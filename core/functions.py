@@ -18,6 +18,20 @@ int_checker = Checker(int)
 str_checker = Checker(str)
 
 
+def spec_path(system: str, *parts) -> str:
+    """
+    spec/<system>/... 경로를 절대경로로 만들어 반환
+    예: spec_path("video", "ReplayURL_request.json")
+    """
+    return resource_path(os.path.join("spec", system, *parts))
+
+def spec_json(system: str, filename: str, mode="r", encoding="utf-8"):
+    """
+    spec/<system>/<filename> 를 열어서 파일 객체를 반환
+    with spec_json("video", "ReplayURL_request.json") as f: ...
+    """
+    return open(spec_path(system, filename), mode, encoding=encoding)
+
 def resource_path(relative_path):
     try:
         base_path = sys._MEIPASS

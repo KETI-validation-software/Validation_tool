@@ -1,1 +1,1 @@
-null
+{"camList": [{"camID": "cam001"}, {"camID": "cam002"}], "transProtocol": {"transProtocolType": "LongPolling", "transProtocolDesc": "https://127.0.0.1:8090/RealtimeVideoEventInfos"}, "duration": 10, "eventFilter": "배회", "startTime": 20220822163022123}
