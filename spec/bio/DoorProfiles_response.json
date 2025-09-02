@@ -1,0 +1,150 @@
+{
+  "doorList": [
+    {
+      "doorID": "DOOR-22",
+      "doorName": "BS3",
+      "doorRelayStatus": "UNKNOWN",
+      "doorSensor": "UNKNOWN",
+      "doorLoc": {
+        "lon": "127.107795066463",
+        "lat": "37.37259117305621",
+        "alt": "",
+        "desc": "8F"
+      },
+      "bioDeviceList": [
+        {
+          "bioDeviceID": "BAC-431",
+          "bioDeviceName": "BS3_tim",
+          "bioDeviceAuthTypeList": ["홍채, 지문"]
+        }
+      ],
+      "otherDeviceList": [
+        {
+          "otherDeviceID": "OAC-416",
+          "otherDeviceName": "DEV-SUPREMA-XStation2-XS2_DPB-777005",
+          "otherDeviceAuthTypeList": ["카드"]
+        }
+      ]
+    },
+    {
+      "doorID": "DOOR-30",
+      "doorName": "test1",
+      "doorRelayStatus": "UNKNOWN",
+      "doorSensor": "UNKNOWN",
+      "doorLoc": {
+        "lon": "127.107795066463",
+        "lat": "37.37259117305621",
+        "alt": "",
+        "desc": "8F"
+      },
+      "bioDeviceList": [
+        {
+          "bioDeviceID": "BAC-431",
+          "bioDeviceName": "BS3_tim",
+          "bioDeviceAuthTypeList": ["Face"]
+        }
+      ],
+      "otherDeviceList": [
+        {
+          "otherDeviceID": "OAC-416",
+          "otherDeviceName": "DEV-SUPREMA-XStation2-XS2_DPB-777005",
+          "otherDeviceAuthTypeList": ["카드"]
+        }
+      ]
+    },
+    {
+      "doorID": "DOOR-31",
+      "doorName": "선임님신혼집현관문",
+      "doorRelayStatus": "UNKNOWN",
+      "doorSensor": "UNKNOWN",
+      "doorLoc": {
+        "lon": "127.107795066463",
+        "lat": "37.37259117305621",
+        "alt": "",
+        "desc": "8F"
+      },
+      "bioDeviceList": [
+        {
+          "bioDeviceID": "BAC-431",
+          "bioDeviceName": "BS3_tim",
+          "bioDeviceAuthTypeList": ["Face"]
+        }
+      ],
+      "otherDeviceList": [
+        {
+          "otherDeviceID": "OAC-412",
+          "otherDeviceName": "정문 출입문",
+          "otherDeviceAuthTypeList": ["QR"]
+        },
+        {
+          "otherDeviceID": "OAC-413",
+          "otherDeviceName": "정문 외곽",
+          "otherDeviceAuthTypeList": ["QR"]
+        }
+      ]
+    },
+    {
+      "doorID": "DOOR-32",
+      "doorName": "전임님 집 ",
+      "doorRelayStatus": "UNKNOWN",
+      "doorSensor": "UNKNOWN",
+      "doorLoc": {
+        "lon": "127.107795066463",
+        "lat": "37.37259117305621",
+        "alt": "",
+        "desc": "8F"
+      },
+      "bioDeviceList": [
+        {
+          "bioDeviceID": "BAC-431",
+          "bioDeviceName": "BS3_tim_1",
+          "bioDeviceAuthTypeList": ["Face"]
+        },
+        {
+          "bioDeviceID": "BAC-432",
+          "bioDeviceName": "BS3_tim_2",
+          "bioDeviceAuthTypeList": ["Face"]
+        },
+        {
+          "bioDeviceID": "BAC-433",
+          "bioDeviceName": "BS3_tim_3",
+          "bioDeviceAuthTypeList": ["Face"]
+        },
+        {
+          "bioDeviceID": "BAC-434",
+          "bioDeviceName": "BS3_tim_4",
+          "bioDeviceAuthTypeList": ["Face"]
+        }
+      ],
+      "otherDeviceList": [
+        {
+          "otherDeviceID": "OAC-417",
+          "otherDeviceName": "디바이스006",
+          "otherDeviceAuthTypeList": ["QR"]
+        },
+        {
+          "otherDeviceID": "OAC-423",
+          "otherDeviceName": "423",
+          "otherDeviceAuthTypeList": ["QR"]
+        },
+        {
+          "otherDeviceID": "OAC-423",
+          "otherDeviceName": "423",
+          "otherDeviceAuthTypeList": ["QR"]
+        },
+        {
+          "otherDeviceID": "OAC-424",
+          "otherDeviceName": "423",
+          "otherDeviceAuthTypeList": ["QR"]
+        },
+        {
+          "otherDeviceID": "OAC-425",
+          "otherDeviceName": "423",
+          "otherDeviceAuthTypeList": ["QR"]
+        }
+      ]
+    }
+  ],
+  "code": "200",
+  "message": "성공"
+}

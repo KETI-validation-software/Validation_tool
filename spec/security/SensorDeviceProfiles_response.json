@@ -1,0 +1,26 @@
+{
+    "code": "200",
+    "message": "성공",
+    "sensorDeviceList":
+     [ {
+        "sensorDeviceID": "iot0001",
+        "sensorDeviceType": "온도",
+        "sensorDeviceName": "온도 센서",
+        "sensorDeviceLoc": {
+            "lon":"127.127730",
+            "lat": "38.439801",
+            "alt": "32.131",
+            "desc": "3층복도"
+         }
+      },
+      {
+        "sensorDeviceID": "iot0002",
+        "sensorDeviceType": "온도",
+        "sensorDeviceName": "온도 센서",
+        "sensorDeviceLoc": {
+            "lon":"127.127730",
+            "lat": "38.439801"
+         }
+      }
+    ]
+}

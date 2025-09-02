@@ -1,0 +1,18 @@
+{
+    "sensorDeviceList":
+     [ {
+        "sensorDeviceID": "iot001"
+
+       },{
+        "sensorDeviceID": "iot002"
+
+       }
+     ] ,
+     "transProtocol": {
+           "transProtocolType": "WebHook",
+          "transProtocolDesc": "https://127.0.0.1:8010/RealtimeSensorEventInfos"
+      },
+     "duration": 200,
+     "eventFilter": "화재",
+     "startTime": 20220822163022123
+}
