@@ -13,9 +13,12 @@ import ssl
 from core.functions import json_check_, save_result, resource_path, field_finder, json_to_data, set_auth, timeout_field_finder
 
 import spec
-from spec.video import videoMessages, videoOutMessage, videoInMessage, videoInSchema, videoOutSchema
-from spec.bio import bioMessages, bioOutMessage, bioInMessage, bioInSchema, bioOutSchema
-from spec.security import securityMessages, securityOutMessage, securityInMessage, securityInSchema, securityOutSchema
+from spec.video.videoRequest import videoMessages, videoOutMessage, videoInMessage
+from spec.video.videoSchema import videoInSchema, videoOutSchema
+from spec.bio.bioRequest import bioMessages, bioOutMessage, bioInMessage
+from spec.bio.bioSchema import  bioInSchema, bioOutSchema
+from spec.security.securityRequest import securityMessages, securityOutMessage, securityInMessage
+from spec.security.securitySchema import securityInSchema, securityOutSchema
 import config.CONSTANTS as CONSTANTS
 
 from http.server import HTTPServer
