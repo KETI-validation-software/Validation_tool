@@ -8,9 +8,12 @@ import cgi
 import time
 import traceback
 
-from spec.video import videoMessages, videoOutMessage, videoInMessage, videoInSchema, videoOutSchema
-from spec.bio import bioMessages, bioOutMessage, bioInMessage, bioInSchema, bioOutSchema
-from spec.security import securityMessages, securityOutMessage, securityInMessage, securityInSchema, securityOutSchema
+from spec.video.videoRequest import videoMessages, videoOutMessage, videoInMessage
+from spec.video.videoSchema import videoInSchema, videoOutSchema
+from spec.bio.bioRequest import bioMessages, bioOutMessage, bioInMessage
+from spec.bio.bioSchema import  bioInSchema, bioOutSchema
+from spec.security.securityRequest import securityMessages, securityOutMessage, securityInMessage
+from spec.security.securitySchema import securityInSchema, securityOutSchema
 
 from core.functions import resource_path
 from requests.auth import HTTPDigestAuth
