@@ -1,7 +1,7 @@
 # 물리보안 통합플랫폼 검증 소프트웨어
 # physical security integrated platform validation software
 
-import api.api_server as api
+from api.api_server import Server
 import time
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore
@@ -13,6 +13,9 @@ import ssl
 from core.functions import json_check_, save_result, resource_path, field_finder, json_to_data, set_auth, timeout_field_finder
 
 import spec
+from spec.video import videoMessages, videoOutMessage, videoInMessage, videoInSchema, videoOutSchema
+from spec.bio import bioMessages, bioOutMessage, bioInMessage, bioInSchema, bioOutSchema
+from spec.security import securityMessages, securityOutMessage, securityInMessage, securityInSchema, securityOutSchema
 import config.CONSTANTS as CONSTANTS
 
 from http.server import HTTPServer
@@ -52,16 +55,16 @@ class MyApp(QWidget):
         super().__init__()
         self.embedded = embedded
         self.radio_check_flag = False
-        self.img_pass = resource_path("image/green.png")
-        self.img_fail = resource_path("image/red.png")
-        self.img_none = resource_path("image/black.png")
+        self.img_pass = resource_path("assets/image/green.png")
+        self.img_fail = resource_path("assets/image/red.png")
+        self.img_none = resource_path("assets/image/black.png")
 
         self.flag_opt = True  # functions.py-json_check_ # 필수필드만 확인 False, optional 필드까지 확인 True
         self.tick_timer = QTimer()
         self.tick_timer.timeout.connect(self.update_view)
         self.auth_flag = False
         # self.setFixedSize(QSize(850, 500))
-        self.Server = api.Server
+        self.Server = Server
         self.valid_field = [25, 11, 11]
 
         auth_temp, auth_temp2 = set_auth("config/config.txt")
@@ -105,7 +108,7 @@ class MyApp(QWidget):
             if time_interval < int(self.timeOut_widget.text()):
                 try:
 
-                    with open(resource_path("json0627/" + self.Server.system + "/" + self.Server.message[self.cnt] +
+                    with open(resource_path("spec/" + self.Server.system + "/" + self.Server.message[self.cnt] +
                                             ".json"), "r", encoding="UTF-8") as out_file:
                         data = json.load(out_file)
 
@@ -166,7 +169,7 @@ class MyApp(QWidget):
                             if "Webhook".lower() in str(data).lower():
                                 try:
                                     with open(resource_path(
-                                            "json0627/" + self.Server.system + "/" + "webhook_" + self.Server.message[self.cnt] + ".json"), "r",
+                                            "spec/" + self.Server.system + "/" + "webhook_" + self.Server.message[self.cnt] + ".json"), "r",
                                               encoding="UTF-8") as out_file2:
                                         self.realtime_flag = True
                                         webhook_data = json.load(out_file2)
@@ -882,7 +885,7 @@ class MyApp(QWidget):
     def init_win(self):
         self.cnt = 0
         for i in range(0, len(self.Server.message)):
-            with open(resource_path("json0627/"+self.Server.system + "/" + self.Server.message[i] + ".json"), "w",
+            with open(resource_path("spec/"+self.Server.system + "/" + self.Server.message[i] + ".json"), "w",
                       encoding="UTF-8") as out_file:  # 수정해야함
                 json.dump(None, out_file, ensure_ascii=False)
 
@@ -989,10 +992,10 @@ class json_data(QThread):
 
     def run(self):
         while True:
-            with open(resource_path("json0627/rows.json"), "r", encoding="UTF-8") as out_file:
+            with open(resource_path("spec/rows.json"), "r", encoding="UTF-8") as out_file:
                 data = json.load(out_file)
             if data is not None:
-                with open(resource_path("json0627/rows.json"), "w", encoding="UTF-8") as out_file:
+                with open(resource_path("spec/rows.json"), "w", encoding="UTF-8") as out_file:
                     json.dump(None, out_file, ensure_ascii=False)
                 self.json_update_data.emit(data)
 
