@@ -110,7 +110,6 @@ class MyApp(QWidget):
 
             if time_interval < int(self.timeOut_widget.text()):
                 try:
-
                     with open(resource_path("spec/" + self.Server.system + "/" + self.Server.message[self.cnt] +
                                             ".json"), "r", encoding="UTF-8") as out_file:
                         data = json.load(out_file)
