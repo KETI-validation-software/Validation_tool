@@ -1,0 +1,15 @@
+{
+    "doorList":
+     [ {
+        "doorID": "door001"
+      },{
+        "doorID": "door002"
+      }
+    ],
+   "duration": 200,
+   "transProtocol": {
+        "transProtocolType": "WebHook",
+     "transProtocolDesc": "https://127.0.0.1:8020/RealtimeDoorStatus"
+    },
+    "startTime": 20220822163022123
+}

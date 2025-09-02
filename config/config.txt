@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+    <auth type="Bearer Token">  <!-- 사용자 인증 방식 정의 (지원 타입:Bearer Token) -->
+        <bearer_token>abcd1234</bearer_token>
+    </auth>
+    <auth type="Digest Auth">  <!-- 사용자 인증 방식 정의 (지원 타입:Digest Auth) -->
+        <username>admin</username>
+        <password>pass</password>
+    </auth>
+</config>
