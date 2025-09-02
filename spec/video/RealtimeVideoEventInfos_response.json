@@ -1,0 +1,22 @@
+{
+    "code": "200",
+    "message": "성공",
+    "camList":
+     [ {
+        "camID": "cam0001",
+        "eventUUID": "event01",
+        "eventName": "배회",
+        "startTime": 20220822163022123,
+        "endTime": 20220822163025123,
+        "eventDesc": "sfdfEFASDDDLKJFjdkdlfjde"
+      },
+      {
+        "camID": "cam0002",
+        "eventUUID": "event01",
+        "eventName": "배회",
+        "startTime": 20220822163022123,
+        "endTime": 20220822163025123,
+        "eventDesc": "dddddeeeeeAAFEDFiikjf"
+      }
+    ]
+}

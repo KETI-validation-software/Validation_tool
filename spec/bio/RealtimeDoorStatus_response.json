@@ -1,0 +1,16 @@
+{
+  "doorList": [
+    {
+      "doorID": "door0001",
+      "doorName": "A건물 출입문",
+      "doorRelaySensor": "일반",
+      "doorSensor": "0"
+    },
+    {
+      "doorID": "door0002",
+      "doorName": "B건물 출입문",
+      "doorRelaySensor": "수동 개방",
+      "doorSensor": "0"
+    }
+  ]
+}

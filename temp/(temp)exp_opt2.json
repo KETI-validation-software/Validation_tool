@@ -1,0 +1,57 @@
+{
+  "specification": {
+    "id": "spec-001",
+    "name": "기본 인증 API 명세서",
+    "version": "1.0",
+    "steps": [
+      {
+        "id": "step-1",
+        "name": "인증",
+        "order": 1,
+        "api": {
+          "name": "인증",
+          "method": "POST",
+          "endpoint": "/authentication",
+          "authMethod": "Bearer Token,abcd1234",
+          "requestData": {
+              "userID": "str",
+              "userPW": "str"
+          },
+          "respoonseData": {
+              "code": "200",
+              "message": "성공"
+          },
+          "requestValidation": [
+            {
+              "id": "username-field",
+              "key": "useID",
+              "type": "string",
+              "valueType": "user-input",
+              "required": true,
+              "validation": {
+                "enabled": true,
+                "minLength": "3",
+                "maxLength": "20",
+                "pattern": "^[a-zA-Z0-9_]+$"
+              }
+            },
+            {
+              "id": "password-field",
+              "key": "userPW",
+              "type": "string",
+              "valueType": "user-input",
+              "required": true,
+              "validation": {
+                "enabled": true,
+                "minLength": "8"
+              }
+            }
+          ]
+        },
+        "timeoutSettings": {
+          "connectTimeout": 5000
+        }
+      }
+    ]
+  }
+}

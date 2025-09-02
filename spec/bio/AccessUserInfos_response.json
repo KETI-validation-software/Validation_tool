@@ -1,0 +1,37 @@
+{
+    "code": "200",
+    "message": "성공",
+    "userList":
+     [ {
+        "userID": "user0001",
+        "userName": "홍길동",
+        "userDesc": "일반사용자",
+        "doorList": [ {
+            "doorID": "door0001",
+            "timePeriod": {
+                "startTime": 20220822163022123,
+                "endTime": 20220822163025123
+             }
+         } ]
+      },
+      {
+        "userID": "user0002",
+        "userName": "김철수",
+        "userDesc": "관리자",
+        "doorList": [ {
+            "doorID": "door0002",
+            "timePeriod": {
+                "startTime": 20220822163022213,
+                "endTime": 20220822163025123
+             }
+         },
+         {
+            "doorID": "door0003",
+            "timePeriod":{
+                "startTime": 20220822162300123,
+                "endTime": 20220822162350123
+             }
+         } ]
+      }
+    ]
+}
