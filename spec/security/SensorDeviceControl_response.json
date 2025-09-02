@@ -1,0 +1,6 @@
+{
+  "code": "200",
+  "message": "성공",
+  "sensorDeviceID": "iot0001",
+  "sensorDeviceStatus": "Alarm"
+}

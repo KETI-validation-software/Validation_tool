@@ -1,0 +1,20 @@
+{
+    "code": "200",
+    "message": "성공",
+    "camList":
+     [ {
+        "camID": "cam0001",
+        "timeList": [{
+           "startTime": 20220822163022123,
+           "endTime": 20220822163025123
+         }]
+      },
+      {
+        "camID": "cam0002",
+        "timeList": [{
+           "startTime": 20220822163022123,
+           "endTime": 20220822163025123
+         }]
+      }
+    ]
+}

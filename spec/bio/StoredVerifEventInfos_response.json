@@ -1,0 +1,25 @@
+{
+    "code": "200",
+    "message": "성공",
+    "doorList":
+     [ {
+        "eventTime": 20220822163022123,
+        "doorID": "door0001",
+        "userID": "user0001",
+        "bioAuthTypeList": ["지문", "얼굴"],
+        "otherAuthTypeList": ["카드"],
+        "eventName": "성공",
+       "eventDesc": "36.5"
+
+       },
+       {
+        "eventTime": 20220822253022123,
+        "doorID": "door0002",
+        "userID": "user0002",
+        "bioAuthTypeList": ["홍채"],
+        "otherAuthTypeList": ["카드"] ,
+        "eventName": "성공",
+       "eventDesc": "pass"
+       }
+     ]
+}

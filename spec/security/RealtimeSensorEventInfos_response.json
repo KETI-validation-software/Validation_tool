@@ -1,0 +1,16 @@
+{
+    "sensorDeviceList":
+     [ {
+        "sensorDeviceID": "iot0001",
+        "eventName": "화재",
+        "eventTime": 20220822163022123,
+        "eventDesc": "100도"
+      },
+      {
+        "sensorDeviceID": "iot0002",
+        "eventName": "화재",
+        "eventTime": 20220822163022123,
+        "eventDesc": "200도"
+      }
+    ]
+}
