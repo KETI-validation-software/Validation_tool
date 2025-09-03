@@ -11,7 +11,7 @@ from PyQt5.QtCore import Qt
 import platformVal_all as platform_app
 import systemVal_all as system_app
 
-from functions import resource_path
+from core.functions import resource_path
 
 
 class SelectionWidget(QWidget):
