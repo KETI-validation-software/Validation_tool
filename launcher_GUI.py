@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QFontDatabase, QFont
 from PyQt5.QtCore import Qt
 
+# 체크용 커밋
 # 두 앱 모듈 (둘 다 MyApp(QWidget) 제공) - GUI 자동실행 방지를 위해 클래스만 import
 import platformVal_all as platform_app
 import systemVal_all as system_app
