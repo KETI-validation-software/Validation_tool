@@ -17,7 +17,6 @@ opt_checker = Checker((OptionalKey))
 int_checker = Checker(int)
 str_checker = Checker(str)
 
-
 def resource_path(relative_path):
     try:
         base_path = sys._MEIPASS
@@ -83,7 +82,7 @@ def set_auth(file):
 
 def set_message(path_):
     try:
-        with open(path_, 'r', encoding="UTF-8") as fp:
+        with open(resource_path(path_), 'r', encoding="UTF-8") as fp:
             json_data = json.load(fp)
             message = json_data
         return message
@@ -102,28 +101,32 @@ def set_message(path_):
 
 
 def json_to_data(type_):
+    def _p(t, name, kind):  # kind: "request" | "response"
+        return os.path.join("spec", t, f"{name}_{kind}.json")
+
     if type_ == "video":
         paths = videoMessages
         for cnt, path in enumerate(paths):
-            path_req = type_ + "/" + path + "_request.json"
-            path_res = type_ + "/" + path + "_response.json"
-            videoInMessage[cnt] = set_message(path_req)
+            path_req = _p(type_, path, "request")
+            path_res = _p(type_, path, "response")
+            videoInMessage[cnt]  = set_message(path_req)
             videoOutMessage[cnt] = set_message(path_res)
 
     elif type_ == "bio":
         paths = bioMessages
         for cnt, path in enumerate(paths):
-            path_req = type_ + "/" + path + "_request.json"
-            path_res = type_ + "/" + path + "_response.json"
-            bioInMessage[cnt] = set_message(path_req)
+            path_req = _p(type_, path, "request")
+            path_res = _p(type_, path, "response")
+            bioInMessage[cnt]  = set_message(path_req)
             bioOutMessage[cnt] = set_message(path_res)
 
     elif type_ == "security":
         paths = securityMessages
         for cnt, path in enumerate(paths):
-            path_req = type_ + "/" + path + "_request.json"
-            path_res = type_ + "/" + path + "_response.json"
-            securityInMessage[cnt] = set_message(path_req)
+            path_req = _p(type_, path, "request")
+            path_res = _p(type_, path, "response")
+            securityInMessage[cnt]  = set_message(path_req)
             securityOutMessage[cnt] = set_message(path_res)
 
     return True
+

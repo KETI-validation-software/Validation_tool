@@ -7,6 +7,12 @@ import json
 import requests
 import sys
 import spec
+from spec.video.videoRequest import videoMessages, videoOutMessage, videoInMessage
+from spec.video.videoSchema import videoInSchema, videoOutSchema
+from spec.bio.bioRequest import bioMessages, bioOutMessage, bioInMessage
+from spec.bio.bioSchema import  bioInSchema, bioOutSchema
+from spec.security.securityRequest import securityMessages, securityOutMessage, securityInMessage
+from spec.security.securitySchema import securityInSchema, securityOutSchema
 from urllib.parse import urlparse
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QIcon, QFontDatabase, QFont
@@ -718,12 +724,12 @@ class MyApp(QWidget):
     def g1_radio1_checked(self, checked):
         if checked:
             self.radio_check_flag = True
-            self.message = spec.video.videoMessages
-            self.inMessage = spec.video.videoInMessage
-            self.outMessage = spec.video.videoOutMessage
-            self.inSchema = spec.video.videoInSchema
-            self.outSchema = spec.video.videoOutSchema
-            self.webhookSchema = spec.video.videoWebhookSchema
+            self.message = videoMessages
+            self.inMessage = videoInMessage
+            self.outMessage = videoOutMessage
+            self.inSchema = videoInSchema
+            self.outSchema = videoOutSchema
+            self.webhookSchema = videoWebhookSchema
             self.system = "video"
             self.final_report = "영상보안 시스템-물리보안 통합플랫폼(가상) 검증 결과"+"\n"
             self.step7.setEnabled(True)
@@ -745,12 +751,12 @@ class MyApp(QWidget):
     def g1_radio2_checked(self, checked):
         if checked:
             self.radio_check_flag = True
-            self.message = spec.bio.bioMessages
-            self.inMessage = spec.bio.bioInMessage
-            self.outMessage = spec.bio.bioOutMessage
-            self.inSchema = spec.bio.bioInSchema
-            self.outSchema = spec.bio.bioOutSchema
-            self.webhookSchema = spec.bio.bioWebhookSchema
+            self.message = bioMessages
+            self.inMessage = bioInMessage
+            self.outMessage = bioOutMessage
+            self.inSchema = bioInSchema
+            self.outSchema = bioOutSchema
+            self.webhookSchema = bioWebhookSchema
             self.system = "bio"
             self.final_report = "바이오인식 기반 출입통제 시스템-물리보안 통합플랫폼(가상) 검증 결과"+"\n"
             self.step7.setEnabled(True)
@@ -774,12 +780,12 @@ class MyApp(QWidget):
     def g1_radio3_checked(self, checked):
         if checked:
             self.radio_check_flag = True
-            self.message = spec.security.securityMessages
-            self.inMessage = spec.security.securityInMessage
-            self.outMessage = spec.security.securityOutMessage
-            self.inSchema = spec.security.securityInSchema
-            self.outSchema = spec.security.securityOutSchema
-            self.webhookSchema = spec.security.securityWebhookSchema
+            self.message = securityMessages
+            self.inMessage = securityInMessage
+            self.outMessage = securityOutMessage
+            self.inSchema = securityInSchema
+            self.outSchema = securityOutSchema
+            self.webhookSchema = securityWebhookSchema
             self.system = "security"
             self.final_report = "보안용 센서 시스템-물리보안 통합플랫폼(가상) 검증 결과"+"\n"
             self.step7.setEnabled(True)

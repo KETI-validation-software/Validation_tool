@@ -8,7 +8,12 @@ import cgi
 import time
 import traceback
 
-import spec
+from spec.video.videoRequest import videoMessages, videoOutMessage, videoInMessage
+from spec.video.videoSchema import videoInSchema, videoOutSchema
+from spec.bio.bioRequest import bioMessages, bioOutMessage, bioInMessage
+from spec.bio.bioSchema import  bioInSchema, bioOutSchema
+from spec.security.securityRequest import securityMessages, securityOutMessage, securityInMessage
+from spec.security.securitySchema import securityInSchema, securityOutSchema
 
 from core.functions import resource_path
 from requests.auth import HTTPDigestAuth
@@ -134,7 +139,7 @@ class Server(BaseHTTPRequestHandler):
             post_data = '{}'
         dict_data = json.loads(post_data)  # type(dict_data)는 <class 'dict'>
 
-        with open(resource_path("json0627/"+self.system + "/" + self.path[1:]+".json"), "w", encoding="UTF-8") \
+        with open(resource_path("spec/"+self.system + "/" + self.path[1:]+".json"), "w", encoding="UTF-8") \
                 as out_file:
             json.dump(dict_data, out_file, ensure_ascii=False)
         # with open(self.path[1:]+".json","r", encoding="UTF-8") as out_file:
@@ -240,7 +245,7 @@ class Server(BaseHTTPRequestHandler):
                 result = requests.post(url, data=json_data_tmp, verify=False)
                 #print("webhook response", result.text)
                 self.result = result
-                with open(resource_path("json0627/" + self.system + "/" + "webhook_" + self.path[1:] + ".json"),
+                with open(resource_path("spec/" + self.system + "/" + "webhook_" + self.path[1:] + ".json"),
                           "w", encoding="UTF-8") as out_file2:
                     json.dump(json.loads(str(self.result.text)), out_file2, ensure_ascii=False)
                 break
