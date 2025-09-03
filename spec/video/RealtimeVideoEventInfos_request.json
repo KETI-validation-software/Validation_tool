@@ -1,5 +1,4 @@
 {
-
     "camList":
      [ {
         "camID": "cam001"
@@ -9,7 +8,7 @@
        }
      ] ,
      "transProtocol":{
-           "transProtocolType": "WebHook_API",
+           "transProtocolType": "LongPolling",
           "transProtocolDesc": "https://127.0.0.1:8090/RealtimeVideoEventInfos"
       },
      "duration": 10,

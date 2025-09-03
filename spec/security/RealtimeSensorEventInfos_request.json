@@ -9,7 +9,7 @@
        }
      ] ,
      "transProtocol": {
-           "transProtocolType": "WebHook_API",
+           "transProtocolType": "WebHook",
           "transProtocolDesc": "https://127.0.0.1:8010/RealtimeSensorEventInfos"
       },
      "duration": 200,
