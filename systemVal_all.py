@@ -120,14 +120,15 @@ class MyApp(QWidget):
 
                             if "WebHook".lower() in str(trans_protocol_type).lower():
                                 path_tmp = trans_protocol.get("transProtocolDesc", {})
+                                if not path_tmp or str(path_tmp).strip() in ["None", "", "desc"]:
+                                    path_tmp = "http://127.0.0.1"
 
                                 if "http" not in str(path_tmp):  # tylee
                                     path_tmp = "http://" + str(path_tmp)
 
                                 parsed = urlparse(str(path_tmp))
-
-                                url = parsed.hostname
-                                port = parsed.port
+                                url = parsed.hostname if parsed.hostname is not None else "127.0.0.1"
+                                port = parsed.port if parsed.port is not None else 80
                                 msg = self.outMessage[-1]
                                 self.webhook_flag = True
 
@@ -138,7 +139,8 @@ class MyApp(QWidget):
 
                     except Exception as e:
                         print(e)
-                        #print(traceback.format_exc())
+                        import traceback
+                        traceback.print_exc()   # 에러 상세 출력 -> VIDEO에서만 계속 에러 뜨고 있음
 
         except Exception as e:
             #print(traceback.format_exc())

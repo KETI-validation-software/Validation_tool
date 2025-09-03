@@ -1,1 +1,1 @@
-{"sensorDeviceList": [{"sensorDeviceID": "iot001"}, {"sensorDeviceID": "iot002"}, {"sensorDeviceID": "iot003"}], "transProtocol": {"transProtocolType": "WebHook", "transProtocolDesc": "https://127.0.0.1:8020/RealtimeSensorData"}, "duration": 100, "startTime": 20220822163022123}
+{"sensorDeviceList": [{"sensorDeviceID": "iot0001"}, {"sensorDeviceID": "iot0002"}, {"sensorDeviceID": "iot0003"}], "duration": 100, "transProtocol": {"transProtocolType": "HTTP_API", "transProtocolDesc": "descriptoin"}, "startTime": 20220822163022123}
