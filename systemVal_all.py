@@ -8,11 +8,11 @@ import requests
 import sys
 import spec
 from spec.video.videoRequest import videoMessages, videoOutMessage, videoInMessage
-from spec.video.videoSchema import videoInSchema, videoOutSchema
+from spec.video.videoSchema import videoInSchema, videoOutSchema, videoWebhookSchema
 from spec.bio.bioRequest import bioMessages, bioOutMessage, bioInMessage
-from spec.bio.bioSchema import  bioInSchema, bioOutSchema
+from spec.bio.bioSchema import  bioInSchema, bioOutSchema, bioWebhookSchema
 from spec.security.securityRequest import securityMessages, securityOutMessage, securityInMessage
-from spec.security.securitySchema import securityInSchema, securityOutSchema
+from spec.security.securitySchema import securityInSchema, securityOutSchema, securityWebhookSchema
 from urllib.parse import urlparse
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QIcon, QFontDatabase, QFont
@@ -57,9 +57,9 @@ class MyApp(QWidget):
         self.webhook_res = None
         self.res = None
         self.radio_check_flag = False
-        self.img_pass = resource_path("image/green.png")
-        self.img_fail = resource_path("image/red.png")
-        self.img_none = resource_path("image/black.png")
+        self.img_pass = resource_path("assets/image/green.png")
+        self.img_fail = resource_path("assets/image/red.png")
+        self.img_none = resource_path("assets/image/black.png")
 
         self.flag_opt = True  # functions.py-json_check_ # 필수필드만 확인 False, optional 필드까지 확인 True #seo 추후 맵핑 필요
         self.tick_timer = QTimer()

@@ -298,8 +298,8 @@ def run(server_class=HTTPServer, handler_class=Server, address='127.0.0.3', port
         Server.inSchema = securityInSchema
         Server.outSchema = securityOutSchema
 
-    certificate_private = resource_path('key0627/server.crt')
-    certificate_key = resource_path('key0627/server.key')
+    certificate_private = resource_path('config/key0627/server.crt')
+    certificate_key = resource_path('config/key0627/server.key')
     httpd = server_class(server_address, handler_class)
     httpd.socket = ssl.wrap_socket(httpd.socket,  certfile=certificate_private,
                                    keyfile=certificate_key, server_side=True)

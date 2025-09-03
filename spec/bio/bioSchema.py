@@ -226,12 +226,12 @@ bioOutSchema = [Authentication_out_schema,
             ]
 
 bioWebhookSchema = [
-Webhook_out_schema,
-Webhook_out_schema,
-Webhook_out_schema,
-Webhook_out_schema,
+    Webhook_out_schema,
+    Webhook_out_schema,
+    Webhook_out_schema,
+    Webhook_out_schema,
     WeHook_RealtimeVerifEventInfos_out_schema,
-Webhook_out_schema,
+    Webhook_out_schema,
     WebHook_RealtimeDoorStatus_out_schema,
-Webhook_out_schema
-]
+    Webhook_out_schema
+    ]

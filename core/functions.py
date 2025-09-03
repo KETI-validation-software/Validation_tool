@@ -109,24 +109,24 @@ def json_to_data(type_):
         for cnt, path in enumerate(paths):
             path_req = _p(type_, path, "request")
             path_res = _p(type_, path, "response")
-            videoInMessage[cnt]  = set_message(path_req)
-            videoOutMessage[cnt] = set_message(path_res)
+            videoInMessage.append(set_message(path_req))
+            videoOutMessage.append(set_message(path_res))
 
     elif type_ == "bio":
         paths = bioMessages
         for cnt, path in enumerate(paths):
             path_req = _p(type_, path, "request")
             path_res = _p(type_, path, "response")
-            bioInMessage[cnt]  = set_message(path_req)
-            bioOutMessage[cnt] = set_message(path_res)
+            bioInMessage.append(set_message(path_req))
+            bioOutMessage.append(set_message(path_res))
 
     elif type_ == "security":
         paths = securityMessages
         for cnt, path in enumerate(paths):
             path_req = _p(type_, path, "request")
             path_res = _p(type_, path, "response")
-            securityInMessage[cnt]  = set_message(path_req)
-            securityOutMessage[cnt] = set_message(path_res)
+            securityInMessage.append(set_message(path_req))
+            securityOutMessage.append(set_message(path_res))
 
     return True
 

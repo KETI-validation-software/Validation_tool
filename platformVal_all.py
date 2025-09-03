@@ -970,8 +970,8 @@ class server_th(QThread):
         self.server_address = (self.address_ip, self.address_port)
         self.httpd = HTTPServer(self.server_address, self.handler_class)
 
-        certificate_private = resource_path('key0627/server.crt')
-        certificate_key = resource_path('key0627/server.key')
+        certificate_private = resource_path('config/key0627/server.crt')
+        certificate_key = resource_path('config/key0627/server.key')
         try:
             self.httpd.socket = ssl.wrap_socket(self.httpd.socket, certfile=certificate_private,
                                                 keyfile=certificate_key, server_side=True)
