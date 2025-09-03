@@ -8,7 +8,7 @@ a = Analysis(
     ['platformVal_all.py'],
     pathex=[],
     binaries=[],
-    datas=[('image/*', 'image/'), ('spec/*', 'spec/'), ('spec/video/*.json', 'spec/video/'), ('spec/security/*.json', 'spec/security/')],
+    datas=[('assets/image/*', 'assets/image/'), ('spec/*', 'spec/'), ('spec/video/*.json', 'spec/video/'), ('spec/security/*.json', 'spec/security/')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

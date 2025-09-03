@@ -68,8 +68,8 @@ class WebhookThread(QThread):
         #print('Starting https on port %d...' % self.port)
 
         server_address = (self.url, self.port)
-        certificate_private = resource_path('key0627/server.crt')
-        certificate_key = resource_path('key0627/server.key')
+        certificate_private = resource_path('config/key0627/server.crt')
+        certificate_key = resource_path('config/key0627/server.key')
         ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         ssl_context.load_cert_chain(certfile=certificate_private, keyfile=certificate_key)
 

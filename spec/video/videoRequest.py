@@ -393,4 +393,5 @@ videoMessages = ["Authentication",
                  "ReplayURL",
                  "RealtimeVideoEventInfos",
                  "StoredVideoEventInfos",
-                 "StoredObjectAnalyticsInfos"]
+                 "StoredObjectAnalyticsInfos"
+                 ]
