@@ -289,113 +289,100 @@ class MyApp(QWidget):
 
     def icon_update(self, tmp_res_auth, val_result, val_text):
         msg, img = self.icon_update_step(tmp_res_auth, val_result, val_text)
-
-        if self.cnt == 0:  # step(cnt+1)
-            self.step1_icon.setIcon(QIcon(img))
-            self.step1_msg += msg
-
-        elif self.cnt == 1:
-            self.step2_icon.setIcon(QIcon(img))
-            self.step2_msg += msg
-
-        elif self.cnt == 2:
-            self.step3_icon.setIcon(QIcon(img))
-            self.step3_msg += msg
-
-        elif self.cnt == 3:
-            self.step4_icon.setIcon(QIcon(img))
-            self.step4_msg += msg
-
-        elif self.cnt == 4:
-            self.step5_icon.setIcon(QIcon(img))
-            self.step5_msg += msg
-
-        elif self.cnt == 5:
-            self.step6_icon.setIcon(QIcon(img))
-            self.step6_msg += msg
-
-        elif self.cnt == 6:
-            self.step7_icon.setIcon(QIcon(img))
-            self.step7_msg += msg
-
-        elif self.cnt == 7:
-            self.step8_icon.setIcon(QIcon(img))
-            self.step8_msg += msg
-
-        elif self.cnt == 8:
-            self.step9_icon.setIcon(QIcon(img))
-            self.step9_msg += msg
+        icon_item = QTableWidgetItem()
+        icon_item.setIcon(QIcon(img))
+        icon_item.setToolTip(msg)
+        # 아이콘을 가운데 정렬
+        icon_item.setTextAlignment(Qt.AlignCenter)
+        if self.cnt < self.tableWidget.rowCount():
+            self.tableWidget.setItem(self.cnt, 1, icon_item)
+            # 메시지 저장 (팝업용)
+            setattr(self, f"step{self.cnt+1}_msg", msg)
 
     def initUI(self):
 
         outerLayout = QVBoxLayout()
-        contentLayout = QHBoxLayout()
-        leftLayout = QVBoxLayout()
-        self.centerLayout = QVBoxLayout()
-        self.circleLayout = QVBoxLayout()
-        rightLayout = QVBoxLayout()
-        mainTitle = QLabel("물리보안 통합플랫폼 검증\n 소프트웨어", self)
-        mainTitle.setAlignment(Qt.AlignLeft)
-        mainTitle.setStyleSheet('font-size: 18pt')
-        outerLayout.addWidget(mainTitle)
+        topLayout = QHBoxLayout()      # 최상단 환경설정과 버튼들 레이아웃
+        contentLayout = QVBoxLayout()  # 시험 결과 레이아웃
+        bottomLayout = QVBoxLayout()   # 하단 모니터링 레이아웃
+        
         empty = QLabel(" ")
         empty.setStyleSheet('font-size:5pt')
         outerLayout.addWidget(empty)  # empty
-        # left layout
-        self.r1 = ""
-        self.r2 = ""
-        leftLayout.addWidget(self.group1())
-        self.settingGroup = QGroupBox("환경설정")
-        settingLayout = QVBoxLayout()
-        settingLayout.addWidget(self.group2())
-        settingLayout.addWidget(self.group3())
-        settingLayout.addWidget(self.group4())
-        self.settingGroup.setLayout(settingLayout)
-        leftLayout.addWidget(self.settingGroup)
-        #settingTitle = QLabel("환경설정")
-        #self.label.setFixedSize(200, 100)  #
         
-        #leftLayout.addWidget(settingTitle)
-        #leftLayout.addWidget(self.group2())
-        #leftLayout.addWidget(self.group3())
-        #leftLayout.addWidget(self.group4())
-
+        # 환경 설정 박스 (가로 배치)
+        self.settingGroup = QGroupBox("환경설정")
+        self.settingGroup.setMaximumWidth(600)  # 환경설정 박스 전체 너비 제한
+        settingLayout = QHBoxLayout()  # 가로로 변경
+        settingLayout.addWidget(self.group2())  # 사용자 인증 방식
+        settingLayout.addWidget(self.group3())  # 메시지 송수신
+        settingLayout.addWidget(self.group4())  # 연동 URL
+        self.settingGroup.setLayout(settingLayout)
+        
+        # 검증 버튼들 (가로 배치, 짧은 너비)
+        buttonGroup = QGroupBox("")
+        buttonGroup.setMaximumWidth(380)  # 버튼 그룹 박스 너비 제한
+        buttonLayout = QHBoxLayout()
+        
         self.sbtn = QPushButton(self)
-        self.sbtn.setText('검증 시작')
+        self.sbtn.setText('평가 시작')
+        self.sbtn.setMaximumWidth(100)  # 버튼 너비 제한
         self.sbtn.clicked.connect(self.sbtn_push)
-        leftLayout.addWidget(self.sbtn)
 
         self.stop_btn = QPushButton(self)
-        self.stop_btn.setText('검증 중지')
+        self.stop_btn.setText('일시 정지')
+        self.stop_btn.setMaximumWidth(100)  # 버튼 너비 제한
         self.stop_btn.clicked.connect(self.stop_btn_clicked)
-        leftLayout.addWidget(self.stop_btn)
         self.stop_btn.setDisabled(True)
-
-        # center layout
-        self.valmsg = QLabel('검증 메시지', self)
-        self.centerLayout.addWidget(self.valmsg)
-        self.init_centerLayout()
-        self.circleLayout.addWidget(QLabel(""))  # align
-        self.init_circleLayout()
-        # right layout
-        rightLayout.addWidget(QLabel("검증 진행 결과"))
-        self.valResult = QTextBrowser(self)
-
-        rightLayout.addWidget(self.valResult)
+        
         self.rbtn = QPushButton(self)
         self.rbtn.setText('검증 결과 저장')
+        self.rbtn.setMaximumWidth(120)  # 버튼 너비 제한
         self.rbtn.clicked.connect(self.rbtn_push)
-        rightLayout.addWidget(self.rbtn)
-        contentLayout.addLayout(leftLayout)
-        contentLayout.addLayout(self.centerLayout)
-        contentLayout.addLayout(self.circleLayout)
-        contentLayout.addLayout(rightLayout)
 
-        outerLayout.addLayout(contentLayout)
+        buttonLayout.addWidget(self.sbtn)
+        buttonLayout.addWidget(self.stop_btn)
+        buttonLayout.addWidget(self.rbtn)
+        # buttonLayout.addStretch() 제거하여 더 컴팩트하게
+        buttonGroup.setLayout(buttonLayout)
+        
+        # 상단 레이아웃 구성 (환경설정 + 버튼들)
+        topLayout.addWidget(self.settingGroup)
+        topLayout.addWidget(buttonGroup)
+
+        # 시험 결과 레이아웃
+        self.valmsg = QLabel('시험 결과', self)
+        contentLayout.addWidget(self.valmsg)
+        self.init_centerLayout()
+        
+        # 시험 결과 영역을 테이블 크기에 맞게 조정
+        contentWidget = QWidget()
+        contentWidget.setLayout(self.centerLayout)
+        contentWidget.setMaximumSize(1000, 400)  # 테이블 크기와 동일하게 설정
+        contentWidget.setMinimumSize(900, 300)   # 테이블 최소 크기와 동일하게 설정
+        
+        contentLayout.addWidget(contentWidget)
+
+        # 하단 모니터링 레이아웃 구성
+        bottomLayout.addWidget(QLabel("수신 메시지 실시간 모니터링"))
+        self.valResult = QTextBrowser(self)
+        self.valResult.setMaximumHeight(200)  # 높이 제한
+        self.valResult.setMaximumWidth(1000)  # 테이블과 동일한 너비로 설정
+        self.valResult.setMinimumWidth(900)   # 테이블 최소 너비와 동일하게 설정
+        bottomLayout.addWidget(self.valResult)
+        
+        # 연동 시스템을 맨 아래에 배치
+        self.r1 = ""
+        self.r2 = ""
+        bottomLayout.addWidget(self.group1())  # 연동 시스템을 맨 아래로 이동
+
+        outerLayout.addLayout(topLayout)     # 최상단: 환경설정 + 버튼들
+        outerLayout.addLayout(contentLayout) # 중단: 시험 결과
+        outerLayout.addLayout(bottomLayout)  # 하단: 모니터링 + 연동 시스템
         outerLayout.addWidget(empty)  # empty
         self.setLayout(outerLayout)
         self.setWindowTitle('물리보안 통합플랫폼 연동 검증 소프트웨어')
-        self.setGeometry(500, 500, 1000, 10)  # 500, 500, 1000, 10)
+        self.setGeometry(500, 300, 1200, 800)  # 창 크기 설정
         # showing all the widgets
 
         # self.json_th.json_update_data.connect(self.json_update_data)
@@ -404,178 +391,90 @@ class MyApp(QWidget):
             self.show()
 
     def init_centerLayout(self):
-        # self.stepLayout = QVBoxLayout()
+        # 표 형태로 변경 (6컬럼으로 확장)
+        self.tableWidget = QTableWidget(9, 6)
+        self.tableWidget.setHorizontalHeaderLabels(["API 명", "결과", "검증 횟수", "실패 횟수", "평가 점수", "상세 결과"])
+        self.tableWidget.verticalHeader().setVisible(False)
+        self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tableWidget.setSelectionMode(QAbstractItemView.NoSelection)
+        self.tableWidget.setIconSize(QtCore.QSize(16, 16))
+        
+        # 테이블 크기 설정
+        self.tableWidget.setMinimumSize(900, 300)  # 최소 크기 설정
+        self.tableWidget.resize(1000, 400)  # 기본 크기 설정 (여백을 고려해서 50px 증가)
+        
+        # 컬럼 너비 설정
+        self.tableWidget.setColumnWidth(0, 280)  # API 명 컬럼 너비 (20px 줄임)
+        self.tableWidget.setColumnWidth(1, 90)   # 결과 컬럼 너비 (10px 줄임)
+        self.tableWidget.setColumnWidth(2, 90)   # 검증 횟수 컬럼 너비 (10px 줄임)
+        self.tableWidget.setColumnWidth(3, 90)   # 실패 횟수 컬럼 너비 (10px 줄임)
+        self.tableWidget.setColumnWidth(4, 90)   # 평가 점수 컬럼 너비 (10px 줄임)
+        self.tableWidget.setColumnWidth(5, 280)  # 상세 결과 컬럼 너비 (20px 줄임)
 
-        self.step1 = QPushButton("1. step1")
-        self.step2 = QPushButton("2. step2")
-        self.step3 = QPushButton("3. step3")
-        self.step4 = QPushButton("4. step4")
-        self.step5 = QPushButton("5. step5")
-        self.step6 = QPushButton("6. step6")
-        self.step7 = QPushButton("7. step7")
-        self.step8 = QPushButton("8. step8")
-        self.step9 = QPushButton("9. step9")
+        # 행 높이 설정
+        for i in range(9):
+            self.tableWidget.setRowHeight(i, 40)
 
-        self.step1.setFixedSize(250, 60)
-        self.step2.setFixedSize(250, 60)
-        self.step3.setFixedSize(250, 60)
-        self.step4.setFixedSize(250, 60)
-        self.step5.setFixedSize(250, 60)
-        self.step6.setFixedSize(250, 60)
-        self.step7.setFixedSize(250, 60)
-        self.step8.setFixedSize(250, 60)
-        self.step9.setFixedSize(250, 60)
+        # 단계명 리스트 (기본값)
+        self.step_names = [
+            "Authentication", "Capabilities", "CameraProfiles", "StoredVideoInfos",
+            "StreamURLs", "ReplayURL", "RealtimeVideoEventInfos",
+            "StoredVideoEventInfos", "StoredObjectAnalyticsInfos"
+        ]
+        for i, name in enumerate(self.step_names):
+            # API 명
+            self.tableWidget.setItem(i, 0, QTableWidgetItem(f"{i+1}. {name}"))
+            # 결과 아이콘
+            icon_item = QTableWidgetItem()
+            icon_item.setIcon(QIcon(self.img_none))
+            icon_item.setTextAlignment(Qt.AlignCenter)
+            self.tableWidget.setItem(i, 1, icon_item)
+            # 검증 횟수
+            self.tableWidget.setItem(i, 2, QTableWidgetItem("0"))
+            self.tableWidget.item(i, 2).setTextAlignment(Qt.AlignCenter)
+            # 실패 횟수
+            self.tableWidget.setItem(i, 3, QTableWidgetItem("0"))
+            self.tableWidget.item(i, 3).setTextAlignment(Qt.AlignCenter)
+            # 평가 점수
+            self.tableWidget.setItem(i, 4, QTableWidgetItem("0%"))
+            self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
+            # 상세 결과 버튼
+            detail_btn = QPushButton("세부 결과 확인")
+            detail_btn.setMaximumHeight(30)
+            detail_btn.setMaximumWidth(120)  # 버튼 최대 너비 제한
+            detail_btn.clicked.connect(lambda checked, row=i: self.show_detail_result(row))
+            self.tableWidget.setCellWidget(i, 5, detail_btn)
 
-        self.step1.clicked.connect(self.step1_clicked)
-        self.step2.clicked.connect(self.step2_clicked)
-        self.step3.clicked.connect(self.step3_clicked)
-        self.step4.clicked.connect(self.step4_clicked)
-        self.step5.clicked.connect(self.step5_clicked)
-        self.step6.clicked.connect(self.step6_clicked)
-        self.step7.clicked.connect(self.step7_clicked)
-        self.step8.clicked.connect(self.step8_clicked)
-        self.step9.clicked.connect(self.step9_clicked)
+        # 결과 컬럼만 클릭 가능하도록 설정 (기존 기능 유지)
+        self.tableWidget.cellClicked.connect(self.table_cell_clicked)
+        
+        # centerLayout을 초기화하고 테이블 추가
+        self.centerLayout = QVBoxLayout()
+        self.centerLayout.addWidget(self.tableWidget)
 
-        self.step1_msg = ""
-        self.step2_msg = ""
-        self.step3_msg = ""
-        self.step4_msg = ""
-        self.step5_msg = ""
-        self.step6_msg = ""
-        self.step7_msg = ""
-        self.step8_msg = ""
-        self.step9_msg = ""
+    def show_detail_result(self, row):
+        """상세 결과 확인 버튼 클릭 시 호출되는 함수"""
+        msg = getattr(self, f"step{row+1}_msg", "")
+        if msg:
+            CustomDialog(msg, self.tableWidget.item(row, 0).text())
+        else:
+            CustomDialog("아직 검증 결과가 없습니다.", self.tableWidget.item(row, 0).text())
 
-        split1 = QSplitter()
-        split1.setFrameShape(QFrame.NoFrame)
-        split1.addWidget(self.step1)
-
-        split2 = QSplitter()
-        split2.setFrameShape(QFrame.NoFrame)
-        split2.addWidget(self.step2)
-
-        split3 = QSplitter()
-        split3.setFrameShape(QFrame.NoFrame)
-        split3.addWidget(self.step3)
-
-        split4 = QSplitter()
-        split4.setFrameShape(QFrame.NoFrame)
-        split4.addWidget(self.step4)
-
-        split5 = QSplitter()
-        split5.setFrameShape(QFrame.NoFrame)
-        split5.addWidget(self.step5)
-
-        split6 = QSplitter()
-        split6.setFrameShape(QFrame.NoFrame)
-        split6.addWidget(self.step6)
-
-        split7 = QSplitter()
-        split7.setFrameShape(QFrame.NoFrame)
-        split7.addWidget(self.step7)
-
-        split8 = QSplitter()
-        split8.setFrameShape(QFrame.NoFrame)
-        split8.addWidget(self.step8)
-
-        split9 = QSplitter()
-        split9.setFrameShape(QFrame.NoFrame)
-        split9.addWidget(self.step9)
-
-        self.splitwidget = QSplitter(Qt.Vertical)
-        self.splitwidget.addWidget(split1)
-        self.splitwidget.addWidget(split2)
-        self.splitwidget.addWidget(split3)
-        self.splitwidget.addWidget(split4)
-        self.splitwidget.addWidget(split5)
-        self.splitwidget.addWidget(split6)
-        self.splitwidget.addWidget(split7)
-        self.splitwidget.addWidget(split8)
-        self.splitwidget.addWidget(split9)
-        self.centerLayout.addWidget(self.splitwidget)
+    def table_cell_clicked(self, row, col):
+        """테이블 셀 클릭 시 호출되는 함수 (결과 아이콘 클릭용으로 유지)"""
+        if col == 1:  # 결과 컬럼 클릭 시에만 동작
+            msg = getattr(self, f"step{row+1}_msg", "")
+            if msg:
+                CustomDialog(msg, self.tableWidget.item(row, 0).text())
 
     def init_circleLayout(self):
-        # self.stepLayout = QVBoxLayout()
-        self.step1_icon = QPushButton("")
-        self.step2_icon = QPushButton("")
-        self.step3_icon = QPushButton("")
-        self.step4_icon = QPushButton("")
-        self.step5_icon = QPushButton("")
-        self.step6_icon = QPushButton("")
-        self.step7_icon = QPushButton("")
-        self.step8_icon = QPushButton("")
-        self.step9_icon = QPushButton("")
-
-        self.step1_icon.setStyleSheet('background-color:transparent')
-        self.step2_icon.setStyleSheet('background-color:transparent')
-        self.step3_icon.setStyleSheet('background-color:transparent')
-        self.step4_icon.setStyleSheet('background-color:transparent')
-        self.step5_icon.setStyleSheet('background-color:transparent')
-        self.step6_icon.setStyleSheet('background-color:transparent')
-        self.step7_icon.setStyleSheet('background-color:transparent')
-        self.step8_icon.setStyleSheet('background-color:transparent')
-        self.step9_icon.setStyleSheet('background-color:transparent')
-
-        self.step1_icon.setIcon(QIcon(self.img_none))
-        self.step2_icon.setIcon(QIcon(self.img_none))
-        self.step3_icon.setIcon(QIcon(self.img_none))
-        self.step4_icon.setIcon(QIcon(self.img_none))
-        self.step5_icon.setIcon(QIcon(self.img_none))
-        self.step6_icon.setIcon(QIcon(self.img_none))
-        self.step7_icon.setIcon(QIcon(self.img_none))
-        self.step8_icon.setIcon(QIcon(self.img_none))
-        self.step9_icon.setIcon(QIcon(self.img_none))
-
-        split1 = QSplitter()
-        split1.setFrameShape(QFrame.NoFrame)
-        split1.addWidget(self.step1_icon)
-
-        split2 = QSplitter()
-        split2.setFrameShape(QFrame.NoFrame)
-        split2.addWidget(self.step2_icon)
-
-        split3 = QSplitter()
-        split3.setFrameShape(QFrame.NoFrame)
-        split3.addWidget(self.step3_icon)
-
-        split4 = QSplitter()
-        split4.setFrameShape(QFrame.NoFrame)
-        split4.addWidget(self.step4_icon)
-
-        split5 = QSplitter()
-        split5.setFrameShape(QFrame.NoFrame)
-        split5.addWidget(self.step5_icon)
-
-        split6 = QSplitter()
-        split6.setFrameShape(QFrame.NoFrame)
-        split6.addWidget(self.step6_icon)
-
-        split7 = QSplitter()
-        split7.setFrameShape(QFrame.NoFrame)
-        split7.addWidget(self.step7_icon)
-
-        split8 = QSplitter()
-        split8.setFrameShape(QFrame.NoFrame)
-        split8.addWidget(self.step8_icon)
-
-        split9 = QSplitter()
-        split9.setFrameShape(QFrame.NoFrame)
-        split9.addWidget(self.step9_icon)
-
-        self.splitwidget = QSplitter(Qt.Vertical)
-        self.splitwidget.addWidget(split1)
-        self.splitwidget.addWidget(split2)
-        self.splitwidget.addWidget(split3)
-        self.splitwidget.addWidget(split4)
-        self.splitwidget.addWidget(split5)
-        self.splitwidget.addWidget(split6)
-        self.splitwidget.addWidget(split7)
-        self.splitwidget.addWidget(split8)
-        self.splitwidget.addWidget(split9)
-        self.circleLayout.addWidget(self.splitwidget)
+        pass  # 테이블 형태로 변경했으므로 이 메서드는 더이상 필요 없음
 
     def group1(self):
         rgroup = QGroupBox('연동 시스템')
+        rgroup.setMaximumWidth(1000)  # 테이블과 모니터링과 동일한 너비로 설정
+        rgroup.setMinimumWidth(900)   # 테이블 최소 너비와 동일하게 설정
+        
         self.g1_radio1 = QRadioButton('영상보안 시스템')
         self.g1_radio1.toggled.connect(self.g1_radio1_checked)
         self.g1_radio2 = QRadioButton('바이오인식 기반 출입통제 시스템')
@@ -591,7 +490,9 @@ class MyApp(QWidget):
         return rgroup
 
     def group2(self):
-        rgroup = QGroupBox('사용자 인증 방식')
+        rgroup = QGroupBox('시험 인증 정보')
+        rgroup.setMaximumWidth(180)  # 인증 정보 박스 너비 제한
+        
         self.g2_radio1 = QRadioButton('Digest Auth')
         self.g2_radio1.toggled.connect(self.g2_radio_checked)
         self.g2_radio2 = QRadioButton('Bearer Token')
@@ -608,6 +509,8 @@ class MyApp(QWidget):
 
     def group3(self):
         fgroup = QGroupBox('메시지 송수신')
+        fgroup.setMaximumWidth(200)  # 메시지 송수신 박스 너비 제한
+        
         self.protocol_widget = QComboBox()
         self.protocol_widget.addItem("LongPolling")
         self.protocol_widget.addItem("WebHook")
@@ -624,12 +527,14 @@ class MyApp(QWidget):
 
     def group4(self):
         fgroup = QGroupBox('')
+        fgroup.setMaximumWidth(150)  # 시험 URL 박스 너비 제한
 
         self.linkUrl = QLineEdit(self)
         self.linkUrl.setText("https://127.0.0.1:8008")
+        self.linkUrl.setMaximumWidth(130)  # URL 입력 필드 너비 제한
 
         layout = QVBoxLayout()
-        layout.addWidget(QLabel('연동 URL'))
+        layout.addWidget(QLabel('시험 URL'))
         layout.addWidget(self.linkUrl)
 
         fgroup.setLayout(layout)
@@ -639,63 +544,100 @@ class MyApp(QWidget):
         if checked:
             self.radio_check_flag = "video"
             self.final_report = "영상보안 시스템(가상)-물리보안 통합플랫폼 검증 결과" + "\n"
-            self.step7.setEnabled(True)
-            self.step8.setEnabled(True)
-            self.step9.setEnabled(True)
-            self.step7_icon.setEnabled(True)
-            self.step8_icon.setEnabled(True)
-            self.step9_icon.setEnabled(True)
-            self.step1.setText("1. Authentication")
-            self.step2.setText("2. Capabilities")
-            self.step3.setText("3. CameraProfiles")
-            self.step4.setText("4. StoredVideoInfos")
-            self.step5.setText("5. StreamURLs")
-            self.step6.setText("6. ReplayURL")
-            self.step7.setText("7. RealtimeVideoEventInfos")
-            self.step8.setText("8. StoredVideoEventInfos")
-            self.step9.setText("9. StoredObjectAnalyticsInfos")
+            self.step_names = [
+                "Authentication", "Capabilities", "CameraProfiles", "StoredVideoInfos",
+                "StreamURLs", "ReplayURL", "RealtimeVideoEventInfos",
+                "StoredVideoEventInfos", "StoredObjectAnalyticsInfos"
+            ]
+            for i, name in enumerate(self.step_names):
+                # API 명
+                self.tableWidget.setItem(i, 0, QTableWidgetItem(f"{i+1}. {name}"))
+                # 결과 아이콘
+                icon_item = QTableWidgetItem()
+                icon_item.setIcon(QIcon(self.img_none))
+                icon_item.setTextAlignment(Qt.AlignCenter)
+                self.tableWidget.setItem(i, 1, icon_item)
+                # 검증 횟수
+                self.tableWidget.setItem(i, 2, QTableWidgetItem("0"))
+                self.tableWidget.item(i, 2).setTextAlignment(Qt.AlignCenter)
+                # 실패 횟수
+                self.tableWidget.setItem(i, 3, QTableWidgetItem("0"))
+                self.tableWidget.item(i, 3).setTextAlignment(Qt.AlignCenter)
+                # 평가 점수
+                self.tableWidget.setItem(i, 4, QTableWidgetItem("0%"))
+                self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
+                # 상세 결과 버튼
+                detail_btn = QPushButton("세부 결과 확인")
+                detail_btn.setMaximumHeight(30)
+                detail_btn.setMaximumWidth(120)  # 버튼 최대 너비 제한
+                detail_btn.clicked.connect(lambda checked, row=i: self.show_detail_result(row))
+                self.tableWidget.setCellWidget(i, 5, detail_btn)
 
     def g1_radio2_checked(self, checked):
         if checked:
-
             self.radio_check_flag = "bio"
             self.final_report = "바이오인식 기반 출입통제 시스템(가상)-물리보안 통합플랫폼 검증 결과" + "\n"
-            self.step7.setEnabled(True)
-            self.step8.setEnabled(True)
-            self.step9.setEnabled(False)
-            self.step7_icon.setEnabled(True)
-            self.step8_icon.setEnabled(True)
-            self.step9_icon.setEnabled(False)
-            self.step1.setText("1. Authentication")
-            self.step2.setText("2. Capabilities")
-            self.step3.setText("3. DoorProfiles")
-            self.step4.setText("4. AccessUserInfos")
-            self.step5.setText("5. RealtimeVerifEventInfos")
-            self.step6.setText("6. StoredVerifEventInfos")
-            self.step7.setText("7. RealtimeDoorStatus")
-            self.step8.setText("8. DoorControl")
-            self.step9.setText("")
+            self.step_names = [
+                "Authentication", "Capabilities", "DoorProfiles", "AccessUserInfos",
+                "RealtimeVerifEventInfos", "StoredVerifEventInfos", "RealtimeDoorStatus",
+                "DoorControl", ""
+            ]
+            for i, name in enumerate(self.step_names):
+                # API 명
+                self.tableWidget.setItem(i, 0, QTableWidgetItem(f"{i+1}. {name}"))
+                # 결과 아이콘
+                icon_item = QTableWidgetItem()
+                icon_item.setIcon(QIcon(self.img_none))
+                icon_item.setTextAlignment(Qt.AlignCenter)
+                self.tableWidget.setItem(i, 1, icon_item)
+                # 검증 횟수
+                self.tableWidget.setItem(i, 2, QTableWidgetItem("0"))
+                self.tableWidget.item(i, 2).setTextAlignment(Qt.AlignCenter)
+                # 실패 횟수
+                self.tableWidget.setItem(i, 3, QTableWidgetItem("0"))
+                self.tableWidget.item(i, 3).setTextAlignment(Qt.AlignCenter)
+                # 평가 점수
+                self.tableWidget.setItem(i, 4, QTableWidgetItem("0%"))
+                self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
+                # 상세 결과 버튼
+                detail_btn = QPushButton("세부 결과 확인")
+                detail_btn.setMaximumHeight(30)
+                detail_btn.setMaximumWidth(120)  # 버튼 최대 너비 제한
+                detail_btn.clicked.connect(lambda checked, row=i: self.show_detail_result(row))
+                self.tableWidget.setCellWidget(i, 5, detail_btn)
 
     def g1_radio3_checked(self, checked):
         if checked:
             self.final_report = "보안용 센서 시스템(가상)-물리보안 통합플랫폼 검증 결과" + "\n"
-            self.step7.setEnabled(True)
-            self.step8.setEnabled(False)
-            self.step9.setEnabled(False)
-
-            self.step7_icon.setEnabled(True)
-            self.step8_icon.setEnabled(False)
-            self.step9_icon.setEnabled(False)
             self.radio_check_flag = "security"
-            self.step1.setText("1. Authentication")
-            self.step2.setText("2. Capabilities")
-            self.step3.setText("3. SensorDeviceProfiles")
-            self.step4.setText("4. RealtimeSensorData")
-            self.step5.setText("5. RealtimeSensorEventInfos")
-            self.step6.setText("6. StoredSensorEventInfos")
-            self.step7.setText("7. SensorDeviceControl")
-            self.step8.setText("")
-            self.step9.setText("")
+            self.step_names = [
+                "Authentication", "Capabilities", "SensorDeviceProfiles", "RealtimeSensorData",
+                "RealtimeSensorEventInfos", "StoredSensorEventInfos", "SensorDeviceControl",
+                "", ""
+            ]
+            for i, name in enumerate(self.step_names):
+                # API 명
+                self.tableWidget.setItem(i, 0, QTableWidgetItem(f"{i+1}. {name}"))
+                # 결과 아이콘
+                icon_item = QTableWidgetItem()
+                icon_item.setIcon(QIcon(self.img_none))
+                icon_item.setTextAlignment(Qt.AlignCenter)
+                self.tableWidget.setItem(i, 1, icon_item)
+                # 검증 횟수
+                self.tableWidget.setItem(i, 2, QTableWidgetItem("0"))
+                self.tableWidget.item(i, 2).setTextAlignment(Qt.AlignCenter)
+                # 실패 횟수
+                self.tableWidget.setItem(i, 3, QTableWidgetItem("0"))
+                self.tableWidget.item(i, 3).setTextAlignment(Qt.AlignCenter)
+                # 평가 점수
+                self.tableWidget.setItem(i, 4, QTableWidgetItem("0%"))
+                self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
+                # 상세 결과 버튼
+                detail_btn = QPushButton("세부 결과 확인")
+                detail_btn.setMaximumHeight(30)
+                detail_btn.setMaximumWidth(120)  # 버튼 최대 너비 제한
+                detail_btn.clicked.connect(lambda checked, row=i: self.show_detail_result(row))
+                self.tableWidget.setCellWidget(i, 5, detail_btn)
 
     def g2_radio_checked(self, checked):
         if checked:
@@ -724,60 +666,38 @@ class MyApp(QWidget):
             elif self.g2_radio3.isChecked():
                 self.r2 = "None"
 
+    # 기존 step 클릭 함수들은 table_cell_clicked로 대체됨
     def step1_clicked(self):
-        CustomDialog(self.step1_msg, self.step1.text())
-
+        pass
     def step2_clicked(self):
-        CustomDialog(self.step2_msg, self.step2.text())
-
+        pass
     def step3_clicked(self):
-        CustomDialog(self.step3_msg, self.step3.text())
-
+        pass
     def step4_clicked(self):
-        CustomDialog(self.step4_msg, self.step4.text())
-
+        pass
     def step5_clicked(self):
-        CustomDialog(self.step5_msg, self.step5.text())
-
+        pass
     def step6_clicked(self):
-        CustomDialog(self.step6_msg, self.step6.text())
-
+        pass
     def step7_clicked(self):
-        CustomDialog(self.step7_msg, self.step7.text())
-
+        pass
     def step8_clicked(self):
-        CustomDialog(self.step8_msg, self.step8.text())
-
+        pass
     def step9_clicked(self):
-        CustomDialog(self.step9_msg, self.step9.text())
+        pass
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
-
-        # 창 크기가 변할 때 버튼 크기 조정
-        min_button_width = 250
-        min_button_height = 60
-
-        # 현재 창의 크기를 가져옴
-        window_width = self.width()
-        window_height = self.height()
-
-        # 버튼의 새로운 크기 계산
-        button_width = max(min_button_width, window_width // 3)  # 최소 크기와 창 폭의 1/3 중 더 큰 값으로 설정
-        button_height = max(min_button_height, window_height // 13)
-        #
-        # # 버튼 크기 설정
-        # self.step1.setFixedWidth(button_width)
-        self.step1.setFixedSize(button_width, button_height)
-        self.step2.setFixedSize(button_width, button_height)
-        self.step3.setFixedSize(button_width, button_height)
-        self.step4.setFixedSize(button_width, button_height)
-        self.step5.setFixedSize(button_width, button_height)
-        self.step6.setFixedSize(button_width, button_height)
-        self.step7.setFixedSize(button_width, button_height)
-        self.step8.setFixedSize(button_width, button_height)
-        self.step9.setFixedSize(button_width, button_height)
-        self.valResult.setFixedWidth(window_width//3)
+        # 창 크기 변경 시 테이블 크기 조정
+        if hasattr(self, 'tableWidget'):
+            window_width = self.width()
+            window_height = self.height()
+            
+            # 테이블 크기를 창 크기에 맞게 조정 (3컬럼에 맞게 너비 증가)
+            table_width = min(max(600, window_width // 3), 800)  # 최소 600, 최대 800
+            table_height = min(max(300, window_height // 2), 500)  # 최소 300, 최대 500
+            
+            self.tableWidget.resize(table_width, table_height)
 
 
     def sbtn_push(self):
@@ -843,15 +763,12 @@ class MyApp(QWidget):
             self.valResult.clear()  # 초기화
             self.final_report = ""  # 초기화
 
-            self.step1_icon.setIcon(QIcon(self.img_none))
-            self.step2_icon.setIcon(QIcon(self.img_none))
-            self.step3_icon.setIcon(QIcon(self.img_none))
-            self.step4_icon.setIcon(QIcon(self.img_none))
-            self.step5_icon.setIcon(QIcon(self.img_none))
-            self.step6_icon.setIcon(QIcon(self.img_none))
-            self.step7_icon.setIcon(QIcon(self.img_none))
-            self.step8_icon.setIcon(QIcon(self.img_none))
-            self.step9_icon.setIcon(QIcon(self.img_none))
+            # 테이블 아이콘 초기화
+            for i in range(self.tableWidget.rowCount()):
+                icon_item = QTableWidgetItem()
+                icon_item.setIcon(QIcon(self.img_none))
+                icon_item.setTextAlignment(Qt.AlignCenter)
+                self.tableWidget.setItem(i, 1, icon_item)
             self.pathUrl = self.linkUrl.text()
 
             if self.r2 == "B":
@@ -892,24 +809,15 @@ class MyApp(QWidget):
                 json.dump(None, out_file, ensure_ascii=False)
 
         self.valResult.clear()
-        self.step1_msg = ""
-        self.step2_msg = ""
-        self.step3_msg = ""
-        self.step4_msg = ""
-        self.step5_msg = ""
-        self.step6_msg = ""
-        self.step7_msg = ""
-        self.step8_msg = ""
-        self.step9_msg = ""
-        self.step1_icon.setIcon(QIcon(self.img_none))
-        self.step2_icon.setIcon(QIcon(self.img_none))
-        self.step3_icon.setIcon(QIcon(self.img_none))
-        self.step4_icon.setIcon(QIcon(self.img_none))
-        self.step5_icon.setIcon(QIcon(self.img_none))
-        self.step6_icon.setIcon(QIcon(self.img_none))
-        self.step7_icon.setIcon(QIcon(self.img_none))
-        self.step8_icon.setIcon(QIcon(self.img_none))
-        self.step9_icon.setIcon(QIcon(self.img_none))
+        # 메시지 초기화
+        for i in range(1, 10):
+            setattr(self, f"step{i}_msg", "")
+        # 테이블 아이콘 초기화
+        for i in range(self.tableWidget.rowCount()):
+            icon_item = QTableWidgetItem()
+            icon_item.setIcon(QIcon(self.img_none))
+            icon_item.setTextAlignment(Qt.AlignCenter)
+            self.tableWidget.setItem(i, 1, icon_item)
 
     def rbtn_push(self):
 
