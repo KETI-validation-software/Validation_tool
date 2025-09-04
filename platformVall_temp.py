@@ -1,11 +1,10 @@
-# 물리보안 통합플랫폼 검증 소프트웨어
-# physical security integrated platform validation software
+# 임시 화면
 
 from api.api_server import Server
 import time
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore
-from PyQt5.QtGui import QIcon, QFontDatabase, QFont
+from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor
 from PyQt5.QtCore import Qt, QSettings, QTimer, QThread
 import sys
 import ssl
@@ -321,7 +320,7 @@ class MyApp(QWidget):
     def initUI(self):
 
         outerLayout = QVBoxLayout()
-        topLayout = QHBoxLayout()      # 최상단 환경설정과 버튼들 레이아웃
+        topLayout = QHBoxLayout()      # 최상단 테이블과 버튼들 레이아웃
         contentLayout = QVBoxLayout()  # 시험 결과 레이아웃
         bottomLayout = QVBoxLayout()   # 하단 모니터링 레이아웃
         
@@ -329,49 +328,91 @@ class MyApp(QWidget):
         empty.setStyleSheet('font-size:5pt')
         outerLayout.addWidget(empty)  # empty
         
-        # 시험 정보 박스 (가로 배치)
+        # 시험 정보 테이블 (세로 컬럼 형태)
         self.settingGroup = QGroupBox("시험정보")
-        self.settingGroup.setMaximumWidth(800)  # 시험정보 박스 전체 너비 확장 (연동 시스템 추가를 위해)
-        settingLayout = QHBoxLayout()  # 가로로 변경
-        settingLayout.addWidget(self.group2())  # 사용자 인증 방식
-        settingLayout.addWidget(self.group3())  # 메시지 송수신
-        settingLayout.addWidget(self.group4())  # 연동 URL
-        settingLayout.addWidget(self.group1())  # 연동 시스템을 시험정보에 추가
+        self.settingGroup.setMaximumWidth(600)  # 테이블 너비 조정
+        
+        # 테이블 위젯 생성
+        self.info_table = QTableWidget(9, 2)  # 9행 2열 (항목명, 값)
+        self.info_table.setMaximumWidth(580)
+        self.info_table.setMaximumHeight(300)
+        
+        # 테이블 헤더 설정
+        self.info_table.setHorizontalHeaderLabels(["항목", "내용"])
+        self.info_table.setColumnWidth(0, 150)  # 첫 번째 열 너비 고정
+        self.info_table.setColumnWidth(1, 400)  # 두 번째 열 너비 고정
+        
+        # 테이블 행 레이블 숨기기
+        self.info_table.verticalHeader().setVisible(False)
+        
+        # 테이블 내용 설정
+        table_data = [
+            ("기업명", "삼성전자"),
+            ("제품명", "통합보안플랫폼"),
+            ("버전", "v1.0.0"),
+            ("시험유형", "적합성 시험"),
+            ("시험대상", "영상보안 시스템"),
+            ("시험범위", "전체 API"),
+            ("사용자 인증 방식", "Digest Auth"),
+            ("관리자 코드", "admin123"),
+            ("시험 접속 정보", "https://127.0.0.1:8008")
+        ]
+        
+        # 테이블에 데이터 입력
+        for row, (label, value) in enumerate(table_data):
+            # 첫 번째 컬럼 (항목명) - 읽기 전용
+            item_label = QTableWidgetItem(label)
+            item_label.setFlags(Qt.ItemIsEnabled)  # 편집 불가
+            item_label.setBackground(QColor(240, 240, 240))  # 회색 배경
+            self.info_table.setItem(row, 0, item_label)
+            
+            # 두 번째 컬럼 (내용) - 편집 가능
+            item_value = QTableWidgetItem(value)
+            self.info_table.setItem(row, 1, item_value)
+        
+        # 테이블 레이아웃
+        settingLayout = QVBoxLayout()
+        settingLayout.addWidget(self.info_table)
         self.settingGroup.setLayout(settingLayout)
         
-        # 검증 버튼들 (가로 배치, 짧은 너비)
-        buttonGroup = QGroupBox("")
-        buttonGroup.setMaximumWidth(380)  # 버튼 그룹 박스 너비 제한
-        buttonLayout = QHBoxLayout()
+        # 기존 그룹들 (메시지 송수신, 연동 시스템)
+        # self.messageGroup = QGroupBox("메시지 송수신")
+        # self.messageGroup.setMaximumWidth(300)
+        # messageLayout = QVBoxLayout()
+        # # messageLayout.addWidget(self.group3())  # 메시지 송수신
+        # messageLayout.addWidget(self.group1())  # 연동 시스템
+        # self.messageGroup.setLayout(messageLayout)
+        
+        # 검증 버튼들 (테두리 없는 컨테이너로 변경)
+        buttonGroup = QWidget()  # QGroupBox에서 QWidget으로 변경
+        buttonGroup.setMaximumWidth(500)  # 가로 배치에 맞게 너비 증가
+        buttonLayout = QHBoxLayout()  # 세로에서 가로로 변경
         
         self.sbtn = QPushButton(self)
         self.sbtn.setText('평가 시작')
-        self.sbtn.setMaximumWidth(100)  # 버튼 너비 제한
+        self.sbtn.setMaximumWidth(100)  # 버튼 너비를 100으로 조정
+        self.sbtn.setMaximumHeight(40)   # 버튼 높이도 설정
         self.sbtn.clicked.connect(self.sbtn_push)
 
         self.stop_btn = QPushButton(self)
         self.stop_btn.setText('일시 정지')
-        self.stop_btn.setMaximumWidth(100)  # 버튼 너비 제한
+        self.stop_btn.setMaximumWidth(100)  # 버튼 너비를 100으로 조정
+        self.stop_btn.setMaximumHeight(40)   # 버튼 높이도 설정
         self.stop_btn.clicked.connect(self.stop_btn_clicked)
         self.stop_btn.setDisabled(True)
         
-        # ------------------ 원래 검증 결과 저장 버튼이었음 -> 추후 종료 기능으로 기능 수정해야함 ------------------------
-        self.rbtn = QPushButton(self)
-        self.rbtn.setText('종료')
-        self.rbtn.setMaximumWidth(120)  # 버튼 너비 제한
-        self.rbtn.clicked.connect(self.rbtn_push)
-
         buttonLayout.addWidget(self.sbtn)
         buttonLayout.addWidget(self.stop_btn)
-        buttonLayout.addWidget(self.rbtn)
-        # buttonLayout.addStretch() 
+        buttonLayout.addStretch()
         buttonGroup.setLayout(buttonLayout)
         
-        # 상단 레이아웃 구성 (환경설정 + 버튼들) ---------------------------------
-        topLayout.addWidget(self.settingGroup)
-        topLayout.addWidget(buttonGroup)
-        topLayout.setContentsMargins(0, 0, 0, 0)  # 여백 제거
-        topLayout.setSpacing(10)  # 위젯 간 간격 조정
+        # 상단 레이아웃 구성 (테이블 + 버튼들) ---------------------------------
+        # 시험정보를 더 넓게, 버튼을 오른쪽에 적당히 배치
+        topLayout.addWidget(self.settingGroup, 3)  # 비율 3 (더 넓게)
+        topLayout.addStretch(1)  # 중간에 여백 추가 (비율 1)
+        topLayout.addWidget(buttonGroup, 1)   # 비율 1 (적당히)
+        topLayout.setContentsMargins(0, 0, 0, 0)
+        topLayout.setSpacing(10)
 
         # 중간 레이아웃 구성 (아래까지 포함)---------------------------------
         contentLayout.addWidget(self.group_score()) # 평가 점수 박스 위로 올라감
@@ -409,8 +450,8 @@ class MyApp(QWidget):
         outerLayout.addWidget(empty)  # empty
         # outerLayout.setSpacing(10)  # 레이아웃 간 간격 조정
         self.setLayout(outerLayout)
-        self.setWindowTitle('물리보안 통합플랫폼 연동 검증 소프트웨어')
-        self.setGeometry(500, 300, 1200, 850)  # 창 크기 설정
+        self.setWindowTitle('물리보안 통합플랫폼 연동 검증 소프트웨어 - 임시 화면')
+        self.setGeometry(500, 300, 1000, 900)  # 창 크기 설정 (테이블 형태에 맞게 조정)
         # showing all the widgets
 
         # self.json_th.json_update_data.connect(self.json_update_data)
@@ -529,7 +570,7 @@ class MyApp(QWidget):
         return rgroup
 
     def group2(self):
-        rgroup = QGroupBox('시험 인증 정보')
+        rgroup = QGroupBox('사용자 인증 방식')
         rgroup.setMaximumWidth(180)  # 인증 정보 박스 너비 제한
         
         self.g2_radio1 = QRadioButton('Digest Auth')
@@ -546,26 +587,26 @@ class MyApp(QWidget):
         rgroup.setLayout(vbox)
         return rgroup
 
-    def group3(self):
-        fgroup = QGroupBox('메시지 송수신')
-        fgroup.setMaximumWidth(200)  # 메시지 송수신 박스 너비 제한
+    # def group3(self):
+    #     fgroup = QGroupBox('메시지 송수신')
+    #     fgroup.setMaximumWidth(200)  # 메시지 송수신 박스 너비 제한
         
-        self.protocol_widget = QComboBox()
-        self.protocol_widget.addItem("LongPolling")
-        self.protocol_widget.addItem("WebHook")
-        self.timeOut_widget = QSpinBox()
-        self.timeOut_widget.setValue(5)
-        self.timeOut_widget.setMaximum(1000)
+    #     self.protocol_widget = QComboBox()
+    #     self.protocol_widget.addItem("LongPolling")
+    #     self.protocol_widget.addItem("WebHook")
+    #     self.timeOut_widget = QSpinBox()
+    #     self.timeOut_widget.setValue(5)
+    #     self.timeOut_widget.setMaximum(1000)
 
-        flayout = QFormLayout()
-        flayout.addRow("transProtocol  ", self.protocol_widget)
-        flayout.addRow("timeOut(sec):  ", self.timeOut_widget)
+    #     flayout = QFormLayout()
+    #     flayout.addRow("transProtocol  ", self.protocol_widget)
+    #     flayout.addRow("timeOut(sec):  ", self.timeOut_widget)
 
-        fgroup.setLayout(flayout)
-        return fgroup
+    #     fgroup.setLayout(flayout)
+    #     return fgroup
 
     def group4(self):
-        fgroup = QGroupBox('')
+        fgroup = QGroupBox('시험 URL')
         fgroup.setMaximumWidth(150)  # 시험 URL 박스 너비 제한
 
         self.linkUrl = QLineEdit(self)
@@ -573,7 +614,6 @@ class MyApp(QWidget):
         self.linkUrl.setMaximumWidth(130)  # URL 입력 필드 너비 제한
 
         layout = QVBoxLayout()
-        layout.addWidget(QLabel('시험 URL'))
         layout.addWidget(self.linkUrl)
 
         fgroup.setLayout(layout)
@@ -930,41 +970,61 @@ class MyApp(QWidget):
     def get_setting(self):
         self.setting_variables = QSettings('My App', 'Variable')
         #  QSettings('My App', 'Variable').clear()#tylee
+        
+        # 시스템 설정
         self.Server.system = self.setting_variables.value('system')
-        if self.Server.system == "video":
+        if hasattr(self, 'g1_radio1') and self.Server.system == "video":
             self.g1_radio1.setChecked(True)
-        elif self.Server.system == "bio":
+        elif hasattr(self, 'g1_radio2') and self.Server.system == "bio":
             self.g1_radio2.setChecked(True)
-        elif self.Server.system == "security":
+        elif hasattr(self, 'g1_radio3') and self.Server.system == "security":
             self.g1_radio3.setChecked(True)
 
+        # 인증 설정
         self.r2 = self.setting_variables.value('auth')
-        if self.r2 == "D":
+        if hasattr(self, 'g2_radio1') and self.r2 == "D":
             self.g2_radio1.setChecked(True)
-        elif self.r2 == "B":
+        elif hasattr(self, 'g2_radio2') and self.r2 == "B":
             self.g2_radio2.setChecked(True)
-        elif self.r2 == "None":
+        elif hasattr(self, 'g2_radio3') and self.r2 == "None":
             self.g2_radio3.setChecked(True)
 
+        # URL 설정
         tmp = self.setting_variables.value('linkUrl')
         if tmp is None:
             tmp = "https://127.0.0.1:8008"
-        self.linkUrl.setText(tmp)
+        if hasattr(self, 'linkUrl'):
+            self.linkUrl.setText(tmp)
+            
+        # 타임아웃 설정
         try:
             tmp = self.setting_variables.value('timeOut')
-            self.timeOut_widget.setValue(int(tmp))
-        except TypeError:  # None
-            self.timeOut_widget.setValue(5)
+            if hasattr(self, 'timeOut_widget'):
+                self.timeOut_widget.setValue(int(tmp))
+        except (TypeError, ValueError):  # None 또는 잘못된 값
+            if hasattr(self, 'timeOut_widget'):
+                self.timeOut_widget.setValue(5)
 
-        saved_idx = self.setting_variables.value('protocolWidget',0,int)
-        self.protocol_widget.setCurrentIndex(saved_idx)
+        # 프로토콜 설정
+        try:
+            saved_idx = self.setting_variables.value('protocolWidget', 0, int)
+            if hasattr(self, 'protocol_widget'):
+                self.protocol_widget.setCurrentIndex(saved_idx)
+        except (TypeError, ValueError):
+            pass
 
     def closeEvent(self, event):
-        self.setting_variables.setValue('system', self.Server.system)
-        self.setting_variables.setValue('auth', self.r2)
-        self.setting_variables.setValue('timeOut', self.timeOut_widget.text())
-        self.setting_variables.setValue('linkUrl', self.linkUrl.text())
-        self.setting_variables.setValue('protocolWidget', self.protocol_widget.currentIndex())
+        if hasattr(self, 'setting_variables'):
+            self.setting_variables.setValue('system', self.Server.system)
+            if hasattr(self, 'r2'):
+                self.setting_variables.setValue('auth', self.r2)
+            if hasattr(self, 'timeOut_widget'):
+                self.setting_variables.setValue('timeOut', self.timeOut_widget.text())
+            if hasattr(self, 'linkUrl'):
+                self.setting_variables.setValue('linkUrl', self.linkUrl.text())
+            if hasattr(self, 'protocol_widget'):
+                self.setting_variables.setValue('protocolWidget', self.protocol_widget.currentIndex())
+        event.accept()
 
 
 class server_th(QThread):
