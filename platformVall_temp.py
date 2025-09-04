@@ -510,7 +510,7 @@ class MyApp(QWidget):
             # 평가 점수
             self.tableWidget.setItem(i, 4, QTableWidgetItem("0%"))
             self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
-            # 상세 결과 버튼 (중앙 정렬을 위한 위젯 컨테이너)
+            # 메시지 데이터 버튼 (중앙 정렬을 위한 위젯 컨테이너)
             detail_btn = QPushButton("데이터 확인")
             detail_btn.setMaximumHeight(30)
             detail_btn.setMaximumWidth(120)  # 버튼 최대 너비 제한
@@ -526,6 +526,38 @@ class MyApp(QWidget):
             
             self.tableWidget.setCellWidget(i, 5, container)
 
+            # 메시지 규격 버튼 (6번 컬럼)
+            schema_btn = QPushButton("규격 확인")
+            schema_btn.setMaximumHeight(30)
+            schema_btn.setMaximumWidth(100)
+            schema_btn.clicked.connect(lambda checked, row=i: self.show_schema_result(row))
+            
+            # 버튼을 중앙에 배치하기 위한 위젯과 레이아웃
+            schema_container = QWidget()
+            schema_layout = QHBoxLayout()
+            schema_layout.addWidget(schema_btn)
+            schema_layout.setAlignment(Qt.AlignCenter)
+            schema_layout.setContentsMargins(0, 0, 0, 0)
+            schema_container.setLayout(schema_layout)
+            
+            self.tableWidget.setCellWidget(i, 6, schema_container)
+
+            # 메시지 오류 버튼 (7번 컬럼)
+            error_btn = QPushButton("오류 확인")
+            error_btn.setMaximumHeight(30)
+            error_btn.setMaximumWidth(100)
+            error_btn.clicked.connect(lambda checked, row=i: self.show_error_result(row))
+            
+            # 버튼을 중앙에 배치하기 위한 위젯과 레이아웃
+            error_container = QWidget()
+            error_layout = QHBoxLayout()
+            error_layout.addWidget(error_btn)
+            error_layout.setAlignment(Qt.AlignCenter)
+            error_layout.setContentsMargins(0, 0, 0, 0)
+            error_container.setLayout(error_layout)
+            
+            self.tableWidget.setCellWidget(i, 7, error_container)
+
         # 결과 컬럼만 클릭 가능하도록 설정 (기존 기능 유지)
         self.tableWidget.cellClicked.connect(self.table_cell_clicked)
         
@@ -534,12 +566,24 @@ class MyApp(QWidget):
         self.centerLayout.addWidget(self.tableWidget)
 
     def show_detail_result(self, row):
-        """상세 결과 확인 버튼 클릭 시 호출되는 함수"""
+        """상세 결과 확인 버튼 클릭 시 호출되는 함수 (메시지 데이터)"""
         msg = getattr(self, f"step{row+1}_msg", "") # 얘는 아래 수신 메시지 실시간 모니터링에 뜨는 메시지
         if msg:
             CustomDialog(msg, self.tableWidget.item(row, 0).text())
         else:
             CustomDialog("아직 검증 결과가 없습니다.", self.tableWidget.item(row, 0).text())
+
+    def show_schema_result(self, row):
+        """메시지 규격 확인 버튼 클릭 시 호출되는 함수"""
+        # 임시로 스키마 정보 표시
+        schema_msg = f"API {row+1}의 메시지 규격 정보입니다.\n\n규격 스키마가 여기에 표시됩니다."
+        CustomDialog(schema_msg, f"{self.tableWidget.item(row, 0).text()} - 메시지 규격")
+
+    def show_error_result(self, row):
+        """메시지 오류 확인 버튼 클릭 시 호출되는 함수"""
+        # 임시로 오류 정보 표시
+        error_msg = f"API {row+1}의 메시지 오류 정보입니다.\n\n오류 세부사항이 여기에 표시됩니다."
+        CustomDialog(error_msg, f"{self.tableWidget.item(row, 0).text()} - 메시지 오류")
 
     def table_cell_clicked(self, row, col):
         """테이블 셀 클릭 시 호출되는 함수 (결과 아이콘 클릭용으로 유지)"""
