@@ -1,4 +1,5 @@
-# 임시 화면
+# 임시 화면 -> ui 보여주기만을 위한 파일
+# 제대로 작동되지 않습니다 (여기 파일에다가 기능 작업x)
 
 from api.api_server import Server
 import time
@@ -475,11 +476,11 @@ class MyApp(QWidget):
         self.tableWidget.setIconSize(QtCore.QSize(16, 16))
         
         # 테이블 크기 설정
-        self.tableWidget.setMinimumSize(900, 300)  # 최소 크기 설정
-        self.tableWidget.resize(1000, 400)  # 기본 크기 설정 (여백을 고려해서 50px 증가)
+        self.tableWidget.setMinimumSize(900, 310)  # 최소 크기 설정
+        self.tableWidget.resize(1000, 410)  # 기본 크기 설정 (여백을 고려해서 50px 증가)
         
         # 컬럼 너비 설정
-        self.tableWidget.setColumnWidth(0, 280)  # API 명 컬럼 너비 (20px 줄임)
+        self.tableWidget.setColumnWidth(0, 273)  # API 명 컬럼 너비 (20px 줄임)
         self.tableWidget.setColumnWidth(1, 90)   # 결과 컬럼 너비 (10px 줄임)
         self.tableWidget.setColumnWidth(2, 90)   # 검증 횟수 컬럼 너비 (10px 줄임)
         self.tableWidget.setColumnWidth(3, 90)   # 실패 횟수 컬럼 너비 (10px 줄임)
