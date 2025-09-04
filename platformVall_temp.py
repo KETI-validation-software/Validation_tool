@@ -319,43 +319,51 @@ class MyApp(QWidget):
 
     def initUI(self):
 
-        outerLayout = QVBoxLayout()
-        topLayout = QHBoxLayout()      # 최상단 테이블과 버튼들 레이아웃
-        contentLayout = QVBoxLayout()  # 시험 결과 레이아웃
-        bottomLayout = QVBoxLayout()   # 하단 모니터링 레이아웃
+        # 최상위 레이아웃 - 2열로 구성
+        outerLayout = QHBoxLayout()  # 전체를 가로 2열로 변경
+        leftLayout = QVBoxLayout()   # 왼쪽 열: 시험정보 + 버튼들
+        rightLayout = QVBoxLayout()  # 오른쪽 열: 평가점수 + 시험결과 + 모니터링
         
         empty = QLabel(" ")
         empty.setStyleSheet('font-size:5pt')
-        outerLayout.addWidget(empty)  # empty
+        
+        # ==================== 왼쪽 열 구성 ====================
+        leftLayout.addWidget(empty)  # empty
         
         # 시험 정보 테이블 (세로 컬럼 형태)
         self.settingGroup = QGroupBox("시험정보")
-        self.settingGroup.setMaximumWidth(600)  # 테이블 너비 조정
+        self.settingGroup.setMaximumWidth(460)  # 테이블 너비 조정
         
-        # 테이블 위젯 생성
+        # 시험 정보 위젯 생성하는 부분 -> 간격 조절하는거 여기서 하기
         self.info_table = QTableWidget(9, 2)  # 9행 2열 (항목명, 값)
-        self.info_table.setMaximumWidth(580)
-        self.info_table.setMaximumHeight(300)
-        
-        # 테이블 헤더 설정
+        self.info_table.setMaximumWidth(460)
+        self.info_table.setFixedHeight(386)  # 고정 높이로 설정하여 스크롤 완전 제거
         self.info_table.setHorizontalHeaderLabels(["항목", "내용"])
         self.info_table.setColumnWidth(0, 150)  # 첫 번째 열 너비 고정
-        self.info_table.setColumnWidth(1, 400)  # 두 번째 열 너비 고정
+        self.info_table.setColumnWidth(1, 288)  # 두 번째 열 너비 고정
+        
+        # 스크롤바 완전 제거
+        self.info_table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.info_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         
         # 테이블 행 레이블 숨기기
         self.info_table.verticalHeader().setVisible(False)
         
+        # 각 행의 높이를 조정하여 모든 내용이 보이도록 설정
+        for i in range(9):
+            self.info_table.setRowHeight(i, 40)  # 각 행 높이를 40px로 설정 (세로 간격 증가)
+        
         # 테이블 내용 설정
         table_data = [
-            ("기업명", "삼성전자"),
-            ("제품명", "통합보안플랫폼"),
-            ("버전", "v1.0.0"),
-            ("시험유형", "적합성 시험"),
-            ("시험대상", "영상보안 시스템"),
-            ("시험범위", "전체 API"),
+            ("기업명", "Company"),
+            ("제품명", "DEVICE-01"),
+            ("버전", "2"),
+            ("시험유형", "사전 시험"),
+            ("시험대상", "통합시스템"),
+            ("시험범위", "전체"),
             ("사용자 인증 방식", "Digest Auth"),
-            ("관리자 코드", "admin123"),
-            ("시험 접속 정보", "https://127.0.0.1:8008")
+            ("관리자 코드", "00153250"),
+            ("시험 접속 정보", "192.168.0.1:8080")
         ]
         
         # 테이블에 데이터 입력
@@ -390,68 +398,66 @@ class MyApp(QWidget):
         
         self.sbtn = QPushButton(self)
         self.sbtn.setText('평가 시작')
-        self.sbtn.setMaximumWidth(100)  # 버튼 너비를 100으로 조정
-        self.sbtn.setMaximumHeight(40)   # 버튼 높이도 설정
+        self.sbtn.setFixedSize(140, 50)  # 버튼 크기를 더 크게 (너비 140, 높이 50)
         self.sbtn.clicked.connect(self.sbtn_push)
 
         self.stop_btn = QPushButton(self)
         self.stop_btn.setText('일시 정지')
-        self.stop_btn.setMaximumWidth(100)  # 버튼 너비를 100으로 조정
-        self.stop_btn.setMaximumHeight(40)   # 버튼 높이도 설정
+        self.stop_btn.setFixedSize(140, 50)  # 버튼 크기를 더 크게 (너비 140, 높이 50)
         self.stop_btn.clicked.connect(self.stop_btn_clicked)
         self.stop_btn.setDisabled(True)
         
+        buttonLayout.addStretch()  # 왼쪽 여백 추가로 중앙 정렬
         buttonLayout.addWidget(self.sbtn)
+        buttonLayout.addSpacing(20)  # 버튼 사이에 20px 간격 추가
         buttonLayout.addWidget(self.stop_btn)
-        buttonLayout.addStretch()
+        buttonLayout.addStretch()  # 오른쪽 여백 추가로 중앙 정렬
         buttonGroup.setLayout(buttonLayout)
         
-        # 상단 레이아웃 구성 (테이블 + 버튼들) ---------------------------------
-        # 시험정보를 더 넓게, 버튼을 오른쪽에 적당히 배치
-        topLayout.addWidget(self.settingGroup, 3)  # 비율 3 (더 넓게)
-        topLayout.addStretch(1)  # 중간에 여백 추가 (비율 1)
-        topLayout.addWidget(buttonGroup, 1)   # 비율 1 (적당히)
-        topLayout.setContentsMargins(0, 0, 0, 0)
-        topLayout.setSpacing(10)
-
-        # 중간 레이아웃 구성 (아래까지 포함)---------------------------------
-        contentLayout.addWidget(self.group_score()) # 평가 점수 박스 위로 올라감
-        contentLayout.addSpacing(15)  # 위젯 간 간격 조정
+        # 왼쪽 열에 시험정보와 버튼들 추가
+        leftLayout.addWidget(self.settingGroup)
+        leftLayout.addSpacing(300)  # 시험정보와 버튼 사이 간격을 300px로 설정
+        leftLayout.addWidget(buttonGroup)
+        leftLayout.addStretch()  # 남은 공간을 아래쪽으로 밀어내기
+        
+        # ==================== 오른쪽 열 구성 ====================
+        # 평가 점수
+        rightLayout.addWidget(self.group_score())
+        rightLayout.addSpacing(15)
+        
+        # 시험 결과
         self.valmsg = QLabel('시험 결과', self)
-        contentLayout.addWidget(self.valmsg)
+        rightLayout.addWidget(self.valmsg)
         self.init_centerLayout()
         
         # 시험 결과 영역을 테이블 크기에 맞게 조정
         contentWidget = QWidget()
         contentWidget.setLayout(self.centerLayout)
-        contentWidget.setMaximumSize(1000, 400)  # 테이블 크기와 동일하게 설정
-        contentWidget.setMinimumSize(900, 300)   # 테이블 최소 크기와 동일하게 설정
-        contentLayout.addWidget(contentWidget)
-
-        # 하단 모니터링 레이아웃 구성 ---------------------------------
-        bottomLayout.addWidget(QLabel("수신 메시지 실시간 모니터링"))
-        self.valResult = QTextBrowser(self)
-        self.valResult.setMaximumHeight(200)  # 높이 제한
-        self.valResult.setMaximumWidth(1000)  # 테이블과 동일한 너비로 설정
-        self.valResult.setMinimumWidth(900)   # 테이블 최소 너비와 동일하게 설정
-        bottomLayout.addWidget(self.valResult)
+        contentWidget.setMaximumSize(1000, 400)
+        contentWidget.setMinimumSize(900, 300)
+        rightLayout.addWidget(contentWidget)
         
-        # 평가 점수를 기존 연동 시스템 위치에 배치
+        rightLayout.addSpacing(15)
+        
+        # 수신 메시지 실시간 모니터링
+        rightLayout.addWidget(QLabel("수신 메시지 실시간 모니터링"))
+        self.valResult = QTextBrowser(self)
+        self.valResult.setMaximumHeight(200)
+        self.valResult.setMaximumWidth(1000)
+        self.valResult.setMinimumWidth(900)
+        rightLayout.addWidget(self.valResult)
+        
+        # 변수 초기화
         self.r1 = ""
         self.r2 = ""
-        # bottomLayout.addWidget(self.group_score())  # 평가 점수 박스로 변경
-
-        # 전체 레이아웃 구성 ---------------------------------
-        outerLayout.addLayout(topLayout)     # 최상단: 환경설정 + 버튼들
-        outerLayout.addSpacing(10)  # 위젯 간 간격 조정
-        outerLayout.addLayout(contentLayout) # 중단: 평가 점수 + 시험 결과 
-        outerLayout.addSpacing(10)  # 위젯 간 간격 조정
-        outerLayout.addLayout(bottomLayout)  # 하단: 모니터링 
-        outerLayout.addWidget(empty)  # empty
-        # outerLayout.setSpacing(10)  # 레이아웃 간 간격 조정
+        
+        # 전체 레이아웃 구성 (2열) ---------------------------------
+        outerLayout.addLayout(leftLayout, 1)   # 왼쪽 열 (비율 1)
+        outerLayout.addSpacing(20)  # 열 사이 간격
+        outerLayout.addLayout(rightLayout, 2)  # 오른쪽 열 (비율 2, 더 넓게)
         self.setLayout(outerLayout)
         self.setWindowTitle('물리보안 통합플랫폼 연동 검증 소프트웨어 - 임시 화면')
-        self.setGeometry(500, 300, 1000, 900)  # 창 크기 설정 (테이블 형태에 맞게 조정)
+        self.setGeometry(100, 100, 1600, 900)  # 2열 레이아웃에 맞게 너비를 더 크게 조정
         # showing all the widgets
 
         # self.json_th.json_update_data.connect(self.json_update_data)
