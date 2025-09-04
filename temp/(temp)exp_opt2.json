@@ -12,26 +12,29 @@
           "name": "인증",
           "method": "POST",
           "endpoint": "/authentication",
-          "authMethod": "Bearer Token,abcd1234",
-          "requestData": {
-              "userID": "str",
-              "userPW": "str"
+          "auth": {
+            "type": "Bearer",
+            "token": "abcd1234"
           },
-          "respoonseData": {
-              "code": "200",
-              "message": "성공"
+          "requestData": {
+            "userID": "string",
+            "userPW": "string"
+          },
+          "responseData": {
+            "code": 200,
+            "message": "성공"
           },
           "requestValidation": [
             {
               "id": "username-field",
-              "key": "useID",
+              "key": "userID",
               "type": "string",
               "valueType": "user-input",
               "required": true,
               "validation": {
                 "enabled": true,
-                "minLength": "3",
-                "maxLength": "20",
+                "minLength": 3,
+                "maxLength": 20,
                 "pattern": "^[a-zA-Z0-9_]+$"
               }
             },
@@ -43,7 +46,7 @@
               "required": true,
               "validation": {
                 "enabled": true,
-                "minLength": "8"
+                "minLength": 8
               }
             }
           ]
