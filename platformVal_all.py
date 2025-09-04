@@ -218,6 +218,9 @@ class MyApp(QWidget):
                     self.total_error_cnt += key_error_cnt
                     self.total_pass_cnt += key_psss_cnt
 
+                    # 평가 점수 디스플레이 업데이트
+                    self.update_score_display()
+
                     self.valResult.append(
                         "Score : " + str((self.total_pass_cnt / (self.total_pass_cnt + self.total_error_cnt) * 100)))
                     self.valResult.append("Score details : " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(
@@ -242,6 +245,10 @@ class MyApp(QWidget):
                 # self.total_error_cnt += len(field_finder(self.Server.inSchema[self.cnt]))
 
                 self.total_pass_cnt += 0
+                
+                # 평가 점수 디스플레이 업데이트
+                self.update_score_display()
+                
                 self.valResult.append(
                     "Score : " + str((self.total_pass_cnt / (self.total_pass_cnt + self.total_error_cnt) * 100)))
                 self.valResult.append("Score details : " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(
@@ -278,6 +285,18 @@ class MyApp(QWidget):
 
         time.sleep(0.05)
 
+    def update_score_display(self):
+        """평가 점수 디스플레이를 업데이트"""
+        total_fields = self.total_pass_cnt + self.total_error_cnt
+        if total_fields > 0:
+            score = (self.total_pass_cnt / total_fields) * 100
+        else:
+            score = 0
+            
+        self.pass_count_label.setText(f"통과 필드 수: {self.total_pass_cnt}")
+        self.total_count_label.setText(f"전체 필드 수: {total_fields}")
+        self.score_label.setText(f"평가 점수: {score:.1f}%")
+
     def icon_update_step(self, auth_, result_, text_):
         if result_ == "PASS":
             msg = auth_ + "\n\n" + "Result: " + text_ +"\n"
@@ -310,13 +329,14 @@ class MyApp(QWidget):
         empty.setStyleSheet('font-size:5pt')
         outerLayout.addWidget(empty)  # empty
         
-        # 환경 설정 박스 (가로 배치)
-        self.settingGroup = QGroupBox("환경설정")
-        self.settingGroup.setMaximumWidth(600)  # 환경설정 박스 전체 너비 제한
+        # 시험 정보 박스 (가로 배치)
+        self.settingGroup = QGroupBox("시험정보")
+        self.settingGroup.setMaximumWidth(800)  # 시험정보 박스 전체 너비 확장 (연동 시스템 추가를 위해)
         settingLayout = QHBoxLayout()  # 가로로 변경
         settingLayout.addWidget(self.group2())  # 사용자 인증 방식
         settingLayout.addWidget(self.group3())  # 메시지 송수신
         settingLayout.addWidget(self.group4())  # 연동 URL
+        settingLayout.addWidget(self.group1())  # 연동 시스템을 시험정보에 추가
         self.settingGroup.setLayout(settingLayout)
         
         # 검증 버튼들 (가로 배치, 짧은 너비)
@@ -343,12 +363,14 @@ class MyApp(QWidget):
         buttonLayout.addWidget(self.sbtn)
         buttonLayout.addWidget(self.stop_btn)
         buttonLayout.addWidget(self.rbtn)
-        # buttonLayout.addStretch() 제거하여 더 컴팩트하게
+        # buttonLayout.addStretch() 
         buttonGroup.setLayout(buttonLayout)
         
         # 상단 레이아웃 구성 (환경설정 + 버튼들)
         topLayout.addWidget(self.settingGroup)
         topLayout.addWidget(buttonGroup)
+        topLayout.setContentsMargins(0, 0, 0, 0)  # 여백 제거
+        topLayout.setSpacing(10)  # 위젯 간 간격 조정
 
         # 시험 결과 레이아웃
         self.valmsg = QLabel('시험 결과', self)
@@ -371,10 +393,10 @@ class MyApp(QWidget):
         self.valResult.setMinimumWidth(900)   # 테이블 최소 너비와 동일하게 설정
         bottomLayout.addWidget(self.valResult)
         
-        # 연동 시스템을 맨 아래에 배치
+        # 평가 점수를 기존 연동 시스템 위치에 배치
         self.r1 = ""
         self.r2 = ""
-        bottomLayout.addWidget(self.group1())  # 연동 시스템을 맨 아래로 이동
+        bottomLayout.addWidget(self.group_score())  # 평가 점수 박스로 변경
 
         outerLayout.addLayout(topLayout)     # 최상단: 환경설정 + 버튼들
         outerLayout.addLayout(contentLayout) # 중단: 시험 결과
@@ -438,12 +460,21 @@ class MyApp(QWidget):
             # 평가 점수
             self.tableWidget.setItem(i, 4, QTableWidgetItem("0%"))
             self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
-            # 상세 결과 버튼
+            # 상세 결과 버튼 (중앙 정렬을 위한 위젯 컨테이너)
             detail_btn = QPushButton("세부 결과 확인")
             detail_btn.setMaximumHeight(30)
             detail_btn.setMaximumWidth(120)  # 버튼 최대 너비 제한
             detail_btn.clicked.connect(lambda checked, row=i: self.show_detail_result(row))
-            self.tableWidget.setCellWidget(i, 5, detail_btn)
+            
+            # 버튼을 중앙에 배치하기 위한 위젯과 레이아웃
+            container = QWidget()
+            layout = QHBoxLayout()
+            layout.addWidget(detail_btn)
+            layout.setAlignment(Qt.AlignCenter)
+            layout.setContentsMargins(0, 0, 0, 0)
+            container.setLayout(layout)
+            
+            self.tableWidget.setCellWidget(i, 5, container)
 
         # 결과 컬럼만 클릭 가능하도록 설정 (기존 기능 유지)
         self.tableWidget.cellClicked.connect(self.table_cell_clicked)
@@ -472,8 +503,7 @@ class MyApp(QWidget):
 
     def group1(self):
         rgroup = QGroupBox('연동 시스템')
-        rgroup.setMaximumWidth(1000)  # 테이블과 모니터링과 동일한 너비로 설정
-        rgroup.setMinimumWidth(900)   # 테이블 최소 너비와 동일하게 설정
+        rgroup.setMaximumWidth(200)  # 환경설정에 맞게 너비 조정
         
         self.g1_radio1 = QRadioButton('영상보안 시스템')
         self.g1_radio1.toggled.connect(self.g1_radio1_checked)
@@ -540,6 +570,34 @@ class MyApp(QWidget):
         fgroup.setLayout(layout)
         return fgroup
 
+    def group_score(self):
+        """평가 점수 박스"""
+        sgroup = QGroupBox('평가 점수')
+        sgroup.setMaximumWidth(1000)  # 테이블과 동일한 너비로 설정
+        sgroup.setMinimumWidth(900)   # 테이블 최소 너비와 동일하게 설정
+        
+        # 점수 표시용 레이블들
+        self.pass_count_label = QLabel("통과 필드 수: 0")
+        self.total_count_label = QLabel("전체 필드 수: 0")  
+        self.score_label = QLabel("평가 점수: 0%")
+        
+        # 폰트 크기 조정
+        font = self.pass_count_label.font()
+        font.setPointSize(10)
+        self.pass_count_label.setFont(font)
+        self.total_count_label.setFont(font)
+        self.score_label.setFont(font)
+        
+        # 가로 배치
+        layout = QHBoxLayout()
+        layout.addWidget(self.pass_count_label)
+        layout.addWidget(self.total_count_label)
+        layout.addWidget(self.score_label)
+        layout.addStretch()  # 오른쪽 여백 추가
+        
+        sgroup.setLayout(layout)
+        return sgroup
+
     def g1_radio1_checked(self, checked):
         if checked:
             self.radio_check_flag = "video"
@@ -566,12 +624,21 @@ class MyApp(QWidget):
                 # 평가 점수
                 self.tableWidget.setItem(i, 4, QTableWidgetItem("0%"))
                 self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
-                # 상세 결과 버튼
+                # 상세 결과 버튼 (중앙 정렬을 위한 위젯 컨테이너)
                 detail_btn = QPushButton("세부 결과 확인")
                 detail_btn.setMaximumHeight(30)
                 detail_btn.setMaximumWidth(120)  # 버튼 최대 너비 제한
                 detail_btn.clicked.connect(lambda checked, row=i: self.show_detail_result(row))
-                self.tableWidget.setCellWidget(i, 5, detail_btn)
+                
+                # 버튼을 중앙에 배치하기 위한 위젯과 레이아웃
+                container = QWidget()
+                layout = QHBoxLayout()
+                layout.addWidget(detail_btn)
+                layout.setAlignment(Qt.AlignCenter)
+                layout.setContentsMargins(0, 0, 0, 0)
+                container.setLayout(layout)
+                
+                self.tableWidget.setCellWidget(i, 5, container)
 
     def g1_radio2_checked(self, checked):
         if checked:
@@ -599,12 +666,21 @@ class MyApp(QWidget):
                 # 평가 점수
                 self.tableWidget.setItem(i, 4, QTableWidgetItem("0%"))
                 self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
-                # 상세 결과 버튼
+                # 상세 결과 버튼 (중앙 정렬을 위한 위젯 컨테이너)
                 detail_btn = QPushButton("세부 결과 확인")
                 detail_btn.setMaximumHeight(30)
                 detail_btn.setMaximumWidth(120)  # 버튼 최대 너비 제한
                 detail_btn.clicked.connect(lambda checked, row=i: self.show_detail_result(row))
-                self.tableWidget.setCellWidget(i, 5, detail_btn)
+                
+                # 버튼을 중앙에 배치하기 위한 위젯과 레이아웃
+                container = QWidget()
+                layout = QHBoxLayout()
+                layout.addWidget(detail_btn)
+                layout.setAlignment(Qt.AlignCenter)
+                layout.setContentsMargins(0, 0, 0, 0)
+                container.setLayout(layout)
+                
+                self.tableWidget.setCellWidget(i, 5, container)
 
     def g1_radio3_checked(self, checked):
         if checked:
@@ -632,12 +708,21 @@ class MyApp(QWidget):
                 # 평가 점수
                 self.tableWidget.setItem(i, 4, QTableWidgetItem("0%"))
                 self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
-                # 상세 결과 버튼
+                # 상세 결과 버튼 (중앙 정렬을 위한 위젯 컨테이너)
                 detail_btn = QPushButton("세부 결과 확인")
                 detail_btn.setMaximumHeight(30)
                 detail_btn.setMaximumWidth(120)  # 버튼 최대 너비 제한
                 detail_btn.clicked.connect(lambda checked, row=i: self.show_detail_result(row))
-                self.tableWidget.setCellWidget(i, 5, detail_btn)
+                
+                # 버튼을 중앙에 배치하기 위한 위젯과 레이아웃
+                container = QWidget()
+                layout = QHBoxLayout()
+                layout.addWidget(detail_btn)
+                layout.setAlignment(Qt.AlignCenter)
+                layout.setContentsMargins(0, 0, 0, 0)
+                container.setLayout(layout)
+                
+                self.tableWidget.setCellWidget(i, 5, container)
 
     def g2_radio_checked(self, checked):
         if checked:
@@ -719,6 +804,9 @@ class MyApp(QWidget):
         else:
             self.total_error_cnt = 0
             self.total_pass_cnt = 0
+            # 평가 점수 디스플레이 초기화
+            self.update_score_display()
+            
             self.sbtn.setDisabled(True)
             self.stop_btn.setEnabled(True)
 
