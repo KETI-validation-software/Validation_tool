@@ -5,12 +5,8 @@ import requests
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QRadioButton, QPushButton, QLabel, QStackedWidget, QAction,
-<<<<<<< HEAD
-    QLineEdit, QMessageBox, QFormLayout, QGroupBox
-=======
     QLineEdit, QMessageBox, QFormLayout, QGroupBox,
     QTableWidget, QHeaderView, QAbstractItemView, QTableWidgetItem
->>>>>>> info
 )
 from PyQt5.QtGui import QFontDatabase, QFont
 from PyQt5.QtCore import Qt
@@ -251,35 +247,6 @@ class SelectionWidget(QWidget):
         super().__init__()
         self.apply_callback = apply_callback
 
-<<<<<<< HEAD
-        layout = QVBoxLayout()
-        title = QLabel("검증 소프트웨어 선택")
-        title.setAlignment(Qt.AlignCenter)
-        title.setStyleSheet('font-size: 16pt; font-weight: bold; margin: 10px;')
-        layout.addWidget(title)
-
-        # 선택 옵션들
-        selection_group = QGroupBox("검증 유형")
-        radio_layout = QVBoxLayout()
-
-        self.radio_platform = QRadioButton("플랫폼 검증")
-        self.radio_system = QRadioButton("시스템 검증")
-        self.radio_platform.setChecked(True)
-
-        radio_layout.addWidget(self.radio_platform)
-        radio_layout.addWidget(self.radio_system)
-        selection_group.setLayout(radio_layout)
-        layout.addWidget(selection_group)
-
-        # 적용 버튼
-        btn_layout = QHBoxLayout()
-        btn_layout.addStretch()
-
-        btn_apply = QPushButton("적용")
-        btn_apply.setFixedSize(100, 40)
-        btn_apply.clicked.connect(self._on_apply)
-        btn_layout.addWidget(btn_apply)
-=======
         self.initUI()
 
     def initUI(self):
@@ -302,7 +269,6 @@ class SelectionWidget(QWidget):
         # 하단 버튼 바
         bottom_buttons = self.create_bottom_buttons()
         layout.addWidget(bottom_buttons)
->>>>>>> info
 
         btn_layout.addStretch()
         layout.addLayout(btn_layout)
