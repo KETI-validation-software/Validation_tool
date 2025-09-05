@@ -1218,7 +1218,6 @@ class MyApp(QWidget):
             self.valResult.append("검증 결과 파일 저장했습니다. " + "\n" + "저장 위치: " + file + "/Result_platform.pdf")
         else:
             self.valResult.append("저장 폴더를 선택해주세요.")
-
     def get_setting(self):
         self.setting_variables = QSettings('My App', 'Variable')
         #  QSettings('My App', 'Variable').clear()#tylee

@@ -8,4 +8,10 @@ build/
 *.log
 .idea/
 .vscode/
+<<<<<<< HEAD
 config/key0627/
+=======
+config/key0627/
+project2/
+.project2/
+>>>>>>> info
