@@ -31,7 +31,7 @@
               "type": "string",
               "valueType": "user-input",
               "required": true,
-              "validation": {
+              "validation": { 
                 "enabled": true,
                 "minLength": 3,
                 "maxLength": 20,
