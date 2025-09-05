@@ -5,11 +5,9 @@ import requests
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QRadioButton, QPushButton, QLabel, QStackedWidget, QAction,
-<<<<<<< HEAD
     QLineEdit, QMessageBox, QFormLayout, QGroupBox, QComboBox,
-=======
+    QTableWidget, QHeaderView, QAbstractItemView, QTableWidgetItem,
     QLineEdit, QMessageBox, QFormLayout, QGroupBox,
->>>>>>> 571b18f0072942544b83e71975b5a3e8eb5f8def
     QTableWidget, QHeaderView, QAbstractItemView, QTableWidgetItem
 )
 from PyQt5.QtGui import QFontDatabase, QFont
@@ -20,8 +18,7 @@ import platformVal_all as platform_app
 import systemVal_all as system_app
 
 from core.functions import resource_path
-<<<<<<< HEAD
-=======
+from core.functions import resource_path
 
 
 class LoginWidget(QWidget):
@@ -133,7 +130,6 @@ class LoginWidget(QWidget):
         except Exception as e:
             print(f"로그인 검증 중 오류: {e}")
             return False
->>>>>>> 571b18f0072942544b83e71975b5a3e8eb5f8def
 
 
 class LoginWidget(QWidget):
@@ -217,7 +213,7 @@ class LoginWidget(QWidget):
         try:
             # 1. 관리자 코드 검증 (예시: 해시 검증)
             # 실제 환경에서는 더 안전한 검증 방식을 사용해야 합니다
-            expected_code = "1234"
+            expected_code = "1234"  # 관리자 번호임 (입력해야함)
 
             if admin_code != expected_code:
                 return False
@@ -255,7 +251,6 @@ class SelectionWidget(QWidget):
         self.apply_callback = apply_callback
 
         self.initUI()
-<<<<<<< HEAD
 
     def initUI(self):
 
@@ -316,29 +311,6 @@ class SelectionWidget(QWidget):
         form_layout.addRow("시험범위", self.test_range_edit)
 
         layout.addLayout(form_layout)
-=======
-
-    def initUI(self):
-
-        # 메인 레이아웃 (좌/우 2컬럼)
-        main_layout = QHBoxLayout()
-        
-        # 좌측 패널: 시험 기본
-        left_panel = self.create_left_panel()
-        main_layout.addWidget(left_panel,1)
-
-        # 우측 패널: 시험 입력 정보
-        right_panel = self.create_right_panel()
-        main_layout.addWidget(right_panel, 1)
-
-        # 전체 레이아웃
-        layout = QVBoxLayout() 
-        layout.addLayout(main_layout, 1)
-
-        # 하단 버튼 바
-        bottom_buttons = self.create_bottom_buttons()
-        layout.addWidget(bottom_buttons)
->>>>>>> 571b18f0072942544b83e71975b5a3e8eb5f8def
 
         # 시험항목(API) 테이블
         api_label = QLabel("시험항목(API)")
@@ -538,6 +510,32 @@ class SelectionWidget(QWidget):
         widget = QWidget()
         layout = QHBoxLayout()
         
+        self.initUI()
+
+    def initUI(self):
+
+        # 메인 레이아웃 (좌/우 2컬럼)
+        main_layout = QHBoxLayout()
+        
+        # 좌측 패널: 시험 기본
+        left_panel = self.create_left_panel()
+        main_layout.addWidget(left_panel,1)
+
+        # 우측 패널: 시험 입력 정보
+        right_panel = self.create_right_panel()
+        main_layout.addWidget(right_panel, 1)
+
+        # 전체 레이아웃
+        layout = QVBoxLayout() 
+        layout.addLayout(main_layout, 1)
+
+        # 하단 버튼 바
+        bottom_buttons = self.create_bottom_buttons()
+        layout.addWidget(bottom_buttons)
+
+        btn_layout.addStretch()
+        layout.addLayout(btn_layout)
+
         layout.addStretch()
         
         # 시험 시작 버튼
@@ -551,8 +549,9 @@ class SelectionWidget(QWidget):
         layout.addWidget(reset_btn)
 
         layout.addStretch()
-<<<<<<< HEAD
-=======
+        
+        widget.setLayout(layout)
+        return widget
         self.setLayout(layout)
     
     def create_left_panel(self):
@@ -804,7 +803,6 @@ class SelectionWidget(QWidget):
         layout.addWidget(reset_btn)
 
         layout.addStretch()
->>>>>>> 571b18f0072942544b83e71975b5a3e8eb5f8def
         
         widget.setLayout(layout)
         return widget
