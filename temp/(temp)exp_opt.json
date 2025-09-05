@@ -8,48 +8,28 @@
         "contactPerson": "김철수",
         "productName": "스마트 도어락 시스템",
         "modelName": "SDL-2024",
-        "version": "v2.1.0"
+        "version": "v2.1.0",
+        "testCategory": "사전시험",
+        "targetSystem": "통합시스템"
       },
       "testGroup": {
         "id": "group-001",
         "name": "도어락 시험",
-
-        "testSpecIds": ["spec-001", "spec-002"],
+        "testRange": "all",
+        "testSpecIds": ["spec-001"],
         "adminCode": "DOOR_LOCK_2024"
       },
       "requestDate": "2024-01-25T09:00:00Z",
       "status": "대기",
       "createdAt": "2024-01-25T09:00:00Z",
       "updatedAt": "2024-01-25T09:00:00Z"
-    },
-    {
-      "id": "req-002",
-      "evaluationTarget": {
-        "id": "target-002",
-        "companyName": "시큐리티 솔루션즈",
-        "contactPerson": "박영희",
-        "productName": "IP 카메라 시스템",
-        "modelName": "IPC-4K-PRO",
-        "version": "v3.0.2"
-      },
-      "testGroup": {
-        "id": "group-002",
-        "name": "CCTV 시험",
-
-        "testSpecIds": ["spec-004", "spec-005", "spec-006"],
-        "adminCode": "CCTV_TEST_2024"
-      },
-      "requestDate": "2024-01-20T14:30:00Z",
-      "status": "완료",
-      "createdAt": "2024-01-20T14:30:00Z",
-      "updatedAt": "2024-01-24T16:45:00Z"
     }
   ],
   "pagination": {
     "page": 1,
     "limit": 10,
     "total": 25,
-    "totalPages": 3
+    "totalPages": 1
   },
   "filters": {
     "status": "all",
