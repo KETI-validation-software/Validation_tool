@@ -3,16 +3,17 @@ import pandas as pd
 import json_checker
 
 
+# 필드 개수 세서 반환하는 함수
 def field_finder(schema):
 
     schema = pd.DataFrame([schema])  # , index=[0])
     all_field = []
     fields = []
-    fields_opt = []
+    fields_opt = [] # 선택적 필드
     step = 0
 
     for key, value in schema.items():
-        if step is 0:
+        if step == 0:
             try:
                 if key[-4:] == "List" or key[-4:] == "port":
 
@@ -113,11 +114,12 @@ def data_finder(schema_):
 
     all_field = []
     fields = []
-    step = 0
+    step = 0    # json에서 중첩 깊이 -> 속의 데이터인지 항목인지 체크
 
     for key, value in schema.items():
         if step == 0:
             try:
+                # camList, systemPort 이런식으로 뒤에 네글자가 이런식인 경우에 대해서는 fields 3번째에 type을 추가
                 if key[-4:] == "List" or key[-4:] == "port":
                     for i in value:
                         fields.append([step, key, type(i), i])
@@ -127,10 +129,11 @@ def data_finder(schema_):
                 else:
                     fields.append([step, key, value[0], value[0]])
             except:
-
                 fields.append([step, key.expected_data, value[0], value[0]])
 
     all_field.append([fields])
+
+    # 0번째 step 끝나고 나서, step 1부터는 while문으로 계속 반복
     while True:
         fields = []
         a = all_field[step]
@@ -159,7 +162,6 @@ def data_finder(schema_):
                         elif key[-4:] == "List" or key[-4:] == "port":
                             for i in field[-1][key]:
                                 fields.append([step, [field[1], key], list, i])
-
                         else:
                             fields.append([step, [field[1], key], field[-1][key], field[-1][key]])
                     except:
@@ -189,8 +191,69 @@ def data_finder(schema_):
             break
     return all_field
 
+# 메시지 데이터만 확인
+def check_message_data(all_field, datas, opt_filed, flag_opt):
+    valid_fields = 0
+    total_fields = 0
 
-def do_checker(all_field, datas, opt_field ,flag_opt):  # flag_opt => platformVal_none.py, systemVal_none.py 에서!
+    for fields in all_field:
+        for field in fields[0]:
+            if flag_opt == False and field[-2] == 'OPT':
+                continue
+        
+        total_fields += 1  # 확인해야할 필드 개수 세기
+
+        for data in datas:  # 해당 field마다 list type의 datas 순회하면서 확인
+            for raw_data in data[0]:    # raw_data: 들어온 실제 데이터
+                if field[1] == raw_data[1]:
+                    # 1. 실제 데이터가 스키마 타입과 같은지 or 선택적 데이터인지 or int형인데 numpy int64, int32, float64인 경우 or str형인데 str인 경우 -> 하나라도 참이라면 타당하다! 합격
+                    if type(raw_data[-2]) == field[-2] or field[-2] == 'OPT' or (field[-2] == int and type(raw_data[-2]) in [numpy.int64, numpy.int32, numpy.float64]) or (field[-2] == str and type(raw_data[-2]) == str):
+                        valid_fields += 1
+                    break
+            else:
+                continue
+            break
+    
+    if valid_fields == total_fields:
+        return "PASS", f"{valid_fields}/{total_fields} fields are valid."
+    else:
+        return "FAIL", f"{valid_fields}/{total_fields} fields are valid."
+
+#메시지 규격 확인
+def check_message_schema(all_field, datas, opt_field, flag_opt):
+    format_errors = []
+
+    for fields in all_field:
+        for field in fields[0]:
+            if flag_opt == False and field[-2] == 'OPT':    
+                continue
+
+            field_found = False
+            for data in datas:
+                for raw_data in data[0]:
+                    if field[1] == raw_data[1]:
+                        field_found = True
+                        if not (type(raw_data[-2]) == field[-2] or field[-2] == 'OPT' or (field[-2] == int and type(raw_data[-2]) in [numpy.int64, numpy.int32, numpy.float64]) or (field[-2] == str and type(raw_data[-2]) == str)):
+                            format_errors.append(f"Field '{field[1]}' has incorrect type. Expected {field[-2]}, got {type(raw_data[-2])}.")
+                        break
+                if not field_found and field[-2] != 'OPT':
+                    format_errors.append(f"Field '{field[1]}' is missing.")
+    if len(format_errors) == 0:
+        return "PASS", "All fields match the schema."
+    else:
+        return "FAIL", format_errors
+
+#메시지 에러
+def check_message_error(all_field, datas, opt_field, flag_opt):
+    result, error_msg, correct_cnt, error_cnt = do_checker(all_field, datas, opt_field, flag_opt)
+
+    if result == "PASS":
+        return "PASS", f"All fields are valid. ({correct_cnt} correct, {error_cnt} errors)"
+    else:
+        return "FAIL", error_msg
+
+# 결과 반환하는 부분 -> 여기를 3단 분리 -> 일단 남겨두기는 함
+def do_checker(all_field, datas, opt_field ,flag_opt):  # flag_opt => platformVal_none.py, systemVal_none.py 에서!P
     # type and name error
     check_list = []
     # refine_datas = []
@@ -201,7 +264,7 @@ def do_checker(all_field, datas, opt_field ,flag_opt):  # flag_opt => platformVa
     for fields in all_field:
         for field in fields[0]:
 
-            if flag_opt is False and field[-2] is 'OPT':  # opt 필드 확인 안하는 경우 pass
+            if flag_opt == False and field[-2] == 'OPT':  # opt 필드 확인 안하는 경우 pass
                 pass
             else:
                 check_list.append(field)  # 확인해야할 필드 check_list에 추가
@@ -282,7 +345,7 @@ def do_checker(all_field, datas, opt_field ,flag_opt):  # flag_opt => platformVa
         cnt = cnt_list.count(i)
         all_cnt.append([i, cnt])
 
-    # refine data
+    # refine data -> 세부 결과 확인 부분의 에러 메시지 출력 부분
     check_error = []
     for i, field in enumerate(check_list):
 
@@ -380,9 +443,6 @@ def do_checker(all_field, datas, opt_field ,flag_opt):  # flag_opt => platformVa
 
                     else:
                         check_error.append(raw_data)
-
-
-
 
     for i, field in enumerate(check_list):  # missing key 오류 찾기
 
@@ -533,7 +593,7 @@ def do_checker(all_field, datas, opt_field ,flag_opt):  # flag_opt => platformVa
     if error_cnt == 0:
         return "PASS", "PASS", len(check_list), 0
     else:
-        return "FAIL", error, correct_cnt, error_cnt
+        return "FAIL", error, correct_cnt, error_cnt    # 상세 결과 확인 부분에 출력되는 메시지 -> fail인 경우
 
 
 
