@@ -8,3 +8,6 @@ build/
 *.log
 .idea/
 .vscode/
+config/key0627/
+project2/
+.project2/
