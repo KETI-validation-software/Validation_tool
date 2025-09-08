@@ -101,25 +101,26 @@ class Server(BaseHTTPRequestHandler):
                 if self.path == "/" + self.message[0]:
                     auth_pass = True
                 elif self.auth_type == "B":
-                    auth = auth.split(" ")
-                    if auth[0] == 'Bearer':  # self.auth_type == "B" and  auth[0] == 'Bearer'
-                        token = auth[1].replace('"', "")
-
-                        if token == self.auth_Info[0]:
-                            auth_pass = True
+                    if auth:
+                        auth_parts = auth.split(" ")
+                        if len(auth_parts) > 1 and auth_parts[0] == 'Bearer':
+                            token = auth_parts[1].replace('"', "")
+                            if token == self.auth_Info[0]:
+                                auth_pass = True
                 elif self.auth_type == "D":
                     try:
-                        auth = auth.split(" ")
-                        if auth[0] == 'Digest':
-                            temp = []
-                            for i in auth:
-                                temp.append(i.split("="))
-                            auth_res = ""
-                            for i in temp:
-                                if i[0] == "response":
-                                    auth_res = i[1].replace('"', '').replace(',', '')
-                            if auth_res == self.auth_Info[-1]:
-                                auth_pass = True
+                        if auth:
+                            auth_parts = auth.split(" ")
+                            if len(auth_parts) > 1 and auth_parts[0] == 'Digest':
+                                temp = []
+                                for i in auth_parts:
+                                    temp.append(i.split("="))
+                                auth_res = ""
+                                for i in temp:
+                                    if i[0] == "response":
+                                        auth_res = i[1].replace('"', '').replace(',', '')
+                                if auth_res == self.auth_Info[-1]:
+                                    auth_pass = True
                     except Exception as e:
                         #print(e)
                         #print(traceback.format_exc())
@@ -161,33 +162,38 @@ class Server(BaseHTTPRequestHandler):
         url_tmp = ""
         if "Realtime".lower() in self.message[message_cnt].lower():
             trans_protocol = dict_data.get("transProtocol", {})
-            if trans_protocol:  # webhook 또는 LongPolloing 일 경우
+            if trans_protocol:
                 trans_protocol_type = trans_protocol.get("transProtocolType", {})
-                if "WebHook".lower() in trans_protocol_type.lower():
+                if "WebHook".lower() in str(trans_protocol_type).lower():
                     try:
-                        url_tmp = dict_data["transProtocol"]["transProtocolDesc"]
+                        url_tmp = trans_protocol.get("transProtocolDesc", {})
+                        # 잘못된 값 방어
+                        if not url_tmp or str(url_tmp).strip() in ["None", "", "desc"]:
+                            message = {
+                                "code": "400",
+                                "message": "잘못된 Webhook URL"
+                            }
+                            self._set_headers()
+                            self.wfile.write(json.dumps(message).encode('utf-8'))
+                            return
                         message = self.outMessage[-1]
                         self.webhook_flag = True
 
                         if "https".lower() not in url_tmp.lower():
                             message = {
-                            "code": "400",
-                            "message": "잘못된 요청"
-                        }
+                                "code": "400",
+                                "message": "잘못된 요청"
+                            }
                         if "longpolling" in str(self.transProtocolInput).lower():
-                            # webhook 요청 받았는데 뷰어에서 longpolling 선택한 경우
                             message = {
                                 "code": "400",
                                 "message": "잘못된 요청"
                             }
-
-
-                    except:  # webhook인데 desc 없는 경우
+                    except Exception:
                         message = {
                             "code": "400",
                             "message": "잘못된 요청"
                         }
-
                 else:
                     # LongPolloing 인 경우
                     if auth_pass:
@@ -197,7 +203,6 @@ class Server(BaseHTTPRequestHandler):
                                 "code": "400",
                                 "message": "잘못된 요청"
                             }
-
                     else:
                         message = {
                             "code": "401",
@@ -274,8 +279,9 @@ class Server(BaseHTTPRequestHandler):
 
 
 # 확인용
-def run(server_class=HTTPServer, handler_class=Server, address='127.0.0.3', port=8008, system="video"):
+def run(server_class=HTTPServer, handler_class=Server, address='127.0.0.1', port=8008, system="video"):
     server_address = (address, port)
+
 
     if system == "video":
         Server.message = videoMessages

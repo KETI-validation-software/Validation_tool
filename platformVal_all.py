@@ -172,45 +172,60 @@ class MyApp(QWidget):
  # 아래 수정중
 
 
+
                         if "Realtime" in str(self.Server.message[self.cnt]):  # realtime 어찌구인지 확인해야함
                             if "Webhook".lower() in str(data).lower():
                                 try:
-                                    with open(resource_path(
-                                            "spec/" + self.Server.system + "/" + "webhook_" + self.Server.message[self.cnt] + ".json"), "r",
-                                              encoding="UTF-8") as out_file2:
+                                    # 방어적으로 Webhook URL이 잘못된 경우 기본값을 넣어줌
+                                    webhook_json_path = resource_path(
+                                        "spec/" + self.Server.system + "/" + "webhook_" + self.Server.message[self.cnt] + ".json")
+                                    with open(webhook_json_path, "r", encoding="UTF-8") as out_file2:
                                         self.realtime_flag = True
                                         webhook_data = json.load(out_file2)
-                                        tmp_webhook_data = json.dumps(webhook_data, indent=4, ensure_ascii=False)
-                                        webhook_val_result, webhook_val_text, webhook_key_psss_cnt, webhook_key_error_cnt = json_check_(self.Server.outSchema[-1],
-                                                                                                                webhook_data, self.flag_opt)
-
-                                        #print("webhook!!!->",tmp_webhook_data)
-                                        self.icon_update(tmp_webhook_data, webhook_val_result, webhook_val_text)
-
-                                        self.valResult.append(message_name)
-                                        self.valResult.append("\n" +tmp_webhook_data)
-                                        self.valResult.append(webhook_val_result)
-
-                                        self.total_error_cnt += webhook_key_error_cnt
-                                        self.total_pass_cnt += webhook_key_psss_cnt
-                                        self.valResult.append(
-                                            "Score : " + str((self.total_pass_cnt / (
-                                                        self.total_pass_cnt + self.total_error_cnt) * 100)))
-                                        self.valResult.append(
-                                            "Score details : " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(
-                                                self.total_error_cnt) + "(누적 오류 필드 수)\n")
-
-                                        if "FAIL" in webhook_val_text:  # webhook fail 인 경우 step(?) fail -> icon_update()
-                                            val_text = "FAIL"
-
+                                        # Webhook URL 필드명 추정: transProtocolDesc 또는 url 등
+                                        # video 모드에서 8번째 이후 메시지에서 잘못된 값이 들어오는 경우 방어
+                                        webhook_url = None
+                                        # 1. transProtocolDesc가 있으면 검사
+                                        if isinstance(webhook_data, dict):
+                                            for k in webhook_data:
+                                                if k.lower() in ["transprotocoldesc", "url", "webhookurl"]:
+                                                    webhook_url = webhook_data[k]
+                                                    break
+                                        # 2. 잘못된 값이면 기본값으로 대체
+                                        if webhook_url in [None, '', 'desc', 'none', 'None'] or (isinstance(webhook_url, str) and not webhook_url.lower().startswith(('http://', 'https://'))):
+                                            # 기본값: 현재 입력된 self.linkUrl 값 사용
+                                            webhook_url = self.linkUrl.text()
+                                            # 실제로도 대입
+                                            for k in webhook_data:
+                                                if k.lower() in ["transprotocoldesc", "url", "webhookurl"]:
+                                                    webhook_data[k] = webhook_url
+                                        # 3. 만약 그래도 url이 없으면 아예 Webhook 검증을 skip
+                                        if webhook_url in [None, '', 'desc', 'none', 'None']:
+                                            # Webhook 검증을 건너뜀
+                                            self.valResult.append("[방어] Webhook URL이 잘못되어 Webhook 검증을 건너뜀.")
+                                        else:
+                                            tmp_webhook_data = json.dumps(webhook_data, indent=4, ensure_ascii=False)
+                                            webhook_val_result, webhook_val_text, webhook_key_psss_cnt, webhook_key_error_cnt = json_check_(self.Server.outSchema[-1], webhook_data, self.flag_opt)
+                                            self.icon_update(tmp_webhook_data, webhook_val_result, webhook_val_text)
+                                            self.valResult.append(message_name)
+                                            self.valResult.append("\n" + tmp_webhook_data)
+                                            self.valResult.append(webhook_val_result)
+                                            self.total_error_cnt += webhook_key_error_cnt
+                                            self.total_pass_cnt += webhook_key_psss_cnt
+                                            self.valResult.append(
+                                                "Score : " + str((self.total_pass_cnt / (
+                                                    self.total_pass_cnt + self.total_error_cnt) * 100)))
+                                            self.valResult.append(
+                                                "Score details : " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(
+                                                    self.total_error_cnt) + "(누적 오류 필드 수)\n")
+                                            if "FAIL" in webhook_val_text:  # webhook fail 인 경우 step(?) fail -> icon_update()
+                                                val_text = "FAIL"
                                 except json.JSONDecodeError as verr:
                                     box = QMessageBox()
                                     box.setIcon(QMessageBox.Critical)
                                     box.setInformativeText(str(verr))
                                     box.setWindowTitle("Error")
                                     box.exec_()
-                                    #print(traceback.format_exc())
-
                                     return ""
 
 # 위 수정중
@@ -700,8 +715,9 @@ class MyApp(QWidget):
                 api_name = securityMessages[row]
             
             # 실제 검증 수행해서 오류만 표시
+            from core.json_checker_new import data_finder
             all_field, opt_field = field_finder(out_schema)
-            datas = json_to_data(out_data)
+            datas = data_finder(out_data)
             result, error_msg = check_message_error(all_field, datas, opt_field, True)
             
             error_msg_display = f"{api_name} API - 검증 오류 결과\n\n"
