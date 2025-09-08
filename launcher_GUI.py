@@ -419,8 +419,8 @@ class SelectionWidget(QWidget):
         """temp 폴더의 OPT 파일들을 자동 로드"""
         try:
             # temp 폴더의 예시 파일들 로드
-            exp_opt_path = resource_path("temp/(temp)exp_opt.json")
-            exp_opt2_path = resource_path("temp/(temp)exp_opt2.json")
+            exp_opt_path = resource_path("temp/(temp)exp_opt_requestVal.json")
+            exp_opt2_path = resource_path("temp/(temp)exp_opt2_requestVal.json")
             
             # exp_opt.json 로드 (시험 요청 데이터)
             exp_opt_data = self.opt_loader.load_opt_json(exp_opt_path)
