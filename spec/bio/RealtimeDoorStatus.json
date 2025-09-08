@@ -1,1 +1,1 @@
-null
+{"doorList": [{"doorID": "door0001"}, {"doorID": "door0002"}], "duration": 200, "transProtocol": {"transProtocolType": "REST_API", "transProtocolDesc": "test"}, "startTime": 20220822163022123}
