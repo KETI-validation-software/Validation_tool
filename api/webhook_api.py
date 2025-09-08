@@ -68,17 +68,17 @@ class WebhookThread(QThread):
         #print('Starting https on port %d...' % self.port)
 
         server_address = (self.url, self.port)
-        # SSL 인증서 설정을 주석 처리 (HTTP로 동작)
-        # certificate_private = resource_path('config/key0627/server.crt')
-        # certificate_key = resource_path('config/key0627/server.key')
-        # ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-        # ssl_context.load_cert_chain(certfile=certificate_private, keyfile=certificate_key)
+        # SSL 인증서 설정
+        certificate_private = resource_path('config/key0627/server.crt')
+        certificate_key = resource_path('config/key0627/server.key')
+        ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        ssl_context.load_cert_chain(certfile=certificate_private, keyfile=certificate_key)
 
         self.httpd = HTTPServer(server_address, lambda *args, **kwargs: WebhookServer(*args, msg=self.message,
                                                                                       result_signal=self.result_signal,
                                                                                       **kwargs))
-        # SSL 설정 주석 처리
-        # self.httpd.socket = ssl_context.wrap_socket(self.httpd.socket, server_side=True)
+        # SSL 설정
+        self.httpd.socket = ssl_context.wrap_socket(self.httpd.socket, server_side=True)
         # self.httpd.socket = ssl.wrap_socket(self.httpd.socket, certfile=certificate_private, keyfile=certificate_key,
         #                                     server_side=True)
 
