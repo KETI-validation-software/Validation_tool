@@ -16,6 +16,7 @@ import platformVal_all as platform_app
 import systemVal_all as system_app
 
 from core.functions import resource_path
+from core.opt_loader import OptLoader
 
 
 class LoginWidget(QWidget):
@@ -135,6 +136,8 @@ class SelectionWidget(QWidget):
         super().__init__()
         self.apply_callback = apply_callback
 
+        # OPT 로더
+        self.opt_loader = OptLoader()
         self.initUI()
 
     def initUI(self):
@@ -171,6 +174,7 @@ class SelectionWidget(QWidget):
 
         load_btn = QPushButton("불러오기")
         load_btn.setStyleSheet("QPushButton { background-color: #9FBFE5; color: black; font-weight: bold; }")
+        load_btn.clicked.connect(self.load_opt_files)
         btn_row.addWidget(load_btn) 
         layout.addLayout(btn_row)
     
@@ -410,6 +414,106 @@ class SelectionWidget(QWidget):
         
         widget.setLayout(layout)
         return widget
+    
+    def load_opt_files(self):
+        """temp 폴더의 OPT 파일들을 자동 로드"""
+        try:
+            # temp 폴더의 예시 파일들 로드
+            exp_opt_path = resource_path("temp/(temp)exp_opt.json")
+            exp_opt2_path = resource_path("temp/(temp)exp_opt2.json")
+            
+            # exp_opt.json 로드 (시험 요청 데이터)
+            exp_opt_data = self.opt_loader.load_opt_json(exp_opt_path)
+            
+            # exp_opt2.json 로드 (명세서 데이터)  
+            exp_opt2_data = self.opt_loader.load_opt_json(exp_opt2_path)
+            
+            if exp_opt_data and exp_opt2_data:
+                # 기본 정보 필드 채우기
+                self.populate_basic_info(exp_opt_data)
+                
+                # 시험항목(API) 테이블 채우기
+                self.populate_api_table(exp_opt_data, exp_opt2_data)
+                
+                QMessageBox.information(self, "로드 완료", "OPT 파일들이 성공적으로 로드되었습니다!")
+            else:
+                QMessageBox.warning(self, "로드 실패", "OPT 파일을 읽을 수 없습니다.")
+                
+        except Exception as e:
+            QMessageBox.critical(self, "오류", f"OPT 파일 로드 중 오류가 발생했습니다:\n{str(e)}")
+    
+    def populate_basic_info(self, exp_opt_data):
+        """exp_opt.json 데이터로 기본 정보 필드 채우기"""
+        try:
+            if not exp_opt_data or "testRequests" not in exp_opt_data:
+                return
+                
+            # 첫 번째 시험 요청 데이터 사용
+            first_request = exp_opt_data["testRequests"][0]
+            evaluation_target = first_request.get("evaluationTarget", {})
+            test_group = first_request.get("testGroup", {})
+            
+            # 매핑
+            self.company_edit.setText(evaluation_target.get("companyName", ""))
+            self.product_edit.setText(evaluation_target.get("productName", ""))
+            self.version_edit.setText(evaluation_target.get("version", ""))
+            self.model_edit.setText(evaluation_target.get("modelName", ""))
+            self.test_category_edit.setText(evaluation_target.get("testCategory", ""))
+            self.target_system_edit.setText(evaluation_target.get("targetSystem", ""))
+            self.test_group_edit.setText(test_group.get("name", ""))
+            self.test_range_edit.setText(test_group.get("testRange", ""))
+            
+            print(f"기본 정보 채우기 완료")
+            
+        except Exception as e:
+            print(f"기본 정보 채우기 실패: {e}")
+    
+    def populate_api_table(self, exp_opt_data, exp_opt2_data):
+        """API 테이블 데이터 채우기"""
+        try:
+            if not exp_opt_data or not exp_opt2_data:
+                return
+                
+            # exp_opt.json에서 시험 그룹 이름 가져오기
+            first_request = exp_opt_data["testRequests"][0]
+            test_group_name = first_request.get("testGroup", {}).get("name", "")
+            
+            # exp_opt2.json에서 API 단계 정보 가져오기
+            if "specification" not in exp_opt2_data:
+                return
+                
+            steps = exp_opt2_data["specification"].get("steps", [])
+            
+            # 테이블 초기화
+            self.api_test_table.setRowCount(0)
+            
+            # 각 단계를 테이블에 추가
+            for step in steps:
+                api_info = step.get("api", {})
+                
+                row = self.api_test_table.rowCount()
+                self.api_test_table.insertRow(row)
+                
+                # 1열: 시험 항목 (test_group_name)
+                test_item = QTableWidgetItem(test_group_name)
+                test_item.setTextAlignment(Qt.AlignCenter)
+                test_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+                self.api_test_table.setItem(row, 0, test_item)
+                
+                # 2열: 기능명 (API name)
+                function_name = QTableWidgetItem(api_info.get("name", ""))
+                function_name.setTextAlignment(Qt.AlignCenter)
+                function_name.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+                self.api_test_table.setItem(row, 1, function_name)
+                
+                # 3열: API명 (Endpoint)
+                api_endpoint = QTableWidgetItem(api_info.get("endpoint", ""))
+                api_endpoint.setTextAlignment(Qt.AlignCenter)
+                api_endpoint.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+                self.api_test_table.setItem(row, 2, api_endpoint)
+            
+        except Exception as e:
+            print(f"API 테이블 채우기 실패: {e}")
 
 class MainWindow(QMainWindow):
     def __init__(self):
