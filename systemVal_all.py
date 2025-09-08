@@ -131,7 +131,6 @@ class MyApp(QWidget):
                                 if not path_tmp or str(path_tmp).strip() in ["None", "", "desc"]:
                                     path_tmp = "https://127.0.0.1"
 
-                                if "http" not in str(path_tmp):  # tylee
                                     path_tmp = "https://" + str(path_tmp)
 
                                 parsed = urlparse(str(path_tmp))
@@ -938,8 +937,9 @@ class MyApp(QWidget):
                 api_name = securityMessages[row]
             
             # 실제 검증 수행해서 오류만 표시
+            from core.json_checker_new import data_finder
             all_field, opt_field = field_finder(out_schema)
-            datas = json_to_data(out_data)
+            datas = data_finder(out_data)
             result, error_msg = check_message_error(all_field, datas, opt_field, True)
             
             error_msg_display = f"{api_name} API - 검증 오류 결과\n\n"
