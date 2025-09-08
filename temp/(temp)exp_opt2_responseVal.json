@@ -1,0 +1,716 @@
+{
+  "specification": {
+    "id": "spec-002",
+    "name": "영상보안 시스템 응답 메시지 검증 API 명세서",
+    "version": "0.1",
+    "steps": [
+      {
+        "id": "step-1",
+        "name": "인증",
+        "order": 1,
+        "api": {
+          "name": "인증",
+          "method": "POST",
+          "endpoint": "/Authentication",
+          "authMethod": "Bearer Token,abcd1234",
+          "requestData": {
+            "userID": "user001",
+            "userPW": "pass001"
+          },
+          "responseValidation": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "userName": {
+                "type": "string"
+              },
+              "userAff": {
+                "type": "string"
+              },
+              "accessToken": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "message",
+              "userName",
+              "userAff"
+            ]
+          },
+          "timeoutSettings": {
+            "connectTimeout": 5000
+          }
+        }
+      },
+      {
+        "id": "step-2",
+        "name": "전송 지원 기능 정보",
+        "order": 2,
+        "api": {
+          "name": "전송 지원 기능 정보",
+          "method": "POST",
+          "endpoint": "/Capabilities",
+          "authMethod": "Bearer Token,abcd1234",
+          "requestData": {
+          },
+          "responseValidation": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "streamingSupport": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "streamProtocolType": {
+                      "type": "string"
+                    },
+                    "streamProtocolDesc": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "streamProtocolType"
+                  ]
+                }
+              },
+              "transportSupport": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "transProtocolType": {
+                      "type": "string"
+                    },
+                    "transProtocolDesc": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "transProtocolType"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "code",
+              "message",
+              "streamingSupport",
+              "transportSupport"
+            ]
+          }
+        },
+        "timeoutSettings": {
+          "connectTimeout": 5000
+        }
+      },
+      {
+        "id": "step-3",
+        "name": "카메라 목록 연동",
+        "order": 3,
+        "api": {
+          "name": "카메라 목록 연동",
+          "method": "POST",
+          "endpoint": "/CameraProfiles",
+          "authMethod": "Bearer Token,abcd1234",
+          "requestData": {
+          },
+          "responseValidation": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "camList": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "camID": {
+                      "type": "string"
+                    },
+                    "camName": {
+                      "type": "string"
+                    },
+                    "camLoc": {
+                      "type": "object",
+                      "properties": {
+                        "lon": {
+                          "type": "string"
+                        },
+                        "lat": {
+                          "type": "string"
+                        },
+                        "alt": {
+                          "type": "string"
+                        },
+                        "desc": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "lon",
+                        "lat"
+                      ]
+                    },
+                    "camConfig": {
+                      "type": "object",
+                      "properties": {
+                        "camType": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "camType"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "camID",
+                    "camName"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "code",
+              "message",
+              "camList"
+            ]
+          },
+          "timeoutSettings": {
+            "connectTimeout": 5000
+          }
+        }
+      },
+      {
+        "id": "step-4",
+        "name": "저장된 영상 목록 연동",
+        "order": 4,
+        "api": {
+          "name": "저장된 영상 목록 연동",
+          "method": "POST",
+          "endpoint": "/StoredVideoInfos",
+          "authMethod": "Bearer Token,abcd1234",
+          "requestData": {
+            "timePeriod": {
+              "startTime": 20220822163022123,
+              "endTime": 20220822163025123
+            },
+            "camList": [
+              {
+                "camID": "cam001"
+              },
+              {
+                "camID": "cam002"
+              }
+            ]
+          },
+          "responseValidation": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "camList": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "camID": {
+                      "type": "string"
+                    },
+                    "timeList": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "startTime": {
+                            "type": "integer"
+                          },
+                          "endTime": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "startTime"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "camID",
+                    "timeList"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "code",
+              "message",
+              "camList"
+            ]
+          },
+          "timeoutSettings": {
+            "connectTimeout": 5000
+          }
+        }
+      },
+      {
+        "id": "step-5",
+        "name": "실시간 영상 정보 연동",
+        "order": 5,
+        "api": {
+          "name": "실시간 영상 정보 연동",
+          "method": "POST",
+          "endpoint": "/StreamURLs",
+          "authMethod": "Bearer Token,abcd1234",
+          "requestData": {
+            "camList": [
+              {
+                "camID": "cam001",
+                "streamProtocolType": "RTSP"
+              }
+            ]
+          },
+          "responseValidation": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "camList": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "camID": {
+                      "type": "string"
+                    },
+                    "accessID": {
+                      "type": "string"
+                    },
+                    "accessPW": {
+                      "type": "string"
+                    },
+                    "camURL": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "camID",
+                    "camURL"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "code",
+              "message",
+              "camList"
+            ]
+          },
+          "timeoutSettings": {
+            "connectTimeout": 5000
+          }
+        }
+      },
+      {
+        "id": "step-6",
+        "name": "저장된 영상 정보 연동",
+        "order": 6,
+        "api": {
+          "name": "저장된 영상 정보 연동",
+          "method": "POST",
+          "endpoint": "/ReplayURL",
+          "authMethod": "Bearer Token,abcd1234",
+          "requestData": {
+            "camList": [
+              {
+                "camID": "cam001",
+                "startTime": 20220822163022123,
+                "endTime": 20220822163025123,
+                "streamProtocolType": "RTSP"
+              },
+              {
+                "camID": "cam002",
+                "startTime": 20220822163022123,
+                "endTime": 20220822163025123,
+                "streamProtocolType": "RTSP"
+              },
+              {
+                "camID": "cam003",
+                "startTime": 20220822163022123,
+                "endTime": 20220822163025123,
+                "streamProtocolType": "RTSP"
+              }
+            ]
+          },
+          "responseValidation": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "camList": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "camID": {
+                      "type": "string"
+                    },
+                    "startTime": {
+                      "type": "integer"
+                    },
+                    "camURL": {
+                      "type": "string"
+                    },
+                    "accessID": {
+                      "type": "string"
+                    },
+                    "accessPW": {
+                      "type": "string"
+                    },
+                    "endTime": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "camID",
+                    "startTime",
+                    "camURL"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "code",
+              "message",
+              "camList"
+            ]
+          },
+          "timeoutSettings": {
+            "connectTimeout":5000
+          }
+        }
+      },
+      {
+        "id": "step-7",
+        "name": "실시간 이벤트 분석 정보 연동",
+        "order": 7,
+        "api": {
+          "name": "실시간 이벤트 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/RealtimeVideoEventInfos",
+          "authMethod": "Bearer Token,abcd1234",
+          "requestData": {
+            "camList": [
+              {
+                "camID": "cam001"
+              },
+              {
+                "camID": "cam002"
+              }
+            ],
+            "transProtocol": {
+              "transProtocolType": "LongPolling",
+              "transProtocolDesc": "https://127.0.0.1:8090/RealtimeVideoEventInfos"
+            },
+            "duration": 10,
+            "eventFilter": "배회",
+            "startTime": 20220822163022123
+          },
+          "responseValidation": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "camList": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "camID": {
+                      "type": "string"
+                    },
+                    "eventUUID": {
+                      "type": "string"
+                    },
+                    "eventName": {
+                      "type": "string"
+                    },
+                    "startTime": {
+                      "type": "integer"
+                    },
+                    "endTime": {
+                      "type": "integer"
+                    },
+                    "eventDesc": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "camID",
+                    "eventUUID",
+                    "eventName",
+                    "startTime"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "code",
+              "message",
+              "camList"
+            ]
+          },
+          "timeoutSettings": {
+            "connectTimeout": 5000
+          }
+        }
+      },
+      {
+        "id": "step-8",
+        "name": "저장된 이벤트 분석 정보 연동",
+        "order": 8,
+        "api": {
+          "name": "저장된 이벤트 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/StoredVideoEventInfos",
+          "authMethod": "Bearer Token,abcd1234",
+          "requestData": {
+            "code": "200",
+            "message": "성공",
+            "camList": [
+              {
+                "camID": "cam0001",
+                "eventUUID": "event01",
+                "eventName": "배회",
+                "startTime": 20220822163022123,
+                "endTime": 20220822163025123,
+                "eventDesc": "AAABVVVVCCCDDssvfdd"
+              },
+              {
+                "camID": "cam0002",
+                "eventUUID": "event01",
+                "eventName": "배회",
+                "startTime": 20220822163022123,
+                "endTime": 20220822163025123,
+                "eventDesc": "FFFeeiiiWWkdjflskdjfoEKK"
+              },
+              {
+                "camID": "cam0003",
+                "eventUUID": "event01",
+                "eventName": "배회",
+                "startTime": 20220822163022123,
+                "endTime": 20220822163025123,
+                "eventDesc": "iVUhEUgAAACAAAAAgCAYAAA"
+              }
+            ]
+          },
+          "responseValidation": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "camList": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "camID": {
+                      "type": "string"
+                    },
+                    "eventUUID": {
+                      "type": "string"
+                    },
+                    "eventName": {
+                      "type": "string"
+                    },
+                    "startTime": {
+                      "type": "integer"
+                    },
+                    "endTime": {
+                      "type": "integer"
+                    },
+                    "eventDesc": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "camID",
+                    "eventUUID",
+                    "eventName",
+                    "startTime"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "code",
+              "message",
+              "camList"
+            ]
+          },
+          "timeoutSettings": {
+            "connectTimeout": 5000
+          }
+        }
+      },
+      {
+        "id": "step-9",
+        "name": "저장된 객체 분석 정보 연동",
+        "order": 9,
+        "api": {
+          "name": "저장된 객체 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/StoredObjectAnalyticsInfos",
+          "authMethod": "Bearer Token,abcd1234",
+          "requestData": {
+            "timePeriod": {
+              "startTime": 20220822163022123,
+              "endTime": 20220822163025123
+            },
+            "camList": [
+              {
+                "camID": "cam0001"
+              },
+              {
+                "camID": "cam0002"
+              },
+              {
+                "camID": "cam0003"
+              }
+            ],
+            "anayticsFilter": "객체탐지",
+            "classFilter": [
+              "차량",
+              "사람"
+            ]
+          },
+          "responseValidation": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "camList": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "camID": {
+                      "type": "string"
+                    },
+                    "analyticsTime": {
+                      "type": "integer"
+                    },
+                    "anlayticsResultList": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "anayticsID": {
+                            "type": "string"
+                          },
+                          "analyticsClass": {
+                            "type": "string"
+                          },
+                          "analyticsAttribute": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "analyticsConfidence": {
+                            "type": "integer"
+                          },
+                          "aanalyticsDesc": {
+                            "type": "string"
+                          },
+                          "analyticsBoundingBox": {
+                            "type": "object",
+                            "properties": {
+                              "left": {
+                                "type": "integer"
+                              },
+                              "top": {
+                                "type": "integer"
+                              },
+                              "right": {
+                                "type": "integer"
+                              },
+                              "bottom": {
+                                "type": "integer"
+                              }
+                            },
+                            "required": [
+                              "left",
+                              "top",
+                              "right",
+                              "bottom"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "anayticsID",
+                          "analyticsClass"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "camID",
+                    "analyticsTime"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "code",
+              "message"
+            ]
+          },
+          "timeoutSettings": {
+            "connectTimeout": 5000
+          }
+        }
+      }
+    ]
+  }
+}

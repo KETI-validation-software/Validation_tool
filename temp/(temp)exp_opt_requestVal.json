@@ -6,7 +6,7 @@
         "id": "target-001",
         "companyName": "스마트홈 테크놀로지",
         "contactPerson": "김철수",
-        "productName": "스마트 도어락 시스템",
+        "productName": "물리보안 통합플랫폼",
         "modelName": "SDL-2024",
         "version": "v2.1.0",
         "testCategory": "사전시험",
@@ -14,8 +14,8 @@
       },
       "testGroup": {
         "id": "group-001",
-        "name": "도어락 시험",
-        "testRange": "all",
+        "name": "영상보안 시스템 시험",
+        "testRange": "전체필드",
         "testSpecIds": ["spec-001"],
         "adminCode": "DOOR_LOCK_2024"
       },

@@ -1,0 +1,43 @@
+{
+  "testRequests": [
+    {
+      "id": "req-001",
+      "evaluationTarget": {
+        "id": "target-001",
+        "companyName": "스마트홈 테크놀로지",
+        "contactPerson": "김철수",
+        "productName": "물리보안 시스템",
+        "modelName": "SDL-2024",
+        "version": "v2.1.0",
+        "testCategory": "사전시험",
+        "targetSystem": "통합시스템"
+      },
+      "testGroup": {
+        "id": "group-001",
+        "name": "영상보안 시스템 시험",
+        "testRange": "전체필드",
+        "testSpecIds": ["spec-002"],
+        "adminCode": "DOOR_LOCK_2024"
+      },
+      "requestDate": "2024-01-25T09:00:00Z",
+      "status": "대기",
+      "createdAt": "2024-01-25T09:00:00Z",
+      "updatedAt": "2024-01-25T09:00:00Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 25,
+    "totalPages": 1
+  },
+  "filters": {
+    "status": "all",
+    "companyName": "",
+    "testGroupName": "",
+    "dateRange": {
+      "startDate": "2024-01-01",
+      "endDate": "2024-01-31"
+    }
+  }
+}
