@@ -68,12 +68,12 @@ def set_auth(file):
     info2 = []
 
     for child in root:
-        if child.attrib['type'] == 'Bearer Token':
+        if 'type' in child.attrib and child.attrib['type'] == 'Bearer Token':
             for a in child[1:]:
                 if a.text != "None" or a.text is not None:
                     info = a.text
 
-        if child.attrib['type'] == 'Digest Auth':
+        if 'type' in child.attrib and child.attrib['type'] == 'Digest Auth':
             for a in child[1:]:
                 info2.append(a.text)
 
