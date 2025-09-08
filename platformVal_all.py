@@ -363,11 +363,55 @@ class MyApp(QWidget):
         self.sbtn = QPushButton(self)
         self.sbtn.setText('평가 시작')
         self.sbtn.setMaximumWidth(100)  # 버튼 너비 제한
+        self.sbtn.setStyleSheet("""
+            QPushButton {
+                background-color: #87CEEB;  /* 스카이블루 */
+                border: 2px solid #4682B4;
+                border-radius: 5px;
+                padding: 5px;
+                font-weight: bold;
+                color: #191970;  /* 미드나잇 블루 텍스트 */
+            }
+            QPushButton:hover {
+                background-color: #B0E0E6;  /* 호버시 더 밝은 블루 */
+                border: 2px solid #1E90FF;
+            }
+            QPushButton:pressed {
+                background-color: #4682B4;  /* 클릭시 더 진한 블루 */
+            }
+            QPushButton:disabled {
+                background-color: #F0F0F0;
+                border: 2px solid #CCCCCC;
+                color: #999999;
+            }
+        """)
         self.sbtn.clicked.connect(self.sbtn_push)
 
         self.stop_btn = QPushButton(self)
         self.stop_btn.setText('일시 정지')
         self.stop_btn.setMaximumWidth(100)  # 버튼 너비 제한
+        self.stop_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #87CEEB;  /* 스카이블루 */
+                border: 2px solid #4682B4;
+                border-radius: 5px;
+                padding: 5px;
+                font-weight: bold;
+                color: #191970;  /* 미드나잇 블루 텍스트 */
+            }
+            QPushButton:hover {
+                background-color: #B0E0E6;  /* 호버시 더 밝은 블루 */
+                border: 2px solid #1E90FF;
+            }
+            QPushButton:pressed {
+                background-color: #4682B4;  /* 클릭시 더 진한 블루 */
+            }
+            QPushButton:disabled {
+                background-color: #F0F0F0;
+                border: 2px solid #CCCCCC;
+                color: #999999;
+            }
+        """)
         self.stop_btn.clicked.connect(self.stop_btn_clicked)
         self.stop_btn.setDisabled(True)
         
@@ -375,6 +419,28 @@ class MyApp(QWidget):
         self.rbtn = QPushButton(self)
         self.rbtn.setText('종료')
         self.rbtn.setMaximumWidth(120)  # 버튼 너비 제한
+        self.rbtn.setStyleSheet("""
+            QPushButton {
+                background-color: #87CEEB;  /* 스카이블루 */
+                border: 2px solid #4682B4;
+                border-radius: 5px;
+                padding: 5px;
+                font-weight: bold;
+                color: #191970;  /* 미드나잇 블루 텍스트 */
+            }
+            QPushButton:hover {
+                background-color: #B0E0E6;  /* 호버시 더 밝은 블루 */
+                border: 2px solid #1E90FF;
+            }
+            QPushButton:pressed {
+                background-color: #4682B4;  /* 클릭시 더 진한 블루 */
+            }
+            QPushButton:disabled {
+                background-color: #F0F0F0;
+                border: 2px solid #CCCCCC;
+                color: #999999;
+            }
+        """)
         self.rbtn.clicked.connect(self.rbtn_push)
 
         buttonLayout.addWidget(self.sbtn)
