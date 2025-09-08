@@ -7,6 +7,13 @@ import json
 import requests
 import sys
 import spec
+import urllib3
+import warnings
+
+# SSL 경고 비활성화 (자체 서명 인증서 사용 시)
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+warnings.filterwarnings('ignore')
+
 from spec.video.videoRequest import videoMessages, videoOutMessage, videoInMessage
 from spec.video.videoSchema import videoInSchema, videoOutSchema, videoWebhookSchema
 from spec.bio.bioRequest import bioMessages, bioOutMessage, bioInMessage
@@ -122,10 +129,10 @@ class MyApp(QWidget):
                             if "WebHook".lower() in str(trans_protocol_type).lower():
                                 path_tmp = trans_protocol.get("transProtocolDesc", {})
                                 if not path_tmp or str(path_tmp).strip() in ["None", "", "desc"]:
-                                    path_tmp = "http://127.0.0.1"
+                                    path_tmp = "https://127.0.0.1"
 
                                 if "http" not in str(path_tmp):  # tylee
-                                    path_tmp = "http://" + str(path_tmp)
+                                    path_tmp = "https://" + str(path_tmp)
 
                                 parsed = urlparse(str(path_tmp))
                                 url = parsed.hostname if parsed.hostname is not None else "127.0.0.1"
@@ -173,6 +180,10 @@ class MyApp(QWidget):
         self.valResult.append(val_result)
         self.total_error_cnt += key_error_cnt
         self.total_pass_cnt += key_psss_cnt
+        
+        # 평가 점수 디스플레이 업데이트
+        self.update_score_display()
+        
         self.valResult.append(
             "Score : " + str((self.total_pass_cnt / (self.total_pass_cnt + self.total_error_cnt) * 100)))
         self.valResult.append("Score details : " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(
@@ -311,6 +322,10 @@ class MyApp(QWidget):
 
                             self.total_error_cnt += key_error_cnt
                             self.total_pass_cnt += key_psss_cnt
+                            
+                            # 평가 점수 디스플레이 업데이트
+                            self.update_score_display()
+                            
                             self.icon_update(tmp_res_auth, val_result, val_text)
                             self.valResult.append("Score : " + str(
                                 (self.total_pass_cnt / (self.total_pass_cnt + self.total_error_cnt) * 100)))
@@ -339,6 +354,10 @@ class MyApp(QWidget):
 
                             self.total_error_cnt += key_error_cnt
                             self.total_pass_cnt += key_psss_cnt
+                            
+                            # 평가 점수 디스플레이 업데이트
+                            self.update_score_display()
+                            
                             self.icon_update(tmp_res_auth, val_result, val_text)
                             self.valResult.append("Score : " + str(
                                 (self.total_pass_cnt / (self.total_pass_cnt + self.total_error_cnt) * 100)))
@@ -786,7 +805,7 @@ class MyApp(QWidget):
         fgroup = QGroupBox('')
 
         self.linkUrl = QLineEdit(self)
-        self.linkUrl.setText("http://127.0.0.1:8008")
+        self.linkUrl.setText("https://127.0.0.1:8008")
 
         layout = QVBoxLayout()
         layout.addWidget(QLabel('연동 URL'))
@@ -823,6 +842,18 @@ class MyApp(QWidget):
         
         sgroup.setLayout(layout)
         return sgroup
+
+    def update_score_display(self):
+        """평가 점수 디스플레이 업데이트"""
+        total_fields = self.total_pass_cnt + self.total_error_cnt
+        if total_fields > 0:
+            score = (self.total_pass_cnt / total_fields) * 100
+        else:
+            score = 0
+            
+        self.pass_count_label.setText(f"통과 필드 수: {self.total_pass_cnt}")
+        self.total_count_label.setText(f"전체 필드 수: {total_fields}")
+        self.score_label.setText(f"평가 점수: {score:.1f}%")
 
     def show_detail_result(self, row):
         """데이터 확인 버튼 - 실제 데이터 내용 표시"""
@@ -1269,7 +1300,7 @@ class MyApp(QWidget):
 
         tmp = self.setting_variables.value('linkUrl')
         if tmp is None:
-            tmp = "http://127.0.0.1:8008"
+            tmp = "https://127.0.0.1:8008"
         self.linkUrl.setText(tmp)
         try:
             tmp = self.setting_variables.value('timeInterval')
