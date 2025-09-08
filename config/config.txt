@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <config>
+    <selected_auth>Bearer Token</selected_auth> <!-- 선택된 사용자 인증 방식 -->
+    <url>https://127.0.0.1:8888</url> <!-- 시험 URL -->
     <auth type="Bearer Token">  <!-- 사용자 인증 방식 정의 (지원 타입:Bearer Token) -->
         <bearer_token>abcd1234</bearer_token>
     </auth>
     <auth type="Digest Auth">  <!-- 사용자 인증 방식 정의 (지원 타입:Digest Auth) -->
-        <username>admin</username>
-        <password>pass</password>
+        <username></username>
+        <password></password>
     </auth>
 </config>
