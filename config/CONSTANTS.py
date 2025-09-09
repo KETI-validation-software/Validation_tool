@@ -1,11 +1,32 @@
+#API-info
 headers = {"Content-type": "application/json", "User-Agent":'test'}
-
 none_request_message = ['Capabilities',
                         'CameraProfiles',
                         'DoorProfiles',
                         'AccessUserInfos',
                         'SensorDeviceProfiles']
 
+#test-info
+company_name = "스마트홈 테크놀로지"
+product_name = "물리보안 통합플랫폼"
+version = "v.2.1.0"
+test_category = "사전시험"
+test_target = "통합시스템" # 연동시스템
+test_range = "전체필드"
+auth_type = "Bearer Token"
+auth_info = "abcd1234" #Digest Auth의 경우 id,pass 형태로 표기 예 auth_info = "user,pass"
+admin_code = "door_lock_2024"
+url = "https://127.0.0.1:8008"
+
+#test-opt
+'''
+opt2의 메시지의 settings 내 정보 보고 작성, 메시지 순차별로 
+'''
+trans_protocol = [None,None,None,None,None,None,"LongPolling",None,None] #"LongPolling" #WebHook
+time_out = [5000,5000,5000,5000,5000,5000,5000,5000,5000]
+num_retries = [1,1,3,3,2,2,1,1,2]
+
+#etc
 digest_vid_res = [
  'ae8dd6b1b3b7ebcddccf77e1e1cee42ac3d3d90e4c2cc111c4d2aab17870e8cf',
     '16ba752619484f662586478081c99daeb3126df5988fd7956fbb302de964f958',

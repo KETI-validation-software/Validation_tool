@@ -45,11 +45,9 @@
             "userAff": "오산시청",
             "accessToken": "abcde1234"
           },
-          "timeoutSettings": {
-            "connectTimeout": 5000
-          },
-          "timeoutSettings": {
-            "connectTimeout": 5000
+          "settings": {
+            "connectTimeout": 5000,
+            "numRetries": 1
           }
         }
       },
@@ -80,8 +78,9 @@
               }
             ]
           },
-          "timeoutSettings": {
-            "connectTimeout": 5000
+          "settings": {
+            "connectTimeout": 5000,
+            "numRetries": 1
           }
         }
       },
@@ -126,8 +125,9 @@
               }
             ]
           },
-          "timeoutSettings": {
-            "connectTimeout": 5000
+          "settings": {
+            "connectTimeout": 5000,
+            "numRetries": 3
           }
         }
       },
@@ -205,8 +205,9 @@
               }
             ]
           },
-          "timeoutSettings": {
-            "connectTimeout": 5000
+          "settings": {
+            "connectTimeout": 5000,
+            "numRetries": 3
           }
         }
       },
@@ -276,8 +277,9 @@
             }
           ]
         },
-        "timeoutSettings": {
-          "connectTimeout": 5000
+        "settings": {
+          "connectTimeout": 5000,
+          "numRetries": 2
         }
       },
       {
@@ -353,8 +355,9 @@
               }
             ]
           },
-          "timeoutSettings": {
-            "connectTimeout": 5000
+          "settings": {
+            "connectTimeout": 5000,
+            "numRetries": 2
           }
         }
       },
@@ -436,8 +439,10 @@
               }
             ]
           },
-          "timeoutSettings": {
-            "connectTimeout": 5000
+          "settings": {
+            "connectTimeout": 5000,
+            "numRetries": 1,
+            "transportMode": "LongPolling"
           }
         }
       },
@@ -526,8 +531,9 @@
               }
             ]
           },
-          "timeoutSettings": {
-            "connectTimeout": 5000
+          "settings": {
+            "connectTimeout": 5000,
+            "numRetries": 1
           }
         }
       },
@@ -639,8 +645,9 @@
               }
             ]
           },
-          "timeoutSettings": {
-            "connectTimeout": 5000
+          "settings": {
+            "connectTimeout": 5000,
+            "numRetries": 2
           }
         }
       }

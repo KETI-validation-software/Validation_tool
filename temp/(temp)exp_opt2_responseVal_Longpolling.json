@@ -43,8 +43,9 @@
               "userAff"
             ]
           },
-          "timeoutSettings": {
-            "connectTimeout": 5000
+          "settings": {
+            "connectTimeout": 5000,
+            "numRetries": 1
           }
         }
       },
@@ -111,8 +112,9 @@
             ]
           }
         },
-        "timeoutSettings": {
-          "connectTimeout": 5000
+        "settings": {
+          "connectTimeout": 5000,
+          "numRetries": 1
         }
       },
       {
@@ -192,8 +194,9 @@
               "camList"
             ]
           },
-          "timeoutSettings": {
-            "connectTimeout": 5000
+          "settings": {
+            "connectTimeout": 5000,
+            "numRetries": 3
           }
         }
       },
@@ -268,8 +271,9 @@
               "camList"
             ]
           },
-          "timeoutSettings": {
-            "connectTimeout": 5000
+          "settings": {
+            "connectTimeout": 5000,
+            "numRetries": 3
           }
         }
       },
@@ -330,8 +334,9 @@
               "camList"
             ]
           },
-          "timeoutSettings": {
-            "connectTimeout": 5000
+          "settings": {
+            "connectTimeout": 5000,
+            "numRetries": 2
           }
         }
       },
@@ -413,8 +418,9 @@
               "camList"
             ]
           },
-          "timeoutSettings": {
-            "connectTimeout":5000
+          "settings": {
+            "connectTimeout":5000,
+            "numRetries": 2
           }
         }
       },
@@ -492,8 +498,11 @@
               "camList"
             ]
           },
-          "timeoutSettings": {
-            "connectTimeout": 5000
+          "settings": {
+            "connectTimeout": 5000,
+            "numRetries": 1,
+            "transportMode": "LongPolling"
+
           }
         }
       },
@@ -584,8 +593,9 @@
               "camList"
             ]
           },
-          "timeoutSettings": {
-            "connectTimeout": 5000
+          "settings": {
+            "connectTimeout": 5000,
+            "numRetries": 1
           }
         }
       },
@@ -706,8 +716,9 @@
               "message"
             ]
           },
-          "timeoutSettings": {
-            "connectTimeout": 5000
+          "settings": {
+            "connectTimeout": 5000,
+            "numRetries": 2
           }
         }
       }
