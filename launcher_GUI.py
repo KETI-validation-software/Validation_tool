@@ -5,11 +5,11 @@ import requests
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QRadioButton, QPushButton, QLabel, QStackedWidget, QAction,
-    QLineEdit, QMessageBox, QFormLayout, QGroupBox, QComboBox,
+    QLineEdit, QMessageBox, QFormLayout, QGroupBox, QCheckBox,
     QTableWidget, QHeaderView, QAbstractItemView, QTableWidgetItem
 )
 from PyQt5.QtGui import QFontDatabase, QFont
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QObject, pyqtSignal
 
 # 두 앱 모듈 (둘 다 MyApp(QWidget) 제공) - GUI 자동실행 방지를 위해 클래스만 import
 import platformVal_all as platform_app
@@ -17,6 +17,7 @@ import systemVal_all as system_app
 
 from core.functions import resource_path
 from core.opt_loader import OptLoader
+import socket
 
 
 class LoginWidget(QWidget):
@@ -129,6 +130,90 @@ class LoginWidget(QWidget):
             return False
 
 
+class NetworkScanWorker(QObject):
+    """네트워크 스캔 작업을 위한 Worker 클래스"""
+    scan_completed = pyqtSignal(list)  # 스캔 완료 시 URL 리스트 전송
+    scan_failed = pyqtSignal(str)      # 스캔 실패 시 에러 메시지 전송
+    
+    def __init__(self):
+        super().__init__()
+    
+    def scan_network(self):
+        """네트워크 스캔 수행"""
+        try:
+            
+            # 1. 내 IP 주소 탐지
+            local_ip = self._get_local_ip()
+            
+            if not local_ip:
+                self.scan_failed.emit("내 IP 주소를 찾을 수 없습니다.")
+                return
+            
+            # 2. 사용 가능한 포트 스캔 (8000-8099 범위)
+            available_ports = self._scan_available_ports(local_ip, range(8000, 8100))
+            print(f"사용 가능한 포트들: {available_ports}")
+            
+            # 3. 결과 처리
+            if available_ports:
+                # 상위 3개 포트 선택
+                recommended_ports = available_ports[:3]
+                urls = [f"{local_ip}:{port}" for port in recommended_ports]
+                print(f"추천 URL: {urls}")
+                
+                # 시그널로 결과 전송
+                self.scan_completed.emit(urls)
+            else:
+                self.scan_failed.emit("검색된 사용가능 포트 없음")
+                
+        except Exception as e:
+            self.scan_failed.emit(f"네트워크 탐색 중 오류 발생:\n{str(e)}")
+    
+    def _get_local_ip(self):
+        """로컬 IP 주소 탐지"""
+        try:
+            # 외부 서버에 연결해서 로컬 IP 확인 (실제 연결하지 않음)
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+                s.connect(("8.8.8.8", 80))
+                local_ip = s.getsockname()[0]
+                return local_ip
+        except Exception:
+            try:
+                # 대안: 호스트명으로 IP 얻기
+                return socket.gethostbyname(socket.gethostname())
+            except Exception:
+                return None
+    
+    def _scan_available_ports(self, ip, port_range):
+        """지정된 IP에서 바인드 가능한 포트 스캔"""
+        available_ports = []
+        scanned_count = 0
+        
+        for port in port_range:
+            scanned_count += 1
+            try:
+                # 포트가 사용 가능한지 확인 (바인드 테스트)
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                    sock.settimeout(0.1)  # 타임아웃 설정으로 속도 향상
+                    result = sock.bind((ip, port))
+                    available_ports.append(port)
+                    
+                    # 너무 많이 찾으면 상위 10개로 제한
+                    if len(available_ports) >= 10:
+                        break
+                        
+            except OSError as e:
+                # 포트가 이미 사용 중이거나 바인드 불가
+                if scanned_count % 20 == 0:  # 20개마다 로그
+                    print(f"스캔 중... {scanned_count}/{len(list(port_range))}, 발견: {len(available_ports)}개")
+                continue
+            except Exception as e:
+                # 기타 오류는 무시하고 계속
+                continue
+        
+        return available_ports
+
+
 class SelectionWidget(QWidget):
     """두 번째 화면: 플랫폼/시스템 선택 및 적용"""
 
@@ -138,6 +223,11 @@ class SelectionWidget(QWidget):
 
         # OPT 로더
         self.opt_loader = OptLoader()
+        
+        # 네트워크 스캔 워커 초기화
+        self.scan_worker = None
+        self.scan_thread = None
+        
         self.initUI()
 
     def initUI(self):
@@ -358,40 +448,113 @@ class SelectionWidget(QWidget):
             self.token_input.setEnabled(True)
 
     def populate_demo_urls(self):
-        """하드코딩된 IP:Port 목록을 표에 표시"""
-        demo_urls = [
-            "192.168.0.1:8080",
-            "192.168.0.2:8080",
-        ]
-        self.url_table.setRowCount(0)
-        for url in demo_urls:
-            row = self.url_table.rowCount()
-            self.url_table.insertRow(row)
+        """실제 네트워크 스캔으로 사용 가능한 주소 탐지"""
+        try:
+            
+            # 이미 스캔 중이면 중복 실행 방지
+            if self.scan_thread and self.scan_thread.isRunning():
+                QMessageBox.information(self, "알림", "이미 주소 탐색이 진행 중입니다.")
+                return
+            
+            # Worker와 Thread 설정
+            from PyQt5.QtCore import QThread
+            
+            self.scan_worker = NetworkScanWorker()
+            self.scan_thread = QThread()
+            
+            # Worker를 Thread로 이동
+            self.scan_worker.moveToThread(self.scan_thread)
+            
+            # 시그널 연결
+            self.scan_worker.scan_completed.connect(self._on_scan_completed)
+            self.scan_worker.scan_failed.connect(self._on_scan_failed)
+            self.scan_thread.started.connect(self.scan_worker.scan_network)
+            self.scan_thread.finished.connect(self.scan_thread.deleteLater)
+            
+            # 스레드 시작
+            self.scan_thread.start()
+            
+        except Exception as e:
+            print(f"주소 탐색 오류: {e}")
+            QMessageBox.critical(self, "오류", f"네트워크 탐색 중 오류 발생:\n{str(e)}")
+    
+    def _on_scan_completed(self, urls):
+        """스캔 완료 시 호출되는 슬롯"""
+        print(f"스캔 완료 신호 수신: {urls}")
+        self._populate_url_table(urls)
+    
+    def _on_scan_failed(self, error_message):
+        """스캔 실패 시 호출되는 슬롯"""
+        print(f"스캔 실패 신호 수신: {error_message}")
+        self._show_scan_error(error_message)
+    
+    def _populate_url_table(self, urls):
+        """URL 테이블에 스캔 결과 채우기"""
+        try:
+            self.url_table.setRowCount(0)
+            
+            for i, url in enumerate(urls):
+                row = self.url_table.rowCount()
+                self.url_table.insertRow(row)
 
-            # 체크 아이템 (사용자 체크 가능)
-            check_item = QTableWidgetItem()
-            check_item.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled | Qt.ItemIsSelectable)
-            check_item.setCheckState(Qt.Unchecked)
-            check_item.setTextAlignment(Qt.AlignCenter)
-            self.url_table.setItem(row, 0, check_item)
+                # 체크 아이템 (사용자 체크 가능)
+                checkbox_widget = QWidget()
+                checkbox_layout = QHBoxLayout()
+                checkbox_layout.setAlignment(Qt.AlignCenter)
+                checkbox_layout.setContentsMargins(0, 0, 0, 0)
+                
+                checkbox = QCheckBox()
+                checkbox.setChecked(False)
+                checkbox.clicked.connect(lambda checked, r=row: self.on_checkbox_clicked(r, checked))
+                checkbox_layout.addWidget(checkbox)
+                checkbox_widget.setLayout(checkbox_layout)
+                
+                self.url_table.setCellWidget(row, 0, checkbox_widget)
 
-            # URL 텍스트
-            url_item = QTableWidgetItem(url)
-            url_item.setTextAlignment(Qt.AlignCenter)  
-            self.url_table.setItem(row, 1, url_item)
+                # URL 텍스트
+                url_item = QTableWidgetItem(url)
+                url_item.setTextAlignment(Qt.AlignCenter)  
+                self.url_table.setItem(row, 1, url_item)
+            
+            # 성공 메시지
+            message = f"사용 가능한 주소를 찾았습니다."
+            QMessageBox.information(self, "탐색 완료", message)
+            
+        except Exception as e:
+            self._show_scan_error(f"테이블 업데이트 중 오류:\n{str(e)}")
+    
+    def _show_scan_error(self, message):
+        """스캔 오류 메시지 표시"""
+        QMessageBox.warning(self, "주소 탐색 실패", message)
+
+    def on_checkbox_clicked(self, clicked_row, checked):
+        """체크박스 클릭 시: 단일 선택 처리"""
+        if checked:  # 체크된 경우에만 처리
+            # 모든 행 체크 해제
+            for r in range(self.url_table.rowCount()):
+                if r != clicked_row:  # 클릭된 행 제외
+                    checkbox_widget = self.url_table.cellWidget(r, 0)
+                    if checkbox_widget:
+                        checkbox = checkbox_widget.findChild(QCheckBox)
+                        if checkbox:
+                            checkbox.setChecked(False)
 
     def select_url_row(self, row, col):
         """행 클릭 시: 체크 단일 선택"""
         # 모든 행 체크 해제
         for r in range(self.url_table.rowCount()):
-            item = self.url_table.item(r, 0)
-            if item is not None:
-                item.setCheckState(Qt.Unchecked)
+            checkbox_widget = self.url_table.cellWidget(r, 0)
+            if checkbox_widget:
+                checkbox = checkbox_widget.findChild(QCheckBox)
+                if checkbox:
+                    checkbox.setChecked(False)
 
         # 선택된 행 체크
-        sel_item = self.url_table.item(row, 0)
-        if sel_item is not None:
-            sel_item.setCheckState(Qt.Checked)
+        selected_checkbox_widget = self.url_table.cellWidget(row, 0)
+        if selected_checkbox_widget:
+            checkbox = selected_checkbox_widget.findChild(QCheckBox)
+            if checkbox:
+                checkbox.setChecked(True)
 
     def create_bottom_buttons(self):
         """하단 버튼 바"""
