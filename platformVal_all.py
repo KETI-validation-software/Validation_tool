@@ -87,11 +87,32 @@ class MyApp(QWidget):
         self.time_pre = 0
         self.cnt_pre = 0
         self.final_report = ""
+        # 스텝별 표시할 버퍼 (요약, 데이터, 오류, 결과)
+        self.step_buffers = [
+            {"summary": "", "data": "", "error": "", "result": "PASS"} for _ in range(9)
+        ]
         self.get_setting()
 
         with open(resource_path("spec/rows.json"), "w") as out_file:
             json.dump(None, out_file, ensure_ascii=False)
 
+
+    def _to_detail_text(self, val_text):
+        """검증 결과 텍스트를 항상 사람이 읽을 문자열로 표준화"""
+        if val_text is None:
+            return "오류가 없습니다."
+        if isinstance(val_text, list):
+            return "\n".join(str(x) for x in val_text) if val_text else "오류가 없습니다."
+        if isinstance(val_text, dict):
+            try:
+                import json
+                return json.dumps(val_text, indent=2, ensure_ascii=False)
+            except Exception:
+                return str(val_text)
+        return str(val_text)
+
+
+    # 실시간 모니터링용
     def update_view(self):
         try:
             time_interval = 0
@@ -146,32 +167,47 @@ class MyApp(QWidget):
                     message_name = "step " + str(self.cnt + 1) + ": " + self.Server.message[self.cnt]
                     inMessage = dict()
 
+                    # ▼ 추가: 이 스텝에서 합칠 버퍼들
+                    combined_data_parts = []    # 화면/버튼 "데이터"에 넣을 JSON 문자열들
+                    combined_error_parts = []   # 화면/버튼 "오류"에 넣을 오류 문자열들
+                    step_result = "PASS"        # 입력/웹훅 둘 중 하나라도 FAIL이면 FAIL
+                    add_pass = 0
+                    add_err = 0
 
                     val_result = ""
                     val_text = ""
                     key_psss_cnt = 0
                     key_error_cnt = 0
                     if self.Server.message[self.cnt] in CONSTANTS.none_request_message:
+                        tmp_res_auth = json.dumps(data, indent=4, ensure_ascii=False)
+                        combined_data_parts.append(tmp_res_auth)
 
                         if (len(data) != 0) and data != "{}":
-                            val_result = "FAIL"
-                            val_text = ""
-                            key_psss_cnt = 0
-                            key_error_cnt = 1
-                        elif (len(data) != 0) or data != "{}":
-                            val_result = "PASS"
-                            val_text = "PASS"
-                            key_psss_cnt = 1
-                            key_error_cnt = 0
+                            step_result = "FAIL"
+                            add_err = 1
+                            combined_error_parts.append("[None Request] 데이터가 있으면 안 됩니다.")
+                        elif (len(data) == 0) or data == "{}":
+                            step_result = "PASS"
+                            add_pass = 1
 
                     else:
                         #print("통플검증sw이 받은 ->", data)
+                        # 입력 데이터 수집
+                        tmp_res_auth = json.dumps(data, indent=4, ensure_ascii=False)
+                        combined_data_parts.append(tmp_res_auth)
+                        
+                        # do_chcker 호출 1번
                         val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.Server.inSchema[self.cnt],
                                                                                     data, self.flag_opt)
+                        add_pass += key_psss_cnt
+                        add_err += key_error_cnt
+                        
+                        inbound_err_txt = self._to_detail_text(val_text)
+                        if val_result == "FAIL":
+                            step_result = "FAIL"
+                            combined_error_parts.append("[Inbound] " + inbound_err_txt)
 #############################################################################################################
  # 아래 수정중
-
-
 
                         if "Realtime" in str(self.Server.message[self.cnt]):  # realtime 어찌구인지 확인해야함
                             if "Webhook".lower() in str(data).lower():
@@ -201,25 +237,24 @@ class MyApp(QWidget):
                                                     webhook_data[k] = webhook_url
                                         # 3. 만약 그래도 url이 없으면 아예 Webhook 검증을 skip
                                         if webhook_url in [None, '', 'desc', 'none', 'None']:
-                                            # Webhook 검증을 건너뜀
-                                            self.valResult.append("[방어] Webhook URL이 잘못되어 Webhook 검증을 건너뜀.")
+                                            pass  # Webhook 검증 스킵
                                         else:
+                                            # Webhook 데이터 수집 (UI 갱신 없이)
                                             tmp_webhook_data = json.dumps(webhook_data, indent=4, ensure_ascii=False)
-                                            webhook_val_result, webhook_val_text, webhook_key_psss_cnt, webhook_key_error_cnt = json_check_(self.Server.outSchema[-1], webhook_data, self.flag_opt)
-                                            self.icon_update(tmp_webhook_data, webhook_val_result, webhook_val_text)
-                                            self.valResult.append(message_name)
-                                            self.valResult.append("\n" + tmp_webhook_data)
-                                            self.valResult.append(webhook_val_result)
-                                            self.total_error_cnt += webhook_key_error_cnt
-                                            self.total_pass_cnt += webhook_key_psss_cnt
-                                            self.valResult.append(
-                                                "Score : " + str((self.total_pass_cnt / (
-                                                    self.total_pass_cnt + self.total_error_cnt) * 100)))
-                                            self.valResult.append(
-                                                "Score details : " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(
-                                                    self.total_error_cnt) + "(누적 오류 필드 수)\n")
-                                            if "FAIL" in webhook_val_text:  # webhook fail 인 경우 step(?) fail -> icon_update()
-                                                val_text = "FAIL"
+                                            webhook_val_result, webhook_val_text, webhook_key_psss_cnt, webhook_key_error_cnt = json_check_(
+                                                self.Server.outSchema[-1], webhook_data, self.flag_opt
+                                            )
+                                            
+                                            combined_data_parts.append("\n--- Webhook ---\n" + tmp_webhook_data)
+                                            
+                                            add_pass += webhook_key_psss_cnt
+                                            add_err += webhook_key_error_cnt
+                                            
+                                            webhook_err_txt = self._to_detail_text(webhook_val_text)
+                                            if webhook_val_result == "FAIL":
+                                                step_result = "FAIL"
+                                                combined_error_parts.append("[Webhook] " + webhook_err_txt)
+                                
                                 except json.JSONDecodeError as verr:
                                     box = QMessageBox()
                                     box.setIcon(QMessageBox.Critical)
@@ -228,32 +263,48 @@ class MyApp(QWidget):
                                     box.exec_()
                                     return ""
 
-# 위 수정중
-#############################################################################################################
+                    # (1) 스텝 버퍼 저장
+                    data_text = "\n".join(combined_data_parts) if combined_data_parts else "아직 수신된 데이터가 없습니다."
+                    error_text = "\n".join(combined_error_parts) if combined_error_parts else "오류가 없습니다."
+                    self.step_buffers[self.cnt]["data"] = data_text
+                    self.step_buffers[self.cnt]["error"] = error_text
+                    self.step_buffers[self.cnt]["result"] = step_result
+
+                    # (2) 아이콘/툴팁 갱신 (툴팁 길이 줄이려면 data_text 대신 tmp_res_auth만 써도 OK)
+                    if combined_data_parts:
+                        tmp_res_auth = combined_data_parts[0]  # 첫 번째 데이터 사용 (inbound data)
+                    else:
+                        tmp_res_auth = "No data"
+                    self.icon_update(tmp_res_auth, step_result, error_text)
+
+                    # (3) 모니터링 창에는 '한 번만' 붙이기 (입력 + (있다면) Webhook까지 합쳐진 data_text를 보여줌)
                     self.valResult.append(message_name)
-                    tmp_res_auth = json.dumps(data, indent=4, ensure_ascii=False)
-                    self.valResult.append(tmp_res_auth)
+                    self.valResult.append("\n" + data_text)
+                    self.valResult.append(step_result)
 
-                    self.valResult.append(val_result)
-                    self.total_error_cnt += key_error_cnt
-                    self.total_pass_cnt += key_psss_cnt
+                    # (4) 누적 점수 업데이트 (한 번만)
+                    self.total_error_cnt += add_err
+                    self.total_pass_cnt += add_pass
 
-                    # 평가 점수 디스플레이 업데이트
                     self.update_score_display()
-
                     self.valResult.append(
                         "Score : " + str((self.total_pass_cnt / (self.total_pass_cnt + self.total_error_cnt) * 100)))
-                    self.valResult.append("Score details : " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(
-                        self.total_error_cnt) + "(누적 오류 필드 수)\n")
-                    self.icon_update(tmp_res_auth, val_result, val_text)
+                    self.valResult.append(
+                        "Score details : " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(self.total_error_cnt) + "(누적 오류 필드 수)\n")
+                    
                     self.cnt += 1
                 self.realtime_flag = False
 
             elif time_interval > int(self.timeOut_widget.text()) and self.cnt == self.cnt_pre:
                 # self.valResult.append(self.Server.message[self.cnt])
                 message_name = "step " + str(self.cnt + 1) + ": " + self.Server.message[self.cnt]
+                
+                # message missing인 경우에 대해서도 버퍼에 업데이트 -> 오류니까
+                self.step_buffers[self.cnt]["data"] = "아직 수신된 데이터가 없습니다."
+                self.step_buffers[self.cnt]["error"] = "Message Missing!"
+                self.step_buffers[self.cnt]["result"] = "FAIL"
+
                 self.valResult.append(message_name)
-                # self.valResult.append("FAIL")
                 self.valResult.append("Message Missing!")
                 tmp_fields_rqd_cnt, tmp_fields_opt_cnt = timeout_field_finder(self.Server.inSchema[self.cnt])
 
@@ -262,10 +313,8 @@ class MyApp(QWidget):
                     self.total_error_cnt += 1
                 if self.flag_opt:
                     self.total_error_cnt += tmp_fields_opt_cnt
-                # self.total_error_cnt += len(field_finder(self.Server.inSchema[self.cnt]))
 
                 self.total_pass_cnt += 0
-                
                 # 평가 점수 디스플레이 업데이트
                 self.update_score_display()
                 
@@ -633,27 +682,13 @@ class MyApp(QWidget):
 
     ##################### 여기 작업해야함 -> 데이터, 규격, 오류 세가지 내용으로 나눠서 세 버튼에 각각 connect 작업 ###########################
     def show_detail_result(self, row):
-        """데이터 확인 버튼 - 실제 데이터 내용 표시"""
         try:
-            if self.radio_check_flag == "bio":
-                out_data = bioOutMessage[row]
-                api_name = bioMessages[row]
-            elif self.radio_check_flag == "video":
-                out_data = videoOutMessage[row]
-                api_name = videoMessages[row]
-            else:
-                out_data = securityOutMessage[row]
-                api_name = securityMessages[row]
-            
-            # 실제 데이터 내용을 JSON 형태로 보여주기
-            import json
-            data_msg = f"{api_name} API - 실제 메시지 데이터\n\n"
-            data_msg += json.dumps(out_data, indent=2, ensure_ascii=False)
-            
-            CustomDialog(data_msg, f"{api_name} - 실제 데이터")
-            
+            buf = self.step_buffers[row]
+            api_name = self.tableWidget.item(row, 0).text()
+            text = buf["data"] if buf["data"] else "아직 수신된 데이터가 없습니다."
+            CustomDialog(f"{api_name} 메시지 데이터:\n\n{text}", f"{api_name} - 실제 데이터")
         except Exception as e:
-            CustomDialog(f"오류: {str(e)}", "데이터 확인 오류")
+            CustomDialog(f"오류:\n{str(e)}", "데이터 확인 오류")
 
     def show_schema_result(self, row):
         """규격 확인 버튼 - 스키마 구조 표시"""
@@ -698,40 +733,26 @@ class MyApp(QWidget):
         except Exception as e:
             CustomDialog(f"오류: {str(e)}", "규격 확인 오류")
 
+    # 오류확인에 오류 띄워주는 부분
     def show_error_result(self, row):
-        """오류 확인 버튼 - 검증 오류 표시"""
+        """오류 확인 버튼 - 검증 당시의 오류 저장본만 표시(재검증 금지)"""
         try:
-            if self.radio_check_flag == "bio":
-                out_schema = bioOutSchema[row]
-                out_data = bioOutMessage[row]
-                api_name = bioMessages[row]
-            elif self.radio_check_flag == "video":
-                out_schema = videoOutSchema[row]
-                out_data = videoOutMessage[row]
-                api_name = videoMessages[row]
-            else:
-                out_schema = securityOutSchema[row]
-                out_data = securityOutMessage[row]
-                api_name = securityMessages[row]
-            
-            # 실제 검증 수행해서 오류만 표시
-            from core.json_checker_new import data_finder
-            all_field, opt_field = field_finder(out_schema)
-            datas = data_finder(out_data)
-            result, error_msg = check_message_error(all_field, datas, opt_field, True)
-            
-            error_msg_display = f"{api_name} API - 검증 오류 결과\n\n"
-            error_msg_display += f"검증 결과: {result}\n\n"
+            buf = self.step_buffers[row]
+            api_name = self.tableWidget.item(row, 0).text()
+
+            result = buf["result"]
+            error  = buf["error"] if buf["error"] else ("오류가 없습니다." if result=="PASS" else "")
+
+            msg = f"{api_name} API - 검증 오류 결과\n\n검증 결과: {result}\n\n"
             if result == "FAIL":
-                error_msg_display += "오류 세부사항:\n"
-                error_msg_display += error_msg
+                msg += "오류 세부사항:\n" + error
             else:
-                error_msg_display += "오류가 없습니다."
-            
-            CustomDialog(error_msg_display, f"{api_name} - 검증 오류")
-            
+                msg += "오류가 없습니다."
+
+            CustomDialog(msg, f"{api_name} - 검증 오류")
         except Exception as e:
             CustomDialog(f"오류: {str(e)}", "검증 오류")
+
 
     def table_cell_clicked(self, row, col):
         """테이블 셀 클릭 시 호출되는 함수 (결과 아이콘 클릭용으로 유지)"""
@@ -1266,6 +1287,11 @@ class MyApp(QWidget):
 
     def init_win(self):
         self.cnt = 0
+
+        # 버퍼 초기화
+        self.step_buffers = [{"data": "", "result": "", "error": ""} for _ in range(9)]
+
+        # josn 파일 초기화
         for i in range(0, len(self.Server.message)):
             with open(resource_path("spec/"+self.Server.system + "/" + self.Server.message[i] + ".json"), "w",
                       encoding="UTF-8") as out_file:  # 수정해야함
