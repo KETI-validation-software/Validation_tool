@@ -87,9 +87,10 @@ class MyApp(QWidget):
         self.time_pre = 0
         self.cnt_pre = 0
         self.final_report = ""
-        # 스텝별 표시할 버퍼 (요약, 데이터, 오류, 결과)
+        self.valCnt = 0  # 검증 횟수 카운터 추가
+        # 스텝별 표시할 버퍼 (데이터, 오류, 결과)
         self.step_buffers = [
-            {"summary": "", "data": "", "error": "", "result": "PASS"} for _ in range(9)
+            {"data": "", "error": "", "result": "PASS"} for _ in range(9)
         ]
         self.get_setting()
 
@@ -111,6 +112,57 @@ class MyApp(QWidget):
                 return str(val_text)
         return str(val_text)
 
+    def update_table_row(self, row, result, pass_count, error_count, data, error_text):
+        """테이블 행 업데이트 (아이콘, 통과/전체 필드 수 포함)"""
+        if row >= self.tableWidget.rowCount():
+            return
+            
+        # 아이콘 업데이트
+        msg, img = self.icon_update_step(data, result, error_text)
+        
+        # 아이콘을 완전히 중앙에 정렬하기 위해 위젯 사용
+        icon_widget = QWidget()
+        icon_layout = QHBoxLayout()
+        icon_layout.setContentsMargins(0, 0, 0, 0)
+        
+        icon_label = QLabel()
+        icon_label.setPixmap(QIcon(img).pixmap(16, 16))
+        icon_label.setToolTip(msg)
+        icon_label.setAlignment(Qt.AlignCenter)
+        
+        icon_layout.addWidget(icon_label)
+        icon_layout.setAlignment(Qt.AlignCenter)
+        icon_widget.setLayout(icon_layout)
+        
+        self.tableWidget.setCellWidget(row, 1, icon_widget)
+        
+        # 검증 횟수 업데이트 (기본 1회)
+        self.tableWidget.setItem(row, 2, QTableWidgetItem("1"))
+        self.tableWidget.item(row, 2).setTextAlignment(Qt.AlignCenter)
+        
+        # 통과 필드 수 업데이트
+        self.tableWidget.setItem(row, 3, QTableWidgetItem(str(pass_count)))
+        self.tableWidget.item(row, 3).setTextAlignment(Qt.AlignCenter)
+        
+        # 전체 필드 수 업데이트
+        total_fields = pass_count + error_count
+        self.tableWidget.setItem(row, 4, QTableWidgetItem(str(total_fields)))
+        self.tableWidget.item(row, 4).setTextAlignment(Qt.AlignCenter)
+        
+        # 실패 횟수 업데이트
+        self.tableWidget.setItem(row, 5, QTableWidgetItem(str(error_count)))
+        self.tableWidget.item(row, 5).setTextAlignment(Qt.AlignCenter)
+        
+        # 평가 점수 업데이트
+        if total_fields > 0:
+            score = (pass_count / total_fields) * 100
+            self.tableWidget.setItem(row, 6, QTableWidgetItem(f"{score:.1f}%"))
+        else:
+            self.tableWidget.setItem(row, 6, QTableWidgetItem("0%"))
+        self.tableWidget.item(row, 6).setTextAlignment(Qt.AlignCenter)
+        
+        # 메시지 저장 (팝업용)
+        setattr(self, f"step{row+1}_msg", msg)
 
     # 실시간 모니터링용
     def update_view(self):
@@ -275,7 +327,9 @@ class MyApp(QWidget):
                         tmp_res_auth = combined_data_parts[0]  # 첫 번째 데이터 사용 (inbound data)
                     else:
                         tmp_res_auth = "No data"
-                    self.icon_update(tmp_res_auth, step_result, error_text)
+                    
+                    # 테이블 업데이트 (통과/전체 필드 수 포함)
+                    self.update_table_row(self.cnt, step_result, add_pass, add_err, tmp_res_auth, error_text)
 
                     # (3) 모니터링 창에는 '한 번만' 붙이기 (입력 + (있다면) Webhook까지 합쳐진 data_text를 보여줌)
                     self.valResult.append(message_name)
@@ -315,6 +369,7 @@ class MyApp(QWidget):
                     self.total_error_cnt += tmp_fields_opt_cnt
 
                 self.total_pass_cnt += 0
+                
                 # 평가 점수 디스플레이 업데이트
                 self.update_score_display()
                 
@@ -322,7 +377,13 @@ class MyApp(QWidget):
                     "Score : " + str((self.total_pass_cnt / (self.total_pass_cnt + self.total_error_cnt) * 100)))
                 self.valResult.append("Score details : " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(
                     self.total_error_cnt) + "(누적 오류 필드 수)\n")
-                self.icon_update("", "FAIL", "")
+                
+                # 테이블 업데이트 (Message Missing)
+                add_err = tmp_fields_rqd_cnt if tmp_fields_rqd_cnt > 0 else 1
+                if self.flag_opt:
+                    add_err += tmp_fields_opt_cnt
+                self.update_table_row(self.cnt, "FAIL", 0, add_err, "", "Message Missing!")
+                
                 self.cnt += 1
 
             if self.cnt == len(self.Server.message):
@@ -364,7 +425,7 @@ class MyApp(QWidget):
             
         self.pass_count_label.setText(f"통과 필드 수: {self.total_pass_cnt}")
         self.total_count_label.setText(f"전체 필드 수: {total_fields}")
-        self.score_label.setText(f"평가 점수: {score:.1f}%")
+        self.score_label.setText(f"종합 평가 점수: {score:.1f}%")
 
     # 더 정확히는 여기서 데이터 확인의 팝업창 메시지 포맷 형태를 정하고 있음
     def icon_update_step(self, auth_, result_, text_):
@@ -529,16 +590,16 @@ class MyApp(QWidget):
         # 시험 결과 영역을 테이블 크기에 맞게 조정
         contentWidget = QWidget()
         contentWidget.setLayout(self.centerLayout)
-        contentWidget.setMaximumSize(1000, 400)  # 테이블 크기와 동일하게 설정
-        contentWidget.setMinimumSize(900, 300)   # 테이블 최소 크기와 동일하게 설정
+        contentWidget.setMaximumSize(1200, 400)  # 테이블 크기와 동일하게 설정 (증가)
+        contentWidget.setMinimumSize(1100, 300)   # 테이블 최소 크기와 동일하게 설정 (증가)
         contentLayout.addWidget(contentWidget)
 
         # 하단 모니터링 레이아웃 구성 ---------------------------------
         bottomLayout.addWidget(QLabel("수신 메시지 실시간 모니터링"))
         self.valResult = QTextBrowser(self)
         self.valResult.setMaximumHeight(200)  # 높이 제한
-        self.valResult.setMaximumWidth(1000)  # 테이블과 동일한 너비로 설정
-        self.valResult.setMinimumWidth(900)   # 테이블 최소 너비와 동일하게 설정
+        self.valResult.setMaximumWidth(1200)  # 테이블과 동일한 너비로 설정 (증가)
+        self.valResult.setMinimumWidth(1100)   # 테이블 최소 너비와 동일하게 설정 (증가)
         bottomLayout.addWidget(self.valResult)
         
         # 평가 점수를 기존 연동 시스템 위치에 배치
@@ -565,27 +626,29 @@ class MyApp(QWidget):
             self.show()
 
     def init_centerLayout(self):
-        # 표 형태로 변경 (8컬럼으로 확장)
-        self.tableWidget = QTableWidget(9, 8)
-        self.tableWidget.setHorizontalHeaderLabels(["API 명", "결과", "검증 횟수", "실패 횟수", "평가 점수", "메시지 데이터", "메시지 규격", "메시지 오류"])
+        # 표 형태로 변경 (10컬럼으로 확장)
+        self.tableWidget = QTableWidget(9, 10)
+        self.tableWidget.setHorizontalHeaderLabels(["API 명", "결과", "검증 횟수", "통과 필드 수", "전체 필드 수", "실패 횟수", "평가 점수", "메시지 데이터", "메시지 규격", "메시지 오류"])
         self.tableWidget.verticalHeader().setVisible(False)
         self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tableWidget.setSelectionMode(QAbstractItemView.NoSelection)
         self.tableWidget.setIconSize(QtCore.QSize(16, 16))
         
         # 테이블 크기 설정
-        self.tableWidget.setMinimumSize(900, 300)  # 최소 크기 설정
-        self.tableWidget.resize(1000, 400)  # 기본 크기 설정 (여백을 고려해서 50px 증가)
+        self.tableWidget.setMinimumSize(1100, 300)  # 최소 크기 증가
+        self.tableWidget.resize(1200, 400)  # 기본 크기 증가
         
         # 컬럼 너비 설정
-        self.tableWidget.setColumnWidth(0, 280)  # API 명 컬럼 너비 (20px 줄임)
-        self.tableWidget.setColumnWidth(1, 90)   # 결과 컬럼 너비 (10px 줄임)
-        self.tableWidget.setColumnWidth(2, 90)   # 검증 횟수 컬럼 너비 (10px 줄임)
-        self.tableWidget.setColumnWidth(3, 90)   # 실패 횟수 컬럼 너비 (10px 줄임)
-        self.tableWidget.setColumnWidth(4, 90)   # 평가 점수 컬럼 너비 (10px 줄임)
-        self.tableWidget.setColumnWidth(5, 110)  # 상세 결과 컬럼 너비 (20px 줄임)
-        self.tableWidget.setColumnWidth(6, 110)    # 메시지 데이터 컬럼 숨김
-        self.tableWidget.setColumnWidth(7, 110)    # 메시지 규격
+        self.tableWidget.setColumnWidth(0, 240)  # API 명 컬럼 너비 
+        self.tableWidget.setColumnWidth(1, 90)   # 결과 컬럼 너비 
+        self.tableWidget.setColumnWidth(2, 80)   # 검증 횟수 컬럼 너비 
+        self.tableWidget.setColumnWidth(3, 100)   # 통과 필드 수 컬럼 너비 
+        self.tableWidget.setColumnWidth(4, 100)   # 전체 필드 수 컬럼 너비 
+        self.tableWidget.setColumnWidth(5, 100)   # 실패 횟수 컬럼 너비
+        self.tableWidget.setColumnWidth(6, 100)   # 평가 점수 컬럼 너비
+        self.tableWidget.setColumnWidth(7, 120)  # 메시지 데이터 컬럼 너비 
+        self.tableWidget.setColumnWidth(8, 110)  # 메시지 규격 컬럼 너비 
+        self.tableWidget.setColumnWidth(9, 110)  # 메시지 오류 컬럼 너비 
 
 
         # 행 높이 설정
@@ -618,12 +681,18 @@ class MyApp(QWidget):
             # 검증 횟수
             self.tableWidget.setItem(i, 2, QTableWidgetItem("0"))
             self.tableWidget.item(i, 2).setTextAlignment(Qt.AlignCenter)
-            # 실패 횟수
+            # 통과 필드 수
             self.tableWidget.setItem(i, 3, QTableWidgetItem("0"))
             self.tableWidget.item(i, 3).setTextAlignment(Qt.AlignCenter)
-            # 평가 점수
-            self.tableWidget.setItem(i, 4, QTableWidgetItem("0%"))
+            # 전체 필드 수
+            self.tableWidget.setItem(i, 4, QTableWidgetItem("0"))
             self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
+            # 실패 횟수
+            self.tableWidget.setItem(i, 5, QTableWidgetItem("0"))
+            self.tableWidget.item(i, 5).setTextAlignment(Qt.AlignCenter)
+            # 평가 점수
+            self.tableWidget.setItem(i, 6, QTableWidgetItem("0%"))
+            self.tableWidget.item(i, 6).setTextAlignment(Qt.AlignCenter)
             # 상세 결과 버튼 (중앙 정렬을 위한 위젯 컨테이너)
             detail_btn = QPushButton("데이터 확인")
             detail_btn.setMaximumHeight(30)
@@ -638,9 +707,9 @@ class MyApp(QWidget):
             layout.setContentsMargins(0, 0, 0, 0)
             container.setLayout(layout)
             
-            self.tableWidget.setCellWidget(i, 5, container)
+            self.tableWidget.setCellWidget(i, 7, container)
 
-            # 메시지 규격 버튼 (6번 컬럼)
+            # 메시지 규격 버튼 (8번 컬럼)
             schema_btn = QPushButton("규격 확인")
             schema_btn.setMaximumHeight(30)
             schema_btn.setMaximumWidth(100)
@@ -654,9 +723,9 @@ class MyApp(QWidget):
             schema_layout.setContentsMargins(0, 0, 0, 0)
             schema_container.setLayout(schema_layout)
             
-            self.tableWidget.setCellWidget(i, 6, schema_container)
+            self.tableWidget.setCellWidget(i, 8, schema_container)
 
-            # 메시지 오류 버튼 (7번 컬럼)
+            # 메시지 오류 버튼 (9번 컬럼)
             error_btn = QPushButton("오류 확인")
             error_btn.setMaximumHeight(30)
             error_btn.setMaximumWidth(100)
@@ -670,7 +739,7 @@ class MyApp(QWidget):
             error_layout.setContentsMargins(0, 0, 0, 0)
             error_container.setLayout(error_layout)
             
-            self.tableWidget.setCellWidget(i, 7, error_container)
+            self.tableWidget.setCellWidget(i, 9, error_container)
 
         # 결과 컬럼만 클릭 가능하도록 설정 (기존 기능 유지)
         self.tableWidget.cellClicked.connect(self.table_cell_clicked)
@@ -836,13 +905,13 @@ class MyApp(QWidget):
     def group_score(self):
         """평가 점수 박스"""
         sgroup = QGroupBox('평가 점수')
-        sgroup.setMaximumWidth(1000)  # 테이블과 동일한 너비로 설정
-        sgroup.setMinimumWidth(900)   # 테이블 최소 너비와 동일하게 설정
+        sgroup.setMaximumWidth(1200)  # 테이블과 동일한 너비로 설정 (증가)
+        sgroup.setMinimumWidth(1100)   # 테이블 최소 너비와 동일하게 설정 (증가)
         
         # 점수 표시용 레이블들
         self.pass_count_label = QLabel("통과 필드 수: 0")
         self.total_count_label = QLabel("전체 필드 수: 0")  
-        self.score_label = QLabel("평가 점수: 0%")
+        self.score_label = QLabel("종합 평가 점수: 0%")
         
         # 폰트 크기 조정
         font = self.pass_count_label.font()
@@ -891,19 +960,25 @@ class MyApp(QWidget):
                 # 검증 횟수
                 self.tableWidget.setItem(i, 2, QTableWidgetItem("0"))
                 self.tableWidget.item(i, 2).setTextAlignment(Qt.AlignCenter)
-                # 실패 횟수
+                # 통과 필드 수
                 self.tableWidget.setItem(i, 3, QTableWidgetItem("0"))
                 self.tableWidget.item(i, 3).setTextAlignment(Qt.AlignCenter)
-                # 평가 점수
-                self.tableWidget.setItem(i, 4, QTableWidgetItem("0%"))
+                # 전체 필드 수
+                self.tableWidget.setItem(i, 4, QTableWidgetItem("0"))
                 self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
-                # 상세 결과 버튼 (중앙 정렬을 위한 위젯 컨테이너)
+                # 실패 횟수
+                self.tableWidget.setItem(i, 5, QTableWidgetItem("0"))
+                self.tableWidget.item(i, 5).setTextAlignment(Qt.AlignCenter)
+                # 평가 점수
+                self.tableWidget.setItem(i, 6, QTableWidgetItem("0%"))
+                self.tableWidget.item(i, 6).setTextAlignment(Qt.AlignCenter)
+                
+                # 메시지 데이터 버튼 (7번 컬럼) - 데이터 확인
                 detail_btn = QPushButton("데이터 확인")
                 detail_btn.setMaximumHeight(30)
-                detail_btn.setMaximumWidth(120)  # 버튼 최대 너비 제한
+                detail_btn.setMaximumWidth(120)
                 detail_btn.clicked.connect(lambda checked, row=i: self.show_detail_result(row))
                 
-                # 버튼을 중앙에 배치하기 위한 위젯과 레이아웃
                 container = QWidget()
                 layout = QHBoxLayout()
                 layout.addWidget(detail_btn)
@@ -911,15 +986,14 @@ class MyApp(QWidget):
                 layout.setContentsMargins(0, 0, 0, 0)
                 container.setLayout(layout)
                 
-                self.tableWidget.setCellWidget(i, 5, container)
+                self.tableWidget.setCellWidget(i, 7, container)
 
-                # 메시지 규격 버튼 (6번 컬럼)
+                # 메시지 규격 버튼 (8번 컬럼)
                 schema_btn = QPushButton("규격 확인")
                 schema_btn.setMaximumHeight(30)
                 schema_btn.setMaximumWidth(100)
                 schema_btn.clicked.connect(lambda checked, row=i: self.show_schema_result(row))
                 
-                # 버튼을 중앙에 배치하기 위한 위젯과 레이아웃
                 schema_container = QWidget()
                 schema_layout = QHBoxLayout()
                 schema_layout.addWidget(schema_btn)
@@ -927,15 +1001,14 @@ class MyApp(QWidget):
                 schema_layout.setContentsMargins(0, 0, 0, 0)
                 schema_container.setLayout(schema_layout)
                 
-                self.tableWidget.setCellWidget(i, 6, schema_container)
+                self.tableWidget.setCellWidget(i, 8, schema_container)
 
-                # 메시지 오류 버튼 (7번 컬럼)
+                # 메시지 오류 버튼 (9번 컬럼)
                 error_btn = QPushButton("오류 확인")
                 error_btn.setMaximumHeight(30)
                 error_btn.setMaximumWidth(100)
                 error_btn.clicked.connect(lambda checked, row=i: self.show_error_result(row))
                 
-                # 버튼을 중앙에 배치하기 위한 위젯과 레이아웃
                 error_container = QWidget()
                 error_layout = QHBoxLayout()
                 error_layout.addWidget(error_btn)
@@ -943,7 +1016,7 @@ class MyApp(QWidget):
                 error_layout.setContentsMargins(0, 0, 0, 0)
                 error_container.setLayout(error_layout)
                 
-                self.tableWidget.setCellWidget(i, 7, error_container)
+                self.tableWidget.setCellWidget(i, 9, error_container)
 
     def g1_radio2_checked(self, checked):
         if checked:
@@ -974,19 +1047,25 @@ class MyApp(QWidget):
                 # 검증 횟수
                 self.tableWidget.setItem(i, 2, QTableWidgetItem("0"))
                 self.tableWidget.item(i, 2).setTextAlignment(Qt.AlignCenter)
-                # 실패 횟수
+                # 통과 필드 수
                 self.tableWidget.setItem(i, 3, QTableWidgetItem("0"))
                 self.tableWidget.item(i, 3).setTextAlignment(Qt.AlignCenter)
-                # 평가 점수
-                self.tableWidget.setItem(i, 4, QTableWidgetItem("0%"))
+                # 전체 필드 수
+                self.tableWidget.setItem(i, 4, QTableWidgetItem("0"))
                 self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
-                # 상세 결과 버튼 (중앙 정렬을 위한 위젯 컨테이너)
+                # 실패 횟수
+                self.tableWidget.setItem(i, 5, QTableWidgetItem("0"))
+                self.tableWidget.item(i, 5).setTextAlignment(Qt.AlignCenter)
+                # 평가 점수
+                self.tableWidget.setItem(i, 6, QTableWidgetItem("0%"))
+                self.tableWidget.item(i, 6).setTextAlignment(Qt.AlignCenter)
+                
+                # 메시지 데이터 버튼 (7번 컬럼) - 데이터 확인
                 detail_btn = QPushButton("데이터 확인")
                 detail_btn.setMaximumHeight(30)
-                detail_btn.setMaximumWidth(120)  # 버튼 최대 너비 제한
+                detail_btn.setMaximumWidth(120)
                 detail_btn.clicked.connect(lambda checked, row=i: self.show_detail_result(row))
                 
-                # 버튼을 중앙에 배치하기 위한 위젯과 레이아웃
                 container = QWidget()
                 layout = QHBoxLayout()
                 layout.addWidget(detail_btn)
@@ -994,15 +1073,14 @@ class MyApp(QWidget):
                 layout.setContentsMargins(0, 0, 0, 0)
                 container.setLayout(layout)
                 
-                self.tableWidget.setCellWidget(i, 5, container)
+                self.tableWidget.setCellWidget(i, 7, container)
 
-                # 메시지 규격 버튼 (6번 컬럼)
+                # 메시지 규격 버튼 (8번 컬럼)
                 schema_btn = QPushButton("규격 확인")
                 schema_btn.setMaximumHeight(30)
                 schema_btn.setMaximumWidth(100)
                 schema_btn.clicked.connect(lambda checked, row=i: self.show_schema_result(row))
                 
-                # 버튼을 중앙에 배치하기 위한 위젯과 레이아웃
                 schema_container = QWidget()
                 schema_layout = QHBoxLayout()
                 schema_layout.addWidget(schema_btn)
@@ -1010,15 +1088,14 @@ class MyApp(QWidget):
                 schema_layout.setContentsMargins(0, 0, 0, 0)
                 schema_container.setLayout(schema_layout)
                 
-                self.tableWidget.setCellWidget(i, 6, schema_container)
+                self.tableWidget.setCellWidget(i, 8, schema_container)
 
-                # 메시지 오류 버튼 (7번 컬럼)
+                # 메시지 오류 버튼 (9번 컬럼)
                 error_btn = QPushButton("오류 확인")
                 error_btn.setMaximumHeight(30)
                 error_btn.setMaximumWidth(100)
                 error_btn.clicked.connect(lambda checked, row=i: self.show_error_result(row))
                 
-                # 버튼을 중앙에 배치하기 위한 위젯과 레이아웃
                 error_container = QWidget()
                 error_layout = QHBoxLayout()
                 error_layout.addWidget(error_btn)
@@ -1026,7 +1103,7 @@ class MyApp(QWidget):
                 error_layout.setContentsMargins(0, 0, 0, 0)
                 error_container.setLayout(error_layout)
                 
-                self.tableWidget.setCellWidget(i, 7, error_container)
+                self.tableWidget.setCellWidget(i, 9, error_container)
 
     def g1_radio3_checked(self, checked):
         if checked:
@@ -1057,19 +1134,25 @@ class MyApp(QWidget):
                 # 검증 횟수
                 self.tableWidget.setItem(i, 2, QTableWidgetItem("0"))
                 self.tableWidget.item(i, 2).setTextAlignment(Qt.AlignCenter)
-                # 실패 횟수
+                # 통과 필드 수
                 self.tableWidget.setItem(i, 3, QTableWidgetItem("0"))
                 self.tableWidget.item(i, 3).setTextAlignment(Qt.AlignCenter)
-                # 평가 점수
-                self.tableWidget.setItem(i, 4, QTableWidgetItem("0%"))
+                # 전체 필드 수
+                self.tableWidget.setItem(i, 4, QTableWidgetItem("0"))
                 self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
-                # 상세 결과 버튼 (중앙 정렬을 위한 위젯 컨테이너)
+                # 실패 횟수
+                self.tableWidget.setItem(i, 5, QTableWidgetItem("0"))
+                self.tableWidget.item(i, 5).setTextAlignment(Qt.AlignCenter)
+                # 평가 점수
+                self.tableWidget.setItem(i, 6, QTableWidgetItem("0%"))
+                self.tableWidget.item(i, 6).setTextAlignment(Qt.AlignCenter)
+                
+                # 메시지 데이터 버튼 (7번 컬럼) - 데이터 확인
                 detail_btn = QPushButton("데이터 확인")
                 detail_btn.setMaximumHeight(30)
-                detail_btn.setMaximumWidth(120)  # 버튼 최대 너비 제한
+                detail_btn.setMaximumWidth(120)
                 detail_btn.clicked.connect(lambda checked, row=i: self.show_detail_result(row))
                 
-                # 버튼을 중앙에 배치하기 위한 위젯과 레이아웃
                 container = QWidget()
                 layout = QHBoxLayout()
                 layout.addWidget(detail_btn)
@@ -1077,15 +1160,37 @@ class MyApp(QWidget):
                 layout.setContentsMargins(0, 0, 0, 0)
                 container.setLayout(layout)
                 
-                self.tableWidget.setCellWidget(i, 5, container)
+                self.tableWidget.setCellWidget(i, 7, container)
 
-                # 메시지 규격 버튼 (6번 컬럼)
+                # 메시지 규격 버튼 (8번 컬럼)
                 schema_btn = QPushButton("규격 확인")
                 schema_btn.setMaximumHeight(30)
                 schema_btn.setMaximumWidth(100)
                 schema_btn.clicked.connect(lambda checked, row=i: self.show_schema_result(row))
                 
-                # 버튼을 중앙에 배치하기 위한 위젯과 레이아웃
+                schema_container = QWidget()
+                schema_layout = QHBoxLayout()
+                schema_layout.addWidget(schema_btn)
+                schema_layout.setAlignment(Qt.AlignCenter)
+                schema_layout.setContentsMargins(0, 0, 0, 0)
+                schema_container.setLayout(schema_layout)
+                
+                self.tableWidget.setCellWidget(i, 8, schema_container)
+
+                # 메시지 오류 버튼 (9번 컬럼)
+                error_btn = QPushButton("오류 확인")
+                error_btn.setMaximumHeight(30)
+                error_btn.setMaximumWidth(100)
+                error_btn.clicked.connect(lambda checked, row=i: self.show_error_result(row))
+                
+                error_container = QWidget()
+                error_layout = QHBoxLayout()
+                error_layout.addWidget(error_btn)
+                error_layout.setAlignment(Qt.AlignCenter)
+                error_layout.setContentsMargins(0, 0, 0, 0)
+                error_container.setLayout(error_layout)
+                
+                self.tableWidget.setCellWidget(i, 9, error_container)
                 schema_container = QWidget()
                 schema_layout = QHBoxLayout()
                 schema_layout.addWidget(schema_btn)
