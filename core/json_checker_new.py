@@ -3,7 +3,7 @@ import pandas as pd
 import json_checker
 
 
-# 필드 개수 세서 반환하는 함수
+# 필드 개수 세서 반환하는 함수 (필수/선택 필드 추출)
 def field_finder(schema):
 
     schema = pd.DataFrame([schema])  # , index=[0])
@@ -100,7 +100,7 @@ def field_finder(schema):
 
     return all_field, fields_opt
 
-
+# 실제 데이터에서 필드 추출하기
 def data_finder(schema_):
 
     dataframe_flag = True
@@ -253,6 +253,9 @@ def check_message_error(all_field, datas, opt_field, flag_opt):
         return "FAIL", error_msg
 
 # 결과 반환하는 부분 -> 여기를 3단 분리 -> 일단 남겨두기는 함
+# 지금 문제가 모니터링용 함수 호출 1번, 버튼 눌렀을 때 용 함수 호출 1번(2번째 호출) 이렇게 일어나는데
+# -> 두번째 호출에서 첫번째 호출로 인해 결과가 덮어씌워지는 문제가 발생해서 결과가 이상한 경우 발생함
+# deepcopy
 def do_checker(all_field, datas, opt_field ,flag_opt):  # flag_opt => platformVal_none.py, systemVal_none.py 에서!P
     # type and name error
     check_list = []
