@@ -25,7 +25,7 @@ def resource_path(relative_path):
 
     return os.path.join(base_path, relative_path)
 
-
+# pass/fail 판별
 def json_check_(schema, data, flag):
     all_field, opt_field = field_finder(schema)
     all_data = data_finder(data)
