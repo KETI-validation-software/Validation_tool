@@ -20,7 +20,10 @@ url = "https://127.0.0.1:8008"
 
 #test-opt
 '''
-opt2의 메시지의 settings 내 정보 보고 작성, 메시지 순차별로 
+opt2의 메시지의 settings 내 정보 보고 작성, 메시지 순차별로
+trans_protocol : 메시지별 실시간 송수신 메시지 여부, None-실시간 아님, LongPolling, WebHook은 설정에 따라 동작 
+time_out : 메시지별 timeout 설정 시간
+num_retries : 메시지별 메시지 검증 횟수
 '''
 trans_protocol = [None,None,None,None,None,None,"LongPolling",None,None] #"LongPolling" #WebHook
 time_out = [5000,5000,5000,5000,5000,5000,5000,5000,5000]
