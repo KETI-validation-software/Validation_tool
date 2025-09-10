@@ -17,10 +17,6 @@ warnings.filterwarnings('ignore')
 
 from spec.video.videoRequest import videoMessages, videoOutMessage, videoInMessage
 from spec.video.videoSchema import videoInSchema, videoOutSchema, videoWebhookSchema
-from spec.bio.bioRequest import bioMessages, bioOutMessage, bioInMessage
-from spec.bio.bioSchema import  bioInSchema, bioOutSchema, bioWebhookSchema
-from spec.security.securityRequest import securityMessages, securityOutMessage, securityInMessage
-from spec.security.securitySchema import securityInSchema, securityOutSchema, securityWebhookSchema
 from urllib.parse import urlparse
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QIcon, QFontDatabase, QFont
@@ -65,7 +61,7 @@ class MyApp(QWidget):
         self.embedded = embedded
         self.webhook_res = None
         self.res = None
-        self.radio_check_flag = False
+        self.radio_check_flag = "video"  # 영상보안 시스템으로 고정
         self.img_pass = resource_path("assets/image/green.png")
         self.img_fail = resource_path("assets/image/red.png")
         self.img_none = resource_path("assets/image/black.png")
@@ -852,15 +848,10 @@ class MyApp(QWidget):
         
         self.g1_radio1 = QRadioButton('영상보안 시스템')
         self.g1_radio1.toggled.connect(self.g1_radio1_checked)
-        self.g1_radio2 = QRadioButton('바이오인식 기반 출입통제 시스템')
-        self.g1_radio2.toggled.connect(self.g1_radio2_checked)
-        self.g1_radio3 = QRadioButton('보안용 센서 시스템')
-        self.g1_radio3.toggled.connect(self.g1_radio3_checked)
+        self.g1_radio1.setChecked(True)  # 기본 선택
 
         vbox = QVBoxLayout()
         vbox.addWidget(self.g1_radio1)
-        vbox.addWidget(self.g1_radio2)
-        vbox.addWidget(self.g1_radio3)
         rgroup.setLayout(vbox)
         return rgroup
 
@@ -971,15 +962,8 @@ class MyApp(QWidget):
     def show_schema_result(self, row):
         """규격 확인 버튼 - 스키마 구조 표시"""
         try:
-            if self.radio_check_flag == "bio":
-                out_schema = bioOutSchema[row]
-                api_name = bioMessages[row]
-            elif self.radio_check_flag == "video":
-                out_schema = videoOutSchema[row]
-                api_name = videoMessages[row]
-            else:
-                out_schema = securityOutSchema[row]
-                api_name = securityMessages[row]
+            out_schema = videoOutSchema[row]
+            api_name = videoMessages[row]
             
             # 스키마 구조를 문자열로 변환해서 보여주기
             def schema_to_string(schema, indent=0):
@@ -1053,306 +1037,7 @@ class MyApp(QWidget):
             self.system = "video"
             self.final_report = "영상보안 시스템-물리보안 통합플랫폼(가상) 검증 결과"+"\n"
             
-            # 테이블 업데이트
-            self.step_names = [
-                "Authentication", "Capabilities", "CameraProfiles", "StoredVideoInfos",
-                "StreamURLs", "ReplayURL", "RealtimeVideoEventInfos",
-                "StoredVideoEventInfos", "StoredObjectAnalyticsInfos"
-            ]
-            
-            for i, name in enumerate(self.step_names):
-                if i < self.tableWidget.rowCount():
-                    # API 명 업데이트
-                    self.tableWidget.setItem(i, 0, QTableWidgetItem(f"{i+1}. {name}"))
-                    
-                    # 결과 아이콘 리셋 (위젯으로 중앙 정렬)
-                    icon_widget = QWidget()
-                    icon_layout = QHBoxLayout()
-                    icon_layout.setContentsMargins(0, 0, 0, 0)
-                    
-                    icon_label = QLabel()
-                    icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
-                    icon_label.setAlignment(Qt.AlignCenter)
-                    
-                    icon_layout.addWidget(icon_label)
-                    icon_layout.setAlignment(Qt.AlignCenter)
-                    icon_widget.setLayout(icon_layout)
-                    
-                    self.tableWidget.setCellWidget(i, 1, icon_widget)
-                    
-                    # 카운트 리셋
-                    self.tableWidget.setItem(i, 2, QTableWidgetItem("0"))
-                    self.tableWidget.item(i, 2).setTextAlignment(Qt.AlignCenter)
-                    # 통과 필드 수
-                    self.tableWidget.setItem(i, 3, QTableWidgetItem("0"))
-                    self.tableWidget.item(i, 3).setTextAlignment(Qt.AlignCenter)
-                    # 전체 필드 수
-                    self.tableWidget.setItem(i, 4, QTableWidgetItem("0"))
-                    self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
-                    # 실패 횟수
-                    self.tableWidget.setItem(i, 5, QTableWidgetItem("0"))
-                    self.tableWidget.item(i, 5).setTextAlignment(Qt.AlignCenter)
-                    # 평가 점수
-                    self.tableWidget.setItem(i, 6, QTableWidgetItem("0%"))
-                    self.tableWidget.item(i, 6).setTextAlignment(Qt.AlignCenter)
-                    
-                    # 메시지 데이터 버튼 (7번 컬럼) - 데이터 확인
-                    detail_btn = QPushButton("데이터 확인")
-                    detail_btn.setMaximumHeight(30)
-                    detail_btn.setMaximumWidth(120)
-                    detail_btn.clicked.connect(lambda checked, row=i: self.show_detail_result(row))
-                    
-                    btn_widget = QWidget()
-                    btn_layout = QHBoxLayout()
-                    btn_layout.setContentsMargins(0, 0, 0, 0)
-                    btn_layout.addWidget(detail_btn)
-                    btn_layout.setAlignment(Qt.AlignCenter)
-                    btn_widget.setLayout(btn_layout)
-                    
-                    self.tableWidget.setCellWidget(i, 7, btn_widget)
-
-                    # 메시지 규격 버튼 (8번 컬럼)
-                    schema_btn = QPushButton("규격 확인")
-                    schema_btn.setMaximumHeight(30)
-                    schema_btn.setMaximumWidth(100)
-                    schema_btn.clicked.connect(lambda checked, row=i: self.show_schema_result(row))
-                    
-                    schema_widget = QWidget()
-                    schema_layout = QHBoxLayout()
-                    schema_layout.setContentsMargins(0, 0, 0, 0)
-                    schema_layout.addWidget(schema_btn)
-                    schema_layout.setAlignment(Qt.AlignCenter)
-                    schema_widget.setLayout(schema_layout)
-                    
-                    self.tableWidget.setCellWidget(i, 8, schema_widget)
-
-                    # 메시지 오류 버튼 (9번 컬럼)
-                    error_btn = QPushButton("오류 확인")
-                    error_btn.setMaximumHeight(30)
-                    error_btn.setMaximumWidth(100)
-                    error_btn.clicked.connect(lambda checked, row=i: self.show_error_result(row))
-                    
-                    error_widget = QWidget()
-                    error_layout = QHBoxLayout()
-                    error_layout.setContentsMargins(0, 0, 0, 0)
-                    error_layout.addWidget(error_btn)
-                    error_layout.setAlignment(Qt.AlignCenter)
-                    error_widget.setLayout(error_layout)
-                    
-                    self.tableWidget.setCellWidget(i, 9, error_widget)
-
-    def g1_radio2_checked(self, checked):
-        if checked:
-            self.radio_check_flag = "bio"
-            self.message = bioMessages
-            self.inMessage = bioInMessage
-            self.outMessage = bioOutMessage
-            self.inSchema = bioInSchema
-            self.outSchema = bioOutSchema
-            self.webhookSchema = bioWebhookSchema
-            self.system = "bio"
-            self.final_report = "바이오인식 기반 출입통제 시스템-물리보안 통합플랫폼(가상) 검증 결과"+"\n"
-            
-            # 테이블 업데이트
-            self.step_names = [
-                "Authentication", "Capabilities", "DoorProfiles", "AccessUserInfos",
-                "RealtimeVerifEventInfos", "StoredVerifEventInfos", "RealtimeDoorStatus",
-                "DoorControl", ""
-            ]
-            
-            for i, name in enumerate(self.step_names):
-                if i < self.tableWidget.rowCount():
-                    if name:  # 빈 이름이 아닌 경우만
-                        # API 명 업데이트
-                        self.tableWidget.setItem(i, 0, QTableWidgetItem(f"{i+1}. {name}"))
-                        
-                        # 결과 아이콘 리셋
-                        icon_widget = QWidget()
-                        icon_layout = QHBoxLayout()
-                        icon_layout.setContentsMargins(0, 0, 0, 0)
-                        
-                        icon_label = QLabel()
-                        icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
-                        icon_label.setAlignment(Qt.AlignCenter)
-                        
-                        icon_layout.addWidget(icon_label)
-                        icon_layout.setAlignment(Qt.AlignCenter)
-                        icon_widget.setLayout(icon_layout)
-                        
-                        self.tableWidget.setCellWidget(i, 1, icon_widget)
-                        
-                        # 카운트 리셋
-                        self.tableWidget.setItem(i, 2, QTableWidgetItem("0"))
-                        self.tableWidget.item(i, 2).setTextAlignment(Qt.AlignCenter)
-                        # 통과 필드 수
-                        self.tableWidget.setItem(i, 3, QTableWidgetItem("0"))
-                        self.tableWidget.item(i, 3).setTextAlignment(Qt.AlignCenter)
-                        # 전체 필드 수
-                        self.tableWidget.setItem(i, 4, QTableWidgetItem("0"))
-                        self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
-                        # 실패 횟수
-                        self.tableWidget.setItem(i, 5, QTableWidgetItem("0"))
-                        self.tableWidget.item(i, 5).setTextAlignment(Qt.AlignCenter)
-                        # 평가 점수
-                        self.tableWidget.setItem(i, 6, QTableWidgetItem("0%"))
-                        self.tableWidget.item(i, 6).setTextAlignment(Qt.AlignCenter)
-                        
-                        # 메시지 데이터 버튼 (7번 컬럼) - 데이터 확인
-                        detail_btn = QPushButton("데이터 확인")
-                        detail_btn.setMaximumHeight(30)
-                        detail_btn.setMaximumWidth(120)
-                        detail_btn.clicked.connect(lambda checked, row=i: self.show_detail_result(row))
-                        
-                        btn_widget = QWidget()
-                        btn_layout = QHBoxLayout()
-                        btn_layout.setContentsMargins(0, 0, 0, 0)
-                        btn_layout.addWidget(detail_btn)
-                        btn_layout.setAlignment(Qt.AlignCenter)
-                        btn_widget.setLayout(btn_layout)
-                        
-                        self.tableWidget.setCellWidget(i, 7, btn_widget)
-
-                        # 메시지 규격 버튼 (8번 컬럼)
-                        schema_btn = QPushButton("규격 확인")
-                        schema_btn.setMaximumHeight(30)
-                        schema_btn.setMaximumWidth(100)
-                        schema_btn.clicked.connect(lambda checked, row=i: self.show_schema_result(row))
-                        
-                        schema_widget = QWidget()
-                        schema_layout = QHBoxLayout()
-                        schema_layout.setContentsMargins(0, 0, 0, 0)
-                        schema_layout.addWidget(schema_btn)
-                        schema_layout.setAlignment(Qt.AlignCenter)
-                        schema_widget.setLayout(schema_layout)
-                        
-                        self.tableWidget.setCellWidget(i, 8, schema_widget)
-
-                        # 메시지 오류 버튼 (9번 컬럼)
-                        error_btn = QPushButton("오류 확인")
-                        error_btn.setMaximumHeight(30)
-                        error_btn.setMaximumWidth(100)
-                        error_btn.clicked.connect(lambda checked, row=i: self.show_error_result(row))
-                        
-                        error_widget = QWidget()
-                        error_layout = QHBoxLayout()
-                        error_layout.setContentsMargins(0, 0, 0, 0)
-                        error_layout.addWidget(error_btn)
-                        error_layout.setAlignment(Qt.AlignCenter)
-                        error_widget.setLayout(error_layout)
-                        
-                        self.tableWidget.setCellWidget(i, 9, error_widget)
-                    else:
-                        # 빈 행 처리
-                        for j in range(10):
-                            self.tableWidget.setItem(i, j, QTableWidgetItem(""))
-
-    def g1_radio3_checked(self, checked):
-        if checked:
-            self.radio_check_flag = "security"
-            self.message = securityMessages
-            self.inMessage = securityInMessage
-            self.outMessage = securityOutMessage
-            self.inSchema = securityInSchema
-            self.outSchema = securityOutSchema
-            self.webhookSchema = securityWebhookSchema
-            self.system = "security"
-            self.final_report = "보안용 센서 시스템-물리보안 통합플랫폼(가상) 검증 결과"+"\n"
-            
-            # 테이블 업데이트
-            self.step_names = [
-                "Authentication", "Capabilities", "SensorDeviceProfiles", "RealtimeSensorData",
-                "RealtimeSensorEventInfos", "StoredSensorEventInfos", "SensorDeviceControl",
-                "", ""
-            ]
-            
-            for i, name in enumerate(self.step_names):
-                if i < self.tableWidget.rowCount():
-                    if name:  # 빈 이름이 아닌 경우만
-                        # API 명 업데이트
-                        self.tableWidget.setItem(i, 0, QTableWidgetItem(f"{i+1}. {name}"))
-                        
-                        # 결과 아이콘 리셋
-                        icon_widget = QWidget()
-                        icon_layout = QHBoxLayout()
-                        icon_layout.setContentsMargins(0, 0, 0, 0)
-                        
-                        icon_label = QLabel()
-                        icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
-                        icon_label.setAlignment(Qt.AlignCenter)
-                        
-                        icon_layout.addWidget(icon_label)
-                        icon_layout.setAlignment(Qt.AlignCenter)
-                        icon_widget.setLayout(icon_layout)
-                        
-                        self.tableWidget.setCellWidget(i, 1, icon_widget)
-                        
-                        # 카운트 리셋
-                        self.tableWidget.setItem(i, 2, QTableWidgetItem("0"))
-                        self.tableWidget.item(i, 2).setTextAlignment(Qt.AlignCenter)
-                        # 통과 필드 수
-                        self.tableWidget.setItem(i, 3, QTableWidgetItem("0"))
-                        self.tableWidget.item(i, 3).setTextAlignment(Qt.AlignCenter)
-                        # 전체 필드 수
-                        self.tableWidget.setItem(i, 4, QTableWidgetItem("0"))
-                        self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
-                        # 실패 횟수
-                        self.tableWidget.setItem(i, 5, QTableWidgetItem("0"))
-                        self.tableWidget.item(i, 5).setTextAlignment(Qt.AlignCenter)
-                        # 평가 점수
-                        self.tableWidget.setItem(i, 6, QTableWidgetItem("0%"))
-                        self.tableWidget.item(i, 6).setTextAlignment(Qt.AlignCenter)
-                        
-                        # 메시지 데이터 버튼 (7번 컬럼) - 데이터 확인
-                        detail_btn = QPushButton("데이터 확인")
-                        detail_btn.setMaximumHeight(30)
-                        detail_btn.setMaximumWidth(120)
-                        detail_btn.clicked.connect(lambda checked, row=i: self.show_detail_result(row))
-                        
-                        btn_widget = QWidget()
-                        btn_layout = QHBoxLayout()
-                        btn_layout.setContentsMargins(0, 0, 0, 0)
-                        btn_layout.addWidget(detail_btn)
-                        btn_layout.setAlignment(Qt.AlignCenter)
-                        btn_widget.setLayout(btn_layout)
-                        
-                        self.tableWidget.setCellWidget(i, 7, btn_widget)
-
-                        # 메시지 규격 버튼 (8번 컬럼)
-                        schema_btn = QPushButton("규격 확인")
-                        schema_btn.setMaximumHeight(30)
-                        schema_btn.setMaximumWidth(100)
-                        schema_btn.clicked.connect(lambda checked, row=i: self.show_schema_result(row))
-                        
-                        schema_widget = QWidget()
-                        schema_layout = QHBoxLayout()
-                        schema_layout.setContentsMargins(0, 0, 0, 0)
-                        schema_layout.addWidget(schema_btn)
-                        schema_layout.setAlignment(Qt.AlignCenter)
-                        schema_widget.setLayout(schema_layout)
-                        
-                        self.tableWidget.setCellWidget(i, 8, schema_widget)
-
-                        # 메시지 오류 버튼 (9번 컬럼)
-                        error_btn = QPushButton("오류 확인")
-                        error_btn.setMaximumHeight(30)
-                        error_btn.setMaximumWidth(100)
-                        error_btn.clicked.connect(lambda checked, row=i: self.show_error_result(row))
-                        
-                        error_widget = QWidget()
-                        error_layout = QHBoxLayout()
-                        error_layout.setContentsMargins(0, 0, 0, 0)
-                        error_layout.addWidget(error_btn)
-                        error_layout.setAlignment(Qt.AlignCenter)
-                        error_widget.setLayout(error_layout)
-                        
-                        self.tableWidget.setCellWidget(i, 9, error_widget)
-                    else:
-                        # 빈 행 처리
-                        for j in range(10):
-                            self.tableWidget.setItem(i, j, QTableWidgetItem(""))
-                        
-                        btn_widget = QWidget()
-                        btn_layout = QHBoxLayout()
+            # 테이블은 이미 영상보안 시스템 데이터로 초기화되어 있으므로 재설정하지 않음
 
     def g2_radio_checked(self, checked):
         if checked:
@@ -1394,9 +1079,8 @@ class MyApp(QWidget):
             msg.setWindowTitle("Error")
             msg.exec_()
         else:
-            # system_type self.system 으로 바꿀것 #tylee
-            system_type = "video" if self.g1_radio1.isChecked() else "bio" if self.g1_radio2.isChecked() else "security"
-            json_to_data(system_type)
+            # system_type를 video로 고정
+            json_to_data("video")
             self.sbtn.setDisabled(True)
             self.stop_btn.setEnabled(True)
 
@@ -1478,13 +1162,8 @@ class MyApp(QWidget):
     def get_setting(self):
         self.setting_variables = QSettings('My App', 'Variable')
 
-        self.system = self.setting_variables.value('system')
-        if self.system == "video":
-            self.g1_radio1.setChecked(True)
-        elif self.system == "bio":
-            self.g1_radio2.setChecked(True)
-        elif self.system == "security":
-            self.g1_radio3.setChecked(True)
+        self.system = "video"  # 영상보안 시스템으로 고정
+        # 라디오 버튼은 이미 group1()에서 setChecked(True)로 설정됨
 
         self.r2 = self.setting_variables.value('auth')
         if self.r2 == "D":
