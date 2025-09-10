@@ -30,7 +30,7 @@ warnings.filterwarnings('ignore')
 #  from charset_normalizer import md__mypyc  # A library that helps you read text from an unknown charset encoding
 
 
-# 통합된 상세 내용 확인 팝업창 클래스
+# 통합된 상세 내용 확인 팝업창 클래스 (세가지 내용 다 들어가있어야함)
 class CombinedDetailDialog(QDialog):
     def __init__(self, api_name, step_buffer, schema_data):
         super().__init__()
