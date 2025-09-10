@@ -1191,30 +1191,6 @@ class MyApp(QWidget):
                 error_container.setLayout(error_layout)
                 
                 self.tableWidget.setCellWidget(i, 9, error_container)
-                schema_container = QWidget()
-                schema_layout = QHBoxLayout()
-                schema_layout.addWidget(schema_btn)
-                schema_layout.setAlignment(Qt.AlignCenter)
-                schema_layout.setContentsMargins(0, 0, 0, 0)
-                schema_container.setLayout(schema_layout)
-                
-                self.tableWidget.setCellWidget(i, 6, schema_container)
-
-                # 메시지 오류 버튼 (7번 컬럼)
-                error_btn = QPushButton("오류 확인")
-                error_btn.setMaximumHeight(30)
-                error_btn.setMaximumWidth(100)
-                error_btn.clicked.connect(lambda checked, row=i: self.show_error_result(row))
-                
-                # 버튼을 중앙에 배치하기 위한 위젯과 레이아웃
-                error_container = QWidget()
-                error_layout = QHBoxLayout()
-                error_layout.addWidget(error_btn)
-                error_layout.setAlignment(Qt.AlignCenter)
-                error_layout.setContentsMargins(0, 0, 0, 0)
-                error_container.setLayout(error_layout)
-                
-                self.tableWidget.setCellWidget(i, 7, error_container)
 
     def g2_radio_checked(self, checked):
         if checked:
