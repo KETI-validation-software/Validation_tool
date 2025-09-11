@@ -17,13 +17,9 @@ warnings.filterwarnings('ignore')
 
 from spec.video.videoRequest import videoMessages, videoOutMessage, videoInMessage
 from spec.video.videoSchema import videoInSchema, videoOutSchema, videoWebhookSchema
-from spec.bio.bioRequest import bioMessages, bioOutMessage, bioInMessage
-from spec.bio.bioSchema import  bioInSchema, bioOutSchema, bioWebhookSchema
-from spec.security.securityRequest import securityMessages, securityOutMessage, securityInMessage
-from spec.security.securitySchema import securityInSchema, securityOutSchema, securityWebhookSchema
 from urllib.parse import urlparse
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QIcon, QFontDatabase, QFont
+from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor
 from PyQt5.QtCore import *
 from api.webhook_api import WebhookThread
 from core.functions import BearerAuth, json_check_, field_finder, save_result, resource_path, set_auth, json_to_data, timeout_field_finder
@@ -33,8 +29,114 @@ import config.CONSTANTS as CONSTANTS
 import traceback
 
 #  from charset_normalizer import md__mypyc  # A library that helps you read text from an unknown charset encoding
-import warnings
-warnings.filterwarnings('ignore')
+
+
+# 통합된 상세 내용 확인 팝업창 클래스
+class CombinedDetailDialog(QDialog):
+    def __init__(self, api_name, step_buffer, schema_data):
+        super().__init__()
+        
+        self.setWindowTitle(f"{api_name} - 통합 상세 정보")
+        self.setGeometry(400, 300, 1200, 600)  # 가로로 넓게 설정
+        self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
+        self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
+
+        # 전체 레이아웃
+        main_layout = QVBoxLayout()
+        
+        # 상단 제목
+        title_label = QLabel(f"{api_name} API 상세 정보")
+        title_font = title_label.font()
+        title_font.setPointSize(14)
+        title_font.setBold(True)
+        title_label.setFont(title_font)
+        title_label.setAlignment(Qt.AlignCenter)
+        main_layout.addWidget(title_label)
+        
+        # 3열 테이블 형태로 배치
+        content_layout = QHBoxLayout()
+        
+        # 1열: 메시지 데이터
+        data_group = QGroupBox("메시지 데이터")
+        data_layout = QVBoxLayout()
+        self.data_browser = QTextBrowser()
+        self.data_browser.setAcceptRichText(True)
+        data_text = step_buffer["data"] if step_buffer["data"] else "아직 수신된 데이터가 없습니다."
+        self.data_browser.setPlainText(data_text)
+        data_layout.addWidget(self.data_browser)
+        data_group.setLayout(data_layout)
+        
+        # 2열: 메시지 규격
+        schema_group = QGroupBox("메시지 규격")
+        schema_layout = QVBoxLayout()
+        self.schema_browser = QTextBrowser()
+        self.schema_browser.setAcceptRichText(True)
+        schema_text = self._format_schema(schema_data)
+        self.schema_browser.setPlainText(schema_text)
+        schema_layout.addWidget(self.schema_browser)
+        schema_group.setLayout(schema_layout)
+        
+        # 3열: 검증 오류
+        error_group = QGroupBox("검증 오류")
+        error_layout = QVBoxLayout()
+        self.error_browser = QTextBrowser()
+        self.error_browser.setAcceptRichText(True)
+        result = step_buffer["result"]
+        error_text = step_buffer["error"] if step_buffer["error"] else ("오류가 없습니다." if result=="PASS" else "")
+        error_msg = f"검증 결과: {result}\n\n"
+        if result == "FAIL":
+            error_msg += "오류 세부사항:\n" + error_text
+        else:
+            error_msg += "오류가 없습니다."
+        self.error_browser.setPlainText(error_msg)
+        error_layout.addWidget(self.error_browser)
+        error_group.setLayout(error_layout)
+        
+        # 3개 그룹을 가로로 배치
+        content_layout.addWidget(data_group)
+        content_layout.addWidget(schema_group)
+        content_layout.addWidget(error_group)
+        
+        # 확인 버튼
+        QBtn = QDialogButtonBox.Ok
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        
+        # 레이아웃 구성
+        main_layout.addLayout(content_layout)
+        main_layout.addWidget(self.buttonBox)
+        
+        self.setLayout(main_layout)
+        
+    def _format_schema(self, schema):
+        """스키마 구조를 문자열로 변환"""
+        if not schema:
+            return "스키마 정보가 없습니다."
+            
+        def schema_to_string(schema_obj, indent=0):
+            result = ""
+            spaces = "  " * indent
+            
+            if isinstance(schema_obj, dict):
+                for key, value in schema_obj.items():
+                    if hasattr(key, 'expected_data'):  # OptionalKey인 경우
+                        key_name = f"{key.expected_data} (선택사항)"
+                    else:
+                        key_name = str(key)
+                        
+                    if isinstance(value, dict):
+                        result += f"{spaces}{key_name}: {{\n"
+                        result += schema_to_string(value, indent + 1)
+                        result += f"{spaces}}}\n"
+                    elif isinstance(value, list) and len(value) > 0 and isinstance(value[0], dict):
+                        result += f"{spaces}{key_name}: [\n"
+                        result += schema_to_string(value[0], indent + 1)
+                        result += f"{spaces}]\n"
+                    else:
+                        result += f"{spaces}{key_name}: {value.__name__ if hasattr(value, '__name__') else str(value)}\n"
+            return result
+        
+        return schema_to_string(schema)
 
 
 class CustomDialog(QDialog):  # popup window for validation result
@@ -65,20 +167,18 @@ class MyApp(QWidget):
         self.embedded = embedded
         self.webhook_res = None
         self.res = None
-        self.radio_check_flag = False
+        self.radio_check_flag = "video"  # 영상보안 시스템으로 고정
         self.img_pass = resource_path("assets/image/green.png")
         self.img_fail = resource_path("assets/image/red.png")
         self.img_none = resource_path("assets/image/black.png")
 
-        self.flag_opt = True  # functions.py-json_check_ # 필수필드만 확인 False, optional 필드까지 확인 True #seo 추후 맵핑 필요
+        self.flag_opt = True  # functions.py-json_check_ # 필수필드만 확인 False, optional 필드까지 확인 True
         self.tick_timer = QTimer()
         self.tick_timer.timeout.connect(self.update_view)
         self.pathUrl = None
         self.auth_type = None
         self.cnt = 0
-
-        self.auth_flag = False
-        self.tmp_msg_append_flag = False  # step1이 여러번 적힘 우선 임시 T.T(?)
+        self.auth_flag = True  # CONSTANTS.py에서 인증 정보를 가져오므로 True로 설정
 
         self.time_pre = 0
         self.post_flag = False
@@ -87,23 +187,36 @@ class MyApp(QWidget):
         self.message_in_cnt = 0
         self.message_error = []
         self.message_name = ""
-        self.valCnt = 0  # 검증 횟수 카운터 추가
         
         # 스텝별 표시할 버퍼 (데이터, 오류, 결과)
         self.step_buffers = [
             {"data": "", "error": "", "result": "PASS"} for _ in range(9)
         ]
 
-        self.initUI()
-
-        auth_temp, auth_temp2 = set_auth("config/config.txt")  # config.xml? #tylee
+        auth_temp, auth_temp2 = set_auth("config/config.txt")
         self.digestInfo = [auth_temp2[0], auth_temp2[1]]
         self.token = auth_temp
+
+        self.initUI()
 
         self.get_setting()
         self.webhook_flag = False
         self.webhook_msg = "."
         self.webhook_cnt = 99
+
+    def _to_detail_text(self, val_text):
+        """검증 결과 텍스트를 항상 사람이 읽을 문자열로 표준화"""
+        if val_text is None:
+            return "오류가 없습니다."
+        if isinstance(val_text, list):
+            return "\n".join(str(x) for x in val_text) if val_text else "오류가 없습니다."
+        if isinstance(val_text, dict):
+            try:
+                import json
+                return json.dumps(val_text, indent=2, ensure_ascii=False)
+            except Exception:
+                return str(val_text)
+        return str(val_text)
 
     def update_table_row(self, row, result_text, pass_count, total_count, detail_text, message_text):
         """테이블 행을 업데이트하는 함수"""
@@ -154,6 +267,20 @@ class MyApp(QWidget):
             self.tableWidget.item(row, 6).setTextAlignment(Qt.AlignCenter)
             
             # Message (컬럼 7-9는 버튼들이 있으므로 사용 안 함)
+
+    def load_test_info_from_constants(self):
+        """CONSTANTS.py에서 시험정보를 로드 (읽기 전용)"""
+        return [
+            ("기업명", CONSTANTS.company_name),
+            ("제품명", CONSTANTS.product_name),
+            ("버전", CONSTANTS.version),
+            ("시험유형", CONSTANTS.test_category),
+            ("시험대상", CONSTANTS.test_target),
+            ("시험범위", CONSTANTS.test_range),
+            ("사용자 인증 방식", CONSTANTS.auth_type),
+            ("관리자 코드", CONSTANTS.admin_code),
+            ("시험 접속 정보", CONSTANTS.url)
+        ]
 
     def _to_detail_text(self, val_text):
         """검증 결과 텍스트를 항상 사람이 읽을 문자열로 표준화"""
@@ -292,7 +419,7 @@ class MyApp(QWidget):
                 time.sleep(1)
                 time_interval += 1
 
-            if time_interval >= int(self.timeInterval_widget.text()):
+            if time_interval >= 2:  # 기본 timeInterval 값 사용
                 if self.post_flag is False:
                     self.message_in_cnt += 1
                     self.time_pre = time.time()
@@ -357,7 +484,7 @@ class MyApp(QWidget):
                             self.stop_btn.setDisabled(True)
                         return
 
-                    time_ = int(self.timeOut_widget.text())
+                    time_ = 5  # 기본 timeout 값 (5초) - CONSTANTS에서 설정
                     path = self.pathUrl + "/" + self.message[self.cnt]
                     #  self.valResult.append(message_name)
                     inMessage = self.inMessage[self.cnt]
@@ -548,34 +675,73 @@ class MyApp(QWidget):
                 self.step9_msg += msg
 
     def initUI(self):
-
-        outerLayout = QVBoxLayout()
-        topLayout = QHBoxLayout()      # 최상단 환경설정과 버튼들 레이아웃
-        contentLayout = QVBoxLayout()  # 시험 결과 레이아웃
-        bottomLayout = QVBoxLayout()   # 하단 모니터링 레이아웃
+        # 최상위 레이아웃 - 2열로 구성 (platformVal_all.py와 동일)
+        outerLayout = QHBoxLayout()  # 전체를 가로 2열로 변경
+        leftLayout = QVBoxLayout()   # 왼쪽 열: 시험정보 + 버튼들
+        rightLayout = QVBoxLayout()  # 오른쪽 열: 평가점수 + 시험결과 + 모니터링
         
         empty = QLabel(" ")
         empty.setStyleSheet('font-size:5pt')
-        outerLayout.addWidget(empty)  # empty
         
-        # 시험 정보 박스 (가로 배치)
+        # ==================== 왼쪽 열 구성 ====================
+        leftLayout.addWidget(empty)  # empty
+        
+        # 시험 정보 테이블 (세로 컬럼 형태) - CONSTANTS.py에서 동적으로 로드
         self.settingGroup = QGroupBox("시험정보")
-        self.settingGroup.setMaximumWidth(800)  # 시험정보 박스 전체 너비 확장 (연동 시스템 추가를 위해)
-        settingLayout = QHBoxLayout()  # 가로로 변경
-        settingLayout.addWidget(self.group2())  # 사용자 인증 방식
-        settingLayout.addWidget(self.group3())  # 메시지 송수신
-        settingLayout.addWidget(self.group4())  # 연동 URL
-        settingLayout.addWidget(self.group1())  # 연동 시스템을 시험정보에 추가
+        self.settingGroup.setMaximumWidth(460)  # platformVal_all.py와 동일한 너비
+        
+        # 시험 정보 위젯 생성 (platformVal_all.py와 동일한 구조)
+        self.info_table = QTableWidget(9, 2)  # 9행 2열 (항목명, 값)
+        self.info_table.setMaximumWidth(460)
+        self.info_table.setFixedHeight(386)  # 고정 높이로 설정하여 스크롤 완전 제거
+        self.info_table.setHorizontalHeaderLabels(["항목", "내용"])
+        self.info_table.setColumnWidth(0, 150)  # 첫 번째 열 너비 고정
+        self.info_table.setColumnWidth(1, 288)  # 두 번째 열 너비 고정
+        
+        # 스크롤바 완전 제거
+        self.info_table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.info_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        
+        # 테이블 행 레이블 숨기기
+        self.info_table.verticalHeader().setVisible(False)
+        
+        # 테이블 전체를 읽기 전용으로 설정
+        self.info_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        
+        # 각 행의 높이를 조정하여 모든 내용이 보이도록 설정
+        for i in range(9):
+            self.info_table.setRowHeight(i, 40)  # 각 행 높이를 40px로 설정
+        
+        # CONSTANTS.py에서 테이블 데이터 로드
+        table_data = self.load_test_info_from_constants()
+        
+        # 테이블에 데이터 입력 (모두 읽기 전용)
+        for row, (label, value) in enumerate(table_data):
+            # 첫 번째 컬럼 (항목명) - 회색 배경
+            item_label = QTableWidgetItem(label)
+            item_label.setFlags(Qt.ItemIsEnabled)  # 편집 불가
+            item_label.setBackground(QColor(240, 240, 240))  # 회색 배경
+            self.info_table.setItem(row, 0, item_label)
+            
+            # 두 번째 컬럼 (내용) - 흰색 배경, 읽기 전용
+            item_value = QTableWidgetItem(str(value))
+            item_value.setFlags(Qt.ItemIsEnabled)  # 편집 불가
+            item_value.setBackground(QColor(255, 255, 255))  # 흰색 배경
+            self.info_table.setItem(row, 1, item_value)
+        
+        # 테이블 레이아웃
+        settingLayout = QVBoxLayout()
+        settingLayout.addWidget(self.info_table)
         self.settingGroup.setLayout(settingLayout)
         
-        # 검증 버튼들 (가로 배치, 짧은 너비)
-        buttonGroup = QGroupBox("")
-        buttonGroup.setMaximumWidth(380)  # 버튼 그룹 박스 너비 제한
-        buttonLayout = QHBoxLayout()
+        # 검증 버튼들 (platformVal_all.py와 동일한 구조, 색상만 핑크로)
+        buttonGroup = QWidget()  # QGroupBox에서 QWidget으로 변경
+        buttonGroup.setMaximumWidth(500)  # 가로 배치에 맞게 너비 증가
+        buttonLayout = QHBoxLayout()  # 세로에서 가로로 변경
         
         self.sbtn = QPushButton(self)
         self.sbtn.setText('평가 시작')
-        self.sbtn.setMaximumWidth(100)  # 버튼 너비 제한
+        self.sbtn.setFixedSize(140, 50)  # platformVal_all.py와 동일한 크기
         self.sbtn.setStyleSheet("""
             QPushButton {
                 background-color: #FFB6C1;  /* 파스텔 핑크 */
@@ -602,7 +768,7 @@ class MyApp(QWidget):
 
         self.stop_btn = QPushButton(self)
         self.stop_btn.setText('일시 정지')
-        self.stop_btn.setMaximumWidth(100)  # 버튼 너비 제한
+        self.stop_btn.setFixedSize(140, 50)  # platformVal_all.py와 동일한 크기
         self.stop_btn.setStyleSheet("""
             QPushButton {
                 background-color: #FFB6C1;  /* 파스텔 핑크 */
@@ -628,11 +794,11 @@ class MyApp(QWidget):
         self.stop_btn.clicked.connect(self.stop_btn_clicked)
         self.stop_btn.setDisabled(True)
         
-        # ------------------ 원래 검증 결과 저장 버튼이었음 -> 추후 종료 기능으로 기능 수정해야함 ------------------------
-        self.resultsave_btn = QPushButton(self)
-        self.resultsave_btn.setText('종료')
-        self.resultsave_btn.setMaximumWidth(120)  # 버튼 너비 제한
-        self.resultsave_btn.setStyleSheet("""
+        # ------------------ 종료 버튼 ------------------------
+        self.rbtn = QPushButton(self)
+        self.rbtn.setText('종료')
+        self.rbtn.setFixedSize(140, 50)  # platformVal_all.py와 동일한 크기
+        self.rbtn.setStyleSheet("""
             QPushButton {
                 background-color: #FFB6C1;  /* 파스텔 핑크 */
                 border: 2px solid #FF69B4;
@@ -654,89 +820,83 @@ class MyApp(QWidget):
                 color: #999999;
             }
         """)
-        self.resultsave_btn.clicked.connect(self.resultsave_btn_clicked)
-
+        self.rbtn.clicked.connect(self.resultsave_btn_clicked)
+        
+        buttonLayout.addStretch()  # 왼쪽 여백 추가로 중앙 정렬
         buttonLayout.addWidget(self.sbtn)
+        buttonLayout.addSpacing(20)  # 버튼 사이에 20px 간격 추가
         buttonLayout.addWidget(self.stop_btn)
-        buttonLayout.addWidget(self.resultsave_btn)
-        # buttonLayout.addStretch() 
+        buttonLayout.addSpacing(20)  # 버튼 사이에 20px 간격 추가
+        buttonLayout.addWidget(self.rbtn)
+        buttonLayout.addStretch()  # 오른쪽 여백 추가로 중앙 정렬
         buttonGroup.setLayout(buttonLayout)
         
-        # 상단 레이아웃 구성 (환경설정 + 버튼들) ---------------------------------
-        topLayout.addWidget(self.settingGroup)
-        topLayout.addWidget(buttonGroup)
-        topLayout.setContentsMargins(0, 0, 0, 0)  # 여백 제거
-        topLayout.setSpacing(10)  # 위젯 간 간격 조정
-
-        # 중간 레이아웃 구성 (아래까지 포함)---------------------------------
-        contentLayout.addWidget(self.group_score()) # 평가 점수 박스 위로 올라감
-        contentLayout.addSpacing(15)  # 위젯 간 간격 조정
+        # 왼쪽 열에 시험정보와 버튼들 추가
+        leftLayout.addWidget(self.settingGroup)
+        leftLayout.addSpacing(300)  # 시험정보와 버튼 사이 간격을 300px로 설정
+        leftLayout.addWidget(buttonGroup)
+        leftLayout.addStretch()  # 남은 공간을 아래쪽으로 밀어내기
+        
+        # ==================== 오른쪽 열 구성 ====================
+        # 평가 점수
+        rightLayout.addWidget(self.group_score())
+        rightLayout.addSpacing(15)
+        
+        # 시험 결과
         self.valmsg = QLabel('시험 결과', self)
-        contentLayout.addWidget(self.valmsg)
+        rightLayout.addWidget(self.valmsg)
         self.init_centerLayout()
         
         # 시험 결과 영역을 테이블 크기에 맞게 조정
         contentWidget = QWidget()
         contentWidget.setLayout(self.centerLayout)
-        contentWidget.setMaximumSize(1200, 400)  # 테이블 크기와 동일하게 설정 (증가)
-        contentWidget.setMinimumSize(1100, 300)   # 테이블 최소 크기와 동일하게 설정 (증가)
-        contentLayout.addWidget(contentWidget)
-
-        # 하단 모니터링 레이아웃 구성 ---------------------------------
-        bottomLayout.addWidget(QLabel("수신 메시지 실시간 모니터링"))
-        self.valResult = QTextBrowser(self)
-        self.valResult.setMaximumHeight(200)  # 높이 제한
-        self.valResult.setMaximumWidth(1200)  # 테이블과 동일한 너비로 설정 (증가)
-        self.valResult.setMinimumWidth(1100)   # 테이블 최소 너비와 동일하게 설정 (증가)
-        bottomLayout.addWidget(self.valResult)
+        contentWidget.setMaximumSize(1050, 400)  # platformVal_all.py와 유사한 크기
+        contentWidget.setMinimumSize(950, 300)
+        rightLayout.addWidget(contentWidget)
         
-        # 평가 점수를 기존 연동 시스템 위치에 배치
-        self.r1 = ""
-        self.r2 = ""
-        # bottomLayout.addWidget(self.group_score())  # 평가 점수 박스로 변경
-
-        # 전체 레이아웃 구성 ---------------------------------
-        outerLayout.addLayout(topLayout)     # 최상단: 환경설정 + 버튼들
-        outerLayout.addSpacing(10)  # 위젯 간 간격 조정
-        outerLayout.addLayout(contentLayout) # 중단: 평가 점수 + 시험 결과 
-        outerLayout.addSpacing(10)  # 위젯 간 간격 조정
-        outerLayout.addLayout(bottomLayout)  # 하단: 모니터링 
-        outerLayout.addWidget(empty)  # empty
-        # outerLayout.setSpacing(10)  # 레이아웃 간 간격 조정
+        rightLayout.addSpacing(15)
+        
+        # 수신 메시지 실시간 모니터링
+        rightLayout.addWidget(QLabel("수신 메시지 실시간 모니터링"))
+        self.valResult = QTextBrowser(self)
+        self.valResult.setMaximumHeight(200)
+        self.valResult.setMaximumWidth(1050)  # platformVal_all.py와 유사한 크기
+        self.valResult.setMinimumWidth(950)
+        rightLayout.addWidget(self.valResult)
+        
+        # 전체 레이아웃 구성 (2열) - platformVal_all.py와 동일
+        outerLayout.addLayout(leftLayout, 1)   # 왼쪽 열 (비율 1)
+        outerLayout.addSpacing(20)  # 열 사이 간격
+        outerLayout.addLayout(rightLayout, 2)  # 오른쪽 열 (비율 2, 더 넓게)
         self.setLayout(outerLayout)
         self.setWindowTitle('물리보안 시스템 연동 검증 소프트웨어')
-        self.setGeometry(500, 300, 1200, 850)  # 창 크기 설정
-        # showing all the widgets
-
-        # self.json_th.json_update_data.connect(self.json_update_data)
-        # self.json_th.start()
-        if not self.embedded :
+        self.setGeometry(100, 100, 1600, 900)  # 2열 레이아웃에 맞게 너비를 더 크게 조정
+        
+        if not self.embedded:
             self.show()
 
     def init_centerLayout(self):
-        # 표 형태로 변경 (10컬럼으로 확장)
-        self.tableWidget = QTableWidget(9, 10)
-        self.tableWidget.setHorizontalHeaderLabels(["API 명", "결과", "검증 횟수", "통과 필드 수", "전체 필드 수", "실패 횟수", "평가 점수", "메시지 데이터", "메시지 규격", "메시지 오류"])
+        # 표 형태로 변경 (8컬럼으로 축소)
+        self.tableWidget = QTableWidget(9, 8)
+        self.tableWidget.setHorizontalHeaderLabels(["API 명", "결과", "검증 횟수", "통과 필드 수", "전체 필드 수", "실패 횟수", "평가 점수", "상세 내용"])
         self.tableWidget.verticalHeader().setVisible(False)
         self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tableWidget.setSelectionMode(QAbstractItemView.NoSelection)
         self.tableWidget.setIconSize(QSize(16, 16))
         
         # 테이블 크기 설정
-        self.tableWidget.setMinimumSize(1100, 300)  # 최소 크기 증가
-        self.tableWidget.resize(1200, 400)  # 기본 크기 증가
+        self.tableWidget.setMinimumSize(950, 300)  # 최소 크기 조정
+        self.tableWidget.resize(1050, 400)  # 기본 크기 조정
         
         # 컬럼 너비 설정
         self.tableWidget.setColumnWidth(0, 240)  # API 명 컬럼 너비 
         self.tableWidget.setColumnWidth(1, 90)   # 결과 컬럼 너비 
-        self.tableWidget.setColumnWidth(2, 80)   # 검증 횟수 컬럼 너비 
-        self.tableWidget.setColumnWidth(3, 100)   # 통과 필드 수 컬럼 너비 
-        self.tableWidget.setColumnWidth(4, 100)   # 전체 필드 수 컬럼 너비 
-        self.tableWidget.setColumnWidth(5, 100)   # 실패 횟수 컬럼 너비 
-        self.tableWidget.setColumnWidth(6, 100)   # 평가 점수 컬럼 너비 
-        self.tableWidget.setColumnWidth(7, 120)  # 메시지 데이터 컬럼 너비 
-        self.tableWidget.setColumnWidth(8, 110)  # 메시지 규격 컬럼 너비 
-        self.tableWidget.setColumnWidth(9, 110)  # 메시지 오류 컬럼 너비 
+        self.tableWidget.setColumnWidth(2, 100)  # 검증 횟수 컬럼 너비 
+        self.tableWidget.setColumnWidth(3, 110)  # 통과 필드 수 컬럼 너비 
+        self.tableWidget.setColumnWidth(4, 110)  # 전체 필드 수 컬럼 너비 
+        self.tableWidget.setColumnWidth(5, 100)  # 실패 횟수 컬럼 너비
+        self.tableWidget.setColumnWidth(6, 110)  # 평가 점수 컬럼 너비
+        self.tableWidget.setColumnWidth(7, 130)  # 상세 내용 컬럼 너비 (확장) 
 
         # 행 높이 설정
         for i in range(9):
@@ -781,10 +941,10 @@ class MyApp(QWidget):
             self.tableWidget.setItem(i, 6, QTableWidgetItem("0%"))
             self.tableWidget.item(i, 6).setTextAlignment(Qt.AlignCenter)
             # 상세 결과 버튼 (중앙 정렬을 위한 위젯 컨테이너)
-            detail_btn = QPushButton("데이터 확인")
+            detail_btn = QPushButton("상세 내용 확인")
             detail_btn.setMaximumHeight(30)
-            detail_btn.setMaximumWidth(120)  # 버튼 최대 너비 제한
-            detail_btn.clicked.connect(lambda checked, row=i: self.show_detail_result(row))
+            detail_btn.setMaximumWidth(130)  # 버튼 최대 너비 증가
+            detail_btn.clicked.connect(lambda checked, row=i: self.show_combined_result(row))
             
             # 버튼을 중앙에 배치하기 위한 위젯과 레이아웃
             container = QWidget()
@@ -795,38 +955,6 @@ class MyApp(QWidget):
             container.setLayout(layout)
             
             self.tableWidget.setCellWidget(i, 7, container)
-
-            # 메시지 규격 버튼 (8번 컬럼)
-            schema_btn = QPushButton("규격 확인")
-            schema_btn.setMaximumHeight(30)
-            schema_btn.setMaximumWidth(100)
-            schema_btn.clicked.connect(lambda checked, row=i: self.show_schema_result(row))
-            
-            # 버튼을 중앙에 배치하기 위한 위젯과 레이아웃
-            schema_container = QWidget()
-            schema_layout = QHBoxLayout()
-            schema_layout.addWidget(schema_btn)
-            schema_layout.setAlignment(Qt.AlignCenter)
-            schema_layout.setContentsMargins(0, 0, 0, 0)
-            schema_container.setLayout(schema_layout)
-            
-            self.tableWidget.setCellWidget(i, 8, schema_container)
-
-            # 메시지 오류 버튼 (9번 컬럼)
-            error_btn = QPushButton("오류 확인")
-            error_btn.setMaximumHeight(30)
-            error_btn.setMaximumWidth(100)
-            error_btn.clicked.connect(lambda checked, row=i: self.show_error_result(row))
-            
-            # 버튼을 중앙에 배치하기 위한 위젯과 레이아웃
-            error_container = QWidget()
-            error_layout = QHBoxLayout()
-            error_layout.addWidget(error_btn)
-            error_layout.setAlignment(Qt.AlignCenter)
-            error_layout.setContentsMargins(0, 0, 0, 0)
-            error_container.setLayout(error_layout)
-            
-            self.tableWidget.setCellWidget(i, 9, error_container)
 
         # 결과 컬럼만 클릭 가능하도록 설정 (기존 기능 유지)
         self.tableWidget.cellClicked.connect(self.table_cell_clicked)
@@ -846,82 +974,32 @@ class MyApp(QWidget):
         self.step8_msg = ""
         self.step9_msg = ""
 
-    def group1(self):
-        rgroup = QGroupBox('연동 시스템')
-        rgroup.setMaximumWidth(200)  # 환경설정에 맞게 너비 조정
-        
-        self.g1_radio1 = QRadioButton('영상보안 시스템')
-        self.g1_radio1.toggled.connect(self.g1_radio1_checked)
-        self.g1_radio2 = QRadioButton('바이오인식 기반 출입통제 시스템')
-        self.g1_radio2.toggled.connect(self.g1_radio2_checked)
-        self.g1_radio3 = QRadioButton('보안용 센서 시스템')
-        self.g1_radio3.toggled.connect(self.g1_radio3_checked)
+    def show_combined_result(self, row):
+        """통합 상세 내용 확인 - 데이터, 규격, 오류를 모두 보여주는 3열 팝업"""
+        try:
+            buf = self.step_buffers[row]
+            api_name = self.tableWidget.item(row, 0).text()
+            
+            # 스키마 데이터 가져오기
+            try:
+                schema_data = videoOutSchema[row] if row < len(videoOutSchema) else None
+            except:
+                schema_data = None
+            
+            # 통합 팝업창 띄우기
+            dialog = CombinedDetailDialog(api_name, buf, schema_data)
+            dialog.exec_()
+            
+        except Exception as e:
+            CustomDialog(f"오류:\n{str(e)}", "상세 내용 확인 오류")
 
-        vbox = QVBoxLayout()
-        vbox.addWidget(self.g1_radio1)
-        vbox.addWidget(self.g1_radio2)
-        vbox.addWidget(self.g1_radio3)
-        rgroup.setLayout(vbox)
-        return rgroup
-
-    def group2(self):
-        rgroup = QGroupBox('시험 인증 정보')
-        rgroup.setMaximumWidth(180)  # 인증 정보 박스 너비 제한
-        
-        self.g2_radio1 = QRadioButton('Digest Auth')
-        self.g2_radio1.toggled.connect(self.g2_radio_checked)
-        self.g2_radio2 = QRadioButton('Bearer Token')
-        self.g2_radio2.toggled.connect(self.g2_radio_checked)
-        self.g2_radio3 = QRadioButton('None')
-        self.g2_radio3.toggled.connect(self.g2_radio_checked)
-
-        vbox = QVBoxLayout()
-        vbox.addWidget(self.g2_radio1)
-        vbox.addWidget(self.g2_radio2)
-        vbox.addWidget(self.g2_radio3)
-        rgroup.setLayout(vbox)
-        return rgroup
-
-    def group3(self):
-        fgroup = QGroupBox('메시지 송수신')
-        fgroup.setMaximumWidth(200)  # 메시지 송수신 박스 너비 제한
-        
-        self.protocol_widget = QComboBox()
-        self.protocol_widget.addItem("LongPolling")
-        self.protocol_widget.addItem("WebHook")
-        self.timeInterval_widget = QSpinBox()
-        self.timeInterval_widget.setValue(2)
-        self.timeInterval_widget.setMaximum(1000)
-        self.timeOut_widget = QSpinBox()
-        self.timeOut_widget.setValue(5)
-        self.timeOut_widget.setMaximum(1000)
-
-        flayout = QFormLayout()
-        flayout.addRow("transProtocol  ", self.protocol_widget)
-        flayout.addRow("timeInterval(sec):  ", self.timeInterval_widget)
-        flayout.addRow("timeOut(sec):  ", self.timeOut_widget)
-
-        fgroup.setLayout(flayout)
-        return fgroup
-
-    def group4(self):
-        fgroup = QGroupBox('')
-
-        self.linkUrl = QLineEdit(self)
-        self.linkUrl.setText("https://127.0.0.1:8008")
-
-        layout = QVBoxLayout()
-        layout.addWidget(QLabel('연동 URL'))
-        layout.addWidget(self.linkUrl)
-
-        fgroup.setLayout(layout)
-        return fgroup
+# 기존 그룹 UI 함수들 제거됨 - CONSTANTS.py에서 설정을 가져오는 2열 레이아웃으로 변경
 
     def group_score(self):
         """평가 점수 박스"""
         sgroup = QGroupBox('평가 점수')
-        sgroup.setMaximumWidth(1200)  # 테이블과 동일한 너비로 설정 (증가)
-        sgroup.setMinimumWidth(1100)   # 테이블 최소 너비와 동일하게 설정 (증가)
+        sgroup.setMaximumWidth(1050)  # 테이블과 동일한 너비로 설정 (축소)
+        sgroup.setMinimumWidth(950)   # 테이블 최소 너비와 동일하게 설정 (축소)
         
         # 점수 표시용 레이블들
         self.pass_count_label = QLabel("통과 필드 수: 0")
@@ -958,77 +1036,24 @@ class MyApp(QWidget):
         self.total_count_label.setText(f"전체 필드 수: {total_fields}")
         self.score_label.setText(f"종합 평가 점수: {score:.1f}%")
 
-    def show_detail_result(self, row):
-        """데이터 확인 버튼 - 버퍼에 저장된 실제 데이터 표시"""
+    def show_combined_result(self, row):
+        """통합 상세 내용 확인 - 데이터, 규격, 오류를 모두 보여주는 3열 팝업"""
         try:
             buf = self.step_buffers[row]
             api_name = self.tableWidget.item(row, 0).text()
-            text = buf["data"] if buf["data"] else "아직 수신된 데이터가 없습니다."
-            CustomDialog(f"{api_name} 메시지 데이터:\n\n{text}", f"{api_name} - 실제 데이터")
-        except Exception as e:
-            CustomDialog(f"오류:\n{str(e)}", "데이터 확인 오류")
-
-    def show_schema_result(self, row):
-        """규격 확인 버튼 - 스키마 구조 표시"""
-        try:
-            if self.radio_check_flag == "bio":
-                out_schema = bioOutSchema[row]
-                api_name = bioMessages[row]
-            elif self.radio_check_flag == "video":
-                out_schema = videoOutSchema[row]
-                api_name = videoMessages[row]
-            else:
-                out_schema = securityOutSchema[row]
-                api_name = securityMessages[row]
             
-            # 스키마 구조를 문자열로 변환해서 보여주기
-            def schema_to_string(schema, indent=0):
-                result = ""
-                spaces = "  " * indent
-                for key, value in schema.items():
-                    if hasattr(key, 'expected_data'):  # OptionalKey인 경우
-                        key_name = f"{key.expected_data} (선택사항)"
-                    else:
-                        key_name = str(key)
-                        
-                    if isinstance(value, dict):
-                        result += f"{spaces}{key_name}: {{\n"
-                        result += schema_to_string(value, indent + 1)
-                        result += f"{spaces}}}\n"
-                    elif isinstance(value, list) and len(value) > 0 and isinstance(value[0], dict):
-                        result += f"{spaces}{key_name}: [\n"
-                        result += schema_to_string(value[0], indent + 1)
-                        result += f"{spaces}]\n"
-                    else:
-                        result += f"{spaces}{key_name}: {value.__name__ if hasattr(value, '__name__') else str(value)}\n"
-                return result
+            # 스키마 데이터 가져오기
+            try:
+                schema_data = videoOutSchema[row] if row < len(videoOutSchema) else None
+            except:
+                schema_data = None
             
-            schema_msg = f"{api_name} API - 메시지 규격 구조\n\n"
-            schema_msg += schema_to_string(out_schema)
-            
-            CustomDialog(schema_msg, f"{api_name} - 규격 구조")
+            # 통합 팝업창 띄우기
+            dialog = CombinedDetailDialog(api_name, buf, schema_data)
+            dialog.exec_()
             
         except Exception as e:
-            CustomDialog(f"오류: {str(e)}", "규격 확인 오류")
-
-    def show_error_result(self, row):
-        """오류 확인 버튼 - 검증 당시의 오류 저장본만 표시(재검증 금지)"""
-        try:
-            buf = self.step_buffers[row]
-            api_name = self.tableWidget.item(row, 0).text()
-
-            result = buf["result"]
-            error = buf["error"] if buf["error"] else ("오류가 없습니다." if result=="PASS" else "")
-
-            msg = f"{api_name} API - 검증 오류 결과\n\n검증 결과: {result}\n\n"
-            if result == "FAIL":
-                msg += "오류 세부사항:\n" + error
-            else:
-                msg += "오류가 없습니다."
-
-            CustomDialog(msg, f"{api_name} - 검증 오류")
-        except Exception as e:
-            CustomDialog(f"오류: {str(e)}", "검증 오류")
+            CustomDialog(f"오류:\n{str(e)}", "상세 내용 확인 오류")
 
     def table_cell_clicked(self, row, col):
         """테이블 셀 클릭 시 호출되는 함수"""
@@ -1041,381 +1066,30 @@ class MyApp(QWidget):
     def init_circleLayout(self):
         pass  # 테이블 형태로 변경했으므로 이 메서드는 더이상 필요 없음
 
-    def g1_radio1_checked(self, checked):
-        if checked:
-            self.radio_check_flag = "video"
-            self.message = videoMessages
-            self.inMessage = videoInMessage
-            self.outMessage = videoOutMessage
-            self.inSchema = videoInSchema
-            self.outSchema = videoOutSchema
-            self.webhookSchema = videoWebhookSchema
-            self.system = "video"
-            self.final_report = "영상보안 시스템-물리보안 통합플랫폼(가상) 검증 결과"+"\n"
-            
-            # 테이블 업데이트
-            self.step_names = [
-                "Authentication", "Capabilities", "CameraProfiles", "StoredVideoInfos",
-                "StreamURLs", "ReplayURL", "RealtimeVideoEventInfos",
-                "StoredVideoEventInfos", "StoredObjectAnalyticsInfos"
-            ]
-            
-            for i, name in enumerate(self.step_names):
-                if i < self.tableWidget.rowCount():
-                    # API 명 업데이트
-                    self.tableWidget.setItem(i, 0, QTableWidgetItem(f"{i+1}. {name}"))
-                    
-                    # 결과 아이콘 리셋 (위젯으로 중앙 정렬)
-                    icon_widget = QWidget()
-                    icon_layout = QHBoxLayout()
-                    icon_layout.setContentsMargins(0, 0, 0, 0)
-                    
-                    icon_label = QLabel()
-                    icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
-                    icon_label.setAlignment(Qt.AlignCenter)
-                    
-                    icon_layout.addWidget(icon_label)
-                    icon_layout.setAlignment(Qt.AlignCenter)
-                    icon_widget.setLayout(icon_layout)
-                    
-                    self.tableWidget.setCellWidget(i, 1, icon_widget)
-                    
-                    # 카운트 리셋
-                    self.tableWidget.setItem(i, 2, QTableWidgetItem("0"))
-                    self.tableWidget.item(i, 2).setTextAlignment(Qt.AlignCenter)
-                    # 통과 필드 수
-                    self.tableWidget.setItem(i, 3, QTableWidgetItem("0"))
-                    self.tableWidget.item(i, 3).setTextAlignment(Qt.AlignCenter)
-                    # 전체 필드 수
-                    self.tableWidget.setItem(i, 4, QTableWidgetItem("0"))
-                    self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
-                    # 실패 횟수
-                    self.tableWidget.setItem(i, 5, QTableWidgetItem("0"))
-                    self.tableWidget.item(i, 5).setTextAlignment(Qt.AlignCenter)
-                    # 평가 점수
-                    self.tableWidget.setItem(i, 6, QTableWidgetItem("0%"))
-                    self.tableWidget.item(i, 6).setTextAlignment(Qt.AlignCenter)
-                    
-                    # 메시지 데이터 버튼 (7번 컬럼) - 데이터 확인
-                    detail_btn = QPushButton("데이터 확인")
-                    detail_btn.setMaximumHeight(30)
-                    detail_btn.setMaximumWidth(120)
-                    detail_btn.clicked.connect(lambda checked, row=i: self.show_detail_result(row))
-                    
-                    btn_widget = QWidget()
-                    btn_layout = QHBoxLayout()
-                    btn_layout.setContentsMargins(0, 0, 0, 0)
-                    btn_layout.addWidget(detail_btn)
-                    btn_layout.setAlignment(Qt.AlignCenter)
-                    btn_widget.setLayout(btn_layout)
-                    
-                    self.tableWidget.setCellWidget(i, 7, btn_widget)
-
-                    # 메시지 규격 버튼 (8번 컬럼)
-                    schema_btn = QPushButton("규격 확인")
-                    schema_btn.setMaximumHeight(30)
-                    schema_btn.setMaximumWidth(100)
-                    schema_btn.clicked.connect(lambda checked, row=i: self.show_schema_result(row))
-                    
-                    schema_widget = QWidget()
-                    schema_layout = QHBoxLayout()
-                    schema_layout.setContentsMargins(0, 0, 0, 0)
-                    schema_layout.addWidget(schema_btn)
-                    schema_layout.setAlignment(Qt.AlignCenter)
-                    schema_widget.setLayout(schema_layout)
-                    
-                    self.tableWidget.setCellWidget(i, 8, schema_widget)
-
-                    # 메시지 오류 버튼 (9번 컬럼)
-                    error_btn = QPushButton("오류 확인")
-                    error_btn.setMaximumHeight(30)
-                    error_btn.setMaximumWidth(100)
-                    error_btn.clicked.connect(lambda checked, row=i: self.show_error_result(row))
-                    
-                    error_widget = QWidget()
-                    error_layout = QHBoxLayout()
-                    error_layout.setContentsMargins(0, 0, 0, 0)
-                    error_layout.addWidget(error_btn)
-                    error_layout.setAlignment(Qt.AlignCenter)
-                    error_widget.setLayout(error_layout)
-                    
-                    self.tableWidget.setCellWidget(i, 9, error_widget)
-
-    def g1_radio2_checked(self, checked):
-        if checked:
-            self.radio_check_flag = "bio"
-            self.message = bioMessages
-            self.inMessage = bioInMessage
-            self.outMessage = bioOutMessage
-            self.inSchema = bioInSchema
-            self.outSchema = bioOutSchema
-            self.webhookSchema = bioWebhookSchema
-            self.system = "bio"
-            self.final_report = "바이오인식 기반 출입통제 시스템-물리보안 통합플랫폼(가상) 검증 결과"+"\n"
-            
-            # 테이블 업데이트
-            self.step_names = [
-                "Authentication", "Capabilities", "DoorProfiles", "AccessUserInfos",
-                "RealtimeVerifEventInfos", "StoredVerifEventInfos", "RealtimeDoorStatus",
-                "DoorControl", ""
-            ]
-            
-            for i, name in enumerate(self.step_names):
-                if i < self.tableWidget.rowCount():
-                    if name:  # 빈 이름이 아닌 경우만
-                        # API 명 업데이트
-                        self.tableWidget.setItem(i, 0, QTableWidgetItem(f"{i+1}. {name}"))
-                        
-                        # 결과 아이콘 리셋
-                        icon_widget = QWidget()
-                        icon_layout = QHBoxLayout()
-                        icon_layout.setContentsMargins(0, 0, 0, 0)
-                        
-                        icon_label = QLabel()
-                        icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
-                        icon_label.setAlignment(Qt.AlignCenter)
-                        
-                        icon_layout.addWidget(icon_label)
-                        icon_layout.setAlignment(Qt.AlignCenter)
-                        icon_widget.setLayout(icon_layout)
-                        
-                        self.tableWidget.setCellWidget(i, 1, icon_widget)
-                        
-                        # 카운트 리셋
-                        self.tableWidget.setItem(i, 2, QTableWidgetItem("0"))
-                        self.tableWidget.item(i, 2).setTextAlignment(Qt.AlignCenter)
-                        # 통과 필드 수
-                        self.tableWidget.setItem(i, 3, QTableWidgetItem("0"))
-                        self.tableWidget.item(i, 3).setTextAlignment(Qt.AlignCenter)
-                        # 전체 필드 수
-                        self.tableWidget.setItem(i, 4, QTableWidgetItem("0"))
-                        self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
-                        # 실패 횟수
-                        self.tableWidget.setItem(i, 5, QTableWidgetItem("0"))
-                        self.tableWidget.item(i, 5).setTextAlignment(Qt.AlignCenter)
-                        # 평가 점수
-                        self.tableWidget.setItem(i, 6, QTableWidgetItem("0%"))
-                        self.tableWidget.item(i, 6).setTextAlignment(Qt.AlignCenter)
-                        
-                        # 메시지 데이터 버튼 (7번 컬럼) - 데이터 확인
-                        detail_btn = QPushButton("데이터 확인")
-                        detail_btn.setMaximumHeight(30)
-                        detail_btn.setMaximumWidth(120)
-                        detail_btn.clicked.connect(lambda checked, row=i: self.show_detail_result(row))
-                        
-                        btn_widget = QWidget()
-                        btn_layout = QHBoxLayout()
-                        btn_layout.setContentsMargins(0, 0, 0, 0)
-                        btn_layout.addWidget(detail_btn)
-                        btn_layout.setAlignment(Qt.AlignCenter)
-                        btn_widget.setLayout(btn_layout)
-                        
-                        self.tableWidget.setCellWidget(i, 7, btn_widget)
-
-                        # 메시지 규격 버튼 (8번 컬럼)
-                        schema_btn = QPushButton("규격 확인")
-                        schema_btn.setMaximumHeight(30)
-                        schema_btn.setMaximumWidth(100)
-                        schema_btn.clicked.connect(lambda checked, row=i: self.show_schema_result(row))
-                        
-                        schema_widget = QWidget()
-                        schema_layout = QHBoxLayout()
-                        schema_layout.setContentsMargins(0, 0, 0, 0)
-                        schema_layout.addWidget(schema_btn)
-                        schema_layout.setAlignment(Qt.AlignCenter)
-                        schema_widget.setLayout(schema_layout)
-                        
-                        self.tableWidget.setCellWidget(i, 8, schema_widget)
-
-                        # 메시지 오류 버튼 (9번 컬럼)
-                        error_btn = QPushButton("오류 확인")
-                        error_btn.setMaximumHeight(30)
-                        error_btn.setMaximumWidth(100)
-                        error_btn.clicked.connect(lambda checked, row=i: self.show_error_result(row))
-                        
-                        error_widget = QWidget()
-                        error_layout = QHBoxLayout()
-                        error_layout.setContentsMargins(0, 0, 0, 0)
-                        error_layout.addWidget(error_btn)
-                        error_layout.setAlignment(Qt.AlignCenter)
-                        error_widget.setLayout(error_layout)
-                        
-                        self.tableWidget.setCellWidget(i, 9, error_widget)
-                    else:
-                        # 빈 행 처리
-                        for j in range(10):
-                            self.tableWidget.setItem(i, j, QTableWidgetItem(""))
-
-    def g1_radio3_checked(self, checked):
-        if checked:
-            self.radio_check_flag = "security"
-            self.message = securityMessages
-            self.inMessage = securityInMessage
-            self.outMessage = securityOutMessage
-            self.inSchema = securityInSchema
-            self.outSchema = securityOutSchema
-            self.webhookSchema = securityWebhookSchema
-            self.system = "security"
-            self.final_report = "보안용 센서 시스템-물리보안 통합플랫폼(가상) 검증 결과"+"\n"
-            
-            # 테이블 업데이트
-            self.step_names = [
-                "Authentication", "Capabilities", "SensorDeviceProfiles", "RealtimeSensorData",
-                "RealtimeSensorEventInfos", "StoredSensorEventInfos", "SensorDeviceControl",
-                "", ""
-            ]
-            
-            for i, name in enumerate(self.step_names):
-                if i < self.tableWidget.rowCount():
-                    if name:  # 빈 이름이 아닌 경우만
-                        # API 명 업데이트
-                        self.tableWidget.setItem(i, 0, QTableWidgetItem(f"{i+1}. {name}"))
-                        
-                        # 결과 아이콘 리셋
-                        icon_widget = QWidget()
-                        icon_layout = QHBoxLayout()
-                        icon_layout.setContentsMargins(0, 0, 0, 0)
-                        
-                        icon_label = QLabel()
-                        icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
-                        icon_label.setAlignment(Qt.AlignCenter)
-                        
-                        icon_layout.addWidget(icon_label)
-                        icon_layout.setAlignment(Qt.AlignCenter)
-                        icon_widget.setLayout(icon_layout)
-                        
-                        self.tableWidget.setCellWidget(i, 1, icon_widget)
-                        
-                        # 카운트 리셋
-                        self.tableWidget.setItem(i, 2, QTableWidgetItem("0"))
-                        self.tableWidget.item(i, 2).setTextAlignment(Qt.AlignCenter)
-                        # 통과 필드 수
-                        self.tableWidget.setItem(i, 3, QTableWidgetItem("0"))
-                        self.tableWidget.item(i, 3).setTextAlignment(Qt.AlignCenter)
-                        # 전체 필드 수
-                        self.tableWidget.setItem(i, 4, QTableWidgetItem("0"))
-                        self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
-                        # 실패 횟수
-                        self.tableWidget.setItem(i, 5, QTableWidgetItem("0"))
-                        self.tableWidget.item(i, 5).setTextAlignment(Qt.AlignCenter)
-                        # 평가 점수
-                        self.tableWidget.setItem(i, 6, QTableWidgetItem("0%"))
-                        self.tableWidget.item(i, 6).setTextAlignment(Qt.AlignCenter)
-                        
-                        # 메시지 데이터 버튼 (7번 컬럼) - 데이터 확인
-                        detail_btn = QPushButton("데이터 확인")
-                        detail_btn.setMaximumHeight(30)
-                        detail_btn.setMaximumWidth(120)
-                        detail_btn.clicked.connect(lambda checked, row=i: self.show_detail_result(row))
-                        
-                        btn_widget = QWidget()
-                        btn_layout = QHBoxLayout()
-                        btn_layout.setContentsMargins(0, 0, 0, 0)
-                        btn_layout.addWidget(detail_btn)
-                        btn_layout.setAlignment(Qt.AlignCenter)
-                        btn_widget.setLayout(btn_layout)
-                        
-                        self.tableWidget.setCellWidget(i, 7, btn_widget)
-
-                        # 메시지 규격 버튼 (8번 컬럼)
-                        schema_btn = QPushButton("규격 확인")
-                        schema_btn.setMaximumHeight(30)
-                        schema_btn.setMaximumWidth(100)
-                        schema_btn.clicked.connect(lambda checked, row=i: self.show_schema_result(row))
-                        
-                        schema_widget = QWidget()
-                        schema_layout = QHBoxLayout()
-                        schema_layout.setContentsMargins(0, 0, 0, 0)
-                        schema_layout.addWidget(schema_btn)
-                        schema_layout.setAlignment(Qt.AlignCenter)
-                        schema_widget.setLayout(schema_layout)
-                        
-                        self.tableWidget.setCellWidget(i, 8, schema_widget)
-
-                        # 메시지 오류 버튼 (9번 컬럼)
-                        error_btn = QPushButton("오류 확인")
-                        error_btn.setMaximumHeight(30)
-                        error_btn.setMaximumWidth(100)
-                        error_btn.clicked.connect(lambda checked, row=i: self.show_error_result(row))
-                        
-                        error_widget = QWidget()
-                        error_layout = QHBoxLayout()
-                        error_layout.setContentsMargins(0, 0, 0, 0)
-                        error_layout.addWidget(error_btn)
-                        error_layout.setAlignment(Qt.AlignCenter)
-                        error_widget.setLayout(error_layout)
-                        
-                        self.tableWidget.setCellWidget(i, 9, error_widget)
-                    else:
-                        # 빈 행 처리
-                        for j in range(10):
-                            self.tableWidget.setItem(i, j, QTableWidgetItem(""))
-                        
-                        btn_widget = QWidget()
-                        btn_layout = QHBoxLayout()
-
-    def g2_radio_checked(self, checked):
-        if checked:
-            self.auth_flag = True
-            if self.g2_radio1.isChecked():  # digest
-                self.r2 = "D"
-                msg = QMessageBox()
-                msg.setText("Message: 사용자 인증 정보")
-                msg.setInformativeText(
-                    'ID: ' + str(self.digestInfo[0]) + '  \nPW:' + str(self.digestInfo[1]))
-                msg.setWindowTitle("Information")
-                msg.exec_()
-            elif self.g2_radio2.isChecked():  # bearer token
-                self.r2 = "B"
-                msg = QMessageBox()
-                msg.setText("Message: 사용자 인증 정보")
-                if self.token is None:
-                    msg.setInformativeText('Bearer Token' + ': ' + '토큰 정보 없음')
-                else:
-                    msg.setInformativeText('Bearer Token'+': '+self.token)
-                msg.setWindowTitle("Information")
-                msg.exec_()
-            elif self.g2_radio3.isChecked():
-                self.r2 = "None"
+# 기존 라디오 버튼 이벤트 핸들러 제거됨 - CONSTANTS.py에서 설정 관리
 
     def start_btn_clicked(self):
-        if self.radio_check_flag == False:
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Critical)
-            msg.setText("Error Message: 연동시스템 선택 오류")
-            msg.setInformativeText('물리보안 시스템을 선택해주세요.')
-            msg.setWindowTitle("Error")
-            msg.exec_()
-        elif self.auth_flag == False:
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Critical)
-            msg.setText("Error Message: 사용자 인증 선택 오류")
-            msg.setInformativeText('사용자 인증을 선택해주세요.')
-            msg.setWindowTitle("Error")
-            msg.exec_()
-        else:
-            # system_type self.system 으로 바꿀것 #tylee
-            system_type = "video" if self.g1_radio1.isChecked() else "bio" if self.g1_radio2.isChecked() else "security"
-            json_to_data(system_type)
-            self.sbtn.setDisabled(True)
-            self.stop_btn.setEnabled(True)
+        # 영상보안 시스템으로 고정되어 있고, CONSTANTS.py에서 인증 정보를 가져오므로
+        # 별도의 검증 없이 바로 시작
+        json_to_data("video")
+        self.sbtn.setDisabled(True)
+        self.stop_btn.setEnabled(True)
 
-            self.init_win()
-            self.valResult.clear()  # 초기화
+        self.init_win()
+        self.valResult.clear()  # 초기화
 
-            self.final_report = ""  # 초기화
-            self.tmp_msg_append_flag = False  # 초기화 . step1이 여러번 적힘 우선 임시 T.T
+        self.final_report = ""  # 초기화
+        self.post_flag = False
+        self.total_error_cnt = 0
+        self.total_pass_cnt = 0
+        self.message_in_cnt = 0
+        self.message_error = []
 
-            self.post_flag = False
-            self.total_error_cnt = 0
-            self.total_pass_cnt = 0
-            self.message_in_cnt = 0
-            self.message_error = []
-
-            self.pathUrl = self.linkUrl.text()
-            self.valResult.append("Start Validation...\n")
-            self.webhook_cnt = 99
-            self.tick_timer.start()
+        # CONSTANTS.py에서 URL 가져오기
+        self.pathUrl = CONSTANTS.url
+        self.valResult.append("Start Validation...\n")
+        self.webhook_cnt = 99
+        self.tick_timer.start()
 
     def stop_btn_clicked(self):
         self.tick_timer.stop()
@@ -1477,48 +1151,30 @@ class MyApp(QWidget):
 
     def get_setting(self):
         self.setting_variables = QSettings('My App', 'Variable')
-
-        self.system = self.setting_variables.value('system')
-        if self.system == "video":
-            self.g1_radio1.setChecked(True)
-        elif self.system == "bio":
-            self.g1_radio2.setChecked(True)
-        elif self.system == "security":
-            self.g1_radio3.setChecked(True)
-
-        self.r2 = self.setting_variables.value('auth')
-        if self.r2 == "D":
-            self.g2_radio1.setChecked(True)
-        elif self.r2 == "B":
-            self.g2_radio2.setChecked(True)
-        elif self.r2 == "None":
-            self.g2_radio3.setChecked(True)
-
-        tmp = self.setting_variables.value('linkUrl')
-        if tmp is None:
-            tmp = "https://127.0.0.1:8008"
-        self.linkUrl.setText(tmp)
-        try:
-            tmp = self.setting_variables.value('timeInterval')
-            self.timeInterval_widget.setValue(int(tmp))
-        except TypeError:
-            self.timeInterval_widget.setValue(2)
-        try:
-            tmp = self.setting_variables.value('timeOut')
-            self.timeOut_widget.setValue(int(tmp))
-        except TypeError:
-            self.timeOut_widget.setValue(5)
-
-        saved_idx = self.setting_variables.value('protocolWidget',0,int)
-        self.protocol_widget.setCurrentIndex(saved_idx)
+        self.system = "video"  # 영상보안 시스템으로 고정
+        
+        # 기본 시스템 설정 (영상보안 시스템으로 고정)
+        self.radio_check_flag = "video"
+        self.message = videoMessages
+        self.inMessage = videoInMessage
+        self.outMessage = videoOutMessage
+        self.inSchema = videoInSchema
+        self.outSchema = videoOutSchema
+        self.webhookSchema = videoWebhookSchema
+        self.final_report = "영상보안 시스템-물리보안 통합플랫폼(가상) 검증 결과"+"\n"
+        
+        # 기본 인증 설정 (CONSTANTS.py에서 가져옴)
+        self.r2 = CONSTANTS.auth_type
+        if self.r2 == "Digest Auth":
+            self.r2 = "D"
+        elif self.r2 == "Bearer Token":
+            self.r2 = "B"
+        else:
+            self.r2 = "None"
 
     def closeEvent(self, event):
-        self.setting_variables.setValue('system', self.system)
-        self.setting_variables.setValue('auth', self.r2)
-        self.setting_variables.setValue('timeInterval', self.timeInterval_widget.text())
-        self.setting_variables.setValue('timeOut', self.timeOut_widget.text())
-        self.setting_variables.setValue('linkUrl', self.linkUrl.text())
-        self.setting_variables.setValue('protocolWidget', self.protocol_widget.currentIndex())
+        # 설정을 저장할 필요가 없음 (CONSTANTS.py에서 관리)
+        event.accept()
 
 
 if __name__ == '__main__':
