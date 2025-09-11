@@ -17,20 +17,10 @@
             "type": "object",
             "properties": {
               "userID": {
-                "type": "string",
-                "validation": {
-                  "minLength": 3,
-                  "maxLength": 20,
-                  "pattern": "^[a-zA-Z0-9_]+$"
-                }
+                "type": "string"
               },
               "userPW": {
-                "type": "string",
-                "validation": {
-                  "minLength": 3,
-                  "maxLength": 20,
-                  "pattern": "^[a-zA-Z0-9_]+$"
-                }
+                "type": "string"
               }
             },
             "required": [
@@ -147,12 +137,10 @@
                 "type": "object",
                 "properties": {
                   "startTime": {
-                    "type": "integer",
-                    "description": "Start time in UNIX timestamp or epoch format"
+                    "type": "integer"
                   },
                   "endTime": {
-                    "type": "integer",
-                    "description": "End time in UNIX timestamp or epoch format"
+                    "type": "integer"
                   }
                 },
                 "required": [
@@ -166,8 +154,7 @@
                   "type": "object",
                   "properties": {
                     "camID": {
-                      "type": "string",
-                      "description": "Unique camera identifier"
+                      "type": "string"
                     }
                   },
                   "required": [
@@ -229,12 +216,7 @@
                   "type": "object",
                   "properties": {
                     "camID": {
-                      "type": "string",
-                      "validation": {
-                        "anyOf": [
-                          "cam001",
-                          "cam002"
-                        ]
+                      "type": "string"
                       }
                     },
                     "streamProtocolType": {

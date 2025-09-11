@@ -20,7 +20,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("검증 소프트웨어 통합 실행기")
         self.resize(1200, 720)
-
+        self._orig_flags = self.windowFlags()
         self.stack = QStackedWidget()
         self.setCentralWidget(self.stack)
 
@@ -41,9 +41,9 @@ class MainWindow(QMainWindow):
         menubar = self.menuBar()
         main_menu = menubar.addMenu("메뉴")
 
-        act_login = QAction("로그인", self)
-        act_login.triggered.connect(lambda: self.stack.setCurrentIndex(0))
-        main_menu.addAction(act_login)
+        self.act_login = QAction("로그인", self)
+        self.act_login.triggered.connect(lambda: self.stack.setCurrentIndex(0))
+        main_menu.addAction(self.act_login)
 
         self.act_logout = QAction("로그아웃", self)
         self.act_logout.triggered.connect(self._logout)
@@ -66,15 +66,41 @@ class MainWindow(QMainWindow):
 
         view_menu = menubar.addMenu("보기")
         act_full = QAction("전체화면 전환", self, checkable=True)
-        act_full.triggered.connect(lambda checked: self.showFullScreen() if checked else self.showNormal())
+        act_full.triggered.connect(self._toggle_fullscreen)
         view_menu.addAction(act_full)
 
+    def _toggle_fullscreen(self, checked: bool):
+        """
+        On: 최소화/이전크기/종료 버튼만 보이게 하고, 최대화 상태로 전환.
+            (이전크기 버튼이 활성화됨)
+        Off: 원래 플래그/지오메트리로 복원.
+        """
+        if checked:
+            # 현재 상태/지오메트리 저장(복원용)
+            self._saved_geom = self.saveGeometry()
+            self._saved_state = self.windowState()
+
+            # 제목표시줄 + 최소화 + 최대화(최대화 시 '이전크기'로 표기) + 종료
+            flags = (Qt.Window | Qt.WindowTitleHint |
+                     Qt.WindowMinimizeButtonHint |
+                     Qt.WindowMaximizeButtonHint |
+                     Qt.WindowCloseButtonHint)
+            self.setWindowFlags(flags)
+            self.show()
+            self.showMaximized()
+        else:
+            self.setWindowFlags(self._orig_flags)
+            self.show()
+            if self._saved_geom:
+                self.restoreGeometry(self._saved_geom)
+            self.showNormal()
     def _on_login_success(self, url: str):
         # 접속 성공 → 두 번째 화면으로 전환
         self.stack.setCurrentIndex(1)
         self.act_test_info.setEnabled(True)
         self.act_run_platform.setEnabled(True)
         self.act_logout.setEnabled(True)
+        self.act_login.setEnabled(False)
         # 필요 시 selection_widget에 서버 URL 전달:
         # if hasattr(self.selection_widget, 'setServerUrl'): self.selection_widget.setServerUrl(url)
 
@@ -86,6 +112,7 @@ class MainWindow(QMainWindow):
         self.act_test_info.setEnabled(False)
         self.act_run_platform.setEnabled(False)
         self.act_logout.setEnabled(False)
+        self.act_login.setEnabled(True)
         # 필요시 platform 화면도 초기화
         if hasattr(self, "_platform_widget"):
             self.stack.removeWidget(self._platform_widget)
