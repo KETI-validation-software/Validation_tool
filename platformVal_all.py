@@ -173,7 +173,7 @@ class MyApp(QWidget):
         self.flag_opt = True  # functions.py-json_check_ # 필수필드만 확인 False, optional 필드까지 확인 True
         self.tick_timer = QTimer()
         self.tick_timer.timeout.connect(self.update_view)
-        self.auth_flag = True  # CONSTANTS.py에서 인증 정보를 가져오므로 True로 설정
+        self.auth_flag = True 
         self.Server = Server
 
         auth_temp, auth_temp2 = set_auth("config/config.txt")
@@ -211,6 +211,59 @@ class MyApp(QWidget):
             except Exception:
                 return str(val_text)
         return str(val_text)
+    
+    def update_table_row_with_retries(self, row, result, pass_count, error_count, data, error_text, retries):
+        if row>= self.tableWidget.rowCount():
+            return
+        
+        # 아이콘 업데이트
+        msg, img = self.icon_update_step(data, result, error_text)
+    
+    # 아이콘을 완전히 중앙에 정렬하기 위해 위젯 사용
+        icon_widget = QWidget()
+        icon_layout = QHBoxLayout()
+        icon_layout.setContentsMargins(0, 0, 0, 0)
+    
+        icon_label = QLabel()
+        icon_label.setPixmap(QIcon(img).pixmap(16, 16))
+        icon_label.setToolTip(msg)
+        icon_label.setAlignment(Qt.AlignCenter)
+    
+        icon_layout.addWidget(icon_label)
+        icon_layout.setAlignment(Qt.AlignCenter)
+        icon_widget.setLayout(icon_layout)
+    
+        self.tableWidget.setCellWidget(row, 1, icon_widget)
+    
+    # 실제 검증 횟수 업데이트
+        self.tableWidget.setItem(row, 2, QTableWidgetItem(str(retries)))
+        self.tableWidget.item(row, 2).setTextAlignment(Qt.AlignCenter)
+    
+    # 통과 필드 수 업데이트
+        self.tableWidget.setItem(row, 3, QTableWidgetItem(str(pass_count)))
+        self.tableWidget.item(row, 3).setTextAlignment(Qt.AlignCenter)
+    
+    # 전체 필드 수 업데이트
+        total_fields = pass_count + error_count
+        self.tableWidget.setItem(row, 4, QTableWidgetItem(str(total_fields)))
+        self.tableWidget.item(row, 4).setTextAlignment(Qt.AlignCenter)
+    
+    # 실패 횟수 업데이트
+        self.tableWidget.setItem(row, 5, QTableWidgetItem(str(error_count)))
+        self.tableWidget.item(row, 5).setTextAlignment(Qt.AlignCenter)
+    
+    # 평가 점수 업데이트
+        if total_fields > 0:
+            score = (pass_count / total_fields) * 100
+            self.tableWidget.setItem(row, 6, QTableWidgetItem(f"{score:.1f}%"))
+        else:
+            self.tableWidget.setItem(row, 6, QTableWidgetItem("0%"))
+        self.tableWidget.item(row, 6).setTextAlignment(Qt.AlignCenter)
+    
+    # 메시지 저장 (팝업용)
+        setattr(self, f"step{row+1}_msg", msg)
+
+
 
     def update_table_row(self, row, result, pass_count, error_count, data, error_text):
         """테이블 행 업데이트 (아이콘, 통과/전체 필드 수 포함)"""
@@ -264,7 +317,7 @@ class MyApp(QWidget):
         # 메시지 저장 (팝업용)
         setattr(self, f"step{row+1}_msg", msg)
 
-    # 실시간 모니터링용
+    # 실시간 모니터링용 + 메인 검증 로직
     def update_view(self):
         try:
             time_interval = 0
@@ -286,7 +339,10 @@ class MyApp(QWidget):
                 time.sleep(1)
                 time_interval += 1
 
-            if time_interval < 5:  # CONSTANTS에서 기본 timeout 값 사용
+        ##################### 09/12 이 아래부터 수정 ##############################
+            current_timeout = CONSTANTS.time_out[self.cnt] / 1000   # ms를 초로 변환
+
+            if time_interval < current_timeout:  # CONSTANTS에서 기본 timeout 값 사용 -> 얘도 나중에 수정해야함
                 try:
                     with open(resource_path("spec/" + self.Server.system + "/" + self.Server.message[self.cnt] +
                                             ".json"), "r", encoding="UTF-8") as out_file:
@@ -299,9 +355,9 @@ class MyApp(QWidget):
                     # box.setText("Error Message: " + path_ + " 을 확인하세요")
                     box.setInformativeText(str(verr))
                     box.setWindowTitle("Error")
-
                     box.exec_()
                     return ""
+                
                 except Exception as err:
                     #print(traceback.format_exc())
                     box = QMessageBox()
@@ -309,7 +365,6 @@ class MyApp(QWidget):
                     # box.setText("Error Message: " + path_ + " 을 확인하세요")
                     box.setInformativeText(str(err))
                     box.setWindowTitle("Error")
-
                     box.exec_()
                     return ""
 
@@ -317,110 +372,131 @@ class MyApp(QWidget):
                     # with open(self.Server.message[self.cnt] + ".json", "w") as out_file:
                     #    json.dump(None, out_file)
                     message_name = "step " + str(self.cnt + 1) + ": " + self.Server.message[self.cnt]
-                    inMessage = dict()
+                    
+                    ############### 09/12 여기부터 수정 ##########################
+                    # 개별 검증 횟수 처리하기
+                    current_retries = CONSTANTS.num_retries[self.cnt]
+                    current_protocol = CONSTANTS.trans_protocol[self.cnt]
 
-                    # ▼ 추가: 이 스텝에서 합칠 버퍼들
-                    combined_data_parts = []    # 화면/버튼 "데이터"에 넣을 JSON 문자열들
-                    combined_error_parts = []   # 화면/버튼 "오류"에 넣을 오류 문자열들
-                    step_result = "PASS"        # 입력/웹훅 둘 중 하나라도 FAIL이면 FAIL
-                    add_pass = 0
-                    add_err = 0
+                    # 반복 루프 처리해야함
+                    total_pass_count = 0
+                    total_error_count = 0
+                    all_validation_results = []
+                    all_error_messages = []
+                    combined_data_parts = []    # 루프 밖으로 이동 - 전체 검증에서 한 번만 데이터 수집
 
-                    val_result = ""
-                    val_text = ""
-                    key_psss_cnt = 0
-                    key_error_cnt = 0
-                    if self.Server.message[self.cnt] in CONSTANTS.none_request_message:
-                        tmp_res_auth = json.dumps(data, indent=4, ensure_ascii=False)
-                        combined_data_parts.append(tmp_res_auth)
+                    for retry_attempt in range(current_retries):
+                                            #이 스텝에서 합칠 버퍼들 -> 루프문 안에 넣어서 루프 처리
+                        combined_error_parts = []   # 화면/버튼 "오류"에 넣을 오류 문자열들 (각 회차별)
+                        step_result = "PASS"        # 입력/웹훅 둘 중 하나라도 FAIL이면 FAIL
+                        add_pass = 0
+                        add_err = 0
 
-                        if (len(data) != 0) and data != "{}":
-                            step_result = "FAIL"
-                            add_err = 1
-                            combined_error_parts.append("[None Request] 데이터가 있으면 안 됩니다.")
-                        elif (len(data) == 0) or data == "{}":
-                            step_result = "PASS"
-                            add_pass = 1
+                        if self.Server.message[self.cnt] in CONSTANTS.none_request_message:
+                            # 첫 번째 검증에서만 데이터 수집
+                            if retry_attempt == 0:
+                                tmp_res_auth = json.dumps(data, indent=4, ensure_ascii=False)
+                                combined_data_parts.append(tmp_res_auth)
 
-                    else:
+                            if (len(data) != 0) and data != "{}":
+                                step_result = "FAIL"
+                                add_err = 1
+                                combined_error_parts.append(f"[검증 {retry_attempt + 1}회차] [None Request] 데이터가 있으면 안 됩니다.")
+                            elif (len(data) == 0) or data == "{}":
+                                step_result = "PASS"
+                                add_pass = 1
+
+                        else:
                         #print("통플검증sw이 받은 ->", data)
-                        # 입력 데이터 수집
-                        tmp_res_auth = json.dumps(data, indent=4, ensure_ascii=False)
-                        combined_data_parts.append(tmp_res_auth)
+                        # 입력 데이터 수집 (첫 번째 검증에서만)
+                            if retry_attempt == 0:
+                                tmp_res_auth = json.dumps(data, indent=4, ensure_ascii=False)
+                                combined_data_parts.append(tmp_res_auth)
                         
-                        # do_chcker 호출 1번
-                        val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.Server.inSchema[self.cnt],
+                            # do_chcker 호출 1번
+                            val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.Server.inSchema[self.cnt],
                                                                                     data, self.flag_opt)
-                        add_pass += key_psss_cnt
-                        add_err += key_error_cnt
+                            add_pass += key_psss_cnt
+                            add_err += key_error_cnt
                         
-                        inbound_err_txt = self._to_detail_text(val_text)
-                        if val_result == "FAIL":
-                            step_result = "FAIL"
-                            combined_error_parts.append("[Inbound] " + inbound_err_txt)
+                            inbound_err_txt = self._to_detail_text(val_text)
+                            if val_result == "FAIL":
+                                step_result = "FAIL"
+                                combined_error_parts.append(f"[검증 {retry_attempt + 1}회차] [Inbound] " + inbound_err_txt)
+                            
 #############################################################################################################
  # 아래 수정중
-
-                        if "Realtime" in str(self.Server.message[self.cnt]):  # realtime 어찌구인지 확인해야함
-                            if "Webhook".lower() in str(data).lower():
-                                try:
+                            # 개별 프로토콜 설정에 따른 처리 -> 09/12 기존에 새로 추가되는 부분
+                            if current_protocol == "LongPolling" and "Realtime" in str(self.Server.message[self.cnt]):
+                                if "Webhook".lower() in str(data).lower():
+                                    try:
                                     # 방어적으로 Webhook URL이 잘못된 경우 기본값을 넣어줌
-                                    webhook_json_path = resource_path(
-                                        "spec/" + self.Server.system + "/" + "webhook_" + self.Server.message[self.cnt] + ".json")
-                                    with open(webhook_json_path, "r", encoding="UTF-8") as out_file2:
-                                        self.realtime_flag = True
-                                        webhook_data = json.load(out_file2)
+                                        webhook_json_path = resource_path(
+                                            "spec/" + self.Server.system + "/" + "webhook_" + self.Server.message[self.cnt] + ".json")
+                                        with open(webhook_json_path, "r", encoding="UTF-8") as out_file2:
+                                            self.realtime_flag = True
+                                            webhook_data = json.load(out_file2)
                                         # Webhook URL 필드명 추정: transProtocolDesc 또는 url 등
                                         # video 모드에서 8번째 이후 메시지에서 잘못된 값이 들어오는 경우 방어
-                                        webhook_url = None
+                                            webhook_url = None
                                         # 1. transProtocolDesc가 있으면 검사
-                                        if isinstance(webhook_data, dict):
-                                            for k in webhook_data:
-                                                if k.lower() in ["transprotocoldesc", "url", "webhookurl"]:
-                                                    webhook_url = webhook_data[k]
-                                                    break
+                                            if isinstance(webhook_data, dict):
+                                                for k in webhook_data:
+                                                    if k.lower() in ["transprotocoldesc", "url", "webhookurl"]:
+                                                        webhook_url = webhook_data[k]
+                                                        break
                                         # 2. 잘못된 값이면 기본값으로 대체
-                                        if webhook_url in [None, '', 'desc', 'none', 'None'] or (isinstance(webhook_url, str) and not webhook_url.lower().startswith(('http://', 'https://'))):
-                                            # 기본값: CONSTANTS.py에서 URL 사용
-                                            webhook_url = CONSTANTS.url
+                                            if webhook_url in [None, '', 'desc', 'none', 'None'] or (isinstance(webhook_url, str) and not webhook_url.lower().startswith(('http://', 'https://'))):
+                                                webhook_url = CONSTANTS.url
                                             # 실제로도 대입
-                                            for k in webhook_data:
-                                                if k.lower() in ["transprotocoldesc", "url", "webhookurl"]:
-                                                    webhook_data[k] = webhook_url
+                                                for k in webhook_data:
+                                                    if k.lower() in ["transprotocoldesc", "url", "webhookurl"]:
+                                                        webhook_data[k] = webhook_url
                                         # 3. 만약 그래도 url이 없으면 아예 Webhook 검증을 skip
-                                        if webhook_url in [None, '', 'desc', 'none', 'None']:
-                                            pass  # Webhook 검증 스킵
-                                        else:
-                                            # Webhook 데이터 수집 (UI 갱신 없이)
-                                            tmp_webhook_data = json.dumps(webhook_data, indent=4, ensure_ascii=False)
-                                            webhook_val_result, webhook_val_text, webhook_key_psss_cnt, webhook_key_error_cnt = json_check_(
-                                                self.Server.outSchema[-1], webhook_data, self.flag_opt
-                                            )
+                                            if webhook_url in [None, '', 'desc', 'none', 'None']:
+                                                pass  # Webhook 검증 스킵
+                                            else:
+                                            # Webhook 데이터 수집 (첫 번째 검증에서만)
+                                                if retry_attempt == 0:
+                                                    tmp_webhook_data = json.dumps(webhook_data, indent=4, ensure_ascii=False)
+                                                    combined_data_parts.append("\n--- Webhook ---\n" + tmp_webhook_data)
+                                                
+                                                # 매번 Webhook 검증 수행
+                                                webhook_val_result, webhook_val_text, webhook_key_psss_cnt, webhook_key_error_cnt = json_check_(
+                                                    self.Server.outSchema[-1], webhook_data, self.flag_opt
+                                                )
                                             
-                                            combined_data_parts.append("\n--- Webhook ---\n" + tmp_webhook_data)
+                                                add_pass += webhook_key_psss_cnt
+                                                add_err += webhook_key_error_cnt
                                             
-                                            add_pass += webhook_key_psss_cnt
-                                            add_err += webhook_key_error_cnt
-                                            
-                                            webhook_err_txt = self._to_detail_text(webhook_val_text)
-                                            if webhook_val_result == "FAIL":
-                                                step_result = "FAIL"
-                                                combined_error_parts.append("[Webhook] " + webhook_err_txt)
+                                                webhook_err_txt = self._to_detail_text(webhook_val_text)
+                                                if webhook_val_result == "FAIL":
+                                                    step_result = "FAIL"
+                                                    combined_error_parts.append(f"[검증 {retry_attempt + 1}회차] [Webhook] " + webhook_err_txt)
                                 
-                                except json.JSONDecodeError as verr:
-                                    box = QMessageBox()
-                                    box.setIcon(QMessageBox.Critical)
-                                    box.setInformativeText(str(verr))
-                                    box.setWindowTitle("Error")
-                                    box.exec_()
-                                    return ""
+                                    except json.JSONDecodeError as verr:
+                                        box = QMessageBox()
+                                        box.setIcon(QMessageBox.Critical)
+                                        box.setInformativeText(str(verr))
+                                        box.setWindowTitle("Error")
+                                        box.exec_()
+                                        return ""
+                        
+                        # 각 검증 회차별 결과 저장
+                        all_validation_results.append(step_result)
+                        all_error_messages.extend(combined_error_parts)
+                        total_pass_count += add_pass
+                        total_error_count += add_err
+
+                    # 최종 결과 -> 하나라도 fail이면 fail 
+                    final_result = "FAIL" if "FAIL" in all_validation_results else "PASS"
 
                     # (1) 스텝 버퍼 저장
                     data_text = "\n".join(combined_data_parts) if combined_data_parts else "아직 수신된 데이터가 없습니다."
-                    error_text = "\n".join(combined_error_parts) if combined_error_parts else "오류가 없습니다."
+                    error_text = "\n".join(all_error_messages) if all_error_messages else "오류가 없습니다."
                     self.step_buffers[self.cnt]["data"] = data_text
                     self.step_buffers[self.cnt]["error"] = error_text
-                    self.step_buffers[self.cnt]["result"] = step_result
+                    self.step_buffers[self.cnt]["result"] = final_result
 
                     # (2) 아이콘/툴팁 갱신 (툴팁 길이 줄이려면 data_text 대신 tmp_res_auth만 써도 OK)
                     if combined_data_parts:
@@ -428,17 +504,20 @@ class MyApp(QWidget):
                     else:
                         tmp_res_auth = "No data"
                     
-                    # 테이블 업데이트 (통과/전체 필드 수 포함)
-                    self.update_table_row(self.cnt, step_result, add_pass, add_err, tmp_res_auth, error_text)
+                    # 테이블 업데이트 (통과/전체 필드 수 포함) -> 얘도 09/12 수정
+                    #self.update_table_row(self.cnt, step_result, add_pass, add_err, tmp_res_auth, error_text)
+                    self.update_table_row_with_retries(self.cnt, final_result, total_pass_count, total_error_count, tmp_res_auth, error_text, current_retries)
 
-                    # (3) 모니터링 창에는 '한 번만' 붙이기 (입력 + (있다면) Webhook까지 합쳐진 data_text를 보여줌)
+                    # (3) 모니터링 창에는 '한 번만' 붙이기 (입력 + (있다면) Webhook까지 합쳐진 data_text를 보여줌) > 09/12 수정
                     self.valResult.append(message_name)
+                    self.valResult.append(f"\n검증 횟수: {current_retries}")
+                    self.valResult.append(f"프로토콜: {current_protocol}")
                     self.valResult.append("\n" + data_text)
-                    self.valResult.append(step_result)
+                    self.valResult.append(final_result)
 
-                    # (4) 누적 점수 업데이트 (한 번만)
-                    self.total_error_cnt += add_err
-                    self.total_pass_cnt += add_pass
+                    # (4) 누적 점수 업데이트 (한 번만) -> 09/12 수정
+                    self.total_error_cnt += total_error_count
+                    self.total_pass_cnt += total_pass_count
 
                     self.update_score_display()
                     self.valResult.append(
@@ -449,7 +528,8 @@ class MyApp(QWidget):
                     self.cnt += 1
                 self.realtime_flag = False
 
-            elif time_interval > 5 and self.cnt == self.cnt_pre:  # CONSTANTS에서 기본 timeout 값 사용
+            # 09/12 추가된 부분
+            elif time_interval > current_timeout and self.cnt == self.cnt_pre:  # CONSTANTS에서 기본 timeout 값 사용
                 # self.valResult.append(self.Server.message[self.cnt])
                 message_name = "step " + str(self.cnt + 1) + ": " + self.Server.message[self.cnt]
                 
@@ -459,6 +539,7 @@ class MyApp(QWidget):
                 self.step_buffers[self.cnt]["result"] = "FAIL"
 
                 self.valResult.append(message_name)
+                self.valResult.append(f"Timeout: {current_timeout}초")
                 self.valResult.append("Message Missing!")
                 tmp_fields_rqd_cnt, tmp_fields_opt_cnt = timeout_field_finder(self.Server.inSchema[self.cnt])
 
@@ -482,7 +563,9 @@ class MyApp(QWidget):
                 add_err = tmp_fields_rqd_cnt if tmp_fields_rqd_cnt > 0 else 1
                 if self.flag_opt:
                     add_err += tmp_fields_opt_cnt
-                self.update_table_row(self.cnt, "FAIL", 0, add_err, "", "Message Missing!")
+                
+                current_retries = CONSTANTS.num_retries[self.cnt]
+                self.update_table_row_with_retries(self.cnt, "FAIL", 0, add_err, "", "Message Missing!", current_retries)
                 
                 self.cnt += 1
 
@@ -949,6 +1032,7 @@ class MyApp(QWidget):
         json_to_data(self.radio_check_flag)
 
         timeout = 5  # CONSTANTS에서 기본값 사용
+        default_timeout = 5
         if self.r2 == "B":
             videoOutMessage[0]['accessToken'] = self.token
         self.Server.message = videoMessages
