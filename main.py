@@ -9,10 +9,7 @@ from login_GUI import LoginWidget
 from info_GUI import InfoWidget
 from core.functions import resource_path
 import platformVal_all as platform_app
-
-# (필요 시) 실제 검증 앱 화면을 추가적으로 임베드하려면 아래 모듈을 사용
-# import platformVal_all as platform_app
-# import systemVal_all as system_app
+import systemVal_all as system_app
 
 
 class MainWindow(QMainWindow):
@@ -32,7 +29,7 @@ class MainWindow(QMainWindow):
         # 접속 후 화면
         self.info_widget = InfoWidget()
         self.stack.addWidget(self.info_widget)  # index 1
-        self.info_widget.startTestRequested.connect(self._open_platform)
+        self.info_widget.startTestRequested.connect(self._open_validation_app)
 
         self._setup_menu()
         self.stack.setCurrentIndex(0)
@@ -57,7 +54,7 @@ class MainWindow(QMainWindow):
 
         self.act_run_platform = QAction("시험 실행", self)
         self.act_run_platform.setEnabled(False)
-        self.act_run_platform.triggered.connect(self._open_platform)
+        self.act_run_platform.triggered.connect(self._open_validation_app)
         main_menu.addAction(self.act_run_platform)
 
         act_exit = QAction("종료", self)
@@ -119,13 +116,20 @@ class MainWindow(QMainWindow):
             self._platform_widget = None
         QMessageBox.information(self, "로그아웃", "정상적으로 로그아웃되었습니다.")
 
-    def _open_platform(self):
-        # 이미 생성되어 있으면 그걸로 전환
-        if getattr(self, "_platform_widget", None) is None:
-            # platformVal_all.MyApp는 embedded=True로 생성 → QStackedWidget에 삽입
-            self._platform_widget = platform_app.MyApp(embedded=True)
-            self.stack.addWidget(self._platform_widget)
-        self.stack.setCurrentWidget(self._platform_widget)
+    def _open_validation_app(self, mode):
+        """모드에 따라 다른 검증 앱 실행"""
+        if mode == "request":
+            # Request 모드 - Platform 검증
+            if getattr(self, "_platform_widget", None) is None:
+                self._platform_widget = platform_app.MyApp(embedded=True)
+                self.stack.addWidget(self._platform_widget)
+            self.stack.setCurrentWidget(self._platform_widget)
+        else:  # response
+            # Response 모드 - System 검증  
+            if getattr(self, "_system_widget", None) is None:
+                self._system_widget = system_app.MyApp(embedded=True)
+                self.stack.addWidget(self._system_widget)
+            self.stack.setCurrentWidget(self._system_widget)
 
     def closeEvent(self, event):
         reply = QMessageBox.question(self, '종료', '프로그램을 종료하시겠습니까?',
