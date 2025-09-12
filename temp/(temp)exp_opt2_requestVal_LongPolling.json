@@ -233,7 +233,6 @@
             "required": [
               "camList"
             ]
-          }
         },
         "respoonseData": {
           "code": "200",

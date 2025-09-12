@@ -434,7 +434,7 @@ class InfoWidget(QWidget):
     def update_constants_py(self):
         """CONSTANTS.py 파일의 변수들을 GUI 입력값으로 업데이트"""
         try:
-            constants_path = "config/CONSTANTS_test.py"
+            constants_path = "config/CONSTANTS.py"
 
             # 1. 시험 기본 정보 수집
             company_name = self.company_edit.text().strip()
