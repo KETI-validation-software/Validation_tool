@@ -221,8 +221,6 @@ class MyApp(QWidget):
     def update_table_row(self, row, result_text, pass_count, total_count, detail_text, message_text):
         """테이블 행을 업데이트하는 함수"""
         if row < self.tableWidget.rowCount():
-            # API 명 (컬럼 0)은 기존 값을 유지 - 덮어쓰지 않음
-            
             # Result 아이콘 (컬럼 1) - 아이콘 위젯으로 설정
             icon_widget = QWidget()
             icon_layout = QHBoxLayout()
@@ -241,7 +239,7 @@ class MyApp(QWidget):
             
             self.tableWidget.setCellWidget(row, 1, icon_widget)
             
-            # Validation Count (컬럼 2) - 각 단계당 1회 검증으로 설정
+            # Validation Count (컬럼 2) - 각 단계당 1회 검증으로 설정 -> 추후 수정할 예정
             self.tableWidget.setItem(row, 2, QTableWidgetItem("1"))
             self.tableWidget.item(row, 2).setTextAlignment(Qt.AlignCenter)
             
@@ -266,7 +264,6 @@ class MyApp(QWidget):
                 self.tableWidget.setItem(row, 6, QTableWidgetItem("0%"))
             self.tableWidget.item(row, 6).setTextAlignment(Qt.AlignCenter)
             
-            # Message (컬럼 7-9는 버튼들이 있으므로 사용 안 함)
 
     def load_test_info_from_constants(self):
         """CONSTANTS.py에서 시험정보를 로드 (읽기 전용)"""
@@ -591,12 +588,6 @@ class MyApp(QWidget):
 
                     self.post_flag = False
 
-
-
-                # res = requests.post(self.pathUrl + "/"+ self.message[self.cnt],
-                #                    headers=CONSTANTS.headers, data=json_data,
-                #                    auth=self.auth_type, verify=False, timeout=10)
-
                 if self.cnt == len(self.message):
                     self.tick_timer.stop()
                     self.valResult.append("검증 절차가 완료되었습니다.")
@@ -611,9 +602,7 @@ class MyApp(QWidget):
                     self.stop_btn.setDisabled(True)
 
         except Exception as err:
-            #print("오류발생")
             print(err)
-            #print(traceback.format_exc())
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Critical)
             msg.setText("Error Message: 오류 확인 후 검증 절차를 다시 시작해주세요")
@@ -686,17 +675,15 @@ class MyApp(QWidget):
         # ==================== 왼쪽 열 구성 ====================
         leftLayout.addWidget(empty)  # empty
         
-        # 시험 정보 테이블 (세로 컬럼 형태) - CONSTANTS.py에서 동적으로 로드
         self.settingGroup = QGroupBox("시험정보")
-        self.settingGroup.setMaximumWidth(460)  # platformVal_all.py와 동일한 너비
+        self.settingGroup.setMaximumWidth(460)  
         
-        # 시험 정보 위젯 생성 (platformVal_all.py와 동일한 구조)
-        self.info_table = QTableWidget(9, 2)  # 9행 2열 (항목명, 값)
+        self.info_table = QTableWidget(9, 2)  
         self.info_table.setMaximumWidth(460)
-        self.info_table.setFixedHeight(386)  # 고정 높이로 설정하여 스크롤 완전 제거
+        self.info_table.setFixedHeight(386)  
         self.info_table.setHorizontalHeaderLabels(["항목", "내용"])
-        self.info_table.setColumnWidth(0, 150)  # 첫 번째 열 너비 고정
-        self.info_table.setColumnWidth(1, 288)  # 두 번째 열 너비 고정
+        self.info_table.setColumnWidth(0, 150)  
+        self.info_table.setColumnWidth(1, 288)  
         
         # 스크롤바 완전 제거
         self.info_table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -710,7 +697,7 @@ class MyApp(QWidget):
         
         # 각 행의 높이를 조정하여 모든 내용이 보이도록 설정
         for i in range(9):
-            self.info_table.setRowHeight(i, 40)  # 각 행 높이를 40px로 설정
+            self.info_table.setRowHeight(i, 40) 
         
         # CONSTANTS.py에서 테이블 데이터 로드
         table_data = self.load_test_info_from_constants()
@@ -719,14 +706,14 @@ class MyApp(QWidget):
         for row, (label, value) in enumerate(table_data):
             # 첫 번째 컬럼 (항목명) - 회색 배경
             item_label = QTableWidgetItem(label)
-            item_label.setFlags(Qt.ItemIsEnabled)  # 편집 불가
-            item_label.setBackground(QColor(240, 240, 240))  # 회색 배경
+            item_label.setFlags(Qt.ItemIsEnabled)  
+            item_label.setBackground(QColor(240, 240, 240))  
             self.info_table.setItem(row, 0, item_label)
             
             # 두 번째 컬럼 (내용) - 흰색 배경, 읽기 전용
             item_value = QTableWidgetItem(str(value))
-            item_value.setFlags(Qt.ItemIsEnabled)  # 편집 불가
-            item_value.setBackground(QColor(255, 255, 255))  # 흰색 배경
+            item_value.setFlags(Qt.ItemIsEnabled)  
+            item_value.setBackground(QColor(255, 255, 255))  
             self.info_table.setItem(row, 1, item_value)
         
         # 테이블 레이아웃
@@ -736,12 +723,12 @@ class MyApp(QWidget):
         
         # 검증 버튼들 (platformVal_all.py와 동일한 구조, 색상만 핑크로)
         buttonGroup = QWidget()  # QGroupBox에서 QWidget으로 변경
-        buttonGroup.setMaximumWidth(500)  # 가로 배치에 맞게 너비 증가
-        buttonLayout = QHBoxLayout()  # 세로에서 가로로 변경
+        buttonGroup.setMaximumWidth(500)  
+        buttonLayout = QHBoxLayout()  
         
         self.sbtn = QPushButton(self)
         self.sbtn.setText('평가 시작')
-        self.sbtn.setFixedSize(140, 50)  # platformVal_all.py와 동일한 크기
+        self.sbtn.setFixedSize(140, 50) 
         self.sbtn.setStyleSheet("""
             QPushButton {
                 background-color: #FFB6C1;  /* 파스텔 핑크 */
@@ -768,7 +755,7 @@ class MyApp(QWidget):
 
         self.stop_btn = QPushButton(self)
         self.stop_btn.setText('일시 정지')
-        self.stop_btn.setFixedSize(140, 50)  # platformVal_all.py와 동일한 크기
+        self.stop_btn.setFixedSize(140, 50) 
         self.stop_btn.setStyleSheet("""
             QPushButton {
                 background-color: #FFB6C1;  /* 파스텔 핑크 */
@@ -797,7 +784,7 @@ class MyApp(QWidget):
         # ------------------ 종료 버튼 ------------------------
         self.rbtn = QPushButton(self)
         self.rbtn.setText('종료')
-        self.rbtn.setFixedSize(140, 50)  # platformVal_all.py와 동일한 크기
+        self.rbtn.setFixedSize(140, 50) 
         self.rbtn.setStyleSheet("""
             QPushButton {
                 background-color: #FFB6C1;  /* 파스텔 핑크 */
@@ -822,20 +809,19 @@ class MyApp(QWidget):
         """)
         self.rbtn.clicked.connect(self.resultsave_btn_clicked)
         
-        buttonLayout.addStretch()  # 왼쪽 여백 추가로 중앙 정렬
+        buttonLayout.addStretch() 
         buttonLayout.addWidget(self.sbtn)
-        buttonLayout.addSpacing(20)  # 버튼 사이에 20px 간격 추가
+        buttonLayout.addSpacing(20) 
         buttonLayout.addWidget(self.stop_btn)
-        buttonLayout.addSpacing(20)  # 버튼 사이에 20px 간격 추가
+        buttonLayout.addSpacing(20) 
         buttonLayout.addWidget(self.rbtn)
-        buttonLayout.addStretch()  # 오른쪽 여백 추가로 중앙 정렬
+        buttonLayout.addStretch()  
         buttonGroup.setLayout(buttonLayout)
         
-        # 왼쪽 열에 시험정보와 버튼들 추가
         leftLayout.addWidget(self.settingGroup)
-        leftLayout.addSpacing(300)  # 시험정보와 버튼 사이 간격을 300px로 설정
+        leftLayout.addSpacing(300) 
         leftLayout.addWidget(buttonGroup)
-        leftLayout.addStretch()  # 남은 공간을 아래쪽으로 밀어내기
+        leftLayout.addStretch()  
         
         # ==================== 오른쪽 열 구성 ====================
         # 평가 점수
@@ -850,7 +836,7 @@ class MyApp(QWidget):
         # 시험 결과 영역을 테이블 크기에 맞게 조정
         contentWidget = QWidget()
         contentWidget.setLayout(self.centerLayout)
-        contentWidget.setMaximumSize(1050, 400)  # platformVal_all.py와 유사한 크기
+        contentWidget.setMaximumSize(1050, 400) 
         contentWidget.setMinimumSize(950, 300)
         rightLayout.addWidget(contentWidget)
         
@@ -860,23 +846,23 @@ class MyApp(QWidget):
         rightLayout.addWidget(QLabel("수신 메시지 실시간 모니터링"))
         self.valResult = QTextBrowser(self)
         self.valResult.setMaximumHeight(200)
-        self.valResult.setMaximumWidth(1050)  # platformVal_all.py와 유사한 크기
+        self.valResult.setMaximumWidth(1050)  
         self.valResult.setMinimumWidth(950)
         rightLayout.addWidget(self.valResult)
         
-        # 전체 레이아웃 구성 (2열) - platformVal_all.py와 동일
-        outerLayout.addLayout(leftLayout, 1)   # 왼쪽 열 (비율 1)
-        outerLayout.addSpacing(20)  # 열 사이 간격
-        outerLayout.addLayout(rightLayout, 2)  # 오른쪽 열 (비율 2, 더 넓게)
+        # 전체 레이아웃 구성 (2열) 
+        outerLayout.addLayout(leftLayout, 1)   
+        outerLayout.addSpacing(20)  
+        outerLayout.addLayout(rightLayout, 2)  
         self.setLayout(outerLayout)
         self.setWindowTitle('물리보안 시스템 연동 검증 소프트웨어')
-        self.setGeometry(100, 100, 1600, 900)  # 2열 레이아웃에 맞게 너비를 더 크게 조정
+        self.setGeometry(100, 100, 1600, 900) 
         
         if not self.embedded:
             self.show()
 
     def init_centerLayout(self):
-        # 표 형태로 변경 (8컬럼으로 축소)
+        # 표 형태로 변경
         self.tableWidget = QTableWidget(9, 8)
         self.tableWidget.setHorizontalHeaderLabels(["API 명", "결과", "검증 횟수", "통과 필드 수", "전체 필드 수", "실패 횟수", "평가 점수", "상세 내용"])
         self.tableWidget.verticalHeader().setVisible(False)
@@ -885,8 +871,8 @@ class MyApp(QWidget):
         self.tableWidget.setIconSize(QSize(16, 16))
         
         # 테이블 크기 설정
-        self.tableWidget.setMinimumSize(950, 300)  # 최소 크기 조정
-        self.tableWidget.resize(1050, 400)  # 기본 크기 조정
+        self.tableWidget.setMinimumSize(950, 300) 
+        self.tableWidget.resize(1050, 400)  
         
         # 컬럼 너비 설정
         self.tableWidget.setColumnWidth(0, 240)  # API 명 컬럼 너비 
@@ -896,7 +882,7 @@ class MyApp(QWidget):
         self.tableWidget.setColumnWidth(4, 110)  # 전체 필드 수 컬럼 너비 
         self.tableWidget.setColumnWidth(5, 100)  # 실패 횟수 컬럼 너비
         self.tableWidget.setColumnWidth(6, 110)  # 평가 점수 컬럼 너비
-        self.tableWidget.setColumnWidth(7, 130)  # 상세 내용 컬럼 너비 (확장) 
+        self.tableWidget.setColumnWidth(7, 130)  # 상세 내용 컬럼 너비
 
         # 행 높이 설정
         for i in range(9):
@@ -943,10 +929,9 @@ class MyApp(QWidget):
             # 상세 결과 버튼 (중앙 정렬을 위한 위젯 컨테이너)
             detail_btn = QPushButton("상세 내용 확인")
             detail_btn.setMaximumHeight(30)
-            detail_btn.setMaximumWidth(130)  # 버튼 최대 너비 증가
+            detail_btn.setMaximumWidth(130) 
             detail_btn.clicked.connect(lambda checked, row=i: self.show_combined_result(row))
             
-            # 버튼을 중앙에 배치하기 위한 위젯과 레이아웃
             container = QWidget()
             layout = QHBoxLayout()
             layout.addWidget(detail_btn)
@@ -993,13 +978,11 @@ class MyApp(QWidget):
         except Exception as e:
             CustomDialog(f"오류:\n{str(e)}", "상세 내용 확인 오류")
 
-# 기존 그룹 UI 함수들 제거됨 - CONSTANTS.py에서 설정을 가져오는 2열 레이아웃으로 변경
-
     def group_score(self):
         """평가 점수 박스"""
         sgroup = QGroupBox('평가 점수')
-        sgroup.setMaximumWidth(1050)  # 테이블과 동일한 너비로 설정 (축소)
-        sgroup.setMinimumWidth(950)   # 테이블 최소 너비와 동일하게 설정 (축소)
+        sgroup.setMaximumWidth(1050)  
+        sgroup.setMinimumWidth(950)   
         
         # 점수 표시용 레이블들
         self.pass_count_label = QLabel("통과 필드 수: 0")
@@ -1015,11 +998,11 @@ class MyApp(QWidget):
         
         # 가로 배치
         layout = QHBoxLayout()
-        layout.setSpacing(90)  # 레이블 간 간격 조정
+        layout.setSpacing(90)  
         layout.addWidget(self.pass_count_label)
         layout.addWidget(self.total_count_label)
         layout.addWidget(self.score_label)
-        layout.addStretch()  # 오른쪽 여백 추가
+        layout.addStretch()
         
         sgroup.setLayout(layout)
         return sgroup
@@ -1063,10 +1046,6 @@ class MyApp(QWidget):
                 api_name = self.step_names[row] if row < len(self.step_names) else f"Step {row+1}"
                 CustomDialog(msg, api_name)
 
-    def init_circleLayout(self):
-        pass  # 테이블 형태로 변경했으므로 이 메서드는 더이상 필요 없음
-
-# 기존 라디오 버튼 이벤트 핸들러 제거됨 - CONSTANTS.py에서 설정 관리
 
     def start_btn_clicked(self):
         # 영상보안 시스템으로 고정되어 있고, CONSTANTS.py에서 인증 정보를 가져오므로
@@ -1173,7 +1152,6 @@ class MyApp(QWidget):
             self.r2 = "None"
 
     def closeEvent(self, event):
-        # 설정을 저장할 필요가 없음 (CONSTANTS.py에서 관리)
         event.accept()
 
 
