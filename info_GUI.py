@@ -63,13 +63,14 @@ class InfoWidget(QWidget):
     접속 후 화면 GUI.
     - 시험 기본/입력 정보, 인증 선택, 주소 탐색, OPT 로드 등
     """
-    startTestRequested = pyqtSignal()
+    startTestRequested = pyqtSignal(str)  # 모드를 전달
 
     def __init__(self):
         super().__init__()
         self.opt_loader = OptLoader()
         self.scan_thread = None
         self.scan_worker = None
+        self.current_mode = None
         self.initUI()
 
     def initUI(self):
@@ -87,13 +88,20 @@ class InfoWidget(QWidget):
         panel = QGroupBox("시험 기본 정보")
         layout = QVBoxLayout()
 
-        # 불러오기
+        # 불러오기 버튼들 (Request/Response)
         btn_row = QHBoxLayout()
         btn_row.addStretch()
-        load_btn = QPushButton("불러오기")
-        load_btn.setStyleSheet("QPushButton { background-color: #9FBFE5; color: black; font-weight: bold; }")
-        load_btn.clicked.connect(self.load_opt_files)
-        btn_row.addWidget(load_btn)
+        
+        self.load_request_btn = QPushButton("불러오기|Request")
+        self.load_request_btn.setStyleSheet("QPushButton { background-color: #9FBFE5; color: black; font-weight: bold; }")
+        self.load_request_btn.clicked.connect(lambda: self.load_opt_files("request"))
+        btn_row.addWidget(self.load_request_btn)
+        
+        self.load_response_btn = QPushButton("불러오기|Response")
+        self.load_response_btn.setStyleSheet("QPushButton { background-color: #9FBFE5; color: black; font-weight: bold; }")
+        self.load_response_btn.clicked.connect(lambda: self.load_opt_files("response"))
+        btn_row.addWidget(self.load_response_btn)
+        
         layout.addLayout(btn_row)
 
         form = QFormLayout()
@@ -168,9 +176,10 @@ class InfoWidget(QWidget):
         self.digest_radio.toggled.connect(self.update_auth_fields)
         self.bearer_radio.toggled.connect(self.update_auth_fields)
         
-        self.id_input.textChanged.connect(self.update_start_button_state)
-        self.pw_input.textChanged.connect(self.update_start_button_state)
-        self.token_input.textChanged.connect(self.update_start_button_state)
+        # 입력 필드 변경 시 버튼 상태 체크
+        self.id_input.textChanged.connect(self.check_start_button_state)
+        self.pw_input.textChanged.connect(self.check_start_button_state)
+        self.token_input.textChanged.connect(self.check_start_button_state)
 
         self.update_auth_fields()
 
@@ -384,6 +393,9 @@ class InfoWidget(QWidget):
                         checkbox = checkbox_widget.findChild(QCheckBox)
                         if checkbox:
                             checkbox.setChecked(False)
+        
+        # URL 선택 변경 시 버튼 상태 체크
+        self.check_start_button_state()
 
     def select_url_row(self, row, col):
         """행 클릭 시: 체크 단일 선택"""
@@ -401,6 +413,9 @@ class InfoWidget(QWidget):
             checkbox = selected_checkbox_widget.findChild(QCheckBox)
             if checkbox:
                 checkbox.setChecked(True)
+        
+        # URL 선택 변경 시 버튼 상태 체크
+        self.check_start_button_state()
 
     def get_selected_url(self):
         """URL 테이블에서 선택된 URL 반환"""
@@ -419,17 +434,60 @@ class InfoWidget(QWidget):
         return None
 
     def start_test(self):
-      """시험 시작 - CONSTANTS.py 업데이트 후 검증 소프트웨어 실행"""
-      try:
-          # CONSTANTS.py 업데이트
-          if self.update_constants_py():
-              self.startTestRequested.emit()  # 검증 소프트웨어 실행 신호
-          else:
-              QMessageBox.warning(self, "저장 실패", "CONSTANTS.py 업데이트에 실패했습니다.")
+        """시험 시작 - CONSTANTS.py 업데이트 후 검증 소프트웨어 실행"""
+        try:
+            # 모드 선택 확인
+            if not self.current_mode:
+                QMessageBox.warning(self, "모드 미선택", "먼저 불러오기|Request 또는 불러오기|Response 버튼을 눌러 모드를 선택해주세요.")
+                return
+            
+            # CONSTANTS.py 업데이트
+            if self.update_constants_py():
+                self.startTestRequested.emit(self.current_mode)
+            else:
+                QMessageBox.warning(self, "저장 실패", "CONSTANTS.py 업데이트에 실패했습니다.")
 
-      except Exception as e:
-          QMessageBox.critical(self, "오류", f"시험 시작 중 오류가 발생했습니다:\n{str(e)}")    
+        except Exception as e:
+            QMessageBox.critical(self, "오류", f"시험 시작 중 오류가 발생했습니다:\n{str(e)}")    
 
+    def check_start_button_state(self):
+        """시험 시작 버튼 활성화 조건 체크"""
+        try:
+            # 1. 모드 선택 확인
+            if not self.current_mode:
+                self.start_btn.setEnabled(False)
+                return
+            
+            # 2. 시험 기본 정보 확인
+            basic_info_filled = all([
+                self.company_edit.text().strip(),
+                self.product_edit.text().strip(),
+                self.version_edit.text().strip(),
+                self.test_category_edit.text().strip(),
+                self.target_system_edit.text().strip(),
+                self.test_range_edit.text().strip()
+            ])
+            
+            # 3. 시험항목(API) 테이블 확인
+            api_table_filled = self.api_test_table.rowCount() > 0
+            
+            # 4. 인증 정보 확인
+            auth_filled = False
+            if self.digest_radio.isChecked():
+                auth_filled = bool(self.id_input.text().strip() and self.pw_input.text().strip())
+            else:  # Bearer Token
+                auth_filled = bool(self.token_input.text().strip())
+            
+            # 5. 접속 정보 확인 (URL 선택됨)
+            url_selected = bool(self.get_selected_url())
+            
+            # 모든 조건이 충족되면 활성화
+            all_conditions_met = basic_info_filled and api_table_filled and auth_filled and url_selected
+            self.start_btn.setEnabled(all_conditions_met)
+            
+        except Exception as e:
+            print(f"버튼 상태 체크 실패: {e}")
+            self.start_btn.setEnabled(False)
 
     def update_constants_py(self):
         """CONSTANTS.py 파일의 변수들을 GUI 입력값으로 업데이트"""
@@ -673,17 +731,31 @@ class InfoWidget(QWidget):
             raise
 
     # ---------- OPT 로드 ----------
-    def load_opt_files(self):
+    def load_opt_files(self, mode):
         try:
-            exp_opt_path = resource_path("temp/(temp)exp_opt_requestVal.json")
-            exp_opt2_path = resource_path("temp/(temp)exp_opt2_requestVal_LongPolling.json")
+            # 모드에 따라 다른 파일 경로 설정
+            if mode == "request":
+                exp_opt_path = resource_path("temp/(temp)exp_opt_requestVal.json")
+                exp_opt2_path = resource_path("temp/(temp)exp_opt2_requestVal_LongPolling.json")
+            else:  # response
+                exp_opt_path = resource_path("temp/(temp)exp_opt_responseVal.json")
+                exp_opt2_path = resource_path("temp/(temp)exp_opt2_responseVal_LongPolling.json")
+            
             exp_opt = self.opt_loader.load_opt_json(exp_opt_path)
             exp_opt2 = self.opt_loader.load_opt_json(exp_opt2_path)
             if not (exp_opt and exp_opt2):
-                QMessageBox.warning(self, "로드 실패", "OPT 파일을 읽을 수 없습니다.")
+                QMessageBox.warning(self, "로드 실패", f"{mode.upper()} 모드 OPT 파일을 읽을 수 없습니다.")
                 return
+            
+            # 현재 모드 저장 및 UI 업데이트
+            self.current_mode = mode
+            
             self._fill_basic_info(exp_opt)
             self._fill_api_table(exp_opt, exp_opt2)
+            
+            # 버튼 상태 업데이트
+            self.check_start_button_state()
+            
             QMessageBox.information(self, "로드 완료", "OPT 파일들이 성공적으로 로드되었습니다!")
         except Exception as e:
             QMessageBox.critical(self, "오류", f"OPT 파일 로드 중 오류가 발생했습니다:\n{str(e)}")
