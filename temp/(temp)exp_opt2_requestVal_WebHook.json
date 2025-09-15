@@ -30,7 +30,10 @@
               "checkType": "value",
               "key": "userID",
               "operator": "equalsAny",
-              "expected": ["user001","user002"]
+              "expected": [
+                "user001",
+                "user002"
+              ]
             }
           },
           "responseData": {
@@ -68,7 +71,7 @@
             "transportSupport": [
               {
                 "transProtocolType": "REST_API",
-                "transProtocolDesc": "desc"
+                "transProtocolDesc": "trans protocol description"
               }
             ]
           },
@@ -400,6 +403,28 @@
             ]
           },
           "responseData": {
+            "code": 200,
+            "message": "성공"
+          },
+          "settings": {
+            "connectTimeout": 5000,
+            "numRetries": 1,
+            "transProtocol": {
+              "mode": "WebHook",
+              "urlKey": "transProtocolDesc"
+            }
+          }
+        }
+      },
+      {
+        "id": "step-7-1",
+        "name": "실시간 이벤트 분석 정보 연동(WebHook)",
+        "order": 7.1,
+        "api": {
+          "name": "실시간 이벤트 분석 정보 연동(WebHook)",
+          "method": "POST",
+          "urlKey": "transProtocolDesc", 
+          "requestData": {
             "camList": [
               {
                 "camID": "cam0001",
@@ -419,13 +444,20 @@
               }
             ]
           },
+          "responseSchema": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          },
           "settings": {
             "connectTimeout": 5000,
-            "numRetries": 1,
-            "transProtocol": {
-              "mode": "LongPolling",
-              "durationKey": "duration"
-            }
+            "numRetries": 1
           }
         }
       },

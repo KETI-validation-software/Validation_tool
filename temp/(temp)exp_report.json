@@ -10,6 +10,7 @@
   "testGroup": {
     "id": "group-001",
     "name": "도어락 시험",
+    "testRange": "전체필드",
     "testSpecIds": [
       "spec-001",
       "spec-002"
@@ -17,11 +18,12 @@
     "adminCode": "DOOR_LOCK_2024"
   },
   "status": "완료",
+  "authMethod": "Bearer Token",
   "testScore": {
     "score": 66.7,
     "totalFields": 3,
     "passedFields": 2,
-    "failedTests": 1
+    "failedFields": 1
   },
   "testResult": [
     {
@@ -32,13 +34,12 @@
         "name": "인증",
         "method": "POST",
         "endpoint": "/Authentication",
-        "authMethod": "Bearer Token",
         "score": 50,
         "validationCnt": 1,
         "totalFields": 2,
         "passFields": 1,
         "failFields": 1,
-        "validationJson": {
+        "validationData": {
               "username": "user001",
               "userpass": 1
             },
@@ -55,18 +56,17 @@
           "name": "전송 지원 기능 정보 연동",
           "method": "POST",
           "endpoint": "/Capabilities",
-          "authMethod": "Bearer Token",
           "score": 100,
           "validationCnt": 1,
           "totalFields": 1,
           "passFields": 1,
           "failFields": 0,
-          "validationJson": {
+          "validationData": {
           },
           "validationErrors": []
         }
       ]
     }
   ],
-  "completedAt": "2024-01-24T16:45:00Z"
+  "completedDate": "2024-01-24T16:45:00Z"
 }

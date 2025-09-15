@@ -436,7 +436,8 @@
               }
             ],
             "transProtocol": {
-              "transProtocolType": "LongPolling"
+              "transProtocolType": "LongPolling",
+              "transProtocolDesc": "https://127.0.0.1:8090/RealtimeVideoEventInfos"
             },
             "duration": 10,
             "eventFilter": "배회",
@@ -494,9 +495,68 @@
             "connectTimeout": 5000,
             "numRetries": 1,
             "transProtocol": {
-              "mode": "LongPolling",
-              "durationKey": "duration"
+              "mode": "WebHook",
+              "urlKey": "transProtocolDesc"
             }
+
+          }
+        }
+      },
+      {
+        "id": "step-7-1",
+        "name": "실시간 이벤트 분석 정보 연동(WebHook)",
+        "order": 7.1,
+        "api": {
+          "name": "실시간 이벤트 분석 정보 연동",
+          "method": "POST",
+          "urlKey": "transProtocolDesc",
+          "requestSchema": {
+            "type": "object",
+            "properties": {
+              "camList": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "camID": {
+                      "type": "string"
+                    },
+                    "eventUUID": {
+                      "type": "string"
+                    },
+                    "eventName": {
+                      "type": "string"
+                    },
+                    "startTime": {
+                      "type": "integer"
+                    },
+                    "endTime": {
+                      "type": "integer"
+                    },
+                    "eventDesc": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "camID",
+                    "eventUUID",
+                    "eventName",
+                    "startTime"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "camList"
+            ]
+          },
+          "responseData": {
+            "code": 200,
+            "message": "성공"
+          },
+          "settings": {
+            "connectTimeout": 5000,
+            "numRetries": 1
           }
         }
       },
