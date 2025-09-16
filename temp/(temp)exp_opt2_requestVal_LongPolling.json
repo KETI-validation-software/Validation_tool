@@ -218,6 +218,7 @@
                   "properties": {
                     "camID": {
                       "type": "string"
+<<<<<<< HEAD
                     }
                   },
                   "streamProtocolType": {
@@ -306,7 +307,7 @@
               "camList"
             ]
           },
-          "respoonseData": {
+          "responseData": {
             "code": "200",
             "message": "성공",
             "camList": [
