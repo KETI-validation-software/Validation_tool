@@ -208,7 +208,8 @@
           "name": "실시간 영상 정보 연동",
           "method": "POST",
           "endpoint": "/StreamURLs",
-          "requestSchema": {
+          "authMethod": "Bearer Token,abcd1234",
+          "requestValidation": {
             "type": "object",
             "properties": {
               "camList": {
@@ -218,47 +219,41 @@
                   "properties": {
                     "camID": {
                       "type": "string"
-<<<<<<< HEAD
+                    },
+                    "streamProtocolType": {
+                      "type": "string"
                     }
                   },
-                  "streamProtocolType": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "camID",
-                  "streamProtocolType"
-                ]
+                  "required": ["camID", "streamProtocolType"]
+                }
               }
-            }
+            },
+            "required": ["camList"]
           },
-          "required": [
-            "camList"
-          ]
-        },
-        "respoonseData": {
-          "code": "200",
-          "message": "성공",
-          "camList": [
-            {
-              "camID": "cam001",
-              "accessID": "conn001",
-              "accessPW": "1234",
-              "camURL": "rtsp://192.168.0.1:8000"
-            },
-            {
-              "camID": "cam002",
-              "accessID": "conn002",
-              "accessPW": "1234",
-              "camURL": "rtsp://192.168.0.2:8000"
-            },
-            {
-              "camID": "cam003",
-              "accessID": "conn003",
-              "accessPW": "1234",
-              "camURL": "rtsp://192.168.0.3:8000"
-            }
-          ]
+          "responseData": {
+            "code": "200",
+            "message": "성공",
+            "camList": [
+              {
+                "camID": "cam001",
+                "accessID": "conn001",
+                "accessPW": "1234",
+                "camURL": "rtsp://192.168.0.1:8000"
+              },
+              {
+                "camID": "cam002",
+                "accessID": "conn002",
+                "accessPW": "1234",
+                "camURL": "rtsp://192.168.0.2:8000"
+              },
+              {
+                "camID": "cam003",
+                "accessID": "conn003",
+                "accessPW": "1234",
+                "camURL": "rtsp://192.168.0.3:8000"
+              }
+            ]
+          }
         },
         "settings": {
           "connectTimeout": 5000,
