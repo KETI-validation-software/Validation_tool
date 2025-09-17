@@ -517,8 +517,8 @@ class InfoWidget(QWidget):
             exp_opt_path = resource_path("temp/(temp)exp_opt_requestVal.json")
             exp_opt = self.opt_loader.load_opt_json(exp_opt_path)
             admin_code = ""
-            if exp_opt and "testRequests" in exp_opt and len(exp_opt["testRequests"]) > 0:
-                test_group = exp_opt["testRequests"][0].get("testGroup", {})
+            if exp_opt and "testRequest" in exp_opt:
+                test_group = exp_opt["testRequest"].get("testGroup", {})
                 admin_code = test_group.get("adminCode", "")
 
             # 5. OPT2 파일에서 프로토콜/타임아웃 정보 추출
@@ -756,14 +756,14 @@ class InfoWidget(QWidget):
             # 버튼 상태 업데이트
             self.check_start_button_state()
             
-            QMessageBox.information(self, "로드 완료", "OPT 파일들이 성공적으로 로드되었습니다!")
+            QMessageBox.information(self, "로드 완료", f"{mode.upper()} 모드 파일들이 성공적으로 로드되었습니다!")
         except Exception as e:
             QMessageBox.critical(self, "오류", f"OPT 파일 로드 중 오류가 발생했습니다:\n{str(e)}")
 
     def _fill_basic_info(self, exp_opt):
-        if not exp_opt or "testRequests" not in exp_opt:
+        if not exp_opt or "testRequest" not in exp_opt:
             return
-        first = exp_opt["testRequests"][0]
+        first = exp_opt["testRequest"]
         et = first.get("evaluationTarget", {})
         tg = first.get("testGroup", {})
         self.company_edit.setText(et.get("companyName", ""))
@@ -778,7 +778,7 @@ class InfoWidget(QWidget):
     def _fill_api_table(self, exp_opt, exp_opt2):
         if not exp_opt or not exp_opt2 or "specification" not in exp_opt2:
             return
-        first = exp_opt["testRequests"][0]
+        first = exp_opt["testRequest"]
         test_group_name = first.get("testGroup", {}).get("name", "")
         steps = exp_opt2["specification"].get("steps", [])
         self.api_test_table.setRowCount(0)

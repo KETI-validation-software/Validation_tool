@@ -37,7 +37,7 @@ class OptLoader:
                 data = json.load(f)
                 
             # JSON 파일 타입 자동 감지
-            if "testRequests" in data:
+            if "testRequest" in data:
                 self.test_requests_data = data
                 print(f"시험 요청 데이터 로드 완료")
             elif "specification" in data:
@@ -61,16 +61,16 @@ class OptLoader:
         시험 요청 데이터에서 GUI 매핑용 시험 정보를 추출합니다.
         
         Args:
-            test_request_data: testRequests JSON 데이터
+            test_request_data: testRequest JSON 데이터
             
         Returns:
             GUI 매핑용 시험 정보 딕셔너리
         """
-        if not test_request_data or "testRequests" not in test_request_data:
+        if not test_request_data or "testRequest" not in test_request_data:
             return {}
-            
-        # 첫 번째 시험 요청 사용 (여러 개가 있을 경우)
-        first_request = test_request_data["testRequests"][0]
+
+        # 시험 요청 데이터 사용
+        first_request = test_request_data["testRequest"]
         evaluation_target = first_request.get("evaluationTarget", {})
         test_group = first_request.get("testGroup", {})
         
@@ -107,7 +107,7 @@ class OptLoader:
             test_info = {}
             auth_info = {}
             
-            if "testRequests" in data:
+            if "testRequest" in data:
                 test_info = self.parse_test_info(data)
                 
             if "specification" in data:
@@ -133,14 +133,14 @@ class OptLoader:
             return False
             
         # 시험 요청 데이터 검증
-        if "testRequests" in data:
-            test_requests = data["testRequests"]
-            if not isinstance(test_requests, list) or len(test_requests) == 0:
+        if "testRequest" in data:
+            test_request = data["testRequest"]
+            if not isinstance(test_request, dict):
                 return False
-                
+
             # 필수 필드 검증
             required_fields = ["id", "evaluationTarget", "testGroup"]
-            first_request = test_requests[0]
+            first_request = test_request
             
             for field in required_fields:
                 if field not in first_request:
@@ -167,8 +167,8 @@ class OptLoader:
         Returns:
             시험 명세 ID 리스트
         """
-        if self.test_requests_data and "testRequests" in self.test_requests_data:
-            first_request = self.test_requests_data["testRequests"][0]
+        if self.test_requests_data and "testRequest" in self.test_requests_data:
+            first_request = self.test_requests_data["testRequest"]
             test_group = first_request.get("testGroup", {})
             return test_group.get("testSpecIds", [])
         return []
