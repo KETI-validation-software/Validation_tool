@@ -209,7 +209,7 @@
           "method": "POST",
           "endpoint": "/StreamURLs",
           "authMethod": "Bearer Token,abcd1234",
-          "requestValidation": {
+          "requestSchema": {
             "type": "object",
             "properties": {
               "camList": {
