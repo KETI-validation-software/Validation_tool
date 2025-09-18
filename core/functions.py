@@ -61,23 +61,37 @@ def save_result(str_in, path):
         print(err)
 
 
-def set_auth(file):
-    tree = etree.parse(file)
-    root = tree.getroot()
-    info = "None"
-    info2 = []
+def set_auth(file=None):
+    """
+    CONSTANTS.py에서 인증 정보를 읽어옵니다.
+    file 매개변수는 하위 호환성을 위해 유지하지만 사용하지 않습니다.
+    """
+    try:
+        # CONSTANTS.py에서 인증 정보 가져오기
+        from config.CONSTANTS import auth_type, auth_info
 
-    for child in root:
-        if 'type' in child.attrib and child.attrib['type'] == 'Bearer Token':
-            for a in child[1:]:
-                if a.text != "None" or a.text is not None:
-                    info = a.text
+        info = "None"
+        info2 = []
 
-        if 'type' in child.attrib and child.attrib['type'] == 'Digest Auth':
-            for a in child[1:]:
-                info2.append(a.text)
+        if auth_type == "Bearer Token":
+            info = auth_info  # Bearer Token인 경우 토큰 문자열
+        elif auth_type == "Digest Auth":
+            # Digest Auth인 경우 "id,pass" 형태를 분리
+            if "," in auth_info:
+                info2 = auth_info.split(",")
+            else:
+                info2 = [auth_info, ""]  # 기본값
 
-    return info, info2
+        return info, info2
+
+    except ImportError as e:
+        # CONSTANTS.py를 찾을 수 없는 경우
+        print(f"CONSTANTS.py를 찾을 수 없습니다: {e}")
+        return "None", []
+    except Exception as e:
+        # 기타 오류
+        print(f"인증 정보 로드 중 오류: {e}")
+        return "None", []
 
 
 def set_message(path_):

@@ -10,6 +10,7 @@ from PyQt5.QtCore import Qt, QObject, pyqtSignal, QThread
 # 외부 유틸/의존 (원본과 동일 모듈 사용)
 from core.functions import resource_path
 from core.opt_loader import OptLoader
+from core.schema_generator import generate_schema_file
 
 class NetworkScanWorker(QObject):
     scan_completed = pyqtSignal(list)
@@ -752,6 +753,27 @@ class InfoWidget(QWidget):
             
             self._fill_basic_info(exp_opt)
             self._fill_api_table(exp_opt, exp_opt2)
+            
+            # 모드에 따른 스키마 파일 생성
+            try:
+                if mode == "request":
+                    schema_path = generate_schema_file(
+                        exp_opt2_path,
+                        schema_type="request",
+                        output_path="spec/video/videoSchema_request.py"
+                    )
+                    print(f"videoSchema_request.py 생성 완료: {schema_path}")
+
+                elif mode == "response":
+                    schema_path = generate_schema_file(
+                        exp_opt2_path,
+                        schema_type="response", 
+                        output_path="spec/video/videoSchema_response.py"
+                    )
+                    print(f"videoSchema_response.py 생성 완료: {schema_path}")
+
+            except Exception as e:
+                print(f"스키마 파일 생성 실패: {e}")
             
             # 버튼 상태 업데이트
             self.check_start_button_state()
