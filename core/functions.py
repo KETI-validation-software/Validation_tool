@@ -71,14 +71,15 @@ def set_auth(file=None):
         from config.CONSTANTS import auth_type, auth_info
 
         info = "None"
-        info2 = []
+        info2 = ["", ""]  # 기본값을 2개 요소로 초기화
 
         if auth_type == "Bearer Token":
             info = auth_info  # Bearer Token인 경우 토큰 문자열
         elif auth_type == "Digest Auth":
             # Digest Auth인 경우 "id,pass" 형태를 분리
             if "," in auth_info:
-                info2 = auth_info.split(",")
+                parts = auth_info.split(",")
+                info2 = [parts[0], parts[1] if len(parts) > 1 else ""]
             else:
                 info2 = [auth_info, ""]  # 기본값
 
@@ -87,11 +88,11 @@ def set_auth(file=None):
     except ImportError as e:
         # CONSTANTS.py를 찾을 수 없는 경우
         print(f"CONSTANTS.py를 찾을 수 없습니다: {e}")
-        return "None", []
+        return "None", ["", ""]  # 2개 요소 보장
     except Exception as e:
         # 기타 오류
         print(f"인증 정보 로드 중 오류: {e}")
-        return "None", []
+        return "None", ["", ""]  # 2개 요소 보장
 
 
 def set_message(path_):
