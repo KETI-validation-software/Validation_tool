@@ -898,7 +898,7 @@ class MyApp(QWidget):
                 color: #999999;
             }
         """)
-        self.rbtn.clicked.connect(self.resultsave_btn_clicked)
+        self.rbtn.clicked.connect(self.exit_btn_clicked)
         
         buttonLayout.addStretch() 
         buttonLayout.addWidget(self.sbtn)
@@ -1223,15 +1223,20 @@ class MyApp(QWidget):
                 self.tableWidget.setItem(i, 4, QTableWidgetItem("0%"))
                 self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
 
-    def resultsave_btn_clicked(self):
-        tmp_result = self.final_report  # + '\n'+ self.valResult.toPlainText()
-        file = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
-
-        if file != "":
-            save_result(tmp_result, file + "/Result_system.pdf")
-            self.valResult.append("검증 결과 파일 저장했습니다. " + "\n" + "저장 위치: " + file + "/Result_system.pdf")
-        else:
-            self.valResult.append("저장 폴더를 선택해주세요.")
+    def exit_btn_clicked(self):
+        """프로그램 종료"""
+        # 타이머 정지
+        if hasattr(self, 'tick_timer'):
+            self.tick_timer.stop()
+        
+        # 확인 대화상자
+        reply = QMessageBox.question(self, '프로그램 종료', 
+                                   '정말로 프로그램을 종료하시겠습니까?',
+                                   QMessageBox.Yes | QMessageBox.No, 
+                                   QMessageBox.No)
+        
+        if reply == QMessageBox.Yes:
+            QApplication.quit()
 
     def get_setting(self):
         self.setting_variables = QSettings('My App', 'Variable')
