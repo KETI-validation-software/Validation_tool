@@ -11,6 +11,7 @@ from PyQt5.QtCore import Qt, QObject, pyqtSignal, QThread
 from core.functions import resource_path
 from core.opt_loader import OptLoader
 from core.schema_generator import generate_schema_file
+from core.video_request_generator import generate_video_request_file
 
 class NetworkScanWorker(QObject):
     scan_completed = pyqtSignal(list)
@@ -206,35 +207,6 @@ class InfoWidget(QWidget):
         self.url_table.setColumnWidth(0, 36)
         self.url_table.cellClicked.connect(self.select_url_row)
         layout.addWidget(self.url_table)
-
-        # 입력 테이블
-        input_label = QLabel("시험데이터")
-        input_label.setStyleSheet("font-weight: bold; margin-top: 10px;")
-        layout.addWidget(input_label)
-
-        self.input_table = QTableWidget(0, 3)
-        self.input_table.setHorizontalHeaderLabels(["API명", "입력 요청 정보", "입력 값"])
-        self.input_table.verticalHeader().setVisible(False)
-        self.input_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        layout.addWidget(self.input_table)
-
-        # 기본 행
-        from PyQt5.QtWidgets import QLineEdit as QLE
-        self.input_table.setRowCount(0)
-        r = self.input_table.rowCount()
-        self.input_table.insertRow(r)
-        item_api = QTableWidgetItem("Authentication")
-        item_api.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-        item_api.setTextAlignment(Qt.AlignCenter)
-        self.input_table.setItem(r, 0, item_api)
-
-        item_req = QTableWidgetItem("camID")
-        item_req.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-        item_req.setTextAlignment(Qt.AlignCenter)
-        self.input_table.setItem(r, 1, item_req)
-
-        edit = QLE(); edit.setPlaceholderText("입력하세요")
-        self.input_table.setCellWidget(r, 2, edit)
 
         panel.setLayout(layout)
         return panel
@@ -754,7 +726,7 @@ class InfoWidget(QWidget):
             self._fill_basic_info(exp_opt)
             self._fill_api_table(exp_opt, exp_opt2)
             
-            # 모드에 따른 스키마 파일 생성
+            # 모드에 따른 파일 생성
             try:
                 if mode == "request":
                     schema_path = generate_schema_file(
@@ -764,6 +736,14 @@ class InfoWidget(QWidget):
                     )
                     print(f"videoSchema_request.py 생성 완료: {schema_path}")
 
+                    # videoRequest_request.py 생성
+                    request_path = generate_video_request_file(
+                        exp_opt2_path,
+                        file_type="request",
+                        output_path="spec/video/videoData_request.py"
+                    )
+                    print(f"videoRequest_request.py 생성 완료: {request_path}")
+
                 elif mode == "response":
                     schema_path = generate_schema_file(
                         exp_opt2_path,
@@ -771,6 +751,14 @@ class InfoWidget(QWidget):
                         output_path="spec/video/videoSchema_response.py"
                     )
                     print(f"videoSchema_response.py 생성 완료: {schema_path}")
+
+                    # videoRequest_response.py 생성
+                    request_path = generate_video_request_file(
+                        exp_opt2_path,
+                        file_type="response",
+                        output_path="spec/video/videoData_response.py"
+                    )
+                    print(f"videoRequest_response.py 생성 완료: {request_path}")
 
             except Exception as e:
                 print(f"스키마 파일 생성 실패: {e}")
