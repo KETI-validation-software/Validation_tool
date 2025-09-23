@@ -1,0 +1,16 @@
+{
+  "code": "200",
+  "message": "성공",
+  "streamingSupport": [
+    {
+      "streamProtocolType": "RTSP",
+      "streamProtocolDesc": "Unicast"
+    }
+  ],
+  "transportSupport": [
+    {
+      "transProtocolType": "HTTP_API",
+      "transProtocolDesc": "desc"
+    }
+  ]
+}

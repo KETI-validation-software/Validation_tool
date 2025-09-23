@@ -1020,8 +1020,16 @@ class MyApp(QWidget):
     def sbtn_push(self):
         # 영상보안 시스템으로 고정되어 있고, CONSTANTS.py에서 인증 정보를 가져오므로
         # 별도의 검증 없이 바로 시작
+        
+        # 완전한 상태 초기화
         self.total_error_cnt = 0
         self.total_pass_cnt = 0
+        self.cnt = 0
+        self.cnt_pre = 0
+        self.time_pre = 0
+        self.realtime_flag = False
+        self.tmp_msg_append_flag = False
+        
         # 평가 점수 디스플레이 초기화
         self.update_score_display()
         
@@ -1113,7 +1121,7 @@ class MyApp(QWidget):
         # 메시지 초기화
         for i in range(1, 10):
             setattr(self, f"step{i}_msg", "")
-        # 테이블 아이콘 초기화
+        # 테이블 아이콘 및 카운트 초기화
         for i in range(self.tableWidget.rowCount()):
             icon_widget = QWidget()
             icon_layout = QHBoxLayout()
@@ -1128,6 +1136,14 @@ class MyApp(QWidget):
             icon_widget.setLayout(icon_layout)
             
             self.tableWidget.setCellWidget(i, 1, icon_widget)
+            
+            # 카운트들도 초기화
+            self.tableWidget.setItem(i, 2, QTableWidgetItem("0"))
+            self.tableWidget.item(i, 2).setTextAlignment(Qt.AlignCenter)
+            self.tableWidget.setItem(i, 3, QTableWidgetItem("0"))
+            self.tableWidget.item(i, 3).setTextAlignment(Qt.AlignCenter)
+            self.tableWidget.setItem(i, 4, QTableWidgetItem("0%"))
+            self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
 
     def rbtn_push(self):
 
