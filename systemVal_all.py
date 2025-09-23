@@ -456,87 +456,102 @@ class MyApp(QWidget):
                 time.sleep(1)
                 time_interval += 1
 
-            if time_interval >= CONSTANTS.time_out[self.cnt] / 1000:  # 개별 timeout 사용 (ms를 초로 변환)
-                if self.post_flag is False:
-                    self.message_in_cnt += 1
-                    self.time_pre = time.time()
+            # 순차적 처리: 현재 스텝이 완료되지 않았고, 응답 처리 중이 아닐 때만 새 요청 전송
+            if (self.post_flag is False and 
+                self.processing_response is False and 
+                self.cnt < len(self.message)):
+                self.message_in_cnt += 1
+                self.time_pre = time.time()
 
-                    self.message_name = "step " + str(self.cnt + 1) + ": " + self.message[self.cnt]
+                self.message_name = "step " + str(self.cnt + 1) + ": " + self.message[self.cnt]
 
-                    # if self.tmp_msg_append_flag:
-                    #     self.valResult.append(self.message_name)
-                    if self.cnt == 0:
-                        self.tmp_msg_append_flag = True
+                # if self.tmp_msg_append_flag:
+                #     self.valResult.append(self.message_name)
+                if self.cnt == 0:
+                    self.tmp_msg_append_flag = True
 
-                    if self.message_in_cnt > 1:
-                        self.message_error.append([self.message[self.cnt]])
-                        self.message_in_ctime_nt = 0
-                        self.valResult.append("Message Missing!")
+                # 즉시 POST 요청 전송
+                current_timeout = CONSTANTS.time_out[self.cnt] / 1000  # 개별 timeout 사용 (ms를 초로 변환)
+                path = self.pathUrl + "/" + self.message[self.cnt]
+                inMessage = self.inMessage[self.cnt]
+                json_data = json.dumps(inMessage).encode('utf-8')
 
-                        # ▼ 버퍼에 FAIL 정보 저장 추가
-                        self.step_buffers[self.cnt]["data"] = "타임아웃으로 인해 수신된 데이터가 없습니다."
-                        self.step_buffers[self.cnt]["error"] = "Message Missing! - 지정된 시간 내에 메시지를 받지 못했습니다."
-                        self.step_buffers[self.cnt]["result"] = "FAIL"
+                t = threading.Thread(target=self.post, args=(path, json_data, current_timeout), daemon=True)
+                t.start()
+                self.post_flag = True
 
-                        # self.total_error_cnt += len(field_finder(self.outSchema[self.cnt]))
-                        tmp_fields_rqd_cnt, tmp_fields_opt_cnt = timeout_field_finder(
-                            self.outSchema[self.cnt])
-                        self.total_error_cnt += tmp_fields_rqd_cnt
-                        if tmp_fields_rqd_cnt == 0:  # {}인 경우 +1
-                            self.total_error_cnt += 1
-                        if self.flag_opt:  # 오류 필드 수 증가
-                            self.total_error_cnt += tmp_fields_opt_cnt
+            # timeout 조건은 응답 대기/재시도 판단에만 사용
+            elif time_interval >= CONSTANTS.time_out[self.cnt] / 1000 and self.post_flag is True:
+                if self.message_in_cnt > 1:
+                    self.message_error.append([self.message[self.cnt]])
+                    self.message_in_cnt = 0
+                    self.valResult.append("Message Missing!")
 
-                        self.total_pass_cnt += 0
-                        
-                        # 평가 점수 디스플레이 업데이트
-                        self.update_score_display()
-                        
-                        self.valResult.append("Score : " + str(
-                            (self.total_pass_cnt / (self.total_pass_cnt + self.total_error_cnt) * 100)))
-                        self.valResult.append("Score details : " + str(self.total_pass_cnt) + "(누적 검증 통과 필드 수), " + str(
-                            self.total_error_cnt) + "(누적 검증 오류 필드 수)\n")
-                        
-                        # 테이블 업데이트 (Message Missing)
-                        add_err = tmp_fields_rqd_cnt if tmp_fields_rqd_cnt > 0 else 1
-                        if self.flag_opt:
-                            add_err += tmp_fields_opt_cnt
-                        
-                        current_retries = CONSTANTS.num_retries[self.cnt]
-                        self.update_table_row_with_retries(self.cnt, "FAIL", 0, add_err, "", "Message Missing!", current_retries)
-                        
-                        self.cnt += 1
+                    # ▼ 버퍼에 FAIL 정보 저장 추가
+                    self.step_buffers[self.cnt]["data"] = "타임아웃으로 인해 수신된 데이터가 없습니다."
+                    self.step_buffers[self.cnt]["error"] = "Message Missing! - 지정된 시간 내에 메시지를 받지 못했습니다."
+                    self.step_buffers[self.cnt]["result"] = "FAIL"
 
-                        if self.cnt >= len(self.message):
-                            self.tick_timer.stop()
-                            self.valResult.append("검증 절차가 완료되었습니다.")
-                            self.cnt = 0
-                            self.final_report += "전체 점수: " + str(
-                                (self.total_pass_cnt / (self.total_pass_cnt + self.total_error_cnt) * 100)) + "\n"
-                            self.final_report += "전체 결과: " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(
-                                self.total_error_cnt) + "(누적 오류 필드 수)" + "\n"
-                            self.final_report += "\n"
-                            self.final_report += "메시지 검증 세부 결과 \n"
-                            self.final_report += self.valResult.toPlainText()
+                    # self.total_error_cnt += len(field_finder(self.outSchema[self.cnt]))
+                    tmp_fields_rqd_cnt, tmp_fields_opt_cnt = timeout_field_finder(
+                        self.outSchema[self.cnt])
+                    self.total_error_cnt += tmp_fields_rqd_cnt
+                    if tmp_fields_rqd_cnt == 0:  # {}인 경우 +1
+                        self.total_error_cnt += 1
+                    if self.flag_opt:  # 오류 필드 수 증가
+                        self.total_error_cnt += tmp_fields_opt_cnt
 
-                            self.sbtn.setEnabled(True)
-                            self.stop_btn.setDisabled(True)
-                        return
+                    self.total_pass_cnt += 0
+                    
+                    # 평가 점수 디스플레이 업데이트
+                    self.update_score_display()
+                    
+                    self.valResult.append("Score : " + str(
+                        (self.total_pass_cnt / (self.total_pass_cnt + self.total_error_cnt) * 100)))
+                    self.valResult.append("Score details : " + str(self.total_pass_cnt) + "(누적 검증 통과 필드 수), " + str(
+                        self.total_error_cnt) + "(누적 검증 오류 필드 수)\n")
+                    
+                    # 테이블 업데이트 (Message Missing)
+                    add_err = tmp_fields_rqd_cnt if tmp_fields_rqd_cnt > 0 else 1
+                    if self.flag_opt:
+                        add_err += tmp_fields_opt_cnt
+                    
+                    current_retries = CONSTANTS.num_retries[self.cnt]
+                    self.update_table_row_with_retries(self.cnt, "FAIL", 0, add_err, "", "Message Missing!", current_retries)
+                    
+                    # 다음 스텝으로 이동하고 모든 플래그 리셋 (타임아웃 케이스)
+                    self.cnt += 1
+                    self.message_in_cnt = 0
+                    self.post_flag = False  # 다음 스텝을 위해 플래그 리셋
+                    self.processing_response = False  # 응답 처리 완료
+                    
+                    # 다음 스텝으로 넘어가기 전 충분한 대기
+                    self.time_pre = time.time() + 2.0  # 2초 추가 대기
 
-                    current_timeout = CONSTANTS.time_out[self.cnt] / 1000  # 개별 timeout 사용 (ms를 초로 변환)
-                    path = self.pathUrl + "/" + self.message[self.cnt]
-                    #  self.valResult.append(message_name)
-                    inMessage = self.inMessage[self.cnt]
-                    json_data = json.dumps(inMessage).encode('utf-8')
+                    if self.cnt >= len(self.message):
+                        self.tick_timer.stop()
+                        self.valResult.append("검증 절차가 완료되었습니다.")
+                        self.cnt = 0
+                        self.final_report += "전체 점수: " + str(
+                            (self.total_pass_cnt / (self.total_pass_cnt + self.total_error_cnt) * 100)) + "\n"
+                        self.final_report += "전체 결과: " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(
+                            self.total_error_cnt) + "(누적 오류 필드 수)" + "\n"
+                        self.final_report += "\n"
+                        self.final_report += "메시지 검증 세부 결과 \n"
+                        self.final_report += self.valResult.toPlainText()
 
-                    t = threading.Thread(target=self.post, args=(path, json_data, current_timeout), daemon=True)
-                    t.start()
-                    self.post_flag = True
+                        self.sbtn.setEnabled(True)
+                        self.stop_btn.setDisabled(True)
+                    return
 
-                elif self.post_flag == True:
+            # 응답이 도착한 경우 처리
+            elif self.post_flag == True:
                     #  if self.cnt == 0 and
                     #    self.tmp_msg_append_flag = True
                     if self.res != None:
+                        # 응답 처리 시작
+                        self.processing_response = True
+                        
                         if self.cnt == 0 or self.tmp_msg_append_flag:  # and -> or 수정함- 240710
                             self.valResult.append(self.message_name)
 
@@ -644,26 +659,38 @@ class MyApp(QWidget):
                         self.valResult.append(
                             "Score details : " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(
                                 self.total_error_cnt) + "(누적 오류 필드 수)\n")
+                        
+                        # 다음 스텝으로 이동하고 모든 플래그 리셋
                         self.cnt += 1
+                        self.message_in_cnt = 0
+                        self.post_flag = False  # 다음 스텝을 위해 플래그 리셋
+                        self.processing_response = False  # 응답 처리 완료
+                        
+                        # 다음 스텝으로 넘어가기 전 충분한 대기 (CONSTANTS timeout 고려)
+                        self.time_pre = time.time() + 2.0  # 2초 추가 대기
                         self.message_in_cnt = 0
 
                         if self.webhook_flag and self.webhook_res is not None:
                             self.get_webhook_result()
 
-                    self.post_flag = False
+                        self.post_flag = False
 
-                if self.cnt == len(self.message):
-                    self.tick_timer.stop()
-                    self.valResult.append("검증 절차가 완료되었습니다.")
+            if self.cnt == len(self.message):
+                self.tick_timer.stop()
+                self.valResult.append("검증 절차가 완료되었습니다.")
+                
+                # 완료 시 모든 플래그 리셋
+                self.processing_response = False
+                self.post_flag = False
 
-                    self.cnt = 0
-                    self.final_report += "전체 점수: "+  str((self.total_pass_cnt/(self.total_pass_cnt+self.total_error_cnt)*100))+"\n"
-                    self.final_report += "전체 결과: "+ str(self.total_pass_cnt)+"(누적 통과 필드 수), "+str(self.total_error_cnt)+"(누적 오류 필드 수)"+"\n"
-                    self.final_report += "\n"
-                    self.final_report += "메시지 검증 세부 결과 \n"
-                    self.final_report += self.valResult.toPlainText()
-                    self.sbtn.setEnabled(True)
-                    self.stop_btn.setDisabled(True)
+                self.cnt = 0
+                self.final_report += "전체 점수: "+  str((self.total_pass_cnt/(self.total_pass_cnt+self.total_error_cnt)*100))+"\n"
+                self.final_report += "전체 결과: "+ str(self.total_pass_cnt)+"(누적 통과 필드 수), "+str(self.total_error_cnt)+"(누적 오류 필드 수)"+"\n"
+                self.final_report += "\n"
+                self.final_report += "메시지 검증 세부 결과 \n"
+                self.final_report += self.valResult.toPlainText()
+                self.sbtn.setEnabled(True)
+                self.stop_btn.setDisabled(True)
 
         except Exception as err:
             print(err)
@@ -1118,21 +1145,35 @@ class MyApp(QWidget):
         self.sbtn.setDisabled(True)
         self.stop_btn.setEnabled(True)
 
+        # 완전한 초기화
         self.init_win()
-        self.valResult.clear()  # 초기화
-
-        self.final_report = ""  # 초기화
+        self.valResult.clear()
+        
+        # 상태 변수들 초기화
+        self.final_report = ""
         self.post_flag = False
+        self.processing_response = False  # 응답 처리 중 플래그 추가
         self.total_error_cnt = 0
         self.total_pass_cnt = 0
         self.message_in_cnt = 0
         self.message_error = []
+        self.cnt = 0
+        self.cnt_pre = 0
+        self.time_pre = 0
+        self.res = None
+        self.webhook_res = None
+        self.realtime_flag = False
+        self.tmp_msg_append_flag = False
+        
+        # 점수 디스플레이 초기화
+        self.update_score_display()
 
         # CONSTANTS.py에서 URL 가져오기
         self.pathUrl = CONSTANTS.url
         self.valResult.append("Start Validation...\n")
         self.webhook_cnt = 99
-        self.tick_timer.start()
+        # 타이머를 1초 간격으로 시작 (CONSTANTS timeout과 조화)
+        self.tick_timer.start(1000)
 
     def stop_btn_clicked(self):
         self.tick_timer.stop()
