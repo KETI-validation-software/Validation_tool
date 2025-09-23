@@ -28,8 +28,6 @@ from requests.auth import HTTPDigestAuth
 import config.CONSTANTS as CONSTANTS
 import traceback
 
-#  from charset_normalizer import md__mypyc  # A library that helps you read text from an unknown charset encoding
-
 
 # 통합된 상세 내용 확인 팝업창 클래스
 class CombinedDetailDialog(QDialog):
@@ -37,7 +35,7 @@ class CombinedDetailDialog(QDialog):
         super().__init__()
         
         self.setWindowTitle(f"{api_name} - 통합 상세 정보")
-        self.setGeometry(400, 300, 1200, 600)  # 가로로 넓게 설정
+        self.setGeometry(400, 300, 1200, 600)
         self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
         self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
 
@@ -172,13 +170,13 @@ class MyApp(QWidget):
         self.img_fail = resource_path("assets/image/red.png")
         self.img_none = resource_path("assets/image/black.png")
 
-        self.flag_opt = True  # functions.py-json_check_ # 필수필드만 확인 False, optional 필드까지 확인 True
+        self.flag_opt = True
         self.tick_timer = QTimer()
         self.tick_timer.timeout.connect(self.update_view)
         self.pathUrl = None
         self.auth_type = None
         self.cnt = 0
-        self.auth_flag = True  # CONSTANTS.py에서 인증 정보를 가져오므로 True로 설정
+        self.auth_flag = True
 
         self.time_pre = 0
         self.post_flag = False
@@ -188,7 +186,6 @@ class MyApp(QWidget):
         self.message_error = []
         self.message_name = ""
         
-        # 스텝별 표시할 버퍼 (데이터, 오류, 결과)
         self.step_buffers = [
             {"data": "", "error": "", "result": "PASS"} for _ in range(9)
         ]
@@ -221,7 +218,6 @@ class MyApp(QWidget):
     def update_table_row(self, row, result_text, pass_count, total_count, detail_text, message_text):
         """테이블 행을 업데이트하는 함수"""
         if row < self.tableWidget.rowCount():
-            # Result 아이콘 (컬럼 1) - 아이콘 위젯으로 설정
             icon_widget = QWidget()
             icon_layout = QHBoxLayout()
             icon_layout.setContentsMargins(0, 0, 0, 0)
@@ -239,24 +235,19 @@ class MyApp(QWidget):
             
             self.tableWidget.setCellWidget(row, 1, icon_widget)
             
-            # Validation Count (컬럼 2) - 각 단계당 1회 검증으로 설정 -> 추후 수정할 예정
             self.tableWidget.setItem(row, 2, QTableWidgetItem("1"))
             self.tableWidget.item(row, 2).setTextAlignment(Qt.AlignCenter)
             
-            # Pass Count (컬럼 3)
             self.tableWidget.setItem(row, 3, QTableWidgetItem(str(pass_count)))
             self.tableWidget.item(row, 3).setTextAlignment(Qt.AlignCenter)
             
-            # Total Count (컬럼 4)
             self.tableWidget.setItem(row, 4, QTableWidgetItem(str(total_count)))
             self.tableWidget.item(row, 4).setTextAlignment(Qt.AlignCenter)
             
-            # 실패 횟수 (컬럼 5)
             fail_count = total_count - pass_count
             self.tableWidget.setItem(row, 5, QTableWidgetItem(str(fail_count)))
             self.tableWidget.item(row, 5).setTextAlignment(Qt.AlignCenter)
             
-            # 평가 점수 (컬럼 6)
             if total_count > 0:
                 score = (pass_count / total_count) * 100
                 self.tableWidget.setItem(row, 6, QTableWidgetItem(f"{score:.1f}%"))
@@ -270,10 +261,8 @@ class MyApp(QWidget):
         if row >= self.tableWidget.rowCount():
             return
             
-        # 아이콘 업데이트
         msg, img = self.icon_update_step(data, result, error_text)
         
-        # 아이콘을 완전히 중앙에 정렬하기 위해 위젯 사용
         icon_widget = QWidget()
         icon_layout = QHBoxLayout()
         icon_layout.setContentsMargins(0, 0, 0, 0)
@@ -289,24 +278,19 @@ class MyApp(QWidget):
         
         self.tableWidget.setCellWidget(row, 1, icon_widget)
         
-        # 실제 검증 횟수 업데이트
         self.tableWidget.setItem(row, 2, QTableWidgetItem(str(retries)))
         self.tableWidget.item(row, 2).setTextAlignment(Qt.AlignCenter)
         
-        # 통과 필드 수 업데이트
         self.tableWidget.setItem(row, 3, QTableWidgetItem(str(pass_count)))
         self.tableWidget.item(row, 3).setTextAlignment(Qt.AlignCenter)
         
-        # 전체 필드 수 업데이트
         total_fields = pass_count + error_count
         self.tableWidget.setItem(row, 4, QTableWidgetItem(str(total_fields)))
         self.tableWidget.item(row, 4).setTextAlignment(Qt.AlignCenter)
         
-        # 실패 횟수 업데이트
         self.tableWidget.setItem(row, 5, QTableWidgetItem(str(error_count)))
         self.tableWidget.item(row, 5).setTextAlignment(Qt.AlignCenter)
         
-        # 평가 점수 업데이트
         if total_fields > 0:
             score = (pass_count / total_fields) * 100
             self.tableWidget.setItem(row, 6, QTableWidgetItem(f"{score:.1f}%"))
@@ -314,11 +298,9 @@ class MyApp(QWidget):
             self.tableWidget.setItem(row, 6, QTableWidgetItem("0%"))
         self.tableWidget.item(row, 6).setTextAlignment(Qt.AlignCenter)
         
-        # 메시지 저장 (팝업용)
         setattr(self, f"step{row+1}_msg", msg)
 
     def load_test_info_from_constants(self):
-        """CONSTANTS.py에서 시험정보를 로드 (읽기 전용)"""
         return [
             ("기업명", CONSTANTS.company_name),
             ("제품명", CONSTANTS.product_name),
@@ -380,11 +362,9 @@ class MyApp(QWidget):
                     except Exception as e:
                         print(e)
                         import traceback
-                        traceback.print_exc()   # 에러 상세 출력 -> VIDEO에서만 계속 에러 뜨고 있음
+                        traceback.print_exc()
 
         except Exception as e:
-            #print(traceback.format_exc())
-            #print("post exception", path)
             print(e)
 
 
@@ -398,9 +378,6 @@ class MyApp(QWidget):
     def get_webhook_result(self):
         tmp_webhook_res = json.dumps(self.webhook_res, indent=4, ensure_ascii=False)
         message_name = "step " + str(self.webhook_cnt + 1) + ": " + self.message[self.webhook_cnt]
-        # code&message 제외
-        #val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.outSchema[self.webhook_cnt],
-        #                                                                self.webhook_res, self.flag_opt)
 
         val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.webhookSchema[self.webhook_cnt],
                                                                         self.webhook_res, self.flag_opt)
@@ -456,7 +433,6 @@ class MyApp(QWidget):
                 time.sleep(1)
                 time_interval += 1
 
-            # 순차적 처리: 현재 스텝이 완료되지 않았고, 응답 처리 중이 아닐 때만 새 요청 전송
             if (self.post_flag is False and 
                 self.processing_response is False and 
                 self.cnt < len(self.message)):
@@ -487,7 +463,6 @@ class MyApp(QWidget):
                     self.message_in_cnt = 0
                     self.valResult.append("Message Missing!")
 
-                    # ▼ 버퍼에 FAIL 정보 저장 추가
                     self.step_buffers[self.cnt]["data"] = "타임아웃으로 인해 수신된 데이터가 없습니다."
                     self.step_buffers[self.cnt]["error"] = "Message Missing! - 지정된 시간 내에 메시지를 받지 못했습니다."
                     self.step_buffers[self.cnt]["result"] = "FAIL"
