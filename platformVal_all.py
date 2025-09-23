@@ -802,7 +802,7 @@ class MyApp(QWidget):
                 color: #999999;
             }
         """)
-        self.rbtn.clicked.connect(self.rbtn_push)
+        self.rbtn.clicked.connect(self.exit_btn_clicked)
         
         buttonLayout.addStretch()  # 왼쪽 여백 추가로 중앙 정렬
         buttonLayout.addWidget(self.sbtn)
@@ -1145,15 +1145,20 @@ class MyApp(QWidget):
             self.tableWidget.setItem(i, 4, QTableWidgetItem("0%"))
             self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
 
-    def rbtn_push(self):
-
-        file = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
-        if file != "":
-            tmp_result = self.final_report  # + '\n'+ self.valResult.toPlainText()
-            save_result(tmp_result, file + "/Result_platform.pdf")
-            self.valResult.append("검증 결과 파일 저장했습니다. " + "\n" + "저장 위치: " + file + "/Result_platform.pdf")
-        else:
-            self.valResult.append("저장 폴더를 선택해주세요.")
+    def exit_btn_clicked(self):
+        """프로그램 종료"""
+        # 타이머 정지
+        if hasattr(self, 'timer'):
+            self.timer.stop()
+        
+        # 확인 대화상자
+        reply = QMessageBox.question(self, '프로그램 종료', 
+                                   '정말로 프로그램을 종료하시겠습니까?',
+                                   QMessageBox.Yes | QMessageBox.No, 
+                                   QMessageBox.No)
+        
+        if reply == QMessageBox.Yes:
+            QApplication.quit()
     def get_setting(self):
         self.setting_variables = QSettings('My App', 'Variable')
         self.Server.system = "video"  # 영상보안 시스템으로 고정
