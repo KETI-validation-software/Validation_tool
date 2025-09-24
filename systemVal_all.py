@@ -28,8 +28,6 @@ from requests.auth import HTTPDigestAuth
 import config.CONSTANTS as CONSTANTS
 import traceback
 
-#  from charset_normalizer import md__mypyc  # A library that helps you read text from an unknown charset encoding
-
 
 # 통합된 상세 내용 확인 팝업창 클래스
 class CombinedDetailDialog(QDialog):
@@ -37,7 +35,7 @@ class CombinedDetailDialog(QDialog):
         super().__init__()
         
         self.setWindowTitle(f"{api_name} - 통합 상세 정보")
-        self.setGeometry(400, 300, 1200, 600)  # 가로로 넓게 설정
+        self.setGeometry(400, 300, 1200, 600)
         self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
         self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
 
@@ -172,13 +170,14 @@ class MyApp(QWidget):
         self.img_fail = resource_path("assets/image/red.png")
         self.img_none = resource_path("assets/image/black.png")
 
-        self.flag_opt = True  # functions.py-json_check_ # 필수필드만 확인 False, optional 필드까지 확인 True
+        self.flag_opt = True
         self.tick_timer = QTimer()
         self.tick_timer.timeout.connect(self.update_view)
         self.pathUrl = None
         self.auth_type = None
         self.cnt = 0
-        self.auth_flag = True  # CONSTANTS.py에서 인증 정보를 가져오므로 True로 설정
+        self.current_retry = 0  # 현재 API의 반복 횟수 카운터
+        self.auth_flag = True
 
         self.time_pre = 0
         self.post_flag = False
@@ -188,7 +187,6 @@ class MyApp(QWidget):
         self.message_error = []
         self.message_name = ""
         
-        # 스텝별 표시할 버퍼 (데이터, 오류, 결과)
         self.step_buffers = [
             {"data": "", "error": "", "result": "PASS"} for _ in range(9)
         ]
@@ -221,7 +219,6 @@ class MyApp(QWidget):
     def update_table_row(self, row, result_text, pass_count, total_count, detail_text, message_text):
         """테이블 행을 업데이트하는 함수"""
         if row < self.tableWidget.rowCount():
-            # Result 아이콘 (컬럼 1) - 아이콘 위젯으로 설정
             icon_widget = QWidget()
             icon_layout = QHBoxLayout()
             icon_layout.setContentsMargins(0, 0, 0, 0)
@@ -239,24 +236,19 @@ class MyApp(QWidget):
             
             self.tableWidget.setCellWidget(row, 1, icon_widget)
             
-            # Validation Count (컬럼 2) - 각 단계당 1회 검증으로 설정 -> 추후 수정할 예정
             self.tableWidget.setItem(row, 2, QTableWidgetItem("1"))
             self.tableWidget.item(row, 2).setTextAlignment(Qt.AlignCenter)
             
-            # Pass Count (컬럼 3)
             self.tableWidget.setItem(row, 3, QTableWidgetItem(str(pass_count)))
             self.tableWidget.item(row, 3).setTextAlignment(Qt.AlignCenter)
             
-            # Total Count (컬럼 4)
             self.tableWidget.setItem(row, 4, QTableWidgetItem(str(total_count)))
             self.tableWidget.item(row, 4).setTextAlignment(Qt.AlignCenter)
             
-            # 실패 횟수 (컬럼 5)
             fail_count = total_count - pass_count
             self.tableWidget.setItem(row, 5, QTableWidgetItem(str(fail_count)))
             self.tableWidget.item(row, 5).setTextAlignment(Qt.AlignCenter)
             
-            # 평가 점수 (컬럼 6)
             if total_count > 0:
                 score = (pass_count / total_count) * 100
                 self.tableWidget.setItem(row, 6, QTableWidgetItem(f"{score:.1f}%"))
@@ -270,10 +262,8 @@ class MyApp(QWidget):
         if row >= self.tableWidget.rowCount():
             return
             
-        # 아이콘 업데이트
         msg, img = self.icon_update_step(data, result, error_text)
         
-        # 아이콘을 완전히 중앙에 정렬하기 위해 위젯 사용
         icon_widget = QWidget()
         icon_layout = QHBoxLayout()
         icon_layout.setContentsMargins(0, 0, 0, 0)
@@ -289,24 +279,19 @@ class MyApp(QWidget):
         
         self.tableWidget.setCellWidget(row, 1, icon_widget)
         
-        # 실제 검증 횟수 업데이트
         self.tableWidget.setItem(row, 2, QTableWidgetItem(str(retries)))
         self.tableWidget.item(row, 2).setTextAlignment(Qt.AlignCenter)
         
-        # 통과 필드 수 업데이트
         self.tableWidget.setItem(row, 3, QTableWidgetItem(str(pass_count)))
         self.tableWidget.item(row, 3).setTextAlignment(Qt.AlignCenter)
         
-        # 전체 필드 수 업데이트
         total_fields = pass_count + error_count
         self.tableWidget.setItem(row, 4, QTableWidgetItem(str(total_fields)))
         self.tableWidget.item(row, 4).setTextAlignment(Qt.AlignCenter)
         
-        # 실패 횟수 업데이트
         self.tableWidget.setItem(row, 5, QTableWidgetItem(str(error_count)))
         self.tableWidget.item(row, 5).setTextAlignment(Qt.AlignCenter)
         
-        # 평가 점수 업데이트
         if total_fields > 0:
             score = (pass_count / total_fields) * 100
             self.tableWidget.setItem(row, 6, QTableWidgetItem(f"{score:.1f}%"))
@@ -314,11 +299,9 @@ class MyApp(QWidget):
             self.tableWidget.setItem(row, 6, QTableWidgetItem("0%"))
         self.tableWidget.item(row, 6).setTextAlignment(Qt.AlignCenter)
         
-        # 메시지 저장 (팝업용)
         setattr(self, f"step{row+1}_msg", msg)
 
     def load_test_info_from_constants(self):
-        """CONSTANTS.py에서 시험정보를 로드 (읽기 전용)"""
         return [
             ("기업명", CONSTANTS.company_name),
             ("제품명", CONSTANTS.product_name),
@@ -380,11 +363,9 @@ class MyApp(QWidget):
                     except Exception as e:
                         print(e)
                         import traceback
-                        traceback.print_exc()   # 에러 상세 출력 -> VIDEO에서만 계속 에러 뜨고 있음
+                        traceback.print_exc()
 
         except Exception as e:
-            #print(traceback.format_exc())
-            #print("post exception", path)
             print(e)
 
 
@@ -398,9 +379,6 @@ class MyApp(QWidget):
     def get_webhook_result(self):
         tmp_webhook_res = json.dumps(self.webhook_res, indent=4, ensure_ascii=False)
         message_name = "step " + str(self.webhook_cnt + 1) + ": " + self.message[self.webhook_cnt]
-        # code&message 제외
-        #val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.outSchema[self.webhook_cnt],
-        #                                                                self.webhook_res, self.flag_opt)
 
         val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.webhookSchema[self.webhook_cnt],
                                                                         self.webhook_res, self.flag_opt)
@@ -434,11 +412,11 @@ class MyApp(QWidget):
                                 tmp_webhook_res, self._to_detail_text(val_text), current_retries)
 
         # 메시지 저장
-        if self.webhook_cnt == 6:  # step(cnt+1), video 7th, bio 7th,
+        if self.webhook_cnt == 6:  
             self.step7_msg += msg
-        elif self.webhook_cnt == 4:  # step(cnt+1), bio 5th, security 5th
+        elif self.webhook_cnt == 4: 
             self.step5_msg += msg
-        elif self.webhook_cnt == 3:  # step(cnt+1), security 4th
+        elif self.webhook_cnt == 3: 
             self.step4_msg += msg
 
         self.webhook_res = None  # init
@@ -456,18 +434,19 @@ class MyApp(QWidget):
                 time.sleep(1)
                 time_interval += 1
 
-            # 순차적 처리: 현재 스텝이 완료되지 않았고, 응답 처리 중이 아닐 때만 새 요청 전송
             if (self.post_flag is False and 
                 self.processing_response is False and 
-                self.cnt < len(self.message)):
+                self.cnt < len(self.message) and 
+                self.current_retry < CONSTANTS.num_retries[self.cnt]):
                 self.message_in_cnt += 1
                 self.time_pre = time.time()
 
-                self.message_name = "step " + str(self.cnt + 1) + ": " + self.message[self.cnt]
+                retry_info = f" (시도 {self.current_retry + 1}/{CONSTANTS.num_retries[self.cnt]})"
+                self.message_name = "step " + str(self.cnt + 1) + ": " + self.message[self.cnt] + retry_info
 
                 # if self.tmp_msg_append_flag:
                 #     self.valResult.append(self.message_name)
-                if self.cnt == 0:
+                if self.cnt == 0 and self.current_retry == 0:
                     self.tmp_msg_append_flag = True
 
                 # 즉시 POST 요청 전송
@@ -485,22 +464,15 @@ class MyApp(QWidget):
                 if self.message_in_cnt > 1:
                     self.message_error.append([self.message[self.cnt]])
                     self.message_in_cnt = 0
-                    self.valResult.append("Message Missing!")
+                    self.valResult.append(f"Message Missing! (시도 {self.current_retry + 1}/{CONSTANTS.num_retries[self.cnt]})")
 
-                    # ▼ 버퍼에 FAIL 정보 저장 추가
-                    self.step_buffers[self.cnt]["data"] = "타임아웃으로 인해 수신된 데이터가 없습니다."
-                    self.step_buffers[self.cnt]["error"] = "Message Missing! - 지정된 시간 내에 메시지를 받지 못했습니다."
-                    self.step_buffers[self.cnt]["result"] = "FAIL"
+                    # 현재 시도에 대한 타임아웃 처리
+                    tmp_fields_rqd_cnt, tmp_fields_opt_cnt = timeout_field_finder(self.outSchema[self.cnt])
+                    add_err = tmp_fields_rqd_cnt if tmp_fields_rqd_cnt > 0 else 1
+                    if self.flag_opt:
+                        add_err += tmp_fields_opt_cnt
 
-                    # self.total_error_cnt += len(field_finder(self.outSchema[self.cnt]))
-                    tmp_fields_rqd_cnt, tmp_fields_opt_cnt = timeout_field_finder(
-                        self.outSchema[self.cnt])
-                    self.total_error_cnt += tmp_fields_rqd_cnt
-                    if tmp_fields_rqd_cnt == 0:  # {}인 경우 +1
-                        self.total_error_cnt += 1
-                    if self.flag_opt:  # 오류 필드 수 증가
-                        self.total_error_cnt += tmp_fields_opt_cnt
-
+                    self.total_error_cnt += add_err
                     self.total_pass_cnt += 0
                     
                     # 평가 점수 디스플레이 업데이트
@@ -511,22 +483,33 @@ class MyApp(QWidget):
                     self.valResult.append("Score details : " + str(self.total_pass_cnt) + "(누적 검증 통과 필드 수), " + str(
                         self.total_error_cnt) + "(누적 검증 오류 필드 수)\n")
                     
-                    # 테이블 업데이트 (Message Missing)
-                    add_err = tmp_fields_rqd_cnt if tmp_fields_rqd_cnt > 0 else 1
-                    if self.flag_opt:
-                        add_err += tmp_fields_opt_cnt
+                    # 재시도 카운터 증가
+                    self.current_retry += 1
                     
-                    current_retries = CONSTANTS.num_retries[self.cnt]
-                    self.update_table_row_with_retries(self.cnt, "FAIL", 0, add_err, "", "Message Missing!", current_retries)
+                    # 재시도 완료 여부 확인
+                    if self.current_retry >= CONSTANTS.num_retries[self.cnt]:
+                        # 모든 재시도 완료 - 버퍼에 최종 결과 저장
+                        self.step_buffers[self.cnt]["data"] = "타임아웃으로 인해 수신된 데이터가 없습니다."
+                        self.step_buffers[self.cnt]["error"] = f"Message Missing! - 모든 시도({CONSTANTS.num_retries[self.cnt]}회)에서 타임아웃 발생"
+                        self.step_buffers[self.cnt]["result"] = "FAIL"
+                        
+                        # 테이블 업데이트 (Message Missing)
+                        current_retries = CONSTANTS.num_retries[self.cnt]
+                        self.update_table_row_with_retries(self.cnt, "FAIL", 0, add_err, "", "Message Missing!", current_retries)
+                        
+                        # 다음 API로 이동
+                        self.cnt += 1
+                        self.current_retry = 0  # 재시도 카운터 리셋
                     
-                    # 다음 스텝으로 이동하고 모든 플래그 리셋 (타임아웃 케이스)
-                    self.cnt += 1
                     self.message_in_cnt = 0
-                    self.post_flag = False  # 다음 스텝을 위해 플래그 리셋
-                    self.processing_response = False  # 응답 처리 완료
-                    
-                    # 다음 스텝으로 넘어가기 전 충분한 대기
-                    self.time_pre = time.time() + 2.0  # 2초 추가 대기
+                    self.post_flag = False  
+                    self.processing_response = False
+
+                    # 재시도인 경우 더 긴 대기 시간 설정
+                    if self.current_retry > 0:
+                        self.time_pre = time.time() + 3.0  # 재시도 시 3초 대기
+                    else:
+                        self.time_pre = time.time() + 2.0  # 첫 시도 시 2초 대기
 
                     if self.cnt >= len(self.message):
                         self.tick_timer.stop()
@@ -558,96 +541,65 @@ class MyApp(QWidget):
                         res_data = self.res.text
                         res_data = json.loads(res_data)
 
-                        # 개별 검증 횟수와 프로토콜 설정
+                        # 현재 재시도 정보
                         current_retries = CONSTANTS.num_retries[self.cnt]
                         current_protocol = CONSTANTS.trans_protocol[self.cnt]
 
-                        # 반복 검증 처리
-                        total_pass_count = 0
-                        total_error_count = 0
-                        all_validation_results = []
-                        all_error_messages = []
-                        combined_data_parts = []  # 루프 밖으로 이동 - 전체 검증에서 한 번만 데이터 수집
-
-                        for retry_attempt in range(current_retries):
-                            combined_error_parts = []   # 각 회차별 오류 메시지
-                            step_result = "PASS"        # 이 회차의 결과
-                            add_pass = 0
-                            add_err = 0
-
-                            # 첫 번째 검증에서만 데이터 수집
-                            if retry_attempt == 0:
-                                tmp_res_auth = json.dumps(res_data, indent=4, ensure_ascii=False)
-                                combined_data_parts.append(tmp_res_auth)
-
-                            if self.webhook_flag:  # webhook 인 경우
-                                val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.outSchema[-1],
-                                                                                                res_data, self.flag_opt)
-                                add_pass += key_psss_cnt
-                                add_err += key_error_cnt
-                                
-                                webhook_err_txt = self._to_detail_text(val_text)
-                                if val_result == "FAIL":
-                                    step_result = "FAIL"
-                                    combined_error_parts.append(f"[검증 {retry_attempt + 1}회차] [Webhook] " + webhook_err_txt)
-                                
-                                try:
-                                    if self.message[self.cnt] == "Authentication":
-                                        self.token = res_data["accessToken"]
-                                except:
-                                    pass
-
-                            else:  # webhook 아닌경우
-                                val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.outSchema[self.cnt],
-                                                                                                    res_data, self.flag_opt)
-                                add_pass += key_psss_cnt
-                                add_err += key_error_cnt
-                                
-                                inbound_err_txt = self._to_detail_text(val_text)
-                                if val_result == "FAIL":
-                                    step_result = "FAIL"
-                                    combined_error_parts.append(f"[검증 {retry_attempt + 1}회차] [Inbound] " + inbound_err_txt)
-
-                                try:
-                                    if self.message[self.cnt] == "Authentication":
-                                        self.token = res_data["accessToken"]
-                                except:
-                                    pass
-
-                            # 각 검증 회차별 결과 저장
-                            all_validation_results.append(step_result)
-                            all_error_messages.extend(combined_error_parts)
-                            total_pass_count += add_pass
-                            total_error_count += add_err
-
-                        # 최종 결과 결정 (하나라도 FAIL이면 FAIL)
-                        final_result = "FAIL" if "FAIL" in all_validation_results else "PASS"
-
-                        # (1) 스텝 버퍼 저장
-                        data_text = "\n".join(combined_data_parts) if combined_data_parts else "아직 수신된 데이터가 없습니다."
-                        error_text = "\n".join(all_error_messages) if all_error_messages else "오류가 없습니다."
-                        self.step_buffers[self.cnt]["data"] = data_text
-                        self.step_buffers[self.cnt]["error"] = error_text
-                        self.step_buffers[self.cnt]["result"] = final_result
-
-                        # (2) 아이콘/툴팁 갱신 - 새로운 테이블 업데이트 함수 사용
-                        if combined_data_parts:
-                            tmp_res_auth = combined_data_parts[0]  # 첫 번째 데이터 사용
-                        else:
-                            tmp_res_auth = "No data"
+                        # 단일 응답에 대한 검증 처리
+                        tmp_res_auth = json.dumps(res_data, indent=4, ensure_ascii=False)
                         
-                        # 테이블 업데이트 (개별 검증 횟수 반영)
+                        if self.webhook_flag:  # webhook 인 경우
+                            val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.outSchema[-1],
+                                                                                            res_data, self.flag_opt)
+                            
+                            try:
+                                if self.message[self.cnt] == "Authentication":
+                                    self.token = res_data["accessToken"]
+                            except:
+                                pass
+
+                        else:  # webhook 아닌경우
+                            val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.outSchema[self.cnt],
+                                                                                                res_data, self.flag_opt)
+                            
+                            try:
+                                if self.message[self.cnt] == "Authentication":
+                                    self.token = res_data["accessToken"]
+                            except:
+                                pass
+
+                        # 이번 시도의 결과
+                        final_result = val_result
+                        total_pass_count = key_psss_cnt
+                        total_error_count = key_error_cnt
+
+                        # (1) 스텝 버퍼 저장 - 재시도별로 누적
+                        data_text = tmp_res_auth
+                        error_text = self._to_detail_text(val_text) if val_result == "FAIL" else "오류가 없습니다."
+                        
+                        # 기존 버퍼에 누적 (재시도 정보와 함께)
+                        if self.current_retry == 0:
+                            # 첫 번째 시도인 경우 초기화
+                            self.step_buffers[self.cnt]["data"] = f"[시도 {self.current_retry + 1}/{current_retries}]\n{data_text}"
+                            self.step_buffers[self.cnt]["error"] = f"[시도 {self.current_retry + 1}/{current_retries}]\n{error_text}"
+                            self.step_buffers[self.cnt]["result"] = final_result
+                        else:
+                            # 재시도인 경우 누적
+                            self.step_buffers[self.cnt]["data"] += f"\n\n[시도 {self.current_retry + 1}/{current_retries}]\n{data_text}"
+                            self.step_buffers[self.cnt]["error"] += f"\n\n[시도 {self.current_retry + 1}/{current_retries}]\n{error_text}"
+                            if final_result == "FAIL":
+                                self.step_buffers[self.cnt]["result"] = "FAIL"  # 하나라도 실패하면 FAIL
+                        
+                        # 테이블 업데이트 (누적된 재시도 횟수 반영)
                         message_name = "step " + str(self.cnt + 1) + ": " + self.message[self.cnt]
                         self.update_table_row_with_retries(self.cnt, final_result, total_pass_count, total_error_count, 
-                                                         tmp_res_auth, error_text, current_retries)
+                                                         tmp_res_auth, error_text, self.current_retry + 1)
 
-                        # (3) 모니터링 창에는 '한 번만' 붙이기
-                        self.valResult.append(f"\n검증 횟수: {current_retries}회")
+                        self.valResult.append(f"\n검증 진행: {self.current_retry + 1}/{current_retries}회")
                         self.valResult.append(f"프로토콜: {current_protocol}")
                         self.valResult.append("\n" + data_text)
                         self.valResult.append(final_result)
 
-                        # (4) 누적 점수 업데이트 (한 번만)
                         self.total_error_cnt += total_error_count
                         self.total_pass_cnt += total_pass_count
                         
@@ -659,31 +611,39 @@ class MyApp(QWidget):
                         self.valResult.append(
                             "Score details : " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(
                                 self.total_error_cnt) + "(누적 오류 필드 수)\n")
+                    
+                        # 재시도 카운터 증가
+                        self.current_retry += 1
                         
-                        # 다음 스텝으로 이동하고 모든 플래그 리셋
-                        self.cnt += 1
+                        # 현재 API의 모든 재시도가 완료되었는지 확인
+                        if self.current_retry >= CONSTANTS.num_retries[self.cnt]:
+                            # 다음 API로 이동
+                            self.cnt += 1
+                            self.current_retry = 0  # 재시도 카운터 리셋
+                        
                         self.message_in_cnt = 0
-                        self.post_flag = False  # 다음 스텝을 위해 플래그 리셋
-                        self.processing_response = False  # 응답 처리 완료
+                        self.post_flag = False 
+                        self.processing_response = False 
                         
-                        # 다음 스텝으로 넘어가기 전 충분한 대기 (CONSTANTS timeout 고려)
-                        self.time_pre = time.time() + 2.0  # 2초 추가 대기
+                        # 재시도 여부에 따라 대기 시간 조정
+                        if self.current_retry < CONSTANTS.num_retries[self.cnt] - 1:
+                            self.time_pre = time.time() + 3.0  # 재시도 예정 시 3초 대기
+                        else:
+                            self.time_pre = time.time() + 2.0  # 마지막 시도 후 2초 대기
                         self.message_in_cnt = 0
 
                         if self.webhook_flag and self.webhook_res is not None:
                             self.get_webhook_result()
 
-                        self.post_flag = False
-
-            if self.cnt == len(self.message):
+            if self.cnt >= len(self.message):
                 self.tick_timer.stop()
                 self.valResult.append("검증 절차가 완료되었습니다.")
                 
-                # 완료 시 모든 플래그 리셋
                 self.processing_response = False
                 self.post_flag = False
 
                 self.cnt = 0
+                self.current_retry = 0  # 재시도 카운터도 리셋
                 self.final_report += "전체 점수: "+  str((self.total_pass_cnt/(self.total_pass_cnt+self.total_error_cnt)*100))+"\n"
                 self.final_report += "전체 결과: "+ str(self.total_pass_cnt)+"(누적 통과 필드 수), "+str(self.total_error_cnt)+"(누적 오류 필드 수)"+"\n"
                 self.final_report += "\n"
@@ -717,7 +677,6 @@ class MyApp(QWidget):
     def icon_update(self, tmp_res_auth, val_result, val_text):
         msg, img = self.icon_update_step(tmp_res_auth, val_result, val_text)
         
-        # 테이블 아이콘 업데이트
         if self.cnt < self.tableWidget.rowCount():
             # 아이콘 위젯 생성
             icon_widget = QWidget()
@@ -734,7 +693,6 @@ class MyApp(QWidget):
             
             self.tableWidget.setCellWidget(self.cnt, 1, icon_widget)
             
-            # 메시지 저장
             if self.cnt == 0:
                 self.step1_msg += msg
             elif self.cnt == 1:
@@ -755,16 +713,15 @@ class MyApp(QWidget):
                 self.step9_msg += msg
 
     def initUI(self):
-        # 최상위 레이아웃 - 2열로 구성 (platformVal_all.py와 동일)
-        outerLayout = QHBoxLayout()  # 전체를 가로 2열로 변경
-        leftLayout = QVBoxLayout()   # 왼쪽 열: 시험정보 + 버튼들
-        rightLayout = QVBoxLayout()  # 오른쪽 열: 평가점수 + 시험결과 + 모니터링
+        # 최상위 레이아웃 - 2열로 구성
+        outerLayout = QHBoxLayout()  
+        leftLayout = QVBoxLayout() 
+        rightLayout = QVBoxLayout() 
         
         empty = QLabel(" ")
         empty.setStyleSheet('font-size:5pt')
         
-        # ==================== 왼쪽 열 구성 ====================
-        leftLayout.addWidget(empty)  # empty
+        leftLayout.addWidget(empty)
         
         self.settingGroup = QGroupBox("시험정보")
         self.settingGroup.setMaximumWidth(460)  
@@ -776,44 +733,34 @@ class MyApp(QWidget):
         self.info_table.setColumnWidth(0, 150)  
         self.info_table.setColumnWidth(1, 288)  
         
-        # 스크롤바 완전 제거
         self.info_table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.info_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         
-        # 테이블 행 레이블 숨기기
         self.info_table.verticalHeader().setVisible(False)
         
-        # 테이블 전체를 읽기 전용으로 설정
         self.info_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         
-        # 각 행의 높이를 조정하여 모든 내용이 보이도록 설정
         for i in range(9):
             self.info_table.setRowHeight(i, 40) 
         
-        # CONSTANTS.py에서 테이블 데이터 로드
         table_data = self.load_test_info_from_constants()
         
-        # 테이블에 데이터 입력 (모두 읽기 전용)
         for row, (label, value) in enumerate(table_data):
-            # 첫 번째 컬럼 (항목명) - 회색 배경
             item_label = QTableWidgetItem(label)
             item_label.setFlags(Qt.ItemIsEnabled)  
             item_label.setBackground(QColor(240, 240, 240))  
             self.info_table.setItem(row, 0, item_label)
             
-            # 두 번째 컬럼 (내용) - 흰색 배경, 읽기 전용
             item_value = QTableWidgetItem(str(value))
             item_value.setFlags(Qt.ItemIsEnabled)  
             item_value.setBackground(QColor(255, 255, 255))  
             self.info_table.setItem(row, 1, item_value)
         
-        # 테이블 레이아웃
         settingLayout = QVBoxLayout()
         settingLayout.addWidget(self.info_table)
         self.settingGroup.setLayout(settingLayout)
         
-        # 검증 버튼들 (platformVal_all.py와 동일한 구조, 색상만 핑크로)
-        buttonGroup = QWidget()  # QGroupBox에서 QWidget으로 변경
+        buttonGroup = QWidget()
         buttonGroup.setMaximumWidth(500)  
         buttonLayout = QHBoxLayout()  
         
@@ -872,25 +819,24 @@ class MyApp(QWidget):
         self.stop_btn.clicked.connect(self.stop_btn_clicked)
         self.stop_btn.setDisabled(True)
         
-        # ------------------ 종료 버튼 ------------------------
         self.rbtn = QPushButton(self)
         self.rbtn.setText('종료')
         self.rbtn.setFixedSize(140, 50) 
         self.rbtn.setStyleSheet("""
             QPushButton {
-                background-color: #FFB6C1;  /* 파스텔 핑크 */
+                background-color: #FFB6C1;
                 border: 2px solid #FF69B4;
                 border-radius: 5px;
                 padding: 5px;
                 font-weight: bold;
-                color: #8B0000;  /* 진한 빨간색 텍스트 */
+                color: #8B0000;
             }
             QPushButton:hover {
-                background-color: #FFC0CB;  /* 호버시 더 밝은 핑크 */
+                background-color: #FFC0CB;
                 border: 2px solid #FF1493;
             }
             QPushButton:pressed {
-                background-color: #FF69B4;  /* 클릭시 더 진한 핑크 */
+                background-color: #FF69B4;
             }
             QPushButton:disabled {
                 background-color: #F0F0F0;
@@ -966,14 +912,14 @@ class MyApp(QWidget):
         self.tableWidget.resize(1050, 400)  
         
         # 컬럼 너비 설정
-        self.tableWidget.setColumnWidth(0, 240)  # API 명 컬럼 너비 
-        self.tableWidget.setColumnWidth(1, 90)   # 결과 컬럼 너비 
-        self.tableWidget.setColumnWidth(2, 100)  # 검증 횟수 컬럼 너비 
-        self.tableWidget.setColumnWidth(3, 110)  # 통과 필드 수 컬럼 너비 
-        self.tableWidget.setColumnWidth(4, 110)  # 전체 필드 수 컬럼 너비 
-        self.tableWidget.setColumnWidth(5, 100)  # 실패 횟수 컬럼 너비
-        self.tableWidget.setColumnWidth(6, 110)  # 평가 점수 컬럼 너비
-        self.tableWidget.setColumnWidth(7, 130)  # 상세 내용 컬럼 너비
+        self.tableWidget.setColumnWidth(0, 240)  
+        self.tableWidget.setColumnWidth(1, 90)   
+        self.tableWidget.setColumnWidth(2, 100)   
+        self.tableWidget.setColumnWidth(3, 110) 
+        self.tableWidget.setColumnWidth(4, 110)  
+        self.tableWidget.setColumnWidth(5, 100)  
+        self.tableWidget.setColumnWidth(6, 110)  
+        self.tableWidget.setColumnWidth(7, 130)  
 
         # 행 높이 설정
         for i in range(9):
@@ -1056,7 +1002,7 @@ class MyApp(QWidget):
             buf = self.step_buffers[row]
             api_name = self.tableWidget.item(row, 0).text()
             
-            # 스키마 데이터 가져오기
+            # 스키마 데이터 가져오기 -> 09/24 시스템쪽은 OutSchema
             try:
                 schema_data = videoOutSchema[row] if row < len(videoOutSchema) else None
             except:
@@ -1139,13 +1085,11 @@ class MyApp(QWidget):
 
 
     def start_btn_clicked(self):
-        # 영상보안 시스템으로 고정되어 있고, CONSTANTS.py에서 인증 정보를 가져오므로
-        # 별도의 검증 없이 바로 시작
+
         json_to_data("video")
         self.sbtn.setDisabled(True)
         self.stop_btn.setEnabled(True)
 
-        # 완전한 초기화
         self.init_win()
         self.valResult.clear()
         
@@ -1158,6 +1102,7 @@ class MyApp(QWidget):
         self.message_in_cnt = 0
         self.message_error = []
         self.cnt = 0
+        self.current_retry = 0  # 반복 카운터 초기화
         self.cnt_pre = 0
         self.time_pre = 0
         self.res = None
@@ -1183,6 +1128,7 @@ class MyApp(QWidget):
 
     def init_win(self):
         self.cnt = 0
+        self.current_retry = 0  # 재시도 카운터 초기화
         
         # 버퍼 초기화
         self.step_buffers = [{"data": "", "result": "", "error": ""} for _ in range(9)]

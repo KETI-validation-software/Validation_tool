@@ -26,7 +26,7 @@ time_out : 메시지별 timeout 설정 시간
 num_retries : 메시지별 메시지 검증 횟수
 '''
 trans_protocol = [None,None,None,None,None,None,"LongPolling",None,None] #"LongPolling" #WebHook
-time_out = [5000,5000,5000,5000,5000,5000,5000,5000,5000]
+time_out = [5000,5000,8000,8000,8000,8000,5000,5000,8000]
 num_retries = [1,1,3,3,2,2,1,1,2]
 
 #etc
