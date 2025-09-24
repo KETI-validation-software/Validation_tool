@@ -90,21 +90,37 @@ class InfoWidget(QWidget):
         panel = QGroupBox("시험 기본 정보")
         layout = QVBoxLayout()
 
-        # 불러오기 버튼들 (Request/Response)
-        btn_row = QHBoxLayout()
-        btn_row.addStretch()
-        
-        self.load_request_btn = QPushButton("불러오기|Request")
+        # 불러오기 버튼들 (Request/Response - 일반/WebHook)
+        btn_row1 = QHBoxLayout()
+        btn_row1.addStretch()
+
+        self.load_request_btn = QPushButton("Long Polling|Request")
         self.load_request_btn.setStyleSheet("QPushButton { background-color: #9FBFE5; color: black; font-weight: bold; }")
-        self.load_request_btn.clicked.connect(lambda: self.load_opt_files("request"))
-        btn_row.addWidget(self.load_request_btn)
-        
-        self.load_response_btn = QPushButton("불러오기|Response")
+        self.load_request_btn.clicked.connect(lambda: self.load_opt_files("request_longpolling"))
+        btn_row1.addWidget(self.load_request_btn)
+
+        self.load_response_btn = QPushButton("Long Polling|Response")
         self.load_response_btn.setStyleSheet("QPushButton { background-color: #9FBFE5; color: black; font-weight: bold; }")
-        self.load_response_btn.clicked.connect(lambda: self.load_opt_files("response"))
-        btn_row.addWidget(self.load_response_btn)
-        
-        layout.addLayout(btn_row)
+        self.load_response_btn.clicked.connect(lambda: self.load_opt_files("response_longpolling"))
+        btn_row1.addWidget(self.load_response_btn)
+
+        layout.addLayout(btn_row1)
+
+        # WebHook 버전 버튼들
+        btn_row2 = QHBoxLayout()
+        btn_row2.addStretch()
+
+        self.load_request_webhook_btn = QPushButton("WebHook|Request")
+        self.load_request_webhook_btn.setStyleSheet("QPushButton { background-color: #C4BEE2; color: black; font-weight: bold; }")
+        self.load_request_webhook_btn.clicked.connect(lambda: self.load_opt_files("request_webhook"))
+        btn_row2.addWidget(self.load_request_webhook_btn)
+
+        self.load_response_webhook_btn = QPushButton("WebHook|Response")
+        self.load_response_webhook_btn.setStyleSheet("QPushButton { background-color: #C4BEE2; color: black; font-weight: bold; }")
+        self.load_response_webhook_btn.clicked.connect(lambda: self.load_opt_files("response_webhook"))
+        btn_row2.addWidget(self.load_response_webhook_btn)
+
+        layout.addLayout(btn_row2)
 
         form = QFormLayout()
         self.company_edit = QLineEdit()
@@ -411,7 +427,7 @@ class InfoWidget(QWidget):
         try:
             # 모드 선택 확인
             if not self.current_mode:
-                QMessageBox.warning(self, "모드 미선택", "먼저 불러오기|Request 또는 불러오기|Response 버튼을 눌러 모드를 선택해주세요.")
+                QMessageBox.warning(self, "모드 미선택", "먼저 불러오기 버튼 중 하나를 눌러 모드를 선택해주세요.")
                 return
             
             # CONSTANTS.py 업데이트
@@ -707,12 +723,21 @@ class InfoWidget(QWidget):
     def load_opt_files(self, mode):
         try:
             # 모드에 따라 다른 파일 경로 설정
-            if mode == "request":
+            if mode == "request_longpolling":
                 exp_opt_path = resource_path("temp/(temp)exp_opt_requestVal.json")
                 exp_opt2_path = resource_path("temp/(temp)exp_opt2_requestVal_LongPolling.json")
-            else:  # response
+            elif mode == "response_longpolling":
                 exp_opt_path = resource_path("temp/(temp)exp_opt_responseVal.json")
                 exp_opt2_path = resource_path("temp/(temp)exp_opt2_responseVal_LongPolling.json")
+            elif mode == "request_webhook":
+                exp_opt_path = resource_path("temp/(temp)exp_opt_requestVal.json")
+                exp_opt2_path = resource_path("temp/(temp)exp_opt2_requestVal_WebHook.json")
+            elif mode == "response_webhook":
+                exp_opt_path = resource_path("temp/(temp)exp_opt_responseVal.json")
+                exp_opt2_path = resource_path("temp/(temp)exp_opt2_responseVal_WebHook.json")
+            else:
+                QMessageBox.warning(self, "모드 오류", f"알 수 없는 모드: {mode}")
+                return
             
             exp_opt = self.opt_loader.load_opt_json(exp_opt_path)
             exp_opt2 = self.opt_loader.load_opt_json(exp_opt2_path)
@@ -728,7 +753,8 @@ class InfoWidget(QWidget):
             
             # 모드에 따른 파일 생성
             try:
-                if mode == "request":
+                if mode in ["request_longpolling", "request_webhook"]:
+                    # Request 모드 (일반/WebHook)
                     schema_path = generate_schema_file(
                         exp_opt2_path,
                         schema_type="request",
@@ -744,7 +770,7 @@ class InfoWidget(QWidget):
                     )
                     print(f"videoRequest_request.py 생성 완료: {request_path}")
 
-                elif mode == "response":
+                elif mode in ["response_longpolling", "response_webhook"]:
                     schema_path = generate_schema_file(
                         exp_opt2_path,
                         schema_type="response", 
