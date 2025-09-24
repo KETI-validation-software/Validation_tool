@@ -221,24 +221,24 @@
                   "properties": {
                     "camID": {
                       "type": "string"
+                    },
+                    "streamProtocolType": {
+                      "type": "string"
                     }
                   },
-                  "streamProtocolType": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "camID",
-                  "streamProtocolType"
-                ]
+                  "required": [
+                    "camID",
+                    "streamProtocolType"
+                  ]
+                }
               }
-            }
-          },
-          "required": [
-            "camList"
-          ]
+            },
+            "required": [
+              "camList"
+            ]
+          }
         },
-        "respoonseData": {
+        "responseData": {
           "code": "200",
           "message": "성공",
           "camList": [
@@ -309,7 +309,7 @@
               "camList"
             ]
           },
-          "respoonseData": {
+          "responseData": {
             "code": "200",
             "message": "성공",
             "camList": [
