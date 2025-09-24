@@ -1,5 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
-
+# exe로 빌드하기 위한 설정 파일
 
 block_cipher = None
 
