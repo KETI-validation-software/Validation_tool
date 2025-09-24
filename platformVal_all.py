@@ -179,6 +179,7 @@ class MyApp(QWidget):
         self.initUI()
         self.realtime_flag = False
         self.cnt = 0
+        self.current_retry = 0  # 현재 API의 반복 횟수 카운터
         self.total_error_cnt = 0
         self.total_pass_cnt = 0
         self.time_pre = 0
@@ -917,7 +918,7 @@ class MyApp(QWidget):
             buf = self.step_buffers[row]
             api_name = self.tableWidget.item(row, 0).text()
             
-            # 스키마 데이터 가져오기
+            # 스키마 데이터 가져오기 -> 09/24 플랫폼쪽은 InSchema
             try:
                 schema_data = videoInSchema[row] if row < len(videoInSchema) else None
             except:
