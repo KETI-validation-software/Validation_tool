@@ -118,18 +118,20 @@ class MainWindow(QMainWindow):
 
     def _open_validation_app(self, mode):
         """모드에 따라 다른 검증 앱 실행"""
-        if mode == "request":
-            # Request 모드 - Platform 검증
+        if mode in ["request_longpolling", "request_webhook"]:
+            # Request 모드 (LongPolling/WebHook) - Platform 검증
             if getattr(self, "_platform_widget", None) is None:
                 self._platform_widget = platform_app.MyApp(embedded=True)
                 self.stack.addWidget(self._platform_widget)
             self.stack.setCurrentWidget(self._platform_widget)
-        else:  # response
-            # Response 모드 - System 검증  
+        elif mode in ["response_longpolling", "response_webhook"]:
+            # Response 모드 (LongPolling/WebHook) - System 검증
             if getattr(self, "_system_widget", None) is None:
                 self._system_widget = system_app.MyApp(embedded=True)
                 self.stack.addWidget(self._system_widget)
             self.stack.setCurrentWidget(self._system_widget)
+        else:
+            print(f"알 수 없는 모드: {mode}")
 
     def closeEvent(self, event):
         reply = QMessageBox.question(self, '종료', '프로그램을 종료하시겠습니까?',
