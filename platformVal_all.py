@@ -919,7 +919,7 @@ class MyApp(QWidget):
             
             # 스키마 데이터 가져오기
             try:
-                schema_data = videoOutSchema[row] if row < len(videoOutSchema) else None
+                schema_data = videoInSchema[row] if row < len(videoInSchema) else None
             except:
                 schema_data = None
             
