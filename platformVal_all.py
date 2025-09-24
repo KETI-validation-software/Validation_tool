@@ -365,8 +365,8 @@ class MyApp(QWidget):
                     message_name = "step " + str(self.cnt + 1) + ": " + self.Server.message[self.cnt]
                     
                     # 개별 검증 횟수 처리
-                    current_retries = CONSTANTS.num_retries[self.cnt]
-                    current_protocol = CONSTANTS.trans_protocol[self.cnt]
+                    current_retries = CONSTANTS.num_retries[self.cnt] if self.cnt < len(CONSTANTS.num_retries) else 1
+                    current_protocol = CONSTANTS.trans_protocol[self.cnt] if self.cnt < len(CONSTANTS.trans_protocol) else "Unknown"
 
                     total_pass_count = 0
                     total_error_count = 0
@@ -542,7 +542,7 @@ class MyApp(QWidget):
                 if self.flag_opt:
                     add_err += tmp_fields_opt_cnt
                 
-                current_retries = CONSTANTS.num_retries[self.cnt]
+                current_retries = CONSTANTS.num_retries[self.cnt] if self.cnt < len(CONSTANTS.num_retries) else 1
                 self.update_table_row_with_retries(self.cnt, "FAIL", 0, add_err, "", "Message Missing!", current_retries)
                 
                 self.cnt += 1
