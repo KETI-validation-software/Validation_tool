@@ -411,11 +411,11 @@ class MyApp(QWidget):
                                 tmp_webhook_res, self._to_detail_text(val_text), current_retries)
 
         # 메시지 저장
-        if self.webhook_cnt == 6:  # step(cnt+1), video 7th, bio 7th,
+        if self.webhook_cnt == 6:  
             self.step7_msg += msg
-        elif self.webhook_cnt == 4:  # step(cnt+1), bio 5th, security 5th
+        elif self.webhook_cnt == 4: 
             self.step5_msg += msg
-        elif self.webhook_cnt == 3:  # step(cnt+1), security 4th
+        elif self.webhook_cnt == 3: 
             self.step4_msg += msg
 
         self.webhook_res = None  # init
@@ -494,14 +494,12 @@ class MyApp(QWidget):
                     current_retries = CONSTANTS.num_retries[self.cnt]
                     self.update_table_row_with_retries(self.cnt, "FAIL", 0, add_err, "", "Message Missing!", current_retries)
                     
-                    # 다음 스텝으로 이동하고 모든 플래그 리셋 (타임아웃 케이스)
                     self.cnt += 1
                     self.message_in_cnt = 0
-                    self.post_flag = False  # 다음 스텝을 위해 플래그 리셋
-                    self.processing_response = False  # 응답 처리 완료
-                    
-                    # 다음 스텝으로 넘어가기 전 충분한 대기
-                    self.time_pre = time.time() + 2.0  # 2초 추가 대기
+                    self.post_flag = False  
+                    self.processing_response = False
+
+                    self.time_pre = time.time() + 2.0
 
                     if self.cnt >= len(self.message):
                         self.tick_timer.stop()
@@ -542,15 +540,14 @@ class MyApp(QWidget):
                         total_error_count = 0
                         all_validation_results = []
                         all_error_messages = []
-                        combined_data_parts = []  # 루프 밖으로 이동 - 전체 검증에서 한 번만 데이터 수집
+                        combined_data_parts = []  
 
                         for retry_attempt in range(current_retries):
-                            combined_error_parts = []   # 각 회차별 오류 메시지
-                            step_result = "PASS"        # 이 회차의 결과
+                            combined_error_parts = []   
+                            step_result = "PASS"      
                             add_pass = 0
                             add_err = 0
 
-                            # 첫 번째 검증에서만 데이터 수집
                             if retry_attempt == 0:
                                 tmp_res_auth = json.dumps(res_data, indent=4, ensure_ascii=False)
                                 combined_data_parts.append(tmp_res_auth)
@@ -607,7 +604,7 @@ class MyApp(QWidget):
 
                         # (2) 아이콘/툴팁 갱신 - 새로운 테이블 업데이트 함수 사용
                         if combined_data_parts:
-                            tmp_res_auth = combined_data_parts[0]  # 첫 번째 데이터 사용
+                            tmp_res_auth = combined_data_parts[0]  
                         else:
                             tmp_res_auth = "No data"
                         
@@ -616,13 +613,11 @@ class MyApp(QWidget):
                         self.update_table_row_with_retries(self.cnt, final_result, total_pass_count, total_error_count, 
                                                          tmp_res_auth, error_text, current_retries)
 
-                        # (3) 모니터링 창에는 '한 번만' 붙이기
                         self.valResult.append(f"\n검증 횟수: {current_retries}회")
                         self.valResult.append(f"프로토콜: {current_protocol}")
                         self.valResult.append("\n" + data_text)
                         self.valResult.append(final_result)
 
-                        # (4) 누적 점수 업데이트 (한 번만)
                         self.total_error_cnt += total_error_count
                         self.total_pass_cnt += total_pass_count
                         
@@ -634,15 +629,14 @@ class MyApp(QWidget):
                         self.valResult.append(
                             "Score details : " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(
                                 self.total_error_cnt) + "(누적 오류 필드 수)\n")
-                        
-                        # 다음 스텝으로 이동하고 모든 플래그 리셋
+                    
                         self.cnt += 1
                         self.message_in_cnt = 0
-                        self.post_flag = False  # 다음 스텝을 위해 플래그 리셋
-                        self.processing_response = False  # 응답 처리 완료
+                        self.post_flag = False 
+                        self.processing_response = False 
                         
-                        # 다음 스텝으로 넘어가기 전 충분한 대기 (CONSTANTS timeout 고려)
-                        self.time_pre = time.time() + 2.0  # 2초 추가 대기
+
+                        self.time_pre = time.time() + 2.0
                         self.message_in_cnt = 0
 
                         if self.webhook_flag and self.webhook_res is not None:
@@ -654,7 +648,6 @@ class MyApp(QWidget):
                 self.tick_timer.stop()
                 self.valResult.append("검증 절차가 완료되었습니다.")
                 
-                # 완료 시 모든 플래그 리셋
                 self.processing_response = False
                 self.post_flag = False
 
@@ -692,7 +685,6 @@ class MyApp(QWidget):
     def icon_update(self, tmp_res_auth, val_result, val_text):
         msg, img = self.icon_update_step(tmp_res_auth, val_result, val_text)
         
-        # 테이블 아이콘 업데이트
         if self.cnt < self.tableWidget.rowCount():
             # 아이콘 위젯 생성
             icon_widget = QWidget()
@@ -709,7 +701,6 @@ class MyApp(QWidget):
             
             self.tableWidget.setCellWidget(self.cnt, 1, icon_widget)
             
-            # 메시지 저장
             if self.cnt == 0:
                 self.step1_msg += msg
             elif self.cnt == 1:
@@ -730,16 +721,15 @@ class MyApp(QWidget):
                 self.step9_msg += msg
 
     def initUI(self):
-        # 최상위 레이아웃 - 2열로 구성 (platformVal_all.py와 동일)
-        outerLayout = QHBoxLayout()  # 전체를 가로 2열로 변경
-        leftLayout = QVBoxLayout()   # 왼쪽 열: 시험정보 + 버튼들
-        rightLayout = QVBoxLayout()  # 오른쪽 열: 평가점수 + 시험결과 + 모니터링
+        # 최상위 레이아웃 - 2열로 구성
+        outerLayout = QHBoxLayout()  
+        leftLayout = QVBoxLayout() 
+        rightLayout = QVBoxLayout() 
         
         empty = QLabel(" ")
         empty.setStyleSheet('font-size:5pt')
         
-        # ==================== 왼쪽 열 구성 ====================
-        leftLayout.addWidget(empty)  # empty
+        leftLayout.addWidget(empty)
         
         self.settingGroup = QGroupBox("시험정보")
         self.settingGroup.setMaximumWidth(460)  
@@ -751,44 +741,34 @@ class MyApp(QWidget):
         self.info_table.setColumnWidth(0, 150)  
         self.info_table.setColumnWidth(1, 288)  
         
-        # 스크롤바 완전 제거
         self.info_table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.info_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         
-        # 테이블 행 레이블 숨기기
         self.info_table.verticalHeader().setVisible(False)
         
-        # 테이블 전체를 읽기 전용으로 설정
         self.info_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         
-        # 각 행의 높이를 조정하여 모든 내용이 보이도록 설정
         for i in range(9):
             self.info_table.setRowHeight(i, 40) 
         
-        # CONSTANTS.py에서 테이블 데이터 로드
         table_data = self.load_test_info_from_constants()
         
-        # 테이블에 데이터 입력 (모두 읽기 전용)
         for row, (label, value) in enumerate(table_data):
-            # 첫 번째 컬럼 (항목명) - 회색 배경
             item_label = QTableWidgetItem(label)
             item_label.setFlags(Qt.ItemIsEnabled)  
             item_label.setBackground(QColor(240, 240, 240))  
             self.info_table.setItem(row, 0, item_label)
             
-            # 두 번째 컬럼 (내용) - 흰색 배경, 읽기 전용
             item_value = QTableWidgetItem(str(value))
             item_value.setFlags(Qt.ItemIsEnabled)  
             item_value.setBackground(QColor(255, 255, 255))  
             self.info_table.setItem(row, 1, item_value)
         
-        # 테이블 레이아웃
         settingLayout = QVBoxLayout()
         settingLayout.addWidget(self.info_table)
         self.settingGroup.setLayout(settingLayout)
         
-        # 검증 버튼들 (platformVal_all.py와 동일한 구조, 색상만 핑크로)
-        buttonGroup = QWidget()  # QGroupBox에서 QWidget으로 변경
+        buttonGroup = QWidget()
         buttonGroup.setMaximumWidth(500)  
         buttonLayout = QHBoxLayout()  
         
@@ -847,25 +827,24 @@ class MyApp(QWidget):
         self.stop_btn.clicked.connect(self.stop_btn_clicked)
         self.stop_btn.setDisabled(True)
         
-        # ------------------ 종료 버튼 ------------------------
         self.rbtn = QPushButton(self)
         self.rbtn.setText('종료')
         self.rbtn.setFixedSize(140, 50) 
         self.rbtn.setStyleSheet("""
             QPushButton {
-                background-color: #FFB6C1;  /* 파스텔 핑크 */
+                background-color: #FFB6C1;
                 border: 2px solid #FF69B4;
                 border-radius: 5px;
                 padding: 5px;
                 font-weight: bold;
-                color: #8B0000;  /* 진한 빨간색 텍스트 */
+                color: #8B0000;
             }
             QPushButton:hover {
-                background-color: #FFC0CB;  /* 호버시 더 밝은 핑크 */
+                background-color: #FFC0CB;
                 border: 2px solid #FF1493;
             }
             QPushButton:pressed {
-                background-color: #FF69B4;  /* 클릭시 더 진한 핑크 */
+                background-color: #FF69B4;
             }
             QPushButton:disabled {
                 background-color: #F0F0F0;
@@ -941,14 +920,14 @@ class MyApp(QWidget):
         self.tableWidget.resize(1050, 400)  
         
         # 컬럼 너비 설정
-        self.tableWidget.setColumnWidth(0, 240)  # API 명 컬럼 너비 
-        self.tableWidget.setColumnWidth(1, 90)   # 결과 컬럼 너비 
-        self.tableWidget.setColumnWidth(2, 100)  # 검증 횟수 컬럼 너비 
-        self.tableWidget.setColumnWidth(3, 110)  # 통과 필드 수 컬럼 너비 
-        self.tableWidget.setColumnWidth(4, 110)  # 전체 필드 수 컬럼 너비 
-        self.tableWidget.setColumnWidth(5, 100)  # 실패 횟수 컬럼 너비
-        self.tableWidget.setColumnWidth(6, 110)  # 평가 점수 컬럼 너비
-        self.tableWidget.setColumnWidth(7, 130)  # 상세 내용 컬럼 너비
+        self.tableWidget.setColumnWidth(0, 240)  
+        self.tableWidget.setColumnWidth(1, 90)   
+        self.tableWidget.setColumnWidth(2, 100)   
+        self.tableWidget.setColumnWidth(3, 110) 
+        self.tableWidget.setColumnWidth(4, 110)  
+        self.tableWidget.setColumnWidth(5, 100)  
+        self.tableWidget.setColumnWidth(6, 110)  
+        self.tableWidget.setColumnWidth(7, 130)  
 
         # 행 높이 설정
         for i in range(9):
@@ -1031,7 +1010,7 @@ class MyApp(QWidget):
             buf = self.step_buffers[row]
             api_name = self.tableWidget.item(row, 0).text()
             
-            # 스키마 데이터 가져오기
+            # 스키마 데이터 가져오기 -> 09/24 시스템쪽은 OutSchema
             try:
                 schema_data = videoOutSchema[row] if row < len(videoOutSchema) else None
             except:
@@ -1114,13 +1093,11 @@ class MyApp(QWidget):
 
 
     def start_btn_clicked(self):
-        # 영상보안 시스템으로 고정되어 있고, CONSTANTS.py에서 인증 정보를 가져오므로
-        # 별도의 검증 없이 바로 시작
+
         json_to_data("video")
         self.sbtn.setDisabled(True)
         self.stop_btn.setEnabled(True)
 
-        # 완전한 초기화
         self.init_win()
         self.valResult.clear()
         
