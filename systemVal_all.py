@@ -437,6 +437,7 @@ class MyApp(QWidget):
             if (self.post_flag is False and 
                 self.processing_response is False and 
                 self.cnt < len(self.message) and 
+                self.cnt < len(CONSTANTS.num_retries) and
                 self.current_retry < CONSTANTS.num_retries[self.cnt]):
                 self.message_in_cnt += 1
                 self.time_pre = time.time()
@@ -464,7 +465,8 @@ class MyApp(QWidget):
                 if self.message_in_cnt > 1:
                     self.message_error.append([self.message[self.cnt]])
                     self.message_in_cnt = 0
-                    self.valResult.append(f"Message Missing! (시도 {self.current_retry + 1}/{CONSTANTS.num_retries[self.cnt]})")
+                    current_retries = CONSTANTS.num_retries[self.cnt] if self.cnt < len(CONSTANTS.num_retries) else 1
+                    self.valResult.append(f"Message Missing! (시도 {self.current_retry + 1}/{current_retries})")
 
                     # 현재 시도에 대한 타임아웃 처리
                     tmp_fields_rqd_cnt, tmp_fields_opt_cnt = timeout_field_finder(self.outSchema[self.cnt])
@@ -487,14 +489,15 @@ class MyApp(QWidget):
                     self.current_retry += 1
                     
                     # 재시도 완료 여부 확인
-                    if self.current_retry >= CONSTANTS.num_retries[self.cnt]:
+                    if (self.cnt < len(CONSTANTS.num_retries) and 
+                        self.current_retry >= CONSTANTS.num_retries[self.cnt]):
                         # 모든 재시도 완료 - 버퍼에 최종 결과 저장
                         self.step_buffers[self.cnt]["data"] = "타임아웃으로 인해 수신된 데이터가 없습니다."
-                        self.step_buffers[self.cnt]["error"] = f"Message Missing! - 모든 시도({CONSTANTS.num_retries[self.cnt]}회)에서 타임아웃 발생"
+                        current_retries = CONSTANTS.num_retries[self.cnt] if self.cnt < len(CONSTANTS.num_retries) else 1
+                        self.step_buffers[self.cnt]["error"] = f"Message Missing! - 모든 시도({current_retries}회)에서 타임아웃 발생"
                         self.step_buffers[self.cnt]["result"] = "FAIL"
                         
                         # 테이블 업데이트 (Message Missing)
-                        current_retries = CONSTANTS.num_retries[self.cnt]
                         self.update_table_row_with_retries(self.cnt, "FAIL", 0, add_err, "", "Message Missing!", current_retries)
                         
                         # 다음 API로 이동
@@ -542,8 +545,8 @@ class MyApp(QWidget):
                         res_data = json.loads(res_data)
 
                         # 현재 재시도 정보
-                        current_retries = CONSTANTS.num_retries[self.cnt]
-                        current_protocol = CONSTANTS.trans_protocol[self.cnt]
+                        current_retries = CONSTANTS.num_retries[self.cnt] if self.cnt < len(CONSTANTS.num_retries) else 1
+                        current_protocol = CONSTANTS.trans_protocol[self.cnt] if self.cnt < len(CONSTANTS.trans_protocol) else "Unknown"
 
                         # 단일 응답에 대한 검증 처리
                         tmp_res_auth = json.dumps(res_data, indent=4, ensure_ascii=False)
@@ -616,7 +619,8 @@ class MyApp(QWidget):
                         self.current_retry += 1
                         
                         # 현재 API의 모든 재시도가 완료되었는지 확인
-                        if self.current_retry >= CONSTANTS.num_retries[self.cnt]:
+                        if (self.cnt < len(CONSTANTS.num_retries) and 
+                            self.current_retry >= CONSTANTS.num_retries[self.cnt]):
                             # 다음 API로 이동
                             self.cnt += 1
                             self.current_retry = 0  # 재시도 카운터 리셋
@@ -626,7 +630,8 @@ class MyApp(QWidget):
                         self.processing_response = False 
                         
                         # 재시도 여부에 따라 대기 시간 조정
-                        if self.current_retry < CONSTANTS.num_retries[self.cnt] - 1:
+                        if (self.cnt < len(CONSTANTS.num_retries) and 
+                            self.current_retry < CONSTANTS.num_retries[self.cnt] - 1):
                             self.time_pre = time.time() + 3.0  # 재시도 예정 시 3초 대기
                         else:
                             self.time_pre = time.time() + 2.0  # 마지막 시도 후 2초 대기

@@ -2,6 +2,25 @@ import numpy
 import pandas as pd
 import json_checker
 
+# OptionalKey 안전 길이 확인 함수
+def safe_len(obj):
+    """OptionalKey와 같은 객체에 대해 안전하게 len() 호출"""
+    try:
+        if isinstance(obj, json_checker.core.checkers.OptionalKey):
+            return 0  # OptionalKey는 길이가 없다고 간주
+        return len(obj)
+    except (TypeError, AttributeError):
+        return 0  # len() 호출 불가능한 객체는 길이 0으로 간주
+
+
+# 리스트 필드인지 동적으로 확인하는 함수
+def is_list_field(value):
+    if isinstance(value, list): # 내장함수로 객체가 list 타입인지 확인 -> 맞다면 true, 아니라면 종료
+        return True
+    # elif isinstance(value, tuple) and len(value) > 0:   # 튜플로 맵핑된 경우
+    #     return isinstance(value[0], list)
+    return False
+
 
 # 필드 개수 세서 반환하는 함수 (필수/선택 필드 추출)
 def field_finder(schema):
@@ -14,18 +33,38 @@ def field_finder(schema):
 
     for key, value in schema.items():
         if step == 0:
+            # OptionalKey 객체 처리
+            if hasattr(key, 'expected_data'):
+                key_name = key.expected_data
+                is_optional = True
+            else:
+                key_name = key
+                is_optional = False
+            
             try:
-                if key[-4:] == "List" or key[-4:] == "port":
-
+                if is_list_field(value):
                     for i in value:
-                        fields.append([step, key, list, i])
+                        if is_optional:
+                            fields.append([step, key_name, "OPT", i])
+                            fields_opt.append([step, key_name, "OPT", i])
+                        else:
+                            fields.append([step, key_name, list, i])
                 elif type(value[0]) == dict:
-                    fields.append([step, key, dict, value[0]])
+                    if is_optional:
+                        fields.append([step, key_name, "OPT", value[0]])
+                        fields_opt.append([step, key_name, "OPT", value[0]])
+                    else:
+                        fields.append([step, key_name, dict, value[0]])
                 else:
-                    fields.append([step, key, value[0], value[0]])
+                    if is_optional:
+                        fields.append([step, key_name, "OPT", value[0]])
+                        fields_opt.append([step, key_name, "OPT", value[0]])
+                    else:
+                        fields.append([step, key_name, value[0], value[0]])
             except:
-                fields.append([step, key.expected_data, "OPT", value[0]])
-                fields_opt.append([step, key.expected_data, "OPT", value[0]])
+                # 예외가 발생한 경우 (보안상 OptionalKey 처리)
+                fields.append([step, key_name, "OPT", value[0]])
+                fields_opt.append([step, key_name, "OPT", value[0]])
 
     all_field.append([fields])
     while True:
@@ -36,18 +75,34 @@ def field_finder(schema):
             if type(field[-1]) == dict:
                 for key, value in field[-1].items():
                     try:
-                        if key[-4:] == "List" or key[-4:] == "port":
-                            for i in value:
-                                fields.append([step, [field[1], key], list, i])
-                        elif type(value) == dict:
-                            fields.append([step, [field[1], key], dict, value])
+                        # OptionalKey 객체 처리
+                        if hasattr(key, 'expected_data'):
+                            key_name = key.expected_data
+                            is_optional = True
                         else:
-                            #fields.append([step, [field[1], key], value, value])
-                            if any(field[1] in tmp for tmp in fields_opt):
-                                fields.append([step, [field[1], key], "OPT", value])
-                                fields_opt.append([step, [field[1], key], "OPT", value])
+                            key_name = key
+                            is_optional = False
+                        
+                        if is_list_field(value):
+                            for i in value:
+                                if is_optional:
+                                    fields.append([step, [field[1], key_name], list, i])
+                                else:
+                                    fields.append([step, [field[1], key_name], list, i])
+                        elif type(value) == dict:
+                            if is_optional:
+                                fields.append([step, [field[1], key_name], dict, value])
                             else:
-                                fields.append([step, [field[1], key], value, value])
+                                fields.append([step, [field[1], key_name], dict, value])
+                        else:
+                            if is_optional:
+                                fields.append([step, [field[1], key_name], "OPT", value])
+                                fields_opt.append([step, [field[1], key_name], "OPT", value])
+                            elif any(field[1] in tmp for tmp in fields_opt):
+                                fields.append([step, [field[1], key_name], "OPT", value])
+                                fields_opt.append([step, [field[1], key_name], "OPT", value])
+                            else:
+                                fields.append([step, [field[1], key_name], value, value])
 
                     except:
                         fields.append([step, [field[1], key.expected_data], "OPT", value])
@@ -58,7 +113,7 @@ def field_finder(schema):
                     try:
                         if type(field[-1][key]) == dict:
                             fields.append([step, [field[1], key], dict, field[-1][key]])
-                        elif key[-4:] == "List" or key[-4:] == "port":
+                        elif is_list_field(field[-1][key]):
                             for i in field[-1][key]:
                                 fields.append([step, [field[1], key], list, i])
 
@@ -70,7 +125,7 @@ def field_finder(schema):
                                 try:
                                     if type(field[-1][key2]) == dict:
                                         fields.append([step, [field[1], key2], dict, field[-1][key2]])
-                                    elif key2[-4:] == "List" or key2[-4:] == "port":
+                                    elif is_list_field(field[-1][key2]):
                                         for i in field[-1][key2]:
                                             fields.append([step, [field[1], key2], list, i])
                                     else:
@@ -93,7 +148,7 @@ def field_finder(schema):
                                 fields.append([step, [field[1], key.expected_data], "OPT", field[-1][key]])
                                 fields_opt.append([step, [field[1], key.expected_data], "OPT", field[-1][key]])
 
-        if len(fields) != 0:
+        if safe_len(fields) != 0:
             all_field.append([fields])
         else:
             break
@@ -119,8 +174,8 @@ def data_finder(schema_):
     for key, value in schema.items():
         if step == 0:
             try:
-                # camList, systemPort 이런식으로 뒤에 네글자가 이런식인 경우에 대해서는 fields 3번째에 type을 추가
-                if key[-4:] == "List" or key[-4:] == "port":
+                # List 필드를 자동으로 감지하여 처리
+                if is_list_field(value):
                     for i in value:
                         fields.append([step, key, type(i), i])
 
@@ -142,7 +197,7 @@ def data_finder(schema_):
             if type(field[-1]) == dict:
                 for key, value in field[-1].items():
                     try:
-                        if key[-4:] == "List" or key[-4:] == "port":
+                        if is_list_field(value):
                             for i in value:
                                 fields.append([step, [field[1], key], list, i])
 
@@ -159,7 +214,7 @@ def data_finder(schema_):
                         # fields
                         if type(field[-1][key]) == dict:
                             fields.append([step, [field[1], key], dict, field[-1][key]])
-                        elif key[-4:] == "List" or key[-4:] == "port":
+                        elif is_list_field(field[-1][key]):
                             for i in field[-1][key]:
                                 fields.append([step, [field[1], key], list, i])
                         else:
@@ -170,7 +225,7 @@ def data_finder(schema_):
                                 try:
                                     if type(field[-1][key2]) == dict:
                                         fields.append([step, [field[1], key2], dict, field[-1][key2]])
-                                    elif key2[-4:] == "List" or key2[-4:] == "port":
+                                    elif is_list_field(field[-1][key2]):
                                         for i in field[-1][key2]:
                                             fields.append([step, [field[1], key2], list, i])
 
@@ -185,7 +240,7 @@ def data_finder(schema_):
                             else:
                                 fields.append([step, [field[1], key.expected_data], field[-1][key], field[-1][key]])
 
-        if len(fields) != 0:
+        if safe_len(fields) != 0:
             all_field.append([fields])
         else:
             break
@@ -238,7 +293,7 @@ def check_message_schema(all_field, datas, opt_field, flag_opt):
                         break
                 if not field_found and field[-2] != 'OPT':
                     format_errors.append(f"Field '{field[1]}' is missing.")
-    if len(format_errors) == 0:
+    if safe_len(format_errors) == 0:
         return "PASS", "All fields match the schema."
     else:
         return "FAIL", format_errors
@@ -267,8 +322,9 @@ def do_checker(all_field, datas, opt_field ,flag_opt):  # flag_opt => platformVa
     for fields in all_field:
         for field in fields[0]:
 
-            if flag_opt == False and field[-2] == 'OPT':  # opt 필드 확인 안하는 경우 pass
-                pass
+            # OPT 태그가 있는 필드는 OptionalKey에서 나온 것이므로 누락 검사에서 제외
+            if field[-2] == 'OPT':  
+                pass  # OptionalKey는 선택사항이므로 누락되어도 에러가 아님
             else:
                 check_list.append(field)  # 확인해야할 필드 check_list에 추가
                 for data in datas:  # 해당 field마다 list type의 datas 순회하면서 확인
@@ -278,16 +334,17 @@ def do_checker(all_field, datas, opt_field ,flag_opt):  # flag_opt => platformVa
                             if raw_data[-2] == list and type(raw_data[-1]) != float:
                                 # 리스트 안에 있는 필드 값은 cnt_list 에 raw_data[1] 추가하기
 
-                                if (len(raw_data[-1]) > 1) and (type(raw_data[-1]) != dict):
-                                    for i in range(0, len(raw_data[-1])):
+                                # OptionalKey 객체인 경우 len() 에러 방지
+                                data_length = safe_len(raw_data[-1])
+                                if (data_length > 1 and type(raw_data[-1]) != dict):
+                                    for i in range(0, data_length):
                                         cnt_list.append(raw_data[1])
-
                                 else:
                                     cnt_list.append(raw_data[1])
 
                                 # cnt_element가 0이면 무조건 raw_data[1] cnt_elements에 raw_data[1] 추가
                                 # 0이상이면, cnt_element와 raw_data[1]이 다른 경우, cnt_elements에 raw_data[1] 추가
-                                if len(cnt_elements) != 0:
+                                if safe_len(cnt_elements) != 0:
                                     flag = False
                                     for i, cnt_element in enumerate(cnt_elements):
                                         if raw_data[1] == cnt_element:
@@ -358,9 +415,7 @@ def do_checker(all_field, datas, opt_field ,flag_opt):  # flag_opt => platformVa
                 if (field[1] == raw_data[1]) and (raw_data[-1] is True):  # 필드 이름, 필드 타입 맞으면
                     if type(check_list[i][-1]) != int:  # type(field[-1]) != int
                         check_list[i][-1] = 1
-
                     else:
-
                         check_list[i][-1] += 1
 
                 elif field[1] == raw_data[1]:  # 필드명만 맞은 경우
@@ -370,22 +425,15 @@ def do_checker(all_field, datas, opt_field ,flag_opt):  # flag_opt => platformVa
                                             "Data Type Error: " + str(field[1]) + " " + str(field[2])])
 
                         if type(field[-1]) == dict:
-
                             for kk in field[-1]:
-                                if isinstance(kk, json_checker.core.checkers.OptionalKey) and flag_opt:
-                                    kk = str(kk)
-                                    kk = kk[12:-1]
-                                    check_error.append([field[0], [field[1], kk],
-                                                        "Missing Key Error: " + str([field[1], kk]) + " " + str(
-                                                            field[-1]) + " " + kk])
-
-
-                                elif not isinstance(kk, json_checker.core.checkers.OptionalKey):
-                                    check_error.append([field[0], [field[1], kk],
-                                                        "Missing Key Error: " + str([field[1], kk]) + " " + str(
-                                                            field[-1]) + " " + kk])
-                                else:
+                                if isinstance(kk, json_checker.core.checkers.OptionalKey):
+                                    # OptionalKey는 선택사항이므로 누락되어도 에러가 아님
                                     pass
+                                else:
+                                    # 필수 키만 Missing Key Error로 처리
+                                    check_error.append([field[0], [field[1], kk],
+                                                        "Missing Key Error: " + str([field[1], kk]) + " " + str(
+                                                            field[-1]) + " " + kk])
 
                     elif type(field[2]) == dict:  # object -> Array<object>로 틀린 경우?
                         check_error.append([field[0], [field[1]],
@@ -399,37 +447,25 @@ def do_checker(all_field, datas, opt_field ,flag_opt):  # flag_opt => platformVa
                                             "Data Type Error: " + str(field[1]) + " " + str(field[2])])
                         if type(field[-1]) == list and type(field[-1][0]) == dict:  #field[-1]==>[{'transProtocolType': <class 'str'>, OptionalKey(transProtocolDesc): <class 'str'>}]
                             for kks, val in field[-1][0].items():
-                                if isinstance(kks, json_checker.core.checkers.OptionalKey) and flag_opt:
-                                    kks = str(kks)
-                                    kks = kks[12:-1]
-                                    check_error.append([field[0], [field[1], kks], "Missing Key Error: " + str(
-                                    [field[1], kks]) + " " + kks])
-
-
-                                elif not isinstance(kks, json_checker.core.checkers.OptionalKey):
+                                if isinstance(kks, json_checker.core.checkers.OptionalKey):
+                                    # OptionalKey는 선택사항이므로 누락되어도 에러가 아님
+                                    pass
+                                else:
+                                    # 필수 키만 Missing Key Error로 처리
                                     check_error.append([field[0], [field[1], kks], "Missing Key Error: " + str(
                                         [field[1], kks]) + " " + kks])
-
-                                else:
-                                    pass
 
                                 if val != type and type(val) == dict:
 
                                     for tmp_val in val:
-                                        if isinstance(tmp_val, json_checker.core.checkers.OptionalKey) and flag_opt:
-                                            tmp_val = str(tmp_val)
-                                            tmp_val = tmp_val[12:-1]
-                                            check_error.append([field[0], [field[1], kks, tmp_val], "Missing Key Error: " + str(
-                                            [field[1], kks, tmp_val]) + " " + tmp_val])
-
-
-                                        elif not isinstance(tmp_val, json_checker.core.checkers.OptionalKey):
+                                        if isinstance(tmp_val, json_checker.core.checkers.OptionalKey):
+                                            # OptionalKey는 선택사항이므로 누락되어도 에러가 아님
+                                            pass
+                                        else:
+                                            # 필수 키만 Missing Key Error로 처리
                                             check_error.append(
                                                 [field[0], [field[1], kks, tmp_val], "Missing Key Error: " + str(
                                                     [field[1], kks, tmp_val]) + " " + tmp_val])
-
-                                        else:
-                                            pass
 
                         else:
                             check_error.append([field[0], [field[1], field[-1]], "Missing Key Error: " + str([field[1], field[-1]]) + " " + str(field[-1])])
@@ -557,15 +593,20 @@ def do_checker(all_field, datas, opt_field ,flag_opt):  # flag_opt => platformVa
                     _tmp_flag = True
 
                     for lst in check_error:  # 이미 (Data Type Error)있는 경우 Missing Key Error는 없애기 위해 추가함
-                        if len(lst[1]) == 1 and field[1] == lst[1][0]:
-
+                        # OptionalKey 관련 안전 검사
+                        if (safe_len(lst[1]) == 1 and field[1] == lst[1][0]):
                             _tmp_flag = False
-                        #elif field[1][1] == lst[1][-1]: #
-                            #_tmp_flag = False
-                        elif type(field[1]) is list and type(lst[1]) is list and field[1][1] == lst[1][-1]:
-                            # code message missing key error 찾기위해 type 비교 추가함
-
-                            _tmp_flag = False
+                        
+                        # 추가 조건: 리스트 필드의 중첩 검사 (OptionalKey 안전 처리)
+                        if (type(field[1]) is list and type(lst[1]) is list and 
+                            safe_len(field[1]) > 1 and safe_len(lst[1]) > 0):
+                            try:
+                                if field[1][1] == lst[1][-1]:
+                                    # code message missing key error 찾기위해 type 비교 추가함
+                                    _tmp_flag = False
+                            except (IndexError, AttributeError):
+                                # 리스트 접근 중 에러 발생 시 무시
+                                pass
 
                     if _tmp_flag == True:
 
@@ -578,7 +619,7 @@ def do_checker(all_field, datas, opt_field ,flag_opt):  # flag_opt => platformVa
     error_fields = []
 
     for i in check_error:
-        if len(error_fields) != 0:
+        if safe_len(error_fields) != 0:
             flag = False
             for j, error_field in enumerate(error_fields):
                 if i[1] == error_field:
@@ -590,11 +631,11 @@ def do_checker(all_field, datas, opt_field ,flag_opt):  # flag_opt => platformVa
 
         error += str(i[-1]) + "\n"
 
-    error_cnt = len(error_fields)
-    correct_cnt = len(check_list) - error_cnt
+    error_cnt = safe_len(error_fields)
+    correct_cnt = safe_len(check_list) - error_cnt
 
     if error_cnt == 0:
-        return "PASS", "PASS", len(check_list), 0
+        return "PASS", "PASS", safe_len(check_list), 0
     else:
         return "FAIL", error, correct_cnt, error_cnt    # 상세 결과 확인 부분에 출력되는 메시지 -> fail인 경우
 
@@ -611,7 +652,7 @@ def timeout_field_finder(schema):
     for key, value in schema.items():
         if step == 0:
             try:
-                if key[-4:] == "List" or key[-4:] == "port":
+                if is_list_field(value):
                     for i in value:
                         fields.append([step, key, list, i])
                 elif type(value[0]) == dict:
@@ -643,7 +684,7 @@ def timeout_field_finder(schema):
             if type(field[-1]) == dict:
                 for key, value in field[-1].items():
                     try:
-                        if key[-4:] == "List" or key[-4:] == "port":
+                        if is_list_field(value):
                             for i in value:
                                 fields.append([step, [field[1], key], list, i])
 
@@ -664,7 +705,7 @@ def timeout_field_finder(schema):
                         if type(field[-1][key]) == dict:
 
                             fields.append([step, [field[1], key], dict, field[-1][key]])
-                        elif key[-4:] == "List" or key[-4:] == "port":
+                        elif is_list_field(field[-1][key]):
                             for i in field[-1][key]:
                                 fields.append([step, [field[1], key], list, i])
 
@@ -677,7 +718,7 @@ def timeout_field_finder(schema):
                                 try:
                                     if type(field[-1][key2]) == dict:
                                         fields.append([step, [field[1], key2], dict, field[-1][key2]])
-                                    elif key2[-4:] == "List" or key2[-4:] == "port":
+                                    elif is_list_field(field[-1][key2]):
                                         for i in field[-1][key2]:
                                             fields.append([step, [field[1], key2], list, i])
 
@@ -713,14 +754,14 @@ def timeout_field_finder(schema):
 
 
 
-        if len(fields) != 0:
+        if safe_len(fields) != 0:
             all_field.append([fields])
         else:
             break
 
 
-    all_field_cnt = len(all_field[0][0])
-    fields_opt_cnt = len(fields_opt)
+    all_field_cnt = safe_len(all_field[0][0])
+    fields_opt_cnt = safe_len(fields_opt)
 
     for fields_tmp in all_field[0][0]:
 
@@ -729,7 +770,7 @@ def timeout_field_finder(schema):
 
             for field_tmp in fields_tmp[-1]:
                 if type(field_tmp) == list:
-                    all_field_cnt += len(field_tmp)
+                    all_field_cnt += safe_len(field_tmp)
                 elif type(field_tmp) == dict:
                     for key, val in field_tmp.items():
                         if isinstance(key, json_checker.core.checkers.OptionalKey):
