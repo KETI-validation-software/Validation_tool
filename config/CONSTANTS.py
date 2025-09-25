@@ -18,6 +18,9 @@ auth_info = "user001,pass001"
 admin_code = ""
 url = "https://10.252.219.95:8000"
 
+specs = [["spec-001_inSchema","spec-001_outData","spec001_messages","영상보안 시스템 검증(요청검증)"],
+         ["spec-0011_inSchema","spec-0011_outData","spec0011_messages","보안용 센서 시스템 검증(요청검증"]]
+
 
 #test-opt
 '''
