@@ -502,17 +502,34 @@ class InfoWidget(QWidget):
                 auth_type = "Bearer Token"
                 auth_info = self.token_input.text().strip()
 
-            # 4. OPT 파일에서 admin_code 추출
-            exp_opt_path = resource_path("temp/(temp)exp_opt_requestVal.json")
+            # 4. OPT 파일에서 admin_code 추출 (현재 모드와 관계없이 동일 파일)
+            if "request" in self.current_mode:
+                exp_opt_path = resource_path("temp/(temp)exp_opt_requestVal.json")
+            else:  # response
+                exp_opt_path = resource_path("temp/(temp)exp_opt_responseVal.json")
+
             exp_opt = self.opt_loader.load_opt_json(exp_opt_path)
             admin_code = ""
             if exp_opt and "testRequest" in exp_opt:
                 test_group = exp_opt["testRequest"].get("testGroup", {})
                 admin_code = test_group.get("adminCode", "")
 
-            # 5. OPT2 파일에서 프로토콜/타임아웃 정보 추출
-            exp_opt2_path = resource_path("temp/(temp)exp_opt2_requestVal_LongPolling.json")
+            # 5. OPT2 파일에서 프로토콜/타임아웃 정보 추출 (현재 모드에 따라 파일 선택)
+            if self.current_mode == "request":
+                exp_opt2_path = resource_path("temp/(temp)exp_opt2_requestVal_LongPolling.json")
+            elif self.current_mode == "response":
+                exp_opt2_path = resource_path("temp/(temp)exp_opt2_responseVal_LongPolling.json")
+            elif self.current_mode == "request_webhook":
+                exp_opt2_path = resource_path("temp/(temp)exp_opt2_requestVal_WebHook.json")
+            elif self.current_mode == "response_webhook":
+                exp_opt2_path = resource_path("temp/(temp)exp_opt2_responseVal_WebHook.json")
+            else:
+                # fallback to default
+                exp_opt2_path = resource_path("temp/(temp)exp_opt2_requestVal_LongPolling.json")
+
             exp_opt2 = self.opt_loader.load_opt_json(exp_opt2_path)
+            print(f"CONSTANTS.py 업데이트 - 현재 모드: {self.current_mode}")
+            print(f"선택된 OPT2 파일: {exp_opt2_path}")
 
             steps = exp_opt2.get("specification", {}).get("steps", [])
             step_count = len(steps)
@@ -527,13 +544,11 @@ class InfoWidget(QWidget):
                 settings = step.get("api", {}).get("settings", {})
                 time_out.append(settings.get("connectTimeout", 30))  # 기본값 30
                 num_retries.append(settings.get("numRetries", 3))    # 기본값 3
-                
-                # transportMode 추출 (settings에서 또는 api에서)
-                transport_mode = settings.get("transportMode", None)
-                if transport_mode is None:
-                    # settings에 없으면 api 레벨에서 찾기
-                    transport_mode = step.get("api", {}).get("transportMode", None)
-                trans_protocol.append(transport_mode)
+
+                # transProtocol.mode 추출
+                trans_protocol_obj = settings.get("transProtocol", {})
+                trans_protocol_mode = trans_protocol_obj.get("mode", None)
+                trans_protocol.append(trans_protocol_mode)
 
             # 6. CONSTANTS.py 파일 업데이트
             self._update_constants_file(constants_path, {
