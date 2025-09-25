@@ -1,7 +1,7 @@
 {
   "specification": {
     "id": "spec-002",
-    "name": "영상보안 시스템 응답 메시지 검증 API 명세서",
+    "name": "영상보안 시스템(응답검증)",
     "version": "0.1",
     "steps": [
       {
