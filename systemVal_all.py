@@ -423,10 +423,14 @@ class MyApp(QWidget):
         self.webhook_flag = False
 
     def update_view(self):
+
         try:
             time_interval = 0
-            if self.time_pre == 0:
+            # 플랫폼과 동일하게 time_pre/cnt_pre 조건 적용
+            if self.time_pre == 0 or self.cnt != self.cnt_pre:
                 self.time_pre = time.time()
+                self.cnt_pre = self.cnt
+                return  # 첫 틱에서는 대기만 하고 리턴
             else:
                 time_interval = time.time() - self.time_pre
 
@@ -1159,7 +1163,7 @@ class MyApp(QWidget):
         self.cnt = 0
         self.current_retry = 0  # 반복 카운터 초기화
         self.cnt_pre = 0
-        self.time_pre = 0
+        self.time_pre = time.time()  # 0 대신 현재 시간으로 설정
         self.res = None
         self.webhook_res = None
         self.realtime_flag = False
