@@ -188,7 +188,11 @@ class MyApp(QWidget):
         self.step_buffers = [
             {"data": "", "error": "", "result": "PASS"} for _ in range(9)
         ]
+
+
         self.get_setting()
+        # 첫 실행 여부 플래그
+        self.first_run = True
 
         with open(resource_path("spec/rows.json"), "w") as out_file:
             json.dump(None, out_file, ensure_ascii=False)
@@ -313,7 +317,7 @@ class MyApp(QWidget):
         # 메시지 저장 (팝업용)
         setattr(self, f"step{row+1}_msg", msg)
 
-    # 실시간 모니터링용 + 메인 검증 로직
+    # 실시간 모니터링용 + 메인 검증 로직 (부하테스트 타이밍) - 09/25
     def update_view(self):
         try:
             time_interval = 0
@@ -1012,6 +1016,23 @@ class MyApp(QWidget):
 
 
     def sbtn_push(self):
+        import shutil, os
+        # 첫 실행이 아니면 spec_origin에서 spec으로 복사(초기화)
+        if not self.first_run:
+            origin_dir = resource_path("spec_origin")
+            target_dir = resource_path("spec")
+            def copytree_overwrite(src, dst):
+                if not os.path.exists(dst):
+                    os.makedirs(dst)
+                for item in os.listdir(src):
+                    s = os.path.join(src, item)
+                    d = os.path.join(dst, item)
+                    if os.path.isdir(s):
+                        copytree_overwrite(s, d)
+                    else:
+                        shutil.copy2(s, d)
+            copytree_overwrite(origin_dir, target_dir)
+        self.first_run = False
         self.total_error_cnt = 0
         self.total_pass_cnt = 0
         self.cnt = 0
