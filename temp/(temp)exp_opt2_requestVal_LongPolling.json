@@ -253,11 +253,11 @@
                 "camURL": "rtsp://192.168.0.3:8000"
               }
             ]
-          }
-        },
-        "settings": {
+          },
+          "settings": {
           "connectTimeout": 5000,
           "numRetries": 2
+          }
         }
       },
       {

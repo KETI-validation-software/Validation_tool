@@ -23,7 +23,7 @@ Capabilities_out_data = {
     "transportSupport": [
         {
         "transProtocolType": "REST_API",
-        "transProtocolDesc": "trans protocol description"
+        "transProtocolDesc": "desc"
     }
 ]
 }
@@ -87,7 +87,30 @@ StoredVideoInfos_out_data = {
 }
 
 # StreamURLs
-StreamURLs_out_data = {}
+StreamURLs_out_data = {
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+        "camID": "cam001",
+        "accessID": "conn001",
+        "accessPW": "1234",
+        "camURL": "rtsp://192.168.0.1:8000"
+    },
+        {
+        "camID": "cam002",
+        "accessID": "conn002",
+        "accessPW": "1234",
+        "camURL": "rtsp://192.168.0.2:8000"
+    },
+        {
+        "camID": "cam003",
+        "accessID": "conn003",
+        "accessPW": "1234",
+        "camURL": "rtsp://192.168.0.3:8000"
+    }
+]
+}
 
 # ReplayURL
 ReplayURL_out_data = {
@@ -123,8 +146,24 @@ ReplayURL_out_data = {
 
 # RealtimeVideoEventInfos
 RealtimeVideoEventInfos_out_data = {
-    "code": 200,
-    "message": "성공"
+    "camList": [
+        {
+        "camID": "cam0001",
+        "eventUUID": "event01",
+        "eventName": "배회",
+        "startTime": 20220822163022123,
+        "endTime": 20220822163025123,
+        "eventDesc": "sfdfEFASDDDLKJFjdkdlfjde"
+    },
+        {
+        "camID": "cam0002",
+        "eventUUID": "event01",
+        "eventName": "배회",
+        "startTime": 20220822163022123,
+        "endTime": 20220822163025123,
+        "eventDesc": "dddddeeeeeAAFEDFiikjf"
+    }
+]
 }
 
 # StoredVideoEventInfos
@@ -202,28 +241,6 @@ StoredObjectAnalyticsInfos_out_data = {
 ]
 }
 
-# WebHook RealtimeVideoEventInfos
-RealtimeVideoEventInfos_in_data = {
-    "camList": [
-        {
-        "camID": "cam0001",
-        "eventUUID": "event01",
-        "eventName": "배회",
-        "startTime": 20220822163022123,
-        "endTime": 20220822163025123,
-        "eventDesc": "sfdfEFASDDDLKJFjdkdlfjde"
-    },
-        {
-        "camID": "cam0002",
-        "eventUUID": "event01",
-        "eventName": "배회",
-        "startTime": 20220822163022123,
-        "endTime": 20220822163025123,
-        "eventDesc": "dddddeeeeeAAFEDFiikjf"
-    }
-]
-}
-
 # steps 순서대로 출력 메시지 생성
 videoOutMessage = [
     Authentication_out_data,
@@ -248,9 +265,4 @@ videoMessages = [
     "RealtimeVideoEventInfos",
     "StoredVideoEventInfos",
     "StoredObjectAnalyticsInfos",
-]
-
-# WebHook
-videoWebhookData = [
-    RealtimeVideoEventInfos_in_data,
 ]
