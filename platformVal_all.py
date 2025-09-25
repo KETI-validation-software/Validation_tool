@@ -385,7 +385,10 @@ class MyApp(QWidget):
                             self.valResult.append(message_name)
                             self.valResult.append(f"🔄 부하테스트 시작: 총 {current_retries}회 검증 예정")
                         
-                        self.valResult.append(f"⏳ 검증 진행중... [{retry_attempt + 1}/{current_retries}]")
+                        # 순서 확인용 로그
+                        print(f"[PLATFORM] 시스템 요청 대기 중: {self.Server.message[self.cnt]} (시도 {retry_attempt + 1})")
+                        
+                        self.valResult.append(f"⏳ 시스템 요청 대기 중... [{retry_attempt + 1}/{current_retries}]")
                         
                         # 테이블에 실시간 진행률 표시
                         self.update_table_row_with_retries(self.cnt, "진행중", 0, 0, "검증 진행중...", f"시도 {retry_attempt + 1}/{current_retries}", retry_attempt + 1)
