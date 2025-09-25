@@ -89,6 +89,12 @@ StoredObjectAnalyticsInfos_in_schema = {
 }],
 }
 
+# WebHook RealtimeVideoEventInfos
+WebHook_RealtimeVideoEventInfos_out_schema = {
+    OptionalKey("code"): str,
+    OptionalKey("message"): str,
+}
+
 # steps 순서대로 스키마 리스트 생성
 videoInSchema = [
     Authentication_in_schema,
@@ -101,4 +107,9 @@ videoInSchema = [
     _in_schema,
     StoredVideoEventInfos_in_schema,
     StoredObjectAnalyticsInfos_in_schema,
+]
+
+# WebHook 전용 스키마 리스트
+videoWebhookSchema = [
+    WebHook_RealtimeVideoEventInfos_out_schema,
 ]
