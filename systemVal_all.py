@@ -258,47 +258,37 @@ class MyApp(QWidget):
             
 
     def update_table_row_with_retries(self, row, result, pass_count, error_count, data, error_text, retries):
-        """테이블 행 업데이트 (실제 검증 횟수 포함)"""
+        """테이블 행 업데이트 (실제 검증 횟수 포함, 플랫폼과 동일하게 아이콘 처리)"""
         if row >= self.tableWidget.rowCount():
             return
-            
+        # result가 '진행중'이면 검정색, PASS/FAIL이면 초록/빨강
         msg, img = self.icon_update_step(data, result, error_text)
-        
         icon_widget = QWidget()
         icon_layout = QHBoxLayout()
         icon_layout.setContentsMargins(0, 0, 0, 0)
-        
         icon_label = QLabel()
         icon_label.setPixmap(QIcon(img).pixmap(16, 16))
         icon_label.setToolTip(msg)
         icon_label.setAlignment(Qt.AlignCenter)
-        
         icon_layout.addWidget(icon_label)
         icon_layout.setAlignment(Qt.AlignCenter)
         icon_widget.setLayout(icon_layout)
-        
         self.tableWidget.setCellWidget(row, 1, icon_widget)
-        
         self.tableWidget.setItem(row, 2, QTableWidgetItem(str(retries)))
         self.tableWidget.item(row, 2).setTextAlignment(Qt.AlignCenter)
-        
         self.tableWidget.setItem(row, 3, QTableWidgetItem(str(pass_count)))
         self.tableWidget.item(row, 3).setTextAlignment(Qt.AlignCenter)
-        
         total_fields = pass_count + error_count
         self.tableWidget.setItem(row, 4, QTableWidgetItem(str(total_fields)))
         self.tableWidget.item(row, 4).setTextAlignment(Qt.AlignCenter)
-        
         self.tableWidget.setItem(row, 5, QTableWidgetItem(str(error_count)))
         self.tableWidget.item(row, 5).setTextAlignment(Qt.AlignCenter)
-        
         if total_fields > 0:
             score = (pass_count / total_fields) * 100
             self.tableWidget.setItem(row, 6, QTableWidgetItem(f"{score:.1f}%"))
         else:
             self.tableWidget.setItem(row, 6, QTableWidgetItem("0%"))
         self.tableWidget.item(row, 6).setTextAlignment(Qt.AlignCenter)
-        
         setattr(self, f"step{row+1}_msg", msg)
 
     def load_test_info_from_constants(self):
@@ -423,10 +413,14 @@ class MyApp(QWidget):
         self.webhook_flag = False
 
     def update_view(self):
+
         try:
             time_interval = 0
-            if self.time_pre == 0:
+            # 플랫폼과 동일하게 time_pre/cnt_pre 조건 적용
+            if self.time_pre == 0 or self.cnt != self.cnt_pre:
                 self.time_pre = time.time()
+                self.cnt_pre = self.cnt
+                return  # 첫 틱에서는 대기만 하고 리턴
             else:
                 time_interval = time.time() - self.time_pre
 
@@ -721,9 +715,13 @@ class MyApp(QWidget):
             self.stop_btn.setDisabled(True)
 
     def icon_update_step(self, auth_, result_, text_):
+        # 플랫폼과 동일하게 '진행중'이면 검정색, PASS면 초록, FAIL이면 빨강
         if result_ == "PASS":
             msg = auth_ + "\n\n" + "Result: " + text_
             img = self.img_pass
+        elif result_ == "진행중":
+            msg = auth_ + "\n\n" + "Status: " + text_
+            img = self.img_none
         else:
             msg = auth_ + "\n\n" + "Result: " + result_ + "\nResult details:\n" + text_
             img = self.img_fail
@@ -1159,7 +1157,7 @@ class MyApp(QWidget):
         self.cnt = 0
         self.current_retry = 0  # 반복 카운터 초기화
         self.cnt_pre = 0
-        self.time_pre = 0
+        self.time_pre = time.time()  # 0 대신 현재 시간으로 설정
         self.res = None
         self.webhook_res = None
         self.realtime_flag = False
