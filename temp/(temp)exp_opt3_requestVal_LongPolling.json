@@ -1,0 +1,403 @@
+{
+  "specification": {
+    "id": "spec-0011",
+    "name": "보안용 센서 시스템(요청검증)",
+    "version": "0.1",
+    "steps": [
+      {
+        "id": "step-1",
+        "name": "인증",
+        "order": 1,
+        "api": {
+          "name": "인증",
+          "method": "POST",
+          "endpoint": "/Authentication",
+          "requestSchema": {
+            "type": "object",
+            "properties": {
+              "userID": {
+                "type": "string"
+              },
+              "userPW": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "userID",
+              "userPW"
+            ],
+            "validation": {
+              "checkType": "value",
+              "key": "userID",
+              "operator": "equalsAny",
+              "expected": [
+                "user0001"
+              ]
+            }
+          },
+          "responseData": {
+            "code": "200",
+            "message": "성공",
+            "userName": "관리자",
+            "userAff": "오산시청",
+            "accessToken": "abcde1234"
+          },
+          "settings": {
+            "connectTimeout": 5000,
+            "numRetries": 1
+          }
+        }
+      },
+      {
+        "id": "step-2",
+        "name": "전송 지원 기능 정보",
+        "order": 2,
+        "api": {
+          "name": "전송 지원 기능 정보",
+          "method": "POST",
+          "endpoint": "/Capabilities",
+          "requestSchema": {
+          },
+          "responseData": {
+            "code": "200",
+            "message": "성공",
+            "transportSupport": [
+              {
+                "transProtocolType": "HTTP_API",
+                "transProtocolDesc": "description"
+              }
+            ]
+          },
+          "settings": {
+            "connectTimeout": 5000,
+            "numRetries": 1
+          }
+        }
+      },
+      {
+        "id": "step-3",
+        "name": "보안용 센서 단말 목록 정보 연동",
+        "order": 3,
+        "api": {
+          "name": "보안용 센서 단말 목록 정보 연동",
+          "method": "POST",
+          "endpoint": "/SensorDeviceProfiles",
+          "requestSchema": {
+          },
+          "responseData": {
+            "code": "200",
+            "message": "성공",
+            "sensorDeviceList": [
+              {
+                "sensorDeviceID": "iot0001",
+                "sensorDeviceType": "온도",
+                "sensorDeviceName": "온도 센서",
+                "sensorDeviceLoc": {
+                  "lon": "127.127730",
+                  "lat": "38.439801",
+                  "alt": "32.131",
+                  "desc": "3층복도"
+                }
+              },
+              {
+                "sensorDeviceID": "iot0002",
+                "sensorDeviceType": "온도",
+                "sensorDeviceName": "온도 센서",
+                "sensorDeviceLoc": {
+                  "lon": "127.127730",
+                  "lat": "38.439801",
+                  "alt": "32.131",
+                  "desc": "3층복도"
+                }
+              }
+            ]
+          },
+          "settings": {
+            "connectTimeout": 5000,
+            "numRetries": 1
+          }
+        }
+      },
+      {
+        "id": "step-4",
+        "name": "실시간 보안용 센서 데이터 정보 연동",
+        "order": 4,
+        "api": {
+          "name": "실시간 보안용 센서 데이터 정보 연동",
+          "method": "POST",
+          "endpoint": "/RealtimeSensorData",
+          "requestSchema": {
+            "type": "object",
+            "properties": {
+              "sensorDeviceList": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "sensorDeviceID": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "sensorDeviceID"
+                  ]
+                }
+              },
+              "transProtocol": {
+                "type": "object",
+                "properties": {
+                  "transProtocolType": {
+                    "type": "string"
+                  },
+                  "transProtocolDesc": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "transProtocolType"
+                ]
+              },
+              "duration": {
+                "type": "integer"
+              },
+              "startTime": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "sensorDeviceList",
+              "transProtocol"
+            ]
+          },
+          "responseData": {
+            "code": "200",
+            "message": "성공",
+            "sensorDeviceList": [
+              {
+                "sensorDeviceID": "iot0001",
+                "measureTime": 20220822163022123,
+                "sensorDeviceType": "온도",
+                "sensorDeviceUnit": "섭씨",
+                "sensorDeviceValue": "90"
+              },
+              {
+                "sensorDeviceID": "iot0002",
+                "measureTime": 20220822163022123,
+                "sensorDeviceType": "온도",
+                "sensorDeviceUnit": "섭씨",
+                "sensorDeviceValue": "36"
+              },
+              {
+                "sensorDeviceID": "iot0003",
+                "measureTime": 20220822163022123,
+                "sensorDeviceType": "온도",
+                "sensorDeviceUnit": "섭씨",
+                "sensorDeviceValue": "36"
+              }
+            ]
+          },
+          "settings": {
+            "connectTimeout": 5000,
+            "numRetries": 1,
+            "transProtocol": {
+              "mode": "LongPolling",
+              "durationKey": "duration"
+            }
+          }
+        }
+      },
+      {
+        "id": "step-5",
+        "name": "실시간 보안용 센서 이벤트 분석 정보 연동",
+        "order": 5,
+        "api": {
+          "name": "실시간 보안용 센서 이벤트 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/RealtimeSensorEventInfos",
+          "requestSchema": {
+            "type": "object",
+            "properties": {
+              "sensorDeviceList": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "sensorDeviceID": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "sensorDeviceID"
+                  ]
+                }
+              },
+              "transProtocol": {
+                "type": "object",
+                "properties": {
+                  "transProtocolType": {
+                    "type": "string"
+                  },
+                  "transProtocolDesc": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "transProtocolType"
+                ]
+              },
+              "duration": {
+                "type": "integer"
+              },
+              "eventFilter": {
+                "type": "string"
+              },
+              "startTime": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "sensorDeviceList",
+              "transProtocol"
+            ]
+          },
+          "responseData": {
+            "code": "200",
+            "message": "성공",
+            "sensorDeviceList": [
+              {
+                "sensorDeviceID": "iot0001",
+                "eventName": "화재",
+                "eventTime": 20220822163022123,
+                "eventDesc": "100도"
+              },
+              {
+                "sensorDeviceID": "iot0002",
+                "eventName": "화재",
+                "eventTime": 20220822163022123,
+                "eventDesc": "200도"
+              }
+            ]
+          },
+          "settings": {
+            "connectTimeout": 5000,
+            "numRetries": 1,
+            "transProtocol": {
+              "mode": "LongPolling",
+              "durationKey": "duration"
+            }
+          }
+        }
+      },
+      {
+        "id": "step-6",
+        "name": "저장된 보안용 센서 이벤트 분석 정보 연동",
+        "order": 6,
+        "api": {
+          "name": "저장된 보안용 센서 이벤트 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/StoredSensorEventInfos",
+          "requestSchema": {
+            "type": "object",
+            "properties": {
+              "sensorDeviceList": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "sensorDeviceID": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "sensorDeviceID"
+                  ]
+                }
+              },
+              "timePeriod": {
+                "type": "object",
+                "properties": {
+                  "startTime": {
+                    "type": "integer"
+                  },
+                  "endTime": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "startTime",
+                  "endTime"
+                ]
+              },
+              "maxCount": {
+                "type": "integer"
+              },
+              "eventFilter": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "sensorDeviceList",
+              "timePeriod"
+            ]
+          },
+          "responseData": {
+            "code": "200",
+            "message": "성공",
+            "sensorDeviceList": [
+              {
+                "sensorDeviceID": "iot0001",
+                "eventName": "화재",
+                "eventTime": 20220822163022123,
+                "eventDesc": "100도"
+              },
+              {
+                "sensorDeviceID": "iot0002",
+                "eventName": "화재",
+                "eventTime": 20220822163022123,
+                "eventDesc": "100도"
+              }
+            ]
+          },
+          "settings": {
+            "connectTimeout": 5000,
+            "numRetries": 1
+          }
+        }
+      },
+      {
+        "id": "step-7",
+        "name": "보안용 센서 단말 제어 정보 연동",
+        "order": 7,
+        "api": {
+          "name": "보안용 센서 단말 제어 정보 연동",
+          "method": "POST",
+          "endpoint": "/SensorDeviceControl",
+          "requestSchema": {
+            "type": "object",
+            "properties": {
+              "sensorDeviceID": {
+                "type": "string"
+              },
+              "commandType": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "sensorDeviceID"
+            ]
+          },
+          "responseData": {
+            "code": "200",
+            "message": "성공",
+            "sensorDeviceID": "iot0001",
+            "sensorDeviceStatus": "Alarm"
+          },
+          "settings": {
+            "connectTimeout": 5000,
+            "numRetries": 1
+          }
+        }
+      }
+    ]
+  }
+}
