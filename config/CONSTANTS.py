@@ -20,8 +20,6 @@ url = "https://127.0.0.1:8000"
 
 specs = [["spec-001_inSchema","spec-001_outData","spec001_messages","영상보안 시스템 검증(요청검증)"],
          ["spec-0011_inSchema","spec-0011_outData","spec0011_messages","보안용 센서 시스템 검증(요청검증"]]
-
-
 #test-opt
 '''
 opt2의 메시지의 settings 내 정보 보고 작성, 메시지 순차별로
@@ -31,7 +29,7 @@ num_retries : 메시지별 메시지 검증 횟수
 '''
 
 trans_protocol = [None,None,None,None,None,None,"LongPolling",None,None] #"LongPolling" #WebHook
-time_out = [5000,5000,8000,8000,8000,8000,5000,5000,8000]   # 타임아웃 건드리게 되면 건드린 이유와 함께 커밋해주세요. (수정중입니다)
+time_out = [5000,5000,8000,8000,8000,8000,5000,5000,8000]   # time_out = [5000,5000,8000,8000,8000,8000,5000,5000,8000]
 num_retries = [1, 1, 3, 3, 3, 2, 1, 1, 2]
 
 
