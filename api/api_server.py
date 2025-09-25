@@ -10,10 +10,10 @@ import traceback
 
 from spec.video.videoRequest import videoMessages, videoOutMessage, videoInMessage
 from spec.video.videoSchema import videoInSchema, videoOutSchema
-from spec.bio.bioRequest import bioMessages, bioOutMessage, bioInMessage
-from spec.bio.bioSchema import  bioInSchema, bioOutSchema
-from spec.security.securityRequest import securityMessages, securityOutMessage, securityInMessage
-from spec.security.securitySchema import securityInSchema, securityOutSchema
+# from spec.bio.bioRequest import bioMessages, bioOutMessage, bioInMessage
+# from spec.bio.bioSchema import  bioInSchema, bioOutSchema
+# from spec.security.securityRequest import securityMessages, securityOutMessage, securityInMessage
+# from spec.security.securitySchema import securityInSchema, securityOutSchema
 
 from core.functions import resource_path
 from requests.auth import HTTPDigestAuth
@@ -89,8 +89,11 @@ class Server(BaseHTTPRequestHandler):
 
     # POST echoes the message adding a JSON field
     def do_POST(self):
+        print(f"[DEBUG][SERVER] do_POST called, path={self.path}, auth_type={self.auth_type}, headers={dict(self.headers)}")
         ctype, pdict = cgi.parse_header(self.headers.get_content_type())
         auth = self.headers.get('Authorization')
+        if auth is None:
+            auth = self.headers.get('authorization')
         auth_pass = False
         message_cnt, data = self.api_res()
 
@@ -101,29 +104,59 @@ class Server(BaseHTTPRequestHandler):
                 if self.path == "/" + self.message[0]:
                     auth_pass = True
                 elif self.auth_type == "B":
+                    print(f"[DEBUG][SERVER] Checking Bearer, auth={auth}")
                     if auth:
                         auth_parts = auth.split(" ")
                         if len(auth_parts) > 1 and auth_parts[0] == 'Bearer':
-                            token = auth_parts[1].replace('"', "")
-                            if token == self.auth_Info[0]:
+                            token = auth_parts[1].replace('"', "").strip()
+                            stored_token = None
+                            if isinstance(self.auth_Info, list):
+                                if self.auth_Info:
+                                    stored_token = self.auth_Info[0]
+                            else:
+                                stored_token = self.auth_Info
+
+                            # 디버그 로그 추가: Bearer 토큰 비교 직전
+                            print(f"[DEBUG][SERVER] Bearer token in header: {token}, stored_token: {stored_token}")
+
+                            if stored_token is not None and token == str(stored_token).strip():
                                 auth_pass = True
                 elif self.auth_type == "D":
+                    import hashlib
                     try:
-                        if auth:
-                            auth_parts = auth.split(" ")
-                            if len(auth_parts) > 1 and auth_parts[0] == 'Digest':
-                                temp = []
-                                for i in auth_parts:
-                                    temp.append(i.split("="))
-                                auth_res = ""
-                                for i in temp:
-                                    if i[0] == "response":
-                                        auth_res = i[1].replace('"', '').replace(',', '')
-                                if auth_res == self.auth_Info[-1]:
-                                    auth_pass = True
+                        if auth and auth.startswith('Digest '):
+                            digest_header = auth[len('Digest '):]
+                            digest_items = {}
+                            for item in digest_header.split(','):
+                                if '=' in item:
+                                    k, v = item.strip().split('=', 1)
+                                    digest_items[k.strip()] = v.strip().strip('"')
+                            # 필수 파라미터 추출
+                            username = digest_items.get('username')
+                            realm = digest_items.get('realm')
+                            nonce = digest_items.get('nonce')
+                            uri = digest_items.get('uri')
+                            qop = digest_items.get('qop')
+                            nc = digest_items.get('nc')
+                            cnonce = digest_items.get('cnonce')
+                            response = digest_items.get('response')
+                            method = self.command  # 'POST'
+                            password = self.auth_Info[1] if hasattr(self, 'auth_Info') and self.auth_Info else ''
+                            # RFC 7616 방식으로 해시 계산
+                            a1 = f"{username}:{realm}:{password}"
+                            ha1 = hashlib.md5(a1.encode()).hexdigest()
+                            a2 = f"{method}:{uri}"
+                            ha2 = hashlib.md5(a2.encode()).hexdigest()
+                            if qop and cnonce and nc:
+                                expected_response = hashlib.md5(f"{ha1}:{nonce}:{nc}:{cnonce}:{qop}:{ha2}".encode()).hexdigest()
+                            else:
+                                expected_response = hashlib.md5(f"{ha1}:{nonce}:{ha2}".encode()).hexdigest()
+                            # 디버그 로그
+                            print(f"[DEBUG][SERVER][Digest] client_response={response}, expected_response={expected_response}")
+                            if response and expected_response and response == expected_response:
+                                auth_pass = True
                     except Exception as e:
-                        #print(e)
-                        #print(traceback.format_exc())
+                        print(f"[DEBUG][SERVER][Digest] Exception: {e}")
                         self._set_digest_headers()
                         return
             except Exception as err:
@@ -271,9 +304,16 @@ class Server(BaseHTTPRequestHandler):
                 data = self.outMessage[i]
                 if i == 0 and self.auth_type == "B":
                     try:
-                        self.auth_Info = data['accessToken']
-                    except:
+                        token = data['accessToken']
+                    except Exception:
                         pass
+                    else:
+                        if isinstance(self.auth_Info, list):
+                            if not self.auth_Info:
+                                self.auth_Info.append(None)
+                            self.auth_Info[0] = str(token).strip()
+                        else:
+                            self.auth_Info = [str(token).strip()]
                 break
         return i, data
 
@@ -290,19 +330,19 @@ def run(server_class=HTTPServer, handler_class=Server, address='127.0.0.1', port
         Server.inSchema = videoInSchema
         Server.outSchema = videoOutSchema
 
-    elif system == "bio":
-        Server.message = bioMessages
-        Server.inMessage = bioInMessage
-        Server.outMessage = bioOutMessage
-        Server.inSchema = bioInSchema
-        Server.outSchema = bioOutSchema
+    # elif system == "bio":
+    #     Server.message = bioMessages
+    #     Server.inMessage = bioInMessage
+    #     Server.outMessage = bioOutMessage
+    #     Server.inSchema = bioInSchema
+    #     Server.outSchema = bioOutSchema
 
-    elif system == "security":
-        Server.message = securityMessages
-        Server.inMessage = securityInMessage
-        Server.outMessage = securityOutMessage
-        Server.inSchema = securityInSchema
-        Server.outSchema = securityOutSchema
+    # elif system == "security":
+    #     Server.message = securityMessages
+    #     Server.inMessage = securityInMessage
+    #     Server.outMessage = securityOutMessage
+    #     Server.inSchema = securityInSchema
+    #     Server.outSchema = securityOutSchema
 
     certificate_private = resource_path('config/key0627/server.crt')
     certificate_key = resource_path('config/key0627/server.key')

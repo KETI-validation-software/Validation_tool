@@ -15,8 +15,11 @@ from datetime import datetime
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 warnings.filterwarnings('ignore')
 
-from spec.video.videoRequest import videoMessages, videoOutMessage, videoInMessage
-from spec.video.videoSchema import videoInSchema, videoOutSchema, videoWebhookSchema
+from spec.video.videoData_response import videoInMessage, videoMessages
+from spec.video.videoData_request import videoOutMessage
+from spec.video.videoSchema_request import videoInSchema
+from spec.video.videoSchema_response import videoOutSchema
+from spec.video.videoSchema import videoWebhookSchema
 from urllib.parse import urlparse
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor
@@ -160,6 +163,14 @@ class CustomDialog(QDialog):  # popup window for validation result
 
 
 class MyApp(QWidget):
+    def handle_authentication_response(self, res_data):
+        """Handles the response for the Authentication step, updates token if present."""
+        # Fix: Use 'accessToken' key, not 'token'
+        if isinstance(res_data, dict):
+            token = res_data.get("accessToken")
+            if token:
+                self.token = token
+                print(f"[DEBUG] [handle_authentication_response] Token updated: {self.token}")
     def __init__(self, embedded=False):
         super().__init__()
         self.embedded = embedded
@@ -257,6 +268,7 @@ class MyApp(QWidget):
             self.tableWidget.item(row, 6).setTextAlignment(Qt.AlignCenter)
             
 
+    # (removed misplaced print)
     def update_table_row_with_retries(self, row, result, pass_count, error_count, data, error_text, retries):
         """테이블 행 업데이트 (실제 검증 횟수 포함, 플랫폼과 동일하게 아이콘 처리)"""
         if row >= self.tableWidget.rowCount():
@@ -314,10 +326,12 @@ class MyApp(QWidget):
             self.auth_type = False
         try:
             if self.token is None:
+                print(f"[DEBUG] [post] No token, sending request without Authorization header. path={path}")
                 self.res = requests.post(path,
                                          headers=CONSTANTS.headers, data=json_data,  # headers = head
                                          verify=False, timeout=time_out)
             else:
+                print(f"[DEBUG] [post] Sending request to {path} with Bearer token: {self.token}")
                 self.res = requests.post(path,
                                          headers=CONSTANTS.headers, data=json_data,  # headers = head
                                          auth=self.auth_type, verify=False, timeout=time_out)
@@ -330,8 +344,6 @@ class MyApp(QWidget):
 
                         if trans_protocol:
                             trans_protocol_type = trans_protocol.get("transProtocolType", {})
-                            #if self.res.json()['code'] is not str(200):
-
                             if "WebHook".lower() in str(trans_protocol_type).lower():
                                 path_tmp = trans_protocol.get("transProtocolDesc", {})
                                 if not path_tmp or str(path_tmp).strip() in ["None", "", "desc"]:
@@ -445,7 +457,10 @@ class MyApp(QWidget):
                 self.time_pre = time.time()
 
                 retry_info = f" (시도 {self.current_retry + 1}/{CONSTANTS.num_retries[self.cnt]})"
-                self.message_name = "step " + str(self.cnt + 1) + ": " + self.message[self.cnt] + retry_info
+                if self.cnt < len(self.message):
+                    self.message_name = "step " + str(self.cnt + 1) + ": " + self.message[self.cnt] + retry_info
+                else:
+                    self.message_name = f"step {self.cnt + 1}: (index out of range)" + retry_info
 
                 # if self.tmp_msg_append_flag:
                 #     self.valResult.append(self.message_name)
@@ -453,38 +468,44 @@ class MyApp(QWidget):
                     self.tmp_msg_append_flag = True
 
                 # 시스템이 플랫폼에 요청 전송
-                current_timeout = CONSTANTS.time_out[self.cnt] / 1000  # 개별 timeout 사용 (ms를 초로 변환)
-                path = self.pathUrl + "/" + self.message[self.cnt]
-                inMessage = self.inMessage[self.cnt]
+                current_timeout = CONSTANTS.time_out[self.cnt] / 1000 if self.cnt < len(CONSTANTS.time_out) else 5.0
+                path = self.pathUrl + "/" + (self.message[self.cnt] if self.cnt < len(self.message) else "")
+                inMessage = self.inMessage[self.cnt] if self.cnt < len(self.inMessage) else {}
                 json_data = json.dumps(inMessage).encode('utf-8')
 
                 # 순서 확인용 로그
-                print(f"[SYSTEM] 플랫폼에 요청 전송: {self.message[self.cnt]} (시도 {self.current_retry + 1})")
+                print(f"[SYSTEM] 플랫폼에 요청 전송: {(self.message[self.cnt] if self.cnt < len(self.message) else 'index out of range')} (시도 {self.current_retry + 1})")
 
                 t = threading.Thread(target=self.post, args=(path, json_data, current_timeout), daemon=True)
                 t.start()
                 self.post_flag = True
 
             # timeout 조건은 응답 대기/재시도 판단에만 사용
-            elif time_interval >= CONSTANTS.time_out[self.cnt] / 1000 and self.post_flag is True:
+            elif self.cnt < len(CONSTANTS.time_out) and time_interval >= CONSTANTS.time_out[self.cnt] / 1000 and self.post_flag is True:
                 # 디버깅 로그 추가
                 if self.cnt >= 4:
-                    print(f"[DEBUG] TIMEOUT TRIGGERED for cnt={self.cnt}, time_interval={time_interval}, timeout_limit={CONSTANTS.time_out[self.cnt]/1000}")
-                
-                self.message_error.append([self.message[self.cnt]])
+                    print(f"[DEBUG] TIMEOUT TRIGGERED for cnt={self.cnt}, time_interval={time_interval}, timeout_limit={(CONSTANTS.time_out[self.cnt]/1000) if self.cnt < len(CONSTANTS.time_out) else 'N/A'}")
+
+                if self.cnt < len(self.message):
+                    self.message_error.append([self.message[self.cnt]])
+                else:
+                    self.message_error.append([f"index out of range: {self.cnt}"])
                 self.message_in_cnt = 0
                 current_retries = CONSTANTS.num_retries[self.cnt] if self.cnt < len(CONSTANTS.num_retries) else 1
                 self.valResult.append(f"Message Missing! (시도 {self.current_retry + 1}/{current_retries})")
 
                 # 현재 시도에 대한 타임아웃 처리
-                tmp_fields_rqd_cnt, tmp_fields_opt_cnt = timeout_field_finder(self.outSchema[self.cnt])
+                if self.cnt < len(self.outSchema):
+                    tmp_fields_rqd_cnt, tmp_fields_opt_cnt = timeout_field_finder(self.outSchema[self.cnt])
+                else:
+                    tmp_fields_rqd_cnt, tmp_fields_opt_cnt = 0, 0
                 add_err = tmp_fields_rqd_cnt if tmp_fields_rqd_cnt > 0 else 1
                 if self.flag_opt:
                     add_err += tmp_fields_opt_cnt
 
                 self.total_error_cnt += add_err
                 self.total_pass_cnt += 0
-                
+
                 # 평가 점수 디스플레이 업데이트
                 self.update_score_display()
                 
@@ -565,22 +586,13 @@ class MyApp(QWidget):
                         if self.webhook_flag:  # webhook 인 경우
                             val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.outSchema[-1],
                                                                                             res_data, self.flag_opt)
-                            
-                            try:
-                                if self.message[self.cnt] == "Authentication":
-                                    self.token = res_data["accessToken"]
-                            except:
-                                pass
-
+                            if self.message[self.cnt] == "Authentication":
+                                self.handle_authentication_response(res_data)
                         else:  # webhook 아닌경우
                             val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.outSchema[self.cnt],
                                                                                                 res_data, self.flag_opt)
-                            
-                            try:
-                                if self.message[self.cnt] == "Authentication":
-                                    self.token = res_data["accessToken"]
-                            except:
-                                pass
+                            if self.message[self.cnt] == "Authentication":
+                                self.handle_authentication_response(res_data)
 
                         # 이번 시도의 결과
                         final_result = val_result
@@ -1174,7 +1186,7 @@ class MyApp(QWidget):
         # CONSTANTS.py에서 URL 가져오기
         self.pathUrl = CONSTANTS.url
         self.valResult.append("Start Validation...\n")
-        self.valResult.append("� 시스템이 플랫폼에 요청을 전송하여 응답을 검증합니다")
+        self.valResult.append("시스템이 플랫폼에 요청을 전송하여 응답을 검증합니다")
         self.webhook_cnt = 99
         # 타이머를 1초 간격으로 시작 (CONSTANTS timeout과 조화)
         self.tick_timer.start(1000)

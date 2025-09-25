@@ -7,8 +7,8 @@ import os
 import json
 #from charset_normalizer import md__mypyc  # A library that helps you read text from an unknown charset encoding
 from spec.video.videoRequest import *
-from spec.bio.bioRequest import *
-from spec.security.securityRequest import *
+# from spec.bio.bioRequest import *
+# from spec.security.securityRequest import *
 from lxml import etree
 from PyQt5.QtWidgets import QMessageBox
 
@@ -37,7 +37,10 @@ class BearerAuth(requests.auth.AuthBase):
         self.token = token
 
     def __call__(self, r):
-        r.headers["authorization"] = "Bearer " + self.token
+        token = "" if self.token is None else str(self.token).strip()
+        auth_value = "Bearer" if token == "" else "Bearer " + token
+        r.headers["Authorization"] = auth_value
+        r.headers["authorization"] = auth_value
         return r
 
 
@@ -127,21 +130,21 @@ def json_to_data(type_):
             videoInMessage.append(set_message(path_req))
             videoOutMessage.append(set_message(path_res))
 
-    elif type_ == "bio":
-        paths = bioMessages
-        for cnt, path in enumerate(paths):
-            path_req = _p(type_, path, "request")
-            path_res = _p(type_, path, "response")
-            bioInMessage.append(set_message(path_req))
-            bioOutMessage.append(set_message(path_res))
+    # elif type_ == "bio":
+    #     paths = bioMessages
+    #     for cnt, path in enumerate(paths):
+    #         path_req = _p(type_, path, "request")
+    #         path_res = _p(type_, path, "response")
+    #         bioInMessage.append(set_message(path_req))
+    #         bioOutMessage.append(set_message(path_res))
 
-    elif type_ == "security":
-        paths = securityMessages
-        for cnt, path in enumerate(paths):
-            path_req = _p(type_, path, "request")
-            path_res = _p(type_, path, "response")
-            securityInMessage.append(set_message(path_req))
-            securityOutMessage.append(set_message(path_res))
+    # elif type_ == "security":
+    #     paths = securityMessages
+    #     for cnt, path in enumerate(paths):
+    #         path_req = _p(type_, path, "request")
+    #         path_res = _p(type_, path, "response")
+    #         securityInMessage.append(set_message(path_req))
+    #         securityOutMessage.append(set_message(path_res))
 
     return True
 
