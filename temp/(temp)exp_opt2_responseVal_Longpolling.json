@@ -108,12 +108,12 @@
               "streamingSupport",
               "transportSupport"
             ]
-          }
-        },
-        "settings": {
+          },
+          "settings": {
           "connectTimeout": 5000,
           "numRetries": 1
-        }
+          }
+        }  
       },
       {
         "id": "step-3",
