@@ -74,12 +74,16 @@ RealtimeVideoEventInfos_in_data = {
     }
 ],
     "transProtocol": {
-    "transProtocolType": "LongPolling"
+    "transProtocolType": "WebHook",
+    "transProtocolDesc": "https://127.0.0.1:8090/RealtimeVideoEventInfos"
 },
     "duration": 10,
     "eventFilter": "배회",
     "startTime": 20220822163022123
 }
+
+# 
+_in_data = {}
 
 # StoredVideoEventInfos
 StoredVideoEventInfos_in_data = {
@@ -146,6 +150,7 @@ videoInMessage = [
     StreamURLs_in_data,
     ReplayURL_in_data,
     RealtimeVideoEventInfos_in_data,
+    _in_data,
     StoredVideoEventInfos_in_data,
     StoredObjectAnalyticsInfos_in_data,
 ]
@@ -159,6 +164,7 @@ videoMessages = [
     "StreamURLs",
     "ReplayURL",
     "RealtimeVideoEventInfos",
+    "",
     "StoredVideoEventInfos",
     "StoredObjectAnalyticsInfos",
 ]

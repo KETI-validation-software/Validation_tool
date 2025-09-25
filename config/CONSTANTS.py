@@ -8,15 +8,15 @@ none_request_message = ['Capabilities',
 
 #test-info
 company_name = "스마트홈 테크놀로지"
-product_name = "물리보안 통합플랫폼"
-version = "v.2.1.0"
+product_name = "물리보안 시스템"
+version = "v2.1.0"
 test_category = "사전시험"
-test_target = "통합시스템" # 연동시스템
+test_target = "통합시스템"
 test_range = "전체필드"
-auth_type = "Bearer Token"
-auth_info = "abcd1234" #Digest Auth의 경우 id,pass 형태로 표기 예 auth_info = "user,pass"
-admin_code = "door_lock_2024"
-url = "https://127.0.0.1:8008"
+auth_type = "Digest Auth"
+auth_info = "user001,pass001"
+admin_code = ""
+url = "https://10.252.219.95:8000"
 
 #test-opt
 '''
@@ -26,8 +26,8 @@ time_out : 메시지별 timeout 설정 시간
 num_retries : 메시지별 메시지 검증 횟수
 '''
 trans_protocol = [None,None,None,None,None,None,"LongPolling",None,None] #"LongPolling" #WebHook
-time_out = [5000,5000,8000,8000,8000,8000,5000,5000,8000]
-num_retries = [1,1,3,3,2,2,1,1,2]
+time_out = [5000,5000,8000,8000,8000,8000,5000,5000,8000]   # 타임아웃 건드리게 되면 건드린 이유와 함께 커밋해주세요. (수정중입니다)
+num_retries = [1, 1, 3, 3, 3, 2, 1, 1, 2]
 
 #etc
 digest_vid_res = [

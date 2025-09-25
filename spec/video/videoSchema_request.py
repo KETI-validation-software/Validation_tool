@@ -57,6 +57,9 @@ RealtimeVideoEventInfos_in_schema = {
     OptionalKey("startTime"): int,
 }
 
+# 
+_in_schema = {}
+
 # StoredVideoEventInfos
 StoredVideoEventInfos_in_schema = {
     "timePeriod": {
@@ -95,6 +98,7 @@ videoInSchema = [
     StreamURLs_in_schema,
     ReplayURL_in_schema,
     RealtimeVideoEventInfos_in_schema,
+    _in_schema,
     StoredVideoEventInfos_in_schema,
     StoredObjectAnalyticsInfos_in_schema,
 ]
