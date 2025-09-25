@@ -99,13 +99,6 @@ class LoginWidget(QWidget):
         form.setVerticalSpacing(16)
         form.setContentsMargins(0, 0, 0, 0)
 
-        self.admin_code_input = QLineEdit()
-        self.admin_code_input.setPlaceholderText("관리자 코드를 입력하세요")
-        self.admin_code_input.setEchoMode(QLineEdit.Password)
-
-        self.admin_code_input.setFixedSize(620, 40)
-        form.addRow("관리자 코드", self.admin_code_input)
-
         self.url_input = QLineEdit()
         self.url_input.setPlaceholderText("URL을 입력하세요")
         self.url_input.setText("https://127.0.0.1:8008")
@@ -179,25 +172,19 @@ class LoginWidget(QWidget):
         layout.addWidget(illust, alignment=Qt.AlignRight | Qt.AlignBottom)
 
         # 엔터키 동작
-        self.admin_code_input.returnPressed.connect(self._on_login)
         self.url_input.returnPressed.connect(self._on_login)
 
         self.setLayout(layout)
 
     def _on_login(self):
-        admin_code = self.admin_code_input.text().strip()
         url = self.url_input.text().strip()
 
-        if not admin_code:
-            QMessageBox.warning(self, "입력 오류", "관리자 코드를 입력해주세요.")
-            self.admin_code_input.setFocus()
-            return
         if not url:
             QMessageBox.warning(self, "입력 오류", "접속 URL을 입력해주세요.")
             self.url_input.setFocus()
             return
 
-        if self._validate_credentials(admin_code, url):
+        if self._validate_credentials(url):
             self.loginSucceeded.emit(url)
         else:
             QMessageBox.critical(self, "접속 실패",
@@ -205,12 +192,9 @@ class LoginWidget(QWidget):
             self.admin_code_input.clear()
             self.admin_code_input.setFocus()
 
-    def _validate_credentials(self, admin_code: str, url: str) -> bool:
-        # 1) 관리자 코드 확인
-        if admin_code != self.expected_code:
-            return False
+    def _validate_credentials(self, url: str) -> bool:
 
-        # 2) URL 형식/접속 확인
+        # 1) URL 형식/접속 확인
         if not url.startswith(('http://', 'https://')):
             return False
         try:
