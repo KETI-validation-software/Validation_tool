@@ -1,5 +1,5 @@
 # 자동 생성된 VideoRequest 파일
-# JSON 데이터를 기반으로 생성되었습니다. (response 모드)
+# response 모드
 
 # Authentication
 Authentication_in_data = {
@@ -74,7 +74,8 @@ RealtimeVideoEventInfos_in_data = {
     }
 ],
     "transProtocol": {
-    "transProtocolType": "LongPolling"
+    "transProtocolType": "WebHook",
+    "transProtocolDesc": "https://127.0.0.1:8090/RealtimeVideoEventInfos"
 },
     "duration": 10,
     "eventFilter": "배회",
@@ -137,7 +138,13 @@ StoredObjectAnalyticsInfos_in_data = {
 ]
 }
 
-# steps 순서대로 입력 메시지 리스트 생성
+# WebHook RealtimeVideoEventInfos
+RealtimeVideoEventInfos_out_data = {
+    "code": 200,
+    "message": "성공"
+}
+
+# steps 순서대로 입력 메시지 생성
 videoInMessage = [
     Authentication_in_data,
     Capabilities_in_data,
@@ -150,7 +157,7 @@ videoInMessage = [
     StoredObjectAnalyticsInfos_in_data,
 ]
 
-# API endpoint 이름 리스트
+# API endpoint
 videoMessages = [
     "Authentication",
     "Capabilities",
@@ -161,4 +168,9 @@ videoMessages = [
     "RealtimeVideoEventInfos",
     "StoredVideoEventInfos",
     "StoredObjectAnalyticsInfos",
+]
+
+# WebHook
+videoWebhookData = [
+    RealtimeVideoEventInfos_out_data,
 ]
