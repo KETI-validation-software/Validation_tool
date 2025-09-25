@@ -12,10 +12,10 @@
     },
     "testGroup": {
       "id": "group-001",
-      "name": "영상보안 시스템 시험",
+      "name": "물리보안 통합플랫폼 시험",
       "testRange": "전체필드",
       "testSpecIds": [
-        "spec-001"
+        "spec-001","spec-0011"
       ]
     },
     "status": "대기",
