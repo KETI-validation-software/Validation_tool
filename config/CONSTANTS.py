@@ -8,7 +8,7 @@ none_request_message = ['Capabilities',
 
 #test-info
 company_name = "스마트홈 테크놀로지"
-product_name = "물리보안 시스템"
+product_name = "물리보안 통합플랫폼"
 version = "v2.1.0"
 test_category = "사전시험"
 test_target = "통합시스템"
@@ -28,8 +28,8 @@ num_retries : 메시지별 메시지 검증 횟수
 '''
 specs = [["spec-001_InSchema","영상보안 시스템 검증(요청검증)"],
          ["spec-0011_InSchema","보안용 센서 시스템 검증(요청검증"]]
-trans_protocol = [None,None,None,None,None,None,"LongPolling",None,None] #"LongPolling" #WebHook
-time_out = [5000,5000,8000,8000,8000,8000,5000,5000,8000]   # 타임아웃 건드리게 되면 건드린 이유와 함께 커밋해주세요. (수정중입니다)
+trans_protocol = [None, None, None, None, None, None, None, None, None]
+time_out = [5000, 5000, 5000, 5000, 30, 5000, 5000, 5000, 5000]
 num_retries = [1, 1, 3, 3, 3, 2, 1, 1, 2]
 
 

@@ -1,1 +1,0 @@
-{"sensorDeviceList": [{"sensorDeviceID": "iot0001"}, {"sensorDeviceID": "iot0002"}, {"sensorDeviceID": "iot0003"}], "duration": 100, "transProtocol": {"transProtocolType": "HTTP_API", "transProtocolDesc": "descriptoin"}, "startTime": 20220822163022123}

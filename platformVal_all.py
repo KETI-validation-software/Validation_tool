@@ -13,8 +13,10 @@ import ssl
 from core.functions import json_check_, save_result, resource_path, field_finder, json_to_data, set_auth, timeout_field_finder
 
 import spec
-from spec.video.videoRequest import videoMessages, videoOutMessage, videoInMessage
-from spec.video.videoSchema import videoInSchema, videoOutSchema
+from spec.video.videoData_response import videoInMessage, videoMessages
+from spec.video.videoData_request import videoOutMessage
+from spec.video.videoSchema_request import videoInSchema
+from spec.video.videoSchema_response import videoOutSchema
 import config.CONSTANTS as CONSTANTS
 
 from core.functions import json_check_, save_result, resource_path, field_finder, json_to_data, set_auth, timeout_field_finder 
@@ -211,7 +213,20 @@ class MyApp(QWidget):
             except Exception:
                 return str(val_text)
         return str(val_text)
-    
+
+    def _update_server_bearer_token(self, token):
+        """서버 스레드가 참조하는 Bearer 토큰을 일관된 형태로 저장"""
+        server_auth = getattr(self.Server, "auth_Info", [])
+        if not isinstance(server_auth, list):
+            server_auth = [server_auth]
+        if len(server_auth) == 0:
+            server_auth.append(None)
+
+        server_auth[0] = None if token is None else str(token).strip()
+        self.Server.auth_Info = server_auth
+        # 디버그 로그 추가: 토큰 저장 시
+        print(f"[DEBUG][PLATFORM] _update_server_bearer_token: stored_token={self.Server.auth_Info[0]}")
+
     def update_table_row_with_retries(self, row, result, pass_count, error_count, data, error_text, retries):
         if row>= self.tableWidget.rowCount():
             return
@@ -330,10 +345,20 @@ class MyApp(QWidget):
             if self.cnt == 1 and self.r2 == "B":
                 data = self.Server.outMessage[0]
                 try:
-                    self.auth_Info = data['accessToken']
-                    self.Server.auth_Info[0] = self.auth_Info
-                except:
+                    self.auth_Info = str(data['accessToken']).strip()
+                    self._update_server_bearer_token(self.auth_Info)
+                except (KeyError, TypeError):
                     pass
+
+            # 주요 요청 처리 시 Bearer 토큰 상태 디버그 로그
+            if self.r2 == "B":
+                token = None
+                if hasattr(self, 'auth_Info'):
+                    token = self.auth_Info
+                stored_token = None
+                if hasattr(self.Server, 'auth_Info'):
+                    stored_token = self.Server.auth_Info[0] if isinstance(self.Server.auth_Info, list) and self.Server.auth_Info else self.Server.auth_Info
+                print(f"[DEBUG][PLATFORM] update_view: token={token}, stored_token={stored_token}")
 
             if self.realtime_flag is True:
                 time.sleep(1)
@@ -1040,20 +1065,17 @@ class MyApp(QWidget):
         self.time_pre = 0
         self.realtime_flag = False
         self.tmp_msg_append_flag = False
-        
         # 평가 점수 디스플레이 초기화
         self.update_score_display()
-        
         self.sbtn.setDisabled(True)
         self.stop_btn.setEnabled(True)
-
         # self.Server = api_server.Server# -> MyApp init()으로
         json_to_data(self.radio_check_flag)
-
         timeout = 5 
         default_timeout = 5
         if self.r2 == "B":
-            videoOutMessage[0]['accessToken'] = self.token
+            token_value = None if self.token is None else str(self.token).strip()
+            videoOutMessage[0]['accessToken'] = token_value
         self.Server.message = videoMessages
         self.Server.inMessage = videoInMessage
         self.Server.outMessage = videoOutMessage
@@ -1061,33 +1083,26 @@ class MyApp(QWidget):
         self.Server.outSchema = videoOutSchema
         self.Server.system = "video"
         self.Server.timeout = timeout
-
         self.init_win()
         self.valResult.clear()  # 초기화
         self.final_report = ""  # 초기화
-
         # 테이블 아이콘 초기화
         for i in range(self.tableWidget.rowCount()):
             icon_widget = QWidget()
             icon_layout = QHBoxLayout()
             icon_layout.setContentsMargins(0, 0, 0, 0)
-            
             icon_label = QLabel()
             icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
             icon_label.setAlignment(Qt.AlignCenter)
-            
             icon_layout.addWidget(icon_label)
             icon_layout.setAlignment(Qt.AlignCenter)
             icon_widget.setLayout(icon_layout)
-            
             self.tableWidget.setCellWidget(i, 1, icon_widget)
-        
         # CONSTANTS.py에서 URL 가져오기
         self.pathUrl = CONSTANTS.url
-
         if self.r2 == "B":
             self.Server.auth_type = "B"
-            self.Server.auth_Info[0] = str(self.token)
+            self._update_server_bearer_token(self.token)
         elif self.r2 == "D":
             self.Server.auth_type = "D"
             self.Server.auth_Info[0] = self.digestInfo[0]
@@ -1095,19 +1110,20 @@ class MyApp(QWidget):
         elif self.r2 == "None":
             self.Server.auth_type = "None"
             self.Server.auth_Info[0] = None
-
         # 기본값으로 LongPolling 사용
         self.Server.transProtocolInput = "LongPolling"
-
         self.valResult.append("Start Validation...\n")
-
         # CONSTANTS.py의 URL 사용
         url = CONSTANTS.url.split(":")
         address_ip = url[-2].split("/")[-1]
         address_port = int(url[-1])
-
         self.server_th = server_th(handler_class=self.Server, address=address_ip, port=address_port)
         self.server_th.start()
+        # 서버 준비 완료까지 대기 (첫 실행 시)
+        if self.first_run:
+            self.valResult.append("🔄 플랫폼 서버 초기화 중...")
+            time.sleep(5)
+            self.valResult.append("✅ 플랫폼 서버 준비 완료")
         self.tick_timer.start(1000)  # 시스템쪽과 동일한 1초 간격
 
     def stop_btn_clicked(self):
@@ -1118,16 +1134,14 @@ class MyApp(QWidget):
 
     def init_win(self):
         self.cnt = 0
-
         # 버퍼 초기화
         self.step_buffers = [{"data": "", "result": "", "error": ""} for _ in range(9)]
-
-        # josn 파일 초기화
-        for i in range(0, len(self.Server.message)):
-            with open(resource_path("spec/"+self.Server.system + "/" + self.Server.message[i] + ".json"), "w",
-                      encoding="UTF-8") as out_file:  # 수정해야함
-                json.dump(None, out_file, ensure_ascii=False)
-
+        # 첫 실행이 아닌 경우에만 JSON 파일 초기화
+        if not self.first_run:
+            for i in range(0, len(self.Server.message)):
+                with open(resource_path("spec/"+self.Server.system + "/" + self.Server.message[i] + ".json"), "w",
+                          encoding="UTF-8") as out_file:
+                    json.dump(None, out_file, ensure_ascii=False)
         self.valResult.clear()
         # 메시지 초기화
         for i in range(1, 10):
@@ -1137,17 +1151,13 @@ class MyApp(QWidget):
             icon_widget = QWidget()
             icon_layout = QHBoxLayout()
             icon_layout.setContentsMargins(0, 0, 0, 0)
-            
             icon_label = QLabel()
             icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
             icon_label.setAlignment(Qt.AlignCenter)
-            
             icon_layout.addWidget(icon_label)
             icon_layout.setAlignment(Qt.AlignCenter)
             icon_widget.setLayout(icon_layout)
-            
             self.tableWidget.setCellWidget(i, 1, icon_widget)
-            
             # 카운트들도 초기화
             self.tableWidget.setItem(i, 2, QTableWidgetItem("0"))
             self.tableWidget.item(i, 2).setTextAlignment(Qt.AlignCenter)
