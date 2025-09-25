@@ -365,8 +365,8 @@ class MyApp(QWidget):
                     message_name = "step " + str(self.cnt + 1) + ": " + self.Server.message[self.cnt]
                     
                     # 개별 검증 횟수 처리
-                    current_retries = CONSTANTS.num_retries[self.cnt]
-                    current_protocol = CONSTANTS.trans_protocol[self.cnt]
+                    current_retries = CONSTANTS.num_retries[self.cnt] if self.cnt < len(CONSTANTS.num_retries) else 1
+                    current_protocol = CONSTANTS.trans_protocol[self.cnt] if self.cnt < len(CONSTANTS.trans_protocol) else "Unknown"
 
                     total_pass_count = 0
                     total_error_count = 0
@@ -380,28 +380,55 @@ class MyApp(QWidget):
                         add_pass = 0
                         add_err = 0
 
-                        if self.Server.message[self.cnt] in CONSTANTS.none_request_message:
-                            # 첫 번째 검증에서만 데이터 수집
-                            if retry_attempt == 0:
-                                tmp_res_auth = json.dumps(data, indent=4, ensure_ascii=False)
-                                combined_data_parts.append(tmp_res_auth)
+                        # 실시간 진행률 표시 (시스템쪽처럼)
+                        if retry_attempt == 0:
+                            self.valResult.append(message_name)
+                            self.valResult.append(f"🔄 부하테스트 시작: 총 {current_retries}회 검증 예정")
+                        
+                        self.valResult.append(f"⏳ 검증 진행중... [{retry_attempt + 1}/{current_retries}]")
+                        
+                        # 테이블에 실시간 진행률 표시
+                        self.update_table_row_with_retries(self.cnt, "진행중", 0, 0, "검증 진행중...", f"시도 {retry_attempt + 1}/{current_retries}", retry_attempt + 1)
+                        
+                        # UI 업데이트를 위한 지연 (시스템쪽과 동일한 타이밍)
+                        QApplication.processEvents()
+                        time.sleep(2.0)  # 시스템쪽과 동일한 간격
 
-                            if (len(data) != 0) and data != "{}":
+                        # 매 시도마다 새로운 데이터 읽기 (실제 부하테스트)
+                        try:
+                            with open(resource_path("spec/" + self.Server.system + "/" + self.Server.message[self.cnt] +
+                                                    ".json"), "r", encoding="UTF-8") as out_file:
+                                current_data = json.load(out_file)
+                        except:
+                            current_data = data  # 파일 읽기 실패 시 기존 데이터 사용
+
+                        if self.Server.message[self.cnt] in CONSTANTS.none_request_message:
+                            # 매 시도마다 데이터 수집
+                            tmp_res_auth = json.dumps(current_data, indent=4, ensure_ascii=False)
+                            if retry_attempt == 0:
+                                combined_data_parts.append(f"[시도 {retry_attempt + 1}회차]\n{tmp_res_auth}")
+                            else:
+                                combined_data_parts.append(f"\n[시도 {retry_attempt + 1}회차]\n{tmp_res_auth}")
+
+                            if (len(current_data) != 0) and current_data != "{}":
                                 step_result = "FAIL"
                                 add_err = 1
                                 combined_error_parts.append(f"[검증 {retry_attempt + 1}회차] [None Request] 데이터가 있으면 안 됩니다.")
-                            elif (len(data) == 0) or data == "{}":
+                            elif (len(current_data) == 0) or current_data == "{}":
                                 step_result = "PASS"
                                 add_pass = 1
 
                         else:
-                            # 입력 데이터 수집 (첫 번째 검증에서만)
+                            # 매 시도마다 입력 데이터 수집
+                            tmp_res_auth = json.dumps(current_data, indent=4, ensure_ascii=False)
                             if retry_attempt == 0:
-                                tmp_res_auth = json.dumps(data, indent=4, ensure_ascii=False)
-                                combined_data_parts.append(tmp_res_auth)
+                                combined_data_parts.append(f"[시도 {retry_attempt + 1}회차]\n{tmp_res_auth}")
+                            else:
+                                combined_data_parts.append(f"\n[시도 {retry_attempt + 1}회차]\n{tmp_res_auth}")
                         
+                            # 매 시도마다 실제 검증 수행
                             val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.Server.inSchema[self.cnt],
-                                                                                    data, self.flag_opt)
+                                                                                    current_data, self.flag_opt)
                             add_pass += key_psss_cnt
                             add_err += key_error_cnt
                         
@@ -412,7 +439,7 @@ class MyApp(QWidget):
                             
                             # 개별 프로토콜 설정에 따른 처리
                             if current_protocol == "LongPolling" and "Realtime" in str(self.Server.message[self.cnt]):
-                                if "Webhook".lower() in str(data).lower():
+                                if "Webhook".lower() in str(current_data).lower():
                                     try:
                                         # 방어적으로 Webhook URL이 잘못된 경우 기본값을 넣어줌
                                         webhook_json_path = resource_path(
@@ -437,10 +464,9 @@ class MyApp(QWidget):
                                             if webhook_url in [None, '', 'desc', 'none', 'None']:
                                                 pass  # Webhook 검증 스킵
                                             else:
-                                            # Webhook 데이터 수집 (첫 번째 검증에서만)
-                                                if retry_attempt == 0:
-                                                    tmp_webhook_data = json.dumps(webhook_data, indent=4, ensure_ascii=False)
-                                                    combined_data_parts.append("\n--- Webhook ---\n" + tmp_webhook_data)
+                                            # Webhook 데이터 수집 (매 시도마다)
+                                                tmp_webhook_data = json.dumps(webhook_data, indent=4, ensure_ascii=False)
+                                                combined_data_parts.append(f"\n--- Webhook (시도 {retry_attempt + 1}회차) ---\n{tmp_webhook_data}")
                                                 
                                                 # 매번 Webhook 검증 수행
                                                 webhook_val_result, webhook_val_text, webhook_key_psss_cnt, webhook_key_error_cnt = json_check_(
@@ -488,9 +514,8 @@ class MyApp(QWidget):
                     # 테이블 업데이트
                     self.update_table_row_with_retries(self.cnt, final_result, total_pass_count, total_error_count, tmp_res_auth, error_text, current_retries)
 
-                    # 모니터링 창에 결과 표시
-                    self.valResult.append(message_name)
-                    self.valResult.append(f"\n검증 횟수: {current_retries}")
+                    # 모니터링 창에 최종 결과 표시
+                    self.valResult.append(f"\n✅ 부하테스트 완료: {current_retries}회 검증 완료")
                     self.valResult.append(f"프로토콜: {current_protocol}")
                     self.valResult.append("\n" + data_text)
                     self.valResult.append(final_result)
@@ -542,7 +567,7 @@ class MyApp(QWidget):
                 if self.flag_opt:
                     add_err += tmp_fields_opt_cnt
                 
-                current_retries = CONSTANTS.num_retries[self.cnt]
+                current_retries = CONSTANTS.num_retries[self.cnt] if self.cnt < len(CONSTANTS.num_retries) else 1
                 self.update_table_row_with_retries(self.cnt, "FAIL", 0, add_err, "", "Message Missing!", current_retries)
                 
                 self.cnt += 1
@@ -573,8 +598,6 @@ class MyApp(QWidget):
             self.sbtn.setEnabled(True)
             self.stop_btn.setDisabled(True)
 
-        time.sleep(0.05)
-
     def update_score_display(self):
         """평가 점수 디스플레이를 업데이트"""
         total_fields = self.total_pass_cnt + self.total_error_cnt
@@ -591,6 +614,9 @@ class MyApp(QWidget):
         if result_ == "PASS":
             msg = auth_ + "\n\n" + "Result: " + text_ +"\n"
             img = self.img_pass
+        elif result_ == "진행중":
+            msg = auth_ + "\n\n" + "Status: " + text_ +"\n"
+            img = self.img_none  # 진행중일 때는 검은색 아이콘
         else:
             msg = auth_ + "\n\n" + "Result: " + result_ + "\nResult details:\n" + text_ +"\n"
             img = self.img_fail
@@ -1058,7 +1084,7 @@ class MyApp(QWidget):
 
         self.server_th = server_th(handler_class=self.Server, address=address_ip, port=address_port)
         self.server_th.start()
-        self.tick_timer.start()
+        self.tick_timer.start(1000)  # 시스템쪽과 동일한 1초 간격
 
     def stop_btn_clicked(self):
         self.tick_timer.stop()
