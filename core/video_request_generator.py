@@ -124,15 +124,29 @@ class VideoRequestGenerator:
         specification = data.get("specification", {})
         steps = specification.get("steps", [])
 
+        # WebHook 파일인지 확인
+        is_webhook = "WebHook" in json_path
+
         # 파일 내용 생성
         content = "# 자동 생성된 VideoRequest 파일\n"
-        content += f"# JSON 데이터를 기반으로 생성되었습니다. ({file_type} 모드)\n\n"
+        content += f"# {file_type} 모드\n\n"
 
         # 각 step별로 데이터 생성
         data_names = []
         endpoint_names = []
+        webhook_data = []
 
         for step in steps:
+            step_id = step.get("id", "")
+            api = step.get("api", {})
+            endpoint = api.get("endpoint", "")
+            settings = api.get("settings", {})
+            trans_protocol = settings.get("transProtocol", {})
+
+            # 콜백 스텝 (endpoint가 없고 urlKey만 있는 스텝)은 건너뛰기
+            if not endpoint and api.get("urlKey"):
+                continue
+
             data_info = self.extract_endpoint_data(step, file_type)
             data_name = data_info["name"]
             data_content = data_info["content"]
@@ -147,28 +161,64 @@ class VideoRequestGenerator:
 
             # 리스트를 위해 이름 저장
             data_names.append(data_name)
+
+            # WebHook 모드이고 transProtocol.mode가 "WebHook"인 경우
+            if is_webhook and trans_protocol.get("mode") == "WebHook":
+                # 해당 스텝과 쌍을 이루는 콜백 스텝 찾기
+                callback_step_id = f"{step_id}-1"
+                callback_step = None
+
+                for s in steps:
+                    if s.get("id") == callback_step_id:
+                        callback_step = s
+                        break
+
+                if callback_step:
+                    webhook_data_info = self._generate_webhook_data(callback_step, endpoint_name, file_type)
+                    if webhook_data_info:
+                        webhook_data.append(webhook_data_info)
             endpoint_names.append(endpoint_name)
+
+        # WebHook 전용 데이터들 추가
+        webhook_data_names = []
+        for webhook_info in webhook_data:
+            content += webhook_info + "\n"
+            # WebHook 데이터 이름 추출
+            lines = webhook_info.strip().split('\n')
+            for line in lines:
+                if ' = {' in line or ' = [' in line:
+                    data_name = line.split(' = ')[0].strip()
+                    webhook_data_names.append(data_name)
+                    break
 
         # 메시지 리스트 생성 (steps 순서대로)
         if file_type == "request":
             # Request 파일: responseData로 _out_data 생성했으므로 videoOutMessage
-            content += "# steps 순서대로 출력 메시지 리스트 생성\n"
+            content += "# steps 순서대로 출력 메시지 생성\n"
             content += "videoOutMessage = [\n"
         else:  # response
             # Response 파일: requestData로 _in_data 생성했으므로 videoInMessage
-            content += "# steps 순서대로 입력 메시지 리스트 생성\n"
+            content += "# steps 순서대로 입력 메시지 생성\n"
             content += "videoInMessage = [\n"
 
         for name in data_names:
             content += f"    {name},\n"
         content += "]\n\n"
 
-        # videoMessages 리스트 생성 (endpoint 이름들)
-        content += "# API endpoint 이름 리스트\n"
+        # videoMessages 리스트 생성 (endpoint)
+        content += "# API endpoint\n"
         content += "videoMessages = [\n"
         for endpoint in endpoint_names:
             content += f'    "{endpoint}",\n'
         content += "]\n"
+
+        # WebHook 데이터 리스트 생성 (WebHook)
+        if is_webhook and webhook_data_names:
+            content += "\n# WebHook\n"
+            content += "videoWebhookData = [\n"
+            for name in webhook_data_names:
+                content += f"    {name},\n"
+            content += "]\n"
 
         # 출력 디렉토리 생성
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -178,6 +228,44 @@ class VideoRequestGenerator:
             f.write(content)
 
         return output_path
+
+    def _generate_webhook_data(self, callback_step: Dict, endpoint_name: str, file_type: str) -> str:
+        """
+        WebHook 콜백 데이터를 생성합니다.
+
+        Args:
+            callback_step: 콜백 스텝 정보
+            endpoint_name: 앞 스텝의 엔드포인트 이름 (RealtimeVideoEventInfos)
+            file_type: "request" 또는 "response"
+
+        Returns:
+            WebHook 데이터 코드 문자열
+        """
+        callback_api = callback_step.get("api", {})
+
+        # file_type에 따라 데이터 소스와 suffix 결정
+        if file_type == "request":
+            # Request 모드: requestData 사용, _in_data 생성
+            data_source_key = "requestData"
+            suffix = "_in_data"
+        else:  # response
+            # Response 모드: responseData 사용, _out_data 생성
+            data_source_key = "responseData"
+            suffix = "_out_data"
+
+        data_source = callback_api.get(data_source_key, {})
+        if not data_source:
+            return ""
+
+        # 데이터 변수명 생성 (앞 스텝의 endpoint명 사용)
+        data_name = f"{endpoint_name}{suffix}"
+
+        # 주석과 데이터 변수 생성
+        result = f"# WebHook {endpoint_name}\n"
+        formatted_content = self.format_data_content(data_source)
+        result += f"{data_name} = {formatted_content}\n"
+
+        return result
 
 
 def generate_video_request_file(json_path: str, file_type: str, output_path: str = None) -> str:

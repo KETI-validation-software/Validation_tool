@@ -1,5 +1,5 @@
 # 자동 생성된 VideoRequest 파일
-# JSON 데이터를 기반으로 생성되었습니다. (request 모드)
+# request 모드
 
 # Authentication
 Authentication_out_data = {
@@ -241,7 +241,29 @@ StoredObjectAnalyticsInfos_out_data = {
 ]
 }
 
-# steps 순서대로 출력 메시지 리스트 생성
+# WebHook RealtimeVideoEventInfos
+RealtimeVideoEventInfos_in_data = {
+    "camList": [
+        {
+        "camID": "cam0001",
+        "eventUUID": "event01",
+        "eventName": "배회",
+        "startTime": 20220822163022123,
+        "endTime": 20220822163025123,
+        "eventDesc": "sfdfEFASDDDLKJFjdkdlfjde"
+    },
+        {
+        "camID": "cam0002",
+        "eventUUID": "event01",
+        "eventName": "배회",
+        "startTime": 20220822163022123,
+        "endTime": 20220822163025123,
+        "eventDesc": "dddddeeeeeAAFEDFiikjf"
+    }
+]
+}
+
+# steps 순서대로 출력 메시지 생성
 videoOutMessage = [
     Authentication_out_data,
     Capabilities_out_data,
@@ -254,7 +276,7 @@ videoOutMessage = [
     StoredObjectAnalyticsInfos_out_data,
 ]
 
-# API endpoint 이름 리스트
+# API endpoint
 videoMessages = [
     "Authentication",
     "Capabilities",
@@ -265,4 +287,9 @@ videoMessages = [
     "RealtimeVideoEventInfos",
     "StoredVideoEventInfos",
     "StoredObjectAnalyticsInfos",
+]
+
+# WebHook
+videoWebhookData = [
+    RealtimeVideoEventInfos_in_data,
 ]
