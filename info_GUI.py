@@ -743,7 +743,7 @@ class InfoWidget(QWidget):
             # 모드에 따른 파일 생성
             try:
                 if mode in ["request_longpolling", "request_webhook"]:
-                    # Request 모드 (일반/WebHook)
+                    # Request 모드 (LongPolling/WebHook)
                     schema_path = generate_schema_file(
                         exp_opt2_path,
                         schema_type="request",
@@ -759,6 +759,7 @@ class InfoWidget(QWidget):
                     )
                     print(f"videoRequest_request.py 생성 완료: {request_path}")
 
+                    # Response 모드 (LongPolling/WebHook)
                 elif mode in ["response_longpolling", "response_webhook"]:
                     schema_path = generate_schema_file(
                         exp_opt2_path,
@@ -807,22 +808,37 @@ class InfoWidget(QWidget):
         test_group_name = first.get("testGroup", {}).get("name", "")
         steps = exp_opt2["specification"].get("steps", [])
         self.api_test_table.setRowCount(0)
+
+        prev_endpoint = None #직전 step의 endpoint 저장
+
         for step in steps:
             api_info = step.get("api", {})
             r = self.api_test_table.rowCount()
             self.api_test_table.insertRow(r)
 
+            #시험 항목
             item0 = QTableWidgetItem(test_group_name)
             item0.setTextAlignment(Qt.AlignCenter)
             item0.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
             self.api_test_table.setItem(r, 0, item0)
 
+            #기능명
             item1 = QTableWidgetItem(api_info.get("name", ""))
             item1.setTextAlignment(Qt.AlignCenter)
             item1.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
             self.api_test_table.setItem(r, 1, item1)
+            
+            #API명
+            endpoint = api_info.get("endpoint")
+            if not endpoint and prev_endpoint:
+                #endpoint 없으면 직전 step endpoint 사용
+                endpoint = prev_endpoint
 
-            item2 = QTableWidgetItem(api_info.get("endpoint", ""))
+            item2 = QTableWidgetItem(endpoint or "")
             item2.setTextAlignment(Qt.AlignCenter)
             item2.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
             self.api_test_table.setItem(r, 2, item2)
+
+            #이번 step endpoint 저장 없으면 유지
+            if api_info.get("endpoint"):
+                prev_endpoint = api_info["endpoint"]
