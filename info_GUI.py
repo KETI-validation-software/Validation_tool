@@ -649,14 +649,7 @@ class InfoWidget(QWidget):
                     if checkbox and checkbox.isChecked():
                         return True
             
-            # 입력값 테이블의 QLineEdit에 값이 있는지 확인
-            for row in range(self.input_table.rowCount()):
-                widget = self.input_table.cellWidget(row, 2)
-                if isinstance(widget, QLineEdit) and widget.text().strip():
-                    return True
-            
             # 인증 방식이 Bearer Token으로 선택되어 있다면 초기화 필요
-            # (기본값은 Digest Auth이므로)
             if self.bearer_radio.isChecked():
                 return True
             
@@ -664,7 +657,6 @@ class InfoWidget(QWidget):
             
         except Exception as e:
             print(f"데이터 확인 중 오류: {e}")
-            # 오류가 발생하면 안전하게 초기화 진행
             return True
         
     def _perform_reset(self):
@@ -698,19 +690,16 @@ class InfoWidget(QWidget):
             # 주소 탐색 테이블 초기화 (테이블 자체를 비움)
             self.url_table.setRowCount(0)
             
-            # 입력값 테이블 초기화 (3번째 컬럼의 QLineEdit 위젯들)
-            for row in range(self.input_table.rowCount()):
-                widget = self.input_table.cellWidget(row, 2)
-                if isinstance(widget, QLineEdit):
-                    widget.clear()
-            
             # === 버튼 상태 초기화 ===
-            
+
+            # 현재 모드 초기화
+            self.current_mode = None
+
             # update_auth_fields() 호출하여 필드 상태 초기화
             self.update_auth_fields()
 
             # 버튼 상태 업데이트
-            self.update_start_button_state()
+            self.check_start_button_state()
             
             print("모든 필드 초기화 완료")
             QMessageBox.information(self, "초기화 완료", "모든 입력값이 초기화되었습니다.")
