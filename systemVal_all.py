@@ -333,7 +333,7 @@ class MyApp(QWidget):
                                          auth=self.auth_type, verify=False, timeout=time_out)
 
                 if "Realtime" in path:
-                    time.sleep(0.1)
+                    time.sleep(0.1)  # Realtime 처리를 위한 짧은 대기
                     try:
                         json_data_dict = json.loads(json_data.decode('utf-8'))
                         trans_protocol = json_data_dict.get("transProtocol", {})
@@ -446,6 +446,7 @@ class MyApp(QWidget):
                 self.cnt < len(self.message) and 
                 self.cnt < len(CONSTANTS.num_retries) and
                 self.current_retry < CONSTANTS.num_retries[self.cnt]):
+                
                 self.message_in_cnt += 1
                 self.time_pre = time.time()
 
@@ -457,11 +458,14 @@ class MyApp(QWidget):
                 if self.cnt == 0 and self.current_retry == 0:
                     self.tmp_msg_append_flag = True
 
-                # 즉시 POST 요청 전송
+                # 시스템이 플랫폼에 요청 전송
                 current_timeout = CONSTANTS.time_out[self.cnt] / 1000  # 개별 timeout 사용 (ms를 초로 변환)
                 path = self.pathUrl + "/" + self.message[self.cnt]
                 inMessage = self.inMessage[self.cnt]
                 json_data = json.dumps(inMessage).encode('utf-8')
+
+                # 순서 확인용 로그
+                print(f"[SYSTEM] 플랫폼에 요청 전송: {self.message[self.cnt]} (시도 {self.current_retry + 1})")
 
                 t = threading.Thread(target=self.post, args=(path, json_data, current_timeout), daemon=True)
                 t.start()
@@ -513,16 +517,19 @@ class MyApp(QWidget):
                     # 다음 API로 이동
                     self.cnt += 1
                     self.current_retry = 0  # 재시도 카운터 리셋
+                    
+                    # 다음 API를 위한 누적 카운트 초기 설정 확인
+                    if hasattr(self, 'step_pass_counts') and self.cnt < len(self.step_pass_counts):
+                        self.step_pass_counts[self.cnt] = 0
+                        self.step_error_counts[self.cnt] = 0
+                        self.step_pass_flags[self.cnt] = 0
                 
                 self.message_in_cnt = 0
                 self.post_flag = False  
                 self.processing_response = False
 
-                # 재시도인 경우 더 긴 대기 시간 설정
-                if self.current_retry > 0:
-                    self.time_pre = time.time() + 3.0  # 재시도 시 3초 대기
-                else:
-                    self.time_pre = time.time() + 2.0  # 첫 시도 시 2초 대기
+                # 플랫폼과 동일한 대기 시간 설정
+                self.time_pre = time.time() + 2.0  # 플랫폼과 동일한 2초 대기
 
                 if self.cnt >= len(self.message):
                     self.tick_timer.stop()
@@ -583,8 +590,22 @@ class MyApp(QWidget):
 
                         # 이번 시도의 결과
                         final_result = val_result
-                        total_pass_count = key_psss_cnt
-                        total_error_count = key_error_cnt
+                        
+                        # 플랫폼과 동일한 누적 카운트 로직
+                        if not hasattr(self, 'step_pass_counts'):
+                            self.step_pass_counts = [0] * 9
+                            self.step_error_counts = [0] * 9
+                            self.step_pass_flags = [0] * 9  # PASS 횟수 카운트
+                        
+                        # 이번 시도 결과를 누적
+                        self.step_pass_counts[self.cnt] += key_psss_cnt
+                        self.step_error_counts[self.cnt] += key_error_cnt
+                        
+                        if final_result == "PASS":
+                            self.step_pass_flags[self.cnt] += 1
+                        
+                        total_pass_count = self.step_pass_counts[self.cnt]
+                        total_error_count = self.step_error_counts[self.cnt]
 
                         # (1) 스텝 버퍼 저장 - 재시도별로 누적
                         data_text = tmp_res_auth
@@ -595,18 +616,33 @@ class MyApp(QWidget):
                             # 첫 번째 시도인 경우 초기화
                             self.step_buffers[self.cnt]["data"] = f"[시도 {self.current_retry + 1}/{current_retries}]\n{data_text}"
                             self.step_buffers[self.cnt]["error"] = f"[시도 {self.current_retry + 1}/{current_retries}]\n{error_text}"
-                            self.step_buffers[self.cnt]["result"] = final_result
+                            # 최종 결과는 플랫폼처럼 모든 시도가 PASS일 때만 PASS
+                            self.step_buffers[self.cnt]["result"] = "PASS"  # 초기값
                         else:
                             # 재시도인 경우 누적
                             self.step_buffers[self.cnt]["data"] += f"\n\n[시도 {self.current_retry + 1}/{current_retries}]\n{data_text}"
                             self.step_buffers[self.cnt]["error"] += f"\n\n[시도 {self.current_retry + 1}/{current_retries}]\n{error_text}"
-                            if final_result == "FAIL":
-                                self.step_buffers[self.cnt]["result"] = "FAIL"  # 하나라도 실패하면 FAIL
                         
-                        # 테이블 업데이트 (누적된 재시도 횟수 반영)
+                        # 최종 결과 판정 (플랫폼과 동일한 로직)
+                        if self.current_retry + 1 >= current_retries:
+                            # 모든 재시도 완료 - 모든 시도가 PASS일 때만 PASS
+                            if self.step_pass_flags[self.cnt] >= current_retries:
+                                self.step_buffers[self.cnt]["result"] = "PASS"
+                            else:
+                                self.step_buffers[self.cnt]["result"] = "FAIL"
+                        
+                        # 진행 중 표시 (플랫폼과 동일하게)
                         message_name = "step " + str(self.cnt + 1) + ": " + self.message[self.cnt]
-                        self.update_table_row_with_retries(self.cnt, final_result, total_pass_count, total_error_count, 
-                                                         tmp_res_auth, error_text, self.current_retry + 1)
+                        if self.current_retry + 1 < current_retries:
+                            # 아직 재시도가 남아있으면 진행중으로 표시
+                            self.update_table_row_with_retries(self.cnt, "진행중", total_pass_count, total_error_count, 
+                                                             f"검증 진행중... ({self.current_retry + 1}/{current_retries})", 
+                                                             f"시도 {self.current_retry + 1}/{current_retries}", self.current_retry + 1)
+                        else:
+                            # 마지막 시도이면 최종 결과 표시
+                            final_buffer_result = self.step_buffers[self.cnt]["result"]
+                            self.update_table_row_with_retries(self.cnt, final_buffer_result, total_pass_count, total_error_count, 
+                                                             tmp_res_auth, error_text, current_retries)
 
                         self.valResult.append(f"\n검증 진행: {self.current_retry + 1}/{current_retries}회")
                         self.valResult.append(f"프로토콜: {current_protocol}")
@@ -639,10 +675,10 @@ class MyApp(QWidget):
                         self.post_flag = False 
                         self.processing_response = False 
                         
-                        # 재시도 여부에 따라 대기 시간 조정
+                        # 재시도 여부에 따라 대기 시간 조정 (플랫폼과 동기화)
                         if (self.cnt < len(CONSTANTS.num_retries) and 
                             self.current_retry < CONSTANTS.num_retries[self.cnt] - 1):
-                            self.time_pre = time.time() + 3.0  # 재시도 예정 시 3초 대기
+                            self.time_pre = time.time() + 2.0  # 재시도 예정 시 2초 대기 (플랫폼과 동일)
                         else:
                             self.time_pre = time.time() + 2.0  # 마지막 시도 후 2초 대기
                         self.message_in_cnt = 0
@@ -1129,12 +1165,18 @@ class MyApp(QWidget):
         self.realtime_flag = False
         self.tmp_msg_append_flag = False
         
+        # 플랫폼과 동일한 누적 카운트 초기화
+        self.step_pass_counts = [0] * 9
+        self.step_error_counts = [0] * 9
+        self.step_pass_flags = [0] * 9
+        
         # 점수 디스플레이 초기화
         self.update_score_display()
 
         # CONSTANTS.py에서 URL 가져오기
         self.pathUrl = CONSTANTS.url
         self.valResult.append("Start Validation...\n")
+        self.valResult.append("� 시스템이 플랫폼에 요청을 전송하여 응답을 검증합니다")
         self.webhook_cnt = 99
         # 타이머를 1초 간격으로 시작 (CONSTANTS timeout과 조화)
         self.tick_timer.start(1000)
@@ -1151,6 +1193,11 @@ class MyApp(QWidget):
         
         # 버퍼 초기화
         self.step_buffers = [{"data": "", "result": "", "error": ""} for _ in range(9)]
+        
+        # 누적 카운트 초기화
+        self.step_pass_counts = [0] * 9
+        self.step_error_counts = [0] * 9
+        self.step_pass_flags = [0] * 9
         
         self.valResult.clear()
         self.step1_msg = ""
