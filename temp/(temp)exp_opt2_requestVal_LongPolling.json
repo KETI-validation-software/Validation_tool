@@ -1,7 +1,7 @@
 {
   "specification": {
     "id": "spec-001",
-    "name": "영상보안 시스템(요청검증)",
+    "name": "영상보안 시스템 요청 메시지 검증 API 명세서",
     "version": "0.1",
     "steps": [
       {
@@ -253,11 +253,11 @@
                 "camURL": "rtsp://192.168.0.3:8000"
               }
             ]
-          }
-        },
-        "settings": {
+          },
+          "settings": {
           "connectTimeout": 5000,
           "numRetries": 2
+          }
         }
       },
       {

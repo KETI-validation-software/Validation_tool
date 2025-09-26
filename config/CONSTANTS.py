@@ -14,13 +14,16 @@ test_category = "사전시험"
 test_target = "통합시스템"
 test_range = "전체필드"
 auth_type = "Bearer Token"
+
 auth_info = "1234"
 admin_code = ""
 url = "https://10.252.219.95:8000"
 
+
 specs = [["spec-001_inSchema","spec-001_outData","spec001_messages","영상보안 시스템 검증(요청검증)"],
          ["spec-0011_inSchema","spec-0011_outData","spec0011_messages","보안용 센서 시스템 검증(요청검증"]]
 #test-opt
+# time_out = [5000,5000,8000,8000,8000,8000,5000,5000,8000]
 '''
 opt2의 메시지의 settings 내 정보 보고 작성, 메시지 순차별로
 trans_protocol : 메시지별 실시간 송수신 메시지 여부, None-실시간 아님, LongPolling, WebHook은 설정에 따라 동작 
@@ -28,9 +31,10 @@ time_out : 메시지별 timeout 설정 시간
 num_retries : 메시지별 메시지 검증 횟수
 '''
 
-trans_protocol = [None, None, None, None, None, None, 'WebHook', None, None, None]
-time_out = [5000, 5000, 5000, 5000, 30, 5000, 5000, 5000, 5000, 5000]
-num_retries = [1, 1, 3, 3, 3, 2, 1, 1, 1, 2]
+
+trans_protocol = [None, None, None, None, None, None, 'LongPolling', None, None]
+time_out = [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000]
+num_retries = [1, 1, 3, 3, 2, 2, 1, 1, 2]
 
 
 #etc
