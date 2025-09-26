@@ -241,30 +241,6 @@ StoredObjectAnalyticsInfos_out_data = {
 ]
 }
 
-
-# WebHook RealtimeVideoEventInfos
-WebHook_RealtimeVideoEventInfos_in_data = {
-    "camList": [
-        {
-        "camID": "cam0001",
-        "eventUUID": "event01",
-        "eventName": "배회",
-        "startTime": 20220822163022123,
-        "endTime": 20220822163025123,
-        "eventDesc": "sfdfEFASDDDLKJFjdkdlfjde"
-    },
-        {
-        "camID": "cam0002",
-        "eventUUID": "event01",
-        "eventName": "배회",
-        "startTime": 20220822163022123,
-        "endTime": 20220822163025123,
-        "eventDesc": "dddddeeeeeAAFEDFiikjf"
-    }
-]
-}
-
-
 # steps 순서대로 출력 메시지 생성
 videoOutMessage = [
     Authentication_out_data,
@@ -290,10 +266,3 @@ videoMessages = [
     "StoredVideoEventInfos",
     "StoredObjectAnalyticsInfos",
 ]
-
-
-# WebHook
-videoWebhookData = [
-    WebHook_RealtimeVideoEventInfos_in_data,
-]
-
