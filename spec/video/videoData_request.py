@@ -23,7 +23,7 @@ Capabilities_out_data = {
     "transportSupport": [
         {
         "transProtocolType": "REST_API",
-        "transProtocolDesc": "desc"
+        "transProtocolDesc": "trans protocol description"
     }
 ]
 }
@@ -87,30 +87,7 @@ StoredVideoInfos_out_data = {
 }
 
 # StreamURLs
-StreamURLs_out_data = {
-    "code": "200",
-    "message": "성공",
-    "camList": [
-        {
-        "camID": "cam001",
-        "accessID": "conn001",
-        "accessPW": "1234",
-        "camURL": "rtsp://192.168.0.1:8000"
-    },
-        {
-        "camID": "cam002",
-        "accessID": "conn002",
-        "accessPW": "1234",
-        "camURL": "rtsp://192.168.0.2:8000"
-    },
-        {
-        "camID": "cam003",
-        "accessID": "conn003",
-        "accessPW": "1234",
-        "camURL": "rtsp://192.168.0.3:8000"
-    }
-]
-}
+StreamURLs_out_data = {}
 
 # ReplayURL
 ReplayURL_out_data = {
@@ -146,24 +123,8 @@ ReplayURL_out_data = {
 
 # RealtimeVideoEventInfos
 RealtimeVideoEventInfos_out_data = {
-    "camList": [
-        {
-        "camID": "cam0001",
-        "eventUUID": "event01",
-        "eventName": "배회",
-        "startTime": 20220822163022123,
-        "endTime": 20220822163025123,
-        "eventDesc": "sfdfEFASDDDLKJFjdkdlfjde"
-    },
-        {
-        "camID": "cam0002",
-        "eventUUID": "event01",
-        "eventName": "배회",
-        "startTime": 20220822163022123,
-        "endTime": 20220822163025123,
-        "eventDesc": "dddddeeeeeAAFEDFiikjf"
-    }
-]
+    "code": 200,
+    "message": "성공"
 }
 
 # StoredVideoEventInfos
