@@ -542,7 +542,7 @@ class InfoWidget(QWidget):
             for step in steps:
                 # 각 step의 api.settings에서 값 추출
                 settings = step.get("api", {}).get("settings", {})
-                time_out.append(settings.get("connectTimeout", 30))  # 기본값 30
+                time_out.append(settings.get("connectTimeout", 8000))  # 기본값 8000
                 num_retries.append(settings.get("numRetries", 3))    # 기본값 3
 
                 # transProtocol.mode 추출
