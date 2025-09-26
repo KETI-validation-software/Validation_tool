@@ -14,9 +14,11 @@ test_category = "사전시험"
 test_target = "통합시스템"
 test_range = "전체필드"
 auth_type = "Digest Auth"
+
 auth_info = "user001,pass001"
 admin_code = ""
 url = "https://127.0.0.1:8000"
+
 
 specs = [["spec-001_inSchema","spec-001_outData","spec001_messages","영상보안 시스템 검증(요청검증)"],
          ["spec-0011_inSchema","spec-0011_outData","spec0011_messages","보안용 센서 시스템 검증(요청검증"]]
@@ -27,6 +29,7 @@ trans_protocol : 메시지별 실시간 송수신 메시지 여부, None-실시�
 time_out : 메시지별 timeout 설정 시간
 num_retries : 메시지별 메시지 검증 횟수
 '''
+
 
 trans_protocol = [None,None,None,None,None,None,"LongPolling",None,None] #"LongPolling" #WebHook
 time_out = [5000,5000,8000,8000,8000,8000,5000,5000,8000]   # time_out = [5000,5000,8000,8000,8000,8000,5000,5000,8000]
