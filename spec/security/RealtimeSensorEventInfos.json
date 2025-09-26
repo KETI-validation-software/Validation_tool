@@ -1,1 +1,0 @@
-{"sensorDeviceList": [{"sensorDeviceID": "iot0001"}, {"sensorDeviceID": "iot0002"}], "transProtocol": {"transProtocolType": "HTTP_API", "transProtocolDesc": "description"}, "duration": 200, "eventFilter": "화재", "startTime": 20220822163022123}
