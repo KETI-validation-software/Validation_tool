@@ -82,6 +82,9 @@ RealtimeVideoEventInfos_in_data = {
     "startTime": 20220822163022123
 }
 
+# 
+_in_data = {}
+
 # StoredVideoEventInfos
 StoredVideoEventInfos_in_data = {
     "code": "200",
@@ -153,6 +156,7 @@ videoInMessage = [
     StreamURLs_in_data,
     ReplayURL_in_data,
     RealtimeVideoEventInfos_in_data,
+    _in_data,
     StoredVideoEventInfos_in_data,
     StoredObjectAnalyticsInfos_in_data,
 ]
@@ -166,6 +170,7 @@ videoMessages = [
     "StreamURLs",
     "ReplayURL",
     "RealtimeVideoEventInfos",
+    "",
     "StoredVideoEventInfos",
     "StoredObjectAnalyticsInfos",
 ]
