@@ -258,7 +258,7 @@ class VideoRequestGenerator:
             return ""
 
         # 데이터 변수명 생성 (앞 스텝의 endpoint명 사용)
-        data_name = f"{endpoint_name}{suffix}"
+        data_name = f"WebHook_{endpoint_name}{suffix}"
 
         # 주석과 데이터 변수 생성
         result = f"# WebHook {endpoint_name}\n"
