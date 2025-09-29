@@ -128,8 +128,7 @@ class VideoRequestGenerator:
         is_webhook = "WebHook" in json_path
 
         # 파일 내용 생성
-        content = "# 자동 생성된 VideoRequest 파일\n"
-        content += f"# {file_type} 모드\n\n"
+        content = f"# {file_type} 모드\n\n"
 
         # 각 step별로 데이터 생성
         data_names = []
