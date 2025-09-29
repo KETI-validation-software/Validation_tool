@@ -73,8 +73,7 @@ RealtimeVideoEventInfos_in_data = {
     }
 ],
     "transProtocol": {
-    "transProtocolType": "WebHook",
-    "transProtocolDesc": "https://127.0.0.1:8090/RealtimeVideoEventInfos"
+    "transProtocolType": "LongPolling"
 },
     "duration": 10,
     "eventFilter": "배회",
