@@ -100,70 +100,78 @@ class Server(BaseHTTPRequestHandler):
         if self.auth_type == "None":
             auth_pass = True
         else:
-            try:
-                if self.path == "/" + self.message[0]:
-                    auth_pass = True
-                elif self.auth_type == "B":
-                    print(f"[DEBUG][SERVER] Checking Bearer, auth={auth}")
-                    if auth:
-                        auth_parts = auth.split(" ")
-                        if len(auth_parts) > 1 and auth_parts[0] == 'Bearer':
-                            token = auth_parts[1].replace('"', "").strip()
-                            stored_token = None
-                            if isinstance(self.auth_Info, list):
-                                if self.auth_Info:
-                                    stored_token = self.auth_Info[0]
-                            else:
-                                stored_token = self.auth_Info
-
-                            # 디버그 로그 추가: Bearer 토큰 비교 직전
-                            print(f"[DEBUG][SERVER] Bearer token in header: {token}, stored_token: {stored_token}")
-
-                            if stored_token is not None and token == str(stored_token).strip():
-                                auth_pass = True
-                elif self.auth_type == "D":
-                    import hashlib
-                    try:
-                        if auth and auth.startswith('Digest '):
-                            digest_header = auth[len('Digest '):]
-                            digest_items = {}
-                            for item in digest_header.split(','):
-                                if '=' in item:
-                                    k, v = item.strip().split('=', 1)
-                                    digest_items[k.strip()] = v.strip().strip('"')
-                            # 필수 파라미터 추출
-                            username = digest_items.get('username')
-                            realm = digest_items.get('realm')
-                            nonce = digest_items.get('nonce')
-                            uri = digest_items.get('uri')
-                            qop = digest_items.get('qop')
-                            nc = digest_items.get('nc')
-                            cnonce = digest_items.get('cnonce')
-                            response = digest_items.get('response')
-                            method = self.command  # 'POST'
-                            password = self.auth_Info[1] if hasattr(self, 'auth_Info') and self.auth_Info else ''
-                            # RFC 7616 방식으로 해시 계산
-                            a1 = f"{username}:{realm}:{password}"
-                            ha1 = hashlib.md5(a1.encode()).hexdigest()
-                            a2 = f"{method}:{uri}"
-                            ha2 = hashlib.md5(a2.encode()).hexdigest()
-                            if qop and cnonce and nc:
-                                expected_response = hashlib.md5(f"{ha1}:{nonce}:{nc}:{cnonce}:{qop}:{ha2}".encode()).hexdigest()
-                            else:
-                                expected_response = hashlib.md5(f"{ha1}:{nonce}:{ha2}".encode()).hexdigest()
-                            # 디버그 로그
-                            print(f"[DEBUG][SERVER][Digest] client_response={response}, expected_response={expected_response}")
-                            if response and expected_response and response == expected_response:
-                                auth_pass = True
-                    except Exception as e:
-                        print(f"[DEBUG][SERVER][Digest] Exception: {e}")
+            # Digest Auth
+            if self.auth_type == "D":
+                import hashlib
+                # 1) Authorization 없으면 → 401 챌린지
+                if not auth:
+                    self._set_digest_headers()
+                    return
+                # 2) 스킴 확인
+                parts = auth.split(" ", 1)
+                if parts[0] != "Digest":
+                    self._set_digest_headers()
+                    return
+                # 3) response 추출 실패/불일치 → 401 챌린지
+                try:
+                    digest_header = parts[1]
+                    digest_items = {}
+                    for item in digest_header.split(','):
+                        if '=' in item:
+                            k, v = item.strip().split('=', 1)
+                            digest_items[k.strip()] = v.strip().strip('"')
+                    # 필수 파라미터 추출
+                    username = digest_items.get('username')
+                    realm = digest_items.get('realm')
+                    nonce = digest_items.get('nonce')
+                    uri = digest_items.get('uri')
+                    qop = digest_items.get('qop')
+                    nc = digest_items.get('nc')
+                    cnonce = digest_items.get('cnonce')
+                    response = digest_items.get('response')
+                    method = self.command  # 'POST'
+                    password = self.auth_Info[1] if hasattr(self, 'auth_Info') and self.auth_Info else ''
+                    # RFC 7616 방식으로 해시 계산
+                    a1 = f"{username}:{realm}:{password}"
+                    ha1 = hashlib.md5(a1.encode()).hexdigest()
+                    a2 = f"{method}:{uri}"
+                    ha2 = hashlib.md5(a2.encode()).hexdigest()
+                    if qop and cnonce and nc:
+                        expected_response = hashlib.md5(f"{ha1}:{nonce}:{nc}:{cnonce}:{qop}:{ha2}".encode()).hexdigest()
+                    else:
+                        expected_response = hashlib.md5(f"{ha1}:{nonce}:{ha2}".encode()).hexdigest()
+                    # 디버그 로그
+                    print(f"[DEBUG][SERVER][Digest] client_response={response}, expected_response={expected_response}")
+                    if not response or not expected_response or response != expected_response:
                         self._set_digest_headers()
                         return
-            except Exception as err:
-                # err_msg = traceback.format_exc()
-                print(err)
-                #print(traceback.format_exc())
-                return
+                    auth_pass = True
+                except Exception as e:
+                    print(f"[DEBUG][SERVER][Digest] Exception: {e}")
+                    self._set_digest_headers()
+                    return
+            # Bearer Auth
+            elif self.auth_type == "B":
+                print(f"[DEBUG][SERVER] Checking Bearer, auth={auth}")
+                if auth:
+                    auth_parts = auth.split(" ")
+                    if len(auth_parts) > 1 and auth_parts[0] == 'Bearer':
+                        token = auth_parts[1].replace('"', "").strip()
+                        stored_token = None
+                        if isinstance(self.auth_Info, list):
+                            if self.auth_Info:
+                                stored_token = self.auth_Info[0]
+                        else:
+                            stored_token = self.auth_Info
+
+                        # 디버그 로그 추가: Bearer 토큰 비교 직전
+                        print(f"[DEBUG][SERVER] Bearer token in header: {token}, stored_token: {stored_token}")
+
+                        if stored_token is not None and token == str(stored_token).strip():
+                            auth_pass = True
+            # 기타: 특정 path 우회
+            elif self.path == "/" + self.message[0]:
+                auth_pass = True
         post_data = '{}'
         try:
             content_len = int(self.headers.get('Content-Length'))

@@ -380,10 +380,16 @@ class MyApp(QWidget):
 
     def get_webhook_result(self):
         tmp_webhook_res = json.dumps(self.webhook_res, indent=4, ensure_ascii=False)
-        message_name = "step " + str(self.webhook_cnt + 1) + ": " + self.message[self.webhook_cnt]
+        if self.webhook_cnt < len(self.message):
+            message_name = "step " + str(self.webhook_cnt + 1) + ": " + self.message[self.webhook_cnt]
+        else:
+            message_name = f"step {self.webhook_cnt + 1}: (index out of range)"
 
-        val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.webhookSchema[self.webhook_cnt],
-                                                                        self.webhook_res, self.flag_opt)
+        if self.webhook_cnt < len(self.webhookSchema):
+            val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.webhookSchema[self.webhook_cnt],
+                                                                            self.webhook_res, self.flag_opt)
+        else:
+            val_result, val_text, key_psss_cnt, key_error_cnt = "FAIL", "webhookSchema index error", 0, 0
 
         self.valResult.append(message_name)
         self.valResult.append("\n" + tmp_webhook_res)
@@ -409,7 +415,10 @@ class MyApp(QWidget):
         # 새로운 테이블 업데이트 함수 사용 (개별 검증 횟수 적용)
         if self.webhook_cnt < self.tableWidget.rowCount():
             total_fields = key_psss_cnt + key_error_cnt
-            current_retries = CONSTANTS.num_retries[self.webhook_cnt]
+            if self.webhook_cnt < len(CONSTANTS.num_retries):
+                current_retries = CONSTANTS.num_retries[self.webhook_cnt]
+            else:
+                current_retries = 1
             self.update_table_row_with_retries(self.webhook_cnt, val_result, key_psss_cnt, key_error_cnt, 
                                 tmp_webhook_res, self._to_detail_text(val_text), current_retries)
 
@@ -428,6 +437,13 @@ class MyApp(QWidget):
 
         try:
             time_interval = 0
+
+            # cnt가 리스트 길이 이상이면 종료 처리 (무한 반복 방지)
+            if self.cnt >= len(self.message) or self.cnt >= len(CONSTANTS.time_out):
+                self.tick_timer.stop()
+                self.valResult.append("검증 절차가 완료되었습니다.")
+                self.cnt = 0
+                return
             # 플랫폼과 동일하게 time_pre/cnt_pre 조건 적용
             if self.time_pre == 0 or self.cnt != self.cnt_pre:
                 self.time_pre = time.time()
