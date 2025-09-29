@@ -29,7 +29,7 @@ class Server(BaseHTTPRequestHandler):
     outSchema = None
     system = ""
     auth_type = "D"
-    auth_Info = ['admin', '1234', 'user', 'abcd1234', 'SHA-256', None]
+    auth_Info = ['admin', '1234', 'user', 'abcd1234', 'SHA-256', None]  # 저장된 상태로 main 입력하지 않으면 digest auth 인증 x
     digest_res = ""
     transProtocolInput = ""
 
