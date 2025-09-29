@@ -12,6 +12,8 @@ from core.functions import resource_path
 from core.opt_loader import OptLoader
 from core.schema_generator import generate_schema_file
 from core.video_request_generator import generate_video_request_file
+import config.CONSTANTS as CONSTANTS
+import importlib
 
 class NetworkScanWorker(QObject):
     scan_completed = pyqtSignal(list)
@@ -424,6 +426,7 @@ class InfoWidget(QWidget):
 
     def start_test(self):
         """시험 시작 - CONSTANTS.py 업데이트 후 검증 소프트웨어 실행"""
+        importlib.reload(CONSTANTS)  # CONSTANTS 모듈을 다시 로드하여 최신 설정 반영
         try:
             # 모드 선택 확인
             if not self.current_mode:
