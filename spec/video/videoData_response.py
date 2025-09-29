@@ -74,16 +74,12 @@ RealtimeVideoEventInfos_in_data = {
     }
 ],
     "transProtocol": {
-    "transProtocolType": "WebHook",
-    "transProtocolDesc": "https://127.0.0.1:8090/RealtimeVideoEventInfos"
+    "transProtocolType": "LongPolling"
 },
     "duration": 10,
     "eventFilter": "배회",
     "startTime": 20220822163022123
 }
-
-# 
-_in_data = {}
 
 # StoredVideoEventInfos
 StoredVideoEventInfos_in_data = {
@@ -141,12 +137,6 @@ StoredObjectAnalyticsInfos_in_data = {
 ]
 }
 
-# WebHook RealtimeVideoEventInfos
-RealtimeVideoEventInfos_out_data = {
-    "code": 200,
-    "message": "성공"
-}
-
 # steps 순서대로 입력 메시지 생성
 videoInMessage = [
     Authentication_in_data,
@@ -171,9 +161,4 @@ videoMessages = [
     "RealtimeVideoEventInfos",
     "StoredVideoEventInfos",
     "StoredObjectAnalyticsInfos",
-]
-
-# WebHook
-videoWebhookData = [
-    RealtimeVideoEventInfos_out_data,
 ]
