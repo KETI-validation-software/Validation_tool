@@ -26,6 +26,7 @@ from http.server import HTTPServer
 import json
 import traceback
 import warnings
+import importlib
 warnings.filterwarnings('ignore')
 
 
@@ -161,6 +162,7 @@ class CustomDialog(QDialog):
 
 class MyApp(QWidget):
     def __init__(self, embedded=False):
+        importlib.reload(CONSTANTS)  # CONSTANTS 모듈을 다시 로드하여 최신 설정 반영
         super().__init__()
         self.embedded = embedded
         self.radio_check_flag = "video"  # 영상보안 시스템으로 고정

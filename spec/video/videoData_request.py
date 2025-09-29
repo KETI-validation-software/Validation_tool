@@ -224,6 +224,7 @@ StoredObjectAnalyticsInfos_out_data = {
 ]
 }
 
+
 # WebHook RealtimeVideoEventInfos
 WebHook_RealtimeVideoEventInfos_in_data = {
     "camList": [
@@ -245,6 +246,7 @@ WebHook_RealtimeVideoEventInfos_in_data = {
     }
 ]
 }
+
 
 # steps 순서대로 출력 메시지 생성
 videoOutMessage = [
@@ -276,3 +278,4 @@ videoMessages = [
 videoWebhookData = [
     WebHook_RealtimeVideoEventInfos_in_data,
 ]
+
