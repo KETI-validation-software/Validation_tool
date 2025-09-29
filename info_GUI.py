@@ -3,7 +3,9 @@ from PyQt5.QtWidgets import (
     QPushButton, QMessageBox, QTableWidget, QHeaderView, QAbstractItemView, QTableWidgetItem, QCheckBox,
     QStackedWidget, QRadioButton
 )
+
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
+
 
 # 분리된 모듈들 import
 from network_scanner import NetworkScanWorker
@@ -604,6 +606,7 @@ class InfoWidget(QWidget):
 
     def start_test(self):
         """시험 시작 - CONSTANTS.py 업데이트 후 검증 소프트웨어 실행"""
+        importlib.reload(CONSTANTS)  # CONSTANTS 모듈을 다시 로드하여 최신 설정 반영
         try:
             # 모드 선택 확인
             if not self.current_mode:
@@ -660,6 +663,7 @@ class InfoWidget(QWidget):
         except Exception as e:
             print(f"버튼 상태 체크 실패: {e}")
             self.start_btn.setEnabled(False)
+
 
     def reset_all_fields(self):
         """모든 필드 초기화"""
