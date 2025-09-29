@@ -131,15 +131,17 @@ class Server(BaseHTTPRequestHandler):
                     response = digest_items.get('response')
                     method = self.command  # 'POST'
                     password = self.auth_Info[1] if hasattr(self, 'auth_Info') and self.auth_Info else ''
-                    # RFC 7616 방식으로 해시 계산
+                    # SHA-256로 해시 계산 (RFC 7616, qop 없이)
+                    def sha256_hex(s):
+                        return hashlib.sha256(s.encode('utf-8')).hexdigest()
                     a1 = f"{username}:{realm}:{password}"
-                    ha1 = hashlib.md5(a1.encode()).hexdigest()
+                    ha1 = sha256_hex(a1)
                     a2 = f"{method}:{uri}"
-                    ha2 = hashlib.md5(a2.encode()).hexdigest()
+                    ha2 = sha256_hex(a2)
                     if qop and cnonce and nc:
-                        expected_response = hashlib.md5(f"{ha1}:{nonce}:{nc}:{cnonce}:{qop}:{ha2}".encode()).hexdigest()
+                        expected_response = sha256_hex(f"{ha1}:{nonce}:{nc}:{cnonce}:{qop}:{ha2}")
                     else:
-                        expected_response = hashlib.md5(f"{ha1}:{nonce}:{ha2}".encode()).hexdigest()
+                        expected_response = sha256_hex(f"{ha1}:{nonce}:{ha2}")
                     # 디버그 로그
                     print(f"[DEBUG][SERVER][Digest] client_response={response}, expected_response={expected_response}")
                     if not response or not expected_response or response != expected_response:

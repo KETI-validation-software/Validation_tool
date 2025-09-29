@@ -161,6 +161,16 @@ class CustomDialog(QDialog):  # popup window for validation result
 
 
 class MyApp(QWidget):
+
+    def _append_text(self, obj):
+        import json
+        try:
+            if isinstance(obj, (dict, list)):
+                self.valResult.append(json.dumps(obj, ensure_ascii=False, indent=2))
+            else:
+                self.valResult.append(str(obj))
+        except Exception as e:
+            self.valResult.append(f"[append_error] {e}")
     def handle_authentication_response(self, res_data):
         """Handles the response for the Authentication step, updates token if present."""
         # Fix: Use 'accessToken' key, not 'token'
@@ -317,57 +327,55 @@ class MyApp(QWidget):
 
     def post(self, path, json_data, time_out):
         self.res = None
+        # 인증 방식(r2)에 따라 auth 인자 결정 (토큰 유무로 분기 X)
+        auth = None
         if self.r2 == "B":
-            self.auth_type = BearerAuth(self.token)
+            auth = BearerAuth(self.token) if self.token else None
         elif self.r2 == "D":
-            self.auth_type = HTTPDigestAuth(self.digestInfo[0], self.digestInfo[1])
-        elif self.r2 == "None":
-            self.auth_type = False
+            auth = HTTPDigestAuth(self.digestInfo[0], self.digestInfo[1])
+        # self.r2 == "None"이면 그대로 None
+
         try:
-            if self.token is None:
-                print(f"[DEBUG] [post] No token, sending request without Authorization header. path={path}")
-                self.res = requests.post(path,
-                                         headers=CONSTANTS.headers, data=json_data,  # headers = head
-                                         verify=False, timeout=time_out)
-            else:
-                print(f"[DEBUG] [post] Sending request to {path} with Bearer token: {self.token}")
-                self.res = requests.post(path,
-                                         headers=CONSTANTS.headers, data=json_data,  # headers = head
-                                         auth=self.auth_type, verify=False, timeout=time_out)
-
-                if "Realtime" in path:
-                    time.sleep(0.1)  # Realtime 처리를 위한 짧은 대기
-                    try:
-                        json_data_dict = json.loads(json_data.decode('utf-8'))
-                        trans_protocol = json_data_dict.get("transProtocol", {})
-
-                        if trans_protocol:
-                            trans_protocol_type = trans_protocol.get("transProtocolType", {})
-                            if "WebHook".lower() in str(trans_protocol_type).lower():
-                                path_tmp = trans_protocol.get("transProtocolDesc", {})
-                                if not path_tmp or str(path_tmp).strip() in ["None", "", "desc"]:
-                                    path_tmp = "https://127.0.0.1"
-
-                                    path_tmp = "https://" + str(path_tmp)
-
-                                parsed = urlparse(str(path_tmp))
-                                url = parsed.hostname if parsed.hostname is not None else "127.0.0.1"
-                                port = parsed.port if parsed.port is not None else 80
-                                msg = self.outMessage[-1]
-                                self.webhook_flag = True
-
-                                self.webhook_cnt = self.cnt
-                                self.webhook_thread = WebhookThread(url, port, msg)
-                                self.webhook_thread.result_signal.connect(self.handle_webhook_result)
-                                self.webhook_thread.start()
-
-                    except Exception as e:
-                        print(e)
-                        import traceback
-                        traceback.print_exc()
-
+            print(f"[DEBUG] [post] Sending request to {path} with auth_type={self.r2}, token={self.token}")
+            self.res = requests.post(
+                path,
+                headers=CONSTANTS.headers,
+                data=json_data,
+                auth=auth,
+                verify=False,
+                timeout=time_out
+            )
         except Exception as e:
             print(e)
+
+        # Webhook/Realtime 처리 (더 방어적으로)
+        if "Realtime" in path:
+            time.sleep(0.1)
+            try:
+                json_data_dict = json.loads(json_data.decode('utf-8'))
+                trans_protocol = json_data_dict.get("transProtocol", {})
+                if trans_protocol:
+                    trans_protocol_type = trans_protocol.get("transProtocolType", {})
+                    if "WebHook".lower() in str(trans_protocol_type).lower():
+                        path_tmp = trans_protocol.get("transProtocolDesc", {})
+                        # http/https 접두어 보정
+                        if not path_tmp or str(path_tmp).strip() in ["None", "", "desc"]:
+                            path_tmp = "https://127.0.0.1"
+                        if not str(path_tmp).startswith("http"):
+                            path_tmp = "https://" + str(path_tmp)
+                        parsed = urlparse(str(path_tmp))
+                        url = parsed.hostname if parsed.hostname is not None else "127.0.0.1"
+                        port = parsed.port if parsed.port is not None else 80
+                        msg = self.outMessage[-1]
+                        self.webhook_flag = True
+                        self.webhook_cnt = self.cnt
+                        self.webhook_thread = WebhookThread(url, port, msg)
+                        self.webhook_thread.result_signal.connect(self.handle_webhook_result)
+                        self.webhook_thread.start()
+            except Exception as e:
+                print(e)
+                import traceback
+                traceback.print_exc()
 
 
     def handle_webhook_result(self, result):
@@ -597,7 +605,18 @@ class MyApp(QWidget):
                             self.valResult.append(self.message_name)
 
                         res_data = self.res.text
-                        res_data = json.loads(res_data)
+                        #res_data = json.loads(res_data)
+
+                        try:
+                            res_data = json.loads(res_data)
+                        except Exception as e:
+                            self._append_text(f"응답 JSON 파싱 오류: {e}")
+                            self._append_text({"raw_response": self.res.text})
+                            # 이후 로직 건너뜀
+                            self.post_flag = False
+                            self.processing_response = False
+                            self.current_retry += 1
+                            return
 
                         # 현재 재시도 정보
                         current_retries = CONSTANTS.num_retries[self.cnt] if self.cnt < len(CONSTANTS.num_retries) else 1

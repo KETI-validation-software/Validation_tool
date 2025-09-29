@@ -13,9 +13,9 @@ version = "v2.1.0"
 test_category = "사전시험"
 test_target = "통합시스템"
 test_range = "전체필드"
-auth_type = "Bearer Token"
+auth_type = "Digest Auth"
 
-auth_info = "1234"
+auth_info = "admin,1234"
 admin_code = ""
 url = "https://10.252.219.95:8000"
 
