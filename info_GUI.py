@@ -1,63 +1,13 @@
-import socket
-import os
-
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QGroupBox, QFormLayout, QLineEdit,
-    QPushButton, QMessageBox, QTableWidget, QHeaderView, QAbstractItemView, QTableWidgetItem, QCheckBox
+    QPushButton, QMessageBox, QTableWidget, QHeaderView, QAbstractItemView, QTableWidgetItem, QCheckBox,
+    QStackedWidget, QRadioButton
 )
-from PyQt5.QtCore import Qt, QObject, pyqtSignal, QThread
+from PyQt5.QtCore import Qt, QThread, pyqtSignal
 
-# 외부 유틸/의존 (원본과 동일 모듈 사용)
-from core.functions import resource_path
-from core.opt_loader import OptLoader
-from core.schema_generator import generate_schema_file
-from core.video_request_generator import generate_video_request_file
-
-class NetworkScanWorker(QObject):
-    scan_completed = pyqtSignal(list)
-    scan_failed = pyqtSignal(str)
-
-    def scan_network(self):
-        try:
-            local_ip = self._get_local_ip()
-            if not local_ip:
-                self.scan_failed.emit("내 IP 주소를 찾을 수 없습니다.")
-                return
-
-            ports = self._scan_available_ports(local_ip, range(8000, 8100))
-            if ports:
-                urls = [f"{local_ip}:{p}" for p in ports[:3]]
-                self.scan_completed.emit(urls)
-            else:
-                self.scan_failed.emit("검색된 사용가능 포트 없음")
-        except Exception as e:
-            self.scan_failed.emit(f"네트워크 탐색 중 오류 발생:\n{str(e)}")
-
-    def _get_local_ip(self):
-        try:
-            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-                s.connect(("8.8.8.8", 80))
-                return s.getsockname()[0]
-        except Exception:
-            try:
-                return socket.gethostbyname(socket.gethostname())
-            except Exception:
-                return None
-
-    def _scan_available_ports(self, ip, port_range):
-        found = []
-        for port in port_range:
-            try:
-                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                    sock.settimeout(0.1)
-                    sock.bind((ip, port))
-                    found.append(port)
-                    if len(found) >= 10:
-                        break
-            except Exception:
-                continue
-        return found
+# 분리된 모듈들 import
+from network_scanner import NetworkScanWorker
+from form_validator import FormValidator
 
 
 class InfoWidget(QWidget):
@@ -69,24 +19,160 @@ class InfoWidget(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.opt_loader = OptLoader()
+        self.form_validator = FormValidator(self)  # 폼 검증 모듈 초기화
         self.scan_thread = None
         self.scan_worker = None
         self.current_mode = None
+        self.current_page = 0
+        self.stacked_widget = QStackedWidget()
         self.initUI()
 
     def initUI(self):
-        main_layout = QHBoxLayout()
-        main_layout.addWidget(self.create_left_panel(), 1)
-        main_layout.addWidget(self.create_right_panel(), 1)
+        # 메인 레이아웃
+        main_layout = QVBoxLayout()
 
+        # 스택 위젯에 페이지 추가
+        self.stacked_widget.addWidget(self.create_page1())  # 시험 정보 확인
+        self.stacked_widget.addWidget(self.create_page2())  # 시험 설정
+
+        main_layout.addWidget(self.stacked_widget)
+        self.setLayout(main_layout)
+
+    def create_page1(self):
+        """첫 번째 페이지: 시험 정보 확인"""
+        page = QWidget()
         layout = QVBoxLayout()
-        layout.addLayout(main_layout, 1)
-        layout.addWidget(self.create_bottom_buttons())
-        self.setLayout(layout)
 
-    # ---------- 좌측 패널 ----------
-    def create_left_panel(self):
+        # 상단 타이틀
+        title = QLabel("시험 정보를 확인하세요.")
+        title.setStyleSheet("font-size: 16px; font-weight: bold; padding: 10px; text-align: center;")
+        title.setAlignment(Qt.AlignCenter)
+        layout.addWidget(title)
+
+        # 시험 기본 정보 (기존 좌측 패널에서 API 테이블 제외)
+        info_panel = self.create_basic_info_panel()
+        layout.addWidget(info_panel)
+
+        # 하단 버튼
+        buttons = self.create_page1_buttons()
+        layout.addWidget(buttons)
+
+        page.setLayout(layout)
+        return page
+
+    def create_page2(self):
+        """두 번째 페이지: 시험 설정"""
+        page = QWidget()
+        main_layout = QHBoxLayout()
+
+        # 좌측 패널
+        left_panel = QGroupBox()
+        left_layout = QVBoxLayout()
+
+        # 시험 분야 확인 문구
+        left_title = QLabel("시험 분야를 확인하세요.")
+        left_title.setStyleSheet("font-size: 14px; font-weight: bold; padding: 10px;")
+        left_layout.addWidget(left_title)
+
+        # 새로운 시험 분야 테이블
+        field_table = self.create_test_field_table()
+        left_layout.addWidget(field_table)
+
+        # 기존 API 테이블 (시험분야(API)로 변경)
+        api_table = self.create_test_field_api_table()
+        left_layout.addWidget(api_table)
+
+        left_panel.setLayout(left_layout)
+
+        # 우측 패널
+        right_panel = QGroupBox()
+        right_layout = QVBoxLayout()
+
+        # 시험 설정 정보 문구
+        right_title = QLabel("시험 설정 정보를 입력하세요.")
+        right_title.setStyleSheet("font-size: 14px; font-weight: bold; padding: 10px;")
+        right_layout.addWidget(right_title)
+
+        # 기존 우측 패널 내용
+        auth_section = self.create_auth_section()
+        connection_section = self.create_connection_section()
+        right_layout.addWidget(auth_section)
+        right_layout.addWidget(connection_section)
+
+        right_panel.setLayout(right_layout)
+
+        main_layout.addWidget(left_panel, 1)
+        main_layout.addWidget(right_panel, 1)
+
+        # 하단 버튼
+        page_layout = QVBoxLayout()
+        page_layout.addLayout(main_layout, 1)
+        page_layout.addWidget(self.create_page2_buttons())
+
+        page.setLayout(page_layout)
+        return page
+
+    # ---------- 페이지 전환 메서드 ----------
+    def go_to_next_page(self):
+        """다음 페이지로 이동"""
+        if self.current_page < 1:
+            self.current_page += 1
+            self.stacked_widget.setCurrentIndex(self.current_page)
+
+    def go_to_previous_page(self):
+        """이전 페이지로 이동"""
+        if self.current_page > 0:
+            self.current_page -= 1
+            self.stacked_widget.setCurrentIndex(self.current_page)
+
+    def create_page1_buttons(self):
+        """첫 번째 페이지 버튼들"""
+        widget = QWidget()
+        layout = QHBoxLayout()
+        layout.addStretch()
+
+        # 다음 버튼
+        next_btn = QPushButton("다음")
+        next_btn.setStyleSheet("QPushButton { background-color: #9FBFE5; color: black; font-weight: bold; }")
+        next_btn.clicked.connect(self.go_to_next_page)
+        layout.addWidget(next_btn)
+
+        # 초기화 버튼
+        reset_btn = QPushButton("초기화")
+        reset_btn.setStyleSheet("QPushButton { background-color: #9FBFE5; color: black; font-weight: bold; }")
+        reset_btn.clicked.connect(self.reset_all_fields)
+        layout.addWidget(reset_btn)
+
+        layout.addStretch()
+        widget.setLayout(layout)
+        return widget
+
+    def create_page2_buttons(self):
+        """두 번째 페이지 버튼들"""
+        widget = QWidget()
+        layout = QHBoxLayout()
+        layout.addStretch()
+
+        # 시험 시작 버튼
+        self.start_btn = QPushButton("시험 시작")
+        self.start_btn.setStyleSheet("QPushButton { background-color: #9FBFE5; color: black; font-weight: bold; }")
+        self.start_btn.clicked.connect(self.start_test)
+        self.start_btn.setEnabled(False)  # 초기에는 비활성화
+        layout.addWidget(self.start_btn)
+
+        # 초기화 버튼
+        reset_btn = QPushButton("초기화")
+        reset_btn.setStyleSheet("QPushButton { background-color: #9FBFE5; color: black; font-weight: bold; }")
+        reset_btn.clicked.connect(self.reset_all_fields)
+        layout.addWidget(reset_btn)
+
+        layout.addStretch()
+        widget.setLayout(layout)
+        return widget
+
+    # ---------- 새로운 패널 생성 메서드들 ----------
+    def create_basic_info_panel(self):
+        """시험 기본 정보만 (불러오기 버튼 + 기본 정보 필드)"""
         panel = QGroupBox("시험 기본 정보")
         layout = QVBoxLayout()
 
@@ -96,12 +182,12 @@ class InfoWidget(QWidget):
 
         self.load_request_btn = QPushButton("Long Polling|Request")
         self.load_request_btn.setStyleSheet("QPushButton { background-color: #9FBFE5; color: black; font-weight: bold; }")
-        self.load_request_btn.clicked.connect(lambda: self.load_opt_files("request_longpolling"))
+        self.load_request_btn.clicked.connect(lambda: self.form_validator.load_opt_files("request_longpolling"))
         btn_row1.addWidget(self.load_request_btn)
 
         self.load_response_btn = QPushButton("Long Polling|Response")
         self.load_response_btn.setStyleSheet("QPushButton { background-color: #9FBFE5; color: black; font-weight: bold; }")
-        self.load_response_btn.clicked.connect(lambda: self.load_opt_files("response_longpolling"))
+        self.load_response_btn.clicked.connect(lambda: self.form_validator.load_opt_files("response_longpolling"))
         btn_row1.addWidget(self.load_response_btn)
 
         layout.addLayout(btn_row1)
@@ -112,12 +198,12 @@ class InfoWidget(QWidget):
 
         self.load_request_webhook_btn = QPushButton("WebHook|Request")
         self.load_request_webhook_btn.setStyleSheet("QPushButton { background-color: #C4BEE2; color: black; font-weight: bold; }")
-        self.load_request_webhook_btn.clicked.connect(lambda: self.load_opt_files("request_webhook"))
+        self.load_request_webhook_btn.clicked.connect(lambda: self.form_validator.load_opt_files("request_webhook"))
         btn_row2.addWidget(self.load_request_webhook_btn)
 
         self.load_response_webhook_btn = QPushButton("WebHook|Response")
         self.load_response_webhook_btn.setStyleSheet("QPushButton { background-color: #C4BEE2; color: black; font-weight: bold; }")
-        self.load_response_webhook_btn.clicked.connect(lambda: self.load_opt_files("response_webhook"))
+        self.load_response_webhook_btn.clicked.connect(lambda: self.form_validator.load_opt_files("response_webhook"))
         btn_row2.addWidget(self.load_response_webhook_btn)
 
         layout.addLayout(btn_row2)
@@ -132,27 +218,121 @@ class InfoWidget(QWidget):
         self.test_group_edit = QLineEdit()
         self.test_range_edit = QLineEdit()
 
-        form.addRow("기업명", self.company_edit)
-        form.addRow("제품명", self.product_edit)
-        form.addRow("버전", self.version_edit)
-        form.addRow("모델명", self.model_edit)
-        form.addRow("시험유형", self.test_category_edit)
-        form.addRow("시험대상", self.target_system_edit)
-        form.addRow("시험분야", self.test_group_edit)
-        form.addRow("시험범위", self.test_range_edit)
+        # 관리자 코드 입력 필드 추가
+        self.admin_code_edit = QLineEdit()
+        self.admin_code_edit.setEchoMode(QLineEdit.Password)  # 비밀번호 모드
+        self.admin_code_edit.setPlaceholderText("입력해주세요")
+
+        # 관리자 코드 입력 시 숫자 검증 및 버튼 상태 업데이트
+        self.admin_code_edit.textChanged.connect(self.form_validator.validate_admin_code)
+        self.admin_code_edit.textChanged.connect(self.check_start_button_state)
+
+        form.addRow("기업명:", self.company_edit)
+        form.addRow("제품명:", self.product_edit)
+        form.addRow("버전:", self.version_edit)
+        form.addRow("모델명:", self.model_edit)
+        form.addRow("시험유형:", self.test_category_edit)
+        form.addRow("시험대상:", self.target_system_edit)
+        form.addRow("시험분야:", self.test_group_edit)
+        form.addRow("시험범위:", self.test_range_edit)
+        form.addRow("관리자 코드:", self.admin_code_edit)
+
+        # 시험유형 변경 시 관리자 코드 필드 활성화/비활성화
+        self.test_category_edit.textChanged.connect(self.form_validator.handle_test_category_change)
+        self.test_category_edit.textChanged.connect(self.check_start_button_state)
+
         layout.addLayout(form)
-
-        api_label = QLabel("시험항목(API)")
-        api_label.setStyleSheet("font-weight: bold; margin-top: 10px;")
-        layout.addWidget(api_label)
-
-        self.api_test_table = QTableWidget(0, 3)
-        self.api_test_table.setHorizontalHeaderLabels(["시험 항목", "기능명", "API명"])
-        self.api_test_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        layout.addWidget(self.api_test_table)
-
         panel.setLayout(layout)
         return panel
+
+    def create_test_field_table(self):
+        """시험 분야명  테이블"""
+        table = QTableWidget(0, 1)
+        table.setHorizontalHeaderLabels(["시험 분야명"])
+        table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        return table
+
+    def create_test_field_api_table(self):
+        """시험분야(API) 테이블"""
+        table = QTableWidget(0, 3)
+        table.setHorizontalHeaderLabels(["시험 분야", "기능명", "API명"])
+        table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.api_test_table = table 
+        return table
+
+    def create_auth_section(self):
+        """인증 방식 섹션"""
+        section = QGroupBox("사용자 인증 방식")
+        layout = QVBoxLayout()
+
+        # Digest
+        self.digest_radio = QRadioButton("Digest Auth")
+        self.digest_radio.setChecked(True)
+        layout.addWidget(self.digest_radio)
+        digest_row = QHBoxLayout()
+        self.id_input = QLineEdit()
+        self.pw_input = QLineEdit()
+        digest_row.addWidget(QLabel("ID:"))
+        digest_row.addWidget(self.id_input)
+        digest_row.addWidget(QLabel("PW:"))
+        digest_row.addWidget(self.pw_input)
+        digest_w = QWidget()
+        digest_w.setLayout(digest_row)
+        digest_row.setContentsMargins(20, 0, 0, 0)
+        layout.addWidget(digest_w)
+
+        # Bearer
+        self.bearer_radio = QRadioButton("Bearer Token")
+        layout.addWidget(self.bearer_radio)
+        token_row = QHBoxLayout()
+        self.token_input = QLineEdit()
+        token_row.addWidget(QLabel("Token:"))
+        token_row.addWidget(self.token_input)
+        token_w = QWidget()
+        token_w.setLayout(token_row)
+        token_row.setContentsMargins(20, 0, 0, 0)
+        layout.addWidget(token_w)
+
+        # 라디오 버튼 연결
+        self.digest_radio.toggled.connect(self.update_auth_fields)
+        self.bearer_radio.toggled.connect(self.update_auth_fields)
+
+        # 입력 필드 변경 시 버튼 상태 체크
+        self.id_input.textChanged.connect(self.check_start_button_state)
+        self.pw_input.textChanged.connect(self.check_start_button_state)
+        self.token_input.textChanged.connect(self.check_start_button_state)
+
+        section.setLayout(layout)
+        return section
+
+    def create_connection_section(self):
+        """접속 정보 섹션"""
+        section = QGroupBox("시험 접속 정보")
+        layout = QVBoxLayout()
+
+        scan_label = QLabel("주소 탐색")
+        scan_label.setStyleSheet("font-weight: bold; margin-top: 10px;")
+        layout.addWidget(scan_label)
+
+        btn_row = QHBoxLayout()
+        btn_row.addStretch()
+        scan_btn = QPushButton("🔍주소 탐색")
+        scan_btn.setStyleSheet("QPushButton { background-color: #E1EBF4; color: #3987C1; font-weight: bold; }")
+        scan_btn.clicked.connect(self.start_scan)
+        btn_row.addWidget(scan_btn)
+        btn_row.addStretch()
+        layout.addLayout(btn_row)
+
+        self.url_table = QTableWidget(0, 2)
+        self.url_table.setHorizontalHeaderLabels(["☑", "URL"])
+        self.url_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.url_table.cellClicked.connect(self.select_url_row)
+        layout.addWidget(self.url_table)
+
+        section.setLayout(layout)
+        return section
+
+    # ---------- 공통 기능 메서드들 ----------
 
     # ---------- 우측 패널 ----------
     def create_right_panel(self):
@@ -431,7 +611,7 @@ class InfoWidget(QWidget):
                 return
             
             # CONSTANTS.py 업데이트
-            if self.update_constants_py():
+            if self.form_validator.update_constants_py():
                 self.startTestRequested.emit(self.current_mode)
             else:
                 QMessageBox.warning(self, "저장 실패", "CONSTANTS.py 업데이트에 실패했습니다.")
@@ -456,6 +636,9 @@ class InfoWidget(QWidget):
                 self.target_system_edit.text().strip(),
                 self.test_range_edit.text().strip()
             ])
+
+            # 2-1. 관리자 코드 검증 추가
+            admin_code_valid = self.form_validator.is_admin_code_valid()
             
             # 3. 시험항목(API) 테이블 확인
             api_table_filled = self.api_test_table.rowCount() > 0
@@ -470,135 +653,13 @@ class InfoWidget(QWidget):
             # 5. 접속 정보 확인 (URL 선택됨)
             url_selected = bool(self.get_selected_url())
             
-            # 모든 조건이 충족되면 활성화
-            all_conditions_met = basic_info_filled and api_table_filled and auth_filled and url_selected
+            # 모든 조건이 충족되면 활성화 (관리자 코드 유효성 포함)
+            all_conditions_met = basic_info_filled and admin_code_valid and api_table_filled and auth_filled and url_selected
             self.start_btn.setEnabled(all_conditions_met)
             
         except Exception as e:
             print(f"버튼 상태 체크 실패: {e}")
             self.start_btn.setEnabled(False)
-
-    def update_constants_py(self):
-        """CONSTANTS.py 파일의 변수들을 GUI 입력값으로 업데이트"""
-        try:
-            constants_path = "config/CONSTANTS.py"
-
-            # 1. 시험 기본 정보 수집
-            company_name = self.company_edit.text().strip()
-            product_name = self.product_edit.text().strip()
-            version = self.version_edit.text().strip()
-            test_category = self.test_category_edit.text().strip()
-            test_target = self.target_system_edit.text().strip()
-            test_range = self.test_range_edit.text().strip()
-
-            # 2. 접속 정보
-            url = self.get_selected_url()
-
-            # 3. 인증 정보
-            if self.digest_radio.isChecked():
-                auth_type = "Digest Auth"
-                auth_info = f"{self.id_input.text().strip()},{self.pw_input.text().strip()}"
-            else:
-                auth_type = "Bearer Token"
-                auth_info = self.token_input.text().strip()
-
-            # 4. OPT 파일에서 admin_code 추출 (현재 모드와 관계없이 동일 파일)
-            if "request" in self.current_mode:
-                exp_opt_path = resource_path("temp/(temp)exp_opt_requestVal.json")
-            else:  # response
-                exp_opt_path = resource_path("temp/(temp)exp_opt_responseVal.json")
-
-            exp_opt = self.opt_loader.load_opt_json(exp_opt_path)
-            admin_code = ""
-            if exp_opt and "testRequest" in exp_opt:
-                test_group = exp_opt["testRequest"].get("testGroup", {})
-                admin_code = test_group.get("adminCode", "")
-
-            # 5. OPT2 파일에서 프로토콜/타임아웃 정보 추출 (현재 모드에 따라 파일 선택)
-            if self.current_mode == "request":
-                exp_opt2_path = resource_path("temp/(temp)exp_opt2_requestVal_LongPolling.json")
-            elif self.current_mode == "response":
-                exp_opt2_path = resource_path("temp/(temp)exp_opt2_responseVal_LongPolling.json")
-            elif self.current_mode == "request_webhook":
-                exp_opt2_path = resource_path("temp/(temp)exp_opt2_requestVal_WebHook.json")
-            elif self.current_mode == "response_webhook":
-                exp_opt2_path = resource_path("temp/(temp)exp_opt2_responseVal_WebHook.json")
-            else:
-                # fallback to default
-                exp_opt2_path = resource_path("temp/(temp)exp_opt2_requestVal_LongPolling.json")
-
-            exp_opt2 = self.opt_loader.load_opt_json(exp_opt2_path)
-            print(f"CONSTANTS.py 업데이트 - 현재 모드: {self.current_mode}")
-            print(f"선택된 OPT2 파일: {exp_opt2_path}")
-
-            steps = exp_opt2.get("specification", {}).get("steps", [])
-            step_count = len(steps)
-
-            # connectTimeout, numRetries, transportMode를 step 개수만큼 리스트로 생성
-            time_out = []
-            num_retries = []
-            trans_protocol = []
-
-            for step in steps:
-                # 각 step의 api.settings에서 값 추출
-                settings = step.get("api", {}).get("settings", {})
-                time_out.append(settings.get("connectTimeout", 30))  # 기본값 30
-                num_retries.append(settings.get("numRetries", 3))    # 기본값 3
-
-                # transProtocol.mode 추출
-                trans_protocol_obj = settings.get("transProtocol", {})
-                trans_protocol_mode = trans_protocol_obj.get("mode", None)
-                trans_protocol.append(trans_protocol_mode)
-
-            # 6. CONSTANTS.py 파일 업데이트
-            self._update_constants_file(constants_path, {
-                'company_name': company_name,
-                'product_name': product_name,
-                'version': version,
-                'test_category': test_category,
-                'test_target': test_target,
-                'test_range': test_range,
-                'url': url,
-                'auth_type': auth_type,
-                'auth_info': auth_info,
-                'admin_code': admin_code,
-                'trans_protocol': trans_protocol,
-                'time_out': time_out,
-                'num_retries': num_retries
-            })
-
-            return True
-
-        except Exception as e:
-            print(f"CONSTANTS.py 업데이트 실패: {e}")
-            return False
-
-    def _update_constants_file(self, file_path, variables):
-        """CONSTANTS.py 파일의 특정 변수들을 업데이트"""
-        import re
-
-        with open(file_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-
-        for var_name, var_value in variables.items():
-            # 변수 형태에 따른 패턴 매칭
-            if isinstance(var_value, str):
-                new_line = f'{var_name} = "{var_value}"'
-            elif isinstance(var_value, list):
-                new_line = f'{var_name} = {var_value}'
-            elif var_value is None:
-                new_line = f'{var_name} = None'
-            else:
-                new_line = f'{var_name} = {var_value}'
-
-            # 기존 변수 라인을 찾아서 교체
-            pattern = rf'^{var_name}\s*=.*$'
-            content = re.sub(pattern, new_line, content, flags=re.MULTILINE)
-
-        with open(file_path, 'w', encoding='utf-8') as f:
-            f.write(content)
-
-
 
     def reset_all_fields(self):
         """모든 필드 초기화"""
@@ -607,23 +668,21 @@ class InfoWidget(QWidget):
             if not self._has_data_to_reset():
                 QMessageBox.information(self, "초기화", "초기화할 입력값이 없습니다.")
                 return
-            
+
             # 확인 메시지
-            reply = QMessageBox.question(self, '초기화', 
+            reply = QMessageBox.question(self, '초기화',
                                        '모든 입력값을 초기화하시겠습니까?',
                                        QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-            
+
             if reply == QMessageBox.Yes:
                 self._perform_reset()
-                
+
         except Exception as e:
             QMessageBox.critical(self, "오류", f"초기화 중 오류가 발생했습니다:\n{str(e)}")
-        
+
     def _has_data_to_reset(self):
         """초기화할 데이터가 있는지 확인"""
         try:
-            # === 좌측 패널 확인 ===
-            
             # 기본 정보 필드에 입력값이 있는지 확인
             basic_fields = [
                 self.company_edit.text().strip(),
@@ -633,52 +692,48 @@ class InfoWidget(QWidget):
                 self.test_category_edit.text().strip(),
                 self.target_system_edit.text().strip(),
                 self.test_group_edit.text().strip(),
-                self.test_range_edit.text().strip()
+                self.test_range_edit.text().strip(),
+                self.admin_code_edit.text().strip()
             ]
-            
-            # 하나라도 값이 있으면 초기화 필요
+
             if any(field for field in basic_fields):
                 return True
-            
+
             # API 테이블에 데이터가 있는지 확인
             if self.api_test_table.rowCount() > 0:
                 return True
-            
-            # === 우측 패널 확인 ===
-            
+
             # 인증 정보에 입력값이 있는지 확인
             auth_fields = [
                 self.id_input.text().strip(),
                 self.pw_input.text().strip(),
                 self.token_input.text().strip()
             ]
-            
+
             if any(field for field in auth_fields):
                 return True
-            
-            # 주소 탐색 테이블에서 선택된 항목이 있는지 확인
+
+            # URL 테이블에서 선택된 항목이 있는지 확인
             for row in range(self.url_table.rowCount()):
                 checkbox_widget = self.url_table.cellWidget(row, 0)
                 if checkbox_widget:
                     checkbox = checkbox_widget.findChild(QCheckBox)
                     if checkbox and checkbox.isChecked():
                         return True
-            
+
             # 인증 방식이 Bearer Token으로 선택되어 있다면 초기화 필요
             if self.bearer_radio.isChecked():
                 return True
-            
+
             return False
-            
+
         except Exception as e:
             print(f"데이터 확인 중 오류: {e}")
             return True
-        
+
     def _perform_reset(self):
         """실제 초기화 작업 수행"""
         try:
-            # === 좌측 패널 초기화 ===
-            
             # 기본 정보 필드 초기화
             self.company_edit.clear()
             self.product_edit.clear()
@@ -688,24 +743,25 @@ class InfoWidget(QWidget):
             self.target_system_edit.clear()
             self.test_group_edit.clear()
             self.test_range_edit.clear()
-            
+            self.admin_code_edit.clear()
+
+            # 관리자 코드 필드를 기본 상태로 되돌림
+            self.admin_code_edit.setEnabled(True)
+            self.admin_code_edit.setPlaceholderText("입력해주세요")
+
             # API 테이블 초기화
             self.api_test_table.setRowCount(0)
-            
-            # === 우측 패널 초기화 ===
-            
+
             # 인증 정보 초기화
             self.id_input.clear()
             self.pw_input.clear()
             self.token_input.clear()
-            
+
             # 인증 방식을 Digest Auth로 초기화
             self.digest_radio.setChecked(True)
-            
-            # 주소 탐색 테이블 초기화 (테이블 자체를 비움)
+
+            # 주소 탐색 테이블 초기화
             self.url_table.setRowCount(0)
-            
-            # === 버튼 상태 초기화 ===
 
             # 현재 모드 초기화
             self.current_mode = None
@@ -715,145 +771,11 @@ class InfoWidget(QWidget):
 
             # 버튼 상태 업데이트
             self.check_start_button_state()
-            
+
             print("모든 필드 초기화 완료")
             QMessageBox.information(self, "초기화 완료", "모든 입력값이 초기화되었습니다.")
-            
+
         except Exception as e:
             print(f"초기화 실패: {e}")
             raise
 
-    # ---------- OPT 로드 ----------
-    def load_opt_files(self, mode):
-        try:
-            # 모드에 따라 다른 파일 경로 설정
-            if mode == "request_longpolling":
-                exp_opt_path = resource_path("temp/(temp)exp_opt_requestVal.json")
-                exp_opt2_path = resource_path("temp/(temp)exp_opt2_requestVal_LongPolling.json")
-            elif mode == "response_longpolling":
-                exp_opt_path = resource_path("temp/(temp)exp_opt_responseVal.json")
-                exp_opt2_path = resource_path("temp/(temp)exp_opt2_responseVal_LongPolling.json")
-            elif mode == "request_webhook":
-                exp_opt_path = resource_path("temp/(temp)exp_opt_requestVal.json")
-                exp_opt2_path = resource_path("temp/(temp)exp_opt2_requestVal_WebHook.json")
-            elif mode == "response_webhook":
-                exp_opt_path = resource_path("temp/(temp)exp_opt_responseVal.json")
-                exp_opt2_path = resource_path("temp/(temp)exp_opt2_responseVal_WebHook.json")
-            else:
-                QMessageBox.warning(self, "모드 오류", f"알 수 없는 모드: {mode}")
-                return
-            
-            exp_opt = self.opt_loader.load_opt_json(exp_opt_path)
-            exp_opt2 = self.opt_loader.load_opt_json(exp_opt2_path)
-            if not (exp_opt and exp_opt2):
-                QMessageBox.warning(self, "로드 실패", f"{mode.upper()} 모드 OPT 파일을 읽을 수 없습니다.")
-                return
-            
-            # 현재 모드 저장 및 UI 업데이트
-            self.current_mode = mode
-            
-            self._fill_basic_info(exp_opt)
-            self._fill_api_table(exp_opt, exp_opt2)
-            
-            # 모드에 따른 파일 생성
-            try:
-                if mode in ["request_longpolling", "request_webhook"]:
-                    # Request 모드 (LongPolling/WebHook)
-                    schema_path = generate_schema_file(
-                        exp_opt2_path,
-                        schema_type="request",
-                        output_path="spec/video/videoSchema_request.py"
-                    )
-                    print(f"videoSchema_request.py 생성 완료: {schema_path}")
-
-                    # videoRequest_request.py 생성
-                    request_path = generate_video_request_file(
-                        exp_opt2_path,
-                        file_type="request",
-                        output_path="spec/video/videoData_request.py"
-                    )
-                    print(f"videoRequest_request.py 생성 완료: {request_path}")
-
-                    # Response 모드 (LongPolling/WebHook)
-                elif mode in ["response_longpolling", "response_webhook"]:
-                    schema_path = generate_schema_file(
-                        exp_opt2_path,
-                        schema_type="response", 
-                        output_path="spec/video/videoSchema_response.py"
-                    )
-                    print(f"videoSchema_response.py 생성 완료: {schema_path}")
-
-                    # videoRequest_response.py 생성
-                    request_path = generate_video_request_file(
-                        exp_opt2_path,
-                        file_type="response",
-                        output_path="spec/video/videoData_response.py"
-                    )
-                    print(f"videoRequest_response.py 생성 완료: {request_path}")
-
-            except Exception as e:
-                print(f"스키마 파일 생성 실패: {e}")
-            
-            # 버튼 상태 업데이트
-            self.check_start_button_state()
-            
-            QMessageBox.information(self, "로드 완료", f"{mode.upper()} 모드 파일들이 성공적으로 로드되었습니다!")
-        except Exception as e:
-            QMessageBox.critical(self, "오류", f"OPT 파일 로드 중 오류가 발생했습니다:\n{str(e)}")
-
-    def _fill_basic_info(self, exp_opt):
-        if not exp_opt or "testRequest" not in exp_opt:
-            return
-        first = exp_opt["testRequest"]
-        et = first.get("evaluationTarget", {})
-        tg = first.get("testGroup", {})
-        self.company_edit.setText(et.get("companyName", ""))
-        self.product_edit.setText(et.get("productName", ""))
-        self.version_edit.setText(et.get("version", ""))
-        self.model_edit.setText(et.get("modelName", ""))
-        self.test_category_edit.setText(et.get("testCategory", ""))
-        self.target_system_edit.setText(et.get("targetSystem", ""))
-        self.test_group_edit.setText(tg.get("name", ""))
-        self.test_range_edit.setText(tg.get("testRange", ""))
-
-    def _fill_api_table(self, exp_opt, exp_opt2):
-        if not exp_opt or not exp_opt2 or "specification" not in exp_opt2:
-            return
-        first = exp_opt["testRequest"]
-        test_group_name = first.get("testGroup", {}).get("name", "")
-        steps = exp_opt2["specification"].get("steps", [])
-        self.api_test_table.setRowCount(0)
-
-        prev_endpoint = None #직전 step의 endpoint 저장
-
-        for step in steps:
-            api_info = step.get("api", {})
-            r = self.api_test_table.rowCount()
-            self.api_test_table.insertRow(r)
-
-            #시험 항목
-            item0 = QTableWidgetItem(test_group_name)
-            item0.setTextAlignment(Qt.AlignCenter)
-            item0.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-            self.api_test_table.setItem(r, 0, item0)
-
-            #기능명
-            item1 = QTableWidgetItem(api_info.get("name", ""))
-            item1.setTextAlignment(Qt.AlignCenter)
-            item1.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-            self.api_test_table.setItem(r, 1, item1)
-            
-            #API명
-            endpoint = api_info.get("endpoint")
-            if not endpoint and prev_endpoint:
-                #endpoint 없으면 직전 step endpoint 사용
-                endpoint = prev_endpoint
-
-            item2 = QTableWidgetItem(endpoint or "")
-            item2.setTextAlignment(Qt.AlignCenter)
-            item2.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-            self.api_test_table.setItem(r, 2, item2)
-
-            #이번 step endpoint 저장 없으면 유지
-            if api_info.get("endpoint"):
-                prev_endpoint = api_info["endpoint"]

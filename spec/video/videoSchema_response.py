@@ -96,9 +96,6 @@ RealtimeVideoEventInfos_out_schema = {
 }],
 }
 
-# 
-_out_schema = {}
-
 # StoredVideoEventInfos
 StoredVideoEventInfos_out_schema = {
     "code": str,
@@ -157,7 +154,6 @@ videoOutSchema = [
     StreamURLs_out_schema,
     ReplayURL_out_schema,
     RealtimeVideoEventInfos_out_schema,
-    _out_schema,
     StoredVideoEventInfos_out_schema,
     StoredObjectAnalyticsInfos_out_schema,
 ]
