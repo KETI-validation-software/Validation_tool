@@ -30,6 +30,7 @@ from core.json_checker_new import check_message_error
 from requests.auth import HTTPDigestAuth
 import config.CONSTANTS as CONSTANTS
 import traceback
+import importlib
 
 
 # 통합된 상세 내용 확인 팝업창 클래스
@@ -169,6 +170,7 @@ class MyApp(QWidget):
                 self.token = token
                 print(f"[DEBUG] [handle_authentication_response] Token updated: {self.token}")
     def __init__(self, embedded=False):
+        importlib.reload(CONSTANTS)  # CONSTANTS 모듈을 다시 로드하여 최신 설정 반영
         super().__init__()
         self.embedded = embedded
         self.webhook_res = None
