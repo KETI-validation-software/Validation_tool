@@ -96,9 +96,6 @@ RealtimeVideoEventInfos_out_schema = {
 }],
 }
 
-# 
-_out_schema = {}
-
 # StoredVideoEventInfos
 StoredVideoEventInfos_out_schema = {
     "code": str,

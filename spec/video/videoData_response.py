@@ -1,4 +1,3 @@
-# 자동 생성된 VideoRequest 파일
 # response 모드
 
 # Authentication
@@ -82,9 +81,6 @@ RealtimeVideoEventInfos_in_data = {
     "startTime": 20220822163022123
 }
 
-# 
-_in_data = {}
-
 # StoredVideoEventInfos
 StoredVideoEventInfos_in_data = {
     "code": "200",
@@ -142,7 +138,7 @@ StoredObjectAnalyticsInfos_in_data = {
 }
 
 # WebHook RealtimeVideoEventInfos
-RealtimeVideoEventInfos_out_data = {
+WebHook_RealtimeVideoEventInfos_out_data = {
     "code": 200,
     "message": "성공"
 }
@@ -175,5 +171,5 @@ videoMessages = [
 
 # WebHook
 videoWebhookData = [
-    RealtimeVideoEventInfos_out_data,
+    WebHook_RealtimeVideoEventInfos_out_data,
 ]
