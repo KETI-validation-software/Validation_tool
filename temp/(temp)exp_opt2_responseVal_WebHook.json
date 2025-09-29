@@ -108,11 +108,11 @@
               "streamingSupport",
               "transportSupport"
             ]
-          }
-        },
-        "settings": {
+          },
+          "settings": {
           "connectTimeout": 5000,
           "numRetries": 1
+          }
         }
       },
       {
