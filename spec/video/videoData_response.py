@@ -156,7 +156,6 @@ videoInMessage = [
     StreamURLs_in_data,
     ReplayURL_in_data,
     RealtimeVideoEventInfos_in_data,
-    _in_data,
     StoredVideoEventInfos_in_data,
     StoredObjectAnalyticsInfos_in_data,
 ]
@@ -170,7 +169,6 @@ videoMessages = [
     "StreamURLs",
     "ReplayURL",
     "RealtimeVideoEventInfos",
-    "",
     "StoredVideoEventInfos",
     "StoredObjectAnalyticsInfos",
 ]
