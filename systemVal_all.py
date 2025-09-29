@@ -83,12 +83,9 @@ class CombinedDetailDialog(QDialog):
         self.error_browser = QTextBrowser()
         self.error_browser.setAcceptRichText(True)
         result = step_buffer["result"]
-        error_text = step_buffer["error"] if step_buffer["error"] else ("오류가 없습니다." if result=="PASS" else "")
-        error_msg = f"검증 결과: {result}\n\n"
-        if result == "FAIL":
-            error_msg += "오류 세부사항:\n" + error_text
-        else:
-            error_msg += "오류가 없습니다."
+        # 항상 step_buffer["error"]를 그대로 보여주고, 없으면 안내 메시지
+        error_text = step_buffer["error"] if step_buffer["error"] else ("오류가 없습니다." if result=="PASS" else "오류 내용 없음")
+        error_msg = f"검증 결과: {result}\n\n{error_text}"
         self.error_browser.setPlainText(error_msg)
         error_layout.addWidget(self.error_browser)
         error_group.setLayout(error_layout)
@@ -380,10 +377,16 @@ class MyApp(QWidget):
 
     def get_webhook_result(self):
         tmp_webhook_res = json.dumps(self.webhook_res, indent=4, ensure_ascii=False)
-        message_name = "step " + str(self.webhook_cnt + 1) + ": " + self.message[self.webhook_cnt]
+        if self.webhook_cnt < len(self.message):
+            message_name = "step " + str(self.webhook_cnt + 1) + ": " + self.message[self.webhook_cnt]
+        else:
+            message_name = f"step {self.webhook_cnt + 1}: (index out of range)"
 
-        val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.webhookSchema[self.webhook_cnt],
-                                                                        self.webhook_res, self.flag_opt)
+        if self.webhook_cnt < len(self.webhookSchema):
+            val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.webhookSchema[self.webhook_cnt],
+                                                                            self.webhook_res, self.flag_opt)
+        else:
+            val_result, val_text, key_psss_cnt, key_error_cnt = "FAIL", "webhookSchema index error", 0, 0
 
         self.valResult.append(message_name)
         self.valResult.append("\n" + tmp_webhook_res)
@@ -409,9 +412,20 @@ class MyApp(QWidget):
         # 새로운 테이블 업데이트 함수 사용 (개별 검증 횟수 적용)
         if self.webhook_cnt < self.tableWidget.rowCount():
             total_fields = key_psss_cnt + key_error_cnt
-            current_retries = CONSTANTS.num_retries[self.webhook_cnt]
+            if self.webhook_cnt < len(CONSTANTS.num_retries):
+                current_retries = CONSTANTS.num_retries[self.webhook_cnt]
+            else:
+                current_retries = 1
             self.update_table_row_with_retries(self.webhook_cnt, val_result, key_psss_cnt, key_error_cnt, 
                                 tmp_webhook_res, self._to_detail_text(val_text), current_retries)
+
+        # step_buffers 업데이트 추가 (실시간 모니터링과 상세보기 일치)
+        if self.webhook_cnt < len(self.step_buffers):
+            webhook_data_text = tmp_webhook_res
+            webhook_error_text = self._to_detail_text(val_text) if val_result == "FAIL" else "오류가 없습니다."
+            self.step_buffers[self.webhook_cnt]["data"] += f"\n\n--- Webhook 결과 ---\n{webhook_data_text}"
+            self.step_buffers[self.webhook_cnt]["error"] += f"\n\n--- Webhook 검증 ---\n{webhook_error_text}"
+            self.step_buffers[self.webhook_cnt]["result"] = val_result
 
         # 메시지 저장
         if self.webhook_cnt == 6:  
@@ -428,6 +442,13 @@ class MyApp(QWidget):
 
         try:
             time_interval = 0
+
+            # cnt가 리스트 길이 이상이면 종료 처리 (무한 반복 방지)
+            if self.cnt >= len(self.message) or self.cnt >= len(CONSTANTS.time_out):
+                self.tick_timer.stop()
+                self.valResult.append("검증 절차가 완료되었습니다.")
+                self.cnt = 0
+                return
             # 플랫폼과 동일하게 time_pre/cnt_pre 조건 적용
             if self.time_pre == 0 or self.cnt != self.cnt_pre:
                 self.time_pre = time.time()
@@ -622,13 +643,12 @@ class MyApp(QWidget):
                             # 첫 번째 시도인 경우 초기화
                             self.step_buffers[self.cnt]["data"] = f"[시도 {self.current_retry + 1}/{current_retries}]\n{data_text}"
                             self.step_buffers[self.cnt]["error"] = f"[시도 {self.current_retry + 1}/{current_retries}]\n{error_text}"
-                            # 최종 결과는 플랫폼처럼 모든 시도가 PASS일 때만 PASS
-                            self.step_buffers[self.cnt]["result"] = "PASS"  # 초기값
+                            self.step_buffers[self.cnt]["result"] = val_result  # 첫 시도 결과로 초기화
                         else:
                             # 재시도인 경우 누적
                             self.step_buffers[self.cnt]["data"] += f"\n\n[시도 {self.current_retry + 1}/{current_retries}]\n{data_text}"
                             self.step_buffers[self.cnt]["error"] += f"\n\n[시도 {self.current_retry + 1}/{current_retries}]\n{error_text}"
-                        
+                            self.step_buffers[self.cnt]["result"] = val_result  # 마지막 시도 결과로 항상 갱신
                         # 최종 결과 판정 (플랫폼과 동일한 로직)
                         if self.current_retry + 1 >= current_retries:
                             # 모든 재시도 완료 - 모든 시도가 PASS일 때만 PASS
@@ -636,19 +656,27 @@ class MyApp(QWidget):
                                 self.step_buffers[self.cnt]["result"] = "PASS"
                             else:
                                 self.step_buffers[self.cnt]["result"] = "FAIL"
+                            # 마지막 시도 결과의 오류 텍스트로 덮어쓰기 (실패 시)
+                            if self.step_buffers[self.cnt]["result"] == "FAIL":
+                                self.step_buffers[self.cnt]["error"] = f"[시도 {self.current_retry + 1}/{current_retries}]\n{error_text}"
                         
                         # 진행 중 표시 (플랫폼과 동일하게)
                         message_name = "step " + str(self.cnt + 1) + ": " + self.message[self.cnt]
+                        # 각 시도별로 pass/error count는 누적이 아니라 이번 시도만 반영해야 함
+                        # key_psss_cnt, key_error_cnt는 이번 시도에 대한 값임
                         if self.current_retry + 1 < current_retries:
                             # 아직 재시도가 남아있으면 진행중으로 표시
-                            self.update_table_row_with_retries(self.cnt, "진행중", total_pass_count, total_error_count, 
-                                                             f"검증 진행중... ({self.current_retry + 1}/{current_retries})", 
-                                                             f"시도 {self.current_retry + 1}/{current_retries}", self.current_retry + 1)
+                            self.update_table_row_with_retries(
+                                self.cnt, "진행중", key_psss_cnt, key_error_cnt,
+                                f"검증 진행중... ({self.current_retry + 1}/{current_retries})",
+                                f"시도 {self.current_retry + 1}/{current_retries}", self.current_retry + 1)
                         else:
                             # 마지막 시도이면 최종 결과 표시
                             final_buffer_result = self.step_buffers[self.cnt]["result"]
-                            self.update_table_row_with_retries(self.cnt, final_buffer_result, total_pass_count, total_error_count, 
-                                                             tmp_res_auth, error_text, current_retries)
+                            # 마지막 시도에서는 누적이 아니라 마지막 시도 결과만 반영
+                            self.update_table_row_with_retries(
+                                self.cnt, final_buffer_result, key_psss_cnt, key_error_cnt,
+                                tmp_res_auth, error_text, current_retries)
 
                         self.valResult.append(f"\n검증 진행: {self.current_retry + 1}/{current_retries}회")
                         self.valResult.append(f"프로토콜: {current_protocol}")
