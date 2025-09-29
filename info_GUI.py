@@ -10,6 +10,8 @@ from PyQt5.QtCore import Qt, QThread, pyqtSignal
 # 분리된 모듈들 import
 from network_scanner import NetworkScanWorker
 from form_validator import FormValidator
+import importlib
+import config.CONSTANTS as CONSTANTS
 
 
 class InfoWidget(QWidget):
