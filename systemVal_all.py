@@ -392,9 +392,10 @@ class MyApp(QWidget):
         else:
             message_name = f"step {self.webhook_cnt + 1}: (index out of range)"
 
-        if self.webhook_cnt < len(self.webhookSchema):
-            val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.webhookSchema[self.webhook_cnt],
-                                                                            self.webhook_res, self.flag_opt)
+        # Adapted for new single-element list structure of webhookSchema
+        if isinstance(self.webhookSchema, list) and len(self.webhookSchema) > 0:
+            schema_to_check = self.webhookSchema[0]
+            val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(schema_to_check, self.webhook_res, self.flag_opt)
         else:
             val_result, val_text, key_psss_cnt, key_error_cnt = "FAIL", "webhookSchema index error", 0, 0
 
@@ -1320,7 +1321,8 @@ class MyApp(QWidget):
         self.outMessage = videoOutMessage
         self.inSchema = videoInSchema
         self.outSchema = videoOutSchema
-        self.webhookSchema = videoWebhookSchema
+        # Adapted for new single-element list structure
+        self.webhookSchema = videoWebhookSchema if isinstance(videoWebhookSchema, list) and len(videoWebhookSchema) > 0 else [{}]
         self.final_report = "영상보안 시스템-물리보안 통합플랫폼(가상) 검증 결과"+"\n"
         
         # 기본 인증 설정 (CONSTANTS.py에서 가져옴)
