@@ -19,55 +19,9 @@
 
 
 ## Project Structure
+<img width="3888" height="2034" alt="image" src="https://github.com/user-attachments/assets/677cdcd2-b1bb-4418-9774-176f7aeceaa3" />
 
-```text
-validation-tool/
-├─ requirements.txt
-├─ config/                     # 설정 관련
-│   ├─ CONSTANTS.py
-│   ├─ config.txt
-│   └─ key0627/                # 인증 키 파일
-│
-├─ core/                       # 공통 엔진 / 도메인
-│   ├─ functions.py            # 공통 유틸
-│   └─ json_checker.py         # JSON 스키마 검증
-│
-├─ api/                        # API 서버/웹훅
-│   ├─ api_server.py
-│   ├─ webhook_server.py
-│   └─ routes/                 # 엔드포인트별 처리
-│
-├─ specs/                      # 명세 (Request/Response + Schema)
-│   ├─ bio/
-│   │   ├─ bioRequest.py
-│   │   ├─ bioSchema.py
-│   │   └─ requests/           # JSON 예제
-│   ├─ security/
-│   │   ├─ securityRequest.py
-│   │   ├─ securitySchema.py
-│   │   └─ requests/
-│   └─ video/
-│       ├─ videoRequest.py
-│       ├─ videoSchema.py
-│       └─ requests/
-│
-│
-├─ assets/                     # 리소스
-│   ├─ fonts/
-│   │   ├─ NamuGothic.ttf
-│   │   └─ NamuGothic.pkl
-│   └─ images/
-│       └─ 버튼 이미지들
-│
-├─ launcher_GUI.py            # 장예진 담당
-├─ platformVal_all.py         # 정수인 담당
-├─ systemVal_app.py           # 정수인 담당
-└─ 
-```
-
-<img width="4229" height="2214" alt="최종 구조도" src="https://github.com/user-attachments/assets/ac06203f-7ea9-4756-84c6-1509b2940f9a" />
-
-## 브랜치
+## Branch
 runner: 시험 진행 GUI (정수인)
 
 info: 시험 정보 GUI (장예진)
