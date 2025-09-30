@@ -64,8 +64,7 @@ validation-tool/
 ├─ systemVal_app.py           # 정수인 담당
 └─ 
 ```
-
-<img width="4229" height="2214" alt="최종 구조도" src="https://github.com/user-attachments/assets/ac06203f-7ea9-4756-84c6-1509b2940f9a" />
+<img width="3544" height="1660" alt="image" src="https://github.com/user-attachments/assets/0e296baf-8829-415f-8ab6-ce84c86d23de" />
 
 ## 브랜치
 runner: 시험 진행 GUI (정수인)
