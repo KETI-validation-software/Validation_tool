@@ -21,8 +21,6 @@
 ## Project Structure
 <img width="3888" height="2034" alt="image" src="https://github.com/user-attachments/assets/677cdcd2-b1bb-4418-9774-176f7aeceaa3" />
 
-<img width="3544" height="1660" alt="image" src="https://github.com/user-attachments/assets/0e296baf-8829-415f-8ab6-ce84c86d23de" />
-
 ## Branch
 runner: 시험 진행 GUI (정수인)
 
