@@ -1,6 +1,6 @@
 # 시스템 검증 소프트웨어
 # physical security integrated system validation software
-
+import os
 import time
 import threading
 import json
@@ -1161,6 +1161,8 @@ class MyApp(QWidget):
 
     def update_score_display(self):
         """평가 점수 디스플레이 업데이트"""
+        if not (hasattr(self, "pass_count_label") and hasattr(self, "total_count_label") and hasattr(self, "score_label")):
+            return
         total_fields = self.total_pass_cnt + self.total_error_cnt
         if total_fields > 0:
             score = (self.total_pass_cnt / total_fields) * 100
@@ -1301,6 +1303,49 @@ class MyApp(QWidget):
         if hasattr(self, 'tick_timer'):
             self.tick_timer.stop()
         
+        # print문 추가 -> 나중에 기능 수정해야함 (09/30)
+        total_pass = getattr(self, 'total_pass_cnt', 0)
+        total_error = getattr(self, 'total_error_cnt', 0)
+        grand_total = total_pass + total_error
+        overall_score = (total_pass / grand_total * 100) if grand_total > 0 else 0
+
+        # 스텝별 결과 수집
+        rows = self.tableWidget.rowCount()
+        step_lines = []
+        for i in range(rows):
+            name = self.tableWidget.item(i, 0).text() if self.tableWidget.item(i, 0) else "N/A"
+            get_txt = lambda col: self.tableWidget.item(i, col).text() if self.tableWidget.item(i, col) else "N/A"
+            retries = get_txt(2)
+            pass_cnt = get_txt(3)
+            total_cnt = get_txt(4)
+            fail_cnt = get_txt(5)
+            score = get_txt(6)
+            # step_buffer에 최종 판정 가져오기
+            final_res = self.step_buffers[i]["result"] if i < len(self.step_buffers) else "N/A"
+            step_lines.append(f"{name} | 결과: {final_res} | 검증 횟수: {retries} | 통과 필드 수: {pass_cnt} | 전체 필드 수: {total_cnt} | 실패 횟수: {fail_cnt} | 평가 점수: {score}") 
+
+            # 로그 원문
+            raw_log = self.valResult.toPlainText() if hasattr(self, 'valResult') else ""
+
+            # 최종 페이로드 구성
+            header = "=== 시험 결과 ==="
+            overall = f"통과 필드 수: {total_pass}\n전체 필드 수: {grand_total}\n종합 평가 점수: {overall_score:.1f}%"
+            steps_text = "=== 스텝별 결과 ===\n" + "\n".join(step_lines) if step_lines else "스텝별 결과 없음"
+            logs_text = "=== 전체 로그 ===\n" + raw_log if raw_log else "로그 없음"
+            final_text = f"{header}\n{overall}\n\n{steps_text}\n\n{logs_text}\n"
+
+            # print(final_text)  # 나중에 대체
+
+            import os
+            result_dir = os.path.join(os.getcwd(), "results")
+            os.makedirs(result_dir, exist_ok=True)
+            results_path = os.path.join(result_dir, "response_results.txt") # 파일 저장명 수정
+
+            with open(results_path, "w", encoding="utf-8") as f:
+                f.write(final_text)
+            
+            print(f"시험 결과가 '{results_path}'에 저장되었습니다.")
+
         # 확인 대화상자
         reply = QMessageBox.question(self, '프로그램 종료', 
                                    '정말로 프로그램을 종료하시겠습니까?',
