@@ -838,42 +838,42 @@ class MyApp(QWidget):
         
         leftLayout.addWidget(empty)
         
-        self.settingGroup = QGroupBox("시험정보")
-        self.settingGroup.setMaximumWidth(460)  
-        
-        self.info_table = QTableWidget(9, 2)  
-        self.info_table.setMaximumWidth(460)
-        self.info_table.setFixedHeight(386)  
-        self.info_table.setHorizontalHeaderLabels(["항목", "내용"])
-        self.info_table.setColumnWidth(0, 150)  
-        self.info_table.setColumnWidth(1, 288)  
-        
-        self.info_table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.info_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        
-        self.info_table.verticalHeader().setVisible(False)
-        
-        self.info_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        
-        for i in range(9):
-            self.info_table.setRowHeight(i, 40) 
-        
-        table_data = self.load_test_info_from_constants()
-        
-        for row, (label, value) in enumerate(table_data):
-            item_label = QTableWidgetItem(label)
-            item_label.setFlags(Qt.ItemIsEnabled)  
-            item_label.setBackground(QColor(240, 240, 240))  
-            self.info_table.setItem(row, 0, item_label)
-            
-            item_value = QTableWidgetItem(str(value))
-            item_value.setFlags(Qt.ItemIsEnabled)  
-            item_value.setBackground(QColor(255, 255, 255))  
-            self.info_table.setItem(row, 1, item_value)
-        
-        settingLayout = QVBoxLayout()
-        settingLayout.addWidget(self.info_table)
-        self.settingGroup.setLayout(settingLayout)
+        # self.settingGroup = QGroupBox("시험정보")
+        # self.settingGroup.setMaximumWidth(460)  
+        # 
+        # self.info_table = QTableWidget(9, 2)  
+        # self.info_table.setMaximumWidth(460)
+        # self.info_table.setFixedHeight(386)  
+        # self.info_table.setHorizontalHeaderLabels(["항목", "내용"])
+        # self.info_table.setColumnWidth(0, 150)  
+        # self.info_table.setColumnWidth(1, 288)  
+        # 
+        # self.info_table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        # self.info_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        # 
+        # self.info_table.verticalHeader().setVisible(False)
+        # 
+        # self.info_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        # 
+        # for i in range(9):
+        #     self.info_table.setRowHeight(i, 40) 
+        # 
+        # table_data = self.load_test_info_from_constants()
+        # 
+        # for row, (label, value) in enumerate(table_data):
+        #     item_label = QTableWidgetItem(label)
+        #     item_label.setFlags(Qt.ItemIsEnabled)  
+        #     item_label.setBackground(QColor(240, 240, 240))  
+        #     self.info_table.setItem(row, 0, item_label)
+        #     
+        #     item_value = QTableWidgetItem(str(value))
+        #     item_value.setFlags(Qt.ItemIsEnabled)  
+        #     item_value.setBackground(QColor(255, 255, 255))  
+        #     self.info_table.setItem(row, 1, item_value)
+        # 
+        # settingLayout = QVBoxLayout()
+        # settingLayout.addWidget(self.info_table)
+        # self.settingGroup.setLayout(settingLayout)
         
         buttonGroup = QWidget()
         buttonGroup.setMaximumWidth(500)  
@@ -970,15 +970,15 @@ class MyApp(QWidget):
         buttonLayout.addStretch()  
         buttonGroup.setLayout(buttonLayout)
         
-        leftLayout.addWidget(self.settingGroup)
+    # leftLayout.addWidget(self.settingGroup)
         leftLayout.addSpacing(300) 
         leftLayout.addWidget(buttonGroup)
         leftLayout.addStretch()  
         
-        # ==================== 오른쪽 열 구성 ====================
-        # 평가 점수
-        rightLayout.addWidget(self.group_score())
-        rightLayout.addSpacing(15)
+    # ==================== 오른쪽 열 구성 ====================
+    # 평가 점수 UI 주석 처리
+    # rightLayout.addWidget(self.group_score())
+    # rightLayout.addSpacing(15)
         
         # 시험 결과
         self.valmsg = QLabel('시험 결과', self)
