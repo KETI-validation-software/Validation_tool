@@ -407,6 +407,7 @@ class MyApp(QWidget):
                     all_error_messages = []
                     combined_data_parts = []
 
+
                     for retry_attempt in range(current_retries):
                         combined_error_parts = []
                         step_result = "PASS"
@@ -417,18 +418,19 @@ class MyApp(QWidget):
                         if retry_attempt == 0:
                             self.valResult.append(message_name)
                             self.valResult.append(f"🔄 부하테스트 시작: 총 {current_retries}회 검증 예정")
-                        
+
                         # 순서 확인용 로그
                         print(f"[PLATFORM] 시스템 요청 대기 중: {self.Server.message[self.cnt]} (시도 {retry_attempt + 1})")
-                        
+
                         self.valResult.append(f"⏳ 시스템 요청 대기 중... [{retry_attempt + 1}/{current_retries}]")
-                        
+
                         # 테이블에 실시간 진행률 표시
                         self.update_table_row_with_retries(self.cnt, "진행중", 0, 0, "검증 진행중...", f"시도 {retry_attempt + 1}/{current_retries}", retry_attempt + 1)
-                        
-                        # UI 업데이트를 위한 지연 (시스템쪽과 동일한 타이밍)
+
                         QApplication.processEvents()
-                        time.sleep(2.0)  # 시스템쪽과 동일한 간격
+                        # 마지막 반복이 아닐 때만 대기
+                        if retry_attempt < current_retries - 1:
+                            time.sleep(2.0)  # 시험 진행 속도 간격임 -> 숫자 클수록 느리게 검증 횟수 카운트
 
                         # 매 시도마다 새로운 데이터 읽기 (실제 부하테스트)
                         try:
@@ -547,7 +549,7 @@ class MyApp(QWidget):
                     else:
                         tmp_res_auth = "No data"
                     
-                    # 테이블 업데이트
+                    # 테이블 업데이트 
                     self.update_table_row_with_retries(self.cnt, final_result, total_pass_count, total_error_count, tmp_res_auth, error_text, current_retries)
 
                     # 모니터링 창에 최종 결과 표시
