@@ -76,13 +76,13 @@ class InfoWidget(QWidget):
         left_title.setStyleSheet("font-size: 14px; font-weight: bold; padding: 10px;")
         left_layout.addWidget(left_title)
 
-        # 새로운 시험 분야 테이블
-        field_table = self.create_test_field_table()
-        left_layout.addWidget(field_table)
+        # 시험 분야명 테이블 (QGroupBox로 감싸기)
+        field_group = self.create_test_field_group()
+        left_layout.addWidget(field_group)
 
-        # 기존 API 테이블 (시험분야(API)로 변경)
-        api_table = self.create_test_field_api_table()
-        left_layout.addWidget(api_table)
+        # 시험 API 테이블 (QGroupBox로 감싸기)
+        api_group = self.create_test_api_group()
+        left_layout.addWidget(api_group)
 
         left_panel.setLayout(left_layout)
 
@@ -116,7 +116,11 @@ class InfoWidget(QWidget):
 
     # ---------- 페이지 전환 메서드 ----------
     def go_to_next_page(self):
-        """다음 페이지로 이동"""
+        """다음 페이지로 이동 (조건 검증 후)"""
+        if not self._is_page1_complete():
+            QMessageBox.warning(self, "입력 필요", "첫 번째 페이지의 모든 필수 항목을 입력해주세요.")
+            return
+
         if self.current_page < 1:
             self.current_page += 1
             self.stacked_widget.setCurrentIndex(self.current_page)
@@ -134,10 +138,11 @@ class InfoWidget(QWidget):
         layout.addStretch()
 
         # 다음 버튼
-        next_btn = QPushButton("다음")
-        next_btn.setStyleSheet("QPushButton { background-color: #9FBFE5; color: black; font-weight: bold; }")
-        next_btn.clicked.connect(self.go_to_next_page)
-        layout.addWidget(next_btn)
+        self.next_btn = QPushButton("다음")
+        self.next_btn.setStyleSheet("QPushButton { background-color: #9FBFE5; color: black; font-weight: bold; }")
+        self.next_btn.clicked.connect(self.go_to_next_page)
+        self.next_btn.setEnabled(False)  # 초기에는 비활성화
+        layout.addWidget(self.next_btn)
 
         # 초기화 버튼
         reset_btn = QPushButton("초기화")
@@ -243,24 +248,43 @@ class InfoWidget(QWidget):
         self.test_category_edit.textChanged.connect(self.form_validator.handle_test_category_change)
         self.test_category_edit.textChanged.connect(self.check_start_button_state)
 
+        # 첫 번째 페이지 필드들의 변경 시 다음 버튼 상태 체크
+        for field in [self.company_edit, self.product_edit, self.version_edit, self.model_edit,
+                     self.test_category_edit, self.target_system_edit, self.test_group_edit, self.test_range_edit,
+                     self.admin_code_edit]:
+            field.textChanged.connect(self.check_next_button_state)
+
         layout.addLayout(form)
         panel.setLayout(layout)
         return panel
 
-    def create_test_field_table(self):
-        """시험 분야명  테이블"""
-        table = QTableWidget(0, 1)
-        table.setHorizontalHeaderLabels(["시험 분야명"])
-        table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        return table
+    def create_test_field_group(self):
+        """시험 분야명 그룹 (QGroupBox)"""
+        group = QGroupBox("시험 분야")
+        layout = QVBoxLayout()
 
-    def create_test_field_api_table(self):
-        """시험분야(API) 테이블"""
-        table = QTableWidget(0, 3)
-        table.setHorizontalHeaderLabels(["시험 분야", "기능명", "API명"])
-        table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.api_test_table = table 
-        return table
+        self.test_field_table = QTableWidget(0, 1)
+        self.test_field_table.setHorizontalHeaderLabels(["시험 분야명"])
+        self.test_field_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.test_field_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.test_field_table.cellClicked.connect(self.on_test_field_selected)
+
+        layout.addWidget(self.test_field_table)
+        group.setLayout(layout)
+        return group
+
+    def create_test_api_group(self):
+        """시험 API 그룹 (QGroupBox)"""
+        group = QGroupBox("시험 API")
+        layout = QVBoxLayout()
+
+        self.api_test_table = QTableWidget(0, 2)
+        self.api_test_table.setHorizontalHeaderLabels(["기능명", "API명"])
+        self.api_test_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+
+        layout.addWidget(self.api_test_table)
+        group.setLayout(layout)
+        return group
 
     def create_auth_section(self):
         """인증 방식 섹션"""
@@ -322,12 +346,14 @@ class InfoWidget(QWidget):
         scan_btn.setStyleSheet("QPushButton { background-color: #E1EBF4; color: #3987C1; font-weight: bold; }")
         scan_btn.clicked.connect(self.start_scan)
         btn_row.addWidget(scan_btn)
-        btn_row.addStretch()
+        #btn_row.addStretch()
         layout.addLayout(btn_row)
 
         self.url_table = QTableWidget(0, 2)
         self.url_table.setHorizontalHeaderLabels(["☑", "URL"])
-        self.url_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        header = self.url_table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeToContents) 
+        header.setSectionResizeMode(1, QHeaderView.Stretch)   
         self.url_table.cellClicked.connect(self.select_url_row)
         layout.addWidget(self.url_table)
 
@@ -388,7 +414,8 @@ class InfoWidget(QWidget):
         scan_label.setStyleSheet("font-weight: bold; margin-top: 10px;")
         layout.addWidget(scan_label)
 
-        btn_row = QHBoxLayout(); btn_row.addStretch()
+        btn_row = QHBoxLayout()
+        btn_row.addStretch()
         scan_btn = QPushButton("🔍주소 탐색")
         scan_btn.setStyleSheet("QPushButton { background-color: #E1EBF4; color: #3987C1; font-weight: bold; }")
         scan_btn.clicked.connect(self.start_scan)
@@ -703,8 +730,8 @@ class InfoWidget(QWidget):
             if any(field for field in basic_fields):
                 return True
 
-            # API 테이블에 데이터가 있는지 확인
-            if self.api_test_table.rowCount() > 0:
+            # 테이블들에 데이터가 있는지 확인
+            if self.test_field_table.rowCount() > 0 or self.api_test_table.rowCount() > 0:
                 return True
 
             # 인증 정보에 입력값이 있는지 확인
@@ -753,7 +780,8 @@ class InfoWidget(QWidget):
             self.admin_code_edit.setEnabled(True)
             self.admin_code_edit.setPlaceholderText("입력해주세요")
 
-            # API 테이블 초기화
+            # 테이블들 초기화
+            self.test_field_table.setRowCount(0)
             self.api_test_table.setRowCount(0)
 
             # 인증 정보 초기화
@@ -775,6 +803,7 @@ class InfoWidget(QWidget):
 
             # 버튼 상태 업데이트
             self.check_start_button_state()
+            self.check_next_button_state()  # 다음 버튼 상태도 업데이트
 
             print("모든 필드 초기화 완료")
             QMessageBox.information(self, "초기화 완료", "모든 입력값이 초기화되었습니다.")
@@ -782,4 +811,52 @@ class InfoWidget(QWidget):
         except Exception as e:
             print(f"초기화 실패: {e}")
             raise
+
+    def check_next_button_state(self):
+        """첫 번째 페이지의 다음 버튼 활성화 조건 체크"""
+        try:
+            if hasattr(self, 'next_btn'):
+                self.next_btn.setEnabled(self._is_page1_complete())
+        except Exception as e:
+            print(f"다음 버튼 상태 체크 실패: {e}")
+
+    def _is_page1_complete(self):
+        """첫 번째 페이지 완료 조건 검사"""
+        try:
+            # 1. 모드 선택 확인 (불러오기 버튼 중 하나를 눌렀는지)
+            if not self.current_mode:
+                return False
+
+            # 2. 시험 기본 정보 모든 필드 입력 확인
+            basic_info_filled = all([
+                self.company_edit.text().strip(),
+                self.product_edit.text().strip(),
+                self.version_edit.text().strip(),
+                self.model_edit.text().strip(),
+                self.test_category_edit.text().strip(),
+                self.target_system_edit.text().strip(),
+                self.test_group_edit.text().strip(),
+                self.test_range_edit.text().strip()
+            ])
+
+            # 3. 관리자 코드 유효성 확인
+            admin_code_valid = self.form_validator.is_admin_code_valid()
+
+            # 4. 시험 분야명 테이블에 데이터가 있는지 확인
+            test_field_filled = self.test_field_table.rowCount() > 0
+
+            # 모든 조건이 충족되면 완료
+            return basic_info_filled and admin_code_valid and test_field_filled
+
+        except Exception as e:
+            print(f"페이지 완료 조건 체크 실패: {e}")
+            return False
+
+    def on_test_field_selected(self, row, col):
+        """시험 분야명 선택 시 해당 API 테이블 표시"""
+        try:
+            self.form_validator._fill_api_table_for_selected_field(row)
+        except Exception as e:
+            print(f"시험 분야 선택 처리 실패: {e}")
+            QMessageBox.warning(self, "오류", f"시험 분야 데이터 로드 중 오류가 발생했습니다:\n{str(e)}")
 

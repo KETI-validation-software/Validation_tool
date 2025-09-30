@@ -133,18 +133,6 @@ StoredObjectAnalyticsInfos_out_schema = {
 }],
 }
 
-# WebHook RealtimeVideoEventInfos
-WebHook_RealtimeVideoEventInfos_in_schema = {
-    "camList": [{
-    "camID": str,
-    "eventUUID": str,
-    "eventName": str,
-    "startTime": int,
-    OptionalKey("endTime"): int,
-    OptionalKey("eventDesc"): str,
-}],
-}
-
 # steps 순서대로 스키마 리스트 생성
 videoOutSchema = [
     Authentication_out_schema,
@@ -156,9 +144,4 @@ videoOutSchema = [
     RealtimeVideoEventInfos_out_schema,
     StoredVideoEventInfos_out_schema,
     StoredObjectAnalyticsInfos_out_schema,
-]
-
-# WebHook 전용 스키마 리스트
-videoWebhookSchema = [
-    WebHook_RealtimeVideoEventInfos_in_schema,
 ]
