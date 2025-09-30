@@ -1,6 +1,6 @@
 # 시스템 검증 소프트웨어
 # physical security integrated system validation software
-
+import os
 import time
 import threading
 import json
@@ -161,6 +161,16 @@ class CustomDialog(QDialog):  # popup window for validation result
 
 
 class MyApp(QWidget):
+
+    def _append_text(self, obj):
+        import json
+        try:
+            if isinstance(obj, (dict, list)):
+                self.valResult.append(json.dumps(obj, ensure_ascii=False, indent=2))
+            else:
+                self.valResult.append(str(obj))
+        except Exception as e:
+            self.valResult.append(f"[append_error] {e}")
     def handle_authentication_response(self, res_data):
         """Handles the response for the Authentication step, updates token if present."""
         # Fix: Use 'accessToken' key, not 'token'
@@ -317,57 +327,55 @@ class MyApp(QWidget):
 
     def post(self, path, json_data, time_out):
         self.res = None
+        # 인증 방식(r2)에 따라 auth 인자 결정 (토큰 유무로 분기 X)
+        auth = None
         if self.r2 == "B":
-            self.auth_type = BearerAuth(self.token)
+            auth = BearerAuth(self.token) if self.token else None
         elif self.r2 == "D":
-            self.auth_type = HTTPDigestAuth(self.digestInfo[0], self.digestInfo[1])
-        elif self.r2 == "None":
-            self.auth_type = False
+            auth = HTTPDigestAuth(self.digestInfo[0], self.digestInfo[1])
+        # self.r2 == "None"이면 그대로 None
+
         try:
-            if self.token is None:
-                print(f"[DEBUG] [post] No token, sending request without Authorization header. path={path}")
-                self.res = requests.post(path,
-                                         headers=CONSTANTS.headers, data=json_data,  # headers = head
-                                         verify=False, timeout=time_out)
-            else:
-                print(f"[DEBUG] [post] Sending request to {path} with Bearer token: {self.token}")
-                self.res = requests.post(path,
-                                         headers=CONSTANTS.headers, data=json_data,  # headers = head
-                                         auth=self.auth_type, verify=False, timeout=time_out)
-
-                if "Realtime" in path:
-                    time.sleep(0.1)  # Realtime 처리를 위한 짧은 대기
-                    try:
-                        json_data_dict = json.loads(json_data.decode('utf-8'))
-                        trans_protocol = json_data_dict.get("transProtocol", {})
-
-                        if trans_protocol:
-                            trans_protocol_type = trans_protocol.get("transProtocolType", {})
-                            if "WebHook".lower() in str(trans_protocol_type).lower():
-                                path_tmp = trans_protocol.get("transProtocolDesc", {})
-                                if not path_tmp or str(path_tmp).strip() in ["None", "", "desc"]:
-                                    path_tmp = "https://127.0.0.1"
-
-                                    path_tmp = "https://" + str(path_tmp)
-
-                                parsed = urlparse(str(path_tmp))
-                                url = parsed.hostname if parsed.hostname is not None else "127.0.0.1"
-                                port = parsed.port if parsed.port is not None else 80
-                                msg = self.outMessage[-1]
-                                self.webhook_flag = True
-
-                                self.webhook_cnt = self.cnt
-                                self.webhook_thread = WebhookThread(url, port, msg)
-                                self.webhook_thread.result_signal.connect(self.handle_webhook_result)
-                                self.webhook_thread.start()
-
-                    except Exception as e:
-                        print(e)
-                        import traceback
-                        traceback.print_exc()
-
+            print(f"[DEBUG] [post] Sending request to {path} with auth_type={self.r2}, token={self.token}")
+            self.res = requests.post(
+                path,
+                headers=CONSTANTS.headers,
+                data=json_data,
+                auth=auth,
+                verify=False,
+                timeout=time_out
+            )
         except Exception as e:
             print(e)
+
+        # Webhook/Realtime 처리 (더 방어적으로)
+        if "Realtime" in path:
+            time.sleep(0.1)
+            try:
+                json_data_dict = json.loads(json_data.decode('utf-8'))
+                trans_protocol = json_data_dict.get("transProtocol", {})
+                if trans_protocol:
+                    trans_protocol_type = trans_protocol.get("transProtocolType", {})
+                    if "WebHook".lower() in str(trans_protocol_type).lower():
+                        path_tmp = trans_protocol.get("transProtocolDesc", {})
+                        # http/https 접두어 보정
+                        if not path_tmp or str(path_tmp).strip() in ["None", "", "desc"]:
+                            path_tmp = "https://127.0.0.1"
+                        if not str(path_tmp).startswith("http"):
+                            path_tmp = "https://" + str(path_tmp)
+                        parsed = urlparse(str(path_tmp))
+                        url = parsed.hostname if parsed.hostname is not None else "127.0.0.1"
+                        port = parsed.port if parsed.port is not None else 80
+                        msg = self.outMessage[-1]
+                        self.webhook_flag = True
+                        self.webhook_cnt = self.cnt
+                        self.webhook_thread = WebhookThread(url, port, msg)
+                        self.webhook_thread.result_signal.connect(self.handle_webhook_result)
+                        self.webhook_thread.start()
+            except Exception as e:
+                print(e)
+                import traceback
+                traceback.print_exc()
 
 
     def handle_webhook_result(self, result):
@@ -384,9 +392,10 @@ class MyApp(QWidget):
         else:
             message_name = f"step {self.webhook_cnt + 1}: (index out of range)"
 
-        if self.webhook_cnt < len(self.webhookSchema):
-            val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.webhookSchema[self.webhook_cnt],
-                                                                            self.webhook_res, self.flag_opt)
+        # Adapted for new single-element list structure of webhookSchema
+        if isinstance(self.webhookSchema, list) and len(self.webhookSchema) > 0:
+            schema_to_check = self.webhookSchema[0]
+            val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(schema_to_check, self.webhook_res, self.flag_opt)
         else:
             val_result, val_text, key_psss_cnt, key_error_cnt = "FAIL", "webhookSchema index error", 0, 0
 
@@ -597,7 +606,18 @@ class MyApp(QWidget):
                             self.valResult.append(self.message_name)
 
                         res_data = self.res.text
-                        res_data = json.loads(res_data)
+                        #res_data = json.loads(res_data)
+
+                        try:
+                            res_data = json.loads(res_data)
+                        except Exception as e:
+                            self._append_text(f"응답 JSON 파싱 오류: {e}")
+                            self._append_text({"raw_response": self.res.text})
+                            # 이후 로직 건너뜀
+                            self.post_flag = False
+                            self.processing_response = False
+                            self.current_retry += 1
+                            return
 
                         # 현재 재시도 정보
                         current_retries = CONSTANTS.num_retries[self.cnt] if self.cnt < len(CONSTANTS.num_retries) else 1
@@ -818,42 +838,42 @@ class MyApp(QWidget):
         
         leftLayout.addWidget(empty)
         
-        self.settingGroup = QGroupBox("시험정보")
-        self.settingGroup.setMaximumWidth(460)  
-        
-        self.info_table = QTableWidget(9, 2)  
-        self.info_table.setMaximumWidth(460)
-        self.info_table.setFixedHeight(386)  
-        self.info_table.setHorizontalHeaderLabels(["항목", "내용"])
-        self.info_table.setColumnWidth(0, 150)  
-        self.info_table.setColumnWidth(1, 288)  
-        
-        self.info_table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.info_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        
-        self.info_table.verticalHeader().setVisible(False)
-        
-        self.info_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        
-        for i in range(9):
-            self.info_table.setRowHeight(i, 40) 
-        
-        table_data = self.load_test_info_from_constants()
-        
-        for row, (label, value) in enumerate(table_data):
-            item_label = QTableWidgetItem(label)
-            item_label.setFlags(Qt.ItemIsEnabled)  
-            item_label.setBackground(QColor(240, 240, 240))  
-            self.info_table.setItem(row, 0, item_label)
-            
-            item_value = QTableWidgetItem(str(value))
-            item_value.setFlags(Qt.ItemIsEnabled)  
-            item_value.setBackground(QColor(255, 255, 255))  
-            self.info_table.setItem(row, 1, item_value)
-        
-        settingLayout = QVBoxLayout()
-        settingLayout.addWidget(self.info_table)
-        self.settingGroup.setLayout(settingLayout)
+        # self.settingGroup = QGroupBox("시험정보")
+        # self.settingGroup.setMaximumWidth(460)  
+        # 
+        # self.info_table = QTableWidget(9, 2)  
+        # self.info_table.setMaximumWidth(460)
+        # self.info_table.setFixedHeight(386)  
+        # self.info_table.setHorizontalHeaderLabels(["항목", "내용"])
+        # self.info_table.setColumnWidth(0, 150)  
+        # self.info_table.setColumnWidth(1, 288)  
+        # 
+        # self.info_table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        # self.info_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        # 
+        # self.info_table.verticalHeader().setVisible(False)
+        # 
+        # self.info_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        # 
+        # for i in range(9):
+        #     self.info_table.setRowHeight(i, 40) 
+        # 
+        # table_data = self.load_test_info_from_constants()
+        # 
+        # for row, (label, value) in enumerate(table_data):
+        #     item_label = QTableWidgetItem(label)
+        #     item_label.setFlags(Qt.ItemIsEnabled)  
+        #     item_label.setBackground(QColor(240, 240, 240))  
+        #     self.info_table.setItem(row, 0, item_label)
+        #     
+        #     item_value = QTableWidgetItem(str(value))
+        #     item_value.setFlags(Qt.ItemIsEnabled)  
+        #     item_value.setBackground(QColor(255, 255, 255))  
+        #     self.info_table.setItem(row, 1, item_value)
+        # 
+        # settingLayout = QVBoxLayout()
+        # settingLayout.addWidget(self.info_table)
+        # self.settingGroup.setLayout(settingLayout)
         
         buttonGroup = QWidget()
         buttonGroup.setMaximumWidth(500)  
@@ -950,15 +970,15 @@ class MyApp(QWidget):
         buttonLayout.addStretch()  
         buttonGroup.setLayout(buttonLayout)
         
-        leftLayout.addWidget(self.settingGroup)
+    # leftLayout.addWidget(self.settingGroup)
         leftLayout.addSpacing(300) 
         leftLayout.addWidget(buttonGroup)
         leftLayout.addStretch()  
         
-        # ==================== 오른쪽 열 구성 ====================
-        # 평가 점수
-        rightLayout.addWidget(self.group_score())
-        rightLayout.addSpacing(15)
+    # ==================== 오른쪽 열 구성 ====================
+    # 평가 점수 UI 주석 처리
+    # rightLayout.addWidget(self.group_score())
+    # rightLayout.addSpacing(15)
         
         # 시험 결과
         self.valmsg = QLabel('시험 결과', self)
@@ -1141,6 +1161,8 @@ class MyApp(QWidget):
 
     def update_score_display(self):
         """평가 점수 디스플레이 업데이트"""
+        if not (hasattr(self, "pass_count_label") and hasattr(self, "total_count_label") and hasattr(self, "score_label")):
+            return
         total_fields = self.total_pass_cnt + self.total_error_cnt
         if total_fields > 0:
             score = (self.total_pass_cnt / total_fields) * 100
@@ -1281,6 +1303,49 @@ class MyApp(QWidget):
         if hasattr(self, 'tick_timer'):
             self.tick_timer.stop()
         
+        # print문 추가 -> 나중에 기능 수정해야함 (09/30)
+        total_pass = getattr(self, 'total_pass_cnt', 0)
+        total_error = getattr(self, 'total_error_cnt', 0)
+        grand_total = total_pass + total_error
+        overall_score = (total_pass / grand_total * 100) if grand_total > 0 else 0
+
+        # 스텝별 결과 수집
+        rows = self.tableWidget.rowCount()
+        step_lines = []
+        for i in range(rows):
+            name = self.tableWidget.item(i, 0).text() if self.tableWidget.item(i, 0) else "N/A"
+            get_txt = lambda col: self.tableWidget.item(i, col).text() if self.tableWidget.item(i, col) else "N/A"
+            retries = get_txt(2)
+            pass_cnt = get_txt(3)
+            total_cnt = get_txt(4)
+            fail_cnt = get_txt(5)
+            score = get_txt(6)
+            # step_buffer에 최종 판정 가져오기
+            final_res = self.step_buffers[i]["result"] if i < len(self.step_buffers) else "N/A"
+            step_lines.append(f"{name} | 결과: {final_res} | 검증 횟수: {retries} | 통과 필드 수: {pass_cnt} | 전체 필드 수: {total_cnt} | 실패 횟수: {fail_cnt} | 평가 점수: {score}") 
+
+            # 로그 원문
+            raw_log = self.valResult.toPlainText() if hasattr(self, 'valResult') else ""
+
+            # 최종 페이로드 구성
+            header = "=== 시험 결과 ==="
+            overall = f"통과 필드 수: {total_pass}\n전체 필드 수: {grand_total}\n종합 평가 점수: {overall_score:.1f}%"
+            steps_text = "=== 스텝별 결과 ===\n" + "\n".join(step_lines) if step_lines else "스텝별 결과 없음"
+            logs_text = "=== 전체 로그 ===\n" + raw_log if raw_log else "로그 없음"
+            final_text = f"{header}\n{overall}\n\n{steps_text}\n\n{logs_text}\n"
+
+            # print(final_text)  # 나중에 대체
+
+            import os
+            result_dir = os.path.join(os.getcwd(), "results")
+            os.makedirs(result_dir, exist_ok=True)
+            results_path = os.path.join(result_dir, "response_results.txt") # 파일 저장명 수정
+
+            with open(results_path, "w", encoding="utf-8") as f:
+                f.write(final_text)
+            
+            print(f"시험 결과가 '{results_path}'에 저장되었습니다.")
+
         # 확인 대화상자
         reply = QMessageBox.question(self, '프로그램 종료', 
                                    '정말로 프로그램을 종료하시겠습니까?',
@@ -1301,7 +1366,8 @@ class MyApp(QWidget):
         self.outMessage = videoOutMessage
         self.inSchema = videoInSchema
         self.outSchema = videoOutSchema
-        self.webhookSchema = videoWebhookSchema
+        # Adapted for new single-element list structure
+        self.webhookSchema = videoWebhookSchema if isinstance(videoWebhookSchema, list) and len(videoWebhookSchema) > 0 else [{}]
         self.final_report = "영상보안 시스템-물리보안 통합플랫폼(가상) 검증 결과"+"\n"
         
         # 기본 인증 설정 (CONSTANTS.py에서 가져옴)

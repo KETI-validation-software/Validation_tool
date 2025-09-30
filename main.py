@@ -10,6 +10,8 @@ from info_GUI import InfoWidget
 from core.functions import resource_path
 import platformVal_all as platform_app
 import systemVal_all as system_app
+import config.CONSTANTS as CONSTANTS
+import importlib
 
 
 class MainWindow(QMainWindow):
@@ -117,6 +119,15 @@ class MainWindow(QMainWindow):
         QMessageBox.information(self, "로그아웃", "정상적으로 로그아웃되었습니다.")
 
     def _open_validation_app(self, mode):
+        importlib.reload(CONSTANTS)  # CONSTANTS 모듈을 다시 로드하여 최신 설정 반영
+        
+        # 인스턴스 재사용 금지
+        if hasattr(self, "validation_window") and self.validation_window is not None:
+            self.validation_window.close()
+            self.validation_window = None
+        self.validation_window = platform_app.MyApp(mode)
+        self.validation_window.show()
+
         """모드에 따라 다른 검증 앱 실행"""
         if mode in ["request_longpolling", "request_webhook"]:
             # Request 모드 (LongPolling/WebHook) - Platform 검증
