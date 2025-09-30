@@ -167,11 +167,39 @@ class MyApp(QWidget):
         super().__init__()
         self.embedded = embedded
         self.radio_check_flag = "video"  # 영상보안 시스템으로 고정
+        # 아이콘 경로 먼저 초기화 (initUI에서 사용됨)
         self.img_pass = resource_path("assets/image/green.png")
         self.img_fail = resource_path("assets/image/red.png")
         self.img_none = resource_path("assets/image/black.png")
 
-        self.flag_opt = True  # functions.py-json_check_ # 필수필드만 확인 False, optional 필드까지 확인 True
+        self.tick_timer = QTimer()
+        self.tick_timer.timeout.connect(self.update_view)
+        self.auth_flag = True 
+        self.Server = Server
+
+        auth_temp, auth_temp2 = set_auth("config/config.txt")
+        self.digestInfo = [auth_temp2[0], auth_temp2[1]]
+        self.token = auth_temp
+
+        self.initUI()
+        self.realtime_flag = False
+        self.cnt = 0
+        self.current_retry = 0  # 현재 API의 반복 횟수 카운터
+        self.total_error_cnt = 0
+        self.total_pass_cnt = 0
+        self.time_pre = 0
+        self.cnt_pre = 0
+        self.final_report = ""
+        self.step_buffers = [
+            {"data": "", "error": "", "result": "PASS"} for _ in range(9)
+        ]
+
+        self.get_setting()
+        # 첫 실행 여부 플래그
+        self.first_run = True
+
+        with open(resource_path("spec/rows.json"), "w") as out_file:
+            json.dump(None, out_file, ensure_ascii=False)
         self.tick_timer = QTimer()
         self.tick_timer.timeout.connect(self.update_view)
         self.auth_flag = True 
@@ -695,63 +723,47 @@ class MyApp(QWidget):
             ("시험 접속 정보", CONSTANTS.url)
         ]
 
+
     def initUI(self):
-        outerLayout = QHBoxLayout()  
-        leftLayout = QVBoxLayout()  
-        rightLayout = QVBoxLayout()  
-        
-        empty = QLabel(" ")
-        empty.setStyleSheet('font-size:5pt')
-        
-        # ==================== 왼쪽 열 구성 ====================
-        leftLayout.addWidget(empty)  # empty
-        
-        # self.settingGroup = QGroupBox("시험정보")
-        # self.settingGroup.setMaximumWidth(460)  
-        # 
-        # # 시험 정보 위젯 생성 
-        # self.info_table = QTableWidget(9, 2)  
-        # self.info_table.setMaximumWidth(460)
-        # self.info_table.setFixedHeight(386) 
-        # self.info_table.setHorizontalHeaderLabels(["항목", "내용"])
-        # self.info_table.setColumnWidth(0, 150) 
-        # self.info_table.setColumnWidth(1, 288)  
-        # 
-        # self.info_table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        # self.info_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        # self.info_table.verticalHeader().setVisible(False)
-        # self.info_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        # 
-        # for i in range(9):
-        #     self.info_table.setRowHeight(i, 40)
-        # 
-        # # CONSTANTS.py에서 테이블 데이터 로드
-        # table_data = self.load_test_info_from_constants()
-        # 
-        # # 테이블에 데이터 입력 (모두 읽기 전용)
-        # for row, (label, value) in enumerate(table_data):
-        #     # 첫 번째 컬럼 (항목) 
-        #     item_label = QTableWidgetItem(label)
-        #     item_label.setFlags(Qt.ItemIsEnabled)
-        #     item_label.setBackground(QColor(240, 240, 240))
-        #     self.info_table.setItem(row, 0, item_label)
-        #     
-        #     # 두 번째 컬럼 (내용) 
-        #     item_value = QTableWidgetItem(str(value))
-        #     item_value.setFlags(Qt.ItemIsEnabled)
-        #     item_value.setBackground(QColor(255, 255, 255))
-        #     self.info_table.setItem(row, 1, item_value)
-        # 
-        # # 테이블 레이아웃
-        # settingLayout = QVBoxLayout()
-        # settingLayout.addWidget(self.info_table)
-        # self.settingGroup.setLayout(settingLayout)
-        
-        # 검증 버튼들 
-        buttonGroup = QWidget()  
-        buttonGroup.setMaximumWidth(500)  
-        buttonLayout = QHBoxLayout() 
-        
+        # 1열(세로) 레이아웃으로 통합
+        mainLayout = QVBoxLayout()
+
+        # 상단 큰 제목
+        self.title_label = QLabel('통합플랫폼 연동 검증', self)
+        title_font = self.title_label.font()
+        title_font.setPointSize(22)
+        title_font.setBold(True)
+        self.title_label.setFont(title_font)
+        self.title_label.setAlignment(Qt.AlignCenter)
+        mainLayout.addWidget(self.title_label)
+
+        # 시험 결과
+        self.valmsg = QLabel('시험 결과', self)
+        mainLayout.addWidget(self.valmsg)
+
+        self.init_centerLayout()
+        contentWidget = QWidget()
+        contentWidget.setLayout(self.centerLayout)
+        contentWidget.setMaximumSize(1050, 400)
+        contentWidget.setMinimumSize(950, 300)
+        mainLayout.addWidget(contentWidget)
+
+        mainLayout.addSpacing(15)
+
+        # 수신 메시지 실시간 모니터링
+        monitor_label = QLabel("수신 메시지 실시간 모니터링")
+        mainLayout.addWidget(monitor_label)
+        self.valResult = QTextBrowser(self)
+        self.valResult.setMaximumHeight(200)
+        self.valResult.setMaximumWidth(1050)
+        self.valResult.setMinimumWidth(950)
+        mainLayout.addWidget(self.valResult)
+
+        # 버튼 그룹 (평가 시작, 일시 정지, 종료) - 아래쪽, 가운데 정렬
+        buttonGroup = QWidget()
+        buttonLayout = QHBoxLayout()
+        buttonLayout.setAlignment(Qt.AlignCenter)
+
         self.sbtn = QPushButton(self)
         self.sbtn.setText('평가 시작')
         self.sbtn.setFixedSize(140, 50)
@@ -806,8 +818,7 @@ class MyApp(QWidget):
         """)
         self.stop_btn.clicked.connect(self.stop_btn_clicked)
         self.stop_btn.setDisabled(True)
-        
-        # 종료 버튼
+
         self.rbtn = QPushButton(self)
         self.rbtn.setText('종료')
         self.rbtn.setFixedSize(140, 50)
@@ -834,54 +845,23 @@ class MyApp(QWidget):
             }
         """)
         self.rbtn.clicked.connect(self.exit_btn_clicked)
-        
-        buttonLayout.addStretch()
+
         buttonLayout.addWidget(self.sbtn)
         buttonLayout.addSpacing(20)
         buttonLayout.addWidget(self.stop_btn)
         buttonLayout.addSpacing(20)
         buttonLayout.addWidget(self.rbtn)
-        buttonLayout.addStretch()
         buttonGroup.setLayout(buttonLayout)
-        
-    # leftLayout.addWidget(self.settingGroup)
-        leftLayout.addSpacing(300)
-        leftLayout.addWidget(buttonGroup)
-        leftLayout.addStretch()
-        
-    # 오른쪽 열 구성
-    # rightLayout.addWidget(self.group_score())
-    # rightLayout.addSpacing(15)
-        
-        # 시험 결과
-        self.valmsg = QLabel('시험 결과', self)
-        rightLayout.addWidget(self.valmsg)
-        self.init_centerLayout()
 
-        contentWidget = QWidget()
-        contentWidget.setLayout(self.centerLayout)
-        contentWidget.setMaximumSize(1050, 400) 
-        contentWidget.setMinimumSize(950, 300)
-        rightLayout.addWidget(contentWidget)
-        
-        rightLayout.addSpacing(15)
-        
-        # 수신 메시지 실시간 모니터링
-        rightLayout.addWidget(QLabel("수신 메시지 실시간 모니터링"))
-        self.valResult = QTextBrowser(self)
-        self.valResult.setMaximumHeight(200)
-        self.valResult.setMaximumWidth(1050)  
-        self.valResult.setMinimumWidth(950)
-        rightLayout.addWidget(self.valResult)
-        
-        # 전체 레이아웃 구성 (2열)
-        outerLayout.addLayout(leftLayout, 1)
-        outerLayout.addSpacing(20)
-        outerLayout.addLayout(rightLayout, 2)
-        self.setLayout(outerLayout)
+        mainLayout.addSpacing(20)
+        mainLayout.addWidget(buttonGroup)
+        mainLayout.addStretch()
+
+        self.setLayout(mainLayout)
         self.setWindowTitle('물리보안 통합플랫폼 연동 검증 소프트웨어')
-        self.setGeometry(100, 100, 1600, 900)
-        
+        # 창 크기
+        self.setGeometry(100, 100, 1100, 700)
+
         if not self.embedded:
             self.show()
 
