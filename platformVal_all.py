@@ -1,6 +1,7 @@
 # 물리보안 통합플랫폼 검증 소프트웨어
 # physical security integrated platform validation software
 
+import os
 from api.api_server import Server
 import time
 from PyQt5.QtWidgets import *
@@ -634,12 +635,14 @@ class MyApp(QWidget):
 
     def update_score_display(self):
         """평가 점수 디스플레이를 업데이트"""
+        # 평가 점수 UI가 주석처리된 경우 오류 방지
+        if not (hasattr(self, "pass_count_label") and hasattr(self, "total_count_label") and hasattr(self, "score_label")):
+            return
         total_fields = self.total_pass_cnt + self.total_error_cnt
         if total_fields > 0:
             score = (self.total_pass_cnt / total_fields) * 100
         else:
             score = 0
-            
         self.pass_count_label.setText(f"통과 필드 수: {self.total_pass_cnt}")
         self.total_count_label.setText(f"전체 필드 수: {total_fields}")
         self.score_label.setText(f"종합 평가 점수: {score:.1f}%")
@@ -703,47 +706,46 @@ class MyApp(QWidget):
         # ==================== 왼쪽 열 구성 ====================
         leftLayout.addWidget(empty)  # empty
         
-        self.settingGroup = QGroupBox("시험정보")
-        self.settingGroup.setMaximumWidth(460)  
-        
-        # 시험 정보 위젯 생성 
-        self.info_table = QTableWidget(9, 2)  
-        self.info_table.setMaximumWidth(460)
-        self.info_table.setFixedHeight(386) 
-        self.info_table.setHorizontalHeaderLabels(["항목", "내용"])
-        self.info_table.setColumnWidth(0, 150) 
-        self.info_table.setColumnWidth(1, 288)  
-        
-
-        self.info_table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.info_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.info_table.verticalHeader().setVisible(False)
-        self.info_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        
-        for i in range(9):
-            self.info_table.setRowHeight(i, 40)
-        
-        # CONSTANTS.py에서 테이블 데이터 로드
-        table_data = self.load_test_info_from_constants()
-        
-        # 테이블에 데이터 입력 (모두 읽기 전용)
-        for row, (label, value) in enumerate(table_data):
-            # 첫 번째 컬럼 (항목) 
-            item_label = QTableWidgetItem(label)
-            item_label.setFlags(Qt.ItemIsEnabled)
-            item_label.setBackground(QColor(240, 240, 240))
-            self.info_table.setItem(row, 0, item_label)
-            
-            # 두 번째 컬럼 (내용) 
-            item_value = QTableWidgetItem(str(value))
-            item_value.setFlags(Qt.ItemIsEnabled)
-            item_value.setBackground(QColor(255, 255, 255))
-            self.info_table.setItem(row, 1, item_value)
-        
-        # 테이블 레이아웃
-        settingLayout = QVBoxLayout()
-        settingLayout.addWidget(self.info_table)
-        self.settingGroup.setLayout(settingLayout)
+        # self.settingGroup = QGroupBox("시험정보")
+        # self.settingGroup.setMaximumWidth(460)  
+        # 
+        # # 시험 정보 위젯 생성 
+        # self.info_table = QTableWidget(9, 2)  
+        # self.info_table.setMaximumWidth(460)
+        # self.info_table.setFixedHeight(386) 
+        # self.info_table.setHorizontalHeaderLabels(["항목", "내용"])
+        # self.info_table.setColumnWidth(0, 150) 
+        # self.info_table.setColumnWidth(1, 288)  
+        # 
+        # self.info_table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        # self.info_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        # self.info_table.verticalHeader().setVisible(False)
+        # self.info_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        # 
+        # for i in range(9):
+        #     self.info_table.setRowHeight(i, 40)
+        # 
+        # # CONSTANTS.py에서 테이블 데이터 로드
+        # table_data = self.load_test_info_from_constants()
+        # 
+        # # 테이블에 데이터 입력 (모두 읽기 전용)
+        # for row, (label, value) in enumerate(table_data):
+        #     # 첫 번째 컬럼 (항목) 
+        #     item_label = QTableWidgetItem(label)
+        #     item_label.setFlags(Qt.ItemIsEnabled)
+        #     item_label.setBackground(QColor(240, 240, 240))
+        #     self.info_table.setItem(row, 0, item_label)
+        #     
+        #     # 두 번째 컬럼 (내용) 
+        #     item_value = QTableWidgetItem(str(value))
+        #     item_value.setFlags(Qt.ItemIsEnabled)
+        #     item_value.setBackground(QColor(255, 255, 255))
+        #     self.info_table.setItem(row, 1, item_value)
+        # 
+        # # 테이블 레이아웃
+        # settingLayout = QVBoxLayout()
+        # settingLayout.addWidget(self.info_table)
+        # self.settingGroup.setLayout(settingLayout)
         
         # 검증 버튼들 
         buttonGroup = QWidget()  
@@ -842,14 +844,14 @@ class MyApp(QWidget):
         buttonLayout.addStretch()
         buttonGroup.setLayout(buttonLayout)
         
-        leftLayout.addWidget(self.settingGroup)
+    # leftLayout.addWidget(self.settingGroup)
         leftLayout.addSpacing(300)
         leftLayout.addWidget(buttonGroup)
         leftLayout.addStretch()
         
-        # 오른쪽 열 구성
-        rightLayout.addWidget(self.group_score())
-        rightLayout.addSpacing(15)
+    # 오른쪽 열 구성
+    # rightLayout.addWidget(self.group_score())
+    # rightLayout.addSpacing(15)
         
         # 시험 결과
         self.valmsg = QLabel('시험 결과', self)
@@ -999,34 +1001,34 @@ class MyApp(QWidget):
             if msg:
                 CustomDialog(msg, self.tableWidget.item(row, 0).text())
 
-    def group_score(self):
-        """평가 점수 박스"""
-        sgroup = QGroupBox('평가 점수')
-        sgroup.setMaximumWidth(1050)
-        sgroup.setMinimumWidth(950)
+    # def group_score(self):
+    #     """평가 점수 박스"""
+    #     sgroup = QGroupBox('평가 점수')
+    #     sgroup.setMaximumWidth(1050)
+    #     sgroup.setMinimumWidth(950)
         
-        # 점수 표시용 레이블들
-        self.pass_count_label = QLabel("통과 필드 수: 0")
-        self.total_count_label = QLabel("전체 필드 수: 0")  
-        self.score_label = QLabel("종합 평가 점수: 0%")
+    #     # 점수 표시용 레이블들
+    #     self.pass_count_label = QLabel("통과 필드 수: 0")
+    #     self.total_count_label = QLabel("전체 필드 수: 0")  
+    #     self.score_label = QLabel("종합 평가 점수: 0%")
         
-        # 폰트 크기 조정
-        font = self.pass_count_label.font()
-        font.setPointSize(20)
-        self.pass_count_label.setFont(font)
-        self.total_count_label.setFont(font)
-        self.score_label.setFont(font)
+    #     # 폰트 크기 조정
+    #     font = self.pass_count_label.font()
+    #     font.setPointSize(20)
+    #     self.pass_count_label.setFont(font)
+    #     self.total_count_label.setFont(font)
+    #     self.score_label.setFont(font)
         
-        # 가로 배치
-        layout = QHBoxLayout()
-        layout.setSpacing(90)
-        layout.addWidget(self.pass_count_label)
-        layout.addWidget(self.total_count_label)
-        layout.addWidget(self.score_label)
-        layout.addStretch()
+    #     # 가로 배치
+    #     layout = QHBoxLayout()
+    #     layout.setSpacing(90)
+    #     layout.addWidget(self.pass_count_label)
+    #     layout.addWidget(self.total_count_label)
+    #     layout.addWidget(self.score_label)
+    #     layout.addStretch()
         
-        sgroup.setLayout(layout)
-        return sgroup
+    #     sgroup.setLayout(layout)
+    #     return sgroup
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
@@ -1174,6 +1176,49 @@ class MyApp(QWidget):
         if hasattr(self, 'timer'):
             self.timer.stop()
         
+        # print문 추가 -> 나중에 기능 수정해야함 (09/30)
+        total_pass = getattr(self, 'total_pass_cnt', 0)
+        total_error = getattr(self, 'total_error_cnt', 0)
+        grand_total = total_pass + total_error
+        overall_score = (total_pass / grand_total * 100) if grand_total > 0 else 0
+
+        # 스텝별 결과 수집
+        rows = self.tableWidget.rowCount()
+        step_lines = []
+        for i in range(rows):
+            name = self.tableWidget.item(i, 0).text() if self.tableWidget.item(i, 0) else "N/A"
+            get_txt = lambda col: self.tableWidget.item(i, col).text() if self.tableWidget.item(i, col) else "N/A"
+            retries = get_txt(2)
+            pass_cnt = get_txt(3)
+            total_cnt = get_txt(4)
+            fail_cnt = get_txt(5)
+            score = get_txt(6)
+            # step_buffer에 최종 판정 가져오기
+            final_res = self.step_buffers[i]["result"] if i < len(self.step_buffers) else "N/A"
+            step_lines.append(f"{name} | 결과: {final_res} | 검증 횟수: {retries} | 통과 필드 수: {pass_cnt} | 전체 필드 수: {total_cnt} | 실패 횟수: {fail_cnt} | 평가 점수: {score}") 
+
+            # 로그 원문
+            raw_log = self.valResult.toPlainText() if hasattr(self, 'valResult') else ""
+
+            # 최종 페이로드 구성
+            header = "=== 시험 결과 ==="
+            overall = f"통과 필드 수: {total_pass}\n전체 필드 수: {grand_total}\n종합 평가 점수: {overall_score:.1f}%"
+            steps_text = "=== 스텝별 결과 ===\n" + "\n".join(step_lines) if step_lines else "스텝별 결과 없음"
+            logs_text = "=== 전체 로그 ===\n" + raw_log if raw_log else "로그 없음"
+            final_text = f"{header}\n{overall}\n\n{steps_text}\n\n{logs_text}\n"
+
+            # print(final_text)  # 나중에 대체
+
+            import os
+            result_dir = os.path.join(os.getcwd(), "results")
+            os.makedirs(result_dir, exist_ok=True)
+            results_path = os.path.join(result_dir, "request_results.txt")  # 파일 저장명
+
+            with open(results_path, "w", encoding="utf-8") as f:
+                f.write(final_text)
+            
+            print(f"시험 결과가 '{results_path}'에 저장되었습니다.")
+
         # 확인 대화상자
         reply = QMessageBox.question(self, '프로그램 종료', 
                                    '정말로 프로그램을 종료하시겠습니까?',
@@ -1181,6 +1226,8 @@ class MyApp(QWidget):
                                    QMessageBox.No)
         
         if reply == QMessageBox.Yes:
+            result_payload = self.build_result_payload()
+
             QApplication.quit()
     def get_setting(self):
         self.setting_variables = QSettings('My App', 'Variable')
@@ -1196,6 +1243,17 @@ class MyApp(QWidget):
 
     def closeEvent(self, event):
         event.accept()
+    
+    def build_result_payload(self):
+        """최종 결과(점수, 통과/실패 카운트, 세부 결과 등)를 dict로 반환 (system과 동일)"""
+        total_fields = self.total_pass_cnt + self.total_error_cnt
+        score = (self.total_pass_cnt / total_fields) * 100 if total_fields > 0 else 0
+        return {
+            "score": score,
+            "pass_count": self.total_pass_cnt,
+            "error_count": self.total_error_cnt,
+            "details": self.final_report if hasattr(self, "final_report") else ""
+        }
 
 
 class server_th(QThread):
@@ -1215,6 +1273,7 @@ class server_th(QThread):
         except Exception as e:
             #print(traceback.format_exc())
             print(e)
+
 
         print('Starting on ', self.server_address)
 
