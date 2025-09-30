@@ -240,6 +240,7 @@ StoredObjectAnalyticsInfos_out_data = {
 ]
 }
 
+
 # steps 순서대로 출력 메시지 생성
 videoOutMessage = [
     Authentication_out_data,

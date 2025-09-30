@@ -136,12 +136,6 @@ StoredObjectAnalyticsInfos_in_data = {
 ]
 }
 
-# WebHook RealtimeVideoEventInfos
-WebHook_RealtimeVideoEventInfos_out_data = {
-    "code": 200,
-    "message": "성공"
-}
-
 # steps 순서대로 입력 메시지 생성
 videoInMessage = [
     Authentication_in_data,
@@ -166,9 +160,4 @@ videoMessages = [
     "RealtimeVideoEventInfos",
     "StoredVideoEventInfos",
     "StoredObjectAnalyticsInfos",
-]
-
-# WebHook
-videoWebhookData = [
-    WebHook_RealtimeVideoEventInfos_out_data,
 ]
