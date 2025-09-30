@@ -162,6 +162,7 @@ class CustomDialog(QDialog):
         self.exec_()
 
 class MyApp(QWidget):
+
     def __init__(self, embedded=False):
         importlib.reload(CONSTANTS)  # CONSTANTS 모듈을 다시 로드하여 최신 설정 반영
         super().__init__()
@@ -172,6 +173,7 @@ class MyApp(QWidget):
         self.img_fail = resource_path("assets/image/red.png")
         self.img_none = resource_path("assets/image/black.png")
 
+        self.flag_opt = True  # 필수필드만 확인 False, optional 필드까지 확인 True
         self.tick_timer = QTimer()
         self.tick_timer.timeout.connect(self.update_view)
         self.auth_flag = True 
@@ -193,35 +195,6 @@ class MyApp(QWidget):
         self.step_buffers = [
             {"data": "", "error": "", "result": "PASS"} for _ in range(9)
         ]
-
-        self.get_setting()
-        # 첫 실행 여부 플래그
-        self.first_run = True
-
-        with open(resource_path("spec/rows.json"), "w") as out_file:
-            json.dump(None, out_file, ensure_ascii=False)
-        self.tick_timer = QTimer()
-        self.tick_timer.timeout.connect(self.update_view)
-        self.auth_flag = True 
-        self.Server = Server
-
-        auth_temp, auth_temp2 = set_auth("config/config.txt")
-        self.digestInfo = [auth_temp2[0], auth_temp2[1]]
-        self.token = auth_temp
-
-        self.initUI()
-        self.realtime_flag = False
-        self.cnt = 0
-        self.current_retry = 0  # 현재 API의 반복 횟수 카운터
-        self.total_error_cnt = 0
-        self.total_pass_cnt = 0
-        self.time_pre = 0
-        self.cnt_pre = 0
-        self.final_report = ""
-        self.step_buffers = [
-            {"data": "", "error": "", "result": "PASS"} for _ in range(9)
-        ]
-
 
         self.get_setting()
         # 첫 실행 여부 플래그
@@ -1025,22 +998,6 @@ class MyApp(QWidget):
 
 
     def sbtn_push(self):
-        import shutil, os
-        # 첫 실행이 아니면 spec_origin에서 spec으로 복사(초기화)
-        if not self.first_run:
-            origin_dir = resource_path("spec_origin")
-            target_dir = resource_path("spec")
-            def copytree_overwrite(src, dst):
-                if not os.path.exists(dst):
-                    os.makedirs(dst)
-                for item in os.listdir(src):
-                    s = os.path.join(src, item)
-                    d = os.path.join(dst, item)
-                    if os.path.isdir(s):
-                        copytree_overwrite(s, d)
-                    else:
-                        shutil.copy2(s, d)
-            copytree_overwrite(origin_dir, target_dir)
         self.first_run = False
         self.total_error_cnt = 0
         self.total_pass_cnt = 0
