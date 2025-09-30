@@ -827,61 +827,50 @@ class MyApp(QWidget):
             elif self.cnt == 8:
                 self.step9_msg += msg
 
+
     def initUI(self):
-        # 최상위 레이아웃 - 2열로 구성
-        outerLayout = QHBoxLayout()  
-        leftLayout = QVBoxLayout() 
-        rightLayout = QVBoxLayout() 
-        
-        empty = QLabel(" ")
-        empty.setStyleSheet('font-size:5pt')
-        
-        leftLayout.addWidget(empty)
-        
-        # self.settingGroup = QGroupBox("시험정보")
-        # self.settingGroup.setMaximumWidth(460)  
-        # 
-        # self.info_table = QTableWidget(9, 2)  
-        # self.info_table.setMaximumWidth(460)
-        # self.info_table.setFixedHeight(386)  
-        # self.info_table.setHorizontalHeaderLabels(["항목", "내용"])
-        # self.info_table.setColumnWidth(0, 150)  
-        # self.info_table.setColumnWidth(1, 288)  
-        # 
-        # self.info_table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        # self.info_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        # 
-        # self.info_table.verticalHeader().setVisible(False)
-        # 
-        # self.info_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        # 
-        # for i in range(9):
-        #     self.info_table.setRowHeight(i, 40) 
-        # 
-        # table_data = self.load_test_info_from_constants()
-        # 
-        # for row, (label, value) in enumerate(table_data):
-        #     item_label = QTableWidgetItem(label)
-        #     item_label.setFlags(Qt.ItemIsEnabled)  
-        #     item_label.setBackground(QColor(240, 240, 240))  
-        #     self.info_table.setItem(row, 0, item_label)
-        #     
-        #     item_value = QTableWidgetItem(str(value))
-        #     item_value.setFlags(Qt.ItemIsEnabled)  
-        #     item_value.setBackground(QColor(255, 255, 255))  
-        #     self.info_table.setItem(row, 1, item_value)
-        # 
-        # settingLayout = QVBoxLayout()
-        # settingLayout.addWidget(self.info_table)
-        # self.settingGroup.setLayout(settingLayout)
-        
+        # 1열(세로) 레이아웃으로 통합
+        mainLayout = QVBoxLayout()
+
+        # 상단 큰 제목
+        self.title_label = QLabel('시스템 연동 검증', self)
+        title_font = self.title_label.font()
+        title_font.setPointSize(22)
+        title_font.setBold(True)
+        self.title_label.setFont(title_font)
+        self.title_label.setAlignment(Qt.AlignCenter)
+        mainLayout.addWidget(self.title_label)
+
+        # 시험 결과
+        self.valmsg = QLabel('시험 결과', self)
+        mainLayout.addWidget(self.valmsg)
+
+        self.init_centerLayout()
+        contentWidget = QWidget()
+        contentWidget.setLayout(self.centerLayout)
+        contentWidget.setMaximumSize(1050, 400)
+        contentWidget.setMinimumSize(950, 300)
+        mainLayout.addWidget(contentWidget)
+
+        mainLayout.addSpacing(15)
+
+        # 수신 메시지 실시간 모니터링
+        monitor_label = QLabel("수신 메시지 실시간 모니터링")
+        mainLayout.addWidget(monitor_label)
+        self.valResult = QTextBrowser(self)
+        self.valResult.setMaximumHeight(200)
+        self.valResult.setMaximumWidth(1050)
+        self.valResult.setMinimumWidth(950)
+        mainLayout.addWidget(self.valResult)
+
+        # 버튼 그룹 (평가 시작, 일시 정지, 종료) - 아래쪽, 가운데 정렬
         buttonGroup = QWidget()
-        buttonGroup.setMaximumWidth(500)  
-        buttonLayout = QHBoxLayout()  
-        
+        buttonLayout = QHBoxLayout()
+        buttonLayout.setAlignment(Qt.AlignCenter)
+
         self.sbtn = QPushButton(self)
         self.sbtn.setText('평가 시작')
-        self.sbtn.setFixedSize(140, 50) 
+        self.sbtn.setFixedSize(140, 50)
         self.sbtn.setStyleSheet("""
             QPushButton {
                 background-color: #FFB6C1;  /* 파스텔 핑크 */
@@ -908,7 +897,7 @@ class MyApp(QWidget):
 
         self.stop_btn = QPushButton(self)
         self.stop_btn.setText('일시 정지')
-        self.stop_btn.setFixedSize(140, 50) 
+        self.stop_btn.setFixedSize(140, 50)
         self.stop_btn.setStyleSheet("""
             QPushButton {
                 background-color: #FFB6C1;  /* 파스텔 핑크 */
@@ -933,10 +922,10 @@ class MyApp(QWidget):
         """)
         self.stop_btn.clicked.connect(self.stop_btn_clicked)
         self.stop_btn.setDisabled(True)
-        
+
         self.rbtn = QPushButton(self)
         self.rbtn.setText('종료')
-        self.rbtn.setFixedSize(140, 50) 
+        self.rbtn.setFixedSize(140, 50)
         self.rbtn.setStyleSheet("""
             QPushButton {
                 background-color: #FFB6C1;
@@ -960,56 +949,22 @@ class MyApp(QWidget):
             }
         """)
         self.rbtn.clicked.connect(self.exit_btn_clicked)
-        
-        buttonLayout.addStretch() 
+
         buttonLayout.addWidget(self.sbtn)
-        buttonLayout.addSpacing(20) 
+        buttonLayout.addSpacing(20)
         buttonLayout.addWidget(self.stop_btn)
-        buttonLayout.addSpacing(20) 
+        buttonLayout.addSpacing(20)
         buttonLayout.addWidget(self.rbtn)
-        buttonLayout.addStretch()  
         buttonGroup.setLayout(buttonLayout)
-        
-    # leftLayout.addWidget(self.settingGroup)
-        leftLayout.addSpacing(300) 
-        leftLayout.addWidget(buttonGroup)
-        leftLayout.addStretch()  
-        
-    # ==================== 오른쪽 열 구성 ====================
-    # 평가 점수 UI 주석 처리
-    # rightLayout.addWidget(self.group_score())
-    # rightLayout.addSpacing(15)
-        
-        # 시험 결과
-        self.valmsg = QLabel('시험 결과', self)
-        rightLayout.addWidget(self.valmsg)
-        self.init_centerLayout()
-        
-        # 시험 결과 영역을 테이블 크기에 맞게 조정
-        contentWidget = QWidget()
-        contentWidget.setLayout(self.centerLayout)
-        contentWidget.setMaximumSize(1050, 400) 
-        contentWidget.setMinimumSize(950, 300)
-        rightLayout.addWidget(contentWidget)
-        
-        rightLayout.addSpacing(15)
-        
-        # 수신 메시지 실시간 모니터링
-        rightLayout.addWidget(QLabel("수신 메시지 실시간 모니터링"))
-        self.valResult = QTextBrowser(self)
-        self.valResult.setMaximumHeight(200)
-        self.valResult.setMaximumWidth(1050)  
-        self.valResult.setMinimumWidth(950)
-        rightLayout.addWidget(self.valResult)
-        
-        # 전체 레이아웃 구성 (2열) 
-        outerLayout.addLayout(leftLayout, 1)   
-        outerLayout.addSpacing(20)  
-        outerLayout.addLayout(rightLayout, 2)  
-        self.setLayout(outerLayout)
+
+        mainLayout.addSpacing(20)
+        mainLayout.addWidget(buttonGroup)
+        mainLayout.addStretch()
+
+        self.setLayout(mainLayout)
         self.setWindowTitle('물리보안 시스템 연동 검증 소프트웨어')
-        self.setGeometry(100, 100, 1600, 900) 
-        
+        self.setGeometry(100, 100, 1100, 700)
+
         if not self.embedded:
             self.show()
 
