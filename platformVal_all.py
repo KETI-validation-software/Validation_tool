@@ -177,7 +177,7 @@ class ResultPageDialog(QDialog):
     def initUI(self):
         mainLayout = QVBoxLayout()
         
-        # 상단 큰 제목
+        # 상단 대제목 (수정된 부분)S
         title_label = QLabel('통합플랫폼 연동 시험 결과', self)
         title_font = title_label.font()
         title_font.setPointSize(22)
