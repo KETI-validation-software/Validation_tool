@@ -240,6 +240,134 @@ StoredObjectAnalyticsInfos_out_data = {
 ]
 }
 
+# Authentication
+Authentication_out_data = {
+    "code": "200",
+    "message": "성공",
+    "userName": "관리자",
+    "userAff": "오산시청",
+    "accessToken": "abcde1234"
+}
+
+# Capabilities
+Capabilities_out_data = {
+    "code": "200",
+    "message": "성공",
+    "transportSupport": [
+        {
+        "transProtocolType": "HTTP_API",
+        "transProtocolDesc": "description"
+    }
+]
+}
+
+# SensorDeviceProfiles
+SensorDeviceProfiles_out_data = {
+    "code": "200",
+    "message": "성공",
+    "sensorDeviceList": [
+        {
+        "sensorDeviceID": "iot0001",
+        "sensorDeviceType": "온도",
+        "sensorDeviceName": "온도 센서",
+        "sensorDeviceLoc": {
+        "lon": "127.127730",
+        "lat": "38.439801",
+        "alt": "32.131",
+        "desc": "3층복도"
+    }
+    },
+        {
+        "sensorDeviceID": "iot0002",
+        "sensorDeviceType": "온도",
+        "sensorDeviceName": "온도 센서",
+        "sensorDeviceLoc": {
+        "lon": "127.127730",
+        "lat": "38.439801",
+        "alt": "32.131",
+        "desc": "3층복도"
+    }
+    }
+]
+}
+
+# RealtimeSensorData
+RealtimeSensorData_out_data = {
+    "code": "200",
+    "message": "성공",
+    "sensorDeviceList": [
+        {
+        "sensorDeviceID": "iot0001",
+        "measureTime": 20220822163022123,
+        "sensorDeviceType": "온도",
+        "sensorDeviceUnit": "섭씨",
+        "sensorDeviceValue": "90"
+    },
+        {
+        "sensorDeviceID": "iot0002",
+        "measureTime": 20220822163022123,
+        "sensorDeviceType": "온도",
+        "sensorDeviceUnit": "섭씨",
+        "sensorDeviceValue": "36"
+    },
+        {
+        "sensorDeviceID": "iot0003",
+        "measureTime": 20220822163022123,
+        "sensorDeviceType": "온도",
+        "sensorDeviceUnit": "섭씨",
+        "sensorDeviceValue": "36"
+    }
+]
+}
+
+# RealtimeSensorEventInfos
+RealtimeSensorEventInfos_out_data = {
+    "code": "200",
+    "message": "성공",
+    "sensorDeviceList": [
+        {
+        "sensorDeviceID": "iot0001",
+        "eventName": "화재",
+        "eventTime": 20220822163022123,
+        "eventDesc": "100도"
+    },
+        {
+        "sensorDeviceID": "iot0002",
+        "eventName": "화재",
+        "eventTime": 20220822163022123,
+        "eventDesc": "200도"
+    }
+]
+}
+
+# StoredSensorEventInfos
+StoredSensorEventInfos_out_data = {
+    "code": "200",
+    "message": "성공",
+    "sensorDeviceList": [
+        {
+        "sensorDeviceID": "iot0001",
+        "eventName": "화재",
+        "eventTime": 20220822163022123,
+        "eventDesc": "100도"
+    },
+        {
+        "sensorDeviceID": "iot0002",
+        "eventName": "화재",
+        "eventTime": 20220822163022123,
+        "eventDesc": "100도"
+    }
+]
+}
+
+# SensorDeviceControl
+SensorDeviceControl_out_data = {
+    "code": "200",
+    "message": "성공",
+    "sensorDeviceID": "iot0001",
+    "sensorDeviceStatus": "Alarm"
+}
+
 # steps 순서대로 출력 메시지 생성
 videoOutMessage = [
     Authentication_out_data,
@@ -251,6 +379,13 @@ videoOutMessage = [
     RealtimeVideoEventInfos_out_data,
     StoredVideoEventInfos_out_data,
     StoredObjectAnalyticsInfos_out_data,
+    Authentication_out_data,
+    Capabilities_out_data,
+    SensorDeviceProfiles_out_data,
+    RealtimeSensorData_out_data,
+    RealtimeSensorEventInfos_out_data,
+    StoredSensorEventInfos_out_data,
+    SensorDeviceControl_out_data,
 ]
 
 # API endpoint
@@ -264,4 +399,11 @@ videoMessages = [
     "RealtimeVideoEventInfos",
     "StoredVideoEventInfos",
     "StoredObjectAnalyticsInfos",
+    "Authentication",
+    "Capabilities",
+    "SensorDeviceProfiles",
+    "RealtimeSensorData",
+    "RealtimeSensorEventInfos",
+    "StoredSensorEventInfos",
+    "SensorDeviceControl",
 ]
