@@ -7,7 +7,6 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 
 #test-info
-# auth_info(admin, 1234) 틀리면 Digest Auth 제대로 작동되지 않습니다.
 company_name = "스마트홈 테크놀로지"
 product_name = "물리보안 통합플랫폼"
 version = "v2.1.0"
@@ -16,16 +15,14 @@ test_target = "통합시스템"
 test_range = "전체필드"
 auth_type = "Digest Auth"
 
-auth_info = "admin,1234"
+auth_info = "idcheck,pwcheck"
 admin_code = ""
-url = "https://10.252.219.95:8000"
+url = "https://192.168.0.3:8001"
 
 
-# [시험 스키마 이름, 시험 데이터, 시험 메시지, 시험 분야]
 specs = [["spec-001_inSchema","spec-001_outData","spec001_messages","영상보안 시스템 검증(요청검증)"],
          ["spec-0011_inSchema","spec-0011_outData","spec0011_messages","보안용 센서 시스템 검증(요청검증"]]
 #test-opt
-# time_out = [5000,5000,8000,8000,8000,8000,5000,5000,8000]
 '''
 opt2의 메시지의 settings 내 정보 보고 작성, 메시지 순차별로
 trans_protocol : 메시지별 실시간 송수신 메시지 여부, None-실시간 아님, LongPolling, WebHook은 설정에 따라 동작 
