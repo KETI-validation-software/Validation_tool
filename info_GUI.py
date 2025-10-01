@@ -3,9 +3,9 @@ from PyQt5.QtWidgets import (
     QPushButton, QMessageBox, QTableWidget, QHeaderView, QAbstractItemView, QTableWidgetItem, QCheckBox,
     QStackedWidget, QRadioButton
 )
-
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
-
+import importlib
+from config import CONSTANTS
 
 # 분리된 모듈들 import
 from network_scanner import NetworkScanWorker
@@ -270,6 +270,10 @@ class InfoWidget(QWidget):
         self.test_field_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.test_field_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.test_field_table.cellClicked.connect(self.on_test_field_selected)
+        self.test_field_table.verticalHeader().setVisible(False)
+
+        # 마지막으로 클릭된 시험 분야의 행을 추적
+        self.selected_test_field_row = None
 
         layout.addWidget(self.test_field_table)
         group.setLayout(layout)
@@ -855,8 +859,12 @@ class InfoWidget(QWidget):
             return False
 
     def on_test_field_selected(self, row, col):
-        """시험 분야명 선택 시 해당 API 테이블 표시"""
+        """시험 분야명 행 클릭 시 해당 API 테이블 표시"""
         try:
+            # 클릭된 행 번호 저장
+            self.selected_test_field_row = row
+
+            # 선택된 시험 분야의 API 테이블 표시
             self.form_validator._fill_api_table_for_selected_field(row)
         except Exception as e:
             print(f"시험 분야 선택 처리 실패: {e}")

@@ -1,5 +1,6 @@
 import re
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem
+from PyQt5.QtCore import Qt
 from core.functions import resource_path
 from core.opt_loader import OptLoader
 from core.schema_generator import generate_schema_file
@@ -163,13 +164,11 @@ class FormValidator:
                 row = self.parent.test_field_table.rowCount()
                 self.parent.test_field_table.insertRow(row)
 
-                from PyQt5.QtWidgets import QTableWidgetItem
-                from PyQt5.QtCore import Qt
-
+                # 시험 분야명
                 item = QTableWidgetItem(spec_name)
                 item.setTextAlignment(Qt.AlignCenter)
                 item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-                # spec_id를 저장해서 나중에 API 테이블에서 사용
+                # spec_id를 저장해서 나중에 사용
                 item.setData(Qt.UserRole, spec_id)
                 self.parent.test_field_table.setItem(row, 0, item)
 
@@ -413,26 +412,32 @@ class FormValidator:
         return auth_type, auth_info
 
     def _extract_protocol_info(self):
-        """OPT2 파일에서 프로토콜/타임아웃 정보 추출"""
-        # 현재 모드에 따라 파일 선택
-        mode_files = {
-            "request": "temp/(temp)exp_opt2_requestVal_LongPolling.json",
-            "response": "temp/(temp)exp_opt2_responseVal_LongPolling.json",
-            "request_webhook": "temp/(temp)exp_opt2_requestVal_WebHook.json",
-            "response_webhook": "temp/(temp)exp_opt2_responseVal_WebHook.json"
-        }
+        """선택된 시험 분야의 프로토콜/타임아웃 정보 추출"""
+        # 선택된 시험 분야의 spec_id 가져오기
+        selected_spec_id = self._get_selected_test_field_spec_id()
+        if not selected_spec_id:
+            print("경고: 선택된 시험 분야가 없습니다.")
+            return {'trans_protocol': [], 'time_out': [], 'num_retries': []}
 
-        exp_opt2_path = resource_path(mode_files.get(
-            self.parent.current_mode,
-            "temp/(temp)exp_opt2_requestVal_LongPolling.json"
-        ))
-
-        exp_opt2 = self.opt_loader.load_opt_json(exp_opt2_path)
         print(f"CONSTANTS.py 업데이트 - 현재 모드: {self.parent.current_mode}")
-        print(f"선택된 OPT2 파일: {exp_opt2_path}")
+        print(f"선택된 시험 분야: {selected_spec_id}")
 
-        steps = exp_opt2.get("specification", {}).get("steps", [])
+        # 선택된 spec_id에 해당하는 파일 경로 가져오기
+        spec_file_path = self._get_spec_file_mapping(selected_spec_id)
+        if not spec_file_path:
+            print(f"경고: spec_id '{selected_spec_id}'에 대한 매핑을 찾을 수 없습니다.")
+            return {'trans_protocol': [], 'time_out': [], 'num_retries': []}
 
+        print(f"  파일: {spec_file_path}")
+
+        # 파일 로드
+        spec_data = self.opt_loader.load_opt_json(resource_path(spec_file_path))
+        if not spec_data:
+            print(f"경고: {spec_file_path} 파일을 로드할 수 없습니다.")
+            return {'trans_protocol': [], 'time_out': [], 'num_retries': []}
+
+        # steps에서 프로토콜 정보 추출
+        steps = spec_data.get("specification", {}).get("steps", [])
         time_out = []
         num_retries = []
         trans_protocol = []
@@ -447,11 +452,27 @@ class FormValidator:
             trans_protocol_mode = trans_protocol_obj.get("mode", None)
             trans_protocol.append(trans_protocol_mode)
 
+        #print(f"추출된 프로토콜 정보: {len(time_out)}개 스텝")
+
         return {
             'trans_protocol': trans_protocol,
             'time_out': time_out,
             'num_retries': num_retries
         }
+
+    def _get_selected_test_field_spec_id(self):
+        """시험 분야 테이블에서 마지막으로 클릭된 항목의 spec_id 반환"""
+        try:
+            # 마지막으로 클릭된 행 번호 사용
+            if hasattr(self.parent, 'selected_test_field_row') and self.parent.selected_test_field_row is not None:
+                row = self.parent.selected_test_field_row
+                item = self.parent.test_field_table.item(row, 0)
+                if item:
+                    return item.data(Qt.UserRole)
+            return None
+        except Exception as e:
+            print(f"선택된 시험 분야 spec_id 가져오기 실패: {e}")
+            return None
 
     def _update_constants_file(self, file_path, variables):
         """CONSTANTS.py 파일의 특정 변수들을 업데이트"""
