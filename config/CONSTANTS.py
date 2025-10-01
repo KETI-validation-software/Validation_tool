@@ -8,7 +8,7 @@ none_request_message = ['Capabilities',
 
 #test-info -> (주의) auth_info의 id, pw admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음!!!!!!!
 company_name = "스마트홈 테크놀로지"
-product_name = "물리보안 통합플랫폼"
+product_name = "물리보안 시스템"
 version = "v2.1.0"
 test_category = "사전시험"
 test_target = "통합시스템"
@@ -17,11 +17,10 @@ auth_type = "Digest Auth"
 
 auth_info = "admin,1234"
 admin_code = ""
-url = "https://10.252.219.95:8000"
+url = "https://192.168.0.3:8002"
 
 
-specs = [["spec-001_inSchema","spec-001_outData","spec001_messages","영상보안 시스템 검증(요청검증)"],
-         ["spec-0011_inSchema","spec-0011_outData","spec0011_messages","보안용 센서 시스템 검증(요청검증"]]
+specs = [["spec_001_inSchema","spec_001_outData","spec_001_messages","spec_001_webhookSchema","spec_001_webhookData","영상보안 시스템 요청 메시지 검증 API 명세서"]]
 #test-opt
 '''
 opt2의 메시지의 settings 내 정보 보고 작성, 메시지 순차별로
@@ -30,9 +29,8 @@ time_out : 메시지별 timeout 설정 시간
 num_retries : 메시지별 메시지 검증 횟수
 '''
 
-# 기본값 설정 (9개 API에 대한 기본 설정)
-# main.py를 통해 실행하면 form_validator.py가 자동으로 업데이트합니다
-trans_protocol = [None, None, None, None, None, None, "LongPolling", None, None]
+
+trans_protocol = [None, None, None, None, None, None, 'LongPolling', None, None]
 time_out = [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000]
 num_retries = [1, 2, 3, 3, 3, 2, 1, 1, 1]
 

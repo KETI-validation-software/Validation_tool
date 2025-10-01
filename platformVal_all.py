@@ -14,10 +14,20 @@ import ssl
 from core.functions import json_check_, save_result, resource_path, field_finder, json_to_data, set_auth, timeout_field_finder
 
 import spec
-from spec.video.videoData_response import videoInMessage, videoMessages
-from spec.video.videoData_request import videoOutMessage
-from spec.video.videoSchema_request import videoInSchema
-from spec.video.videoSchema_response import videoOutSchema
+# from spec.video.videoData_response import videoInMessage, videoMessages
+# from spec.video.videoData_request import videoOutMessage
+# from spec.video.videoSchema_request import videoInSchema
+# from spec.video.videoSchema_response import videoOutSchema
+#from spec.video.videoData_response import spec_002_inData, spec_002_messages, spec_0022_inData, spec_0022_messages
+from spec.video.videoData_response import spec_002_inData, spec_002_messages
+#from spec.video.videoData_request import spec_001_outData, spec_001_messages, spec_0011_outData, spec_0011_messages
+#from spec.video.videoSchema_request import spec_001_inSchema, spec_0011_inSchema
+from spec.video.videoData_request import spec_001_outData, spec_001_messages
+from spec.video.videoSchema_request import spec_001_inSchema
+#from spec.video.videoSchema_response import spec_002_outSchema, spec_0022_outSchema
+from spec.video.videoSchema_response import spec_002_outSchema
+# from spec.video.videoSchema import videoWebhookSchema
+
 import config.CONSTANTS as CONSTANTS
 
 from core.functions import json_check_, save_result, resource_path, field_finder, json_to_data, set_auth, timeout_field_finder 
