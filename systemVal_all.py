@@ -165,7 +165,7 @@ class ResultPageDialog(QDialog):
     def __init__(self, parent):
         super().__init__()
         self.parent = parent
-        self.setWindowTitle('시스템 연동 검증 - 시험 결과')
+        self.setWindowTitle('시스템 연동 시험 결과')
         self.setGeometry(100, 100, 1100, 600)
         self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
         self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
@@ -176,7 +176,7 @@ class ResultPageDialog(QDialog):
         mainLayout = QVBoxLayout()
         
         # 상단 큰 제목
-        title_label = QLabel('시스템 연동 검증 - 시험 결과', self)
+        title_label = QLabel('시스템 연동 시험 결과', self)
         title_font = title_label.font()
         title_font.setPointSize(22)
         title_font.setBold(True)
@@ -449,48 +449,6 @@ class MyApp(QWidget):
                 return str(val_text)
         return str(val_text)
 
-    def update_table_row(self, row, result_text, pass_count, total_count, detail_text, message_text):
-        """테이블 행을 업데이트하는 함수"""
-        if row < self.tableWidget.rowCount():
-            icon_widget = QWidget()
-            icon_layout = QHBoxLayout()
-            icon_layout.setContentsMargins(0, 0, 0, 0)
-            
-            icon_label = QLabel()
-            if result_text == "PASS":
-                icon_label.setPixmap(QIcon(self.img_pass).pixmap(16, 16))
-            else:
-                icon_label.setPixmap(QIcon(self.img_fail).pixmap(16, 16))
-            icon_label.setAlignment(Qt.AlignCenter)
-            
-            icon_layout.addWidget(icon_label)
-            icon_layout.setAlignment(Qt.AlignCenter)
-            icon_widget.setLayout(icon_layout)
-            
-            self.tableWidget.setCellWidget(row, 1, icon_widget)
-            
-            self.tableWidget.setItem(row, 2, QTableWidgetItem("1"))
-            self.tableWidget.item(row, 2).setTextAlignment(Qt.AlignCenter)
-            
-            self.tableWidget.setItem(row, 3, QTableWidgetItem(str(pass_count)))
-            self.tableWidget.item(row, 3).setTextAlignment(Qt.AlignCenter)
-            
-            self.tableWidget.setItem(row, 4, QTableWidgetItem(str(total_count)))
-            self.tableWidget.item(row, 4).setTextAlignment(Qt.AlignCenter)
-            
-            fail_count = total_count - pass_count
-            self.tableWidget.setItem(row, 5, QTableWidgetItem(str(fail_count)))
-            self.tableWidget.item(row, 5).setTextAlignment(Qt.AlignCenter)
-            
-            if total_count > 0:
-                score = (pass_count / total_count) * 100
-                self.tableWidget.setItem(row, 6, QTableWidgetItem(f"{score:.1f}%"))
-            else:
-                self.tableWidget.setItem(row, 6, QTableWidgetItem("0%"))
-            self.tableWidget.item(row, 6).setTextAlignment(Qt.AlignCenter)
-            
-
-    # (removed misplaced print)
     def update_table_row_with_retries(self, row, result, pass_count, error_count, data, error_text, retries):
         """테이블 행 업데이트 (실제 검증 횟수 포함, 플랫폼과 동일하게 아이콘 처리)"""
         if row >= self.tableWidget.rowCount():
@@ -1369,25 +1327,6 @@ class MyApp(QWidget):
         self.pass_count_label.setText(f"통과 필드 수: {self.total_pass_cnt}")
         self.total_count_label.setText(f"전체 필드 수: {total_fields}")
         self.score_label.setText(f"종합 평가 점수: {score:.1f}%")
-
-    def show_combined_result(self, row):
-        """통합 상세 내용 확인 - 데이터, 규격, 오류를 모두 보여주는 3열 팝업"""
-        try:
-            buf = self.step_buffers[row]
-            api_name = self.tableWidget.item(row, 0).text()
-            
-            # 스키마 데이터 가져오기
-            try:
-                schema_data = videoOutSchema[row] if row < len(videoOutSchema) else None
-            except:
-                schema_data = None
-            
-            # 통합 팝업창 띄우기
-            dialog = CombinedDetailDialog(api_name, buf, schema_data)
-            dialog.exec_()
-            
-        except Exception as e:
-            CustomDialog(f"오류:\n{str(e)}", "상세 내용 확인 오류")
 
     def table_cell_clicked(self, row, col):
         """테이블 셀 클릭 시 호출되는 함수"""
