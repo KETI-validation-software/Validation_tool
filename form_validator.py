@@ -411,6 +411,7 @@ class FormValidator:
 
         return auth_type, auth_info
 
+    # 기본값 []으로 설정하시면 안됩니다. 무조건 9개 API에 대한 기본값이 들어가야 합니다!!! 검증 작동이 아예 안돼서 테스트가 안됩니다..
     def _extract_protocol_info(self):
         """선택된 시험 분야의 프로토콜/타임아웃 정보 추출"""
         # 선택된 시험 분야의 spec_id 가져오기
@@ -428,7 +429,7 @@ class FormValidator:
         print(f"CONSTANTS.py 업데이트 - 현재 모드: {self.parent.current_mode}")
         print(f"선택된 시험 분야: {selected_spec_id}")
 
-        # 선택된 spec_id에 해당하는 파일 경로 가져오기 -> 기본값 []으로 하면 안됩니다.
+        # 선택된 spec_id에 해당하는 파일 경로 가져오기 
         spec_file_path = self._get_spec_file_mapping(selected_spec_id)
         if not spec_file_path:
             print(f"경고: spec_id '{selected_spec_id}'에 대한 매핑을 찾을 수 없습니다.")
