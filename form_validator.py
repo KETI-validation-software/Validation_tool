@@ -417,16 +417,28 @@ class FormValidator:
         selected_spec_id = self._get_selected_test_field_spec_id()
         if not selected_spec_id:
             print("경고: 선택된 시험 분야가 없습니다.")
-            return {'trans_protocol': [], 'time_out': [], 'num_retries': []}
+            print("기본값을 사용합니다: 9개 API, 각 30초 타임아웃, 3회 재시도")
+            # 기본값 반환 (9개 API 기준)
+            return {
+                'trans_protocol': [None, None, None, None, None, None, "LongPolling", None, None],
+                'time_out': [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
+                'num_retries': [1, 2, 3, 3, 3, 2, 1, 1, 1]
+            }
 
         print(f"CONSTANTS.py 업데이트 - 현재 모드: {self.parent.current_mode}")
         print(f"선택된 시험 분야: {selected_spec_id}")
 
-        # 선택된 spec_id에 해당하는 파일 경로 가져오기
+        # 선택된 spec_id에 해당하는 파일 경로 가져오기 -> 기본값 []으로 하면 안됩니다.
         spec_file_path = self._get_spec_file_mapping(selected_spec_id)
         if not spec_file_path:
             print(f"경고: spec_id '{selected_spec_id}'에 대한 매핑을 찾을 수 없습니다.")
-            return {'trans_protocol': [], 'time_out': [], 'num_retries': []}
+            print(f"기본값을 사용합니다: 9개 API, 각 30초 타임아웃, 3회 재시도")
+            # 기본값 반환 (9개 API 기준)
+            return {
+                'trans_protocol': [None, None, None, None, None, None, "LongPolling", None, None],
+                'time_out': [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
+                'num_retries': [1, 2, 3, 3, 3, 2, 1, 1, 1]
+            }
 
         print(f"  파일: {spec_file_path}")
 
@@ -434,7 +446,13 @@ class FormValidator:
         spec_data = self.opt_loader.load_opt_json(resource_path(spec_file_path))
         if not spec_data:
             print(f"경고: {spec_file_path} 파일을 로드할 수 없습니다.")
-            return {'trans_protocol': [], 'time_out': [], 'num_retries': []}
+            print(f"기본값을 사용합니다: 9개 API, 각 30초 타임아웃, 3회 재시도")
+            # 기본값 반환 (9개 API 기준)
+            return {
+                'trans_protocol': [None, None, None, None, None, None, "LongPolling", None, None],
+                'time_out': [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
+                'num_retries': [1, 2, 3, 3, 3, 2, 1, 1, 1]
+            }
 
         # steps에서 프로토콜 정보 추출
         steps = spec_data.get("specification", {}).get("steps", [])
