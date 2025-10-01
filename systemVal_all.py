@@ -950,11 +950,40 @@ class MyApp(QWidget):
         """)
         self.rbtn.clicked.connect(self.exit_btn_clicked)
 
+        self.result_btn = QPushButton(self)
+        self.result_btn.setText('시험 결과')
+        self.result_btn.setFixedSize(140, 50)
+        self.result_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #FFB6C1;
+                border: 2px solid #FF69B4;
+                border-radius: 5px;
+                padding: 5px;
+                font-weight: bold;
+                color: #8B0000;
+            }
+            QPushButton:hover {
+                background-color: #FFC0CB;
+                border: 2px solid #FF1493;
+            }
+            QPushButton:pressed {
+                background-color: #FF69B4;
+            }
+            QPushButton:disabled {
+                background-color: #F0F0F0;
+                border: 2px solid #CCCCCC;
+                color: #999999;
+            }
+        """)
+        self.result_btn.clicked.connect(self.show_result_page)
+
         buttonLayout.addWidget(self.sbtn)
         buttonLayout.addSpacing(20)
         buttonLayout.addWidget(self.stop_btn)
         buttonLayout.addSpacing(20)
         buttonLayout.addWidget(self.rbtn)
+        buttonLayout.addSpacing(20)
+        buttonLayout.addWidget(self.result_btn)
         buttonGroup.setLayout(buttonLayout)
 
         mainLayout.addSpacing(20)
@@ -1251,6 +1280,11 @@ class MyApp(QWidget):
                 self.tableWidget.item(i, 3).setTextAlignment(Qt.AlignCenter)
                 self.tableWidget.setItem(i, 4, QTableWidgetItem("0%"))
                 self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
+
+    def show_result_page(self):
+        """시험 결과 페이지 표시"""
+        # TODO: 시험 결과 페이지 구현 예정
+        QMessageBox.information(self, '시험 결과', '시험 결과 페이지가 곧 구현됩니다.')
 
     def exit_btn_clicked(self):
         """프로그램 종료"""
