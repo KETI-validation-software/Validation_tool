@@ -29,17 +29,15 @@ class FormValidator:
     def load_opt_files(self, mode):
         """OPT 파일 로드 및 스키마 생성"""
         try:
-            # 모드에 따라 다른 파일 경로 설정
-            exp_opt_path, exp_opt2_path = self._get_file_paths(mode)
-            if not exp_opt_path or not exp_opt2_path:
+            # 모드에 따라 exp_opt 파일 경로 설정
+            exp_opt_path = self._get_exp_opt_path(mode)
+            if not exp_opt_path:
                 QMessageBox.warning(self.parent, "모드 오류", f"알 수 없는 모드: {mode}")
                 return
 
-            # OPT 파일 로드
+            # exp_opt 파일 로드 (testSpecIds 정보 포함)
             exp_opt = self.opt_loader.load_opt_json(exp_opt_path)
-            exp_opt2 = self.opt_loader.load_opt_json(exp_opt2_path)
-
-            if not (exp_opt and exp_opt2):
+            if not exp_opt:
                 QMessageBox.warning(self.parent, "로드 실패", f"{mode.upper()} 모드 OPT 파일을 읽을 수 없습니다.")
                 return
 
@@ -53,80 +51,138 @@ class FormValidator:
                 self.parent.test_field_table.selectRow(0)
                 self._fill_api_table_for_selected_field(0)
 
-            # 모드에 따른 파일 생성
-            self._generate_schema_files(mode, exp_opt2_path)
+            # 모드에 따른 파일 생성 (모든 testSpecIds의 opt2, opt3 등)
+            self._generate_files_for_all_specs(mode, exp_opt)
 
             # 버튼 상태 업데이트
             self.parent.check_start_button_state()
-            self.parent.check_next_button_state()  # 다음 버튼 상태도 업데이트
+            self.parent.check_next_button_state()
 
             QMessageBox.information(self.parent, "로드 완료", f"{mode.upper()} 모드 파일들이 성공적으로 로드되었습니다!")
 
         except Exception as e:
             QMessageBox.critical(self.parent, "오류", f"OPT 파일 로드 중 오류가 발생했습니다:\n{str(e)}")
 
-    def _get_file_paths(self, mode):
-        """모드에 따른 파일 경로 반환"""
-        if mode == "request_longpolling":
-            return (
-                resource_path("temp/(temp)exp_opt_requestVal.json"),
-                resource_path("temp/(temp)exp_opt2_requestVal_LongPolling.json")
-            )
-        elif mode == "response_longpolling":
-            return (
-                resource_path("temp/(temp)exp_opt_responseVal.json"),
-                resource_path("temp/(temp)exp_opt2_responseVal_LongPolling.json")
-            )
-        elif mode == "request_webhook":
-            return (
-                resource_path("temp/(temp)exp_opt_requestVal.json"),
-                resource_path("temp/(temp)exp_opt2_requestVal_WebHook.json")
-            )
-        elif mode == "response_webhook":
-            return (
-                resource_path("temp/(temp)exp_opt_responseVal.json"),
-                resource_path("temp/(temp)exp_opt2_responseVal_WebHook.json")
-            )
+    def _get_exp_opt_path(self, mode):
+        """모드에 따른 exp_opt 파일 경로 반환"""
+        if mode in ["request_longpolling", "request_webhook"]:
+            return resource_path("temp/(temp)exp_opt_requestVal.json")
+        elif mode in ["response_longpolling", "response_webhook"]:
+            return resource_path("temp/(temp)exp_opt_responseVal.json")
         else:
-            return None, None
+            return None
 
-    def _generate_schema_files(self, mode, exp_opt2_path):
-        """모드에 따른 스키마 파일 생성"""
+    def _generate_files_for_all_specs(self, mode, exp_opt):
+        """모든 testSpecIds를 하나의 파일로 합쳐서 생성 (schema + videoData)"""
         try:
-            if mode in ["request_longpolling", "request_webhook"]:
-                # Request 모드
-                schema_path = generate_schema_file(
-                    exp_opt2_path,
-                    schema_type="request",
-                    output_path="spec/video/videoSchema_request.py"
-                )
-                print(f"videoSchema_request.py 생성 완료: {schema_path}")
+            # testSpecIds 추출
+            test_spec_ids = exp_opt.get("testRequest", {}).get("testGroup", {}).get("testSpecIds", [])
+            print(f"\n=== 산출물 생성 시작 ===")
+            print(f"모드: {mode}")
+            print(f"testSpecIds: {test_spec_ids}")
 
-                request_path = generate_video_request_file(
-                    exp_opt2_path,
-                    file_type="request",
-                    output_path="spec/video/videoData_request.py"
+            # 모든 spec 파일 경로 수집
+            spec_file_paths = []
+            for spec_id in test_spec_ids:
+                spec_file_path = self._get_spec_file_mapping(spec_id)
+                if spec_file_path:
+                    spec_file_paths.append(resource_path(spec_file_path))
+                    print(f"  [{spec_id}] {spec_file_path}")
+                else:
+                    print(f"  경고: spec_id '{spec_id}'에 대한 매핑을 찾을 수 없습니다.")
+
+            if not spec_file_paths:
+                print("  경고: 처리할 spec 파일이 없습니다.")
+                return
+
+            print(f"\n총 {len(spec_file_paths)}개 spec 파일을 하나로 합쳐서 생성")
+
+            if mode in ["request_longpolling", "request_webhook"]:
+                # Request 모드 - 모든 spec을 하나의 파일로
+                print("\n[Request 모드 산출물 생성]")
+                self._generate_merged_files(
+                    spec_file_paths,
+                    schema_type="request",
+                    file_type="request"
                 )
-                print(f"videoData_request.py 생성 완료: {request_path}")
 
             elif mode in ["response_longpolling", "response_webhook"]:
-                # Response 모드
-                schema_path = generate_schema_file(
-                    exp_opt2_path,
+                # Response 모드 - 모든 spec을 하나의 파일로
+                print("\n[Response 모드 산출물 생성]")
+                self._generate_merged_files(
+                    spec_file_paths,
                     schema_type="response",
-                    output_path="spec/video/videoSchema_response.py"
+                    file_type="response"
                 )
-                print(f"videoSchema_response.py 생성 완료: {schema_path}")
 
-                request_path = generate_video_request_file(
-                    exp_opt2_path,
-                    file_type="response",
-                    output_path="spec/video/videoData_response.py"
-                )
-                print(f"videoData_response.py 생성 완료: {request_path}")
+            print(f"\n=== 산출물 생성 완료 ===\n")
 
         except Exception as e:
             print(f"스키마 파일 생성 실패: {e}")
+            import traceback
+            traceback.print_exc()
+
+    def _generate_merged_files(self, spec_file_paths, schema_type, file_type):
+        """여러 spec 파일을 하나로 합쳐서 생성"""
+        import json
+        import tempfile
+
+        if not spec_file_paths:
+            return
+
+        # 모든 spec 파일의 steps를 하나로 합치기
+        merged_steps = []
+        merged_spec_id = "merged"
+        merged_spec_name = "통합 시험 분야"
+
+        for spec_path in spec_file_paths:
+            try:
+                spec_data = self.opt_loader.load_opt_json(spec_path)
+                if spec_data and "specification" in spec_data:
+                    steps = spec_data["specification"].get("steps", [])
+                    merged_steps.extend(steps)
+                    print(f"  - {spec_data['specification'].get('name', '?')}: {len(steps)}개 step")
+            except Exception as e:
+                print(f"  경고: {spec_path} 로드 실패: {e}")
+
+        print(f"\n총 {len(merged_steps)}개 step을 통합")
+
+        # 합쳐진 데이터로 임시 JSON 파일 생성
+        merged_data = {
+            "specification": {
+                "id": merged_spec_id,
+                "name": merged_spec_name,
+                "version": "1.0",
+                "steps": merged_steps
+            }
+        }
+
+        # 임시 파일에 저장
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False, encoding='utf-8') as temp_file:
+            json.dump(merged_data, temp_file, ensure_ascii=False, indent=2)
+            temp_file_path = temp_file.name
+
+        try:
+            # 임시 파일을 사용하여 산출물 생성
+            schema_path = generate_schema_file(
+                temp_file_path,
+                schema_type=schema_type,
+                output_path=f"spec/video/videoSchema_{file_type}.py"
+            )
+            print(f"videoSchema_{file_type}.py 생성 완료")
+
+            request_path = generate_video_request_file(
+                temp_file_path,
+                file_type=file_type,
+                output_path=f"spec/video/videoData_{file_type}.py"
+            )
+            print(f"videoData_{file_type}.py 생성 완료")
+
+        finally:
+            # 임시 파일 삭제
+            import os
+            if os.path.exists(temp_file_path):
+                os.unlink(temp_file_path)
 
     def _fill_basic_info(self, exp_opt):
         """기본 정보 필드 채우기"""

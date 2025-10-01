@@ -86,6 +86,64 @@ StoredObjectAnalyticsInfos_in_schema = {
 }],
 }
 
+# Authentication
+Authentication_in_schema = {
+    "userID": str,
+    "userPW": str,
+}
+
+# Capabilities
+Capabilities_in_schema = {}
+
+# SensorDeviceProfiles
+SensorDeviceProfiles_in_schema = {}
+
+# RealtimeSensorData
+RealtimeSensorData_in_schema = {
+    "sensorDeviceList": [{
+    "sensorDeviceID": str,
+}],
+    "transProtocol": {
+    "transProtocolType": str,
+    OptionalKey("transProtocolDesc"): str,
+},
+    OptionalKey("duration"): int,
+    OptionalKey("startTime"): int,
+}
+
+# RealtimeSensorEventInfos
+RealtimeSensorEventInfos_in_schema = {
+    "sensorDeviceList": [{
+    "sensorDeviceID": str,
+}],
+    "transProtocol": {
+    "transProtocolType": str,
+    OptionalKey("transProtocolDesc"): str,
+},
+    OptionalKey("duration"): int,
+    OptionalKey("eventFilter"): str,
+    OptionalKey("startTime"): int,
+}
+
+# StoredSensorEventInfos
+StoredSensorEventInfos_in_schema = {
+    "sensorDeviceList": [{
+    "sensorDeviceID": str,
+}],
+    "timePeriod": {
+    "startTime": int,
+    "endTime": int,
+},
+    OptionalKey("maxCount"): int,
+    OptionalKey("eventFilter"): str,
+}
+
+# SensorDeviceControl
+SensorDeviceControl_in_schema = {
+    "sensorDeviceID": str,
+    OptionalKey("commandType"): str,
+}
+
 # steps 순서대로 스키마 리스트 생성
 videoInSchema = [
     Authentication_in_schema,
@@ -97,4 +155,11 @@ videoInSchema = [
     RealtimeVideoEventInfos_in_schema,
     StoredVideoEventInfos_in_schema,
     StoredObjectAnalyticsInfos_in_schema,
+    Authentication_in_schema,
+    Capabilities_in_schema,
+    SensorDeviceProfiles_in_schema,
+    RealtimeSensorData_in_schema,
+    RealtimeSensorEventInfos_in_schema,
+    StoredSensorEventInfos_in_schema,
+    SensorDeviceControl_in_schema,
 ]
