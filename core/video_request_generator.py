@@ -99,7 +99,7 @@ class VideoRequestGenerator:
         else:
             return f'"{str(content)}"'
 
-    def create_video_request_file(self, json_path: str, file_type: str, output_path: str = None) -> str:
+    def create_video_request_file(self, json_path: str, file_type: str, output_path: str = None, spec_prefix: str = "video") -> str:
         """
         JSON 파일로부터 videoRequest 파일을 생성합니다.
 
@@ -107,6 +107,7 @@ class VideoRequestGenerator:
             json_path: 입력 JSON 파일 경로
             file_type: "request" 또는 "response"
             output_path: 출력 파일 경로
+            spec_prefix: 변수명 접두사 (예: "spec-001", "spec-0011")
 
         Returns:
             생성된 파일 경로
@@ -122,6 +123,7 @@ class VideoRequestGenerator:
             data = json.load(f)
 
         specification = data.get("specification", {})
+        spec_id = specification.get("id", "")
         steps = specification.get("steps", [])
 
         # WebHook 파일인지 확인
@@ -190,31 +192,31 @@ class VideoRequestGenerator:
                     webhook_data_names.append(data_name)
                     break
 
-        # 메시지 리스트 생성 (steps 순서대로)
+        # 메시지 리스트 생성 (steps 순서대로) - spec_prefix 사용
         if file_type == "request":
-            # Request 파일: responseData로 _out_data 생성했으므로 videoOutMessage
-            content += "# steps 순서대로 출력 메시지 생성\n"
-            content += "videoOutMessage = [\n"
+            # Request 파일: responseData로 _out_data 생성했으므로 outData
+            content += f"# {spec_prefix} 출력 메시지 리스트\n"
+            content += f"{spec_prefix}_outData = [\n"
         else:  # response
-            # Response 파일: requestData로 _in_data 생성했으므로 videoInMessage
-            content += "# steps 순서대로 입력 메시지 생성\n"
-            content += "videoInMessage = [\n"
+            # Response 파일: requestData로 _in_data 생성했으므로 inData
+            content += f"# {spec_prefix} 입력 메시지 리스트\n"
+            content += f"{spec_prefix}_inData = [\n"
 
         for name in data_names:
             content += f"    {name},\n"
         content += "]\n\n"
 
-        # videoMessages 리스트 생성 (endpoint)
-        content += "# API endpoint\n"
-        content += "videoMessages = [\n"
+        # messages 리스트 생성 (endpoint) - spec_prefix 사용
+        content += f"# {spec_prefix} API endpoint\n"
+        content += f"{spec_prefix}_messages = [\n"
         for endpoint in endpoint_names:
             content += f'    "{endpoint}",\n'
         content += "]\n"
 
-        # WebHook 데이터 리스트 생성 (WebHook)
+        # WebHook 데이터 리스트 생성 (WebHook) - spec_prefix 사용
         if is_webhook and webhook_data_names:
-            content += "\n# WebHook\n"
-            content += "videoWebhookData = [\n"
+            content += f"\n# {spec_prefix} WebHook\n"
+            content += f"{spec_prefix}_webhookData = [\n"
             for name in webhook_data_names:
                 content += f"    {name},\n"
             content += "]\n"
@@ -267,7 +269,7 @@ class VideoRequestGenerator:
         return result
 
 
-def generate_video_request_file(json_path: str, file_type: str, output_path: str = None) -> str:
+def generate_video_request_file(json_path: str, file_type: str, output_path: str = None, spec_prefix: str = "video") -> str:
     """
     편의 함수: JSON 파일로부터 videoRequest 파일을 생성합니다.
 
@@ -275,9 +277,10 @@ def generate_video_request_file(json_path: str, file_type: str, output_path: str
         json_path: 입력 JSON 파일 경로
         file_type: "request" 또는 "response"
         output_path: 출력 파일 경로
+        spec_prefix: 변수명 접두사 (예: "spec-001", "spec-0011")
 
     Returns:
         생성된 파일 경로
     """
     generator = VideoRequestGenerator()
-    return generator.create_video_request_file(json_path, file_type, output_path)
+    return generator.create_video_request_file(json_path, file_type, output_path, spec_prefix)

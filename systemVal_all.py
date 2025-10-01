@@ -15,11 +15,19 @@ from datetime import datetime
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 warnings.filterwarnings('ignore')
 
-from spec.video.videoData_response import videoInMessage, videoMessages
-from spec.video.videoData_request import videoOutMessage
-from spec.video.videoSchema_request import videoInSchema
-from spec.video.videoSchema_response import videoOutSchema
-from spec.video.videoSchema import videoWebhookSchema
+# from spec.video.videoData_response import videoInMessage, videoMessages
+# from spec.video.videoData_request import videoOutMessage
+# from spec.video.videoSchema_request import videoInSchema
+# from spec.video.videoSchema_response import videoOutSchema
+#from spec.video.videoData_response import spec_002_inData, spec_002_messages, spec_0022_inData, spec_0022_messages
+from spec.video.videoData_response import spec_002_inData, spec_002_messages
+#from spec.video.videoData_request import spec_001_outData, spec_001_messages, spec_0011_outData, spec_0011_messages
+#from spec.video.videoSchema_request import spec_001_inSchema, spec_0011_inSchema
+from spec.video.videoData_request import spec_001_outData, spec_001_messages
+from spec.video.videoSchema_request import spec_001_inSchema
+#from spec.video.videoSchema_response import spec_002_outSchema, spec_0022_outSchema
+from spec.video.videoSchema_response import spec_002_outSchema
+# from spec.video.videoSchema import videoWebhookSchema
 from urllib.parse import urlparse
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor
