@@ -167,7 +167,7 @@ class ResultPageDialog(QDialog):
     def __init__(self, parent):
         super().__init__()
         self.parent = parent
-        self.setWindowTitle('통합플랫폼 연동 검증 - 시험 결과')
+        self.setWindowTitle('통합플랫폼 연동 시험 결과')
         self.setGeometry(100, 100, 1100, 600)
         self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
         self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
@@ -178,7 +178,7 @@ class ResultPageDialog(QDialog):
         mainLayout = QVBoxLayout()
         
         # 상단 큰 제목
-        title_label = QLabel('통합플랫폼 연동 검증 - 시험 결과', self)
+        title_label = QLabel('통합플랫폼 연동 시험 결과', self)
         title_font = title_label.font()
         title_font.setPointSize(22)
         title_font.setBold(True)
@@ -469,60 +469,6 @@ class MyApp(QWidget):
         
         # 실제 검증 횟수 업데이트
         self.tableWidget.setItem(row, 2, QTableWidgetItem(str(retries)))
-        self.tableWidget.item(row, 2).setTextAlignment(Qt.AlignCenter)
-        
-        # 통과 필드 수 업데이트
-        self.tableWidget.setItem(row, 3, QTableWidgetItem(str(pass_count)))
-        self.tableWidget.item(row, 3).setTextAlignment(Qt.AlignCenter)
-        
-        # 전체 필드 수 업데이트
-        total_fields = pass_count + error_count
-        self.tableWidget.setItem(row, 4, QTableWidgetItem(str(total_fields)))
-        self.tableWidget.item(row, 4).setTextAlignment(Qt.AlignCenter)
-        
-        # 실패 횟수 업데이트
-        self.tableWidget.setItem(row, 5, QTableWidgetItem(str(error_count)))
-        self.tableWidget.item(row, 5).setTextAlignment(Qt.AlignCenter)
-        
-        # 평가 점수 업데이트
-        if total_fields > 0:
-            score = (pass_count / total_fields) * 100
-            self.tableWidget.setItem(row, 6, QTableWidgetItem(f"{score:.1f}%"))
-        else:
-            self.tableWidget.setItem(row, 6, QTableWidgetItem("0%"))
-        self.tableWidget.item(row, 6).setTextAlignment(Qt.AlignCenter)
-        
-        # 메시지 저장 (팝업용)
-        setattr(self, f"step{row+1}_msg", msg)
-
-
-
-    def update_table_row(self, row, result, pass_count, error_count, data, error_text):
-        """테이블 행 업데이트 (아이콘, 통과/전체 필드 수 포함)"""
-        if row >= self.tableWidget.rowCount():
-            return
-            
-        # 아이콘 업데이트
-        msg, img = self.icon_update_step(data, result, error_text)
-        
-        # 아이콘을 완전히 중앙에 정렬하기 위해 위젯 사용
-        icon_widget = QWidget()
-        icon_layout = QHBoxLayout()
-        icon_layout.setContentsMargins(0, 0, 0, 0)
-        
-        icon_label = QLabel()
-        icon_label.setPixmap(QIcon(img).pixmap(16, 16))
-        icon_label.setToolTip(msg)
-        icon_label.setAlignment(Qt.AlignCenter)
-        
-        icon_layout.addWidget(icon_label)
-        icon_layout.setAlignment(Qt.AlignCenter)
-        icon_widget.setLayout(icon_layout)
-        
-        self.tableWidget.setCellWidget(row, 1, icon_widget)
-        
-        # 검증 횟수 업데이트 (기본 1회)
-        self.tableWidget.setItem(row, 2, QTableWidgetItem("1"))
         self.tableWidget.item(row, 2).setTextAlignment(Qt.AlignCenter)
         
         # 통과 필드 수 업데이트
