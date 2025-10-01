@@ -136,6 +136,81 @@ StoredObjectAnalyticsInfos_in_data = {
 ]
 }
 
+# Authentication
+Authentication_in_data = {
+    "userID": "user0001",
+    "userPW": "pass0001"
+}
+
+# Capabilities
+Capabilities_in_data = {}
+
+# SensorDeviceProfiles
+SensorDeviceProfiles_in_data = {}
+
+# RealtimeSensorData
+RealtimeSensorData_in_data = {
+    "sensorDeviceList": [
+        {
+        "sensorDeviceID": "iot0001"
+    },
+        {
+        "sensorDeviceID": "iot0002"
+    },
+        {
+        "sensorDeviceID": "iot0003"
+    }
+],
+    "duration": 100,
+    "transProtocol": {
+    "transProtocolType": "LongPolling"
+},
+    "startTime": 20220822163022123
+}
+
+# RealtimeSensorEventInfos
+RealtimeSensorEventInfos_in_data = {
+    "sensorDeviceList": [
+        {
+        "sensorDeviceID": "iot0001"
+    },
+        {
+        "sensorDeviceID": "iot0002"
+    }
+],
+    "transProtocol": {
+    "transProtocolType": "LongPolling",
+    "transProtocolDesc": "description"
+},
+    "duration": 200,
+    "eventFilter": "화재",
+    "startTime": 20220822163022123
+}
+
+# StoredSensorEventInfos
+StoredSensorEventInfos_in_data = {
+    "timePeriod": {
+    "startTime": 20220822163022123,
+    "endTime": 20220822263022123
+},
+    "sensorDeviceList": [
+        {
+        "sensorDeviceID": "iot0001"
+    },
+        {
+        "sensorDeviceID": "iot0002"
+    }
+],
+    "maxCount": 10,
+    "eventFilter": "화재"
+}
+
+# SensorDeviceControl
+SensorDeviceControl_in_data = {
+    "sensorDeviceID": "iot0001",
+    "commandType": "Alarm"
+}
+
 # steps 순서대로 입력 메시지 생성
 videoInMessage = [
     Authentication_in_data,
@@ -147,6 +222,13 @@ videoInMessage = [
     RealtimeVideoEventInfos_in_data,
     StoredVideoEventInfos_in_data,
     StoredObjectAnalyticsInfos_in_data,
+    Authentication_in_data,
+    Capabilities_in_data,
+    SensorDeviceProfiles_in_data,
+    RealtimeSensorData_in_data,
+    RealtimeSensorEventInfos_in_data,
+    StoredSensorEventInfos_in_data,
+    SensorDeviceControl_in_data,
 ]
 
 # API endpoint
@@ -160,4 +242,11 @@ videoMessages = [
     "RealtimeVideoEventInfos",
     "StoredVideoEventInfos",
     "StoredObjectAnalyticsInfos",
+    "Authentication",
+    "Capabilities",
+    "SensorDeviceProfiles",
+    "RealtimeSensorData",
+    "RealtimeSensorEventInfos",
+    "StoredSensorEventInfos",
+    "SensorDeviceControl",
 ]
