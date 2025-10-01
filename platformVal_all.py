@@ -161,6 +161,219 @@ class CustomDialog(QDialog):
         self.setLayout(self.layout)
         self.exec_()
 
+
+# 시험 결과 페이지 다이얼로그
+class ResultPageDialog(QDialog):
+    def __init__(self, parent):
+        super().__init__()
+        self.parent = parent
+        self.setWindowTitle('통합플랫폼 연동 검증 - 시험 결과')
+        self.setGeometry(100, 100, 1100, 600)
+        self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
+        self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
+        
+        self.initUI()
+    
+    def initUI(self):
+        mainLayout = QVBoxLayout()
+        
+        # 상단 큰 제목
+        title_label = QLabel('통합플랫폼 연동 검증 - 시험 결과', self)
+        title_font = title_label.font()
+        title_font.setPointSize(22)
+        title_font.setBold(True)
+        title_label.setFont(title_font)
+        title_label.setAlignment(Qt.AlignCenter)
+        mainLayout.addWidget(title_label)
+        
+        # 시험 정보 섹션
+        info_group = QGroupBox('시험 정보')
+        info_layout = QVBoxLayout()
+        
+        test_info = self.parent.load_test_info_from_constants()
+        info_text = ""
+        for label, value in test_info:
+            info_text += f"{label}: {value}\n"
+        
+        info_browser = QTextBrowser()
+        info_browser.setPlainText(info_text)
+        info_browser.setMaximumHeight(150)
+        info_layout.addWidget(info_browser)
+        info_group.setLayout(info_layout)
+        mainLayout.addWidget(info_group)
+        
+        mainLayout.addSpacing(10)
+        
+        # 시험 결과 레이블
+        result_label = QLabel('시험 결과')
+        mainLayout.addWidget(result_label)
+        
+        # 결과 테이블 (parent의 테이블 데이터 복사)
+        self.tableWidget = QTableWidget(9, 8)
+        self.tableWidget.setHorizontalHeaderLabels([
+            "API 명", "결과", "검증 횟수", "통과 필드 수", 
+            "전체 필드 수", "실패 횟수", "평가 점수", "상세 내용"
+        ])
+        self.tableWidget.verticalHeader().setVisible(False)
+        self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tableWidget.setSelectionMode(QAbstractItemView.NoSelection)
+        self.tableWidget.setIconSize(QtCore.QSize(16, 16))
+        
+        # 테이블 크기 설정
+        self.tableWidget.setMinimumSize(950, 300)
+        self.tableWidget.resize(1050, 400)
+        
+        # 컬럼 너비 설정
+        self.tableWidget.setColumnWidth(0, 240)
+        self.tableWidget.setColumnWidth(1, 90)
+        self.tableWidget.setColumnWidth(2, 100)
+        self.tableWidget.setColumnWidth(3, 110)
+        self.tableWidget.setColumnWidth(4, 110)
+        self.tableWidget.setColumnWidth(5, 100)
+        self.tableWidget.setColumnWidth(6, 110)
+        self.tableWidget.setColumnWidth(7, 150)
+        
+        # 행 높이 설정
+        for i in range(9):
+            self.tableWidget.setRowHeight(i, 40)
+        
+        # parent 테이블 데이터 복사
+        self._copy_table_data()
+        
+        # 상세 내용 버튼 클릭 이벤트
+        self.tableWidget.cellClicked.connect(self.table_cell_clicked)
+        
+        mainLayout.addWidget(self.tableWidget)
+        
+        mainLayout.addSpacing(15)
+        
+        # 평가 점수 표시
+        score_group = self._create_score_display()
+        mainLayout.addWidget(score_group)
+        
+        mainLayout.addSpacing(20)
+        
+        # 닫기 버튼
+        close_btn = QPushButton('닫기')
+        close_btn.setFixedSize(140, 50)
+        close_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #87CEEB;
+                border: 2px solid #4682B4;
+                border-radius: 5px;
+                padding: 5px;
+                font-weight: bold;
+                color: #191970;
+            }
+            QPushButton:hover {
+                background-color: #B0E0E6;
+                border: 2px solid #1E90FF;
+            }
+            QPushButton:pressed {
+                background-color: #4682B4;
+            }
+        """)
+        close_btn.clicked.connect(self.accept)
+        
+        close_layout = QHBoxLayout()
+        close_layout.setAlignment(Qt.AlignCenter)
+        close_layout.addWidget(close_btn)
+        mainLayout.addLayout(close_layout)
+        
+        mainLayout.addStretch()
+        self.setLayout(mainLayout)
+    
+    def _copy_table_data(self):
+        """parent의 테이블 데이터를 복사"""
+        for row in range(9):
+            # API 명
+            api_item = self.parent.tableWidget.item(row, 0)
+            if api_item:
+                self.tableWidget.setItem(row, 0, QTableWidgetItem(api_item.text()))
+            
+            # 결과 아이콘 (위젯 복사)
+            icon_widget = self.parent.tableWidget.cellWidget(row, 1)
+            if icon_widget:
+                new_icon_widget = QWidget()
+                new_icon_layout = QHBoxLayout()
+                new_icon_layout.setContentsMargins(0, 0, 0, 0)
+                
+                # 원본 아이콘 찾기
+                old_label = icon_widget.findChild(QLabel)
+                if old_label:
+                    new_icon_label = QLabel()
+                    new_icon_label.setPixmap(old_label.pixmap())
+                    new_icon_label.setToolTip(old_label.toolTip())
+                    new_icon_label.setAlignment(Qt.AlignCenter)
+                    
+                    new_icon_layout.addWidget(new_icon_label)
+                    new_icon_layout.setAlignment(Qt.AlignCenter)
+                    new_icon_widget.setLayout(new_icon_layout)
+                    
+                    self.tableWidget.setCellWidget(row, 1, new_icon_widget)
+            
+            # 나머지 컬럼들 (검증 횟수, 통과 필드 수, 전체 필드 수, 실패 횟수, 평가 점수)
+            for col in range(2, 7):
+                item = self.parent.tableWidget.item(row, col)
+                if item:
+                    new_item = QTableWidgetItem(item.text())
+                    new_item.setTextAlignment(Qt.AlignCenter)
+                    self.tableWidget.setItem(row, col, new_item)
+            
+            # 상세 내용 버튼
+            detail_btn = QPushButton('확인')
+            detail_btn.setStyleSheet("""
+                QPushButton {
+                    background-color: #87CEEB;
+                    border: 1px solid #4682B4;
+                    border-radius: 3px;
+                    padding: 5px;
+                    font-weight: bold;
+                    color: #191970;
+                }
+                QPushButton:hover {
+                    background-color: #B0E0E6;
+                }
+            """)
+            self.tableWidget.setCellWidget(row, 7, detail_btn)
+    
+    def _create_score_display(self):
+        """평가 점수 표시 그룹"""
+        score_group = QGroupBox('평가 점수')
+        score_group.setMaximumWidth(1050)
+        score_group.setMinimumWidth(950)
+        
+        total_pass = self.parent.total_pass_cnt
+        total_error = self.parent.total_error_cnt
+        total_fields = total_pass + total_error
+        score = (total_pass / total_fields * 100) if total_fields > 0 else 0
+        
+        pass_label = QLabel(f"통과 필드 수: {total_pass}")
+        total_label = QLabel(f"전체 필드 수: {total_fields}")
+        score_label = QLabel(f"종합 평가 점수: {score:.1f}%")
+        
+        # 폰트 크기 조정
+        font = pass_label.font()
+        font.setPointSize(20)
+        pass_label.setFont(font)
+        total_label.setFont(font)
+        score_label.setFont(font)
+        
+        layout = QHBoxLayout()
+        layout.setSpacing(90)
+        layout.addWidget(pass_label)
+        layout.addWidget(total_label)
+        layout.addWidget(score_label)
+        layout.addStretch()
+        
+        score_group.setLayout(layout)
+        return score_group
+    
+    def table_cell_clicked(self, row, col):
+        """상세 내용 버튼 클릭 시"""
+        if col == 7:  # 상세 내용 컬럼
+            self.parent.show_combined_result(row)
+
 class MyApp(QWidget):
 
     def __init__(self, embedded=False):
@@ -1140,8 +1353,8 @@ class MyApp(QWidget):
 
     def show_result_page(self):
         """시험 결과 페이지 표시"""
-        # TODO: 시험 결과 페이지 구현 예정
-        QMessageBox.information(self, '시험 결과', '시험 결과 페이지가 곧 구현됩니다.')
+        dialog = ResultPageDialog(self)
+        dialog.exec_()
 
     def exit_btn_clicked(self):
         """프로그램 종료"""
