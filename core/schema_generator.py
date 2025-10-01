@@ -149,7 +149,7 @@ class SchemaGenerator:
         else:
             return "str"
     
-    def create_schema_file(self, json_path: str, schema_type: str = "request", output_path: str = None) -> str:
+    def create_schema_file(self, json_path: str, schema_type: str = "request", output_path: str = None, spec_prefix: str = "video") -> str:
         """
         JSON 파일로부터 전체 스키마 파일을 생성합니다.
 
@@ -157,6 +157,7 @@ class SchemaGenerator:
             json_path: 입력 JSON 파일 경로
             schema_type: "request" 또는 "response"
             output_path: 출력 파일 경로
+            spec_prefix: 변수명 접두사 (예: "spec-001", "spec-0011")
 
         Returns:
             생성된 파일 경로
@@ -172,6 +173,7 @@ class SchemaGenerator:
             data = json.load(f)
 
         specification = data.get("specification", {})
+        spec_id = specification.get("id", "")
         steps = specification.get("steps", [])
 
         # WebHook 파일인지 확인
@@ -259,22 +261,22 @@ class SchemaGenerator:
                     webhook_schema_names.append(schema_name)
                     break
 
-        # 스키마 리스트 생성 (steps 순서대로)
-        content += "# steps 순서대로 스키마 리스트 생성\n"
+        # 스키마 리스트 생성 (steps 순서대로) - spec_prefix 사용
+        content += f"# {spec_prefix} 스키마 리스트\n"
         if schema_type == "request":
-            list_name = "videoInSchema"
+            list_name = f"{spec_prefix}_inSchema"
         else:  # response
-            list_name = "videoOutSchema"
+            list_name = f"{spec_prefix}_outSchema"
 
         content += f"{list_name} = [\n"
         for name in schema_names:
             content += f"    {name},\n"
         content += "]\n"
 
-        # WebHook 스키마 리스트 생성 (WebHook 전용)
+        # WebHook 스키마 리스트 생성 (WebHook 전용) - spec_prefix 사용
         if is_webhook and webhook_schema_names:
-            content += "\n# WebHook 전용 스키마 리스트\n"
-            content += "videoWebhookSchema = [\n"
+            content += f"\n# {spec_prefix} WebHook 전용 스키마 리스트\n"
+            content += f"{spec_prefix}_webhookSchema = [\n"
             for name in webhook_schema_names:
                 content += f"    {name},\n"
             content += "]\n"
@@ -398,17 +400,18 @@ class SchemaGenerator:
             return str  # 기본값
 
 
-def generate_schema_file(json_path: str, schema_type: str = "request", output_path: str = None) -> str:
+def generate_schema_file(json_path: str, schema_type: str = "request", output_path: str = None, spec_prefix: str = "video") -> str:
     """
     편의 함수: JSON 파일로부터 스키마 파일을 생성합니다.
-    
+
     Args:
         json_path: 입력 JSON 파일 경로
         schema_type: "request" 또는 "response"
         output_path: 출력 파일 경로
-        
+        spec_prefix: 변수명 접두사 (예: "spec-001", "spec-0011")
+
     Returns:
         생성된 파일 경로
     """
     generator = SchemaGenerator()
-    return generator.create_schema_file(json_path, schema_type, output_path)
+    return generator.create_schema_file(json_path, schema_type, output_path, spec_prefix)
