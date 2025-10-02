@@ -266,6 +266,20 @@ spec_001_messages = [
     "StoredObjectAnalyticsInfos",
 ]
 
+# spec_001 WebHook 데이터 리스트
+spec_001_webhookData = [
+    RealtimeVideoEventInfos_out_data,
+]
+
+# 통합 데이터 리스트 (하위 호환성)
+videoOutMessage = spec_001_outData
+
+# 통합 API endpoint 리스트 (하위 호환성)
+videoMessages = spec_001_messages
+
+
+# ========== spec_0011: 보안용 센서 시스템 ==========
+
 # Authentication
 Authentication_out_data = {
     "code": "200",
@@ -415,4 +429,10 @@ spec_0011_messages = [
     "StoredSensorEventInfos",
     "SensorDeviceControl",
 ]
+
+# spec_0011 WebHook 데이터 리스트
+spec_0011_webhookData = [
+    RealtimeSensorEventInfos_out_data,
+]
+
 
