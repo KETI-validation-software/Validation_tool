@@ -121,26 +121,33 @@ class MainWindow(QMainWindow):
     def _open_validation_app(self, mode):
         importlib.reload(CONSTANTS)  # CONSTANTS 모듈을 다시 로드하여 최신 설정 반영
         
-        # 인스턴스 재사용 금지
-        if hasattr(self, "validation_window") and self.validation_window is not None:
-            self.validation_window.close()
-            self.validation_window = None
-        self.validation_window = platform_app.MyApp(mode)
-        self.validation_window.show()
-
         """모드에 따라 다른 검증 앱 실행"""
         if mode in ["request_longpolling", "request_webhook"]:
-            # Request 모드 (LongPolling/WebHook) - Platform 검증
-            if getattr(self, "_platform_widget", None) is None:
-                self._platform_widget = platform_app.MyApp(embedded=True)
-                self.stack.addWidget(self._platform_widget)
-            self.stack.setCurrentWidget(self._platform_widget)
-        elif mode in ["response_longpolling", "response_webhook"]:
-            # Response 모드 (LongPolling/WebHook) - System 검증
+            # Request 모드 - Platform 검증 (새 창)
+            if hasattr(self, "platform_window") and self.platform_window is not None:
+                self.platform_window.close()
+            self.platform_window = platform_app.MyApp(embedded=False)
+            self.platform_window.show()
+            
+            # Main 화면은 System 검증으로 전환
             if getattr(self, "_system_widget", None) is None:
                 self._system_widget = system_app.MyApp(embedded=True)
                 self.stack.addWidget(self._system_widget)
             self.stack.setCurrentWidget(self._system_widget)
+            
+        elif mode in ["response_longpolling", "response_webhook"]:
+            # Response 모드 - System 검증 (새 창)
+            if hasattr(self, "system_window") and self.system_window is not None:
+                self.system_window.close()
+            self.system_window = system_app.MyApp(embedded=False)
+            self.system_window.show()
+            
+            # Main 화면은 Platform 검증으로 전환
+            if getattr(self, "_platform_widget", None) is None:
+                self._platform_widget = platform_app.MyApp(embedded=True)
+                self.stack.addWidget(self._platform_widget)
+            self.stack.setCurrentWidget(self._platform_widget)
+            
         else:
             print(f"알 수 없는 모드: {mode}")
 

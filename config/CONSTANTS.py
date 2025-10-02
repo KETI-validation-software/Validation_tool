@@ -29,7 +29,7 @@ specs = [
 ]
 
 # 선택된 시험 분야의 인덱스 (0: 영상보안, 1: 보안용센서)
-selected_spec_index = 1
+selected_spec_index = 0
 
 #test-opt
 '''
@@ -40,9 +40,9 @@ num_retries : 메시지별 메시지 검증 횟수
 '''
 
 
-trans_protocol = [None, None, None, 'LongPolling', 'LongPolling', None, None]
-time_out = [5000, 5000, 5000, 5000, 5000, 5000, 5000]
-num_retries = [1, 1, 1, 1, 1, 1, 1]
+trans_protocol = [None, None, None, None, None, None, 'LongPolling', None, None]
+time_out = [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000]
+num_retries = [1, 2, 3, 3, 3, 2, 1, 1, 1]
 
 
 #etc
