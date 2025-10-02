@@ -153,9 +153,9 @@ class FormValidator:
         spec_list_names = []
 
         # 통합 리스트 생성용 (하위 호환성)
-        all_schema_list_names = []
-        all_data_list_names = []
-        all_messages_list_names = []
+        # all_schema_list_names = []
+        # all_data_list_names = []
+        # all_messages_list_names = []
 
         # 각 spec 파일별로 처리
         for spec_path in spec_file_paths:
@@ -373,40 +373,41 @@ class FormValidator:
                     if webhook_data_names:
                         spec_info["webhookData"] = f"{spec_id_safe}_webhookData"
 
+                #CONSTANTS.py업데이트용
                 spec_list_names.append(spec_info)
 
                 # 통합 리스트 생성용 이름 수집
-                all_schema_list_names.append(list_name)
-                all_data_list_names.append(data_list_name)
-                all_messages_list_names.append(messages_list_name)
+                # all_schema_list_names.append(list_name)
+                # all_data_list_names.append(data_list_name)
+                # all_messages_list_names.append(messages_list_name)
 
             except Exception as e:
                 print(f"  경고: {spec_path} 처리 실패: {e}")
                 import traceback
                 traceback.print_exc()
 
-        # 통합 리스트 생성 (하위 호환성 유지)
-        if all_schema_list_names:
-            if schema_type == "request":
-                unified_schema_name = "videoInSchema"
-            else:
-                unified_schema_name = "videoOutSchema"
+        # # 통합 리스트 생성 (하위 호환성 유지)
+        # if all_schema_list_names:
+        #     if schema_type == "request":
+        #         unified_schema_name = "videoInSchema"
+        #     else:
+        #         unified_schema_name = "videoOutSchema"
 
-            schema_content += f"# 통합 스키마 리스트 (하위 호환성)\n"
-            schema_content += f"{unified_schema_name} = " + " + ".join(all_schema_list_names) + "\n\n"
+        #     schema_content += f"# 통합 스키마 리스트 (하위 호환성)\n"
+        #     schema_content += f"{unified_schema_name} = " + " + ".join(all_schema_list_names) + "\n\n"
 
-        if all_data_list_names:
-            if file_type == "request":
-                unified_data_name = "videoOutMessage"
-            else:
-                unified_data_name = "videoInMessage"
+        # if all_data_list_names:
+        #     if file_type == "request":
+        #         unified_data_name = "videoOutMessage"
+        #     else:
+        #         unified_data_name = "videoInMessage"
 
-            data_content += f"# 통합 데이터 리스트 (하위 호환성)\n"
-            data_content += f"{unified_data_name} = " + " + ".join(all_data_list_names) + "\n\n"
+        #     data_content += f"# 통합 데이터 리스트 (하위 호환성)\n"
+        #     data_content += f"{unified_data_name} = " + " + ".join(all_data_list_names) + "\n\n"
 
-        if all_messages_list_names:
-            data_content += f"# 통합 API endpoint 리스트 (하위 호환성)\n"
-            data_content += f"videoMessages = " + " + ".join(all_messages_list_names) + "\n\n"
+        # if all_messages_list_names:
+        #     data_content += f"# 통합 API endpoint 리스트 (하위 호환성)\n"
+        #     data_content += f"videoMessages = " + " + ".join(all_messages_list_names) + "\n\n"
 
         # 파일 저장
         schema_output = f"spec/video/videoSchema_{file_type}.py"
@@ -416,11 +417,11 @@ class FormValidator:
 
         with open(schema_output, 'w', encoding='utf-8') as f:
             f.write(schema_content)
-        print(f"  ✓ videoSchema_{file_type}.py 생성 완료")
+        print(f"videoSchema_{file_type}.py 생성 완료")
 
         with open(data_output, 'w', encoding='utf-8') as f:
             f.write(data_content)
-        print(f"  ✓ videoData_{file_type}.py 생성 완료")
+        print(f"videoData_{file_type}.py 생성 완료")
 
         # CONSTANTS.py의 specs 리스트 업데이트
         return spec_list_names
