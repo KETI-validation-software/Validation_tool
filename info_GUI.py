@@ -185,37 +185,16 @@ class InfoWidget(QWidget):
         panel = QGroupBox("시험 기본 정보")
         layout = QVBoxLayout()
 
-        # 불러오기 버튼들 (Request/Response - 일반/WebHook)
-        btn_row1 = QHBoxLayout()
-        btn_row1.addStretch()
+        # 시험정보 불러오기 버튼 (API 기반)
+        btn_row = QHBoxLayout()
+        btn_row.addStretch()
 
-        self.load_request_btn = QPushButton("Long Polling|Request")
-        self.load_request_btn.setStyleSheet("QPushButton { background-color: #9FBFE5; color: black; font-weight: bold; }")
-        self.load_request_btn.clicked.connect(lambda: self.form_validator.load_opt_files("request_longpolling"))
-        btn_row1.addWidget(self.load_request_btn)
+        self.load_test_info_btn = QPushButton("시험정보 불러오기")
+        self.load_test_info_btn.setStyleSheet("QPushButton { background-color: #9FBFE5; color: black; font-weight: bold; font-size: 14px; padding: 8px 20px; }")
+        self.load_test_info_btn.clicked.connect(self.on_load_test_info_clicked)
+        btn_row.addWidget(self.load_test_info_btn)
 
-        self.load_response_btn = QPushButton("Long Polling|Response")
-        self.load_response_btn.setStyleSheet("QPushButton { background-color: #9FBFE5; color: black; font-weight: bold; }")
-        self.load_response_btn.clicked.connect(lambda: self.form_validator.load_opt_files("response_longpolling"))
-        btn_row1.addWidget(self.load_response_btn)
-
-        layout.addLayout(btn_row1)
-
-        # WebHook 버전 버튼들
-        btn_row2 = QHBoxLayout()
-        btn_row2.addStretch()
-
-        self.load_request_webhook_btn = QPushButton("WebHook|Request")
-        self.load_request_webhook_btn.setStyleSheet("QPushButton { background-color: #C4BEE2; color: black; font-weight: bold; }")
-        self.load_request_webhook_btn.clicked.connect(lambda: self.form_validator.load_opt_files("request_webhook"))
-        btn_row2.addWidget(self.load_request_webhook_btn)
-
-        self.load_response_webhook_btn = QPushButton("WebHook|Response")
-        self.load_response_webhook_btn.setStyleSheet("QPushButton { background-color: #C4BEE2; color: black; font-weight: bold; }")
-        self.load_response_webhook_btn.clicked.connect(lambda: self.form_validator.load_opt_files("response_webhook"))
-        btn_row2.addWidget(self.load_response_webhook_btn)
-
-        layout.addLayout(btn_row2)
+        layout.addLayout(btn_row)
 
         form = QFormLayout()
         self.company_edit = QLineEdit()
@@ -517,30 +496,45 @@ class InfoWidget(QWidget):
     def start_scan(self):
         """실제 네트워크 스캔으로 사용 가능한 주소 탐지"""
         try:
-            
+            # API에서 받은 testPort가 있으면 직접 URL 생성
+            if hasattr(self, 'test_port') and self.test_port:
+                my_ip = self.get_local_ip()
+                if my_ip:
+                    url = f"{my_ip}:{self.test_port}"
+                    print(f"API testPort 사용: {url}")
+                    self._populate_url_table([url])
+                    QMessageBox.information(self, "주소 설정 완료",
+                        f"API에서 받은 포트 정보로 주소를 설정했습니다.\n"
+                        f"주소: {url}")
+                    return
+                else:
+                    QMessageBox.warning(self, "경고", "로컬 IP를 가져올 수 없습니다.")
+                    return
+
+            # testPort가 없으면 기존 네트워크 스캔 수행
             # 이미 스캔 중이면 중복 실행 방지
             if self.scan_thread and self.scan_thread.isRunning():
                 QMessageBox.information(self, "알림", "이미 주소 탐색이 진행 중입니다.")
                 return
-            
+
             # Worker와 Thread 설정
             from PyQt5.QtCore import QThread
-            
+
             self.scan_worker = NetworkScanWorker()
             self.scan_thread = QThread()
-            
+
             # Worker를 Thread로 이동
             self.scan_worker.moveToThread(self.scan_thread)
-            
+
             # 시그널 연결
             self.scan_worker.scan_completed.connect(self._on_scan_completed)
             self.scan_worker.scan_failed.connect(self._on_scan_failed)
             self.scan_thread.started.connect(self.scan_worker.scan_network)
             self.scan_thread.finished.connect(self.scan_thread.deleteLater)
-            
+
             # 스레드 시작
             self.scan_thread.start()
-            
+
         except Exception as e:
             print(f"주소 탐색 오류: {e}")
             QMessageBox.critical(self, "오류", f"네트워크 탐색 중 오류 발생:\n{str(e)}")
@@ -818,6 +812,80 @@ class InfoWidget(QWidget):
             print(f"초기화 실패: {e}")
             raise
 
+    def on_load_test_info_clicked(self):
+        """시험정보 불러오기 버튼 클릭 이벤트 (API 기반)"""
+        try:
+            # 로컬 IP 주소 가져오기
+            my_ip = self.get_local_ip()
+            if not my_ip:
+                QMessageBox.warning(self, "경고", "로컬 IP 주소를 가져올 수 없습니다.")
+                return
+
+            print(f"로컬 IP: {my_ip}")
+
+            # API 호출하여 시험 정보 가져오기
+            test_data = self.form_validator.fetch_test_info_by_ip(my_ip)
+
+            if not test_data:
+                QMessageBox.warning(self, "경고",
+                    "시험 정보를 불러올 수 없습니다.\n"
+                    "- 서버 연결을 확인해주세요.\n"
+                    "- IP 주소에 해당하는 시험 요청이 있는지 확인해주세요.")
+                return
+
+            # 1페이지 필드 채우기
+            eval_target = test_data.get("testRequest", {}).get("evaluationTarget", {})
+            test_group = test_data.get("testRequest", {}).get("testGroup", {})
+
+            self.company_edit.setText(eval_target.get("companyName", ""))
+            self.product_edit.setText(eval_target.get("productName", ""))
+            self.version_edit.setText(eval_target.get("version", ""))
+            self.model_edit.setText(eval_target.get("modelName", ""))
+            self.test_category_edit.setText(eval_target.get("testCategory", ""))
+            self.target_system_edit.setText(eval_target.get("targetSystem", ""))
+            self.test_group_edit.setText(test_group.get("name", ""))
+            self.test_range_edit.setText(test_group.get("testRange", ""))
+
+            # testSpecs와 testPort 저장 (2페이지에서 사용)
+            self.test_specs = test_group.get("testSpecs", [])
+            self.test_port = test_data.get("schedule", {}).get("testPort", None)
+
+            # 모드 설정 (API 기반이므로 기본값 설정)
+            self.current_mode = "api_loaded"
+
+            # API 데이터를 이용하여 OPT 파일 로드 및 스키마 생성
+            self.form_validator.load_opt_files_from_api(test_data)
+
+            # 다음 버튼 상태 업데이트
+            self.check_next_button_state()
+
+        except Exception as e:
+            print(f"시험정보 불러오기 실패: {e}")
+            import traceback
+            traceback.print_exc()
+            QMessageBox.critical(self, "오류", f"시험 정보를 불러오는 중 오류가 발생했습니다:\n{str(e)}")
+
+    def get_local_ip(self):
+        """로컬 IP 주소 가져오기"""
+        # TODO: 테스트용 고정 IP - 나중에 실제 IP 자동 감지로 변경 필요
+        return "192.168.1.1"
+
+        # # 실제 IP 자동 감지 코드 (나중에 활성화)
+        # import socket
+        # try:
+        #     # 외부 서버에 연결 시도하여 로컬 IP 확인
+        #     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        #     s.connect(("8.8.8.8", 80))
+        #     local_ip = s.getsockname()[0]
+        #     s.close()
+        #     return local_ip
+        # except Exception:
+        #     try:
+        #         # 위 방법 실패 시 호스트명으로 IP 가져오기
+        #         return socket.gethostbyname(socket.gethostname())
+        #     except Exception:
+        #         return None
+
     def check_next_button_state(self):
         """첫 번째 페이지의 다음 버튼 활성화 조건 체크"""
         try:
@@ -859,13 +927,13 @@ class InfoWidget(QWidget):
             return False
 
     def on_test_field_selected(self, row, col):
-        """시험 분야명 행 클릭 시 해당 API 테이블 표시"""
+        """시험 분야명 행 클릭 시 해당 API 테이블 표시 (API 기반)"""
         try:
             # 클릭된 행 번호 저장
             self.selected_test_field_row = row
 
-            # 선택된 시험 분야의 API 테이블 표시
-            self.form_validator._fill_api_table_for_selected_field(row)
+            # specifications API 호출하여 API 테이블 채우기
+            self.form_validator._fill_api_table_for_selected_field_from_api(row)
         except Exception as e:
             print(f"시험 분야 선택 처리 실패: {e}")
             QMessageBox.warning(self, "오류", f"시험 분야 데이터 로드 중 오류가 발생했습니다:\n{str(e)}")

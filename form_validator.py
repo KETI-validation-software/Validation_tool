@@ -1,4 +1,5 @@
 import re
+import requests
 from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem
 from PyQt5.QtCore import Qt
 from core.functions import resource_path
@@ -27,51 +28,52 @@ class FormValidator:
 
     # ---------- OPT 파일 로드 관련 ----------
 
-    def load_opt_files(self, mode):
-        """OPT 파일 로드 및 스키마 생성"""
-        try:
-            # 모드에 따라 exp_opt 파일 경로 설정
-            exp_opt_path = self._get_exp_opt_path(mode)
-            if not exp_opt_path:
-                QMessageBox.warning(self.parent, "모드 오류", f"알 수 없는 모드: {mode}")
-                return
+    # API 연동으로 인해 더 이상 사용하지 않음 - 주석처리
+    # def load_opt_files(self, mode):
+    #     """OPT 파일 로드 및 스키마 생성"""
+    #     try:
+    #         # 모드에 따라 exp_opt 파일 경로 설정
+    #         exp_opt_path = self._get_exp_opt_path(mode)
+    #         if not exp_opt_path:
+    #             QMessageBox.warning(self.parent, "모드 오류", f"알 수 없는 모드: {mode}")
+    #             return
 
-            # exp_opt 파일 로드 (testSpecIds 정보 포함)
-            exp_opt = self.opt_loader.load_opt_json(exp_opt_path)
-            if not exp_opt:
-                QMessageBox.warning(self.parent, "로드 실패", f"{mode.upper()} 모드 OPT 파일을 읽을 수 없습니다.")
-                return
+    #         # exp_opt 파일 로드 (testSpecIds 정보 포함)
+    #         exp_opt = self.opt_loader.load_opt_json(exp_opt_path)
+    #         if not exp_opt:
+    #             QMessageBox.warning(self.parent, "로드 실패", f"{mode.upper()} 모드 OPT 파일을 읽을 수 없습니다.")
+    #             return
 
-            # 현재 모드 저장 및 UI 업데이트
-            self.parent.current_mode = mode
-            self._fill_basic_info(exp_opt)
-            self._fill_test_field_table(exp_opt)
+    #         # 현재 모드 저장 및 UI 업데이트
+    #         self.parent.current_mode = mode
+    #         self._fill_basic_info(exp_opt)
+    #         self._fill_test_field_table(exp_opt)
 
-            # API 테이블은 첫 번째 분야를 자동 선택하여 표시
-            if self.parent.test_field_table.rowCount() > 0:
-                self.parent.test_field_table.selectRow(0)
-                self._fill_api_table_for_selected_field(0)
+    #         # API 테이블은 첫 번째 분야를 자동 선택하여 표시
+    #         if self.parent.test_field_table.rowCount() > 0:
+    #             self.parent.test_field_table.selectRow(0)
+    #             self._fill_api_table_for_selected_field(0)
 
-            # 모드에 따른 파일 생성 (모든 testSpecIds의 opt2, opt3 등)
-            self._generate_files_for_all_specs(mode, exp_opt)
+    #         # 모드에 따른 파일 생성 (모든 testSpecIds의 opt2, opt3 등)
+    #         self._generate_files_for_all_specs(mode, exp_opt)
 
-            # 버튼 상태 업데이트
-            self.parent.check_start_button_state()
-            self.parent.check_next_button_state()
+    #         # 버튼 상태 업데이트
+    #         self.parent.check_start_button_state()
+    #         self.parent.check_next_button_state()
 
-            QMessageBox.information(self.parent, "로드 완료", f"{mode.upper()} 모드 파일들이 성공적으로 로드되었습니다!")
+    #         QMessageBox.information(self.parent, "로드 완료", f"{mode.upper()} 모드 파일들이 성공적으로 로드되었습니다!")
 
-        except Exception as e:
-            QMessageBox.critical(self.parent, "오류", f"OPT 파일 로드 중 오류가 발생했습니다:\n{str(e)}")
+    #     except Exception as e:
+    #         QMessageBox.critical(self.parent, "오류", f"OPT 파일 로드 중 오류가 발생했습니다:\n{str(e)}")
 
-    def _get_exp_opt_path(self, mode):
-        """모드에 따른 exp_opt 파일 경로 반환"""
-        if mode in ["request_longpolling", "request_webhook"]:
-            return resource_path("temp/(temp)exp_opt_requestVal.json")
-        elif mode in ["response_longpolling", "response_webhook"]:
-            return resource_path("temp/(temp)exp_opt_responseVal.json")
-        else:
-            return None
+    # def _get_exp_opt_path(self, mode):
+    #     """모드에 따른 exp_opt 파일 경로 반환"""
+    #     if mode in ["request_longpolling", "request_webhook"]:
+    #         return resource_path("temp/(temp)exp_opt_requestVal.json")
+    #     elif mode in ["response_longpolling", "response_webhook"]:
+    #         return resource_path("temp/(temp)exp_opt_responseVal.json")
+    #     else:
+    #         return None
 
     def _generate_files_for_all_specs(self, mode, exp_opt):
         """모든 testSpecIds를 하나의 파일로 합쳐서 생성 (schema + videoData)"""
@@ -152,10 +154,6 @@ class FormValidator:
         # 각 스펙별 리스트 이름 저장 (CONSTANTS.py 업데이트용)
         spec_list_names = []
 
-        # 통합 리스트 생성용 (하위 호환성)
-        # all_schema_list_names = []
-        # all_data_list_names = []
-        # all_messages_list_names = []
 
         # 각 spec 파일별로 처리
         for spec_path in spec_file_paths:
@@ -376,38 +374,10 @@ class FormValidator:
                 #CONSTANTS.py업데이트용
                 spec_list_names.append(spec_info)
 
-                # 통합 리스트 생성용 이름 수집
-                # all_schema_list_names.append(list_name)
-                # all_data_list_names.append(data_list_name)
-                # all_messages_list_names.append(messages_list_name)
-
             except Exception as e:
                 print(f"  경고: {spec_path} 처리 실패: {e}")
                 import traceback
                 traceback.print_exc()
-
-        # # 통합 리스트 생성 (하위 호환성 유지)
-        # if all_schema_list_names:
-        #     if schema_type == "request":
-        #         unified_schema_name = "videoInSchema"
-        #     else:
-        #         unified_schema_name = "videoOutSchema"
-
-        #     schema_content += f"# 통합 스키마 리스트 (하위 호환성)\n"
-        #     schema_content += f"{unified_schema_name} = " + " + ".join(all_schema_list_names) + "\n\n"
-
-        # if all_data_list_names:
-        #     if file_type == "request":
-        #         unified_data_name = "videoOutMessage"
-        #     else:
-        #         unified_data_name = "videoInMessage"
-
-        #     data_content += f"# 통합 데이터 리스트 (하위 호환성)\n"
-        #     data_content += f"{unified_data_name} = " + " + ".join(all_data_list_names) + "\n\n"
-
-        # if all_messages_list_names:
-        #     data_content += f"# 통합 API endpoint 리스트 (하위 호환성)\n"
-        #     data_content += f"videoMessages = " + " + ".join(all_messages_list_names) + "\n\n"
 
         # 파일 저장
         schema_output = f"spec/video/videoSchema_{file_type}.py"
@@ -479,70 +449,71 @@ class FormValidator:
             import traceback
             traceback.print_exc()
 
-    def _fill_basic_info(self, exp_opt):
-        """기본 정보 필드 채우기"""
-        if not exp_opt or "testRequest" not in exp_opt:
-            return
+    # API 연동으로 인해 더 이상 사용하지 않음 - 주석처리
+    # def _fill_basic_info(self, exp_opt):
+    #     """기본 정보 필드 채우기"""
+    #     if not exp_opt or "testRequest" not in exp_opt:
+    #         return
 
-        first = exp_opt["testRequest"]
-        et = first.get("evaluationTarget", {})
-        tg = first.get("testGroup", {})
+    #     first = exp_opt["testRequest"]
+    #     et = first.get("evaluationTarget", {})
+    #     tg = first.get("testGroup", {})
 
-        self.parent.company_edit.setText(et.get("companyName", ""))
-        self.parent.product_edit.setText(et.get("productName", ""))
-        self.parent.version_edit.setText(et.get("version", ""))
-        self.parent.model_edit.setText(et.get("modelName", ""))
-        self.parent.test_category_edit.setText(et.get("testCategory", ""))
-        self.parent.target_system_edit.setText(et.get("targetSystem", ""))
-        self.parent.test_group_edit.setText(tg.get("name", ""))
-        self.parent.test_range_edit.setText(tg.get("testRange", ""))
+    #     self.parent.company_edit.setText(et.get("companyName", ""))
+    #     self.parent.product_edit.setText(et.get("productName", ""))
+    #     self.parent.version_edit.setText(et.get("version", ""))
+    #     self.parent.model_edit.setText(et.get("modelName", ""))
+    #     self.parent.test_category_edit.setText(et.get("testCategory", ""))
+    #     self.parent.target_system_edit.setText(et.get("targetSystem", ""))
+    #     self.parent.test_group_edit.setText(tg.get("name", ""))
+    #     self.parent.test_range_edit.setText(tg.get("testRange", ""))
 
-    def _fill_test_field_table(self, exp_opt):
-        """시험 분야명 테이블 채우기 (testSpecIds 기반)"""
-        if not exp_opt or "testRequest" not in exp_opt:
-            return
+    # def _fill_test_field_table(self, exp_opt):
+    #     """시험 분야명 테이블 채우기 (testSpecIds 기반)"""
+    #     if not exp_opt or "testRequest" not in exp_opt:
+    #         return
 
-        test_group = exp_opt["testRequest"].get("testGroup", {})
-        test_spec_ids = test_group.get("testSpecIds", [])
+    #     test_group = exp_opt["testRequest"].get("testGroup", {})
+    #     test_spec_ids = test_group.get("testSpecIds", [])
 
-        # 시험 분야명 테이블 초기화
-        self.parent.test_field_table.setRowCount(0)
+    #     # 시험 분야명 테이블 초기화
+    #     self.parent.test_field_table.setRowCount(0)
 
-        # 각 testSpecId에 대해 해당하는 specification 파일 로드
-        for spec_id in test_spec_ids:
-            spec_name = self._get_specification_name(spec_id)
-            if spec_name:
-                row = self.parent.test_field_table.rowCount()
-                self.parent.test_field_table.insertRow(row)
+    #     # 각 testSpecId에 대해 해당하는 specification 파일 로드
+    #     for spec_id in test_spec_ids:
+    #         spec_name = self._get_specification_name(spec_id)
+    #         if spec_name:
+    #             row = self.parent.test_field_table.rowCount()
+    #             self.parent.test_field_table.insertRow(row)
 
-                # 시험 분야명
-                item = QTableWidgetItem(spec_name)
-                item.setTextAlignment(Qt.AlignCenter)
-                item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-                # spec_id를 저장해서 나중에 사용
-                item.setData(Qt.UserRole, spec_id)
-                self.parent.test_field_table.setItem(row, 0, item)
+    #             # 시험 분야명
+    #             item = QTableWidgetItem(spec_name)
+    #             item.setTextAlignment(Qt.AlignCenter)
+    #             item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+    #             # spec_id를 저장해서 나중에 사용
+    #             item.setData(Qt.UserRole, spec_id)
+    #             self.parent.test_field_table.setItem(row, 0, item)
 
-    def _get_specification_name(self, spec_id):
-        """testSpecId에 해당하는 specification의 name 가져오기 (하드코딩 매핑)"""
-        try:
-            # spec_id와 파일명 하드코딩 매핑
-            spec_file_map = self._get_spec_file_mapping(spec_id)
-            if not spec_file_map:
-                return f"시험 분야 {spec_id}"
+    # def _get_specification_name(self, spec_id):
+    #     """testSpecId에 해당하는 specification의 name 가져오기 (하드코딩 매핑)"""
+    #     try:
+    #         # spec_id와 파일명 하드코딩 매핑
+    #         spec_file_map = self._get_spec_file_mapping(spec_id)
+    #         if not spec_file_map:
+    #             return f"시험 분야 {spec_id}"
 
-            from core.functions import resource_path
-            spec_file_path = resource_path(spec_file_map)
+    #         from core.functions import resource_path
+    #         spec_file_path = resource_path(spec_file_map)
 
-            # 해당 파일에서 specification.name 가져오기
-            spec_data = self.opt_loader.load_opt_json(spec_file_path)
-            if spec_data and "specification" in spec_data:
-                return spec_data["specification"].get("name", f"시험 분야 {spec_id}")
+    #         # 해당 파일에서 specification.name 가져오기
+    #         spec_data = self.opt_loader.load_opt_json(spec_file_path)
+    #         if spec_data and "specification" in spec_data:
+    #             return spec_data["specification"].get("name", f"시험 분야 {spec_id}")
 
-        except Exception as e:
-            print(f"Specification {spec_id} 로드 실패: {e}")
+    #     except Exception as e:
+    #         print(f"Specification {spec_id} 로드 실패: {e}")
 
-        return f"시험 분야 {spec_id}"  # 기본값
+    #     return f"시험 분야 {spec_id}"  # 기본값
 
     def _get_spec_file_mapping(self, spec_id):
         """spec_id를 실제 파일 경로로 매핑 (하드코딩)
@@ -900,3 +871,192 @@ class FormValidator:
 
         with open(file_path, 'w', encoding='utf-8') as f:
             f.write(content)
+
+    def load_opt_files_from_api(self, test_data):
+        """API 데이터를 이용하여 OPT 파일 로드 및 스키마 생성"""
+        try:
+            # test_specs 추출
+            test_group = test_data.get("testRequest", {}).get("testGroup", {})
+            test_specs = test_group.get("testSpecs", [])
+
+            if not test_specs:
+                QMessageBox.warning(self.parent, "데이터 없음", "testSpecs 데이터가 비어있습니다.")
+                return
+
+            print(f"\n=== API 기반 OPT 로드 시작 ===")
+            print(f"spec 개수: {len(test_specs)}개")
+
+            # 시험 분야 테이블 채우기 (testSpecs 기반)
+            self._fill_test_field_table_from_api(test_specs)
+
+            # API 테이블은 첫 번째 분야를 자동 선택하여 표시 (API 기반)
+            if self.parent.test_field_table.rowCount() > 0:
+                self.parent.test_field_table.selectRow(0)
+                self._fill_api_table_for_selected_field_from_api(0)
+
+            # testSpecs로부터 OPT 파일 동적 로드 및 산출물 생성
+            # TODO: 실제 OPT 파일 로드 및 생성 로직 구현
+            # spec_file_paths = self.load_specs_from_api_data(test_specs)
+            # self._generate_merged_files(spec_file_paths, ...)
+
+            # 버튼 상태 업데이트
+            self.parent.check_start_button_state()
+            self.parent.check_next_button_state()
+
+        except Exception as e:
+            print(f"API 데이터 로드 실패: {e}")
+            import traceback
+            traceback.print_exc()
+            QMessageBox.critical(self.parent, "오류", f"API 데이터 로드 중 오류가 발생했습니다:\n{str(e)}")
+
+    def _fill_test_field_table_from_api(self, test_specs):
+        """API testSpecs 배열로부터 시험 분야 테이블 채우기"""
+        try:
+            table = self.parent.test_field_table
+            table.setRowCount(0)
+
+            for i, spec in enumerate(test_specs):
+                spec_id = spec.get("id", "")
+                spec_name = spec.get("name", "")
+
+                table.insertRow(i)
+
+                # 시험 분야명
+                field_item = QTableWidgetItem(spec_name)
+                field_item.setData(Qt.UserRole, spec_id)  # spec_id 저장
+                table.setItem(i, 0, field_item)
+
+            print(f"시험 분야 테이블 채우기 완료: {len(test_specs)}개 항목")
+
+        except Exception as e:
+            print(f"시험 분야 테이블 채우기 실패: {e}")
+            import traceback
+            traceback.print_exc()
+
+    def fetch_test_info_by_ip(self, ip_address):
+        """IP 주소로 시험 정보 조회"""
+        url = f"http://ect2.iptime.org:20223/api/integration/test-requests/by-ip?ipAddress={ip_address}"
+        try:
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()
+            json_data = response.json()
+
+            if json_data.get("success") and json_data.get("data"):
+                print(f"API 호출 성공: {len(json_data['data'])}개 시험 정보 조회됨")
+                return json_data["data"][0]
+            else:
+                raise ValueError("API 응답에 데이터가 없습니다.")
+        except requests.exceptions.Timeout:
+            print(f"API 호출 타임아웃: 서버 응답 시간 초과")
+            return None
+        except requests.exceptions.ConnectionError:
+            print(f"API 호출 실패: 서버 연결 불가")
+            return None
+        except Exception as e:
+            print(f"API 호출 실패: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
+
+    def fetch_opt_by_spec_id(self, spec_id):
+        """spec_id로 OPT 파일 조회 (API 기반)"""
+        # TODO: spec_id를 서버에 전송하여 OPT JSON 받아오는 API 구현 필요
+        # 현재는 임시로 로컬 파일 조회
+        opt_file_path = f"opt_files/{spec_id}.json"
+
+        if os.path.exists(opt_file_path):
+            print(f"spec_id {spec_id}에 해당하는 OPT 파일 발견: {opt_file_path}")
+            return opt_file_path
+        else:
+            print(f"spec_id {spec_id}에 해당하는 OPT 파일이 없습니다.")
+            return None
+
+    def load_specs_from_api_data(self, test_specs):
+        """testSpecs 배열로부터 스펙 목록 동적 로드"""
+        spec_file_paths = []
+
+        print(f"testSpecs 배열로부터 {len(test_specs)}개 스펙 로드 시작...")
+        for i, spec in enumerate(test_specs, 1):
+            spec_id = spec.get("id", "")
+            spec_name = spec.get("name", "")
+            print(f"  {i}. {spec_name} (ID: {spec_id})")
+
+            opt_path = self.fetch_opt_by_spec_id(spec_id)
+            if opt_path:
+                spec_file_paths.append(opt_path)
+
+        print(f"총 {len(spec_file_paths)}개 스펙 파일 로드 완료")
+        return spec_file_paths
+
+    def fetch_specification_by_id(self, spec_id):
+        """spec_id로 specification 상세 정보 조회 (API 기반)"""
+        url = f"http://ect2.iptime.org:20223/api/integration/specifications/{spec_id}"
+        try:
+            print(f"Specification API 호출 중: {spec_id}")
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()
+            json_data = response.json()
+            print(f"Specification 조회 성공: {json_data.get('specification', {}).get('name', '')}")
+            return json_data
+        except requests.exceptions.Timeout:
+            print(f"Specification API 타임아웃: {spec_id}")
+            return None
+        except requests.exceptions.ConnectionError:
+            print(f"Specification API 연결 실패: {spec_id}")
+            return None
+        except Exception as e:
+            print(f"Specification 조회 실패 ({spec_id}): {e}")
+            return None
+
+    def _fill_api_table_for_selected_field_from_api(self, row):
+        """선택된 시험 분야의 API 테이블 채우기 (API 기반)"""
+        try:
+            # spec_id 추출
+            item = self.parent.test_field_table.item(row, 0)
+            if not item:
+                return
+
+            from PyQt5.QtCore import Qt
+            spec_id = item.data(Qt.UserRole)
+            if not spec_id:
+                return
+
+            # specifications API 호출
+            spec_data = self.fetch_specification_by_id(spec_id)
+            if not spec_data:
+                return
+
+            # API 테이블 초기화
+            self.parent.api_test_table.setRowCount(0)
+
+            # steps 순회하여 테이블 채우기
+            steps = spec_data.get("specification", {}).get("steps", [])
+
+            for step in steps:
+                if not step.get("hasApi"):
+                    continue  # API 없는 step은 제외
+
+                r = self.parent.api_test_table.rowCount()
+                self.parent.api_test_table.insertRow(r)
+
+                from PyQt5.QtWidgets import QTableWidgetItem
+                from PyQt5.QtCore import Qt
+
+                # 기능명 (step.name)
+                name_item = QTableWidgetItem(step.get("name", ""))
+                name_item.setTextAlignment(Qt.AlignCenter)
+                name_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+                self.parent.api_test_table.setItem(r, 0, name_item)
+
+                # API명 (endpoint) - specifications API에는 endpoint 없음
+                endpoint_item = QTableWidgetItem("")
+                endpoint_item.setTextAlignment(Qt.AlignCenter)
+                endpoint_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+                self.parent.api_test_table.setItem(r, 1, endpoint_item)
+
+            print(f"API 테이블 채우기 완료: {len(steps)}개 step 중 {self.parent.api_test_table.rowCount()}개 API")
+
+        except Exception as e:
+            print(f"API 테이블 채우기 실패: {e}")
+            import traceback
+            traceback.print_exc()
