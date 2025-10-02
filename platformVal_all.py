@@ -1440,7 +1440,7 @@ class MyApp(QWidget):
             self.tableWidget.item(i, 2).setTextAlignment(Qt.AlignCenter)
             self.tableWidget.setItem(i, 3, QTableWidgetItem("0"))
             self.tableWidget.item(i, 3).setTextAlignment(Qt.AlignCenter)
-            self.tableWidget.setItem(i, 4, QTableWidgetItem("0%"))
+            self.tableWidget.setItem(i, 4, QTableWidgetItem("0"))
             self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
 
     def show_result_page(self):
