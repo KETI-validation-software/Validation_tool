@@ -168,6 +168,3 @@ spec_0011_inSchema = [
     SensorDeviceControl_in_schema,
 ]
 
-# 통합 스키마 리스트 (하위 호환성)
-videoInSchema = spec_001_inSchema + spec_0011_inSchema
-

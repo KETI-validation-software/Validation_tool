@@ -416,9 +416,3 @@ spec_0011_messages = [
     "SensorDeviceControl",
 ]
 
-# 통합 데이터 리스트 (하위 호환성)
-videoOutMessage = spec_001_outData + spec_0011_outData
-
-# 통합 API endpoint 리스트 (하위 호환성)
-videoMessages = spec_001_messages + spec_0011_messages
-
