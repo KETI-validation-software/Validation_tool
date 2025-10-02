@@ -731,7 +731,14 @@ class FormValidator:
             protocol_info = self._extract_protocol_info()
             variables.update(protocol_info)
 
-            # 6. CONSTANTS.py 파일 업데이트
+            # 6. 선택된 시험 분야의 인덱스 저장 (중요!)
+            selected_spec_index = self._get_selected_spec_index()
+            variables['selected_spec_index'] = selected_spec_index
+            print(f"\n🎯 [CRITICAL] CONSTANTS.py에 저장할 selected_spec_index: {selected_spec_index}")
+            print(f"   변수 타입: {type(selected_spec_index)}")
+            print(f"   전체 variables: {variables}\n")
+
+            # 7. CONSTANTS.py 파일 업데이트
             self._update_constants_file(constants_path, variables)
 
             return True
@@ -877,6 +884,49 @@ class FormValidator:
         except Exception as e:
             print(f"선택된 시험 분야 spec_id 가져오기 실패: {e}")
             return None
+
+    def _get_selected_spec_index(self):
+        """선택된 시험 분야의 CONSTANTS.specs 인덱스 반환"""
+        try:
+            print("\n=== _get_selected_spec_index 시작 ===")
+            selected_spec_id = self._get_selected_test_field_spec_id()
+            print(f"[DEBUG] selected_spec_id: {selected_spec_id}")
+            
+            if not selected_spec_id:
+                print("⚠️ 경고: 선택된 시험 분야가 없습니다. 기본값 0 사용")
+                return 0
+            
+            # spec_id로 직접 판단 (파일 경로 대신)
+            # spec-001 = 영상보안(index 0), spec-0011 = 보안용센서(index 1)
+            spec_id_str = str(selected_spec_id).lower()
+            
+            if "spec-0011" in spec_id_str or "spec_0011" in spec_id_str:
+                print("✅ 보안용 센서 시스템 선택됨 (index 1)")
+                return 1  # 보안용 센서 시스템
+            elif "spec-001" in spec_id_str or "spec_001" in spec_id_str:
+                print("✅ 영상보안 시스템 선택됨 (index 0)")
+                return 0  # 영상보안 시스템
+            else:
+                # 추가: 파일 경로로도 확인 (이중 체크)
+                spec_file_path = self._get_spec_file_mapping(selected_spec_id)
+                print(f"[DEBUG] spec_file_path: {spec_file_path}")
+                
+                if spec_file_path:
+                    if "opt3" in spec_file_path or "0011" in spec_file_path:
+                        print("✅ 보안용 센서 시스템 선택됨 (index 1) - 파일 경로로 판단")
+                        return 1
+                    elif "opt2" in spec_file_path or "_001" in spec_file_path:
+                        print("✅ 영상보안 시스템 선택됨 (index 0) - 파일 경로로 판단")
+                        return 0
+                
+                print(f"⚠️ 경고: 알 수 없는 spec_id '{selected_spec_id}'. 기본값 0 사용")
+                return 0
+                
+        except Exception as e:
+            print(f"❌ 선택된 spec 인덱스 가져오기 실패: {e}")
+            import traceback
+            traceback.print_exc()
+            return 0
 
     def _update_constants_file(self, file_path, variables):
         """CONSTANTS.py 파일의 특정 변수들을 업데이트"""

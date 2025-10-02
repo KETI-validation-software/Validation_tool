@@ -1015,6 +1015,9 @@ class MyApp(QWidget):
                             self.update_table_row_with_retries(
                                 self.cnt, final_buffer_result, key_psss_cnt, key_error_cnt,
                                 tmp_res_auth, error_text, current_retries)
+                        
+                        # UI 즉시 업데이트 (화면에 반영)
+                        QApplication.processEvents()
 
                         self.valResult.append(f"\n검증 진행: {self.current_retry + 1}/{current_retries}회")
                         self.valResult.append(f"프로토콜: {current_protocol}")
@@ -1574,7 +1577,7 @@ class MyApp(QWidget):
                 self.tableWidget.item(i, 2).setTextAlignment(Qt.AlignCenter)
                 self.tableWidget.setItem(i, 3, QTableWidgetItem("0"))
                 self.tableWidget.item(i, 3).setTextAlignment(Qt.AlignCenter)
-                self.tableWidget.setItem(i, 4, QTableWidgetItem("0%"))
+                self.tableWidget.setItem(i, 4, QTableWidgetItem("0"))
                 self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
 
     def show_result_page(self):

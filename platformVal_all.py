@@ -471,10 +471,11 @@ class ResultPageDialog(QDialog):
 
 class MyApp(QWidget):
 
-    def __init__(self, embedded=False):
+    def __init__(self, embedded=False, mode=None):
         importlib.reload(CONSTANTS)  # CONSTANTS 모듈을 다시 로드하여 최신 설정 반영
         super().__init__()
         self.embedded = embedded
+        self.mode = mode  # 모드 저장
         self.radio_check_flag = "video"  # 영상보안 시스템으로 고정
         # 아이콘 경로 먼저 초기화 (initUI에서 사용됨)
         self.img_pass = resource_path("assets/image/green.png")
@@ -522,8 +523,16 @@ class MyApp(QWidget):
         if not hasattr(CONSTANTS, 'specs') or not CONSTANTS.specs:
             raise ValueError("CONSTANTS.specs가 정의되지 않았습니다!")
         
-        # 첫 번째 spec 사용 (향후 여러 spec 지원 가능)
-        spec = CONSTANTS.specs[0]
+        # selected_spec_index 사용 (info_GUI에서 선택한 spec)
+        spec_index = getattr(CONSTANTS, 'selected_spec_index', 0)
+        print(f"[DEBUG] load_specs_from_constants: selected_spec_index = {spec_index}")
+        
+        # 인덱스 범위 확인
+        if spec_index >= len(CONSTANTS.specs):
+            print(f"[WARNING] selected_spec_index({spec_index})가 범위를 벗어났습니다. 첫 번째 spec 사용")
+            spec_index = 0
+        
+        spec = CONSTANTS.specs[spec_index]
         inSchema_name = spec[0]  # e.g., "spec_001_inSchema"
         outData_name = spec[1]   # e.g., "spec_001_outData"
         messages_name = spec[2]  # e.g., "spec_001_messages"
@@ -1440,7 +1449,7 @@ class MyApp(QWidget):
             self.tableWidget.item(i, 2).setTextAlignment(Qt.AlignCenter)
             self.tableWidget.setItem(i, 3, QTableWidgetItem("0"))
             self.tableWidget.item(i, 3).setTextAlignment(Qt.AlignCenter)
-            self.tableWidget.setItem(i, 4, QTableWidgetItem("0%"))
+            self.tableWidget.setItem(i, 4, QTableWidgetItem("0"))
             self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
 
     def show_result_page(self):
