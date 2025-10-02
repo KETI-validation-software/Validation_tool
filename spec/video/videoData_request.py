@@ -240,6 +240,32 @@ StoredObjectAnalyticsInfos_out_data = {
 ]
 }
 
+# spec_001 데이터 리스트
+spec_001_outData = [
+    Authentication_out_data,
+    Capabilities_out_data,
+    CameraProfiles_out_data,
+    StoredVideoInfos_out_data,
+    StreamURLs_out_data,
+    ReplayURL_out_data,
+    RealtimeVideoEventInfos_out_data,
+    StoredVideoEventInfos_out_data,
+    StoredObjectAnalyticsInfos_out_data,
+]
+
+# spec_001 API endpoint
+spec_001_messages = [
+    "Authentication",
+    "Capabilities",
+    "CameraProfiles",
+    "StoredVideoInfos",
+    "StreamURLs",
+    "ReplayURL",
+    "RealtimeVideoEventInfos",
+    "StoredVideoEventInfos",
+    "StoredObjectAnalyticsInfos",
+]
+
 # Authentication
 Authentication_out_data = {
     "code": "200",
@@ -368,17 +394,8 @@ SensorDeviceControl_out_data = {
     "sensorDeviceStatus": "Alarm"
 }
 
-# steps 순서대로 출력 메시지 생성
-videoOutMessage = [
-    Authentication_out_data,
-    Capabilities_out_data,
-    CameraProfiles_out_data,
-    StoredVideoInfos_out_data,
-    StreamURLs_out_data,
-    ReplayURL_out_data,
-    RealtimeVideoEventInfos_out_data,
-    StoredVideoEventInfos_out_data,
-    StoredObjectAnalyticsInfos_out_data,
+# spec_0011 데이터 리스트
+spec_0011_outData = [
     Authentication_out_data,
     Capabilities_out_data,
     SensorDeviceProfiles_out_data,
@@ -388,17 +405,8 @@ videoOutMessage = [
     SensorDeviceControl_out_data,
 ]
 
-# API endpoint
-videoMessages = [
-    "Authentication",
-    "Capabilities",
-    "CameraProfiles",
-    "StoredVideoInfos",
-    "StreamURLs",
-    "ReplayURL",
-    "RealtimeVideoEventInfos",
-    "StoredVideoEventInfos",
-    "StoredObjectAnalyticsInfos",
+# spec_0011 API endpoint
+spec_0011_messages = [
     "Authentication",
     "Capabilities",
     "SensorDeviceProfiles",
@@ -407,3 +415,10 @@ videoMessages = [
     "StoredSensorEventInfos",
     "SensorDeviceControl",
 ]
+
+# 통합 데이터 리스트 (하위 호환성)
+videoOutMessage = spec_001_outData + spec_0011_outData
+
+# 통합 API endpoint 리스트 (하위 호환성)
+videoMessages = spec_001_messages + spec_0011_messages
+

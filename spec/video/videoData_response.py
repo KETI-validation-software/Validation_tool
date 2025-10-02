@@ -73,11 +73,18 @@ RealtimeVideoEventInfos_in_data = {
     }
 ],
     "transProtocol": {
-    "transProtocolType": "LongPolling"
+    "transProtocolType": "WebHook",
+    "transProtocolDesc": "https://127.0.0.1:8090/RealtimeVideoEventInfos"
 },
     "duration": 10,
     "eventFilter": "배회",
     "startTime": 20220822163022123
+}
+
+# WebHook RealtimeVideoEventInfos
+WebHook_RealtimeVideoEventInfos_out_data = {
+    "code": 200,
+    "message": "성공"
 }
 
 # StoredVideoEventInfos
@@ -136,83 +143,8 @@ StoredObjectAnalyticsInfos_in_data = {
 ]
 }
 
-# Authentication
-Authentication_in_data = {
-    "userID": "user0001",
-    "userPW": "pass0001"
-}
-
-# Capabilities
-Capabilities_in_data = {}
-
-# SensorDeviceProfiles
-SensorDeviceProfiles_in_data = {}
-
-# RealtimeSensorData
-RealtimeSensorData_in_data = {
-    "sensorDeviceList": [
-        {
-        "sensorDeviceID": "iot0001"
-    },
-        {
-        "sensorDeviceID": "iot0002"
-    },
-        {
-        "sensorDeviceID": "iot0003"
-    }
-],
-    "duration": 100,
-    "transProtocol": {
-    "transProtocolType": "LongPolling"
-},
-    "startTime": 20220822163022123
-}
-
-# RealtimeSensorEventInfos
-RealtimeSensorEventInfos_in_data = {
-    "sensorDeviceList": [
-        {
-        "sensorDeviceID": "iot0001"
-    },
-        {
-        "sensorDeviceID": "iot0002"
-    }
-],
-    "transProtocol": {
-    "transProtocolType": "LongPolling",
-    "transProtocolDesc": "description"
-},
-    "duration": 200,
-    "eventFilter": "화재",
-    "startTime": 20220822163022123
-}
-
-# StoredSensorEventInfos
-StoredSensorEventInfos_in_data = {
-    "timePeriod": {
-    "startTime": 20220822163022123,
-    "endTime": 20220822263022123
-},
-    "sensorDeviceList": [
-        {
-        "sensorDeviceID": "iot0001"
-    },
-        {
-        "sensorDeviceID": "iot0002"
-    }
-],
-    "maxCount": 10,
-    "eventFilter": "화재"
-}
-
-# SensorDeviceControl
-SensorDeviceControl_in_data = {
-    "sensorDeviceID": "iot0001",
-    "commandType": "Alarm"
-}
-
-# steps 순서대로 입력 메시지 생성
-videoInMessage = [
+# spec_002 데이터 리스트
+spec_002_inData = [
     Authentication_in_data,
     Capabilities_in_data,
     CameraProfiles_in_data,
@@ -222,17 +154,10 @@ videoInMessage = [
     RealtimeVideoEventInfos_in_data,
     StoredVideoEventInfos_in_data,
     StoredObjectAnalyticsInfos_in_data,
-    Authentication_in_data,
-    Capabilities_in_data,
-    SensorDeviceProfiles_in_data,
-    RealtimeSensorData_in_data,
-    RealtimeSensorEventInfos_in_data,
-    StoredSensorEventInfos_in_data,
-    SensorDeviceControl_in_data,
 ]
 
-# API endpoint
-videoMessages = [
+# spec_002 API endpoint
+spec_002_messages = [
     "Authentication",
     "Capabilities",
     "CameraProfiles",
@@ -242,11 +167,10 @@ videoMessages = [
     "RealtimeVideoEventInfos",
     "StoredVideoEventInfos",
     "StoredObjectAnalyticsInfos",
-    "Authentication",
-    "Capabilities",
-    "SensorDeviceProfiles",
-    "RealtimeSensorData",
-    "RealtimeSensorEventInfos",
-    "StoredSensorEventInfos",
-    "SensorDeviceControl",
 ]
+
+# spec_002 WebHook 데이터 리스트
+spec_002_webhookData = [
+    WebHook_RealtimeVideoEventInfos_out_data,
+]
+
