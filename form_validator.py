@@ -5,6 +5,7 @@ from core.functions import resource_path
 from core.opt_loader import OptLoader
 from core.schema_generator import generate_schema_file
 from core.video_request_generator import generate_video_request_file
+import os
 
 
 class FormValidator:
@@ -97,23 +98,39 @@ class FormValidator:
 
             print(f"\n총 {len(spec_file_paths)}개 spec 파일을 하나로 합쳐서 생성")
 
+            all_spec_list_names = []
+
             if mode in ["request_longpolling", "request_webhook"]:
                 # Request 모드 - 모든 spec을 하나의 파일로
                 print("\n[Request 모드 산출물 생성]")
-                self._generate_merged_files(
+                spec_list_names = self._generate_merged_files(
                     spec_file_paths,
                     schema_type="request",
                     file_type="request"
                 )
+                if spec_list_names:
+                    all_spec_list_names.extend(spec_list_names)
 
             elif mode in ["response_longpolling", "response_webhook"]:
                 # Response 모드 - 모든 spec을 하나의 파일로
                 print("\n[Response 모드 산출물 생성]")
-                self._generate_merged_files(
+                spec_list_names = self._generate_merged_files(
                     spec_file_paths,
                     schema_type="response",
                     file_type="response"
                 )
+                if spec_list_names:
+                    all_spec_list_names.extend(spec_list_names)
+
+            # CONSTANTS.py 업데이트
+            if all_spec_list_names:
+                self._update_constants_specs(all_spec_list_names)
+
+            # trans_protocol, time_out, num_retries 업데이트
+            print("\n[CONSTANTS.py 프로토콜 정보 업데이트]")
+            protocol_info = self._extract_protocol_info()
+            if protocol_info:
+                self._update_protocol_in_constants(protocol_info)
 
             print(f"\n=== 산출물 생성 완료 ===\n")
 
@@ -123,66 +140,343 @@ class FormValidator:
             traceback.print_exc()
 
     def _generate_merged_files(self, spec_file_paths, schema_type, file_type):
-        """여러 spec 파일을 하나로 합쳐서 생성"""
-        import json
-        import tempfile
+        """여러 spec 파일을 하나의 파일에 spec별로 구분하여 생성"""
 
         if not spec_file_paths:
             return
 
-        # 모든 spec 파일의 steps를 하나로 합치기
-        merged_steps = []
-        merged_spec_id = "merged"
-        merged_spec_name = "통합 시험 분야"
+        # Schema 파일과 Data 파일 내용을 담을 문자열
+        schema_content = "from json_checker import OptionalKey\n\n\n"
+        data_content = f"# {file_type} 모드\n\n"
 
+        # 각 스펙별 리스트 이름 저장 (CONSTANTS.py 업데이트용)
+        spec_list_names = []
+
+        # 통합 리스트 생성용 (하위 호환성)
+        all_schema_list_names = []
+        all_data_list_names = []
+        all_messages_list_names = []
+
+        # 각 spec 파일별로 처리
         for spec_path in spec_file_paths:
             try:
                 spec_data = self.opt_loader.load_opt_json(spec_path)
-                if spec_data and "specification" in spec_data:
-                    steps = spec_data["specification"].get("steps", [])
-                    merged_steps.extend(steps)
-                    print(f"  - {spec_data['specification'].get('name', '?')}: {len(steps)}개 step")
+                if not spec_data or "specification" not in spec_data:
+                    continue
+
+                spec_id = spec_data["specification"].get("id", "")
+                spec_name = spec_data["specification"].get("name", "")
+                # spec_id의 -을 _로 변경
+                spec_id_safe = spec_id.replace("-", "_")
+                print(f"  - [{spec_id}] {spec_name}")
+
+                # WebHook 파일인지 확인
+                is_webhook = "WebHook" in spec_path
+
+                # SchemaGenerator와 VideoRequestGenerator 인스턴스 생성
+                from core.schema_generator import SchemaGenerator
+                from core.video_request_generator import VideoRequestGenerator
+
+                schema_gen = SchemaGenerator()
+                data_gen = VideoRequestGenerator()
+
+                # 각 spec의 steps 처리
+                steps = spec_data["specification"].get("steps", [])
+
+                # WebHook 관련 리스트
+                webhook_schema_names = []
+                webhook_data_names = []
+
+                # Schema 생성 (spec별로)
+                schema_names = []
+                for step in steps:
+                    step_id = step.get("id", "")
+                    api = step.get("api", {})
+                    endpoint = api.get("endpoint", "")
+                    settings = api.get("settings", {})
+                    trans_protocol = settings.get("transProtocol", {})
+
+                    # 콜백 스텝은 건너뛰기
+                    if not endpoint and api.get("urlKey"):
+                        continue
+
+                    schema_info = schema_gen.generate_endpoint_schema(step, schema_type)
+                    schema_name = schema_info["name"]
+                    schema_obj = schema_info["content"]
+                    endpoint_name = schema_info["endpoint"]
+
+                    # 스키마 내용 추가
+                    schema_content += f"# {endpoint_name}\n"
+                    formatted = schema_gen.format_schema_content(schema_obj)
+                    schema_content += f"{schema_name} = {formatted}\n\n"
+                    schema_names.append(schema_name)
+
+                    # WebHook 모드이고 transProtocol.mode가 "WebHook"인 경우
+                    if is_webhook and trans_protocol.get("mode") == "WebHook":
+                        # 콜백 스텝 찾기
+                        callback_step_id = f"{step_id}-1"
+                        callback_step = None
+                        for s in steps:
+                            if s.get("id") == callback_step_id:
+                                callback_step = s
+                                break
+
+                        if callback_step:
+                            callback_api = callback_step.get("api", {})
+
+                            # WebHook 스키마 생성
+                            if schema_type == "request":
+                                target_schema = callback_api.get("responseSchema", {})
+                                if target_schema:
+                                    webhook_schema_str = schema_gen._generate_webhook_schema_from_json_schema(target_schema, endpoint_name, schema_type)
+                                    schema_content += webhook_schema_str + "\n"
+                                    # 스키마 이름 추출
+                                    for line in webhook_schema_str.split('\n'):
+                                        if ' = {' in line and 'WebHook_' in line:
+                                            wh_name = line.split(' = ')[0].strip()
+                                            webhook_schema_names.append(wh_name)
+                                            break
+                            else:  # response
+                                target_schema = callback_api.get("requestSchema", {})
+                                if target_schema:
+                                    webhook_schema_str = schema_gen._generate_webhook_schema_from_json_schema(target_schema, endpoint_name, schema_type)
+                                    schema_content += webhook_schema_str + "\n"
+                                    for line in webhook_schema_str.split('\n'):
+                                        if ' = {' in line and 'WebHook_' in line:
+                                            wh_name = line.split(' = ')[0].strip()
+                                            webhook_schema_names.append(wh_name)
+                                            break
+
+                                # ACK 응답 스키마 생성
+                                response_schema = callback_api.get("responseSchema", {})
+                                if response_schema:
+                                    ack_schema_str = schema_gen._generate_webhook_ack_schema(response_schema)
+                                    if ack_schema_str:
+                                        schema_content += ack_schema_str + "\n"
+                                        for line in ack_schema_str.split('\n'):
+                                            if ' = {' in line and 'Webhook_' in line:
+                                                wh_name = line.split(' = ')[0].strip()
+                                                if wh_name not in webhook_schema_names:
+                                                    webhook_schema_names.append(wh_name)
+                                                break
+
+                # Schema 리스트 생성 (spec별로) - spec_id_safe 사용
+                if schema_type == "request":
+                    list_name = f"{spec_id_safe}_inSchema"
+                else:
+                    list_name = f"{spec_id_safe}_outSchema"
+
+                schema_content += f"# {spec_id_safe} 스키마 리스트\n"
+                schema_content += f"{list_name} = [\n"
+                for name in schema_names:
+                    schema_content += f"    {name},\n"
+                schema_content += "]\n\n"
+
+                # WebHook 스키마 리스트 생성
+                if is_webhook and webhook_schema_names:
+                    webhook_list_name = f"{spec_id_safe}_webhookSchema"
+                    schema_content += f"# {spec_id_safe} WebHook 스키마 리스트\n"
+                    schema_content += f"{webhook_list_name} = [\n"
+                    for name in webhook_schema_names:
+                        schema_content += f"    {name},\n"
+                    schema_content += "]\n\n"
+
+                # Data 생성 (spec별로)
+                data_names = []
+                endpoint_names = []
+                for step in steps:
+                    step_id = step.get("id", "")
+                    api = step.get("api", {})
+                    endpoint = api.get("endpoint", "")
+                    settings = api.get("settings", {})
+                    trans_protocol = settings.get("transProtocol", {})
+
+                    # 콜백 스텝은 건너뛰기
+                    if not endpoint and api.get("urlKey"):
+                        continue
+
+                    data_info = data_gen.extract_endpoint_data(step, file_type)
+                    data_name = data_info["name"]
+                    data_obj = data_info["content"]
+                    endpoint_name = data_info["endpoint"]
+
+                    # 데이터 내용 추가
+                    data_content += f"# {endpoint_name}\n"
+                    formatted = data_gen.format_data_content(data_obj)
+                    data_content += f"{data_name} = {formatted}\n\n"
+                    data_names.append(data_name)
+                    endpoint_names.append(endpoint_name)
+
+                    # WebHook 모드이고 transProtocol.mode가 "WebHook"인 경우
+                    if is_webhook and trans_protocol.get("mode") == "WebHook":
+                        # 콜백 스텝 찾기
+                        callback_step_id = f"{step_id}-1"
+                        callback_step = None
+                        for s in steps:
+                            if s.get("id") == callback_step_id:
+                                callback_step = s
+                                break
+
+                        if callback_step:
+                            webhook_data_str = data_gen._generate_webhook_data(callback_step, endpoint_name, file_type)
+                            if webhook_data_str:
+                                data_content += webhook_data_str + "\n"
+                                # 데이터 이름 추출
+                                for line in webhook_data_str.split('\n'):
+                                    if ' = {' in line or ' = [' in line:
+                                        wh_data_name = line.split(' = ')[0].strip()
+                                        webhook_data_names.append(wh_data_name)
+                                        break
+
+                # Data 리스트 생성 (spec별로) - spec_id_safe 사용
+                if file_type == "request":
+                    data_list_name = f"{spec_id_safe}_outData"
+                else:
+                    data_list_name = f"{spec_id_safe}_inData"
+
+                data_content += f"# {spec_id_safe} 데이터 리스트\n"
+                data_content += f"{data_list_name} = [\n"
+                for name in data_names:
+                    data_content += f"    {name},\n"
+                data_content += "]\n\n"
+
+                # Messages 리스트 생성 (spec별로) - spec_id_safe 사용
+                messages_list_name = f"{spec_id_safe}_messages"
+                data_content += f"# {spec_id_safe} API endpoint\n"
+                data_content += f"{messages_list_name} = [\n"
+                for endpoint in endpoint_names:
+                    data_content += f'    "{endpoint}",\n'
+                data_content += "]\n\n"
+
+                # WebHook 데이터 리스트 생성
+                if is_webhook and webhook_data_names:
+                    webhook_data_list_name = f"{spec_id_safe}_webhookData"
+                    data_content += f"# {spec_id_safe} WebHook 데이터 리스트\n"
+                    data_content += f"{webhook_data_list_name} = [\n"
+                    for name in webhook_data_names:
+                        data_content += f"    {name},\n"
+                    data_content += "]\n\n"
+
+                # CONSTANTS.py 업데이트용 리스트 저장
+                spec_info = {
+                    "spec_id": spec_id,
+                    "inSchema": list_name if schema_type == "response" else f"{spec_id_safe}_inSchema",
+                    "outData": data_list_name if file_type == "request" else f"{spec_id_safe}_outData",
+                    "messages": messages_list_name,
+                    "name": spec_name
+                }
+
+                # webhook 리스트 추가 (있을 경우)
+                if is_webhook:
+                    if webhook_schema_names:
+                        spec_info["webhookSchema"] = f"{spec_id_safe}_webhookSchema"
+                    if webhook_data_names:
+                        spec_info["webhookData"] = f"{spec_id_safe}_webhookData"
+
+                spec_list_names.append(spec_info)
+
+                # 통합 리스트 생성용 이름 수집
+                all_schema_list_names.append(list_name)
+                all_data_list_names.append(data_list_name)
+                all_messages_list_names.append(messages_list_name)
+
             except Exception as e:
-                print(f"  경고: {spec_path} 로드 실패: {e}")
+                print(f"  경고: {spec_path} 처리 실패: {e}")
+                import traceback
+                traceback.print_exc()
 
-        print(f"\n총 {len(merged_steps)}개 step을 통합")
+        # 통합 리스트 생성 (하위 호환성 유지)
+        if all_schema_list_names:
+            if schema_type == "request":
+                unified_schema_name = "videoInSchema"
+            else:
+                unified_schema_name = "videoOutSchema"
 
-        # 합쳐진 데이터로 임시 JSON 파일 생성
-        merged_data = {
-            "specification": {
-                "id": merged_spec_id,
-                "name": merged_spec_name,
-                "version": "1.0",
-                "steps": merged_steps
-            }
-        }
+            schema_content += f"# 통합 스키마 리스트 (하위 호환성)\n"
+            schema_content += f"{unified_schema_name} = " + " + ".join(all_schema_list_names) + "\n\n"
 
-        # 임시 파일에 저장
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False, encoding='utf-8') as temp_file:
-            json.dump(merged_data, temp_file, ensure_ascii=False, indent=2)
-            temp_file_path = temp_file.name
+        if all_data_list_names:
+            if file_type == "request":
+                unified_data_name = "videoOutMessage"
+            else:
+                unified_data_name = "videoInMessage"
 
+            data_content += f"# 통합 데이터 리스트 (하위 호환성)\n"
+            data_content += f"{unified_data_name} = " + " + ".join(all_data_list_names) + "\n\n"
+
+        if all_messages_list_names:
+            data_content += f"# 통합 API endpoint 리스트 (하위 호환성)\n"
+            data_content += f"videoMessages = " + " + ".join(all_messages_list_names) + "\n\n"
+
+        # 파일 저장
+        schema_output = f"spec/video/videoSchema_{file_type}.py"
+        data_output = f"spec/video/videoData_{file_type}.py"
+
+        os.makedirs("spec/video", exist_ok=True)
+
+        with open(schema_output, 'w', encoding='utf-8') as f:
+            f.write(schema_content)
+        print(f"  ✓ videoSchema_{file_type}.py 생성 완료")
+
+        with open(data_output, 'w', encoding='utf-8') as f:
+            f.write(data_content)
+        print(f"  ✓ videoData_{file_type}.py 생성 완료")
+
+        # CONSTANTS.py의 specs 리스트 업데이트
+        return spec_list_names
+
+    def _update_constants_specs(self, spec_list_names):
+        """CONSTANTS.py의 specs 리스트를 업데이트"""
         try:
-            # 임시 파일을 사용하여 산출물 생성
-            schema_path = generate_schema_file(
-                temp_file_path,
-                schema_type=schema_type,
-                output_path=f"spec/video/videoSchema_{file_type}.py"
-            )
-            print(f"videoSchema_{file_type}.py 생성 완료")
+            import re
+            constants_path = "config/CONSTANTS.py"
 
-            request_path = generate_video_request_file(
-                temp_file_path,
-                file_type=file_type,
-                output_path=f"spec/video/videoData_{file_type}.py"
-            )
-            print(f"videoData_{file_type}.py 생성 완료")
+            # CONSTANTS.py 파일 읽기
+            with open(constants_path, 'r', encoding='utf-8') as f:
+                content = f.read()
 
-        finally:
-            # 임시 파일 삭제
-            import os
-            if os.path.exists(temp_file_path):
-                os.unlink(temp_file_path)
+            # specs 리스트 생성
+            specs_lines = []
+            for spec_info in spec_list_names:
+                in_schema = spec_info.get("inSchema", "")
+                out_data = spec_info.get("outData", "")
+                messages = spec_info.get("messages", "")
+                webhook_schema = spec_info.get("webhookSchema", "")
+                webhook_data = spec_info.get("webhookData", "")
+                name = spec_info.get("name", "")
+
+                # webhook이 있으면 포함, 없으면 제외
+                if webhook_schema and webhook_data:
+                    spec_line = f'["{in_schema}","{out_data}","{messages}","{webhook_schema}","{webhook_data}","{name}"]'
+                else:
+                    spec_line = f'["{in_schema}","{out_data}","{messages}","{name}"]'
+
+                specs_lines.append(spec_line)
+
+            # specs 리스트 문자열 생성
+            specs_str = "specs = [" + ",\n         ".join(specs_lines) + "]"
+
+            # 기존 specs 패턴 찾기 및 교체
+            pattern = r'specs\s*=\s*\[\[.*?\]\]'
+
+            if re.search(pattern, content, re.DOTALL):
+                # 기존 specs가 있으면 교체
+                new_content = re.sub(pattern, specs_str, content, flags=re.DOTALL)
+            else:
+                # specs가 없으면 추가 (url 다음에)
+                url_pattern = r'(url\s*=\s*"[^"]*"\n\n)'
+                new_content = re.sub(url_pattern, r'\1\n' + specs_str + '\n', content)
+
+            # 파일에 쓰기
+            with open(constants_path, 'w', encoding='utf-8') as f:
+                f.write(new_content)
+
+            print(f"CONSTANTS.py specs 리스트 업데이트 완료")
+
+        except Exception as e:
+            print(f"  경고: CONSTANTS.py specs 업데이트 실패: {e}")
+            import traceback
+            traceback.print_exc()
 
     def _fill_basic_info(self, exp_opt):
         """기본 정보 필드 채우기"""
@@ -432,7 +726,7 @@ class FormValidator:
             # 4. 관리자 코드 (GUI 입력값만 사용)
             variables['admin_code'] = self.parent.admin_code_edit.text().strip()
 
-            # 5. OPT2 파일에서 프로토콜/타임아웃 정보 추출
+            # 5. OPT 파일에서 프로토콜/타임아웃 정보 추출
             protocol_info = self._extract_protocol_info()
             variables.update(protocol_info)
 
@@ -485,7 +779,7 @@ class FormValidator:
         print(f"CONSTANTS.py 업데이트 - 현재 모드: {self.parent.current_mode}")
         print(f"선택된 시험 분야: {selected_spec_id}")
 
-        # 선택된 spec_id에 해당하는 파일 경로 가져오기 
+        # 선택된 spec_id에 해당하는 파일 경로 가져오기
         spec_file_path = self._get_spec_file_mapping(selected_spec_id)
         if not spec_file_path:
             print(f"경고: spec_id '{selected_spec_id}'에 대한 매핑을 찾을 수 없습니다.")
@@ -517,6 +811,8 @@ class FormValidator:
         num_retries = []
         trans_protocol = []
 
+        # print(f"  추출 시작: {len(steps)}개 steps")
+
         for step in steps:
             settings = step.get("api", {}).get("settings", {})
             time_out.append(settings.get("connectTimeout", 30))
@@ -526,14 +822,46 @@ class FormValidator:
             trans_protocol_obj = settings.get("transProtocol", {})
             trans_protocol_mode = trans_protocol_obj.get("mode", None)
             trans_protocol.append(trans_protocol_mode)
+            # print(f"    step {step.get('id')}: timeout={settings.get('connectTimeout', 30)}, retries={settings.get('numRetries', 3)}, protocol={trans_protocol_mode}")
 
-        #print(f"추출된 프로토콜 정보: {len(time_out)}개 스텝")
+        # print(f"  추출된 프로토콜 정보: {len(time_out)}개 스텝")
+        # print(f"  trans_protocol: {trans_protocol}")
+        # print(f"  time_out: {time_out}")
+        # print(f"  num_retries: {num_retries}")
 
         return {
             'trans_protocol': trans_protocol,
             'time_out': time_out,
             'num_retries': num_retries
         }
+
+    def _update_protocol_in_constants(self, protocol_info):
+        """CONSTANTS.py의 trans_protocol, time_out, num_retries만 업데이트"""
+        try:
+            import re
+            constants_path = "config/CONSTANTS.py"
+
+            with open(constants_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+
+            # trans_protocol, time_out, num_retries 업데이트
+            for var_name in ['trans_protocol', 'time_out', 'num_retries']:
+                var_value = protocol_info.get(var_name)
+                if var_value is not None:
+                    new_line = f'{var_name} = {var_value}'
+                    pattern = rf'^{var_name}\s*=.*$'
+                    content = re.sub(pattern, new_line, content, flags=re.MULTILINE)
+                    print(f"{var_name} 업데이트: {var_value}")
+
+            with open(constants_path, 'w', encoding='utf-8') as f:
+                f.write(content)
+
+            print(f"CONSTANTS.py 프로토콜 정보 업데이트 완료")
+
+        except Exception as e:
+            print(f"  경고: CONSTANTS.py 프로토콜 정보 업데이트 실패: {e}")
+            import traceback
+            traceback.print_exc()
 
     def _get_selected_test_field_spec_id(self):
         """시험 분야 테이블에서 마지막으로 클릭된 항목의 spec_id 반환"""

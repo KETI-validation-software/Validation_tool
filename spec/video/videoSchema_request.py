@@ -86,6 +86,19 @@ StoredObjectAnalyticsInfos_in_schema = {
 }],
 }
 
+# spec_001 스키마 리스트
+spec_001_inSchema = [
+    Authentication_in_schema,
+    Capabilities_in_schema,
+    CameraProfiles_in_schema,
+    StoredVideoInfos_in_schema,
+    StreamURLs_in_schema,
+    ReplayURL_in_schema,
+    RealtimeVideoEventInfos_in_schema,
+    StoredVideoEventInfos_in_schema,
+    StoredObjectAnalyticsInfos_in_schema,
+]
+
 # Authentication
 Authentication_in_schema = {
     "userID": str,
@@ -144,17 +157,8 @@ SensorDeviceControl_in_schema = {
     OptionalKey("commandType"): str,
 }
 
-# steps 순서대로 스키마 리스트 생성
-videoInSchema = [
-    Authentication_in_schema,
-    Capabilities_in_schema,
-    CameraProfiles_in_schema,
-    StoredVideoInfos_in_schema,
-    StreamURLs_in_schema,
-    ReplayURL_in_schema,
-    RealtimeVideoEventInfos_in_schema,
-    StoredVideoEventInfos_in_schema,
-    StoredObjectAnalyticsInfos_in_schema,
+# spec_0011 스키마 리스트
+spec_0011_inSchema = [
     Authentication_in_schema,
     Capabilities_in_schema,
     SensorDeviceProfiles_in_schema,
@@ -163,3 +167,7 @@ videoInSchema = [
     StoredSensorEventInfos_in_schema,
     SensorDeviceControl_in_schema,
 ]
+
+# 통합 스키마 리스트 (하위 호환성)
+videoInSchema = spec_001_inSchema + spec_0011_inSchema
+

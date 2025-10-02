@@ -20,8 +20,10 @@ admin_code = ""
 url = "https://10.252.219.95:8000"
 
 
-specs = [["spec-001_inSchema","spec-001_outData","spec001_messages","영상보안 시스템 검증(요청검증)"],
-         ["spec-0011_inSchema","spec-0011_outData","spec0011_messages","보안용 센서 시스템 검증(요청검증"]]
+specs = [
+    ["spec_001_inSchema", "spec_001_outData", "spec_001_messages", "spec_001_webhookSchema", "spec_001_webhookData", "영상보안 시스템 요청 메시지 검증 API 명세서"],
+    ["spec_0011_inSchema", "spec_0011_outData", "spec_0011_messages", "spec_0011_webhookSchema", "spec_0011_webhookData", "보안용 센서 시스템(요청검증)"]
+]
 #test-opt
 '''
 opt2의 메시지의 settings 내 정보 보고 작성, 메시지 순차별로
@@ -30,11 +32,10 @@ time_out : 메시지별 timeout 설정 시간
 num_retries : 메시지별 메시지 검증 횟수
 '''
 
-# 기본값 설정 (9개 API에 대한 기본 설정)
-# main.py를 통해 실행하면 form_validator.py가 자동으로 업데이트합니다
-trans_protocol = [None, None, None, None, None, None, "LongPolling", None, None]
+
+trans_protocol = [None, None, None, None, None, None, 'LongPolling', None, None]
 time_out = [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000]
-num_retries = [1, 2, 3, 3, 3, 2, 1, 1, 1]
+num_retries = [1, 1, 3, 3, 2, 2, 1, 1, 2]
 
 
 #etc
