@@ -15,19 +15,12 @@ from datetime import datetime
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 warnings.filterwarnings('ignore')
 
-# from spec.video.videoData_response import videoInMessage, videoMessages
-# from spec.video.videoData_request import videoOutMessage
-# from spec.video.videoSchema_request import videoInSchema
-# from spec.video.videoSchema_response import videoOutSchema
-#from spec.video.videoData_response import spec_002_inData, spec_002_messages, spec_0022_inData, spec_0022_messages
-from spec.video.videoData_response import spec_002_inData, spec_002_messages
-#from spec.video.videoData_request import spec_001_outData, spec_001_messages, spec_0011_outData, spec_0011_messages
-#from spec.video.videoSchema_request import spec_001_inSchema, spec_0011_inSchema
-from spec.video.videoData_request import spec_001_outData, spec_001_messages
-from spec.video.videoSchema_request import spec_001_inSchema
-#from spec.video.videoSchema_response import spec_002_outSchema, spec_0022_outSchema
-from spec.video.videoSchema_response import spec_002_outSchema
-# from spec.video.videoSchema import videoWebhookSchema
+# Dynamic spec imports - will be loaded based on CONSTANTS.specs
+# Import modules for dynamic attribute access
+import spec.video.videoData_response as video_data_response
+import spec.video.videoData_request as video_data_request
+import spec.video.videoSchema_request as video_schema_request
+import spec.video.videoSchema_response as video_schema_response
 from urllib.parse import urlparse
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor
@@ -214,8 +207,9 @@ class ResultPageDialog(QDialog):
         result_label = QLabel('시험 결과')
         mainLayout.addWidget(result_label)
         
-        # 결과 테이블 (parent의 테이블 데이터 복사)
-        self.tableWidget = QTableWidget(9, 8)
+        # 결과 테이블 (parent의 테이블 데이터 복사) - 동적 API 개수
+        api_count = self.parent.tableWidget.rowCount()
+        self.tableWidget = QTableWidget(api_count, 8)
         self.tableWidget.setHorizontalHeaderLabels([
             "API 명", "결과", "검증 횟수", "통과 필드 수", 
             "전체 필드 수", "실패 횟수", "평가 점수", "상세 내용"
@@ -240,7 +234,7 @@ class ResultPageDialog(QDialog):
         self.tableWidget.setColumnWidth(7, 130)
         
         # 행 높이 설정
-        for i in range(9):
+        for i in range(api_count):
             self.tableWidget.setRowHeight(i, 40)
         
         # parent 테이블 데이터 복사
@@ -291,7 +285,8 @@ class ResultPageDialog(QDialog):
     
     def _copy_table_data(self):
         """parent의 테이블 데이터를 복사"""
-        for row in range(9):
+        api_count = self.parent.tableWidget.rowCount()
+        for row in range(api_count):
             # API 명
             api_item = self.parent.tableWidget.item(row, 0)
             if api_item:
@@ -428,13 +423,17 @@ class MyApp(QWidget):
         self.message_error = []
         self.message_name = ""
         
-        self.step_buffers = [
-            {"data": "", "error": "", "result": "PASS"} for _ in range(9)
-        ]
-
         auth_temp, auth_temp2 = set_auth("config/config.txt")
         self.digestInfo = [auth_temp2[0], auth_temp2[1]]
         self.token = auth_temp
+
+        # Load specs dynamically from CONSTANTS
+        self.load_specs_from_constants()
+
+        # step_buffers 동적 생성 (API 개수에 따라)
+        self.step_buffers = [
+            {"data": "", "error": "", "result": "PASS"} for _ in range(len(self.videoMessages))
+        ]
 
         self.initUI()
 
@@ -442,6 +441,54 @@ class MyApp(QWidget):
         self.webhook_flag = False
         self.webhook_msg = "."
         self.webhook_cnt = 99
+
+    def load_specs_from_constants(self):
+        """CONSTANTS.specs 설정에 따라 동적으로 spec 데이터 로드"""
+        # specs는 [[inSchema_name, outData_name, messages_name, webhookSchema_name, webhookData_name, description], ...]
+        if not hasattr(CONSTANTS, 'specs') or not CONSTANTS.specs:
+            raise ValueError("CONSTANTS.specs가 정의되지 않았습니다!")
+        
+        # 첫 번째 spec 사용 (향후 여러 spec 지원 가능)
+        spec = CONSTANTS.specs[0]
+        inSchema_name = spec[0]  # e.g., "spec_001_inSchema"
+        outData_name = spec[1]   # e.g., "spec_001_outData"
+        messages_name = spec[2]  # e.g., "spec_001_messages"
+        webhookSchema_name = spec[3]  # e.g., "spec_001_webhookSchema"
+        webhookData_name = spec[4]  # e.g., "spec_001_webhookData"
+        self.spec_description = spec[5]  # e.g., "영상보안 시스템 요청 메시지 검증 API 명세서"
+        
+        # Dynamic import based on spec names
+        # Request schemas (inSchema) from videoSchema_request
+        self.videoInSchema = getattr(video_schema_request, inSchema_name, [])
+        # Request data (outData) from videoData_request
+        self.videoOutMessage = getattr(video_data_request, outData_name, [])
+        # Message names from videoData_request
+        self.videoMessages = getattr(video_data_request, messages_name, [])
+        # Webhook schemas from videoSchema_request
+        self.videoWebhookSchema = getattr(video_schema_request, webhookSchema_name, [])
+        # Webhook data from videoData_request
+        self.videoWebhookData = getattr(video_data_request, webhookData_name, [])
+        
+        # Response schemas (outSchema) from videoSchema_response - need to infer name
+        # Convention: spec_001 -> spec_002 for response
+        outSchema_name = inSchema_name.replace("_inSchema", "_outSchema").replace("spec_001", "spec_002")
+        self.videoOutSchema = getattr(video_schema_response, outSchema_name, [])
+        
+        # Response data (inData) from videoData_response
+        inData_name = outData_name.replace("_outData", "_inData").replace("spec_001", "spec_002")
+        self.videoInMessage = getattr(video_data_response, inData_name, [])
+        
+        # Response webhook schemas from videoSchema_response
+        webhookInSchema_name = webhookSchema_name.replace("spec_001", "spec_002")
+        self.videoWebhookInSchema = getattr(video_schema_response, webhookInSchema_name, [])
+        
+        # Response webhook data from videoData_response
+        webhookInData_name = webhookData_name.replace("spec_001", "spec_002")
+        self.videoWebhookInData = getattr(video_data_response, webhookInData_name, [])
+        
+        print(f"[DEBUG] Loaded spec: {self.spec_description}")
+        print(f"[DEBUG] API count: {len(self.videoMessages)}")
+        print(f"[DEBUG] API names: {self.videoMessages}")
 
     def _to_detail_text(self, val_text):
         """검증 결과 텍스트를 항상 사람이 읽을 문자열로 표준화"""
@@ -1177,8 +1224,9 @@ class MyApp(QWidget):
             self.show()
 
     def init_centerLayout(self):
-        # 표 형태로 변경
-        self.tableWidget = QTableWidget(9, 8)
+        # 표 형태로 변경 - 동적 API 개수
+        api_count = len(self.videoMessages)
+        self.tableWidget = QTableWidget(api_count, 8)
         self.tableWidget.setHorizontalHeaderLabels(["API 명", "결과", "검증 횟수", "통과 필드 수", "전체 필드 수", "실패 횟수", "평가 점수", "상세 내용"])
         self.tableWidget.verticalHeader().setVisible(False)
         self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -1200,15 +1248,11 @@ class MyApp(QWidget):
         self.tableWidget.setColumnWidth(7, 130)  
 
         # 행 높이 설정
-        for i in range(9):
+        for i in range(api_count):
             self.tableWidget.setRowHeight(i, 40)
 
-        # 단계명 리스트 (기본값)
-        self.step_names = [
-            "Authentication", "Capabilities", "CameraProfiles", "StoredVideoInfos",
-            "StreamURLs", "ReplayURL", "RealtimeVideoEventInfos",
-            "StoredVideoEventInfos", "StoredObjectAnalyticsInfos"
-        ]
+        # 단계명 리스트 (동적으로 로드된 API 이름 사용)
+        self.step_names = self.videoMessages
         for i, name in enumerate(self.step_names):
             # API 명
             self.tableWidget.setItem(i, 0, QTableWidgetItem(f"{i+1}. {name}"))
@@ -1282,7 +1326,7 @@ class MyApp(QWidget):
             
             # 스키마 데이터 가져오기 -> 09/24 시스템쪽은 OutSchema
             try:
-                schema_data = videoOutSchema[row] if row < len(videoOutSchema) else None
+                schema_data = self.videoOutSchema[row] if row < len(self.videoOutSchema) else None
             except:
                 schema_data = None
             
@@ -1371,10 +1415,11 @@ class MyApp(QWidget):
         self.realtime_flag = False
         self.tmp_msg_append_flag = False
         
-        # 플랫폼과 동일한 누적 카운트 초기화
-        self.step_pass_counts = [0] * 9
-        self.step_error_counts = [0] * 9
-        self.step_pass_flags = [0] * 9
+        # 플랫폼과 동일한 누적 카운트 초기화 - 동적 API 개수
+        api_count = len(self.videoMessages)
+        self.step_pass_counts = [0] * api_count
+        self.step_error_counts = [0] * api_count
+        self.step_pass_flags = [0] * api_count
         
         # 점수 디스플레이 초기화
         self.update_score_display()
@@ -1397,13 +1442,14 @@ class MyApp(QWidget):
         self.cnt = 0
         self.current_retry = 0  # 재시도 카운터 초기화
         
-        # 버퍼 초기화
-        self.step_buffers = [{"data": "", "result": "", "error": ""} for _ in range(9)]
+        # 버퍼 초기화 - 동적 API 개수
+        api_count = len(self.videoMessages)
+        self.step_buffers = [{"data": "", "result": "", "error": ""} for _ in range(api_count)]
         
-        # 누적 카운트 초기화
-        self.step_pass_counts = [0] * 9
-        self.step_error_counts = [0] * 9
-        self.step_pass_flags = [0] * 9
+        # 누적 카운트 초기화 - 동적 API 개수
+        self.step_pass_counts = [0] * api_count
+        self.step_error_counts = [0] * api_count
+        self.step_pass_flags = [0] * api_count
         
         self.valResult.clear()
         self.step1_msg = ""
@@ -1510,14 +1556,14 @@ class MyApp(QWidget):
         
         # 기본 시스템 설정 (영상보안 시스템으로 고정)
         self.radio_check_flag = "video"
-        self.message = videoMessages
-        self.inMessage = videoInMessage
-        self.outMessage = videoOutMessage
-        self.inSchema = videoInSchema
-        self.outSchema = videoOutSchema
+        self.message = self.videoMessages
+        self.inMessage = self.videoInMessage
+        self.outMessage = self.videoOutMessage
+        self.inSchema = self.videoInSchema
+        self.outSchema = self.videoOutSchema
         # Adapted for new single-element list structure
-        self.webhookSchema = videoWebhookSchema if isinstance(videoWebhookSchema, list) and len(videoWebhookSchema) > 0 else [{}]
-        self.final_report = "영상보안 시스템-물리보안 통합플랫폼(가상) 검증 결과"+"\n"
+        self.webhookSchema = self.videoWebhookInSchema if isinstance(self.videoWebhookInSchema, list) and len(self.videoWebhookInSchema) > 0 else [{}]
+        self.final_report = f"{self.spec_description} 검증 결과\n"
         
         # 기본 인증 설정 (CONSTANTS.py에서 가져옴)
         self.r2 = CONSTANTS.auth_type
