@@ -57,12 +57,6 @@ RealtimeVideoEventInfos_in_schema = {
     OptionalKey("startTime"): int,
 }
 
-# WebHook RealtimeVideoEventInfos
-WebHook_RealtimeVideoEventInfos_out_schema = {
-    OptionalKey("code"): str,
-    OptionalKey("message"): str,
-}
-
 # StoredVideoEventInfos
 StoredVideoEventInfos_in_schema = {
     "timePeriod": {
@@ -105,11 +99,72 @@ spec_001_inSchema = [
     StoredObjectAnalyticsInfos_in_schema,
 ]
 
-# spec_001 WebHook 스키마 리스트
-spec_001_webhookSchema = [
-    WebHook_RealtimeVideoEventInfos_out_schema,
-]
+# Authentication
+Authentication_in_schema = {
+    "userID": str,
+    "userPW": str,
+}
 
-# 통합 스키마 리스트 (하위 호환성)
-videoInSchema = spec_001_inSchema
+# Capabilities
+Capabilities_in_schema = {}
+
+# SensorDeviceProfiles
+SensorDeviceProfiles_in_schema = {}
+
+# RealtimeSensorData
+RealtimeSensorData_in_schema = {
+    "sensorDeviceList": [{
+    "sensorDeviceID": str,
+}],
+    "transProtocol": {
+    "transProtocolType": str,
+    OptionalKey("transProtocolDesc"): str,
+},
+    OptionalKey("duration"): int,
+    OptionalKey("startTime"): int,
+}
+
+# RealtimeSensorEventInfos
+RealtimeSensorEventInfos_in_schema = {
+    "sensorDeviceList": [{
+    "sensorDeviceID": str,
+}],
+    "transProtocol": {
+    "transProtocolType": str,
+    OptionalKey("transProtocolDesc"): str,
+},
+    OptionalKey("duration"): int,
+    OptionalKey("eventFilter"): str,
+    OptionalKey("startTime"): int,
+}
+
+# StoredSensorEventInfos
+StoredSensorEventInfos_in_schema = {
+    "sensorDeviceList": [{
+    "sensorDeviceID": str,
+}],
+    "timePeriod": {
+    "startTime": int,
+    "endTime": int,
+},
+    OptionalKey("maxCount"): int,
+    OptionalKey("eventFilter"): str,
+}
+
+# SensorDeviceControl
+SensorDeviceControl_in_schema = {
+    "sensorDeviceID": str,
+    OptionalKey("commandType"): str,
+}
+
+# spec_0011 스키마 리스트
+spec_0011_inSchema = [
+    Authentication_in_schema,
+    Capabilities_in_schema,
+    SensorDeviceProfiles_in_schema,
+    RealtimeSensorData_in_schema,
+    RealtimeSensorEventInfos_in_schema,
+    StoredSensorEventInfos_in_schema,
+    SensorDeviceControl_in_schema,
+]
 
