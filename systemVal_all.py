@@ -538,8 +538,16 @@ class MyApp(QWidget):
         if not hasattr(CONSTANTS, 'specs') or not CONSTANTS.specs:
             raise ValueError("CONSTANTS.specs가 정의되지 않았습니다!")
         
-        # 첫 번째 spec 사용 (향후 여러 spec 지원 가능)
-        spec = CONSTANTS.specs[0]
+        # selected_spec_index 사용 (info_GUI에서 선택한 spec)
+        spec_index = getattr(CONSTANTS, 'selected_spec_index', 0)
+        print(f"[DEBUG] load_specs_from_constants: selected_spec_index = {spec_index}")
+        
+        # 인덱스 범위 확인
+        if spec_index >= len(CONSTANTS.specs):
+            print(f"[WARNING] selected_spec_index({spec_index})가 범위를 벗어났습니다. 첫 번째 spec 사용")
+            spec_index = 0
+        
+        spec = CONSTANTS.specs[spec_index]
         inSchema_name = spec[0]  # e.g., "spec_001_inSchema"
         outData_name = spec[1]   # e.g., "spec_001_outData"
         messages_name = spec[2]  # e.g., "spec_001_messages"
