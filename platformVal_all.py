@@ -251,9 +251,15 @@ class ResultPageDialog(QDialog):
         
         mainLayout.addSpacing(15)
         
-        # 평가 점수 표시
-        score_group = self._create_score_display()
-        mainLayout.addWidget(score_group)
+        # 시험 분야별 점수 표시
+        spec_score_group = self._create_spec_score_display()
+        mainLayout.addWidget(spec_score_group)
+        
+        mainLayout.addSpacing(10)
+        
+        # 전체 점수 표시
+        total_score_group = self._create_total_score_display()
+        mainLayout.addWidget(total_score_group)
         
         mainLayout.addSpacing(20)
         
@@ -342,8 +348,92 @@ class ResultPageDialog(QDialog):
             """)
             self.tableWidget.setCellWidget(row, 7, detail_btn)
     
+    def _create_spec_score_display(self):
+        """시험 분야별 점수 표시 그룹"""
+        spec_group = QGroupBox('시험 분야별 점수')
+        spec_group.setMaximumWidth(1050)
+        spec_group.setMinimumWidth(950)
+        
+        # spec 정보 가져오기
+        spec_description = self.parent.spec_description
+        api_count = len(self.parent.videoMessages)
+        
+        total_pass = self.parent.total_pass_cnt
+        total_error = self.parent.total_error_cnt
+        total_fields = total_pass + total_error
+        score = (total_pass / total_fields * 100) if total_fields > 0 else 0
+        
+        # 분야명 레이블 (강조)
+        spec_name_label = QLabel(f"📋 {spec_description} ({api_count}개 API)")
+        spec_name_font = spec_name_label.font()
+        spec_name_font.setPointSize(16)
+        spec_name_font.setBold(True)
+        spec_name_label.setFont(spec_name_font)
+        
+        # 점수 레이블들
+        pass_label = QLabel(f"통과 필드 수: {total_pass}")
+        total_label = QLabel(f"전체 필드 수: {total_fields}")
+        score_label = QLabel(f"종합 평가 점수: {score:.1f}%")
+        
+        # 폰트 크기 조정
+        font = pass_label.font()
+        font.setPointSize(14)
+        pass_label.setFont(font)
+        total_label.setFont(font)
+        score_label.setFont(font)
+        
+        # 레이아웃 구성
+        main_layout = QVBoxLayout()
+        main_layout.addWidget(spec_name_label)
+        main_layout.addSpacing(10)
+        
+        score_layout = QHBoxLayout()
+        score_layout.setSpacing(70)
+        score_layout.addWidget(pass_label)
+        score_layout.addWidget(total_label)
+        score_layout.addWidget(score_label)
+        score_layout.addStretch()
+        
+        main_layout.addLayout(score_layout)
+        spec_group.setLayout(main_layout)
+        return spec_group
+    
+    def _create_total_score_display(self):
+        """전체 점수 표시 그룹 (향후 여러 spec 평균 계산용)"""
+        total_group = QGroupBox('전체 점수')
+        total_group.setMaximumWidth(1050)
+        total_group.setMinimumWidth(950)
+        
+        # 현재는 1개 spec만 실행하므로 동일한 값
+        total_pass = self.parent.total_pass_cnt
+        total_error = self.parent.total_error_cnt
+        total_fields = total_pass + total_error
+        score = (total_pass / total_fields * 100) if total_fields > 0 else 0
+        
+        pass_label = QLabel(f"통과 필드 수: {total_pass}")
+        total_label = QLabel(f"전체 필드 수: {total_fields}")
+        score_label = QLabel(f"종합 평가 점수: {score:.1f}%")
+        
+        # 폰트 크기 조정
+        font = pass_label.font()
+        font.setPointSize(16)
+        font.setBold(True)
+        pass_label.setFont(font)
+        total_label.setFont(font)
+        score_label.setFont(font)
+        
+        layout = QHBoxLayout()
+        layout.setSpacing(70)
+        layout.addWidget(pass_label)
+        layout.addWidget(total_label)
+        layout.addWidget(score_label)
+        layout.addStretch()
+        
+        total_group.setLayout(layout)
+        return total_group
+    
     def _create_score_display(self):
-        """평가 점수 표시 그룹"""
+        """평가 점수 표시 그룹 (구 버전 - 호환성 유지)"""
         score_group = QGroupBox('평가 점수')
         score_group.setMaximumWidth(1050)
         score_group.setMinimumWidth(950)
