@@ -20,10 +20,17 @@ admin_code = ""
 url = "https://10.252.219.95:8000"
 
 
+specs = [["spec_001_inSchema","spec_001_outData","spec_001_messages","영상보안 시스템 요청 메시지 검증 API 명세서"],
+         ["spec_0011_inSchema","spec_0011_outData","spec_0011_messages","보안용 센서 시스템(요청검증)"]]
+# 시험 분야별 spec 정의 (인덱스 순서 중요!)
 specs = [
     ["spec_001_inSchema", "spec_001_outData", "spec_001_messages", "spec_001_webhookSchema", "spec_001_webhookData", "영상보안 시스템 요청 메시지 검증 API 명세서"],
     ["spec_0011_inSchema", "spec_0011_outData", "spec_0011_messages", "spec_0011_webhookSchema", "spec_0011_webhookData", "보안용 센서 시스템(요청검증)"]
 ]
+
+# 선택된 시험 분야의 인덱스 (0: 영상보안, 1: 보안용센서)
+selected_spec_index = 1
+
 #test-opt
 '''
 opt2의 메시지의 settings 내 정보 보고 작성, 메시지 순차별로
@@ -33,9 +40,9 @@ num_retries : 메시지별 메시지 검증 횟수
 '''
 
 
-trans_protocol = [None, None, None, None, None, None, 'LongPolling', None, None]
-time_out = [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000]
-num_retries = [1, 1, 3, 3, 2, 2, 1, 1, 2]
+trans_protocol = [None, None, None, 'LongPolling', 'LongPolling', None, None]
+time_out = [5000, 5000, 5000, 5000, 5000, 5000, 5000]
+num_retries = [1, 1, 1, 1, 1, 1, 1]
 
 
 #etc
