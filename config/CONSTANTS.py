@@ -7,16 +7,16 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 
 #test-info -> (주의) auth_info의 id, pw admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음!!!!!!!
-company_name = "스마트홈 테크놀로지"
-product_name = "물리보안 통합플랫폼"
-version = "v2.1.0"
-test_category = "사전시험"
+company_name = "테스트기업"
+product_name = "테스트시스템"
+version = "v0.1"
+test_category = "본시험"
 test_target = "통합시스템"
-test_range = "전체필드"
+test_range = "ALL_FIELDS"
 auth_type = "Digest Auth"
 auth_info = "admin,1234"
-admin_code = ""
-url = "https://127.0.0.1:8000"
+admin_code = "1234"
+url = "https://192.168.1.1:8080"
 
 
 specs = [["cmg90br3n002qihleffuljnth_inSchema","cmg90br3n002qihleffuljnth_outData","cmg90br3n002qihleffuljnth_messages",""],
@@ -36,16 +36,34 @@ selected_spec_index = 0
 
 #test-opt
 '''
-opt2의 메시지의 settings 내 정보 보고 작성, 메시지 순차별로
-trans_protocol : 메시지별 실시간 송수신 메시지 여부, None-실시간 아님, LongPolling, WebHook은 설정에 따라 동작 
-time_out : 메시지별 timeout 설정 시간
+specification.id별 step 설정
+각 spec의 steps 순서대로 trans_protocol, time_out, num_retries 설정
+trans_protocol : 메시지별 실시간 송수신 메시지 여부, None-실시간 아님, LongPolling, WebHook은 설정에 따라 동작
+time_out : 메시지별 timeout 설정 시간 (ms)
 num_retries : 메시지별 메시지 검증 횟수
 '''
 
+# specification.id별 설정
+SPEC_CONFIG = {
 
-trans_protocol = [None, None, None, None, None, None, 'LongPolling', None, None]
-time_out = [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000]
-num_retries = [1, 2, 3, 3, 3, 2, 1, 1, 1]
+    "cmg90br3n002qihleffuljnth": {
+        "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic'],
+        "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000],
+        "num_retries": [1, 3, 2, 2, 3, 2, 1]
+    }
+,
+    "cmg7edeo50013124xiux3gbkb": {
+        "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic'],
+        "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
+        "num_retries": [1, 1, 2, 1, 3, 1, 1, 1]
+    }
+,
+    "cmg7bve25000114cevhn5o3vr": {
+        "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic'],
+        "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
+        "num_retries": [1, 1, 2, 2, 3, 1, 1, 1, 5, 1, 1, 1]
+    }
+}
 
 
 #etc
