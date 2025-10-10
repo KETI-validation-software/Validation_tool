@@ -8,6 +8,8 @@ from collections import defaultdict, deque            # ### NEW
 import datetime
 import time
 import traceback
+import os
+import config.CONSTANTS as CONSTANTS
 
 from spec.video.videoRequest import videoMessages, videoOutMessage, videoInMessage
 from spec.video.videoSchema import videoInSchema, videoOutSchema
@@ -53,7 +55,11 @@ class Server(BaseHTTPRequestHandler):
                 "data": payload
             }
             self.trace[api_name].append(evt)
-
+            os.makedirs(CONSTANTS.trace_path, exist_ok=True)
+            safe_api = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in str(api_name))
+            trace_path = os.path.join(CONSTANTS.trace_path, f"trace_{safe_api}.ndjson")
+            with open(trace_path, "a", encoding="utf-8") as f:
+                f.write(json.dumps(evt, ensure_ascii=False) + "\n")
         except Exception:
             pass
 
