@@ -25,7 +25,7 @@ class VideoRequestGenerator:
         Returns:
             추출된 데이터 정보
         """
-        api = step.get("api", {})
+        api = step.get("detail", {}).get("step", {}).get("api", {})
         endpoint = api.get("endpoint", "")
 
         # endpoint에서 변수명 생성 (/ 제거)
@@ -37,12 +37,12 @@ class VideoRequestGenerator:
         # data_type에 따라 데이터 소스와 suffix 결정
         if data_type == "request":
             # Request 버튼: responseData를 가져와서 _out_data 생성
-            data_source = api.get("responseData", {})
-            suffix = "_out_data"
+            data_source = api.get("request", {})
+            suffix = "_in_data"
         else:  # response
             # Response 버튼: requestData를 가져와서 _in_data 생성
-            data_source = api.get("requestData", {})
-            suffix = "_in_data"
+            data_source = api.get("response", {})
+            suffix = "_out_data"
 
         variable_name = f"{endpoint_name}{suffix}"
 

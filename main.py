@@ -5,7 +5,6 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QStackedWidget, QAction, 
 from PyQt5.QtGui import QFontDatabase, QFont
 from PyQt5.QtCore import Qt
 
-from login_GUI import LoginWidget
 from info_GUI import InfoWidget
 from core.functions import resource_path
 import platformVal_all as platform_app
@@ -23,11 +22,6 @@ class MainWindow(QMainWindow):
         self.stack = QStackedWidget()
         self.setCentralWidget(self.stack)
 
-        # 시작 화면
-        self.login_widget = LoginWidget()
-        self.login_widget.loginSucceeded.connect(self._on_login_success)
-        self.stack.addWidget(self.login_widget)  # index 0
-
         # 접속 후 화면
         self.info_widget = InfoWidget()
         self.stack.addWidget(self.info_widget)  # index 1
@@ -39,15 +33,6 @@ class MainWindow(QMainWindow):
     def _setup_menu(self):
         menubar = self.menuBar()
         main_menu = menubar.addMenu("메뉴")
-
-        self.act_login = QAction("로그인", self)
-        self.act_login.triggered.connect(lambda: self.stack.setCurrentIndex(0))
-        main_menu.addAction(self.act_login)
-
-        self.act_logout = QAction("로그아웃", self)
-        self.act_logout.triggered.connect(self._logout)
-        self.act_logout.setEnabled(False)  # 로그인 전에는 비활성화
-        main_menu.addAction(self.act_logout)
 
         self.act_test_info = QAction("시험 정보", self)
         self.act_test_info.triggered.connect(lambda: self.stack.setCurrentIndex(1))
@@ -93,30 +78,6 @@ class MainWindow(QMainWindow):
             if self._saved_geom:
                 self.restoreGeometry(self._saved_geom)
             self.showNormal()
-    def _on_login_success(self, url: str):
-        # 접속 성공 → 두 번째 화면으로 전환
-        self.stack.setCurrentIndex(1)
-        self.act_test_info.setEnabled(True)
-        self.act_run_platform.setEnabled(True)
-        self.act_logout.setEnabled(True)
-        self.act_login.setEnabled(False)
-        # 필요 시 selection_widget에 서버 URL 전달:
-        # if hasattr(self.selection_widget, 'setServerUrl'): self.selection_widget.setServerUrl(url)
-
-    def _logout(self):
-        """로그아웃 처리"""
-        # 스택을 로그인 화면으로 전환
-        self.stack.setCurrentIndex(0)
-        # 시험 관련 메뉴 비활성화
-        self.act_test_info.setEnabled(False)
-        self.act_run_platform.setEnabled(False)
-        self.act_logout.setEnabled(False)
-        self.act_login.setEnabled(True)
-        # 필요시 platform 화면도 초기화
-        if hasattr(self, "_platform_widget"):
-            self.stack.removeWidget(self._platform_widget)
-            self._platform_widget = None
-        QMessageBox.information(self, "로그아웃", "정상적으로 로그아웃되었습니다.")
 
     def _open_validation_app(self, mode):
         importlib.reload(CONSTANTS)  # CONSTANTS 모듈을 다시 로드하여 최신 설정 반영

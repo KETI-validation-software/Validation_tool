@@ -14,14 +14,17 @@ test_category = "사전시험"
 test_target = "통합시스템"
 test_range = "전체필드"
 auth_type = "Digest Auth"
-
 auth_info = "admin,1234"
 admin_code = ""
-url = "https://10.252.219.95:8000"
+url = "https://127.0.0.1:8000"
 
 
-specs = [["spec_001_inSchema","spec_001_outData","spec_001_messages","영상보안 시스템 요청 메시지 검증 API 명세서"],
-         ["spec_0011_inSchema","spec_0011_outData","spec_0011_messages","보안용 센서 시스템(요청검증)"]]
+specs = [["cmg90br3n002qihleffuljnth_inSchema","cmg90br3n002qihleffuljnth_outData","cmg90br3n002qihleffuljnth_messages",""],
+         ["cmg7edeo50013124xiux3gbkb_inSchema","cmg7edeo50013124xiux3gbkb_outData","cmg7edeo50013124xiux3gbkb_messages",""],
+         ["cmg7bve25000114cevhn5o3vr_inSchema","cmg7bve25000114cevhn5o3vr_outData","cmg7bve25000114cevhn5o3vr_messages",""]]
+flag_opt = False
+if test_range == "전체필드":
+    flag_opt = True
 # 시험 분야별 spec 정의 (인덱스 순서 중요!)
 specs = [
     ["spec_001_inSchema", "spec_001_outData", "spec_001_messages", "spec_001_webhookSchema", "spec_001_webhookData", "영상보안 시스템 요청 메시지 검증 API 명세서"],

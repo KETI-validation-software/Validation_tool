@@ -4,10 +4,11 @@ from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem
 from PyQt5.QtCore import Qt
 from core.functions import resource_path
 from core.opt_loader import OptLoader
-from core.schema_generator import generate_schema_file
-from core.video_request_generator import generate_video_request_file
 import os
-
+from core.schema_generator import SchemaGenerator
+from core.data_generator import dataGenerator
+from core.validation_generator import ValidationGenerator
+import json
 
 class FormValidator:
     """
@@ -25,6 +26,11 @@ class FormValidator:
         """
         self.parent = parent_widget
         self.opt_loader = OptLoader()
+        self._steps_cache = {}
+        self._test_step_cache = {}
+        self.schema_gen = SchemaGenerator()
+        self.data_gen = dataGenerator()
+        self.validation_gen = ValidationGenerator()
 
     # ---------- OPT 파일 로드 관련 ----------
 
@@ -75,54 +81,124 @@ class FormValidator:
     #     else:
     #         return None
 
-    def _generate_files_for_all_specs(self, mode, exp_opt):
+    def _generate_files_for_all_specs(self):
         """모든 testSpecIds를 하나의 파일로 합쳐서 생성 (schema + videoData)"""
         try:
             # testSpecIds 추출
-            test_spec_ids = exp_opt.get("testRequest", {}).get("testGroup", {}).get("testSpecIds", [])
             print(f"\n=== 산출물 생성 시작 ===")
-            print(f"모드: {mode}")
-            print(f"testSpecIds: {test_spec_ids}")
+            print(f"specIds: {self._steps_cache.items()}")
 
-            # 모든 spec 파일 경로 수집
-            spec_file_paths = []
-            for spec_id in test_spec_ids:
-                spec_file_path = self._get_spec_file_mapping(spec_id)
-                if spec_file_path:
-                    spec_file_paths.append(resource_path(spec_file_path))
-                    print(f"  [{spec_id}] {spec_file_path}")
+            schema_content = ""
+            data_content = ""
+            validation_content = ""
+            spec_list_names = []
+
+            for spec_id, steps in self._steps_cache.items():
+                if not isinstance(steps, list):
+                    continue
+                schema_names = []
+                data_names = []
+                endpoint_names = []
+                validation_names  = []
+                for s in steps:
+                    step_id = s.get("id")
+                    ts = self._test_step_cache.get(step_id) if hasattr(self, "_test_step_cache") else None
+
+                    if ts:
+                        schema_type = ts.get("verificationType")
+                        if schema_type == 'request':
+                            file_type = 'response'
+                        elif schema_type == 'response':
+                            file_type = 'request'
+                        schema_content, data_content, validation_content = self._generate_files_for_each_steps(
+                            schema_type=schema_type,
+                            file_type=file_type,
+                            ts=ts,
+                            schema_content=schema_content,
+                            data_content=data_content,
+                            schema_names=schema_names,
+                            data_names=data_names,
+                            endpoint_names=endpoint_names,
+                            validation_content=validation_content,
+                            validation_names=validation_names
+                        )
+                if schema_type == "request":
+                    list_name = f"{spec_id}_inSchema"
                 else:
-                    print(f"  경고: spec_id '{spec_id}'에 대한 매핑을 찾을 수 없습니다.")
+                    list_name = f"{spec_id}_outSchema"
 
-            if not spec_file_paths:
-                print("  경고: 처리할 spec 파일이 없습니다.")
-                return
+                schema_content += f"# {spec_id} 스키마 리스트\n"
+                schema_content += f"{list_name} = [\n"
+                for name in schema_names:
+                    schema_content += f"    {name},\n"
+                schema_content += "]\n\n"
 
-            print(f"\n총 {len(spec_file_paths)}개 spec 파일을 하나로 합쳐서 생성")
+                if file_type == "request":
+                    data_list_name = f"{spec_id}_outData"
+                else:
+                    data_list_name = f"{spec_id}_inData"
+
+                data_content += f"# {spec_id} 데이터 리스트\n"
+                data_content += f"{data_list_name} = [\n"
+                for name in data_names:
+                    data_content += f"    {name},\n"
+                data_content += "]\n\n"
+
+                # Messages 리스트 생성 (spec별로) - spec_id_safe 사용
+                messages_list_name = f"{spec_id}_messages"
+                data_content += f"# {spec_id} API endpoint\n"
+                data_content += f"{messages_list_name} = [\n"
+                for endpoint in endpoint_names:
+                    data_content += f'    "{endpoint}",\n'
+                data_content += "]\n\n"
+
+                # Validation 리스트
+                if schema_type == "request":
+                    v_list_name = f"{spec_id}_inValidation"
+                else:
+                    v_list_name = f"{spec_id}_outValidation"
+
+                validation_content += f"# {spec_id} 검증 리스트\n"
+                validation_content += f"{v_list_name} = [\n"
+                for vname in validation_names:
+                    validation_content += f"    {vname},\n"
+                validation_content += "]\n\n"
+
+                # CONSTANTS.py 업데이트용 리스트 저장
+                spec_info = {
+                    "spec_id": spec_id,
+                    "inSchema": list_name if schema_type == "response" else f"{spec_id}_inSchema",
+                    "outData": data_list_name if file_type == "request" else f"{spec_id}_outData",
+                    "messages": messages_list_name,
+                    "name": ts.get("detail", {}).get("testSpec", {}).get("name", "")
+
+                }
+                spec_list_names.append(spec_info)
+
+            schema_content = "from json_checker import OptionalKey\n\n\n" + schema_content
+            data_content = f"# {file_type} 모드\n\n" + data_content
 
             all_spec_list_names = []
 
-            if mode in ["request_longpolling", "request_webhook"]:
-                # Request 모드 - 모든 spec을 하나의 파일로
-                print("\n[Request 모드 산출물 생성]")
-                spec_list_names = self._generate_merged_files(
-                    spec_file_paths,
-                    schema_type="request",
-                    file_type="request"
-                )
-                if spec_list_names:
-                    all_spec_list_names.extend(spec_list_names)
+            if spec_list_names:
+                all_spec_list_names.extend(spec_list_names)
 
-            elif mode in ["response_longpolling", "response_webhook"]:
-                # Response 모드 - 모든 spec을 하나의 파일로
-                print("\n[Response 모드 산출물 생성]")
-                spec_list_names = self._generate_merged_files(
-                    spec_file_paths,
-                    schema_type="response",
-                    file_type="response"
-                )
-                if spec_list_names:
-                    all_spec_list_names.extend(spec_list_names)
+            # 파일 저장
+            schema_output = f"spec/Schema_{schema_type}.py"
+            data_output = f"spec/Data_{file_type}.py"
+            validation_output = f"spec/Validation_{schema_type}.py"
+
+            with open(schema_output, 'w', encoding='utf-8') as f:
+                f.write(schema_content)
+            print(f"Schema_{schema_type}.py 생성 완료")
+
+            with open(data_output, 'w', encoding='utf-8') as f:
+                f.write(data_content)
+            print(f"Data_{file_type}.py 생성 완료")
+
+            with open(validation_output, 'w', encoding='utf-8') as f:
+                f.write(validation_content)
+            print(f"Data_{validation_output}.py 생성 완료")
 
             # CONSTANTS.py 업데이트
             if all_spec_list_names:
@@ -141,6 +217,60 @@ class FormValidator:
             import traceback
             traceback.print_exc()
 
+    def _generate_files_for_each_steps(self, schema_type, file_type, ts, schema_content,
+                                       data_content, schema_names, data_names, endpoint_names,
+                                       validation_content, validation_names):
+        step_id = ts.get("id", "")
+        api = ts.get("detail", {}).get("step", {}).get("api", {})
+        endpoint = ts.get("endpoint", "")
+        settings = api.get("settings", {})
+        trans_protocol = ts.get("detail", {}).get("step", {}).get("protocolType", "")
+
+        schema_info = self.schema_gen.generate_endpoint_schema(ts, schema_type)
+        schema_name = schema_info["name"]
+        schema_obj = schema_info["content"]
+        endpoint_name = schema_info["endpoint"]
+
+        # 스키마 내용 추가
+        schema_content += f"# {endpoint_name}\n"
+        formatted = self.schema_gen.format_schema_content(schema_obj)
+        schema_content += f"{schema_name} = {formatted}\n\n"
+        schema_names.append(schema_name)
+        # Data 생성 (spec별로)
+        data_info = self.data_gen.extract_endpoint_data(ts, file_type)
+        data_name = data_info["name"]
+        data_obj = data_info["content"]
+        endpoint_name = data_info["endpoint"]
+        if isinstance(data_obj, dict) and isinstance(data_obj.get("bodyJson"), list):
+            data_obj = self.data_gen.build_data_from_spec(data_obj["bodyJson"])
+        # 데이터 내용 추가
+        data_content += f"# {endpoint_name}\n"
+        formatted = self.data_gen.format_data_content(data_obj)
+        data_content += f"{data_name} = {formatted}\n\n"
+        data_names.append(data_name)
+        endpoint_names.append(endpoint_name)
+
+        vinfo = self.validation_gen.extract_enabled_validations(ts,
+                                                                schema_type)  # {"endpoint":..., "validation": {...}}
+        v_endpoint = vinfo.get("endpoint") or endpoint_name
+        v_suffix = "_in_validation" if schema_type == "request" else "_out_validation"
+        v_var_name = f"{v_endpoint}{v_suffix}"
+
+        # JSON → 문자열 직렬화
+        raw_json = json.dumps(vinfo.get("validation", {}), ensure_ascii=False, indent=2)
+
+        # true/false → True/False 로 교체
+        py_style_json = re.sub(r'\btrue\b', 'True', raw_json)
+        py_style_json = re.sub(r'\bfalse\b', 'False', py_style_json)
+
+        # 내용 추가
+        validation_content += f"# {v_endpoint}\n"
+        validation_content += f"{v_var_name} = {py_style_json}\n\n"
+        validation_names.append(v_var_name)
+
+        # 기존과 동일하게 누적본 반환 + validation도 함께 반환
+        return schema_content, data_content, validation_content
+
     def _generate_merged_files(self, spec_file_paths, schema_type, file_type):
         """여러 spec 파일을 하나의 파일에 spec별로 구분하여 생성"""
 
@@ -153,7 +283,6 @@ class FormValidator:
 
         # 각 스펙별 리스트 이름 저장 (CONSTANTS.py 업데이트용)
         spec_list_names = []
-
 
         # 각 spec 파일별로 처리
         for spec_path in spec_file_paths:
@@ -226,7 +355,9 @@ class FormValidator:
                             if schema_type == "request":
                                 target_schema = callback_api.get("responseSchema", {})
                                 if target_schema:
-                                    webhook_schema_str = schema_gen._generate_webhook_schema_from_json_schema(target_schema, endpoint_name, schema_type)
+                                    webhook_schema_str = schema_gen._generate_webhook_schema_from_json_schema(target_schema,
+                                                                                                              endpoint_name,
+                                                                                                              schema_type)
                                     schema_content += webhook_schema_str + "\n"
                                     # 스키마 이름 추출
                                     for line in webhook_schema_str.split('\n'):
@@ -237,7 +368,9 @@ class FormValidator:
                             else:  # response
                                 target_schema = callback_api.get("requestSchema", {})
                                 if target_schema:
-                                    webhook_schema_str = schema_gen._generate_webhook_schema_from_json_schema(target_schema, endpoint_name, schema_type)
+                                    webhook_schema_str = schema_gen._generate_webhook_schema_from_json_schema(target_schema,
+                                                                                                              endpoint_name,
+                                                                                                              schema_type)
                                     schema_content += webhook_schema_str + "\n"
                                     for line in webhook_schema_str.split('\n'):
                                         if ' = {' in line and 'WebHook_' in line:
@@ -371,7 +504,7 @@ class FormValidator:
                     if webhook_data_names:
                         spec_info["webhookData"] = f"{spec_id_safe}_webhookData"
 
-                #CONSTANTS.py업데이트용
+                # CONSTANTS.py업데이트용
                 spec_list_names.append(spec_info)
 
             except Exception as e:
@@ -395,6 +528,7 @@ class FormValidator:
 
         # CONSTANTS.py의 specs 리스트 업데이트
         return spec_list_names
+
 
     def _update_constants_specs(self, spec_list_names):
         """CONSTANTS.py의 specs 리스트를 업데이트"""
@@ -448,6 +582,7 @@ class FormValidator:
             print(f"  경고: CONSTANTS.py specs 업데이트 실패: {e}")
             import traceback
             traceback.print_exc()
+
 
     # API 연동으로 인해 더 이상 사용하지 않음 - 주석처리
     # def _fill_basic_info(self, exp_opt):
@@ -554,6 +689,7 @@ class FormValidator:
 
         return None
 
+
     def _fill_api_table_for_selected_field(self, row):
         """선택된 시험 분야에 해당하는 API 테이블 채우기"""
         try:
@@ -613,6 +749,7 @@ class FormValidator:
         except Exception as e:
             print(f"API 테이블 채우기 실패: {e}")
 
+
     def _load_specification_data(self, spec_id):
         """spec_id에 해당하는 specification 데이터 로드 (하드코딩 매핑)"""
         try:
@@ -646,10 +783,12 @@ class FormValidator:
             new_pos = cursor_pos - (len(text) - len(filtered_text))
             self.parent.admin_code_edit.setCursorPosition(max(0, new_pos))
 
+
     def is_admin_code_required(self):
         """관리자 코드 입력이 필요한지 확인"""
         test_category = self.parent.test_category_edit.text().strip()
         return test_category == "본시험"
+
 
     def is_admin_code_valid(self):
         """관리자 코드 유효성 검사"""
@@ -660,6 +799,7 @@ class FormValidator:
         admin_code = self.parent.admin_code_edit.text().strip()
         # 본시험인 경우 숫자가 입력되어야 함
         return bool(admin_code and admin_code.isdigit())
+
 
     def handle_test_category_change(self):
         """시험유형 변경 시 관리자 코드 필드 활성화/비활성화"""
@@ -676,6 +816,7 @@ class FormValidator:
             # 다른 값이거나 빈 값일 때는 기본 상태 유지
             self.parent.admin_code_edit.setEnabled(True)
             self.parent.admin_code_edit.setPlaceholderText("숫자만 입력 가능합니다")
+
 
     # ---------- CONSTANTS.py 업데이트 ----------
 
@@ -718,6 +859,7 @@ class FormValidator:
             print(f"CONSTANTS.py 업데이트 실패: {e}")
             return False
 
+
     def _collect_basic_info(self):
         """시험 기본 정보 수집"""
         return {
@@ -729,6 +871,7 @@ class FormValidator:
             'test_range': self.parent.test_range_edit.text().strip()
         }
 
+
     def _collect_auth_info(self):
         """인증 정보 수집"""
         if self.parent.digest_radio.isChecked():
@@ -739,6 +882,7 @@ class FormValidator:
             auth_info = self.parent.token_input.text().strip()
 
         return auth_type, auth_info
+
 
     # 기본값 []으로 설정하시면 안됩니다. 무조건 9개 API에 대한 기본값이 들어가야 합니다!!! 검증 작동이 아예 안돼서 테스트가 안됩니다..
     def _extract_protocol_info(self):
@@ -814,6 +958,7 @@ class FormValidator:
             'num_retries': num_retries
         }
 
+
     def _update_protocol_in_constants(self, protocol_info):
         """CONSTANTS.py의 trans_protocol, time_out, num_retries만 업데이트"""
         try:
@@ -842,6 +987,7 @@ class FormValidator:
             import traceback
             traceback.print_exc()
 
+
     def _get_selected_test_field_spec_id(self):
         """시험 분야 테이블에서 마지막으로 클릭된 항목의 spec_id 반환"""
         try:
@@ -856,21 +1002,22 @@ class FormValidator:
             print(f"선택된 시험 분야 spec_id 가져오기 실패: {e}")
             return None
 
+
     def _get_selected_spec_index(self):
         """선택된 시험 분야의 CONSTANTS.specs 인덱스 반환"""
         try:
             print("\n=== _get_selected_spec_index 시작 ===")
             selected_spec_id = self._get_selected_test_field_spec_id()
             print(f"[DEBUG] selected_spec_id: {selected_spec_id}")
-            
+
             if not selected_spec_id:
                 print("⚠️ 경고: 선택된 시험 분야가 없습니다. 기본값 0 사용")
                 return 0
-            
+
             # spec_id로 직접 판단 (파일 경로 대신)
             # spec-001 = 영상보안(index 0), spec-0011 = 보안용센서(index 1)
             spec_id_str = str(selected_spec_id).lower()
-            
+
             if "spec-0011" in spec_id_str or "spec_0011" in spec_id_str:
                 print("✅ 보안용 센서 시스템 선택됨 (index 1)")
                 return 1  # 보안용 센서 시스템
@@ -881,7 +1028,7 @@ class FormValidator:
                 # 추가: 파일 경로로도 확인 (이중 체크)
                 spec_file_path = self._get_spec_file_mapping(selected_spec_id)
                 print(f"[DEBUG] spec_file_path: {spec_file_path}")
-                
+
                 if spec_file_path:
                     if "opt3" in spec_file_path or "0011" in spec_file_path:
                         print("✅ 보안용 센서 시스템 선택됨 (index 1) - 파일 경로로 판단")
@@ -889,15 +1036,16 @@ class FormValidator:
                     elif "opt2" in spec_file_path or "_001" in spec_file_path:
                         print("✅ 영상보안 시스템 선택됨 (index 0) - 파일 경로로 판단")
                         return 0
-                
+
                 print(f"⚠️ 경고: 알 수 없는 spec_id '{selected_spec_id}'. 기본값 0 사용")
                 return 0
-                
+
         except Exception as e:
             print(f"❌ 선택된 spec 인덱스 가져오기 실패: {e}")
             import traceback
             traceback.print_exc()
             return 0
+
 
     def _update_constants_file(self, file_path, variables):
         """CONSTANTS.py 파일의 특정 변수들을 업데이트"""
@@ -922,6 +1070,7 @@ class FormValidator:
         with open(file_path, 'w', encoding='utf-8') as f:
             f.write(content)
 
+
     def load_opt_files_from_api(self, test_data):
         """API 데이터를 이용하여 OPT 파일 로드 및 스키마 생성"""
         try:
@@ -938,7 +1087,9 @@ class FormValidator:
 
             # 시험 분야 테이블 채우기 (testSpecs 기반)
             self._fill_test_field_table_from_api(test_specs)
-
+            self.preload_all_spec_steps()
+            self.preload_test_step_details_from_cache()
+            self._generate_files_for_all_specs()
             # API 테이블은 첫 번째 분야를 자동 선택하여 표시 (API 기반)
             if self.parent.test_field_table.rowCount() > 0:
                 self.parent.test_field_table.selectRow(0)
@@ -958,6 +1109,7 @@ class FormValidator:
             import traceback
             traceback.print_exc()
             QMessageBox.critical(self.parent, "오류", f"API 데이터 로드 중 오류가 발생했습니다:\n{str(e)}")
+
 
     def _fill_test_field_table_from_api(self, test_specs):
         """API testSpecs 배열로부터 시험 분야 테이블 채우기"""
@@ -982,6 +1134,7 @@ class FormValidator:
             print(f"시험 분야 테이블 채우기 실패: {e}")
             import traceback
             traceback.print_exc()
+
 
     def fetch_test_info_by_ip(self, ip_address):
         """IP 주소로 시험 정보 조회"""
@@ -1008,6 +1161,7 @@ class FormValidator:
             traceback.print_exc()
             return None
 
+
     def fetch_opt_by_spec_id(self, spec_id):
         """spec_id로 OPT 파일 조회 (API 기반)"""
         # TODO: spec_id를 서버에 전송하여 OPT JSON 받아오는 API 구현 필요
@@ -1020,6 +1174,7 @@ class FormValidator:
         else:
             print(f"spec_id {spec_id}에 해당하는 OPT 파일이 없습니다.")
             return None
+
 
     def load_specs_from_api_data(self, test_specs):
         """testSpecs 배열로부터 스펙 목록 동적 로드"""
@@ -1037,6 +1192,7 @@ class FormValidator:
 
         print(f"총 {len(spec_file_paths)}개 스펙 파일 로드 완료")
         return spec_file_paths
+
 
     def fetch_specification_by_id(self, spec_id):
         """spec_id로 specification 상세 정보 조회 (API 기반)"""
@@ -1058,6 +1214,42 @@ class FormValidator:
             print(f"Specification 조회 실패 ({spec_id}): {e}")
             return None
 
+
+    def preload_all_spec_steps(self):
+        """test_field_table에 있는 모든 spec_id의 steps(id, name)만 미리 캐싱"""
+
+        table = self.parent.test_field_table
+        row_count = table.rowCount()
+        loaded, skipped = 0, 0
+
+        for row in range(row_count):
+            item = table.item(row, 0)
+            if not item:
+                continue
+            spec_id = item.data(Qt.UserRole)
+            if not spec_id:
+                continue
+
+            if spec_id in self._steps_cache:
+                skipped += 1
+                continue
+
+            spec_data = self.fetch_specification_by_id(spec_id)
+            if not spec_data:
+                continue
+
+            steps = spec_data.get("specification", {}).get("steps", [])
+            # hasApi만 필터링하고, id/name만 저장
+            trimmed = [
+                {"id": s.get("id"), "name": s.get("name", "")}
+                for s in steps if s.get("hasApi")
+            ]
+            self._steps_cache[spec_id] = trimmed
+            loaded += 1
+
+        print(f"[preload_all_spec_steps] 로드:{loaded}, 스킵:{skipped}, 총행:{row_count}")
+
+
     def _fill_api_table_for_selected_field_from_api(self, row):
         """선택된 시험 분야의 API 테이블 채우기 (API 기반)"""
         try:
@@ -1066,47 +1258,140 @@ class FormValidator:
             if not item:
                 return
 
-            from PyQt5.QtCore import Qt
             spec_id = item.data(Qt.UserRole)
             if not spec_id:
                 return
 
-            # specifications API 호출
-            spec_data = self.fetch_specification_by_id(spec_id)
-            if not spec_data:
-                return
-
+            cached_steps = self._steps_cache.get(spec_id)
+            if cached_steps is None:
+                # 백업: 혹시 캐시가 안돼있으면 1회 호출 후 최소 데이터로 변환
+                spec_data = self.fetch_specification_by_id(spec_id)
+                if not spec_data:
+                    return
+                steps = spec_data.get("specification", {}).get("steps", [])
+                cached_steps = [
+                    {"id": s.get("id"), "name": s.get("name", "")}
+                    for s in steps if s.get("hasApi")
+                ]
+                # 필요 시 캐시에 저장(선택)
+                self._steps_cache[spec_id] = cached_steps
             # API 테이블 초기화
             self.parent.api_test_table.setRowCount(0)
 
             # steps 순회하여 테이블 채우기
-            steps = spec_data.get("specification", {}).get("steps", [])
+            for step in cached_steps:
+                step_id = step.get("id")
 
-            for step in steps:
-                if not step.get("hasApi"):
-                    continue  # API 없는 step은 제외
+                # ✅ [변경] _test_step_cache에 저장된 id/name 우선 사용
+                ts = self._test_step_cache.get(step_id) if hasattr(self, "_test_step_cache") else None
+                name_to_show = ""
+                id_to_show = ""
+
+                if ts:
+                    # { "id": ..., "name": ..., "detail": {...} } 구조 가정
+                    name_to_show = ts.get("name", "")
+                    id_to_show = "" if ts.get("endpoint") is None else str(ts.get("endpoint"))
+                else:
+                    # 백업: 캐시에 없으면 기존 steps 값 사용
+                    name_to_show = step.get("name", "")
+                    id_to_show = "" if step_id is None else str(step_id)
 
                 r = self.parent.api_test_table.rowCount()
                 self.parent.api_test_table.insertRow(r)
 
-                from PyQt5.QtWidgets import QTableWidgetItem
-                from PyQt5.QtCore import Qt
-
-                # 기능명 (step.name)
-                name_item = QTableWidgetItem(step.get("name", ""))
+                # 기능명 (name) -> 0열
+                name_item = QTableWidgetItem(name_to_show)
                 name_item.setTextAlignment(Qt.AlignCenter)
                 name_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
                 self.parent.api_test_table.setItem(r, 0, name_item)
 
-                # API명 (endpoint) - specifications API에는 endpoint 없음
-                endpoint_item = QTableWidgetItem("")
-                endpoint_item.setTextAlignment(Qt.AlignCenter)
-                endpoint_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-                self.parent.api_test_table.setItem(r, 1, endpoint_item)
+                # 1열에는 id
+                id_item = QTableWidgetItem(id_to_show)
+                id_item.setTextAlignment(Qt.AlignCenter)
+                id_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+                self.parent.api_test_table.setItem(r, 1, id_item)
 
-            print(f"API 테이블 채우기 완료: {len(steps)}개 step 중 {self.parent.api_test_table.rowCount()}개 API")
+            print(f"API 테이블 채우기 완료: {len(cached_steps)}개 API")
 
         except Exception as e:
             print(f"API 테이블 채우기 실패: {e}")
             import traceback
             traceback.print_exc()
+
+
+    def fetch_test_step_by_id(self, step_id):
+        """step_id로 test-step 상세 정보 조회 (API 기반)"""
+        url = f"http://ect2.iptime.org:20223/api/integration/test-steps/{step_id}"
+        try:
+            print(f"Test-Step API 호출 중: {step_id}")
+            resp = requests.get(url, timeout=10)
+            resp.raise_for_status()
+            data = resp.json()
+            # 응답 구조에 따라 이름 키가 다를 수 있어 안전하게 접근
+            name = (
+                    data.get("step", {}).get("name")
+                    or data.get("name")
+                    or ""
+            )
+            print(f"Test-Step 조회 성공: id={step_id}, name={name}")
+            return data
+        except requests.exceptions.Timeout:
+            print(f"Test-Step API 타임아웃: {step_id}")
+            return None
+        except requests.exceptions.ConnectionError:
+            print(f"Test-Step API 연결 실패: {step_id}")
+            return None
+        except Exception as e:
+            print(f"Test-Step 조회 실패 ({step_id}): {e}")
+            return None
+
+
+    # [ADD] _steps_cache를 순회하며 step 상세 응답을 _test_step_cache에 저장
+    def preload_test_step_details_from_cache(self):
+        """
+        _steps_cache에 들어있는 step.id로 test-steps API 호출 후
+        _test_step_cache에 id, name, detail을 저장
+        """
+        loaded, skipped, empty = 0, 0, 0
+
+        for spec_id, steps in self._steps_cache.items():
+            if not isinstance(steps, list):
+                continue
+
+            for s in steps:
+                step_id = s.get("id")
+                step_name = s.get("name", "")
+
+                if step_id is None:
+                    empty += 1
+                    continue
+
+                # 이미 캐시에 있으면 스킵
+                if step_id in self._test_step_cache:
+                    skipped += 1
+                    continue
+
+                detail = self.fetch_test_step_by_id(step_id)
+                if detail is not None:
+                    step_verificationType = detail.get("step", {}).get("verificationType", "")
+
+                    endpoint = (
+                        detail.get("step", {})
+                            .get("api", {})
+                            .get("endpoint", "")
+                    )
+                    self._test_step_cache[step_id] = {
+                        "id": step_id,
+                        "name": step_name,
+                        "endpoint": endpoint,
+                        "verificationType": step_verificationType,
+                        "detail": detail
+                    }
+                    loaded += 1
+                    # print(self._test_step_cache[step_id])
+
+        print(
+            f"[preload_test_step_details_from_cache] "
+            f"로드:{loaded}, 스킵:{skipped}, id없음:{empty}, "
+            f"총 step 수(대략): {sum(len(v) for v in self._steps_cache.values())}"
+        )
