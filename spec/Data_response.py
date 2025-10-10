@@ -1,7 +1,7 @@
 # response 모드
 
 # Authentication
-Authentication_out_data = {
+cmg90br3n002qihleffuljnth_Authentication_out_data = {
     "code": "",
     "message": "",
     "userName": "",
@@ -10,7 +10,7 @@ Authentication_out_data = {
 }
 
 # Capabilities
-Capabilities_out_data = {
+cmg90br3n002qihleffuljnth_Capabilities_out_data = {
     "code": "",
     "message": "",
     "transportSupport": [
@@ -22,7 +22,7 @@ Capabilities_out_data = {
 }
 
 # DoorProfiles
-DoorProfiles_out_data = {
+cmg90br3n002qihleffuljnth_DoorProfiles_out_data = {
     "code": "",
     "message": "",
     "doorList": [
@@ -56,7 +56,7 @@ DoorProfiles_out_data = {
 }
 
 # StoredVideoInfos
-StoredVideoInfos_out_data = {
+cmg90br3n002qihleffuljnth_StoredVideoInfos_out_data = {
     "code": "",
     "message": "",
     "camList": [
@@ -73,7 +73,7 @@ StoredVideoInfos_out_data = {
 }
 
 # RealtimeSensorEventInfos
-RealtimeSensorEventInfos_out_data = {
+cmg90br3n002qihleffuljnth_RealtimeSensorEventInfos_out_data = {
     "code": "",
     "message": "",
     "sensorDeviceList": [
@@ -87,7 +87,7 @@ RealtimeSensorEventInfos_out_data = {
 }
 
 # StoredSensorEventInfos
-StoredSensorEventInfos_out_data = {
+cmg90br3n002qihleffuljnth_StoredSensorEventInfos_out_data = {
     "code": "",
     "message": "",
     "sensorDeviceList": [
@@ -101,7 +101,7 @@ StoredSensorEventInfos_out_data = {
 }
 
 # RealtimeDoorStatus
-RealtimeDoorStatus_out_data = {
+cmg90br3n002qihleffuljnth_RealtimeDoorStatus_out_data = {
     "code": "",
     "message": "",
     "doorList": [
@@ -115,13 +115,13 @@ RealtimeDoorStatus_out_data = {
 
 # cmg90br3n002qihleffuljnth 데이터 리스트
 cmg90br3n002qihleffuljnth_inData = [
-    Authentication_out_data,
-    Capabilities_out_data,
-    DoorProfiles_out_data,
-    StoredVideoInfos_out_data,
-    RealtimeSensorEventInfos_out_data,
-    StoredSensorEventInfos_out_data,
-    RealtimeDoorStatus_out_data,
+    cmg90br3n002qihleffuljnth_Authentication_out_data,
+    cmg90br3n002qihleffuljnth_Capabilities_out_data,
+    cmg90br3n002qihleffuljnth_DoorProfiles_out_data,
+    cmg90br3n002qihleffuljnth_StoredVideoInfos_out_data,
+    cmg90br3n002qihleffuljnth_RealtimeSensorEventInfos_out_data,
+    cmg90br3n002qihleffuljnth_StoredSensorEventInfos_out_data,
+    cmg90br3n002qihleffuljnth_RealtimeDoorStatus_out_data,
 ]
 
 # cmg90br3n002qihleffuljnth API endpoint
@@ -136,7 +136,7 @@ cmg90br3n002qihleffuljnth_messages = [
 ]
 
 # Authentication
-Authentication_out_data = {
+cmg7edeo50013124xiux3gbkb_Authentication_out_data = {
     "code": "",
     "message": "",
     "userName": "",
@@ -145,7 +145,7 @@ Authentication_out_data = {
 }
 
 # Capabilities
-Capabilities_out_data = {
+cmg7edeo50013124xiux3gbkb_Capabilities_out_data = {
     "code": "",
     "message": "",
     "transportSupport": [
@@ -156,7 +156,7 @@ Capabilities_out_data = {
 }
 
 # DoorProfiles
-DoorProfiles_out_data = {
+cmg7edeo50013124xiux3gbkb_DoorProfiles_out_data = {
     "code": "",
     "message": "",
     "doorList": [
@@ -190,7 +190,7 @@ DoorProfiles_out_data = {
 }
 
 # AccessUserInfos
-AccessUserInfos_out_data = {
+cmg7edeo50013124xiux3gbkb_AccessUserInfos_out_data = {
     "code": "200",
     "message": "성공",
     "userList": [
@@ -212,7 +212,7 @@ AccessUserInfos_out_data = {
 }
 
 # RealtimeVerifEventInfos
-RealtimeVerifEventInfos_out_data = {
+cmg7edeo50013124xiux3gbkb_RealtimeVerifEventInfos_out_data = {
     "code": "200",
     "message": "성공",
     "doorList": [
@@ -229,7 +229,7 @@ RealtimeVerifEventInfos_out_data = {
 }
 
 # StoredVerifEventInfos
-StoredVerifEventInfos_out_data = {
+cmg7edeo50013124xiux3gbkb_StoredVerifEventInfos_out_data = {
     "code": "",
     "message": "",
     "doorList": [
@@ -246,7 +246,7 @@ StoredVerifEventInfos_out_data = {
 }
 
 # RealtimeDoorStatus
-RealtimeDoorStatus_out_data = {
+cmg7edeo50013124xiux3gbkb_RealtimeDoorStatus_out_data = {
     "code": "",
     "message": "",
     "doorList": [
@@ -259,21 +259,21 @@ RealtimeDoorStatus_out_data = {
 }
 
 # DoorControl
-DoorControl_out_data = {
+cmg7edeo50013124xiux3gbkb_DoorControl_out_data = {
     "code": "200",
     "message": "성공"
 }
 
 # cmg7edeo50013124xiux3gbkb 데이터 리스트
 cmg7edeo50013124xiux3gbkb_inData = [
-    Authentication_out_data,
-    Capabilities_out_data,
-    DoorProfiles_out_data,
-    AccessUserInfos_out_data,
-    RealtimeVerifEventInfos_out_data,
-    StoredVerifEventInfos_out_data,
-    RealtimeDoorStatus_out_data,
-    DoorControl_out_data,
+    cmg7edeo50013124xiux3gbkb_Authentication_out_data,
+    cmg7edeo50013124xiux3gbkb_Capabilities_out_data,
+    cmg7edeo50013124xiux3gbkb_DoorProfiles_out_data,
+    cmg7edeo50013124xiux3gbkb_AccessUserInfos_out_data,
+    cmg7edeo50013124xiux3gbkb_RealtimeVerifEventInfos_out_data,
+    cmg7edeo50013124xiux3gbkb_StoredVerifEventInfos_out_data,
+    cmg7edeo50013124xiux3gbkb_RealtimeDoorStatus_out_data,
+    cmg7edeo50013124xiux3gbkb_DoorControl_out_data,
 ]
 
 # cmg7edeo50013124xiux3gbkb API endpoint
@@ -289,7 +289,7 @@ cmg7edeo50013124xiux3gbkb_messages = [
 ]
 
 # Authentication
-Authentication_out_data = {
+cmg7bve25000114cevhn5o3vr_Authentication_out_data = {
     "code": "",
     "message": "",
     "userName": "",
@@ -298,7 +298,7 @@ Authentication_out_data = {
 }
 
 # Capabilities
-Capabilities_out_data = {
+cmg7bve25000114cevhn5o3vr_Capabilities_out_data = {
     "code": "",
     "message": "",
     "transportSupport": [
@@ -309,7 +309,7 @@ Capabilities_out_data = {
 }
 
 # DoorProfiles
-DoorProfiles_out_data = {
+cmg7bve25000114cevhn5o3vr_DoorProfiles_out_data = {
     "code": "",
     "message": "",
     "doorList": [
@@ -343,7 +343,7 @@ DoorProfiles_out_data = {
 }
 
 # StoredVideoInfos
-StoredVideoInfos_out_data = {
+cmg7bve25000114cevhn5o3vr_StoredVideoInfos_out_data = {
     "code": "",
     "message": "",
     "camList": [
@@ -360,7 +360,7 @@ StoredVideoInfos_out_data = {
 }
 
 # RealtimeVerifEventInfos
-RealtimeVerifEventInfos_out_data = {
+cmg7bve25000114cevhn5o3vr_RealtimeVerifEventInfos_out_data = {
     "code": "200",
     "message": "성공",
     "doorList": [
@@ -377,7 +377,7 @@ RealtimeVerifEventInfos_out_data = {
 }
 
 # StoredVerifEventInfos
-StoredVerifEventInfos_out_data = {
+cmg7bve25000114cevhn5o3vr_StoredVerifEventInfos_out_data = {
     "code": "",
     "message": "",
     "doorList": [
@@ -394,7 +394,7 @@ StoredVerifEventInfos_out_data = {
 }
 
 # RealtimeDoorStatus
-RealtimeDoorStatus_out_data = {
+cmg7bve25000114cevhn5o3vr_RealtimeDoorStatus_out_data = {
     "code": "",
     "message": "",
     "doorList": [
@@ -407,13 +407,13 @@ RealtimeDoorStatus_out_data = {
 }
 
 # DoorControl
-DoorControl_out_data = {
+cmg7bve25000114cevhn5o3vr_DoorControl_out_data = {
     "code": "200",
     "message": "성공"
 }
 
 # StoredObjectAnalyticsInfos
-StoredObjectAnalyticsInfos_out_data = {
+cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_out_data = {
     "code": "",
     "message": "",
     "camList": [
@@ -440,7 +440,7 @@ StoredObjectAnalyticsInfos_out_data = {
 }
 
 # PtzStatus
-PtzStatus_out_data = {
+cmg7bve25000114cevhn5o3vr_PtzStatus_out_data = {
     "code": "",
     "message": "",
     "position": {
@@ -456,31 +456,31 @@ PtzStatus_out_data = {
 }
 
 # PtzContinuousMove
-PtzContinuousMove_out_data = {
+cmg7bve25000114cevhn5o3vr_PtzContinuousMove_out_data = {
     "code": "200",
     "message": "성공"
 }
 
 # PtzStop
-PtzStop_out_data = {
+cmg7bve25000114cevhn5o3vr_PtzStop_out_data = {
     "code": "200",
     "message": "성공"
 }
 
 # cmg7bve25000114cevhn5o3vr 데이터 리스트
 cmg7bve25000114cevhn5o3vr_inData = [
-    Authentication_out_data,
-    Capabilities_out_data,
-    DoorProfiles_out_data,
-    StoredVideoInfos_out_data,
-    RealtimeVerifEventInfos_out_data,
-    StoredVerifEventInfos_out_data,
-    RealtimeDoorStatus_out_data,
-    DoorControl_out_data,
-    StoredObjectAnalyticsInfos_out_data,
-    PtzStatus_out_data,
-    PtzContinuousMove_out_data,
-    PtzStop_out_data,
+    cmg7bve25000114cevhn5o3vr_Authentication_out_data,
+    cmg7bve25000114cevhn5o3vr_Capabilities_out_data,
+    cmg7bve25000114cevhn5o3vr_DoorProfiles_out_data,
+    cmg7bve25000114cevhn5o3vr_StoredVideoInfos_out_data,
+    cmg7bve25000114cevhn5o3vr_RealtimeVerifEventInfos_out_data,
+    cmg7bve25000114cevhn5o3vr_StoredVerifEventInfos_out_data,
+    cmg7bve25000114cevhn5o3vr_RealtimeDoorStatus_out_data,
+    cmg7bve25000114cevhn5o3vr_DoorControl_out_data,
+    cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_out_data,
+    cmg7bve25000114cevhn5o3vr_PtzStatus_out_data,
+    cmg7bve25000114cevhn5o3vr_PtzContinuousMove_out_data,
+    cmg7bve25000114cevhn5o3vr_PtzStop_out_data,
 ]
 
 # cmg7bve25000114cevhn5o3vr API endpoint

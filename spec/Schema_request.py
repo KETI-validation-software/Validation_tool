@@ -2,19 +2,19 @@ from json_checker import OptionalKey
 
 
 # Authentication
-Authentication_in_schema = {
+cmg90br3n002qihleffuljnth_Authentication_in_schema = {
     "userID": str,
     "userPW": str,
 }
 
 # Capabilities
-Capabilities_in_schema = {}
+cmg90br3n002qihleffuljnth_Capabilities_in_schema = {}
 
 # DoorProfiles
-DoorProfiles_in_schema = {}
+cmg90br3n002qihleffuljnth_DoorProfiles_in_schema = {}
 
 # StoredVideoInfos
-StoredVideoInfos_in_schema = {
+cmg90br3n002qihleffuljnth_StoredVideoInfos_in_schema = {
     "timePeriod": {
     "startTime": float,
     "endTime": float,
@@ -25,7 +25,7 @@ StoredVideoInfos_in_schema = {
 }
 
 # RealtimeSensorEventInfos
-RealtimeSensorEventInfos_in_schema = {
+cmg90br3n002qihleffuljnth_RealtimeSensorEventInfos_in_schema = {
     "sensorDeviceList": [{
     "sensorDeviceID": str,
 }],
@@ -39,7 +39,7 @@ RealtimeSensorEventInfos_in_schema = {
 }
 
 # StoredSensorEventInfos
-StoredSensorEventInfos_in_schema = {
+cmg90br3n002qihleffuljnth_StoredSensorEventInfos_in_schema = {
     "timePeriod": {
     "startTime": str,
     "endTime": str,
@@ -52,7 +52,7 @@ StoredSensorEventInfos_in_schema = {
 }
 
 # RealtimeDoorStatus
-RealtimeDoorStatus_in_schema = {
+cmg90br3n002qihleffuljnth_RealtimeDoorStatus_in_schema = {
     "doorList": [{
     "doorID": str,
 }],
@@ -66,36 +66,36 @@ RealtimeDoorStatus_in_schema = {
 
 # cmg90br3n002qihleffuljnth 스키마 리스트
 cmg90br3n002qihleffuljnth_inSchema = [
-    Authentication_in_schema,
-    Capabilities_in_schema,
-    DoorProfiles_in_schema,
-    StoredVideoInfos_in_schema,
-    RealtimeSensorEventInfos_in_schema,
-    StoredSensorEventInfos_in_schema,
-    RealtimeDoorStatus_in_schema,
+    cmg90br3n002qihleffuljnth_Authentication_in_schema,
+    cmg90br3n002qihleffuljnth_Capabilities_in_schema,
+    cmg90br3n002qihleffuljnth_DoorProfiles_in_schema,
+    cmg90br3n002qihleffuljnth_StoredVideoInfos_in_schema,
+    cmg90br3n002qihleffuljnth_RealtimeSensorEventInfos_in_schema,
+    cmg90br3n002qihleffuljnth_StoredSensorEventInfos_in_schema,
+    cmg90br3n002qihleffuljnth_RealtimeDoorStatus_in_schema,
 ]
 
 # Authentication
-Authentication_in_schema = {
+cmg7edeo50013124xiux3gbkb_Authentication_in_schema = {
     "userID": str,
     "userPW": str,
 }
 
 # Capabilities
-Capabilities_in_schema = {
+cmg7edeo50013124xiux3gbkb_Capabilities_in_schema = {
     "": str,
 }
 
 # DoorProfiles
-DoorProfiles_in_schema = {}
+cmg7edeo50013124xiux3gbkb_DoorProfiles_in_schema = {}
 
 # AccessUserInfos
-AccessUserInfos_in_schema = {
+cmg7edeo50013124xiux3gbkb_AccessUserInfos_in_schema = {
     "": str,
 }
 
 # RealtimeVerifEventInfos
-RealtimeVerifEventInfos_in_schema = {
+cmg7edeo50013124xiux3gbkb_RealtimeVerifEventInfos_in_schema = {
     "doorList": [{
     "doorID": str,
 }],
@@ -109,7 +109,7 @@ RealtimeVerifEventInfos_in_schema = {
 }
 
 # StoredVerifEventInfos
-StoredVerifEventInfos_in_schema = {
+cmg7edeo50013124xiux3gbkb_StoredVerifEventInfos_in_schema = {
     "timePeriod": [{
     "startTime": float,
     "endTime": float,
@@ -122,7 +122,7 @@ StoredVerifEventInfos_in_schema = {
 }
 
 # RealtimeDoorStatus
-RealtimeDoorStatus_in_schema = {
+cmg7edeo50013124xiux3gbkb_RealtimeDoorStatus_in_schema = {
     "doorList": [{
     "doorID": str,
 }],
@@ -135,39 +135,39 @@ RealtimeDoorStatus_in_schema = {
 }
 
 # DoorControl
-DoorControl_in_schema = {
+cmg7edeo50013124xiux3gbkb_DoorControl_in_schema = {
     "doorID": str,
     "commandType": str,
 }
 
 # cmg7edeo50013124xiux3gbkb 스키마 리스트
 cmg7edeo50013124xiux3gbkb_inSchema = [
-    Authentication_in_schema,
-    Capabilities_in_schema,
-    DoorProfiles_in_schema,
-    AccessUserInfos_in_schema,
-    RealtimeVerifEventInfos_in_schema,
-    StoredVerifEventInfos_in_schema,
-    RealtimeDoorStatus_in_schema,
-    DoorControl_in_schema,
+    cmg7edeo50013124xiux3gbkb_Authentication_in_schema,
+    cmg7edeo50013124xiux3gbkb_Capabilities_in_schema,
+    cmg7edeo50013124xiux3gbkb_DoorProfiles_in_schema,
+    cmg7edeo50013124xiux3gbkb_AccessUserInfos_in_schema,
+    cmg7edeo50013124xiux3gbkb_RealtimeVerifEventInfos_in_schema,
+    cmg7edeo50013124xiux3gbkb_StoredVerifEventInfos_in_schema,
+    cmg7edeo50013124xiux3gbkb_RealtimeDoorStatus_in_schema,
+    cmg7edeo50013124xiux3gbkb_DoorControl_in_schema,
 ]
 
 # Authentication
-Authentication_in_schema = {
+cmg7bve25000114cevhn5o3vr_Authentication_in_schema = {
     "userID": str,
     "userPW": str,
 }
 
 # Capabilities
-Capabilities_in_schema = {
+cmg7bve25000114cevhn5o3vr_Capabilities_in_schema = {
     "": str,
 }
 
 # DoorProfiles
-DoorProfiles_in_schema = {}
+cmg7bve25000114cevhn5o3vr_DoorProfiles_in_schema = {}
 
 # StoredVideoInfos
-StoredVideoInfos_in_schema = {
+cmg7bve25000114cevhn5o3vr_StoredVideoInfos_in_schema = {
     "timePeriod": {
     "startTime": float,
     "endTime": float,
@@ -178,7 +178,7 @@ StoredVideoInfos_in_schema = {
 }
 
 # RealtimeVerifEventInfos
-RealtimeVerifEventInfos_in_schema = {
+cmg7bve25000114cevhn5o3vr_RealtimeVerifEventInfos_in_schema = {
     "doorList": [{
     "doorID": str,
 }],
@@ -192,7 +192,7 @@ RealtimeVerifEventInfos_in_schema = {
 }
 
 # StoredVerifEventInfos
-StoredVerifEventInfos_in_schema = {
+cmg7bve25000114cevhn5o3vr_StoredVerifEventInfos_in_schema = {
     "timePeriod": [{
     "startTime": float,
     "endTime": float,
@@ -205,7 +205,7 @@ StoredVerifEventInfos_in_schema = {
 }
 
 # RealtimeDoorStatus
-RealtimeDoorStatus_in_schema = {
+cmg7bve25000114cevhn5o3vr_RealtimeDoorStatus_in_schema = {
     "doorList": [{
     "doorID": str,
 }],
@@ -218,13 +218,13 @@ RealtimeDoorStatus_in_schema = {
 }
 
 # DoorControl
-DoorControl_in_schema = {
+cmg7bve25000114cevhn5o3vr_DoorControl_in_schema = {
     "doorID": str,
     "commandType": str,
 }
 
 # StoredObjectAnalyticsInfos
-StoredObjectAnalyticsInfos_in_schema = {
+cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_in_schema = {
     "timePeriod": {
     "startTime": float,
     "endTime": float,
@@ -239,12 +239,12 @@ StoredObjectAnalyticsInfos_in_schema = {
 }
 
 # PtzStatus
-PtzStatus_in_schema = {
+cmg7bve25000114cevhn5o3vr_PtzStatus_in_schema = {
     "camID": str,
 }
 
 # PtzContinuousMove
-PtzContinuousMove_in_schema = {
+cmg7bve25000114cevhn5o3vr_PtzContinuousMove_in_schema = {
     "camID": str,
     "velocity": {
     OptionalKey("pan"): float,
@@ -255,7 +255,7 @@ PtzContinuousMove_in_schema = {
 }
 
 # PtzStop
-PtzStop_in_schema = {
+cmg7bve25000114cevhn5o3vr_PtzStop_in_schema = {
     "camID": str,
     OptionalKey("pan"): bool,
     OptionalKey("tilt"): bool,
@@ -264,17 +264,17 @@ PtzStop_in_schema = {
 
 # cmg7bve25000114cevhn5o3vr 스키마 리스트
 cmg7bve25000114cevhn5o3vr_inSchema = [
-    Authentication_in_schema,
-    Capabilities_in_schema,
-    DoorProfiles_in_schema,
-    StoredVideoInfos_in_schema,
-    RealtimeVerifEventInfos_in_schema,
-    StoredVerifEventInfos_in_schema,
-    RealtimeDoorStatus_in_schema,
-    DoorControl_in_schema,
-    StoredObjectAnalyticsInfos_in_schema,
-    PtzStatus_in_schema,
-    PtzContinuousMove_in_schema,
-    PtzStop_in_schema,
+    cmg7bve25000114cevhn5o3vr_Authentication_in_schema,
+    cmg7bve25000114cevhn5o3vr_Capabilities_in_schema,
+    cmg7bve25000114cevhn5o3vr_DoorProfiles_in_schema,
+    cmg7bve25000114cevhn5o3vr_StoredVideoInfos_in_schema,
+    cmg7bve25000114cevhn5o3vr_RealtimeVerifEventInfos_in_schema,
+    cmg7bve25000114cevhn5o3vr_StoredVerifEventInfos_in_schema,
+    cmg7bve25000114cevhn5o3vr_RealtimeDoorStatus_in_schema,
+    cmg7bve25000114cevhn5o3vr_DoorControl_in_schema,
+    cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_in_schema,
+    cmg7bve25000114cevhn5o3vr_PtzStatus_in_schema,
+    cmg7bve25000114cevhn5o3vr_PtzContinuousMove_in_schema,
+    cmg7bve25000114cevhn5o3vr_PtzStop_in_schema,
 ]
 
