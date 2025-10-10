@@ -482,7 +482,7 @@ class MyApp(QWidget):
         self.img_fail = resource_path("assets/image/red.png")
         self.img_none = resource_path("assets/image/black.png")
 
-        self.flag_opt = True  # 필수필드만 확인 False, optional 필드까지 확인 True
+        self.flag_opt = CONSTANTS.flag_opt  # 필수필드만 확인 False, optional 필드까지 확인 True
         self.tick_timer = QTimer()
         self.tick_timer.timeout.connect(self.update_view)
         self.auth_flag = True 
@@ -834,7 +834,7 @@ class MyApp(QWidget):
                                                 if webhook_val_result == "FAIL":
                                                     step_result = "FAIL"
                                                     combined_error_parts.append(f"[검증 {retry_attempt + 1}회차] [Webhook] " + webhook_err_txt)
-                                
+
                                     except json.JSONDecodeError as verr:
                                         box = QMessageBox()
                                         box.setIcon(QMessageBox.Critical)
@@ -858,6 +858,14 @@ class MyApp(QWidget):
                     self.step_buffers[self.cnt]["data"] = data_text
                     self.step_buffers[self.cnt]["error"] = error_text
                     self.step_buffers[self.cnt]["result"] = final_result
+
+                    try:
+                        api_name = self.Server.message[self.cnt]  # 현재 스텝의 API 이름
+                        events = list(self.Server.trace.get(api_name, []))  # deque -> list
+                        self.step_buffers[self.cnt]["events"] = events  # ### NEW: 원본 타임라인 저장
+                    except Exception:
+                        self.step_buffers[self.cnt]["events"] = []
+                    print("seo", self.step_buffers[self.cnt]["events"])
 
                     # 아이콘/툴팁 갱신
                     if combined_data_parts:
