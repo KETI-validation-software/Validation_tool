@@ -1349,8 +1349,19 @@ class MyApp(QWidget):
             
             self.tableWidget.resize(table_width, table_height)
 
+    def _clean_trace_dir_once(self):
+        """results/trace 폴더 안의 파일들을 삭제"""
+        os.makedirs(CONSTANTS.trace_path, exist_ok=True)
+        for name in os.listdir(CONSTANTS.trace_path):
+            path = os.path.join(CONSTANTS.trace_path, name)
+            if os.path.isfile(path):
+                try:
+                    os.remove(path)
+                except OSError:
+                    pass
 
     def sbtn_push(self):
+        self._clean_trace_dir_once()
         self.first_run = False
         self.total_error_cnt = 0
         self.total_pass_cnt = 0

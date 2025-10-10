@@ -561,9 +561,9 @@ class MyApp(QWidget):
             self.trace[step_idx].append(evt)
 
             # (옵션) 즉시 파일로도 남김 - append-only ndjson
-            os.makedirs(os.path.join("results", "trace"), exist_ok=True)
+            os.makedirs(CONSTANTS.trace_path, exist_ok=True)
             safe_api = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in str(api))
-            trace_path = os.path.join("results", "trace", f"trace_{step_idx + 1:02d}_{safe_api}.ndjson")
+            trace_path = os.path.join(CONSTANTS.trace_path, f"trace_{step_idx + 1:02d}_{safe_api}.ndjson")
             with open(trace_path, "a", encoding="utf-8") as f:
                 f.write(json.dumps(evt, ensure_ascii=False) + "\n")
         except Exception:
@@ -1534,10 +1534,19 @@ class MyApp(QWidget):
             if msg:
                 api_name = self.step_names[row] if row < len(self.step_names) else f"Step {row+1}"
                 CustomDialog(msg, api_name)
-
+    def _clean_trace_dir_once(self):
+        """results/trace 폴더 안의 파일들을 삭제"""
+        os.makedirs(CONSTANTS.trace_path, exist_ok=True)
+        for name in os.listdir(CONSTANTS.trace_path):
+            path = os.path.join(CONSTANTS.trace_path, name)
+            if os.path.isfile(path):
+                try:
+                    os.remove(path)
+                except OSError:
+                    pass
 
     def start_btn_clicked(self):
-
+        self._clean_trace_dir_once()
         json_to_data("video")
         self.sbtn.setDisabled(True)
         self.stop_btn.setEnabled(True)
