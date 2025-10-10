@@ -1,224 +1,120 @@
-# data.py
-from typing import Dict, List, Any, Union
+from typing import Any, Dict, List, Union, Optional
+from copy import deepcopy
 
+class constraintGeneractor:
+    """
+    bodyJson 트리에서 valueType이 있는 '영역'만 골라
+    점(.) 경로 key로 정리하여 StoredXXX_in_validation 형태의 dict를 생성한다.
 
-class dataGenerator:
-    """key/type/value 규격 스펙을 실제 JSON 데이터로 변환하는 클래스"""
+    규칙
+    - 수집 대상: valueType이 존재하는 dict 노드
+    - 제외: 'type', 'value' 키는 수집/병합에서 제외
+    - 보존: required, referenceField, requestRange, arrayElementType, valueType 등은 보존
+    - 경로: 상위~하위 key를 '.'로 연결(빈 문자열 key는 경로 생략)
+    - 기본 템플릿: {"score": 1, "enabled": True, "validationType": "response-field-list-match"}
+      → 필요 시 생성자 인자로 커스터마이징 가능
+    """
 
-    def __init__(self):
-        pass
+    EXCLUDE_KEYS = {"type", "value"}
+    CHILD_KEYS = ("children", "items", "properties", "fields")  # 다양한 스키마 호환
 
-    def extract_endpoint_data(self, step: Dict, data_type: str) -> Dict[str, Any]:
-        """
-        엔드포인트 스텝에서 request/response 데이터를 추출하고,
-        bodyJson 스펙이 있으면 실제 JSON 데이터로 변환
-        """
-        api = step.get("detail", {}).get("step", {}).get("api", {})
-        endpoint = api.get("endpoint", "")
-        endpoint_name = endpoint[1:] if endpoint.startswith("/") else endpoint
-
-        request_source = api.get("request", {}) or {}
-        response_source = api.get("response", {}) or {}
-
-        if data_type == "request":
-            data_source = request_source
-            suffix = "_in_data"
-        else:
-            data_source = response_source
-            suffix = "_out_data"
-
-        variable_name = f"{endpoint_name}{suffix}"
-        data_content = dict(data_source) if isinstance(data_source, dict) else {}
-
-        # ✅ bodyJson이 key/type/value 구조라면 실제 데이터로 변환
-        if isinstance(data_content.get("bodyJson"), list):
-            spec_list = data_content["bodyJson"]
-            data_content = self.build_data_from_spec(spec_list)
-        else:
-            pass  # bodyJson이 없으면 그대로 유지
-
-        return {
-            "name": variable_name,
-            "content": data_content,
-            "endpoint": endpoint_name
+    def __init__(self, default_entry: Optional[Dict[str, Any]] = None):
+        self.default_entry = default_entry or {
         }
 
-    # -----------------------------
-    # 스펙 → 데이터 생성기
-    # -----------------------------
-    def build_data_from_spec(self, spec_list: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def build_validation_map(
+        self,
+        body_json: Union[List[Any], Dict[str, Any]]
+    ) -> Dict[str, Dict[str, Any]]:
         """
-        key/type/value/children 기반 스펙 리스트를 실제 JSON(dict) 데이터로 변환
+        Args:
+            body_json: 주신 예시처럼 'bodyJson' 위치의 리스트(또는 dict)
+        Returns:
+            { "<dotted.path>": {score, enabled, validationType, ...보존필드}, ... }
         """
-        result: Dict[str, Any] = {}
-        for item in spec_list:
-            if not isinstance(item, dict):
+        acc: Dict[str, Dict[str, Any]] = {}
+        self._walk(node=body_json, prefix="", acc=acc)
+        return acc
+
+    # -------------------- 내부 구현 -------------------- #
+
+    def _walk(
+        self,
+        node: Union[List[Any], Dict[str, Any], Any],
+        prefix: str,
+        acc: Dict[str, Dict[str, Any]],
+    ) -> None:
+        if node is None:
+            return
+
+        if isinstance(node, list):
+            for child in node:
+                self._walk(child, prefix, acc)
+            return
+
+        if not isinstance(node, dict):
+            return
+
+        # 경로 계산 (빈 문자열 key는 경로에 포함하지 않음)
+        key = node.get("key")
+        path = self._join_path(prefix, key)
+
+        # valueType이 있으면 '영역'으로 간주하고 엔트리 생성
+        if "valueType" in node:
+            entry = self._build_entry(node)
+            if entry:  # 빈 dict가 아니면 기록
+                acc[path] = entry
+
+        # 하위 노드 순회
+        for ck in self.CHILD_KEYS:
+            if ck in node and isinstance(node[ck], (list, dict)):
+                self._walk(node[ck], path, acc)
+
+    def _build_entry(self, region: Dict[str, Any]) -> Dict[str, Any]:
+        # region(dict) 자체에서 보존 필드만 추출
+        kept = {}
+        for k, v in region.items():
+            if k in self.EXCLUDE_KEYS:
                 continue
-
-            key = item.get("key", "")
-            t = (item.get("type") or "string").lower()
-            required = bool(item.get("required", False))
-            value = item.get("value", None)
-            children = item.get("children", None)
-            array_elem_type = (item.get("arrayElementType") or "").lower()
-
-            if t == "object":
-                obj = self._build_object_from_children(children, required)
-                if key:
-                    result[key] = obj
+            if k in ("key", *self.CHILD_KEYS):
                 continue
+            kept[k] = v
 
-            if t == "array":
-                arr = self._build_array_from_spec(value, array_elem_type, children, required)
-                if key:
-                    result[key] = arr
-                continue
+        # region 내부에 흔히 쓰는 'data' 블록이 있다면 동일 규칙으로 병합
+        data_block = region.get("data")
+        if isinstance(data_block, dict):
+            for k, v in data_block.items():
+                if k in self.EXCLUDE_KEYS:
+                    continue
+                kept[k] = v
 
-            coerced = self._coerce_primitive(value, t, required)
-            if key:
-                result[key] = coerced
+        # 기본 템플릿 + 보존 필드 병합
+        entry = deepcopy(self.default_entry)
+        entry.update(kept)
+        return entry
 
-        return result
+    @staticmethod
+    def _join_path(prefix: str, key: Optional[str]) -> str:
+        if not key:
+            # 빈 문자열/None은 경로 생략
+            return prefix
+        return f"{prefix}.{key}" if prefix else key
 
-    def _build_object_from_children(self, children: Any, required: bool) -> Dict[str, Any]:
-        if not isinstance(children, list):
-            return {} if required else {}
-        obj: Dict[str, Any] = {}
-        for child in children:
-            if not isinstance(child, dict):
-                continue
-            k = child.get("key", "")
-            t = (child.get("type") or "string").lower()
-            v = child.get("value", None)
-            req = bool(child.get("required", False))
-            sub_children = child.get("children", None)
+    def extract_value_type_fields(self, step: Dict[str, Any], schema_type: str = "response") -> Dict[str, Any]:
+        step_obj = step.get("detail", {}).get("step") or step.get("step") or step
+        api = step_obj.get("api", {}) if isinstance(step_obj, dict) else {}
+        endpoint = (api.get("endpoint") or "").lstrip("/")
 
-            if t == "object":
-                obj_val = self._build_object_from_children(sub_children, req)
-                if k:
-                    obj[k] = obj_val
-                else:
-                    # ✅ key가 빈 object면 내부를 상위에 병합
-                    if isinstance(obj_val, dict):
-                        obj.update(obj_val)
-                continue
-
-            if t == "array":
-                obj_val = self._build_array_from_spec(
-                    child.get("value", None),
-                    (child.get("arrayElementType") or "").lower(),
-                    sub_children,
-                    req
-                )
-                if k:
-                    obj[k] = obj_val
-                # k가 빈 배열은 보통 정의용이므로 무시
-                continue
-
-            obj_val = self._coerce_primitive(v, t, req)
-            if k:
-                obj[k] = obj_val
-        return obj
-
-    def _build_array_from_spec(
-            self,
-            value: Any,
-            array_elem_type: str,
-            children: Any,
-            required: bool
-    ) -> List[Any]:
-        # object 배열 + children 정의가 있으면, 자식들로 구성된 객체 1개 리스트
-        if array_elem_type == "object" and isinstance(children, list):
-            # ✅ 래퍼(unwrapped): children에 key==""인 object가 1개 있고 그 안에 실제 필드가 있을 때
-            real_children = children
-            if len(children) == 1 and isinstance(children[0], dict):
-                c0 = children[0]
-                if (c0.get("type", "").lower() == "object") and (c0.get("key", "") == "") and isinstance(
-                        c0.get("children"), list):
-                    real_children = c0["children"]
-            obj = self._build_object_from_children(real_children, required=True)
-            return [obj]
-
-        # value 기반 처리 (원소 타입이 primitive/문자열 리스트인 경우)
-        if value is None or value == "":
-            return [] if required else []
-
-        if isinstance(value, list):
-            return value
-
-        if isinstance(value, str):
-            parts = [p.strip() for p in value.split(",") if p.strip() != ""]
-            return parts
-
-        return [value]
-
-    def _coerce_primitive(self, value: Any, t: str, required: bool) -> Any:
-        """string/number/boolean 등 기본 타입 처리"""
-        if value in (None, ""):
-            default_map = {
-                "string": "",
-                "number": 0,
-                "integer": 0,
-                "float": 0.0,
-                "boolean": False,
-            }
-            return default_map.get(t, "")
-
-        try:
-            if t == "string":
-                return str(value)
-            if t in ("number", "integer", "float"):
-                if isinstance(value, (int, float)):
-                    return value
-                s = str(value).strip()
-                return float(s) if "." in s else int(s)
-            if t == "boolean":
-                if isinstance(value, bool):
-                    return value
-                s = str(value).strip().lower()
-                return s in ("true", "1", "yes", "y")
-        except Exception:
-            return "" if t == "string" else (0 if t in ("number", "integer", "float") else False)
-
-        return str(value)
-
-    def format_data_content(self, content: Union[Dict, List, str, int, float, bool]) -> str:
-        """데이터 내용을 Python 코드 문자열로 포맷팅합니다."""
-        if isinstance(content, dict):
-            if not content:
-                return "{}"
-
-            lines = ["{"]
-            items = list(content.items())
-            for i, (key, value) in enumerate(items):
-                formatted_value = self.format_data_content(value)
-                comma = "," if i < len(items) - 1 else ""
-                lines.append(f'    "{key}": {formatted_value}{comma}')
-            lines.append("}")
-            return "\n".join(lines)
-
-        elif isinstance(content, list):
-            if not content:
-                return "[]"
-
-            lines = ["["]
-            for i, item in enumerate(content):
-                formatted_item = self.format_data_content(item)
-                comma = "," if i < len(content) - 1 else ""
-                # 들여쓰기 추가
-                if "\n" in formatted_item:
-                    indented_item = "\n".join("    " + line for line in formatted_item.split("\n"))
-                    lines.append(f"    {indented_item}{comma}")
-                else:
-                    lines.append(f"    {formatted_item}{comma}")
-            lines.append("]")
-            return "\n".join(lines)
-
-        elif isinstance(content, str):
-            return f'"{content}"'
-        elif isinstance(content, (int, float)):
-            return str(content)
-        elif isinstance(content, bool):
-            return "True" if content else "False"
+        if schema_type == "request":
+            request_source = api.get("request", {}) or {}
+            data_source = request_source
         else:
-            return f'"{str(content)}"'
+            response_source = api.get("response", {}) or {}
+            data_source = response_source
+        data_content = dict(data_source) if isinstance(data_source, dict) else {}
+
+        if isinstance(data_content.get("bodyJson"), list):
+            spec_list = data_content["bodyJson"]
+        validation_map = self.build_validation_map(spec_list)
+
+        return {"endpoint": endpoint, "validation": validation_map}

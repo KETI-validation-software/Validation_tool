@@ -8,6 +8,7 @@ import os
 from core.schema_generator import SchemaGenerator
 from core.data_generator import dataGenerator
 from core.validation_generator import ValidationGenerator
+from core.constraint_generator import constraintGeneractor
 import json
 
 class FormValidator:
@@ -31,6 +32,7 @@ class FormValidator:
         self.schema_gen = SchemaGenerator()
         self.data_gen = dataGenerator()
         self.validation_gen = ValidationGenerator()
+        self.const_gen = constraintGeneractor()
 
     # ---------- OPT 파일 로드 관련 ----------
 
@@ -91,6 +93,7 @@ class FormValidator:
             schema_content = ""
             data_content = ""
             validation_content = ""
+            constraints_content = ""
             spec_list_names = []
 
             for spec_id, steps in self._steps_cache.items():
@@ -100,6 +103,8 @@ class FormValidator:
                 data_names = []
                 endpoint_names = []
                 validation_names  = []
+                constraints_names  = []
+                temp_spec_id = spec_id+"_"
                 for s in steps:
                     step_id = s.get("id")
                     ts = self._test_step_cache.get(step_id) if hasattr(self, "_test_step_cache") else None
@@ -110,7 +115,7 @@ class FormValidator:
                             file_type = 'response'
                         elif schema_type == 'response':
                             file_type = 'request'
-                        schema_content, data_content, validation_content = self._generate_files_for_each_steps(
+                        schema_content, data_content, validation_content,constraints_content = self._generate_files_for_each_steps(
                             schema_type=schema_type,
                             file_type=file_type,
                             ts=ts,
@@ -120,7 +125,10 @@ class FormValidator:
                             data_names=data_names,
                             endpoint_names=endpoint_names,
                             validation_content=validation_content,
-                            validation_names=validation_names
+                            validation_names=validation_names,
+                            constraints_content=constraints_content,
+                            constraints_names=constraints_names,
+                            spec_id = temp_spec_id
                         )
                 if schema_type == "request":
                     list_name = f"{spec_id}_inSchema"
@@ -130,7 +138,7 @@ class FormValidator:
                 schema_content += f"# {spec_id} 스키마 리스트\n"
                 schema_content += f"{list_name} = [\n"
                 for name in schema_names:
-                    schema_content += f"    {name},\n"
+                    schema_content += f"    {temp_spec_id}{name},\n"
                 schema_content += "]\n\n"
 
                 if file_type == "request":
@@ -141,7 +149,7 @@ class FormValidator:
                 data_content += f"# {spec_id} 데이터 리스트\n"
                 data_content += f"{data_list_name} = [\n"
                 for name in data_names:
-                    data_content += f"    {name},\n"
+                    data_content += f"    {temp_spec_id}{name},\n"
                 data_content += "]\n\n"
 
                 # Messages 리스트 생성 (spec별로) - spec_id_safe 사용
@@ -163,6 +171,18 @@ class FormValidator:
                 for vname in validation_names:
                     validation_content += f"    {vname},\n"
                 validation_content += "]\n\n"
+
+                # Constraints 리스트
+                if file_type == "request":
+                    c_list_name = f"{spec_id}_OutConstraints"
+                else:
+                    c_list_name = f"{spec_id}_inConstraints"
+
+                constraints_content += f"# {spec_id} 검증 리스트\n"
+                constraints_content += f"{c_list_name} = [\n"
+                for cname in constraints_names:
+                    constraints_content += f"    {cname},\n"
+                constraints_content += "]\n\n"
 
                 # CONSTANTS.py 업데이트용 리스트 저장
                 spec_info = {
@@ -187,6 +207,8 @@ class FormValidator:
             schema_output = f"spec/Schema_{schema_type}.py"
             data_output = f"spec/Data_{file_type}.py"
             validation_output = f"spec/Validation_{schema_type}.py"
+            constraints_output = f"spec/Constraints_{file_type}.py"
+
 
             with open(schema_output, 'w', encoding='utf-8') as f:
                 f.write(schema_content)
@@ -199,6 +221,10 @@ class FormValidator:
             with open(validation_output, 'w', encoding='utf-8') as f:
                 f.write(validation_content)
             print(f"Data_{validation_output}.py 생성 완료")
+
+            with open(constraints_output, 'w', encoding='utf-8') as f:
+                f.write(constraints_content)
+            print(f"Data_{constraints_output}.py 생성 완료")
 
             # CONSTANTS.py 업데이트
             if all_spec_list_names:
@@ -219,12 +245,10 @@ class FormValidator:
 
     def _generate_files_for_each_steps(self, schema_type, file_type, ts, schema_content,
                                        data_content, schema_names, data_names, endpoint_names,
-                                       validation_content, validation_names):
-        step_id = ts.get("id", "")
+                                       validation_content, validation_names,
+                                   constraints_content, constraints_names, spec_id):
+
         api = ts.get("detail", {}).get("step", {}).get("api", {})
-        endpoint = ts.get("endpoint", "")
-        settings = api.get("settings", {})
-        trans_protocol = ts.get("detail", {}).get("step", {}).get("protocolType", "")
 
         schema_info = self.schema_gen.generate_endpoint_schema(ts, schema_type)
         schema_name = schema_info["name"]
@@ -234,7 +258,7 @@ class FormValidator:
         # 스키마 내용 추가
         schema_content += f"# {endpoint_name}\n"
         formatted = self.schema_gen.format_schema_content(schema_obj)
-        schema_content += f"{schema_name} = {formatted}\n\n"
+        schema_content += f"{spec_id}{schema_name} = {formatted}\n\n"
         schema_names.append(schema_name)
         # Data 생성 (spec별로)
         data_info = self.data_gen.extract_endpoint_data(ts, file_type)
@@ -246,30 +270,52 @@ class FormValidator:
         # 데이터 내용 추가
         data_content += f"# {endpoint_name}\n"
         formatted = self.data_gen.format_data_content(data_obj)
-        data_content += f"{data_name} = {formatted}\n\n"
+        data_content += f"{spec_id}{data_name} = {formatted}\n\n"
         data_names.append(data_name)
         endpoint_names.append(endpoint_name)
 
+        #validation 생성
         vinfo = self.validation_gen.extract_enabled_validations(ts,
                                                                 schema_type)  # {"endpoint":..., "validation": {...}}
         v_endpoint = vinfo.get("endpoint") or endpoint_name
         v_suffix = "_in_validation" if schema_type == "request" else "_out_validation"
-        v_var_name = f"{v_endpoint}{v_suffix}"
+        v_var_name = f"{spec_id}{v_endpoint}{v_suffix}"
 
-        # JSON → 문자열 직렬화
-        raw_json = json.dumps(vinfo.get("validation", {}), ensure_ascii=False, indent=2)
+        v_map = vinfo.get("validation", {})
 
-        # true/false → True/False 로 교체
-        py_style_json = re.sub(r'\btrue\b', 'True', raw_json)
-        py_style_json = re.sub(r'\bfalse\b', 'False', py_style_json)
-
-        # 내용 추가
         validation_content += f"# {v_endpoint}\n"
-        validation_content += f"{v_var_name} = {py_style_json}\n\n"
+        if not v_map:
+            # 데이터 없으면 빈 dict 출력
+            validation_content += f"{v_var_name} = {{}}\n\n"
+        else:
+            raw_json = json.dumps(v_map, ensure_ascii=False, indent=2)
+            py_style_json = re.sub(r'\btrue\b', 'True', raw_json)
+            py_style_json = re.sub(r'\bfalse\b', 'False', py_style_json)
+            validation_content += f"{v_var_name} = {py_style_json}\n\n"
         validation_names.append(v_var_name)
 
+        # constraints 생성
+        cinfo = self.const_gen.extract_value_type_fields(ts, file_type)
+        c_endpoint = cinfo.get("endpoint") or endpoint_name
+        c_suffix = "_in_constraints" if file_type == "request" else "_out_constraints"
+        c_var_name = f"{spec_id}{c_endpoint}{c_suffix}"
+
+        # extractor는 항상 {"endpoint":..., "validation": {...}} 반환한다고 가정
+        c_map = cinfo.get("validation", {})
+
+        constraints_content += f"# {c_endpoint}\n"
+        if not c_map:
+            # 데이터 없으면 빈 dict로 출력
+            constraints_content += f"{c_var_name} = {{}}\n\n"
+        else:
+            c_raw_json = json.dumps(c_map, ensure_ascii=False, indent=2)
+            c_py_style_json = re.sub(r'\btrue\b', 'True', c_raw_json)
+            c_py_style_json = re.sub(r'\bfalse\b', 'False', c_py_style_json)
+            constraints_content += f"{c_var_name} = {c_py_style_json}\n\n"
+        constraints_names.append(c_var_name)
+
         # 기존과 동일하게 누적본 반환 + validation도 함께 반환
-        return schema_content, data_content, validation_content
+        return schema_content, data_content, validation_content, constraints_content
 
     def _generate_merged_files(self, spec_file_paths, schema_type, file_type):
         """여러 spec 파일을 하나의 파일에 spec별로 구분하여 생성"""
