@@ -34,55 +34,6 @@ class FormValidator:
         self.validation_gen = ValidationGenerator()
         self.const_gen = constraintGeneractor()
 
-    # ---------- OPT 파일 로드 관련 ----------
-
-    # API 연동으로 인해 더 이상 사용하지 않음 - 주석처리
-    # def load_opt_files(self, mode):
-    #     """OPT 파일 로드 및 스키마 생성"""
-    #     try:
-    #         # 모드에 따라 exp_opt 파일 경로 설정
-    #         exp_opt_path = self._get_exp_opt_path(mode)
-    #         if not exp_opt_path:
-    #             QMessageBox.warning(self.parent, "모드 오류", f"알 수 없는 모드: {mode}")
-    #             return
-
-    #         # exp_opt 파일 로드 (testSpecIds 정보 포함)
-    #         exp_opt = self.opt_loader.load_opt_json(exp_opt_path)
-    #         if not exp_opt:
-    #             QMessageBox.warning(self.parent, "로드 실패", f"{mode.upper()} 모드 OPT 파일을 읽을 수 없습니다.")
-    #             return
-
-    #         # 현재 모드 저장 및 UI 업데이트
-    #         self.parent.current_mode = mode
-    #         self._fill_basic_info(exp_opt)
-    #         self._fill_test_field_table(exp_opt)
-
-    #         # API 테이블은 첫 번째 분야를 자동 선택하여 표시
-    #         if self.parent.test_field_table.rowCount() > 0:
-    #             self.parent.test_field_table.selectRow(0)
-    #             self._fill_api_table_for_selected_field(0)
-
-    #         # 모드에 따른 파일 생성 (모든 testSpecIds의 opt2, opt3 등)
-    #         self._generate_files_for_all_specs(mode, exp_opt)
-
-    #         # 버튼 상태 업데이트
-    #         self.parent.check_start_button_state()
-    #         self.parent.check_next_button_state()
-
-    #         QMessageBox.information(self.parent, "로드 완료", f"{mode.upper()} 모드 파일들이 성공적으로 로드되었습니다!")
-
-    #     except Exception as e:
-    #         QMessageBox.critical(self.parent, "오류", f"OPT 파일 로드 중 오류가 발생했습니다:\n{str(e)}")
-
-    # def _get_exp_opt_path(self, mode):
-    #     """모드에 따른 exp_opt 파일 경로 반환"""
-    #     if mode in ["request_longpolling", "request_webhook"]:
-    #         return resource_path("temp/(temp)exp_opt_requestVal.json")
-    #     elif mode in ["response_longpolling", "response_webhook"]:
-    #         return resource_path("temp/(temp)exp_opt_responseVal.json")
-    #     else:
-    #         return None
-
     def _generate_files_for_all_specs(self):
         """모든 testSpecIds를 하나의 파일로 합쳐서 생성 (schema + videoData)"""
         try:
@@ -229,12 +180,6 @@ class FormValidator:
             # CONSTANTS.py 업데이트
             if all_spec_list_names:
                 self._update_constants_specs(all_spec_list_names)
-
-            # trans_protocol, time_out, num_retries 업데이트
-            print("\n[CONSTANTS.py 프로토콜 정보 업데이트]")
-            protocol_info = self._extract_protocol_info()
-            if protocol_info:
-                self._update_protocol_in_constants(protocol_info)
 
             print(f"\n=== 산출물 생성 완료 ===\n")
 
@@ -630,191 +575,6 @@ class FormValidator:
             traceback.print_exc()
 
 
-    # API 연동으로 인해 더 이상 사용하지 않음 - 주석처리
-    # def _fill_basic_info(self, exp_opt):
-    #     """기본 정보 필드 채우기"""
-    #     if not exp_opt or "testRequest" not in exp_opt:
-    #         return
-
-    #     first = exp_opt["testRequest"]
-    #     et = first.get("evaluationTarget", {})
-    #     tg = first.get("testGroup", {})
-
-    #     self.parent.company_edit.setText(et.get("companyName", ""))
-    #     self.parent.product_edit.setText(et.get("productName", ""))
-    #     self.parent.version_edit.setText(et.get("version", ""))
-    #     self.parent.model_edit.setText(et.get("modelName", ""))
-    #     self.parent.test_category_edit.setText(et.get("testCategory", ""))
-    #     self.parent.target_system_edit.setText(et.get("targetSystem", ""))
-    #     self.parent.test_group_edit.setText(tg.get("name", ""))
-    #     self.parent.test_range_edit.setText(tg.get("testRange", ""))
-
-    # def _fill_test_field_table(self, exp_opt):
-    #     """시험 분야명 테이블 채우기 (testSpecIds 기반)"""
-    #     if not exp_opt or "testRequest" not in exp_opt:
-    #         return
-
-    #     test_group = exp_opt["testRequest"].get("testGroup", {})
-    #     test_spec_ids = test_group.get("testSpecIds", [])
-
-    #     # 시험 분야명 테이블 초기화
-    #     self.parent.test_field_table.setRowCount(0)
-
-    #     # 각 testSpecId에 대해 해당하는 specification 파일 로드
-    #     for spec_id in test_spec_ids:
-    #         spec_name = self._get_specification_name(spec_id)
-    #         if spec_name:
-    #             row = self.parent.test_field_table.rowCount()
-    #             self.parent.test_field_table.insertRow(row)
-
-    #             # 시험 분야명
-    #             item = QTableWidgetItem(spec_name)
-    #             item.setTextAlignment(Qt.AlignCenter)
-    #             item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-    #             # spec_id를 저장해서 나중에 사용
-    #             item.setData(Qt.UserRole, spec_id)
-    #             self.parent.test_field_table.setItem(row, 0, item)
-
-    # def _get_specification_name(self, spec_id):
-    #     """testSpecId에 해당하는 specification의 name 가져오기 (하드코딩 매핑)"""
-    #     try:
-    #         # spec_id와 파일명 하드코딩 매핑
-    #         spec_file_map = self._get_spec_file_mapping(spec_id)
-    #         if not spec_file_map:
-    #             return f"시험 분야 {spec_id}"
-
-    #         from core.functions import resource_path
-    #         spec_file_path = resource_path(spec_file_map)
-
-    #         # 해당 파일에서 specification.name 가져오기
-    #         spec_data = self.opt_loader.load_opt_json(spec_file_path)
-    #         if spec_data and "specification" in spec_data:
-    #             return spec_data["specification"].get("name", f"시험 분야 {spec_id}")
-
-    #     except Exception as e:
-    #         print(f"Specification {spec_id} 로드 실패: {e}")
-
-    #     return f"시험 분야 {spec_id}"  # 기본값
-
-    def _get_spec_file_mapping(self, spec_id):
-        """spec_id를 실제 파일 경로로 매핑 (하드코딩)
-
-        매핑 규칙:
-        - Request 모드: spec-001 (opt2), spec-0011 (opt3)
-        - Response 모드: spec-002 (opt2), spec-0022 (opt3)
-
-        TODO: 향후 API 주소 기반 매핑으로 변경 예정
-        """
-        mode = self.parent.current_mode
-
-        # Request 모드: spec-001, spec-0011
-        if spec_id == "spec-001":
-            if mode == "request_longpolling":
-                return "temp/(temp)exp_opt2_requestVal_LongPolling.json"
-            elif mode == "request_webhook":
-                return "temp/(temp)exp_opt2_requestVal_WebHook.json"
-
-        elif spec_id == "spec-0011":
-            if mode == "request_longpolling":
-                return "temp/(temp)exp_opt3_requestVal_LongPolling.json"
-            elif mode == "request_webhook":
-                return "temp/(temp)exp_opt3_requestVal_WebHook.json"
-
-        # Response 모드: spec-002, spec-0022
-        elif spec_id == "spec-002":
-            if mode == "response_longpolling":
-                return "temp/(temp)exp_opt2_responseVal_Longpolling.json"
-            elif mode == "response_webhook":
-                return "temp/(temp)exp_opt2_responseVal_WebHook.json"
-
-        elif spec_id == "spec-0022":
-            if mode == "response_longpolling":
-                return "temp/(temp)exp_opt3_responseVal_Longpolling.json"
-            elif mode == "response_webhook":
-                return "temp/(temp)exp_opt3_responseVal_WebHook.json"
-
-        return None
-
-
-    def _fill_api_table_for_selected_field(self, row):
-        """선택된 시험 분야에 해당하는 API 테이블 채우기"""
-        try:
-            # 선택된 행에서 spec_id 가져오기
-            item = self.parent.test_field_table.item(row, 0)
-            if not item:
-                return
-
-            from PyQt5.QtCore import Qt
-            spec_id = item.data(Qt.UserRole)
-            if not spec_id:
-                return
-
-            # 해당 spec_id의 OPT2 파일 로드
-            spec_data = self._load_specification_data(spec_id)
-            if not spec_data:
-                return
-
-            # API 테이블 초기화
-            self.parent.api_test_table.setRowCount(0)
-
-            # specification의 steps에서 API 정보 추출
-            steps = spec_data.get("specification", {}).get("steps", [])
-            prev_endpoint = None
-
-            for step in steps:
-                api_info = step.get("api", {})
-                if not api_info:
-                    continue
-
-                r = self.parent.api_test_table.rowCount()
-                self.parent.api_test_table.insertRow(r)
-
-                from PyQt5.QtWidgets import QTableWidgetItem
-                from PyQt5.QtCore import Qt
-
-                # 기능명
-                item1 = QTableWidgetItem(api_info.get("name", ""))
-                item1.setTextAlignment(Qt.AlignCenter)
-                item1.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-                self.parent.api_test_table.setItem(r, 0, item1)
-
-                # API명
-                endpoint = api_info.get("endpoint")
-                if not endpoint and prev_endpoint:
-                    endpoint = prev_endpoint
-
-                item2 = QTableWidgetItem(endpoint or "")
-                item2.setTextAlignment(Qt.AlignCenter)
-                item2.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-                self.parent.api_test_table.setItem(r, 1, item2)
-
-                # 이번 step endpoint 저장
-                if api_info.get("endpoint"):
-                    prev_endpoint = api_info["endpoint"]
-
-        except Exception as e:
-            print(f"API 테이블 채우기 실패: {e}")
-
-
-    def _load_specification_data(self, spec_id):
-        """spec_id에 해당하는 specification 데이터 로드 (하드코딩 매핑)"""
-        try:
-            # spec_id와 파일명 하드코딩 매핑
-            spec_file_map = self._get_spec_file_mapping(spec_id)
-            if not spec_file_map:
-                return None
-
-            from core.functions import resource_path
-            spec_file_path = resource_path(spec_file_map)
-
-            # 해당 파일에서 specification 데이터 가져오기
-            return self.opt_loader.load_opt_json(spec_file_path)
-
-        except Exception as e:
-            print(f"Specification 데이터 로드 실패 ({spec_id}): {e}")
-            return None
-
-
     # ---------- 관리자 코드 검증 ----------
 
     def validate_admin_code(self):
@@ -885,14 +645,18 @@ class FormValidator:
             # 4. 관리자 코드 (GUI 입력값만 사용)
             variables['admin_code'] = self.parent.admin_code_edit.text().strip()
 
-            # 5. OPT 파일에서 프로토콜/타임아웃 정보 추출
-            protocol_info = self._extract_protocol_info()
-            variables.update(protocol_info)
+            # 5. API에서 프로토콜/타임아웃 정보 추출 및 SPEC_CONFIG 업데이트
+            selected_spec_id = self._get_selected_test_field_spec_id()
+            if selected_spec_id:
+                # SPEC_CONFIG 딕셔너리 업데이트
+                spec_config_data = self._extract_spec_config_from_api(selected_spec_id)
+                if spec_config_data:
+                    self._update_spec_config(selected_spec_id, spec_config_data)
 
             # 6. 선택된 시험 분야의 인덱스 저장 (중요!)
             selected_spec_index = self._get_selected_spec_index()
             variables['selected_spec_index'] = selected_spec_index
-            print(f"\n🎯 [CRITICAL] CONSTANTS.py에 저장할 selected_spec_index: {selected_spec_index}")
+            print(f"\n[CRITICAL] CONSTANTS.py에 저장할 selected_spec_index: {selected_spec_index}")
             print(f"   변수 타입: {type(selected_spec_index)}")
             print(f"   전체 variables: {variables}\n")
 
@@ -930,106 +694,164 @@ class FormValidator:
         return auth_type, auth_info
 
 
-    # 기본값 []으로 설정하시면 안됩니다. 무조건 9개 API에 대한 기본값이 들어가야 합니다!!! 검증 작동이 아예 안돼서 테스트가 안됩니다..
-    def _extract_protocol_info(self):
-        """선택된 시험 분야의 프로토콜/타임아웃 정보 추출"""
-        # 선택된 시험 분야의 spec_id 가져오기
-        selected_spec_id = self._get_selected_test_field_spec_id()
-        if not selected_spec_id:
-            print("경고: 선택된 시험 분야가 없습니다.")
-            print("기본값을 사용합니다: 9개 API, 각 30초 타임아웃, 3회 재시도")
-            # 기본값 반환 (9개 API 기준)
-            return {
-                'trans_protocol': [None, None, None, None, None, None, "LongPolling", None, None],
-                'time_out': [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
-                'num_retries': [1, 2, 3, 3, 3, 2, 1, 1, 1]
-            }
 
-        print(f"CONSTANTS.py 업데이트 - 현재 모드: {self.parent.current_mode}")
-        print(f"선택된 시험 분야: {selected_spec_id}")
-
-        # 선택된 spec_id에 해당하는 파일 경로 가져오기
-        spec_file_path = self._get_spec_file_mapping(selected_spec_id)
-        if not spec_file_path:
-            print(f"경고: spec_id '{selected_spec_id}'에 대한 매핑을 찾을 수 없습니다.")
-            print(f"기본값을 사용합니다: 9개 API, 각 30초 타임아웃, 3회 재시도")
-            # 기본값 반환 (9개 API 기준)
-            return {
-                'trans_protocol': [None, None, None, None, None, None, "LongPolling", None, None],
-                'time_out': [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
-                'num_retries': [1, 2, 3, 3, 3, 2, 1, 1, 1]
-            }
-
-        print(f"  파일: {spec_file_path}")
-
-        # 파일 로드
-        spec_data = self.opt_loader.load_opt_json(resource_path(spec_file_path))
-        if not spec_data:
-            print(f"경고: {spec_file_path} 파일을 로드할 수 없습니다.")
-            print(f"기본값을 사용합니다: 9개 API, 각 30초 타임아웃, 3회 재시도")
-            # 기본값 반환 (9개 API 기준)
-            return {
-                'trans_protocol': [None, None, None, None, None, None, "LongPolling", None, None],
-                'time_out': [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
-                'num_retries': [1, 2, 3, 3, 3, 2, 1, 1, 1]
-            }
-
-        # steps에서 프로토콜 정보 추출
-        steps = spec_data.get("specification", {}).get("steps", [])
-        time_out = []
-        num_retries = []
-        trans_protocol = []
-
-        # print(f"  추출 시작: {len(steps)}개 steps")
-
-        for step in steps:
-            settings = step.get("api", {}).get("settings", {})
-            time_out.append(settings.get("connectTimeout", 30))
-            num_retries.append(settings.get("numRetries", 3))
-
-            # transProtocol.mode 추출
-            trans_protocol_obj = settings.get("transProtocol", {})
-            trans_protocol_mode = trans_protocol_obj.get("mode", None)
-            trans_protocol.append(trans_protocol_mode)
-            # print(f"    step {step.get('id')}: timeout={settings.get('connectTimeout', 30)}, retries={settings.get('numRetries', 3)}, protocol={trans_protocol_mode}")
-
-        # print(f"  추출된 프로토콜 정보: {len(time_out)}개 스텝")
-        # print(f"  trans_protocol: {trans_protocol}")
-        # print(f"  time_out: {time_out}")
-        # print(f"  num_retries: {num_retries}")
-
-        return {
-            'trans_protocol': trans_protocol,
-            'time_out': time_out,
-            'num_retries': num_retries
-        }
-
-
-    def _update_protocol_in_constants(self, protocol_info):
-        """CONSTANTS.py의 trans_protocol, time_out, num_retries만 업데이트"""
+    def _extract_spec_config_from_api(self, spec_id):
+        """test-steps API 캐시에서 spec_id별 프로토콜 설정 추출하여 SPEC_CONFIG 형식으로 반환"""
         try:
-            import re
+            # _steps_cache에서 해당 spec_id의 steps 가져오기
+            steps = self._steps_cache.get(spec_id, [])
+            if not steps:
+                print(f"경고: spec_id={spec_id}에 대한 steps 캐시가 없습니다.")
+                return None
+
+            time_out = []
+            num_retries = []
+            trans_protocol = []
+
+            for step in steps:
+                step_id = step.get("id")
+                if not step_id:
+                    continue
+
+                # _test_step_cache에서 step detail 가져오기
+                cached_step = self._test_step_cache.get(step_id)
+                if not cached_step:
+                    print(f"⚠️  경고: step_id={step_id}에 대한 캐시가 없습니다.")
+                    # 기본값 추가
+                    time_out.append(5000)
+                    num_retries.append(1)
+                    trans_protocol.append(None)
+                    continue
+
+                # detail.step.api.settings에서 설정 추출
+                detail = cached_step.get("detail", {})
+                settings = detail.get("step", {}).get("api", {}).get("settings", {})
+
+                # connectTimeout 추출
+                time_out.append(settings.get("connectTimeout", 5000))
+
+                # loadTest.concurrentUsers 추출 (num_retries)
+                load_test = settings.get("loadTest", {})
+                num_retries.append(load_test.get("concurrentUsers", 1))
+
+                # transProtocol 추출
+                trans_protocol_obj = settings.get("transProtocol")
+                # transProtocol이 문자열일 경우와 객체일 경우 모두 처리
+                if isinstance(trans_protocol_obj, str):
+                    # 문자열인 경우: "LongPolling", "WebHook" 등
+                    trans_protocol_mode = trans_protocol_obj if trans_protocol_obj else None
+                elif isinstance(trans_protocol_obj, dict):
+                    # 객체인 경우: {"mode": "LongPolling"}
+                    trans_protocol_mode = trans_protocol_obj.get("mode", None)
+                else:
+                    # null이거나 다른 타입
+                    trans_protocol_mode = None
+                trans_protocol.append(trans_protocol_mode)
+
+            print(f"{spec_id} 프로토콜 설정 추출 완료: {len(time_out)}개 steps")
+
+            return {
+                "trans_protocol": trans_protocol,
+                "time_out": time_out,
+                "num_retries": num_retries
+            }
+
+        except Exception as e:
+            print(f"spec_id={spec_id} 프로토콜 설정 추출 실패: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
+
+
+    def _update_spec_config(self, spec_id, config_data):
+        """CONSTANTS.py의 SPEC_CONFIG 딕셔너리에 spec_id별 설정 업데이트"""
+        try:
             constants_path = "config/CONSTANTS.py"
 
             with open(constants_path, 'r', encoding='utf-8') as f:
                 content = f.read()
 
-            # trans_protocol, time_out, num_retries 업데이트
-            for var_name in ['trans_protocol', 'time_out', 'num_retries']:
-                var_value = protocol_info.get(var_name)
-                if var_value is not None:
-                    new_line = f'{var_name} = {var_value}'
-                    pattern = rf'^{var_name}\s*=.*$'
-                    content = re.sub(pattern, new_line, content, flags=re.MULTILINE)
-                    print(f"{var_name} 업데이트: {var_value}")
+            # SPEC_CONFIG 딕셔너리 찾기 (중첩된 구조 처리)
+            spec_config_start = content.find('SPEC_CONFIG = {')
+            if spec_config_start == -1:
+                print("경고: SPEC_CONFIG 딕셔너리를 찾을 수 없습니다.")
+                return
+
+            # 중괄호 개수를 세면서 끝 위치 찾기
+            brace_count = 0
+            start_pos = content.find('{', spec_config_start)
+            current_pos = start_pos
+
+            while current_pos < len(content):
+                if content[current_pos] == '{':
+                    brace_count += 1
+                elif content[current_pos] == '}':
+                    brace_count -= 1
+                    if brace_count == 0:
+                        # SPEC_CONFIG의 끝 } 발견
+                        end_pos = current_pos + 1
+                        break
+                current_pos += 1
+
+            # 현재 SPEC_CONFIG 추출
+            current_config = content[spec_config_start:end_pos]
+
+            # spec_id가 이미 존재하는지 확인 (중첩된 중괄호 고려)
+            spec_key_start = current_config.find(f'"{spec_id}":')
+
+            # 새로운 설정 문자열 생성
+            new_spec_config = f'''"{spec_id}": {{
+        "trans_protocol": {config_data.get("trans_protocol", [])},
+        "time_out": {config_data.get("time_out", [])},
+        "num_retries": {config_data.get("num_retries", [])}
+    }}'''
+
+            if spec_key_start != -1:
+                # 기존 설정 업데이트 - 해당 spec_id 블록 전체를 찾아서 교체
+                # spec_id의 시작부터 해당 블록의 끝 }까지 찾기
+                brace_start = current_config.find('{', spec_key_start)
+                brace_count = 0
+                pos = brace_start
+
+                while pos < len(current_config):
+                    if current_config[pos] == '{':
+                        brace_count += 1
+                    elif current_config[pos] == '}':
+                        brace_count -= 1
+                        if brace_count == 0:
+                            brace_end = pos + 1
+                            break
+                    pos += 1
+
+                # 기존 블록 전체 교체
+                old_spec_block = current_config[spec_key_start:brace_end]
+                new_config = current_config.replace(old_spec_block, new_spec_config)
+                print(f"SPEC_CONFIG['{spec_id}'] 업데이트")
+            else:
+                # 새로운 설정 추가
+                # SPEC_CONFIG = { ... } 에서 마지막 }를 찾아서 그 앞에 추가
+                closing_brace = current_config.rfind('}')
+
+                # 기존 항목이 있는지 확인 (빈 딕셔너리가 아닌지)
+                if '":' in current_config:
+                    # 기존 항목이 있으면 콤마 추가
+                    new_config = current_config[:closing_brace] + f',\n    {new_spec_config}\n' + current_config[closing_brace:]
+                else:
+                    # 빈 딕셔너리면 그냥 추가
+                    new_config = current_config[:closing_brace] + f'\n    {new_spec_config}\n' + current_config[closing_brace:]
+
+                print(f"SPEC_CONFIG['{spec_id}'] 신규 추가")
+
+            # 전체 내용에서 SPEC_CONFIG 교체
+            content = content.replace(current_config, new_config)
 
             with open(constants_path, 'w', encoding='utf-8') as f:
                 f.write(content)
 
-            print(f"CONSTANTS.py 프로토콜 정보 업데이트 완료")
+            print(f"CONSTANTS.py SPEC_CONFIG 업데이트 완료")
 
         except Exception as e:
-            print(f"  경고: CONSTANTS.py 프로토콜 정보 업데이트 실패: {e}")
+            print(f"SPEC_CONFIG 업데이트 실패: {e}")
             import traceback
             traceback.print_exc()
 
@@ -1057,7 +879,7 @@ class FormValidator:
             print(f"[DEBUG] selected_spec_id: {selected_spec_id}")
 
             if not selected_spec_id:
-                print("⚠️ 경고: 선택된 시험 분야가 없습니다. 기본값 0 사용")
+                print("경고: 선택된 시험 분야가 없습니다. 기본값 0 사용")
                 return 0
 
             # spec_id로 직접 판단 (파일 경로 대신)
@@ -1065,29 +887,17 @@ class FormValidator:
             spec_id_str = str(selected_spec_id).lower()
 
             if "spec-0011" in spec_id_str or "spec_0011" in spec_id_str:
-                print("✅ 보안용 센서 시스템 선택됨 (index 1)")
+                print("보안용 센서 시스템 선택됨 (index 1)")
                 return 1  # 보안용 센서 시스템
             elif "spec-001" in spec_id_str or "spec_001" in spec_id_str:
-                print("✅ 영상보안 시스템 선택됨 (index 0)")
+                print("영상보안 시스템 선택됨 (index 0)")
                 return 0  # 영상보안 시스템
             else:
-                # 추가: 파일 경로로도 확인 (이중 체크)
-                spec_file_path = self._get_spec_file_mapping(selected_spec_id)
-                print(f"[DEBUG] spec_file_path: {spec_file_path}")
-
-                if spec_file_path:
-                    if "opt3" in spec_file_path or "0011" in spec_file_path:
-                        print("✅ 보안용 센서 시스템 선택됨 (index 1) - 파일 경로로 판단")
-                        return 1
-                    elif "opt2" in spec_file_path or "_001" in spec_file_path:
-                        print("✅ 영상보안 시스템 선택됨 (index 0) - 파일 경로로 판단")
-                        return 0
-
-                print(f"⚠️ 경고: 알 수 없는 spec_id '{selected_spec_id}'. 기본값 0 사용")
+                print(f"경고: 알 수 없는 spec_id '{selected_spec_id}'. 기본값 0 사용")
                 return 0
 
         except Exception as e:
-            print(f"❌ 선택된 spec 인덱스 가져오기 실패: {e}")
+            print(f"선택된 spec 인덱스 가져오기 실패: {e}")
             import traceback
             traceback.print_exc()
             return 0
@@ -1135,6 +945,17 @@ class FormValidator:
             self._fill_test_field_table_from_api(test_specs)
             self.preload_all_spec_steps()
             self.preload_test_step_details_from_cache()
+
+            # 모든 spec에 대해 SPEC_CONFIG 업데이트
+            print(f"\n=== SPEC_CONFIG 업데이트 시작 ===")
+            for spec in test_specs:
+                spec_id = spec.get("id", "")
+                if spec_id:
+                    spec_config_data = self._extract_spec_config_from_api(spec_id)
+                    if spec_config_data:
+                        self._update_spec_config(spec_id, spec_config_data)
+            print(f"=== SPEC_CONFIG 업데이트 완료 ===\n")
+
             self._generate_files_for_all_specs()
             # API 테이블은 첫 번째 분야를 자동 선택하여 표시 (API 기반)
             if self.parent.test_field_table.rowCount() > 0:
