@@ -28,6 +28,8 @@ class ValidationGenerator:
 
         result: Dict[str, Any] = {}
         self._collect_enabled(validations, result, prefix="")
+
+
         return {"endpoint": endpoint, "validation": result}
 
     def _collect_enabled(self, nodes: List[Dict[str, Any]], out: Dict[str, Any], prefix: str):
@@ -45,3 +47,5 @@ class ValidationGenerator:
             children = node.get("children", [])
             if children:
                 self._collect_enabled(children, out, path)
+
+
