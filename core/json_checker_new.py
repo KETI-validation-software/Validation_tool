@@ -323,7 +323,7 @@ def do_checker(all_field, datas, opt_field ,flag_opt):  # flag_opt => platformVa
         for field in fields[0]:
 
             # OPT 태그가 있는 필드는 OptionalKey에서 나온 것이므로 누락 검사에서 제외
-            if field[-2] == 'OPT':  
+            if flag_opt is False and field[-2] == 'OPT':
                 pass  # OptionalKey는 선택사항이므로 누락되어도 에러가 아님
             else:
                 check_list.append(field)  # 확인해야할 필드 check_list에 추가
