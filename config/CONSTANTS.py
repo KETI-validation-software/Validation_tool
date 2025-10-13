@@ -6,7 +6,7 @@ none_request_message = ['Capabilities',
                         'DoorProfiles',
                         'AccessUserInfos',
                         'SensorDeviceProfiles']
-
+# 로컬 테스트용 주소 (플랫폼과 시스템이 같은 PC에서 실행되더야 함, 변경하면 평가 작동 안됌ㅜ)
 #test-info -> (주의) auth_info의 id, pw admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음!!!!!!!
 company_name = "테스트기업"
 product_name = "테스트시스템"
@@ -17,7 +17,7 @@ test_range = "ALL_FIELDS"
 auth_type = "Digest Auth"
 auth_info = "admin,1234"
 admin_code = "123456789"
-url = "https://192.168.1.1:8080"
+url = "https://127.0.0.1:8080"
 
 
 
