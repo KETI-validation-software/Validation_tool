@@ -1,10 +1,10 @@
 === 시험 결과 ===
 통과 필드 수: 0
-전체 필드 수: 2
+전체 필드 수: 0
 종합 평가 점수: 0.0%
 
 === 스텝별 결과 ===
-Authentication | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 0 | 전체 필드 수: 2 | 실패 횟수: 2 | 평가 점수: 0.0%
+Authentication | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 횟수: 0 | 평가 점수: 0%
 Capabilities | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 횟수: 0 | 평가 점수: 0%
 CameraProfiles | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 횟수: 0 | 평가 점수: 0%
 StoredVideoInfos | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 횟수: 0 | 평가 점수: 0%
@@ -18,9 +18,16 @@ StoredObjectAnalyticsInfos | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 
 Start Validation...
 
 step 1: Authentication
-Timeout: 5.0초
-Message Missing!
-Score : 0.0
-Score details : 0(누적 통과 필드 수), 2(누적 오류 필드 수)
+🔄 부하테스트 시작: 총 1회 검증 예정
+📨 시스템 요청 수신, 검증 중... [1/1]
 
+✅ 부하테스트 완료: 1회 검증 완료
+프로토콜: None
+
+[시도 1회차]
+{
+    "userID": "user001",
+    "userPW": "pass001"
+}
+PASS
 검증 절차가 중지되었습니다.

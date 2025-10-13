@@ -2084,9 +2084,9 @@ class MyApp(QWidget):
 
     def get_setting(self):
         self.setting_variables = QSettings('My App', 'Variable')
-        self.system = "video"  # 영상보안 시스템으로 고정
+        self.system = "video"  # 고정
 
-        # 기본 시스템 설정 (영상보안 시스템으로 고정)
+        # 기본 시스템 설정 (영상보안 시스템으로 지금은 일단 고정)
         self.radio_check_flag = "video"
         self.message = self.videoMessages
         self.inMessage = self.videoInMessage
