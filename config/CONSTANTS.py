@@ -1,4 +1,5 @@
 #API-info
+import os
 headers = {"Content-type": "application/json", "User-Agent":'test'}
 none_request_message = ['Capabilities',
                         'CameraProfiles',
@@ -13,15 +14,18 @@ version = "v0.1"
 test_category = "본시험"
 test_target = "통합시스템"
 test_range = "ALL_FIELDS"
-auth_type = "Digest Auth"
-
-auth_info = "admin,1234"
+auth_type = "Bearer Token"
+auth_info = "1234"
 admin_code = "1234"
 url = "https://192.168.1.1:8080"
 
 
-specs = [["spec_001_inSchema","spec_001_outData","spec_001_messages","영상보안 시스템 요청 메시지 검증 API 명세서"],
-         ["spec_0011_inSchema","spec_0011_outData","spec_0011_messages","보안용 센서 시스템(요청검증)"]]
+specs = [["cmg90br3n002qihleffuljnth_inSchema","cmg90br3n002qihleffuljnth_outData","cmg90br3n002qihleffuljnth_messages",""],
+         ["cmg7edeo50013124xiux3gbkb_inSchema","cmg7edeo50013124xiux3gbkb_outData","cmg7edeo50013124xiux3gbkb_messages",""],
+         ["cmg7bve25000114cevhn5o3vr_inSchema","cmg7bve25000114cevhn5o3vr_outData","cmg7bve25000114cevhn5o3vr_messages",""]]
+flag_opt = False
+if test_range == "전체필드":
+    flag_opt = True
 # 시험 분야별 spec 정의 (인덱스 순서 중요!)
 specs = [
     ["spec_001_inSchema", "spec_001_outData", "spec_001_messages", "spec_001_webhookSchema", "spec_001_webhookData", "영상보안 시스템 요청 메시지 검증 API 명세서"],
@@ -29,20 +33,42 @@ specs = [
 ]
 
 # 선택된 시험 분야의 인덱스 (0: 영상보안, 1: 보안용센서)
-selected_spec_index = 0
-
+selected_spec_index = 1
+trace_path = os.path.join("results", "trace")
 #test-opt
 '''
-opt2의 메시지의 settings 내 정보 보고 작성, 메시지 순차별로
-trans_protocol : 메시지별 실시간 송수신 메시지 여부, None-실시간 아님, LongPolling, WebHook은 설정에 따라 동작 
-time_out : 메시지별 timeout 설정 시간
+specification.id별 step 설정
+각 spec의 steps 순서대로 trans_protocol, time_out, num_retries 설정
+trans_protocol : 메시지별 실시간 송수신 메시지 여부, None-실시간 아님, LongPolling, WebHook은 설정에 따라 동작
+time_out : 메시지별 timeout 설정 시간 (ms)
 num_retries : 메시지별 메시지 검증 횟수
 '''
-
-
+#나중에 삭제
 trans_protocol = [None, None, None, None, None, None, 'LongPolling', None, None]
 time_out = [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000]
 num_retries = [1, 2, 3, 3, 3, 2, 1, 1, 1]
+
+# specification.id별 설정
+SPEC_CONFIG = {
+
+    "cmg90br3n002qihleffuljnth": {
+        "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic'],
+        "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000],
+        "num_retries": [3, 3, 2, 2, 3, 2, 1]
+    }
+,
+    "cmg7edeo50013124xiux3gbkb": {
+        "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic'],
+        "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
+        "num_retries": [3, 1, 2, 1, 3, 1, 1, 1]
+    }
+,
+    "cmg7bve25000114cevhn5o3vr": {
+        "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic'],
+        "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
+        "num_retries": [3, 1, 2, 2, 3, 1, 1, 1, 5, 1, 1, 1]
+    }
+}
 
 
 #etc
