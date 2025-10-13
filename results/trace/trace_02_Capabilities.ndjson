@@ -1,4 +1,4 @@
-{"time": "2025-10-13T03:32:45.917770Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
-{"time": "2025-10-13T03:32:46.916051Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "streamingSupport": [{"streamProtocolType": "RTSP", "streamProtocolDesc": "Unicast"}], "transportSupport": [{"transProtocolType": "REST_API", "transProtocolDesc": "desc"}]}}
-{"time": "2025-10-13T03:32:47.918589Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
-{"time": "2025-10-13T03:32:48.927109Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "streamingSupport": [{"streamProtocolType": "RTSP", "streamProtocolDesc": "Unicast"}], "transportSupport": [{"transProtocolType": "REST_API", "transProtocolDesc": "desc"}]}}
+{"time": "2025-10-13T06:20:41.930395Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
+{"time": "2025-10-13T06:20:42.941282Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "streamingSupport": [{"streamProtocolType": "RTSP", "streamProtocolDesc": "Unicast"}], "transportSupport": [{"transProtocolType": "REST_API", "transProtocolDesc": "desc"}]}}
+{"time": "2025-10-13T06:20:43.937655Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
+{"time": "2025-10-13T06:20:44.939070Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "streamingSupport": [{"streamProtocolType": "RTSP", "streamProtocolDesc": "Unicast"}], "transportSupport": [{"transProtocolType": "REST_API", "transProtocolDesc": "desc"}]}}
