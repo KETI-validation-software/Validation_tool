@@ -2,11 +2,11 @@
 
 # Authentication
 cmg90br3n002qihleffuljnth_Authentication_out_data = {
-    "code": "",
-    "message": "",
-    "userName": "",
-    "userAff": "",
-    "accessToken": ""
+    "code": "200",
+    "message": "성공",
+    "userName": "관리자",
+    "userAff": "오산시청",
+    "accessToken": "abcde1234"
 }
 
 # Capabilities
@@ -137,11 +137,11 @@ cmg90br3n002qihleffuljnth_messages = [
 
 # Authentication
 cmg7edeo50013124xiux3gbkb_Authentication_out_data = {
-    "code": "",
-    "message": "",
-    "userName": "",
-    "userAff": "",
-    "accessToken": ""
+    "code": "200",
+    "message": "성공",
+    "userName": "관리자",
+    "userAff": "오산시청",
+    "accessToken": "abcde1234"
 }
 
 # Capabilities
@@ -290,11 +290,11 @@ cmg7edeo50013124xiux3gbkb_messages = [
 
 # Authentication
 cmg7bve25000114cevhn5o3vr_Authentication_out_data = {
-    "code": "",
-    "message": "",
-    "userName": "",
-    "userAff": "",
-    "accessToken": ""
+    "code": "200",
+    "message": "성공",
+    "userName": "관리자",
+    "userAff": "오산시청",
+    "accessToken": "abcde1234"
 }
 
 # Capabilities
