@@ -1,4 +1,5 @@
 #API-info
+import os
 headers = {"Content-type": "application/json", "User-Agent":'test'}
 none_request_message = ['Capabilities',
                         'CameraProfiles',
@@ -19,6 +20,7 @@ admin_code = "123456789"
 url = "https://192.168.1.1:8080"
 
 
+
 specs = [["cmg90br3n002qihleffuljnth_inSchema","cmg90br3n002qihleffuljnth_outData","cmg90br3n002qihleffuljnth_messages",""],
          ["cmg7edeo50013124xiux3gbkb_inSchema","cmg7edeo50013124xiux3gbkb_outData","cmg7edeo50013124xiux3gbkb_messages",""],
          ["cmg7bve25000114cevhn5o3vr_inSchema","cmg7bve25000114cevhn5o3vr_outData","cmg7bve25000114cevhn5o3vr_messages",""]]
@@ -33,7 +35,7 @@ specs = [
 
 # 선택된 시험 분야의 인덱스 (0: 영상보안, 1: 보안용센서)
 selected_spec_index = 0
-
+trace_path = os.path.join("results", "trace")
 #test-opt
 '''
 specification.id별 step 설정
@@ -42,6 +44,10 @@ trans_protocol : 메시지별 실시간 송수신 메시지 여부, None-실시�
 time_out : 메시지별 timeout 설정 시간 (ms)
 num_retries : 메시지별 메시지 검증 횟수
 '''
+#나중에 삭제
+trans_protocol = [None, None, None, None, None, None, 'LongPolling', None, None]
+time_out = [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000]
+num_retries = [1, 2, 3, 3, 3, 2, 1, 1, 1]
 
 # specification.id별 설정
 SPEC_CONFIG = {
