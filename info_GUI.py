@@ -497,19 +497,35 @@ class InfoWidget(QWidget):
         """실제 네트워크 스캔으로 사용 가능한 주소 탐지"""
         try:
             # API에서 받은 testPort가 있으면 직접 URL 생성
+            # if hasattr(self, 'test_port') and self.test_port:
+            #     my_ip = self.get_local_ip()
+            #     if my_ip:
+            #         url = f"{my_ip}:{self.test_port}"
+            #         print(f"API testPort 사용: {url}")
+            #         self._populate_url_table([url])
+            #         QMessageBox.information(self, "주소 설정 완료",
+            #             f"API에서 받은 포트 정보로 주소를 설정했습니다.\n"
+            #             f"주소: {url}")
+            #         return
+            #     else:
+            #         QMessageBox.warning(self, "경고", "로컬 IP를 가져올 수 없습니다.")
+            #         return
             if hasattr(self, 'test_port') and self.test_port:
-                my_ip = self.get_local_ip()
-                if my_ip:
-                    url = f"{my_ip}:{self.test_port}"
-                    print(f"API testPort 사용: {url}")
-                    self._populate_url_table([url])
-                    QMessageBox.information(self, "주소 설정 완료",
-                        f"API에서 받은 포트 정보로 주소를 설정했습니다.\n"
-                        f"주소: {url}")
-                    return
-                else:
-                    QMessageBox.warning(self, "경고", "로컬 IP를 가져올 수 없습니다.")
-                    return
+                ip_list = self._get_local_ip_list()
+                if not ip_list:
+                    ip_list = ["127.0.0.1"]  # 안전한 기본값
+
+                # ip:port 목록 생성
+                urls = [f"{ip}:{self.test_port}" for ip in dict.fromkeys(ip_list)]  # 중복 제거 유지 순서
+
+                print(f"API testPort 사용 (후보): {urls}")
+                self._populate_url_table(urls)
+                QMessageBox.information(
+                    self, "주소 설정 완료",
+                    "API에서 받은 포트 정보로 주소 후보를 설정했습니다.\n"
+                    f"후보: {', '.join(urls)}"
+                )
+                return
 
             # testPort가 없으면 기존 네트워크 스캔 수행
             # 이미 스캔 중이면 중복 실행 방지
@@ -862,16 +878,28 @@ class InfoWidget(QWidget):
     def on_load_test_info_clicked(self):
         """시험정보 불러오기 버튼 클릭 이벤트 (API 기반)"""
         try:
-            # 로컬 IP 주소 가져오기
-            my_ip = self.get_local_ip()
-            if not my_ip:
+            #임시 이후 삭제
+            # 여러 IP 중 '첫 번째'만 사용
+            ip_list = self._get_local_ip_list()
+            if not ip_list:
                 QMessageBox.warning(self, "경고", "로컬 IP 주소를 가져올 수 없습니다.")
-                return
+                return           
+            # 로컬 IP 주소 가져오기
+            #my_ip = self.get_local_ip()
+            # if not my_ip:
+            #     QMessageBox.warning(self, "경고", "로컬 IP 주소를 가져올 수 없습니다.")
+            #     return
 
-            print(f"로컬 IP: {my_ip}")
+            #print(f"로컬 IP: {my_ip}")
+
+            #임시 이후 삭제
+            first_ip = ip_list[0]
+            print(f"로컬 IP(첫 번째): {first_ip}")
 
             # API 호출하여 시험 정보 가져오기
-            test_data = self.form_validator.fetch_test_info_by_ip(my_ip)
+            #test_data = self.form_validator.fetch_test_info_by_ip(my_ip)
+            #임시이후삭제
+            test_data = self.form_validator.fetch_test_info_by_ip(first_ip)
 
             if not test_data:
                 QMessageBox.warning(self, "경고",
@@ -911,11 +939,25 @@ class InfoWidget(QWidget):
             import traceback
             traceback.print_exc()
             QMessageBox.critical(self, "오류", f"시험 정보를 불러오는 중 오류가 발생했습니다:\n{str(e)}")
-
+    
+    #임시버전
     def get_local_ip(self):
-        """로컬 IP 주소 가져오기"""
-        # TODO: 테스트용 고정 IP - 나중에 실제 IP 자동 감지로 변경 필요
-        return "192.168.1.1"
+        return "192.168.1.1, 127.0.0.1"
+    
+    def _get_local_ip_list(self):
+        """get_local_ip() 결과를 안전하게 리스트로 변환"""
+        raw = self.get_local_ip()
+        if isinstance(raw, str):
+            return [ip.strip() for ip in raw.split(',') if ip.strip()]
+        elif isinstance(raw, (list, tuple, set)):
+            return [str(ip).strip() for ip in raw if str(ip).strip()]
+        return []
+
+
+    # def get_local_ip(self):
+    #     """로컬 IP 주소 가져오기"""
+    #     # TODO: 테스트용 고정 IP - 나중에 실제 IP 자동 감지로 변경 필요
+    #     return "192.168.1.1"
 
         # # 실제 IP 자동 감지 코드 (나중에 활성화)
         # import socket
