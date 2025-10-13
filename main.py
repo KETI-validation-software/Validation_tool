@@ -24,8 +24,11 @@ class MainWindow(QMainWindow):
 
         # 접속 후 화면
         self.info_widget = InfoWidget()
-        self.stack.addWidget(self.info_widget)  # index 1
+        self.stack.addWidget(self.info_widget)  # index 0
         self.info_widget.startTestRequested.connect(self._open_validation_app)
+
+        # info_widget의 페이지 변경 시그널 연결 (시험 정보 불러오기 완료 시)
+        self.info_widget.stacked_widget.currentChanged.connect(self._on_page_changed)
 
         self._setup_menu()
         self.stack.setCurrentIndex(0)
@@ -34,16 +37,33 @@ class MainWindow(QMainWindow):
         menubar = self.menuBar()
         main_menu = menubar.addMenu("메뉴")
 
+        # 1. 시험 정보 (초기 활성화)
         self.act_test_info = QAction("시험 정보", self)
-        self.act_test_info.triggered.connect(lambda: self.stack.setCurrentIndex(1))
-        self.act_test_info.setEnabled(False)
+        self.act_test_info.triggered.connect(self._show_test_info)
+        self.act_test_info.setEnabled(True)  # 초기 활성화
         main_menu.addAction(self.act_test_info)
 
-        self.act_run_platform = QAction("시험 실행", self)
-        self.act_run_platform.setEnabled(False)
-        self.act_run_platform.triggered.connect(self._open_validation_app)
-        main_menu.addAction(self.act_run_platform)
+        # 2. 시험 설정 (시험 정보 불러오기 후 활성화)
+        self.act_test_setup = QAction("시험 설정", self)
+        self.act_test_setup.triggered.connect(self._show_test_setup)
+        self.act_test_setup.setEnabled(False)
+        main_menu.addAction(self.act_test_setup)
 
+        # 3. 시험 실행 (시험 설정 완료 후 활성화 - 향후 구현)
+        self.act_test_run = QAction("시험 실행", self)
+        self.act_test_run.setEnabled(False)
+        self.act_test_run.triggered.connect(self._open_validation_app)
+        main_menu.addAction(self.act_test_run)
+
+        # 4. 시험 결과 (시험 실행 완료 후 활성화 - 향후 구현)
+        self.act_test_result = QAction("시험 결과", self)
+        self.act_test_result.setEnabled(False)
+        # self.act_test_result.triggered.connect(self._show_test_result)  # 향후 구현
+        main_menu.addAction(self.act_test_result)
+
+        main_menu.addSeparator()
+
+        # 종료
         act_exit = QAction("종료", self)
         act_exit.triggered.connect(self.close)
         main_menu.addAction(act_exit)
@@ -52,6 +72,21 @@ class MainWindow(QMainWindow):
         act_full = QAction("전체화면 전환", self, checkable=True)
         act_full.triggered.connect(self._toggle_fullscreen)
         view_menu.addAction(act_full)
+
+    def _show_test_info(self):
+        """시험 정보 페이지로 이동 (1페이지)"""
+        self.info_widget.stacked_widget.setCurrentIndex(0)
+
+    def _show_test_setup(self):
+        """시험 설정 페이지로 이동 (2페이지)"""
+        self.info_widget.stacked_widget.setCurrentIndex(1)
+
+    def _on_page_changed(self, index):
+        """info_widget의 페이지가 변경될 때 호출되는 함수"""
+        if index == 1:
+            # 2페이지(시험 설정)로 이동 → 시험 설정 메뉴 활성화
+            self.act_test_setup.setEnabled(True)
+            print("시험 설정 메뉴 활성화")
 
     def _toggle_fullscreen(self, checked: bool):
         """
