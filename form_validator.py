@@ -716,7 +716,7 @@ class FormValidator:
                 # _test_step_cache에서 step detail 가져오기
                 cached_step = self._test_step_cache.get(step_id)
                 if not cached_step:
-                    print(f"⚠️  경고: step_id={step_id}에 대한 캐시가 없습니다.")
+                    print(f"경고: step_id={step_id}에 대한 캐시가 없습니다.")
                     # 기본값 추가
                     time_out.append(5000)
                     num_retries.append(1)
@@ -962,11 +962,6 @@ class FormValidator:
                 self.parent.test_field_table.selectRow(0)
                 self._fill_api_table_for_selected_field_from_api(0)
 
-            # testSpecs로부터 OPT 파일 동적 로드 및 산출물 생성
-            # TODO: 실제 OPT 파일 로드 및 생성 로직 구현
-            # spec_file_paths = self.load_specs_from_api_data(test_specs)
-            # self._generate_merged_files(spec_file_paths, ...)
-
             # 버튼 상태 업데이트
             self.parent.check_start_button_state()
             self.parent.check_next_button_state()
@@ -1149,7 +1144,7 @@ class FormValidator:
             for step in cached_steps:
                 step_id = step.get("id")
 
-                # ✅ [변경] _test_step_cache에 저장된 id/name 우선 사용
+                # [변경] _test_step_cache에 저장된 id/name 우선 사용
                 ts = self._test_step_cache.get(step_id) if hasattr(self, "_test_step_cache") else None
                 name_to_show = ""
                 id_to_show = ""
