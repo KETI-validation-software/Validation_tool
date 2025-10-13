@@ -80,37 +80,40 @@ class MainWindow(QMainWindow):
             self.showNormal()
 
     def _open_validation_app(self, mode):
+        """verificationType에 따라 다른 검증 앱 실행 (API 기반)"""
         importlib.reload(CONSTANTS)  # CONSTANTS 모듈을 다시 로드하여 최신 설정 반영
-        
-        """모드에 따라 다른 검증 앱 실행"""
-        if mode in ["request_longpolling", "request_webhook"]:
+
+        print(f"검증 화면 실행: verificationType={mode}")
+
+        if mode == "request":
             # Request 모드 - Platform 검증 (새 창)
             if hasattr(self, "platform_window") and self.platform_window is not None:
                 self.platform_window.close()
             self.platform_window = platform_app.MyApp(embedded=False)
             self.platform_window.show()
-            
+
             # Main 화면은 System 검증으로 전환
             if getattr(self, "_system_widget", None) is None:
                 self._system_widget = system_app.MyApp(embedded=True)
                 self.stack.addWidget(self._system_widget)
             self.stack.setCurrentWidget(self._system_widget)
-            
-        elif mode in ["response_longpolling", "response_webhook"]:
+
+        elif mode == "response":
             # Response 모드 - System 검증 (새 창)
             if hasattr(self, "system_window") and self.system_window is not None:
                 self.system_window.close()
             self.system_window = system_app.MyApp(embedded=False)
             self.system_window.show()
-            
+
             # Main 화면은 Platform 검증으로 전환
             if getattr(self, "_platform_widget", None) is None:
                 self._platform_widget = platform_app.MyApp(embedded=True)
                 self.stack.addWidget(self._platform_widget)
             self.stack.setCurrentWidget(self._platform_widget)
-            
+
         else:
-            print(f"알 수 없는 모드: {mode}")
+            print(f"알 수 없는 verificationType: {mode}")
+            print(f"   (API에서 'request' 또는 'response'를 반환해야 합니다)")
 
     def closeEvent(self, event):
         reply = QMessageBox.question(self, '종료', '프로그램을 종료하시겠습니까?',
