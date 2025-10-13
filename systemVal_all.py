@@ -162,6 +162,78 @@ class CustomDialog(QDialog):  # popup window for validation result
         self.exec_()
 
 
+# API 선택 다이얼로그
+class APISelectionDialog(QDialog):
+    def __init__(self, api_list, selected_indices, parent=None):
+        super().__init__(parent)
+        self.api_list = api_list
+        self.selected_indices = selected_indices.copy()
+        
+        self.setWindowTitle("API 선택")
+        self.setGeometry(400, 300, 500, 600)
+        self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
+        self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
+        
+        self.initUI()
+    
+    def initUI(self):
+        layout = QVBoxLayout()
+        
+        # 상단 안내
+        info_label = QLabel("시험할 API를 선택하세요 (복수 선택 가능)")
+        info_label.setStyleSheet("font-weight: bold; font-size: 12px; padding: 10px;")
+        layout.addWidget(info_label)
+        
+        # 전체 선택/해제 버튼
+        button_layout = QHBoxLayout()
+        select_all_btn = QPushButton("전체 선택")
+        select_all_btn.clicked.connect(self.select_all)
+        deselect_all_btn = QPushButton("전체 해제")
+        deselect_all_btn.clicked.connect(self.deselect_all)
+        button_layout.addWidget(select_all_btn)
+        button_layout.addWidget(deselect_all_btn)
+        button_layout.addStretch()
+        layout.addLayout(button_layout)
+        
+        # API 리스트 (체크박스)
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll_widget = QWidget()
+        scroll_layout = QVBoxLayout()
+        
+        self.checkboxes = []
+        for idx, api_name in enumerate(self.api_list):
+            checkbox = QCheckBox(f"{idx + 1}. {api_name}")
+            checkbox.setChecked(idx in self.selected_indices)
+            self.checkboxes.append(checkbox)
+            scroll_layout.addWidget(checkbox)
+        
+        scroll_layout.addStretch()
+        scroll_widget.setLayout(scroll_layout)
+        scroll.setWidget(scroll_widget)
+        layout.addWidget(scroll)
+        
+        # 하단 버튼
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box.accepted.connect(self.accept)
+        button_box.rejected.connect(self.reject)
+        layout.addWidget(button_box)
+        
+        self.setLayout(layout)
+    
+    def select_all(self):
+        for checkbox in self.checkboxes:
+            checkbox.setChecked(True)
+    
+    def deselect_all(self):
+        for checkbox in self.checkboxes:
+            checkbox.setChecked(False)
+    
+    def get_selected_indices(self):
+        """선택된 API 인덱스 리스트 반환"""
+        return [idx for idx, checkbox in enumerate(self.checkboxes) if checkbox.isChecked()]
+
+
 # 시험 결과 페이지 다이얼로그
 class ResultPageDialog(QDialog):
     def __init__(self, parent):
@@ -490,6 +562,12 @@ class MyApp(QWidget):
         importlib.reload(CONSTANTS)  # CONSTANTS 모듈을 다시 로드하여 최신 설정 반영
         super().__init__()
         self.embedded = embedded
+        
+        # 전체화면 관련 변수 초기화
+        self._is_fullscreen = False
+        self._saved_geom = None
+        self._saved_state = None
+        
         self.webhook_res = None
         self.res = None
         self.radio_check_flag = "video"  # 영상보안 시스템으로 고정
@@ -685,6 +763,147 @@ class MyApp(QWidget):
             ("관리자 코드", CONSTANTS.admin_code),
             ("시험 접속 정보", CONSTANTS.url)
         ]
+
+    def create_spec_selection_panel(self, parent_layout):
+        """시험 분야 선택 패널 생성"""
+        # 시험 분야 패널
+        panel_widget = QWidget()
+        panel_layout = QVBoxLayout()
+        panel_layout.setContentsMargins(10, 10, 10, 10)
+        
+        # 시험 분야 확인 문구
+        title = QLabel("시험 분야를 선택하세요.")
+        title.setStyleSheet("font-size: 14px; font-weight: bold; padding: 10px;")
+        panel_layout.addWidget(title)
+        
+        # 시험 분야명 테이블
+        field_group = self.create_test_field_group()
+        panel_layout.addWidget(field_group)
+        
+        panel_widget.setLayout(panel_layout)
+        parent_layout.addWidget(panel_widget)
+        
+        # 선택된 시험 분야 행
+        self.selected_test_field_row = None
+    
+    def create_test_field_group(self):
+        """시험 분야명 그룹"""
+        group = QGroupBox("시험 분야")
+        layout = QVBoxLayout()
+        
+        self.test_field_table = QTableWidget(0, 1)
+        self.test_field_table.setHorizontalHeaderLabels(["시험 분야명"])
+        self.test_field_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.test_field_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.test_field_table.cellClicked.connect(self.on_test_field_selected)
+        self.test_field_table.verticalHeader().setVisible(False)
+        self.test_field_table.setMaximumHeight(200)
+        
+        # CONSTANTS.specs에서 시험 분야 로드
+        if hasattr(CONSTANTS, 'specs') and CONSTANTS.specs:
+            self.test_field_table.setRowCount(len(CONSTANTS.specs))
+            for idx, spec in enumerate(CONSTANTS.specs):
+                description = spec[5] if len(spec) > 5 else f"시험 분야 {idx + 1}"
+                item = QTableWidgetItem(description)
+                item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+                self.test_field_table.setItem(idx, 0, item)
+            
+            # 현재 선택된 spec으로 자동 선택
+            current_spec_index = getattr(CONSTANTS, 'selected_spec_index', 0)
+            self.test_field_table.selectRow(current_spec_index)
+            self.selected_test_field_row = current_spec_index
+            
+            # 초기 로드는 initUI 완료 후에 수행하도록 플래그 설정
+            self._initial_spec_index = current_spec_index
+        
+        layout.addWidget(self.test_field_table)
+        group.setLayout(layout)
+        return group
+        return group
+    
+    def on_test_field_selected(self, row, col):
+        """시험 분야명 행 클릭 시 시험 결과 테이블의 API 목록 업데이트"""
+        try:
+            self.selected_test_field_row = row
+            
+            # 선택된 분야의 spec 정보 가져오기
+            if row < len(CONSTANTS.specs):
+                # CONSTANTS의 selected_spec_index 업데이트
+                CONSTANTS.selected_spec_index = row
+                
+                # spec 데이터 다시 로드 (중요!)
+                self.load_specs_from_constants()
+                
+                # step_buffers 재생성
+                self.step_buffers = [
+                    {"data": "", "error": "", "result": "PASS"} for _ in range(len(self.videoMessages))
+                ]
+                
+                spec = CONSTANTS.specs[row]
+                messages_name = spec[2]  # messages_name
+                
+                # 해당 spec의 API 목록 가져오기
+                import spec.video.videoData_request as video_data_request
+                api_list = getattr(video_data_request, messages_name, [])
+                
+                # 시험 결과 테이블 업데이트
+                self.update_result_table_with_apis(api_list)
+                
+                print(f"[DEBUG] 시험 분야 선택: {spec[5]}, API 수: {len(api_list)}")
+        except Exception as e:
+            print(f"시험 분야 선택 처리 실패: {e}")
+            import traceback
+            traceback.print_exc()
+    
+    def update_result_table_with_apis(self, api_list):
+        """시험 결과 테이블을 새로운 API 목록으로 업데이트"""
+        api_count = len(api_list)
+        self.tableWidget.setRowCount(api_count)
+        
+        # 각 행의 API 명 업데이트
+        for row in range(api_count):
+            # API 명
+            api_item = QTableWidgetItem(api_list[row])
+            api_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            self.tableWidget.setItem(row, 0, api_item)
+            
+            # 나머지 컬럼 초기화
+            # 결과 아이콘 (검정색)
+            icon_widget = QWidget()
+            icon_layout = QHBoxLayout()
+            icon_layout.setContentsMargins(0, 0, 0, 0)
+            icon_label = QLabel()
+            icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
+            icon_label.setAlignment(Qt.AlignCenter)
+            icon_layout.addWidget(icon_label)
+            icon_layout.setAlignment(Qt.AlignCenter)
+            icon_widget.setLayout(icon_layout)
+            self.tableWidget.setCellWidget(row, 1, icon_widget)
+            
+            # 검증 횟수, 통과 필드 수, 전체 필드 수, 실패 횟수, 평가 점수
+            for col in range(2, 7):
+                item = QTableWidgetItem("0" if col != 6 else "0%")
+                item.setTextAlignment(Qt.AlignCenter)
+                self.tableWidget.setItem(row, col, item)
+            
+            # 상세 내용 버튼 (중앙 정렬을 위한 위젯 컨테이너)
+            detail_btn = QPushButton("상세 내용 확인")
+            detail_btn.setMaximumHeight(30)
+            detail_btn.setMaximumWidth(130)
+            detail_btn.clicked.connect(lambda checked, r=row: self.show_combined_result(r))
+            
+            # 버튼을 중앙에 배치하기 위한 위젯과 레이아웃
+            container = QWidget()
+            layout = QHBoxLayout()
+            layout.addWidget(detail_btn)
+            layout.setAlignment(Qt.AlignCenter)
+            layout.setContentsMargins(0, 0, 0, 0)
+            container.setLayout(layout)
+            
+            self.tableWidget.setCellWidget(row, 7, container)
+            
+            # 행 높이 설정
+            self.tableWidget.setRowHeight(row, 40)
 
     def post(self, path, json_data, time_out):
         self.res = None
@@ -1202,6 +1421,11 @@ class MyApp(QWidget):
 
 
     def initUI(self):
+        # 창 크기 설정 (main.py와 동일)
+        if not self.embedded:
+            self.resize(1200, 720)
+            self.setWindowTitle('시스템 연동 검증')
+        
         # 1열(세로) 레이아웃으로 통합
         mainLayout = QVBoxLayout()
 
@@ -1214,6 +1438,9 @@ class MyApp(QWidget):
         self.title_label.setAlignment(Qt.AlignCenter)
         mainLayout.addWidget(self.title_label)
 
+        # 시험 분야 선택 영역 추가
+        self.create_spec_selection_panel(mainLayout)
+
         # 시험 결과
         self.valmsg = QLabel('시험 결과', self)
         mainLayout.addWidget(self.valmsg)
@@ -1221,9 +1448,8 @@ class MyApp(QWidget):
         self.init_centerLayout()
         contentWidget = QWidget()
         contentWidget.setLayout(self.centerLayout)
-        contentWidget.setMaximumSize(1050, 400)
-        contentWidget.setMinimumSize(950, 300)
-        mainLayout.addWidget(contentWidget)
+        # 고정 크기 제거 - 반응형으로 변경
+        mainLayout.addWidget(contentWidget, 1)  # stretch factor 1 추가
 
         mainLayout.addSpacing(15)
 
@@ -1231,10 +1457,19 @@ class MyApp(QWidget):
         monitor_label = QLabel("수신 메시지 실시간 모니터링")
         mainLayout.addWidget(monitor_label)
         self.valResult = QTextBrowser(self)
-        self.valResult.setMaximumHeight(200)
-        self.valResult.setMaximumWidth(1050)
-        self.valResult.setMinimumWidth(950)
-        mainLayout.addWidget(self.valResult)
+        # 고정 크기 제거 - 반응형으로 변경
+        self.valResult.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        mainLayout.addWidget(self.valResult, 1)  # stretch factor 1 추가
+
+        mainLayout.addSpacing(15)
+
+        # 평가 점수 표시 (메인 화면에 추가)
+        spec_score_group = self.create_spec_score_display_widget()
+        mainLayout.addWidget(spec_score_group)
+        
+        # 전체 점수 표시
+        total_score_group = self.create_total_score_display_widget()
+        mainLayout.addWidget(total_score_group)
 
         # 버튼 그룹 (평가 시작, 일시 정지, 종료) - 아래쪽, 가운데 정렬
         buttonGroup = QWidget()
@@ -1357,6 +1592,7 @@ class MyApp(QWidget):
         buttonLayout.addWidget(self.rbtn)
         buttonLayout.addSpacing(20)
         buttonLayout.addWidget(self.result_btn)
+        
         buttonGroup.setLayout(buttonLayout)
 
         mainLayout.addSpacing(20)
@@ -1364,8 +1600,14 @@ class MyApp(QWidget):
         mainLayout.addStretch()
 
         self.setLayout(mainLayout)
-        self.setWindowTitle('물리보안 시스템 연동 검증 소프트웨어')
-        self.setGeometry(100, 100, 1100, 700)
+        
+        # 창 제목 설정 (embedded가 아닐 때만)
+        if not self.embedded:
+            self.setWindowTitle('물리보안 시스템 연동 검증 소프트웨어')
+
+        # tableWidget이 생성된 후에 초기 시험 분야 선택 처리
+        if hasattr(self, '_initial_spec_index'):
+            self.on_test_field_selected(self._initial_spec_index, 0)
 
         if not self.embedded:
             self.show()
@@ -1515,17 +1757,26 @@ class MyApp(QWidget):
 
     def update_score_display(self):
         """평가 점수 디스플레이 업데이트"""
-        if not (hasattr(self, "pass_count_label") and hasattr(self, "total_count_label") and hasattr(self, "score_label")):
+        # 메인 화면의 평가 점수 레이블 업데이트
+        if not (hasattr(self, "spec_pass_label") and hasattr(self, "spec_total_label") and hasattr(self, "spec_score_label")):
             return
+        
         total_fields = self.total_pass_cnt + self.total_error_cnt
         if total_fields > 0:
             score = (self.total_pass_cnt / total_fields) * 100
         else:
             score = 0
 
-        self.pass_count_label.setText(f"통과 필드 수: {self.total_pass_cnt}")
-        self.total_count_label.setText(f"전체 필드 수: {total_fields}")
-        self.score_label.setText(f"종합 평가 점수: {score:.1f}%")
+        # 시험 분야별 점수 업데이트
+        self.spec_pass_label.setText(f"통과 필드 수: {self.total_pass_cnt}")
+        self.spec_total_label.setText(f"전체 필드 수: {total_fields}")
+        self.spec_score_label.setText(f"종합 평가 점수: {score:.1f}%")
+        
+        # 전체 점수 업데이트 (현재는 1개 spec만 실행하므로 동일한 값)
+        if hasattr(self, "total_pass_label") and hasattr(self, "total_total_label") and hasattr(self, "total_score_label"):
+            self.total_pass_label.setText(f"통과 필드 수: {self.total_pass_cnt}")
+            self.total_total_label.setText(f"전체 필드 수: {total_fields}")
+            self.total_score_label.setText(f"종합 평가 점수: {score:.1f}%")
 
     def table_cell_clicked(self, row, col):
         """테이블 셀 클릭 시 호출되는 함수"""
@@ -1534,6 +1785,80 @@ class MyApp(QWidget):
             if msg:
                 api_name = self.step_names[row] if row < len(self.step_names) else f"Step {row+1}"
                 CustomDialog(msg, api_name)
+
+    def create_spec_score_display_widget(self):
+        """메인 화면에 표시할 시험 분야별 평가 점수 위젯 생성"""
+        # 시험 분야별 점수 그룹
+        spec_group = QGroupBox('시험 분야별 점수')
+        spec_group.setMaximumWidth(1050)
+        spec_group.setMinimumWidth(950)
+        spec_group.setMaximumHeight(120)
+        
+        # 분야명 레이블
+        self.spec_name_label = QLabel(f"📋 {self.spec_description} ({len(self.videoMessages)}개 API)")
+        spec_name_font = self.spec_name_label.font()
+        spec_name_font.setPointSize(14)
+        spec_name_font.setBold(True)
+        self.spec_name_label.setFont(spec_name_font)
+        
+        # 점수 레이블들
+        self.spec_pass_label = QLabel("통과 필드 수: 0")
+        self.spec_total_label = QLabel("전체 필드 수: 0")
+        self.spec_score_label = QLabel("종합 평가 점수: 0.0%")
+        
+        font = self.spec_pass_label.font()
+        font.setPointSize(12)
+        self.spec_pass_label.setFont(font)
+        self.spec_total_label.setFont(font)
+        self.spec_score_label.setFont(font)
+        
+        spec_layout = QVBoxLayout()
+        spec_layout.addWidget(self.spec_name_label)
+        spec_layout.addSpacing(5)
+        
+        spec_score_layout = QHBoxLayout()
+        spec_score_layout.setSpacing(50)
+        spec_score_layout.addWidget(self.spec_pass_label)
+        spec_score_layout.addWidget(self.spec_total_label)
+        spec_score_layout.addWidget(self.spec_score_label)
+        spec_score_layout.addStretch()
+        
+        spec_layout.addLayout(spec_score_layout)
+        spec_group.setLayout(spec_layout)
+        
+        return spec_group
+
+    def create_total_score_display_widget(self):
+        """메인 화면에 표시할 전체 평가 점수 위젯 생성"""
+        # 전체 점수 그룹
+        total_group = QGroupBox('전체 점수')
+        total_group.setMaximumWidth(1050)
+        total_group.setMinimumWidth(950)
+        total_group.setMaximumHeight(90)
+        
+        # 점수 레이블들 (전체 점수는 볼드체로 강조)
+        self.total_pass_label = QLabel("통과 필드 수: 0")
+        self.total_total_label = QLabel("전체 필드 수: 0")
+        self.total_score_label = QLabel("종합 평가 점수: 0.0%")
+        
+        font = self.total_pass_label.font()
+        font.setPointSize(14)
+        font.setBold(True)
+        self.total_pass_label.setFont(font)
+        self.total_total_label.setFont(font)
+        self.total_score_label.setFont(font)
+        
+        total_layout = QHBoxLayout()
+        total_layout.setSpacing(60)
+        total_layout.addWidget(self.total_pass_label)
+        total_layout.addWidget(self.total_total_label)
+        total_layout.addWidget(self.total_score_label)
+        total_layout.addStretch()
+        
+        total_group.setLayout(total_layout)
+        
+        return total_group
+
     def _clean_trace_dir_once(self):
         """results/trace 폴더 안의 파일들을 삭제"""
         os.makedirs(CONSTANTS.trace_path, exist_ok=True)
@@ -1647,6 +1972,57 @@ class MyApp(QWidget):
         """시험 결과 페이지 표시"""
         dialog = ResultPageDialog(self)
         dialog.exec_()
+
+    def resizeEvent(self, event):
+        """창 크기 변경 시 반응형 UI 조정"""
+        try:
+            super().resizeEvent(event)
+            
+            # 테이블 위젯 크기 조정
+            if hasattr(self, 'tableWidget'):
+                # 현재 창 너비의 95%를 테이블 너비로 설정
+                new_width = int(self.width() * 0.95)
+                new_width = max(950, new_width)  # 최소 950px
+                
+                # 컬럼 너비를 창 크기에 맞춰 조정
+                total_width = new_width - 50  # 여백 고려
+                col_widths = [0.22, 0.09, 0.10, 0.11, 0.11, 0.10, 0.11, 0.16]  # 비율
+                for col, ratio in enumerate(col_widths):
+                    self.tableWidget.setColumnWidth(col, int(total_width * ratio))
+                
+        except Exception as e:
+            print(f"resizeEvent 오류: {e}")
+
+    def toggle_fullscreen(self):
+        """전체화면 전환 (main.py 스타일)"""
+        try:
+            if not self._is_fullscreen:
+                # 전체화면으로 전환
+                self._saved_geom = self.saveGeometry()
+                self._saved_state = self.windowState()
+                
+                flags = (Qt.Window | Qt.WindowTitleHint |
+                        Qt.WindowMinimizeButtonHint |
+                        Qt.WindowMaximizeButtonHint |
+                        Qt.WindowCloseButtonHint)
+                self.setWindowFlags(flags)
+                self.show()
+                self.showMaximized()
+                self._is_fullscreen = True
+                if hasattr(self, 'fullscreen_btn'):
+                    self.fullscreen_btn.setText("전체화면 해제")
+            else:
+                # 원래 크기로 복원
+                self.setWindowFlags(Qt.Window)
+                self.show()
+                if self._saved_geom:
+                    self.restoreGeometry(self._saved_geom)
+                self.showNormal()
+                self._is_fullscreen = False
+                if hasattr(self, 'fullscreen_btn'):
+                    self.fullscreen_btn.setText("전체화면")
+        except Exception as e:
+            print(f"전체화면 전환 오류: {e}")
 
     def exit_btn_clicked(self):
         """프로그램 종료"""

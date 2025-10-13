@@ -1,4 +1,4 @@
-# response 모드
+# response 모드 - 플랫폼 측 메시지 데이터 확인에 뜨는 내용
 
 # Authentication
 Authentication_in_data = {
