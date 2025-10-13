@@ -1,2 +1,2 @@
-{"time": "2025-10-13T07:10:53.820983Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "cam001"}, {"camID": "cam002"}], "transProtocol": {"transProtocolType": "WebHook", "transProtocolDesc": "https://127.0.0.1:8090/RealtimeVideoEventInfos"}, "duration": 10, "eventFilter": "배회", "startTime": 20220822163022123}}
-{"time": "2025-10-13T07:10:53.821981Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}
+{"time": "2025-10-13T07:46:14.504674Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "cam001"}, {"camID": "cam002"}], "transProtocol": {"transProtocolType": "WebHook", "transProtocolDesc": "https://127.0.0.1:8090/RealtimeVideoEventInfos"}, "duration": 10, "eventFilter": "배회", "startTime": 20220822163022123}}
+{"time": "2025-10-13T07:46:14.505671Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}
