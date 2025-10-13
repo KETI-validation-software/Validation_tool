@@ -118,6 +118,12 @@ class Server(BaseHTTPRequestHandler):
             auth = self.headers.get('authorization')
         auth_pass = False
         message_cnt, data = self.api_res()
+        
+        # api_res()가 에러를 반환한 경우 (Server.message가 None)
+        if message_cnt is None:
+            self._set_headers()
+            self.wfile.write(json.dumps(data).encode('utf-8'))
+            return
 
         if self.auth_type == "None":
             auth_pass = True
@@ -210,11 +216,10 @@ class Server(BaseHTTPRequestHandler):
         except Exception:
             pass
 
-        with open(resource_path("spec/"+self.system + "/" + self.path[1:]+".json"), "w", encoding="UTF-8") \
-                as out_file:
-            json.dump(dict_data, out_file, ensure_ascii=False)
-        # with open(self.path[1:]+".json","r", encoding="UTF-8") as out_file:
-        #    datas = json.load(out_file)
+        # JSON 파일 저장 제거 - spec/video/videoData_request.py 사용
+        # with open(resource_path("spec/"+self.system + "/" + self.path[1:]+".json"), "w", encoding="UTF-8") \
+        #         as out_file:
+        #     json.dump(dict_data, out_file, ensure_ascii=False)
 
         #  refuse to receive non-json content
         if ctype == 'text/plain':
@@ -323,9 +328,10 @@ class Server(BaseHTTPRequestHandler):
                 result = requests.post(url, data=json_data_tmp, verify=False)
                 #print("webhook response", result.text)
                 self.result = result
-                with open(resource_path("spec/" + self.system + "/" + "webhook_" + self.path[1:] + ".json"),
-                          "w", encoding="UTF-8") as out_file2:
-                    json.dump(json.loads(str(self.result.text)), out_file2, ensure_ascii=False)
+                # JSON 파일 저장 제거 - spec/video/videoData_response.py 사용
+                # with open(resource_path("spec/" + self.system + "/" + "webhook_" + self.path[1:] + ".json"),
+                #           "w", encoding="UTF-8") as out_file2:
+                #     json.dump(json.loads(str(self.result.text)), out_file2, ensure_ascii=False)
                 break
                 #  self.res.emit(str(self.result.text))
             #except requests.ConnectionError:
@@ -338,6 +344,11 @@ class Server(BaseHTTPRequestHandler):
 
     def api_res(self):
         i, data = None, None
+        # message가 None이거나 빈 리스트인 경우 방어 코드
+        if not self.message:
+            print("[ERROR] Server.message is None or empty!")
+            return None, {"code": "500", "message": "Server not initialized"}
+        
         for i in range(0, len(self.message)):
             data = ""
             if self.path == "/" + self.message[i]:

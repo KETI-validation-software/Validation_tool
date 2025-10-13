@@ -812,6 +812,53 @@ class InfoWidget(QWidget):
             print(f"초기화 실패: {e}")
             raise
 
+    def _determine_mode_from_api(self, test_data):
+        """
+        test-steps API 캐시에서 verificationType 추출하여 모드 결정
+
+        Returns:
+            str: "request" 또는 "response"
+        """
+        try:
+            # test_specs에서 첫 번째 spec_id 가져오기
+            test_specs = test_data.get("testRequest", {}).get("testGroup", {}).get("testSpecs", [])
+            if not test_specs:
+                print("경고: testSpecs 데이터가 없습니다. 기본값 'request' 사용")
+                return "request"  # 기본값
+
+            first_spec_id = test_specs[0].get("id")
+            if not first_spec_id:
+                print("경고: 첫 번째 spec_id를 찾을 수 없습니다. 기본값 'request' 사용")
+                return "request"
+
+            # form_validator의 캐시에서 steps 가져오기
+            steps = self.form_validator._steps_cache.get(first_spec_id, [])
+            if not steps:
+                print(f"경고: spec_id={first_spec_id}에 대한 steps 캐시가 없습니다. 기본값 'request' 사용")
+                return "request"
+
+            first_step_id = steps[0].get("id")
+            if not first_step_id:
+                print("경고: 첫 번째 step_id를 찾을 수 없습니다. 기본값 'request' 사용")
+                return "request"
+
+            # test-step detail 캐시에서 verificationType 가져오기
+            step_detail = self.form_validator._test_step_cache.get(first_step_id)
+            if not step_detail:
+                print(f"경고: step_id={first_step_id}에 대한 캐시가 없습니다. 기본값 'request' 사용")
+                return "request"
+
+            verification_type = step_detail.get("verificationType", "request")
+
+            print(f"verificationType 추출 완료: {verification_type}")
+            return verification_type
+
+        except Exception as e:
+            print(f"verificationType 추출 실패: {e}")
+            import traceback
+            traceback.print_exc()
+            return "request"  # 기본값
+
     def on_load_test_info_clicked(self):
         """시험정보 불러오기 버튼 클릭 이벤트 (API 기반)"""
         try:
@@ -850,8 +897,8 @@ class InfoWidget(QWidget):
             self.test_specs = test_group.get("testSpecs", [])
             self.test_port = test_data.get("schedule", {}).get("testPort", None)
 
-            # 모드 설정 (API 기반이므로 기본값 설정)
-            self.current_mode = "api_loaded"
+            # verificationType 기반 모드 설정 (API 기반)
+            self.current_mode = self._determine_mode_from_api(test_data)
 
             # API 데이터를 이용하여 OPT 파일 로드 및 스키마 생성
             self.form_validator.load_opt_files_from_api(test_data)

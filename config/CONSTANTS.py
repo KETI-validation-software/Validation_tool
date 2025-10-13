@@ -6,7 +6,7 @@ none_request_message = ['Capabilities',
                         'DoorProfiles',
                         'AccessUserInfos',
                         'SensorDeviceProfiles']
-
+# 로컬 테스트용 주소 (플랫폼과 시스템이 같은 PC에서 실행되더야 함, 변경하면 평가 작동 안됌ㅜ)
 #test-info -> (주의) auth_info의 id, pw admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음!!!!!!!
 company_name = "테스트기업"
 product_name = "테스트시스템"
@@ -14,10 +14,11 @@ version = "v0.1"
 test_category = "본시험"
 test_target = "통합시스템"
 test_range = "ALL_FIELDS"
-auth_type = "Bearer Token"
-auth_info = "1234"
-admin_code = "1234"
-url = "https://192.168.1.1:8080"
+auth_type = "Digest Auth"
+auth_info = "admin,1234"
+admin_code = "123456789"
+url = "https://127.0.0.1:8080"
+
 
 
 specs = [["cmg90br3n002qihleffuljnth_inSchema","cmg90br3n002qihleffuljnth_outData","cmg90br3n002qihleffuljnth_messages",""],
@@ -33,7 +34,7 @@ specs = [
 ]
 
 # 선택된 시험 분야의 인덱스 (0: 영상보안, 1: 보안용센서)
-selected_spec_index = 1
+selected_spec_index = 0
 trace_path = os.path.join("results", "trace")
 #test-opt
 '''
@@ -50,7 +51,6 @@ num_retries = [1, 2, 3, 3, 3, 2, 1, 1, 1]
 
 # specification.id별 설정
 SPEC_CONFIG = {
-
     "cmg90br3n002qihleffuljnth": {
         "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic'],
         "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000],

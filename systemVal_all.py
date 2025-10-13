@@ -828,6 +828,17 @@ class MyApp(QWidget):
             
             # 선택된 분야의 spec 정보 가져오기
             if row < len(CONSTANTS.specs):
+                # CONSTANTS의 selected_spec_index 업데이트
+                CONSTANTS.selected_spec_index = row
+                
+                # spec 데이터 다시 로드 (중요!)
+                self.load_specs_from_constants()
+                
+                # step_buffers 재생성
+                self.step_buffers = [
+                    {"data": "", "error": "", "result": "PASS"} for _ in range(len(self.videoMessages))
+                ]
+                
                 spec = CONSTANTS.specs[row]
                 messages_name = spec[2]  # messages_name
                 
@@ -1450,6 +1461,16 @@ class MyApp(QWidget):
         self.valResult.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         mainLayout.addWidget(self.valResult, 1)  # stretch factor 1 추가
 
+        mainLayout.addSpacing(15)
+
+        # 평가 점수 표시 (메인 화면에 추가)
+        spec_score_group = self.create_spec_score_display_widget()
+        mainLayout.addWidget(spec_score_group)
+        
+        # 전체 점수 표시
+        total_score_group = self.create_total_score_display_widget()
+        mainLayout.addWidget(total_score_group)
+
         # 버튼 그룹 (평가 시작, 일시 정지, 종료) - 아래쪽, 가운데 정렬
         buttonGroup = QWidget()
         buttonLayout = QHBoxLayout()
@@ -1736,17 +1757,26 @@ class MyApp(QWidget):
 
     def update_score_display(self):
         """평가 점수 디스플레이 업데이트"""
-        if not (hasattr(self, "pass_count_label") and hasattr(self, "total_count_label") and hasattr(self, "score_label")):
+        # 메인 화면의 평가 점수 레이블 업데이트
+        if not (hasattr(self, "spec_pass_label") and hasattr(self, "spec_total_label") and hasattr(self, "spec_score_label")):
             return
+        
         total_fields = self.total_pass_cnt + self.total_error_cnt
         if total_fields > 0:
             score = (self.total_pass_cnt / total_fields) * 100
         else:
             score = 0
 
-        self.pass_count_label.setText(f"통과 필드 수: {self.total_pass_cnt}")
-        self.total_count_label.setText(f"전체 필드 수: {total_fields}")
-        self.score_label.setText(f"종합 평가 점수: {score:.1f}%")
+        # 시험 분야별 점수 업데이트
+        self.spec_pass_label.setText(f"통과 필드 수: {self.total_pass_cnt}")
+        self.spec_total_label.setText(f"전체 필드 수: {total_fields}")
+        self.spec_score_label.setText(f"종합 평가 점수: {score:.1f}%")
+        
+        # 전체 점수 업데이트 (현재는 1개 spec만 실행하므로 동일한 값)
+        if hasattr(self, "total_pass_label") and hasattr(self, "total_total_label") and hasattr(self, "total_score_label"):
+            self.total_pass_label.setText(f"통과 필드 수: {self.total_pass_cnt}")
+            self.total_total_label.setText(f"전체 필드 수: {total_fields}")
+            self.total_score_label.setText(f"종합 평가 점수: {score:.1f}%")
 
     def table_cell_clicked(self, row, col):
         """테이블 셀 클릭 시 호출되는 함수"""
@@ -1755,6 +1785,80 @@ class MyApp(QWidget):
             if msg:
                 api_name = self.step_names[row] if row < len(self.step_names) else f"Step {row+1}"
                 CustomDialog(msg, api_name)
+
+    def create_spec_score_display_widget(self):
+        """메인 화면에 표시할 시험 분야별 평가 점수 위젯 생성"""
+        # 시험 분야별 점수 그룹
+        spec_group = QGroupBox('시험 분야별 점수')
+        spec_group.setMaximumWidth(1050)
+        spec_group.setMinimumWidth(950)
+        spec_group.setMaximumHeight(120)
+        
+        # 분야명 레이블
+        self.spec_name_label = QLabel(f"📋 {self.spec_description} ({len(self.videoMessages)}개 API)")
+        spec_name_font = self.spec_name_label.font()
+        spec_name_font.setPointSize(14)
+        spec_name_font.setBold(True)
+        self.spec_name_label.setFont(spec_name_font)
+        
+        # 점수 레이블들
+        self.spec_pass_label = QLabel("통과 필드 수: 0")
+        self.spec_total_label = QLabel("전체 필드 수: 0")
+        self.spec_score_label = QLabel("종합 평가 점수: 0.0%")
+        
+        font = self.spec_pass_label.font()
+        font.setPointSize(12)
+        self.spec_pass_label.setFont(font)
+        self.spec_total_label.setFont(font)
+        self.spec_score_label.setFont(font)
+        
+        spec_layout = QVBoxLayout()
+        spec_layout.addWidget(self.spec_name_label)
+        spec_layout.addSpacing(5)
+        
+        spec_score_layout = QHBoxLayout()
+        spec_score_layout.setSpacing(50)
+        spec_score_layout.addWidget(self.spec_pass_label)
+        spec_score_layout.addWidget(self.spec_total_label)
+        spec_score_layout.addWidget(self.spec_score_label)
+        spec_score_layout.addStretch()
+        
+        spec_layout.addLayout(spec_score_layout)
+        spec_group.setLayout(spec_layout)
+        
+        return spec_group
+
+    def create_total_score_display_widget(self):
+        """메인 화면에 표시할 전체 평가 점수 위젯 생성"""
+        # 전체 점수 그룹
+        total_group = QGroupBox('전체 점수')
+        total_group.setMaximumWidth(1050)
+        total_group.setMinimumWidth(950)
+        total_group.setMaximumHeight(90)
+        
+        # 점수 레이블들 (전체 점수는 볼드체로 강조)
+        self.total_pass_label = QLabel("통과 필드 수: 0")
+        self.total_total_label = QLabel("전체 필드 수: 0")
+        self.total_score_label = QLabel("종합 평가 점수: 0.0%")
+        
+        font = self.total_pass_label.font()
+        font.setPointSize(14)
+        font.setBold(True)
+        self.total_pass_label.setFont(font)
+        self.total_total_label.setFont(font)
+        self.total_score_label.setFont(font)
+        
+        total_layout = QHBoxLayout()
+        total_layout.setSpacing(60)
+        total_layout.addWidget(self.total_pass_label)
+        total_layout.addWidget(self.total_total_label)
+        total_layout.addWidget(self.total_score_label)
+        total_layout.addStretch()
+        
+        total_group.setLayout(total_layout)
+        
+        return total_group
+
     def _clean_trace_dir_once(self):
         """results/trace 폴더 안의 파일들을 삭제"""
         os.makedirs(CONSTANTS.trace_path, exist_ok=True)
