@@ -39,6 +39,7 @@ class Server(BaseHTTPRequestHandler):
     url_tmp = None
 
     trace = defaultdict(lambda: deque(maxlen=1000))  # api_name -> deque(events)
+    request_counter = {}  # ✅ API별 시스템 요청 카운터 (클래스 변수)
 
 
     def __init__(self, *args, **kwargs):
@@ -216,10 +217,19 @@ class Server(BaseHTTPRequestHandler):
         except Exception:
             pass
 
-        # JSON 파일 저장 제거 - spec/video/videoData_request.py 사용
-        # with open(resource_path("spec/"+self.system + "/" + self.path[1:]+".json"), "w", encoding="UTF-8") \
-        #         as out_file:
-        #     json.dump(dict_data, out_file, ensure_ascii=False)
+        # ✅ 플랫폼에 시스템 요청 도착 신호 보내기 (JSON 파일 대신)
+        # 클래스 변수 request_counter 사용하여 API별 요청 횟수 추적
+        try:
+            api_name = self.path[1:]  # 예: "Authentication", "storedVideoInfos"
+            if api_name not in Server.request_counter:
+                Server.request_counter[api_name] = 0
+            Server.request_counter[api_name] += 1
+            print(f"[API_SERVER] 요청 수신: {api_name} (카운트: {Server.request_counter[api_name]})")
+        except Exception as e:
+            print(f"[API_SERVER] request_counter 에러: {e}")
+            pass
+        except Exception:
+            pass
 
         #  refuse to receive non-json content
         if ctype == 'text/plain':

@@ -734,9 +734,16 @@ class MyApp(QWidget):
     def update_view(self):
         try:
             time_interval = 0
+            
+            # cnt가 리스트 길이 이상이면 종료 처리
+            if self.cnt >= len(self.Server.message):
+                return
+            
+            # ✅ 시스템과 동일: 첫 틱에서는 대기만 하고 리턴
             if self.time_pre == 0 or self.cnt != self.cnt_pre:
                 self.time_pre = time.time()
                 self.cnt_pre = self.cnt
+                return  # 첫 틱에서는 대기만 하고 리턴
             else:
                 time_interval = time.time() - self.time_pre
 
@@ -765,180 +772,180 @@ class MyApp(QWidget):
             current_timeout = CONSTANTS.time_out[self.cnt] / 1000
 
             if time_interval < current_timeout:
-                try:
-                    # JSON 파일에서 데이터 읽기 시도
-                    json_file_path = resource_path("spec/" + self.Server.system + "/" + self.Server.message[self.cnt] + ".json")
-                    try:
-                        with open(json_file_path, "r", encoding="UTF-8") as out_file:
-                            data = json.load(out_file)
-                    except (FileNotFoundError, json.JSONDecodeError):
-                        # 파일이 없거나 JSON 오류 시 빈 딕셔너리 사용
-                        data = {}
-
-                except Exception as verr:
-                    #print(traceback.format_exc())
-                    box = QMessageBox()
-                    box.setIcon(QMessageBox.Critical)
-                    # box.setText("Error Message: " + path_ + " 을 확인하세요")
-                    box.setInformativeText(str(verr))
-                    box.setWindowTitle("Error")
-                    box.exec_()
-                    return ""
+                # ✅ 시스템 요청 확인 (요청-응답 구조)
+                # Server 클래스의 request_counter(클래스 변수)를 확인하여 시스템이 요청을 보냈는지 체크
+                api_name = self.Server.message[self.cnt]
+                request_received = False
                 
-                except Exception as err:
-                    box = QMessageBox()
-                    box.setIcon(QMessageBox.Critical)
-                    box.setInformativeText(str(err))
-                    box.setWindowTitle("Error")
-                    box.exec_()
-                    return ""
+                # Server 클래스 변수 request_counter 확인
+                if hasattr(self.Server, 'request_counter') and api_name in self.Server.request_counter:
+                    expected_count = self.current_retry + 1  # 현재 회차에 맞는 요청 수
+                    actual_count = self.Server.request_counter[api_name]
+                    print(f"[PLATFORM] API: {api_name}, 예상: {expected_count}, 실제: {actual_count}")
+                    if actual_count >= expected_count:
+                        request_received = True
+                
+                # ✅ 요청이 도착하지 않았으면 대기
+                if not request_received:
+                    return  # 다음 틱까지 대기
+                
+                # ✅ 플랫폼이 검증할 데이터: 플랫폼이 보낼 응답 (videoData_response.py)
+                if self.cnt < len(self.videoInMessage):
+                    data = self.videoInMessage[self.cnt]
+                else:
+                    data = {}  # 데이터가 없으면 빈 딕셔너리 -> 이 부분 문제인 거 같음..
 
-                if data != None:
-                    message_name = "step " + str(self.cnt + 1) + ": " + self.Server.message[self.cnt]
-                    
-                    # 개별 검증 횟수 처리
-                    current_retries = CONSTANTS.num_retries[self.cnt] if self.cnt < len(CONSTANTS.num_retries) else 1
-                    current_protocol = CONSTANTS.trans_protocol[self.cnt] if self.cnt < len(CONSTANTS.trans_protocol) else "Unknown"
+                message_name = "step " + str(self.cnt + 1) + ": " + self.Server.message[self.cnt]
+                
+                # 개별 검증 횟수 처리
+                current_retries = CONSTANTS.num_retries[self.cnt] if self.cnt < len(CONSTANTS.num_retries) else 1
+                current_protocol = CONSTANTS.trans_protocol[self.cnt] if self.cnt < len(CONSTANTS.trans_protocol) else "Unknown"
 
-                    total_pass_count = 0
-                    total_error_count = 0
-                    all_validation_results = []
-                    all_error_messages = []
-                    combined_data_parts = []
+                # ✅ API별 누적 데이터 초기화 (시스템과 동일)
+                if not hasattr(self, 'api_accumulated_data'):
+                    self.api_accumulated_data = {}
+                
+                api_index = self.cnt
+                # ✅ 첫 회차면 초기화 (이전 데이터 제거)
+                if self.current_retry == 0 or api_index not in self.api_accumulated_data:
+                    self.api_accumulated_data[api_index] = {
+                        'data_parts': [],
+                        'error_messages': [],
+                        'validation_results': [],
+                        'total_pass': 0,
+                        'total_error': 0
+                    }
+                
+                accumulated = self.api_accumulated_data[api_index]
+                
+                # ✅ 시스템과 동일: for 루프 제거, current_retry 사용
+                retry_attempt = self.current_retry
+                
+                combined_error_parts = []
+                step_result = "PASS"
+                add_pass = 0
+                add_err = 0
 
+                # 실시간 진행률 표시
+                if retry_attempt == 0:
+                    self.valResult.append(message_name)
+                    self.valResult.append(f"🔄 부하테스트 시작: 총 {current_retries}회 검증 예정")
 
-                    for retry_attempt in range(current_retries):
-                        combined_error_parts = []
+                # 순서 확인용 로그
+                print(f"[PLATFORM] 시스템 요청 수신: {self.Server.message[self.cnt]} (시도 {retry_attempt + 1}/{current_retries})")
+
+                self.valResult.append(f"📨 시스템 요청 수신, 검증 중... [{retry_attempt + 1}/{current_retries}]")
+
+                # 테이블에 실시간 진행률 표시
+                self.update_table_row_with_retries(self.cnt, "진행중", 0, 0, "검증 진행중...", f"시도 {retry_attempt + 1}/{current_retries}", retry_attempt + 1)
+
+                QApplication.processEvents()
+
+                # 현재 데이터 사용 (이미 읽음)
+                current_data = data
+
+                if self.Server.message[self.cnt] in CONSTANTS.none_request_message:
+                    # 매 시도마다 데이터 수집
+                    tmp_res_auth = json.dumps(current_data, indent=4, ensure_ascii=False)
+                    if retry_attempt == 0:
+                        accumulated['data_parts'].append(f"[시도 {retry_attempt + 1}회차]\n{tmp_res_auth}")
+                    else:
+                        accumulated['data_parts'].append(f"\n[시도 {retry_attempt + 1}회차]\n{tmp_res_auth}")
+
+                    if (len(current_data) != 0) and current_data != "{}":
+                        step_result = "FAIL"
+                        add_err = 1
+                        combined_error_parts.append(f"[검증 {retry_attempt + 1}회차] [None Request] 데이터가 있으면 안 됩니다.")
+                    elif (len(current_data) == 0) or current_data == "{}":
                         step_result = "PASS"
-                        add_pass = 0
-                        add_err = 0
+                        add_pass = 1
 
-                        # 실시간 진행률 표시 (시스템쪽처럼)
-                        if retry_attempt == 0:
-                            self.valResult.append(message_name)
-                            self.valResult.append(f"🔄 부하테스트 시작: 총 {current_retries}회 검증 예정")
+                else:
+                    # 매 시도마다 입력 데이터 수집
+                    tmp_res_auth = json.dumps(current_data, indent=4, ensure_ascii=False)
+                    if retry_attempt == 0:
+                        accumulated['data_parts'].append(f"[시도 {retry_attempt + 1}회차]\n{tmp_res_auth}")
+                    else:
+                        accumulated['data_parts'].append(f"\n[시도 {retry_attempt + 1}회차]\n{tmp_res_auth}")
+                    
+                    # 매 시도마다 실제 검증 수행 (시스템 요청을 플랫폼 요청 스키마로 검증)
+                    val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.videoInSchema[self.cnt],
+                                                                            current_data, self.flag_opt)
+                    add_pass += key_psss_cnt
+                    add_err += key_error_cnt
+                
+                    inbound_err_txt = self._to_detail_text(val_text)
+                    if val_result == "FAIL":
+                        step_result = "FAIL"
+                        combined_error_parts.append(f"[검증 {retry_attempt + 1}회차] [Inbound] " + inbound_err_txt)
+                    
+                    # 개별 프로토콜 설정에 따른 처리
+                    if current_protocol == "LongPolling" and "Realtime" in str(self.Server.message[self.cnt]):
+                        if "Webhook".lower() in str(current_data).lower():
+                            try:
+                                # ✅ JSON 파일 대신 videoData_response.py의 webhook 데이터 사용
+                                if self.cnt < len(self.videoWebhookInData):
+                                    self.realtime_flag = True
+                                    webhook_data = self.videoWebhookInData[self.cnt]
+                                    webhook_url = None
+                                    # transProtocolDesc가 있으면 검사
+                                    if isinstance(webhook_data, dict):
+                                        for k in webhook_data:
+                                            if k.lower() in ["transprotocoldesc", "url", "webhookurl"]:
+                                                webhook_url = webhook_data[k]
+                                                break
+                                    # 잘못된 값이면 기본값으로 대체
+                                    if webhook_url in [None, '', 'desc', 'none', 'None'] or (isinstance(webhook_url, str) and not webhook_url.lower().startswith(('http://', 'https://'))):
+                                        webhook_url = CONSTANTS.url
+                                        for k in webhook_data:
+                                            if k.lower() in ["transprotocoldesc", "url", "webhookurl"]:
+                                                webhook_data[k] = webhook_url
+                                    # 만약 그래도 url이 없으면 아예 Webhook 검증을 skip
+                                    if webhook_url in [None, '', 'desc', 'none', 'None']:
+                                        pass  # Webhook 검증 스킵
+                                    else:
+                                        # Webhook 데이터 수집 (매 시도마다)
+                                        tmp_webhook_data = json.dumps(webhook_data, indent=4, ensure_ascii=False)
+                                        accumulated['data_parts'].append(f"\n--- Webhook (시도 {retry_attempt + 1}회차) ---\n{tmp_webhook_data}")
+                                        
+                                        # ✅ 플랫폼은 응답 웹훅 스키마(videoSchema_response.py)로 검증
+                                        if self.cnt < len(self.videoWebhookInSchema):
+                                            webhook_val_result, webhook_val_text, webhook_key_psss_cnt, webhook_key_error_cnt = json_check_(
+                                                self.videoWebhookInSchema[self.cnt], webhook_data, self.flag_opt
+                                            )
+                                        else:
+                                            webhook_val_result, webhook_val_text, webhook_key_psss_cnt, webhook_key_error_cnt = "FAIL", "videoWebhookInSchema index error", 0, 0
+                                    
+                                        add_pass += webhook_key_psss_cnt
+                                        add_err += webhook_key_error_cnt
+                                    
+                                        webhook_err_txt = self._to_detail_text(webhook_val_text)
+                                        if webhook_val_result == "FAIL":
+                                            step_result = "FAIL"
+                                            combined_error_parts.append(f"[검증 {retry_attempt + 1}회차] [Webhook] " + webhook_err_txt)
 
-                        # 순서 확인용 로그
-                        print(f"[PLATFORM] 시스템 요청 대기 중: {self.Server.message[self.cnt]} (시도 {retry_attempt + 1})")
+                            except Exception as verr:
+                                print(f"[ERROR] Webhook 처리 오류: {verr}")
+                                import traceback
+                                traceback.print_exc()
+                
+                # ✅ 이번 회차 결과를 누적 데이터에 저장
+                accumulated['validation_results'].append(step_result)
+                accumulated['error_messages'].extend(combined_error_parts)
+                accumulated['total_pass'] += add_pass
+                accumulated['total_error'] += add_err
 
-                        self.valResult.append(f"⏳ 시스템 요청 대기 중... [{retry_attempt + 1}/{current_retries}]")
-
-                        # 테이블에 실시간 진행률 표시
-                        self.update_table_row_with_retries(self.cnt, "진행중", 0, 0, "검증 진행중...", f"시도 {retry_attempt + 1}/{current_retries}", retry_attempt + 1)
-
-                        QApplication.processEvents()
-                        # 마지막 반복이 아닐 때만 대기
-                        if retry_attempt < current_retries - 1:
-                            time.sleep(2.0)  # 시험 진행 속도 간격임 -> 숫자 클수록 느리게 검증 횟수 카운트
-
-                        # 매 시도마다 새로운 데이터 읽기 (실제 부하테스트)
-                        try:
-                            json_file_path = resource_path("spec/" + self.Server.system + "/" + self.Server.message[self.cnt] + ".json")
-                            with open(json_file_path, "r", encoding="UTF-8") as out_file:
-                                current_data = json.load(out_file)
-                        except (FileNotFoundError, json.JSONDecodeError):
-                            # 파일이 없거나 읽기 실패 시 기존 데이터 사용
-                            current_data = data
-
-                        if self.Server.message[self.cnt] in CONSTANTS.none_request_message:
-                            # 매 시도마다 데이터 수집
-                            tmp_res_auth = json.dumps(current_data, indent=4, ensure_ascii=False)
-                            if retry_attempt == 0:
-                                combined_data_parts.append(f"[시도 {retry_attempt + 1}회차]\n{tmp_res_auth}")
-                            else:
-                                combined_data_parts.append(f"\n[시도 {retry_attempt + 1}회차]\n{tmp_res_auth}")
-
-                            if (len(current_data) != 0) and current_data != "{}":
-                                step_result = "FAIL"
-                                add_err = 1
-                                combined_error_parts.append(f"[검증 {retry_attempt + 1}회차] [None Request] 데이터가 있으면 안 됩니다.")
-                            elif (len(current_data) == 0) or current_data == "{}":
-                                step_result = "PASS"
-                                add_pass = 1
-
-                        else:
-                            # 매 시도마다 입력 데이터 수집
-                            tmp_res_auth = json.dumps(current_data, indent=4, ensure_ascii=False)
-                            if retry_attempt == 0:
-                                combined_data_parts.append(f"[시도 {retry_attempt + 1}회차]\n{tmp_res_auth}")
-                            else:
-                                combined_data_parts.append(f"\n[시도 {retry_attempt + 1}회차]\n{tmp_res_auth}")
-                        
-                            # 매 시도마다 실제 검증 수행
-                            val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.Server.inSchema[self.cnt],
-                                                                                    current_data, self.flag_opt)
-                            add_pass += key_psss_cnt
-                            add_err += key_error_cnt
-                        
-                            inbound_err_txt = self._to_detail_text(val_text)
-                            if val_result == "FAIL":
-                                step_result = "FAIL"
-                                combined_error_parts.append(f"[검증 {retry_attempt + 1}회차] [Inbound] " + inbound_err_txt)
-                            
-                            # 개별 프로토콜 설정에 따른 처리
-                            if current_protocol == "LongPolling" and "Realtime" in str(self.Server.message[self.cnt]):
-                                if "Webhook".lower() in str(current_data).lower():
-                                    try:
-                                        # 방어적으로 Webhook URL이 잘못된 경우 기본값을 넣어줌
-                                        webhook_json_path = resource_path(
-                                            "spec/" + self.Server.system + "/" + "webhook_" + self.Server.message[self.cnt] + ".json")
-                                        with open(webhook_json_path, "r", encoding="UTF-8") as out_file2:
-                                            self.realtime_flag = True
-                                            webhook_data = json.load(out_file2)
-                                            webhook_url = None
-                                            # transProtocolDesc가 있으면 검사
-                                            if isinstance(webhook_data, dict):
-                                                for k in webhook_data:
-                                                    if k.lower() in ["transprotocoldesc", "url", "webhookurl"]:
-                                                        webhook_url = webhook_data[k]
-                                                        break
-                                            # 잘못된 값이면 기본값으로 대체
-                                            if webhook_url in [None, '', 'desc', 'none', 'None'] or (isinstance(webhook_url, str) and not webhook_url.lower().startswith(('http://', 'https://'))):
-                                                webhook_url = CONSTANTS.url
-                                                for k in webhook_data:
-                                                    if k.lower() in ["transprotocoldesc", "url", "webhookurl"]:
-                                                        webhook_data[k] = webhook_url
-                                            # 만약 그래도 url이 없으면 아예 Webhook 검증을 skip
-                                            if webhook_url in [None, '', 'desc', 'none', 'None']:
-                                                pass  # Webhook 검증 스킵
-                                            else:
-                                            # Webhook 데이터 수집 (매 시도마다)
-                                                tmp_webhook_data = json.dumps(webhook_data, indent=4, ensure_ascii=False)
-                                                combined_data_parts.append(f"\n--- Webhook (시도 {retry_attempt + 1}회차) ---\n{tmp_webhook_data}")
-                                                
-                                                # 매번 Webhook 검증 수행
-                                                webhook_val_result, webhook_val_text, webhook_key_psss_cnt, webhook_key_error_cnt = json_check_(
-                                                    self.Server.outSchema[-1], webhook_data, self.flag_opt
-                                                )
-                                            
-                                                add_pass += webhook_key_psss_cnt
-                                                add_err += webhook_key_error_cnt
-                                            
-                                                webhook_err_txt = self._to_detail_text(webhook_val_text)
-                                                if webhook_val_result == "FAIL":
-                                                    step_result = "FAIL"
-                                                    combined_error_parts.append(f"[검증 {retry_attempt + 1}회차] [Webhook] " + webhook_err_txt)
-
-                                    except json.JSONDecodeError as verr:
-                                        box = QMessageBox()
-                                        box.setIcon(QMessageBox.Critical)
-                                        box.setInformativeText(str(verr))
-                                        box.setWindowTitle("Error")
-                                        box.exec_()
-                                        return ""
-                        
-                        # 각 검증 회차별 결과 저장
-                        all_validation_results.append(step_result)
-                        all_error_messages.extend(combined_error_parts)
-                        total_pass_count += add_pass
-                        total_error_count += add_err
-
+                # ✅ current_retry 증가
+                self.current_retry += 1
+                
+                # ✅ 모든 재시도 완료 여부 확인
+                if self.current_retry >= current_retries:
                     # 최종 결과
-                    final_result = "FAIL" if "FAIL" in all_validation_results else "PASS"
+                    final_result = "FAIL" if "FAIL" in accumulated['validation_results'] else "PASS"
 
                     # 스텝 버퍼 저장
-                    data_text = "\n".join(combined_data_parts) if combined_data_parts else "아직 수신된 데이터가 없습니다."
-                    error_text = "\n".join(all_error_messages) if all_error_messages else "오류가 없습니다."
+                    data_text = "\n".join(accumulated['data_parts']) if accumulated['data_parts'] else "아직 수신된 데이터가 없습니다."
+                    error_text = "\n".join(accumulated['error_messages']) if accumulated['error_messages'] else "오류가 없습니다."
                     self.step_buffers[self.cnt]["data"] = data_text
                     self.step_buffers[self.cnt]["error"] = error_text
                     self.step_buffers[self.cnt]["result"] = final_result
@@ -946,19 +953,18 @@ class MyApp(QWidget):
                     try:
                         api_name = self.Server.message[self.cnt]  # 현재 스텝의 API 이름
                         events = list(self.Server.trace.get(api_name, []))  # deque -> list
-                        self.step_buffers[self.cnt]["events"] = events  # ### NEW: 원본 타임라인 저장
+                        self.step_buffers[self.cnt]["events"] = events
                     except Exception:
                         self.step_buffers[self.cnt]["events"] = []
-                    print("seo", self.step_buffers[self.cnt]["events"])
 
                     # 아이콘/툴팁 갱신
-                    if combined_data_parts:
-                        tmp_res_auth = combined_data_parts[0]
+                    if accumulated['data_parts']:
+                        tmp_res_auth = accumulated['data_parts'][0]
                     else:
                         tmp_res_auth = "No data"
                     
                     # 테이블 업데이트 
-                    self.update_table_row_with_retries(self.cnt, final_result, total_pass_count, total_error_count, tmp_res_auth, error_text, current_retries)
+                    self.update_table_row_with_retries(self.cnt, final_result, accumulated['total_pass'], accumulated['total_error'], tmp_res_auth, error_text, current_retries)
 
                     # 모니터링 창에 최종 결과 표시
                     self.valResult.append(f"\n✅ 부하테스트 완료: {current_retries}회 검증 완료")
@@ -967,16 +973,31 @@ class MyApp(QWidget):
                     self.valResult.append(final_result)
 
                     # 누적 점수 업데이트
-                    self.total_error_cnt += total_error_count
-                    self.total_pass_cnt += total_pass_count
+                    self.total_error_cnt += accumulated['total_error']
+                    self.total_pass_cnt += accumulated['total_pass']
 
                     self.update_score_display()
-                    self.valResult.append(
-                        "Score : " + str((self.total_pass_cnt / (self.total_pass_cnt + self.total_error_cnt) * 100)))
+                    
+                    total_fields = self.total_pass_cnt + self.total_error_cnt
+                    if total_fields > 0:
+                        score_text = str((self.total_pass_cnt / total_fields * 100))
+                    else:
+                        score_text = "0"
+                    
+                    self.valResult.append("Score : " + score_text)
                     self.valResult.append(
                         "Score details : " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(self.total_error_cnt) + "(누적 오류 필드 수)\n")
                     
+                    # ✅ 다음 API로 이동
                     self.cnt += 1
+                    self.current_retry = 0  # 재시도 카운터 리셋
+                    
+                    # ✅ 시스템과 동일하게 2초 대기
+                    self.time_pre = time.time() + 2.0
+                else:
+                    # ✅ 아직 재시도가 남음 - 2초 대기 후 다음 시도
+                    self.time_pre = time.time() + 2.0
+                        
                 self.realtime_flag = False
 
             elif time_interval > current_timeout and self.cnt == self.cnt_pre:
@@ -1003,8 +1024,13 @@ class MyApp(QWidget):
                 # 평가 점수 디스플레이 업데이트
                 self.update_score_display()
                 
-                self.valResult.append(
-                    "Score : " + str((self.total_pass_cnt / (self.total_pass_cnt + self.total_error_cnt) * 100)))
+                total_fields = self.total_pass_cnt + self.total_error_cnt
+                if total_fields > 0:
+                    score_text = str((self.total_pass_cnt / total_fields * 100))
+                else:
+                    score_text = "0"
+                
+                self.valResult.append("Score : " + score_text)
                 self.valResult.append("Score details : " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(
                     self.total_error_cnt) + "(누적 오류 필드 수)\n")
                 
@@ -1022,8 +1048,14 @@ class MyApp(QWidget):
                 self.tick_timer.stop()
                 self.valResult.append("검증 절차가 완료되었습니다.")
                 self.cnt = 0
-                self.final_report += "전체 점수: " + str(
-                    (self.total_pass_cnt / (self.total_pass_cnt + self.total_error_cnt) * 100)) + "\n"
+                
+                total_fields = self.total_pass_cnt + self.total_error_cnt
+                if total_fields > 0:
+                    final_score = (self.total_pass_cnt / total_fields * 100)
+                else:
+                    final_score = 0
+                
+                self.final_report += "전체 점수: " + str(final_score) + "\n"
                 self.final_report += "전체 결과: " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(
                     self.total_error_cnt) + "(누적 오류 필드 수)" + "\n"
                 self.final_report += "\n"

@@ -972,12 +972,12 @@ class MyApp(QWidget):
         else:
             message_name = f"step {self.webhook_cnt + 1}: (index out of range)"
 
-        # Adapted for new single-element list structure of webhookSchema
-        if isinstance(self.webhookSchema, list) and len(self.webhookSchema) > 0:
-            schema_to_check = self.webhookSchema[0]
+        # ✅ videoData_response.py의 webhook 스키마 사용 (JSON 파일 대신)
+        if self.webhook_cnt < len(self.videoWebhookInSchema):
+            schema_to_check = self.videoWebhookInSchema[self.webhook_cnt]
             val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(schema_to_check, self.webhook_res, self.flag_opt)
         else:
-            val_result, val_text, key_psss_cnt, key_error_cnt = "FAIL", "webhookSchema index error", 0, 0
+            val_result, val_text, key_psss_cnt, key_error_cnt = "FAIL", "webhookInSchema index error", 0, 0
 
         self.valResult.append(message_name)
         self.valResult.append("\n" + tmp_webhook_res)
@@ -2084,17 +2084,17 @@ class MyApp(QWidget):
 
     def get_setting(self):
         self.setting_variables = QSettings('My App', 'Variable')
-        self.system = "video"  # 영상보안 시스템으로 고정
+        self.system = "video"  # 고정
 
-        # 기본 시스템 설정 (영상보안 시스템으로 고정)
+        # 기본 시스템 설정 (영상보안 시스템으로 지금은 일단 고정)
         self.radio_check_flag = "video"
         self.message = self.videoMessages
         self.inMessage = self.videoInMessage
         self.outMessage = self.videoOutMessage
         self.inSchema = self.videoInSchema
         self.outSchema = self.videoOutSchema
-        # Adapted for new single-element list structure
-        self.webhookSchema = self.videoWebhookInSchema if isinstance(self.videoWebhookInSchema, list) and len(self.videoWebhookInSchema) > 0 else [{}]
+        # ✅ JSON 파일 대신 videoData_response.py의 webhook 스키마 사용
+        self.webhookSchema = self.videoWebhookInSchema
         self.final_report = f"{self.spec_description} 검증 결과\n"
 
         # 기본 인증 설정 (CONSTANTS.py에서 가져옴)
