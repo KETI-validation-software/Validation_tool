@@ -1,4 +1,4 @@
-# request 모드
+# request 모드 - 시스템 측 메시지 데이터 확인에 뜨는 내용
 
 # Authentication
 Authentication_out_data = {
