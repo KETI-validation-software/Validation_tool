@@ -4,9 +4,12 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import ssl
 import json
 import cgi
-
+from collections import defaultdict, deque            # ### NEW
+import datetime
 import time
 import traceback
+import os
+import config.CONSTANTS as CONSTANTS
 
 from spec.video.videoRequest import videoMessages, videoOutMessage, videoInMessage
 from spec.video.videoSchema import videoInSchema, videoOutSchema
@@ -35,11 +38,30 @@ class Server(BaseHTTPRequestHandler):
 
     url_tmp = None
 
+    trace = defaultdict(lambda: deque(maxlen=1000))  # api_name -> deque(events)
+
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.result = ""
         self.webhook_flag = False
 
+    def _push_event(self, api_name, direction, payload):
+        try:
+            evt = {
+                "time": datetime.datetime.utcnow().isoformat() + "Z",
+                "api": api_name,
+                "dir": direction,  # "REQUEST" | "RESPONSE" | "WEBHOOK"
+                "data": payload
+            }
+            self.trace[api_name].append(evt)
+            os.makedirs(CONSTANTS.trace_path, exist_ok=True)
+            safe_api = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in str(api_name))
+            trace_path = os.path.join(CONSTANTS.trace_path, f"trace_{safe_api}.ndjson")
+            with open(trace_path, "a", encoding="utf-8") as f:
+                f.write(json.dumps(evt, ensure_ascii=False) + "\n")
+        except Exception:
+            pass
 
     def _set_headers(self):
         self.send_response(200, None)
@@ -183,6 +205,11 @@ class Server(BaseHTTPRequestHandler):
             post_data = '{}'
         dict_data = json.loads(post_data)  # type(dict_data)는 <class 'dict'>
 
+        try:
+            self._push_event(self.path[1:], "REQUEST", dict_data)
+        except Exception:
+            pass
+
         with open(resource_path("spec/"+self.system + "/" + self.path[1:]+".json"), "w", encoding="UTF-8") \
                 as out_file:
             json.dump(dict_data, out_file, ensure_ascii=False)
@@ -267,7 +294,10 @@ class Server(BaseHTTPRequestHandler):
                 }
         # send the message back
         a = json.dumps(message).encode('utf-8')
-
+        try:
+            self._push_event(self.path[1:], "RESPONSE", message)
+        except Exception:
+            pass
         self._set_headers()
         self.wfile.write(a)
 
