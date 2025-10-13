@@ -883,12 +883,10 @@ class MyApp(QWidget):
                     if current_protocol == "LongPolling" and "Realtime" in str(self.Server.message[self.cnt]):
                         if "Webhook".lower() in str(current_data).lower():
                             try:
-                                # 방어적으로 Webhook URL이 잘못된 경우 기본값을 넣어줌
-                                webhook_json_path = resource_path(
-                                    "spec/" + self.Server.system + "/" + "webhook_" + self.Server.message[self.cnt] + ".json")
-                                with open(webhook_json_path, "r", encoding="UTF-8") as out_file2:
+                                # ✅ JSON 파일 대신 videoData_response.py의 webhook 데이터 사용
+                                if self.cnt < len(self.videoWebhookInData):
                                     self.realtime_flag = True
-                                    webhook_data = json.load(out_file2)
+                                    webhook_data = self.videoWebhookInData[self.cnt]
                                     webhook_url = None
                                     # transProtocolDesc가 있으면 검사
                                     if isinstance(webhook_data, dict):
@@ -910,10 +908,13 @@ class MyApp(QWidget):
                                         tmp_webhook_data = json.dumps(webhook_data, indent=4, ensure_ascii=False)
                                         accumulated['data_parts'].append(f"\n--- Webhook (시도 {retry_attempt + 1}회차) ---\n{tmp_webhook_data}")
                                         
-                                        # 매번 Webhook 검증 수행
-                                        webhook_val_result, webhook_val_text, webhook_key_psss_cnt, webhook_key_error_cnt = json_check_(
-                                            self.videoWebhookInSchema[-1], webhook_data, self.flag_opt
-                                        )
+                                        # ✅ 플랫폼은 응답 웹훅 스키마(videoSchema_response.py)로 검증
+                                        if self.cnt < len(self.videoWebhookInSchema):
+                                            webhook_val_result, webhook_val_text, webhook_key_psss_cnt, webhook_key_error_cnt = json_check_(
+                                                self.videoWebhookInSchema[self.cnt], webhook_data, self.flag_opt
+                                            )
+                                        else:
+                                            webhook_val_result, webhook_val_text, webhook_key_psss_cnt, webhook_key_error_cnt = "FAIL", "videoWebhookInSchema index error", 0, 0
                                     
                                         add_pass += webhook_key_psss_cnt
                                         add_err += webhook_key_error_cnt
@@ -923,13 +924,10 @@ class MyApp(QWidget):
                                             step_result = "FAIL"
                                             combined_error_parts.append(f"[검증 {retry_attempt + 1}회차] [Webhook] " + webhook_err_txt)
 
-                            except json.JSONDecodeError as verr:
-                                box = QMessageBox()
-                                box.setIcon(QMessageBox.Critical)
-                                box.setInformativeText(str(verr))
-                                box.setWindowTitle("Error")
-                                box.exec_()
-                                return ""
+                            except Exception as verr:
+                                print(f"[ERROR] Webhook 처리 오류: {verr}")
+                                import traceback
+                                traceback.print_exc()
                 
                 # ✅ 이번 회차 결과를 누적 데이터에 저장
                 accumulated['validation_results'].append(step_result)
