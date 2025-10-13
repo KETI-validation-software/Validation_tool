@@ -21,6 +21,7 @@ url = "https://127.0.0.1:8080"
 
 
 
+
 specs = [["cmg90br3n002qihleffuljnth_inSchema","cmg90br3n002qihleffuljnth_outData","cmg90br3n002qihleffuljnth_messages",""],
          ["cmg7edeo50013124xiux3gbkb_inSchema","cmg7edeo50013124xiux3gbkb_outData","cmg7edeo50013124xiux3gbkb_messages",""],
          ["cmg7bve25000114cevhn5o3vr_inSchema","cmg7bve25000114cevhn5o3vr_outData","cmg7bve25000114cevhn5o3vr_messages",""]]
@@ -47,10 +48,12 @@ trans_protocol : 메시지별 실시간 송수신 메시지 여부, None-실시�
 time_out : 메시지별 timeout 설정 시간 (ms)
 num_retries : 메시지별 메시지 검증 횟수
 '''
+
 #나중에 삭제
 trans_protocol = [None, None, None, None, None, None, 'WebHook', None, None]
 time_out = [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000]
 num_retries = [1, 2, 3, 2, 1, 2, 3, 2, 1]
+
 
 # specification.id별 설정
 SPEC_CONFIG = {
