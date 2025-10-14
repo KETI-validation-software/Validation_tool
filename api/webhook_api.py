@@ -27,40 +27,47 @@ class WebhookServer(BaseHTTPRequestHandler):
         self.wfile.write(b'Hello, World!')
         #print(f"Received GET request from {self.client_address[0]}")
 
-def do_POST(self):
-    try:
-        content_length = int(self.headers.get('Content-Length', '0'))
-        raw = self.rfile.read(content_length) if content_length > 0 else b'{}'
+    def do_POST(self):  # ✅ 들여쓰기 수정 (클래스 메서드로 변경)
+        print(f"[WEBHOOK] do_POST called: path={self.path}")  # ✅ 디버그 로그
         try:
-            payload = json.loads(raw.decode('utf-8'))
-        except Exception:
-            # JSON 파싱 실패 대비 (원문 그대로 보존)
-            payload = {"_raw": raw.decode('utf-8', errors='ignore')}
+            content_length = int(self.headers.get('Content-Length', '0'))
+            print(f"[WEBHOOK] Content-Length: {content_length}")  # ✅ 디버그 로그
+            raw = self.rfile.read(content_length) if content_length > 0 else b'{}'
+            try:
+                payload = json.loads(raw.decode('utf-8'))
+            except Exception:
+                # JSON 파싱 실패 대비 (원문 그대로 보존)
+                payload = {"_raw": raw.decode('utf-8', errors='ignore')}
 
-        # ✅ 1) 수신한 웹훅 요청 바디를 그대로 상위로 전달 (검증용)
-        if self.result_signal:
-            self.result_signal.emit(payload)
+            print(f"[WEBHOOK] Payload received: {json.dumps(payload, ensure_ascii=False)[:200]}")  # ✅ 디버그 로그
 
-        # ✅ 2) 플랫폼(콜백 보낸 쪽)에게는 "간단한 성공 응답"만 돌려준다
-        self.send_response(200)
-        self.send_header('Content-Type', 'application/json; charset=utf-8')
-        self.end_headers()
-        resp = {"code": 200, "message": "성공"}
-        self.wfile.write(json.dumps(resp, ensure_ascii=False).encode('utf-8'))
-        self.wfile.flush()
+            # ✅ 1) 수신한 웹훅 요청 바디를 그대로 상위로 전달 (검증용)
+            if self.result_signal:
+                self.result_signal.emit(payload)
 
-    except Exception as e:
-        # 실패 응답 (옵션)
-        try:
-            self.send_response(500)
+            # ✅ 2) 플랫폼(콜백 보낸 쪽)에게는 "간단한 성공 응답"만 돌려준다
+            self.send_response(200)
             self.send_header('Content-Type', 'application/json; charset=utf-8')
             self.end_headers()
-            err = {"code": 500, "message": f"서버 오류: {str(e)}"}
-            self.wfile.write(json.dumps(err, ensure_ascii=False).encode('utf-8'))
+            resp = {"code": 200, "message": "성공"}
+            self.wfile.write(json.dumps(resp, ensure_ascii=False).encode('utf-8'))
             self.wfile.flush()
-        finally:
-            import traceback
-            print(traceback.format_exc())
+            
+            print(f"[WEBHOOK] Response sent: {resp}")  # ✅ 디버그 로그
+
+        except Exception as e:
+            print(f"[WEBHOOK ERROR] {e}")  # ✅ 디버그 로그
+            # 실패 응답 (옵션)
+            try:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.end_headers()
+                err = {"code": 500, "message": f"서버 오류: {str(e)}"}
+                self.wfile.write(json.dumps(err, ensure_ascii=False).encode('utf-8'))
+                self.wfile.flush()
+            finally:
+                import traceback
+                print(traceback.format_exc())
 
 
 

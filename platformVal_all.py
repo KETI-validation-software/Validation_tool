@@ -1787,10 +1787,11 @@ class MyApp(QWidget):
         self.Server.outMessage = self.videoOutMessage
         self.Server.inSchema = self.videoInSchema
         self.Server.outSchema = self.videoOutSchema
-        self.Server.webhookData = self.videoWebhookInData  # ✅ 웹훅 데이터 추가
+        self.Server.webhookData = self.videoWebhookData  # ✅ 웹훅 이벤트 데이터 (플랫폼 → 시스템)
         self.Server.system = "video"
         self.Server.timeout = timeout
         print(f"[DEBUG] sbtn_push: Server configured - message={self.Server.message[:3] if self.Server.message else 'None'}...")
+        print(f"[DEBUG] sbtn_push: webhookData length={len(self.Server.webhookData) if self.Server.webhookData else 0}")  # ✅ 디버그 로그
         
         self.init_win()
         self.valResult.clear()  # 초기화
