@@ -1287,15 +1287,7 @@ class MyApp(QWidget):
                         if self.cnt < len(self.outMessage):
                             platform_data = self.outMessage[self.cnt]
                             data_text = json.dumps(platform_data, indent=4, ensure_ascii=False)
-                            
-                            # ✅ 웹훅 API인 경우 웹훅 데이터도 함께 표시
-                            current_protocol = CONSTANTS.trans_protocol[self.cnt] if self.cnt < len(CONSTANTS.trans_protocol) else "Unknown"
-                            if "Realtime" in self.message[self.cnt] and current_protocol == "WebHook":
-                                # 웹훅 데이터 추가
-                                if len(self.videoWebhookInData) > 0:
-                                    webhook_event_data = self.videoWebhookInData[0]
-                                    webhook_text = json.dumps(webhook_event_data, indent=4, ensure_ascii=False)
-                                    data_text += f"\n\n--- Webhook 이벤트 데이터 ---\n{webhook_text}"
+                            # ✅ 웹훅 이벤트 데이터는 get_webhook_result()에서만 추가
                         else:
                             data_text = tmp_res_auth  # fallback
                         
@@ -2171,8 +2163,8 @@ class MyApp(QWidget):
         self.outMessage = self.videoOutMessage
         self.inSchema = self.videoInSchema
         self.outSchema = self.videoOutSchema
-        # ✅ JSON 파일 대신 videoData_response.py의 webhook 스키마 사용
-        self.webhookSchema = self.videoWebhookSchema
+        # ✅ 시스템이 받는 웹훅 이벤트는 spec_002_webhookSchema (플랫폼 → 시스템)
+        self.webhookSchema = self.videoWebhookInSchema
         self.final_report = f"{self.spec_description} 검증 결과\n"
 
         # 기본 인증 설정 (CONSTANTS.py에서 가져옴)
