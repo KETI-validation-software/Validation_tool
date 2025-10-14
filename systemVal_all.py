@@ -37,7 +37,7 @@ import importlib
 
 # 통합된 상세 내용 확인 팝업창 클래스
 class CombinedDetailDialog(QDialog):
-    def __init__(self, api_name, step_buffer, schema_data):
+    def __init__(self, api_name, step_buffer, schema_data, webhook_schema=None):
         super().__init__()
 
         self.setWindowTitle(f"{api_name} - 통합 상세 정보")
@@ -47,6 +47,9 @@ class CombinedDetailDialog(QDialog):
 
         # 전체 레이아웃
         main_layout = QVBoxLayout()
+
+        # webhook_schema 저장
+        self.webhook_schema = webhook_schema
 
         # 상단 제목
         title_label = QLabel(f"{api_name} API 상세 정보")
@@ -75,7 +78,13 @@ class CombinedDetailDialog(QDialog):
         schema_layout = QVBoxLayout()
         self.schema_browser = QTextBrowser()
         self.schema_browser.setAcceptRichText(True)
+        
+        # 기본 스키마 + 웹훅 스키마 결합
         schema_text = self._format_schema(schema_data)
+        if self.webhook_schema:
+            schema_text += "\n\n=== 웹훅 이벤트 스키마 (플랫폼→시스템) ===\n"
+            schema_text += self._format_schema(self.webhook_schema)
+        
         self.schema_browser.setPlainText(schema_text)
         schema_layout.addWidget(self.schema_browser)
         schema_group.setLayout(schema_layout)
@@ -1778,8 +1787,18 @@ class MyApp(QWidget):
             except:
                 schema_data = None
 
+            # 웹훅 스키마 가져오기 (시스템: 플랫폼이 보내는 웹훅 이벤트 스키마)
+            # ✅ 웹훅 스키마는 모든 API가 공통으로 사용하므로 항상 [0] 사용
+            try:
+                webhook_schema = self.videoWebhookInSchema[0] if len(self.videoWebhookInSchema) > 0 else None
+                print(f"[DEBUG] System webhook_schema for row {row}: {webhook_schema is not None}")
+                print(f"[DEBUG] videoWebhookInSchema length: {len(self.videoWebhookInSchema)}")
+            except Exception as e:
+                print(f"[DEBUG] Error getting webhook_schema: {e}")
+                webhook_schema = None
+
             # 통합 팝업창 띄우기
-            dialog = CombinedDetailDialog(api_name, buf, schema_data)
+            dialog = CombinedDetailDialog(api_name, buf, schema_data, webhook_schema)
             dialog.exec_()
 
         except Exception as e:
