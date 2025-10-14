@@ -889,16 +889,37 @@ class MyApp(QWidget):
                         combined_error_parts.append(f"[검증 {retry_attempt + 1}회차] [Inbound] " + inbound_err_txt)
                     
                     # ✅ WebHook 프로토콜인 경우 웹훅 응답 표시
+                    print(f"[DEBUG][PLATFORM] cnt={self.cnt}, protocol={current_protocol}, msg={self.Server.message[self.cnt]}")
                     if current_protocol == "WebHook" and "Realtime" in str(self.Server.message[self.cnt]):
-                        if len(self.videoWebhookInData) > 0:
-                            webhook_response = self.videoWebhookInData[0]  # 웹훅 응답 데이터
+                        print(f"[DEBUG][PLATFORM] 웹훅 조건 만족!")
+                        print(f"[DEBUG][PLATFORM] Server 인스턴스 ID: {id(self.Server)}")
+                        
+                        # ✅ 웹훅 스레드가 생성될 때까지 짧게 대기
+                        wait_count = 0
+                        while wait_count < 10:  # 최대 1초 (0.1초 x 10)
+                            if hasattr(self.Server, 'webhook_thread') and self.Server.webhook_thread:
+                                print(f"[DEBUG][PLATFORM] 웹훅 스레드 발견! (대기 횟수: {wait_count})")
+                                break
+                            time.sleep(0.1)
+                            wait_count += 1
+                        
+                        # ✅ 웹훅 스레드 완료 대기
+                        if hasattr(self.Server, 'webhook_thread') and self.Server.webhook_thread:
+                            print(f"[DEBUG][PLATFORM] 웹훅 스레드 찾음, 완료 대기 중...")
+                            self.Server.webhook_thread.join(timeout=5)  # 최대 5초 대기
+                            print(f"[DEBUG][PLATFORM] 웹훅 스레드 완료됨")
+                        else:
+                            print(f"[DEBUG][PLATFORM] 웹훅 스레드 없음 (대기 횟수: {wait_count})")
+                        
+                        # ✅ 실제 웹훅 응답 사용 (Server.webhook_response)
+                        if hasattr(self.Server, 'webhook_response') and self.Server.webhook_response:
+                            webhook_response = self.Server.webhook_response  # 실제 웹훅 응답
+                            print(f"[DEBUG][PLATFORM] 웹훅 응답 사용: {webhook_response}")
                             tmp_webhook_response = json.dumps(webhook_response, indent=4, ensure_ascii=False)
                             accumulated['data_parts'].append(f"\n--- Webhook 응답 (시도 {retry_attempt + 1}회차) ---\n{tmp_webhook_response}")
-                            
-                            # 웹훅 응답은 간단한 {code, message} 형태이므로 검증 생략 가능
-                            # 또는 필요시 검증 추가 가능
                         else:
-                            accumulated['data_parts'].append(f"\n--- Webhook 응답 ---\n(웹훅 응답 데이터 없음)")
+                            print(f"[DEBUG][PLATFORM] 웹훅 응답 없음")
+                            accumulated['data_parts'].append(f"\n--- Webhook 응답 ---\nnull")
                     
                     # 개별 프로토콜 설정에 따른 처리
                     if current_protocol == "LongPolling" and "Realtime" in str(self.Server.message[self.cnt]):
@@ -1787,10 +1808,11 @@ class MyApp(QWidget):
         self.Server.outMessage = self.videoOutMessage
         self.Server.inSchema = self.videoInSchema
         self.Server.outSchema = self.videoOutSchema
-        self.Server.webhookData = self.videoWebhookInData  # ✅ 웹훅 데이터 추가
+        self.Server.webhookData = self.videoWebhookData  # ✅ 웹훅 이벤트 데이터 (플랫폼 → 시스템)
         self.Server.system = "video"
         self.Server.timeout = timeout
         print(f"[DEBUG] sbtn_push: Server configured - message={self.Server.message[:3] if self.Server.message else 'None'}...")
+        print(f"[DEBUG] sbtn_push: webhookData length={len(self.Server.webhookData) if self.Server.webhookData else 0}")  # ✅ 디버그 로그
         
         self.init_win()
         self.valResult.clear()  # 초기화
