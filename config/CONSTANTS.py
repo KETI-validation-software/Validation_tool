@@ -14,8 +14,8 @@ version = "v0.1"
 test_category = "본시험"
 test_target = "통합시스템"
 test_range = "ALL_FIELDS"
-auth_type = "Digest Auth"
-auth_info = "admin,1234"
+auth_type = "Bearer Token"
+auth_info = "1234"
 admin_code = "123456789"
 url = "https://127.0.0.1:8080"
 
@@ -40,14 +40,14 @@ trace_path = os.path.join("results", "trace")
 '''
 specification.id별 step 설정
 각 spec의 steps 순서대로 trans_protocol, time_out, num_retries 설정
-trans_protocol : 메시지별 실시간 송수신 메시지 여부, None-실시간 아님, LongPolling, WebHook은 설정에 따라 동작
+trans_protocol : 메시지별 실시간 송수신 메시지 여부, None-실시간 아님, LongPolling, WebHook은 설정에 따라 동작 -> 잠깐 웹훅으로 변경
 time_out : 메시지별 timeout 설정 시간 (ms)
 num_retries : 메시지별 메시지 검증 횟수
 '''
 #나중에 삭제
-trans_protocol = [None, None, None, None, None, None, 'LongPolling', None, None]
+trans_protocol = [None, None, None, None, None, None, 'WebHook', None, None]
 time_out = [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000]
-num_retries = [1, 2, 3, 3, 3, 2, 1, 1, 1]
+num_retries = [1, 1, 1, 1, 1, 1, 1, 1, 1]
 
 # specification.id별 설정
 SPEC_CONFIG = {

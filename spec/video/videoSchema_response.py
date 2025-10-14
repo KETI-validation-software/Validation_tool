@@ -82,21 +82,13 @@ ReplayURL_out_schema = {
 }],
 }
 
-# RealtimeVideoEventInfos
+# RealtimeVideoEventInfos - 구독 응답 검증 (시스템이 플랫폼의 응답을 검증)
 RealtimeVideoEventInfos_out_schema = {
     "code": str,
     "message": str,
-    "camList": [{
-    "camID": str,
-    "eventUUID": str,
-    "eventName": str,
-    "startTime": int,
-    OptionalKey("endTime"): int,
-    OptionalKey("eventDesc"): str,
-}],
 }
 
-# WebHook RealtimeVideoEventInfos
+# WebHook RealtimeVideoEventInfos - 웹훅 이벤트 데이터 검증 (시스템이 플랫폼의 웹훅 콜백을 검증)
 WebHook_RealtimeVideoEventInfos_in_schema = {
     "camList": [{
     "camID": str,
@@ -160,6 +152,6 @@ spec_002_outSchema = [
 
 # spec_002 WebHook 스키마 리스트
 spec_002_webhookSchema = [
-    WebHook_RealtimeVideoEventInfos_in_schema,
+    WebHook_RealtimeVideoEventInfos_in_schema,  # 플랫폼→시스템: 웹훅 이벤트 데이터 (시스템이 검증)
 ]
 
