@@ -883,10 +883,10 @@ class MyApp(QWidget):
                     if current_protocol == "LongPolling" and "Realtime" in str(self.Server.message[self.cnt]):
                         if "Webhook".lower() in str(current_data).lower():
                             try:
-                                # ✅ JSON 파일 대신 videoData_response.py의 webhook 데이터 사용
-                                if self.cnt < len(self.videoWebhookInData):
+                                # ✅ 웹훅 데이터는 별도 리스트이므로 항상 첫 번째 요소 사용
+                                if len(self.videoWebhookInData) > 0:
                                     self.realtime_flag = True
-                                    webhook_data = self.videoWebhookInData[self.cnt]
+                                    webhook_data = self.videoWebhookInData[0]  # 웹훅 데이터는 첫 번째 요소
                                     webhook_url = None
                                     # transProtocolDesc가 있으면 검사
                                     if isinstance(webhook_data, dict):
@@ -908,13 +908,13 @@ class MyApp(QWidget):
                                         tmp_webhook_data = json.dumps(webhook_data, indent=4, ensure_ascii=False)
                                         accumulated['data_parts'].append(f"\n--- Webhook (시도 {retry_attempt + 1}회차) ---\n{tmp_webhook_data}")
                                         
-                                        # ✅ 플랫폼은 응답 웹훅 스키마(videoSchema_response.py)로 검증
-                                        if self.cnt < len(self.videoWebhookInSchema):
+                                        # ✅ 웹훅 스키마는 별도 리스트이므로 항상 첫 번째 요소 사용
+                                        if len(self.videoWebhookInSchema) > 0:
                                             webhook_val_result, webhook_val_text, webhook_key_psss_cnt, webhook_key_error_cnt = json_check_(
-                                                self.videoWebhookInSchema[self.cnt], webhook_data, self.flag_opt
+                                                self.videoWebhookInSchema[0], webhook_data, self.flag_opt
                                             )
                                         else:
-                                            webhook_val_result, webhook_val_text, webhook_key_psss_cnt, webhook_key_error_cnt = "FAIL", "videoWebhookInSchema index error", 0, 0
+                                            webhook_val_result, webhook_val_text, webhook_key_psss_cnt, webhook_key_error_cnt = "FAIL", "videoWebhookInSchema not found", 0, 0
                                     
                                         add_pass += webhook_key_psss_cnt
                                         add_err += webhook_key_error_cnt
@@ -1756,6 +1756,7 @@ class MyApp(QWidget):
         self.Server.outMessage = self.videoOutMessage
         self.Server.inSchema = self.videoInSchema
         self.Server.outSchema = self.videoOutSchema
+        self.Server.webhookData = self.videoWebhookInData  # ✅ 웹훅 데이터 추가
         self.Server.system = "video"
         self.Server.timeout = timeout
         print(f"[DEBUG] sbtn_push: Server configured - message={self.Server.message[:3] if self.Server.message else 'None'}...")
