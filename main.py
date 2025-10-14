@@ -25,7 +25,7 @@ class MainWindow(QMainWindow):
         # 접속 후 화면
         self.info_widget = InfoWidget()
         self.stack.addWidget(self.info_widget)  # index 0
-        self.info_widget.startTestRequested.connect(self._open_validation_app)
+        self.info_widget.startTestRequested.connect(self._on_start_test_requested)
 
         # info_widget의 페이지 변경 시그널 연결 (시험 정보 불러오기 완료 시)
         self.info_widget.stacked_widget.currentChanged.connect(self._on_page_changed)
@@ -49,10 +49,10 @@ class MainWindow(QMainWindow):
         self.act_test_setup.setEnabled(False)
         main_menu.addAction(self.act_test_setup)
 
-        # 3. 시험 실행 (시험 설정 완료 후 활성화 - 향후 구현)
+        # 3. 시험 실행 (시험 설정 완료 후 활성화)
         self.act_test_run = QAction("시험 실행", self)
         self.act_test_run.setEnabled(False)
-        self.act_test_run.triggered.connect(self._open_validation_app)
+        self.act_test_run.triggered.connect(self._run_test_from_menu)
         main_menu.addAction(self.act_test_run)
 
         # 4. 시험 결과 (시험 실행 완료 후 활성화 - 향후 구현)
@@ -75,11 +75,19 @@ class MainWindow(QMainWindow):
 
     def _show_test_info(self):
         """시험 정보 페이지로 이동 (1페이지)"""
+        # 메인 stack을 info_widget으로 전환
+        self.stack.setCurrentWidget(self.info_widget)
+        # info_widget 내부를 1페이지로 전환
         self.info_widget.stacked_widget.setCurrentIndex(0)
+        print("시험 정보 페이지로 이동")
 
     def _show_test_setup(self):
         """시험 설정 페이지로 이동 (2페이지)"""
+        # 메인 stack을 info_widget으로 전환
+        self.stack.setCurrentWidget(self.info_widget)
+        # info_widget 내부를 2페이지로 전환
         self.info_widget.stacked_widget.setCurrentIndex(1)
+        print("시험 설정 페이지로 이동")
 
     def _on_page_changed(self, index):
         """info_widget의 페이지가 변경될 때 호출되는 함수"""
@@ -87,6 +95,40 @@ class MainWindow(QMainWindow):
             # 2페이지(시험 설정)로 이동 → 시험 설정 메뉴 활성화
             self.act_test_setup.setEnabled(True)
             print("시험 설정 메뉴 활성화")
+
+    def _on_start_test_requested(self, mode):
+        """시험 시작 버튼 클릭 시 호출 - 시험 실행 메뉴 활성화 후 검증 앱 실행"""
+        # 시험 실행 메뉴 활성화
+        self.act_test_run.setEnabled(True)
+        print("시험 실행 메뉴 활성화")
+
+        # 현재 모드 저장 (메뉴에서 시험 실행 클릭 시 사용)
+        self._current_test_mode = mode
+
+        # 검증 앱 실행
+        self._open_validation_app(mode)
+
+    def _run_test_from_menu(self):
+        """메뉴에서 시험 실행 클릭 시 호출 - 메인 창을 검증 화면으로 전환"""
+        if hasattr(self, '_current_test_mode') and self._current_test_mode:
+            mode = self._current_test_mode
+            print(f"시험 실행 페이지로 이동: verificationType={mode}")
+
+            # 메인 창을 해당 검증 화면으로 전환
+            if mode == "request":
+                # Request 모드 - 메인 창을 System 검증으로 전환
+                if getattr(self, "_system_widget", None) is None:
+                    self._system_widget = system_app.MyApp(embedded=True)
+                    self.stack.addWidget(self._system_widget)
+                self.stack.setCurrentWidget(self._system_widget)
+            elif mode == "response":
+                # Response 모드 - 메인 창을 Platform 검증으로 전환
+                if getattr(self, "_platform_widget", None) is None:
+                    self._platform_widget = platform_app.MyApp(embedded=True)
+                    self.stack.addWidget(self._platform_widget)
+                self.stack.setCurrentWidget(self._platform_widget)
+        else:
+            QMessageBox.warning(self, "경고", "시험 모드가 설정되지 않았습니다.\n시험 시작 버튼을 먼저 클릭해주세요.")
 
     def _toggle_fullscreen(self, checked: bool):
         """
