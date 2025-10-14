@@ -143,26 +143,32 @@ ReplayURL_out_data = {
 ]
 }
 
-# RealtimeVideoEventInfos
+# RealtimeVideoEventInfos - 플랫폼이 시스템에 보내는 웹훅 요청 응답 메시지
 RealtimeVideoEventInfos_out_data = {
+    "code": "200",
+    "message": "성공",
+}
+
+# WebHook RealtimeVideoEventInfos - 플랫폼이 시스템에 보내는 웹훅 데이터 메시지
+WebHook_RealtimeVideoEventInfos_in_data = {
     "camList": [
         {
-        "camID": "cam0001",
-        "eventUUID": "event01",
-        "eventName": "배회",
-        "startTime": 20220822163022123,
-        "endTime": 20220822163025123,
-        "eventDesc": "sfdfEFASDDDLKJFjdkdlfjde"
-    },
+            "camID": "cam0001",
+            "eventUUID": "event01",
+            "eventName": "배회",
+            "startTime": 20220822163022123,
+            "endTime": 20220822163025123,
+            "eventDesc": "sfdfEFASDDDLKJFjdkdlfjde"
+        },
         {
-        "camID": "cam0002",
-        "eventUUID": "event01",
-        "eventName": "배회",
-        "startTime": 20220822163022123,
-        "endTime": 20220822163025123,
-        "eventDesc": "dddddeeeeeAAFEDFiikjf"
-    }
-]
+            "camID": "cam0002",
+            "eventUUID": "event01",
+            "eventName": "배회",
+            "startTime": 20220822163022123,
+            "endTime": 20220822163025123,
+            "eventDesc": "dddddeeeeeAAFEDFiikjf"
+        }
+    ]
 }
 
 # StoredVideoEventInfos
@@ -264,6 +270,11 @@ spec_001_messages = [
     "RealtimeVideoEventInfos",
     "StoredVideoEventInfos",
     "StoredObjectAnalyticsInfos",
+]
+
+# spec_001 WebHook 데이터 리스트
+spec_001_webhookData = [
+    WebHook_RealtimeVideoEventInfos_in_data,
 ]
 
 # Authentication

@@ -62,7 +62,7 @@ ReplayURL_in_data = {
 ]
 }
 
-# RealtimeVideoEventInfos
+# RealtimeVideoEventInfos - 시스템이 플랫폼에 보내는 웹훅
 RealtimeVideoEventInfos_in_data = {
     "camList": [
         {
@@ -81,7 +81,7 @@ RealtimeVideoEventInfos_in_data = {
     "startTime": 20220822163022123
 }
 
-# WebHook RealtimeVideoEventInfos
+# WebHook RealtimeVideoEventInfos - 시스템이 플랫폼에 보내는 메시지 잘 받았다는 응답
 WebHook_RealtimeVideoEventInfos_out_data = {
     "code": 200,
     "message": "성공"

@@ -879,6 +879,18 @@ class MyApp(QWidget):
                         step_result = "FAIL"
                         combined_error_parts.append(f"[검증 {retry_attempt + 1}회차] [Inbound] " + inbound_err_txt)
                     
+                    # ✅ WebHook 프로토콜인 경우 웹훅 응답 표시
+                    if current_protocol == "WebHook" and "Realtime" in str(self.Server.message[self.cnt]):
+                        if len(self.videoWebhookInData) > 0:
+                            webhook_response = self.videoWebhookInData[0]  # 웹훅 응답 데이터
+                            tmp_webhook_response = json.dumps(webhook_response, indent=4, ensure_ascii=False)
+                            accumulated['data_parts'].append(f"\n--- Webhook 응답 (시도 {retry_attempt + 1}회차) ---\n{tmp_webhook_response}")
+                            
+                            # 웹훅 응답은 간단한 {code, message} 형태이므로 검증 생략 가능
+                            # 또는 필요시 검증 추가 가능
+                        else:
+                            accumulated['data_parts'].append(f"\n--- Webhook 응답 ---\n(웹훅 응답 데이터 없음)")
+                    
                     # 개별 프로토콜 설정에 따른 처리
                     if current_protocol == "LongPolling" and "Realtime" in str(self.Server.message[self.cnt]):
                         if "Webhook".lower() in str(current_data).lower():

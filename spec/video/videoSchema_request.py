@@ -42,7 +42,7 @@ ReplayURL_in_schema = {
 }],
 }
 
-# RealtimeVideoEventInfos
+# RealtimeVideoEventInfos - 웹훅 이벤트 요청서 검사 (플랫폼이 시스템을 검사)
 RealtimeVideoEventInfos_in_schema = {
     "camList": [{
     "camID": str,
@@ -55,6 +55,12 @@ RealtimeVideoEventInfos_in_schema = {
     OptionalKey("eventFilter"): str,
     OptionalKey("classFilter"): str,
     OptionalKey("startTime"): int,
+}
+
+# WebHook RealtimeVideoEventInfos - 웹훅 응답 검증 (플랫폼이 시스템의 응답을 검증)
+WebHook_RealtimeVideoEventInfos_out_schema = {
+    "code": int,
+    "message": str,
 }
 
 # StoredVideoEventInfos
@@ -97,6 +103,11 @@ spec_001_inSchema = [
     RealtimeVideoEventInfos_in_schema,
     StoredVideoEventInfos_in_schema,
     StoredObjectAnalyticsInfos_in_schema,
+]
+
+# spec_001 WebHook 스키마 리스트
+spec_001_webhookSchema = [
+    WebHook_RealtimeVideoEventInfos_out_schema,
 ]
 
 # Authentication
