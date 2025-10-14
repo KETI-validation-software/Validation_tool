@@ -1,18 +1,18 @@
 === 시험 결과 ===
-통과 필드 수: 0
-전체 필드 수: 16
-종합 평가 점수: 0.0%
+통과 필드 수: 22
+전체 필드 수: 25
+종합 평가 점수: 88.0%
 
 === 스텝별 결과 ===
-Authentication | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 0 | 전체 필드 수: 2 | 실패 횟수: 2 | 평가 점수: 0.0%
-Capabilities | 결과: FAIL | 검증 횟수: 2 | 통과 필드 수: 0 | 전체 필드 수: 2 | 실패 횟수: 2 | 평가 점수: 0.0%
-CameraProfiles | 결과: FAIL | 검증 횟수: 3 | 통과 필드 수: 0 | 전체 필드 수: 3 | 실패 횟수: 3 | 평가 점수: 0.0%
-StoredVideoInfos | 결과: FAIL | 검증 횟수: 3 | 통과 필드 수: 0 | 전체 필드 수: 9 | 실패 횟수: 9 | 평가 점수: 0.0%
-StreamURLs | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 횟수: 0 | 평가 점수: 0%
-ReplayURL | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 횟수: 0 | 평가 점수: 0%
-RealtimeVideoEventInfos | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 횟수: 0 | 평가 점수: 0%
-StoredVideoEventInfos | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 횟수: 0 | 평가 점수: 0%
-StoredObjectAnalyticsInfos | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 횟수: 0 | 평가 점수: 0%
+Authentication | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 2 | 전체 필드 수: 2 | 실패 횟수: 0 | 평가 점수: 100.0%
+Capabilities | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 1 | 전체 필드 수: 1 | 실패 횟수: 0 | 평가 점수: 100.0%
+CameraProfiles | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 1 | 전체 필드 수: 1 | 실패 횟수: 0 | 평가 점수: 100.0%
+StoredVideoInfos | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 3 | 전체 필드 수: 3 | 실패 횟수: 0 | 평가 점수: 100.0%
+StreamURLs | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 3 | 전체 필드 수: 3 | 실패 횟수: 0 | 평가 점수: 100.0%
+ReplayURL | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 5 | 전체 필드 수: 5 | 실패 횟수: 0 | 평가 점수: 100.0%
+RealtimeVideoEventInfos | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 4 | 전체 필드 수: 4 | 실패 횟수: 0 | 평가 점수: 100.0%
+StoredVideoEventInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 0 | 전체 필드 수: 3 | 실패 횟수: 3 | 평가 점수: 0.0%
+StoredObjectAnalyticsInfos | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 3 | 전체 필드 수: 3 | 실패 횟수: 0 | 평가 점수: 100.0%
 
 === 전체 로그 ===
 Start Validation...
@@ -26,178 +26,156 @@ step 1: Authentication
 
 [시도 1회차]
 {
-    "code": "200",
-    "message": "성공",
-    "userName": "관리자",
-    "userAff": "오산시청",
-    "accessToken": "abcde1234"
+    "userID": "user001",
+    "userPW": "pass001"
 }
-FAIL
-Score : 0.0
-Score details : 0(누적 통과 필드 수), 2(누적 오류 필드 수)
+PASS
+Score : 100.0
+Score details : 2(누적 통과 필드 수), 0(누적 오류 필드 수)
 
 step 2: Capabilities
-🔄 부하테스트 시작: 총 2회 검증 예정
-📨 시스템 요청 수신, 검증 중... [1/2]
-📨 시스템 요청 수신, 검증 중... [2/2]
+🔄 부하테스트 시작: 총 1회 검증 예정
+📨 시스템 요청 수신, 검증 중... [1/1]
 
-✅ 부하테스트 완료: 2회 검증 완료
+✅ 부하테스트 완료: 1회 검증 완료
 프로토콜: None
 
 [시도 1회차]
-{
-    "code": "200",
-    "message": "성공",
-    "streamingSupport": [
-        {
-            "streamProtocolType": "RTSP",
-            "streamProtocolDesc": "Unicast"
-        }
-    ],
-    "transportSupport": [
-        {
-            "transProtocolType": "REST_API",
-            "transProtocolDesc": "desc"
-        }
-    ]
-}
-
-[시도 2회차]
-{
-    "code": "200",
-    "message": "성공",
-    "streamingSupport": [
-        {
-            "streamProtocolType": "RTSP",
-            "streamProtocolDesc": "Unicast"
-        }
-    ],
-    "transportSupport": [
-        {
-            "transProtocolType": "REST_API",
-            "transProtocolDesc": "desc"
-        }
-    ]
-}
-FAIL
-Score : 0.0
-Score details : 0(누적 통과 필드 수), 4(누적 오류 필드 수)
+{}
+PASS
+Score : 100.0
+Score details : 3(누적 통과 필드 수), 0(누적 오류 필드 수)
 
 step 3: CameraProfiles
-🔄 부하테스트 시작: 총 3회 검증 예정
-📨 시스템 요청 수신, 검증 중... [1/3]
-📨 시스템 요청 수신, 검증 중... [2/3]
-📨 시스템 요청 수신, 검증 중... [3/3]
+🔄 부하테스트 시작: 총 1회 검증 예정
+📨 시스템 요청 수신, 검증 중... [1/1]
 
-✅ 부하테스트 완료: 3회 검증 완료
+✅ 부하테스트 완료: 1회 검증 완료
 프로토콜: None
 
 [시도 1회차]
-{
-    "code": "200",
-    "message": "성공",
-    "camList": [
-        {
-            "camID": "cam0001",
-            "camName": "카메라1",
-            "camLoc": {
-                "lon": "127.127730",
-                "lat": "38.439801",
-                "alt": "32.131",
-                "desc": "3층복도"
-            },
-            "camConfig": {
-                "camType": "PTZ"
-            }
-        },
-        {
-            "camID": "cam0002",
-            "camName": "카메라2",
-            "camLoc": {
-                "lon": "127.2887",
-                "lat": "37.33671"
-            },
-            "camConfig": {
-                "camType": "dome"
-            }
-        }
-    ]
-}
-
-[시도 2회차]
-{
-    "code": "200",
-    "message": "성공",
-    "camList": [
-        {
-            "camID": "cam0001",
-            "camName": "카메라1",
-            "camLoc": {
-                "lon": "127.127730",
-                "lat": "38.439801",
-                "alt": "32.131",
-                "desc": "3층복도"
-            },
-            "camConfig": {
-                "camType": "PTZ"
-            }
-        },
-        {
-            "camID": "cam0002",
-            "camName": "카메라2",
-            "camLoc": {
-                "lon": "127.2887",
-                "lat": "37.33671"
-            },
-            "camConfig": {
-                "camType": "dome"
-            }
-        }
-    ]
-}
-
-[시도 3회차]
-{
-    "code": "200",
-    "message": "성공",
-    "camList": [
-        {
-            "camID": "cam0001",
-            "camName": "카메라1",
-            "camLoc": {
-                "lon": "127.127730",
-                "lat": "38.439801",
-                "alt": "32.131",
-                "desc": "3층복도"
-            },
-            "camConfig": {
-                "camType": "PTZ"
-            }
-        },
-        {
-            "camID": "cam0002",
-            "camName": "카메라2",
-            "camLoc": {
-                "lon": "127.2887",
-                "lat": "37.33671"
-            },
-            "camConfig": {
-                "camType": "dome"
-            }
-        }
-    ]
-}
-FAIL
-Score : 0.0
-Score details : 0(누적 통과 필드 수), 7(누적 오류 필드 수)
+{}
+PASS
+Score : 100.0
+Score details : 4(누적 통과 필드 수), 0(누적 오류 필드 수)
 
 step 4: StoredVideoInfos
-🔄 부하테스트 시작: 총 3회 검증 예정
-📨 시스템 요청 수신, 검증 중... [1/3]
-📨 시스템 요청 수신, 검증 중... [2/3]
-📨 시스템 요청 수신, 검증 중... [3/3]
+🔄 부하테스트 시작: 총 1회 검증 예정
+📨 시스템 요청 수신, 검증 중... [1/1]
 
-✅ 부하테스트 완료: 3회 검증 완료
+✅ 부하테스트 완료: 1회 검증 완료
+프로토콜: None
+
+[시도 1회차]
+{
+    "timePeriod": {
+        "startTime": 20220822163022123,
+        "endTime": 20220822163025123
+    },
+    "camList": [
+        {
+            "camID": "cam001"
+        },
+        {
+            "camID": "cam002"
+        }
+    ]
+}
+PASS
+Score : 100.0
+Score details : 7(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 5: StreamURLs
+🔄 부하테스트 시작: 총 1회 검증 예정
+📨 시스템 요청 수신, 검증 중... [1/1]
+
+✅ 부하테스트 완료: 1회 검증 완료
+프로토콜: None
+
+[시도 1회차]
+{
+    "camList": [
+        {
+            "camID": "cam001",
+            "streamProtocolType": "RTSP"
+        }
+    ]
+}
+PASS
+Score : 100.0
+Score details : 10(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 6: ReplayURL
+🔄 부하테스트 시작: 총 1회 검증 예정
+📨 시스템 요청 수신, 검증 중... [1/1]
+
+✅ 부하테스트 완료: 1회 검증 완료
+프로토콜: None
+
+[시도 1회차]
+{
+    "camList": [
+        {
+            "camID": "cam001",
+            "startTime": 20220822163022123,
+            "endTime": 20220822163025123,
+            "streamProtocolType": "RTSP"
+        },
+        {
+            "camID": "cam002",
+            "startTime": 20220822163022123,
+            "endTime": 20220822163025123,
+            "streamProtocolType": "RTSP"
+        },
+        {
+            "camID": "cam003",
+            "startTime": 20220822163022123,
+            "endTime": 20220822163025123,
+            "streamProtocolType": "RTSP"
+        }
+    ]
+}
+PASS
+Score : 100.0
+Score details : 15(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 7: RealtimeVideoEventInfos
+🔄 부하테스트 시작: 총 1회 검증 예정
+📨 시스템 요청 수신, 검증 중... [1/1]
+
+✅ 부하테스트 완료: 1회 검증 완료
+프로토콜: WebHook
+
+[시도 1회차]
+{
+    "camList": [
+        {
+            "camID": "cam001"
+        },
+        {
+            "camID": "cam002"
+        }
+    ],
+    "transProtocol": {
+        "transProtocolType": "WebHook",
+        "transProtocolDesc": "https://127.0.0.1:8090/RealtimeVideoEventInfos"
+    },
+    "duration": 10,
+    "eventFilter": "배회",
+    "startTime": 20220822163022123
+}
+
+--- Webhook 응답 (시도 1회차) ---
+null
+PASS
+Score : 100.0
+Score details : 19(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 8: StoredVideoEventInfos
+🔄 부하테스트 시작: 총 1회 검증 예정
+📨 시스템 요청 수신, 검증 중... [1/1]
+
+✅ 부하테스트 완료: 1회 검증 완료
 프로토콜: None
 
 [시도 1회차]
@@ -207,77 +185,66 @@ step 4: StoredVideoInfos
     "camList": [
         {
             "camID": "cam0001",
-            "timeList": [
-                {
-                    "startTime": 20220822163022123,
-                    "endTime": 20220822163025123
-                }
-            ]
+            "eventUUID": "event01",
+            "eventName": "배회",
+            "startTime": 20220822163022123,
+            "endTime": 20220822163025123,
+            "eventDesc": "AAABVVVVCCCDDssvfdd"
         },
         {
             "camID": "cam0002",
-            "timeList": [
-                {
-                    "startTime": 20220822163022123,
-                    "endTime": 20220822163025123
-                }
-            ]
-        }
-    ]
-}
-
-[시도 2회차]
-{
-    "code": "200",
-    "message": "성공",
-    "camList": [
-        {
-            "camID": "cam0001",
-            "timeList": [
-                {
-                    "startTime": 20220822163022123,
-                    "endTime": 20220822163025123
-                }
-            ]
+            "eventUUID": "event01",
+            "eventName": "배회",
+            "startTime": 20220822163022123,
+            "endTime": 20220822163025123,
+            "eventDesc": "FFFeeiiiWWkdjflskdjfoEKK"
         },
         {
-            "camID": "cam0002",
-            "timeList": [
-                {
-                    "startTime": 20220822163022123,
-                    "endTime": 20220822163025123
-                }
-            ]
-        }
-    ]
-}
-
-[시도 3회차]
-{
-    "code": "200",
-    "message": "성공",
-    "camList": [
-        {
-            "camID": "cam0001",
-            "timeList": [
-                {
-                    "startTime": 20220822163022123,
-                    "endTime": 20220822163025123
-                }
-            ]
-        },
-        {
-            "camID": "cam0002",
-            "timeList": [
-                {
-                    "startTime": 20220822163022123,
-                    "endTime": 20220822163025123
-                }
-            ]
+            "camID": "cam0003",
+            "eventUUID": "event01",
+            "eventName": "배회",
+            "startTime": 20220822163022123,
+            "endTime": 20220822163025123,
+            "eventDesc": "iVUhEUgAAACAAAAAgCAYAAA"
         }
     ]
 }
 FAIL
-Score : 0.0
-Score details : 0(누적 통과 필드 수), 16(누적 오류 필드 수)
+Score : 86.36363636363636
+Score details : 19(누적 통과 필드 수), 3(누적 오류 필드 수)
 
+step 9: StoredObjectAnalyticsInfos
+🔄 부하테스트 시작: 총 1회 검증 예정
+📨 시스템 요청 수신, 검증 중... [1/1]
+
+✅ 부하테스트 완료: 1회 검증 완료
+프로토콜: None
+
+[시도 1회차]
+{
+    "timePeriod": {
+        "startTime": 20220822163022123,
+        "endTime": 20220822163025123
+    },
+    "camList": [
+        {
+            "camID": "cam0001"
+        },
+        {
+            "camID": "cam0002"
+        },
+        {
+            "camID": "cam0003"
+        }
+    ],
+    "anayticsFilter": "객체탐지",
+    "classFilter": [
+        "차량",
+        "사람"
+    ]
+}
+PASS
+Score : 88.0
+Score details : 22(누적 통과 필드 수), 3(누적 오류 필드 수)
+
+검증 절차가 완료되었습니다.

@@ -170,7 +170,16 @@ spec_002_messages = [
 ]
 
 # spec_002 WebHook 데이터 리스트
+# ✅ API 개수(9개)만큼 확장 (웹훅이 없는 API는 None)
 spec_002_webhookData = [
-    WebHook_RealtimeVideoEventInfos_out_data,
+    None,  # Authentication - 웹훅 없음
+    None,  # Capabilities - 웹훅 없음
+    None,  # CameraProfiles - 웹훅 없음
+    None,  # StoredVideoInfos - 웹훅 없음
+    None,  # StreamURLs - 웹훅 없음
+    None,  # ReplayURL - 웹훅 없음
+    WebHook_RealtimeVideoEventInfos_out_data,  # RealtimeVideoEventInfos - 웹훅 있음!
+    None,  # StoredVideoEventInfos - 웹훅 없음
+    None,  # StoredObjectAnalyticsInfos - 웹훅 없음
 ]
 

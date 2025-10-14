@@ -245,7 +245,9 @@ class Server(BaseHTTPRequestHandler):
 
         self.webhook_flag = False
         message = ""
-        url_tmp = ""
+        url_tmp = ""  # ✅ 스코프 확장을 위해 먼저 선언
+        webhook_url = ""  # ✅ 웹훅 URL 저장용
+        
         if "Realtime".lower() in self.message[message_cnt].lower():
             print(f"[DEBUG][SERVER] Realtime API 감지: {self.message[message_cnt]}")
             trans_protocol = dict_data.get("transProtocol", {})
@@ -287,7 +289,8 @@ class Server(BaseHTTPRequestHandler):
                             self.wfile.write(json.dumps(message).encode('utf-8'))
                             return
                         
-                        message = self.outMessage[-1]
+                        # ✅ 올바른 인덱스 사용: message_cnt (현재 API)
+                        message = self.outMessage[message_cnt]
                         self.webhook_flag = True
                         print(f"[DEBUG][SERVER] 웹훅 플래그 설정 완료, message={message}")
                         
@@ -353,15 +356,30 @@ class Server(BaseHTTPRequestHandler):
         self.wfile.write(a)
 
         if self.webhook_flag:
-            # ✅ 웹훅 데이터 사용 (videoData_response.py의 webhookData)
-            if self.webhookData and len(self.webhookData) > 0:
-                webhook_payload = self.webhookData[0]  # 첫 번째 웹훅 데이터
+            print(f"[DEBUG][SERVER] 웹훅 전송 준비 중...")
+            print(f"[DEBUG][SERVER] self.webhookData: {self.webhookData is not None}, len: {len(self.webhookData) if self.webhookData else 0}")
+            print(f"[DEBUG][SERVER] message_cnt: {message_cnt}")
+            print(f"[DEBUG][SERVER] url_tmp: {url_tmp}")
+            
+            # ✅ 웹훅 데이터 사용 (videoData_request.py의 webhookData)
+            if self.webhookData and len(self.webhookData) > message_cnt:
+                webhook_payload = self.webhookData[message_cnt]
+                print(f"[DEBUG][SERVER] 웹훅 데이터 사용: webhookData[{message_cnt}]")
+                
+                # None이면 웹훅 전송하지 않음
+                if webhook_payload is None:
+                    print(f"[DEBUG][SERVER] 웹훅 데이터가 None, 웹훅 전송 건너뛰기")
+                    return
             else:
-                webhook_payload = data  # 웹훅 데이터가 없으면 일반 응답 사용
+                print(f"[DEBUG][SERVER] 웹훅 데이터 인덱스 범위 초과 또는 없음, 웹훅 전송 건너뛰기")
+                return
+            
+            print(f"[DEBUG][SERVER] webhook_payload: {json.dumps(webhook_payload, ensure_ascii=False)[:200]}")
             
             json_data_tmp = json.dumps(webhook_payload).encode('utf-8')
             webhook_thread = threading.Thread(target=self.webhook_req, args=(url_tmp, json_data_tmp, 5))
             webhook_thread.start()
+            print(f"[DEBUG][SERVER] 웹훅 스레드 시작됨")
 
         #print("통플검증sw이 보낸 메시지", a)
 
