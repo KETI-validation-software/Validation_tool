@@ -1,2 +1,2 @@
-{"time": "2025-10-14T07:48:34.334262Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "user001", "userPW": "pass001"}}
-{"time": "2025-10-14T07:48:34.335231Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "userName": "관리자", "userAff": "오산시청", "accessToken": "1234"}}
+{"time": "2025-10-14T08:10:10.641351Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "user001", "userPW": "pass001"}}
+{"time": "2025-10-14T08:10:10.642349Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "userName": "관리자", "userAff": "오산시청", "accessToken": "1234"}}

@@ -31,6 +31,8 @@ class Server(BaseHTTPRequestHandler):
     inSchema = None
     outSchema = None
     webhookData = None  # ✅ 웹훅 데이터 추가
+    webhook_thread = None  # ✅ 웹훅 스레드 (클래스 변수)
+    webhook_response = None  # ✅ 웹훅 응답 (클래스 변수)
     system = ""
     auth_type = "D"
     auth_Info = ['admin', '1234', 'user', 'abcd1234', 'SHA-256', None]  # 저장된 상태로 main 입력하지 않으면 digest auth 인증 x
@@ -376,8 +378,13 @@ class Server(BaseHTTPRequestHandler):
             
             print(f"[DEBUG][SERVER] webhook_payload: {json.dumps(webhook_payload, ensure_ascii=False)[:200]}")
             
+            # ✅ 웹훅 응답 초기화 (클래스 변수)
+            Server.webhook_response = None
+            
             json_data_tmp = json.dumps(webhook_payload).encode('utf-8')
             webhook_thread = threading.Thread(target=self.webhook_req, args=(url_tmp, json_data_tmp, 5))
+            Server.webhook_thread = webhook_thread  # ✅ 클래스 변수에 저장
+            print(f"[DEBUG][SERVER] webhook_thread 저장됨 (클래스 변수): thread={id(webhook_thread)}")
             webhook_thread.start()
             print(f"[DEBUG][SERVER] 웹훅 스레드 시작됨")
 
@@ -389,8 +396,10 @@ class Server(BaseHTTPRequestHandler):
 
             try:
                 result = requests.post(url, data=json_data_tmp, verify=False)
-                #print("webhook response", result.text)
+                print(f"[DEBUG][SERVER] 웹훅 응답 수신: {result.text}")
                 self.result = result
+                Server.webhook_response = json.loads(result.text)  # ✅ 클래스 변수에 저장
+                print(f"[DEBUG][SERVER] webhook_response 저장됨 (클래스 변수): {Server.webhook_response}")
                 # JSON 파일 저장 제거 - spec/video/videoData_response.py 사용
                 # with open(resource_path("spec/" + self.system + "/" + "webhook_" + self.path[1:] + ".json"),
                 #           "w", encoding="UTF-8") as out_file2:
