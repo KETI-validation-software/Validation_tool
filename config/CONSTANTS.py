@@ -47,7 +47,7 @@ num_retries : 메시지별 메시지 검증 횟수
 #나중에 삭제
 trans_protocol = [None, None, None, None, None, None, 'WebHook', None, None]
 time_out = [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000]
-num_retries = [1, 2, 3, 3, 3, 2, 1, 1, 1]
+num_retries = [1, 1, 1, 1, 1, 1, 1, 1, 1]
 
 # specification.id별 설정
 SPEC_CONFIG = {

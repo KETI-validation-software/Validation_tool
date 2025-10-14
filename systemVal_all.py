@@ -695,9 +695,9 @@ class MyApp(QWidget):
         webhookInSchema_name = webhookSchema_name.replace("spec_001", "spec_002")
         self.videoWebhookInSchema = getattr(video_schema_response, webhookInSchema_name, [])
 
-        # Response webhook data from videoData_response
-        webhookInData_name = webhookData_name.replace("spec_001", "spec_002")
-        self.videoWebhookInData = getattr(video_data_response, webhookInData_name, [])
+        # Response webhook data from videoData_request (플랫폼이 보내는 웹훅 이벤트 데이터)
+        # ✅ 시스템은 플랫폼(spec_001)의 웹훅 데이터를 받아서 검증함
+        self.videoWebhookInData = getattr(video_data_request, webhookData_name, [])
 
         print(f"[DEBUG] Loaded spec: {self.spec_description}")
         print(f"[DEBUG] API count: {len(self.videoMessages)}")
@@ -983,8 +983,14 @@ class MyApp(QWidget):
             val_result, val_text, key_psss_cnt, key_error_cnt = "FAIL", "webhookSchema not found", 0, 0
 
         self.valResult.append(message_name)
-        self.valResult.append("\n" + tmp_webhook_res)
-        self.valResult.append(val_result)
+        self.valResult.append("\n=== 웹훅 이벤트 데이터 ===")
+        self.valResult.append(tmp_webhook_res)
+        self.valResult.append(f"\n웹훅 검증 결과: {val_result}")
+        
+        if val_result == "FAIL":
+            self.valResult.append("\n⚠️  웹훅 데이터 검증 실패")
+        else:
+            self.valResult.append("\n✅ 웹훅 데이터 검증 성공")
         self.total_error_cnt += key_error_cnt
         self.total_pass_cnt += key_psss_cnt
 
@@ -1017,7 +1023,8 @@ class MyApp(QWidget):
         if self.webhook_cnt < len(self.step_buffers):
             webhook_data_text = tmp_webhook_res
             webhook_error_text = self._to_detail_text(val_text) if val_result == "FAIL" else "오류가 없습니다."
-            self.step_buffers[self.webhook_cnt]["data"] += f"\n\n--- Webhook 결과 ---\n{webhook_data_text}"
+            # ✅ 웹훅 이벤트 데이터를 명확히 표시
+            self.step_buffers[self.webhook_cnt]["data"] += f"\n\n--- Webhook 이벤트 데이터 ---\n{webhook_data_text}"
             self.step_buffers[self.webhook_cnt]["error"] += f"\n\n--- Webhook 검증 ---\n{webhook_error_text}"
             self.step_buffers[self.webhook_cnt]["result"] = val_result
 
@@ -1267,7 +1274,22 @@ class MyApp(QWidget):
                         total_error_count = self.step_error_counts[self.cnt]
 
                         # (1) 스텝 버퍼 저장 - 재시도별로 누적
-                        data_text = tmp_res_auth
+                        # ✅ 시스템은 플랫폼이 보내는 데이터를 표시해야 함
+                        if self.cnt < len(self.outMessage):
+                            platform_data = self.outMessage[self.cnt]
+                            data_text = json.dumps(platform_data, indent=4, ensure_ascii=False)
+                            
+                            # ✅ 웹훅 API인 경우 웹훅 데이터도 함께 표시
+                            current_protocol = CONSTANTS.trans_protocol[self.cnt] if self.cnt < len(CONSTANTS.trans_protocol) else "Unknown"
+                            if "Realtime" in self.message[self.cnt] and current_protocol == "WebHook":
+                                # 웹훅 데이터 추가
+                                if len(self.videoWebhookInData) > 0:
+                                    webhook_event_data = self.videoWebhookInData[0]
+                                    webhook_text = json.dumps(webhook_event_data, indent=4, ensure_ascii=False)
+                                    data_text += f"\n\n--- Webhook 이벤트 데이터 ---\n{webhook_text}"
+                        else:
+                            data_text = tmp_res_auth  # fallback
+                        
                         error_text = self._to_detail_text(val_text) if val_result == "FAIL" else "오류가 없습니다."
 
                         # 기존 버퍼에 누적 (재시도 정보와 함께)
@@ -1313,10 +1335,22 @@ class MyApp(QWidget):
                         # UI 즉시 업데이트 (화면에 반영)
                         QApplication.processEvents()
 
-                        self.valResult.append(f"\n검증 진행: {self.current_retry + 1}/{current_retries}회")
+                        # ✅ 웹훅 API인 경우 명확하게 구분 표시
+                        if "Realtime" in self.message[self.cnt] and current_protocol == "WebHook":
+                            self.valResult.append(f"\n=== 구독 요청 응답 ===")
+                            self.valResult.append(f"[시도 {self.current_retry + 1}/{current_retries}]")
+                        else:
+                            self.valResult.append(f"\n검증 진행: {self.current_retry + 1}/{current_retries}회")
+                        
                         self.valResult.append(f"프로토콜: {current_protocol}")
                         self.valResult.append("\n" + data_text)
-                        self.valResult.append(final_result)
+                        self.valResult.append(f"\n검증 결과: {final_result}")
+                        
+                        # ✅ 응답 코드 실패 시 명확한 메시지
+                        if final_result == "FAIL" and isinstance(res_data, dict):
+                            response_code = str(res_data.get("code", "")).strip()
+                            if response_code not in ["200", "201"]:
+                                self.valResult.append(f"⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.")
 
                         self.total_error_cnt += total_error_count
                         self.total_pass_cnt += total_pass_count
