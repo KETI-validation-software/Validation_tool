@@ -36,7 +36,7 @@ warnings.filterwarnings('ignore')
 
 # 통합된 상세 내용 확인 팝업창 클래스
 class CombinedDetailDialog(QDialog):
-    def __init__(self, api_name, step_buffer, schema_data):
+    def __init__(self, api_name, step_buffer, schema_data, webhook_schema=None):
         super().__init__()
         
         self.setWindowTitle(f"{api_name} - 통합 상세 정보")
@@ -46,6 +46,9 @@ class CombinedDetailDialog(QDialog):
 
         # 전체 레이아웃
         main_layout = QVBoxLayout()
+        
+        # webhook_schema 저장
+        self.webhook_schema = webhook_schema
         
         # 상단 제목
         title_label = QLabel(f"{api_name} API 상세 정보")
@@ -74,7 +77,13 @@ class CombinedDetailDialog(QDialog):
         schema_layout = QVBoxLayout()
         self.schema_browser = QTextBrowser()
         self.schema_browser.setAcceptRichText(True)
+        
+        # 기본 스키마 + 웹훅 스키마 결합
         schema_text = self._format_schema(schema_data)
+        if self.webhook_schema:
+            schema_text += "\n\n=== 웹훅 응답 스키마 (시스템→플랫폼) ===\n"
+            schema_text += self._format_schema(self.webhook_schema)
+        
         self.schema_browser.setPlainText(schema_text)
         schema_layout.addWidget(self.schema_browser)
         schema_group.setLayout(schema_layout)
@@ -879,14 +888,26 @@ class MyApp(QWidget):
                         step_result = "FAIL"
                         combined_error_parts.append(f"[검증 {retry_attempt + 1}회차] [Inbound] " + inbound_err_txt)
                     
+                    # ✅ WebHook 프로토콜인 경우 웹훅 응답 표시
+                    if current_protocol == "WebHook" and "Realtime" in str(self.Server.message[self.cnt]):
+                        if len(self.videoWebhookInData) > 0:
+                            webhook_response = self.videoWebhookInData[0]  # 웹훅 응답 데이터
+                            tmp_webhook_response = json.dumps(webhook_response, indent=4, ensure_ascii=False)
+                            accumulated['data_parts'].append(f"\n--- Webhook 응답 (시도 {retry_attempt + 1}회차) ---\n{tmp_webhook_response}")
+                            
+                            # 웹훅 응답은 간단한 {code, message} 형태이므로 검증 생략 가능
+                            # 또는 필요시 검증 추가 가능
+                        else:
+                            accumulated['data_parts'].append(f"\n--- Webhook 응답 ---\n(웹훅 응답 데이터 없음)")
+                    
                     # 개별 프로토콜 설정에 따른 처리
                     if current_protocol == "LongPolling" and "Realtime" in str(self.Server.message[self.cnt]):
                         if "Webhook".lower() in str(current_data).lower():
                             try:
-                                # ✅ JSON 파일 대신 videoData_response.py의 webhook 데이터 사용
-                                if self.cnt < len(self.videoWebhookInData):
+                                # ✅ 웹훅 데이터는 별도 리스트이므로 항상 첫 번째 요소 사용
+                                if len(self.videoWebhookInData) > 0:
                                     self.realtime_flag = True
-                                    webhook_data = self.videoWebhookInData[self.cnt]
+                                    webhook_data = self.videoWebhookInData[0]  # 웹훅 데이터는 첫 번째 요소
                                     webhook_url = None
                                     # transProtocolDesc가 있으면 검사
                                     if isinstance(webhook_data, dict):
@@ -908,13 +929,13 @@ class MyApp(QWidget):
                                         tmp_webhook_data = json.dumps(webhook_data, indent=4, ensure_ascii=False)
                                         accumulated['data_parts'].append(f"\n--- Webhook (시도 {retry_attempt + 1}회차) ---\n{tmp_webhook_data}")
                                         
-                                        # ✅ 플랫폼은 응답 웹훅 스키마(videoSchema_response.py)로 검증
-                                        if self.cnt < len(self.videoWebhookInSchema):
+                                        # ✅ 웹훅 스키마는 별도 리스트이므로 항상 첫 번째 요소 사용
+                                        if len(self.videoWebhookInSchema) > 0:
                                             webhook_val_result, webhook_val_text, webhook_key_psss_cnt, webhook_key_error_cnt = json_check_(
-                                                self.videoWebhookInSchema[self.cnt], webhook_data, self.flag_opt
+                                                self.videoWebhookInSchema[0], webhook_data, self.flag_opt
                                             )
                                         else:
-                                            webhook_val_result, webhook_val_text, webhook_key_psss_cnt, webhook_key_error_cnt = "FAIL", "videoWebhookInSchema index error", 0, 0
+                                            webhook_val_result, webhook_val_text, webhook_key_psss_cnt, webhook_key_error_cnt = "FAIL", "videoWebhookInSchema not found", 0, 0
                                     
                                         add_pass += webhook_key_psss_cnt
                                         add_err += webhook_key_error_cnt
@@ -1579,8 +1600,18 @@ class MyApp(QWidget):
             except:
                 schema_data = None
             
+            # 웹훅 스키마 가져오기 (플랫폼: 시스템이 보내는 웹훅 응답 스키마)
+            # ✅ 웹훅 스키마는 모든 API가 공통으로 사용하므로 항상 [0] 사용
+            try:
+                webhook_schema = self.videoWebhookSchema[0] if len(self.videoWebhookSchema) > 0 else None
+                print(f"[DEBUG] Platform webhook_schema for row {row}: {webhook_schema is not None}")
+                print(f"[DEBUG] videoWebhookSchema length: {len(self.videoWebhookSchema)}")
+            except Exception as e:
+                print(f"[DEBUG] Error getting webhook_schema: {e}")
+                webhook_schema = None
+            
             # 통합 팝업창 띄우기
-            dialog = CombinedDetailDialog(api_name, buf, schema_data)
+            dialog = CombinedDetailDialog(api_name, buf, schema_data, webhook_schema)
             dialog.exec_()
             
         except Exception as e:
@@ -1756,6 +1787,7 @@ class MyApp(QWidget):
         self.Server.outMessage = self.videoOutMessage
         self.Server.inSchema = self.videoInSchema
         self.Server.outSchema = self.videoOutSchema
+        self.Server.webhookData = self.videoWebhookInData  # ✅ 웹훅 데이터 추가
         self.Server.system = "video"
         self.Server.timeout = timeout
         print(f"[DEBUG] sbtn_push: Server configured - message={self.Server.message[:3] if self.Server.message else 'None'}...")

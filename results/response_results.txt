@@ -1,7 +1,7 @@
 === 시험 결과 ===
-통과 필드 수: 147
-전체 필드 수: 152
-종합 평가 점수: 96.7%
+통과 필드 수: 142
+전체 필드 수: 142
+종합 평가 점수: 100.0%
 
 === 스텝별 결과 ===
 Authentication | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 4 | 전체 필드 수: 4 | 실패 횟수: 0 | 평가 점수: 100.0%
@@ -10,8 +10,8 @@ CameraProfiles | 결과: PASS | 검증 횟수: 3 | 통과 필드 수: 5 | 전체
 StoredVideoInfos | 결과: PASS | 검증 횟수: 3 | 통과 필드 수: 6 | 전체 필드 수: 6 | 실패 횟수: 0 | 평가 점수: 100.0%
 StreamURLs | 결과: PASS | 검증 횟수: 3 | 통과 필드 수: 5 | 전체 필드 수: 5 | 실패 횟수: 0 | 평가 점수: 100.0%
 ReplayURL | 결과: PASS | 검증 횟수: 2 | 통과 필드 수: 6 | 전체 필드 수: 6 | 실패 횟수: 0 | 평가 점수: 100.0%
-RealtimeVideoEventInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 0 | 전체 필드 수: 5 | 실패 횟수: 5 | 평가 점수: 0.0%
-StoredVideoEventInfos | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 7 | 전체 필드 수: 7 | 실패 횟수: 0 | 평가 점수: 100.0%
+RealtimeVideoEventInfos | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 2 | 전체 필드 수: 2 | 실패 횟수: 0 | 평가 점수: 100.0%
+StoredVideoEventInfos | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 2 | 전체 필드 수: 2 | 실패 횟수: 0 | 평가 점수: 100.0%
 StoredObjectAnalyticsInfos | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 2 | 전체 필드 수: 2 | 실패 횟수: 0 | 평가 점수: 100.0%
 
 === 전체 로그 ===
@@ -480,7 +480,7 @@ Score details : 136(누적 통과 필드 수), 0(누적 오류 필드 수)
 step 7: RealtimeVideoEventInfos (시도 1/1)
 
 검증 진행: 1/1회
-프로토콜: LongPolling
+프로토콜: WebHook
 
 {
     "code": "400",
@@ -489,16 +489,6 @@ step 7: RealtimeVideoEventInfos (시도 1/1)
 PASS
 Score : 100.0
 Score details : 138(누적 통과 필드 수), 0(누적 오류 필드 수)
-
-step 7: RealtimeVideoEventInfos
-
-{
-    "code": "400",
-    "message": "잘못된 요청"
-}
-FAIL
-Score : 96.5034965034965
-Score details : 138(누적 통과 필드 수), 5(누적 오류 필드 수)
 
 step 8: StoredVideoEventInfos (시도 1/1)
 
@@ -536,8 +526,8 @@ step 8: StoredVideoEventInfos (시도 1/1)
     ]
 }
 PASS
-Score : 96.66666666666667
-Score details : 145(누적 통과 필드 수), 5(누적 오류 필드 수)
+Score : 100.0
+Score details : 140(누적 통과 필드 수), 0(누적 오류 필드 수)
 
 step 9: StoredObjectAnalyticsInfos (시도 1/1)
 
@@ -586,7 +576,7 @@ step 9: StoredObjectAnalyticsInfos (시도 1/1)
     ]
 }
 PASS
-Score : 96.71052631578947
-Score details : 147(누적 통과 필드 수), 5(누적 오류 필드 수)
+Score : 100.0
+Score details : 142(누적 통과 필드 수), 0(누적 오류 필드 수)
 
 검증 절차가 완료되었습니다.

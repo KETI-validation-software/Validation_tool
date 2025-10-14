@@ -30,6 +30,7 @@ class Server(BaseHTTPRequestHandler):
     outMessage = None
     inSchema = None
     outSchema = None
+    webhookData = None  # ✅ 웹훅 데이터 추가
     system = ""
     auth_type = "D"
     auth_Info = ['admin', '1234', 'user', 'abcd1234', 'SHA-256', None]  # 저장된 상태로 main 입력하지 않으면 digest auth 인증 x
@@ -246,14 +247,38 @@ class Server(BaseHTTPRequestHandler):
         message = ""
         url_tmp = ""
         if "Realtime".lower() in self.message[message_cnt].lower():
+            print(f"[DEBUG][SERVER] Realtime API 감지: {self.message[message_cnt]}")
             trans_protocol = dict_data.get("transProtocol", {})
+            print(f"[DEBUG][SERVER] transProtocol: {trans_protocol}")
+            
             if trans_protocol:
                 trans_protocol_type = trans_protocol.get("transProtocolType", {})
+                print(f"[DEBUG][SERVER] transProtocolType: {trans_protocol_type}")
+                
+                # 동적으로 프로토콜 업데이트 해야함 (기존에는 롱풀링으로 하드코딩 - 10/14)
+                self.transProtocolInput = str(trans_protocol_type)
+                print(f"[DEBUG][SERVER] transProtocolInput 업데이트: {self.transProtocolInput}")
+                
                 if "WebHook".lower() in str(trans_protocol_type).lower():
+                    print(f"[DEBUG][SERVER] WebHook 모드 감지, auth_pass={auth_pass}")
                     try:
                         url_tmp = trans_protocol.get("transProtocolDesc", {})
-                        # 잘못된 값 방어
+                        print(f"[DEBUG][SERVER] Webhook URL: {url_tmp}")
+                        
+                        # ✅ 인증 확인 추가
+                        if not auth_pass:
+                            print(f"[SERVER ERROR] 인증 실패!")
+                            message = {
+                                "code": "401",
+                                "message": "인증 오류"
+                            }
+                            self._set_headers()
+                            self.wfile.write(json.dumps(message).encode('utf-8'))
+                            return
+                        
+                        # url 유효성 검사 -> 없거나 잘못되면 400
                         if not url_tmp or str(url_tmp).strip() in ["None", "", "desc"]:
+                            print(f"[SERVER ERROR] Webhook URL이 유효하지 않음: {url_tmp}")
                             message = {
                                 "code": "400",
                                 "message": "잘못된 Webhook URL"
@@ -261,34 +286,45 @@ class Server(BaseHTTPRequestHandler):
                             self._set_headers()
                             self.wfile.write(json.dumps(message).encode('utf-8'))
                             return
+                        
                         message = self.outMessage[-1]
                         self.webhook_flag = True
-
+                        print(f"[DEBUG][SERVER] 웹훅 플래그 설정 완료, message={message}")
+                        
+                        # https 아니면 400
                         if "https".lower() not in url_tmp.lower():
+                            print(f"[SERVER ERROR] Webhook URL이 HTTPS가 아님: {url_tmp}")
                             message = {
                                 "code": "400",
-                                "message": "잘못된 요청"
+                                "message": "잘못된 요청: HTTPS 필요"
                             }
+                        # 웹훅인데 롱풀링으로 하려고 할 때 문제..?? 
                         if "longpolling" in str(self.transProtocolInput).lower():
+                            print(f"[SERVER ERROR] transProtocolInput이 longpolling: {self.transProtocolInput}")
                             message = {
                                 "code": "400",
-                                "message": "잘못된 요청"
+                                "message": "잘못된 요청: 프로토콜 불일치"
                             }
-                    except Exception:
+                    except Exception as e:
+                        print(f"[SERVER ERROR] WebHook 처리 중 예외 발생: {e}")
+                        import traceback
+                        traceback.print_exc()
                         message = {
                             "code": "400",
-                            "message": "잘못된 요청"
+                            "message": f"잘못된 요청: {str(e)}"
                         }
                 else:
                     # LongPolloing 인 경우
                     if auth_pass:
                         message = data
+                        # LongPolloing 이면서 웹훅으로 하려고 할 때 문제
                         if "webhook".lower() in str(self.transProtocolInput).lower():
                             message = {
                                 "code": "400",
                                 "message": "잘못된 요청"
                             }
                     else:
+                        # LongPolloing 이면서 인증 실패
                         message = {
                             "code": "401",
                             "message": "인증 오류"
@@ -317,14 +353,13 @@ class Server(BaseHTTPRequestHandler):
         self.wfile.write(a)
 
         if self.webhook_flag:
-            json_data_tmp = json.dumps(data).encode('utf-8')
-            if "longpolling" in str(self.transProtocolInput).lower():
-                # webhook 요청 받았는데 뷰어에서 longpolling 선택한 경우
-                data = {
-                    "code": "400",
-                    "message": "잘못된 요청"
-                }
-                json_data_tmp = json.dumps(data).encode('utf-8')
+            # ✅ 웹훅 데이터 사용 (videoData_response.py의 webhookData)
+            if self.webhookData and len(self.webhookData) > 0:
+                webhook_payload = self.webhookData[0]  # 첫 번째 웹훅 데이터
+            else:
+                webhook_payload = data  # 웹훅 데이터가 없으면 일반 응답 사용
+            
+            json_data_tmp = json.dumps(webhook_payload).encode('utf-8')
             webhook_thread = threading.Thread(target=self.webhook_req, args=(url_tmp, json_data_tmp, 5))
             webhook_thread.start()
 
