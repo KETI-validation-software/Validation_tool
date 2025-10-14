@@ -907,11 +907,12 @@ class MyApp(QWidget):
 
     def post(self, path, json_data, time_out):
         self.res = None
-        # 인증 방식(r2)에 따라 auth 인자 결정 (토큰 유무로 분기 X)
+        headers = CONSTANTS.headers.copy()
         auth = None
-        if self.r2 == "B":
-            auth = BearerAuth(self.token) if self.token else None
-        elif self.r2 == "D":
+        if self.r2 == "B":  # Bearer
+            if self.token:
+                headers['Authorization'] = f"Bearer {self.token}"
+        elif self.r2 == "D":    # Digest
             auth = HTTPDigestAuth(self.digestInfo[0], self.digestInfo[1])
         # self.r2 == "None"이면 그대로 None
 
@@ -919,7 +920,7 @@ class MyApp(QWidget):
             print(f"[DEBUG] [post] Sending request to {path} with auth_type={self.r2}, token={self.token}")
             self.res = requests.post(
                 path,
-                headers=CONSTANTS.headers,
+                headers=headers,
                 data=json_data,
                 auth=auth,
                 verify=False,
@@ -936,6 +937,7 @@ class MyApp(QWidget):
                 trans_protocol = json_data_dict.get("transProtocol", {})
                 if trans_protocol:
                     trans_protocol_type = trans_protocol.get("transProtocolType", {})
+                    # 웹훅 서버 시작 (포트는 8090)
                     if "WebHook".lower() in str(trans_protocol_type).lower():
                         path_tmp = trans_protocol.get("transProtocolDesc", {})
                         # http/https 접두어 보정
@@ -972,12 +974,13 @@ class MyApp(QWidget):
         else:
             message_name = f"step {self.webhook_cnt + 1}: (index out of range)"
 
-        # ✅ videoData_response.py의 webhook 스키마 사용 (JSON 파일 대신)
-        if self.webhook_cnt < len(self.videoWebhookInSchema):
-            schema_to_check = self.videoWebhookInSchema[self.webhook_cnt]
+        # ✅ 웹훅 스키마는 별도 리스트이므로 항상 첫 번째 요소 사용
+        # (RealtimeVideoEventInfos 웹훅은 spec_002_webhookSchema[0])
+        if len(self.webhookSchema) > 0:
+            schema_to_check = self.webhookSchema[0]  # 웹훅 스키마는 첫 번째 요소
             val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(schema_to_check, self.webhook_res, self.flag_opt)
         else:
-            val_result, val_text, key_psss_cnt, key_error_cnt = "FAIL", "webhookInSchema index error", 0, 0
+            val_result, val_text, key_psss_cnt, key_error_cnt = "FAIL", "webhookSchema not found", 0, 0
 
         self.valResult.append(message_name)
         self.valResult.append("\n" + tmp_webhook_res)
@@ -1221,6 +1224,28 @@ class MyApp(QWidget):
                                                                                                 res_data, self.flag_opt)
                             if self.message[self.cnt] == "Authentication":
                                 self.handle_authentication_response(res_data)
+
+                        # ✅ 의미 검증: 응답 코드가 성공인지 확인
+                        if isinstance(res_data, dict):
+                            response_code = str(res_data.get("code", "")).strip()
+                            response_message = res_data.get("message", "")
+                            
+                            # 성공 코드가 아니면 FAIL 처리
+                            if response_code not in ["200", "201"]:
+                                print(f"[SYSTEM] 응답 코드 검증 실패: code={response_code}, message={response_message}")
+                                val_result = "FAIL"
+                                
+                                # 기존 오류 메시지에 응답 코드 오류 추가
+                                code_error_msg = f"응답 실패: code={response_code}, message={response_message}"
+                                if isinstance(val_text, str):
+                                    val_text = code_error_msg if val_text == "오류가 없습니다." else f"{code_error_msg}\n\n{val_text}"
+                                elif isinstance(val_text, list):
+                                    val_text.insert(0, code_error_msg)
+                                else:
+                                    val_text = code_error_msg
+                                
+                                # 응답 실패는 오류로 카운트 (스키마는 맞지만 의미상 실패)
+                                key_error_cnt += 1
 
                         # 이번 시도의 결과
                         final_result = val_result
@@ -2094,7 +2119,7 @@ class MyApp(QWidget):
         self.inSchema = self.videoInSchema
         self.outSchema = self.videoOutSchema
         # ✅ JSON 파일 대신 videoData_response.py의 webhook 스키마 사용
-        self.webhookSchema = self.videoWebhookInSchema
+        self.webhookSchema = self.videoWebhookSchema
         self.final_report = f"{self.spec_description} 검증 결과\n"
 
         # 기본 인증 설정 (CONSTANTS.py에서 가져옴)
