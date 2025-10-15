@@ -40,7 +40,6 @@ specs = [
 # 선택된 시험 분야의 인덱스 (0: 영상보안, 1: 보안용센서)
 selected_spec_index = 0
 trace_path = os.path.join("results", "trace")
-enable_retry_delay = False  # False 권장: 불필요한 sleep 제거
 
 #test-opt
 '''
