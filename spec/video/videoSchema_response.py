@@ -1,5 +1,6 @@
 from json_checker import OptionalKey
-
+# 시스템 측 규격UI에 뜨는 스키마
+# 플랫폼 메시지를 검증하는 스키마
 
 # Authentication
 Authentication_out_schema = {
