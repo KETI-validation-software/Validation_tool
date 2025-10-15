@@ -294,7 +294,7 @@ class ResultPageDialog(QDialog):
         self.tableWidget = QTableWidget(api_count, 8)
         self.tableWidget.setHorizontalHeaderLabels([
             "API 명", "결과", "검증 횟수", "통과 필드 수",
-            "전체 필드 수", "실패 횟수", "평가 점수", "상세 내용"
+            "전체 필드 수", "실패 필드 수", "평가 점수", "상세 내용"
         ])
         self.tableWidget.verticalHeader().setVisible(False)
         self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -401,7 +401,7 @@ class ResultPageDialog(QDialog):
 
                     self.tableWidget.setCellWidget(row, 1, new_icon_widget)
 
-            # 나머지 컬럼들 (검증 횟수, 통과 필드 수, 전체 필드 수, 실패 횟수, 평가 점수)
+            # 나머지 컬럼들 (검증 횟수, 통과 필드 수, 전체 필드 수, 실패 필드 수, 평가 점수)
             for col in range(2, 7):
                 item = self.parent.tableWidget.item(row, col)
                 if item:
@@ -566,7 +566,7 @@ class MyApp(QWidget):
             token = res_data.get("accessToken")
             if token:
                 self.token = token
-                print(f"[DEBUG] [handle_authentication_response] Token updated: {self.token}")
+                # print(f"[DEBUG] [handle_authentication_response] Token updated: {self.token}")
     def __init__(self, embedded=False):
         importlib.reload(CONSTANTS)  # CONSTANTS 모듈을 다시 로드하여 최신 설정 반영
         super().__init__()
@@ -708,9 +708,9 @@ class MyApp(QWidget):
         # ✅ 시스템은 플랫폼(spec_001)의 웹훅 데이터를 받아서 검증함
         self.videoWebhookInData = getattr(video_data_request, webhookData_name, [])
 
-        print(f"[DEBUG] Loaded spec: {self.spec_description}")
-        print(f"[DEBUG] API count: {len(self.videoMessages)}")
-        print(f"[DEBUG] API names: {self.videoMessages}")
+        #print(f"[DEBUG] Loaded spec: {self.spec_description}")
+        #print(f"[DEBUG] API count: {len(self.videoMessages)}")
+        #print(f"[DEBUG] API names: {self.videoMessages}")
 
     def _to_detail_text(self, val_text):
         """검증 결과 텍스트를 항상 사람이 읽을 문자열로 표준화"""
@@ -889,7 +889,7 @@ class MyApp(QWidget):
             icon_widget.setLayout(icon_layout)
             self.tableWidget.setCellWidget(row, 1, icon_widget)
             
-            # 검증 횟수, 통과 필드 수, 전체 필드 수, 실패 횟수, 평가 점수
+            # 검증 횟수, 통과 필드 수, 전체 필드 수, 실패 필드 수, 평가 점수
             for col in range(2, 7):
                 item = QTableWidgetItem("0" if col != 6 else "0%")
                 item.setTextAlignment(Qt.AlignCenter)
@@ -984,26 +984,34 @@ class MyApp(QWidget):
         else:
             message_name = f"step {self.webhook_cnt + 1}: (index out of range)"
 
-        # ✅ 디버깅: 웹훅 이벤트 스키마 검증
-        print(f"\n[DEBUG] ========== 웹훅 이벤트 검증 디버깅 ==========")
-        print(f"[DEBUG] webhook_cnt={self.webhook_cnt}, API={self.message[self.webhook_cnt] if self.webhook_cnt < len(self.message) else 'N/A'}")
-        print(f"[DEBUG] webhookSchema 총 개수={len(self.webhookSchema)}")
-        
-        # (RealtimeVideoEventInfos 웹훅은 spec_002_webhookSchema[0])
-        if len(self.webhookSchema) > 0:
-            schema_to_check = self.webhookSchema[0]  # 웹훅 스키마는 첫 번째 요소
-            print(f"[DEBUG] 사용 스키마: webhookSchema[0]")
-            if isinstance(schema_to_check, dict):
-                schema_keys = list(schema_to_check.keys())[:5]
-                print(f"[DEBUG] 웹훅 스키마 필드 (first 5): {schema_keys}")
+        # ✅ 디버깅: 웹훅 이벤트 스키마 검증 (첫 호출에만 출력)
+        if not hasattr(self, '_webhook_debug_printed'):
+            self._webhook_debug_printed = True
+            print(f"\n[DEBUG] ========== 웹훅 이벤트 검증 디버깅 ==========")
+            print(f"[DEBUG] webhook_cnt={self.webhook_cnt}, API={self.message[self.webhook_cnt] if self.webhook_cnt < len(self.message) else 'N/A'}")
+            print(f"[DEBUG] webhookSchema 총 개수={len(self.webhookSchema)}")
             
+            # (RealtimeVideoEventInfos 웹훅은 spec_002_webhookSchema[0])
+            if len(self.webhookSchema) > 0:
+                schema_to_check = self.webhookSchema[0]  # 웹훅 스키마는 첫 번째 요소
+                print(f"[DEBUG] 사용 스키마: webhookSchema[0]")
+                if isinstance(schema_to_check, dict):
+                    schema_keys = list(schema_to_check.keys())[:5]
+                    print(f"[DEBUG] 웹훅 스키마 필드 (first 5): {schema_keys}")
+        
+        # 실제 검증
+        if len(self.webhookSchema) > 0:
+            schema_to_check = self.webhookSchema[0]
             val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(schema_to_check, self.webhook_res, self.flag_opt)
-            print(f"[DEBUG] 웹훅 검증 결과: {val_result}, pass={key_psss_cnt}, error={key_error_cnt}")
+            if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
+                print(f"[DEBUG] 웹훅 검증 결과: {val_result}, pass={key_psss_cnt}, error={key_error_cnt}")
         else:
             val_result, val_text, key_psss_cnt, key_error_cnt = "FAIL", "webhookSchema not found", 0, 0
-            print(f"[DEBUG] webhookSchema가 없습니다!")
+            if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
+                print(f"[DEBUG] webhookSchema가 없습니다!")
         
-        print(f"[DEBUG] ==========================================\n")
+        if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
+            print(f"[DEBUG] ==========================================\n")
 
         self.valResult.append(message_name)
         self.valResult.append("\n=== 웹훅 이벤트 데이터 ===")
@@ -1032,14 +1040,29 @@ class MyApp(QWidget):
             msg = "\n" + tmp_webhook_res + "\n\n" + "Result: " + val_result + "\nResult details:\n" + val_text + "\n"
             img = self.img_fail
 
-        # 새로운 테이블 업데이트 함수 사용 (개별 검증 횟수 적용)
+        # ✅ 웹훅 검증 결과를 기존 누적 필드 수에 추가
         if self.webhook_cnt < self.tableWidget.rowCount():
-            total_fields = key_psss_cnt + key_error_cnt
+            # 기존 누적 필드 수 가져오기
+            if hasattr(self, 'step_pass_counts') and hasattr(self, 'step_error_counts'):
+                # 웹훅 결과를 기존 누적에 추가
+                self.step_pass_counts[self.webhook_cnt] += key_psss_cnt
+                self.step_error_counts[self.webhook_cnt] += key_error_cnt
+                
+                # 누적된 총 필드 수로 테이블 업데이트
+                accumulated_pass = self.step_pass_counts[self.webhook_cnt]
+                accumulated_error = self.step_error_counts[self.webhook_cnt]
+            else:
+                # 누적 배열이 없으면 웹훅 결과만 사용
+                accumulated_pass = key_psss_cnt
+                accumulated_error = key_error_cnt
+            
             if self.webhook_cnt < len(CONSTANTS.num_retries):
                 current_retries = CONSTANTS.num_retries[self.webhook_cnt]
             else:
                 current_retries = 1
-            self.update_table_row_with_retries(self.webhook_cnt, val_result, key_psss_cnt, key_error_cnt,
+            
+            # 누적된 필드 수로 테이블 업데이트
+            self.update_table_row_with_retries(self.webhook_cnt, val_result, accumulated_pass, accumulated_error,
                                 tmp_webhook_res, self._to_detail_text(val_text), current_retries)
 
         # step_buffers 업데이트 추가 (실시간 모니터링과 상세보기 일치)
@@ -1082,11 +1105,11 @@ class MyApp(QWidget):
                 time_interval = time.time() - self.time_pre
 
             # 디버깅 정보 추가
-            if self.cnt >= 4:  # StreamURLs 이후부터 로깅
-                print(f"[DEBUG] cnt={self.cnt}, post_flag={self.post_flag}, processing_response={self.processing_response}")
-                print(f"[DEBUG] current_retry={self.current_retry}, webhook_flag={self.webhook_flag}")
-                print(f"[DEBUG] time_interval={time_interval}, timeout={CONSTANTS.time_out[self.cnt]/1000 if self.cnt < len(CONSTANTS.time_out) else 'N/A'}")
-                print(f"[DEBUG] self.res is None: {self.res is None}")
+            # if self.cnt >= 4:  # StreamURLs 이후부터 로깅
+            #     print(f"[DEBUG] cnt={self.cnt}, post_flag={self.post_flag}, processing_response={self.processing_response}")
+            #     print(f"[DEBUG] current_retry={self.current_retry}, webhook_flag={self.webhook_flag}")
+            #     print(f"[DEBUG] time_interval={time_interval}, timeout={CONSTANTS.time_out[self.cnt]/1000 if self.cnt < len(CONSTANTS.time_out) else 'N/A'}")
+            #     print(f"[DEBUG] self.res is None: {self.res is None}")
 
             if self.webhook_flag is True:
                 time.sleep(1)
@@ -1130,8 +1153,8 @@ class MyApp(QWidget):
             # timeout 조건은 응답 대기/재시도 판단에만 사용
             elif self.cnt < len(CONSTANTS.time_out) and time_interval >= CONSTANTS.time_out[self.cnt] / 1000 and self.post_flag is True:
                 # 디버깅 로그 추가
-                if self.cnt >= 4:
-                    print(f"[DEBUG] TIMEOUT TRIGGERED for cnt={self.cnt}, time_interval={time_interval}, timeout_limit={(CONSTANTS.time_out[self.cnt]/1000) if self.cnt < len(CONSTANTS.time_out) else 'N/A'}")
+                # if self.cnt >= 4:
+                #     print(f"[DEBUG] TIMEOUT TRIGGERED for cnt={self.cnt}, time_interval={time_interval}, timeout_limit={(CONSTANTS.time_out[self.cnt]/1000) if self.cnt < len(CONSTANTS.time_out) else 'N/A'}")
 
                 if self.cnt < len(self.message):
                     self.message_error.append([self.message[self.cnt]])
@@ -1245,32 +1268,34 @@ class MyApp(QWidget):
                         tmp_res_auth = json.dumps(res_data, indent=4, ensure_ascii=False)
 
                         # ✅ 디버깅: 어떤 스키마로 검증하는지 확인
-                        print(f"\n[DEBUG] ========== 스키마 검증 디버깅 ==========")
-                        print(f"[DEBUG] cnt={self.cnt}, API={self.message[self.cnt] if self.cnt < len(self.message) else 'N/A'}")
-                        print(f"[DEBUG] webhook_flag={self.webhook_flag}")
-                        print(f"[DEBUG] current_protocol={current_protocol}")
-                        print(f"[DEBUG] outSchema 총 개수={len(self.outSchema)}")
-                        
-                        # ✅ 웹훅 API의 구독 응답은 일반 스키마 사용
-                        # webhook_flag는 실제 웹훅 이벤트 수신 시에만 True
-                        # 구독 응답은 항상 outSchema[self.cnt] 사용
-                        schema_index = self.cnt
-                        print(f"[DEBUG] 사용 스키마: outSchema[{schema_index}]")
-                        
-                        # 스키마 필드 확인
-                        if self.cnt < len(self.outSchema):
-                            schema_to_use = self.outSchema[self.cnt]
-                            if isinstance(schema_to_use, dict):
-                                schema_keys = list(schema_to_use.keys())[:5]
-                                print(f"[DEBUG] 스키마 필드 (first 5): {schema_keys}")
+                        if self.current_retry == 0:  # 첫 시도에만 출력
+                            print(f"\n[DEBUG] ========== 스키마 검증 디버깅 ==========")
+                            print(f"[DEBUG] cnt={self.cnt}, API={self.message[self.cnt] if self.cnt < len(self.message) else 'N/A'}")
+                            print(f"[DEBUG] webhook_flag={self.webhook_flag}")
+                            print(f"[DEBUG] current_protocol={current_protocol}")
+                            print(f"[DEBUG] outSchema 총 개수={len(self.outSchema)}")
+                            
+                            # ✅ 웹훅 API의 구독 응답은 일반 스키마 사용
+                            # webhook_flag는 실제 웹훅 이벤트 수신 시에만 True
+                            # 구독 응답은 항상 outSchema[self.cnt] 사용
+                            schema_index = self.cnt
+                            print(f"[DEBUG] 사용 스키마: outSchema[{schema_index}]")
+                            
+                            # 스키마 필드 확인
+                            if self.cnt < len(self.outSchema):
+                                schema_to_use = self.outSchema[self.cnt]
+                                if isinstance(schema_to_use, dict):
+                                    schema_keys = list(schema_to_use.keys())[:5]
+                                    print(f"[DEBUG] 스키마 필드 (first 5): {schema_keys}")
                         
                         val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.outSchema[self.cnt],
                                                                                             res_data, self.flag_opt)
                         if self.message[self.cnt] == "Authentication":
                             self.handle_authentication_response(res_data)
                         
-                        print(f"[DEBUG] 검증 결과: {val_result}, pass={key_psss_cnt}, error={key_error_cnt}")
-                        print(f"[DEBUG] ==========================================\n")
+                        if self.current_retry == 0:  # 첫 시도에만 출력
+                            print(f"[DEBUG] 검증 결과: {val_result}, pass={key_psss_cnt}, error={key_error_cnt}")
+                            print(f"[DEBUG] ==========================================\n")
 
                         # ✅ 의미 검증: 응답 코드가 성공인지 확인
                         if isinstance(res_data, dict):
@@ -1279,7 +1304,7 @@ class MyApp(QWidget):
                             
                             # 성공 코드가 아니면 FAIL 처리
                             if response_code not in ["200", "201"]:
-                                print(f"[SYSTEM] 응답 코드 검증 실패: code={response_code}, message={response_message}")
+                                # print(f"[SYSTEM] 응답 코드 검증 실패: code={response_code}, message={response_message}")
                                 val_result = "FAIL"
                                 
                                 # 기존 오류 메시지에 응답 코드 오류 추가
@@ -1355,17 +1380,16 @@ class MyApp(QWidget):
                         # 각 시도별로 pass/error count는 누적이 아니라 이번 시도만 반영해야 함
                         # key_psss_cnt, key_error_cnt는 이번 시도에 대한 값임
                         if self.current_retry + 1 < current_retries:
-                            # 아직 재시도가 남아있으면 진행중으로 표시
+                            # 아직 재시도가 남아있으면 진행중으로 표시 (누적 카운트 표시)
                             self.update_table_row_with_retries(
-                                self.cnt, "진행중", key_psss_cnt, key_error_cnt,
+                                self.cnt, "진행중", total_pass_count, total_error_count,
                                 f"검증 진행중... ({self.current_retry + 1}/{current_retries})",
                                 f"시도 {self.current_retry + 1}/{current_retries}", self.current_retry + 1)
                         else:
-                            # 마지막 시도이면 최종 결과 표시
+                            # ✅ 마지막 시도이면 최종 결과 표시 (누적된 필드 수 사용!)
                             final_buffer_result = self.step_buffers[self.cnt]["result"]
-                            # 마지막 시도에서는 누적이 아니라 마지막 시도 결과만 반영
                             self.update_table_row_with_retries(
-                                self.cnt, final_buffer_result, key_psss_cnt, key_error_cnt,
+                                self.cnt, final_buffer_result, total_pass_count, total_error_count,
                                 tmp_res_auth, error_text, current_retries)
 
                         # UI 즉시 업데이트 (화면에 반영)
@@ -1388,8 +1412,9 @@ class MyApp(QWidget):
                             if response_code not in ["200", "201"]:
                                 self.valResult.append(f"⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.")
 
-                        self.total_error_cnt += total_error_count
-                        self.total_pass_cnt += total_pass_count
+                        # ✅ 이번 회차의 결과만 전체 점수에 추가 (누적된 값이 아님!)
+                        self.total_error_cnt += key_error_cnt
+                        self.total_pass_cnt += key_psss_cnt
 
                         # 평가 점수 디스플레이 업데이트
                         self.update_score_display()
@@ -1711,7 +1736,7 @@ class MyApp(QWidget):
         # 표 형태로 변경 - 동적 API 개수
         api_count = len(self.videoMessages)
         self.tableWidget = QTableWidget(api_count, 8)
-        self.tableWidget.setHorizontalHeaderLabels(["API 명", "결과", "검증 횟수", "통과 필드 수", "전체 필드 수", "실패 횟수", "평가 점수", "상세 내용"])
+        self.tableWidget.setHorizontalHeaderLabels(["API 명", "결과", "검증 횟수", "통과 필드 수", "전체 필드 수", "실패 필드 수", "평가 점수", "상세 내용"])
         self.tableWidget.verticalHeader().setVisible(False)
         self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tableWidget.setSelectionMode(QAbstractItemView.NoSelection)
@@ -1763,7 +1788,7 @@ class MyApp(QWidget):
             # 전체 필드 수
             self.tableWidget.setItem(i, 4, QTableWidgetItem("0"))
             self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
-            # 실패 횟수
+            # 실패 필드 수
             self.tableWidget.setItem(i, 5, QTableWidgetItem("0"))
             self.tableWidget.item(i, 5).setTextAlignment(Qt.AlignCenter)
             # 평가 점수
@@ -2156,7 +2181,7 @@ class MyApp(QWidget):
             score = get_txt(6)
             # step_buffer에 최종 판정 가져오기
             final_res = self.step_buffers[i]["result"] if i < len(self.step_buffers) else "N/A"
-            step_lines.append(f"{name} | 결과: {final_res} | 검증 횟수: {retries} | 통과 필드 수: {pass_cnt} | 전체 필드 수: {total_cnt} | 실패 횟수: {fail_cnt} | 평가 점수: {score}")
+            step_lines.append(f"{name} | 결과: {final_res} | 검증 횟수: {retries} | 통과 필드 수: {pass_cnt} | 전체 필드 수: {total_cnt} | 실패 필드 수: {fail_cnt} | 평가 점수: {score}")
 
             # 로그 원문
             raw_log = self.valResult.toPlainText() if hasattr(self, 'valResult') else ""

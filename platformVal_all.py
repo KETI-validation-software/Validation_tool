@@ -297,7 +297,7 @@ class ResultPageDialog(QDialog):
         self.tableWidget = QTableWidget(api_count, 8)
         self.tableWidget.setHorizontalHeaderLabels([
             "API 명", "결과", "검증 횟수", "통과 필드 수", 
-            "전체 필드 수", "실패 횟수", "평가 점수", "상세 내용"
+            "전체 필드 수", "실패 필드 수", "평가 점수", "상세 내용"
         ])
         self.tableWidget.verticalHeader().setVisible(False)
         self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -404,7 +404,7 @@ class ResultPageDialog(QDialog):
                     
                     self.tableWidget.setCellWidget(row, 1, new_icon_widget)
             
-            # 나머지 컬럼들 (검증 횟수, 통과 필드 수, 전체 필드 수, 실패 횟수, 평가 점수)
+            # 나머지 컬럼들 (검증 횟수, 통과 필드 수, 전체 필드 수, 실패 필드 수, 평가 점수)
             for col in range(2, 7):
                 item = self.parent.tableWidget.item(row, col)
                 if item:
@@ -656,9 +656,9 @@ class MyApp(QWidget):
         webhookInData_name = webhookData_name.replace("spec_001", "spec_002")
         self.videoWebhookInData = getattr(video_data_response, webhookInData_name, [])
         
-        print(f"[DEBUG] Loaded spec: {self.spec_description}")
-        print(f"[DEBUG] API count: {len(self.videoMessages)}")
-        print(f"[DEBUG] API names: {self.videoMessages}")
+        # print(f"[DEBUG] Loaded spec: {self.spec_description}")
+        # print(f"[DEBUG] API count: {len(self.videoMessages)}")
+        # print(f"[DEBUG] API names: {self.videoMessages}")
 
 
     def _to_detail_text(self, val_text):
@@ -686,7 +686,7 @@ class MyApp(QWidget):
         server_auth[0] = None if token is None else str(token).strip()
         self.Server.auth_Info = server_auth
         # 디버그 로그 추가: 토큰 저장 시
-        print(f"[DEBUG][PLATFORM] _update_server_bearer_token: stored_token={self.Server.auth_Info[0]}")
+        # print(f"[DEBUG][PLATFORM] _update_server_bearer_token: stored_token={self.Server.auth_Info[0]}")
 
     def update_table_row_with_retries(self, row, result, pass_count, error_count, data, error_text, retries):
         if row>= self.tableWidget.rowCount():
@@ -724,7 +724,7 @@ class MyApp(QWidget):
         self.tableWidget.setItem(row, 4, QTableWidgetItem(str(total_fields)))
         self.tableWidget.item(row, 4).setTextAlignment(Qt.AlignCenter)
         
-        # 실패 횟수 업데이트
+        # 실패 필드 수 업데이트
         self.tableWidget.setItem(row, 5, QTableWidgetItem(str(error_count)))
         self.tableWidget.item(row, 5).setTextAlignment(Qt.AlignCenter)
         
@@ -772,15 +772,17 @@ class MyApp(QWidget):
                 stored_token = None
                 if hasattr(self.Server, 'auth_Info'):
                     stored_token = self.Server.auth_Info[0] if isinstance(self.Server.auth_Info, list) and self.Server.auth_Info else self.Server.auth_Info
-                print(f"[DEBUG][PLATFORM] update_view: token={token}, stored_token={stored_token}")
+                # print(f"[DEBUG][PLATFORM] update_view: token={token}, stored_token={stored_token}")
 
+            # 실시간 모드인 경우 1초 대기 추가(즉 웹훅인 경우)
             if self.realtime_flag is True:
                 time.sleep(1)
                 time_interval += 1
 
             current_timeout = CONSTANTS.time_out[self.cnt] / 1000
-
-            if time_interval < current_timeout:
+            
+            # ✅ timeout=0인 경우 즉시 처리 (대기 시간 없음)
+            if current_timeout == 0 or time_interval < current_timeout:
                 # ✅ 시스템 요청 확인 (요청-응답 구조)
                 # Server 클래스의 request_counter(클래스 변수)를 확인하여 시스템이 요청을 보냈는지 체크
                 api_name = self.Server.message[self.cnt]
@@ -790,7 +792,7 @@ class MyApp(QWidget):
                 if hasattr(self.Server, 'request_counter') and api_name in self.Server.request_counter:
                     expected_count = self.current_retry + 1  # 현재 회차에 맞는 요청 수
                     actual_count = self.Server.request_counter[api_name]
-                    print(f"[PLATFORM] API: {api_name}, 예상: {expected_count}, 실제: {actual_count}")
+                    # print(f"[PLATFORM] API: {api_name}, 예상: {expected_count}, 실제: {actual_count}")  # 가독성 개선: 주석 처리
                     if actual_count >= expected_count:
                         request_received = True
                 
@@ -838,12 +840,12 @@ class MyApp(QWidget):
                 # 실시간 진행률 표시
                 if retry_attempt == 0:
                     self.valResult.append(message_name)
-                    self.valResult.append(f"🔄 부하테스트 시작: 총 {current_retries}회 검증 예정")
+                    # self.valResult.append(f"🔄 부하테스트 시작: 총 {current_retries}회 검증 예정")  # 가독성 개선: 주석 처리
 
-                # 순서 확인용 로그
-                print(f"[PLATFORM] 시스템 요청 수신: {self.Server.message[self.cnt]} (시도 {retry_attempt + 1}/{current_retries})")
+                # 순서 확인용 로그 - 가독성 개선: 주석 처리
+                # print(f"[PLATFORM] 시스템 요청 수신: {self.Server.message[self.cnt]} (시도 {retry_attempt + 1}/{current_retries})")
 
-                self.valResult.append(f"📨 시스템 요청 수신, 검증 중... [{retry_attempt + 1}/{current_retries}]")
+                # self.valResult.append(f"📨 시스템 요청 수신, 검증 중... [{retry_attempt + 1}/{current_retries}]")  # 가독성 개선: 주석 처리
 
                 # 테이블에 실시간 진행률 표시
                 self.update_table_row_with_retries(self.cnt, "진행중", 0, 0, "검증 진행중...", f"시도 {retry_attempt + 1}/{current_retries}", retry_attempt + 1)
@@ -914,23 +916,23 @@ class MyApp(QWidget):
                         wait_count = 0
                         while wait_count < 10:  # 최대 1초 (0.1초 x 10)
                             if hasattr(self.Server, 'webhook_thread') and self.Server.webhook_thread:
-                                print(f"[DEBUG][PLATFORM] 웹훅 스레드 발견! (대기 횟수: {wait_count})")
+                                # print(f"[DEBUG][PLATFORM] 웹훅 스레드 발견! (대기 횟수: {wait_count})")
                                 break
                             time.sleep(0.1)
                             wait_count += 1
                         
                         # ✅ 웹훅 스레드 완료 대기
                         if hasattr(self.Server, 'webhook_thread') and self.Server.webhook_thread:
-                            print(f"[DEBUG][PLATFORM] 웹훅 스레드 찾음, 완료 대기 중...")
+                            #print(f"[DEBUG][PLATFORM] 웹훅 스레드 찾음, 완료 대기 중...")
                             self.Server.webhook_thread.join(timeout=5)  # 최대 5초 대기
-                            print(f"[DEBUG][PLATFORM] 웹훅 스레드 완료됨")
-                        else:
-                            print(f"[DEBUG][PLATFORM] 웹훅 스레드 없음 (대기 횟수: {wait_count})")
+                            #print(f"[DEBUG][PLATFORM] 웹훅 스레드 완료됨")
+                        # else:
+                        #     print(f"[DEBUG][PLATFORM] 웹훅 스레드 없음 (대기 횟수: {wait_count})")
                         
                         # ✅ 실제 웹훅 응답 사용 (Server.webhook_response)
                         if hasattr(self.Server, 'webhook_response') and self.Server.webhook_response:
                             webhook_response = self.Server.webhook_response  # 실제 웹훅 응답
-                            print(f"[DEBUG][PLATFORM] 웹훅 응답 사용: {webhook_response}")
+                            # print(f"[DEBUG][PLATFORM] 웹훅 응답 사용: {webhook_response}")
                             tmp_webhook_response = json.dumps(webhook_response, indent=4, ensure_ascii=False)
                             accumulated['data_parts'].append(f"\n--- Webhook 응답 (시도 {retry_attempt + 1}회차) ---\n{tmp_webhook_response}")
                             
@@ -969,7 +971,7 @@ class MyApp(QWidget):
                                     print(f"[DEBUG] videoWebhookSchema가 없습니다!")
                                     print(f"[DEBUG] ==========================================\n")
                         else:
-                            print(f"[DEBUG][PLATFORM] 웹훅 응답 없음")
+                            # print(f"[DEBUG][PLATFORM] 웹훅 응답 없음")
                             accumulated['data_parts'].append(f"\n--- Webhook 응답 ---\nnull")
                     
                     # 개별 프로토콜 설정에 따른 처리
@@ -1101,14 +1103,13 @@ class MyApp(QWidget):
                     self.valResult.append(
                         "Score details : " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(self.total_error_cnt) + "(누적 오류 필드 수)\n")
                     
-                    # ✅ 다음 API로 이동
                     self.cnt += 1
                     self.current_retry = 0  # 재시도 카운터 리셋
                     
-                    # ✅ 시스템과 동일하게 2초 대기
+                    # (10/15) 반복 검증 시 대기시간
                     self.time_pre = time.time() + 2.0
                 else:
-                    # ✅ 아직 재시도가 남음 - 2초 대기 후 다음 시도
+                    # 재시도인 경우
                     self.time_pre = time.time() + 2.0
                         
                 self.realtime_flag = False
@@ -1375,7 +1376,7 @@ class MyApp(QWidget):
             icon_widget.setLayout(icon_layout)
             self.tableWidget.setCellWidget(row, 1, icon_widget)
             
-            # 검증 횟수, 통과 필드 수, 전체 필드 수, 실패 횟수, 평가 점수
+            # 검증 횟수, 통과 필드 수, 전체 필드 수, 실패 필드 수, 평가 점수
             for col in range(2, 7):
                 item = QTableWidgetItem("0" if col != 6 else "0%")
                 item.setTextAlignment(Qt.AlignCenter)
@@ -1597,7 +1598,7 @@ class MyApp(QWidget):
         # 동적 API 개수에 따라 테이블 생성
         api_count = len(self.videoMessages)
         self.tableWidget = QTableWidget(api_count, 8)
-        self.tableWidget.setHorizontalHeaderLabels(["API 명", "결과", "검증 횟수", "통과 필드 수", "전체 필드 수", "실패 횟수", "평가 점수", "상세 내용"])
+        self.tableWidget.setHorizontalHeaderLabels(["API 명", "결과", "검증 횟수", "통과 필드 수", "전체 필드 수", "실패 필드 수", "평가 점수", "상세 내용"])
         self.tableWidget.verticalHeader().setVisible(False)
         self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tableWidget.setSelectionMode(QAbstractItemView.NoSelection)
@@ -1650,7 +1651,7 @@ class MyApp(QWidget):
             # 전체 필드 수
             self.tableWidget.setItem(i, 4, QTableWidgetItem("0"))
             self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
-            # 실패 횟수
+            # 실패 필드 수
             self.tableWidget.setItem(i, 5, QTableWidgetItem("0"))
             self.tableWidget.item(i, 5).setTextAlignment(Qt.AlignCenter)
             # 평가 점수
@@ -1875,7 +1876,7 @@ class MyApp(QWidget):
             self.videoOutMessage[0]['accessToken'] = token_value
         
         # Server 설정 (디버그 메시지 추가)
-        print(f"[DEBUG] sbtn_push: Setting Server.message (length={len(self.videoMessages)})")
+        # print(f"[DEBUG] sbtn_push: Setting Server.message (length={len(self.videoMessages)})")
         self.Server.message = self.videoMessages
         self.Server.inMessage = self.videoInMessage
         self.Server.outMessage = self.videoOutMessage
@@ -1884,8 +1885,8 @@ class MyApp(QWidget):
         self.Server.webhookData = self.videoWebhookData  # ✅ 웹훅 이벤트 데이터 (플랫폼 → 시스템)
         self.Server.system = "video"
         self.Server.timeout = timeout
-        print(f"[DEBUG] sbtn_push: Server configured - message={self.Server.message[:3] if self.Server.message else 'None'}...")
-        print(f"[DEBUG] sbtn_push: webhookData length={len(self.Server.webhookData) if self.Server.webhookData else 0}")  # ✅ 디버그 로그
+        #print(f"[DEBUG] sbtn_push: Server configured - message={self.Server.message[:3] if self.Server.message else 'None'}...")
+        #print(f"[DEBUG] sbtn_push: webhookData length={len(self.Server.webhookData) if self.Server.webhookData else 0}")  # ✅ 디버그 로그
         
         self.init_win()
         self.valResult.clear()  # 초기화
@@ -1924,7 +1925,7 @@ class MyApp(QWidget):
         address_port = int(url[-1])  # 포트만 사용
         address_ip = "127.0.0.1"  # 플랫폼 서버는 로컬호스트에서 실행
         
-        print(f"[DEBUG] 플랫폼 서버 시작: {address_ip}:{address_port}")
+        #print(f"[DEBUG] 플랫폼 서버 시작: {address_ip}:{address_port}")
         self.server_th = server_th(handler_class=self.Server, address=address_ip, port=address_port)
         self.server_th.start()
         # 서버 준비 완료까지 대기 (첫 실행 시)
@@ -1945,7 +1946,7 @@ class MyApp(QWidget):
         # 버퍼 초기화 - API 개수에 맞춰 동적으로 생성
         api_count = len(self.videoMessages) if self.videoMessages else 9
         self.step_buffers = [{"data": "", "result": "", "error": ""} for _ in range(api_count)]
-        print(f"[DEBUG] init_win: step_buffers 초기화 완료 (크기={api_count})")
+       #print(f"[DEBUG] init_win: step_buffers 초기화 완료 (크기={api_count})")
         # JSON 파일 초기화 제거 - 더 이상 개별 JSON 파일을 사용하지 않음
         # (videoData_request.py와 videoData_response.py에서 데이터를 가져옴)
         
@@ -2034,7 +2035,7 @@ class MyApp(QWidget):
             score = get_txt(6)
             # step_buffer에 최종 판정 가져오기
             final_res = self.step_buffers[i]["result"] if i < len(self.step_buffers) else "N/A"
-            step_lines.append(f"{name} | 결과: {final_res} | 검증 횟수: {retries} | 통과 필드 수: {pass_cnt} | 전체 필드 수: {total_cnt} | 실패 횟수: {fail_cnt} | 평가 점수: {score}") 
+            step_lines.append(f"{name} | 결과: {final_res} | 검증 횟수: {retries} | 통과 필드 수: {pass_cnt} | 전체 필드 수: {total_cnt} | 실패 필드 수: {fail_cnt} | 평가 점수: {score}") 
 
             # 로그 원문
             raw_log = self.valResult.toPlainText() if hasattr(self, 'valResult') else ""
