@@ -376,12 +376,6 @@ cmg7bve25000114cevhn5o3vr_ReplayURL_out_data = {
 
 # RealtimeVideoEventInfos
 cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_data = {
-    "code": "200",
-    "message": "성공"
-}
-
-# RealtimeVideoEventInfos
-cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_data = {
     "code": "",
     "message": "",
     "camList": [
@@ -476,7 +470,6 @@ cmg7bve25000114cevhn5o3vr_inData = [
     cmg7bve25000114cevhn5o3vr_StreamURLs_out_data,
     cmg7bve25000114cevhn5o3vr_ReplayURL_out_data,
     cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_data,
-    cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_data,
     cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_data,
     cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_out_data,
     cmg7bve25000114cevhn5o3vr_PtzStatus_out_data,
@@ -492,7 +485,6 @@ cmg7bve25000114cevhn5o3vr_messages = [
     "StoredVideoInfos",
     "StreamURLs",
     "ReplayURL",
-    "RealtimeVideoEventInfos",
     "RealtimeVideoEventInfos",
     "StoredVideoEventInfos",
     "StoredObjectAnalyticsInfos",
