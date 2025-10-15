@@ -12,6 +12,7 @@ cmg90br3n002qihleffuljnth_RealtimeSensorData_out_constraints = {
   "sensorDeviceList.sensorDeviceID": {
     "valueType": "request-based",
     "required": True,
+    "referenceEndpoint": "RealtimeSensorData",
     "referenceField": "sensorDeviceID"
   },
   "sensorDeviceList.measureTime": {
@@ -79,12 +80,13 @@ cmg90br3n002qihleffuljnth_SensorDeviceControl_out_constraints = {
   "sensorDeviceID": {
     "valueType": "request-based",
     "required": True,
-
+    "referenceEndpoint": "/SensorDeviceControl",
     "referenceField": "sensorDeviceID"
   },
   "sensorDeviceStatus": {
     "valueType": "request-based",
     "required": True,
+    "referenceEndpoint": "/SensorDeviceControl",
     "referenceField": "commandType"
   }
 }
@@ -255,7 +257,9 @@ cmg7bve25000114cevhn5o3vr_ReplayURL_out_constraints = {
 }
 
 # RealtimeVideoEventInfos
+cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_constraints = {}
 
+# RealtimeVideoEventInfos
 cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_constraints = {
   "camList.camID": {
     "valueType": "request-based",
@@ -296,6 +300,7 @@ cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_constraints = {
   "camList.camID": {
     "valueType": "request-based",
     "required": True,
+    "referenceEndpoint": "/StoredVideoEventInfos",
     "referenceField": "camID",
     "requestRange": {
       "operator": "between"
@@ -385,6 +390,7 @@ cmg7bve25000114cevhn5o3vr_inConstraints = [
     cmg7bve25000114cevhn5o3vr_StoredVideoInfos_out_constraints,
     cmg7bve25000114cevhn5o3vr_StreamURLs_out_constraints,
     cmg7bve25000114cevhn5o3vr_ReplayURL_out_constraints,
+    cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_constraints,
     cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_constraints,
     cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_constraints,
     cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_out_constraints,
