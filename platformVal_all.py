@@ -909,8 +909,8 @@ class MyApp(QWidget):
                         step_result = "FAIL"
                         combined_error_parts.append(f"[검증 {retry_attempt + 1}회차] [Inbound] " + inbound_err_txt)
                     
-                    # ✅ WebHook 프로토콜인 경우 웹훅 응답 표시
-                    if current_protocol == "WebHook" and "Realtime" in str(self.Server.message[self.cnt]):
+                    # ✅ WebHook 프로토콜인 경우 웹훅 응답 표시 (transProtocol 기반으로만 판단)
+                    if current_protocol == "WebHook":
                         
                         # ✅ 웹훅 스레드가 생성될 때까지 짧게 대기
                         wait_count = 0
@@ -974,8 +974,8 @@ class MyApp(QWidget):
                             # print(f"[DEBUG][PLATFORM] 웹훅 응답 없음")
                             accumulated['data_parts'].append(f"\n--- Webhook 응답 ---\nnull")
                     
-                    # 개별 프로토콜 설정에 따른 처리
-                    if current_protocol == "LongPolling" and "Realtime" in str(self.Server.message[self.cnt]):
+                    # ✅ LongPolling 프로토콜인 경우 (transProtocol 기반으로만 판단)
+                    if current_protocol == "LongPolling":
                         if "Webhook".lower() in str(current_data).lower():
                             try:
                                 # ✅ 웹훅 데이터는 별도 리스트이므로 항상 첫 번째 요소 사용
@@ -1693,17 +1693,15 @@ class MyApp(QWidget):
             except:
                 schema_data = None
             
-            # 웹훅 검증인 경우에만 웹훅 스키마
+            # 웹훅 검증인 경우에만 웹훅 스키마 (transProtocol 기반으로만 판단)
             webhook_schema = None
-            if row < len(self.videoMessages):
-                api_name_raw = self.videoMessages[row]
-                if "Realtime" in api_name_raw or "realTime" in api_name_raw or "webhook" in api_name_raw.lower():
-                    current_protocol = CONSTANTS.trans_protocol[row] if row < len(CONSTANTS.trans_protocol) else None
-                    if current_protocol == "WebHook":
-                        try:
-                            webhook_schema = self.videoWebhookSchema[0] if len(self.videoWebhookSchema) > 0 else None
-                        except:
-                            webhook_schema = None
+            if row < len(CONSTANTS.trans_protocol):
+                current_protocol = CONSTANTS.trans_protocol[row]
+                if current_protocol == "WebHook":
+                    try:
+                        webhook_schema = self.videoWebhookSchema[0] if len(self.videoWebhookSchema) > 0 else None
+                    except:
+                        webhook_schema = None
             
             # 통합 팝업창 띄우기
             dialog = CombinedDetailDialog(api_name, buf, schema_data, webhook_schema)
