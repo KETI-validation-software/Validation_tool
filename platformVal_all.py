@@ -7,7 +7,7 @@ import time
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore
 from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor
-from PyQt5.QtCore import Qt, QSettings, QTimer, QThread
+from PyQt5.QtCore import Qt, QSettings, QTimer, QThread, pyqtSignal
 import sys
 import ssl
 
@@ -551,6 +551,8 @@ class ResultPageDialog(QDialog):
             self.parent.show_combined_result(row)
 
 class MyApp(QWidget):
+    # 시험 결과 표시 요청 시그널 (main.py와 연동)
+    showResultRequested = pyqtSignal(object)  # parent widget을 인자로 전달
 
     def __init__(self, embedded=False, mode=None):
         importlib.reload(CONSTANTS)  # CONSTANTS 모듈을 다시 로드하여 최신 설정 반영
@@ -1995,8 +1997,13 @@ class MyApp(QWidget):
 
     def show_result_page(self):
         """시험 결과 페이지 표시"""
-        dialog = ResultPageDialog(self)
-        dialog.exec_()
+        if self.embedded:
+            # Embedded 모드: 시그널을 emit하여 main.py에 알림
+            self.showResultRequested.emit(self)
+        else:
+            # Standalone 모드: 다이얼로그 표시
+            dialog = ResultPageDialog(self)
+            dialog.exec_()
 
     def toggle_fullscreen(self):
         """전체화면 전환 (main.py 스타일)"""

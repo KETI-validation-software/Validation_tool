@@ -374,10 +374,20 @@ cmg7bve25000114cevhn5o3vr_ReplayURL_out_data = {
 ]
 }
 
-# RealtimeVideoEventInfos
-cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_data = {
+# StoredVideoEventInfos
+cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_data = {
     "code": "200",
-    "message": "성공"
+    "message": "성공",
+    "camList": [
+        {
+        "camID": "",
+        "eventUUID": [],
+        "eventName": "",
+        "startTime": 0,
+        "endTime": 0,
+        "eventDesc": "aaabbbAAA"
+    }
+]
 }
 
 # RealtimeVideoEventInfos
@@ -392,22 +402,6 @@ cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_data = {
         "startTime": "",
         "endTime": "",
         "eventDesc": "dddddeeeeeAAFEDFiikjf"
-    }
-]
-}
-
-# StoredVideoEventInfos
-cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_data = {
-    "code": "200",
-    "message": "성공",
-    "camList": [
-        {
-        "camID": "",
-        "eventUUID": [],
-        "eventName": "",
-        "startTime": 0,
-        "endTime": 0,
-        "eventDesc": "aaabbbAAA"
     }
 ]
 }
@@ -475,9 +469,8 @@ cmg7bve25000114cevhn5o3vr_inData = [
     cmg7bve25000114cevhn5o3vr_StoredVideoInfos_out_data,
     cmg7bve25000114cevhn5o3vr_StreamURLs_out_data,
     cmg7bve25000114cevhn5o3vr_ReplayURL_out_data,
-    cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_data,
-    cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_data,
     cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_data,
+    cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_data,
     cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_out_data,
     cmg7bve25000114cevhn5o3vr_PtzStatus_out_data,
     cmg7bve25000114cevhn5o3vr_PtzContinuousMove_out_data,
@@ -492,9 +485,8 @@ cmg7bve25000114cevhn5o3vr_messages = [
     "StoredVideoInfos",
     "StreamURLs",
     "ReplayURL",
-    "RealtimeVideoEventInfos",
-    "RealtimeVideoEventInfos",
     "StoredVideoEventInfos",
+    "RealtimeVideoEventInfos",
     "StoredObjectAnalyticsInfos",
     "PtzStatus",
     "PtzContinuousMove",

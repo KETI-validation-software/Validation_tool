@@ -8,9 +8,9 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소 (플랫폼과 시스템이 같은 PC에서 실행되더야 함, 변경하면 평가 작동 안됌ㅜ)
 #test-info -> (주의) auth_info의 id, pw admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음!!!!!!!
-company_name = "테스트기업"
-product_name = "테스트시스템"
-version = "v0.1"
+company_name = "통합플랫폼기업"
+product_name = "통합플랫폼테스트"
+version = "v1.0"
 test_category = "본시험"
 test_target = "통합시스템"
 test_range = "ALL_FIELDS"
@@ -60,21 +60,39 @@ num_retries = [1, 2, 3, 2, 1, 2, 3, 2, 1]
 # specification.id별 설정
 SPEC_CONFIG = {
     "cmg90br3n002qihleffuljnth": {
-        "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic'],
+        "trans_protocol": ['basic', 'basic', 'basic', 'LongPolling', 'LongPolling', 'basic', 'basic'],
         "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000],
         "num_retries": [1, 3, 2, 3, 3, 2, 1]
     }
 ,
     "cmg7edeo50013124xiux3gbkb": {
-        "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic'],
+        "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'LongPolling', 'basic', 'LongPolling', 'basic'],
         "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
         "num_retries": [2, 1, 2, 1, 3, 1, 1, 1]
     }
 ,
     "cmg7bve25000114cevhn5o3vr": {
-        "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic'],
+        "trans_protocol": ['basic', 'LongPolling', 'basic', 'basic', 'basic', 'basic', 'basic', 'LongPolling', 'basic', 'basic', 'basic', 'basic'],
         "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
         "num_retries": [3, 10, 10, 2, 2, 2, 5, 5, 5, 1, 1, 1]
+    }
+,
+    "cmgatbdp000bqihlexmywusvq": {
+        "trans_protocol": ['basic', 'LongPolling', 'basic', 'LongPolling', 'LongPolling', 'basic', 'basic'],
+        "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000],
+        "num_retries": [2, 2, 2, 2, 2, 2, 2]
+    }
+,
+    "cmgasj98w009aihlezm0fe6cs": {
+        "trans_protocol": ['basic', 'LongPolling', 'basic', 'basic', 'LongPolling', 'basic', 'LongPolling', 'basic'],
+        "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
+        "num_retries": [2, 2, 1, 2, 2, 2, 2, 1]
+    }
+,
+    "cmga0l5mh005dihlet5fcoj0o": {
+        "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'WebHook', 'basic', 'basic', 'basic', 'basic', 'basic'],
+        "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
+        "num_retries": [2, 1, 2, 2, 1, 1, 1, 1, 3, 1, 2, 2]
     }
 }
 
