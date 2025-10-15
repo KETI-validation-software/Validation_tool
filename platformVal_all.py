@@ -1620,15 +1620,17 @@ class MyApp(QWidget):
             except:
                 schema_data = None
             
-            # 웹훅 스키마 가져오기 (플랫폼: 시스템이 보내는 웹훅 응답 스키마)
-            # ✅ 웹훅 스키마는 모든 API가 공통으로 사용하므로 항상 [0] 사용
-            try:
-                webhook_schema = self.videoWebhookSchema[0] if len(self.videoWebhookSchema) > 0 else None
-                print(f"[DEBUG] Platform webhook_schema for row {row}: {webhook_schema is not None}")
-                print(f"[DEBUG] videoWebhookSchema length: {len(self.videoWebhookSchema)}")
-            except Exception as e:
-                print(f"[DEBUG] Error getting webhook_schema: {e}")
-                webhook_schema = None
+            # 웹훅 검증인 경우에만 웹훅 스키마
+            webhook_schema = None
+            if row < len(self.videoMessages):
+                api_name_raw = self.videoMessages[row]
+                if "Realtime" in api_name_raw or "realTime" in api_name_raw or "webhook" in api_name_raw.lower():
+                    current_protocol = CONSTANTS.trans_protocol[row] if row < len(CONSTANTS.trans_protocol) else None
+                    if current_protocol == "WebHook":
+                        try:
+                            webhook_schema = self.videoWebhookSchema[0] if len(self.videoWebhookSchema) > 0 else None
+                        except:
+                            webhook_schema = None
             
             # 통합 팝업창 띄우기
             dialog = CombinedDetailDialog(api_name, buf, schema_data, webhook_schema)
