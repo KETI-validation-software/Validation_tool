@@ -91,14 +91,16 @@ class MainWindow(QMainWindow):
 
     def _show_test_result(self):
         """시험 결과 페이지로 이동"""
-        # 시험 결과 위젯이 아직 없으면 경고
-        if not hasattr(self, '_result_widget') or self._result_widget is None:
-            QMessageBox.warning(self, "경고", "시험 결과가 아직 생성되지 않았습니다.")
-            return
-
-        # 메인 stack을 결과 페이지로 전환
-        self.stack.setCurrentWidget(self._result_widget)
-        print("✓ 시험 결과 페이지로 이동")
+        # embedded 모드의 검증 위젯에서 시험 결과 표시
+        current_widget = self.stack.currentWidget()
+        
+        if isinstance(current_widget, (platform_app.MyApp, system_app.MyApp)):
+            # 현재 검증 화면이 활성화된 경우, 해당 검증 화면의 시험 결과 표시
+            current_widget.show_result_page()
+        else:
+            QMessageBox.warning(self, "경고", "시험이 실행되지 않았습니다.\n먼저 시험을 실행해주세요.")
+        
+        print("✓ 시험 결과 표시 요청")
 
     def _on_show_result_requested(self, parent_widget):
         """검증 화면에서 시험 결과 표시 요청 시 호출"""
@@ -106,35 +108,22 @@ class MainWindow(QMainWindow):
         print(f"   parent_widget 타입: {type(parent_widget)}")
         print(f"   parent_widget.embedded: {parent_widget.embedded}")
 
-        # parent_widget이 platform인지 system인지 확인하여 적절한 Widget 생성
+        # parent_widget이 platform인지 system인지 확인하여 적절한 Dialog 생성
         if isinstance(parent_widget, platform_app.MyApp):
-            print(f"   → Platform 시험 결과 생성")
-            self._result_widget = platform_app.ResultPageWidget(parent_widget)
+            print(f"   → Platform 시험 결과 다이얼로그 표시")
+            dialog = platform_app.ResultPageDialog(parent_widget)
+            dialog.exec_()
         elif isinstance(parent_widget, system_app.MyApp):
-            print(f"   → System 시험 결과 생성")
-            self._result_widget = system_app.ResultPageWidget(parent_widget)
+            print(f"   → System 시험 결과 다이얼로그 표시")
+            dialog = system_app.ResultPageDialog(parent_widget)
+            dialog.exec_()
         else:
             print(f"알 수 없는 parent_widget 타입: {type(parent_widget)}")
             return
 
-        # stack에 추가 (이미 있으면 제거 후 추가)
-        if hasattr(self, '_result_widget_added') and self._result_widget_added:
-            # 기존 위젯 제거
-            for i in range(self.stack.count()):
-                widget = self.stack.widget(i)
-                if isinstance(widget, (platform_app.ResultPageWidget, system_app.ResultPageWidget)):
-                    self.stack.removeWidget(widget)
-                    break
-        self.stack.addWidget(self._result_widget)
-        self._result_widget_added = True
-
-        # 시험 결과 페이지로 전환
-        self.stack.setCurrentWidget(self._result_widget)
-
         # 시험 결과 메뉴 활성화
         self.act_test_result.setEnabled(True)
         print("✓ 시험 결과 메뉴 활성화")
-        print("✓ 시험 결과 페이지로 이동")
 
     def _on_page_changed(self, index):
         """info_widget의 페이지가 변경될 때 호출되는 함수"""
