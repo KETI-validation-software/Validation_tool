@@ -938,35 +938,34 @@ class MyApp(QWidget):
         except Exception as e:
             print(e)
 
-        # Webhook/Realtime 처리 (더 방어적으로)
-        if "Realtime" in path:
-            time.sleep(0.1)
-            try:
-                json_data_dict = json.loads(json_data.decode('utf-8'))
-                trans_protocol = json_data_dict.get("transProtocol", {})
-                if trans_protocol:
-                    trans_protocol_type = trans_protocol.get("transProtocolType", {})
-                    # 웹훅 서버 시작 (포트는 8090)
-                    if "WebHook".lower() in str(trans_protocol_type).lower():
-                        path_tmp = trans_protocol.get("transProtocolDesc", {})
-                        # http/https 접두어 보정
-                        if not path_tmp or str(path_tmp).strip() in ["None", "", "desc"]:
-                            path_tmp = "https://127.0.0.1"
-                        if not str(path_tmp).startswith("http"):
-                            path_tmp = "https://" + str(path_tmp)
-                        parsed = urlparse(str(path_tmp))
-                        url = parsed.hostname if parsed.hostname is not None else "127.0.0.1"
-                        port = parsed.port if parsed.port is not None else 80
-                        msg = self.outMessage[-1]
-                        self.webhook_flag = True
-                        self.webhook_cnt = self.cnt
-                        self.webhook_thread = WebhookThread(url, port, msg)
-                        self.webhook_thread.result_signal.connect(self.handle_webhook_result)
-                        self.webhook_thread.start()
-            except Exception as e:
-                print(e)
-                import traceback
-                traceback.print_exc()
+        # ✅ Webhook 처리 (transProtocol 기반으로만 판단)
+        try:
+            json_data_dict = json.loads(json_data.decode('utf-8'))
+            trans_protocol = json_data_dict.get("transProtocol", {})
+            if trans_protocol:
+                trans_protocol_type = trans_protocol.get("transProtocolType", {})
+                # 웹훅 서버 시작 (transProtocolType이 WebHook인 경우만)
+                if "WebHook".lower() in str(trans_protocol_type).lower():
+                    time.sleep(0.1)
+                    path_tmp = trans_protocol.get("transProtocolDesc", {})
+                    # http/https 접두어 보정
+                    if not path_tmp or str(path_tmp).strip() in ["None", "", "desc"]:
+                        path_tmp = "https://127.0.0.1"
+                    if not str(path_tmp).startswith("http"):
+                        path_tmp = "https://" + str(path_tmp)
+                    parsed = urlparse(str(path_tmp))
+                    url = parsed.hostname if parsed.hostname is not None else "127.0.0.1"
+                    port = parsed.port if parsed.port is not None else 80
+                    msg = self.outMessage[-1]
+                    self.webhook_flag = True
+                    self.webhook_cnt = self.cnt
+                    self.webhook_thread = WebhookThread(url, port, msg)
+                    self.webhook_thread.result_signal.connect(self.handle_webhook_result)
+                    self.webhook_thread.start()
+        except Exception as e:
+            print(e)
+            import traceback
+            traceback.print_exc()
 
 
     def handle_webhook_result(self, result):
@@ -1395,9 +1394,9 @@ class MyApp(QWidget):
                         # UI 즉시 업데이트 (화면에 반영)
                         QApplication.processEvents()
 
-                        # ✅ 웹훅 API인 경우 명확하게 구분 표시
-                        if "Realtime" in self.message[self.cnt] and current_protocol == "WebHook":
-                            self.valResult.append(f"\n=== 구독 요청 응답 ===")
+                        # ✅ 웹훅 API인 경우 명확하게 구분 표시 (transProtocol 기반으로만 판단)
+                        if current_protocol == "WebHook":
+                            self.valResult.append(f"\n=== 웹훅 구독 요청 응답 ===")
                             self.valResult.append(f"[시도 {self.current_retry + 1}/{current_retries}]")
                         else:
                             self.valResult.append(f"\n검증 진행: {self.current_retry + 1}/{current_retries}회")
@@ -1839,17 +1838,15 @@ class MyApp(QWidget):
             except:
                 schema_data = None
 
-            # 웹훅 스키마 데이터 가져오기 (웹훅 API인 경우)
+            # 웹훅 스키마 데이터 가져오기 (transProtocol 기반으로만 판단)
             webhook_schema = None
-            if row < len(self.videoMessages):
-                api_name_raw = self.videoMessages[row]
-                if "Realtime" in api_name_raw or "realTime" in api_name_raw or "webhook" in api_name_raw.lower():
-                    current_protocol = CONSTANTS.trans_protocol[row] if row < len(CONSTANTS.trans_protocol) else None
-                    if current_protocol == "WebHook":
-                        try:
-                            webhook_schema = self.videoWebhookInSchema[0] if len(self.videoWebhookInSchema) > 0 else None
-                        except:
-                            webhook_schema = None
+            if row < len(CONSTANTS.trans_protocol):
+                current_protocol = CONSTANTS.trans_protocol[row]
+                if current_protocol == "WebHook":
+                    try:
+                        webhook_schema = self.videoWebhookInSchema[0] if len(self.videoWebhookInSchema) > 0 else None
+                    except:
+                        webhook_schema = None
 
             # 통합 팝업창 띄우기
             dialog = CombinedDetailDialog(api_name, buf, schema_data, webhook_schema)
