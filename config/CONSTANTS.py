@@ -25,7 +25,7 @@ specs = [["cmg90br3n002qihleffuljnth_inSchema","cmg90br3n002qihleffuljnth_outDat
          ["cmg7edeo50013124xiux3gbkb_inSchema","cmg7edeo50013124xiux3gbkb_outData","cmg7edeo50013124xiux3gbkb_messages",""],
          ["cmg7bve25000114cevhn5o3vr_inSchema","cmg7bve25000114cevhn5o3vr_outData","cmg7bve25000114cevhn5o3vr_messages",""]]
 
-# opt 검증 - False 이면 검증 안함
+# opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황 
 flag_opt = False
 if test_range == "ALL_FIELDS":
     flag_opt = True
@@ -50,7 +50,7 @@ num_retries : 메시지별 메시지 검증 횟수
 #나중에 삭제
 trans_protocol = [None, None, None, None, None, None, 'WebHook', None, None]
 time_out = [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000]
-num_retries = [1, 1, 1, 1, 1, 1, 1, 1, 1]
+num_retries = [1, 2, 3, 2, 1, 2, 3, 2, 1]
 
 # specification.id별 설정
 SPEC_CONFIG = {
