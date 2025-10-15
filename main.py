@@ -55,10 +55,10 @@ class MainWindow(QMainWindow):
         self.act_test_run.triggered.connect(self._run_test_from_menu)
         main_menu.addAction(self.act_test_run)
 
-        # 4. 시험 결과 (시험 실행 완료 후 활성화 - 향후 구현)
+        # 4. 시험 결과 (시험 실행 완료 후 활성화)
         self.act_test_result = QAction("시험 결과", self)
         self.act_test_result.setEnabled(False)
-        # self.act_test_result.triggered.connect(self._show_test_result)  # 향후 구현
+        self.act_test_result.triggered.connect(self._show_test_result)
         main_menu.addAction(self.act_test_result)
 
         main_menu.addSeparator()
@@ -89,12 +89,59 @@ class MainWindow(QMainWindow):
         self.info_widget.stacked_widget.setCurrentIndex(1)
         print("시험 설정 페이지로 이동")
 
+    def _show_test_result(self):
+        """시험 결과 페이지로 이동"""
+        # 시험 결과 위젯이 아직 없으면 경고
+        if not hasattr(self, '_result_widget') or self._result_widget is None:
+            QMessageBox.warning(self, "경고", "시험 결과가 아직 생성되지 않았습니다.")
+            return
+
+        # 메인 stack을 결과 페이지로 전환
+        self.stack.setCurrentWidget(self._result_widget)
+        print("✓ 시험 결과 페이지로 이동")
+
+    def _on_show_result_requested(self, parent_widget):
+        """검증 화면에서 시험 결과 표시 요청 시 호출"""
+        print(f"✓ _on_show_result_requested 호출됨")
+        print(f"   parent_widget 타입: {type(parent_widget)}")
+        print(f"   parent_widget.embedded: {parent_widget.embedded}")
+
+        # parent_widget이 platform인지 system인지 확인하여 적절한 Widget 생성
+        if isinstance(parent_widget, platform_app.MyApp):
+            print(f"   → Platform 시험 결과 생성")
+            self._result_widget = platform_app.ResultPageWidget(parent_widget)
+        elif isinstance(parent_widget, system_app.MyApp):
+            print(f"   → System 시험 결과 생성")
+            self._result_widget = system_app.ResultPageWidget(parent_widget)
+        else:
+            print(f"❌ 알 수 없는 parent_widget 타입: {type(parent_widget)}")
+            return
+
+        # stack에 추가 (이미 있으면 제거 후 추가)
+        if hasattr(self, '_result_widget_added') and self._result_widget_added:
+            # 기존 위젯 제거
+            for i in range(self.stack.count()):
+                widget = self.stack.widget(i)
+                if isinstance(widget, (platform_app.ResultPageWidget, system_app.ResultPageWidget)):
+                    self.stack.removeWidget(widget)
+                    break
+        self.stack.addWidget(self._result_widget)
+        self._result_widget_added = True
+
+        # 시험 결과 페이지로 전환
+        self.stack.setCurrentWidget(self._result_widget)
+
+        # 시험 결과 메뉴 활성화
+        self.act_test_result.setEnabled(True)
+        print("✓ 시험 결과 메뉴 활성화")
+        print("✓ 시험 결과 페이지로 이동")
+
     def _on_page_changed(self, index):
         """info_widget의 페이지가 변경될 때 호출되는 함수"""
         if index == 1:
             # 2페이지(시험 설정)로 이동 → 시험 설정 메뉴 활성화
             self.act_test_setup.setEnabled(True)
-            print("시험 설정 메뉴 활성화")
+            print("✓ 시험 설정 메뉴 활성화")
 
     def _on_start_test_requested(self, mode):
         """시험 시작 버튼 클릭 시 호출 - 시험 실행 메뉴 활성화 후 검증 앱 실행"""
@@ -119,12 +166,16 @@ class MainWindow(QMainWindow):
                 # Request 모드 - 메인 창을 System 검증으로 전환
                 if getattr(self, "_system_widget", None) is None:
                     self._system_widget = system_app.MyApp(embedded=True)
+                    # Embedded 위젯도 시험 결과 시그널 연결
+                    self._system_widget.showResultRequested.connect(self._on_show_result_requested)
                     self.stack.addWidget(self._system_widget)
                 self.stack.setCurrentWidget(self._system_widget)
             elif mode == "response":
                 # Response 모드 - 메인 창을 Platform 검증으로 전환
                 if getattr(self, "_platform_widget", None) is None:
                     self._platform_widget = platform_app.MyApp(embedded=True)
+                    # Embedded 위젯도 시험 결과 시그널 연결
+                    self._platform_widget.showResultRequested.connect(self._on_show_result_requested)
                     self.stack.addWidget(self._platform_widget)
                 self.stack.setCurrentWidget(self._platform_widget)
         else:
@@ -167,11 +218,15 @@ class MainWindow(QMainWindow):
             if hasattr(self, "platform_window") and self.platform_window is not None:
                 self.platform_window.close()
             self.platform_window = platform_app.MyApp(embedded=False)
+            # 시험 결과 표시 시그널 연결
+            self.platform_window.showResultRequested.connect(self._on_show_result_requested)
             self.platform_window.show()
 
             # Main 화면은 System 검증으로 전환
             if getattr(self, "_system_widget", None) is None:
                 self._system_widget = system_app.MyApp(embedded=True)
+                # Embedded 위젯도 시험 결과 시그널 연결
+                self._system_widget.showResultRequested.connect(self._on_show_result_requested)
                 self.stack.addWidget(self._system_widget)
             self.stack.setCurrentWidget(self._system_widget)
 
@@ -180,11 +235,15 @@ class MainWindow(QMainWindow):
             if hasattr(self, "system_window") and self.system_window is not None:
                 self.system_window.close()
             self.system_window = system_app.MyApp(embedded=False)
+            # 시험 결과 표시 시그널 연결
+            self.system_window.showResultRequested.connect(self._on_show_result_requested)
             self.system_window.show()
 
             # Main 화면은 Platform 검증으로 전환
             if getattr(self, "_platform_widget", None) is None:
                 self._platform_widget = platform_app.MyApp(embedded=True)
+                # Embedded 위젯도 시험 결과 시그널 연결
+                self._platform_widget.showResultRequested.connect(self._on_show_result_requested)
                 self.stack.addWidget(self._platform_widget)
             self.stack.setCurrentWidget(self._platform_widget)
 
