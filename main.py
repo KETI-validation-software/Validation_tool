@@ -114,7 +114,7 @@ class MainWindow(QMainWindow):
             print(f"   → System 시험 결과 생성")
             self._result_widget = system_app.ResultPageWidget(parent_widget)
         else:
-            print(f"❌ 알 수 없는 parent_widget 타입: {type(parent_widget)}")
+            print(f"알 수 없는 parent_widget 타입: {type(parent_widget)}")
             return
 
         # stack에 추가 (이미 있으면 제거 후 추가)
