@@ -12,7 +12,7 @@ cmg90br3n002qihleffuljnth_RealtimeSensorData_out_constraints = {
   "sensorDeviceList.sensorDeviceID": {
     "valueType": "request-based",
     "required": True,
-    "referenceEndpoint": "RealtimeSensorData",
+    "referenceEndpoint": "/RealtimeSensorData",
     "referenceField": "sensorDeviceID"
   },
   "sensorDeviceList.measureTime": {
@@ -256,45 +256,6 @@ cmg7bve25000114cevhn5o3vr_ReplayURL_out_constraints = {
   }
 }
 
-# RealtimeVideoEventInfos
-cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_constraints = {}
-
-# RealtimeVideoEventInfos
-cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_constraints = {
-  "camList.camID": {
-    "valueType": "request-based",
-    "required": True,
-    "referenceField": "camID"
-  },
-  "camList.eventUUID": {
-    "valueType": "random",
-    "required": True,
-    "randomType": "specified-values",
-    "arrayElementType": "array"
-  },
-  "camList.eventName": {
-    "valueType": "request-based",
-    "required": True,
-    "referenceField": "eventFilter"
-  },
-  "camList.startTime": {
-    "valueType": "request-range",
-    "required": True,
-    "requestRange": {
-      "minField": "startTime",
-      "operator": "greater-equal"
-    }
-  },
-  "camList.endTime": {
-    "valueType": "request-range",
-    "required": False,
-    "requestRange": {
-      "minField": "startTime",
-      "operator": "greater-equal"
-    }
-  }
-}
-
 # StoredVideoEventInfos
 cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_constraints = {
   "camList.camID": {
@@ -334,6 +295,42 @@ cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_constraints = {
       "maxField": "endTime",
       "minField": "startTime",
       "operator": "between"
+    }
+  }
+}
+
+# RealtimeVideoEventInfos
+cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_constraints = {
+  "camList.camID": {
+    "valueType": "request-based",
+    "required": True,
+    "referenceField": "camID"
+  },
+  "camList.eventUUID": {
+    "valueType": "random",
+    "required": True,
+    "randomType": "specified-values",
+    "arrayElementType": "array"
+  },
+  "camList.eventName": {
+    "valueType": "request-based",
+    "required": True,
+    "referenceField": "eventFilter"
+  },
+  "camList.startTime": {
+    "valueType": "request-range",
+    "required": True,
+    "requestRange": {
+      "minField": "startTime",
+      "operator": "greater-equal"
+    }
+  },
+  "camList.endTime": {
+    "valueType": "request-range",
+    "required": False,
+    "requestRange": {
+      "minField": "startTime",
+      "operator": "greater-equal"
     }
   }
 }
@@ -390,9 +387,8 @@ cmg7bve25000114cevhn5o3vr_inConstraints = [
     cmg7bve25000114cevhn5o3vr_StoredVideoInfos_out_constraints,
     cmg7bve25000114cevhn5o3vr_StreamURLs_out_constraints,
     cmg7bve25000114cevhn5o3vr_ReplayURL_out_constraints,
-    cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_constraints,
-    cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_constraints,
     cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_constraints,
+    cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_constraints,
     cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_out_constraints,
     cmg7bve25000114cevhn5o3vr_PtzStatus_out_constraints,
     cmg7bve25000114cevhn5o3vr_PtzContinuousMove_out_constraints,
