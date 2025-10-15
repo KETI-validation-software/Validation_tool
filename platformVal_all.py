@@ -1119,26 +1119,13 @@ class MyApp(QWidget):
                     self.cnt += 1
                     self.current_retry = 0  # 재시도 카운터 리셋
                     
-                    # ✅ [TIMING_CONTROL] 반복 검증 시 대기시간 (CONSTANTS.enable_retry_delay로 제어)
-                    if CONSTANTS.enable_retry_delay:
-                        print(f"[TIMING_DEBUG] ⚠️ 수동 지연(SLEEP): API 완료 후 2초 대기 추가 (API: {self.Server.message[self.cnt-1] if self.cnt > 0 else 'N/A'})")
-                        print(f"[TIMING_DEBUG] ⚠️ WARNING: enable_retry_delay=True로 인한 인위적 대기입니다!")
-                        print(f"[TIMING_DEBUG] 💡 제안: CONSTANTS.enable_retry_delay=False로 설정하여 이 sleep을 제거하세요.")
-                        self.time_pre = time.time() + 2.0
-                    else:
-                        print(f"[TIMING_DEBUG] ✅ 수동 지연 비활성화: API 완료, 다음 시스템 요청 대기 (API: {self.Server.message[self.cnt-1] if self.cnt > 0 else 'N/A'})")
-                        print(f"[TIMING_DEBUG] ✅ enable_retry_delay=False: 시스템 요청 도착 시 즉시 검증 시작합니다.")
-                        self.time_pre = time.time()  # 즉시 다음 검증 가능
+                    # ✅ [TIMING_CONTROL] 인위적 지연 없이 즉시 다음 검증 가능
+                    print(f"[TIMING_DEBUG] ✅ API 완료, 다음 시스템 요청 대기 (API: {self.Server.message[self.cnt-1] if self.cnt > 0 else 'N/A'})")
+                    self.time_pre = time.time()  # 즉시 다음 검증 가능
                 else:
                     # 재시도인 경우
-                    if CONSTANTS.enable_retry_delay:
-                        print(f"[TIMING_DEBUG] ⚠️ 수동 지연(SLEEP): 재시도 후 2초 대기 추가 (API: {self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else 'N/A'}, 시도: {self.current_retry}/{current_retries})")
-                        print(f"[TIMING_DEBUG] ⚠️ WARNING: enable_retry_delay=True로 인한 인위적 대기입니다!")
-                        self.time_pre = time.time() + 2.0
-                    else:
-                        print(f"[TIMING_DEBUG] ✅ 수동 지연 비활성화: 재시도 완료, 다음 시스템 요청 대기 (API: {self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else 'N/A'})")
-                        print(f"[TIMING_DEBUG] ✅ enable_retry_delay=False: 시스템 요청 도착 시 즉시 검증 시작합니다.")
-                        self.time_pre = time.time()  # 즉시 다음 재시도 가능
+                    print(f"[TIMING_DEBUG] ✅ 재시도 완료, 다음 시스템 요청 대기 (API: {self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else 'N/A'})")
+                    self.time_pre = time.time()  # 즉시 다음 재시도 가능
                         
                 self.realtime_flag = False
 
