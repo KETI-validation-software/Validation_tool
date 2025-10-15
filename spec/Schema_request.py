@@ -10,18 +10,17 @@ cmg90br3n002qihleffuljnth_Authentication_in_schema = {
 # Capabilities
 cmg90br3n002qihleffuljnth_Capabilities_in_schema = {}
 
-# DoorProfiles
-cmg90br3n002qihleffuljnth_DoorProfiles_in_schema = {}
+# SensorDeviceProfiles
+cmg90br3n002qihleffuljnth_SensorDeviceProfiles_in_schema = {}
 
-# StoredVideoInfos
-cmg90br3n002qihleffuljnth_StoredVideoInfos_in_schema = {
-    "timePeriod": {
-    "startTime": float,
-    "endTime": float,
-},
-    OptionalKey("camList"): [{
-    "camID": str,
+# RealtimeSensorData
+cmg90br3n002qihleffuljnth_RealtimeSensorData_in_schema = {
+    "sensorDeviceList": [{
+    "sensorDeviceID": str,
 }],
+    "duration": str,
+    "transProtocol": str,
+    "startTime": str,
 }
 
 # RealtimeSensorEventInfos
@@ -51,28 +50,21 @@ cmg90br3n002qihleffuljnth_StoredSensorEventInfos_in_schema = {
     "eventFilter": str,
 }
 
-# RealtimeDoorStatus
-cmg90br3n002qihleffuljnth_RealtimeDoorStatus_in_schema = {
-    "doorList": [{
-    "doorID": str,
-}],
-    "duration": float,
-    "transProtocol": {
-    "transProtocolType": str,
-    "transProtocolDesc": str,
-},
-    "startTime": float,
+# SensorDeviceControl
+cmg90br3n002qihleffuljnth_SensorDeviceControl_in_schema = {
+    "sensorDeviceID": str,
+    "commandType": str,
 }
 
 # cmg90br3n002qihleffuljnth 스키마 리스트
 cmg90br3n002qihleffuljnth_inSchema = [
     cmg90br3n002qihleffuljnth_Authentication_in_schema,
     cmg90br3n002qihleffuljnth_Capabilities_in_schema,
-    cmg90br3n002qihleffuljnth_DoorProfiles_in_schema,
-    cmg90br3n002qihleffuljnth_StoredVideoInfos_in_schema,
+    cmg90br3n002qihleffuljnth_SensorDeviceProfiles_in_schema,
+    cmg90br3n002qihleffuljnth_RealtimeSensorData_in_schema,
     cmg90br3n002qihleffuljnth_RealtimeSensorEventInfos_in_schema,
     cmg90br3n002qihleffuljnth_StoredSensorEventInfos_in_schema,
-    cmg90br3n002qihleffuljnth_RealtimeDoorStatus_in_schema,
+    cmg90br3n002qihleffuljnth_SensorDeviceControl_in_schema,
 ]
 
 # Authentication
@@ -159,12 +151,10 @@ cmg7bve25000114cevhn5o3vr_Authentication_in_schema = {
 }
 
 # Capabilities
-cmg7bve25000114cevhn5o3vr_Capabilities_in_schema = {
-    "": str,
-}
+cmg7bve25000114cevhn5o3vr_Capabilities_in_schema = {}
 
-# DoorProfiles
-cmg7bve25000114cevhn5o3vr_DoorProfiles_in_schema = {}
+# CameraProfiles
+cmg7bve25000114cevhn5o3vr_CameraProfiles_in_schema = {}
 
 # StoredVideoInfos
 cmg7bve25000114cevhn5o3vr_StoredVideoInfos_in_schema = {
@@ -177,50 +167,51 @@ cmg7bve25000114cevhn5o3vr_StoredVideoInfos_in_schema = {
 }],
 }
 
-# RealtimeVerifEventInfos
-cmg7bve25000114cevhn5o3vr_RealtimeVerifEventInfos_in_schema = {
-    "doorList": [{
-    "doorID": str,
+# StreamURLs
+cmg7bve25000114cevhn5o3vr_StreamURLs_in_schema = {
+    "camList": [{
+    "camID": str,
+    "streamProtocolType": str,
 }],
-    "duration": float,
-    "transProtocol": {
-    "transProtocolType": str,
-    "transProtocolDesc": str,
-},
-    "eventFilter": str,
-    "startTime": float,
 }
 
-# StoredVerifEventInfos
-cmg7bve25000114cevhn5o3vr_StoredVerifEventInfos_in_schema = {
-    "timePeriod": [{
+# ReplayURL
+cmg7bve25000114cevhn5o3vr_ReplayURL_in_schema = {
+    "camList": [{
+    "camID": str,
     "startTime": float,
     "endTime": float,
+    "streamProtocolType": str,
 }],
-    "doorList": [{
-    "doorID": str,
-}],
-    "maxCount": float,
-    "eventFilter": str,
 }
 
-# RealtimeDoorStatus
-cmg7bve25000114cevhn5o3vr_RealtimeDoorStatus_in_schema = {
-    "doorList": [{
-    "doorID": str,
+# RealtimeVideoEventInfos
+cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_schema = {
+    "camList": [{
+    "camID": str,
 }],
-    "duration": float,
+    OptionalKey("duration"): str,
     "transProtocol": {
     "transProtocolType": str,
-    "transProtocolDesc": str,
+    OptionalKey("transProtocolDesc"): str,
 },
-    "startTime": float,
+    OptionalKey("eventFilter"): str,
+    OptionalKey("classFilter"): str,
+    OptionalKey("startTime"): float,
 }
 
-# DoorControl
-cmg7bve25000114cevhn5o3vr_DoorControl_in_schema = {
-    "doorID": str,
-    "commandType": str,
+# StoredVideoEventInfos
+cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_in_schema = {
+    "timePeriod": {
+    "startTime": float,
+    "endTime": float,
+},
+    OptionalKey("camList"): [{
+    "camID": str,
+}],
+    OptionalKey("maxCount"): float,
+    OptionalKey("eventFilter"): str,
+    OptionalKey("classFilter"): str,
 }
 
 # StoredObjectAnalyticsInfos
@@ -266,12 +257,12 @@ cmg7bve25000114cevhn5o3vr_PtzStop_in_schema = {
 cmg7bve25000114cevhn5o3vr_inSchema = [
     cmg7bve25000114cevhn5o3vr_Authentication_in_schema,
     cmg7bve25000114cevhn5o3vr_Capabilities_in_schema,
-    cmg7bve25000114cevhn5o3vr_DoorProfiles_in_schema,
+    cmg7bve25000114cevhn5o3vr_CameraProfiles_in_schema,
     cmg7bve25000114cevhn5o3vr_StoredVideoInfos_in_schema,
-    cmg7bve25000114cevhn5o3vr_RealtimeVerifEventInfos_in_schema,
-    cmg7bve25000114cevhn5o3vr_StoredVerifEventInfos_in_schema,
-    cmg7bve25000114cevhn5o3vr_RealtimeDoorStatus_in_schema,
-    cmg7bve25000114cevhn5o3vr_DoorControl_in_schema,
+    cmg7bve25000114cevhn5o3vr_StreamURLs_in_schema,
+    cmg7bve25000114cevhn5o3vr_ReplayURL_in_schema,
+    cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_schema,
+    cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_in_schema,
     cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_in_schema,
     cmg7bve25000114cevhn5o3vr_PtzStatus_in_schema,
     cmg7bve25000114cevhn5o3vr_PtzContinuousMove_in_schema,
