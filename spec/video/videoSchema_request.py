@@ -63,7 +63,7 @@ WebHook_RealtimeVideoEventInfos_out_schema = {
     "message": str,
 }
 
-# StoredVideoEventInfos
+# StoredVideoEventInfos - 잘못 설정되어 있음
 StoredVideoEventInfos_in_schema = {
     "timePeriod": {
     "startTime": int,

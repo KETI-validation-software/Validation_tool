@@ -27,7 +27,7 @@ class WebhookServer(BaseHTTPRequestHandler):
         self.wfile.write(b'Hello, World!')
         #print(f"Received GET request from {self.client_address[0]}")
 
-    def do_POST(self):  # ✅ 들여쓰기 수정 (클래스 메서드로 변경)
+    def do_POST(self): 
         print(f"[WEBHOOK] do_POST called: path={self.path}")  # ✅ 디버그 로그
         try:
             content_length = int(self.headers.get('Content-Length', '0'))
