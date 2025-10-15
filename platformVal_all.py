@@ -877,7 +877,6 @@ class MyApp(QWidget):
                     else:
                         accumulated['data_parts'].append(f"\n[시도 {retry_attempt + 1}회차]\n{tmp_res_auth}")
                     
-                    # 매 시도마다 실제 검증 수행 (시스템 요청을 플랫폼 요청 스키마로 검증)
                     val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.videoInSchema[self.cnt],
                                                                             current_data, self.flag_opt)
                     add_pass += key_psss_cnt

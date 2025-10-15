@@ -89,34 +89,24 @@ WebHook_RealtimeVideoEventInfos_out_data = {
 
 # StoredVideoEventInfos
 StoredVideoEventInfos_in_data = {
-    "code": "200",
-    "message": "성공",
-    "camList": [
-        {
-        "camID": "cam0001",
-        "eventUUID": "event01",
-        "eventName": "배회",
+    "timePeriod": {
         "startTime": 20220822163022123,
-        "endTime": 20220822163025123,
-        "eventDesc": "AAABVVVVCCCDDssvfdd"
-    },
-        {
-        "camID": "cam0002",
-        "eventUUID": "event01",
-        "eventName": "배회",
-        "startTime": 20220822163022123,
-        "endTime": 20220822163025123,
-        "eventDesc": "FFFeeiiiWWkdjflskdjfoEKK"
-    },
-        {
-        "camID": "cam0003",
-        "eventUUID": "event01",
-        "eventName": "배회",
-        "startTime": 20220822163022123,
-        "endTime": 20220822163025123,
-        "eventDesc": "iVUhEUgAAACAAAAAgCAYAAA"
-    }
-]
+        "endTime": 20220822163025123
+     },
+    "camList":
+     [ {
+        "camID": "cam001"
+      },
+       {
+        "camID": "cam002"
+      },
+       {
+        "camID": "cam003"
+      }
+    ],
+    "maxCount": 3,
+    "eventFilter": "배회",
+    "classFilter": "사람"
 }
 
 # StoredObjectAnalyticsInfos
