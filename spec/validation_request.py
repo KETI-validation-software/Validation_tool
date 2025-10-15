@@ -4,13 +4,12 @@ cmg90br3n002qihleffuljnth_Authentication_in_validation = {}
 # Capabilities
 cmg90br3n002qihleffuljnth_Capabilities_in_validation = {}
 
-# DoorProfiles
-cmg90br3n002qihleffuljnth_DoorProfiles_in_validation = {}
+# SensorDeviceProfiles
+cmg90br3n002qihleffuljnth_SensorDeviceProfiles_in_validation = {}
 
-# StoredVideoInfos
-cmg90br3n002qihleffuljnth_StoredVideoInfos_in_validation = {
-  "camList.camID": {
-    "score": 1,
+# RealtimeSensorData
+cmg90br3n002qihleffuljnth_RealtimeSensorData_in_validation = {
+  "sensorDeviceList.sensorDeviceID": {
     "enabled": True,
     "validationType": "response-field-list-match"
   }
@@ -56,19 +55,12 @@ cmg90br3n002qihleffuljnth_StoredSensorEventInfos_in_validation = {
   }
 }
 
-# RealtimeDoorStatus
-cmg90br3n002qihleffuljnth_RealtimeDoorStatus_in_validation = {
-  "doorList.doorID": {
+# SensorDeviceControl
+cmg90br3n002qihleffuljnth_SensorDeviceControl_in_validation = {
+  "sensorDeviceID": {
     "enabled": True,
     "validationType": "response-field-list-match",
-    "referenceListField": "doorID"
-  },
-  "transProtocol.transProtocolType": {
-    "enabled": True,
-    "allowedValues": [
-      "LongPolling"
-    ],
-    "validationType": "specified-value-match"
+    "referenceListField": "sensorDeviceID"
   }
 }
 
@@ -76,11 +68,11 @@ cmg90br3n002qihleffuljnth_RealtimeDoorStatus_in_validation = {
 cmg90br3n002qihleffuljnth_inValidation = [
     cmg90br3n002qihleffuljnth_Authentication_in_validation,
     cmg90br3n002qihleffuljnth_Capabilities_in_validation,
-    cmg90br3n002qihleffuljnth_DoorProfiles_in_validation,
-    cmg90br3n002qihleffuljnth_StoredVideoInfos_in_validation,
+    cmg90br3n002qihleffuljnth_SensorDeviceProfiles_in_validation,
+    cmg90br3n002qihleffuljnth_RealtimeSensorData_in_validation,
     cmg90br3n002qihleffuljnth_RealtimeSensorEventInfos_in_validation,
     cmg90br3n002qihleffuljnth_StoredSensorEventInfos_in_validation,
-    cmg90br3n002qihleffuljnth_RealtimeDoorStatus_in_validation,
+    cmg90br3n002qihleffuljnth_SensorDeviceControl_in_validation,
 ]
 
 # Authentication
@@ -185,87 +177,106 @@ cmg7bve25000114cevhn5o3vr_Authentication_in_validation = {}
 # Capabilities
 cmg7bve25000114cevhn5o3vr_Capabilities_in_validation = {}
 
-# DoorProfiles
-cmg7bve25000114cevhn5o3vr_DoorProfiles_in_validation = {}
+# CameraProfiles
+cmg7bve25000114cevhn5o3vr_CameraProfiles_in_validation = {}
 
 # StoredVideoInfos
 cmg7bve25000114cevhn5o3vr_StoredVideoInfos_in_validation = {
   "camList.camID": {
     "score": 1,
     "enabled": True,
-    "validationType": "response-field-list-match"
+    "validationType": "response-field-list-match",
+    "referenceListField": "camID"
   }
 }
 
-# RealtimeVerifEventInfos
-cmg7bve25000114cevhn5o3vr_RealtimeVerifEventInfos_in_validation = {
-  "doorList.doorID": {
+# StreamURLs
+cmg7bve25000114cevhn5o3vr_StreamURLs_in_validation = {
+  "camList.camID": {
+    "score": 1,
     "enabled": True,
     "validationType": "response-field-list-match",
-    "referenceListField": "doorID"
-  },
-  "transProtocol.transProtocolType": {
+    "referenceListField": "camID"
+  }
+}
+
+# ReplayURL
+cmg7bve25000114cevhn5o3vr_ReplayURL_in_validation = {
+  "camList.camID": {
+    "score": 1,
     "enabled": True,
-    "allowedValues": [
-      "LongPolling"
-    ],
-    "validationType": "specified-value-match"
+    "validationType": "response-field-list-match",
+    "referenceListField": "camID"
+  }
+}
+
+# RealtimeVideoEventInfos
+cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_validation = {
+  "camList.camID": {
+    "score": 1,
+    "enabled": True,
+    "validationType": "response-field-list-match",
+    "referenceListField": "camID"
   },
   "eventFilter": {
+    "score": 1,
     "enabled": True,
     "validationType": "valid-value-match",
     "validValueOperator": "equalsAny",
-    "validValueFieldName": "eventFilter_bio",
+    "validValueFieldName": "classFilter",
     "validValueMatchType": "validation-field",
     "allowedValues": [
-      "성공",
-      "실패"
+      "사람",
+      "트럭",
+      "버스"
+    ]
+  },
+  "classFilter": {
+    "score": 1,
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueOperator": "equals",
+    "validValueFieldName": "classFilter",
+    "validValueMatchType": "validation-field",
+    "allowedValues": [
+      "사람",
+      "트럭",
+      "버스"
     ]
   }
 }
 
-# StoredVerifEventInfos
-cmg7bve25000114cevhn5o3vr_StoredVerifEventInfos_in_validation = {
-  "doorList.doorID": {
+# StoredVideoEventInfos
+cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_in_validation = {
+  "camList.camID": {
+    "score": 1,
     "enabled": True,
     "validationType": "response-field-list-match",
-    "referenceListField": "doorID"
+    "referenceListField": "camID"
   },
   "eventFilter": {
+    "score": 1,
     "enabled": True,
     "validationType": "valid-value-match",
     "validValueOperator": "equalsAny",
-    "validValueFieldName": "eventFilter_bio",
+    "validValueFieldName": "eventFilter",
     "validValueMatchType": "validation-field",
     "allowedValues": [
-      "성공",
-      "실패"
+      "화재",
+      "배회"
     ]
-  }
-}
-
-# RealtimeDoorStatus
-cmg7bve25000114cevhn5o3vr_RealtimeDoorStatus_in_validation = {
-  "doorList.doorID": {
-    "enabled": True,
-    "validationType": "response-field-list-match",
-    "referenceListField": "doorID"
   },
-  "transProtocol.transProtocolType": {
+  "classFilter": {
+    "score": 1,
     "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueOperator": "equalsAny",
+    "validValueFieldName": "eventFilter",
+    "validValueMatchType": "validation-field",
     "allowedValues": [
-      "LongPolling"
-    ],
-    "validationType": "specified-value-match"
-  }
-}
-
-# DoorControl
-cmg7bve25000114cevhn5o3vr_DoorControl_in_validation = {
-  "doorID": {
-    "enabled": True,
-    "validationType": "response-field-list-match",
-    "referenceListField": "doorID"
+      "화재",
+      "배회"
+    ]
   }
 }
 
@@ -331,12 +342,12 @@ cmg7bve25000114cevhn5o3vr_PtzStop_in_validation = {}
 cmg7bve25000114cevhn5o3vr_inValidation = [
     cmg7bve25000114cevhn5o3vr_Authentication_in_validation,
     cmg7bve25000114cevhn5o3vr_Capabilities_in_validation,
-    cmg7bve25000114cevhn5o3vr_DoorProfiles_in_validation,
+    cmg7bve25000114cevhn5o3vr_CameraProfiles_in_validation,
     cmg7bve25000114cevhn5o3vr_StoredVideoInfos_in_validation,
-    cmg7bve25000114cevhn5o3vr_RealtimeVerifEventInfos_in_validation,
-    cmg7bve25000114cevhn5o3vr_StoredVerifEventInfos_in_validation,
-    cmg7bve25000114cevhn5o3vr_RealtimeDoorStatus_in_validation,
-    cmg7bve25000114cevhn5o3vr_DoorControl_in_validation,
+    cmg7bve25000114cevhn5o3vr_StreamURLs_in_validation,
+    cmg7bve25000114cevhn5o3vr_ReplayURL_in_validation,
+    cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_validation,
+    cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_in_validation,
     cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_in_validation,
     cmg7bve25000114cevhn5o3vr_PtzStatus_in_validation,
     cmg7bve25000114cevhn5o3vr_PtzContinuousMove_in_validation,
