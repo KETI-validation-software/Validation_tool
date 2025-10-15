@@ -1,2 +1,2 @@
-{"time": "2025-10-15T02:16:14.634097Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "cam001"}, {"camID": "cam002"}], "transProtocol": {"transProtocolType": "WebHook", "transProtocolDesc": "https://127.0.0.1:8090/RealtimeVideoEventInfos"}, "duration": 10, "eventFilter": "배회", "startTime": 20220822163022123}}
-{"time": "2025-10-15T02:16:16.640647Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "200", "message": "성공"}}
+{"time": "2025-10-15T03:15:05.733370Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "cam001"}, {"camID": "cam002"}], "transProtocol": {"transProtocolType": "WebHook", "transProtocolDesc": "https://127.0.0.1:8090/RealtimeVideoEventInfos"}, "duration": 10, "eventFilter": "배회", "startTime": 20220822163022123}}
+{"time": "2025-10-15T03:15:07.750606Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "200", "message": "성공"}}
