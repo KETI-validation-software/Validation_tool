@@ -210,8 +210,39 @@ cmg7bve25000114cevhn5o3vr_ReplayURL_in_validation = {
   }
 }
 
-# RealtimeVideoEventInfos
-cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_validation = {}
+# StoredVideoEventInfos
+cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_in_validation = {
+  "camList.camID": {
+    "score": 1,
+    "enabled": True,
+    "validationType": "response-field-list-match",
+    "referenceListField": "camID"
+  },
+  "eventFilter": {
+    "score": 1,
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueOperator": "equalsAny",
+    "validValueFieldName": "eventFilter",
+    "validValueMatchType": "validation-field",
+    "allowedValues": [
+      "화재",
+      "배회"
+    ]
+  },
+  "classFilter": {
+    "score": 1,
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueOperator": "equalsAny",
+    "validValueFieldName": "eventFilter",
+    "validValueMatchType": "validation-field",
+    "allowedValues": [
+      "화재",
+      "배회"
+    ]
+  }
+}
 
 # RealtimeVideoEventInfos
 cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_validation = {
@@ -245,40 +276,6 @@ cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_validation = {
       "사람",
       "트럭",
       "버스"
-    ]
-  }
-}
-
-# StoredVideoEventInfos
-cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_in_validation = {
-  "camList.camID": {
-    "score": 1,
-    "enabled": True,
-    "validationType": "response-field-list-match",
-    "referenceListField": "camID"
-  },
-  "eventFilter": {
-    "score": 1,
-    "enabled": True,
-    "validationType": "valid-value-match",
-    "validValueOperator": "equalsAny",
-    "validValueFieldName": "eventFilter",
-    "validValueMatchType": "validation-field",
-    "allowedValues": [
-      "화재",
-      "배회"
-    ]
-  },
-  "classFilter": {
-    "score": 1,
-    "enabled": True,
-    "validationType": "valid-value-match",
-    "validValueOperator": "equalsAny",
-    "validValueFieldName": "eventFilter",
-    "validValueMatchType": "validation-field",
-    "allowedValues": [
-      "화재",
-      "배회"
     ]
   }
 }
@@ -349,9 +346,8 @@ cmg7bve25000114cevhn5o3vr_inValidation = [
     cmg7bve25000114cevhn5o3vr_StoredVideoInfos_in_validation,
     cmg7bve25000114cevhn5o3vr_StreamURLs_in_validation,
     cmg7bve25000114cevhn5o3vr_ReplayURL_in_validation,
-    cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_validation,
-    cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_validation,
     cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_in_validation,
+    cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_validation,
     cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_in_validation,
     cmg7bve25000114cevhn5o3vr_PtzStatus_in_validation,
     cmg7bve25000114cevhn5o3vr_PtzContinuousMove_in_validation,

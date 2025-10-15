@@ -549,6 +549,8 @@ class ResultPageDialog(QDialog):
 
 
 class MyApp(QWidget):
+    # 시험 결과 표시 요청 시그널 (main.py와 연동)
+    showResultRequested = pyqtSignal(object)  # parent widget을 인자로 전달
 
     def _append_text(self, obj):
         import json
@@ -2100,8 +2102,13 @@ class MyApp(QWidget):
 
     def show_result_page(self):
         """시험 결과 페이지 표시"""
-        dialog = ResultPageDialog(self)
-        dialog.exec_()
+        if self.embedded:
+            # Embedded 모드: 시그널을 emit하여 main.py에 알림
+            self.showResultRequested.emit(self)
+        else:
+            # Standalone 모드: 다이얼로그 표시
+            dialog = ResultPageDialog(self)
+            dialog.exec_()
 
     def resizeEvent(self, event):
         """창 크기 변경 시 반응형 UI 조정"""
