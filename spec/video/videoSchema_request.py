@@ -77,7 +77,7 @@ StoredVideoEventInfos_in_schema = {
     OptionalKey("classFilter"): str,
 }
 
-# StoredObjectAnalyticsInfos
+# StoredObjectAnalyticsInfos - 잘못 되어 잇음
 StoredObjectAnalyticsInfos_in_schema = {
     "timePeriod": {
     "startTime": int,
