@@ -24,9 +24,12 @@ url = "https://127.0.0.1:8080"
 specs = [["cmg90br3n002qihleffuljnth_inSchema","cmg90br3n002qihleffuljnth_outData","cmg90br3n002qihleffuljnth_messages",""],
          ["cmg7edeo50013124xiux3gbkb_inSchema","cmg7edeo50013124xiux3gbkb_outData","cmg7edeo50013124xiux3gbkb_messages",""],
          ["cmg7bve25000114cevhn5o3vr_inSchema","cmg7bve25000114cevhn5o3vr_outData","cmg7bve25000114cevhn5o3vr_messages",""]]
+
+# opt 검증 - False 이면 검증 안함
 flag_opt = False
-if test_range == "전체필드":
+if test_range == "ALL_FIELDS":
     flag_opt = True
+
 # 시험 분야별 spec 정의 (인덱스 순서 중요!)
 specs = [
     ["spec_001_inSchema", "spec_001_outData", "spec_001_messages", "spec_001_webhookSchema", "spec_001_webhookData", "영상보안 시스템 요청 메시지 검증 API 명세서"],

@@ -1,5 +1,6 @@
 from json_checker import OptionalKey
-
+# 플랫폼쪽 uj에 뜨는 스키마
+# 시스템 메시지를 검증하는 스키마
 
 # Authentication
 Authentication_in_schema = {
@@ -77,7 +78,7 @@ StoredVideoEventInfos_in_schema = {
     OptionalKey("classFilter"): str,
 }
 
-# StoredObjectAnalyticsInfos
+# StoredObjectAnalyticsInfos - 잘못 되어 잇음
 StoredObjectAnalyticsInfos_in_schema = {
     "timePeriod": {
     "startTime": int,

@@ -877,8 +877,28 @@ class MyApp(QWidget):
                     else:
                         accumulated['data_parts'].append(f"\n[시도 {retry_attempt + 1}회차]\n{tmp_res_auth}")
                     
+                    # ✅ 디버깅: 어떤 스키마로 검증하는지 확인
+                    if retry_attempt == 0:  # 첫 시도에만 출력
+                        print(f"\n[DEBUG] ========== 스키마 검증 디버깅 ==========")
+                        print(f"[DEBUG] cnt={self.cnt}, API={self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else 'N/A'}")
+                        print(f"[DEBUG] current_protocol={current_protocol}")
+                        print(f"[DEBUG] videoInSchema 총 개수={len(self.videoInSchema)}")
+                        print(f"[DEBUG] 사용 스키마: videoInSchema[{self.cnt}]")
+                        
+                        # 스키마 필드 확인
+                        if self.cnt < len(self.videoInSchema):
+                            schema_to_use = self.videoInSchema[self.cnt]
+                            if isinstance(schema_to_use, dict):
+                                schema_keys = list(schema_to_use.keys())[:5]
+                                print(f"[DEBUG] 스키마 필드 (first 5): {schema_keys}")
+                    
                     val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.videoInSchema[self.cnt],
                                                                             current_data, self.flag_opt)
+                    
+                    if retry_attempt == 0:  # 첫 시도에만 출력
+                        print(f"[DEBUG] 검증 결과: {val_result}, pass={key_psss_cnt}, error={key_error_cnt}")
+                        print(f"[DEBUG] ==========================================\n")
+                    
                     add_pass += key_psss_cnt
                     add_err += key_error_cnt
                 
@@ -888,10 +908,7 @@ class MyApp(QWidget):
                         combined_error_parts.append(f"[검증 {retry_attempt + 1}회차] [Inbound] " + inbound_err_txt)
                     
                     # ✅ WebHook 프로토콜인 경우 웹훅 응답 표시
-                    print(f"[DEBUG][PLATFORM] cnt={self.cnt}, protocol={current_protocol}, msg={self.Server.message[self.cnt]}")
                     if current_protocol == "WebHook" and "Realtime" in str(self.Server.message[self.cnt]):
-                        print(f"[DEBUG][PLATFORM] 웹훅 조건 만족!")
-                        print(f"[DEBUG][PLATFORM] Server 인스턴스 ID: {id(self.Server)}")
                         
                         # ✅ 웹훅 스레드가 생성될 때까지 짧게 대기
                         wait_count = 0
@@ -916,6 +933,41 @@ class MyApp(QWidget):
                             print(f"[DEBUG][PLATFORM] 웹훅 응답 사용: {webhook_response}")
                             tmp_webhook_response = json.dumps(webhook_response, indent=4, ensure_ascii=False)
                             accumulated['data_parts'].append(f"\n--- Webhook 응답 (시도 {retry_attempt + 1}회차) ---\n{tmp_webhook_response}")
+                            
+                            # ✅ 디버깅: 웹훅 응답 검증 스키마 확인
+                            if retry_attempt == 0:  # 첫 시도에만 출력
+                                print(f"\n[DEBUG] ========== 웹훅 응답 검증 디버깅 ==========")
+                                print(f"[DEBUG] cnt={self.cnt}, API={self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else 'N/A'}")
+                                print(f"[DEBUG] videoWebhookSchema 총 개수={len(self.videoWebhookSchema)}")
+                            
+                            # ✅ 웹훅 응답 검증 (플랫폼은 시스템의 웹훅 응답을 받음 - spec_001의 웹훅 응답 스키마)
+                            if len(self.videoWebhookSchema) > 0:
+                                if retry_attempt == 0:
+                                    print(f"[DEBUG] 사용 스키마: videoWebhookSchema[0]")
+                                    schema_to_use = self.videoWebhookSchema[0]
+                                    if isinstance(schema_to_use, dict):
+                                        schema_keys = list(schema_to_use.keys())[:5]
+                                        print(f"[DEBUG] 웹훅 응답 스키마 필드 (first 5): {schema_keys}")
+                                
+                                webhook_resp_val_result, webhook_resp_val_text, webhook_resp_key_psss_cnt, webhook_resp_key_error_cnt = json_check_(
+                                    self.videoWebhookSchema[0], webhook_response, self.flag_opt
+                                )
+                                
+                                if retry_attempt == 0:
+                                    print(f"[DEBUG] 웹훅 응답 검증 결과: {webhook_resp_val_result}, pass={webhook_resp_key_psss_cnt}, error={webhook_resp_key_error_cnt}")
+                                    print(f"[DEBUG] ==========================================\n")
+                                
+                                add_pass += webhook_resp_key_psss_cnt
+                                add_err += webhook_resp_key_error_cnt
+                                
+                                webhook_resp_err_txt = self._to_detail_text(webhook_resp_val_text)
+                                if webhook_resp_val_result == "FAIL":
+                                    step_result = "FAIL"
+                                    combined_error_parts.append(f"[검증 {retry_attempt + 1}회차] [Webhook 응답] " + webhook_resp_err_txt)
+                            else:
+                                if retry_attempt == 0:
+                                    print(f"[DEBUG] videoWebhookSchema가 없습니다!")
+                                    print(f"[DEBUG] ==========================================\n")
                         else:
                             print(f"[DEBUG][PLATFORM] 웹훅 응답 없음")
                             accumulated['data_parts'].append(f"\n--- Webhook 응답 ---\nnull")
@@ -949,13 +1001,33 @@ class MyApp(QWidget):
                                         tmp_webhook_data = json.dumps(webhook_data, indent=4, ensure_ascii=False)
                                         accumulated['data_parts'].append(f"\n--- Webhook (시도 {retry_attempt + 1}회차) ---\n{tmp_webhook_data}")
                                         
+                                        # ✅ 디버깅: 웹훅 검증 스키마 확인
+                                        if retry_attempt == 0:  # 첫 시도에만 출력
+                                            print(f"\n[DEBUG] ========== 웹훅 검증 디버깅 ==========")
+                                            print(f"[DEBUG] cnt={self.cnt}, API={self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else 'N/A'}")
+                                            print(f"[DEBUG] videoWebhookInSchema 총 개수={len(self.videoWebhookInSchema)}")
+                                        
                                         # ✅ 웹훅 스키마는 별도 리스트이므로 항상 첫 번째 요소 사용
                                         if len(self.videoWebhookInSchema) > 0:
+                                            if retry_attempt == 0:
+                                                print(f"[DEBUG] 사용 스키마: videoWebhookInSchema[0]")
+                                                schema_to_use = self.videoWebhookInSchema[0]
+                                                if isinstance(schema_to_use, dict):
+                                                    schema_keys = list(schema_to_use.keys())[:5]
+                                                    print(f"[DEBUG] 웹훅 스키마 필드 (first 5): {schema_keys}")
+                                            
                                             webhook_val_result, webhook_val_text, webhook_key_psss_cnt, webhook_key_error_cnt = json_check_(
                                                 self.videoWebhookInSchema[0], webhook_data, self.flag_opt
                                             )
+                                            
+                                            if retry_attempt == 0:
+                                                print(f"[DEBUG] 웹훅 검증 결과: {webhook_val_result}, pass={webhook_key_psss_cnt}, error={webhook_key_error_cnt}")
+                                                print(f"[DEBUG] ==========================================\n")
                                         else:
                                             webhook_val_result, webhook_val_text, webhook_key_psss_cnt, webhook_key_error_cnt = "FAIL", "videoWebhookInSchema not found", 0, 0
+                                            if retry_attempt == 0:
+                                                print(f"[DEBUG] videoWebhookInSchema가 없습니다!")
+                                                print(f"[DEBUG] ==========================================\n")
                                     
                                         add_pass += webhook_key_psss_cnt
                                         add_err += webhook_key_error_cnt
@@ -1620,15 +1692,17 @@ class MyApp(QWidget):
             except:
                 schema_data = None
             
-            # 웹훅 스키마 가져오기 (플랫폼: 시스템이 보내는 웹훅 응답 스키마)
-            # ✅ 웹훅 스키마는 모든 API가 공통으로 사용하므로 항상 [0] 사용
-            try:
-                webhook_schema = self.videoWebhookSchema[0] if len(self.videoWebhookSchema) > 0 else None
-                print(f"[DEBUG] Platform webhook_schema for row {row}: {webhook_schema is not None}")
-                print(f"[DEBUG] videoWebhookSchema length: {len(self.videoWebhookSchema)}")
-            except Exception as e:
-                print(f"[DEBUG] Error getting webhook_schema: {e}")
-                webhook_schema = None
+            # 웹훅 검증인 경우에만 웹훅 스키마
+            webhook_schema = None
+            if row < len(self.videoMessages):
+                api_name_raw = self.videoMessages[row]
+                if "Realtime" in api_name_raw or "realTime" in api_name_raw or "webhook" in api_name_raw.lower():
+                    current_protocol = CONSTANTS.trans_protocol[row] if row < len(CONSTANTS.trans_protocol) else None
+                    if current_protocol == "WebHook":
+                        try:
+                            webhook_schema = self.videoWebhookSchema[0] if len(self.videoWebhookSchema) > 0 else None
+                        except:
+                            webhook_schema = None
             
             # 통합 팝업창 띄우기
             dialog = CombinedDetailDialog(api_name, buf, schema_data, webhook_schema)
