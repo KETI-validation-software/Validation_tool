@@ -211,6 +211,9 @@ cmg7bve25000114cevhn5o3vr_ReplayURL_in_validation = {
 }
 
 # RealtimeVideoEventInfos
+cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_validation = {}
+
+# RealtimeVideoEventInfos
 cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_validation = {
   "camList.camID": {
     "score": 1,
@@ -346,6 +349,7 @@ cmg7bve25000114cevhn5o3vr_inValidation = [
     cmg7bve25000114cevhn5o3vr_StoredVideoInfos_in_validation,
     cmg7bve25000114cevhn5o3vr_StreamURLs_in_validation,
     cmg7bve25000114cevhn5o3vr_ReplayURL_in_validation,
+    cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_validation,
     cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_validation,
     cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_in_validation,
     cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_in_validation,
