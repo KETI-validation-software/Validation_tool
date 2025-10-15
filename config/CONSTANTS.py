@@ -14,8 +14,8 @@ version = "v0.1"
 test_category = "본시험"
 test_target = "통합시스템"
 test_range = "ALL_FIELDS"
-auth_type = "Bearer Token"
-auth_info = "1234"
+auth_type = "Digest Auth"
+auth_info = "admin,1234"
 admin_code = "123456789"
 url = "https://127.0.0.1:8080"
 
@@ -55,21 +55,21 @@ num_retries = [1, 2, 3, 2, 1, 2, 3, 2, 1]
 # specification.id별 설정
 SPEC_CONFIG = {
     "cmg90br3n002qihleffuljnth": {
-        "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic'],
+        "trans_protocol": ['basic', 'basic', 'basic', 'LongPolling', 'LongPolling', 'basic', 'basic'],
         "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000],
-        "num_retries": [3, 3, 2, 2, 3, 2, 1]
+        "num_retries": [1, 3, 2, 3, 3, 2, 1]
     }
 ,
     "cmg7edeo50013124xiux3gbkb": {
-        "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic'],
+        "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'LongPolling', 'basic', 'LongPolling', 'basic'],
         "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
-        "num_retries": [3, 1, 2, 1, 3, 1, 1, 1]
+        "num_retries": [2, 1, 2, 1, 3, 1, 1, 1]
     }
 ,
     "cmg7bve25000114cevhn5o3vr": {
-        "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic'],
-        "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
-        "num_retries": [3, 1, 2, 2, 3, 1, 1, 1, 5, 1, 1, 1]
+        "trans_protocol": ['basic', 'LongPolling', 'basic', 'basic', 'basic', 'basic', 'WebHook', 'LongPolling', 'basic', 'basic', 'basic', 'basic', 'basic'],
+        "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
+        "num_retries": [3, 10, 10, 2, 2, 2, 2, 5, 5, 5, 1, 1, 1]
     }
 }
 

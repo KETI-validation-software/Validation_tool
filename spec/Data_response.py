@@ -2,11 +2,11 @@
 
 # Authentication
 cmg90br3n002qihleffuljnth_Authentication_out_data = {
-    "code": "200",
-    "message": "성공",
-    "userName": "관리자",
-    "userAff": "오산시청",
-    "accessToken": "abcde1234"
+    "code": "",
+    "message": "",
+    "userName": "",
+    "userAff": "",
+    "accessToken": ""
 }
 
 # Capabilities
@@ -21,53 +21,38 @@ cmg90br3n002qihleffuljnth_Capabilities_out_data = {
 ]
 }
 
-# DoorProfiles
-cmg90br3n002qihleffuljnth_DoorProfiles_out_data = {
-    "code": "",
-    "message": "",
-    "doorList": [
+# SensorDeviceProfiles
+cmg90br3n002qihleffuljnth_SensorDeviceProfiles_out_data = {
+    "code": "200",
+    "message": "성공",
+    "sensorDeviceList": [
         {
-        "doorID": "door0001",
-        "doorName": "",
-        "doorRelayStatus": "",
-        "doorSensor": "",
-        "doorLoc": {
-        "lon": "127.127730",
-        "lat": "38.439801",
-        "alt": "32.131",
-        "desc": "3층복도"
-    },
-        "bioDeviceList": [
+        "sensorDeviceID": "iot0001",
+        "sensorDeviceType": "온도",
+        "sensorDeviceName": "홍채 센서",
+        "sensorDeviceLoc": [
             {
-            "bioDeviceID": "",
-            "bioDeviceName": "",
-            "bioDeviceAuthTypeList": [],
-            "otherDeviceList": [
-                {
-                "otherDeviceID": "other0001",
-                "otherDeviceName": "출입문카드 인식기기",
-                "otherDeviceAuthTypeList": []
-            }
-        ]
+            "lon": "12.7127730",
+            "lat": "38.439801",
+            "alt": "32.131",
+            "desc": "3층복도"
         }
     ]
     }
 ]
 }
 
-# StoredVideoInfos
-cmg90br3n002qihleffuljnth_StoredVideoInfos_out_data = {
+# RealtimeSensorData
+cmg90br3n002qihleffuljnth_RealtimeSensorData_out_data = {
     "code": "",
     "message": "",
-    "camList": [
+    "sensorDeviceList": [
         {
-        "camID": "",
-        "timeList": [
-            {
-            "startTime": 0,
-            "endTime": 0
-        }
-    ]
+        "sensorDeviceID": "",
+        "measureTime": 0,
+        "sensorDeviceType": "온도",
+        "sensorDeviceUnit": "섭씨",
+        "sensorDeviceValue": "100"
     }
 ]
 }
@@ -100,39 +85,34 @@ cmg90br3n002qihleffuljnth_StoredSensorEventInfos_out_data = {
 ]
 }
 
-# RealtimeDoorStatus
-cmg90br3n002qihleffuljnth_RealtimeDoorStatus_out_data = {
-    "code": "",
-    "message": "",
-    "doorList": [
-        {
-        "doorName": "A 건물 출입문",
-        "doorRelaySensor": "일반",
-        "doorSensor": "0"
-    }
-]
+# SensorDeviceControl
+cmg90br3n002qihleffuljnth_SensorDeviceControl_out_data = {
+    "code": "200",
+    "message": "성공",
+    "sensorDeviceID": "",
+    "sensorDeviceStatus": ""
 }
 
 # cmg90br3n002qihleffuljnth 데이터 리스트
 cmg90br3n002qihleffuljnth_inData = [
     cmg90br3n002qihleffuljnth_Authentication_out_data,
     cmg90br3n002qihleffuljnth_Capabilities_out_data,
-    cmg90br3n002qihleffuljnth_DoorProfiles_out_data,
-    cmg90br3n002qihleffuljnth_StoredVideoInfos_out_data,
+    cmg90br3n002qihleffuljnth_SensorDeviceProfiles_out_data,
+    cmg90br3n002qihleffuljnth_RealtimeSensorData_out_data,
     cmg90br3n002qihleffuljnth_RealtimeSensorEventInfos_out_data,
     cmg90br3n002qihleffuljnth_StoredSensorEventInfos_out_data,
-    cmg90br3n002qihleffuljnth_RealtimeDoorStatus_out_data,
+    cmg90br3n002qihleffuljnth_SensorDeviceControl_out_data,
 ]
 
 # cmg90br3n002qihleffuljnth API endpoint
 cmg90br3n002qihleffuljnth_messages = [
     "Authentication",
     "Capabilities",
-    "DoorProfiles",
-    "StoredVideoInfos",
+    "SensorDeviceProfiles",
+    "RealtimeSensorData",
     "RealtimeSensorEventInfos",
     "StoredSensorEventInfos",
-    "RealtimeDoorStatus",
+    "SensorDeviceControl",
 ]
 
 # Authentication
@@ -141,7 +121,7 @@ cmg7edeo50013124xiux3gbkb_Authentication_out_data = {
     "message": "성공",
     "userName": "관리자",
     "userAff": "오산시청",
-    "accessToken": "abcde1234"
+    "accessToken": "abcd1234"
 }
 
 # Capabilities
@@ -299,53 +279,46 @@ cmg7bve25000114cevhn5o3vr_Authentication_out_data = {
 
 # Capabilities
 cmg7bve25000114cevhn5o3vr_Capabilities_out_data = {
-    "code": "",
-    "message": "",
+    "code": "200",
+    "message": "성공",
+    "streamingSupport": [
+        {
+        "streamProtocolType": "RTSP",
+        "streamProtocolDesc": "Unicast"
+    }
+],
     "transportSupport": [
         {
-        "transProtocolType": "LongPolling"
+        "transProtocolType": "LongPolling",
+        "transProtocolDesc": ""
     }
 ]
 }
 
-# DoorProfiles
-cmg7bve25000114cevhn5o3vr_DoorProfiles_out_data = {
-    "code": "",
-    "message": "",
-    "doorList": [
+# CameraProfiles
+cmg7bve25000114cevhn5o3vr_CameraProfiles_out_data = {
+    "code": "200",
+    "message": "성공",
+    "camList": [
         {
-        "doorID": "door0001",
-        "doorName": "",
-        "doorRelayStatus": "",
-        "doorSensor": "",
-        "doorLoc": {
-        "lon": "127.127730",
-        "lat": "38.439801",
-        "alt": "32.131",
-        "desc": "3층복도"
+        "camID": "cam0002",
+        "camName": "카메라2",
+        "camLoc": {
+        "lon": "127.2887",
+        "lat": "37.33671",
+        "desc": "2층복도"
     },
-        "bioDeviceList": [
-            {
-            "bioDeviceID": "",
-            "bioDeviceName": "",
-            "bioDeviceAuthTypeList": [],
-            "otherDeviceList": [
-                {
-                "otherDeviceID": "other0001",
-                "otherDeviceName": "출입문카드 인식기기",
-                "otherDeviceAuthTypeList": []
-            }
-        ]
-        }
-    ]
+        "camConfig": {
+        "camType": "PTZ"
+    }
     }
 ]
 }
 
 # StoredVideoInfos
 cmg7bve25000114cevhn5o3vr_StoredVideoInfos_out_data = {
-    "code": "",
-    "message": "",
+    "code": "200",
+    "message": "성공",
     "camList": [
         {
         "camID": "",
@@ -359,57 +332,84 @@ cmg7bve25000114cevhn5o3vr_StoredVideoInfos_out_data = {
 ]
 }
 
-# RealtimeVerifEventInfos
-cmg7bve25000114cevhn5o3vr_RealtimeVerifEventInfos_out_data = {
-    "code": "200",
-    "message": "성공",
-    "doorList": [
-        {
-        "eventTime": 0,
-        "doorID": "door001",
-        "userID": "user001",
-        "bioAuthTypeList": [],
-        "otherAuthTypeList": [],
-        "eventName": "성공",
-        "eventDesc": "36.5"
-    }
-]
-}
-
-# StoredVerifEventInfos
-cmg7bve25000114cevhn5o3vr_StoredVerifEventInfos_out_data = {
+# StreamURLs
+cmg7bve25000114cevhn5o3vr_StreamURLs_out_data = {
     "code": "",
     "message": "",
-    "doorList": [
+    "camList": [
         {
-        "eventTime": "",
-        "doorID": "",
-        "userID": "",
-        "bioAuthTypeList": [],
-        "otherAuthTypeList": [],
-        "eventName": "",
-        "eventDesc": "3.65"
+        "camID": "cam0001",
+        "accessID": "conn0001",
+        "accessPW": "1234",
+        "camURL": "rtsp://192.168. 0.5:8000",
+        "videoInfo": {
+        "resolution": "1920x1080",
+        "fps": 30,
+        "videoCodec": "H.264",
+        "audioCodec": "G.711"
+    }
     }
 ]
 }
 
-# RealtimeDoorStatus
-cmg7bve25000114cevhn5o3vr_RealtimeDoorStatus_out_data = {
+# ReplayURL
+cmg7bve25000114cevhn5o3vr_ReplayURL_out_data = {
     "code": "",
     "message": "",
-    "doorList": [
+    "camList": [
         {
-        "doorName": "A 건물 출입문",
-        "doorRelaySensor": "일반",
-        "doorSensor": "0"
+        "camID": "",
+        "accessID": "",
+        "accessPW": "",
+        "startTime": "",
+        "endTime": "",
+        "camURL": "rtsp://192.168. 0.5:8000",
+        "videoInfo": {
+        "resolution": "1920x1080",
+        "fps": 30,
+        "videoCodec": "H.264",
+        "audioCodec": "G.711"
+    }
     }
 ]
 }
 
-# DoorControl
-cmg7bve25000114cevhn5o3vr_DoorControl_out_data = {
+# RealtimeVideoEventInfos
+cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_data = {
     "code": "200",
     "message": "성공"
+}
+
+# RealtimeVideoEventInfos
+cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_data = {
+    "code": "",
+    "message": "",
+    "camList": [
+        {
+        "camID": "",
+        "eventUUID": [],
+        "eventName": "",
+        "startTime": "",
+        "endTime": "",
+        "eventDesc": "dddddeeeeeAAFEDFiikjf"
+    }
+]
+}
+
+# StoredVideoEventInfos
+cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_data = {
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+        "camID": "",
+        "eventUUID": [],
+        "eventName": "",
+        "startTime": 0,
+        "endTime": 0,
+        "eventDesc": "aaabbbAAA"
+    }
+]
 }
 
 # StoredObjectAnalyticsInfos
@@ -471,12 +471,13 @@ cmg7bve25000114cevhn5o3vr_PtzStop_out_data = {
 cmg7bve25000114cevhn5o3vr_inData = [
     cmg7bve25000114cevhn5o3vr_Authentication_out_data,
     cmg7bve25000114cevhn5o3vr_Capabilities_out_data,
-    cmg7bve25000114cevhn5o3vr_DoorProfiles_out_data,
+    cmg7bve25000114cevhn5o3vr_CameraProfiles_out_data,
     cmg7bve25000114cevhn5o3vr_StoredVideoInfos_out_data,
-    cmg7bve25000114cevhn5o3vr_RealtimeVerifEventInfos_out_data,
-    cmg7bve25000114cevhn5o3vr_StoredVerifEventInfos_out_data,
-    cmg7bve25000114cevhn5o3vr_RealtimeDoorStatus_out_data,
-    cmg7bve25000114cevhn5o3vr_DoorControl_out_data,
+    cmg7bve25000114cevhn5o3vr_StreamURLs_out_data,
+    cmg7bve25000114cevhn5o3vr_ReplayURL_out_data,
+    cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_data,
+    cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_data,
+    cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_data,
     cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_out_data,
     cmg7bve25000114cevhn5o3vr_PtzStatus_out_data,
     cmg7bve25000114cevhn5o3vr_PtzContinuousMove_out_data,
@@ -487,12 +488,13 @@ cmg7bve25000114cevhn5o3vr_inData = [
 cmg7bve25000114cevhn5o3vr_messages = [
     "Authentication",
     "Capabilities",
-    "DoorProfiles",
+    "CameraProfiles",
     "StoredVideoInfos",
-    "RealtimeVerifEventInfos",
-    "StoredVerifEventInfos",
-    "RealtimeDoorStatus",
-    "DoorControl",
+    "StreamURLs",
+    "ReplayURL",
+    "RealtimeVideoEventInfos",
+    "RealtimeVideoEventInfos",
+    "StoredVideoEventInfos",
     "StoredObjectAnalyticsInfos",
     "PtzStatus",
     "PtzContinuousMove",
