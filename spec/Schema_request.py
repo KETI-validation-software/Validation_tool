@@ -190,6 +190,22 @@ cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_schema = {
     "camList": [{
     "camID": str,
 }],
+    OptionalKey("duration"): float,
+    "transProtocol": {
+    "transProtocolType": str,
+    "transProtocolDesc": str,
+},
+    OptionalKey("eventFilter"): str,
+    OptionalKey("classFilter"): str,
+    OptionalKey("startTime"): float,
+}
+
+# RealtimeVideoEventInfos
+cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_schema = {
+    "camList": [{
+    "camID": str,
+}],
+    OptionalKey("duration"): str,
     "transProtocol": {
     "transProtocolType": str,
     OptionalKey("transProtocolDesc"): str,
@@ -198,7 +214,6 @@ cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_schema = {
     OptionalKey("classFilter"): str,
     OptionalKey("startTime"): float,
 }
-
 
 # StoredVideoEventInfos
 cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_in_schema = {
@@ -261,6 +276,7 @@ cmg7bve25000114cevhn5o3vr_inSchema = [
     cmg7bve25000114cevhn5o3vr_StoredVideoInfos_in_schema,
     cmg7bve25000114cevhn5o3vr_StreamURLs_in_schema,
     cmg7bve25000114cevhn5o3vr_ReplayURL_in_schema,
+    cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_schema,
     cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_schema,
     cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_in_schema,
     cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_in_schema,
