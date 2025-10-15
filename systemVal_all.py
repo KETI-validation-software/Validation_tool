@@ -243,22 +243,17 @@ class APISelectionDialog(QDialog):
         return [idx for idx, checkbox in enumerate(self.checkboxes) if checkbox.isChecked()]
 
 
-# 시험 결과 페이지 다이얼로그
-class ResultPageDialog(QDialog):
+# 시험 결과 페이지 위젯 (메인 창에 표시)
+class ResultPageWidget(QWidget):
     def __init__(self, parent):
         super().__init__()
         self.parent = parent
-        self.setWindowTitle('시스템 연동 시험 결과')
-        self.setGeometry(100, 100, 1100, 600)
-        self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
-        self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
-
         self.initUI()
 
     def initUI(self):
         mainLayout = QVBoxLayout()
 
-        # 상단 큰 제목
+        # 상단 대제목
         title_label = QLabel('시스템 연동 시험 결과', self)
         title_font = title_label.font()
         title_font.setPointSize(22)
@@ -289,7 +284,7 @@ class ResultPageDialog(QDialog):
         result_label = QLabel('시험 결과')
         mainLayout.addWidget(result_label)
 
-        # 결과 테이블 (parent의 테이블 데이터 복사) - 동적 API 개수
+        # 결과 테이블
         api_count = self.parent.tableWidget.rowCount()
         self.tableWidget = QTableWidget(api_count, 8)
         self.tableWidget.setHorizontalHeaderLabels([
@@ -339,35 +334,6 @@ class ResultPageDialog(QDialog):
         total_score_group = self._create_total_score_display()
         mainLayout.addWidget(total_score_group)
 
-        mainLayout.addSpacing(20)
-
-        # 닫기 버튼
-        close_btn = QPushButton('닫기')
-        close_btn.setFixedSize(140, 50)
-        close_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #FFB6C1;
-                border: 2px solid #FF69B4;
-                border-radius: 5px;
-                padding: 5px;
-                font-weight: bold;
-                color: #8B0000;
-            }
-            QPushButton:hover {
-                background-color: #FFC0CB;
-                border: 2px solid #FF1493;
-            }
-            QPushButton:pressed {
-                background-color: #FF69B4;
-            }
-        """)
-        close_btn.clicked.connect(self.accept)
-
-        close_layout = QHBoxLayout()
-        close_layout.setAlignment(Qt.AlignCenter)
-        close_layout.addWidget(close_btn)
-        mainLayout.addLayout(close_layout)
-
         mainLayout.addStretch()
         self.setLayout(mainLayout)
 
@@ -387,7 +353,6 @@ class ResultPageDialog(QDialog):
                 new_icon_layout = QHBoxLayout()
                 new_icon_layout.setContentsMargins(0, 0, 0, 0)
 
-                # 원본 아이콘 찾기
                 old_label = icon_widget.findChild(QLabel)
                 if old_label:
                     new_icon_label = QLabel()
@@ -401,7 +366,9 @@ class ResultPageDialog(QDialog):
 
                     self.tableWidget.setCellWidget(row, 1, new_icon_widget)
 
+
             # 나머지 컬럼들 (검증 횟수, 통과 필드 수, 전체 필드 수, 실패 필드 수, 평가 점수)
+
             for col in range(2, 7):
                 item = self.parent.tableWidget.item(row, col)
                 if item:
@@ -432,7 +399,6 @@ class ResultPageDialog(QDialog):
         spec_group.setMaximumWidth(1050)
         spec_group.setMinimumWidth(950)
 
-        # spec 정보 가져오기
         spec_description = self.parent.spec_description
         api_count = len(self.parent.videoMessages)
 
@@ -441,26 +407,22 @@ class ResultPageDialog(QDialog):
         total_fields = total_pass + total_error
         score = (total_pass / total_fields * 100) if total_fields > 0 else 0
 
-        # 분야명 레이블 (강조)
         spec_name_label = QLabel(f"📋 {spec_description} ({api_count}개 API)")
         spec_name_font = spec_name_label.font()
         spec_name_font.setPointSize(16)
         spec_name_font.setBold(True)
         spec_name_label.setFont(spec_name_font)
 
-        # 점수 레이블들
         pass_label = QLabel(f"통과 필드 수: {total_pass}")
         total_label = QLabel(f"전체 필드 수: {total_fields}")
         score_label = QLabel(f"종합 평가 점수: {score:.1f}%")
 
-        # 폰트 크기 조정
         font = pass_label.font()
         font.setPointSize(14)
         pass_label.setFont(font)
         total_label.setFont(font)
         score_label.setFont(font)
 
-        # 레이아웃 구성
         main_layout = QVBoxLayout()
         main_layout.addWidget(spec_name_label)
         main_layout.addSpacing(10)
@@ -477,12 +439,11 @@ class ResultPageDialog(QDialog):
         return spec_group
 
     def _create_total_score_display(self):
-        """전체 점수 표시 그룹 (향후 여러 spec 평균 계산용)"""
+        """전체 점수 표시 그룹"""
         total_group = QGroupBox('전체 점수')
         total_group.setMaximumWidth(1050)
         total_group.setMinimumWidth(950)
 
-        # 현재는 1개 spec만 실행하므로 동일한 값
         total_pass = self.parent.total_pass_cnt
         total_error = self.parent.total_error_cnt
         total_fields = total_pass + total_error
@@ -492,7 +453,6 @@ class ResultPageDialog(QDialog):
         total_label = QLabel(f"전체 필드 수: {total_fields}")
         score_label = QLabel(f"종합 평가 점수: {score:.1f}%")
 
-        # 폰트 크기 조정
         font = pass_label.font()
         font.setPointSize(16)
         font.setBold(True)
@@ -510,45 +470,15 @@ class ResultPageDialog(QDialog):
         total_group.setLayout(layout)
         return total_group
 
-    def _create_score_display(self):
-        """평가 점수 표시 그룹 (구 버전 - 호환성 유지)"""
-        score_group = QGroupBox('평가 점수')
-        score_group.setMaximumWidth(1050)
-        score_group.setMinimumWidth(950)
-
-        total_pass = self.parent.total_pass_cnt
-        total_error = self.parent.total_error_cnt
-        total_fields = total_pass + total_error
-        score = (total_pass / total_fields * 100) if total_fields > 0 else 0
-
-        pass_label = QLabel(f"통과 필드 수: {total_pass}")
-        total_label = QLabel(f"전체 필드 수: {total_fields}")
-        score_label = QLabel(f"종합 평가 점수: {score:.1f}%")
-
-        # 폰트 크기 조정
-        font = pass_label.font()
-        font.setPointSize(20)
-        pass_label.setFont(font)
-        total_label.setFont(font)
-        score_label.setFont(font)
-
-        layout = QHBoxLayout()
-        layout.setSpacing(90)
-        layout.addWidget(pass_label)
-        layout.addWidget(total_label)
-        layout.addWidget(score_label)
-        layout.addStretch()
-
-        score_group.setLayout(layout)
-        return score_group
-
     def table_cell_clicked(self, row, col):
         """상세 내용 버튼 클릭 시"""
-        if col == 7:  # 상세 내용 컬럼
+        if col == 7:
             self.parent.show_combined_result(row)
 
 
 class MyApp(QWidget):
+    # 시험 결과 표시 요청 시그널
+    showResultRequested = pyqtSignal(object)  # parent 객체 전달
 
     def _append_text(self, obj):
         import json
@@ -2098,9 +2028,13 @@ class MyApp(QWidget):
                 self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
 
     def show_result_page(self):
-        """시험 결과 페이지 표시"""
-        dialog = ResultPageDialog(self)
-        dialog.exec_()
+        """시험 결과 페이지 표시 - 메인 창에 표시하도록 시그널 발생"""
+        print(f"✓ show_result_page 호출됨 (System)")
+        print(f"   self.embedded: {self.embedded}")
+
+        # embedded 여부와 관계없이 항상 시그널 발생 (메인 창에 표시)
+        print(f"   → 시그널 발생: showResultRequested.emit")
+        self.showResultRequested.emit(self)
 
     def resizeEvent(self, event):
         """창 크기 변경 시 반응형 UI 조정"""

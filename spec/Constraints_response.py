@@ -37,6 +37,7 @@ cmg90br3n002qihleffuljnth_RealtimeSensorEventInfos_out_constraints = {
   "sensorDeviceList.eventName": {
     "valueType": "request-based",
     "required": True,
+    "referenceEndpoint": "/RealtimeSensorEventInfos",
     "referenceField": "eventFilter"
   },
   "sensorDeviceList.eventTime": {
@@ -59,6 +60,7 @@ cmg90br3n002qihleffuljnth_StoredSensorEventInfos_out_constraints = {
   "sensorDeviceList.eventName": {
     "valueType": "request-based",
     "required": True,
+    "referenceEndpoint": "/StoredSensorEventInfos",
     "referenceField": "eventFilter"
   },
   "sensorDeviceList.eventTime": {
@@ -77,6 +79,7 @@ cmg90br3n002qihleffuljnth_SensorDeviceControl_out_constraints = {
   "sensorDeviceID": {
     "valueType": "request-based",
     "required": True,
+
     "referenceField": "sensorDeviceID"
   },
   "sensorDeviceStatus": {
@@ -152,6 +155,7 @@ cmg7edeo50013124xiux3gbkb_StoredVerifEventInfos_out_constraints = {
   "doorList.eventName": {
     "valueType": "request-based",
     "required": True,
+    "referenceEndpoint": "/StoredVerifEventInfos",
     "referenceField": "eventFilter"
   }
 }
@@ -251,6 +255,7 @@ cmg7bve25000114cevhn5o3vr_ReplayURL_out_constraints = {
 }
 
 # RealtimeVideoEventInfos
+
 cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_constraints = {
   "camList.camID": {
     "valueType": "request-based",
@@ -305,6 +310,7 @@ cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_constraints = {
   "camList.eventName": {
     "valueType": "request-based",
     "required": True,
+    "referenceEndpoint": "/StoredVideoEventInfos",
     "referenceField": "eventFilter"
   },
   "camList.startTime": {

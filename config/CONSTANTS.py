@@ -60,21 +60,23 @@ num_retries = [1, 2, 3, 2, 1, 2, 3, 2, 1]
 # specification.id별 설정
 SPEC_CONFIG = {
     "cmg90br3n002qihleffuljnth": {
-        "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic'],
+        "trans_protocol": ['basic', 'basic', 'basic', 'LongPolling', 'LongPolling', 'basic', 'basic'],
         "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000],
         "num_retries": [1, 3, 2, 3, 3, 2, 1]
     }
 ,
     "cmg7edeo50013124xiux3gbkb": {
-        "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic'],
+        "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'LongPolling', 'basic', 'LongPolling', 'basic'],
         "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
         "num_retries": [2, 1, 2, 1, 3, 1, 1, 1]
     }
 ,
     "cmg7bve25000114cevhn5o3vr": {
+
         "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic'],
         "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
         "num_retries": [3, 10, 10, 2, 2, 2, 5, 5, 5, 1, 1, 1]
+
     }
 }
 

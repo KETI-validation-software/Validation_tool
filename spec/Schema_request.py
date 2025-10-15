@@ -190,7 +190,6 @@ cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_schema = {
     "camList": [{
     "camID": str,
 }],
-    OptionalKey("duration"): str,
     "transProtocol": {
     "transProtocolType": str,
     OptionalKey("transProtocolDesc"): str,
@@ -199,6 +198,7 @@ cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_schema = {
     OptionalKey("classFilter"): str,
     OptionalKey("startTime"): float,
 }
+
 
 # StoredVideoEventInfos
 cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_in_schema = {
