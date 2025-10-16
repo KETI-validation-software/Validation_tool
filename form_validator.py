@@ -29,6 +29,7 @@ class FormValidator:
         self.opt_loader = OptLoader()
         self._steps_cache = {}
         self._test_step_cache = {}
+        self._spec_names_cache = {}  # spec_id -> spec_name 매핑
         self.schema_gen = SchemaGenerator()
         self.data_gen = dataGenerator()
         self.validation_gen = ValidationGenerator()
@@ -799,8 +800,21 @@ class FormValidator:
             # spec_id가 이미 존재하는지 확인 (중첩된 중괄호 고려)
             spec_key_start = current_config.find(f'"{spec_id}":')
 
-            # 새로운 설정 문자열 생성
+            # testSpecs.name 추출 (_spec_names_cache에서 가져오기)
+            spec_name = self._spec_names_cache.get(spec_id, "")
+            print(f"spec_id={spec_id}에 대한 spec_name: {spec_name}")
+
+            # specs 파일 리스트 생성 (spec_id 기반)
+            specs_list = [
+                f"{spec_id}_inSchema",
+                f"{spec_id}_outData",
+                f"{spec_id}_messages"
+            ]
+
+            # 새로운 설정 문자열 생성 (순서: test_name, specs, trans_protocol, time_out, num_retries)
             new_spec_config = f'''"{spec_id}": {{
+        "test_name": "{spec_name}",
+        "specs": {specs_list},
         "trans_protocol": {config_data.get("trans_protocol", [])},
         "time_out": {config_data.get("time_out", [])},
         "num_retries": {config_data.get("num_retries", [])}
@@ -982,6 +996,9 @@ class FormValidator:
             for i, spec in enumerate(test_specs):
                 spec_id = spec.get("id", "")
                 spec_name = spec.get("name", "")
+
+                # spec_name을 캐시에 저장
+                self._spec_names_cache[spec_id] = spec_name
 
                 table.insertRow(i)
 
