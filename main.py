@@ -91,46 +91,65 @@ class MainWindow(QMainWindow):
 
     def _show_test_result(self):
         """시험 결과 페이지로 이동"""
-        # embedded 모드의 검증 위젯에서 시험 결과 표시
-        current_widget = self.stack.currentWidget()
+        # 현재 활성화된 검증 위젯 찾기
+        validation_widget = None
         
-        if isinstance(current_widget, (platform_app.MyApp, system_app.MyApp)):
-            # 현재 검증 화면이 활성화된 경우, 해당 검증 화면의 시험 결과 표시
-            current_widget.show_result_page()
-        else:
+        if hasattr(self, '_system_widget') and self._system_widget is not None:
+            validation_widget = self._system_widget
+        elif hasattr(self, '_platform_widget') and self._platform_widget is not None:
+            validation_widget = self._platform_widget
+        
+        if validation_widget is None:
             QMessageBox.warning(self, "경고", "시험이 실행되지 않았습니다.\n먼저 시험을 실행해주세요.")
+            return
         
-        print("✓ 시험 결과 표시 요청")
+        # 시험 결과 위젯 생성 및 스택에 추가
+        self._show_result_widget(validation_widget)
 
-    def _on_show_result_requested(self, parent_widget):
-        """검증 화면에서 시험 결과 표시 요청 시 호출"""
-        print(f"✓ _on_show_result_requested 호출됨")
-        print(f"   parent_widget 타입: {type(parent_widget)}")
-        print(f"   parent_widget.embedded: {parent_widget.embedded}")
-
-        # parent_widget이 platform인지 system인지 확인하여 적절한 Dialog 생성
+    def _show_result_widget(self, parent_widget):
+        """시험 결과 위젯을 스택에 추가하고 전환"""
+        # 기존 시험 결과 위젯이 있으면 제거
+        if hasattr(self, '_result_widget') and self._result_widget is not None:
+            self.stack.removeWidget(self._result_widget)
+            self._result_widget.deleteLater()
+        
+        # 새로운 시험 결과 위젯 생성
         if isinstance(parent_widget, platform_app.MyApp):
-            print(f"   → Platform 시험 결과 다이얼로그 표시")
-            dialog = platform_app.ResultPageDialog(parent_widget)
-            dialog.exec_()
+            self._result_widget = platform_app.ResultPageWidget(parent_widget, embedded=True)
         elif isinstance(parent_widget, system_app.MyApp):
-            print(f"   → System 시험 결과 다이얼로그 표시")
-            dialog = system_app.ResultPageDialog(parent_widget)
-            dialog.exec_()
+            self._result_widget = system_app.ResultPageWidget(parent_widget, embedded=True)
         else:
             print(f"알 수 없는 parent_widget 타입: {type(parent_widget)}")
             return
-
+        
+        # 뒤로가기 시그널 연결
+        self._result_widget.backRequested.connect(self._on_back_to_validation)
+        
+        # 스택에 추가하고 전환
+        self.stack.addWidget(self._result_widget)
+        self.stack.setCurrentWidget(self._result_widget)
+        
         # 시험 결과 메뉴 활성화
         self.act_test_result.setEnabled(True)
-        print("✓ 시험 결과 메뉴 활성화")
+    
+    def _on_back_to_validation(self):
+        """뒤로가기: 시험 결과 페이지에서 검증 화면으로 복귀"""
+        # 현재 활성화된 검증 위젯으로 전환
+        if hasattr(self, '_system_widget') and self._system_widget is not None:
+            self.stack.setCurrentWidget(self._system_widget)
+        elif hasattr(self, '_platform_widget') and self._platform_widget is not None:
+            self.stack.setCurrentWidget(self._platform_widget)
+
+    def _on_show_result_requested(self, parent_widget):
+        """검증 화면에서 시험 결과 표시 요청 시 호출 (embedded 모드에서)"""
+        # 스택에 시험 결과 위젯 추가하고 전환
+        self._show_result_widget(parent_widget)
 
     def _on_page_changed(self, index):
         """info_widget의 페이지가 변경될 때 호출되는 함수"""
         if index == 1:
             # 2페이지(시험 설정)로 이동 → 시험 설정 메뉴 활성화
             self.act_test_setup.setEnabled(True)
-            print("✓ 시험 설정 메뉴 활성화")
 
     def _on_start_test_requested(self, test_group_name, verification_type):
         """시험 시작 버튼 클릭 시 호출 - 시험 실행 메뉴 활성화 후 검증 앱 실행"""
@@ -214,6 +233,7 @@ class MainWindow(QMainWindow):
                 self.platform_window.close()
             self.platform_window = platform_app.MyApp(embedded=False)
             self.platform_window.showResultRequested.connect(self._on_show_result_requested)
+
             self.platform_window.show()
 
             # Main 화면: System 검증으로 전환

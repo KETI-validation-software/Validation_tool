@@ -34,6 +34,49 @@ import importlib
 warnings.filterwarnings('ignore')
 
 
+# 플랫폼 검증을 위한 래퍼 윈도우 (standalone 모드에서 스택 전환 지원)
+class PlatformValidationWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("통합플랫폼 연동 검증")
+        self.resize(1200, 720)
+        
+        # 스택 위젯 생성
+        self.stack = QStackedWidget()
+        self.setCentralWidget(self.stack)
+        
+        # 플랫폼 검증 위젯은 나중에 생성 (순환 참조 방지)
+        self.validation_widget = None
+        self._result_widget = None
+    
+    def initialize(self):
+        """검증 위젯 초기화 (MyApp 클래스 정의 후 호출)"""
+        if self.validation_widget is None:
+            self.validation_widget = MyApp(embedded=False)
+            self.validation_widget._wrapper_window = self  # 래퍼 참조 전달
+            self.stack.addWidget(self.validation_widget)
+            self.stack.setCurrentWidget(self.validation_widget)
+    
+    def _show_result_page(self):
+        """시험 결과 페이지로 전환 (스택 내부)"""
+        # 기존 결과 위젯 제거
+        if self._result_widget is not None:
+            self.stack.removeWidget(self._result_widget)
+            self._result_widget.deleteLater()
+        
+        # 새로운 결과 위젯 생성
+        self._result_widget = ResultPageWidget(self.validation_widget, embedded=True)
+        self._result_widget.backRequested.connect(self._on_back_to_validation)
+        
+        # 스택에 추가하고 전환
+        self.stack.addWidget(self._result_widget)
+        self.stack.setCurrentWidget(self._result_widget)
+    
+    def _on_back_to_validation(self):
+        """뒤로가기: 시험 결과에서 검증 화면으로 복귀"""
+        self.stack.setCurrentWidget(self.validation_widget)
+
+
 # 통합된 상세 내용 확인 팝업창 클래스
 class CombinedDetailDialog(QDialog):
     def __init__(self, api_name, step_buffer, schema_data, webhook_schema=None):
@@ -246,15 +289,17 @@ class APISelectionDialog(QDialog):
         return [idx for idx, checkbox in enumerate(self.checkboxes) if checkbox.isChecked()]
 
 
-# 시험 결과 페이지 다이얼로그
-class ResultPageDialog(QDialog):
-    def __init__(self, parent):
+# 시험 결과 페이지 위젯
+class ResultPageWidget(QWidget):
+    # 뒤로가기 시그널 추가
+    backRequested = pyqtSignal()
+    
+    def __init__(self, parent, embedded=False):
         super().__init__()
         self.parent = parent
+        self.embedded = embedded  # embedded 모드 여부 저장
         self.setWindowTitle('통합플랫폼 연동 시험 결과')
-        self.setGeometry(100, 100, 1100, 600)
-        self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
-        self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
+        self.resize(1100, 600)
         
         self.initUI()
     
@@ -344,35 +389,68 @@ class ResultPageDialog(QDialog):
         
         mainLayout.addSpacing(20)
         
-        # 닫기 버튼
-        close_btn = QPushButton('닫기')
-        close_btn.setFixedSize(140, 50)
-        close_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #87CEEB;
-                border: 2px solid #4682B4;
-                border-radius: 5px;
-                padding: 5px;
-                font-weight: bold;
-                color: #191970;
-            }
-            QPushButton:hover {
-                background-color: #B0E0E6;
-                border: 2px solid #1E90FF;
-            }
-            QPushButton:pressed {
-                background-color: #4682B4;
-            }
-        """)
-        close_btn.clicked.connect(self.accept)
-        
-        close_layout = QHBoxLayout()
-        close_layout.setAlignment(Qt.AlignCenter)
-        close_layout.addWidget(close_btn)
-        mainLayout.addLayout(close_layout)
+        # 뒤로가기/닫기 버튼
+        if self.embedded:
+            # Embedded 모드: 뒤로가기 버튼
+            back_btn = QPushButton('← 뒤로가기')
+            back_btn.setFixedSize(140, 50)
+            back_btn.setStyleSheet("""
+                QPushButton {
+                    background-color: #87CEEB;
+                    border: 2px solid #4682B4;
+                    border-radius: 5px;
+                    padding: 5px;
+                    font-weight: bold;
+                    color: #191970;
+                }
+                QPushButton:hover {
+                    background-color: #B0E0E6;
+                    border: 2px solid #1E90FF;
+                }
+                QPushButton:pressed {
+                    background-color: #4682B4;
+                }
+            """)
+            back_btn.clicked.connect(self._on_back_clicked)
+            
+            close_layout = QHBoxLayout()
+            close_layout.setAlignment(Qt.AlignCenter)
+            close_layout.addWidget(back_btn)
+            mainLayout.addLayout(close_layout)
+        else:
+            # Standalone 모드: 닫기 버튼
+            close_btn = QPushButton('닫기')
+            close_btn.setFixedSize(140, 50)
+            close_btn.setStyleSheet("""
+                QPushButton {
+                    background-color: #87CEEB;
+                    border: 2px solid #4682B4;
+                    border-radius: 5px;
+                    padding: 5px;
+                    font-weight: bold;
+                    color: #191970;
+                }
+                QPushButton:hover {
+                    background-color: #B0E0E6;
+                    border: 2px solid #1E90FF;
+                }
+                QPushButton:pressed {
+                    background-color: #4682B4;
+                }
+            """)
+            close_btn.clicked.connect(self.close)
+            
+            close_layout = QHBoxLayout()
+            close_layout.setAlignment(Qt.AlignCenter)
+            close_layout.addWidget(close_btn)
+            mainLayout.addLayout(close_layout)
         
         mainLayout.addStretch()
         self.setLayout(mainLayout)
+    
+    def _on_back_clicked(self):
+        """뒤로가기 버튼 클릭 시 시그널 발생"""
+        self.backRequested.emit()
     
     def _copy_table_data(self):
         """parent의 테이블 데이터를 복사"""
@@ -560,6 +638,9 @@ class MyApp(QWidget):
         self.embedded = embedded
         self.mode = mode  # 모드 저장
         self.radio_check_flag = "video"  # 영상보안 시스템으로 고정
+        
+        # Standalone 모드일 때 래퍼 윈도우 참조 저장
+        self._wrapper_window = None
         
         # 전체화면 관련 변수 초기화
         self._is_fullscreen = False
@@ -1998,12 +2079,18 @@ class MyApp(QWidget):
     def show_result_page(self):
         """시험 결과 페이지 표시"""
         if self.embedded:
-            # Embedded 모드: 시그널을 emit하여 main.py에 알림
+            # Embedded 모드: 시그널을 emit하여 main.py에서 스택 전환 처리
             self.showResultRequested.emit(self)
         else:
-            # Standalone 모드: 다이얼로그 표시
-            dialog = ResultPageDialog(self)
-            dialog.exec_()
+            # Standalone 모드: 래퍼 윈도우가 있으면 그 안에서 스택 전환
+            if self._wrapper_window is not None:
+                self._wrapper_window._show_result_page()
+            else:
+                # 래퍼가 없으면 새 창으로 표시 (하위 호환성)
+                if hasattr(self, 'result_window') and self.result_window is not None:
+                    self.result_window.close()
+                self.result_window = ResultPageWidget(self, embedded=False)
+                self.result_window.show()
 
     def toggle_fullscreen(self):
         """전체화면 전환 (main.py 스타일)"""
@@ -2167,5 +2254,8 @@ if __name__ == '__main__':
     fontDB = QFontDatabase()
     fontDB.addApplicationFont(resource_path('NanumGothic.ttf'))
     app.setFont(QFont('NanumGothic'))
-    ex = MyApp(embedded=False)
+    # 래퍼 윈도우 사용 (스택 전환 지원)
+    ex = PlatformValidationWindow()
+    ex.initialize()  # MyApp 정의 후 초기화
+    ex.show()
     sys.exit(app.exec())
