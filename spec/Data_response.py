@@ -289,7 +289,7 @@ cmg7bve25000114cevhn5o3vr_Capabilities_out_data = {
 ],
     "transportSupport": [
         {
-        "transProtocolType": "LongPolling",
+        "transProtocolType": "WebHook",
         "transProtocolDesc": ""
     }
 ]
@@ -301,16 +301,15 @@ cmg7bve25000114cevhn5o3vr_CameraProfiles_out_data = {
     "message": "성공",
     "camList": [
         {
-        "camID": "cam0002",
-        "camName": "카메라2",
+        "camID": "cam0001",
+        "camName": "카메라1",
         "camLoc": {
-        "lon": "127.2887",
-        "lat": "37.33671",
-        "desc": "2층복도"
+        "lon": "127.127730",
+        "lat": "38.439801",
+        "alt": "32.131",
+        "desc": "3층복도"
     },
-        "camConfig": {
-        "camType": "PTZ"
-    }
+        "camConfig": "PTZ"
     }
 ]
 }
@@ -374,22 +373,6 @@ cmg7bve25000114cevhn5o3vr_ReplayURL_out_data = {
 ]
 }
 
-# StoredVideoEventInfos
-cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_data = {
-    "code": "200",
-    "message": "성공",
-    "camList": [
-        {
-        "camID": "",
-        "eventUUID": [],
-        "eventName": "",
-        "startTime": 0,
-        "endTime": 0,
-        "eventDesc": "aaabbbAAA"
-    }
-]
-}
-
 # RealtimeVideoEventInfos
 cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_data = {
     "code": "",
@@ -402,6 +385,22 @@ cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_data = {
         "startTime": "",
         "endTime": "",
         "eventDesc": "dddddeeeeeAAFEDFiikjf"
+    }
+]
+}
+
+# StoredVideoEventInfos
+cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_data = {
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+        "camID": "",
+        "eventUUID": [],
+        "eventName": "",
+        "startTime": 0,
+        "endTime": 0,
+        "eventDesc": "aaabbbAAA"
     }
 ]
 }
@@ -469,8 +468,8 @@ cmg7bve25000114cevhn5o3vr_inData = [
     cmg7bve25000114cevhn5o3vr_StoredVideoInfos_out_data,
     cmg7bve25000114cevhn5o3vr_StreamURLs_out_data,
     cmg7bve25000114cevhn5o3vr_ReplayURL_out_data,
-    cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_data,
     cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_data,
+    cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_data,
     cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_out_data,
     cmg7bve25000114cevhn5o3vr_PtzStatus_out_data,
     cmg7bve25000114cevhn5o3vr_PtzContinuousMove_out_data,
@@ -485,8 +484,8 @@ cmg7bve25000114cevhn5o3vr_messages = [
     "StoredVideoInfos",
     "StreamURLs",
     "ReplayURL",
-    "StoredVideoEventInfos",
     "RealtimeVideoEventInfos",
+    "StoredVideoEventInfos",
     "StoredObjectAnalyticsInfos",
     "PtzStatus",
     "PtzContinuousMove",
