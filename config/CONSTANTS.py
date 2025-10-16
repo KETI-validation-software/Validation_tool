@@ -16,8 +16,8 @@ test_target = "통합시스템"
 test_range = "ALL_FIELDS"
 auth_type = "Digest Auth"
 auth_info = "admin,1234"
-admin_code = "123456789"
-url = "https://192.168.1.1:8080"
+admin_code = "1234"
+url = "https://127.0.0.1:8080"
 
 
 specs = [["cmgatbdp000bqihlexmywusvq_outSchema","cmgatbdp000bqihlexmywusvq_outData","cmgatbdp000bqihlexmywusvq_messages",""],
@@ -95,6 +95,8 @@ SPEC_CONFIG = {
     }
 ,
     "cmga0l5mh005dihlet5fcoj0o": {
+        "test_name": "영상보안 시스템",
+        "specs": ['cmga0l5mh005dihlet5fcoj0o_inSchema', 'cmga0l5mh005dihlet5fcoj0o_outData', 'cmga0l5mh005dihlet5fcoj0o_messages'],
         "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'WebHook', 'basic', 'basic', 'basic', 'basic', 'basic'],
         "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
         "num_retries": [2, 1, 2, 2, 1, 1, 1, 1, 3, 1, 2, 2]
