@@ -1,11 +1,11 @@
 # Authentication
-cmgatbdp000bqihlexmywusvq_Authentication_out_constraints = {}
+cmg90br3n002qihleffuljnth_Authentication_out_constraints = {}
 
 # Capabilities
-cmgatbdp000bqihlexmywusvq_Capabilities_out_constraints = {}
+cmg90br3n002qihleffuljnth_Capabilities_out_constraints = {}
 
 # SensorDeviceProfiles
-cmgatbdp000bqihlexmywusvq_SensorDeviceProfiles_out_constraints = {}
+cmg90br3n002qihleffuljnth_SensorDeviceProfiles_out_constraints = {}
 
 # RealtimeSensorData
 cmg90br3n002qihleffuljnth_RealtimeSensorData_out_constraints = {
@@ -21,19 +21,67 @@ cmg90br3n002qihleffuljnth_RealtimeSensorData_out_constraints = {
     "requestRange": {
       "minField": "startTime",
       "operator": "greater-equal"
-    }
+    },
+    "requestRangeMinEndpoint": "/RealtimeSensorData"
   }
 }
 
-
 # RealtimeSensorEventInfos
-cmgatbdp000bqihlexmywusvq_RealtimeSensorEventInfos_out_constraints = {}
+cmg90br3n002qihleffuljnth_RealtimeSensorEventInfos_out_constraints = {
+  "sensorDeviceList.sensorDeviceID": {
+    "valueType": "request-based",
+    "required": True,
+    "referenceEndpoint": "/RealtimeSensorEventInfos",
+    "referenceField": "sensorDeviceID",
+    "requestRange": {
+      "operator": "between"
+    }
+  },
+  "sensorDeviceList.eventName": {
+    "valueType": "request-based",
+    "required": True,
+    "referenceEndpoint": "/RealtimeSensorEventInfos",
+    "referenceField": "eventFilter"
+  },
+  "sensorDeviceList.eventTime": {
+    "valueType": "request-range",
+    "required": True,
+    "requestRange": {
+      "minField": "startTime",
+      "operator": "greater-equal"
+    },
+    "requestRangeMinEndpoint": "/RealtimeSensorEventInfos"
+  }
+}
 
 # StoredSensorEventInfos
-cmgatbdp000bqihlexmywusvq_StoredSensorEventInfos_out_constraints = {}
+cmg90br3n002qihleffuljnth_StoredSensorEventInfos_out_constraints = {
+  "sensorDeviceList.sensorDeviceID": {
+    "valueType": "request-based",
+    "required": True,
+    "referenceEndpoint": "/StoredSensorEventInfos",
+    "referenceField": "sensorDeviceID"
+  },
+  "sensorDeviceList.eventName": {
+    "valueType": "request-based",
+    "required": True,
+    "referenceEndpoint": "/StoredSensorEventInfos",
+    "referenceField": "eventFilter"
+  },
+  "sensorDeviceList.eventTime": {
+    "valueType": "request-range",
+    "required": True,
+    "requestRange": {
+      "maxField": "endTime",
+      "minField": "startTime",
+      "operator": "between"
+    },
+    "requestRangeMinEndpoint": "/StoredSensorEventInfos",
+    "requestRangeMaxEndpoint": "/StoredSensorEventInfos"
+  }
+}
 
 # SensorDeviceControl
-
 cmg90br3n002qihleffuljnth_SensorDeviceControl_out_constraints = {
   "sensorDeviceID": {
     "valueType": "request-based",
@@ -58,63 +106,175 @@ cmg90br3n002qihleffuljnth_inConstraints = [
     cmg90br3n002qihleffuljnth_RealtimeSensorEventInfos_out_constraints,
     cmg90br3n002qihleffuljnth_StoredSensorEventInfos_out_constraints,
     cmg90br3n002qihleffuljnth_SensorDeviceControl_out_constraints,
-
 ]
 
 # Authentication
-cmgasj98w009aihlezm0fe6cs_Authentication_out_constraints = {}
+cmg7edeo50013124xiux3gbkb_Authentication_out_constraints = {}
 
 # Capabilities
-cmgasj98w009aihlezm0fe6cs_Capabilities_out_constraints = {}
+cmg7edeo50013124xiux3gbkb_Capabilities_out_constraints = {}
 
 # DoorProfiles
-cmgasj98w009aihlezm0fe6cs_DoorProfiles_out_constraints = {}
+cmg7edeo50013124xiux3gbkb_DoorProfiles_out_constraints = {}
 
 # AccessUserInfos
-cmgasj98w009aihlezm0fe6cs_AccessUserInfos_out_constraints = {}
+cmg7edeo50013124xiux3gbkb_AccessUserInfos_out_constraints = {}
 
 # RealtimeVerifEventInfos
-cmgasj98w009aihlezm0fe6cs_RealtimeVerifEventInfos_out_constraints = {}
+cmg7edeo50013124xiux3gbkb_RealtimeVerifEventInfos_out_constraints = {
+  "doorList.eventTime": {
+    "valueType": "request-range",
+    "required": True,
+    "requestRange": {
+      "minField": "startTime",
+      "operator": "greater-equal"
+    },
+    "requestRangeMinEndpoint": "RealtimeVerifEventInfos"
+  }
+}
 
 # StoredVerifEventInfos
-cmgasj98w009aihlezm0fe6cs_StoredVerifEventInfos_out_constraints = {}
+cmg7edeo50013124xiux3gbkb_StoredVerifEventInfos_out_constraints = {
+  "doorList.eventTime": {
+    "valueType": "request-range",
+    "required": True,
+    "requestRange": {
+      "maxField": "endTime",
+      "minField": "startTime",
+      "operator": "between"
+    },
+    "requestRangeMinEndpoint": "/StoredVerifEventInfos",
+    "requestRangeMaxEndpoint": "/StoredVerifEventInfos"
+  },
+  "doorList.doorID": {
+    "valueType": "request-based",
+    "required": True,
+    "referenceEndpoint": "/StoredVerifEventInfos",
+    "referenceField": "doorID"
+  },
+  "doorList.bioAuthTypeList": {
+    "valueType": "random",
+    "required": True,
+    "randomType": "specified-values",
+    "arrayElementType": "array"
+  },
+  "doorList.otherAuthTypeList": {
+    "valueType": "random",
+    "required": True,
+    "randomType": "specified-values",
+    "arrayElementType": "array"
+  },
+  "doorList.eventName": {
+    "valueType": "request-based",
+    "required": True,
+    "referenceEndpoint": "/StoredVerifEventInfos",
+    "referenceField": "eventFilter"
+  }
+}
 
 # RealtimeDoorStatus
-cmgasj98w009aihlezm0fe6cs_RealtimeDoorStatus_out_constraints = {}
+cmg7edeo50013124xiux3gbkb_RealtimeDoorStatus_out_constraints = {}
 
 # DoorControl
-cmgasj98w009aihlezm0fe6cs_DoorControl_out_constraints = {}
+cmg7edeo50013124xiux3gbkb_DoorControl_out_constraints = {}
 
-# cmgasj98w009aihlezm0fe6cs 검증 리스트
-cmgasj98w009aihlezm0fe6cs_inConstraints = [
-    cmgasj98w009aihlezm0fe6cs_Authentication_out_constraints,
-    cmgasj98w009aihlezm0fe6cs_Capabilities_out_constraints,
-    cmgasj98w009aihlezm0fe6cs_DoorProfiles_out_constraints,
-    cmgasj98w009aihlezm0fe6cs_AccessUserInfos_out_constraints,
-    cmgasj98w009aihlezm0fe6cs_RealtimeVerifEventInfos_out_constraints,
-    cmgasj98w009aihlezm0fe6cs_StoredVerifEventInfos_out_constraints,
-    cmgasj98w009aihlezm0fe6cs_RealtimeDoorStatus_out_constraints,
-    cmgasj98w009aihlezm0fe6cs_DoorControl_out_constraints,
+# cmg7edeo50013124xiux3gbkb 검증 리스트
+cmg7edeo50013124xiux3gbkb_inConstraints = [
+    cmg7edeo50013124xiux3gbkb_Authentication_out_constraints,
+    cmg7edeo50013124xiux3gbkb_Capabilities_out_constraints,
+    cmg7edeo50013124xiux3gbkb_DoorProfiles_out_constraints,
+    cmg7edeo50013124xiux3gbkb_AccessUserInfos_out_constraints,
+    cmg7edeo50013124xiux3gbkb_RealtimeVerifEventInfos_out_constraints,
+    cmg7edeo50013124xiux3gbkb_StoredVerifEventInfos_out_constraints,
+    cmg7edeo50013124xiux3gbkb_RealtimeDoorStatus_out_constraints,
+    cmg7edeo50013124xiux3gbkb_DoorControl_out_constraints,
 ]
 
 # Authentication
-cmga0l5mh005dihlet5fcoj0o_Authentication_out_constraints = {}
+cmg7bve25000114cevhn5o3vr_Authentication_out_constraints = {}
 
 # Capabilities
-cmga0l5mh005dihlet5fcoj0o_Capabilities_out_constraints = {}
+cmg7bve25000114cevhn5o3vr_Capabilities_out_constraints = {}
 
 # CameraProfiles
-cmga0l5mh005dihlet5fcoj0o_CameraProfiles_out_constraints = {}
+cmg7bve25000114cevhn5o3vr_CameraProfiles_out_constraints = {
+  "camList.camID": {
+    "valueType": "preset",
+    "required": True
+  }
+}
 
 # StoredVideoInfos
-cmga0l5mh005dihlet5fcoj0o_StoredVideoInfos_out_constraints = {}
+cmg7bve25000114cevhn5o3vr_StoredVideoInfos_out_constraints = {
+  "camList": {
+    "valueType": "preset",
+    "required": True,
+    "arrayElementType": "object"
+  },
+  "camList.camID": {
+    "valueType": "request-based",
+    "required": True,
+    "referenceEndpoint": "/StoredVideoInfos",
+    "referenceField": "camID"
+  },
+  "camList.timeList.startTime": {
+    "valueType": "request-range",
+    "required": True,
+    "requestRange": {
+      "maxField": "endTime",
+      "minField": "startTime",
+      "operator": "between"
+    },
+    "requestRangeMinEndpoint": "/StoredVideoInfos",
+    "requestRangeMaxEndpoint": "/StoredVideoInfos"
+  },
+  "camList.timeList.endTime": {
+    "valueType": "request-range",
+    "required": False,
+    "requestRange": {
+      "maxField": "endTime",
+      "minField": "startTime",
+      "operator": "between"
+    },
+    "requestRangeMinEndpoint": "/StoredVideoInfos",
+    "requestRangeMaxEndpoint": "/StoredVideoInfos"
+  }
+}
 
 # StreamURLs
-cmga0l5mh005dihlet5fcoj0o_StreamURLs_out_constraints = {}
+cmg7bve25000114cevhn5o3vr_StreamURLs_out_constraints = {}
 
 # ReplayURL
-cmga0l5mh005dihlet5fcoj0o_ReplayURL_out_constraints = {}
-
+cmg7bve25000114cevhn5o3vr_ReplayURL_out_constraints = {
+  "camList.camID": {
+    "valueType": "request-based",
+    "required": True,
+    "referenceEndpoint": "/ReplayURL",
+    "referenceField": "camID"
+  },
+  "camList.startTime": {
+    "valueType": "request-range",
+    "required": True,
+    "requestRange": {
+      "maxField": "endTime",
+      "minField": "startTime",
+      "operator": "between"
+    },
+    "requestRangeMinEndpoint": "/ReplayURL",
+    "requestRangeMaxEndpoint": "/ReplayURL"
+  },
+  "camList.endTime": {
+    "valueType": "request-range",
+    "required": False,
+    "requestRange": {
+      "maxField": "endTime",
+      "minField": "startTime",
+      "operator": "between"
+    },
+    "requestRangeMinEndpoint": "/ReplayURL",
+    "requestRangeMaxEndpoint": "/ReplayURL"
+  }
+}
 
 # StoredVideoEventInfos
 cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_constraints = {
@@ -146,7 +306,9 @@ cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_constraints = {
       "maxField": "endTime",
       "minField": "startTime",
       "operator": "between"
-    }
+    },
+    "requestRangeMinEndpoint": "/StoredVideoEventInfos",
+    "requestRangeMaxEndpoint": "/StoredVideoEventInfos"
   },
   "camList.endTime": {
     "valueType": "request-range",
@@ -155,7 +317,9 @@ cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_constraints = {
       "maxField": "endTime",
       "minField": "startTime",
       "operator": "between"
-    }
+    },
+    "requestRangeMinEndpoint": "/StoredVideoEventInfos",
+    "requestRangeMaxEndpoint": "/StoredVideoEventInfos"
   }
 }
 
@@ -164,6 +328,7 @@ cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_constraints = {
   "camList.camID": {
     "valueType": "request-based",
     "required": True,
+    "referenceEndpoint": "/RealtimeVideoEventInfos",
     "referenceField": "camID"
   },
   "camList.eventUUID": {
@@ -175,6 +340,7 @@ cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_constraints = {
   "camList.eventName": {
     "valueType": "request-based",
     "required": True,
+    "referenceEndpoint": "/RealtimeVideoEventInfos",
     "referenceField": "eventFilter"
   },
   "camList.startTime": {
@@ -183,7 +349,8 @@ cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_constraints = {
     "requestRange": {
       "minField": "startTime",
       "operator": "greater-equal"
-    }
+    },
+    "requestRangeMinEndpoint": "/RealtimeVideoEventInfos"
   },
   "camList.endTime": {
     "valueType": "request-range",
@@ -191,19 +358,56 @@ cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_constraints = {
     "requestRange": {
       "minField": "startTime",
       "operator": "greater-equal"
-    }
+    },
+    "requestRangeMinEndpoint": "/RealtimeVideoEventInfos"
   }
 }
 
-
 # StoredObjectAnalyticsInfos
-cmga0l5mh005dihlet5fcoj0o_StoredObjectAnalyticsInfos_out_constraints = {}
+cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_out_constraints = {
+  "camList.camID": {
+    "valueType": "request-based",
+    "required": True,
+    "referenceEndpoint": "/StoredObjectAnalyticsInfos",
+    "referenceField": "camID"
+  },
+  "camList.analyticsTime": {
+    "valueType": "request-range",
+    "required": True,
+    "requestRange": {
+      "maxField": "endTime",
+      "minField": "startTime",
+      "operator": "between"
+    },
+    "requestRangeMinEndpoint": "/StoredObjectAnalyticsInfos",
+    "requestRangeMaxEndpoint": "/StoredObjectAnalyticsInfos"
+  },
+  "camList.anlayticsResultList.analyticsClass": {
+    "valueType": "request-based",
+    "required": True,
+    "referenceEndpoint": "/StoredObjectAnalyticsInfos",
+    "referenceField": "classFilter"
+  },
+  "camList.anlayticsResultList.analyticsAttribute": {
+    "valueType": "request-based",
+    "required": False,
+    "referenceEndpoint": "/StoredObjectAnalyticsInfos",
+    "referenceField": "attributeFilter",
+    "requestRange": {
+      "operator": "between"
+    }
+  },
+  "camList.anlayticsResultList.analyticsConfidence": {
+    "valueType": "preset",
+    "required": False
+  }
+}
 
 # PtzStatus
-cmga0l5mh005dihlet5fcoj0o_PtzStatus_out_constraints = {}
+cmg7bve25000114cevhn5o3vr_PtzStatus_out_constraints = {}
 
 # PtzContinuousMove
-cmga0l5mh005dihlet5fcoj0o_PtzContinuousMove_out_constraints = {}
+cmg7bve25000114cevhn5o3vr_PtzContinuousMove_out_constraints = {}
 
 # PtzStop
 cmg7bve25000114cevhn5o3vr_PtzStop_out_constraints = {}
@@ -222,6 +426,5 @@ cmg7bve25000114cevhn5o3vr_inConstraints = [
     cmg7bve25000114cevhn5o3vr_PtzStatus_out_constraints,
     cmg7bve25000114cevhn5o3vr_PtzContinuousMove_out_constraints,
     cmg7bve25000114cevhn5o3vr_PtzStop_out_constraints,
-
 ]
 

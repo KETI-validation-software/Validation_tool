@@ -19,7 +19,7 @@ class InfoWidget(QWidget):
     접속 후 화면 GUI.
     - 시험 기본/입력 정보, 인증 선택, 주소 탐색, OPT 로드 등
     """
-    startTestRequested = pyqtSignal(str)  # 모드를 전달
+    startTestRequested = pyqtSignal(str, str)  # (test_group_name, verification_type) 전달
 
     def __init__(self):
         super().__init__()
@@ -27,6 +27,7 @@ class InfoWidget(QWidget):
         self.scan_thread = None
         self.scan_worker = None
         self.current_mode = None
+        self.test_group_name = None  # testGroup.name 저장
         self.current_page = 0
         self.stacked_widget = QStackedWidget()
         self.initUI()
@@ -655,10 +656,17 @@ class InfoWidget(QWidget):
             if not self.current_mode:
                 QMessageBox.warning(self, "모드 미선택", "먼저 불러오기 버튼 중 하나를 눌러 모드를 선택해주세요.")
                 return
-            
+
+            # test_group_name 확인
+            if not self.test_group_name:
+                QMessageBox.warning(self, "데이터 없음", "시험 분야 정보가 없습니다. 시험 정보를 다시 불러와주세요.")
+                return
+
             # CONSTANTS.py 업데이트
             if self.form_validator.update_constants_py():
-                self.startTestRequested.emit(self.current_mode)
+                # test_group_name과 verification_type(current_mode)를 함께 전달
+                print(f"시험 시작: testGroup.name={self.test_group_name}, verificationType={self.current_mode}")
+                self.startTestRequested.emit(self.test_group_name, self.current_mode)
             else:
                 QMessageBox.warning(self, "저장 실패", "CONSTANTS.py 업데이트에 실패했습니다.")
 
@@ -921,6 +929,10 @@ class InfoWidget(QWidget):
             self.test_group_edit.setText(test_group.get("name", ""))
             self.test_range_edit.setText(test_group.get("testRange", ""))
 
+            # testGroup.name 저장 (시험 시작 시 사용)
+            self.test_group_name = test_group.get("name", "")
+            print(f"testGroup.name 저장: {self.test_group_name}")
+
             # testSpecs와 testPort 저장 (2페이지에서 사용)
             self.test_specs = test_group.get("testSpecs", [])
             self.test_port = test_data.get("schedule", {}).get("testPort", None)
@@ -942,7 +954,7 @@ class InfoWidget(QWidget):
     
     #임시버전
     def get_local_ip(self):
-        return "192.168.1.1, 127.0.0.1"
+        return "192.168.1.2, 127.0.0.1"
     
     def _get_local_ip_list(self):
         """get_local_ip() 결과를 안전하게 리스트로 변환"""
