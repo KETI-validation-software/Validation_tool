@@ -1,89 +1,224 @@
 # Authentication
-cmgatbdp000bqihlexmywusvq_Authentication_in_validation = {}
+cmg90br3n002qihleffuljnth_Authentication_in_validation = {}
 
 # Capabilities
-cmgatbdp000bqihlexmywusvq_Capabilities_in_validation = {}
+cmg90br3n002qihleffuljnth_Capabilities_in_validation = {}
 
 # SensorDeviceProfiles
-cmgatbdp000bqihlexmywusvq_SensorDeviceProfiles_in_validation = {}
+cmg90br3n002qihleffuljnth_SensorDeviceProfiles_in_validation = {}
 
 # RealtimeSensorData
-cmgatbdp000bqihlexmywusvq_RealtimeSensorData_in_validation = {}
+cmg90br3n002qihleffuljnth_RealtimeSensorData_in_validation = {
+  "sensorDeviceList.sensorDeviceID": {
+    "enabled": True,
+    "validationType": "response-field-list-match"
+  }
+}
 
 # RealtimeSensorEventInfos
-cmgatbdp000bqihlexmywusvq_RealtimeSensorEventInfos_in_validation = {}
+cmg90br3n002qihleffuljnth_RealtimeSensorEventInfos_in_validation = {
+  "sensorDeviceList.sensorDeviceID": {
+    "enabled": True,
+    "validationType": "response-field-list-match",
+    "referenceListField": "sensorDeviceID",
+    "referenceEndpoint": "/RealtimeSensorEventInfos"
+  },
+  "eventFilter": {
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueOperator": "equalsAny",
+    "validValueFieldName": "eventFilter",
+    "validValueMatchType": "validation-field",
+    "allowedValues": [
+      "화재",
+      "배회"
+    ]
+  }
+}
 
 # StoredSensorEventInfos
-cmgatbdp000bqihlexmywusvq_StoredSensorEventInfos_in_validation = {}
+cmg90br3n002qihleffuljnth_StoredSensorEventInfos_in_validation = {
+  "sensorDeviceList.sensorDeviceID": {
+    "enabled": True,
+    "validationType": "response-field-list-match",
+    "referenceListField": "sensorDeviceID",
+    "referenceEndpoint": "/StoredSensorEventInfos"
+  },
+  "eventFilter": {
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueOperator": "equalsAny",
+    "validValueFieldName": "eventFilter",
+    "validValueMatchType": "validation-field",
+    "allowedValues": [
+      "화재",
+      "배회"
+    ]
+  }
+}
 
 # SensorDeviceControl
-cmgatbdp000bqihlexmywusvq_SensorDeviceControl_in_validation = {}
+cmg90br3n002qihleffuljnth_SensorDeviceControl_in_validation = {
+  "sensorDeviceID": {
+    "enabled": True,
+    "validationType": "response-field-list-match",
+    "referenceListField": "sensorDeviceID",
+    "referenceEndpoint": "/SensorDeviceControl"
+  }
+}
 
-# cmgatbdp000bqihlexmywusvq 검증 리스트
-cmgatbdp000bqihlexmywusvq_inValidation = [
-    cmgatbdp000bqihlexmywusvq_Authentication_in_validation,
-    cmgatbdp000bqihlexmywusvq_Capabilities_in_validation,
-    cmgatbdp000bqihlexmywusvq_SensorDeviceProfiles_in_validation,
-    cmgatbdp000bqihlexmywusvq_RealtimeSensorData_in_validation,
-    cmgatbdp000bqihlexmywusvq_RealtimeSensorEventInfos_in_validation,
-    cmgatbdp000bqihlexmywusvq_StoredSensorEventInfos_in_validation,
-    cmgatbdp000bqihlexmywusvq_SensorDeviceControl_in_validation,
+# cmg90br3n002qihleffuljnth 검증 리스트
+cmg90br3n002qihleffuljnth_inValidation = [
+    cmg90br3n002qihleffuljnth_Authentication_in_validation,
+    cmg90br3n002qihleffuljnth_Capabilities_in_validation,
+    cmg90br3n002qihleffuljnth_SensorDeviceProfiles_in_validation,
+    cmg90br3n002qihleffuljnth_RealtimeSensorData_in_validation,
+    cmg90br3n002qihleffuljnth_RealtimeSensorEventInfos_in_validation,
+    cmg90br3n002qihleffuljnth_StoredSensorEventInfos_in_validation,
+    cmg90br3n002qihleffuljnth_SensorDeviceControl_in_validation,
 ]
 
 # Authentication
-cmgasj98w009aihlezm0fe6cs_Authentication_in_validation = {}
+cmg7edeo50013124xiux3gbkb_Authentication_in_validation = {}
 
 # Capabilities
-cmgasj98w009aihlezm0fe6cs_Capabilities_in_validation = {}
+cmg7edeo50013124xiux3gbkb_Capabilities_in_validation = {}
 
 # DoorProfiles
-cmgasj98w009aihlezm0fe6cs_DoorProfiles_in_validation = {}
+cmg7edeo50013124xiux3gbkb_DoorProfiles_in_validation = {}
 
 # AccessUserInfos
-cmgasj98w009aihlezm0fe6cs_AccessUserInfos_in_validation = {}
+cmg7edeo50013124xiux3gbkb_AccessUserInfos_in_validation = {}
 
 # RealtimeVerifEventInfos
-cmgasj98w009aihlezm0fe6cs_RealtimeVerifEventInfos_in_validation = {}
+cmg7edeo50013124xiux3gbkb_RealtimeVerifEventInfos_in_validation = {
+  "doorList.doorID": {
+    "enabled": True,
+    "validationType": "response-field-list-match",
+    "referenceListField": "doorID",
+    "referenceEndpoint": "RealtimeVerifEventInfos"
+  },
+  "transProtocol.transProtocolType": {
+    "enabled": True,
+    "allowedValues": [
+      "LongPolling"
+    ],
+    "validationType": "specified-value-match"
+  },
+  "eventFilter": {
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueOperator": "equalsAny",
+    "validValueFieldName": "eventFilter_bio",
+    "validValueMatchType": "validation-field",
+    "allowedValues": [
+      "성공",
+      "실패"
+    ]
+  }
+}
 
 # StoredVerifEventInfos
-cmgasj98w009aihlezm0fe6cs_StoredVerifEventInfos_in_validation = {}
+cmg7edeo50013124xiux3gbkb_StoredVerifEventInfos_in_validation = {
+  "doorList.doorID": {
+    "enabled": True,
+    "validationType": "response-field-list-match",
+    "referenceListField": "doorID",
+    "referenceEndpoint": "/StoredVerifEventInfos"
+  },
+  "eventFilter": {
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueOperator": "equalsAny",
+    "validValueFieldName": "eventFilter_bio",
+    "validValueMatchType": "validation-field",
+    "allowedValues": [
+      "성공",
+      "실패"
+    ]
+  }
+}
 
 # RealtimeDoorStatus
-cmgasj98w009aihlezm0fe6cs_RealtimeDoorStatus_in_validation = {}
+cmg7edeo50013124xiux3gbkb_RealtimeDoorStatus_in_validation = {
+  "doorList.doorID": {
+    "enabled": True,
+    "validationType": "response-field-list-match",
+    "referenceListField": "doorID",
+    "referenceEndpoint": "RealtimeDoorStatus"
+  },
+  "transProtocol.transProtocolType": {
+    "enabled": True,
+    "allowedValues": [
+      "LongPolling"
+    ],
+    "validationType": "specified-value-match"
+  }
+}
 
 # DoorControl
-cmgasj98w009aihlezm0fe6cs_DoorControl_in_validation = {}
+cmg7edeo50013124xiux3gbkb_DoorControl_in_validation = {
+  "doorID": {
+    "enabled": True,
+    "validationType": "response-field-list-match",
+    "referenceListField": "doorID",
+    "referenceEndpoint": "/DoorControl"
+  }
+}
 
-# cmgasj98w009aihlezm0fe6cs 검증 리스트
-cmgasj98w009aihlezm0fe6cs_inValidation = [
-    cmgasj98w009aihlezm0fe6cs_Authentication_in_validation,
-    cmgasj98w009aihlezm0fe6cs_Capabilities_in_validation,
-    cmgasj98w009aihlezm0fe6cs_DoorProfiles_in_validation,
-    cmgasj98w009aihlezm0fe6cs_AccessUserInfos_in_validation,
-    cmgasj98w009aihlezm0fe6cs_RealtimeVerifEventInfos_in_validation,
-    cmgasj98w009aihlezm0fe6cs_StoredVerifEventInfos_in_validation,
-    cmgasj98w009aihlezm0fe6cs_RealtimeDoorStatus_in_validation,
-    cmgasj98w009aihlezm0fe6cs_DoorControl_in_validation,
+# cmg7edeo50013124xiux3gbkb 검증 리스트
+cmg7edeo50013124xiux3gbkb_inValidation = [
+    cmg7edeo50013124xiux3gbkb_Authentication_in_validation,
+    cmg7edeo50013124xiux3gbkb_Capabilities_in_validation,
+    cmg7edeo50013124xiux3gbkb_DoorProfiles_in_validation,
+    cmg7edeo50013124xiux3gbkb_AccessUserInfos_in_validation,
+    cmg7edeo50013124xiux3gbkb_RealtimeVerifEventInfos_in_validation,
+    cmg7edeo50013124xiux3gbkb_StoredVerifEventInfos_in_validation,
+    cmg7edeo50013124xiux3gbkb_RealtimeDoorStatus_in_validation,
+    cmg7edeo50013124xiux3gbkb_DoorControl_in_validation,
 ]
 
 # Authentication
-cmga0l5mh005dihlet5fcoj0o_Authentication_in_validation = {}
+cmg7bve25000114cevhn5o3vr_Authentication_in_validation = {}
 
 # Capabilities
-cmga0l5mh005dihlet5fcoj0o_Capabilities_in_validation = {}
+cmg7bve25000114cevhn5o3vr_Capabilities_in_validation = {}
 
 # CameraProfiles
-cmga0l5mh005dihlet5fcoj0o_CameraProfiles_in_validation = {}
+cmg7bve25000114cevhn5o3vr_CameraProfiles_in_validation = {}
 
 # StoredVideoInfos
-cmga0l5mh005dihlet5fcoj0o_StoredVideoInfos_in_validation = {}
+cmg7bve25000114cevhn5o3vr_StoredVideoInfos_in_validation = {
+  "camList.camID": {
+    "score": 1,
+    "enabled": True,
+    "validationType": "response-field-list-match",
+    "referenceListField": "camID",
+    "referenceEndpoint": "/StoredVideoInfos"
+  }
+}
 
 # StreamURLs
-cmga0l5mh005dihlet5fcoj0o_StreamURLs_in_validation = {}
+cmg7bve25000114cevhn5o3vr_StreamURLs_in_validation = {
+  "camList.camID": {
+    "score": 1,
+    "enabled": True,
+    "validationType": "response-field-list-match",
+    "referenceListField": "camID",
+    "referenceEndpoint": "/StreamURLs"
+  }
+}
 
 # ReplayURL
-cmga0l5mh005dihlet5fcoj0o_ReplayURL_in_validation = {}
-
+cmg7bve25000114cevhn5o3vr_ReplayURL_in_validation = {
+  "camList.camID": {
+    "score": 1,
+    "enabled": True,
+    "validationType": "response-field-list-match",
+    "referenceListField": "camID",
+    "referenceEndpoint": "/ReplayURL"
+  }
+}
 
 # StoredVideoEventInfos
 cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_in_validation = {
@@ -91,7 +226,8 @@ cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_in_validation = {
     "score": 1,
     "enabled": True,
     "validationType": "response-field-list-match",
-    "referenceListField": "camID"
+    "referenceListField": "camID",
+    "referenceEndpoint": "/StoredVideoEventInfos"
   },
   "eventFilter": {
     "score": 1,
@@ -125,7 +261,8 @@ cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_validation = {
     "score": 1,
     "enabled": True,
     "validationType": "response-field-list-match",
-    "referenceListField": "camID"
+    "referenceListField": "camID",
+    "referenceEndpoint": "/RealtimeVideoEventInfos"
   },
   "eventFilter": {
     "score": 1,
@@ -155,18 +292,65 @@ cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_validation = {
   }
 }
 
-
 # StoredObjectAnalyticsInfos
-cmga0l5mh005dihlet5fcoj0o_StoredObjectAnalyticsInfos_in_validation = {}
+cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_in_validation = {
+  "camList.camID": {
+    "score": 1,
+    "enabled": True,
+    "validationType": "response-field-list-match",
+    "referenceListField": "camID",
+    "referenceEndpoint": "/StoredObjectAnalyticsInfos"
+  },
+  "filterList.classFilter": {
+    "score": 1,
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueOperator": "equalsAny",
+    "validValueFieldName": "classFilter",
+    "validValueMatchType": "validation-field",
+    "allowedValues": [
+      "사람",
+      "트럭",
+      "버스"
+    ]
+  },
+  "filterList.attributeFilter": {
+    "score": 1,
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueOperator": "equalsAny",
+    "validValueFieldName": "attributeFilter",
+    "validValueMatchType": "validation-field",
+    "allowedValues": [
+      "여자",
+      "안경"
+    ]
+  }
+}
 
 # PtzStatus
-cmga0l5mh005dihlet5fcoj0o_PtzStatus_in_validation = {}
+cmg7bve25000114cevhn5o3vr_PtzStatus_in_validation = {
+  "camID": {
+    "score": 1,
+    "enabled": True,
+    "validationType": "response-field-list-match",
+    "referenceListField": "camID",
+    "referenceEndpoint": "/PtzStatus"
+  }
+}
 
 # PtzContinuousMove
-cmga0l5mh005dihlet5fcoj0o_PtzContinuousMove_in_validation = {}
+cmg7bve25000114cevhn5o3vr_PtzContinuousMove_in_validation = {
+  "camID": {
+    "score": 1,
+    "enabled": True,
+    "validationType": "response-field-list-match",
+    "referenceListField": "camID",
+    "referenceEndpoint": "/PtzContinuousMove"
+  }
+}
 
 # PtzStop
-
 cmg7bve25000114cevhn5o3vr_PtzStop_in_validation = {}
 
 # cmg7bve25000114cevhn5o3vr 검증 리스트
@@ -183,6 +367,5 @@ cmg7bve25000114cevhn5o3vr_inValidation = [
     cmg7bve25000114cevhn5o3vr_PtzStatus_in_validation,
     cmg7bve25000114cevhn5o3vr_PtzContinuousMove_in_validation,
     cmg7bve25000114cevhn5o3vr_PtzStop_in_validation,
-
 ]
 

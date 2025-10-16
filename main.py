@@ -151,43 +151,45 @@ class MainWindow(QMainWindow):
             # 2페이지(시험 설정)로 이동 → 시험 설정 메뉴 활성화
             self.act_test_setup.setEnabled(True)
 
-    def _on_start_test_requested(self, mode):
+    def _on_start_test_requested(self, test_group_name, verification_type):
         """시험 시작 버튼 클릭 시 호출 - 시험 실행 메뉴 활성화 후 검증 앱 실행"""
         # 시험 실행 메뉴 활성화
         self.act_test_run.setEnabled(True)
-        print("시험 실행 메뉴 활성화")
+        print(f"시험 실행 메뉴 활성화: testGroup.name={test_group_name}, verificationType={verification_type}")
 
-        # 현재 모드 저장 (메뉴에서 시험 실행 클릭 시 사용)
-        self._current_test_mode = mode
+        # 현재 정보 저장 (메뉴에서 시험 실행 클릭 시 사용)
+        self._current_test_group_name = test_group_name
+        self._current_verification_type = verification_type
 
         # 검증 앱 실행
-        self._open_validation_app(mode)
+        self._open_validation_app(test_group_name, verification_type)
 
     def _run_test_from_menu(self):
         """메뉴에서 시험 실행 클릭 시 호출 - 메인 창을 검증 화면으로 전환"""
-        if hasattr(self, '_current_test_mode') and self._current_test_mode:
-            mode = self._current_test_mode
-            print(f"시험 실행 페이지로 이동: verificationType={mode}")
+        if hasattr(self, '_current_test_group_name') and self._current_test_group_name:
+            test_group_name = self._current_test_group_name
+            verification_type = getattr(self, '_current_verification_type', 'request')
+            print(f"시험 실행 페이지로 이동: testGroup.name={test_group_name}, verificationType={verification_type}")
 
-            # 메인 창을 해당 검증 화면으로 전환
-            if mode == "request":
-                # Request 모드 - 메인 창을 System 검증으로 전환
+            # testGroup.name에 따라 검증 화면 결정
+            if "물리보안" in test_group_name:
+                # 물리보안 - System 검증으로 전환
                 if getattr(self, "_system_widget", None) is None:
                     self._system_widget = system_app.MyApp(embedded=True)
-                    # Embedded 위젯도 시험 결과 시그널 연결
                     self._system_widget.showResultRequested.connect(self._on_show_result_requested)
                     self.stack.addWidget(self._system_widget)
                 self.stack.setCurrentWidget(self._system_widget)
-            elif mode == "response":
-                # Response 모드 - 메인 창을 Platform 검증으로 전환
+            elif "통합플랫폼" in test_group_name:
+                # 통합플랫폼 - Platform 검증으로 전환
                 if getattr(self, "_platform_widget", None) is None:
                     self._platform_widget = platform_app.MyApp(embedded=True)
-                    # Embedded 위젯도 시험 결과 시그널 연결
                     self._platform_widget.showResultRequested.connect(self._on_show_result_requested)
                     self.stack.addWidget(self._platform_widget)
                 self.stack.setCurrentWidget(self._platform_widget)
+            else:
+                QMessageBox.warning(self, "경고", f"알 수 없는 시험 분야: {test_group_name}\n'물리보안' 또는 '통합플랫폼'이어야 합니다.")
         else:
-            QMessageBox.warning(self, "경고", "시험 모드가 설정되지 않았습니다.\n시험 시작 버튼을 먼저 클릭해주세요.")
+            QMessageBox.warning(self, "경고", "시험 정보가 설정되지 않았습니다.\n시험 시작 버튼을 먼저 클릭해주세요.")
 
     def _toggle_fullscreen(self, checked: bool):
         """
@@ -215,49 +217,54 @@ class MainWindow(QMainWindow):
                 self.restoreGeometry(self._saved_geom)
             self.showNormal()
 
-    def _open_validation_app(self, mode):
-        """verificationType에 따라 다른 검증 앱 실행 (API 기반)"""
+    def _open_validation_app(self, test_group_name, verification_type):
+        """testGroup.name에 따라 다른 검증 앱 실행"""
         importlib.reload(CONSTANTS)  # CONSTANTS 모듈을 다시 로드하여 최신 설정 반영
 
-        print(f"검증 화면 실행: verificationType={mode}")
+        print(f"검증 화면 실행: testGroup.name={test_group_name}, verificationType={verification_type}")
 
-        if mode == "request":
-            # Request 모드 - Platform 검증 (새 창 with 래퍼)
+        # testGroup.name에 따라 어떤 검증 앱을 실행할지 결정
+        if "물리보안" in test_group_name:
+            # 물리보안: 메인 창=System, 새 창=Platform
+            print("→ 물리보안: 메인 창=System, 새 창=Platform")
+
+            # Platform 새 창 열기
             if hasattr(self, "platform_window") and self.platform_window is not None:
                 self.platform_window.close()
-            # 래퍼 윈도우 사용 (스택 전환 지원)
-            self.platform_window = platform_app.PlatformValidationWindow()
-            self.platform_window.initialize()  # MyApp 정의 후 초기화
+            self.platform_window = platform_app.MyApp(embedded=False)
+            self.platform_window.showResultRequested.connect(self._on_show_result_requested)
+
             self.platform_window.show()
 
-            # Main 화면은 System 검증으로 전환
+            # Main 화면: System 검증으로 전환
             if getattr(self, "_system_widget", None) is None:
                 self._system_widget = system_app.MyApp(embedded=True)
-                # Embedded 위젯도 시험 결과 시그널 연결
                 self._system_widget.showResultRequested.connect(self._on_show_result_requested)
                 self.stack.addWidget(self._system_widget)
             self.stack.setCurrentWidget(self._system_widget)
 
-        elif mode == "response":
-            # Response 모드 - System 검증 (새 창)
+        elif "통합플랫폼" in test_group_name:
+            # 통합플랫폼: 메인 창=Platform, 새 창=System
+            print("→ 통합플랫폼: 메인 창=Platform, 새 창=System")
+
+            # System 새 창 열기
             if hasattr(self, "system_window") and self.system_window is not None:
                 self.system_window.close()
             self.system_window = system_app.MyApp(embedded=False)
-            # 시험 결과 표시 시그널 연결
             self.system_window.showResultRequested.connect(self._on_show_result_requested)
             self.system_window.show()
 
-            # Main 화면은 Platform 검증으로 전환
+            # Main 화면: Platform 검증으로 전환
             if getattr(self, "_platform_widget", None) is None:
                 self._platform_widget = platform_app.MyApp(embedded=True)
-                # Embedded 위젯도 시험 결과 시그널 연결
                 self._platform_widget.showResultRequested.connect(self._on_show_result_requested)
                 self.stack.addWidget(self._platform_widget)
             self.stack.setCurrentWidget(self._platform_widget)
 
         else:
-            print(f"알 수 없는 verificationType: {mode}")
-            print(f"   (API에서 'request' 또는 'response'를 반환해야 합니다)")
+            print(f"알 수 없는 testGroup.name: {test_group_name}")
+            print(f"   ('물리보안' 또는 '통합플랫폼'이 포함되어야 합니다)")
+            QMessageBox.warning(self, "경고", f"알 수 없는 시험 분야: {test_group_name}\n'물리보안' 또는 '통합플랫폼'이 포함되어야 합니다.")
 
     def closeEvent(self, event):
         reply = QMessageBox.question(self, '종료', '프로그램을 종료하시겠습니까?',

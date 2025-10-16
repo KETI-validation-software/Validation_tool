@@ -1,7 +1,7 @@
 # response 모드
 
 # Authentication
-cmgatbdp000bqihlexmywusvq_Authentication_out_data = {
+cmg90br3n002qihleffuljnth_Authentication_out_data = {
     "code": "",
     "message": "",
     "userName": "",
@@ -10,7 +10,7 @@ cmgatbdp000bqihlexmywusvq_Authentication_out_data = {
 }
 
 # Capabilities
-cmgatbdp000bqihlexmywusvq_Capabilities_out_data = {
+cmg90br3n002qihleffuljnth_Capabilities_out_data = {
     "code": "",
     "message": "",
     "transportSupport": [
@@ -22,88 +22,90 @@ cmgatbdp000bqihlexmywusvq_Capabilities_out_data = {
 }
 
 # SensorDeviceProfiles
-cmgatbdp000bqihlexmywusvq_SensorDeviceProfiles_out_data = {
-    "code": "",
-    "message": "",
+cmg90br3n002qihleffuljnth_SensorDeviceProfiles_out_data = {
+    "code": "200",
+    "message": "성공",
     "sensorDeviceList": [
         {
-        "sensorDeviceID": "",
-        "sensorDeviceType": "",
-        "sensorDeviceName": "",
-        "sensorDeviceLoc": {
-        "lon": "",
-        "lat": "",
-        "alt": "",
-        "desc": ""
-    }
+        "sensorDeviceID": "iot0001",
+        "sensorDeviceType": "온도",
+        "sensorDeviceName": "홍채 센서",
+        "sensorDeviceLoc": [
+            {
+            "lon": "12.7127730",
+            "lat": "38.439801",
+            "alt": "32.131",
+            "desc": "3층복도"
+        }
+    ]
     }
 ]
 }
 
 # RealtimeSensorData
-cmgatbdp000bqihlexmywusvq_RealtimeSensorData_out_data = {
+cmg90br3n002qihleffuljnth_RealtimeSensorData_out_data = {
     "code": "",
     "message": "",
     "sensorDeviceList": [
         {
         "sensorDeviceID": "",
         "measureTime": 0,
-        "sensorDeviceType": "",
-        "sensorDeviceUnit": "",
-        "sensorDeviceValue": ""
+        "sensorDeviceType": "온도",
+        "sensorDeviceUnit": "섭씨",
+        "sensorDeviceValue": "100"
     }
 ]
 }
 
 # RealtimeSensorEventInfos
-cmgatbdp000bqihlexmywusvq_RealtimeSensorEventInfos_out_data = {
+cmg90br3n002qihleffuljnth_RealtimeSensorEventInfos_out_data = {
     "code": "",
     "message": "",
     "sensorDeviceList": [
         {
         "sensorDeviceID": "",
         "eventName": "",
-        "eventTime": 0,
-        "eventDesc": ""
+        "eventTime": "",
+        "eventDesc": "100도"
     }
 ]
 }
 
 # StoredSensorEventInfos
-cmgatbdp000bqihlexmywusvq_StoredSensorEventInfos_out_data = {
+cmg90br3n002qihleffuljnth_StoredSensorEventInfos_out_data = {
     "code": "",
     "message": "",
     "sensorDeviceList": [
         {
         "sensorDeviceID": "",
         "eventName": "",
-        "eventTime": 0,
-        "eventDesc": ""
+        "eventTime": "",
+        "eventDesc": "100도"
     }
 ]
 }
 
 # SensorDeviceControl
-cmgatbdp000bqihlexmywusvq_SensorDeviceControl_out_data = {
-    "code": "",
-    "message": "",
+cmg90br3n002qihleffuljnth_SensorDeviceControl_out_data = {
+    "code": "200",
+    "message": "성공",
     "sensorDeviceID": "",
     "sensorDeviceStatus": ""
 }
 
-# cmgatbdp000bqihlexmywusvq 데이터 리스트
-cmgatbdp000bqihlexmywusvq_inData = [
-    cmgatbdp000bqihlexmywusvq_Authentication_out_data,
-    cmgatbdp000bqihlexmywusvq_Capabilities_out_data,
-    cmgatbdp000bqihlexmywusvq_SensorDeviceProfiles_out_data,
-    cmgatbdp000bqihlexmywusvq_RealtimeSensorData_out_data,
-    cmgatbdp000bqihlexmywusvq_RealtimeSensorEventInfos_out_data,
-    cmgatbdp000bqihlexmywusvq_StoredSensorEventInfos_out_data,
-    cmgatbdp000bqihlexmywusvq_SensorDeviceControl_out_data,
+# cmg90br3n002qihleffuljnth 데이터 리스트
+cmg90br3n002qihleffuljnth_inData = [
+    cmg90br3n002qihleffuljnth_Authentication_out_data,
+    cmg90br3n002qihleffuljnth_Capabilities_out_data,
+    cmg90br3n002qihleffuljnth_SensorDeviceProfiles_out_data,
+    cmg90br3n002qihleffuljnth_RealtimeSensorData_out_data,
+    cmg90br3n002qihleffuljnth_RealtimeSensorEventInfos_out_data,
+    cmg90br3n002qihleffuljnth_StoredSensorEventInfos_out_data,
+    cmg90br3n002qihleffuljnth_SensorDeviceControl_out_data,
 ]
 
-# cmgatbdp000bqihlexmywusvq API endpoint
-cmgatbdp000bqihlexmywusvq_messages = [
+# cmg90br3n002qihleffuljnth API endpoint
+cmg90br3n002qihleffuljnth_messages = [
     "Authentication",
     "Capabilities",
     "SensorDeviceProfiles",
@@ -114,54 +116,53 @@ cmgatbdp000bqihlexmywusvq_messages = [
 ]
 
 # Authentication
-cmgasj98w009aihlezm0fe6cs_Authentication_out_data = {
-    "code": "",
-    "message": "",
-    "userName": "",
-    "userAff": "",
-    "accessToken": ""
+cmg7edeo50013124xiux3gbkb_Authentication_out_data = {
+    "code": "200",
+    "message": "성공",
+    "userName": "관리자",
+    "userAff": "오산시청",
+    "accessToken": "abcd1234"
 }
 
 # Capabilities
-cmgasj98w009aihlezm0fe6cs_Capabilities_out_data = {
+cmg7edeo50013124xiux3gbkb_Capabilities_out_data = {
     "code": "",
     "message": "",
     "transportSupport": [
         {
-        "transProtocolType": "",
-        "transProtocolDesc": ""
+        "transProtocolType": "LongPolling"
     }
 ]
 }
 
 # DoorProfiles
-cmgasj98w009aihlezm0fe6cs_DoorProfiles_out_data = {
+cmg7edeo50013124xiux3gbkb_DoorProfiles_out_data = {
     "code": "",
     "message": "",
     "doorList": [
         {
-        "doorID": "",
+        "doorID": "door0001",
         "doorName": "",
         "doorRelayStatus": "",
         "doorSensor": "",
         "doorLoc": {
-        "lon": "",
-        "lat": "",
-        "alt": "",
-        "desc": ""
+        "lon": "127.127730",
+        "lat": "38.439801",
+        "alt": "32.131",
+        "desc": "3층복도"
     },
         "bioDeviceList": [
             {
             "bioDeviceID": "",
             "bioDeviceName": "",
-            "bioDeviceAuthTypeList": []
-        }
-    ],
-        "otherDeviceList": [
-            {
-            "otherDeviceID": "",
-            "otherDeviceName": "",
-            "otherDeviceAuthTypeList": []
+            "bioDeviceAuthTypeList": [],
+            "otherDeviceList": [
+                {
+                "otherDeviceID": "other0001",
+                "otherDeviceName": "출입문카드 인식기기",
+                "otherDeviceAuthTypeList": []
+            }
+        ]
         }
     ]
     }
@@ -169,20 +170,20 @@ cmgasj98w009aihlezm0fe6cs_DoorProfiles_out_data = {
 }
 
 # AccessUserInfos
-cmgasj98w009aihlezm0fe6cs_AccessUserInfos_out_data = {
-    "code": "",
-    "message": "",
+cmg7edeo50013124xiux3gbkb_AccessUserInfos_out_data = {
+    "code": "200",
+    "message": "성공",
     "userList": [
         {
-        "userID": "",
-        "userName": "",
-        "userDesc": "",
+        "userID": "user001",
+        "userName": "홍길동",
+        "userDesc": "일반사용자",
         "doorList": [
             {
-            "doorID": "",
+            "doorID": "door0001",
             "timePeriod": {
-            "startTime": 0,
-            "endTime": 0
+            "startTime": 1759371960000,
+            "endTime": 1759371960000
         }
         }
     ]
@@ -191,73 +192,72 @@ cmgasj98w009aihlezm0fe6cs_AccessUserInfos_out_data = {
 }
 
 # RealtimeVerifEventInfos
-cmgasj98w009aihlezm0fe6cs_RealtimeVerifEventInfos_out_data = {
-    "code": "",
-    "message": "",
+cmg7edeo50013124xiux3gbkb_RealtimeVerifEventInfos_out_data = {
+    "code": "200",
+    "message": "성공",
     "doorList": [
         {
         "eventTime": 0,
-        "doorID": "",
-        "userID": "",
+        "doorID": "door001",
+        "userID": "user001",
         "bioAuthTypeList": [],
         "otherAuthTypeList": [],
-        "eventName": "",
-        "eventDesc": ""
+        "eventName": "성공",
+        "eventDesc": "36.5"
     }
 ]
 }
 
 # StoredVerifEventInfos
-cmgasj98w009aihlezm0fe6cs_StoredVerifEventInfos_out_data = {
+cmg7edeo50013124xiux3gbkb_StoredVerifEventInfos_out_data = {
     "code": "",
     "message": "",
     "doorList": [
         {
-        "eventTime": 0,
+        "eventTime": "",
         "doorID": "",
         "userID": "",
         "bioAuthTypeList": [],
         "otherAuthTypeList": [],
         "eventName": "",
-        "eventDesc": ""
+        "eventDesc": "3.65"
     }
 ]
 }
 
 # RealtimeDoorStatus
-cmgasj98w009aihlezm0fe6cs_RealtimeDoorStatus_out_data = {
+cmg7edeo50013124xiux3gbkb_RealtimeDoorStatus_out_data = {
     "code": "",
     "message": "",
     "doorList": [
         {
-        "doorID": "",
-        "doorName": "",
-        "doorRelaySensor": "",
-        "doorSensor": ""
+        "doorName": "A 건물 출입문",
+        "doorRelaySensor": "일반",
+        "doorSensor": "0"
     }
 ]
 }
 
 # DoorControl
-cmgasj98w009aihlezm0fe6cs_DoorControl_out_data = {
-    "code": "",
-    "message": ""
+cmg7edeo50013124xiux3gbkb_DoorControl_out_data = {
+    "code": "200",
+    "message": "성공"
 }
 
-# cmgasj98w009aihlezm0fe6cs 데이터 리스트
-cmgasj98w009aihlezm0fe6cs_inData = [
-    cmgasj98w009aihlezm0fe6cs_Authentication_out_data,
-    cmgasj98w009aihlezm0fe6cs_Capabilities_out_data,
-    cmgasj98w009aihlezm0fe6cs_DoorProfiles_out_data,
-    cmgasj98w009aihlezm0fe6cs_AccessUserInfos_out_data,
-    cmgasj98w009aihlezm0fe6cs_RealtimeVerifEventInfos_out_data,
-    cmgasj98w009aihlezm0fe6cs_StoredVerifEventInfos_out_data,
-    cmgasj98w009aihlezm0fe6cs_RealtimeDoorStatus_out_data,
-    cmgasj98w009aihlezm0fe6cs_DoorControl_out_data,
+# cmg7edeo50013124xiux3gbkb 데이터 리스트
+cmg7edeo50013124xiux3gbkb_inData = [
+    cmg7edeo50013124xiux3gbkb_Authentication_out_data,
+    cmg7edeo50013124xiux3gbkb_Capabilities_out_data,
+    cmg7edeo50013124xiux3gbkb_DoorProfiles_out_data,
+    cmg7edeo50013124xiux3gbkb_AccessUserInfos_out_data,
+    cmg7edeo50013124xiux3gbkb_RealtimeVerifEventInfos_out_data,
+    cmg7edeo50013124xiux3gbkb_StoredVerifEventInfos_out_data,
+    cmg7edeo50013124xiux3gbkb_RealtimeDoorStatus_out_data,
+    cmg7edeo50013124xiux3gbkb_DoorControl_out_data,
 ]
 
-# cmgasj98w009aihlezm0fe6cs API endpoint
-cmgasj98w009aihlezm0fe6cs_messages = [
+# cmg7edeo50013124xiux3gbkb API endpoint
+cmg7edeo50013124xiux3gbkb_messages = [
     "Authentication",
     "Capabilities",
     "DoorProfiles",
@@ -269,57 +269,56 @@ cmgasj98w009aihlezm0fe6cs_messages = [
 ]
 
 # Authentication
-cmga0l5mh005dihlet5fcoj0o_Authentication_out_data = {
-    "code": "",
-    "message": "",
-    "userName": "",
-    "userAff": "",
-    "accessToken": ""
+cmg7bve25000114cevhn5o3vr_Authentication_out_data = {
+    "code": "200",
+    "message": "성공",
+    "userName": "관리자",
+    "userAff": "오산시청",
+    "accessToken": "abcde1234"
 }
 
 # Capabilities
-cmga0l5mh005dihlet5fcoj0o_Capabilities_out_data = {
-    "code": "",
-    "message": "",
+cmg7bve25000114cevhn5o3vr_Capabilities_out_data = {
+    "code": "200",
+    "message": "성공",
     "streamingSupport": [
         {
-        "streamProtocolType": "",
-        "streamProtocolDesc": ""
+        "streamProtocolType": "RTSP",
+        "streamProtocolDesc": "Unicast"
     }
 ],
     "transportSupport": [
         {
-        "transProtocolType": "",
+        "transProtocolType": "LongPolling",
         "transProtocolDesc": ""
     }
 ]
 }
 
 # CameraProfiles
-cmga0l5mh005dihlet5fcoj0o_CameraProfiles_out_data = {
-    "code": "",
-    "message": "",
+cmg7bve25000114cevhn5o3vr_CameraProfiles_out_data = {
+    "code": "200",
+    "message": "성공",
     "camList": [
         {
-        "camID": "",
-        "camName": "",
+        "camID": "cam0002",
+        "camName": "카메라2",
         "camLoc": {
-        "lon": "",
-        "lat": "",
-        "alt": "",
-        "desc": ""
+        "lon": "127.2887",
+        "lat": "37.33671",
+        "desc": "2층복도"
     },
         "camConfig": {
-        "camType": ""
+        "camType": "PTZ"
     }
     }
 ]
 }
 
 # StoredVideoInfos
-cmga0l5mh005dihlet5fcoj0o_StoredVideoInfos_out_data = {
-    "code": "",
-    "message": "",
+cmg7bve25000114cevhn5o3vr_StoredVideoInfos_out_data = {
+    "code": "200",
+    "message": "성공",
     "camList": [
         {
         "camID": "",
@@ -330,32 +329,31 @@ cmga0l5mh005dihlet5fcoj0o_StoredVideoInfos_out_data = {
         }
     ]
     }
-],
-    "camID2": ""
+]
 }
 
 # StreamURLs
-cmga0l5mh005dihlet5fcoj0o_StreamURLs_out_data = {
+cmg7bve25000114cevhn5o3vr_StreamURLs_out_data = {
     "code": "",
     "message": "",
     "camList": [
         {
-        "camID": "",
-        "accessID": "",
-        "accessPW": "",
-        "camURL": "",
+        "camID": "cam0001",
+        "accessID": "conn0001",
+        "accessPW": "1234",
+        "camURL": "rtsp://192.168. 0.5:8000",
         "videoInfo": {
-        "resolution": "",
-        "fps": 0,
-        "videoCodec": "",
-        "audioCodec": ""
+        "resolution": "1920x1080",
+        "fps": 30,
+        "videoCodec": "H.264",
+        "audioCodec": "G.711"
     }
     }
 ]
 }
 
 # ReplayURL
-cmga0l5mh005dihlet5fcoj0o_ReplayURL_out_data = {
+cmg7bve25000114cevhn5o3vr_ReplayURL_out_data = {
     "code": "",
     "message": "",
     "camList": [
@@ -363,19 +361,18 @@ cmga0l5mh005dihlet5fcoj0o_ReplayURL_out_data = {
         "camID": "",
         "accessID": "",
         "accessPW": "",
-        "startTime": 0,
-        "endTime": 0,
-        "camURL": "",
+        "startTime": "",
+        "endTime": "",
+        "camURL": "rtsp://192.168. 0.5:8000",
         "videoInfo": {
-        "resolution": "",
-        "fps": 0,
-        "videoCodec": "",
-        "audioCodec": ""
+        "resolution": "1920x1080",
+        "fps": 30,
+        "videoCodec": "H.264",
+        "audioCodec": "G.711"
     }
     }
 ]
 }
-
 
 # StoredVideoEventInfos
 cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_data = {
@@ -395,77 +392,74 @@ cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_data = {
 
 # RealtimeVideoEventInfos
 cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_data = {
-
     "code": "",
     "message": "",
     "camList": [
         {
         "camID": "",
-        "eventUUID": "",
+        "eventUUID": [],
         "eventName": "",
         "startTime": "",
         "endTime": "",
         "eventDesc": "dddddeeeeeAAFEDFiikjf"
-
     }
 ]
 }
 
 # StoredObjectAnalyticsInfos
-cmga0l5mh005dihlet5fcoj0o_StoredObjectAnalyticsInfos_out_data = {
+cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_out_data = {
     "code": "",
     "message": "",
     "camList": [
         {
         "camID": "",
-        "analyticsTime": 0,
+        "analyticsTime": "",
         "anlayticsResultList": [
             {
-            "anayticsID": "",
+            "anayticsID": "object001",
             "analyticsClass": "",
             "analyticsAttribute": [],
-            "analyticsConfidence": 0,
-            "analyticsBoundingBox": {
-            "left": 0,
-            "top": 0,
-            "right": 0,
-            "bottom": 0
-        },
-            "analyticsDesc": ""
+            "analyticsConfidence": 0.8
         }
-    ]
+    ],
+        "analyticsBoundingBox": {
+        "left": 0.2,
+        "top": 0.1,
+        "right": 0.3,
+        "bottom": 0.4
+    },
+        "analyticsDesc": "aaabbb"
     }
 ]
 }
 
 # PtzStatus
-cmga0l5mh005dihlet5fcoj0o_PtzStatus_out_data = {
+cmg7bve25000114cevhn5o3vr_PtzStatus_out_data = {
     "code": "",
     "message": "",
     "position": {
-    "pan": 0,
-    "tilt": 0,
-    "zoom": 0
+    "pan": 10,
+    "tilt": 20,
+    "zoom": 30
 },
     "moveStatus": {
-    "pan": "",
-    "tilt": "",
-    "zoom": ""
+    "pan": "정지",
+    "tilt": "이동중",
+    "zoom": "정지"
 }
 }
 
 # PtzContinuousMove
-cmga0l5mh005dihlet5fcoj0o_PtzContinuousMove_out_data = {
-    "code": "",
-    "message": ""
+cmg7bve25000114cevhn5o3vr_PtzContinuousMove_out_data = {
+    "code": "200",
+    "message": "성공"
 }
 
 # PtzStop
-cmga0l5mh005dihlet5fcoj0o_PtzStop_out_data = {
-    "code": "",
-    "message": ""
+cmg7bve25000114cevhn5o3vr_PtzStop_out_data = {
+    "code": "200",
+    "message": "성공"
 }
-
 
 # cmg7bve25000114cevhn5o3vr 데이터 리스트
 cmg7bve25000114cevhn5o3vr_inData = [
@@ -481,11 +475,10 @@ cmg7bve25000114cevhn5o3vr_inData = [
     cmg7bve25000114cevhn5o3vr_PtzStatus_out_data,
     cmg7bve25000114cevhn5o3vr_PtzContinuousMove_out_data,
     cmg7bve25000114cevhn5o3vr_PtzStop_out_data,
-
 ]
 
-# cmga0l5mh005dihlet5fcoj0o API endpoint
-cmga0l5mh005dihlet5fcoj0o_messages = [
+# cmg7bve25000114cevhn5o3vr API endpoint
+cmg7bve25000114cevhn5o3vr_messages = [
     "Authentication",
     "Capabilities",
     "CameraProfiles",
