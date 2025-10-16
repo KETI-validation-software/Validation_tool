@@ -115,9 +115,9 @@ class FormValidator:
                 schema_content += "]\n\n"
 
                 if file_type == "request":
-                    data_list_name = f"{spec_id}_outData"
-                else:
                     data_list_name = f"{spec_id}_inData"
+                else:
+                    data_list_name = f"{spec_id}_outData"
 
                 data_content += f"# {spec_id} 데이터 리스트\n"
                 data_content += f"{data_list_name} = [\n"
