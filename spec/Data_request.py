@@ -141,7 +141,7 @@ cmgasj98w009aihlezm0fe6cs_RealtimeDoorStatus_in_data = {
 ],
     "duration": 200,
     "transProtocol": {
-    "transProtocolType": ""LongPolling"",
+    "transProtocolType": "LongPolling",
     "transProtocolDesc": ""
 },
     "startTime": 1759493760000
