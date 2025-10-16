@@ -16,7 +16,7 @@ test_target = "통합시스템"
 test_range = "ALL_FIELDS"
 auth_type = "Digest Auth"
 auth_info = "admin,1234"
-admin_code = "123456789"
+admin_code = "1234"
 url = "https://127.0.0.1:8080"
 
 
