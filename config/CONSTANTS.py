@@ -8,8 +8,8 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소 (플랫폼과 시스템이 같은 PC에서 실행되더야 함, 변경하면 평가 작동 안됌ㅜ)
 #test-info -> (주의) auth_info의 id, pw admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음!!!!!!!
-company_name = "통합플랫폼기업"
-product_name = "통합플랫폼테스트"
+company_name = "물리보안시스템테스트"
+product_name = "물리보안시스템"
 version = "v1.0"
 test_category = "본시험"
 test_target = "통합시스템"
@@ -17,14 +17,14 @@ test_range = "ALL_FIELDS"
 auth_type = "Digest Auth"
 auth_info = "admin,1234"
 admin_code = "123456789"
-url = "https://127.0.0.1:8080"
+url = "https://192.168.1.1:8080"
 
 
+specs = [["cmgatbdp000bqihlexmywusvq_outSchema","cmgatbdp000bqihlexmywusvq_outData","cmgatbdp000bqihlexmywusvq_messages",""],
+         ["cmgasj98w009aihlezm0fe6cs_outSchema","cmgasj98w009aihlezm0fe6cs_outData","cmgasj98w009aihlezm0fe6cs_messages",""],
+         ["cmga0l5mh005dihlet5fcoj0o_outSchema","cmga0l5mh005dihlet5fcoj0o_outData","cmga0l5mh005dihlet5fcoj0o_messages",""]]
 
 
-specs = [["cmg90br3n002qihleffuljnth_inSchema","cmg90br3n002qihleffuljnth_outData","cmg90br3n002qihleffuljnth_messages",""],
-         ["cmg7edeo50013124xiux3gbkb_inSchema","cmg7edeo50013124xiux3gbkb_outData","cmg7edeo50013124xiux3gbkb_messages",""],
-         ["cmg7bve25000114cevhn5o3vr_inSchema","cmg7bve25000114cevhn5o3vr_outData","cmg7bve25000114cevhn5o3vr_messages",""]]
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황 
 flag_opt = False
@@ -59,16 +59,21 @@ num_retries = [1, 2, 3, 2, 1, 2, 3, 2, 1]
 
 # specification.id별 설정
 SPEC_CONFIG = {
-    "cmg90br3n002qihleffuljnth": {
-        "trans_protocol": ['basic', 'basic', 'basic', 'LongPolling', 'LongPolling', 'basic', 'basic'],
+
+    "cmgatbdp000bqihlexmywusvq": {
+        "test_name": "보안용 센서 시스템",
+        "specs": ['cmgatbdp000bqihlexmywusvq_inSchema', 'cmgatbdp000bqihlexmywusvq_outData', 'cmgatbdp000bqihlexmywusvq_messages'],
+        "trans_protocol": ['basic', 'LongPolling', 'basic', 'LongPolling', 'LongPolling', 'basic', 'basic'],
         "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000],
-        "num_retries": [1, 3, 2, 3, 3, 2, 1]
+        "num_retries": [2, 2, 2, 2, 2, 2, 2]
     }
 ,
-    "cmg7edeo50013124xiux3gbkb": {
-        "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'LongPolling', 'basic', 'LongPolling', 'basic'],
+    "cmgasj98w009aihlezm0fe6cs": {
+        "test_name": "바이오 인식 기반 출입통제 시스템",
+        "specs": ['cmgasj98w009aihlezm0fe6cs_inSchema', 'cmgasj98w009aihlezm0fe6cs_outData', 'cmgasj98w009aihlezm0fe6cs_messages'],
+        "trans_protocol": ['basic', 'LongPolling', 'basic', 'basic', 'LongPolling', 'basic', 'LongPolling', 'basic'],
         "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
-        "num_retries": [2, 1, 2, 1, 3, 1, 1, 1]
+        "num_retries": [2, 2, 1, 2, 2, 2, 2, 1]
     }
 ,
     "cmg7bve25000114cevhn5o3vr": {
