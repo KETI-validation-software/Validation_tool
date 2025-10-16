@@ -10,68 +10,68 @@ cmgatbdp000bqihlexmywusvq_SensorDeviceProfiles_out_validation = {}
 # RealtimeSensorData
 cmgatbdp000bqihlexmywusvq_RealtimeSensorData_out_validation = {
   "sensorDeviceList.sensorDeviceID": {
+    "score": 1,
     "enabled": True,
     "validationType": "request-field-list-match",
-    "referenceListField": "sensorDeviceID",
-    "referenceEndpoint": "/RealtimeSensorData"
+    "referenceListField": "sensorDeviceID"
   },
   "sensorDeviceList.measureTime": {
+    "score": 1,
     "enabled": True,
     "validationType": "request-field-range-match",
     "referenceFieldMin": "startTime",
     "referenceRangeOperator": "greater-equal",
-    "referenceEndpointMin": "/RealtimeSensorData",
-    "referenceEndpoint": "/RealtimeSensorData"
+    "referenceEndpointMin": "/RealtimeSensorData"
   }
 }
 
 # RealtimeSensorEventInfos
 cmgatbdp000bqihlexmywusvq_RealtimeSensorEventInfos_out_validation = {
   "sensorDeviceList.sensorDeviceID": {
+    "score": 1,
     "enabled": True,
     "validationType": "request-field-list-match",
-    "referenceListField": "sensorDeviceID",
-    "referenceEndpoint": "/RealtimeSensorEventInfos"
+    "referenceListField": "sensorDeviceID"
   },
   "sensorDeviceList.eventName": {
+    "score": 1,
     "enabled": True,
     "referenceField": "eventFilter",
     "validationType": "request-field-match",
     "referenceEndpoint": "/RealtimeSensorEventInfos"
   },
   "sensorDeviceList.eventTime": {
+    "score": 1,
     "enabled": True,
     "validationType": "request-field-range-match",
     "referenceFieldMin": "startTime",
     "referenceRangeOperator": "greater-equal",
-    "referenceEndpointMin": "/RealtimeSensorEventInfos",
-    "referenceEndpoint": "/RealtimeSensorEventInfos"
+    "referenceEndpointMin": "/RealtimeSensorEventInfos"
   }
 }
 
 # StoredSensorEventInfos
 cmgatbdp000bqihlexmywusvq_StoredSensorEventInfos_out_validation = {
   "sensorDeviceList.sensorDeviceID": {
+    "score": 1,
     "enabled": True,
     "validationType": "request-field-list-match",
-    "referenceListField": "sensorDeviceID",
-    "referenceEndpoint": "/StoredSensorEventInfos"
+    "referenceListField": "sensorDeviceID"
   },
   "sensorDeviceList.eventName": {
+    "score": 1,
     "enabled": True,
     "referenceField": "eventFilter",
     "validationType": "request-field-match",
     "referenceEndpoint": "/StoredSensorEventInfos"
   },
   "sensorDeviceList.eventTime": {
+    "score": 1,
     "enabled": True,
     "validationType": "request-field-range-match",
     "referenceFieldMax": "endTime",
     "referenceFieldMin": "startTime",
-    "referenceRangeOperator": "between",
-    "referenceEndpointMin": "/StoredSensorEventInfos",
-    "referenceEndpoint": "/StoredSensorEventInfos",
-    "referenceEndpointMax": "/StoredSensorEventInfos"
+    "referenceRangeOperator": "between"
   }
 }
 
@@ -128,8 +128,7 @@ cmgasj98w009aihlezm0fe6cs_RealtimeVerifEventInfos_out_validation = {
     "validationType": "request-field-range-match",
     "referenceFieldMin": "startTime",
     "referenceRangeOperator": "greater-equal",
-    "referenceEndpointMin": "/RealtimeVerifEventInfos",
-    "referenceEndpoint": "/RealtimeVerifEventInfos"
+    "referenceEndpointMin": "/RealtimeVerifEventInfos"
   },
   "doorList.doorID": {
     "enabled": True,
@@ -154,7 +153,6 @@ cmgasj98w009aihlezm0fe6cs_StoredVerifEventInfos_out_validation = {
     "referenceFieldMin": "startTime",
     "referenceRangeOperator": "between",
     "referenceEndpointMin": "/StoredVerifEventInfos",
-    "referenceEndpoint": "/StoredVerifEventInfos",
     "referenceEndpointMax": "/StoredVerifEventInfos"
   },
   "doorList.doorID": {
@@ -222,7 +220,6 @@ cmga0l5mh005dihlet5fcoj0o_StoredVideoInfos_out_validation = {
     "referenceFieldMin": "startTime",
     "referenceRangeOperator": "between",
     "referenceEndpointMin": "/StoredVideoInfos",
-    "referenceEndpoint": "/StoredVideoInfos",
     "referenceEndpointMax": "/StoredVideoInfos"
   },
   "camList.timeList.endTime": {
@@ -233,7 +230,6 @@ cmga0l5mh005dihlet5fcoj0o_StoredVideoInfos_out_validation = {
     "referenceFieldMin": "startTime",
     "referenceRangeOperator": "between",
     "referenceEndpointMin": "/StoredVideoInfos",
-    "referenceEndpoint": "/StoredVideoInfos",
     "referenceEndpointMax": "/StoredVideoInfos"
   },
   "camID2": {
@@ -278,7 +274,6 @@ cmga0l5mh005dihlet5fcoj0o_ReplayURL_out_validation = {
     "referenceFieldMin": "startTime",
     "referenceRangeOperator": "between",
     "referenceEndpointMin": "/ReplayURL",
-    "referenceEndpoint": "/ReplayURL",
     "referenceEndpointMax": "/ReplayURL"
   },
   "camList.endTime": {
@@ -289,7 +284,6 @@ cmga0l5mh005dihlet5fcoj0o_ReplayURL_out_validation = {
     "referenceFieldMin": "startTime",
     "referenceRangeOperator": "between",
     "referenceEndpointMin": "/ReplayURL",
-    "referenceEndpoint": "/ReplayURL",
     "referenceEndpointMax": "/ReplayURL"
   },
   "camList.camURL": {
@@ -327,7 +321,6 @@ cmga0l5mh005dihlet5fcoj0o_StoredVideoEventInfos_out_validation = {
     "referenceFieldMin": "startTime",
     "referenceRangeOperator": "between",
     "referenceEndpointMin": "/StoredVideoEventInfos",
-    "referenceEndpoint": "/StoredVideoEventInfos",
     "referenceEndpointMax": "/StoredVideoEventInfos"
   },
   "camList.endTime": {
@@ -338,7 +331,6 @@ cmga0l5mh005dihlet5fcoj0o_StoredVideoEventInfos_out_validation = {
     "referenceFieldMin": "startTime",
     "referenceRangeOperator": "between",
     "referenceEndpointMin": "/StoredVideoEventInfos",
-    "referenceEndpoint": "/StoredVideoEventInfos",
     "referenceEndpointMax": "/StoredVideoEventInfos"
   }
 }
@@ -360,7 +352,6 @@ cmga0l5mh005dihlet5fcoj0o_StoredObjectAnalyticsInfos_out_validation = {
     "referenceFieldMin": "startTime",
     "referenceRangeOperator": "between",
     "referenceEndpointMin": "/StoredObjectAnalyticsInfos",
-    "referenceEndpoint": "/StoredObjectAnalyticsInfos",
     "referenceEndpointMax": "/StoredObjectAnalyticsInfos"
   },
   "camList.anlayticsResultList.analyticsClass": {

@@ -243,15 +243,17 @@ class APISelectionDialog(QDialog):
         return [idx for idx, checkbox in enumerate(self.checkboxes) if checkbox.isChecked()]
 
 
-# 시험 결과 페이지 다이얼로그
-class ResultPageDialog(QDialog):
-    def __init__(self, parent):
+# 시험 결과 페이지 위젯
+class ResultPageWidget(QWidget):
+    # 뒤로가기 시그널 추가
+    backRequested = pyqtSignal()
+    
+    def __init__(self, parent, embedded=False):
         super().__init__()
         self.parent = parent
+        self.embedded = embedded  # embedded 모드 여부 저장
         self.setWindowTitle('시스템 연동 시험 결과')
-        self.setGeometry(100, 100, 1100, 600)
-        self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
-        self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
+        self.resize(1100, 600)
 
         self.initUI()
 
@@ -341,35 +343,68 @@ class ResultPageDialog(QDialog):
 
         mainLayout.addSpacing(20)
 
-        # 닫기 버튼
-        close_btn = QPushButton('닫기')
-        close_btn.setFixedSize(140, 50)
-        close_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #FFB6C1;
-                border: 2px solid #FF69B4;
-                border-radius: 5px;
-                padding: 5px;
-                font-weight: bold;
-                color: #8B0000;
-            }
-            QPushButton:hover {
-                background-color: #FFC0CB;
-                border: 2px solid #FF1493;
-            }
-            QPushButton:pressed {
-                background-color: #FF69B4;
-            }
-        """)
-        close_btn.clicked.connect(self.accept)
+        # 뒤로가기/닫기 버튼
+        if self.embedded:
+            # Embedded 모드: 뒤로가기 버튼
+            back_btn = QPushButton('← 뒤로가기')
+            back_btn.setFixedSize(140, 50)
+            back_btn.setStyleSheet("""
+                QPushButton {
+                    background-color: #FFB6C1;
+                    border: 2px solid #FF69B4;
+                    border-radius: 5px;
+                    padding: 5px;
+                    font-weight: bold;
+                    color: #8B0000;
+                }
+                QPushButton:hover {
+                    background-color: #FFC0CB;
+                    border: 2px solid #FF1493;
+                }
+                QPushButton:pressed {
+                    background-color: #FF69B4;
+                }
+            """)
+            back_btn.clicked.connect(self._on_back_clicked)
+            
+            close_layout = QHBoxLayout()
+            close_layout.setAlignment(Qt.AlignCenter)
+            close_layout.addWidget(back_btn)
+            mainLayout.addLayout(close_layout)
+        else:
+            # Standalone 모드: 닫기 버튼
+            close_btn = QPushButton('닫기')
+            close_btn.setFixedSize(140, 50)
+            close_btn.setStyleSheet("""
+                QPushButton {
+                    background-color: #FFB6C1;
+                    border: 2px solid #FF69B4;
+                    border-radius: 5px;
+                    padding: 5px;
+                    font-weight: bold;
+                    color: #8B0000;
+                }
+                QPushButton:hover {
+                    background-color: #FFC0CB;
+                    border: 2px solid #FF1493;
+                }
+                QPushButton:pressed {
+                    background-color: #FF69B4;
+                }
+            """)
+            close_btn.clicked.connect(self.close)
 
-        close_layout = QHBoxLayout()
-        close_layout.setAlignment(Qt.AlignCenter)
-        close_layout.addWidget(close_btn)
-        mainLayout.addLayout(close_layout)
+            close_layout = QHBoxLayout()
+            close_layout.setAlignment(Qt.AlignCenter)
+            close_layout.addWidget(close_btn)
+            mainLayout.addLayout(close_layout)
 
         mainLayout.addStretch()
         self.setLayout(mainLayout)
+    
+    def _on_back_clicked(self):
+        """뒤로가기 버튼 클릭 시 시그널 발생"""
+        self.backRequested.emit()
 
     def _copy_table_data(self):
         """parent의 테이블 데이터를 복사"""
@@ -2103,12 +2138,14 @@ class MyApp(QWidget):
     def show_result_page(self):
         """시험 결과 페이지 표시"""
         if self.embedded:
-            # Embedded 모드: 시그널을 emit하여 main.py에 알림
+            # Embedded 모드: 시그널을 emit하여 main.py에서 스택 전환 처리
             self.showResultRequested.emit(self)
         else:
-            # Standalone 모드: 다이얼로그 표시
-            dialog = ResultPageDialog(self)
-            dialog.exec_()
+            # Standalone 모드: 새 창으로 위젯 표시
+            if hasattr(self, 'result_window') and self.result_window is not None:
+                self.result_window.close()
+            self.result_window = ResultPageWidget(self)
+            self.result_window.show()
 
     def resizeEvent(self, event):
         """창 크기 변경 시 반응형 UI 조정"""
