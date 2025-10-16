@@ -84,11 +84,77 @@ cmga0l5mh005dihlet5fcoj0o_StreamURLs_in_validation = {}
 # ReplayURL
 cmga0l5mh005dihlet5fcoj0o_ReplayURL_in_validation = {}
 
-# RealtimeVideoEventInfos
-cmga0l5mh005dihlet5fcoj0o_RealtimeVideoEventInfos_in_validation = {}
 
 # StoredVideoEventInfos
-cmga0l5mh005dihlet5fcoj0o_StoredVideoEventInfos_in_validation = {}
+cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_in_validation = {
+  "camList.camID": {
+    "score": 1,
+    "enabled": True,
+    "validationType": "response-field-list-match",
+    "referenceListField": "camID"
+  },
+  "eventFilter": {
+    "score": 1,
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueOperator": "equalsAny",
+    "validValueFieldName": "eventFilter",
+    "validValueMatchType": "validation-field",
+    "allowedValues": [
+      "화재",
+      "배회"
+    ]
+  },
+  "classFilter": {
+    "score": 1,
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueOperator": "equalsAny",
+    "validValueFieldName": "eventFilter",
+    "validValueMatchType": "validation-field",
+    "allowedValues": [
+      "화재",
+      "배회"
+    ]
+  }
+}
+
+# RealtimeVideoEventInfos
+cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_validation = {
+  "camList.camID": {
+    "score": 1,
+    "enabled": True,
+    "validationType": "response-field-list-match",
+    "referenceListField": "camID"
+  },
+  "eventFilter": {
+    "score": 1,
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueOperator": "equalsAny",
+    "validValueFieldName": "classFilter",
+    "validValueMatchType": "validation-field",
+    "allowedValues": [
+      "사람",
+      "트럭",
+      "버스"
+    ]
+  },
+  "classFilter": {
+    "score": 1,
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueOperator": "equals",
+    "validValueFieldName": "classFilter",
+    "validValueMatchType": "validation-field",
+    "allowedValues": [
+      "사람",
+      "트럭",
+      "버스"
+    ]
+  }
+}
+
 
 # StoredObjectAnalyticsInfos
 cmga0l5mh005dihlet5fcoj0o_StoredObjectAnalyticsInfos_in_validation = {}
@@ -100,21 +166,23 @@ cmga0l5mh005dihlet5fcoj0o_PtzStatus_in_validation = {}
 cmga0l5mh005dihlet5fcoj0o_PtzContinuousMove_in_validation = {}
 
 # PtzStop
-cmga0l5mh005dihlet5fcoj0o_PtzStop_in_validation = {}
 
-# cmga0l5mh005dihlet5fcoj0o 검증 리스트
-cmga0l5mh005dihlet5fcoj0o_inValidation = [
-    cmga0l5mh005dihlet5fcoj0o_Authentication_in_validation,
-    cmga0l5mh005dihlet5fcoj0o_Capabilities_in_validation,
-    cmga0l5mh005dihlet5fcoj0o_CameraProfiles_in_validation,
-    cmga0l5mh005dihlet5fcoj0o_StoredVideoInfos_in_validation,
-    cmga0l5mh005dihlet5fcoj0o_StreamURLs_in_validation,
-    cmga0l5mh005dihlet5fcoj0o_ReplayURL_in_validation,
-    cmga0l5mh005dihlet5fcoj0o_RealtimeVideoEventInfos_in_validation,
-    cmga0l5mh005dihlet5fcoj0o_StoredVideoEventInfos_in_validation,
-    cmga0l5mh005dihlet5fcoj0o_StoredObjectAnalyticsInfos_in_validation,
-    cmga0l5mh005dihlet5fcoj0o_PtzStatus_in_validation,
-    cmga0l5mh005dihlet5fcoj0o_PtzContinuousMove_in_validation,
-    cmga0l5mh005dihlet5fcoj0o_PtzStop_in_validation,
+cmg7bve25000114cevhn5o3vr_PtzStop_in_validation = {}
+
+# cmg7bve25000114cevhn5o3vr 검증 리스트
+cmg7bve25000114cevhn5o3vr_inValidation = [
+    cmg7bve25000114cevhn5o3vr_Authentication_in_validation,
+    cmg7bve25000114cevhn5o3vr_Capabilities_in_validation,
+    cmg7bve25000114cevhn5o3vr_CameraProfiles_in_validation,
+    cmg7bve25000114cevhn5o3vr_StoredVideoInfos_in_validation,
+    cmg7bve25000114cevhn5o3vr_StreamURLs_in_validation,
+    cmg7bve25000114cevhn5o3vr_ReplayURL_in_validation,
+    cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_in_validation,
+    cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_validation,
+    cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_in_validation,
+    cmg7bve25000114cevhn5o3vr_PtzStatus_in_validation,
+    cmg7bve25000114cevhn5o3vr_PtzContinuousMove_in_validation,
+    cmg7bve25000114cevhn5o3vr_PtzStop_in_validation,
+
 ]
 

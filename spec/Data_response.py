@@ -376,14 +376,26 @@ cmga0l5mh005dihlet5fcoj0o_ReplayURL_out_data = {
 ]
 }
 
-# RealtimeVideoEventInfos
-cmga0l5mh005dihlet5fcoj0o_RealtimeVideoEventInfos_out_data = {
-    "code": "",
-    "message": ""
-}
 
 # StoredVideoEventInfos
-cmga0l5mh005dihlet5fcoj0o_StoredVideoEventInfos_out_data = {
+cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_data = {
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+        "camID": "",
+        "eventUUID": [],
+        "eventName": "",
+        "startTime": 0,
+        "endTime": 0,
+        "eventDesc": "aaabbbAAA"
+    }
+]
+}
+
+# RealtimeVideoEventInfos
+cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_data = {
+
     "code": "",
     "message": "",
     "camList": [
@@ -391,9 +403,10 @@ cmga0l5mh005dihlet5fcoj0o_StoredVideoEventInfos_out_data = {
         "camID": "",
         "eventUUID": "",
         "eventName": "",
-        "startTime": 0,
-        "endTime": 0,
-        "eventDesc": ""
+        "startTime": "",
+        "endTime": "",
+        "eventDesc": "dddddeeeeeAAFEDFiikjf"
+
     }
 ]
 }
@@ -453,20 +466,22 @@ cmga0l5mh005dihlet5fcoj0o_PtzStop_out_data = {
     "message": ""
 }
 
-# cmga0l5mh005dihlet5fcoj0o 데이터 리스트
-cmga0l5mh005dihlet5fcoj0o_inData = [
-    cmga0l5mh005dihlet5fcoj0o_Authentication_out_data,
-    cmga0l5mh005dihlet5fcoj0o_Capabilities_out_data,
-    cmga0l5mh005dihlet5fcoj0o_CameraProfiles_out_data,
-    cmga0l5mh005dihlet5fcoj0o_StoredVideoInfos_out_data,
-    cmga0l5mh005dihlet5fcoj0o_StreamURLs_out_data,
-    cmga0l5mh005dihlet5fcoj0o_ReplayURL_out_data,
-    cmga0l5mh005dihlet5fcoj0o_RealtimeVideoEventInfos_out_data,
-    cmga0l5mh005dihlet5fcoj0o_StoredVideoEventInfos_out_data,
-    cmga0l5mh005dihlet5fcoj0o_StoredObjectAnalyticsInfos_out_data,
-    cmga0l5mh005dihlet5fcoj0o_PtzStatus_out_data,
-    cmga0l5mh005dihlet5fcoj0o_PtzContinuousMove_out_data,
-    cmga0l5mh005dihlet5fcoj0o_PtzStop_out_data,
+
+# cmg7bve25000114cevhn5o3vr 데이터 리스트
+cmg7bve25000114cevhn5o3vr_inData = [
+    cmg7bve25000114cevhn5o3vr_Authentication_out_data,
+    cmg7bve25000114cevhn5o3vr_Capabilities_out_data,
+    cmg7bve25000114cevhn5o3vr_CameraProfiles_out_data,
+    cmg7bve25000114cevhn5o3vr_StoredVideoInfos_out_data,
+    cmg7bve25000114cevhn5o3vr_StreamURLs_out_data,
+    cmg7bve25000114cevhn5o3vr_ReplayURL_out_data,
+    cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_data,
+    cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_data,
+    cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_out_data,
+    cmg7bve25000114cevhn5o3vr_PtzStatus_out_data,
+    cmg7bve25000114cevhn5o3vr_PtzContinuousMove_out_data,
+    cmg7bve25000114cevhn5o3vr_PtzStop_out_data,
+
 ]
 
 # cmga0l5mh005dihlet5fcoj0o API endpoint
@@ -477,8 +492,8 @@ cmga0l5mh005dihlet5fcoj0o_messages = [
     "StoredVideoInfos",
     "StreamURLs",
     "ReplayURL",
-    "RealtimeVideoEventInfos",
     "StoredVideoEventInfos",
+    "RealtimeVideoEventInfos",
     "StoredObjectAnalyticsInfos",
     "PtzStatus",
     "PtzContinuousMove",
