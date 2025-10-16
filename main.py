@@ -105,7 +105,6 @@ class MainWindow(QMainWindow):
         
         # 시험 결과 위젯 생성 및 스택에 추가
         self._show_result_widget(validation_widget)
-        print("✓ 시험 결과 페이지로 이동")
 
     def _show_result_widget(self, parent_widget):
         """시험 결과 위젯을 스택에 추가하고 전환"""
@@ -116,10 +115,8 @@ class MainWindow(QMainWindow):
         
         # 새로운 시험 결과 위젯 생성
         if isinstance(parent_widget, platform_app.MyApp):
-            print(f"   → Platform 시험 결과 페이지로 전환")
             self._result_widget = platform_app.ResultPageWidget(parent_widget, embedded=True)
         elif isinstance(parent_widget, system_app.MyApp):
-            print(f"   → System 시험 결과 페이지로 전환")
             self._result_widget = system_app.ResultPageWidget(parent_widget, embedded=True)
         else:
             print(f"알 수 없는 parent_widget 타입: {type(parent_widget)}")
@@ -134,26 +131,17 @@ class MainWindow(QMainWindow):
         
         # 시험 결과 메뉴 활성화
         self.act_test_result.setEnabled(True)
-        print("✓ 시험 결과 메뉴 활성화")
     
     def _on_back_to_validation(self):
         """뒤로가기: 시험 결과 페이지에서 검증 화면으로 복귀"""
         # 현재 활성화된 검증 위젯으로 전환
         if hasattr(self, '_system_widget') and self._system_widget is not None:
             self.stack.setCurrentWidget(self._system_widget)
-            print("✓ 시스템 검증 화면으로 복귀")
         elif hasattr(self, '_platform_widget') and self._platform_widget is not None:
             self.stack.setCurrentWidget(self._platform_widget)
-            print("✓ 플랫폼 검증 화면으로 복귀")
-        else:
-            print("⚠️ 검증 위젯을 찾을 수 없습니다.")
 
     def _on_show_result_requested(self, parent_widget):
         """검증 화면에서 시험 결과 표시 요청 시 호출 (embedded 모드에서)"""
-        print(f"✓ _on_show_result_requested 호출됨")
-        print(f"   parent_widget 타입: {type(parent_widget)}")
-        print(f"   parent_widget.embedded: {parent_widget.embedded}")
-        
         # 스택에 시험 결과 위젯 추가하고 전환
         self._show_result_widget(parent_widget)
 
@@ -162,7 +150,6 @@ class MainWindow(QMainWindow):
         if index == 1:
             # 2페이지(시험 설정)로 이동 → 시험 설정 메뉴 활성화
             self.act_test_setup.setEnabled(True)
-            print("✓ 시험 설정 메뉴 활성화")
 
     def _on_start_test_requested(self, mode):
         """시험 시작 버튼 클릭 시 호출 - 시험 실행 메뉴 활성화 후 검증 앱 실행"""
