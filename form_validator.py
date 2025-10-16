@@ -35,6 +35,27 @@ class FormValidator:
         self.validation_gen = ValidationGenerator()
         self.const_gen = constraintGeneractor()
 
+    def _convert_webhook_spec_to_schema(self, webhook_spec):
+        """webhook.integrationSpec을 스키마 형식으로 변환"""
+        # webhook_spec이 리스트인 경우 (bodyJson 배열이 직접 들어있음)
+        if isinstance(webhook_spec, list):
+            return self.schema_gen._parse_body_fields(webhook_spec)
+        # webhook_spec이 딕셔너리이고 bodyJson 키가 있는 경우
+        elif isinstance(webhook_spec, dict) and "bodyJson" in webhook_spec:
+            body_json = webhook_spec.get("bodyJson", [])
+            return self.schema_gen._parse_body_fields(body_json)
+        # 이미 스키마 형식이면 그대로 반환
+        return webhook_spec
+
+    def _convert_webhook_spec_to_data(self, webhook_spec):
+        """webhook.requestSpec을 데이터 형식으로 변환"""
+        # webhook_spec이 bodyJson 형식이면 파싱
+        if isinstance(webhook_spec, dict) and "bodyJson" in webhook_spec:
+            body_json = webhook_spec.get("bodyJson", [])
+            return self.data_gen.build_data_from_spec(body_json)
+        # 이미 데이터 형식이면 그대로 반환
+        return webhook_spec
+
     def _generate_files_for_all_specs(self):
         """모든 testSpecIds를 하나의 파일로 합쳐서 생성 (schema + videoData)"""
         try:
@@ -194,7 +215,22 @@ class FormValidator:
                                        validation_content, validation_names,
                                    constraints_content, constraints_names, spec_id):
 
-        api = ts.get("detail", {}).get("step", {}).get("api", {})
+        # step 레벨에서 protocolType 확인 (소문자 "webhook")
+        detail = ts.get("detail", {})
+        step = detail.get("step", {})
+        protocol_type = step.get("protocolType", "").lower()
+
+        api = step.get("api", {})
+        settings = api.get("settings", {})
+
+        # # [DEBUG] WebHook 디버깅
+        # print(f"\n[DEBUG] step.protocolType: {step.get('protocolType')}")
+        # print(f"[DEBUG] protocol_type (lower): {protocol_type}")
+        # print(f"[DEBUG] schema_type: {schema_type}, file_type: {file_type}")
+        # print(f"[DEBUG] settings.webhook 존재 여부: {'webhook' in settings}")
+        # if 'webhook' in settings:
+        #     print(f"[DEBUG] webhook.integrationSpec 존재: {'integrationSpec' in settings.get('webhook', {})}")
+        #     print(f"[DEBUG] webhook.requestSpec 존재: {'requestSpec' in settings.get('webhook', {})}")
 
         schema_info = self.schema_gen.generate_endpoint_schema(ts, schema_type)
         schema_name = schema_info["name"]
@@ -206,6 +242,31 @@ class FormValidator:
         formatted = self.schema_gen.format_schema_content(schema_obj)
         schema_content += f"{spec_id}{schema_name} = {formatted}\n\n"
         schema_names.append(schema_name)
+
+        # WebHook 처리 - schema_type="request"일 때 webhook_out_schema 생성
+        if protocol_type == "webhook" and schema_type == "request":
+            webhook_spec = settings.get("webhook", {}).get("integrationSpec", {})
+            if webhook_spec:
+                webhook_schema_name = f"{endpoint_name}_webhook_out_schema"
+                webhook_schema_obj = self._convert_webhook_spec_to_schema(webhook_spec)
+                schema_content += f"# {endpoint_name} WebHook OUT Schema\n"
+                formatted_webhook = self.schema_gen.format_schema_content(webhook_schema_obj)
+                schema_content += f"{spec_id}{webhook_schema_name} = {formatted_webhook}\n\n"
+                schema_names.append(webhook_schema_name)
+                print(f"  ✓ WebHook OUT Schema 생성: {webhook_schema_name}")
+
+        # WebHook 처리 - schema_type="response"일 때 webhook_in_schema 생성
+        if protocol_type == "webhook" and schema_type == "response":
+            webhook_spec = settings.get("webhook", {}).get("integrationSpec", {})
+            if webhook_spec:
+                webhook_schema_name = f"{endpoint_name}_webhook_in_schema"
+                webhook_schema_obj = self._convert_webhook_spec_to_schema(webhook_spec)
+                schema_content += f"# {endpoint_name} WebHook IN Schema\n"
+                formatted_webhook = self.schema_gen.format_schema_content(webhook_schema_obj)
+                schema_content += f"{spec_id}{webhook_schema_name} = {formatted_webhook}\n\n"
+                schema_names.append(webhook_schema_name)
+                print(f"  ✓ WebHook IN Schema 생성: {webhook_schema_name}")
+
         # Data 생성 (spec별로)
         data_info = self.data_gen.extract_endpoint_data(ts, file_type)
         data_name = data_info["name"]
@@ -218,6 +279,45 @@ class FormValidator:
         formatted = self.data_gen.format_data_content(data_obj)
         data_content += f"{spec_id}{data_name} = {formatted}\n\n"
         data_names.append(data_name)
+
+        # WebHook 처리 - file_type="response"일 때 webhook_in_data 생성
+        if protocol_type == "webhook" and file_type == "response":
+            webhook_request_spec = settings.get("webhook", {}).get("requestSpec", {})
+            if webhook_request_spec:
+                webhook_data_name = f"{endpoint_name}_webhook_in_data"
+
+                # requestSpec이 리스트인 경우 (bodyJson 배열이 직접 들어있음)
+                if isinstance(webhook_request_spec, list):
+                    webhook_data_obj = self.data_gen.build_data_from_spec(webhook_request_spec)
+                else:
+                    # requestSpec이 딕셔너리인 경우 (bodyJson 키가 있을 수 있음)
+                    webhook_data_obj = self._convert_webhook_spec_to_data(webhook_request_spec)
+
+                data_content += f"# {endpoint_name} WebHook IN Data\n"
+                formatted_webhook_data = self.data_gen.format_data_content(webhook_data_obj)
+                data_content += f"{spec_id}{webhook_data_name} = {formatted_webhook_data}\n\n"
+                data_names.append(webhook_data_name)
+                print(f"  ✓ WebHook IN Data 생성: {webhook_data_name}")
+
+        # WebHook 처리 - file_type="request"일 때 webhook_out_data 생성
+        if protocol_type == "webhook" and file_type == "request":
+            webhook_request_spec = settings.get("webhook", {}).get("requestSpec", {})
+            if webhook_request_spec:
+                webhook_data_name = f"{endpoint_name}_webhook_out_data"
+
+                # requestSpec이 리스트인 경우 (bodyJson 배열이 직접 들어있음)
+                if isinstance(webhook_request_spec, list):
+                    webhook_data_obj = self.data_gen.build_data_from_spec(webhook_request_spec)
+                else:
+                    # requestSpec이 딕셔너리인 경우 (bodyJson 키가 있을 수 있음)
+                    webhook_data_obj = self._convert_webhook_spec_to_data(webhook_request_spec)
+
+                data_content += f"# {endpoint_name} WebHook OUT Data\n"
+                formatted_webhook_data = self.data_gen.format_data_content(webhook_data_obj)
+                data_content += f"{spec_id}{webhook_data_name} = {formatted_webhook_data}\n\n"
+                data_names.append(webhook_data_name)
+                print(f"  ✓ WebHook OUT Data 생성: {webhook_data_name}")
+
         endpoint_names.append(endpoint_name)
 
         #validation 생성
