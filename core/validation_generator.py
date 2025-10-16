@@ -42,7 +42,7 @@ class ValidationGenerator:
             key = node.get("key", "")
             path = f"{prefix}.{key}" if (prefix and key) else (key or prefix)
             rule = node.get("validation", {})
-            if isinstance(rule, dict) and rule.get("enabled") is True:
+            if isinstance(rule, dict) :# and rule.get("enabled") is True:
                 out[path] = rule
             children = node.get("children", [])
             if children:
