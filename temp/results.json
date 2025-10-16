@@ -1,0 +1,75 @@
+{
+  "requestId": "req-001",
+  "evaluationTarget": {
+    "companyName": "스마트홈 테크놀로지",
+    "contactPerson": "김철수",
+    "productName": "스마트 도어락 시스템",
+    "modelName": "SDL-2024",
+    "version": "v2.1.0"
+  },
+  "testGroup": {
+    "id": "group-001",
+    "name": "도어락 시험",
+    "testRange": "전체필드",
+    "testSpecIds": [
+      "spec-001"
+    ],
+    "adminCode": "DOOR_LOCK_2024"
+  },
+  "status": "완료",
+  "authMethod": "Bearer Token",
+  "testScore": {
+    "score": 50,
+    "totalFields": 2,
+    "passedFields": 1,
+    "failedFields": 1
+  },
+  "testResult": [
+    {
+      "testSpecId": "spec-001",
+      "score": 50,
+      "apis": [
+        {
+          "id": "step-1",
+          "name": "인증",
+          "method": "POST",
+          "endpoint": "/Authentication",
+          "score": 50,
+          "validationCnt": 3,
+          "totalFields": 2,
+          "passFields": 1,
+          "failFields": 1,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "username": "user001",
+                "userpass": 1
+              },
+              "validationErrors": [
+                "userpass data type error [int]->[string]"
+              ]
+            },
+            {
+              "attempt": 2,
+              "validationData": {
+                "username": "user002",
+                "userpass": "pass123"
+              },
+              "validationErrors": []
+            },
+            {
+              "attempt": 3,
+              "validationData": {
+                "username": "user002",
+                "userpass": "secret"
+              },
+              "validationErrors": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "completedDate": "2024-01-24T16:45:00Z"
+}
