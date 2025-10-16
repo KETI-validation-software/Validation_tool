@@ -15,6 +15,7 @@ cmgatbdp000bqihlexmywusvq_RealtimeSensorEventInfos_in_constraints = {
   "sensorDeviceList.sensorDeviceID": {
     "valueType": "random-response",
     "required": True,
+    "referenceEndpoint": "/SensorDeviceControl",
     "referenceField": "sensorDeviceID"
   },
   "eventFilter": {
@@ -29,6 +30,7 @@ cmgatbdp000bqihlexmywusvq_StoredSensorEventInfos_in_constraints = {
   "sensorDeviceList.sensorDeviceID": {
     "valueType": "random-response",
     "required": True,
+    "referenceEndpoint": "/SensorDeviceControl",
     "referenceField": "sensorDeviceID"
   },
   "eventFilter": {
@@ -99,7 +101,7 @@ cmgasj98w009aihlezm0fe6cs_DoorControl_in_constraints = {
   "doorID": {
     "valueType": "response-based",
     "required": True,
-    "referenceEndpoint": "/DoorControl",
+    "referenceEndpoint": "/DoorProfiles",
     "referenceField": "doorID"
   }
 }
@@ -130,7 +132,7 @@ cmga0l5mh005dihlet5fcoj0o_StoredVideoInfos_in_constraints = {
   "camList.camID": {
     "valueType": "random-response",
     "required": True,
-    "referenceEndpoint": "/StoredVideoInfos",
+    "referenceEndpoint": "/PtzStatus",
     "referenceField": "camID"
   }
 }
@@ -148,7 +150,7 @@ cmga0l5mh005dihlet5fcoj0o_ReplayURL_in_constraints = {
   "camList.camID": {
     "valueType": "random-response",
     "required": True,
-    "referenceEndpoint": "/ReplayURL",
+    "referenceEndpoint": "/PtzStatus",
     "referenceField": "camID"
   }
 }
@@ -158,7 +160,7 @@ cmga0l5mh005dihlet5fcoj0o_RealtimeVideoEventInfos_in_constraints = {
   "camList.camID": {
     "valueType": "random-response",
     "required": True,
-    "referenceEndpoint": "/RealtimeVideoEventInfos",
+    "referenceEndpoint": "/PtzStatus",
     "referenceField": "camID"
   }
 }
@@ -168,7 +170,7 @@ cmga0l5mh005dihlet5fcoj0o_StoredVideoEventInfos_in_constraints = {
   "camList.camID": {
     "valueType": "random-response",
     "required": True,
-    "referenceEndpoint": "/StoredVideoEventInfos",
+    "referenceEndpoint": "/PtzStatus",
     "referenceField": "camID"
   },
   "eventFilter": {
@@ -188,7 +190,7 @@ cmga0l5mh005dihlet5fcoj0o_StoredObjectAnalyticsInfos_in_constraints = {
   "camList.camID": {
     "valueType": "random-response",
     "required": True,
-    "referenceEndpoint": "/StoredObjectAnalyticsInfos",
+    "referenceEndpoint": "/PtzStatus",
     "referenceField": "camID"
   },
   "filterList.classFilter": {
@@ -218,7 +220,7 @@ cmga0l5mh005dihlet5fcoj0o_PtzContinuousMove_in_constraints = {
   "camID": {
     "valueType": "random-response",
     "required": True,
-    "referenceEndpoint": "/PtzContinuousMove",
+    "referenceEndpoint": "/PtzStatus",
     "referenceField": "camID"
   }
 }
@@ -228,7 +230,7 @@ cmga0l5mh005dihlet5fcoj0o_PtzStop_in_constraints = {
   "camID": {
     "valueType": "random-response",
     "required": True,
-    "referenceEndpoint": "/PtzStop",
+    "referenceEndpoint": "/PtzStatus",
     "referenceField": "camID"
   }
 }

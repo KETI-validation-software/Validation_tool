@@ -185,20 +185,6 @@ cmg7bve25000114cevhn5o3vr_ReplayURL_in_schema = {
 }],
 }
 
-# StoredVideoEventInfos
-cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_in_schema = {
-    "timePeriod": {
-    "startTime": float,
-    "endTime": float,
-},
-    OptionalKey("camList"): [{
-    "camID": str,
-}],
-    OptionalKey("maxCount"): float,
-    OptionalKey("eventFilter"): str,
-    OptionalKey("classFilter"): str,
-}
-
 # RealtimeVideoEventInfos
 cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_schema = {
     "camList": [{
@@ -212,6 +198,20 @@ cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_schema = {
     OptionalKey("eventFilter"): str,
     OptionalKey("classFilter"): str,
     OptionalKey("startTime"): float,
+}
+
+# StoredVideoEventInfos
+cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_in_schema = {
+    "timePeriod": {
+    "startTime": float,
+    "endTime": float,
+},
+    OptionalKey("camList"): [{
+    "camID": str,
+}],
+    OptionalKey("maxCount"): float,
+    OptionalKey("eventFilter"): str,
+    OptionalKey("classFilter"): str,
 }
 
 # StoredObjectAnalyticsInfos
@@ -261,8 +261,8 @@ cmg7bve25000114cevhn5o3vr_inSchema = [
     cmg7bve25000114cevhn5o3vr_StoredVideoInfos_in_schema,
     cmg7bve25000114cevhn5o3vr_StreamURLs_in_schema,
     cmg7bve25000114cevhn5o3vr_ReplayURL_in_schema,
-    cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_in_schema,
     cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_schema,
+    cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_in_schema,
     cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_in_schema,
     cmg7bve25000114cevhn5o3vr_PtzStatus_in_schema,
     cmg7bve25000114cevhn5o3vr_PtzContinuousMove_in_schema,

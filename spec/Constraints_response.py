@@ -12,7 +12,7 @@ cmg90br3n002qihleffuljnth_RealtimeSensorData_out_constraints = {
   "sensorDeviceList.sensorDeviceID": {
     "valueType": "request-based",
     "required": True,
-    "referenceEndpoint": "/RealtimeSensorData",
+    "referenceEndpoint": "/SensorDeviceProfiles",
     "referenceField": "sensorDeviceID"
   },
   "sensorDeviceList.measureTime": {
@@ -22,7 +22,7 @@ cmg90br3n002qihleffuljnth_RealtimeSensorData_out_constraints = {
       "minField": "startTime",
       "operator": "greater-equal"
     },
-    "requestRangeMinEndpoint": "/RealtimeSensorData"
+    "requestRangeMinEndpoint": "/RealtimeSensorEventInfos"
   }
 }
 
@@ -31,7 +31,7 @@ cmg90br3n002qihleffuljnth_RealtimeSensorEventInfos_out_constraints = {
   "sensorDeviceList.sensorDeviceID": {
     "valueType": "request-based",
     "required": True,
-    "referenceEndpoint": "/RealtimeSensorEventInfos",
+    "referenceEndpoint": "/SensorDeviceProfiles",
     "referenceField": "sensorDeviceID",
     "requestRange": {
       "operator": "between"
@@ -59,13 +59,13 @@ cmg90br3n002qihleffuljnth_StoredSensorEventInfos_out_constraints = {
   "sensorDeviceList.sensorDeviceID": {
     "valueType": "request-based",
     "required": True,
-    "referenceEndpoint": "/StoredSensorEventInfos",
+    "referenceEndpoint": "/SensorDeviceProfiles",
     "referenceField": "sensorDeviceID"
   },
   "sensorDeviceList.eventName": {
     "valueType": "request-based",
     "required": True,
-    "referenceEndpoint": "/StoredSensorEventInfos",
+    "referenceEndpoint": "/RealtimeSensorEventInfos",
     "referenceField": "eventFilter"
   },
   "sensorDeviceList.eventTime": {
@@ -76,7 +76,7 @@ cmg90br3n002qihleffuljnth_StoredSensorEventInfos_out_constraints = {
       "minField": "startTime",
       "operator": "between"
     },
-    "requestRangeMinEndpoint": "/StoredSensorEventInfos",
+    "requestRangeMinEndpoint": "/RealtimeSensorEventInfos",
     "requestRangeMaxEndpoint": "/StoredSensorEventInfos"
   }
 }
@@ -86,7 +86,7 @@ cmg90br3n002qihleffuljnth_SensorDeviceControl_out_constraints = {
   "sensorDeviceID": {
     "valueType": "request-based",
     "required": True,
-    "referenceEndpoint": "/SensorDeviceControl",
+    "referenceEndpoint": "/SensorDeviceProfiles",
     "referenceField": "sensorDeviceID"
   },
   "sensorDeviceStatus": {
@@ -143,13 +143,13 @@ cmg7edeo50013124xiux3gbkb_StoredVerifEventInfos_out_constraints = {
       "minField": "startTime",
       "operator": "between"
     },
-    "requestRangeMinEndpoint": "/StoredVerifEventInfos",
+    "requestRangeMinEndpoint": "RealtimeVerifEventInfos",
     "requestRangeMaxEndpoint": "/StoredVerifEventInfos"
   },
   "doorList.doorID": {
     "valueType": "request-based",
     "required": True,
-    "referenceEndpoint": "/StoredVerifEventInfos",
+    "referenceEndpoint": "DoorProfiles",
     "referenceField": "doorID"
   },
   "doorList.bioAuthTypeList": {
@@ -167,7 +167,7 @@ cmg7edeo50013124xiux3gbkb_StoredVerifEventInfos_out_constraints = {
   "doorList.eventName": {
     "valueType": "request-based",
     "required": True,
-    "referenceEndpoint": "/StoredVerifEventInfos",
+    "referenceEndpoint": "RealtimeVerifEventInfos",
     "referenceField": "eventFilter"
   }
 }
@@ -197,12 +197,7 @@ cmg7bve25000114cevhn5o3vr_Authentication_out_constraints = {}
 cmg7bve25000114cevhn5o3vr_Capabilities_out_constraints = {}
 
 # CameraProfiles
-cmg7bve25000114cevhn5o3vr_CameraProfiles_out_constraints = {
-  "camList.camID": {
-    "valueType": "preset",
-    "required": True
-  }
-}
+cmg7bve25000114cevhn5o3vr_CameraProfiles_out_constraints = {}
 
 # StoredVideoInfos
 cmg7bve25000114cevhn5o3vr_StoredVideoInfos_out_constraints = {
@@ -214,7 +209,7 @@ cmg7bve25000114cevhn5o3vr_StoredVideoInfos_out_constraints = {
   "camList.camID": {
     "valueType": "request-based",
     "required": True,
-    "referenceEndpoint": "/StoredVideoInfos",
+    "referenceEndpoint": "/PtzStatus",
     "referenceField": "camID"
   },
   "camList.timeList.startTime": {
@@ -225,8 +220,8 @@ cmg7bve25000114cevhn5o3vr_StoredVideoInfos_out_constraints = {
       "minField": "startTime",
       "operator": "between"
     },
-    "requestRangeMinEndpoint": "/StoredVideoInfos",
-    "requestRangeMaxEndpoint": "/StoredVideoInfos"
+    "requestRangeMinEndpoint": "/RealtimeVideoEventInfos",
+    "requestRangeMaxEndpoint": "/ReplayURL"
   },
   "camList.timeList.endTime": {
     "valueType": "request-range",
@@ -236,8 +231,8 @@ cmg7bve25000114cevhn5o3vr_StoredVideoInfos_out_constraints = {
       "minField": "startTime",
       "operator": "between"
     },
-    "requestRangeMinEndpoint": "/StoredVideoInfos",
-    "requestRangeMaxEndpoint": "/StoredVideoInfos"
+    "requestRangeMinEndpoint": "/RealtimeVideoEventInfos",
+    "requestRangeMaxEndpoint": "/ReplayURL"
   }
 }
 
@@ -249,7 +244,7 @@ cmg7bve25000114cevhn5o3vr_ReplayURL_out_constraints = {
   "camList.camID": {
     "valueType": "request-based",
     "required": True,
-    "referenceEndpoint": "/ReplayURL",
+    "referenceEndpoint": "/PtzStatus",
     "referenceField": "camID"
   },
   "camList.startTime": {
@@ -260,7 +255,7 @@ cmg7bve25000114cevhn5o3vr_ReplayURL_out_constraints = {
       "minField": "startTime",
       "operator": "between"
     },
-    "requestRangeMinEndpoint": "/ReplayURL",
+    "requestRangeMinEndpoint": "/RealtimeVideoEventInfos",
     "requestRangeMaxEndpoint": "/ReplayURL"
   },
   "camList.endTime": {
@@ -271,8 +266,48 @@ cmg7bve25000114cevhn5o3vr_ReplayURL_out_constraints = {
       "minField": "startTime",
       "operator": "between"
     },
-    "requestRangeMinEndpoint": "/ReplayURL",
+    "requestRangeMinEndpoint": "/RealtimeVideoEventInfos",
     "requestRangeMaxEndpoint": "/ReplayURL"
+  }
+}
+
+# RealtimeVideoEventInfos
+cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_constraints = {
+  "camList.camID": {
+    "valueType": "request-based",
+    "required": True,
+    "referenceEndpoint": "/PtzStatus",
+    "referenceField": "camID"
+  },
+  "camList.eventUUID": {
+    "valueType": "random",
+    "required": True,
+    "randomType": "specified-values",
+    "arrayElementType": "array"
+  },
+  "camList.eventName": {
+    "valueType": "request-based",
+    "required": True,
+    "referenceEndpoint": "/RealtimeVideoEventInfos",
+    "referenceField": "eventFilter"
+  },
+  "camList.startTime": {
+    "valueType": "request-range",
+    "required": True,
+    "requestRange": {
+      "minField": "startTime",
+      "operator": "greater-equal"
+    },
+    "requestRangeMinEndpoint": "/RealtimeVideoEventInfos"
+  },
+  "camList.endTime": {
+    "valueType": "request-range",
+    "required": False,
+    "requestRange": {
+      "minField": "startTime",
+      "operator": "greater-equal"
+    },
+    "requestRangeMinEndpoint": "/RealtimeVideoEventInfos"
   }
 }
 
@@ -281,7 +316,7 @@ cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_constraints = {
   "camList.camID": {
     "valueType": "request-based",
     "required": True,
-    "referenceEndpoint": "/StoredVideoEventInfos",
+    "referenceEndpoint": "/PtzStatus",
     "referenceField": "camID",
     "requestRange": {
       "operator": "between"
@@ -296,7 +331,7 @@ cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_constraints = {
   "camList.eventName": {
     "valueType": "request-based",
     "required": True,
-    "referenceEndpoint": "/StoredVideoEventInfos",
+    "referenceEndpoint": "/RealtimeVideoEventInfos",
     "referenceField": "eventFilter"
   },
   "camList.startTime": {
@@ -307,8 +342,8 @@ cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_constraints = {
       "minField": "startTime",
       "operator": "between"
     },
-    "requestRangeMinEndpoint": "/StoredVideoEventInfos",
-    "requestRangeMaxEndpoint": "/StoredVideoEventInfos"
+    "requestRangeMinEndpoint": "/RealtimeVideoEventInfos",
+    "requestRangeMaxEndpoint": "/ReplayURL"
   },
   "camList.endTime": {
     "valueType": "request-range",
@@ -318,48 +353,8 @@ cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_constraints = {
       "minField": "startTime",
       "operator": "between"
     },
-    "requestRangeMinEndpoint": "/StoredVideoEventInfos",
-    "requestRangeMaxEndpoint": "/StoredVideoEventInfos"
-  }
-}
-
-# RealtimeVideoEventInfos
-cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_constraints = {
-  "camList.camID": {
-    "valueType": "request-based",
-    "required": True,
-    "referenceEndpoint": "/RealtimeVideoEventInfos",
-    "referenceField": "camID"
-  },
-  "camList.eventUUID": {
-    "valueType": "random",
-    "required": True,
-    "randomType": "specified-values",
-    "arrayElementType": "array"
-  },
-  "camList.eventName": {
-    "valueType": "request-based",
-    "required": True,
-    "referenceEndpoint": "/RealtimeVideoEventInfos",
-    "referenceField": "eventFilter"
-  },
-  "camList.startTime": {
-    "valueType": "request-range",
-    "required": True,
-    "requestRange": {
-      "minField": "startTime",
-      "operator": "greater-equal"
-    },
-    "requestRangeMinEndpoint": "/RealtimeVideoEventInfos"
-  },
-  "camList.endTime": {
-    "valueType": "request-range",
-    "required": False,
-    "requestRange": {
-      "minField": "startTime",
-      "operator": "greater-equal"
-    },
-    "requestRangeMinEndpoint": "/RealtimeVideoEventInfos"
+    "requestRangeMinEndpoint": "/RealtimeVideoEventInfos",
+    "requestRangeMaxEndpoint": "/ReplayURL"
   }
 }
 
@@ -368,7 +363,7 @@ cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_out_constraints = {
   "camList.camID": {
     "valueType": "request-based",
     "required": True,
-    "referenceEndpoint": "/StoredObjectAnalyticsInfos",
+    "referenceEndpoint": "/PtzStatus",
     "referenceField": "camID"
   },
   "camList.analyticsTime": {
@@ -379,19 +374,18 @@ cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_out_constraints = {
       "minField": "startTime",
       "operator": "between"
     },
-    "requestRangeMinEndpoint": "/StoredObjectAnalyticsInfos",
-    "requestRangeMaxEndpoint": "/StoredObjectAnalyticsInfos"
+    "requestRangeMinEndpoint": "/RealtimeVideoEventInfos",
+    "requestRangeMaxEndpoint": "/ReplayURL"
   },
   "camList.anlayticsResultList.analyticsClass": {
     "valueType": "request-based",
     "required": True,
-    "referenceEndpoint": "/StoredObjectAnalyticsInfos",
+    "referenceEndpoint": "/RealtimeVideoEventInfos",
     "referenceField": "classFilter"
   },
   "camList.anlayticsResultList.analyticsAttribute": {
     "valueType": "request-based",
     "required": False,
-    "referenceEndpoint": "/StoredObjectAnalyticsInfos",
     "referenceField": "attributeFilter",
     "requestRange": {
       "operator": "between"
@@ -420,8 +414,8 @@ cmg7bve25000114cevhn5o3vr_inConstraints = [
     cmg7bve25000114cevhn5o3vr_StoredVideoInfos_out_constraints,
     cmg7bve25000114cevhn5o3vr_StreamURLs_out_constraints,
     cmg7bve25000114cevhn5o3vr_ReplayURL_out_constraints,
-    cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_constraints,
     cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_constraints,
+    cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_constraints,
     cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_out_constraints,
     cmg7bve25000114cevhn5o3vr_PtzStatus_out_constraints,
     cmg7bve25000114cevhn5o3vr_PtzContinuousMove_out_constraints,
