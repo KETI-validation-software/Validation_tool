@@ -184,17 +184,6 @@ cmga0l5mh005dihlet5fcoj0o_ReplayURL_in_schema = {
 }],
 }
 
-# RealtimeVideoEventInfos
-cmga0l5mh005dihlet5fcoj0o_RealtimeVideoEventInfos_in_schema = {
-    "camList": [{
-    "camID": str,
-    "eventUUID": str,
-    "eventName": str,
-    "startTime": float,
-    OptionalKey("endTime"): float,
-    OptionalKey("eventDesc"): str,
-}],
-}
 
 # StoredVideoEventInfos
 cmga0l5mh005dihlet5fcoj0o_StoredVideoEventInfos_in_schema = {
@@ -208,6 +197,21 @@ cmga0l5mh005dihlet5fcoj0o_StoredVideoEventInfos_in_schema = {
     OptionalKey("maxCount"): float,
     OptionalKey("eventFilter"): str,
     OptionalKey("classFilter"): str,
+}
+
+# RealtimeVideoEventInfos
+cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_schema = {
+    "camList": [{
+    "camID": str,
+}],
+    OptionalKey("duration"): str,
+    "transProtocol": {
+    "transProtocolType": str,
+    OptionalKey("transProtocolDesc"): str,
+},
+    OptionalKey("eventFilter"): str,
+    OptionalKey("classFilter"): str,
+    OptionalKey("startTime"): float,
 }
 
 # StoredObjectAnalyticsInfos
@@ -249,19 +253,21 @@ cmga0l5mh005dihlet5fcoj0o_PtzStop_in_schema = {
     OptionalKey("zoom"): bool,
 }
 
-# cmga0l5mh005dihlet5fcoj0o 스키마 리스트
-cmga0l5mh005dihlet5fcoj0o_inSchema = [
-    cmga0l5mh005dihlet5fcoj0o_Authentication_in_schema,
-    cmga0l5mh005dihlet5fcoj0o_Capabilities_in_schema,
-    cmga0l5mh005dihlet5fcoj0o_CameraProfiles_in_schema,
-    cmga0l5mh005dihlet5fcoj0o_StoredVideoInfos_in_schema,
-    cmga0l5mh005dihlet5fcoj0o_StreamURLs_in_schema,
-    cmga0l5mh005dihlet5fcoj0o_ReplayURL_in_schema,
-    cmga0l5mh005dihlet5fcoj0o_RealtimeVideoEventInfos_in_schema,
-    cmga0l5mh005dihlet5fcoj0o_StoredVideoEventInfos_in_schema,
-    cmga0l5mh005dihlet5fcoj0o_StoredObjectAnalyticsInfos_in_schema,
-    cmga0l5mh005dihlet5fcoj0o_PtzStatus_in_schema,
-    cmga0l5mh005dihlet5fcoj0o_PtzContinuousMove_in_schema,
-    cmga0l5mh005dihlet5fcoj0o_PtzStop_in_schema,
+
+# cmg7bve25000114cevhn5o3vr 스키마 리스트
+cmg7bve25000114cevhn5o3vr_inSchema = [
+    cmg7bve25000114cevhn5o3vr_Authentication_in_schema,
+    cmg7bve25000114cevhn5o3vr_Capabilities_in_schema,
+    cmg7bve25000114cevhn5o3vr_CameraProfiles_in_schema,
+    cmg7bve25000114cevhn5o3vr_StoredVideoInfos_in_schema,
+    cmg7bve25000114cevhn5o3vr_StreamURLs_in_schema,
+    cmg7bve25000114cevhn5o3vr_ReplayURL_in_schema,
+    cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_in_schema,
+    cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_schema,
+    cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_in_schema,
+    cmg7bve25000114cevhn5o3vr_PtzStatus_in_schema,
+    cmg7bve25000114cevhn5o3vr_PtzContinuousMove_in_schema,
+    cmg7bve25000114cevhn5o3vr_PtzStop_in_schema,
+
 ]
 

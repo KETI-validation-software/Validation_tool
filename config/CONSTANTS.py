@@ -76,9 +76,25 @@ SPEC_CONFIG = {
         "num_retries": [2, 2, 1, 2, 2, 2, 2, 1]
     }
 ,
+    "cmg7bve25000114cevhn5o3vr": {
+        "trans_protocol": ['basic', 'LongPolling', 'basic', 'basic', 'basic', 'basic', 'basic', 'LongPolling', 'basic', 'basic', 'basic', 'basic'],
+        "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
+        "num_retries": [3, 10, 10, 2, 2, 2, 5, 5, 5, 1, 1, 1]
+    }
+,
+    "cmgatbdp000bqihlexmywusvq": {
+        "trans_protocol": ['basic', 'LongPolling', 'basic', 'LongPolling', 'LongPolling', 'basic', 'basic'],
+        "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000],
+        "num_retries": [2, 2, 2, 2, 2, 2, 2]
+    }
+,
+    "cmgasj98w009aihlezm0fe6cs": {
+        "trans_protocol": ['basic', 'LongPolling', 'basic', 'basic', 'LongPolling', 'basic', 'LongPolling', 'basic'],
+        "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
+        "num_retries": [2, 2, 1, 2, 2, 2, 2, 1]
+    }
+,
     "cmga0l5mh005dihlet5fcoj0o": {
-        "test_name": "영상보안 시스템",
-        "specs": ['cmga0l5mh005dihlet5fcoj0o_inSchema', 'cmga0l5mh005dihlet5fcoj0o_outData', 'cmga0l5mh005dihlet5fcoj0o_messages'],
         "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'WebHook', 'basic', 'basic', 'basic', 'basic', 'basic'],
         "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
         "num_retries": [2, 1, 2, 2, 1, 1, 1, 1, 3, 1, 2, 2]
