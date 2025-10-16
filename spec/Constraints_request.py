@@ -15,7 +15,6 @@ cmgatbdp000bqihlexmywusvq_RealtimeSensorEventInfos_in_constraints = {
   "sensorDeviceList.sensorDeviceID": {
     "valueType": "random-response",
     "required": True,
-    "referenceEndpoint": "/RealtimeSensorEventInfos",
     "referenceField": "sensorDeviceID"
   },
   "eventFilter": {
@@ -30,7 +29,6 @@ cmgatbdp000bqihlexmywusvq_StoredSensorEventInfos_in_constraints = {
   "sensorDeviceList.sensorDeviceID": {
     "valueType": "random-response",
     "required": True,
-    "referenceEndpoint": "/StoredSensorEventInfos",
     "referenceField": "sensorDeviceID"
   },
   "eventFilter": {
