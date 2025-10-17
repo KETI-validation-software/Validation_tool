@@ -19,7 +19,7 @@ class InfoWidget(QWidget):
     접속 후 화면 GUI.
     - 시험 기본/입력 정보, 인증 선택, 주소 탐색, OPT 로드 등
     """
-    startTestRequested = pyqtSignal(str, str)  # (test_group_name, verification_type) 전달
+    startTestRequested = pyqtSignal(str, str, str)  # (test_group_name, verification_type, spec_id) 전달
 
     def __init__(self):
         super().__init__()
@@ -28,6 +28,7 @@ class InfoWidget(QWidget):
         self.scan_worker = None
         self.current_mode = None
         self.test_group_name = None  # testGroup.name 저장
+        self.test_specs = []  # testSpecs 리스트 저장
         self.current_page = 0
         self.stacked_widget = QStackedWidget()
         self.initUI()
@@ -662,11 +663,20 @@ class InfoWidget(QWidget):
                 QMessageBox.warning(self, "데이터 없음", "시험 분야 정보가 없습니다. 시험 정보를 다시 불러와주세요.")
                 return
 
+            # spec_id 추출 (testSpecs의 첫 번째 항목)
+            spec_id = ""
+            if self.test_specs and len(self.test_specs) > 0:
+                spec_id = self.test_specs[0].get("id", "")
+            
+            if not spec_id:
+                QMessageBox.warning(self, "데이터 없음", "spec_id 정보가 없습니다. 시험 정보를 다시 불러와주세요.")
+                return
+
             # CONSTANTS.py 업데이트
             if self.form_validator.update_constants_py():
-                # test_group_name과 verification_type(current_mode)를 함께 전달
-                print(f"시험 시작: testGroup.name={self.test_group_name}, verificationType={self.current_mode}")
-                self.startTestRequested.emit(self.test_group_name, self.current_mode)
+                # test_group_name, verification_type(current_mode), spec_id를 함께 전달
+                print(f"시험 시작: testGroup.name={self.test_group_name}, verificationType={self.current_mode}, spec_id={spec_id}")
+                self.startTestRequested.emit(self.test_group_name, self.current_mode, spec_id)
             else:
                 QMessageBox.warning(self, "저장 실패", "CONSTANTS.py 업데이트에 실패했습니다.")
 

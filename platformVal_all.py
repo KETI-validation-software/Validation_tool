@@ -632,7 +632,7 @@ class MyApp(QWidget):
     # 시험 결과 표시 요청 시그널 (main.py와 연동)
     showResultRequested = pyqtSignal(object)  # parent widget을 인자로 전달
 
-    def __init__(self, embedded=False, mode=None):
+    def __init__(self, embedded=False, mode=None, spec_id=None):
         importlib.reload(CONSTANTS)  # CONSTANTS 모듈을 다시 로드하여 최신 설정 반영
         super().__init__()
         self.embedded = embedded
@@ -662,6 +662,14 @@ class MyApp(QWidget):
         self.digestInfo = [auth_temp2[0], auth_temp2[1]]
         self.token = auth_temp
 
+        # ✅ spec_id 초기화 (info_GUI에서 전달받거나 기본값 사용)
+        if spec_id:
+            self.current_spec_id = spec_id
+            print(f"[PLATFORM] 📌 전달받은 spec_id 사용: {spec_id}")
+        else:
+            self.current_spec_id = "cmgatbdp000bqihlexmywusvq"  # 기본값: 보안용 센서 시스템 (7개 API)
+            print(f"[PLATFORM] 📌 기본 spec_id 사용: {self.current_spec_id}")
+        
         # Load specs dynamically from CONSTANTS
         self.load_specs_from_constants()
 
@@ -688,60 +696,79 @@ class MyApp(QWidget):
             json.dump(None, out_file, ensure_ascii=False)
 
     def load_specs_from_constants(self):
-        """CONSTANTS.specs 설정에 따라 동적으로 spec 데이터 로드"""
-        # specs는 [[inSchema_name, outData_name, messages_name, webhookSchema_name, webhookData_name, description], ...]
-        if not hasattr(CONSTANTS, 'specs') or not CONSTANTS.specs:
-            raise ValueError("CONSTANTS.specs가 정의되지 않았습니다!")
+        """
+        ✅ SPEC_CONFIG 기반으로 spec 데이터 동적 로드
+        - current_spec_id에 따라 올바른 모듈(spec.video 또는 spec/)에서 데이터 로드
+        - trans_protocol, time_out, num_retries도 SPEC_CONFIG에서 가져옴
+        """
+        # ✅ SPEC_CONFIG에서 현재 spec 설정 가져오기
+        if not hasattr(CONSTANTS, 'SPEC_CONFIG'):
+            raise ValueError("CONSTANTS.SPEC_CONFIG가 정의되지 않았습니다!")
         
-        # selected_spec_index 사용 (info_GUI에서 선택한 spec)
-        spec_index = getattr(CONSTANTS, 'selected_spec_index', 0)
-        print(f"[DEBUG] load_specs_from_constants: selected_spec_index = {spec_index}")
+        config = CONSTANTS.SPEC_CONFIG.get(self.current_spec_id, {})
+        if not config:
+            raise ValueError(f"spec_id '{self.current_spec_id}'에 대한 설정을 찾을 수 없습니다!")
         
-        # 인덱스 범위 확인
-        if spec_index >= len(CONSTANTS.specs):
-            print(f"[WARNING] selected_spec_index({spec_index})가 범위를 벗어났습니다. 첫 번째 spec 사용")
-            spec_index = 0
+        # ✅ 설정 정보 추출
+        self.spec_description = config.get('test_name', 'Unknown Test')
+        spec_names = config.get('specs', [])
         
-        spec = CONSTANTS.specs[spec_index]
-        inSchema_name = spec[0]  # e.g., "spec_001_inSchema"
-        outData_name = spec[1]   # e.g., "spec_001_outData"
-        messages_name = spec[2]  # e.g., "spec_001_messages"
-        webhookSchema_name = spec[3]  # e.g., "spec_001_webhookSchema"
-        webhookData_name = spec[4]  # e.g., "spec_001_webhookData"
-        self.spec_description = spec[5]  # e.g., "영상보안 시스템 요청 메시지 검증 API 명세서"
+        # ✅ trans_protocol, time_out, num_retries 저장
+        self.trans_protocols = config.get('trans_protocol', [])
+        self.time_outs = config.get('time_out', [])
+        self.num_retries_list = config.get('num_retries', [])
         
-        # Dynamic import based on spec names
-        # Request schemas (inSchema) from videoSchema_request
-        self.videoInSchema = getattr(video_schema_request, inSchema_name, [])
-        # Request data (outData) from videoData_request
-        self.videoOutMessage = getattr(video_data_request, outData_name, [])
-        # Message names from videoData_request
-        self.videoMessages = getattr(video_data_request, messages_name, [])
-        # Webhook schemas from videoSchema_request
-        self.videoWebhookSchema = getattr(video_schema_request, webhookSchema_name, [])
-        # Webhook data from videoData_request
-        self.videoWebhookData = getattr(video_data_request, webhookData_name, [])
+        if len(spec_names) < 3:
+            raise ValueError(f"spec_id '{self.current_spec_id}'의 specs 설정이 올바르지 않습니다! (최소 3개 필요)")
         
-        # Response schemas (outSchema) from videoSchema_response - need to infer name
-        # Convention: spec_001 -> spec_002 for response
-        outSchema_name = inSchema_name.replace("_inSchema", "_outSchema").replace("spec_001", "spec_002")
-        self.videoOutSchema = getattr(video_schema_response, outSchema_name, [])
+        print(f"[PLATFORM] 📋 Spec 로딩 시작: {self.spec_description} (ID: {self.current_spec_id})")
         
-        # Response data (inData) from videoData_response
-        inData_name = outData_name.replace("_outData", "_inData").replace("spec_001", "spec_002")
-        self.videoInMessage = getattr(video_data_response, inData_name, [])
+        # ✅ 모든 시스템은 spec/ 폴더 사용
+        print(f"[PLATFORM] 📁 모듈: spec (센서/바이오/영상 통합)")
+        import spec.Schema_request as schema_request_module
+        import spec.Data_request as data_request_module
+        import spec.Schema_response as schema_response_module
+        import spec.Data_response as data_response_module
         
-        # Response webhook schemas from videoSchema_response
-        webhookInSchema_name = webhookSchema_name.replace("spec_001", "spec_002")
-        self.videoWebhookInSchema = getattr(video_schema_response, webhookInSchema_name, [])
+        # ✅ 플랫폼은 요청 검증 + 응답 전송 (inSchema/outData 사용)
+        print(f"[PLATFORM] 🔧 타입: 요청 검증 + 응답 전송")
         
-        # Response webhook data from videoData_response
-        webhookInData_name = webhookData_name.replace("spec_001", "spec_002")
-        self.videoWebhookInData = getattr(video_data_response, webhookInData_name, [])
+        # ✅ Request 검증용 데이터 로드 (플랫폼이 시스템으로부터 받을 요청 검증) - inSchema
+        self.videoInSchema = getattr(schema_request_module, spec_names[0], [])
         
-        # print(f"[DEBUG] Loaded spec: {self.spec_description}")
-        # print(f"[DEBUG] API count: {len(self.videoMessages)}")
-        # print(f"[DEBUG] API names: {self.videoMessages}")
+        # ✅ Response 전송용 데이터 로드 (플랫폼이 시스템에게 보낼 응답) - outData
+        self.videoInMessage = getattr(data_response_module, spec_names[1], [])
+        self.videoMessages = getattr(data_response_module, spec_names[2], [])
+        
+        # ✅ Request 전송용 데이터 로드 (Server가 시스템에게 보낼 요청) - inData
+        inData_name = spec_names[1].replace("_outData", "_inData")
+        self.videoOutMessage = getattr(data_request_module, inData_name, [])
+        
+        # ✅ Response 검증용 스키마 로드 (Server가 시스템으로부터 받을 응답 검증) - outSchema
+        outSchema_name = spec_names[0].replace("_inSchema", "_outSchema")
+        self.videoOutSchema = getattr(schema_response_module, outSchema_name, [])
+        
+        # ✅ Webhook 관련 (영상보안 시스템만 사용)
+        self.videoWebhookSchema = []
+        self.videoWebhookData = []
+        self.videoWebhookInSchema = []
+        self.videoWebhookInData = []
+        
+        if self.current_spec_id == "cmga0l5mh005dihlet5fcoj0o":
+            # 영상보안만 Webhook 지원
+            webhookSchema_name = "spec_001_webhookSchema"  # 고정값
+            webhookData_name = "spec_001_webhookData"
+            self.videoWebhookSchema = getattr(video_schema_request, webhookSchema_name, [])
+            self.videoWebhookData = getattr(video_data_request, webhookData_name, [])
+            
+            webhookInSchema_name = "spec_002_webhookSchema"
+            webhookInData_name = "spec_002_webhookData"
+            self.videoWebhookInSchema = getattr(video_schema_response, webhookInSchema_name, [])
+            self.videoWebhookInData = getattr(video_data_response, webhookInData_name, [])
+        
+        print(f"[PLATFORM] ✅ 로딩 완료: {len(self.videoMessages)}개 API")
+        print(f"[PLATFORM] 📋 API 목록: {self.videoMessages}")
+        print(f"[PLATFORM] 🔄 프로토콜 설정: {self.trans_protocols}")
 
 
     def _to_detail_text(self, val_text):
@@ -862,7 +889,8 @@ class MyApp(QWidget):
                 print(f"[TIMING_DEBUG] 웹훅 모드 활성화 (API: {self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else 'N/A'})")
                 print(f"[TIMING_DEBUG] ✅ 웹훅 스레드의 join()이 동기화 처리 (수동 sleep 제거됨)")
 
-            current_timeout = CONSTANTS.time_out[self.cnt] / 1000
+            # ✅ SPEC_CONFIG에서 timeout 가져오기
+            current_timeout = (self.time_outs[self.cnt] / 1000) if self.cnt < len(self.time_outs) else 5.0
             
             # ✅ timeout=0인 경우 즉시 처리 (대기 시간 없음)
             if current_timeout == 0 or time_interval < current_timeout:
@@ -890,7 +918,8 @@ class MyApp(QWidget):
                 
                 # ✅ [TIMING_DEBUG] 시스템 요청 도착 확인
                 request_arrival_time = time.time()
-                print(f"[TIMING_DEBUG] ✅ 요청 도착 감지! API: {api_name}, 시도: {self.current_retry + 1}/{CONSTANTS.num_retries[self.cnt] if self.cnt < len(CONSTANTS.num_retries) else 1}")
+                expected_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
+                print(f"[TIMING_DEBUG] ✅ 요청 도착 감지! API: {api_name}, 시도: {self.current_retry + 1}/{expected_retries}")
                 print(f"[TIMING_DEBUG] ✅ 시스템 요청 카운트: {actual_count}회, 즉시 검증 시작합니다.")
                 
                 # ✅ 플랫폼이 검증할 데이터: 플랫폼이 보낼 응답 (videoData_response.py)
@@ -901,9 +930,9 @@ class MyApp(QWidget):
 
                 message_name = "step " + str(self.cnt + 1) + ": " + self.Server.message[self.cnt]
                 
-                # 개별 검증 횟수 처리
-                current_retries = CONSTANTS.num_retries[self.cnt] if self.cnt < len(CONSTANTS.num_retries) else 1
-                current_protocol = CONSTANTS.trans_protocol[self.cnt] if self.cnt < len(CONSTANTS.trans_protocol) else "Unknown"
+                # ✅ SPEC_CONFIG에서 검증 설정 가져오기
+                current_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
+                current_protocol = self.trans_protocols[self.cnt] if self.cnt < len(self.trans_protocols) else "basic"
 
                 # ✅ API별 누적 데이터 초기화 (시스템과 동일)
                 if not hasattr(self, 'api_accumulated_data'):
@@ -1063,75 +1092,16 @@ class MyApp(QWidget):
                             # print(f"[DEBUG][PLATFORM] 웹훅 응답 없음")
                             accumulated['data_parts'].append(f"\n--- Webhook 응답 ---\nnull")
                     
-                    # ✅ LongPolling 프로토콜인 경우 (transProtocol 기반으로만 판단)
-                    if current_protocol == "LongPolling":
-                        if "Webhook".lower() in str(current_data).lower():
-                            try:
-                                # ✅ 웹훅 데이터는 별도 리스트이므로 항상 첫 번째 요소 사용
-                                if len(self.videoWebhookInData) > 0:
-                                    self.realtime_flag = True
-                                    webhook_data = self.videoWebhookInData[0]  # 웹훅 데이터는 첫 번째 요소
-                                    webhook_url = None
-                                    # transProtocolDesc가 있으면 검사
-                                    if isinstance(webhook_data, dict):
-                                        for k in webhook_data:
-                                            if k.lower() in ["transprotocoldesc", "url", "webhookurl"]:
-                                                webhook_url = webhook_data[k]
-                                                break
-                                    # 잘못된 값이면 기본값으로 대체
-                                    if webhook_url in [None, '', 'desc', 'none', 'None'] or (isinstance(webhook_url, str) and not webhook_url.lower().startswith(('http://', 'https://'))):
-                                        webhook_url = CONSTANTS.url
-                                        for k in webhook_data:
-                                            if k.lower() in ["transprotocoldesc", "url", "webhookurl"]:
-                                                webhook_data[k] = webhook_url
-                                    # 만약 그래도 url이 없으면 아예 Webhook 검증을 skip
-                                    if webhook_url in [None, '', 'desc', 'none', 'None']:
-                                        pass  # Webhook 검증 스킵
-                                    else:
-                                        # Webhook 데이터 수집 (매 시도마다)
-                                        tmp_webhook_data = json.dumps(webhook_data, indent=4, ensure_ascii=False)
-                                        accumulated['data_parts'].append(f"\n--- Webhook (시도 {retry_attempt + 1}회차) ---\n{tmp_webhook_data}")
-                                        
-                                        # ✅ 디버깅: 웹훅 검증 스키마 확인
-                                        if retry_attempt == 0:  # 첫 시도에만 출력
-                                            print(f"\n[DEBUG] ========== 웹훅 검증 디버깅 ==========")
-                                            print(f"[DEBUG] cnt={self.cnt}, API={self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else 'N/A'}")
-                                            print(f"[DEBUG] videoWebhookInSchema 총 개수={len(self.videoWebhookInSchema)}")
-                                        
-                                        # ✅ 웹훅 스키마는 별도 리스트이므로 항상 첫 번째 요소 사용
-                                        if len(self.videoWebhookInSchema) > 0:
-                                            if retry_attempt == 0:
-                                                print(f"[DEBUG] 사용 스키마: videoWebhookInSchema[0]")
-                                                schema_to_use = self.videoWebhookInSchema[0]
-                                                if isinstance(schema_to_use, dict):
-                                                    schema_keys = list(schema_to_use.keys())[:5]
-                                                    print(f"[DEBUG] 웹훅 스키마 필드 (first 5): {schema_keys}")
-                                            
-                                            webhook_val_result, webhook_val_text, webhook_key_psss_cnt, webhook_key_error_cnt = json_check_(
-                                                self.videoWebhookInSchema[0], webhook_data, self.flag_opt
-                                            )
-                                            
-                                            if retry_attempt == 0:
-                                                print(f"[DEBUG] 웹훅 검증 결과: {webhook_val_result}, pass={webhook_key_psss_cnt}, error={webhook_key_error_cnt}")
-                                                print(f"[DEBUG] ==========================================\n")
-                                        else:
-                                            webhook_val_result, webhook_val_text, webhook_key_psss_cnt, webhook_key_error_cnt = "FAIL", "videoWebhookInSchema not found", 0, 0
-                                            if retry_attempt == 0:
-                                                print(f"[DEBUG] videoWebhookInSchema가 없습니다!")
-                                                print(f"[DEBUG] ==========================================\n")
-                                    
-                                        add_pass += webhook_key_psss_cnt
-                                        add_err += webhook_key_error_cnt
-                                    
-                                        webhook_err_txt = self._to_detail_text(webhook_val_text)
-                                        if webhook_val_result == "FAIL":
-                                            step_result = "FAIL"
-                                            combined_error_parts.append(f"[검증 {retry_attempt + 1}회차] [Webhook] " + webhook_err_txt)
-
-                            except Exception as verr:
-                                print(f"[ERROR] Webhook 처리 오류: {verr}")
-                                import traceback
-                                traceback.print_exc()
+                    # ✅ LongPolling 프로토콜인 경우 (순수 LongPolling만 처리)
+                    elif current_protocol == "LongPolling":
+                        # ✅ 박사님 요청: LongPolling은 WebHook 검증하지 않음 (WebHook 기능 미완성)
+                        # LongPolling은 서버가 이벤트 발생 시 응답을 계속 보내주는 방식
+                        if retry_attempt == 0:
+                            print(f"[LongPolling] 실시간 데이터 수신 대기 중... (API: {api_name})")
+                        
+                        # LongPolling은 기본 검증만 수행 (위에서 이미 완료됨)
+                        # 추가 검증 없음
+                        pass
                 
                 # ✅ 이번 회차 결과를 누적 데이터에 저장
                 accumulated['validation_results'].append(step_result)
@@ -1257,7 +1227,8 @@ class MyApp(QWidget):
                 if self.flag_opt:
                     add_err += tmp_fields_opt_cnt
                 
-                current_retries = CONSTANTS.num_retries[self.cnt] if self.cnt < len(CONSTANTS.num_retries) else 1
+                # ✅ SPEC_CONFIG에서 retries 가져오기
+                current_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
                 self.update_table_row_with_retries(self.cnt, "FAIL", 0, add_err, "", "Message Missing!", current_retries)
                 
                 self.cnt += 1
@@ -1388,7 +1359,9 @@ class MyApp(QWidget):
         self.selected_test_field_row = None
     
     def create_test_field_group(self):
-        """시험 분야명 그룹"""
+        """
+        ✅ Platform은 Request 검증만 - Request 스키마 ID만 표시 (3개)
+        """
         group = QGroupBox("시험 분야")
         layout = QVBoxLayout()
         
@@ -1400,56 +1373,108 @@ class MyApp(QWidget):
         self.test_field_table.verticalHeader().setVisible(False)
         self.test_field_table.setMaximumHeight(200)
         
-        # CONSTANTS.specs에서 시험 분야 로드
-        if hasattr(CONSTANTS, 'specs') and CONSTANTS.specs:
-            self.test_field_table.setRowCount(len(CONSTANTS.specs))
-            for idx, spec in enumerate(CONSTANTS.specs):
-                description = spec[5] if len(spec) > 5 else f"시험 분야 {idx + 1}"
-                item = QTableWidgetItem(description)
+        # ✅ Platform은 Request 검증 - Request 스키마 ID만 표시
+        request_spec_ids = [
+            "cmg90br3n002qihleffuljnth",  # 보안용센서 시스템 (Request)
+            "cmg7edeo50013124xiux3gbkb",  # 바이오 인식 기반 출입통제 시스템 (Request)
+            "cmg7bve25000114cevhn5o3vr",  # 영상보안 시스템 (Request)
+        ]
+        
+        if hasattr(CONSTANTS, 'SPEC_CONFIG') and CONSTANTS.SPEC_CONFIG:
+            spec_items = [(sid, CONSTANTS.SPEC_CONFIG[sid]) for sid in request_spec_ids if sid in CONSTANTS.SPEC_CONFIG]
+            self.test_field_table.setRowCount(len(spec_items))
+            
+            # spec_id와 인덱스 매핑 저장
+            self.spec_id_to_index = {}
+            self.index_to_spec_id = {}
+            
+            for idx, (spec_id, config) in enumerate(spec_items):
+                description = config.get('test_name', f'시험 분야 {idx + 1}')
+                # ✅ 플랫폼은 요청 검증 역할 명시
+                description_with_role = f"{description} (요청 검증)"
+                item = QTableWidgetItem(description_with_role)
                 item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
                 self.test_field_table.setItem(idx, 0, item)
+                
+                # 매핑 저장
+                self.spec_id_to_index[spec_id] = idx
+                self.index_to_spec_id[idx] = spec_id
             
-            # 현재 선택된 spec으로 자동 선택
-            current_spec_index = getattr(CONSTANTS, 'selected_spec_index', 0)
-            self.test_field_table.selectRow(current_spec_index)
-            self.selected_test_field_row = current_spec_index
-            
-            # 초기 로드는 initUI 완료 후에 수행하도록 플래그 설정
-            self._initial_spec_index = current_spec_index
+            # 현재 로드된 spec_id 선택
+            if self.current_spec_id in self.spec_id_to_index:
+                current_index = self.spec_id_to_index[self.current_spec_id]
+                self.test_field_table.selectRow(current_index)
+                self.selected_test_field_row = current_index
         
         layout.addWidget(self.test_field_table)
         group.setLayout(layout)
         return group
     
     def on_test_field_selected(self, row, col):
-        """시험 분야명 행 클릭 시 시험 결과 테이블의 API 목록 업데이트"""
+        """
+        ✅ SPEC_CONFIG 기반 - 시험 분야 클릭 시 해당 시스템으로 동적 전환
+        """
         try:
             self.selected_test_field_row = row
             
-            # 선택된 분야의 spec 정보 가져오기
-            if row < len(CONSTANTS.specs):
-                # CONSTANTS의 selected_spec_index 업데이트
-                CONSTANTS.selected_spec_index = row
+            # ✅ 클릭한 행에 해당하는 spec_id 가져오기
+            if row in self.index_to_spec_id:
+                new_spec_id = self.index_to_spec_id[row]
                 
-                # spec 데이터 다시 로드 (중요!)
+                # 이미 선택된 시스템이면 무시
+                if new_spec_id == self.current_spec_id:
+                    return
+                
+                print(f"[PLATFORM] 🔄 시험 분야 전환: {self.current_spec_id} → {new_spec_id}")
+                
+                # spec_id 업데이트
+                self.current_spec_id = new_spec_id
+                
+                # spec 데이터 다시 로드
                 self.load_specs_from_constants()
+                
+                # 테이블 초기화
+                self.cnt = 0
+                self.current_retry = 0
+                self.total_pass_cnt = 0
+                self.total_error_cnt = 0
+                self.message_error = []
                 
                 # step_buffers 재생성
                 self.step_buffers = [
                     {"data": "", "error": "", "result": "PASS"} for _ in range(len(self.videoMessages))
                 ]
                 
-                spec = CONSTANTS.specs[row]
-                messages_name = spec[2]  # messages_name
-                
-                # 해당 spec의 API 목록 가져오기
-                import spec.video.videoData_request as video_data_request
-                api_list = getattr(video_data_request, messages_name, [])
+                # trace 초기화 (Server 객체에 있음)
+                if hasattr(self.Server, 'trace'):
+                    self.Server.trace.clear()
                 
                 # 시험 결과 테이블 업데이트
-                self.update_result_table_with_apis(api_list)
+                self.update_result_table_with_apis(self.videoMessages)
                 
-                print(f"[DEBUG] 시험 분야 선택: {spec[5]}, API 수: {len(api_list)}")
+                # Server 객체 초기화
+                if hasattr(self, 'Server'):
+                    self.Server.cnt = 0
+                    self.Server.message = self.videoMessages
+                    self.Server.outMessage = self.videoOutMessage
+                    self.Server.inMessage = self.videoInMessage
+                    self.Server.outSchema = self.videoOutSchema
+                    self.Server.inSchema = self.videoInSchema
+                    self.Server.webhookSchema = self.videoWebhookSchema
+                    self.Server.webhookData = self.videoWebhookData
+                
+                # 설정 다시 로드
+                self.get_setting()
+                
+                # 평가 점수 디스플레이 초기화
+                self.update_score_display()
+                
+                # 결과 텍스트 초기화
+                self.valResult.clear()
+                self.valResult.append(f"✅ 시스템 전환 완료: {self.spec_description}")
+                self.valResult.append(f"📋 API 목록 ({len(self.videoMessages)}개): {self.videoMessages}\n")
+                
+                print(f"[PLATFORM] ✅ 시스템 전환 완료: {self.spec_description}, API 수: {len(self.videoMessages)}")
         except Exception as e:
             print(f"시험 분야 선택 처리 실패: {e}")
             import traceback
@@ -1797,10 +1822,10 @@ class MyApp(QWidget):
             except:
                 schema_data = None
             
-            # 웹훅 검증인 경우에만 웹훅 스키마 (transProtocol 기반으로만 판단)
+            # ✅ 웹훅 검증인 경우에만 웹훅 스키마 (SPEC_CONFIG 기반)
             webhook_schema = None
-            if row < len(CONSTANTS.trans_protocol):
-                current_protocol = CONSTANTS.trans_protocol[row]
+            if row < len(self.trans_protocols):
+                current_protocol = self.trans_protocols[row]
                 if current_protocol == "WebHook":
                     try:
                         webhook_schema = self.videoWebhookSchema[0] if len(self.videoWebhookSchema) > 0 else None
