@@ -896,7 +896,9 @@ class MyApp(QWidget):
             
             for idx, (spec_id, config) in enumerate(spec_items):
                 description = config.get('test_name', f'시험 분야 {idx + 1}')
-                item = QTableWidgetItem(description)
+                # ✅ 시스템은 응답 검증 역할 명시
+                description_with_role = f"{description} (응답 검증)"
+                item = QTableWidgetItem(description_with_role)
                 item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
                 self.test_field_table.setItem(idx, 0, item)
                 
