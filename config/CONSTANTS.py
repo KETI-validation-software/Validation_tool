@@ -87,21 +87,21 @@ SPEC_CONFIG = {
     # === 시스템 입장 ===
     "cmgatbdp000bqihlexmywusvq": {
         "test_name": "보안용 센서 시스템",
-        "specs": ['cmgatbdp000bqihlexmywusvq_inSchema', 'cmgatbdp000bqihlexmywusvq_outData', 'cmgatbdp000bqihlexmywusvq_messages'],
+        "specs": ['cmgatbdp000bqihlexmywusvq_outSchema', 'cmgatbdp000bqihlexmywusvq_inData', 'cmgatbdp000bqihlexmywusvq_messages'],
         "trans_protocol": ['basic', 'LongPolling', 'basic', 'LongPolling', 'LongPolling', 'basic', 'basic'],
         "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000],
         "num_retries": [2, 2, 2, 2, 2, 2, 2]
     },
     "cmgasj98w009aihlezm0fe6cs": {
         "test_name": "바이오 인식 기반 출입통제 시스템",
-        "specs": ['cmgasj98w009aihlezm0fe6cs_inSchema', 'cmgasj98w009aihlezm0fe6cs_outData', 'cmgasj98w009aihlezm0fe6cs_messages'],
+        "specs": ['cmgasj98w009aihlezm0fe6cs_outSchema', 'cmgasj98w009aihlezm0fe6cs_inData', 'cmgasj98w009aihlezm0fe6cs_messages'],
         "trans_protocol": ['basic', 'LongPolling', 'basic', 'basic', 'LongPolling', 'basic', 'LongPolling', 'basic'],
         "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
         "num_retries": [2, 2, 1, 2, 2, 2, 2, 1]
     },
     "cmga0l5mh005dihlet5fcoj0o": {
         "test_name": "영상보안 시스템",
-        "specs": ['cmga0l5mh005dihlet5fcoj0o_inSchema', 'cmga0l5mh005dihlet5fcoj0o_outData', 'cmga0l5mh005dihlet5fcoj0o_messages'],
+        "specs": ['cmga0l5mh005dihlet5fcoj0o_outSchema', 'cmga0l5mh005dihlet5fcoj0o_inData', 'cmga0l5mh005dihlet5fcoj0o_messages'],
         "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'LongPolling', 'basic', 'basic', 'basic', 'basic', 'basic'],
         "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
         "num_retries": [2, 1, 2, 2, 1, 1, 1, 1, 3, 1, 2, 2]
