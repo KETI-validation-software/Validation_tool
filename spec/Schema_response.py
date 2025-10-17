@@ -316,6 +316,14 @@ cmga0l5mh005dihlet5fcoj0o_ReplayURL_out_schema = {
 cmga0l5mh005dihlet5fcoj0o_RealtimeVideoEventInfos_out_schema = {
     "code": str,
     "message": str,
+    "camList": [{
+    "camID": str,
+    "eventUUID": str,
+    "eventName": str,
+    "startTime": float,
+    OptionalKey("endTime"): float,
+    OptionalKey("eventDesc"): str,
+}],
 }
 
 # StoredVideoEventInfos

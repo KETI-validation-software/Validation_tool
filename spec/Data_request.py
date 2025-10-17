@@ -65,7 +65,7 @@ cmgatbdp000bqihlexmywusvq_SensorDeviceControl_in_data = {
 }
 
 # cmgatbdp000bqihlexmywusvq 데이터 리스트
-cmgatbdp000bqihlexmywusvq_outData = [
+cmgatbdp000bqihlexmywusvq_inData = [
     cmgatbdp000bqihlexmywusvq_Authentication_in_data,
     cmgatbdp000bqihlexmywusvq_Capabilities_in_data,
     cmgatbdp000bqihlexmywusvq_SensorDeviceProfiles_in_data,
@@ -154,7 +154,7 @@ cmgasj98w009aihlezm0fe6cs_DoorControl_in_data = {
 }
 
 # cmgasj98w009aihlezm0fe6cs 데이터 리스트
-cmgasj98w009aihlezm0fe6cs_outData = [
+cmgasj98w009aihlezm0fe6cs_inData = [
     cmgasj98w009aihlezm0fe6cs_Authentication_in_data,
     cmgasj98w009aihlezm0fe6cs_Capabilities_in_data,
     cmgasj98w009aihlezm0fe6cs_DoorProfiles_in_data,
@@ -230,31 +230,17 @@ cmga0l5mh005dihlet5fcoj0o_ReplayURL_in_data = {
 cmga0l5mh005dihlet5fcoj0o_RealtimeVideoEventInfos_in_data = {
     "camList": [
         {
-        "camID": "",
-        "eventUUID": "",
-        "eventName": "",
-        "startTime": 0,
-        "endTime": 0,
-        "eventDesc": ""
-    }
-]
-}
-
-# RealtimeVideoEventInfos WebHook OUT Data
-cmga0l5mh005dihlet5fcoj0o_RealtimeVideoEventInfos_webhook_out_data = {
-    "camList": [
-        {
         "camID": ""
     }
 ],
-    "duration": 100,
+    "duration": 10,
     "transProtocol": {
-    "transProtocolType": "WebHook",
-    "transProtocolDesc": "http://127.0.0.1:8090/RealtimeVideoEventInfos"
+    "transProtocolType": "LongPolling",
+    "transProtocolDesc": ""
 },
     "eventFilter": "배회",
     "classFilter": "사람",
-    "startTime": 1760512020000
+    "startTime": 1760602920000
 }
 
 # StoredVideoEventInfos
@@ -317,7 +303,7 @@ cmga0l5mh005dihlet5fcoj0o_PtzStop_in_data = {
 }
 
 # cmga0l5mh005dihlet5fcoj0o 데이터 리스트
-cmga0l5mh005dihlet5fcoj0o_outData = [
+cmga0l5mh005dihlet5fcoj0o_inData = [
     cmga0l5mh005dihlet5fcoj0o_Authentication_in_data,
     cmga0l5mh005dihlet5fcoj0o_Capabilities_in_data,
     cmga0l5mh005dihlet5fcoj0o_CameraProfiles_in_data,
@@ -325,7 +311,6 @@ cmga0l5mh005dihlet5fcoj0o_outData = [
     cmga0l5mh005dihlet5fcoj0o_StreamURLs_in_data,
     cmga0l5mh005dihlet5fcoj0o_ReplayURL_in_data,
     cmga0l5mh005dihlet5fcoj0o_RealtimeVideoEventInfos_in_data,
-    cmga0l5mh005dihlet5fcoj0o_RealtimeVideoEventInfos_webhook_out_data,
     cmga0l5mh005dihlet5fcoj0o_StoredVideoEventInfos_in_data,
     cmga0l5mh005dihlet5fcoj0o_StoredObjectAnalyticsInfos_in_data,
     cmga0l5mh005dihlet5fcoj0o_PtzStatus_in_data,
