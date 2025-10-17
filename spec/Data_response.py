@@ -95,7 +95,7 @@ cmg90br3n002qihleffuljnth_SensorDeviceControl_out_data = {
 }
 
 # cmg90br3n002qihleffuljnth 데이터 리스트
-cmg90br3n002qihleffuljnth_inData = [
+cmg90br3n002qihleffuljnth_outData = [
     cmg90br3n002qihleffuljnth_Authentication_out_data,
     cmg90br3n002qihleffuljnth_Capabilities_out_data,
     cmg90br3n002qihleffuljnth_SensorDeviceProfiles_out_data,
@@ -247,7 +247,7 @@ cmg7edeo50013124xiux3gbkb_DoorControl_out_data = {
 }
 
 # cmg7edeo50013124xiux3gbkb 데이터 리스트
-cmg7edeo50013124xiux3gbkb_inData = [
+cmg7edeo50013124xiux3gbkb_outData = [
     cmg7edeo50013124xiux3gbkb_Authentication_out_data,
     cmg7edeo50013124xiux3gbkb_Capabilities_out_data,
     cmg7edeo50013124xiux3gbkb_DoorProfiles_out_data,
@@ -464,7 +464,7 @@ cmg7bve25000114cevhn5o3vr_PtzStop_out_data = {
 }
 
 # cmg7bve25000114cevhn5o3vr 데이터 리스트
-cmg7bve25000114cevhn5o3vr_inData = [
+cmg7bve25000114cevhn5o3vr_outData = [
     cmg7bve25000114cevhn5o3vr_Authentication_out_data,
     cmg7bve25000114cevhn5o3vr_Capabilities_out_data,
     cmg7bve25000114cevhn5o3vr_CameraProfiles_out_data,

@@ -721,12 +721,7 @@ class MyApp(QWidget):
         if len(spec_names) < 3:
             raise ValueError(f"spec_id '{self.current_spec_id}'의 specs 설정이 올바르지 않습니다! (최소 3개 필요)")
         
-        inSchema_name = spec_names[0]  # 예: "cmgatbdp000bqihlexmywusvq_inSchema"
-        outData_name = spec_names[1]   # 예: "cmgatbdp000bqihlexmywusvq_outData"
-        messages_name = spec_names[2]  # 예: "cmgatbdp000bqihlexmywusvq_messages"
-        
         print(f"[PLATFORM] 📋 Spec 로딩 시작: {self.spec_description} (ID: {self.current_spec_id})")
-        print(f"[PLATFORM] 🔧 Schema: {inSchema_name}, Data: {outData_name}, Messages: {messages_name}")
         
         # ✅ 모든 시스템은 spec/ 폴더 사용
         print(f"[PLATFORM] 📁 모듈: spec (센서/바이오/영상 통합)")
@@ -735,21 +730,23 @@ class MyApp(QWidget):
         import spec.Schema_response as schema_response_module
         import spec.Data_response as data_response_module
         
-        # ✅ Request 데이터 로드 (플랫폼이 시스템에게 보낼 요청)
-        # CONSTANTS의 outData는 실제로는 inData를 가리킴 (명명 혼동 방지)
-        inData_name_actual = outData_name.replace("_outData", "_inData")
+        # ✅ 플랫폼은 요청 검증 + 응답 전송 (inSchema/outData 사용)
+        print(f"[PLATFORM] 🔧 타입: 요청 검증 + 응답 전송")
         
-        self.videoInSchema = getattr(schema_request_module, inSchema_name, [])
-        self.videoOutMessage = getattr(data_request_module, inData_name_actual, [])
-        self.videoMessages = getattr(data_request_module, messages_name, [])
+        # ✅ Request 검증용 데이터 로드 (플랫폼이 시스템으로부터 받을 요청 검증) - inSchema
+        self.videoInSchema = getattr(schema_request_module, spec_names[0], [])
         
-        # ✅ Response 데이터 로드 (플랫폼이 시스템으로부터 받을 응답)
-        # 명명 규칙: inSchema -> outSchema, inData -> outData
-        outSchema_name = inSchema_name.replace("_inSchema", "_outSchema")
-        outData_name_actual = outData_name.replace("_outData", "_outData")  # 이미 맞음
+        # ✅ Response 전송용 데이터 로드 (플랫폼이 시스템에게 보낼 응답) - outData
+        self.videoInMessage = getattr(data_response_module, spec_names[1], [])
+        self.videoMessages = getattr(data_response_module, spec_names[2], [])
         
+        # ✅ Request 전송용 데이터 로드 (Server가 시스템에게 보낼 요청) - inData
+        inData_name = spec_names[1].replace("_outData", "_inData")
+        self.videoOutMessage = getattr(data_request_module, inData_name, [])
+        
+        # ✅ Response 검증용 스키마 로드 (Server가 시스템으로부터 받을 응답 검증) - outSchema
+        outSchema_name = spec_names[0].replace("_inSchema", "_outSchema")
         self.videoOutSchema = getattr(schema_response_module, outSchema_name, [])
-        self.videoInMessage = getattr(data_response_module, outData_name_actual, [])
         
         # ✅ Webhook 관련 (영상보안 시스템만 사용)
         self.videoWebhookSchema = []
@@ -1448,8 +1445,9 @@ class MyApp(QWidget):
                     {"data": "", "error": "", "result": "PASS"} for _ in range(len(self.videoMessages))
                 ]
                 
-                # trace 초기화
-                self.trace.clear()
+                # trace 초기화 (Server 객체에 있음)
+                if hasattr(self.Server, 'trace'):
+                    self.Server.trace.clear()
                 
                 # 시험 결과 테이블 업데이트
                 self.update_result_table_with_apis(self.videoMessages)
@@ -1464,6 +1462,9 @@ class MyApp(QWidget):
                     self.Server.inSchema = self.videoInSchema
                     self.Server.webhookSchema = self.videoWebhookSchema
                     self.Server.webhookData = self.videoWebhookData
+                
+                # 설정 다시 로드
+                self.get_setting()
                 
                 # 평가 점수 디스플레이 초기화
                 self.update_score_display()

@@ -736,39 +736,23 @@ class MyApp(QWidget):
         import spec.Schema_response as schema_response_module
         import spec.Data_response as data_response_module
         
-        # ✅ spec_id로 Request/Response 구분
-        # Request 스키마에 있는 spec_id: cmg90..., cmg7e..., cmg7b...
-        # Response 스키마에 있는 spec_id: cmgat..., cmgas..., cmga0...
-        request_spec_ids = ["cmg90br3n002qihleffuljnth", "cmg7edeo50013124xiux3gbkb", "cmg7bve25000114cevhn5o3vr"]
+        # ✅ 시스템은 응답 검증 + 요청 전송 (outSchema/inData 사용)
+        print(f"[SYSTEM] 🔧 타입: 응답 검증 + 요청 전송")
         
-        if self.current_spec_id in request_spec_ids:
-            # Request 스키마 사용 (System이 플랫폼으로부터 받는 요청)
-            print(f"[SYSTEM] 🔧 타입: Request 검증 (System이 받을 요청)")
-            inData_name_actual = spec_names[1].replace("_outData", "_inData")
-            
-            self.videoInSchema = getattr(schema_request_module, spec_names[0], [])
-            self.videoOutMessage = getattr(data_request_module, inData_name_actual, [])
-            self.videoMessages = getattr(data_request_module, spec_names[2], [])
-            
-            # Response는 outSchema/outData 사용
-            outSchema_name = spec_names[0].replace("_inSchema", "_outSchema")
-            outData_name = spec_names[1]  # 그대로 사용
-            self.videoOutSchema = getattr(schema_response_module, outSchema_name, [])
-            self.videoInMessage = getattr(data_response_module, outData_name, [])
-        else:
-            # Response 스키마 사용 (System이 플랫폼에게 보낼 응답)
-            print(f"[SYSTEM] 🔧 타입: Response 검증 (System이 보낼 응답)")
-            inData_name_actual = spec_names[1].replace("_outData", "_inData")
-            
-            # Request는 inSchema/inData 사용
-            self.videoInSchema = getattr(schema_request_module, spec_names[0], [])
-            self.videoOutMessage = getattr(data_request_module, inData_name_actual, [])
-            self.videoMessages = getattr(data_request_module, spec_names[2], [])
-            
-            # Response는 outSchema/outData 사용
-            outSchema_name = spec_names[0].replace("_inSchema", "_outSchema")
-            self.videoOutSchema = getattr(schema_response_module, outSchema_name, [])
-            self.videoInMessage = getattr(data_response_module, spec_names[1], [])
+        # ✅ Response 검증용 스키마 로드 (시스템이 플랫폼으로부터 받을 응답 검증) - outSchema
+        self.videoOutSchema = getattr(schema_response_module, spec_names[0], [])
+        
+        # ✅ Request 전송용 데이터 로드 (시스템이 플랫폼에게 보낼 요청) - inData
+        self.videoOutMessage = getattr(data_request_module, spec_names[1], [])
+        self.videoMessages = getattr(data_request_module, spec_names[2], [])
+        
+        # ✅ Request 검증용 스키마 로드 (플랫폼으로부터 받을 요청 검증용, 역방향) - inSchema
+        inSchema_name = spec_names[0].replace("_outSchema", "_inSchema")
+        self.videoInSchema = getattr(schema_request_module, inSchema_name, [])
+        
+        # ✅ Response 전송용 데이터 로드 (플랫폼에게 보낼 응답용, 역방향) - outData
+        outData_name = spec_names[1].replace("_inData", "_outData")
+        self.videoInMessage = getattr(data_response_module, outData_name, [])
         
         # ✅ Webhook 관련 (현재 미사용)
         self.videoWebhookSchema = []
