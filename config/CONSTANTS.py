@@ -8,21 +8,21 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소 (플랫폼과 시스템이 같은 PC에서 실행되더야 함, 변경하면 평가 작동 안됌ㅜ)
 #test-info -> (주의) auth_info의 id, pw admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음!!!!!!!
-company_name = "통합플랫폼기업"
-product_name = "통합플랫폼테스트"
+company_name = "물리보안시스템테스트"
+product_name = "물리보안시스템"
 version = "v1.0"
 test_category = "본시험"
 test_target = "통합시스템"
 test_range = "ALL_FIELDS"
 auth_type = "Digest Auth"
 auth_info = "admin,1234"
-admin_code = "123456789"
+admin_code = "1234"
 url = "https://127.0.0.1:8080"
 
 
-specs = [["cmgatbdp000bqihlexmywusvq_outSchema","cmgatbdp000bqihlexmywusvq_outData","cmgatbdp000bqihlexmywusvq_messages",""],
-         ["cmgasj98w009aihlezm0fe6cs_outSchema","cmgasj98w009aihlezm0fe6cs_outData","cmgasj98w009aihlezm0fe6cs_messages",""],
-         ["cmga0l5mh005dihlet5fcoj0o_outSchema","cmga0l5mh005dihlet5fcoj0o_outData","cmga0l5mh005dihlet5fcoj0o_messages",""]]
+specs = [["cmgatbdp000bqihlexmywusvq_outSchema","cmgatbdp000bqihlexmywusvq_inData","cmgatbdp000bqihlexmywusvq_messages",""],
+         ["cmgasj98w009aihlezm0fe6cs_outSchema","cmgasj98w009aihlezm0fe6cs_inData","cmgasj98w009aihlezm0fe6cs_messages",""],
+         ["cmga0l5mh005dihlet5fcoj0o_outSchema","cmga0l5mh005dihlet5fcoj0o_inData","cmga0l5mh005dihlet5fcoj0o_messages",""]]
 
 
 
@@ -44,20 +44,20 @@ enable_retry_delay = False  # False 권장: 불필요한 sleep 제거
 
 #test-opt
 '''
-specification.id별 step 설정
-각 spec의 steps 순서대로 trans_protocol, time_out, num_retries 설정
-trans_protocol : 메시지별 실시간 송수신 메시지 여부, None-실시간 아님, LongPolling, WebHook은 설정에 따라 동작 -> 잠깐 웹훅으로 변경
-time_out : 메시지별 timeout 설정 시간 (ms)
-num_retries : 메시지별 메시지 검증 횟수
+✅ SPEC_CONFIG: specification.id별 설정 (통합 관리)
+- 각 spec의 API별로 trans_protocol, time_out, num_retries 설정
+- trans_protocol: 'basic' (일반), 'LongPolling' (실시간), 'WebHook' (웹훅, 현재 미완성)
+- time_out: 메시지별 timeout 설정 시간 (ms)
+- num_retries: 메시지별 검증 반복 횟수
 '''
 
-#나중에 삭제
-trans_protocol = [None, None, None, None, None, None, 'WebHook', None, None]
-time_out = [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000]
-num_retries = [1, 2, 3, 2, 1, 2, 3, 2, 1]
+# ❌ 기존 방식 (삭제됨 - 아래 SPEC_CONFIG로 통합)
+# trans_protocol = [None, None, None, None, None, None, 'WebHook', None, None]
+# time_out = [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000]
+# num_retries = [1, 2, 3, 2, 1, 2, 3, 2, 1]
 
 
-# specification.id별 설정
+# ✅ specification.id별 설정 (신규 통합 방식) - 위 3개가 응답, 아래 3개가 요청
 SPEC_CONFIG = {
     "cmg90br3n002qihleffuljnth": {
         "test_name": "보안용센서 시스템",
@@ -102,7 +102,7 @@ SPEC_CONFIG = {
     "cmga0l5mh005dihlet5fcoj0o": {
         "test_name": "영상보안 시스템",
         "specs": ['cmga0l5mh005dihlet5fcoj0o_inSchema', 'cmga0l5mh005dihlet5fcoj0o_outData', 'cmga0l5mh005dihlet5fcoj0o_messages'],
-        "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'WebHook', 'basic', 'basic', 'basic', 'basic', 'basic'],
+        "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'LongPolling', 'basic', 'basic', 'basic', 'basic', 'basic'],
         "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
         "num_retries": [2, 1, 2, 2, 1, 1, 1, 1, 3, 1, 2, 2]
     }
