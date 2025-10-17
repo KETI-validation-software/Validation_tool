@@ -1,0 +1,4 @@
+{"time": "2025-10-17T07:41:15.635581Z", "api": "RealtimeSensorEventInfos", "dir": "REQUEST", "data": {}}
+{"time": "2025-10-17T07:41:15.636554Z", "api": "RealtimeSensorEventInfos", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}
+{"time": "2025-10-17T07:41:17.671758Z", "api": "RealtimeSensorEventInfos", "dir": "REQUEST", "data": {}}
+{"time": "2025-10-17T07:41:17.671758Z", "api": "RealtimeSensorEventInfos", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}

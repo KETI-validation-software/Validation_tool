@@ -15,11 +15,6 @@ from core.functions import json_check_, save_result, resource_path, field_finder
 
 import spec
 # Dynamic spec imports - will be loaded based on CONSTANTS.specs
-# Import modules for dynamic attribute access
-import spec.video.videoData_response as video_data_response
-import spec.video.videoData_request as video_data_request
-import spec.video.videoSchema_request as video_schema_request
-import spec.video.videoSchema_response as video_schema_response
 
 import config.CONSTANTS as CONSTANTS
 
@@ -1016,8 +1011,15 @@ class MyApp(QWidget):
                                 schema_keys = list(schema_to_use.keys())[:5]
                                 print(f"[DEBUG] 스키마 필드 (first 5): {schema_keys}")
                     
-                    val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.videoInSchema[self.cnt],
-                                                                            current_data, self.flag_opt)
+                    # 맞춰야함 - functions.py의 json_check_(맥락 검증 추가함)
+                    result_dict = json_check_(self.videoInSchema[self.cnt], current_data, self.flag_opt)
+                    structure = result_dict["structure_result"]
+                    semantic = result_dict["semantic_result"]
+
+                    val_result = structure["result"]
+                    val_text = structure["error_msg"]
+                    key_psss_cnt = structure["correct_cnt"]
+                    key_error_cnt = structure["error_cnt"]
                     
                     if retry_attempt == 0:  # 첫 시도에만 출력
                         print(f"[DEBUG] 검증 결과: {val_result}, pass={key_psss_cnt}, error={key_error_cnt}")

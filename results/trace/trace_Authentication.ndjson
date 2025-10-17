@@ -1,2 +1,4 @@
-{"time": "2025-10-16T03:33:19.975288Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "user001", "userPW": "pass001"}}
-{"time": "2025-10-16T03:33:19.975288Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "userName": "관리자", "userAff": "오산시청", "accessToken": "abcde1234"}}
+{"time": "2025-10-17T07:40:55.658073Z", "api": "Authentication", "dir": "REQUEST", "data": {}}
+{"time": "2025-10-17T07:40:55.659070Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "404", "message": "No response data for this API"}}
+{"time": "2025-10-17T07:40:57.664042Z", "api": "Authentication", "dir": "REQUEST", "data": {}}
+{"time": "2025-10-17T07:40:57.665039Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "404", "message": "No response data for this API"}}

@@ -2,6 +2,153 @@ import numpy
 import pandas as pd
 import json_checker
 
+# 1단계: validation_request.py에서 규칙 dict 추출 함수
+def extract_validation_rules(validation_dict):
+    """
+    validation_dict: 각 API별 _in_validation dict (ex: cmg90br3n002qihleffuljnth_Authentication_in_validation)
+    반환: {필드명: 검증규칙 dict, ...} 형태로 평탄화
+    """
+    rules = {}
+    def _flatten(prefix, d):
+        for k, v in d.items():
+            field_name = f"{prefix}.{k}" if prefix else k
+            if isinstance(v, dict) and ("validationType" in v or "enabled" in v):
+                rules[field_name] = v
+            elif isinstance(v, dict):
+                _flatten(field_name, v)
+    _flatten("", validation_dict)
+    return rules
+
+# 2단계: semantic validation logic (4.1~4.8)
+import re
+def do_semantic_checker(rules_dict, data_dict):
+    """
+    rules_dict: extract_validation_rules로 추출한 {필드명: 규칙 dict}
+    data_dict: 실제 데이터(dict)
+    반환: {필드명: {'result': PASS/FAIL, 'score': int, 'msg': str}} + total_score
+    """
+    results = {}
+    total_score = 0
+    max_score = 0
+    for field, rule in rules_dict.items():
+        # 필드명은 중첩 가능 (a.b.c)
+        keys = field.split('.')
+        value = data_dict
+        for k in keys:
+            if isinstance(value, dict) and k in value:
+                value = value[k]
+            else:
+                value = None
+                break
+        # 점수 처리
+        score = rule.get('score', 1)
+        max_score += score
+        # 비활성화된 필드는 PASS 처리
+        if not rule.get('enabled', True):
+            results[field] = {'result': 'SKIP', 'score': 0, 'msg': 'Validation disabled'}
+            continue
+        vtype = rule.get('validationType', None)
+        msg = ''
+        passed = True
+
+        # 4.1 valid-value-match
+        if vtype == 'valid-value-match':
+            allowed = rule.get('allowedValues', [])
+            if value not in allowed:
+                passed = False
+                msg = f"Value '{value}' not in allowedValues {allowed}"
+
+        # 4.2 specified-value-match
+        elif vtype == 'specified-value-match':
+            specified = rule.get('specifiedValue', None)
+            if value != specified:
+                passed = False
+                msg = f"Value '{value}' does not match specifiedValue '{specified}'"
+
+        # 4.3 range
+        elif vtype == 'range':
+            minv = rule.get('min', None)
+            maxv = rule.get('max', None)
+            try:
+                v = float(value)
+                if (minv is not None and v < minv) or (maxv is not None and v > maxv):
+                    passed = False
+                    msg = f"Value {v} not in range [{minv}, {maxv}]"
+            except Exception:
+                passed = False
+                msg = f"Value '{value}' is not a number"
+
+        # 4.4 length
+        elif vtype == 'length':
+            minl = rule.get('minLength', None)
+            maxl = rule.get('maxLength', None)
+            try:
+                l = len(value)
+                if (minl is not None and l < minl) or (maxl is not None and l > maxl):
+                    passed = False
+                    msg = f"Length {l} not in range [{minl}, {maxl}]"
+            except Exception:
+                passed = False
+                msg = f"Value '{value}' has no length"
+
+        # 4.5 regex
+        elif vtype == 'regex':
+            pattern = rule.get('pattern', None)
+            if pattern is not None:
+                try:
+                    if not re.fullmatch(pattern, str(value)):
+                        passed = False
+                        msg = f"Value '{value}' does not match regex '{pattern}'"
+                except Exception as e:
+                    passed = False
+                    msg = f"Regex error: {e}"
+            else:
+                passed = False
+                msg = "No regex pattern specified"
+
+        # 4.6 required
+        elif vtype == 'required':
+            if value is None or value == '':
+                passed = False
+                msg = "Field is required but missing or empty"
+                
+        # 4.7 unique (list 내 중복 불가)
+        elif vtype == 'unique':
+            if isinstance(value, list):
+                if len(value) != len(set(value)):
+                    passed = False
+                    msg = "List contains duplicate values"
+            else:
+                passed = False
+                msg = "Field is not a list for unique validation"
+        # 4.8 custom (customFunction)
+        elif vtype == 'custom':
+            func = rule.get('customFunction', None)
+            if callable(func):
+                try:
+                    if not func(value):
+                        passed = False
+                        msg = f"Custom function failed for value '{value}'"
+                except Exception as e:
+                    passed = False
+                    msg = f"Custom function error: {e}"
+            else:
+                passed = False
+                msg = "No custom function provided"
+        # 기타/미지정 validationType
+        else:
+            # validationType이 없으면 무시 (PASS)
+            pass
+        # 결과 기록
+        if passed:
+            results[field] = {'result': 'PASS', 'score': score, 'msg': msg}
+            total_score += score
+        else:
+            results[field] = {'result': 'FAIL', 'score': 0, 'msg': msg}
+    results['total_score'] = total_score
+    results['max_score'] = max_score
+    return results
+
 # OptionalKey 안전 길이 확인 함수
 def safe_len(obj):
     """OptionalKey와 같은 객체에 대해 안전하게 len() 호출"""

@@ -16,12 +16,6 @@ from collections import defaultdict
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 warnings.filterwarnings('ignore')
 
-# Dynamic spec imports - will be loaded based on CONSTANTS.specs
-# Import modules for dynamic attribute access
-import spec.video.videoData_response as video_data_response
-import spec.video.videoData_request as video_data_request
-import spec.video.videoSchema_request as video_schema_request
-import spec.video.videoSchema_response as video_schema_response
 from urllib.parse import urlparse
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor
@@ -717,7 +711,7 @@ class MyApp(QWidget):
         
         # ✅ 설정 정보 추출
         self.spec_description = config.get('test_name', 'Unknown Test')
-        spec_names = config.get('specs', [])
+        spec_names = config.get('specs', [])    # ['cmg7bve25000114cevhn5o3vr_inSchema', 'cmg7bve25000114cevhn5o3vr_outData', 'cmg7bve25000114cevhn5o3vr_messages'] 이런거
         
         # ✅ trans_protocol, time_out, num_retries 저장
         self.trans_protocols = config.get('trans_protocol', [])
@@ -733,7 +727,7 @@ class MyApp(QWidget):
         print(f"[SYSTEM] 📁 모듈: spec (센서/바이오/영상 통합)")
         import spec.Schema_request as schema_request_module
         import spec.Data_request as data_request_module
-        import spec.Schema_response as schema_response_module
+        import spec.Schema_response as schema_response_module   # 사용
         import spec.Data_response as data_response_module
         
         # ✅ 시스템은 응답 검증 + 요청 전송 (outSchema/inData 사용)
@@ -1383,8 +1377,16 @@ class MyApp(QWidget):
                                     schema_keys = list(schema_to_use.keys())[:5]
                                     print(f"[DEBUG] 스키마 필드 (first 5): {schema_keys}")
                         
-                        val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.outSchema[self.cnt],
-                                                                                            res_data, self.flag_opt)
+                        # 수정된 부분
+                        result_dict = json_check_(self.outSchema[self.cnt], res_data, self.flag_opt)
+                        structure = result_dict["structure_result"]
+                        semantic = result_dict["semantic_result"]
+
+                        val_result = structure["result"]
+                        val_text = structure["error_msg"]
+                        key_psss_cnt = structure["correct_cnt"]
+                        key_error_cnt = structure["error_cnt"]
+
                         if self.message[self.cnt] == "Authentication":
                             self.handle_authentication_response(res_data)
                         
@@ -1524,8 +1526,8 @@ class MyApp(QWidget):
                         self.current_retry += 1
 
                         # 현재 API의 모든 재시도가 완료되었는지 확인
-                        if (self.cnt < len(CONSTANTS.num_retries) and
-                            self.current_retry >= CONSTANTS.num_retries[self.cnt]):
+                        if (self.cnt < len(self.num_retries_list) and
+                            self.current_retry >= self.num_retries_list[self.cnt]):
 
                             self.step_buffers[self.cnt]["events"] = list(self.trace.get(self.cnt, []))
                             print("seo", self.step_buffers[self.cnt]["events"])
@@ -1539,8 +1541,8 @@ class MyApp(QWidget):
                         self.processing_response = False
 
                         # 재시도 여부에 따라 대기 시간 조정 (플랫폼과 동기화)
-                        if (self.cnt < len(CONSTANTS.num_retries) and
-                            self.current_retry < CONSTANTS.num_retries[self.cnt] - 1):
+                        if (self.cnt < len(self.num_retries_list) and
+                            self.current_retry < self.num_retries_list[self.cnt] - 1):
                             self.time_pre = time.time() + 2.0  # 재시도 예정 시 2초 대기 (플랫폼과 동일)
                         else:
                             self.time_pre = time.time() + 2.0  # 마지막 시도 후 2초 대기
