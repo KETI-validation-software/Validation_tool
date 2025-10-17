@@ -6,14 +6,13 @@
 === 스텝별 결과 ===
 Authentication | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
 Capabilities | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-DoorProfiles | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-AccessUserInfos | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-RealtimeVerifEventInfos | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-StoredVerifEventInfos | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-RealtimeDoorStatus | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-DoorControl | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
+SensorDeviceProfiles | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
+RealtimeSensorData | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
+RealtimeSensorEventInfos | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
+StoredSensorEventInfos | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
+SensorDeviceControl | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
 
 === 전체 로그 ===
-✅ 시스템 전환 완료: 바이오 인식 기반 출입통제 시스템
-📋 API 목록 (8개): ['Authentication', 'Capabilities', 'DoorProfiles', 'AccessUserInfos', 'RealtimeVerifEventInfos', 'StoredVerifEventInfos', 'RealtimeDoorStatus', 'DoorControl']
+✅ 시스템 전환 완료: 보안용 센서 시스템
+📋 API 목록 (7개): ['Authentication', 'Capabilities', 'SensorDeviceProfiles', 'RealtimeSensorData', 'RealtimeSensorEventInfos', 'StoredSensorEventInfos', 'SensorDeviceControl']
 
