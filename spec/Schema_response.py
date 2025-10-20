@@ -271,7 +271,6 @@ cmga0l5mh005dihlet5fcoj0o_StoredVideoInfos_out_schema = {
     OptionalKey("endTime"): float,
 }],
 }],
-    "camID2": str,
 }
 
 # StreamURLs

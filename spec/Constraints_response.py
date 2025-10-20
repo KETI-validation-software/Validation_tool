@@ -12,7 +12,7 @@ cmg90br3n002qihleffuljnth_RealtimeSensorData_out_constraints = {
   "sensorDeviceList.sensorDeviceID": {
     "valueType": "request-based",
     "required": True,
-    "referenceEndpoint": "/SensorDeviceProfiles",
+    "referenceEndpoint": "/SensorDeviceControl",
     "referenceField": "sensorDeviceID"
   },
   "sensorDeviceList.measureTime": {
@@ -31,7 +31,7 @@ cmg90br3n002qihleffuljnth_RealtimeSensorEventInfos_out_constraints = {
   "sensorDeviceList.sensorDeviceID": {
     "valueType": "request-based",
     "required": True,
-    "referenceEndpoint": "/SensorDeviceProfiles",
+    "referenceEndpoint": "/SensorDeviceControl",
     "referenceField": "sensorDeviceID",
     "requestRange": {
       "operator": "between"
@@ -59,7 +59,7 @@ cmg90br3n002qihleffuljnth_StoredSensorEventInfos_out_constraints = {
   "sensorDeviceList.sensorDeviceID": {
     "valueType": "request-based",
     "required": True,
-    "referenceEndpoint": "/SensorDeviceProfiles",
+    "referenceEndpoint": "/SensorDeviceControl",
     "referenceField": "sensorDeviceID"
   },
   "sensorDeviceList.eventName": {
@@ -86,7 +86,7 @@ cmg90br3n002qihleffuljnth_SensorDeviceControl_out_constraints = {
   "sensorDeviceID": {
     "valueType": "request-based",
     "required": True,
-    "referenceEndpoint": "/SensorDeviceProfiles",
+    "referenceEndpoint": "/SensorDeviceControl",
     "referenceField": "sensorDeviceID"
   },
   "sensorDeviceStatus": {

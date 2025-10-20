@@ -727,7 +727,6 @@ cmga0l5mh005dihlet5fcoj0o_CameraProfiles_out_validation = {
     "validationType": "specified-value-match"
   },
   "camList.camID": {
-    "score": 1,
     "enabled": False,
     "validationType": "specified-value-match"
   },
@@ -816,12 +815,6 @@ cmga0l5mh005dihlet5fcoj0o_StoredVideoInfos_out_validation = {
     "referenceEndpointMax": "/StoredObjectAnalyticsInfos",
     "referenceEndpointMin": "/RealtimeVideoEventInfos",
     "referenceRangeOperator": "between"
-  },
-  "camID2": {
-    "enabled": True,
-    "validationType": "request-field-list-match",
-    "referenceEndpoint": "/PtzStatus",
-    "referenceListField": "camID"
   }
 }
 

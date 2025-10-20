@@ -1,6 +1,5 @@
-# response 모드 - 응답 데이터
+# response 모드
 
-# 보안용 센서 시스템
 # Authentication
 cmg90br3n002qihleffuljnth_Authentication_out_data = {
     "code": "",
@@ -116,7 +115,6 @@ cmg90br3n002qihleffuljnth_messages = [
     "SensorDeviceControl",
 ]
 
-# 바이오 인식
 # Authentication
 cmg7edeo50013124xiux3gbkb_Authentication_out_data = {
     "code": "200",
@@ -270,7 +268,6 @@ cmg7edeo50013124xiux3gbkb_messages = [
     "DoorControl",
 ]
 
-# 영상보안 시스템
 # Authentication
 cmg7bve25000114cevhn5o3vr_Authentication_out_data = {
     "code": "200",
