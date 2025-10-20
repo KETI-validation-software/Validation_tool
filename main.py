@@ -228,15 +228,7 @@ class MainWindow(QMainWindow):
         # testGroup.name에 따라 어떤 검증 앱을 실행할지 결정
         if "물리보안" in test_group_name:
             # 물리보안: 메인 창=System, 새 창=Platform
-            print("→ 물리보안: 메인 창=System, 새 창=Platform")
-
-            # Platform 새 창 열기
-            if hasattr(self, "platform_window") and self.platform_window is not None:
-                self.platform_window.close()
-            self.platform_window = platform_app.MyApp(embedded=False, spec_id=spec_id)
-            self.platform_window.showResultRequested.connect(self._on_show_result_requested)
-
-            self.platform_window.show()
+            print("→ 물리보안: 메인 창=System")
 
             # Main 화면: System 검증으로 전환
             if getattr(self, "_system_widget", None) is None:
@@ -247,14 +239,8 @@ class MainWindow(QMainWindow):
 
         elif "통합플랫폼" in test_group_name:
             # 통합플랫폼: 메인 창=Platform, 새 창=System
-            print("→ 통합플랫폼: 메인 창=Platform, 새 창=System")
+            print("→ 통합플랫폼: 메인 창=Platform")
 
-            # System 새 창 열기
-            if hasattr(self, "system_window") and self.system_window is not None:
-                self.system_window.close()
-            self.system_window = system_app.MyApp(embedded=False, spec_id=spec_id)
-            self.system_window.showResultRequested.connect(self._on_show_result_requested)
-            self.system_window.show()
 
             # Main 화면: Platform 검증으로 전환
             if getattr(self, "_platform_widget", None) is None:

@@ -10,11 +10,9 @@ from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor
 from PyQt5.QtCore import Qt, QSettings, QTimer, QThread, pyqtSignal
 import sys
 import ssl
+from datetime import datetime
 
 from core.functions import json_check_, save_result, resource_path, field_finder, json_to_data, set_auth, timeout_field_finder
-
-import spec
-# Dynamic spec imports - will be loaded based on CONSTANTS.specs
 
 import config.CONSTANTS as CONSTANTS
 
@@ -721,8 +719,6 @@ class MyApp(QWidget):
         # ✅ 모든 시스템은 spec/ 폴더 사용
         print(f"[PLATFORM] 📁 모듈: spec (센서/바이오/영상 통합)")
         import spec.Schema_request as schema_request_module
-        import spec.Data_request as data_request_module
-        import spec.Schema_response as schema_response_module
         import spec.Data_response as data_response_module
         
         # ✅ 플랫폼은 요청 검증 + 응답 전송 (inSchema/outData 사용)
@@ -732,38 +728,80 @@ class MyApp(QWidget):
         self.videoInSchema = getattr(schema_request_module, spec_names[0], [])
         
         # ✅ Response 전송용 데이터 로드 (플랫폼이 시스템에게 보낼 응답) - outData
-        self.videoInMessage = getattr(data_response_module, spec_names[1], [])
+        self.videoOutMessage = getattr(data_response_module, spec_names[1], [])
         self.videoMessages = getattr(data_response_module, spec_names[2], [])
-        
-        # ✅ Request 전송용 데이터 로드 (Server가 시스템에게 보낼 요청) - inData
-        inData_name = spec_names[1].replace("_outData", "_inData")
-        self.videoOutMessage = getattr(data_request_module, inData_name, [])
-        
-        # ✅ Response 검증용 스키마 로드 (Server가 시스템으로부터 받을 응답 검증) - outSchema
-        outSchema_name = spec_names[0].replace("_inSchema", "_outSchema")
-        self.videoOutSchema = getattr(schema_response_module, outSchema_name, [])
-        
+
         # ✅ Webhook 관련 (영상보안 시스템만 사용)
         self.videoWebhookSchema = []
         self.videoWebhookData = []
         self.videoWebhookInSchema = []
         self.videoWebhookInData = []
         
-        if self.current_spec_id == "cmga0l5mh005dihlet5fcoj0o":
-            # 영상보안만 Webhook 지원
-            webhookSchema_name = "spec_001_webhookSchema"  # 고정값
-            webhookData_name = "spec_001_webhookData"
-            self.videoWebhookSchema = getattr(video_schema_request, webhookSchema_name, [])
-            self.videoWebhookData = getattr(video_data_request, webhookData_name, [])
+        # if self.current_spec_id == "cmga0l5mh005dihlet5fcoj0o":
+        #     # 영상보안만 Webhook 지원
+        #     webhookSchema_name = "spec_001_webhookSchema"  # 고정값
+        #     webhookData_name = "spec_001_webhookData"
+        #     self.videoWebhookSchema = getattr(video_schema_request, webhookSchema_name, [])
+        #     self.videoWebhookData = getattr(video_data_request, webhookData_name, [])
             
-            webhookInSchema_name = "spec_002_webhookSchema"
-            webhookInData_name = "spec_002_webhookData"
-            self.videoWebhookInSchema = getattr(video_schema_response, webhookInSchema_name, [])
-            self.videoWebhookInData = getattr(video_data_response, webhookInData_name, [])
+        #     webhookInSchema_name = "spec_002_webhookSchema"
+        #     webhookInData_name = "spec_002_webhookData"
+        #     self.videoWebhookInSchema = getattr(video_schema_response, webhookInSchema_name, [])
+        #     self.videoWebhookInData = getattr(video_data_response, webhookInData_name, [])
         
         print(f"[PLATFORM] ✅ 로딩 완료: {len(self.videoMessages)}개 API")
         print(f"[PLATFORM] 📋 API 목록: {self.videoMessages}")
         print(f"[PLATFORM] 🔄 프로토콜 설정: {self.trans_protocols}")
+
+
+    def _redact(self, payload):
+        try:
+            if isinstance(payload, dict):
+                p = dict(payload)
+                for k in ["accessToken", "token", "Authorization", "password", "secret", "apiKey"]:
+                    if k in p and isinstance(p[k], (str, bytes)):
+                        p[k] = "***"
+                return p
+            return payload
+        except Exception:
+            return payload
+
+    def _push_event(self, api_name, direction, payload):
+        """direction: 'REQUEST'|'RESPONSE'|'WEBHOOK'"""
+        try:
+            if not hasattr(self.Server, "trace") or self.Server.trace is None:
+                self.Server.trace = {}
+            if api_name not in self.Server.trace:
+                from collections import deque
+                self.Server.trace[api_name] = deque(maxlen=500)
+            evt = {
+                "time": datetime.utcnow().isoformat()+"Z",
+                "api": api_name,
+                "dir": direction,
+                "data": self._redact(payload),
+            }
+            self.Server.trace[api_name].append(evt)
+        except Exception:
+            pass
+
+    def get_latest_from_trace(self, api_name, direction):
+        """trace에서 해당 방향의 최신 이벤트 반환"""
+        try:
+            events = list((getattr(self.Server, "trace", {}) or {}).get(api_name, []))
+            for ev in reversed(events):
+                if ev.get("dir") == direction:
+                    return ev.get("data")
+        except Exception:
+            pass
+        return None
+
+    def get_latest_request(self, step_idx):
+        api = self.Server.message[step_idx]
+        return self.get_latest_from_trace(api, "REQUEST")
+
+    def get_latest_response(self, step_idx):
+        api = self.Server.message[step_idx]
+        return self.get_latest_from_trace(api, "RESPONSE")
 
 
     def _to_detail_text(self, val_text):
@@ -917,11 +955,12 @@ class MyApp(QWidget):
                 print(f"[TIMING_DEBUG] ✅ 요청 도착 감지! API: {api_name}, 시도: {self.current_retry + 1}/{expected_retries}")
                 print(f"[TIMING_DEBUG] ✅ 시스템 요청 카운트: {actual_count}회, 즉시 검증 시작합니다.")
                 
-                # ✅ 플랫폼이 검증할 데이터: 플랫폼이 보낼 응답 (videoData_response.py)
-                if self.cnt < len(self.videoInMessage):
-                    data = self.videoInMessage[self.cnt]
-                else:
-                    data = {}  # 데이터가 없으면 빈 딕셔너리 -> 이 부분 문제인 거 같음..
+                # (10/20) 수정
+                # if self.cnt < len(self.videoInMessage):
+                #     data = self.videoInMessage[self.cnt]
+                # else:
+                #     data = {}  # 데이터가 없으면 빈 딕셔너리
+
 
                 message_name = "step " + str(self.cnt + 1) + ": " + self.Server.message[self.cnt]
                 
@@ -970,7 +1009,7 @@ class MyApp(QWidget):
                 QApplication.processEvents()
 
                 # 현재 데이터 사용 (이미 읽음)
-                current_data = data
+                current_data = self._get_latest_request_data(api_name)
 
                 if self.Server.message[self.cnt] in CONSTANTS.none_request_message:
                     # 매 시도마다 데이터 수집
@@ -1011,15 +1050,8 @@ class MyApp(QWidget):
                                 schema_keys = list(schema_to_use.keys())[:5]
                                 print(f"[DEBUG] 스키마 필드 (first 5): {schema_keys}")
                     
-                    # 맞춰야함 - functions.py의 json_check_(맥락 검증 추가함)
-                    result_dict = json_check_(self.videoInSchema[self.cnt], current_data, self.flag_opt)
-                    structure = result_dict["structure_result"]
-                    semantic = result_dict["semantic_result"]
-
-                    val_result = structure["result"]
-                    val_text = structure["error_msg"]
-                    key_psss_cnt = structure["correct_cnt"]
-                    key_error_cnt = structure["error_cnt"]
+                    val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.videoInSchema[self.cnt],
+                                                                            current_data, self.flag_opt)
                     
                     if retry_attempt == 0:  # 첫 시도에만 출력
                         print(f"[DEBUG] 검증 결과: {val_result}, pass={key_psss_cnt}, error={key_error_cnt}")
@@ -1459,8 +1491,6 @@ class MyApp(QWidget):
                     self.Server.cnt = 0
                     self.Server.message = self.videoMessages
                     self.Server.outMessage = self.videoOutMessage
-                    self.Server.inMessage = self.videoInMessage
-                    self.Server.outSchema = self.videoOutSchema
                     self.Server.inSchema = self.videoInSchema
                     self.Server.webhookSchema = self.videoWebhookSchema
                     self.Server.webhookData = self.videoWebhookData
@@ -2007,10 +2037,8 @@ class MyApp(QWidget):
         # Server 설정 (디버그 메시지 추가)
         # print(f"[DEBUG] sbtn_push: Setting Server.message (length={len(self.videoMessages)})")
         self.Server.message = self.videoMessages
-        self.Server.inMessage = self.videoInMessage
         self.Server.outMessage = self.videoOutMessage
         self.Server.inSchema = self.videoInSchema
-        self.Server.outSchema = self.videoOutSchema
         self.Server.webhookData = self.videoWebhookData  # ✅ 웹훅 이벤트 데이터 (플랫폼 → 시스템)
         self.Server.system = "video"
         self.Server.timeout = timeout
@@ -2048,12 +2076,12 @@ class MyApp(QWidget):
         self.Server.transProtocolInput = "LongPolling"
         self.valResult.append("Start Validation...\n")
         
-        # 플랫폼 서버 주소 설정 (로컬 서버로 바인딩)
-        # CONSTANTS.url은 시스템이 접속할 주소이므로, 여기서는 로컬 서버 주소 사용
+        # (10/20) 수정
+        # 서버는 address_ip, port로 listen, 클라이언트는 constants.url로 접속
         url = CONSTANTS.url.split(":")
         address_port = int(url[-1])  # 포트만 사용
-        address_ip = "127.0.0.1"  # 플랫폼 서버는 로컬호스트에서 실행
-        
+        address_ip = "0.0.0.0"  # 내부 IP 주소, 외부에서도 접근 가능하게 설정
+
         #print(f"[DEBUG] 플랫폼 서버 시작: {address_ip}:{address_port}")
         self.server_th = server_th(handler_class=self.Server, address=address_ip, port=address_port)
         self.server_th.start()

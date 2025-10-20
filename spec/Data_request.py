@@ -243,6 +243,23 @@ cmga0l5mh005dihlet5fcoj0o_RealtimeVideoEventInfos_in_data = {
     "startTime": 1760602920000
 }
 
+# RealtimeVideoEventInfos WebHook OUT Data
+cmga0l5mh005dihlet5fcoj0o_RealtimeVideoEventInfos_webhook_out_data = {
+    "camList": [
+        {
+        "camID": ""
+    }
+],
+    "duration": "",
+    "transProtocol": {
+    "transProtocolType": "WebHook",
+    "transProtocolDesc": ""
+},
+    "eventFilter": "",
+    "classFilter": "",
+    "startTime": 0
+}
+
 # StoredVideoEventInfos
 cmga0l5mh005dihlet5fcoj0o_StoredVideoEventInfos_in_data = {
     "timePeriod": {
@@ -311,6 +328,7 @@ cmga0l5mh005dihlet5fcoj0o_inData = [
     cmga0l5mh005dihlet5fcoj0o_StreamURLs_in_data,
     cmga0l5mh005dihlet5fcoj0o_ReplayURL_in_data,
     cmga0l5mh005dihlet5fcoj0o_RealtimeVideoEventInfos_in_data,
+    cmga0l5mh005dihlet5fcoj0o_RealtimeVideoEventInfos_webhook_out_data,
     cmga0l5mh005dihlet5fcoj0o_StoredVideoEventInfos_in_data,
     cmga0l5mh005dihlet5fcoj0o_StoredObjectAnalyticsInfos_in_data,
     cmga0l5mh005dihlet5fcoj0o_PtzStatus_in_data,

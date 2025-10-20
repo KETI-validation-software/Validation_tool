@@ -10,7 +10,9 @@ from core.data_generator import dataGenerator
 from core.validation_generator import ValidationGenerator
 from core.constraint_generator import constraintGeneractor
 import json
-
+import ast
+from pathlib import Path
+from typing import Dict, List
 class FormValidator:
     """
     폼 검증 및 데이터 처리를 담당하는 클래스
@@ -778,7 +780,7 @@ class FormValidator:
             'product_name': self.parent.product_edit.text().strip(),
             'version': self.parent.version_edit.text().strip(),
             'test_category': self.parent.test_category_edit.text().strip(),
-            'test_target': self.parent.target_system_edit.text().strip(),
+            'test_target': self.parent.test_group_edit.text().strip(),
             'test_range': self.parent.test_range_edit.text().strip()
         }
 
@@ -863,6 +865,125 @@ class FormValidator:
             traceback.print_exc()
             return None
 
+    def overwrite_spec_config_from_mapping(self,
+                                           config_defaults: dict = None,
+                                           constants_path: str = "config/CONSTANTS.py") -> None:
+        """
+        merge_list_prefix_mappings()로 얻은 merged_result를 이용해
+        CONSTANTS.py의 SPEC_CONFIG 전체 블록을 '덮어쓰기'로 갱신한다.
+        """
+        try:
+            if config_defaults is None:
+                config_defaults = {
+                    "trans_protocol": [],
+                    "time_out": [],
+                    "num_retries": []
+                }
+
+            # 1) CONSTANTS.py 읽기
+            with open(constants_path, "r", encoding="utf-8") as f:
+                content = f.read()
+
+            # 2) SPEC_CONFIG = { ... } 블록 범위 찾기 (중첩 중괄호 안전 처리)
+            header = "SPEC_CONFIG = {"
+            spec_config_start = content.find(header)
+            if spec_config_start == -1:
+                # 없으면 새로 추가
+                spec_config_start = len(content)
+                end_pos = spec_config_start
+                current_config = ""
+            else:
+                # 블록 시작 '{' 위치
+                start_brace_pos = content.find("{", spec_config_start)
+                brace_count = 0
+                pos = start_brace_pos
+                end_pos = None
+                while pos < len(content):
+                    ch = content[pos]
+                    if ch == "{":
+                        brace_count += 1
+                    elif ch == "}":
+                        brace_count -= 1
+                        if brace_count == 0:
+                            end_pos = pos + 1  # '}' 포함
+                            break
+                    pos += 1
+                if end_pos is None:
+                    raise RuntimeError("SPEC_CONFIG 블록의 닫는 중괄호를 찾지 못했습니다.")
+                current_config = content[spec_config_start:end_pos]
+
+            # 3) merged_result를 SPEC_CONFIG용 문자열로 재구성
+            #    - spec_id는 merged_result의 key
+            #    - specs는 해당 파일들에 있는 리스트 변수명을 모두 합쳐 중복 제거 + 정렬
+            entries = []
+
+            mode = self.parent.test_group_edit.text().strip()
+
+            if mode == "물리보안":
+                priority_order = ["outSchema", "inData", "messages"]
+                merged_result = self.merge_list_prefix_mappings("spec/Schema_response.py", "spec/Data_request.py")
+            elif mode == "통합플랫폼":
+                priority_order = ["inSchema", "outData", "messages"]
+                merged_result = self.merge_list_prefix_mappings("spec/Schema_request.py", "spec/Data_response.py")
+            else:
+                print("[CONFIG SPEC]: 모드 확인해주세요.")
+
+            for spec_id in sorted(merged_result.keys()):
+                # test_name은 이미 캐시된 이름 사용(없으면 빈 문자열)
+                spec_name = self._spec_names_cache.get(spec_id, "")
+
+                # 해당 prefix에 매핑된 모든 리스트 변수 수집 (suffix 무관)
+                file_map = merged_result[spec_id]
+                all_lists = []
+
+                for _fname, lists in file_map.items():
+                    all_lists.extend(lists or [])
+
+                # spec_id로 시작하는 리스트만 취함
+                filtered_lists = [name for name in all_lists if name.startswith(spec_id + "_")]
+
+                # ✅ 우선순위 기반 정렬 함수 정의
+                def sort_by_priority(name: str) -> int:
+                    suffix = name.split("_")[-1]
+                    if suffix in priority_order:
+                        return priority_order.index(suffix)
+                    return len(priority_order)  # 우선순위 밖은 맨 뒤
+
+                # ✅ 중복 제거 후 우선순위 정렬 적용
+                specs_list = sorted(set(filtered_lists), key=sort_by_priority)
+
+                # 항목 문자열 조립 (순서: test_name, specs, trans_protocol, time_out, num_retries)
+                entry = (
+                    f'"{spec_id}": {{\n'
+                    f'    "test_name": "{spec_name}",\n'
+                    f'    "specs": {specs_list},\n'
+                    f'    "trans_protocol": {config_defaults.get("trans_protocol", [])},\n'
+                    f'    "time_out": {config_defaults.get("time_out", [])},\n'
+                    f'    "num_retries": {config_defaults.get("num_retries", [])}\n'
+                    f'}}'
+                )
+                entries.append(entry)
+
+            # SPEC_CONFIG 전체 문자열
+            new_spec_config_block = "SPEC_CONFIG = {\n    " + ",\n    ".join(entries) + "\n}"
+
+            # 4) 콘텐츠에 반영 (덮어쓰기)
+            if current_config:
+                new_content = content.replace(current_config, new_spec_config_block, 1)
+            else:
+                # 기존에 SPEC_CONFIG가 없던 경우 파일 끝에 추가
+                sep = "\n\n" if content and not content.endswith("\n") else "\n"
+                new_content = content + sep + new_spec_config_block + "\n"
+
+            with open(constants_path, "w", encoding="utf-8") as f:
+                f.write(new_content)
+
+            print("CONSTANTS.py SPEC_CONFIG 전체 덮어쓰기 완료")
+
+        except Exception as e:
+            print(f"SPEC_CONFIG 덮어쓰기 실패: {e}")
+            import traceback
+            traceback.print_exc()
 
     def _update_spec_config(self, spec_id, config_data):
         """CONSTANTS.py의 SPEC_CONFIG 딕셔너리에 spec_id별 설정 업데이트"""
@@ -969,6 +1090,40 @@ class FormValidator:
             import traceback
             traceback.print_exc()
 
+    def merge_list_prefix_mappings(self, file_a: str, file_b: str) -> Dict[str, Dict[str, List[str]]]:
+        # 파일별 리스트 추출
+        lists_a = self.extract_lists(file_a)
+        lists_b = self.extract_lists(file_b)
+
+        # 모든 prefix의 합집합 생성
+        all_prefixes = sorted(set(lists_a.keys()) | set(lists_b.keys()))
+
+        merged: Dict[str, Dict[str, List[str]]] = {}
+        for prefix in all_prefixes:
+            merged[prefix] = {
+                Path(file_a).name: lists_a.get(prefix, []),
+                Path(file_b).name: lists_b.get(prefix, [])
+            }
+
+        return merged
+
+    def extract_lists(self, file_path: str) -> Dict[str, List[str]]:
+        """내부용: 파일에서 리스트 변수명 추출 → prefix 기준 그룹화"""
+        src = Path(file_path).read_text(encoding="utf-8")
+        tree = ast.parse(src, filename=file_path)
+
+        prefix_map: Dict[str, List[str]] = {}
+        for node in tree.body:
+            if isinstance(node, (ast.Assign, ast.AnnAssign)) and isinstance(node.value, ast.List):
+                targets = []
+                if isinstance(node, ast.Assign):
+                    targets = [t.id for t in node.targets if isinstance(t, ast.Name)]
+                elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+                    targets = [node.target.id]
+                for var_name in targets:
+                    prefix = var_name.split("_")[0] if "_" in var_name else var_name
+                    prefix_map.setdefault(prefix, []).append(var_name)
+        return prefix_map
 
     def _get_selected_test_field_spec_id(self):
         """시험 분야 테이블에서 마지막으로 클릭된 항목의 spec_id 반환"""
@@ -1067,7 +1222,7 @@ class FormValidator:
                 if spec_id:
                     spec_config_data = self._extract_spec_config_from_api(spec_id)
                     if spec_config_data:
-                        self._update_spec_config(spec_id, spec_config_data)
+                        self.overwrite_spec_config_from_mapping(config_defaults=spec_config_data)
             print(f"=== SPEC_CONFIG 업데이트 완료 ===\n")
 
             self._generate_files_for_all_specs()

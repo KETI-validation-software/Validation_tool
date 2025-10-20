@@ -1,74 +1,54 @@
 === 시험 결과 ===
 통과 필드 수: 0
-전체 필드 수: 39
+전체 필드 수: 9
 종합 평가 점수: 0.0%
 
 === 스텝별 결과 ===
-Authentication | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 0 | 전체 필드 수: 2 | 실패 횟수: 2 | 평가 점수: 0.0%
-Capabilities | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 0 | 전체 필드 수: 1 | 실패 횟수: 1 | 평가 점수: 0.0%
-CameraProfiles | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 0 | 전체 필드 수: 1 | 실패 횟수: 1 | 평가 점수: 0.0%
-StoredVideoInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 0 | 전체 필드 수: 5 | 실패 횟수: 5 | 평가 점수: 0.0%
-StreamURLs | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 0 | 전체 필드 수: 3 | 실패 횟수: 3 | 평가 점수: 0.0%
-ReplayURL | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 0 | 전체 필드 수: 5 | 실패 횟수: 5 | 평가 점수: 0.0%
-RealtimeVideoEventInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 0 | 전체 필드 수: 8 | 실패 횟수: 8 | 평가 점수: 0.0%
-StoredVideoEventInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 0 | 전체 필드 수: 8 | 실패 횟수: 8 | 평가 점수: 0.0%
-StoredObjectAnalyticsInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 0 | 전체 필드 수: 6 | 실패 횟수: 6 | 평가 점수: 0.0%
+Authentication | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 0 | 전체 필드 수: 2 | 실패 필드 수: 2 | 평가 점수: 0.0%
+Capabilities | 결과: FAIL | 검증 횟수: 3 | 통과 필드 수: 0 | 전체 필드 수: 1 | 실패 필드 수: 1 | 평가 점수: 0.0%
+SensorDeviceProfiles | 결과: FAIL | 검증 횟수: 2 | 통과 필드 수: 0 | 전체 필드 수: 1 | 실패 필드 수: 1 | 평가 점수: 0.0%
+RealtimeSensorData | 결과: FAIL | 검증 횟수: 3 | 통과 필드 수: 0 | 전체 필드 수: 5 | 실패 필드 수: 5 | 평가 점수: 0.0%
+RealtimeSensorEventInfos | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
+StoredSensorEventInfos | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
+SensorDeviceControl | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
 
 === 전체 로그 ===
 Start Validation...
 
 step 1: Authentication
-Timeout: 5.0초
-Message Missing!
+
+✅ 부하테스트 완료: 1회 검증 완료
+프로토콜: basic
+
+[시도 1회차]
+{
+    "code": "",
+    "message": "",
+    "userName": "",
+    "userAff": "",
+    "accessToken": ""
+}
+FAIL
 Score : 0.0
 Score details : 0(누적 통과 필드 수), 2(누적 오류 필드 수)
 
+step 2: Capabilities
 step 2: Capabilities
 Timeout: 5.0초
 Message Missing!
 Score : 0.0
 Score details : 0(누적 통과 필드 수), 3(누적 오류 필드 수)
 
-step 3: CameraProfiles
+step 3: SensorDeviceProfiles
 Timeout: 5.0초
 Message Missing!
 Score : 0.0
 Score details : 0(누적 통과 필드 수), 4(누적 오류 필드 수)
 
-step 4: StoredVideoInfos
+step 4: RealtimeSensorData
 Timeout: 5.0초
 Message Missing!
 Score : 0.0
 Score details : 0(누적 통과 필드 수), 9(누적 오류 필드 수)
 
-step 5: StreamURLs
-Timeout: 5.0초
-Message Missing!
-Score : 0.0
-Score details : 0(누적 통과 필드 수), 12(누적 오류 필드 수)
-
-step 6: ReplayURL
-Timeout: 5.0초
-Message Missing!
-Score : 0.0
-Score details : 0(누적 통과 필드 수), 17(누적 오류 필드 수)
-
-step 7: RealtimeVideoEventInfos
-Timeout: 5.0초
-Message Missing!
-Score : 0.0
-Score details : 0(누적 통과 필드 수), 25(누적 오류 필드 수)
-
-step 8: StoredVideoEventInfos
-Timeout: 5.0초
-Message Missing!
-Score : 0.0
-Score details : 0(누적 통과 필드 수), 33(누적 오류 필드 수)
-
-step 9: StoredObjectAnalyticsInfos
-Timeout: 5.0초
-Message Missing!
-Score : 0.0
-Score details : 0(누적 통과 필드 수), 39(누적 오류 필드 수)
-
-검증 절차가 완료되었습니다.
+검증 절차가 중지되었습니다.

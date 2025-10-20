@@ -57,10 +57,7 @@ class BearerAuth(requests.auth.AuthBase):
         self.token = token
 
     def __call__(self, r):
-        token = "" if self.token is None else str(self.token).strip()
-        auth_value = "Bearer" if token == "" else "Bearer " + token
-        r.headers["Authorization"] = auth_value
-        r.headers["authorization"] = auth_value
+        r.headers["authorization"] = "Bearer " + self.token
         return r
 
 

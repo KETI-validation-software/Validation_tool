@@ -1,4 +1,0 @@
-{"time": "2025-10-17T07:40:55.658073Z", "api": "Authentication", "dir": "REQUEST", "data": {}}
-{"time": "2025-10-17T07:40:55.659070Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "404", "message": "No response data for this API"}}
-{"time": "2025-10-17T07:40:57.664042Z", "api": "Authentication", "dir": "REQUEST", "data": {}}
-{"time": "2025-10-17T07:40:57.665039Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "404", "message": "No response data for this API"}}
