@@ -1034,8 +1034,8 @@ class MyApp(QWidget):
                     parsed = urlparse(str(path_tmp))
                     url = parsed.hostname if parsed.hostname is not None else "127.0.0.1"
                     port = parsed.port if parsed.port is not None else 80
-                    #seo 나중에 확6인 필요
-                    msg = self.outMessage[-1]
+                    #seo 나중에 확인 필요 - 우선은 빈 객체로 대체
+                    msg = {}
                     self.webhook_flag = True
                     self.webhook_cnt = self.cnt
                     self.webhook_thread = WebhookThread(url, port, msg)
@@ -1080,7 +1080,14 @@ class MyApp(QWidget):
         # 실제 검증
         if len(self.webhookSchema) > 0:
             schema_to_check = self.webhookSchema[0]
-            val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(schema_to_check, self.webhook_res, self.flag_opt)
+            check = json_check_(schema_to_check, self.webhook_res, self.flag_opt)
+            struct = check["structure_result"]
+            val_result    = struct["result"]        # "PASS" | "FAIL"
+            val_text      = struct["error_msg"]     # 문자열
+            key_psss_cnt  = struct["correct_cnt"]   # int
+            key_error_cnt = struct["error_cnt"]     # int
+            # 의미 검증 결과도 필요하면 아래처럼 사용 가능
+            semantic = check.get("semantic_result")  # dict 또는 None
             if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
                 print(f"[DEBUG] 웹훅 검증 결과: {val_result}, pass={key_psss_cnt}, error={key_error_cnt}")
         else:
@@ -1181,13 +1188,6 @@ class MyApp(QWidget):
                 return  # 첫 틱에서는 대기만 하고 리턴
             else:
                 time_interval = time.time() - self.time_pre
-
-            # 디버깅 정보 추가
-            # if self.cnt >= 4:  # StreamURLs 이후부터 로깅
-            #     print(f"[DEBUG] cnt={self.cnt}, post_flag={self.post_flag}, processing_response={self.processing_response}")
-            #     print(f"[DEBUG] current_retry={self.current_retry}, webhook_flag={self.webhook_flag}")
-            #     print(f"[DEBUG] time_interval={time_interval}, timeout={CONSTANTS.time_out[self.cnt]/1000 if self.cnt < len(CONSTANTS.time_out) else 'N/A'}")
-            #     print(f"[DEBUG] self.res is None: {self.res is None}")
 
             # 웹훅 이벤트 수신 확인 - webhook_thread.wait()이 이미 동기화 처리하므로 별도 sleep 불필요
             if self.webhook_flag is True:
@@ -1367,8 +1367,14 @@ class MyApp(QWidget):
                                     schema_keys = list(schema_to_use.keys())[:5]
                                     print(f"[DEBUG] 스키마 필드 (first 5): {schema_keys}")
                         
-                        val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.outSchema[self.cnt],
-                                                                                            res_data, self.flag_opt)
+                        check = json_check_(self.outSchema[self.cnt], res_data, self.flag_opt)
+                        struct = check["structure_result"]
+                        val_result    = struct["result"]        # "PASS" | "FAIL"
+                        val_text      = struct["error_msg"]     # 문자열
+                        key_psss_cnt  = struct["correct_cnt"]   # int
+                        key_error_cnt = struct["error_cnt"]     # int
+                        # 의미 검증 결과도 필요하면 아래처럼 사용 가능
+                        semantic = check.get("semantic_result")  # dict 또는 None
                         if self.message[self.cnt] == "Authentication":
                             self.handle_authentication_response(res_data)
                         
@@ -1401,11 +1407,12 @@ class MyApp(QWidget):
                         # 이번 시도의 결과
                         final_result = val_result
 
-                        # 플랫폼과 동일한 누적 카운트 로직
+                        # 플랫폼과 동일한 누적 카운트 로직 - (10/20) 하드코딩 흔적
                         if not hasattr(self, 'step_pass_counts'):
-                            self.step_pass_counts = [0] * 9
-                            self.step_error_counts = [0] * 9
-                            self.step_pass_flags = [0] * 9  # PASS 횟수 카운트
+                            api_count = len(self.videoMessages)
+                            self.step_pass_counts = [0] * api_count
+                            self.step_error_counts = [0] * api_count
+                            self.step_pass_flags = [0] * api_count  # PASS 횟수 카운트
 
                         # 이번 시도 결과를 누적
                         self.step_pass_counts[self.cnt] += key_psss_cnt
@@ -1509,8 +1516,8 @@ class MyApp(QWidget):
                         self.current_retry += 1
 
                         # 현재 API의 모든 재시도가 완료되었는지 확인
-                        if (self.cnt < len(CONSTANTS.num_retries) and
-                            self.current_retry >= CONSTANTS.num_retries[self.cnt]):
+                        if (self.cnt < len(self.num_retries_list) and
+                            self.current_retry >= self.num_retries_list[self.cnt]):
 
                             self.step_buffers[self.cnt]["events"] = list(self.trace.get(self.cnt, []))
 
@@ -1523,8 +1530,8 @@ class MyApp(QWidget):
                         self.processing_response = False
 
                         # 재시도 여부에 따라 대기 시간 조정 (플랫폼과 동기화)
-                        if (self.cnt < len(CONSTANTS.num_retries) and
-                            self.current_retry < CONSTANTS.num_retries[self.cnt] - 1):
+                        if (self.cnt < len(self.num_retries_list) and
+                            self.current_retry < self.num_retries_list[self.cnt] - 1):
                             self.time_pre = time.time() + 2.0  # 재시도 예정 시 2초 대기 (플랫폼과 동일)
                         else:
                             self.time_pre = time.time() + 2.0  # 마지막 시도 후 2초 대기
@@ -1920,8 +1927,8 @@ class MyApp(QWidget):
 
             # 웹훅 스키마 데이터 가져오기 (transProtocol 기반으로만 판단)
             webhook_schema = None
-            if row < len(CONSTANTS.trans_protocol):
-                current_protocol = CONSTANTS.trans_protocol[row]
+            if row < len(self.trans_protocol_list):
+                current_protocol = self.trans_protocol_list[row]
                 if current_protocol == "WebHook":
                     try:
                         webhook_schema = self.videoWebhookInSchema[0] if len(self.videoWebhookInSchema) > 0 else None
