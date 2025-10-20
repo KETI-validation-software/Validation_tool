@@ -296,7 +296,6 @@ cmga0l5mh005dihlet5fcoj0o_ReplayURL_out_schema = {
     "code": str,
     "message": str,
     "camList": [{
-    "camID": str,
     OptionalKey("accessID"): str,
     OptionalKey("accessPW"): str,
     "startTime": float,
@@ -308,6 +307,7 @@ cmga0l5mh005dihlet5fcoj0o_ReplayURL_out_schema = {
     OptionalKey("videoCodec"): str,
     OptionalKey("audioCodec"): str,
 },
+    "camID": str,
 }],
 }
 

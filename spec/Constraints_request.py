@@ -132,7 +132,7 @@ cmga0l5mh005dihlet5fcoj0o_StoredVideoInfos_in_constraints = {
   "camList.camID": {
     "valueType": "random-response",
     "required": True,
-    "referenceEndpoint": "/PtzStatus",
+    "referenceEndpoint": "/CameraProfiles",
     "referenceField": "camID"
   }
 }
@@ -150,7 +150,7 @@ cmga0l5mh005dihlet5fcoj0o_ReplayURL_in_constraints = {
   "camList.camID": {
     "valueType": "random-response",
     "required": True,
-    "referenceEndpoint": "/PtzStatus",
+    "referenceEndpoint": "/StreamURLs",
     "referenceField": "camID"
   }
 }
@@ -160,7 +160,7 @@ cmga0l5mh005dihlet5fcoj0o_RealtimeVideoEventInfos_in_constraints = {
   "camList.camID": {
     "valueType": "random-response",
     "required": True,
-    "referenceEndpoint": "/PtzStatus",
+    "referenceEndpoint": "/StreamURLs",
     "referenceField": "camID"
   }
 }
@@ -170,13 +170,15 @@ cmga0l5mh005dihlet5fcoj0o_StoredVideoEventInfos_in_constraints = {
   "camList.camID": {
     "valueType": "random-response",
     "required": True,
-    "referenceEndpoint": "/PtzStatus",
+    "referenceEndpoint": "/CameraProfiles",
     "referenceField": "camID"
   },
   "eventFilter": {
     "valueType": "random",
     "required": False,
-    "validValueField": "eventFilter"
+    "randomType": "valid-values",
+    "validValueField": "eventFilter",
+    "arrayElementType": "string"
   },
   "classFilter": {
     "valueType": "random",
@@ -190,7 +192,7 @@ cmga0l5mh005dihlet5fcoj0o_StoredObjectAnalyticsInfos_in_constraints = {
   "camList.camID": {
     "valueType": "random-response",
     "required": True,
-    "referenceEndpoint": "/PtzStatus",
+    "referenceEndpoint": "/StreamURLs",
     "referenceField": "camID"
   },
   "filterList.classFilter": {
@@ -210,7 +212,7 @@ cmga0l5mh005dihlet5fcoj0o_PtzStatus_in_constraints = {
   "camID": {
     "valueType": "random-response",
     "required": True,
-    "referenceEndpoint": "/PtzStatus",
+    "referenceEndpoint": "/StreamURLs",
     "referenceField": "camID"
   }
 }
@@ -220,7 +222,7 @@ cmga0l5mh005dihlet5fcoj0o_PtzContinuousMove_in_constraints = {
   "camID": {
     "valueType": "random-response",
     "required": True,
-    "referenceEndpoint": "/PtzStatus",
+    "referenceEndpoint": "/StreamURLs",
     "referenceField": "camID"
   }
 }
@@ -230,7 +232,7 @@ cmga0l5mh005dihlet5fcoj0o_PtzStop_in_constraints = {
   "camID": {
     "valueType": "random-response",
     "required": True,
-    "referenceEndpoint": "/PtzStatus",
+    "referenceEndpoint": "/StreamURLs",
     "referenceField": "camID"
   }
 }
