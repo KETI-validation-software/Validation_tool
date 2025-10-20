@@ -317,6 +317,9 @@ cmga0l5mh005dihlet5fcoj0o_RealtimeVideoEventInfos_out_schema = {
     "message": str,
 }
 
+# RealtimeVideoEventInfos WebHook IN Schema
+cmga0l5mh005dihlet5fcoj0o_RealtimeVideoEventInfos_webhook_in_schema = {}
+
 # StoredVideoEventInfos
 cmga0l5mh005dihlet5fcoj0o_StoredVideoEventInfos_out_schema = {
     "code": str,
@@ -396,5 +399,10 @@ cmga0l5mh005dihlet5fcoj0o_outSchema = [
     cmga0l5mh005dihlet5fcoj0o_PtzStatus_out_schema,
     cmga0l5mh005dihlet5fcoj0o_PtzContinuousMove_out_schema,
     cmga0l5mh005dihlet5fcoj0o_PtzStop_out_schema,
+]
+
+# cmga0l5mh005dihlet5fcoj0o WebHook 스키마 리스트
+cmga0l5mh005dihlet5fcoj0o_webhook_inSchema = [
+    cmga0l5mh005dihlet5fcoj0o_RealtimeVideoEventInfos_webhook_in_schema,
 ]
 
