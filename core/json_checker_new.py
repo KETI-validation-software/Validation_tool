@@ -162,10 +162,8 @@ def safe_len(obj):
 
 # 리스트 필드인지 동적으로 확인하는 함수
 def is_list_field(value):
-    if isinstance(value, list): # 내장함수로 객체가 list 타입인지 확인 -> 맞다면 true, 아니라면 종료
+    if isinstance(value, list):
         return True
-    # elif isinstance(value, tuple) and len(value) > 0:   # 튜플로 맵핑된 경우
-    #     return isinstance(value[0], list)
     return False
 
 
