@@ -6,7 +6,6 @@ import sys
 import os
 import json
 #from charset_normalizer import md__mypyc  # A library that helps you read text from an unknown charset encoding
-from spec.video.videoRequest import *
 # from spec.bio.bioRequest import *
 # from spec.security.securityRequest import *
 from lxml import etree
@@ -25,11 +24,32 @@ def resource_path(relative_path):
 
     return os.path.join(base_path, relative_path)
 
-# pass/fail 판별
+# pass/fail 판별 -> 여기에 연동 맥락 ㄱㅓㅁ증 추가하기
 def json_check_(schema, data, flag):
     all_field, opt_field = field_finder(schema)
     all_data = data_finder(data)
-    return do_checker(all_field, all_data, opt_field, flag)
+    # 1단계: 구조 검증
+    result, error_msg, correct_cnt, error_cnt = do_checker(all_field, all_data, opt_field, flag)
+    # 2단계: 의미 검증 (구조 PASS일 때만)
+    semantic_result = None
+    if result == "PASS":
+        try:
+            from core.json_checker_new import extract_validation_rules, do_semantic_checker
+            # validation_dict는 schema에서 추출하거나 별도 전달 필요 (여기서는 schema에 dict가 있다고 가정)
+            rules = extract_validation_rules(schema)
+            # data_dict는 실제 원본 데이터(dict)로 전달
+            semantic_result = do_semantic_checker(rules, data)
+        except Exception as e:
+            semantic_result = {"error": f"Semantic validation error: {e}"}
+    return {
+        "structure_result": {
+            "result": result,
+            "error_msg": error_msg,
+            "correct_cnt": correct_cnt,
+            "error_cnt": error_cnt
+        },
+        "semantic_result": semantic_result
+    }
 
 
 class BearerAuth(requests.auth.AuthBase):
@@ -37,10 +57,7 @@ class BearerAuth(requests.auth.AuthBase):
         self.token = token
 
     def __call__(self, r):
-        token = "" if self.token is None else str(self.token).strip()
-        auth_value = "Bearer" if token == "" else "Bearer " + token
-        r.headers["Authorization"] = auth_value
-        r.headers["authorization"] = auth_value
+        r.headers["authorization"] = "Bearer " + self.token
         return r
 
 
@@ -122,13 +139,6 @@ def json_to_data(type_):
     def _p(t, name, kind):  # kind: "request" | "response"
         return os.path.join("spec", t, f"{name}_{kind}.json")
 
-    if type_ == "video":
-        paths = videoMessages
-        for cnt, path in enumerate(paths):
-            path_req = _p(type_, path, "request")
-            path_res = _p(type_, path, "response")
-            videoInMessage.append(set_message(path_req))
-            videoOutMessage.append(set_message(path_res))
 
     # elif type_ == "bio":
     #     paths = bioMessages

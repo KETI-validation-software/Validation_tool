@@ -11,8 +11,8 @@ import traceback
 import os
 import config.CONSTANTS as CONSTANTS
 
-from spec.video.videoRequest import videoMessages, videoOutMessage, videoInMessage
-from spec.video.videoSchema import videoInSchema, videoOutSchema
+# from spec.video.videoRequest import videoMessages, videoOutMessage, videoInMessage
+# from spec.video.videoSchema import videoInSchema, videoOutSchema
 # from spec.bio.bioRequest import bioMessages, bioOutMessage, bioInMessage
 # from spec.bio.bioSchema import  bioInSchema, bioOutSchema
 # from spec.security.securityRequest import securityMessages, securityOutMessage, securityInMessage
@@ -446,12 +446,12 @@ def run(server_class=HTTPServer, handler_class=Server, address='127.0.0.1', port
     server_address = (address, port)
 
 
-    if system == "video":
-        Server.message = videoMessages
-        Server.inMessage = videoInMessage
-        Server.outMessage = videoOutMessage
-        Server.inSchema = videoInSchema
-        Server.outSchema = videoOutSchema
+    # if system == "video":
+    #     Server.message = videoMessages
+    #     Server.inMessage = videoInMessage
+    #     Server.outMessage = videoOutMessage
+    #     Server.inSchema = videoInSchema
+    #     Server.outSchema = videoOutSchema
 
     # elif system == "bio":
     #     Server.message = bioMessages
