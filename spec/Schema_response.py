@@ -271,7 +271,6 @@ cmga0l5mh005dihlet5fcoj0o_StoredVideoInfos_out_schema = {
     OptionalKey("endTime"): float,
 }],
 }],
-    "camID2": str,
 }
 
 # StreamURLs
@@ -316,14 +315,6 @@ cmga0l5mh005dihlet5fcoj0o_ReplayURL_out_schema = {
 cmga0l5mh005dihlet5fcoj0o_RealtimeVideoEventInfos_out_schema = {
     "code": str,
     "message": str,
-    "camList": [{
-    "camID": str,
-    "eventUUID": str,
-    "eventName": str,
-    "startTime": float,
-    OptionalKey("endTime"): float,
-    OptionalKey("eventDesc"): str,
-}],
 }
 
 # StoredVideoEventInfos

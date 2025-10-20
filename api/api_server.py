@@ -11,6 +11,13 @@ import traceback
 import os
 import config.CONSTANTS as CONSTANTS
 
+# from spec.video.videoRequest import videoMessages, videoOutMessage, videoInMessage
+# from spec.video.videoSchema import videoInSchema, videoOutSchema
+# from spec.bio.bioRequest import bioMessages, bioOutMessage, bioInMessage
+# from spec.bio.bioSchema import  bioInSchema, bioOutSchema
+# from spec.security.securityRequest import securityMessages, securityOutMessage, securityInMessage
+# from spec.security.securitySchema import securityInSchema, securityOutSchema
+
 from core.functions import resource_path
 from requests.auth import HTTPDigestAuth
 from config.CONSTANTS import none_request_message
@@ -417,31 +424,48 @@ class Server(BaseHTTPRequestHandler):
         for i in range(0, len(self.message)):
             data = ""
             if self.path == "/" + self.message[i]:
-                    if self.outMessage and i < len(self.outMessage):
-                        data = self.outMessage[i]
+                data = self.outMessage[i]
+                if i == 0 and self.auth_type == "B":
+                    try:
+                        token = data['accessToken']
+                    except Exception:
+                        pass
                     else:
-                        print(f"[ERROR] outMessage index {i} out of range (len={len(self.outMessage) if self.outMessage else 0})")
-                        data = {"code": "404", "message": "No response data for this API"}
-                    if i == 0 and self.auth_type == "B":
-                        try:
-                            token = data.get('accessToken') if isinstance(data, dict) else None
-                        except Exception:
-                            pass
+                        if isinstance(self.auth_Info, list):
+                            if not self.auth_Info:
+                                self.auth_Info.append(None)
+                            self.auth_Info[0] = str(token).strip()
                         else:
-                            if token is not None:
-                                if isinstance(self.auth_Info, list):
-                                    if not self.auth_Info:
-                                        self.auth_Info.append(None)
-                                    self.auth_Info[0] = str(token).strip()
-                                else:
-                                    self.auth_Info = [str(token).strip()]
-                    break
+                            self.auth_Info = [str(token).strip()]
+                break
         return i, data
 
 
 # 확인용
 def run(server_class=HTTPServer, handler_class=Server, address='127.0.0.1', port=8008, system="video"):
     server_address = (address, port)
+
+
+    # if system == "video":
+    #     Server.message = videoMessages
+    #     Server.inMessage = videoInMessage
+    #     Server.outMessage = videoOutMessage
+    #     Server.inSchema = videoInSchema
+    #     Server.outSchema = videoOutSchema
+
+    # elif system == "bio":
+    #     Server.message = bioMessages
+    #     Server.inMessage = bioInMessage
+    #     Server.outMessage = bioOutMessage
+    #     Server.inSchema = bioInSchema
+    #     Server.outSchema = bioOutSchema
+
+    # elif system == "security":
+    #     Server.message = securityMessages
+    #     Server.inMessage = securityInMessage
+    #     Server.outMessage = securityOutMessage
+    #     Server.inSchema = securityInSchema
+    #     Server.outSchema = securityOutSchema
 
     certificate_private = resource_path('config/key0627/server.crt')
     certificate_key = resource_path('config/key0627/server.key')

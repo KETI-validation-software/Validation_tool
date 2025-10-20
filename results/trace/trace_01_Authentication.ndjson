@@ -1,4 +1,2 @@
-{"time": "2025-10-17T07:40:55.595245Z", "api": "Authentication", "dir": "REQUEST", "data": {}}
-{"time": "2025-10-17T07:40:56.597073Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "404", "message": "No response data for this API"}}
-{"time": "2025-10-17T07:40:57.596229Z", "api": "Authentication", "dir": "REQUEST", "data": {}}
-{"time": "2025-10-17T07:40:58.592193Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "404", "message": "No response data for this API"}}
+{"time": "2025-10-20T03:30:48.858366Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "", "userPW": ""}}
+{"time": "2025-10-20T03:30:55.854897Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "", "userPW": ""}}

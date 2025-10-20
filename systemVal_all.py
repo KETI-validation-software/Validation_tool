@@ -6,7 +6,7 @@ import threading
 import json
 import requests
 import sys
-import spec
+
 import urllib3
 import warnings
 from datetime import datetime
@@ -617,7 +617,7 @@ class MyApp(QWidget):
             self.current_spec_id = spec_id
             print(f"[SYSTEM] 📌 전달받은 spec_id 사용: {spec_id}")
         else:
-            self.current_spec_id = "cmg90br3n002qihleffuljnth"  # 기본값: 보안용센서 시스템 (7개 API)
+            self.current_spec_id = "cmg90br3n002qihleffuljnth"  # 기본값: 보안용센서 시스템 (7개 API) -> 지금은 잠깐 없어짐
             print(f"[SYSTEM] 📌 기본 spec_id 사용: {self.current_spec_id}")
         self.img_pass = resource_path("assets/image/green.png")
         self.img_fail = resource_path("assets/image/red.png")
@@ -711,7 +711,7 @@ class MyApp(QWidget):
         
         # ✅ 설정 정보 추출
         self.spec_description = config.get('test_name', 'Unknown Test')
-        spec_names = config.get('specs', [])    # ['cmg7bve25000114cevhn5o3vr_inSchema', 'cmg7bve25000114cevhn5o3vr_outData', 'cmg7bve25000114cevhn5o3vr_messages'] 이런거
+        spec_names = config.get('specs', [])
         
         # ✅ trans_protocol, time_out, num_retries 저장
         self.trans_protocols = config.get('trans_protocol', [])
@@ -723,30 +723,20 @@ class MyApp(QWidget):
         
         print(f"[SYSTEM] 📋 Spec 로딩 시작: {self.spec_description} (ID: {self.current_spec_id})")
         
-        # ✅ 모든 시스템은 spec/ 폴더 사용
+        # 시스템은 response schema / request data 사용
         print(f"[SYSTEM] 📁 모듈: spec (센서/바이오/영상 통합)")
-        import spec.Schema_request as schema_request_module
         import spec.Data_request as data_request_module
-        import spec.Schema_response as schema_response_module   # 사용
-        import spec.Data_response as data_response_module
+        import spec.Schema_response as schema_response_module
         
         # ✅ 시스템은 응답 검증 + 요청 전송 (outSchema/inData 사용)
         print(f"[SYSTEM] 🔧 타입: 응답 검증 + 요청 전송")
-        
+        print(spec_names)
         # ✅ Response 검증용 스키마 로드 (시스템이 플랫폼으로부터 받을 응답 검증) - outSchema
         self.videoOutSchema = getattr(schema_response_module, spec_names[0], [])
         
         # ✅ Request 전송용 데이터 로드 (시스템이 플랫폼에게 보낼 요청) - inData
-        self.videoOutMessage = getattr(data_request_module, spec_names[1], [])
+        self.videoInMessage = getattr(data_request_module, spec_names[1], [])
         self.videoMessages = getattr(data_request_module, spec_names[2], [])
-        
-        # ✅ Request 검증용 스키마 로드 (플랫폼으로부터 받을 요청 검증용, 역방향) - inSchema
-        inSchema_name = spec_names[0].replace("_outSchema", "_inSchema")
-        self.videoInSchema = getattr(schema_request_module, inSchema_name, [])
-        
-        # ✅ Response 전송용 데이터 로드 (플랫폼에게 보낼 응답용, 역방향) - outData
-        outData_name = spec_names[1].replace("_inData", "_outData")
-        self.videoInMessage = getattr(data_response_module, outData_name, [])
         
         # ✅ Webhook 관련 (현재 미사용)
         self.videoWebhookSchema = []
@@ -892,7 +882,6 @@ class MyApp(QWidget):
         
         layout.addWidget(self.test_field_table)
         group.setLayout(layout)
-        return group
         return group
     
     def on_test_field_selected(self, row, col):
@@ -1045,6 +1034,7 @@ class MyApp(QWidget):
                     parsed = urlparse(str(path_tmp))
                     url = parsed.hostname if parsed.hostname is not None else "127.0.0.1"
                     port = parsed.port if parsed.port is not None else 80
+                    #seo 나중에 확6인 필요
                     msg = self.outMessage[-1]
                     self.webhook_flag = True
                     self.webhook_cnt = self.cnt
@@ -1377,16 +1367,8 @@ class MyApp(QWidget):
                                     schema_keys = list(schema_to_use.keys())[:5]
                                     print(f"[DEBUG] 스키마 필드 (first 5): {schema_keys}")
                         
-                        # 수정된 부분
-                        result_dict = json_check_(self.outSchema[self.cnt], res_data, self.flag_opt)
-                        structure = result_dict["structure_result"]
-                        semantic = result_dict["semantic_result"]
-
-                        val_result = structure["result"]
-                        val_text = structure["error_msg"]
-                        key_psss_cnt = structure["correct_cnt"]
-                        key_error_cnt = structure["error_cnt"]
-
+                        val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.outSchema[self.cnt],
+                                                                                            res_data, self.flag_opt)
                         if self.message[self.cnt] == "Authentication":
                             self.handle_authentication_response(res_data)
                         
@@ -1437,12 +1419,13 @@ class MyApp(QWidget):
 
                         # (1) 스텝 버퍼 저장 - 재시도별로 누적
                         # ✅ 시스템은 플랫폼이 보내는 데이터를 표시해야 함
-                        if self.cnt < len(self.outMessage):
-                            platform_data = self.outMessage[self.cnt]
-                            data_text = json.dumps(platform_data, indent=4, ensure_ascii=False)
-                            # ✅ 웹훅 이벤트 데이터는 get_webhook_result()에서만 추가
+                        if isinstance(res_data, (dict, list)):
+                            platform_data = res_data
                         else:
-                            data_text = tmp_res_auth  # fallback
+                            # 혹시 dict/list가 아니면 raw 텍스트를 감싸서 기록
+                            platform_data = {"raw_response": self.res.text}
+
+                        data_text = json.dumps(platform_data, indent=4, ensure_ascii=False)
                         
                         # ✅ PASS인 경우 오류 텍스트 무시 (val_text에 불필요한 정보가 있을 수 있음)
                         if val_result == "FAIL":
@@ -1526,11 +1509,10 @@ class MyApp(QWidget):
                         self.current_retry += 1
 
                         # 현재 API의 모든 재시도가 완료되었는지 확인
-                        if (self.cnt < len(self.num_retries_list) and
-                            self.current_retry >= self.num_retries_list[self.cnt]):
+                        if (self.cnt < len(CONSTANTS.num_retries) and
+                            self.current_retry >= CONSTANTS.num_retries[self.cnt]):
 
                             self.step_buffers[self.cnt]["events"] = list(self.trace.get(self.cnt, []))
-                            print("seo", self.step_buffers[self.cnt]["events"])
 
                             # 다음 API로 이동
                             self.cnt += 1
@@ -1541,8 +1523,8 @@ class MyApp(QWidget):
                         self.processing_response = False
 
                         # 재시도 여부에 따라 대기 시간 조정 (플랫폼과 동기화)
-                        if (self.cnt < len(self.num_retries_list) and
-                            self.current_retry < self.num_retries_list[self.cnt] - 1):
+                        if (self.cnt < len(CONSTANTS.num_retries) and
+                            self.current_retry < CONSTANTS.num_retries[self.cnt] - 1):
                             self.time_pre = time.time() + 2.0  # 재시도 예정 시 2초 대기 (플랫폼과 동일)
                         else:
                             self.time_pre = time.time() + 2.0  # 마지막 시도 후 2초 대기
@@ -2320,13 +2302,12 @@ class MyApp(QWidget):
         self.setting_variables = QSettings('My App', 'Variable')
         self.system = "video"  # 고정
 
-        # 기본 시스템 설정 (영상보안 시스템으로 지금은 일단 고정)
+        # 기본 시스템 설정
         self.radio_check_flag = "video"
         self.message = self.videoMessages
         self.inMessage = self.videoInMessage
-        self.outMessage = self.videoOutMessage
-        self.inSchema = self.videoInSchema
         self.outSchema = self.videoOutSchema
+
         # ✅ 시스템이 받는 웹훅 이벤트는 spec_002_webhookSchema (플랫폼 → 시스템)
         self.webhookSchema = self.videoWebhookInSchema
         self.final_report = f"{self.spec_description} 검증 결과\n"
