@@ -272,7 +272,7 @@ cmga0l5mh005dihlet5fcoj0o_StoredVideoEventInfos_in_data = {
     }
 ],
     "maxCount": 3,
-    "eventFilter": "",
+    "eventFilter": [],
     "classFilter": ""
 }
 
