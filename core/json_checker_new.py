@@ -40,10 +40,8 @@ def do_semantic_checker(rules_dict, data_dict):
             else:
                 value = None
                 break
-        # 점수 처리
         score = rule.get('score', 1)
         max_score += score
-        # 비활성화된 필드는 PASS 처리
         if not rule.get('enabled', True):
             results[field] = {'result': 'SKIP', 'score': 0, 'msg': 'Validation disabled'}
             continue
@@ -54,31 +52,219 @@ def do_semantic_checker(rules_dict, data_dict):
         # 4.1 valid-value-match
         if vtype == 'valid-value-match':
             allowed = rule.get('allowedValues', [])
-            if value not in allowed:
-                passed = False
-                msg = f"Value '{value}' not in allowedValues {allowed}"
+            operator = rule.get('validValueOperator', 'equalsAny')
+            match_type = rule.get('validValueMatchType', None)
+            ref_field_name = rule.get('validValueFieldName', None)
+            # equals: 정확히 일치
+            if operator == 'equals':
+                if value not in allowed:
+                    passed = False
+                    msg = f"Value '{value}' not in allowedValues {allowed} (equals)"
+            # equalsAny: 목록 중 하나라도 일치
+            elif operator == 'equalsAny':
+                if value not in allowed:
+                    passed = False
+                    msg = f"Value '{value}' not in allowedValues {allowed} (equalsAny)"
+            # 기타 연산자 확장 가능
 
         # 4.2 specified-value-match
         elif vtype == 'specified-value-match':
-            specified = rule.get('specifiedValue', None)
-            if value != specified:
-                passed = False
-                msg = f"Value '{value}' does not match specifiedValue '{specified}'"
+            specified = rule.get('allowedValues', [])
+            value_input_type = rule.get('valueInputType', 'single')
+            if value_input_type == 'single':
+                if value not in specified:
+                    passed = False
+                    msg = f"Value '{value}' does not match specifiedValue {specified}"
+            elif value_input_type == 'array':
+                if value not in specified:
+                    passed = False
+                    msg = f"Value '{value}' does not match any specifiedValue in {specified}"
 
-        # 4.3 range
-        elif vtype == 'range':
-            minv = rule.get('min', None)
-            maxv = rule.get('max', None)
+        # 4.3 range-match
+        elif vtype == 'range-match':
+            operator = rule.get('rangeOperator', None)
+            minv = rule.get('rangeMin', None)
+            maxv = rule.get('rangeMax', None)
             try:
                 v = float(value)
-                if (minv is not None and v < minv) or (maxv is not None and v > maxv):
-                    passed = False
-                    msg = f"Value {v} not in range [{minv}, {maxv}]"
+                if operator == 'less-than':
+                    if maxv is not None and v >= maxv:
+                        passed = False
+                        msg = f"Value {v} not less than {maxv}"
+                elif operator == 'less-equal':
+                    if maxv is not None and v > maxv:
+                        passed = False
+                        msg = f"Value {v} not less or equal to {maxv}"
+                elif operator == 'between':
+                    if (minv is not None and v < minv) or (maxv is not None and v > maxv):
+                        passed = False
+                        msg = f"Value {v} not between [{minv}, {maxv}]"
+                elif operator == 'greater-equal':
+                    if minv is not None and v < minv:
+                        passed = False
+                        msg = f"Value {v} not greater or equal to {minv}"
+                elif operator == 'greater-than':
+                    if minv is not None and v <= minv:
+                        passed = False
+                        msg = f"Value {v} not greater than {minv}"
             except Exception:
                 passed = False
                 msg = f"Value '{value}' is not a number"
 
-        # 4.4 length
+        # 4.3 요청 필드 일치 (request-field-match)
+        elif vtype == 'request-field-match':
+            ref_field = rule.get('referenceField', None)
+            ref_endpoint = rule.get('referenceEndpoint', None)
+            # 기본적으로 같은 데이터 내에서 참조
+            ref_value = None
+            if ref_field:
+                # 중첩 필드 지원
+                ref_keys = ref_field.split('.')
+                ref_value = data_dict
+                for rk in ref_keys:
+                    if isinstance(ref_value, dict) and rk in ref_value:
+                        ref_value = ref_value[rk]
+                    else:
+                        ref_value = None
+                        break
+            if value != ref_value:
+                passed = False
+                msg = f"Value '{value}' does not match referenceField '{ref_field}' value '{ref_value}'"
+
+        # 4.4 응답 필드 일치 (response-field-match)
+        elif vtype == 'response-field-match':
+            ref_field = rule.get('referenceField', None)
+            ref_value = None
+            if ref_field:
+                ref_keys = ref_field.split('.')
+                ref_value = data_dict
+                for rk in ref_keys:
+                    if isinstance(ref_value, dict) and rk in ref_value:
+                        ref_value = ref_value[rk]
+                    else:
+                        ref_value = None
+                        break
+            if value != ref_value:
+                passed = False
+                msg = f"Value '{value}' does not match responseField '{ref_field}' value '{ref_value}'"
+
+        # 4.5 요청 필드 범위 일치 (request-field-range-match)
+        elif vtype == 'request-field-range-match':
+            ref_min_field = rule.get('referenceFieldMin', None)
+            ref_max_field = rule.get('referenceFieldMax', None)
+            ref_min = None
+            ref_max = None
+            if ref_min_field:
+                ref_keys = ref_min_field.split('.')
+                ref_min = data_dict
+                for rk in ref_keys:
+                    if isinstance(ref_min, dict) and rk in ref_min:
+                        ref_min = ref_min[rk]
+                    else:
+                        ref_min = None
+                        break
+            if ref_max_field:
+                ref_keys = ref_max_field.split('.')
+                ref_max = data_dict
+                for rk in ref_keys:
+                    if isinstance(ref_max, dict) and rk in ref_max:
+                        ref_max = ref_max[rk]
+                    else:
+                        ref_max = None
+                        break
+            try:
+                v = float(value)
+                minv = float(ref_min) if ref_min is not None else None
+                maxv = float(ref_max) if ref_max is not None else None
+                operator = rule.get('referenceRangeOperator', None)
+                if operator == 'between':
+                    if (minv is not None and v < minv) or (maxv is not None and v > maxv):
+                        passed = False
+                        msg = f"Value {v} not between [{minv}, {maxv}] (request-field-range-match)"
+                elif operator == 'less-equal':
+                    if maxv is not None and v > maxv:
+                        passed = False
+                        msg = f"Value {v} not less or equal to {maxv} (request-field-range-match)"
+                elif operator == 'greater-equal':
+                    if minv is not None and v < minv:
+                        passed = False
+                        msg = f"Value {v} not greater or equal to {minv} (request-field-range-match)"
+            except Exception:
+                passed = False
+                msg = f"Value '{value}' is not a number (request-field-range-match)"
+
+        # 4.6 응답 필드 범위 일치 (response-field-range-match)
+        elif vtype == 'response-field-range-match':
+            ref_max_field = rule.get('referenceFieldMax', None)
+            ref_max = None
+            if ref_max_field:
+                ref_keys = ref_max_field.split('.')
+                ref_max = data_dict
+                for rk in ref_keys:
+                    if isinstance(ref_max, dict) and rk in ref_max:
+                        ref_max = ref_max[rk]
+                    else:
+                        ref_max = None
+                        break
+            try:
+                v = float(value)
+                maxv = float(ref_max) if ref_max is not None else None
+                operator = rule.get('referenceRangeOperator', None)
+                if operator == 'less-equal':
+                    if maxv is not None and v > maxv:
+                        passed = False
+                        msg = f"Value {v} not less or equal to {maxv} (response-field-range-match)"
+                elif operator == 'greater-equal':
+                    if maxv is not None and v < maxv:
+                        passed = False
+                        msg = f"Value {v} not greater or equal to {maxv} (response-field-range-match)"
+            except Exception:
+                passed = False
+                msg = f"Value '{value}' is not a number (response-field-range-match)"
+
+        # 4.7 요청 필드 목록 일치 (request-field-list-match)
+        elif vtype == 'request-field-list-match':
+            ref_list_field = rule.get('referenceListField', None)
+            ref_list = None
+            if ref_list_field:
+                ref_keys = ref_list_field.split('.')
+                ref_list = data_dict
+                for rk in ref_keys:
+                    if isinstance(ref_list, dict) and rk in ref_list:
+                        ref_list = ref_list[rk]
+                    else:
+                        ref_list = None
+                        break
+            if isinstance(ref_list, list):
+                if value not in ref_list:
+                    passed = False
+                    msg = f"Value '{value}' not in referenceListField {ref_list} (request-field-list-match)"
+            else:
+                passed = False
+                msg = f"referenceListField '{ref_list_field}' is not a list"
+
+        # 4.8 응답 필드 목록 일치 (response-field-list-match)
+        elif vtype == 'response-field-list-match':
+            ref_list_field = rule.get('referenceListField', None)
+            ref_list = None
+            if ref_list_field:
+                ref_keys = ref_list_field.split('.')
+                ref_list = data_dict
+                for rk in ref_keys:
+                    if isinstance(ref_list, dict) and rk in ref_list:
+                        ref_list = ref_list[rk]
+                    else:
+                        ref_list = None
+                        break
+            if isinstance(ref_list, list):
+                if value not in ref_list:
+                    passed = False
+                    msg = f"Value '{value}' not in responseListField {ref_list} (response-field-list-match)"
+            else:
+                passed = False
+                msg = f"responseListField '{ref_list_field}' is not a list"
+
+        # 기존 일반 validationType (length, regex, required, unique, custom)
         elif vtype == 'length':
             minl = rule.get('minLength', None)
             maxl = rule.get('maxLength', None)
@@ -90,8 +276,6 @@ def do_semantic_checker(rules_dict, data_dict):
             except Exception:
                 passed = False
                 msg = f"Value '{value}' has no length"
-
-        # 4.5 regex
         elif vtype == 'regex':
             pattern = rule.get('pattern', None)
             if pattern is not None:
@@ -105,14 +289,10 @@ def do_semantic_checker(rules_dict, data_dict):
             else:
                 passed = False
                 msg = "No regex pattern specified"
-
-        # 4.6 required
         elif vtype == 'required':
             if value is None or value == '':
                 passed = False
                 msg = "Field is required but missing or empty"
-                
-        # 4.7 unique (list 내 중복 불가)
         elif vtype == 'unique':
             if isinstance(value, list):
                 if len(value) != len(set(value)):
@@ -121,7 +301,6 @@ def do_semantic_checker(rules_dict, data_dict):
             else:
                 passed = False
                 msg = "Field is not a list for unique validation"
-        # 4.8 custom (customFunction)
         elif vtype == 'custom':
             func = rule.get('customFunction', None)
             if callable(func):
@@ -137,9 +316,7 @@ def do_semantic_checker(rules_dict, data_dict):
                 msg = "No custom function provided"
         # 기타/미지정 validationType
         else:
-            # validationType이 없으면 무시 (PASS)
             pass
-        # 결과 기록
         if passed:
             results[field] = {'result': 'PASS', 'score': score, 'msg': msg}
             total_score += score
