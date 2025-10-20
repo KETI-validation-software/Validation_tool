@@ -336,6 +336,11 @@ cmga0l5mh005dihlet5fcoj0o_inData = [
     cmga0l5mh005dihlet5fcoj0o_PtzStop_in_data,
 ]
 
+# cmga0l5mh005dihlet5fcoj0o WebHook 데이터 리스트
+cmga0l5mh005dihlet5fcoj0o_webhook_outData = [
+    cmga0l5mh005dihlet5fcoj0o_RealtimeVideoEventInfos_webhook_out_data,
+]
+
 # cmga0l5mh005dihlet5fcoj0o API endpoint
 cmga0l5mh005dihlet5fcoj0o_messages = [
     "Authentication",

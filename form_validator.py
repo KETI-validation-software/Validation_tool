@@ -79,6 +79,8 @@ class FormValidator:
                 endpoint_names = []
                 validation_names  = []
                 constraints_names  = []
+                webhook_schema_names = []  # webhook 전용 스키마 리스트
+                webhook_data_names = []    # webhook 전용 데이터 리스트
                 temp_spec_id = spec_id+"_"
                 for s in steps:
                     step_id = s.get("id")
@@ -103,6 +105,8 @@ class FormValidator:
                             validation_names=validation_names,
                             constraints_content=constraints_content,
                             constraints_names=constraints_names,
+                            webhook_schema_names=webhook_schema_names,
+                            webhook_data_names=webhook_data_names,
                             spec_id = temp_spec_id
                         )
                 if schema_type == "request":
@@ -116,6 +120,15 @@ class FormValidator:
                     schema_content += f"    {temp_spec_id}{name},\n"
                 schema_content += "]\n\n"
 
+                # WebHook 전용 스키마 리스트 생성
+                if webhook_schema_names:
+                    webhook_schema_list_name = f"{spec_id}_webhook_outSchema" if schema_type == "request" else f"{spec_id}_webhook_inSchema"
+                    schema_content += f"# {spec_id} WebHook 스키마 리스트\n"
+                    schema_content += f"{webhook_schema_list_name} = [\n"
+                    for name in webhook_schema_names:
+                        schema_content += f"    {temp_spec_id}{name},\n"
+                    schema_content += "]\n\n"
+
                 if file_type == "request":
                     data_list_name = f"{spec_id}_inData"
                 else:
@@ -126,6 +139,15 @@ class FormValidator:
                 for name in data_names:
                     data_content += f"    {temp_spec_id}{name},\n"
                 data_content += "]\n\n"
+
+                # WebHook 전용 데이터 리스트 생성
+                if webhook_data_names:
+                    webhook_data_list_name = f"{spec_id}_webhook_inData" if file_type == "response" else f"{spec_id}_webhook_outData"
+                    data_content += f"# {spec_id} WebHook 데이터 리스트\n"
+                    data_content += f"{webhook_data_list_name} = [\n"
+                    for name in webhook_data_names:
+                        data_content += f"    {temp_spec_id}{name},\n"
+                    data_content += "]\n\n"
 
                 # Messages 리스트 생성 (spec별로) - spec_id_safe 사용
                 messages_list_name = f"{spec_id}_messages"
@@ -201,7 +223,7 @@ class FormValidator:
                 f.write(constraints_content)
             print(f"Data_{constraints_output}.py 생성 완료")
 
-            # CONSTANTS.py 업데이트
+            # CONSTANTS.py 업데이트 (specs 리스트 생성 비활성화)
             if all_spec_list_names:
                 self._update_constants_specs(all_spec_list_names)
 
@@ -215,7 +237,8 @@ class FormValidator:
     def _generate_files_for_each_steps(self, schema_type, file_type, ts, schema_content,
                                        data_content, schema_names, data_names, endpoint_names,
                                        validation_content, validation_names,
-                                   constraints_content, constraints_names, spec_id):
+                                   constraints_content, constraints_names,
+                                   webhook_schema_names, webhook_data_names, spec_id):
 
         # step 레벨에서 protocolType 확인 (소문자 "webhook")
         detail = ts.get("detail", {})
@@ -247,27 +270,25 @@ class FormValidator:
 
         # WebHook 처리 - schema_type="request"일 때 webhook_out_schema 생성
         if protocol_type == "webhook" and schema_type == "request":
-            webhook_spec = settings.get("webhook", {}).get("integrationSpec", {})
-            if webhook_spec:
-                webhook_schema_name = f"{endpoint_name}_webhook_out_schema"
-                webhook_schema_obj = self._convert_webhook_spec_to_schema(webhook_spec)
-                schema_content += f"# {endpoint_name} WebHook OUT Schema\n"
-                formatted_webhook = self.schema_gen.format_schema_content(webhook_schema_obj)
-                schema_content += f"{spec_id}{webhook_schema_name} = {formatted_webhook}\n\n"
-                schema_names.append(webhook_schema_name)
-                print(f"  ✓ WebHook OUT Schema 생성: {webhook_schema_name}")
+            webhook_spec = settings.get("webhook", {}).get("integrationSpec") or {}
+            webhook_schema_name = f"{endpoint_name}_webhook_out_schema"
+            webhook_schema_obj = self._convert_webhook_spec_to_schema(webhook_spec)
+            schema_content += f"# {endpoint_name} WebHook OUT Schema\n"
+            formatted_webhook = self.schema_gen.format_schema_content(webhook_schema_obj)
+            schema_content += f"{spec_id}{webhook_schema_name} = {formatted_webhook}\n\n"
+            webhook_schema_names.append(webhook_schema_name)  # webhook 전용 리스트에 추가
+            print(f"  ✓ WebHook OUT Schema 생성: {webhook_schema_name}" + (" (빈 딕셔너리)" if not webhook_spec else ""))
 
         # WebHook 처리 - schema_type="response"일 때 webhook_in_schema 생성
         if protocol_type == "webhook" and schema_type == "response":
-            webhook_spec = settings.get("webhook", {}).get("integrationSpec", {})
-            if webhook_spec:
-                webhook_schema_name = f"{endpoint_name}_webhook_in_schema"
-                webhook_schema_obj = self._convert_webhook_spec_to_schema(webhook_spec)
-                schema_content += f"# {endpoint_name} WebHook IN Schema\n"
-                formatted_webhook = self.schema_gen.format_schema_content(webhook_schema_obj)
-                schema_content += f"{spec_id}{webhook_schema_name} = {formatted_webhook}\n\n"
-                schema_names.append(webhook_schema_name)
-                print(f"  ✓ WebHook IN Schema 생성: {webhook_schema_name}")
+            webhook_spec = settings.get("webhook", {}).get("integrationSpec") or {}
+            webhook_schema_name = f"{endpoint_name}_webhook_in_schema"
+            webhook_schema_obj = self._convert_webhook_spec_to_schema(webhook_spec)
+            schema_content += f"# {endpoint_name} WebHook IN Schema\n"
+            formatted_webhook = self.schema_gen.format_schema_content(webhook_schema_obj)
+            schema_content += f"{spec_id}{webhook_schema_name} = {formatted_webhook}\n\n"
+            webhook_schema_names.append(webhook_schema_name)  # webhook 전용 리스트에 추가
+            print(f"  ✓ WebHook IN Schema 생성: {webhook_schema_name}" + (" (빈 딕셔너리)" if not webhook_spec else ""))
 
         # Data 생성 (spec별로)
         data_info = self.data_gen.extract_endpoint_data(ts, file_type)
@@ -284,41 +305,39 @@ class FormValidator:
 
         # WebHook 처리 - file_type="response"일 때 webhook_in_data 생성
         if protocol_type == "webhook" and file_type == "response":
-            webhook_request_spec = settings.get("webhook", {}).get("requestSpec", {})
-            if webhook_request_spec:
-                webhook_data_name = f"{endpoint_name}_webhook_in_data"
+            webhook_request_spec = settings.get("webhook", {}).get("requestSpec") or {}
+            webhook_data_name = f"{endpoint_name}_webhook_in_data"
 
-                # requestSpec이 리스트인 경우 (bodyJson 배열이 직접 들어있음)
-                if isinstance(webhook_request_spec, list):
-                    webhook_data_obj = self.data_gen.build_data_from_spec(webhook_request_spec)
-                else:
-                    # requestSpec이 딕셔너리인 경우 (bodyJson 키가 있을 수 있음)
-                    webhook_data_obj = self._convert_webhook_spec_to_data(webhook_request_spec)
+            # requestSpec이 리스트인 경우 (bodyJson 배열이 직접 들어있음)
+            if isinstance(webhook_request_spec, list):
+                webhook_data_obj = self.data_gen.build_data_from_spec(webhook_request_spec)
+            else:
+                # requestSpec이 딕셔너리인 경우 (bodyJson 키가 있을 수 있음)
+                webhook_data_obj = self._convert_webhook_spec_to_data(webhook_request_spec)
 
-                data_content += f"# {endpoint_name} WebHook IN Data\n"
-                formatted_webhook_data = self.data_gen.format_data_content(webhook_data_obj)
-                data_content += f"{spec_id}{webhook_data_name} = {formatted_webhook_data}\n\n"
-                data_names.append(webhook_data_name)
-                print(f"  ✓ WebHook IN Data 생성: {webhook_data_name}")
+            data_content += f"# {endpoint_name} WebHook IN Data\n"
+            formatted_webhook_data = self.data_gen.format_data_content(webhook_data_obj)
+            data_content += f"{spec_id}{webhook_data_name} = {formatted_webhook_data}\n\n"
+            webhook_data_names.append(webhook_data_name)  # webhook 전용 리스트에 추가
+            print(f"  ✓ WebHook IN Data 생성: {webhook_data_name}" + (" (빈 딕셔너리)" if not webhook_request_spec else ""))
 
         # WebHook 처리 - file_type="request"일 때 webhook_out_data 생성
         if protocol_type == "webhook" and file_type == "request":
-            webhook_request_spec = settings.get("webhook", {}).get("requestSpec", {})
-            if webhook_request_spec:
-                webhook_data_name = f"{endpoint_name}_webhook_out_data"
+            webhook_request_spec = settings.get("webhook", {}).get("requestSpec") or {}
+            webhook_data_name = f"{endpoint_name}_webhook_out_data"
 
-                # requestSpec이 리스트인 경우 (bodyJson 배열이 직접 들어있음)
-                if isinstance(webhook_request_spec, list):
-                    webhook_data_obj = self.data_gen.build_data_from_spec(webhook_request_spec)
-                else:
-                    # requestSpec이 딕셔너리인 경우 (bodyJson 키가 있을 수 있음)
-                    webhook_data_obj = self._convert_webhook_spec_to_data(webhook_request_spec)
+            # requestSpec이 리스트인 경우 (bodyJson 배열이 직접 들어있음)
+            if isinstance(webhook_request_spec, list):
+                webhook_data_obj = self.data_gen.build_data_from_spec(webhook_request_spec)
+            else:
+                # requestSpec이 딕셔너리인 경우 (bodyJson 키가 있을 수 있음)
+                webhook_data_obj = self._convert_webhook_spec_to_data(webhook_request_spec)
 
-                data_content += f"# {endpoint_name} WebHook OUT Data\n"
-                formatted_webhook_data = self.data_gen.format_data_content(webhook_data_obj)
-                data_content += f"{spec_id}{webhook_data_name} = {formatted_webhook_data}\n\n"
-                data_names.append(webhook_data_name)
-                print(f"  ✓ WebHook OUT Data 생성: {webhook_data_name}")
+            data_content += f"# {endpoint_name} WebHook OUT Data\n"
+            formatted_webhook_data = self.data_gen.format_data_content(webhook_data_obj)
+            data_content += f"{spec_id}{webhook_data_name} = {formatted_webhook_data}\n\n"
+            webhook_data_names.append(webhook_data_name)  # webhook 전용 리스트에 추가
+            print(f"  ✓ WebHook OUT Data 생성: {webhook_data_name}" + (" (빈 딕셔너리)" if not webhook_request_spec else ""))
 
         endpoint_names.append(endpoint_name)
 
@@ -807,6 +826,11 @@ class FormValidator:
                 print(f"경고: spec_id={spec_id}에 대한 steps 캐시가 없습니다.")
                 return None
 
+            print(f"\n[DEBUG] _extract_spec_config_from_api 호출")
+            print(f"  spec_id: {spec_id}")
+            print(f"  _steps_cache의 step 개수: {len(steps)}")
+            print(f"  steps: {[s.get('id') for s in steps]}")
+
             time_out = []
             num_retries = []
             trans_protocol = []
@@ -851,7 +875,10 @@ class FormValidator:
                     trans_protocol_mode = None
                 trans_protocol.append(trans_protocol_mode)
 
-            print(f"{spec_id} 프로토콜 설정 추출 완료: {len(time_out)}개 steps")
+            print(f"  {spec_id} 프로토콜 설정 추출 완료: {len(time_out)}개 steps")
+            print(f"  trans_protocol: {trans_protocol}")
+            print(f"  time_out: {time_out}")
+            print(f"  num_retries: {num_retries}\n")
 
             return {
                 "trans_protocol": trans_protocol,
@@ -866,19 +893,12 @@ class FormValidator:
             return None
 
     def overwrite_spec_config_from_mapping(self,
-                                           config_defaults: dict = None,
                                            constants_path: str = "config/CONSTANTS.py") -> None:
         """
-        merge_list_prefix_mappings()로 얻은 merged_result를 이용해
-        CONSTANTS.py의 SPEC_CONFIG 전체 블록을 '덮어쓰기'로 갱신한다.
+        산출물 파일을 분석하여 CONSTANTS.py의 SPEC_CONFIG 전체 블록을 '덮어쓰기'로 갱신한다.
+        각 spec_id별로 API에서 trans_protocol, time_out, num_retries를 추출하여 반영한다.
         """
         try:
-            if config_defaults is None:
-                config_defaults = {
-                    "trans_protocol": [],
-                    "time_out": [],
-                    "num_retries": []
-                }
 
             # 1) CONSTANTS.py 읽기
             with open(constants_path, "r", encoding="utf-8") as f:
@@ -920,10 +940,10 @@ class FormValidator:
             mode = self.parent.test_group_edit.text().strip()
 
             if mode == "물리보안":
-                priority_order = ["outSchema", "inData", "messages"]
+                priority_order = ["outSchema", "inData", "messages", "webhook"]
                 merged_result = self.merge_list_prefix_mappings("spec/Schema_response.py", "spec/Data_request.py")
             elif mode == "통합플랫폼":
-                priority_order = ["inSchema", "outData", "messages"]
+                priority_order = ["inSchema", "outData", "messages", "webhook"]
                 merged_result = self.merge_list_prefix_mappings("spec/Schema_request.py", "spec/Data_response.py")
             else:
                 print("[CONFIG SPEC]: 모드 확인해주세요.")
@@ -942,8 +962,13 @@ class FormValidator:
                 # spec_id로 시작하는 리스트만 취함
                 filtered_lists = [name for name in all_lists if name.startswith(spec_id + "_")]
 
-                # ✅ 우선순위 기반 정렬 함수 정의
+                # 우선순위 기반 정렬 함수 정의
                 def sort_by_priority(name: str) -> int:
+                    # webhook 리스트는 "webhook"이 이름에 포함되어 있음
+                    if "webhook" in name.lower():
+                        return priority_order.index("webhook") if "webhook" in priority_order else len(priority_order)
+
+                    # 일반 리스트는 마지막 suffix로 판단
                     suffix = name.split("_")[-1]
                     if suffix in priority_order:
                         return priority_order.index(suffix)
@@ -952,14 +977,24 @@ class FormValidator:
                 # ✅ 중복 제거 후 우선순위 정렬 적용
                 specs_list = sorted(set(filtered_lists), key=sort_by_priority)
 
+                # 각 spec_id별로 설정 가져오기 (API에서 추출 또는 기본값)
+                spec_config_data = self._extract_spec_config_from_api(spec_id)
+                if not spec_config_data:
+                    # API에서 가져오지 못하면 기본값 사용
+                    spec_config_data = {
+                        "trans_protocol": [],
+                        "time_out": [],
+                        "num_retries": []
+                    }
+
                 # 항목 문자열 조립 (순서: test_name, specs, trans_protocol, time_out, num_retries)
                 entry = (
                     f'"{spec_id}": {{\n'
                     f'    "test_name": "{spec_name}",\n'
                     f'    "specs": {specs_list},\n'
-                    f'    "trans_protocol": {config_defaults.get("trans_protocol", [])},\n'
-                    f'    "time_out": {config_defaults.get("time_out", [])},\n'
-                    f'    "num_retries": {config_defaults.get("num_retries", [])}\n'
+                    f'    "trans_protocol": {spec_config_data.get("trans_protocol", [])},\n'
+                    f'    "time_out": {spec_config_data.get("time_out", [])},\n'
+                    f'    "num_retries": {spec_config_data.get("num_retries", [])}\n'
                     f'}}'
                 )
                 entries.append(entry)
@@ -1026,6 +1061,8 @@ class FormValidator:
             print(f"spec_id={spec_id}에 대한 spec_name: {spec_name}")
 
             # specs 파일 리스트 생성 (spec_id 기반)
+            # ⚠️ 주의: 이 함수는 개별 spec 업데이트용으로, 기본 리스트만 포함
+            # webhook 리스트는 overwrite_spec_config_from_mapping()에서 자동 감지하여 추가됨
             specs_list = [
                 f"{spec_id}_inSchema",
                 f"{spec_id}_outData",
@@ -1215,17 +1252,23 @@ class FormValidator:
             self.preload_all_spec_steps()
             self.preload_test_step_details_from_cache()
 
-            # 모든 spec에 대해 SPEC_CONFIG 업데이트
+            # 산출물 파일 생성 먼저 (SPEC_CONFIG 업데이트보다 먼저 실행)
+            self._generate_files_for_all_specs()
+
+            # 모든 spec에 대해 개별 설정 업데이트 (trans_protocol, time_out, num_retries)
             print(f"\n=== SPEC_CONFIG 업데이트 시작 ===")
             for spec in test_specs:
                 spec_id = spec.get("id", "")
                 if spec_id:
                     spec_config_data = self._extract_spec_config_from_api(spec_id)
                     if spec_config_data:
-                        self.overwrite_spec_config_from_mapping(config_defaults=spec_config_data)
-            print(f"=== SPEC_CONFIG 업데이트 완료 ===\n")
+                        self._update_spec_config(spec_id, spec_config_data)  # 개별 spec 업데이트
+            print(f"=== SPEC_CONFIG 개별 업데이트 완료 ===\n")
 
-            self._generate_files_for_all_specs()
+            # 산출물 파일 기반으로 SPEC_CONFIG 전체 재구성 (specs 필드 포함)
+            print(f"=== SPEC_CONFIG 전체 재구성 시작 ===")
+            self.overwrite_spec_config_from_mapping()  # 한 번만 호출, 모든 spec 처리
+            print(f"=== SPEC_CONFIG 전체 재구성 완료 ===\n")
             # API 테이블은 첫 번째 분야를 자동 선택하여 표시 (API 기반)
             if self.parent.test_field_table.rowCount() > 0:
                 self.parent.test_field_table.selectRow(0)
@@ -1373,11 +1416,18 @@ class FormValidator:
                 continue
 
             steps = spec_data.get("specification", {}).get("steps", [])
-            # hasApi만 필터링하고, id/name만 저장
+            # hasApi만 필터링하고, webhook callback step 제외 (id에 '-'가 2번 이상 있는 경우)
             trimmed = [
                 {"id": s.get("id"), "name": s.get("name", "")}
-                for s in steps if s.get("hasApi")
+                for s in steps
+                if s.get("hasApi") and s.get("id", "").count("-") <= 1  # webhook callback step 제외
             ]
+
+            print(f"[DEBUG] preload_all_spec_steps - spec_id: {spec_id}")
+            print(f"  전체 steps: {len(steps)}개")
+            print(f"  hasApi=True인 steps (callback 제외): {len(trimmed)}개")
+            print(f"  step IDs: {[t.get('id') for t in trimmed]}")
+
             self._steps_cache[spec_id] = trimmed
             loaded += 1
 
