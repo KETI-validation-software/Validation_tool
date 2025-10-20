@@ -16,7 +16,7 @@ test_target = "물리보안"
 test_range = "ALL_FIELDS"
 auth_type = "Digest Auth"
 auth_info = "admin,1234"
-admin_code = "1324"
+admin_code = "1234"
 url = "https://192.168.1.1:8080"
 
 
