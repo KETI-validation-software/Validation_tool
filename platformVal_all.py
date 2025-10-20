@@ -726,8 +726,6 @@ class MyApp(QWidget):
         # ✅ 모든 시스템은 spec/ 폴더 사용
         print(f"[PLATFORM] 📁 모듈: spec (센서/바이오/영상 통합)")
         import spec.Schema_request as schema_request_module
-        import spec.Data_request as data_request_module
-        import spec.Schema_response as schema_response_module
         import spec.Data_response as data_response_module
         
         # ✅ 플랫폼은 요청 검증 + 응답 전송 (inSchema/outData 사용)
@@ -737,17 +735,9 @@ class MyApp(QWidget):
         self.videoInSchema = getattr(schema_request_module, spec_names[0], [])
         
         # ✅ Response 전송용 데이터 로드 (플랫폼이 시스템에게 보낼 응답) - outData
-        self.videoInMessage = getattr(data_response_module, spec_names[1], [])
+        self.videoOutMessage = getattr(data_response_module, spec_names[1], [])
         self.videoMessages = getattr(data_response_module, spec_names[2], [])
-        
-        # ✅ Request 전송용 데이터 로드 (Server가 시스템에게 보낼 요청) - inData
-        inData_name = spec_names[1].replace("_outData", "_inData")
-        self.videoOutMessage = getattr(data_request_module, inData_name, [])
-        
-        # ✅ Response 검증용 스키마 로드 (Server가 시스템으로부터 받을 응답 검증) - outSchema
-        outSchema_name = spec_names[0].replace("_inSchema", "_outSchema")
-        self.videoOutSchema = getattr(schema_response_module, outSchema_name, [])
-        
+
         # ✅ Webhook 관련 (영상보안 시스템만 사용)
         self.videoWebhookSchema = []
         self.videoWebhookData = []
@@ -2005,10 +1995,8 @@ class MyApp(QWidget):
         # Server 설정 (디버그 메시지 추가)
         # print(f"[DEBUG] sbtn_push: Setting Server.message (length={len(self.videoMessages)})")
         self.Server.message = self.videoMessages
-        self.Server.inMessage = self.videoInMessage
         self.Server.outMessage = self.videoOutMessage
         self.Server.inSchema = self.videoInSchema
-        self.Server.outSchema = self.videoOutSchema
         self.Server.webhookData = self.videoWebhookData  # ✅ 웹훅 이벤트 데이터 (플랫폼 → 시스템)
         self.Server.system = "video"
         self.Server.timeout = timeout

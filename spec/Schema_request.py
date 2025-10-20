@@ -1,5 +1,4 @@
 from json_checker import OptionalKey
-# 요청을 검증
 
 
 # Authentication

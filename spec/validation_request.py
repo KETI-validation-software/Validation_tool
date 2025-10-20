@@ -50,7 +50,7 @@ cmg90br3n002qihleffuljnth_RealtimeSensorEventInfos_in_validation = {
     "enabled": True,
     "validationType": "response-field-list-match",
     "referenceListField": "sensorDeviceID",
-    "referenceEndpoint": "/SensorDeviceProfiles"
+    "referenceEndpoint": "/SensorDeviceControl"
   },
   "duration": {
     "enabled": False,
@@ -107,7 +107,7 @@ cmg90br3n002qihleffuljnth_StoredSensorEventInfos_in_validation = {
     "enabled": True,
     "validationType": "response-field-list-match",
     "referenceListField": "sensorDeviceID",
-    "referenceEndpoint": "/SensorDeviceProfiles"
+    "referenceEndpoint": "/SensorDeviceControl"
   },
   "maxCount": {
     "enabled": False,
@@ -132,7 +132,7 @@ cmg90br3n002qihleffuljnth_SensorDeviceControl_in_validation = {
     "enabled": True,
     "validationType": "response-field-list-match",
     "referenceListField": "sensorDeviceID",
-    "referenceEndpoint": "/SensorDeviceProfiles"
+    "referenceEndpoint": "/SensorDeviceControl"
   },
   "commandType": {
     "enabled": False,
