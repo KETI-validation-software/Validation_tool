@@ -981,44 +981,6 @@ cmga0l5mh005dihlet5fcoj0o_RealtimeVideoEventInfos_out_validation = {
   "message": {
     "enabled": False,
     "validationType": "specified-value-match"
-  },
-  "camList": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.camID": {
-    "enabled": True,
-    "validationType": "request-field-list-match",
-    "referenceEndpoint": "/PtzStatus",
-    "referenceListField": "camID"
-  },
-  "camList.eventUUID": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.eventName": {
-    "enabled": True,
-    "referenceField": "eventFilter",
-    "validationType": "request-field-match",
-    "referenceEndpoint": "/RealtimeVideoEventInfos"
-  },
-  "camList.startTime": {
-    "enabled": True,
-    "validationType": "request-field-range-match",
-    "referenceFieldMin": "startTime",
-    "referenceEndpointMin": "/RealtimeVideoEventInfos",
-    "referenceRangeOperator": "greater-equal"
-  },
-  "camList.endTime": {
-    "enabled": True,
-    "validationType": "request-field-range-match",
-    "referenceFieldMin": "startTime",
-    "referenceEndpointMin": "/RealtimeVideoEventInfos",
-    "referenceRangeOperator": "greater-equal"
-  },
-  "camList.eventDesc": {
-    "enabled": False,
-    "validationType": "specified-value-match"
   }
 }
 
