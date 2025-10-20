@@ -889,6 +889,7 @@ class MyApp(QWidget):
             
             # cnt가 리스트 길이 이상이면 종료 처리
             if self.cnt >= len(self.Server.message):
+                self.tick_timer.stop()
                 return
             
             # ✅ 시스템과 동일: 첫 틱에서는 대기만 하고 리턴
@@ -906,7 +907,7 @@ class MyApp(QWidget):
                     self._update_server_bearer_token(self.auth_Info)
                 except (KeyError, TypeError):
                     pass
-
+        
             # 주요 요청 처리 시 Bearer 토큰 상태 디버그 로그
             if self.r2 == "B":
                 token = None
@@ -1009,7 +1010,7 @@ class MyApp(QWidget):
                 QApplication.processEvents()
 
                 # 현재 데이터 사용 (이미 읽음)
-                current_data = self._get_latest_request_data(api_name)
+                current_data = self._get_latest_request_data(api_name, "REQUEST") or {}
 
                 if self.Server.message[self.cnt] in CONSTANTS.none_request_message:
                     # 매 시도마다 데이터 수집
@@ -2181,9 +2182,9 @@ class MyApp(QWidget):
     def exit_btn_clicked(self):
         """프로그램 종료"""
         # 타이머 정지
-        if hasattr(self, 'timer'):
-            self.timer.stop()
-        
+        if hasattr(self, 'tick_timer'):
+            self.tick_timer.stop()
+
         # print문 추가 -> 나중에 기능 수정해야함 (09/30)
         total_pass = getattr(self, 'total_pass_cnt', 0)
         total_error = getattr(self, 'total_error_cnt', 0)
@@ -2294,7 +2295,9 @@ class json_data(QThread):
     def __init__(self):
         super().__init__()
 
+    # busy loop 대체용 -> cpu 사용량 최적화
     def run(self):
+        import time
         while True:
             with open(resource_path("spec/rows.json"), "r", encoding="UTF-8") as out_file:
                 data = json.load(out_file)
@@ -2302,6 +2305,7 @@ class json_data(QThread):
                 with open(resource_path("spec/rows.json"), "w", encoding="UTF-8") as out_file:
                     json.dump(None, out_file, ensure_ascii=False)
                 self.json_update_data.emit(data)
+            time.sleep(0.1)  # 0.1초 대기
 
 
 if __name__ == '__main__':

@@ -1407,7 +1407,7 @@ class MyApp(QWidget):
                         # 이번 시도의 결과
                         final_result = val_result
 
-                        # 플랫폼과 동일한 누적 카운트 로직 - (10/20) 하드코딩 흔적
+                        # 플랫폼과 동일한 누적 카운트 로직 - (10/20) 하드코딩 흔적 지움
                         if not hasattr(self, 'step_pass_counts'):
                             api_count = len(self.videoMessages)
                             self.step_pass_counts = [0] * api_count
