@@ -870,7 +870,7 @@ class MyApp(QWidget):
                 item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
                 self.test_field_table.setItem(idx, 0, item)
                 
-                # 매핑 저장
+                # 매핑 저장 
                 self.spec_id_to_index[spec_id] = idx
                 self.index_to_spec_id[idx] = spec_id
             
