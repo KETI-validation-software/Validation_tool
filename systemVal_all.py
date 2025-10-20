@@ -731,28 +731,18 @@ class MyApp(QWidget):
         
         # ✅ 모든 시스템은 spec/ 폴더 사용
         print(f"[SYSTEM] 📁 모듈: spec (센서/바이오/영상 통합)")
-        import spec.Schema_request as schema_request_module
         import spec.Data_request as data_request_module
         import spec.Schema_response as schema_response_module
-        import spec.Data_response as data_response_module
         
         # ✅ 시스템은 응답 검증 + 요청 전송 (outSchema/inData 사용)
         print(f"[SYSTEM] 🔧 타입: 응답 검증 + 요청 전송")
-        
+        print(spec_names)
         # ✅ Response 검증용 스키마 로드 (시스템이 플랫폼으로부터 받을 응답 검증) - outSchema
         self.videoOutSchema = getattr(schema_response_module, spec_names[0], [])
         
         # ✅ Request 전송용 데이터 로드 (시스템이 플랫폼에게 보낼 요청) - inData
-        self.videoOutMessage = getattr(data_request_module, spec_names[1], [])
+        self.videoInMessage = getattr(data_request_module, spec_names[1], [])
         self.videoMessages = getattr(data_request_module, spec_names[2], [])
-        
-        # ✅ Request 검증용 스키마 로드 (플랫폼으로부터 받을 요청 검증용, 역방향) - inSchema
-        inSchema_name = spec_names[0].replace("_outSchema", "_inSchema")
-        self.videoInSchema = getattr(schema_request_module, inSchema_name, [])
-        
-        # ✅ Response 전송용 데이터 로드 (플랫폼에게 보낼 응답용, 역방향) - outData
-        outData_name = spec_names[1].replace("_inData", "_outData")
-        self.videoInMessage = getattr(data_response_module, outData_name, [])
         
         # ✅ Webhook 관련 (현재 미사용)
         self.videoWebhookSchema = []
@@ -1051,6 +1041,7 @@ class MyApp(QWidget):
                     parsed = urlparse(str(path_tmp))
                     url = parsed.hostname if parsed.hostname is not None else "127.0.0.1"
                     port = parsed.port if parsed.port is not None else 80
+                    #seo 나중에 확6인 필요
                     msg = self.outMessage[-1]
                     self.webhook_flag = True
                     self.webhook_cnt = self.cnt
@@ -1435,12 +1426,13 @@ class MyApp(QWidget):
 
                         # (1) 스텝 버퍼 저장 - 재시도별로 누적
                         # ✅ 시스템은 플랫폼이 보내는 데이터를 표시해야 함
-                        if self.cnt < len(self.outMessage):
-                            platform_data = self.outMessage[self.cnt]
-                            data_text = json.dumps(platform_data, indent=4, ensure_ascii=False)
-                            # ✅ 웹훅 이벤트 데이터는 get_webhook_result()에서만 추가
+                        if isinstance(res_data, (dict, list)):
+                            platform_data = res_data
                         else:
-                            data_text = tmp_res_auth  # fallback
+                            # 혹시 dict/list가 아니면 raw 텍스트를 감싸서 기록
+                            platform_data = {"raw_response": self.res.text}
+
+                        data_text = json.dumps(platform_data, indent=4, ensure_ascii=False)
                         
                         # ✅ PASS인 경우 오류 텍스트 무시 (val_text에 불필요한 정보가 있을 수 있음)
                         if val_result == "FAIL":
@@ -1528,7 +1520,6 @@ class MyApp(QWidget):
                             self.current_retry >= CONSTANTS.num_retries[self.cnt]):
 
                             self.step_buffers[self.cnt]["events"] = list(self.trace.get(self.cnt, []))
-                            print("seo", self.step_buffers[self.cnt]["events"])
 
                             # 다음 API로 이동
                             self.cnt += 1
@@ -2322,8 +2313,6 @@ class MyApp(QWidget):
         self.radio_check_flag = "video"
         self.message = self.videoMessages
         self.inMessage = self.videoInMessage
-        self.outMessage = self.videoOutMessage
-        self.inSchema = self.videoInSchema
         self.outSchema = self.videoOutSchema
         # ✅ 시스템이 받는 웹훅 이벤트는 spec_002_webhookSchema (플랫폼 → 시스템)
         self.webhookSchema = self.videoWebhookInSchema
