@@ -6,7 +6,7 @@ import threading
 import json
 import requests
 import sys
-import spec
+
 import urllib3
 import warnings
 from datetime import datetime
@@ -16,12 +16,6 @@ from collections import defaultdict
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 warnings.filterwarnings('ignore')
 
-# Dynamic spec imports - will be loaded based on CONSTANTS.specs
-# Import modules for dynamic attribute access
-import spec.video.videoData_response as video_data_response
-import spec.video.videoData_request as video_data_request
-import spec.video.videoSchema_request as video_schema_request
-import spec.video.videoSchema_response as video_schema_response
 from urllib.parse import urlparse
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor
@@ -623,7 +617,7 @@ class MyApp(QWidget):
             self.current_spec_id = spec_id
             print(f"[SYSTEM] 📌 전달받은 spec_id 사용: {spec_id}")
         else:
-            self.current_spec_id = "cmg90br3n002qihleffuljnth"  # 기본값: 보안용센서 시스템 (7개 API)
+            self.current_spec_id = "cmg90br3n002qihleffuljnth"  # 기본값: 보안용센서 시스템 (7개 API) -> 지금은 잠깐 없어짐
             print(f"[SYSTEM] 📌 기본 spec_id 사용: {self.current_spec_id}")
         self.img_pass = resource_path("assets/image/green.png")
         self.img_fail = resource_path("assets/image/red.png")
@@ -729,7 +723,7 @@ class MyApp(QWidget):
         
         print(f"[SYSTEM] 📋 Spec 로딩 시작: {self.spec_description} (ID: {self.current_spec_id})")
         
-        # ✅ 모든 시스템은 spec/ 폴더 사용
+        # 시스템은 response schema / request data 사용
         print(f"[SYSTEM] 📁 모듈: spec (센서/바이오/영상 통합)")
         import spec.Data_request as data_request_module
         import spec.Schema_response as schema_response_module
@@ -888,7 +882,6 @@ class MyApp(QWidget):
         
         layout.addWidget(self.test_field_table)
         group.setLayout(layout)
-        return group
         return group
     
     def on_test_field_selected(self, row, col):
@@ -2309,11 +2302,12 @@ class MyApp(QWidget):
         self.setting_variables = QSettings('My App', 'Variable')
         self.system = "video"  # 고정
 
-        # 기본 시스템 설정 (영상보안 시스템으로 지금은 일단 고정)
+        # 기본 시스템 설정
         self.radio_check_flag = "video"
         self.message = self.videoMessages
         self.inMessage = self.videoInMessage
         self.outSchema = self.videoOutSchema
+
         # ✅ 시스템이 받는 웹훅 이벤트는 spec_002_webhookSchema (플랫폼 → 시스템)
         self.webhookSchema = self.videoWebhookInSchema
         self.final_report = f"{self.spec_description} 검증 결과\n"
