@@ -11,7 +11,7 @@ none_request_message = ['Capabilities',
 company_name = "물리보안시스템테스트"
 product_name = "물리보안시스템"
 version = "v1.0"
-test_category = "본시험"
+test_category = "MAIN_TEST"
 test_target = "물리보안"
 test_range = "ALL_FIELDS"
 auth_type = "Bearer Token"
@@ -28,10 +28,10 @@ if test_range == "ALL_FIELDS":
     flag_opt = True
 
 # 시험 분야별 spec 정의 (인덱스 순서 중요!)
-specs = [
-    ["spec_001_inSchema", "spec_001_outData", "spec_001_messages", "spec_001_webhookSchema", "spec_001_webhookData", "영상보안 시스템 요청 메시지 검증 API 명세서"],
-    ["spec_0011_inSchema", "spec_0011_outData", "spec_0011_messages", "spec_0011_webhookSchema", "spec_0011_webhookData", "보안용 센서 시스템(요청검증)"]
-]
+# specs = [
+#     ["spec_001_inSchema", "spec_001_outData", "spec_001_messages", "spec_001_webhookSchema", "spec_001_webhookData", "영상보안 시스템 요청 메시지 검증 API 명세서"],
+#     ["spec_0011_inSchema", "spec_0011_outData", "spec_0011_messages", "spec_0011_webhookSchema", "spec_0011_webhookData", "보안용 센서 시스템(요청검증)"]
+# ]
 
 # 선택된 시험 분야의 인덱스 (0: 영상보안, 1: 보안용센서)
 selected_spec_index = 0
@@ -51,26 +51,12 @@ enable_retry_delay = False  # False 권장: 불필요한 sleep 제거
 # 플랫폼(cmg90, cmg7e, cmg7b)
 # 시스템(cmgat, cmgas, cmga0)
 SPEC_CONFIG = {
-    "cmga0l5mh005dihlet5fcoj0o": {
-    "test_name": "영상보안 시스템",
-    "specs": ['cmga0l5mh005dihlet5fcoj0o_outSchema', 'cmga0l5mh005dihlet5fcoj0o_inData', 'cmga0l5mh005dihlet5fcoj0o_messages', 'cmga0l5mh005dihlet5fcoj0o_webhook_inSchema', 'cmga0l5mh005dihlet5fcoj0o_webhook_outData'],
-    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'WebHook', 'basic', 'basic', 'basic', 'basic', 'basic'],
-    "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
-    "num_retries": [2, 1, 2, 2, 1, 1, 1, 1, 3, 1, 2, 2]
-},
-    "cmgasj98w009aihlezm0fe6cs": {
-    "test_name": "바이오 인식 기반 출입통제 시스템",
-    "specs": ['cmgasj98w009aihlezm0fe6cs_outSchema', 'cmgasj98w009aihlezm0fe6cs_inData', 'cmgasj98w009aihlezm0fe6cs_messages'],
-    "trans_protocol": ['basic', 'LongPolling', 'basic', 'basic', 'LongPolling', 'basic', 'LongPolling', 'basic'],
-    "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
-    "num_retries": [2, 2, 1, 2, 2, 2, 2, 1]
-},
-    "cmgatbdp000bqihlexmywusvq": {
-    "test_name": "보안용 센서 시스템",
-    "specs": ['cmgatbdp000bqihlexmywusvq_outSchema', 'cmgatbdp000bqihlexmywusvq_inData', 'cmgatbdp000bqihlexmywusvq_messages'],
-    "trans_protocol": ['basic', 'LongPolling', 'basic', 'LongPolling', 'LongPolling', 'basic', 'basic'],
+    "cmgyv3rzl014nvsveidu5jpzp": {
+    "test_name": "영상보안시스템_new",
+    "specs": ['cmgyv3rzl014nvsveidu5jpzp_outSchema', 'cmgyv3rzl014nvsveidu5jpzp_inData', 'cmgyv3rzl014nvsveidu5jpzp_messages'],
+    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic'],
     "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000],
-    "num_retries": [2, 2, 2, 2, 2, 2, 2]
+    "num_retries": [2, 10, 1, 10, 8, 10, 10]
 }
 }
 
