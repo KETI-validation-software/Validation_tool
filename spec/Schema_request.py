@@ -58,7 +58,10 @@ cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_in_schema = {
 }
 
 # RealtimeVideoEventInfos WebHook OUT Schema
-cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_webhook_out_schema = {}
+cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_webhook_out_schema = {
+    "code": str,
+    "message": str,
+}
 
 # StoredVideoEventInfos
 cmgvieyak001b6cd04cgaawmm_StoredVideoEventInfos_in_schema = {

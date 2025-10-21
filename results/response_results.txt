@@ -1,17 +1,17 @@
 === 시험 결과 ===
-통과 필드 수: 152
-전체 필드 수: 172
-종합 평가 점수: 88.4%
+통과 필드 수: 132
+전체 필드 수: 144
+종합 평가 점수: 91.7%
 
 === 스텝별 결과 ===
 1. Authentication | 결과: PASS | 검증 횟수: 2 | 통과 필드 수: 10 | 전체 필드 수: 10 | 실패 필드 수: 0 | 평가 점수: 100.0%
 2. Capabilities | 결과: PASS | 검증 횟수: 10 | 통과 필드 수: 80 | 전체 필드 수: 80 | 실패 필드 수: 0 | 평가 점수: 100.0%
 3. CameraProfiles | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 12 | 전체 필드 수: 12 | 실패 필드 수: 0 | 평가 점수: 100.0%
-4. StoredVideoInfos | 결과: FAIL | 검증 횟수: 10 | 통과 필드 수: 50 | 전체 필드 수: 70 | 실패 필드 수: 20 | 평가 점수: 71.4%
-5. StreamURLs | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-6. ReplayURL | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-7. RealtimeVideoEventInfos | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-8. StoredVideoEventInfos | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
+4. StoredVideoInfos | 결과: FAIL | 검증 횟수: 6 | 통과 필드 수: 30 | 전체 필드 수: 42 | 실패 필드 수: 12 | 평가 점수: 71.4%
+5. StreamURLs | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 8 | 평가 점수: 91.7%
+6. ReplayURL | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 20 | 평가 점수: 86.7%
+7. RealtimeVideoEventInfos | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 10 | 평가 점수: 66.7%
+8. StoredVideoEventInfos | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 100.0%
 
 === 전체 로그 ===
 Start Validation...
@@ -502,105 +502,5 @@ step 4: StoredVideoInfos (시도 6/10)
 검증 결과: FAIL
 Score : 91.66666666666666
 Score details : 132(누적 통과 필드 수), 12(누적 오류 필드 수)
-
-step 4: StoredVideoInfos (시도 7/10)
-
-검증 진행: 7/10회
-프로토콜: basic
-
-{
-    "code": "200",
-    "message": "성공",
-    "camList": [
-        {
-            "camID": "",
-            "timeList": [
-                {
-                    "startTime": 0,
-                    "endTime": 0
-                }
-            ]
-        }
-    ]
-}
-
-검증 결과: FAIL
-Score : 90.72847682119205
-Score details : 137(누적 통과 필드 수), 14(누적 오류 필드 수)
-
-step 4: StoredVideoInfos (시도 8/10)
-
-검증 진행: 8/10회
-프로토콜: basic
-
-{
-    "code": "200",
-    "message": "성공",
-    "camList": [
-        {
-            "camID": "",
-            "timeList": [
-                {
-                    "startTime": 0,
-                    "endTime": 0
-                }
-            ]
-        }
-    ]
-}
-
-검증 결과: FAIL
-Score : 89.87341772151899
-Score details : 142(누적 통과 필드 수), 16(누적 오류 필드 수)
-
-step 4: StoredVideoInfos (시도 9/10)
-
-검증 진행: 9/10회
-프로토콜: basic
-
-{
-    "code": "200",
-    "message": "성공",
-    "camList": [
-        {
-            "camID": "",
-            "timeList": [
-                {
-                    "startTime": 0,
-                    "endTime": 0
-                }
-            ]
-        }
-    ]
-}
-
-검증 결과: FAIL
-Score : 89.0909090909091
-Score details : 147(누적 통과 필드 수), 18(누적 오류 필드 수)
-
-step 4: StoredVideoInfos (시도 10/10)
-
-검증 진행: 10/10회
-프로토콜: basic
-
-{
-    "code": "200",
-    "message": "성공",
-    "camList": [
-        {
-            "camID": "",
-            "timeList": [
-                {
-                    "startTime": 0,
-                    "endTime": 0
-                }
-            ]
-        }
-    ]
-}
-
-검증 결과: FAIL
-Score : 88.37209302325581
-Score details : 152(누적 통과 필드 수), 20(누적 오류 필드 수)
 
 검증 절차가 중지되었습니다.
