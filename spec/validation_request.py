@@ -347,36 +347,14 @@ cmg7bve25000114cevhn5o3vr_Authentication_in_validation = {
 }
 
 # Capabilities
-cmg7bve25000114cevhn5o3vr_Capabilities_in_validation = {}
+cmgvieyak001b6cd04cgaawmm_Capabilities_in_validation = {}
 
 # CameraProfiles
-cmg7bve25000114cevhn5o3vr_CameraProfiles_in_validation = {}
+cmgvieyak001b6cd04cgaawmm_CameraProfiles_in_validation = {}
 
 # StoredVideoInfos
-cmg7bve25000114cevhn5o3vr_StoredVideoInfos_in_validation = {
-  "timePeriod": {
-    "score": 1,
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "timePeriod.startTime": {
-    "score": 1,
-    "enabled": False,
-    "validationType": "response-field-range-match",
-    "referenceRangeOperator": "between"
-  },
-  "timePeriod.endTime": {
-    "score": 1,
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList": {
-    "score": 1,
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
+cmgvieyak001b6cd04cgaawmm_StoredVideoInfos_in_validation = {
   "camList.camID": {
-    "score": 1,
     "enabled": True,
     "validationType": "response-field-list-match",
     "referenceListField": "camID",
@@ -386,35 +364,19 @@ cmg7bve25000114cevhn5o3vr_StoredVideoInfos_in_validation = {
 }
 
 # StreamURLs
-cmg7bve25000114cevhn5o3vr_StreamURLs_in_validation = {
-  "camList": {
-    "score": 1,
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
+cmgvieyak001b6cd04cgaawmm_StreamURLs_in_validation = {
   "camList.camID": {
-    "score": 1,
     "enabled": True,
     "validationType": "response-field-list-match",
     "referenceListField": "camID",
-    "referenceEndpoint": "/StreamURLs"
-  },
-  "camList.streamProtocolType": {
-    "score": 1,
-    "enabled": False,
-    "validationType": "specified-value-match"
+    "referenceListEndpoint": "/CameraProfiles",
+    "referenceEndpoint": "/CameraProfiles"
   }
 }
 
 # ReplayURL
-cmg7bve25000114cevhn5o3vr_ReplayURL_in_validation = {
-  "camList": {
-    "score": 1,
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
+cmgvieyak001b6cd04cgaawmm_ReplayURL_in_validation = {
   "camList.camID": {
-    "score": 1,
     "enabled": True,
     "validationType": "response-field-list-match",
     "referenceListField": "camID",
@@ -439,14 +401,8 @@ cmg7bve25000114cevhn5o3vr_ReplayURL_in_validation = {
 }
 
 # RealtimeVideoEventInfos
-cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_validation = {
-  "camList": {
-    "score": 1,
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
+cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_in_validation = {
   "camList.camID": {
-    "score": 1,
     "enabled": True,
     "validationType": "response-field-list-match",
     "referenceListField": "camID",
@@ -473,23 +429,20 @@ cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_validation = {
     "validationType": "specified-value-match"
   },
   "eventFilter": {
-    "score": 1,
     "enabled": True,
     "validationType": "valid-value-match",
     "validValueOperator": "equalsAny",
-    "validValueFieldName": "classFilter",
+    "validValueFieldName": "eventFilter",
     "validValueMatchType": "validation-field",
     "allowedValues": [
-      "사람",
-      "트럭",
-      "버스"
+      "화재",
+      "배회"
     ]
   },
   "classFilter": {
-    "score": 1,
     "enabled": True,
     "validationType": "valid-value-match",
-    "validValueOperator": "equals",
+    "validValueOperator": "equalsAny",
     "validValueFieldName": "classFilter",
     "validValueMatchType": "validation-field",
     "allowedValues": [
@@ -505,101 +458,15 @@ cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_validation = {
 }
 
 # StoredVideoEventInfos
-cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_in_validation = {
-  "timePeriod": {
-    "score": 1,
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "timePeriod.startTime": {
-    "score": 1,
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "timePeriod.endTime": {
-    "score": 1,
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList": {
-    "score": 1,
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
+cmgvieyak001b6cd04cgaawmm_StoredVideoEventInfos_in_validation = {
   "camList.camID": {
-    "score": 1,
     "enabled": True,
     "validationType": "response-field-list-match",
     "referenceListField": "camID",
-    "referenceEndpoint": "/StreamURLs"
-  },
-  "maxCount": {
-    "score": 1,
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "eventFilter": {
-    "score": 1,
-    "enabled": True,
-    "validationType": "valid-value-match",
-    "validValueOperator": "equalsAny",
-    "validValueFieldName": "eventFilter",
-    "validValueMatchType": "validation-field",
-    "allowedValues": [
-      "화재",
-      "배회"
-    ]
+    "referenceListEndpoint": "/CameraProfiles",
+    "referenceEndpoint": "/CameraProfiles"
   },
   "classFilter": {
-    "score": 1,
-    "enabled": True,
-    "validationType": "valid-value-match",
-    "validValueOperator": "equalsAny",
-    "validValueFieldName": "eventFilter",
-    "validValueMatchType": "validation-field",
-    "allowedValues": [
-      "화재",
-      "배회"
-    ]
-  }
-}
-
-# StoredObjectAnalyticsInfos
-cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_in_validation = {
-  "timePeriod": {
-    "score": 1,
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "timePeriod.startTime": {
-    "score": 1,
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "timePeriod.endTime": {
-    "score": 1,
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList": {
-    "score": 1,
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.camID": {
-    "score": 1,
-    "enabled": True,
-    "validationType": "response-field-list-match",
-    "referenceListField": "camID",
-    "referenceEndpoint": "/StreamURLs"
-  },
-  "filterList": {
-    "score": 1,
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "filterList.classFilter": {
-    "score": 1,
     "enabled": True,
     "validationType": "valid-value-match",
     "validValueOperator": "equalsAny",
@@ -611,104 +478,28 @@ cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_in_validation = {
       "버스"
     ]
   },
-  "filterList.attributeFilter": {
-    "score": 1,
+  "eventFilter": {
     "enabled": True,
     "validationType": "valid-value-match",
     "validValueOperator": "equalsAny",
-    "validValueFieldName": "attributeFilter",
+    "validValueFieldName": "eventFilter",
     "validValueMatchType": "validation-field",
     "allowedValues": [
-      "여자",
-      "안경"
+      "화재",
+      "배회"
     ]
   }
 }
 
-# PtzStatus
-cmg7bve25000114cevhn5o3vr_PtzStatus_in_validation = {
-  "camID": {
-    "score": 1,
-    "enabled": True,
-    "validationType": "response-field-list-match",
-    "referenceListField": "camID",
-    "referenceEndpoint": "/StreamURLs"
-  }
-}
-
-# PtzContinuousMove
-cmg7bve25000114cevhn5o3vr_PtzContinuousMove_in_validation = {
-  "camID": {
-    "score": 1,
-    "enabled": True,
-    "validationType": "response-field-list-match",
-    "referenceListField": "camID",
-    "referenceEndpoint": "/StreamURLs"
-  },
-  "velocity": {
-    "score": 1,
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "velocity.pan": {
-    "score": 1,
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "velocity.tilt": {
-    "score": 1,
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "velocity.zoom": {
-    "score": 1,
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "timeOut": {
-    "score": 1,
-    "enabled": False,
-    "validationType": "specified-value-match"
-  }
-}
-
-# PtzStop
-cmg7bve25000114cevhn5o3vr_PtzStop_in_validation = {
-  "camID": {
-    "score": 1,
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "pan": {
-    "score": 1,
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "tilt": {
-    "score": 1,
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "zoom": {
-    "score": 1,
-    "enabled": False,
-    "validationType": "specified-value-match"
-  }
-}
-
-# cmg7bve25000114cevhn5o3vr 검증 리스트
-cmg7bve25000114cevhn5o3vr_inValidation = [
-    cmg7bve25000114cevhn5o3vr_Authentication_in_validation,
-    cmg7bve25000114cevhn5o3vr_Capabilities_in_validation,
-    cmg7bve25000114cevhn5o3vr_CameraProfiles_in_validation,
-    cmg7bve25000114cevhn5o3vr_StoredVideoInfos_in_validation,
-    cmg7bve25000114cevhn5o3vr_StreamURLs_in_validation,
-    cmg7bve25000114cevhn5o3vr_ReplayURL_in_validation,
-    cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_validation,
-    cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_in_validation,
-    cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_in_validation,
-    cmg7bve25000114cevhn5o3vr_PtzStatus_in_validation,
-    cmg7bve25000114cevhn5o3vr_PtzContinuousMove_in_validation,
-    cmg7bve25000114cevhn5o3vr_PtzStop_in_validation,
+# cmgvieyak001b6cd04cgaawmm 검증 리스트
+cmgvieyak001b6cd04cgaawmm_inValidation = [
+    cmgvieyak001b6cd04cgaawmm_Authentication_in_validation,
+    cmgvieyak001b6cd04cgaawmm_Capabilities_in_validation,
+    cmgvieyak001b6cd04cgaawmm_CameraProfiles_in_validation,
+    cmgvieyak001b6cd04cgaawmm_StoredVideoInfos_in_validation,
+    cmgvieyak001b6cd04cgaawmm_StreamURLs_in_validation,
+    cmgvieyak001b6cd04cgaawmm_ReplayURL_in_validation,
+    cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_in_validation,
+    cmgvieyak001b6cd04cgaawmm_StoredVideoEventInfos_in_validation,
 ]
 

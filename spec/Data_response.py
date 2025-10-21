@@ -277,7 +277,7 @@ cmg7bve25000114cevhn5o3vr_Authentication_out_data = {
 }
 
 # Capabilities
-cmg7bve25000114cevhn5o3vr_Capabilities_out_data = {
+cmgvieyak001b6cd04cgaawmm_Capabilities_out_data = {
     "code": "200",
     "message": "성공",
     "streamingSupport": [
@@ -295,7 +295,7 @@ cmg7bve25000114cevhn5o3vr_Capabilities_out_data = {
 }
 
 # CameraProfiles
-cmg7bve25000114cevhn5o3vr_CameraProfiles_out_data = {
+cmgvieyak001b6cd04cgaawmm_CameraProfiles_out_data = {
     "code": "200",
     "message": "성공",
     "camList": [
@@ -308,13 +308,28 @@ cmg7bve25000114cevhn5o3vr_CameraProfiles_out_data = {
         "alt": "32.131",
         "desc": "3층복도"
     },
-        "camConfig": "PTZ"
+        "camConfig": {
+        "camType": "PTZ"
+    }
+    },
+        {
+        "camID": "cam0002",
+        "camName": "카메라2",
+        "camLoc": {
+        "lon": "126",
+        "lat": "32",
+        "alt": "31",
+        "desc": "2층복도"
+    },
+        "camConfig": {
+        "camType": "PTZ"
+    }
     }
 ]
 }
 
 # StoredVideoInfos
-cmg7bve25000114cevhn5o3vr_StoredVideoInfos_out_data = {
+cmgvieyak001b6cd04cgaawmm_StoredVideoInfos_out_data = {
     "code": "200",
     "message": "성공",
     "camList": [
@@ -331,18 +346,18 @@ cmg7bve25000114cevhn5o3vr_StoredVideoInfos_out_data = {
 }
 
 # StreamURLs
-cmg7bve25000114cevhn5o3vr_StreamURLs_out_data = {
-    "code": "",
-    "message": "",
+cmgvieyak001b6cd04cgaawmm_StreamURLs_out_data = {
+    "code": "200",
+    "message": "성공",
     "camList": [
         {
-        "camID": "cam0001",
+        "camID": "",
         "accessID": "conn0001",
         "accessPW": "1234",
-        "camURL": "rtsp://192.168. 0.5:8000",
+        "camURL": "rtsp://192.168.0.5:8000",
         "videoInfo": {
         "resolution": "1920x1080",
-        "fps": 30,
+        "fps": "30",
         "videoCodec": "H.264",
         "audioCodec": "G.711"
     }
@@ -351,20 +366,20 @@ cmg7bve25000114cevhn5o3vr_StreamURLs_out_data = {
 }
 
 # ReplayURL
-cmg7bve25000114cevhn5o3vr_ReplayURL_out_data = {
-    "code": "",
-    "message": "",
+cmgvieyak001b6cd04cgaawmm_ReplayURL_out_data = {
+    "code": "성공",
+    "message": "200",
     "camList": [
         {
         "camID": "",
-        "accessID": "",
-        "accessPW": "",
+        "accessID": "cam0001",
+        "accessPW": "conn0001",
         "startTime": "",
         "endTime": "",
-        "camURL": "rtsp://192.168. 0.5:8000",
+        "camURL": "rtsp://192.168.0.5:8000",
         "videoInfo": {
         "resolution": "1920x1080",
-        "fps": 30,
+        "fps": "30",
         "videoCodec": "H.264",
         "audioCodec": "G.711"
     }
@@ -393,90 +408,36 @@ cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_webhook_in_data = {
 }
 
 # StoredVideoEventInfos
-cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_data = {
+cmgvieyak001b6cd04cgaawmm_StoredVideoEventInfos_out_data = {
     "code": "200",
     "message": "성공",
     "camList": [
         {
         "camID": "",
-        "eventUUID": [],
+        "eventUUID": "event01",
         "eventName": "",
-        "startTime": 0,
-        "endTime": 0,
+        "startTime": "",
+        "endTime": "",
         "eventDesc": "aaabbbAAA"
     }
 ]
 }
 
-# StoredObjectAnalyticsInfos
-cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_out_data = {
-    "code": "",
-    "message": "",
-    "camList": [
-        {
-        "camID": "",
-        "analyticsTime": "",
-        "anlayticsResultList": [
-            {
-            "anayticsID": "object001",
-            "analyticsClass": "",
-            "analyticsAttribute": [],
-            "analyticsConfidence": 0.8
-        }
-    ],
-        "analyticsBoundingBox": {
-        "left": 0.2,
-        "top": 0.1,
-        "right": 0.3,
-        "bottom": 0.4
-    },
-        "analyticsDesc": "aaabbb"
-    }
+# cmgvieyak001b6cd04cgaawmm 데이터 리스트
+cmgvieyak001b6cd04cgaawmm_outData = [
+    cmgvieyak001b6cd04cgaawmm_Authentication_out_data,
+    cmgvieyak001b6cd04cgaawmm_Capabilities_out_data,
+    cmgvieyak001b6cd04cgaawmm_CameraProfiles_out_data,
+    cmgvieyak001b6cd04cgaawmm_StoredVideoInfos_out_data,
+    cmgvieyak001b6cd04cgaawmm_StreamURLs_out_data,
+    cmgvieyak001b6cd04cgaawmm_ReplayURL_out_data,
+    cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_out_data,
+    cmgvieyak001b6cd04cgaawmm_StoredVideoEventInfos_out_data,
 ]
-}
 
-# PtzStatus
-cmg7bve25000114cevhn5o3vr_PtzStatus_out_data = {
-    "code": "",
-    "message": "",
-    "position": {
-    "pan": 10,
-    "tilt": 20,
-    "zoom": 30
-},
-    "moveStatus": {
-    "pan": "정지",
-    "tilt": "이동중",
-    "zoom": "정지"
-}
-}
-
-# PtzContinuousMove
-cmg7bve25000114cevhn5o3vr_PtzContinuousMove_out_data = {
-    "code": "200",
-    "message": "성공"
-}
-
-# PtzStop
-cmg7bve25000114cevhn5o3vr_PtzStop_out_data = {
-    "code": "200",
-    "message": "성공"
-}
-
-# cmg7bve25000114cevhn5o3vr 데이터 리스트
-cmg7bve25000114cevhn5o3vr_outData = [
-    cmg7bve25000114cevhn5o3vr_Authentication_out_data,
-    cmg7bve25000114cevhn5o3vr_Capabilities_out_data,
-    cmg7bve25000114cevhn5o3vr_CameraProfiles_out_data,
-    cmg7bve25000114cevhn5o3vr_StoredVideoInfos_out_data,
-    cmg7bve25000114cevhn5o3vr_StreamURLs_out_data,
-    cmg7bve25000114cevhn5o3vr_ReplayURL_out_data,
-    cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_data,
-    cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_data,
-    cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_out_data,
-    cmg7bve25000114cevhn5o3vr_PtzStatus_out_data,
-    cmg7bve25000114cevhn5o3vr_PtzContinuousMove_out_data,
-    cmg7bve25000114cevhn5o3vr_PtzStop_out_data,
+# cmgvieyak001b6cd04cgaawmm WebHook 데이터 리스트
+cmgvieyak001b6cd04cgaawmm_webhook_inData = [
+    cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_webhook_in_data,
 ]
 
 # cmg7bve25000114cevhn5o3vr WebHook 데이터 리스트
@@ -494,9 +455,5 @@ cmg7bve25000114cevhn5o3vr_messages = [
     "ReplayURL",
     "RealtimeVideoEventInfos",
     "StoredVideoEventInfos",
-    "StoredObjectAnalyticsInfos",
-    "PtzStatus",
-    "PtzContinuousMove",
-    "PtzStop",
 ]
 
