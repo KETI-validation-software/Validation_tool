@@ -27,6 +27,7 @@ class Server(BaseHTTPRequestHandler):
     message = None
     inMessage = None
     outMessage = None
+    outCon = None
     inSchema = None
     outSchema = None
     webhookData = None  # ✅ 웹훅 데이터 추가
@@ -65,6 +66,9 @@ class Server(BaseHTTPRequestHandler):
                 f.write(json.dumps(evt, ensure_ascii=False) + "\n")
         except Exception:
             pass
+
+    def _applied_constraints(self, api_name, json_data):
+        return "seo"
 
     def _set_headers(self):
         self.send_response(200, None)
@@ -216,6 +220,7 @@ class Server(BaseHTTPRequestHandler):
 
         try:
             self._push_event(self.path[1:], "REQUEST", dict_data)
+            data = self._applied_constraints(self.path[1:], data)
         except Exception:
             pass
 
