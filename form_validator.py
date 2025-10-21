@@ -173,7 +173,7 @@ class FormValidator:
                 validation_content += "]\n\n"
 
                 # Constraints 리스트
-                if file_type == "request":
+                if file_type == "response":
                     c_list_name = f"{spec_id}_OutConstraints"
                 else:
                     c_list_name = f"{spec_id}_inConstraints"
@@ -815,8 +815,6 @@ class FormValidator:
         else:
             auth_type = "Bearer Token"
             auth_info = self.parent.token_input.text().strip()
-            updated = False
-
             updated = False
             
             for name, value in vars(Data_response).items():
