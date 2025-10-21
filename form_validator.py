@@ -13,6 +13,9 @@ import json
 import ast
 from pathlib import Path
 from typing import Dict, List
+import inspect
+import spec.Data_response as Data_response
+
 class FormValidator:
     """
     폼 검증 및 데이터 처리를 담당하는 클래스
@@ -812,6 +815,38 @@ class FormValidator:
         else:
             auth_type = "Bearer Token"
             auth_info = self.parent.token_input.text().strip()
+            updated = False
+
+            updated = False
+            
+            for name, value in vars(Data_response).items():
+                # 리스트 이름에 'Authentication'이 포함된 변수만 찾기
+                if "authentication" in name.lower() and isinstance(value, dict):
+                    if "accessToken" in value:
+                        old_token = value["accessToken"]
+                        value["accessToken"] = auth_info
+                        print(f"[✅] {name} accessToken updated: {old_token} → {auth_info}")
+                        updated = True
+                        break
+
+                # 실제 파일 수정 반영 (파일 내 accessToken 문자열 교체)
+            if updated:
+                file_path = Path(inspect.getfile(Data_response))
+                text = file_path.read_text(encoding="utf-8")
+
+                # 첫 번째 accessToken 값만 교체
+                new_text = re.sub(
+                    r'(["\']accessToken["\']\s*:\s*["\'])([^"\']*)(["\'])',
+                    rf'\1{auth_info}\3',
+                    text,
+                    count=0,
+                    flags=re.IGNORECASE
+                )
+
+                file_path.write_text(new_text, encoding="utf-8")
+                print(f"Data_response.py 파일에 토큰 반영 완료 → {file_path}")
+            else:
+                print("Authentication 관련 변수를 찾지 못했습니다.")
 
         return auth_type, auth_info
 
