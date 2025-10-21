@@ -20,9 +20,7 @@ admin_code = "1234"
 url = "https://127.0.0.1:8080"
 
 
-specs = [["cmgatbdp000bqihlexmywusvq_outSchema","cmgatbdp000bqihlexmywusvq_inData","cmgatbdp000bqihlexmywusvq_messages",""],
-         ["cmgasj98w009aihlezm0fe6cs_outSchema","cmgasj98w009aihlezm0fe6cs_inData","cmgasj98w009aihlezm0fe6cs_messages",""],
-         ["cmga0l5mh005dihlet5fcoj0o_outSchema","cmga0l5mh005dihlet5fcoj0o_inData","cmga0l5mh005dihlet5fcoj0o_messages",""]]
+specs = [["cmgyv3rzl014nvsveidu5jpzp_outSchema","cmgyv3rzl014nvsveidu5jpzp_inData","cmgyv3rzl014nvsveidu5jpzp_messages",""]]
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황 
 flag_opt = False

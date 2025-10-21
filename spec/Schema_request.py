@@ -2,7 +2,7 @@ from json_checker import OptionalKey
 
 
 # Authentication
-cmg90br3n002qihleffuljnth_Authentication_in_schema = {
+cmgvieyak001b6cd04cgaawmm_Authentication_in_schema = {
     "userID": str,
     "userPW": str,
 }
@@ -153,10 +153,10 @@ cmg7bve25000114cevhn5o3vr_Authentication_in_schema = {
 cmg7bve25000114cevhn5o3vr_Capabilities_in_schema = {}
 
 # CameraProfiles
-cmg7bve25000114cevhn5o3vr_CameraProfiles_in_schema = {}
+cmgvieyak001b6cd04cgaawmm_CameraProfiles_in_schema = {}
 
 # StoredVideoInfos
-cmg7bve25000114cevhn5o3vr_StoredVideoInfos_in_schema = {
+cmgvieyak001b6cd04cgaawmm_StoredVideoInfos_in_schema = {
     "timePeriod": {
     "startTime": float,
     "endTime": float,
@@ -167,7 +167,7 @@ cmg7bve25000114cevhn5o3vr_StoredVideoInfos_in_schema = {
 }
 
 # StreamURLs
-cmg7bve25000114cevhn5o3vr_StreamURLs_in_schema = {
+cmgvieyak001b6cd04cgaawmm_StreamURLs_in_schema = {
     "camList": [{
     "camID": str,
     "streamProtocolType": str,
@@ -175,7 +175,7 @@ cmg7bve25000114cevhn5o3vr_StreamURLs_in_schema = {
 }
 
 # ReplayURL
-cmg7bve25000114cevhn5o3vr_ReplayURL_in_schema = {
+cmgvieyak001b6cd04cgaawmm_ReplayURL_in_schema = {
     "camList": [{
     "camID": str,
     "startTime": float,
@@ -185,7 +185,7 @@ cmg7bve25000114cevhn5o3vr_ReplayURL_in_schema = {
 }
 
 # RealtimeVideoEventInfos
-cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_schema = {
+cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_in_schema = {
     "camList": [{
     "camID": str,
 }],
@@ -206,23 +206,18 @@ cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_webhook_out_schema = {}
 cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_in_schema = {
     "timePeriod": {
     "startTime": float,
-    "endTime": float,
-},
-    OptionalKey("camList"): [{
-    "camID": str,
-}],
-    OptionalKey("maxCount"): float,
-    OptionalKey("eventFilter"): str,
-    OptionalKey("classFilter"): str,
 }
 
-# StoredObjectAnalyticsInfos
-cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_in_schema = {
+# RealtimeVideoEventInfos WebHook OUT Schema
+cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_webhook_out_schema = {}
+
+# StoredVideoEventInfos
+cmgvieyak001b6cd04cgaawmm_StoredVideoEventInfos_in_schema = {
     "timePeriod": {
     "startTime": float,
     "endTime": float,
 },
-    OptionalKey("camList"): [{
+    "camList": [{
     "camID": str,
 }],
     OptionalKey("filterList"): [{
@@ -247,28 +242,21 @@ cmg7bve25000114cevhn5o3vr_PtzContinuousMove_in_schema = {
     OptionalKey("timeOut"): float,
 }
 
-# PtzStop
-cmg7bve25000114cevhn5o3vr_PtzStop_in_schema = {
-    "camID": str,
-    OptionalKey("pan"): bool,
-    OptionalKey("tilt"): bool,
-    OptionalKey("zoom"): bool,
-}
+# cmgvieyak001b6cd04cgaawmm 스키마 리스트
+cmgvieyak001b6cd04cgaawmm_inSchema = [
+    cmgvieyak001b6cd04cgaawmm_Authentication_in_schema,
+    cmgvieyak001b6cd04cgaawmm_Capabilities_in_schema,
+    cmgvieyak001b6cd04cgaawmm_CameraProfiles_in_schema,
+    cmgvieyak001b6cd04cgaawmm_StoredVideoInfos_in_schema,
+    cmgvieyak001b6cd04cgaawmm_StreamURLs_in_schema,
+    cmgvieyak001b6cd04cgaawmm_ReplayURL_in_schema,
+    cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_in_schema,
+    cmgvieyak001b6cd04cgaawmm_StoredVideoEventInfos_in_schema,
+]
 
-# cmg7bve25000114cevhn5o3vr 스키마 리스트
-cmg7bve25000114cevhn5o3vr_inSchema = [
-    cmg7bve25000114cevhn5o3vr_Authentication_in_schema,
-    cmg7bve25000114cevhn5o3vr_Capabilities_in_schema,
-    cmg7bve25000114cevhn5o3vr_CameraProfiles_in_schema,
-    cmg7bve25000114cevhn5o3vr_StoredVideoInfos_in_schema,
-    cmg7bve25000114cevhn5o3vr_StreamURLs_in_schema,
-    cmg7bve25000114cevhn5o3vr_ReplayURL_in_schema,
-    cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_schema,
-    cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_in_schema,
-    cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_in_schema,
-    cmg7bve25000114cevhn5o3vr_PtzStatus_in_schema,
-    cmg7bve25000114cevhn5o3vr_PtzContinuousMove_in_schema,
-    cmg7bve25000114cevhn5o3vr_PtzStop_in_schema,
+# cmgvieyak001b6cd04cgaawmm WebHook 스키마 리스트
+cmgvieyak001b6cd04cgaawmm_webhook_outSchema = [
+    cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_webhook_out_schema,
 ]
 
 # cmg7bve25000114cevhn5o3vr WebHook 스키마 리스트

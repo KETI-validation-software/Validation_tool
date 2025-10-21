@@ -1,5 +1,5 @@
 # Authentication
-cmg90br3n002qihleffuljnth_Authentication_out_constraints = {}
+cmgvieyak001b6cd04cgaawmm_Authentication_out_constraints = {}
 
 # Capabilities
 cmg90br3n002qihleffuljnth_Capabilities_out_constraints = {}
@@ -197,19 +197,14 @@ cmg7bve25000114cevhn5o3vr_Authentication_out_constraints = {}
 cmg7bve25000114cevhn5o3vr_Capabilities_out_constraints = {}
 
 # CameraProfiles
-cmg7bve25000114cevhn5o3vr_CameraProfiles_out_constraints = {}
+cmgvieyak001b6cd04cgaawmm_CameraProfiles_out_constraints = {}
 
 # StoredVideoInfos
-cmg7bve25000114cevhn5o3vr_StoredVideoInfos_out_constraints = {
-  "camList": {
-    "valueType": "preset",
-    "required": True,
-    "arrayElementType": "object"
-  },
+cmgvieyak001b6cd04cgaawmm_StoredVideoInfos_out_constraints = {
   "camList.camID": {
     "valueType": "request-based",
     "required": True,
-    "referenceEndpoint": "/PtzStatus",
+    "referenceEndpoint": "/StoredVideoInfos",
     "referenceField": "camID"
   },
   "camList.timeList.startTime": {
@@ -218,14 +213,15 @@ cmg7bve25000114cevhn5o3vr_StoredVideoInfos_out_constraints = {
     "requestRange": {
       "maxField": "endTime",
       "minField": "startTime",
-      "operator": "between"
+      "operator": "between",
+      "minEndpoint": "/StoredVideoInfos"
     },
     "requestRangeMinEndpoint": "/RealtimeVideoEventInfos",
     "requestRangeMaxEndpoint": "/StoredObjectAnalyticsInfos"
   },
   "camList.timeList.endTime": {
     "valueType": "request-range",
-    "required": False,
+    "required": True,
     "requestRange": {
       "maxField": "endTime",
       "minField": "startTime",
@@ -238,10 +234,17 @@ cmg7bve25000114cevhn5o3vr_StoredVideoInfos_out_constraints = {
 }
 
 # StreamURLs
-cmg7bve25000114cevhn5o3vr_StreamURLs_out_constraints = {}
+cmgvieyak001b6cd04cgaawmm_StreamURLs_out_constraints = {
+  "camList.camID": {
+    "valueType": "request-based",
+    "required": True,
+    "referenceEndpoint": "/StreamURLs",
+    "referenceField": "camID"
+  }
+}
 
 # ReplayURL
-cmg7bve25000114cevhn5o3vr_ReplayURL_out_constraints = {
+cmgvieyak001b6cd04cgaawmm_ReplayURL_out_constraints = {
   "camList.camID": {
     "valueType": "request-based",
     "required": True,
@@ -262,11 +265,13 @@ cmg7bve25000114cevhn5o3vr_ReplayURL_out_constraints = {
   },
   "camList.endTime": {
     "valueType": "request-range",
-    "required": False,
+    "required": True,
     "requestRange": {
       "maxField": "endTime",
       "minField": "startTime",
-      "operator": "between"
+      "operator": "between",
+      "maxEndpoint": "/ReplayURL",
+      "minEndpoint": "/ReplayURL"
     },
     "requestRangeMinEndpoint": "/RealtimeVideoEventInfos",
     "requestRangeMaxEndpoint": "/StoredObjectAnalyticsInfos"
@@ -277,35 +282,26 @@ cmg7bve25000114cevhn5o3vr_ReplayURL_out_constraints = {
 cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_constraints = {}
 
 # StoredVideoEventInfos
-cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_constraints = {
+cmgvieyak001b6cd04cgaawmm_StoredVideoEventInfos_out_constraints = {
   "camList.camID": {
     "valueType": "request-based",
     "required": True,
-    "referenceEndpoint": "/PtzStatus",
-    "referenceField": "camID",
-    "requestRange": {
-      "operator": "between"
-    }
-  },
-  "camList.eventUUID": {
-    "valueType": "random",
-    "required": True,
-    "randomType": "specified-values",
-    "arrayElementType": "array"
+    "referenceEndpoint": "/StoredVideoEventInfos",
+    "referenceField": "camID"
   },
   "camList.eventName": {
     "valueType": "request-based",
     "required": True,
-    "referenceEndpoint": "/RealtimeVideoEventInfos",
+    "referenceEndpoint": "/StoredVideoEventInfos",
     "referenceField": "eventFilter"
   },
   "camList.startTime": {
     "valueType": "request-range",
     "required": True,
     "requestRange": {
-      "maxField": "endTime",
       "minField": "startTime",
-      "operator": "between"
+      "operator": "greater-equal",
+      "minEndpoint": "/StoredVideoEventInfos"
     },
     "requestRangeMinEndpoint": "/RealtimeVideoEventInfos",
     "requestRangeMaxEndpoint": "/StoredObjectAnalyticsInfos"
@@ -335,9 +331,9 @@ cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_out_constraints = {
     "valueType": "request-range",
     "required": True,
     "requestRange": {
-      "maxField": "endTime",
       "minField": "startTime",
-      "operator": "between"
+      "operator": "greater-equal",
+      "minEndpoint": "/StoredVideoEventInfos"
     },
     "requestRangeMinEndpoint": "/RealtimeVideoEventInfos",
     "requestRangeMaxEndpoint": "/StoredObjectAnalyticsInfos"
@@ -363,28 +359,15 @@ cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_out_constraints = {
   }
 }
 
-# PtzStatus
-cmg7bve25000114cevhn5o3vr_PtzStatus_out_constraints = {}
-
-# PtzContinuousMove
-cmg7bve25000114cevhn5o3vr_PtzContinuousMove_out_constraints = {}
-
-# PtzStop
-cmg7bve25000114cevhn5o3vr_PtzStop_out_constraints = {}
-
-# cmg7bve25000114cevhn5o3vr 검증 리스트
-cmg7bve25000114cevhn5o3vr_inConstraints = [
-    cmg7bve25000114cevhn5o3vr_Authentication_out_constraints,
-    cmg7bve25000114cevhn5o3vr_Capabilities_out_constraints,
-    cmg7bve25000114cevhn5o3vr_CameraProfiles_out_constraints,
-    cmg7bve25000114cevhn5o3vr_StoredVideoInfos_out_constraints,
-    cmg7bve25000114cevhn5o3vr_StreamURLs_out_constraints,
-    cmg7bve25000114cevhn5o3vr_ReplayURL_out_constraints,
-    cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_constraints,
-    cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_constraints,
-    cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_out_constraints,
-    cmg7bve25000114cevhn5o3vr_PtzStatus_out_constraints,
-    cmg7bve25000114cevhn5o3vr_PtzContinuousMove_out_constraints,
-    cmg7bve25000114cevhn5o3vr_PtzStop_out_constraints,
+# cmgvieyak001b6cd04cgaawmm 검증 리스트
+cmgvieyak001b6cd04cgaawmm_inConstraints = [
+    cmgvieyak001b6cd04cgaawmm_Authentication_out_constraints,
+    cmgvieyak001b6cd04cgaawmm_Capabilities_out_constraints,
+    cmgvieyak001b6cd04cgaawmm_CameraProfiles_out_constraints,
+    cmgvieyak001b6cd04cgaawmm_StoredVideoInfos_out_constraints,
+    cmgvieyak001b6cd04cgaawmm_StreamURLs_out_constraints,
+    cmgvieyak001b6cd04cgaawmm_ReplayURL_out_constraints,
+    cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_out_constraints,
+    cmgvieyak001b6cd04cgaawmm_StoredVideoEventInfos_out_constraints,
 ]
 
