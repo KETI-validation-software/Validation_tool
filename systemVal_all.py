@@ -22,7 +22,7 @@ from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor
 from PyQt5.QtCore import *
 from api.webhook_api import WebhookThread
 from core.functions import BearerAuth, json_check_, field_finder, save_result, resource_path, set_auth, json_to_data, timeout_field_finder
-from core.json_checker_new import check_message_error
+from core.json_checker_new import check_message_data, check_message_schema, check_message_error
 from requests.auth import HTTPDigestAuth
 import config.CONSTANTS as CONSTANTS
 import traceback
@@ -617,7 +617,7 @@ class MyApp(QWidget):
             self.current_spec_id = spec_id
             print(f"[SYSTEM] 📌 전달받은 spec_id 사용: {spec_id}")
         else:
-            self.current_spec_id = "cmg90br3n002qihleffuljnth"  # 기본값: 보안용센서 시스템 (7개 API) -> 지금은 잠깐 없어짐
+            self.current_spec_id = "cmgatbdp000bqihlexmywusvq"  # 기본값: 보안용센서 시스템 (7개 API) -> 지금은 잠깐 없어짐
             print(f"[SYSTEM] 📌 기본 spec_id 사용: {self.current_spec_id}")
         self.img_pass = resource_path("assets/image/green.png")
         self.img_fail = resource_path("assets/image/red.png")
@@ -809,6 +809,7 @@ class MyApp(QWidget):
             ("시험 접속 정보", CONSTANTS.url)
         ]
 
+    
     def create_spec_selection_panel(self, parent_layout):
         """시험 분야 선택 패널 생성"""
         # 시험 분야 패널
@@ -846,12 +847,8 @@ class MyApp(QWidget):
         self.test_field_table.verticalHeader().setVisible(False)
         self.test_field_table.setMaximumHeight(200)
         
-        # ✅ System은 Response 검증 - Response 스키마 ID만 표시
-        response_spec_ids = [
-            "cmgatbdp000bqihlexmywusvq",  # 보안용 센서 시스템 (Response)
-            "cmgasj98w009aihlezm0fe6cs",  # 바이오 인식 기반 출입통제 시스템 (Response)
-            "cmga0l5mh005dihlet5fcoj0o",  # 영상보안 시스템 (Response)
-        ]
+        # response 스펙 ID 목록 
+        response_spec_ids = list(CONSTANTS.SPEC_CONFIG.keys())
         
         if hasattr(CONSTANTS, 'SPEC_CONFIG') and CONSTANTS.SPEC_CONFIG:
             spec_items = [(sid, CONSTANTS.SPEC_CONFIG[sid]) for sid in response_spec_ids if sid in CONSTANTS.SPEC_CONFIG]
@@ -1169,6 +1166,7 @@ class MyApp(QWidget):
 
         self.webhook_res = None  # init
         self.webhook_flag = False
+
 
     def update_view(self):
 

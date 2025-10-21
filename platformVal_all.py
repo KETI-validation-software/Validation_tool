@@ -913,7 +913,7 @@ class MyApp(QWidget):
     # 실시간 모니터링용 + 메인 검증 로직 (부하테스트 타이밍) - 09/25
     def update_view(self):
         try:
-            print(f"[DEBUG] update_view 시작: cnt={self.cnt}, cnt_pre={self.cnt_pre}")
+            # print(f"[DEBUG] update_view 시작: cnt={self.cnt}, cnt_pre={self.cnt_pre}")
             time_interval = 0
             
             # cnt가 리스트 길이 이상이면 종료 처리
@@ -955,10 +955,10 @@ class MyApp(QWidget):
                 print(f"[TIMING_DEBUG] 웹훅 모드 활성화 (API: {self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else 'N/A'})")
                 print(f"[TIMING_DEBUG] ✅ 웹훅 스레드의 join()이 동기화 처리 (수동 sleep 제거됨)")
 
-            # ✅ SPEC_CONFIG에서 timeout 가져오기
+            # SPEC_CONFIG에서 timeout
             current_timeout = (self.time_outs[self.cnt] / 1000) if self.cnt < len(self.time_outs) else 5.0
             
-            # ✅ timeout=0인 경우 즉시 처리 (대기 시간 없음)
+            # timeout이 0인 경우
             if current_timeout == 0 or time_interval < current_timeout:
                 # ✅ 시스템 요청 확인 (요청-응답 구조)
                 # Server 클래스의 request_counter(클래스 변수)를 확인하여 시스템이 요청을 보냈는지 체크
@@ -1470,12 +1470,8 @@ class MyApp(QWidget):
         self.test_field_table.verticalHeader().setVisible(False)
         self.test_field_table.setMaximumHeight(200)
         
-        # ✅ Platform은 Request 검증 - Request 스키마 ID만 표시
-        request_spec_ids = [
-            "cmg90br3n002qihleffuljnth",  # 보안용센서 시스템 (Request)
-            "cmg7edeo50013124xiux3gbkb",  # 바이오 인식 기반 출입통제 시스템 (Request)
-            "cmg7bve25000114cevhn5o3vr",  # 영상보안 시스템 (Request)
-        ]
+        # platform spec_id -> spec_config 기반
+        request_spec_ids = list(CONSTANTS.SPEC_CONFIG.keys())
         
         if hasattr(CONSTANTS, 'SPEC_CONFIG') and CONSTANTS.SPEC_CONFIG:
             spec_items = [(sid, CONSTANTS.SPEC_CONFIG[sid]) for sid in request_spec_ids if sid in CONSTANTS.SPEC_CONFIG]

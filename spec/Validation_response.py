@@ -76,17 +76,14 @@ cmgyv3rzl014nvsveidu5jpzp_ReplayURL_out_validation = {
   }
 }
 
-# RealtimeVideoEventInfos
-cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_out_validation = {}
-
 # StoredVideoEventInfos
 cmgyv3rzl014nvsveidu5jpzp_StoredVideoEventInfos_out_validation = {
   "camList.camID": {
     "enabled": True,
     "validationType": "request-field-list-match",
+    "referenceEndpoint": "/StoredVideoEventInfos",
     "referenceListField": "camID",
-    "referenceListEndpoint": "/StoredVideoEventInfos",
-    "referenceEndpoint": "/StoredVideoEventInfos"
+    "referenceListEndpoint": "/StoredVideoEventInfos"
   },
   "camList.eventName": {
     "enabled": True,
@@ -122,7 +119,6 @@ cmgyv3rzl014nvsveidu5jpzp_outValidation = [
     cmgyv3rzl014nvsveidu5jpzp_StoredVideoInfos_out_validation,
     cmgyv3rzl014nvsveidu5jpzp_StreamURLs_out_validation,
     cmgyv3rzl014nvsveidu5jpzp_ReplayURL_out_validation,
-    cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_out_validation,
     cmgyv3rzl014nvsveidu5jpzp_StoredVideoEventInfos_out_validation,
 ]
 
