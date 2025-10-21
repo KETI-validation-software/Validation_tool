@@ -29,7 +29,17 @@ def json_check_(schema, data, flag):
     all_field, opt_field = field_finder(schema)
     all_data = data_finder(data)
     # 1단계: 구조 검증
-    result, error_msg, correct_cnt, error_cnt = do_checker(all_field, all_data, opt_field, flag)
+    try:
+        result, error_msg, correct_cnt, error_cnt = do_checker(all_field, all_data, opt_field, flag)
+    except TypeError as e:
+        if "unhashable type" in str(e):
+            import traceback
+            print("[DEBUG][unhashable] error in json_check_ (functions.py)")
+            print("all_field:", all_field)
+            print("all_data:", all_data)
+            print("opt_field:", opt_field)
+            traceback.print_exc()
+        raise
     # 2단계: 의미 검증 (구조 PASS일 때만)
     semantic_result = None
     if result == "PASS":

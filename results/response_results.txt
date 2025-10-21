@@ -1,15 +1,75 @@
 === 시험 결과 ===
-통과 필드 수: 0
-전체 필드 수: 0
-종합 평가 점수: 0.0%
+통과 필드 수: 15
+전체 필드 수: 18
+종합 평가 점수: 83.3%
 
 === 스텝별 결과 ===
-1. Authentication | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-2. Capabilities | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-3. SensorDeviceProfiles | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-4. RealtimeSensorData | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-5. RealtimeSensorEventInfos | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-6. StoredSensorEventInfos | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-7. SensorDeviceControl | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
+1. Authentication | 결과: FAIL | 검증 횟수: 2 | 통과 필드 수: 10 | 전체 필드 수: 12 | 실패 필드 수: 2 | 평가 점수: 83.3%
+2. Capabilities | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 5 | 전체 필드 수: 6 | 실패 필드 수: 1 | 평가 점수: 83.3%
+3. SensorDeviceProfiles | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
+4. RealtimeSensorData | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
+5. RealtimeSensorEventInfos | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
+6. StoredSensorEventInfos | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
+7. SensorDeviceControl | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
 
-로그 없음
+=== 전체 로그 ===
+Start Validation...
+
+시스템이 플랫폼에 요청을 전송하여 응답을 검증합니다
+step 1: Authentication (시도 1/2)
+
+검증 진행: 1/2회
+프로토콜: basic
+
+{
+    "code": "",
+    "message": "",
+    "userName": "",
+    "userAff": "",
+    "accessToken": "a"
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 83.33333333333334
+Score details : 5(누적 통과 필드 수), 1(누적 오류 필드 수)
+
+step 1: Authentication (시도 2/2)
+
+검증 진행: 2/2회
+프로토콜: basic
+
+{
+    "code": "",
+    "message": "",
+    "userName": "",
+    "userAff": "",
+    "accessToken": "a"
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 83.33333333333334
+Score details : 10(누적 통과 필드 수), 2(누적 오류 필드 수)
+
+step 2: Capabilities (시도 1/2)
+
+검증 진행: 1/2회
+프로토콜: LongPolling
+
+{
+    "code": "",
+    "message": "",
+    "transportSupport": [
+        {
+            "transProtocolType": "",
+            "transProtocolDesc": ""
+        }
+    ]
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 83.33333333333334
+Score details : 15(누적 통과 필드 수), 3(누적 오류 필드 수)
+

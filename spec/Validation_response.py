@@ -1030,7 +1030,7 @@ cmga0l5mh005dihlet5fcoj0o_StoredVideoEventInfos_out_validation = {
     "referenceFieldMax": "endTime",
     "referenceFieldMin": "startTime",
     "referenceEndpointMax": "/StoredVideoEventInfos",
-    "referenceEndpointMin": "/RealtimeVideoEventInfos",
+    "referenceEndpointMin": "/StoredVideoEventInfos",
     "referenceRangeOperator": "between"
   },
   "camList.endTime": {
@@ -1082,7 +1082,7 @@ cmga0l5mh005dihlet5fcoj0o_StoredObjectAnalyticsInfos_out_validation = {
     "referenceFieldMin": "startTime",
     "referenceRangeOperator": "between",
     "referenceEndpointMin": "/RealtimeVideoEventInfos",
-    "referenceEndpointMax": "/StoredObjectAnalyticsInfos"
+    "referenceEndpointMax": "/RealtimeVideoEventInfos"
   },
   "camList.anlayticsResultList": {
     "score": 1,
@@ -1099,7 +1099,7 @@ cmga0l5mh005dihlet5fcoj0o_StoredObjectAnalyticsInfos_out_validation = {
     "enabled": True,
     "validationType": "request-field-list-match",
     "referenceListField": "classFilter",
-    "referenceEndpoint": "/RealtimeVideoEventInfos"
+    "referenceEndpoint": "/StoredObjectAnalyticsInfos"
   },
   "camList.anlayticsResultList.analyticsAttribute": {
     "score": 1,

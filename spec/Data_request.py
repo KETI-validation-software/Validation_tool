@@ -230,17 +230,14 @@ cmga0l5mh005dihlet5fcoj0o_ReplayURL_in_data = {
 cmga0l5mh005dihlet5fcoj0o_RealtimeVideoEventInfos_in_data = {
     "camList": [
         {
-        "camID": ""
+        "camID": "",
+        "eventUUID": "",
+        "eventName": "",
+        "startTime": 0,
+        "endTime": 0,
+        "eventDesc": ""
     }
-],
-    "duration": 10,
-    "transProtocol": {
-    "transProtocolType": "LongPolling",
-    "transProtocolDesc": ""
-},
-    "eventFilter": "배회",
-    "classFilter": "사람",
-    "startTime": 1760602920000
+]
 }
 
 # RealtimeVideoEventInfos WebHook OUT Data

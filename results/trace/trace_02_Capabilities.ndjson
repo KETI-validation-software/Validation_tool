@@ -1,0 +1,3 @@
+{"time": "2025-10-21T01:18:24.586813Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
+{"time": "2025-10-21T01:18:25.580119Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "", "message": "", "transportSupport": [{"transProtocolType": "", "transProtocolDesc": ""}]}}
+{"time": "2025-10-21T01:18:26.582798Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}

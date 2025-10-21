@@ -1,2 +1,4 @@
-{"time": "2025-10-20T05:24:44.850538Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "", "userPW": ""}}
-{"time": "2025-10-20T05:24:50.871847Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "", "userPW": ""}}
+{"time": "2025-10-21T01:18:19.593875Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "", "userPW": ""}}
+{"time": "2025-10-21T01:18:20.581441Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "", "message": "", "userName": "", "userAff": "", "accessToken": "***"}}
+{"time": "2025-10-21T01:18:21.586810Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "", "userPW": ""}}
+{"time": "2025-10-21T01:18:22.582201Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "", "message": "", "userName": "", "userAff": "", "accessToken": "***"}}
