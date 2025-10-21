@@ -20,9 +20,7 @@ admin_code = "1234"
 url = "https://127.0.0.1:8080"
 
 
-specs = [["cmg90br3n002qihleffuljnth_inSchema","cmg90br3n002qihleffuljnth_outData","cmg90br3n002qihleffuljnth_messages",""],
-         ["cmg7edeo50013124xiux3gbkb_inSchema","cmg7edeo50013124xiux3gbkb_outData","cmg7edeo50013124xiux3gbkb_messages",""],
-         ["cmg7bve25000114cevhn5o3vr_inSchema","cmg7bve25000114cevhn5o3vr_outData","cmg7bve25000114cevhn5o3vr_messages",""]]
+specs = [["cmgyv3rzl014nvsveidu5jpzp_outSchema","cmgyv3rzl014nvsveidu5jpzp_inData","cmgyv3rzl014nvsveidu5jpzp_messages",""]]
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황 
 flag_opt = False
@@ -53,27 +51,21 @@ enable_retry_delay = False  # False 권장: 불필요한 sleep 제거
 # 플랫폼(cmg90, cmg7e, cmg7b)
 # 시스템(cmgat, cmgas, cmga0)
 SPEC_CONFIG = {
-    "cmg7bve25000114cevhn5o3vr": {
-    "test_name": "영상보안 시스템",
-    "specs": ['cmg7bve25000114cevhn5o3vr_inSchema', 'cmg7bve25000114cevhn5o3vr_outData', 'cmg7bve25000114cevhn5o3vr_messages', 'cmg7bve25000114cevhn5o3vr_webhook_inData', 'cmg7bve25000114cevhn5o3vr_webhook_outSchema'],
-    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'WebHook', 'basic', 'basic', 'basic', 'basic', 'basic'],
-    "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
-    "num_retries": [3, 10, 10, 2, 2, 2, 5, 5, 5, 1, 1, 1]
-},
-    "cmg7edeo50013124xiux3gbkb": {
-    "test_name": "바이오 인식 기반 출입통제 시스템",
-    "specs": ['cmg7edeo50013124xiux3gbkb_inSchema', 'cmg7edeo50013124xiux3gbkb_outData', 'cmg7edeo50013124xiux3gbkb_messages'],
-    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'LongPolling', 'basic', 'LongPolling', 'basic'],
+    "cmgyv3rzl014nvsveidu5jpzp": {
+    "test_name": "영상보안시스템_new",
+    "specs": ['cmgyv3rzl014nvsveidu5jpzp_outSchema', 'cmgyv3rzl014nvsveidu5jpzp_inData', 'cmgyv3rzl014nvsveidu5jpzp_messages', 'cmgyv3rzl014nvsveidu5jpzp_webhook_inSchema', 'cmgyv3rzl014nvsveidu5jpzp_webhook_outData'],
+    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'WebHook', 'basic'],
     "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
-    "num_retries": [2, 1, 2, 1, 3, 1, 1, 1]
-},
-    "cmg90br3n002qihleffuljnth": {
-    "test_name": "보안용센서 시스템",
-    "specs": ['cmg90br3n002qihleffuljnth_inSchema', 'cmg90br3n002qihleffuljnth_outData', 'cmg90br3n002qihleffuljnth_messages'],
-    "trans_protocol": ['basic', 'LongPolling', 'basic', 'LongPolling', 'LongPolling', 'basic', 'basic'],
-    "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000],
-    "num_retries": [1, 3, 2, 3, 3, 2, 1]
+    "num_retries": [2, 10, 1, 10, 8, 10, 10, 10]
 }
+,
+    "cmgvieyak001b6cd04cgaawmm": {
+        "test_name": "영상보안시스템_new",
+        "specs": ['cmgvieyak001b6cd04cgaawmm_inSchema', 'cmgvieyak001b6cd04cgaawmm_outData', 'cmgvieyak001b6cd04cgaawmm_messages'],
+        "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'WebHook', 'basic'],
+        "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
+        "num_retries": [3, 1, 4, 10, 1, 10, 10, 10]
+    }
 }
 
 
