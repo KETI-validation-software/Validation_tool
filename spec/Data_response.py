@@ -30,14 +30,12 @@ cmg90br3n002qihleffuljnth_SensorDeviceProfiles_out_data = {
         "sensorDeviceID": "iot0001",
         "sensorDeviceType": "온도",
         "sensorDeviceName": "홍채 센서",
-        "sensorDeviceLoc": [
-            {
-            "lon": "12.7127730",
-            "lat": "38.439801",
-            "alt": "32.131",
-            "desc": "3층복도"
-        }
-    ]
+        "sensorDeviceLoc": {
+        "lon": "12.7127730",
+        "lat": "38.439801",
+        "alt": "32.131",
+        "desc": "3층복도"
+    }
     }
 ]
 }
@@ -130,7 +128,8 @@ cmg7edeo50013124xiux3gbkb_Capabilities_out_data = {
     "message": "",
     "transportSupport": [
         {
-        "transProtocolType": "LongPolling"
+        "transProtocolType": "LongPolling",
+        "transProtocolDesc": ""
     }
 ]
 }
@@ -376,15 +375,19 @@ cmg7bve25000114cevhn5o3vr_ReplayURL_out_data = {
 # RealtimeVideoEventInfos
 cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_data = {
     "code": "",
-    "message": "",
+    "message": ""
+}
+
+# RealtimeVideoEventInfos WebHook IN Data
+cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_webhook_in_data = {
     "camList": [
         {
         "camID": "",
-        "eventUUID": [],
+        "eventUUID": "",
         "eventName": "",
-        "startTime": "",
-        "endTime": "",
-        "eventDesc": "dddddeeeeeAAFEDFiikjf"
+        "startTime": 1760935020000,
+        "endTime": 1761280620000,
+        "eventDesc": "aaabbbAAA"
     }
 ]
 }
@@ -474,6 +477,11 @@ cmg7bve25000114cevhn5o3vr_outData = [
     cmg7bve25000114cevhn5o3vr_PtzStatus_out_data,
     cmg7bve25000114cevhn5o3vr_PtzContinuousMove_out_data,
     cmg7bve25000114cevhn5o3vr_PtzStop_out_data,
+]
+
+# cmg7bve25000114cevhn5o3vr WebHook 데이터 리스트
+cmg7bve25000114cevhn5o3vr_webhook_inData = [
+    cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_webhook_in_data,
 ]
 
 # cmg7bve25000114cevhn5o3vr API endpoint

@@ -14,8 +14,8 @@ version = "v1.0"
 test_category = "본시험"
 test_target = "물리보안"
 test_range = "ALL_FIELDS"
-auth_type = "Digest Auth"
-auth_info = "admin,1234"
+auth_type = "Bearer Token"
+auth_info = "a"
 admin_code = "1234"
 url = "https://127.0.0.1:8080"
 
@@ -54,19 +54,19 @@ enable_retry_delay = False  # False 권장: 불필요한 sleep 제거
 # 시스템(cmgat, cmgas, cmga0)
 SPEC_CONFIG = {
     "cmga0l5mh005dihlet5fcoj0o": {
-        "test_name": "영상보안 시스템",
-        "specs": ['cmga0l5mh005dihlet5fcoj0o_inSchema', 'cmga0l5mh005dihlet5fcoj0o_outData', 'cmga0l5mh005dihlet5fcoj0o_messages'],
-        "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'WebHook', 'basic', 'basic', 'basic', 'basic', 'basic'],
-        "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
-        "num_retries": [2, 1, 2, 2, 1, 1, 1, 1, 3, 1, 2, 2]
-    },
+    "test_name": "영상보안 시스템",
+    "specs": ['cmga0l5mh005dihlet5fcoj0o_outSchema', 'cmga0l5mh005dihlet5fcoj0o_inData', 'cmga0l5mh005dihlet5fcoj0o_messages', 'cmga0l5mh005dihlet5fcoj0o_webhook_inSchema', 'cmga0l5mh005dihlet5fcoj0o_webhook_outData'],
+    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'WebHook', 'basic', 'basic', 'basic', 'basic', 'basic'],
+    "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
+    "num_retries": [2, 1, 2, 2, 1, 1, 1, 1, 3, 1, 2, 2]
+},
     "cmgasj98w009aihlezm0fe6cs": {
-        "test_name": "바이오 인식 기반 출입통제 시스템",
-        "specs": ['cmgasj98w009aihlezm0fe6cs_inSchema', 'cmgasj98w009aihlezm0fe6cs_outData', 'cmgasj98w009aihlezm0fe6cs_messages'],
-        "trans_protocol": ['basic', 'LongPolling', 'basic', 'basic', 'LongPolling', 'basic', 'LongPolling', 'basic'],
-        "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
-        "num_retries": [2, 2, 1, 2, 2, 2, 2, 1]
-    },
+    "test_name": "바이오 인식 기반 출입통제 시스템",
+    "specs": ['cmgasj98w009aihlezm0fe6cs_outSchema', 'cmgasj98w009aihlezm0fe6cs_inData', 'cmgasj98w009aihlezm0fe6cs_messages'],
+    "trans_protocol": ['basic', 'LongPolling', 'basic', 'basic', 'LongPolling', 'basic', 'LongPolling', 'basic'],
+    "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
+    "num_retries": [2, 2, 1, 2, 2, 2, 2, 1]
+},
     "cmgatbdp000bqihlexmywusvq": {
     "test_name": "보안용 센서 시스템",
     "specs": ['cmgatbdp000bqihlexmywusvq_outSchema', 'cmgatbdp000bqihlexmywusvq_inData', 'cmgatbdp000bqihlexmywusvq_messages'],

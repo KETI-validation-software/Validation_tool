@@ -34,6 +34,14 @@ cmg90br3n002qihleffuljnth_RealtimeSensorData_in_validation = {
     "enabled": False,
     "validationType": "specified-value-match"
   },
+  "transProtocol.transProtocolType": {
+    "enabled": False,
+    "validationType": "specified-value-match"
+  },
+  "transProtocol.transProtocolDesc": {
+    "enabled": False,
+    "validationType": "specified-value-match"
+  },
   "startTime": {
     "enabled": False,
     "validationType": "specified-value-match"
@@ -50,7 +58,7 @@ cmg90br3n002qihleffuljnth_RealtimeSensorEventInfos_in_validation = {
     "enabled": True,
     "validationType": "response-field-list-match",
     "referenceListField": "sensorDeviceID",
-    "referenceEndpoint": "/SensorDeviceControl"
+    "referenceEndpoint": "/SensorDeviceProfiles"
   },
   "duration": {
     "enabled": False,
@@ -107,7 +115,7 @@ cmg90br3n002qihleffuljnth_StoredSensorEventInfos_in_validation = {
     "enabled": True,
     "validationType": "response-field-list-match",
     "referenceListField": "sensorDeviceID",
-    "referenceEndpoint": "/SensorDeviceControl"
+    "referenceEndpoint": "/SensorDeviceProfiles"
   },
   "maxCount": {
     "enabled": False,
@@ -132,7 +140,7 @@ cmg90br3n002qihleffuljnth_SensorDeviceControl_in_validation = {
     "enabled": True,
     "validationType": "response-field-list-match",
     "referenceListField": "sensorDeviceID",
-    "referenceEndpoint": "/SensorDeviceControl"
+    "referenceEndpoint": "/SensorDeviceProfiles"
   },
   "commandType": {
     "enabled": False,
@@ -164,23 +172,13 @@ cmg7edeo50013124xiux3gbkb_Authentication_in_validation = {
 }
 
 # Capabilities
-cmg7edeo50013124xiux3gbkb_Capabilities_in_validation = {
-  "": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  }
-}
+cmg7edeo50013124xiux3gbkb_Capabilities_in_validation = {}
 
 # DoorProfiles
 cmg7edeo50013124xiux3gbkb_DoorProfiles_in_validation = {}
 
 # AccessUserInfos
-cmg7edeo50013124xiux3gbkb_AccessUserInfos_in_validation = {
-  "": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  }
-}
+cmg7edeo50013124xiux3gbkb_AccessUserInfos_in_validation = {}
 
 # RealtimeVerifEventInfos
 cmg7edeo50013124xiux3gbkb_RealtimeVerifEventInfos_in_validation = {
@@ -382,7 +380,8 @@ cmg7bve25000114cevhn5o3vr_StoredVideoInfos_in_validation = {
     "enabled": True,
     "validationType": "response-field-list-match",
     "referenceListField": "camID",
-    "referenceEndpoint": "/StreamURLs"
+    "referenceListEndpoint": "/CameraProfiles",
+    "referenceEndpoint": "/CameraProfiles"
   }
 }
 
@@ -419,7 +418,8 @@ cmg7bve25000114cevhn5o3vr_ReplayURL_in_validation = {
     "enabled": True,
     "validationType": "response-field-list-match",
     "referenceListField": "camID",
-    "referenceEndpoint": "/StreamURLs"
+    "referenceListEndpoint": "/CameraProfiles",
+    "referenceEndpoint": "/CameraProfiles"
   },
   "camList.startTime": {
     "score": 1,
@@ -450,7 +450,8 @@ cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_validation = {
     "enabled": True,
     "validationType": "response-field-list-match",
     "referenceListField": "camID",
-    "referenceEndpoint": "/StreamURLs"
+    "referenceListEndpoint": "/CameraProfiles",
+    "referenceEndpoint": "/CameraProfiles"
   },
   "duration": {
     "score": 1,
@@ -468,7 +469,6 @@ cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_validation = {
     "validationType": "specified-value-match"
   },
   "transProtocol.transProtocolDesc": {
-    "score": 1,
     "enabled": False,
     "validationType": "specified-value-match"
   },
@@ -499,7 +499,6 @@ cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_validation = {
     ]
   },
   "startTime": {
-    "score": 1,
     "enabled": False,
     "validationType": "specified-value-match"
   }
