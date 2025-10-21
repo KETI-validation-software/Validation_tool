@@ -1,0 +1,20 @@
+{"time": "2025-10-21T08:36:17.233699Z", "api": "StreamURLs", "dir": "REQUEST", "data": {"camList": [{"camID": "", "streamProtocolType": ""}]}}
+{"time": "2025-10-21T08:36:18.232030Z", "api": "StreamURLs", "dir": "RESPONSE", "data": {"code": "", "message": "", "camList": [{"camID": "", "accessID": "", "accessPW": "", "camURL": "", "videoInfo": {"resolution": "", "fps": "", "videoCodec": "", "audioCodec": ""}}]}}
+{"time": "2025-10-21T08:36:19.237343Z", "api": "StreamURLs", "dir": "REQUEST", "data": {"camList": [{"camID": "", "streamProtocolType": ""}]}}
+{"time": "2025-10-21T08:36:20.240692Z", "api": "StreamURLs", "dir": "RESPONSE", "data": {"code": "", "message": "", "camList": [{"camID": "", "accessID": "", "accessPW": "", "camURL": "", "videoInfo": {"resolution": "", "fps": "", "videoCodec": "", "audioCodec": ""}}]}}
+{"time": "2025-10-21T08:36:21.243014Z", "api": "StreamURLs", "dir": "REQUEST", "data": {"camList": [{"camID": "", "streamProtocolType": ""}]}}
+{"time": "2025-10-21T08:36:22.246332Z", "api": "StreamURLs", "dir": "RESPONSE", "data": {"code": "", "message": "", "camList": [{"camID": "", "accessID": "", "accessPW": "", "camURL": "", "videoInfo": {"resolution": "", "fps": "", "videoCodec": "", "audioCodec": ""}}]}}
+{"time": "2025-10-21T08:36:23.241673Z", "api": "StreamURLs", "dir": "REQUEST", "data": {"camList": [{"camID": "", "streamProtocolType": ""}]}}
+{"time": "2025-10-21T08:36:24.239007Z", "api": "StreamURLs", "dir": "RESPONSE", "data": {"code": "", "message": "", "camList": [{"camID": "", "accessID": "", "accessPW": "", "camURL": "", "videoInfo": {"resolution": "", "fps": "", "videoCodec": "", "audioCodec": ""}}]}}
+{"time": "2025-10-21T08:36:25.234346Z", "api": "StreamURLs", "dir": "REQUEST", "data": {"camList": [{"camID": "", "streamProtocolType": ""}]}}
+{"time": "2025-10-21T08:36:26.235781Z", "api": "StreamURLs", "dir": "RESPONSE", "data": {"code": "", "message": "", "camList": [{"camID": "", "accessID": "", "accessPW": "", "camURL": "", "videoInfo": {"resolution": "", "fps": "", "videoCodec": "", "audioCodec": ""}}]}}
+{"time": "2025-10-21T08:36:27.242091Z", "api": "StreamURLs", "dir": "REQUEST", "data": {"camList": [{"camID": "", "streamProtocolType": ""}]}}
+{"time": "2025-10-21T08:36:28.233440Z", "api": "StreamURLs", "dir": "RESPONSE", "data": {"code": "", "message": "", "camList": [{"camID": "", "accessID": "", "accessPW": "", "camURL": "", "videoInfo": {"resolution": "", "fps": "", "videoCodec": "", "audioCodec": ""}}]}}
+{"time": "2025-10-21T08:36:29.230811Z", "api": "StreamURLs", "dir": "REQUEST", "data": {"camList": [{"camID": "", "streamProtocolType": ""}]}}
+{"time": "2025-10-21T08:36:30.242107Z", "api": "StreamURLs", "dir": "RESPONSE", "data": {"code": "", "message": "", "camList": [{"camID": "", "accessID": "", "accessPW": "", "camURL": "", "videoInfo": {"resolution": "", "fps": "", "videoCodec": "", "audioCodec": ""}}]}}
+{"time": "2025-10-21T08:36:31.239444Z", "api": "StreamURLs", "dir": "REQUEST", "data": {"camList": [{"camID": "", "streamProtocolType": ""}]}}
+{"time": "2025-10-21T08:36:32.234783Z", "api": "StreamURLs", "dir": "RESPONSE", "data": {"code": "", "message": "", "camList": [{"camID": "", "accessID": "", "accessPW": "", "camURL": "", "videoInfo": {"resolution": "", "fps": "", "videoCodec": "", "audioCodec": ""}}]}}
+{"time": "2025-10-21T08:36:33.240095Z", "api": "StreamURLs", "dir": "REQUEST", "data": {"camList": [{"camID": "", "streamProtocolType": ""}]}}
+{"time": "2025-10-21T08:36:34.235434Z", "api": "StreamURLs", "dir": "RESPONSE", "data": {"code": "", "message": "", "camList": [{"camID": "", "accessID": "", "accessPW": "", "camURL": "", "videoInfo": {"resolution": "", "fps": "", "videoCodec": "", "audioCodec": ""}}]}}
+{"time": "2025-10-21T08:36:35.245933Z", "api": "StreamURLs", "dir": "REQUEST", "data": {"camList": [{"camID": "", "streamProtocolType": ""}]}}
+{"time": "2025-10-21T08:36:36.231333Z", "api": "StreamURLs", "dir": "RESPONSE", "data": {"code": "", "message": "", "camList": [{"camID": "", "accessID": "", "accessPW": "", "camURL": "", "videoInfo": {"resolution": "", "fps": "", "videoCodec": "", "audioCodec": ""}}]}}

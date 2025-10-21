@@ -2,10 +2,7 @@ from json_checker import OptionalKey
 
 
 # Authentication
-cmgvieyak001b6cd04cgaawmm_Authentication_in_schema = {
-    "userID": str,
-    "userPW": str,
-}
+cmgvieyak001b6cd04cgaawmm_Authentication_in_schema = {}
 
 # Capabilities
 cmgvieyak001b6cd04cgaawmm_Capabilities_in_schema = {}
