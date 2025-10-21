@@ -964,9 +964,12 @@ class FormValidator:
 
                 # 우선순위 기반 정렬 함수 정의
                 def sort_by_priority(name: str) -> int:
-                    # webhook 리스트는 "webhook"이 이름에 포함되어 있음
                     if "webhook" in name.lower():
-                        return priority_order.index("webhook") if "webhook" in priority_order else len(priority_order)
+                        if "schema" in name.lower():
+                            return priority_order.index("webhook") * 10 + 0 # webhook schema
+                        elif "data" in name.lower():
+                            return priority_order.index("webhook") * 10 + 1 # webhook data
+                        return priority_order.index("webhook") * 10
 
                     # 일반 리스트는 마지막 suffix로 판단
                     suffix = name.split("_")[-1]
