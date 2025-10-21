@@ -33,6 +33,19 @@ cmgvieyak001b6cd04cgaawmm_CameraProfiles_out_data = {
     "message": "성공",
     "camList": [
         {
+        "camID": "cam0001",
+        "camName": "카메라1",
+        "camLoc": {
+        "lon": "127.127730",
+        "lat": "38.439801",
+        "alt": "32.131",
+        "desc": "3층복도"
+    },
+        "camConfig": {
+        "camType": "PTZ"
+    }
+    },
+        {
         "camID": "cam0002",
         "camName": "카메라2",
         "camLoc": {
