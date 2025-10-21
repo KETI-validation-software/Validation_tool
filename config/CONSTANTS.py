@@ -56,7 +56,7 @@ SPEC_CONFIG = {
     "specs": ['cmgvieyak001b6cd04cgaawmm_inSchema', 'cmgvieyak001b6cd04cgaawmm_outData', 'cmgvieyak001b6cd04cgaawmm_messages', 'cmgvieyak001b6cd04cgaawmm_webhook_outSchema', 'cmgvieyak001b6cd04cgaawmm_webhook_inData'],
     "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'WebHook', 'basic'],
     "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
-    "num_retries": [3, 1, 4, 10, 1, 10, 10, 10]
+    "num_retries": [10, 10, 10, 10, 10, 10, 10, 10]
 }
 }
 
