@@ -2,26 +2,26 @@
 
 # Authentication
 cmgvieyak001b6cd04cgaawmm_Authentication_out_data = {
-    "code": "200",
-    "message": "성공",
-    "userName": "관리자",
-    "userAff": "오산시청",
-    "accessToken": "abcde1234"
+    "code": "",
+    "message": "",
+    "userName": "",
+    "userAff": "",
+    "accessToken": "a"
 }
 
 # Capabilities
 cmgvieyak001b6cd04cgaawmm_Capabilities_out_data = {
-    "code": "200",
-    "message": "성공",
+    "code": "",
+    "message": "",
     "streamingSupport": [
         {
-        "streamProtocolType": "RTSP",
-        "streamProtocolDesc": "Unicast"
+        "streamProtocolType": "",
+        "streamProtocolDesc": ""
     }
 ],
     "transportSupport": [
         {
-        "transProtocolType": "WebHook",
+        "transProtocolType": "",
         "transProtocolDesc": ""
     }
 ]
@@ -29,33 +29,33 @@ cmgvieyak001b6cd04cgaawmm_Capabilities_out_data = {
 
 # CameraProfiles
 cmgvieyak001b6cd04cgaawmm_CameraProfiles_out_data = {
-    "code": "200",
-    "message": "성공",
+    "code": "",
+    "message": "",
     "camList": [
         {
-        "camID": "cam0001",
-        "camName": "카메라1",
+        "camID": "",
+        "camName": "",
         "camLoc": {
-        "lon": "127.127730",
-        "lat": "38.439801",
-        "alt": "32.131",
-        "desc": "3층복도"
+        "lon": "",
+        "lat": "",
+        "alt": "",
+        "desc": ""
     },
         "camConfig": {
-        "camType": "PTZ"
+        "camType": ""
     }
     },
         {
-        "camID": "cam0002",
-        "camName": "카메라2",
+        "camID": "",
+        "camName": "",
         "camLoc": {
-        "lon": "126",
-        "lat": "32",
-        "alt": "31",
-        "desc": "2층복도"
+        "lon": "",
+        "lat": "",
+        "alt": "",
+        "desc": ""
     },
         "camConfig": {
-        "camType": "PTZ"
+        "camType": ""
     }
     }
 ]
@@ -63,8 +63,8 @@ cmgvieyak001b6cd04cgaawmm_CameraProfiles_out_data = {
 
 # StoredVideoInfos
 cmgvieyak001b6cd04cgaawmm_StoredVideoInfos_out_data = {
-    "code": "200",
-    "message": "성공",
+    "code": "",
+    "message": "",
     "camList": [
         {
         "camID": "",
@@ -80,19 +80,19 @@ cmgvieyak001b6cd04cgaawmm_StoredVideoInfos_out_data = {
 
 # StreamURLs
 cmgvieyak001b6cd04cgaawmm_StreamURLs_out_data = {
-    "code": "200",
-    "message": "성공",
+    "code": "",
+    "message": "",
     "camList": [
         {
         "camID": "",
-        "accessID": "conn0001",
-        "accessPW": "1234",
-        "camURL": "rtsp://192.168.0.5:8000",
+        "accessID": "",
+        "accessPW": "",
+        "camURL": "",
         "videoInfo": {
-        "resolution": "1920x1080",
-        "fps": "30",
-        "videoCodec": "H.264",
-        "audioCodec": "G.711"
+        "resolution": "",
+        "fps": "",
+        "videoCodec": "",
+        "audioCodec": ""
     }
     }
 ]
@@ -100,21 +100,21 @@ cmgvieyak001b6cd04cgaawmm_StreamURLs_out_data = {
 
 # ReplayURL
 cmgvieyak001b6cd04cgaawmm_ReplayURL_out_data = {
-    "code": "성공",
-    "message": "200",
+    "code": "",
+    "message": "",
     "camList": [
         {
         "camID": "",
-        "accessID": "cam0001",
-        "accessPW": "conn0001",
+        "accessID": "",
+        "accessPW": "",
         "startTime": "",
         "endTime": "",
-        "camURL": "rtsp://192.168.0.5:8000",
+        "camURL": "",
         "videoInfo": {
-        "resolution": "1920x1080",
-        "fps": "30",
-        "videoCodec": "H.264",
-        "audioCodec": "G.711"
+        "resolution": "",
+        "fps": "",
+        "videoCodec": "",
+        "audioCodec": ""
     }
     }
 ]
@@ -122,8 +122,8 @@ cmgvieyak001b6cd04cgaawmm_ReplayURL_out_data = {
 
 # RealtimeVideoEventInfos
 cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_out_data = {
-    "code": "200",
-    "message": "성공"
+    "code": "",
+    "message": ""
 }
 
 # RealtimeVideoEventInfos WebHook IN Data
@@ -131,27 +131,27 @@ cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_webhook_in_data = {
     "camList": [
         {
         "camID": "",
-        "eventUUID": "event01",
-        "eventName": "배회",
+        "eventUUID": "",
+        "eventName": "",
         "startTime": "",
         "endTime": "",
-        "eventDesc": "aaabbbAAA"
+        "eventDesc": ""
     }
 ]
 }
 
 # StoredVideoEventInfos
 cmgvieyak001b6cd04cgaawmm_StoredVideoEventInfos_out_data = {
-    "code": "200",
-    "message": "성공",
+    "code": "",
+    "message": "",
     "camList": [
         {
         "camID": "",
-        "eventUUID": "event01",
+        "eventUUID": "",
         "eventName": "",
         "startTime": "",
         "endTime": "",
-        "eventDesc": "aaabbbAAA"
+        "eventDesc": ""
     }
 ]
 }
