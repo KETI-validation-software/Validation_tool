@@ -1,13 +1,13 @@
 === 시험 결과 ===
-통과 필드 수: 0
-전체 필드 수: 0
-종합 평가 점수: 0.0%
+통과 필드 수: 1
+전체 필드 수: 9
+종합 평가 점수: 11.1%
 
 === 스텝별 결과 ===
-1. Authentication | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-2. Capabilities | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 100.0%
-3. CameraProfiles | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 1 | 평가 점수: 0.0%
-4. StoredVideoInfos | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
+1. Authentication | 결과: FAIL | 검증 횟수: 3 | 통과 필드 수: 0 | 전체 필드 수: 2 | 실패 필드 수: 2 | 평가 점수: 0.0%
+2. Capabilities | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 1 | 전체 필드 수: 1 | 실패 필드 수: 0 | 평가 점수: 100.0%
+3. CameraProfiles | 결과: FAIL | 검증 횟수: 4 | 통과 필드 수: 0 | 전체 필드 수: 1 | 실패 필드 수: 1 | 평가 점수: 0.0%
+4. StoredVideoInfos | 결과: FAIL | 검증 횟수: 10 | 통과 필드 수: 0 | 전체 필드 수: 5 | 실패 필드 수: 5 | 평가 점수: 0.0%
 5. StreamURLs | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
 6. ReplayURL | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
 7. RealtimeVideoEventInfos | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
@@ -15,5 +15,35 @@
 
 === 전체 로그 ===
 Start Validation...
+
+step 1: Authentication
+step 1: Authentication
+Timeout: 5.0초
+Message Missing!
+Score : 0.0
+Score details : 0(누적 통과 필드 수), 2(누적 오류 필드 수)
+
+
+✅ 부하테스트 완료: 1회 검증 완료
+프로토콜: basic
+
+
+[시도 3회차]
+{}
+PASS
+Score : 33.33333333333333
+Score details : 1(누적 통과 필드 수), 2(누적 오류 필드 수)
+
+step 3: CameraProfiles
+Timeout: 5.0초
+Message Missing!
+Score : 25.0
+Score details : 1(누적 통과 필드 수), 3(누적 오류 필드 수)
+
+step 4: StoredVideoInfos
+Timeout: 5.0초
+Message Missing!
+Score : 11.11111111111111
+Score details : 1(누적 통과 필드 수), 8(누적 오류 필드 수)
 
 검증 절차가 중지되었습니다.

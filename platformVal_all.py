@@ -1321,7 +1321,18 @@ class MyApp(QWidget):
                 current_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
                 self.update_table_row_with_retries(self.cnt, "FAIL", 0, add_err, "", "Message Missing!", current_retries)
                 
+                # 타임아웃 분기에서 반드시 current_retry 리셋
                 self.cnt += 1
+                self.current_retry = 0  # ✅ 다음 API는 0회차부터 시작
+                self.time_pre = time.time()  # ✅ 다음 스텝의 대기 타이머 재시작
+
+                # (선택) 타임아웃으로 스킵된 스텝의 request_counter도 정리
+                if hasattr(self.Server, 'request_counter'):
+                    try:
+                        del self.Server.request_counter[self.Server.message[self.cnt-1]]
+                    except Exception:
+                        pass
+                return  # 분기 종료 명확히
 
             if self.cnt == len(self.Server.message):
                 self.tick_timer.stop()

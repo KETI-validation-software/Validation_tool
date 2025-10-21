@@ -99,8 +99,8 @@ cmgyv3rzl014nvsveidu5jpzp_StoredVideoEventInfos_out_validation = {
     "validationType": "request-field-range-match",
     "referenceFieldMax": "endTime",
     "referenceFieldMin": "startTime",
-    "referenceEndpointMax": "/StoredVideoEventInfos",
-    "referenceEndpointMin": "/StoredVideoEventInfos",
+    "referenceEndpointMax": "/StoredVideoInfos",
+    "referenceEndpointMin": "/StoredVideoInfos",
     "referenceRangeOperator": "between"
   },
   "camList.endTime": {
@@ -108,8 +108,8 @@ cmgyv3rzl014nvsveidu5jpzp_StoredVideoEventInfos_out_validation = {
     "validationType": "request-field-range-match",
     "referenceFieldMax": "endTime",
     "referenceFieldMin": "startTime",
-    "referenceEndpointMax": "/StoredVideoEventInfos",
-    "referenceEndpointMin": "/StoredVideoEventInfos",
+    "referenceEndpointMax": "/StoredVideoInfos",
+    "referenceEndpointMin": "/StoredVideoInfos",
     "referenceRangeOperator": "between"
   }
 }
