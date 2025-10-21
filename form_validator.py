@@ -815,6 +815,7 @@ class FormValidator:
         else:
             auth_type = "Bearer Token"
             auth_info = self.parent.token_input.text().strip()
+            updated = False
 
             updated = False
             
