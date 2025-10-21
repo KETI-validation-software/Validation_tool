@@ -127,7 +127,7 @@ cmgvieyak001b6cd04cgaawmm_StoredVideoEventInfos_out_constraints = {
 }
 
 # cmgvieyak001b6cd04cgaawmm 검증 리스트
-cmgvieyak001b6cd04cgaawmm_inConstraints = [
+cmgvieyak001b6cd04cgaawmm_OutConstraints = [
     cmgvieyak001b6cd04cgaawmm_Authentication_out_constraints,
     cmgvieyak001b6cd04cgaawmm_Capabilities_out_constraints,
     cmgvieyak001b6cd04cgaawmm_CameraProfiles_out_constraints,
