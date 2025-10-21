@@ -1367,14 +1367,8 @@ class MyApp(QWidget):
                                     schema_keys = list(schema_to_use.keys())[:5]
                                     print(f"[DEBUG] 스키마 필드 (first 5): {schema_keys}")
                         
-                        check = json_check_(self.outSchema[self.cnt], res_data, self.flag_opt)
-                        struct = check["structure_result"]
-                        val_result    = struct["result"]        # "PASS" | "FAIL"
-                        val_text      = struct["error_msg"]     # 문자열
-                        key_psss_cnt  = struct["correct_cnt"]   # int
-                        key_error_cnt = struct["error_cnt"]     # int
-                        # 의미 검증 결과도 필요하면 아래처럼 사용 가능
-                        semantic = check.get("semantic_result")  # dict 또는 None
+                        val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.outSchema[self.cnt], res_data, self.flag_opt)
+                        
                         if self.message[self.cnt] == "Authentication":
                             self.handle_authentication_response(res_data)
                         
@@ -1927,8 +1921,8 @@ class MyApp(QWidget):
 
             # 웹훅 스키마 데이터 가져오기 (transProtocol 기반으로만 판단)
             webhook_schema = None
-            if row < len(self.trans_protocol_list):
-                current_protocol = self.trans_protocol_list[row]
+            if row < len(self.trans_protocols):
+                current_protocol = self.trans_protocols[row]
                 if current_protocol == "WebHook":
                     try:
                         webhook_schema = self.videoWebhookInSchema[0] if len(self.videoWebhookInSchema) > 0 else None
