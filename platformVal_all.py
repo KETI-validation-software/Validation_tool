@@ -622,6 +622,19 @@ class ResultPageWidget(QWidget):
             self.parent.show_combined_result(row)
 
 class MyApp(QWidget):
+    def _get_latest_request_data(self, api_name, direction="REQUEST"):
+        """
+        Server.trace에서 해당 api_name, direction의 최신 데이터를 반환한다.
+        direction은 'REQUEST' 또는 'RESPONSE'가 될 수 있다.
+        """
+        try:
+            events = list((getattr(self.Server, "trace", {{}}) or {{}}).get(api_name, []))
+            for ev in reversed(events):
+                if ev.get("dir") == direction:
+                    return ev.get("data", {{}})
+        except Exception:
+            pass
+        return {{}}
     # 시험 결과 표시 요청 시그널 (main.py와 연동)
     showResultRequested = pyqtSignal(object)  # parent widget을 인자로 전달
 
@@ -1051,8 +1064,17 @@ class MyApp(QWidget):
                                 schema_keys = list(schema_to_use.keys())[:5]
                                 print(f"[DEBUG] 스키마 필드 (first 5): {schema_keys}")
                     
-                    val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.videoInSchema[self.cnt],
+                    try:
+                        val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.videoInSchema[self.cnt],
                                                                             current_data, self.flag_opt)
+                    except TypeError as e:
+                        if "unhashable type" in str(e):
+                            import traceback
+                            print("[DEBUG][unhashable] error in platformVal_all.py update_view")
+                            print("videoInSchema:", self.videoInSchema[self.cnt])
+                            print("current_data:", current_data)
+                            traceback.print_exc()
+                        raise
                     
                     if retry_attempt == 0:  # 첫 시도에만 출력
                         print(f"[DEBUG] 검증 결과: {val_result}, pass={key_psss_cnt}, error={key_error_cnt}")
@@ -1129,13 +1151,10 @@ class MyApp(QWidget):
                     
                     # ✅ LongPolling 프로토콜인 경우 (순수 LongPolling만 처리)
                     elif current_protocol == "LongPolling":
-                        # ✅ 박사님 요청: LongPolling은 WebHook 검증하지 않음 (WebHook 기능 미완성)
-                        # LongPolling은 서버가 이벤트 발생 시 응답을 계속 보내주는 방식
+
                         if retry_attempt == 0:
                             print(f"[LongPolling] 실시간 데이터 수신 대기 중... (API: {api_name})")
-                        
-                        # LongPolling은 기본 검증만 수행 (위에서 이미 완료됨)
-                        # 추가 검증 없음
+
                         pass
                 
                 # ✅ 이번 회차 결과를 누적 데이터에 저장
@@ -2081,7 +2100,7 @@ class MyApp(QWidget):
         # 서버는 address_ip, port로 listen, 클라이언트는 constants.url로 접속
         url = CONSTANTS.url.split(":")
         address_port = int(url[-1])  # 포트만 사용
-        address_ip = "0.0.0.0"  # 내부 IP 주소, 외부에서도 접근 가능하게 설정
+        address_ip = "127.0.0.1"  # 내부 IP 주소, 외부에서도 접근 가능하게 설정
 
         #print(f"[DEBUG] 플랫폼 서버 시작: {address_ip}:{address_port}")
         self.server_th = server_th(handler_class=self.Server, address=address_ip, port=address_port)

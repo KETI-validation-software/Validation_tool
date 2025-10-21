@@ -156,14 +156,7 @@ cmga0l5mh005dihlet5fcoj0o_ReplayURL_in_constraints = {
 }
 
 # RealtimeVideoEventInfos
-cmga0l5mh005dihlet5fcoj0o_RealtimeVideoEventInfos_in_constraints = {
-  "camList.camID": {
-    "valueType": "random-response",
-    "required": True,
-    "referenceEndpoint": "/StreamURLs",
-    "referenceField": "camID"
-  }
-}
+cmga0l5mh005dihlet5fcoj0o_RealtimeVideoEventInfos_in_constraints = {}
 
 # StoredVideoEventInfos
 cmga0l5mh005dihlet5fcoj0o_StoredVideoEventInfos_in_constraints = {

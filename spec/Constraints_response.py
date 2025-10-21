@@ -149,18 +149,18 @@ cmg7edeo50013124xiux3gbkb_StoredVerifEventInfos_out_constraints = {
   "doorList.doorID": {
     "valueType": "request-based",
     "required": True,
-    "referenceEndpoint": "DoorProfiles",
+    "referenceEndpoint": "RealtimeVerifEventInfos",
     "referenceField": "doorID"
   },
   "doorList.bioAuthTypeList": {
     "valueType": "random",
-    "required": True,
+    "required": False,
     "randomType": "specified-values",
     "arrayElementType": "array"
   },
   "doorList.otherAuthTypeList": {
     "valueType": "random",
-    "required": True,
+    "required": False,
     "randomType": "specified-values",
     "arrayElementType": "array"
   },
@@ -221,7 +221,7 @@ cmg7bve25000114cevhn5o3vr_StoredVideoInfos_out_constraints = {
       "operator": "between"
     },
     "requestRangeMinEndpoint": "/RealtimeVideoEventInfos",
-    "requestRangeMaxEndpoint": "/ReplayURL"
+    "requestRangeMaxEndpoint": "/StoredObjectAnalyticsInfos"
   },
   "camList.timeList.endTime": {
     "valueType": "request-range",
@@ -229,10 +229,11 @@ cmg7bve25000114cevhn5o3vr_StoredVideoInfos_out_constraints = {
     "requestRange": {
       "maxField": "endTime",
       "minField": "startTime",
-      "operator": "between"
+      "operator": "between",
+      "maxEndpoint": "/StoredVideoInfos"
     },
     "requestRangeMinEndpoint": "/RealtimeVideoEventInfos",
-    "requestRangeMaxEndpoint": "/ReplayURL"
+    "requestRangeMaxEndpoint": "/StoredVideoInfos"
   }
 }
 
@@ -244,7 +245,7 @@ cmg7bve25000114cevhn5o3vr_ReplayURL_out_constraints = {
   "camList.camID": {
     "valueType": "request-based",
     "required": True,
-    "referenceEndpoint": "/PtzStatus",
+    "referenceEndpoint": "/StoredVideoInfos",
     "referenceField": "camID"
   },
   "camList.startTime": {
@@ -253,10 +254,11 @@ cmg7bve25000114cevhn5o3vr_ReplayURL_out_constraints = {
     "requestRange": {
       "maxField": "endTime",
       "minField": "startTime",
-      "operator": "between"
+      "operator": "between",
+      "minEndpoint": "/StoredVideoInfos"
     },
-    "requestRangeMinEndpoint": "/RealtimeVideoEventInfos",
-    "requestRangeMaxEndpoint": "/ReplayURL"
+    "requestRangeMinEndpoint": "/StoredVideoInfos",
+    "requestRangeMaxEndpoint": "/StoredObjectAnalyticsInfos"
   },
   "camList.endTime": {
     "valueType": "request-range",
@@ -267,49 +269,12 @@ cmg7bve25000114cevhn5o3vr_ReplayURL_out_constraints = {
       "operator": "between"
     },
     "requestRangeMinEndpoint": "/RealtimeVideoEventInfos",
-    "requestRangeMaxEndpoint": "/ReplayURL"
+    "requestRangeMaxEndpoint": "/StoredObjectAnalyticsInfos"
   }
 }
 
 # RealtimeVideoEventInfos
-cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_constraints = {
-  "camList.camID": {
-    "valueType": "request-based",
-    "required": True,
-    "referenceEndpoint": "/PtzStatus",
-    "referenceField": "camID"
-  },
-  "camList.eventUUID": {
-    "valueType": "random",
-    "required": True,
-    "randomType": "specified-values",
-    "arrayElementType": "array"
-  },
-  "camList.eventName": {
-    "valueType": "request-based",
-    "required": True,
-    "referenceEndpoint": "/RealtimeVideoEventInfos",
-    "referenceField": "eventFilter"
-  },
-  "camList.startTime": {
-    "valueType": "request-range",
-    "required": True,
-    "requestRange": {
-      "minField": "startTime",
-      "operator": "greater-equal"
-    },
-    "requestRangeMinEndpoint": "/RealtimeVideoEventInfos"
-  },
-  "camList.endTime": {
-    "valueType": "request-range",
-    "required": False,
-    "requestRange": {
-      "minField": "startTime",
-      "operator": "greater-equal"
-    },
-    "requestRangeMinEndpoint": "/RealtimeVideoEventInfos"
-  }
-}
+cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_out_constraints = {}
 
 # StoredVideoEventInfos
 cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_constraints = {
@@ -343,7 +308,7 @@ cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_constraints = {
       "operator": "between"
     },
     "requestRangeMinEndpoint": "/RealtimeVideoEventInfos",
-    "requestRangeMaxEndpoint": "/ReplayURL"
+    "requestRangeMaxEndpoint": "/StoredObjectAnalyticsInfos"
   },
   "camList.endTime": {
     "valueType": "request-range",
@@ -354,7 +319,7 @@ cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_out_constraints = {
       "operator": "between"
     },
     "requestRangeMinEndpoint": "/RealtimeVideoEventInfos",
-    "requestRangeMaxEndpoint": "/ReplayURL"
+    "requestRangeMaxEndpoint": "/StoredObjectAnalyticsInfos"
   }
 }
 
@@ -375,7 +340,7 @@ cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_out_constraints = {
       "operator": "between"
     },
     "requestRangeMinEndpoint": "/RealtimeVideoEventInfos",
-    "requestRangeMaxEndpoint": "/ReplayURL"
+    "requestRangeMaxEndpoint": "/StoredObjectAnalyticsInfos"
   },
   "camList.anlayticsResultList.analyticsClass": {
     "valueType": "request-based",
@@ -386,6 +351,7 @@ cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_out_constraints = {
   "camList.anlayticsResultList.analyticsAttribute": {
     "valueType": "request-based",
     "required": False,
+    "referenceEndpoint": "/StoredObjectAnalyticsInfos",
     "referenceField": "attributeFilter",
     "requestRange": {
       "operator": "between"

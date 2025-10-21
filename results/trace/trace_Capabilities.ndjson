@@ -1,0 +1,4 @@
+{"time": "2025-10-21T01:18:24.625700Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
+{"time": "2025-10-21T01:18:24.626697Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "", "message": "", "transportSupport": [{"transProtocolType": "", "transProtocolDesc": ""}]}}
+{"time": "2025-10-21T01:18:26.625678Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
+{"time": "2025-10-21T01:18:26.626675Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "", "message": "", "transportSupport": [{"transProtocolType": "", "transProtocolDesc": ""}]}}
