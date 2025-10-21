@@ -836,7 +836,7 @@ class FormValidator:
                     r'(["\']accessToken["\']\s*:\s*["\'])([^"\']*)(["\'])',
                     rf'\1{auth_info}\3',
                     text,
-                    count=1,
+                    count=0,
                     flags=re.IGNORECASE
                 )
 
