@@ -168,7 +168,7 @@ class InfoWidget(QWidget):
         self.start_btn = QPushButton("시험 시작")
         self.start_btn.setStyleSheet("QPushButton { background-color: #9FBFE5; color: black; font-weight: bold; }")
         self.start_btn.clicked.connect(self.start_test)
-        self.start_btn.setEnabled(False)  # 초기에는 비활성화
+        self.start_btn.setEnabled(True)  # 항상 활성화 (클릭 시 검증)
         layout.addWidget(self.start_btn)
 
         # 초기화 버튼
@@ -434,7 +434,7 @@ class InfoWidget(QWidget):
         self.start_btn = QPushButton("시험 시작")
         self.start_btn.setStyleSheet("QPushButton { background-color: #9FBFE5; color: black; font-weight: bold; }")
         self.start_btn.clicked.connect(self.start_test)
-        self.start_btn.setEnabled(False)  # 초기에는 비활성화
+        self.start_btn.setEnabled(True)  # 항상 활성화 (클릭 시 검증)
         layout.addWidget(self.start_btn)
 
         # 초기화 버튼
@@ -473,25 +473,15 @@ class InfoWidget(QWidget):
         self.update_start_button_state()
     
     def update_start_button_state(self):
-        """필수값 입력 여부에 따른 시험 시작 버튼 상태 업데이트"""
+        """시험 시작 버튼 상태 업데이트 (항상 활성화, 클릭 시 검증)"""
         try:
             # start_btn이 아직 생성되지 않았으면 건너뛰기
             if not hasattr(self, 'start_btn'):
                 return
-                
-            auth_valid = False
-            
-            # 인증 정보 유효성 검사
-            if self.digest_radio.isChecked():
-                # Digest Auth: ID와 PW가 모두 입력되어야 함
-                auth_valid = bool(self.id_input.text().strip() and self.pw_input.text().strip())
-            else:
-                # Bearer Token: Token이 입력되어야 함
-                auth_valid = bool(self.token_input.text().strip())
-            
-            # 인증 정보만으로 버튼 활성화
-            self.start_btn.setEnabled(auth_valid)
-            
+
+            # 항상 활성화 - 클릭 시 _check_required_fields()에서 검증
+            self.start_btn.setEnabled(True)
+
         except Exception as e:
             print(f"버튼 상태 업데이트 실패: {e}")
 
@@ -649,28 +639,39 @@ class InfoWidget(QWidget):
                         return selected_url
         return None
 
+    def _check_required_fields(self):
+        """필수 입력 필드 검증 - 누락된 항목 리스트 반환 (인증 정보 및 접속 URL만 체크)"""
+        missing_fields = []
+
+        # 1. 인증 정보 확인
+        if self.digest_radio.isChecked():
+            if not self.id_input.text().strip():
+                missing_fields.append("• 인증 ID (Digest Auth)")
+            if not self.pw_input.text().strip():
+                missing_fields.append("• 인증 PW (Digest Auth)")
+        else:  # Bearer Token
+            if not self.token_input.text().strip():
+                missing_fields.append("• 인증 토큰 (Bearer Token)")
+
+        # 2. 접속 정보 확인 (URL 선택됨)
+        if not self.get_selected_url():
+            missing_fields.append("• 접속 URL 선택")
+
+        return missing_fields
+
     def start_test(self):
         """시험 시작 - CONSTANTS.py 업데이트 후 검증 소프트웨어 실행"""
         importlib.reload(CONSTANTS)  # CONSTANTS 모듈을 다시 로드하여 최신 설정 반영
         try:
-            # 모드 선택 확인
-            if not self.current_mode:
-                QMessageBox.warning(self, "모드 미선택", "먼저 불러오기 버튼 중 하나를 눌러 모드를 선택해주세요.")
-                return
-
-            # test_group_name 확인
-            if not self.test_group_name:
-                QMessageBox.warning(self, "데이터 없음", "시험 분야 정보가 없습니다. 시험 정보를 다시 불러와주세요.")
+            # 필수 입력 필드 검증
+            missing_fields = self._check_required_fields()
+            if missing_fields:
+                message = "다음 정보를 입력해주세요:\n\n" + "\n".join(missing_fields)
+                QMessageBox.warning(self, "입력 정보 부족", message)
                 return
 
             # spec_id 추출 (testSpecs의 첫 번째 항목)
-            spec_id = ""
-            if self.test_specs and len(self.test_specs) > 0:
-                spec_id = self.test_specs[0].get("id", "")
-            
-            if not spec_id:
-                QMessageBox.warning(self, "데이터 없음", "spec_id 정보가 없습니다. 시험 정보를 다시 불러와주세요.")
-                return
+            spec_id = self.test_specs[0].get("id", "")
 
             # CONSTANTS.py 업데이트
             if self.form_validator.update_constants_py():
@@ -684,46 +685,14 @@ class InfoWidget(QWidget):
             QMessageBox.critical(self, "오류", f"시험 시작 중 오류가 발생했습니다:\n{str(e)}")    
 
     def check_start_button_state(self):
-        """시험 시작 버튼 활성화 조건 체크"""
+        """시험 시작 버튼 활성화 조건 체크 (항상 활성화, 클릭 시 검증)"""
         try:
-            # 1. 모드 선택 확인
-            if not self.current_mode:
-                self.start_btn.setEnabled(False)
-                return
-            
-            # 2. 시험 기본 정보 확인
-            basic_info_filled = all([
-                self.company_edit.text().strip(),
-                self.product_edit.text().strip(),
-                self.version_edit.text().strip(),
-                self.test_category_edit.text().strip(),
-                self.target_system_edit.text().strip(),
-                self.test_range_edit.text().strip()
-            ])
+            # 항상 활성화 - 클릭 시 _check_required_fields()에서 검증
+            self.start_btn.setEnabled(True)
 
-            # 2-1. 관리자 코드 검증 추가
-            admin_code_valid = self.form_validator.is_admin_code_valid()
-            
-            # 3. 시험항목(API) 테이블 확인
-            api_table_filled = self.api_test_table.rowCount() > 0
-            
-            # 4. 인증 정보 확인
-            auth_filled = False
-            if self.digest_radio.isChecked():
-                auth_filled = bool(self.id_input.text().strip() and self.pw_input.text().strip())
-            else:  # Bearer Token
-                auth_filled = bool(self.token_input.text().strip())
-            
-            # 5. 접속 정보 확인 (URL 선택됨)
-            url_selected = bool(self.get_selected_url())
-            
-            # 모든 조건이 충족되면 활성화 (관리자 코드 유효성 포함)
-            all_conditions_met = basic_info_filled and admin_code_valid and api_table_filled and auth_filled and url_selected
-            self.start_btn.setEnabled(all_conditions_met)
-            
         except Exception as e:
             print(f"버튼 상태 체크 실패: {e}")
-            self.start_btn.setEnabled(False)
+            self.start_btn.setEnabled(True)  # 오류 발생 시에도 활성화 유지
 
 
     def reset_all_fields(self):
@@ -964,7 +933,7 @@ class InfoWidget(QWidget):
     
     #임시버전
     def get_local_ip(self):
-        return "192.168.1.2, 127.0.0.1"
+        return "192.168.1.1, 127.0.0.1"
     
     def _get_local_ip_list(self):
         """get_local_ip() 결과를 안전하게 리스트로 변환"""
