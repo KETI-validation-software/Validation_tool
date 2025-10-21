@@ -1292,7 +1292,7 @@ class MyApp(QWidget):
                 self.processing_response = False
 
                 # 플랫폼과 동일한 대기 시간 설정
-                self.time_pre = time.time() + 2.0  # 플랫폼과 동일한 2초 대기
+                self.time_pre = time.time() 
 
                 if self.cnt >= len(self.message):
                     self.tick_timer.stop()

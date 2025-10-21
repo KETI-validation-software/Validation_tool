@@ -1,20 +1,20 @@
-{"time": "2025-10-21T07:02:41.466905Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
-{"time": "2025-10-21T07:02:41.467902Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "streamingSupport": [{"streamProtocolType": "RTSP", "streamProtocolDesc": "Unicast"}], "transportSupport": [{"transProtocolType": "WebHook", "transProtocolDesc": ""}]}}
-{"time": "2025-10-21T07:02:43.457354Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
-{"time": "2025-10-21T07:02:43.457354Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "streamingSupport": [{"streamProtocolType": "RTSP", "streamProtocolDesc": "Unicast"}], "transportSupport": [{"transProtocolType": "WebHook", "transProtocolDesc": ""}]}}
-{"time": "2025-10-21T07:02:45.462057Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
-{"time": "2025-10-21T07:02:45.463055Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "streamingSupport": [{"streamProtocolType": "RTSP", "streamProtocolDesc": "Unicast"}], "transportSupport": [{"transProtocolType": "WebHook", "transProtocolDesc": ""}]}}
-{"time": "2025-10-21T07:02:47.453838Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
-{"time": "2025-10-21T07:02:47.454835Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "streamingSupport": [{"streamProtocolType": "RTSP", "streamProtocolDesc": "Unicast"}], "transportSupport": [{"transProtocolType": "WebHook", "transProtocolDesc": ""}]}}
-{"time": "2025-10-21T07:02:49.454730Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
-{"time": "2025-10-21T07:02:49.455727Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "streamingSupport": [{"streamProtocolType": "RTSP", "streamProtocolDesc": "Unicast"}], "transportSupport": [{"transProtocolType": "WebHook", "transProtocolDesc": ""}]}}
-{"time": "2025-10-21T07:02:51.466463Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
-{"time": "2025-10-21T07:02:51.466463Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "streamingSupport": [{"streamProtocolType": "RTSP", "streamProtocolDesc": "Unicast"}], "transportSupport": [{"transProtocolType": "WebHook", "transProtocolDesc": ""}]}}
-{"time": "2025-10-21T07:02:53.456010Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
-{"time": "2025-10-21T07:02:53.456010Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "streamingSupport": [{"streamProtocolType": "RTSP", "streamProtocolDesc": "Unicast"}], "transportSupport": [{"transProtocolType": "WebHook", "transProtocolDesc": ""}]}}
-{"time": "2025-10-21T07:02:55.453885Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
-{"time": "2025-10-21T07:02:55.454882Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "streamingSupport": [{"streamProtocolType": "RTSP", "streamProtocolDesc": "Unicast"}], "transportSupport": [{"transProtocolType": "WebHook", "transProtocolDesc": ""}]}}
-{"time": "2025-10-21T07:02:57.465336Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
-{"time": "2025-10-21T07:02:57.466334Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "streamingSupport": [{"streamProtocolType": "RTSP", "streamProtocolDesc": "Unicast"}], "transportSupport": [{"transProtocolType": "WebHook", "transProtocolDesc": ""}]}}
-{"time": "2025-10-21T07:02:59.466024Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
-{"time": "2025-10-21T07:02:59.466993Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "streamingSupport": [{"streamProtocolType": "RTSP", "streamProtocolDesc": "Unicast"}], "transportSupport": [{"transProtocolType": "WebHook", "transProtocolDesc": ""}]}}
+{"time": "2025-10-21T08:35:14.265042Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
+{"time": "2025-10-21T08:35:14.266039Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "", "message": "", "streamingSupport": [{"streamProtocolType": "", "streamProtocolDesc": ""}], "transportSupport": [{"transProtocolType": "", "transProtocolDesc": ""}]}}
+{"time": "2025-10-21T08:35:16.268686Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
+{"time": "2025-10-21T08:35:16.268686Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "", "message": "", "streamingSupport": [{"streamProtocolType": "", "streamProtocolDesc": ""}], "transportSupport": [{"transProtocolType": "", "transProtocolDesc": ""}]}}
+{"time": "2025-10-21T08:35:18.265597Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
+{"time": "2025-10-21T08:35:18.266594Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "", "message": "", "streamingSupport": [{"streamProtocolType": "", "streamProtocolDesc": ""}], "transportSupport": [{"transProtocolType": "", "transProtocolDesc": ""}]}}
+{"time": "2025-10-21T08:35:20.277221Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
+{"time": "2025-10-21T08:35:20.278216Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "", "message": "", "streamingSupport": [{"streamProtocolType": "", "streamProtocolDesc": ""}], "transportSupport": [{"transProtocolType": "", "transProtocolDesc": ""}]}}
+{"time": "2025-10-21T08:35:22.271910Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
+{"time": "2025-10-21T08:35:22.272883Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "", "message": "", "streamingSupport": [{"streamProtocolType": "", "streamProtocolDesc": ""}], "transportSupport": [{"transProtocolType": "", "transProtocolDesc": ""}]}}
+{"time": "2025-10-21T08:35:24.271550Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
+{"time": "2025-10-21T08:35:24.271550Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "", "message": "", "streamingSupport": [{"streamProtocolType": "", "streamProtocolDesc": ""}], "transportSupport": [{"transProtocolType": "", "transProtocolDesc": ""}]}}
+{"time": "2025-10-21T08:35:26.267203Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
+{"time": "2025-10-21T08:35:26.267203Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "", "message": "", "streamingSupport": [{"streamProtocolType": "", "streamProtocolDesc": ""}], "transportSupport": [{"transProtocolType": "", "transProtocolDesc": ""}]}}
+{"time": "2025-10-21T08:35:28.251898Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
+{"time": "2025-10-21T08:35:28.252896Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "", "message": "", "streamingSupport": [{"streamProtocolType": "", "streamProtocolDesc": ""}], "transportSupport": [{"transProtocolType": "", "transProtocolDesc": ""}]}}
+{"time": "2025-10-21T08:35:30.264597Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
+{"time": "2025-10-21T08:35:30.265582Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "", "message": "", "streamingSupport": [{"streamProtocolType": "", "streamProtocolDesc": ""}], "transportSupport": [{"transProtocolType": "", "transProtocolDesc": ""}]}}
+{"time": "2025-10-21T08:35:32.269236Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
+{"time": "2025-10-21T08:35:32.270222Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "", "message": "", "streamingSupport": [{"streamProtocolType": "", "streamProtocolDesc": ""}], "transportSupport": [{"transProtocolType": "", "transProtocolDesc": ""}]}}
