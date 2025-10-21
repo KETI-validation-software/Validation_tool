@@ -1,15 +1,124 @@
 === 시험 결과 ===
-통과 필드 수: 0
-전체 필드 수: 0
-종합 평가 점수: 0.0%
+통과 필드 수: 31
+전체 필드 수: 35
+종합 평가 점수: 88.6%
 
 === 스텝별 결과 ===
-1. Authentication | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-2. Capabilities | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-3. SensorDeviceProfiles | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-4. RealtimeSensorData | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-5. RealtimeSensorEventInfos | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-6. StoredSensorEventInfos | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-7. SensorDeviceControl | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
+1. Authentication | 결과: FAIL | 검증 횟수: 2 | 통과 필드 수: 10 | 전체 필드 수: 12 | 실패 필드 수: 2 | 평가 점수: 83.3%
+2. Capabilities | 결과: FAIL | 검증 횟수: 2 | 통과 필드 수: 10 | 전체 필드 수: 12 | 실패 필드 수: 2 | 평가 점수: 83.3%
+3. SensorDeviceProfiles | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 11 | 전체 필드 수: 11 | 실패 필드 수: 0 | 평가 점수: 100.0%
+4. RealtimeSensorData | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
+5. RealtimeSensorEventInfos | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
+6. StoredSensorEventInfos | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
+7. SensorDeviceControl | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
 
-로그 없음
+=== 전체 로그 ===
+Start Validation...
+
+시스템이 플랫폼에 요청을 전송하여 응답을 검증합니다
+step 1: Authentication (시도 1/2)
+
+검증 진행: 1/2회
+프로토콜: basic
+
+{
+    "code": "",
+    "message": "",
+    "userName": "",
+    "userAff": "",
+    "accessToken": "a"
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 83.33333333333334
+Score details : 5(누적 통과 필드 수), 1(누적 오류 필드 수)
+
+step 1: Authentication (시도 2/2)
+
+검증 진행: 2/2회
+프로토콜: basic
+
+{
+    "code": "",
+    "message": "",
+    "userName": "",
+    "userAff": "",
+    "accessToken": "a"
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 83.33333333333334
+Score details : 10(누적 통과 필드 수), 2(누적 오류 필드 수)
+
+step 2: Capabilities (시도 1/2)
+
+검증 진행: 1/2회
+프로토콜: LongPolling
+
+{
+    "code": "",
+    "message": "",
+    "transportSupport": [
+        {
+            "transProtocolType": "",
+            "transProtocolDesc": ""
+        }
+    ]
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 83.33333333333334
+Score details : 15(누적 통과 필드 수), 3(누적 오류 필드 수)
+
+step 2: Capabilities (시도 2/2)
+
+검증 진행: 2/2회
+프로토콜: LongPolling
+
+{
+    "code": "",
+    "message": "",
+    "transportSupport": [
+        {
+            "transProtocolType": "",
+            "transProtocolDesc": ""
+        }
+    ]
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 83.33333333333334
+Score details : 20(누적 통과 필드 수), 4(누적 오류 필드 수)
+
+step 3: SensorDeviceProfiles (시도 1/2)
+
+검증 진행: 1/2회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "sensorDeviceList": [
+        {
+            "sensorDeviceID": "iot0001",
+            "sensorDeviceType": "온도",
+            "sensorDeviceName": "홍채 센서",
+            "sensorDeviceLoc": {
+                "lon": "12.7127730",
+                "lat": "38.439801",
+                "alt": "32.131",
+                "desc": "3층복도"
+            }
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 88.57142857142857
+Score details : 31(누적 통과 필드 수), 4(누적 오류 필드 수)
+
+검증 절차가 중지되었습니다.

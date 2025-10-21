@@ -1,0 +1,4 @@
+{"time": "2025-10-21T01:40:20.285108Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "", "userPW": ""}}
+{"time": "2025-10-21T01:40:20.286106Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "", "message": "", "userName": "", "userAff": "", "accessToken": "a"}}
+{"time": "2025-10-21T01:40:22.274608Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "", "userPW": ""}}
+{"time": "2025-10-21T01:40:22.275605Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "", "message": "", "userName": "", "userAff": "", "accessToken": "a"}}

@@ -18,9 +18,12 @@ cmg90br3n002qihleffuljnth_RealtimeSensorData_in_schema = {
     "sensorDeviceList": [{
     "sensorDeviceID": str,
 }],
-    "duration": str,
-    "transProtocol": str,
-    "startTime": str,
+    OptionalKey("duration"): float,
+    "transProtocol": {
+    "transProtocolType": str,
+    OptionalKey("transProtocolDesc"): str,
+},
+    OptionalKey("startTime"): float,
 }
 
 # RealtimeSensorEventInfos
@@ -28,32 +31,32 @@ cmg90br3n002qihleffuljnth_RealtimeSensorEventInfos_in_schema = {
     "sensorDeviceList": [{
     "sensorDeviceID": str,
 }],
-    "duration": float,
-    "transProtocol": [{
+    OptionalKey("duration"): float,
+    "transProtocol": {
     "transProtocolType": str,
-    "transProtocolDesc": str,
-}],
-    "eventFilter": str,
-    "startTime": float,
+    OptionalKey("transProtocolDesc"): str,
+},
+    OptionalKey("eventFilter"): str,
+    OptionalKey("startTime"): float,
 }
 
 # StoredSensorEventInfos
 cmg90br3n002qihleffuljnth_StoredSensorEventInfos_in_schema = {
     "timePeriod": {
-    "startTime": str,
-    "endTime": str,
+    "startTime": float,
+    "endTime": float,
 },
     "sensorDeviceList": [{
     "sensorDeviceID": str,
 }],
-    "maxCount": str,
-    "eventFilter": str,
+    OptionalKey("maxCount"): float,
+    OptionalKey("eventFilter"): str,
 }
 
 # SensorDeviceControl
 cmg90br3n002qihleffuljnth_SensorDeviceControl_in_schema = {
     "sensorDeviceID": str,
-    "commandType": str,
+    OptionalKey("commandType"): str,
 }
 
 # cmg90br3n002qihleffuljnth 스키마 리스트
@@ -74,30 +77,26 @@ cmg7edeo50013124xiux3gbkb_Authentication_in_schema = {
 }
 
 # Capabilities
-cmg7edeo50013124xiux3gbkb_Capabilities_in_schema = {
-    "": str,
-}
+cmg7edeo50013124xiux3gbkb_Capabilities_in_schema = {}
 
 # DoorProfiles
 cmg7edeo50013124xiux3gbkb_DoorProfiles_in_schema = {}
 
 # AccessUserInfos
-cmg7edeo50013124xiux3gbkb_AccessUserInfos_in_schema = {
-    "": str,
-}
+cmg7edeo50013124xiux3gbkb_AccessUserInfos_in_schema = {}
 
 # RealtimeVerifEventInfos
 cmg7edeo50013124xiux3gbkb_RealtimeVerifEventInfos_in_schema = {
     "doorList": [{
     "doorID": str,
 }],
-    "duration": float,
+    OptionalKey("duration"): float,
     "transProtocol": {
     "transProtocolType": str,
-    "transProtocolDesc": str,
+    OptionalKey("transProtocolDesc"): str,
 },
-    "eventFilter": str,
-    "startTime": float,
+    OptionalKey("eventFilter"): str,
+    OptionalKey("startTime"): float,
 }
 
 # StoredVerifEventInfos
@@ -109,8 +108,8 @@ cmg7edeo50013124xiux3gbkb_StoredVerifEventInfos_in_schema = {
     "doorList": [{
     "doorID": str,
 }],
-    "maxCount": float,
-    "eventFilter": str,
+    OptionalKey("maxCount"): float,
+    OptionalKey("eventFilter"): str,
 }
 
 # RealtimeDoorStatus
@@ -118,12 +117,12 @@ cmg7edeo50013124xiux3gbkb_RealtimeDoorStatus_in_schema = {
     "doorList": [{
     "doorID": str,
 }],
-    "duration": float,
+    OptionalKey("duration"): float,
     "transProtocol": {
     "transProtocolType": str,
-    "transProtocolDesc": str,
+    OptionalKey("transProtocolDesc"): str,
 },
-    "startTime": float,
+    OptionalKey("startTime"): float,
 }
 
 # DoorControl
@@ -190,15 +189,18 @@ cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_in_schema = {
     "camList": [{
     "camID": str,
 }],
-    OptionalKey("duration"): str,
+    OptionalKey("duration"): float,
     "transProtocol": {
     "transProtocolType": str,
-    OptionalKey("transProtocolDesc"): str,
+    "transProtocolDesc": str,
 },
     OptionalKey("eventFilter"): str,
     OptionalKey("classFilter"): str,
     OptionalKey("startTime"): float,
 }
+
+# RealtimeVideoEventInfos WebHook OUT Schema
+cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_webhook_out_schema = {}
 
 # StoredVideoEventInfos
 cmg7bve25000114cevhn5o3vr_StoredVideoEventInfos_in_schema = {
@@ -223,7 +225,7 @@ cmg7bve25000114cevhn5o3vr_StoredObjectAnalyticsInfos_in_schema = {
     OptionalKey("camList"): [{
     "camID": str,
 }],
-    "filterList": [{
+    OptionalKey("filterList"): [{
     OptionalKey("classFilter"): [str],
     OptionalKey("attributeFilter"): [str],
 }],
@@ -267,5 +269,10 @@ cmg7bve25000114cevhn5o3vr_inSchema = [
     cmg7bve25000114cevhn5o3vr_PtzStatus_in_schema,
     cmg7bve25000114cevhn5o3vr_PtzContinuousMove_in_schema,
     cmg7bve25000114cevhn5o3vr_PtzStop_in_schema,
+]
+
+# cmg7bve25000114cevhn5o3vr WebHook 스키마 리스트
+cmg7bve25000114cevhn5o3vr_webhook_outSchema = [
+    cmg7bve25000114cevhn5o3vr_RealtimeVideoEventInfos_webhook_out_schema,
 ]
 
