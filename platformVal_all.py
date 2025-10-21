@@ -2188,13 +2188,17 @@ class MyApp(QWidget):
 
     def init_win(self):
         self.cnt = 0
+        self.current_retry = 0
+        self.total_error_cnt = 0
+        self.total_pass_cnt = 0
+        self.message_error = []
+        self.api_accumulated_data = {}
         # 버퍼 초기화 - API 개수에 맞춰 동적으로 생성
         api_count = len(self.videoMessages) if self.videoMessages else 9
         self.step_buffers = [{"data": "", "result": "", "error": ""} for _ in range(api_count)]
-       #print(f"[DEBUG] init_win: step_buffers 초기화 완료 (크기={api_count})")
+        #print(f"[DEBUG] init_win: step_buffers 초기화 완료 (크기={api_count})")
         # JSON 파일 초기화 제거 - 더 이상 개별 JSON 파일을 사용하지 않음
         # (videoData_request.py와 videoData_response.py에서 데이터를 가져옴)
-        
         self.valResult.clear()
         # 메시지 초기화
         for i in range(1, 10):
@@ -2212,12 +2216,10 @@ class MyApp(QWidget):
             icon_widget.setLayout(icon_layout)
             self.tableWidget.setCellWidget(i, 1, icon_widget)
             # 카운트들도 초기화
-            self.tableWidget.setItem(i, 2, QTableWidgetItem("0"))
-            self.tableWidget.item(i, 2).setTextAlignment(Qt.AlignCenter)
-            self.tableWidget.setItem(i, 3, QTableWidgetItem("0"))
-            self.tableWidget.item(i, 3).setTextAlignment(Qt.AlignCenter)
-            self.tableWidget.setItem(i, 4, QTableWidgetItem("0"))
-            self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
+            for col, value in ((2, "0"), (3, "0"), (4, "0"), (5, "0"), (6, "0%")):
+                item = QTableWidgetItem(value)
+                item.setTextAlignment(Qt.AlignCenter)
+                self.tableWidget.setItem(i, col, item)
 
     def show_result_page(self):
         """시험 결과 페이지 표시"""

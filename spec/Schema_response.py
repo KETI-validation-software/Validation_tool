@@ -94,6 +94,18 @@ cmgyv3rzl014nvsveidu5jpzp_ReplayURL_out_schema = {
 }],
 }
 
+# RealtimeVideoEventInfos
+cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_out_schema = {
+    "code": str,
+    "message": str,
+}
+
+# RealtimeVideoEventInfos WebHook IN Schema
+cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_webhook_in_schema = {
+    "code": str,
+    "message": str,
+}
+
 # StoredVideoEventInfos
 cmgyv3rzl014nvsveidu5jpzp_StoredVideoEventInfos_out_schema = {
     "code": str,
@@ -116,6 +128,12 @@ cmgyv3rzl014nvsveidu5jpzp_outSchema = [
     cmgyv3rzl014nvsveidu5jpzp_StoredVideoInfos_out_schema,
     cmgyv3rzl014nvsveidu5jpzp_StreamURLs_out_schema,
     cmgyv3rzl014nvsveidu5jpzp_ReplayURL_out_schema,
+    cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_out_schema,
     cmgyv3rzl014nvsveidu5jpzp_StoredVideoEventInfos_out_schema,
+]
+
+# cmgyv3rzl014nvsveidu5jpzp WebHook 스키마 리스트
+cmgyv3rzl014nvsveidu5jpzp_webhook_inSchema = [
+    cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_webhook_in_schema,
 ]
 
