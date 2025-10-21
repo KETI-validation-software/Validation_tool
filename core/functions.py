@@ -26,30 +26,28 @@ def resource_path(relative_path):
 
 # pass/fail 판별 -> 여기에 연동 맥락 ㄱㅓㅁ증 추가하기
 def json_check_(schema, data, flag):
-    all_field, opt_field = field_finder(schema)
-    all_data = data_finder(data)
-    # 1단계: 구조 검증
-    result, error_msg, correct_cnt, error_cnt = do_checker(all_field, all_data, opt_field, flag)
-    # 2단계: 의미 검증 (구조 PASS일 때만)
-    semantic_result = None
-    if result == "PASS":
-        try:
-            from core.json_checker_new import extract_validation_rules, do_semantic_checker
-            # validation_dict는 schema에서 추출하거나 별도 전달 필요 (여기서는 schema에 dict가 있다고 가정)
-            rules = extract_validation_rules(schema)
-            # data_dict는 실제 원본 데이터(dict)로 전달
-            semantic_result = do_semantic_checker(rules, data)
-        except Exception as e:
-            semantic_result = {"error": f"Semantic validation error: {e}"}
-    return {
-        "structure_result": {
-            "result": result,
-            "error_msg": error_msg,
-            "correct_cnt": correct_cnt,
-            "error_cnt": error_cnt
-        },
-        "semantic_result": semantic_result
-    }
+    try:
+        print(f"[DEBUG] json_check_ 시작")
+        print(f"[DEBUG] schema type: {type(schema)}")
+        print(f"[DEBUG] data type: {type(data)}")
+        print(f"[DEBUG] flag: {flag}")
+        
+        all_field, opt_field = field_finder(schema)
+        print(f"[DEBUG] field_finder 완료: all_field 개수={len(all_field)}, opt_field 개수={len(opt_field)}")
+        
+        all_data = data_finder(data)
+        print(f"[DEBUG] data_finder 완료: all_data 개수={len(all_data)}")
+        
+        # 구조 검증만 수행 (기존 호환성 유지)
+        result, error_msg, correct_cnt, error_cnt = do_checker(all_field, all_data, opt_field, flag)
+        print(f"[DEBUG] do_checker 완료: result={result}, correct_cnt={correct_cnt}, error_cnt={error_cnt}")
+        
+        return result, error_msg, correct_cnt, error_cnt
+    except Exception as e:
+        print(f"[DEBUG] json_check_ 에러: {e}")
+        import traceback
+        traceback.print_exc()
+        raise
 
 
 class BearerAuth(requests.auth.AuthBase):
