@@ -1,7 +1,7 @@
 === 시험 결과 ===
 통과 필드 수: 7
-전체 필드 수: 38
-종합 평가 점수: 18.4%
+전체 필드 수: 30
+종합 평가 점수: 23.3%
 
 === 스텝별 결과 ===
 1. Authentication | 결과: PASS | 검증 횟수: 3 | 통과 필드 수: 6 | 전체 필드 수: 6 | 실패 필드 수: 0 | 평가 점수: 100.0%
@@ -11,7 +11,7 @@
 5. StreamURLs | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 0 | 전체 필드 수: 3 | 실패 필드 수: 3 | 평가 점수: 0.0%
 6. ReplayURL | 결과: FAIL | 검증 횟수: 10 | 통과 필드 수: 0 | 전체 필드 수: 5 | 실패 필드 수: 5 | 평가 점수: 0.0%
 7. RealtimeVideoEventInfos | 결과: FAIL | 검증 횟수: 10 | 통과 필드 수: 0 | 전체 필드 수: 9 | 실패 필드 수: 9 | 평가 점수: 0.0%
-8. StoredVideoEventInfos | 결과: FAIL | 검증 횟수: 10 | 통과 필드 수: 0 | 전체 필드 수: 8 | 실패 필드 수: 8 | 평가 점수: 0.0%
+8. StoredVideoEventInfos | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
 
 === 전체 로그 ===
 Start Validation...
@@ -54,7 +54,6 @@ Score : 100.0
 Score details : 7(누적 통과 필드 수), 0(누적 오류 필드 수)
 
 step 3: CameraProfiles
-step 3: CameraProfiles
 Timeout: 5.0초
 Message Missing!
 Score : 87.5
@@ -84,10 +83,4 @@ Message Missing!
 Score : 23.333333333333332
 Score details : 7(누적 통과 필드 수), 23(누적 오류 필드 수)
 
-step 8: StoredVideoEventInfos
-Timeout: 5.0초
-Message Missing!
-Score : 18.421052631578945
-Score details : 7(누적 통과 필드 수), 31(누적 오류 필드 수)
-
-검증 절차가 완료되었습니다.
+검증 절차가 중지되었습니다.

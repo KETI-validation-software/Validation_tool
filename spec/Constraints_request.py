@@ -37,9 +37,6 @@ cmgyv3rzl014nvsveidu5jpzp_ReplayURL_in_constraints = {
   }
 }
 
-# RealtimeVideoEventInfos
-cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_in_constraints = {}
-
 # StoredVideoEventInfos
 cmgyv3rzl014nvsveidu5jpzp_StoredVideoEventInfos_in_constraints = {
   "camList.camID": {
@@ -51,12 +48,21 @@ cmgyv3rzl014nvsveidu5jpzp_StoredVideoEventInfos_in_constraints = {
   "eventFilter": {
     "valueType": "random",
     "required": False,
-    "validValueField": "eventFilter"
+    "validValueField": "eventFilter",
+    "validValues": [
+      "화재",
+      "배회"
+    ]
   },
   "classFilter": {
     "valueType": "random",
     "required": False,
-    "validValueField": "classFilter"
+    "validValueField": "classFilter",
+    "validValues": [
+      "사람",
+      "트럭",
+      "버스"
+    ]
   }
 }
 
@@ -68,7 +74,6 @@ cmgyv3rzl014nvsveidu5jpzp_OutConstraints = [
     cmgyv3rzl014nvsveidu5jpzp_StoredVideoInfos_in_constraints,
     cmgyv3rzl014nvsveidu5jpzp_StreamURLs_in_constraints,
     cmgyv3rzl014nvsveidu5jpzp_ReplayURL_in_constraints,
-    cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_in_constraints,
     cmgyv3rzl014nvsveidu5jpzp_StoredVideoEventInfos_in_constraints,
 ]
 

@@ -809,6 +809,7 @@ class MyApp(QWidget):
             ("시험 접속 정보", CONSTANTS.url)
         ]
 
+    
     def create_spec_selection_panel(self, parent_layout):
         """시험 분야 선택 패널 생성"""
         # 시험 분야 패널
@@ -846,12 +847,8 @@ class MyApp(QWidget):
         self.test_field_table.verticalHeader().setVisible(False)
         self.test_field_table.setMaximumHeight(200)
         
-        # response 스펙 ID 목록 (3개) -> 추후 수정해야함 (지금은 하드코딩)
-        response_spec_ids = [
-            "cmgatbdp000bqihlexmywusvq",  # 보안용 센서 시스템 (Response)
-            "cmgasj98w009aihlezm0fe6cs",  # 바이오 인식 기반 출입통제 시스템 (Response)
-            "cmga0l5mh005dihlet5fcoj0o",  # 영상보안 시스템 (Response)
-        ]
+        # response 스펙 ID 목록 
+        response_spec_ids = list(CONSTANTS.SPEC_CONFIG.keys())
         
         if hasattr(CONSTANTS, 'SPEC_CONFIG') and CONSTANTS.SPEC_CONFIG:
             spec_items = [(sid, CONSTANTS.SPEC_CONFIG[sid]) for sid in response_spec_ids if sid in CONSTANTS.SPEC_CONFIG]

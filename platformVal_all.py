@@ -1470,12 +1470,8 @@ class MyApp(QWidget):
         self.test_field_table.verticalHeader().setVisible(False)
         self.test_field_table.setMaximumHeight(200)
         
-        # ✅ Platform은 Request 검증 - Request 스키마 ID만 표시
-        request_spec_ids = [
-            "cmg90br3n002qihleffuljnth",  # 보안용센서 시스템 (Request)
-            "cmg7edeo50013124xiux3gbkb",  # 바이오 인식 기반 출입통제 시스템 (Request)
-            "cmg7bve25000114cevhn5o3vr",  # 영상보안 시스템 (Request)
-        ]
+        # platform spec_id -> spec_config 기반
+        request_spec_ids = list(CONSTANTS.SPEC_CONFIG.keys())
         
         if hasattr(CONSTANTS, 'SPEC_CONFIG') and CONSTANTS.SPEC_CONFIG:
             spec_items = [(sid, CONSTANTS.SPEC_CONFIG[sid]) for sid in request_spec_ids if sid in CONSTANTS.SPEC_CONFIG]
