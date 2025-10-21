@@ -815,7 +815,9 @@ class FormValidator:
         else:
             auth_type = "Bearer Token"
             auth_info = self.parent.token_input.text().strip()
+
             updated = False
+            
             for name, value in vars(Data_response).items():
                 # 리스트 이름에 'Authentication'이 포함된 변수만 찾기
                 if "authentication" in name.lower() and isinstance(value, dict):
