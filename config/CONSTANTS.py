@@ -8,19 +8,21 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소 (플랫폼과 시스템이 같은 PC에서 실행되더야 함, 변경하면 평가 작동 안됌ㅜ)
 #test-info -> (주의) auth_info의 id, pw admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음!!!!!!!
-company_name = "물리보안시스템테스트"
-product_name = "물리보안시스템"
+company_name = "통합플랫폼기업"
+product_name = "통합플랫폼테스트"
 version = "v1.0"
-test_category = "본시험"
-test_target = "물리보안"
+test_category = "MAIN_TEST"
+test_target = "통합플랫폼"
 test_range = "ALL_FIELDS"
-auth_type = "Digest Auth"
-auth_info = "admin,1234"
+auth_type = "Bearer Token"
+auth_info = "a"
 admin_code = "1234"
 url = "https://127.0.0.1:8080"
 
 
-specs = [["cmgyv3rzl014nvsveidu5jpzp_outSchema","cmgyv3rzl014nvsveidu5jpzp_inData","cmgyv3rzl014nvsveidu5jpzp_messages",""]]
+
+specs = [["cmgvieyak001b6cd04cgaawmm_inSchema","cmgvieyak001b6cd04cgaawmm_outData","cmgvieyak001b6cd04cgaawmm_messages",""]]
+
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황 
 flag_opt = False
@@ -28,10 +30,10 @@ if test_range == "ALL_FIELDS":
     flag_opt = True
 
 # 시험 분야별 spec 정의 (인덱스 순서 중요!)
-specs = [
-    ["spec_001_inSchema", "spec_001_outData", "spec_001_messages", "spec_001_webhookSchema", "spec_001_webhookData", "영상보안 시스템 요청 메시지 검증 API 명세서"],
-    ["spec_0011_inSchema", "spec_0011_outData", "spec_0011_messages", "spec_0011_webhookSchema", "spec_0011_webhookData", "보안용 센서 시스템(요청검증)"]
-]
+# specs = [
+#     ["spec_001_inSchema", "spec_001_outData", "spec_001_messages", "spec_001_webhookSchema", "spec_001_webhookData", "영상보안 시스템 요청 메시지 검증 API 명세서"],
+#     ["spec_0011_inSchema", "spec_0011_outData", "spec_0011_messages", "spec_0011_webhookSchema", "spec_0011_webhookData", "보안용 센서 시스템(요청검증)"]
+# ]
 
 # 선택된 시험 분야의 인덱스 (0: 영상보안, 1: 보안용센서)
 selected_spec_index = 0
@@ -51,9 +53,10 @@ enable_retry_delay = False  # False 권장: 불필요한 sleep 제거
 # 플랫폼(cmg90, cmg7e, cmg7b)
 # 시스템(cmgat, cmgas, cmga0)
 SPEC_CONFIG = {
-    "cmgyv3rzl014nvsveidu5jpzp": {
+
+    "cmgvieyak001b6cd04cgaawmm": {
     "test_name": "영상보안시스템_new",
-    "specs": ['cmgyv3rzl014nvsveidu5jpzp_outSchema', 'cmgyv3rzl014nvsveidu5jpzp_inData', 'cmgyv3rzl014nvsveidu5jpzp_messages', 'cmgyv3rzl014nvsveidu5jpzp_webhook_inSchema', 'cmgyv3rzl014nvsveidu5jpzp_webhook_outData'],
+    "specs": ['cmgvieyak001b6cd04cgaawmm_inSchema', 'cmgvieyak001b6cd04cgaawmm_outData', 'cmgvieyak001b6cd04cgaawmm_messages', 'cmgvieyak001b6cd04cgaawmm_webhook_outSchema', 'cmgvieyak001b6cd04cgaawmm_webhook_inData'],
     "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'WebHook', 'basic'],
     "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
     "num_retries": [10, 10, 10, 10, 10, 10, 10, 10]

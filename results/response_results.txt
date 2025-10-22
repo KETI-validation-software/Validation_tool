@@ -1,15 +1,416 @@
 === 시험 결과 ===
 통과 필드 수: 0
-전체 필드 수: 0
+전체 필드 수: 18
 종합 평가 점수: 0.0%
 
 === 스텝별 결과 ===
-1. Authentication | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-2. Capabilities | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-3. SensorDeviceProfiles | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-4. RealtimeSensorData | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-5. RealtimeSensorEventInfos | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-6. StoredSensorEventInfos | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-7. SensorDeviceControl | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
+1. Authentication | 결과: FAIL | 검증 횟수: 10 | 통과 필드 수: 0 | 전체 필드 수: 10 | 실패 필드 수: 10 | 평가 점수: 0.0%
+2. Capabilities | 결과: FAIL | 검증 횟수: 8 | 통과 필드 수: 0 | 전체 필드 수: 8 | 실패 필드 수: 8 | 평가 점수: 0.0%
+3. CameraProfiles | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 10 | 평가 점수: 0.0%
+4. StoredVideoInfos | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 30 | 평가 점수: 62.5%
+5. StreamURLs | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 18 | 평가 점수: 84.6%
+6. ReplayURL | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
+7. RealtimeVideoEventInfos | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
+8. StoredVideoEventInfos | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
 
-로그 없음
+=== 전체 로그 ===
+Start Validation...
+
+시스템이 플랫폼에 요청을 전송하여 응답을 검증합니다
+step 1: Authentication (시도 1/10)
+
+검증 진행: 1/10회
+프로토콜: basic
+
+{
+    "code": "",
+    "message": "",
+    "userName": "",
+    "userAff": "",
+    "accessToken": "a"
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 0.0
+Score details : 0(누적 통과 필드 수), 1(누적 오류 필드 수)
+
+step 1: Authentication (시도 2/10)
+
+검증 진행: 2/10회
+프로토콜: basic
+
+{
+    "code": "",
+    "message": "",
+    "userName": "",
+    "userAff": "",
+    "accessToken": "a"
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 0.0
+Score details : 0(누적 통과 필드 수), 2(누적 오류 필드 수)
+
+step 1: Authentication (시도 3/10)
+
+검증 진행: 3/10회
+프로토콜: basic
+
+{
+    "code": "",
+    "message": "",
+    "userName": "",
+    "userAff": "",
+    "accessToken": "a"
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 0.0
+Score details : 0(누적 통과 필드 수), 3(누적 오류 필드 수)
+
+step 1: Authentication (시도 4/10)
+
+검증 진행: 4/10회
+프로토콜: basic
+
+{
+    "code": "",
+    "message": "",
+    "userName": "",
+    "userAff": "",
+    "accessToken": "a"
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 0.0
+Score details : 0(누적 통과 필드 수), 4(누적 오류 필드 수)
+
+step 1: Authentication (시도 5/10)
+
+검증 진행: 5/10회
+프로토콜: basic
+
+{
+    "code": "",
+    "message": "",
+    "userName": "",
+    "userAff": "",
+    "accessToken": "a"
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 0.0
+Score details : 0(누적 통과 필드 수), 5(누적 오류 필드 수)
+
+step 1: Authentication (시도 6/10)
+
+검증 진행: 6/10회
+프로토콜: basic
+
+{
+    "code": "",
+    "message": "",
+    "userName": "",
+    "userAff": "",
+    "accessToken": "a"
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 0.0
+Score details : 0(누적 통과 필드 수), 6(누적 오류 필드 수)
+
+step 1: Authentication (시도 7/10)
+
+검증 진행: 7/10회
+프로토콜: basic
+
+{
+    "code": "",
+    "message": "",
+    "userName": "",
+    "userAff": "",
+    "accessToken": "a"
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 0.0
+Score details : 0(누적 통과 필드 수), 7(누적 오류 필드 수)
+
+step 1: Authentication (시도 8/10)
+
+검증 진행: 8/10회
+프로토콜: basic
+
+{
+    "code": "",
+    "message": "",
+    "userName": "",
+    "userAff": "",
+    "accessToken": "a"
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 0.0
+Score details : 0(누적 통과 필드 수), 8(누적 오류 필드 수)
+
+step 1: Authentication (시도 9/10)
+
+검증 진행: 9/10회
+프로토콜: basic
+
+{
+    "code": "",
+    "message": "",
+    "userName": "",
+    "userAff": "",
+    "accessToken": "a"
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 0.0
+Score details : 0(누적 통과 필드 수), 9(누적 오류 필드 수)
+
+step 1: Authentication (시도 10/10)
+
+검증 진행: 10/10회
+프로토콜: basic
+
+{
+    "code": "",
+    "message": "",
+    "userName": "",
+    "userAff": "",
+    "accessToken": "a"
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 0.0
+Score details : 0(누적 통과 필드 수), 10(누적 오류 필드 수)
+
+step 2: Capabilities (시도 1/10)
+
+검증 진행: 1/10회
+프로토콜: basic
+
+{
+    "code": "",
+    "message": "",
+    "streamingSupport": [
+        {
+            "streamProtocolType": "",
+            "streamProtocolDesc": ""
+        }
+    ],
+    "transportSupport": [
+        {
+            "transProtocolType": "",
+            "transProtocolDesc": ""
+        }
+    ]
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 0.0
+Score details : 0(누적 통과 필드 수), 11(누적 오류 필드 수)
+
+step 2: Capabilities (시도 2/10)
+
+검증 진행: 2/10회
+프로토콜: basic
+
+{
+    "code": "",
+    "message": "",
+    "streamingSupport": [
+        {
+            "streamProtocolType": "",
+            "streamProtocolDesc": ""
+        }
+    ],
+    "transportSupport": [
+        {
+            "transProtocolType": "",
+            "transProtocolDesc": ""
+        }
+    ]
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 0.0
+Score details : 0(누적 통과 필드 수), 12(누적 오류 필드 수)
+
+step 2: Capabilities (시도 3/10)
+
+검증 진행: 3/10회
+프로토콜: basic
+
+{
+    "code": "",
+    "message": "",
+    "streamingSupport": [
+        {
+            "streamProtocolType": "",
+            "streamProtocolDesc": ""
+        }
+    ],
+    "transportSupport": [
+        {
+            "transProtocolType": "",
+            "transProtocolDesc": ""
+        }
+    ]
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 0.0
+Score details : 0(누적 통과 필드 수), 13(누적 오류 필드 수)
+
+step 2: Capabilities (시도 4/10)
+
+검증 진행: 4/10회
+프로토콜: basic
+
+{
+    "code": "",
+    "message": "",
+    "streamingSupport": [
+        {
+            "streamProtocolType": "",
+            "streamProtocolDesc": ""
+        }
+    ],
+    "transportSupport": [
+        {
+            "transProtocolType": "",
+            "transProtocolDesc": ""
+        }
+    ]
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 0.0
+Score details : 0(누적 통과 필드 수), 14(누적 오류 필드 수)
+
+step 2: Capabilities (시도 5/10)
+
+검증 진행: 5/10회
+프로토콜: basic
+
+{
+    "code": "",
+    "message": "",
+    "streamingSupport": [
+        {
+            "streamProtocolType": "",
+            "streamProtocolDesc": ""
+        }
+    ],
+    "transportSupport": [
+        {
+            "transProtocolType": "",
+            "transProtocolDesc": ""
+        }
+    ]
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 0.0
+Score details : 0(누적 통과 필드 수), 15(누적 오류 필드 수)
+
+step 2: Capabilities (시도 6/10)
+
+검증 진행: 6/10회
+프로토콜: basic
+
+{
+    "code": "",
+    "message": "",
+    "streamingSupport": [
+        {
+            "streamProtocolType": "",
+            "streamProtocolDesc": ""
+        }
+    ],
+    "transportSupport": [
+        {
+            "transProtocolType": "",
+            "transProtocolDesc": ""
+        }
+    ]
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 0.0
+Score details : 0(누적 통과 필드 수), 16(누적 오류 필드 수)
+
+step 2: Capabilities (시도 7/10)
+
+검증 진행: 7/10회
+프로토콜: basic
+
+{
+    "code": "",
+    "message": "",
+    "streamingSupport": [
+        {
+            "streamProtocolType": "",
+            "streamProtocolDesc": ""
+        }
+    ],
+    "transportSupport": [
+        {
+            "transProtocolType": "",
+            "transProtocolDesc": ""
+        }
+    ]
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 0.0
+Score details : 0(누적 통과 필드 수), 17(누적 오류 필드 수)
+
+step 2: Capabilities (시도 8/10)
+
+검증 진행: 8/10회
+프로토콜: basic
+
+{
+    "code": "",
+    "message": "",
+    "streamingSupport": [
+        {
+            "streamProtocolType": "",
+            "streamProtocolDesc": ""
+        }
+    ],
+    "transportSupport": [
+        {
+            "transProtocolType": "",
+            "transProtocolDesc": ""
+        }
+    ]
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 0.0
+Score details : 0(누적 통과 필드 수), 18(누적 오류 필드 수)
+
+검증 절차가 중지되었습니다.

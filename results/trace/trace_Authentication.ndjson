@@ -1,0 +1,20 @@
+{"time": "2025-10-21T08:34:53.255827Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "", "userPW": ""}}
+{"time": "2025-10-21T08:34:53.256825Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "", "message": "", "userName": "", "userAff": "", "accessToken": "a"}}
+{"time": "2025-10-21T08:34:55.271512Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "", "userPW": ""}}
+{"time": "2025-10-21T08:34:55.272509Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "", "message": "", "userName": "", "userAff": "", "accessToken": "a"}}
+{"time": "2025-10-21T08:34:57.273162Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "", "userPW": ""}}
+{"time": "2025-10-21T08:34:57.274159Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "", "message": "", "userName": "", "userAff": "", "accessToken": "a"}}
+{"time": "2025-10-21T08:34:59.271053Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "", "userPW": ""}}
+{"time": "2025-10-21T08:34:59.272051Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "", "message": "", "userName": "", "userAff": "", "accessToken": "a"}}
+{"time": "2025-10-21T08:35:01.273699Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "", "userPW": ""}}
+{"time": "2025-10-21T08:35:01.273699Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "", "message": "", "userName": "", "userAff": "", "accessToken": "a"}}
+{"time": "2025-10-21T08:35:03.277342Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "", "userPW": ""}}
+{"time": "2025-10-21T08:35:03.278365Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "", "message": "", "userName": "", "userAff": "", "accessToken": "a"}}
+{"time": "2025-10-21T08:35:05.266028Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "", "userPW": ""}}
+{"time": "2025-10-21T08:35:05.266028Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "", "message": "", "userName": "", "userAff": "", "accessToken": "a"}}
+{"time": "2025-10-21T08:35:07.260697Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "", "userPW": ""}}
+{"time": "2025-10-21T08:35:07.260697Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "", "message": "", "userName": "", "userAff": "", "accessToken": "a"}}
+{"time": "2025-10-21T08:35:09.266335Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "", "userPW": ""}}
+{"time": "2025-10-21T08:35:09.267332Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "", "message": "", "userName": "", "userAff": "", "accessToken": "a"}}
+{"time": "2025-10-21T08:35:11.269000Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "", "userPW": ""}}
+{"time": "2025-10-21T08:35:11.269977Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "", "message": "", "userName": "", "userAff": "", "accessToken": "a"}}
