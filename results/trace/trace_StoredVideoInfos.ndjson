@@ -1,20 +1,20 @@
-{"time": "2025-10-21T08:35:56.276625Z", "api": "StoredVideoInfos", "dir": "REQUEST", "data": {"timePeriod": {"startTime": 0, "endTime": 0}, "camList": [{"camID": ""}]}}
-{"time": "2025-10-21T08:35:56.277621Z", "api": "StoredVideoInfos", "dir": "RESPONSE", "data": {"code": "", "message": "", "camList": [{"camID": "", "timeList": [{"startTime": 0, "endTime": 0}]}]}}
-{"time": "2025-10-21T08:35:58.270265Z", "api": "StoredVideoInfos", "dir": "REQUEST", "data": {"timePeriod": {"startTime": 0, "endTime": 0}, "camList": [{"camID": ""}]}}
-{"time": "2025-10-21T08:35:58.271263Z", "api": "StoredVideoInfos", "dir": "RESPONSE", "data": {"code": "", "message": "", "camList": [{"camID": "", "timeList": [{"startTime": 0, "endTime": 0}]}]}}
-{"time": "2025-10-21T08:36:00.264960Z", "api": "StoredVideoInfos", "dir": "REQUEST", "data": {"timePeriod": {"startTime": 0, "endTime": 0}, "camList": [{"camID": ""}]}}
-{"time": "2025-10-21T08:36:00.265930Z", "api": "StoredVideoInfos", "dir": "RESPONSE", "data": {"code": "", "message": "", "camList": [{"camID": "", "timeList": [{"startTime": 0, "endTime": 0}]}]}}
-{"time": "2025-10-21T08:36:02.273590Z", "api": "StoredVideoInfos", "dir": "REQUEST", "data": {"timePeriod": {"startTime": 0, "endTime": 0}, "camList": [{"camID": ""}]}}
-{"time": "2025-10-21T08:36:02.274577Z", "api": "StoredVideoInfos", "dir": "RESPONSE", "data": {"code": "", "message": "", "camList": [{"camID": "", "timeList": [{"startTime": 0, "endTime": 0}]}]}}
-{"time": "2025-10-21T08:36:04.279254Z", "api": "StoredVideoInfos", "dir": "REQUEST", "data": {"timePeriod": {"startTime": 0, "endTime": 0}, "camList": [{"camID": ""}]}}
-{"time": "2025-10-21T08:36:04.279254Z", "api": "StoredVideoInfos", "dir": "RESPONSE", "data": {"code": "", "message": "", "camList": [{"camID": "", "timeList": [{"startTime": 0, "endTime": 0}]}]}}
-{"time": "2025-10-21T08:36:06.263990Z", "api": "StoredVideoInfos", "dir": "REQUEST", "data": {"timePeriod": {"startTime": 0, "endTime": 0}, "camList": [{"camID": ""}]}}
-{"time": "2025-10-21T08:36:06.263990Z", "api": "StoredVideoInfos", "dir": "RESPONSE", "data": {"code": "", "message": "", "camList": [{"camID": "", "timeList": [{"startTime": 0, "endTime": 0}]}]}}
-{"time": "2025-10-21T08:36:08.273623Z", "api": "StoredVideoInfos", "dir": "REQUEST", "data": {"timePeriod": {"startTime": 0, "endTime": 0}, "camList": [{"camID": ""}]}}
-{"time": "2025-10-21T08:36:08.273623Z", "api": "StoredVideoInfos", "dir": "RESPONSE", "data": {"code": "", "message": "", "camList": [{"camID": "", "timeList": [{"startTime": 0, "endTime": 0}]}]}}
-{"time": "2025-10-21T08:36:10.270316Z", "api": "StoredVideoInfos", "dir": "REQUEST", "data": {"timePeriod": {"startTime": 0, "endTime": 0}, "camList": [{"camID": ""}]}}
-{"time": "2025-10-21T08:36:10.270316Z", "api": "StoredVideoInfos", "dir": "RESPONSE", "data": {"code": "", "message": "", "camList": [{"camID": "", "timeList": [{"startTime": 0, "endTime": 0}]}]}}
-{"time": "2025-10-21T08:36:12.276961Z", "api": "StoredVideoInfos", "dir": "REQUEST", "data": {"timePeriod": {"startTime": 0, "endTime": 0}, "camList": [{"camID": ""}]}}
-{"time": "2025-10-21T08:36:12.277955Z", "api": "StoredVideoInfos", "dir": "RESPONSE", "data": {"code": "", "message": "", "camList": [{"camID": "", "timeList": [{"startTime": 0, "endTime": 0}]}]}}
-{"time": "2025-10-21T08:36:14.271627Z", "api": "StoredVideoInfos", "dir": "REQUEST", "data": {"timePeriod": {"startTime": 0, "endTime": 0}, "camList": [{"camID": ""}]}}
-{"time": "2025-10-21T08:36:14.272597Z", "api": "StoredVideoInfos", "dir": "RESPONSE", "data": {"code": "", "message": "", "camList": [{"camID": "", "timeList": [{"startTime": 0, "endTime": 0}]}]}}
+{"time": "2025-10-22T02:59:58.165491Z", "api": "StoredVideoInfos", "dir": "REQUEST", "data": {"timePeriod": {"startTime": 1760948700000, "endTime": 1761121500000}, "camList": [{"camID": ""}]}}
+{"time": "2025-10-22T02:59:58.166488Z", "api": "StoredVideoInfos", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "camList": [{"camID": "", "timeList": [{"startTime": 0, "endTime": 0}]}]}}
+{"time": "2025-10-22T03:00:00.166110Z", "api": "StoredVideoInfos", "dir": "REQUEST", "data": {"timePeriod": {"startTime": 1760948700000, "endTime": 1761121500000}, "camList": [{"camID": ""}]}}
+{"time": "2025-10-22T03:00:00.166110Z", "api": "StoredVideoInfos", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "camList": [{"camID": "", "timeList": [{"startTime": 0, "endTime": 0}]}]}}
+{"time": "2025-10-22T03:00:02.165439Z", "api": "StoredVideoInfos", "dir": "REQUEST", "data": {"timePeriod": {"startTime": 1760948700000, "endTime": 1761121500000}, "camList": [{"camID": ""}]}}
+{"time": "2025-10-22T03:00:02.166437Z", "api": "StoredVideoInfos", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "camList": [{"camID": "", "timeList": [{"startTime": 0, "endTime": 0}]}]}}
+{"time": "2025-10-22T03:00:04.166086Z", "api": "StoredVideoInfos", "dir": "REQUEST", "data": {"timePeriod": {"startTime": 1760948700000, "endTime": 1761121500000}, "camList": [{"camID": ""}]}}
+{"time": "2025-10-22T03:00:04.166086Z", "api": "StoredVideoInfos", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "camList": [{"camID": "", "timeList": [{"startTime": 0, "endTime": 0}]}]}}
+{"time": "2025-10-22T03:00:06.170694Z", "api": "StoredVideoInfos", "dir": "REQUEST", "data": {"timePeriod": {"startTime": 1760948700000, "endTime": 1761121500000}, "camList": [{"camID": ""}]}}
+{"time": "2025-10-22T03:00:06.170694Z", "api": "StoredVideoInfos", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "camList": [{"camID": "", "timeList": [{"startTime": 0, "endTime": 0}]}]}}
+{"time": "2025-10-22T03:00:08.153404Z", "api": "StoredVideoInfos", "dir": "REQUEST", "data": {"timePeriod": {"startTime": 1760948700000, "endTime": 1761121500000}, "camList": [{"camID": ""}]}}
+{"time": "2025-10-22T03:00:08.153404Z", "api": "StoredVideoInfos", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "camList": [{"camID": "", "timeList": [{"startTime": 0, "endTime": 0}]}]}}
+{"time": "2025-10-22T03:00:10.169973Z", "api": "StoredVideoInfos", "dir": "REQUEST", "data": {"timePeriod": {"startTime": 1760948700000, "endTime": 1761121500000}, "camList": [{"camID": ""}]}}
+{"time": "2025-10-22T03:00:10.169973Z", "api": "StoredVideoInfos", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "camList": [{"camID": "", "timeList": [{"startTime": 0, "endTime": 0}]}]}}
+{"time": "2025-10-22T03:00:12.165630Z", "api": "StoredVideoInfos", "dir": "REQUEST", "data": {"timePeriod": {"startTime": 1760948700000, "endTime": 1761121500000}, "camList": [{"camID": ""}]}}
+{"time": "2025-10-22T03:00:12.165630Z", "api": "StoredVideoInfos", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "camList": [{"camID": "", "timeList": [{"startTime": 0, "endTime": 0}]}]}}
+{"time": "2025-10-22T03:00:14.165532Z", "api": "StoredVideoInfos", "dir": "REQUEST", "data": {"timePeriod": {"startTime": 1760948700000, "endTime": 1761121500000}, "camList": [{"camID": ""}]}}
+{"time": "2025-10-22T03:00:14.165532Z", "api": "StoredVideoInfos", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "camList": [{"camID": "", "timeList": [{"startTime": 0, "endTime": 0}]}]}}
+{"time": "2025-10-22T03:00:16.168190Z", "api": "StoredVideoInfos", "dir": "REQUEST", "data": {"timePeriod": {"startTime": 1760948700000, "endTime": 1761121500000}, "camList": [{"camID": ""}]}}
+{"time": "2025-10-22T03:00:16.169155Z", "api": "StoredVideoInfos", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "camList": [{"camID": "", "timeList": [{"startTime": 0, "endTime": 0}]}]}}
