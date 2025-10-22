@@ -20,7 +20,9 @@ admin_code = "1234"
 url = "https://127.0.0.1:8080"
 
 
+
 specs = [["cmgvieyak001b6cd04cgaawmm_inSchema","cmgvieyak001b6cd04cgaawmm_outData","cmgvieyak001b6cd04cgaawmm_messages",""]]
+
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황 
 flag_opt = False
@@ -51,6 +53,7 @@ enable_retry_delay = False  # False 권장: 불필요한 sleep 제거
 # 플랫폼(cmg90, cmg7e, cmg7b)
 # 시스템(cmgat, cmgas, cmga0)
 SPEC_CONFIG = {
+
     "cmgvieyak001b6cd04cgaawmm": {
     "test_name": "영상보안시스템_new",
     "specs": ['cmgvieyak001b6cd04cgaawmm_inSchema', 'cmgvieyak001b6cd04cgaawmm_outData', 'cmgvieyak001b6cd04cgaawmm_messages', 'cmgvieyak001b6cd04cgaawmm_webhook_outSchema', 'cmgvieyak001b6cd04cgaawmm_webhook_inData'],
