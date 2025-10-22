@@ -84,6 +84,7 @@ class FormValidator:
                 constraints_names  = []
                 webhook_schema_names = []  # webhook 전용 스키마 리스트
                 webhook_data_names = []    # webhook 전용 데이터 리스트
+                webhook_constraints_names = []  # webhook 전용 constraints 리스트
                 temp_spec_id = spec_id+"_"
                 for s in steps:
                     step_id = s.get("id")
@@ -110,6 +111,7 @@ class FormValidator:
                             constraints_names=constraints_names,
                             webhook_schema_names=webhook_schema_names,
                             webhook_data_names=webhook_data_names,
+                            webhook_constraints_names=webhook_constraints_names,
                             spec_id = temp_spec_id
                         )
                 if schema_type == "request":
@@ -184,6 +186,19 @@ class FormValidator:
                     constraints_content += f"    {cname},\n"
                 constraints_content += "]\n\n"
 
+                # WebHook Constraints 리스트 생성
+                if webhook_constraints_names:
+                    if file_type == "response":
+                        webhook_c_list_name = f"{spec_id}_webhook_inConstraints"
+                    else:
+                        webhook_c_list_name = f"{spec_id}_webhook_outConstraints"
+
+                    constraints_content += f"# {spec_id} WebHook Constraints 리스트\n"
+                    constraints_content += f"{webhook_c_list_name} = [\n"
+                    for cname in webhook_constraints_names:
+                        constraints_content += f"    {temp_spec_id}{cname},\n"
+                    constraints_content += "]\n\n"
+
                 # CONSTANTS.py 업데이트용 리스트 저장
                 spec_info = {
                     "spec_id": spec_id,
@@ -241,7 +256,7 @@ class FormValidator:
                                        data_content, schema_names, data_names, endpoint_names,
                                        validation_content, validation_names,
                                    constraints_content, constraints_names,
-                                   webhook_schema_names, webhook_data_names, spec_id):
+                                   webhook_schema_names, webhook_data_names, webhook_constraints_names, spec_id):
 
         # step 레벨에서 protocolType 확인 (소문자 "webhook")
         detail = ts.get("detail", {})
@@ -383,6 +398,62 @@ class FormValidator:
             c_py_style_json = re.sub(r'\bfalse\b', 'False', c_py_style_json)
             constraints_content += f"{c_var_name} = {c_py_style_json}\n\n"
         constraints_names.append(c_var_name)
+
+        # WebHook Constraints 처리 - file_type="response"일 때 webhook_in_constraints 생성
+        if protocol_type == "webhook" and file_type == "response":
+            webhook_request_spec = settings.get("webhook", {}).get("requestSpec") or {}
+            webhook_c_name = f"{endpoint_name}_webhook_in_constraints"
+
+            # requestSpec에서 bodyJson 추출하여 valueType 필드 찾기
+            webhook_body_json = None
+            if isinstance(webhook_request_spec, list):
+                webhook_body_json = webhook_request_spec
+            elif isinstance(webhook_request_spec, dict) and "bodyJson" in webhook_request_spec:
+                webhook_body_json = webhook_request_spec.get("bodyJson")
+
+            # valueType 필드가 있으면 constraints 생성
+            webhook_c_map = {}
+            if webhook_body_json:
+                webhook_c_map = self.const_gen.build_validation_map(webhook_body_json)
+
+            constraints_content += f"# {endpoint_name} WebHook IN Constraints\n"
+            if not webhook_c_map:
+                constraints_content += f"{spec_id}{webhook_c_name} = {{}}\n\n"
+            else:
+                webhook_c_raw_json = json.dumps(webhook_c_map, ensure_ascii=False, indent=2)
+                webhook_c_py_style_json = re.sub(r'\btrue\b', 'True', webhook_c_raw_json)
+                webhook_c_py_style_json = re.sub(r'\bfalse\b', 'False', webhook_c_py_style_json)
+                constraints_content += f"{spec_id}{webhook_c_name} = {webhook_c_py_style_json}\n\n"
+            webhook_constraints_names.append(webhook_c_name)
+            print(f"  ✓ WebHook IN Constraints 생성: {webhook_c_name}" + (" (빈 딕셔너리)" if not webhook_c_map else ""))
+
+        # WebHook Constraints 처리 - file_type="request"일 때 webhook_out_constraints 생성
+        if protocol_type == "webhook" and file_type == "request":
+            webhook_request_spec = settings.get("webhook", {}).get("requestSpec") or {}
+            webhook_c_name = f"{endpoint_name}_webhook_out_constraints"
+
+            # requestSpec에서 bodyJson 추출하여 valueType 필드 찾기
+            webhook_body_json = None
+            if isinstance(webhook_request_spec, list):
+                webhook_body_json = webhook_request_spec
+            elif isinstance(webhook_request_spec, dict) and "bodyJson" in webhook_request_spec:
+                webhook_body_json = webhook_request_spec.get("bodyJson")
+
+            # valueType 필드가 있으면 constraints 생성
+            webhook_c_map = {}
+            if webhook_body_json:
+                webhook_c_map = self.const_gen.build_validation_map(webhook_body_json)
+
+            constraints_content += f"# {endpoint_name} WebHook OUT Constraints\n"
+            if not webhook_c_map:
+                constraints_content += f"{spec_id}{webhook_c_name} = {{}}\n\n"
+            else:
+                webhook_c_raw_json = json.dumps(webhook_c_map, ensure_ascii=False, indent=2)
+                webhook_c_py_style_json = re.sub(r'\btrue\b', 'True', webhook_c_raw_json)
+                webhook_c_py_style_json = re.sub(r'\bfalse\b', 'False', webhook_c_py_style_json)
+                constraints_content += f"{spec_id}{webhook_c_name} = {webhook_c_py_style_json}\n\n"
+            webhook_constraints_names.append(webhook_c_name)
+            print(f"  ✓ WebHook OUT Constraints 생성: {webhook_c_name}" + (" (빈 딕셔너리)" if not webhook_c_map else ""))
 
         # 기존과 동일하게 누적본 반환 + validation도 함께 반환
         return schema_content, data_content, validation_content, constraints_content
