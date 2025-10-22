@@ -1,202 +1,23 @@
 # request 모드
 
 # Authentication
-cmgatbdp000bqihlexmywusvq_Authentication_in_data = {
-    "userID": "",
-    "userPW": ""
-}
-
-# Capabilities
-cmgatbdp000bqihlexmywusvq_Capabilities_in_data = {}
-
-# SensorDeviceProfiles
-cmgatbdp000bqihlexmywusvq_SensorDeviceProfiles_in_data = {}
-
-# RealtimeSensorData
-cmgatbdp000bqihlexmywusvq_RealtimeSensorData_in_data = {
-    "sensorDeviceList": [
-        {
-        "sensorDeviceID": ""
-    }
-],
-    "duration": 0,
-    "transProtocol": {
-    "transProtocolType": "",
-    "transProtocolDesc": ""
-},
-    "startTime": 1759494300000
-}
-
-# RealtimeSensorEventInfos
-cmgatbdp000bqihlexmywusvq_RealtimeSensorEventInfos_in_data = {
-    "sensorDeviceList": [
-        {
-        "sensorDeviceID": ""
-    }
-],
-    "duration": 0,
-    "transProtocol": {
-    "transProtocolType": "",
-    "transProtocolDesc": ""
-},
-    "eventFilter": "",
-    "startTime": 1759494540000
-}
-
-# StoredSensorEventInfos
-cmgatbdp000bqihlexmywusvq_StoredSensorEventInfos_in_data = {
-    "timePeriod": {
-    "startTime": 1759494660000,
-    "endTime": 1761827460000
-},
-    "sensorDeviceList": [
-        {
-        "sensorDeviceID": ""
-    }
-],
-    "maxCount": 0,
-    "eventFilter": ""
-}
-
-# SensorDeviceControl
-cmgatbdp000bqihlexmywusvq_SensorDeviceControl_in_data = {
-    "sensorDeviceID": "",
-    "commandType": ""
-}
-
-# cmgatbdp000bqihlexmywusvq 데이터 리스트
-cmgatbdp000bqihlexmywusvq_inData = [
-    cmgatbdp000bqihlexmywusvq_Authentication_in_data,
-    cmgatbdp000bqihlexmywusvq_Capabilities_in_data,
-    cmgatbdp000bqihlexmywusvq_SensorDeviceProfiles_in_data,
-    cmgatbdp000bqihlexmywusvq_RealtimeSensorData_in_data,
-    cmgatbdp000bqihlexmywusvq_RealtimeSensorEventInfos_in_data,
-    cmgatbdp000bqihlexmywusvq_StoredSensorEventInfos_in_data,
-    cmgatbdp000bqihlexmywusvq_SensorDeviceControl_in_data,
-]
-
-# cmgatbdp000bqihlexmywusvq API endpoint
-cmgatbdp000bqihlexmywusvq_messages = [
-    "Authentication",
-    "Capabilities",
-    "SensorDeviceProfiles",
-    "RealtimeSensorData",
-    "RealtimeSensorEventInfos",
-    "StoredSensorEventInfos",
-    "SensorDeviceControl",
-]
-
-# Authentication
-cmgasj98w009aihlezm0fe6cs_Authentication_in_data = {
-    "userID": "",
-    "userPW": ""
-}
-
-# Capabilities
-cmgasj98w009aihlezm0fe6cs_Capabilities_in_data = {}
-
-# DoorProfiles
-cmgasj98w009aihlezm0fe6cs_DoorProfiles_in_data = {}
-
-# AccessUserInfos
-cmgasj98w009aihlezm0fe6cs_AccessUserInfos_in_data = {}
-
-# RealtimeVerifEventInfos
-cmgasj98w009aihlezm0fe6cs_RealtimeVerifEventInfos_in_data = {
-    "doorList": [
-        {
-        "doorID": ""
-    }
-],
-    "duration": 0,
-    "transProtocol": {
-    "transProtocolType": "",
-    "transProtocolDesc": ""
-},
-    "eventFilter": [],
-    "startTime": 1759493220000
-}
-
-# StoredVerifEventInfos
-cmgasj98w009aihlezm0fe6cs_StoredVerifEventInfos_in_data = {
-    "timePeriod": {
-    "startTime": 1759493460000,
-    "endTime": 1761826260000
-},
-    "doorList": [
-        {
-        "doorID": ""
-    }
-],
-    "maxCount": 0,
-    "eventFilter": ""
-}
-
-# RealtimeDoorStatus
-cmgasj98w009aihlezm0fe6cs_RealtimeDoorStatus_in_data = {
-    "doorList": [
-        {
-        "doorID": "door0001"
-    }
-],
-    "duration": 200,
-    "transProtocol": {
-    "transProtocolType": "LongPolling",
-    "transProtocolDesc": ""
-},
-    "startTime": 1759493760000
-}
-
-# DoorControl
-cmgasj98w009aihlezm0fe6cs_DoorControl_in_data = {
-    "doorID": "",
-    "commandType": "unlock"
-}
-
-# cmgasj98w009aihlezm0fe6cs 데이터 리스트
-cmgasj98w009aihlezm0fe6cs_inData = [
-    cmgasj98w009aihlezm0fe6cs_Authentication_in_data,
-    cmgasj98w009aihlezm0fe6cs_Capabilities_in_data,
-    cmgasj98w009aihlezm0fe6cs_DoorProfiles_in_data,
-    cmgasj98w009aihlezm0fe6cs_AccessUserInfos_in_data,
-    cmgasj98w009aihlezm0fe6cs_RealtimeVerifEventInfos_in_data,
-    cmgasj98w009aihlezm0fe6cs_StoredVerifEventInfos_in_data,
-    cmgasj98w009aihlezm0fe6cs_RealtimeDoorStatus_in_data,
-    cmgasj98w009aihlezm0fe6cs_DoorControl_in_data,
-]
-
-# cmgasj98w009aihlezm0fe6cs API endpoint
-cmgasj98w009aihlezm0fe6cs_messages = [
-    "Authentication",
-    "Capabilities",
-    "DoorProfiles",
-    "AccessUserInfos",
-    "RealtimeVerifEventInfos",
-    "StoredVerifEventInfos",
-    "RealtimeDoorStatus",
-    "DoorControl",
-]
-
-# Authentication
-cmga0l5mh005dihlet5fcoj0o_Authentication_in_data = {
+cmgyv3rzl014nvsveidu5jpzp_Authentication_in_data = {
     "userID": "user0001",
     "userPW": "pass0001"
 }
 
 # Capabilities
-cmga0l5mh005dihlet5fcoj0o_Capabilities_in_data = {}
+cmgyv3rzl014nvsveidu5jpzp_Capabilities_in_data = {}
 
 # CameraProfiles
-cmga0l5mh005dihlet5fcoj0o_CameraProfiles_in_data = {}
+cmgyv3rzl014nvsveidu5jpzp_CameraProfiles_in_data = {}
 
 # StoredVideoInfos
-cmga0l5mh005dihlet5fcoj0o_StoredVideoInfos_in_data = {
-    "timePeriod": [
-        {
-        "startTime": 1759453440000,
-        "endTime": 1760321100000
-    }
-],
+cmgyv3rzl014nvsveidu5jpzp_StoredVideoInfos_in_data = {
+    "timePeriod": {
+    "startTime": 1760948700000,
+    "endTime": 1761121500000
+},
     "camList": [
         {
         "camID": ""
@@ -205,29 +26,29 @@ cmga0l5mh005dihlet5fcoj0o_StoredVideoInfos_in_data = {
 }
 
 # StreamURLs
-cmga0l5mh005dihlet5fcoj0o_StreamURLs_in_data = {
+cmgyv3rzl014nvsveidu5jpzp_StreamURLs_in_data = {
     "camList": [
         {
-        "camID": "cam0001",
-        "streamProtocolType": "RSTP"
+        "camID": "",
+        "streamProtocolType": "RTSP"
     }
 ]
 }
 
 # ReplayURL
-cmga0l5mh005dihlet5fcoj0o_ReplayURL_in_data = {
+cmgyv3rzl014nvsveidu5jpzp_ReplayURL_in_data = {
     "camList": [
         {
         "camID": "",
-        "startTime": 1759452240000,
-        "endTime": 1760057040000,
+        "startTime": 1760949060000,
+        "endTime": 1761208260000,
         "streamProtocolType": "RTSP"
     }
 ]
 }
 
 # RealtimeVideoEventInfos
-cmga0l5mh005dihlet5fcoj0o_RealtimeVideoEventInfos_in_data = {
+cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_in_data = {
     "camList": [
         {
         "camID": "",
@@ -241,27 +62,27 @@ cmga0l5mh005dihlet5fcoj0o_RealtimeVideoEventInfos_in_data = {
 }
 
 # RealtimeVideoEventInfos WebHook OUT Data
-cmga0l5mh005dihlet5fcoj0o_RealtimeVideoEventInfos_webhook_out_data = {
+cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_webhook_out_data = {
     "camList": [
         {
         "camID": ""
     }
 ],
-    "duration": "",
+    "duration": "100",
     "transProtocol": {
     "transProtocolType": "WebHook",
-    "transProtocolDesc": ""
+    "transProtocolDesc": "127.0.0.1:8090"
 },
     "eventFilter": "",
     "classFilter": "",
-    "startTime": 0
+    "startTime": 1761110160000
 }
 
 # StoredVideoEventInfos
-cmga0l5mh005dihlet5fcoj0o_StoredVideoEventInfos_in_data = {
+cmgyv3rzl014nvsveidu5jpzp_StoredVideoEventInfos_in_data = {
     "timePeriod": {
-    "startTime": 1759499520000,
-    "endTime": 1761832320000
+    "startTime": 1759221900000,
+    "endTime": 1761727500000
 },
     "camList": [
         {
@@ -269,76 +90,29 @@ cmga0l5mh005dihlet5fcoj0o_StoredVideoEventInfos_in_data = {
     }
 ],
     "maxCount": 3,
-    "eventFilter": [],
+    "eventFilter": "",
     "classFilter": ""
 }
 
-# StoredObjectAnalyticsInfos
-cmga0l5mh005dihlet5fcoj0o_StoredObjectAnalyticsInfos_in_data = {
-    "timePeriod": {
-    "startTime": 1759499580000,
-    "endTime": 1761918840000
-},
-    "camList": [
-        {
-        "camID": ""
-    }
-],
-    "filterList": [
-        {
-        "classFilter": "",
-        "attributeFilter": ""
-    }
-]
-}
-
-# PtzStatus
-cmga0l5mh005dihlet5fcoj0o_PtzStatus_in_data = {
-    "camID": ""
-}
-
-# PtzContinuousMove
-cmga0l5mh005dihlet5fcoj0o_PtzContinuousMove_in_data = {
-    "camID": "",
-    "velocity": {
-    "pan": 10,
-    "tilt": -20,
-    "zoom": 30
-},
-    "timeOut": 5
-}
-
-# PtzStop
-cmga0l5mh005dihlet5fcoj0o_PtzStop_in_data = {
-    "camID": "",
-    "pan": False,
-    "tilt": True,
-    "zoom": False
-}
-
-# cmga0l5mh005dihlet5fcoj0o 데이터 리스트
-cmga0l5mh005dihlet5fcoj0o_inData = [
-    cmga0l5mh005dihlet5fcoj0o_Authentication_in_data,
-    cmga0l5mh005dihlet5fcoj0o_Capabilities_in_data,
-    cmga0l5mh005dihlet5fcoj0o_CameraProfiles_in_data,
-    cmga0l5mh005dihlet5fcoj0o_StoredVideoInfos_in_data,
-    cmga0l5mh005dihlet5fcoj0o_StreamURLs_in_data,
-    cmga0l5mh005dihlet5fcoj0o_ReplayURL_in_data,
-    cmga0l5mh005dihlet5fcoj0o_RealtimeVideoEventInfos_in_data,
-    cmga0l5mh005dihlet5fcoj0o_StoredVideoEventInfos_in_data,
-    cmga0l5mh005dihlet5fcoj0o_StoredObjectAnalyticsInfos_in_data,
-    cmga0l5mh005dihlet5fcoj0o_PtzStatus_in_data,
-    cmga0l5mh005dihlet5fcoj0o_PtzContinuousMove_in_data,
-    cmga0l5mh005dihlet5fcoj0o_PtzStop_in_data,
+# cmgyv3rzl014nvsveidu5jpzp 데이터 리스트
+cmgyv3rzl014nvsveidu5jpzp_inData = [
+    cmgyv3rzl014nvsveidu5jpzp_Authentication_in_data,
+    cmgyv3rzl014nvsveidu5jpzp_Capabilities_in_data,
+    cmgyv3rzl014nvsveidu5jpzp_CameraProfiles_in_data,
+    cmgyv3rzl014nvsveidu5jpzp_StoredVideoInfos_in_data,
+    cmgyv3rzl014nvsveidu5jpzp_StreamURLs_in_data,
+    cmgyv3rzl014nvsveidu5jpzp_ReplayURL_in_data,
+    cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_in_data,
+    cmgyv3rzl014nvsveidu5jpzp_StoredVideoEventInfos_in_data,
 ]
 
-# cmga0l5mh005dihlet5fcoj0o WebHook 데이터 리스트
-cmga0l5mh005dihlet5fcoj0o_webhook_outData = [
-    cmga0l5mh005dihlet5fcoj0o_RealtimeVideoEventInfos_webhook_out_data,
+# cmgyv3rzl014nvsveidu5jpzp WebHook 데이터 리스트
+cmgyv3rzl014nvsveidu5jpzp_webhook_outData = [
+    cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_webhook_out_data,
 ]
 
-# cmga0l5mh005dihlet5fcoj0o API endpoint
-cmga0l5mh005dihlet5fcoj0o_messages = [
+# cmgyv3rzl014nvsveidu5jpzp API endpoint
+cmgyv3rzl014nvsveidu5jpzp_messages = [
     "Authentication",
     "Capabilities",
     "CameraProfiles",
@@ -347,9 +121,5 @@ cmga0l5mh005dihlet5fcoj0o_messages = [
     "ReplayURL",
     "RealtimeVideoEventInfos",
     "StoredVideoEventInfos",
-    "StoredObjectAnalyticsInfos",
-    "PtzStatus",
-    "PtzContinuousMove",
-    "PtzStop",
 ]
 

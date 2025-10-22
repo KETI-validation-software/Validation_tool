@@ -739,11 +739,11 @@ class FormValidator:
             self.parent.admin_code_edit.setPlaceholderText("사전시험은 관리자 코드가 불필요합니다")
         elif test_category == "본시험":
             self.parent.admin_code_edit.setEnabled(True)
-            self.parent.admin_code_edit.setPlaceholderText("숫자만 입력 가능합니다")
+            self.parent.admin_code_edit.setPlaceholderText("내용을 입력해주세요")
         else:
             # 다른 값이거나 빈 값일 때는 기본 상태 유지
             self.parent.admin_code_edit.setEnabled(True)
-            self.parent.admin_code_edit.setPlaceholderText("숫자만 입력 가능합니다")
+            self.parent.admin_code_edit.setPlaceholderText("내용을 입력해주세요")
 
 
     # ---------- CONSTANTS.py 업데이트 ----------
