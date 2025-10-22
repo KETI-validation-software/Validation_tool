@@ -2,8 +2,10 @@
 
 # Authentication
 cmgyv3rzl014nvsveidu5jpzp_Authentication_in_data = {
+
     "userID": "",
     "userPW": ""
+
 }
 
 # Capabilities
@@ -15,8 +17,10 @@ cmgyv3rzl014nvsveidu5jpzp_CameraProfiles_in_data = {}
 # StoredVideoInfos
 cmgyv3rzl014nvsveidu5jpzp_StoredVideoInfos_in_data = {
     "timePeriod": {
+
     "startTime": 0,
     "endTime": 0
+
 },
     "camList": [
         {
@@ -30,7 +34,9 @@ cmgyv3rzl014nvsveidu5jpzp_StreamURLs_in_data = {
     "camList": [
         {
         "camID": "",
+
         "streamProtocolType": ""
+
     }
 ]
 }
@@ -40,9 +46,11 @@ cmgyv3rzl014nvsveidu5jpzp_ReplayURL_in_data = {
     "camList": [
         {
         "camID": "",
+
         "startTime": 0,
         "endTime": 0,
         "streamProtocolType": ""
+
     }
 ]
 }
@@ -68,19 +76,22 @@ cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_webhook_out_data = {
         "camID": ""
     }
 ],
-    "duration": "",
+    "duration": "100",
     "transProtocol": {
+
     "transProtocolType": "",
     "transProtocolDesc": ""
+
 },
     "eventFilter": "",
     "classFilter": "",
-    "startTime": 0
+    "startTime": 1761110160000
 }
 
 # StoredVideoEventInfos
 cmgyv3rzl014nvsveidu5jpzp_StoredVideoEventInfos_in_data = {
     "timePeriod": {
+
     "startTime": 0,
     "endTime": 0
 },
@@ -89,7 +100,9 @@ cmgyv3rzl014nvsveidu5jpzp_StoredVideoEventInfos_in_data = {
         "camID": ""
     }
 ],
+
     "maxCount": 0,
+
     "eventFilter": "",
     "classFilter": ""
 }
