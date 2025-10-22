@@ -27,6 +27,7 @@ from requests.auth import HTTPDigestAuth
 import config.CONSTANTS as CONSTANTS
 import traceback
 import importlib
+from core.validation_registry import get_validation_rules
 
 
 # 통합된 상세 내용 확인 팝업창 클래스
@@ -90,7 +91,17 @@ class CombinedDetailDialog(QDialog):
         self.error_browser.setAcceptRichText(True)
         result = step_buffer["result"]
         # 항상 step_buffer["error"]를 그대로 보여주고, 없으면 안내 메시지
+        # 오류 설명 추가: 값 자체뿐 아니라 원인도 함께 표시
         error_text = step_buffer["error"] if step_buffer["error"] else ("오류가 없습니다." if result=="PASS" else "오류 내용 없음")
+        # 예시: 값이 범위에 맞지 않거나 타입이 다를 때 추가 설명
+        if result == "FAIL" and error_text and isinstance(error_text, str):
+            # 간단한 규칙 기반 설명 추가 (실제 검증 로직에 맞게 확장 가능)
+            if "startTime" in error_text or "endTime" in error_text:
+                error_text += "\n[설명] startTime 또는 endTime 값이 허용된 범위에 맞지 않거나, 요청값과 다릅니다."
+            if "camID" in error_text and '""' in error_text:
+                error_text += "\n[설명] camID 값이 비어 있습니다. 실제 카메라 ID가 필요합니다."
+            if "타입" in error_text or "type" in error_text:
+                error_text += "\n[설명] 데이터 타입이 스키마와 일치하지 않습니다."
         error_msg = f"검증 결과: {result}\n\n{error_text}"
         self.error_browser.setPlainText(error_msg)
         error_layout.addWidget(self.error_browser)
@@ -660,6 +671,7 @@ class MyApp(QWidget):
         self.webhook_flag = False
         self.webhook_msg = "."
         self.webhook_cnt = 99
+        self.reference_context = {} # 맥락검증 참조 컨텍스트 
 
     def _redact(self, payload):  # ### NEW
         """응답/요청에서 토큰, 패스워드 등 민감값 마스킹(선택)"""
@@ -1010,9 +1022,9 @@ class MyApp(QWidget):
                 verify=False,
                 timeout=time_out
             )
-            print(f"[seo] 응답 상태 코드 : {self.res.status_code}")
-            print(f"[seo] 응답 헤더: {dict(self.res.headers)}")
-            print(f"[seo] 응답 본문: {repr(self.res.text)}")
+            # print(f"[seo] 응답 상태 코드 : {self.res.status_code}")
+            # print(f"[seo] 응답 헤더: {dict(self.res.headers)}")
+            # print(f"[seo] 응답 본문: {repr(self.res.text)}")
         except Exception as e:
             print(e)
 
@@ -1080,14 +1092,20 @@ class MyApp(QWidget):
         # 실제 검증
         if len(self.webhookSchema) > 0:
             schema_to_check = self.webhookSchema[0]
-            check = json_check_(schema_to_check, self.webhook_res, self.flag_opt)
-            struct = check["structure_result"]
-            val_result    = struct["result"]        # "PASS" | "FAIL"
-            val_text      = struct["error_msg"]     # 문자열
-            key_psss_cnt  = struct["correct_cnt"]   # int
-            key_error_cnt = struct["error_cnt"]     # int
-            # 의미 검증 결과도 필요하면 아래처럼 사용 가능
-            semantic = check.get("semantic_result")  # dict 또는 None
+            val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(
+                schema=schema_to_check,
+                data=self.webhook_res,
+                flag_opt=self.flag_opt,
+                reference_context=self.reference_context
+            )
+            # check = json_check_(schema_to_check, self.webhook_res, self.flag_opt)
+            # struct = check["structure_result"]
+            # val_result    = struct["result"]        # "PASS" | "FAIL"
+            # val_text      = struct["error_msg"]     # 문자열
+            # key_psss_cnt  = struct["correct_cnt"]   # int
+            # key_error_cnt = struct["error_cnt"]     # int
+            # # 의미 검증 결과도 필요하면 아래처럼 사용 가능
+            # semantic = check.get("semantic_result")  # dict 또는 None
             if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
                 print(f"[DEBUG] 웹훅 검증 결과: {val_result}, pass={key_psss_cnt}, error={key_error_cnt}")
         else:
@@ -1226,6 +1244,33 @@ class MyApp(QWidget):
                 json_data = json.dumps(inMessage).encode('utf-8')
 
                 self._push_event(self.cnt, "REQUEST", inMessage)
+
+                api_name = self.message[self.cnt] if self.cnt < len(self.message) else ""
+                if api_name and isinstance(inMessage, dict):
+                    self.reference_context[f"/{api_name}"] = inMessage
+                
+                try:
+                    req_rules = get_validation_rules(
+                        spec_id=self.current_spec_id,
+                        api_name=api_name,
+                        direction="out" #응답 검증
+                    )
+                    # print(f"디버깅: {req_rules.spec_id}, {req_rules.api_name}, {req_rules.direction}, {req_rules.rules}")
+                    if req_rules:
+                        try:
+                            _ = json_check_(
+                                schema={},
+                                data=inMessage,
+                                flag=self.flag_opt,
+                                validation_rules=req_rules,
+                                reference_context=self.reference_context
+                            )
+                        except TypeError as te:
+                            print(f"[ERROR] 요청 검증 중 TypeError 발생: {te}")
+                            pass
+                except Exception as e:
+                    print(f"[ERROR] 요청 검증 규칙 로드 실패: {e}")
+                    pass    # 규칙 없으면 그냥 통과
 
                 # 순서 확인용 로그
                 print(f"[SYSTEM] 플랫폼에 요청 전송: {(self.message[self.cnt] if self.cnt < len(self.message) else 'index out of range')} (시도 {self.current_retry + 1})")
@@ -1380,7 +1425,37 @@ class MyApp(QWidget):
                                     schema_keys = list(schema_to_use.keys())[:5]
                                     print(f"[DEBUG] 스키마 필드 (first 5): {schema_keys}")
                         
-                        val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.outSchema[self.cnt], res_data, self.flag_opt)
+                        # val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.outSchema[self.cnt], res_data, self.flag_opt)
+                        resp_rules = {}
+                        try:
+                            resp_rules = get_validation_rules(
+                                spec_id=self.current_spec_id,
+                                api_name=self.message[self.cnt] if self.cnt < len(self.message) else "",
+                                direction="in" #응답 검증
+                            ) or {}
+                        except Exception as e:
+                            resp_rules = {}
+                            print(f"[ERROR] 응답 검증 규칙 로드 실패: {e}")
+                        
+                        try:
+                            val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(
+                                self.outSchema[self.cnt],
+                                res_data,
+                                self.flag_opt,
+                                validation_rules=resp_rules,
+                                reference_context=self.reference_context
+                                )
+                        except TypeError as te:
+                            val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(
+                                self.outSchema[self.cnt],
+                                res_data,
+                                self.flag_opt
+                            )
+                        
+                        # 응답을 규칙 참조 컨텍스트에 저장
+                        api_name = self.message[self.cnt] if self.cnt < len(self.message) else ""
+                        if api_name and isinstance(res_data, dict):
+                            self.reference_context[f"/{api_name}"] = res_data
                         
                         if self.message[self.cnt] == "Authentication":
                             self.handle_authentication_response(res_data)
