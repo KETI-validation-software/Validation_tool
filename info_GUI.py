@@ -1479,4 +1479,3 @@ class InfoWidget(QWidget):
         except Exception as e:
             print(f"시험 분야 선택 처리 실패: {e}")
             QMessageBox.warning(self, "오류", f"시험 분야 데이터 로드 중 오류가 발생했습니다:\n{str(e)}")
-
