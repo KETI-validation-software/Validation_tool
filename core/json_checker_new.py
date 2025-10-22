@@ -628,7 +628,7 @@ def field_finder(schema):
 
     return all_field, fields_opt
 
-# 실제 데이터에서 필드 추출하기
+# 실제 데이터에서 필드 추출하기 - dict 타입에서 추출함
 def data_finder(schema_):
     dataframe_flag = True
     for schema_value in schema_.values():
