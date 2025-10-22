@@ -157,8 +157,9 @@ class CombinedDetailDialog(QDialog):
         
     def _format_schema(self, schema):
         """스키마 구조를 문자열로 변환"""
+        # {} 처럼 안이 비어있는 경우는 아래와 같이 표시함
         if not schema:
-            return "스키마 정보가 없습니다."
+            return "빈 스키마"
             
         def schema_to_string(schema_obj, indent=0):
             result = ""
@@ -169,7 +170,7 @@ class CombinedDetailDialog(QDialog):
                     if hasattr(key, 'expected_data'):  # OptionalKey인 경우
                         key_name = f"{key.expected_data} (선택사항)"
                     else:
-                        key_name = str(key)
+                        key_name = str(key) 
                         
                     if isinstance(value, dict):
                         result += f"{spaces}{key_name}: {{\n"
@@ -622,6 +623,34 @@ class ResultPageWidget(QWidget):
             self.parent.show_combined_result(row)
 
 class MyApp(QWidget):
+    def _get_latest_request_data(self, api_name, direction="REQUEST"):
+        """
+        Server.trace에서 해당 api_name, direction의 최신 데이터를 반환한다.
+        direction은 'REQUEST' 또는 'RESPONSE'가 될 수 있다.
+        """
+        try:
+            print(f"[DEBUG] _get_latest_request_data 호출: api_name={api_name}, direction={direction}")
+            
+            if not hasattr(self.Server, "trace") or self.Server.trace is None:
+                print(f"[DEBUG] Server.trace가 없음")
+                return {}
+            
+            events = list((getattr(self.Server, "trace", {}) or {}).get(api_name, []))
+            print(f"[DEBUG] {api_name}의 이벤트 개수: {len(events)}")
+            
+            for ev in reversed(events):
+                if ev.get("dir") == direction:
+                    data = ev.get("data", {})
+                    print(f"[DEBUG] {direction} 데이터 발견: {type(data)}")
+                    return data
+            
+            print(f"[DEBUG] {direction} 데이터 없음")
+            return {}
+        except Exception as e:
+            print(f"[DEBUG] _get_latest_request_data 에러: {e}")
+            import traceback
+            traceback.print_exc()
+            return {}
     # 시험 결과 표시 요청 시그널 (main.py와 연동)
     showResultRequested = pyqtSignal(object)  # parent widget을 인자로 전달
 
@@ -720,7 +749,7 @@ class MyApp(QWidget):
         print(f"[PLATFORM] 📁 모듈: spec (센서/바이오/영상 통합)")
         import spec.Schema_request as schema_request_module
         import spec.Data_response as data_response_module
-        
+        import spec.Constraints_response as constraints_response_module
         # ✅ 플랫폼은 요청 검증 + 응답 전송 (inSchema/outData 사용)
         print(f"[PLATFORM] 🔧 타입: 요청 검증 + 응답 전송")
         
@@ -729,6 +758,7 @@ class MyApp(QWidget):
         
         # ✅ Response 전송용 데이터 로드 (플랫폼이 시스템에게 보낼 응답) - outData
         self.videoOutMessage = getattr(data_response_module, spec_names[1], [])
+        self.videoOutConstraint = getattr(constraints_response_module, self.current_spec_id+"_OutConstraints", [])
         self.videoMessages = getattr(data_response_module, spec_names[2], [])
 
         # ✅ Webhook 관련 (영상보안 시스템만 사용)
@@ -885,20 +915,25 @@ class MyApp(QWidget):
     # 실시간 모니터링용 + 메인 검증 로직 (부하테스트 타이밍) - 09/25
     def update_view(self):
         try:
+            print("+++++++++++ update view 호출 +++++++++++")
+            print(f"[DEBUG] update_view 시작: cnt={self.cnt}, cnt_pre={self.cnt_pre}")
             time_interval = 0
             
             # cnt가 리스트 길이 이상이면 종료 처리
             if self.cnt >= len(self.Server.message):
+                print(f"[DEBUG] 모든 API 처리 완료, 타이머 정지")
                 self.tick_timer.stop()
                 return
             
             # ✅ 시스템과 동일: 첫 틱에서는 대기만 하고 리턴
             if self.time_pre == 0 or self.cnt != self.cnt_pre:
+                print(f"[DEBUG] 첫 틱 대기: time_pre={self.time_pre}, cnt={self.cnt}, cnt_pre={self.cnt_pre}")
                 self.time_pre = time.time()
                 self.cnt_pre = self.cnt
                 return  # 첫 틱에서는 대기만 하고 리턴
             else:
                 time_interval = time.time() - self.time_pre
+                print(f"[DEBUG] 시간 간격: {time_interval}초")
 
             if self.cnt == 1 and self.r2 == "B":
                 data = self.Server.outMessage[0]
@@ -923,14 +958,17 @@ class MyApp(QWidget):
                 print(f"[TIMING_DEBUG] 웹훅 모드 활성화 (API: {self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else 'N/A'})")
                 print(f"[TIMING_DEBUG] ✅ 웹훅 스레드의 join()이 동기화 처리 (수동 sleep 제거됨)")
 
-            # ✅ SPEC_CONFIG에서 timeout 가져오기
+            # SPEC_CONFIG에서 timeout
             current_timeout = (self.time_outs[self.cnt] / 1000) if self.cnt < len(self.time_outs) else 5.0
             
-            # ✅ timeout=0인 경우 즉시 처리 (대기 시간 없음)
+            # timeout이 0인 경우
             if current_timeout == 0 or time_interval < current_timeout:
                 # ✅ 시스템 요청 확인 (요청-응답 구조)
                 # Server 클래스의 request_counter(클래스 변수)를 확인하여 시스템이 요청을 보냈는지 체크
                 api_name = self.Server.message[self.cnt]
+                print(f"[DEBUG] API 처리 시작: {api_name}")
+                print(f"[DEBUG] cnt={self.cnt}, current_retry={self.current_retry}")
+                
                 request_received = False
                 expected_count = self.current_retry + 1  # 현재 회차에 맞는 요청 수
                 actual_count = 0  # 초기값
@@ -938,7 +976,7 @@ class MyApp(QWidget):
                 # Server 클래스 변수 request_counter 확인
                 if hasattr(self.Server, 'request_counter') and api_name in self.Server.request_counter:
                     actual_count = self.Server.request_counter[api_name]
-                    # print(f"[PLATFORM] API: {api_name}, 예상: {expected_count}, 실제: {actual_count}")  # 가독성 개선: 주석 처리
+                    print(f"[DEBUG] API: {api_name}, 예상: {expected_count}, 실제: {actual_count}")
                     if actual_count >= expected_count:
                         request_received = True
                 
@@ -997,12 +1035,12 @@ class MyApp(QWidget):
                 # 실시간 진행률 표시
                 if retry_attempt == 0:
                     self.valResult.append(message_name)
-                    # self.valResult.append(f"🔄 부하테스트 시작: 총 {current_retries}회 검증 예정")  # 가독성 개선: 주석 처리
+                    self.valResult.append(f"🔄 부하테스트 시작: 총 {current_retries}회 검증 예정")  # 가독성 개선: 주석 처리
 
                 # 순서 확인용 로그 - 가독성 개선: 주석 처리
-                # print(f"[PLATFORM] 시스템 요청 수신: {self.Server.message[self.cnt]} (시도 {retry_attempt + 1}/{current_retries})")
+                print(f"[PLATFORM] 시스템 요청 수신: {self.Server.message[self.cnt]} (시도 {retry_attempt + 1}/{current_retries})")
 
-                # self.valResult.append(f"📨 시스템 요청 수신, 검증 중... [{retry_attempt + 1}/{current_retries}]")  # 가독성 개선: 주석 처리
+                self.valResult.append(f"📨 시스템 요청 수신, 검증 중... [{retry_attempt + 1}/{current_retries}]")  # 가독성 개선: 주석 처리
 
                 # 테이블에 실시간 진행률 표시
                 self.update_table_row_with_retries(self.cnt, "진행중", 0, 0, "검증 진행중...", f"시도 {retry_attempt + 1}/{current_retries}", retry_attempt + 1)
@@ -1038,21 +1076,44 @@ class MyApp(QWidget):
                     
                     # ✅ 디버깅: 어떤 스키마로 검증하는지 확인
                     if retry_attempt == 0:  # 첫 시도에만 출력
-                        print(f"\n[DEBUG] ========== 스키마 검증 디버깅 ==========")
-                        print(f"[DEBUG] cnt={self.cnt}, API={self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else 'N/A'}")
-                        print(f"[DEBUG] current_protocol={current_protocol}")
-                        print(f"[DEBUG] videoInSchema 총 개수={len(self.videoInSchema)}")
-                        print(f"[DEBUG] 사용 스키마: videoInSchema[{self.cnt}]")
+                        # print(f"\n[DEBUG] ========== 스키마 검증 디버깅 ==========")
+                        # print(f"[DEBUG] cnt={self.cnt}, API={self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else 'N/A'}")
+                        # print(f"[DEBUG] current_protocol={current_protocol}")
+                        # print(f"[DEBUG] videoInSchema 총 개수={len(self.videoInSchema)}")
+                        # print(f"[DEBUG] 사용 스키마: videoInSchema[{self.cnt}]")
                         
                         # 스키마 필드 확인
                         if self.cnt < len(self.videoInSchema):
                             schema_to_use = self.videoInSchema[self.cnt]
                             if isinstance(schema_to_use, dict):
                                 schema_keys = list(schema_to_use.keys())[:5]
-                                print(f"[DEBUG] 스키마 필드 (first 5): {schema_keys}")
+                                # print(f"[DEBUG] 스키마 필드 (first 5): {schema_keys}")
                     
-                    val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.videoInSchema[self.cnt],
+                    try:
+                        print(f"[DEBUG] json_check_ 호출 시작")
+                        print(f"[DEBUG] videoInSchema[{self.cnt}] type: {type(self.videoInSchema[self.cnt])}")
+                        print(f"[DEBUG] current_data type: {type(current_data)}")
+                        print(f"[DEBUG] current_data 내용: {repr(current_data)}")
+                        
+                        val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.videoInSchema[self.cnt],
                                                                             current_data, self.flag_opt)
+                        
+                        print(f"[DEBUG] json_check_ 성공: result={val_result}, pass={key_psss_cnt}, error={key_error_cnt}")
+                    except TypeError as e:
+                        if "unhashable type" in str(e):
+                            import traceback
+                            # print("[DEBUG][unhashable] error in platformVal_all.py update_view")
+                            # print("videoInSchema:", self.videoInSchema[self.cnt])
+                            # print("current_data:", current_data)
+                            # print("videoInSchema type:", type(self.videoInSchema[self.cnt]))
+                            # print("current_data type:", type(current_data))
+                            traceback.print_exc()
+                        raise
+                    except Exception as e:
+                        print(f"[DEBUG] json_check_ 기타 에러: {e}")
+                        import traceback
+                        traceback.print_exc()
+                        raise
                     
                     if retry_attempt == 0:  # 첫 시도에만 출력
                         print(f"[DEBUG] 검증 결과: {val_result}, pass={key_psss_cnt}, error={key_error_cnt}")
@@ -1090,10 +1151,10 @@ class MyApp(QWidget):
                             accumulated['data_parts'].append(f"\n--- Webhook 응답 (시도 {retry_attempt + 1}회차) ---\n{tmp_webhook_response}")
                             
                             # ✅ 디버깅: 웹훅 응답 검증 스키마 확인
-                            if retry_attempt == 0:  # 첫 시도에만 출력
-                                print(f"\n[DEBUG] ========== 웹훅 응답 검증 디버깅 ==========")
-                                print(f"[DEBUG] cnt={self.cnt}, API={self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else 'N/A'}")
-                                print(f"[DEBUG] videoWebhookSchema 총 개수={len(self.videoWebhookSchema)}")
+                            # if retry_attempt == 0:  # 첫 시도에만 출력
+                            #     print(f"\n[DEBUG] ========== 웹훅 응답 검증 디버깅 ==========")
+                            #     print(f"[DEBUG] cnt={self.cnt}, API={self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else 'N/A'}")
+                            #     print(f"[DEBUG] videoWebhookSchema 총 개수={len(self.videoWebhookSchema)}")
                             
                             # ✅ 웹훅 응답 검증 (플랫폼은 시스템의 웹훅 응답을 받음 - spec_001의 웹훅 응답 스키마)
                             if len(self.videoWebhookSchema) > 0:
@@ -1129,13 +1190,10 @@ class MyApp(QWidget):
                     
                     # ✅ LongPolling 프로토콜인 경우 (순수 LongPolling만 처리)
                     elif current_protocol == "LongPolling":
-                        # ✅ 박사님 요청: LongPolling은 WebHook 검증하지 않음 (WebHook 기능 미완성)
-                        # LongPolling은 서버가 이벤트 발생 시 응답을 계속 보내주는 방식
+
                         if retry_attempt == 0:
                             print(f"[LongPolling] 실시간 데이터 수신 대기 중... (API: {api_name})")
-                        
-                        # LongPolling은 기본 검증만 수행 (위에서 이미 완료됨)
-                        # 추가 검증 없음
+
                         pass
                 
                 # ✅ 이번 회차 결과를 누적 데이터에 저장
@@ -1205,7 +1263,7 @@ class MyApp(QWidget):
                         print(f"[TIMING_DEBUG] ⚠️ 수동 지연(SLEEP): API 완료 후 2초 대기 추가 (API: {self.Server.message[self.cnt-1] if self.cnt > 0 else 'N/A'})")
                         print(f"[TIMING_DEBUG] ⚠️ WARNING: enable_retry_delay=True로 인한 인위적 대기입니다!")
                         print(f"[TIMING_DEBUG] 💡 제안: CONSTANTS.enable_retry_delay=False로 설정하여 이 sleep을 제거하세요.")
-                        self.time_pre = time.time() + 2.0
+                        self.time_pre = time.time()
                     else:
                         print(f"[TIMING_DEBUG] ✅ 수동 지연 비활성화: API 완료, 다음 시스템 요청 대기 (API: {self.Server.message[self.cnt-1] if self.cnt > 0 else 'N/A'})")
                         print(f"[TIMING_DEBUG] ✅ enable_retry_delay=False: 시스템 요청 도착 시 즉시 검증 시작합니다.")
@@ -1215,7 +1273,7 @@ class MyApp(QWidget):
                     if CONSTANTS.enable_retry_delay:
                         print(f"[TIMING_DEBUG] ⚠️ 수동 지연(SLEEP): 재시도 후 2초 대기 추가 (API: {self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else 'N/A'}, 시도: {self.current_retry}/{current_retries})")
                         print(f"[TIMING_DEBUG] ⚠️ WARNING: enable_retry_delay=True로 인한 인위적 대기입니다!")
-                        self.time_pre = time.time() + 2.0
+                        self.time_pre = time.time() 
                     else:
                         print(f"[TIMING_DEBUG] ✅ 수동 지연 비활성화: 재시도 완료, 다음 시스템 요청 대기 (API: {self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else 'N/A'})")
                         print(f"[TIMING_DEBUG] ✅ enable_retry_delay=False: 시스템 요청 도착 시 즉시 검증 시작합니다.")
@@ -1266,7 +1324,18 @@ class MyApp(QWidget):
                 current_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
                 self.update_table_row_with_retries(self.cnt, "FAIL", 0, add_err, "", "Message Missing!", current_retries)
                 
+                # 타임아웃 분기에서 반드시 current_retry 리셋
                 self.cnt += 1
+                self.current_retry = 0  # ✅ 다음 API는 0회차부터 시작
+                self.time_pre = time.time()  # ✅ 다음 스텝의 대기 타이머 재시작
+
+                # (선택) 타임아웃으로 스킵된 스텝의 request_counter도 정리
+                if hasattr(self.Server, 'request_counter'):
+                    try:
+                        del self.Server.request_counter[self.Server.message[self.cnt-1]]
+                    except Exception:
+                        pass
+                return  # 분기 종료 명확히
 
             if self.cnt == len(self.Server.message):
                 self.tick_timer.stop()
@@ -1289,6 +1358,13 @@ class MyApp(QWidget):
                 self.stop_btn.setDisabled(True)
 
         except Exception as err:
+            print(f"[ERROR] update_view에서 예외 발생: {err}")
+            print(f"[ERROR] 현재 상태 - cnt={self.cnt}, current_retry={self.current_retry}")
+            print(f"[ERROR] Server.message 길이: {len(self.Server.message) if hasattr(self.Server, 'message') else 'None'}")
+            import traceback
+            print(f"[ERROR] Traceback:")
+            traceback.print_exc()
+            
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Critical)
             msg.setText("Error Message: 오류 확인 후 검증 절차를 다시 시작해주세요")
@@ -1408,12 +1484,8 @@ class MyApp(QWidget):
         self.test_field_table.verticalHeader().setVisible(False)
         self.test_field_table.setMaximumHeight(200)
         
-        # ✅ Platform은 Request 검증 - Request 스키마 ID만 표시
-        request_spec_ids = [
-            "cmg90br3n002qihleffuljnth",  # 보안용센서 시스템 (Request)
-            "cmg7edeo50013124xiux3gbkb",  # 바이오 인식 기반 출입통제 시스템 (Request)
-            "cmg7bve25000114cevhn5o3vr",  # 영상보안 시스템 (Request)
-        ]
+        # platform spec_id -> spec_config 기반
+        request_spec_ids = list(CONSTANTS.SPEC_CONFIG.keys())
         
         if hasattr(CONSTANTS, 'SPEC_CONFIG') and CONSTANTS.SPEC_CONFIG:
             spec_items = [(sid, CONSTANTS.SPEC_CONFIG[sid]) for sid in request_spec_ids if sid in CONSTANTS.SPEC_CONFIG]
@@ -1492,6 +1564,7 @@ class MyApp(QWidget):
                     self.Server.cnt = 0
                     self.Server.message = self.videoMessages
                     self.Server.outMessage = self.videoOutMessage
+                    self.Server.outCon = self.videoOutConstraint
                     self.Server.inSchema = self.videoInSchema
                     self.Server.webhookSchema = self.videoWebhookSchema
                     self.Server.webhookData = self.videoWebhookData
@@ -2014,84 +2087,113 @@ class MyApp(QWidget):
                     pass
 
     def sbtn_push(self):
-        self._clean_trace_dir_once()
-        self.first_run = False
-        self.total_error_cnt = 0
-        self.total_pass_cnt = 0
-        self.cnt = 0
-        self.cnt_pre = 0
-        self.time_pre = 0
-        self.realtime_flag = False
-        self.tmp_msg_append_flag = False
-        # 평가 점수 디스플레이 초기화
-        self.update_score_display()
-        self.sbtn.setDisabled(True)
-        self.stop_btn.setEnabled(True)
-        # self.Server = api_server.Server# -> MyApp init()으로
-        json_to_data(self.radio_check_flag)
-        timeout = 5 
-        default_timeout = 5
-        if self.r2 == "B":
-            token_value = None if self.token is None else str(self.token).strip()
-            self.videoOutMessage[0]['accessToken'] = token_value
-        
-        # Server 설정 (디버그 메시지 추가)
-        # print(f"[DEBUG] sbtn_push: Setting Server.message (length={len(self.videoMessages)})")
-        self.Server.message = self.videoMessages
-        self.Server.outMessage = self.videoOutMessage
-        self.Server.inSchema = self.videoInSchema
-        self.Server.webhookData = self.videoWebhookData  # ✅ 웹훅 이벤트 데이터 (플랫폼 → 시스템)
-        self.Server.system = "video"
-        self.Server.timeout = timeout
-        #print(f"[DEBUG] sbtn_push: Server configured - message={self.Server.message[:3] if self.Server.message else 'None'}...")
-        #print(f"[DEBUG] sbtn_push: webhookData length={len(self.Server.webhookData) if self.Server.webhookData else 0}")  # ✅ 디버그 로그
-        
-        self.init_win()
-        self.valResult.clear()  # 초기화
-        self.final_report = ""  # 초기화
-        # 테이블 아이콘 초기화
-        for i in range(self.tableWidget.rowCount()):
-            icon_widget = QWidget()
-            icon_layout = QHBoxLayout()
-            icon_layout.setContentsMargins(0, 0, 0, 0)
-            icon_label = QLabel()
-            icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
-            icon_label.setAlignment(Qt.AlignCenter)
-            icon_layout.addWidget(icon_label)
-            icon_layout.setAlignment(Qt.AlignCenter)
-            icon_widget.setLayout(icon_layout)
-            self.tableWidget.setCellWidget(i, 1, icon_widget)
-        # CONSTANTS.py에서 URL 가져오기
-        self.pathUrl = CONSTANTS.url
-        if self.r2 == "B":
-            self.Server.auth_type = "B"
-            self._update_server_bearer_token(self.token)
-        elif self.r2 == "D":
-            self.Server.auth_type = "D"
-            self.Server.auth_Info[0] = self.digestInfo[0]
-            self.Server.auth_Info[1] = self.digestInfo[1]
-        elif self.r2 == "None":
-            self.Server.auth_type = "None"
-            self.Server.auth_Info[0] = None
-        # 기본값으로 LongPolling 사용
-        self.Server.transProtocolInput = "LongPolling"
-        self.valResult.append("Start Validation...\n")
-        
-        # (10/20) 수정
-        # 서버는 address_ip, port로 listen, 클라이언트는 constants.url로 접속
-        url = CONSTANTS.url.split(":")
-        address_port = int(url[-1])  # 포트만 사용
-        address_ip = "0.0.0.0"  # 내부 IP 주소, 외부에서도 접근 가능하게 설정
+        try:
+            print(f"[DEBUG] sbtn_push 시작")
+            print(f"[DEBUG] videoMessages 개수: {len(self.videoMessages)}")
+            print(f"[DEBUG] videoInSchema 개수: {len(self.videoInSchema)}")
+            print(f"[DEBUG] videoOutMessage 개수: {len(self.videoOutMessage)}")
+            
+            self._clean_trace_dir_once()
+            self.first_run = False
+            self.total_error_cnt = 0
+            self.total_pass_cnt = 0
+            self.cnt = 0
+            self.cnt_pre = 0
+            self.time_pre = 0
+            self.realtime_flag = False
+            self.tmp_msg_append_flag = False
+            # 평가 점수 디스플레이 초기화
+            self.update_score_display()
+            self.sbtn.setDisabled(True)
+            self.stop_btn.setEnabled(True)
+            # self.Server = api_server.Server# -> MyApp init()으로
+            json_to_data(self.radio_check_flag)
+            timeout = 5 
+            default_timeout = 5
+            if self.r2 == "B":
+                token_value = None if self.token is None else str(self.token).strip()
+                self.videoOutMessage[0]['accessToken'] = token_value
+            
+            # Server 설정 (디버그 메시지 추가)
+            print(f"[DEBUG] Server 설정 시작")
+            self.Server.message = self.videoMessages
+            self.Server.outMessage = self.videoOutMessage
+            self.Server.inSchema = self.videoInSchema
+            self.Server.webhookData = self.videoWebhookData  # ✅ 웹훅 이벤트 데이터 (플랫폼 → 시스템)
+            self.Server.system = "video"
+            self.Server.timeout = timeout
+            print(f"[DEBUG] Server 설정 완료")
+            #print(f"[DEBUG] sbtn_push: Server configured - message={self.Server.message[:3] if self.Server.message else 'None'}...")
+            #print(f"[DEBUG] sbtn_push: webhookData length={len(self.Server.webhookData) if self.Server.webhookData else 0}")  # ✅ 디버그 로그
+            
+            print(f"[DEBUG] init_win 호출")
+            self.init_win()
+            self.valResult.clear()  # 초기화
+            self.final_report = ""  # 초기화
+            print(f"[DEBUG] UI 초기화 완료")
+            
+            # 테이블 아이콘 초기화
+            print(f"[DEBUG] 테이블 아이콘 초기화 시작")
+            for i in range(self.tableWidget.rowCount()):
+                icon_widget = QWidget()
+                icon_layout = QHBoxLayout()
+                icon_layout.setContentsMargins(0, 0, 0, 0)
+                icon_label = QLabel()
+                icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
+                icon_label.setAlignment(Qt.AlignCenter)
+                icon_layout.addWidget(icon_label)
+                icon_layout.setAlignment(Qt.AlignCenter)
+                icon_widget.setLayout(icon_layout)
+                self.tableWidget.setCellWidget(i, 1, icon_widget)
+            
+            # CONSTANTS.py에서 URL 가져오기
+            print(f"[DEBUG] 인증 설정 시작")
+            self.pathUrl = CONSTANTS.url
+            if self.r2 == "B":
+                self.Server.auth_type = "B"
+                self._update_server_bearer_token(self.token)
+            elif self.r2 == "D":
+                self.Server.auth_type = "D"
+                self.Server.auth_Info[0] = self.digestInfo[0]
+                self.Server.auth_Info[1] = self.digestInfo[1]
+            elif self.r2 == "None":
+                self.Server.auth_type = "None"
+                self.Server.auth_Info[0] = None
+            
+            # 기본값으로 LongPolling 사용
+            self.Server.transProtocolInput = "LongPolling"
+            self.valResult.append("Start Validation...\n")
+            
+            # (10/20) 수정
+            # 서버는 address_ip, port로 listen, 클라이언트는 constants.url로 접속
+            print(f"[DEBUG] 서버 시작 준비")
+            url = CONSTANTS.url.split(":")
+            address_port = int(url[-1])  # 포트만 사용
+            address_ip = "127.0.0.1"  # 내부 IP 주소, 외부에서도 접근 가능하게 설정
 
-        #print(f"[DEBUG] 플랫폼 서버 시작: {address_ip}:{address_port}")
-        self.server_th = server_th(handler_class=self.Server, address=address_ip, port=address_port)
-        self.server_th.start()
-        # 서버 준비 완료까지 대기 (첫 실행 시)
-        if self.first_run:
-            self.valResult.append("🔄 플랫폼 서버 초기화 중...")
-            time.sleep(5)
-            self.valResult.append("✅ 플랫폼 서버 준비 완료")
-        self.tick_timer.start(1000)  # 시스템쪽과 동일한 1초 간격
+            print(f"[DEBUG] 플랫폼 서버 시작: {address_ip}:{address_port}")
+            self.server_th = server_th(handler_class=self.Server, address=address_ip, port=address_port)
+            self.server_th.start()
+            
+            # 서버 준비 완료까지 대기 (첫 실행 시)
+            if self.first_run:
+                self.valResult.append("🔄 플랫폼 서버 초기화 중...")
+                time.sleep(5)
+                self.valResult.append("✅ 플랫폼 서버 준비 완료")
+            
+            print(f"[DEBUG] 타이머 시작")
+            self.tick_timer.start(1000)  # 시스템쪽과 동일한 1초 간격
+            print(f"[DEBUG] sbtn_push 완료")
+            
+        except Exception as e:
+            print(f"[ERROR] sbtn_push에서 예외 발생: {e}")
+            import traceback
+            print(f"[ERROR] Traceback:")
+            traceback.print_exc()
+            
+            # 에러 발생 시 버튼 상태 복원
+            self.sbtn.setEnabled(True)
+            self.stop_btn.setDisabled(True)
 
     def stop_btn_clicked(self):
         self.tick_timer.stop()
@@ -2101,13 +2203,17 @@ class MyApp(QWidget):
 
     def init_win(self):
         self.cnt = 0
+        self.current_retry = 0
+        self.total_error_cnt = 0
+        self.total_pass_cnt = 0
+        self.message_error = []
+        self.api_accumulated_data = {}
         # 버퍼 초기화 - API 개수에 맞춰 동적으로 생성
         api_count = len(self.videoMessages) if self.videoMessages else 9
         self.step_buffers = [{"data": "", "result": "", "error": ""} for _ in range(api_count)]
-       #print(f"[DEBUG] init_win: step_buffers 초기화 완료 (크기={api_count})")
+        #print(f"[DEBUG] init_win: step_buffers 초기화 완료 (크기={api_count})")
         # JSON 파일 초기화 제거 - 더 이상 개별 JSON 파일을 사용하지 않음
         # (videoData_request.py와 videoData_response.py에서 데이터를 가져옴)
-        
         self.valResult.clear()
         # 메시지 초기화
         for i in range(1, 10):
@@ -2125,12 +2231,10 @@ class MyApp(QWidget):
             icon_widget.setLayout(icon_layout)
             self.tableWidget.setCellWidget(i, 1, icon_widget)
             # 카운트들도 초기화
-            self.tableWidget.setItem(i, 2, QTableWidgetItem("0"))
-            self.tableWidget.item(i, 2).setTextAlignment(Qt.AlignCenter)
-            self.tableWidget.setItem(i, 3, QTableWidgetItem("0"))
-            self.tableWidget.item(i, 3).setTextAlignment(Qt.AlignCenter)
-            self.tableWidget.setItem(i, 4, QTableWidgetItem("0"))
-            self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
+            for col, value in ((2, "0"), (3, "0"), (4, "0"), (5, "0"), (6, "0%")):
+                item = QTableWidgetItem(value)
+                item.setTextAlignment(Qt.AlignCenter)
+                self.tableWidget.setItem(i, col, item)
 
     def show_result_page(self):
         """시험 결과 페이지 표시"""
