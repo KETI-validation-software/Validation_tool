@@ -1,17 +1,17 @@
 === 시험 결과 ===
-통과 필드 수: 0
-전체 필드 수: 0
-종합 평가 점수: 0.0%
+통과 필드 수: 410
+전체 필드 수: 440
+종합 평가 점수: 93.2%
 
 === 스텝별 결과 ===
-1. Authentication | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-2. Capabilities | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-3. CameraProfiles | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-4. StoredVideoInfos | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-5. StreamURLs | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-6. ReplayURL | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-7. RealtimeVideoEventInfos | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-8. StoredVideoEventInfos | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
+1. Authentication | 결과: PASS | 검증 횟수: 10 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
+2. Capabilities | 결과: PASS | 검증 횟수: 10 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
+3. CameraProfiles | 결과: PASS | 검증 횟수: 10 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
+4. StoredVideoInfos | 결과: FAIL | 검증 횟수: 10 | 통과 필드 수: 60 | 전체 필드 수: 70 | 실패 필드 수: 10 | 평가 점수: 85.7%
+5. StreamURLs | 결과: PASS | 검증 횟수: 10 | 통과 필드 수: 120 | 전체 필드 수: 120 | 실패 필드 수: 0 | 평가 점수: 100.0%
+6. ReplayURL | 결과: FAIL | 검증 횟수: 10 | 통과 필드 수: 140 | 전체 필드 수: 150 | 실패 필드 수: 10 | 평가 점수: 93.3%
+7. RealtimeVideoEventInfos | 결과: FAIL | 검증 횟수: 10 | 통과 필드 수: 0 | 전체 필드 수: 10 | 실패 필드 수: 10 | 평가 점수: 0.0%
+8. StoredVideoEventInfos | 결과: PASS | 검증 횟수: 10 | 통과 필드 수: 90 | 전체 필드 수: 90 | 실패 필드 수: 0 | 평가 점수: 100.0%
 
 === 전체 로그 ===
 Start Validation...
@@ -31,4 +31,2080 @@ step 1: Authentication (시도 1/10)
 }
 
 검증 결과: PASS
-검증 절차가 중지되었습니다. (오류 위치: Step 1)
+Score : 0
+Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 1: Authentication (시도 2/10)
+
+검증 진행: 2/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "userName": "관리자",
+    "userAff": "오산시청",
+    "accessToken": "a"
+}
+
+검증 결과: PASS
+Score : 0
+Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 1: Authentication (시도 3/10)
+
+검증 진행: 3/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "userName": "관리자",
+    "userAff": "오산시청",
+    "accessToken": "a"
+}
+
+검증 결과: PASS
+Score : 0
+Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 1: Authentication (시도 4/10)
+
+검증 진행: 4/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "userName": "관리자",
+    "userAff": "오산시청",
+    "accessToken": "a"
+}
+
+검증 결과: PASS
+Score : 0
+Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 1: Authentication (시도 5/10)
+
+검증 진행: 5/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "userName": "관리자",
+    "userAff": "오산시청",
+    "accessToken": "a"
+}
+
+검증 결과: PASS
+Score : 0
+Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 1: Authentication (시도 6/10)
+
+검증 진행: 6/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "userName": "관리자",
+    "userAff": "오산시청",
+    "accessToken": "a"
+}
+
+검증 결과: PASS
+Score : 0
+Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 1: Authentication (시도 7/10)
+
+검증 진행: 7/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "userName": "관리자",
+    "userAff": "오산시청",
+    "accessToken": "a"
+}
+
+검증 결과: PASS
+Score : 0
+Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 1: Authentication (시도 8/10)
+
+검증 진행: 8/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "userName": "관리자",
+    "userAff": "오산시청",
+    "accessToken": "a"
+}
+
+검증 결과: PASS
+Score : 0
+Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 1: Authentication (시도 9/10)
+
+검증 진행: 9/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "userName": "관리자",
+    "userAff": "오산시청",
+    "accessToken": "a"
+}
+
+검증 결과: PASS
+Score : 0
+Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 1: Authentication (시도 10/10)
+
+검증 진행: 10/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "userName": "관리자",
+    "userAff": "오산시청",
+    "accessToken": "a"
+}
+
+검증 결과: PASS
+Score : 0
+Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 2: Capabilities (시도 1/10)
+
+검증 진행: 1/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "streamingSupport": [
+        {
+            "streamProtocolType": "RTSP",
+            "streamProtocolDesc": "Unicast"
+        }
+    ],
+    "transportSupport": [
+        {
+            "transProtocolType": "WebHook",
+            "transProtocolDesc": ""
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 0
+Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 2: Capabilities (시도 2/10)
+
+검증 진행: 2/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "streamingSupport": [
+        {
+            "streamProtocolType": "RTSP",
+            "streamProtocolDesc": "Unicast"
+        }
+    ],
+    "transportSupport": [
+        {
+            "transProtocolType": "WebHook",
+            "transProtocolDesc": ""
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 0
+Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 2: Capabilities (시도 3/10)
+
+검증 진행: 3/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "streamingSupport": [
+        {
+            "streamProtocolType": "RTSP",
+            "streamProtocolDesc": "Unicast"
+        }
+    ],
+    "transportSupport": [
+        {
+            "transProtocolType": "WebHook",
+            "transProtocolDesc": ""
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 0
+Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 2: Capabilities (시도 4/10)
+
+검증 진행: 4/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "streamingSupport": [
+        {
+            "streamProtocolType": "RTSP",
+            "streamProtocolDesc": "Unicast"
+        }
+    ],
+    "transportSupport": [
+        {
+            "transProtocolType": "WebHook",
+            "transProtocolDesc": ""
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 0
+Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 2: Capabilities (시도 5/10)
+
+검증 진행: 5/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "streamingSupport": [
+        {
+            "streamProtocolType": "RTSP",
+            "streamProtocolDesc": "Unicast"
+        }
+    ],
+    "transportSupport": [
+        {
+            "transProtocolType": "WebHook",
+            "transProtocolDesc": ""
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 0
+Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 2: Capabilities (시도 6/10)
+
+검증 진행: 6/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "streamingSupport": [
+        {
+            "streamProtocolType": "RTSP",
+            "streamProtocolDesc": "Unicast"
+        }
+    ],
+    "transportSupport": [
+        {
+            "transProtocolType": "WebHook",
+            "transProtocolDesc": ""
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 0
+Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 2: Capabilities (시도 7/10)
+
+검증 진행: 7/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "streamingSupport": [
+        {
+            "streamProtocolType": "RTSP",
+            "streamProtocolDesc": "Unicast"
+        }
+    ],
+    "transportSupport": [
+        {
+            "transProtocolType": "WebHook",
+            "transProtocolDesc": ""
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 0
+Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 2: Capabilities (시도 8/10)
+
+검증 진행: 8/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "streamingSupport": [
+        {
+            "streamProtocolType": "RTSP",
+            "streamProtocolDesc": "Unicast"
+        }
+    ],
+    "transportSupport": [
+        {
+            "transProtocolType": "WebHook",
+            "transProtocolDesc": ""
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 0
+Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 2: Capabilities (시도 9/10)
+
+검증 진행: 9/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "streamingSupport": [
+        {
+            "streamProtocolType": "RTSP",
+            "streamProtocolDesc": "Unicast"
+        }
+    ],
+    "transportSupport": [
+        {
+            "transProtocolType": "WebHook",
+            "transProtocolDesc": ""
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 0
+Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 2: Capabilities (시도 10/10)
+
+검증 진행: 10/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "streamingSupport": [
+        {
+            "streamProtocolType": "RTSP",
+            "streamProtocolDesc": "Unicast"
+        }
+    ],
+    "transportSupport": [
+        {
+            "transProtocolType": "WebHook",
+            "transProtocolDesc": ""
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 0
+Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 3: CameraProfiles (시도 1/10)
+
+검증 진행: 1/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "cam0001",
+            "camName": "카메라1",
+            "camLoc": {
+                "lon": "127.127730",
+                "lat": "38.439801",
+                "alt": "32.131",
+                "desc": "3층복도"
+            },
+            "camConfig": {
+                "camType": "PTZ"
+            }
+        },
+        {
+            "camID": "cam0002",
+            "camName": "카메라2",
+            "camLoc": {
+                "lon": "126",
+                "lat": "32",
+                "alt": "31",
+                "desc": "2층복도"
+            },
+            "camConfig": {
+                "camType": "PTZ"
+            }
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 0
+Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 3: CameraProfiles (시도 2/10)
+
+검증 진행: 2/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "cam0001",
+            "camName": "카메라1",
+            "camLoc": {
+                "lon": "127.127730",
+                "lat": "38.439801",
+                "alt": "32.131",
+                "desc": "3층복도"
+            },
+            "camConfig": {
+                "camType": "PTZ"
+            }
+        },
+        {
+            "camID": "cam0002",
+            "camName": "카메라2",
+            "camLoc": {
+                "lon": "126",
+                "lat": "32",
+                "alt": "31",
+                "desc": "2층복도"
+            },
+            "camConfig": {
+                "camType": "PTZ"
+            }
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 0
+Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 3: CameraProfiles (시도 3/10)
+
+검증 진행: 3/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "cam0001",
+            "camName": "카메라1",
+            "camLoc": {
+                "lon": "127.127730",
+                "lat": "38.439801",
+                "alt": "32.131",
+                "desc": "3층복도"
+            },
+            "camConfig": {
+                "camType": "PTZ"
+            }
+        },
+        {
+            "camID": "cam0002",
+            "camName": "카메라2",
+            "camLoc": {
+                "lon": "126",
+                "lat": "32",
+                "alt": "31",
+                "desc": "2층복도"
+            },
+            "camConfig": {
+                "camType": "PTZ"
+            }
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 0
+Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 3: CameraProfiles (시도 4/10)
+
+검증 진행: 4/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "cam0001",
+            "camName": "카메라1",
+            "camLoc": {
+                "lon": "127.127730",
+                "lat": "38.439801",
+                "alt": "32.131",
+                "desc": "3층복도"
+            },
+            "camConfig": {
+                "camType": "PTZ"
+            }
+        },
+        {
+            "camID": "cam0002",
+            "camName": "카메라2",
+            "camLoc": {
+                "lon": "126",
+                "lat": "32",
+                "alt": "31",
+                "desc": "2층복도"
+            },
+            "camConfig": {
+                "camType": "PTZ"
+            }
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 0
+Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 3: CameraProfiles (시도 5/10)
+
+검증 진행: 5/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "cam0001",
+            "camName": "카메라1",
+            "camLoc": {
+                "lon": "127.127730",
+                "lat": "38.439801",
+                "alt": "32.131",
+                "desc": "3층복도"
+            },
+            "camConfig": {
+                "camType": "PTZ"
+            }
+        },
+        {
+            "camID": "cam0002",
+            "camName": "카메라2",
+            "camLoc": {
+                "lon": "126",
+                "lat": "32",
+                "alt": "31",
+                "desc": "2층복도"
+            },
+            "camConfig": {
+                "camType": "PTZ"
+            }
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 0
+Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 3: CameraProfiles (시도 6/10)
+
+검증 진행: 6/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "cam0001",
+            "camName": "카메라1",
+            "camLoc": {
+                "lon": "127.127730",
+                "lat": "38.439801",
+                "alt": "32.131",
+                "desc": "3층복도"
+            },
+            "camConfig": {
+                "camType": "PTZ"
+            }
+        },
+        {
+            "camID": "cam0002",
+            "camName": "카메라2",
+            "camLoc": {
+                "lon": "126",
+                "lat": "32",
+                "alt": "31",
+                "desc": "2층복도"
+            },
+            "camConfig": {
+                "camType": "PTZ"
+            }
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 0
+Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 3: CameraProfiles (시도 7/10)
+
+검증 진행: 7/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "cam0001",
+            "camName": "카메라1",
+            "camLoc": {
+                "lon": "127.127730",
+                "lat": "38.439801",
+                "alt": "32.131",
+                "desc": "3층복도"
+            },
+            "camConfig": {
+                "camType": "PTZ"
+            }
+        },
+        {
+            "camID": "cam0002",
+            "camName": "카메라2",
+            "camLoc": {
+                "lon": "126",
+                "lat": "32",
+                "alt": "31",
+                "desc": "2층복도"
+            },
+            "camConfig": {
+                "camType": "PTZ"
+            }
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 0
+Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 3: CameraProfiles (시도 8/10)
+
+검증 진행: 8/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "cam0001",
+            "camName": "카메라1",
+            "camLoc": {
+                "lon": "127.127730",
+                "lat": "38.439801",
+                "alt": "32.131",
+                "desc": "3층복도"
+            },
+            "camConfig": {
+                "camType": "PTZ"
+            }
+        },
+        {
+            "camID": "cam0002",
+            "camName": "카메라2",
+            "camLoc": {
+                "lon": "126",
+                "lat": "32",
+                "alt": "31",
+                "desc": "2층복도"
+            },
+            "camConfig": {
+                "camType": "PTZ"
+            }
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 0
+Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 3: CameraProfiles (시도 9/10)
+
+검증 진행: 9/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "cam0001",
+            "camName": "카메라1",
+            "camLoc": {
+                "lon": "127.127730",
+                "lat": "38.439801",
+                "alt": "32.131",
+                "desc": "3층복도"
+            },
+            "camConfig": {
+                "camType": "PTZ"
+            }
+        },
+        {
+            "camID": "cam0002",
+            "camName": "카메라2",
+            "camLoc": {
+                "lon": "126",
+                "lat": "32",
+                "alt": "31",
+                "desc": "2층복도"
+            },
+            "camConfig": {
+                "camType": "PTZ"
+            }
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 0
+Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 3: CameraProfiles (시도 10/10)
+
+검증 진행: 10/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "cam0001",
+            "camName": "카메라1",
+            "camLoc": {
+                "lon": "127.127730",
+                "lat": "38.439801",
+                "alt": "32.131",
+                "desc": "3층복도"
+            },
+            "camConfig": {
+                "camType": "PTZ"
+            }
+        },
+        {
+            "camID": "cam0002",
+            "camName": "카메라2",
+            "camLoc": {
+                "lon": "126",
+                "lat": "32",
+                "alt": "31",
+                "desc": "2층복도"
+            },
+            "camConfig": {
+                "camType": "PTZ"
+            }
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 0
+Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 4: StoredVideoInfos (시도 1/10)
+
+검증 진행: 1/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "",
+            "timeList": [
+                {
+                    "startTime": 0,
+                    "endTime": 0
+                }
+            ]
+        }
+    ]
+}
+
+검증 결과: FAIL
+Score : 85.71428571428571
+Score details : 6(누적 통과 필드 수), 1(누적 오류 필드 수)
+
+step 4: StoredVideoInfos (시도 2/10)
+
+검증 진행: 2/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "",
+            "timeList": [
+                {
+                    "startTime": 0,
+                    "endTime": 0
+                }
+            ]
+        }
+    ]
+}
+
+검증 결과: FAIL
+Score : 85.71428571428571
+Score details : 12(누적 통과 필드 수), 2(누적 오류 필드 수)
+
+step 4: StoredVideoInfos (시도 3/10)
+
+검증 진행: 3/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "",
+            "timeList": [
+                {
+                    "startTime": 0,
+                    "endTime": 0
+                }
+            ]
+        }
+    ]
+}
+
+검증 결과: FAIL
+Score : 85.71428571428571
+Score details : 18(누적 통과 필드 수), 3(누적 오류 필드 수)
+
+step 4: StoredVideoInfos (시도 4/10)
+
+검증 진행: 4/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "",
+            "timeList": [
+                {
+                    "startTime": 0,
+                    "endTime": 0
+                }
+            ]
+        }
+    ]
+}
+
+검증 결과: FAIL
+Score : 85.71428571428571
+Score details : 24(누적 통과 필드 수), 4(누적 오류 필드 수)
+
+step 4: StoredVideoInfos (시도 5/10)
+
+검증 진행: 5/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "",
+            "timeList": [
+                {
+                    "startTime": 0,
+                    "endTime": 0
+                }
+            ]
+        }
+    ]
+}
+
+검증 결과: FAIL
+Score : 85.71428571428571
+Score details : 30(누적 통과 필드 수), 5(누적 오류 필드 수)
+
+step 4: StoredVideoInfos (시도 6/10)
+
+검증 진행: 6/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "",
+            "timeList": [
+                {
+                    "startTime": 0,
+                    "endTime": 0
+                }
+            ]
+        }
+    ]
+}
+
+검증 결과: FAIL
+Score : 85.71428571428571
+Score details : 36(누적 통과 필드 수), 6(누적 오류 필드 수)
+
+step 4: StoredVideoInfos (시도 7/10)
+
+검증 진행: 7/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "",
+            "timeList": [
+                {
+                    "startTime": 0,
+                    "endTime": 0
+                }
+            ]
+        }
+    ]
+}
+
+검증 결과: FAIL
+Score : 85.71428571428571
+Score details : 42(누적 통과 필드 수), 7(누적 오류 필드 수)
+
+step 4: StoredVideoInfos (시도 8/10)
+
+검증 진행: 8/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "",
+            "timeList": [
+                {
+                    "startTime": 0,
+                    "endTime": 0
+                }
+            ]
+        }
+    ]
+}
+
+검증 결과: FAIL
+Score : 85.71428571428571
+Score details : 48(누적 통과 필드 수), 8(누적 오류 필드 수)
+
+step 4: StoredVideoInfos (시도 9/10)
+
+검증 진행: 9/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "",
+            "timeList": [
+                {
+                    "startTime": 0,
+                    "endTime": 0
+                }
+            ]
+        }
+    ]
+}
+
+검증 결과: FAIL
+Score : 85.71428571428571
+Score details : 54(누적 통과 필드 수), 9(누적 오류 필드 수)
+
+step 4: StoredVideoInfos (시도 10/10)
+
+검증 진행: 10/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "",
+            "timeList": [
+                {
+                    "startTime": 0,
+                    "endTime": 0
+                }
+            ]
+        }
+    ]
+}
+
+검증 결과: FAIL
+Score : 85.71428571428571
+Score details : 60(누적 통과 필드 수), 10(누적 오류 필드 수)
+
+step 5: StreamURLs (시도 1/10)
+
+검증 진행: 1/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "",
+            "accessID": "conn0001",
+            "accessPW": "1234",
+            "camURL": "rtsp://192.168.0.5:8000",
+            "videoInfo": {
+                "resolution": "1920x1080",
+                "fps": "30",
+                "videoCodec": "H.264",
+                "audioCodec": "G.711"
+            }
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 87.8048780487805
+Score details : 72(누적 통과 필드 수), 10(누적 오류 필드 수)
+
+step 5: StreamURLs (시도 2/10)
+
+검증 진행: 2/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "",
+            "accessID": "conn0001",
+            "accessPW": "1234",
+            "camURL": "rtsp://192.168.0.5:8000",
+            "videoInfo": {
+                "resolution": "1920x1080",
+                "fps": "30",
+                "videoCodec": "H.264",
+                "audioCodec": "G.711"
+            }
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 89.36170212765957
+Score details : 84(누적 통과 필드 수), 10(누적 오류 필드 수)
+
+step 5: StreamURLs (시도 3/10)
+
+검증 진행: 3/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "",
+            "accessID": "conn0001",
+            "accessPW": "1234",
+            "camURL": "rtsp://192.168.0.5:8000",
+            "videoInfo": {
+                "resolution": "1920x1080",
+                "fps": "30",
+                "videoCodec": "H.264",
+                "audioCodec": "G.711"
+            }
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 90.56603773584906
+Score details : 96(누적 통과 필드 수), 10(누적 오류 필드 수)
+
+step 5: StreamURLs (시도 4/10)
+
+검증 진행: 4/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "",
+            "accessID": "conn0001",
+            "accessPW": "1234",
+            "camURL": "rtsp://192.168.0.5:8000",
+            "videoInfo": {
+                "resolution": "1920x1080",
+                "fps": "30",
+                "videoCodec": "H.264",
+                "audioCodec": "G.711"
+            }
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 91.52542372881356
+Score details : 108(누적 통과 필드 수), 10(누적 오류 필드 수)
+
+step 5: StreamURLs (시도 5/10)
+
+검증 진행: 5/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "",
+            "accessID": "conn0001",
+            "accessPW": "1234",
+            "camURL": "rtsp://192.168.0.5:8000",
+            "videoInfo": {
+                "resolution": "1920x1080",
+                "fps": "30",
+                "videoCodec": "H.264",
+                "audioCodec": "G.711"
+            }
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 92.3076923076923
+Score details : 120(누적 통과 필드 수), 10(누적 오류 필드 수)
+
+step 5: StreamURLs (시도 6/10)
+
+검증 진행: 6/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "",
+            "accessID": "conn0001",
+            "accessPW": "1234",
+            "camURL": "rtsp://192.168.0.5:8000",
+            "videoInfo": {
+                "resolution": "1920x1080",
+                "fps": "30",
+                "videoCodec": "H.264",
+                "audioCodec": "G.711"
+            }
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 92.95774647887323
+Score details : 132(누적 통과 필드 수), 10(누적 오류 필드 수)
+
+step 5: StreamURLs (시도 7/10)
+
+검증 진행: 7/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "",
+            "accessID": "conn0001",
+            "accessPW": "1234",
+            "camURL": "rtsp://192.168.0.5:8000",
+            "videoInfo": {
+                "resolution": "1920x1080",
+                "fps": "30",
+                "videoCodec": "H.264",
+                "audioCodec": "G.711"
+            }
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 93.5064935064935
+Score details : 144(누적 통과 필드 수), 10(누적 오류 필드 수)
+
+step 5: StreamURLs (시도 8/10)
+
+검증 진행: 8/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "",
+            "accessID": "conn0001",
+            "accessPW": "1234",
+            "camURL": "rtsp://192.168.0.5:8000",
+            "videoInfo": {
+                "resolution": "1920x1080",
+                "fps": "30",
+                "videoCodec": "H.264",
+                "audioCodec": "G.711"
+            }
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 93.97590361445783
+Score details : 156(누적 통과 필드 수), 10(누적 오류 필드 수)
+
+step 5: StreamURLs (시도 9/10)
+
+검증 진행: 9/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "",
+            "accessID": "conn0001",
+            "accessPW": "1234",
+            "camURL": "rtsp://192.168.0.5:8000",
+            "videoInfo": {
+                "resolution": "1920x1080",
+                "fps": "30",
+                "videoCodec": "H.264",
+                "audioCodec": "G.711"
+            }
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 94.3820224719101
+Score details : 168(누적 통과 필드 수), 10(누적 오류 필드 수)
+
+step 5: StreamURLs (시도 10/10)
+
+검증 진행: 10/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "",
+            "accessID": "conn0001",
+            "accessPW": "1234",
+            "camURL": "rtsp://192.168.0.5:8000",
+            "videoInfo": {
+                "resolution": "1920x1080",
+                "fps": "30",
+                "videoCodec": "H.264",
+                "audioCodec": "G.711"
+            }
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 94.73684210526315
+Score details : 180(누적 통과 필드 수), 10(누적 오류 필드 수)
+
+step 6: ReplayURL (시도 1/10)
+
+검증 진행: 1/10회
+프로토콜: basic
+
+{
+    "code": "성공",
+    "message": "200",
+    "camList": [
+        {
+            "camID": "",
+            "accessID": "cam0001",
+            "accessPW": "conn0001",
+            "startTime": "",
+            "endTime": "",
+            "camURL": "rtsp://192.168.0.5:8000",
+            "videoInfo": {
+                "resolution": "1920x1080",
+                "fps": "30",
+                "videoCodec": "H.264",
+                "audioCodec": "G.711"
+            }
+        }
+    ]
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 94.6341463414634
+Score details : 194(누적 통과 필드 수), 11(누적 오류 필드 수)
+
+step 6: ReplayURL (시도 2/10)
+
+검증 진행: 2/10회
+프로토콜: basic
+
+{
+    "code": "성공",
+    "message": "200",
+    "camList": [
+        {
+            "camID": "",
+            "accessID": "cam0001",
+            "accessPW": "conn0001",
+            "startTime": "",
+            "endTime": "",
+            "camURL": "rtsp://192.168.0.5:8000",
+            "videoInfo": {
+                "resolution": "1920x1080",
+                "fps": "30",
+                "videoCodec": "H.264",
+                "audioCodec": "G.711"
+            }
+        }
+    ]
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 94.54545454545455
+Score details : 208(누적 통과 필드 수), 12(누적 오류 필드 수)
+
+step 6: ReplayURL (시도 3/10)
+
+검증 진행: 3/10회
+프로토콜: basic
+
+{
+    "code": "성공",
+    "message": "200",
+    "camList": [
+        {
+            "camID": "",
+            "accessID": "cam0001",
+            "accessPW": "conn0001",
+            "startTime": "",
+            "endTime": "",
+            "camURL": "rtsp://192.168.0.5:8000",
+            "videoInfo": {
+                "resolution": "1920x1080",
+                "fps": "30",
+                "videoCodec": "H.264",
+                "audioCodec": "G.711"
+            }
+        }
+    ]
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 94.46808510638299
+Score details : 222(누적 통과 필드 수), 13(누적 오류 필드 수)
+
+step 6: ReplayURL (시도 4/10)
+
+검증 진행: 4/10회
+프로토콜: basic
+
+{
+    "code": "성공",
+    "message": "200",
+    "camList": [
+        {
+            "camID": "",
+            "accessID": "cam0001",
+            "accessPW": "conn0001",
+            "startTime": "",
+            "endTime": "",
+            "camURL": "rtsp://192.168.0.5:8000",
+            "videoInfo": {
+                "resolution": "1920x1080",
+                "fps": "30",
+                "videoCodec": "H.264",
+                "audioCodec": "G.711"
+            }
+        }
+    ]
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 94.39999999999999
+Score details : 236(누적 통과 필드 수), 14(누적 오류 필드 수)
+
+step 6: ReplayURL (시도 5/10)
+
+검증 진행: 5/10회
+프로토콜: basic
+
+{
+    "code": "성공",
+    "message": "200",
+    "camList": [
+        {
+            "camID": "",
+            "accessID": "cam0001",
+            "accessPW": "conn0001",
+            "startTime": "",
+            "endTime": "",
+            "camURL": "rtsp://192.168.0.5:8000",
+            "videoInfo": {
+                "resolution": "1920x1080",
+                "fps": "30",
+                "videoCodec": "H.264",
+                "audioCodec": "G.711"
+            }
+        }
+    ]
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 94.33962264150944
+Score details : 250(누적 통과 필드 수), 15(누적 오류 필드 수)
+
+step 6: ReplayURL (시도 6/10)
+
+검증 진행: 6/10회
+프로토콜: basic
+
+{
+    "code": "성공",
+    "message": "200",
+    "camList": [
+        {
+            "camID": "",
+            "accessID": "cam0001",
+            "accessPW": "conn0001",
+            "startTime": "",
+            "endTime": "",
+            "camURL": "rtsp://192.168.0.5:8000",
+            "videoInfo": {
+                "resolution": "1920x1080",
+                "fps": "30",
+                "videoCodec": "H.264",
+                "audioCodec": "G.711"
+            }
+        }
+    ]
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 94.28571428571428
+Score details : 264(누적 통과 필드 수), 16(누적 오류 필드 수)
+
+step 6: ReplayURL (시도 7/10)
+
+검증 진행: 7/10회
+프로토콜: basic
+
+{
+    "code": "성공",
+    "message": "200",
+    "camList": [
+        {
+            "camID": "",
+            "accessID": "cam0001",
+            "accessPW": "conn0001",
+            "startTime": "",
+            "endTime": "",
+            "camURL": "rtsp://192.168.0.5:8000",
+            "videoInfo": {
+                "resolution": "1920x1080",
+                "fps": "30",
+                "videoCodec": "H.264",
+                "audioCodec": "G.711"
+            }
+        }
+    ]
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 94.23728813559322
+Score details : 278(누적 통과 필드 수), 17(누적 오류 필드 수)
+
+step 6: ReplayURL (시도 8/10)
+
+검증 진행: 8/10회
+프로토콜: basic
+
+{
+    "code": "성공",
+    "message": "200",
+    "camList": [
+        {
+            "camID": "",
+            "accessID": "cam0001",
+            "accessPW": "conn0001",
+            "startTime": "",
+            "endTime": "",
+            "camURL": "rtsp://192.168.0.5:8000",
+            "videoInfo": {
+                "resolution": "1920x1080",
+                "fps": "30",
+                "videoCodec": "H.264",
+                "audioCodec": "G.711"
+            }
+        }
+    ]
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 94.19354838709677
+Score details : 292(누적 통과 필드 수), 18(누적 오류 필드 수)
+
+step 6: ReplayURL (시도 9/10)
+
+검증 진행: 9/10회
+프로토콜: basic
+
+{
+    "code": "성공",
+    "message": "200",
+    "camList": [
+        {
+            "camID": "",
+            "accessID": "cam0001",
+            "accessPW": "conn0001",
+            "startTime": "",
+            "endTime": "",
+            "camURL": "rtsp://192.168.0.5:8000",
+            "videoInfo": {
+                "resolution": "1920x1080",
+                "fps": "30",
+                "videoCodec": "H.264",
+                "audioCodec": "G.711"
+            }
+        }
+    ]
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 94.15384615384616
+Score details : 306(누적 통과 필드 수), 19(누적 오류 필드 수)
+
+step 6: ReplayURL (시도 10/10)
+
+검증 진행: 10/10회
+프로토콜: basic
+
+{
+    "code": "성공",
+    "message": "200",
+    "camList": [
+        {
+            "camID": "",
+            "accessID": "cam0001",
+            "accessPW": "conn0001",
+            "startTime": "",
+            "endTime": "",
+            "camURL": "rtsp://192.168.0.5:8000",
+            "videoInfo": {
+                "resolution": "1920x1080",
+                "fps": "30",
+                "videoCodec": "H.264",
+                "audioCodec": "G.711"
+            }
+        }
+    ]
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 94.11764705882352
+Score details : 320(누적 통과 필드 수), 20(누적 오류 필드 수)
+
+step 7: RealtimeVideoEventInfos (시도 1/10)
+
+=== 웹훅 구독 요청 응답 ===
+[시도 1/10]
+프로토콜: WebHook
+
+{
+    "code": "400",
+    "message": "잘못된 요청"
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 93.841642228739
+Score details : 320(누적 통과 필드 수), 21(누적 오류 필드 수)
+
+step 7: RealtimeVideoEventInfos (시도 2/10)
+
+=== 웹훅 구독 요청 응답 ===
+[시도 2/10]
+프로토콜: WebHook
+
+{
+    "code": "400",
+    "message": "잘못된 요청"
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 93.56725146198829
+Score details : 320(누적 통과 필드 수), 22(누적 오류 필드 수)
+
+step 7: RealtimeVideoEventInfos (시도 3/10)
+
+=== 웹훅 구독 요청 응답 ===
+[시도 3/10]
+프로토콜: WebHook
+
+{
+    "code": "400",
+    "message": "잘못된 요청"
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 93.29446064139941
+Score details : 320(누적 통과 필드 수), 23(누적 오류 필드 수)
+
+step 7: RealtimeVideoEventInfos (시도 4/10)
+
+=== 웹훅 구독 요청 응답 ===
+[시도 4/10]
+프로토콜: WebHook
+
+{
+    "code": "400",
+    "message": "잘못된 요청"
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 93.02325581395348
+Score details : 320(누적 통과 필드 수), 24(누적 오류 필드 수)
+
+step 7: RealtimeVideoEventInfos (시도 5/10)
+
+=== 웹훅 구독 요청 응답 ===
+[시도 5/10]
+프로토콜: WebHook
+
+{
+    "code": "400",
+    "message": "잘못된 요청"
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 92.7536231884058
+Score details : 320(누적 통과 필드 수), 25(누적 오류 필드 수)
+
+step 7: RealtimeVideoEventInfos (시도 6/10)
+
+=== 웹훅 구독 요청 응답 ===
+[시도 6/10]
+프로토콜: WebHook
+
+{
+    "code": "400",
+    "message": "잘못된 요청"
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 92.48554913294798
+Score details : 320(누적 통과 필드 수), 26(누적 오류 필드 수)
+
+step 7: RealtimeVideoEventInfos (시도 7/10)
+
+=== 웹훅 구독 요청 응답 ===
+[시도 7/10]
+프로토콜: WebHook
+
+{
+    "code": "400",
+    "message": "잘못된 요청"
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 92.21902017291066
+Score details : 320(누적 통과 필드 수), 27(누적 오류 필드 수)
+
+step 7: RealtimeVideoEventInfos (시도 8/10)
+
+=== 웹훅 구독 요청 응답 ===
+[시도 8/10]
+프로토콜: WebHook
+
+{
+    "code": "400",
+    "message": "잘못된 요청"
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 91.95402298850574
+Score details : 320(누적 통과 필드 수), 28(누적 오류 필드 수)
+
+step 7: RealtimeVideoEventInfos (시도 9/10)
+
+=== 웹훅 구독 요청 응답 ===
+[시도 9/10]
+프로토콜: WebHook
+
+{
+    "code": "400",
+    "message": "잘못된 요청"
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 91.69054441260745
+Score details : 320(누적 통과 필드 수), 29(누적 오류 필드 수)
+
+step 7: RealtimeVideoEventInfos (시도 10/10)
+
+=== 웹훅 구독 요청 응답 ===
+[시도 10/10]
+프로토콜: WebHook
+
+{
+    "code": "400",
+    "message": "잘못된 요청"
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 91.42857142857143
+Score details : 320(누적 통과 필드 수), 30(누적 오류 필드 수)
+
+step 8: StoredVideoEventInfos (시도 1/10)
+
+검증 진행: 1/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "",
+            "eventUUID": "event01",
+            "eventName": "",
+            "startTime": "",
+            "endTime": "",
+            "eventDesc": "aaabbbAAA"
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 91.64345403899722
+Score details : 329(누적 통과 필드 수), 30(누적 오류 필드 수)
+
+step 8: StoredVideoEventInfos (시도 2/10)
+
+검증 진행: 2/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "",
+            "eventUUID": "event01",
+            "eventName": "",
+            "startTime": "",
+            "endTime": "",
+            "eventDesc": "aaabbbAAA"
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 91.84782608695652
+Score details : 338(누적 통과 필드 수), 30(누적 오류 필드 수)
+
+step 8: StoredVideoEventInfos (시도 3/10)
+
+검증 진행: 3/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "",
+            "eventUUID": "event01",
+            "eventName": "",
+            "startTime": "",
+            "endTime": "",
+            "eventDesc": "aaabbbAAA"
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 92.04244031830238
+Score details : 347(누적 통과 필드 수), 30(누적 오류 필드 수)
+
+step 8: StoredVideoEventInfos (시도 4/10)
+
+검증 진행: 4/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "",
+            "eventUUID": "event01",
+            "eventName": "",
+            "startTime": "",
+            "endTime": "",
+            "eventDesc": "aaabbbAAA"
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 92.2279792746114
+Score details : 356(누적 통과 필드 수), 30(누적 오류 필드 수)
+
+step 8: StoredVideoEventInfos (시도 5/10)
+
+검증 진행: 5/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "",
+            "eventUUID": "event01",
+            "eventName": "",
+            "startTime": "",
+            "endTime": "",
+            "eventDesc": "aaabbbAAA"
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 92.40506329113924
+Score details : 365(누적 통과 필드 수), 30(누적 오류 필드 수)
+
+step 8: StoredVideoEventInfos (시도 6/10)
+
+검증 진행: 6/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "",
+            "eventUUID": "event01",
+            "eventName": "",
+            "startTime": "",
+            "endTime": "",
+            "eventDesc": "aaabbbAAA"
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 92.57425742574257
+Score details : 374(누적 통과 필드 수), 30(누적 오류 필드 수)
+
+step 8: StoredVideoEventInfos (시도 7/10)
+
+검증 진행: 7/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "",
+            "eventUUID": "event01",
+            "eventName": "",
+            "startTime": "",
+            "endTime": "",
+            "eventDesc": "aaabbbAAA"
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 92.7360774818402
+Score details : 383(누적 통과 필드 수), 30(누적 오류 필드 수)
+
+step 8: StoredVideoEventInfos (시도 8/10)
+
+검증 진행: 8/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "",
+            "eventUUID": "event01",
+            "eventName": "",
+            "startTime": "",
+            "endTime": "",
+            "eventDesc": "aaabbbAAA"
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 92.89099526066352
+Score details : 392(누적 통과 필드 수), 30(누적 오류 필드 수)
+
+step 8: StoredVideoEventInfos (시도 9/10)
+
+검증 진행: 9/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "",
+            "eventUUID": "event01",
+            "eventName": "",
+            "startTime": "",
+            "endTime": "",
+            "eventDesc": "aaabbbAAA"
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 93.03944315545245
+Score details : 401(누적 통과 필드 수), 30(누적 오류 필드 수)
+
+step 8: StoredVideoEventInfos (시도 10/10)
+
+검증 진행: 10/10회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "camList": [
+        {
+            "camID": "",
+            "eventUUID": "event01",
+            "eventName": "",
+            "startTime": "",
+            "endTime": "",
+            "eventDesc": "aaabbbAAA"
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 93.18181818181817
+Score details : 410(누적 통과 필드 수), 30(누적 오류 필드 수)
+
+검증 절차가 완료되었습니다.
