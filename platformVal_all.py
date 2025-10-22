@@ -12,7 +12,7 @@ import sys
 import ssl
 from datetime import datetime
 
-from core.functions import json_check_, save_result, resource_path, field_finder, json_to_data, set_auth, timeout_field_finder
+# from core.functions import json_check_, save_result, resource_path, field_finder, json_to_data, set_auth, timeout_field_finder
 
 import config.CONSTANTS as CONSTANTS
 
@@ -24,6 +24,7 @@ import json
 import traceback
 import warnings
 import importlib
+from core.validation_registry import get_validation_rules
 warnings.filterwarnings('ignore')
 
 
@@ -716,6 +717,8 @@ class MyApp(QWidget):
 
         with open(resource_path("spec/rows.json"), "w") as out_file:
             json.dump(None, out_file, ensure_ascii=False)
+        
+        self.reference_context = {} # 맥락 검증 참조 컨텍스트
 
     def load_specs_from_constants(self):
         """
@@ -923,6 +926,11 @@ class MyApp(QWidget):
             if self.cnt >= len(self.Server.message):
                 print(f"[DEBUG] 모든 API 처리 완료, 타이머 정지")
                 self.tick_timer.stop()
+                # ====== 구조검증 시작 ======
+                print("~~~~~~~~~~~~ 구조검증 시작 ~~~~~~~~~~~~ json_check_ 시작")
+                schema_obj = self.videoInSchema[self.cnt] if self.cnt < len(self.videoInSchema) else None
+                print(f"[json_check] field_finder 완료: all_field={len(schema_obj) if isinstance(schema_obj, dict) else 'N/A'}, opt_field=N/A")
+                print(f"[json_check] data_finder 완료: all_data={len(current_data) if isinstance(current_data, dict) else 'N/A'}")
                 return
             
             # ✅ 시스템과 동일: 첫 틱에서는 대기만 하고 리턴
@@ -955,8 +963,10 @@ class MyApp(QWidget):
 
             # 웹훅 모드 - 웹훅 스레드의 join()이 동기화를 담당하므로 별도 sleep 불필요
             if self.realtime_flag is True:
-                print(f"[TIMING_DEBUG] 웹훅 모드 활성화 (API: {self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else 'N/A'})")
-                print(f"[TIMING_DEBUG] ✅ 웹훅 스레드의 join()이 동기화 처리 (수동 sleep 제거됨)")
+                        print(f"[json_check] do_checker 호출: 스키마={schema_obj}, 데이터={current_data}")
+                # print(f"[TIMING_DEBUG] 웹훅 모드 활성화 (API: {self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else 'N/A'})")
+                # print(f"[TIMING_DEBUG] ✅ 웹훅 스레드의 join()이 동기화 처리 (수동 sleep 제거됨)")
+                # print(f"[json_check] do_checker 완료: result={val_result}, correct={key_psss_cnt}, error={key_error_cnt}")
 
             # SPEC_CONFIG에서 timeout
             current_timeout = (self.time_outs[self.cnt] / 1000) if self.cnt < len(self.time_outs) else 5.0
@@ -968,6 +978,26 @@ class MyApp(QWidget):
                 api_name = self.Server.message[self.cnt]
                 print(f"[DEBUG] API 처리 시작: {api_name}")
                 print(f"[DEBUG] cnt={self.cnt}, current_retry={self.current_retry}")
+
+                current_validation = {}
+                # ====== 구조 PASS → 의미 검증 시작 ======
+                print("++++++++++ 구조 PASS → 의미 검증 시작 ++++++++++")
+                if current_validation:
+                    print(f"[semantic] 규칙(validation_rules) 있음 → 의미 검증 수행")
+                else:
+                    print(f"[semantic] 규칙(validation_rules) 없음 → 의미 검증 건너뜀")
+                try:
+                    from core.validation_registry import get_validation_rules
+                    current_validation = get_validation_rules(
+                        spec_id=self.current_spec_id,
+                        api_name=api_name,
+                        direction="in", # 요청 검증
+                    ) or {}
+                    if current_validation:
+                        print(f"[DEBUG] 현재 API의 검증 규칙 로드 완료: {list(current_validation.keys())}")
+                except Exception as e:
+                    current_validation = {}
+                    print(f"[DEBUG] 현재 API의 검증 규칙 로드 실패: {e}")
                 
                 request_received = False
                 expected_count = self.current_retry + 1  # 현재 회차에 맞는 요청 수
@@ -1050,6 +1080,9 @@ class MyApp(QWidget):
                 # 현재 데이터 사용 (이미 읽음)
                 current_data = self._get_latest_request_data(api_name, "REQUEST") or {}
 
+                if api_name and isinstance(current_data, dict):
+                    self.reference_context[f"/{api_name}"] = current_data
+
                 if self.Server.message[self.cnt] in CONSTANTS.none_request_message:
                     # 매 시도마다 데이터 수집
                     tmp_res_auth = json.dumps(current_data, indent=4, ensure_ascii=False)
@@ -1093,22 +1126,33 @@ class MyApp(QWidget):
                         print(f"[DEBUG] json_check_ 호출 시작")
                         print(f"[DEBUG] videoInSchema[{self.cnt}] type: {type(self.videoInSchema[self.cnt])}")
                         print(f"[DEBUG] current_data type: {type(current_data)}")
-                        print(f"[DEBUG] current_data 내용: {repr(current_data)}")
+                        print(f"[DEBUG] current_data 내용: {repr(current_data)[:5]}")
                         
-                        val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.videoInSchema[self.cnt],
-                                                                            current_data, self.flag_opt)
+                        val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(
+                            self.videoInSchema[self.cnt],
+                            current_data, 
+                            self.flag_opt,
+                            validation_rules=current_validation,
+                            reference_context=self.reference_context
+                            )
                         
                         print(f"[DEBUG] json_check_ 성공: result={val_result}, pass={key_psss_cnt}, error={key_error_cnt}")
                     except TypeError as e:
-                        if "unhashable type" in str(e):
-                            import traceback
-                            # print("[DEBUG][unhashable] error in platformVal_all.py update_view")
-                            # print("videoInSchema:", self.videoInSchema[self.cnt])
-                            # print("current_data:", current_data)
-                            # print("videoInSchema type:", type(self.videoInSchema[self.cnt]))
-                            # print("current_data type:", type(current_data))
-                            traceback.print_exc()
-                        raise
+                        print(f"[DEBUG] TypeError 발생, 맥락 검증 제외 하고 다시 시도: {e}")
+                        val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(
+                            self.videoInSchema[self.cnt],
+                            current_data,
+                            self.flag_opt
+                            )
+                        # if "unhashable type" in str(e):
+                        #     import traceback
+                        #     # print("[DEBUG][unhashable] error in platformVal_all.py update_view")
+                        #     # print("videoInSchema:", self.videoInSchema[self.cnt])
+                        #     # print("current_data:", current_data)
+                        #     # print("videoInSchema type:", type(self.videoInSchema[self.cnt]))
+                        #     # print("current_data type:", type(current_data))
+                        #     traceback.print_exc()
+                        # raise
                     except Exception as e:
                         print(f"[DEBUG] json_check_ 기타 에러: {e}")
                         import traceback
@@ -1201,6 +1245,11 @@ class MyApp(QWidget):
                 accumulated['error_messages'].extend(combined_error_parts)
                 accumulated['total_pass'] += add_pass
                 accumulated['total_error'] += add_err
+
+                api_name = self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else ""
+                if api_name and isinstance(current_data, dict):
+                    self.reference_context[f"/{api_name}"] = current_data
+                    print(f"[PLATFORM] 📚 맥락 업데이트: /{api_name}")
 
                 # ✅ current_retry 증가
                 self.current_retry += 1
