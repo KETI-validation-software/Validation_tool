@@ -1,6 +1,6 @@
 import requests
 from json_checker import Checker, OptionalKey   # 커스텀 라이브러리 아니고, venv에 깔려있는 공식 라이브러리 (착각x)
-from core.json_checker_new import data_finder, field_finder, do_checker, timeout_field_finder
+from core.json_checker_new import data_finder, field_finder, do_checker, timeout_field_finder, do_semantic_checker, extract_validation_rules
 from fpdf import FPDF
 import sys
 import os
@@ -25,29 +25,93 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 # pass/fail 판별 -> 여기에 연동 맥락 ㄱㅓㅁ증 추가하기
-def json_check_(schema, data, flag):
+def json_check_(schema, data, flag, validation_rules=None, reference_context=None):
+    """
+    schema: 구조 검증용 응답 스키마
+    data:   실제 응답 데이터(dict 권장)
+    flag:   옵션(기존 그대로)
+    validation_rules: (선택) 의미 검증 규칙 dict
+        - 예: validation_request.py 의 각 *_in_validation 중 해당 API 것
+        - 없으면 의미 검증을 건너뜀
+    reference_context: (선택) 다른 엔드포인트 응답 사전
+        - 예: {"/CameraProfiles": <CameraProfiles 응답 dict>, ...}
+    반환: (result, error_msg, correct_cnt, error_cnt)
+        - result: 구조&의미 최종 결과 ("PASS"/"FAIL")
+        - error_msg: 구조/의미 에러 메시지 합본 (없으면 "오류 없음")
+        - correct_cnt: 구조 통과 필드 + 의미 통과 필드
+        - error_cnt:   구조 실패 필드 + 의미 실패 필드
+    """
     try:
-        print(f"~~~~~~~~~~~~ json_check_ ~~~~~~~~~~~~ 시작")
-        # print(f"[json_check] schema type: {type(schema)}")
-        # print(f"[json_check] data type: {type(data)}")
-        # print(f"[json_check] flag: {flag}")
+        print("~~~~~~~~~~~~ 구조검증 시작 ~~~~~~~~~~~~ json_check_ 시작")
 
+        # 1) 구조 검증 준비
         all_field, opt_field = field_finder(schema)
-        print(f"[json_check] field_finder 완료: all_field 개수={len(all_field)}, opt_field 개수={len(opt_field)}")
+        print(f"[json_check] field_finder 완료: all_field={len(all_field)}, opt_field={len(opt_field)}")
 
         all_data = data_finder(data)
-        print(f"[json_check] data_finder 완료: all_data 개수={len(all_data)}")
+        print(f"[json_check] data_finder 완료: all_data={len(all_data)}")
 
-        # 구조 검증만 수행 (기존 호환성 유지)
-        result, error_msg, correct_cnt, error_cnt = do_checker(all_field, all_data, opt_field, flag)
-        print(f"[json_check] do_checker 완료: result={result}, correct_cnt={correct_cnt}, error_cnt={error_cnt}")
+        # 2) 구조 검증 수행
+        struct_result, struct_error_msg, struct_correct_cnt, struct_error_cnt = do_checker(
+            all_field, all_data, opt_field, flag
+        )
+        print(f"[json_check] do_checker 완료: result={struct_result}, "
+              f"correct={struct_correct_cnt}, error={struct_error_cnt}")
 
-        return result, error_msg, correct_cnt, error_cnt
+        # 구조 FAIL이면 즉시 반환
+        if struct_result != "PASS":
+            return struct_result, (struct_error_msg or "구조 검증 실패"), struct_correct_cnt, struct_error_cnt
+
+        # 3) (선택) 의미 검증 수행
+        sem_result = "PASS"
+        sem_error_msg = ""
+        sem_correct_cnt = 0
+        sem_error_cnt = 0
+
+        if validation_rules:
+            print("++++++++++ 구조 PASS → 의미 검증 시작 ++++++++++")
+            # from core.json_checker_new import do_semantic_checker, extract_validation_rules
+
+            # validation_rules는 이미 “점 포함 키” 기반 dict일 수도 있고(예: {"camList.camID": {...}})
+            # 중첩 dict에서 평탄화가 필요하면 extract_validation_rules 사용
+            if any("." in k for k in validation_rules.keys()):
+                rules_dict = validation_rules  # 이미 평탄화된 형태
+            else:
+                rules_dict = extract_validation_rules(validation_rules)
+
+            sem_result, sem_error_msg, sem_correct_cnt, sem_error_cnt = do_semantic_checker(
+                rules_dict, data, reference_context=reference_context
+            )
+            print(f"[semantic] 완료: result={sem_result}, correct={sem_correct_cnt}, error={sem_error_cnt}")
+        else:
+            print("[semantic] 규칙(validation_rules) 없음 → 의미 검증 건너뜀")
+
+        # 4) 결과 합산/결정
+        final_result = "PASS" if (struct_result == "PASS" and sem_result == "PASS") else "FAIL"
+
+        # 메시지 병합(가독성)
+        merged_msg_parts = []
+        if struct_error_msg:
+            merged_msg_parts.append(f"[구조] {struct_error_msg}")
+        if validation_rules:
+            if sem_error_msg and sem_result != "PASS":
+                merged_msg_parts.append(f"[의미] {sem_error_msg}")
+            elif not sem_error_msg:
+                merged_msg_parts.append("[의미] 오류 없음")
+        error_msg = "\n".join(merged_msg_parts) if merged_msg_parts else "오류 없음"
+
+        # 카운트 합산
+        correct_cnt = (struct_correct_cnt or 0) + (sem_correct_cnt or 0)
+        error_cnt   = (struct_error_cnt or 0)   + (sem_error_cnt or 0)
+
+        return final_result, error_msg, correct_cnt, error_cnt
+
     except Exception as e:
         print(f"[json_check] 에러: {e}")
         import traceback
         traceback.print_exc()
         raise
+
 
 
 class BearerAuth(requests.auth.AuthBase):
