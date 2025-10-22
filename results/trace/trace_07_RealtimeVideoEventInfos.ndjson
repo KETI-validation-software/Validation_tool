@@ -1,20 +1,20 @@
-{"time": "2025-10-21T08:36:59.232867Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "", "eventUUID": "", "eventName": "", "startTime": 0, "endTime": 0, "eventDesc": ""}]}}
-{"time": "2025-10-21T08:37:00.246195Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}
-{"time": "2025-10-21T08:37:01.243492Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "", "eventUUID": "", "eventName": "", "startTime": 0, "endTime": 0, "eventDesc": ""}]}}
-{"time": "2025-10-21T08:37:02.230852Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}
-{"time": "2025-10-21T08:37:03.232175Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "", "eventUUID": "", "eventName": "", "startTime": 0, "endTime": 0, "eventDesc": ""}]}}
-{"time": "2025-10-21T08:37:04.232500Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}
-{"time": "2025-10-21T08:37:05.232925Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "", "eventUUID": "", "eventName": "", "startTime": 0, "endTime": 0, "eventDesc": ""}]}}
-{"time": "2025-10-21T08:37:06.236304Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}
-{"time": "2025-10-21T08:37:07.237601Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "", "eventUUID": "", "eventName": "", "startTime": 0, "endTime": 0, "eventDesc": ""}]}}
-{"time": "2025-10-21T08:37:08.231002Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}
-{"time": "2025-10-21T08:37:09.238318Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "", "eventUUID": "", "eventName": "", "startTime": 0, "endTime": 0, "eventDesc": ""}]}}
-{"time": "2025-10-21T08:37:10.230886Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}
-{"time": "2025-10-21T08:37:11.239163Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "", "eventUUID": "", "eventName": "", "startTime": 0, "endTime": 0, "eventDesc": ""}]}}
-{"time": "2025-10-21T08:37:12.234526Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}
-{"time": "2025-10-21T08:37:13.237868Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "", "eventUUID": "", "eventName": "", "startTime": 0, "endTime": 0, "eventDesc": ""}]}}
-{"time": "2025-10-21T08:37:14.245176Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}
-{"time": "2025-10-21T08:37:15.243511Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "", "eventUUID": "", "eventName": "", "startTime": 0, "endTime": 0, "eventDesc": ""}]}}
-{"time": "2025-10-21T08:37:16.238818Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}
-{"time": "2025-10-21T08:37:17.238177Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "", "eventUUID": "", "eventName": "", "startTime": 0, "endTime": 0, "eventDesc": ""}]}}
-{"time": "2025-10-21T08:37:18.239530Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}
+{"time": "2025-10-22T03:01:01.140562Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "", "eventUUID": "", "eventName": "", "startTime": 0, "endTime": 0, "eventDesc": ""}]}}
+{"time": "2025-10-22T03:01:02.133889Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}
+{"time": "2025-10-22T03:01:03.132205Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "", "eventUUID": "", "eventName": "", "startTime": 0, "endTime": 0, "eventDesc": ""}]}}
+{"time": "2025-10-22T03:01:04.131761Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}
+{"time": "2025-10-22T03:01:05.141029Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "", "eventUUID": "", "eventName": "", "startTime": 0, "endTime": 0, "eventDesc": ""}]}}
+{"time": "2025-10-22T03:01:06.135350Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}
+{"time": "2025-10-22T03:01:07.130787Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "", "eventUUID": "", "eventName": "", "startTime": 0, "endTime": 0, "eventDesc": ""}]}}
+{"time": "2025-10-22T03:01:08.133182Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}
+{"time": "2025-10-22T03:01:09.127511Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "", "eventUUID": "", "eventName": "", "startTime": 0, "endTime": 0, "eventDesc": ""}]}}
+{"time": "2025-10-22T03:01:10.136976Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}
+{"time": "2025-10-22T03:01:11.137290Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "", "eventUUID": "", "eventName": "", "startTime": 0, "endTime": 0, "eventDesc": ""}]}}
+{"time": "2025-10-22T03:01:12.130685Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}
+{"time": "2025-10-22T03:01:13.127010Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "", "eventUUID": "", "eventName": "", "startTime": 0, "endTime": 0, "eventDesc": ""}]}}
+{"time": "2025-10-22T03:01:14.127315Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}
+{"time": "2025-10-22T03:01:15.139607Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "", "eventUUID": "", "eventName": "", "startTime": 0, "endTime": 0, "eventDesc": ""}]}}
+{"time": "2025-10-22T03:01:16.133937Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}
+{"time": "2025-10-22T03:01:17.130262Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "", "eventUUID": "", "eventName": "", "startTime": 0, "endTime": 0, "eventDesc": ""}]}}
+{"time": "2025-10-22T03:01:18.127579Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}
+{"time": "2025-10-22T03:01:19.134870Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "", "eventUUID": "", "eventName": "", "startTime": 0, "endTime": 0, "eventDesc": ""}]}}
+{"time": "2025-10-22T03:01:20.133184Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}

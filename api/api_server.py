@@ -67,6 +67,7 @@ class Server(BaseHTTPRequestHandler):
         except Exception:
             pass
 
+    # 적용된 제약조건 반환 (현재는 더미 구현)
     def _applied_constraints(self, api_name, json_data):
         return "seo"
 
@@ -220,11 +221,10 @@ class Server(BaseHTTPRequestHandler):
 
         try:
             self._push_event(self.path[1:], "REQUEST", dict_data)
-            data = self._applied_constraints(self.path[1:], data)
+            # data = self._applied_constraints(self.path[1:], data) -> seo 메시지로 반환됨(응답)
         except Exception:
             pass
-
-        # ✅ 플랫폼에 시스템 요청 도착 신호 보내기 (JSON 파일 대신)
+        
         # 클래스 변수 request_counter 사용하여 API별 요청 횟수 추적
         try:
             api_name = self.path[1:]  # 예: "Authentication", "storedVideoInfos"
