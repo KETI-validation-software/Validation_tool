@@ -28,9 +28,9 @@ def resource_path(relative_path):
 def json_check_(schema, data, flag):
     try:
         print(f"~~~~~~~~~~~~ json_check_ ~~~~~~~~~~~~ 시작")
-        print(f"[json_check] schema type: {type(schema)}")
-        print(f"[json_check] data type: {type(data)}")
-        print(f"[json_check] flag: {flag}")
+        # print(f"[json_check] schema type: {type(schema)}")
+        # print(f"[json_check] data type: {type(data)}")
+        # print(f"[json_check] flag: {flag}")
 
         all_field, opt_field = field_finder(schema)
         print(f"[json_check] field_finder 완료: all_field 개수={len(all_field)}, opt_field 개수={len(opt_field)}")

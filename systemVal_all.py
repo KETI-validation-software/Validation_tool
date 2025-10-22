@@ -1010,6 +1010,9 @@ class MyApp(QWidget):
                 verify=False,
                 timeout=time_out
             )
+            print(f"[seo] 응답 상태 코드 : {self.res.status_code}")
+            print(f"[seo] 응답 헤더: {dict(self.res.headers)}")
+            print(f"[seo] 응답 본문: {repr(self.res.text)}")
         except Exception as e:
             print(e)
 
@@ -1031,7 +1034,7 @@ class MyApp(QWidget):
                     parsed = urlparse(str(path_tmp))
                     url = parsed.hostname if parsed.hostname is not None else "127.0.0.1"
                     port = parsed.port if parsed.port is not None else 80
-                    #seo 나중에 확인 필요 - 우선은 빈 객체로 대체
+
                     msg = {}
                     self.webhook_flag = True
                     self.webhook_cnt = self.cnt
@@ -1110,8 +1113,12 @@ class MyApp(QWidget):
         # 평가 점수 디스플레이 업데이트
         self.update_score_display()
 
-        self.valResult.append(
-            "Score : " + str((self.total_pass_cnt / (self.total_pass_cnt + self.total_error_cnt) * 100)))
+        total_fields = self.total_pass_cnt + self.total_error_cnt
+        if total_fields > 0:
+            score = (self.total_pass_cnt / total_fields) * 100
+        else:
+            score = 0
+        self.valResult.append("Score : " + str(score))
         self.valResult.append("Score details : " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(
             self.total_error_cnt) + "(누적 오류 필드 수)\n")
 
@@ -1256,8 +1263,12 @@ class MyApp(QWidget):
                 # 평가 점수 디스플레이 업데이트
                 self.update_score_display()
 
-                self.valResult.append("Score : " + str(
-                    (self.total_pass_cnt / (self.total_pass_cnt + self.total_error_cnt) * 100)))
+                total_fields = self.total_pass_cnt + self.total_error_cnt
+                if total_fields > 0:
+                    score = (self.total_pass_cnt / total_fields) * 100
+                else:
+                    score = 0
+                self.valResult.append("Score : " + str(score))
                 self.valResult.append("Score details : " + str(self.total_pass_cnt) + "(누적 검증 통과 필드 수), " + str(
                     self.total_error_cnt) + "(누적 검증 오류 필드 수)\n")
 
@@ -1298,8 +1309,12 @@ class MyApp(QWidget):
                     self.tick_timer.stop()
                     self.valResult.append("검증 절차가 완료되었습니다.")
                     self.cnt = 0
-                    self.final_report += "전체 점수: " + str(
-                        (self.total_pass_cnt / (self.total_pass_cnt + self.total_error_cnt) * 100)) + "\n"
+                    total_fields = self.total_pass_cnt + self.total_error_cnt
+                    if total_fields > 0:
+                        score = (self.total_pass_cnt / total_fields) * 100
+                    else:
+                        score = 0
+                    self.final_report += "전체 점수: " + str(score) + "\n"
                     self.final_report += "전체 결과: " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(
                         self.total_error_cnt) + "(누적 오류 필드 수)" + "\n"
                     self.final_report += "\n"
@@ -1312,8 +1327,6 @@ class MyApp(QWidget):
 
             # 응답이 도착한 경우 처리
             elif self.post_flag == True:
-                    #  if self.cnt == 0 and
-                    #    self.tmp_msg_append_flag = True
                     if self.res != None:
                         # 응답 처리 시작
                         self.processing_response = True
@@ -1323,6 +1336,8 @@ class MyApp(QWidget):
 
                         res_data = self.res.text
                         #res_data = json.loads(res_data)
+
+                        print(f"~+~+~+~+ 원본 응답 텍스트: {repr(res_data)}~+~+~+~+")
 
                         try:
                             res_data = json.loads(res_data)
@@ -1498,8 +1513,12 @@ class MyApp(QWidget):
                         # 평가 점수 디스플레이 업데이트
                         self.update_score_display()
 
-                        self.valResult.append("Score : " + str(
-                            (self.total_pass_cnt / (self.total_pass_cnt + self.total_error_cnt) * 100)))
+                        total_fields = self.total_pass_cnt + self.total_error_cnt
+                        if total_fields > 0:
+                            score = (self.total_pass_cnt / total_fields) * 100
+                        else:
+                            score = 0
+                        self.valResult.append("Score : " + str(score))
                         self.valResult.append(
                             "Score details : " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(
                                 self.total_error_cnt) + "(누적 오류 필드 수)\n")
@@ -1524,9 +1543,9 @@ class MyApp(QWidget):
                         # 재시도 여부에 따라 대기 시간 조정 (플랫폼과 동기화)
                         if (self.cnt < len(self.num_retries_list) and
                             self.current_retry < self.num_retries_list[self.cnt] - 1):
-                            self.time_pre = time.time() + 2.0  # 재시도 예정 시 2초 대기 (플랫폼과 동일)
+                            self.time_pre = time.time()
                         else:
-                            self.time_pre = time.time() + 2.0  # 마지막 시도 후 2초 대기
+                            self.time_pre = time.time()
                         self.message_in_cnt = 0
 
                         if self.webhook_flag and self.webhook_res is not None:

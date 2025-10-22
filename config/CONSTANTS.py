@@ -6,13 +6,13 @@ none_request_message = ['Capabilities',
                         'DoorProfiles',
                         'AccessUserInfos',
                         'SensorDeviceProfiles']
-# 로컬 테스트용 주소 (플랫폼과 시스템이 같은 PC에서 실행되더야 함, 변경하면 평가 작동 안됌ㅜ)
-#test-info -> (주의) auth_info의 id, pw admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음!!!!!!!
-company_name = "통합플랫폼기업"
-product_name = "통합플랫폼테스트"
+# 로컬 테스트용 주소 
+#test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
+company_name = "물리보안시스템테스트"
+product_name = "물리보안시스템"
 version = "v1.0"
 test_category = "MAIN_TEST"
-test_target = "통합플랫폼"
+test_target = "물리보안"
 test_range = "ALL_FIELDS"
 auth_type = "Bearer Token"
 auth_info = "a"
@@ -21,7 +21,7 @@ url = "https://127.0.0.1:8080"
 
 
 
-specs = [["cmgvieyak001b6cd04cgaawmm_inSchema","cmgvieyak001b6cd04cgaawmm_outData","cmgvieyak001b6cd04cgaawmm_messages",""]]
+specs = [["cmgyv3rzl014nvsveidu5jpzp_outSchema","cmgyv3rzl014nvsveidu5jpzp_inData","cmgyv3rzl014nvsveidu5jpzp_messages",""]]
 
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황 
@@ -53,10 +53,9 @@ enable_retry_delay = False  # False 권장: 불필요한 sleep 제거
 # 플랫폼(cmg90, cmg7e, cmg7b)
 # 시스템(cmgat, cmgas, cmga0)
 SPEC_CONFIG = {
-
-    "cmgvieyak001b6cd04cgaawmm": {
+    "cmgyv3rzl014nvsveidu5jpzp": {
     "test_name": "영상보안시스템_new",
-    "specs": ['cmgvieyak001b6cd04cgaawmm_inSchema', 'cmgvieyak001b6cd04cgaawmm_outData', 'cmgvieyak001b6cd04cgaawmm_messages', 'cmgvieyak001b6cd04cgaawmm_webhook_outSchema', 'cmgvieyak001b6cd04cgaawmm_webhook_inData'],
+    "specs": ['cmgyv3rzl014nvsveidu5jpzp_outSchema', 'cmgyv3rzl014nvsveidu5jpzp_inData', 'cmgyv3rzl014nvsveidu5jpzp_messages', 'cmgyv3rzl014nvsveidu5jpzp_webhook_inSchema', 'cmgyv3rzl014nvsveidu5jpzp_webhook_outData'],
     "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'WebHook', 'basic'],
     "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
     "num_retries": [10, 10, 10, 10, 10, 10, 10, 10]

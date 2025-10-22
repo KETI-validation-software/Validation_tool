@@ -11,17 +11,17 @@ cmgvieyak001b6cd04cgaawmm_Authentication_out_data = {
 
 # Capabilities
 cmgvieyak001b6cd04cgaawmm_Capabilities_out_data = {
-    "code": "",
-    "message": "",
+    "code": "200",
+    "message": "성공",
     "streamingSupport": [
         {
-        "streamProtocolType": "",
-        "streamProtocolDesc": ""
+        "streamProtocolType": "RTSP",
+        "streamProtocolDesc": "Unicast"
     }
 ],
     "transportSupport": [
         {
-        "transProtocolType": "",
+        "transProtocolType": "WebHook",
         "transProtocolDesc": ""
     }
 ]
@@ -29,33 +29,33 @@ cmgvieyak001b6cd04cgaawmm_Capabilities_out_data = {
 
 # CameraProfiles
 cmgvieyak001b6cd04cgaawmm_CameraProfiles_out_data = {
-    "code": "",
-    "message": "",
+    "code": "200",
+    "message": "성공",
     "camList": [
         {
-        "camID": "",
-        "camName": "",
+        "camID": "cam0001",
+        "camName": "카메라1",
         "camLoc": {
-        "lon": "",
-        "lat": "",
-        "alt": "",
-        "desc": ""
+        "lon": "127.127730",
+        "lat": "38.439801",
+        "alt": "32.131",
+        "desc": "3층복도"
     },
         "camConfig": {
-        "camType": ""
+        "camType": "PTZ"
     }
     },
         {
-        "camID": "",
-        "camName": "",
+        "camID": "cam0002",
+        "camName": "카메라2",
         "camLoc": {
-        "lon": "",
-        "lat": "",
-        "alt": "",
-        "desc": ""
+        "lon": "126",
+        "lat": "32",
+        "alt": "31",
+        "desc": "2층복도"
     },
         "camConfig": {
-        "camType": ""
+        "camType": "PTZ"
     }
     }
 ]
@@ -63,8 +63,8 @@ cmgvieyak001b6cd04cgaawmm_CameraProfiles_out_data = {
 
 # StoredVideoInfos
 cmgvieyak001b6cd04cgaawmm_StoredVideoInfos_out_data = {
-    "code": "",
-    "message": "",
+    "code": "200",
+    "message": "성공",
     "camList": [
         {
         "camID": "",
@@ -80,19 +80,19 @@ cmgvieyak001b6cd04cgaawmm_StoredVideoInfos_out_data = {
 
 # StreamURLs
 cmgvieyak001b6cd04cgaawmm_StreamURLs_out_data = {
-    "code": "",
-    "message": "",
+    "code": "200",
+    "message": "성공",
     "camList": [
         {
         "camID": "",
-        "accessID": "",
-        "accessPW": "",
-        "camURL": "",
+        "accessID": "conn0001",
+        "accessPW": "1234",
+        "camURL": "rtsp://192.168.0.5:8000",
         "videoInfo": {
-        "resolution": "",
-        "fps": "",
-        "videoCodec": "",
-        "audioCodec": ""
+        "resolution": "1920x1080",
+        "fps": "30",
+        "videoCodec": "H.264",
+        "audioCodec": "G.711"
     }
     }
 ]
@@ -100,21 +100,21 @@ cmgvieyak001b6cd04cgaawmm_StreamURLs_out_data = {
 
 # ReplayURL
 cmgvieyak001b6cd04cgaawmm_ReplayURL_out_data = {
-    "code": "",
-    "message": "",
+    "code": "성공",
+    "message": "200",
     "camList": [
         {
         "camID": "",
-        "accessID": "",
-        "accessPW": "",
+        "accessID": "cam0001",
+        "accessPW": "conn0001",
         "startTime": "",
         "endTime": "",
-        "camURL": "",
+        "camURL": "rtsp://192.168.0.5:8000",
         "videoInfo": {
-        "resolution": "",
-        "fps": "",
-        "videoCodec": "",
-        "audioCodec": ""
+        "resolution": "1920x1080",
+        "fps": "30",
+        "videoCodec": "H.264",
+        "audioCodec": "G.711"
     }
     }
 ]
@@ -122,8 +122,8 @@ cmgvieyak001b6cd04cgaawmm_ReplayURL_out_data = {
 
 # RealtimeVideoEventInfos
 cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_out_data = {
-    "code": "",
-    "message": ""
+    "code": "200",
+    "message": "성공"
 }
 
 # RealtimeVideoEventInfos WebHook IN Data
@@ -131,27 +131,27 @@ cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_webhook_in_data = {
     "camList": [
         {
         "camID": "",
-        "eventUUID": "",
+        "eventUUID": "event01",
         "eventName": "",
         "startTime": "",
         "endTime": "",
-        "eventDesc": ""
+        "eventDesc": "aaabbbAAA"
     }
 ]
 }
 
 # StoredVideoEventInfos
 cmgvieyak001b6cd04cgaawmm_StoredVideoEventInfos_out_data = {
-    "code": "",
-    "message": "",
+    "code": "200",
+    "message": "성공",
     "camList": [
         {
         "camID": "",
-        "eventUUID": "",
+        "eventUUID": "event01",
         "eventName": "",
         "startTime": "",
         "endTime": "",
-        "eventDesc": ""
+        "eventDesc": "aaabbbAAA"
     }
 ]
 }
