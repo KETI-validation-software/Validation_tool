@@ -25,7 +25,7 @@ cmgvieyak001b6cd04cgaawmm_StoredVideoInfos_out_constraints = {
       "minEndpoint": "/StoredVideoInfos"
     },
     "requestRangeMinEndpoint": "/StoredVideoInfos",
-    "requestRangeMaxEndpoint": "/StoredVideoInfos"
+    "requestRangeMaxEndpoint": "/RealtimeVideoEventInfos"
   },
   "camList.timeList.endTime": {
     "valueType": "request-range",
@@ -37,7 +37,7 @@ cmgvieyak001b6cd04cgaawmm_StoredVideoInfos_out_constraints = {
       "minEndpoint": "/StoredVideoInfos"
     },
     "requestRangeMinEndpoint": "/StoredVideoInfos",
-    "requestRangeMaxEndpoint": "/StoredVideoInfos"
+    "requestRangeMaxEndpoint": "/RealtimeVideoEventInfos"
   }
 }
 

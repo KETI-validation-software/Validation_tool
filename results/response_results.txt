@@ -1,17 +1,17 @@
 === 시험 결과 ===
-통과 필드 수: 410
-전체 필드 수: 440
-종합 평가 점수: 93.2%
+통과 필드 수: 450
+전체 필드 수: 520
+종합 평가 점수: 86.5%
 
 === 스텝별 결과 ===
 1. Authentication | 결과: PASS | 검증 횟수: 10 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
 2. Capabilities | 결과: PASS | 검증 횟수: 10 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
 3. CameraProfiles | 결과: PASS | 검증 횟수: 10 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
 4. StoredVideoInfos | 결과: FAIL | 검증 횟수: 10 | 통과 필드 수: 60 | 전체 필드 수: 70 | 실패 필드 수: 10 | 평가 점수: 85.7%
-5. StreamURLs | 결과: PASS | 검증 횟수: 10 | 통과 필드 수: 120 | 전체 필드 수: 120 | 실패 필드 수: 0 | 평가 점수: 100.0%
-6. ReplayURL | 결과: FAIL | 검증 횟수: 10 | 통과 필드 수: 140 | 전체 필드 수: 150 | 실패 필드 수: 10 | 평가 점수: 93.3%
+5. StreamURLs | 결과: FAIL | 검증 횟수: 10 | 통과 필드 수: 120 | 전체 필드 수: 130 | 실패 필드 수: 10 | 평가 점수: 92.3%
+6. ReplayURL | 결과: FAIL | 검증 횟수: 10 | 통과 필드 수: 160 | 전체 필드 수: 180 | 실패 필드 수: 20 | 평가 점수: 88.9%
 7. RealtimeVideoEventInfos | 결과: FAIL | 검증 횟수: 10 | 통과 필드 수: 0 | 전체 필드 수: 10 | 실패 필드 수: 10 | 평가 점수: 0.0%
-8. StoredVideoEventInfos | 결과: PASS | 검증 횟수: 10 | 통과 필드 수: 90 | 전체 필드 수: 90 | 실패 필드 수: 0 | 평가 점수: 100.0%
+8. StoredVideoEventInfos | 결과: FAIL | 검증 횟수: 10 | 통과 필드 수: 110 | 전체 필드 수: 130 | 실패 필드 수: 20 | 평가 점수: 84.6%
 
 === 전체 로그 ===
 Start Validation...
@@ -1141,9 +1141,9 @@ step 5: StreamURLs (시도 1/10)
     ]
 }
 
-검증 결과: PASS
-Score : 87.8048780487805
-Score details : 72(누적 통과 필드 수), 10(누적 오류 필드 수)
+검증 결과: FAIL
+Score : 86.74698795180723
+Score details : 72(누적 통과 필드 수), 11(누적 오류 필드 수)
 
 step 5: StreamURLs (시도 2/10)
 
@@ -1169,9 +1169,9 @@ step 5: StreamURLs (시도 2/10)
     ]
 }
 
-검증 결과: PASS
-Score : 89.36170212765957
-Score details : 84(누적 통과 필드 수), 10(누적 오류 필드 수)
+검증 결과: FAIL
+Score : 87.5
+Score details : 84(누적 통과 필드 수), 12(누적 오류 필드 수)
 
 step 5: StreamURLs (시도 3/10)
 
@@ -1197,9 +1197,9 @@ step 5: StreamURLs (시도 3/10)
     ]
 }
 
-검증 결과: PASS
-Score : 90.56603773584906
-Score details : 96(누적 통과 필드 수), 10(누적 오류 필드 수)
+검증 결과: FAIL
+Score : 88.07339449541286
+Score details : 96(누적 통과 필드 수), 13(누적 오류 필드 수)
 
 step 5: StreamURLs (시도 4/10)
 
@@ -1225,9 +1225,9 @@ step 5: StreamURLs (시도 4/10)
     ]
 }
 
-검증 결과: PASS
-Score : 91.52542372881356
-Score details : 108(누적 통과 필드 수), 10(누적 오류 필드 수)
+검증 결과: FAIL
+Score : 88.52459016393442
+Score details : 108(누적 통과 필드 수), 14(누적 오류 필드 수)
 
 step 5: StreamURLs (시도 5/10)
 
@@ -1253,9 +1253,9 @@ step 5: StreamURLs (시도 5/10)
     ]
 }
 
-검증 결과: PASS
-Score : 92.3076923076923
-Score details : 120(누적 통과 필드 수), 10(누적 오류 필드 수)
+검증 결과: FAIL
+Score : 88.88888888888889
+Score details : 120(누적 통과 필드 수), 15(누적 오류 필드 수)
 
 step 5: StreamURLs (시도 6/10)
 
@@ -1281,9 +1281,9 @@ step 5: StreamURLs (시도 6/10)
     ]
 }
 
-검증 결과: PASS
-Score : 92.95774647887323
-Score details : 132(누적 통과 필드 수), 10(누적 오류 필드 수)
+검증 결과: FAIL
+Score : 89.1891891891892
+Score details : 132(누적 통과 필드 수), 16(누적 오류 필드 수)
 
 step 5: StreamURLs (시도 7/10)
 
@@ -1309,9 +1309,9 @@ step 5: StreamURLs (시도 7/10)
     ]
 }
 
-검증 결과: PASS
-Score : 93.5064935064935
-Score details : 144(누적 통과 필드 수), 10(누적 오류 필드 수)
+검증 결과: FAIL
+Score : 89.44099378881988
+Score details : 144(누적 통과 필드 수), 17(누적 오류 필드 수)
 
 step 5: StreamURLs (시도 8/10)
 
@@ -1337,9 +1337,9 @@ step 5: StreamURLs (시도 8/10)
     ]
 }
 
-검증 결과: PASS
-Score : 93.97590361445783
-Score details : 156(누적 통과 필드 수), 10(누적 오류 필드 수)
+검증 결과: FAIL
+Score : 89.65517241379311
+Score details : 156(누적 통과 필드 수), 18(누적 오류 필드 수)
 
 step 5: StreamURLs (시도 9/10)
 
@@ -1365,9 +1365,9 @@ step 5: StreamURLs (시도 9/10)
     ]
 }
 
-검증 결과: PASS
-Score : 94.3820224719101
-Score details : 168(누적 통과 필드 수), 10(누적 오류 필드 수)
+검증 결과: FAIL
+Score : 89.83957219251337
+Score details : 168(누적 통과 필드 수), 19(누적 오류 필드 수)
 
 step 5: StreamURLs (시도 10/10)
 
@@ -1393,9 +1393,9 @@ step 5: StreamURLs (시도 10/10)
     ]
 }
 
-검증 결과: PASS
-Score : 94.73684210526315
-Score details : 180(누적 통과 필드 수), 10(누적 오류 필드 수)
+검증 결과: FAIL
+Score : 90.0
+Score details : 180(누적 통과 필드 수), 20(누적 오류 필드 수)
 
 step 6: ReplayURL (시도 1/10)
 
@@ -1425,8 +1425,8 @@ step 6: ReplayURL (시도 1/10)
 
 검증 결과: FAIL
 ⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
-Score : 94.6341463414634
-Score details : 194(누적 통과 필드 수), 11(누적 오류 필드 수)
+Score : 89.90825688073394
+Score details : 196(누적 통과 필드 수), 22(누적 오류 필드 수)
 
 step 6: ReplayURL (시도 2/10)
 
@@ -1456,8 +1456,8 @@ step 6: ReplayURL (시도 2/10)
 
 검증 결과: FAIL
 ⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
-Score : 94.54545454545455
-Score details : 208(누적 통과 필드 수), 12(누적 오류 필드 수)
+Score : 89.83050847457628
+Score details : 212(누적 통과 필드 수), 24(누적 오류 필드 수)
 
 step 6: ReplayURL (시도 3/10)
 
@@ -1487,8 +1487,8 @@ step 6: ReplayURL (시도 3/10)
 
 검증 결과: FAIL
 ⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
-Score : 94.46808510638299
-Score details : 222(누적 통과 필드 수), 13(누적 오류 필드 수)
+Score : 89.76377952755905
+Score details : 228(누적 통과 필드 수), 26(누적 오류 필드 수)
 
 step 6: ReplayURL (시도 4/10)
 
@@ -1518,8 +1518,8 @@ step 6: ReplayURL (시도 4/10)
 
 검증 결과: FAIL
 ⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
-Score : 94.39999999999999
-Score details : 236(누적 통과 필드 수), 14(누적 오류 필드 수)
+Score : 89.70588235294117
+Score details : 244(누적 통과 필드 수), 28(누적 오류 필드 수)
 
 step 6: ReplayURL (시도 5/10)
 
@@ -1549,8 +1549,8 @@ step 6: ReplayURL (시도 5/10)
 
 검증 결과: FAIL
 ⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
-Score : 94.33962264150944
-Score details : 250(누적 통과 필드 수), 15(누적 오류 필드 수)
+Score : 89.65517241379311
+Score details : 260(누적 통과 필드 수), 30(누적 오류 필드 수)
 
 step 6: ReplayURL (시도 6/10)
 
@@ -1580,8 +1580,8 @@ step 6: ReplayURL (시도 6/10)
 
 검증 결과: FAIL
 ⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
-Score : 94.28571428571428
-Score details : 264(누적 통과 필드 수), 16(누적 오류 필드 수)
+Score : 89.6103896103896
+Score details : 276(누적 통과 필드 수), 32(누적 오류 필드 수)
 
 step 6: ReplayURL (시도 7/10)
 
@@ -1611,8 +1611,8 @@ step 6: ReplayURL (시도 7/10)
 
 검증 결과: FAIL
 ⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
-Score : 94.23728813559322
-Score details : 278(누적 통과 필드 수), 17(누적 오류 필드 수)
+Score : 89.57055214723927
+Score details : 292(누적 통과 필드 수), 34(누적 오류 필드 수)
 
 step 6: ReplayURL (시도 8/10)
 
@@ -1642,8 +1642,8 @@ step 6: ReplayURL (시도 8/10)
 
 검증 결과: FAIL
 ⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
-Score : 94.19354838709677
-Score details : 292(누적 통과 필드 수), 18(누적 오류 필드 수)
+Score : 89.53488372093024
+Score details : 308(누적 통과 필드 수), 36(누적 오류 필드 수)
 
 step 6: ReplayURL (시도 9/10)
 
@@ -1673,8 +1673,8 @@ step 6: ReplayURL (시도 9/10)
 
 검증 결과: FAIL
 ⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
-Score : 94.15384615384616
-Score details : 306(누적 통과 필드 수), 19(누적 오류 필드 수)
+Score : 89.50276243093923
+Score details : 324(누적 통과 필드 수), 38(누적 오류 필드 수)
 
 step 6: ReplayURL (시도 10/10)
 
@@ -1704,8 +1704,8 @@ step 6: ReplayURL (시도 10/10)
 
 검증 결과: FAIL
 ⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
-Score : 94.11764705882352
-Score details : 320(누적 통과 필드 수), 20(누적 오류 필드 수)
+Score : 89.47368421052632
+Score details : 340(누적 통과 필드 수), 40(누적 오류 필드 수)
 
 step 7: RealtimeVideoEventInfos (시도 1/10)
 
@@ -1720,8 +1720,8 @@ step 7: RealtimeVideoEventInfos (시도 1/10)
 
 검증 결과: FAIL
 ⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
-Score : 93.841642228739
-Score details : 320(누적 통과 필드 수), 21(누적 오류 필드 수)
+Score : 89.23884514435696
+Score details : 340(누적 통과 필드 수), 41(누적 오류 필드 수)
 
 step 7: RealtimeVideoEventInfos (시도 2/10)
 
@@ -1736,8 +1736,8 @@ step 7: RealtimeVideoEventInfos (시도 2/10)
 
 검증 결과: FAIL
 ⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
-Score : 93.56725146198829
-Score details : 320(누적 통과 필드 수), 22(누적 오류 필드 수)
+Score : 89.00523560209425
+Score details : 340(누적 통과 필드 수), 42(누적 오류 필드 수)
 
 step 7: RealtimeVideoEventInfos (시도 3/10)
 
@@ -1752,8 +1752,8 @@ step 7: RealtimeVideoEventInfos (시도 3/10)
 
 검증 결과: FAIL
 ⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
-Score : 93.29446064139941
-Score details : 320(누적 통과 필드 수), 23(누적 오류 필드 수)
+Score : 88.77284595300262
+Score details : 340(누적 통과 필드 수), 43(누적 오류 필드 수)
 
 step 7: RealtimeVideoEventInfos (시도 4/10)
 
@@ -1768,8 +1768,8 @@ step 7: RealtimeVideoEventInfos (시도 4/10)
 
 검증 결과: FAIL
 ⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
-Score : 93.02325581395348
-Score details : 320(누적 통과 필드 수), 24(누적 오류 필드 수)
+Score : 88.54166666666666
+Score details : 340(누적 통과 필드 수), 44(누적 오류 필드 수)
 
 step 7: RealtimeVideoEventInfos (시도 5/10)
 
@@ -1784,8 +1784,8 @@ step 7: RealtimeVideoEventInfos (시도 5/10)
 
 검증 결과: FAIL
 ⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
-Score : 92.7536231884058
-Score details : 320(누적 통과 필드 수), 25(누적 오류 필드 수)
+Score : 88.31168831168831
+Score details : 340(누적 통과 필드 수), 45(누적 오류 필드 수)
 
 step 7: RealtimeVideoEventInfos (시도 6/10)
 
@@ -1800,8 +1800,8 @@ step 7: RealtimeVideoEventInfos (시도 6/10)
 
 검증 결과: FAIL
 ⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
-Score : 92.48554913294798
-Score details : 320(누적 통과 필드 수), 26(누적 오류 필드 수)
+Score : 88.08290155440415
+Score details : 340(누적 통과 필드 수), 46(누적 오류 필드 수)
 
 step 7: RealtimeVideoEventInfos (시도 7/10)
 
@@ -1816,8 +1816,8 @@ step 7: RealtimeVideoEventInfos (시도 7/10)
 
 검증 결과: FAIL
 ⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
-Score : 92.21902017291066
-Score details : 320(누적 통과 필드 수), 27(누적 오류 필드 수)
+Score : 87.85529715762273
+Score details : 340(누적 통과 필드 수), 47(누적 오류 필드 수)
 
 step 7: RealtimeVideoEventInfos (시도 8/10)
 
@@ -1832,8 +1832,8 @@ step 7: RealtimeVideoEventInfos (시도 8/10)
 
 검증 결과: FAIL
 ⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
-Score : 91.95402298850574
-Score details : 320(누적 통과 필드 수), 28(누적 오류 필드 수)
+Score : 87.62886597938144
+Score details : 340(누적 통과 필드 수), 48(누적 오류 필드 수)
 
 step 7: RealtimeVideoEventInfos (시도 9/10)
 
@@ -1848,8 +1848,8 @@ step 7: RealtimeVideoEventInfos (시도 9/10)
 
 검증 결과: FAIL
 ⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
-Score : 91.69054441260745
-Score details : 320(누적 통과 필드 수), 29(누적 오류 필드 수)
+Score : 87.40359897172236
+Score details : 340(누적 통과 필드 수), 49(누적 오류 필드 수)
 
 step 7: RealtimeVideoEventInfos (시도 10/10)
 
@@ -1864,8 +1864,8 @@ step 7: RealtimeVideoEventInfos (시도 10/10)
 
 검증 결과: FAIL
 ⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
-Score : 91.42857142857143
-Score details : 320(누적 통과 필드 수), 30(누적 오류 필드 수)
+Score : 87.17948717948718
+Score details : 340(누적 통과 필드 수), 50(누적 오류 필드 수)
 
 step 8: StoredVideoEventInfos (시도 1/10)
 
@@ -1887,9 +1887,9 @@ step 8: StoredVideoEventInfos (시도 1/10)
     ]
 }
 
-검증 결과: PASS
-Score : 91.64345403899722
-Score details : 329(누적 통과 필드 수), 30(누적 오류 필드 수)
+검증 결과: FAIL
+Score : 87.09677419354838
+Score details : 351(누적 통과 필드 수), 52(누적 오류 필드 수)
 
 step 8: StoredVideoEventInfos (시도 2/10)
 
@@ -1911,9 +1911,9 @@ step 8: StoredVideoEventInfos (시도 2/10)
     ]
 }
 
-검증 결과: PASS
-Score : 91.84782608695652
-Score details : 338(누적 통과 필드 수), 30(누적 오류 필드 수)
+검증 결과: FAIL
+Score : 87.01923076923077
+Score details : 362(누적 통과 필드 수), 54(누적 오류 필드 수)
 
 step 8: StoredVideoEventInfos (시도 3/10)
 
@@ -1935,9 +1935,9 @@ step 8: StoredVideoEventInfos (시도 3/10)
     ]
 }
 
-검증 결과: PASS
-Score : 92.04244031830238
-Score details : 347(누적 통과 필드 수), 30(누적 오류 필드 수)
+검증 결과: FAIL
+Score : 86.94638694638695
+Score details : 373(누적 통과 필드 수), 56(누적 오류 필드 수)
 
 step 8: StoredVideoEventInfos (시도 4/10)
 
@@ -1959,9 +1959,9 @@ step 8: StoredVideoEventInfos (시도 4/10)
     ]
 }
 
-검증 결과: PASS
-Score : 92.2279792746114
-Score details : 356(누적 통과 필드 수), 30(누적 오류 필드 수)
+검증 결과: FAIL
+Score : 86.87782805429865
+Score details : 384(누적 통과 필드 수), 58(누적 오류 필드 수)
 
 step 8: StoredVideoEventInfos (시도 5/10)
 
@@ -1983,9 +1983,9 @@ step 8: StoredVideoEventInfos (시도 5/10)
     ]
 }
 
-검증 결과: PASS
-Score : 92.40506329113924
-Score details : 365(누적 통과 필드 수), 30(누적 오류 필드 수)
+검증 결과: FAIL
+Score : 86.81318681318682
+Score details : 395(누적 통과 필드 수), 60(누적 오류 필드 수)
 
 step 8: StoredVideoEventInfos (시도 6/10)
 
@@ -2007,9 +2007,9 @@ step 8: StoredVideoEventInfos (시도 6/10)
     ]
 }
 
-검증 결과: PASS
-Score : 92.57425742574257
-Score details : 374(누적 통과 필드 수), 30(누적 오류 필드 수)
+검증 결과: FAIL
+Score : 86.75213675213675
+Score details : 406(누적 통과 필드 수), 62(누적 오류 필드 수)
 
 step 8: StoredVideoEventInfos (시도 7/10)
 
@@ -2031,9 +2031,9 @@ step 8: StoredVideoEventInfos (시도 7/10)
     ]
 }
 
-검증 결과: PASS
-Score : 92.7360774818402
-Score details : 383(누적 통과 필드 수), 30(누적 오류 필드 수)
+검증 결과: FAIL
+Score : 86.6943866943867
+Score details : 417(누적 통과 필드 수), 64(누적 오류 필드 수)
 
 step 8: StoredVideoEventInfos (시도 8/10)
 
@@ -2055,9 +2055,9 @@ step 8: StoredVideoEventInfos (시도 8/10)
     ]
 }
 
-검증 결과: PASS
-Score : 92.89099526066352
-Score details : 392(누적 통과 필드 수), 30(누적 오류 필드 수)
+검증 결과: FAIL
+Score : 86.63967611336032
+Score details : 428(누적 통과 필드 수), 66(누적 오류 필드 수)
 
 step 8: StoredVideoEventInfos (시도 9/10)
 
@@ -2079,9 +2079,9 @@ step 8: StoredVideoEventInfos (시도 9/10)
     ]
 }
 
-검증 결과: PASS
-Score : 93.03944315545245
-Score details : 401(누적 통과 필드 수), 30(누적 오류 필드 수)
+검증 결과: FAIL
+Score : 86.58777120315581
+Score details : 439(누적 통과 필드 수), 68(누적 오류 필드 수)
 
 step 8: StoredVideoEventInfos (시도 10/10)
 
@@ -2103,8 +2103,8 @@ step 8: StoredVideoEventInfos (시도 10/10)
     ]
 }
 
-검증 결과: PASS
-Score : 93.18181818181817
-Score details : 410(누적 통과 필드 수), 30(누적 오류 필드 수)
+검증 결과: FAIL
+Score : 86.53846153846155
+Score details : 450(누적 통과 필드 수), 70(누적 오류 필드 수)
 
 검증 절차가 완료되었습니다.
