@@ -82,9 +82,9 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
             sem_result, sem_error_msg, sem_correct_cnt, sem_error_cnt = do_semantic_checker(
                 rules_dict, data, reference_context=reference_context
             )
-            print(f"[semantic] 완료: result={sem_result}, correct={sem_correct_cnt}, error={sem_error_cnt}")
+            print(f"[functions.py의 json_check_] 완료: result={sem_result}, correct={sem_correct_cnt}, error={sem_error_cnt}")
         else:
-            print("[semantic] 규칙(validation_rules) 없음 → 의미 검증 건너뜀")
+            print("[functions.py의 json_check_] 규칙(validation_rules) 없음 → 의미 검증 건너뜀")
 
         # 4) 결과 합산/결정
         final_result = "PASS" if (struct_result == "PASS" and sem_result == "PASS") else "FAIL"

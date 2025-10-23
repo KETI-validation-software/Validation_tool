@@ -8,8 +8,8 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소 
 #test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
-company_name = "물리보안시스템테스트"
-product_name = "물리보안시스템"
+company_name = "물리보안기업"
+product_name = "물리보안테스트제품"
 version = "v1.0"
 test_category = "MAIN_TEST"
 test_target = "물리보안"
