@@ -8,8 +8,8 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소 
 #test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
-company_name = "물리보안시스템테스트"
-product_name = "물리보안시스템"
+company_name = "물리보안기업"
+product_name = "물리보안테스트제품"
 version = "v1.0"
 test_category = "MAIN_TEST"
 test_target = "물리보안"
@@ -53,7 +53,6 @@ enable_retry_delay = False  # False 권장: 불필요한 sleep 제거
 # 플랫폼(cmg90, cmg7e, cmg7b)
 # 시스템(cmgat, cmgas, cmga0)
 SPEC_CONFIG = {
-
     "cmgyv3rzl014nvsveidu5jpzp": {
     "test_name": "영상보안시스템_new",
     "specs": ['cmgyv3rzl014nvsveidu5jpzp_outSchema', 'cmgyv3rzl014nvsveidu5jpzp_inData', 'cmgyv3rzl014nvsveidu5jpzp_messages', 'cmgyv3rzl014nvsveidu5jpzp_webhook_inSchema', 'cmgyv3rzl014nvsveidu5jpzp_webhook_outData'],
