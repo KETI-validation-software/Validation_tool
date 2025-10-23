@@ -789,7 +789,7 @@ class FormValidator:
     def is_admin_code_required(self):
         """관리자 코드 입력이 필요한지 확인"""
         test_category = self.parent.test_category_edit.text().strip()
-        return test_category == "본시험"
+        return test_category == "MAIN_TEST"
 
 
     def is_admin_code_valid(self):
@@ -799,7 +799,7 @@ class FormValidator:
             return True
 
         admin_code = self.parent.admin_code_edit.text().strip()
-        # 본시험인 경우 숫자가 입력되어야 함
+        # MAIN_TEST인 경우 숫자가 입력되어야 함
         return bool(admin_code and admin_code.isdigit())
 
 
@@ -811,13 +811,14 @@ class FormValidator:
             self.parent.admin_code_edit.setEnabled(False)
             self.parent.admin_code_edit.clear()
             self.parent.admin_code_edit.setPlaceholderText("사전시험은 관리자 코드가 불필요합니다")
-        elif test_category == "본시험":
+        elif test_category == "MAIN_TEST":
             self.parent.admin_code_edit.setEnabled(True)
             self.parent.admin_code_edit.setPlaceholderText("내용을 입력해주세요")
         else:
-            # 다른 값이거나 빈 값일 때는 기본 상태 유지
-            self.parent.admin_code_edit.setEnabled(True)
-            self.parent.admin_code_edit.setPlaceholderText("내용을 입력해주세요")
+            # 그 외의 경우(빈 값, 다른 값 등)는 비활성화
+            self.parent.admin_code_edit.setEnabled(False)
+            self.parent.admin_code_edit.clear()
+            self.parent.admin_code_edit.setPlaceholderText("")
 
 
     # ---------- CONSTANTS.py 업데이트 ----------
@@ -1395,6 +1396,8 @@ class FormValidator:
     def _fill_test_field_table_from_api(self, test_specs):
         """API testSpecs 배열로부터 시험 분야 테이블 채우기"""
         try:
+            from PyQt5.QtGui import QFont
+
             table = self.parent.test_field_table
             table.setRowCount(0)
 
@@ -1410,6 +1413,13 @@ class FormValidator:
                 # 시험 분야명
                 field_item = QTableWidgetItem(spec_name)
                 field_item.setData(Qt.UserRole, spec_id)  # spec_id 저장
+
+                # 폰트 설정 (Noto Sans KR, Regular 400, 14px)
+                font = QFont("Noto Sans KR", 14)
+                font.setWeight(400)
+                font.setLetterSpacing(QFont.AbsoluteSpacing, 0.098)
+                field_item.setFont(font)
+
                 table.setItem(i, 0, field_item)
 
             print(f"시험 분야 테이블 채우기 완료: {len(test_specs)}개 항목")
