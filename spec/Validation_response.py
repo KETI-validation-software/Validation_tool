@@ -61,8 +61,8 @@ cmgyv3rzl014nvsveidu5jpzp_ReplayURL_out_validation = {
     "validationType": "request-field-range-match",
     "referenceFieldMax": "endTime",
     "referenceFieldMin": "startTime",
-    "referenceEndpointMax": "/StoredVideoInfos",
-    "referenceEndpointMin": "/StoredVideoInfos",
+    "referenceEndpointMax": "/RealtimeVideoEventInfos",
+    "referenceEndpointMin": "/RealtimeVideoEventInfos",
     "referenceRangeOperator": "between"
   },
   "camList.endTime": {
@@ -70,8 +70,8 @@ cmgyv3rzl014nvsveidu5jpzp_ReplayURL_out_validation = {
     "validationType": "request-field-range-match",
     "referenceFieldMax": "endTime",
     "referenceFieldMin": "startTime",
-    "referenceEndpointMax": "/StoredVideoInfos",
-    "referenceEndpointMin": "/StoredVideoInfos",
+    "referenceEndpointMax": "/RealtimeVideoEventInfos",
+    "referenceEndpointMin": "/RealtimeVideoEventInfos",
     "referenceRangeOperator": "between"
   }
 }
@@ -92,15 +92,15 @@ cmgyv3rzl014nvsveidu5jpzp_StoredVideoEventInfos_out_validation = {
     "enabled": True,
     "referenceField": "eventFilter",
     "validationType": "request-field-match",
-    "referenceEndpoint": "/RealtimeVideoEventInfos"
+    "referenceEndpoint": "/StoredVideoEventInfos"
   },
   "camList.startTime": {
     "enabled": True,
     "validationType": "request-field-range-match",
     "referenceFieldMax": "endTime",
     "referenceFieldMin": "startTime",
-    "referenceEndpointMax": "/StoredVideoInfos",
-    "referenceEndpointMin": "/StoredVideoInfos",
+    "referenceEndpointMax": "/StoredVideoEventInfos",
+    "referenceEndpointMin": "/StoredVideoEventInfos",
     "referenceRangeOperator": "between"
   },
   "camList.endTime": {
@@ -108,8 +108,8 @@ cmgyv3rzl014nvsveidu5jpzp_StoredVideoEventInfos_out_validation = {
     "validationType": "request-field-range-match",
     "referenceFieldMax": "endTime",
     "referenceFieldMin": "startTime",
-    "referenceEndpointMax": "/StoredVideoInfos",
-    "referenceEndpointMin": "/StoredVideoInfos",
+    "referenceEndpointMax": "/StoredVideoEventInfos",
+    "referenceEndpointMin": "/StoredVideoEventInfos",
     "referenceRangeOperator": "between"
   }
 }
