@@ -84,6 +84,7 @@ class FormValidator:
                 constraints_names  = []
                 webhook_schema_names = []  # webhook 전용 스키마 리스트
                 webhook_data_names = []    # webhook 전용 데이터 리스트
+                webhook_constraints_names = []  # webhook 전용 constraints 리스트
                 temp_spec_id = spec_id+"_"
                 for s in steps:
                     step_id = s.get("id")
@@ -110,6 +111,7 @@ class FormValidator:
                             constraints_names=constraints_names,
                             webhook_schema_names=webhook_schema_names,
                             webhook_data_names=webhook_data_names,
+                            webhook_constraints_names=webhook_constraints_names,
                             spec_id = temp_spec_id
                         )
                 if schema_type == "request":
@@ -184,6 +186,19 @@ class FormValidator:
                     constraints_content += f"    {cname},\n"
                 constraints_content += "]\n\n"
 
+                # WebHook Constraints 리스트 생성
+                if webhook_constraints_names:
+                    if file_type == "response":
+                        webhook_c_list_name = f"{spec_id}_webhook_inConstraints"
+                    else:
+                        webhook_c_list_name = f"{spec_id}_webhook_outConstraints"
+
+                    constraints_content += f"# {spec_id} WebHook Constraints 리스트\n"
+                    constraints_content += f"{webhook_c_list_name} = [\n"
+                    for cname in webhook_constraints_names:
+                        constraints_content += f"    {temp_spec_id}{cname},\n"
+                    constraints_content += "]\n\n"
+
                 # CONSTANTS.py 업데이트용 리스트 저장
                 spec_info = {
                     "spec_id": spec_id,
@@ -241,7 +256,7 @@ class FormValidator:
                                        data_content, schema_names, data_names, endpoint_names,
                                        validation_content, validation_names,
                                    constraints_content, constraints_names,
-                                   webhook_schema_names, webhook_data_names, spec_id):
+                                   webhook_schema_names, webhook_data_names, webhook_constraints_names, spec_id):
 
         # step 레벨에서 protocolType 확인 (소문자 "webhook")
         detail = ts.get("detail", {})
@@ -383,6 +398,62 @@ class FormValidator:
             c_py_style_json = re.sub(r'\bfalse\b', 'False', c_py_style_json)
             constraints_content += f"{c_var_name} = {c_py_style_json}\n\n"
         constraints_names.append(c_var_name)
+
+        # WebHook Constraints 처리 - file_type="response"일 때 webhook_in_constraints 생성
+        if protocol_type == "webhook" and file_type == "response":
+            webhook_request_spec = settings.get("webhook", {}).get("requestSpec") or {}
+            webhook_c_name = f"{endpoint_name}_webhook_in_constraints"
+
+            # requestSpec에서 bodyJson 추출하여 valueType 필드 찾기
+            webhook_body_json = None
+            if isinstance(webhook_request_spec, list):
+                webhook_body_json = webhook_request_spec
+            elif isinstance(webhook_request_spec, dict) and "bodyJson" in webhook_request_spec:
+                webhook_body_json = webhook_request_spec.get("bodyJson")
+
+            # valueType 필드가 있으면 constraints 생성
+            webhook_c_map = {}
+            if webhook_body_json:
+                webhook_c_map = self.const_gen.build_validation_map(webhook_body_json)
+
+            constraints_content += f"# {endpoint_name} WebHook IN Constraints\n"
+            if not webhook_c_map:
+                constraints_content += f"{spec_id}{webhook_c_name} = {{}}\n\n"
+            else:
+                webhook_c_raw_json = json.dumps(webhook_c_map, ensure_ascii=False, indent=2)
+                webhook_c_py_style_json = re.sub(r'\btrue\b', 'True', webhook_c_raw_json)
+                webhook_c_py_style_json = re.sub(r'\bfalse\b', 'False', webhook_c_py_style_json)
+                constraints_content += f"{spec_id}{webhook_c_name} = {webhook_c_py_style_json}\n\n"
+            webhook_constraints_names.append(webhook_c_name)
+            print(f"  ✓ WebHook IN Constraints 생성: {webhook_c_name}" + (" (빈 딕셔너리)" if not webhook_c_map else ""))
+
+        # WebHook Constraints 처리 - file_type="request"일 때 webhook_out_constraints 생성
+        if protocol_type == "webhook" and file_type == "request":
+            webhook_request_spec = settings.get("webhook", {}).get("requestSpec") or {}
+            webhook_c_name = f"{endpoint_name}_webhook_out_constraints"
+
+            # requestSpec에서 bodyJson 추출하여 valueType 필드 찾기
+            webhook_body_json = None
+            if isinstance(webhook_request_spec, list):
+                webhook_body_json = webhook_request_spec
+            elif isinstance(webhook_request_spec, dict) and "bodyJson" in webhook_request_spec:
+                webhook_body_json = webhook_request_spec.get("bodyJson")
+
+            # valueType 필드가 있으면 constraints 생성
+            webhook_c_map = {}
+            if webhook_body_json:
+                webhook_c_map = self.const_gen.build_validation_map(webhook_body_json)
+
+            constraints_content += f"# {endpoint_name} WebHook OUT Constraints\n"
+            if not webhook_c_map:
+                constraints_content += f"{spec_id}{webhook_c_name} = {{}}\n\n"
+            else:
+                webhook_c_raw_json = json.dumps(webhook_c_map, ensure_ascii=False, indent=2)
+                webhook_c_py_style_json = re.sub(r'\btrue\b', 'True', webhook_c_raw_json)
+                webhook_c_py_style_json = re.sub(r'\bfalse\b', 'False', webhook_c_py_style_json)
+                constraints_content += f"{spec_id}{webhook_c_name} = {webhook_c_py_style_json}\n\n"
+            webhook_constraints_names.append(webhook_c_name)
+            print(f"  ✓ WebHook OUT Constraints 생성: {webhook_c_name}" + (" (빈 딕셔너리)" if not webhook_c_map else ""))
 
         # 기존과 동일하게 누적본 반환 + validation도 함께 반환
         return schema_content, data_content, validation_content, constraints_content
@@ -718,7 +789,7 @@ class FormValidator:
     def is_admin_code_required(self):
         """관리자 코드 입력이 필요한지 확인"""
         test_category = self.parent.test_category_edit.text().strip()
-        return test_category == "본시험"
+        return test_category == "MAIN_TEST"
 
 
     def is_admin_code_valid(self):
@@ -728,7 +799,7 @@ class FormValidator:
             return True
 
         admin_code = self.parent.admin_code_edit.text().strip()
-        # 본시험인 경우 숫자가 입력되어야 함
+        # MAIN_TEST인 경우 숫자가 입력되어야 함
         return bool(admin_code and admin_code.isdigit())
 
 
@@ -740,13 +811,14 @@ class FormValidator:
             self.parent.admin_code_edit.setEnabled(False)
             self.parent.admin_code_edit.clear()
             self.parent.admin_code_edit.setPlaceholderText("사전시험은 관리자 코드가 불필요합니다")
-        elif test_category == "본시험":
+        elif test_category == "MAIN_TEST":
             self.parent.admin_code_edit.setEnabled(True)
             self.parent.admin_code_edit.setPlaceholderText("내용을 입력해주세요")
         else:
-            # 다른 값이거나 빈 값일 때는 기본 상태 유지
-            self.parent.admin_code_edit.setEnabled(True)
-            self.parent.admin_code_edit.setPlaceholderText("내용을 입력해주세요")
+            # 그 외의 경우(빈 값, 다른 값 등)는 비활성화
+            self.parent.admin_code_edit.setEnabled(False)
+            self.parent.admin_code_edit.clear()
+            self.parent.admin_code_edit.setPlaceholderText("")
 
 
     # ---------- CONSTANTS.py 업데이트 ----------
@@ -1324,6 +1396,8 @@ class FormValidator:
     def _fill_test_field_table_from_api(self, test_specs):
         """API testSpecs 배열로부터 시험 분야 테이블 채우기"""
         try:
+            from PyQt5.QtGui import QFont
+
             table = self.parent.test_field_table
             table.setRowCount(0)
 
@@ -1339,6 +1413,13 @@ class FormValidator:
                 # 시험 분야명
                 field_item = QTableWidgetItem(spec_name)
                 field_item.setData(Qt.UserRole, spec_id)  # spec_id 저장
+
+                # 폰트 설정 (Noto Sans KR, Regular 400, 14px)
+                font = QFont("Noto Sans KR", 14)
+                font.setWeight(400)
+                font.setLetterSpacing(QFont.AbsoluteSpacing, 0.098)
+                field_item.setFont(font)
+
                 table.setItem(i, 0, field_item)
 
             print(f"시험 분야 테이블 채우기 완료: {len(test_specs)}개 항목")
