@@ -626,34 +626,6 @@ class ResultPageWidget(QWidget):
             self.parent.show_combined_result(row)
 
 class MyApp(QWidget):
-    # def _get_latest_request_data(self, api_name, direction="REQUEST"):
-    #     """
-    #     Server.trace에서 해당 api_name, direction의 최신 데이터를 반환한다.
-    #     direction은 'REQUEST' 또는 'RESPONSE'가 될 수 있다.
-    #     """
-    #     try:
-    #         print(f"[DEBUG] _get_latest_request_data 호출: api_name={api_name}, direction={direction}")
-            
-    #         if not hasattr(self.Server, "trace") or self.Server.trace is None:
-    #             print(f"[DEBUG] Server.trace가 없음")
-    #             return {}
-            
-    #         events = list((getattr(self.Server, "trace", {}) or {}).get(api_name, []))
-    #         print(f"[DEBUG] {api_name}의 이벤트 개수: {len(events)}")
-            
-    #         for ev in reversed(events):
-    #             if ev.get("dir") == direction:
-    #                 data = ev.get("data", {})
-    #                 print(f"[DEBUG] {direction} 데이터 발견: {type(data)}")
-    #                 return data
-            
-    #         print(f"[DEBUG] {direction} 데이터 없음")
-    #         return {}
-    #     except Exception as e:
-    #         print(f"[DEBUG] _get_latest_request_data 에러: {e}")
-    #         import traceback
-    #         traceback.print_exc()
-    #         return {}
     # 시험 결과 표시 요청 시그널 (main.py와 연동)
     showResultRequested = pyqtSignal(object)  # parent widget을 인자로 전달
 
@@ -826,19 +798,7 @@ class MyApp(QWidget):
         self.videoWebhookData = []
         self.videoWebhookInSchema = []
         self.videoWebhookInData = []
-        
-        # if self.current_spec_id == "cmga0l5mh005dihlet5fcoj0o":
-        #     # 영상보안만 Webhook 지원
-        #     webhookSchema_name = "spec_001_webhookSchema"  # 고정값
-        #     webhookData_name = "spec_001_webhookData"
-        #     self.videoWebhookSchema = getattr(video_schema_request, webhookSchema_name, [])
-        #     self.videoWebhookData = getattr(video_data_request, webhookData_name, [])
-            
-        #     webhookInSchema_name = "spec_002_webhookSchema"
-        #     webhookInData_name = "spec_002_webhookData"
-        #     self.videoWebhookInSchema = getattr(video_schema_response, webhookInSchema_name, [])
-        #     self.videoWebhookInData = getattr(video_data_response, webhookInData_name, [])
-        
+
         print(f"[PLATFORM] ✅ 로딩 완료: {len(self.videoMessages)}개 API")
         print(f"[PLATFORM] 📋 API 목록: {self.videoMessages}")
         print(f"[PLATFORM] 🔄 프로토콜 설정: {self.trans_protocols}")
@@ -873,26 +833,6 @@ class MyApp(QWidget):
             self.Server.trace[api_name].append(evt)
         except Exception:
             pass
-
-    # def get_latest_from_trace(self, api_name, direction):
-    #     """trace에서 해당 방향의 최신 이벤트 반환"""
-    #     try:
-    #         events = list((getattr(self.Server, "trace", {}) or {}).get(api_name, []))
-    #         for ev in reversed(events):
-    #             if ev.get("dir") == direction:
-    #                 return ev.get("data")
-    #     except Exception:
-    #         pass
-    #     return None
-
-    # def get_latest_request(self, step_idx):
-    #     api = self.Server.message[step_idx]
-    #     return self.get_latest_from_trace(api, "REQUEST")
-
-    # def get_latest_response(self, step_idx):
-    #     api = self.Server.message[step_idx]
-    #     return self.get_latest_from_trace(api, "RESPONSE")
-
 
     def _to_detail_text(self, val_text):
         """검증 결과 텍스트를 항상 사람이 읽을 문자열로 표준화"""
@@ -975,21 +915,13 @@ class MyApp(QWidget):
     # 실시간 모니터링용 + 메인 검증 로직 (부하테스트 타이밍) - 09/25
     def update_view(self):
         try:
-            # print("+++++++++++ update view 호출 +++++++++++")
-            # print(f"[DEBUG] update_view 시작: cnt={self.cnt}, cnt_pre={self.cnt_pre}")
             time_interval = 0
             
             # cnt가 리스트 길이 이상이면 종료 처리
             if self.cnt >= len(self.Server.message):
                 print(f"[DEBUG] 모든 API 처리 완료, 타이머 정지")
                 self.tick_timer.stop()
-                # ====== 구조검증 시작 ======
-
-                # print("~~~~~~~~~~~~ 구조검증 시작 ~~~~~~~~~~~~ json_check_ 시작")
                 schema_obj = self.videoInSchema[self.cnt] if self.cnt < len(self.videoInSchema) else None
-                #print(f"[json_check] field_finder 완료: all_field={len(schema_obj) if isinstance(schema_obj, dict) else 'N/A'}, opt_field=N/A")
-                #print(f"[json_check] data_finder 완료: all_data={len(current_data) if isinstance(current_data, dict) else 'N/A'}")
-
                 return
             
             # ✅ 시스템과 동일: 첫 틱에서는 대기만 하고 리턴
@@ -1023,9 +955,6 @@ class MyApp(QWidget):
             # 웹훅 모드 - 웹훅 스레드의 join()이 동기화를 담당하므로 별도 sleep 불필요
             if self.realtime_flag is True:
                         print(f"[json_check] do_checker 호출: 스키마={schema_obj}, 데이터={current_data}")
-                # print(f"[TIMING_DEBUG] 웹훅 모드 활성화 (API: {self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else 'N/A'})")
-                # print(f"[TIMING_DEBUG] ✅ 웹훅 스레드의 join()이 동기화 처리 (수동 sleep 제거됨)")
-                # print(f"[json_check] do_checker 완료: result={val_result}, correct={key_psss_cnt}, error={key_error_cnt}")
 
             # SPEC_CONFIG에서 timeout
             current_timeout = (self.time_outs[self.cnt] / 1000) if self.cnt < len(self.time_outs) else 5.0
@@ -1044,7 +973,6 @@ class MyApp(QWidget):
                 print("++++++++++ 규칙 가져오기 ++++++++++")
 
                 try:
-
                     current_validation = get_validation_rules(
                         spec_id=self.current_spec_id,
                         api_name=api_name,
@@ -1132,10 +1060,6 @@ class MyApp(QWidget):
 
                 # 1. request 검증용 데이터 로드
                 current_data = self._load_from_trace_file(api_name, "REQUEST") or {}
-
-                # if api_name and isinstance(current_data, dict):
-                #     self.reference_context[f"/{api_name}"] = current_data
-
                 # 2. 맥락 검증ㅇ용 - 자신이 보낸 response 로드 (trace 폴더에서)
                 if api_name:
                     response_data = self._load_from_trace_file(api_name, "RESPONSE")
@@ -1169,11 +1093,6 @@ class MyApp(QWidget):
                     
                     # ✅ 디버깅: 어떤 스키마로 검증하는지 확인
                     if retry_attempt == 0:  # 첫 시도에만 출력
-                        # print(f"\n[DEBUG] ========== 스키마 검증 디버깅 ==========")
-                        # print(f"[DEBUG] cnt={self.cnt}, API={self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else 'N/A'}")
-                        # print(f"[DEBUG] current_protocol={current_protocol}")
-                        # print(f"[DEBUG] videoInSchema 총 개수={len(self.videoInSchema)}")
-                        # print(f"[DEBUG] 사용 스키마: videoInSchema[{self.cnt}]")
                         
                         # 스키마 필드 확인
                         if self.cnt < len(self.videoInSchema):
@@ -1204,15 +1123,7 @@ class MyApp(QWidget):
                             current_data,
                             self.flag_opt
                             )
-                        # if "unhashable type" in str(e):
-                        #     import traceback
-                        #     # print("[DEBUG][unhashable] error in platformVal_all.py update_view")
-                        #     # print("videoInSchema:", self.videoInSchema[self.cnt])
-                        #     # print("current_data:", current_data)
-                        #     # print("videoInSchema type:", type(self.videoInSchema[self.cnt]))
-                        #     # print("current_data type:", type(current_data))
-                        #     traceback.print_exc()
-                        # raise
+                        
                     except Exception as e:
                         print(f"[DEBUG] json_check_ 기타 에러: {e}")
                         import traceback
@@ -1253,12 +1164,7 @@ class MyApp(QWidget):
                             # print(f"[DEBUG][PLATFORM] 웹훅 응답 사용: {webhook_response}")
                             tmp_webhook_response = json.dumps(webhook_response, indent=4, ensure_ascii=False)
                             accumulated['data_parts'].append(f"\n--- Webhook 응답 (시도 {retry_attempt + 1}회차) ---\n{tmp_webhook_response}")
-                            
-                            # ✅ 디버깅: 웹훅 응답 검증 스키마 확인
-                            # if retry_attempt == 0:  # 첫 시도에만 출력
-                            #     print(f"\n[DEBUG] ========== 웹훅 응답 검증 디버깅 ==========")
-                            #     print(f"[DEBUG] cnt={self.cnt}, API={self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else 'N/A'}")
-                            #     print(f"[DEBUG] videoWebhookSchema 총 개수={len(self.videoWebhookSchema)}")
+
                             
                             # ✅ 웹훅 응답 검증 (플랫폼은 시스템의 웹훅 응답을 받음 - spec_001의 웹훅 응답 스키마)
                             if len(self.videoWebhookSchema) > 0:
@@ -1306,17 +1212,6 @@ class MyApp(QWidget):
                 accumulated['error_messages'].extend(combined_error_parts)
                 accumulated['total_pass'] += add_pass
                 accumulated['total_error'] += add_err
-
-                # trace 기반 구조로 변경 중..
-                # api_name = self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else ""
-                # # if api_name and isinstance(current_data, dict):
-                # #     self.reference_context[f"/{api_name}"] = current_data
-                # #     print(f"[PLATFORM] 📚 맥락 업데이트: /{api_name}")
-                # if api_name:
-                #     response_data = self._load_from_trace_file(api_name, "RESPONSE")
-                #     if response_data and isinstance(response_data, dict):
-                #         self.reference_context[f"/{api_name}"] = response_data
-                #         print(f"[TRACE] /{api_name} RESPONSE를 trace 파일에서 로드")   
 
                 # ✅ current_retry 증가
                 self.current_retry += 1
@@ -2145,35 +2040,6 @@ class MyApp(QWidget):
         
         return total_group
 
-    # def group_score(self):
-    #     """평가 점수 박스"""
-    #     sgroup = QGroupBox('평가 점수')
-    #     sgroup.setMaximumWidth(1050)
-    #     sgroup.setMinimumWidth(950)
-        
-    #     # 점수 표시용 레이블들
-    #     self.pass_count_label = QLabel("통과 필드 수: 0")
-    #     self.total_count_label = QLabel("전체 필드 수: 0")  
-    #     self.score_label = QLabel("종합 평가 점수: 0%")
-        
-    #     # 폰트 크기 조정
-    #     font = self.pass_count_label.font()
-    #     font.setPointSize(20)
-    #     self.pass_count_label.setFont(font)
-    #     self.total_count_label.setFont(font)
-    #     self.score_label.setFont(font)
-        
-    #     # 가로 배치
-    #     layout = QHBoxLayout()
-    #     layout.setSpacing(90)
-    #     layout.addWidget(self.pass_count_label)
-    #     layout.addWidget(self.total_count_label)
-    #     layout.addWidget(self.score_label)
-    #     layout.addStretch()
-        
-    #     sgroup.setLayout(layout)
-    #     return sgroup
-
     def resizeEvent(self, event):
         """창 크기 변경 시 반응형 UI 조정"""
         try:
@@ -2330,9 +2196,6 @@ class MyApp(QWidget):
         # 버퍼 초기화 - API 개수에 맞춰 동적으로 생성
         api_count = len(self.videoMessages) if self.videoMessages else 9
         self.step_buffers = [{"data": "", "result": "", "error": ""} for _ in range(api_count)]
-        #print(f"[DEBUG] init_win: step_buffers 초기화 완료 (크기={api_count})")
-        # JSON 파일 초기화 제거 - 더 이상 개별 JSON 파일을 사용하지 않음
-        # (videoData_request.py와 videoData_response.py에서 데이터를 가져옴)
         self.valResult.clear()
         # 메시지 초기화
         for i in range(1, 10):
