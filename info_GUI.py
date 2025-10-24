@@ -1766,8 +1766,8 @@ class InfoWidget(QWidget):
             # CONSTANTS.py 업데이트
             if self.form_validator.update_constants_py():
                 # test_group_name, verification_type(current_mode), spec_id를 함께 전달
-                print(f"시험 시작: testGroup.name={self.test_group_name}, verificationType={self.current_mode}, spec_id={spec_id}")
-                self.startTestRequested.emit(self.test_group_name, self.current_mode, spec_id)
+                print(f"시험 시작: testTarget.name={self.target_system}, verificationType={self.current_mode}, spec_id={spec_id}")
+                self.startTestRequested.emit(self.target_system, self.current_mode, spec_id)
             else:
                 QMessageBox.warning(self, "저장 실패", "CONSTANTS.py 업데이트에 실패했습니다.")
 
@@ -2012,7 +2012,14 @@ class InfoWidget(QWidget):
             self.version_edit.setText(eval_target.get("version", ""))
             self.model_edit.setText(eval_target.get("modelName", ""))
             self.test_category_edit.setText(eval_target.get("testCategory", ""))
-            self.target_system_edit.setText(eval_target.get("targetSystem", ""))
+
+            self.target_system = eval_target.get("targetSystem", "")
+            if self.target_system == "PHYSICAL_SECURITY":
+                self.target_system = "물리보안시스템"
+            elif self.target_system == "INTEGRATED_SYSTEM":
+                self.target_system = "통합플랫폼시스템"
+            self.target_system_edit.setText(self.target_system)
+
             self.test_group_edit.setText(combined_group_names)  # 콤마로 연결된 그룹 이름들
             self.test_range_edit.setText(combined_group_ranges)  # 콤마로 연결된 범위들
 
