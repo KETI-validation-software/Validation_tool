@@ -28,6 +28,7 @@ import config.CONSTANTS as CONSTANTS
 import traceback
 import importlib
 from core.validation_registry import get_validation_rules
+from pathlib import Path
 
 
 # 통합된 상세 내용 확인 팝업창 클래스
@@ -591,6 +592,41 @@ class ResultPageWidget(QWidget):
 class MyApp(QWidget):
     # 시험 결과 표시 요청 시그널 (main.py와 연동)
     showResultRequested = pyqtSignal(object)  # parent widget을 인자로 전달
+
+    def _load_from_trace_file(self, api_name, direction="RESPONSE"):
+        try:
+            trace_file = Path("results/trace") / f"trace_{api_name.replace('/', '_')}.ndjson"
+
+            if not trace_file.exists():
+                return None # 파일이 없으면 None 반환
+
+            latest_data = None
+
+            with open(trace_file, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+
+                    try:
+                        entry = json.loads(line)
+
+                        if entry.get("dir") == direction and entry.get("api") == api_name:
+                            latest_data = entry.get("data", {})
+
+                    except json.JSONDecodeError:
+                        continue
+
+            if latest_data:
+                print(f"[DEBUG] trace 파일에서 {api_name} {direction} 데이터 로드 완료")
+                return latest_data
+            else:
+                print(f"[DEBUG] trace 파일에서 {api_name} {direction} 데이터 없음")
+                return None
+        
+        except Exception as e:
+            print(f"[ERROR] trace 파일 로드 중 오류: {e}")
+            return None
 
     def _append_text(self, obj):
         import json
@@ -1246,9 +1282,17 @@ class MyApp(QWidget):
                 self._push_event(self.cnt, "REQUEST", inMessage)
 
                 api_name = self.message[self.cnt] if self.cnt < len(self.message) else ""
-                if api_name and isinstance(inMessage, dict):
-                    self.reference_context[f"/{api_name}"] = inMessage
-                
+                if api_name:
+                    my_request = self.inMessage[self.cnt] if self.cnt < len(self.inMessage) else {}
+                    if my_request:
+                        self.reference_context[f"/{api_name}"] = my_request
+                        print(f"[SYSTEM] 맥락: /{api_name} (inMessage)")
+
+                    # request_data = self._load_from_trace_file(api_name, "REQUEST")
+                    # if request_data and isinstance(request_data, dict):
+                    #     self.reference_context[f"/{api_name}"] = request_data
+                    #     print(f"[SYSTEM] 맥락: /{api_name} (trace)")
+
                 # try:
                 #     req_rules = get_validation_rules(
                 #         spec_id=self.current_spec_id,
@@ -1455,9 +1499,13 @@ class MyApp(QWidget):
                             )
                         
                         # 응답을 규칙 참조 컨텍스트에 저장
-                        api_name = self.message[self.cnt] if self.cnt < len(self.message) else ""
-                        if api_name and isinstance(res_data, dict):
-                            self.reference_context[f"/{api_name}"] = res_data
+                        # api_name = self.message[self.cnt] if self.cnt < len(self.message) else ""
+                        # if api_name:
+                        #     request_data = self._load_from_trace_file(api_name, "REQUEST")
+                        #     if request_data and isinstance(request_data, dict):
+                        #         self.reference_context[f"/{api_name}"] = request_data
+                        #         print(f"[SYSTEM] 맥락: /{api_name} (trace)")
+
                         
                         if self.message[self.cnt] == "Authentication":
                             self.handle_authentication_response(res_data)
