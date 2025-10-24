@@ -237,6 +237,7 @@ class MainWindow(QMainWindow):
                 self.stack.addWidget(self._system_widget)
             self.stack.setCurrentWidget(self._system_widget)
 
+        # 1.2로 했을때 통합플랫폼으로 들어가야함
         elif "통합플랫폼" in test_group_name:
             # 통합플랫폼: 메인 창=Platform, 새 창=System
             print("→ 통합플랫폼: 메인 창=Platform")
