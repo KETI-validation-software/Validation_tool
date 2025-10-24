@@ -8,14 +8,14 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소 
 #test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
-company_name = "통합플랫폼테스트"
-product_name = "통합플랫폼테스트제품"
+company_name = "물리보안기업"
+product_name = "물리보안테스트제품"
 version = "v1.0"
 test_category = "MAIN_TEST"
 test_target = "통합플랫폼"
 test_range = "ALL_FIELDS"
-auth_type = "Bearer Token"
-auth_info = "a"
+auth_type = "Digest Auth"
+auth_info = "admin,1234"
 admin_code = "1234"
 url = "https://127.0.0.1:8080"
 
@@ -52,15 +52,21 @@ enable_retry_delay = False  # False 권장: 불필요한 sleep 제거
 # ✅ specification.id별 설정 (신규 통합 방식)
 # 플랫폼(cmg90, cmg7e, cmg7b)
 # 시스템(cmgat, cmgas, cmga0)
-SPEC_CONFIG = {
-    "cmgvieyak001b6cd04cgaawmm": {
+
+SPEC_CONFIG = [
+    {
+        "group_name": "물리보안",
+        "group_id": "cmgzwohuq01y8vsvep0hpuuf4",
+        "cmgyv3rzl014nvsveidu5jpzp": {
+
     "test_name": "영상보안시스템_new",
     "specs": ['cmgvieyak001b6cd04cgaawmm_inSchema', 'cmgvieyak001b6cd04cgaawmm_outData', 'cmgvieyak001b6cd04cgaawmm_messages', 'cmgvieyak001b6cd04cgaawmm_webhook_outSchema', 'cmgvieyak001b6cd04cgaawmm_webhook_inData'],
     "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'WebHook', 'basic'],
     "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
     "num_retries": [1, 1, 1, 1, 1, 1, 1, 1]
 }
-}
+    }
+]
 
 
 #etc
@@ -91,4 +97,158 @@ digest_security_res = [
    '5196b2513bbc86a08386720240053b2a29a628aac0e1fdaf372e7f220e984538',
    '99f13e073da1f5e4e6db0d37d9f99285e4439ef57820518067ce56847613239f',
    'a723679b7b81137cb0b560428ea120fc3468ca3f2c3d2bc120a2f9a84b3a5a49'
+]
+
+SPEC_CONFIG = [
+    {
+        "group_name": "통합플랫폼",
+        "group_id": "cmgzwocpp01y6vsve880sfysm",
+        "cmgvieyak001b6cd04cgaawmm": {
+    "test_name": "영상보안시스템_new",
+    "specs": ['cmgvieyak001b6cd04cgaawmm_inSchema', 'cmgvieyak001b6cd04cgaawmm_outData', 'cmgvieyak001b6cd04cgaawmm_messages', 'cmgvieyak001b6cd04cgaawmm_webhook_outSchema', 'cmgvieyak001b6cd04cgaawmm_webhook_inData'],
+    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'WebHook', 'basic'],
+    "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
+    "num_retries": [1, 1, 1, 1, 1, 1, 1, 1]
+}
+    }
+]
+
+SPEC_CONFIG = [
+    {
+        "group_name": "통합플랫폼",
+        "group_id": "cmgzwocpp01y6vsve880sfysm",
+        "cmgvieyak001b6cd04cgaawmm": {
+    "test_name": "영상보안시스템_new",
+    "specs": ['cmgvieyak001b6cd04cgaawmm_inSchema', 'cmgvieyak001b6cd04cgaawmm_outData', 'cmgvieyak001b6cd04cgaawmm_messages', 'cmgvieyak001b6cd04cgaawmm_webhook_outSchema', 'cmgvieyak001b6cd04cgaawmm_webhook_inData'],
+    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'WebHook', 'basic'],
+    "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
+    "num_retries": [1, 1, 1, 1, 1, 1, 1, 1]
+}
+    }
+]
+
+SPEC_CONFIG = [
+    {
+        "group_name": "물리보안",
+        "group_id": "cmgzwohuq01y8vsvep0hpuuf4",
+        "cmgyv3rzl014nvsveidu5jpzp": {
+    "test_name": "영상보안시스템_new",
+    "specs": ['cmgyv3rzl014nvsveidu5jpzp_outSchema', 'cmgyv3rzl014nvsveidu5jpzp_inData', 'cmgyv3rzl014nvsveidu5jpzp_messages', 'cmgyv3rzl014nvsveidu5jpzp_webhook_inSchema', 'cmgyv3rzl014nvsveidu5jpzp_webhook_outData'],
+    "trans_protocol": [],
+    "time_out": [],
+    "num_retries": []
+}
+    }
+]
+
+SPEC_CONFIG = [
+    {
+        "group_name": "물리보안",
+        "group_id": "cmgzwohuq01y8vsvep0hpuuf4",
+        "cmgyv3rzl014nvsveidu5jpzp": {
+    "test_name": "영상보안시스템_new",
+    "specs": ['cmgyv3rzl014nvsveidu5jpzp_outSchema', 'cmgyv3rzl014nvsveidu5jpzp_inData', 'cmgyv3rzl014nvsveidu5jpzp_messages', 'cmgyv3rzl014nvsveidu5jpzp_webhook_inSchema', 'cmgyv3rzl014nvsveidu5jpzp_webhook_outData'],
+    "trans_protocol": [],
+    "time_out": [],
+    "num_retries": []
+}
+    }
+]
+
+SPEC_CONFIG = [
+    {
+        "group_name": "물리보안",
+        "group_id": "cmgzwohuq01y8vsvep0hpuuf4",
+        "cmgyv3rzl014nvsveidu5jpzp": {
+    "test_name": "영상보안시스템_new",
+    "specs": ['cmgyv3rzl014nvsveidu5jpzp_outSchema', 'cmgyv3rzl014nvsveidu5jpzp_inData', 'cmgyv3rzl014nvsveidu5jpzp_messages', 'cmgyv3rzl014nvsveidu5jpzp_webhook_inSchema', 'cmgyv3rzl014nvsveidu5jpzp_webhook_outData'],
+    "trans_protocol": [],
+    "time_out": [],
+    "num_retries": []
+}
+    }
+]
+
+SPEC_CONFIG = [
+    {
+        "group_name": "물리보안",
+        "group_id": "cmgzwohuq01y8vsvep0hpuuf4",
+        "cmgyv3rzl014nvsveidu5jpzp": {
+    "test_name": "영상보안시스템_new",
+    "specs": ['cmgyv3rzl014nvsveidu5jpzp_outSchema', 'cmgyv3rzl014nvsveidu5jpzp_inData', 'cmgyv3rzl014nvsveidu5jpzp_messages', 'cmgyv3rzl014nvsveidu5jpzp_webhook_inSchema', 'cmgyv3rzl014nvsveidu5jpzp_webhook_outData'],
+    "trans_protocol": [],
+    "time_out": [],
+    "num_retries": []
+}
+    }
+]
+
+SPEC_CONFIG = [
+    {
+        "group_name": "물리보안",
+        "group_id": "cmgzwohuq01y8vsvep0hpuuf4",
+        "cmgyv3rzl014nvsveidu5jpzp": {
+    "test_name": "영상보안시스템_new",
+    "specs": ['cmgyv3rzl014nvsveidu5jpzp_outSchema', 'cmgyv3rzl014nvsveidu5jpzp_inData', 'cmgyv3rzl014nvsveidu5jpzp_messages', 'cmgyv3rzl014nvsveidu5jpzp_webhook_inSchema', 'cmgyv3rzl014nvsveidu5jpzp_webhook_outData'],
+    "trans_protocol": [],
+    "time_out": [],
+    "num_retries": []
+}
+    }
+]
+
+SPEC_CONFIG = [
+    {
+        "group_name": "물리보안",
+        "group_id": "cmgzwohuq01y8vsvep0hpuuf4",
+        "cmgyv3rzl014nvsveidu5jpzp": {
+    "test_name": "영상보안시스템_new",
+    "specs": ['cmgyv3rzl014nvsveidu5jpzp_outSchema', 'cmgyv3rzl014nvsveidu5jpzp_inData', 'cmgyv3rzl014nvsveidu5jpzp_messages', 'cmgyv3rzl014nvsveidu5jpzp_webhook_inSchema', 'cmgyv3rzl014nvsveidu5jpzp_webhook_outData'],
+    "trans_protocol": [],
+    "time_out": [],
+    "num_retries": []
+}
+    }
+]
+
+SPEC_CONFIG = [
+    {
+        "group_name": "물리보안",
+        "group_id": "cmgzwohuq01y8vsvep0hpuuf4",
+        "cmgyv3rzl014nvsveidu5jpzp": {
+    "test_name": "영상보안시스템_new",
+    "specs": ['cmgyv3rzl014nvsveidu5jpzp_outSchema', 'cmgyv3rzl014nvsveidu5jpzp_inData', 'cmgyv3rzl014nvsveidu5jpzp_messages', 'cmgyv3rzl014nvsveidu5jpzp_webhook_inSchema', 'cmgyv3rzl014nvsveidu5jpzp_webhook_outData'],
+    "trans_protocol": [],
+    "time_out": [],
+    "num_retries": []
+}
+    }
+]
+
+SPEC_CONFIG = [
+    {
+        "group_name": "물리보안",
+        "group_id": "cmgzwohuq01y8vsvep0hpuuf4",
+        "cmgyv3rzl014nvsveidu5jpzp": {
+    "test_name": "영상보안시스템_new",
+    "specs": ['cmgyv3rzl014nvsveidu5jpzp_outSchema', 'cmgyv3rzl014nvsveidu5jpzp_inData', 'cmgyv3rzl014nvsveidu5jpzp_messages', 'cmgyv3rzl014nvsveidu5jpzp_webhook_inSchema', 'cmgyv3rzl014nvsveidu5jpzp_webhook_outData'],
+    "trans_protocol": [],
+    "time_out": [],
+    "num_retries": []
+}
+    }
+]
+
+SPEC_CONFIG = [
+    {
+        "group_name": "물리보안",
+        "group_id": "cmgzwohuq01y8vsvep0hpuuf4",
+        "cmgyv3rzl014nvsveidu5jpzp": {
+    "test_name": "영상보안시스템_new",
+    "specs": ['cmgyv3rzl014nvsveidu5jpzp_outSchema', 'cmgyv3rzl014nvsveidu5jpzp_inData', 'cmgyv3rzl014nvsveidu5jpzp_messages', 'cmgyv3rzl014nvsveidu5jpzp_webhook_inSchema', 'cmgyv3rzl014nvsveidu5jpzp_webhook_outData'],
+    "trans_protocol": [],
+    "time_out": [],
+    "num_retries": []
+}
+    }
 ]
