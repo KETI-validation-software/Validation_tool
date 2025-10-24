@@ -61,8 +61,8 @@ cmgyv3rzl014nvsveidu5jpzp_ReplayURL_out_validation = {
     "validationType": "request-field-range-match",
     "referenceFieldMax": "endTime",
     "referenceFieldMin": "startTime",
-    "referenceEndpointMax": "/ReplayURL",
-    "referenceEndpointMin": "/ReplayURL",
+    "referenceEndpointMax": "/RealtimeVideoEventInfos",
+    "referenceEndpointMin": "/RealtimeVideoEventInfos",
     "referenceRangeOperator": "between"
   },
   "camList.endTime": {
@@ -70,8 +70,8 @@ cmgyv3rzl014nvsveidu5jpzp_ReplayURL_out_validation = {
     "validationType": "request-field-range-match",
     "referenceFieldMax": "endTime",
     "referenceFieldMin": "startTime",
-    "referenceEndpointMax": "/ReplayURL",
-    "referenceEndpointMin": "/ReplayURL",
+    "referenceEndpointMax": "/RealtimeVideoEventInfos",
+    "referenceEndpointMin": "/RealtimeVideoEventInfos",
     "referenceRangeOperator": "between"
   }
 }
