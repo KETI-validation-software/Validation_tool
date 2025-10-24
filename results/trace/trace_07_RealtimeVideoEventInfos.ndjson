@@ -1,4 +1,9 @@
+<<<<<<< HEAD
+{"time": "2025-10-24T06:27:06.344438Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "", "eventUUID": "", "eventName": "", "startTime": 0, "endTime": 0, "eventDesc": ""}]}}
+{"time": "2025-10-24T06:27:07.343002Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}
+=======
 
 {"time": "2025-10-23T07:48:27.881410Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "", "eventUUID": "", "eventName": "", "startTime": 0, "endTime": 0, "eventDesc": ""}]}}
 {"time": "2025-10-23T07:48:28.875377Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}
 
+>>>>>>> 56257ed8d265be6d3105f32e763803e2061e5308
