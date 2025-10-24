@@ -765,6 +765,7 @@ class MyApp(QWidget):
         
         if not config:
             raise ValueError(f"spec_id '{self.current_spec_id}'에 대한 설정을 찾을 수 없습니다!")
+            return
         
         # ✅ 설정 정보 추출
         self.spec_description = config.get('test_name', 'Unknown Test')
@@ -893,9 +894,9 @@ class MyApp(QWidget):
         """
         ✅ System은 Response 검증만 - Response 스키마 ID만 표시 (3개)
         """
-        group = QGroupBox("시험 분야")
+        group_box = QGroupBox("시험 분야")  # ← 변수명 변경
         layout = QVBoxLayout()
-        
+    
         self.test_field_table = QTableWidget(0, 1)
         self.test_field_table.setHorizontalHeaderLabels(["시험 분야명"])
         self.test_field_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
@@ -903,19 +904,21 @@ class MyApp(QWidget):
         self.test_field_table.cellClicked.connect(self.on_test_field_selected)
         self.test_field_table.verticalHeader().setVisible(False)
         self.test_field_table.setMaximumHeight(200)
-        
-        # response 스펙 ID 목록 
-        response_spec_ids = list(CONSTANTS.SPEC_CONFIG.keys())
-        
-        if hasattr(CONSTANTS, 'SPEC_CONFIG') and CONSTANTS.SPEC_CONFIG:
-            spec_items = [(sid, CONSTANTS.SPEC_CONFIG[sid]) for sid in response_spec_ids if sid in CONSTANTS.SPEC_CONFIG]
-            
+    
+        # 🔥 SPEC_CONFIG에서 spec_id와 config 추출 (리스트 구조 대응)
+        spec_items = []
+        for group_data in CONSTANTS.SPEC_CONFIG:  # ← 변수명 변경
+            for key, value in group_data.items():
+                if key not in ['group_name', 'group_id'] and isinstance(value, dict):
+                    spec_items.append((key, value))  # ← 이미 (key, value) 튜플
+    
+        if spec_items:  # ← 바로 사용
             self.test_field_table.setRowCount(len(spec_items))
-            
+        
             # spec_id와 인덱스 매핑 저장
             self.spec_id_to_index = {}
             self.index_to_spec_id = {}
-            
+        
             for idx, (spec_id, config) in enumerate(spec_items):
                 description = config.get('test_name', f'시험 분야 {idx + 1}')
                 # ✅ 시스템은 응답 검증 역할 명시
@@ -923,20 +926,20 @@ class MyApp(QWidget):
                 item = QTableWidgetItem(description_with_role)
                 item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
                 self.test_field_table.setItem(idx, 0, item)
-                
-                # 매핑 저장 
+            
+                # 매핑 저장
                 self.spec_id_to_index[spec_id] = idx
                 self.index_to_spec_id[idx] = spec_id
-            
+        
             # 현재 로드된 spec_id 선택
             if self.current_spec_id in self.spec_id_to_index:
                 current_index = self.spec_id_to_index[self.current_spec_id]
                 self.test_field_table.selectRow(current_index)
                 self.selected_test_field_row = current_index
-        
+    
         layout.addWidget(self.test_field_table)
-        group.setLayout(layout)
-        return group
+        group_box.setLayout(layout)  # ← group_box 사용
+        return group_box  # ← group_box 반환
     
     def on_test_field_selected(self, row, col):
         """
