@@ -93,7 +93,7 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
     data:   실제 응답 데이터(dict 권장)
     flag:   옵션(기존 그대로)
     validation_rules: (선택) 의미 검증 규칙 dict
-        - 예: validation_request.py 의 각 *_in_validation 중 해당 API 것
+        - 예: Validation_request.py 의 각 *_in_validation 중 해당 API 것
         - 없으면 의미 검증을 건너뜀
     reference_context: (선택) 다른 엔드포인트 응답 사전
         - 예: {"/CameraProfiles": <CameraProfiles 응답 dict>, ...}
