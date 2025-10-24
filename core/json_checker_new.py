@@ -10,6 +10,7 @@ def safe_hash(obj):
         return json.dumps(obj, sort_keys=True)
     return obj
 
+
 def collect_all_values_by_key(data, key):
     """
     중첩된 dict/list 구조에서 특정 키의 모든 값을 재귀적으로 수집
