@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+{"time": "2025-10-24T06:27:09.383481Z", "api": "StoredVideoEventInfos", "dir": "REQUEST", "data": {"timePeriod": {"startTime": 1759221900000, "endTime": 1761727500000}, "camList": [{"camID": ""}], "maxCount": 3, "eventFilter": "", "classFilter": ""}}
+{"time": "2025-10-24T06:27:09.384479Z", "api": "StoredVideoEventInfos", "dir": "RESPONSE", "data": {"code": "401", "message": "인증 오류"}}
+=======
 
 {"time": "2025-10-23T07:48:30.901347Z", "api": "StoredVideoEventInfos", "dir": "REQUEST", "data": {"timePeriod": {"startTime": 1759221900000, "endTime": 1761727500000}, "camList": [{"camID": ""}], "maxCount": 3, "eventFilter": "", "classFilter": ""}}
 {"time": "2025-10-23T07:48:30.902345Z", "api": "StoredVideoEventInfos", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "camList": [{"camID": "", "eventUUID": "event01", "eventName": "", "startTime": "", "endTime": "", "eventDesc": "aaabbbAAA"}]}}
+>>>>>>> 56257ed8d265be6d3105f32e763803e2061e5308
