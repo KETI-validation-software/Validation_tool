@@ -842,13 +842,8 @@ class FormValidator:
             # 4. 관리자 코드 (GUI 입력값만 사용)
             variables['admin_code'] = self.parent.admin_code_edit.text().strip()
 
-            # 5. API에서 프로토콜/타임아웃 정보 추출 및 SPEC_CONFIG 업데이트
-            selected_spec_id = self._get_selected_test_field_spec_id()
-            if selected_spec_id:
-                # SPEC_CONFIG 딕셔너리 업데이트
-                spec_config_data = self._extract_spec_config_from_api(selected_spec_id)
-                if spec_config_data:
-                    self._update_spec_config(selected_spec_id, spec_config_data)
+            # 5. SPEC_CONFIG 전체 덮어쓰기 (모든 spec_id 포함)
+            self.overwrite_spec_config_from_mapping()
 
             # 6. 선택된 시험 분야의 인덱스 저장 (중요!)
             selected_spec_index = self._get_selected_spec_index()
@@ -1009,35 +1004,7 @@ class FormValidator:
             with open(constants_path, "r", encoding="utf-8") as f:
                 content = f.read()
 
-            # 2) SPEC_CONFIG = { ... } 블록 범위 찾기 (중첩 중괄호 안전 처리)
-            header = "SPEC_CONFIG = {"
-            spec_config_start = content.find(header)
-            if spec_config_start == -1:
-                # 없으면 새로 추가
-                spec_config_start = len(content)
-                end_pos = spec_config_start
-                current_config = ""
-            else:
-                # 블록 시작 '{' 위치
-                start_brace_pos = content.find("{", spec_config_start)
-                brace_count = 0
-                pos = start_brace_pos
-                end_pos = None
-                while pos < len(content):
-                    ch = content[pos]
-                    if ch == "{":
-                        brace_count += 1
-                    elif ch == "}":
-                        brace_count -= 1
-                        if brace_count == 0:
-                            end_pos = pos + 1  # '}' 포함
-                            break
-                    pos += 1
-                if end_pos is None:
-                    raise RuntimeError("SPEC_CONFIG 블록의 닫는 중괄호를 찾지 못했습니다.")
-                current_config = content[spec_config_start:end_pos]
-
-            # 3) merged_result를 SPEC_CONFIG용 문자열로 재구성
+            # 2) merged_result를 SPEC_CONFIG용 문자열로 재구성
             #    - spec_id는 merged_result의 key
             #    - specs는 해당 파일들에 있는 리스트 변수명을 모두 합쳐 중복 제거 + 정렬
             entries = []
@@ -1110,6 +1077,8 @@ class FormValidator:
             # 그룹 정보 추가 (리스트 형태로 여러 그룹 지원)
             # parent에 저장된 모든 그룹 정보 사용
             test_groups = getattr(self.parent, 'test_groups', [])
+            print(f"[DEBUG] overwrite_spec_config_from_mapping - test_groups: {test_groups}")
+            print(f"[DEBUG] test_groups 개수: {len(test_groups)}")
 
             if not test_groups:
                 # 그룹 정보가 없으면 기존 방식 사용
@@ -1146,13 +1115,38 @@ class FormValidator:
                 # SPEC_CONFIG = [ {...} ] 형태로 생성 (단일 항목으로 모든 그룹 정보 포함)
                 new_spec_config_block = f"SPEC_CONFIG = [\n    {{\n        {group_content}\n    }}\n]"
 
-            # 4) 콘텐츠에 반영 (덮어쓰기)
-            if current_config:
-                new_content = content.replace(current_config, new_spec_config_block, 1)
+            # 3) 모든 SPEC_CONFIG 블록 찾아서 첫 번째 것만 남기고 모두 삭제, 첫 번째 것은 새 내용으로 교체
+            import re
+            # SPEC_CONFIG = [ 로 시작해서 대괄호와 중괄호가 모두 닫힐 때까지의 블록 패턴
+            pattern = r'SPEC_CONFIG = \[[\s\S]*?\n\]'
+
+            # 모든 SPEC_CONFIG 블록 찾기
+            matches = list(re.finditer(pattern, content))
+
+            if not matches:
+                # SPEC_CONFIG가 하나도 없으면 "#etc" 주석 위에 새로 생성
+                etc_comment = "\n#etc"
+                etc_pos = content.find(etc_comment)
+                if etc_pos != -1:
+                    new_content = content[:etc_pos + 1] + new_spec_config_block + "\n\n" + content[etc_pos + 1:]
+                else:
+                    # #etc도 없으면 파일 끝에 추가
+                    new_content = content + "\n\n" + new_spec_config_block + "\n"
             else:
-                # 기존에 SPEC_CONFIG가 없던 경우 파일 끝에 추가
-                sep = "\n\n" if content and not content.endswith("\n") else "\n"
-                new_content = content + sep + new_spec_config_block + "\n"
+                # 첫 번째 SPEC_CONFIG를 새로운 내용으로 교체하고, 나머지는 모두 삭제
+                # 뒤에서부터 삭제해야 인덱스가 안 꼬임
+                temp_content = content
+                for match in reversed(matches[1:]):
+                    temp_content = temp_content[:match.start()] + temp_content[match.end():]
+
+                # 첫 번째 SPEC_CONFIG를 새로운 내용으로 교체
+                first_match_in_temp = re.search(pattern, temp_content)
+                if first_match_in_temp:
+                    new_content = (temp_content[:first_match_in_temp.start()] +
+                                 new_spec_config_block +
+                                 temp_content[first_match_in_temp.end():])
+                else:
+                    new_content = temp_content
 
             with open(constants_path, "w", encoding="utf-8") as f:
                 f.write(new_content)
@@ -1165,31 +1159,32 @@ class FormValidator:
             traceback.print_exc()
 
     def _update_spec_config(self, spec_id, config_data):
-        """CONSTANTS.py의 SPEC_CONFIG 딕셔너리에 spec_id별 설정 업데이트"""
+        """CONSTANTS.py의 SPEC_CONFIG 리스트에 spec_id별 설정 업데이트"""
         try:
             constants_path = "config/CONSTANTS.py"
 
             with open(constants_path, 'r', encoding='utf-8') as f:
                 content = f.read()
 
-            # SPEC_CONFIG 딕셔너리 찾기 (중첩된 구조 처리)
-            spec_config_start = content.find('SPEC_CONFIG = {')
+            # SPEC_CONFIG 리스트 찾기 (새로운 형태: SPEC_CONFIG = [{...}])
+            spec_config_start = content.find('SPEC_CONFIG = [')
             if spec_config_start == -1:
-                print("경고: SPEC_CONFIG 딕셔너리를 찾을 수 없습니다.")
+                print("경고: SPEC_CONFIG 리스트를 찾을 수 없습니다.")
                 return
 
-            # 중괄호 개수를 세면서 끝 위치 찾기
+            # 대괄호와 중괄호 개수를 세면서 끝 위치 찾기
+            bracket_count = 0
             brace_count = 0
-            start_pos = content.find('{', spec_config_start)
+            start_pos = content.find('[', spec_config_start)
             current_pos = start_pos
 
             while current_pos < len(content):
-                if content[current_pos] == '{':
-                    brace_count += 1
-                elif content[current_pos] == '}':
-                    brace_count -= 1
-                    if brace_count == 0:
-                        # SPEC_CONFIG의 끝 } 발견
+                if content[current_pos] == '[':
+                    bracket_count += 1
+                elif content[current_pos] == ']':
+                    bracket_count -= 1
+                    if bracket_count == 0:
+                        # SPEC_CONFIG의 끝 ] 발견
                         end_pos = current_pos + 1
                         break
                 current_pos += 1
@@ -1573,7 +1568,8 @@ class FormValidator:
         loaded, skipped = 0, 0
 
         for row in range(row_count):
-            item = table.item(row, 0)
+            # spec_id는 두 번째 컬럼(1번)에 저장되어 있음
+            item = table.item(row, 1)
             if not item:
                 continue
             spec_id = item.data(Qt.UserRole)
