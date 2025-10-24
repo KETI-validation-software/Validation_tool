@@ -1095,25 +1095,44 @@ class FormValidator:
                 group_content = ",\n        ".join(all_group_entries)
                 new_spec_config_block = f"SPEC_CONFIG = [\n    {{\n        {group_content}\n    }}\n]"
             else:
-                # 여러 그룹을 하나로 합쳐서 저장 (그룹 이름은 콤마로 연결)
-                group_names = [g.get("name", "") for g in test_groups]
-                combined_group_names = ", ".join(group_names)
+                # 여러 그룹을 그룹별로 분리하여 저장
+                # entries를 spec_id별로 딕셔너리로 변환 (나중에 그룹별로 필터링하기 위함)
+                entries_dict = {}
+                for entry in entries:
+                    # entry는 '"spec_id": {...}' 형태의 문자열
+                    # spec_id 추출
+                    spec_id = entry.split('"')[1]  # 첫 번째 따옴표 안의 내용
+                    entries_dict[spec_id] = entry
 
-                group_ids = [g.get("id", "") for g in test_groups]
-                combined_group_ids = ", ".join(group_ids)
+                # 각 그룹별로 딕셔너리 생성
+                group_blocks = []
+                for group in test_groups:
+                    group_name = group.get("name", "")
+                    group_id = group.get("id", "")
+                    group_specs = group.get("testSpecs", [])
 
-                group_fields = []
-                if combined_group_names:
-                    group_fields.append(f'"group_name": "{combined_group_names}"')
-                if combined_group_ids:
-                    group_fields.append(f'"group_id": "{combined_group_ids}"')
+                    # 이 그룹에 속한 spec_id만 필터링
+                    group_spec_ids = [spec.get("id") for spec in group_specs]
+                    group_entries = [entries_dict[sid] for sid in group_spec_ids if sid in entries_dict]
 
-                # 그룹 내부 전체 내용
-                all_group_entries = group_fields + entries
-                group_content = ",\n        ".join(all_group_entries)
+                    # 그룹 필드 생성
+                    group_fields = []
+                    if group_name:
+                        group_fields.append(f'"group_name": "{group_name}"')
+                    if group_id:
+                        group_fields.append(f'"group_id": "{group_id}"')
 
-                # SPEC_CONFIG = [ {...} ] 형태로 생성 (단일 항목으로 모든 그룹 정보 포함)
-                new_spec_config_block = f"SPEC_CONFIG = [\n    {{\n        {group_content}\n    }}\n]"
+                    # 그룹 내부 전체 내용
+                    all_group_entries = group_fields + group_entries
+                    group_content = ",\n        ".join(all_group_entries)
+
+                    # 각 그룹을 딕셔너리 형태로 추가
+                    group_block = f"    {{\n        {group_content}\n    }}"
+                    group_blocks.append(group_block)
+
+                # 모든 그룹 블록을 콤마로 연결
+                all_groups_content = ",\n".join(group_blocks)
+                new_spec_config_block = f"SPEC_CONFIG = [\n{all_groups_content}\n]"
 
             # 3) 모든 SPEC_CONFIG 블록 찾아서 첫 번째 것만 남기고 모두 삭제, 첫 번째 것은 새 내용으로 교체
             import re
