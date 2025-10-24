@@ -50,15 +50,15 @@ def _collect_from_module(mod: ModuleType) -> Dict[str, Dict[str, Dict[str, Any]]
 
 @lru_cache(maxsize=16)
 def build_validation_registry(
-    request_module_path: str = "spec.validation_request",
-    response_module_path: str = "spec.validation_response",
+    request_module_path: str = "spec.Validation_request",
+    response_module_path: str = "spec.Validation_response",
 ) -> Dict[str, Dict[str, Dict[str, Any]]]:
 
     """
     검증 규칙 레지스트리 빌드
     
     구조:
-        - validation_request.py: _in_validation (플랫폼→시스템 요청)
+        - Validation_request.py: _in_validation (플랫폼→시스템 요청)
         - validation_response.py: _out_validation (시스템→플랫폼 응답)
     
     Returns:
@@ -98,8 +98,8 @@ def get_validation_rules(
     spec_id: str,
     api_name: str,
     direction: str,
-    request_module_path: str = "spec.validation_request",
-    response_module_path: str = "spec.validation_response",
+    request_module_path: str = "spec.Validation_request",
+    response_module_path: str = "spec.Validation_response",
 ) -> Dict[str, Any]:
     """
     검증 규칙 반환
@@ -110,7 +110,7 @@ def get_validation_rules(
         api_name: API 이름 (예: 'StreamURLs', 'StoredVideoInfos')
         direction: 검증 방향
             - "in": 플랫폼→시스템 요청 검증
-                   (platformVal에서 사용, validation_request.py)
+                   (platformVal에서 사용, Validation_request.py)
             - "out": 시스템→플랫폼 응답 검증
                     (systemVal에서 사용, validation_response.py)
         request_module_path: 요청 검증 규칙 모듈 경로

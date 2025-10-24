@@ -782,6 +782,8 @@ class MyApp(QWidget):
         print(f"[PLATFORM] 📁 모듈: spec (센서/바이오/영상 통합)")
         import spec.Schema_request as schema_request_module
         import spec.Data_response as data_response_module
+        import spec.Constraints_response as constraints_response_module
+
         # ✅ 플랫폼은 요청 검증 + 응답 전송 (inSchema/outData 사용)
         print(f"[PLATFORM] 🔧 타입: 요청 검증 + 응답 전송")
         
@@ -792,8 +794,9 @@ class MyApp(QWidget):
         self.videoOutMessage = getattr(data_response_module, spec_names[1], [])
         #self.videoOutConstraint = getattr(constraints_response_module, self.current_spec_id+"_OutConstraints", [])
         self.videoMessages = getattr(data_response_module, spec_names[2], [])
-
+        self.videoOutConstraint = getattr(constraints_response_module, self.current_spec_id+"_OutConstraints", [])
         # ✅ Webhook 관련 (영상보안 시스템만 사용)
+
         self.videoWebhookSchema = []
         self.videoWebhookData = []
         self.videoWebhookInSchema = []
@@ -1578,7 +1581,7 @@ class MyApp(QWidget):
                     self.Server.cnt = 0
                     self.Server.message = self.videoMessages
                     self.Server.outMessage = self.videoOutMessage
-                    # self.Server.outCon = self.videoOutConstraint
+                    self.Server.outCon = self.videoOutConstraint
                     self.Server.inSchema = self.videoInSchema
                     self.Server.webhookSchema = self.videoWebhookSchema
                     self.Server.webhookData = self.videoWebhookData
@@ -2104,6 +2107,7 @@ class MyApp(QWidget):
             self.Server.message = self.videoMessages
             self.Server.outMessage = self.videoOutMessage
             self.Server.inSchema = self.videoInSchema
+            self.Server.outCon = self.videoOutConstraint
             self.Server.webhookData = self.videoWebhookData  # ✅ 웹훅 이벤트 데이터 (플랫폼 → 시스템)
             self.Server.system = "video"
             self.Server.timeout = timeout

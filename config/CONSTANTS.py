@@ -16,7 +16,7 @@ test_target = "통합플랫폼"
 test_range = "ALL_FIELDS"
 auth_type = "Bearer Token"
 auth_info = "a"
-admin_code = "1234"
+admin_code = "1"
 url = "https://127.0.0.1:8080"
 
 specs = [["cmgvieyak001b6cd04cgaawmm_inSchema","cmgvieyak001b6cd04cgaawmm_outData","cmgvieyak001b6cd04cgaawmm_messages",""]]
@@ -58,7 +58,7 @@ SPEC_CONFIG = [
     "test_name": "영상보안시스템_new",
     "specs": ['cmgvieyak001b6cd04cgaawmm_inSchema', 'cmgvieyak001b6cd04cgaawmm_outData', 'cmgvieyak001b6cd04cgaawmm_messages', 'cmgvieyak001b6cd04cgaawmm_webhook_outSchema', 'cmgvieyak001b6cd04cgaawmm_webhook_inData'],
     "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'WebHook', 'basic'],
-    "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
+    "time_out": [10000, 10000, 10000, 5000, 5000, 5000, 5000, 5000],
     "num_retries": [1, 1, 1, 1, 1, 1, 1, 1]
 }
     }
