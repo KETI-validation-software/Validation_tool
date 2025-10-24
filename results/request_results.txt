@@ -1,4 +1,5 @@
 === 시험 결과 ===
+
 통과 필드 수: 22
 전체 필드 수: 34
 종합 평가 점수: 64.7%
@@ -13,14 +14,17 @@
 7. RealtimeVideoEventInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 4 | 전체 필드 수: 9 | 실패 필드 수: 5 | 평가 점수: 44.4%
 8. StoredVideoEventInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 5 | 전체 필드 수: 8 | 실패 필드 수: 3 | 평가 점수: 62.5%
 
+
 === 전체 로그 ===
 Start Validation...
 
 step 1: Authentication
+
 🔄 부하테스트 시작: 총 1회 검증 예정
 📨 시스템 요청 수신, 검증 중... [1/1]
 
 ✅ 부하테스트 완료: 1회 검증 완료
+
 프로토콜: basic
 
 [시도 1회차]
@@ -28,21 +32,53 @@ step 1: Authentication
     "userID": "user0001",
     "userPW": "pass0001"
 }
+
+
 PASS
 Score : 0
 Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
 
 step 2: Capabilities
+
 🔄 부하테스트 시작: 총 1회 검증 예정
 📨 시스템 요청 수신, 검증 중... [1/1]
 
-✅ 부하테스트 완료: 1회 검증 완료
+
+✅ 부하테스트 완료: 10회 검증 완료
 프로토콜: basic
 
 [시도 1회차]
 {}
+
+[시도 2회차]
+{}
+
+[시도 3회차]
+{}
+
+[시도 4회차]
+{}
+
+[시도 5회차]
+{}
+
+[시도 6회차]
+{}
+
+[시도 7회차]
+{}
+
+[시도 8회차]
+{}
+
+[시도 9회차]
+{}
+
+[시도 10회차]
+{}
 PASS
 Score : 100.0
+
 Score details : 1(누적 통과 필드 수), 0(누적 오류 필드 수)
 
 step 3: CameraProfiles
@@ -54,6 +90,7 @@ step 3: CameraProfiles
 
 [시도 1회차]
 {}
+
 PASS
 Score : 100.0
 Score details : 2(누적 통과 필드 수), 0(누적 오류 필드 수)
@@ -63,6 +100,7 @@ step 4: StoredVideoInfos
 📨 시스템 요청 수신, 검증 중... [1/1]
 
 ✅ 부하테스트 완료: 1회 검증 완료
+
 프로토콜: basic
 
 [시도 1회차]
@@ -77,6 +115,7 @@ step 4: StoredVideoInfos
         }
     ]
 }
+
 FAIL
 Score : 71.42857142857143
 Score details : 5(누적 통과 필드 수), 2(누적 오류 필드 수)
@@ -97,6 +136,7 @@ step 5: StreamURLs
         }
     ]
 }
+
 FAIL
 Score : 72.72727272727273
 Score details : 8(누적 통과 필드 수), 3(누적 오류 필드 수)
@@ -119,6 +159,7 @@ step 6: ReplayURL
         }
     ]
 }
+
 FAIL
 Score : 76.47058823529412
 Score details : 13(누적 통과 필드 수), 4(누적 오류 필드 수)
@@ -146,6 +187,7 @@ step 7: RealtimeVideoEventInfos
 
 --- Webhook 응답 ---
 null
+
 FAIL
 Score : 65.38461538461539
 Score details : 17(누적 통과 필드 수), 9(누적 오류 필드 수)
@@ -155,6 +197,7 @@ step 8: StoredVideoEventInfos
 📨 시스템 요청 수신, 검증 중... [1/1]
 
 ✅ 부하테스트 완료: 1회 검증 완료
+
 프로토콜: basic
 
 [시도 1회차]
@@ -172,6 +215,7 @@ step 8: StoredVideoEventInfos
     "eventFilter": "",
     "classFilter": ""
 }
+
 FAIL
 Score : 64.70588235294117
 Score details : 22(누적 통과 필드 수), 12(누적 오류 필드 수)
