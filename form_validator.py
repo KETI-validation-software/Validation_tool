@@ -1107,8 +1107,44 @@ class FormValidator:
                 )
                 entries.append(entry)
 
-            # SPEC_CONFIG 전체 문자열
-            new_spec_config_block = "SPEC_CONFIG = {\n    " + ",\n    ".join(entries) + "\n}"
+            # 그룹 정보 추가 (리스트 형태로 여러 그룹 지원)
+            # parent에 저장된 모든 그룹 정보 사용
+            test_groups = getattr(self.parent, 'test_groups', [])
+
+            if not test_groups:
+                # 그룹 정보가 없으면 기존 방식 사용
+                group_id = getattr(self.parent, 'test_group_id', "")
+                group_name = getattr(self.parent, 'test_group_name', "")
+
+                group_fields = []
+                if group_name:
+                    group_fields.append(f'"group_name": "{group_name}"')
+                if group_id:
+                    group_fields.append(f'"group_id": "{group_id}"')
+
+                all_group_entries = group_fields + entries
+                group_content = ",\n        ".join(all_group_entries)
+                new_spec_config_block = f"SPEC_CONFIG = [\n    {{\n        {group_content}\n    }}\n]"
+            else:
+                # 여러 그룹을 하나로 합쳐서 저장 (그룹 이름은 콤마로 연결)
+                group_names = [g.get("name", "") for g in test_groups]
+                combined_group_names = ", ".join(group_names)
+
+                group_ids = [g.get("id", "") for g in test_groups]
+                combined_group_ids = ", ".join(group_ids)
+
+                group_fields = []
+                if combined_group_names:
+                    group_fields.append(f'"group_name": "{combined_group_names}"')
+                if combined_group_ids:
+                    group_fields.append(f'"group_id": "{combined_group_ids}"')
+
+                # 그룹 내부 전체 내용
+                all_group_entries = group_fields + entries
+                group_content = ",\n        ".join(all_group_entries)
+
+                # SPEC_CONFIG = [ {...} ] 형태로 생성 (단일 항목으로 모든 그룹 정보 포함)
+                new_spec_config_block = f"SPEC_CONFIG = [\n    {{\n        {group_content}\n    }}\n]"
 
             # 4) 콘텐츠에 반영 (덮어쓰기)
             if current_config:
@@ -1271,7 +1307,7 @@ class FormValidator:
         return prefix_map
 
     def _get_selected_test_field_spec_id(self):
-        """시험 분야 테이블에서 마지막으로 클릭된 항목의 spec_id 반환"""
+        """시험 시나리오 테이블에서 마지막으로 클릭된 항목의 spec_id 반환"""
         try:
             # 마지막으로 클릭된 행 번호 사용
             if hasattr(self.parent, 'selected_test_field_row') and self.parent.selected_test_field_row is not None:
@@ -1342,21 +1378,34 @@ class FormValidator:
 
 
     def load_opt_files_from_api(self, test_data):
-        """API 데이터를 이용하여 OPT 파일 로드 및 스키마 생성"""
+        """API 데이터를 이용하여 OPT 파일 로드 및 스키마 생성 (모든 그룹 처리)"""
         try:
-            # test_specs 추출
-            test_group = test_data.get("testRequest", {}).get("testGroup", {})
-            test_specs = test_group.get("testSpecs", [])
+            # testGroups 배열에서 모든 그룹의 testSpecs 추출
+            test_groups = test_data.get("testRequest", {}).get("testGroups", [])
+            if not test_groups:
+                QMessageBox.warning(self.parent, "데이터 없음", "testGroups 데이터가 비어있습니다.")
+                return
 
-            if not test_specs:
+            # 모든 그룹의 testSpecs를 합치면서 그룹 이름도 함께 저장
+            all_test_specs_with_group = []
+            for group in test_groups:
+                group_name = group.get("name", "")
+                for spec in group.get("testSpecs", []):
+                    # 각 spec에 group_name 추가
+                    spec_with_group = spec.copy()
+                    spec_with_group["group_name"] = group_name
+                    all_test_specs_with_group.append(spec_with_group)
+
+            if not all_test_specs_with_group:
                 QMessageBox.warning(self.parent, "데이터 없음", "testSpecs 데이터가 비어있습니다.")
                 return
 
             print(f"\n=== API 기반 OPT 로드 시작 ===")
-            print(f"spec 개수: {len(test_specs)}개")
+            print(f"그룹 개수: {len(test_groups)}개")
+            print(f"전체 시나리오 개수: {len(all_test_specs_with_group)}개")
 
-            # 시험 분야 테이블 채우기 (testSpecs 기반)
-            self._fill_test_field_table_from_api(test_specs)
+            # 시험 시나리오 테이블 채우기 (그룹 정보 포함)
+            self._fill_test_field_table_from_api(all_test_specs_with_group)
             self.preload_all_spec_steps()
             self.preload_test_step_details_from_cache()
 
@@ -1365,7 +1414,7 @@ class FormValidator:
 
             # 모든 spec에 대해 개별 설정 업데이트 (trans_protocol, time_out, num_retries)
             print(f"\n=== SPEC_CONFIG 업데이트 시작 ===")
-            for spec in test_specs:
+            for spec in all_test_specs_with_group:  # all_test_specs_with_group 사용
                 spec_id = spec.get("id", "")
                 if spec_id:
                     spec_config_data = self._extract_spec_config_from_api(spec_id)
@@ -1394,7 +1443,7 @@ class FormValidator:
 
 
     def _fill_test_field_table_from_api(self, test_specs):
-        """API testSpecs 배열로부터 시험 분야 테이블 채우기"""
+        """API testSpecs 배열로부터 시험 시나리오 테이블 채우기 (2개 컬럼: 시험 분야명, 시험 시나리오명)"""
         try:
             from PyQt5.QtGui import QFont
 
@@ -1404,28 +1453,35 @@ class FormValidator:
             for i, spec in enumerate(test_specs):
                 spec_id = spec.get("id", "")
                 spec_name = spec.get("name", "")
+                group_name = spec.get("group_name", "")  # 그룹 이름
 
                 # spec_name을 캐시에 저장
                 self._spec_names_cache[spec_id] = spec_name
 
                 table.insertRow(i)
 
-                # 시험 분야명
-                field_item = QTableWidgetItem(spec_name)
-                field_item.setData(Qt.UserRole, spec_id)  # spec_id 저장
-
                 # 폰트 설정 (Noto Sans KR, Regular 400, 14px)
                 font = QFont("Noto Sans KR", 14)
                 font.setWeight(400)
                 font.setLetterSpacing(QFont.AbsoluteSpacing, 0.098)
-                field_item.setFont(font)
 
-                table.setItem(i, 0, field_item)
+                # 첫 번째 컬럼: 시험 분야명
+                group_item = QTableWidgetItem(group_name)
+                group_item.setFont(font)
+                group_item.setTextAlignment(Qt.AlignCenter)  # 가운데 정렬
+                table.setItem(i, 0, group_item)
 
-            print(f"시험 분야 테이블 채우기 완료: {len(test_specs)}개 항목")
+                # 두 번째 컬럼: 시험 시나리오명
+                scenario_item = QTableWidgetItem(spec_name)
+                scenario_item.setData(Qt.UserRole, spec_id)  # spec_id 저장
+                scenario_item.setFont(font)
+                scenario_item.setTextAlignment(Qt.AlignCenter)  # 가운데 정렬
+                table.setItem(i, 1, scenario_item)
+
+            print(f"시험 시나리오 테이블 채우기 완료: {len(test_specs)}개 항목")
 
         except Exception as e:
-            print(f"시험 분야 테이블 채우기 실패: {e}")
+            print(f"시험 시나리오 테이블 채우기 실패: {e}")
             import traceback
             traceback.print_exc()
 
@@ -1552,10 +1608,10 @@ class FormValidator:
 
 
     def _fill_api_table_for_selected_field_from_api(self, row):
-        """선택된 시험 분야의 API 테이블 채우기 (API 기반)"""
+        """선택된 시험 시나리오의 API 테이블 채우기 (API 기반)"""
         try:
-            # spec_id 추출
-            item = self.parent.test_field_table.item(row, 0)
+            # spec_id 추출 (두 번째 컬럼: 시험 시나리오명에서 가져오기)
+            item = self.parent.test_field_table.item(row, 1)
             if not item:
                 return
 
@@ -1589,13 +1645,21 @@ class FormValidator:
                 id_to_show = ""
 
                 if ts:
-                    # { "id": ..., "name": ..., "detail": {...} } 구조 가정
+                    # { "id": ..., "name": ..., "endpoint": ..., "detail": {...} } 구조
                     name_to_show = ts.get("name", "")
-                    id_to_show = "" if ts.get("endpoint") is None else str(ts.get("endpoint"))
+                    endpoint = ts.get("endpoint")
+                    id_to_show = "" if endpoint is None else str(endpoint)
                 else:
-                    # 백업: 캐시에 없으면 기존 steps 값 사용
-                    name_to_show = step.get("name", "")
-                    id_to_show = "" if step_id is None else str(step_id)
+                    # 백업: 캐시에 없으면 API 호출해서 endpoint 가져오기
+                    step_detail = self.fetch_test_step_by_id(step_id)
+                    if step_detail:
+                        endpoint = step_detail.get("step", {}).get("api", {}).get("endpoint", "")
+                        name_to_show = step_detail.get("step", {}).get("name", step.get("name", ""))
+                        id_to_show = str(endpoint) if endpoint else ""
+                    else:
+                        # API 호출 실패 시 step의 name만 사용
+                        name_to_show = step.get("name", "")
+                        id_to_show = ""
 
                 r = self.parent.api_test_table.rowCount()
                 self.parent.api_test_table.insertRow(r)
