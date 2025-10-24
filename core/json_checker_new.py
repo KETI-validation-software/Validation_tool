@@ -343,8 +343,9 @@ def do_semantic_checker(rules_dict, data_dict, reference_context=None):
 
             # 3) 검증 수행
             if isinstance(ref_list, (list, tuple)):
-                # 빈 문자열 필터링 (선택사항)
-                ref_list_filtered = [item for item in ref_list if item not in (None, '')]
+                # 빈 문자열 필터링 (선택사항) - 이 부분 확인해야함
+                # ref_list_filtered = [item for item in ref_list if item not in (None, '')]
+                ref_list_filtered = [item for item in ref_list if item is not None]
                 
                 if not safe_in_check(value, ref_list_filtered):
                     passed = False

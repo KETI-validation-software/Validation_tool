@@ -14,7 +14,8 @@ cmgvieyak001b6cd04cgaawmm_StoredVideoInfos_in_validation = {
     "validationType": "response-field-list-match",
     "referenceListField": "camID",
     "referenceListEndpoint": "/CameraProfiles",
-    "referenceEndpoint": "/CameraProfiles"
+    "referenceEndpoint": "/CameraProfiles",
+    "score": 0
   }
 }
 
@@ -25,7 +26,8 @@ cmgvieyak001b6cd04cgaawmm_StreamURLs_in_validation = {
     "validationType": "response-field-list-match",
     "referenceListField": "camID",
     "referenceListEndpoint": "/CameraProfiles",
-    "referenceEndpoint": "/CameraProfiles"
+    "referenceEndpoint": "/CameraProfiles",
+    "score": 0
   }
 }
 
@@ -36,7 +38,8 @@ cmgvieyak001b6cd04cgaawmm_ReplayURL_in_validation = {
     "validationType": "response-field-list-match",
     "referenceListField": "camID",
     "referenceListEndpoint": "/CameraProfiles",
-    "referenceEndpoint": "/CameraProfiles"
+    "referenceEndpoint": "/CameraProfiles",
+    "score": 0
   }
 }
 
@@ -47,7 +50,8 @@ cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_in_validation = {
     "validationType": "response-field-list-match",
     "referenceListField": "camID",
     "referenceListEndpoint": "/CameraProfiles",
-    "referenceEndpoint": "/CameraProfiles"
+    "referenceEndpoint": "/CameraProfiles",
+    "score": 0
   },
   "eventFilter": {
     "enabled": True,
@@ -58,7 +62,8 @@ cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_in_validation = {
     "allowedValues": [
       "화재",
       "배회"
-    ]
+    ],
+    "score": 0
   },
   "classFilter": {
     "enabled": True,
@@ -70,7 +75,8 @@ cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_in_validation = {
       "사람",
       "트럭",
       "버스"
-    ]
+    ],
+    "score": 0
   }
 }
 
@@ -81,7 +87,8 @@ cmgvieyak001b6cd04cgaawmm_StoredVideoEventInfos_in_validation = {
     "validationType": "response-field-list-match",
     "referenceListField": "camID",
     "referenceListEndpoint": "/CameraProfiles",
-    "referenceEndpoint": "/CameraProfiles"
+    "referenceEndpoint": "/CameraProfiles",
+    "score": 0
   },
   "classFilter": {
     "enabled": True,
@@ -93,7 +100,8 @@ cmgvieyak001b6cd04cgaawmm_StoredVideoEventInfos_in_validation = {
       "사람",
       "트럭",
       "버스"
-    ]
+    ],
+    "score": 0
   },
   "eventFilter": {
     "enabled": True,
@@ -104,7 +112,8 @@ cmgvieyak001b6cd04cgaawmm_StoredVideoEventInfos_in_validation = {
     "allowedValues": [
       "화재",
       "배회"
-    ]
+    ],
+    "score": 0
   }
 }
 
