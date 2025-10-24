@@ -1,0 +1,493 @@
+import random
+
+
+class ConstraintDataGenerator:
+    def __init__(self, latest_events=None):
+        """
+        latest_events: API 이벤트 저장소 {api_name: {direction: event_data}}
+        """
+        self.latest_events = latest_events if latest_events is not None else {}
+
+    def _applied_constraints(self, request_data, template_data, constraints, n=5):
+        """
+        request_data: 요청 데이터 (camID 후보 등)
+        template_data: response 템플릿
+        constraints: 제약 조건
+        n: 생성 개수
+        """
+        print(f"[DEBUG][DATA_MAPPER] _applied_constraints 호출됨")
+        print(f"[DEBUG][DATA_MAPPER] request_data: {request_data}")
+        print(f"[DEBUG][DATA_MAPPER] constraints keys: {list(constraints.keys()) if constraints else []}")
+        print(
+            f"[DEBUG][DATA_MAPPER] template_data keys: {list(template_data.keys()) if isinstance(template_data, dict) else 'N/A'}")
+        print(f"[DEBUG][DATA_MAPPER] n: {n}")
+
+        # constraints 분석 및 참조 값 수집
+        constraint_map = self._build_constraint_map(constraints, request_data)
+        print(f"[DEBUG][DATA_MAPPER] constraint_map: {constraint_map}")
+
+        # 템플릿 기반 데이터 생성
+        response = self._generate_from_template(template_data, constraint_map, n)
+        print(f"[DEBUG][DATA_MAPPER] generated response: {response}")
+
+        # template_data 업데이트 (원본 수정)
+        template_data.update(response)
+
+        # 전체 메시지 반환 (업데이트된 template_data)
+        return template_data
+
+    def _build_constraint_map(self, constraints, request_data):
+        """constraints를 분석하여 각 필드의 제약 조건과 참조 값을 매핑"""
+        constraint_map = {}
+
+        print(f"[DEBUG][BUILD_MAP] constraints: {constraints}")
+        print(f"[DEBUG][BUILD_MAP] request_data: {request_data}")
+
+        for path, rule in constraints.items():
+            print(f"[DEBUG][BUILD_MAP] Processing path: {path}, rule: {rule}")
+
+            value_type = rule.get("valueType")
+            ref_endpoint = rule.get("referenceEndpoint")
+            ref_field = rule.get("referenceField")
+
+            print(f"[DEBUG][BUILD_MAP]   valueType: {value_type}")
+            print(f"[DEBUG][BUILD_MAP]   referenceEndpoint: {ref_endpoint}")
+            print(f"[DEBUG][BUILD_MAP]   referenceField: {ref_field}")
+
+            # referenceEndpoint가 있으면 latest_events에서 데이터 찾기
+            if ref_endpoint:
+                values = []
+
+                # referenceEndpoint의 슬래시 처리 (있든 없든 찾을 수 있도록)
+                # 예: "/StoredVideoEventInfos" → "StoredVideoEventInfos"
+                ref_key = ref_endpoint.lstrip('/')
+
+                print(f"[DEBUG][BUILD_MAP]   Searching for ref_key: {ref_key}")
+
+                if ref_key in self.latest_events:
+                    print(f"[DEBUG][BUILD_MAP]   Found referenceEndpoint in latest_events")
+                    # valueType에 따라 REQUEST 또는 RESPONSE에서 가져오기
+                    if value_type == "request-based":
+                        event = self.latest_events[ref_key].get("REQUEST", {})
+                        print(f"[DEBUG][BUILD_MAP]   Using REQUEST event")
+                    else:  # random-response 등 다른 타입
+                        event = self.latest_events[ref_key].get("RESPONSE", {})
+                        print(f"[DEBUG][BUILD_MAP]   Using RESPONSE event")
+
+                    event_data = event.get("data", {})
+                    print(f"[DEBUG][BUILD_MAP]   event_data: {event_data}")
+                    values = self.find_key(event_data, ref_field)
+                    print(f"[DEBUG][BUILD_MAP]   Found values from event: {values}")
+                else:
+                    print(f"[DEBUG][BUILD_MAP]   referenceEndpoint NOT found in latest_events")
+                    print(f"[DEBUG][BUILD_MAP]   Available endpoints: {list(self.latest_events.keys())}")
+
+                constraint_map[path] = {
+                    "type": value_type,
+                    "values": values if values else []
+                }
+
+            elif value_type == "request-based":
+                # referenceEndpoint 없으면 현재 request_data에서 찾기
+                print(f"[DEBUG][BUILD_MAP]   Searching in current request_data")
+                values = self.find_key(request_data, ref_field)
+                print(f"[DEBUG][BUILD_MAP]   Found values from request: {values}")
+                constraint_map[path] = {
+                    "type": "request-based",
+                    "values": values if values else []
+                }
+
+            elif value_type == "random-response":
+                # referenceEndpoint 없으면 현재 request_data에서 찾기
+                values = self.find_key(request_data, ref_field)
+                constraint_map[path] = {
+                    "type": "random-response",
+                    "values": values if values else []
+                }
+
+            elif value_type == "random":
+                # validValues에서 랜덤 선택
+                valid_values = rule.get("validValues", [])
+                constraint_map[path] = {
+                    "type": "random",
+                    "values": valid_values
+                }
+
+            elif value_type == "request-range":
+                # 범위 제약 조건 처리
+                req_range = rule.get("requestRange", {})
+                operator = req_range.get("operator")
+
+                if operator == "between":
+                    min_field = req_range.get("minField")
+                    max_field = req_range.get("maxField")
+
+                    # referenceEndpoint가 있으면 latest_events에서, 없으면 request_data에서 찾기
+                    # 슬래시 제거하여 키 매칭
+                    ref_key = ref_endpoint.lstrip('/') if ref_endpoint else None
+
+                    if ref_key and ref_key in self.latest_events:
+                        event = self.latest_events[ref_key].get("REQUEST", {})
+                        event_data = event.get("data", {})
+                        min_vals = self.find_key(event_data, min_field) if min_field else []
+                        max_vals = self.find_key(event_data, max_field) if max_field else []
+                    else:
+                        min_vals = self.find_key(request_data, min_field) if min_field else []
+                        max_vals = self.find_key(request_data, max_field) if max_field else []
+
+                    min_val = min_vals[0] if min_vals else 0
+                    max_val = max_vals[0] if max_vals else 9999999999999
+
+                    constraint_map[path] = {
+                        "type": "request-range",
+                        "operator": "between",
+                        "min": min_val,
+                        "max": max_val
+                    }
+            elif value_type == "response-based":
+                # referenceEndpoint 없으면 현재 request_data에서 찾기
+                print(f"[DEBUG][BUILD_MAP]   Searching in current request_data")
+                values = self.find_key(request_data, ref_field)
+                print(f"[DEBUG][BUILD_MAP]   Found values from request: {values}")
+                constraint_map[path] = {
+                    "type": "request-based",
+                    "values": values if values else []
+                }
+
+            elif value_type == "random-response":
+                # referenceEndpoint 없으면 현재 request_data에서 찾기
+                values = self.find_key(request_data, ref_field)
+                constraint_map[path] = {
+                    "type": "random-response",
+                    "values": values if values else []
+                }
+
+        return constraint_map
+
+    def _generate_from_template(self, template, constraint_map, n):
+        """템플릿을 재귀적으로 순회하며 데이터 생성"""
+        result = {}
+
+        for key, value in template.items():
+            # 최상위 레벨에서 constraint 확인
+            if key in constraint_map:
+                constraint = constraint_map[key]
+                if constraint["type"] in ["random-response", "random", "request-based", "response-based", ]:
+                    # 랜덤 값 선택
+                    if constraint["values"]:
+                        result[key] = random.choice(constraint["values"])
+                    else:
+                        result[key] = value
+            elif isinstance(value, list) and len(value) > 0 and isinstance(value[0], dict):
+                # 리스트 형태의 구조 처리
+                result[key] = self._generate_list_items(
+                    key, value[0], constraint_map, n
+                )
+            elif isinstance(value, dict):
+                # 중첩된 딕셔너리 구조는 그대로 유지 (최상위 레벨)
+                result[key] = value
+            else:
+                # 일반 필드는 그대로 유지
+                result[key] = value
+
+        return result
+
+    def _generate_list_items(self, parent_key, item_template, constraint_map, n):
+        """리스트 항목 생성"""
+        items = []
+
+        for _ in range(n):
+            item = self._generate_item(parent_key, item_template, constraint_map, n)
+            items.append(item)
+
+        return items
+
+    def _generate_item(self, parent_key, template, constraint_map, n):
+        """단일 항목 생성 (재귀적으로 중첩 구조 처리)"""
+        item = {}
+
+        for field, value in template.items():
+            field_path = f"{parent_key}.{field}"
+
+            # 중첩된 딕셔너리 처리 (예: videoInfo)
+            if isinstance(value, dict):
+                item[field] = self._generate_item(field_path, value, constraint_map, n)
+
+            # 중첩된 리스트 처리 (예: timeList)
+            elif isinstance(value, list):
+                if len(value) > 0 and isinstance(value[0], dict):
+                    item[field] = self._generate_list_items(
+                        field_path, value[0], constraint_map, n
+                    )
+                else:
+                    item[field] = value
+
+            # constraint가 있는 필드 처리
+            elif field_path in constraint_map:
+                constraint = constraint_map[field_path]
+
+                if constraint["type"] in ["request-based", "random-response", "random"]:
+                    # 참조 값 중 랜덤 선택
+                    if constraint["values"]:
+                        item[field] = random.choice(constraint["values"])
+                    else:
+                        item[field] = value
+
+                elif constraint["type"] == "request-range":
+                    # 범위 내 랜덤 값 생성
+                    min_val = constraint.get("min", 0)
+                    max_val = constraint.get("max", 9999999999999)
+
+                    # 유효성 검사: min이 max보다 큰 경우 처리
+                    if min_val >= max_val:
+                        max_val = min_val + 1000
+
+                    # startTime/endTime 처리 (endTime은 startTime보다 커야 함)
+                    if "endTime" in field and "startTime" in item:
+                        item[field] = random.randint(item["startTime"] + 1, max_val)
+                    else:
+                        item[field] = random.randint(min_val, max_val)
+
+            else:
+                # constraint 없는 필드는 기본값 유지
+                item[field] = value
+
+        return item
+
+    def find_key(self, data, target_key):
+        """재귀적으로 데이터에서 키 찾기"""
+        results = []
+
+        if isinstance(data, dict):
+            for k, v in data.items():
+                if k == target_key:
+                    results.append(v)
+                elif isinstance(v, (dict, list)):
+                    results.extend(self.find_key(v, target_key))
+        elif isinstance(data, list):
+            for item in data:
+                results.extend(self.find_key(item, target_key))
+
+        return results
+
+
+# -----------------------
+# 테스트
+# -----------------------
+if __name__ == "__main__":
+    # latest_events 모의 데이터 생성 (Server.latest_events 형식)
+    import datetime
+
+    latest_events = {
+        "/CameraProfiles": {
+            "REQUEST": {
+                "time": datetime.datetime.utcnow().isoformat() + "Z",
+                "api": "/CameraProfiles",
+                "dir": "REQUEST",
+                "data": {}
+            },
+            "RESPONSE": {
+                "time": datetime.datetime.utcnow().isoformat() + "Z",
+                "api": "/CameraProfiles",
+                "dir": "RESPONSE",
+                "data": {
+                    "code": "200",
+                    "message": "성공",
+                    "camList": [
+                        {
+                            "camID": "cam0001",
+                            "camName": "카메라1",
+                            "camLoc": {
+                                "lon": "127.127730",
+                                "lat": "38.439801",
+                                "alt": "32.131",
+                                "desc": "3층복도"
+                            },
+                            "camConfig": {
+                                "camType": "PTZ"
+                            }
+                        },
+                        {
+                            "camID": "cam0002",
+                            "camName": "카메라2",
+                            "camLoc": {
+                                "lon": "126",
+                                "lat": "32",
+                                "alt": "31",
+                                "desc": "2층복도"
+                            },
+                            "camConfig": {
+                                "camType": "PTZ"
+                            }
+                        },
+                        {
+                            "camID": "cam0003",
+                            "camName": "카메라3",
+                            "camLoc": {
+                                "lon": "125",
+                                "lat": "30",
+                                "alt": "30",
+                                "desc": "1층복도"
+                            },
+                            "camConfig": {
+                                "camType": "FIXED"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/StreamURLs": {
+            "REQUEST": {
+                "time": datetime.datetime.utcnow().isoformat() + "Z",
+                "api": "/StreamURLs",
+                "dir": "REQUEST",
+                "data": {
+                    "camList": [
+                        {"camID": "cam_A01"},
+                        {"camID": "cam_B02"},
+                        {"camID": "cam_C03"}
+                    ]
+                }
+            },
+            "RESPONSE": {
+                "time": datetime.datetime.utcnow().isoformat() + "Z",
+                "api": "/StreamURLs",
+                "dir": "RESPONSE",
+                "data": {
+                    "code": "200",
+                    "message": "성공",
+                    "camList": [
+                        {"camID": "cam_A01", "streamURL": "rtsp://..."},
+                        {"camID": "cam_B02", "streamURL": "rtsp://..."},
+                        {"camID": "cam_C03", "streamURL": "rtsp://..."}
+                    ]
+                }
+            }
+        },
+        "/TimeRangeAPI": {
+            "REQUEST": {
+                "time": datetime.datetime.utcnow().isoformat() + "Z",
+                "api": "/TimeRangeAPI",
+                "dir": "REQUEST",
+                "data": {
+                    "timePeriod": {
+                        "startTime": 1760948700000,
+                        "endTime": 1761121500000
+                    }
+                }
+            },
+            "RESPONSE": {
+                "time": datetime.datetime.utcnow().isoformat() + "Z",
+                "api": "/TimeRangeAPI",
+                "dir": "RESPONSE",
+                "data": {}
+            }
+        }
+    }
+
+    generator = ConstraintDataGenerator(latest_events)
+
+    # 테스트 1: request-based with referenceEndpoint (latest_events의 REQUEST에서)
+    print("=== 테스트 1: request-based (latest_events REQUEST) ===")
+    request_data1 = {}  # 빈 request
+
+    template_data1 = {
+        "camList": [
+            {
+                "camID": "",
+                "status": "active"
+            }
+        ]
+    }
+
+    constraints1 = {
+        "camList.camID": {
+            "valueType": "request-based",
+            "required": True,
+            "referenceEndpoint": "/StreamURLs",
+            "referenceField": "camID"
+        }
+    }
+
+    result1 = generator._applied_constraints(request_data1, template_data1, constraints1, n=3)
+    print(f"camList 개수: {len(result1['camList'])}")
+    for i, cam in enumerate(result1['camList']):
+        print(f"[{i}] camID: {cam['camID']} (latest_events의 /StreamURLs REQUEST에서 가져옴)")
+
+    # 테스트 2: random-response with referenceEndpoint (latest_events의 RESPONSE에서)
+    print("\n=== 테스트 2: random-response (latest_events RESPONSE) ===")
+    request_data2 = {}
+
+    template_data2 = {
+        "selectedCamList": [
+            {
+                "camID": "",
+                "info": "selected"
+            }
+        ]
+    }
+
+    constraints2 = {
+        "selectedCamList.camID": {
+            "valueType": "random-response",
+            "required": True,
+            "referenceEndpoint": "/CameraProfiles",
+            "referenceField": "camID"
+        }
+    }
+
+    result2 = generator._applied_constraints(request_data2, template_data2, constraints2, n=4)
+    print(f"selectedCamList 개수: {len(result2['selectedCamList'])}")
+    for i, cam in enumerate(result2['selectedCamList']):
+        print(f"[{i}] camID: {cam['camID']} (latest_events의 /CameraProfiles RESPONSE에서 가져옴)")
+
+    # 테스트 3: request-range with referenceEndpoint
+    print("\n=== 테스트 3: request-range (latest_events REQUEST) ===")
+    request_data3 = {}
+
+    template_data3 = {
+        "events": [
+            {
+                "eventID": "",
+                "timeList": [{"startTime": 0, "endTime": 0}]
+            }
+        ]
+    }
+
+    constraints3 = {
+        "events.timeList.startTime": {
+            "valueType": "request-range",
+            "required": True,
+            "referenceEndpoint": "/TimeRangeAPI",
+            "requestRange": {
+                "operator": "between",
+                "minField": "startTime",
+                "maxField": "endTime"
+            }
+        },
+        "events.timeList.endTime": {
+            "valueType": "request-range",
+            "required": True,
+            "referenceEndpoint": "/TimeRangeAPI",
+            "requestRange": {
+                "operator": "between",
+                "minField": "startTime",
+                "maxField": "endTime"
+            }
+        }
+    }
+
+    result3 = generator._applied_constraints(request_data3, template_data3, constraints3, n=2)
+    print(f"events 개수: {len(result3['events'])}")
+    for i, event in enumerate(result3['events']):
+        print(f"[{i}] timeList: {len(event['timeList'])}개")
+        for j, time in enumerate(event['timeList'][:2]):
+            print(f"    [{j}] startTime: {time['startTime']}, endTime: {time['endTime']}")
+
+    print("\n=== latest_events 확인 ===")
+    print(f"저장된 API 목록: {list(latest_events.keys())}")
+    print(
+        f"/CameraProfiles RESPONSE의 camID들: {[c['camID'] for c in latest_events['/CameraProfiles']['RESPONSE']['data']['camList']]}")
+    print(
+        f"/StreamURLs REQUEST의 camID들: {[c['camID'] for c in latest_events['/StreamURLs']['REQUEST']['data']['camList']]}")
