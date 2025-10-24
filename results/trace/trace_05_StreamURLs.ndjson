@@ -1,9 +1,2 @@
-<<<<<<< HEAD
-{"time": "2025-10-24T06:27:00.344635Z", "api": "StreamURLs", "dir": "REQUEST", "data": {"camList": [{"camID": "", "streamProtocolType": "RTSP"}]}}
-{"time": "2025-10-24T06:27:01.347173Z", "api": "StreamURLs", "dir": "RESPONSE", "data": {"code": "401", "message": "인증 오류"}}
-=======
-
-{"time": "2025-10-23T07:48:21.873884Z", "api": "StreamURLs", "dir": "REQUEST", "data": {"camList": [{"camID": "", "streamProtocolType": "RTSP"}]}}
-{"time": "2025-10-23T07:48:22.874371Z", "api": "StreamURLs", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "camList": [{"camID": "", "accessID": "conn0001", "accessPW": "1234", "camURL": "rtsp://192.168.0.5:8000", "videoInfo": {"resolution": "1920x1080", "fps": "30", "videoCodec": "H.264", "audioCodec": "G.711"}}]}}
-
->>>>>>> 56257ed8d265be6d3105f32e763803e2061e5308
+{"time": "2025-10-24T07:20:56.925499Z", "api": "StreamURLs", "dir": "REQUEST", "data": {"camList": [{"camID": "", "streamProtocolType": "RTSP"}]}}
+{"time": "2025-10-24T07:20:57.924390Z", "api": "StreamURLs", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "camList": [{"camID": "", "accessID": "conn0001", "accessPW": "1234", "camURL": "rtsp://192.168.0.5:8000", "videoInfo": {"resolution": "1920x1080", "fps": "30", "videoCodec": "H.264", "audioCodec": "G.711"}}]}}
