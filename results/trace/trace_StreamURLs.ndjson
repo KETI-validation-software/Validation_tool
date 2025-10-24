@@ -1,2 +1,9 @@
+<<<<<<< HEAD
 {"time": "2025-10-24T06:27:00.376514Z", "api": "StreamURLs", "dir": "REQUEST", "data": {"camList": [{"camID": "", "streamProtocolType": "RTSP"}]}}
 {"time": "2025-10-24T06:27:00.377512Z", "api": "StreamURLs", "dir": "RESPONSE", "data": {"code": "401", "message": "인증 오류"}}
+=======
+
+{"time": "2025-10-23T07:48:21.906792Z", "api": "StreamURLs", "dir": "REQUEST", "data": {"camList": [{"camID": "", "streamProtocolType": "RTSP"}]}}
+{"time": "2025-10-23T07:48:21.906792Z", "api": "StreamURLs", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "camList": [{"camID": "", "accessID": "conn0001", "accessPW": "1234", "camURL": "rtsp://192.168.0.5:8000", "videoInfo": {"resolution": "1920x1080", "fps": "30", "videoCodec": "H.264", "audioCodec": "G.711"}}]}}
+
+>>>>>>> 56257ed8d265be6d3105f32e763803e2061e5308

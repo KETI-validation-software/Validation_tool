@@ -749,11 +749,20 @@ class MyApp(QWidget):
         - current_spec_id에 따라 올바른 모듈(spec.video 또는 spec/)에서 데이터 로드
         - trans_protocol, time_out, num_retries도 SPEC_CONFIG에서 가져옴
         """
-        # ✅ SPEC_CONFIG에서 현재 spec 설정 가져오기
-        if not hasattr(CONSTANTS, 'SPEC_CONFIG'):
-            raise ValueError("CONSTANTS.SPEC_CONFIG가 정의되지 않았습니다!")
+        # # ✅ SPEC_CONFIG에서 현재 spec 설정 가져오기
+        # if not hasattr(CONSTANTS, 'SPEC_CONFIG'):
+        #     raise ValueError("CONSTANTS.SPEC_CONFIG가 정의되지 않았습니다!")
         
-        config = CONSTANTS.SPEC_CONFIG.get(self.current_spec_id, {})
+        # config = CONSTANTS.SPEC_CONFIG.get(self.current_spec_id, {})
+        # if not config:
+        #     raise ValueError(f"spec_id '{self.current_spec_id}'에 대한 설정을 찾을 수 없습니다!")
+
+        config = {}
+        for group in CONSTANTS.SPEC_CONFIG:
+            if self.current_spec_id in group:
+                config = group[self.current_spec_id]
+                break
+        
         if not config:
             raise ValueError(f"spec_id '{self.current_spec_id}'에 대한 설정을 찾을 수 없습니다!")
         
@@ -1131,7 +1140,9 @@ class MyApp(QWidget):
             val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(
                 schema=schema_to_check,
                 data=self.webhook_res,
+
                 flag=self.flag_opt,
+
                 reference_context=self.reference_context
             )
             # check = json_check_(schema_to_check, self.webhook_res, self.flag_opt)
@@ -1282,11 +1293,8 @@ class MyApp(QWidget):
                 self._push_event(self.cnt, "REQUEST", inMessage)
 
                 api_name = self.message[self.cnt] if self.cnt < len(self.message) else ""
-                if api_name:
-                    my_request = self.inMessage[self.cnt] if self.cnt < len(self.inMessage) else {}
-                    if my_request:
-                        self.reference_context[f"/{api_name}"] = my_request
-                        print(f"[SYSTEM] 맥락: /{api_name} (inMessage)")
+                if api_name and isinstance(inMessage, dict):
+                    self.reference_context[f"/{api_name}"] = inMessage
 
                     # request_data = self._load_from_trace_file(api_name, "REQUEST")
                     # if request_data and isinstance(request_data, dict):
@@ -1315,6 +1323,7 @@ class MyApp(QWidget):
                 # except Exception as e:
                 #     print(f"[ERROR] 요청 검증 규칙 로드 실패: {e}")
                 #     pass    # 규칙 없으면 그냥 통과
+
 
                 # 순서 확인용 로그
                 print(f"[SYSTEM] 플랫폼에 요청 전송: {(self.message[self.cnt] if self.cnt < len(self.message) else 'index out of range')} (시도 {self.current_retry + 1})")
@@ -1475,7 +1484,9 @@ class MyApp(QWidget):
                             resp_rules = get_validation_rules(
                                 spec_id=self.current_spec_id,
                                 api_name=self.message[self.cnt] if self.cnt < len(self.message) else "",
+
                                 direction="out" #응답 검증
+
                             ) or {}
                         except Exception as e:
                             resp_rules = {}
@@ -1489,9 +1500,11 @@ class MyApp(QWidget):
                                 validation_rules=resp_rules,
                                 reference_context=self.reference_context
                                 )
+
                         # 일반 검증으로 돌렸을때 - 맥락 검증 실패해서
                         except TypeError as te:
                             print(f"[ERROR] 응답 검증 중 TypeError 발생: {te}, 일반 검증으로 재시도")
+
                             val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(
                                 self.outSchema[self.cnt],
                                 res_data,

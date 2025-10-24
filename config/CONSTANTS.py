@@ -19,10 +19,7 @@ auth_info = "a"
 admin_code = "1234"
 url = "https://127.0.0.1:8080"
 
-
-
 specs = [["cmgvieyak001b6cd04cgaawmm_inSchema","cmgvieyak001b6cd04cgaawmm_outData","cmgvieyak001b6cd04cgaawmm_messages",""]]
-
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황 
 flag_opt = False
@@ -52,36 +49,19 @@ enable_retry_delay = False  # False 권장: 불필요한 sleep 제거
 # ✅ specification.id별 설정 (신규 통합 방식)
 # 플랫폼(cmg90, cmg7e, cmg7b)
 # 시스템(cmgat, cmgas, cmga0)
-SPEC_CONFIG = {
-    "cmgvieyak001b6cd04cgaawmm": {
+
+SPEC_CONFIG = [
+    {
+        "group_name": "통합플랫폼",
+        "group_id": "cmgzwocpp01y6vsve880sfysm",
+        "cmgvieyak001b6cd04cgaawmm": {
     "test_name": "영상보안시스템_new",
     "specs": ['cmgvieyak001b6cd04cgaawmm_inSchema', 'cmgvieyak001b6cd04cgaawmm_outData', 'cmgvieyak001b6cd04cgaawmm_messages', 'cmgvieyak001b6cd04cgaawmm_webhook_outSchema', 'cmgvieyak001b6cd04cgaawmm_webhook_inData'],
     "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'WebHook', 'basic'],
     "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
     "num_retries": [1, 1, 1, 1, 1, 1, 1, 1]
 }
-}
-
-
-#etc
-digest_vid_res = [
- 'ae8dd6b1b3b7ebcddccf77e1e1cee42ac3d3d90e4c2cc111c4d2aab17870e8cf',
-    '16ba752619484f662586478081c99daeb3126df5988fd7956fbb302de964f958',
-    '0b291354cb2338955fbc81c904f7bcb171906852ed52365f958eddf63ec42c97',
-    'ebd7297452fb427685a83ccf4cb96b00af3d529a8e3443b0f88e51277c507ded',
-    'f92fc4612c8625ab118e759e1238e03957e9146df9da38bfbf4fb0c8e77cf203',
-    'c8093c4727aa4aadf69632184eea3080876a398f146db439bad8edf9e6cd56e2',
-    '46b0a8a762095f685e6b88218480d45bccbb5f8cd3200423417593f5bff2ed0a',
-    'e4151b19d396475ab65881e846873c2f2e8be2ca9d4fa725aa65e2b65e73418d']
-
-digest_bio_res = [
-   'ae8dd6b1b3b7ebcddccf77e1e1cee42ac3d3d90e4c2cc111c4d2aab17870e8cf',
-   '16ba752619484f662586478081c99daeb3126df5988fd7956fbb302de964f958',
-   '541f9497d3e62b19e39117abe07775bc0380c2d54cd565cb23b72cb628103588',
-   'f57d4bbd6647d93ebbc4c20065507565c9ea0b127c9ee736e9fa655bca2eeaf1',
-   '86c0a2818b29f016af13fd263a93e16cb125db60c02f8a0b241b75d535f03136',
-   '1d3c9b533d30652b3130de1816cab2a25e9a6304011419ff90b604d4b73cbe14',
-   'acff39c098791c9949bed23d24d2a8bbb029a61f71971bea24fdf48068fd01bf',
+    }
 ]
 
 digest_security_res = [
@@ -92,3 +72,4 @@ digest_security_res = [
    '99f13e073da1f5e4e6db0d37d9f99285e4439ef57820518067ce56847613239f',
    'a723679b7b81137cb0b560428ea120fc3468ca3f2c3d2bc120a2f9a84b3a5a49'
 ]
+

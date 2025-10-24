@@ -781,30 +781,35 @@ class MyApp(QWidget):
         # ✅ SPEC_CONFIG에서 현재 spec 설정 가져오기
         if not hasattr(CONSTANTS, 'SPEC_CONFIG'):
             raise ValueError("CONSTANTS.SPEC_CONFIG가 정의되지 않았습니다!")
-        
-        config = CONSTANTS.SPEC_CONFIG.get(self.current_spec_id, {})
+    
+        # 🔥 수정: SPEC_CONFIG가 리스트 구조이므로 검색 필요
+        config = {}
+        for group in CONSTANTS.SPEC_CONFIG:
+            if self.current_spec_id in group:
+                config = group[self.current_spec_id]
+                break
+    
         if not config:
             raise ValueError(f"spec_id '{self.current_spec_id}'에 대한 설정을 찾을 수 없습니다!")
-        
+    
         # ✅ 설정 정보 추출
         self.spec_description = config.get('test_name', 'Unknown Test')
         spec_names = config.get('specs', [])
-        
+    
         # ✅ trans_protocol, time_out, num_retries 저장
         self.trans_protocols = config.get('trans_protocol', [])
         self.time_outs = config.get('time_out', [])
         self.num_retries_list = config.get('num_retries', [])
-        
+    
         if len(spec_names) < 3:
             raise ValueError(f"spec_id '{self.current_spec_id}'의 specs 설정이 올바르지 않습니다! (최소 3개 필요)")
-        
+    
         print(f"[PLATFORM] 📋 Spec 로딩 시작: {self.spec_description} (ID: {self.current_spec_id})")
-        
+    
         # ✅ 모든 시스템은 spec/ 폴더 사용
         print(f"[PLATFORM] 📁 모듈: spec (센서/바이오/영상 통합)")
         import spec.Schema_request as schema_request_module
         import spec.Data_response as data_response_module
-        import spec.Constraints_response as constraints_response_module
         # ✅ 플랫폼은 요청 검증 + 응답 전송 (inSchema/outData 사용)
         print(f"[PLATFORM] 🔧 타입: 요청 검증 + 응답 전송")
         
@@ -813,7 +818,7 @@ class MyApp(QWidget):
         
         # ✅ Response 전송용 데이터 로드 (플랫폼이 시스템에게 보낼 응답) - outData
         self.videoOutMessage = getattr(data_response_module, spec_names[1], [])
-        self.videoOutConstraint = getattr(constraints_response_module, self.current_spec_id+"_OutConstraints", [])
+        #self.videoOutConstraint = getattr(constraints_response_module, self.current_spec_id+"_OutConstraints", [])
         self.videoMessages = getattr(data_response_module, spec_names[2], [])
 
         # ✅ Webhook 관련 (영상보안 시스템만 사용)
@@ -979,10 +984,12 @@ class MyApp(QWidget):
                 print(f"[DEBUG] 모든 API 처리 완료, 타이머 정지")
                 self.tick_timer.stop()
                 # ====== 구조검증 시작 ======
+
                 # print("~~~~~~~~~~~~ 구조검증 시작 ~~~~~~~~~~~~ json_check_ 시작")
                 schema_obj = self.videoInSchema[self.cnt] if self.cnt < len(self.videoInSchema) else None
                 #print(f"[json_check] field_finder 완료: all_field={len(schema_obj) if isinstance(schema_obj, dict) else 'N/A'}, opt_field=N/A")
                 #print(f"[json_check] data_finder 완료: all_data={len(current_data) if isinstance(current_data, dict) else 'N/A'}")
+
                 return
             
             # ✅ 시스템과 동일: 첫 틱에서는 대기만 하고 리턴
@@ -1033,9 +1040,11 @@ class MyApp(QWidget):
 
                 current_validation = {}
                 # ====== 구조 PASS → 의미 검증 시작 ======
+
                 print("++++++++++ 규칙 가져오기 ++++++++++")
 
                 try:
+
                     current_validation = get_validation_rules(
                         spec_id=self.current_spec_id,
                         api_name=api_name,
@@ -1046,7 +1055,9 @@ class MyApp(QWidget):
                 except Exception as e:
                     current_validation = {}
                     print(f"[DEBUG] 현재 API의 검증 규칙 로드 실패: {e}")
+
                 print("++++++++++ 규칙 로드 끝 ++++++++++")
+
                 
                 request_received = False
                 expected_count = self.current_retry + 1  # 현재 회차에 맞는 요청 수
@@ -1578,9 +1589,9 @@ class MyApp(QWidget):
         """
         ✅ Platform은 Request 검증만 - Request 스키마 ID만 표시 (3개)
         """
-        group = QGroupBox("시험 분야")
+        group_box = QGroupBox("시험 분야")  # ← 변수명 변경
         layout = QVBoxLayout()
-        
+    
         self.test_field_table = QTableWidget(0, 1)
         self.test_field_table.setHorizontalHeaderLabels(["시험 분야명"])
         self.test_field_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
@@ -1588,18 +1599,21 @@ class MyApp(QWidget):
         self.test_field_table.cellClicked.connect(self.on_test_field_selected)
         self.test_field_table.verticalHeader().setVisible(False)
         self.test_field_table.setMaximumHeight(200)
-        
-        # platform spec_id -> spec_config 기반
-        request_spec_ids = list(CONSTANTS.SPEC_CONFIG.keys())
-        
-        if hasattr(CONSTANTS, 'SPEC_CONFIG') and CONSTANTS.SPEC_CONFIG:
-            spec_items = [(sid, CONSTANTS.SPEC_CONFIG[sid]) for sid in request_spec_ids if sid in CONSTANTS.SPEC_CONFIG]
+    
+        # 🔥 SPEC_CONFIG에서 spec_id와 config 추출 (리스트 구조 대응)
+        spec_items = []
+        for group_data in CONSTANTS.SPEC_CONFIG:
+            for key, value in group_data.items():
+                if key not in ['group_name', 'group_id'] and isinstance(value, dict):
+                    spec_items.append((key, value))
+    
+        if spec_items:
             self.test_field_table.setRowCount(len(spec_items))
-            
+        
             # spec_id와 인덱스 매핑 저장
             self.spec_id_to_index = {}
             self.index_to_spec_id = {}
-            
+        
             for idx, (spec_id, config) in enumerate(spec_items):
                 description = config.get('test_name', f'시험 분야 {idx + 1}')
                 # ✅ 플랫폼은 요청 검증 역할 명시
@@ -1607,20 +1621,20 @@ class MyApp(QWidget):
                 item = QTableWidgetItem(description_with_role)
                 item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
                 self.test_field_table.setItem(idx, 0, item)
-                
+            
                 # 매핑 저장
                 self.spec_id_to_index[spec_id] = idx
                 self.index_to_spec_id[idx] = spec_id
-            
+        
             # 현재 로드된 spec_id 선택
             if self.current_spec_id in self.spec_id_to_index:
                 current_index = self.spec_id_to_index[self.current_spec_id]
                 self.test_field_table.selectRow(current_index)
                 self.selected_test_field_row = current_index
-        
+    
         layout.addWidget(self.test_field_table)
-        group.setLayout(layout)
-        return group
+        group_box.setLayout(layout)  # ← group_box 사용
+        return group_box  # ← group_box 반환
     
     def on_test_field_selected(self, row, col):
         """
@@ -1669,7 +1683,7 @@ class MyApp(QWidget):
                     self.Server.cnt = 0
                     self.Server.message = self.videoMessages
                     self.Server.outMessage = self.videoOutMessage
-                    self.Server.outCon = self.videoOutConstraint
+                    # self.Server.outCon = self.videoOutConstraint
                     self.Server.inSchema = self.videoInSchema
                     self.Server.webhookSchema = self.videoWebhookSchema
                     self.Server.webhookData = self.videoWebhookData
