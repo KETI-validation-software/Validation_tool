@@ -144,7 +144,7 @@ def safe_len(obj):
 def is_list_field(value):
     return isinstance(value, list)
 
-# 1단계: validation_request.py, response.py에서 규칙 dict 추출 함수
+# 1단계: Validation_request.py, response.py에서 규칙 dict 추출 함수
 def extract_validation_rules(validation_dict):
     """
     validation_dict: 각 API별 _in_validation dict
