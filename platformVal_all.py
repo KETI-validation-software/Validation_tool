@@ -11,6 +11,8 @@ from PyQt5.QtCore import Qt, QSettings, QTimer, QThread, pyqtSignal
 import sys
 import ssl
 from datetime import datetime
+import json
+from pathlib import Path
 
 # from core.functions import json_check_, save_result, resource_path, field_finder, json_to_data, set_auth, timeout_field_finder
 
@@ -624,36 +626,86 @@ class ResultPageWidget(QWidget):
             self.parent.show_combined_result(row)
 
 class MyApp(QWidget):
-    def _get_latest_request_data(self, api_name, direction="REQUEST"):
-        """
-        Server.trace에서 해당 api_name, direction의 최신 데이터를 반환한다.
-        direction은 'REQUEST' 또는 'RESPONSE'가 될 수 있다.
-        """
-        try:
-            print(f"[DEBUG] _get_latest_request_data 호출: api_name={api_name}, direction={direction}")
+    # def _get_latest_request_data(self, api_name, direction="REQUEST"):
+    #     """
+    #     Server.trace에서 해당 api_name, direction의 최신 데이터를 반환한다.
+    #     direction은 'REQUEST' 또는 'RESPONSE'가 될 수 있다.
+    #     """
+    #     try:
+    #         print(f"[DEBUG] _get_latest_request_data 호출: api_name={api_name}, direction={direction}")
             
-            if not hasattr(self.Server, "trace") or self.Server.trace is None:
-                print(f"[DEBUG] Server.trace가 없음")
-                return {}
+    #         if not hasattr(self.Server, "trace") or self.Server.trace is None:
+    #             print(f"[DEBUG] Server.trace가 없음")
+    #             return {}
             
-            events = list((getattr(self.Server, "trace", {}) or {}).get(api_name, []))
-            print(f"[DEBUG] {api_name}의 이벤트 개수: {len(events)}")
+    #         events = list((getattr(self.Server, "trace", {}) or {}).get(api_name, []))
+    #         print(f"[DEBUG] {api_name}의 이벤트 개수: {len(events)}")
             
-            for ev in reversed(events):
-                if ev.get("dir") == direction:
-                    data = ev.get("data", {})
-                    print(f"[DEBUG] {direction} 데이터 발견: {type(data)}")
-                    return data
+    #         for ev in reversed(events):
+    #             if ev.get("dir") == direction:
+    #                 data = ev.get("data", {})
+    #                 print(f"[DEBUG] {direction} 데이터 발견: {type(data)}")
+    #                 return data
             
-            print(f"[DEBUG] {direction} 데이터 없음")
-            return {}
-        except Exception as e:
-            print(f"[DEBUG] _get_latest_request_data 에러: {e}")
-            import traceback
-            traceback.print_exc()
-            return {}
+    #         print(f"[DEBUG] {direction} 데이터 없음")
+    #         return {}
+    #     except Exception as e:
+    #         print(f"[DEBUG] _get_latest_request_data 에러: {e}")
+    #         import traceback
+    #         traceback.print_exc()
+    #         return {}
     # 시험 결과 표시 요청 시그널 (main.py와 연동)
     showResultRequested = pyqtSignal(object)  # parent widget을 인자로 전달
+
+    def _load_from_trace_file(self, api_name, direction="RESPONSE"):
+        """
+    trace 파일에서 특정 API의 RESPONSE 데이터를 읽어옴
+    
+    Args:
+        api_name: API 이름 (예: "CameraProfiles")
+        direction: "REQUEST" 또는 "RESPONSE" (기본: "RESPONSE")
+    
+    Returns:
+        dict: 해당 API의 데이터, 없으면 None
+    """
+        try:
+            # trace 파일 경로
+            trace_file = Path("results/trace") / f"trace_{api_name}.ndjson"
+        
+            if not trace_file.exists():
+                print(f"[DEBUG] trace 파일 없음: {trace_file}")
+                return None
+        
+            # 파일에서 해당 direction의 최신 데이터 찾기
+            latest_data = None
+        
+            with open(trace_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                
+                    try:
+                        entry = json.loads(line)
+                    
+                        # 원하는 direction의 데이터만
+                        if entry.get('dir') == direction and entry.get('api') == api_name:
+                            latest_data = entry.get('data', {})
+                            # 계속 읽어서 가장 최신 것 사용
+                
+                    except json.JSONDecodeError:
+                        continue
+        
+            if latest_data:
+                print(f"[DEBUG] trace 파일에서 {api_name} {direction} 로드 완료")
+                return latest_data
+            else:
+                print(f"[DEBUG] trace 파일에 {api_name} {direction} 없음")
+                return None
+    
+        except Exception as e:
+            print(f"[ERROR] trace 파일 로드 실패: {e}")
+            return None
 
     def __init__(self, embedded=False, mode=None, spec_id=None):
         importlib.reload(CONSTANTS)  # CONSTANTS 모듈을 다시 로드하여 최신 설정 반영
@@ -817,24 +869,24 @@ class MyApp(QWidget):
         except Exception:
             pass
 
-    def get_latest_from_trace(self, api_name, direction):
-        """trace에서 해당 방향의 최신 이벤트 반환"""
-        try:
-            events = list((getattr(self.Server, "trace", {}) or {}).get(api_name, []))
-            for ev in reversed(events):
-                if ev.get("dir") == direction:
-                    return ev.get("data")
-        except Exception:
-            pass
-        return None
+    # def get_latest_from_trace(self, api_name, direction):
+    #     """trace에서 해당 방향의 최신 이벤트 반환"""
+    #     try:
+    #         events = list((getattr(self.Server, "trace", {}) or {}).get(api_name, []))
+    #         for ev in reversed(events):
+    #             if ev.get("dir") == direction:
+    #                 return ev.get("data")
+    #     except Exception:
+    #         pass
+    #     return None
 
-    def get_latest_request(self, step_idx):
-        api = self.Server.message[step_idx]
-        return self.get_latest_from_trace(api, "REQUEST")
+    # def get_latest_request(self, step_idx):
+    #     api = self.Server.message[step_idx]
+    #     return self.get_latest_from_trace(api, "REQUEST")
 
-    def get_latest_response(self, step_idx):
-        api = self.Server.message[step_idx]
-        return self.get_latest_from_trace(api, "RESPONSE")
+    # def get_latest_response(self, step_idx):
+    #     api = self.Server.message[step_idx]
+    #     return self.get_latest_from_trace(api, "RESPONSE")
 
 
     def _to_detail_text(self, val_text):
@@ -1073,11 +1125,18 @@ class MyApp(QWidget):
 
                 QApplication.processEvents()
 
-                # 현재 데이터 사용 (이미 읽음)
-                current_data = self._get_latest_request_data(api_name, "REQUEST") or {}
+                # 1. request 검증용 데이터 로드
+                current_data = self._load_from_trace_file(api_name, "REQUEST") or {}
 
-                if api_name and isinstance(current_data, dict):
-                    self.reference_context[f"/{api_name}"] = current_data
+                # if api_name and isinstance(current_data, dict):
+                #     self.reference_context[f"/{api_name}"] = current_data
+
+                # 2. 맥락 검증ㅇ용 - 자신이 보낸 response 로드 (trace 폴더에서)
+                if api_name:
+                    response_data = self._load_from_trace_file(api_name, "RESPONSE")
+                    if response_data and isinstance(response_data, dict):
+                        self.reference_context[f"/{api_name}"] = response_data
+                        print(f"[TRACE] /{api_name} RESPONSE를 trace 파일에서 로드")
 
                 if self.Server.message[self.cnt] in CONSTANTS.none_request_message:
                     # 매 시도마다 데이터 수집
@@ -1243,10 +1302,16 @@ class MyApp(QWidget):
                 accumulated['total_pass'] += add_pass
                 accumulated['total_error'] += add_err
 
-                api_name = self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else ""
-                if api_name and isinstance(current_data, dict):
-                    self.reference_context[f"/{api_name}"] = current_data
-                    print(f"[PLATFORM] 📚 맥락 업데이트: /{api_name}")
+                # trace 기반 구조로 변경 중..
+                # api_name = self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else ""
+                # # if api_name and isinstance(current_data, dict):
+                # #     self.reference_context[f"/{api_name}"] = current_data
+                # #     print(f"[PLATFORM] 📚 맥락 업데이트: /{api_name}")
+                # if api_name:
+                #     response_data = self._load_from_trace_file(api_name, "RESPONSE")
+                #     if response_data and isinstance(response_data, dict):
+                #         self.reference_context[f"/{api_name}"] = response_data
+                #         print(f"[TRACE] /{api_name} RESPONSE를 trace 파일에서 로드")   
 
                 # ✅ current_retry 증가
                 self.current_retry += 1

@@ -10,6 +10,50 @@ def safe_hash(obj):
         return json.dumps(obj, sort_keys=True)
     return obj
 
+
+def collect_all_values_by_key(data, key):
+    """
+    중첩된 dict/list 구조에서 특정 키의 모든 값을 재귀적으로 수집
+    
+    Args:
+        data: 검색할 데이터 (dict, list, 또는 기타)
+        key: 찾을 키 이름 (예: "camID")
+    
+    Returns:
+        list: 해당 키의 모든 값들의 리스트
+    
+    Example:
+        # CameraProfiles 응답 예시
+        data = {
+            "camList": [
+                {"camID": "cam1", "name": "Camera 1"},
+                {"camID": "cam2", "name": "Camera 2"}
+            ],
+            "extra": {"camID": "cam3"}
+        }
+        collect_all_values_by_key(data, "camID")
+        # Returns: ["cam1", "cam2", "cam3"]
+    """
+    results = []
+    
+    def _recursive_search(obj):
+        if isinstance(obj, dict):
+            for k, v in obj.items():
+                if k == key:
+                    # 값이 리스트면 펼치고, 아니면 그대로 추가
+                    if isinstance(v, list):
+                        results.extend(v)
+                    else:
+                        results.append(v)
+                # 재귀적으로 계속 탐색 (값이 dict나 list면)
+                _recursive_search(v)
+        elif isinstance(obj, list):
+            for item in obj:
+                _recursive_search(item)
+    
+    _recursive_search(data)
+    return results
+
 def safe_compare(a, b):
     """두 값을 안전하게 비교 (딕셔너리/리스트 포함)"""
     try:
@@ -272,25 +316,39 @@ def do_semantic_checker(rules_dict, data_dict, reference_context=None):
                 kind = 'referenceField' if vtype.startswith('request') else 'responseField'
                 msg = f"Value {value!r} != {kind} {ref_field!r} -> {ref_value!r}"
 
-        # ---- request/response-field-list-match ----
+        # ---- 🔥 핵심 수정: request/response-field-list-match ----
         elif vtype in ('request-field-list-match', 'response-field-list-match'):
             ref_list_field = rule.get('referenceListField')
             ref_list = None
 
-            # 1) 우선 현재 응답에서 찾기
+            # 1) 우선 현재 응답에서 get_by_path로 찾기 (기존 로직)
             if ref_list_field:
                 ref_list = get_by_path(data_dict, ref_list_field)
 
-            # 2) 필요 시 다른 엔드포인트 응답에서 찾기
+            # 2) 🆕 다른 엔드포인트 응답에서 재귀적으로 찾기
             if (ref_list is None or not isinstance(ref_list, (list, tuple))) and reference_context:
                 ref_ep = rule.get('referenceListEndpoint') or rule.get('referenceEndpoint')
+                
                 if ref_ep and ref_ep in reference_context:
-                    ref_list = get_by_path(reference_context[ref_ep], ref_list_field)
+                    # 🔥 핵심: collect_all_values_by_key로 재귀적 수집
+                    # referenceListField가 단순 키 이름이면 (예: "camID")
+                    # 중첩 구조 전체에서 해당 키의 모든 값을 수집
+                    ref_list = collect_all_values_by_key(
+                        reference_context[ref_ep], 
+                        ref_list_field
+                    )
+                    
+                    print(f"[DEBUG] 재귀 수집 결과 - Endpoint: {ref_ep}, "
+                          f"Field: {ref_list_field}, Values: {ref_list}")
 
+            # 3) 검증 수행
             if isinstance(ref_list, (list, tuple)):
-                if not safe_in_check(value, ref_list):
+                # 빈 문자열 필터링 (선택사항)
+                ref_list_filtered = [item for item in ref_list if item not in (None, '')]
+                
+                if not safe_in_check(value, ref_list_filtered):
                     passed = False
-                    msg = f"Value {value!r} not in referenceList {ref_list!r}"
+                    msg = f"Value {value!r} not in referenceList {ref_list_filtered!r}"
             else:
                 passed = False
                 msg = f"referenceListField {ref_list_field!r} not found as list"
@@ -382,6 +440,7 @@ def do_semantic_checker(rules_dict, data_dict, reference_context=None):
 
     # json_check_의 의미검증 반환형과 합치도록 유지
     return overall_result, error_msg, pass_count, fail_count
+
 
 
 # 필드 개수 세서 반환하는 함수 (필수/선택 필드 추출)
