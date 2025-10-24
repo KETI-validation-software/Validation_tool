@@ -1095,7 +1095,9 @@ class MyApp(QWidget):
             val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(
                 schema=schema_to_check,
                 data=self.webhook_res,
-                flag_opt=self.flag_opt,
+
+                flag=self.flag_opt,
+
                 reference_context=self.reference_context
             )
             # check = json_check_(schema_to_check, self.webhook_res, self.flag_opt)
@@ -1249,28 +1251,30 @@ class MyApp(QWidget):
                 if api_name and isinstance(inMessage, dict):
                     self.reference_context[f"/{api_name}"] = inMessage
                 
-                try:
-                    req_rules = get_validation_rules(
-                        spec_id=self.current_spec_id,
-                        api_name=api_name,
-                        direction="out" #응답 검증
-                    )
-                    # print(f"디버깅: {req_rules.spec_id}, {req_rules.api_name}, {req_rules.direction}, {req_rules.rules}")
-                    if req_rules:
-                        try:
-                            _ = json_check_(
-                                schema={},
-                                data=inMessage,
-                                flag=self.flag_opt,
-                                validation_rules=req_rules,
-                                reference_context=self.reference_context
-                            )
-                        except TypeError as te:
-                            print(f"[ERROR] 요청 검증 중 TypeError 발생: {te}")
-                            pass
-                except Exception as e:
-                    print(f"[ERROR] 요청 검증 규칙 로드 실패: {e}")
-                    pass    # 규칙 없으면 그냥 통과
+
+                # try:
+                #     req_rules = get_validation_rules(
+                #         spec_id=self.current_spec_id,
+                #         api_name=api_name,
+                #         direction="out" #응답 검증
+                #     )
+                #     # print(f"디버깅: {req_rules.spec_id}, {req_rules.api_name}, {req_rules.direction}, {req_rules.rules}")
+                #     if req_rules:
+                #         try:
+                #             _ = json_check_(
+                #                 schema={},
+                #                 data=inMessage,
+                #                 flag=self.flag_opt,
+                #                 validation_rules=req_rules,
+                #                 reference_context=self.reference_context
+                #             )
+                #         except TypeError as te:
+                #             print(f"[ERROR] 요청 검증 중 TypeError 발생: {te}")
+                #             pass
+                # except Exception as e:
+                #     print(f"[ERROR] 요청 검증 규칙 로드 실패: {e}")
+                #     pass    # 규칙 없으면 그냥 통과
+
 
                 # 순서 확인용 로그
                 print(f"[SYSTEM] 플랫폼에 요청 전송: {(self.message[self.cnt] if self.cnt < len(self.message) else 'index out of range')} (시도 {self.current_retry + 1})")
@@ -1431,7 +1435,9 @@ class MyApp(QWidget):
                             resp_rules = get_validation_rules(
                                 spec_id=self.current_spec_id,
                                 api_name=self.message[self.cnt] if self.cnt < len(self.message) else "",
-                                direction="in" #응답 검증
+
+                                direction="out" #응답 검증
+
                             ) or {}
                         except Exception as e:
                             resp_rules = {}
@@ -1445,7 +1451,11 @@ class MyApp(QWidget):
                                 validation_rules=resp_rules,
                                 reference_context=self.reference_context
                                 )
+
+                        # 일반 검증으로 돌렸을때 - 맥락 검증 실패해서
                         except TypeError as te:
+                            print(f"[ERROR] 응답 검증 중 TypeError 발생: {te}, 일반 검증으로 재시도")
+
                             val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(
                                 self.outSchema[self.cnt],
                                 res_data,

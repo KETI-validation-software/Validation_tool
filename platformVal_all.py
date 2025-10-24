@@ -918,8 +918,8 @@ class MyApp(QWidget):
     # 실시간 모니터링용 + 메인 검증 로직 (부하테스트 타이밍) - 09/25
     def update_view(self):
         try:
-            print("+++++++++++ update view 호출 +++++++++++")
-            print(f"[DEBUG] update_view 시작: cnt={self.cnt}, cnt_pre={self.cnt_pre}")
+            # print("+++++++++++ update view 호출 +++++++++++")
+            # print(f"[DEBUG] update_view 시작: cnt={self.cnt}, cnt_pre={self.cnt_pre}")
             time_interval = 0
             
             # cnt가 리스트 길이 이상이면 종료 처리
@@ -927,10 +927,12 @@ class MyApp(QWidget):
                 print(f"[DEBUG] 모든 API 처리 완료, 타이머 정지")
                 self.tick_timer.stop()
                 # ====== 구조검증 시작 ======
-                print("~~~~~~~~~~~~ 구조검증 시작 ~~~~~~~~~~~~ json_check_ 시작")
+
+                # print("~~~~~~~~~~~~ 구조검증 시작 ~~~~~~~~~~~~ json_check_ 시작")
                 schema_obj = self.videoInSchema[self.cnt] if self.cnt < len(self.videoInSchema) else None
-                print(f"[json_check] field_finder 완료: all_field={len(schema_obj) if isinstance(schema_obj, dict) else 'N/A'}, opt_field=N/A")
-                print(f"[json_check] data_finder 완료: all_data={len(current_data) if isinstance(current_data, dict) else 'N/A'}")
+                #print(f"[json_check] field_finder 완료: all_field={len(schema_obj) if isinstance(schema_obj, dict) else 'N/A'}, opt_field=N/A")
+                #print(f"[json_check] data_finder 완료: all_data={len(current_data) if isinstance(current_data, dict) else 'N/A'}")
+
                 return
             
             # ✅ 시스템과 동일: 첫 틱에서는 대기만 하고 리턴
@@ -981,13 +983,11 @@ class MyApp(QWidget):
 
                 current_validation = {}
                 # ====== 구조 PASS → 의미 검증 시작 ======
-                print("++++++++++ 구조 PASS → 의미 검증 시작 ++++++++++")
-                if current_validation:
-                    print(f"[semantic] 규칙(validation_rules) 있음 → 의미 검증 수행")
-                else:
-                    print(f"[semantic] 규칙(validation_rules) 없음 → 의미 검증 건너뜀")
+
+                print("++++++++++ 규칙 가져오기 ++++++++++")
+
                 try:
-                    from core.validation_registry import get_validation_rules
+
                     current_validation = get_validation_rules(
                         spec_id=self.current_spec_id,
                         api_name=api_name,
@@ -998,6 +998,9 @@ class MyApp(QWidget):
                 except Exception as e:
                     current_validation = {}
                     print(f"[DEBUG] 현재 API의 검증 규칙 로드 실패: {e}")
+
+                print("++++++++++ 규칙 로드 끝 ++++++++++")
+
                 
                 request_received = False
                 expected_count = self.current_retry + 1  # 현재 회차에 맞는 요청 수
@@ -1023,13 +1026,6 @@ class MyApp(QWidget):
                 expected_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
                 print(f"[TIMING_DEBUG] ✅ 요청 도착 감지! API: {api_name}, 시도: {self.current_retry + 1}/{expected_retries}")
                 print(f"[TIMING_DEBUG] ✅ 시스템 요청 카운트: {actual_count}회, 즉시 검증 시작합니다.")
-                
-                # (10/20) 수정
-                # if self.cnt < len(self.videoInMessage):
-                #     data = self.videoInMessage[self.cnt]
-                # else:
-                #     data = {}  # 데이터가 없으면 빈 딕셔너리
-
 
                 message_name = "step " + str(self.cnt + 1) + ": " + self.Server.message[self.cnt]
                 
@@ -1209,6 +1205,7 @@ class MyApp(QWidget):
                                         schema_keys = list(schema_to_use.keys())[:5]
                                         print(f"[DEBUG] 웹훅 응답 스키마 필드 (first 5): {schema_keys}")
                                 
+                                # 웹훅 검증은 아직 맥락 검증 연결 x
                                 webhook_resp_val_result, webhook_resp_val_text, webhook_resp_key_psss_cnt, webhook_resp_key_error_cnt = json_check_(
                                     self.videoWebhookSchema[0], webhook_response, self.flag_opt
                                 )
