@@ -979,10 +979,12 @@ class MyApp(QWidget):
                 print(f"[DEBUG] 모든 API 처리 완료, 타이머 정지")
                 self.tick_timer.stop()
                 # ====== 구조검증 시작 ======
+
                 # print("~~~~~~~~~~~~ 구조검증 시작 ~~~~~~~~~~~~ json_check_ 시작")
                 schema_obj = self.videoInSchema[self.cnt] if self.cnt < len(self.videoInSchema) else None
                 #print(f"[json_check] field_finder 완료: all_field={len(schema_obj) if isinstance(schema_obj, dict) else 'N/A'}, opt_field=N/A")
                 #print(f"[json_check] data_finder 완료: all_data={len(current_data) if isinstance(current_data, dict) else 'N/A'}")
+
                 return
             
             # ✅ 시스템과 동일: 첫 틱에서는 대기만 하고 리턴
@@ -1033,9 +1035,11 @@ class MyApp(QWidget):
 
                 current_validation = {}
                 # ====== 구조 PASS → 의미 검증 시작 ======
+
                 print("++++++++++ 규칙 가져오기 ++++++++++")
 
                 try:
+
                     current_validation = get_validation_rules(
                         spec_id=self.current_spec_id,
                         api_name=api_name,
@@ -1046,7 +1050,9 @@ class MyApp(QWidget):
                 except Exception as e:
                     current_validation = {}
                     print(f"[DEBUG] 현재 API의 검증 규칙 로드 실패: {e}")
+
                 print("++++++++++ 규칙 로드 끝 ++++++++++")
+
                 
                 request_received = False
                 expected_count = self.current_retry + 1  # 현재 회차에 맞는 요청 수

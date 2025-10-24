@@ -180,24 +180,24 @@ class InfoWidget(QWidget):
         title_layout.setContentsMargins(0, 0, 0, 0)
         title_layout.setSpacing(0)
 
-        # 첫 번째 줄: "시험 분야 및 API"
-        title_line1 = QLabel("시험 분야 및 API(미정)")
+        # 첫 번째 줄: "시험 시나리오 및 API"
+        title_line1 = QLabel("시험 시나리오 및 API(미정)")
         title_line1.setStyleSheet("font-size: 16px; font-weight: bold;")
         title_layout.addWidget(title_line1)
 
-        # 두 번째 줄: "시험 분야 및 API 정보를 확인하세요"
-        title_line2 = QLabel("시험 분야 및 API 정보를 확인하세요(미정)")
+        # 두 번째 줄: "시험 시나리오 및 API 정보를 확인하세요"
+        title_line2 = QLabel("시험 시나리오 및 API 정보를 확인하세요(미정)")
         title_line2.setStyleSheet("font-size: 14px;")
         title_layout.addWidget(title_line2)
 
         title_widget.setLayout(title_layout)
         left_layout.addWidget(title_widget)
 
-        # 시험 분야명 테이블 (QGroupBox로 감싸기)
+        # 시험 시나리오명 테이블 (QGroupBox로 감싸기)
         field_group = self.create_test_field_group()
         left_layout.addWidget(field_group)
 
-        # 시험 분야와 시험 API 사이 간격 12px
+        # 시험 시나리오와 시험 API 사이 간격 12px
         left_layout.addSpacing(12)
 
         # 시험 API 테이블 (QGroupBox로 감싸기)
@@ -826,8 +826,8 @@ class InfoWidget(QWidget):
         }
 
     def create_test_field_group(self):
-        """시험 분야명 그룹 (QGroupBox)"""
-        group = QGroupBox("시험 분야")
+        """시험 시나리오명 그룹 (QGroupBox)"""
+        group = QGroupBox("시험 시나리오")
         group.setFixedSize(744, 280)
 
         # QGroupBox 스타일 설정
@@ -854,11 +854,17 @@ class InfoWidget(QWidget):
         layout.setContentsMargins(0, 0, 14, 0)  # 좌, 상, 우, 하
         layout.setSpacing(0)
 
-        # 시험 분야명 테이블 (730x238px)
-        self.test_field_table = QTableWidget(0, 1)
+        # 시험 시나리오명 테이블 (730x238px) - 2개 컬럼: 시험 분야명, 시험 시나리오명
+        self.test_field_table = QTableWidget(0, 2)
         self.test_field_table.setFixedSize(730, 238)
-        self.test_field_table.setHorizontalHeaderLabels(["시험 분야명"])
-        self.test_field_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.test_field_table.setHorizontalHeaderLabels(["시험 분야명", "시험 시나리오명"])
+
+        # 컬럼 너비 설정 (시험 분야명: 360px, 시험 시나리오명: 360px)
+        header = self.test_field_table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.Fixed)
+        header.resizeSection(0, 360)
+        header.setSectionResizeMode(1, QHeaderView.Fixed)
+        header.resizeSection(1, 360)
         self.test_field_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.test_field_table.cellClicked.connect(self.on_test_field_selected)
         self.test_field_table.verticalHeader().setVisible(False)
@@ -1745,7 +1751,17 @@ class InfoWidget(QWidget):
                 return
 
             # spec_id 추출 (testSpecs의 첫 번째 항목)
-            spec_id = self.test_specs[0].get("id", "")
+            if not self.test_specs or len(self.test_specs) == 0:
+                QMessageBox.warning(self, "오류", "시험 시나리오 정보가 없습니다.")
+                return
+
+            # test_specs[0]이 딕셔너리인지 확인
+            first_spec = self.test_specs[0]
+            if isinstance(first_spec, dict):
+                spec_id = first_spec.get("id", "")
+            else:
+                QMessageBox.warning(self, "오류", f"시험 시나리오 데이터 형식이 올바르지 않습니다: {type(first_spec)}")
+                return
 
             # CONSTANTS.py 업데이트
             if self.form_validator.update_constants_py():
@@ -1897,8 +1913,13 @@ class InfoWidget(QWidget):
             str: "request" 또는 "response"
         """
         try:
-            # test_specs에서 첫 번째 spec_id 가져오기
-            test_specs = test_data.get("testRequest", {}).get("testGroup", {}).get("testSpecs", [])
+            # testGroups에서 첫 번째 그룹의 testSpecs 가져오기
+            test_groups = test_data.get("testRequest", {}).get("testGroups", [])
+            if not test_groups:
+                print("경고: testGroups 데이터가 없습니다. 기본값 'request' 사용")
+                return "request"  # 기본값
+
+            test_specs = test_groups[0].get("testSpecs", [])
             if not test_specs:
                 print("경고: testSpecs 데이터가 없습니다. 기본값 'request' 사용")
                 return "request"  # 기본값
@@ -1971,7 +1992,20 @@ class InfoWidget(QWidget):
 
             # 1페이지 필드 채우기
             eval_target = test_data.get("testRequest", {}).get("evaluationTarget", {})
-            test_group = test_data.get("testRequest", {}).get("testGroup", {})
+            test_groups = test_data.get("testRequest", {}).get("testGroups", [])
+
+            # testGroups 배열 처리
+            if not test_groups:
+                QMessageBox.warning(self, "경고", "testGroups 데이터가 비어있습니다.")
+                return
+
+            # 여러 그룹의 이름을 콤마로 연결
+            group_names = [g.get("name", "") for g in test_groups]
+            combined_group_names = ", ".join(group_names)
+
+            # 여러 그룹의 testRange를 콤마로 연결
+            group_ranges = [g.get("testRange", "") for g in test_groups]
+            combined_group_ranges = ", ".join(group_ranges)
 
             self.company_edit.setText(eval_target.get("companyName", ""))
             self.product_edit.setText(eval_target.get("productName", ""))
@@ -1979,15 +2013,21 @@ class InfoWidget(QWidget):
             self.model_edit.setText(eval_target.get("modelName", ""))
             self.test_category_edit.setText(eval_target.get("testCategory", ""))
             self.target_system_edit.setText(eval_target.get("targetSystem", ""))
-            self.test_group_edit.setText(test_group.get("name", ""))
-            self.test_range_edit.setText(test_group.get("testRange", ""))
+            self.test_group_edit.setText(combined_group_names)  # 콤마로 연결된 그룹 이름들
+            self.test_range_edit.setText(combined_group_ranges)  # 콤마로 연결된 범위들
 
-            # testGroup.name 저장 (시험 시작 시 사용)
-            self.test_group_name = test_group.get("name", "")
-            print(f"testGroup.name 저장: {self.test_group_name}")
+            # 모든 testGroups 저장 (시험 시작 시 사용)
+            self.test_groups = test_groups  # 전체 그룹 배열 저장
+            self.test_group_id = test_groups[0].get("id", "") if test_groups else ""  # 첫 번째 그룹 ID
+            self.test_group_name = test_groups[0].get("name", "") if test_groups else ""  # 첫 번째 그룹 이름
+            print(f"testGroups 저장: {len(test_groups)}개 그룹, 첫 번째 id={self.test_group_id}, name={self.test_group_name}")
 
-            # testSpecs와 testPort 저장 (2페이지에서 사용)
-            self.test_specs = test_group.get("testSpecs", [])
+            # 모든 그룹의 testSpecs를 합침 (2페이지에서 사용)
+            all_test_specs = []
+            for group in test_groups:
+                all_test_specs.extend(group.get("testSpecs", []))
+
+            self.test_specs = all_test_specs
             self.test_port = test_data.get("schedule", {}).get("testPort", None)
 
             # verificationType 기반 모드 설정 (API 기반)
@@ -2070,7 +2110,7 @@ class InfoWidget(QWidget):
             # 3. 관리자 코드 유효성 확인
             admin_code_valid = self.form_validator.is_admin_code_valid()
 
-            # 4. 시험 분야명 테이블에 데이터가 있는지 확인
+            # 4. 시험 시나리오명 테이블에 데이터가 있는지 확인
             test_field_filled = self.test_field_table.rowCount() > 0
 
             # 모든 조건이 충족되면 완료
