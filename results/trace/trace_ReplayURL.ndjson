@@ -1,2 +1,4 @@
-{"time": "2025-10-24T06:27:03.384233Z", "api": "ReplayURL", "dir": "REQUEST", "data": {"camList": [{"camID": "", "startTime": 1760949060000, "endTime": 1761208260000, "streamProtocolType": "RTSP"}]}}
-{"time": "2025-10-24T06:27:03.385230Z", "api": "ReplayURL", "dir": "RESPONSE", "data": {"code": "401", "message": "인증 오류"}}
+
+{"time": "2025-10-23T07:48:24.916314Z", "api": "ReplayURL", "dir": "REQUEST", "data": {"camList": [{"camID": "", "startTime": 1760949060000, "endTime": 1761208260000, "streamProtocolType": "RTSP"}]}}
+{"time": "2025-10-23T07:48:24.917312Z", "api": "ReplayURL", "dir": "RESPONSE", "data": {"code": "성공", "message": "200", "camList": [{"camID": "", "accessID": "cam0001", "accessPW": "conn0001", "startTime": "", "endTime": "", "camURL": "rtsp://192.168.0.5:8000", "videoInfo": {"resolution": "1920x1080", "fps": "30", "videoCodec": "H.264", "audioCodec": "G.711"}}]}}
+

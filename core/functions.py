@@ -112,6 +112,7 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
 
         # 1) 구조 검증 준비
         all_field, opt_field = field_finder(schema)
+
         # print(f"[json_check] field_finder 완료: all_field={len(all_field)}, opt_field={len(opt_field)}")
 
         all_data = data_finder(data)
@@ -147,6 +148,7 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
             else:
                 rules_dict = extract_validation_rules(validation_rules)
 
+
             print(f"[DEBUG] 실제 검증에 사용할 rules_dict 키: {list(rules_dict.keys())}")
 
             sem_result, sem_error_msg, sem_correct_cnt, sem_error_cnt = do_semantic_checker(
@@ -157,11 +159,13 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
         else:
             print("[functions.py의 맥락 검증] 규칙(validation_rules) 없음 → 의미 검증 건너뜀")
 
+
         # 4) 결과 합산/결정
         final_result = "PASS" if (struct_result == "PASS" and sem_result == "PASS") else "FAIL"
 
         # 메시지 병합(가독성)
         merged_msg_parts = []
+
         
         # 구조 검증 메시지
         if struct_error_msg:
@@ -178,13 +182,16 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
                 else:
                     merged_msg_parts.append(f"[의미] 오류 없음 (검증 필드 수: {sem_correct_cnt})")
         
+
         error_msg = "\n".join(merged_msg_parts) if merged_msg_parts else "오류 없음"
 
         # 카운트 합산
         correct_cnt = (struct_correct_cnt or 0) + (sem_correct_cnt or 0)
         error_cnt   = (struct_error_cnt or 0)   + (sem_error_cnt or 0)
 
+
         print(f"[functions.py] 최종 결과: result={final_result}, correct={correct_cnt}, error={error_cnt}")
+
 
         return final_result, error_msg, correct_cnt, error_cnt
 
@@ -193,6 +200,7 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
         import traceback
         traceback.print_exc()
         raise
+
 
 
 class BearerAuth(requests.auth.AuthBase):

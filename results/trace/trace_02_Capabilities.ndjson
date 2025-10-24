@@ -1,2 +1,4 @@
-{"time": "2025-10-24T06:26:51.356722Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
-{"time": "2025-10-24T06:26:52.344104Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "401", "message": "인증 오류"}}
+
+{"time": "2025-10-23T07:48:12.873938Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
+{"time": "2025-10-23T07:48:13.872502Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "streamingSupport": [{"streamProtocolType": "RTSP", "streamProtocolDesc": "Unicast"}], "transportSupport": [{"transProtocolType": "WebHook", "transProtocolDesc": ""}]}}
+
