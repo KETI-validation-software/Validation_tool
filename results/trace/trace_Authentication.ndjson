@@ -1,9 +1,2 @@
-<<<<<<< HEAD
-{"time": "2025-10-24T06:26:48.382069Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "user0001", "userPW": "pass0001"}}
-{"time": "2025-10-24T06:26:48.383036Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "401", "message": "인증 오류"}}
-=======
-
-{"time": "2025-10-23T07:48:09.911999Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "user0001", "userPW": "pass0001"}}
-{"time": "2025-10-23T07:48:09.911999Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "userName": "관리자", "userAff": "오산시청", "accessToken": "a"}}
-
->>>>>>> 56257ed8d265be6d3105f32e763803e2061e5308
+{"time": "2025-10-24T07:20:44.952969Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "user0001", "userPW": "pass0001"}}
+{"time": "2025-10-24T07:20:44.954003Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "userName": "관리자", "userAff": "오산시청", "accessToken": "a"}}

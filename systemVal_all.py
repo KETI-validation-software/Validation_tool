@@ -21,8 +21,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor
 from PyQt5.QtCore import *
 from api.webhook_api import WebhookThread
-from core.functions import BearerAuth, json_check_, field_finder, save_result, resource_path, set_auth, json_to_data, timeout_field_finder
-from core.json_checker_new import check_message_data, check_message_schema, check_message_error
+from core.functions import json_check_, resource_path, set_auth, json_to_data, timeout_field_finder
 from requests.auth import HTTPDigestAuth
 import config.CONSTANTS as CONSTANTS
 import traceback
@@ -749,14 +748,6 @@ class MyApp(QWidget):
         - current_spec_id에 따라 올바른 모듈(spec.video 또는 spec/)에서 데이터 로드
         - trans_protocol, time_out, num_retries도 SPEC_CONFIG에서 가져옴
         """
-        # # ✅ SPEC_CONFIG에서 현재 spec 설정 가져오기
-        # if not hasattr(CONSTANTS, 'SPEC_CONFIG'):
-        #     raise ValueError("CONSTANTS.SPEC_CONFIG가 정의되지 않았습니다!")
-        
-        # config = CONSTANTS.SPEC_CONFIG.get(self.current_spec_id, {})
-        # if not config:
-        #     raise ValueError(f"spec_id '{self.current_spec_id}'에 대한 설정을 찾을 수 없습니다!")
-
         config = {}
         for group in CONSTANTS.SPEC_CONFIG:
             if self.current_spec_id in group:
@@ -1070,9 +1061,6 @@ class MyApp(QWidget):
                 verify=False,
                 timeout=time_out
             )
-            # print(f"[seo] 응답 상태 코드 : {self.res.status_code}")
-            # print(f"[seo] 응답 헤더: {dict(self.res.headers)}")
-            # print(f"[seo] 응답 본문: {repr(self.res.text)}")
         except Exception as e:
             print(e)
 
@@ -1148,14 +1136,7 @@ class MyApp(QWidget):
 
                 reference_context=self.reference_context
             )
-            # check = json_check_(schema_to_check, self.webhook_res, self.flag_opt)
-            # struct = check["structure_result"]
-            # val_result    = struct["result"]        # "PASS" | "FAIL"
-            # val_text      = struct["error_msg"]     # 문자열
-            # key_psss_cnt  = struct["correct_cnt"]   # int
-            # key_error_cnt = struct["error_cnt"]     # int
-            # # 의미 검증 결과도 필요하면 아래처럼 사용 가능
-            # semantic = check.get("semantic_result")  # dict 또는 None
+
             if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
                 print(f"[DEBUG] 웹훅 검증 결과: {val_result}, pass={key_psss_cnt}, error={key_error_cnt}")
         else:
@@ -1299,35 +1280,6 @@ class MyApp(QWidget):
                 if api_name and isinstance(inMessage, dict):
                     self.reference_context[f"/{api_name}"] = inMessage
 
-                    # request_data = self._load_from_trace_file(api_name, "REQUEST")
-                    # if request_data and isinstance(request_data, dict):
-                    #     self.reference_context[f"/{api_name}"] = request_data
-                    #     print(f"[SYSTEM] 맥락: /{api_name} (trace)")
-
-                # try:
-                #     req_rules = get_validation_rules(
-                #         spec_id=self.current_spec_id,
-                #         api_name=api_name,
-                #         direction="out" #응답 검증
-                #     )
-                #     # print(f"디버깅: {req_rules.spec_id}, {req_rules.api_name}, {req_rules.direction}, {req_rules.rules}")
-                #     if req_rules:
-                #         try:
-                #             _ = json_check_(
-                #                 schema={},
-                #                 data=inMessage,
-                #                 flag=self.flag_opt,
-                #                 validation_rules=req_rules,
-                #                 reference_context=self.reference_context
-                #             )
-                #         except TypeError as te:
-                #             print(f"[ERROR] 요청 검증 중 TypeError 발생: {te}")
-                #             pass
-                # except Exception as e:
-                #     print(f"[ERROR] 요청 검증 규칙 로드 실패: {e}")
-                #     pass    # 규칙 없으면 그냥 통과
-
-
                 # 순서 확인용 로그
                 print(f"[SYSTEM] 플랫폼에 요청 전송: {(self.message[self.cnt] if self.cnt < len(self.message) else 'index out of range')} (시도 {self.current_retry + 1})")
 
@@ -1337,10 +1289,7 @@ class MyApp(QWidget):
 
             # timeout 조건은 응답 대기/재시도 판단에만 사용
             elif self.cnt < len(self.time_outs) and time_interval >= self.time_outs[self.cnt] / 1000 and self.post_flag is True:
-                # 디버깅 로그 추가
-                # if self.cnt >= 4:
-                #     print(f"[DEBUG] TIMEOUT TRIGGERED for cnt={self.cnt}, time_interval={time_interval}, timeout_limit={(self.time_outs[self.cnt]/1000) if self.cnt < len(self.time_outs) else 'N/A'}")
-
+                
                 if self.cnt < len(self.message):
                     self.message_error.append([self.message[self.cnt]])
                 else:
@@ -1513,16 +1462,7 @@ class MyApp(QWidget):
                                 res_data,
                                 self.flag_opt
                             )
-                        
-                        # 응답을 규칙 참조 컨텍스트에 저장
-                        # api_name = self.message[self.cnt] if self.cnt < len(self.message) else ""
-                        # if api_name:
-                        #     request_data = self._load_from_trace_file(api_name, "REQUEST")
-                        #     if request_data and isinstance(request_data, dict):
-                        #         self.reference_context[f"/{api_name}"] = request_data
-                        #         print(f"[SYSTEM] 맥락: /{api_name} (trace)")
 
-                        
                         if self.message[self.cnt] == "Authentication":
                             self.handle_authentication_response(res_data)
                         
