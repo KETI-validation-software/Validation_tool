@@ -1,11 +1,14 @@
 # core/validation_registry.py
+
 # 검증 규칙 레지스트리 빌드 및 조회 (개선 버전)
 
 import importlib
 import re
 from functools import lru_cache
 from types import ModuleType
+
 from typing import Dict, Any, Optional
+
 
 # 변수명 규칙: {specId}_{apiName}_{in|out}_validation
 _PATTERN = re.compile(r'^(?P<spec>[^_]+)_(?P<api>.+)_(?P<dir>in|out)_validation$')
@@ -50,6 +53,7 @@ def build_validation_registry(
     request_module_path: str = "spec.validation_request",
     response_module_path: str = "spec.validation_response",
 ) -> Dict[str, Dict[str, Dict[str, Any]]]:
+
     """
     검증 규칙 레지스트리 빌드
     
@@ -101,6 +105,7 @@ def get_validation_rules(
     검증 규칙 반환
     
     Args:
+
         spec_id: 스펙 ID (예: 'cmgvieyak001b6cd04cgaawmm')
         api_name: API 이름 (예: 'StreamURLs', 'StoredVideoInfos')
         direction: 검증 방향
