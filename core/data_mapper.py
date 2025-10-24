@@ -118,6 +118,8 @@ class ConstraintDataGenerator:
                 req_range = rule.get("requestRange", {})
                 operator = req_range.get("operator")
 
+                print(f"[DEBUG][BUILD_MAP]   request-range operator: {operator}")
+
                 if operator == "between":
                     min_field = req_range.get("minField")
                     max_field = req_range.get("maxField")
@@ -143,6 +145,58 @@ class ConstraintDataGenerator:
                         "operator": "between",
                         "min": min_val,
                         "max": max_val
+                    }
+
+                elif operator in ["greater-equal", "greater", "less-equal", "less"]:
+                    # greater-equal, greater, less-equal, less 연산자 처리
+                    min_field = req_range.get("minField")
+                    max_field = req_range.get("maxField")
+                    min_endpoint = req_range.get("minEndpoint")
+                    max_endpoint = req_range.get("maxEndpoint")
+
+                    # referenceEndpoint 또는 minEndpoint/maxEndpoint 처리
+                    ref_key_min = (min_endpoint or ref_endpoint or "").lstrip('/')
+                    ref_key_max = (max_endpoint or ref_endpoint or "").lstrip('/')
+
+                    min_val = 0
+                    max_val = 9999999999999
+
+                    # min 값 찾기
+                    if min_field:
+                        if ref_key_min and ref_key_min in self.latest_events:
+                            event = self.latest_events[ref_key_min].get("REQUEST", {})
+                            event_data = event.get("data", {})
+                            min_vals = self.find_key(event_data, min_field)
+                        else:
+                            min_vals = self.find_key(request_data, min_field)
+                        min_val = min_vals[0] if min_vals else 0
+
+                    # max 값 찾기
+                    if max_field:
+                        if ref_key_max and ref_key_max in self.latest_events:
+                            event = self.latest_events[ref_key_max].get("REQUEST", {})
+                            event_data = event.get("data", {})
+                            max_vals = self.find_key(event_data, max_field)
+                        else:
+                            max_vals = self.find_key(request_data, max_field)
+                        max_val = max_vals[0] if max_vals else 9999999999999
+
+                    print(f"[DEBUG][BUILD_MAP]   request-range: min={min_val}, max={max_val}")
+
+                    constraint_map[path] = {
+                        "type": "request-range",
+                        "operator": operator,
+                        "min": min_val,
+                        "max": max_val
+                    }
+                else:
+                    # 기본 범위 (operator 없거나 알 수 없는 경우)
+                    print(f"[DEBUG][BUILD_MAP]   Unknown operator: {operator}, using default range")
+                    constraint_map[path] = {
+                        "type": "request-range",
+                        "operator": "between",
+                        "min": 0,
+                        "max": 9999999999999
                     }
             elif value_type == "response-based":
                 # referenceEndpoint 없으면 현재 request_data에서 찾기
@@ -193,25 +247,74 @@ class ConstraintDataGenerator:
         return result
 
     def _generate_list_items(self, parent_key, item_template, constraint_map, n):
-        """리스트 항목 생성"""
+        """리스트 항목 생성 - 중복 방지 (각 항목은 고유한 값)"""
         items = []
 
-        for _ in range(n):
-            item = self._generate_item(parent_key, item_template, constraint_map, n)
+        # ✅ 사용 가능한 값들을 미리 수집
+        available_values = {}
+        used_values = {}  # 이미 사용된 값 추적
+        shared_values = {}  # 필터 필드 (모든 항목에 동일한 값)
+        min_available_count = float('inf')  # 최소 값 개수 추적
+
+        # 필터 필드 목록 (중복 허용)
+        filter_fields = ["eventFilter", "classFilter", "eventName"]
+
+        for field, value in item_template.items():
+            field_path = f"{parent_key}.{field}"
+            if field_path in constraint_map:
+                constraint = constraint_map[field_path]
+
+                # request-based 중 필터 필드는 모든 항목에 동일한 값 사용
+                if constraint["type"] == "request-based" and any(f in field for f in filter_fields):
+                    if constraint["values"]:
+                        # 첫 번째 값을 모든 항목에 공유
+                        shared_values[field_path] = constraint["values"][0]
+
+                # 그 외 필드는 중복 방지
+                elif constraint["type"] in ["request-based", "random-response", "random"]:
+                    if constraint["values"]:
+                        available_values[field_path] = constraint["values"].copy()
+                        used_values[field_path] = []  # 사용된 값 추적 초기화
+
+                        # 최소 값 개수 추적
+                        min_available_count = min(min_available_count, len(constraint["values"]))
+
+        # ✅ 중복 방지: 생성 개수를 사용 가능한 최소 값 개수로 제한
+        if min_available_count != float('inf') and n > min_available_count:
+            original_n = n
+            n = min_available_count
+            print(
+                f"[INFO] {parent_key}: 중복 방지를 위해 생성 개수를 {original_n}개 → {n}개로 조정했습니다. (사용 가능한 고유 값: {min_available_count}개)")
+
+        for i in range(n):
+            item = self._generate_item(parent_key, item_template, constraint_map, n,
+                                       available_values=available_values,
+                                       used_values=used_values,
+                                       shared_values=shared_values,
+                                       item_index=i)
             items.append(item)
 
         return items
 
-    def _generate_item(self, parent_key, template, constraint_map, n):
-        """단일 항목 생성 (재귀적으로 중첩 구조 처리)"""
+    def _generate_item(self, parent_key, template, constraint_map, n, available_values=None, used_values=None,
+                       shared_values=None, item_index=0):
+        """단일 항목 생성 (재귀적으로 중첩 구조 처리) - 중복 방지"""
         item = {}
+
+        if available_values is None:
+            available_values = {}
+        if used_values is None:
+            used_values = {}
+        if shared_values is None:
+            shared_values = {}
 
         for field, value in template.items():
             field_path = f"{parent_key}.{field}"
 
             # 중첩된 딕셔너리 처리 (예: videoInfo)
             if isinstance(value, dict):
-                item[field] = self._generate_item(field_path, value, constraint_map, n)
+                item[field] = self._generate_item(field_path, value, constraint_map, n,
+                                                  available_values, used_values, shared_values, item_index)
 
             # 중첩된 리스트 처리 (예: timeList)
             elif isinstance(value, list):
@@ -226,10 +329,55 @@ class ConstraintDataGenerator:
             elif field_path in constraint_map:
                 constraint = constraint_map[field_path]
 
-                if constraint["type"] in ["request-based", "random-response", "random"]:
-                    # 참조 값 중 랜덤 선택
-                    if constraint["values"]:
-                        item[field] = random.choice(constraint["values"])
+                # ✅ shared_values (필터 필드): 모든 항목에 동일한 값
+                if field_path in shared_values:
+                    item[field] = shared_values[field_path]
+
+                # ✅ request-based, random-response, random: 중복 방지 (순차 할당)
+                elif constraint["type"] in ["request-based", "random-response", "random"]:
+                    # ✅ 중복 방지: 사용되지 않은 값 선택
+                    if field_path in available_values and available_values[field_path]:
+                        values_list = available_values[field_path]
+                        used_list = used_values.get(field_path, [])
+
+                        # 사용 가능한 값 중 아직 사용하지 않은 값 찾기
+                        unused_values = [v for v in values_list if v not in used_list]
+
+                        if unused_values:
+                            # 사용하지 않은 값 중 첫 번째 선택
+                            selected_value = unused_values[0]
+                            item[field] = selected_value
+                            # 사용된 값으로 표시
+                            if field_path not in used_values:
+                                used_values[field_path] = []
+                            used_values[field_path].append(selected_value)
+                        elif values_list:
+                            # ⚠️ 모든 값을 다 사용했는데 여기 도달하면 안 됨 (n이 조정되었어야 함)
+                            print(f"[ERROR] {field_path}: 모든 값이 소진되었습니다. 생성 개수 조정 실패.")
+                            item[field] = values_list[0]
+                        else:
+                            item[field] = value
+                    elif constraint["values"]:
+                        # fallback: constraint["values"]에서 선택
+                        values_list = constraint["values"]
+
+                        # used_values 초기화
+                        if field_path not in used_values:
+                            used_values[field_path] = []
+
+                        used_list = used_values[field_path]
+                        unused_values = [v for v in values_list if v not in used_list]
+
+                        if unused_values:
+                            selected_value = unused_values[0]
+                            item[field] = selected_value
+                            used_values[field_path].append(selected_value)
+                        elif values_list:
+                            # 모든 값 소진 (발생하면 안 됨)
+                            print(f"[ERROR] {field_path}: 모든 값이 소진되었습니다. (fallback)")
+                            item[field] = values_list[0]
+                        else:
+                            item[field] = value
                     else:
                         item[field] = value
 

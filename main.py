@@ -1,4 +1,3 @@
-# main.py
 import sys
 import urllib3
 from PyQt5.QtWidgets import QApplication, QMainWindow, QStackedWidget, QAction, QMessageBox
@@ -93,16 +92,16 @@ class MainWindow(QMainWindow):
         """시험 결과 페이지로 이동"""
         # 현재 활성화된 검증 위젯 찾기
         validation_widget = None
-        
+
         if hasattr(self, '_system_widget') and self._system_widget is not None:
             validation_widget = self._system_widget
         elif hasattr(self, '_platform_widget') and self._platform_widget is not None:
             validation_widget = self._platform_widget
-        
+
         if validation_widget is None:
             QMessageBox.warning(self, "경고", "시험이 실행되지 않았습니다.\n먼저 시험을 실행해주세요.")
             return
-        
+
         # 시험 결과 위젯 생성 및 스택에 추가
         self._show_result_widget(validation_widget)
 
@@ -112,7 +111,7 @@ class MainWindow(QMainWindow):
         if hasattr(self, '_result_widget') and self._result_widget is not None:
             self.stack.removeWidget(self._result_widget)
             self._result_widget.deleteLater()
-        
+
         # 새로운 시험 결과 위젯 생성
         if isinstance(parent_widget, platform_app.MyApp):
             self._result_widget = platform_app.ResultPageWidget(parent_widget, embedded=True)
@@ -121,17 +120,17 @@ class MainWindow(QMainWindow):
         else:
             print(f"알 수 없는 parent_widget 타입: {type(parent_widget)}")
             return
-        
+
         # 뒤로가기 시그널 연결
         self._result_widget.backRequested.connect(self._on_back_to_validation)
-        
+
         # 스택에 추가하고 전환
         self.stack.addWidget(self._result_widget)
         self.stack.setCurrentWidget(self._result_widget)
-        
+
         # 시험 결과 메뉴 활성화
         self.act_test_result.setEnabled(True)
-    
+
     def _on_back_to_validation(self):
         """뒤로가기: 시험 결과 페이지에서 검증 화면으로 복귀"""
         # 현재 활성화된 검증 위젯으로 전환
@@ -151,37 +150,39 @@ class MainWindow(QMainWindow):
             # 2페이지(시험 설정)로 이동 → 시험 설정 메뉴 활성화
             self.act_test_setup.setEnabled(True)
 
-    def _on_start_test_requested(self, test_group_name, verification_type, spec_id):
+    def _on_start_test_requested(self, target_system_edit, verification_type, spec_id):
         """시험 시작 버튼 클릭 시 호출 - 시험 실행 메뉴 활성화 후 검증 앱 실행"""
         # 시험 실행 메뉴 활성화
         self.act_test_run.setEnabled(True)
-        print(f"시험 실행 메뉴 활성화: testGroup.name={test_group_name}, verificationType={verification_type}, spec_id={spec_id}")
+        print(
+            f"시험 실행 메뉴 활성화: target_system={target_system_edit}, verificationType={verification_type}, spec_id={spec_id}")
 
         # 현재 정보 저장 (메뉴에서 시험 실행 클릭 시 사용)
-        self._current_test_group_name = test_group_name
+        self._current_test_target_system_name = target_system_edit
         self._current_verification_type = verification_type
         self._current_spec_id = spec_id
 
         # 검증 앱 실행
-        self._open_validation_app(test_group_name, verification_type, spec_id)
+        self._open_validation_app(target_system_edit, verification_type, spec_id)
 
     def _run_test_from_menu(self):
         """메뉴에서 시험 실행 클릭 시 호출 - 메인 창을 검증 화면으로 전환"""
-        if hasattr(self, '_current_test_group_name') and self._current_test_group_name:
-            test_group_name = self._current_test_group_name
+        if hasattr(self, '_current_test_target_system_name') and self._current_test_target_system_name:
+            target_system_edit = self._current_test_target_system_name
             verification_type = getattr(self, '_current_verification_type', 'request')
             spec_id = getattr(self, '_current_spec_id', '')
-            print(f"시험 실행 페이지로 이동: testGroup.name={test_group_name}, verificationType={verification_type}, spec_id={spec_id}")
+            print(
+                f"시험 실행 페이지로 이동: target_system={target_system_edit}, verificationType={verification_type}, spec_id={spec_id}")
 
-            # testGroup.name에 따라 검증 화면 결정
-            if "물리보안" in test_group_name:
+            # target_system_edit에 따라 검증 화면 결정
+            if "물리보안시스템" in target_system_edit:
                 # 물리보안 - System 검증으로 전환
                 if getattr(self, "_system_widget", None) is None:
                     self._system_widget = system_app.MyApp(embedded=True, spec_id=spec_id)
                     self._system_widget.showResultRequested.connect(self._on_show_result_requested)
                     self.stack.addWidget(self._system_widget)
                 self.stack.setCurrentWidget(self._system_widget)
-            elif "통합플랫폼" in test_group_name:
+            elif "통합플랫폼시스템" in target_system_edit:
                 # 통합플랫폼 - Platform 검증으로 전환
                 if getattr(self, "_platform_widget", None) is None:
                     self._platform_widget = platform_app.MyApp(embedded=True, spec_id=spec_id)
@@ -189,7 +190,7 @@ class MainWindow(QMainWindow):
                     self.stack.addWidget(self._platform_widget)
                 self.stack.setCurrentWidget(self._platform_widget)
             else:
-                QMessageBox.warning(self, "경고", f"알 수 없는 시험 분야: {test_group_name}\n'물리보안' 또는 '통합플랫폼'이어야 합니다.")
+                QMessageBox.warning(self, "경고", f"알 수 없는 시험 분야: {target_system_edit}\n'물리보안' 또는 '통합플랫폼'이어야 합니다.")
         else:
             QMessageBox.warning(self, "경고", "시험 정보가 설정되지 않았습니다.\n시험 시작 버튼을 먼저 클릭해주세요.")
 
@@ -219,14 +220,14 @@ class MainWindow(QMainWindow):
                 self.restoreGeometry(self._saved_geom)
             self.showNormal()
 
-    def _open_validation_app(self, test_group_name, verification_type, spec_id):
-        """testGroup.name에 따라 다른 검증 앱 실행"""
+    def _open_validation_app(self, target_system_edit, verification_type, spec_id):
+        """target_system_edit에 따라 다른 검증 앱 실행"""
         importlib.reload(CONSTANTS)  # CONSTANTS 모듈을 다시 로드하여 최신 설정 반영
 
-        print(f"검증 화면 실행: testGroup.name={test_group_name}, verificationType={verification_type}, spec_id={spec_id}")
+        print(f"검증 화면 실행: target_system={target_system_edit}, verificationType={verification_type}, spec_id={spec_id}")
 
-        # testGroup.name에 따라 어떤 검증 앱을 실행할지 결정
-        if "물리보안" in test_group_name:
+        # target_system_edit에 따라 어떤 검증 앱을 실행할지 결정
+        if "물리보안시스템" in target_system_edit:
             # 물리보안: 메인 창=System, 새 창=Platform
             print("→ 물리보안: 메인 창=System")
 
@@ -238,10 +239,9 @@ class MainWindow(QMainWindow):
             self.stack.setCurrentWidget(self._system_widget)
 
         # 1.2로 했을때 통합플랫폼으로 들어가야함
-        elif "통합플랫폼" in test_group_name:
+        elif "통합플랫폼시스템" in target_system_edit:
             # 통합플랫폼: 메인 창=Platform, 새 창=System
             print("→ 통합플랫폼: 메인 창=Platform")
-
 
             # Main 화면: Platform 검증으로 전환
             if getattr(self, "_platform_widget", None) is None:
@@ -251,9 +251,9 @@ class MainWindow(QMainWindow):
             self.stack.setCurrentWidget(self._platform_widget)
 
         else:
-            print(f"알 수 없는 testGroup.name: {test_group_name}")
+            print(f"알 수 없는 target_system: {target_system_edit}")
             print(f"   ('물리보안' 또는 '통합플랫폼'이 포함되어야 합니다)")
-            QMessageBox.warning(self, "경고", f"알 수 없는 시험 분야: {test_group_name}\n'물리보안' 또는 '통합플랫폼'이 포함되어야 합니다.")
+            QMessageBox.warning(self, "경고", f"알 수 없는 시험 분야: {target_system_edit}\n'물리보안' 또는 '통합플랫폼'이 포함되어야 합니다.")
 
     def closeEvent(self, event):
         reply = QMessageBox.question(self, '종료', '프로그램을 종료하시겠습니까?',

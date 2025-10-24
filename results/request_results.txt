@@ -1,17 +1,17 @@
 === 시험 결과 ===
-통과 필드 수: 8
+통과 필드 수: 14
 전체 필드 수: 17
-종합 평가 점수: 47.1%
+종합 평가 점수: 82.4%
 
 === 스텝별 결과 ===
 1. Authentication | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 1 | 전체 필드 수: 1 | 실패 필드 수: 0 | 평가 점수: 100.0%
 2. Capabilities | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 1 | 전체 필드 수: 1 | 실패 필드 수: 0 | 평가 점수: 100.0%
 3. CameraProfiles | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 1 | 전체 필드 수: 1 | 실패 필드 수: 0 | 평가 점수: 100.0%
-4. StoredVideoInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 1 | 전체 필드 수: 2 | 실패 필드 수: 1 | 평가 점수: 50.0%
-5. StreamURLs | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 1 | 전체 필드 수: 2 | 실패 필드 수: 1 | 평가 점수: 50.0%
-6. ReplayURL | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 1 | 전체 필드 수: 2 | 실패 필드 수: 1 | 평가 점수: 50.0%
+4. StoredVideoInfos | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 2 | 전체 필드 수: 2 | 실패 필드 수: 0 | 평가 점수: 100.0%
+5. StreamURLs | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 2 | 전체 필드 수: 2 | 실패 필드 수: 0 | 평가 점수: 100.0%
+6. ReplayURL | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 2 | 전체 필드 수: 2 | 실패 필드 수: 0 | 평가 점수: 100.0%
 7. RealtimeVideoEventInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 1 | 전체 필드 수: 4 | 실패 필드 수: 3 | 평가 점수: 25.0%
-8. StoredVideoEventInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 1 | 전체 필드 수: 4 | 실패 필드 수: 3 | 평가 점수: 25.0%
+8. StoredVideoEventInfos | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 4 | 전체 필드 수: 4 | 실패 필드 수: 0 | 평가 점수: 100.0%
 
 === 전체 로그 ===
 Start Validation...
@@ -73,13 +73,16 @@ step 4: StoredVideoInfos
     },
     "camList": [
         {
-            "camID": ""
+            "camID": "cam0001"
+        },
+        {
+            "camID": "cam0002"
         }
     ]
 }
-FAIL
-Score : 80.0
-Score details : 4(누적 통과 필드 수), 1(누적 오류 필드 수)
+PASS
+Score : 100.0
+Score details : 5(누적 통과 필드 수), 0(누적 오류 필드 수)
 
 step 5: StreamURLs
 🔄 부하테스트 시작: 총 1회 검증 예정
@@ -92,14 +95,18 @@ step 5: StreamURLs
 {
     "camList": [
         {
-            "camID": "",
+            "camID": "cam0001",
+            "streamProtocolType": "RTSP"
+        },
+        {
+            "camID": "cam0002",
             "streamProtocolType": "RTSP"
         }
     ]
 }
-FAIL
-Score : 71.42857142857143
-Score details : 5(누적 통과 필드 수), 2(누적 오류 필드 수)
+PASS
+Score : 100.0
+Score details : 7(누적 통과 필드 수), 0(누적 오류 필드 수)
 
 step 6: ReplayURL
 🔄 부하테스트 시작: 총 1회 검증 예정
@@ -112,16 +119,22 @@ step 6: ReplayURL
 {
     "camList": [
         {
-            "camID": "",
+            "camID": "cam0001",
+            "startTime": 1760949060000,
+            "endTime": 1761208260000,
+            "streamProtocolType": "RTSP"
+        },
+        {
+            "camID": "cam0002",
             "startTime": 1760949060000,
             "endTime": 1761208260000,
             "streamProtocolType": "RTSP"
         }
     ]
 }
-FAIL
-Score : 66.66666666666666
-Score details : 6(누적 통과 필드 수), 3(누적 오류 필드 수)
+PASS
+Score : 100.0
+Score details : 9(누적 통과 필드 수), 0(누적 오류 필드 수)
 
 step 7: RealtimeVideoEventInfos
 🔄 부하테스트 시작: 총 1회 검증 예정
@@ -147,8 +160,8 @@ step 7: RealtimeVideoEventInfos
 --- Webhook 응답 ---
 null
 FAIL
-Score : 53.84615384615385
-Score details : 7(누적 통과 필드 수), 6(누적 오류 필드 수)
+Score : 76.92307692307693
+Score details : 10(누적 통과 필드 수), 3(누적 오류 필드 수)
 
 step 8: StoredVideoEventInfos
 🔄 부하테스트 시작: 총 1회 검증 예정
@@ -165,15 +178,18 @@ step 8: StoredVideoEventInfos
     },
     "camList": [
         {
-            "camID": ""
+            "camID": "cam0001"
+        },
+        {
+            "camID": "cam0002"
         }
     ],
     "maxCount": 3,
-    "eventFilter": "",
-    "classFilter": ""
+    "eventFilter": "배회",
+    "classFilter": "버스"
 }
-FAIL
-Score : 47.05882352941176
-Score details : 8(누적 통과 필드 수), 9(누적 오류 필드 수)
+PASS
+Score : 82.35294117647058
+Score details : 14(누적 통과 필드 수), 3(누적 오류 필드 수)
 
 검증 절차가 완료되었습니다.
