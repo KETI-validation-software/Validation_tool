@@ -5,14 +5,14 @@
 종합 평가 점수: 64.7%
 
 === 스텝별 결과 ===
-1. Authentication | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
+1. Authentication | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 1 | 전체 필드 수: 1 | 실패 필드 수: 0 | 평가 점수: 100.0%
 2. Capabilities | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 1 | 전체 필드 수: 1 | 실패 필드 수: 0 | 평가 점수: 100.0%
 3. CameraProfiles | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 1 | 전체 필드 수: 1 | 실패 필드 수: 0 | 평가 점수: 100.0%
-4. StoredVideoInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 3 | 전체 필드 수: 5 | 실패 필드 수: 2 | 평가 점수: 60.0%
-5. StreamURLs | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 3 | 전체 필드 수: 4 | 실패 필드 수: 1 | 평가 점수: 75.0%
-6. ReplayURL | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 5 | 전체 필드 수: 6 | 실패 필드 수: 1 | 평가 점수: 83.3%
-7. RealtimeVideoEventInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 4 | 전체 필드 수: 9 | 실패 필드 수: 5 | 평가 점수: 44.4%
-8. StoredVideoEventInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 5 | 전체 필드 수: 8 | 실패 필드 수: 3 | 평가 점수: 62.5%
+4. StoredVideoInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 1 | 전체 필드 수: 2 | 실패 필드 수: 1 | 평가 점수: 50.0%
+5. StreamURLs | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 1 | 전체 필드 수: 2 | 실패 필드 수: 1 | 평가 점수: 50.0%
+6. ReplayURL | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 1 | 전체 필드 수: 2 | 실패 필드 수: 1 | 평가 점수: 50.0%
+7. RealtimeVideoEventInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 1 | 전체 필드 수: 4 | 실패 필드 수: 3 | 평가 점수: 25.0%
+8. StoredVideoEventInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 1 | 전체 필드 수: 4 | 실패 필드 수: 3 | 평가 점수: 25.0%
 
 
 === 전체 로그 ===
@@ -35,8 +35,8 @@ step 1: Authentication
 
 
 PASS
-Score : 0
-Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+Score : 100.0
+Score details : 1(누적 통과 필드 수), 0(누적 오류 필드 수)
 
 step 2: Capabilities
 
@@ -93,7 +93,7 @@ step 3: CameraProfiles
 
 PASS
 Score : 100.0
-Score details : 2(누적 통과 필드 수), 0(누적 오류 필드 수)
+Score details : 3(누적 통과 필드 수), 0(누적 오류 필드 수)
 
 step 4: StoredVideoInfos
 🔄 부하테스트 시작: 총 1회 검증 예정
@@ -117,8 +117,8 @@ step 4: StoredVideoInfos
 }
 
 FAIL
-Score : 71.42857142857143
-Score details : 5(누적 통과 필드 수), 2(누적 오류 필드 수)
+Score : 80.0
+Score details : 4(누적 통과 필드 수), 1(누적 오류 필드 수)
 
 step 5: StreamURLs
 🔄 부하테스트 시작: 총 1회 검증 예정
@@ -138,8 +138,8 @@ step 5: StreamURLs
 }
 
 FAIL
-Score : 72.72727272727273
-Score details : 8(누적 통과 필드 수), 3(누적 오류 필드 수)
+Score : 71.42857142857143
+Score details : 5(누적 통과 필드 수), 2(누적 오류 필드 수)
 
 step 6: ReplayURL
 🔄 부하테스트 시작: 총 1회 검증 예정
@@ -161,8 +161,8 @@ step 6: ReplayURL
 }
 
 FAIL
-Score : 76.47058823529412
-Score details : 13(누적 통과 필드 수), 4(누적 오류 필드 수)
+Score : 66.66666666666666
+Score details : 6(누적 통과 필드 수), 3(누적 오류 필드 수)
 
 step 7: RealtimeVideoEventInfos
 🔄 부하테스트 시작: 총 1회 검증 예정
@@ -189,8 +189,8 @@ step 7: RealtimeVideoEventInfos
 null
 
 FAIL
-Score : 65.38461538461539
-Score details : 17(누적 통과 필드 수), 9(누적 오류 필드 수)
+Score : 53.84615384615385
+Score details : 7(누적 통과 필드 수), 6(누적 오류 필드 수)
 
 step 8: StoredVideoEventInfos
 🔄 부하테스트 시작: 총 1회 검증 예정
@@ -217,7 +217,7 @@ step 8: StoredVideoEventInfos
 }
 
 FAIL
-Score : 64.70588235294117
-Score details : 22(누적 통과 필드 수), 12(누적 오류 필드 수)
+Score : 47.05882352941176
+Score details : 8(누적 통과 필드 수), 9(누적 오류 필드 수)
 
 검증 절차가 완료되었습니다.

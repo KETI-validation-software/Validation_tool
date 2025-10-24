@@ -5,14 +5,14 @@
 종합 평가 점수: 86.5%
 
 === 스텝별 결과 ===
-1. Authentication | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-2. Capabilities | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-3. CameraProfiles | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-4. StoredVideoInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 6 | 전체 필드 수: 7 | 실패 필드 수: 1 | 평가 점수: 85.7%
-5. StreamURLs | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 12 | 전체 필드 수: 13 | 실패 필드 수: 1 | 평가 점수: 92.3%
-6. ReplayURL | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 16 | 전체 필드 수: 18 | 실패 필드 수: 2 | 평가 점수: 88.9%
-7. RealtimeVideoEventInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 0 | 전체 필드 수: 1 | 실패 필드 수: 1 | 평가 점수: 0.0%
-8. StoredVideoEventInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 11 | 전체 필드 수: 13 | 실패 필드 수: 2 | 평가 점수: 84.6%
+1. Authentication | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 1 | 전체 필드 수: 1 | 실패 필드 수: 0 | 평가 점수: 100.0%
+2. Capabilities | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 1 | 전체 필드 수: 1 | 실패 필드 수: 0 | 평가 점수: 100.0%
+3. CameraProfiles | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 1 | 전체 필드 수: 1 | 실패 필드 수: 0 | 평가 점수: 100.0%
+4. StoredVideoInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 3 | 전체 필드 수: 4 | 실패 필드 수: 1 | 평가 점수: 75.0%
+5. StreamURLs | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 1 | 전체 필드 수: 2 | 실패 필드 수: 1 | 평가 점수: 50.0%
+6. ReplayURL | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 3 | 전체 필드 수: 5 | 실패 필드 수: 2 | 평가 점수: 60.0%
+7. RealtimeVideoEventInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 1 | 전체 필드 수: 2 | 실패 필드 수: 1 | 평가 점수: 50.0%
+8. StoredVideoEventInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 3 | 전체 필드 수: 5 | 실패 필드 수: 2 | 평가 점수: 60.0%
 
 
 === 전체 로그 ===
@@ -33,8 +33,8 @@ step 1: Authentication (시도 1/1)
 }
 
 검증 결과: PASS
-Score : 0
-Score details : 0(누적 통과 필드 수), 0(누적 오류 필드 수)
+Score : 100.0
+Score details : 1(누적 통과 필드 수), 0(누적 오류 필드 수)
 
 
 step 2: Capabilities (시도 1/1)
@@ -164,8 +164,8 @@ step 5: StreamURLs (시도 1/1)
 }
 
 검증 결과: FAIL
-Score : 90.0
-Score details : 18(누적 통과 필드 수), 2(누적 오류 필드 수)
+Score : 77.77777777777779
+Score details : 7(누적 통과 필드 수), 2(누적 오류 필드 수)
 
 step 6: ReplayURL (시도 1/1)
 
@@ -195,8 +195,8 @@ step 6: ReplayURL (시도 1/1)
 
 검증 결과: FAIL
 ⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
-Score : 89.47368421052632
-Score details : 34(누적 통과 필드 수), 4(누적 오류 필드 수)
+Score : 71.42857142857143
+Score details : 10(누적 통과 필드 수), 4(누적 오류 필드 수)
 
 step 7: RealtimeVideoEventInfos (시도 1/1)
 
@@ -211,8 +211,8 @@ step 7: RealtimeVideoEventInfos (시도 1/1)
 
 검증 결과: FAIL
 ⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
-Score : 87.17948717948718
-Score details : 34(누적 통과 필드 수), 5(누적 오류 필드 수)
+Score : 68.75
+Score details : 11(누적 통과 필드 수), 5(누적 오류 필드 수)
 
 step 8: StoredVideoEventInfos (시도 1/1)
 
@@ -236,7 +236,7 @@ step 8: StoredVideoEventInfos (시도 1/1)
 
 
 검증 결과: FAIL
-Score : 86.53846153846155
-Score details : 45(누적 통과 필드 수), 7(누적 오류 필드 수)
+Score : 66.66666666666666
+Score details : 14(누적 통과 필드 수), 7(누적 오류 필드 수)
 
 검증 절차가 완료되었습니다.
