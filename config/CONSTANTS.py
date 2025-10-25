@@ -8,18 +8,18 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소 
 #test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
-company_name = "물리보안기업"
-product_name = "물리보안테스트제품"
+company_name = "통합플랫폼테스트"
+product_name = "통합플랫폼테스트제품"
 version = "v1.0"
 test_category = "MAIN_TEST"
-test_target = "물리보안"
+test_target = "통합플랫폼"
 test_range = "ALL_FIELDS"
 auth_type = "Bearer Token"
 auth_info = "a"
 admin_code = "1"
 url = "https://127.0.0.1:8080"
 
-specs = [["cmgyv3rzl014nvsveidu5jpzp_outSchema","cmgyv3rzl014nvsveidu5jpzp_inData","cmgyv3rzl014nvsveidu5jpzp_messages",""]]
+specs = [["cmgvieyak001b6cd04cgaawmm_inSchema","cmgvieyak001b6cd04cgaawmm_outData","cmgvieyak001b6cd04cgaawmm_messages",""]]
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황 
 flag_opt = False
@@ -52,13 +52,13 @@ enable_retry_delay = False  # False 권장: 불필요한 sleep 제거
 
 SPEC_CONFIG = [
     {
-        "group_name": "물리보안",
-        "group_id": "cmgzwohuq01y8vsvep0hpuuf4",
-        "cmgyv3rzl014nvsveidu5jpzp": {
+        "group_name": "통합플랫폼",
+        "group_id": "cmgzwocpp01y6vsve880sfysm",
+        "cmgvieyak001b6cd04cgaawmm": {
     "test_name": "영상보안시스템_new",
-    "specs": ['cmgyv3rzl014nvsveidu5jpzp_outSchema', 'cmgyv3rzl014nvsveidu5jpzp_inData', 'cmgyv3rzl014nvsveidu5jpzp_messages', 'cmgyv3rzl014nvsveidu5jpzp_webhook_inSchema', 'cmgyv3rzl014nvsveidu5jpzp_webhook_outData'],
+    "specs": ['cmgvieyak001b6cd04cgaawmm_inSchema', 'cmgvieyak001b6cd04cgaawmm_outData', 'cmgvieyak001b6cd04cgaawmm_messages', 'cmgvieyak001b6cd04cgaawmm_webhook_OutSchema', 'cmgvieyak001b6cd04cgaawmm_webhook_inData'],
     "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'WebHook', 'basic'],
-    "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
+    "time_out": [10000, 10000, 10000, 5000, 5000, 5000, 5000, 5000],
     "num_retries": [1, 1, 1, 1, 1, 1, 1, 1]
 }
     }

@@ -794,7 +794,7 @@ class MyApp(QWidget):
         self.videoOutMessage = getattr(data_response_module, spec_names[1], [])
         #self.videoOutConstraint = getattr(constraints_response_module, self.current_spec_id+"_OutConstraints", [])
         self.videoMessages = getattr(data_response_module, spec_names[2], [])
-        self.videoOutConstraint = getattr(constraints_response_module, self.current_spec_id+"_OutConstraints", [])
+        self.videoOutConstraint = getattr(constraints_response_module, self.current_spec_id+"_outConstraints", [])
         # ✅ Webhook 관련 (영상보안 시스템만 사용)
 
         self.videoWebhookSchema = []
