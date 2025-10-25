@@ -182,9 +182,9 @@ class FormValidator:
 
                 # Constraints 리스트
                 if file_type == "response":
-                    c_list_name = f"{spec_id}_OutConstraints"
+                    c_list_name = f"{spec_id}_outConstraints"
                 else:
-                    c_list_name = f"{spec_id}_InConstraints"
+                    c_list_name = f"{spec_id}_inConstraints"
 
                 constraints_content += f"# {spec_id} 검증 리스트\n"
                 constraints_content += f"{c_list_name} = [\n"
