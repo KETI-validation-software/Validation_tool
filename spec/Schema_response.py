@@ -50,8 +50,8 @@ cmgyv3rzl014nvsveidu5jpzp_StoredVideoInfos_out_schema = {
     "camList": [{
     "camID": str,
     "timeList": [{
-    "startTime": float,
-    "endTime": float,
+    "startTime": int,
+    "endTime": int,
 }],
 }],
 }
@@ -67,7 +67,7 @@ cmgyv3rzl014nvsveidu5jpzp_StreamURLs_out_schema = {
     "camURL": str,
     OptionalKey("videoInfo"): {
     OptionalKey("resolution"): str,
-    OptionalKey("fps"): float,
+    OptionalKey("fps"): int,
     OptionalKey("videoCodec"): str,
     OptionalKey("audioCodec"): str,
 },
@@ -87,7 +87,7 @@ cmgyv3rzl014nvsveidu5jpzp_ReplayURL_out_schema = {
     "camURL": str,
     OptionalKey("videoInfo"): {
     OptionalKey("resolution"): str,
-    OptionalKey("fps"): float,
+    OptionalKey("fps"): int,
     OptionalKey("videoCodec"): str,
     OptionalKey("audioCodec"): str,
 },
@@ -112,7 +112,7 @@ cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_webhook_in_schema = {
 },
     OptionalKey("eventFilter"): str,
     OptionalKey("classFilter"): str,
-    OptionalKey("startTime"): float,
+    OptionalKey("startTime"): int,
 }
 
 # StoredVideoEventInfos
