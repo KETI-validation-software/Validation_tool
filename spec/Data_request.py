@@ -63,19 +63,8 @@ cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_in_data = {
 
 # RealtimeVideoEventInfos WebHook OUT Data
 cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_webhook_out_data = {
-    "camList": [
-        {
-        "camID": ""
-    }
-],
-    "duration": "100",
-    "transProtocol": {
-    "transProtocolType": "WebHook",
-    "transProtocolDesc": "127.0.0.1:8090"
-},
-    "eventFilter": "",
-    "classFilter": "",
-    "startTime": 1761110160000
+    "code": "",
+    "message": ""
 }
 
 # StoredVideoEventInfos
