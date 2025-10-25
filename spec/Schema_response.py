@@ -102,8 +102,17 @@ cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_out_schema = {
 
 # RealtimeVideoEventInfos WebHook IN Schema
 cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_webhook_in_schema = {
-    "code": str,
-    "message": str,
+    "camList": [{
+    "camID": str,
+}],
+    "duration": str,
+    "transProtocol": {
+    "transProtocolType": str,
+    OptionalKey("transProtocolDesc"): str,
+},
+    OptionalKey("eventFilter"): str,
+    OptionalKey("classFilter"): str,
+    OptionalKey("startTime"): float,
 }
 
 # StoredVideoEventInfos
