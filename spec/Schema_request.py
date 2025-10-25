@@ -90,7 +90,7 @@ cmgvieyak001b6cd04cgaawmm_inSchema = [
 ]
 
 # cmgvieyak001b6cd04cgaawmm WebHook 스키마 리스트
-cmgvieyak001b6cd04cgaawmm_webhook_outSchema = [
+cmgvieyak001b6cd04cgaawmm_webhook_OutSchema = [
     cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_webhook_out_schema,
 ]
 

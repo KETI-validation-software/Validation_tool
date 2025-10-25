@@ -112,53 +112,28 @@ step 4: StoredVideoInfos (시도 1/1)
     "message": "성공",
     "camList": [
         {
-            "camID": "",
+            "camID": "cam0001",
             "timeList": [
                 {
-                    "startTime": 1761032308185,
-                    "endTime": 1761110996691
+                    "startTime": 1760972919198,
+                    "endTime": 1761020124017
                 },
                 {
-                    "startTime": 1761020030521,
-                    "endTime": 1761037282673
-                },
-                {
-                    "startTime": 1761011801531,
-                    "endTime": 1761104453770
+                    "startTime": 1760999755573,
+                    "endTime": 1761109636339
                 }
             ]
         },
         {
-            "camID": "",
+            "camID": "cam0002",
             "timeList": [
                 {
-                    "startTime": 1760963475339,
-                    "endTime": 1761088090917
+                    "startTime": 1761110141138,
+                    "endTime": 1761118453573
                 },
                 {
-                    "startTime": 1760955853959,
-                    "endTime": 1761037043082
-                },
-                {
-                    "startTime": 1761053491305,
-                    "endTime": 1761094109930
-                }
-            ]
-        },
-        {
-            "camID": "",
-            "timeList": [
-                {
-                    "startTime": 1761076605540,
-                    "endTime": 1761083113650
-                },
-                {
-                    "startTime": 1760950785702,
-                    "endTime": 1761042333694
-                },
-                {
-                    "startTime": 1760956886967,
-                    "endTime": 1761116128971
+                    "startTime": 1761061830690,
+                    "endTime": 1761077270074
                 }
             ]
         }
@@ -179,7 +154,7 @@ step 5: StreamURLs (시도 1/1)
     "message": "성공",
     "camList": [
         {
-            "camID": "",
+            "camID": "cam0001",
             "accessID": "conn0001",
             "accessPW": "1234",
             "camURL": "rtsp://192.168.0.5:8000",
@@ -191,19 +166,7 @@ step 5: StreamURLs (시도 1/1)
             }
         },
         {
-            "camID": "",
-            "accessID": "conn0001",
-            "accessPW": "1234",
-            "camURL": "rtsp://192.168.0.5:8000",
-            "videoInfo": {
-                "resolution": "1920x1080",
-                "fps": "30",
-                "videoCodec": "H.264",
-                "audioCodec": "G.711"
-            }
-        },
-        {
-            "camID": "",
+            "camID": "cam0002",
             "accessID": "conn0001",
             "accessPW": "1234",
             "camURL": "rtsp://192.168.0.5:8000",
@@ -231,11 +194,11 @@ step 6: ReplayURL (시도 1/1)
     "message": "200",
     "camList": [
         {
-            "camID": "",
+            "camID": "cam0001",
             "accessID": "cam0001",
             "accessPW": "conn0001",
-            "startTime": 1761003163076,
-            "endTime": 1761140315471,
+            "startTime": 1761081146778,
+            "endTime": 1761155304181,
             "camURL": "rtsp://192.168.0.5:8000",
             "videoInfo": {
                 "resolution": "1920x1080",
@@ -245,25 +208,11 @@ step 6: ReplayURL (시도 1/1)
             }
         },
         {
-            "camID": "",
+            "camID": "cam0002",
             "accessID": "cam0001",
             "accessPW": "conn0001",
-            "startTime": 1761020569308,
-            "endTime": 1761206432409,
-            "camURL": "rtsp://192.168.0.5:8000",
-            "videoInfo": {
-                "resolution": "1920x1080",
-                "fps": "30",
-                "videoCodec": "H.264",
-                "audioCodec": "G.711"
-            }
-        },
-        {
-            "camID": "",
-            "accessID": "cam0001",
-            "accessPW": "conn0001",
-            "startTime": 1761095659296,
-            "endTime": 1761200914553,
+            "startTime": 1761143686983,
+            "endTime": 1761184305126,
             "camURL": "rtsp://192.168.0.5:8000",
             "videoInfo": {
                 "resolution": "1920x1080",
@@ -306,27 +255,19 @@ step 8: StoredVideoEventInfos (시도 1/1)
     "message": "성공",
     "camList": [
         {
-            "camID": "",
+            "camID": "cam0001",
             "eventUUID": "event01",
-            "eventName": "",
-            "startTime": "",
-            "endTime": "",
+            "eventName": "배회",
+            "startTime": 3133857500431,
+            "endTime": 5111300030500,
             "eventDesc": "aaabbbAAA"
         },
         {
-            "camID": "",
+            "camID": "cam0002",
             "eventUUID": "event01",
-            "eventName": "",
-            "startTime": "",
-            "endTime": "",
-            "eventDesc": "aaabbbAAA"
-        },
-        {
-            "camID": "",
-            "eventUUID": "event01",
-            "eventName": "",
-            "startTime": "",
-            "endTime": "",
+            "eventName": "배회",
+            "startTime": 2507322112868,
+            "endTime": 9992359307282,
             "eventDesc": "aaabbbAAA"
         }
     ]
