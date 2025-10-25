@@ -18,7 +18,7 @@ from pathlib import Path
 
 import config.CONSTANTS as CONSTANTS
 
-from core.functions import json_check_, save_result, resource_path, field_finder, json_to_data, set_auth, timeout_field_finder 
+from core.functions import json_check_, save_result, resource_path, json_to_data, set_auth, timeout_field_finder
 from core.json_checker_new import check_message_data, check_message_schema, check_message_error 
 
 from http.server import HTTPServer
@@ -1108,7 +1108,7 @@ class MyApp(QWidget):
                         print(f"[DEBUG] json_check_ 호출 시작")
                         print(f"[DEBUG] videoInSchema[{self.cnt}] type: {type(self.videoInSchema[self.cnt])}")
                         print(f"[DEBUG] current_data type: {type(current_data)}")
-                        print(f"[DEBUG] current_data 내용: {repr(current_data)[:5]}")
+                        print(f"[DEBUG] current_data 내용: {repr(current_data)}")
                         
                         val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(
                             self.videoInSchema[self.cnt],
