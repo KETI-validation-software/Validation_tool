@@ -11,7 +11,10 @@ import os
 import json
 from lxml import etree
 from PyQt5.QtWidgets import QMessageBox
-
+import json
+from datetime import datetime
+import uuid
+import config.CONSTANTS as CONSTANTS
 
 def resource_path(relative_path):
     try:
@@ -432,3 +435,318 @@ def json_to_data(type_):
         return os.path.join("spec", t, f"{name}_{kind}.json")
 
     return True
+
+
+def get_test_group_info():
+    """CONSTANTS의 SPEC_CONFIG에서 테스트 그룹 정보 추출"""
+    if not CONSTANTS.SPEC_CONFIG:
+        return {
+            "id": "group-001",
+            "name": CONSTANTS.test_target,
+            "testRange": CONSTANTS.test_range,
+            "testSpecIds": []
+        }
+
+    # 첫 번째 그룹 정보 가져오기
+    first_group = CONSTANTS.SPEC_CONFIG[0]
+    group_id = first_group.get("group_id", "group-001")
+    group_name = first_group.get("group_name", CONSTANTS.test_target)
+
+    # 그룹 내 모든 spec ID 수집
+    test_spec_ids = []
+    for key, value in first_group.items():
+        if key not in ["group_name", "group_id"] and isinstance(value, dict):
+            test_spec_ids.append(key)
+
+    return {
+        "id": group_id,
+        "name": group_name,
+        "testRange": CONSTANTS.test_range,
+        "testSpecIds": test_spec_ids
+    }
+
+
+def get_spec_test_name(spec_id):
+    """SPEC_CONFIG에서 spec_id에 해당하는 test_name 가져오기"""
+    for group in CONSTANTS.SPEC_CONFIG:
+        for key, value in group.items():
+            if key == spec_id and isinstance(value, dict):
+                return value.get("test_name", spec_id)
+    return spec_id
+
+
+def map_auth_method(auth_type_str):
+    """인증 방식 문자열 매핑"""
+    auth_map = {
+        "Bearer Token": "Bearer Token",
+        "Digest Auth": "Digest Auth",
+        "None": "None"
+    }
+    return auth_map.get(auth_type_str, auth_type_str)
+
+
+def generate_validation_data_from_step_buffer(step_buffer, attempt_num):
+    """스텝 버퍼에서 검증 데이터 추출 (raw_data_list 우선 사용)"""
+    import re
+
+    validation_data = {}
+    validation_errors = []
+
+    if "raw_data_list" in step_buffer and step_buffer["raw_data_list"]:
+        raw_data_list = step_buffer["raw_data_list"]
+        # attempt_num은 1부터 시작하므로 인덱스는 attempt_num - 1
+        if 0 <= attempt_num - 1 < len(raw_data_list):
+            validation_data = raw_data_list[attempt_num - 1]
+        else:
+            validation_data = {}
+
+        # ✅ raw_data_list가 없으면 기존 방식 사용 (하위 호환성)
+    elif step_buffer.get("data"):
+        data_text = step_buffer["data"]
+
+        # "[시도 n회차]" 패턴으로 분리
+        # 패턴: [시도 1회차], [시도 2회차] 등
+        pattern = r'\[시도 (\d+)회차\]'
+        parts = re.split(pattern, data_text)
+
+        # parts는 [앞부분, '1', 데이터1, '2', 데이터2, ...] 형식
+        # 시도 번호와 데이터를 매핑
+        attempt_data_map = {}
+        for i in range(1, len(parts), 2):
+            if i + 1 < len(parts):
+                attempt_idx = int(parts[i])
+                data_content = parts[i + 1].strip()
+                attempt_data_map[attempt_idx] = data_content
+
+        # 현재 attempt_num에 해당하는 데이터 가져오기
+        if attempt_num in attempt_data_map:
+            raw_data = attempt_data_map[attempt_num]
+            try:
+                # JSON 파싱 시도
+                validation_data = json.loads(raw_data)
+            except:
+                # JSON 파싱 실패 시 원본 텍스트 그대로 사용
+                validation_data = {"raw_data": raw_data}
+        else:
+            # 해당 시도의 데이터가 없는 경우
+            validation_data = {}    # attempt_num은 1부터 시작하므로 인덱스는 attempt_num - 1
+
+    # 에러 메시지 추출 - 시도별로 분리
+    if step_buffer.get("error"):
+        error_text = step_buffer["error"]
+
+        # 에러도 시도별로 분리
+        # 패턴: [검증 n회차] 또는 [시도 n회차]
+        error_pattern = r'\[(?:검증|시도) (\d+)회차\]'
+        error_parts = re.split(error_pattern, error_text)
+
+        # 에러 메시지 매핑
+        attempt_error_map = {}
+        for i in range(1, len(error_parts), 2):
+            if i + 1 < len(error_parts):
+                attempt_idx = int(error_parts[i])
+                error_content = error_parts[i + 1].strip()
+                if attempt_idx not in attempt_error_map:
+                    attempt_error_map[attempt_idx] = []
+                if error_content:
+                    attempt_error_map[attempt_idx].append(error_content)
+
+        # 현재 attempt_num에 해당하는 에러만 가져오기
+        if attempt_num in attempt_error_map:
+            validation_errors = attempt_error_map[attempt_num]
+        else:
+            # 패턴이 없는 경우 전체 에러를 첫 번째 시도에만 할당
+            if attempt_num == 1 and not attempt_error_map:
+                validation_errors = [line.strip() for line in error_text.split('\n') if line.strip()]
+
+    return {
+        "attempt": attempt_num,
+        "validationData": validation_data,
+        "validationErrors": validation_errors
+    }
+
+
+def build_result_json(myapp_instance):
+    """
+    MyApp 인스턴스에서 데이터를 추출하여 JSON 형식으로 변환 (CONSTANTS 통합)
+
+    Args:
+        myapp_instance: MyApp 클래스의 인스턴스
+
+    Returns:
+        dict: JSON 형식의 결과 데이터
+    """
+
+    # 1. Request ID 생성 (CONSTANTS에서 가져오거나 신규 생성)
+    request_id = CONSTANTS.request_id
+    # 2. 평가 대상 정보 (CONSTANTS에서 가져오기)
+    evaluation_target = {
+        "companyName": CONSTANTS.company_name,
+        "contactPerson": CONSTANTS.contact_person,
+        "productName": CONSTANTS.product_name,
+        "modelName": CONSTANTS.model_name,
+        "version": CONSTANTS.version
+    }
+
+    # 3. 테스트 그룹 정보 (CONSTANTS.SPEC_CONFIG에서 추출)
+    test_group = get_test_group_info()
+
+    # 4. 인증 방식 (CONSTANTS에서 가져오기)
+    auth_method = map_auth_method(CONSTANTS.auth_type)
+
+    current_spec_id = myapp_instance.current_spec_id if hasattr(myapp_instance, 'current_spec_id') else None
+    api_names_list = []
+    api_ids_list = []
+    api_endpoints_list = []
+
+    if current_spec_id:
+        for group in CONSTANTS.SPEC_CONFIG:
+            if current_spec_id in group:
+                spec_config = group[current_spec_id]
+                api_names_list = spec_config.get('api_name', [])
+                api_ids_list = spec_config.get('api_id', [])
+                api_endpoints_list = spec_config.get('api_endpoint', [])
+                break
+
+    # 5. 테스트 점수 계산
+    total_pass = getattr(myapp_instance, 'total_pass_cnt', 0)
+    total_error = getattr(myapp_instance, 'total_error_cnt', 0)
+    total_fields = total_pass + total_error
+    score = (total_pass / total_fields * 100) if total_fields > 0 else 0
+
+    test_score = {
+        "score": round(score, 2),
+        "totalFields": total_fields,
+        "passedFields": total_pass,
+        "failedFields": total_error
+    }
+
+    # 6. 테스트 결과 상세 정보 구성
+    test_result = []
+    step_buffers = getattr(myapp_instance, 'step_buffers', [])
+
+    # spec별로 그룹화
+    spec_results = {}
+
+    for i, step_buffer in enumerate(step_buffers):
+        # 테이블에서 추가 정보 가져오기
+        table_widget = myapp_instance.tableWidget
+        api_name = table_widget.item(i, 0).text() if table_widget.item(i, 0) else f"API-{i + 1}"
+        retries = int(table_widget.item(i, 2).text()) if table_widget.item(i, 2) else 1
+        pass_cnt = int(table_widget.item(i, 3).text()) if table_widget.item(i, 3) else 0
+        total_cnt = int(table_widget.item(i, 4).text()) if table_widget.item(i, 4) else 0
+        fail_cnt = int(table_widget.item(i, 5).text()) if table_widget.item(i, 5) else 0
+        api_score_str = table_widget.item(i, 6).text() if table_widget.item(i, 6) else "0%"
+        api_score = float(api_score_str.replace('%', ''))
+
+        api_name = api_names_list[i] if i < len(api_names_list) else f"API-{i+1}"
+        api_id = api_ids_list[i] if i < len(api_ids_list) else ""
+        api_endpoint = api_endpoints_list[i] if i < len(api_endpoints_list) else f"/api{i+1}"
+
+        # API 정보에서 메서드와 엔드포인트 추출
+        api_info = step_buffer.get("api_info", {})
+        method = api_info.get("method", "POST")
+        endpoint = api_info.get("endpoint", api_name)
+
+        # 검증 데이터 생성 (재시도 횟수만큼)
+        validations = []
+        for attempt in range(1, retries + 1):
+            validation = generate_validation_data_from_step_buffer(step_buffer, attempt)
+            validations.append(validation)
+        # API 결과 구성
+        api_result = {
+            "id": api_id,
+            "name": api_name,
+            "method": method,
+            "endpoint": api_endpoint,
+            "score": round(api_score, 0),
+            "validationCnt": retries,
+            "totalFields": total_cnt,
+            "passFields": pass_cnt,
+            "failFields": fail_cnt,
+            "validations": validations
+        }
+
+        # spec_id 추출 (step_buffer에서 또는 SPEC_CONFIG에서)
+        spec_id = step_buffer.get("spec_id")
+        if not spec_id and test_group["testSpecIds"]:
+            spec_id = test_group["testSpecIds"][0]
+        else:
+            spec_id = "spec-001"
+
+        if spec_id not in spec_results:
+            spec_results[spec_id] = {
+                "testSpecId": spec_id,
+                "score": 0,
+                "apis": []
+            }
+
+        spec_results[spec_id]["apis"].append(api_result)
+
+    # spec별 평균 점수 계산
+    status = getattr(myapp_instance, 'run_status', 0)
+    if status == "진행중":
+        test_score = 0.0
+
+    for spec_id, spec_data in spec_results.items():
+        if spec_data["apis"]:
+            total_pass = sum(api["passFields"] for api in spec_data["apis"])
+            total_fields = sum(api["totalFields"] for api in spec_data["apis"])
+
+            if total_fields > 0:
+                avg_score = (total_pass / total_fields) * 100
+            else:
+                avg_score = 0
+            if status == "진행중":
+                test_score = 0.0
+            else :
+                spec_data["score"] = round(avg_score, 2)
+
+    test_result = list(spec_results.values())
+
+    # 8. 완료 시간
+    completed_date = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    # 최종 JSON 구성
+    result_json = {
+        "requestId": request_id,
+        "evaluationTarget": evaluation_target,
+        "testGroup": test_group,
+        "status": status,
+        "authMethod": auth_method,
+        "testScore": test_score,
+        "testResult": test_result,
+        "completedDate": completed_date
+    }
+
+    return result_json
+
+
+def save_result_json(myapp_instance, output_path="results/validation_result.json"):
+    """
+    검증 결과를 JSON 파일로 저장
+
+    Args:
+        myapp_instance: MyApp 클래스의 인스턴스
+        output_path: 저장할 파일 경로
+
+    Returns:
+        str: 저장된 파일 경로
+    """
+    import os
+
+    # 결과 디렉토리 생성
+    result_dir = os.path.dirname(output_path)
+    if result_dir:
+        os.makedirs(result_dir, exist_ok=True)
+
+    # JSON 생성
+    result_json = build_result_json(myapp_instance)
+
+    # 파일 저장
+    with open(output_path, 'w', encoding='utf-8') as f:
+        json.dump(result_json, f, ensure_ascii=False, indent=2)
+
+    print(f"검증 결과가 '{output_path}'에 저장되었습니다.")
+    return output_path
+
