@@ -799,11 +799,14 @@ class MyApp(QWidget):
         self.videoOutConstraint = getattr(constraints_response_module, self.current_spec_id+"_outConstraints", [])
         # ✅ Webhook 관련 (영상보안 시스템만 사용)
 
+        # config에서 가져오게 되어있는데.....
+        # spec_names[0] → "videoInSchema", spec_names[1] → "videoOutMessage", spec_names[2] → "videoMessages", spec_names[3] → "videoWebhookSchema". spec_names[4] → "videoWebhookData"
         try:
             if len(spec_names) >= 5:
                 webhook_schema_name = spec_names[3]
                 webhook_data_name = spec_names[4]
 
+                # platform이 보유하고 있는 것은: response data, request schema, request validation 임.
                 self.videoWebhookSchema = getattr(schema_request_module, webhook_schema_name, [])
                 self.videoWebhookData = getattr(data_response_module, webhook_data_name, [])
 
@@ -1221,7 +1224,8 @@ class MyApp(QWidget):
                                 webhook_resp_err_txt = self._to_detail_text(webhook_resp_val_text)
                                 if webhook_resp_val_result == "FAIL":
                                     step_result = "FAIL"
-                                    combined_error_parts.append(f"[검증 {retry_attempt + 1}회차] [Webhook 응답] " + webhook_resp_err_txt)
+                                    # [검증 {retry_attempt + 1}회차] -> 회차 추가하고 싶으면 주석 해제하고 포함
+                                    combined_error_parts.append(f"--- Webhook 검증 ---\n" + webhook_resp_err_txt)
                             else:
                                 if retry_attempt == 0:
                                     print(f"[DEBUG] videoWebhookSchema가 없습니다!")
