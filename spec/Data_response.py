@@ -6,7 +6,7 @@ cmgvieyak001b6cd04cgaawmm_Authentication_out_data = {
     "message": "성공",
     "userName": "관리자",
     "userAff": "오산시청",
-    "accessToken": "a"
+    "accessToken": "abcde1234"
 }
 
 # Capabilities
@@ -170,7 +170,14 @@ cmgvieyak001b6cd04cgaawmm_outData = [
 
 # cmgvieyak001b6cd04cgaawmm WebHook 데이터 리스트
 cmgvieyak001b6cd04cgaawmm_webhook_inData = [
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
     cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_webhook_in_data,
+    None,
 ]
 
 # cmgvieyak001b6cd04cgaawmm API endpoint
