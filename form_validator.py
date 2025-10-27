@@ -127,12 +127,15 @@ class FormValidator:
 
                 # WebHook 전용 스키마 리스트 생성
                 if webhook_schema_names:
-                    webhook_schema_list_name = f"{spec_id}_webhook_outSchema" if schema_type == "request" else f"{spec_id}_webhook_inSchema"
-                    schema_content += f"# {spec_id} WebHook 스키마 리스트\n"
-                    schema_content += f"{webhook_schema_list_name} = [\n"
-                    for name in webhook_schema_names:
-                        schema_content += f"    {temp_spec_id}{name},\n"
-                    schema_content += "]\n\n"
+                    if file_type == "request":
+                        webhook_schema_list_name = f"{spec_id}_webhook_inSchema"
+                    else:
+                        webhook_schema_list_name = f"{spec_id}_webhook_OutSchema"
+                schema_content += f"# {spec_id} WebHook 스키마 리스트\n"
+                schema_content += f"{webhook_schema_list_name} = [\n"
+                for name in webhook_schema_names:
+                    schema_content += f"    {temp_spec_id}{name},\n"
+                schema_content += "]\n\n"
 
                 if file_type == "request":
                     data_list_name = f"{spec_id}_inData"
@@ -147,7 +150,10 @@ class FormValidator:
 
                 # WebHook 전용 데이터 리스트 생성
                 if webhook_data_names:
-                    webhook_data_list_name = f"{spec_id}_webhook_inData" if file_type == "response" else f"{spec_id}_webhook_outData"
+                    if file_type == "response":
+                        webhook_data_list_name = f"{spec_id}_webhook_inData"
+                    else :
+                        webhook_data_list_name = f"{spec_id}_webhook_outData"
                     data_content += f"# {spec_id} WebHook 데이터 리스트\n"
                     data_content += f"{webhook_data_list_name} = [\n"
                     for name in webhook_data_names:
@@ -176,7 +182,7 @@ class FormValidator:
 
                 # Constraints 리스트
                 if file_type == "response":
-                    c_list_name = f"{spec_id}_OutConstraints"
+                    c_list_name = f"{spec_id}_outConstraints"
                 else:
                     c_list_name = f"{spec_id}_inConstraints"
 
@@ -299,7 +305,7 @@ class FormValidator:
 
         # WebHook 처리 - schema_type="response"일 때 webhook_in_schema 생성
         if protocol_type == "webhook" and schema_type == "response":
-            webhook_spec = settings.get("webhook", {}).get("integrationSpec") or {}
+            webhook_spec = settings.get("webhook", {}).get("requestSpec") or {}
             webhook_schema_name = f"{endpoint_name}_webhook_in_schema"
             webhook_schema_obj = self._convert_webhook_spec_to_schema(webhook_spec)
             schema_content += f"# {endpoint_name} WebHook IN Schema\n"
@@ -322,6 +328,24 @@ class FormValidator:
         data_names.append(data_name)
 
         # WebHook 처리 - file_type="response"일 때 webhook_in_data 생성
+        if protocol_type == "webhook" and file_type == "request":
+            webhook_request_spec = settings.get("webhook", {}).get("integrationSpec") or {}
+            webhook_data_name = f"{endpoint_name}_webhook_out_data"
+
+            # requestSpec이 리스트인 경우 (bodyJson 배열이 직접 들어있음)
+            if isinstance(webhook_request_spec, list):
+                webhook_data_obj = self.data_gen.build_data_from_spec(webhook_request_spec)
+            else:
+                # requestSpec이 딕셔너리인 경우 (bodyJson 키가 있을 수 있음)
+                webhook_data_obj = self._convert_webhook_spec_to_data(webhook_request_spec)
+
+            data_content += f"# {endpoint_name} WebHook OUT Data\n"
+            formatted_webhook_data = self.data_gen.format_data_content(webhook_data_obj)
+            data_content += f"{spec_id}{webhook_data_name} = {formatted_webhook_data}\n\n"
+            webhook_data_names.append(webhook_data_name)  # webhook 전용 리스트에 추가
+            print(f"  ✓ WebHook OUT Data 생성: {webhook_data_name}" + (" (빈 딕셔너리)" if not webhook_request_spec else ""))
+
+        # WebHook 처리 - file_type="request"일 때 webhook_out_data 생성
         if protocol_type == "webhook" and file_type == "response":
             webhook_request_spec = settings.get("webhook", {}).get("requestSpec") or {}
             webhook_data_name = f"{endpoint_name}_webhook_in_data"
@@ -338,24 +362,6 @@ class FormValidator:
             data_content += f"{spec_id}{webhook_data_name} = {formatted_webhook_data}\n\n"
             webhook_data_names.append(webhook_data_name)  # webhook 전용 리스트에 추가
             print(f"  ✓ WebHook IN Data 생성: {webhook_data_name}" + (" (빈 딕셔너리)" if not webhook_request_spec else ""))
-
-        # WebHook 처리 - file_type="request"일 때 webhook_out_data 생성
-        if protocol_type == "webhook" and file_type == "request":
-            webhook_request_spec = settings.get("webhook", {}).get("requestSpec") or {}
-            webhook_data_name = f"{endpoint_name}_webhook_out_data"
-
-            # requestSpec이 리스트인 경우 (bodyJson 배열이 직접 들어있음)
-            if isinstance(webhook_request_spec, list):
-                webhook_data_obj = self.data_gen.build_data_from_spec(webhook_request_spec)
-            else:
-                # requestSpec이 딕셔너리인 경우 (bodyJson 키가 있을 수 있음)
-                webhook_data_obj = self._convert_webhook_spec_to_data(webhook_request_spec)
-
-            data_content += f"# {endpoint_name} WebHook OUT Data\n"
-            formatted_webhook_data = self.data_gen.format_data_content(webhook_data_obj)
-            data_content += f"{spec_id}{webhook_data_name} = {formatted_webhook_data}\n\n"
-            webhook_data_names.append(webhook_data_name)  # webhook 전용 리스트에 추가
-            print(f"  ✓ WebHook OUT Data 생성: {webhook_data_name}" + (" (빈 딕셔너리)" if not webhook_request_spec else ""))
 
         endpoint_names.append(endpoint_name)
 
@@ -429,7 +435,7 @@ class FormValidator:
 
         # WebHook Constraints 처리 - file_type="request"일 때 webhook_out_constraints 생성
         if protocol_type == "webhook" and file_type == "request":
-            webhook_request_spec = settings.get("webhook", {}).get("requestSpec") or {}
+            webhook_request_spec = settings.get("webhook", {}).get("integrationSpec") or {}
             webhook_c_name = f"{endpoint_name}_webhook_out_constraints"
 
             # requestSpec에서 bodyJson 추출하여 valueType 필드 찾기
