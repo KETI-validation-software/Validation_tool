@@ -29,6 +29,9 @@ import traceback
 import importlib
 from core.validation_registry import get_validation_rules
 from pathlib import Path
+import spec.Data_request as data_request_module
+import spec.Schema_response as schema_response_module
+import spec.Constraints_request as constraints_request_module
 
 
 # 통합된 상세 내용 확인 팝업창 클래스
@@ -46,6 +49,7 @@ class CombinedDetailDialog(QDialog):
 
         # webhook_schema 저장
         self.webhook_schema = webhook_schema
+        #self.webhookInSchema = []
 
         # 상단 제목
         title_label = QLabel(f"{api_name} API 상세 정보")
@@ -79,7 +83,7 @@ class CombinedDetailDialog(QDialog):
         schema_text = self._format_schema(schema_data)
         if self.webhook_schema:
             schema_text += "\n\n=== 웹훅 이벤트 스키마 (플랫폼→시스템) ===\n"
-            schema_text += self._format_schema(self.webhook_schema)
+            schema_text += self._format_schema(self.webhook_schema) # 값이 있음
 
         self.schema_browser.setPlainText(schema_text)
         schema_layout.addWidget(self.schema_browser)
@@ -798,7 +802,8 @@ class MyApp(QWidget):
 
         self.initUI()
 
-        self.get_setting()
+        self.webhookInSchema = []
+        self.get_setting()  # 실행되는 시점
         self.webhook_flag = False
         self.webhook_msg = "."
         self.webhook_cnt = 99
@@ -875,9 +880,9 @@ class MyApp(QWidget):
 
         # 시스템은 response schema / request data 사용
         print(f"[SYSTEM] 📁 모듈: spec (센서/바이오/영상 통합)")
-        import spec.Data_request as data_request_module
-        import spec.Schema_response as schema_response_module
-        import spec.Constraints_request as constraints_request_module
+        # import spec.Data_request as data_request_module
+        # import spec.Schema_response as schema_response_module
+        # import spec.Constraints_request as constraints_request_module
 
         # ✅ 시스템은 응답 검증 + 요청 전송 (outSchema/inData 사용)
         print(f"[SYSTEM] 🔧 타입: 응답 검증 + 요청 전송")
@@ -891,10 +896,10 @@ class MyApp(QWidget):
         self.videoInConstraint = getattr(constraints_request_module, self.current_spec_id + "_inConstraints", [])
 
         # ✅ Webhook 관련 (현재 미사용)
-        self.videoWebhookSchema = []
-        self.videoWebhookData = []
-        self.videoWebhookInSchema = []
-        self.videoWebhookInData = []
+        # self.videoWebhookSchema = []
+        # self.videoWebhookData = []
+        # self.videoWebhookInSchema = []
+        # self.videoWebhookInData = []
 
         print(f"[SYSTEM] ✅ 로딩 완료: {len(self.videoMessages)}개 API")
         print(f"[SYSTEM] 📋 API 목록: {self.videoMessages}")
@@ -1169,7 +1174,21 @@ class MyApp(QWidget):
         # ✅ Webhook 처리 (transProtocol 기반으로만 판단)
         try:
             json_data_dict = json.loads(json_data.decode('utf-8'))
-            trans_protocol = json_data_dict.get("transProtocol", {})
+            trans_protocol = json_data_dict.get("transProtocol", {})    # 이 부분 수정해야함
+            
+            if not trans_protocol:
+                if self.cnt < len(self.trans_protocols):
+                    current_protocol = self.trans_protocols[self.cnt]
+
+                    if current_protocol == "WebHook":
+                        trans_protocol = {
+                            "transProtocolType": "WebHook",
+                            "transProtocolDesc": "https://127.0.0.1:8008"
+                        }
+                        json_data_dict["transProtocol"] = trans_protocol
+                        # 재직렬화
+                        json_data = json.dumps(json_data_dict).encode('utf-8')
+                        print(f"[DEBUG] [post] transProtocol 설정 추가됨: {trans_protocol}")
             if trans_protocol:
                 trans_protocol_type = trans_protocol.get("transProtocolType", {})
                 # 웹훅 서버 시작 (transProtocolType이 WebHook인 경우만)
@@ -1178,12 +1197,12 @@ class MyApp(QWidget):
                     path_tmp = trans_protocol.get("transProtocolDesc", {})
                     # http/https 접두어 보정
                     if not path_tmp or str(path_tmp).strip() in ["None", "", "desc"]:
-                        path_tmp = "https://127.0.0.1"
+                        path_tmp = "https://127.0.0.1:8008"
                     if not str(path_tmp).startswith("http"):
                         path_tmp = "https://" + str(path_tmp)
                     parsed = urlparse(str(path_tmp))
                     url = parsed.hostname if parsed.hostname is not None else "127.0.0.1"
-                    port = parsed.port if parsed.port is not None else 80
+                    port = parsed.port if parsed.port is not None else 8008
 
                     msg = {}
                     self.webhook_flag = True
@@ -1233,9 +1252,7 @@ class MyApp(QWidget):
             val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(
                 schema=schema_to_check,
                 data=self.webhook_res,
-
                 flag=self.flag_opt,
-
                 reference_context=self.reference_context
             )
 
@@ -1311,8 +1328,8 @@ class MyApp(QWidget):
             webhook_error_text = self._to_detail_text(val_text) if val_result == "FAIL" else "오류가 없습니다."
             # ✅ 웹훅 이벤트 데이터를 명확히 표시
             self.step_buffers[self.webhook_cnt]["data"] += f"\n\n--- Webhook 이벤트 데이터 ---\n{webhook_data_text}"
-            self.step_buffers[self.webhook_cnt]["error"] += f"\n\n--- Webhook 검증 ---\n{webhook_error_text}"
-            self.step_buffers[self.webhook_cnt]["result"] = val_result
+            self.step_buffers[self.webhook_cnt]["error"] += f"\n\n--- Webhook 검증 ---\n{webhook_error_text}"   # 얘가 문제임 화딱지가 난다
+            self.step_buffers[self.webhook_cnt]["result"] = val_result  
 
         # 메시지 저장
         if self.webhook_cnt == 6:
@@ -2139,8 +2156,21 @@ class MyApp(QWidget):
                 current_protocol = self.trans_protocols[row]
                 if current_protocol == "WebHook":
                     try:
-                        webhook_schema = self.videoWebhookInSchema[0] if len(self.videoWebhookInSchema) > 0 else None
-                    except:
+                        # import spec.Schema_response as schema_response_module
+                        webhook_schema = f"{self.current_spec_id}_webhook_inSchema"
+                        self.webhookInSchema = getattr(schema_response_module, webhook_schema, [])
+
+                        if isinstance(self.webhookInSchema, list):
+                            webhook_indices = [i for i, name in enumerate(self.videoMessages) if name is not None]
+                            if webhook_indices:
+                                print(f"[DEBUG] 웹훅 스키마 인덱스: {webhook_indices}")
+                            else:
+                                print(f"[DEBUG] 웹훅 스키마 인덱스가 없습니다.")
+                        webhook_schema = self.webhookInSchema[0] if len(self.webhookInSchema) > 0 else None
+                    except Exception as e:
+                        print(f"[ERROR] 웹훅 스키마 로드 실패: {e}")
+                        import traceback
+                        traceback.print_exc()
                         webhook_schema = None
 
             # 통합 팝업창 띄우기
@@ -2527,8 +2557,15 @@ class MyApp(QWidget):
         self.outSchema = self.videoOutSchema
         self.inCon = self.videoInConstraint
 
-        # ✅ 시스템이 받는 웹훅 이벤트는 spec_002_webhookSchema (플랫폼 → 시스템)
-        self.webhookSchema = self.videoWebhookInSchema
+        # 이 부분 수정해야함
+        try:
+            webhook_schema_name = f"{self.current_spec_id}_webhook_inSchema"
+            self.webhookInSchema = getattr(schema_response_module, webhook_schema_name, [])
+        except Exception as e:
+            print(f"Error loading webhook schema: {e}")
+            self.webhookInSchema = []
+            
+        self.webhookSchema = self.webhookInSchema
         self.final_report = f"{self.spec_description} 검증 결과\n"
 
         # 기본 인증 설정 (CONSTANTS.py에서 가져옴)
