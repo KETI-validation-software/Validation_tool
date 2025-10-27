@@ -97,7 +97,14 @@ cmgyv3rzl014nvsveidu5jpzp_inData = [
 
 # cmgyv3rzl014nvsveidu5jpzp WebHook 데이터 리스트
 cmgyv3rzl014nvsveidu5jpzp_webhook_outData = [
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
     cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_webhook_out_data,
+    None,
 ]
 
 # cmgyv3rzl014nvsveidu5jpzp API endpoint

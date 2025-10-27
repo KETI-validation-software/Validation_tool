@@ -2135,6 +2135,10 @@ class InfoWidget(QWidget):
             eval_target = test_data.get("testRequest", {}).get("evaluationTarget", {})
             test_groups = test_data.get("testRequest", {}).get("testGroups", [])
 
+
+            test_groups = test_data.get("testRequest", {}).get("testGroups", [])
+
+
             # testGroups 배열 처리
             if not test_groups:
                 QMessageBox.warning(self, "경고", "testGroups 데이터가 비어있습니다.")
@@ -2163,6 +2167,10 @@ class InfoWidget(QWidget):
 
             self.test_group_edit.setText(combined_group_names)  # 콤마로 연결된 그룹 이름들
             self.test_range_edit.setText(combined_group_ranges)  # 콤마로 연결된 범위들
+
+            self.contact_person = eval_target.get("contactPerson", "")
+            self.model_name = eval_target.get("modelName", "")
+            self.request_id = test_data.get("testRequest", {}).get("id", {})
 
             # 모든 testGroups 저장 (시험 시작 시 사용)
             self.test_groups = test_groups  # 전체 그룹 배열 저장

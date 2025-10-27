@@ -877,6 +877,9 @@ class FormValidator:
 
             # 4. 관리자 코드 (GUI 입력값만 사용)
             variables['admin_code'] = self.parent.admin_code_edit.text().strip()
+            variables['contact_person'] = getattr(self.parent, 'contact_person', "")
+            variables['model_name'] = getattr(self.parent, 'model_name', "")
+            variables['request_id'] = getattr(self.parent, 'request_id', "")
 
             # 5. SPEC_CONFIG 전체 덮어쓰기 (모든 spec_id 포함)
             self.overwrite_spec_config_from_mapping()
@@ -979,6 +982,9 @@ class FormValidator:
             time_out = []
             num_retries = []
             trans_protocol = []
+            api_name = []
+            api_id = []
+            api_endpoint = []
 
             for step in steps:
                 step_id = step.get("id")
@@ -998,6 +1004,10 @@ class FormValidator:
                 # detail.step.api.settings에서 설정 추출
                 detail = cached_step.get("detail", {})
                 settings = detail.get("step", {}).get("api", {}).get("settings", {})
+
+                api_name.append(detail.get("step", {}).get("api", {}).get("name", {}))
+                api_id.append(detail.get("step", {}).get("id", {}))
+                api_endpoint.append(detail.get("step", {}).get("api", {}).get("endpoint", {}))
 
                 # connectTimeout 추출
                 time_out.append(settings.get("connectTimeout", 5000))
@@ -1026,6 +1036,9 @@ class FormValidator:
             print(f"  num_retries: {num_retries}\n")
 
             return {
+                "api_name": api_name,
+                "api_id": api_id,
+                "api_endpoint":api_endpoint,
                 "trans_protocol": trans_protocol,
                 "time_out": time_out,
                 "num_retries": num_retries
@@ -1102,6 +1115,9 @@ class FormValidator:
                 if not spec_config_data:
                     # API에서 가져오지 못하면 기본값 사용
                     spec_config_data = {
+                        "api_name": [],
+                        "api_id": [],
+                        "api_endpoint": [],
                         "trans_protocol": [],
                         "time_out": [],
                         "num_retries": []
@@ -1111,7 +1127,10 @@ class FormValidator:
                 entry = (
                     f'"{spec_id}": {{\n'
                     f'    "test_name": "{spec_name}",\n'
-                    f'    "specs": {specs_list},\n'
+                    f'    "specs": {specs_list},\n' 
+                    f'    "api_name": {spec_config_data.get("api_name", [])},\n'
+                    f'    "api_id": {spec_config_data.get("api_id", [])},\n'
+                    f'    "api_endpoint": {spec_config_data.get("api_endpoint", [])},\n'
                     f'    "trans_protocol": {spec_config_data.get("trans_protocol", [])},\n'
                     f'    "time_out": {spec_config_data.get("time_out", [])},\n'
                     f'    "num_retries": {spec_config_data.get("num_retries", [])}\n'
