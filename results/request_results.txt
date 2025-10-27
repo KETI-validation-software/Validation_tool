@@ -185,7 +185,7 @@ step 8: StoredVideoEventInfos
         }
     ],
     "maxCount": 3,
-    "eventFilter": "배회",
+    "eventFilter": "화재",
     "classFilter": "사람"
 }
 PASS

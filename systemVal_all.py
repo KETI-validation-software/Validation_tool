@@ -1169,7 +1169,21 @@ class MyApp(QWidget):
         # ✅ Webhook 처리 (transProtocol 기반으로만 판단)
         try:
             json_data_dict = json.loads(json_data.decode('utf-8'))
-            trans_protocol = json_data_dict.get("transProtocol", {})
+            trans_protocol = json_data_dict.get("transProtocol", {})    # 이 부분 수정해야함
+            
+            if not trans_protocol:
+                if self.cnt < len(self.trans_protocols):
+                    current_protocol = self.trans_protocols[self.cnt]
+
+                    if current_protocol == "WebHook":
+                        trans_protocol = {
+                            "transProtocolType": "WebHook",
+                            "transProtocolDesc": "https://127.0.0.1:8008"
+                        }
+                        json_data_dict["transProtocol"] = trans_protocol
+                        # 재직렬화
+                        json_data = json.dumps(json_data_dict).encode('utf-8')
+                        print(f"[DEBUG] [post] transProtocol 설정 추가됨: {trans_protocol}")
             if trans_protocol:
                 trans_protocol_type = trans_protocol.get("transProtocolType", {})
                 # 웹훅 서버 시작 (transProtocolType이 WebHook인 경우만)
@@ -1178,12 +1192,12 @@ class MyApp(QWidget):
                     path_tmp = trans_protocol.get("transProtocolDesc", {})
                     # http/https 접두어 보정
                     if not path_tmp or str(path_tmp).strip() in ["None", "", "desc"]:
-                        path_tmp = "https://127.0.0.1"
+                        path_tmp = "https://127.0.0.1:8008"
                     if not str(path_tmp).startswith("http"):
                         path_tmp = "https://" + str(path_tmp)
                     parsed = urlparse(str(path_tmp))
                     url = parsed.hostname if parsed.hostname is not None else "127.0.0.1"
-                    port = parsed.port if parsed.port is not None else 80
+                    port = parsed.port if parsed.port is not None else 8008
 
                     msg = {}
                     self.webhook_flag = True

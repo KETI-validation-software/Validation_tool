@@ -473,10 +473,10 @@ class Server(BaseHTTPRequestHandler):
             print(f"[DEBUG][SERVER] message_cnt: {message_cnt}")
             print(f"[DEBUG][SERVER] url_tmp: {url_tmp}")
 
-            # ✅ 웹훅 데이터 사용 (videoData_request.py의 webhookData)
-            if self.webhookData and len(self.webhookData) > message_cnt:
-                webhook_payload = self.webhookData[message_cnt]
-                print(f"[DEBUG][SERVER] 웹훅 데이터 사용: webhookData[{message_cnt}]")
+            # 그냥 무조건 0번 인덱스 사용하는 걸로 수정
+            if self.webhookData and len(self.webhookData) > 0:
+                webhook_payload = self.webhookData[0]
+                print(f"[DEBUG][SERVER] 웹훅 데이터 사용: webhookData[0]")
 
                 # None이면 웹훅 전송하지 않음
                 if webhook_payload is None:
