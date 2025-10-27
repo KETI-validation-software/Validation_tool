@@ -813,15 +813,35 @@ class FormValidator:
         """시험유형 변경 시 관리자 코드 필드 활성화/비활성화"""
         test_category = self.parent.test_category_edit.text().strip()
 
-        if test_category == "사전시험":
+        # 빈 값인 경우는 아무것도 하지 않음
+        if not test_category:
             self.parent.admin_code_edit.setEnabled(False)
             self.parent.admin_code_edit.clear()
-            self.parent.admin_code_edit.setPlaceholderText("사전시험은 관리자 코드가 불필요합니다")
-        elif test_category == "MAIN_TEST":
+            self.parent.admin_code_edit.setPlaceholderText("")
+            return
+
+        # 이미 변환된 값("본시험", "사전시험")이면 처리하지 않음
+        if test_category in ["본시험", "사전시험"]:
+            if test_category == "본시험":
+                self.parent.admin_code_edit.setEnabled(True)
+                self.parent.admin_code_edit.setPlaceholderText("내용을 입력해주세요")
+            else:  # "사전시험"
+                self.parent.admin_code_edit.setEnabled(False)
+                self.parent.admin_code_edit.clear()
+                self.parent.admin_code_edit.setPlaceholderText("")
+            return
+
+        # 원래 값을 보관
+        self.parent.original_test_category = test_category
+
+        # MAIN_TEST를 본시험으로 표시
+        if test_category == "MAIN_TEST":
+            self.parent.test_category_edit.setText("본시험")
             self.parent.admin_code_edit.setEnabled(True)
             self.parent.admin_code_edit.setPlaceholderText("내용을 입력해주세요")
         else:
-            # 그 외의 경우(빈 값, 다른 값 등)는 비활성화
+            # MAIN_TEST 이외의 모든 값은 UI에 "사전시험"으로 표시
+            self.parent.test_category_edit.setText("사전시험")
             self.parent.admin_code_edit.setEnabled(False)
             self.parent.admin_code_edit.clear()
             self.parent.admin_code_edit.setPlaceholderText("")
@@ -870,11 +890,20 @@ class FormValidator:
 
     def _collect_basic_info(self):
         """시험 기본 정보 수집"""
+        test_category = self.parent.test_category_edit.text().strip()
+
+        # UI 표시값을 원래 값으로 복원
+        if test_category == "본시험":
+            test_category = "MAIN_TEST"
+        elif test_category == "사전시험":
+            # 원래 값이 보관되어 있으면 복원, 없으면 "사전시험" 그대로
+            test_category = self.parent.original_test_category if self.parent.original_test_category else "사전시험"
+
         return {
             'company_name': self.parent.company_edit.text().strip(),
             'product_name': self.parent.product_edit.text().strip(),
             'version': self.parent.version_edit.text().strip(),
-            'test_category': self.parent.test_category_edit.text().strip(),
+            'test_category': test_category,
             'test_target': self.parent.test_group_edit.text().strip(),
             'test_range': self.parent.test_range_edit.text().strip()
         }
@@ -1481,9 +1510,10 @@ class FormValidator:
                 table.insertRow(i)
 
                 # 폰트 설정 (Noto Sans KR, Regular 400, 14px)
-                font = QFont("Noto Sans KR", 14)
+                font = QFont("Noto Sans KR")
+                font.setPixelSize(14)
                 font.setWeight(400)
-                font.setLetterSpacing(QFont.AbsoluteSpacing, 0.098)
+                font.setLetterSpacing(QFont.PercentageSpacing, 100.7)
 
                 # 첫 번째 컬럼: 시험 분야명
                 group_item = QTableWidgetItem(group_name)
