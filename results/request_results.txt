@@ -186,7 +186,7 @@ step 8: StoredVideoEventInfos
     ],
     "maxCount": 3,
     "eventFilter": "배회",
-    "classFilter": "버스"
+    "classFilter": "사람"
 }
 PASS
 Score : 76.47058823529412

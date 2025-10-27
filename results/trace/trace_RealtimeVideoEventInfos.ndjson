@@ -1,2 +1,2 @@
-{"time": "2025-10-27T02:00:33.922997Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "", "eventUUID": "", "eventName": "", "startTime": 0, "endTime": 0, "eventDesc": ""}]}}
-{"time": "2025-10-27T02:00:33.924965Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "200", "message": "성공"}}
+{"time": "2025-10-27T02:29:16.407733Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "", "eventUUID": "", "eventName": "", "startTime": 0, "endTime": 0, "eventDesc": ""}]}}
+{"time": "2025-10-27T02:29:16.409727Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "200", "message": "성공"}}
