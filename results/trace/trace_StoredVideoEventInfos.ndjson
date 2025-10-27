@@ -1,2 +1,0 @@
-{"time": "2025-10-27T08:04:26.765086Z", "api": "StoredVideoEventInfos", "dir": "REQUEST", "data": {"timePeriod": {"startTime": 1759221900000, "endTime": 1761727500000}, "camList": [{"camID": ""}], "maxCount": 3, "eventFilter": "", "classFilter": ""}}
-{"time": "2025-10-27T08:04:26.769075Z", "api": "StoredVideoEventInfos", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "camList": [{"camID": "", "eventUUID": "event01", "eventName": "", "startTime": 7071423184684, "endTime": 9263547749384, "eventDesc": "aaabbbAAA"}]}}

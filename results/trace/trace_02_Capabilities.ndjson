@@ -1,2 +1,2 @@
-{"time": "2025-10-27T08:04:08.722474Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
-{"time": "2025-10-27T08:04:09.728757Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "streamingSupport": [{"streamProtocolType": "RTSP", "streamProtocolDesc": "Unicast"}], "transportSupport": [{"transProtocolType": "WebHook", "transProtocolDesc": ""}]}}
+{"time": "2025-10-27T08:31:01.487197Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
+{"time": "2025-10-27T08:31:02.478196Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "streamingSupport": [{"streamProtocolType": "RTSP", "streamProtocolDesc": "Unicast"}], "transportSupport": [{"transProtocolType": "WebHook", "transProtocolDesc": ""}]}}
