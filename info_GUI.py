@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (
     QStackedWidget, QRadioButton
 )
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QColor
 import importlib
 from config import CONSTANTS
 
@@ -32,6 +32,7 @@ class InfoWidget(QWidget):
         self.test_specs = []  # testSpecs 리스트 저장
         self.current_page = 0
         self.stacked_widget = QStackedWidget()
+        self.original_test_category = None  # API에서 받아온 원래 test_category 값 보관
         self.initUI()
 
     def initUI(self):
@@ -135,10 +136,15 @@ class InfoWidget(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        # 헤더 영역 (1632x56px) - 절대 좌표로 배치
-        header_widget = QWidget(page)
+        # 헤더 영역 (1632x56px)
+        header_container = QWidget()
+        header_container.setFixedSize(1680, 56)
+        header_container_layout = QHBoxLayout()
+        header_container_layout.setContentsMargins(24, 0, 24, 0)
+        header_container_layout.setSpacing(0)
+
+        header_widget = QWidget()
         header_widget.setFixedSize(1632, 56)
-        header_widget.setGeometry(24, 0, 1632, 56)  # 좌측 24px 오프셋 (1680-1632)/2
 
         # 헤더 레이아웃 (로고 + 텍스트는 나중에 추가)
         header_layout = QHBoxLayout(header_widget)
@@ -147,6 +153,11 @@ class InfoWidget(QWidget):
         header_layout.setSpacing(8)
 
         # TODO: 헤더 로고와 텍스트 추가 예정
+
+        header_container_layout.addWidget(header_widget)
+        header_container.setLayout(header_container_layout)
+
+        layout.addWidget(header_container)
 
         # 콘텐츠 영역 (1680x976px, Fill: #F5F5F5, Padding: 48px 0px 48px 44px)
         content_widget = QWidget()
@@ -212,7 +223,7 @@ class InfoWidget(QWidget):
         right_panel.setStyleSheet("QGroupBox { border: none; }")
 
         right_layout = QVBoxLayout()
-        right_layout.setContentsMargins(24, 28, 24, 80)  # 좌, 상, 우, 하
+        right_layout.setContentsMargins(24, 28, 24, 24)  # 좌, 상, 우, 하 (하단 padding 조정)
         right_layout.setSpacing(0)
 
         # 타이틀 영역 (744x66px)
@@ -253,16 +264,44 @@ class InfoWidget(QWidget):
         button_layout.setSpacing(20)  # 버튼 간격 20px
 
         # 초기화 버튼 (364x48px)
-        reset_btn = QPushButton("초기화")
+        reset_btn = QPushButton("")
         reset_btn.setFixedSize(364, 48)
-        reset_btn.setStyleSheet("QPushButton { background-color: #9FBFE5; color: black; font-weight: bold; }")
+
+        btn_reset_enabled = "assets/image/test_config/btn_초기화_enabled.png"
+        btn_reset_hover = "assets/image/test_config/btn_초기화_Hover.png"
+
+        reset_btn.setStyleSheet(f"""
+            QPushButton {{
+                border: none;
+                background-image: url({btn_reset_enabled});
+                background-repeat: no-repeat;
+                background-position: center;
+            }}
+            QPushButton:hover {{
+                background-image: url({btn_reset_hover});
+            }}
+        """)
         reset_btn.clicked.connect(self.reset_all_fields)
         button_layout.addWidget(reset_btn)
 
         # 시험 시작 버튼 (364x48px)
-        self.start_btn = QPushButton("시험 시작")
+        self.start_btn = QPushButton("")
         self.start_btn.setFixedSize(364, 48)
-        self.start_btn.setStyleSheet("QPushButton { background-color: #9FBFE5; color: black; font-weight: bold; }")
+
+        btn_start_enabled = "assets/image/test_config/btn_시험시작_enabled.png"
+        btn_start_hover = "assets/image/test_config/btn_시험시작_Hover.png"
+
+        self.start_btn.setStyleSheet(f"""
+            QPushButton {{
+                border: none;
+                background-image: url({btn_start_enabled});
+                background-repeat: no-repeat;
+                background-position: center;
+            }}
+            QPushButton:hover {{
+                background-image: url({btn_start_hover});
+            }}
+        """)
         self.start_btn.clicked.connect(self.start_test)
         self.start_btn.setEnabled(True)
         button_layout.addWidget(self.start_btn)
@@ -283,18 +322,15 @@ class InfoWidget(QWidget):
 
         page.setLayout(layout)
 
-        # 헤더를 최상위로 올림 (배경 이미지 위에 표시)
-        header_widget.raise_()
-
         return page
 
     # ---------- 페이지 전환 메서드 ----------
     def go_to_next_page(self):
         """다음 페이지로 이동 (조건 검증 후)"""
         if not self._is_page1_complete():
-            QMessageBox.warning(self, "입력 필요", "첫 번째 페이지의 모든 필수 항목을 입력해주세요.")
+            QMessageBox.warning(self,"입력 필요", "첫 번째 페이지의 모든 필수 항목을 입력해주세요.")
             return
-
+        
         if self.current_page < 1:
             self.current_page += 1
             self.stacked_widget.setCurrentIndex(self.current_page)
@@ -851,16 +887,17 @@ class InfoWidget(QWidget):
         """)
 
         layout = QVBoxLayout()
-        layout.setContentsMargins(0, 0, 14, 0)  # 좌, 상, 우, 하
+        layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        # 시험 시나리오명 테이블 (730x238px) - 2개 컬럼: 시험 분야명, 시험 시나리오명
+        # 시험 시나리오명 테이블 (744x238px) - 2개 컬럼: 시험 분야명, 시험 시나리오명
         self.test_field_table = QTableWidget(0, 2)
-        self.test_field_table.setFixedSize(730, 238)
+        self.test_field_table.setFixedSize(744, 238)
         self.test_field_table.setHorizontalHeaderLabels(["시험 분야명", "시험 시나리오명"])
 
         # 컬럼 너비 설정 (시험 분야명: 360px, 시험 시나리오명: 360px)
         header = self.test_field_table.horizontalHeader()
+        header.setFixedHeight(24)
         header.setSectionResizeMode(0, QHeaderView.Fixed)
         header.resizeSection(0, 360)
         header.setSectionResizeMode(1, QHeaderView.Fixed)
@@ -876,12 +913,16 @@ class InfoWidget(QWidget):
                 border: 1px solid #CECECE;
                 border-radius: 4px;
                 gridline-color: #CCCCCC;
+                font-family: 'Noto Sans KR';
+                font-weight: 400;
+                font-size: 14px;
+                letter-spacing: 0.098px;
             }
             QTableWidget::item {
                 height: 26px;
                 background-color: #FFFFFF;
                 border-bottom: 1px solid #CCCCCC;
-                padding: 5px;
+                padding-right: 14px;
                 font-family: 'Noto Sans KR';
                 font-weight: 400;
                 font-size: 14px;
@@ -890,14 +931,13 @@ class InfoWidget(QWidget):
             }
             QTableWidget::item:selected {
                 background-color: #E3F2FF;
+                color: #000000;
             }
             QHeaderView::section {
-                height: 24px;
                 background-color: #EDF0F3;
                 border: none;
                 border-bottom: 1px solid #CCCCCC;
                 border-right: 1px solid #CCCCCC;
-                padding: 5px;
                 font-family: 'Noto Sans KR';
                 font-weight: 600;
                 font-size: 13px;
@@ -942,14 +982,25 @@ class InfoWidget(QWidget):
         """)
 
         layout = QVBoxLayout()
-        layout.setContentsMargins(0, 0, 14, 0)  # 좌, 상, 우, 하
+        layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        # 시험 API 테이블 (730x436px) - 466 - 36(타이틀) - 6(gap) = 424px
+        # 시험 API 테이블 (744x424px) - 466 - 36(타이틀) - 6(gap) = 424px
         self.api_test_table = QTableWidget(0, 2)
-        self.api_test_table.setFixedSize(730, 424)
+        self.api_test_table.setFixedSize(744, 424)
         self.api_test_table.setHorizontalHeaderLabels(["기능명", "API명"])
-        self.api_test_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+
+        header = self.api_test_table.horizontalHeader()
+        header.setFixedHeight(24)
+        header.setSectionResizeMode(QHeaderView.Stretch)
+
+        # 왼쪽 행 번호 헤더 설정
+        vertical_header = self.api_test_table.verticalHeader()
+        vertical_header.setDefaultAlignment(Qt.AlignCenter)
+        vertical_header.setStyleSheet("QHeaderView { background-color: #FFFFFF; }")
+
+        # 세로 grid line 제거
+        self.api_test_table.setShowGrid(False)
 
         # 테이블 스타일 설정
         self.api_test_table.setStyleSheet("""
@@ -957,33 +1008,48 @@ class InfoWidget(QWidget):
                 background-color: #FFFFFF;
                 border: 1px solid #CECECE;
                 border-radius: 4px;
-                gridline-color: #CCCCCC;
+                font-family: 'Noto Sans KR';
+                font-weight: 400;
+                font-size: 14px;
+                letter-spacing: 0.098px;
             }
             QTableWidget::item {
                 height: 26px;
                 background-color: #FFFFFF;
                 border-bottom: 1px solid #CCCCCC;
-                padding: 5px;
+                border-right: none;
+                padding-right: 14px;
+                color: #000000;
+            }
+            QTableWidget::item:selected {
+                background-color: #E3F2FF;
+                color: #000000;
+            }
+            QHeaderView::section {
+                background-color: #EDF0F3;
+                border: none;
+                border-bottom: 1px solid #CCCCCC;
+                font-family: 'Noto Sans KR';
+                font-weight: 600;
+                font-size: 13px;
+                letter-spacing: -0.156px;
+                color: #000000;
+            }
+            QHeaderView::section:vertical {
+                background-color: #FFFFFF;
+                border: none;
+                border-right: none;
+                border-bottom: 1px solid #CCCCCC;
                 font-family: 'Noto Sans KR';
                 font-weight: 400;
                 font-size: 14px;
                 letter-spacing: 0.098px;
                 color: #000000;
             }
-            QTableWidget::item:selected {
-                background-color: #E3F2FF;
-            }
-            QHeaderView::section {
-                height: 24px;
+            QTableCornerButton::section {
                 background-color: #EDF0F3;
                 border: none;
                 border-bottom: 1px solid #CCCCCC;
-                padding: 5px;
-                font-family: 'Noto Sans KR';
-                font-weight: 600;
-                font-size: 13px;
-                letter-spacing: -0.156px;
-                color: #000000;
             }
         """)
 
@@ -1347,7 +1413,7 @@ class InfoWidget(QWidget):
         section.setStyleSheet("QGroupBox { border: none; }")
 
         layout = QVBoxLayout()
-        layout.setContentsMargins(0, 0, 14, 0)
+        layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
         # 접속 주소 탐색 + 주소탐색버튼 영역 (744x36px)
@@ -1414,13 +1480,89 @@ class InfoWidget(QWidget):
         # 6px gap
         layout.addSpacing(6)
 
-        # URL 테이블 (730x424px, 오른쪽 padding 14px)
+        # URL 테이블 (744x424px)
         self.url_table = QTableWidget(0, 2)
-        self.url_table.setFixedSize(730, 424)
-        self.url_table.setHorizontalHeaderLabels(["☑", "URL"])
+        self.url_table.setFixedSize(744, 424)
+        self.url_table.setHorizontalHeaderLabels(["", "URL"])  # 첫 번째 헤더는 빈 문자열
+        self.url_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.url_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.url_table.setSelectionMode(QAbstractItemView.SingleSelection)
+
+        # 헤더 설정
         header = self.url_table.horizontalHeader()
-        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(1, QHeaderView.Stretch)
+        header.setFixedHeight(24)
+        header.setStretchLastSection(True)
+        header.setDefaultAlignment(Qt.AlignCenter)  # 헤더 가운데 정렬
+
+        # 왼쪽 행 번호 헤더 설정
+        vertical_header = self.url_table.verticalHeader()
+        vertical_header.setVisible(True)
+        vertical_header.setDefaultAlignment(Qt.AlignCenter)
+        vertical_header.setStyleSheet("QHeaderView { background-color: #FFFFFF; }")
+
+        # 컬럼 너비 설정 (체크박스: 36px, URL: 나머지, 오른쪽 padding: 14px)
+        self.url_table.setColumnWidth(0, 36)
+
+        # 세로 grid line 제거
+        self.url_table.setShowGrid(False)
+
+        # 행 높이 설정
+        self.url_table.verticalHeader().setDefaultSectionSize(26)
+
+        # 스타일 설정
+        self.url_table.setStyleSheet("""
+            QTableWidget {
+                background-color: #FFFFFF;
+                border: 1px solid #CECECE;
+                border-radius: 4px;
+                font-family: 'Noto Sans KR';
+                font-weight: 400;
+                font-size: 14px;
+                letter-spacing: 0.098px;
+            }
+            QTableWidget::item {
+                background-color: #FFFFFF;
+                border-bottom: 1px solid #CCCCCC;
+                border-right: none;
+                padding-right: 14px;
+                color: #000000;
+            }
+            QTableWidget::item:selected {
+                background-color: #E3F2FF;
+                color: #000000;
+            }
+            QHeaderView::section {
+                background-color: #EDF0F3;
+                border: none;
+                border-bottom: 1px solid #CCCCCC;
+                padding: 4px;
+                height: 24px;
+                font-family: 'Noto Sans KR';
+                font-size: 13px;
+                font-weight: 600;
+                letter-spacing: -0.156px;
+            }
+            QHeaderView::section:vertical {
+                background-color: #FFFFFF;
+                border: none;
+                border-right: none;
+                border-bottom: 1px solid #CCCCCC;
+                font-family: 'Noto Sans KR';
+                font-weight: 400;
+                font-size: 14px;
+                letter-spacing: 0.098px;
+                color: #000000;
+            }
+            QHeaderView::section:vertical:checked {
+                background-color: #E3F2FF;
+            }
+            QTableCornerButton::section {
+                background-color: #EDF0F3;
+                border: none;
+                border-bottom: 1px solid #CCCCCC;
+            }
+        """)
+
         self.url_table.cellClicked.connect(self.select_url_row)
         layout.addWidget(self.url_table)
 
@@ -1475,30 +1617,6 @@ class InfoWidget(QWidget):
         self.token_input.textChanged.connect(self.check_start_button_state)
 
         self.update_auth_fields()
-
-        # 주소 탐색
-        scan_label = QLabel("시험 접속 정보")
-        scan_label.setStyleSheet("font-weight: bold; margin-top: 10px;")
-        layout.addWidget(scan_label)
-
-        btn_row = QHBoxLayout()
-        btn_row.addStretch()
-        scan_btn = QPushButton("🔍주소 탐색")
-        scan_btn.setStyleSheet("QPushButton { background-color: #E1EBF4; color: #3987C1; font-weight: bold; }")
-        scan_btn.clicked.connect(self.start_scan)
-        btn_row.addWidget(scan_btn)
-        layout.addLayout(btn_row)
-
-        self.url_table = QTableWidget(0, 2)
-        self.url_table.setHorizontalHeaderLabels(["☑", "URL"])
-        self.url_table.verticalHeader().setVisible(False)
-        self.url_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.url_table.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.url_table.setSelectionMode(QAbstractItemView.SingleSelection)
-        self.url_table.horizontalHeader().setStretchLastSection(True)
-        self.url_table.setColumnWidth(0, 36)
-        self.url_table.cellClicked.connect(self.select_url_row)
-        layout.addWidget(self.url_table)
 
         panel.setLayout(layout)
         return panel
@@ -1644,10 +1762,11 @@ class InfoWidget(QWidget):
                 self.url_table.insertRow(row)
 
                 checkbox_widget = QWidget()
+                checkbox_widget.setStyleSheet("background-color: #FFFFFF;")
                 checkbox_layout = QHBoxLayout()
                 checkbox_layout.setAlignment(Qt.AlignCenter)
                 checkbox_layout.setContentsMargins(0, 0, 0, 0)
-                
+
                 checkbox = QCheckBox()
                 checkbox.setChecked(False)
                 checkbox.clicked.connect(lambda checked, r=row: self.on_checkbox_clicked(r, checked))
@@ -1679,7 +1798,22 @@ class InfoWidget(QWidget):
                         checkbox = checkbox_widget.findChild(QCheckBox)
                         if checkbox:
                             checkbox.setChecked(False)
-        
+                        # 체크박스 위젯 배경색 흰색으로
+                        checkbox_widget.setStyleSheet("background-color: #FFFFFF;")
+
+            # 체크된 행 선택 (stylesheet의 :selected로 배경색 자동 적용)
+            self.url_table.selectRow(clicked_row)
+            # 체크박스 위젯 배경색도 변경
+            checkbox_widget = self.url_table.cellWidget(clicked_row, 0)
+            if checkbox_widget:
+                checkbox_widget.setStyleSheet("background-color: #E3F2FF;")
+        else:
+            # 체크 해제 시 선택 해제
+            self.url_table.clearSelection()
+            checkbox_widget = self.url_table.cellWidget(clicked_row, 0)
+            if checkbox_widget:
+                checkbox_widget.setStyleSheet("background-color: #FFFFFF;")
+
         # URL 선택 변경 시 버튼 상태 체크
         self.check_start_button_state()
 
@@ -1692,6 +1826,8 @@ class InfoWidget(QWidget):
                 checkbox = checkbox_widget.findChild(QCheckBox)
                 if checkbox:
                     checkbox.setChecked(False)
+                # 체크박스 위젯 배경색 흰색으로
+                checkbox_widget.setStyleSheet("background-color: #FFFFFF;")
 
         # 선택된 행 체크
         selected_checkbox_widget = self.url_table.cellWidget(row, 0)
@@ -1699,7 +1835,12 @@ class InfoWidget(QWidget):
             checkbox = selected_checkbox_widget.findChild(QCheckBox)
             if checkbox:
                 checkbox.setChecked(True)
-        
+            # 체크박스 위젯 배경색 변경
+            selected_checkbox_widget.setStyleSheet("background-color: #E3F2FF;")
+
+        # 행 선택 (stylesheet의 :selected로 배경색 자동 적용)
+        self.url_table.selectRow(row)
+
         # URL 선택 변경 시 버튼 상태 체크
         self.check_start_button_state()
 
