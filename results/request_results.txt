@@ -165,6 +165,7 @@ step 7: RealtimeVideoEventInfos
 FAIL
 Score : 67.85714285714286
 Score details : 19(누적 통과 필드 수), 9(누적 오류 필드 수)
+
 step 8: StoredVideoEventInfos
 🔄 부하테스트 시작: 총 1회 검증 예정
 📨 시스템 요청 수신, 검증 중... [1/1]
@@ -188,7 +189,7 @@ step 8: StoredVideoEventInfos
     ],
     "maxCount": 3,
     "eventFilter": "화재",
-    "classFilter": "트럭"
+    "classFilter": "사람"
 }
 PASS
 Score : 75.0
