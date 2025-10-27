@@ -225,10 +225,11 @@ class FormValidator:
                 all_spec_list_names.extend(spec_list_names)
 
             # 파일 저장
-            schema_output = f"spec/Schema_{schema_type}.py"
-            data_output = f"spec/Data_{file_type}.py"
-            validation_output = f"spec/Validation_{schema_type}.py"
-            constraints_output = f"spec/Constraints_{file_type}.py"
+            from core.functions import resource_path
+            schema_output = resource_path(f"spec/Schema_{schema_type}.py")
+            data_output = resource_path(f"spec/Data_{file_type}.py")
+            validation_output = resource_path(f"spec/Validation_{schema_type}.py")
+            constraints_output = resource_path(f"spec/Constraints_{file_type}.py")
 
 
             with open(schema_output, 'w', encoding='utf-8') as f:
@@ -852,7 +853,8 @@ class FormValidator:
     def update_constants_py(self):
         """CONSTANTS.py 파일의 변수들을 GUI 입력값으로 업데이트"""
         try:
-            constants_path = "config/CONSTANTS.py"
+            from core.functions import resource_path
+            constants_path = resource_path("config/CONSTANTS.py")
 
             # 1. 시험 기본 정보 수집
             variables = self._collect_basic_info()
@@ -1041,12 +1043,15 @@ class FormValidator:
             return None
 
     def overwrite_spec_config_from_mapping(self,
-                                           constants_path: str = "config/CONSTANTS.py") -> None:
+                                           constants_path: str = None) -> None:
         """
         산출물 파일을 분석하여 CONSTANTS.py의 SPEC_CONFIG 전체 블록을 '덮어쓰기'로 갱신한다.
         각 spec_id별로 API에서 trans_protocol, time_out, num_retries를 추출하여 반영한다.
         """
         try:
+            from core.functions import resource_path
+            if constants_path is None:
+                constants_path = resource_path("config/CONSTANTS.py")
 
             # 1) CONSTANTS.py 읽기
             with open(constants_path, "r", encoding="utf-8") as f:
@@ -1059,12 +1064,13 @@ class FormValidator:
 
             mode = self.parent.test_group_edit.text().strip()
 
+            from core.functions import resource_path
             if mode == "물리보안":
                 priority_order = ["outSchema", "inData", "messages", "webhook"]
-                merged_result = self.merge_list_prefix_mappings("spec/Schema_response.py", "spec/Data_request.py")
+                merged_result = self.merge_list_prefix_mappings(resource_path("spec/Schema_response.py"), resource_path("spec/Data_request.py"))
             elif mode == "통합플랫폼":
                 priority_order = ["inSchema", "outData", "messages", "webhook"]
-                merged_result = self.merge_list_prefix_mappings("spec/Schema_request.py", "spec/Data_response.py")
+                merged_result = self.merge_list_prefix_mappings(resource_path("spec/Schema_request.py"), resource_path("spec/Data_response.py"))
             else:
                 print("[CONFIG SPEC]: 모드 확인해주세요.")
 
@@ -1224,6 +1230,17 @@ class FormValidator:
             with open(constants_path, "w", encoding="utf-8") as f:
                 f.write(new_content)
 
+            # 실제로 업데이트되었는지 검증
+            import os
+            if os.path.exists(constants_path):
+                file_size = os.path.getsize(constants_path)
+                print(f"[DEBUG] CONSTANTS.py 업데이트 완료:")
+                print(f"  경로: {constants_path}")
+                print(f"  파일 크기: {file_size} bytes")
+                print(f"  파일 존재: True")
+            else:
+                print(f"[WARNING] 파일이 존재하지 않습니다: {constants_path}")
+
             print("CONSTANTS.py SPEC_CONFIG 전체 덮어쓰기 완료")
 
         except Exception as e:
@@ -1234,7 +1251,8 @@ class FormValidator:
     def _update_spec_config(self, spec_id, config_data):
         """CONSTANTS.py의 SPEC_CONFIG 리스트에 spec_id별 설정 업데이트"""
         try:
-            constants_path = "config/CONSTANTS.py"
+            from core.functions import resource_path
+            constants_path = resource_path("config/CONSTANTS.py")
 
             with open(constants_path, 'r', encoding='utf-8') as f:
                 content = f.read()
@@ -1329,6 +1347,7 @@ class FormValidator:
             # 전체 내용에서 SPEC_CONFIG 교체
             content = content.replace(current_config, new_config)
 
+            # 파일 쓰기
             with open(constants_path, 'w', encoding='utf-8') as f:
                 f.write(content)
 
@@ -1443,6 +1462,17 @@ class FormValidator:
 
         with open(file_path, 'w', encoding='utf-8') as f:
             f.write(content)
+
+        # 실제로 업데이트되었는지 검증
+        import os
+        if os.path.exists(file_path):
+            file_size = os.path.getsize(file_path)
+            print(f"[DEBUG] CONSTANTS.py 변수 업데이트 완료:")
+            print(f"  경로: {file_path}")
+            print(f"  파일 크기: {file_size} bytes")
+            print(f"  업데이트된 변수: {list(variables.keys())}")
+        else:
+            print(f"[WARNING] 파일이 존재하지 않습니다: {file_path}")
 
 
     def load_opt_files_from_api(self, test_data):
