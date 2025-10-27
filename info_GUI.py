@@ -51,12 +51,13 @@ class InfoWidget(QWidget):
         page = QWidget()
 
         # 배경 이미지 설정
-        page.setStyleSheet("""
-            #page1 {
-                background-image: url(assets/image/test_info/bg.png);
+        bg_path = resource_path("assets/image/test_info/bg.png").replace(chr(92), "/")
+        page.setStyleSheet(f"""
+            #page1 {{
+                background-image: url({bg_path});
                 background-repeat: no-repeat;
                 background-position: center;
-            }
+            }}
         """)
         page.setObjectName("page1")
 
@@ -79,14 +80,14 @@ class InfoWidget(QWidget):
 
         # 헤더 로고 (36x36px)
         logo_label = QLabel(header_widget)
-        logo_pixmap = QPixmap("assets/image/test_info/header_logo.png")
+        logo_pixmap = QPixmap(resource_path("assets/image/test_info/header_logo.png"))
         logo_label.setPixmap(logo_pixmap.scaled(36, 36, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         logo_label.setFixedSize(36, 36)
         header_layout.addWidget(logo_label)
 
         # 헤더 텍스트 이미지 (301x36px)
         header_txt_label = QLabel(header_widget)
-        header_txt_pixmap = QPixmap("assets/image/test_info/header_txt.png")
+        header_txt_pixmap = QPixmap(resource_path("assets/image/test_info/header_txt.png"))
         header_txt_label.setPixmap(header_txt_pixmap.scaled(301, 36, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         header_txt_label.setFixedSize(301, 36)
         header_layout.addWidget(header_txt_label)
@@ -102,7 +103,7 @@ class InfoWidget(QWidget):
 
         # 배경 일러스트 이미지 추가 (bg-illust.png) - 레이아웃 설정 후 추가
         illust_label = QLabel(page)
-        illust_pixmap = QPixmap("assets/image/test_info/bg-illust.png")
+        illust_pixmap = QPixmap(resource_path("assets/image/test_info/bg-illust.png"))
         illust_label.setPixmap(illust_pixmap)
         illust_label.setScaledContents(True)
         # 페이지 전체 크기로 설정하여 bg.png 위에 표시
@@ -124,12 +125,13 @@ class InfoWidget(QWidget):
         page.setFixedSize(1680, 1032)
 
         # 배경 이미지 설정 (bg.png)
-        page.setStyleSheet("""
-            #page2 {
-                background-image: url(assets/image/test_config/bg.png);
+        bg_path2 = resource_path("assets/image/test_config/bg.png").replace(chr(92), "/")
+        page.setStyleSheet(f"""
+            #page2 {{
+                background-image: url({bg_path2});
                 background-repeat: no-repeat;
                 background-position: center;
-            }
+            }}
         """)
 
         layout = QVBoxLayout()
@@ -267,8 +269,8 @@ class InfoWidget(QWidget):
         reset_btn = QPushButton("")
         reset_btn.setFixedSize(364, 48)
 
-        btn_reset_enabled = "assets/image/test_config/btn_초기화_enabled.png"
-        btn_reset_hover = "assets/image/test_config/btn_초기화_Hover.png"
+        btn_reset_enabled = resource_path("assets/image/test_config/btn_초기화_enabled.png").replace(chr(92), "/")
+        btn_reset_hover = resource_path("assets/image/test_config/btn_초기화_Hover.png").replace(chr(92), "/")
 
         reset_btn.setStyleSheet(f"""
             QPushButton {{
@@ -288,8 +290,8 @@ class InfoWidget(QWidget):
         self.start_btn = QPushButton("")
         self.start_btn.setFixedSize(364, 48)
 
-        btn_start_enabled = "assets/image/test_config/btn_시험시작_enabled.png"
-        btn_start_hover = "assets/image/test_config/btn_시험시작_Hover.png"
+        btn_start_enabled = resource_path("assets/image/test_config/btn_시험시작_enabled.png").replace(chr(92), "/")
+        btn_start_hover = resource_path("assets/image/test_config/btn_시험시작_Hover.png").replace(chr(92), "/")
 
         self.start_btn.setStyleSheet(f"""
             QPushButton {{
@@ -437,9 +439,8 @@ class InfoWidget(QWidget):
 
         # 한글 경로 처리를 위한 절대 경로 사용
         import os
-        base_path = os.path.abspath("assets/image/test_info")
-        btn_enabled = os.path.join(base_path, "btn_불러오기_enabled.png").replace("\\", "/")
-        btn_hover = os.path.join(base_path, "btn_불러오기_Hover.png").replace("\\", "/")
+        btn_enabled = resource_path("assets/image/test_info/btn_불러오기_enabled.png").replace(chr(92), "/")
+        btn_hover = resource_path("assets/image/test_info/btn_불러오기_Hover.png").replace(chr(92), "/")
 
         self.load_test_info_btn.setStyleSheet(f"""
             QPushButton {{
@@ -583,9 +584,8 @@ class InfoWidget(QWidget):
         reset_btn = QPushButton()
         reset_btn.setFixedSize(374, 82)
         import os
-        base_path = os.path.abspath("assets/image/test_info")
-        btn_reset_enabled = os.path.join(base_path, "btn_초기화_enabled.png").replace("\\", "/")
-        btn_reset_hover = os.path.join(base_path, "btn_초기화_Hover.png").replace("\\", "/")
+        btn_reset_enabled = resource_path("assets/image/test_info/btn_초기화_enabled.png").replace(chr(92), "/")
+        btn_reset_hover = resource_path("assets/image/test_info/btn_초기화_Hover.png").replace(chr(92), "/")
         reset_btn.setStyleSheet(f"""
             QPushButton {{
                 border: none;
@@ -603,8 +603,8 @@ class InfoWidget(QWidget):
         # 다음 버튼 (오른쪽)
         self.next_btn = QPushButton()
         self.next_btn.setFixedSize(374, 82)
-        btn_next_enabled = os.path.join(base_path, "btn_다음_enabled.png").replace("\\", "/")
-        btn_next_hover = os.path.join(base_path, "btn_다음_Hover.png").replace("\\", "/")
+        btn_next_enabled = resource_path("assets/image/test_info/btn_다음_enabled.png").replace(chr(92), "/")
+        btn_next_hover = resource_path("assets/image/test_info/btn_다음_Hover.png").replace(chr(92), "/")
         self.next_btn.setStyleSheet(f"""
             QPushButton {{
                 border: none;
@@ -721,17 +721,15 @@ class InfoWidget(QWidget):
 
         # 한글 경로 처리를 위한 절대 경로 사용
         import os
-        base_path = os.path.abspath("assets/image/test_info")
-
         # 너비에 따라 다른 이미지 사용
         if width >= 768:
             # 전체 너비 (768px) - wide 이미지
-            input_default = os.path.join(base_path, "불러온정보_w_default.png").replace("\\", "/")
-            input_filled = os.path.join(base_path, "불러온정보_w_filled.png").replace("\\", "/")
+            input_default = resource_path("assets/image/test_info/불러온정보_w_default.png").replace(chr(92), "/")
+            input_filled = resource_path("assets/image/test_info/불러온정보_w_filled.png").replace(chr(92), "/")
         else:
             # 반 너비 (374px) - small 이미지
-            input_default = os.path.join(base_path, "불러온정보_s_default.png").replace("\\", "/")
-            input_filled = os.path.join(base_path, "불러온정보_s_filled.png").replace("\\", "/")
+            input_default = resource_path("assets/image/test_info/불러온정보_s_default.png").replace(chr(92), "/")
+            input_filled = resource_path("assets/image/test_info/불러온정보_s_filled.png").replace(chr(92), "/")
 
         input_field.setStyleSheet(f"""
             QLineEdit {{
@@ -807,10 +805,9 @@ class InfoWidget(QWidget):
 
         # 한글 경로 처리를 위한 절대 경로 사용
         import os
-        base_path = os.path.abspath("assets/image/test_info")
-        input_enabled = os.path.join(base_path, "input_enabled.png").replace("\\", "/")
-        input_disabled = os.path.join(base_path, "input_disabled.png").replace("\\", "/")
-        input_hover = os.path.join(base_path, "input_Hover.png").replace("\\", "/")
+        input_enabled = resource_path("assets/image/test_info/input_enabled.png").replace(chr(92), "/")
+        input_disabled = resource_path("assets/image/test_info/input_disabled.png").replace(chr(92), "/")
+        input_hover = resource_path("assets/image/test_info/input_Hover.png").replace(chr(92), "/")
 
         input_field.setStyleSheet(f"""
             QLineEdit {{
@@ -1196,12 +1193,14 @@ class InfoWidget(QWidget):
 
         self.id_input = QLineEdit()
         self.id_input.setFixedSize(329, 38)
-        self.id_input.setStyleSheet("""
-            QLineEdit {
+        digest_enabled = resource_path("assets/image/test_config/input_DigestAuth_enabled.png").replace(chr(92), "/")
+        digest_disabled = resource_path("assets/image/test_config/input_DigestAuth_disabled.png").replace(chr(92), "/")
+        self.id_input.setStyleSheet(f"""
+            QLineEdit {{
                 padding-left: 20px;
                 border: none;
                 background-color: #F5F5F5;
-                background-image: url(assets/image/test_config/input_DigestAuth_enabled.png);
+                background-image: url({digest_enabled});
                 background-repeat: no-repeat;
                 background-position: center;
                 font-family: 'Noto Sans KR';
@@ -1209,11 +1208,11 @@ class InfoWidget(QWidget):
                 font-size: 17px;
                 letter-spacing: -0.17px;
                 color: #000000;
-            }
-            QLineEdit:disabled {
-                background-image: url(assets/image/test_config/input_DigestAuth_disabled.png);
+            }}
+            QLineEdit:disabled {{
+                background-image: url({digest_disabled});
                 color: #868686;
-            }
+            }}
         """)
         userid_layout.addWidget(self.id_input)
 
@@ -1246,12 +1245,12 @@ class InfoWidget(QWidget):
 
         self.pw_input = QLineEdit()
         self.pw_input.setFixedSize(329, 38)
-        self.pw_input.setStyleSheet("""
-            QLineEdit {
+        self.pw_input.setStyleSheet(f"""
+            QLineEdit {{
                 padding-left: 20px;
                 border: none;
                 background-color: #F5F5F5;
-                background-image: url(assets/image/test_config/input_DigestAuth_enabled.png);
+                background-image: url({digest_enabled});
                 background-repeat: no-repeat;
                 background-position: center;
                 font-family: 'Noto Sans KR';
@@ -1259,11 +1258,11 @@ class InfoWidget(QWidget):
                 font-size: 17px;
                 letter-spacing: -0.17px;
                 color: #000000;
-            }
-            QLineEdit:disabled {
-                background-image: url(assets/image/test_config/input_DigestAuth_disabled.png);
+            }}
+            QLineEdit:disabled {{
+                background-image: url({digest_disabled});
                 color: #868686;
-            }
+            }}
         """)
         self.pw_input.setEchoMode(QLineEdit.Password)
         password_layout.addWidget(self.pw_input)
@@ -1354,12 +1353,14 @@ class InfoWidget(QWidget):
 
         self.token_input = QLineEdit()
         self.token_input.setFixedSize(678, 38)  # 716 - 38(좌측 padding) = 678
-        self.token_input.setStyleSheet("""
-            QLineEdit {
+        token_enabled = resource_path("assets/image/test_config/input_Token_enabled.png").replace(chr(92), "/")
+        token_disabled = resource_path("assets/image/test_config/input_Token_disabled.png").replace(chr(92), "/")
+        self.token_input.setStyleSheet(f"""
+            QLineEdit {{
                 padding-left: 20px;
                 border: none;
                 background-color: #F5F5F5;
-                background-image: url(assets/image/test_config/input_Token_enabled.png);
+                background-image: url({token_enabled});
                 background-repeat: no-repeat;
                 background-position: center;
                 font-family: 'Noto Sans KR';
@@ -1367,11 +1368,11 @@ class InfoWidget(QWidget):
                 font-size: 17px;
                 letter-spacing: -0.17px;
                 color: #000000;
-            }
-            QLineEdit:disabled {
-                background-image: url(assets/image/test_config/input_Token_disabled.png);
+            }}
+            QLineEdit:disabled {{
+                background-image: url({token_disabled});
                 color: #868686;
-            }
+            }}
         """)
         token_input_layout.addWidget(self.token_input)
 
@@ -1455,8 +1456,8 @@ class InfoWidget(QWidget):
         scan_btn = QPushButton("")
         scan_btn.setFixedSize(120, 30)
 
-        btn_scan_enabled = "assets/image/test_config/btn_주소탐색_enabled.png"
-        btn_scan_hover = "assets/image/test_config/btn_주소탐색_Hover.png"
+        btn_scan_enabled = resource_path("assets/image/test_config/btn_주소탐색_enabled.png").replace(chr(92), "/")
+        btn_scan_hover = resource_path("assets/image/test_config/btn_주소탐색_Hover.png").replace(chr(92), "/")
 
         scan_btn.setStyleSheet(f"""
             QPushButton {{
