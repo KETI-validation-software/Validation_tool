@@ -41,45 +41,7 @@ cmgyv3rzl014nvsveidu5jpzp_ReplayURL_in_constraints = {
 cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_in_constraints = {}
 
 # RealtimeVideoEventInfos WebHook OUT Constraints
-cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_webhook_out_constraints = {
-  "camList.camID": {
-    "valueType": "response-based",
-    "required": True,
-    "referenceEndpoint": "/CameraProfiles",
-    "referenceField": "camID",
-    "validation": {
-      "enabled": False,
-      "validationType": "specified-value-match"
-    }
-  },
-  "eventFilter": {
-    "valueType": "random",
-    "required": False,
-    "validValueField": "eventFilter",
-    "validValues": [
-      "화재",
-      "배회"
-    ],
-    "validation": {
-      "enabled": False,
-      "validationType": "specified-value-match"
-    }
-  },
-  "classFilter": {
-    "valueType": "random",
-    "required": False,
-    "validValueField": "classFilter",
-    "validValues": [
-      "사람",
-      "트럭",
-      "버스"
-    ],
-    "validation": {
-      "enabled": False,
-      "validationType": "specified-value-match"
-    }
-  }
-}
+cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_webhook_out_constraints = {}
 
 # StoredVideoEventInfos
 cmgyv3rzl014nvsveidu5jpzp_StoredVideoEventInfos_in_constraints = {

@@ -22,6 +22,7 @@ from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor
 from PyQt5.QtCore import *
 from api.webhook_api import WebhookThread
 from core.functions import json_check_, resource_path, set_auth, json_to_data, timeout_field_finder
+from core.data_mapper import ConstraintDataGenerator
 from requests.auth import HTTPDigestAuth
 import config.CONSTANTS as CONSTANTS
 import traceback
@@ -73,13 +74,13 @@ class CombinedDetailDialog(QDialog):
         schema_layout = QVBoxLayout()
         self.schema_browser = QTextBrowser()
         self.schema_browser.setAcceptRichText(True)
-        
+
         # 기본 스키마 + 웹훅 스키마 결합
         schema_text = self._format_schema(schema_data)
         if self.webhook_schema:
             schema_text += "\n\n=== 웹훅 이벤트 스키마 (플랫폼→시스템) ===\n"
             schema_text += self._format_schema(self.webhook_schema)
-        
+
         self.schema_browser.setPlainText(schema_text)
         schema_layout.addWidget(self.schema_browser)
         schema_group.setLayout(schema_layout)
@@ -92,7 +93,7 @@ class CombinedDetailDialog(QDialog):
         result = step_buffer["result"]
         # 항상 step_buffer["error"]를 그대로 보여주고, 없으면 안내 메시지
         # 오류 설명 추가: 값 자체뿐 아니라 원인도 함께 표시
-        error_text = step_buffer["error"] if step_buffer["error"] else ("오류가 없습니다." if result=="PASS" else "오류 내용 없음")
+        error_text = step_buffer["error"] if step_buffer["error"] else ("오류가 없습니다." if result == "PASS" else "오류 내용 없음")
         # 예시: 값이 범위에 맞지 않거나 타입이 다를 때 추가 설명
         if result == "FAIL" and error_text and isinstance(error_text, str):
             # 간단한 규칙 기반 설명 추가 (실제 검증 로직에 맞게 확장 가능)
@@ -182,22 +183,22 @@ class APISelectionDialog(QDialog):
         super().__init__(parent)
         self.api_list = api_list
         self.selected_indices = selected_indices.copy()
-        
+
         self.setWindowTitle("API 선택")
         self.setGeometry(400, 300, 500, 600)
         self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
         self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
-        
+
         self.initUI()
-    
+
     def initUI(self):
         layout = QVBoxLayout()
-        
+
         # 상단 안내
         info_label = QLabel("시험할 API를 선택하세요 (복수 선택 가능)")
         info_label.setStyleSheet("font-weight: bold; font-size: 12px; padding: 10px;")
         layout.addWidget(info_label)
-        
+
         # 전체 선택/해제 버튼
         button_layout = QHBoxLayout()
         select_all_btn = QPushButton("전체 선택")
@@ -208,41 +209,41 @@ class APISelectionDialog(QDialog):
         button_layout.addWidget(deselect_all_btn)
         button_layout.addStretch()
         layout.addLayout(button_layout)
-        
+
         # API 리스트 (체크박스)
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll_widget = QWidget()
         scroll_layout = QVBoxLayout()
-        
+
         self.checkboxes = []
         for idx, api_name in enumerate(self.api_list):
             checkbox = QCheckBox(f"{idx + 1}. {api_name}")
             checkbox.setChecked(idx in self.selected_indices)
             self.checkboxes.append(checkbox)
             scroll_layout.addWidget(checkbox)
-        
+
         scroll_layout.addStretch()
         scroll_widget.setLayout(scroll_layout)
         scroll.setWidget(scroll_widget)
         layout.addWidget(scroll)
-        
+
         # 하단 버튼
         button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         button_box.accepted.connect(self.accept)
         button_box.rejected.connect(self.reject)
         layout.addWidget(button_box)
-        
+
         self.setLayout(layout)
-    
+
     def select_all(self):
         for checkbox in self.checkboxes:
             checkbox.setChecked(True)
-    
+
     def deselect_all(self):
         for checkbox in self.checkboxes:
             checkbox.setChecked(False)
-    
+
     def get_selected_indices(self):
         """선택된 API 인덱스 리스트 반환"""
         return [idx for idx, checkbox in enumerate(self.checkboxes) if checkbox.isChecked()]
@@ -252,7 +253,7 @@ class APISelectionDialog(QDialog):
 class ResultPageWidget(QWidget):
     # 뒤로가기 시그널 추가
     backRequested = pyqtSignal()
-    
+
     def __init__(self, parent, embedded=False):
         super().__init__()
         self.parent = parent
@@ -371,7 +372,7 @@ class ResultPageWidget(QWidget):
                 }
             """)
             back_btn.clicked.connect(self._on_back_clicked)
-            
+
             close_layout = QHBoxLayout()
             close_layout.setAlignment(Qt.AlignCenter)
             close_layout.addWidget(back_btn)
@@ -406,7 +407,7 @@ class ResultPageWidget(QWidget):
 
         mainLayout.addStretch()
         self.setLayout(mainLayout)
-    
+
     def _on_back_clicked(self):
         """뒤로가기 버튼 클릭 시 시그널 발생"""
         self.backRequested.emit()
@@ -593,11 +594,100 @@ class MyApp(QWidget):
     showResultRequested = pyqtSignal(object)  # parent widget을 인자로 전달
 
     def _load_from_trace_file(self, api_name, direction="RESPONSE"):
+        """Trace 파일에서 최신 이벤트 데이터 로드"""
         try:
             trace_file = Path("results/trace") / f"trace_{api_name.replace('/', '_')}.ndjson"
 
             if not trace_file.exists():
-                return None # 파일이 없으면 None 반환
+                print(f"[DEBUG] trace 파일 없음: {trace_file}")
+                return None
+
+            # 파일에서 가장 최근의 해당 direction 이벤트 찾기
+            latest_event = None
+            with open(trace_file, "r", encoding="utf-8") as f:
+                for line in f:
+                    try:
+                        event = json.loads(line.strip())
+                        if event.get("dir") == direction:
+                            latest_event = event
+                    except json.JSONDecodeError:
+                        continue
+
+            if latest_event:
+                # latest_events 업데이트
+                api_key = latest_event.get("api", api_name)
+                if api_key not in self.latest_events:
+                    self.latest_events[api_key] = {}
+                self.latest_events[api_key][direction] = latest_event
+                print(f"[DEBUG] trace 파일에서 {api_name} {direction} 데이터 로드 완료")
+                return latest_event.get("data")
+            else:
+                print(f"[DEBUG] trace 파일에서 {api_name} {direction} 데이터 없음")
+                return None
+
+        except Exception as e:
+            print(f"[ERROR] trace 파일 로드 중 오류: {e}")
+            return None
+
+    def _apply_request_constraints(self, request_data, cnt):
+        """
+        이전 응답 데이터를 기반으로 요청 데이터 업데이트
+        - inCon (request constraints)을 사용하여 이전 endpoint 응답에서 값 가져오기
+        """
+        try:
+            # constraints 가져오기
+            if cnt >= len(self.inCon) or not self.inCon[cnt]:
+                print(f"[DATA_MAPPER] constraints 없음 (cnt={cnt})")
+                return request_data
+
+            constraints = self.inCon[cnt]
+
+            if not constraints or not isinstance(constraints, dict):
+                print(f"[DATA_MAPPER] constraints가 비어있거나 dict가 아님")
+                return request_data
+
+            print(f"[DATA_MAPPER] 요청 데이터 업데이트 시작 (API: {self.message[cnt]})")
+            print(f"[DATA_MAPPER] constraints: {list(constraints.keys())}")
+
+            # trace 파일에서 이전 응답 데이터 로드 (필요한 경우)
+            for path, rule in constraints.items():
+                ref_endpoint = rule.get("referenceEndpoint")
+                if ref_endpoint:
+                    # 슬래시 제거하여 키 생성
+                    ref_key = ref_endpoint.lstrip('/')
+
+                    # latest_events에 없으면 trace 파일에서 로드
+                    if ref_key not in self.latest_events or "RESPONSE" not in self.latest_events.get(ref_key, {}):
+                        print(f"[DATA_MAPPER] trace 파일에서 {ref_endpoint} RESPONSE 로드 시도")
+                        self._load_from_trace_file(ref_key, "RESPONSE")
+
+            # data mapper 적용
+            # request_data를 template로, constraints 적용하여 업데이트
+            # 빈 dict를 template로 사용하지 않고 request_data 자체를 업데이트
+            updated_request = self.generator._applied_constraints(
+                request_data={},  # 이전 요청 데이터는 필요 없음
+                template_data=request_data.copy(),  # 현재 요청 데이터를 템플릿으로
+                constraints=constraints,
+                n=3  # 기본 생성 개수
+            )
+
+            print(f"[DATA_MAPPER] 요청 데이터 업데이트 완료")
+            print(f"[DATA_MAPPER] 업데이트된 필드: {list(updated_request.keys())}")
+
+            return updated_request
+
+        except Exception as e:
+            print(f"[ERROR] _apply_request_constraints 실행 중 오류: {e}")
+            import traceback
+            traceback.print_exc()
+            return request_data
+
+    def _load_from_trace_file_OLD(self, api_name, direction="RESPONSE"):
+        try:
+            trace_file = Path("results/trace") / f"trace_{api_name.replace('/', '_')}.ndjson"
+
+            if not trace_file.exists():
+                return None  # 파일이 없으면 None 반환
 
             latest_data = None
 
@@ -622,7 +712,7 @@ class MyApp(QWidget):
             else:
                 print(f"[DEBUG] trace 파일에서 {api_name} {direction} 데이터 없음")
                 return None
-        
+
         except Exception as e:
             print(f"[ERROR] trace 파일 로드 중 오류: {e}")
             return None
@@ -636,6 +726,7 @@ class MyApp(QWidget):
                 self.valResult.append(str(obj))
         except Exception as e:
             self.valResult.append(f"[append_error] {e}")
+
     def handle_authentication_response(self, res_data):
         """Handles the response for the Authentication step, updates token if present."""
         # Fix: Use 'accessToken' key, not 'token'
@@ -644,20 +735,21 @@ class MyApp(QWidget):
             if token:
                 self.token = token
                 # print(f"[DEBUG] [handle_authentication_response] Token updated: {self.token}")
+
     def __init__(self, embedded=False, spec_id=None):
         importlib.reload(CONSTANTS)  # CONSTANTS 모듈을 다시 로드하여 최신 설정 반영
         super().__init__()
         self.embedded = embedded
-        
+
         # 전체화면 관련 변수 초기화
         self._is_fullscreen = False
         self._saved_geom = None
         self._saved_state = None
-        
+
         self.webhook_res = None
         self.res = None
         self.radio_check_flag = "video"  # 영상보안 시스템으로 고정
-        
+
         # ✅ spec_id 초기화 (info_GUI에서 전달받거나 기본값 사용)
         if spec_id:
             self.current_spec_id = spec_id
@@ -700,13 +792,17 @@ class MyApp(QWidget):
 
         self.trace = defaultdict(list)
 
+        # ✅ Data Mapper 초기화 - trace 기반 latest_events 사용
+        self.latest_events = {}  # API별 최신 이벤트 저장
+        self.generator = ConstraintDataGenerator(self.latest_events)
+
         self.initUI()
 
         self.get_setting()
         self.webhook_flag = False
         self.webhook_msg = "."
         self.webhook_cnt = 99
-        self.reference_context = {} # 맥락검증 참조 컨텍스트 
+        self.reference_context = {}  # 맥락검증 참조 컨텍스트
 
     def _redact(self, payload):  # ### NEW
         """응답/요청에서 토큰, 패스워드 등 민감값 마스킹(선택)"""
@@ -733,6 +829,11 @@ class MyApp(QWidget):
             }
             self.trace[step_idx].append(evt)
 
+            # ✅ latest_events 업데이트 (data mapper용)
+            if api not in self.latest_events:
+                self.latest_events[api] = {}
+            self.latest_events[api][direction] = evt
+
             # (옵션) 즉시 파일로도 남김 - append-only ndjson
             os.makedirs(CONSTANTS.trace_path, exist_ok=True)
             safe_api = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in str(api))
@@ -753,46 +854,48 @@ class MyApp(QWidget):
             if self.current_spec_id in group:
                 config = group[self.current_spec_id]
                 break
-        
+
         if not config:
             raise ValueError(f"spec_id '{self.current_spec_id}'에 대한 설정을 찾을 수 없습니다!")
             return
-        
+
         # ✅ 설정 정보 추출
         self.spec_description = config.get('test_name', 'Unknown Test')
         spec_names = config.get('specs', [])
-        
+
         # ✅ trans_protocol, time_out, num_retries 저장
         self.trans_protocols = config.get('trans_protocol', [])
         self.time_outs = config.get('time_out', [])
         self.num_retries_list = config.get('num_retries', [])
-        
+
         if len(spec_names) < 3:
             raise ValueError(f"spec_id '{self.current_spec_id}'의 specs 설정이 올바르지 않습니다! (최소 3개 필요)")
-        
+
         print(f"[SYSTEM] 📋 Spec 로딩 시작: {self.spec_description} (ID: {self.current_spec_id})")
-        
+
         # 시스템은 response schema / request data 사용
         print(f"[SYSTEM] 📁 모듈: spec (센서/바이오/영상 통합)")
         import spec.Data_request as data_request_module
         import spec.Schema_response as schema_response_module
-        
+        import spec.Constraints_request as constraints_request_module
+
         # ✅ 시스템은 응답 검증 + 요청 전송 (outSchema/inData 사용)
         print(f"[SYSTEM] 🔧 타입: 응답 검증 + 요청 전송")
         print(spec_names)
         # ✅ Response 검증용 스키마 로드 (시스템이 플랫폼으로부터 받을 응답 검증) - outSchema
         self.videoOutSchema = getattr(schema_response_module, spec_names[0], [])
-        
+
         # ✅ Request 전송용 데이터 로드 (시스템이 플랫폼에게 보낼 요청) - inData
         self.videoInMessage = getattr(data_request_module, spec_names[1], [])
         self.videoMessages = getattr(data_request_module, spec_names[2], [])
-        
+        self.videoInConstraint = getattr(constraints_request_module, self.current_spec_id + "_inConstraints", [])
+
         # ✅ Webhook 관련 (현재 미사용)
         self.videoWebhookSchema = []
         self.videoWebhookData = []
         self.videoWebhookInSchema = []
         self.videoWebhookInData = []
-        
+
         print(f"[SYSTEM] ✅ 로딩 완료: {len(self.videoMessages)}개 API")
         print(f"[SYSTEM] 📋 API 목록: {self.videoMessages}")
         print(f"[SYSTEM] 🔄 프로토콜 설정: {self.trans_protocols}")
@@ -843,7 +946,7 @@ class MyApp(QWidget):
         else:
             self.tableWidget.setItem(row, 6, QTableWidgetItem("0%"))
         self.tableWidget.item(row, 6).setTextAlignment(Qt.AlignCenter)
-        setattr(self, f"step{row+1}_msg", msg)
+        setattr(self, f"step{row + 1}_msg", msg)
 
     def load_test_info_from_constants(self):
         return [
@@ -858,36 +961,35 @@ class MyApp(QWidget):
             ("시험 접속 정보", CONSTANTS.url)
         ]
 
-    
     def create_spec_selection_panel(self, parent_layout):
         """시험 분야 선택 패널 생성"""
         # 시험 분야 패널
         panel_widget = QWidget()
         panel_layout = QVBoxLayout()
         panel_layout.setContentsMargins(10, 10, 10, 10)
-        
+
         # 시험 분야 확인 문구
         title = QLabel("시험 분야를 선택하세요.")
         title.setStyleSheet("font-size: 14px; font-weight: bold; padding: 10px;")
         panel_layout.addWidget(title)
-        
+
         # 시험 분야명 테이블
         field_group = self.create_test_field_group()
         panel_layout.addWidget(field_group)
-        
+
         panel_widget.setLayout(panel_layout)
         parent_layout.addWidget(panel_widget)
-        
+
         # 선택된 시험 분야 행
         self.selected_test_field_row = None
-    
+
     def create_test_field_group(self):
         """
         ✅ System은 Response 검증만 - Response 스키마 ID만 표시 (3개)
         """
         group_box = QGroupBox("시험 분야")  # ← 변수명 변경
         layout = QVBoxLayout()
-    
+
         self.test_field_table = QTableWidget(0, 1)
         self.test_field_table.setHorizontalHeaderLabels(["시험 분야명"])
         self.test_field_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
@@ -895,21 +997,21 @@ class MyApp(QWidget):
         self.test_field_table.cellClicked.connect(self.on_test_field_selected)
         self.test_field_table.verticalHeader().setVisible(False)
         self.test_field_table.setMaximumHeight(200)
-    
+
         # 🔥 SPEC_CONFIG에서 spec_id와 config 추출 (리스트 구조 대응)
         spec_items = []
         for group_data in CONSTANTS.SPEC_CONFIG:  # ← 변수명 변경
             for key, value in group_data.items():
                 if key not in ['group_name', 'group_id'] and isinstance(value, dict):
                     spec_items.append((key, value))  # ← 이미 (key, value) 튜플
-    
+
         if spec_items:  # ← 바로 사용
             self.test_field_table.setRowCount(len(spec_items))
-        
+
             # spec_id와 인덱스 매핑 저장
             self.spec_id_to_index = {}
             self.index_to_spec_id = {}
-        
+
             for idx, (spec_id, config) in enumerate(spec_items):
                 description = config.get('test_name', f'시험 분야 {idx + 1}')
                 # ✅ 시스템은 응답 검증 역할 명시
@@ -917,91 +1019,91 @@ class MyApp(QWidget):
                 item = QTableWidgetItem(description_with_role)
                 item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
                 self.test_field_table.setItem(idx, 0, item)
-            
+
                 # 매핑 저장
                 self.spec_id_to_index[spec_id] = idx
                 self.index_to_spec_id[idx] = spec_id
-        
+
             # 현재 로드된 spec_id 선택
             if self.current_spec_id in self.spec_id_to_index:
                 current_index = self.spec_id_to_index[self.current_spec_id]
                 self.test_field_table.selectRow(current_index)
                 self.selected_test_field_row = current_index
-    
+
         layout.addWidget(self.test_field_table)
         group_box.setLayout(layout)  # ← group_box 사용
         return group_box  # ← group_box 반환
-    
+
     def on_test_field_selected(self, row, col):
         """
         ✅ SPEC_CONFIG 기반 - 시험 분야 클릭 시 해당 시스템으로 동적 전환
         """
         try:
             self.selected_test_field_row = row
-            
+
             # ✅ 클릭한 행에 해당하는 spec_id 가져오기
             if row in self.index_to_spec_id:
                 new_spec_id = self.index_to_spec_id[row]
-                
+
                 # 이미 선택된 시스템이면 무시
                 if new_spec_id == self.current_spec_id:
                     return
-                
+
                 print(f"[SYSTEM] 🔄 시험 분야 전환: {self.current_spec_id} → {new_spec_id}")
-                
+
                 # spec_id 업데이트
                 self.current_spec_id = new_spec_id
-                
+
                 # spec 데이터 다시 로드
                 self.load_specs_from_constants()
-                
+
                 # 테이블 초기화
                 self.cnt = 0
                 self.current_retry = 0
                 self.total_pass_cnt = 0
                 self.total_error_cnt = 0
                 self.message_error = []
-                
+
                 # step_buffers 재생성
                 self.step_buffers = [
                     {"data": "", "error": "", "result": "PASS"} for _ in range(len(self.videoMessages))
                 ]
-                
+
                 # trace 초기화
                 self.trace.clear()
-                
+
                 # 시험 결과 테이블 업데이트
                 self.update_result_table_with_apis(self.videoMessages)
-                
+
                 # 설정 다시 로드
                 self.get_setting()
-                
+
                 # 평가 점수 디스플레이 초기화
                 self.update_score_display()
-                
+
                 # 결과 텍스트 초기화
                 self.valResult.clear()
                 self.valResult.append(f"✅ 시스템 전환 완료: {self.spec_description}")
                 self.valResult.append(f"📋 API 목록 ({len(self.videoMessages)}개): {self.videoMessages}\n")
-                
+
                 print(f"[SYSTEM] ✅ 시스템 전환 완료: {self.spec_description}, API 수: {len(self.videoMessages)}")
         except Exception as e:
             print(f"시험 분야 선택 처리 실패: {e}")
             import traceback
             traceback.print_exc()
-    
+
     def update_result_table_with_apis(self, api_list):
         """시험 결과 테이블을 새로운 API 목록으로 업데이트"""
         api_count = len(api_list)
         self.tableWidget.setRowCount(api_count)
-        
+
         # 각 행의 API 명 업데이트
         for row in range(api_count):
             # API 명
             api_item = QTableWidgetItem(api_list[row])
             api_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 0, api_item)
-            
+
             # 나머지 컬럼 초기화
             # 결과 아이콘 (검정색)
             icon_widget = QWidget()
@@ -1014,19 +1116,19 @@ class MyApp(QWidget):
             icon_layout.setAlignment(Qt.AlignCenter)
             icon_widget.setLayout(icon_layout)
             self.tableWidget.setCellWidget(row, 1, icon_widget)
-            
+
             # 검증 횟수, 통과 필드 수, 전체 필드 수, 실패 필드 수, 평가 점수
             for col in range(2, 7):
                 item = QTableWidgetItem("0" if col != 6 else "0%")
                 item.setTextAlignment(Qt.AlignCenter)
                 self.tableWidget.setItem(row, col, item)
-            
+
             # 상세 내용 버튼 (중앙 정렬을 위한 위젯 컨테이너)
             detail_btn = QPushButton("상세 내용 확인")
             detail_btn.setMaximumHeight(30)
             detail_btn.setMaximumWidth(130)
             detail_btn.clicked.connect(lambda checked, r=row: self.show_combined_result(r))
-            
+
             # 버튼을 중앙에 배치하기 위한 위젯과 레이아웃
             container = QWidget()
             layout = QHBoxLayout()
@@ -1034,9 +1136,9 @@ class MyApp(QWidget):
             layout.setAlignment(Qt.AlignCenter)
             layout.setContentsMargins(0, 0, 0, 0)
             container.setLayout(layout)
-            
+
             self.tableWidget.setCellWidget(row, 7, container)
-            
+
             # 행 높이 설정
             self.tableWidget.setRowHeight(row, 40)
 
@@ -1047,7 +1149,7 @@ class MyApp(QWidget):
         if self.r2 == "B":  # Bearer
             if self.token:
                 headers['Authorization'] = f"Bearer {self.token}"
-        elif self.r2 == "D":    # Digest
+        elif self.r2 == "D":  # Digest
             auth = HTTPDigestAuth(self.digestInfo[0], self.digestInfo[1])
         # self.r2 == "None"이면 그대로 None
 
@@ -1094,7 +1196,6 @@ class MyApp(QWidget):
             import traceback
             traceback.print_exc()
 
-
     def handle_webhook_result(self, result):
         self.webhook_flag = True
         self.webhook_res = result
@@ -1114,9 +1215,10 @@ class MyApp(QWidget):
         if not hasattr(self, '_webhook_debug_printed'):
             self._webhook_debug_printed = True
             print(f"\n[DEBUG] ========== 웹훅 이벤트 검증 디버깅 ==========")
-            print(f"[DEBUG] webhook_cnt={self.webhook_cnt}, API={self.message[self.webhook_cnt] if self.webhook_cnt < len(self.message) else 'N/A'}")
+            print(
+                f"[DEBUG] webhook_cnt={self.webhook_cnt}, API={self.message[self.webhook_cnt] if self.webhook_cnt < len(self.message) else 'N/A'}")
             print(f"[DEBUG] webhookSchema 총 개수={len(self.webhookSchema)}")
-            
+
             # (RealtimeVideoEventInfos 웹훅은 spec_002_webhookSchema[0])
             if len(self.webhookSchema) > 0:
                 schema_to_check = self.webhookSchema[0]  # 웹훅 스키마는 첫 번째 요소
@@ -1124,7 +1226,7 @@ class MyApp(QWidget):
                 if isinstance(schema_to_check, dict):
                     schema_keys = list(schema_to_check.keys())[:5]
                     print(f"[DEBUG] 웹훅 스키마 필드 (first 5): {schema_keys}")
-        
+
         # 실제 검증
         if len(self.webhookSchema) > 0:
             schema_to_check = self.webhookSchema[0]
@@ -1143,7 +1245,7 @@ class MyApp(QWidget):
             val_result, val_text, key_psss_cnt, key_error_cnt = "FAIL", "webhookSchema not found", 0, 0
             if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
                 print(f"[DEBUG] webhookSchema가 없습니다!")
-        
+
         if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
             print(f"[DEBUG] ==========================================\n")
 
@@ -1151,7 +1253,7 @@ class MyApp(QWidget):
         self.valResult.append("\n=== 웹훅 이벤트 데이터 ===")
         self.valResult.append(tmp_webhook_res)
         self.valResult.append(f"\n웹훅 검증 결과: {val_result}")
-        
+
         if val_result == "FAIL":
             self.valResult.append("\n⚠️  웹훅 데이터 검증 실패")
         else:
@@ -1185,7 +1287,7 @@ class MyApp(QWidget):
                 # 웹훅 결과를 기존 누적에 추가
                 self.step_pass_counts[self.webhook_cnt] += key_psss_cnt
                 self.step_error_counts[self.webhook_cnt] += key_error_cnt
-                
+
                 # 누적된 총 필드 수로 테이블 업데이트
                 accumulated_pass = self.step_pass_counts[self.webhook_cnt]
                 accumulated_error = self.step_error_counts[self.webhook_cnt]
@@ -1193,15 +1295,15 @@ class MyApp(QWidget):
                 # 누적 배열이 없으면 웹훅 결과만 사용
                 accumulated_pass = key_psss_cnt
                 accumulated_error = key_error_cnt
-            
+
             if self.webhook_cnt < len(self.num_retries_list):
                 current_retries = self.num_retries_list[self.webhook_cnt]
             else:
                 current_retries = 1
-            
+
             # 누적된 필드 수로 테이블 업데이트
             self.update_table_row_with_retries(self.webhook_cnt, val_result, accumulated_pass, accumulated_error,
-                                tmp_webhook_res, self._to_detail_text(val_text), current_retries)
+                                               tmp_webhook_res, self._to_detail_text(val_text), current_retries)
 
         # step_buffers 업데이트 추가 (실시간 모니터링과 상세보기 일치)
         if self.webhook_cnt < len(self.step_buffers):
@@ -1222,7 +1324,6 @@ class MyApp(QWidget):
 
         self.webhook_res = None  # init
         self.webhook_flag = False
-
 
     def update_view(self):
 
@@ -1245,14 +1346,15 @@ class MyApp(QWidget):
 
             # 웹훅 이벤트 수신 확인 - webhook_thread.wait()이 이미 동기화 처리하므로 별도 sleep 불필요
             if self.webhook_flag is True:
-                print(f"[TIMING_DEBUG] 웹훅 이벤트 수신 완료 (API: {self.message[self.cnt] if self.cnt < len(self.message) else 'N/A'})")
+                print(
+                    f"[TIMING_DEBUG] 웹훅 이벤트 수신 완료 (API: {self.message[self.cnt] if self.cnt < len(self.message) else 'N/A'})")
                 print(f"[TIMING_DEBUG] ✅ 웹훅 스레드의 wait()이 동기화 처리 완료 (수동 sleep 제거됨)")
 
             if (self.post_flag is False and
-                self.processing_response is False and
-                self.cnt < len(self.message) and
-                self.cnt < len(self.num_retries_list) and
-                self.current_retry < self.num_retries_list[self.cnt]):
+                    self.processing_response is False and
+                    self.cnt < len(self.message) and
+                    self.cnt < len(self.num_retries_list) and
+                    self.current_retry < self.num_retries_list[self.cnt]):
 
                 self.message_in_cnt += 1
                 self.time_pre = time.time()
@@ -1272,6 +1374,9 @@ class MyApp(QWidget):
                 current_timeout = self.time_outs[self.cnt] / 1000 if self.cnt < len(self.time_outs) else 5.0
                 path = self.pathUrl + "/" + (self.message[self.cnt] if self.cnt < len(self.message) else "")
                 inMessage = self.inMessage[self.cnt] if self.cnt < len(self.inMessage) else {}
+                # ✅ Data Mapper 적용 - 이전 응답 데이터로 요청 업데이트
+                inMessage = self._apply_request_constraints(inMessage, self.cnt)
+
                 json_data = json.dumps(inMessage).encode('utf-8')
 
                 self._push_event(self.cnt, "REQUEST", inMessage)
@@ -1281,15 +1386,17 @@ class MyApp(QWidget):
                     self.reference_context[f"/{api_name}"] = inMessage
 
                 # 순서 확인용 로그
-                print(f"[SYSTEM] 플랫폼에 요청 전송: {(self.message[self.cnt] if self.cnt < len(self.message) else 'index out of range')} (시도 {self.current_retry + 1})")
+                print(
+                    f"[SYSTEM] 플랫폼에 요청 전송: {(self.message[self.cnt] if self.cnt < len(self.message) else 'index out of range')} (시도 {self.current_retry + 1})")
 
                 t = threading.Thread(target=self.post, args=(path, json_data, current_timeout), daemon=True)
                 t.start()
                 self.post_flag = True
 
             # timeout 조건은 응답 대기/재시도 판단에만 사용
-            elif self.cnt < len(self.time_outs) and time_interval >= self.time_outs[self.cnt] / 1000 and self.post_flag is True:
-                
+            elif self.cnt < len(self.time_outs) and time_interval >= self.time_outs[
+                self.cnt] / 1000 and self.post_flag is True:
+
                 if self.cnt < len(self.message):
                     self.message_error.append([self.message[self.cnt]])
                 else:
@@ -1327,7 +1434,7 @@ class MyApp(QWidget):
 
                 # 재시도 완료 여부 확인
                 if (self.cnt < len(self.num_retries_list) and
-                    self.current_retry >= self.num_retries_list[self.cnt]):
+                        self.current_retry >= self.num_retries_list[self.cnt]):
                     # 모든 재시도 완료 - 버퍼에 최종 결과 저장
                     self.step_buffers[self.cnt]["data"] = "타임아웃으로 인해 수신된 데이터가 없습니다."
                     current_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
@@ -1336,7 +1443,8 @@ class MyApp(QWidget):
                     self.step_buffers[self.cnt]["events"] = list(self.trace.get(self.cnt, []))
 
                     # 테이블 업데이트 (Message Missing)
-                    self.update_table_row_with_retries(self.cnt, "FAIL", 0, add_err, "", "Message Missing!", current_retries)
+                    self.update_table_row_with_retries(self.cnt, "FAIL", 0, add_err, "", "Message Missing!",
+                                                       current_retries)
 
                     # 다음 API로 이동
                     self.cnt += 1
@@ -1353,7 +1461,7 @@ class MyApp(QWidget):
                 self.processing_response = False
 
                 # 플랫폼과 동일한 대기 시간 설정
-                self.time_pre = time.time() 
+                self.time_pre = time.time()
 
                 if self.cnt >= len(self.message):
                     self.tick_timer.stop()
@@ -1377,260 +1485,266 @@ class MyApp(QWidget):
 
             # 응답이 도착한 경우 처리
             elif self.post_flag == True:
-                    if self.res != None:
-                        # 응답 처리 시작
-                        self.processing_response = True
+                if self.res != None:
+                    # 응답 처리 시작
+                    self.processing_response = True
 
-                        if self.cnt == 0 or self.tmp_msg_append_flag:  # and -> or 수정함- 240710
-                            self.valResult.append(self.message_name)
+                    if self.cnt == 0 or self.tmp_msg_append_flag:  # and -> or 수정함- 240710
+                        self.valResult.append(self.message_name)
 
-                        res_data = self.res.text
-                        #res_data = json.loads(res_data)
+                    res_data = self.res.text
+                    # res_data = json.loads(res_data)
 
-                        print(f"~+~+~+~+ 원본 응답 텍스트: {repr(res_data)}~+~+~+~+")
+                    print(f"~+~+~+~+ 원본 응답 텍스트: {repr(res_data)}~+~+~+~+")
 
-                        try:
-                            res_data = json.loads(res_data)
-                        except Exception as e:
-                            self._append_text(f"응답 JSON 파싱 오류: {e}")
-                            self._append_text({"raw_response": self.res.text})
-                            # 이후 로직 건너뜀
-                            self.post_flag = False
-                            self.processing_response = False
-                            self.current_retry += 1
-                            return
-
-                        self._push_event(self.cnt, "RESPONSE", res_data)
-
-                        # 현재 재시도 정보
-                        current_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
-                        current_protocol = self.trans_protocols[self.cnt] if self.cnt < len(self.trans_protocols) else "Unknown"
-
-                        # 단일 응답에 대한 검증 처리
-                        tmp_res_auth = json.dumps(res_data, indent=4, ensure_ascii=False)
-
-                        # ✅ 디버깅: 어떤 스키마로 검증하는지 확인
-                        if self.current_retry == 0:  # 첫 시도에만 출력
-                            print(f"\n[DEBUG] ========== 스키마 검증 디버깅 ==========")
-                            print(f"[DEBUG] cnt={self.cnt}, API={self.message[self.cnt] if self.cnt < len(self.message) else 'N/A'}")
-                            print(f"[DEBUG] webhook_flag={self.webhook_flag}")
-                            print(f"[DEBUG] current_protocol={current_protocol}")
-                            print(f"[DEBUG] outSchema 총 개수={len(self.outSchema)}")
-                            
-                            # ✅ 웹훅 API의 구독 응답은 일반 스키마 사용
-                            # webhook_flag는 실제 웹훅 이벤트 수신 시에만 True
-                            # 구독 응답은 항상 outSchema[self.cnt] 사용
-                            schema_index = self.cnt
-                            print(f"[DEBUG] 사용 스키마: outSchema[{schema_index}]")
-                            
-                            # 스키마 필드 확인
-                            if self.cnt < len(self.outSchema):
-                                schema_to_use = self.outSchema[self.cnt]
-                                if isinstance(schema_to_use, dict):
-                                    schema_keys = list(schema_to_use.keys())[:5]
-                                    print(f"[DEBUG] 스키마 필드 (first 5): {schema_keys}")
-                        
-                        # val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.outSchema[self.cnt], res_data, self.flag_opt)
-                        resp_rules = {}
-                        try:
-                            resp_rules = get_validation_rules(
-                                spec_id=self.current_spec_id,
-                                api_name=self.message[self.cnt] if self.cnt < len(self.message) else "",
-
-                                direction="out" #응답 검증
-
-                            ) or {}
-                        except Exception as e:
-                            resp_rules = {}
-                            print(f"[ERROR] 응답 검증 규칙 로드 실패: {e}")
-                        
-                        try:
-                            val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(
-                                self.outSchema[self.cnt],
-                                res_data,
-                                self.flag_opt,
-                                validation_rules=resp_rules,
-                                reference_context=self.reference_context
-                                )
-
-                        # 일반 검증으로 돌렸을때 - 맥락 검증 실패해서
-                        except TypeError as te:
-                            print(f"[ERROR] 응답 검증 중 TypeError 발생: {te}, 일반 검증으로 재시도")
-
-                            val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(
-                                self.outSchema[self.cnt],
-                                res_data,
-                                self.flag_opt
-                            )
-
-                        if self.message[self.cnt] == "Authentication":
-                            self.handle_authentication_response(res_data)
-                        
-                        if self.current_retry == 0:  # 첫 시도에만 출력
-                            print(f"[DEBUG] 검증 결과: {val_result}, pass={key_psss_cnt}, error={key_error_cnt}")
-                            print(f"[DEBUG] ==========================================\n")
-
-                        # ✅ 의미 검증: 응답 코드가 성공인지 확인
-                        if isinstance(res_data, dict):
-                            response_code = str(res_data.get("code", "")).strip()
-                            response_message = res_data.get("message", "")
-                            
-                            # 성공 코드가 아니면 FAIL 처리
-                            if response_code not in ["200", "201"]:
-                                # print(f"[SYSTEM] 응답 코드 검증 실패: code={response_code}, message={response_message}")
-                                val_result = "FAIL"
-                                
-                                # 기존 오류 메시지에 응답 코드 오류 추가
-                                code_error_msg = f"응답 실패: code={response_code}, message={response_message}"
-                                if isinstance(val_text, str):
-                                    val_text = code_error_msg if val_text == "오류가 없습니다." else f"{code_error_msg}\n\n{val_text}"
-                                elif isinstance(val_text, list):
-                                    val_text.insert(0, code_error_msg)
-                                else:
-                                    val_text = code_error_msg
-                                
-                                # 응답 실패는 오류로 카운트 (스키마는 맞지만 의미상 실패)
-                                key_error_cnt += 1
-
-                        # 이번 시도의 결과
-                        final_result = val_result
-
-                        # 플랫폼과 동일한 누적 카운트 로직 - (10/20) 하드코딩 흔적 지움
-                        if not hasattr(self, 'step_pass_counts'):
-                            api_count = len(self.videoMessages)
-                            self.step_pass_counts = [0] * api_count
-                            self.step_error_counts = [0] * api_count
-                            self.step_pass_flags = [0] * api_count  # PASS 횟수 카운트
-
-                        # 이번 시도 결과를 누적
-                        self.step_pass_counts[self.cnt] += key_psss_cnt
-                        self.step_error_counts[self.cnt] += key_error_cnt
-
-                        if final_result == "PASS":
-                            self.step_pass_flags[self.cnt] += 1
-
-                        total_pass_count = self.step_pass_counts[self.cnt]
-                        total_error_count = self.step_error_counts[self.cnt]
-
-                        # (1) 스텝 버퍼 저장 - 재시도별로 누적
-                        # ✅ 시스템은 플랫폼이 보내는 데이터를 표시해야 함
-                        if isinstance(res_data, (dict, list)):
-                            platform_data = res_data
-                        else:
-                            # 혹시 dict/list가 아니면 raw 텍스트를 감싸서 기록
-                            platform_data = {"raw_response": self.res.text}
-
-                        data_text = json.dumps(platform_data, indent=4, ensure_ascii=False)
-                        
-                        # ✅ PASS인 경우 오류 텍스트 무시 (val_text에 불필요한 정보가 있을 수 있음)
-                        if val_result == "FAIL":
-                            error_text = self._to_detail_text(val_text)
-                        else:
-                            error_text = "오류가 없습니다."
-
-                        # 기존 버퍼에 누적 (재시도 정보와 함께)
-                        if self.current_retry == 0:
-                            # 첫 번째 시도인 경우 초기화
-                            self.step_buffers[self.cnt]["data"] = f"[시도 {self.current_retry + 1}/{current_retries}]\n{data_text}"
-                            self.step_buffers[self.cnt]["error"] = f"[시도 {self.current_retry + 1}/{current_retries}]\n{error_text}"
-                            self.step_buffers[self.cnt]["result"] = val_result  # 첫 시도 결과로 초기화
-                        else:
-                            # 재시도인 경우 누적
-                            self.step_buffers[self.cnt]["data"] += f"\n\n[시도 {self.current_retry + 1}/{current_retries}]\n{data_text}"
-                            self.step_buffers[self.cnt]["error"] += f"\n\n[시도 {self.current_retry + 1}/{current_retries}]\n{error_text}"
-                            self.step_buffers[self.cnt]["result"] = val_result  # 마지막 시도 결과로 항상 갱신
-                        # 최종 결과 판정 (플랫폼과 동일한 로직)
-                        if self.current_retry + 1 >= current_retries:
-                            # 모든 재시도 완료 - 모든 시도가 PASS일 때만 PASS
-                            if self.step_pass_flags[self.cnt] >= current_retries:
-                                self.step_buffers[self.cnt]["result"] = "PASS"
-                            else:
-                                self.step_buffers[self.cnt]["result"] = "FAIL"
-                            # 마지막 시도 결과의 오류 텍스트로 덮어쓰기 (실패 시)
-                            if self.step_buffers[self.cnt]["result"] == "FAIL":
-                                self.step_buffers[self.cnt]["error"] = f"[시도 {self.current_retry + 1}/{current_retries}]\n{error_text}"
-
-                        # 진행 중 표시 (플랫폼과 동일하게)
-                        message_name = "step " + str(self.cnt + 1) + ": " + self.message[self.cnt]
-                        # 각 시도별로 pass/error count는 누적이 아니라 이번 시도만 반영해야 함
-                        # key_psss_cnt, key_error_cnt는 이번 시도에 대한 값임
-                        if self.current_retry + 1 < current_retries:
-                            # 아직 재시도가 남아있으면 진행중으로 표시 (누적 카운트 표시)
-                            self.update_table_row_with_retries(
-                                self.cnt, "진행중", total_pass_count, total_error_count,
-                                f"검증 진행중... ({self.current_retry + 1}/{current_retries})",
-                                f"시도 {self.current_retry + 1}/{current_retries}", self.current_retry + 1)
-                        else:
-                            # ✅ 마지막 시도이면 최종 결과 표시 (누적된 필드 수 사용!)
-                            final_buffer_result = self.step_buffers[self.cnt]["result"]
-                            self.update_table_row_with_retries(
-                                self.cnt, final_buffer_result, total_pass_count, total_error_count,
-                                tmp_res_auth, error_text, current_retries)
-
-                        # UI 즉시 업데이트 (화면에 반영)
-                        QApplication.processEvents()
-
-                        # ✅ 웹훅 API인 경우 명확하게 구분 표시 (transProtocol 기반으로만 판단)
-                        if current_protocol == "WebHook":
-                            self.valResult.append(f"\n=== 웹훅 구독 요청 응답 ===")
-                            self.valResult.append(f"[시도 {self.current_retry + 1}/{current_retries}]")
-                        else:
-                            self.valResult.append(f"\n검증 진행: {self.current_retry + 1}/{current_retries}회")
-                        
-                        self.valResult.append(f"프로토콜: {current_protocol}")
-                        self.valResult.append("\n" + data_text)
-                        self.valResult.append(f"\n검증 결과: {final_result}")
-                        
-                        # ✅ 응답 코드 실패 시 명확한 메시지
-                        if final_result == "FAIL" and isinstance(res_data, dict):
-                            response_code = str(res_data.get("code", "")).strip()
-                            if response_code not in ["200", "201"]:
-                                self.valResult.append(f"⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.")
-
-                        # ✅ 이번 회차의 결과만 전체 점수에 추가 (누적된 값이 아님!)
-                        self.total_error_cnt += key_error_cnt
-                        self.total_pass_cnt += key_psss_cnt
-
-                        # 평가 점수 디스플레이 업데이트
-                        self.update_score_display()
-
-                        total_fields = self.total_pass_cnt + self.total_error_cnt
-                        if total_fields > 0:
-                            score = (self.total_pass_cnt / total_fields) * 100
-                        else:
-                            score = 0
-                        self.valResult.append("Score : " + str(score))
-                        self.valResult.append(
-                            "Score details : " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(
-                                self.total_error_cnt) + "(누적 오류 필드 수)\n")
-
-                        # 재시도 카운터 증가
-                        self.current_retry += 1
-
-                        # 현재 API의 모든 재시도가 완료되었는지 확인
-                        if (self.cnt < len(self.num_retries_list) and
-                            self.current_retry >= self.num_retries_list[self.cnt]):
-
-                            self.step_buffers[self.cnt]["events"] = list(self.trace.get(self.cnt, []))
-
-                            # 다음 API로 이동
-                            self.cnt += 1
-                            self.current_retry = 0  # 재시도 카운터 리셋
-
-                        self.message_in_cnt = 0
+                    try:
+                        res_data = json.loads(res_data)
+                    except Exception as e:
+                        self._append_text(f"응답 JSON 파싱 오류: {e}")
+                        self._append_text({"raw_response": self.res.text})
+                        # 이후 로직 건너뜀
                         self.post_flag = False
                         self.processing_response = False
+                        self.current_retry += 1
+                        return
 
-                        # 재시도 여부에 따라 대기 시간 조정 (플랫폼과 동기화)
-                        if (self.cnt < len(self.num_retries_list) and
-                            self.current_retry < self.num_retries_list[self.cnt] - 1):
-                            self.time_pre = time.time()
+                    self._push_event(self.cnt, "RESPONSE", res_data)
+
+                    # 현재 재시도 정보
+                    current_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
+                    current_protocol = self.trans_protocols[self.cnt] if self.cnt < len(
+                        self.trans_protocols) else "Unknown"
+
+                    # 단일 응답에 대한 검증 처리
+                    tmp_res_auth = json.dumps(res_data, indent=4, ensure_ascii=False)
+
+                    # ✅ 디버깅: 어떤 스키마로 검증하는지 확인
+                    if self.current_retry == 0:  # 첫 시도에만 출력
+                        print(f"\n[DEBUG] ========== 스키마 검증 디버깅 ==========")
+                        print(
+                            f"[DEBUG] cnt={self.cnt}, API={self.message[self.cnt] if self.cnt < len(self.message) else 'N/A'}")
+                        print(f"[DEBUG] webhook_flag={self.webhook_flag}")
+                        print(f"[DEBUG] current_protocol={current_protocol}")
+                        print(f"[DEBUG] outSchema 총 개수={len(self.outSchema)}")
+
+                        # ✅ 웹훅 API의 구독 응답은 일반 스키마 사용
+                        # webhook_flag는 실제 웹훅 이벤트 수신 시에만 True
+                        # 구독 응답은 항상 outSchema[self.cnt] 사용
+                        schema_index = self.cnt
+                        print(f"[DEBUG] 사용 스키마: outSchema[{schema_index}]")
+
+                        # 스키마 필드 확인
+                        if self.cnt < len(self.outSchema):
+                            schema_to_use = self.outSchema[self.cnt]
+                            if isinstance(schema_to_use, dict):
+                                schema_keys = list(schema_to_use.keys())[:5]
+                                print(f"[DEBUG] 스키마 필드 (first 5): {schema_keys}")
+
+                    # val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.outSchema[self.cnt], res_data, self.flag_opt)
+                    resp_rules = {}
+                    try:
+                        resp_rules = get_validation_rules(
+                            spec_id=self.current_spec_id,
+                            api_name=self.message[self.cnt] if self.cnt < len(self.message) else "",
+
+                            direction="out"  # 응답 검증
+
+                        ) or {}
+                    except Exception as e:
+                        resp_rules = {}
+                        print(f"[ERROR] 응답 검증 규칙 로드 실패: {e}")
+
+                    try:
+                        val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(
+                            self.outSchema[self.cnt],
+                            res_data,
+                            self.flag_opt,
+                            validation_rules=resp_rules,
+                            reference_context=self.reference_context
+                        )
+
+                    # 일반 검증으로 돌렸을때 - 맥락 검증 실패해서
+                    except TypeError as te:
+                        print(f"[ERROR] 응답 검증 중 TypeError 발생: {te}, 일반 검증으로 재시도")
+
+                        val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(
+                            self.outSchema[self.cnt],
+                            res_data,
+                            self.flag_opt
+                        )
+
+                    if self.message[self.cnt] == "Authentication":
+                        self.handle_authentication_response(res_data)
+
+                    if self.current_retry == 0:  # 첫 시도에만 출력
+                        print(f"[DEBUG] 검증 결과: {val_result}, pass={key_psss_cnt}, error={key_error_cnt}")
+                        print(f"[DEBUG] ==========================================\n")
+
+                    # ✅ 의미 검증: 응답 코드가 성공인지 확인
+                    if isinstance(res_data, dict):
+                        response_code = str(res_data.get("code", "")).strip()
+                        response_message = res_data.get("message", "")
+
+                        # 성공 코드가 아니면 FAIL 처리
+                        if response_code not in ["200", "201"]:
+                            # print(f"[SYSTEM] 응답 코드 검증 실패: code={response_code}, message={response_message}")
+                            val_result = "FAIL"
+
+                            # 기존 오류 메시지에 응답 코드 오류 추가
+                            code_error_msg = f"응답 실패: code={response_code}, message={response_message}"
+                            if isinstance(val_text, str):
+                                val_text = code_error_msg if val_text == "오류가 없습니다." else f"{code_error_msg}\n\n{val_text}"
+                            elif isinstance(val_text, list):
+                                val_text.insert(0, code_error_msg)
+                            else:
+                                val_text = code_error_msg
+
+                            # 응답 실패는 오류로 카운트 (스키마는 맞지만 의미상 실패)
+                            key_error_cnt += 1
+
+                    # 이번 시도의 결과
+                    final_result = val_result
+
+                    # 플랫폼과 동일한 누적 카운트 로직 - (10/20) 하드코딩 흔적 지움
+                    if not hasattr(self, 'step_pass_counts'):
+                        api_count = len(self.videoMessages)
+                        self.step_pass_counts = [0] * api_count
+                        self.step_error_counts = [0] * api_count
+                        self.step_pass_flags = [0] * api_count  # PASS 횟수 카운트
+
+                    # 이번 시도 결과를 누적
+                    self.step_pass_counts[self.cnt] += key_psss_cnt
+                    self.step_error_counts[self.cnt] += key_error_cnt
+
+                    if final_result == "PASS":
+                        self.step_pass_flags[self.cnt] += 1
+
+                    total_pass_count = self.step_pass_counts[self.cnt]
+                    total_error_count = self.step_error_counts[self.cnt]
+
+                    # (1) 스텝 버퍼 저장 - 재시도별로 누적
+                    # ✅ 시스템은 플랫폼이 보내는 데이터를 표시해야 함
+                    if isinstance(res_data, (dict, list)):
+                        platform_data = res_data
+                    else:
+                        # 혹시 dict/list가 아니면 raw 텍스트를 감싸서 기록
+                        platform_data = {"raw_response": self.res.text}
+
+                    data_text = json.dumps(platform_data, indent=4, ensure_ascii=False)
+
+                    # ✅ PASS인 경우 오류 텍스트 무시 (val_text에 불필요한 정보가 있을 수 있음)
+                    if val_result == "FAIL":
+                        error_text = self._to_detail_text(val_text)
+                    else:
+                        error_text = "오류가 없습니다."
+
+                    # 기존 버퍼에 누적 (재시도 정보와 함께)
+                    if self.current_retry == 0:
+                        # 첫 번째 시도인 경우 초기화
+                        self.step_buffers[self.cnt][
+                            "data"] = f"[시도 {self.current_retry + 1}/{current_retries}]\n{data_text}"
+                        self.step_buffers[self.cnt][
+                            "error"] = f"[시도 {self.current_retry + 1}/{current_retries}]\n{error_text}"
+                        self.step_buffers[self.cnt]["result"] = val_result  # 첫 시도 결과로 초기화
+                    else:
+                        # 재시도인 경우 누적
+                        self.step_buffers[self.cnt][
+                            "data"] += f"\n\n[시도 {self.current_retry + 1}/{current_retries}]\n{data_text}"
+                        self.step_buffers[self.cnt][
+                            "error"] += f"\n\n[시도 {self.current_retry + 1}/{current_retries}]\n{error_text}"
+                        self.step_buffers[self.cnt]["result"] = val_result  # 마지막 시도 결과로 항상 갱신
+                    # 최종 결과 판정 (플랫폼과 동일한 로직)
+                    if self.current_retry + 1 >= current_retries:
+                        # 모든 재시도 완료 - 모든 시도가 PASS일 때만 PASS
+                        if self.step_pass_flags[self.cnt] >= current_retries:
+                            self.step_buffers[self.cnt]["result"] = "PASS"
                         else:
-                            self.time_pre = time.time()
-                        self.message_in_cnt = 0
+                            self.step_buffers[self.cnt]["result"] = "FAIL"
+                        # 마지막 시도 결과의 오류 텍스트로 덮어쓰기 (실패 시)
+                        if self.step_buffers[self.cnt]["result"] == "FAIL":
+                            self.step_buffers[self.cnt][
+                                "error"] = f"[시도 {self.current_retry + 1}/{current_retries}]\n{error_text}"
 
-                        if self.webhook_flag and self.webhook_res is not None:
-                            self.get_webhook_result()
+                    # 진행 중 표시 (플랫폼과 동일하게)
+                    message_name = "step " + str(self.cnt + 1) + ": " + self.message[self.cnt]
+                    # 각 시도별로 pass/error count는 누적이 아니라 이번 시도만 반영해야 함
+                    # key_psss_cnt, key_error_cnt는 이번 시도에 대한 값임
+                    if self.current_retry + 1 < current_retries:
+                        # 아직 재시도가 남아있으면 진행중으로 표시 (누적 카운트 표시)
+                        self.update_table_row_with_retries(
+                            self.cnt, "진행중", total_pass_count, total_error_count,
+                            f"검증 진행중... ({self.current_retry + 1}/{current_retries})",
+                            f"시도 {self.current_retry + 1}/{current_retries}", self.current_retry + 1)
+                    else:
+                        # ✅ 마지막 시도이면 최종 결과 표시 (누적된 필드 수 사용!)
+                        final_buffer_result = self.step_buffers[self.cnt]["result"]
+                        self.update_table_row_with_retries(
+                            self.cnt, final_buffer_result, total_pass_count, total_error_count,
+                            tmp_res_auth, error_text, current_retries)
+
+                    # UI 즉시 업데이트 (화면에 반영)
+                    QApplication.processEvents()
+
+                    # ✅ 웹훅 API인 경우 명확하게 구분 표시 (transProtocol 기반으로만 판단)
+                    if current_protocol == "WebHook":
+                        self.valResult.append(f"\n=== 웹훅 구독 요청 응답 ===")
+                        self.valResult.append(f"[시도 {self.current_retry + 1}/{current_retries}]")
+                    else:
+                        self.valResult.append(f"\n검증 진행: {self.current_retry + 1}/{current_retries}회")
+
+                    self.valResult.append(f"프로토콜: {current_protocol}")
+                    self.valResult.append("\n" + data_text)
+                    self.valResult.append(f"\n검증 결과: {final_result}")
+
+                    # ✅ 응답 코드 실패 시 명확한 메시지
+                    if final_result == "FAIL" and isinstance(res_data, dict):
+                        response_code = str(res_data.get("code", "")).strip()
+                        if response_code not in ["200", "201"]:
+                            self.valResult.append(f"⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.")
+
+                    # ✅ 이번 회차의 결과만 전체 점수에 추가 (누적된 값이 아님!)
+                    self.total_error_cnt += key_error_cnt
+                    self.total_pass_cnt += key_psss_cnt
+
+                    # 평가 점수 디스플레이 업데이트
+                    self.update_score_display()
+
+                    total_fields = self.total_pass_cnt + self.total_error_cnt
+                    if total_fields > 0:
+                        score = (self.total_pass_cnt / total_fields) * 100
+                    else:
+                        score = 0
+                    self.valResult.append("Score : " + str(score))
+                    self.valResult.append(
+                        "Score details : " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(
+                            self.total_error_cnt) + "(누적 오류 필드 수)\n")
+
+                    # 재시도 카운터 증가
+                    self.current_retry += 1
+
+                    # 현재 API의 모든 재시도가 완료되었는지 확인
+                    if (self.cnt < len(self.num_retries_list) and
+                            self.current_retry >= self.num_retries_list[self.cnt]):
+                        self.step_buffers[self.cnt]["events"] = list(self.trace.get(self.cnt, []))
+
+                        # 다음 API로 이동
+                        self.cnt += 1
+                        self.current_retry = 0  # 재시도 카운터 리셋
+
+                    self.message_in_cnt = 0
+                    self.post_flag = False
+                    self.processing_response = False
+
+                    # 재시도 여부에 따라 대기 시간 조정 (플랫폼과 동기화)
+                    if (self.cnt < len(self.num_retries_list) and
+                            self.current_retry < self.num_retries_list[self.cnt] - 1):
+                        self.time_pre = time.time()
+                    else:
+                        self.time_pre = time.time()
+                    self.message_in_cnt = 0
+
+                    if self.webhook_flag and self.webhook_res is not None:
+                        self.get_webhook_result()
 
             if self.cnt >= len(self.message):
                 self.tick_timer.stop()
@@ -1641,8 +1755,10 @@ class MyApp(QWidget):
 
                 self.cnt = 0
                 self.current_retry = 0  # 재시도 카운터도 리셋
-                self.final_report += "전체 점수: "+  str((self.total_pass_cnt/(self.total_pass_cnt+self.total_error_cnt)*100))+"\n"
-                self.final_report += "전체 결과: "+ str(self.total_pass_cnt)+"(누적 통과 필드 수), "+str(self.total_error_cnt)+"(누적 오류 필드 수)"+"\n"
+                self.final_report += "전체 점수: " + str(
+                    (self.total_pass_cnt / (self.total_pass_cnt + self.total_error_cnt) * 100)) + "\n"
+                self.final_report += "전체 결과: " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(
+                    self.total_error_cnt) + "(누적 오류 필드 수)" + "\n"
                 self.final_report += "\n"
                 self.final_report += "메시지 검증 세부 결과 \n"
                 self.final_report += self.valResult.toPlainText()
@@ -1658,11 +1774,11 @@ class MyApp(QWidget):
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Critical)
             msg.setText("Error Message: 오류 확인 후 검증 절차를 다시 시작해주세요")
-            msg.setInformativeText(f"Error at step {self.cnt+1}: {str(err)}")
+            msg.setInformativeText(f"Error at step {self.cnt + 1}: {str(err)}")
             msg.setWindowTitle("Error")
             msg.exec_()
             self.tick_timer.stop()
-            self.valResult.append(f"검증 절차가 중지되었습니다. (오류 위치: Step {self.cnt+1})")
+            self.valResult.append(f"검증 절차가 중지되었습니다. (오류 위치: Step {self.cnt + 1})")
             self.sbtn.setEnabled(True)
             self.stop_btn.setDisabled(True)
 
@@ -1717,13 +1833,12 @@ class MyApp(QWidget):
             elif self.cnt == 8:
                 self.step9_msg += msg
 
-
     def initUI(self):
         # 창 크기 설정 (main.py와 동일)
         if not self.embedded:
             self.resize(1200, 720)
             self.setWindowTitle('시스템 연동 검증')
-        
+
         # 1열(세로) 레이아웃으로 통합
         mainLayout = QVBoxLayout()
 
@@ -1764,7 +1879,7 @@ class MyApp(QWidget):
         # 평가 점수 표시 (메인 화면에 추가)
         spec_score_group = self.create_spec_score_display_widget()
         mainLayout.addWidget(spec_score_group)
-        
+
         # 전체 점수 표시
         total_score_group = self.create_total_score_display_widget()
         mainLayout.addWidget(total_score_group)
@@ -1890,7 +2005,7 @@ class MyApp(QWidget):
         buttonLayout.addWidget(self.rbtn)
         buttonLayout.addSpacing(20)
         buttonLayout.addWidget(self.result_btn)
-        
+
         buttonGroup.setLayout(buttonLayout)
 
         mainLayout.addSpacing(20)
@@ -1898,7 +2013,7 @@ class MyApp(QWidget):
         mainLayout.addStretch()
 
         self.setLayout(mainLayout)
-        
+
         # 창 제목 설정 (embedded가 아닐 때만)
         if not self.embedded:
             self.setWindowTitle('물리보안 시스템 연동 검증 소프트웨어')
@@ -1914,7 +2029,8 @@ class MyApp(QWidget):
         # 표 형태로 변경 - 동적 API 개수
         api_count = len(self.videoMessages)
         self.tableWidget = QTableWidget(api_count, 8)
-        self.tableWidget.setHorizontalHeaderLabels(["API 명", "결과", "검증 횟수", "통과 필드 수", "전체 필드 수", "실패 필드 수", "평가 점수", "상세 내용"])
+        self.tableWidget.setHorizontalHeaderLabels(
+            ["API 명", "결과", "검증 횟수", "통과 필드 수", "전체 필드 수", "실패 필드 수", "평가 점수", "상세 내용"])
         self.tableWidget.verticalHeader().setVisible(False)
         self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tableWidget.setSelectionMode(QAbstractItemView.NoSelection)
@@ -1942,7 +2058,7 @@ class MyApp(QWidget):
         self.step_names = self.videoMessages
         for i, name in enumerate(self.step_names):
             # API 명
-            self.tableWidget.setItem(i, 0, QTableWidgetItem(f"{i+1}. {name}"))
+            self.tableWidget.setItem(i, 0, QTableWidgetItem(f"{i + 1}. {name}"))
             # 결과 아이콘 (위젯으로 중앙 정렬)
             icon_widget = QWidget()
             icon_layout = QHBoxLayout()
@@ -2066,9 +2182,10 @@ class MyApp(QWidget):
     def update_score_display(self):
         """평가 점수 디스플레이 업데이트"""
         # 메인 화면의 평가 점수 레이블 업데이트
-        if not (hasattr(self, "spec_pass_label") and hasattr(self, "spec_total_label") and hasattr(self, "spec_score_label")):
+        if not (hasattr(self, "spec_pass_label") and hasattr(self, "spec_total_label") and hasattr(self,
+                                                                                                   "spec_score_label")):
             return
-        
+
         total_fields = self.total_pass_cnt + self.total_error_cnt
         if total_fields > 0:
             score = (self.total_pass_cnt / total_fields) * 100
@@ -2079,9 +2196,10 @@ class MyApp(QWidget):
         self.spec_pass_label.setText(f"통과 필드 수: {self.total_pass_cnt}")
         self.spec_total_label.setText(f"전체 필드 수: {total_fields}")
         self.spec_score_label.setText(f"종합 평가 점수: {score:.1f}%")
-        
+
         # 전체 점수 업데이트 (현재는 1개 spec만 실행하므로 동일한 값)
-        if hasattr(self, "total_pass_label") and hasattr(self, "total_total_label") and hasattr(self, "total_score_label"):
+        if hasattr(self, "total_pass_label") and hasattr(self, "total_total_label") and hasattr(self,
+                                                                                                "total_score_label"):
             self.total_pass_label.setText(f"통과 필드 수: {self.total_pass_cnt}")
             self.total_total_label.setText(f"전체 필드 수: {total_fields}")
             self.total_score_label.setText(f"종합 평가 점수: {score:.1f}%")
@@ -2089,9 +2207,9 @@ class MyApp(QWidget):
     def table_cell_clicked(self, row, col):
         """테이블 셀 클릭 시 호출되는 함수"""
         if col == 1:  # 결과 컬럼 클릭 시에만 동작
-            msg = getattr(self, f"step{row+1}_msg", "")
+            msg = getattr(self, f"step{row + 1}_msg", "")
             if msg:
-                api_name = self.step_names[row] if row < len(self.step_names) else f"Step {row+1}"
+                api_name = self.step_names[row] if row < len(self.step_names) else f"Step {row + 1}"
                 CustomDialog(msg, api_name)
 
     def create_spec_score_display_widget(self):
@@ -2101,39 +2219,39 @@ class MyApp(QWidget):
         spec_group.setMaximumWidth(1050)
         spec_group.setMinimumWidth(950)
         spec_group.setMaximumHeight(120)
-        
+
         # 분야명 레이블
         self.spec_name_label = QLabel(f"📋 {self.spec_description} ({len(self.videoMessages)}개 API)")
         spec_name_font = self.spec_name_label.font()
         spec_name_font.setPointSize(14)
         spec_name_font.setBold(True)
         self.spec_name_label.setFont(spec_name_font)
-        
+
         # 점수 레이블들
         self.spec_pass_label = QLabel("통과 필드 수: 0")
         self.spec_total_label = QLabel("전체 필드 수: 0")
         self.spec_score_label = QLabel("종합 평가 점수: 0.0%")
-        
+
         font = self.spec_pass_label.font()
         font.setPointSize(12)
         self.spec_pass_label.setFont(font)
         self.spec_total_label.setFont(font)
         self.spec_score_label.setFont(font)
-        
+
         spec_layout = QVBoxLayout()
         spec_layout.addWidget(self.spec_name_label)
         spec_layout.addSpacing(5)
-        
+
         spec_score_layout = QHBoxLayout()
         spec_score_layout.setSpacing(50)
         spec_score_layout.addWidget(self.spec_pass_label)
         spec_score_layout.addWidget(self.spec_total_label)
         spec_score_layout.addWidget(self.spec_score_label)
         spec_score_layout.addStretch()
-        
+
         spec_layout.addLayout(spec_score_layout)
         spec_group.setLayout(spec_layout)
-        
+
         return spec_group
 
     def create_total_score_display_widget(self):
@@ -2143,28 +2261,28 @@ class MyApp(QWidget):
         total_group.setMaximumWidth(1050)
         total_group.setMinimumWidth(950)
         total_group.setMaximumHeight(90)
-        
+
         # 점수 레이블들 (전체 점수는 볼드체로 강조)
         self.total_pass_label = QLabel("통과 필드 수: 0")
         self.total_total_label = QLabel("전체 필드 수: 0")
         self.total_score_label = QLabel("종합 평가 점수: 0.0%")
-        
+
         font = self.total_pass_label.font()
         font.setPointSize(14)
         font.setBold(True)
         self.total_pass_label.setFont(font)
         self.total_total_label.setFont(font)
         self.total_score_label.setFont(font)
-        
+
         total_layout = QHBoxLayout()
         total_layout.setSpacing(60)
         total_layout.addWidget(self.total_pass_label)
         total_layout.addWidget(self.total_total_label)
         total_layout.addWidget(self.total_score_label)
         total_layout.addStretch()
-        
+
         total_group.setLayout(total_layout)
-        
+
         return total_group
 
     def _clean_trace_dir_once(self):
@@ -2292,19 +2410,19 @@ class MyApp(QWidget):
         """창 크기 변경 시 반응형 UI 조정"""
         try:
             super().resizeEvent(event)
-            
+
             # 테이블 위젯 크기 조정
             if hasattr(self, 'tableWidget'):
                 # 현재 창 너비의 95%를 테이블 너비로 설정
                 new_width = int(self.width() * 0.95)
                 new_width = max(950, new_width)  # 최소 950px
-                
+
                 # 컬럼 너비를 창 크기에 맞춰 조정
                 total_width = new_width - 50  # 여백 고려
                 col_widths = [0.22, 0.09, 0.10, 0.11, 0.11, 0.10, 0.11, 0.16]  # 비율
                 for col, ratio in enumerate(col_widths):
                     self.tableWidget.setColumnWidth(col, int(total_width * ratio))
-                
+
         except Exception as e:
             print(f"resizeEvent 오류: {e}")
 
@@ -2315,11 +2433,11 @@ class MyApp(QWidget):
                 # 전체화면으로 전환
                 self._saved_geom = self.saveGeometry()
                 self._saved_state = self.windowState()
-                
+
                 flags = (Qt.Window | Qt.WindowTitleHint |
-                        Qt.WindowMinimizeButtonHint |
-                        Qt.WindowMaximizeButtonHint |
-                        Qt.WindowCloseButtonHint)
+                         Qt.WindowMinimizeButtonHint |
+                         Qt.WindowMaximizeButtonHint |
+                         Qt.WindowCloseButtonHint)
                 self.setWindowFlags(flags)
                 self.show()
                 self.showMaximized()
@@ -2364,7 +2482,8 @@ class MyApp(QWidget):
             score = get_txt(6)
             # step_buffer에 최종 판정 가져오기
             final_res = self.step_buffers[i]["result"] if i < len(self.step_buffers) else "N/A"
-            step_lines.append(f"{name} | 결과: {final_res} | 검증 횟수: {retries} | 통과 필드 수: {pass_cnt} | 전체 필드 수: {total_cnt} | 실패 필드 수: {fail_cnt} | 평가 점수: {score}")
+            step_lines.append(
+                f"{name} | 결과: {final_res} | 검증 횟수: {retries} | 통과 필드 수: {pass_cnt} | 전체 필드 수: {total_cnt} | 실패 필드 수: {fail_cnt} | 평가 점수: {score}")
 
             # 로그 원문
             raw_log = self.valResult.toPlainText() if hasattr(self, 'valResult') else ""
@@ -2381,7 +2500,7 @@ class MyApp(QWidget):
             import os
             result_dir = os.path.join(os.getcwd(), "results")
             os.makedirs(result_dir, exist_ok=True)
-            results_path = os.path.join(result_dir, "response_results.txt") # 파일 저장명 수정
+            results_path = os.path.join(result_dir, "response_results.txt")  # 파일 저장명 수정
 
             with open(results_path, "w", encoding="utf-8") as f:
                 f.write(final_text)
@@ -2390,9 +2509,9 @@ class MyApp(QWidget):
 
         # 확인 대화상자
         reply = QMessageBox.question(self, '프로그램 종료',
-                                   '정말로 프로그램을 종료하시겠습니까?',
-                                   QMessageBox.Yes | QMessageBox.No,
-                                   QMessageBox.No)
+                                     '정말로 프로그램을 종료하시겠습니까?',
+                                     QMessageBox.Yes | QMessageBox.No,
+                                     QMessageBox.No)
 
         if reply == QMessageBox.Yes:
             QApplication.quit()
@@ -2406,6 +2525,7 @@ class MyApp(QWidget):
         self.message = self.videoMessages
         self.inMessage = self.videoInMessage
         self.outSchema = self.videoOutSchema
+        self.inCon = self.videoInConstraint
 
         # ✅ 시스템이 받는 웹훅 이벤트는 spec_002_webhookSchema (플랫폼 → 시스템)
         self.webhookSchema = self.videoWebhookInSchema

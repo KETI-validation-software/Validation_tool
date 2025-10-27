@@ -119,7 +119,7 @@ class SchemaGenerator:
         if t == "integer":
             return int
         if t == "number":
-            return float
+            return int
         if t == "boolean":
             return bool
         return str
