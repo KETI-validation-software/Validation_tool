@@ -22,6 +22,7 @@ from core.functions import json_check_, save_result, resource_path, json_to_data
 from core.json_checker_new import check_message_data, check_message_schema, check_message_error 
 import spec.Data_response as data_response_module
 import spec.Schema_response as schema_response_module
+import spec.Schema_request as schema_request_module
 from http.server import HTTPServer
 import json
 import traceback
@@ -803,7 +804,7 @@ class MyApp(QWidget):
                 webhook_schema_name = spec_names[3]
                 webhook_data_name = spec_names[4]
 
-                self.videoWebhookSchema = getattr(schema_response_module, webhook_schema_name, [])
+                self.videoWebhookSchema = getattr(schema_request_module, webhook_schema_name, [])
                 self.videoWebhookData = getattr(data_response_module, webhook_data_name, [])
 
                 print(f"[PLATFORM] 📦 웹훅 스키마 개수: {len(self.videoWebhookSchema)}개 API")
