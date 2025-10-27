@@ -14,10 +14,10 @@ version = "v1.0"
 test_category = "MAIN_TEST"
 test_target = "통합플랫폼"
 test_range = "ALL_FIELDS"
-auth_type = "Bearer Token"
-auth_info = "a"
-admin_code = "1"
-url = "https://127.0.0.1:8080"
+auth_type = "Digest Auth"
+auth_info = "admin,1234"
+admin_code = "1234"
+url = "https://192.168.1.2:8080"
 
 specs = [["cmgvieyak001b6cd04cgaawmm_inSchema","cmgvieyak001b6cd04cgaawmm_outData","cmgvieyak001b6cd04cgaawmm_messages",""]]
 
