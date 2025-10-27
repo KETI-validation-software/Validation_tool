@@ -14,7 +14,8 @@ cmgyv3rzl014nvsveidu5jpzp_StoredVideoInfos_out_validation = {
     "validationType": "request-field-list-match",
     "referenceEndpoint": "/StoredVideoInfos",
     "referenceListField": "camID",
-    "referenceListEndpoint": "/StoredVideoInfos"
+    "referenceListEndpoint": "/StoredVideoInfos",
+    "score": 0
   },
   "camList.timeList.startTime": {
     "enabled": True,
@@ -23,7 +24,8 @@ cmgyv3rzl014nvsveidu5jpzp_StoredVideoInfos_out_validation = {
     "referenceFieldMin": "startTime",
     "referenceEndpointMax": "/StoredVideoInfos",
     "referenceEndpointMin": "/StoredVideoInfos",
-    "referenceRangeOperator": "between"
+    "referenceRangeOperator": "between",
+    "score": 0
   },
   "camList.timeList.endTime": {
     "enabled": True,
@@ -32,7 +34,8 @@ cmgyv3rzl014nvsveidu5jpzp_StoredVideoInfos_out_validation = {
     "referenceFieldMin": "startTime",
     "referenceEndpointMax": "/StoredVideoInfos",
     "referenceEndpointMin": "/StoredVideoInfos",
-    "referenceRangeOperator": "between"
+    "referenceRangeOperator": "between",
+    "score": 0
   }
 }
 
@@ -43,7 +46,8 @@ cmgyv3rzl014nvsveidu5jpzp_StreamURLs_out_validation = {
     "validationType": "request-field-list-match",
     "referenceEndpoint": "/StreamURLs",
     "referenceListField": "camID",
-    "referenceListEndpoint": "/StreamURLs"
+    "referenceListEndpoint": "/StreamURLs",
+    "score": 0
   }
 }
 
@@ -54,7 +58,8 @@ cmgyv3rzl014nvsveidu5jpzp_ReplayURL_out_validation = {
     "validationType": "request-field-list-match",
     "referenceEndpoint": "/ReplayURL",
     "referenceListField": "camID",
-    "referenceListEndpoint": "/ReplayURL"
+    "referenceListEndpoint": "/ReplayURL",
+    "score": 0
   },
   "camList.startTime": {
     "enabled": True,
@@ -63,7 +68,8 @@ cmgyv3rzl014nvsveidu5jpzp_ReplayURL_out_validation = {
     "referenceFieldMin": "startTime",
     "referenceEndpointMax": "/RealtimeVideoEventInfos",
     "referenceEndpointMin": "/RealtimeVideoEventInfos",
-    "referenceRangeOperator": "between"
+    "referenceRangeOperator": "between",
+    "score": 0
   },
   "camList.endTime": {
     "enabled": True,
@@ -72,7 +78,8 @@ cmgyv3rzl014nvsveidu5jpzp_ReplayURL_out_validation = {
     "referenceFieldMin": "startTime",
     "referenceEndpointMax": "/RealtimeVideoEventInfos",
     "referenceEndpointMin": "/RealtimeVideoEventInfos",
-    "referenceRangeOperator": "between"
+    "referenceRangeOperator": "between",
+    "score": 0
   }
 }
 
@@ -86,13 +93,15 @@ cmgyv3rzl014nvsveidu5jpzp_StoredVideoEventInfos_out_validation = {
     "validationType": "request-field-list-match",
     "referenceEndpoint": "/StoredVideoEventInfos",
     "referenceListField": "camID",
-    "referenceListEndpoint": "/StoredVideoEventInfos"
+    "referenceListEndpoint": "/StoredVideoEventInfos",
+    "score": 0
   },
   "camList.eventName": {
     "enabled": True,
     "referenceField": "eventFilter",
     "validationType": "request-field-match",
-    "referenceEndpoint": "/StoredVideoEventInfos"
+    "referenceEndpoint": "/StoredVideoEventInfos",
+    "score": 0
   },
   "camList.startTime": {
     "enabled": True,
@@ -101,7 +110,8 @@ cmgyv3rzl014nvsveidu5jpzp_StoredVideoEventInfos_out_validation = {
     "referenceFieldMin": "startTime",
     "referenceEndpointMax": "/StoredVideoEventInfos",
     "referenceEndpointMin": "/StoredVideoEventInfos",
-    "referenceRangeOperator": "between"
+    "referenceRangeOperator": "between",
+    "score": 0
   },
   "camList.endTime": {
     "enabled": True,
@@ -110,7 +120,8 @@ cmgyv3rzl014nvsveidu5jpzp_StoredVideoEventInfos_out_validation = {
     "referenceFieldMin": "startTime",
     "referenceEndpointMax": "/StoredVideoEventInfos",
     "referenceEndpointMin": "/StoredVideoEventInfos",
-    "referenceRangeOperator": "between"
+    "referenceRangeOperator": "between",
+    "score": 0
   }
 }
 
