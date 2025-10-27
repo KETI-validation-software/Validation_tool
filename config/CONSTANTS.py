@@ -7,37 +7,21 @@ none_request_message = ['Capabilities',
                         'DoorProfiles',
                         'AccessUserInfos',
                         'SensorDeviceProfiles']
-# 로컬 테스트용 주소 
-<<<<<<< HEAD
+# 로컬 테스트용 주소
 # test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
 company_name = "통합플랫폼테스트"
 product_name = "통합플랫폼테스트제품"
-=======
-#test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
-company_name = "물리보안기업"
-product_name = "물리보안테스트제품"
->>>>>>> 4fc0caa98fd2234438b18f224cb618d8eb0de007
 version = "v1.0"
 test_category = "MAIN_TEST"
 test_target = "물리보안"
 test_range = "ALL_FIELDS"
 auth_type = "Bearer Token"
 auth_info = "a"
-<<<<<<< HEAD
-admin_code = ""
-url = "https://127.0.0.1:8080"
-contact_person = "김철수"
-model_name = "v1.0"
-request_id = "cmh1yg49v000t9y0jdr1wwuja"
-specs = [
-    ["cmgvieyak001b6cd04cgaawmm_inSchema", "cmgvieyak001b6cd04cgaawmm_outData", "cmgvieyak001b6cd04cgaawmm_messages",
-     ""]]
-=======
 admin_code = "1234"
 url = "https://127.0.0.1:8080"
 
 specs = [["cmgyv3rzl014nvsveidu5jpzp_outSchema","cmgyv3rzl014nvsveidu5jpzp_inData","cmgyv3rzl014nvsveidu5jpzp_messages",""]]
->>>>>>> 4fc0caa98fd2234438b18f224cb618d8eb0de007
+
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황 
 flag_opt = False
