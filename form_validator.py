@@ -80,12 +80,12 @@ class FormValidator:
                 schema_names = []
                 data_names = []
                 endpoint_names = []
-                validation_names  = []
-                constraints_names  = []
+                validation_names = []
+                constraints_names = []
                 webhook_schema_names = []  # webhook 전용 스키마 리스트
-                webhook_data_names = []    # webhook 전용 데이터 리스트
+                webhook_data_names = []  # webhook 전용 데이터 리스트
                 webhook_constraints_names = []  # webhook 전용 constraints 리스트
-                temp_spec_id = spec_id+"_"
+                temp_spec_id = spec_id + "_"
                 for s in steps:
                     step_id = s.get("id")
                     ts = self._test_step_cache.get(step_id) if hasattr(self, "_test_step_cache") else None
@@ -96,7 +96,7 @@ class FormValidator:
                             file_type = 'response'
                         elif schema_type == 'response':
                             file_type = 'request'
-                        schema_content, data_content, validation_content,constraints_content = self._generate_files_for_each_steps(
+                        schema_content, data_content, validation_content, constraints_content = self._generate_files_for_each_steps(
                             schema_type=schema_type,
                             file_type=file_type,
                             ts=ts,
@@ -112,7 +112,7 @@ class FormValidator:
                             webhook_schema_names=webhook_schema_names,
                             webhook_data_names=webhook_data_names,
                             webhook_constraints_names=webhook_constraints_names,
-                            spec_id = temp_spec_id
+                            spec_id=temp_spec_id
                         )
                 if schema_type == "request":
                     list_name = f"{spec_id}_inSchema"
@@ -131,11 +131,14 @@ class FormValidator:
                         webhook_schema_list_name = f"{spec_id}_webhook_inSchema"
                     else:
                         webhook_schema_list_name = f"{spec_id}_webhook_OutSchema"
-                schema_content += f"# {spec_id} WebHook 스키마 리스트\n"
-                schema_content += f"{webhook_schema_list_name} = [\n"
-                for name in webhook_schema_names:
-                    schema_content += f"    {temp_spec_id}{name},\n"
-                schema_content += "]\n\n"
+                    schema_content += f"# {spec_id} WebHook 스키마 리스트\n"
+                    schema_content += f"{webhook_schema_list_name} = [\n"
+                    for name in webhook_schema_names:
+                        if name == None:
+                            schema_content += f"    {name},\n"
+                        else:
+                            schema_content += f"    {temp_spec_id}{name},\n"
+                    schema_content += "]\n\n"
 
                 if file_type == "request":
                     data_list_name = f"{spec_id}_inData"
@@ -152,12 +155,15 @@ class FormValidator:
                 if webhook_data_names:
                     if file_type == "response":
                         webhook_data_list_name = f"{spec_id}_webhook_inData"
-                    else :
+                    else:
                         webhook_data_list_name = f"{spec_id}_webhook_outData"
                     data_content += f"# {spec_id} WebHook 데이터 리스트\n"
                     data_content += f"{webhook_data_list_name} = [\n"
                     for name in webhook_data_names:
-                        data_content += f"    {temp_spec_id}{name},\n"
+                        if name == None:
+                            data_content += f"    {name},\n"
+                        else:
+                            data_content += f"    {temp_spec_id}{name},\n"
                     data_content += "]\n\n"
 
                 # Messages 리스트 생성 (spec별로) - spec_id_safe 사용
@@ -202,7 +208,10 @@ class FormValidator:
                     constraints_content += f"# {spec_id} WebHook Constraints 리스트\n"
                     constraints_content += f"{webhook_c_list_name} = [\n"
                     for cname in webhook_constraints_names:
-                        constraints_content += f"    {temp_spec_id}{cname},\n"
+                        if cname == None:
+                            constraints_content += f"    {cname},\n"
+                        else:
+                            constraints_content += f"    {temp_spec_id}{cname},\n"
                     constraints_content += "]\n\n"
 
                 # CONSTANTS.py 업데이트용 리스트 저장
@@ -229,7 +238,6 @@ class FormValidator:
             data_output = f"spec/Data_{file_type}.py"
             validation_output = f"spec/Validation_{schema_type}.py"
             constraints_output = f"spec/Constraints_{file_type}.py"
-
 
             with open(schema_output, 'w', encoding='utf-8') as f:
                 f.write(schema_content)
@@ -261,8 +269,8 @@ class FormValidator:
     def _generate_files_for_each_steps(self, schema_type, file_type, ts, schema_content,
                                        data_content, schema_names, data_names, endpoint_names,
                                        validation_content, validation_names,
-                                   constraints_content, constraints_names,
-                                   webhook_schema_names, webhook_data_names, webhook_constraints_names, spec_id):
+                                       constraints_content, constraints_names,
+                                       webhook_schema_names, webhook_data_names, webhook_constraints_names, spec_id):
 
         # step 레벨에서 protocolType 확인 (소문자 "webhook")
         detail = ts.get("detail", {})
@@ -304,7 +312,7 @@ class FormValidator:
             print(f"  ✓ WebHook OUT Schema 생성: {webhook_schema_name}" + (" (빈 딕셔너리)" if not webhook_spec else ""))
 
         # WebHook 처리 - schema_type="response"일 때 webhook_in_schema 생성
-        if protocol_type == "webhook" and schema_type == "response":
+        elif protocol_type == "webhook" and schema_type == "response":
             webhook_spec = settings.get("webhook", {}).get("requestSpec") or {}
             webhook_schema_name = f"{endpoint_name}_webhook_in_schema"
             webhook_schema_obj = self._convert_webhook_spec_to_schema(webhook_spec)
@@ -313,7 +321,8 @@ class FormValidator:
             schema_content += f"{spec_id}{webhook_schema_name} = {formatted_webhook}\n\n"
             webhook_schema_names.append(webhook_schema_name)  # webhook 전용 리스트에 추가
             print(f"  ✓ WebHook IN Schema 생성: {webhook_schema_name}" + (" (빈 딕셔너리)" if not webhook_spec else ""))
-
+        else:
+            webhook_schema_names.append(None)
         # Data 생성 (spec별로)
         data_info = self.data_gen.extract_endpoint_data(ts, file_type)
         data_name = data_info["name"]
@@ -346,7 +355,7 @@ class FormValidator:
             print(f"  ✓ WebHook OUT Data 생성: {webhook_data_name}" + (" (빈 딕셔너리)" if not webhook_request_spec else ""))
 
         # WebHook 처리 - file_type="request"일 때 webhook_out_data 생성
-        if protocol_type == "webhook" and file_type == "response":
+        elif protocol_type == "webhook" and file_type == "response":
             webhook_request_spec = settings.get("webhook", {}).get("requestSpec") or {}
             webhook_data_name = f"{endpoint_name}_webhook_in_data"
 
@@ -362,10 +371,11 @@ class FormValidator:
             data_content += f"{spec_id}{webhook_data_name} = {formatted_webhook_data}\n\n"
             webhook_data_names.append(webhook_data_name)  # webhook 전용 리스트에 추가
             print(f"  ✓ WebHook IN Data 생성: {webhook_data_name}" + (" (빈 딕셔너리)" if not webhook_request_spec else ""))
-
+        else:
+            webhook_data_names.append(None)
         endpoint_names.append(endpoint_name)
 
-        #validation 생성
+        # validation 생성
         vinfo = self.validation_gen.extract_enabled_validations(ts,
                                                                 schema_type)  # {"endpoint":..., "validation": {...}}
         v_endpoint = vinfo.get("endpoint") or endpoint_name
@@ -432,9 +442,8 @@ class FormValidator:
                 constraints_content += f"{spec_id}{webhook_c_name} = {webhook_c_py_style_json}\n\n"
             webhook_constraints_names.append(webhook_c_name)
             print(f"  ✓ WebHook IN Constraints 생성: {webhook_c_name}" + (" (빈 딕셔너리)" if not webhook_c_map else ""))
-
         # WebHook Constraints 처리 - file_type="request"일 때 webhook_out_constraints 생성
-        if protocol_type == "webhook" and file_type == "request":
+        elif protocol_type == "webhook" and file_type == "request":
             webhook_request_spec = settings.get("webhook", {}).get("integrationSpec") or {}
             webhook_c_name = f"{endpoint_name}_webhook_out_constraints"
 
@@ -460,7 +469,8 @@ class FormValidator:
                 constraints_content += f"{spec_id}{webhook_c_name} = {webhook_c_py_style_json}\n\n"
             webhook_constraints_names.append(webhook_c_name)
             print(f"  ✓ WebHook OUT Constraints 생성: {webhook_c_name}" + (" (빈 딕셔너리)" if not webhook_c_map else ""))
-
+        else:
+            webhook_constraints_names.append(None)
         # 기존과 동일하게 누적본 반환 + validation도 함께 반환
         return schema_content, data_content, validation_content, constraints_content
 
@@ -795,7 +805,7 @@ class FormValidator:
     def is_admin_code_required(self):
         """관리자 코드 입력이 필요한지 확인"""
         test_category = self.parent.test_category_edit.text().strip()
-        return test_category == "MAIN_TEST"
+        return test_category == "본시험"
 
 
     def is_admin_code_valid(self):
@@ -805,7 +815,7 @@ class FormValidator:
             return True
 
         admin_code = self.parent.admin_code_edit.text().strip()
-        # MAIN_TEST인 경우 숫자가 입력되어야 함
+        # 본시험 경우 숫자가 입력되어야 함
         return bool(admin_code and admin_code.isdigit())
 
 
@@ -835,7 +845,7 @@ class FormValidator:
         self.parent.original_test_category = test_category
 
         # MAIN_TEST를 본시험으로 표시
-        if test_category == "MAIN_TEST":
+        if test_category == "본시험":
             self.parent.test_category_edit.setText("본시험")
             self.parent.admin_code_edit.setEnabled(True)
             self.parent.admin_code_edit.setPlaceholderText("내용을 입력해주세요")
