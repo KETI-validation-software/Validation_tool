@@ -7,6 +7,7 @@ from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QPixmap, QColor
 import importlib
 from config import CONSTANTS
+from core.functions import resource_path
 
 # 분리된 모듈들 import
 from network_scanner import NetworkScanWorker
@@ -2204,7 +2205,7 @@ class InfoWidget(QWidget):
     
     #임시버전
     def get_local_ip(self):
-        return "192.168.1.1, 127.0.0.1"
+        return "192.168.1.2, 127.0.0.1"
     
     def _get_local_ip_list(self):
         """get_local_ip() 결과를 안전하게 리스트로 변환"""

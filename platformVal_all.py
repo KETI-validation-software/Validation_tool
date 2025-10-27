@@ -13,22 +13,16 @@ import ssl
 from datetime import datetime
 import json
 from pathlib import Path
+from core.functions import build_result_json
 
 # from core.functions import json_check_, save_result, resource_path, field_finder, json_to_data, set_auth, timeout_field_finder
 
 import config.CONSTANTS as CONSTANTS
-
-<<<<<<< HEAD
-from core.functions import json_check_, build_result_json, resource_path, json_to_data, set_auth, timeout_field_finder
-from core.json_checker_new import check_message_data, check_message_schema, check_message_error
-
-=======
 from core.functions import json_check_, save_result, resource_path, json_to_data, set_auth, timeout_field_finder
 from core.json_checker_new import check_message_data, check_message_schema, check_message_error 
 import spec.Data_response as data_response_module
 import spec.Schema_response as schema_response_module
 import spec.Schema_request as schema_request_module
->>>>>>> 4fc0caa98fd2234438b18f224cb618d8eb0de007
 from http.server import HTTPServer
 import json
 import traceback
@@ -1194,7 +1188,7 @@ class MyApp(QWidget):
                     inbound_err_txt = self._to_detail_text(val_text)
                     if val_result == "FAIL":
                         step_result = "FAIL"
-                        combined_error_parts.append(f"[검증 {retry_attempt + 1}회차] [Inbound] " + inbound_err_txt)
+                        combined_error_parts.append(f"[검증 {retry_attempt + 1}회차] [Inbound]\n" + inbound_err_txt)
 
                     # ✅ WebHook 프로토콜인 경우 웹훅 응답 표시 (transProtocol 기반으로만 판단)
                     if current_protocol == "WebHook":

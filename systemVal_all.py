@@ -633,6 +633,7 @@ class MyApp(QWidget):
             print(f"[ERROR] trace 파일 로드 중 오류: {e}")
             return None
 
+    # 
     def _apply_request_constraints(self, request_data, cnt):
         """
         이전 응답 데이터를 기반으로 요청 데이터 업데이트
@@ -1392,7 +1393,7 @@ class MyApp(QWidget):
                 path = self.pathUrl + "/" + (self.message[self.cnt] if self.cnt < len(self.message) else "")
                 inMessage = self.inMessage[self.cnt] if self.cnt < len(self.inMessage) else {}
                 # ✅ Data Mapper 적용 - 이전 응답 데이터로 요청 업데이트
-                inMessage = self._apply_request_constraints(inMessage, self.cnt)
+                # inMessage = self._apply_request_constraints(inMessage, self.cnt)
 
                 json_data = json.dumps(inMessage).encode('utf-8')
 

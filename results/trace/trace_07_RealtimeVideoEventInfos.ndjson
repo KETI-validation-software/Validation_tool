@@ -1,7 +1,2 @@
-<<<<<<< HEAD
-{"time": "2025-10-27T07:26:21.814020Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "", "eventUUID": "", "eventName": "", "startTime": 0, "endTime": 0, "eventDesc": ""}]}}
-{"time": "2025-10-27T07:26:22.804054Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}
-=======
-{"time": "2025-10-27T06:59:17.428282Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "", "eventUUID": "", "eventName": "", "startTime": 0, "endTime": 0, "eventDesc": ""}]}}
-{"time": "2025-10-27T06:59:18.434589Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "200", "message": "성공"}}
->>>>>>> 4fc0caa98fd2234438b18f224cb618d8eb0de007
+{"time": "2025-10-27T08:04:23.732266Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "", "eventUUID": "", "eventName": "", "startTime": 0, "endTime": 0, "eventDesc": ""}]}}
+{"time": "2025-10-27T08:04:24.734492Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "200", "message": "성공"}}
