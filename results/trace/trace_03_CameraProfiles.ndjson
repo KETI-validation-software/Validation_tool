@@ -1,7 +1,2 @@
-<<<<<<< HEAD
-{"time": "2025-10-27T07:26:09.813145Z", "api": "CameraProfiles", "dir": "REQUEST", "data": {}}
-{"time": "2025-10-27T07:26:10.804145Z", "api": "CameraProfiles", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "camList": [{"camID": "cam0001", "camName": "카메라1", "camLoc": {"lon": "127.127730", "lat": "38.439801", "alt": "32.131", "desc": "3층복도"}, "camConfig": {"camType": "PTZ"}}, {"camID": "cam0002", "camName": "카메라2", "camLoc": {"lon": "126", "lat": "32", "alt": "31", "desc": "2층복도"}, "camConfig": {"camType": "PTZ"}}]}}
-=======
-{"time": "2025-10-27T06:59:05.433988Z", "api": "CameraProfiles", "dir": "REQUEST", "data": {}}
-{"time": "2025-10-27T06:59:06.436312Z", "api": "CameraProfiles", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "camList": [{"camID": "cam0001", "camName": "카메라1", "camLoc": {"lon": "127.127730", "lat": "38.439801", "alt": "32.131", "desc": "3층복도"}, "camConfig": {"camType": "PTZ"}}, {"camID": "cam0002", "camName": "카메라2", "camLoc": {"lon": "126", "lat": "32", "alt": "31", "desc": "2층복도"}, "camConfig": {"camType": "PTZ"}}]}}
->>>>>>> 4fc0caa98fd2234438b18f224cb618d8eb0de007
+{"time": "2025-10-27T08:04:11.734127Z", "api": "CameraProfiles", "dir": "REQUEST", "data": {}}
+{"time": "2025-10-27T08:04:12.730491Z", "api": "CameraProfiles", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "camList": [{"camID": "cam0001", "camName": "카메라1", "camLoc": {"lon": "127.127730", "lat": "38.439801", "alt": "32.131", "desc": "3층복도"}, "camConfig": {"camType": "PTZ"}}, {"camID": "cam0002", "camName": "카메라2", "camLoc": {"lon": "126", "lat": "32", "alt": "31", "desc": "2층복도"}, "camConfig": {"camType": "PTZ"}}]}}
