@@ -1,7 +1,7 @@
 === 시험 결과 ===
-통과 필드 수: 27
-전체 필드 수: 36
-종합 평가 점수: 75.0%
+통과 필드 수: 26
+전체 필드 수: 34
+종합 평가 점수: 76.5%
 
 === 스텝별 결과 ===
 1. Authentication | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 2 | 전체 필드 수: 2 | 실패 필드 수: 0 | 평가 점수: 100.0%
@@ -10,7 +10,7 @@
 4. StoredVideoInfos | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 5 | 전체 필드 수: 5 | 실패 필드 수: 0 | 평가 점수: 100.0%
 5. StreamURLs | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 3 | 전체 필드 수: 3 | 실패 필드 수: 0 | 평가 점수: 100.0%
 6. ReplayURL | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 5 | 전체 필드 수: 5 | 실패 필드 수: 0 | 평가 점수: 100.0%
-7. RealtimeVideoEventInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 2 | 전체 필드 수: 11 | 실패 필드 수: 9 | 평가 점수: 18.2%
+7. RealtimeVideoEventInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 1 | 전체 필드 수: 9 | 실패 필드 수: 8 | 평가 점수: 11.1%
 8. StoredVideoEventInfos | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 8 | 전체 필드 수: 8 | 실패 필드 수: 0 | 평가 점수: 100.0%
 
 === 전체 로그 ===
@@ -157,14 +157,11 @@ step 7: RealtimeVideoEventInfos
     ]
 }
 
---- Webhook 응답 (시도 1회차) ---
-{
-    "code": 200,
-    "message": "성공"
-}
+--- Webhook 응답 ---
+null
 FAIL
-Score : 67.85714285714286
-Score details : 19(누적 통과 필드 수), 9(누적 오류 필드 수)
+Score : 69.23076923076923
+Score details : 18(누적 통과 필드 수), 8(누적 오류 필드 수)
 
 step 8: StoredVideoEventInfos
 🔄 부하테스트 시작: 총 1회 검증 예정
@@ -188,11 +185,11 @@ step 8: StoredVideoEventInfos
         }
     ],
     "maxCount": 3,
-    "eventFilter": "화재",
-    "classFilter": "트럭"
+    "eventFilter": "배회",
+    "classFilter": "버스"
 }
 PASS
-Score : 75.0
-Score details : 27(누적 통과 필드 수), 9(누적 오류 필드 수)
+Score : 76.47058823529412
+Score details : 26(누적 통과 필드 수), 8(누적 오류 필드 수)
 
 검증 절차가 완료되었습니다.

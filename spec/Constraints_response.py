@@ -190,13 +190,6 @@ cmgvieyak001b6cd04cgaawmm_outConstraints = [
 
 # cmgvieyak001b6cd04cgaawmm WebHook Constraints 리스트
 cmgvieyak001b6cd04cgaawmm_webhook_inConstraints = [
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
     cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_webhook_in_constraints,
-    None,
 ]
 
