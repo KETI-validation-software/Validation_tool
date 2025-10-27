@@ -18,9 +18,17 @@ from pathlib import Path
 
 import config.CONSTANTS as CONSTANTS
 
+<<<<<<< HEAD
 from core.functions import json_check_, build_result_json, resource_path, json_to_data, set_auth, timeout_field_finder
 from core.json_checker_new import check_message_data, check_message_schema, check_message_error
 
+=======
+from core.functions import json_check_, save_result, resource_path, json_to_data, set_auth, timeout_field_finder
+from core.json_checker_new import check_message_data, check_message_schema, check_message_error 
+import spec.Data_response as data_response_module
+import spec.Schema_response as schema_response_module
+import spec.Schema_request as schema_request_module
+>>>>>>> 4fc0caa98fd2234438b18f224cb618d8eb0de007
 from http.server import HTTPServer
 import json
 import traceback
@@ -800,10 +808,40 @@ class MyApp(QWidget):
         self.videoOutConstraint = getattr(constraints_response_module, self.current_spec_id + "_outConstraints", [])
         # ✅ Webhook 관련 (영상보안 시스템만 사용)
 
-        self.videoWebhookSchema = []
-        self.videoWebhookData = []
-        self.videoWebhookInSchema = []
-        self.videoWebhookInData = []
+        # config에서 가져오게 되어있는데.....
+        # spec_names[0] → "videoInSchema", spec_names[1] → "videoOutMessage", spec_names[2] → "videoMessages", spec_names[3] → "videoWebhookSchema". spec_names[4] → "videoWebhookData"
+        try:
+            if len(spec_names) >= 5:
+                webhook_schema_name = spec_names[3]
+                webhook_data_name = spec_names[4]
+
+                # platform이 보유하고 있는 것은: response data, request schema, request validation 임.
+                self.videoWebhookSchema = getattr(schema_request_module, webhook_schema_name, [])
+                self.videoWebhookData = getattr(data_response_module, webhook_data_name, [])
+
+                print(f"[PLATFORM] 📦 웹훅 스키마 개수: {len(self.videoWebhookSchema)}개 API")
+                print(f"[PLATFORM] 📋 웹훅 데이터 개수: {len(self.videoWebhookData)}개")
+
+                webhook_indices = [i for i, msg in enumerate(self.videoMessages) if "Webhook" in msg]
+                if webhook_indices:
+                    print(f"[PLATFORM] 🔔 웹훅 API 인덱스: {webhook_indices}")
+                else:
+                    print(f"[PLATFORM] ⚠️ 웹훅 API가 videoMessages에 없습니다.")
+            else:
+                print(f"[PLATFORM] ⚠️ 웹훅 스키마 및 데이터가 SPEC_CONFIG에 정의되어 있지 않습니다.")
+                self.videoWebhookSchema = []
+                self.videoWebhookData = []
+        except Exception as e:
+            print(f"[PLATFORM] ⚠️ 웹훅 스키마 및 데이터 로드 중 오류 발생: {e}")
+            import traceback
+            traceback.print_exc()
+            self.videoWebhookSchema = []
+            self.videoWebhookData = []
+
+        # self.videoWebhookSchema = []
+        # self.videoWebhookData = []
+        # self.videoWebhookInSchema = []
+        # self.videoWebhookInData = []
 
         print(f"[PLATFORM] ✅ 로딩 완료: {len(self.videoMessages)}개 API")
         print(f"[PLATFORM] 📋 API 목록: {self.videoMessages}")
@@ -1207,8 +1245,8 @@ class MyApp(QWidget):
                                 webhook_resp_err_txt = self._to_detail_text(webhook_resp_val_text)
                                 if webhook_resp_val_result == "FAIL":
                                     step_result = "FAIL"
-                                    combined_error_parts.append(
-                                        f"[검증 {retry_attempt + 1}회차] [Webhook 응답] " + webhook_resp_err_txt)
+                                    # [검증 {retry_attempt + 1}회차] -> 회차 추가하고 싶으면 주석 해제하고 포함
+                                    combined_error_parts.append(f"--- Webhook 검증 ---\n" + webhook_resp_err_txt)
                             else:
                                 if retry_attempt == 0:
                                     print(f"[DEBUG] videoWebhookSchema가 없습니다!")

@@ -1,2 +1,7 @@
+<<<<<<< HEAD
 {"time": "2025-10-27T07:26:12.870178Z", "api": "StoredVideoInfos", "dir": "REQUEST", "data": {"timePeriod": {"startTime": 1760948700000, "endTime": 1761121500000}, "camList": [{"camID": "cam0001"}, {"camID": "cam0002"}]}}
 {"time": "2025-10-27T07:26:12.873175Z", "api": "StoredVideoInfos", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "camList": [{"camID": "cam0001", "timeList": [{"startTime": 1761045083335, "endTime": 1761062973124}, {"startTime": 1761104384255, "endTime": 1761108298677}]}, {"camID": "cam0002", "timeList": [{"startTime": 1761065844035, "endTime": 1761115743103}, {"startTime": 1761074684399, "endTime": 1761098634487}]}]}}
+=======
+{"time": "2025-10-27T06:59:08.470916Z", "api": "StoredVideoInfos", "dir": "REQUEST", "data": {"timePeriod": {"startTime": 1760948700000, "endTime": 1761121500000}, "camList": [{"camID": "cam0001"}, {"camID": "cam0002"}]}}
+{"time": "2025-10-27T06:59:08.474878Z", "api": "StoredVideoInfos", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "camList": [{"camID": "cam0001", "timeList": [{"startTime": 1761053605660, "endTime": 1761076835729}, {"startTime": 1761092239314, "endTime": 1761101098317}]}, {"camID": "cam0002", "timeList": [{"startTime": 1760956280822, "endTime": 1761051268839}, {"startTime": 1761050046540, "endTime": 1761110561104}]}]}}
+>>>>>>> 4fc0caa98fd2234438b18f224cb618d8eb0de007
