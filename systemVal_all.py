@@ -1603,10 +1603,9 @@ class MyApp(QWidget):
                         response_message = res_data.get("message", "")
 
                         # 성공 코드가 아니면 FAIL 처리
-                        if response_code not in ["200", "201"]:
+                        if response_code not in ["200", "201", "성공", "Success"]:
                             # print(f"[SYSTEM] 응답 코드 검증 실패: code={response_code}, message={response_message}")
                             val_result = "FAIL"
-
                             # 기존 오류 메시지에 응답 코드 오류 추가
                             code_error_msg = f"응답 실패: code={response_code}, message={response_message}"
                             if isinstance(val_text, str):
@@ -2564,7 +2563,7 @@ class MyApp(QWidget):
         except Exception as e:
             print(f"Error loading webhook schema: {e}")
             self.webhookInSchema = []
-            
+
         self.webhookSchema = self.webhookInSchema
         self.final_report = f"{self.spec_description} 검증 결과\n"
 
