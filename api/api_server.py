@@ -293,6 +293,30 @@ class Server(BaseHTTPRequestHandler):
             trans_protocol = dict_data.get("transProtocol", {})
             print(f"[DEBUG][SERVER] transProtocol: {trans_protocol}")
 
+            if not trans_protocol:
+                try:
+                    for group in CONSTANTS.SPEC_CONFIG:
+                        for spec_id, config in group.items():
+                            if spec_id in ["group_name", "group_id"]:
+                                continue
+                        
+                        trans_protocols = config.get('trans_protocol', [])
+                        if message_cnt < len(trans_protocols):
+                            protocol_type = trans_protocols[message_cnt]
+
+                            if protocol_type == 'WebHook':
+                                webhook_url = "https://127.0.0.1:8008"
+                                trans_protocol = {
+                                    "transProtocolType": "WebHook",
+                                    "transProtocolDesc": webhook_url
+                                }
+                                print(f"[DEBUG][SERVER] 기본 WebHook 프로토콜 설정")
+                                break
+                        if trans_protocol:
+                            break
+                except Exception as e:
+                    print(f"[DEBUG][SERVER] constants에서 프로토콜 로드 실패: {e}")
+
             if trans_protocol:
                 trans_protocol_type = trans_protocol.get("transProtocolType", {})
                 print(f"[DEBUG][SERVER] transProtocolType: {trans_protocol_type}")
@@ -388,6 +412,7 @@ class Server(BaseHTTPRequestHandler):
                     "code": "401",
                     "message": "인증 오류"
                 }
+
         # send the message back
         try:
             # constraints 디버그 로그
@@ -448,10 +473,10 @@ class Server(BaseHTTPRequestHandler):
             print(f"[DEBUG][SERVER] message_cnt: {message_cnt}")
             print(f"[DEBUG][SERVER] url_tmp: {url_tmp}")
 
-            # ✅ 웹훅 데이터 사용 (videoData_request.py의 webhookData)
-            if self.webhookData and len(self.webhookData) > message_cnt:
-                webhook_payload = self.webhookData[message_cnt]
-                print(f"[DEBUG][SERVER] 웹훅 데이터 사용: webhookData[{message_cnt}]")
+            # 그냥 무조건 0번 인덱스 사용하는 걸로 수정
+            if self.webhookData and len(self.webhookData) > 0:
+                webhook_payload = self.webhookData[0]
+                print(f"[DEBUG][SERVER] 웹훅 데이터 사용: webhookData[0]")
 
                 # None이면 웹훅 전송하지 않음
                 if webhook_payload is None:

@@ -20,7 +20,9 @@ import config.CONSTANTS as CONSTANTS
 
 from core.functions import json_check_, save_result, resource_path, json_to_data, set_auth, timeout_field_finder
 from core.json_checker_new import check_message_data, check_message_schema, check_message_error 
-
+import spec.Data_response as data_response_module
+import spec.Schema_response as schema_response_module
+import spec.Schema_request as schema_request_module
 from http.server import HTTPServer
 import json
 import traceback
@@ -797,15 +799,41 @@ class MyApp(QWidget):
         self.videoOutConstraint = getattr(constraints_response_module, self.current_spec_id+"_outConstraints", [])
         # ✅ Webhook 관련 (영상보안 시스템만 사용)
 
-        self.videoWebhookSchema = []
-        self.videoWebhookData = []
-        self.videoWebhookInSchema = []
-        self.videoWebhookInData = []
+        try:
+            if len(spec_names) >= 5:
+                webhook_schema_name = spec_names[3]
+                webhook_data_name = spec_names[4]
+
+                self.videoWebhookSchema = getattr(schema_request_module, webhook_schema_name, [])
+                self.videoWebhookData = getattr(data_response_module, webhook_data_name, [])
+
+                print(f"[PLATFORM] 📦 웹훅 스키마 개수: {len(self.videoWebhookSchema)}개 API")
+                print(f"[PLATFORM] 📋 웹훅 데이터 개수: {len(self.videoWebhookData)}개")
+
+                webhook_indices = [i for i, msg in enumerate(self.videoMessages) if "Webhook" in msg]
+                if webhook_indices:
+                    print(f"[PLATFORM] 🔔 웹훅 API 인덱스: {webhook_indices}")
+                else:
+                    print(f"[PLATFORM] ⚠️ 웹훅 API가 videoMessages에 없습니다.")
+            else:
+                print(f"[PLATFORM] ⚠️ 웹훅 스키마 및 데이터가 SPEC_CONFIG에 정의되어 있지 않습니다.")
+                self.videoWebhookSchema = []
+                self.videoWebhookData = []
+        except Exception as e:
+            print(f"[PLATFORM] ⚠️ 웹훅 스키마 및 데이터 로드 중 오류 발생: {e}")
+            import traceback
+            traceback.print_exc()
+            self.videoWebhookSchema = []
+            self.videoWebhookData = []
+
+        # self.videoWebhookSchema = []
+        # self.videoWebhookData = []
+        # self.videoWebhookInSchema = []
+        # self.videoWebhookInData = []
 
         print(f"[PLATFORM] ✅ 로딩 완료: {len(self.videoMessages)}개 API")
         print(f"[PLATFORM] 📋 API 목록: {self.videoMessages}")
         print(f"[PLATFORM] 🔄 프로토콜 설정: {self.trans_protocols}")
-
 
     def _redact(self, payload):
         try:
