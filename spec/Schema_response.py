@@ -143,13 +143,6 @@ cmgyv3rzl014nvsveidu5jpzp_outSchema = [
 
 # cmgyv3rzl014nvsveidu5jpzp WebHook 스키마 리스트
 cmgyv3rzl014nvsveidu5jpzp_webhook_inSchema = [
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
     cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_webhook_in_schema,
-    None,
 ]
 

@@ -170,14 +170,7 @@ cmgvieyak001b6cd04cgaawmm_outData = [
 
 # cmgvieyak001b6cd04cgaawmm WebHook 데이터 리스트
 cmgvieyak001b6cd04cgaawmm_webhook_inData = [
-    None,
-    None,
-    None,
-    None,
-    None,
-    None,
     cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_webhook_in_data,
-    None,
 ]
 
 # cmgvieyak001b6cd04cgaawmm API endpoint
