@@ -248,7 +248,7 @@
                   }
                 ],
                 "maxCount": 3,
-                "eventFilter": "배회",
+                "eventFilter": "화재",
                 "classFilter": "트럭"
               },
               "validationErrors": [
@@ -260,5 +260,5 @@
       ]
     }
   ],
-  "completedDate": "2025-10-28T15:46:24Z"
+  "completedDate": "2025-10-28T16:59:49Z"
 }
