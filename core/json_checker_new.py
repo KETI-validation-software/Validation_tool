@@ -336,6 +336,7 @@ def do_semantic_checker(rules_dict, data_dict, reference_context=None):
                 kind = 'referenceField' if vtype.startswith('request') else 'responseField'
                 msg = f"Value {value!r} != {kind} {ref_field!r} -> {ref_value!r}"
 
+        # 확인하고 있는 부분 - 현재 여기 기능은 platformVal에 내장되어 있는 상황
         # ---- 🔥 핵심 수정: request/response-field-list-match ----
         elif vtype in ('request-field-list-match', 'response-field-list-match'):
             ref_list_field = rule.get('referenceListField')
@@ -373,6 +374,44 @@ def do_semantic_checker(rules_dict, data_dict, reference_context=None):
             else:
                 passed = False
                 msg = f"referenceListField {ref_list_field!r} not found as list"
+        
+        # ---- request/response-field-range-match ----
+        elif vtype in ('request-field-range-match', 'response-field-range-match'):
+            ref_field_min = rule.get('referenceFieldMin')
+            ref_field_max = rule.get('referenceFieldMax')
+            ref_endpoint_max = rule.get('referenceEndpointMax')
+            ref_endpoint_min = rule.get('referenceEndpointMin')
+            ref_operator = rule.get('referenceRangeOperator')
+
+            max_value = None
+            min_value = None
+
+            if ref_endpoint_max and ref_endpoint_max in reference_context:
+                max_data = reference_context[ref_endpoint_max]
+                if ref_field_max:
+                    max_values = collect_all_values_by_key(max_data, ref_field_max)
+                    if max_values and isinstance(max_values, list) and len(max_values) == 1:
+                        max_value = max_values[0]   # 최댓값 사용
+                        print(f"[DEBUG] 최대값 추출 from {ref_endpoint_max}.{ref_field_max} -> {max_value}")
+            
+            if ref_endpoint_min and ref_endpoint_min in reference_context:
+                min_data = reference_context[ref_endpoint_min]
+                if ref_field_min:
+                    min_values = collect_all_values_by_key(min_data, ref_field_min)
+                    if min_values and isinstance(min_values, list) and len(min_values) == 1:
+                        min_value = min_values[0]   # 최솟값 사용
+                        print(f"[DEBUG] 최소값 추출 from {ref_endpoint_min}.{ref_field_min} -> {min_value}")
+            
+            # 검증 수행
+            if ref_operator == 'between' and (min_value is not None or max_value is not None):
+                if not (min_value <= value <= max_value):
+                    passed = False
+                    msg = f"Value {value!r} not in range [{min_value}, {max_value}]"
+                else:
+                    print(f"[DEBUG] 값 {value!r}이 범위 [{min_value}, {max_value}] 내에 있음")
+            else:
+                passed = False
+                msg = f"Invalid referenceRangeOperator {ref_operator!r} or missing min/max values"
 
         # ---- length ----
         elif vtype == 'length':
