@@ -1111,19 +1111,32 @@ class MyApp(QWidget):
                         if ref_endpoint:
                             # '/' 제거하여 API 이름만 추출
                             ref_api_name = ref_endpoint.lstrip("/")
-                            
                             # 해당 referenceEndpoint의 RESPONSE 로드
                             response_data = self._load_from_trace_file(ref_api_name, "RESPONSE")
                             if response_data and isinstance(response_data, dict):
                                 self.reference_context[ref_endpoint] = response_data
                                 print(f"[TRACE] {ref_endpoint} RESPONSE를 trace 파일에서 로드 (from validation rule)")
                 
-                # 3. 추가로 자신이 보낸 response도 로드 (기존 로직 유지)
-                if api_name:
-                    response_data = self._load_from_trace_file(api_name, "RESPONSE")
-                    if response_data and isinstance(response_data, dict):
-                        self.reference_context[f"/{api_name}"] = response_data
-                        print(f"[TRACE] /{api_name} RESPONSE를 trace 파일에서 로드")
+                        ref_endpoint_max = validation_rule.get("referenceEndpointMax", "")
+                        if ref_endpoint_max:
+                            ref_api_name_max = ref_endpoint_max.lstrip("/")
+                            response_data_max = self._load_from_trace_file(ref_api_name_max, "RESPONSE")
+                            if response_data_max and isinstance(response_data_max, dict):
+                                self.reference_context[ref_endpoint_max] = response_data_max
+                                print(f"[TRACE] {ref_endpoint_max} RESPONSE를 trace 파일에서 로드 (from validation rule)")
+                        
+                        ref_endpoint_min = validation_rule.get("referenceEndpointMin", "")
+                        if ref_endpoint_min:
+                            ref_api_name_min = ref_endpoint_min.lstrip("/")
+                            response_data_min = self._load_from_trace_file(ref_api_name_min, "RESPONSE")
+                            if response_data_min and isinstance(response_data_min, dict):
+                                self.reference_context[ref_endpoint_min] = response_data_min
+                                print(f"[TRACE] {ref_endpoint_min} RESPONSE를 trace 파일에서 로드 (from validation rule)")
+                # if api_name:
+                #     response_data = self._load_from_trace_file(api_name, "RESPONSE")
+                #     if response_data and isinstance(response_data, dict):
+                #         self.reference_context[f"/{api_name}"] = response_data
+                #         print(f"[TRACE] /{api_name} RESPONSE를 trace 파일에서 로드")
                 
 
                 if self.Server.message[self.cnt] in CONSTANTS.none_request_message:
