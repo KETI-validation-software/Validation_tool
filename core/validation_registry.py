@@ -50,8 +50,8 @@ def _collect_from_module(mod: ModuleType) -> Dict[str, Dict[str, Dict[str, Any]]
 
 @lru_cache(maxsize=16)
 def build_validation_registry(
-    request_module_path: str = "spec.Validation_request",
-    response_module_path: str = "spec.Validation_response",
+    request_module_path: str = "spec.validation_request",
+    response_module_path: str = "spec.validation_response",
 ) -> Dict[str, Dict[str, Dict[str, Any]]]:
 
     """
@@ -98,8 +98,8 @@ def get_validation_rules(
     spec_id: str,
     api_name: str,
     direction: str,
-    request_module_path: str = "spec.Validation_request",
-    response_module_path: str = "spec.Validation_response",
+    request_module_path: str = "spec.validation_request",
+    response_module_path: str = "spec.validation_response",
 ) -> Dict[str, Any]:
     """
     검증 규칙 반환

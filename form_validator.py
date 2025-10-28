@@ -228,7 +228,7 @@ class FormValidator:
             from core.functions import resource_path
             schema_output = resource_path(f"spec/Schema_{schema_type}.py")
             data_output = resource_path(f"spec/Data_{file_type}.py")
-            validation_output = resource_path(f"spec/Validation_{schema_type}.py")
+            validation_output = resource_path(f"spec/validation_{schema_type}.py")
             constraints_output = resource_path(f"spec/Constraints_{file_type}.py")
 
 
