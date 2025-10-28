@@ -646,8 +646,9 @@ class MyApp(QWidget):
         dict: 해당 API의 데이터, 없으면 None
     """
         try:
+            api_name_clean = api_name.lstrip("/")  # 앞의 '/' 제거
             # trace 파일 경로
-            trace_file = Path("results/trace") / f"trace_{api_name}.ndjson"
+            trace_file = Path("results/trace") / f"trace_{api_name_clean}.ndjson"
 
             if not trace_file.exists():
                 print(f"[DEBUG] trace 파일 없음: {trace_file}")
@@ -1099,14 +1100,31 @@ class MyApp(QWidget):
 
                 QApplication.processEvents()
 
-                # 1. request 검증용 데이터 로드
+                # 1. request 검증용 데이터 로드 - 현재 API의 REQUEST 로드
                 current_data = self._load_from_trace_file(api_name, "REQUEST") or {}
-                # 2. 맥락 검증ㅇ용 - 자신이 보낸 response 로드 (trace 폴더에서)
+                
+                # 2. 맥락 검증용 - current_validation의 각 필드별 referenceEndpoint에서 RESPONSE 로드
+                if current_validation:
+                    for field_path, validation_rule in current_validation.items():
+                        # referenceEndpoint 추출
+                        ref_endpoint = validation_rule.get("referenceEndpoint", "")
+                        if ref_endpoint:
+                            # '/' 제거하여 API 이름만 추출
+                            ref_api_name = ref_endpoint.lstrip("/")
+                            
+                            # 해당 referenceEndpoint의 RESPONSE 로드
+                            response_data = self._load_from_trace_file(ref_api_name, "RESPONSE")
+                            if response_data and isinstance(response_data, dict):
+                                self.reference_context[ref_endpoint] = response_data
+                                print(f"[TRACE] {ref_endpoint} RESPONSE를 trace 파일에서 로드 (from validation rule)")
+                
+                # 3. 추가로 자신이 보낸 response도 로드 (기존 로직 유지)
                 if api_name:
                     response_data = self._load_from_trace_file(api_name, "RESPONSE")
                     if response_data and isinstance(response_data, dict):
                         self.reference_context[f"/{api_name}"] = response_data
                         print(f"[TRACE] /{api_name} RESPONSE를 trace 파일에서 로드")
+                
 
                 if self.Server.message[self.cnt] in CONSTANTS.none_request_message:
                     # 매 시도마다 데이터 수집
