@@ -248,8 +248,8 @@
                   }
                 ],
                 "maxCount": 3,
-                "eventFilter": "화재",
-                "classFilter": "버스"
+                "eventFilter": "배회",
+                "classFilter": "트럭"
               },
               "validationErrors": [
                 "오류가 없습니다."
@@ -260,5 +260,5 @@
       ]
     }
   ],
-  "completedDate": "2025-10-28T12:02:42Z"
+  "completedDate": "2025-10-28T15:46:24Z"
 }
