@@ -1,16 +1,16 @@
 === 시험 결과 ===
-통과 필드 수: 72
-전체 필드 수: 78
-종합 평가 점수: 92.3%
+통과 필드 수: 65
+전체 필드 수: 69
+종합 평가 점수: 94.2%
 
 === 스텝별 결과 ===
 1. Authentication | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 5 | 전체 필드 수: 5 | 실패 필드 수: 0 | 평가 점수: 100.0%
 2. Capabilities | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 8 | 전체 필드 수: 8 | 실패 필드 수: 0 | 평가 점수: 100.0%
 3. CameraProfiles | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 12 | 전체 필드 수: 12 | 실패 필드 수: 0 | 평가 점수: 100.0%
-4. StoredVideoInfos | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 7 | 전체 필드 수: 7 | 실패 필드 수: 0 | 평가 점수: 100.0%
+4. StoredVideoInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 6 | 전체 필드 수: 7 | 실패 필드 수: 1 | 평가 점수: 85.7%
 5. StreamURLs | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 12 | 전체 필드 수: 12 | 실패 필드 수: 0 | 평가 점수: 100.0%
 6. ReplayURL | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 13 | 전체 필드 수: 14 | 실패 필드 수: 1 | 평가 점수: 92.9%
-7. RealtimeVideoEventInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 8 | 전체 필드 수: 11 | 실패 필드 수: 3 | 평가 점수: 72.7%
+7. RealtimeVideoEventInfos | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 2 | 전체 필드 수: 2 | 실패 필드 수: 0 | 평가 점수: 100.0%
 8. StoredVideoEventInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 7 | 전체 필드 수: 9 | 실패 필드 수: 2 | 평가 점수: 77.8%
 
 === 전체 로그 ===
@@ -112,37 +112,20 @@ step 4: StoredVideoInfos (시도 1/1)
     "message": "성공",
     "camList": [
         {
-            "camID": "cam0001",
+            "camID": "",
             "timeList": [
                 {
-                    "startTime": 1761053605660,
-                    "endTime": 1761076835729
-                },
-                {
-                    "startTime": 1761092239314,
-                    "endTime": 1761101098317
-                }
-            ]
-        },
-        {
-            "camID": "cam0002",
-            "timeList": [
-                {
-                    "startTime": 1760956280822,
-                    "endTime": 1761051268839
-                },
-                {
-                    "startTime": 1761050046540,
-                    "endTime": 1761110561104
+                    "startTime": 1761090955643,
+                    "endTime": 1761101583870
                 }
             ]
         }
     ]
 }
 
-검증 결과: PASS
-Score : 100.0
-Score details : 32(누적 통과 필드 수), 0(누적 오류 필드 수)
+검증 결과: FAIL
+Score : 96.875
+Score details : 31(누적 통과 필드 수), 1(누적 오류 필드 수)
 
 step 5: StreamURLs (시도 1/1)
 
@@ -154,19 +137,7 @@ step 5: StreamURLs (시도 1/1)
     "message": "성공",
     "camList": [
         {
-            "camID": "cam0001",
-            "accessID": "conn0001",
-            "accessPW": "1234",
-            "camURL": "rtsp://192.168.0.5:8000",
-            "videoInfo": {
-                "resolution": "1920x1080",
-                "fps": "30",
-                "videoCodec": "H.264",
-                "audioCodec": "G.711"
-            }
-        },
-        {
-            "camID": "cam0002",
+            "camID": "",
             "accessID": "conn0001",
             "accessPW": "1234",
             "camURL": "rtsp://192.168.0.5:8000",
@@ -181,8 +152,8 @@ step 5: StreamURLs (시도 1/1)
 }
 
 검증 결과: PASS
-Score : 100.0
-Score details : 44(누적 통과 필드 수), 0(누적 오류 필드 수)
+Score : 97.72727272727273
+Score details : 43(누적 통과 필드 수), 1(누적 오류 필드 수)
 
 step 6: ReplayURL (시도 1/1)
 
@@ -194,25 +165,11 @@ step 6: ReplayURL (시도 1/1)
     "message": "200",
     "camList": [
         {
-            "camID": "cam0001",
+            "camID": "",
             "accessID": "cam0001",
             "accessPW": "conn0001",
-            "startTime": 1760953334874,
-            "endTime": 1761090933588,
-            "camURL": "rtsp://192.168.0.5:8000",
-            "videoInfo": {
-                "resolution": "1920x1080",
-                "fps": "30",
-                "videoCodec": "H.264",
-                "audioCodec": "G.711"
-            }
-        },
-        {
-            "camID": "cam0002",
-            "accessID": "cam0001",
-            "accessPW": "conn0001",
-            "startTime": 1761028267353,
-            "endTime": 1761106154944,
+            "startTime": 1761039302829,
+            "endTime": 1761180845895,
             "camURL": "rtsp://192.168.0.5:8000",
             "videoInfo": {
                 "resolution": "1920x1080",
@@ -226,8 +183,8 @@ step 6: ReplayURL (시도 1/1)
 
 검증 결과: FAIL
 ⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
-Score : 98.27586206896551
-Score details : 57(누적 통과 필드 수), 1(누적 오류 필드 수)
+Score : 96.55172413793103
+Score details : 56(누적 통과 필드 수), 2(누적 오류 필드 수)
 
 step 7: RealtimeVideoEventInfos (시도 1/1)
 
@@ -241,30 +198,8 @@ step 7: RealtimeVideoEventInfos (시도 1/1)
 }
 
 검증 결과: PASS
-Score : 98.33333333333333
-Score details : 59(누적 통과 필드 수), 1(누적 오류 필드 수)
-
-step 7: RealtimeVideoEventInfos
-
-=== 웹훅 이벤트 데이터 ===
-{
-    "camList": [
-        {
-            "camID": "",
-            "eventUUID": "event01",
-            "eventName": "",
-            "startTime": "",
-            "endTime": "",
-            "eventDesc": "aaabbbAAA"
-        }
-    ]
-}
-
-웹훅 검증 결과: FAIL
-
-⚠️  웹훅 데이터 검증 실패
-Score : 94.20289855072464
-Score details : 65(누적 통과 필드 수), 4(누적 오류 필드 수)
+Score : 96.66666666666667
+Score details : 58(누적 통과 필드 수), 2(누적 오류 필드 수)
 
 step 8: StoredVideoEventInfos (시도 1/1)
 
@@ -276,26 +211,18 @@ step 8: StoredVideoEventInfos (시도 1/1)
     "message": "성공",
     "camList": [
         {
-            "camID": "cam0001",
+            "camID": "",
             "eventUUID": "event01",
-            "eventName": "화재",
-            "startTime": 5334983810253,
-            "endTime": 9586647711314,
-            "eventDesc": "aaabbbAAA"
-        },
-        {
-            "camID": "cam0002",
-            "eventUUID": "event01",
-            "eventName": "화재",
-            "startTime": 2472007155171,
-            "endTime": 8410724836827,
+            "eventName": "",
+            "startTime": 8478048571318,
+            "endTime": 8950582761417,
             "eventDesc": "aaabbbAAA"
         }
     ]
 }
 
 검증 결과: FAIL
-Score : 92.3076923076923
-Score details : 72(누적 통과 필드 수), 6(누적 오류 필드 수)
+Score : 94.20289855072464
+Score details : 65(누적 통과 필드 수), 4(누적 오류 필드 수)
 
 검증 절차가 완료되었습니다.
