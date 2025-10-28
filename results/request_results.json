@@ -18,15 +18,15 @@
   "status": "완료",
   "authMethod": "Bearer Token",
   "testScore": {
-    "score": 66.67,
+    "score": 75.0,
     "totalFields": 36,
-    "passedFields": 24,
-    "failedFields": 12
+    "passedFields": 27,
+    "failedFields": 9
   },
   "testResult": [
     {
       "testSpecId": "cmgvieyak001b6cd04cgaawmm",
-      "score": 66.67,
+      "score": 75.0,
       "apis": [
         {
           "id": "step-1-77lxvxrit",
@@ -111,7 +111,10 @@
                 },
                 "camList": [
                   {
-                    "camID": ""
+                    "camID": "cam0001"
+                  },
+                  {
+                    "camID": "cam0002"
                   }
                 ]
               },
@@ -126,24 +129,28 @@
           "name": "실시간 영상 정보 연동",
           "method": "POST",
           "endpoint": "/StreamURLs",
-          "score": 67.0,
+          "score": 100.0,
           "validationCnt": 1,
           "totalFields": 3,
-          "passFields": 2,
-          "failFields": 1,
+          "passFields": 3,
+          "failFields": 0,
           "validations": [
             {
               "attempt": 1,
               "validationData": {
                 "camList": [
                   {
-                    "camID": "",
+                    "camID": "cam0001",
+                    "streamProtocolType": "RTSP"
+                  },
+                  {
+                    "camID": "cam0002",
                     "streamProtocolType": "RTSP"
                   }
                 ]
               },
               "validationErrors": [
-                "[Inbound]\n[의미] camList.camID: 값 불일치:  (index 0)가 camID(['cam0001', 'cam0002'])에 없음"
+                "오류가 없습니다."
               ]
             }
           ]
@@ -153,18 +160,24 @@
           "name": "저장된 영상 정보 연동",
           "method": "POST",
           "endpoint": "/ReplayURL",
-          "score": 80.0,
+          "score": 100.0,
           "validationCnt": 1,
           "totalFields": 5,
-          "passFields": 4,
-          "failFields": 1,
+          "passFields": 5,
+          "failFields": 0,
           "validations": [
             {
               "attempt": 1,
               "validationData": {
                 "camList": [
                   {
-                    "camID": "",
+                    "camID": "cam0001",
+                    "startTime": 1760949060000,
+                    "endTime": 1761208260000,
+                    "streamProtocolType": "RTSP"
+                  },
+                  {
+                    "camID": "cam0002",
                     "startTime": 1760949060000,
                     "endTime": 1761208260000,
                     "streamProtocolType": "RTSP"
@@ -172,7 +185,7 @@
                 ]
               },
               "validationErrors": [
-                "[Inbound]\n[의미] camList.camID: 값 불일치:  (index 0)가 camID(['cam0001', 'cam0002'])에 없음"
+                "오류가 없습니다."
               ]
             }
           ]
@@ -213,11 +226,11 @@
           "name": "저장된 이벤트 분석 정보 연동",
           "method": "POST",
           "endpoint": "/StoredVideoEventInfos",
-          "score": 88.0,
+          "score": 100.0,
           "validationCnt": 1,
           "totalFields": 8,
-          "passFields": 7,
-          "failFields": 1,
+          "passFields": 8,
+          "failFields": 0,
           "validations": [
             {
               "attempt": 1,
@@ -228,15 +241,18 @@
                 },
                 "camList": [
                   {
-                    "camID": ""
+                    "camID": "cam0001"
+                  },
+                  {
+                    "camID": "cam0002"
                   }
                 ],
                 "maxCount": 3,
-                "eventFilter": "",
-                "classFilter": ""
+                "eventFilter": "화재",
+                "classFilter": "버스"
               },
               "validationErrors": [
-                "[Inbound]\n[의미] camList.camID: 값 불일치:  (index 0)가 camID(['cam0001', 'cam0002'])에 없음"
+                "오류가 없습니다."
               ]
             }
           ]
@@ -244,5 +260,5 @@
       ]
     }
   ],
-  "completedDate": "2025-10-28T09:52:50Z"
+  "completedDate": "2025-10-28T12:02:42Z"
 }
