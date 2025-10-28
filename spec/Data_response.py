@@ -87,7 +87,7 @@ cmgvieyak001b6cd04cgaawmm_StreamURLs_out_data = {
         "camID": "",
         "accessID": "conn0001",
         "accessPW": "1234",
-        "camURL": "rtsp://192.168.0.5:8000",
+        "camURL": "rtsp://127.0.01:8554",
         "videoInfo": {
         "resolution": "1920x1080",
         "fps": "30",
@@ -122,22 +122,25 @@ cmgvieyak001b6cd04cgaawmm_ReplayURL_out_data = {
 
 # RealtimeVideoEventInfos
 cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_out_data = {
-    "code": "200",
-    "message": "성공"
+    "code": "",
+    "message": ""
 }
 
 # RealtimeVideoEventInfos WebHook IN Data
 cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_webhook_in_data = {
     "camList": [
         {
-        "camID": "",
-        "eventUUID": "event01",
-        "eventName": "",
-        "startTime": "",
-        "endTime": "",
-        "eventDesc": "aaabbbAAA"
+        "camID": ""
     }
-]
+],
+    "duration": 0,
+    "transProtocol": {
+    "transProtocolType": "",
+    "transProtocolDesc": ""
+},
+    "eventFilter": "",
+    "classFilter": "",
+    "startTime": 0
 }
 
 # StoredVideoEventInfos
