@@ -258,6 +258,14 @@ def _validate_field_semantic(field_path, field_value, rule, data, reference_cont
     elif validation_type == "response-field-match":
         return _validate_field_match(field_path, field_value, rule, reference_context,
                                      field_errors, global_errors)
+    
+    elif validation_type == "request-field-range-match":
+        return _validate_range_match(field_path, field_value, rule, reference_context,
+                                     field_errors, global_errors)
+    
+    elif validation_type == "request-field-list-match":
+        return _validate_list_match(field_path, field_value, rule, data, reference_context,
+                                    field_errors, global_errors)
     else:
         print(f"  ⚠ 미지원 validationType: {validation_type}")
         return True
@@ -357,6 +365,55 @@ def _validate_field_match(field_path, field_value, rule, reference_context,
         return False
 
     return True
+
+
+def _validate_range_match(field_path, field_value, rule, reference_context,
+                          field_errors, global_errors):
+    """필드 값이 참조 범위 내에 있는지 검증"""
+    from core.json_checker_new import collect_all_values_by_key
+    
+    ref_field_max = rule.get('referenceFieldMax')
+    ref_field_min = rule.get('referenceFieldMin')
+    ref_endpoint_max = rule.get('referenceEndpointMax')
+    ref_endpoint_min = rule.get('referenceEndpointMin')
+    ref_operator = rule.get('referenceRangeOperator', 'between')
+    
+    max_value = None
+    min_value = None
+    
+    # 1) referenceEndpointMax에서 max 값 추출
+    if ref_endpoint_max and ref_endpoint_max in reference_context:
+        max_data = reference_context[ref_endpoint_max]
+        if ref_field_max:
+            max_values = collect_all_values_by_key(max_data, ref_field_max)
+            if max_values and isinstance(max_values, list) and len(max_values) > 0:
+                max_value = max(max_values)
+                print(f"  [DEBUG] Max value from {ref_endpoint_max}.{ref_field_max}: {max_value}")
+    
+    # 2) referenceEndpointMin에서 min 값 추출
+    if ref_endpoint_min and ref_endpoint_min in reference_context:
+        min_data = reference_context[ref_endpoint_min]
+        if ref_field_min:
+            min_values = collect_all_values_by_key(min_data, ref_field_min)
+            if min_values and isinstance(min_values, list) and len(min_values) > 0:
+                min_value = min(min_values)
+                print(f"  [DEBUG] Min value from {ref_endpoint_min}.{ref_field_min}: {min_value}")
+    
+    # 3) range 검증 수행
+    if ref_operator == 'between' and min_value is not None and max_value is not None:
+        if not (min_value <= field_value <= max_value):
+            error_msg = f"범위 초과: {field_value}가 [{min_value}, {max_value}] 범위를 벗어남"
+            field_errors.append(error_msg)
+            global_errors.append(f"[의미] {field_path}: {error_msg}")
+            return False
+        else:
+            print(f"  [DEBUG] ✅ Value {field_value} is between {min_value} and {max_value}")
+            return True
+    else:
+        error_msg = f"범위 검증 실패: min={min_value}, max={max_value}, operator={ref_operator}"
+        field_errors.append(error_msg)
+        global_errors.append(f"[의미] {field_path}: {error_msg}")
+        return False
 
 
 # ================================================================
@@ -749,4 +806,3 @@ def save_result_json(myapp_instance, output_path="results/validation_result.json
 
     print(f"검증 결과가 '{output_path}'에 저장되었습니다.")
     return output_path
-

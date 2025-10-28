@@ -91,54 +91,7 @@ cmgvieyak001b6cd04cgaawmm_ReplayURL_out_constraints = {
 cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_out_constraints = {}
 
 # RealtimeVideoEventInfos WebHook IN Constraints
-cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_webhook_in_constraints = {
-  "camList.camID": {
-    "valueType": "request-based",
-    "required": True,
-    "referenceEndpoint": "/RealtimeVideoEventInfos",
-    "referenceField": "camID",
-    "validation": {
-      "enabled": False,
-      "validationType": "specified-value-match"
-    }
-  },
-  "camList.eventName": {
-    "valueType": "request-based",
-    "required": True,
-    "validation": {
-      "enabled": False,
-      "validationType": "specified-value-match"
-    }
-  },
-  "camList.startTime": {
-    "valueType": "request-range",
-    "required": True,
-    "requestRange": {
-      "minField": "startTime",
-      "operator": "greater-equal",
-      "minEndpoint": "/RealtimeVideoEventInfos"
-    },
-    "requestRangeMinEndpoint": "/RealtimeVideoEventInfos",
-    "validation": {
-      "enabled": False,
-      "validationType": "specified-value-match"
-    }
-  },
-  "camList.endTime": {
-    "valueType": "request-range",
-    "required": True,
-    "requestRange": {
-      "minField": "startTime",
-      "operator": "greater-equal",
-      "minEndpoint": "/RealtimeVideoEventInfos"
-    },
-    "requestRangeMinEndpoint": "/RealtimeVideoEventInfos",
-    "validation": {
-      "enabled": False,
-      "validationType": "specified-value-match"
-    }
-  }
-}
+cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_webhook_in_constraints = {}
 
 # StoredVideoEventInfos
 cmgvieyak001b6cd04cgaawmm_StoredVideoEventInfos_out_constraints = {

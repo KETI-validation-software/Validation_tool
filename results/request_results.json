@@ -18,15 +18,15 @@
   "status": "완료",
   "authMethod": "Bearer Token",
   "testScore": {
-    "score": 75.0,
+    "score": 77.78,
     "totalFields": 36,
-    "passedFields": 27,
-    "failedFields": 9
+    "passedFields": 28,
+    "failedFields": 8
   },
   "testResult": [
     {
       "testSpecId": "cmgvieyak001b6cd04cgaawmm",
-      "score": 75.0,
+      "score": 77.78,
       "apis": [
         {
           "id": "step-1-77lxvxrit",
@@ -195,11 +195,11 @@
           "name": "실시간 이벤트 분석 정보 연동",
           "method": "POST",
           "endpoint": "/RealtimeVideoEventInfos",
-          "score": 18.0,
+          "score": 27.0,
           "validationCnt": 1,
           "totalFields": 11,
-          "passFields": 2,
-          "failFields": 9,
+          "passFields": 3,
+          "failFields": 8,
           "validations": [
             {
               "attempt": 1,
@@ -216,7 +216,7 @@
                 ]
               },
               "validationErrors": [
-                "[Inbound]\n[의미] camList.camID: 값 불일치:  (index 0)가 camID(['cam0001', 'cam0002'])에 없음\n[구조] 필수 필드 누락: classFilter\n[구조] 필수 필드 누락: duration\n[구조] 필수 필드 누락: eventFilter\n[구조] 필수 필드 누락: startTime\n[구조] 필수 필드 누락: transProtocol\n[구조] 필수 필드 누락: transProtocol.transProtocolDesc\n[구조] 필수 필드 누락: transProtocol.transProtocolType\n--- Webhook 검증 ---\n[구조] 타입 불일치: code (예상: str, 실제: int)"
+                "[Inbound]\n[구조] 필수 필드 누락: classFilter\n[구조] 필수 필드 누락: duration\n[구조] 필수 필드 누락: eventFilter\n[구조] 필수 필드 누락: startTime\n[구조] 필수 필드 누락: transProtocol\n[구조] 필수 필드 누락: transProtocol.transProtocolDesc\n[구조] 필수 필드 누락: transProtocol.transProtocolType\n--- Webhook 검증 ---\n[구조] 타입 불일치: code (예상: str, 실제: int)"
               ]
             }
           ]
@@ -248,7 +248,7 @@
                   }
                 ],
                 "maxCount": 3,
-                "eventFilter": "화재",
+                "eventFilter": "배회",
                 "classFilter": "트럭"
               },
               "validationErrors": [
@@ -260,5 +260,5 @@
       ]
     }
   ],
-  "completedDate": "2025-10-28T16:59:49Z"
+  "completedDate": "2025-10-28T17:12:30Z"
 }
