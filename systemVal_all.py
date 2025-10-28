@@ -100,7 +100,7 @@ class CombinedDetailDialog(QDialog):
         error_text = step_buffer["error"] if step_buffer["error"] else ("오류가 없습니다." if result == "PASS" else "오류 내용 없음")
         # 예시: 값이 범위에 맞지 않거나 타입이 다를 때 추가 설명
         if result == "FAIL" and error_text and isinstance(error_text, str):
-            # 간단한 규칙 기반 설명 추가 (실제 검증 로직에 맞게 확장 가능)
+            # 간단한 규칙 기반 설명 추가 (실제 검증 로직에 맞게 확장 가능) - (10/28) 수정해야함
             if "startTime" in error_text or "endTime" in error_text:
                 error_text += "\n[설명] startTime 또는 endTime 값이 허용된 범위에 맞지 않거나, 요청값과 다릅니다."
             if "camID" in error_text and '""' in error_text:
@@ -1572,6 +1572,56 @@ class MyApp(QWidget):
                         resp_rules = {}
                         print(f"[ERROR] 응답 검증 규칙 로드 실패: {e}")
 
+                    # 🆕 응답 검증용 - resp_rules의 각 필드별 referenceEndpoint/Max/Min에서 trace 파일 로드
+                    if resp_rules:
+                        for field_path, validation_rule in resp_rules.items():
+                            # 1) referenceEndpoint 처리
+                            ref_endpoint = validation_rule.get("referenceEndpoint", "")
+                            if ref_endpoint:
+                                ref_api_name = ref_endpoint.lstrip("/")
+                                # latest_events에 없으면 trace 파일에서 로드
+                                if ref_api_name not in self.latest_events or "RESPONSE" not in self.latest_events.get(ref_api_name, {}):
+                                    print(f"[TRACE] {ref_endpoint} RESPONSE를 trace 파일에서 로드 시도")
+                                    response_data = self._load_from_trace_file(ref_api_name, "RESPONSE")
+                                    if response_data and isinstance(response_data, dict):
+                                        self.reference_context[ref_endpoint] = response_data
+                                        print(f"[TRACE] {ref_endpoint} RESPONSE를 trace 파일에서 로드 완료")
+                                else:
+                                    # latest_events에 있으면 거기서 가져오기
+                                    event_data = self.latest_events.get(ref_api_name, {}).get("RESPONSE", {})
+                                    if event_data and isinstance(event_data, dict):
+                                        self.reference_context[ref_endpoint] = event_data.get("data", {})
+                            
+                            # 2) referenceEndpointMax 처리
+                            ref_endpoint_max = validation_rule.get("referenceEndpointMax", "")
+                            if ref_endpoint_max:
+                                ref_api_name_max = ref_endpoint_max.lstrip("/")
+                                if ref_api_name_max not in self.latest_events or "RESPONSE" not in self.latest_events.get(ref_api_name_max, {}):
+                                    print(f"[TRACE] {ref_endpoint_max} RESPONSE를 trace 파일에서 로드 시도 (Max)")
+                                    response_data_max = self._load_from_trace_file(ref_api_name_max, "RESPONSE")
+                                    if response_data_max and isinstance(response_data_max, dict):
+                                        self.reference_context[ref_endpoint_max] = response_data_max
+                                        print(f"[TRACE] {ref_endpoint_max} RESPONSE를 trace 파일에서 로드 완료 (Max)")
+                                else:
+                                    event_data = self.latest_events.get(ref_api_name_max, {}).get("RESPONSE", {})
+                                    if event_data and isinstance(event_data, dict):
+                                        self.reference_context[ref_endpoint_max] = event_data.get("data", {})
+                            
+                            # 3) referenceEndpointMin 처리
+                            ref_endpoint_min = validation_rule.get("referenceEndpointMin", "")
+                            if ref_endpoint_min:
+                                ref_api_name_min = ref_endpoint_min.lstrip("/")
+                                if ref_api_name_min not in self.latest_events or "RESPONSE" not in self.latest_events.get(ref_api_name_min, {}):
+                                    print(f"[TRACE] {ref_endpoint_min} RESPONSE를 trace 파일에서 로드 시도 (Min)")
+                                    response_data_min = self._load_from_trace_file(ref_api_name_min, "RESPONSE")
+                                    if response_data_min and isinstance(response_data_min, dict):
+                                        self.reference_context[ref_endpoint_min] = response_data_min
+                                        print(f"[TRACE] {ref_endpoint_min} RESPONSE를 trace 파일에서 로드 완료 (Min)")
+                                else:
+                                    event_data = self.latest_events.get(ref_api_name_min, {}).get("RESPONSE", {})
+                                    if event_data and isinstance(event_data, dict):
+                                        self.reference_context[ref_endpoint_min] = event_data.get("data", {})
+
                     try:
                         val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(
                             self.outSchema[self.cnt],
@@ -2160,12 +2210,12 @@ class MyApp(QWidget):
                         webhook_schema = f"{self.current_spec_id}_webhook_inSchema"
                         self.webhookInSchema = getattr(schema_response_module, webhook_schema, [])
 
-                        if isinstance(self.webhookInSchema, list):
-                            webhook_indices = [i for i, name in enumerate(self.videoMessages) if name is not None]
-                            if webhook_indices:
-                                print(f"[DEBUG] 웹훅 스키마 인덱스: {webhook_indices}")
-                            else:
-                                print(f"[DEBUG] 웹훅 스키마 인덱스가 없습니다.")
+                        # 확인하고 있는 부분 - 현재 여기 기능은 platformVal에 내장되어 있는 상황
+                            # webhook_indices = [i for i, name in enumerate(self.videoMessages) if name is not None]
+                            # if webhook_indices:
+                            #     print(f"[DEBUG] 웹훅 스키마 인덱스: {webhook_indices}")
+                            # else:
+                            #     print(f"[DEBUG] 웹훅 스키마 인덱스가 없습니다.")
                         webhook_schema = self.webhookInSchema[0] if len(self.webhookInSchema) > 0 else None
                     except Exception as e:
                         print(f"[ERROR] 웹훅 스키마 로드 실패: {e}")
