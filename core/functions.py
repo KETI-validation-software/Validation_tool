@@ -15,6 +15,7 @@ import json
 from datetime import datetime
 import uuid
 import config.CONSTANTS as CONSTANTS
+import re
 
 def resource_path(relative_path):
     try:
@@ -119,7 +120,6 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
                     print(f"  ✅ 구조: 타입 일치 ({expected_type.__name__})")
             # 구조 검증 통과
             field_results[field_path]["struct_pass"] = True
-            # total_correct += 1  # 여기서 카운트하지 않음 - 의미 검증 결과 확인 후 카운트
 
             # 4-3) 의미 검증 (구조 통과한 경우에만 수행)
             if field_path not in rules_dict:
@@ -266,6 +266,47 @@ def _validate_field_semantic(field_path, field_value, rule, data, reference_cont
     elif validation_type == "request-field-list-match":
         return _validate_list_match(field_path, field_value, rule, data, reference_context,
                                     field_errors, global_errors)
+    
+    elif validation_type == "request-field-match":
+        return _validate_field_match(field_path, field_value, rule, reference_context,
+                                     field_errors, global_errors)
+
+    elif validation_type == "response-field-range-match":
+        return _validate_range_match(field_path, field_value, rule, reference_context,
+                                     field_errors, global_errors)
+    
+    elif validation_type == "valid-value-match":
+        return _validate_valid_value_match(field_path, field_value, rule,
+                                          field_errors, global_errors)
+    
+    elif validation_type == "specified-value-match":
+        return _validate_specified_value_match(field_path, field_value, rule,
+                                               field_errors, global_errors)
+    
+    elif validation_type == "range-match":
+        return _validate_range_match_direct(field_path, field_value, rule,
+                                           field_errors, global_errors)
+    
+    elif validation_type == "length":
+        return _validate_length(field_path, field_value, rule,
+                               field_errors, global_errors)
+    
+    elif validation_type == "regex":
+        return _validate_regex(field_path, field_value, rule,
+                              field_errors, global_errors)
+    
+    elif validation_type == "required":
+        return _validate_required(field_path, field_value, rule,
+                                 field_errors, global_errors)
+    
+    elif validation_type == "unique":
+        return _validate_unique(field_path, field_value, rule,
+                               field_errors, global_errors)
+    
+    elif validation_type == "custom":
+        return _validate_custom(field_path, field_value, rule,
+                               field_errors, global_errors)
+    
     else:
         print(f"  ⚠ 미지원 validationType: {validation_type}")
         return True
@@ -414,6 +455,229 @@ def _validate_range_match(field_path, field_value, rule, reference_context,
         field_errors.append(error_msg)
         global_errors.append(f"[의미] {field_path}: {error_msg}")
         return False
+
+
+def _validate_valid_value_match(field_path, field_value, rule, field_errors, global_errors):
+    """허용된 값 목록과 일치하는지 검증"""
+    allowed = rule.get('allowedValues', [])
+    operator = rule.get('validValueOperator', 'equalsAny')
+    
+    if operator == 'equals':
+        # 단일 값만 허용 (allowed가 리스트이면 첫 값 기준)
+        expected = allowed[0] if allowed else None
+        if field_value != expected:
+            error_msg = f"값 불일치: {field_value} != 예상값 {expected}"
+            field_errors.append(error_msg)
+            global_errors.append(f"[의미] {field_path}: {error_msg}")
+            return False
+    else:  # equalsAny
+        if field_value not in allowed:
+            error_msg = f"값 불일치: {field_value}가 허용값 목록 {allowed}에 없음"
+            field_errors.append(error_msg)
+            global_errors.append(f"[의미] {field_path}: {error_msg}")
+            return False
+    
+    return True
+
+
+def _validate_specified_value_match(field_path, field_value, rule, field_errors, global_errors):
+    """지정된 값과 일치하는지 검증"""
+    specified = rule.get('allowedValues', [])
+    
+    if field_value not in specified:
+        error_msg = f"값 불일치: {field_value}가 지정값 {specified}에 없음"
+        field_errors.append(error_msg)
+        global_errors.append(f"[의미] {field_path}: {error_msg}")
+        return False
+    
+    return True
+
+
+def _validate_range_match_direct(field_path, field_value, rule, field_errors, global_errors):
+    """직접 범위 검증 (reference 없이)"""
+    operator = rule.get('rangeOperator')
+    min_val = rule.get('rangeMin')
+    max_val = rule.get('rangeMax')
+    
+    # 리스트인 경우 모든 요소 검증
+    values = [field_value] if not isinstance(field_value, list) else field_value
+    
+    for v in values:
+        try:
+            v_num = float(v)
+        except (ValueError, TypeError):
+            error_msg = f"숫자 변환 실패: {v}"
+            field_errors.append(error_msg)
+            global_errors.append(f"[의미] {field_path}: {error_msg}")
+            return False
+        
+        if operator == 'less-than' and max_val is not None:
+            if not (v_num < max_val):
+                error_msg = f"범위 초과: {v_num} >= {max_val}"
+                field_errors.append(error_msg)
+                global_errors.append(f"[의미] {field_path}: {error_msg}")
+                return False
+        
+        elif operator == 'less-equal' and max_val is not None:
+            if not (v_num <= max_val):
+                error_msg = f"범위 초과: {v_num} > {max_val}"
+                field_errors.append(error_msg)
+                global_errors.append(f"[의미] {field_path}: {error_msg}")
+                return False
+        
+        elif operator == 'between':
+            if (min_val is not None and v_num < min_val) or (max_val is not None and v_num > max_val):
+                error_msg = f"범위 초과: {v_num}이 [{min_val}, {max_val}] 범위를 벗어남"
+                field_errors.append(error_msg)
+                global_errors.append(f"[의미] {field_path}: {error_msg}")
+                return False
+        
+        elif operator == 'greater-equal' and min_val is not None:
+            if not (v_num >= min_val):
+                error_msg = f"범위 미달: {v_num} < {min_val}"
+                field_errors.append(error_msg)
+                global_errors.append(f"[의미] {field_path}: {error_msg}")
+                return False
+        
+        elif operator == 'greater-than' and min_val is not None:
+            if not (v_num > min_val):
+                error_msg = f"범위 미달: {v_num} <= {min_val}"
+                field_errors.append(error_msg)
+                global_errors.append(f"[의미] {field_path}: {error_msg}")
+                return False
+    
+    return True
+
+
+def _validate_length(field_path, field_value, rule, field_errors, global_errors):
+    """길이 검증"""
+    min_length = rule.get('minLength')
+    max_length = rule.get('maxLength')
+    
+    # 리스트인 경우 모든 요소 검증
+    values = [field_value] if not isinstance(field_value, list) else field_value
+    
+    for v in values:
+        try:
+            length = len(v)
+        except TypeError:
+            error_msg = f"길이 측정 불가: {v}"
+            field_errors.append(error_msg)
+            global_errors.append(f"[의미] {field_path}: {error_msg}")
+            return False
+        
+        if (min_length is not None and length < min_length) or \
+           (max_length is not None and length > max_length):
+            error_msg = f"길이 불일치: {length}가 [{min_length}, {max_length}] 범위를 벗어남"
+            field_errors.append(error_msg)
+            global_errors.append(f"[의미] {field_path}: {error_msg}")
+            return False
+    
+    return True
+
+
+def _validate_regex(field_path, field_value, rule, field_errors, global_errors):
+    """정규식 검증"""
+    pattern = rule.get('pattern')
+    
+    if pattern is None:
+        error_msg = "정규식 패턴이 지정되지 않음"
+        field_errors.append(error_msg)
+        global_errors.append(f"[의미] {field_path}: {error_msg}")
+        return False
+    
+    # 리스트인 경우 모든 요소 검증
+    values = [field_value] if not isinstance(field_value, list) else field_value
+    
+    try:
+        for v in values:
+            if re.fullmatch(pattern, str(v)) is None:
+                error_msg = f"패턴 불일치: {v}가 패턴 /{pattern}/와 일치하지 않음"
+                field_errors.append(error_msg)
+                global_errors.append(f"[의미] {field_path}: {error_msg}")
+                return False
+    except Exception as e:
+        error_msg = f"정규식 검증 오류: {e}"
+        field_errors.append(error_msg)
+        global_errors.append(f"[의미] {field_path}: {error_msg}")
+        return False
+    
+    return True
+
+
+def _validate_required(field_path, field_value, rule, field_errors, global_errors):
+    """필수 필드 검증"""
+    # 리스트인 경우 모든 요소 검증
+    values = [field_value] if not isinstance(field_value, list) else field_value
+    
+    if field_value is None or (len(values) == 1 and values[0] in (None, '')):
+        error_msg = "필수 필드가 비어있음"
+        field_errors.append(error_msg)
+        global_errors.append(f"[의미] {field_path}: {error_msg}")
+        return False
+    
+    return True
+
+
+def _validate_unique(field_path, field_value, rule, field_errors, global_errors):
+    """유일성 검증 (리스트 내 중복 체크)"""
+    if not isinstance(field_value, list):
+        error_msg = "유일성 검증은 리스트에만 적용 가능"
+        field_errors.append(error_msg)
+        global_errors.append(f"[의미] {field_path}: {error_msg}")
+        return False
+    
+    # 해시 가능한 항목과 불가능한 항목 분리
+    hashable_items = []
+    unhashable_items = []
+    
+    for item in field_value:
+        try:
+            hash(item)
+            hashable_items.append(item)
+        except TypeError:
+            unhashable_items.append(repr(item))
+    
+    # 해시 가능한 항목 중복 체크
+    if hashable_items and len(hashable_items) != len(set(hashable_items)):
+        error_msg = "리스트에 중복된 값이 있음"
+        field_errors.append(error_msg)
+        global_errors.append(f"[의미] {field_path}: {error_msg}")
+        return False
+    
+    # 해시 불가능한 항목 중복 체크 (repr 기반)
+    if unhashable_items and len(unhashable_items) != len(set(unhashable_items)):
+        error_msg = "리스트에 중복된 복합 객체가 있음"
+        field_errors.append(error_msg)
+        global_errors.append(f"[의미] {field_path}: {error_msg}")
+        return False
+    
+    return True
+
+
+def _validate_custom(field_path, field_value, rule, field_errors, global_errors):
+    """커스텀 함수 검증"""
+    func = rule.get('customFunction')
+    
+    if not callable(func):
+        error_msg = "커스텀 검증 함수가 제공되지 않음"
+        field_errors.append(error_msg)
+        global_errors.append(f"[의미] {field_path}: {error_msg}")
+        return False
+    
+    try:
+        if not func(field_value):
+            error_msg = f"커스텀 검증 실패: {field_value}"
+            field_errors.append(error_msg)
+            global_errors.append(f"[의미] {field_path}: {error_msg}")
+            return False
+    except Exception as e:
+        error_msg = f"커스텀 검증 오류: {e}"
+        field_errors.append(error_msg)
+        global_errors.append(f"[의미] {field_path}: {error_msg}")
+        return False
+    
+    return True
 
 
 # ================================================================
