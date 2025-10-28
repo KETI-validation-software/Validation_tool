@@ -11,6 +11,7 @@ from config import CONSTANTS
 # 분리된 모듈들 import
 from network_scanner import NetworkScanWorker
 from form_validator import FormValidator
+from core.functions import resource_path
 import importlib
 import config.CONSTANTS as CONSTANTS
 
