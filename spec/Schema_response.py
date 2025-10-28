@@ -104,15 +104,12 @@ cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_out_schema = {
 cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_webhook_in_schema = {
     "camList": [{
     "camID": str,
+    "eventUUID": str,
+    "eventName": str,
+    "startTime": int,
+    OptionalKey("endTime"): int,
+    OptionalKey("eventDesc"): str,
 }],
-    "duration": str,
-    "transProtocol": {
-    "transProtocolType": str,
-    OptionalKey("transProtocolDesc"): str,
-},
-    OptionalKey("eventFilter"): str,
-    OptionalKey("classFilter"): str,
-    OptionalKey("startTime"): int,
 }
 
 # StoredVideoEventInfos

@@ -46,15 +46,12 @@ cmgvieyak001b6cd04cgaawmm_ReplayURL_in_schema = {
 cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_in_schema = {
     "camList": [{
     "camID": str,
+    "eventUUID": str,
+    "eventName": str,
+    "startTime": str,
+    "endTime": str,
+    "eventDesc": str,
 }],
-    "duration": int,
-    "transProtocol": {
-    "transProtocolType": str,
-    "transProtocolDesc": str,
-},
-    "eventFilter": str,
-    "classFilter": str,
-    "startTime": int,
 }
 
 # RealtimeVideoEventInfos WebHook OUT Schema

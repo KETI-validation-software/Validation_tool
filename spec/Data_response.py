@@ -122,22 +122,25 @@ cmgvieyak001b6cd04cgaawmm_ReplayURL_out_data = {
 
 # RealtimeVideoEventInfos
 cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_out_data = {
-    "code": "200",
-    "message": "성공"
+    "code": "",
+    "message": ""
 }
 
 # RealtimeVideoEventInfos WebHook IN Data
 cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_webhook_in_data = {
     "camList": [
         {
-        "camID": "",
-        "eventUUID": "event01",
-        "eventName": "",
-        "startTime": "",
-        "endTime": "",
-        "eventDesc": "aaabbbAAA"
+        "camID": ""
     }
-]
+],
+    "duration": 0,
+    "transProtocol": {
+    "transProtocolType": "",
+    "transProtocolDesc": ""
+},
+    "eventFilter": "",
+    "classFilter": "",
+    "startTime": 0
 }
 
 # StoredVideoEventInfos
