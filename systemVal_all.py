@@ -1392,8 +1392,8 @@ class MyApp(QWidget):
                 current_timeout = self.time_outs[self.cnt] / 1000 if self.cnt < len(self.time_outs) else 5.0
                 path = self.pathUrl + "/" + (self.message[self.cnt] if self.cnt < len(self.message) else "")
                 inMessage = self.inMessage[self.cnt] if self.cnt < len(self.inMessage) else {}
-                # ✅ Data Mapper 적용 - 이전 응답 데이터로 요청 업데이트
-                # inMessage = self._apply_request_constraints(inMessage, self.cnt)
+                # ✅ Data Mapper 적용 - 이전 응답 데이터로 요청 업데이트 (trace 파일 != ui)
+                inMessage = self._apply_request_constraints(inMessage, self.cnt)
 
                 json_data = json.dumps(inMessage).encode('utf-8')
 
