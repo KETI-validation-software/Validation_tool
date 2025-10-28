@@ -87,7 +87,7 @@ cmgvieyak001b6cd04cgaawmm_StreamURLs_out_data = {
         "camID": "",
         "accessID": "conn0001",
         "accessPW": "1234",
-        "camURL": "rtsp://192.168.0.5:8000",
+        "camURL": "rtsp://127.0.01:8554",
         "videoInfo": {
         "resolution": "1920x1080",
         "fps": "30",
