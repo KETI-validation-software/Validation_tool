@@ -796,7 +796,8 @@ class FormValidator:
     def is_admin_code_required(self):
         """관리자 코드 입력이 필요한지 확인"""
         test_category = self.parent.test_category_edit.text().strip()
-        return test_category == "MAIN_TEST"
+        # MAIN_TEST 또는 UI에 표시되는 "본시험" 모두 체크
+        return test_category == "MAIN_TEST" or test_category == "본시험"
 
 
     def is_admin_code_valid(self):
@@ -848,6 +849,29 @@ class FormValidator:
             self.parent.admin_code_edit.setPlaceholderText("")
 
 
+    def handle_test_range_change(self):
+        """시험범위 변경 시 UI 표시 텍스트 변환"""
+        test_range = self.parent.test_range_edit.text().strip()
+
+        # 빈 값인 경우는 아무것도 하지 않음
+        if not test_range:
+            return
+
+        # 이미 변환된 값("전체필드", "필수필드")이면 처리하지 않음
+        if test_range in ["전체필드", "필수필드"]:
+            return
+
+        # 원래 값을 보관
+        self.parent.original_test_range = test_range
+
+        # ALL_FIELDS를 전체필드로 표시
+        if test_range == "ALL_FIELDS":
+            self.parent.test_range_edit.setText("전체필드")
+        else:
+            # ALL_FIELDS 이외의 모든 값은 UI에 "필수필드"로 표시
+            self.parent.test_range_edit.setText("필수필드")
+
+
     # ---------- CONSTANTS.py 업데이트 ----------
 
     def update_constants_py(self):
@@ -896,13 +920,21 @@ class FormValidator:
     def _collect_basic_info(self):
         """시험 기본 정보 수집"""
         test_category = self.parent.test_category_edit.text().strip()
+        test_range = self.parent.test_range_edit.text().strip()
 
-        # UI 표시값을 원래 값으로 복원
+        # 시험유형 UI 표시값을 원래 값으로 복원
         if test_category == "본시험":
             test_category = "MAIN_TEST"
         elif test_category == "사전시험":
             # 원래 값이 보관되어 있으면 복원, 없으면 "사전시험" 그대로
             test_category = self.parent.original_test_category if self.parent.original_test_category else "사전시험"
+
+        # 시험범위 UI 표시값을 원래 값으로 복원
+        if test_range == "전체필드":
+            test_range = "ALL_FIELDS"
+        elif test_range == "필수필드":
+            # 원래 값이 보관되어 있으면 복원, 없으면 "필수필드" 그대로
+            test_range = self.parent.original_test_range if self.parent.original_test_range else "필수필드"
 
         return {
             'company_name': self.parent.company_edit.text().strip(),
@@ -910,7 +942,7 @@ class FormValidator:
             'version': self.parent.version_edit.text().strip(),
             'test_category': test_category,
             'test_target': self.parent.test_group_edit.text().strip(),
-            'test_range': self.parent.test_range_edit.text().strip()
+            'test_range': test_range
         }
 
 
