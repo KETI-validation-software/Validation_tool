@@ -38,7 +38,33 @@ cmgyv3rzl014nvsveidu5jpzp_ReplayURL_in_constraints = {
 }
 
 # RealtimeVideoEventInfos
-cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_in_constraints = {}
+cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_in_constraints = {
+  "camList.camID": {
+    "valueType": "response-based",
+    "required": True,
+    "referenceEndpoint": "/CameraProfiles",
+    "referenceField": "camID"
+  },
+  "eventFilter": {
+    "valueType": "random",
+    "required": False,
+    "validValueField": "eventFilter",
+    "validValues": [
+      "화재",
+      "배회"
+    ]
+  },
+  "classFilter": {
+    "valueType": "random",
+    "required": False,
+    "validValueField": "classFilter",
+    "validValues": [
+      "사람",
+      "트럭",
+      "버스"
+    ]
+  }
+}
 
 # RealtimeVideoEventInfos WebHook OUT Constraints
 cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_webhook_out_constraints = {}
