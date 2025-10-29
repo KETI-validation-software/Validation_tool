@@ -288,11 +288,13 @@ class Server(BaseHTTPRequestHandler):
         url_tmp = ""  # ✅ 스코프 확장을 위해 먼저 선언
         webhook_url = ""  # ✅ 웹훅 URL 저장용
 
+        # do_POST 함수 출신 - 지금은 realtime이라는 단어가 들어간 api에 한해서 웹훅 하는걸로 하드코딩 되어있음
         if "Realtime".lower() in self.message[message_cnt].lower():
             print(f"[DEBUG][SERVER] Realtime API 감지: {self.message[message_cnt]}")
             trans_protocol = dict_data.get("transProtocol", {})
             print(f"[DEBUG][SERVER] transProtocol: {trans_protocol}")
 
+            # transProtocol이 데이터에 없으면 constants에서 로드 시도
             if not trans_protocol:
                 try:
                     for group in CONSTANTS.SPEC_CONFIG:
@@ -317,6 +319,7 @@ class Server(BaseHTTPRequestHandler):
                 except Exception as e:
                     print(f"[DEBUG][SERVER] constants에서 프로토콜 로드 실패: {e}")
 
+            # transProtocol이 데이터에 들어가있으면 -> 지금 있어서 앞에 https 붙여주어야함 + 시스템이 보낼때 제대로 다시 맵핑하도록 수정해야함
             if trans_protocol:
                 trans_protocol_type = trans_protocol.get("transProtocolType", {})
                 print(f"[DEBUG][SERVER] transProtocolType: {trans_protocol_type}")
@@ -352,21 +355,57 @@ class Server(BaseHTTPRequestHandler):
                             self._set_headers()
                             self.wfile.write(json.dumps(message).encode('utf-8'))
                             return
+                        
+                        # 2단계: 잘못된 주소인 경우
+                        url_tmp = str(url_tmp).strip()
 
-                        # ✅ 올바른 인덱스 사용: message_cnt (현재 API)
+                        # 0.0.0.0 도 추가?
+                        if any(local in url_tmp.lower() for local in ["localhost", "127.0.0.1", "0.0.0.0"]):
+                            print(f"[SERVER ERROR] Webhook URL이 로컬 주소임: {url_tmp}, 실제 주소로 맵핑 시작")
+                            url_tmp = f"https://{CONSTANTS.url.split('//')[1].split(':')[0]}:8090"
+                            print(f"[SERVER] 맵핑된 Webhook URL: {url_tmp}")
+                        else:
+                            # 로컬호스트가 아니더라도 포트가 8008이 아니면 일단은 수정하게 해놨는데, 추후 수정해야함
+                            if ":" in url_tmp:
+                                base_url = url_tmp.split(":")[0]
+                                current_port = url_tmp.split(":")[-1].split("/")[0]
+
+                                if current_port != "8090":
+                                    print(f"[SERVER ERROR] Webhook URL 포트가 8008이 아님: {current_port}, 포트 수정 시작")
+                                    if "/" in url_tmp.split[":"][-1]:
+                                        path = "/" + "/".join(url_tmp.split(":")[-1].split("/")[1:])
+                                        url_tmp = f"{base_url}:8090{path}"
+                                    else:
+                                        url_tmp = f"{base_url}:8090"
+                            else:
+                                url_tmp = f"{url_tmp}:8090"
+                                print(f"[SERVER] 포트 추가된 Webhook URL: {url_tmp}")
+                        
+                        # 3단계: https 앞에 붙이기
+                        if not url_tmp.lower().startswith("https://") and not url_tmp.lower().startswith("http://"):
+                            url_tmp = "https://" + url_tmp
+                            print(f"[SERVER] 스킴 추가된 Webhook URL: {url_tmp}")
+                        
+                        if url_tmp.lower().startswith("http://"):
+                            url_tmp = url_tmp.replace("http://", "https://", 1)
+                            print(f"[SERVER] HTTPS로 변환된 Webhook URL: {url_tmp}")
+                        
+                        if "https" not in url_tmp.lower():
+                            message = {
+                                "code": "400",
+                                "message": "잘못된 요청: HTTPS 필요 - 진짜 문제"
+                            }
+                            self._set_headers()
+                            self.wfile.write(json.dumps(message).encode('utf-8'))
+                            return
+
+                        # 4단계: 올바른 인덱스 사용
                         message = self.outMessage[message_cnt]
 
                         print("!!! update message", message)
                         self.webhook_flag = True
                         print(f"[DEBUG][SERVER] 웹훅 플래그 설정 완료, message={message}")
 
-                        # https 아니면 400
-                        if "https".lower() not in url_tmp.lower():
-                            print(f"[SERVER ERROR] Webhook URL이 HTTPS가 아님: {url_tmp}")
-                            message = {
-                                "code": "400",
-                                "message": "잘못된 요청: HTTPS 필요"
-                            }
                         # 웹훅인데 롱풀링으로 하려고 할 때 문제..??
                         if "longpolling" in str(self.transProtocolInput).lower():
                             print(f"[SERVER ERROR] transProtocolInput이 longpolling: {self.transProtocolInput}")
@@ -374,6 +413,7 @@ class Server(BaseHTTPRequestHandler):
                                 "code": "400",
                                 "message": "잘못된 요청: 프로토콜 불일치"
                             }
+
                     except Exception as e:
                         print(f"[SERVER ERROR] WebHook 처리 중 예외 발생: {e}")
                         import traceback
@@ -482,6 +522,18 @@ class Server(BaseHTTPRequestHandler):
                 if webhook_payload is None:
                     print(f"[DEBUG][SERVER] 웹훅 데이터가 None, 웹훅 전송 건너뛰기")
                     return
+                
+                # 임시로 추가 - 비어있는 경우 더미 데이터로 대체 (10/29)
+                if isinstance(webhook_payload, dict):
+                    code = webhook_payload.get("code", "")
+                    message_text = webhook_payload.get("message", "")
+
+                    if (not code or code == "") and (not message_text or message_text == ""):
+                        print(f"[DEBUG][SERVER] 웹훅 데이터가 비어있음, 더미 데이터로 대체")
+                        webhook_payload = {
+                            "code": "200",
+                            "message": "성공"
+                        }
             else:
                 print(f"[DEBUG][SERVER] 웹훅 데이터 인덱스 범위 초과 또는 없음, 웹훅 전송 건너뛰기")
                 return
