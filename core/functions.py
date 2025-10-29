@@ -16,6 +16,7 @@ from datetime import datetime
 import uuid
 import config.CONSTANTS as CONSTANTS
 import re
+import cv2
 
 def resource_path(relative_path):
     try:
@@ -307,6 +308,10 @@ def _validate_field_semantic(field_path, field_value, rule, data, reference_cont
         return _validate_custom(field_path, field_value, rule,
                                field_errors, global_errors)
     
+    
+    elif validation_type == "url-video":
+        return _validate_url_video(field_path, field_value, rule, reference_context,
+                                   field_errors, global_errors)
     else:
         print(f"  ⚠ 미지원 validationType: {validation_type}")
         return True
@@ -1129,3 +1134,141 @@ def save_result_json(myapp_instance, output_path="results/validation_result.json
 
     print(f"검증 결과가 '{output_path}'에 저장되었습니다.")
     return output_path
+def _validate_url_video(field_path, field_value, rule, reference_context, field_errors, global_errors):
+    """
+    RTSP URL 스트리밍 가능 여부 검증
+    
+    Args:
+        field_path: 필드 경로 (예: "camList.camID")
+        field_value: 현재 필드 값 (예: camID 값)
+        rule: 검증 규칙 (urlField, referenceEndpoint 등 포함)
+        reference_context: 참조 엔드포인트 응답 데이터
+        field_errors: 필드별 에러 목록
+        global_errors: 전역 에러 목록
+    
+    Returns:
+        bool: 검증 성공 여부
+    """
+    from core.json_checker_new import collect_all_values_by_key, get_by_path
+    
+    url_field = rule.get("urlField")  # 예: "camURL"
+    ref_endpoint = rule.get("referenceEndpoint")  # 예: "/StreamURLs"
+    
+    if not url_field:
+        error_msg = "urlField가 지정되지 않음"
+        field_errors.append(error_msg)
+        global_errors.append(f"[의미] {field_path}: {error_msg}")
+        return False
+    
+    if not reference_context or ref_endpoint not in reference_context:
+        error_msg = f"참조 엔드포인트 없음: {ref_endpoint}"
+        field_errors.append(error_msg)
+        global_errors.append(f"[의미] {error_msg}")
+        return False
+    
+    ref_data = reference_context[ref_endpoint]
+    
+    # field_path가 "camList.camID" 형식인 경우
+    if "." in field_path:
+        parts = field_path.split(".")
+        parent_path = ".".join(parts[:-1])  # "camList"
+        child_field = parts[-1]  # "camID"
+        
+        # 참조 데이터에서 해당 객체 찾기
+        # ref_data가 리스트인 경우 각 항목에서 매칭되는 객체 찾기
+        if isinstance(ref_data, list):
+            target_url = None
+            for item in ref_data:
+                if isinstance(item, dict) and item.get(child_field) == field_value:
+                    target_url = item.get(url_field)
+                    break
+            
+            if not target_url:
+                error_msg = f"{child_field}={field_value}에 해당하는 {url_field}을 찾을 수 없음"
+                field_errors.append(error_msg)
+                global_errors.append(f"[의미] {field_path}: {error_msg}")
+                return False
+        
+        # ref_data가 dict이고 리스트를 포함하는 경우
+        elif isinstance(ref_data, dict):
+            # parent_path에 해당하는 리스트 찾기
+            parent_list = get_by_path(ref_data, parent_path)
+            
+            if not isinstance(parent_list, list):
+                error_msg = f"참조 경로가 리스트가 아님: {parent_path}"
+                field_errors.append(error_msg)
+                global_errors.append(f"[의미] {field_path}: {error_msg}")
+                return False
+            
+            target_url = None
+            for item in parent_list:
+                if isinstance(item, dict) and item.get(child_field) == field_value:
+                    target_url = item.get(url_field)
+                    break
+            
+            if not target_url:
+                error_msg = f"{child_field}={field_value}에 해당하는 {url_field}을 찾을 수 없음"
+                field_errors.append(error_msg)
+                global_errors.append(f"[의미] {field_path}: {error_msg}")
+                return False
+        else:
+            error_msg = f"참조 데이터 형식이 올바르지 않음"
+            field_errors.append(error_msg)
+            global_errors.append(f"[의미] {field_path}: {error_msg}")
+            return False
+    
+    # 단일 필드인 경우 (field_value 자체가 URL)
+    else:
+        target_url = field_value
+    
+    # RTSP URL 검증
+    print(f"    [url-video] 검증할 URL: {target_url}")
+    
+    if not target_url or not isinstance(target_url, str):
+        error_msg = f"유효하지 않은 URL: {target_url}"
+        field_errors.append(error_msg)
+        global_errors.append(f"[의미] {field_path}: {error_msg}")
+        return False
+    
+    # URL 형식 기본 검증 (rtsp://)
+    if not target_url.startswith("rtsp://"):
+        error_msg = f"RTSP URL이 아님: {target_url} (rtsp:// 로 시작해야 함)"
+        field_errors.append(error_msg)
+        global_errors.append(f"[의미] {field_path}: {error_msg}")
+        return False
+    
+    # OpenCV로 스트림 연결 테스트
+    cap = None
+    try:
+        print(f"    [url-video] OpenCV로 연결 시도 중...")
+        cap = cv2.VideoCapture(target_url)
+        
+        # 연결 성공 여부 확인
+        if not cap.isOpened():
+            error_msg = f"스트림 연결 실패: {target_url}"
+            field_errors.append(error_msg)
+            global_errors.append(f"[의미] {field_path}: {error_msg}")
+            return False
+        
+        # 첫 프레임 읽기 시도
+        ret, frame = cap.read()
+        
+        if not ret or frame is None:
+            error_msg = f"프레임 읽기 실패: {target_url}"
+            field_errors.append(error_msg)
+            global_errors.append(f"[의미] {field_path}: {error_msg}")
+            return False
+        
+        print(f"    [url-video] ✅ 스트림 검증 성공: {target_url} (프레임 크기: {frame.shape})")
+        return True
+    
+    except Exception as e:
+        error_msg = f"스트림 검증 중 오류 발생: {target_url} - {str(e)}"
+        field_errors.append(error_msg)
+        global_errors.append(f"[의미] {field_path}: {error_msg}")
+        return False
+    
+    finally:
+        if cap is not None:
+            cap.release()
+            print(f"    [url-video] 연결 해제 완료")

@@ -43,10 +43,17 @@ cmgyv3rzl014nvsveidu5jpzp_StoredVideoInfos_out_validation = {
 cmgyv3rzl014nvsveidu5jpzp_StreamURLs_out_validation = {
   "camList.camID": {
     "enabled": True,
+    "validationType": "request-field-list-match",
+    "referenceEndpoint": "/StreamURLs",
+    "referenceListField": "camID",
+    "referenceListEndpoint": "/StreamURLs",
+    "score": 0
+  },
+  "camList.camURL": {
+    "enabled": True,
     "urlField": "camURL",
     "validationType": "url-video",
     "referenceEndpoint": "/StreamURLs",
-    "referenceListEndpoint": "/StreamURLs",
     "score": 0
   }
 }

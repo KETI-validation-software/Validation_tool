@@ -8,10 +8,10 @@
 2. Capabilities | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 8 | 전체 필드 수: 8 | 실패 필드 수: 0 | 평가 점수: 100.0%
 3. CameraProfiles | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 12 | 전체 필드 수: 12 | 실패 필드 수: 0 | 평가 점수: 100.0%
 4. StoredVideoInfos | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 7 | 전체 필드 수: 7 | 실패 필드 수: 0 | 평가 점수: 100.0%
-5. StreamURLs | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 12 | 전체 필드 수: 12 | 실패 필드 수: 0 | 평가 점수: 100.0%
+5. StreamURLs | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 11 | 전체 필드 수: 12 | 실패 필드 수: 1 | 평가 점수: 91.7%
 6. ReplayURL | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 13 | 전체 필드 수: 14 | 실패 필드 수: 1 | 평가 점수: 92.9%
 7. RealtimeVideoEventInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 4 | 전체 필드 수: 9 | 실패 필드 수: 5 | 평가 점수: 44.4%
-8. StoredVideoEventInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 6 | 전체 필드 수: 9 | 실패 필드 수: 3 | 평가 점수: 66.7%
+8. StoredVideoEventInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 7 | 전체 필드 수: 9 | 실패 필드 수: 2 | 평가 점수: 77.8%
 
 === 전체 로그 ===
 Start Validation...
@@ -115,12 +115,12 @@ step 4: StoredVideoInfos (시도 1/1)
             "camID": "cam0001",
             "timeList": [
                 {
-                    "startTime": 1761035394925,
-                    "endTime": 1761035480065
+                    "startTime": 1761005268535,
+                    "endTime": 1761094614052
                 },
                 {
-                    "startTime": 1760980941281,
-                    "endTime": 1761078054707
+                    "startTime": 1761047416016,
+                    "endTime": 1761089010538
                 }
             ]
         },
@@ -128,12 +128,12 @@ step 4: StoredVideoInfos (시도 1/1)
             "camID": "cam0002",
             "timeList": [
                 {
-                    "startTime": 1761022252602,
-                    "endTime": 1761024985071
+                    "startTime": 1761006790291,
+                    "endTime": 1761075275309
                 },
                 {
-                    "startTime": 1761099152947,
-                    "endTime": 1761109746938
+                    "startTime": 1761027935836,
+                    "endTime": 1761050376987
                 }
             ]
         }
@@ -180,9 +180,9 @@ step 5: StreamURLs (시도 1/1)
     ]
 }
 
-검증 결과: PASS
-Score : 100.0
-Score details : 44(누적 통과 필드 수), 0(누적 오류 필드 수)
+검증 결과: FAIL
+Score : 97.72727272727273
+Score details : 43(누적 통과 필드 수), 1(누적 오류 필드 수)
 
 step 6: ReplayURL (시도 1/1)
 
@@ -197,8 +197,8 @@ step 6: ReplayURL (시도 1/1)
             "camID": "cam0001",
             "accessID": "cam0001",
             "accessPW": "conn0001",
-            "startTime": 1761027826546,
-            "endTime": 1761176047409,
+            "startTime": 1761188049996,
+            "endTime": 1761193566932,
             "camURL": "rtsp://192.168.0.5:8000",
             "videoInfo": {
                 "resolution": "1920x1080",
@@ -211,8 +211,8 @@ step 6: ReplayURL (시도 1/1)
             "camID": "cam0002",
             "accessID": "cam0001",
             "accessPW": "conn0001",
-            "startTime": 1760988076252,
-            "endTime": 1761011237040,
+            "startTime": 1761084792316,
+            "endTime": 1761191613708,
             "camURL": "rtsp://192.168.0.5:8000",
             "videoInfo": {
                 "resolution": "1920x1080",
@@ -226,8 +226,8 @@ step 6: ReplayURL (시도 1/1)
 
 검증 결과: FAIL
 ⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
-Score : 98.27586206896551
-Score details : 57(누적 통과 필드 수), 1(누적 오류 필드 수)
+Score : 96.55172413793103
+Score details : 56(누적 통과 필드 수), 2(누적 오류 필드 수)
 
 step 7: RealtimeVideoEventInfos (시도 1/1)
 
@@ -241,8 +241,8 @@ step 7: RealtimeVideoEventInfos (시도 1/1)
 }
 
 검증 결과: PASS
-Score : 98.33333333333333
-Score details : 59(누적 통과 필드 수), 1(누적 오류 필드 수)
+Score : 96.66666666666667
+Score details : 58(누적 통과 필드 수), 2(누적 오류 필드 수)
 
 step 7: RealtimeVideoEventInfos
 
@@ -255,8 +255,8 @@ step 7: RealtimeVideoEventInfos
 웹훅 검증 결과: FAIL
 
 ⚠️  웹훅 데이터 검증 실패
-Score : 91.04477611940298
-Score details : 61(누적 통과 필드 수), 6(누적 오류 필드 수)
+Score : 89.55223880597015
+Score details : 60(누적 통과 필드 수), 7(누적 오류 필드 수)
 
 step 8: StoredVideoEventInfos (시도 1/1)
 
@@ -271,16 +271,16 @@ step 8: StoredVideoEventInfos (시도 1/1)
             "camID": "cam0001",
             "eventUUID": "event01",
             "eventName": "배회",
-            "startTime": 6958148313712,
-            "endTime": 9482792793909,
+            "startTime": 6954774707820,
+            "endTime": 8823041025039,
             "eventDesc": "aaabbbAAA"
         },
         {
             "camID": "cam0002",
             "eventUUID": "event01",
             "eventName": "배회",
-            "startTime": 6366057490405,
-            "endTime": 9388364362442,
+            "startTime": 6168447828652,
+            "endTime": 8461894199480,
             "eventDesc": "aaabbbAAA"
         }
     ]

@@ -215,7 +215,7 @@
                   "transProtocolDesc": "127.0.0.1:8090"
                 },
                 "eventFilter": "배회",
-                "classFilter": "사람",
+                "classFilter": "트럭",
                 "startTime": 1761110160000
               },
               "validationErrors": [
@@ -252,7 +252,7 @@
                 ],
                 "maxCount": 3,
                 "eventFilter": "화재",
-                "classFilter": "트럭"
+                "classFilter": "사람"
               },
               "validationErrors": [
                 "오류가 없습니다."
@@ -263,5 +263,5 @@
       ]
     }
   ],
-  "completedDate": "2025-10-29T16:01:02Z"
+  "completedDate": "2025-10-29T17:23:39Z"
 }
