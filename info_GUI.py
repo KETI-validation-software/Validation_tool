@@ -55,7 +55,7 @@ class InfoWidget(QWidget):
         page = QWidget()
 
         # 배경 이미지 설정
-        bg_path = resource_path("assets/image/test_info/bg.png").replace(chr(92), "/")
+        bg_path = resource_path("assets/image/common/bg.png").replace(chr(92), "/")
         page.setStyleSheet(f"""
             #page1 {{
                 background-image: url({bg_path});
@@ -84,7 +84,7 @@ class InfoWidget(QWidget):
 
         # 헤더 로고 (36x36px)
         logo_label = QLabel(header_widget)
-        logo_pixmap = QPixmap(resource_path("assets/image/test_info/header_logo.png"))
+        logo_pixmap = QPixmap(resource_path("assets/image/common/header_logo.png"))
         logo_label.setPixmap(logo_pixmap.scaled(36, 36, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         logo_label.setFixedSize(36, 36)
         header_layout.addWidget(logo_label)
@@ -129,7 +129,7 @@ class InfoWidget(QWidget):
         page.setFixedSize(1680, 1032)
 
         # 배경 이미지 설정 (bg.png)
-        bg_path2 = resource_path("assets/image/test_config/bg.png").replace(chr(92), "/")
+        bg_path2 = resource_path("assets/image/common/bg.png").replace(chr(92), "/")
         page.setStyleSheet(f"""
             #page2 {{
                 background-image: url({bg_path2});
@@ -152,13 +152,25 @@ class InfoWidget(QWidget):
         header_widget = QWidget()
         header_widget.setFixedSize(1632, 56)
 
-        # 헤더 레이아웃 (로고 + 텍스트는 나중에 추가)
+        # 헤더 레이아웃 (로고 + 타이틀)
         header_layout = QHBoxLayout(header_widget)
         header_layout.setContentsMargins(0, 0, 0, 0)
         header_layout.setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-        header_layout.setSpacing(8)
+        header_layout.setSpacing(10)
 
-        # TODO: 헤더 로고와 텍스트 추가 예정
+        # 헤더 로고 (36x36px)
+        logo_label = QLabel(header_widget)
+        logo_pixmap = QPixmap(resource_path("assets/image/common/header_logo.png"))
+        logo_label.setPixmap(logo_pixmap.scaled(36, 36, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        logo_label.setFixedSize(36, 36)
+        header_layout.addWidget(logo_label)
+
+        # 헤더 타이틀 이미지 (133x36px)
+        header_title_label = QLabel(header_widget)
+        header_title_pixmap = QPixmap(resource_path("assets/image/test_config/header_title.png"))
+        header_title_label.setPixmap(header_title_pixmap.scaled(133, 36, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        header_title_label.setFixedSize(133, 36)
+        header_layout.addWidget(header_title_label)
 
         header_container_layout.addWidget(header_widget)
         header_container.setLayout(header_container_layout)
@@ -190,32 +202,19 @@ class InfoWidget(QWidget):
         left_layout.setContentsMargins(24, 28, 24, 80)  # 좌, 상, 우, 하
         left_layout.setSpacing(0)
 
-        # 타이틀 영역 (744x66px)
-        title_widget = QWidget()
-        title_widget.setFixedSize(744, 66)
-        title_layout = QVBoxLayout()
-        title_layout.setContentsMargins(0, 0, 0, 0)
-        title_layout.setSpacing(0)
-
-        # 첫 번째 줄: "시험 시나리오 및 API"
-        title_line1 = QLabel("시험 시나리오 및 API(미정)")
-        title_line1.setStyleSheet("font-size: 16px; font-weight: bold;")
-        title_layout.addWidget(title_line1)
-
-        # 두 번째 줄: "시험 시나리오 및 API 정보를 확인하세요"
-        title_line2 = QLabel("시험 시나리오 및 API 정보를 확인하세요(미정)")
-        title_line2.setStyleSheet("font-size: 14px;")
-        title_layout.addWidget(title_line2)
-
-        title_widget.setLayout(title_layout)
+        # 타이틀 영역 (744x26px)
+        title_widget = QLabel()
+        title_pixmap = QPixmap(resource_path("assets/image/test_config/left_title_sub.png"))
+        title_widget.setPixmap(title_pixmap.scaled(744, 26, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        title_widget.setFixedSize(744, 26)
         left_layout.addWidget(title_widget)
 
         # 시험 시나리오명 테이블 (QGroupBox로 감싸기)
         field_group = self.create_test_field_group()
         left_layout.addWidget(field_group)
 
-        # 시험 시나리오와 시험 API 사이 간격 12px
-        left_layout.addSpacing(12)
+        # 시험 시나리오와 시험 API 사이 간격 16px
+        left_layout.addSpacing(16)
 
         # 시험 API 테이블 (QGroupBox로 감싸기)
         api_group = self.create_test_api_group()
@@ -232,24 +231,11 @@ class InfoWidget(QWidget):
         right_layout.setContentsMargins(24, 28, 24, 24)  # 좌, 상, 우, 하 (하단 padding 조정)
         right_layout.setSpacing(0)
 
-        # 타이틀 영역 (744x66px)
-        title_widget = QWidget()
-        title_widget.setFixedSize(744, 66)
-        title_layout = QVBoxLayout()
-        title_layout.setContentsMargins(0, 0, 0, 0)
-        title_layout.setSpacing(0)
-
-        # 첫 번째 줄: "시험 설정 정보"
-        title_line1 = QLabel("시험 설정 정보(미정)")
-        title_line1.setStyleSheet("font-size: 16px; font-weight: bold;")
-        title_layout.addWidget(title_line1)
-
-        # 두 번째 줄: "시험 설정 정보를 입력하세요"
-        title_line2 = QLabel("시험 설정 정보를 입력하세요(미정)")
-        title_line2.setStyleSheet("font-size: 14px;")
-        title_layout.addWidget(title_line2)
-
-        title_widget.setLayout(title_layout)
+        # 타이틀 영역 (744x26px)
+        title_widget = QLabel()
+        title_pixmap = QPixmap(resource_path("assets/image/test_config/right_title_sub.png"))
+        title_widget.setPixmap(title_pixmap.scaled(744, 26, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        title_widget.setFixedSize(744, 26)
         right_layout.addWidget(title_widget)
 
         # 기존 우측 패널 내용
@@ -989,7 +975,7 @@ class InfoWidget(QWidget):
     def create_test_api_group(self):
         """시험 API 그룹 (QGroupBox)"""
         group = QGroupBox("시험 API")
-        group.setFixedSize(744, 466)
+        group.setFixedSize(744, 480)
 
         # QGroupBox 스타일 설정
         group.setStyleSheet("""
@@ -1015,9 +1001,9 @@ class InfoWidget(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        # 시험 API 테이블 (744x424px) - 466 - 36(타이틀) - 6(gap) = 424px
+        # 시험 API 테이블 (744x390px)
         self.api_test_table = QTableWidget(0, 2)
-        self.api_test_table.setFixedSize(744, 424)
+        self.api_test_table.setFixedSize(744, 390)
         self.api_test_table.setHorizontalHeaderLabels(["기능명", "API명"])
 
         header = self.api_test_table.horizontalHeader()
@@ -1583,7 +1569,7 @@ class InfoWidget(QWidget):
         # 6px gap
         layout.addSpacing(6)
 
-        # URL 테이블 (744x370px) - 높이 줄임
+        # URL 테이블 (744x370px)
         self.url_table = QTableWidget(0, 2)
         self.url_table.setFixedSize(744, 370)
         self.url_table.setHorizontalHeaderLabels(["", "URL"])  # 첫 번째 헤더는 빈 문자열
