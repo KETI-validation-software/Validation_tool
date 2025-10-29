@@ -36,6 +36,7 @@ class InfoWidget(QWidget):
         self.current_page = 0
         self.stacked_widget = QStackedWidget()
         self.original_test_category = None  # API에서 받아온 원래 test_category 값 보관
+        self.original_test_range = None  # API에서 받아온 원래 test_range 값 보관
         self.initUI()
 
     def initUI(self):
@@ -332,10 +333,12 @@ class InfoWidget(QWidget):
     # ---------- 페이지 전환 메서드 ----------
     def go_to_next_page(self):
         """다음 페이지로 이동 (조건 검증 후)"""
-        if not self._is_page1_complete():
-            QMessageBox.warning(self,"입력 필요", "첫 번째 페이지의 모든 필수 항목을 입력해주세요.")
+        is_complete = self._is_page1_complete()
+
+        if not is_complete:
+            QMessageBox.warning(self,"입력 필요", "시험 정보 페이지의 모든 필수 항목을 입력해주세요.")
             return
-        
+
         if self.current_page < 1:
             self.current_page += 1
             self.stacked_widget.setCurrentIndex(self.current_page)
@@ -345,6 +348,9 @@ class InfoWidget(QWidget):
         if self.current_page > 0:
             self.current_page -= 1
             self.stacked_widget.setCurrentIndex(self.current_page)
+            # 1페이지로 돌아갈 때 다음 버튼 상태 업데이트
+            if self.current_page == 0:
+                self.check_next_button_state()
 
 
     def create_page2_buttons(self):
@@ -587,6 +593,9 @@ class InfoWidget(QWidget):
         # 시험유형 변경 시 관리자 코드 필드 활성화/비활성화
         self.test_category_edit.textChanged.connect(self.form_validator.handle_test_category_change)
         self.test_category_edit.textChanged.connect(self.check_start_button_state)
+
+        # 시험범위 변경 시 UI 표시 텍스트 변환
+        self.test_range_edit.textChanged.connect(self.form_validator.handle_test_range_change)
 
         # 첫 번째 페이지 필드들의 변경 시 다음 버튼 상태 체크
         for field in [self.company_edit, self.product_edit, self.version_edit, self.model_edit,
@@ -2358,6 +2367,9 @@ class InfoWidget(QWidget):
             group_ranges = [g.get("testRange", "") for g in test_groups]
             combined_group_ranges = ", ".join(group_ranges)
 
+            # 원본 시험범위 값 저장
+            self.original_test_range = combined_group_ranges
+
             self.company_edit.setText(eval_target.get("companyName", ""))
             self.product_edit.setText(eval_target.get("productName", ""))
             self.version_edit.setText(eval_target.get("version", ""))
@@ -2372,7 +2384,14 @@ class InfoWidget(QWidget):
             self.target_system_edit.setText(self.target_system)
 
             self.test_group_edit.setText(combined_group_names)  # 콤마로 연결된 그룹 이름들
-            self.test_range_edit.setText(combined_group_ranges)  # 콤마로 연결된 범위들
+
+            # 시험범위를 UI용 텍스트로 변환하여 표시
+            display_test_range = combined_group_ranges
+            if combined_group_ranges == "ALL_FIELDS":
+                display_test_range = "전체필드"
+            elif combined_group_ranges:
+                display_test_range = "필수필드"
+            self.test_range_edit.setText(display_test_range)
 
             self.contact_person = eval_target.get("contactPerson", "")
             self.model_name = eval_target.get("modelName", "")
@@ -2436,7 +2455,8 @@ class InfoWidget(QWidget):
         """첫 번째 페이지의 다음 버튼 활성화 조건 체크"""
         try:
             if hasattr(self, 'next_btn'):
-                self.next_btn.setEnabled(self._is_page1_complete())
+                # 다음 버튼은 항상 활성화 (클릭 시 검증)
+                self.next_btn.setEnabled(True)
         except Exception as e:
             print(f"다음 버튼 상태 체크 실패: {e}")
 
