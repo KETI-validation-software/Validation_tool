@@ -399,12 +399,29 @@ def _validate_field_match(field_path, field_value, rule, reference_context,
     ref_data = reference_context[ref_endpoint]
     ref_value = get_by_path(ref_data, ref_field)
 
-    if field_value != ref_value:
-        error_msg = f"값 불일치: {field_value} != {ref_value} (참조: {ref_field})"
-        field_errors.append(error_msg)
-        global_errors.append(f"[의미] {field_path}: {error_msg}")
-        return False
+    # 보완
+    def to_list(v):
+        if isinstance(v, list):
+            return v
+        return [v]
+    
+    lhs_list = to_list(field_value)
+    rhs_list = to_list(ref_value)
 
+    if len(rhs_list) == 1:
+        expected = rhs_list[0]
+        if not all(item == expected for item in lhs_list):
+            error_msg = f"값 불일치: {lhs_list} != 예상값 {expected}"
+            field_errors.append(error_msg)
+            global_errors.append(f"[의미] {field_path}: {error_msg}")
+            return False
+        return True
+    else:
+        if lhs_list != rhs_list:
+            error_msg = f"값 불일치: {lhs_list} != {rhs_list}"
+            field_errors.append(error_msg)
+            global_errors.append(f"[의미] {field_path}: {error_msg}")
+            return False
     return True
 
 

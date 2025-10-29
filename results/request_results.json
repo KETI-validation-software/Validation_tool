@@ -214,8 +214,8 @@
                   "transProtocolType": "WebHook",
                   "transProtocolDesc": "127.0.0.1:8090"
                 },
-                "eventFilter": "화재",
-                "classFilter": "버스",
+                "eventFilter": "배회",
+                "classFilter": "사람",
                 "startTime": 1761110160000
               },
               "validationErrors": [
@@ -251,7 +251,7 @@
                   }
                 ],
                 "maxCount": 3,
-                "eventFilter": "배회",
+                "eventFilter": "화재",
                 "classFilter": "트럭"
               },
               "validationErrors": [
@@ -263,5 +263,5 @@
       ]
     }
   ],
-  "completedDate": "2025-10-29T14:57:58Z"
+  "completedDate": "2025-10-29T16:01:02Z"
 }
