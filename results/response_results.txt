@@ -1,7 +1,7 @@
 === 시험 결과 ===
-통과 필드 수: 65
-전체 필드 수: 69
-종합 평가 점수: 94.2%
+통과 필드 수: 67
+전체 필드 수: 76
+종합 평가 점수: 88.2%
 
 === 스텝별 결과 ===
 1. Authentication | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 5 | 전체 필드 수: 5 | 실패 필드 수: 0 | 평가 점수: 100.0%
@@ -10,7 +10,7 @@
 4. StoredVideoInfos | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 7 | 전체 필드 수: 7 | 실패 필드 수: 0 | 평가 점수: 100.0%
 5. StreamURLs | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 12 | 전체 필드 수: 12 | 실패 필드 수: 0 | 평가 점수: 100.0%
 6. ReplayURL | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 13 | 전체 필드 수: 14 | 실패 필드 수: 1 | 평가 점수: 92.9%
-7. RealtimeVideoEventInfos | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 2 | 전체 필드 수: 2 | 실패 필드 수: 0 | 평가 점수: 100.0%
+7. RealtimeVideoEventInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 4 | 전체 필드 수: 9 | 실패 필드 수: 5 | 평가 점수: 44.4%
 8. StoredVideoEventInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 6 | 전체 필드 수: 9 | 실패 필드 수: 3 | 평가 점수: 66.7%
 
 === 전체 로그 ===
@@ -115,12 +115,12 @@ step 4: StoredVideoInfos (시도 1/1)
             "camID": "cam0001",
             "timeList": [
                 {
-                    "startTime": 1761085923256,
-                    "endTime": 1761087906387
+                    "startTime": 1761015331318,
+                    "endTime": 1761119662208
                 },
                 {
-                    "startTime": 1760987019080,
-                    "endTime": 1761108206729
+                    "startTime": 1761004247223,
+                    "endTime": 1761004859365
                 }
             ]
         },
@@ -128,12 +128,12 @@ step 4: StoredVideoInfos (시도 1/1)
             "camID": "cam0002",
             "timeList": [
                 {
-                    "startTime": 1761048008026,
-                    "endTime": 1761068041836
+                    "startTime": 1761048720047,
+                    "endTime": 1761082028835
                 },
                 {
-                    "startTime": 1761099788687,
-                    "endTime": 1761107584234
+                    "startTime": 1761025174906,
+                    "endTime": 1761116830049
                 }
             ]
         }
@@ -197,8 +197,8 @@ step 6: ReplayURL (시도 1/1)
             "camID": "cam0001",
             "accessID": "cam0001",
             "accessPW": "conn0001",
-            "startTime": 1761150920262,
-            "endTime": 1761174679242,
+            "startTime": 1761080679122,
+            "endTime": 1761200947149,
             "camURL": "rtsp://192.168.0.5:8000",
             "videoInfo": {
                 "resolution": "1920x1080",
@@ -211,8 +211,8 @@ step 6: ReplayURL (시도 1/1)
             "camID": "cam0002",
             "accessID": "cam0001",
             "accessPW": "conn0001",
-            "startTime": 1761195650858,
-            "endTime": 1761199084444,
+            "startTime": 1761168442557,
+            "endTime": 1761189404139,
             "camURL": "rtsp://192.168.0.5:8000",
             "videoInfo": {
                 "resolution": "1920x1080",
@@ -244,6 +244,20 @@ step 7: RealtimeVideoEventInfos (시도 1/1)
 Score : 98.33333333333333
 Score details : 59(누적 통과 필드 수), 1(누적 오류 필드 수)
 
+step 7: RealtimeVideoEventInfos
+
+=== 웹훅 이벤트 데이터 ===
+{
+    "code": "200",
+    "message": "성공"
+}
+
+웹훅 검증 결과: FAIL
+
+⚠️  웹훅 데이터 검증 실패
+Score : 91.04477611940298
+Score details : 61(누적 통과 필드 수), 6(누적 오류 필드 수)
+
 step 8: StoredVideoEventInfos (시도 1/1)
 
 검증 진행: 1/1회
@@ -257,23 +271,23 @@ step 8: StoredVideoEventInfos (시도 1/1)
             "camID": "cam0001",
             "eventUUID": "event01",
             "eventName": "화재",
-            "startTime": 4429853590211,
-            "endTime": 7441980207501,
+            "startTime": 5005954805666,
+            "endTime": 7577380510453,
             "eventDesc": "aaabbbAAA"
         },
         {
             "camID": "cam0002",
             "eventUUID": "event01",
             "eventName": "화재",
-            "startTime": 9230198607724,
-            "endTime": 9429603198075,
+            "startTime": 7503085068788,
+            "endTime": 9189760918180,
             "eventDesc": "aaabbbAAA"
         }
     ]
 }
 
 검증 결과: FAIL
-Score : 94.20289855072464
-Score details : 65(누적 통과 필드 수), 4(누적 오류 필드 수)
+Score : 88.1578947368421
+Score details : 67(누적 통과 필드 수), 9(누적 오류 필드 수)
 
 검증 절차가 완료되었습니다.
