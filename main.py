@@ -78,6 +78,10 @@ class MainWindow(QMainWindow):
         self.stack.setCurrentWidget(self.info_widget)
         # info_widget 내부를 1페이지로 전환
         self.info_widget.stacked_widget.setCurrentIndex(0)
+        # current_page 변수도 동기화
+        self.info_widget.current_page = 0
+        # 다음 버튼 상태 업데이트
+        self.info_widget.check_next_button_state()
         print("시험 정보 페이지로 이동")
 
     def _show_test_setup(self):
@@ -86,6 +90,8 @@ class MainWindow(QMainWindow):
         self.stack.setCurrentWidget(self.info_widget)
         # info_widget 내부를 2페이지로 전환
         self.info_widget.stacked_widget.setCurrentIndex(1)
+        # current_page 변수도 동기화
+        self.info_widget.current_page = 1
         print("시험 설정 페이지로 이동")
 
     def _show_test_result(self):
