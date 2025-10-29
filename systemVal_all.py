@@ -1653,8 +1653,8 @@ class MyApp(QWidget):
                         response_code = str(res_data.get("code", "")).strip()
                         response_message = res_data.get("message", "")
 
-                        # 성공 코드가 아니면 FAIL 처리
-                        if response_code not in ["200", "201", "성공", "Success"]:
+                        # 성공 코드가 아니면 FAIL 처리 (10/29)
+                        if response_code not in ["200", "201", "성공", "Success", ""]:
                             # print(f"[SYSTEM] 응답 코드 검증 실패: code={response_code}, message={response_message}")
                             val_result = "FAIL"
                             # 기존 오류 메시지에 응답 코드 오류 추가
@@ -1763,6 +1763,7 @@ class MyApp(QWidget):
                     self.valResult.append("\n" + data_text)
                     self.valResult.append(f"\n검증 결과: {final_result}")
 
+                    
                     # ✅ 응답 코드 실패 시 명확한 메시지
                     if final_result == "FAIL" and isinstance(res_data, dict):
                         response_code = str(res_data.get("code", "")).strip()
