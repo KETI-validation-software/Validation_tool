@@ -22,8 +22,7 @@ url = "https://192.168.0.3:8080"
 contact_person = "김철수"
 model_name = "v1.0"
 request_id = "cmh1yg49v000t9y0jdr1wwuja"
-specs = [["cmgyv3rzl014nvsveidu5jpzp_outSchema","cmgyv3rzl014nvsveidu5jpzp_inData","cmgyv3rzl014nvsveidu5jpzp_messages",""],
-         ["cmgvieyak001b6cd04cgaawmm_inSchema","cmgvieyak001b6cd04cgaawmm_outData","cmgvieyak001b6cd04cgaawmm_messages",""]]
+specs = [["cmgvieyak001b6cd04cgaawmm_inSchema","cmgvieyak001b6cd04cgaawmm_outData","cmgvieyak001b6cd04cgaawmm_messages",""]]
 
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황 
