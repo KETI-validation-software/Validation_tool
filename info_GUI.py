@@ -2197,6 +2197,15 @@ class InfoWidget(QWidget):
             if any(field for field in auth_fields):
                 return True
 
+            # 주소 입력창들에 입력값이 있는지 확인
+            address_fields = [
+                self.ip_input_edit.text().strip(),
+                self.page2_ip_direct_input.text().strip()
+            ]
+
+            if any(field for field in address_fields):
+                return True
+
             # URL 테이블에서 선택된 항목이 있는지 확인
             for row in range(self.url_table.rowCount()):
                 checkbox_widget = self.url_table.cellWidget(row, 0)
@@ -2244,6 +2253,10 @@ class InfoWidget(QWidget):
 
             # 인증 방식을 Digest Auth로 초기화
             self.digest_radio.setChecked(True)
+
+            # 주소 입력창들 초기화
+            self.ip_input_edit.clear()
+            self.page2_ip_direct_input.clear()
 
             # 주소 탐색 테이블 초기화
             self.url_table.setRowCount(0)
