@@ -51,14 +51,17 @@ cmgyv3rzl014nvsveidu5jpzp_ReplayURL_in_data = {
 cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_in_data = {
     "camList": [
         {
-        "camID": "",
-        "eventUUID": "",
-        "eventName": "",
-        "startTime": 0,
-        "endTime": 0,
-        "eventDesc": ""
+        "camID": ""
     }
-]
+],
+    "duration": "100",
+    "transProtocol": {
+    "transProtocolType": "WebHook",
+    "transProtocolDesc": "127.0.0.1:8090"
+},
+    "eventFilter": "",
+    "classFilter": "",
+    "startTime": 1761110160000
 }
 
 # RealtimeVideoEventInfos WebHook OUT Data
