@@ -6,12 +6,14 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QPixmap, QColor
 import importlib
+import re
 from config import CONSTANTS
 from core.functions import resource_path
 
 # 분리된 모듈들 import
-from network_scanner import NetworkScanWorker
+from network_scanner import NetworkScanWorker, ARPScanWorker
 from form_validator import FormValidator
+from core.functions import resource_path
 import importlib
 import config.CONSTANTS as CONSTANTS
 
@@ -34,6 +36,7 @@ class InfoWidget(QWidget):
         self.current_page = 0
         self.stacked_widget = QStackedWidget()
         self.original_test_category = None  # API에서 받아온 원래 test_category 값 보관
+        self.original_test_range = None  # API에서 받아온 원래 test_range 값 보관
         self.initUI()
 
     def initUI(self):
@@ -330,10 +333,12 @@ class InfoWidget(QWidget):
     # ---------- 페이지 전환 메서드 ----------
     def go_to_next_page(self):
         """다음 페이지로 이동 (조건 검증 후)"""
-        if not self._is_page1_complete():
-            QMessageBox.warning(self,"입력 필요", "첫 번째 페이지의 모든 필수 항목을 입력해주세요.")
+        is_complete = self._is_page1_complete()
+
+        if not is_complete:
+            QMessageBox.warning(self,"입력 필요", "시험 정보 페이지의 모든 필수 항목을 입력해주세요.")
             return
-        
+
         if self.current_page < 1:
             self.current_page += 1
             self.stacked_widget.setCurrentIndex(self.current_page)
@@ -343,6 +348,9 @@ class InfoWidget(QWidget):
         if self.current_page > 0:
             self.current_page -= 1
             self.stacked_widget.setCurrentIndex(self.current_page)
+            # 1페이지로 돌아갈 때 다음 버튼 상태 업데이트
+            if self.current_page == 0:
+                self.check_next_button_state()
 
 
     def create_page2_buttons(self):
@@ -433,6 +441,27 @@ class InfoWidget(QWidget):
 
         title_area.setLayout(title_area_layout)
         title_box_layout.addWidget(title_area)
+
+        # IP 입력창
+        self.ip_input_edit = QLineEdit()
+        self.ip_input_edit.setFixedSize(200, 40)
+        self.ip_input_edit.setPlaceholderText("주소를 입력해주세요.")
+        self.ip_input_edit.setStyleSheet("""
+            QLineEdit {
+                font-family: 'Noto Sans KR';
+                font-size: 14px;
+                padding: 8px 12px;
+                border: 1px solid #CECECE;
+                border-radius: 4px;
+                background-color: #FFFFFF;
+            }
+            QLineEdit:focus {
+                border: 1px solid #4A90E2;
+            }
+        """)
+        title_box_layout.addWidget(self.ip_input_edit, alignment=Qt.AlignVCenter)
+
+        title_box_layout.addStretch()
 
         # 버튼/불러오기 (198x62px) - 이미지 버튼
         self.load_test_info_btn = QPushButton()
@@ -564,6 +593,9 @@ class InfoWidget(QWidget):
         # 시험유형 변경 시 관리자 코드 필드 활성화/비활성화
         self.test_category_edit.textChanged.connect(self.form_validator.handle_test_category_change)
         self.test_category_edit.textChanged.connect(self.check_start_button_state)
+
+        # 시험범위 변경 시 UI 표시 텍스트 변환
+        self.test_range_edit.textChanged.connect(self.form_validator.handle_test_range_change)
 
         # 첫 번째 페이지 필드들의 변경 시 다음 버튼 상태 체크
         for field in [self.company_edit, self.product_edit, self.version_edit, self.model_edit,
@@ -1482,9 +1514,78 @@ class InfoWidget(QWidget):
         # 6px gap
         layout.addSpacing(6)
 
-        # URL 테이블 (744x424px)
+        # IP 직접 입력 영역 (744x36px) - 기본적으로 비활성화
+        ip_direct_row = QWidget()
+        ip_direct_row.setFixedSize(744, 36)
+        ip_direct_layout = QHBoxLayout()
+        ip_direct_layout.setContentsMargins(0, 0, 0, 0)
+        ip_direct_layout.setSpacing(8)
+
+        # 직접 입력 라벨
+        direct_label = QLabel("")
+        direct_label.setFixedWidth(120)
+        direct_label.setStyleSheet("""
+            QLabel {
+                font-family: 'Noto Sans KR';
+                font-weight: 400;
+                font-size: 14px;
+                letter-spacing: -0.14px;
+                color: #666666;
+            }
+        """)
+        ip_direct_layout.addWidget(direct_label)
+
+        # IP:Port 직접 입력창 - 항상 활성화 (데모용)
+        self.page2_ip_direct_input = QLineEdit()
+        self.page2_ip_direct_input.setFixedHeight(30)
+        self.page2_ip_direct_input.setPlaceholderText("예: 192.168.1.1:8080")
+        self.page2_ip_direct_input.setStyleSheet("""
+            QLineEdit {
+                font-family: 'Noto Sans KR';
+                font-size: 13px;
+                padding: 6px 10px;
+                border: 1px solid #CECECE;
+                border-radius: 4px;
+                background-color: #FFFFFF;
+            }
+            QLineEdit:focus {
+                border: 1px solid #4A90E2;
+            }
+        """)
+        ip_direct_layout.addWidget(self.page2_ip_direct_input)
+
+        # "추가" 버튼 - 항상 활성화 (데모용)
+        self.add_ip_btn = QPushButton("추가")
+        self.add_ip_btn.setFixedSize(80, 30)
+        self.add_ip_btn.setStyleSheet("""
+            QPushButton {
+                font-family: 'Noto Sans KR';
+                font-size: 13px;
+                font-weight: 500;
+                background-color: #4A90E2;
+                color: white;
+                border: none;
+                border-radius: 4px;
+            }
+            QPushButton:hover {
+                background-color: #357ABD;
+            }
+            QPushButton:pressed {
+                background-color: #2E6DA4;
+            }
+        """)
+        self.add_ip_btn.clicked.connect(self.add_ip_to_table)
+        ip_direct_layout.addWidget(self.add_ip_btn)
+
+        ip_direct_row.setLayout(ip_direct_layout)
+        layout.addWidget(ip_direct_row)
+
+        # 6px gap
+        layout.addSpacing(6)
+
+        # URL 테이블 (744x370px) - 높이 줄임
         self.url_table = QTableWidget(0, 2)
-        self.url_table.setFixedSize(744, 424)
+        self.url_table.setFixedSize(744, 370)
         self.url_table.setHorizontalHeaderLabels(["", "URL"])  # 첫 번째 헤더는 빈 문자열
         self.url_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.url_table.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -1688,38 +1789,64 @@ class InfoWidget(QWidget):
     def start_scan(self):
         """실제 네트워크 스캔으로 사용 가능한 주소 탐지"""
         try:
-            # API에서 받은 testPort가 있으면 직접 URL 생성
-            # if hasattr(self, 'test_port') and self.test_port:
-            #     my_ip = self.get_local_ip()
-            #     if my_ip:
-            #         url = f"{my_ip}:{self.test_port}"
-            #         print(f"API testPort 사용: {url}")
-            #         self._populate_url_table([url])
-            #         QMessageBox.information(self, "주소 설정 완료",
-            #             f"API에서 받은 포트 정보로 주소를 설정했습니다.\n"
-            #             f"주소: {url}")
-            #         return
-            #     else:
-            #         QMessageBox.warning(self, "경고", "로컬 IP를 가져올 수 없습니다.")
-            #         return
-            if hasattr(self, 'test_port') and self.test_port:
-                ip_list = self._get_local_ip_list()
-                if not ip_list:
-                    ip_list = ["127.0.0.1"]  # 안전한 기본값
+            # target_system에 따라 분기 처리
+            if hasattr(self, 'target_system') and self.target_system == "통합플랫폼시스템":
+                # 통합플랫폼시스템: 네트워크 IP 검색
+                if hasattr(self, 'test_port') and self.test_port:
+                    ip_list = self._get_local_ip_list()
 
-                # ip:port 목록 생성
-                urls = [f"{ip}:{self.test_port}" for ip in dict.fromkeys(ip_list)]  # 중복 제거 유지 순서
+                    if not ip_list:
+                        # IP 검색 실패 시 경고 및 직접 입력 안내
+                        QMessageBox.warning(
+                            self, "네트워크 IP 검색 실패",
+                            "네트워크 IP 주소를 검색할 수 없습니다.\n\n"
+                            "아래 '직접 입력' 기능을 사용하여 IP:Port를 수동으로 입력해주세요.\n"
+                            "예: 192.168.1.1:8080"
+                        )
+                        return
 
-                print(f"API testPort 사용 (후보): {urls}")
-                self._populate_url_table(urls)
-                QMessageBox.information(
-                    self, "주소 설정 완료",
-                    "API에서 받은 포트 정보로 주소 후보를 설정했습니다.\n"
-                    f"후보: {', '.join(urls)}"
-                )
+                    # ip:port 목록 생성
+                    urls = [f"{ip}:{self.test_port}" for ip in dict.fromkeys(ip_list)]  # 중복 제거 유지 순서
+
+                    print(f"통합플랫폼시스템 - API testPort 사용 (후보): {urls}")
+                    self._populate_url_table(urls)
+                    QMessageBox.information(
+                        self, "주소 설정 완료",
+                        "통합플랫폼시스템: 네트워크 IP로 주소 후보를 설정했습니다.\n"
+                        f"후보: {', '.join(urls)}"
+                    )
+                else:
+                    QMessageBox.warning(self, "경고", "testPort 정보가 없습니다.")
                 return
 
-            # testPort가 없으면 기존 네트워크 스캔 수행
+            elif hasattr(self, 'target_system') and self.target_system == "물리보안시스템":
+                # 물리보안시스템: ARP 스캔으로 동일 네트워크 IP 검색
+                # 이미 스캔 중이면 중복 실행 방지
+                if hasattr(self, 'arp_scan_thread') and self.arp_scan_thread and self.arp_scan_thread.isRunning():
+                    QMessageBox.information(self, "알림", "이미 주소 탐색이 진행 중입니다.")
+                    return
+
+                # ARP Worker와 Thread 설정
+                from PyQt5.QtCore import QThread
+
+                self.arp_scan_worker = ARPScanWorker(test_port=self.test_port if hasattr(self, 'test_port') else None)
+                self.arp_scan_thread = QThread()
+
+                # Worker를 Thread로 이동
+                self.arp_scan_worker.moveToThread(self.arp_scan_thread)
+
+                # 시그널 연결
+                self.arp_scan_worker.scan_completed.connect(self._on_arp_scan_completed)
+                self.arp_scan_worker.scan_failed.connect(self._on_arp_scan_failed)
+                self.arp_scan_thread.started.connect(self.arp_scan_worker.scan_arp)
+                self.arp_scan_thread.finished.connect(self.arp_scan_thread.deleteLater)
+
+                # 스레드 시작
+                self.arp_scan_thread.start()
+                QMessageBox.information(self, "ARP 스캔 시작", "동일 네트워크의 장비를 검색합니다.\n잠시만 기다려주세요...")
+                return
+
+            # 기타 시스템 또는 testPort가 없는 경우: 기존 네트워크 스캔 수행
             # 이미 스캔 중이면 중복 실행 방지
             if self.scan_thread and self.scan_thread.isRunning():
                 QMessageBox.information(self, "알림", "이미 주소 탐색이 진행 중입니다.")
@@ -1753,6 +1880,19 @@ class InfoWidget(QWidget):
 
     def _on_scan_failed(self, msg):
         QMessageBox.warning(self, "주소 탐색 실패", msg)
+
+    def _on_arp_scan_completed(self, urls):
+        """ARP 스캔 완료 시 호출"""
+        self._populate_url_table(urls)
+        QMessageBox.information(
+            self, "ARP 스캔 완료",
+            f"동일 네트워크에서 {len(urls)}개의 장비를 찾았습니다.\n"
+            f"발견된 주소: {', '.join(urls)}"
+        )
+
+    def _on_arp_scan_failed(self, msg):
+        """ARP 스캔 실패 시 호출"""
+        QMessageBox.warning(self, "ARP 스캔 실패", msg)
 
     def _populate_url_table(self, urls):
         """URL 테이블에 스캔 결과 채우기"""
@@ -1788,6 +1928,83 @@ class InfoWidget(QWidget):
     def _show_scan_error(self, message):
         """스캔 오류 메시지 표시"""
         QMessageBox.warning(self, "주소 탐색 실패", message)
+
+    def add_ip_to_table(self):
+        """직접 입력한 IP:Port를 URL 테이블에 추가"""
+        try:
+            # 입력값 가져오기
+            ip_port = self.page2_ip_direct_input.text().strip()
+
+            if not ip_port:
+                QMessageBox.warning(self, "입력 오류", "IP:Port를 입력해주세요.\n예: 192.168.1.1:8080")
+                return
+
+            # 기본적인 형식 검증 (IP:Port)
+            if ':' not in ip_port:
+                QMessageBox.warning(self, "형식 오류", "올바른 형식으로 입력해주세요.\n예: 192.168.1.1:8080")
+                return
+
+            parts = ip_port.split(':')
+            if len(parts) != 2:
+                QMessageBox.warning(self, "형식 오류", "올바른 형식으로 입력해주세요.\n예: 192.168.1.1:8080")
+                return
+
+            ip_part = parts[0]
+            port_part = parts[1]
+
+            # IP 검증
+            if not self._validate_ip_address(ip_part):
+                QMessageBox.warning(self, "IP 오류", "올바른 IP 주소를 입력해주세요.\n예: 192.168.1.100")
+                return
+
+            # Port 검증
+            try:
+                port = int(port_part)
+                if port < 1 or port > 65535:
+                    raise ValueError
+            except ValueError:
+                QMessageBox.warning(self, "Port 오류", "올바른 Port 번호를 입력해주세요. (1-65535)")
+                return
+
+            # 중복 확인
+            for row in range(self.url_table.rowCount()):
+                item = self.url_table.item(row, 1)
+                if item and item.text() == ip_port:
+                    QMessageBox.information(self, "알림", "이미 추가된 주소입니다.")
+                    return
+
+            # 테이블에 추가
+            row = self.url_table.rowCount()
+            self.url_table.insertRow(row)
+
+            # 체크박스 추가
+            checkbox_widget = QWidget()
+            checkbox_widget.setStyleSheet("background-color: #FFFFFF;")
+            checkbox_layout = QHBoxLayout()
+            checkbox_layout.setAlignment(Qt.AlignCenter)
+            checkbox_layout.setContentsMargins(0, 0, 0, 0)
+
+            checkbox = QCheckBox()
+            checkbox.setChecked(False)
+            checkbox.clicked.connect(lambda checked, r=row: self.on_checkbox_clicked(r, checked))
+            checkbox_layout.addWidget(checkbox)
+            checkbox_widget.setLayout(checkbox_layout)
+
+            self.url_table.setCellWidget(row, 0, checkbox_widget)
+
+            # URL 텍스트 추가
+            url_item = QTableWidgetItem(ip_port)
+            url_item.setTextAlignment(Qt.AlignCenter)
+            self.url_table.setItem(row, 1, url_item)
+
+            # 입력창 초기화
+            self.page2_ip_direct_input.clear()
+
+            QMessageBox.information(self, "추가 완료", f"주소가 추가되었습니다.\n{ip_port}")
+
+        except Exception as e:
+            print(f"IP 추가 오류: {e}")
+            QMessageBox.critical(self, "오류", f"주소 추가 중 오류가 발생했습니다:\n{str(e)}")
 
     def on_checkbox_clicked(self, clicked_row, checked):
         """체크박스 클릭 시: 단일 선택 처리"""
@@ -1980,6 +2197,15 @@ class InfoWidget(QWidget):
             if any(field for field in auth_fields):
                 return True
 
+            # 주소 입력창들에 입력값이 있는지 확인
+            address_fields = [
+                self.ip_input_edit.text().strip(),
+                self.page2_ip_direct_input.text().strip()
+            ]
+
+            if any(field for field in address_fields):
+                return True
+
             # URL 테이블에서 선택된 항목이 있는지 확인
             for row in range(self.url_table.rowCount()):
                 checkbox_widget = self.url_table.cellWidget(row, 0)
@@ -2027,6 +2253,10 @@ class InfoWidget(QWidget):
 
             # 인증 방식을 Digest Auth로 초기화
             self.digest_radio.setChecked(True)
+
+            # 주소 입력창들 초기화
+            self.ip_input_edit.clear()
+            self.page2_ip_direct_input.clear()
 
             # 주소 탐색 테이블 초기화
             self.url_table.setRowCount(0)
@@ -2103,28 +2333,24 @@ class InfoWidget(QWidget):
     def on_load_test_info_clicked(self):
         """시험정보 불러오기 버튼 클릭 이벤트 (API 기반)"""
         try:
-            #임시 이후 삭제
-            # 여러 IP 중 '첫 번째'만 사용
-            ip_list = self._get_local_ip_list()
-            if not ip_list:
-                QMessageBox.warning(self, "경고", "로컬 IP 주소를 가져올 수 없습니다.")
-                return           
-            # 로컬 IP 주소 가져오기
-            #my_ip = self.get_local_ip()
-            # if not my_ip:
-            #     QMessageBox.warning(self, "경고", "로컬 IP 주소를 가져올 수 없습니다.")
-            #     return
+            # IP 입력창에서 IP 주소 가져오기
+            ip_address = self.ip_input_edit.text().strip()
 
-            #print(f"로컬 IP: {my_ip}")
+            if not ip_address:
+                QMessageBox.warning(self, "경고", "주소를 입력해주세요.")
+                return
 
-            #임시 이후 삭제
-            first_ip = ip_list[0]
-            print(f"로컬 IP(첫 번째): {first_ip}")
+            # IP 주소 형식 검증
+            if not self._validate_ip_address(ip_address):
+                QMessageBox.warning(self, "경고",
+                    "올바른 IP 주소 형식이 아닙니다.\n"
+                    "예: 192.168.1.1")
+                return
+
+            print(f"입력된 IP 주소: {ip_address}")
 
             # API 호출하여 시험 정보 가져오기
-            #test_data = self.form_validator.fetch_test_info_by_ip(my_ip)
-            #임시이후삭제
-            test_data = self.form_validator.fetch_test_info_by_ip(first_ip)
+            test_data = self.form_validator.fetch_test_info_by_ip(ip_address)
 
             if not test_data:
                 QMessageBox.warning(self, "경고",
@@ -2154,6 +2380,9 @@ class InfoWidget(QWidget):
             group_ranges = [g.get("testRange", "") for g in test_groups]
             combined_group_ranges = ", ".join(group_ranges)
 
+            # 원본 시험범위 값 저장
+            self.original_test_range = combined_group_ranges
+
             self.company_edit.setText(eval_target.get("companyName", ""))
             self.product_edit.setText(eval_target.get("productName", ""))
             self.version_edit.setText(eval_target.get("version", ""))
@@ -2168,7 +2397,14 @@ class InfoWidget(QWidget):
             self.target_system_edit.setText(self.target_system)
 
             self.test_group_edit.setText(combined_group_names)  # 콤마로 연결된 그룹 이름들
-            self.test_range_edit.setText(combined_group_ranges)  # 콤마로 연결된 범위들
+
+            # 시험범위를 UI용 텍스트로 변환하여 표시
+            display_test_range = combined_group_ranges
+            if combined_group_ranges == "ALL_FIELDS":
+                display_test_range = "전체필드"
+            elif combined_group_ranges:
+                display_test_range = "필수필드"
+            self.test_range_edit.setText(display_test_range)
 
             self.contact_person = eval_target.get("contactPerson", "")
             self.model_name = eval_target.get("modelName", "")
@@ -2203,46 +2439,37 @@ class InfoWidget(QWidget):
             traceback.print_exc()
             QMessageBox.critical(self, "오류", f"시험 정보를 불러오는 중 오류가 발생했습니다:\n{str(e)}")
     
-    #임시버전
+    def _validate_ip_address(self, ip):
+        """IP 주소 형식 검증"""
+        # IP 주소 정규식 패턴
+        ip_pattern = re.compile(
+            r'^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}'
+            r'(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
+        )
+        return bool(ip_pattern.match(ip))
+
     def get_local_ip(self):
         return "192.168.1.2, 127.0.0.1"
     
     def _get_local_ip_list(self):
-        """get_local_ip() 결과를 안전하게 리스트로 변환"""
+        """get_local_ip() 결과를 안전하게 리스트로 변환 (최대 3개)"""
         raw = self.get_local_ip()
+        ip_list = []
+
         if isinstance(raw, str):
-            return [ip.strip() for ip in raw.split(',') if ip.strip()]
+            ip_list = [ip.strip() for ip in raw.split(',') if ip.strip()]
         elif isinstance(raw, (list, tuple, set)):
-            return [str(ip).strip() for ip in raw if str(ip).strip()]
-        return []
+            ip_list = [str(ip).strip() for ip in raw if str(ip).strip()]
 
-
-    # def get_local_ip(self):
-    #     """로컬 IP 주소 가져오기"""
-    #     # TODO: 테스트용 고정 IP - 나중에 실제 IP 자동 감지로 변경 필요
-    #     return "192.168.1.1"
-
-        # # 실제 IP 자동 감지 코드 (나중에 활성화)
-        # import socket
-        # try:
-        #     # 외부 서버에 연결 시도하여 로컬 IP 확인
-        #     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        #     s.connect(("8.8.8.8", 80))
-        #     local_ip = s.getsockname()[0]
-        #     s.close()
-        #     return local_ip
-        # except Exception:
-        #     try:
-        #         # 위 방법 실패 시 호스트명으로 IP 가져오기
-        #         return socket.gethostbyname(socket.gethostname())
-        #     except Exception:
-        #         return None
+        # 최대 3개만 반환
+        return ip_list[:3]
 
     def check_next_button_state(self):
         """첫 번째 페이지의 다음 버튼 활성화 조건 체크"""
         try:
             if hasattr(self, 'next_btn'):
-                self.next_btn.setEnabled(self._is_page1_complete())
+                # 다음 버튼은 항상 활성화 (클릭 시 검증)
+                self.next_btn.setEnabled(True)
         except Exception as e:
             print(f"다음 버튼 상태 체크 실패: {e}")
 
