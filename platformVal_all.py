@@ -1105,39 +1105,85 @@ class MyApp(QWidget):
                 
                 # 2. 맥락 검증용 - current_validation의 각 필드별 referenceEndpoint에서 RESPONSE 로드
                 if current_validation:
+                    print("=" * 50)
+                    print("★★★ reference_context 채우기 시작!")
+                    print("=" * 50)
+
                     for field_path, validation_rule in current_validation.items():
+                        validation_type = validation_rule.get("validationType", "")
+                        # ✅ validationType에 따라 REQUEST 또는 RESPONSE 선택
+                        direction = "REQUEST" if "request-field" in validation_type else "RESPONSE"
+
+                        print(f"★★★ field={field_path}")
+                        print(f"★★★ validationType={validation_type}")
+                        print(f"★★★ direction={direction}")
+
                         # referenceEndpoint 추출
                         ref_endpoint = validation_rule.get("referenceEndpoint", "")
                         if ref_endpoint:
                             # '/' 제거하여 API 이름만 추출
                             ref_api_name = ref_endpoint.lstrip("/")
-                            # 해당 referenceEndpoint의 RESPONSE 로드
-                            response_data = self._load_from_trace_file(ref_api_name, "RESPONSE")
-                            if response_data and isinstance(response_data, dict):
-                                self.reference_context[ref_endpoint] = response_data
-                                print(f"[TRACE] {ref_endpoint} RESPONSE를 trace 파일에서 로드 (from validation rule)")
-                
+                            # ✅ direction 사용 (RESPONSE → direction으로 변경)
+                            ref_data = self._load_from_trace_file(ref_api_name, direction)
+                            if ref_data and isinstance(ref_data, dict):
+                                self.reference_context[ref_endpoint] = ref_data
+                                print(f"[TRACE] {ref_endpoint} {direction}를 trace 파일에서 로드 (from validation rule)")
+        
                         ref_endpoint_max = validation_rule.get("referenceEndpointMax", "")
                         if ref_endpoint_max:
                             ref_api_name_max = ref_endpoint_max.lstrip("/")
-                            response_data_max = self._load_from_trace_file(ref_api_name_max, "RESPONSE")
-                            if response_data_max and isinstance(response_data_max, dict):
-                                self.reference_context[ref_endpoint_max] = response_data_max
-                                print(f"[TRACE] {ref_endpoint_max} RESPONSE를 trace 파일에서 로드 (from validation rule)")
-                        
+                            # ✅ direction 사용
+                            ref_data_max = self._load_from_trace_file(ref_api_name_max, direction)
+                            if ref_data_max and isinstance(ref_data_max, dict):
+                                self.reference_context[ref_endpoint_max] = ref_data_max
+                                print(f"★★★ 저장완료: {ref_endpoint_max} → {direction} 데이터")
+                                print(f"[TRACE] {ref_endpoint_max} {direction}를 trace 파일에서 로드 (from validation rule)")
+        
                         ref_endpoint_min = validation_rule.get("referenceEndpointMin", "")
                         if ref_endpoint_min:
                             ref_api_name_min = ref_endpoint_min.lstrip("/")
-                            response_data_min = self._load_from_trace_file(ref_api_name_min, "RESPONSE")
-                            if response_data_min and isinstance(response_data_min, dict):
-                                self.reference_context[ref_endpoint_min] = response_data_min
-                                print(f"[TRACE] {ref_endpoint_min} RESPONSE를 trace 파일에서 로드 (from validation rule)")
+                            # ✅ direction 사용
+                            ref_data_min = self._load_from_trace_file(ref_api_name_min, direction)
+                            if ref_data_min and isinstance(ref_data_min, dict):
+                                self.reference_context[ref_endpoint_min] = ref_data_min
+                                print(f"[TRACE] {ref_endpoint_min} {direction}를 trace 파일에서 로드 (from validation rule)")
+
+                # if current_validation:
+                #     for field_path, validation_rule in current_validation.items():
+                #         validation_type = validation_rule.get("validationType", "")
+                #         direction = "REQUEST" if "request-field" in validation_type else "RESPONSE"
+
+                #         # referenceEndpoint 추출
+                #         ref_endpoint = validation_rule.get("referenceEndpoint", "")
+                #         if ref_endpoint:
+                #             # '/' 제거하여 API 이름만 추출
+                #             ref_api_name = ref_endpoint.lstrip("/")
+                #             # 해당 referenceEndpoint의 RESPONSE 로드
+                #             response_data = self._load_from_trace_file(ref_api_name, "RESPONSE")
+                #             if response_data and isinstance(response_data, dict):
+                #                 self.reference_context[ref_endpoint] = response_data
+                #                 print(f"[TRACE] {ref_endpoint} RESPONSE를 trace 파일에서 로드 (from validation rule)")
+                
+                #         ref_endpoint_max = validation_rule.get("referenceEndpointMax", "")
+                #         if ref_endpoint_max:
+                #             ref_api_name_max = ref_endpoint_max.lstrip("/")
+                #             response_data_max = self._load_from_trace_file(ref_api_name_max, "RESPONSE")
+                #             if response_data_max and isinstance(response_data_max, dict):
+                #                 self.reference_context[ref_endpoint_max] = response_data_max
+                #                 print(f"[TRACE] {ref_endpoint_max} RESPONSE를 trace 파일에서 로드 (from validation rule)")
+                        
+                #         ref_endpoint_min = validation_rule.get("referenceEndpointMin", "")
+                #         if ref_endpoint_min:
+                #             ref_api_name_min = ref_endpoint_min.lstrip("/")
+                #             response_data_min = self._load_from_trace_file(ref_api_name_min, "RESPONSE")
+                #             if response_data_min and isinstance(response_data_min, dict):
+                #                 self.reference_context[ref_endpoint_min] = response_data_min
+                #                 print(f"[TRACE] {ref_endpoint_min} RESPONSE를 trace 파일에서 로드 (from validation rule)")
                 # if api_name:
                 #     response_data = self._load_from_trace_file(api_name, "RESPONSE")
                 #     if response_data and isinstance(response_data, dict):
                 #         self.reference_context[f"/{api_name}"] = response_data
                 #         print(f"[TRACE] /{api_name} RESPONSE를 trace 파일에서 로드")
-                
 
                 if self.Server.message[self.cnt] in CONSTANTS.none_request_message:
                     # 매 시도마다 데이터 수집
