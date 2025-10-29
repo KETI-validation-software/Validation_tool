@@ -1575,52 +1575,107 @@ class MyApp(QWidget):
                     # 🆕 응답 검증용 - resp_rules의 각 필드별 referenceEndpoint/Max/Min에서 trace 파일 로드
                     if resp_rules:
                         for field_path, validation_rule in resp_rules.items():
-                            # 1) referenceEndpoint 처리
+                            validation_type = validation_rule.get("validationType", "")
+                            direction = "REQUEST" if "request-field" in validation_type else "RESPONSE"
+
+                            # referenceEndpoint 처리
                             ref_endpoint = validation_rule.get("referenceEndpoint", "")
                             if ref_endpoint:
                                 ref_api_name = ref_endpoint.lstrip("/")
                                 # latest_events에 없으면 trace 파일에서 로드
-                                if ref_api_name not in self.latest_events or "RESPONSE" not in self.latest_events.get(ref_api_name, {}):
-                                    print(f"[TRACE] {ref_endpoint} RESPONSE를 trace 파일에서 로드 시도")
-                                    response_data = self._load_from_trace_file(ref_api_name, "RESPONSE")
+                                if ref_api_name not in self.latest_events or direction not in self.latest_events.get(ref_api_name, {}):
+                                    print(f"[TRACE] {ref_endpoint} {direction}를 trace 파일에서 로드 시도")
+                                    response_data = self._load_from_trace_file(ref_api_name, direction)
                                     if response_data and isinstance(response_data, dict):
                                         self.reference_context[ref_endpoint] = response_data
-                                        print(f"[TRACE] {ref_endpoint} RESPONSE를 trace 파일에서 로드 완료")
+                                        print(f"[TRACE] {ref_endpoint} {direction}를 trace 파일에서 로드 완료")
                                 else:
                                     # latest_events에 있으면 거기서 가져오기
-                                    event_data = self.latest_events.get(ref_api_name, {}).get("RESPONSE", {})
+                                    event_data = self.latest_events.get(ref_api_name, {}).get(direction, {})
                                     if event_data and isinstance(event_data, dict):
                                         self.reference_context[ref_endpoint] = event_data.get("data", {})
                             
-                            # 2) referenceEndpointMax 처리
+                            # referenceEndpointMax 처리
                             ref_endpoint_max = validation_rule.get("referenceEndpointMax", "")
                             if ref_endpoint_max:
                                 ref_api_name_max = ref_endpoint_max.lstrip("/")
-                                if ref_api_name_max not in self.latest_events or "RESPONSE" not in self.latest_events.get(ref_api_name_max, {}):
-                                    print(f"[TRACE] {ref_endpoint_max} RESPONSE를 trace 파일에서 로드 시도 (Max)")
-                                    response_data_max = self._load_from_trace_file(ref_api_name_max, "RESPONSE")
+                                if ref_api_name_max not in self.latest_events or direction not in self.latest_events.get(ref_api_name_max, {}):
+                                    print(f"[TRACE] {ref_endpoint_max} {direction}를 trace 파일에서 로드 시도 (Max)")
+                                    response_data_max = self._load_from_trace_file(ref_api_name_max, direction)
                                     if response_data_max and isinstance(response_data_max, dict):
                                         self.reference_context[ref_endpoint_max] = response_data_max
-                                        print(f"[TRACE] {ref_endpoint_max} RESPONSE를 trace 파일에서 로드 완료 (Max)")
+                                        print(f"[TRACE] {ref_endpoint_max} {direction}를 trace 파일에서 로드 완료 (Max)")
                                 else:
-                                    event_data = self.latest_events.get(ref_api_name_max, {}).get("RESPONSE", {})
+                                    event_data = self.latest_events.get(ref_api_name_max, {}).get(direction, {})
                                     if event_data and isinstance(event_data, dict):
                                         self.reference_context[ref_endpoint_max] = event_data.get("data", {})
                             
-                            # 3) referenceEndpointMin 처리
+                            # referenceEndpointMin 처리
                             ref_endpoint_min = validation_rule.get("referenceEndpointMin", "")
                             if ref_endpoint_min:
                                 ref_api_name_min = ref_endpoint_min.lstrip("/")
-                                if ref_api_name_min not in self.latest_events or "RESPONSE" not in self.latest_events.get(ref_api_name_min, {}):
-                                    print(f"[TRACE] {ref_endpoint_min} RESPONSE를 trace 파일에서 로드 시도 (Min)")
-                                    response_data_min = self._load_from_trace_file(ref_api_name_min, "RESPONSE")
+                                if ref_api_name_min not in self.latest_events or direction not in self.latest_events.get(ref_api_name_min, {}):
+                                    print(f"[TRACE] {ref_endpoint_min} {direction}를 trace 파일에서 로드 시도 (Min)")
+                                    response_data_min = self._load_from_trace_file(ref_api_name_min, direction)
                                     if response_data_min and isinstance(response_data_min, dict):
                                         self.reference_context[ref_endpoint_min] = response_data_min
-                                        print(f"[TRACE] {ref_endpoint_min} RESPONSE를 trace 파일에서 로드 완료 (Min)")
+                                        print(f"[TRACE] {ref_endpoint_min} {direction}를 trace 파일에서 로드 완료 (Min)")
                                 else:
-                                    event_data = self.latest_events.get(ref_api_name_min, {}).get("RESPONSE", {})
+                                    event_data = self.latest_events.get(ref_api_name_min, {}).get(direction, {})
                                     if event_data and isinstance(event_data, dict):
                                         self.reference_context[ref_endpoint_min] = event_data.get("data", {})
+                    
+                    # if resp_rules:
+                    #     for field_path, validation_rule in resp_rules.items():
+                    #         validation_type = validation_rule.get("validationType", "")
+                    #         direction = "REQUEST" if validation_rule.get("forRequest", False) else "RESPONSE"
+                        
+                    #         # 1) referenceEndpoint 처리
+                    #         ref_endpoint = validation_rule.get("referenceEndpoint", "")
+                    #         if ref_endpoint:
+                    #             ref_api_name = ref_endpoint.lstrip("/")
+                    #             # latest_events에 없으면 trace 파일에서 로드
+                    #             if ref_api_name not in self.latest_events or "RESPONSE" not in self.latest_events.get(ref_api_name, {}):
+                    #                 print(f"[TRACE] {ref_endpoint} RESPONSE를 trace 파일에서 로드 시도")
+                    #                 response_data = self._load_from_trace_file(ref_api_name, "RESPONSE")
+                    #                 if response_data and isinstance(response_data, dict):
+                    #                     self.reference_context[ref_endpoint] = response_data
+                    #                     print(f"[TRACE] {ref_endpoint} RESPONSE를 trace 파일에서 로드 완료")
+                    #             else:
+                    #                 # latest_events에 있으면 거기서 가져오기
+                    #                 event_data = self.latest_events.get(ref_api_name, {}).get("RESPONSE", {})
+                    #                 if event_data and isinstance(event_data, dict):
+                    #                     self.reference_context[ref_endpoint] = event_data.get("data", {})
+                            
+                    #         # 2) referenceEndpointMax 처리
+                    #         ref_endpoint_max = validation_rule.get("referenceEndpointMax", "")
+                    #         if ref_endpoint_max:
+                    #             ref_api_name_max = ref_endpoint_max.lstrip("/")
+                    #             if ref_api_name_max not in self.latest_events or "RESPONSE" not in self.latest_events.get(ref_api_name_max, {}):
+                    #                 print(f"[TRACE] {ref_endpoint_max} RESPONSE를 trace 파일에서 로드 시도 (Max)")
+                    #                 response_data_max = self._load_from_trace_file(ref_api_name_max, "RESPONSE")
+                    #                 if response_data_max and isinstance(response_data_max, dict):
+                    #                     self.reference_context[ref_endpoint_max] = response_data_max
+                    #                     print(f"[TRACE] {ref_endpoint_max} RESPONSE를 trace 파일에서 로드 완료 (Max)")
+                    #             else:
+                    #                 event_data = self.latest_events.get(ref_api_name_max, {}).get("RESPONSE", {})
+                    #                 if event_data and isinstance(event_data, dict):
+                    #                     self.reference_context[ref_endpoint_max] = event_data.get("data", {})
+                            
+                    #         # 3) referenceEndpointMin 처리
+                    #         ref_endpoint_min = validation_rule.get("referenceEndpointMin", "")
+                    #         if ref_endpoint_min:
+                    #             ref_api_name_min = ref_endpoint_min.lstrip("/")
+                    #             if ref_api_name_min not in self.latest_events or "RESPONSE" not in self.latest_events.get(ref_api_name_min, {}):
+                    #                 print(f"[TRACE] {ref_endpoint_min} RESPONSE를 trace 파일에서 로드 시도 (Min)")
+                    #                 response_data_min = self._load_from_trace_file(ref_api_name_min, "RESPONSE")
+                    #                 if response_data_min and isinstance(response_data_min, dict):
+                    #                     self.reference_context[ref_endpoint_min] = response_data_min
+                    #                     print(f"[TRACE] {ref_endpoint_min} RESPONSE를 trace 파일에서 로드 완료 (Min)")
+                    #             else:
+                    #                 event_data = self.latest_events.get(ref_api_name_min, {}).get("RESPONSE", {})
+                    #                 if event_data and isinstance(event_data, dict):
+                    #                     self.reference_context[ref_endpoint_min] = event_data.get("data", {})
 
                     try:
                         val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(
