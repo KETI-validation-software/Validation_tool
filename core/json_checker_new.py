@@ -2,9 +2,12 @@ import numpy
 import json
 import pandas as pd
 import json_checker
-import re
 from json_checker import OptionalKey
 
+
+# ================================================================
+# 1. 유틸리티 함수들 (안전한 비교 및 변환)
+# ================================================================
 
 def safe_hash(obj):
     """unhashable 객체를 hashable하게 변환"""
@@ -13,52 +16,13 @@ def safe_hash(obj):
     return obj
 
 
-def collect_all_values_by_key(data, key):
-    """
-    중첩된 dict/list 구조에서 특정 키의 모든 값을 재귀적으로 수집
-
-    Args:
-        data: 검색할 데이터 (dict, list, 또는 기타)
-        key: 찾을 키 이름 (예: "camID")
-
-    Returns:
-        list: 해당 키의 모든 값들의 리스트
-
-    Example:
-        # CameraProfiles 응답 예시
-        data = {
-            "camList": [
-                {"camID": "cam1", "name": "Camera 1"},
-                {"camID": "cam2", "name": "Camera 2"}
-            ],
-            "extra": {"camID": "cam3"}
-        }
-        collect_all_values_by_key(data, "camID")
-        # Returns: ["cam1", "cam2", "cam3"]
-    """
-    results = []
-
-    def _recursive_search(obj):
-        if isinstance(obj, dict):
-            for k, v in obj.items():
-                if k == key:
-                    # 값이 리스트면 펼치고, 아니면 그대로 추가
-                    if isinstance(v, list):
-                        results.extend(v)
-                    else:
-                        results.append(v)
-                # 재귀적으로 계속 탐색 (값이 dict나 list면)
-                _recursive_search(v)
-        elif isinstance(obj, list):
-            for item in obj:
-                _recursive_search(item)
-
-    _recursive_search(data)
-    return results
-
-
 def safe_compare(a, b):
-    """두 값을 안전하게 비교 (딕셔너리/리스트 포함)"""
+    """
+    두 값을 안전하게 비교 (딕셔너리/리스트 포함)
+    
+    Returns:
+        bool: 두 값이 같으면 True
+    """
     try:
         # None 체크
         if a is None and b is None:
@@ -76,46 +40,17 @@ def safe_compare(a, b):
                 return json.dumps(a, sort_keys=True, default=str) == json.dumps(b, sort_keys=True, default=str)
             except (TypeError, ValueError) as e:
                 print(f"[DEBUG] safe_compare JSON error: {e}")
-                print(f"[DEBUG] a type: {type(a)}, a: {a}")
-                print(f"[DEBUG] b type: {type(b)}, b: {b}")
                 # JSON 직렬화가 실패하면 문자열로 비교
                 return str(a) == str(b)
 
         # 기본 타입은 직접 비교
         return a == b
     except Exception as e:
-        # 모든 예외를 잡아서 False 반환
         print(f"[DEBUG] safe_compare error: {e}")
         print(f"[DEBUG] a type: {type(a)}, a: {repr(a)}")
         print(f"[DEBUG] b type: {type(b)}, b: {repr(b)}")
         import traceback
         traceback.print_exc()
-        return False
-
-
-def safe_in_check(item, container):
-    """item이 container에 있는지 안전하게 확인"""
-    try:
-        if isinstance(item, (dict, list)):
-            try:
-                item_str = json.dumps(item, sort_keys=True, default=str)
-                for c in container:
-                    if isinstance(c, (dict, list)):
-                        if item_str == json.dumps(c, sort_keys=True, default=str):
-                            return True
-                    elif item == c:
-                        return True
-                return False
-            except (TypeError, ValueError):
-                # JSON 직렬화가 실패하면 문자열로 비교
-                item_str = str(item)
-                for c in container:
-                    if str(c) == item_str:
-                        return True
-                return False
-        return item in container
-    except Exception as e:
-        print(f"[DEBUG] safe_in_check error: {e}, item={item}")
         return False
 
 
@@ -137,7 +72,6 @@ def safe_field_in_opt(field_name, opt_field_list):
         return False
 
 
-# OptionalKey 안전 길이 확인 함수
 def safe_len(obj):
     """OptionalKey와 같은 객체에 대해 안전하게 len() 호출"""
     try:
@@ -148,16 +82,115 @@ def safe_len(obj):
         return 0
 
 
-# 리스트 필드인지 동적으로 확인하는 함수
 def is_list_field(value):
+    """리스트 필드인지 확인"""
     return isinstance(value, list)
 
 
-# 1단계: Validation_request.py, response.py에서 규칙 dict 추출 함수
+def to_list(x):
+    """값을 리스트로 변환 (이미 리스트면 그대로, None이면 빈 리스트)"""
+    if x is None:
+        return []
+    return x if isinstance(x, list) else [x]
+
+
+# ================================================================
+# 2. 데이터 수집 및 경로 처리 함수들
+# ================================================================
+
+def collect_all_values_by_key(data, key):
+    """
+    중첩된 dict/list 구조에서 특정 키의 모든 값을 재귀적으로 수집
+
+    Args:
+        data: 검색할 데이터 (dict, list, 또는 기타)
+        key: 찾을 키 이름 (예: "camID")
+
+    Returns:
+        list: 해당 키의 모든 값들의 리스트
+
+    Example:
+        data = {
+            "camList": [
+                {"camID": "cam1", "name": "Camera 1"},
+                {"camID": "cam2", "name": "Camera 2"}
+            ],
+            "extra": {"camID": "cam3"}
+        }
+        collect_all_values_by_key(data, "camID")
+        # Returns: ["cam1", "cam2", "cam3"]
+    """
+    results = []
+
+    def _recursive_search(obj):
+        if isinstance(obj, dict):
+            for k, v in obj.items():
+                if k == key:
+                    # 값이 리스트면 펼치고, 아니면 그대로 추가
+                    if isinstance(v, list):
+                        results.extend(v)
+                    else:
+                        results.append(v)
+                # 재귀적으로 계속 탐색
+                _recursive_search(v)
+        elif isinstance(obj, list):
+            for item in obj:
+                _recursive_search(item)
+
+    _recursive_search(data)
+    return results
+
+
+def get_by_path(data, path):
+    """
+    dot-path를 따라 값을 가져온다.
+    - 중간에 list를 만나면 각 원소에 대해 계속 탐색하여 '값들의 리스트'를 반환
+    - 최종 결과가 단일 값이면 스칼라, 여러 값이면 리스트로 반환
+    
+    Args:
+        data: 탐색할 데이터
+        path: 점으로 구분된 경로 (예: "camList.camID")
+    
+    Returns:
+        값 또는 값들의 리스트 (없으면 None)
+    """
+    parts = path.split(".")
+    current = [data]  # 항상 리스트로 유지해 누적 확장
+
+    for key in parts:
+        next_level = []
+        for item in current:
+            if isinstance(item, dict) and key in item:
+                next_level.append(item[key])
+            elif isinstance(item, list):
+                # 리스트면 각 원소에서 같은 key를 찾는다
+                for elem in item:
+                    if isinstance(elem, dict) and key in elem:
+                        next_level.append(elem[key])
+        current = next_level
+
+        if not current:  # 더 이상 진행 불가
+            return None
+
+    # 결과 평탄화: 단 하나면 스칼라, 2개 이상이면 그대로 리스트
+    if len(current) == 1:
+        return current[0]
+    return current
+
+
+# ================================================================
+# 3. Validation 규칙 추출
+# ================================================================
+
 def extract_validation_rules(validation_dict):
     """
-    validation_dict: 각 API별 _in_validation dict
-    반환: {필드명: 검증규칙 dict, ...} 형태로 평탄화
+    validation_dict에서 규칙 dict를 평탄화하여 추출
+    
+    Args:
+        validation_dict: 각 API별 _in_validation dict
+    
+    Returns:
+        dict: {필드명: 검증규칙 dict, ...} 형태
     """
     print(f"\n🔍 [EXTRACT VALIDATION RULES] 시작")
     print(f"📋 입력 데이터 타입: {type(validation_dict)}")
@@ -183,327 +216,17 @@ def extract_validation_rules(validation_dict):
     return rules
 
 
-def get_by_path(data, path):
-    """
-    dot-path를 따라 값을 가져온다.
-    - 중간에 list를 만나면 각 원소에 대해 계속 탐색하여 '값들의 리스트'를 반환
-    - 최종 결과가 단일 값이면 스칼라, 여러 값이면 리스트로 준다.
-    """
-    parts = path.split(".")
-    current = [data]  # 항상 리스트로 유지해 누적 확장
+# ================================================================
+# 4. 스키마 분석 함수들
+# ================================================================
 
-    for key in parts:
-        next_level = []
-        for item in current:
-            if isinstance(item, dict) and key in item:
-                next_level.append(item[key])
-            elif isinstance(item, list):
-                # 리스트면 각 원소에서 같은 key를 찾는다
-                for elem in item:
-                    if isinstance(elem, dict) and key in elem:
-                        next_level.append(elem[key])
-            # 아니면 해당 분기는 소멸
-        current = next_level
-
-        if not current:  # 더 이상 진행 불가
-            return None
-
-    # 결과 평탄화: 단 하나면 스칼라, 2개 이상이면 그대로 리스트
-    if len(current) == 1:
-        return current[0]
-    return current
-
-
-def to_list(x):
-    if x is None:
-        return []
-    return x if isinstance(x, list) else [x]
-
-
-def safe_compare(a, b):
-    # 리스트 vs 스칼라, 리스트 vs 리스트 모두 지원 (하나라도 일치하면 True)
-    a_list = to_list(a)
-    b_list = to_list(b)
-    return any(av == bv for av in a_list for bv in b_list)
-
-
-def safe_in_check(value, candidates):
-    # value 또는 candidates가 리스트일 수 있음. 교집합 있으면 True
-    v_list = to_list(value)
-    c_list = to_list(candidates)
-    return any(v in c_list for v in v_list)
-
-
-def safe_hash(v):
-    # 리스트/딕셔너리도 비교 가능하도록 문자열로 치환 (간단 버전)
-    try:
-        return (True, hash(v))
-    except TypeError:
-        return (False, repr(v))
-
-
-# 2단계: semantic validation logic
-# def do_semantic_checker(rules_dict, data_dict, reference_context=None):
-#     """
-#     reference_context: 선택. 엔드포인트 문자열 -> 그 응답 dict 의 매핑
-#       예: {
-#         "/CameraProfiles": <CameraProfiles 응답 dict>,
-#         ...
-#       }
-#     """
-#     results = {}
-#     total_score, max_score = 0, 0
-#     error_messages = []
-
-#     for field, rule in rules_dict.items():
-#         score = rule.get('score', 1)
-#         max_score += score
-
-#         if not rule.get('enabled', True):
-#             results[field] = {'result': 'SKIP', 'score': 0, 'msg': 'Validation disabled'}
-#             continue
-
-#         value = get_by_path(data_dict, field)  # <<<<<< 리스트 경로 대응
-#         vtype = rule.get('validationType')
-
-#         passed, msg = True, ''
-
-#         # ---- valid-value-match ----
-#         if vtype == 'valid-value-match':
-#             allowed = rule.get('allowedValues', [])
-#             operator = rule.get('validValueOperator', 'equalsAny')
-#             if operator == 'equals':
-#                 # 단일 값만 허용 (allowed가 리스트이면 첫 값 기준)
-#                 expected = allowed[0] if allowed else None
-#                 if not safe_compare(value, expected):
-#                     passed = False
-#                     msg = f"Value {value!r} != expected {expected!r}"
-#             else:  # equalsAny
-#                 if not safe_in_check(value, allowed):
-#                     passed = False
-#                     msg = f"Value {value!r} not in allowedValues {allowed!r}"
-
-#         # ---- specified-value-match ----
-#         elif vtype == 'specified-value-match':
-#             specified = rule.get('allowedValues', [])
-#             if not safe_in_check(value, specified):
-#                 passed = False
-#                 msg = f"Value {value!r} does not match specifiedValue {specified!r}"
-
-#         # ---- range-match ----
-#         elif vtype == 'range-match':
-#             operator = rule.get('rangeOperator')
-#             minv = rule.get('rangeMin')
-#             maxv = rule.get('rangeMax')
-
-#             def _num_ok(x):
-#                 try:
-#                     return True, float(x)
-#                 except Exception:
-#                     return False, None
-
-#             vals = to_list(value)
-#             for v_raw in vals:
-#                 ok, v = _num_ok(v_raw)
-#                 if not ok:
-#                     passed = False
-#                     msg = f"Value {v_raw!r} is not a number"
-#                     break
-#                 if operator == 'less-than' and maxv is not None and not (v < maxv):
-#                     passed, msg = False, f"{v} !< {maxv}";
-#                     break
-#                 if operator == 'less-equal' and maxv is not None and not (v <= maxv):
-#                     passed, msg = False, f"{v} !<= {maxv}";
-#                     break
-#                 if operator == 'between' and (
-#                         (minv is not None and v < minv) or (maxv is not None and v > maxv)
-#                 ):
-#                     passed, msg = False, f"{v} not in [{minv}, {maxv}]";
-#                     break
-#                 if operator == 'greater-equal' and minv is not None and not (v >= minv):
-#                     passed, msg = False, f"{v} !>= {minv}";
-#                     break
-#                 if operator == 'greater-than' and minv is not None and not (v > minv):
-#                     passed, msg = False, f"{v} !> {minv}";
-#                     break
-
-#         # ---- request/response-field-match ----
-#         elif vtype in ('request-field-match', 'response-field-match'):
-#             ref_field = rule.get('referenceField')
-#             ref_value = get_by_path(data_dict, ref_field) if ref_field else None
-#             if not safe_compare(value, ref_value):
-#                 passed = False
-#                 kind = 'referenceField' if vtype.startswith('request') else 'responseField'
-#                 msg = f"Value {value!r} != {kind} {ref_field!r} -> {ref_value!r}"
-
-#         # 확인하고 있는 부분 - 현재 여기 기능은 platformVal에 내장되어 있는 상황
-#         # ---- 🔥 핵심 수정: request/response-field-list-match ----
-#         elif vtype in ('request-field-list-match', 'response-field-list-match'):
-#             ref_list_field = rule.get('referenceListField')
-#             ref_list = None
-
-#             # 1) 우선 현재 응답에서 get_by_path로 찾기 (기존 로직)
-#             if ref_list_field:
-#                 ref_list = get_by_path(data_dict, ref_list_field)
-
-#             # 2) 🆕 다른 엔드포인트 응답에서 재귀적으로 찾기
-#             if (ref_list is None or not isinstance(ref_list, (list, tuple))) and reference_context:
-#                 ref_ep = rule.get('referenceListEndpoint') or rule.get('referenceEndpoint')
-
-#                 if ref_ep and ref_ep in reference_context:
-#                     # 🔥 핵심: collect_all_values_by_key로 재귀적 수집
-#                     # referenceListField가 단순 키 이름이면 (예: "camID")
-#                     # 중첩 구조 전체에서 해당 키의 모든 값을 수집
-#                     ref_list = collect_all_values_by_key(
-#                         reference_context[ref_ep],
-#                         ref_list_field
-#                     )
-
-#                     print(f"[DEBUG] 재귀 수집 결과 - Endpoint: {ref_ep}, "
-#                           f"Field: {ref_list_field}, Values: {ref_list}")
-
-#             # 3) 검증 수행
-#             if isinstance(ref_list, (list, tuple)):
-#                 # 빈 문자열 필터링 (선택사항) - 이 부분 확인해야함
-#                 # ref_list_filtered = [item for item in ref_list if item not in (None, '')]
-#                 ref_list_filtered = [item for item in ref_list if item is not None]
-
-#                 if not safe_in_check(value, ref_list_filtered):
-#                     passed = False
-#                     msg = f"Value {value!r} not in referenceList {ref_list_filtered!r}"
-#             else:
-#                 passed = False
-#                 msg = f"referenceListField {ref_list_field!r} not found as list"
-        
-#         # ---- request/response-field-range-match ----
-#         elif vtype in ('request-field-range-match', 'response-field-range-match'):
-#             ref_field_min = rule.get('referenceFieldMin')
-#             ref_field_max = rule.get('referenceFieldMax')
-#             ref_endpoint_max = rule.get('referenceEndpointMax')
-#             ref_endpoint_min = rule.get('referenceEndpointMin')
-#             ref_operator = rule.get('referenceRangeOperator')
-
-#             max_value = None
-#             min_value = None
-
-#             if ref_endpoint_max and ref_endpoint_max in reference_context:
-#                 max_data = reference_context[ref_endpoint_max]
-#                 if ref_field_max:
-#                     max_values = collect_all_values_by_key(max_data, ref_field_max)
-#                     if max_values and isinstance(max_values, list) and len(max_values) == 1:
-#                         max_value = max_values[0]   # 최댓값 사용
-#                         print(f"[DEBUG] 최대값 추출 from {ref_endpoint_max}.{ref_field_max} -> {max_value}")
-            
-#             if ref_endpoint_min and ref_endpoint_min in reference_context:
-#                 min_data = reference_context[ref_endpoint_min]
-#                 if ref_field_min:
-#                     min_values = collect_all_values_by_key(min_data, ref_field_min)
-#                     if min_values and isinstance(min_values, list) and len(min_values) == 1:
-#                         min_value = min_values[0]   # 최솟값 사용
-#                         print(f"[DEBUG] 최소값 추출 from {ref_endpoint_min}.{ref_field_min} -> {min_value}")
-            
-#             # 검증 수행
-#             if ref_operator == 'between' and (min_value is not None or max_value is not None):
-#                 if not (min_value <= value <= max_value):
-#                     passed = False
-#                     msg = f"Value {value!r} not in range [{min_value}, {max_value}]"
-#                 else:
-#                     print(f"[DEBUG] 값 {value!r}이 범위 [{min_value}, {max_value}] 내에 있음")
-#             else:
-#                 passed = False
-#                 msg = f"Invalid referenceRangeOperator {ref_operator!r} or missing min/max values"
-
-#         # ---- length ----
-#         elif vtype == 'length':
-#             minl = rule.get('minLength')
-#             maxl = rule.get('maxLength')
-#             vals = to_list(value)
-#             for v in vals:
-#                 try:
-#                     l = len(v)
-#                 except Exception:
-#                     passed, msg = False, f"Value {v!r} has no length"
-#                     break
-#                 if (minl is not None and l < minl) or (maxl is not None and l > maxl):
-#                     passed, msg = False, f"Length {l} not in [{minl}, {maxl}]"
-#                     break
-
-#         # ---- regex ----
-#         elif vtype == 'regex':
-#             pattern = rule.get('pattern')
-#             if pattern is None:
-#                 passed, msg = False, "No regex pattern specified"
-#             else:
-#                 vals = to_list(value)
-#                 try:
-#                     for v in vals:
-#                         if re.fullmatch(pattern, str(v)) is None:
-#                             passed, msg = False, f"{v!r} not match /{pattern}/"
-#                             break
-#                 except Exception as e:
-#                     passed, msg = False, f"Regex error: {e}"
-
-#         # ---- required ----
-#         elif vtype == 'required':
-#             vals = to_list(value)
-#             if value is None or (len(vals) == 1 and vals[0] in (None, '')):
-#                 passed, msg = False, "Field is required but missing or empty"
-
-#         # ---- unique ----
-#         elif vtype == 'unique':
-#             seq = value
-#             if not isinstance(seq, list):
-#                 passed, msg = False, "Field is not a list for unique validation"
-#             else:
-#                 keys = []
-#                 for v in seq:
-#                     ok, hv = safe_hash(v)
-#                     keys.append((ok, hv))
-#                 try:
-#                     # ok==True 인 것만 set으로 비교, 나머지는 repr 기반 중복 검사
-#                     hset = set(hv for ok, hv in keys if ok)
-#                     if len(hset) != sum(1 for ok, _ in keys if ok):
-#                         passed, msg = False, "List contains duplicate hashables"
-#                     else:
-#                         # 비해시 항목은 repr로 비교
-#                         reprs = [hv for ok, hv in keys if not ok]
-#                         if len(reprs) != len(set(reprs)):
-#                             passed, msg = False, "List contains duplicate unhashables"
-#                 except Exception as e:
-#                     passed, msg = False, f"Unique validation error: {e}"
-
-#         # ---- custom ----
-#         elif vtype == 'custom':
-#             func = rule.get('customFunction')
-#             if callable(func):
-#                 try:
-#                     if not func(value):
-#                         passed, msg = False, f"Custom function failed for {value!r}"
-#                 except Exception as e:
-#                     passed, msg = False, f"Custom function error: {e}"
-#             else:
-#                 passed, msg = False, "No custom function provided"
-
-#         # ---- 결과 반영 ----
-#         if passed:
-#             results[field] = {'result': 'PASS', 'score': score, 'msg': msg}
-#             total_score += score
-#         else:
-#             results[field] = {'result': 'FAIL', 'score': 0, 'msg': msg}
-#             error_messages.append(f"{field}: {msg}")
-
-#     pass_count = sum(1 for r in results.values() if r['result'] == 'PASS')
-#     fail_count = sum(1 for r in results.values() if r['result'] == 'FAIL')
-
-#     overall_result = "PASS" if fail_count == 0 else "FAIL"
-#     error_msg = "\n".join(error_messages) if error_messages else "++++ 오류가 없습니다. ++++"
-
-#     # json_check_의 의미검증 반환형과 합치도록 유지
-#     return overall_result, error_msg, pass_count, fail_count
-
-
-# 실제 데이터에서 필드 추출하기 - dict 타입에서 추출함
 def data_finder(schema_):
+    """
+    스키마에서 모든 필드를 재귀적으로 추출
+    
+    Returns:
+        list: 계층별로 필드 정보를 담은 리스트
+    """
     dataframe_flag = True
     for schema_value in schema_.values():
         if type(schema_value) == dict or type(schema_value) == list:
@@ -518,10 +241,10 @@ def data_finder(schema_):
     fields = []
     step = 0
 
+    # 최상위 레벨 처리
     for key, value in schema.items():
         if step == 0:
             try:
-                # 키를 안전하게 처리
                 key_name = str(key) if not hasattr(key, 'expected_data') else key.expected_data
 
                 if is_list_field(value):
@@ -540,6 +263,7 @@ def data_finder(schema_):
 
     all_field.append([fields])
 
+    # 중첩 레벨 재귀 처리
     while True:
         fields = []
         a = all_field[step]
@@ -597,8 +321,217 @@ def data_finder(schema_):
     return all_field
 
 
-# 메시지 데이터만 확인
+def get_flat_fields_from_schema(schema):
+    """
+    스키마를 재귀적으로 순회하여 평탄화
+    
+    Returns:
+        tuple: (flat_fields, opt_fields)
+            - flat_fields: {path_str: type_or_container}
+            - opt_fields: set(path_str) - OptionalKey로 표시된 필드들
+    """
+    flat_fields = {}
+    opt_fields = set()
+
+    def _norm_key(k):
+        """OptionalKey 객체를 실제 키 이름으로 변환"""
+        try:
+            if isinstance(k, OptionalKey):
+                if hasattr(k, 'key'):
+                    return str(k.key)
+                return str(k)
+        except Exception:
+            pass
+        return str(k)
+
+    def walk(node, path, parent_optional=False):
+        """재귀적으로 스키마 탐색"""
+        if isinstance(node, list):
+            if path:
+                flat_fields[path] = list
+                if parent_optional:
+                    opt_fields.add(path)
+
+            if len(node) == 0:
+                return
+
+            first = node[0]
+            if isinstance(first, dict):
+                for k, v in first.items():
+                    keyname = _norm_key(k)
+                    is_opt = isinstance(k, OptionalKey)
+                    child_path = f"{path}.{keyname}" if path else keyname
+                    walk(v, child_path, parent_optional or is_opt)
+            else:
+                child_path = f"{path}[]"
+                walk(first, child_path, parent_optional)
+                
+        elif isinstance(node, dict):
+            if path:
+                flat_fields[path] = dict
+                if parent_optional:
+                    opt_fields.add(path)
+
+            for k, v in node.items():
+                keyname = _norm_key(k)
+                is_opt = isinstance(k, OptionalKey)
+                child_path = f"{path}.{keyname}" if path else keyname
+                walk(v, child_path, parent_optional or is_opt)
+                
+        else:
+            # primitive 타입
+            if not path:
+                return
+            if isinstance(node, type):
+                flat_fields[path] = node
+            else:
+                flat_fields[path] = type(node)
+            if parent_optional:
+                opt_fields.add(path)
+
+    # 진입점
+    if isinstance(schema, dict):
+        for k, v in schema.items():
+            keyname = _norm_key(k)
+            is_opt = isinstance(k, OptionalKey)
+            top_path = keyname
+            walk(v, top_path, parent_optional=is_opt)
+    else:
+        walk(schema, "", False)
+
+    return flat_fields, opt_fields
+
+
+def get_flat_data_from_response(data):
+    """
+    응답 데이터를 재귀적으로 평탄화하여 모든 필드경로별 값을 추출
+    
+    리스트 내 딕셔너리의 경우:
+    - camList -> 전체 리스트 저장
+    - camList.camID -> 모든 아이템의 camID 값들을 리스트로 저장
+    - camList.timeList -> 모든 아이템의 timeList를 리스트로 저장
+    - camList.timeList.startTime -> 모든 timeList의 모든 startTime 평탄화
+    
+    Args:
+        data: 응답 데이터 (dict or list)
+    
+    Returns:
+        dict: {필드경로: 값} 형태
+    """
+    flat_data = {}
+
+    def walk(node, path):
+        """재귀적으로 데이터 구조 탐색"""
+        if isinstance(node, dict):
+            if path:
+                flat_data[path] = node
+
+            for k, v in node.items():
+                child_path = f"{path}.{k}" if path else k
+                walk(v, child_path)
+
+        elif isinstance(node, list):
+            if path:
+                flat_data[path] = node
+
+            if len(node) == 0:
+                return
+
+            # 리스트의 첫 번째 항목이 딕셔너리인 경우
+            if isinstance(node[0], dict):
+                # 모든 딕셔너리의 키를 수집
+                all_keys = set()
+                for item in node:
+                    if isinstance(item, dict):
+                        all_keys.update(item.keys())
+
+                # 각 키에 대해 모든 아이템의 값들을 수집
+                for key in all_keys:
+                    child_path = f"{path}.{key}"
+                    values = []
+
+                    for item in node:
+                        if isinstance(item, dict) and key in item:
+                            values.append(item[key])
+
+                    if len(values) > 0:
+                        # 값이 하나면 스칼라, 여러 개면 리스트
+                        flat_data[child_path] = values[0] if len(values) == 1 else values
+
+                        # 중첩 구조 재귀 탐색
+                        if len(values) > 0 and isinstance(values[0], dict):
+                            walk(values[0], child_path)
+                        elif len(values) > 0 and isinstance(values[0], list):
+                            walk_list_of_lists(values, child_path)
+            else:
+                # 리스트 항목이 primitive 타입인 경우
+                if path:
+                    flat_data[f"{path}[]"] = node[0] if len(node) == 1 else node
+
+        else:
+            # leaf value
+            if path:
+                flat_data[path] = node
+
+    def walk_list_of_lists(lists, path):
+        """list of lists 처리"""
+        all_items = []
+        for lst in lists:
+            if isinstance(lst, list):
+                all_items.extend(lst)
+
+        if len(all_items) == 0:
+            return
+
+        if isinstance(all_items[0], dict):
+            all_keys = set()
+            for item in all_items:
+                if isinstance(item, dict):
+                    all_keys.update(item.keys())
+
+            for key in all_keys:
+                child_path = f"{path}.{key}"
+                values = [item[key] for item in all_items if isinstance(item, dict) and key in item]
+
+                if len(values) > 0:
+                    flat_data[child_path] = values[0] if len(values) == 1 else values
+
+                    if len(values) > 0 and isinstance(values[0], dict):
+                        walk(values[0], child_path)
+
+    # 진입점
+    if isinstance(data, dict):
+        walk(data, "")
+    elif isinstance(data, list):
+        flat_data["root"] = data
+        if len(data) > 0 and isinstance(data[0], dict):
+            all_keys = set()
+            for item in data:
+                if isinstance(item, dict):
+                    all_keys.update(item.keys())
+
+            for key in all_keys:
+                values = [item[key] for item in data if isinstance(item, dict) and key in item]
+
+                if len(values) > 0:
+                    flat_data[f"root.{key}"] = values[0] if len(values) == 1 else values
+
+                    if len(values) > 0 and isinstance(values[0], dict):
+                        walk(values[0], f"root.{key}")
+                    elif len(values) > 0 and isinstance(values[0], list):
+                        walk_list_of_lists(values, f"root.{key}")
+    else:
+        raise TypeError(f"Invalid data type: {type(data)}")
+
+    return flat_data
+
+
+# ================================================================
+# 5. 메시지 검증 함수들
+# ================================================================
+
 def check_message_data(all_field, datas, opt_filed, flag_opt):
+    """메시지 데이터만 확인"""
     valid_fields = 0
     total_fields = 0
 
@@ -613,8 +546,7 @@ def check_message_data(all_field, datas, opt_filed, flag_opt):
                 for raw_data in data[0]:
                     if safe_compare(field[1], raw_data[1]):
                         if type(raw_data[-2]) == field[-2] or field[-2] == 'OPT' or \
-                                (field[-2] == int and type(raw_data[-2]) in [numpy.int64, numpy.int32,
-                                                                             numpy.float64]) or \
+                                (field[-2] == int and type(raw_data[-2]) in [numpy.int64, numpy.int32, numpy.float64]) or \
                                 (field[-2] == str and type(raw_data[-2]) == str):
                             valid_fields += 1
                         break
@@ -628,8 +560,8 @@ def check_message_data(all_field, datas, opt_filed, flag_opt):
         return "FAIL", f"{valid_fields}/{total_fields} fields are valid."
 
 
-# 메시지 규격 확인
 def check_message_schema(all_field, datas, opt_field, flag_opt):
+    """메시지 규격 확인"""
     format_errors = []
 
     for fields in all_field:
@@ -643,8 +575,7 @@ def check_message_schema(all_field, datas, opt_field, flag_opt):
                     if safe_compare(field[1], raw_data[1]):
                         field_found = True
                         if not (type(raw_data[-2]) == field[-2] or field[-2] == 'OPT' or \
-                                (field[-2] == int and type(raw_data[-2]) in [numpy.int64, numpy.int32,
-                                                                             numpy.float64]) or \
+                                (field[-2] == int and type(raw_data[-2]) in [numpy.int64, numpy.int32, numpy.float64]) or \
                                 (field[-2] == str and type(raw_data[-2]) == str)):
                             format_errors.append(
                                 f"Field '{field[1]}' has incorrect type. Expected {field[-2]}, got {type(raw_data[-2])}.")
@@ -659,8 +590,8 @@ def check_message_schema(all_field, datas, opt_field, flag_opt):
         return "FAIL", format_errors
 
 
-# 메시지 에러
 def check_message_error(all_field, datas, opt_field, flag_opt):
+    """메시지 에러 체크"""
     result, error_msg, correct_cnt, error_cnt = do_checker(all_field, datas, opt_field, flag_opt)
 
     if result == "PASS":
@@ -670,6 +601,10 @@ def check_message_error(all_field, datas, opt_field, flag_opt):
 
 
 def do_checker(all_field, datas, opt_field, flag_opt):
+    """
+    실제 필드 검증 로직을 수행하는 핵심 함수
+    (기존 코드 유지 - 너무 복잡하여 리팩토링 제외)
+    """
     check_list = []
     cnt_list = []
     cnt_elements = []
@@ -690,43 +625,31 @@ def do_checker(all_field, datas, opt_field, flag_opt):
                                         try:
                                             cnt_list.append(raw_data[1])
                                         except Exception as e:
-                                            print(f"[DEBUG] cnt_list append error: {e}, raw_data[1]={raw_data[1]}")
+                                            print(f"[DEBUG] cnt_list append error: {e}")
                                 else:
                                     try:
                                         cnt_list.append(raw_data[1])
                                     except Exception as e:
-                                        print(f"[DEBUG] cnt_list append error: {e}, raw_data[1]={raw_data[1]}")
+                                        print(f"[DEBUG] cnt_list append error: {e}")
 
                                 if safe_len(cnt_elements) != 0:
                                     flag = False
-                                    print(f"[DEBUG] cnt_elements 비교 시작: raw_data[1]={repr(raw_data[1])}")
                                     for i, cnt_element in enumerate(cnt_elements):
                                         try:
                                             if safe_compare(raw_data[1], cnt_element):
                                                 flag = True
-                                                print(f"[DEBUG] 매치 발견: raw_data[1] == cnt_elements[{i}]")
                                         except Exception as e:
                                             print(f"[DEBUG] cnt_elements 비교 에러: {e}")
-                                            print(f"[DEBUG] raw_data[1]: {repr(raw_data[1])}")
-                                            print(f"[DEBUG] cnt_element: {repr(cnt_element)}")
                                     if flag == False:
-                                        # 딕셔너리나 리스트인 경우 안전하게 추가
                                         try:
-                                            print(f"[DEBUG] cnt_elements에 추가: {repr(raw_data[1])}")
                                             cnt_elements.append(raw_data[1])
                                         except Exception as e:
-                                            print(f"[DEBUG] cnt_elements append error: {e}, raw_data[1]={raw_data[1]}")
-                                            import traceback
-                                            traceback.print_exc()
+                                            print(f"[DEBUG] cnt_elements append error: {e}")
                                 else:
-                                    # 딕셔너리나 리스트인 경우 안전하게 추가
                                     try:
-                                        print(f"[DEBUG] cnt_elements 첫 번째 추가: {repr(raw_data[1])}")
                                         cnt_elements.append(raw_data[1])
                                     except Exception as e:
-                                        print(f"[DEBUG] cnt_elements append error: {e}, raw_data[1]={raw_data[1]}")
-                                        import traceback
-                                        traceback.print_exc()
+                                        print(f"[DEBUG] cnt_elements append error: {e}")
 
                             if type(raw_data[-2]) == field[-2]:
                                 raw_data[-1] = True
@@ -775,27 +698,13 @@ def do_checker(all_field, datas, opt_field, flag_opt):
                                         pass
 
     all_cnt = []
-    # print(f"[DEBUG] cnt_elements 개수: {len(cnt_elements)}")
-    # print(f"[DEBUG] cnt_list 개수: {len(cnt_list)}")
 
     for idx, i in enumerate(cnt_elements):
         try:
-            # print(f"[DEBUG] cnt_elements[{idx}] 처리 중: type={type(i)}, value={repr(i)}")
-            # 딕셔너리나 리스트인 경우 안전하게 카운트
-            cnt = 0
-            for x_idx, x in enumerate(cnt_list):
-                try:
-                    if safe_compare(i, x):
-                        cnt += 1
-                        print(f"[DEBUG] 매치 발견: cnt_elements[{idx}] == cnt_list[{x_idx}]")
-                except Exception as e:
-                    print(f"[DEBUG] safe_compare 에러: {e}")
-                    print(f"[DEBUG] i: {repr(i)}, x: {repr(x)}")
+            cnt = sum(1 for x in cnt_list if safe_compare(i, x))
             all_cnt.append([i, cnt])
-            print(f"[DEBUG] cnt_elements[{idx}] 최종 카운트: {cnt}")
         except Exception as e:
             print(f"[DEBUG] all_cnt calculation error: {e}")
-            print(f"[DEBUG] i type: {type(i)}, i: {repr(i)}")
             import traceback
             traceback.print_exc()
             all_cnt.append([i, 0])
@@ -873,10 +782,7 @@ def do_checker(all_field, datas, opt_field, flag_opt):
         for j in all_cnt:
             if safe_compare(j[0], field[1][0] if isinstance(field[1], list) and len(field[1]) > 0 else field[1]) and j[
                 1] != field[-1] and type(field[1]) != list:
-                tmp_cnt = 0
-                for l in check_error:
-                    if safe_compare(field[1], l[1]):
-                        tmp_cnt += 1
+                tmp_cnt = sum(1 for l in check_error if safe_compare(field[1], l[1]))
 
                 if type(field[-1]) == type:
                     flag = True
@@ -890,10 +796,7 @@ def do_checker(all_field, datas, opt_field, flag_opt):
 
             elif safe_compare(j[0], field[1][0] if isinstance(field[1], list) and len(field[1]) > 0 else field[1]) and \
                     j[1] != field[-1] and type(field[1]) == list:
-                tmp_cnt = 0
-                for l in check_error:
-                    if safe_compare(field[1], l[1]):
-                        tmp_cnt += 1
+                tmp_cnt = sum(1 for l in check_error if safe_compare(field[1], l[1]))
 
                 if type(field[-1]) == type:
                     if field[-1] == int:
@@ -1005,6 +908,10 @@ def do_checker(all_field, datas, opt_field, flag_opt):
 
 
 def timeout_field_finder(schema):
+    """
+    타임아웃 필드 카운터
+    (기존 로직 유지 - 복잡하여 리팩토링 제외)
+    """
     schema = pd.DataFrame([schema])
     all_field = []
     fields = []
@@ -1139,253 +1046,3 @@ def timeout_field_finder(schema):
                     all_field_cnt += 1
 
     return all_field_cnt, fields_opt_cnt
-
-
-# ================================================================
-# 🆕 필드별 순차 검증을 위한 헬퍼 함수들
-# ================================================================
-
-def get_flat_fields_from_schema(schema):
-    """
-    스키마를 재귀적으로 순회하여
-    - flat_fields: {path_str: type_or_container} (type, list, dict)
-    - opt_fields: set(path_str)  (OptionalKey로 표시된 필드와 그 하위 항목 전체)
-    예: camList -> list, camList.camID -> str, camList.camLoc -> dict (OPTIONAL), ...
-    """
-    flat_fields = {}
-    opt_fields = set()
-
-    def _norm_key(k):
-        # OptionalKey 객체면 실제 키 이름 반환, 아니면 str
-        try:
-            if isinstance(k, OptionalKey):
-                # json_checker OptionalKey 내부 필드 이름 얻는 안전한 처리
-                if hasattr(k, 'key'):
-                    return str(k.key)
-                # 다른 버전일 수 있으므로 str()로 fallback
-                return str(k)
-        except Exception:
-            pass
-        return str(k)
-
-    def walk(node, path, parent_optional=False):
-        """
-        node: 현재 스키마 노드 (dict / list / type / 기타)
-        path: 현재 경로 문자열 (예: 'camList', 'camList.camID')
-        parent_optional: 상위 키가 Optional 이어서 이 노드 전체가 optional이면 True
-        """
-        # 빈 path(루트가 primitive인 경우)는 처리하지 않음(대부분 스키마는 dict 루트)
-        if isinstance(node, list):
-            # 현재 path가 유효하면 이 path는 list 컨테이너로 카운트
-            if path:
-                flat_fields[path] = list
-                if parent_optional:
-                    opt_fields.add(path)
-
-            if len(node) == 0:
-                return
-
-            # 리스트의 대표 원소로 내부 구조를 탐색
-            first = node[0]
-            if isinstance(first, dict):
-                # 리스트 항목이 딕셔너리면, 각 키를 path.child 형태로 추가
-                for k, v in first.items():
-                    keyname = _norm_key(k)
-                    is_opt = isinstance(k, OptionalKey)
-                    child_path = f"{path}.{keyname}" if path else keyname
-                    walk(v, child_path, parent_optional or is_opt)
-            else:
-                # 리스트 내부가 primitive 또는 또 다른 list
-                child_path = f"{path}[]"
-                walk(first, child_path, parent_optional)
-        elif isinstance(node, dict):
-            # 현재 path가 있으면 이 path는 dict 컨테이너로 카운트
-            if path:
-                flat_fields[path] = dict
-                if parent_optional:
-                    opt_fields.add(path)
-
-            for k, v in node.items():
-                keyname = _norm_key(k)
-                is_opt = isinstance(k, OptionalKey)
-                child_path = f"{path}.{keyname}" if path else keyname
-                walk(v, child_path, parent_optional or is_opt)
-        else:
-            # primitive 타입 (보통 type 객체: str, int 등)
-            if not path:
-                return
-            # node가 타입이면 그대로, 아니면 node의 타입 저장
-            if isinstance(node, type):
-                flat_fields[path] = node
-            else:
-                # Checker 래퍼나 기타 객체가 올 수 있으니 타입으로 표기
-                flat_fields[path] = type(node)
-            if parent_optional:
-                opt_fields.add(path)
-
-    # 스키마 최상위(보통 dict) 처리
-    if isinstance(schema, dict):
-        for k, v in schema.items():
-            keyname = _norm_key(k)
-            is_opt = isinstance(k, OptionalKey)
-            top_path = keyname
-            # 최상위 키 자체도 카운트 (dict/list/primitive 판단)
-            # 여기서는 walk를 호출하면 내부에서 container 여부를 기록하므로 바로 호출
-            walk(v, top_path, parent_optional=is_opt)
-    else:
-        # 비정상 입력 보호: 스키마가 dict가 아닌 경우에도 시도
-        walk(schema, "", False)
-
-    return flat_fields, opt_fields
-
-
-def get_flat_data_from_response(data):
-    """
-    응답 데이터를 재귀적으로 평탄화하여 모든 필드경로별 값을 추출
-
-    리스트 내 딕셔너리의 경우:
-    - camList -> 전체 리스트 저장
-    - camList.camID -> 모든 아이템의 camID 값들을 리스트로 저장
-    - camList.timeList -> 모든 아이템의 timeList를 리스트로 저장 (list of lists)
-    - camList.timeList.startTime -> 모든 timeList의 모든 startTime 평탄화
-
-    Args:
-        data (dict or list): 응답 데이터
-
-    Returns:
-        dict: {필드경로: 값} 형태
-    """
-
-    flat_data = {}
-
-    def walk(node, path):
-        # dict: 내부 탐색 + 자기 자신 등록
-        if isinstance(node, dict):
-            if path:
-                flat_data[path] = node
-
-            for k, v in node.items():
-                child_path = f"{path}.{k}" if path else k
-                walk(v, child_path)
-
-        # list: 내부 탐색 + 자기 자신 등록
-        elif isinstance(node, list):
-            if path:
-                flat_data[path] = node
-
-            if len(node) == 0:
-                return
-
-            # 리스트의 첫 번째 항목이 딕셔너리인 경우
-            if isinstance(node[0], dict):
-                # 모든 딕셔너리의 키를 수집
-                all_keys = set()
-                for item in node:
-                    if isinstance(item, dict):
-                        all_keys.update(item.keys())
-
-                # 각 키에 대해 모든 아이템의 값들을 수집
-                for key in all_keys:
-                    child_path = f"{path}.{key}"
-                    values = []
-
-                    for item in node:
-                        if isinstance(item, dict) and key in item:
-                            value = item[key]
-                            values.append(value)
-
-                    # 값을 저장
-                    if len(values) > 0:
-                        # 값이 하나면 스칼라, 여러 개면 리스트
-                        if len(values) == 1:
-                            flat_data[child_path] = values[0]
-                        else:
-                            flat_data[child_path] = values
-
-                        # 중첩 구조 재귀 탐색
-                        if len(values) > 0 and isinstance(values[0], dict):
-                            walk(values[0], child_path)
-                        elif len(values) > 0 and isinstance(values[0], list):
-                            # list of lists 특별 처리
-                            walk_list_of_lists(values, child_path)
-            else:
-                # 리스트 항목이 primitive 타입인 경우
-                if path:
-                    flat_data[f"{path}[]"] = node[0] if len(node) == 1 else node
-
-        # leaf value
-        else:
-            if path:
-                flat_data[path] = node
-
-    def walk_list_of_lists(lists, path):
-        """
-        list of lists 처리
-
-        예: [[{startTime: 123}, ...], [{startTime: 789}, ...]]
-        → startTime: [123, 789, ...]
-        """
-        # 모든 리스트를 평탄화
-        all_items = []
-        for lst in lists:
-            if isinstance(lst, list):
-                all_items.extend(lst)
-
-        if len(all_items) == 0:
-            return
-
-        # 첫 번째 아이템이 dict면 필드 추출
-        if isinstance(all_items[0], dict):
-            all_keys = set()
-            for item in all_items:
-                if isinstance(item, dict):
-                    all_keys.update(item.keys())
-
-            for key in all_keys:
-                child_path = f"{path}.{key}"
-                values = []
-
-                for item in all_items:
-                    if isinstance(item, dict) and key in item:
-                        values.append(item[key])
-
-                if len(values) > 0:
-                    if len(values) == 1:
-                        flat_data[child_path] = values[0]
-                    else:
-                        flat_data[child_path] = values
-
-                    # 더 깊은 중첩도 처리
-                    if len(values) > 0 and isinstance(values[0], dict):
-                        walk(values[0], child_path)
-
-    # 진입점
-    if isinstance(data, dict):
-        walk(data, "")
-    elif isinstance(data, list):
-        flat_data["root"] = data
-        if len(data) > 0 and isinstance(data[0], dict):
-            all_keys = set()
-            for item in data:
-                if isinstance(item, dict):
-                    all_keys.update(item.keys())
-
-            for key in all_keys:
-                values = []
-                for item in data:
-                    if isinstance(item, dict) and key in item:
-                        values.append(item[key])
-
-                if len(values) == 1:
-                    flat_data[f"root.{key}"] = values[0]
-                elif len(values) > 1:
-                    flat_data[f"root.{key}"] = values
-
-                if len(values) > 0 and isinstance(values[0], dict):
-                    walk(values[0], f"root.{key}")
-                elif len(values) > 0 and isinstance(values[0], list):
-                    walk_list_of_lists(values, f"root.{key}")
-    else:
-        raise TypeError(f"Invalid data type: {type(data)}")
-
-    return flat_data
