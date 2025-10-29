@@ -243,263 +243,263 @@ def safe_hash(v):
 
 
 # 2단계: semantic validation logic
-def do_semantic_checker(rules_dict, data_dict, reference_context=None):
-    """
-    reference_context: 선택. 엔드포인트 문자열 -> 그 응답 dict 의 매핑
-      예: {
-        "/CameraProfiles": <CameraProfiles 응답 dict>,
-        ...
-      }
-    """
-    results = {}
-    total_score, max_score = 0, 0
-    error_messages = []
+# def do_semantic_checker(rules_dict, data_dict, reference_context=None):
+#     """
+#     reference_context: 선택. 엔드포인트 문자열 -> 그 응답 dict 의 매핑
+#       예: {
+#         "/CameraProfiles": <CameraProfiles 응답 dict>,
+#         ...
+#       }
+#     """
+#     results = {}
+#     total_score, max_score = 0, 0
+#     error_messages = []
 
-    for field, rule in rules_dict.items():
-        score = rule.get('score', 1)
-        max_score += score
+#     for field, rule in rules_dict.items():
+#         score = rule.get('score', 1)
+#         max_score += score
 
-        if not rule.get('enabled', True):
-            results[field] = {'result': 'SKIP', 'score': 0, 'msg': 'Validation disabled'}
-            continue
+#         if not rule.get('enabled', True):
+#             results[field] = {'result': 'SKIP', 'score': 0, 'msg': 'Validation disabled'}
+#             continue
 
-        value = get_by_path(data_dict, field)  # <<<<<< 리스트 경로 대응
-        vtype = rule.get('validationType')
+#         value = get_by_path(data_dict, field)  # <<<<<< 리스트 경로 대응
+#         vtype = rule.get('validationType')
 
-        passed, msg = True, ''
+#         passed, msg = True, ''
 
-        # ---- valid-value-match ----
-        if vtype == 'valid-value-match':
-            allowed = rule.get('allowedValues', [])
-            operator = rule.get('validValueOperator', 'equalsAny')
-            if operator == 'equals':
-                # 단일 값만 허용 (allowed가 리스트이면 첫 값 기준)
-                expected = allowed[0] if allowed else None
-                if not safe_compare(value, expected):
-                    passed = False
-                    msg = f"Value {value!r} != expected {expected!r}"
-            else:  # equalsAny
-                if not safe_in_check(value, allowed):
-                    passed = False
-                    msg = f"Value {value!r} not in allowedValues {allowed!r}"
+#         # ---- valid-value-match ----
+#         if vtype == 'valid-value-match':
+#             allowed = rule.get('allowedValues', [])
+#             operator = rule.get('validValueOperator', 'equalsAny')
+#             if operator == 'equals':
+#                 # 단일 값만 허용 (allowed가 리스트이면 첫 값 기준)
+#                 expected = allowed[0] if allowed else None
+#                 if not safe_compare(value, expected):
+#                     passed = False
+#                     msg = f"Value {value!r} != expected {expected!r}"
+#             else:  # equalsAny
+#                 if not safe_in_check(value, allowed):
+#                     passed = False
+#                     msg = f"Value {value!r} not in allowedValues {allowed!r}"
 
-        # ---- specified-value-match ----
-        elif vtype == 'specified-value-match':
-            specified = rule.get('allowedValues', [])
-            if not safe_in_check(value, specified):
-                passed = False
-                msg = f"Value {value!r} does not match specifiedValue {specified!r}"
+#         # ---- specified-value-match ----
+#         elif vtype == 'specified-value-match':
+#             specified = rule.get('allowedValues', [])
+#             if not safe_in_check(value, specified):
+#                 passed = False
+#                 msg = f"Value {value!r} does not match specifiedValue {specified!r}"
 
-        # ---- range-match ----
-        elif vtype == 'range-match':
-            operator = rule.get('rangeOperator')
-            minv = rule.get('rangeMin')
-            maxv = rule.get('rangeMax')
+#         # ---- range-match ----
+#         elif vtype == 'range-match':
+#             operator = rule.get('rangeOperator')
+#             minv = rule.get('rangeMin')
+#             maxv = rule.get('rangeMax')
 
-            def _num_ok(x):
-                try:
-                    return True, float(x)
-                except Exception:
-                    return False, None
+#             def _num_ok(x):
+#                 try:
+#                     return True, float(x)
+#                 except Exception:
+#                     return False, None
 
-            vals = to_list(value)
-            for v_raw in vals:
-                ok, v = _num_ok(v_raw)
-                if not ok:
-                    passed = False
-                    msg = f"Value {v_raw!r} is not a number"
-                    break
-                if operator == 'less-than' and maxv is not None and not (v < maxv):
-                    passed, msg = False, f"{v} !< {maxv}";
-                    break
-                if operator == 'less-equal' and maxv is not None and not (v <= maxv):
-                    passed, msg = False, f"{v} !<= {maxv}";
-                    break
-                if operator == 'between' and (
-                        (minv is not None and v < minv) or (maxv is not None and v > maxv)
-                ):
-                    passed, msg = False, f"{v} not in [{minv}, {maxv}]";
-                    break
-                if operator == 'greater-equal' and minv is not None and not (v >= minv):
-                    passed, msg = False, f"{v} !>= {minv}";
-                    break
-                if operator == 'greater-than' and minv is not None and not (v > minv):
-                    passed, msg = False, f"{v} !> {minv}";
-                    break
+#             vals = to_list(value)
+#             for v_raw in vals:
+#                 ok, v = _num_ok(v_raw)
+#                 if not ok:
+#                     passed = False
+#                     msg = f"Value {v_raw!r} is not a number"
+#                     break
+#                 if operator == 'less-than' and maxv is not None and not (v < maxv):
+#                     passed, msg = False, f"{v} !< {maxv}";
+#                     break
+#                 if operator == 'less-equal' and maxv is not None and not (v <= maxv):
+#                     passed, msg = False, f"{v} !<= {maxv}";
+#                     break
+#                 if operator == 'between' and (
+#                         (minv is not None and v < minv) or (maxv is not None and v > maxv)
+#                 ):
+#                     passed, msg = False, f"{v} not in [{minv}, {maxv}]";
+#                     break
+#                 if operator == 'greater-equal' and minv is not None and not (v >= minv):
+#                     passed, msg = False, f"{v} !>= {minv}";
+#                     break
+#                 if operator == 'greater-than' and minv is not None and not (v > minv):
+#                     passed, msg = False, f"{v} !> {minv}";
+#                     break
 
-        # ---- request/response-field-match ----
-        elif vtype in ('request-field-match', 'response-field-match'):
-            ref_field = rule.get('referenceField')
-            ref_value = get_by_path(data_dict, ref_field) if ref_field else None
-            if not safe_compare(value, ref_value):
-                passed = False
-                kind = 'referenceField' if vtype.startswith('request') else 'responseField'
-                msg = f"Value {value!r} != {kind} {ref_field!r} -> {ref_value!r}"
+#         # ---- request/response-field-match ----
+#         elif vtype in ('request-field-match', 'response-field-match'):
+#             ref_field = rule.get('referenceField')
+#             ref_value = get_by_path(data_dict, ref_field) if ref_field else None
+#             if not safe_compare(value, ref_value):
+#                 passed = False
+#                 kind = 'referenceField' if vtype.startswith('request') else 'responseField'
+#                 msg = f"Value {value!r} != {kind} {ref_field!r} -> {ref_value!r}"
 
-        # 확인하고 있는 부분 - 현재 여기 기능은 platformVal에 내장되어 있는 상황
-        # ---- 🔥 핵심 수정: request/response-field-list-match ----
-        elif vtype in ('request-field-list-match', 'response-field-list-match'):
-            ref_list_field = rule.get('referenceListField')
-            ref_list = None
+#         # 확인하고 있는 부분 - 현재 여기 기능은 platformVal에 내장되어 있는 상황
+#         # ---- 🔥 핵심 수정: request/response-field-list-match ----
+#         elif vtype in ('request-field-list-match', 'response-field-list-match'):
+#             ref_list_field = rule.get('referenceListField')
+#             ref_list = None
 
-            # 1) 우선 현재 응답에서 get_by_path로 찾기 (기존 로직)
-            if ref_list_field:
-                ref_list = get_by_path(data_dict, ref_list_field)
+#             # 1) 우선 현재 응답에서 get_by_path로 찾기 (기존 로직)
+#             if ref_list_field:
+#                 ref_list = get_by_path(data_dict, ref_list_field)
 
-            # 2) 🆕 다른 엔드포인트 응답에서 재귀적으로 찾기
-            if (ref_list is None or not isinstance(ref_list, (list, tuple))) and reference_context:
-                ref_ep = rule.get('referenceListEndpoint') or rule.get('referenceEndpoint')
+#             # 2) 🆕 다른 엔드포인트 응답에서 재귀적으로 찾기
+#             if (ref_list is None or not isinstance(ref_list, (list, tuple))) and reference_context:
+#                 ref_ep = rule.get('referenceListEndpoint') or rule.get('referenceEndpoint')
 
-                if ref_ep and ref_ep in reference_context:
-                    # 🔥 핵심: collect_all_values_by_key로 재귀적 수집
-                    # referenceListField가 단순 키 이름이면 (예: "camID")
-                    # 중첩 구조 전체에서 해당 키의 모든 값을 수집
-                    ref_list = collect_all_values_by_key(
-                        reference_context[ref_ep],
-                        ref_list_field
-                    )
+#                 if ref_ep and ref_ep in reference_context:
+#                     # 🔥 핵심: collect_all_values_by_key로 재귀적 수집
+#                     # referenceListField가 단순 키 이름이면 (예: "camID")
+#                     # 중첩 구조 전체에서 해당 키의 모든 값을 수집
+#                     ref_list = collect_all_values_by_key(
+#                         reference_context[ref_ep],
+#                         ref_list_field
+#                     )
 
-                    print(f"[DEBUG] 재귀 수집 결과 - Endpoint: {ref_ep}, "
-                          f"Field: {ref_list_field}, Values: {ref_list}")
+#                     print(f"[DEBUG] 재귀 수집 결과 - Endpoint: {ref_ep}, "
+#                           f"Field: {ref_list_field}, Values: {ref_list}")
 
-            # 3) 검증 수행
-            if isinstance(ref_list, (list, tuple)):
-                # 빈 문자열 필터링 (선택사항) - 이 부분 확인해야함
-                # ref_list_filtered = [item for item in ref_list if item not in (None, '')]
-                ref_list_filtered = [item for item in ref_list if item is not None]
+#             # 3) 검증 수행
+#             if isinstance(ref_list, (list, tuple)):
+#                 # 빈 문자열 필터링 (선택사항) - 이 부분 확인해야함
+#                 # ref_list_filtered = [item for item in ref_list if item not in (None, '')]
+#                 ref_list_filtered = [item for item in ref_list if item is not None]
 
-                if not safe_in_check(value, ref_list_filtered):
-                    passed = False
-                    msg = f"Value {value!r} not in referenceList {ref_list_filtered!r}"
-            else:
-                passed = False
-                msg = f"referenceListField {ref_list_field!r} not found as list"
+#                 if not safe_in_check(value, ref_list_filtered):
+#                     passed = False
+#                     msg = f"Value {value!r} not in referenceList {ref_list_filtered!r}"
+#             else:
+#                 passed = False
+#                 msg = f"referenceListField {ref_list_field!r} not found as list"
         
-        # ---- request/response-field-range-match ----
-        elif vtype in ('request-field-range-match', 'response-field-range-match'):
-            ref_field_min = rule.get('referenceFieldMin')
-            ref_field_max = rule.get('referenceFieldMax')
-            ref_endpoint_max = rule.get('referenceEndpointMax')
-            ref_endpoint_min = rule.get('referenceEndpointMin')
-            ref_operator = rule.get('referenceRangeOperator')
+#         # ---- request/response-field-range-match ----
+#         elif vtype in ('request-field-range-match', 'response-field-range-match'):
+#             ref_field_min = rule.get('referenceFieldMin')
+#             ref_field_max = rule.get('referenceFieldMax')
+#             ref_endpoint_max = rule.get('referenceEndpointMax')
+#             ref_endpoint_min = rule.get('referenceEndpointMin')
+#             ref_operator = rule.get('referenceRangeOperator')
 
-            max_value = None
-            min_value = None
+#             max_value = None
+#             min_value = None
 
-            if ref_endpoint_max and ref_endpoint_max in reference_context:
-                max_data = reference_context[ref_endpoint_max]
-                if ref_field_max:
-                    max_values = collect_all_values_by_key(max_data, ref_field_max)
-                    if max_values and isinstance(max_values, list) and len(max_values) == 1:
-                        max_value = max_values[0]   # 최댓값 사용
-                        print(f"[DEBUG] 최대값 추출 from {ref_endpoint_max}.{ref_field_max} -> {max_value}")
+#             if ref_endpoint_max and ref_endpoint_max in reference_context:
+#                 max_data = reference_context[ref_endpoint_max]
+#                 if ref_field_max:
+#                     max_values = collect_all_values_by_key(max_data, ref_field_max)
+#                     if max_values and isinstance(max_values, list) and len(max_values) == 1:
+#                         max_value = max_values[0]   # 최댓값 사용
+#                         print(f"[DEBUG] 최대값 추출 from {ref_endpoint_max}.{ref_field_max} -> {max_value}")
             
-            if ref_endpoint_min and ref_endpoint_min in reference_context:
-                min_data = reference_context[ref_endpoint_min]
-                if ref_field_min:
-                    min_values = collect_all_values_by_key(min_data, ref_field_min)
-                    if min_values and isinstance(min_values, list) and len(min_values) == 1:
-                        min_value = min_values[0]   # 최솟값 사용
-                        print(f"[DEBUG] 최소값 추출 from {ref_endpoint_min}.{ref_field_min} -> {min_value}")
+#             if ref_endpoint_min and ref_endpoint_min in reference_context:
+#                 min_data = reference_context[ref_endpoint_min]
+#                 if ref_field_min:
+#                     min_values = collect_all_values_by_key(min_data, ref_field_min)
+#                     if min_values and isinstance(min_values, list) and len(min_values) == 1:
+#                         min_value = min_values[0]   # 최솟값 사용
+#                         print(f"[DEBUG] 최소값 추출 from {ref_endpoint_min}.{ref_field_min} -> {min_value}")
             
-            # 검증 수행
-            if ref_operator == 'between' and (min_value is not None or max_value is not None):
-                if not (min_value <= value <= max_value):
-                    passed = False
-                    msg = f"Value {value!r} not in range [{min_value}, {max_value}]"
-                else:
-                    print(f"[DEBUG] 값 {value!r}이 범위 [{min_value}, {max_value}] 내에 있음")
-            else:
-                passed = False
-                msg = f"Invalid referenceRangeOperator {ref_operator!r} or missing min/max values"
+#             # 검증 수행
+#             if ref_operator == 'between' and (min_value is not None or max_value is not None):
+#                 if not (min_value <= value <= max_value):
+#                     passed = False
+#                     msg = f"Value {value!r} not in range [{min_value}, {max_value}]"
+#                 else:
+#                     print(f"[DEBUG] 값 {value!r}이 범위 [{min_value}, {max_value}] 내에 있음")
+#             else:
+#                 passed = False
+#                 msg = f"Invalid referenceRangeOperator {ref_operator!r} or missing min/max values"
 
-        # ---- length ----
-        elif vtype == 'length':
-            minl = rule.get('minLength')
-            maxl = rule.get('maxLength')
-            vals = to_list(value)
-            for v in vals:
-                try:
-                    l = len(v)
-                except Exception:
-                    passed, msg = False, f"Value {v!r} has no length"
-                    break
-                if (minl is not None and l < minl) or (maxl is not None and l > maxl):
-                    passed, msg = False, f"Length {l} not in [{minl}, {maxl}]"
-                    break
+#         # ---- length ----
+#         elif vtype == 'length':
+#             minl = rule.get('minLength')
+#             maxl = rule.get('maxLength')
+#             vals = to_list(value)
+#             for v in vals:
+#                 try:
+#                     l = len(v)
+#                 except Exception:
+#                     passed, msg = False, f"Value {v!r} has no length"
+#                     break
+#                 if (minl is not None and l < minl) or (maxl is not None and l > maxl):
+#                     passed, msg = False, f"Length {l} not in [{minl}, {maxl}]"
+#                     break
 
-        # ---- regex ----
-        elif vtype == 'regex':
-            pattern = rule.get('pattern')
-            if pattern is None:
-                passed, msg = False, "No regex pattern specified"
-            else:
-                vals = to_list(value)
-                try:
-                    for v in vals:
-                        if re.fullmatch(pattern, str(v)) is None:
-                            passed, msg = False, f"{v!r} not match /{pattern}/"
-                            break
-                except Exception as e:
-                    passed, msg = False, f"Regex error: {e}"
+#         # ---- regex ----
+#         elif vtype == 'regex':
+#             pattern = rule.get('pattern')
+#             if pattern is None:
+#                 passed, msg = False, "No regex pattern specified"
+#             else:
+#                 vals = to_list(value)
+#                 try:
+#                     for v in vals:
+#                         if re.fullmatch(pattern, str(v)) is None:
+#                             passed, msg = False, f"{v!r} not match /{pattern}/"
+#                             break
+#                 except Exception as e:
+#                     passed, msg = False, f"Regex error: {e}"
 
-        # ---- required ----
-        elif vtype == 'required':
-            vals = to_list(value)
-            if value is None or (len(vals) == 1 and vals[0] in (None, '')):
-                passed, msg = False, "Field is required but missing or empty"
+#         # ---- required ----
+#         elif vtype == 'required':
+#             vals = to_list(value)
+#             if value is None or (len(vals) == 1 and vals[0] in (None, '')):
+#                 passed, msg = False, "Field is required but missing or empty"
 
-        # ---- unique ----
-        elif vtype == 'unique':
-            seq = value
-            if not isinstance(seq, list):
-                passed, msg = False, "Field is not a list for unique validation"
-            else:
-                keys = []
-                for v in seq:
-                    ok, hv = safe_hash(v)
-                    keys.append((ok, hv))
-                try:
-                    # ok==True 인 것만 set으로 비교, 나머지는 repr 기반 중복 검사
-                    hset = set(hv for ok, hv in keys if ok)
-                    if len(hset) != sum(1 for ok, _ in keys if ok):
-                        passed, msg = False, "List contains duplicate hashables"
-                    else:
-                        # 비해시 항목은 repr로 비교
-                        reprs = [hv for ok, hv in keys if not ok]
-                        if len(reprs) != len(set(reprs)):
-                            passed, msg = False, "List contains duplicate unhashables"
-                except Exception as e:
-                    passed, msg = False, f"Unique validation error: {e}"
+#         # ---- unique ----
+#         elif vtype == 'unique':
+#             seq = value
+#             if not isinstance(seq, list):
+#                 passed, msg = False, "Field is not a list for unique validation"
+#             else:
+#                 keys = []
+#                 for v in seq:
+#                     ok, hv = safe_hash(v)
+#                     keys.append((ok, hv))
+#                 try:
+#                     # ok==True 인 것만 set으로 비교, 나머지는 repr 기반 중복 검사
+#                     hset = set(hv for ok, hv in keys if ok)
+#                     if len(hset) != sum(1 for ok, _ in keys if ok):
+#                         passed, msg = False, "List contains duplicate hashables"
+#                     else:
+#                         # 비해시 항목은 repr로 비교
+#                         reprs = [hv for ok, hv in keys if not ok]
+#                         if len(reprs) != len(set(reprs)):
+#                             passed, msg = False, "List contains duplicate unhashables"
+#                 except Exception as e:
+#                     passed, msg = False, f"Unique validation error: {e}"
 
-        # ---- custom ----
-        elif vtype == 'custom':
-            func = rule.get('customFunction')
-            if callable(func):
-                try:
-                    if not func(value):
-                        passed, msg = False, f"Custom function failed for {value!r}"
-                except Exception as e:
-                    passed, msg = False, f"Custom function error: {e}"
-            else:
-                passed, msg = False, "No custom function provided"
+#         # ---- custom ----
+#         elif vtype == 'custom':
+#             func = rule.get('customFunction')
+#             if callable(func):
+#                 try:
+#                     if not func(value):
+#                         passed, msg = False, f"Custom function failed for {value!r}"
+#                 except Exception as e:
+#                     passed, msg = False, f"Custom function error: {e}"
+#             else:
+#                 passed, msg = False, "No custom function provided"
 
-        # ---- 결과 반영 ----
-        if passed:
-            results[field] = {'result': 'PASS', 'score': score, 'msg': msg}
-            total_score += score
-        else:
-            results[field] = {'result': 'FAIL', 'score': 0, 'msg': msg}
-            error_messages.append(f"{field}: {msg}")
+#         # ---- 결과 반영 ----
+#         if passed:
+#             results[field] = {'result': 'PASS', 'score': score, 'msg': msg}
+#             total_score += score
+#         else:
+#             results[field] = {'result': 'FAIL', 'score': 0, 'msg': msg}
+#             error_messages.append(f"{field}: {msg}")
 
-    pass_count = sum(1 for r in results.values() if r['result'] == 'PASS')
-    fail_count = sum(1 for r in results.values() if r['result'] == 'FAIL')
+#     pass_count = sum(1 for r in results.values() if r['result'] == 'PASS')
+#     fail_count = sum(1 for r in results.values() if r['result'] == 'FAIL')
 
-    overall_result = "PASS" if fail_count == 0 else "FAIL"
-    error_msg = "\n".join(error_messages) if error_messages else "++++ 오류가 없습니다. ++++"
+#     overall_result = "PASS" if fail_count == 0 else "FAIL"
+#     error_msg = "\n".join(error_messages) if error_messages else "++++ 오류가 없습니다. ++++"
 
-    # json_check_의 의미검증 반환형과 합치도록 유지
-    return overall_result, error_msg, pass_count, fail_count
+#     # json_check_의 의미검증 반환형과 합치도록 유지
+#     return overall_result, error_msg, pass_count, fail_count
 
 
 # 실제 데이터에서 필드 추출하기 - dict 타입에서 추출함

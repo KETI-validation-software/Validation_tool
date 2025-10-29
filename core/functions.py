@@ -2,7 +2,7 @@ import requests
 from json_checker import Checker, OptionalKey
 from core.json_checker_new import (
     data_finder, do_checker,
-    timeout_field_finder, do_semantic_checker, extract_validation_rules,
+    timeout_field_finder, extract_validation_rules,
     get_flat_fields_from_schema, get_flat_data_from_response
 )
 from fpdf import FPDF
@@ -419,6 +419,48 @@ def _validate_range_match(field_path, field_value, rule, reference_context,
     ref_endpoint_min = rule.get('referenceEndpointMin')
     ref_operator = rule.get('referenceRangeOperator', 'between')
     
+    # ✅ field_value가 리스트인 경우 각 요소를 검증
+    if isinstance(field_value, list):
+        print(f"  [DEBUG] field_value가 리스트입니다: {field_value}")
+        
+        if not field_value:
+            error_msg = f"빈 리스트: 범위 검증 불가"
+            field_errors.append(error_msg)
+            global_errors.append(f"[의미] {field_path}: {error_msg}")
+            return False
+        
+        all_valid = True
+        for idx, val in enumerate(field_value):
+            if isinstance(val, (int, float)):
+                # 각 요소에 대해 범위 검증 수행
+                if not _validate_single_value_in_range(
+                    field_path, val, ref_endpoint_max, ref_endpoint_min,
+                    ref_field_max, ref_field_min, ref_operator,
+                    reference_context, field_errors, global_errors, idx
+                ):
+                    all_valid = False
+            else:
+                print(f"  [DEBUG] 리스트 요소[{idx}]가 검증 불가능한 타입: {type(val)}")
+        
+        return all_valid
+    
+    # ✅ 단일 값인 경우 기존 로직 수행
+    return _validate_single_value_in_range(
+        field_path, field_value, ref_endpoint_max, ref_endpoint_min,
+        ref_field_max, ref_field_min, ref_operator,
+        reference_context, field_errors, global_errors
+    )
+
+
+def _validate_single_value_in_range(field_path, field_value, ref_endpoint_max, ref_endpoint_min,
+                                     ref_field_max, ref_field_min, ref_operator,
+                                     reference_context, field_errors, global_errors, index=None):
+    """단일 값에 대한 범위 검증"""
+    from core.json_checker_new import collect_all_values_by_key
+    
+    # 필드명 표시 (리스트 인덱스 포함)
+    display_path = f"{field_path}[{index}]" if index is not None else field_path
+    
     max_value = None
     min_value = None
     
@@ -445,7 +487,7 @@ def _validate_range_match(field_path, field_value, rule, reference_context,
         if not (min_value <= field_value <= max_value):
             error_msg = f"범위 초과: {field_value}가 [{min_value}, {max_value}] 범위를 벗어남"
             field_errors.append(error_msg)
-            global_errors.append(f"[의미] {field_path}: {error_msg}")
+            global_errors.append(f"[의미] {display_path}: {error_msg}")
             return False
         else:
             print(f"  [DEBUG] ✅ Value {field_value} is between {min_value} and {max_value}")
@@ -453,7 +495,7 @@ def _validate_range_match(field_path, field_value, rule, reference_context,
     else:
         error_msg = f"범위 검증 실패: min={min_value}, max={max_value}, operator={ref_operator}"
         field_errors.append(error_msg)
-        global_errors.append(f"[의미] {field_path}: {error_msg}")
+        global_errors.append(f"[의미] {display_path}: {error_msg}")
         return False
 
 
