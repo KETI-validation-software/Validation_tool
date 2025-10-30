@@ -469,6 +469,8 @@ class ResultPageWidget(QWidget):
                     background-color: #FFC0CB;
                 }
             """)
+            # 추가했는데 r인지 row인지 확인해야함
+            detail_btn.clicked.connect(lambda checked, r=row: self.parent.show_combined_result(r))
             self.tableWidget.setCellWidget(row, 7, detail_btn)
 
     def _create_spec_score_display(self):
