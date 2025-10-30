@@ -517,23 +517,12 @@ class Server(BaseHTTPRequestHandler):
             if self.webhookData and len(self.webhookData) > 0:
                 webhook_payload = self.webhookData[0]
                 print(f"[DEBUG][SERVER] 웹훅 데이터 사용: webhookData[0]")
+                print(f"[DEBUG][SERVER] 원본 웹훅 페이로드: {json.dumps(webhook_payload, ensure_ascii=False) if webhook_payload else 'None'}")
 
                 # None이면 웹훅 전송하지 않음
                 if webhook_payload is None:
                     print(f"[DEBUG][SERVER] 웹훅 데이터가 None, 웹훅 전송 건너뛰기")
                     return
-                
-                # 임시로 추가 - 비어있는 경우 더미 데이터로 대체 (10/29)
-                if isinstance(webhook_payload, dict):
-                    code = webhook_payload.get("code", "")
-                    message_text = webhook_payload.get("message", "")
-
-                    if (not code or code == "") and (not message_text or message_text == ""):
-                        print(f"[DEBUG][SERVER] 웹훅 데이터가 비어있음, 더미 데이터로 대체")
-                        webhook_payload = {
-                            "code": "200",
-                            "message": "성공"
-                        }
             else:
                 print(f"[DEBUG][SERVER] 웹훅 데이터 인덱스 범위 초과 또는 없음, 웹훅 전송 건너뛰기")
                 return
