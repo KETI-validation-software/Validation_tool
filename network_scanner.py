@@ -143,6 +143,9 @@ class ARPScanWorker(QObject):
                 if ip != my_ip:  # 내 IP 제외
                     found_ips.append(ip)
 
+            # [임시] 본인 IP도 검색 결과에 추가
+            found_ips.append(my_ip)
+
             if not found_ips:
                 self.scan_failed.emit(
                     "동일 네트워크에서 활성 장비를 찾을 수 없습니다.\n"
