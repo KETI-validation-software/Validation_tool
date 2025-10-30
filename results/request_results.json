@@ -26,7 +26,7 @@
   "testResult": [
     {
       "testSpecId": "cmgvieyak001b6cd04cgaawmm",
-      "score": 79.41,
+      "score": 77.78,
       "apis": [
         {
           "id": "step-1-77lxvxrit",
@@ -191,7 +191,7 @@
           ]
         },
         {
-          "id": "step-7-166n5ivbf",
+          "id": "step-7-166n5ivbf-registration",
           "name": "실시간 이벤트 분석 정보 연동",
           "method": "POST",
           "endpoint": "/RealtimeVideoEventInfos",
@@ -214,12 +214,35 @@
                   "transProtocolType": "WebHook",
                   "transProtocolDesc": "127.0.0.1:8090"
                 },
-                "eventFilter": "배회",
-                "classFilter": "트럭",
+                "eventFilter": "화재",
+                "classFilter": "사람",
                 "startTime": 1761110160000
               },
               "validationErrors": [
-                "[Inbound]\n[구조] 필수 필드 누락: camList.camID\n[구조] 필수 필드 누락: camList.endTime\n[구조] 필수 필드 누락: camList.eventDesc\n[구조] 필수 필드 누락: camList.eventName\n[구조] 필수 필드 누락: camList.eventUUID\n[구조] 필수 필드 누락: camList.startTime\n--- Webhook 검증 ---\n[구조] 타입 불일치: code (예상: str, 실제: int)"
+                "[Inbound]\n[구조] 필수 필드 누락: camList.camID\n[구조] 필수 필드 누락: camList.endTime\n[구조] 필수 필드 누락: camList.eventDesc\n[구조] 필수 필드 누락: camList.eventName\n[구조] 필수 필드 누락: camList.eventUUID\n[구조] 필수 필드 누락: camList.startTime\n--- Webhook 검증 ---\n[구조] 타입 불일치: code (예상: str, 실제: int)\n--- Webhook 검증 ---\n[구조] 타입 불일치: code (예상: str, 실제: int)"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "step-7-166n5ivbf-webhook",
+          "name": "실시간 이벤트 분석 정보 연동 (Webhook)",
+          "method": "POST",
+          "endpoint": "/RealtimeVideoEventInfos/webhook",
+          "score": 50.0,
+          "validationCnt": 1,
+          "totalFields": 2,
+          "passFields": 1,
+          "failFields": 1,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": 200,
+                "message": "성공"
+              },
+              "validationErrors": [
+                "[구조] 타입 불일치: code (예상: str, 실제: int)"
               ]
             }
           ]
@@ -251,7 +274,7 @@
                   }
                 ],
                 "maxCount": 3,
-                "eventFilter": "배회",
+                "eventFilter": "화재",
                 "classFilter": "트럭"
               },
               "validationErrors": [
@@ -263,5 +286,5 @@
       ]
     }
   ],
-  "completedDate": "2025-10-30T12:32:02Z"
+  "completedDate": "2025-10-30T17:41:35Z"
 }
