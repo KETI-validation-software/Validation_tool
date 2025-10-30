@@ -2350,8 +2350,42 @@ class InfoWidget(QWidget):
         return bool(ip_pattern.match(ip))
 
     def get_local_ip(self):
-        return "192.168.1.2, 127.0.0.1"
-    
+        """로컬 네트워크 IP 주소 가져오기"""
+        import socket
+
+        ip_list = []
+
+        try:
+            # socket을 사용하여 로컬 IP 확인
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))
+            local_ip = s.getsockname()[0]
+            s.close()
+            if local_ip and not local_ip.startswith('127.'):
+                ip_list.append(local_ip)
+        except Exception as e:
+            print(f"socket을 사용한 IP 검색 실패: {e}")
+
+        # 위 방법 실패 시 호스트명으로 IP 가져오기
+        if not ip_list:
+            try:
+                hostname_ip = socket.gethostbyname(socket.gethostname())
+                if hostname_ip and not hostname_ip.startswith('127.'):
+                    ip_list.append(hostname_ip)
+            except Exception as e2:
+                print(f"hostname을 사용한 IP 검색 실패: {e2}")
+
+        # 중복 제거
+        ip_list = list(dict.fromkeys(ip_list))
+
+        print(f"검색된 네트워크 IP 목록: {ip_list}")
+
+        # 리스트를 쉼표로 구분된 문자열로 반환
+        if ip_list:
+            return ", ".join(ip_list)
+        else:
+            return None
+
     def _get_local_ip_list(self):
         """get_local_ip() 결과를 안전하게 리스트로 변환 (최대 3개)"""
         raw = self.get_local_ip()
