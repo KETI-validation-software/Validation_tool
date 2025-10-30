@@ -1475,6 +1475,17 @@ class MyApp(QWidget):
                     with open(json_path, "w", encoding="utf-8") as f:
                         json.dump(result_json, f, ensure_ascii=False, indent=2)
                     print(f"시험 결과 JSON이 '{json_path}'에 저장되었습니다.")
+
+                    '''
+                    url = f"http://ect2.iptime.org:20223/api/integration/test-results"
+                    response = requests.post(url, json=result_json)
+                    print("✅ 시험 결과 전송 상태 코드:", response.status_code)
+                    print("📥  시험 결과 전송 응답:", response.text)
+
+                    json_path = os.path.join(result_dir, "request_results.json")
+                    with open(json_path, "w", encoding="utf-8") as f:
+                        json.dump(result_json, f, ensure_ascii=False, indent=2)
+                        '''
                 except Exception as e:
                     print(f"JSON 저장 중 오류 발생: {e}")
                     import traceback
@@ -2267,7 +2278,7 @@ class MyApp(QWidget):
             print(f"[DEBUG] 서버 시작 준비")
             url = CONSTANTS.url.split(":")
             address_port = int(url[-1])  # 포트만 사용
-            address_ip = "127.0.0.1"  # 내부 IP 주소, 외부에서도 접근 가능하게 설정
+            address_ip = "0.0.0.0"  # 내부 IP 주소, 외부에서도 접근 가능하게 설정
 
             print(f"[DEBUG] 플랫폼 서버 시작: {address_ip}:{address_port}")
             self.server_th = server_th(handler_class=self.Server, address=address_ip, port=address_port)
