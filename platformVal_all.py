@@ -1073,7 +1073,13 @@ class MyApp(QWidget):
                         'validation_results': [],
                         'total_pass': 0,
                         'total_error': 0,
-                        'raw_data_list': []  # 각 시도별 원본 데이터 저장
+                        'raw_data_list': [],  # 각 시도별 원본 데이터 저장
+                        'is_webhook_api': False,  # ✅ 추가: webhook API 여부 플래그
+                        'webhook_data': None,
+                        'webhook_result': None,
+                        'webhook_error': None,
+                        'webhook_pass': 0,
+                        'webhook_total': 0
                     }
 
                 accumulated = self.api_accumulated_data[api_index]
@@ -1235,6 +1241,7 @@ class MyApp(QWidget):
 
                     # ✅ WebHook 프로토콜인 경우 웹훅 응답 표시 (transProtocol 기반으로만 판단)
                     if current_protocol == "WebHook":
+                        accumulated['is_webhook_api'] = True  # ✅ webhook API로 표시
 
                         # ✅ 웹훅 스레드가 생성될 때까지 짧게 대기
                         wait_count = 0
@@ -1280,6 +1287,16 @@ class MyApp(QWidget):
                                 add_err += webhook_resp_key_error_cnt
 
                                 webhook_resp_err_txt = self._to_detail_text(webhook_resp_val_text)
+                                accumulated['webhook_data'] = webhook_response
+                                accumulated['webhook_result'] = webhook_resp_val_result
+                                accumulated['webhook_error'] = webhook_resp_err_txt
+                                accumulated['webhook_pass'] = webhook_resp_key_psss_cnt
+                                accumulated['webhook_total'] = webhook_resp_key_psss_cnt + webhook_resp_key_error_cnt
+
+                                if webhook_resp_val_result == "FAIL":
+                                    step_result = "FAIL"
+                                    combined_error_parts.append(f"--- Webhook 검증 ---\n" + webhook_resp_err_txt)
+
                                 if webhook_resp_val_result == "FAIL":
                                     step_result = "FAIL"
                                     # [검증 {retry_attempt + 1}회차] -> 회차 추가하고 싶으면 주석 해제하고 포함
@@ -1323,6 +1340,12 @@ class MyApp(QWidget):
                     self.step_buffers[self.cnt]["error"] = error_text
                     self.step_buffers[self.cnt]["result"] = final_result
                     self.step_buffers[self.cnt]["raw_data_list"] = accumulated['raw_data_list']  # ✅ 원본 데이터 리스트 저장
+                    self.step_buffers[self.cnt]["is_webhook_api"] = accumulated.get('is_webhook_api', False)
+                    self.step_buffers[self.cnt]["webhook_data"] = accumulated.get('webhook_data')
+                    self.step_buffers[self.cnt]["webhook_result"] = accumulated.get('webhook_result')
+                    self.step_buffers[self.cnt]["webhook_error"] = accumulated.get('webhook_error')
+                    self.step_buffers[self.cnt]["webhook_pass_cnt"] = accumulated.get('webhook_pass', 0)
+                    self.step_buffers[self.cnt]["webhook_total_cnt"] = accumulated.get('webhook_total', 0)
                     try:
                         api_name = self.Server.message[self.cnt]  # 현재 스텝의 API 이름
                         events = list(self.Server.trace.get(api_name, []))  # deque -> list
