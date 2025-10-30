@@ -252,7 +252,7 @@
                 ],
                 "maxCount": 3,
                 "eventFilter": "화재",
-                "classFilter": "사람"
+                "classFilter": "버스"
               },
               "validationErrors": [
                 "오류가 없습니다."
@@ -263,5 +263,5 @@
       ]
     }
   ],
-  "completedDate": "2025-10-29T17:23:39Z"
+  "completedDate": "2025-10-30T11:14:41Z"
 }
