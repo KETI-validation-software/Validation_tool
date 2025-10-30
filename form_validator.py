@@ -1575,10 +1575,14 @@ class FormValidator:
     def _fill_test_field_table_from_api(self, test_specs):
         """API testSpecs 배열로부터 시험 시나리오 테이블 채우기 (2개 컬럼: 시험 분야명, 시험 시나리오명)"""
         try:
-            from PyQt5.QtGui import QFont
+            from PyQt5.QtGui import QFont, QBrush, QColor
 
             table = self.parent.test_field_table
             table.setRowCount(0)
+
+            # 그룹별로 행 범위를 추적하기 위한 딕셔너리 {group_name: [start_row, end_row]}
+            group_ranges = {}
+            current_group = None
 
             for i, spec in enumerate(test_specs):
                 spec_id = spec.get("id", "")
@@ -1596,20 +1600,48 @@ class FormValidator:
                 font.setWeight(400)
                 font.setLetterSpacing(QFont.PercentageSpacing, 100.7)
 
-                # 첫 번째 컬럼: 시험 분야명
+                # 그룹 범위 추적
+                if group_name != current_group:
+                    # 새로운 그룹 시작
+                    if current_group is not None and current_group in group_ranges:
+                        # 이전 그룹의 끝 행 번호 설정
+                        group_ranges[current_group][1] = i - 1
+
+                    # 새 그룹 시작
+                    group_ranges[group_name] = [i, i]
+                    current_group = group_name
+                else:
+                    # 같은 그룹 계속
+                    group_ranges[group_name][1] = i
+
+                # 첫 번째 컬럼: 시험 분야명 (일단 모든 행에 설정)
                 group_item = QTableWidgetItem(group_name)
                 group_item.setFont(font)
-                group_item.setTextAlignment(Qt.AlignCenter)  # 가운데 정렬
+                group_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)  # 가운데 정렬
+                # 선택되어도 배경색이 변하지 않도록 배경색 고정
+                group_item.setBackground(QBrush(QColor("#FFFFFF")))
+                # 선택 불가능하게 설정
+                group_item.setFlags(group_item.flags() & ~Qt.ItemIsSelectable)
                 table.setItem(i, 0, group_item)
 
                 # 두 번째 컬럼: 시험 시나리오명
                 scenario_item = QTableWidgetItem(spec_name)
                 scenario_item.setData(Qt.UserRole, spec_id)  # spec_id 저장
                 scenario_item.setFont(font)
-                scenario_item.setTextAlignment(Qt.AlignCenter)  # 가운데 정렬
+                scenario_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)  # 가운데 정렬
                 table.setItem(i, 1, scenario_item)
 
-            print(f"시험 시나리오 테이블 채우기 완료: {len(test_specs)}개 항목")
+            # 마지막 그룹의 끝 설정
+            if current_group is not None:
+                group_ranges[current_group][1] = len(test_specs) - 1
+
+            # 그룹별로 셀 병합 적용
+            for group_name, (start_row, end_row) in group_ranges.items():
+                if start_row < end_row:
+                    # 같은 그룹이 2개 이상의 행을 차지하면 병합
+                    table.setSpan(start_row, 0, end_row - start_row + 1, 1)
+
+            print(f"시험 시나리오 테이블 채우기 완료: {len(test_specs)}개 항목, {len(group_ranges)}개 그룹")
 
         except Exception as e:
             print(f"시험 시나리오 테이블 채우기 실패: {e}")
