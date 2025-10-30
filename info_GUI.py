@@ -380,9 +380,9 @@ class InfoWidget(QWidget):
         layout.setContentsMargins(48, 46, 48, 58)  # 좌우 48px, 상단 46px, 하단 58px
         layout.setSpacing(0)
 
-        # 타이틀 박스 (768x66px)
+        # 타이틀 박스 (768x60px)
         title_box = QWidget()
-        title_box.setFixedSize(768, 66)
+        title_box.setFixedSize(768, 60)
         title_box.setStyleSheet("""
             QWidget {
                 padding: 0px 0px 4px 0px;
@@ -390,7 +390,7 @@ class InfoWidget(QWidget):
         """)
         title_box_layout = QHBoxLayout()
         title_box_layout.setContentsMargins(0, 0, 0, 4)  # padding: 0 0 4 0
-        title_box_layout.setSpacing(0)
+        title_box_layout.setSpacing(8)
 
         # 타이틀 영역 (570x62px)
         title_area = QWidget()
@@ -446,8 +446,6 @@ class InfoWidget(QWidget):
             }
         """)
         title_box_layout.addWidget(self.ip_input_edit, alignment=Qt.AlignVCenter)
-
-        title_box_layout.addStretch()
 
         # 버튼/불러오기 (198x62px) - 이미지 버튼
         self.load_test_info_btn = QPushButton()
@@ -911,13 +909,12 @@ class InfoWidget(QWidget):
         self.test_field_table.setFixedSize(744, 238)
         self.test_field_table.setHorizontalHeaderLabels(["시험 분야명", "시험 시나리오명"])
 
-        # 컬럼 너비 설정 (시험 분야명: 360px, 시험 시나리오명: 360px)
+        # 컬럼 너비 설정 (시험 분야명: 360px, 시험 시나리오명: 나머지 전체)
         header = self.test_field_table.horizontalHeader()
         header.setFixedHeight(24)
         header.setSectionResizeMode(0, QHeaderView.Fixed)
         header.resizeSection(0, 360)
-        header.setSectionResizeMode(1, QHeaderView.Fixed)
-        header.resizeSection(1, 360)
+        header.setSectionResizeMode(1, QHeaderView.Stretch)
         self.test_field_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.test_field_table.cellClicked.connect(self.on_test_field_selected)
         self.test_field_table.verticalHeader().setVisible(False)
@@ -1038,7 +1035,7 @@ class InfoWidget(QWidget):
                 color: #000000;
             }
             QTableWidget::item:selected {
-                background-color: #E3F2FF;
+                background-color: #FFFFFF;
                 color: #000000;
             }
             QHeaderView::section {

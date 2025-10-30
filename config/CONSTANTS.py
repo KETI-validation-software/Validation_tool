@@ -9,19 +9,19 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소
 # test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
-company_name = "통합플랫폼테스트"
-product_name = "통합플랫폼테스트제품"
+company_name = "물리보안기업"
+product_name = "물리보안테스트제품"
 version = "v1.0"
 test_category = "MAIN_TEST"
-test_target = "통합플랫폼"
+test_target = "물리보안"
 test_range = "ALL_FIELDS"
 auth_type = "Digest Auth"
 auth_info = "admin,1234"
-admin_code = "1324"
+admin_code = "1234"
 url = "https://192.168.0.3:8080"
 contact_person = "김철수"
 model_name = "v1.0"
-request_id = "cmh1yg49v000t9y0jdr1wwuja"
+request_id = "cmh2sdyj70001ry7uvsgugy25"
 specs = [["cmgyv3rzl014nvsveidu5jpzp_outSchema","cmgyv3rzl014nvsveidu5jpzp_inData","cmgyv3rzl014nvsveidu5jpzp_messages",""]]
 
 
