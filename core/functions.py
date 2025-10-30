@@ -1038,9 +1038,20 @@ def build_result_json(myapp_instance):
         for attempt in range(1, retries + 1):
             validation = generate_validation_data_from_step_buffer(step_buffer, attempt)
             validations.append(validation)
-        # API 결과 구성
+
+        # webhook 메시지 존재 여부 확인
+        has_webhook = step_buffer.get("is_webhook_api", False)  # ✅ 플래그로 판단
+
+        # API ID 결정
+        if has_webhook:
+            registration_id = f"{api_id}-registration"
+            webhook_id = f"{api_id}-webhook"
+        else:
+            registration_id = api_id
+
+        # 기존 API 결과 구성 (registration)
         api_result = {
-            "id": api_id,
+            "id": registration_id,
             "name": api_name,
             "method": method,
             "endpoint": api_endpoint,
@@ -1067,6 +1078,40 @@ def build_result_json(myapp_instance):
             }
 
         spec_results[spec_id]["apis"].append(api_result)
+
+        # webhook 메시지가 있는 경우 추가 API 결과 생성
+        if has_webhook:
+            webhook_validations = []
+            for attempt in range(1, retries + 1):
+                # webhook용 validation 데이터 생성
+                webhook_validation = {
+                    "attempt": attempt,
+                    "validationData": step_buffer.get("webhook_data") or {},  #  {}로 변환
+                    "validationErrors": step_buffer.get("webhook_error", "").split('\n') if step_buffer.get(
+                        "webhook_error") else []
+                }
+                webhook_validations.append(webhook_validation)
+
+            # webhook 필드 수 계산 (step_buffer에 webhook_pass_cnt 등이 있다면 사용)
+            webhook_pass = step_buffer.get("webhook_pass_cnt", 0)
+            webhook_total = step_buffer.get("webhook_total_cnt", 0)
+            webhook_fail = webhook_total - webhook_pass
+            webhook_score = (webhook_pass / webhook_total * 100) if webhook_total > 0 else 0
+
+            webhook_result = {
+                "id": webhook_id,
+                "name": f"{api_name} (Webhook)",
+                "method": "POST",  # webhook은 보통 POST
+                "endpoint": f"{api_endpoint}/webhook",
+                "score": round(webhook_score, 0),
+                "validationCnt": retries,
+                "totalFields": webhook_total,
+                "passFields": webhook_pass,
+                "failFields": webhook_fail,
+                "validations": webhook_validations
+            }
+
+            spec_results[spec_id]["apis"].append(webhook_result)
 
     # spec별 평균 점수 계산
     status = getattr(myapp_instance, 'run_status', 0)
