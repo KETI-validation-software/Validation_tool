@@ -2267,7 +2267,7 @@ class MyApp(QWidget):
             print(f"[DEBUG] 서버 시작 준비")
             url = CONSTANTS.url.split(":")
             address_port = int(url[-1])  # 포트만 사용
-            address_ip = "127.0.0.1"  # 내부 IP 주소, 외부에서도 접근 가능하게 설정
+            address_ip = "0.0.0.0"  # 내부 IP 주소, 외부에서도 접근 가능하게 설정
 
             print(f"[DEBUG] 플랫폼 서버 시작: {address_ip}:{address_port}")
             self.server_th = server_th(handler_class=self.Server, address=address_ip, port=address_port)
