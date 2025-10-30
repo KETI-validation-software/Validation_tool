@@ -6,7 +6,7 @@ from api.api_server import Server
 import time
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore
-from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor
+from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor, QPixmap
 from PyQt5.QtCore import Qt, QSettings, QTimer, QThread, pyqtSignal
 import sys
 import ssl
@@ -235,6 +235,26 @@ class APISelectionDialog(QDialog):
     def initUI(self):
         layout = QVBoxLayout()
 
+        # 배경 이미지 설정
+        self.setObjectName("platform_main")
+        self.setAttribute(Qt.WA_StyledBackground, True)
+    
+        bg_path = resource_path("assets/image/common/bg.png").replace("\\", "/")
+        print(f"배경 이미지 경로: {bg_path}")  # 디버깅용
+    
+        self.setStyleSheet(f"""
+            #platform_main {{
+                background-image: url('{bg_path}');  /* 따옴표 추가 */
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: cover;  /* 추가: 화면에 맞게 조정 */
+            }}
+            QScrollArea, QScrollArea QWidget, QScrollArea::viewport,
+            QGroupBox, QWidget#scroll_widget, QLabel {{
+                background: transparent;
+            }}
+        """)
+
         # 상단 안내
         info_label = QLabel("시험할 API를 선택하세요 (복수 선택 가능)")
         info_label.setStyleSheet("font-weight: bold; font-size: 12px; padding: 10px;")
@@ -306,6 +326,21 @@ class ResultPageWidget(QWidget):
 
     def initUI(self):
         mainLayout = QVBoxLayout()
+
+        # 배경 이미지 설정
+        # 최상위 배경 이미지 적용
+        self.setObjectName("platform_main")
+        self.setAttribute(Qt.WA_StyledBackground, True)
+        bg_path = resource_path("assets/image/common/bg.png").replace("\\", "/")
+        self.setStyleSheet(f"""
+            QWidget#platform_main {{
+                background-image: url('{bg_path}');
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: cover;
+            }}
+        """)
+        # 컬럼 위젯에는 배경 스타일 적용하지 않음
 
         # 상단 대제목 (수정된 부분)S
         title_label = QLabel('통합플랫폼 연동 시험 결과', self)
@@ -691,6 +726,7 @@ class MyApp(QWidget):
     def __init__(self, embedded=False, mode=None, spec_id=None):
         importlib.reload(CONSTANTS)  # CONSTANTS 모듈을 다시 로드하여 최신 설정 반영
         super().__init__()
+        self.setFixedSize(1680, 1032)
         self.embedded = embedded
         self.mode = mode  # 모드 저장
         self.radio_check_flag = "video"  # 영상보안 시스템으로 고정
@@ -1584,8 +1620,8 @@ class MyApp(QWidget):
         panel_layout.setContentsMargins(10, 10, 10, 10)
 
         # 시험 분야 확인 문구
-        title = QLabel("시험 분야를 선택하세요.")
-        title.setStyleSheet("font-size: 14px; font-weight: bold; padding: 10px;")
+        title = QLabel("시험 분야")
+        title.setStyleSheet("font-size: 16px; font-family: 'Noto Sans KR'; font-style: normal; font-weight: 500; line-height: normal; letter-spacing: -0.16px;")
         panel_layout.addWidget(title)
 
         # 시험 분야명 테이블
@@ -1602,7 +1638,7 @@ class MyApp(QWidget):
         """
         ✅ Platform은 Request 검증만 - Request 스키마 ID만 표시 (3개)
         """
-        group_box = QGroupBox("시험 분야")  # ← 변수명 변경
+        group_box = QGroupBox()  # ← 변수명 변경
         layout = QVBoxLayout()
 
         self.test_field_table = QTableWidget(0, 1)
@@ -1768,62 +1804,132 @@ class MyApp(QWidget):
             # 행 높이 설정
             self.tableWidget.setRowHeight(row, 40)
 
+    # 여기가 플랫폼 메인화면 initUI
     def initUI(self):
-        # 창 크기 설정 (main.py와 동일)
+        # 페이지 크기 설정
+        self.setFixedSize(1680, 1032)
+        self.setObjectName("platform_main")
+        self.setAttribute(Qt.WA_StyledBackground, True)
+        
+        # 배경 이미지 설정
+        bg_path = resource_path("assets/image/common/bg.png").replace("\\", "/")
+        self.setStyleSheet(f"""
+            #platform_main {{
+                background-image: url('{bg_path}');
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: cover;
+            }}
+        """)
+        
         if not self.embedded:
-            self.resize(1200, 720)
             self.setWindowTitle('통합플랫폼 연동 검증')
-
-        # 1열(세로) 레이아웃으로 통합
+        
+        # 메인 레이아웃
         mainLayout = QVBoxLayout()
+        mainLayout.setContentsMargins(0, 0, 0, 0)  # 여백 제거
+        mainLayout.setSpacing(0)  # 간격 제거
+        
+        # 헤더 영역 (1680x56px)
+        header_container = QWidget()
+        header_container.setFixedSize(1680, 56)
+        header_container_layout = QHBoxLayout()
+        header_container_layout.setContentsMargins(0, 0, 0, 0)
+        header_container_layout.setSpacing(0)
+        
+        header_widget = QWidget()
+        header_widget.setFixedSize(1680, 56)
+        
+        # 헤더 레이아웃 (로고 + 타이틀)
+        header_layout = QHBoxLayout(header_widget)
+        header_layout.setContentsMargins(0, 0, 0, 0)
+        header_layout.setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+        header_layout.setSpacing(10)
+        
+        # 헤더 로고 (36x36px)
+        logo_label = QLabel(header_widget)
+        logo_pixmap = QPixmap(resource_path("assets/image/common/header_logo.png"))
+        logo_label.setPixmap(logo_pixmap.scaled(36, 36, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        logo_label.setFixedSize(36, 36)
+        header_layout.addWidget(logo_label)
+        
+        # 헤더 타이틀
+        self.title_label = QLabel('통합 플랫폼 연동 검증 시작하기', header_widget)
+        self.title_label.setAlignment(Qt.AlignVCenter)
+        title_style = """
+            color: #FFF;
+            font-family: "Noto Sans KR";
+            font-size: 18px;
+            font-style: normal;
+            font-weight: 500;
+            line-height: normal;
+        """
+        self.title_label.setStyleSheet(title_style)
+        header_layout.addWidget(self.title_label)
+        
+        header_container_layout.addWidget(header_widget)
+        header_container.setLayout(header_container_layout)
+        
+        mainLayout.addWidget(header_container)
 
-        # 상단 큰 제목
-        self.title_label = QLabel('통합플랫폼 연동 검증', self)
-        title_font = self.title_label.font()
-        title_font.setPointSize(22)
-        title_font.setBold(True)
-        self.title_label.setFont(title_font)
-        self.title_label.setAlignment(Qt.AlignCenter)
-        mainLayout.addWidget(self.title_label)
+        # ✅ 배경을 칠할 전용 컨테이너(헤더 제외 영역)
+        bg_root = QWidget()
+        bg_root.setObjectName("bg_root")
+        bg_root.setAttribute(Qt.WA_StyledBackground, True)
+        bg_root_layout = QVBoxLayout()
+        bg_root_layout.setContentsMargins(0, 0, 0, 0)
+        bg_root_layout.setSpacing(0)
 
-        # 시험 분야 선택 영역 추가
-        self.create_spec_selection_panel(mainLayout)
+        # 2컬럼 레이아웃 생성
+        columns_layout = QHBoxLayout()
+        columns_layout.setContentsMargins(0, 0, 0, 0)
+        columns_layout.setSpacing(0)
 
+        # 왼쪽 컬럼 (479x858)
+        left_col = QWidget()
+        left_col.setFixedSize(479, 858)
+        left_layout = QVBoxLayout()
+        left_layout.setContentsMargins(0, 0, 0, 0)
+        left_layout.setSpacing(15)
+        # 시험 분야 선택 영역
+        self.create_spec_selection_panel(left_layout)
         # 시험 결과
         self.valmsg = QLabel('시험 결과', self)
-        mainLayout.addWidget(self.valmsg)
+        left_layout.addWidget(self.valmsg)
+        left_col.setLayout(left_layout)
 
+        # 오른쪽 컬럼 (1112x858)
+        right_col = QWidget()
+        right_col.setFixedSize(1112, 858)
+        right_layout = QVBoxLayout()
+        right_layout.setContentsMargins(0, 0, 0, 0)
+        right_layout.setSpacing(15)
+        # 시험 결과 테이블 및 기타 정보
+        # 시험 API 라벨 추가
+        api_label = QLabel('시험 API')
+        api_label.setStyleSheet('font-size: 16px; font-family: "Noto Sans KR"; font-weight: 500; color: #222;')
+        right_layout.addWidget(api_label)
         self.init_centerLayout()
         contentWidget = QWidget()
         contentWidget.setLayout(self.centerLayout)
-        # 고정 크기 제거 - 반응형으로 변경
-        mainLayout.addWidget(contentWidget, 1)  # stretch factor 1 추가
-
-        mainLayout.addSpacing(15)
-
+        right_layout.addWidget(contentWidget, 1)
         # 수신 메시지 실시간 모니터링
         monitor_label = QLabel("수신 메시지 실시간 모니터링")
-        mainLayout.addWidget(monitor_label)
+        monitor_label.setStyleSheet('font-size: 16px; font-family: "Noto Sans KR"; font-weight: 500; color: #222;')
+        right_layout.addWidget(monitor_label)
         self.valResult = QTextBrowser(self)
-        # 고정 크기 제거 - 반응형으로 변경
         self.valResult.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        mainLayout.addWidget(self.valResult, 1)  # stretch factor 1 추가
-
-        mainLayout.addSpacing(15)
-
-        # 평가 점수 표시 (메인 화면에 추가)
+        right_layout.addWidget(self.valResult, 1)
+        # 평가 점수 표시
         spec_score_group = self.create_spec_score_display_widget()
-        mainLayout.addWidget(spec_score_group)
-
+        right_layout.addWidget(spec_score_group)
         # 전체 점수 표시
         total_score_group = self.create_total_score_display_widget()
-        mainLayout.addWidget(total_score_group)
-
-        # 버튼 그룹 (평가 시작, 일시 정지, 종료) - 아래쪽, 가운데 정렬
+        right_layout.addWidget(total_score_group)
+        # 버튼 그룹 (평가 시작, 일시 정지, 종료)
         buttonGroup = QWidget()
         buttonLayout = QHBoxLayout()
         buttonLayout.setAlignment(Qt.AlignCenter)
-
         self.sbtn = QPushButton(self)
         self.sbtn.setText('평가 시작')
         self.sbtn.setFixedSize(140, 50)
@@ -1850,7 +1956,6 @@ class MyApp(QWidget):
             }
         """)
         self.sbtn.clicked.connect(self.sbtn_push)
-
         self.stop_btn = QPushButton(self)
         self.stop_btn.setText('일시 정지')
         self.stop_btn.setFixedSize(140, 50)
@@ -1878,7 +1983,6 @@ class MyApp(QWidget):
         """)
         self.stop_btn.clicked.connect(self.stop_btn_clicked)
         self.stop_btn.setDisabled(True)
-
         self.rbtn = QPushButton(self)
         self.rbtn.setText('종료')
         self.rbtn.setFixedSize(140, 50)
@@ -1905,7 +2009,6 @@ class MyApp(QWidget):
             }
         """)
         self.rbtn.clicked.connect(self.exit_btn_clicked)
-
         self.result_btn = QPushButton(self)
         self.result_btn.setText('시험 결과')
         self.result_btn.setFixedSize(140, 50)
@@ -1932,7 +2035,6 @@ class MyApp(QWidget):
             }
         """)
         self.result_btn.clicked.connect(self.show_result_page)
-
         buttonLayout.addWidget(self.sbtn)
         buttonLayout.addSpacing(20)
         buttonLayout.addWidget(self.stop_btn)
@@ -1940,12 +2042,20 @@ class MyApp(QWidget):
         buttonLayout.addWidget(self.rbtn)
         buttonLayout.addSpacing(20)
         buttonLayout.addWidget(self.result_btn)
-
         buttonGroup.setLayout(buttonLayout)
+        right_layout.addSpacing(20)
+        right_layout.addWidget(buttonGroup)
+        right_layout.addStretch()
+        right_col.setLayout(right_layout)
 
-        mainLayout.addSpacing(20)
-        mainLayout.addWidget(buttonGroup)
-        mainLayout.addStretch()
+        # 컬럼 레이아웃에 추가
+        columns_layout.addWidget(left_col)
+        columns_layout.addWidget(right_col)
+
+        # mainLayout.addLayout(columns_layout)
+        bg_root_layout.addLayout(columns_layout)
+        bg_root.setLayout(bg_root_layout)
+        mainLayout.addWidget(bg_root)
 
         self.setLayout(mainLayout)
 
