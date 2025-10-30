@@ -99,14 +99,14 @@ class CombinedDetailDialog(QDialog):
         # 오류 설명 추가: 값 자체뿐 아니라 원인도 함께 표시
         error_text = step_buffer["error"] if step_buffer["error"] else ("오류가 없습니다." if result == "PASS" else "오류 내용 없음")
         # 예시: 값이 범위에 맞지 않거나 타입이 다를 때 추가 설명
-        if result == "FAIL" and error_text and isinstance(error_text, str):
-            # 간단한 규칙 기반 설명 추가 (실제 검증 로직에 맞게 확장 가능) - (10/28) 수정해야함
-            if "startTime" in error_text or "endTime" in error_text:
-                error_text += "\n[설명] startTime 또는 endTime 값이 허용된 범위에 맞지 않거나, 요청값과 다릅니다."
-            if "camID" in error_text and '""' in error_text:
-                error_text += "\n[설명] camID 값이 비어 있습니다. 실제 카메라 ID가 필요합니다."
-            if "타입" in error_text or "type" in error_text:
-                error_text += "\n[설명] 데이터 타입이 스키마와 일치하지 않습니다."
+        # if result == "FAIL" and error_text and isinstance(error_text, str):
+        #     # 간단한 규칙 기반 설명 추가 (실제 검증 로직에 맞게 확장 가능) - (10/28) 수정해야함
+        #     if "startTime" in error_text or "endTime" in error_text:
+        #         error_text += "\n[설명] startTime 또는 endTime 값이 허용된 범위에 맞지 않거나, 요청값과 다릅니다."
+        #     if "camID" in error_text and '""' in error_text:
+        #         error_text += "\n[설명] camID 값이 비어 있습니다. 실제 카메라 ID가 필요합니다."
+        #     if "타입" in error_text or "type" in error_text:
+        #         error_text += "\n[설명] 데이터 타입이 스키마와 일치하지 않습니다."
         error_msg = f"검증 결과: {result}\n\n{error_text}"
         self.error_browser.setPlainText(error_msg)
         error_layout.addWidget(self.error_browser)
