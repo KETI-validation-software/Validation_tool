@@ -380,9 +380,9 @@ class InfoWidget(QWidget):
         layout.setContentsMargins(48, 46, 48, 58)  # 좌우 48px, 상단 46px, 하단 58px
         layout.setSpacing(0)
 
-        # 타이틀 박스 (768x66px)
+        # 타이틀 박스 (768x60px)
         title_box = QWidget()
-        title_box.setFixedSize(768, 66)
+        title_box.setFixedSize(768, 60)
         title_box.setStyleSheet("""
             QWidget {
                 padding: 0px 0px 4px 0px;
@@ -390,7 +390,7 @@ class InfoWidget(QWidget):
         """)
         title_box_layout = QHBoxLayout()
         title_box_layout.setContentsMargins(0, 0, 0, 4)  # padding: 0 0 4 0
-        title_box_layout.setSpacing(0)
+        title_box_layout.setSpacing(8)
 
         # 타이틀 영역 (570x62px)
         title_area = QWidget()
@@ -446,8 +446,6 @@ class InfoWidget(QWidget):
             }
         """)
         title_box_layout.addWidget(self.ip_input_edit, alignment=Qt.AlignVCenter)
-
-        title_box_layout.addStretch()
 
         # 버튼/불러오기 (198x62px) - 이미지 버튼
         self.load_test_info_btn = QPushButton()
@@ -911,13 +909,12 @@ class InfoWidget(QWidget):
         self.test_field_table.setFixedSize(744, 238)
         self.test_field_table.setHorizontalHeaderLabels(["시험 분야명", "시험 시나리오명"])
 
-        # 컬럼 너비 설정 (시험 분야명: 360px, 시험 시나리오명: 360px)
+        # 컬럼 너비 설정 (시험 분야명: 360px, 시험 시나리오명: 나머지 전체)
         header = self.test_field_table.horizontalHeader()
         header.setFixedHeight(24)
         header.setSectionResizeMode(0, QHeaderView.Fixed)
         header.resizeSection(0, 360)
-        header.setSectionResizeMode(1, QHeaderView.Fixed)
-        header.resizeSection(1, 360)
+        header.setSectionResizeMode(1, QHeaderView.Stretch)
         self.test_field_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.test_field_table.cellClicked.connect(self.on_test_field_selected)
         self.test_field_table.verticalHeader().setVisible(False)
@@ -1038,7 +1035,7 @@ class InfoWidget(QWidget):
                 color: #000000;
             }
             QTableWidget::item:selected {
-                background-color: #E3F2FF;
+                background-color: #FFFFFF;
                 color: #000000;
             }
             QHeaderView::section {
@@ -2350,8 +2347,42 @@ class InfoWidget(QWidget):
         return bool(ip_pattern.match(ip))
 
     def get_local_ip(self):
-        return "192.168.1.2, 127.0.0.1"
-    
+        """로컬 네트워크 IP 주소 가져오기"""
+        import socket
+
+        ip_list = []
+
+        try:
+            # socket을 사용하여 로컬 IP 확인
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))
+            local_ip = s.getsockname()[0]
+            s.close()
+            if local_ip and not local_ip.startswith('127.'):
+                ip_list.append(local_ip)
+        except Exception as e:
+            print(f"socket을 사용한 IP 검색 실패: {e}")
+
+        # 위 방법 실패 시 호스트명으로 IP 가져오기
+        if not ip_list:
+            try:
+                hostname_ip = socket.gethostbyname(socket.gethostname())
+                if hostname_ip and not hostname_ip.startswith('127.'):
+                    ip_list.append(hostname_ip)
+            except Exception as e2:
+                print(f"hostname을 사용한 IP 검색 실패: {e2}")
+
+        # 중복 제거
+        ip_list = list(dict.fromkeys(ip_list))
+
+        print(f"검색된 네트워크 IP 목록: {ip_list}")
+
+        # 리스트를 쉼표로 구분된 문자열로 반환
+        if ip_list:
+            return ", ".join(ip_list)
+        else:
+            return None
+
     def _get_local_ip_list(self):
         """get_local_ip() 결과를 안전하게 리스트로 변환 (최대 3개)"""
         raw = self.get_local_ip()
