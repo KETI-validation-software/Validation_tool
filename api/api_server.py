@@ -529,6 +529,10 @@ class Server(BaseHTTPRequestHandler):
 
             print(f"[DEBUG][SERVER] webhook_payload: {json.dumps(webhook_payload, ensure_ascii=False)[:200]}")
 
+            # ✅ 웹훅 이벤트 전송 기록 (trace)
+            api_name = self.path[1:] if self.path else "unknown"
+            self._push_event(api_name, "WEBHOOK_OUT", webhook_payload)
+
             # ✅ 웹훅 응답 초기화 (클래스 변수)
             Server.webhook_response = None
 
@@ -551,6 +555,11 @@ class Server(BaseHTTPRequestHandler):
                 self.result = result
                 Server.webhook_response = json.loads(result.text)  # ✅ 클래스 변수에 저장
                 print(f"[DEBUG][SERVER] webhook_response 저장됨 (클래스 변수): {Server.webhook_response}")
+                
+                # ✅ 웹훅 응답 기록 (trace)
+                api_name = self.path[1:] if hasattr(self, 'path') and self.path else "unknown"
+                self._push_event(api_name, "WEBHOOK_IN", Server.webhook_response)
+                
                 # JSON 파일 저장 제거 - spec/video/videoData_response.py 사용
                 # with open(resource_path("spec/" + self.system + "/" + "webhook_" + self.path[1:] + ".json"),
                 #           "w", encoding="UTF-8") as out_file2:
