@@ -1,47 +1,12 @@
 # response 모드
 
-# RealtimeVideoEventInfos
-cmh1u5pef000sgxc3bzl4y9v0_RealtimeVideoEventInfos_out_data = {
-    "code": "200",
-    "message": "성공"
-}
-
-# RealtimeVideoEventInfos WebHook IN Data
-cmh1u5pef000sgxc3bzl4y9v0_RealtimeVideoEventInfos_webhook_in_data = {
-    "camList": [
-        {
-        "camID": "",
-        "eventUUID": "",
-        "eventName": "",
-        "startTime": "",
-        "endTime": "",
-        "eventDesc": ""
-    }
-]
-}
-
-# cmh1u5pef000sgxc3bzl4y9v0 데이터 리스트
-cmh1u5pef000sgxc3bzl4y9v0_outData = [
-    cmh1u5pef000sgxc3bzl4y9v0_RealtimeVideoEventInfos_out_data,
-]
-
-# cmh1u5pef000sgxc3bzl4y9v0 WebHook 데이터 리스트
-cmh1u5pef000sgxc3bzl4y9v0_webhook_inData = [
-    cmh1u5pef000sgxc3bzl4y9v0_RealtimeVideoEventInfos_webhook_in_data,
-]
-
-# cmh1u5pef000sgxc3bzl4y9v0 API endpoint
-cmh1u5pef000sgxc3bzl4y9v0_messages = [
-    "RealtimeVideoEventInfos",
-]
-
 # Authentication
 cmgvieyak001b6cd04cgaawmm_Authentication_out_data = {
     "code": "200",
     "message": "성공",
     "userName": "관리자",
     "userAff": "오산시청",
-    "accessToken": "abcde1234"
+    "accessToken": "a"
 }
 
 # Capabilities
