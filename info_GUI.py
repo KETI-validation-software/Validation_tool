@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QGroupBox, QLineEdit,
-    QPushButton, QMessageBox, QTableWidget, QHeaderView, QAbstractItemView, QTableWidgetItem, QCheckBox,
+    QPushButton, QMessageBox, QTableWidget, QHeaderView, QAbstractItemView, QTableWidgetItem,
     QStackedWidget, QRadioButton
 )
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
@@ -1570,9 +1570,9 @@ class InfoWidget(QWidget):
         layout.addSpacing(6)
 
         # URL 테이블 (744x370px)
-        self.url_table = QTableWidget(0, 2)
+        self.url_table = QTableWidget(0, 1)
         self.url_table.setFixedSize(744, 370)
-        self.url_table.setHorizontalHeaderLabels(["", "URL"])  # 첫 번째 헤더는 빈 문자열
+        self.url_table.setHorizontalHeaderLabels(["URL"])
         self.url_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.url_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.url_table.setSelectionMode(QAbstractItemView.SingleSelection)
@@ -1589,8 +1589,7 @@ class InfoWidget(QWidget):
         vertical_header.setDefaultAlignment(Qt.AlignCenter)
         vertical_header.setStyleSheet("QHeaderView { background-color: #FFFFFF; }")
 
-        # 컬럼 너비 설정 (체크박스: 36px, URL: 나머지, 오른쪽 padding: 14px)
-        self.url_table.setColumnWidth(0, 36)
+        # 컬럼 너비 설정 (URL 컬럼이 자동으로 확장됨)
 
         # 세로 grid line 제거
         self.url_table.setShowGrid(False)
@@ -1884,30 +1883,16 @@ class InfoWidget(QWidget):
         """URL 테이블에 스캔 결과 채우기"""
         try:
             self.url_table.setRowCount(0)
-            
+
             for i, url in enumerate(urls):
                 row = self.url_table.rowCount()
                 self.url_table.insertRow(row)
 
-                checkbox_widget = QWidget()
-                checkbox_widget.setStyleSheet("background-color: #FFFFFF;")
-                checkbox_layout = QHBoxLayout()
-                checkbox_layout.setAlignment(Qt.AlignCenter)
-                checkbox_layout.setContentsMargins(0, 0, 0, 0)
-
-                checkbox = QCheckBox()
-                checkbox.setChecked(False)
-                checkbox.clicked.connect(lambda checked, r=row: self.on_checkbox_clicked(r, checked))
-                checkbox_layout.addWidget(checkbox)
-                checkbox_widget.setLayout(checkbox_layout)
-                
-                self.url_table.setCellWidget(row, 0, checkbox_widget)
-
                 # URL 텍스트
                 url_item = QTableWidgetItem(url)
-                url_item.setTextAlignment(Qt.AlignCenter)  
-                self.url_table.setItem(row, 1, url_item)
-            
+                url_item.setTextAlignment(Qt.AlignCenter)
+                self.url_table.setItem(row, 0, url_item)
+
         except Exception as e:
             self._show_scan_error(f"테이블 업데이트 중 오류:\n{str(e)}")
     
@@ -1954,7 +1939,7 @@ class InfoWidget(QWidget):
 
             # 중복 확인
             for row in range(self.url_table.rowCount()):
-                item = self.url_table.item(row, 1)
+                item = self.url_table.item(row, 0)
                 if item and item.text() == ip_port:
                     QMessageBox.information(self, "알림", "이미 추가된 주소입니다.")
                     return
@@ -1963,25 +1948,10 @@ class InfoWidget(QWidget):
             row = self.url_table.rowCount()
             self.url_table.insertRow(row)
 
-            # 체크박스 추가
-            checkbox_widget = QWidget()
-            checkbox_widget.setStyleSheet("background-color: #FFFFFF;")
-            checkbox_layout = QHBoxLayout()
-            checkbox_layout.setAlignment(Qt.AlignCenter)
-            checkbox_layout.setContentsMargins(0, 0, 0, 0)
-
-            checkbox = QCheckBox()
-            checkbox.setChecked(False)
-            checkbox.clicked.connect(lambda checked, r=row: self.on_checkbox_clicked(r, checked))
-            checkbox_layout.addWidget(checkbox)
-            checkbox_widget.setLayout(checkbox_layout)
-
-            self.url_table.setCellWidget(row, 0, checkbox_widget)
-
             # URL 텍스트 추가
             url_item = QTableWidgetItem(ip_port)
             url_item.setTextAlignment(Qt.AlignCenter)
-            self.url_table.setItem(row, 1, url_item)
+            self.url_table.setItem(row, 0, url_item)
 
             # 입력창 초기화
             self.page2_ip_direct_input.clear()
@@ -1992,57 +1962,8 @@ class InfoWidget(QWidget):
             print(f"IP 추가 오류: {e}")
             QMessageBox.critical(self, "오류", f"주소 추가 중 오류가 발생했습니다:\n{str(e)}")
 
-    def on_checkbox_clicked(self, clicked_row, checked):
-        """체크박스 클릭 시: 단일 선택 처리"""
-        if checked:  # 체크된 경우에만 처리
-            # 모든 행 체크 해제
-            for r in range(self.url_table.rowCount()):
-                if r != clicked_row:  # 클릭된 행 제외
-                    checkbox_widget = self.url_table.cellWidget(r, 0)
-                    if checkbox_widget:
-                        checkbox = checkbox_widget.findChild(QCheckBox)
-                        if checkbox:
-                            checkbox.setChecked(False)
-                        # 체크박스 위젯 배경색 흰색으로
-                        checkbox_widget.setStyleSheet("background-color: #FFFFFF;")
-
-            # 체크된 행 선택 (stylesheet의 :selected로 배경색 자동 적용)
-            self.url_table.selectRow(clicked_row)
-            # 체크박스 위젯 배경색도 변경
-            checkbox_widget = self.url_table.cellWidget(clicked_row, 0)
-            if checkbox_widget:
-                checkbox_widget.setStyleSheet("background-color: #E3F2FF;")
-        else:
-            # 체크 해제 시 선택 해제
-            self.url_table.clearSelection()
-            checkbox_widget = self.url_table.cellWidget(clicked_row, 0)
-            if checkbox_widget:
-                checkbox_widget.setStyleSheet("background-color: #FFFFFF;")
-
-        # URL 선택 변경 시 버튼 상태 체크
-        self.check_start_button_state()
-
     def select_url_row(self, row, col):
-        """행 클릭 시: 체크 단일 선택"""
-        # 모든 행 체크 해제
-        for r in range(self.url_table.rowCount()):
-            checkbox_widget = self.url_table.cellWidget(r, 0)
-            if checkbox_widget:
-                checkbox = checkbox_widget.findChild(QCheckBox)
-                if checkbox:
-                    checkbox.setChecked(False)
-                # 체크박스 위젯 배경색 흰색으로
-                checkbox_widget.setStyleSheet("background-color: #FFFFFF;")
-
-        # 선택된 행 체크
-        selected_checkbox_widget = self.url_table.cellWidget(row, 0)
-        if selected_checkbox_widget:
-            checkbox = selected_checkbox_widget.findChild(QCheckBox)
-            if checkbox:
-                checkbox.setChecked(True)
-            # 체크박스 위젯 배경색 변경
-            selected_checkbox_widget.setStyleSheet("background-color: #E3F2FF;")
-
+        """행 클릭 시: 행 선택"""
         # 행 선택 (stylesheet의 :selected로 배경색 자동 적용)
         self.url_table.selectRow(row)
 
@@ -2051,18 +1972,16 @@ class InfoWidget(QWidget):
 
     def get_selected_url(self):
         """URL 테이블에서 선택된 URL 반환"""
-        for row in range(self.url_table.rowCount()):
-            checkbox_widget = self.url_table.cellWidget(row, 0)
-            if checkbox_widget:
-                checkbox = checkbox_widget.findChild(QCheckBox)
-                if checkbox and checkbox.isChecked():
-                    url_item = self.url_table.item(row, 1)
-                    if url_item:
-                        selected_url = url_item.text().strip()
-                        # http://가 없으면 추가
-                        if not selected_url.startswith(('http://', 'https://')):
-                            selected_url = f"https://{selected_url}"
-                        return selected_url
+        selected_rows = self.url_table.selectedItems()
+        if selected_rows:
+            # 선택된 행의 첫 번째 아이템 (URL)
+            url_item = selected_rows[0]
+            if url_item:
+                selected_url = url_item.text().strip()
+                # http://가 없으면 추가
+                if not selected_url.startswith(('http://', 'https://')):
+                    selected_url = f"https://{selected_url}"
+                return selected_url
         return None
 
     def _check_required_fields(self):
@@ -2192,13 +2111,9 @@ class InfoWidget(QWidget):
             if any(field for field in address_fields):
                 return True
 
-            # URL 테이블에서 선택된 항목이 있는지 확인
-            for row in range(self.url_table.rowCount()):
-                checkbox_widget = self.url_table.cellWidget(row, 0)
-                if checkbox_widget:
-                    checkbox = checkbox_widget.findChild(QCheckBox)
-                    if checkbox and checkbox.isChecked():
-                        return True
+            # URL 테이블에 데이터가 있는지 확인
+            if self.url_table.rowCount() > 0:
+                return True
 
             # 인증 방식이 Bearer Token으로 선택되어 있다면 초기화 필요
             if self.bearer_radio.isChecked():
