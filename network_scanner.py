@@ -129,12 +129,27 @@ class ARPScanWorker(QObject):
             print(f"ARP 스캔 시작: {network}")
 
             # 2. ARP 스캔 실행
-            arp_request = ARP(pdst=network)
-            broadcast = Ether(dst="ff:ff:ff:ff:ff:ff")
-            arp_request_broadcast = broadcast / arp_request
+            try:
+                arp_request = ARP(pdst=network)
+                broadcast = Ether(dst="ff:ff:ff:ff:ff:ff")
+                arp_request_broadcast = broadcast / arp_request
 
-            # timeout 3초, verbose=0 (출력 억제)
-            answered_list = srp(arp_request_broadcast, timeout=3, verbose=0)[0]
+                # timeout 3초, verbose=0 (출력 억제)
+                answered_list = srp(arp_request_broadcast, timeout=3, verbose=0)[0]
+            except Exception as arp_error:
+                # Npcap 미설치 오류 감지
+                error_msg = str(arp_error).lower()
+                if "winpcap" in error_msg or "npcap" in error_msg or "layer2" in error_msg:
+                    self.scan_failed.emit(
+                        "❌ Npcap이 설치되지 않았습니다.\n\n"
+                        "ARP 스캔 기능을 사용하려면 Npcap 설치가 필요합니다.\n\n"
+                        "📥 다운로드: https://npcap.com/\n\n"
+                        "설치 후 프로그램을 재시작해주세요.\n"
+                        "또는 '직접 입력' 기능을 사용해주세요."
+                    )
+                    return
+                else:
+                    raise  # 다른 에러는 상위로 전달
 
             # 3. 응답받은 IP 수집 (내 IP 제외)
             found_ips = []

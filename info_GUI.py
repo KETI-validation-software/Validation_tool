@@ -7,14 +7,11 @@ from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QPixmap, QColor
 import importlib
 import re
-from config import CONSTANTS
 from core.functions import resource_path
 
 # 분리된 모듈들 import
 from network_scanner import NetworkScanWorker, ARPScanWorker
 from form_validator import FormValidator
-from core.functions import resource_path
-import importlib
 import config.CONSTANTS as CONSTANTS
 
 
@@ -2003,7 +2000,22 @@ class InfoWidget(QWidget):
 
     def start_test(self):
         """시험 시작 - CONSTANTS.py 업데이트 후 검증 소프트웨어 실행"""
-        importlib.reload(CONSTANTS)  # CONSTANTS 모듈을 다시 로드하여 최신 설정 반영
+        # ===== 수정: PyInstaller 환경에서 CONSTANTS reload =====
+        import sys
+        import os
+        if getattr(sys, 'frozen', False):
+            # PyInstaller 환경 - sys.modules 삭제 후 재import
+            if 'config.CONSTANTS' in sys.modules:
+                del sys.modules['config.CONSTANTS']
+            import config.CONSTANTS
+            # 모듈 레벨 전역 변수 업데이트는 필요 없음 (여기서는 사용 안 함)
+        else:
+            # 로컬 환경에서는 기존 reload 사용
+            if 'config.CONSTANTS' in sys.modules:
+                importlib.reload(sys.modules['config.CONSTANTS'])  # sys.modules에서 모듈 객체를 가져와 reload
+            else:
+                import config.CONSTANTS  # 모듈이 없으면 새로 import
+        # ===== 수정 끝 =====
         try:
             # 필수 입력 필드 검증
             missing_fields = self._check_required_fields()
