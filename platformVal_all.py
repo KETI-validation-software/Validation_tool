@@ -1991,7 +1991,7 @@ class MyApp(QWidget):
 
         # 오른쪽 컬럼 (1112x858)
         right_col = QWidget()
-        right_col.setFixedSize(1112, 906)
+        right_col.setFixedSize(1064, 906)
         right_layout = QVBoxLayout()
         right_layout.setContentsMargins(0, 0, 0, 0)
         right_layout.setSpacing(0)
@@ -2035,122 +2035,138 @@ class MyApp(QWidget):
         right_layout.addWidget(total_score_group)
         # 버튼 그룹 (평가 시작, 일시 정지, 종료)
         buttonGroup = QWidget()
+        buttonGroup.setFixedWidth(1064)  # ← 이거 추가! (테이블, 점수 박스와 동일한 너비)
         buttonLayout = QHBoxLayout()
-        buttonLayout.setAlignment(Qt.AlignCenter)
+        buttonLayout.setAlignment(Qt.AlignLeft)
+        buttonLayout.setContentsMargins(0, 0, 0, 0)  # ← 이것도 추가 (여백 제거)
+
+        # 평가 시작 버튼
         self.sbtn = QPushButton(self)
-        self.sbtn.setText('평가 시작')
-        self.sbtn.setFixedSize(140, 50)
-        self.sbtn.setStyleSheet("""
-            QPushButton {
-                background-color: #87CEEB;
-                border: 2px solid #4682B4;
-                border-radius: 5px;
-                padding: 5px;
-                font-weight: bold;
-                color: #191970;
-            }
-            QPushButton:hover {
-                background-color: #B0E0E6;
-                border: 2px solid #1E90FF;
-            }
-            QPushButton:pressed {
-                background-color: #4682B4;
-            }
-            QPushButton:disabled {
-                background-color: #F0F0F0;
-                border: 2px solid #CCCCCC;
-                color: #999999;
-            }
+        # self.sbtn.setText()
+        self.sbtn.setFixedSize(255, 50)
+        start_enabled = resource_path("assets/image/test_runner/btn_평가시작_enabled.png").replace("\\", "/")
+        start_hover = resource_path("assets/image/test_runner/btn_평가시작_hover.png").replace("\\", "/")
+        start_disabled = resource_path("assets/image/test_runner/btn_평가시작_disabled.png").replace("\\", "/")
+        self.sbtn.setStyleSheet(f"""
+            QPushButton {{
+                border: none;
+                background-image: url('{start_enabled}');
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: contain;
+                background-color: transparent;
+            }}
+            QPushButton:hover {{
+                background-image: url('{start_hover}');
+            }}
+            QPushButton:pressed {{
+                background-image: url('{start_hover}');
+                opacity: 0.8;
+            }}
+            QPushButton:disabled {{
+        background-image: url('{start_disabled}');
+            }}
         """)
         self.sbtn.clicked.connect(self.sbtn_push)
+
+        # 정지 버튼
         self.stop_btn = QPushButton(self)
-        self.stop_btn.setText('일시 정지')
-        self.stop_btn.setFixedSize(140, 50)
-        self.stop_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #87CEEB;
-                border: 2px solid #4682B4;
-                border-radius: 5px;
-                padding: 5px;
-                font-weight: bold;
-                color: #191970;
-            }
-            QPushButton:hover {
-                background-color: #B0E0E6;
-                border: 2px solid #1E90FF;
-            }
-            QPushButton:pressed {
-                background-color: #4682B4;
-            }
-            QPushButton:disabled {
-                background-color: #F0F0F0;
-                border: 2px solid #CCCCCC;
-                color: #999999;
-            }
+        #self.stop_btn.setText('일시 정지')
+        self.stop_btn.setFixedSize(255, 50)
+        stop_enabled = resource_path("assets/image/test_runner/btn_일시정지_enabled.png").replace("\\", "/")
+        stop_hover = resource_path("assets/image/test_runner/btn_일시정지_hover.png").replace("\\", "/")
+        stop_disabled = resource_path("assets/image/test_runner/btn_일시정지_disabled.png").replace("\\", "/")
+        self.stop_btn.setStyleSheet(f"""
+            QPushButton {{
+                border: none;
+                background-image: url('{stop_enabled}');
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: contain;
+                background-color: transparent;
+            }}
+            QPushButton:hover {{
+                background-image: url('{stop_hover}');
+            }}
+            QPushButton:pressed {{
+                background-image: url('{stop_hover}');
+                opacity: 0.8;
+            }}
+            QPushButton:disabled {{
+                background-image: url('{stop_disabled}');
+            }}
         """)
         self.stop_btn.clicked.connect(self.stop_btn_clicked)
         self.stop_btn.setDisabled(True)
+
+        # 종료 버튼
         self.rbtn = QPushButton(self)
-        self.rbtn.setText('종료')
-        self.rbtn.setFixedSize(140, 50)
-        self.rbtn.setStyleSheet("""
-            QPushButton {
-                background-color: #87CEEB;
-                border: 2px solid #4682B4;
-                border-radius: 5px;
-                padding: 5px;
-                font-weight: bold;
-                color: #191970;
-            }
-            QPushButton:hover {
-                background-color: #B0E0E6;
-                border: 2px solid #1E90FF;
-            }
-            QPushButton:pressed {
-                background-color: #4682B4;
-            }
-            QPushButton:disabled {
-                background-color: #F0F0F0;
-                border: 2px solid #CCCCCC;
-                color: #999999;
-            }
+        #self.rbtn.setText('종료')
+        self.rbtn.setFixedSize(255, 50)
+        exit_enabled = resource_path("assets/image/test_runner/btn_종료_enabled.png").replace("\\", "/")
+        exit_hover = resource_path("assets/image/test_runner/btn_종료_hover.png").replace("\\", "/")
+        exit_disabled = resource_path("assets/image/test_runner/btn_종료_disabled.png").replace("\\", "/")
+        self.rbtn.setStyleSheet(f"""
+            QPushButton {{
+                border: none;
+                background-image: url('{exit_enabled}');
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: contain;
+                background-color: transparent;
+            }}
+            QPushButton:hover {{
+        background-image: url('{exit_hover}');
+            }}
+            QPushButton:pressed {{
+                background-image: url('{exit_hover}');
+                opacity: 0.8;
+            }}
+            QPushButton:disabled {{
+                background-image: url('{exit_disabled}');
+            }}
         """)
         self.rbtn.clicked.connect(self.exit_btn_clicked)
+
+        # 시험 결과 버튼
         self.result_btn = QPushButton(self)
-        self.result_btn.setText('시험 결과')
-        self.result_btn.setFixedSize(140, 50)
-        self.result_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #87CEEB;
-                border: 2px solid #4682B4;
-                border-radius: 5px;
-                padding: 5px;
-                font-weight: bold;
-                color: #191970;
-            }
-            QPushButton:hover {
-                background-color: #B0E0E6;
-                border: 2px solid #1E90FF;
-            }
-            QPushButton:pressed {
-                background-color: #4682B4;
-            }
-            QPushButton:disabled {
-                background-color: #F0F0F0;
-                border: 2px solid #CCCCCC;
-                color: #999999;
-            }
+        # self.result_btn.setText('시험 결과')
+        self.result_btn.setFixedSize(255, 50)
+        result_enabled = resource_path("assets/image/test_runner/btn_시험결과_enabled.png").replace("\\", "/")
+        result_hover = resource_path("assets/image/test_runner/btn_시험결과_hover.png").replace("\\", "/")
+        result_disabled = resource_path("assets/image/test_runner/btn_시험결과_disabled.png").replace("\\", "/")
+        self.result_btn.setStyleSheet(f"""
+            QPushButton {{
+                border: none;
+                background-image: url('{result_enabled}');
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: contain;
+                background-color: transparent;
+            }}
+            QPushButton:hover {{
+            background-image: url('{result_hover}');
+            }}
+            QPushButton:pressed {{
+                background-image: url('{result_hover}');
+                opacity: 0.8;
+            }}
+            QPushButton:disabled {{
+                background-image: url('{result_disabled}');
+            }}
         """)
         self.result_btn.clicked.connect(self.show_result_page)
+
         buttonLayout.addWidget(self.sbtn)
-        buttonLayout.addSpacing(20)
+        buttonLayout.addSpacing(18)
         buttonLayout.addWidget(self.stop_btn)
-        buttonLayout.addSpacing(20)
+        buttonLayout.addSpacing(18)
         buttonLayout.addWidget(self.rbtn)
-        buttonLayout.addSpacing(20)
+        buttonLayout.addSpacing(18)
         buttonLayout.addWidget(self.result_btn)
+        buttonLayout.addStretch()
         buttonGroup.setLayout(buttonLayout)
-        right_layout.addSpacing(20)
+        right_layout.addSpacing(32)
         right_layout.addWidget(buttonGroup)
         right_layout.addStretch()
         left_col.setLayout(left_layout)
@@ -2395,7 +2411,7 @@ class MyApp(QWidget):
         """)
 
         # 분야명 레이블
-        self.spec_name_label = QLabel(f"분야별 점수    |    {self.spec_description} ({len(self.videoMessages)}개 API)")
+        self.spec_name_label = QLabel(f"분야별 점수      |      {self.spec_description} ({len(self.videoMessages)}개 API)")
         self.spec_name_label.setStyleSheet("""
             color: #000;
             font-family: "Noto Sans KR";
