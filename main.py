@@ -1,8 +1,37 @@
 import sys
+import os
 import urllib3
+import logging
+import traceback
+from datetime import datetime
 from PyQt5.QtWidgets import QApplication, QMainWindow, QStackedWidget, QAction, QMessageBox
 from PyQt5.QtGui import QFontDatabase, QFont
 from PyQt5.QtCore import Qt
+
+# ===== PyInstaller 환경에서 외부 config 우선 사용 =====
+if getattr(sys, 'frozen', False):
+    # PyInstaller로 실행 중
+    exe_dir = os.path.dirname(sys.executable)
+    external_config_dir = os.path.join(exe_dir, "config")
+
+    # 외부 config 폴더가 없으면 생성
+    os.makedirs(external_config_dir, exist_ok=True)
+
+    # sys.path 맨 앞에 추가하여 외부 경로 우선 사용
+    if exe_dir not in sys.path:
+        sys.path.insert(0, exe_dir)
+
+    # 최초 실행 시 내부 CONSTANTS.py를 외부로 복사
+    external_constants = os.path.join(external_config_dir, "CONSTANTS.py")
+    if not os.path.exists(external_constants):
+        # resource_path는 아직 import 안 됨, 직접 처리
+        if hasattr(sys, '_MEIPASS'):
+            import shutil
+            internal_constants = os.path.join(sys._MEIPASS, "config", "CONSTANTS.py")
+            if os.path.exists(internal_constants):
+                shutil.copy2(internal_constants, external_constants)
+                print(f"[INIT] 외부 CONSTANTS.py 생성: {external_constants}")
+# ===== 외부 config 우선 사용 끝 =====
 
 from info_GUI import InfoWidget
 from core.functions import resource_path
@@ -10,6 +39,37 @@ import platformVal_all as platform_app
 import systemVal_all as system_app
 import config.CONSTANTS as CONSTANTS
 import importlib
+
+# ===== 로그 파일 설정 (주석 처리) =====
+# 로그 파일 생성을 원하면 아래 주석을 해제하세요
+# log_filename = f"validation_tool_error_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+# logging.basicConfig(
+#     level=logging.DEBUG,
+#     format='%(asctime)s - %(levelname)s - %(message)s',
+#     handlers=[
+#         logging.FileHandler(log_filename, encoding='utf-8'),
+#         logging.StreamHandler(sys.stdout)
+#     ]
+# )
+# logger = logging.getLogger(__name__)
+
+# 콘솔 출력만 활성화 (파일 생성 안 함)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+logger = logging.getLogger(__name__)
+
+# ===== 처리되지 않은 예외를 로그에 기록 (주석 처리) =====
+# def exception_hook(exctype, value, tb):
+#     logger.error("처리되지 않은 예외 발생!")
+#     logger.error(''.join(traceback.format_exception(exctype, value, tb)))
+#     sys.__excepthook__(exctype, value, tb)
+#
+# sys.excepthook = exception_hook
 
 
 class MainWindow(QMainWindow):
@@ -228,38 +288,98 @@ class MainWindow(QMainWindow):
 
     def _open_validation_app(self, target_system_edit, verification_type, spec_id):
         """target_system_edit에 따라 다른 검증 앱 실행"""
-        importlib.reload(CONSTANTS)  # CONSTANTS 모듈을 다시 로드하여 최신 설정 반영
+        try:
+            # ===== 로깅 추가 시작 =====
+            logger.info(f"=== _open_validation_app 시작 ===")
+            logger.info(f"target_system={target_system_edit}, verificationType={verification_type}, spec_id={spec_id}")
+            # ===== 로깅 추가 끝 =====
 
-        print(f"검증 화면 실행: target_system={target_system_edit}, verificationType={verification_type}, spec_id={spec_id}")
+            # ===== 수정: PyInstaller 환경에서 CONSTANTS reload =====
+            import sys
+            import os
+            if getattr(sys, 'frozen', False):
+                # PyInstaller 환경 - sys.modules 삭제 후 재import
+                if 'config.CONSTANTS' in sys.modules:
+                    del sys.modules['config.CONSTANTS']
+                import config.CONSTANTS
+                # 모듈 레벨 전역 변수 업데이트는 필요 없음 (여기서는 사용 안 함)
+            else:
+                # 로컬 환경에서는 기존 reload 사용
+                if 'config.CONSTANTS' in sys.modules:
+                    importlib.reload(sys.modules['config.CONSTANTS'])  # sys.modules에서 모듈 객체를 가져와 reload
+                else:
+                    import config.CONSTANTS  # 모듈이 없으면 새로 import
+            # ===== 수정 끝 =====
 
-        # target_system_edit에 따라 어떤 검증 앱을 실행할지 결정
-        if "물리보안시스템" in target_system_edit:
-            # 물리보안: 메인 창=System, 새 창=Platform
-            print("→ 물리보안: 메인 창=System")
+            print(f"검증 화면 실행: target_system={target_system_edit}, verificationType={verification_type}, spec_id={spec_id}")
 
-            # Main 화면: System 검증으로 전환
-            if getattr(self, "_system_widget", None) is None:
+            # target_system_edit에 따라 어떤 검증 앱을 실행할지 결정
+            if "물리보안시스템" in target_system_edit:
+                # 물리보안: 메인 창=System, 새 창=Platform
+                logger.info("→ 물리보안: 메인 창=System")  # 로깅 추가
+                print("→ 물리보안: 메인 창=System")
+
+                # ===== 수정: 기존 위젯 제거 후 새로 생성 =====
+                # Main 화면: System 검증으로 전환
+                if getattr(self, "_system_widget", None) is not None:
+                    # 기존 위젯이 있으면 제거
+                    logger.info("기존 System 위젯 제거...")
+                    self.stack.removeWidget(self._system_widget)
+                    self._system_widget.deleteLater()
+                    self._system_widget = None
+
+                logger.info("System 위젯 생성 시작...")  # 로깅 추가
                 self._system_widget = system_app.MyApp(embedded=True, spec_id=spec_id)
+                logger.info("System 위젯 생성 완료")  # 로깅 추가
                 self._system_widget.showResultRequested.connect(self._on_show_result_requested)
                 self.stack.addWidget(self._system_widget)
-            self.stack.setCurrentWidget(self._system_widget)
+                # ===== 수정 끝 =====
+                self.stack.setCurrentWidget(self._system_widget)
+                logger.info("System 위젯으로 전환 완료")  # 로깅 추가
 
-        # 1.2로 했을때 통합플랫폼으로 들어가야함
-        elif "통합플랫폼시스템" in target_system_edit:
-            # 통합플랫폼: 메인 창=Platform, 새 창=System
-            print("→ 통합플랫폼: 메인 창=Platform")
+            # 1.2로 했을때 통합플랫폼으로 들어가야함
+            elif "통합플랫폼시스템" in target_system_edit:
+                # 통합플랫폼: 메인 창=Platform, 새 창=System
+                logger.info("→ 통합플랫폼: 메인 창=Platform")  # 로깅 추가
+                print("→ 통합플랫폼: 메인 창=Platform")
 
-            # Main 화면: Platform 검증으로 전환
-            if getattr(self, "_platform_widget", None) is None:
+                # ===== 수정: 기존 위젯 제거 후 새로 생성 =====
+                # Main 화면: Platform 검증으로 전환
+                if getattr(self, "_platform_widget", None) is not None:
+                    # 기존 위젯이 있으면 제거
+                    logger.info("기존 Platform 위젯 제거...")
+                    self.stack.removeWidget(self._platform_widget)
+                    self._platform_widget.deleteLater()
+                    self._platform_widget = None
+
+                logger.info("Platform 위젯 생성 시작...")  # 로깅 추가
                 self._platform_widget = platform_app.MyApp(embedded=True, spec_id=spec_id)
+                logger.info("Platform 위젯 생성 완료")  # 로깅 추가
                 self._platform_widget.showResultRequested.connect(self._on_show_result_requested)
+                logger.info("Signal 연결 완료")  # 로깅 추가
                 self.stack.addWidget(self._platform_widget)
-            self.stack.setCurrentWidget(self._platform_widget)
+                logger.info("Stack에 위젯 추가 완료")  # 로깅 추가
+                # ===== 수정 끝 =====
+                logger.info("Platform 위젯으로 전환 시작...")  # 로깅 추가
+                self.stack.setCurrentWidget(self._platform_widget)
+                logger.info("Platform 위젯으로 전환 완료 ✅")  # 로깅 추가
 
-        else:
-            print(f"알 수 없는 target_system: {target_system_edit}")
-            print(f"   ('물리보안' 또는 '통합플랫폼'이 포함되어야 합니다)")
-            QMessageBox.warning(self, "경고", f"알 수 없는 시험 분야: {target_system_edit}\n'물리보안' 또는 '통합플랫폼'이 포함되어야 합니다.")
+            else:
+                logger.warning(f"알 수 없는 target_system: {target_system_edit}")  # 로깅 추가
+                print(f"알 수 없는 target_system: {target_system_edit}")
+                print(f"   ('물리보안' 또는 '통합플랫폼'이 포함되어야 합니다)")
+                QMessageBox.warning(self, "경고", f"알 수 없는 시험 분야: {target_system_edit}\n'물리보안' 또는 '통합플랫폼'이 포함되어야 합니다.")
+
+            # ===== 로깅 추가 시작 =====
+            logger.info("=== _open_validation_app 완료 ===")
+            # ===== 로깅 추가 끝 =====
+
+        except Exception as e:
+            # ===== 예외 처리 로깅 추가 시작 =====
+            logger.error(f"❌ _open_validation_app에서 예외 발생: {e}")
+            logger.error(traceback.format_exc())
+            raise
+            # ===== 예외 처리 로깅 추가 끝 =====
 
     def closeEvent(self, event):
         reply = QMessageBox.question(self, '종료', '프로그램을 종료하시겠습니까?',
