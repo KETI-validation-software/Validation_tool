@@ -383,6 +383,7 @@ class ResultPageWidget(QWidget):
             background: #FFF;
             border-radius: 8px;
             border: 1px solid #CECECE;
+            font-family: "Noto Sans KR";
             font-size: 15px;
             color: #222;
         """)
@@ -1698,6 +1699,50 @@ class MyApp(QWidget):
         self.test_field_table.verticalHeader().setVisible(False)
         self.test_field_table.setFixedHeight(759)
 
+        # ✅ 스타일시트 추가
+        self.test_field_table.setStyleSheet("""
+            QTableWidget {
+                background-color: #FFFFFF;
+                border: 1px solid #CECECE;
+                border-radius: 4px;
+                font-family: "Noto Sans KR";
+                font-size: 14px;
+                color: #1B1B1C;
+            }
+            QTableWidget::item {
+                border-bottom: 1px solid #E0E0E0;
+                border-right: 0px solid transparent;
+                color: #1B1B1C;
+                font-family: 'Noto Sans KR';
+                font-size: 14px;
+                font-style: normal;
+                font-weight: 400;
+                letter-spacing: 0.098px;
+                text-align: center; 
+            }
+            QTableWidget::item:selected {
+                background-color: #E3F2FF;  /* 선택된 행 배경색 */
+            }
+            QTableWidget::item:hover {
+                background-color: #E3F2FF;  /* 마우스 오버 시 */
+            }
+            QHeaderView::section {
+                background-color: #EDF0F3;
+                border-right: 0px solid transparent;
+                border-left: 0px solid transparent;
+                border-top: 0px solid transparent;
+                border-bottom: 1px solid #CECECE;
+                color: #1B1B1C;
+                text-align: center;
+                font-family: 'Noto Sans KR';
+                font-size: 13px;
+                font-style: normal;
+                font-weight: 600;
+                line-height: normal;
+                letter-spacing: -0.156px;
+            }
+        """)
+
         # 🔥 SPEC_CONFIG에서 spec_id와 config 추출 (리스트 구조 대응)
         spec_items = []
         for group_data in CONSTANTS.SPEC_CONFIG:
@@ -1717,7 +1762,7 @@ class MyApp(QWidget):
                 # ✅ 플랫폼은 요청 검증 역할 명시
                 description_with_role = f"{description} (요청 검증)"
                 item = QTableWidgetItem(description_with_role)
-                item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+                item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
                 self.test_field_table.setItem(idx, 0, item)
 
                 # 매핑 저장
@@ -1812,7 +1857,7 @@ class MyApp(QWidget):
         for row in range(api_count):
             # API 명
             api_item = QTableWidgetItem(api_list[row])
-            api_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 0, api_item)
 
             # 나머지 컬럼 초기화
@@ -1946,14 +1991,14 @@ class MyApp(QWidget):
 
         # 오른쪽 컬럼 (1112x858)
         right_col = QWidget()
-        right_col.setFixedSize(1112, 906)
+        right_col.setFixedSize(1064, 906)
         right_layout = QVBoxLayout()
         right_layout.setContentsMargins(0, 0, 0, 0)
         right_layout.setSpacing(0)
         # 시험 결과 테이블 및 기타 정보
         # 시험 API 라벨 추가
         api_label = QLabel('시험 API')
-        api_label.setStyleSheet('font-size: 16px; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-bottom: 6px;')
+        api_label.setStyleSheet('font-size: 16px; font-style: normal; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-bottom: 6px;')
         right_layout.addWidget(api_label)
         self.init_centerLayout()
         contentWidget = QWidget()
@@ -1961,7 +2006,7 @@ class MyApp(QWidget):
         right_layout.addWidget(contentWidget)
         # 수신 메시지 실시간 모니터링
         monitor_label = QLabel("수신 메시지 실시간 모니터링")
-        monitor_label.setStyleSheet('font-size: 16px; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-top: 20px; margin-bottom: 6px;')
+        monitor_label.setStyleSheet('font-size: 16px; font-style: normal; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-top: 20px; margin-bottom: 6px;')
         right_layout.addWidget(monitor_label)
         self.valResult = QTextBrowser(self)
         self.valResult.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -1979,7 +2024,7 @@ class MyApp(QWidget):
 
         # 시험 결과
         self.valmsg = QLabel('시험 점수 요약', self)
-        self.valmsg.setStyleSheet('font-size: 16px; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-top: 20px; margin-bottom: 6px;')
+        self.valmsg.setStyleSheet('font-size: 16px; font-style: normal; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-top: 20px; margin-bottom: 6px;')
         right_layout.addWidget(self.valmsg)  # ← 오른쪽에 추가!
 
         # 평가 점수 표시
@@ -1990,122 +2035,138 @@ class MyApp(QWidget):
         right_layout.addWidget(total_score_group)
         # 버튼 그룹 (평가 시작, 일시 정지, 종료)
         buttonGroup = QWidget()
+        buttonGroup.setFixedWidth(1064)  # ← 이거 추가! (테이블, 점수 박스와 동일한 너비)
         buttonLayout = QHBoxLayout()
-        buttonLayout.setAlignment(Qt.AlignCenter)
+        buttonLayout.setAlignment(Qt.AlignLeft)
+        buttonLayout.setContentsMargins(0, 0, 0, 0)  # ← 이것도 추가 (여백 제거)
+
+        # 평가 시작 버튼
         self.sbtn = QPushButton(self)
-        self.sbtn.setText('평가 시작')
-        self.sbtn.setFixedSize(140, 50)
-        self.sbtn.setStyleSheet("""
-            QPushButton {
-                background-color: #87CEEB;
-                border: 2px solid #4682B4;
-                border-radius: 5px;
-                padding: 5px;
-                font-weight: bold;
-                color: #191970;
-            }
-            QPushButton:hover {
-                background-color: #B0E0E6;
-                border: 2px solid #1E90FF;
-            }
-            QPushButton:pressed {
-                background-color: #4682B4;
-            }
-            QPushButton:disabled {
-                background-color: #F0F0F0;
-                border: 2px solid #CCCCCC;
-                color: #999999;
-            }
+        # self.sbtn.setText()
+        self.sbtn.setFixedSize(255, 50)
+        start_enabled = resource_path("assets/image/test_runner/btn_평가시작_enabled.png").replace("\\", "/")
+        start_hover = resource_path("assets/image/test_runner/btn_평가시작_hover.png").replace("\\", "/")
+        start_disabled = resource_path("assets/image/test_runner/btn_평가시작_disabled.png").replace("\\", "/")
+        self.sbtn.setStyleSheet(f"""
+            QPushButton {{
+                border: none;
+                background-image: url('{start_enabled}');
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: contain;
+                background-color: transparent;
+            }}
+            QPushButton:hover {{
+                background-image: url('{start_hover}');
+            }}
+            QPushButton:pressed {{
+                background-image: url('{start_hover}');
+                opacity: 0.8;
+            }}
+            QPushButton:disabled {{
+        background-image: url('{start_disabled}');
+            }}
         """)
         self.sbtn.clicked.connect(self.sbtn_push)
+
+        # 정지 버튼
         self.stop_btn = QPushButton(self)
-        self.stop_btn.setText('일시 정지')
-        self.stop_btn.setFixedSize(140, 50)
-        self.stop_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #87CEEB;
-                border: 2px solid #4682B4;
-                border-radius: 5px;
-                padding: 5px;
-                font-weight: bold;
-                color: #191970;
-            }
-            QPushButton:hover {
-                background-color: #B0E0E6;
-                border: 2px solid #1E90FF;
-            }
-            QPushButton:pressed {
-                background-color: #4682B4;
-            }
-            QPushButton:disabled {
-                background-color: #F0F0F0;
-                border: 2px solid #CCCCCC;
-                color: #999999;
-            }
+        #self.stop_btn.setText('일시 정지')
+        self.stop_btn.setFixedSize(255, 50)
+        stop_enabled = resource_path("assets/image/test_runner/btn_일시정지_enabled.png").replace("\\", "/")
+        stop_hover = resource_path("assets/image/test_runner/btn_일시정지_hover.png").replace("\\", "/")
+        stop_disabled = resource_path("assets/image/test_runner/btn_일시정지_disabled.png").replace("\\", "/")
+        self.stop_btn.setStyleSheet(f"""
+            QPushButton {{
+                border: none;
+                background-image: url('{stop_enabled}');
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: contain;
+                background-color: transparent;
+            }}
+            QPushButton:hover {{
+                background-image: url('{stop_hover}');
+            }}
+            QPushButton:pressed {{
+                background-image: url('{stop_hover}');
+                opacity: 0.8;
+            }}
+            QPushButton:disabled {{
+                background-image: url('{stop_disabled}');
+            }}
         """)
         self.stop_btn.clicked.connect(self.stop_btn_clicked)
         self.stop_btn.setDisabled(True)
+
+        # 종료 버튼
         self.rbtn = QPushButton(self)
-        self.rbtn.setText('종료')
-        self.rbtn.setFixedSize(140, 50)
-        self.rbtn.setStyleSheet("""
-            QPushButton {
-                background-color: #87CEEB;
-                border: 2px solid #4682B4;
-                border-radius: 5px;
-                padding: 5px;
-                font-weight: bold;
-                color: #191970;
-            }
-            QPushButton:hover {
-                background-color: #B0E0E6;
-                border: 2px solid #1E90FF;
-            }
-            QPushButton:pressed {
-                background-color: #4682B4;
-            }
-            QPushButton:disabled {
-                background-color: #F0F0F0;
-                border: 2px solid #CCCCCC;
-                color: #999999;
-            }
+        #self.rbtn.setText('종료')
+        self.rbtn.setFixedSize(255, 50)
+        exit_enabled = resource_path("assets/image/test_runner/btn_종료_enabled.png").replace("\\", "/")
+        exit_hover = resource_path("assets/image/test_runner/btn_종료_hover.png").replace("\\", "/")
+        exit_disabled = resource_path("assets/image/test_runner/btn_종료_disabled.png").replace("\\", "/")
+        self.rbtn.setStyleSheet(f"""
+            QPushButton {{
+                border: none;
+                background-image: url('{exit_enabled}');
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: contain;
+                background-color: transparent;
+            }}
+            QPushButton:hover {{
+        background-image: url('{exit_hover}');
+            }}
+            QPushButton:pressed {{
+                background-image: url('{exit_hover}');
+                opacity: 0.8;
+            }}
+            QPushButton:disabled {{
+                background-image: url('{exit_disabled}');
+            }}
         """)
         self.rbtn.clicked.connect(self.exit_btn_clicked)
+
+        # 시험 결과 버튼
         self.result_btn = QPushButton(self)
-        self.result_btn.setText('시험 결과')
-        self.result_btn.setFixedSize(140, 50)
-        self.result_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #87CEEB;
-                border: 2px solid #4682B4;
-                border-radius: 5px;
-                padding: 5px;
-                font-weight: bold;
-                color: #191970;
-            }
-            QPushButton:hover {
-                background-color: #B0E0E6;
-                border: 2px solid #1E90FF;
-            }
-            QPushButton:pressed {
-                background-color: #4682B4;
-            }
-            QPushButton:disabled {
-                background-color: #F0F0F0;
-                border: 2px solid #CCCCCC;
-                color: #999999;
-            }
+        # self.result_btn.setText('시험 결과')
+        self.result_btn.setFixedSize(255, 50)
+        result_enabled = resource_path("assets/image/test_runner/btn_시험결과_enabled.png").replace("\\", "/")
+        result_hover = resource_path("assets/image/test_runner/btn_시험결과_hover.png").replace("\\", "/")
+        result_disabled = resource_path("assets/image/test_runner/btn_시험결과_disabled.png").replace("\\", "/")
+        self.result_btn.setStyleSheet(f"""
+            QPushButton {{
+                border: none;
+                background-image: url('{result_enabled}');
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: contain;
+                background-color: transparent;
+            }}
+            QPushButton:hover {{
+            background-image: url('{result_hover}');
+            }}
+            QPushButton:pressed {{
+                background-image: url('{result_hover}');
+                opacity: 0.8;
+            }}
+            QPushButton:disabled {{
+                background-image: url('{result_disabled}');
+            }}
         """)
         self.result_btn.clicked.connect(self.show_result_page)
+
         buttonLayout.addWidget(self.sbtn)
-        buttonLayout.addSpacing(20)
+        buttonLayout.addSpacing(18)
         buttonLayout.addWidget(self.stop_btn)
-        buttonLayout.addSpacing(20)
+        buttonLayout.addSpacing(18)
         buttonLayout.addWidget(self.rbtn)
-        buttonLayout.addSpacing(20)
+        buttonLayout.addSpacing(18)
         buttonLayout.addWidget(self.result_btn)
+        buttonLayout.addStretch()
         buttonGroup.setLayout(buttonLayout)
-        right_layout.addSpacing(20)
+        right_layout.addSpacing(32)
         right_layout.addWidget(buttonGroup)
         right_layout.addStretch()
         left_col.setLayout(left_layout)
@@ -2174,6 +2235,7 @@ class MyApp(QWidget):
                 font-style: normal;
                 font-weight: 400;
                 letter-spacing: 0.098px;
+                text-align: center; 
             }}
             QHeaderView::section {{
                 background-color: #EDF0F3;
@@ -2212,7 +2274,9 @@ class MyApp(QWidget):
         self.step_names = self.videoMessages
         for i, name in enumerate(self.step_names):
             # API 명
-            self.tableWidget.setItem(i, 0, QTableWidgetItem(f"{i + 1}. {name}"))
+            api_item = QTableWidgetItem(f"{i + 1}. {name}")
+            api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)  # 중앙 정렬
+            self.tableWidget.setItem(i, 0, api_item)
             # 결과 아이콘 (위젯으로 중앙 정렬)
             icon_widget = QWidget()
             icon_layout = QHBoxLayout()
@@ -2347,7 +2411,7 @@ class MyApp(QWidget):
         """)
 
         # 분야명 레이블
-        self.spec_name_label = QLabel(f"분야별 점수    |    {self.spec_description} ({len(self.videoMessages)}개 API)")
+        self.spec_name_label = QLabel(f"분야별 점수      |      {self.spec_description} ({len(self.videoMessages)}개 API)")
         self.spec_name_label.setStyleSheet("""
             color: #000;
             font-family: "Noto Sans KR";
