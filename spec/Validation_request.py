@@ -1,3 +1,11 @@
+# RealtimeVideoEventInfos
+cmh1u5pef000sgxc3bzl4y9v0_RealtimeVideoEventInfos_in_validation = {}
+
+# cmh1u5pef000sgxc3bzl4y9v0 검증 리스트
+cmh1u5pef000sgxc3bzl4y9v0_inValidation = [
+    cmh1u5pef000sgxc3bzl4y9v0_RealtimeVideoEventInfos_in_validation,
+]
+
 # Authentication
 cmgvieyak001b6cd04cgaawmm_Authentication_in_validation = {}
 
