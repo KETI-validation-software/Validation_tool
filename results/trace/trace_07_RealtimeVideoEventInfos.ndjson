@@ -1,2 +1,0 @@
-{"time": "2025-10-30T08:41:31.782647Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{}, {}, {}], "duration": "100", "transProtocol": {"transProtocolType": "WebHook", "transProtocolDesc": "127.0.0.1:8090"}, "eventFilter": "화재", "classFilter": "사람", "startTime": 1761110160000}}
-{"time": "2025-10-30T08:41:32.789078Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "", "message": ""}}
