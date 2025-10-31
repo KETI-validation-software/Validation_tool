@@ -1,0 +1,1 @@
+{"time": "2025-10-31T07:50:26.472105Z", "api": "StreamURLs", "dir": "REQUEST", "data": {"camList": [{"camID": "", "streamProtocolType": "RTSP"}, {"camID": "", "streamProtocolType": "RTSP"}, {"camID": "", "streamProtocolType": "RTSP"}]}}
