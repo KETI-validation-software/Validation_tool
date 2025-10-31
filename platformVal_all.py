@@ -726,7 +726,7 @@ class MyApp(QWidget):
     def __init__(self, embedded=False, mode=None, spec_id=None):
         importlib.reload(CONSTANTS)  # CONSTANTS 모듈을 다시 로드하여 최신 설정 반영
         super().__init__()
-        self.setFixedSize(1680, 1032)
+        # self.resize(1680, 1006)  # 크기는 initUI에서 설정
         self.embedded = embedded
         self.mode = mode  # 모드 저장
         self.radio_check_flag = "video"  # 영상보안 시스템으로 고정
@@ -1807,14 +1807,14 @@ class MyApp(QWidget):
     # 여기가 플랫폼 메인화면 initUI
     def initUI(self):
         # 페이지 크기 설정
-        self.setFixedSize(1680, 1032)
+        # 창 크기 설정 제거 - 배경이 자연스럽게 중앙 정렬되도록
         self.setObjectName("platform_main")
         self.setAttribute(Qt.WA_StyledBackground, True)
         
         # 배경 이미지 설정
         bg_path = resource_path("assets/image/common/bg.png").replace("\\", "/")
         self.setStyleSheet(f"""
-            #platform_main {{
+            QWidget#platform_main {{
                 background-image: url('{bg_path}');
                 background-repeat: no-repeat;
                 background-position: center;
