@@ -1834,7 +1834,7 @@ class MyApp(QWidget):
         header_container = QWidget()
         header_container.setFixedSize(1680, 56)
         header_container_layout = QHBoxLayout()
-        header_container_layout.setContentsMargins(0, 0, 0, 0)
+        header_container_layout.setContentsMargins(0, 8, 0, 0) # 왼, 위, 오, 아
         header_container_layout.setSpacing(0)
         
         header_widget = QWidget()
