@@ -383,6 +383,7 @@ class ResultPageWidget(QWidget):
             background: #FFF;
             border-radius: 8px;
             border: 1px solid #CECECE;
+            font-family: "Noto Sans KR";
             font-size: 15px;
             color: #222;
         """)
@@ -1698,6 +1699,50 @@ class MyApp(QWidget):
         self.test_field_table.verticalHeader().setVisible(False)
         self.test_field_table.setFixedHeight(759)
 
+        # ✅ 스타일시트 추가
+        self.test_field_table.setStyleSheet("""
+            QTableWidget {
+                background-color: #FFFFFF;
+                border: 1px solid #CECECE;
+                border-radius: 4px;
+                font-family: "Noto Sans KR";
+                font-size: 14px;
+                color: #1B1B1C;
+            }
+            QTableWidget::item {
+                border-bottom: 1px solid #E0E0E0;
+                border-right: 0px solid transparent;
+                color: #1B1B1C;
+                font-family: 'Noto Sans KR';
+                font-size: 14px;
+                font-style: normal;
+                font-weight: 400;
+                letter-spacing: 0.098px;
+                text-align: center; 
+            }
+            QTableWidget::item:selected {
+                background-color: #E3F2FF;  /* 선택된 행 배경색 */
+            }
+            QTableWidget::item:hover {
+                background-color: #E3F2FF;  /* 마우스 오버 시 */
+            }
+            QHeaderView::section {
+                background-color: #EDF0F3;
+                border-right: 0px solid transparent;
+                border-left: 0px solid transparent;
+                border-top: 0px solid transparent;
+                border-bottom: 1px solid #CECECE;
+                color: #1B1B1C;
+                text-align: center;
+                font-family: 'Noto Sans KR';
+                font-size: 13px;
+                font-style: normal;
+                font-weight: 600;
+                line-height: normal;
+                letter-spacing: -0.156px;
+            }
+        """)
+
         # 🔥 SPEC_CONFIG에서 spec_id와 config 추출 (리스트 구조 대응)
         spec_items = []
         for group_data in CONSTANTS.SPEC_CONFIG:
@@ -1717,7 +1762,7 @@ class MyApp(QWidget):
                 # ✅ 플랫폼은 요청 검증 역할 명시
                 description_with_role = f"{description} (요청 검증)"
                 item = QTableWidgetItem(description_with_role)
-                item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+                item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
                 self.test_field_table.setItem(idx, 0, item)
 
                 # 매핑 저장
@@ -1812,7 +1857,7 @@ class MyApp(QWidget):
         for row in range(api_count):
             # API 명
             api_item = QTableWidgetItem(api_list[row])
-            api_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 0, api_item)
 
             # 나머지 컬럼 초기화
@@ -1953,7 +1998,7 @@ class MyApp(QWidget):
         # 시험 결과 테이블 및 기타 정보
         # 시험 API 라벨 추가
         api_label = QLabel('시험 API')
-        api_label.setStyleSheet('font-size: 16px; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-bottom: 6px;')
+        api_label.setStyleSheet('font-size: 16px; font-style: normal; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-bottom: 6px;')
         right_layout.addWidget(api_label)
         self.init_centerLayout()
         contentWidget = QWidget()
@@ -1961,7 +2006,7 @@ class MyApp(QWidget):
         right_layout.addWidget(contentWidget)
         # 수신 메시지 실시간 모니터링
         monitor_label = QLabel("수신 메시지 실시간 모니터링")
-        monitor_label.setStyleSheet('font-size: 16px; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-top: 20px; margin-bottom: 6px;')
+        monitor_label.setStyleSheet('font-size: 16px; font-style: normal; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-top: 20px; margin-bottom: 6px;')
         right_layout.addWidget(monitor_label)
         self.valResult = QTextBrowser(self)
         self.valResult.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -1979,7 +2024,7 @@ class MyApp(QWidget):
 
         # 시험 결과
         self.valmsg = QLabel('시험 점수 요약', self)
-        self.valmsg.setStyleSheet('font-size: 16px; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-top: 20px; margin-bottom: 6px;')
+        self.valmsg.setStyleSheet('font-size: 16px; font-style: normal; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-top: 20px; margin-bottom: 6px;')
         right_layout.addWidget(self.valmsg)  # ← 오른쪽에 추가!
 
         # 평가 점수 표시
@@ -2174,6 +2219,7 @@ class MyApp(QWidget):
                 font-style: normal;
                 font-weight: 400;
                 letter-spacing: 0.098px;
+                text-align: center; 
             }}
             QHeaderView::section {{
                 background-color: #EDF0F3;
@@ -2212,7 +2258,9 @@ class MyApp(QWidget):
         self.step_names = self.videoMessages
         for i, name in enumerate(self.step_names):
             # API 명
-            self.tableWidget.setItem(i, 0, QTableWidgetItem(f"{i + 1}. {name}"))
+            api_item = QTableWidgetItem(f"{i + 1}. {name}")
+            api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)  # 중앙 정렬
+            self.tableWidget.setItem(i, 0, api_item)
             # 결과 아이콘 (위젯으로 중앙 정렬)
             icon_widget = QWidget()
             icon_layout = QHBoxLayout()
