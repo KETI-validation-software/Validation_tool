@@ -2410,6 +2410,13 @@ class MyApp(QWidget):
             }
         """)
 
+        # 분야별 점수 아이콘 추가
+        icon_label = QLabel()
+        icon_pixmap = QPixmap(resource_path("assets/image/test_runner/icn_분야별점수.png"))
+        icon_label.setPixmap(icon_pixmap.scaled(40, 40, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        icon_label.setFixedSize(40, 40)
+        icon_label.setAlignment(Qt.AlignCenter)  # ✅ 아이콘 중앙 정렬
+
         # 분야명 레이블
         self.spec_name_label = QLabel(f"분야별 점수      |      {self.spec_description} ({len(self.videoMessages)}개 API)")
         self.spec_name_label.setStyleSheet("""
@@ -2425,6 +2432,13 @@ class MyApp(QWidget):
         # spec_name_font.setPointSize(14)
         spec_name_font.setBold(True)
         self.spec_name_label.setFont(spec_name_font)
+
+        # # 분야별 점수명 + 아이콘을 수평 배치
+        # name_layout = QHBoxLayout()
+        # name_layout.setSpacing(8)
+        # name_layout.addWidget(icon_label)
+        # name_layout.addWidget(self.spec_name_label)
+        # name_layout.addStretch()
 
         # 구분선 추가
         separator = QFrame()
@@ -2478,7 +2492,22 @@ class MyApp(QWidget):
 
         spec_layout = QVBoxLayout()
         spec_layout.setContentsMargins(32, 15, 32, 15)  # 내부 여백
-        spec_layout.addWidget(self.spec_name_label)
+
+        icon_vlayout = QVBoxLayout()
+        icon_vlayout.setContentsMargins(0, 0, 0, 0)
+        icon_vlayout.setSpacing(0)
+        icon_vlayout.addSpacing(0)  # 필요시 0보다 큰 값으로 조절 (예: 0~8)
+        icon_vlayout.addWidget(icon_label, alignment=Qt.AlignHCenter | Qt.AlignTop)
+        icon_vlayout.addStretch()
+
+        # 아이콘 + 분야명을 가로로 배치
+        header_layout = QHBoxLayout()
+        # header_layout.addWidget(icon_label)  # ✅ 아이콘 추가!
+        header_layout.addLayout(icon_vlayout)
+        header_layout.addWidget(self.spec_name_label)
+        header_layout.addStretch()
+
+        spec_layout.addLayout(header_layout)
         spec_layout.addSpacing(5)
         spec_layout.addWidget(separator)  # 구분선 추가
         spec_layout.addSpacing(5)
@@ -2509,6 +2538,12 @@ class MyApp(QWidget):
             }
         """)
 
+        # 분야별 점수 아이콘 추가
+        icon_label = QLabel()
+        icon_pixmap = QPixmap(resource_path("assets/image/test_runner/icn_전체점수.png"))
+        icon_label.setPixmap(icon_pixmap.scaled(40, 40, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        icon_label.setFixedSize(40, 40)
+
         # 점수 레이블들 (전체 점수는 볼드체로 강조)
         total_name_label = QLabel("전체 점수")
         total_name_label.setStyleSheet("""
@@ -2524,6 +2559,13 @@ class MyApp(QWidget):
         # total_name_font.setPointSize(14)
         total_name_font.setBold(True)
         total_name_label.setFont(total_name_font)
+
+         # 전체 점수명 + 아이콘을 수평 배치
+        name_layout = QHBoxLayout()
+        name_layout.setSpacing(8)
+        name_layout.addWidget(icon_label)
+        name_layout.addWidget(total_name_label)
+        name_layout.addStretch()
 
         # 구분선 추가
         separator = QFrame()
@@ -2577,7 +2619,22 @@ class MyApp(QWidget):
 
         total_layout = QVBoxLayout()
         total_layout.setContentsMargins(32, 15, 32, 15)  # 내부 여백
-        total_layout.addWidget(total_name_label)
+
+        icon_vlayout = QVBoxLayout()
+        icon_vlayout.setContentsMargins(0, 0, 0, 0)
+        icon_vlayout.setSpacing(0)
+        icon_vlayout.addSpacing(0)  # 필요시 0보다 큰 값으로 조절 (예: 0~8)
+        icon_vlayout.addWidget(icon_label, alignment=Qt.AlignHCenter | Qt.AlignTop)
+        icon_vlayout.addStretch()
+
+        # 아이콘 + 전체 점수 텍스트를 가로로 배치
+        header_layout = QHBoxLayout()
+        header_layout.setSpacing(8)
+        header_layout.addLayout(icon_vlayout)        # ← 아이콘(세로 레이아웃)
+        header_layout.addWidget(total_name_label)    # ← 전체 점수 텍스트
+        header_layout.addStretch()
+        total_layout.addLayout(header_layout)
+
         total_layout.addSpacing(5)
         total_layout.addWidget(separator)  # 구분선 추가
         total_layout.addSpacing(5)
