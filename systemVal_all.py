@@ -742,7 +742,38 @@ class MyApp(QWidget):
                 # print(f"[DEBUG] [handle_authentication_response] Token updated: {self.token}")
 
     def __init__(self, embedded=False, spec_id=None):
-        importlib.reload(CONSTANTS)  # CONSTANTS 모듈을 다시 로드하여 최신 설정 반영
+        # ===== 수정: instantiation time에 CONSTANTS를 fresh import =====
+        # PyInstaller 환경에서는 절대 경로로 직접 로드
+        import sys
+        import os
+
+        if getattr(sys, 'frozen', False):
+            # PyInstaller 환경 - 외부 CONSTANTS.py를 직접 로드
+            exe_dir = os.path.dirname(sys.executable)
+            constants_file = os.path.join(exe_dir, "config", "CONSTANTS.py")
+
+            print(f"[SYSTEM] 외부 CONSTANTS 파일 로드: {constants_file}")
+
+            # 파일이 존재하는지 확인
+            if not os.path.exists(constants_file):
+                raise FileNotFoundError(f"CONSTANTS.py 파일을 찾을 수 없습니다: {constants_file}")
+
+            # 직접 파일을 읽어서 exec로 실행
+            import types
+            constants_module = types.ModuleType('config.CONSTANTS')
+            with open(constants_file, 'r', encoding='utf-8') as f:
+                exec(f.read(), constants_module.__dict__)
+
+            self.CONSTANTS = constants_module
+            print(f"[SYSTEM] CONSTANTS 직접 로드 완료 - SPEC_CONFIG: {len(constants_module.SPEC_CONFIG)}개 그룹")
+        else:
+            # 로컬 환경 - 일반 import
+            if 'config.CONSTANTS' in sys.modules:
+                del sys.modules['config.CONSTANTS']
+            import config.CONSTANTS
+            self.CONSTANTS = config.CONSTANTS
+            print(f"[SYSTEM] CONSTANTS reload 완료 - SPEC_CONFIG: {len(config.CONSTANTS.SPEC_CONFIG)}개 그룹")
+        # ===== 수정 끝 =====
         super().__init__()
         self.embedded = embedded
 
@@ -766,7 +797,7 @@ class MyApp(QWidget):
         self.img_fail = resource_path("assets/image/red.png")
         self.img_none = resource_path("assets/image/black.png")
 
-        self.flag_opt = CONSTANTS.flag_opt
+        self.flag_opt = self.CONSTANTS.flag_opt
         self.tick_timer = QTimer()
         self.tick_timer.timeout.connect(self.update_view)
         self.pathUrl = None
@@ -855,11 +886,20 @@ class MyApp(QWidget):
         - current_spec_id에 따라 올바른 모듈(spec.video 또는 spec/)에서 데이터 로드
         - trans_protocol, time_out, num_retries도 SPEC_CONFIG에서 가져옴
         """
+        # ===== 디버그 로그 추가 =====
+        print(f"[SYSTEM DEBUG] SPEC_CONFIG 개수: {len(self.CONSTANTS.SPEC_CONFIG)}")
+        print(f"[SYSTEM DEBUG] 찾을 spec_id: {self.current_spec_id}")
+        for i, group in enumerate(self.CONSTANTS.SPEC_CONFIG):
+            print(f"[SYSTEM DEBUG] Group {i} keys: {list(group.keys())}")
+        # ===== 디버그 로그 끝 =====
+
         config = {}
-        for group in CONSTANTS.SPEC_CONFIG:
+        # ===== 수정: self.CONSTANTS 사용 (reload된 CONSTANTS) =====
+        for group in self.CONSTANTS.SPEC_CONFIG:
             if self.current_spec_id in group:
                 config = group[self.current_spec_id]
                 break
+        # ===== 수정 끝 =====
 
         if not config:
             raise ValueError(f"spec_id '{self.current_spec_id}'에 대한 설정을 찾을 수 없습니다!")
