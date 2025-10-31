@@ -61,6 +61,55 @@ class FormValidator:
         # 이미 데이터 형식이면 그대로 반환
         return webhook_spec
 
+    def _generate_response_code_file(self):
+        """API에서 response-codes를 가져와 spec/ResponseCode.py 파일 생성"""
+        try:
+            import requests
+            from core.functions import resource_path
+
+            url = "http://ect2.iptime.org:20223/api/integration/response-codes"
+            print(f"ResponseCode API 호출 중: {url}")
+
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()
+            json_data = response.json()
+
+            if json_data.get("success") and json_data.get("data"):
+                # 데이터 변환: code는 그대로, description을 message로
+                error_message = []
+                for item in json_data["data"]:
+                    error_message.append({
+                        "code": item["code"],
+                        "message": item["description"]
+                    })
+
+                # Python 파일 생성
+                content = "error_message = [\n"
+                for i, msg in enumerate(error_message):
+                    comma = "," if i < len(error_message) - 1 else ""
+                    content += f'    {{"code": "{msg["code"]}", "message": "{msg["message"]}"}}{comma}\n'
+                content += "]\n"
+
+                # 파일 저장
+                output_path = resource_path("spec/ResponseCode.py")
+                with open(output_path, 'w', encoding='utf-8') as f:
+                    f.write(content)
+
+                print(f"ResponseCode.py 생성 완료: {len(error_message)}개 응답 코드")
+                return True
+            else:
+                print("ResponseCode API 응답에 데이터가 없습니다.")
+                return False
+
+        except requests.exceptions.Timeout:
+            print("ResponseCode API 타임아웃")
+            return False
+        except Exception as e:
+            print(f"ResponseCode 파일 생성 실패: {e}")
+            import traceback
+            traceback.print_exc()
+            return False
+
     def _generate_files_for_all_specs(self):
         """모든 testSpecIds를 하나의 파일로 합쳐서 생성 (schema + videoData)"""
         try:
@@ -251,6 +300,9 @@ class FormValidator:
             # CONSTANTS.py 업데이트 (specs 리스트 생성 비활성화)
             if all_spec_list_names:
                 self._update_constants_specs(all_spec_list_names)
+
+            # ResponseCode 파일 생성
+            self._generate_response_code_file()
 
             print(f"\n=== 산출물 생성 완료 ===\n")
 
