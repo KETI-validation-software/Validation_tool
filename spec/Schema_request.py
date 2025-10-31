@@ -1,6 +1,37 @@
 from json_checker import OptionalKey
 
 
+# RealtimeVideoEventInfos
+cmh1u5pef000sgxc3bzl4y9v0_RealtimeVideoEventInfos_in_schema = {
+    "camList": [{
+    "camID": str,
+}],
+    "duration": str,
+    "transProtocol": {
+    "transProtocolType": str,
+    "transProtocolDesc": str,
+},
+    "eventFilter": str,
+    "classFilter": str,
+    "startTime": int,
+}
+
+# RealtimeVideoEventInfos WebHook OUT Schema
+cmh1u5pef000sgxc3bzl4y9v0_RealtimeVideoEventInfos_webhook_out_schema = {
+    "code": str,
+    "message": str,
+}
+
+# cmh1u5pef000sgxc3bzl4y9v0 스키마 리스트
+cmh1u5pef000sgxc3bzl4y9v0_inSchema = [
+    cmh1u5pef000sgxc3bzl4y9v0_RealtimeVideoEventInfos_in_schema,
+]
+
+# cmh1u5pef000sgxc3bzl4y9v0 WebHook 스키마 리스트
+cmh1u5pef000sgxc3bzl4y9v0_webhook_OutSchema = [
+    cmh1u5pef000sgxc3bzl4y9v0_RealtimeVideoEventInfos_webhook_out_schema,
+]
+
 # Authentication
 cmgvieyak001b6cd04cgaawmm_Authentication_in_schema = {
     "userID": str,

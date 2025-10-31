@@ -1664,22 +1664,137 @@ class MyApp(QWidget):
         ]
 
     def create_spec_selection_panel(self, parent_layout):
-        
-        # parent_layout.setContentsMargins(10, -36, 10, 10)  # 헤더~라벨 36px
-        parent_layout.setSpacing(0)  # 라벨-테이블 간격 최소화
 
-        # 시험 분야 확인 문구
-        title = QLabel("시험 분야")
-        title.setStyleSheet("font-size: 16px; font-family: 'Noto Sans KR'; font-style: normal; font-weight: 500; line-height: normal; letter-spacing: -0.16px; margin-bottom: 6px;")
+        title = QLabel("시험 선택")
+        title.setStyleSheet("font-size: 16px; font-weight: bold; margin-bottom: 6px;")
         parent_layout.addWidget(title)
 
-        # 시험 분야명 테이블만 추가 (회색 박스 제거)
-        field_group = self.create_test_field_group()
-        field_group.setStyleSheet("QGroupBox { border: none; background: transparent; margin: 0; padding: 0; }")  # ← 회색 박스 제거
-        parent_layout.addWidget(field_group)
+        # ✅ 그룹 테이블 추가
+        self.group_table_widget = self.create_group_selection_table()
+        parent_layout.addWidget(self.group_table_widget)
 
-        # 선택된 시험 분야 행
-        self.selected_test_field_row = None
+        # 2️⃣ 시험 분야 테이블 (기존 로직 재활용)
+        self.field_group = self.create_test_field_group()
+        parent_layout.addWidget(self.field_group)
+
+    def on_group_selected(self, row, col):
+        group_name = self.index_to_group_name.get(row)
+        if not group_name:
+            return
+
+        # 그룹명으로 SPEC_CONFIG 중 해당 그룹만 필터링
+        selected_group = next(
+            (g for g in CONSTANTS.SPEC_CONFIG if g.get("group_name") == group_name), None
+        )
+
+        if selected_group:
+            self.update_test_field_table(selected_group)
+
+    def update_test_field_table(self, group_data):
+        """선택된 그룹의 spec_id 목록으로 테이블 갱신"""
+        self.test_field_table.clearContents()
+
+        spec_items = [
+            (k, v) for k, v in group_data.items()
+            if k not in ['group_name', 'group_id'] and isinstance(v, dict)
+        ]
+        self.test_field_table.setRowCount(len(spec_items))
+
+        self.spec_id_to_index.clear()
+        self.index_to_spec_id.clear()
+
+        for idx, (spec_id, config) in enumerate(spec_items):
+            desc = config.get('test_name', f'시험분야 {idx + 1}')
+            desc_with_role = f"{desc} (요청 검증)"
+            item = QTableWidgetItem(desc_with_role)
+            item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+            self.test_field_table.setItem(idx, 0, item)
+            self.spec_id_to_index[spec_id] = idx
+            self.index_to_spec_id[idx] = spec_id
+
+    def create_group_selection_table(self):
+        """
+        ✅ 시험 그룹명을 시험 분야명 테이블과 시각적으로 완벽하게 일치시킴
+        """
+        group_box = QWidget()
+        group_box.setFixedSize(459, 220)
+
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+
+        self.group_table = QTableWidget(0, 1)
+        self.group_table.setHorizontalHeaderLabels(["시험 분야"])
+        self.group_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.group_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.group_table.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.group_table.verticalHeader().setVisible(False)
+        self.group_table.setFixedHeight(219)
+
+        # ✅ 스타일 조정 - 그림자/돌출감 제거
+        self.group_table.setStyleSheet("""
+            QTableWidget {
+                background-color: #FFFFFF;
+                border: 1px solid #CECECE;
+                border-radius: 4px;
+                outline: none;
+                font-family: "Noto Sans KR";
+                font-size: 14px;
+                color: #1B1B1C;
+            }
+            QTableWidget::item {
+                border-bottom: 1px solid #E0E0E0;
+                color: #1B1B1C;
+                font-family: 'Noto Sans KR';
+                font-size: 14px;
+                font-weight: 400;
+                padding: 8px;
+                text-align: center;
+            }
+            QTableWidget::item:selected {
+                background-color: #E3F2FF;
+                border: none;
+            }
+            QTableWidget::item:hover {
+                background-color: #F2F8FF;
+            }
+            QHeaderView::section {
+                background-color: #EDF0F3;
+                border: none;
+                border-bottom: 1px solid #CECECE;
+                color: #1B1B1C;
+                text-align: center;
+                font-family: 'Noto Sans KR';
+                font-size: 13px;
+                font-weight: 600;
+                letter-spacing: -0.156px;
+            }
+        """)
+
+        # ✅ SPEC_CONFIG 기반 그룹 로드
+        group_items = [
+            (g.get("group_name", "미지정 그룹"), g.get("group_id", ""))
+            for g in CONSTANTS.SPEC_CONFIG
+        ]
+        self.group_table.setRowCount(len(group_items))
+
+        self.group_name_to_index = {}
+        self.index_to_group_name = {}
+
+        for idx, (name, gid) in enumerate(group_items):
+            display_name = name
+            item = QTableWidgetItem(display_name)
+            item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+            self.group_table.setItem(idx, 0, item)
+            self.group_name_to_index[name] = idx
+            self.index_to_group_name[idx] = name
+
+        # ✅ 클릭 이벤트 연결
+        self.group_table.cellClicked.connect(self.on_group_selected)
+
+        layout.addWidget(self.group_table)
+        group_box.setLayout(layout)
+        return group_box
 
     def create_test_field_group(self):
         """
@@ -1692,7 +1807,7 @@ class MyApp(QWidget):
         layout.setSpacing(0)  # ← 간격 제거
 
         self.test_field_table = QTableWidget(0, 1)
-        self.test_field_table.setHorizontalHeaderLabels(["시험 분야명"])
+        self.test_field_table.setHorizontalHeaderLabels(["시험 시나리오"])
         self.test_field_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.test_field_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.test_field_table.cellClicked.connect(self.on_test_field_selected)
@@ -1853,15 +1968,14 @@ class MyApp(QWidget):
         api_count = len(api_list)
         self.tableWidget.setRowCount(api_count)
 
-        # 각 행의 API 명 업데이트
-        for row in range(api_count):
-            # API 명
-            api_item = QTableWidgetItem(api_list[row])
+        for row, api_name in enumerate(api_list):
+            # ✅ 번호와 함께 표시 (번호 + API명)
+            display_name = f"{row + 1}. {api_name}"
+            api_item = QTableWidgetItem(display_name)
             api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 0, api_item)
 
-            # 나머지 컬럼 초기화
-            # 결과 아이콘 (검정색)
+            # 결과 아이콘 초기화
             icon_widget = QWidget()
             icon_layout = QHBoxLayout()
             icon_layout.setContentsMargins(0, 0, 0, 0)
@@ -1879,13 +1993,12 @@ class MyApp(QWidget):
                 item.setTextAlignment(Qt.AlignCenter)
                 self.tableWidget.setItem(row, col, item)
 
-            # 상세 내용 버튼 (중앙 정렬을 위한 위젯 컨테이너)
+            # 상세 내용 버튼
             detail_btn = QPushButton("상세 내용 확인")
             detail_btn.setMaximumHeight(30)
             detail_btn.setMaximumWidth(130)
             detail_btn.clicked.connect(lambda checked, r=row: self.show_combined_result(r))
 
-            # 버튼을 중앙에 배치하기 위한 위젯과 레이아웃
             container = QWidget()
             layout = QHBoxLayout()
             layout.addWidget(detail_btn)
@@ -1894,8 +2007,6 @@ class MyApp(QWidget):
             container.setLayout(layout)
 
             self.tableWidget.setCellWidget(row, 7, container)
-
-            # 행 높이 설정
             self.tableWidget.setRowHeight(row, 40)
 
     # 여기가 플랫폼 메인화면 initUI
@@ -2682,8 +2793,30 @@ class MyApp(QWidget):
                 except OSError:
                     pass
 
+    def run_single_spec_test(self):
+        """단일 spec_id에 대한 시험 실행"""
+        self._clean_trace_dir_once()
+        self.total_error_cnt = 0
+        self.total_pass_cnt = 0
+        self.cnt = 0
+        self.current_retry = 0
+        self.init_win()
+        self.valResult.append(f"🚀 시험 시작: {self.spec_description}")
+        # 이후 기존 sbtn_push 내부 로직과 동일하게 Server 초기화 및 타이머 시작
+
     def sbtn_push(self):
         try:
+            selected_rows = self.test_field_table.selectionModel().selectedRows()
+            if not selected_rows:
+                QMessageBox.warning(self, "알림", "시험 분야를 선택하세요.")
+                return
+
+            selected_spec_ids = [self.index_to_spec_id[r.row()] for r in selected_rows]
+            for spec_id in selected_spec_ids:
+                self.current_spec_id = spec_id
+                self.load_specs_from_constants()
+                self.run_single_spec_test()
+
             print(f"[DEBUG] sbtn_push 시작")
             print(f"[DEBUG] videoMessages 개수: {len(self.videoMessages)}")
             print(f"[DEBUG] videoInSchema 개수: {len(self.videoInSchema)}")
