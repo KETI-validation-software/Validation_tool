@@ -728,7 +728,17 @@ class FormValidator:
         """CONSTANTS.py의 specs 리스트를 업데이트"""
         try:
             import re
-            constants_path = "config/CONSTANTS.py"
+            import sys
+            import os
+            from core.functions import resource_path
+
+            # ===== 수정: PyInstaller 환경에서 외부 config 우선 사용 =====
+            if getattr(sys, 'frozen', False):
+                exe_dir = os.path.dirname(sys.executable)
+                constants_path = os.path.join(exe_dir, "config", "CONSTANTS.py")
+            else:
+                constants_path = resource_path("config/CONSTANTS.py")
+            # ===== 수정 끝 =====
 
             # CONSTANTS.py 파일 읽기
             with open(constants_path, 'r', encoding='utf-8') as f:
@@ -878,7 +888,16 @@ class FormValidator:
         """CONSTANTS.py 파일의 변수들을 GUI 입력값으로 업데이트"""
         try:
             from core.functions import resource_path
-            constants_path = resource_path("config/CONSTANTS.py")
+            import sys
+            import os
+
+            # ===== 수정: PyInstaller 환경에서 외부 config 우선 사용 =====
+            if getattr(sys, 'frozen', False):
+                exe_dir = os.path.dirname(sys.executable)
+                constants_path = os.path.join(exe_dir, "config", "CONSTANTS.py")
+            else:
+                constants_path = resource_path("config/CONSTANTS.py")
+            # ===== 수정 끝 =====
 
             # 1. 시험 기본 정보 수집
             variables = self._collect_basic_info()
@@ -968,20 +987,28 @@ class FormValidator:
 
                 # 실제 파일 수정 반영 (파일 내 accessToken 문자열 교체)
             if updated:
-                file_path = Path(inspect.getfile(Data_response))
-                text = file_path.read_text(encoding="utf-8")
+                # ===== 수정: PyInstaller 환경에서는 파일 업데이트 스킵 =====
+                import sys
+                if not getattr(sys, 'frozen', False):
+                    # 로컬 환경에서만 파일 업데이트
+                    file_path = Path(inspect.getfile(Data_response))
+                    text = file_path.read_text(encoding="utf-8")
 
-                # 첫 번째 accessToken 값만 교체
-                new_text = re.sub(
-                    r'(["\']accessToken["\']\s*:\s*["\'])([^"\']*)(["\'])',
-                    rf'\1{auth_info}\3',
-                    text,
-                    count=0,
-                    flags=re.IGNORECASE
-                )
+                    # 첫 번째 accessToken 값만 교체
+                    new_text = re.sub(
+                        r'(["\']accessToken["\']\s*:\s*["\'])([^"\']*)(["\'])',
+                        rf'\1{auth_info}\3',
+                        text,
+                        count=0,
+                        flags=re.IGNORECASE
+                    )
 
-                file_path.write_text(new_text, encoding="utf-8")
-                print(f"Data_response.py 파일에 토큰 반영 완료 → {file_path}")
+                    file_path.write_text(new_text, encoding="utf-8")
+                    print(f"Data_response.py 파일에 토큰 반영 완료 → {file_path}")
+                else:
+                    # PyInstaller 환경에서는 메모리만 업데이트 (파일은 read-only)
+                    print(f"[PyInstaller] Data_response 메모리에만 토큰 반영 완료")
+                # ===== 수정 끝 =====
             else:
                 print("Authentication 관련 변수를 찾지 못했습니다.")
 
@@ -1082,8 +1109,19 @@ class FormValidator:
         """
         try:
             from core.functions import resource_path
+            import sys
+            import os
+
             if constants_path is None:
-                constants_path = resource_path("config/CONSTANTS.py")
+                # ===== 수정: PyInstaller 환경에서 외부 config 우선 사용 =====
+                if getattr(sys, 'frozen', False):
+                    # PyInstaller로 실행 중 - 외부 경로 사용
+                    exe_dir = os.path.dirname(sys.executable)
+                    constants_path = os.path.join(exe_dir, "config", "CONSTANTS.py")
+                else:
+                    # 일반 실행 - resource_path 사용
+                    constants_path = resource_path("config/CONSTANTS.py")
+                # ===== 수정 끝 =====
 
             # 1) CONSTANTS.py 읽기
             with open(constants_path, "r", encoding="utf-8") as f:
@@ -1284,7 +1322,16 @@ class FormValidator:
         """CONSTANTS.py의 SPEC_CONFIG 리스트에 spec_id별 설정 업데이트"""
         try:
             from core.functions import resource_path
-            constants_path = resource_path("config/CONSTANTS.py")
+            import sys
+            import os
+
+            # ===== 수정: PyInstaller 환경에서 외부 config 우선 사용 =====
+            if getattr(sys, 'frozen', False):
+                exe_dir = os.path.dirname(sys.executable)
+                constants_path = os.path.join(exe_dir, "config", "CONSTANTS.py")
+            else:
+                constants_path = resource_path("config/CONSTANTS.py")
+            # ===== 수정 끝 =====
 
             with open(constants_path, 'r', encoding='utf-8') as f:
                 content = f.read()
