@@ -77,6 +77,12 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("검증 소프트웨어 통합 실행기")
         self.resize(1200, 720)
+        self.setWindowFlags(
+            Qt.Window |
+            Qt.WindowTitleHint |
+            Qt.WindowMinimizeButtonHint |
+            Qt.WindowCloseButtonHint
+        )
         self._orig_flags = self.windowFlags()
         self.stack = QStackedWidget()
         self.setCentralWidget(self.stack)
@@ -87,9 +93,9 @@ class MainWindow(QMainWindow):
         self.info_widget.startTestRequested.connect(self._on_start_test_requested)
 
         # info_widget의 페이지 변경 시그널 연결 (시험 정보 불러오기 완료 시)
-        self.info_widget.stacked_widget.currentChanged.connect(self._on_page_changed)
+        #self.info_widget.stacked_widget.currentChanged.connect(self._on_page_changed)
 
-        self._setup_menu()
+        #self._setup_menu()
         self.stack.setCurrentIndex(0)
 
     def _setup_menu(self):
@@ -195,7 +201,7 @@ class MainWindow(QMainWindow):
         self.stack.setCurrentWidget(self._result_widget)
 
         # 시험 결과 메뉴 활성화
-        self.act_test_result.setEnabled(True)
+        #self.act_test_result.setEnabled(True)
 
     def _on_back_to_validation(self):
         """뒤로가기: 시험 결과 페이지에서 검증 화면으로 복귀"""
@@ -219,7 +225,7 @@ class MainWindow(QMainWindow):
     def _on_start_test_requested(self, target_system_edit, verification_type, spec_id):
         """시험 시작 버튼 클릭 시 호출 - 시험 실행 메뉴 활성화 후 검증 앱 실행"""
         # 시험 실행 메뉴 활성화
-        self.act_test_run.setEnabled(True)
+        #self.act_test_run.setEnabled(True)
         print(
             f"시험 실행 메뉴 활성화: target_system={target_system_edit}, verificationType={verification_type}, spec_id={spec_id}")
 
