@@ -871,12 +871,26 @@ def map_auth_method(auth_type_str):
 
 
 def generate_validation_data_from_step_buffer(step_buffer, attempt_num):
-    """스텝 버퍼에서 검증 데이터 추출 (raw_data_list 우선 사용)"""
+    """
+    스텝 버퍼에서 검증 데이터 추출 (raw_data_list 우선 사용)
+
+    Args:
+        step_buffer: 스텝 버퍼 딕셔너리
+        attempt_num: 시도 번호 (1부터 시작)
+
+    Returns:
+        dict: {
+            "attempt": attempt_num,
+            "validationData": {...},
+            "validationErrors": [...]
+        }
+    """
     import re
 
     validation_data = {}
     validation_errors = []
 
+    # 1. raw_data_list에서 데이터 추출 (우선순위 1)
     if "raw_data_list" in step_buffer and step_buffer["raw_data_list"]:
         raw_data_list = step_buffer["raw_data_list"]
         # attempt_num은 1부터 시작하므로 인덱스는 attempt_num - 1
@@ -885,17 +899,15 @@ def generate_validation_data_from_step_buffer(step_buffer, attempt_num):
         else:
             validation_data = {}
 
-        # ✅ raw_data_list가 없으면 기존 방식 사용 (하위 호환성)
+    # 2. data 텍스트에서 파싱 (raw_data_list가 없는 경우)
     elif step_buffer.get("data"):
         data_text = step_buffer["data"]
 
         # "[시도 n회차]" 패턴으로 분리
-        # 패턴: [시도 1회차], [시도 2회차] 등
         pattern = r'\[시도 (\d+)회차\]'
         parts = re.split(pattern, data_text)
 
         # parts는 [앞부분, '1', 데이터1, '2', 데이터2, ...] 형식
-        # 시도 번호와 데이터를 매핑
         attempt_data_map = {}
         for i in range(1, len(parts), 2):
             if i + 1 < len(parts):
@@ -907,21 +919,17 @@ def generate_validation_data_from_step_buffer(step_buffer, attempt_num):
         if attempt_num in attempt_data_map:
             raw_data = attempt_data_map[attempt_num]
             try:
-                # JSON 파싱 시도
                 validation_data = json.loads(raw_data)
             except:
-                # JSON 파싱 실패 시 원본 텍스트 그대로 사용
                 validation_data = {"raw_data": raw_data}
         else:
-            # 해당 시도의 데이터가 없는 경우
-            validation_data = {}  # attempt_num은 1부터 시작하므로 인덱스는 attempt_num - 1
+            validation_data = {}
 
-    # 에러 메시지 추출 - 시도별로 분리
+    # 3. 에러 메시지 추출 - attempt별로 분리
     if step_buffer.get("error"):
         error_text = step_buffer["error"]
 
-        # 에러도 시도별로 분리
-        # 패턴: [검증 n회차] 또는 [시도 n회차]
+        # "[검증 n회차]" 또는 "[시도 n회차]" 패턴으로 분리
         error_pattern = r'\[(?:검증|시도) (\d+)회차\]'
         error_parts = re.split(error_pattern, error_text)
 
@@ -934,26 +942,28 @@ def generate_validation_data_from_step_buffer(step_buffer, attempt_num):
                 if attempt_idx not in attempt_error_map:
                     attempt_error_map[attempt_idx] = []
                 if error_content:
-                    attempt_error_map[attempt_idx].append(error_content)
+                    # 에러 내용을 줄 단위로 분리
+                    error_lines = [line.strip() for line in error_content.split('\n') if line.strip()]
+                    attempt_error_map[attempt_idx].extend(error_lines)
 
         # 현재 attempt_num에 해당하는 에러만 가져오기
         if attempt_num in attempt_error_map:
             validation_errors = attempt_error_map[attempt_num]
         else:
-            # 패턴이 없는 경우 전체 에러를 첫 번째 시도에만 할당
+            # 패턴이 없는 경우 첫 번째 시도에만 전체 에러 할당
             if attempt_num == 1 and not attempt_error_map:
                 validation_errors = [line.strip() for line in error_text.split('\n') if line.strip()]
 
+    # 4. 결과 반환 - attempt는 전달받은 값 그대로 사용
     return {
         "attempt": attempt_num,
         "validationData": validation_data,
         "validationErrors": validation_errors
     }
 
-
 def build_result_json(myapp_instance):
     """
-    MyApp 인스턴스에서 데이터를 추출하여 JSON 형식으로 변환 (CONSTANTS 통합)
+    MyApp 인스턴스에서 데이터를 추출하여 JSON 형식으로 변환 (모든 시험 시나리오 포함)
 
     Args:
         myapp_instance: MyApp 클래스의 인스턴스
@@ -962,9 +972,10 @@ def build_result_json(myapp_instance):
         dict: JSON 형식의 결과 데이터
     """
 
-    # 1. Request ID 생성 (CONSTANTS에서 가져오거나 신규 생성)
+    # 1. Request ID 생성
     request_id = CONSTANTS.request_id
-    # 2. 평가 대상 정보 (CONSTANTS에서 가져오기)
+
+    # 2. 평가 대상 정보
     evaluation_target = {
         "companyName": CONSTANTS.company_name,
         "contactPerson": CONSTANTS.contact_person,
@@ -973,166 +984,62 @@ def build_result_json(myapp_instance):
         "version": CONSTANTS.version
     }
 
-    # 3. 테스트 그룹 정보 (CONSTANTS.SPEC_CONFIG에서 추출)
+    # 3. 테스트 그룹 정보
     test_group = get_test_group_info()
 
-    # 4. 인증 방식 (CONSTANTS에서 가져오기)
+    # 4. 인증 방식
     auth_method = map_auth_method(CONSTANTS.auth_type)
 
-    current_spec_id = myapp_instance.current_spec_id if hasattr(myapp_instance, 'current_spec_id') else None
-    api_names_list = []
-    api_ids_list = []
-    api_endpoints_list = []
-
-    if current_spec_id:
-        for group in CONSTANTS.SPEC_CONFIG:
-            if current_spec_id in group:
-                spec_config = group[current_spec_id]
-                api_names_list = spec_config.get('api_name', [])
-                api_ids_list = spec_config.get('api_id', [])
-                api_endpoints_list = spec_config.get('api_endpoint', [])
-                break
-
-    # 5. 테스트 점수 계산
-    total_pass = getattr(myapp_instance, 'total_pass_cnt', 0)
-    total_error = getattr(myapp_instance, 'total_error_cnt', 0)
-    total_fields = total_pass + total_error
-    score = (total_pass / total_fields * 100) if total_fields > 0 else 0
+    # 5. 전체 테스트 점수 계산 (모든 spec 합산)
+    global_pass = getattr(myapp_instance, 'global_pass_cnt', 0)
+    global_error = getattr(myapp_instance, 'global_error_cnt', 0)
+    global_total = global_pass + global_error
+    global_score = (global_pass / global_total * 100) if global_total > 0 else 0
 
     test_score = {
-        "score": round(score, 2),
-        "totalFields": total_fields,
-        "passedFields": total_pass,
-        "failedFields": total_error
+        "score": round(global_score, 2),
+        "totalFields": global_total,
+        "passedFields": global_pass,
+        "failedFields": global_error
     }
 
-    # 6. 테스트 결과 상세 정보 구성
-    test_result = []
-    step_buffers = getattr(myapp_instance, 'step_buffers', [])
+    # 6. 모든 시험 시나리오 결과 수집
+    all_spec_results = {}
 
-    # spec별로 그룹화
-    spec_results = {}
+    # 6-1. 저장된 spec 데이터 처리
+    if hasattr(myapp_instance, 'spec_table_data'):
+        for spec_id, saved_data in myapp_instance.spec_table_data.items():
+            spec_result = _build_spec_result(
+                myapp_instance,
+                spec_id,
+                saved_data['step_buffers'],
+                saved_data.get('table_data', [])
+            )
+            if spec_result:
+                all_spec_results[spec_id] = spec_result
 
-    for i, step_buffer in enumerate(step_buffers):
-        # 테이블에서 추가 정보 가져오기
-        table_widget = myapp_instance.tableWidget
-        api_name = table_widget.item(i, 0).text() if table_widget.item(i, 0) else f"API-{i + 1}"
-        retries = int(table_widget.item(i, 2).text()) if table_widget.item(i, 2) else 1
-        pass_cnt = int(table_widget.item(i, 3).text()) if table_widget.item(i, 3) else 0
-        total_cnt = int(table_widget.item(i, 4).text()) if table_widget.item(i, 4) else 0
-        fail_cnt = int(table_widget.item(i, 5).text()) if table_widget.item(i, 5) else 0
-        api_score_str = table_widget.item(i, 6).text() if table_widget.item(i, 6) else "0%"
-        api_score = float(api_score_str.replace('%', ''))
+    # 6-2. 현재 spec 데이터 처리 (저장되지 않은 경우)
+    current_spec_id = getattr(myapp_instance, 'current_spec_id', None)
+    if current_spec_id and current_spec_id not in all_spec_results:
+        spec_result = _build_spec_result(
+            myapp_instance,
+            current_spec_id,
+            getattr(myapp_instance, 'step_buffers', []),
+            None  # 현재 테이블에서 직접 읽음
+        )
+        if spec_result:
+            all_spec_results[current_spec_id] = spec_result
 
-        api_name = api_names_list[i] if i < len(api_names_list) else f"API-{i + 1}"
-        api_id = api_ids_list[i] if i < len(api_ids_list) else ""
-        api_endpoint = api_endpoints_list[i] if i < len(api_endpoints_list) else f"/api{i + 1}"
+    test_result = list(all_spec_results.values())
 
-        # API 정보에서 메서드와 엔드포인트 추출
-        api_info = step_buffer.get("api_info", {})
-        method = api_info.get("method", "POST")
-        endpoint = api_info.get("endpoint", api_name)
+    # 7. 실행 상태
+    status = getattr(myapp_instance, 'run_status', '진행중')
 
-        # 검증 데이터 생성 (재시도 횟수만큼)
-        validations = []
-        for attempt in range(1, retries + 1):
-            validation = generate_validation_data_from_step_buffer(step_buffer, attempt)
-            validations.append(validation)
-
-        # webhook 메시지 존재 여부 확인
-        has_webhook = step_buffer.get("is_webhook_api", False)  # ✅ 플래그로 판단
-
-        # API ID 결정
-        if has_webhook:
-            registration_id = f"{api_id}-registration"
-            webhook_id = f"{api_id}-webhook"
-        else:
-            registration_id = api_id
-
-        # 기존 API 결과 구성 (registration)
-        api_result = {
-            "id": registration_id,
-            "name": api_name,
-            "method": method,
-            "endpoint": api_endpoint,
-            "score": round(api_score, 0),
-            "validationCnt": retries,
-            "totalFields": total_cnt,
-            "passFields": pass_cnt,
-            "failFields": fail_cnt,
-            "validations": validations
-        }
-
-        # spec_id 추출 (step_buffer에서 또는 SPEC_CONFIG에서)
-        spec_id = step_buffer.get("spec_id")
-        if not spec_id and test_group["testSpecIds"]:
-            spec_id = test_group["testSpecIds"][0]
-        else:
-            spec_id = "spec-001"
-
-        if spec_id not in spec_results:
-            spec_results[spec_id] = {
-                "testSpecId": spec_id,
-                "score": 0,
-                "apis": []
-            }
-
-        spec_results[spec_id]["apis"].append(api_result)
-
-        # webhook 메시지가 있는 경우 추가 API 결과 생성
-        if has_webhook:
-            webhook_validations = []
-            for attempt in range(1, retries + 1):
-                # webhook용 validation 데이터 생성
-                webhook_validation = {
-                    "attempt": attempt,
-                    "validationData": step_buffer.get("webhook_data") or {},  # {}로 변환
-                    "validationErrors": step_buffer.get("webhook_error", "").split('\n') if step_buffer.get(
-                        "webhook_error") else []
-                }
-                webhook_validations.append(webhook_validation)
-
-            # webhook 필드 수 계산 (step_buffer에 webhook_pass_cnt 등이 있다면 사용)
-            webhook_pass = step_buffer.get("webhook_pass_cnt", 0)
-            webhook_total = step_buffer.get("webhook_total_cnt", 0)
-            webhook_fail = webhook_total - webhook_pass
-            webhook_score = (webhook_pass / webhook_total * 100) if webhook_total > 0 else 0
-
-            webhook_result = {
-                "id": webhook_id,
-                "name": f"{api_name} (Webhook)",
-                "method": "POST",  # webhook은 보통 POST
-                "endpoint": f"{api_endpoint}/webhook",
-                "score": round(webhook_score, 0),
-                "validationCnt": retries,
-                "totalFields": webhook_total,
-                "passFields": webhook_pass,
-                "failFields": webhook_fail,
-                "validations": webhook_validations
-            }
-
-            spec_results[spec_id]["apis"].append(webhook_result)
-
-    # spec별 평균 점수 계산
-    status = getattr(myapp_instance, 'run_status', 0)
+    # 진행 중인 경우 점수 0으로 처리
     if status == "진행중":
-        test_score = 0.0
-
-    for spec_id, spec_data in spec_results.items():
-        if spec_data["apis"]:
-            total_pass = sum(api["passFields"] for api in spec_data["apis"])
-            total_fields = sum(api["totalFields"] for api in spec_data["apis"])
-
-            if total_fields > 0:
-                avg_score = (total_pass / total_fields) * 100
-            else:
-                avg_score = 0
-            if status == "진행중":
-                test_score = 0.0
-            else:
-                spec_data["score"] = round(avg_score, 2)
-
-    test_result = list(spec_results.values())
+        test_score["score"] = 0.0
+        for spec_data in test_result:
+            spec_data["score"] = 0.0
 
     # 8. 완료 시간
     completed_date = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -1151,6 +1058,157 @@ def build_result_json(myapp_instance):
 
     return result_json
 
+
+def _build_spec_result(myapp_instance, spec_id, step_buffers, table_data=None):
+    """
+    단일 시험 시나리오(spec)의 결과 구성
+
+    Args:
+        myapp_instance: MyApp 인스턴스
+        spec_id: 시험 시나리오 ID
+        step_buffers: 스텝 버퍼 리스트
+        table_data: 테이블 데이터 (None인 경우 현재 테이블에서 읽음)
+
+    Returns:
+        dict: spec 결과 데이터 또는 None (데이터가 없는 경우)
+    """
+
+    # 1. spec 설정 가져오기
+    api_names_list = []
+    api_ids_list = []
+    api_endpoints_list = []
+
+    for group in CONSTANTS.SPEC_CONFIG:
+        if spec_id in group:
+            spec_config = group[spec_id]
+            api_names_list = spec_config.get('api_name', [])
+            api_ids_list = spec_config.get('api_id', [])
+            api_endpoints_list = spec_config.get('api_endpoint', [])
+            break
+
+    # step_buffers가 없으면 None 반환
+    if not step_buffers:
+        return None
+
+    # 2. API 결과 리스트 및 통계 초기화
+    apis = []
+    total_pass = 0
+    total_fields = 0
+
+    # 3. 각 API별 결과 구성
+    for i, step_buffer in enumerate(step_buffers):
+        # 3-1. 테이블 데이터에서 정보 가져오기
+        if table_data and i < len(table_data):
+            # 저장된 테이블 데이터 사용
+            row_data = table_data[i]
+            retries = int(row_data.get('retry_count', '0'))
+            pass_cnt = int(row_data.get('pass_count', '0'))
+            total_cnt = int(row_data.get('total_count', '0'))
+            fail_cnt = int(row_data.get('fail_count', '0'))
+            api_score_str = row_data.get('score', '0%')
+            api_score = float(api_score_str.replace('%', ''))
+        else:
+            # 현재 테이블에서 직접 읽기
+            table_widget = myapp_instance.tableWidget
+            if i >= table_widget.rowCount():
+                continue
+
+            retries = int(table_widget.item(i, 2).text()) if table_widget.item(i, 2) else 1
+            pass_cnt = int(table_widget.item(i, 3).text()) if table_widget.item(i, 3) else 0
+            total_cnt = int(table_widget.item(i, 4).text()) if table_widget.item(i, 4) else 0
+            fail_cnt = int(table_widget.item(i, 5).text()) if table_widget.item(i, 5) else 0
+            api_score_str = table_widget.item(i, 6).text() if table_widget.item(i, 6) else "0%"
+            api_score = float(api_score_str.replace('%', ''))
+
+        # 3-2. API 기본 정보 설정
+        api_name = api_names_list[i] if i < len(api_names_list) else f"API-{i + 1}"
+        api_id = api_ids_list[i] if i < len(api_ids_list) else f"api-{i + 1}"
+        api_endpoint = api_endpoints_list[i] if i < len(api_endpoints_list) else f"/api{i + 1}"
+
+        # API 메서드 가져오기 (기본값: POST)
+        method = step_buffer.get("api_info", {}).get("method", "POST")
+
+        # 3-3. 검증 데이터 생성 (retries 횟수만큼 attempt 생성)
+        validations = []
+        for attempt in range(1, retries + 1):
+            validation = generate_validation_data_from_step_buffer(step_buffer, attempt)
+            validations.append(validation)
+
+        # 3-4. webhook 존재 여부 확인
+        has_webhook = step_buffer.get("is_webhook_api", False)
+
+        # 3-5. Registration API 결과 구성
+        registration_id = f"{api_id}-registration" if has_webhook else api_id
+
+        api_result = {
+            "id": registration_id,
+            "name": api_name,
+            "method": method,
+            "endpoint": api_endpoint,
+            "score": round(api_score, 0),
+            "validationCnt": retries,
+            "totalFields": total_cnt,
+            "passFields": pass_cnt,
+            "failFields": fail_cnt,
+            "validations": validations
+        }
+
+        apis.append(api_result)
+        total_pass += pass_cnt
+        total_fields += total_cnt
+
+        # 3-6. Webhook API 결과 구성 (있는 경우)
+        if has_webhook:
+            # webhook 검증 데이터 생성
+            webhook_validations = []
+            for attempt in range(1, retries + 1):
+                webhook_validation = {
+                    "attempt": attempt,
+                    "validationData": step_buffer.get("webhook_data") or {},
+                    "validationErrors": step_buffer.get("webhook_error", "").split('\n') if step_buffer.get(
+                        "webhook_error") else []
+                }
+                webhook_validations.append(webhook_validation)
+
+            # webhook 점수 계산
+            webhook_pass = step_buffer.get("webhook_pass_cnt", 0)
+            webhook_total = step_buffer.get("webhook_total_cnt", 0)
+            webhook_fail = webhook_total - webhook_pass
+            webhook_score = (webhook_pass / webhook_total * 100) if webhook_total > 0 else 0
+
+            webhook_result = {
+                "id": f"{api_id}-webhook",
+                "name": f"{api_name} (Webhook)",
+                "method": "POST",
+                "endpoint": f"{api_endpoint}/webhook",
+                "score": round(webhook_score, 0),
+                "validationCnt": retries,
+                "totalFields": webhook_total,
+                "passFields": webhook_pass,
+                "failFields": webhook_fail,
+                "validations": webhook_validations
+            }
+
+            apis.append(webhook_result)
+            total_pass += webhook_pass
+            total_fields += webhook_total
+
+    # 4. spec 전체 평균 점수 계산
+    spec_score = (total_pass / total_fields * 100) if total_fields > 0 else 0
+
+    # 5. spec 이름 가져오기
+    spec_name = get_spec_test_name(spec_id)
+
+    # 6. 최종 결과 반환
+    return {
+        "testSpecId": spec_id,
+        "testSpecName": spec_name,
+        "score": round(spec_score, 2),
+        "totalFields": total_fields,
+        "passedFields": total_pass,
+        "failedFields": total_fields - total_pass,
+        "apis": apis
+    }
 
 def save_result_json(myapp_instance, output_path="results/validation_result.json"):
     """
