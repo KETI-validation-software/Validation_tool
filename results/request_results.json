@@ -1,105 +1,247 @@
 {
-  "requestId": "cmhba7ldg000g6zcrxdqwdcje",
+  "requestId": "cmh1yg49v000t9y0jdr1wwuja",
   "evaluationTarget": {
-    "companyName": "테스트",
+    "companyName": "통합플랫폼테스트",
     "contactPerson": "김철수",
-    "productName": "통합플랫폼",
+    "productName": "통합플랫폼테스트제품",
     "modelName": "v1.0",
     "version": "v1.0"
   },
   "testGroup": {
-    "id": "cmh1yc1yn000g9y0jk37caeqv",
-    "name": "통합시스템그룹",
-    "testRange": "ALL_FIELDS, ALL_FIELDS",
+    "id": "cmgzwocpp01y6vsve880sfysm",
+    "name": "통합플랫폼",
+    "testRange": "ALL_FIELDS",
     "testSpecIds": [
-      "cmh1u5pef000sgxc3bzl4y9v0",
       "cmgvieyak001b6cd04cgaawmm"
     ]
   },
   "status": "완료",
   "authMethod": "Bearer Token",
   "testScore": {
-    "score": 0.0,
-    "totalFields": 9,
-    "passedFields": 0,
-    "failedFields": 9
+    "score": 14.71,
+    "totalFields": 34,
+    "passedFields": 5,
+    "failedFields": 29
   },
   "testResult": [
     {
-      "testSpecId": "cmh1u5pef000sgxc3bzl4y9v0",
-      "testSpecName": "영상보안시스템_시나리오2",
-      "score": 0.0,
-      "totalFields": 9,
-      "passedFields": 0,
-      "failedFields": 9,
+      "testSpecId": "cmgvieyak001b6cd04cgaawmm",
+      "testSpecName": "영상보안시스템_new",
+      "score": 14.71,
+      "totalFields": 34,
+      "passedFields": 5,
+      "failedFields": 29,
       "apis": [
         {
-          "id": "step-1-dfyzdlda0",
-          "name": "실시간 이벤트 분석 정보 연동",
+          "id": "step-1-77lxvxrit",
+          "name": "인증",
           "method": "POST",
-          "endpoint": "/RealtimeVideoEventInfos",
+          "endpoint": "/Authentication",
           "score": 0.0,
-          "validationCnt": 10,
-          "totalFields": 9,
+          "validationCnt": 1,
+          "totalFields": 2,
           "passFields": 0,
-          "failFields": 9,
+          "failFields": 2,
           "validations": [
             {
               "attempt": 1,
               "validationData": {},
               "validationErrors": [
-                "Message Missing!"
+                "[Inbound]",
+                "[구조] 필수 필드 누락: userID",
+                "[구조] 필수 필드 누락: userPW"
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "step-2-ln57b7ahz",
+          "name": "전송 지원 기능 정보 연동",
+          "method": "POST",
+          "endpoint": "/Capabilities",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 1,
+          "passFields": 1,
+          "failFields": 0,
+          "validations": [
             {
-              "attempt": 2,
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "step-1-354py0pz2",
+          "name": "카메라 목록 연동",
+          "method": "POST",
+          "endpoint": "/CameraProfiles",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 1,
+          "passFields": 1,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "step-2-hyto4xrf1",
+          "name": "저장된 영상 목록 연동",
+          "method": "POST",
+          "endpoint": "/StoredVideoInfos",
+          "score": 40.0,
+          "validationCnt": 1,
+          "totalFields": 5,
+          "passFields": 2,
+          "failFields": 3,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "[Inbound]",
+                "[구조] 필수 필드 누락: timePeriod",
+                "[구조] 필수 필드 누락: timePeriod.endTime",
+                "[구조] 필수 필드 누락: timePeriod.startTime"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "step-5-dfxmyzzsw",
+          "name": "실시간 영상 정보 연동",
+          "method": "POST",
+          "endpoint": "/StreamURLs",
+          "score": 0.0,
+          "validationCnt": 1,
+          "totalFields": 3,
+          "passFields": 0,
+          "failFields": 3,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "[Inbound]",
+                "[구조] 필수 필드 누락: camList",
+                "[구조] 필수 필드 누락: camList.camID",
+                "[구조] 필수 필드 누락: camList.streamProtocolType"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "step-6-pflcyt2cp",
+          "name": "저장된 영상 정보 연동",
+          "method": "POST",
+          "endpoint": "/ReplayURL",
+          "score": 0.0,
+          "validationCnt": 1,
+          "totalFields": 5,
+          "passFields": 0,
+          "failFields": 5,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "[Inbound]",
+                "[구조] 필수 필드 누락: camList",
+                "[구조] 필수 필드 누락: camList.camID",
+                "[구조] 필수 필드 누락: camList.endTime",
+                "[구조] 필수 필드 누락: camList.startTime",
+                "[구조] 필수 필드 누락: camList.streamProtocolType"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "step-7-166n5ivbf-registration",
+          "name": "실시간 이벤트 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/RealtimeVideoEventInfos",
+          "score": 11.0,
+          "validationCnt": 1,
+          "totalFields": 9,
+          "passFields": 1,
+          "failFields": 8,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "[Inbound]",
+                "[구조] 필수 필드 누락: camList",
+                "[구조] 필수 필드 누락: camList.camID",
+                "[구조] 필수 필드 누락: camList.endTime",
+                "[구조] 필수 필드 누락: camList.eventDesc",
+                "[구조] 필수 필드 누락: camList.eventName",
+                "[구조] 필수 필드 누락: camList.eventUUID",
+                "[구조] 필수 필드 누락: camList.startTime",
+                "--- Webhook 검증 ---",
+                "[구조] 타입 불일치: code (예상: str, 실제: int)"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "step-7-166n5ivbf-webhook",
+          "name": "실시간 이벤트 분석 정보 연동 (Webhook)",
+          "method": "POST",
+          "endpoint": "/RealtimeVideoEventInfos/webhook",
+          "score": 0,
+          "validationCnt": 1,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
               "validationData": {},
               "validationErrors": []
-            },
+            }
+          ]
+        },
+        {
+          "id": "step-8-fff2u2432",
+          "name": "저장된 이벤트 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/StoredVideoEventInfos",
+          "score": 0.0,
+          "validationCnt": 1,
+          "totalFields": 8,
+          "passFields": 0,
+          "failFields": 8,
+          "validations": [
             {
-              "attempt": 3,
+              "attempt": 1,
               "validationData": {},
-              "validationErrors": []
-            },
-            {
-              "attempt": 4,
-              "validationData": {},
-              "validationErrors": []
-            },
-            {
-              "attempt": 5,
-              "validationData": {},
-              "validationErrors": []
-            },
-            {
-              "attempt": 6,
-              "validationData": {},
-              "validationErrors": []
-            },
-            {
-              "attempt": 7,
-              "validationData": {},
-              "validationErrors": []
-            },
-            {
-              "attempt": 8,
-              "validationData": {},
-              "validationErrors": []
-            },
-            {
-              "attempt": 9,
-              "validationData": {},
-              "validationErrors": []
-            },
-            {
-              "attempt": 10,
-              "validationData": {},
-              "validationErrors": []
+              "validationErrors": [
+                "[Inbound]",
+                "[구조] 필수 필드 누락: camList",
+                "[구조] 필수 필드 누락: camList.camID",
+                "[구조] 필수 필드 누락: classFilter",
+                "[구조] 필수 필드 누락: eventFilter",
+                "[구조] 필수 필드 누락: maxCount",
+                "[구조] 필수 필드 누락: timePeriod",
+                "[구조] 필수 필드 누락: timePeriod.endTime",
+                "[구조] 필수 필드 누락: timePeriod.startTime"
+              ]
             }
           ]
         }
       ]
     }
   ],
-  "completedDate": "2025-11-01T16:57:59Z"
+  "completedDate": "2025-11-01T17:56:13Z"
 }
