@@ -974,8 +974,32 @@ class MyApp(QWidget):
                 print(f"[DEBUG] 모든 API 처리 완료, 타이머 정지")
                 self.tick_timer.stop()
 
+                # ✅ 현재 spec 데이터 저장
+                self.save_current_spec_data()
+
                 self.sbtn.setEnabled(True)
                 self.stop_btn.setDisabled(True)
+
+                # ✅ 완료 메시지 추가
+                self.valResult.append("\n" + "=" * 50)
+                self.valResult.append("🎉 모든 API 검증이 완료되었습니다!")
+                self.valResult.append("=" * 50)
+
+                # ✅ 자동 저장
+                try:
+                    self.run_status = "완료"
+                    result_json = build_result_json(self)
+                    json_path = os.path.join(result_dir, "request_results.json")
+                    with open(json_path, "w", encoding="utf-8") as f:
+                        json.dump(result_json, f, ensure_ascii=False, indent=2)
+                    print(f"✅ 시험 결과가 '{json_path}'에 자동 저장되었습니다.")
+                    self.valResult.append(f"\n📄 결과 파일 저장 완료: {json_path}")
+                except Exception as e:
+                    print(f"❌ JSON 저장 중 오류 발생: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    self.valResult.append(f"\n⚠️ 결과 저장 실패: {str(e)}")
+
                 return
 
             # 첫 틱에서는 대기만
@@ -1422,17 +1446,23 @@ class MyApp(QWidget):
                 self.sbtn.setEnabled(True)
                 self.stop_btn.setDisabled(True)
 
+                # ✅ 현재 spec 데이터 저장
+                self.save_current_spec_data()
+
+                # ✅ 자동 저장
                 try:
                     self.run_status = "완료"
                     result_json = build_result_json(self)
                     json_path = os.path.join(result_dir, "request_results.json")
                     with open(json_path, "w", encoding="utf-8") as f:
                         json.dump(result_json, f, ensure_ascii=False, indent=2)
-                    print(f"시험 결과 JSON이 '{json_path}'에 저장되었습니다.")
+                    print(f"✅ 시험 결과가 '{json_path}'에 자동 저장되었습니다.")
+                    self.valResult.append(f"\n📄 결과 파일 저장 완료: {json_path}")
                 except Exception as e:
-                    print(f"JSON 저장 중 오류 발생: {e}")
+                    print(f"❌ JSON 저장 중 오류 발생: {e}")
                     import traceback
                     traceback.print_exc()
+                    self.valResult.append(f"\n⚠️ 결과 저장 실패: {str(e)}")
 
         except Exception as err:
             print(f"[ERROR] update_view에서 예외 발생: {err}")
@@ -2958,18 +2988,21 @@ class MyApp(QWidget):
         self.valResult.append("검증 절차가 중지되었습니다.")
         self.sbtn.setEnabled(True)
         self.stop_btn.setDisabled(True)
-
+        self.save_current_spec_data()
         try:
             self.run_status = "진행중"
             result_json = build_result_json(self)
             json_path = os.path.join(result_dir, "request_results.json")
             with open(json_path, "w", encoding="utf-8") as f:
                 json.dump(result_json, f, ensure_ascii=False, indent=2)
-            print(f"시험 결과 JSON이 '{json_path}'에 저장되었습니다.")
+            print(f"✅ 진행 중 결과가 '{json_path}'에 저장되었습니다.")
+            self.valResult.append(f"\n📄 진행 상황 저장 완료: {json_path}")
+            self.valResult.append("(일시정지 시점까지의 결과가 저장되었습니다)")
         except Exception as e:
-            print(f"JSON 저장 중 오류 발생: {e}")
+            print(f"❌ JSON 저장 중 오류 발생: {e}")
             import traceback
             traceback.print_exc()
+            self.valResult.append(f"\n⚠️ 결과 저장 실패: {str(e)}")
 
     def init_win(self):
         self.cnt = 0
