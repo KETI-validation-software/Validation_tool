@@ -134,6 +134,7 @@ class FormValidator:
                 webhook_schema_names = []  # webhook 전용 스키마 리스트
                 webhook_data_names = []    # webhook 전용 데이터 리스트
                 webhook_constraints_names = []  # webhook 전용 constraints 리스트
+
                 temp_spec_id = spec_id+"_"
                 for s in steps:
                     step_id = s.get("id")
@@ -175,16 +176,20 @@ class FormValidator:
                 schema_content += "]\n\n"
 
                 # WebHook 전용 스키마 리스트 생성
+                webhook_schema_list_name = None
+
                 if webhook_schema_names:
                     if file_type == "request":
                         webhook_schema_list_name = f"{spec_id}_webhook_inSchema"
                     else:
                         webhook_schema_list_name = f"{spec_id}_webhook_OutSchema"
-                schema_content += f"# {spec_id} WebHook 스키마 리스트\n"
-                schema_content += f"{webhook_schema_list_name} = [\n"
-                for name in webhook_schema_names:
-                    schema_content += f"    {temp_spec_id}{name},\n"
-                schema_content += "]\n\n"
+
+                if webhook_schema_list_name:  # ✅ 실제 값이 있을 때만 추가
+                    schema_content += f"# {spec_id} WebHook 스키마 리스트\n"
+                    schema_content += f"{webhook_schema_list_name} = [\n"
+                    for name in webhook_schema_names:
+                        schema_content += f"    {temp_spec_id}{name},\n"
+                    schema_content += "]\n\n"
 
                 if file_type == "request":
                     data_list_name = f"{spec_id}_inData"
