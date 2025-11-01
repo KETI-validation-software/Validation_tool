@@ -1250,7 +1250,8 @@ class MyApp(QWidget):
                             tmp_webhook_response = json.dumps(webhook_response, indent=4, ensure_ascii=False)
                             accumulated['data_parts'].append(
                                 f"\n--- Webhook 응답 (시도 {retry_attempt + 1}회차) ---\n{tmp_webhook_response}")
-
+                            if self.cnt < len(self.step_buffers):
+                                self.step_buffers[self.cnt]["is_webhook_api"] = True
                             # 웹훅 응답 검증
                             if len(self.videoWebhookSchema) > 0:
                                 webhook_resp_val_result, webhook_resp_val_text, webhook_resp_key_psss_cnt, webhook_resp_key_error_cnt = json_check_(

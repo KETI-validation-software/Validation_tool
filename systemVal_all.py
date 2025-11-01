@@ -6,6 +6,7 @@ import threading
 import json
 import requests
 import sys
+from core.functions import build_result_json
 
 import urllib3
 import warnings
@@ -34,7 +35,10 @@ import spec.Data_request as data_request_module
 import spec.Schema_response as schema_response_module
 import spec.Constraints_request as constraints_request_module
 
+import os
 
+result_dir = os.path.join(os.getcwd(), "results")
+os.makedirs(result_dir, exist_ok=True)
 # 통합된 상세 내용 확인 팝업창 클래스
 class CombinedDetailDialog(QDialog):
     def __init__(self, api_name, step_buffer, schema_data, webhook_schema=None):
@@ -749,6 +753,8 @@ class MyApp(QWidget):
         # PyInstaller 환경에서는 절대 경로로 직접 로드
         import sys
         import os
+        self.run_status = "진행전"
+
         # ✅ 분야별 점수 (현재 spec만)
         self.current_retry = 0
         self.total_error_cnt = 0
@@ -1594,6 +1600,8 @@ class MyApp(QWidget):
 
                     msg = {}
                     self.webhook_flag = True
+                    self.step_buffers[self.cnt]["is_webhook_api"] = True
+
                     self.webhook_cnt = self.cnt
                     self.webhook_thread = WebhookThread(url, port, msg)
                     self.webhook_thread.result_signal.connect(self.handle_webhook_result)
@@ -1879,6 +1887,8 @@ class MyApp(QWidget):
                 if self.cnt >= len(self.message):
                     self.tick_timer.stop()
                     self.valResult.append("검증 절차가 완료되었습니다.")
+
+                    # ✅ 현재 spec 데이터 저장
                     self.save_current_spec_data()
 
                     self.processing_response = False
@@ -1886,21 +1896,32 @@ class MyApp(QWidget):
 
                     self.cnt = 0
                     self.current_retry = 0
+
+                    # 최종 리포트 생성
                     total_fields = self.total_pass_cnt + self.total_error_cnt
                     if total_fields > 0:
-                        score = (self.total_pass_cnt / total_fields) * 100
+                        final_score = (self.total_pass_cnt / total_fields) * 100
                     else:
-                        score = 0
-                    self.final_report += "전체 점수: " + str(score) + "\n"
-                    self.final_report += "전체 결과: " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(
-                        self.total_error_cnt) + "(누적 오류 필드 수)" + "\n"
-                    self.final_report += "\n"
-                    self.final_report += "메시지 검증 세부 결과 \n"
-                    self.final_report += self.valResult.toPlainText()
+                        final_score = 0
+
+                    # ✅ JSON 결과 자동 저장 추가
+                    try:
+                        self.run_status = "완료"
+                        result_json = build_result_json(self)
+                        json_path = os.path.join(result_dir, "response_results.json")
+                        with open(json_path, "w", encoding="utf-8") as f:
+                            json.dump(result_json, f, ensure_ascii=False, indent=2)
+                        print(f"✅ 시험 결과가 '{json_path}'에 자동 저장되었습니다.")
+                        self.valResult.append(f"\n📄 결과 파일 저장 완료: {json_path}")
+                    except Exception as e:
+                        print(f"❌ JSON 저장 중 오류 발생: {e}")
+                        import traceback
+                        traceback.print_exc()
+                        self.valResult.append(f"\n⚠️ 결과 저장 실패: {str(e)}")
 
                     self.sbtn.setEnabled(True)
                     self.stop_btn.setDisabled(True)
-                return
+
 
             # 응답이 도착한 경우 처리
             elif self.post_flag == True:
@@ -2221,20 +2242,38 @@ class MyApp(QWidget):
             if self.cnt >= len(self.message):
                 self.tick_timer.stop()
                 self.valResult.append("검증 절차가 완료되었습니다.")
+
+                # ✅ 현재 spec 데이터 저장
                 self.save_current_spec_data()
 
                 self.processing_response = False
                 self.post_flag = False
 
                 self.cnt = 0
-                self.current_retry = 0  # 재시도 카운터도 리셋
-                self.final_report += "전체 점수: " + str(
-                    (self.total_pass_cnt / (self.total_pass_cnt + self.total_error_cnt) * 100)) + "\n"
-                self.final_report += "전체 결과: " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(
-                    self.total_error_cnt) + "(누적 오류 필드 수)" + "\n"
-                self.final_report += "\n"
-                self.final_report += "메시지 검증 세부 결과 \n"
-                self.final_report += self.valResult.toPlainText()
+                self.current_retry = 0
+
+                # 최종 리포트 생성
+                total_fields = self.total_pass_cnt + self.total_error_cnt
+                if total_fields > 0:
+                    final_score = (self.total_pass_cnt / total_fields) * 100
+                else:
+                    final_score = 0
+
+                # ✅ JSON 결과 자동 저장 추가
+                try:
+                    self.run_status = "완료"
+                    result_json = build_result_json(self)
+                    json_path = os.path.join(result_dir, "response_results.json")
+                    with open(json_path, "w", encoding="utf-8") as f:
+                        json.dump(result_json, f, ensure_ascii=False, indent=2)
+                    print(f"✅ 시험 결과가 '{json_path}'에 자동 저장되었습니다.")
+                    self.valResult.append(f"\n📄 결과 파일 저장 완료: {json_path}")
+                except Exception as e:
+                    print(f"❌ JSON 저장 중 오류 발생: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    self.valResult.append(f"\n⚠️ 결과 저장 실패: {str(e)}")
+
                 self.sbtn.setEnabled(True)
                 self.stop_btn.setDisabled(True)
 
@@ -3090,7 +3129,6 @@ class MyApp(QWidget):
 
         # ✅ 13. 결과 텍스트 초기화
         self.valResult.clear()
-        self.final_report = ""
 
         # ✅ 14. URL 설정
         self.pathUrl = CONSTANTS.url
@@ -3114,6 +3152,24 @@ class MyApp(QWidget):
         self.valResult.append("검증 절차가 중지되었습니다.")
         self.sbtn.setEnabled(True)
         self.stop_btn.setDisabled(True)
+
+        self.save_current_spec_data()
+
+        # ✅ JSON 결과 저장 추가
+        try:
+            self.run_status = "진행중"
+            result_json = build_result_json(self)
+            json_path = os.path.join(result_dir, "response_results.json")
+            with open(json_path, "w", encoding="utf-8") as f:
+                json.dump(result_json, f, ensure_ascii=False, indent=2)
+            print(f"✅ 진행 중 결과가 '{json_path}'에 저장되었습니다.")
+            self.valResult.append(f"\n📄 진행 상황 저장 완료: {json_path}")
+            self.valResult.append("(일시정지 시점까지의 결과가 저장되었습니다)")
+        except Exception as e:
+            print(f"❌ JSON 저장 중 오류 발생: {e}")
+            import traceback
+            traceback.print_exc()
+            self.valResult.append(f"\n⚠️ 결과 저장 실패: {str(e)}")
 
     def init_win(self):
         def init_win(self):
@@ -3223,62 +3279,13 @@ class MyApp(QWidget):
             print(f"전체화면 전환 오류: {e}")
 
     def exit_btn_clicked(self):
-        """프로그램 종료"""
-        # 타이머 정지
-        if hasattr(self, 'tick_timer'):
-            self.tick_timer.stop()
-
-        # print문 추가 -> 나중에 기능 수정해야함 (09/30)
-        total_pass = getattr(self, 'total_pass_cnt', 0)
-        total_error = getattr(self, 'total_error_cnt', 0)
-        grand_total = total_pass + total_error
-        overall_score = (total_pass / grand_total * 100) if grand_total > 0 else 0
-
-        # 스텝별 결과 수집
-        rows = self.tableWidget.rowCount()
-        step_lines = []
-        for i in range(rows):
-            name = self.tableWidget.item(i, 0).text() if self.tableWidget.item(i, 0) else "N/A"
-            get_txt = lambda col: self.tableWidget.item(i, col).text() if self.tableWidget.item(i, col) else "N/A"
-            retries = get_txt(2)
-            pass_cnt = get_txt(3)
-            total_cnt = get_txt(4)
-            fail_cnt = get_txt(5)
-            score = get_txt(6)
-            # step_buffer에 최종 판정 가져오기
-            final_res = self.step_buffers[i]["result"] if i < len(self.step_buffers) else "N/A"
-            step_lines.append(
-                f"{name} | 결과: {final_res} | 검증 횟수: {retries} | 통과 필드 수: {pass_cnt} | 전체 필드 수: {total_cnt} | 실패 필드 수: {fail_cnt} | 평가 점수: {score}")
-
-            # 로그 원문
-            raw_log = self.valResult.toPlainText() if hasattr(self, 'valResult') else ""
-
-            # 최종 페이로드 구성
-            header = "=== 시험 결과 ==="
-            overall = f"통과 필드 수: {total_pass}\n전체 필드 수: {grand_total}\n종합 평가 점수: {overall_score:.1f}%"
-            steps_text = "=== 스텝별 결과 ===\n" + "\n".join(step_lines) if step_lines else "스텝별 결과 없음"
-            logs_text = "=== 전체 로그 ===\n" + raw_log if raw_log else "로그 없음"
-            final_text = f"{header}\n{overall}\n\n{steps_text}\n\n{logs_text}\n"
-
-            # print(final_text)  # 나중에 대체
-
-            import os
-            result_dir = os.path.join(os.getcwd(), "results")
-            os.makedirs(result_dir, exist_ok=True)
-            results_path = os.path.join(result_dir, "response_results.txt")  # 파일 저장명 수정
-
-            with open(results_path, "w", encoding="utf-8") as f:
-                f.write(final_text)
-
-            print(f"시험 결과가 '{results_path}'에 저장되었습니다.")
-
-        # 확인 대화상자
         reply = QMessageBox.question(self, '프로그램 종료',
                                      '정말로 프로그램을 종료하시겠습니까?',
                                      QMessageBox.Yes | QMessageBox.No,
                                      QMessageBox.No)
 
         if reply == QMessageBox.Yes:
+            result_payload = self.build_result_payload()
             QApplication.quit()
 
     def get_setting(self):
@@ -3301,7 +3308,6 @@ class MyApp(QWidget):
             self.webhookInSchema = []
 
         self.webhookSchema = self.webhookInSchema
-        self.final_report = f"{self.spec_description} 검증 결과\n"
 
         # 기본 인증 설정 (CONSTANTS.py에서 가져옴)
         self.r2 = CONSTANTS.auth_type
