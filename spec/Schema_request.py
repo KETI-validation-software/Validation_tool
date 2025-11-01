@@ -1,6 +1,9 @@
 from json_checker import OptionalKey
 
 
+from json_checker import OptionalKey
+
+
 # RealtimeVideoEventInfos
 cmh1u5pef000sgxc3bzl4y9v0_RealtimeVideoEventInfos_in_schema = {
     "camList": [{

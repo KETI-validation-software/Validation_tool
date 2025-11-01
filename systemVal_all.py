@@ -1017,6 +1017,10 @@ class MyApp(QWidget):
         panel_layout = QVBoxLayout()
         panel_layout.setContentsMargins(10, 10, 10, 10)
 
+        # 🆕 시험 그룹 테이블 추가
+        group_table = self.create_group_selection_table()
+        panel_layout.addWidget(group_table)
+
         # 시험 분야 확인 문구
         title = QLabel("시험 분야를 선택하세요.")
         title.setStyleSheet("font-size: 14px; font-weight: bold; padding: 10px;")
@@ -1032,15 +1036,94 @@ class MyApp(QWidget):
         # 선택된 시험 분야 행
         self.selected_test_field_row = None
 
+    def create_group_selection_table(self):
+        """
+        ✅ 시험 분야명을 테이블 형식으로 표시
+        """
+        group_box = QGroupBox("시험 분야")
+        layout = QVBoxLayout()
+
+        self.group_table = QTableWidget(0, 1)
+        self.group_table.setHorizontalHeaderLabels(["시험 분야"])
+        self.group_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.group_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.group_table.verticalHeader().setVisible(False)
+        self.group_table.setMaximumHeight(200)
+        self.group_table.setStyleSheet("""
+            QTableWidget {
+                background-color: #FFFFFF;
+                border: 1px solid #CECECE;
+                border-radius: 4px;
+                font-family: "Noto Sans KR";
+                font-size: 14px;
+                color: #1B1B1C;
+            }
+            QHeaderView::section {
+                background-color: #EDF0F3;
+                border: 0px;
+                color: #1B1B1C;
+                font-weight: 600;
+                text-align: center;
+            }
+            QTableWidget::item:selected {
+                background-color: #E3F2FF;
+            }
+        """)
+
+        # ✅ CONSTANTS.SPEC_CONFIG에서 그룹명 추출
+        group_items = []
+        for group_data in CONSTANTS.SPEC_CONFIG:
+            group_name = group_data.get("group_name", "미정 그룹")
+            group_id = group_data.get("group_id", "")
+            group_items.append((group_name, group_id))
+
+        self.group_table.setRowCount(len(group_items))
+        for i, (name, gid) in enumerate(group_items):
+            item = QTableWidgetItem(name)  # 번호 없이 그룹명만
+            item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            self.group_table.setItem(i, 0, item)
+
+        self.group_table.cellClicked.connect(self.on_group_selected)
+
+        layout.addWidget(self.group_table)
+        group_box.setLayout(layout)
+        return group_box
+
+    def on_group_selected(self, row, col):
+        """
+        ✅ 시험 그룹 선택 시 해당 그룹의 시험 분야 목록을 자동 갱신
+        """
+        # 선택된 그룹명 가져오기
+        if not hasattr(self, "index_to_group_name"):
+            return
+
+        group_name = self.index_to_group_name.get(row)
+        if not group_name:
+            return
+
+        # CONSTANTS.SPEC_CONFIG에서 선택된 그룹 데이터 찾기
+        selected_group = None
+        for group_data in CONSTANTS.SPEC_CONFIG:
+            if group_data.get("group_name") == group_name:
+                selected_group = group_data
+                break
+
+        if selected_group is None:
+            print(f"[WARN] 선택된 그룹({group_name}) 데이터를 찾을 수 없습니다.")
+            return
+
+        # 시험 분야 테이블 갱신
+        self.update_test_field_table(selected_group)
+
     def create_test_field_group(self):
         """
         ✅ System은 Response 검증만 - Response 스키마 ID만 표시 (3개)
         """
-        group_box = QGroupBox("시험 분야")  # ← 변수명 변경
+        group_box = QGroupBox("시험 시나리오")  # ← 변수명 변경
         layout = QVBoxLayout()
 
         self.test_field_table = QTableWidget(0, 1)
-        self.test_field_table.setHorizontalHeaderLabels(["시험 분야명"])
+        self.test_field_table.setHorizontalHeaderLabels(["시험 시나리오"])
         self.test_field_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.test_field_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.test_field_table.cellClicked.connect(self.on_test_field_selected)
@@ -1082,6 +1165,41 @@ class MyApp(QWidget):
         layout.addWidget(self.test_field_table)
         group_box.setLayout(layout)  # ← group_box 사용
         return group_box  # ← group_box 반환
+
+    def update_test_field_table(self, group_data):
+        """
+        ✅ 선택된 시험 그룹의 시험 분야 테이블을 갱신
+        """
+        # 기존 테이블 초기화
+        self.test_field_table.clearContents()
+
+        # 시험 분야만 추출
+        spec_items = [
+            (key, value)
+            for key, value in group_data.items()
+            if key not in ["group_name", "group_id"] and isinstance(value, dict)
+        ]
+
+        # 행 개수 재설정
+        self.test_field_table.setRowCount(len(spec_items))
+
+        # 인덱스 매핑 초기화
+        self.spec_id_to_index = {}
+        self.index_to_spec_id = {}
+
+        # 테이블 갱신
+        for idx, (spec_id, config) in enumerate(spec_items):
+            description = config.get("test_name", f"시험 분야 {idx + 1}")
+            description_with_role = f"{description} (요청 검증)"
+            item = QTableWidgetItem(description_with_role)
+            item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+            self.test_field_table.setItem(idx, 0, item)
+
+            # 매핑 저장
+            self.spec_id_to_index[spec_id] = idx
+            self.index_to_spec_id[idx] = spec_id
+
+        print(f"[INFO] '{group_data.get('group_name')}' 그룹의 시험 분야 {len(spec_items)}개 로드 완료.")
 
     def on_test_field_selected(self, row, col):
         """

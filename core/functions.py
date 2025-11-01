@@ -259,15 +259,15 @@ def _validate_field_semantic(field_path, field_value, rule, data, reference_cont
     elif validation_type == "response-field-match":
         return _validate_field_match(field_path, field_value, rule, reference_context,
                                      field_errors, global_errors)
-    
+
     elif validation_type == "request-field-range-match":
         return _validate_range_match(field_path, field_value, rule, reference_context,
                                      field_errors, global_errors)
-    
+
     elif validation_type == "request-field-list-match":
         return _validate_list_match(field_path, field_value, rule, data, reference_context,
                                     field_errors, global_errors)
-    
+
     elif validation_type == "request-field-match":
         return _validate_field_match(field_path, field_value, rule, reference_context,
                                      field_errors, global_errors)
@@ -275,40 +275,40 @@ def _validate_field_semantic(field_path, field_value, rule, data, reference_cont
     elif validation_type == "response-field-range-match":
         return _validate_range_match(field_path, field_value, rule, reference_context,
                                      field_errors, global_errors)
-    
+
     elif validation_type == "valid-value-match":
         return _validate_valid_value_match(field_path, field_value, rule,
-                                          field_errors, global_errors)
-    
+                                           field_errors, global_errors)
+
     elif validation_type == "specified-value-match":
         return _validate_specified_value_match(field_path, field_value, rule,
                                                field_errors, global_errors)
-    
+
     elif validation_type == "range-match":
         return _validate_range_match_direct(field_path, field_value, rule,
-                                           field_errors, global_errors)
-    
+                                            field_errors, global_errors)
+
     elif validation_type == "length":
         return _validate_length(field_path, field_value, rule,
-                               field_errors, global_errors)
-    
+                                field_errors, global_errors)
+
     elif validation_type == "regex":
         return _validate_regex(field_path, field_value, rule,
-                              field_errors, global_errors)
-    
+                               field_errors, global_errors)
+
     elif validation_type == "required":
         return _validate_required(field_path, field_value, rule,
-                                 field_errors, global_errors)
-    
+                                  field_errors, global_errors)
+
     elif validation_type == "unique":
         return _validate_unique(field_path, field_value, rule,
-                               field_errors, global_errors)
-    
+                                field_errors, global_errors)
+
     elif validation_type == "custom":
         return _validate_custom(field_path, field_value, rule,
-                               field_errors, global_errors)
-    
-    
+                                field_errors, global_errors)
+
+
     elif validation_type == "url-video":
         return _validate_url_video(field_path, field_value, rule, reference_context,
                                    field_errors, global_errors)
@@ -409,7 +409,7 @@ def _validate_field_match(field_path, field_value, rule, reference_context,
         if isinstance(v, list):
             return v
         return [v]
-    
+
     lhs_list = to_list(field_value)
     rhs_list = to_list(ref_value)
 
@@ -434,38 +434,38 @@ def _validate_range_match(field_path, field_value, rule, reference_context,
                           field_errors, global_errors):
     """필드 값이 참조 범위 내에 있는지 검증"""
     from core.json_checker_new import collect_all_values_by_key
-    
+
     ref_field_max = rule.get('referenceFieldMax')
     ref_field_min = rule.get('referenceFieldMin')
     ref_endpoint_max = rule.get('referenceEndpointMax')
     ref_endpoint_min = rule.get('referenceEndpointMin')
     ref_operator = rule.get('referenceRangeOperator', 'between')
-    
+
     # ✅ field_value가 리스트인 경우 각 요소를 검증
     if isinstance(field_value, list):
         print(f"  [DEBUG] field_value가 리스트입니다: {field_value}")
-        
+
         if not field_value:
             error_msg = f"빈 리스트: 범위 검증 불가"
             field_errors.append(error_msg)
             global_errors.append(f"[의미] {field_path}: {error_msg}")
             return False
-        
+
         all_valid = True
         for idx, val in enumerate(field_value):
             if isinstance(val, (int, float)):
                 # 각 요소에 대해 범위 검증 수행
                 if not _validate_single_value_in_range(
-                    field_path, val, ref_endpoint_max, ref_endpoint_min,
-                    ref_field_max, ref_field_min, ref_operator,
-                    reference_context, field_errors, global_errors, idx
+                        field_path, val, ref_endpoint_max, ref_endpoint_min,
+                        ref_field_max, ref_field_min, ref_operator,
+                        reference_context, field_errors, global_errors, idx
                 ):
                     all_valid = False
             else:
                 print(f"  [DEBUG] 리스트 요소[{idx}]가 검증 불가능한 타입: {type(val)}")
-        
+
         return all_valid
-    
+
     # ✅ 단일 값인 경우 기존 로직 수행
     return _validate_single_value_in_range(
         field_path, field_value, ref_endpoint_max, ref_endpoint_min,
@@ -475,17 +475,17 @@ def _validate_range_match(field_path, field_value, rule, reference_context,
 
 
 def _validate_single_value_in_range(field_path, field_value, ref_endpoint_max, ref_endpoint_min,
-                                     ref_field_max, ref_field_min, ref_operator,
-                                     reference_context, field_errors, global_errors, index=None):
+                                    ref_field_max, ref_field_min, ref_operator,
+                                    reference_context, field_errors, global_errors, index=None):
     """단일 값에 대한 범위 검증"""
     from core.json_checker_new import collect_all_values_by_key
-    
+
     # 필드명 표시 (리스트 인덱스 포함)
     display_path = f"{field_path}[{index}]" if index is not None else field_path
-    
+
     max_value = None
     min_value = None
-    
+
     # 1) referenceEndpointMax에서 max 값 추출
     if ref_endpoint_max and ref_endpoint_max in reference_context:
         max_data = reference_context[ref_endpoint_max]
@@ -494,7 +494,7 @@ def _validate_single_value_in_range(field_path, field_value, ref_endpoint_max, r
             if max_values and isinstance(max_values, list) and len(max_values) > 0:
                 max_value = max(max_values)
                 print(f"  [DEBUG] Max value from {ref_endpoint_max}.{ref_field_max}: {max_value}")
-    
+
     # 2) referenceEndpointMin에서 min 값 추출
     if ref_endpoint_min and ref_endpoint_min in reference_context:
         min_data = reference_context[ref_endpoint_min]
@@ -503,7 +503,7 @@ def _validate_single_value_in_range(field_path, field_value, ref_endpoint_max, r
             if min_values and isinstance(min_values, list) and len(min_values) > 0:
                 min_value = min(min_values)
                 print(f"  [DEBUG] Min value from {ref_endpoint_min}.{ref_field_min}: {min_value}")
-    
+
     # 3) range 검증 수행
     if ref_operator == 'between' and min_value is not None and max_value is not None:
         if not (min_value <= field_value <= max_value):
@@ -525,7 +525,7 @@ def _validate_valid_value_match(field_path, field_value, rule, field_errors, glo
     """허용된 값 목록과 일치하는지 검증"""
     allowed = rule.get('allowedValues', [])
     operator = rule.get('validValueOperator', 'equalsAny')
-    
+
     if operator == 'equals':
         # 단일 값만 허용 (allowed가 리스트이면 첫 값 기준)
         expected = allowed[0] if allowed else None
@@ -540,20 +540,20 @@ def _validate_valid_value_match(field_path, field_value, rule, field_errors, glo
             field_errors.append(error_msg)
             global_errors.append(f"[의미] {field_path}: {error_msg}")
             return False
-    
+
     return True
 
 
 def _validate_specified_value_match(field_path, field_value, rule, field_errors, global_errors):
     """지정된 값과 일치하는지 검증"""
     specified = rule.get('allowedValues', [])
-    
+
     if field_value not in specified:
         error_msg = f"값 불일치: {field_value}가 지정값 {specified}에 없음"
         field_errors.append(error_msg)
         global_errors.append(f"[의미] {field_path}: {error_msg}")
         return False
-    
+
     return True
 
 
@@ -562,10 +562,10 @@ def _validate_range_match_direct(field_path, field_value, rule, field_errors, gl
     operator = rule.get('rangeOperator')
     min_val = rule.get('rangeMin')
     max_val = rule.get('rangeMax')
-    
+
     # 리스트인 경우 모든 요소 검증
     values = [field_value] if not isinstance(field_value, list) else field_value
-    
+
     for v in values:
         try:
             v_num = float(v)
@@ -574,42 +574,42 @@ def _validate_range_match_direct(field_path, field_value, rule, field_errors, gl
             field_errors.append(error_msg)
             global_errors.append(f"[의미] {field_path}: {error_msg}")
             return False
-        
+
         if operator == 'less-than' and max_val is not None:
             if not (v_num < max_val):
                 error_msg = f"범위 초과: {v_num} >= {max_val}"
                 field_errors.append(error_msg)
                 global_errors.append(f"[의미] {field_path}: {error_msg}")
                 return False
-        
+
         elif operator == 'less-equal' and max_val is not None:
             if not (v_num <= max_val):
                 error_msg = f"범위 초과: {v_num} > {max_val}"
                 field_errors.append(error_msg)
                 global_errors.append(f"[의미] {field_path}: {error_msg}")
                 return False
-        
+
         elif operator == 'between':
             if (min_val is not None and v_num < min_val) or (max_val is not None and v_num > max_val):
                 error_msg = f"범위 초과: {v_num}이 [{min_val}, {max_val}] 범위를 벗어남"
                 field_errors.append(error_msg)
                 global_errors.append(f"[의미] {field_path}: {error_msg}")
                 return False
-        
+
         elif operator == 'greater-equal' and min_val is not None:
             if not (v_num >= min_val):
                 error_msg = f"범위 미달: {v_num} < {min_val}"
                 field_errors.append(error_msg)
                 global_errors.append(f"[의미] {field_path}: {error_msg}")
                 return False
-        
+
         elif operator == 'greater-than' and min_val is not None:
             if not (v_num > min_val):
                 error_msg = f"범위 미달: {v_num} <= {min_val}"
                 field_errors.append(error_msg)
                 global_errors.append(f"[의미] {field_path}: {error_msg}")
                 return False
-    
+
     return True
 
 
@@ -617,10 +617,10 @@ def _validate_length(field_path, field_value, rule, field_errors, global_errors)
     """길이 검증"""
     min_length = rule.get('minLength')
     max_length = rule.get('maxLength')
-    
+
     # 리스트인 경우 모든 요소 검증
     values = [field_value] if not isinstance(field_value, list) else field_value
-    
+
     for v in values:
         try:
             length = len(v)
@@ -629,30 +629,30 @@ def _validate_length(field_path, field_value, rule, field_errors, global_errors)
             field_errors.append(error_msg)
             global_errors.append(f"[의미] {field_path}: {error_msg}")
             return False
-        
+
         if (min_length is not None and length < min_length) or \
-           (max_length is not None and length > max_length):
+                (max_length is not None and length > max_length):
             error_msg = f"길이 불일치: {length}가 [{min_length}, {max_length}] 범위를 벗어남"
             field_errors.append(error_msg)
             global_errors.append(f"[의미] {field_path}: {error_msg}")
             return False
-    
+
     return True
 
 
 def _validate_regex(field_path, field_value, rule, field_errors, global_errors):
     """정규식 검증"""
     pattern = rule.get('pattern')
-    
+
     if pattern is None:
         error_msg = "정규식 패턴이 지정되지 않음"
         field_errors.append(error_msg)
         global_errors.append(f"[의미] {field_path}: {error_msg}")
         return False
-    
+
     # 리스트인 경우 모든 요소 검증
     values = [field_value] if not isinstance(field_value, list) else field_value
-    
+
     try:
         for v in values:
             if re.fullmatch(pattern, str(v)) is None:
@@ -665,7 +665,7 @@ def _validate_regex(field_path, field_value, rule, field_errors, global_errors):
         field_errors.append(error_msg)
         global_errors.append(f"[의미] {field_path}: {error_msg}")
         return False
-    
+
     return True
 
 
@@ -673,13 +673,13 @@ def _validate_required(field_path, field_value, rule, field_errors, global_error
     """필수 필드 검증"""
     # 리스트인 경우 모든 요소 검증
     values = [field_value] if not isinstance(field_value, list) else field_value
-    
+
     if field_value is None or (len(values) == 1 and values[0] in (None, '')):
         error_msg = "필수 필드가 비어있음"
         field_errors.append(error_msg)
         global_errors.append(f"[의미] {field_path}: {error_msg}")
         return False
-    
+
     return True
 
 
@@ -690,45 +690,45 @@ def _validate_unique(field_path, field_value, rule, field_errors, global_errors)
         field_errors.append(error_msg)
         global_errors.append(f"[의미] {field_path}: {error_msg}")
         return False
-    
+
     # 해시 가능한 항목과 불가능한 항목 분리
     hashable_items = []
     unhashable_items = []
-    
+
     for item in field_value:
         try:
             hash(item)
             hashable_items.append(item)
         except TypeError:
             unhashable_items.append(repr(item))
-    
+
     # 해시 가능한 항목 중복 체크
     if hashable_items and len(hashable_items) != len(set(hashable_items)):
         error_msg = "리스트에 중복된 값이 있음"
         field_errors.append(error_msg)
         global_errors.append(f"[의미] {field_path}: {error_msg}")
         return False
-    
+
     # 해시 불가능한 항목 중복 체크 (repr 기반)
     if unhashable_items and len(unhashable_items) != len(set(unhashable_items)):
         error_msg = "리스트에 중복된 복합 객체가 있음"
         field_errors.append(error_msg)
         global_errors.append(f"[의미] {field_path}: {error_msg}")
         return False
-    
+
     return True
 
 
 def _validate_custom(field_path, field_value, rule, field_errors, global_errors):
     """커스텀 함수 검증"""
     func = rule.get('customFunction')
-    
+
     if not callable(func):
         error_msg = "커스텀 검증 함수가 제공되지 않음"
         field_errors.append(error_msg)
         global_errors.append(f"[의미] {field_path}: {error_msg}")
         return False
-    
+
     try:
         if not func(field_value):
             error_msg = f"커스텀 검증 실패: {field_value}"
@@ -740,7 +740,7 @@ def _validate_custom(field_path, field_value, rule, field_errors, global_errors)
         field_errors.append(error_msg)
         global_errors.append(f"[의미] {field_path}: {error_msg}")
         return False
-    
+
     return True
 
 
@@ -914,7 +914,7 @@ def generate_validation_data_from_step_buffer(step_buffer, attempt_num):
                 validation_data = {"raw_data": raw_data}
         else:
             # 해당 시도의 데이터가 없는 경우
-            validation_data = {}    # attempt_num은 1부터 시작하므로 인덱스는 attempt_num - 1
+            validation_data = {}  # attempt_num은 1부터 시작하므로 인덱스는 attempt_num - 1
 
     # 에러 메시지 추출 - 시도별로 분리
     if step_buffer.get("error"):
@@ -1024,9 +1024,9 @@ def build_result_json(myapp_instance):
         api_score_str = table_widget.item(i, 6).text() if table_widget.item(i, 6) else "0%"
         api_score = float(api_score_str.replace('%', ''))
 
-        api_name = api_names_list[i] if i < len(api_names_list) else f"API-{i+1}"
+        api_name = api_names_list[i] if i < len(api_names_list) else f"API-{i + 1}"
         api_id = api_ids_list[i] if i < len(api_ids_list) else ""
-        api_endpoint = api_endpoints_list[i] if i < len(api_endpoints_list) else f"/api{i+1}"
+        api_endpoint = api_endpoints_list[i] if i < len(api_endpoints_list) else f"/api{i + 1}"
 
         # API 정보에서 메서드와 엔드포인트 추출
         api_info = step_buffer.get("api_info", {})
@@ -1086,7 +1086,7 @@ def build_result_json(myapp_instance):
                 # webhook용 validation 데이터 생성
                 webhook_validation = {
                     "attempt": attempt,
-                    "validationData": step_buffer.get("webhook_data") or {},  #  {}로 변환
+                    "validationData": step_buffer.get("webhook_data") or {},  # {}로 변환
                     "validationErrors": step_buffer.get("webhook_error", "").split('\n') if step_buffer.get(
                         "webhook_error") else []
                 }
@@ -1129,7 +1129,7 @@ def build_result_json(myapp_instance):
                 avg_score = 0
             if status == "진행중":
                 test_score = 0.0
-            else :
+            else:
                 spec_data["score"] = round(avg_score, 2)
 
     test_result = list(spec_results.values())
@@ -1182,7 +1182,7 @@ def save_result_json(myapp_instance, output_path="results/validation_result.json
 def _validate_url_video(field_path, field_value, rule, reference_context, field_errors, global_errors):
     """
     RTSP URL 스트리밍 가능 여부 검증
-    
+
     Args:
         field_path: 필드 경로 (예: "camList.camID")
         field_value: 현재 필드 값 (예: camID 값)
@@ -1190,35 +1190,35 @@ def _validate_url_video(field_path, field_value, rule, reference_context, field_
         reference_context: 참조 엔드포인트 응답 데이터
         field_errors: 필드별 에러 목록
         global_errors: 전역 에러 목록
-    
+
     Returns:
         bool: 검증 성공 여부
     """
     from core.json_checker_new import collect_all_values_by_key, get_by_path
-    
+
     url_field = rule.get("urlField")  # 예: "camURL"
     ref_endpoint = rule.get("referenceEndpoint")  # 예: "/StreamURLs"
-    
+
     if not url_field:
         error_msg = "urlField가 지정되지 않음"
         field_errors.append(error_msg)
         global_errors.append(f"[의미] {field_path}: {error_msg}")
         return False
-    
+
     if not reference_context or ref_endpoint not in reference_context:
         error_msg = f"참조 엔드포인트 없음: {ref_endpoint}"
         field_errors.append(error_msg)
         global_errors.append(f"[의미] {error_msg}")
         return False
-    
+
     ref_data = reference_context[ref_endpoint]
-    
+
     # field_path가 "camList.camID" 형식인 경우
     if "." in field_path:
         parts = field_path.split(".")
         parent_path = ".".join(parts[:-1])  # "camList"
         child_field = parts[-1]  # "camID"
-        
+
         # 참조 데이터에서 해당 객체 찾기
         # ref_data가 리스트인 경우 각 항목에서 매칭되는 객체 찾기
         if isinstance(ref_data, list):
@@ -1227,30 +1227,30 @@ def _validate_url_video(field_path, field_value, rule, reference_context, field_
                 if isinstance(item, dict) and item.get(child_field) == field_value:
                     target_url = item.get(url_field)
                     break
-            
+
             if not target_url:
                 error_msg = f"{child_field}={field_value}에 해당하는 {url_field}을 찾을 수 없음"
                 field_errors.append(error_msg)
                 global_errors.append(f"[의미] {field_path}: {error_msg}")
                 return False
-        
+
         # ref_data가 dict이고 리스트를 포함하는 경우
         elif isinstance(ref_data, dict):
             # parent_path에 해당하는 리스트 찾기
             parent_list = get_by_path(ref_data, parent_path)
-            
+
             if not isinstance(parent_list, list):
                 error_msg = f"참조 경로가 리스트가 아님: {parent_path}"
                 field_errors.append(error_msg)
                 global_errors.append(f"[의미] {field_path}: {error_msg}")
                 return False
-            
+
             target_url = None
             for item in parent_list:
                 if isinstance(item, dict) and item.get(child_field) == field_value:
                     target_url = item.get(url_field)
                     break
-            
+
             if not target_url:
                 error_msg = f"{child_field}={field_value}에 해당하는 {url_field}을 찾을 수 없음"
                 field_errors.append(error_msg)
@@ -1261,58 +1261,58 @@ def _validate_url_video(field_path, field_value, rule, reference_context, field_
             field_errors.append(error_msg)
             global_errors.append(f"[의미] {field_path}: {error_msg}")
             return False
-    
+
     # 단일 필드인 경우 (field_value 자체가 URL)
     else:
         target_url = field_value
-    
+
     # RTSP URL 검증
     print(f"    [url-video] 검증할 URL: {target_url}")
-    
+
     if not target_url or not isinstance(target_url, str):
         error_msg = f"유효하지 않은 URL: {target_url}"
         field_errors.append(error_msg)
         global_errors.append(f"[의미] {field_path}: {error_msg}")
         return False
-    
+
     # URL 형식 기본 검증 (rtsp://)
     if not target_url.startswith("rtsp://"):
         error_msg = f"RTSP URL이 아님: {target_url} (rtsp:// 로 시작해야 함)"
         field_errors.append(error_msg)
         global_errors.append(f"[의미] {field_path}: {error_msg}")
         return False
-    
+
     # OpenCV로 스트림 연결 테스트
     cap = None
     try:
         print(f"    [url-video] OpenCV로 연결 시도 중...")
         cap = cv2.VideoCapture(target_url)
-        
+
         # 연결 성공 여부 확인
         if not cap.isOpened():
             error_msg = f"스트림 연결 실패: {target_url}"
             field_errors.append(error_msg)
             global_errors.append(f"[의미] {field_path}: {error_msg}")
             return False
-        
+
         # 첫 프레임 읽기 시도
         ret, frame = cap.read()
-        
+
         if not ret or frame is None:
             error_msg = f"프레임 읽기 실패: {target_url}"
             field_errors.append(error_msg)
             global_errors.append(f"[의미] {field_path}: {error_msg}")
             return False
-        
+
         print(f"    [url-video] ✅ 스트림 검증 성공: {target_url} (프레임 크기: {frame.shape})")
         return True
-    
+
     except Exception as e:
         error_msg = f"스트림 검증 중 오류 발생: {target_url} - {str(e)}"
         field_errors.append(error_msg)
         global_errors.append(f"[의미] {field_path}: {error_msg}")
         return False
-    
+
     finally:
         if cap is not None:
             cap.release()
