@@ -1,39 +1,38 @@
 === 시험 결과 ===
 통과 필드 수: 0
-전체 필드 수: 44
+전체 필드 수: 25
 종합 평가 점수: 0.0%
 
 === 스텝별 결과 ===
-1. Authentication | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 0 | 전체 필드 수: 5 | 실패 필드 수: 5 | 평가 점수: 0.0%
-2. Capabilities | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 0 | 전체 필드 수: 8 | 실패 필드 수: 8 | 평가 점수: 0.0%
-3. CameraProfiles | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 0 | 전체 필드 수: 12 | 실패 필드 수: 12 | 평가 점수: 0.0%
-4. StoredVideoInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 0 | 전체 필드 수: 7 | 실패 필드 수: 7 | 평가 점수: 0.0%
-5. StreamURLs | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 0 | 전체 필드 수: 12 | 실패 필드 수: 12 | 평가 점수: 0.0%
-6. ReplayURL | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-7. RealtimeVideoEventInfos | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-8. StoredVideoEventInfos | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
+1. Authentication | 결과: PASS | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
 
 === 전체 로그 ===
-Start Validation...
+============================================================
+🚀 시험 시작: 영상보안시스템_시나리오2
+📋 Spec ID: cmh1ua7b00021gxc3rjepbkrm
+📊 API 개수: 1개
+📋 API 목록: ['Authentication']
+============================================================
 
 시스템이 플랫폼에 요청을 전송하여 응답을 검증합니다
-Message Missing! (시도 1/1)
+
+Message Missing! (시도 1/10)
 Score : 0.0
 Score details : 0(누적 검증 통과 필드 수), 5(누적 검증 오류 필드 수)
 
-Message Missing! (시도 1/1)
+Message Missing! (시도 2/10)
 Score : 0.0
-Score details : 0(누적 검증 통과 필드 수), 13(누적 검증 오류 필드 수)
+Score details : 0(누적 검증 통과 필드 수), 10(누적 검증 오류 필드 수)
 
-Message Missing! (시도 1/1)
+Message Missing! (시도 3/10)
+Score : 0.0
+Score details : 0(누적 검증 통과 필드 수), 15(누적 검증 오류 필드 수)
+
+Message Missing! (시도 4/10)
+Score : 0.0
+Score details : 0(누적 검증 통과 필드 수), 20(누적 검증 오류 필드 수)
+
+Message Missing! (시도 5/10)
 Score : 0.0
 Score details : 0(누적 검증 통과 필드 수), 25(누적 검증 오류 필드 수)
-
-Message Missing! (시도 1/1)
-Score : 0.0
-Score details : 0(누적 검증 통과 필드 수), 32(누적 검증 오류 필드 수)
-
-Message Missing! (시도 1/1)
-Score : 0.0
-Score details : 0(누적 검증 통과 필드 수), 44(누적 검증 오류 필드 수)
 

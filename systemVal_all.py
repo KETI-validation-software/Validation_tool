@@ -525,14 +525,14 @@ class ResultPageWidget(QWidget):
         return spec_group
 
     def _create_total_score_display(self):
-        """전체 점수 표시 그룹 (향후 여러 spec 평균 계산용)"""
-        total_group = QGroupBox('전체 점수')
+        """전체 점수 표시 그룹 (모든 spec 평균 계산용)"""
+        total_group = QGroupBox('전체 점수 (모든 시험 분야 합산)')
         total_group.setMaximumWidth(1050)
         total_group.setMinimumWidth(950)
 
-        # 현재는 1개 spec만 실행하므로 동일한 값
-        total_pass = self.parent.total_pass_cnt
-        total_error = self.parent.total_error_cnt
+        # ✅ 전체 누적 점수 사용
+        total_pass = self.parent.global_pass_cnt
+        total_error = self.parent.global_error_cnt
         total_fields = total_pass + total_error
         score = (total_pass / total_fields * 100) if total_fields > 0 else 0
 
@@ -749,7 +749,17 @@ class MyApp(QWidget):
         # PyInstaller 환경에서는 절대 경로로 직접 로드
         import sys
         import os
+        # ✅ 분야별 점수 (현재 spec만)
+        self.current_retry = 0
+        self.total_error_cnt = 0
+        self.total_pass_cnt = 0
 
+        # ✅ 전체 점수 (모든 spec 합산) - 추가
+        self.global_pass_cnt = 0
+        self.global_error_cnt = 0
+
+        # ✅ 각 spec_id별 테이블 데이터 저장 (시나리오 전환 시 결과 유지) - 추가
+        self.spec_table_data = {}  # {spec_id: {table_data, step_buffers, scores}}
         if getattr(sys, 'frozen', False):
             # PyInstaller 환경 - 외부 CONSTANTS.py를 직접 로드
             exe_dir = os.path.dirname(sys.executable)
@@ -843,6 +853,109 @@ class MyApp(QWidget):
         self.webhook_msg = "."
         self.webhook_cnt = 99
         self.reference_context = {}  # 맥락검증 참조 컨텍스트
+
+    def save_current_spec_data(self):
+        """현재 spec의 테이블 데이터와 상태를 저장"""
+        if not hasattr(self, 'current_spec_id'):
+            return
+
+        # 테이블 데이터 저장
+        table_data = []
+        for row in range(self.tableWidget.rowCount()):
+            row_data = {
+                'api_name': self.tableWidget.item(row, 0).text() if self.tableWidget.item(row, 0) else "",
+                'icon_state': self._get_icon_state(row),
+                'retry_count': self.tableWidget.item(row, 2).text() if self.tableWidget.item(row, 2) else "0",
+                'pass_count': self.tableWidget.item(row, 3).text() if self.tableWidget.item(row, 3) else "0",
+                'total_count': self.tableWidget.item(row, 4).text() if self.tableWidget.item(row, 4) else "0",
+                'fail_count': self.tableWidget.item(row, 5).text() if self.tableWidget.item(row, 5) else "0",
+                'score': self.tableWidget.item(row, 6).text() if self.tableWidget.item(row, 6) else "0%",
+            }
+            table_data.append(row_data)
+
+        # 전체 데이터 저장
+        self.spec_table_data[self.current_spec_id] = {
+            'table_data': table_data,
+            'step_buffers': [buf.copy() for buf in self.step_buffers],
+            'total_pass_cnt': self.total_pass_cnt,
+            'total_error_cnt': self.total_error_cnt,
+        }
+        print(f"[DEBUG] {self.current_spec_id} 데이터 저장 완료")
+
+    def _get_icon_state(self, row):
+        """테이블 행의 아이콘 상태 반환 (PASS/FAIL/NONE)"""
+        icon_widget = self.tableWidget.cellWidget(row, 1)
+        if icon_widget:
+            icon_label = icon_widget.findChild(QLabel)
+            if icon_label:
+                tooltip = icon_label.toolTip()
+                if "PASS" in tooltip:
+                    return "PASS"
+                elif "FAIL" in tooltip:
+                    return "FAIL"
+        return "NONE"
+
+    def restore_spec_data(self, spec_id):
+        """저장된 spec 데이터 복원 (안전성 강화)"""
+        if spec_id not in self.spec_table_data:
+            print(f"[RESTORE] {spec_id} 저장된 데이터 없음")
+            return False
+
+        saved_data = self.spec_table_data[spec_id]
+        print(f"[RESTORE] {spec_id} 데이터 복원 시작")
+
+        # 테이블 복원
+        table_data = saved_data['table_data']
+        for row, row_data in enumerate(table_data):
+            if row >= self.tableWidget.rowCount():
+                print(f"[RESTORE] 경고: row={row}가 범위 초과, 건너뜀")
+                break
+
+            # API 이름
+            api_item = self.tableWidget.item(row, 0)
+            if api_item:
+                api_item.setText(row_data['api_name'])
+
+            # 아이콘 상태 복원
+            icon_state = row_data['icon_state']
+            if icon_state == "PASS":
+                img = self.img_pass
+            elif icon_state == "FAIL":
+                img = self.img_fail
+            else:
+                img = self.img_none
+
+            icon_widget = QWidget()
+            icon_layout = QHBoxLayout()
+            icon_layout.setContentsMargins(0, 0, 0, 0)
+            icon_label = QLabel()
+            icon_label.setPixmap(QIcon(img).pixmap(16, 16))
+            icon_label.setAlignment(Qt.AlignCenter)
+            icon_layout.addWidget(icon_label)
+            icon_layout.setAlignment(Qt.AlignCenter)
+            icon_widget.setLayout(icon_layout)
+            self.tableWidget.setCellWidget(row, 1, icon_widget)
+
+            # 나머지 컬럼 복원 (안전하게)
+            for col, key in [(2, 'retry_count'), (3, 'pass_count'),
+                             (4, 'total_count'), (5, 'fail_count'), (6, 'score')]:
+                item = self.tableWidget.item(row, col)
+                if item:
+                    item.setText(row_data[key])
+                else:
+                    new_item = QTableWidgetItem(row_data[key])
+                    new_item.setTextAlignment(Qt.AlignCenter)
+                    self.tableWidget.setItem(row, col, new_item)
+
+        # step_buffers 복원
+        self.step_buffers = [buf.copy() for buf in saved_data['step_buffers']]
+
+        # 점수 복원
+        self.total_pass_cnt = saved_data['total_pass_cnt']
+        self.total_error_cnt = saved_data['total_error_cnt']
+
+        print(f"[RESTORE] {spec_id} 데이터 복원 완료")
+        return True
 
     def _redact(self, payload):  # ### NEW
         """응답/요청에서 토큰, 패스워드 등 민감값 마스킹(선택)"""
@@ -964,11 +1077,17 @@ class MyApp(QWidget):
         return str(val_text)
 
     def update_table_row_with_retries(self, row, result, pass_count, error_count, data, error_text, retries):
-        """테이블 행 업데이트 (실제 검증 횟수 포함, 플랫폼과 동일하게 아이콘 처리)"""
+        """테이블 행 업데이트 (안전성 강화)"""
+        # ✅ 1. 범위 체크
         if row >= self.tableWidget.rowCount():
+            print(f"[TABLE UPDATE] 경고: row={row}가 테이블 범위를 벗어남 (총 {self.tableWidget.rowCount()}행)")
             return
-        # result가 '진행중'이면 검정색, PASS/FAIL이면 초록/빨강
+
+        print(f"[TABLE UPDATE] row={row}, result={result}, pass={pass_count}, error={error_count}, retries={retries}")
+
+        # ✅ 2. 아이콘 업데이트
         msg, img = self.icon_update_step(data, result, error_text)
+
         icon_widget = QWidget()
         icon_layout = QHBoxLayout()
         icon_layout.setContentsMargins(0, 0, 0, 0)
@@ -979,23 +1098,49 @@ class MyApp(QWidget):
         icon_layout.addWidget(icon_label)
         icon_layout.setAlignment(Qt.AlignCenter)
         icon_widget.setLayout(icon_layout)
+
         self.tableWidget.setCellWidget(row, 1, icon_widget)
-        self.tableWidget.setItem(row, 2, QTableWidgetItem(str(retries)))
-        self.tableWidget.item(row, 2).setTextAlignment(Qt.AlignCenter)
-        self.tableWidget.setItem(row, 3, QTableWidgetItem(str(pass_count)))
-        self.tableWidget.item(row, 3).setTextAlignment(Qt.AlignCenter)
+
+        # ✅ 3. 각 컬럼 업데이트 (아이템이 없으면 생성)
+        updates = [
+            (2, str(retries)),  # 검증 횟수
+            (3, str(pass_count)),  # 통과 필드 수
+            (4, str(pass_count + error_count)),  # 전체 필드 수
+            (5, str(error_count)),  # 실패 필드 수
+        ]
+
+        for col, value in updates:
+            item = self.tableWidget.item(row, col)
+            if item is None:
+                item = QTableWidgetItem(value)
+                item.setTextAlignment(Qt.AlignCenter)
+                self.tableWidget.setItem(row, col, item)
+            else:
+                item.setText(value)
+
+        # ✅ 4. 평가 점수 업데이트
         total_fields = pass_count + error_count
-        self.tableWidget.setItem(row, 4, QTableWidgetItem(str(total_fields)))
-        self.tableWidget.item(row, 4).setTextAlignment(Qt.AlignCenter)
-        self.tableWidget.setItem(row, 5, QTableWidgetItem(str(error_count)))
-        self.tableWidget.item(row, 5).setTextAlignment(Qt.AlignCenter)
         if total_fields > 0:
             score = (pass_count / total_fields) * 100
-            self.tableWidget.setItem(row, 6, QTableWidgetItem(f"{score:.1f}%"))
+            score_text = f"{score:.1f}%"
         else:
-            self.tableWidget.setItem(row, 6, QTableWidgetItem("0%"))
-        self.tableWidget.item(row, 6).setTextAlignment(Qt.AlignCenter)
+            score_text = "0%"
+
+        score_item = self.tableWidget.item(row, 6)
+        if score_item is None:
+            score_item = QTableWidgetItem(score_text)
+            score_item.setTextAlignment(Qt.AlignCenter)
+            self.tableWidget.setItem(row, 6, score_item)
+        else:
+            score_item.setText(score_text)
+
+        # ✅ 5. 메시지 저장
         setattr(self, f"step{row + 1}_msg", msg)
+
+        # ✅ 6. UI 즉시 업데이트
+        QApplication.processEvents()
+
+        print(f"[TABLE UPDATE] 완료: row={row}")
 
     def load_test_info_from_constants(self):
         return [
@@ -1202,62 +1347,143 @@ class MyApp(QWidget):
         print(f"[INFO] '{group_data.get('group_name')}' 그룹의 시험 분야 {len(spec_items)}개 로드 완료.")
 
     def on_test_field_selected(self, row, col):
-        """
-        ✅ SPEC_CONFIG 기반 - 시험 분야 클릭 시 해당 시스템으로 동적 전환
-        """
+        """시험 분야 클릭 시 해당 시스템으로 동적 전환"""
         try:
             self.selected_test_field_row = row
 
-            # ✅ 클릭한 행에 해당하는 spec_id 가져오기
             if row in self.index_to_spec_id:
                 new_spec_id = self.index_to_spec_id[row]
 
-                # 이미 선택된 시스템이면 무시
                 if new_spec_id == self.current_spec_id:
+                    print(f"[SELECT] 이미 선택된 시나리오: {new_spec_id}")
                     return
 
-                print(f"[SYSTEM] 🔄 시험 분야 전환: {self.current_spec_id} → {new_spec_id}")
+                print(f"[SELECT] 🔄 시험 분야 전환: {self.current_spec_id} → {new_spec_id}")
 
-                # spec_id 업데이트
+                # ✅ 1. 현재 spec의 테이블 데이터 저장
+                self.save_current_spec_data()
+
+                # ✅ 2. spec_id 업데이트
                 self.current_spec_id = new_spec_id
 
-                # spec 데이터 다시 로드
+                # ✅ 3. spec 데이터 다시 로드
                 self.load_specs_from_constants()
 
-                # 테이블 초기화
+                print(f"[SELECT] 로드된 API 개수: {len(self.videoMessages)}")
+                print(f"[SELECT] API 목록: {self.videoMessages}")
+
+                # ✅ 4. 기본 변수 초기화
                 self.cnt = 0
                 self.current_retry = 0
-                self.total_pass_cnt = 0
-                self.total_error_cnt = 0
                 self.message_error = []
 
-                # step_buffers 재생성
-                self.step_buffers = [
-                    {"data": "", "error": "", "result": "PASS"} for _ in range(len(self.videoMessages))
-                ]
+                # ✅ 5. 테이블 완전 재구성 (이전 데이터 완전 삭제)
+                print(f"[SELECT] 테이블 완전 재구성 시작")
+                self.update_result_table_structure(self.videoMessages)
 
-                # trace 초기화
+                # ✅ 6. 저장된 데이터 복원 시도
+                restored = self.restore_spec_data(new_spec_id)
+
+                if not restored:
+                    print(f"[SELECT] 저장된 데이터 없음 - 초기화")
+                    # 점수 초기화
+                    self.total_pass_cnt = 0
+                    self.total_error_cnt = 0
+
+                    # step_buffers 초기화
+                    self.step_buffers = [
+                        {"data": "", "error": "", "result": "PASS"} for _ in range(len(self.videoMessages))
+                    ]
+                else:
+                    print(f"[SELECT] 저장된 데이터 복원 완료")
+
+                # ✅ 7. trace 및 latest_events 초기화
                 self.trace.clear()
+                self.latest_events = {}
 
-                # 시험 결과 테이블 업데이트
-                self.update_result_table_with_apis(self.videoMessages)
-
-                # 설정 다시 로드
+                # ✅ 8. 설정 다시 로드
                 self.get_setting()
 
-                # 평가 점수 디스플레이 초기화
+                # ✅ 9. 평가 점수 디스플레이 업데이트
                 self.update_score_display()
 
-                # 결과 텍스트 초기화
+                # ✅ 10. 결과 텍스트 초기화
                 self.valResult.clear()
                 self.valResult.append(f"✅ 시스템 전환 완료: {self.spec_description}")
-                self.valResult.append(f"📋 API 목록 ({len(self.videoMessages)}개): {self.videoMessages}\n")
+                self.valResult.append(f"📋 Spec ID: {self.current_spec_id}")
+                self.valResult.append(f"📊 API 개수: {len(self.videoMessages)}개")
+                self.valResult.append(f"📋 API 목록: {self.videoMessages}\n")
 
-                print(f"[SYSTEM] ✅ 시스템 전환 완료: {self.spec_description}, API 수: {len(self.videoMessages)}")
+                print(f"[SELECT] ✅ 시스템 전환 완료")
+
         except Exception as e:
-            print(f"시험 분야 선택 처리 실패: {e}")
+            print(f"[SELECT] 시험 분야 선택 처리 실패: {e}")
             import traceback
             traceback.print_exc()
+
+    def update_result_table_structure(self, api_list):
+        """테이블 구조를 완전히 재구성 (API 개수에 맞게)"""
+        api_count = len(api_list)
+        print(f"[TABLE] 테이블 재구성 시작: {api_count}개 API")
+
+        # ✅ 1. 테이블 행 개수 설정
+        self.tableWidget.setRowCount(api_count)
+
+        # ✅ 2. 각 행을 완전히 초기화
+        for row in range(api_count):
+            api_name = api_list[row]
+            display_name = f"{row + 1}. {api_name}"
+
+            # 컬럼 0: API 명
+            api_item = QTableWidgetItem(display_name)
+            api_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            self.tableWidget.setItem(row, 0, api_item)
+
+            # 컬럼 1: 결과 아이콘
+            icon_widget = QWidget()
+            icon_layout = QHBoxLayout()
+            icon_layout.setContentsMargins(0, 0, 0, 0)
+            icon_label = QLabel()
+            icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
+            icon_label.setAlignment(Qt.AlignCenter)
+            icon_layout.addWidget(icon_label)
+            icon_layout.setAlignment(Qt.AlignCenter)
+            icon_widget.setLayout(icon_layout)
+            self.tableWidget.setCellWidget(row, 1, icon_widget)
+
+            # 컬럼 2-6: 검증 횟수, 통과/전체/실패 필드 수, 평가 점수
+            col_values = [
+                (2, "0"),  # 검증 횟수
+                (3, "0"),  # 통과 필드 수
+                (4, "0"),  # 전체 필드 수
+                (5, "0"),  # 실패 필드 수
+                (6, "0%")  # 평가 점수
+            ]
+
+            for col, value in col_values:
+                item = QTableWidgetItem(value)
+                item.setTextAlignment(Qt.AlignCenter)
+                self.tableWidget.setItem(row, col, item)
+
+            # 컬럼 7: 상세 내용 버튼
+            detail_btn = QPushButton("상세 내용 확인")
+            detail_btn.setMaximumHeight(30)
+            detail_btn.setMaximumWidth(130)
+            detail_btn.clicked.connect(lambda checked, r=row: self.show_combined_result(r))
+
+            container = QWidget()
+            layout = QHBoxLayout()
+            layout.addWidget(detail_btn)
+            layout.setAlignment(Qt.AlignCenter)
+            layout.setContentsMargins(0, 0, 0, 0)
+            container.setLayout(layout)
+
+            self.tableWidget.setCellWidget(row, 7, container)
+
+            # 행 높이 설정
+            self.tableWidget.setRowHeight(row, 40)
+
+        print(f"[TABLE] 테이블 재구성 완료: {self.tableWidget.rowCount()}개 행")
 
     def update_result_table_with_apis(self, api_list):
         """시험 결과 테이블을 새로운 API 목록으로 업데이트"""
@@ -1437,9 +1663,14 @@ class MyApp(QWidget):
             self.valResult.append("\n⚠️  웹훅 데이터 검증 실패")
         else:
             self.valResult.append("\n✅ 웹훅 데이터 검증 성공")
+
+        # ✅ 이번 회차의 결과만 전체 점수에 추가 (누적된 값이 아님!)
         self.total_error_cnt += key_error_cnt
         self.total_pass_cnt += key_psss_cnt
 
+        # ✅ 전체 누적 점수 업데이트 추가
+        self.global_error_cnt += key_error_cnt
+        self.global_pass_cnt += key_psss_cnt
         # 평가 점수 디스플레이 업데이트
         self.update_score_display()
 
@@ -1595,6 +1826,9 @@ class MyApp(QWidget):
 
                 self.total_error_cnt += add_err
                 self.total_pass_cnt += 0
+                # ✅ 전체 누적 점수 업데이트 추가
+                self.global_error_cnt += add_err
+                self.global_pass_cnt += 0
 
                 # 평가 점수 디스플레이 업데이트
                 self.update_score_display()
@@ -1645,7 +1879,13 @@ class MyApp(QWidget):
                 if self.cnt >= len(self.message):
                     self.tick_timer.stop()
                     self.valResult.append("검증 절차가 완료되었습니다.")
+                    self.save_current_spec_data()
+
+                    self.processing_response = False
+                    self.post_flag = False
+
                     self.cnt = 0
+                    self.current_retry = 0
                     total_fields = self.total_pass_cnt + self.total_error_cnt
                     if total_fields > 0:
                         score = (self.total_pass_cnt / total_fields) * 100
@@ -1981,6 +2221,7 @@ class MyApp(QWidget):
             if self.cnt >= len(self.message):
                 self.tick_timer.stop()
                 self.valResult.append("검증 절차가 완료되었습니다.")
+                self.save_current_spec_data()
 
                 self.processing_response = False
                 self.post_flag = False
@@ -2490,29 +2731,58 @@ class MyApp(QWidget):
         return sgroup
 
     def update_score_display(self):
-        """평가 점수 디스플레이 업데이트"""
-        # 메인 화면의 평가 점수 레이블 업데이트
+        """평가 점수 디스플레이를 업데이트"""
         if not (hasattr(self, "spec_pass_label") and hasattr(self, "spec_total_label") and hasattr(self,
                                                                                                    "spec_score_label")):
             return
 
-        total_fields = self.total_pass_cnt + self.total_error_cnt
-        if total_fields > 0:
-            score = (self.total_pass_cnt / total_fields) * 100
+        # ✅ 1️⃣ 분야별 점수 (현재 spec만)
+        spec_total_fields = self.total_pass_cnt + self.total_error_cnt
+        if spec_total_fields > 0:
+            spec_score = (self.total_pass_cnt / spec_total_fields) * 100
         else:
-            score = 0
+            spec_score = 0
 
-        # 시험 분야별 점수 업데이트
-        self.spec_pass_label.setText(f"통과 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-style: Medium; color: #000000; margin-left: 20px;'>{self.total_pass_cnt}</span>")
-        self.spec_total_label.setText(f"전체 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-style: Medium; color: #000000; margin-left: 20px;'>{total_fields}</span>")
-        self.spec_score_label.setText(f"종합 평가 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-style: Medium; color: #000000; margin-left: 20px;'>{score:.1f}%</span>")
+        self.spec_pass_label.setText(
+            f"통과 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-style: Medium; color: #000000; margin-left: 20px;'>"
+            f"{self.total_pass_cnt}</span>"
+        )
+        self.spec_total_label.setText(
+            f"전체 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-style: Medium; color: #000000; margin-left: 20px;'>"
+            f"{spec_total_fields}</span>"
+        )
+        self.spec_score_label.setText(
+            f"종합 평가 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-style: Medium; color: #000000; margin-left: 20px;'>"
+            f"{spec_score:.1f}%</span>"
+        )
 
-        # 전체 점수 업데이트 (현재는 1개 spec만 실행하므로 동일한 값)
+        # ✅ 2️⃣ 전체 점수 (모든 spec 합산)
         if hasattr(self, "total_pass_label") and hasattr(self, "total_total_label") and hasattr(self,
                                                                                                 "total_score_label"):
-            self.total_pass_label.setText(f"통과 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-style: Medium; color: #000000; margin-left: 20px;'>{self.total_pass_cnt}</span>")
-            self.total_total_label.setText(f"전체 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-style: Medium; color: #000000; margin-left: 20px;'>{total_fields}</span>")
-            self.total_score_label.setText(f"종합 평가 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-style: Medium; color: #000000; margin-left: 20px;'>{score:.1f}%</span>")
+            global_total_fields = self.global_pass_cnt + self.global_error_cnt
+            if global_total_fields > 0:
+                global_score = (self.global_pass_cnt / global_total_fields) * 100
+            else:
+                global_score = 0
+
+            self.total_pass_label.setText(
+                f"통과 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+                f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-style: Medium; color: #000000; margin-left: 20px;'>"
+                f"{self.global_pass_cnt}</span>"
+            )
+            self.total_total_label.setText(
+                f"전체 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+                f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-style: Medium; color: #000000; margin-left: 20px;'>"
+                f"{global_total_fields}</span>"
+            )
+            self.total_score_label.setText(
+                f"종합 평가 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+                f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-style: Medium; color: #000000; margin-left: 20px;'>"
+                f"{global_score:.1f}%</span>"
+            )
 
     def table_cell_clicked(self, row, col):
         """테이블 셀 클릭 시 호출되는 함수"""
@@ -2729,47 +2999,115 @@ class MyApp(QWidget):
                     pass
 
     def start_btn_clicked(self):
+        """평가 시작 버튼 클릭"""
+        # ✅ 1. 시나리오 선택 확인
+        if not hasattr(self, 'current_spec_id') or not self.current_spec_id:
+            QMessageBox.warning(self, "알림", "시험 시나리오를 먼저 선택하세요.")
+            return
+
+        print(f"[START] 시험 시작: {self.current_spec_id} - {self.spec_description}")
+        self.update_result_table_structure(self.videoMessages)
+
+        # ✅ 2. trace 디렉토리 초기화
         self._clean_trace_dir_once()
+
+        # ✅ 3. JSON 데이터 준비
         json_to_data("video")
+
+        # ✅ 4. 버튼 상태 변경
         self.sbtn.setDisabled(True)
         self.stop_btn.setEnabled(True)
 
-        self.init_win()
-        self.valResult.clear()
+        # ✅ 5. 이전 시험 결과가 global 점수에 포함되어 있으면 제거
+        if self.current_spec_id in self.spec_table_data:
+            prev_data = self.spec_table_data[self.current_spec_id]
+            prev_pass = prev_data.get('total_pass_cnt', 0)
+            prev_error = prev_data.get('total_error_cnt', 0)
+            print(f"[SCORE RESET] 기존 {self.current_spec_id} 점수 제거: pass={prev_pass}, error={prev_error}")
 
-        # 상태 변수들 초기화
-        self.final_report = ""
-        self.post_flag = False
-        self.processing_response = False  # 응답 처리 중 플래그 추가
+            # global 점수에서 해당 spec 점수 제거
+            self.global_pass_cnt = max(0, self.global_pass_cnt - prev_pass)
+            self.global_error_cnt = max(0, self.global_error_cnt - prev_error)
+
+        # ✅ 6. 현재 spec의 점수만 초기화 (global은 유지)
         self.total_error_cnt = 0
         self.total_pass_cnt = 0
+        self.cnt = 0
+        self.current_retry = 0
+        self.time_pre = 0
+        self.cnt_pre = 0
+        self.post_flag = False
+        self.processing_response = False
         self.message_in_cnt = 0
         self.message_error = []
-        self.cnt = 0
-        self.current_retry = 0  # 반복 카운터 초기화
-        self.cnt_pre = 0
-        self.time_pre = time.time()  # 0 대신 현재 시간으로 설정
         self.res = None
         self.webhook_res = None
         self.realtime_flag = False
         self.tmp_msg_append_flag = False
 
-        # 플랫폼과 동일한 누적 카운트 초기화 - 동적 API 개수
+        # ✅ 7. 현재 spec에 맞게 누적 카운트 초기화
         api_count = len(self.videoMessages)
         self.step_pass_counts = [0] * api_count
         self.step_error_counts = [0] * api_count
         self.step_pass_flags = [0] * api_count
 
-        # 점수 디스플레이 초기화
+        # ✅ 8. step_buffers 재생성 (현재 API 개수에 맞게)
+        self.step_buffers = [
+            {"data": "", "error": "", "result": "PASS"} for _ in range(api_count)
+        ]
+
+        # ✅ 9. trace 초기화
+        self.trace.clear()
+        self.latest_events = {}
+
+        # ✅ 10. 테이블 초기화
+        print(f"[START] 테이블 초기화: {api_count}개 API")
+        for i in range(self.tableWidget.rowCount()):
+            # 아이콘 초기화
+            icon_widget = QWidget()
+            icon_layout = QHBoxLayout()
+            icon_layout.setContentsMargins(0, 0, 0, 0)
+            icon_label = QLabel()
+            icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
+            icon_label.setAlignment(Qt.AlignCenter)
+            icon_layout.addWidget(icon_label)
+            icon_layout.setAlignment(Qt.AlignCenter)
+            icon_widget.setLayout(icon_layout)
+            self.tableWidget.setCellWidget(i, 1, icon_widget)
+
+            # 카운트 초기화
+            for col, value in [(2, "0"), (3, "0"), (4, "0"), (5, "0"), (6, "0%")]:
+                if self.tableWidget.item(i, col):
+                    self.tableWidget.item(i, col).setText(value)
+
+        # ✅ 11. 인증 정보 설정
+        auth_temp, auth_temp2 = set_auth("config/config.txt")
+        self.digestInfo = [auth_temp2[0], auth_temp2[1]]
+        self.token = auth_temp
+
+        # ✅ 12. 평가 점수 디스플레이 초기화
         self.update_score_display()
 
-        # CONSTANTS.py에서 URL 가져오기
+        # ✅ 13. 결과 텍스트 초기화
+        self.valResult.clear()
+        self.final_report = ""
+
+        # ✅ 14. URL 설정
         self.pathUrl = CONSTANTS.url
-        self.valResult.append("Start Validation...\n")
-        self.valResult.append("시스템이 플랫폼에 요청을 전송하여 응답을 검증합니다")
-        self.webhook_cnt = 99
-        # 타이머를 1초 간격으로 시작 (CONSTANTS timeout과 조화)
+
+        # ✅ 15. 시작 메시지
+        self.valResult.append("=" * 60)
+        self.valResult.append(f"🚀 시험 시작: {self.spec_description}")
+        self.valResult.append(f"📋 Spec ID: {self.current_spec_id}")
+        self.valResult.append(f"📊 API 개수: {len(self.videoMessages)}개")
+        self.valResult.append(f"📋 API 목록: {self.videoMessages}")
+        self.valResult.append("=" * 60)
+        self.valResult.append("\n시스템이 플랫폼에 요청을 전송하여 응답을 검증합니다\n")
+
+        # ✅ 16. 타이머 시작 (1초 간격)
         self.tick_timer.start(1000)
+
+        print(f"[START] 타이머 시작 완료")
 
     def stop_btn_clicked(self):
         self.tick_timer.stop()
@@ -2778,53 +3116,48 @@ class MyApp(QWidget):
         self.stop_btn.setDisabled(True)
 
     def init_win(self):
-        self.cnt = 0
-        self.current_retry = 0  # 재시도 카운터 초기화
+        def init_win(self):
+            """검증 시작 전 초기화"""
+            self.cnt = 0
+            self.current_retry = 0
 
-        # 버퍼 초기화 - 동적 API 개수
-        api_count = len(self.videoMessages)
-        self.step_buffers = [{"data": "", "result": "", "error": ""} for _ in range(api_count)]
+            # 현재 spec의 API 개수에 맞게 버퍼 생성
+            api_count = len(self.videoMessages) if self.videoMessages else 0
+            print(f"[INIT] 초기화: {api_count}개 API")
 
-        # 누적 카운트 초기화 - 동적 API 개수
-        self.step_pass_counts = [0] * api_count
-        self.step_error_counts = [0] * api_count
-        self.step_pass_flags = [0] * api_count
+            # 버퍼 초기화
+            self.step_buffers = [
+                {"data": "", "result": "", "error": ""} for _ in range(api_count)
+            ]
 
-        self.valResult.clear()
-        self.step1_msg = ""
-        self.step2_msg = ""
-        self.step3_msg = ""
-        self.step4_msg = ""
-        self.step5_msg = ""
-        self.step6_msg = ""
-        self.step7_msg = ""
-        self.step8_msg = ""
-        self.step9_msg = ""
+            # 누적 카운트 초기화
+            self.step_pass_counts = [0] * api_count
+            self.step_error_counts = [0] * api_count
+            self.step_pass_flags = [0] * api_count
 
-        # 테이블 아이콘들 초기화
-        for i in range(self.tableWidget.rowCount()):
-            if i < len(self.step_names) and self.step_names[i]:
+            self.valResult.clear()
+
+            # 메시지 초기화
+            for i in range(1, 10):
+                setattr(self, f"step{i}_msg", "")
+
+            # 테이블 아이콘 및 카운트 초기화
+            for i in range(self.tableWidget.rowCount()):
                 icon_widget = QWidget()
                 icon_layout = QHBoxLayout()
                 icon_layout.setContentsMargins(0, 0, 0, 0)
-
                 icon_label = QLabel()
                 icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
                 icon_label.setAlignment(Qt.AlignCenter)
-
                 icon_layout.addWidget(icon_label)
                 icon_layout.setAlignment(Qt.AlignCenter)
                 icon_widget.setLayout(icon_layout)
-
                 self.tableWidget.setCellWidget(i, 1, icon_widget)
 
-                # 카운트들도 초기화
-                self.tableWidget.setItem(i, 2, QTableWidgetItem("0"))
-                self.tableWidget.item(i, 2).setTextAlignment(Qt.AlignCenter)
-                self.tableWidget.setItem(i, 3, QTableWidgetItem("0"))
-                self.tableWidget.item(i, 3).setTextAlignment(Qt.AlignCenter)
-                self.tableWidget.setItem(i, 4, QTableWidgetItem("0"))
-                self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
+                for col, value in ((2, "0"), (3, "0"), (4, "0"), (5, "0"), (6, "0%")):
+                    item = QTableWidgetItem(value)
+                    item.setTextAlignment(Qt.AlignCenter)
+                    self.tableWidget.setItem(i, col, item)
 
     def show_result_page(self):
         """시험 결과 페이지 표시"""
