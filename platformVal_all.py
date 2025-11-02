@@ -2486,7 +2486,7 @@ class MyApp(QWidget):
         for i, name in enumerate(self.step_names):
             # API 명
             api_item = QTableWidgetItem(f"{i + 1}. {name}")
-            api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+            #api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self.tableWidget.setItem(i, 0, api_item)
 
             # 결과 아이콘
