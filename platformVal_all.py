@@ -1668,9 +1668,13 @@ class MyApp(QWidget):
 
                 self.videoWebhookSchema = getattr(schema_request_module, webhook_schema_name, [])
                 self.videoWebhookData = getattr(data_response_module, webhook_data_name, [])
+                self.videoWebhookConstraint = getattr(constraints_response_module,
+                                                     self.current_spec_id + "_webhook_inConstraints",
+                                                  [])
 
                 print(f"[PLATFORM] 📦 웹훅 스키마 개수: {len(self.videoWebhookSchema)}개 API")
                 print(f"[PLATFORM] 📋 웹훅 데이터 개수: {len(self.videoWebhookData)}개")
+                print(f"[PLATFORM] 📋 웹훅 constraints 개수: {len(self.videoWebhookConstraint)}개")
 
                 webhook_indices = [i for i, msg in enumerate(self.videoMessages) if "Webhook" in msg]
                 if webhook_indices:
@@ -2805,6 +2809,7 @@ class MyApp(QWidget):
                     self.Server.inSchema = self.videoInSchema
                     self.Server.webhookSchema = self.videoWebhookSchema
                     self.Server.webhookData = self.videoWebhookData
+                    self.Server.webhookCon = self.videoWebhookConstraint
 
                 # 설정 다시 로드
                 self.get_setting()
@@ -3745,6 +3750,7 @@ class MyApp(QWidget):
             self.Server.inSchema = self.videoInSchema
             self.Server.outCon = self.videoOutConstraint
             self.Server.webhookData = self.videoWebhookData
+            self.Server.webhookCon = self.videoWebhookConstraint
             self.Server.system = "video"
             self.Server.timeout = timeout
             print(f"[DEBUG] Server 설정 완료")
