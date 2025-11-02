@@ -91,7 +91,20 @@ cmgvieyak001b6cd04cgaawmm_ReplayURL_out_constraints = {
 cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_out_constraints = {}
 
 # RealtimeVideoEventInfos WebHook IN Constraints
-cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_webhook_in_constraints = {}
+cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_webhook_in_constraints = {
+  "camList.camID": {
+    "valueType": "request-based",
+    "required": True,
+    "referenceEndpoint": "/RealtimeVideoEventInfos",
+    "referenceField": "camID"
+  },
+  "eventFilter": {
+    "valueType": "request-based",
+    "required": True,
+    "referenceEndpoint": "/RealtimeVideoEventInfos",
+    "referenceField": "eventFilter"
+  }
+}
 
 # StoredVideoEventInfos
 cmgvieyak001b6cd04cgaawmm_StoredVideoEventInfos_out_constraints = {
