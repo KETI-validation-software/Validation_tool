@@ -203,6 +203,25 @@ class APISelectionDialog(QDialog):
     def initUI(self):
         layout = QVBoxLayout()
 
+        # ✅ 배경 이미지 설정
+        self.setObjectName("system_main")
+        self.setAttribute(Qt.WA_StyledBackground, True)
+
+        bg_path = resource_path("assets/image/common/bg.png").replace("\\", "/")
+        print(f"배경 이미지 경로: {bg_path}")
+
+        self.setStyleSheet(f"""
+            #system_main {{
+                background-image: url('{bg_path}');
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: cover;
+            }}
+            QScrollArea, QScrollArea QWidget, QScrollArea::viewport,
+            QGroupBox, QWidget#scroll_widget, QLabel {{
+                background: transparent;
+            }}
+        """)
         # 상단 안내
         info_label = QLabel("시험할 API를 선택하세요 (복수 선택 가능)")
         info_label.setStyleSheet("font-weight: bold; font-size: 12px; padding: 10px;")
@@ -1162,77 +1181,98 @@ class MyApp(QWidget):
         ]
 
     def create_spec_selection_panel(self, parent_layout):
-        """시험 분야 선택 패널 생성"""
-        # 시험 분야 패널
-        panel_widget = QWidget()
-        panel_layout = QVBoxLayout()
-        panel_layout.setContentsMargins(10, 10, 10, 10)
+        """시험 선택 패널 - 플랫폼과 동일한 스타일"""
+        title = QLabel("시험 선택")
+        title.setStyleSheet("font-size: 16px; font-weight: bold; margin-bottom: 6px;")
+        parent_layout.addWidget(title)
 
-        # 🆕 시험 그룹 테이블 추가
-        group_table = self.create_group_selection_table()
-        panel_layout.addWidget(group_table)
+        # 배경 이미지가 보이도록 투명 처리
+        parent_layout.setContentsMargins(0, 0, 0, 0)
+        parent_layout.setSpacing(0)
 
-        # 시험 분야 확인 문구
-        title = QLabel("시험 분야를 선택하세요.")
-        title.setStyleSheet("font-size: 14px; font-weight: bold; padding: 10px;")
-        panel_layout.addWidget(title)
+        # 그룹 테이블 추가
+        self.group_table_widget = self.create_group_selection_table()
+        parent_layout.addWidget(self.group_table_widget)
 
-        # 시험 분야명 테이블
-        field_group = self.create_test_field_group()
-        panel_layout.addWidget(field_group)
-
-        panel_widget.setLayout(panel_layout)
-        parent_layout.addWidget(panel_widget)
-
-        # 선택된 시험 분야 행
-        self.selected_test_field_row = None
+        # 시험 분야 테이블
+        self.field_group = self.create_test_field_group()
+        parent_layout.addWidget(self.field_group)
 
     def create_group_selection_table(self):
-        """
-        ✅ 시험 분야명을 테이블 형식으로 표시
-        """
-        group_box = QGroupBox("시험 분야")
+        """시험 분야명 테이블 - 투명 배경 효과"""
+        group_box = QWidget()
+        group_box.setFixedSize(459, 220)
+        group_box.setStyleSheet("background: transparent;")  # ✅ 투명 배경
+
         layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
 
         self.group_table = QTableWidget(0, 1)
         self.group_table.setHorizontalHeaderLabels(["시험 분야"])
         self.group_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.group_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.group_table.setSelectionMode(QAbstractItemView.SingleSelection)
         self.group_table.verticalHeader().setVisible(False)
-        self.group_table.setMaximumHeight(200)
+        self.group_table.setFixedHeight(219)
+
+        # ✅ 플랫폼과 동일한 스타일 적용
         self.group_table.setStyleSheet("""
             QTableWidget {
                 background-color: #FFFFFF;
                 border: 1px solid #CECECE;
                 border-radius: 4px;
+                outline: none;
                 font-family: "Noto Sans KR";
                 font-size: 14px;
                 color: #1B1B1C;
             }
-            QHeaderView::section {
-                background-color: #EDF0F3;
-                border: 0px;
+            QTableWidget::item {
+                border-bottom: 1px solid #E0E0E0;
                 color: #1B1B1C;
-                font-weight: 600;
+                font-family: 'Noto Sans KR';
+                font-size: 14px;
+                font-weight: 400;
+                padding: 8px;
                 text-align: center;
             }
             QTableWidget::item:selected {
                 background-color: #E3F2FF;
+                border: none;
+            }
+            QTableWidget::item:hover {
+                background-color: #F2F8FF;
+            }
+            QHeaderView::section {
+                background-color: #EDF0F3;
+                border: none;
+                border-bottom: 1px solid #CECECE;
+                color: #1B1B1C;
+                text-align: center;
+                font-family: 'Noto Sans KR';
+                font-size: 13px;
+                font-weight: 600;
+                letter-spacing: -0.156px;
             }
         """)
 
-        # ✅ CONSTANTS.SPEC_CONFIG에서 그룹명 추출
-        group_items = []
-        for group_data in CONSTANTS.SPEC_CONFIG:
-            group_name = group_data.get("group_name", "미정 그룹")
-            group_id = group_data.get("group_id", "")
-            group_items.append((group_name, group_id))
-
+        # SPEC_CONFIG 기반 그룹 로드
+        group_items = [
+            (g.get("group_name", "미지정 그룹"), g.get("group_id", ""))
+            for g in CONSTANTS.SPEC_CONFIG
+        ]
         self.group_table.setRowCount(len(group_items))
-        for i, (name, gid) in enumerate(group_items):
-            item = QTableWidgetItem(name)  # 번호 없이 그룹명만
-            item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-            self.group_table.setItem(i, 0, item)
+
+        self.group_name_to_index = {}
+        self.index_to_group_name = {}
+
+        for idx, (name, gid) in enumerate(group_items):
+            display_name = name
+            item = QTableWidgetItem(display_name)
+            item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+            self.group_table.setItem(idx, 0, item)
+            self.group_name_to_index[name] = idx
+            self.index_to_group_name[idx] = name
 
         self.group_table.cellClicked.connect(self.on_group_selected)
 
@@ -1240,6 +1280,39 @@ class MyApp(QWidget):
         group_box.setLayout(layout)
         return group_box
 
+    def on_group_selected(self, row, col):
+        group_name = self.index_to_group_name.get(row)
+        if not group_name:
+            return
+
+        selected_group = next(
+            (g for g in CONSTANTS.SPEC_CONFIG if g.get("group_name") == group_name), None
+        )
+
+        if selected_group:
+            self.update_test_field_table(selected_group)
+
+    def update_test_field_table(self, group_data):
+        """선택된 그룹의 spec_id 목록으로 테이블 갱신"""
+        self.test_field_table.clearContents()
+
+        spec_items = [
+            (k, v) for k, v in group_data.items()
+            if k not in ['group_name', 'group_id'] and isinstance(v, dict)
+        ]
+        self.test_field_table.setRowCount(len(spec_items))
+
+        self.spec_id_to_index.clear()
+        self.index_to_spec_id.clear()
+
+        for idx, (spec_id, config) in enumerate(spec_items):
+            desc = config.get('test_name', f'시험분야 {idx + 1}')
+            desc_with_role = f"{desc} (응답 검증)"
+            item = QTableWidgetItem(desc_with_role)
+            item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+            self.test_field_table.setItem(idx, 0, item)
+            self.spec_id_to_index[spec_id] = idx
+            self.index_to_spec_id[idx] = spec_id
     def on_group_selected(self, row, col):
         """
         ✅ 시험 그룹 선택 시 해당 그룹의 시험 분야 목록을 자동 갱신
@@ -1267,11 +1340,14 @@ class MyApp(QWidget):
         self.update_test_field_table(selected_group)
 
     def create_test_field_group(self):
-        """
-        ✅ System은 Response 검증만 - Response 스키마 ID만 표시 (3개)
-        """
-        group_box = QGroupBox("시험 시나리오")  # ← 변수명 변경
+        """시험 시나리오 테이블 - 플랫폼과 동일한 스타일"""
+        group_box = QWidget()
+        group_box.setFixedSize(459, 760)
+        group_box.setStyleSheet("background: transparent;")  # ✅ 투명 배경
+
         layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
 
         self.test_field_table = QTableWidget(0, 1)
         self.test_field_table.setHorizontalHeaderLabels(["시험 시나리오"])
@@ -1279,31 +1355,72 @@ class MyApp(QWidget):
         self.test_field_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.test_field_table.cellClicked.connect(self.on_test_field_selected)
         self.test_field_table.verticalHeader().setVisible(False)
-        self.test_field_table.setMaximumHeight(200)
+        self.test_field_table.setFixedHeight(759)
 
-        # 🔥 SPEC_CONFIG에서 spec_id와 config 추출 (리스트 구조 대응)
+        # ✅ 플랫폼과 완전히 동일한 스타일
+        self.test_field_table.setStyleSheet("""
+            QTableWidget {
+                background-color: #FFFFFF;
+                border: 1px solid #CECECE;
+                border-radius: 4px;
+                font-family: "Noto Sans KR";
+                font-size: 14px;
+                color: #1B1B1C;
+            }
+            QTableWidget::item {
+                border-bottom: 1px solid #E0E0E0;
+                border-right: 0px solid transparent;
+                color: #1B1B1C;
+                font-family: 'Noto Sans KR';
+                font-size: 14px;
+                font-style: normal;
+                font-weight: 400;
+                letter-spacing: 0.098px;
+                text-align: center; 
+            }
+            QTableWidget::item:selected {
+                background-color: #E3F2FF;
+            }
+            QTableWidget::item:hover {
+                background-color: #E3F2FF;
+            }
+            QHeaderView::section {
+                background-color: #EDF0F3;
+                border-right: 0px solid transparent;
+                border-left: 0px solid transparent;
+                border-top: 0px solid transparent;
+                border-bottom: 1px solid #CECECE;
+                color: #1B1B1C;
+                text-align: center;
+                font-family: 'Noto Sans KR';
+                font-size: 13px;
+                font-style: normal;
+                font-weight: 600;
+                line-height: normal;
+                letter-spacing: -0.156px;
+            }
+        """)
+
+        # SPEC_CONFIG에서 spec_id와 config 추출
         spec_items = []
-        for group_data in CONSTANTS.SPEC_CONFIG:  # ← 변수명 변경
+        for group_data in CONSTANTS.SPEC_CONFIG:
             for key, value in group_data.items():
                 if key not in ['group_name', 'group_id'] and isinstance(value, dict):
-                    spec_items.append((key, value))  # ← 이미 (key, value) 튜플
+                    spec_items.append((key, value))
 
-        if spec_items:  # ← 바로 사용
+        if spec_items:
             self.test_field_table.setRowCount(len(spec_items))
 
-            # spec_id와 인덱스 매핑 저장
             self.spec_id_to_index = {}
             self.index_to_spec_id = {}
 
             for idx, (spec_id, config) in enumerate(spec_items):
                 description = config.get('test_name', f'시험 분야 {idx + 1}')
-                # ✅ 시스템은 응답 검증 역할 명시
                 description_with_role = f"{description} (응답 검증)"
                 item = QTableWidgetItem(description_with_role)
-                item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+                item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
                 self.test_field_table.setItem(idx, 0, item)
 
-                # 매핑 저장
                 self.spec_id_to_index[spec_id] = idx
                 self.index_to_spec_id[idx] = spec_id
 
@@ -1314,8 +1431,8 @@ class MyApp(QWidget):
                 self.selected_test_field_row = current_index
 
         layout.addWidget(self.test_field_table)
-        group_box.setLayout(layout)  # ← group_box 사용
-        return group_box  # ← group_box 반환
+        group_box.setLayout(layout)
+        return group_box
 
     def update_test_field_table(self, group_data):
         """
@@ -2346,40 +2463,121 @@ class MyApp(QWidget):
                 self.step9_msg += msg
 
     def initUI(self):
-        # 창 크기 설정 (main.py와 동일)
+        # ✅ 배경 이미지 설정
+        self.setObjectName("system_main")
+        self.setAttribute(Qt.WA_StyledBackground, True)
+
+        bg_path = resource_path("assets/image/common/bg.png").replace("\\", "/")
+
+        # ✅ 배경 투명 처리를 위한 스타일시트
+        self.setStyleSheet(f"""
+                #system_main {{
+                    background-image: url('{bg_path}');
+                    background-repeat: no-repeat;
+                    background-position: center;
+                    background-size: cover;
+                }}
+                QScrollArea, QScrollArea QWidget, QScrollArea::viewport,
+                QGroupBox, QWidget#scroll_widget, QLabel {{
+                    background: transparent;
+                }}
+            """)
+
         if not self.embedded:
-            self.resize(1200, 720)
             self.setWindowTitle('시스템 연동 검증')
 
-        # 1열(세로) 레이아웃으로 통합
+        # ✅ 메인 레이아웃
         mainLayout = QVBoxLayout()
+        mainLayout.setContentsMargins(0, 0, 0, 0)
+        mainLayout.setSpacing(0)
 
-        # 상단 큰 제목
-        self.title_label = QLabel('시스템 연동 검증', self)
-        title_font = self.title_label.font()
-        title_font.setPointSize(22)
-        title_font.setBold(True)
-        self.title_label.setFont(title_font)
-        self.title_label.setAlignment(Qt.AlignCenter)
-        mainLayout.addWidget(self.title_label)
+        # ✅ 헤더 영역 추가
+        header_container = QWidget()
+        header_container.setFixedSize(1680, 56)
+        header_container_layout = QHBoxLayout()
+        header_container_layout.setContentsMargins(0, 8, 0, 0)
+        header_container_layout.setSpacing(0)
 
-        # 시험 분야 선택 영역 추가
-        self.create_spec_selection_panel(mainLayout)
+        header_widget = QWidget()
+        header_widget.setFixedSize(1680, 56)
 
-        # 시험 API 라벨 추가
+        header_layout = QHBoxLayout(header_widget)
+        header_layout.setContentsMargins(0, 0, 0, 0)
+        header_layout.setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+        header_layout.setSpacing(10)
+
+        # 헤더 로고
+        logo_label = QLabel(header_widget)
+        logo_pixmap = QPixmap(resource_path("assets/image/common/header_logo.png"))
+        logo_label.setPixmap(logo_pixmap.scaled(36, 36, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        logo_label.setFixedSize(36, 36)
+        header_layout.addWidget(logo_label)
+
+        # 헤더 타이틀
+        self.title_label = QLabel('시스템 연동 검증 시작하기', header_widget)
+        self.title_label.setAlignment(Qt.AlignVCenter)
+        title_style = """
+            color: #FFF;
+            font-family: "Noto Sans KR";
+            font-size: 18px;
+            font-style: normal;
+            font-weight: 500;
+            line-height: normal;
+        """
+        self.title_label.setStyleSheet(title_style)
+        header_layout.addWidget(self.title_label)
+
+        header_container_layout.addWidget(header_widget)
+        header_container.setLayout(header_container_layout)
+        mainLayout.addWidget(header_container)
+
+        # ✅ 2컬럼 레이아웃 적용
+        bg_root = QWidget()
+        bg_root.setObjectName("bg_root")
+        bg_root.setAttribute(Qt.WA_StyledBackground, True)
+        bg_root_layout = QVBoxLayout()
+        bg_root_layout.setContentsMargins(0, 0, 0, 0)
+        bg_root_layout.setSpacing(0)
+
+        columns_layout = QHBoxLayout()
+        columns_layout.setContentsMargins(0, 0, 0, 0)
+        columns_layout.setSpacing(0)
+
+        # ✅ 왼쪽 컬럼 (시험 분야 선택)
+        left_col = QWidget()
+        left_col.setFixedSize(479, 906)
+        left_layout = QVBoxLayout()
+        left_layout.setContentsMargins(0, 0, 0, 0)
+        left_layout.setSpacing(0)
+
+        self.create_spec_selection_panel(left_layout)
+        left_layout.addStretch()
+        left_col.setLayout(left_layout)
+
+        # ✅ 오른쪽 컬럼 (나머지 UI)
+        right_col = QWidget()
+        right_col.setFixedSize(1064, 906)
+        right_layout = QVBoxLayout()
+        right_layout.setContentsMargins(0, 0, 0, 0)
+        right_layout.setSpacing(0)
+
+        # 시험 API 라벨
         api_label = QLabel('시험 API')
-        api_label.setStyleSheet('font-size: 16px; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-bottom: 6px;')
-        mainLayout.addWidget(api_label)
+        api_label.setStyleSheet(
+            'font-size: 16px; font-style: normal; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-bottom: 6px;')
+        right_layout.addWidget(api_label)
 
         self.init_centerLayout()
         contentWidget = QWidget()
         contentWidget.setLayout(self.centerLayout)
-        mainLayout.addWidget(contentWidget)
+        right_layout.addWidget(contentWidget)
 
         # 수신 메시지 실시간 모니터링
         monitor_label = QLabel("수신 메시지 실시간 모니터링")
-        monitor_label.setStyleSheet('font-size: 16px; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-top: 20px; margin-bottom: 6px;')
-        mainLayout.addWidget(monitor_label)
+        monitor_label.setStyleSheet(
+            'font-size: 16px; font-style: normal; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-top: 20px; margin-bottom: 6px;')
+        right_layout.addWidget(monitor_label)
+
         self.valResult = QTextBrowser(self)
         self.valResult.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.valResult.setFixedHeight(174)
@@ -2391,162 +2589,198 @@ class MyApp(QWidget):
             font-size: 15px;
             color: #222;
         """)
-        mainLayout.addWidget(self.valResult, 1)
+        right_layout.addWidget(self.valResult, 1)
 
         # 시험 결과
         self.valmsg = QLabel('시험 점수 요약', self)
-        self.valmsg.setStyleSheet('font-size: 16px; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-top: 20px; margin-bottom: 6px;')
-        mainLayout.addWidget(self.valmsg)
+        self.valmsg.setStyleSheet(
+            'font-size: 16px; font-style: normal; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-top: 20px; margin-bottom: 6px;')
+        right_layout.addWidget(self.valmsg)
 
-        # 평가 점수 표시 (메인 화면에 추가)
+        # 평가 점수 표시
         spec_score_group = self.create_spec_score_display_widget()
-        mainLayout.addWidget(spec_score_group)
+        right_layout.addWidget(spec_score_group)
 
-        # 전체 점수 표시
         total_score_group = self.create_total_score_display_widget()
-        mainLayout.addWidget(total_score_group)
+        right_layout.addWidget(total_score_group)
 
-        # 버튼 그룹 (평가 시작, 일시 정지, 종료) - 아래쪽, 가운데 정렬
+        # ✅ 버튼 그룹 (이미지 기반으로 변경)
         buttonGroup = QWidget()
+        buttonGroup.setFixedWidth(1064)
         buttonLayout = QHBoxLayout()
-        buttonLayout.setAlignment(Qt.AlignCenter)
+        buttonLayout.setAlignment(Qt.AlignLeft)
+        buttonLayout.setContentsMargins(0, 0, 0, 0)
 
+        # 평가 시작 버튼
         self.sbtn = QPushButton(self)
-        self.sbtn.setText('평가 시작')
-        self.sbtn.setFixedSize(140, 50)
-        self.sbtn.setStyleSheet("""
-            QPushButton {
-                background-color: #FFB6C1;  /* 파스텔 핑크 */
-                border: 2px solid #FF69B4;
-                border-radius: 5px;
-                padding: 5px;
-                font-weight: bold;
-                color: #8B0000;  /* 진한 빨간색 텍스트 */
-            }
-            QPushButton:hover {
-                background-color: #FFC0CB;  /* 호버시 더 밝은 핑크 */
-                border: 2px solid #FF1493;
-            }
-            QPushButton:pressed {
-                background-color: #FF69B4;  /* 클릭시 더 진한 핑크 */
-            }
-            QPushButton:disabled {
-                background-color: #F0F0F0;
-                border: 2px solid #CCCCCC;
-                color: #999999;
-            }
+        self.sbtn.setFixedSize(255, 50)
+        start_enabled = resource_path("assets/image/test_runner/btn_평가시작_enabled.png").replace("\\", "/")
+        start_hover = resource_path("assets/image/test_runner/btn_평가시작_hover.png").replace("\\", "/")
+        start_disabled = resource_path("assets/image/test_runner/btn_평가시작_disabled.png").replace("\\", "/")
+        self.sbtn.setStyleSheet(f"""
+            QPushButton {{
+                border: none;
+                background-image: url('{start_enabled}');
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: contain;
+                background-color: transparent;
+            }}
+            QPushButton:hover {{
+                background-image: url('{start_hover}');
+            }}
+            QPushButton:pressed {{
+                background-image: url('{start_hover}');
+                opacity: 0.8;
+            }}
+            QPushButton:disabled {{
+                background-image: url('{start_disabled}');
+            }}
         """)
         self.sbtn.clicked.connect(self.start_btn_clicked)
 
+        # 정지 버튼
         self.stop_btn = QPushButton(self)
-        self.stop_btn.setText('일시 정지')
-        self.stop_btn.setFixedSize(140, 50)
-        self.stop_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #FFB6C1;  /* 파스텔 핑크 */
-                border: 2px solid #FF69B4;
-                border-radius: 5px;
-                padding: 5px;
-                font-weight: bold;
-                color: #8B0000;  /* 진한 빨간색 텍스트 */
-            }
-            QPushButton:hover {
-                background-color: #FFC0CB;  /* 호버시 더 밝은 핑크 */
-                border: 2px solid #FF1493;
-            }
-            QPushButton:pressed {
-                background-color: #FF69B4;  /* 클릭시 더 진한 핑크 */
-            }
-            QPushButton:disabled {
-                background-color: #F0F0F0;
-                border: 2px solid #CCCCCC;
-                color: #999999;
-            }
+        self.stop_btn.setFixedSize(255, 50)
+        stop_enabled = resource_path("assets/image/test_runner/btn_일시정지_enabled.png").replace("\\", "/")
+        stop_hover = resource_path("assets/image/test_runner/btn_일시정지_hover.png").replace("\\", "/")
+        stop_disabled = resource_path("assets/image/test_runner/btn_일시정지_disabled.png").replace("\\", "/")
+        self.stop_btn.setStyleSheet(f"""
+            QPushButton {{
+                border: none;
+                background-image: url('{stop_enabled}');
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: contain;
+                background-color: transparent;
+            }}
+            QPushButton:hover {{
+                background-image: url('{stop_hover}');
+            }}
+            QPushButton:pressed {{
+                background-image: url('{stop_hover}');
+                opacity: 0.8;
+            }}
+            QPushButton:disabled {{
+                background-image: url('{stop_disabled}');
+            }}
         """)
         self.stop_btn.clicked.connect(self.stop_btn_clicked)
         self.stop_btn.setDisabled(True)
 
+        # 종료 버튼
         self.rbtn = QPushButton(self)
-        self.rbtn.setText('종료')
-        self.rbtn.setFixedSize(140, 50)
-        self.rbtn.setStyleSheet("""
-            QPushButton {
-                background-color: #FFB6C1;
-                border: 2px solid #FF69B4;
-                border-radius: 5px;
-                padding: 5px;
-                font-weight: bold;
-                color: #8B0000;
-            }
-            QPushButton:hover {
-                background-color: #FFC0CB;
-                border: 2px solid #FF1493;
-            }
-            QPushButton:pressed {
-                background-color: #FF69B4;
-            }
-            QPushButton:disabled {
-                background-color: #F0F0F0;
-                border: 2px solid #CCCCCC;
-                color: #999999;
-            }
+        self.rbtn.setFixedSize(255, 50)
+        exit_enabled = resource_path("assets/image/test_runner/btn_종료_enabled.png").replace("\\", "/")
+        exit_hover = resource_path("assets/image/test_runner/btn_종료_hover.png").replace("\\", "/")
+        exit_disabled = resource_path("assets/image/test_runner/btn_종료_disabled.png").replace("\\", "/")
+        self.rbtn.setStyleSheet(f"""
+            QPushButton {{
+                border: none;
+                background-image: url('{exit_enabled}');
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: contain;
+                background-color: transparent;
+            }}
+            QPushButton:hover {{
+                background-image: url('{exit_hover}');
+            }}
+            QPushButton:pressed {{
+                background-image: url('{exit_hover}');
+                opacity: 0.8;
+            }}
+            QPushButton:disabled {{
+                background-image: url('{exit_disabled}');
+            }}
         """)
         self.rbtn.clicked.connect(self.exit_btn_clicked)
 
+        # 시험 결과 버튼
         self.result_btn = QPushButton(self)
-        self.result_btn.setText('시험 결과')
-        self.result_btn.setFixedSize(140, 50)
-        self.result_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #FFB6C1;
-                border: 2px solid #FF69B4;
-                border-radius: 5px;
-                padding: 5px;
-                font-weight: bold;
-                color: #8B0000;
-            }
-            QPushButton:hover {
-                background-color: #FFC0CB;
-                border: 2px solid #FF1493;
-            }
-            QPushButton:pressed {
-                background-color: #FF69B4;
-            }
-            QPushButton:disabled {
-                background-color: #F0F0F0;
-                border: 2px solid #CCCCCC;
-                color: #999999;
-            }
+        self.result_btn.setFixedSize(255, 50)
+        result_enabled = resource_path("assets/image/test_runner/btn_시험결과_enabled.png").replace("\\", "/")
+        result_hover = resource_path("assets/image/test_runner/btn_시험결과_hover.png").replace("\\", "/")
+        result_disabled = resource_path("assets/image/test_runner/btn_시험결과_disabled.png").replace("\\", "/")
+        self.result_btn.setStyleSheet(f"""
+            QPushButton {{
+                border: none;
+                background-image: url('{result_enabled}');
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: contain;
+                background-color: transparent;
+            }}
+            QPushButton:hover {{
+                background-image: url('{result_hover}');
+            }}
+            QPushButton:pressed {{
+                background-image: url('{result_hover}');
+                opacity: 0.8;
+            }}
+            QPushButton:disabled {{
+                background-image: url('{result_disabled}');
+            }}
         """)
         self.result_btn.clicked.connect(self.show_result_page)
 
         buttonLayout.addWidget(self.sbtn)
-        buttonLayout.addSpacing(20)
+        buttonLayout.addSpacing(18)
         buttonLayout.addWidget(self.stop_btn)
-        buttonLayout.addSpacing(20)
+        buttonLayout.addSpacing(18)
         buttonLayout.addWidget(self.rbtn)
-        buttonLayout.addSpacing(20)
+        buttonLayout.addSpacing(18)
         buttonLayout.addWidget(self.result_btn)
-
+        buttonLayout.addStretch()
         buttonGroup.setLayout(buttonLayout)
 
-        mainLayout.addSpacing(20)
-        mainLayout.addWidget(buttonGroup)
-        mainLayout.addStretch()
+        right_layout.addSpacing(32)
+        right_layout.addWidget(buttonGroup)
+        right_layout.addStretch()
+        right_col.setLayout(right_layout)
+
+        columns_layout.addWidget(left_col)
+        columns_layout.addWidget(right_col)
+
+        bg_root_layout.addLayout(columns_layout)
+        bg_root.setLayout(bg_root_layout)
+        mainLayout.addWidget(bg_root)
 
         self.setLayout(mainLayout)
 
-        # 창 제목 설정 (embedded가 아닐 때만)
         if not self.embedded:
             self.setWindowTitle('물리보안 시스템 연동 검증 소프트웨어')
 
-        # tableWidget이 생성된 후에 초기 시험 분야 선택 처리
-        if hasattr(self, '_initial_spec_index'):
-            self.on_test_field_selected(self._initial_spec_index, 0)
+        QTimer.singleShot(100, self.select_first_scenario)
 
         if not self.embedded:
             self.show()
 
+    def select_first_scenario(self):
+        """프로그램 시작 시 첫 번째 그룹의 첫 번째 시나리오 자동 선택"""
+        try:
+            print(f"[DEBUG] 초기 시나리오 자동 선택 시작")
+
+            # 1. 첫 번째 그룹이 있는지 확인
+            if self.group_table.rowCount() > 0:
+                self.group_table.selectRow(0)
+                print(f"[DEBUG] 첫 번째 그룹 선택: {self.index_to_group_name.get(0)}")
+                self.on_group_selected(0, 0)
+
+            # 2. 시나리오 테이블에 첫 번째 항목이 있는지 확인
+            if self.test_field_table.rowCount() > 0:
+                self.test_field_table.selectRow(0)
+                first_spec_id = self.index_to_spec_id.get(0)
+                print(f"[DEBUG] 첫 번째 시나리오 선택: spec_id={first_spec_id}")
+                self.on_test_field_selected(0, 0)
+
+            print(f"[DEBUG] 초기 시나리오 자동 선택 완료: {self.spec_description}")
+            QApplication.processEvents()
+
+        except Exception as e:
+            print(f"[ERROR] 초기 시나리오 선택 실패: {e}")
+            import traceback
+            traceback.print_exc()
     def init_centerLayout(self):
         # 표 형태로 변경 - 동적 API 개수
         api_count = len(self.videoMessages)
@@ -2834,7 +3068,6 @@ class MyApp(QWidget):
     def create_spec_score_display_widget(self):
         """메인 화면에 표시할 시험 분야별 평가 점수 위젯 생성"""
 
-        # 시험 분야별 점수 그룹
         spec_group = QGroupBox()
         spec_group.setFixedWidth(1064)
         spec_group.setFixedHeight(106)
@@ -2846,8 +3079,15 @@ class MyApp(QWidget):
             }
         """)
 
+        # ✅ 분야별 점수 아이콘 추가
+        icon_label = QLabel()
+        icon_pixmap = QPixmap(resource_path("assets/image/test_runner/icn_분야별점수.png"))
+        icon_label.setPixmap(icon_pixmap.scaled(40, 40, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        icon_label.setFixedSize(40, 40)
+        icon_label.setAlignment(Qt.AlignCenter)
+
         # 분야명 레이블
-        self.spec_name_label = QLabel(f"분야별 점수    |    {self.spec_description} ({len(self.videoMessages)}개 API)")
+        self.spec_name_label = QLabel(f"분야별 점수      |      {self.spec_description} ({len(self.videoMessages)}개 API)")
         self.spec_name_label.setStyleSheet("""
             color: #000;
             font-family: "Noto Sans KR";
@@ -2911,10 +3151,25 @@ class MyApp(QWidget):
         self.spec_score_label.setFont(font)
 
         spec_layout = QVBoxLayout()
-        spec_layout.setContentsMargins(32, 15, 32, 15)  # 내부 여백
-        spec_layout.addWidget(self.spec_name_label)
+        spec_layout.setContentsMargins(32, 15, 32, 15)
+
+        # ✅ 아이콘을 위한 수직 레이아웃
+        icon_vlayout = QVBoxLayout()
+        icon_vlayout.setContentsMargins(0, 0, 0, 0)
+        icon_vlayout.setSpacing(0)
+        icon_vlayout.addSpacing(0)
+        icon_vlayout.addWidget(icon_label, alignment=Qt.AlignHCenter | Qt.AlignTop)
+        icon_vlayout.addStretch()
+
+        # ✅ 아이콘 + 분야명 레이아웃
+        header_layout = QHBoxLayout()
+        header_layout.addLayout(icon_vlayout)
+        header_layout.addWidget(self.spec_name_label)
+        header_layout.addStretch()
+
+        spec_layout.addLayout(header_layout)
         spec_layout.addSpacing(5)
-        spec_layout.addWidget(separator)  # 구분선 추가
+        spec_layout.addWidget(separator)
         spec_layout.addSpacing(5)
 
         spec_score_layout = QHBoxLayout()
@@ -2931,7 +3186,6 @@ class MyApp(QWidget):
 
     def create_total_score_display_widget(self):
         """메인 화면에 표시할 전체 평가 점수 위젯 생성"""
-        # 전체 점수
         total_group = QGroupBox()
         total_group.setFixedWidth(1064)
         total_group.setFixedHeight(106)
@@ -2943,8 +3197,14 @@ class MyApp(QWidget):
             }
         """)
 
-        # 점수 레이블들 (전체 점수는 볼드체로 강조)
-        total_name_label = QLabel("전체 점수")
+        # ✅ 전체 점수 아이콘 추가
+        icon_label = QLabel()
+        icon_pixmap = QPixmap(resource_path("assets/image/test_runner/icn_전체점수.png"))
+        icon_label.setPixmap(icon_pixmap.scaled(40, 40, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        icon_label.setFixedSize(40, 40)
+
+        # 전체 점수 레이블
+        total_name_label = QLabel("전체 점수 (모든 시험 분야 합산)")
         total_name_label.setStyleSheet("""
             color: #000;
             font-family: "Noto Sans KR";
@@ -3008,10 +3268,26 @@ class MyApp(QWidget):
         self.total_score_label.setFont(font)
 
         total_layout = QVBoxLayout()
-        total_layout.setContentsMargins(32, 15, 32, 15)  # 내부 여백
-        total_layout.addWidget(total_name_label)
+        total_layout.setContentsMargins(32, 15, 32, 15)
+
+        # ✅ 아이콘을 위한 수직 레이아웃
+        icon_vlayout = QVBoxLayout()
+        icon_vlayout.setContentsMargins(0, 0, 0, 0)
+        icon_vlayout.setSpacing(0)
+        icon_vlayout.addSpacing(0)
+        icon_vlayout.addWidget(icon_label, alignment=Qt.AlignHCenter | Qt.AlignTop)
+        icon_vlayout.addStretch()
+
+        # ✅ 아이콘 + 전체 점수 텍스트 레이아웃
+        header_layout = QHBoxLayout()
+        header_layout.setSpacing(8)
+        header_layout.addLayout(icon_vlayout)
+        header_layout.addWidget(total_name_label)
+        header_layout.addStretch()
+        total_layout.addLayout(header_layout)
+
         total_layout.addSpacing(5)
-        total_layout.addWidget(separator)  # 구분선 추가
+        total_layout.addWidget(separator)
         total_layout.addSpacing(5)
 
         score_layout = QHBoxLayout()
