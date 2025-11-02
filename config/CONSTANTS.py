@@ -9,19 +9,19 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소
 # test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
-company_name = "통합플랫폼테스트"
-product_name = "통합플랫폼테스트제품"
+company_name = "물리보안테스트2"
+product_name = "물리보안테스트시스템"
 version = "v1.0"
 test_category = "MAIN_TEST"
-test_target = "통합플랫폼"
+test_target = "영상보안그룹"
 test_range = "ALL_FIELDS"
 auth_type = "Bearer Token"
 auth_info = "a"
-admin_code = "1234"
-url = "https://10.252.219.119:8080"
+admin_code = "1"
+url = "https://10.252.219.52:8080"
 contact_person = "김철수"
 model_name = "v1.0"
-request_id = "cmh1yg49v000t9y0jdr1wwuja"
+request_id = "cmhfpjibz000c5t1uxmf2urvj"
 specs = [
     ["cmgvieyak001b6cd04cgaawmm_inSchema", "cmgvieyak001b6cd04cgaawmm_outData", "cmgvieyak001b6cd04cgaawmm_messages",
      ""],
@@ -58,6 +58,30 @@ enable_retry_delay = False  # False 권장: 불필요한 sleep 제거
 # 시스템(cmgat, cmgas, cmga0)
 
 SPEC_CONFIG = [
+    {
+        "group_name": "통합시스템그룹",
+        "group_id": "cmh1yc1yn000g9y0jk37caeqv",
+        "cmh1u5pef000sgxc3bzl4y9v0": {
+    "test_name": "영상보안시스템_시나리오2",
+    "specs": ['cmh1u5pef000sgxc3bzl4y9v0_inSchema', 'cmh1u5pef000sgxc3bzl4y9v0_outData', 'cmh1u5pef000sgxc3bzl4y9v0_messages', 'cmh1u5pef000sgxc3bzl4y9v0_webhook_OutSchema', 'cmh1u5pef000sgxc3bzl4y9v0_webhook_inData'],
+    "api_name": ['실시간 이벤트 분석 정보 연동'],
+    "api_id": ['step-1-dfyzdlda0'],
+    "api_endpoint": ['/RealtimeVideoEventInfos'],
+    "trans_protocol": ['WebHook'],
+    "time_out": [5000],
+    "num_retries": [10]
+},
+        "cmgvieyak001b6cd04cgaawmm": {
+    "test_name": "영상보안시스템_new",
+    "specs": ['cmgvieyak001b6cd04cgaawmm_inSchema', 'cmgvieyak001b6cd04cgaawmm_outData', 'cmgvieyak001b6cd04cgaawmm_messages', 'cmgvieyak001b6cd04cgaawmm_webhook_OutSchema', 'cmgvieyak001b6cd04cgaawmm_webhook_inData'],
+    "api_name": ['인증', '전송 지원 기능 정보 연동', '카메라 목록 연동', '저장된 영상 목록 연동', '실시간 영상 정보 연동', '저장된 영상 정보 연동', '실시간 이벤트 분석 정보 연동', '저장된 이벤트 분석 정보 연동'],
+    "api_id": ['step-1-77lxvxrit', 'step-2-ln57b7ahz', 'step-1-354py0pz2', 'step-2-hyto4xrf1', 'step-5-dfxmyzzsw', 'step-6-pflcyt2cp', 'step-7-166n5ivbf', 'step-8-fff2u2432'],
+    "api_endpoint": ['/Authentication', '/Capabilities', '/CameraProfiles', '/StoredVideoInfos', '/StreamURLs', '/ReplayURL', '/RealtimeVideoEventInfos', '/StoredVideoEventInfos'],
+    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'WebHook', 'basic'],
+    "time_out": [5000, 5000, 10000, 5000, 5000, 5000, 5000, 5000],
+    "num_retries": [1, 1, 1, 1, 1, 1, 1, 1]
+}
+    },
     {
         "group_name": "통합플랫폼",
         "group_id": "cmgzwocpp01y6vsve880sfysm",
