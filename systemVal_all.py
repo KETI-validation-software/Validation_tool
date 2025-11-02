@@ -757,87 +757,231 @@ class ResultPageWidget(QWidget):
             self.index_to_spec_id[idx] = spec_id
 
     def on_test_field_selected(self, row, col):
-        """시나리오 선택 시 해당 결과 표시 (결과 없어도 API 정보 표시)"""
-        if row not in self.index_to_spec_id:
-            return
-
-        selected_spec_id = self.index_to_spec_id[row]
-
-        # 선택된 시나리오가 현재와 같으면 무시
-        if selected_spec_id == self.current_spec_id:
-            return
-
-        print(f"[RESULT] 시나리오 전환: {self.current_spec_id} → {selected_spec_id}")
-
-        # ✅ parent의 spec 전환 (API 목록 로드)
-        old_spec_id = self.parent.current_spec_id
-        old_step_buffers = self.parent.step_buffers.copy() if hasattr(self.parent, 'step_buffers') else []
-
+        """시험 분야 클릭 시 해당 시스템으로 동적 전환"""
         try:
-            # ✅ 1. spec_id 업데이트
-            self.parent.current_spec_id = selected_spec_id
-            self.current_spec_id = selected_spec_id
+            self.selected_test_field_row = row
 
-            # ✅ 2. spec 데이터 다시 로드 (스키마, API 목록 등)
-            self.parent.load_specs_from_constants()
+            if row in self.index_to_spec_id:
+                new_spec_id = self.index_to_spec_id[row]
 
-            # ✅ 3. 설정 다시 로드 (웹훅 스키마 포함)
-            self.parent.get_setting()
+                if new_spec_id == self.current_spec_id:
+                    print(f"[SELECT] 이미 선택된 시나리오: {new_spec_id}")
+                    return
 
-            print(f"[RESULT] API 개수: {len(self.parent.videoMessages)}")
-            print(f"[RESULT] outSchema 개수: {len(self.parent.outSchema)}")
-            print(f"[RESULT] webhookSchema 개수: {len(self.parent.webhookSchema)}")
+                print(f"[SELECT] 🔄 시험 분야 전환: {self.current_spec_id} → {new_spec_id}")
 
-            # ✅ 4. 저장된 결과 데이터가 있으면 로드
-            if selected_spec_id in self.parent.spec_table_data:
-                saved_data = self.parent.spec_table_data[selected_spec_id]
+                # ✅ 1. 현재 spec의 테이블 데이터 저장
+                self.save_current_spec_data()
 
-                # step_buffers 복원
-                saved_buffers = saved_data.get('step_buffers', [])
-                if saved_buffers:
-                    self.parent.step_buffers = [buf.copy() for buf in saved_buffers]
-                    print(f"[RESULT] step_buffers 복원 완료: {len(self.parent.step_buffers)}개")
+                # ✅ 2. spec_id 업데이트
+                self.current_spec_id = new_spec_id
+
+                # ✅ 3. spec 데이터 다시 로드
+                self.load_specs_from_constants()
+
+                print(f"[SELECT] 로드된 API 개수: {len(self.videoMessages)}")
+                print(f"[SELECT] API 목록: {self.videoMessages}")
+
+                # ✅ 4. 기본 변수 초기화
+                self.cnt = 0
+                self.current_retry = 0
+                self.message_error = []
+
+                # ✅ 5. 테이블 완전 재구성 (API 이름 먼저 설정!)
+                print(f"[SELECT] 테이블 완전 재구성 시작")
+                self.update_result_table_structure(self.videoMessages)
+
+                # ✅ 6. 저장된 데이터가 있으면 복원 (API 이름은 유지!)
+                if new_spec_id in self.spec_table_data:
+                    print(f"[SELECT] 저장된 데이터 복원 시작")
+                    restored = self.restore_spec_data_without_api_names(new_spec_id)
+
+                    if restored:
+                        print(f"[SELECT] {new_spec_id} 저장된 결과 로드 완료")
+                    else:
+                        print(f"[SELECT] 저장된 데이터 복원 실패 - 초기화")
+                        self.initialize_empty_table()
                 else:
-                    # 저장된 버퍼가 없으면 빈 버퍼 생성
-                    api_count = len(self.parent.videoMessages)
-                    self.parent.step_buffers = [
-                        {"data": "저장된 데이터가 없습니다.", "error": "", "result": "PASS"}
-                        for _ in range(api_count)
-                    ]
+                    # 저장된 데이터가 없으면 초기화
+                    print(f"[SELECT] {new_spec_id} 저장된 데이터 없음 - 초기화")
+                    self.initialize_empty_table()
 
-                # 점수 정보 복원
-                self.parent.total_pass_cnt = saved_data.get('total_pass_cnt', 0)
-                self.parent.total_error_cnt = saved_data.get('total_error_cnt', 0)
+                # ✅ 7. trace 및 latest_events 초기화
+                self.trace.clear()
+                self.latest_events = {}
 
-                # 테이블 및 점수 표시 업데이트
-                self.reload_result_table(saved_data)
-                self.update_score_displays(saved_data)
+                # ✅ 8. 설정 다시 로드
+                self.get_setting()
 
-                print(f"[RESULT] {selected_spec_id} 저장된 결과 로드 완료")
-            else:
-                # 결과가 없으면 빈 테이블 표시
-                print(f"[RESULT] {selected_spec_id} 결과 없음 - 빈 테이블 표시")
-                self.show_empty_result_table()
+                # ✅ 9. 평가 점수 디스플레이 업데이트
+                self.update_score_display()
+
+                # ✅ 10. 결과 텍스트 초기화
+                self.valResult.clear()
+                self.valResult.append(f"✅ 시스템 전환 완료: {self.spec_description}")
+                self.valResult.append(f"📋 Spec ID: {self.current_spec_id}")
+                self.valResult.append(f"📊 API 개수: {len(self.videoMessages)}개")
+                self.valResult.append(f"📋 API 목록: {self.videoMessages}\n")
+
+                print(f"[SELECT] ✅ 시스템 전환 완료")
 
         except Exception as e:
-            print(f"[ERROR] 시나리오 전환 실패: {e}")
+            print(f"[SELECT] 시험 분야 선택 처리 실패: {e}")
             import traceback
             traceback.print_exc()
 
-            # ✅ 복구 처리
-            self.parent.current_spec_id = old_spec_id
-            self.current_spec_id = old_spec_id
-            if old_step_buffers:
-                self.parent.step_buffers = old_step_buffers
+    def restore_spec_data_without_api_names(self, spec_id):
+        """저장된 spec 데이터 복원 (API 이름은 건드리지 않음!)"""
+        if spec_id not in self.spec_table_data:
+            print(f"[RESTORE] {spec_id} 저장된 데이터 없음")
+            return False
 
-            try:
-                self.parent.load_specs_from_constants()
-                self.parent.get_setting()
-            except:
-                pass
+        saved_data = self.spec_table_data[spec_id]
+        print(f"[RESTORE] {spec_id} 데이터 복원 시작")
 
-            QMessageBox.warning(self, "오류", f"시나리오 전환 중 오류가 발생했습니다.\n{str(e)}")
+        # 테이블 복원 (API 이름 제외!)
+        table_data = saved_data['table_data']
+        for row, row_data in enumerate(table_data):
+            if row >= self.tableWidget.rowCount():
+                print(f"[RESTORE] 경고: row={row}가 범위 초과, 건너뜀")
+                break
 
+            # ✅ API 이름은 이미 update_result_table_structure()에서 설정됨 - 건드리지 않음!
+            # 대신 현재 API 이름이 제대로 있는지만 확인
+            current_api_item = self.tableWidget.item(row, 0)
+            if current_api_item:
+                print(f"[RESTORE] Row {row} API 이름 유지: {current_api_item.text()}")
+            else:
+                print(f"[RESTORE] 경고: Row {row} API 이름이 없음!")
+
+            # 아이콘 상태 복원
+            icon_state = row_data['icon_state']
+            if icon_state == "PASS":
+                img = self.img_pass
+            elif icon_state == "FAIL":
+                img = self.img_fail
+            else:
+                img = self.img_none
+
+            icon_widget = QWidget()
+            icon_layout = QHBoxLayout()
+            icon_layout.setContentsMargins(0, 0, 0, 0)
+            icon_label = QLabel()
+            icon_label.setPixmap(QIcon(img).pixmap(16, 16))
+            icon_label.setAlignment(Qt.AlignCenter)
+            icon_layout.addWidget(icon_label)
+            icon_layout.setAlignment(Qt.AlignCenter)
+            icon_widget.setLayout(icon_layout)
+            self.tableWidget.setCellWidget(row, 1, icon_widget)
+
+            # 나머지 컬럼 복원 (안전하게)
+            for col, key in [(2, 'retry_count'), (3, 'pass_count'),
+                             (4, 'total_count'), (5, 'fail_count'), (6, 'score')]:
+                item = self.tableWidget.item(row, col)
+                if item:
+                    item.setText(row_data[key])
+                else:
+                    new_item = QTableWidgetItem(row_data[key])
+                    new_item.setTextAlignment(Qt.AlignCenter)
+                    self.tableWidget.setItem(row, col, new_item)
+
+        # step_buffers 복원
+        self.step_buffers = [buf.copy() for buf in saved_data['step_buffers']]
+
+        # 점수 복원
+        self.total_pass_cnt = saved_data['total_pass_cnt']
+        self.total_error_cnt = saved_data['total_error_cnt']
+
+        print(f"[RESTORE] {spec_id} 데이터 복원 완료")
+        return True
+
+    def initialize_empty_table(self):
+        """테이블을 초기 상태로 설정 (API 이름은 유지)"""
+        print(f"[INIT] 테이블 초기화 시작")
+
+        # 점수 초기화
+        self.total_pass_cnt = 0
+        self.total_error_cnt = 0
+
+        # step_buffers 초기화
+        api_count = len(self.videoMessages)
+        self.step_buffers = [
+            {"data": "", "error": "", "result": "PASS"} for _ in range(api_count)
+        ]
+
+        # 테이블 데이터만 초기화 (API 이름은 이미 설정되어 있음)
+        for row in range(self.tableWidget.rowCount()):
+            # API 이름 확인
+            api_item = self.tableWidget.item(row, 0)
+            if api_item:
+                print(f"[INIT] Row {row} API 이름 확인: {api_item.text()}")
+            else:
+                # API 이름이 없으면 다시 설정
+                if row < len(self.videoMessages):
+                    display_name = f"{row + 1}. {self.videoMessages[row]}"
+                    api_item = QTableWidgetItem(display_name)
+                    api_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+                    self.tableWidget.setItem(row, 0, api_item)
+                    print(f"[INIT] Row {row} API 이름 재설정: {display_name}")
+
+            # 아이콘 초기화
+            icon_widget = QWidget()
+            icon_layout = QHBoxLayout()
+            icon_layout.setContentsMargins(0, 0, 0, 0)
+            icon_label = QLabel()
+            icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
+            icon_label.setAlignment(Qt.AlignCenter)
+            icon_layout.addWidget(icon_label)
+            icon_layout.setAlignment(Qt.AlignCenter)
+            icon_widget.setLayout(icon_layout)
+            self.tableWidget.setCellWidget(row, 1, icon_widget)
+
+            # 카운트 초기화
+            for col, value in [(2, "0"), (3, "0"), (4, "0"), (5, "0"), (6, "0%")]:
+                item = self.tableWidget.item(row, col)
+                if item:
+                    item.setText(value)
+                else:
+                    new_item = QTableWidgetItem(value)
+                    new_item.setTextAlignment(Qt.AlignCenter)
+                    self.tableWidget.setItem(row, col, new_item)
+
+        print(f"[INIT] 테이블 초기화 완료")
+
+    def save_current_spec_data(self):
+        """현재 spec의 테이블 데이터와 상태를 저장"""
+        if not hasattr(self, 'current_spec_id'):
+            return
+
+        # 테이블 데이터 저장 (현재 videoMessages 기준으로!)
+        table_data = []
+        for row in range(self.tableWidget.rowCount()):
+            # ✅ 실제 API 이름을 videoMessages에서 가져옴 (테이블 텍스트 아님!)
+            if row < len(self.videoMessages):
+                api_name = f"{row + 1}. {self.videoMessages[row]}"
+            else:
+                api_item = self.tableWidget.item(row, 0)
+                api_name = api_item.text() if api_item else ""
+
+            row_data = {
+                'api_name': api_name,  # ✅ 올바른 API 이름 저장
+                'icon_state': self._get_icon_state(row),
+                'retry_count': self.tableWidget.item(row, 2).text() if self.tableWidget.item(row, 2) else "0",
+                'pass_count': self.tableWidget.item(row, 3).text() if self.tableWidget.item(row, 3) else "0",
+                'total_count': self.tableWidget.item(row, 4).text() if self.tableWidget.item(row, 4) else "0",
+                'fail_count': self.tableWidget.item(row, 5).text() if self.tableWidget.item(row, 5) else "0",
+                'score': self.tableWidget.item(row, 6).text() if self.tableWidget.item(row, 6) else "0%",
+            }
+            table_data.append(row_data)
+
+        # 전체 데이터 저장
+        self.spec_table_data[self.current_spec_id] = {
+            'table_data': table_data,
+            'step_buffers': [buf.copy() for buf in self.step_buffers],
+            'total_pass_cnt': self.total_pass_cnt,
+            'total_error_cnt': self.total_error_cnt,
+        }
+        print(f"[DEBUG] {self.current_spec_id} 데이터 저장 완료")
     def show_empty_result_table(self):
         """결과가 없을 때 빈 테이블 표시 (API 목록만)"""
         api_list = self.parent.videoMessages
@@ -2376,10 +2520,12 @@ class MyApp(QWidget):
             api_name = api_list[row]
             display_name = f"{row + 1}. {api_name}"
 
-            # 컬럼 0: API 명
+            # 컬럼 0: API 명 - 강제로 새로 생성!
             api_item = QTableWidgetItem(display_name)
             api_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 0, api_item)
+
+            print(f"[TABLE] Row {row}: {display_name} 설정 완료")
 
             # 컬럼 1: 결과 아이콘
             icon_widget = QWidget()
@@ -2408,14 +2554,24 @@ class MyApp(QWidget):
                 self.tableWidget.setItem(row, col, item)
 
             # 컬럼 7: 상세 내용 버튼
-            detail_btn = QPushButton("상세 내용 확인")
-            detail_btn.setMaximumHeight(30)
-            detail_btn.setMaximumWidth(130)
-            detail_btn.clicked.connect(lambda checked, r=row: self.show_combined_result(r))
+            detail_label = QLabel()
+            try:
+                img_path = resource_path("assets/image/test_runner/btn_상세내용확인.png").replace("\\", "/")
+                pixmap = QPixmap(img_path)
+                detail_label.setPixmap(pixmap)
+                detail_label.setScaledContents(False)
+                detail_label.setFixedSize(pixmap.size())
+            except:
+                detail_label.setText("확인")
+                detail_label.setStyleSheet("color: #4A90E2; font-weight: bold;")
+
+            detail_label.setCursor(Qt.PointingHandCursor)
+            detail_label.setAlignment(Qt.AlignCenter)
+            detail_label.mousePressEvent = lambda event, r=row: self.show_combined_result(r)
 
             container = QWidget()
             layout = QHBoxLayout()
-            layout.addWidget(detail_btn)
+            layout.addWidget(detail_label)
             layout.setAlignment(Qt.AlignCenter)
             layout.setContentsMargins(0, 0, 0, 0)
             container.setLayout(layout)
@@ -2423,7 +2579,7 @@ class MyApp(QWidget):
             self.tableWidget.setCellWidget(row, 7, container)
 
             # 행 높이 설정
-            self.tableWidget.setRowHeight(row, 40)
+            self.tableWidget.setRowHeight(row, 28)
 
         print(f"[TABLE] 테이블 재구성 완료: {self.tableWidget.rowCount()}개 행")
 
@@ -2730,7 +2886,7 @@ class MyApp(QWidget):
                 inMessage = self.inMessage[self.cnt] if self.cnt < len(self.inMessage) else {}
                 # ✅ Data Mapper 적용 - 이전 응답 데이터로 요청 업데이트 (trace 파일 != ui)
                 self.generator.latest_events = self.latest_events
-                inMessage = self._apply_request_constraints(inMessage, self.cnt)
+                #inMessage = self._apply_request_constraints(inMessage, self.cnt)
 
                 json_data = json.dumps(inMessage).encode('utf-8')
 
@@ -2864,36 +3020,35 @@ class MyApp(QWidget):
             elif self.post_flag == True:
                 if self.res != None:
                     # 응답 처리 시작
-                    self.processing_response = True
+                    if self.res != None:
+                        # 응답 처리 시작
+                        self.processing_response = True
 
-                    if self.cnt == 0 or self.tmp_msg_append_flag:  # and -> or 수정함- 240710
-                        self.valResult.append(self.message_name)
+                        if self.cnt == 0 or self.tmp_msg_append_flag:
+                            self.valResult.append(self.message_name)
 
-                    res_data = self.res.text
-                    # res_data = json.loads(res_data)
+                        res_data = self.res.text
 
-                    print(f"~+~+~+~+ 원본 응답 텍스트: {repr(res_data)}~+~+~+~+")
+                        try:
+                            res_data = json.loads(res_data)
+                        except Exception as e:
+                            self._append_text(f"응답 JSON 파싱 오류: {e}")
+                            self._append_text({"raw_response": self.res.text})
+                            self.post_flag = False
+                            self.processing_response = False
+                            self.current_retry += 1
+                            return
 
-                    try:
-                        res_data = json.loads(res_data)
-                    except Exception as e:
-                        self._append_text(f"응답 JSON 파싱 오류: {e}")
-                        self._append_text({"raw_response": self.res.text})
-                        # 이후 로직 건너뜀
-                        self.post_flag = False
-                        self.processing_response = False
-                        self.current_retry += 1
-                        return
+                        self._push_event(self.cnt, "RESPONSE", res_data)
 
-                    self._push_event(self.cnt, "RESPONSE", res_data)
+                        # 현재 재시도 정보
+                        current_retries = self.num_retries_list[self.cnt] if self.cnt < len(
+                            self.num_retries_list) else 1
+                        current_protocol = self.trans_protocols[self.cnt] if self.cnt < len(
+                            self.trans_protocols) else "Unknown"
 
-                    # 현재 재시도 정보
-                    current_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
-                    current_protocol = self.trans_protocols[self.cnt] if self.cnt < len(
-                        self.trans_protocols) else "Unknown"
-
-                    # 단일 응답에 대한 검증 처리
-                    tmp_res_auth = json.dumps(res_data, indent=4, ensure_ascii=False)
+                        # 단일 응답에 대한 검증 처리
+                        tmp_res_auth = json.dumps(res_data, indent=4, ensure_ascii=False)
 
                     # ✅ 디버깅: 어떤 스키마로 검증하는지 확인
                     if self.current_retry == 0:  # 첫 시도에만 출력
@@ -2992,17 +3147,13 @@ class MyApp(QWidget):
                             validation_rules=resp_rules,
                             reference_context=self.reference_context
                         )
-
-                    # 일반 검증으로 돌렸을때 - 맥락 검증 실패해서
                     except TypeError as te:
                         print(f"[ERROR] 응답 검증 중 TypeError 발생: {te}, 일반 검증으로 재시도")
-
                         val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(
                             self.outSchema[self.cnt],
                             res_data,
                             self.flag_opt
                         )
-
                     if self.message[self.cnt] == "Authentication":
                         self.handle_authentication_response(res_data)
 
@@ -3034,12 +3185,12 @@ class MyApp(QWidget):
                     # 이번 시도의 결과
                     final_result = val_result
 
-                    # 플랫폼과 동일한 누적 카운트 로직 - (10/20) 하드코딩 흔적 지움
+                    # 누적 카운트 로직
                     if not hasattr(self, 'step_pass_counts'):
                         api_count = len(self.videoMessages)
                         self.step_pass_counts = [0] * api_count
                         self.step_error_counts = [0] * api_count
-                        self.step_pass_flags = [0] * api_count  # PASS 횟수 카운트
+                        self.step_pass_flags = [0] * api_count
 
                     # 이번 시도 결과를 누적
                     self.step_pass_counts[self.cnt] += key_psss_cnt
@@ -3125,18 +3276,11 @@ class MyApp(QWidget):
                     self.valResult.append("\n" + data_text)
                     self.valResult.append(f"\n검증 결과: {final_result}")
 
-                    
-                    # ✅ 응답 코드 실패 시 명확한 메시지
-                    if final_result == "FAIL" and isinstance(res_data, dict):
-                        response_code = str(res_data.get("code", "")).strip()
-                        '''if response_code not in ["200", "201"]:
-                            self.valResult.append(f"⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.")'''
-
-                    # ✅ 이번 회차의 결과만 전체 점수에 추가 (누적된 값이 아님!)
+                    # ✅ 이번 회차의 결과만 현재 spec 점수에 추가
                     self.total_error_cnt += key_error_cnt
                     self.total_pass_cnt += key_psss_cnt
 
-                    # 평가 점수 디스플레이 업데이트
+                    # ✅ 평가 점수 디스플레이 업데이트 (분야별만)
                     self.update_score_display()
 
                     total_fields = self.total_pass_cnt + self.total_error_cnt
@@ -3152,20 +3296,32 @@ class MyApp(QWidget):
                     # 재시도 카운터 증가
                     self.current_retry += 1
 
-                    # 현재 API의 모든 재시도가 완료되었는지 확인
+                    # ✅ 현재 API의 모든 재시도가 완료되었는지 확인
                     if (self.cnt < len(self.num_retries_list) and
                             self.current_retry >= self.num_retries_list[self.cnt]):
+                        # ✅ 모든 재시도 완료 - 이제 전체 점수에 반영!
+                        print(f"[SCORE] API {self.cnt} 완료: pass={total_pass_count}, error={total_error_count}")
+
+                        # ✅ 전체 누적 점수 업데이트 (재시도 완료 후 한 번만!)
+                        self.global_error_cnt += total_error_count
+                        self.global_pass_cnt += total_pass_count
+
+                        print(f"[SCORE] 전체 점수 업데이트: pass={self.global_pass_cnt}, error={self.global_error_cnt}")
+
+                        # ✅ 전체 점수 포함하여 디스플레이 업데이트
+                        self.update_score_display()
+
                         self.step_buffers[self.cnt]["events"] = list(self.trace.get(self.cnt, []))
 
                         # 다음 API로 이동
                         self.cnt += 1
-                        self.current_retry = 0  # 재시도 카운터 리셋
+                        self.current_retry = 0
 
                     self.message_in_cnt = 0
                     self.post_flag = False
                     self.processing_response = False
 
-                    # 재시도 여부에 따라 대기 시간 조정 (플랫폼과 동기화)
+                    # 재시도 여부에 따라 대기 시간 조정
                     if (self.cnt < len(self.num_retries_list) and
                             self.current_retry < self.num_retries_list[self.cnt] - 1):
                         self.time_pre = time.time()
@@ -3195,6 +3351,14 @@ class MyApp(QWidget):
                     final_score = (self.total_pass_cnt / total_fields) * 100
                 else:
                     final_score = 0
+
+                # ✅ 전체 점수 최종 확인 로그
+                global_total = self.global_pass_cnt + self.global_error_cnt
+                global_score = (self.global_pass_cnt / global_total * 100) if global_total > 0 else 0
+                print(
+                    f"[FINAL] 분야별 점수: pass={self.total_pass_cnt}, error={self.total_error_cnt}, score={final_score:.1f}%")
+                print(
+                    f"[FINAL] 전체 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}, score={global_score:.1f}%")
 
                 # ✅ JSON 결과 자동 저장 추가
                 try:
@@ -3877,6 +4041,12 @@ class MyApp(QWidget):
                 f"{global_score:.1f}%</span>"
             )
 
+            # ✅ 디버그 로그 추가
+            print(
+                f"[SCORE UPDATE] 분야별 - pass: {self.total_pass_cnt}, error: {self.total_error_cnt}, score: {spec_score:.1f}%")
+            print(
+                f"[SCORE UPDATE] 전체 - pass: {self.global_pass_cnt}, error: {self.global_error_cnt}, score: {global_score:.1f}%")
+
     def table_cell_clicked(self, row, col):
         """테이블 셀 클릭 시 호출되는 함수"""
         if col == 1:  # 결과 컬럼 클릭 시에만 동작
@@ -4160,9 +4330,11 @@ class MyApp(QWidget):
             prev_error = prev_data.get('total_error_cnt', 0)
             print(f"[SCORE RESET] 기존 {self.current_spec_id} 점수 제거: pass={prev_pass}, error={prev_error}")
 
-            # global 점수에서 해당 spec 점수 제거
+            # ✅ global 점수에서 해당 spec 점수 제거
             self.global_pass_cnt = max(0, self.global_pass_cnt - prev_pass)
             self.global_error_cnt = max(0, self.global_error_cnt - prev_error)
+
+            print(f"[SCORE RESET] 조정 후 global 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}")
 
         # ✅ 6. 현재 spec의 점수만 초기화 (global은 유지)
         self.total_error_cnt = 0
@@ -4220,7 +4392,7 @@ class MyApp(QWidget):
         self.digestInfo = [auth_temp2[0], auth_temp2[1]]
         self.token = auth_temp
 
-        # ✅ 12. 평가 점수 디스플레이 초기화
+        # ✅ 12. 평가 점수 디스플레이 초기화 (전체 점수 포함)
         self.update_score_display()
 
         # ✅ 13. 결과 텍스트 초기화
@@ -4235,6 +4407,7 @@ class MyApp(QWidget):
         self.valResult.append(f"📋 Spec ID: {self.current_spec_id}")
         self.valResult.append(f"📊 API 개수: {len(self.videoMessages)}개")
         self.valResult.append(f"📋 API 목록: {self.videoMessages}")
+        self.valResult.append(f"📊 전체 누적 점수: {self.global_pass_cnt}(통과) / {self.global_error_cnt}(실패)")
         self.valResult.append("=" * 60)
         self.valResult.append("\n시스템이 플랫폼에 요청을 전송하여 응답을 검증합니다\n")
 
@@ -4242,6 +4415,7 @@ class MyApp(QWidget):
         self.tick_timer.start(1000)
 
         print(f"[START] 타이머 시작 완료")
+        print(f"[START] 현재 global 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}")
 
     def stop_btn_clicked(self):
         self.tick_timer.stop()
