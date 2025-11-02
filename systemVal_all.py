@@ -3129,8 +3129,8 @@ class MyApp(QWidget):
                     # ✅ 응답 코드 실패 시 명확한 메시지
                     if final_result == "FAIL" and isinstance(res_data, dict):
                         response_code = str(res_data.get("code", "")).strip()
-                        if response_code not in ["200", "201"]:
-                            self.valResult.append(f"⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.")
+                        '''if response_code not in ["200", "201"]:
+                            self.valResult.append(f"⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.")'''
 
                     # ✅ 이번 회차의 결과만 전체 점수에 추가 (누적된 값이 아님!)
                     self.total_error_cnt += key_error_cnt

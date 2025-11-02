@@ -18,19 +18,19 @@
   "status": "완료",
   "authMethod": "Bearer Token",
   "testScore": {
-    "score": 79.41,
+    "score": 82.35,
     "totalFields": 34,
-    "passedFields": 27,
-    "failedFields": 7
+    "passedFields": 28,
+    "failedFields": 6
   },
   "testResult": [
     {
       "testSpecId": "cmgvieyak001b6cd04cgaawmm",
       "testSpecName": "영상보안시스템_new",
-      "score": 79.41,
+      "score": 82.35,
       "totalFields": 34,
-      "passedFields": 27,
-      "failedFields": 7,
+      "passedFields": 28,
+      "failedFields": 6,
       "apis": [
         {
           "id": "step-1-77lxvxrit",
@@ -199,19 +199,22 @@
           "name": "실시간 이벤트 분석 정보 연동",
           "method": "POST",
           "endpoint": "/RealtimeVideoEventInfos",
-          "score": 22.0,
+          "score": 33.0,
           "validationCnt": 1,
           "totalFields": 9,
-          "passFields": 2,
-          "failFields": 7,
+          "passFields": 3,
+          "failFields": 6,
           "validations": [
             {
               "attempt": 1,
               "validationData": {
                 "camList": [
-                  {},
-                  {},
-                  {}
+                  {
+                    "camID": "cam0001"
+                  },
+                  {
+                    "camID": "cam0002"
+                  }
                 ],
                 "duration": "100",
                 "transProtocol": {
@@ -219,12 +222,11 @@
                   "transProtocolDesc": "127.0.0.1:8090"
                 },
                 "eventFilter": "화재",
-                "classFilter": "트럭",
+                "classFilter": "사람",
                 "startTime": 1761110160000
               },
               "validationErrors": [
                 "[Inbound]",
-                "[구조] 필수 필드 누락: camList.camID",
                 "[구조] 필수 필드 누락: camList.endTime",
                 "[구조] 필수 필드 누락: camList.eventDesc",
                 "[구조] 필수 필드 누락: camList.eventName",
@@ -282,7 +284,7 @@
                 ],
                 "maxCount": 3,
                 "eventFilter": "배회",
-                "classFilter": "버스"
+                "classFilter": "트럭"
               },
               "validationErrors": [
                 "오류가 없습니다."
@@ -293,5 +295,5 @@
       ]
     }
   ],
-  "completedDate": "2025-11-02T14:58:37Z"
+  "completedDate": "2025-11-02T16:03:14Z"
 }

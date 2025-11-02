@@ -271,10 +271,11 @@ class ConstraintDataGenerator:
                         shared_values[field_path] = constraint["values"][0]
 
                 # 그 외 필드는 중복 방지
-                elif constraint["type"] in ["request-based", "random-response", "random"]:
+                elif constraint["type"] in ["request-based", "random-response", "random",
+                                            "response-based"]:  # ← response-based 추가
                     if constraint["values"]:
                         available_values[field_path] = constraint["values"].copy()
-                        used_values[field_path] = []  # 사용된 값 추적 초기화
+                        used_values[field_path] = []
 
                         # 최소 값 개수 추적
                         min_available_count = min(min_available_count, len(constraint["values"]))
@@ -334,8 +335,8 @@ class ConstraintDataGenerator:
                     item[field] = shared_values[field_path]
 
                 # ✅ request-based, random-response, random: 중복 방지 (순차 할당)
-                elif constraint["type"] in ["request-based", "random-response", "random"]:
-                    # ✅ 중복 방지: 사용되지 않은 값 선택
+                elif constraint["type"] in ["request-based", "random-response", "random",
+                                            "response-based"]:  # ← response-based 추가
                     if field_path in available_values and available_values[field_path]:
                         values_list = available_values[field_path]
                         used_list = used_values.get(field_path, [])

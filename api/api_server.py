@@ -36,6 +36,7 @@ class Server(BaseHTTPRequestHandler):
     webhookData = None  # ✅ 웹훅 데이터 추가
     webhook_thread = None  # ✅ 웹훅 스레드 (클래스 변수)
     webhook_response = None  # ✅ 웹훅 응답 (클래스 변수)
+    webhookCon = None
     system = ""
     auth_type = "D"
     auth_Info = ['admin', '1234', 'user', 'abcd1234', 'SHA-256', None]  # 저장된 상태로 main 입력하지 않으면 digest auth 인증 x
@@ -475,7 +476,6 @@ class Server(BaseHTTPRequestHandler):
                     constraints=out_con,
                     n=len(num_data)
                 )
-                print("!!! 업데이트된 메시지:", updated_message)
                 self._push_event(self.path[1:], "RESPONSE", updated_message)
 
                 # 업데이트된 메시지를 응답으로 전송
@@ -513,23 +513,85 @@ class Server(BaseHTTPRequestHandler):
             print(f"[DEBUG][SERVER] message_cnt: {message_cnt}")
             print(f"[DEBUG][SERVER] url_tmp: {url_tmp}")
 
-            # 그냥 무조건 0번 인덱스 사용하는 걸로 수정
+            # ✅ API 이름으로 webhookData 매칭
             if self.webhookData and len(self.webhookData) > 0:
-                webhook_payload = self.webhookData[0]
-                print(f"[DEBUG][SERVER] 웹훅 데이터 사용: webhookData[0]")
-                print(f"[DEBUG][SERVER] 원본 웹훅 페이로드: {json.dumps(webhook_payload, ensure_ascii=False) if webhook_payload else 'None'}")
+                # 현재 API 이름 가져오기
+                api_name = self.message[message_cnt]
+                print(f"[DEBUG][SERVER] 현재 API: {api_name}")
+
+                # 웹훅이 있는 API들만 필터링 (Realtime이 들어간 API)
+                webhook_apis = [msg for msg in self.message if "Realtime" in msg]
+                print(f"[DEBUG][SERVER] 웹훅 API 목록: {webhook_apis}")
+
+                # 현재 API가 웹훅 API 목록에 있는지 확인
+                if api_name not in webhook_apis:
+                    print(f"[DEBUG][SERVER] '{api_name}'는 웹훅 API가 아님, 웹훅 전송 건너뛰기")
+                    return
+
+                # 웹훅 API 목록에서 현재 API의 인덱스 찾기
+                webhook_index = webhook_apis.index(api_name)
+                print(f"[DEBUG][SERVER] 웹훅 인덱스: {webhook_index}")
+
+                # webhookData에서 해당 인덱스의 데이터 가져오기
+                if webhook_index >= len(self.webhookData):
+                    print(
+                        f"[DEBUG][SERVER] webhookData 인덱스 범위 초과: {webhook_index} >= {len(self.webhookData)}, 웹훅 전송 건너뛰기")
+                    return
+
+                webhook_payload = self.webhookData[webhook_index]
+                print(f"[DEBUG][SERVER] 웹훅 데이터 사용: webhookData[{webhook_index}]")
+                print(
+                    f"[DEBUG][SERVER] 원본 웹훅 페이로드: {json.dumps(webhook_payload, ensure_ascii=False) if webhook_payload else 'None'}")
 
                 # None이면 웹훅 전송하지 않음
                 if webhook_payload is None:
                     print(f"[DEBUG][SERVER] 웹훅 데이터가 None, 웹훅 전송 건너뛰기")
                     return
+
+                # ✅ 웹훅에도 constraints 적용
+                try:
+                    # webhookCon 리스트가 있는 경우
+                    if self.webhookCon and isinstance(self.webhookCon, list):
+                        print(f"[DEBUG][WEBHOOK_CONSTRAINTS] self.webhookCon 타입: {type(self.webhookCon)}")
+                        print(f"[DEBUG][WEBHOOK_CONSTRAINTS] self.webhookCon 길이: {len(self.webhookCon)}")
+
+                        # webhookCon에서 해당 인덱스의 constraint 가져오기
+                        if len(self.webhookCon) > webhook_index:
+                            webhook_con = self.webhookCon[webhook_index]
+
+                            if webhook_con and isinstance(webhook_con, dict) and len(webhook_con) > 0:
+                                print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 웹훅 constraints 적용 시작")
+                                # 웹훅 페이로드에 constraints 적용
+                                num_data = [random.randint(0, 9) for _ in range(3)]
+                                webhook_payload = self.generator._applied_constraints(
+                                    request_data=self.request_data,
+                                    template_data=webhook_payload,
+                                    constraints=webhook_con,
+                                    n=len(num_data)
+                                )
+                                print(f"[DEBUG][WEBHOOK_CONSTRAINTS] constraints 적용 완료")
+                            else:
+                                print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 웹훅 constraints가 비어있음 - 원본 페이로드 사용")
+                        else:
+                            print(
+                                f"[DEBUG][WEBHOOK_CONSTRAINTS] webhookCon 인덱스 범위 초과: {webhook_index} >= {len(self.webhookCon)}")
+                    else:
+                        print(f"[DEBUG][WEBHOOK_CONSTRAINTS] webhookCon이 없거나 리스트가 아님")
+
+                except Exception as e:
+                    print(f"[ERROR][WEBHOOK_CONSTRAINTS] 웹훅 constraints 적용 중 오류: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    # 에러 발생 시 원본 페이로드 사용
+                    pass
+
             else:
-                print(f"[DEBUG][SERVER] 웹훅 데이터 인덱스 범위 초과 또는 없음, 웹훅 전송 건너뛰기")
+                print(f"[DEBUG][SERVER] webhookData가 없거나 비어있음, 웹훅 전송 건너뛰기")
                 return
 
-            print(f"[DEBUG][SERVER] webhook_payload: {json.dumps(webhook_payload, ensure_ascii=False)[:200]}")
+            print(f"[DEBUG][SERVER] 최종 webhook_payload: {json.dumps(webhook_payload, ensure_ascii=False)[:200]}")
 
-            # ✅ 웹훅 이벤트 전송 기록 (trace)
+            # ✅ 웹훅 이벤트 전송 기록 (trace) - constraints 적용 후의 페이로드 기록
             api_name = self.path[1:] if self.path else "unknown"
             self._push_event(api_name, "WEBHOOK_OUT", webhook_payload)
 
