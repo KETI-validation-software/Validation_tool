@@ -18,19 +18,19 @@
   "status": "완료",
   "authMethod": "Bearer Token",
   "testScore": {
-    "score": 82.35,
+    "score": 67.65,
     "totalFields": 34,
-    "passedFields": 28,
-    "failedFields": 6
+    "passedFields": 23,
+    "failedFields": 11
   },
   "testResult": [
     {
       "testSpecId": "cmgvieyak001b6cd04cgaawmm",
       "testSpecName": "영상보안시스템_new",
-      "score": 82.35,
+      "score": 67.65,
       "totalFields": 34,
-      "passedFields": 28,
-      "failedFields": 6,
+      "passedFields": 23,
+      "failedFields": 11,
       "apis": [
         {
           "id": "step-1-77lxvxrit",
@@ -115,10 +115,7 @@
                 },
                 "camList": [
                   {
-                    "camID": "cam0001"
-                  },
-                  {
-                    "camID": "cam0002"
+                    "camID": ""
                   }
                 ]
               },
@@ -133,28 +130,25 @@
           "name": "실시간 영상 정보 연동",
           "method": "POST",
           "endpoint": "/StreamURLs",
-          "score": 100.0,
+          "score": 67.0,
           "validationCnt": 1,
           "totalFields": 3,
-          "passFields": 3,
-          "failFields": 0,
+          "passFields": 2,
+          "failFields": 1,
           "validations": [
             {
               "attempt": 1,
               "validationData": {
                 "camList": [
                   {
-                    "camID": "cam0001",
-                    "streamProtocolType": "RTSP"
-                  },
-                  {
-                    "camID": "cam0002",
+                    "camID": "",
                     "streamProtocolType": "RTSP"
                   }
                 ]
               },
               "validationErrors": [
-                "오류가 없습니다."
+                "[Inbound]",
+                "[의미] camList.camID: 값 불일치:  (index 0)가 camID(['cam0001', 'cam0002'])에 없음"
               ]
             }
           ]
@@ -164,24 +158,18 @@
           "name": "저장된 영상 정보 연동",
           "method": "POST",
           "endpoint": "/ReplayURL",
-          "score": 100.0,
+          "score": 80.0,
           "validationCnt": 1,
           "totalFields": 5,
-          "passFields": 5,
-          "failFields": 0,
+          "passFields": 4,
+          "failFields": 1,
           "validations": [
             {
               "attempt": 1,
               "validationData": {
                 "camList": [
                   {
-                    "camID": "cam0001",
-                    "startTime": 1760949060000,
-                    "endTime": 1761208260000,
-                    "streamProtocolType": "RTSP"
-                  },
-                  {
-                    "camID": "cam0002",
+                    "camID": "",
                     "startTime": 1760949060000,
                     "endTime": 1761208260000,
                     "streamProtocolType": "RTSP"
@@ -189,7 +177,8 @@
                 ]
               },
               "validationErrors": [
-                "오류가 없습니다."
+                "[Inbound]",
+                "[의미] camList.camID: 값 불일치:  (index 0)가 camID(['cam0001', 'cam0002'])에 없음"
               ]
             }
           ]
@@ -210,10 +199,7 @@
               "validationData": {
                 "camList": [
                   {
-                    "camID": "cam0001"
-                  },
-                  {
-                    "camID": "cam0002"
+                    "camID": ""
                   }
                 ],
                 "duration": "100",
@@ -221,8 +207,8 @@
                   "transProtocolType": "WebHook",
                   "transProtocolDesc": "127.0.0.1:8090"
                 },
-                "eventFilter": "화재",
-                "classFilter": "사람",
+                "eventFilter": "",
+                "classFilter": "",
                 "startTime": 1761110160000
               },
               "validationErrors": [
@@ -261,11 +247,11 @@
           "name": "저장된 이벤트 분석 정보 연동",
           "method": "POST",
           "endpoint": "/StoredVideoEventInfos",
-          "score": 100.0,
+          "score": 62.0,
           "validationCnt": 1,
           "totalFields": 8,
-          "passFields": 8,
-          "failFields": 0,
+          "passFields": 5,
+          "failFields": 3,
           "validations": [
             {
               "attempt": 1,
@@ -276,18 +262,18 @@
                 },
                 "camList": [
                   {
-                    "camID": "cam0001"
-                  },
-                  {
-                    "camID": "cam0002"
+                    "camID": ""
                   }
                 ],
                 "maxCount": 3,
-                "eventFilter": "배회",
-                "classFilter": "트럭"
+                "eventFilter": "",
+                "classFilter": ""
               },
               "validationErrors": [
-                "오류가 없습니다."
+                "[Inbound]",
+                "[의미] camList.camID: 값 불일치:  (index 0)가 camID(['cam0001', 'cam0002'])에 없음",
+                "[의미] classFilter: 값 불일치: 가 허용값 목록 ['사람', '트럭', '버스']에 없음",
+                "[의미] eventFilter: 값 불일치: 가 허용값 목록 ['화재', '배회']에 없음"
               ]
             }
           ]
@@ -295,5 +281,5 @@
       ]
     }
   ],
-  "completedDate": "2025-11-02T16:03:14Z"
+  "completedDate": "2025-11-02T20:32:13Z"
 }
