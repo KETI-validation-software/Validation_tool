@@ -158,8 +158,16 @@ class Server(BaseHTTPRequestHandler):
             try:
                 self.request_data = json.loads(request_body.decode('utf-8'))
                 print(f"[DEBUG][SERVER] 파싱된 요청 데이터: {self.request_data}")
+                
+                # ✅ API 이름 추출 및 로깅
+                api_name = self.path[1:]  # 슬래시 제거
+                print(f"[TRACE WRITE] API 이름: {api_name}")
+                print(f"[TRACE WRITE] Direction: REQUEST")
+                
                 # 요청 데이터 기록
-                self._push_event(self.path[1:], "REQUEST", self.request_data)
+                self._push_event(api_name, "REQUEST", self.request_data)
+                
+                print(f"[TRACE WRITE] ✅ trace 파일에 저장 완료")
             except Exception as e:
                 print(f"[ERROR] 요청 본문 파싱 실패: {e}")
                 self.request_data = {}

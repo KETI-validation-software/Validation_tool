@@ -1587,7 +1587,26 @@ class MyApp(QWidget):
     def _load_from_trace_file(self, api_name, direction="RESPONSE"):
         """Trace 파일에서 최신 이벤트 데이터 로드"""
         try:
-            trace_file = Path("results/trace") / f"trace_{api_name.replace('/', '_')}.ndjson"
+            # API 이름에서 슬래시 제거
+            api_name_clean = api_name.lstrip("/")
+            
+            # 번호 prefix 제거 (예: "01_Authentication" -> "Authentication")
+            # 패턴: 숫자로 시작하고 '_'가 있는 경우
+            import re
+            api_name_no_prefix = re.sub(r'^\d+_', '', api_name_clean)
+            
+            print(f"[DEBUG] trace 파일 찾기: 원본={api_name}, 정제={api_name_clean}, prefix제거={api_name_no_prefix}")
+            
+            # trace 파일 이름 생성 (두 가지 모두 시도)
+            # 1. prefix 포함된 이름으로 시도
+            safe_api = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in str(api_name_clean))
+            trace_file = Path("results/trace") / f"trace_{safe_api}.ndjson"
+            
+            # 2. prefix 제거된 이름으로 시도
+            if not trace_file.exists():
+                safe_api_no_prefix = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in str(api_name_no_prefix))
+                trace_file = Path("results/trace") / f"trace_{safe_api_no_prefix}.ndjson"
+                print(f"[DEBUG] prefix 포함 파일 없음, prefix 제거 파일 시도: {trace_file}")
 
             if not trace_file.exists():
                 print(f"[DEBUG] trace 파일 없음: {trace_file}")
@@ -1599,6 +1618,7 @@ class MyApp(QWidget):
                 for line in f:
                     try:
                         event = json.loads(line.strip())
+                        # direction만 확인 (api는 이미 파일명으로 필터링됨)
                         if event.get("dir") == direction:
                             latest_event = event
                     except json.JSONDecodeError:
@@ -1610,7 +1630,7 @@ class MyApp(QWidget):
                 if api_key not in self.latest_events:
                     self.latest_events[api_key] = {}
                 self.latest_events[api_key][direction] = latest_event
-                print(f"[DEBUG] trace 파일에서 {api_name} {direction} 데이터 로드 완료")
+                print(f"[DEBUG] trace 파일에서 {api_name} {direction} 데이터 로드 완료: {len(str(latest_event.get('data', {})))} bytes")
                 return latest_event.get("data")
             else:
                 print(f"[DEBUG] trace 파일에서 {api_name} {direction} 데이터 없음")
@@ -1618,6 +1638,8 @@ class MyApp(QWidget):
 
         except Exception as e:
             print(f"[ERROR] trace 파일 로드 중 오류: {e}")
+            import traceback
+            traceback.print_exc()
             return None
 
     # 
@@ -4400,20 +4422,27 @@ class MyApp(QWidget):
             QMessageBox.warning(self, "알림", "시험 시나리오를 먼저 선택하세요.")
             return
 
-        print(f"[START] 시험 시작: {self.current_spec_id} - {self.spec_description}")
+        print(f"[START] ========== 검증 시작: 완전 초기화 ==========")
+        print(f"[START] 시험: {self.current_spec_id} - {self.spec_description}")
+        
         self.update_result_table_structure(self.videoMessages)
 
-        # ✅ 2. trace 디렉토리 초기화
+        # ✅ 2. 기존 타이머 정지 (중복 실행 방지)
+        if self.tick_timer.isActive():
+            print(f"[START] 기존 타이머 중지")
+            self.tick_timer.stop()
+
+        # ✅ 3. trace 디렉토리 초기화
         self._clean_trace_dir_once()
 
-        # ✅ 3. JSON 데이터 준비
+        # ✅ 4. JSON 데이터 준비
         json_to_data("video")
 
-        # ✅ 4. 버튼 상태 변경
+        # ✅ 5. 버튼 상태 변경
         self.sbtn.setDisabled(True)
         self.stop_btn.setEnabled(True)
 
-        # ✅ 5. 이전 시험 결과가 global 점수에 포함되어 있으면 제거
+        # ✅ 6. 이전 시험 결과가 global 점수에 포함되어 있으면 제거
         if self.current_spec_id in self.spec_table_data:
             prev_data = self.spec_table_data[self.current_spec_id]
             prev_pass = prev_data.get('total_pass_cnt', 0)
@@ -4426,38 +4455,50 @@ class MyApp(QWidget):
 
             print(f"[SCORE RESET] 조정 후 global 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}")
 
-        # ✅ 6. 현재 spec의 점수만 초기화 (global은 유지)
-        self.total_error_cnt = 0
-        self.total_pass_cnt = 0
+        # ✅ 7. 모든 카운터 및 플래그 초기화 (첫 실행처럼)
         self.cnt = 0
-        self.current_retry = 0
-        self.time_pre = 0
         self.cnt_pre = 0
+        self.time_pre = 0
+        self.current_retry = 0
         self.post_flag = False
         self.processing_response = False
         self.message_in_cnt = 0
+        self.realtime_flag = False
+        self.tmp_msg_append_flag = False
+        
+        # ✅ 8. 현재 spec의 점수만 초기화 (global은 유지)
+        self.total_error_cnt = 0
+        self.total_pass_cnt = 0
+
+        # ✅ 9. 메시지 및 에러 관련 변수 초기화
         self.message_error = []
         self.res = None
         self.webhook_res = None
-        self.realtime_flag = False
-        self.tmp_msg_append_flag = False
 
-        # ✅ 7. 현재 spec에 맞게 누적 카운트 초기화
+        # ✅ 10. 현재 spec에 맞게 누적 카운트 초기화
         api_count = len(self.videoMessages)
         self.step_pass_counts = [0] * api_count
         self.step_error_counts = [0] * api_count
         self.step_pass_flags = [0] * api_count
 
-        # ✅ 8. step_buffers 재생성 (현재 API 개수에 맞게)
+        # ✅ 11. step_buffers 완전 재생성
         self.step_buffers = [
             {"data": "", "error": "", "result": "PASS"} for _ in range(api_count)
         ]
+        print(f"[START] step_buffers 재생성 완료: {len(self.step_buffers)}개")
 
-        # ✅ 9. trace 초기화
-        self.trace.clear()
-        self.latest_events = {}
+        # ✅ 12. trace 초기화
+        if hasattr(self, 'trace'):
+            self.trace.clear()
+        else:
+            self.trace = {}
+        
+        if hasattr(self, 'latest_events'):
+            self.latest_events.clear()
+        else:
+            self.latest_events = {}
 
-        # ✅ 10. 테이블 초기화
+        # ✅ 13. 테이블 완전 초기화
         print(f"[START] 테이블 초기화: {api_count}개 API")
         for i in range(self.tableWidget.rowCount()):
             # 아이콘 초기화
@@ -4474,24 +4515,27 @@ class MyApp(QWidget):
 
             # 카운트 초기화
             for col, value in [(2, "0"), (3, "0"), (4, "0"), (5, "0"), (6, "0%")]:
-                if self.tableWidget.item(i, col):
-                    self.tableWidget.item(i, col).setText(value)
+                item = QTableWidgetItem(value) if not self.tableWidget.item(i, col) else self.tableWidget.item(i, col)
+                item.setText(value)
+                item.setTextAlignment(Qt.AlignCenter)
+                self.tableWidget.setItem(i, col, item)
+        print(f"[START] 테이블 초기화 완료")
 
-        # ✅ 11. 인증 정보 설정
+        # ✅ 14. 인증 정보 설정
         auth_temp, auth_temp2 = set_auth("config/config.txt")
         self.digestInfo = [auth_temp2[0], auth_temp2[1]]
         self.token = auth_temp
 
-        # ✅ 12. 평가 점수 디스플레이 초기화 (전체 점수 포함)
+        # ✅ 15. 평가 점수 디스플레이 초기화 (전체 점수 포함)
         self.update_score_display()
 
-        # ✅ 13. 결과 텍스트 초기화
+        # ✅ 16. 결과 텍스트 초기화
         self.valResult.clear()
 
-        # ✅ 14. URL 설정
+        # ✅ 17. URL 설정
         self.pathUrl = CONSTANTS.url
 
-        # ✅ 15. 시작 메시지
+        # ✅ 18. 시작 메시지
         self.valResult.append("=" * 60)
         self.valResult.append(f"🚀 시험 시작: {self.spec_description}")
         self.valResult.append(f"📋 Spec ID: {self.current_spec_id}")
@@ -4501,14 +4545,20 @@ class MyApp(QWidget):
         self.valResult.append("=" * 60)
         self.valResult.append("\n시스템이 플랫폼에 요청을 전송하여 응답을 검증합니다\n")
 
-        # ✅ 16. 타이머 시작 (1초 간격)
+        # ✅ 19. 타이머 시작 (모든 초기화 완료 후)
+        print(f"[START] 타이머 시작")
         self.tick_timer.start(1000)
+        print(f"[START] ========== 검증 시작 준비 완료 ==========")
 
-        print(f"[START] 타이머 시작 완료")
         print(f"[START] 현재 global 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}")
 
     def stop_btn_clicked(self):
-        self.tick_timer.stop()
+        """평가 중지 버튼 클릭"""
+        # ✅ 타이머 중지
+        if self.tick_timer.isActive():
+            self.tick_timer.stop()
+            print(f"[STOP] 타이머 중지됨")
+
         self.valResult.append("검증 절차가 중지되었습니다.")
         self.sbtn.setEnabled(True)
         self.stop_btn.setDisabled(True)
@@ -4677,6 +4727,12 @@ class MyApp(QWidget):
             self.r2 = "None"
 
     def closeEvent(self, event):
+        """창 닫기 이벤트 - 타이머 정리"""
+        # ✅ 타이머 중지
+        if hasattr(self, 'tick_timer') and self.tick_timer.isActive():
+            self.tick_timer.stop()
+            print(f"[CLOSE] 타이머 중지됨")
+
         event.accept()
 
 

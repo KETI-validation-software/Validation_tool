@@ -1497,11 +1497,44 @@ class MyApp(QWidget):
     def _load_from_trace_file(self, api_name, direction="RESPONSE"):
         """trace 파일에서 특정 API의 RESPONSE 데이터를 읽어옴"""
         try:
+            # API 이름에서 슬래시 제거
             api_name_clean = api_name.lstrip("/")
-            trace_file = Path("results/trace") / f"trace_{api_name_clean}.ndjson"
-
-            if not trace_file.exists():
-                print(f"[DEBUG] trace 파일 없음: {trace_file}")
+            
+            # 번호 prefix 제거 (예: "01_Authentication" -> "Authentication")
+            # 패턴: 숫자로 시작하고 '_'가 있는 경우
+            import re
+            api_name_no_prefix = re.sub(r'^\d+_', '', api_name_clean)
+            
+            print(f"[DEBUG] trace 파일 찾기: 원본={api_name}, 정제={api_name_clean}, prefix제거={api_name_no_prefix}")
+            
+            # ✅ 실제 trace 폴더에서 매칭되는 파일 찾기
+            trace_folder = Path("results/trace")
+            trace_file = None
+            
+            if trace_folder.exists():
+                # 가능한 파일명 패턴들
+                possible_patterns = [
+                    f"trace_{api_name_clean}.ndjson",  # trace_CameraProfiles.ndjson
+                    f"trace_{api_name_no_prefix}.ndjson",  # 동일하면 중복이지만 안전장치
+                ]
+                
+                # 실제 파일 목록에서 검색
+                for ndjson_file in trace_folder.glob("trace_*.ndjson"):
+                    file_name = ndjson_file.name
+                    # trace_03_CameraProfiles.ndjson → 03_CameraProfiles
+                    api_part = file_name.replace("trace_", "").replace(".ndjson", "")
+                    
+                    # prefix 제거하고 비교 (03_CameraProfiles → CameraProfiles)
+                    api_part_no_prefix = re.sub(r'^\d+_', '', api_part)
+                    
+                    # 매칭 확인
+                    if api_part == api_name_clean or api_part_no_prefix == api_name_no_prefix:
+                        trace_file = ndjson_file
+                        print(f"[DEBUG] ✅ 매칭 성공: {file_name} (검색어: {api_name_clean})")
+                        break
+            
+            if trace_file is None or not trace_file.exists():
+                print(f"[DEBUG] trace 파일 없음 (검색어: {api_name_clean})")
                 return None
 
             latest_data = None
@@ -1514,15 +1547,17 @@ class MyApp(QWidget):
 
                     try:
                         entry = json.loads(line)
-
-                        if entry.get('dir') == direction and entry.get('api') == api_name:
+                        
+                        # direction만 확인 (api는 이미 파일명으로 필터링됨)
+                        if entry.get('dir') == direction:
                             latest_data = entry.get('data', {})
+                            # 계속 읽어서 가장 마지막 데이터를 가져옴
 
                     except json.JSONDecodeError:
                         continue
 
             if latest_data:
-                print(f"[DEBUG] trace 파일에서 {api_name} {direction} 로드 완료")
+                print(f"[DEBUG] trace 파일에서 {api_name} {direction} 로드 완료: {len(str(latest_data))} bytes")
                 return latest_data
             else:
                 print(f"[DEBUG] trace 파일에 {api_name} {direction} 없음")
@@ -1530,6 +1565,8 @@ class MyApp(QWidget):
 
         except Exception as e:
             print(f"[ERROR] trace 파일 로드 실패: {e}")
+            import traceback
+            traceback.print_exc()
             return None
 
     def __init__(self, embedded=False, mode=None, spec_id=None):
@@ -1582,6 +1619,7 @@ class MyApp(QWidget):
         self.tick_timer.timeout.connect(self.update_view)
         self.auth_flag = True
         self.Server = Server
+        self.server_th = None  # ✅ 서버 스레드 변수 초기화
 
         auth_temp, auth_temp2 = set_auth("config/config.txt")
         self.digestInfo = [auth_temp2[0], auth_temp2[1]]
@@ -1981,7 +2019,17 @@ class MyApp(QWidget):
                 QApplication.processEvents()
 
                 # 1. request 검증용 데이터 로드
+                print(f"[DATA LOAD] API: {api_name}, 시도: {retry_attempt + 1}/{current_retries}")
+                print(f"[DATA LOAD] trace 폴더 확인: {list(Path('results/trace').glob('*.ndjson')) if Path('results/trace').exists() else '폴더 없음'}")
+                
                 current_data = self._load_from_trace_file(api_name, "REQUEST") or {}
+                
+                if not current_data:
+                    print(f"[WARNING] ⚠️ trace 파일에서 데이터를 불러오지 못했습니다!")
+                    print(f"[WARNING] API 이름: {api_name}")
+                    print(f"[WARNING] Direction: REQUEST")
+                else:
+                    print(f"[SUCCESS] ✅ trace 파일에서 데이터 로드 완료: {len(str(current_data))} bytes")
 
                 # 2. 맥락 검증용
                 if current_validation:
@@ -3807,34 +3855,91 @@ class MyApp(QWidget):
                 self.load_specs_from_constants()
                 self.run_single_spec_test()
 
-            print(f"[DEBUG] sbtn_push 시작")
+            print(f"[DEBUG] ========== 검증 시작: 완전 초기화 ==========")
 
+            # ✅ 1. 기존 타이머 정지
+            if self.tick_timer.isActive():
+                print(f"[DEBUG] 기존 타이머 중지")
+                self.tick_timer.stop()
+
+            # ✅ 2. 기존 서버 스레드 종료
+            if self.server_th is not None and self.server_th.isRunning():
+                print(f"[DEBUG] 기존 서버 스레드 종료 중...")
+                try:
+                    self.server_th.httpd.shutdown()
+                    self.server_th.wait(2000)  # 최대 2초 대기
+                    print(f"[DEBUG] 기존 서버 스레드 종료 완료")
+                except Exception as e:
+                    print(f"[WARN] 서버 종료 중 오류 (무시): {e}")
+                self.server_th = None
+
+            # ✅ 3. trace 디렉토리 초기화
             self._clean_trace_dir_once()
 
-            # ✅ 현재 시험 시나리오(spec)의 점수만 초기화
-            self.total_error_cnt = 0
-            self.total_pass_cnt = 0
-            # ✅ 전체 점수(global_pass_cnt, global_error_cnt)는 건드리지 않음
+            # ✅ 4. 모든 카운터 및 플래그 초기화 (첫 실행처럼)
             self.cnt = 0
             self.cnt_pre = 0
             self.time_pre = 0
+            self.current_retry = 0
             self.realtime_flag = False
             self.tmp_msg_append_flag = False
+            
+            # ✅ 5. 현재 spec의 점수만 초기화
+            self.total_error_cnt = 0
+            self.total_pass_cnt = 0
 
-            # 평가 점수 디스플레이 초기화
+            # ✅ 6. 메시지 및 에러 관련 변수 초기화
+            self.message_error = []
+            self.final_report = ""
+            
+            # ✅ 7. API별 누적 데이터 초기화
+            if hasattr(self, 'api_accumulated_data'):
+                self.api_accumulated_data.clear()
+            else:
+                self.api_accumulated_data = {}
+            
+            # ✅ 8. step별 메시지 초기화
+            for i in range(1, 10):
+                setattr(self, f"step{i}_msg", "")
+
+            # ✅ 9. step_buffers 완전 재생성
+            api_count = len(self.videoMessages) if self.videoMessages else 9
+            self.step_buffers = [
+                {"data": "", "error": "", "result": "PASS", "raw_data_list": []} 
+                for _ in range(api_count)
+            ]
+            print(f"[DEBUG] step_buffers 재생성 완료: {len(self.step_buffers)}개")
+
+            # ✅ 10. Server 객체 상태 초기화
+            if hasattr(self.Server, 'trace'):
+                self.Server.trace = {}
+            if hasattr(self.Server, 'request_counter'):
+                self.Server.request_counter = {}
+            if hasattr(self.Server, 'webhook_thread'):
+                self.Server.webhook_thread = None
+
+            # ✅ 11. 평가 점수 디스플레이 초기화
             self.update_score_display()
 
+            # ✅ 12. 버튼 상태 변경
             self.sbtn.setDisabled(True)
             self.stop_btn.setEnabled(True)
 
+            # ✅ 12. 버튼 상태 변경
+            self.sbtn.setDisabled(True)
+            self.stop_btn.setEnabled(True)
+
+            # ✅ 13. JSON 데이터 준비
             json_to_data(self.radio_check_flag)
             timeout = 5
             default_timeout = 5
 
+            # ✅ 14. 인증 토큰 설정
             if self.r2 == "B":
                 token_value = None if self.token is None else str(self.token).strip()
                 self.videoOutMessage[0]['accessToken'] = token_value
 
+            # ✅ 15. Server 설정
             print(f"[DEBUG] Server 설정 시작")
             self.Server.message = self.videoMessages
             self.Server.outMessage = self.videoOutMessage
@@ -3846,15 +3951,15 @@ class MyApp(QWidget):
             self.Server.timeout = timeout
             print(f"[DEBUG] Server 설정 완료")
 
-            print(f"[DEBUG] init_win 호출")
-            self.init_win()
+            # ✅ 16. UI 초기화 (init_win 호출 전에 valResult만 먼저 클리어)
+            print(f"[DEBUG] UI 초기화 시작")
             self.valResult.clear()
-            self.final_report = ""
             print(f"[DEBUG] UI 초기화 완료")
 
-            # 테이블 아이콘 초기화
-            print(f"[DEBUG] 테이블 아이콘 초기화 시작")
+            # ✅ 17. 테이블 아이콘 및 데이터 완전 초기화
+            print(f"[DEBUG] 테이블 초기화 시작")
             for i in range(self.tableWidget.rowCount()):
+                # 아이콘 초기화
                 icon_widget = QWidget()
                 icon_layout = QHBoxLayout()
                 icon_layout.setContentsMargins(0, 0, 0, 0)
@@ -3865,8 +3970,15 @@ class MyApp(QWidget):
                 icon_layout.setAlignment(Qt.AlignCenter)
                 icon_widget.setLayout(icon_layout)
                 self.tableWidget.setCellWidget(i, 1, icon_widget)
+                
+                # 모든 카운트 0으로 초기화
+                for col, value in ((2, "0"), (3, "0"), (4, "0"), (5, "0"), (6, "0%")):
+                    item = QTableWidgetItem(value)
+                    item.setTextAlignment(Qt.AlignCenter)
+                    self.tableWidget.setItem(i, col, item)
+            print(f"[DEBUG] 테이블 초기화 완료")
 
-            # 인증 설정
+            # ✅ 18. 인증 설정
             print(f"[DEBUG] 인증 설정 시작")
             self.pathUrl = CONSTANTS.url
             if self.r2 == "B":
@@ -3881,8 +3993,16 @@ class MyApp(QWidget):
                 self.Server.auth_Info[0] = None
 
             self.Server.transProtocolInput = "LongPolling"
-            self.valResult.append("Start Validation...\n")
+            
+            # ✅ 19. 시작 메시지 출력
+            self.valResult.append("=" * 60)
+            self.valResult.append("🚀 플랫폼 검증 시작")
+            self.valResult.append(f"📋 Spec ID: {self.current_spec_id}")
+            self.valResult.append(f"📊 API 개수: {len(self.videoMessages)}개")
+            self.valResult.append("=" * 60)
+            self.valResult.append("\nStart Validation...\n")
 
+            # ✅ 20. 서버 시작
             print(f"[DEBUG] 서버 시작 준비")
             url = CONSTANTS.url.split(":")
             address_port = int(url[-1])
@@ -3898,10 +4018,16 @@ class MyApp(QWidget):
                 time.sleep(5)
                 self.valResult.append("✅ 플랫폼 서버 준비 완료")
                 self.first_run = False
+            else:
+                # 두 번째 이후에도 서버 안정화를 위한 짧은 대기
+                print("[DEBUG] 서버 재시작 안정화 대기...")
+                time.sleep(2)
+                self.valResult.append("✅ 서버 준비 완료")
 
+            # ✅ 21. 타이머 시작 (모든 초기화 완료 후)
             print(f"[DEBUG] 타이머 시작")
             self.tick_timer.start(1000)
-            print(f"[DEBUG] sbtn_push 완료")
+            print(f"[DEBUG] ========== 검증 시작 준비 완료 ==========")
 
         except Exception as e:
             print(f"[ERROR] sbtn_push에서 예외 발생: {e}")
@@ -3912,7 +4038,22 @@ class MyApp(QWidget):
             self.stop_btn.setDisabled(True)
 
     def stop_btn_clicked(self):
-        self.tick_timer.stop()
+        # ✅ 타이머 중지
+        if self.tick_timer.isActive():
+            self.tick_timer.stop()
+            print(f"[DEBUG] 타이머 중지됨")
+
+        # ✅ 서버 스레드 종료
+        if self.server_th is not None and self.server_th.isRunning():
+            print(f"[DEBUG] 서버 스레드 종료 시작...")
+            try:
+                self.server_th.httpd.shutdown()
+                self.server_th.wait(2000)  # 최대 2초 대기
+                print(f"[DEBUG] 서버 스레드 종료 완료")
+            except Exception as e:
+                print(f"[WARN] 서버 종료 중 오류 (무시): {e}")
+            self.server_th = None
+
         self.valResult.append("검증 절차가 중지되었습니다.")
         self.sbtn.setEnabled(True)
         self.stop_btn.setDisabled(True)
@@ -3933,43 +4074,9 @@ class MyApp(QWidget):
             self.valResult.append(f"\n⚠️ 결과 저장 실패: {str(e)}")
 
     def init_win(self):
-        self.cnt = 0
-        self.current_retry = 0
-
-        # ✅ 현재 spec 점수만 초기화
-        self.total_error_cnt = 0
-        self.total_pass_cnt = 0
-        # global 점수는 건드리지 않음
-
-        self.message_error = []
-        self.api_accumulated_data = {}
-
-        # 버퍼 초기화
-        api_count = len(self.videoMessages) if self.videoMessages else 9
-        self.step_buffers = [{"data": "", "result": "", "error": ""} for _ in range(api_count)]
-        self.valResult.clear()
-
-        # 메시지 초기화
-        for i in range(1, 10):
-            setattr(self, f"step{i}_msg", "")
-
-        # 테이블 아이콘 및 카운트 초기화
-        for i in range(self.tableWidget.rowCount()):
-            icon_widget = QWidget()
-            icon_layout = QHBoxLayout()
-            icon_layout.setContentsMargins(0, 0, 0, 0)
-            icon_label = QLabel()
-            icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
-            icon_label.setAlignment(Qt.AlignCenter)
-            icon_layout.addWidget(icon_label)
-            icon_layout.setAlignment(Qt.AlignCenter)
-            icon_widget.setLayout(icon_layout)
-            self.tableWidget.setCellWidget(i, 1, icon_widget)
-
-            for col, value in ((2, "0"), (3, "0"), (4, "0"), (5, "0"), (6, "0%")):
-                item = QTableWidgetItem(value)
-                item.setTextAlignment(Qt.AlignCenter)
-                self.tableWidget.setItem(i, col, item)
+        """기본 초기화 (sbtn_push에서 이미 대부분 처리되므로 최소화)"""
+        # 이 함수는 레거시 호환성을 위해 유지되지만, 실제 초기화는 sbtn_push에서 수행
+        pass
 
     def show_result_page(self):
         """시험 결과 페이지 표시"""
@@ -4050,6 +4157,22 @@ class MyApp(QWidget):
             self.r2 = "None"
 
     def closeEvent(self, event):
+        """창 닫기 이벤트 - 서버 스레드 정리"""
+        # ✅ 타이머 중지
+        if hasattr(self, 'tick_timer') and self.tick_timer.isActive():
+            self.tick_timer.stop()
+            print(f"[DEBUG] 종료 시 타이머 중지됨")
+
+        # ✅ 서버 스레드 종료
+        if hasattr(self, 'server_th') and self.server_th is not None and self.server_th.isRunning():
+            print(f"[DEBUG] 종료 시 서버 스레드 종료 중...")
+            try:
+                self.server_th.httpd.shutdown()
+                self.server_th.wait(2000)  # 최대 2초 대기
+                print(f"[DEBUG] 서버 스레드 종료 완료")
+            except Exception as e:
+                print(f"[WARN] 서버 종료 중 오류 (무시): {e}")
+
         event.accept()
 
     def build_result_payload(self):
