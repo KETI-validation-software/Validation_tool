@@ -134,6 +134,7 @@ class FormValidator:
                 webhook_schema_names = []  # webhook 전용 스키마 리스트
                 webhook_data_names = []    # webhook 전용 데이터 리스트
                 webhook_constraints_names = []  # webhook 전용 constraints 리스트
+
                 temp_spec_id = spec_id+"_"
                 for s in steps:
                     step_id = s.get("id")
@@ -175,16 +176,20 @@ class FormValidator:
                 schema_content += "]\n\n"
 
                 # WebHook 전용 스키마 리스트 생성
+                webhook_schema_list_name = None
+
                 if webhook_schema_names:
                     if file_type == "request":
                         webhook_schema_list_name = f"{spec_id}_webhook_inSchema"
                     else:
                         webhook_schema_list_name = f"{spec_id}_webhook_OutSchema"
-                schema_content += f"# {spec_id} WebHook 스키마 리스트\n"
-                schema_content += f"{webhook_schema_list_name} = [\n"
-                for name in webhook_schema_names:
-                    schema_content += f"    {temp_spec_id}{name},\n"
-                schema_content += "]\n\n"
+
+                if webhook_schema_list_name:  # ✅ 실제 값이 있을 때만 추가
+                    schema_content += f"# {spec_id} WebHook 스키마 리스트\n"
+                    schema_content += f"{webhook_schema_list_name} = [\n"
+                    for name in webhook_schema_names:
+                        schema_content += f"    {temp_spec_id}{name},\n"
+                    schema_content += "]\n\n"
 
                 if file_type == "request":
                     data_list_name = f"{spec_id}_inData"
@@ -280,22 +285,33 @@ class FormValidator:
             validation_output = resource_path(f"spec/validation_{schema_type}.py")
             constraints_output = resource_path(f"spec/Constraints_{file_type}.py")
 
+            output_files = [
+                (schema_output, schema_content, "Schema"),
+                (data_output, data_content, "Data"),
+                (validation_output, validation_content, "Validation"),
+                (constraints_output, constraints_content, "Constraints"),
+            ]
 
-            with open(schema_output, 'w', encoding='utf-8') as f:
-                f.write(schema_content)
-            print(f"Schema_{schema_type}.py 생성 완료")
+            for path, content, label in output_files:
+                try:
+                    # 1️⃣ 기존 파일 삭제
+                    if os.path.exists(path):
+                        os.remove(path)
+                        print(f"[삭제 완료] 기존 {label} 파일 제거: {path}")
 
-            with open(data_output, 'w', encoding='utf-8') as f:
-                f.write(data_content)
-            print(f"Data_{file_type}.py 생성 완료")
+                    # 2️⃣ Schema 파일에는 OptionalKey 임포트 추가
+                    if "Schema_" in os.path.basename(path):
+                        header = "from json_checker import OptionalKey\n\n\n"
+                        content = header + content
 
-            with open(validation_output, 'w', encoding='utf-8') as f:
-                f.write(validation_content)
-            print(f"Data_{validation_output}.py 생성 완료")
+                    # 3️⃣ 새 파일 생성
+                    with open(path, 'w', encoding='utf-8') as f:
+                        f.write(content)
 
-            with open(constraints_output, 'w', encoding='utf-8') as f:
-                f.write(constraints_content)
-            print(f"Data_{constraints_output}.py 생성 완료")
+                    print(f"[생성 완료] {label} 파일 생성: {path} ({len(content.splitlines())} lines)")
+
+                except Exception as e:
+                    print(f"[경고] {label} 파일 생성 실패: {path}, 사유: {e}")
 
             # CONSTANTS.py 업데이트 (specs 리스트 생성 비활성화)
             if all_spec_list_names:
@@ -1184,17 +1200,17 @@ class FormValidator:
             #    - specs는 해당 파일들에 있는 리스트 변수명을 모두 합쳐 중복 제거 + 정렬
             entries = []
 
-            mode = self.parent.test_group_edit.text().strip()
+            mode = self.parent.target_system_edit.text().strip()
 
             from core.functions import resource_path
-            if mode == "물리보안":
+            if mode == "물리보안시스템":
                 priority_order = ["outSchema", "inData", "messages", "webhook"]
                 merged_result = self.merge_list_prefix_mappings(resource_path("spec/Schema_response.py"), resource_path("spec/Data_request.py"))
-            elif mode == "통합플랫폼":
+            elif mode == "통합플랫폼시스템":
                 priority_order = ["inSchema", "outData", "messages", "webhook"]
                 merged_result = self.merge_list_prefix_mappings(resource_path("spec/Schema_request.py"), resource_path("spec/Data_response.py"))
             else:
-                print("[CONFIG SPEC]: 모드 확인해주세요.")
+                print("[CONFIG SPEC]: 모드 확인해주세요. mode: ", mode)
 
             for spec_id in sorted(merged_result.keys()):
                 # test_name은 이미 캐시된 이름 사용(없으면 빈 문자열)

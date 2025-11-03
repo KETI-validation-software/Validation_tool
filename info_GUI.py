@@ -87,11 +87,18 @@ class InfoWidget(QWidget):
         header_layout.addWidget(logo_label)
 
         # 헤더 텍스트 이미지 (301x36px)
-        header_txt_label = QLabel(header_widget)
-        header_txt_pixmap = QPixmap(resource_path("assets/image/test_info/header_txt.png"))
-        header_txt_label.setPixmap(header_txt_pixmap.scaled(301, 36, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        header_txt_label.setFixedSize(301, 36)
-        header_layout.addWidget(header_txt_label)
+        title_label = QLabel('연동 검증 소프트웨어', header_widget)
+        title_label.setAlignment(Qt.AlignVCenter)
+        title_style = """
+            color: #FFF;
+            font-family: "Noto Sans KR";
+            font-size: 18px;
+            font-style: normal;
+            font-weight: 500;
+            line-height: normal;
+        """
+        title_label.setStyleSheet(title_style)
+        header_layout.addWidget(title_label)
 
         # 시험 기본 정보 (수평 중앙 정렬)
         info_panel = self.create_basic_info_panel()

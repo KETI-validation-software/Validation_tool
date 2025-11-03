@@ -15,18 +15,21 @@ version = "v1.0"
 test_category = "MAIN_TEST"
 test_target = "통합플랫폼"
 test_range = "ALL_FIELDS"
-auth_type = "Digest Auth"
-auth_info = "admin,1234"
-admin_code = "1234"
-url = "https://192.168.0.3:8080"
+auth_type = "Bearer Token"
+auth_info = "a"
+admin_code = "1"
+url = "https://127.0.0.1:8080"
 contact_person = "김철수"
 model_name = "v1.0"
 request_id = "cmh1yg49v000t9y0jdr1wwuja"
-specs = [["cmgvieyak001b6cd04cgaawmm_inSchema","cmgvieyak001b6cd04cgaawmm_outData","cmgvieyak001b6cd04cgaawmm_messages",""]]
+specs = [
+    ["cmgvieyak001b6cd04cgaawmm_inSchema", "cmgvieyak001b6cd04cgaawmm_outData", "cmgvieyak001b6cd04cgaawmm_messages",
+     ""],
+    ["cmh1u5pef000sgxc3bzl4y9v0_inSchema", "cmh1u5pef000sgxc3bzl4y9v0_outData", "cmh1u5pef000sgxc3bzl4y9v0_messages",
+     ""]]
 
 
-
-# opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황 
+# opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황
 flag_opt = False
 if test_range == "ALL_FIELDS":
     flag_opt = True
