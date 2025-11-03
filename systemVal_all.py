@@ -935,7 +935,7 @@ class ResultPageWidget(QWidget):
                 if row < len(self.videoMessages):
                     display_name = f"{row + 1}. {self.videoMessages[row]}"
                     api_item = QTableWidgetItem(display_name)
-                    api_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+                    api_item.setTextAlignment(Qt.AlignCenter)
                     self.tableWidget.setItem(row, 0, api_item)
                     print(f"[INIT] Row {row} API 이름 재설정: {display_name}")
 
@@ -990,10 +990,10 @@ class ResultPageWidget(QWidget):
         self.tableWidget.setRowCount(api_count)
 
         for row in range(api_count):
-            # API 명
+            # API 명 (중앙 정렬)
             api_name = f"{row + 1}. {api_list[row]}"
             api_item = QTableWidgetItem(api_name)
-            api_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            api_item.setTextAlignment(Qt.AlignCenter)
             self.tableWidget.setItem(row, 0, api_item)
 
             # ✅ 기본 아이콘 (결과 페이지 전용 아이콘 사용)
@@ -1054,9 +1054,9 @@ class ResultPageWidget(QWidget):
         self.tableWidget.setRowCount(len(table_data))
 
         for row, row_data in enumerate(table_data):
-            # API 명
+            # API 명 (중앙 정렬)
             api_item = QTableWidgetItem(row_data['api_name'])
-            api_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            api_item.setTextAlignment(Qt.AlignCenter)
             self.tableWidget.setItem(row, 0, api_item)
 
             # ✅ 아이콘 상태 복원 (결과 페이지 전용 아이콘 사용)
@@ -1255,7 +1255,7 @@ class ResultPageWidget(QWidget):
         self.tableWidget.setShowGrid(False)
 
         # 컬럼 너비 설정
-        self.tableWidget.setColumnWidth(0, 520)  # API 명 (546 → 520, -26px)
+        self.tableWidget.setColumnWidth(0, 512)  # API 명 (546 → 520, -26px)
         self.tableWidget.setColumnWidth(1, 90)   # 결과 아이콘 (56 → 90, +34px)
         self.tableWidget.setColumnWidth(2, 62)
         self.tableWidget.setColumnWidth(3, 78)
@@ -1284,10 +1284,12 @@ class ResultPageWidget(QWidget):
         """parent의 테이블 데이터를 복사 (결과 페이지 전용 아이콘 사용)"""
         api_count = self.parent.tableWidget.rowCount()
         for row in range(api_count):
-            # API 명
+            # API 명 (중앙 정렬)
             api_item = self.parent.tableWidget.item(row, 0)
             if api_item:
-                self.tableWidget.setItem(row, 0, QTableWidgetItem(api_item.text()))
+                new_item = QTableWidgetItem(api_item.text())
+                new_item.setTextAlignment(Qt.AlignCenter)
+                self.tableWidget.setItem(row, 0, new_item)
 
             # ✅ 결과 아이콘 (결과 페이지 전용 아이콘으로 교체)
             icon_widget = self.parent.tableWidget.cellWidget(row, 1)
@@ -4395,6 +4397,18 @@ class MyApp(QWidget):
         print(f"[START] 시험 시작: {self.current_spec_id} - {self.spec_description}")
         self.update_result_table_structure(self.videoMessages)
 
+        # ✅ 1.5. 기존 웹훅 스레드 종료 (재시작 시)
+        if hasattr(self, 'webhook_thread') and self.webhook_thread is not None:
+            try:
+                print(f"[DEBUG] 기존 웹훅 스레드 종료 시도")
+                self.webhook_thread.stop()
+                self.webhook_thread.wait(3000)  # 3초 대기
+                print(f"[DEBUG] 기존 웹훅 스레드 종료 완료")
+                self.webhook_thread = None  # 참조 제거
+                time.sleep(2)  # 포트 완전 해제 대기
+            except Exception as e:
+                print(f"[WARNING] 기존 웹훅 종료 중 오류 (무시): {e}")
+
         # ✅ 2. trace 디렉토리 초기화
         self._clean_trace_dir_once()
 
@@ -4445,6 +4459,28 @@ class MyApp(QWidget):
             {"data": "", "error": "", "result": "PASS"} for _ in range(api_count)
         ]
 
+        # ✅ 9. 테이블 초기화 (아이콘과 점수 리셋)
+        print(f"[DEBUG] 테이블 초기화: {self.tableWidget.rowCount()}개 행")
+        for row in range(self.tableWidget.rowCount()):
+            # 아이콘을 기본 상태로
+            icon_widget = QWidget()
+            icon_layout = QHBoxLayout()
+            icon_layout.setContentsMargins(0, 0, 0, 0)
+            icon_label = QLabel()
+            icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
+            icon_label.setAlignment(Qt.AlignCenter)
+            icon_label.setToolTip("")  # 툴팁 제거
+            icon_layout.addWidget(icon_label)
+            icon_layout.setAlignment(Qt.AlignCenter)
+            icon_widget.setLayout(icon_layout)
+            self.tableWidget.setCellWidget(row, 1, icon_widget)
+            
+            # 검증 횟수, 통과/실패 필드 수, 점수 초기화
+            for col, value in [(2, "0"), (3, "0"), (4, "0"), (5, "0"), (6, "0%")]:
+                item = QTableWidgetItem(value)
+                item.setTextAlignment(Qt.AlignCenter)
+                self.tableWidget.setItem(row, col, item)
+
         # ✅ 9. trace 초기화
         self.trace.clear()
         self.latest_events = {}
@@ -4494,7 +4530,12 @@ class MyApp(QWidget):
         self.valResult.append("\n시스템이 플랫폼에 요청을 전송하여 응답을 검증합니다\n")
 
         # ✅ 16. 타이머 시작 (1초 간격)
-        self.tick_timer.start(1000)
+        # ✅ 타이머가 이미 실행 중이면 재시작하지 않음
+        if not self.tick_timer.isActive():
+            print(f"[START] 타이머 시작")
+            self.tick_timer.start(1000)
+        else:
+            print(f"[WARNING] 타이머가 이미 실행 중입니다")
 
         print(f"[START] 타이머 시작 완료")
         print(f"[START] 현재 global 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}")
@@ -4502,6 +4543,18 @@ class MyApp(QWidget):
     def stop_btn_clicked(self):
         self.tick_timer.stop()
         self.valResult.append("검증 절차가 중지되었습니다.")
+        
+        # ✅ 웹훅 스레드 종료
+        if hasattr(self, 'webhook_thread') and self.webhook_thread is not None:
+            try:
+                print(f"[DEBUG] 웹훅 스레드 종료 시도")
+                self.webhook_thread.stop()
+                self.webhook_thread.wait(3000)  # 3초 대기
+                self.valResult.append("🛑 웹훅 서버 종료 완료")
+                print(f"[DEBUG] 웹훅 스레드 종료 완료")
+            except Exception as e:
+                print(f"[WARNING] 웹훅 종료 중 오류: {e}")
+        
         self.sbtn.setEnabled(True)
         self.stop_btn.setDisabled(True)
 
