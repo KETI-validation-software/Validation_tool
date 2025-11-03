@@ -2194,10 +2194,13 @@ class MyApp(QWidget):
         title.setStyleSheet("font-size: 16px; font-family: 'Noto Sans KR'; font-style: normal; font-weight: 500; line-height: normal; letter-spacing: -0.16px; margin-bottom: 6px;")
         parent_layout.addWidget(title)
 
-        # 시험 분야명 테이블만 추가 (회색 박스 제거)
-        field_group = self.create_test_field_group()
-        field_group.setStyleSheet("QGroupBox { border: none; background: transparent; margin: 0; padding: 0; }")  # ← 회색 박스 제거
-        parent_layout.addWidget(field_group)
+        # 시험 그룹 선택 테이블 추가
+        group_table = self.create_group_selection_table()
+        parent_layout.addWidget(group_table)
+        
+        # 시험 분야 선택 테이블 추가
+        field_table = self.create_test_field_table()
+        parent_layout.addWidget(field_table)
 
 
     def create_group_selection_table(self):
@@ -2315,17 +2318,16 @@ class MyApp(QWidget):
             self.test_field_table.setItem(idx, 0, item)
             self.spec_id_to_index[spec_id] = idx
             self.index_to_spec_id[idx] = spec_id
-    def on_group_selected(self, row, col):
-        """
-        ✅ 시험 그룹 선택 시 해당 그룹의 시험 분야 목록을 자동 갱신
-        """
 
-        group_box = QWidget()  # ← QGroupBox에서 QWidget로 변경
-        group_box.setFixedSize(459, 760)  # 플랫폼과 동일한 크기
+    def create_test_field_table(self):
+        """시험 분야 선택 테이블 생성"""
+        group_box = QWidget()
+        group_box.setFixedSize(459, 760)
+        group_box.setStyleSheet("background: transparent;")
+
         layout = QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)  # ← 여백 제거
-        layout.setSpacing(0)  # ← 간격 제거
-
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
 
         self.test_field_table = QTableWidget(0, 1)
         self.test_field_table.setHorizontalHeaderLabels(["시험 시나리오"])
@@ -2335,6 +2337,49 @@ class MyApp(QWidget):
         self.test_field_table.verticalHeader().setVisible(False)
         self.test_field_table.setFixedHeight(759)
 
+        # 플랫폼과 동일한 스타일 적용
+        self.test_field_table.setStyleSheet("""
+            QTableWidget {
+                background-color: #FFFFFF;
+                border: 1px solid #CECECE;
+                border-radius: 4px;
+                font-family: "Noto Sans KR";
+                font-size: 14px;
+                color: #1B1B1C;
+            }
+            QTableWidget::item {
+                border-bottom: 1px solid #E0E0E0;
+                border-right: 0px solid transparent;
+                color: #1B1B1C;
+                font-family: 'Noto Sans KR';
+                font-size: 14px;
+                font-style: normal;
+                font-weight: 400;
+                letter-spacing: 0.098px;
+                text-align: center; 
+            }
+            QTableWidget::item:selected {
+                background-color: #E3F2FF;
+            }
+            QTableWidget::item:hover {
+                background-color: #E3F2FF;
+            }
+            QHeaderView::section {
+                background-color: #EDF0F3;
+                border-right: 0px solid transparent;
+                border-left: 0px solid transparent;
+                border-top: 0px solid transparent;
+                border-bottom: 1px solid #CECECE;
+                color: #1B1B1C;
+                text-align: center;
+                font-family: 'Noto Sans KR';
+                font-size: 13px;
+                font-style: normal;
+                font-weight: 600;
+                line-height: normal;
+                letter-spacing: -0.156px;
+            }
+        """)
 
         # SPEC_CONFIG에서 spec_id와 config 추출
         spec_items = []
