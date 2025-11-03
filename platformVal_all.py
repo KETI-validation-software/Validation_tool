@@ -2402,6 +2402,14 @@ class MyApp(QWidget):
             self.tableWidget.setCellWidget(self.cnt, 1, icon_widget)
             setattr(self, f"step{self.cnt + 1}_msg", msg)
 
+    def _toggle_placeholder(self):
+        """텍스트 유무에 따라 placeholder 표시/숨김"""
+        if hasattr(self, 'placeholder_label'):
+            if self.valResult.toPlainText().strip():
+                self.placeholder_label.hide()
+            else:
+                self.placeholder_label.show()
+
     def load_test_info_from_constants(self):
         """CONSTANTS.py에서 시험정보를 로드"""
         return [
@@ -2417,7 +2425,15 @@ class MyApp(QWidget):
 
     def create_spec_selection_panel(self, parent_layout):
         title = QLabel("시험 분야")
-        title.setStyleSheet("font-size: 16px; font-family: 'Noto Sans KR'; font-style: normal; font-weight: 500; line-height: normal; letter-spacing: -0.16px; margin-bottom: 6px;")
+        title.setStyleSheet("""
+            font-size: 16px; 
+            font-style: normal; 
+            font-family: "Noto Sans KR"; 
+            font-weight: 600; 
+            color: #222; 
+            margin-bottom: 6px;
+            letter-spacing: -0.3px;
+        """)
         parent_layout.addWidget(title)
 
         # 그룹 테이블 추가
@@ -3015,8 +3031,15 @@ class MyApp(QWidget):
 
         # 시험 API 라벨
         api_label = QLabel('시험 API')
-        api_label.setStyleSheet(
-            'font-size: 16px; font-style: normal; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-bottom: 6px;')
+        api_label.setStyleSheet("""
+            font-size: 16px; 
+            font-style: normal; 
+            font-family: "Noto Sans KR"; 
+            font-weight: 600; 
+            color: #222; 
+            margin-bottom: 6px;
+            letter-spacing: -0.3px;
+        """)
         right_layout.addWidget(api_label)
 
         self.init_centerLayout()
@@ -3026,27 +3049,77 @@ class MyApp(QWidget):
 
         # 수신 메시지 실시간 모니터링
         monitor_label = QLabel("수신 메시지 실시간 모니터링")
-        monitor_label.setStyleSheet(
-            'font-size: 16px; font-style: normal; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-top: 20px; margin-bottom: 6px;')
+        monitor_label.setStyleSheet("""
+            font-size: 16px; 
+            font-style: normal; 
+            font-family: "Noto Sans KR"; 
+            font-weight: 600; 
+            color: #222; 
+            margin-top: 20px; 
+            margin-bottom: 6px;
+            letter-spacing: -0.3px;
+        """)
         right_layout.addWidget(monitor_label)
 
-        self.valResult = QTextBrowser(self)
+        # ✅ QTextBrowser를 담을 컨테이너 생성 (placeholder 오버레이를 위해)
+        text_browser_container = QWidget()
+        text_browser_container.setFixedSize(1064, 174)
+        text_browser_layout = QVBoxLayout()
+        text_browser_layout.setContentsMargins(0, 0, 0, 0)
+        text_browser_layout.setSpacing(0)
+        
+        self.valResult = QTextBrowser(text_browser_container)
         self.valResult.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.valResult.setFixedHeight(174)
         self.valResult.setFixedWidth(1064)
-        self.valResult.setStyleSheet(f"""
-            backgroud: #FFF;
-            border-radius: 8px;
-            border: 1px solid #CECECE;
-            font-size: 15px;
-            color: #222;
+        
+        self.valResult.setStyleSheet("""
+            QTextBrowser {
+                background: #FFF;
+                border-radius: 8px;
+                border: 1px solid #CECECE;
+                font-family: "Noto Sans KR";
+                font-size: 15px;
+                color: #222;
+            }
         """)
-        right_layout.addWidget(self.valResult, 1)
+        
+        # ✅ 커스텀 placeholder 라벨 (위치 조정 가능)
+        self.placeholder_label = QLabel("모니터링 내용이 표출됩니다", text_browser_container)
+        self.placeholder_label.setGeometry(24, 10, 1000, 30)  # 왼쪽 24px, 위 16px
+        self.placeholder_label.setStyleSheet("""
+            QLabel {
+                color: #CECECE;
+                font-family: "Noto Sans KR";
+                font-size: 14px;
+                font-weight: 400;
+                background: transparent;
+            }
+        """)
+        self.placeholder_label.setAttribute(Qt.WA_TransparentForMouseEvents)  # 클릭 통과
+        
+        # ✅ 텍스트 변경 시 placeholder 숨기기
+        self.valResult.textChanged.connect(self._toggle_placeholder)
+        
+        text_browser_layout.addWidget(self.valResult)
+        text_browser_container.setLayout(text_browser_layout)
+        right_layout.addWidget(text_browser_container, 1)
+        
+        # 초기 상태 설정
+        self._toggle_placeholder()
 
         # 시험 결과
         self.valmsg = QLabel('시험 점수 요약', self)
-        self.valmsg.setStyleSheet(
-            'font-size: 16px; font-style: normal; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-top: 20px; margin-bottom: 6px;')
+        self.valmsg.setStyleSheet("""
+            font-size: 16px; 
+            font-style: normal; 
+            font-family: "Noto Sans KR"; 
+            font-weight: 600; 
+            color: #222; 
+            margin-top: 20px; 
+            margin-bottom: 6px;
+            letter-spacing: -0.3px;
+        """)
         right_layout.addWidget(self.valmsg)
 
         # 평가 점수 표시
