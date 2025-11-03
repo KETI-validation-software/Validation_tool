@@ -218,7 +218,6 @@ class APISelectionDialog(QDialog):
                 background-image: url('{bg_path}');
                 background-repeat: no-repeat;
                 background-position: center;
-                background-size: cover;
             }}
             QScrollArea, QScrollArea QWidget, QScrollArea::viewport,
             QGroupBox, QWidget#scroll_widget, QLabel {{
@@ -294,6 +293,11 @@ class ResultPageWidget(QWidget):
         # 현재 선택된 spec_id 저장
         self.current_spec_id = parent.current_spec_id
 
+        # ✅ 시험 결과 페이지 전용 아이콘 설정
+        self.img_pass = resource_path("assets/image/test_runner/tag_성공.png")
+        self.img_fail = resource_path("assets/image/test_runner/tag_실패.png")
+        self.img_none = resource_path("assets/image/icon/icn_basic.png")
+
         self.initUI()
     def initUI(self):
         # ✅ 메인 레이아웃
@@ -310,7 +314,6 @@ class ResultPageWidget(QWidget):
                 background-image: url('{bg_path}');
                 background-repeat: no-repeat;
                 background-position: center;
-                background-size: cover;
             }}
             QScrollArea, QScrollArea QWidget, QScrollArea::viewport,
             QGroupBox, QWidget#scroll_widget, QLabel {{
@@ -378,7 +381,7 @@ class ResultPageWidget(QWidget):
         left_layout.setSpacing(0)
 
         # 시험 분야 선택 (폰트 효과 추가)
-        title = QLabel("시험 선택")
+        title = QLabel("시험 분야")
         title.setStyleSheet("""
                     font-size: 16px; 
                     font-style: normal; 
@@ -423,7 +426,7 @@ class ResultPageWidget(QWidget):
 
         info_widget = self._create_simple_info_display()
         right_layout.addWidget(info_widget)
-        right_layout.setSpacing(10)
+        
         # 시험 결과 라벨
         api_name_label = QLabel('시험 API')
         api_name_label.setStyleSheet("""
@@ -432,6 +435,7 @@ class ResultPageWidget(QWidget):
                     font-family: "Noto Sans KR"; 
                     font-weight: 600; 
                     color: #222; 
+                    margin-top: 20px;
                     margin-bottom: 6px;
                     letter-spacing: -0.3px;
                 """)
@@ -440,8 +444,6 @@ class ResultPageWidget(QWidget):
         # 결과 테이블 (크기 키움: 350px)
         self.create_result_table(right_layout)
 
-        right_layout.addSpacing(10)
-
         result_label = QLabel('시험 점수 요약')
         result_label.setStyleSheet("""
                     font-size: 16px; 
@@ -449,6 +451,7 @@ class ResultPageWidget(QWidget):
                     font-family: "Noto Sans KR"; 
                     font-weight: 600; 
                     color: #222; 
+                    margin-top: 20px;
                     margin-bottom: 6px;
                     letter-spacing: -0.3px;
                 """)
@@ -507,7 +510,6 @@ class ResultPageWidget(QWidget):
                         background-image: url('{exit_enabled}');
                         background-repeat: no-repeat;
                         background-position: center;
-                        background-size: contain;
                         background-color: transparent;
                     }}
                     QPushButton:hover {{
@@ -634,7 +636,7 @@ class ResultPageWidget(QWidget):
     def create_test_field_group(self):
         """시험 시나리오 테이블 (크기 줄임: 280px)"""
         group_box = QWidget()
-        group_box.setFixedSize(459, 760)
+        group_box.setFixedSize(459, 650)
         group_box.setStyleSheet("background: transparent;")
 
         layout = QVBoxLayout()
@@ -647,7 +649,7 @@ class ResultPageWidget(QWidget):
         self.test_field_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.test_field_table.cellClicked.connect(self.on_test_field_selected)
         self.test_field_table.verticalHeader().setVisible(False)
-        self.test_field_table.setFixedHeight(759)
+        self.test_field_table.setFixedHeight(645)
 
         self.test_field_table.setStyleSheet("""
             QTableWidget {
@@ -991,12 +993,12 @@ class ResultPageWidget(QWidget):
             api_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 0, api_item)
 
-            # 기본 아이콘
+            # ✅ 기본 아이콘 (결과 페이지 전용 아이콘 사용)
             icon_widget = QWidget()
             icon_layout = QHBoxLayout()
             icon_layout.setContentsMargins(0, 0, 0, 0)
             icon_label = QLabel()
-            icon_label.setPixmap(QIcon(self.parent.img_none).pixmap(16, 16))
+            icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
             icon_label.setAlignment(Qt.AlignCenter)
             icon_layout.addWidget(icon_label)
             icon_layout.setAlignment(Qt.AlignCenter)
@@ -1054,14 +1056,14 @@ class ResultPageWidget(QWidget):
             api_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 0, api_item)
 
-            # 아이콘 상태 복원
+            # ✅ 아이콘 상태 복원 (결과 페이지 전용 아이콘 사용)
             icon_state = row_data['icon_state']
             if icon_state == "PASS":
-                img = self.parent.img_pass
+                img = self.img_pass
             elif icon_state == "FAIL":
-                img = self.parent.img_fail
+                img = self.img_fail
             else:
-                img = self.parent.img_none
+                img = self.img_none
 
             icon_widget = QWidget()
             icon_layout = QHBoxLayout()
@@ -1212,7 +1214,6 @@ class ResultPageWidget(QWidget):
                 background-image: url('{main_path}');
                 background-repeat: no-repeat;
                 background-position: center;
-                background-size: cover;
                 border-radius: 8px;
                 border: 1px solid #CECECE;
                 font-size: 15px;
@@ -2141,8 +2142,16 @@ class MyApp(QWidget):
 
     def create_spec_selection_panel(self, parent_layout):
         """시험 선택 패널 - 플랫폼과 동일한 스타일"""
-        title = QLabel("시험 선택")
-        title.setStyleSheet("font-size: 16px; font-weight: bold; margin-bottom: 6px;")
+        title = QLabel("시험 분야")
+        title.setStyleSheet("""
+            font-size: 16px; 
+            font-style: normal; 
+            font-family: "Noto Sans KR"; 
+            font-weight: 600; 
+            color: #222; 
+            margin-bottom: 6px;
+            letter-spacing: -0.3px;
+        """)
         parent_layout.addWidget(title)
 
         # 배경 이미지가 보이도록 투명 처리
@@ -2301,7 +2310,7 @@ class MyApp(QWidget):
     def create_test_field_group(self):
         """시험 시나리오 테이블 - 플랫폼과 동일한 스타일"""
         group_box = QWidget()
-        group_box.setFixedSize(459, 760)
+        group_box.setFixedSize(459, 650)
         group_box.setStyleSheet("background: transparent;")  # ✅ 투명 배경
 
         layout = QVBoxLayout()
@@ -2314,7 +2323,7 @@ class MyApp(QWidget):
         self.test_field_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.test_field_table.cellClicked.connect(self.on_test_field_selected)
         self.test_field_table.verticalHeader().setVisible(False)
-        self.test_field_table.setFixedHeight(759)
+        self.test_field_table.setFixedHeight(645)
 
         # ✅ 플랫폼과 완전히 동일한 스타일
         self.test_field_table.setStyleSheet("""
@@ -3455,7 +3464,6 @@ class MyApp(QWidget):
                     background-image: url('{bg_path}');
                     background-repeat: no-repeat;
                     background-position: center;
-                    background-size: cover;
                 }}
                 QScrollArea, QScrollArea QWidget, QScrollArea::viewport,
                 QGroupBox, QWidget#scroll_widget, QLabel {{
@@ -3503,6 +3511,7 @@ class MyApp(QWidget):
             font-style: normal;
             font-weight: 500;
             line-height: normal;
+            letter-spacing: -0.3px;
         """
         self.title_label.setStyleSheet(title_style)
         header_layout.addWidget(self.title_label)
@@ -3554,27 +3563,77 @@ class MyApp(QWidget):
 
         # 수신 메시지 실시간 모니터링
         monitor_label = QLabel("수신 메시지 실시간 모니터링")
-        monitor_label.setStyleSheet(
-            'font-size: 16px; font-style: normal; font-family: "Noto Sans KR"; font-weight: 600; color: #222; margin-top: 20px; margin-bottom: 6px;')
+        monitor_label.setStyleSheet("""
+            font-size: 16px; 
+            font-style: normal; 
+            font-family: "Noto Sans KR"; 
+            font-weight: 600; 
+            color: #222; 
+            margin-top: 20px; 
+            margin-bottom: 6px;
+            letter-spacing: -0.3px;
+        """)
         right_layout.addWidget(monitor_label)
 
-        self.valResult = QTextBrowser(self)
+        # ✅ QTextBrowser를 담을 컨테이너 생성 (placeholder 오버레이를 위해)
+        text_browser_container = QWidget()
+        text_browser_container.setFixedSize(1064, 174)
+        text_browser_layout = QVBoxLayout()
+        text_browser_layout.setContentsMargins(0, 0, 0, 0)
+        text_browser_layout.setSpacing(0)
+        
+        self.valResult = QTextBrowser(text_browser_container)
         self.valResult.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.valResult.setFixedHeight(174)
         self.valResult.setFixedWidth(1064)
-        self.valResult.setStyleSheet(f"""
-            background: #FFF;
-            border-radius: 8px;
-            border: 1px solid #CECECE;
-            font-size: 15px;
-            color: #222;
+        
+        self.valResult.setStyleSheet("""
+            QTextBrowser {
+                background: #FFF;
+                border-radius: 8px;
+                border: 1px solid #CECECE;
+                font-family: "Noto Sans KR";
+                font-size: 15px;
+                color: #222;
+            }
         """)
-        right_layout.addWidget(self.valResult, 1)
+        
+        # ✅ 커스텀 placeholder 라벨 (위치 조정 가능)
+        self.placeholder_label = QLabel("모니터링 내용이 표출됩니다", text_browser_container)
+        self.placeholder_label.setGeometry(24, 10, 1000, 30)  # 왼쪽 24px, 위 16px
+        self.placeholder_label.setStyleSheet("""
+            QLabel {
+                color: #CECECE;
+                font-family: "Noto Sans KR";
+                font-size: 14px;
+                font-weight: 400;
+                background: transparent;
+            }
+        """)
+        self.placeholder_label.setAttribute(Qt.WA_TransparentForMouseEvents)  # 클릭 통과
+        
+        # ✅ 텍스트 변경 시 placeholder 숨기기
+        self.valResult.textChanged.connect(self._toggle_placeholder)
+        
+        text_browser_layout.addWidget(self.valResult)
+        text_browser_container.setLayout(text_browser_layout)
+        right_layout.addWidget(text_browser_container, 1)
+        
+        # 초기 상태 설정
+        self._toggle_placeholder()
 
         # 시험 결과
         self.valmsg = QLabel('시험 점수 요약', self)
-        self.valmsg.setStyleSheet(
-            'font-size: 16px; font-style: normal; font-family: "Noto Sans KR"; font-weight: 600; color: #222; margin-top: 20px; margin-bottom: 6px;')
+        self.valmsg.setStyleSheet("""
+            font-size: 16px; 
+            font-style: normal; 
+            font-family: "Noto Sans KR"; 
+            font-weight: 600; 
+            color: #222; 
+            margin-top: 20px; 
+            margin-bottom: 6px;
+            letter-spacing: -0.3px;
+        """)
         right_layout.addWidget(self.valmsg)
 
         # 평가 점수 표시
@@ -3603,7 +3662,6 @@ class MyApp(QWidget):
                 background-image: url('{start_enabled}');
                 background-repeat: no-repeat;
                 background-position: center;
-                background-size: contain;
                 background-color: transparent;
             }}
             QPushButton:hover {{
@@ -3631,7 +3689,6 @@ class MyApp(QWidget):
                 background-image: url('{stop_enabled}');
                 background-repeat: no-repeat;
                 background-position: center;
-                background-size: contain;
                 background-color: transparent;
             }}
             QPushButton:hover {{
@@ -3660,7 +3717,6 @@ class MyApp(QWidget):
                 background-image: url('{exit_enabled}');
                 background-repeat: no-repeat;
                 background-position: center;
-                background-size: contain;
                 background-color: transparent;
             }}
             QPushButton:hover {{
@@ -3688,7 +3744,6 @@ class MyApp(QWidget):
                 background-image: url('{result_enabled}');
                 background-repeat: no-repeat;
                 background-position: center;
-                background-size: contain;
                 background-color: transparent;
             }}
             QPushButton:hover {{
@@ -3787,7 +3842,6 @@ class MyApp(QWidget):
                 background-image: url('{main_path}');
                 background-repeat: no-repeat;
                 background-position: center;
-                background-size: cover;
                 border-radius: 8px;
                 border: 1px solid #CECECE;
                 font-size: 15px;
@@ -4050,6 +4104,13 @@ class MyApp(QWidget):
             if msg:
                 api_name = self.step_names[row] if row < len(self.step_names) else f"Step {row + 1}"
                 CustomDialog(msg, api_name)
+    
+    def _toggle_placeholder(self):
+        """QTextBrowser에 텍스트가 있으면 placeholder 숨기기, 없으면 표시"""
+        if self.valResult.toPlainText().strip():
+            self.placeholder_label.hide()
+        else:
+            self.placeholder_label.show()
 
     def create_spec_score_display_widget(self):
         """메인 화면에 표시할 시험 분야별 평가 점수 위젯 생성"""
@@ -4530,6 +4591,17 @@ class MyApp(QWidget):
                     self.fullscreen_btn.setText("전체화면")
         except Exception as e:
             print(f"전체화면 전환 오류: {e}")
+
+    def build_result_payload(self):
+        """최종 결과를 dict로 반환"""
+        total_fields = self.total_pass_cnt + self.total_error_cnt
+        score = (self.total_pass_cnt / total_fields) * 100 if total_fields > 0 else 0
+        return {
+            "score": score,
+            "pass_count": self.total_pass_cnt,
+            "error_count": self.total_error_cnt,
+            "details": self.final_report if hasattr(self, "final_report") else ""
+        }
 
     def exit_btn_clicked(self):
         reply = QMessageBox.question(self, '프로그램 종료',

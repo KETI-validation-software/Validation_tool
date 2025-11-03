@@ -247,7 +247,6 @@ class APISelectionDialog(QDialog):
                 background-image: url('{bg_path}');
                 background-repeat: no-repeat;
                 background-position: center;
-                background-size: cover;
             }}
             QScrollArea, QScrollArea QWidget, QScrollArea::viewport,
             QGroupBox, QWidget#scroll_widget, QLabel {{
@@ -311,7 +310,6 @@ class APISelectionDialog(QDialog):
 
 
 # 시험 결과 페이지 위젯
-
 class ResultPageWidget(QWidget):
     backRequested = pyqtSignal()
 
@@ -324,6 +322,11 @@ class ResultPageWidget(QWidget):
 
         # 현재 선택된 spec_id 저장
         self.current_spec_id = parent.current_spec_id
+
+        # ✅ 시험 결과 페이지 전용 아이콘 설정
+        self.img_pass = resource_path("assets/image/test_runner/tag_성공.png")
+        self.img_fail = resource_path("assets/image/test_runner/tag_실패.png")
+        self.img_none = resource_path("assets/image/icon/icn_basic.png")
 
         self.initUI()
 
@@ -342,7 +345,6 @@ class ResultPageWidget(QWidget):
                 background-image: url('{bg_path}');
                 background-repeat: no-repeat;
                 background-position: center;
-                background-size: cover;
             }}
             QScrollArea, QScrollArea QWidget, QScrollArea::viewport,
             QGroupBox, QWidget#scroll_widget, QLabel {{
@@ -455,7 +457,7 @@ class ResultPageWidget(QWidget):
 
         info_widget = self._create_simple_info_display()
         right_layout.addWidget(info_widget)
-        right_layout.setSpacing(10)
+        
         # 시험 결과 라벨
         result_label = QLabel('시험 API')
         result_label.setStyleSheet("""
@@ -464,6 +466,7 @@ class ResultPageWidget(QWidget):
             font-family: "Noto Sans KR"; 
             font-weight: 600; 
             color: #222; 
+            margin-top: 20px;
             margin-bottom: 6px;
             letter-spacing: -0.3px;
         """)
@@ -472,8 +475,6 @@ class ResultPageWidget(QWidget):
         # 결과 테이블 (크기 키움: 350px)
         self.create_result_table(right_layout)
 
-        right_layout.addSpacing(10)
-
         result_label = QLabel('시험 점수 요약')
         result_label.setStyleSheet("""
             font-size: 16px; 
@@ -481,6 +482,7 @@ class ResultPageWidget(QWidget):
             font-family: "Noto Sans KR"; 
             font-weight: 600; 
             color: #222; 
+            margin-top: 20px;
             margin-bottom: 6px;
             letter-spacing: -0.3px;
         """)
@@ -539,7 +541,6 @@ class ResultPageWidget(QWidget):
                         background-image: url('{exit_enabled}');
                         background-repeat: no-repeat;
                         background-position: center;
-                        background-size: contain;
                         background-color: transparent;
                     }}
                     QPushButton:hover {{
@@ -905,12 +906,12 @@ class ResultPageWidget(QWidget):
             api_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 0, api_item)
 
-            # 기본 아이콘
+            # ✅ 기본 아이콘 (결과 페이지 전용 아이콘 사용)
             icon_widget = QWidget()
             icon_layout = QHBoxLayout()
             icon_layout.setContentsMargins(0, 0, 0, 0)
             icon_label = QLabel()
-            icon_label.setPixmap(QIcon(self.parent.img_none).pixmap(16, 16))
+            icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
             icon_label.setAlignment(Qt.AlignCenter)
             icon_layout.addWidget(icon_label)
             icon_layout.setAlignment(Qt.AlignCenter)
@@ -968,14 +969,14 @@ class ResultPageWidget(QWidget):
             api_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 0, api_item)
 
-            # 아이콘 상태 복원
+            # ✅ 아이콘 상태 복원 (결과 페이지 전용 아이콘 사용)
             icon_state = row_data['icon_state']
             if icon_state == "PASS":
-                img = self.parent.img_pass
+                img = self.img_pass
             elif icon_state == "FAIL":
-                img = self.parent.img_fail
+                img = self.img_fail
             else:
-                img = self.parent.img_none
+                img = self.img_none
 
             icon_widget = QWidget()
             icon_layout = QHBoxLayout()
@@ -1126,7 +1127,6 @@ class ResultPageWidget(QWidget):
                 background-image: url('{main_path}');
                 background-repeat: no-repeat;
                 background-position: center;
-                background-size: cover;
                 border-radius: 8px;
                 border: 1px solid #CECECE;
                 font-size: 15px;
@@ -2949,7 +2949,6 @@ class MyApp(QWidget):
                 background-image: url('{bg_path}');
                 background-repeat: no-repeat;
                 background-position: center;
-                background-size: cover;
             }}
         """)
 
@@ -2994,6 +2993,7 @@ class MyApp(QWidget):
             font-style: normal;
             font-weight: 500;
             line-height: normal;
+            letter-spacing: -0.3px;
         """
         self.title_label.setStyleSheet(title_style)
         header_layout.addWidget(self.title_label)
@@ -3152,7 +3152,6 @@ class MyApp(QWidget):
                 background-image: url('{start_enabled}');
                 background-repeat: no-repeat;
                 background-position: center;
-                background-size: contain;
                 background-color: transparent;
             }}
             QPushButton:hover {{
@@ -3180,7 +3179,6 @@ class MyApp(QWidget):
                 background-image: url('{stop_enabled}');
                 background-repeat: no-repeat;
                 background-position: center;
-                background-size: contain;
                 background-color: transparent;
             }}
             QPushButton:hover {{
@@ -3209,7 +3207,6 @@ class MyApp(QWidget):
                 background-image: url('{exit_enabled}');
                 background-repeat: no-repeat;
                 background-position: center;
-                background-size: contain;
                 background-color: transparent;
             }}
             QPushButton:hover {{
@@ -3237,7 +3234,6 @@ class MyApp(QWidget):
                 background-image: url('{result_enabled}');
                 background-repeat: no-repeat;
                 background-position: center;
-                background-size: contain;
                 background-color: transparent;
             }}
             QPushButton:hover {{
@@ -3345,7 +3341,6 @@ class MyApp(QWidget):
                 background-image: url('{main_path}');
                 background-repeat: no-repeat;
                 background-position: center;
-                background-size: cover;
                 border-radius: 8px;
                 border: 1px solid #CECECE;
                 font-size: 15px;

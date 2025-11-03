@@ -17,7 +17,11 @@ test_target = "영상보안그룹"
 test_range = "ALL_FIELDS"
 auth_type = "Bearer Token"
 auth_info = "a"
+<<<<<<< HEAD
+admin_code = "1234"
+=======
 admin_code = "1"
+>>>>>>> 53aab043afc8bb81ddd3f54fe1ef11dc32f55793
 url = "https://10.252.219.53:8080"
 contact_person = "김철수"
 model_name = "v1.0"
