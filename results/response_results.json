@@ -111,7 +111,7 @@
               "validationData": {},
               "validationErrors": [
                 "[시도 1/1]",
-                "[구조] 타입 불일치: camList.timeList - 예상: 모든 요소가 list, 실패한 항목들: [0] {'startTime': 1760993645785, 'endTime': 1760996711177} (타입: dict)"
+                "[구조] 타입 불일치: camList.timeList - 예상: 모든 요소가 list, 실패한 항목들: [0] {'startTime': 1761083669655, 'endTime': 1761093465310} (타입: dict)"
               ]
             }
           ]
@@ -153,7 +153,7 @@
               "validationData": {},
               "validationErrors": [
                 "[시도 1/1]",
-                "[구조] 타입 불일치: camList.startTime (예상: str, 실제: int, 값: 1760981590563)"
+                "[구조] 타입 불일치: camList.startTime (예상: str, 실제: int, 값: 1761024421163)"
               ]
             }
           ]
@@ -217,8 +217,8 @@
               "validationData": {},
               "validationErrors": [
                 "[시도 1/1]",
-                "[구조] 타입 불일치: camList.endTime (예상: str, 실제: int, 값: 9246453728527)",
-                "[구조] 타입 불일치: camList.startTime (예상: str, 실제: int, 값: 6302771116441)"
+                "[구조] 타입 불일치: camList.endTime (예상: str, 실제: int, 값: 4769968622510)",
+                "[구조] 타입 불일치: camList.startTime (예상: str, 실제: int, 값: 1786630273935)"
               ]
             }
           ]
@@ -226,5 +226,5 @@
       ]
     }
   ],
-  "completedDate": "2025-11-03T09:55:12Z"
+  "completedDate": "2025-11-03T11:16:44Z"
 }
