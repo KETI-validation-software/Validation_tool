@@ -3845,7 +3845,7 @@ class MyApp(QWidget):
         for i, name in enumerate(self.step_names):
             # API 명
             self.tableWidget.setItem(i, 0, QTableWidgetItem(f"{i + 1}. {name}"))
-            # 결과 아이콘 (위젯으로 중앙 정렬)
+            # 결과 아이콘
             icon_widget = QWidget()
             icon_layout = QHBoxLayout()
             icon_layout.setContentsMargins(0, 0, 0, 0)
@@ -4501,19 +4501,6 @@ class MyApp(QWidget):
         """창 크기 변경 시 반응형 UI 조정"""
         try:
             super().resizeEvent(event)
-
-            # 테이블 위젯 크기 조정
-            if hasattr(self, 'tableWidget'):
-                # 현재 창 너비의 95%를 테이블 너비로 설정
-                new_width = int(self.width() * 0.95)
-                new_width = max(950, new_width)  # 최소 950px
-
-                # 컬럼 너비를 창 크기에 맞춰 조정
-                total_width = new_width - 50  # 여백 고려
-                col_widths = [0.22, 0.09, 0.10, 0.11, 0.11, 0.10, 0.11, 0.16]  # 비율
-                for col, ratio in enumerate(col_widths):
-                    self.tableWidget.setColumnWidth(col, int(total_width * ratio))
-
         except Exception as e:
             print(f"resizeEvent 오류: {e}")
 
