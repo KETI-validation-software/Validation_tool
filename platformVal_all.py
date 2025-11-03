@@ -903,7 +903,7 @@ class ResultPageWidget(QWidget):
             # API 명
             api_name = f"{row + 1}. {api_list[row]}"
             api_item = QTableWidgetItem(api_name)
-            api_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)  # 가운데 정렬
             self.tableWidget.setItem(row, 0, api_item)
 
             # ✅ 기본 아이콘 (결과 페이지 전용 아이콘 사용)
@@ -966,7 +966,7 @@ class ResultPageWidget(QWidget):
         for row, row_data in enumerate(table_data):
             # API 명
             api_item = QTableWidgetItem(row_data['api_name'])
-            api_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)  # 가운데 정렬
             self.tableWidget.setItem(row, 0, api_item)
 
             # ✅ 아이콘 상태 복원 (결과 페이지 전용 아이콘 사용)
@@ -1197,7 +1197,9 @@ class ResultPageWidget(QWidget):
             # API 명
             api_item = self.parent.tableWidget.item(row, 0)
             if api_item:
-                self.tableWidget.setItem(row, 0, QTableWidgetItem(api_item.text()))
+                new_item = QTableWidgetItem(api_item.text())
+                new_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)  # 가운데 정렬
+                self.tableWidget.setItem(row, 0, new_item)
 
             # ✅ 결과 아이콘 (결과 페이지 전용 아이콘으로 교체)
             icon_widget = self.parent.tableWidget.cellWidget(row, 1)
@@ -3460,7 +3462,7 @@ class MyApp(QWidget):
         for i, name in enumerate(self.step_names):
             # API 명
             api_item = QTableWidgetItem(f"{i + 1}. {name}")
-            api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+            api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)  # 가운데 정렬
             self.tableWidget.setItem(i, 0, api_item)
 
             # 결과 아이콘
@@ -4006,9 +4008,10 @@ class MyApp(QWidget):
             print(f"[DEBUG] 서버 시작 준비")
             url = CONSTANTS.url.split(":")
             address_port = int(url[-1])
-            address_ip = "127.0.0.1"
+            # ✅ 0.0.0.0으로 바인딩 (모든 네트워크 인터페이스에서 수신)
+            address_ip = "0.0.0.0"
 
-            print(f"[DEBUG] 플랫폼 서버 시작: {address_ip}:{address_port}")
+            print(f"[DEBUG] 플랫폼 서버 시작: {address_ip}:{address_port} (외부 접근: {CONSTANTS.url})")
             self.server_th = server_th(handler_class=self.Server, address=address_ip, port=address_port)
             self.server_th.start()
 

@@ -1,2 +1,2 @@
-{"time": "2025-11-03T05:08:58.522166Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": ""}], "duration": "100", "transProtocol": {"transProtocolType": "WebHook", "transProtocolDesc": "127.0.0.1:8090"}, "eventFilter": "", "classFilter": "", "startTime": 1761110160000}}
-{"time": "2025-11-03T05:08:59.518289Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "", "message": ""}}
+{"time": "2025-11-03T07:25:10.442893Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "cam0001"}, {"camID": "cam0002"}], "duration": "100", "transProtocol": {"transProtocolType": "WebHook", "transProtocolDesc": "127.0.0.1:8090"}, "eventFilter": "화재", "classFilter": "트럭", "startTime": 1761110160000}}
+{"time": "2025-11-03T07:25:11.446256Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "", "message": ""}}
