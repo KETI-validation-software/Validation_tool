@@ -9,11 +9,11 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소
 # test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
-company_name = "통합플랫폼테스트"
-product_name = "통합플랫폼테스트제품"
+company_name = "물리보안기업"
+product_name = "물리보안테스트제품"
 version = "v1.0"
 test_category = "MAIN_TEST"
-test_target = "통합플랫폼"
+test_target = "물리보안"
 test_range = "ALL_FIELDS"
 auth_type = "Bearer Token"
 auth_info = "a"
@@ -21,7 +21,7 @@ admin_code = "1234"
 url = "https://10.252.219.95:8080"
 contact_person = "김철수"
 model_name = "v1.0"
-request_id = "cmh1yg49v000t9y0jdr1wwuja"
+request_id = "cmh2sdyj70001ry7uvsgugy25"
 specs = [
     ["cmgvieyak001b6cd04cgaawmm_inSchema", "cmgvieyak001b6cd04cgaawmm_outData", "cmgvieyak001b6cd04cgaawmm_messages",
      ""],
@@ -32,12 +32,6 @@ specs = [
 flag_opt = False
 if test_range == "ALL_FIELDS":
     flag_opt = True
-
-# 시험 분야별 spec 정의 (인덱스 순서 중요!)
-# specs = [
-#     ["spec_001_inSchema", "spec_001_outData", "spec_001_messages", "spec_001_webhookSchema", "spec_001_webhookData", "영상보안 시스템 요청 메시지 검증 API 명세서"],
-#     ["spec_0011_inSchema", "spec_0011_outData", "spec_0011_messages", "spec_0011_webhookSchema", "spec_0011_webhookData", "보안용 센서 시스템(요청검증)"]
-# ]
 
 # 선택된 시험 분야의 인덱스 (0: 영상보안, 1: 보안용센서)
 selected_spec_index = 0
@@ -52,10 +46,6 @@ enable_retry_delay = False  # False 권장: 불필요한 sleep 제거
 - time_out: 메시지별 timeout 설정 시간 (ms)
 - num_retries: 메시지별 검증 반복 횟수
 '''
-
-# ✅ specification.id별 설정 (신규 통합 방식)
-# 플랫폼(cmg90, cmg7e, cmg7b)
-# 시스템(cmgat, cmgas, cmga0)
 
 # ✅ 웹훅 서버 설정 (전역)
 WEBHOOK_HOST = "0.0.0.0"  # 서버 바인딩 주소 (모든 인터페이스에서 수신)
@@ -80,16 +70,16 @@ print(f"[CONSTANTS] 웹훅 콜백 URL: {WEBHOOK_URL} (플랫폼/시스템 접속
 
 SPEC_CONFIG = [
     {
-        "group_name": "통합플랫폼",
-        "group_id": "cmgzwocpp01y6vsve880sfysm",
-        "cmgvieyak001b6cd04cgaawmm": {
+        "group_name": "물리보안",
+        "group_id": "cmgzwohuq01y8vsvep0hpuuf4",
+        "cmgyv3rzl014nvsveidu5jpzp": {
     "test_name": "영상보안시스템_new",
-    "specs": ['cmgvieyak001b6cd04cgaawmm_inSchema', 'cmgvieyak001b6cd04cgaawmm_outData', 'cmgvieyak001b6cd04cgaawmm_messages', 'cmgvieyak001b6cd04cgaawmm_webhook_OutSchema', 'cmgvieyak001b6cd04cgaawmm_webhook_inData'],
+    "specs": ['cmgyv3rzl014nvsveidu5jpzp_outSchema', 'cmgyv3rzl014nvsveidu5jpzp_inData', 'cmgyv3rzl014nvsveidu5jpzp_messages', 'cmgyv3rzl014nvsveidu5jpzp_webhook_inSchema', 'cmgyv3rzl014nvsveidu5jpzp_webhook_outData'],
     "api_name": ['인증', '전송 지원 기능 정보 연동', '카메라 목록 연동', '저장된 영상 목록 연동', '실시간 영상 정보 연동', '저장된 영상 정보 연동', '실시간 이벤트 분석 정보 연동', '저장된 이벤트 분석 정보 연동'],
-    "api_id": ['step-1-77lxvxrit', 'step-2-ln57b7ahz', 'step-1-354py0pz2', 'step-2-hyto4xrf1', 'step-5-dfxmyzzsw', 'step-6-pflcyt2cp', 'step-7-166n5ivbf', 'step-8-fff2u2432'],
+    "api_id": ['step-1-s9942zltt', 'step-1-vps6mosa3', 'step-3-dpd47yeve', 'step-4-nbpd1rfle', 'step-5-6juqjc7zt', 'step-6-2hxrdvfry', 'step-7-jgj9l9vf4', 'step-8-57zrt6i4l'],
     "api_endpoint": ['/Authentication', '/Capabilities', '/CameraProfiles', '/StoredVideoInfos', '/StreamURLs', '/ReplayURL', '/RealtimeVideoEventInfos', '/StoredVideoEventInfos'],
     "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'WebHook', 'basic'],
-    "time_out": [5000, 5000, 10000, 5000, 5000, 5000, 5000, 5000],
+    "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
     "num_retries": [1, 1, 1, 1, 1, 1, 1, 1]
 }
     }
