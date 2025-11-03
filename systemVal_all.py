@@ -1255,8 +1255,8 @@ class ResultPageWidget(QWidget):
         self.tableWidget.setShowGrid(False)
 
         # 컬럼 너비 설정
-        self.tableWidget.setColumnWidth(0, 546)
-        self.tableWidget.setColumnWidth(1, 56)
+        self.tableWidget.setColumnWidth(0, 520)  # API 명 (546 → 520, -26px)
+        self.tableWidget.setColumnWidth(1, 90)   # 결과 아이콘 (56 → 90, +34px)
         self.tableWidget.setColumnWidth(2, 62)
         self.tableWidget.setColumnWidth(3, 78)
         self.tableWidget.setColumnWidth(4, 78)
@@ -1298,10 +1298,10 @@ class ResultPageWidget(QWidget):
                     tooltip = old_label.toolTip()
                     
                     # ✅ 결과에 따라 결과 페이지 전용 아이콘 선택
-                    if "Result: PASS" in tooltip or "Result: OK" in tooltip:
+                    if "Result: PASS" in tooltip:
                         img = self.img_pass  # tag_성공.png
                         icon_size = (84, 20)
-                    elif "Result: FAIL" in tooltip or "Result: ERROR" in tooltip:
+                    elif "Result: FAIL" in tooltip:
                         img = self.img_fail  # tag_실패.png
                         icon_size = (84, 20)
                     else:
@@ -1792,6 +1792,8 @@ class MyApp(QWidget):
         else:
             self.current_spec_id = "cmgatbdp000bqihlexmywusvq"  # 기본값: 보안용센서 시스템 (7개 API) -> 지금은 잠깐 없어짐
             print(f"[SYSTEM] 📌 기본 spec_id 사용: {self.current_spec_id}")
+        
+        # 아이콘 경로 (메인 페이지용)
         self.img_pass = resource_path("assets/image/icon/icn_success.png")
         self.img_fail = resource_path("assets/image/icon/icn_fail.png")
         self.img_none = resource_path("assets/image/icon/icn_basic.png")
@@ -3426,13 +3428,13 @@ class MyApp(QWidget):
     def icon_update_step(self, auth_, result_, text_):
         # 플랫폼과 동일하게 '진행중'이면 검정색, PASS면 초록, FAIL이면 빨강
         if result_ == "PASS":
-            msg = auth_ + "\n\n" + "Result: " + text_
+            msg = auth_ + "\n\n" + "Result: PASS" + "\n" + text_
             img = self.img_pass
         elif result_ == "진행중":
             msg = auth_ + "\n\n" + "Status: " + text_
             img = self.img_none
         else:
-            msg = auth_ + "\n\n" + "Result: " + result_ + "\nResult details:\n" + text_
+            msg = auth_ + "\n\n" + "Result: FAIL" + "\nResult details:\n" + text_
             img = self.img_fail
         return msg, img
 
