@@ -15,10 +15,10 @@ version = "v1.0"
 test_category = "MAIN_TEST"
 test_target = "물리보안"
 test_range = "ALL_FIELDS"
-auth_type = "Digest Auth"
-auth_info = "admin,1234"
-admin_code = "1234"
-url = "https://192.168.0.3:8080"
+auth_type = "Bearer Token"
+auth_info = "a"
+admin_code = "19216812"
+url = "https://10.252.219.95:8080"
 contact_person = "김철수"
 model_name = "v1.0"
 request_id = "cmh2sdyj70001ry7uvsgugy25"
@@ -56,6 +56,11 @@ enable_retry_delay = False  # False 권장: 불필요한 sleep 제거
 # ✅ specification.id별 설정 (신규 통합 방식)
 # 플랫폼(cmg90, cmg7e, cmg7b)
 # 시스템(cmgat, cmgas, cmga0)
+
+# ✅ 웹훅 서버 설정 (전역)
+WEBHOOK_HOST = "0.0.0.0"  # 모든 인터페이스에서 수신
+WEBHOOK_PORT = 8090       # 웹훅 수신 포트
+WEBHOOK_URL = f"https://{WEBHOOK_HOST}:{WEBHOOK_PORT}"  # 전체 웹훅 URL
 
 SPEC_CONFIG = [
     {
