@@ -1,4 +1,0 @@
-{"time": "2025-11-03T03:19:30.806120Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": ""}], "duration": "100", "transProtocol": {"transProtocolType": "WebHook", "transProtocolDesc": "127.0.0.1:8090"}, "eventFilter": "", "classFilter": "", "startTime": 1761110160000}}
-{"time": "2025-11-03T03:19:30.807117Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "", "message": ""}}
-{"time": "2025-11-03T03:19:30.810109Z", "api": "RealtimeVideoEventInfos", "dir": "WEBHOOK_OUT", "data": {"camList": [{"camID": ""}], "duration": 0, "transProtocol": {"transProtocolType": "", "transProtocolDesc": ""}, "eventFilter": "", "classFilter": "", "startTime": 0}}
-{"time": "2025-11-03T03:19:31.337707Z", "api": "RealtimeVideoEventInfos", "dir": "WEBHOOK_IN", "data": {"code": 200, "message": "성공"}}

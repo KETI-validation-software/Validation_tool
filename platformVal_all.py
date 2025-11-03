@@ -900,10 +900,10 @@ class ResultPageWidget(QWidget):
         self.tableWidget.setRowCount(api_count)
 
         for row in range(api_count):
-            # API 명
+            # API 명 (중앙 정렬)
             api_name = f"{row + 1}. {api_list[row]}"
             api_item = QTableWidgetItem(api_name)
-            api_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            api_item.setTextAlignment(Qt.AlignCenter)
             self.tableWidget.setItem(row, 0, api_item)
 
             # ✅ 기본 아이콘 (결과 페이지 전용 아이콘 사용)
@@ -964,9 +964,9 @@ class ResultPageWidget(QWidget):
         self.tableWidget.setRowCount(len(table_data))
 
         for row, row_data in enumerate(table_data):
-            # API 명
+            # API 명 (중앙 정렬)
             api_item = QTableWidgetItem(row_data['api_name'])
-            api_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            api_item.setTextAlignment(Qt.AlignCenter)
             self.tableWidget.setItem(row, 0, api_item)
 
             # ✅ 아이콘 상태 복원 (결과 페이지 전용 아이콘 사용)
@@ -1165,7 +1165,7 @@ class ResultPageWidget(QWidget):
         self.tableWidget.setShowGrid(False)
 
         # 컬럼 너비 설정
-        self.tableWidget.setColumnWidth(0, 520)  # API 명 (546 → 520, -26px)
+        self.tableWidget.setColumnWidth(0, 512)  # API 명 (546 → 520, -26px)
         self.tableWidget.setColumnWidth(1, 90)   # 결과 아이콘 (56 → 90, +34px)
         self.tableWidget.setColumnWidth(2, 62)
         self.tableWidget.setColumnWidth(3, 78)
@@ -1194,10 +1194,12 @@ class ResultPageWidget(QWidget):
         """parent의 테이블 데이터를 복사 (결과 페이지 전용 아이콘 사용)"""
         api_count = self.parent.tableWidget.rowCount()
         for row in range(api_count):
-            # API 명
+            # API 명 (중앙 정렬)
             api_item = self.parent.tableWidget.item(row, 0)
             if api_item:
-                self.tableWidget.setItem(row, 0, QTableWidgetItem(api_item.text()))
+                new_item = QTableWidgetItem(api_item.text())
+                new_item.setTextAlignment(Qt.AlignCenter)
+                self.tableWidget.setItem(row, 0, new_item)
 
             # ✅ 결과 아이콘 (결과 페이지 전용 아이콘으로 교체)
             icon_widget = self.parent.tableWidget.cellWidget(row, 1)
@@ -3799,15 +3801,22 @@ class MyApp(QWidget):
             if not selected_rows:
                 QMessageBox.warning(self, "알림", "시험 시나리오를 선택하세요.")
                 return
+            
+            # ✅ 단일 선택만 허용 (복수 선택 시 경고)
+            if len(selected_rows) > 1:
+                QMessageBox.warning(self, "알림", "한 번에 하나의 시나리오만 선택할 수 있습니다.")
+                return
+            
             self.save_current_spec_data()
 
-            selected_spec_ids = [self.index_to_spec_id[r.row()] for r in selected_rows]
-            for spec_id in selected_spec_ids:
-                self.current_spec_id = spec_id
+            # ✅ 선택된 spec으로 전환
+            selected_spec_id = self.index_to_spec_id[selected_rows[0].row()]
+            if selected_spec_id != self.current_spec_id:
+                print(f"[DEBUG] Spec 전환: {self.current_spec_id} → {selected_spec_id}")
+                self.current_spec_id = selected_spec_id
                 self.load_specs_from_constants()
-                self.run_single_spec_test()
 
-            print(f"[DEBUG] sbtn_push 시작")
+            print(f"[DEBUG] sbtn_push 시작 - Spec: {self.current_spec_id}")
 
             self._clean_trace_dir_once()
 
@@ -3820,6 +3829,34 @@ class MyApp(QWidget):
             self.time_pre = 0
             self.realtime_flag = False
             self.tmp_msg_append_flag = False
+
+            # ✅ step_buffers 초기화 (재시작 시 이전 검증 결과 제거)
+            print(f"[DEBUG] step_buffers 초기화: {len(self.videoMessages)}개 API")
+            self.step_buffers = [
+                {"data": "", "error": "", "result": "PASS", "raw_data_list": []} 
+                for _ in range(len(self.videoMessages))
+            ]
+
+            # ✅ 테이블 초기화 (아이콘과 점수 리셋)
+            for row in range(self.tableWidget.rowCount()):
+                # 아이콘을 기본 상태로
+                icon_widget = QWidget()
+                icon_layout = QHBoxLayout()
+                icon_layout.setContentsMargins(0, 0, 0, 0)
+                icon_label = QLabel()
+                icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
+                icon_label.setAlignment(Qt.AlignCenter)
+                icon_label.setToolTip("")  # 툴팁 제거
+                icon_layout.addWidget(icon_label)
+                icon_layout.setAlignment(Qt.AlignCenter)
+                icon_widget.setLayout(icon_layout)
+                self.tableWidget.setCellWidget(row, 1, icon_widget)
+                
+                # 검증 횟수, 통과/실패 필드 수, 점수 초기화
+                for col, value in [(2, "0"), (3, "0"), (4, "0"), (5, "0"), (6, "0%")]:
+                    item = QTableWidgetItem(value)
+                    item.setTextAlignment(Qt.AlignCenter)
+                    self.tableWidget.setItem(row, col, item)
 
             # 평가 점수 디스플레이 초기화
             self.update_score_display()
@@ -3883,24 +3920,54 @@ class MyApp(QWidget):
             self.Server.transProtocolInput = "LongPolling"
             self.valResult.append("Start Validation...\n")
 
+            # ✅ 기존 서버 스레드 종료 (재시작 시)
+            if hasattr(self, 'server_th') and self.server_th is not None:
+                try:
+                    print(f"[DEBUG] 기존 서버 스레드 종료 시도")
+                    self.server_th.terminate()
+                    self.server_th.wait(3000)  # 3초 대기
+                    print(f"[DEBUG] 기존 서버 스레드 종료 완료")
+                    self.server_th = None  # 참조 제거
+                    time.sleep(2)  # 포트 완전 해제 대기 (1초 → 2초)
+                except Exception as e:
+                    print(f"[WARNING] 기존 서버 종료 중 오류 (무시): {e}")
+
             print(f"[DEBUG] 서버 시작 준비")
             url = CONSTANTS.url.split(":")
             address_port = int(url[-1])
             address_ip = "127.0.0.1"
 
+            # ✅ 서버 시작 전 초기화 확인 메시지
+            self.valResult.append("🔄 플랫폼 서버 초기화 중...")
+            
             print(f"[DEBUG] 플랫폼 서버 시작: {address_ip}:{address_port}")
             self.server_th = server_th(handler_class=self.Server, address=address_ip, port=address_port)
             self.server_th.start()
 
-            # 서버 준비 완료까지 대기 (첫 실행 시만)
+            # ✅ 재시작 시에도 서버 준비 시간 확보
             if self.first_run:
-                self.valResult.append("🔄 플랫폼 서버 초기화 중...")
                 time.sleep(5)
-                self.valResult.append("✅ 플랫폼 서버 준비 완료")
                 self.first_run = False
+            else:
+                # 재시작 시 짧은 대기
+                time.sleep(2)
+            
+            self.valResult.append("✅ 플랫폼 서버 준비 완료")
+            
+            # ✅ 서버 시작 후 카운터 초기화 (서버가 실행 중일 때 초기화)
+            if hasattr(self.Server, 'request_counter'):
+                print(f"[DEBUG] 서버 시작 후 request_counter 초기화: {self.Server.request_counter}")
+                self.Server.request_counter = {}
+            
+            print(f"[DEBUG] request_counter 초기화 완료")
 
-            print(f"[DEBUG] 타이머 시작")
-            self.tick_timer.start(1000)
+            print(f"[DEBUG] 타이머 시작 체크")
+            # ✅ 타이머가 이미 실행 중이면 재시작하지 않음
+            if not self.tick_timer.isActive():
+                print(f"[DEBUG] 타이머 시작")
+                self.tick_timer.start(1000)
+            else:
+                print(f"[WARNING] 타이머가 이미 실행 중입니다")
             print(f"[DEBUG] sbtn_push 완료")
 
         except Exception as e:
@@ -3914,6 +3981,18 @@ class MyApp(QWidget):
     def stop_btn_clicked(self):
         self.tick_timer.stop()
         self.valResult.append("검증 절차가 중지되었습니다.")
+        
+        # ✅ 서버 스레드 종료
+        if hasattr(self, 'server_th') and self.server_th is not None:
+            try:
+                print(f"[DEBUG] 서버 스레드 종료 시도")
+                self.server_th.terminate()
+                self.server_th.wait(3000)  # 3초 대기
+                self.valResult.append("🛑 플랫폼 서버 종료 완료")
+                print(f"[DEBUG] 서버 스레드 종료 완료")
+            except Exception as e:
+                print(f"[WARNING] 서버 종료 중 오류: {e}")
+        
         self.sbtn.setEnabled(True)
         self.stop_btn.setDisabled(True)
         self.save_current_spec_data()
