@@ -2660,18 +2660,16 @@ class MyApp(QWidget):
         # ✅ Webhook 처리 (transProtocol 기반으로만 판단)
         try:
             json_data_dict = json.loads(json_data.decode('utf-8'))
-            trans_protocol = json_data_dict.get("transProtocol", {})
+            trans_protocol = json_data_dict.get("transProtocol", {})    # 이 부분 수정해야함
             
             if not trans_protocol:
                 if self.cnt < len(self.trans_protocols):
                     current_protocol = self.trans_protocols[self.cnt]
 
                     if current_protocol == "WebHook":
-                        # ✅ CONSTANTS에서 웹훅 주소 가져오기
-                        webhook_url = getattr(self.CONSTANTS, 'WEBHOOK_URL', 'https://0.0.0.0:8090')
                         trans_protocol = {
                             "transProtocolType": "WebHook",
-                            "transProtocolDesc": webhook_url
+                            "transProtocolDesc": "https://127.0.0.1:8008"
                         }
                         json_data_dict["transProtocol"] = trans_protocol
                         # 재직렬화
@@ -2683,27 +2681,14 @@ class MyApp(QWidget):
                 if "WebHook".lower() in str(trans_protocol_type).lower():
                     time.sleep(0.1)
                     path_tmp = trans_protocol.get("transProtocolDesc", {})
-                    
-                    # ✅ CONSTANTS에서 기본 웹훅 주소 가져오기
-                    default_webhook_url = getattr(self.CONSTANTS, 'WEBHOOK_URL', 'https://0.0.0.0:8090')
-                    
                     # http/https 접두어 보정
                     if not path_tmp or str(path_tmp).strip() in ["None", "", "desc"]:
-                        path_tmp = default_webhook_url
-                        print(f"[WEBHOOK] 기본 웹훅 주소 사용: {path_tmp}")
+                        path_tmp = "https://127.0.0.1:8008"
                     if not str(path_tmp).startswith("http"):
                         path_tmp = "https://" + str(path_tmp)
-                    
                     parsed = urlparse(str(path_tmp))
-                    
-                    # ✅ CONSTANTS에서 기본값 가져오기
-                    default_host = getattr(self.CONSTANTS, 'WEBHOOK_HOST', '0.0.0.0')
-                    default_port = getattr(self.CONSTANTS, 'WEBHOOK_PORT', 8090)
-                    
-                    url = parsed.hostname if parsed.hostname is not None else default_host
-                    port = parsed.port if parsed.port is not None else default_port
-                    
-                    print(f"[WEBHOOK] 웹훅 서버 시작: {url}:{port}")
+                    url = parsed.hostname if parsed.hostname is not None else "127.0.0.1"
+                    port = parsed.port if parsed.port is not None else 8008
 
                     msg = {}
                     self.webhook_flag = True
