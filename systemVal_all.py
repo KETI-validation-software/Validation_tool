@@ -2957,15 +2957,6 @@ class MyApp(QWidget):
                 if self.flag_opt:
                     add_err += tmp_fields_opt_cnt
 
-                self.total_error_cnt += add_err
-                self.total_pass_cnt += 0
-                # ✅ 전체 누적 점수 업데이트 추가
-                self.global_error_cnt += add_err
-                self.global_pass_cnt += 0
-
-                # 평가 점수 디스플레이 업데이트
-                self.update_score_display()
-
                 total_fields = self.total_pass_cnt + self.total_error_cnt
                 if total_fields > 0:
                     score = (self.total_pass_cnt / total_fields) * 100
@@ -2977,6 +2968,15 @@ class MyApp(QWidget):
 
                 # 재시도 카운터 증가
                 self.current_retry += 1
+                self.update_table_row_with_retries(
+                    self.cnt,
+                    "진행중",  # ← 검정색 아이콘
+                    0, 0,  # ← 아직 결과 없음
+                    "검증 진행중...",
+                    f"시도 {self.current_retry }/{current_retries}",
+                    self.current_retry   # ← 검증 횟수: 1, 2, 3...
+                )
+                QApplication.processEvents()  # UI 즉시 반영
 
                 # 재시도 완료 여부 확인
                 if (self.cnt < len(self.num_retries_list) and
@@ -2988,6 +2988,14 @@ class MyApp(QWidget):
                     self.step_buffers[self.cnt]["result"] = "FAIL"
                     self.step_buffers[self.cnt]["events"] = list(self.trace.get(self.cnt, []))
 
+                    self.total_error_cnt += add_err
+                    self.total_pass_cnt += 0
+                    # ✅ 전체 누적 점수 업데이트 추가
+                    self.global_error_cnt += add_err
+                    self.global_pass_cnt += 0
+
+                    # 평가 점수 디스플레이 업데이트
+                    self.update_score_display()
                     # 테이블 업데이트 (Message Missing)
                     self.update_table_row_with_retries(self.cnt, "FAIL", 0, add_err, "", "Message Missing!",
                                                        current_retries)
