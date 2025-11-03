@@ -1,0 +1,4 @@
+{"time": "2025-11-03T08:17:10.923665Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "cam0001"}, {"camID": "cam0002"}], "duration": "100", "transProtocol": {"transProtocolType": "WebHook", "transProtocolDesc": "127.0.0.1:8090"}, "eventFilter": "배회", "classFilter": "사람", "startTime": 1761110160000}}
+{"time": "2025-11-03T08:17:10.926657Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "", "message": ""}}
+{"time": "2025-11-03T08:17:10.929650Z", "api": "RealtimeVideoEventInfos", "dir": "WEBHOOK_OUT", "data": {"camList": [{"camID": "cam0001"}, {"camID": "cam0002"}], "duration": 0, "transProtocol": {"transProtocolType": "", "transProtocolDesc": ""}, "eventFilter": "배회", "classFilter": "", "startTime": 0}}
+{"time": "2025-11-03T08:17:11.452381Z", "api": "RealtimeVideoEventInfos", "dir": "WEBHOOK_IN", "data": {"code": 200, "message": "성공"}}
