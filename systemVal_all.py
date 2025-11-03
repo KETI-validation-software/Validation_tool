@@ -6,6 +6,7 @@ import threading
 import json
 import requests
 import sys
+from core.functions import build_result_json
 
 import urllib3
 import warnings
@@ -34,7 +35,10 @@ import spec.Data_request as data_request_module
 import spec.Schema_response as schema_response_module
 import spec.Constraints_request as constraints_request_module
 
+import os
 
+result_dir = os.path.join(os.getcwd(), "results")
+os.makedirs(result_dir, exist_ok=True)
 # 통합된 상세 내용 확인 팝업창 클래스
 class CombinedDetailDialog(QDialog):
     def __init__(self, api_name, step_buffer, schema_data, webhook_schema=None):
@@ -199,6 +203,25 @@ class APISelectionDialog(QDialog):
     def initUI(self):
         layout = QVBoxLayout()
 
+        # ✅ 배경 이미지 설정
+        self.setObjectName("system_main")
+        self.setAttribute(Qt.WA_StyledBackground, True)
+
+        bg_path = resource_path("assets/image/common/bg.png").replace("\\", "/")
+        print(f"배경 이미지 경로: {bg_path}")
+
+        self.setStyleSheet(f"""
+            #system_main {{
+                background-image: url('{bg_path}');
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: cover;
+            }}
+            QScrollArea, QScrollArea QWidget, QScrollArea::viewport,
+            QGroupBox, QWidget#scroll_widget, QLabel {{
+                background: transparent;
+            }}
+        """)
         # 상단 안내
         info_label = QLabel("시험할 API를 선택하세요 (복수 선택 가능)")
         info_label.setStyleSheet("font-weight: bold; font-size: 12px; padding: 10px;")
@@ -256,49 +279,167 @@ class APISelectionDialog(QDialog):
 
 # 시험 결과 페이지 위젯
 class ResultPageWidget(QWidget):
-    # 뒤로가기 시그널 추가
     backRequested = pyqtSignal()
 
     def __init__(self, parent, embedded=False):
         super().__init__()
         self.parent = parent
-        self.embedded = embedded  # embedded 모드 여부 저장
+        self.embedded = embedded
         self.setWindowTitle('시스템 연동 시험 결과')
-        self.resize(1100, 600)
+        self.resize(1680, 1080)
+
+        # 현재 선택된 spec_id 저장
+        self.current_spec_id = parent.current_spec_id
 
         self.initUI()
 
     def initUI(self):
+        # ✅ 메인 레이아웃
         mainLayout = QVBoxLayout()
+        mainLayout.setContentsMargins(0, 0, 0, 0)
+        mainLayout.setSpacing(0)
 
-        # 상단 큰 제목
-        title_label = QLabel('시스템 연동 시험 결과', self)
-        title_font = title_label.font()
-        title_font.setPointSize(22)
-        title_font.setBold(True)
-        title_label.setFont(title_font)
-        title_label.setAlignment(Qt.AlignCenter)
-        mainLayout.addWidget(title_label)
+        # ✅ 배경 이미지 설정
+        self.setObjectName("result_main")
+        self.setAttribute(Qt.WA_StyledBackground, True)
+        bg_path = resource_path("assets/image/common/bg.png").replace("\\", "/")
+        self.setStyleSheet(f"""
+            QWidget#result_main {{
+                background-image: url('{bg_path}');
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: cover;
+            }}
+            QScrollArea, QScrollArea QWidget, QScrollArea::viewport,
+            QGroupBox, QWidget#scroll_widget, QLabel {{
+                background: transparent;
+            }}
+        """)
 
-        # 시험 정보 섹션
-        info_group = QGroupBox('시험 정보')
-        info_layout = QVBoxLayout()
+        # ✅ 헤더 영역 추가
+        header_container = QWidget()
+        header_container.setFixedSize(1680, 56)
+        header_container_layout = QHBoxLayout()
+        header_container_layout.setContentsMargins(0, 8, 0, 0)
+        header_container_layout.setSpacing(0)
 
-        test_info = self.parent.load_test_info_from_constants()
-        info_text = ""
-        for label, value in test_info:
-            info_text += f"{label}: {value}\n"
+        header_widget = QWidget()
+        header_widget.setFixedSize(1680, 56)
 
-        info_browser = QTextBrowser()
-        info_browser.setPlainText(info_text)
-        info_browser.setMaximumHeight(150)
-        info_layout.addWidget(info_browser)
-        info_group.setLayout(info_layout)
-        mainLayout.addWidget(info_group)
+        header_layout = QHBoxLayout(header_widget)
+        header_layout.setContentsMargins(0, 0, 0, 0)
+        header_layout.setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+        header_layout.setSpacing(10)
 
-        mainLayout.addSpacing(10)
+        # 헤더 로고
+        logo_label = QLabel(header_widget)
+        logo_pixmap = QPixmap(resource_path("assets/image/common/header_logo.png"))
+        logo_label.setPixmap(logo_pixmap.scaled(36, 36, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        logo_label.setFixedSize(36, 36)
+        header_layout.addWidget(logo_label)
 
-        # 시험 결과 레이블
+        # 헤더 타이틀
+        title_label = QLabel('시스템 연동 시험 결과', header_widget)
+        title_label.setAlignment(Qt.AlignVCenter)
+        title_style = """
+            color: #FFF;
+            font-family: "Noto Sans KR";
+            font-size: 18px;
+            font-style: normal;
+            font-weight: 500;
+            line-height: normal;
+        """
+        title_label.setStyleSheet(title_style)
+        header_layout.addWidget(title_label)
+
+        header_container_layout.addWidget(header_widget)
+        header_container.setLayout(header_container_layout)
+        mainLayout.addWidget(header_container)
+
+        # ✅ 2컬럼 레이아웃
+        bg_root = QWidget()
+        bg_root.setObjectName("bg_root")
+        bg_root.setAttribute(Qt.WA_StyledBackground, True)
+        bg_root_layout = QVBoxLayout()
+        bg_root_layout.setContentsMargins(0, 0, 0, 0)
+        bg_root_layout.setSpacing(0)
+
+        columns_layout = QHBoxLayout()
+        columns_layout.setContentsMargins(0, 0, 0, 0)
+        columns_layout.setSpacing(0)
+
+        # ✅ 왼쪽 컬럼 (시험 분야 + 시나리오 )
+        left_col = QWidget()
+        left_col.setFixedSize(479, 906)
+        left_layout = QVBoxLayout()
+        left_layout.setContentsMargins(0, 0, 0, 0)
+        left_layout.setSpacing(0)
+
+        # 시험 분야 선택 (폰트 효과 추가)
+        title = QLabel("시험 선택")
+        title.setStyleSheet("""
+                    font-size: 16px; 
+                    font-style: normal; 
+                    font-family: "Noto Sans KR"; 
+                    font-weight: 600; 
+                    color: #222; 
+                    margin-bottom: 6px;
+                    letter-spacing: -0.3px;
+                """)
+        left_layout.addWidget(title)
+
+        # 그룹 테이블
+        self.group_table_widget = self.create_group_selection_table()
+        left_layout.addWidget(self.group_table_widget)
+
+        # 시험 시나리오 테이블 (크기 줄임: 280px)
+        self.field_group = self.create_test_field_group()
+        left_layout.addWidget(self.field_group)
+
+        left_layout.addStretch()
+        left_col.setLayout(left_layout)
+
+        # ✅ 오른쪽 컬럼 (결과 테이블 및 점수)
+        right_col = QWidget()
+        right_col.setFixedSize(1064, 906)
+        right_layout = QVBoxLayout()
+        right_layout.setContentsMargins(0, 0, 0, 0)
+        right_layout.setSpacing(0)
+
+        # 시험 정보 (크기 키움: 360px)
+        info_title = QLabel("시험 정보")
+        info_title.setStyleSheet("""
+                    font-size: 16px; 
+                    font-style: normal; 
+                    font-family: "Noto Sans KR"; 
+                    font-weight: 600; 
+                    color: #222; 
+                    margin-bottom: 6px;
+                    letter-spacing: -0.3px;
+                """)
+        right_layout.addWidget(info_title)
+
+        info_widget = self._create_simple_info_display()
+        right_layout.addWidget(info_widget)
+        right_layout.setSpacing(10)
+        # 시험 결과 라벨
+        api_name_label = QLabel('시험 API')
+        api_name_label.setStyleSheet("""
+                    font-size: 16px; 
+                    font-style: normal; 
+                    font-family: "Noto Sans KR"; 
+                    font-weight: 600; 
+                    color: #222; 
+                    margin-bottom: 6px;
+                    letter-spacing: -0.3px;
+                """)
+        right_layout.addWidget(api_name_label)
+
+        # 결과 테이블 (크기 키움: 350px)
+        self.create_result_table(right_layout)
+
+        right_layout.addSpacing(10)
+
         result_label = QLabel('시험 점수 요약')
         mainLayout.addWidget(result_label)
 
@@ -352,75 +493,845 @@ class ResultPageWidget(QWidget):
         mainLayout.addSpacing(15)
 
         # 시험 분야별 점수 표시
-        spec_score_group = self._create_spec_score_display()
-        mainLayout.addWidget(spec_score_group)
-
-        mainLayout.addSpacing(10)
+        self.spec_score_group = self._create_spec_score_display()
+        right_layout.addWidget(self.spec_score_group)
 
         # 전체 점수 표시
         total_score_group = self._create_total_score_display()
-        mainLayout.addWidget(total_score_group)
+        right_layout.addWidget(total_score_group)
 
-        mainLayout.addSpacing(20)
+        right_layout.addSpacing(32)
 
-        # 뒤로가기/닫기 버튼
+        # ✅ 버튼 그룹 (가운데 정렬)
+        buttonGroup = QWidget()
+        buttonGroup.setFixedWidth(1064)
+        buttonLayout = QHBoxLayout()
+        buttonLayout.setAlignment(Qt.AlignCenter)  # 가운데 정렬
+        buttonLayout.setContentsMargins(0, 0, 0, 0)
+
         if self.embedded:
             # Embedded 모드: 뒤로가기 버튼
-            back_btn = QPushButton('← 뒤로가기')
-            back_btn.setFixedSize(140, 50)
+            back_btn = QPushButton('뒤로가기', self)
+            back_btn.setFixedSize(255, 50)
             back_btn.setStyleSheet("""
                 QPushButton {
-                    background-color: #FFB6C1;
-                    border: 2px solid #FF69B4;
-                    border-radius: 5px;
-                    padding: 5px;
-                    font-weight: bold;
-                    color: #8B0000;
+                    background-color: #4A90E2;
+                    border: none;
+                    border-radius: 4px;
+                    color: white;
+                    font-family: "Noto Sans KR";
+                    font-size: 15px;
+                    font-weight: 600;
                 }
                 QPushButton:hover {
-                    background-color: #FFC0CB;
-                    border: 2px solid #FF1493;
+                    background-color: #357ABD;
                 }
                 QPushButton:pressed {
-                    background-color: #FF69B4;
+                    background-color: #2868A8;
                 }
             """)
             back_btn.clicked.connect(self._on_back_clicked)
-
-            close_layout = QHBoxLayout()
-            close_layout.setAlignment(Qt.AlignCenter)
-            close_layout.addWidget(back_btn)
-            mainLayout.addLayout(close_layout)
+            buttonLayout.addWidget(back_btn)
         else:
             # Standalone 모드: 닫기 버튼
-            close_btn = QPushButton('닫기')
-            close_btn.setFixedSize(140, 50)
-            close_btn.setStyleSheet("""
-                QPushButton {
-                    background-color: #FFB6C1;
-                    border: 2px solid #FF69B4;
-                    border-radius: 5px;
-                    padding: 5px;
-                    font-weight: bold;
-                    color: #8B0000;
-                }
-                QPushButton:hover {
-                    background-color: #FFC0CB;
-                    border: 2px solid #FF1493;
-                }
-                QPushButton:pressed {
-                    background-color: #FF69B4;
-                }
-            """)
+            close_btn = QPushButton('닫기', self)
+            close_btn.setFixedSize(255, 50)
+            try:
+                exit_enabled = resource_path("assets/image/test_runner/btn_종료_enabled.png").replace("\\", "/")
+                exit_hover = resource_path("assets/image/test_runner/btn_종료_hover.png").replace("\\", "/")
+                close_btn.setStyleSheet(f"""
+                    QPushButton {{
+                        border: none;
+                        background-image: url('{exit_enabled}');
+                        background-repeat: no-repeat;
+                        background-position: center;
+                        background-size: contain;
+                        background-color: transparent;
+                    }}
+                    QPushButton:hover {{
+                        background-image: url('{exit_hover}');
+                    }}
+                    QPushButton:pressed {{
+                        background-image: url('{exit_hover}');
+                        opacity: 0.8;
+                    }}
+                """)
+            except:
+                close_btn.setStyleSheet("""
+                    QPushButton {
+                        background-color: #E74C3C;
+                        border: none;
+                        border-radius: 4px;
+                        color: white;
+                        font-family: "Noto Sans KR";
+                        font-size: 15px;
+                        font-weight: 600;
+                    }
+                    QPushButton:hover {
+                        background-color: #C0392B;
+                    }
+                """)
             close_btn.clicked.connect(self.close)
+            buttonLayout.addWidget(close_btn)
 
-            close_layout = QHBoxLayout()
-            close_layout.setAlignment(Qt.AlignCenter)
-            close_layout.addWidget(close_btn)
-            mainLayout.addLayout(close_layout)
+        buttonGroup.setLayout(buttonLayout)
+        right_layout.addWidget(buttonGroup)
 
-        mainLayout.addStretch()
+        right_layout.addStretch()
+        right_col.setLayout(right_layout)
+
+        columns_layout.addWidget(left_col)
+        columns_layout.addWidget(right_col)
+
+        bg_root_layout.addLayout(columns_layout)
+        bg_root.setLayout(bg_root_layout)
+        mainLayout.addWidget(bg_root)
+
         self.setLayout(mainLayout)
+
+    def create_group_selection_table(self):
+        """시험 분야명 테이블"""
+        group_box = QWidget()
+        group_box.setFixedSize(459, 220)
+        group_box.setStyleSheet("background: transparent;")
+
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+
+        self.group_table = QTableWidget(0, 1)
+        self.group_table.setHorizontalHeaderLabels(["시험 분야"])
+        self.group_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.group_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.group_table.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.group_table.verticalHeader().setVisible(False)
+        self.group_table.setFixedHeight(219)
+
+        self.group_table.setStyleSheet("""
+            QTableWidget {
+                background-color: #FFFFFF;
+                border: 1px solid #CECECE;
+                border-radius: 4px;
+                outline: none;
+                font-family: "Noto Sans KR";
+                font-size: 14px;
+                color: #1B1B1C;
+            }
+            QTableWidget::item {
+                border-bottom: 1px solid #E0E0E0;
+                color: #1B1B1C;
+                font-family: 'Noto Sans KR';
+                font-size: 14px;
+                font-weight: 400;
+                padding: 8px;
+                text-align: center;
+            }
+            QTableWidget::item:selected {
+                background-color: #E3F2FF;
+                border: none;
+            }
+            QTableWidget::item:hover {
+                background-color: #F2F8FF;
+            }
+            QHeaderView::section {
+                background-color: #EDF0F3;
+                border: none;
+                border-bottom: 1px solid #CECECE;
+                color: #1B1B1C;
+                text-align: center;
+                font-family: 'Noto Sans KR';
+                font-size: 13px;
+                font-weight: 600;
+                letter-spacing: -0.156px;
+            }
+        """)
+
+        # SPEC_CONFIG 기반 그룹 로드
+        group_items = [
+            (g.get("group_name", "미지정 그룹"), g.get("group_id", ""))
+            for g in CONSTANTS.SPEC_CONFIG
+        ]
+        self.group_table.setRowCount(len(group_items))
+
+        self.group_name_to_index = {}
+        self.index_to_group_name = {}
+
+        for idx, (name, gid) in enumerate(group_items):
+            item = QTableWidgetItem(name)
+            item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+            self.group_table.setItem(idx, 0, item)
+            self.group_name_to_index[name] = idx
+            self.index_to_group_name[idx] = name
+
+        self.group_table.cellClicked.connect(self.on_group_selected)
+
+        layout.addWidget(self.group_table)
+        group_box.setLayout(layout)
+        return group_box
+
+    def create_test_field_group(self):
+        """시험 시나리오 테이블 (크기 줄임: 280px)"""
+        group_box = QWidget()
+        group_box.setFixedSize(459, 760)
+        group_box.setStyleSheet("background: transparent;")
+
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+
+        self.test_field_table = QTableWidget(0, 1)
+        self.test_field_table.setHorizontalHeaderLabels(["시험 시나리오"])
+        self.test_field_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.test_field_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.test_field_table.cellClicked.connect(self.on_test_field_selected)
+        self.test_field_table.verticalHeader().setVisible(False)
+        self.test_field_table.setFixedHeight(759)
+
+        self.test_field_table.setStyleSheet("""
+            QTableWidget {
+                background-color: #FFFFFF;
+                border: 1px solid #CECECE;
+                border-radius: 4px;
+                font-family: "Noto Sans KR";
+                font-size: 14px;
+                color: #1B1B1C;
+            }
+            QTableWidget::item {
+                border-bottom: 1px solid #E0E0E0;
+                border-right: 0px solid transparent;
+                color: #1B1B1C;
+                font-family: 'Noto Sans KR';
+                font-size: 14px;
+                font-style: normal;
+                font-weight: 400;
+                letter-spacing: 0.098px;
+                text-align: center; 
+            }
+            QTableWidget::item:selected {
+                background-color: #E3F2FF;
+            }
+            QTableWidget::item:hover {
+                background-color: #E3F2FF;
+            }
+            QHeaderView::section {
+                background-color: #EDF0F3;
+                border-right: 0px solid transparent;
+                border-left: 0px solid transparent;
+                border-top: 0px solid transparent;
+                border-bottom: 1px solid #CECECE;
+                color: #1B1B1C;
+                text-align: center;
+                font-family: 'Noto Sans KR';
+                font-size: 13px;
+                font-style: normal;
+                font-weight: 600;
+                line-height: normal;
+                letter-spacing: -0.156px;
+            }
+        """)
+
+        # 초기 로드: 현재 그룹의 시나리오 표시
+        self.load_initial_scenarios()
+
+        layout.addWidget(self.test_field_table)
+        group_box.setLayout(layout)
+        return group_box
+
+    def load_initial_scenarios(self):
+        """초기 시나리오 로드 및 현재 선택된 항목 하이라이트"""
+        # 현재 spec_id가 속한 그룹 찾기
+        current_group = None
+        for group_data in CONSTANTS.SPEC_CONFIG:
+            if self.current_spec_id in group_data:
+                current_group = group_data
+                break
+
+        if current_group:
+            # 해당 그룹의 시나리오 로드
+            self.update_test_field_table(current_group)
+
+            # 현재 spec_id를 선택 상태로 표시
+            if hasattr(self, 'spec_id_to_index') and self.current_spec_id in self.spec_id_to_index:
+                current_row = self.spec_id_to_index[self.current_spec_id]
+                self.test_field_table.selectRow(current_row)
+
+            # 그룹 테이블도 선택
+            group_name = current_group.get("group_name")
+            if group_name in self.group_name_to_index:
+                group_row = self.group_name_to_index[group_name]
+                self.group_table.selectRow(group_row)
+
+    def on_group_selected(self, row, col):
+        """시험 그룹 선택 시"""
+        group_name = self.index_to_group_name.get(row)
+        if not group_name:
+            return
+
+        selected_group = next(
+            (g for g in CONSTANTS.SPEC_CONFIG if g.get("group_name") == group_name), None
+        )
+
+        if selected_group:
+            self.update_test_field_table(selected_group)
+
+    def update_test_field_table(self, group_data):
+        """선택된 그룹의 시나리오 목록 갱신"""
+        self.test_field_table.clearContents()
+
+        spec_items = [
+            (k, v) for k, v in group_data.items()
+            if k not in ['group_name', 'group_id'] and isinstance(v, dict)
+        ]
+        self.test_field_table.setRowCount(len(spec_items))
+
+        self.spec_id_to_index = {}
+        self.index_to_spec_id = {}
+
+        for idx, (spec_id, config) in enumerate(spec_items):
+            desc = config.get('test_name', f'시험분야 {idx + 1}')
+            desc_with_role = f"{desc} (응답 검증)"
+            item = QTableWidgetItem(desc_with_role)
+            item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+            self.test_field_table.setItem(idx, 0, item)
+            self.spec_id_to_index[spec_id] = idx
+            self.index_to_spec_id[idx] = spec_id
+
+    def on_test_field_selected(self, row, col):
+        """시험 분야 클릭 시 해당 시스템으로 동적 전환"""
+        try:
+            self.selected_test_field_row = row
+
+            if row in self.index_to_spec_id:
+                new_spec_id = self.index_to_spec_id[row]
+
+                if new_spec_id == self.current_spec_id:
+                    print(f"[SELECT] 이미 선택된 시나리오: {new_spec_id}")
+                    return
+
+                print(f"[SELECT] 🔄 시험 분야 전환: {self.current_spec_id} → {new_spec_id}")
+
+                # ✅ 1. 현재 spec의 테이블 데이터 저장
+                self.save_current_spec_data()
+
+                # ✅ 2. spec_id 업데이트
+                self.current_spec_id = new_spec_id
+
+                # ✅ 3. spec 데이터 다시 로드
+                self.load_specs_from_constants()
+
+                print(f"[SELECT] 로드된 API 개수: {len(self.videoMessages)}")
+                print(f"[SELECT] API 목록: {self.videoMessages}")
+
+                # ✅ 4. 기본 변수 초기화
+                self.cnt = 0
+                self.current_retry = 0
+                self.message_error = []
+
+                # ✅ 5. 테이블 완전 재구성 (API 이름 먼저 설정!)
+                print(f"[SELECT] 테이블 완전 재구성 시작")
+                self.update_result_table_structure(self.videoMessages)
+
+                # ✅ 6. 저장된 데이터가 있으면 복원 (API 이름은 유지!)
+                if new_spec_id in self.spec_table_data:
+                    print(f"[SELECT] 저장된 데이터 복원 시작")
+                    restored = self.restore_spec_data_without_api_names(new_spec_id)
+
+                    if restored:
+                        print(f"[SELECT] {new_spec_id} 저장된 결과 로드 완료")
+                    else:
+                        print(f"[SELECT] 저장된 데이터 복원 실패 - 초기화")
+                        self.initialize_empty_table()
+                else:
+                    # 저장된 데이터가 없으면 초기화
+                    print(f"[SELECT] {new_spec_id} 저장된 데이터 없음 - 초기화")
+                    self.initialize_empty_table()
+
+                # ✅ 7. trace 및 latest_events 초기화
+                self.trace.clear()
+                self.latest_events = {}
+
+                # ✅ 8. 설정 다시 로드
+                self.get_setting()
+
+                # ✅ 9. 평가 점수 디스플레이 업데이트
+                self.update_score_display()
+
+                # ✅ 10. 결과 텍스트 초기화
+                self.valResult.clear()
+                self.valResult.append(f"✅ 시스템 전환 완료: {self.spec_description}")
+                self.valResult.append(f"📋 Spec ID: {self.current_spec_id}")
+                self.valResult.append(f"📊 API 개수: {len(self.videoMessages)}개")
+                self.valResult.append(f"📋 API 목록: {self.videoMessages}\n")
+
+                print(f"[SELECT] ✅ 시스템 전환 완료")
+
+        except Exception as e:
+            print(f"[SELECT] 시험 분야 선택 처리 실패: {e}")
+            import traceback
+            traceback.print_exc()
+
+    def restore_spec_data_without_api_names(self, spec_id):
+        """저장된 spec 데이터 복원 (API 이름은 건드리지 않음!)"""
+        if spec_id not in self.spec_table_data:
+            print(f"[RESTORE] {spec_id} 저장된 데이터 없음")
+            return False
+
+        saved_data = self.spec_table_data[spec_id]
+        print(f"[RESTORE] {spec_id} 데이터 복원 시작")
+
+        # 테이블 복원 (API 이름 제외!)
+        table_data = saved_data['table_data']
+        for row, row_data in enumerate(table_data):
+            if row >= self.tableWidget.rowCount():
+                print(f"[RESTORE] 경고: row={row}가 범위 초과, 건너뜀")
+                break
+
+            # ✅ API 이름은 이미 update_result_table_structure()에서 설정됨 - 건드리지 않음!
+            # 대신 현재 API 이름이 제대로 있는지만 확인
+            current_api_item = self.tableWidget.item(row, 0)
+            if current_api_item:
+                print(f"[RESTORE] Row {row} API 이름 유지: {current_api_item.text()}")
+            else:
+                print(f"[RESTORE] 경고: Row {row} API 이름이 없음!")
+
+            # 아이콘 상태 복원
+            icon_state = row_data['icon_state']
+            if icon_state == "PASS":
+                img = self.img_pass
+            elif icon_state == "FAIL":
+                img = self.img_fail
+            else:
+                img = self.img_none
+
+            icon_widget = QWidget()
+            icon_layout = QHBoxLayout()
+            icon_layout.setContentsMargins(0, 0, 0, 0)
+            icon_label = QLabel()
+            icon_label.setPixmap(QIcon(img).pixmap(16, 16))
+            icon_label.setAlignment(Qt.AlignCenter)
+            icon_layout.addWidget(icon_label)
+            icon_layout.setAlignment(Qt.AlignCenter)
+            icon_widget.setLayout(icon_layout)
+            self.tableWidget.setCellWidget(row, 1, icon_widget)
+
+            # 나머지 컬럼 복원 (안전하게)
+            for col, key in [(2, 'retry_count'), (3, 'pass_count'),
+                             (4, 'total_count'), (5, 'fail_count'), (6, 'score')]:
+                item = self.tableWidget.item(row, col)
+                if item:
+                    item.setText(row_data[key])
+                else:
+                    new_item = QTableWidgetItem(row_data[key])
+                    new_item.setTextAlignment(Qt.AlignCenter)
+                    self.tableWidget.setItem(row, col, new_item)
+
+        # step_buffers 복원
+        self.step_buffers = [buf.copy() for buf in saved_data['step_buffers']]
+
+        # 점수 복원
+        self.total_pass_cnt = saved_data['total_pass_cnt']
+        self.total_error_cnt = saved_data['total_error_cnt']
+
+        print(f"[RESTORE] {spec_id} 데이터 복원 완료")
+        return True
+
+    def initialize_empty_table(self):
+        """테이블을 초기 상태로 설정 (API 이름은 유지)"""
+        print(f"[INIT] 테이블 초기화 시작")
+
+        # 점수 초기화
+        self.total_pass_cnt = 0
+        self.total_error_cnt = 0
+
+        # step_buffers 초기화
+        api_count = len(self.videoMessages)
+        self.step_buffers = [
+            {"data": "", "error": "", "result": "PASS"} for _ in range(api_count)
+        ]
+
+        # 테이블 데이터만 초기화 (API 이름은 이미 설정되어 있음)
+        for row in range(self.tableWidget.rowCount()):
+            # API 이름 확인
+            api_item = self.tableWidget.item(row, 0)
+            if api_item:
+                print(f"[INIT] Row {row} API 이름 확인: {api_item.text()}")
+            else:
+                # API 이름이 없으면 다시 설정
+                if row < len(self.videoMessages):
+                    display_name = f"{row + 1}. {self.videoMessages[row]}"
+                    api_item = QTableWidgetItem(display_name)
+                    api_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+                    self.tableWidget.setItem(row, 0, api_item)
+                    print(f"[INIT] Row {row} API 이름 재설정: {display_name}")
+
+            # 아이콘 초기화
+            icon_widget = QWidget()
+            icon_layout = QHBoxLayout()
+            icon_layout.setContentsMargins(0, 0, 0, 0)
+            icon_label = QLabel()
+            icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
+            icon_label.setAlignment(Qt.AlignCenter)
+            icon_layout.addWidget(icon_label)
+            icon_layout.setAlignment(Qt.AlignCenter)
+            icon_widget.setLayout(icon_layout)
+            self.tableWidget.setCellWidget(row, 1, icon_widget)
+
+            # 카운트 초기화
+            for col, value in [(2, "0"), (3, "0"), (4, "0"), (5, "0"), (6, "0%")]:
+                item = self.tableWidget.item(row, col)
+                if item:
+                    item.setText(value)
+                else:
+                    new_item = QTableWidgetItem(value)
+                    new_item.setTextAlignment(Qt.AlignCenter)
+                    self.tableWidget.setItem(row, col, new_item)
+
+        print(f"[INIT] 테이블 초기화 완료")
+
+    def save_current_spec_data(self):
+        """현재 spec의 테이블 데이터와 상태를 저장"""
+        if not hasattr(self, 'current_spec_id'):
+            return
+
+        # 테이블 데이터 저장 (현재 videoMessages 기준으로!)
+        table_data = []
+        for row in range(self.tableWidget.rowCount()):
+            # ✅ 실제 API 이름을 videoMessages에서 가져옴 (테이블 텍스트 아님!)
+            if row < len(self.videoMessages):
+                api_name = f"{row + 1}. {self.videoMessages[row]}"
+            else:
+                api_item = self.tableWidget.item(row, 0)
+                api_name = api_item.text() if api_item else ""
+
+            row_data = {
+                'api_name': api_name,  # ✅ 올바른 API 이름 저장
+                'icon_state': self._get_icon_state(row),
+                'retry_count': self.tableWidget.item(row, 2).text() if self.tableWidget.item(row, 2) else "0",
+                'pass_count': self.tableWidget.item(row, 3).text() if self.tableWidget.item(row, 3) else "0",
+                'total_count': self.tableWidget.item(row, 4).text() if self.tableWidget.item(row, 4) else "0",
+                'fail_count': self.tableWidget.item(row, 5).text() if self.tableWidget.item(row, 5) else "0",
+                'score': self.tableWidget.item(row, 6).text() if self.tableWidget.item(row, 6) else "0%",
+            }
+            table_data.append(row_data)
+
+        # 전체 데이터 저장
+        self.spec_table_data[self.current_spec_id] = {
+            'table_data': table_data,
+            'step_buffers': [buf.copy() for buf in self.step_buffers],
+            'total_pass_cnt': self.total_pass_cnt,
+            'total_error_cnt': self.total_error_cnt,
+        }
+        print(f"[DEBUG] {self.current_spec_id} 데이터 저장 완료")
+    def show_empty_result_table(self):
+        """결과가 없을 때 빈 테이블 표시 (API 목록만)"""
+        api_list = self.parent.videoMessages
+        api_count = len(api_list)
+
+        print(f"[RESULT] 빈 테이블 생성: {api_count}개 API")
+
+        # ✅ step_buffers 초기화 (상세 내용 확인을 위해 필수!)
+        self.parent.step_buffers = []
+        for i in range(api_count):
+            api_name = api_list[i] if i < len(api_list) else f"API {i + 1}"
+            self.parent.step_buffers.append({
+                "data": f"아직 시험이 진행되지 않았습니다.\n\nAPI: {api_name}",
+                "error": "시험 데이터가 없습니다.",
+                "result": "PASS"
+            })
+
+        print(f"[RESULT] step_buffers 생성 완료: {len(self.parent.step_buffers)}개")
+
+        # ✅ 점수 정보 초기화
+        self.parent.total_pass_cnt = 0
+        self.parent.total_error_cnt = 0
+
+        # 테이블 행 수 재설정
+        self.tableWidget.setRowCount(api_count)
+
+        for row in range(api_count):
+            # API 명
+            api_name = f"{row + 1}. {api_list[row]}"
+            api_item = QTableWidgetItem(api_name)
+            api_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            self.tableWidget.setItem(row, 0, api_item)
+
+            # 기본 아이콘
+            icon_widget = QWidget()
+            icon_layout = QHBoxLayout()
+            icon_layout.setContentsMargins(0, 0, 0, 0)
+            icon_label = QLabel()
+            icon_label.setPixmap(QIcon(self.parent.img_none).pixmap(16, 16))
+            icon_label.setAlignment(Qt.AlignCenter)
+            icon_layout.addWidget(icon_label)
+            icon_layout.setAlignment(Qt.AlignCenter)
+            icon_widget.setLayout(icon_layout)
+            self.tableWidget.setCellWidget(row, 1, icon_widget)
+
+            # 모든 값 0으로 초기화
+            for col, value in [(2, "0"), (3, "0"), (4, "0"), (5, "0"), (6, "0%")]:
+                item = QTableWidgetItem(value)
+                item.setTextAlignment(Qt.AlignCenter)
+                self.tableWidget.setItem(row, col, item)
+
+            # 상세 내용 버튼
+            detail_label = QLabel()
+            try:
+                img_path = resource_path("assets/image/test_runner/btn_상세내용확인.png").replace("\\", "/")
+                pixmap = QPixmap(img_path)
+                detail_label.setPixmap(pixmap)
+                detail_label.setScaledContents(False)
+                detail_label.setFixedSize(pixmap.size())
+            except:
+                detail_label.setText("확인")
+                detail_label.setStyleSheet("color: #4A90E2; font-weight: bold;")
+
+            detail_label.setCursor(Qt.PointingHandCursor)
+            detail_label.setAlignment(Qt.AlignCenter)
+            detail_label.mousePressEvent = lambda event, r=row: self._show_detail(r)
+
+            container = QWidget()
+            layout = QHBoxLayout()
+            layout.addWidget(detail_label)
+            layout.setAlignment(Qt.AlignCenter)
+            layout.setContentsMargins(0, 0, 0, 0)
+            container.setLayout(layout)
+
+            self.tableWidget.setCellWidget(row, 7, container)
+
+        # 점수 표시도 0으로 업데이트
+        empty_data = {
+            'total_pass_cnt': 0,
+            'total_error_cnt': 0
+        }
+        self.update_score_displays(empty_data)
+
+    def reload_result_table(self, saved_data):
+        """저장된 데이터로 결과 테이블 재구성"""
+        table_data = saved_data.get('table_data', [])
+
+        # 테이블 행 수 재설정
+        self.tableWidget.setRowCount(len(table_data))
+
+        for row, row_data in enumerate(table_data):
+            # API 명
+            api_item = QTableWidgetItem(row_data['api_name'])
+            api_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            self.tableWidget.setItem(row, 0, api_item)
+
+            # 아이콘 상태 복원
+            icon_state = row_data['icon_state']
+            if icon_state == "PASS":
+                img = self.parent.img_pass
+            elif icon_state == "FAIL":
+                img = self.parent.img_fail
+            else:
+                img = self.parent.img_none
+
+            icon_widget = QWidget()
+            icon_layout = QHBoxLayout()
+            icon_layout.setContentsMargins(0, 0, 0, 0)
+            icon_label = QLabel()
+            icon_label.setPixmap(QIcon(img).pixmap(16, 16))
+            icon_label.setAlignment(Qt.AlignCenter)
+            icon_layout.addWidget(icon_label)
+            icon_layout.setAlignment(Qt.AlignCenter)
+            icon_widget.setLayout(icon_layout)
+            self.tableWidget.setCellWidget(row, 1, icon_widget)
+
+            # 나머지 컬럼 복원
+            for col, key in [(2, 'retry_count'), (3, 'pass_count'),
+                             (4, 'total_count'), (5, 'fail_count'), (6, 'score')]:
+                item = QTableWidgetItem(row_data[key])
+                item.setTextAlignment(Qt.AlignCenter)
+                self.tableWidget.setItem(row, col, item)
+
+            # 상세 내용 버튼
+            detail_label = QLabel()
+            try:
+                img_path = resource_path("assets/image/test_runner/btn_상세내용확인.png").replace("\\", "/")
+                pixmap = QPixmap(img_path)
+                detail_label.setPixmap(pixmap)
+                detail_label.setScaledContents(False)
+                detail_label.setFixedSize(pixmap.size())
+            except:
+                detail_label.setText("확인")
+                detail_label.setStyleSheet("color: #4A90E2; font-weight: bold;")
+
+            detail_label.setCursor(Qt.PointingHandCursor)
+            detail_label.setAlignment(Qt.AlignCenter)
+            detail_label.mousePressEvent = lambda event, r=row: self._show_detail(r)
+
+            container = QWidget()
+            layout = QHBoxLayout()
+            layout.addWidget(detail_label)
+            layout.setAlignment(Qt.AlignCenter)
+            layout.setContentsMargins(0, 0, 0, 0)
+            container.setLayout(layout)
+
+            self.tableWidget.setCellWidget(row, 7, container)
+
+    def _show_detail(self, row):
+        """상세 내용 확인 - parent의 show_combined_result 호출"""
+        try:
+            self.parent.show_combined_result(row)
+        except Exception as e:
+            print(f"[ERROR] 상세 내용 확인 오류: {e}")
+            import traceback
+            traceback.print_exc()
+            QMessageBox.warning(self, "오류", f"상세 내용을 표시할 수 없습니다.\n{str(e)}")
+
+    def update_score_displays(self, saved_data):
+        """점수 표시 업데이트"""
+        total_pass = saved_data.get('total_pass_cnt', 0)
+        total_error = saved_data.get('total_error_cnt', 0)
+        total_fields = total_pass + total_error
+        score = (total_pass / total_fields * 100) if total_fields > 0 else 0
+
+        # spec_score_group 재생성
+        if hasattr(self, 'spec_score_group'):
+            # 기존 위젯 제거
+            parent_widget = self.spec_score_group.parent()
+            if parent_widget:
+                layout = parent_widget.layout()
+                if layout:
+                    idx = layout.indexOf(self.spec_score_group)
+                    if idx >= 0:
+                        layout.removeWidget(self.spec_score_group)
+                        self.spec_score_group.deleteLater()
+
+        # 새로운 점수 위젯 생성
+        self.spec_score_group = self._create_spec_score_display_with_data(
+            total_pass, total_error, score
+        )
+
+        # 오른쪽 컬럼의 레이아웃 찾기
+        right_col = self.findChildren(QWidget)
+        for widget in right_col:
+            if widget.width() == 1064 and widget.height() == 906:
+                right_layout = widget.layout()
+                if right_layout:
+                    # 테이블 다음, 전체 점수 앞에 삽입 (인덱스 조정)
+                    right_layout.insertWidget(6, self.spec_score_group)
+                break
+
+    def _create_simple_info_display(self):
+        """심플한 시험 정보 표시 (단일 텍스트, 테두리 유지)"""
+        info_widget = QWidget()
+        info_widget.setFixedSize(1064, 150)
+        info_widget.setStyleSheet("""
+            QWidget {
+                background-color: #FFFFFF;
+                border: 1px solid #CECECE;   /* ✅ 테두리 유지 */
+                border-radius: 6px;
+            }
+        """)
+
+        layout = QVBoxLayout()
+        layout.setContentsMargins(10, 10, 10, 10)
+        layout.setSpacing(5)
+
+        # ✅ 시험 정보 불러오기
+        test_info = self.parent.load_test_info_from_constants()
+
+        # ✅ 시험 정보를 한 개의 문자열로 합치기
+        info_text = "\n".join([f"{label}: {value}" for label, value in test_info])
+
+        # ✅ 한 개의 라벨로 출력
+        info_label = QLabel(info_text)
+        info_label.setWordWrap(True)  # 줄바꿈 자동 처리
+        info_label.setFont(QFont("Noto Sans KR", 10))
+        info_label.setStyleSheet("""
+            color: #222;
+            font-weight: 400;
+            line-height: 1.8;
+            border: none;
+        """)
+
+        layout.addWidget(info_label)
+        layout.addStretch()
+        info_widget.setLayout(layout)
+        return info_widget
+
+    def create_result_table(self, parent_layout):
+        """결과 테이블 생성 (크기 키움: 350px)"""
+        api_count = self.parent.tableWidget.rowCount()
+        self.tableWidget = QTableWidget(api_count, 8)
+        self.tableWidget.setFixedHeight(274)
+        self.tableWidget.setFixedWidth(1064)
+        self.tableWidget.setHorizontalHeaderLabels([
+            "API 명", "결과", "검증 횟수", "통과 필드 수",
+            "전체 필드 수", "실패 필드 수", "평가 점수", "상세 내용"
+        ])
+        self.tableWidget.verticalHeader().setVisible(False)
+        self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tableWidget.setSelectionMode(QAbstractItemView.NoSelection)
+        self.tableWidget.setIconSize(QtCore.QSize(16, 16))
+        self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Fixed)
+
+        # 테이블 스타일
+        main_path = resource_path("assets/image/test_runner/main_table.png").replace("\\", "/")
+        self.tableWidget.setStyleSheet(f"""
+            QTableWidget {{
+                background: #FFF;
+                background-image: url('{main_path}');
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: cover;
+                border-radius: 8px;
+                border: 1px solid #CECECE;
+                font-size: 15px;
+                color: #222;
+            }}
+            QTableWidget::item {{
+                border-bottom: 1px solid #E0E0E0;
+                border-right: 0px solid transparent;
+                color: #1B1B1C;
+                font-family: 'Noto Sans KR';
+                font-size: 14px;
+                font-style: normal;
+                font-weight: 400;
+                letter-spacing: 0.098px;
+            }}
+            QHeaderView::section {{
+                background-color: #EDF0F3;
+                border-right: 0px solid transparent;
+                border-left: 0px solid transparent;
+                border-top: 0px solid transparent;
+                border-bottom: 1px solid #CECECE;
+                color: #1B1B1C;
+                text-align: center;
+                font-family: 'Noto Sans KR';
+                font-size: 13px;
+                font-style: normal;
+                font-weight: 600;
+                line-height: normal;
+                letter-spacing: -0.156px;
+            }}
+        """)
+
+        self.tableWidget.setShowGrid(False)
+
+        # 컬럼 너비 설정
+        self.tableWidget.setColumnWidth(0, 546)
+        self.tableWidget.setColumnWidth(1, 56)
+        self.tableWidget.setColumnWidth(2, 62)
+        self.tableWidget.setColumnWidth(3, 78)
+        self.tableWidget.setColumnWidth(4, 78)
+        self.tableWidget.setColumnWidth(5, 78)
+        self.tableWidget.setColumnWidth(6, 62)
+        self.tableWidget.setColumnWidth(7, 88)
+
+        # 행 높이 설정
+        for i in range(api_count):
+            self.tableWidget.setRowHeight(i, 28)  # 28 → 32
+
+        # parent 테이블 데이터 복사
+        self._copy_table_data()
+
+        # 상세 내용 버튼 클릭 이벤트
+        self.tableWidget.cellClicked.connect(self.table_cell_clicked)
+
+        parent_layout.addWidget(self.tableWidget)
 
     def _on_back_clicked(self):
         """뒤로가기 버튼 클릭 시 시그널 발생"""
@@ -435,14 +1346,13 @@ class ResultPageWidget(QWidget):
             if api_item:
                 self.tableWidget.setItem(row, 0, QTableWidgetItem(api_item.text()))
 
-            # 결과 아이콘 (위젯 복사)
+            # 결과 아이콘
             icon_widget = self.parent.tableWidget.cellWidget(row, 1)
             if icon_widget:
                 new_icon_widget = QWidget()
                 new_icon_layout = QHBoxLayout()
                 new_icon_layout.setContentsMargins(0, 0, 0, 0)
 
-                # 원본 아이콘 찾기
                 old_label = icon_widget.findChild(QLabel)
                 if old_label:
                     new_icon_label = QLabel()
@@ -456,7 +1366,7 @@ class ResultPageWidget(QWidget):
 
                     self.tableWidget.setCellWidget(row, 1, new_icon_widget)
 
-            # 나머지 컬럼들 (검증 횟수, 통과 필드 수, 전체 필드 수, 실패 필드 수, 평가 점수)
+            # 나머지 컬럼들
             for col in range(2, 7):
                 item = self.parent.tableWidget.item(row, col)
                 if item:
@@ -465,65 +1375,136 @@ class ResultPageWidget(QWidget):
                     self.tableWidget.setItem(row, col, new_item)
 
             # 상세 내용 버튼
-            detail_btn = QPushButton('확인')
-            detail_btn.setStyleSheet("""
-                QPushButton {
-                    background-color: #FFB6C1;
-                    border: 1px solid #FF69B4;
-                    border-radius: 3px;
-                    padding: 5px;
-                    font-weight: bold;
-                    color: #8B0000;
-                }
-                QPushButton:hover {
-                    background-color: #FFC0CB;
-                }
-            """)
-            # 추가했는데 r인지 row인지 확인해야함
-            detail_btn.clicked.connect(lambda checked, r=row: self.parent.show_combined_result(r))
-            self.tableWidget.setCellWidget(row, 7, detail_btn)
+            detail_label = QLabel()
+            try:
+                img_path = resource_path("assets/image/test_runner/btn_상세내용확인.png").replace("\\", "/")
+                pixmap = QPixmap(img_path)
+                detail_label.setPixmap(pixmap)
+                detail_label.setScaledContents(False)
+                detail_label.setFixedSize(pixmap.size())
+            except:
+                detail_label.setText("확인")
+                detail_label.setStyleSheet("color: #4A90E2; font-weight: bold;")
+
+            detail_label.setCursor(Qt.PointingHandCursor)
+            detail_label.setAlignment(Qt.AlignCenter)
+            detail_label.mousePressEvent = lambda event, r=row: self._show_detail(r)
+
+            container = QWidget()
+            layout = QHBoxLayout()
+            layout.addWidget(detail_label)
+            layout.setAlignment(Qt.AlignCenter)
+            layout.setContentsMargins(0, 0, 0, 0)
+            container.setLayout(layout)
+
+            self.tableWidget.setCellWidget(row, 7, container)
 
     def _create_spec_score_display(self):
-        """시험 분야별 점수 표시 그룹"""
-        spec_group = QGroupBox('시험 분야별 점수')
-        spec_group.setMaximumWidth(1050)
-        spec_group.setMinimumWidth(950)
-
-        # spec 정보 가져오기
+        """시험 분야별 점수 표시"""
         spec_description = self.parent.spec_description
         api_count = len(self.parent.videoMessages)
-
         total_pass = self.parent.total_pass_cnt
         total_error = self.parent.total_error_cnt
         total_fields = total_pass + total_error
         score = (total_pass / total_fields * 100) if total_fields > 0 else 0
 
-        # 분야명 레이블 (강조)
-        spec_name_label = QLabel(f"📋 {spec_description} ({api_count}개 API)")
-        spec_name_font = spec_name_label.font()
-        spec_name_font.setPointSize(16)
-        spec_name_font.setBold(True)
-        spec_name_label.setFont(spec_name_font)
+        return self._create_spec_score_display_with_data(total_pass, total_error, score)
+
+    def _create_spec_score_display_with_data(self, total_pass, total_error, score):
+        """데이터를 받아서 점수 표시 위젯 생성"""
+        spec_group = QGroupBox()
+        spec_group.setFixedWidth(1064)
+        spec_group.setFixedHeight(106)
+        spec_group.setStyleSheet("""
+            QGroupBox {
+                background-color: #FFF;
+                border: 1px solid #E0E0E0;
+                border-radius: 4px;
+            }
+        """)
+
+        # 분야별 점수 아이콘
+        icon_label = QLabel()
+        icon_pixmap = QPixmap(resource_path("assets/image/test_runner/icn_분야별점수.png"))
+        icon_label.setPixmap(icon_pixmap.scaled(40, 40, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        icon_label.setFixedSize(40, 40)
+        icon_label.setAlignment(Qt.AlignCenter)
+
+        # spec 정보 가져오기
+        spec_description = self.parent.spec_description
+        api_count = len(self.parent.videoMessages)
+        total_fields = total_pass + total_error
+
+        # 분야명 레이블
+        spec_name_label = QLabel(f"분야별 점수      |      {spec_description} ({api_count}개 API)")
+        spec_name_label.setStyleSheet("""
+            color: #000;
+            font-family: "Noto Sans KR";
+            font-size: 15px;
+            font-style: normal;
+            font-weight: 600;
+            line-height: normal;
+            letter-spacing: -0.18px;
+        """)
+
+        # 구분선
+        separator = QFrame()
+        separator.setFrameShape(QFrame.HLine)
+        separator.setFrameShadow(QFrame.Plain)
+        separator.setStyleSheet("QFrame { color: #CECECE; background-color: #CECECE; }")
+        separator.setFixedHeight(1)
 
         # 점수 레이블들
-        pass_label = QLabel(f"통과 필드 수: {total_pass}")
-        total_label = QLabel(f"전체 필드 수: {total_fields}")
-        score_label = QLabel(f"종합 평가 점수: {score:.1f}%")
+        pass_label = QLabel(
+            f"통과 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-style: Medium; color: #000000; margin-left: 20px;'>"
+            f"{total_pass}</span>"
+        )
+        total_label = QLabel(
+            f"전체 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-style: Medium; color: #000000; margin-left: 20px;'>"
+            f"{total_fields}</span>"
+        )
+        score_label = QLabel(
+            f"종합 평가 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-style: Medium; color: #000000; margin-left: 20px;'>"
+            f"{score:.1f}%</span>"
+        )
 
-        # 폰트 크기 조정
-        font = pass_label.font()
-        font.setPointSize(14)
-        pass_label.setFont(font)
-        total_label.setFont(font)
-        score_label.setFont(font)
+        for lbl in [pass_label, total_label, score_label]:
+            lbl.setStyleSheet("""
+                color: #000;
+                font-family: "Noto Sans KR";
+                font-size: 15px;
+                font-style: normal;
+                font-weight: 600;
+                line-height: normal;
+                letter-spacing: -0.18px;
+            """)
 
         # 레이아웃 구성
         main_layout = QVBoxLayout()
-        main_layout.addWidget(spec_name_label)
-        main_layout.addSpacing(10)
+        main_layout.setContentsMargins(32, 15, 32, 15)
+
+        icon_vlayout = QVBoxLayout()
+        icon_vlayout.setContentsMargins(0, 0, 0, 0)
+        icon_vlayout.setSpacing(0)
+        icon_vlayout.addSpacing(0)
+        icon_vlayout.addWidget(icon_label, alignment=Qt.AlignHCenter | Qt.AlignTop)
+        icon_vlayout.addStretch()
+
+        header_layout = QHBoxLayout()
+        header_layout.addLayout(icon_vlayout)
+        header_layout.addWidget(spec_name_label)
+        header_layout.addStretch()
+
+        main_layout.addLayout(header_layout)
+        main_layout.addSpacing(5)
+        main_layout.addWidget(separator)
+        main_layout.addSpacing(5)
 
         score_layout = QHBoxLayout()
-        score_layout.setSpacing(70)
+        score_layout.setSpacing(260)
         score_layout.addWidget(pass_label)
         score_layout.addWidget(total_label)
         score_layout.addWidget(score_label)
@@ -534,75 +1515,112 @@ class ResultPageWidget(QWidget):
         return spec_group
 
     def _create_total_score_display(self):
-        """전체 점수 표시 그룹 (향후 여러 spec 평균 계산용)"""
-        total_group = QGroupBox('전체 점수')
-        total_group.setMaximumWidth(1050)
-        total_group.setMinimumWidth(950)
+        """전체 점수 표시"""
+        total_group = QGroupBox()
+        total_group.setFixedWidth(1064)
+        total_group.setFixedHeight(106)
+        total_group.setStyleSheet("""
+            QGroupBox {
+                background-color: #F0F6FB;
+                border: 1px solid #E0E0E0;
+                border-radius: 4px;
+            }
+        """)
 
-        # 현재는 1개 spec만 실행하므로 동일한 값
-        total_pass = self.parent.total_pass_cnt
-        total_error = self.parent.total_error_cnt
+        # 전체 점수 아이콘
+        icon_label = QLabel()
+        icon_pixmap = QPixmap(resource_path("assets/image/test_runner/icn_전체점수.png"))
+        icon_label.setPixmap(icon_pixmap.scaled(40, 40, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        icon_label.setFixedSize(40, 40)
+
+        # 전체 누적 점수 사용
+        total_pass = self.parent.global_pass_cnt
+        total_error = self.parent.global_error_cnt
         total_fields = total_pass + total_error
         score = (total_pass / total_fields * 100) if total_fields > 0 else 0
 
-        pass_label = QLabel(f"통과 필드 수: {total_pass}")
-        total_label = QLabel(f"전체 필드 수: {total_fields}")
-        score_label = QLabel(f"종합 평가 점수: {score:.1f}%")
+        # 전체 점수 레이블
+        total_name_label = QLabel("전체 점수 (모든 시험 분야 합산)")
+        total_name_label.setStyleSheet("""
+            color: #000;
+            font-family: "Noto Sans KR";
+            font-size: 15px;
+            font-style: normal;
+            font-weight: 600;
+            line-height: normal;
+            letter-spacing: -0.18px;
+        """)
 
-        # 폰트 크기 조정
-        font = pass_label.font()
-        font.setPointSize(16)
-        font.setBold(True)
-        pass_label.setFont(font)
-        total_label.setFont(font)
-        score_label.setFont(font)
+        # 구분선
+        separator = QFrame()
+        separator.setFrameShape(QFrame.HLine)
+        separator.setFrameShadow(QFrame.Plain)
+        separator.setStyleSheet("QFrame { color: #CECECE; background-color: #CECECE; }")
+        separator.setFixedHeight(1)
+
+        pass_label = QLabel(
+            f"통과 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-style: Medium; color: #000000; margin-left: 20px;'>"
+            f"{total_pass}</span>"
+        )
+        total_label = QLabel(
+            f"전체 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-style: Medium; color: #000000; margin-left: 20px;'>"
+            f"{total_fields}</span>"
+        )
+        score_label = QLabel(
+            f"종합 평가 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-style: Medium; color: #000000; margin-left: 20px;'>"
+            f"{score:.1f}%</span>"
+        )
+
+        for lbl in [pass_label, total_label, score_label]:
+            lbl.setStyleSheet("""
+                color: #000;
+                font-family: "Noto Sans KR";
+                font-size: 15px;
+                font-style: normal;
+                font-weight: 600;
+                line-height: normal;
+                letter-spacing: -0.18px;
+            """)
+
+        main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(32, 15, 32, 15)
+
+        icon_vlayout = QVBoxLayout()
+        icon_vlayout.setContentsMargins(0, 0, 0, 0)
+        icon_vlayout.setSpacing(0)
+        icon_vlayout.addSpacing(0)
+        icon_vlayout.addWidget(icon_label, alignment=Qt.AlignHCenter | Qt.AlignTop)
+        icon_vlayout.addStretch()
+
+        header_layout = QHBoxLayout()
+        header_layout.setSpacing(8)
+        header_layout.addLayout(icon_vlayout)
+        header_layout.addWidget(total_name_label)
+        header_layout.addStretch()
+        main_layout.addLayout(header_layout)
+
+        main_layout.addSpacing(5)
+        main_layout.addWidget(separator)
+        main_layout.addSpacing(5)
 
         layout = QHBoxLayout()
-        layout.setSpacing(70)
+        layout.setSpacing(260)
         layout.addWidget(pass_label)
         layout.addWidget(total_label)
         layout.addWidget(score_label)
         layout.addStretch()
 
-        total_group.setLayout(layout)
+        main_layout.addLayout(layout)
+        total_group.setLayout(main_layout)
         return total_group
-
-    def _create_score_display(self):
-        """평가 점수 표시 그룹 (구 버전 - 호환성 유지)"""
-        score_group = QGroupBox('평가 점수')
-        score_group.setMaximumWidth(1050)
-        score_group.setMinimumWidth(950)
-
-        total_pass = self.parent.total_pass_cnt
-        total_error = self.parent.total_error_cnt
-        total_fields = total_pass + total_error
-        score = (total_pass / total_fields * 100) if total_fields > 0 else 0
-
-        pass_label = QLabel(f"통과 필드 수: {total_pass}")
-        total_label = QLabel(f"전체 필드 수: {total_fields}")
-        score_label = QLabel(f"종합 평가 점수: {score:.1f}%")
-
-        # 폰트 크기 조정
-        font = pass_label.font()
-        font.setPointSize(20)
-        pass_label.setFont(font)
-        total_label.setFont(font)
-        score_label.setFont(font)
-
-        layout = QHBoxLayout()
-        layout.setSpacing(90)
-        layout.addWidget(pass_label)
-        layout.addWidget(total_label)
-        layout.addWidget(score_label)
-        layout.addStretch()
-
-        score_group.setLayout(layout)
-        return score_group
 
     def table_cell_clicked(self, row, col):
         """상세 내용 버튼 클릭 시"""
-        if col == 7:  # 상세 내용 컬럼
-            self.parent.show_combined_result(row)
+        if col == 7:
+            self._show_detail(row)
 
 
 class MyApp(QWidget):
@@ -758,7 +1776,19 @@ class MyApp(QWidget):
         # PyInstaller 환경에서는 절대 경로로 직접 로드
         import sys
         import os
+        self.run_status = "진행전"
 
+        # ✅ 분야별 점수 (현재 spec만)
+        self.current_retry = 0
+        self.total_error_cnt = 0
+        self.total_pass_cnt = 0
+
+        # ✅ 전체 점수 (모든 spec 합산) - 추가
+        self.global_pass_cnt = 0
+        self.global_error_cnt = 0
+
+        # ✅ 각 spec_id별 테이블 데이터 저장 (시나리오 전환 시 결과 유지) - 추가
+        self.spec_table_data = {}  # {spec_id: {table_data, step_buffers, scores}}
         if getattr(sys, 'frozen', False):
             # PyInstaller 환경 - 외부 CONSTANTS.py를 직접 로드
             exe_dir = os.path.dirname(sys.executable)
@@ -852,6 +1882,109 @@ class MyApp(QWidget):
         self.webhook_msg = "."
         self.webhook_cnt = 99
         self.reference_context = {}  # 맥락검증 참조 컨텍스트
+
+    def save_current_spec_data(self):
+        """현재 spec의 테이블 데이터와 상태를 저장"""
+        if not hasattr(self, 'current_spec_id'):
+            return
+
+        # 테이블 데이터 저장
+        table_data = []
+        for row in range(self.tableWidget.rowCount()):
+            row_data = {
+                'api_name': self.tableWidget.item(row, 0).text() if self.tableWidget.item(row, 0) else "",
+                'icon_state': self._get_icon_state(row),
+                'retry_count': self.tableWidget.item(row, 2).text() if self.tableWidget.item(row, 2) else "0",
+                'pass_count': self.tableWidget.item(row, 3).text() if self.tableWidget.item(row, 3) else "0",
+                'total_count': self.tableWidget.item(row, 4).text() if self.tableWidget.item(row, 4) else "0",
+                'fail_count': self.tableWidget.item(row, 5).text() if self.tableWidget.item(row, 5) else "0",
+                'score': self.tableWidget.item(row, 6).text() if self.tableWidget.item(row, 6) else "0%",
+            }
+            table_data.append(row_data)
+
+        # 전체 데이터 저장
+        self.spec_table_data[self.current_spec_id] = {
+            'table_data': table_data,
+            'step_buffers': [buf.copy() for buf in self.step_buffers],
+            'total_pass_cnt': self.total_pass_cnt,
+            'total_error_cnt': self.total_error_cnt,
+        }
+        print(f"[DEBUG] {self.current_spec_id} 데이터 저장 완료")
+
+    def _get_icon_state(self, row):
+        """테이블 행의 아이콘 상태 반환 (PASS/FAIL/NONE)"""
+        icon_widget = self.tableWidget.cellWidget(row, 1)
+        if icon_widget:
+            icon_label = icon_widget.findChild(QLabel)
+            if icon_label:
+                tooltip = icon_label.toolTip()
+                if "PASS" in tooltip:
+                    return "PASS"
+                elif "FAIL" in tooltip:
+                    return "FAIL"
+        return "NONE"
+
+    def restore_spec_data(self, spec_id):
+        """저장된 spec 데이터 복원 (안전성 강화)"""
+        if spec_id not in self.spec_table_data:
+            print(f"[RESTORE] {spec_id} 저장된 데이터 없음")
+            return False
+
+        saved_data = self.spec_table_data[spec_id]
+        print(f"[RESTORE] {spec_id} 데이터 복원 시작")
+
+        # 테이블 복원
+        table_data = saved_data['table_data']
+        for row, row_data in enumerate(table_data):
+            if row >= self.tableWidget.rowCount():
+                print(f"[RESTORE] 경고: row={row}가 범위 초과, 건너뜀")
+                break
+
+            # API 이름
+            api_item = self.tableWidget.item(row, 0)
+            if api_item:
+                api_item.setText(row_data['api_name'])
+
+            # 아이콘 상태 복원
+            icon_state = row_data['icon_state']
+            if icon_state == "PASS":
+                img = self.img_pass
+            elif icon_state == "FAIL":
+                img = self.img_fail
+            else:
+                img = self.img_none
+
+            icon_widget = QWidget()
+            icon_layout = QHBoxLayout()
+            icon_layout.setContentsMargins(0, 0, 0, 0)
+            icon_label = QLabel()
+            icon_label.setPixmap(QIcon(img).pixmap(16, 16))
+            icon_label.setAlignment(Qt.AlignCenter)
+            icon_layout.addWidget(icon_label)
+            icon_layout.setAlignment(Qt.AlignCenter)
+            icon_widget.setLayout(icon_layout)
+            self.tableWidget.setCellWidget(row, 1, icon_widget)
+
+            # 나머지 컬럼 복원 (안전하게)
+            for col, key in [(2, 'retry_count'), (3, 'pass_count'),
+                             (4, 'total_count'), (5, 'fail_count'), (6, 'score')]:
+                item = self.tableWidget.item(row, col)
+                if item:
+                    item.setText(row_data[key])
+                else:
+                    new_item = QTableWidgetItem(row_data[key])
+                    new_item.setTextAlignment(Qt.AlignCenter)
+                    self.tableWidget.setItem(row, col, new_item)
+
+        # step_buffers 복원
+        self.step_buffers = [buf.copy() for buf in saved_data['step_buffers']]
+
+        # 점수 복원
+        self.total_pass_cnt = saved_data['total_pass_cnt']
+        self.total_error_cnt = saved_data['total_error_cnt']
+
+        print(f"[RESTORE] {spec_id} 데이터 복원 완료")
+        return True
 
     def _redact(self, payload):  # ### NEW
         """응답/요청에서 토큰, 패스워드 등 민감값 마스킹(선택)"""
@@ -973,11 +2106,17 @@ class MyApp(QWidget):
         return str(val_text)
 
     def update_table_row_with_retries(self, row, result, pass_count, error_count, data, error_text, retries):
-        """테이블 행 업데이트 (실제 검증 횟수 포함, 플랫폼과 동일하게 아이콘 처리)"""
+        """테이블 행 업데이트 (안전성 강화)"""
+        # ✅ 1. 범위 체크
         if row >= self.tableWidget.rowCount():
+            print(f"[TABLE UPDATE] 경고: row={row}가 테이블 범위를 벗어남 (총 {self.tableWidget.rowCount()}행)")
             return
-        # result가 '진행중'이면 검정색, PASS/FAIL이면 초록/빨강
+
+        print(f"[TABLE UPDATE] row={row}, result={result}, pass={pass_count}, error={error_count}, retries={retries}")
+
+        # ✅ 2. 아이콘 업데이트
         msg, img = self.icon_update_step(data, result, error_text)
+
         icon_widget = QWidget()
         icon_layout = QHBoxLayout()
         icon_layout.setContentsMargins(0, 0, 0, 0)
@@ -988,23 +2127,49 @@ class MyApp(QWidget):
         icon_layout.addWidget(icon_label)
         icon_layout.setAlignment(Qt.AlignCenter)
         icon_widget.setLayout(icon_layout)
+
         self.tableWidget.setCellWidget(row, 1, icon_widget)
-        self.tableWidget.setItem(row, 2, QTableWidgetItem(str(retries)))
-        self.tableWidget.item(row, 2).setTextAlignment(Qt.AlignCenter)
-        self.tableWidget.setItem(row, 3, QTableWidgetItem(str(pass_count)))
-        self.tableWidget.item(row, 3).setTextAlignment(Qt.AlignCenter)
+
+        # ✅ 3. 각 컬럼 업데이트 (아이템이 없으면 생성)
+        updates = [
+            (2, str(retries)),  # 검증 횟수
+            (3, str(pass_count)),  # 통과 필드 수
+            (4, str(pass_count + error_count)),  # 전체 필드 수
+            (5, str(error_count)),  # 실패 필드 수
+        ]
+
+        for col, value in updates:
+            item = self.tableWidget.item(row, col)
+            if item is None:
+                item = QTableWidgetItem(value)
+                item.setTextAlignment(Qt.AlignCenter)
+                self.tableWidget.setItem(row, col, item)
+            else:
+                item.setText(value)
+
+        # ✅ 4. 평가 점수 업데이트
         total_fields = pass_count + error_count
-        self.tableWidget.setItem(row, 4, QTableWidgetItem(str(total_fields)))
-        self.tableWidget.item(row, 4).setTextAlignment(Qt.AlignCenter)
-        self.tableWidget.setItem(row, 5, QTableWidgetItem(str(error_count)))
-        self.tableWidget.item(row, 5).setTextAlignment(Qt.AlignCenter)
         if total_fields > 0:
             score = (pass_count / total_fields) * 100
-            self.tableWidget.setItem(row, 6, QTableWidgetItem(f"{score:.1f}%"))
+            score_text = f"{score:.1f}%"
         else:
-            self.tableWidget.setItem(row, 6, QTableWidgetItem("0%"))
-        self.tableWidget.item(row, 6).setTextAlignment(Qt.AlignCenter)
+            score_text = "0%"
+
+        score_item = self.tableWidget.item(row, 6)
+        if score_item is None:
+            score_item = QTableWidgetItem(score_text)
+            score_item.setTextAlignment(Qt.AlignCenter)
+            self.tableWidget.setItem(row, 6, score_item)
+        else:
+            score_item.setText(score_text)
+
+        # ✅ 5. 메시지 저장
         setattr(self, f"step{row + 1}_msg", msg)
+
+        # ✅ 6. UI 즉시 업데이트
+        QApplication.processEvents()
+
+        print(f"[TABLE UPDATE] 완료: row={row}")
 
     def load_test_info_from_constants(self):
         return [
@@ -1015,11 +2180,11 @@ class MyApp(QWidget):
             ("시험대상", CONSTANTS.test_target),
             ("시험범위", CONSTANTS.test_range),
             ("사용자 인증 방식", CONSTANTS.auth_type),
-            ("관리자 코드", CONSTANTS.admin_code),
             ("시험 접속 정보", CONSTANTS.url)
         ]
 
     def create_spec_selection_panel(self, parent_layout):
+
         """시험 분야 선택 패널 생성"""
 
         parent_layout.setSpacing(0)  # 라벨-테이블 간격 최소화
@@ -1034,50 +2199,163 @@ class MyApp(QWidget):
         field_group.setStyleSheet("QGroupBox { border: none; background: transparent; margin: 0; padding: 0; }")  # ← 회색 박스 제거
         parent_layout.addWidget(field_group)
 
-        # 선택된 시험 분야 행
-        self.selected_test_field_row = None
 
-    def create_test_field_group(self):
+    def create_group_selection_table(self):
+        """시험 분야명 테이블 - 투명 배경 효과"""
+        group_box = QWidget()
+        group_box.setFixedSize(459, 220)
+        group_box.setStyleSheet("background: transparent;")  # ✅ 투명 배경
+
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+
+        self.group_table = QTableWidget(0, 1)
+        self.group_table.setHorizontalHeaderLabels(["시험 분야"])
+        self.group_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.group_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.group_table.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.group_table.verticalHeader().setVisible(False)
+        self.group_table.setFixedHeight(219)
+
+        # ✅ 플랫폼과 동일한 스타일 적용
+        self.group_table.setStyleSheet("""
+            QTableWidget {
+                background-color: #FFFFFF;
+                border: 1px solid #CECECE;
+                border-radius: 4px;
+                outline: none;
+                font-family: "Noto Sans KR";
+                font-size: 14px;
+                color: #1B1B1C;
+            }
+            QTableWidget::item {
+                border-bottom: 1px solid #E0E0E0;
+                color: #1B1B1C;
+                font-family: 'Noto Sans KR';
+                font-size: 14px;
+                font-weight: 400;
+                padding: 8px;
+                text-align: center;
+            }
+            QTableWidget::item:selected {
+                background-color: #E3F2FF;
+                border: none;
+            }
+            QTableWidget::item:hover {
+                background-color: #F2F8FF;
+            }
+            QHeaderView::section {
+                background-color: #EDF0F3;
+                border: none;
+                border-bottom: 1px solid #CECECE;
+                color: #1B1B1C;
+                text-align: center;
+                font-family: 'Noto Sans KR';
+                font-size: 13px;
+                font-weight: 600;
+                letter-spacing: -0.156px;
+            }
+        """)
+
+        # SPEC_CONFIG 기반 그룹 로드
+        group_items = [
+            (g.get("group_name", "미지정 그룹"), g.get("group_id", ""))
+            for g in CONSTANTS.SPEC_CONFIG
+        ]
+        self.group_table.setRowCount(len(group_items))
+
+        self.group_name_to_index = {}
+        self.index_to_group_name = {}
+
+        for idx, (name, gid) in enumerate(group_items):
+            display_name = name
+            item = QTableWidgetItem(display_name)
+            item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+            self.group_table.setItem(idx, 0, item)
+            self.group_name_to_index[name] = idx
+            self.index_to_group_name[idx] = name
+
+        self.group_table.cellClicked.connect(self.on_group_selected)
+
+        layout.addWidget(self.group_table)
+        group_box.setLayout(layout)
+        return group_box
+
+    def on_group_selected(self, row, col):
+        group_name = self.index_to_group_name.get(row)
+        if not group_name:
+            return
+
+        selected_group = next(
+            (g for g in CONSTANTS.SPEC_CONFIG if g.get("group_name") == group_name), None
+        )
+
+        if selected_group:
+            self.update_test_field_table(selected_group)
+
+    def update_test_field_table(self, group_data):
+        """선택된 그룹의 spec_id 목록으로 테이블 갱신"""
+        self.test_field_table.clearContents()
+
+        spec_items = [
+            (k, v) for k, v in group_data.items()
+            if k not in ['group_name', 'group_id'] and isinstance(v, dict)
+        ]
+        self.test_field_table.setRowCount(len(spec_items))
+
+        self.spec_id_to_index.clear()
+        self.index_to_spec_id.clear()
+
+        for idx, (spec_id, config) in enumerate(spec_items):
+            desc = config.get('test_name', f'시험분야 {idx + 1}')
+            desc_with_role = f"{desc} (응답 검증)"
+            item = QTableWidgetItem(desc_with_role)
+            item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+            self.test_field_table.setItem(idx, 0, item)
+            self.spec_id_to_index[spec_id] = idx
+            self.index_to_spec_id[idx] = spec_id
+    def on_group_selected(self, row, col):
         """
-        ✅ System은 Response 검증만 - Response 스키마 ID만 표시 (3개)
+        ✅ 시험 그룹 선택 시 해당 그룹의 시험 분야 목록을 자동 갱신
         """
+
         group_box = QWidget()  # ← QGroupBox에서 QWidget로 변경
         group_box.setFixedSize(459, 760)  # 플랫폼과 동일한 크기
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)  # ← 여백 제거
         layout.setSpacing(0)  # ← 간격 제거
 
+
         self.test_field_table = QTableWidget(0, 1)
-        self.test_field_table.setHorizontalHeaderLabels(["시험 분야명"])
+        self.test_field_table.setHorizontalHeaderLabels(["시험 시나리오"])
         self.test_field_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.test_field_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.test_field_table.cellClicked.connect(self.on_test_field_selected)
         self.test_field_table.verticalHeader().setVisible(False)
         self.test_field_table.setFixedHeight(759)
 
-        # 🔥 SPEC_CONFIG에서 spec_id와 config 추출 (리스트 구조 대응)
+
+        # SPEC_CONFIG에서 spec_id와 config 추출
         spec_items = []
-        for group_data in CONSTANTS.SPEC_CONFIG:  # ← 변수명 변경
+        for group_data in CONSTANTS.SPEC_CONFIG:
             for key, value in group_data.items():
                 if key not in ['group_name', 'group_id'] and isinstance(value, dict):
-                    spec_items.append((key, value))  # ← 이미 (key, value) 튜플
+                    spec_items.append((key, value))
 
-        if spec_items:  # ← 바로 사용
+        if spec_items:
             self.test_field_table.setRowCount(len(spec_items))
 
-            # spec_id와 인덱스 매핑 저장
             self.spec_id_to_index = {}
             self.index_to_spec_id = {}
 
             for idx, (spec_id, config) in enumerate(spec_items):
                 description = config.get('test_name', f'시험 분야 {idx + 1}')
-                # ✅ 시스템은 응답 검증 역할 명시
                 description_with_role = f"{description} (응답 검증)"
                 item = QTableWidgetItem(description_with_role)
-                item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+                item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
                 self.test_field_table.setItem(idx, 0, item)
 
-                # 매핑 저장
                 self.spec_id_to_index[spec_id] = idx
                 self.index_to_spec_id[idx] = spec_id
 
@@ -1088,66 +2366,194 @@ class MyApp(QWidget):
                 self.selected_test_field_row = current_index
 
         layout.addWidget(self.test_field_table)
-        group_box.setLayout(layout)  # ← group_box 사용
-        return group_box  # ← group_box 반환
+        group_box.setLayout(layout)
+        return group_box
+
+    def update_test_field_table(self, group_data):
+        """
+        ✅ 선택된 시험 그룹의 시험 분야 테이블을 갱신
+        """
+        # 기존 테이블 초기화
+        self.test_field_table.clearContents()
+
+        # 시험 분야만 추출
+        spec_items = [
+            (key, value)
+            for key, value in group_data.items()
+            if key not in ["group_name", "group_id"] and isinstance(value, dict)
+        ]
+
+        # 행 개수 재설정
+        self.test_field_table.setRowCount(len(spec_items))
+
+        # 인덱스 매핑 초기화
+        self.spec_id_to_index = {}
+        self.index_to_spec_id = {}
+
+        # 테이블 갱신
+        for idx, (spec_id, config) in enumerate(spec_items):
+            description = config.get("test_name", f"시험 분야 {idx + 1}")
+            description_with_role = f"{description} (요청 검증)"
+            item = QTableWidgetItem(description_with_role)
+            item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+            self.test_field_table.setItem(idx, 0, item)
+
+            # 매핑 저장
+            self.spec_id_to_index[spec_id] = idx
+            self.index_to_spec_id[idx] = spec_id
+
+        print(f"[INFO] '{group_data.get('group_name')}' 그룹의 시험 분야 {len(spec_items)}개 로드 완료.")
 
     def on_test_field_selected(self, row, col):
-        """
-        ✅ SPEC_CONFIG 기반 - 시험 분야 클릭 시 해당 시스템으로 동적 전환
-        """
+        """시험 분야 클릭 시 해당 시스템으로 동적 전환"""
         try:
             self.selected_test_field_row = row
 
-            # ✅ 클릭한 행에 해당하는 spec_id 가져오기
             if row in self.index_to_spec_id:
                 new_spec_id = self.index_to_spec_id[row]
 
-                # 이미 선택된 시스템이면 무시
                 if new_spec_id == self.current_spec_id:
+                    print(f"[SELECT] 이미 선택된 시나리오: {new_spec_id}")
                     return
 
-                print(f"[SYSTEM] 🔄 시험 분야 전환: {self.current_spec_id} → {new_spec_id}")
+                print(f"[SELECT] 🔄 시험 분야 전환: {self.current_spec_id} → {new_spec_id}")
 
-                # spec_id 업데이트
+                # ✅ 1. 현재 spec의 테이블 데이터 저장
+                self.save_current_spec_data()
+
+                # ✅ 2. spec_id 업데이트
                 self.current_spec_id = new_spec_id
 
-                # spec 데이터 다시 로드
+                # ✅ 3. spec 데이터 다시 로드
                 self.load_specs_from_constants()
 
-                # 테이블 초기화
+                print(f"[SELECT] 로드된 API 개수: {len(self.videoMessages)}")
+                print(f"[SELECT] API 목록: {self.videoMessages}")
+
+                # ✅ 4. 기본 변수 초기화
                 self.cnt = 0
                 self.current_retry = 0
-                self.total_pass_cnt = 0
-                self.total_error_cnt = 0
                 self.message_error = []
 
-                # step_buffers 재생성
-                self.step_buffers = [
-                    {"data": "", "error": "", "result": "PASS"} for _ in range(len(self.videoMessages))
-                ]
+                # ✅ 5. 테이블 완전 재구성 (이전 데이터 완전 삭제)
+                print(f"[SELECT] 테이블 완전 재구성 시작")
+                self.update_result_table_structure(self.videoMessages)
 
-                # trace 초기화
+                # ✅ 6. 저장된 데이터 복원 시도
+                restored = self.restore_spec_data(new_spec_id)
+
+                if not restored:
+                    print(f"[SELECT] 저장된 데이터 없음 - 초기화")
+                    # 점수 초기화
+                    self.total_pass_cnt = 0
+                    self.total_error_cnt = 0
+
+                    # step_buffers 초기화
+                    self.step_buffers = [
+                        {"data": "", "error": "", "result": "PASS"} for _ in range(len(self.videoMessages))
+                    ]
+                else:
+                    print(f"[SELECT] 저장된 데이터 복원 완료")
+
+                # ✅ 7. trace 및 latest_events 초기화
                 self.trace.clear()
+                self.latest_events = {}
 
-                # 시험 결과 테이블 업데이트
-                self.update_result_table_with_apis(self.videoMessages)
-
-                # 설정 다시 로드
+                # ✅ 8. 설정 다시 로드
                 self.get_setting()
 
-                # 평가 점수 디스플레이 초기화
+                # ✅ 9. 평가 점수 디스플레이 업데이트
                 self.update_score_display()
 
-                # 결과 텍스트 초기화
+                # ✅ 10. 결과 텍스트 초기화
                 self.valResult.clear()
                 self.valResult.append(f"✅ 시스템 전환 완료: {self.spec_description}")
-                self.valResult.append(f"📋 API 목록 ({len(self.videoMessages)}개): {self.videoMessages}\n")
+                self.valResult.append(f"📋 Spec ID: {self.current_spec_id}")
+                self.valResult.append(f"📊 API 개수: {len(self.videoMessages)}개")
+                self.valResult.append(f"📋 API 목록: {self.videoMessages}\n")
 
-                print(f"[SYSTEM] ✅ 시스템 전환 완료: {self.spec_description}, API 수: {len(self.videoMessages)}")
+                print(f"[SELECT] ✅ 시스템 전환 완료")
+
         except Exception as e:
-            print(f"시험 분야 선택 처리 실패: {e}")
+            print(f"[SELECT] 시험 분야 선택 처리 실패: {e}")
             import traceback
             traceback.print_exc()
+
+    def update_result_table_structure(self, api_list):
+        """테이블 구조를 완전히 재구성 (API 개수에 맞게)"""
+        api_count = len(api_list)
+        print(f"[TABLE] 테이블 재구성 시작: {api_count}개 API")
+
+        # ✅ 1. 테이블 행 개수 설정
+        self.tableWidget.setRowCount(api_count)
+
+        # ✅ 2. 각 행을 완전히 초기화
+        for row in range(api_count):
+            api_name = api_list[row]
+            display_name = f"{row + 1}. {api_name}"
+
+            # 컬럼 0: API 명 - 강제로 새로 생성!
+            api_item = QTableWidgetItem(display_name)
+            api_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            self.tableWidget.setItem(row, 0, api_item)
+
+            print(f"[TABLE] Row {row}: {display_name} 설정 완료")
+
+            # 컬럼 1: 결과 아이콘
+            icon_widget = QWidget()
+            icon_layout = QHBoxLayout()
+            icon_layout.setContentsMargins(0, 0, 0, 0)
+            icon_label = QLabel()
+            icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
+            icon_label.setAlignment(Qt.AlignCenter)
+            icon_layout.addWidget(icon_label)
+            icon_layout.setAlignment(Qt.AlignCenter)
+            icon_widget.setLayout(icon_layout)
+            self.tableWidget.setCellWidget(row, 1, icon_widget)
+
+            # 컬럼 2-6: 검증 횟수, 통과/전체/실패 필드 수, 평가 점수
+            col_values = [
+                (2, "0"),  # 검증 횟수
+                (3, "0"),  # 통과 필드 수
+                (4, "0"),  # 전체 필드 수
+                (5, "0"),  # 실패 필드 수
+                (6, "0%")  # 평가 점수
+            ]
+
+            for col, value in col_values:
+                item = QTableWidgetItem(value)
+                item.setTextAlignment(Qt.AlignCenter)
+                self.tableWidget.setItem(row, col, item)
+
+            # 컬럼 7: 상세 내용 버튼
+            detail_label = QLabel()
+            try:
+                img_path = resource_path("assets/image/test_runner/btn_상세내용확인.png").replace("\\", "/")
+                pixmap = QPixmap(img_path)
+                detail_label.setPixmap(pixmap)
+                detail_label.setScaledContents(False)
+                detail_label.setFixedSize(pixmap.size())
+            except:
+                detail_label.setText("확인")
+                detail_label.setStyleSheet("color: #4A90E2; font-weight: bold;")
+
+            detail_label.setCursor(Qt.PointingHandCursor)
+            detail_label.setAlignment(Qt.AlignCenter)
+            detail_label.mousePressEvent = lambda event, r=row: self.show_combined_result(r)
+
+            container = QWidget()
+            layout = QHBoxLayout()
+            layout.addWidget(detail_label)
+            layout.setAlignment(Qt.AlignCenter)
+            layout.setContentsMargins(0, 0, 0, 0)
+            container.setLayout(layout)
+
+            self.tableWidget.setCellWidget(row, 7, container)
+
+            # 행 높이 설정
+            self.tableWidget.setRowHeight(row, 28)
+
+        print(f"[TABLE] 테이블 재구성 완료: {self.tableWidget.rowCount()}개 행")
 
     def update_result_table_with_apis(self, api_list):
         """시험 결과 테이블을 새로운 API 목록으로 업데이트"""
@@ -1258,6 +2664,8 @@ class MyApp(QWidget):
 
                     msg = {}
                     self.webhook_flag = True
+                    self.step_buffers[self.cnt]["is_webhook_api"] = True
+
                     self.webhook_cnt = self.cnt
                     self.webhook_thread = WebhookThread(url, port, msg)
                     self.webhook_thread.result_signal.connect(self.handle_webhook_result)
@@ -1327,9 +2735,14 @@ class MyApp(QWidget):
             self.valResult.append("\n⚠️  웹훅 데이터 검증 실패")
         else:
             self.valResult.append("\n✅ 웹훅 데이터 검증 성공")
+
+        # ✅ 이번 회차의 결과만 전체 점수에 추가 (누적된 값이 아님!)
         self.total_error_cnt += key_error_cnt
         self.total_pass_cnt += key_psss_cnt
 
+        # ✅ 전체 누적 점수 업데이트 추가
+        self.global_error_cnt += key_error_cnt
+        self.global_pass_cnt += key_psss_cnt
         # 평가 점수 디스플레이 업데이트
         self.update_score_display()
 
@@ -1444,7 +2857,8 @@ class MyApp(QWidget):
                 path = self.pathUrl + "/" + (self.message[self.cnt] if self.cnt < len(self.message) else "")
                 inMessage = self.inMessage[self.cnt] if self.cnt < len(self.inMessage) else {}
                 # ✅ Data Mapper 적용 - 이전 응답 데이터로 요청 업데이트 (trace 파일 != ui)
-                inMessage = self._apply_request_constraints(inMessage, self.cnt)
+                self.generator.latest_events = self.latest_events
+                #inMessage = self._apply_request_constraints(inMessage, self.cnt)
 
                 json_data = json.dumps(inMessage).encode('utf-8')
 
@@ -1485,6 +2899,9 @@ class MyApp(QWidget):
 
                 self.total_error_cnt += add_err
                 self.total_pass_cnt += 0
+                # ✅ 전체 누적 점수 업데이트 추가
+                self.global_error_cnt += add_err
+                self.global_pass_cnt += 0
 
                 # 평가 점수 디스플레이 업데이트
                 self.update_score_display()
@@ -1535,57 +2952,75 @@ class MyApp(QWidget):
                 if self.cnt >= len(self.message):
                     self.tick_timer.stop()
                     self.valResult.append("검증 절차가 완료되었습니다.")
+
+                    # ✅ 현재 spec 데이터 저장
+                    self.save_current_spec_data()
+
+                    self.processing_response = False
+                    self.post_flag = False
+
                     self.cnt = 0
+                    self.current_retry = 0
+
+                    # 최종 리포트 생성
                     total_fields = self.total_pass_cnt + self.total_error_cnt
                     if total_fields > 0:
-                        score = (self.total_pass_cnt / total_fields) * 100
+                        final_score = (self.total_pass_cnt / total_fields) * 100
                     else:
-                        score = 0
-                    self.final_report += "전체 점수: " + str(score) + "\n"
-                    self.final_report += "전체 결과: " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(
-                        self.total_error_cnt) + "(누적 오류 필드 수)" + "\n"
-                    self.final_report += "\n"
-                    self.final_report += "메시지 검증 세부 결과 \n"
-                    self.final_report += self.valResult.toPlainText()
+                        final_score = 0
+
+                    # ✅ JSON 결과 자동 저장 추가
+                    try:
+                        self.run_status = "완료"
+                        result_json = build_result_json(self)
+                        json_path = os.path.join(result_dir, "response_results.json")
+                        with open(json_path, "w", encoding="utf-8") as f:
+                            json.dump(result_json, f, ensure_ascii=False, indent=2)
+                        print(f"✅ 시험 결과가 '{json_path}'에 자동 저장되었습니다.")
+                        self.valResult.append(f"\n📄 결과 파일 저장 완료: {json_path}")
+                    except Exception as e:
+                        print(f"❌ JSON 저장 중 오류 발생: {e}")
+                        import traceback
+                        traceback.print_exc()
+                        self.valResult.append(f"\n⚠️ 결과 저장 실패: {str(e)}")
 
                     self.sbtn.setEnabled(True)
                     self.stop_btn.setDisabled(True)
-                return
+
 
             # 응답이 도착한 경우 처리
             elif self.post_flag == True:
                 if self.res != None:
                     # 응답 처리 시작
-                    self.processing_response = True
+                    if self.res != None:
+                        # 응답 처리 시작
+                        self.processing_response = True
 
-                    if self.cnt == 0 or self.tmp_msg_append_flag:  # and -> or 수정함- 240710
-                        self.valResult.append(self.message_name)
+                        if self.cnt == 0 or self.tmp_msg_append_flag:
+                            self.valResult.append(self.message_name)
 
-                    res_data = self.res.text
-                    # res_data = json.loads(res_data)
+                        res_data = self.res.text
 
-                    print(f"~+~+~+~+ 원본 응답 텍스트: {repr(res_data)}~+~+~+~+")
+                        try:
+                            res_data = json.loads(res_data)
+                        except Exception as e:
+                            self._append_text(f"응답 JSON 파싱 오류: {e}")
+                            self._append_text({"raw_response": self.res.text})
+                            self.post_flag = False
+                            self.processing_response = False
+                            self.current_retry += 1
+                            return
 
-                    try:
-                        res_data = json.loads(res_data)
-                    except Exception as e:
-                        self._append_text(f"응답 JSON 파싱 오류: {e}")
-                        self._append_text({"raw_response": self.res.text})
-                        # 이후 로직 건너뜀
-                        self.post_flag = False
-                        self.processing_response = False
-                        self.current_retry += 1
-                        return
+                        self._push_event(self.cnt, "RESPONSE", res_data)
 
-                    self._push_event(self.cnt, "RESPONSE", res_data)
+                        # 현재 재시도 정보
+                        current_retries = self.num_retries_list[self.cnt] if self.cnt < len(
+                            self.num_retries_list) else 1
+                        current_protocol = self.trans_protocols[self.cnt] if self.cnt < len(
+                            self.trans_protocols) else "Unknown"
 
-                    # 현재 재시도 정보
-                    current_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
-                    current_protocol = self.trans_protocols[self.cnt] if self.cnt < len(
-                        self.trans_protocols) else "Unknown"
-
-                    # 단일 응답에 대한 검증 처리
-                    tmp_res_auth = json.dumps(res_data, indent=4, ensure_ascii=False)
+                        # 단일 응답에 대한 검증 처리
+                        tmp_res_auth = json.dumps(res_data, indent=4, ensure_ascii=False)
 
                     # ✅ 디버깅: 어떤 스키마로 검증하는지 확인
                     if self.current_retry == 0:  # 첫 시도에만 출력
@@ -1684,17 +3119,13 @@ class MyApp(QWidget):
                             validation_rules=resp_rules,
                             reference_context=self.reference_context
                         )
-
-                    # 일반 검증으로 돌렸을때 - 맥락 검증 실패해서
                     except TypeError as te:
                         print(f"[ERROR] 응답 검증 중 TypeError 발생: {te}, 일반 검증으로 재시도")
-
                         val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(
                             self.outSchema[self.cnt],
                             res_data,
                             self.flag_opt
                         )
-
                     if self.message[self.cnt] == "Authentication":
                         self.handle_authentication_response(res_data)
 
@@ -1726,12 +3157,12 @@ class MyApp(QWidget):
                     # 이번 시도의 결과
                     final_result = val_result
 
-                    # 플랫폼과 동일한 누적 카운트 로직 - (10/20) 하드코딩 흔적 지움
+                    # 누적 카운트 로직
                     if not hasattr(self, 'step_pass_counts'):
                         api_count = len(self.videoMessages)
                         self.step_pass_counts = [0] * api_count
                         self.step_error_counts = [0] * api_count
-                        self.step_pass_flags = [0] * api_count  # PASS 횟수 카운트
+                        self.step_pass_flags = [0] * api_count
 
                     # 이번 시도 결과를 누적
                     self.step_pass_counts[self.cnt] += key_psss_cnt
@@ -1817,18 +3248,11 @@ class MyApp(QWidget):
                     self.valResult.append("\n" + data_text)
                     self.valResult.append(f"\n검증 결과: {final_result}")
 
-                    
-                    # ✅ 응답 코드 실패 시 명확한 메시지
-                    if final_result == "FAIL" and isinstance(res_data, dict):
-                        response_code = str(res_data.get("code", "")).strip()
-                        if response_code not in ["200", "201"]:
-                            self.valResult.append(f"⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.")
-
-                    # ✅ 이번 회차의 결과만 전체 점수에 추가 (누적된 값이 아님!)
+                    # ✅ 이번 회차의 결과만 현재 spec 점수에 추가
                     self.total_error_cnt += key_error_cnt
                     self.total_pass_cnt += key_psss_cnt
 
-                    # 평가 점수 디스플레이 업데이트
+                    # ✅ 평가 점수 디스플레이 업데이트 (분야별만)
                     self.update_score_display()
 
                     total_fields = self.total_pass_cnt + self.total_error_cnt
@@ -1844,20 +3268,32 @@ class MyApp(QWidget):
                     # 재시도 카운터 증가
                     self.current_retry += 1
 
-                    # 현재 API의 모든 재시도가 완료되었는지 확인
+                    # ✅ 현재 API의 모든 재시도가 완료되었는지 확인
                     if (self.cnt < len(self.num_retries_list) and
                             self.current_retry >= self.num_retries_list[self.cnt]):
+                        # ✅ 모든 재시도 완료 - 이제 전체 점수에 반영!
+                        print(f"[SCORE] API {self.cnt} 완료: pass={total_pass_count}, error={total_error_count}")
+
+                        # ✅ 전체 누적 점수 업데이트 (재시도 완료 후 한 번만!)
+                        self.global_error_cnt += total_error_count
+                        self.global_pass_cnt += total_pass_count
+
+                        print(f"[SCORE] 전체 점수 업데이트: pass={self.global_pass_cnt}, error={self.global_error_cnt}")
+
+                        # ✅ 전체 점수 포함하여 디스플레이 업데이트
+                        self.update_score_display()
+
                         self.step_buffers[self.cnt]["events"] = list(self.trace.get(self.cnt, []))
 
                         # 다음 API로 이동
                         self.cnt += 1
-                        self.current_retry = 0  # 재시도 카운터 리셋
+                        self.current_retry = 0
 
                     self.message_in_cnt = 0
                     self.post_flag = False
                     self.processing_response = False
 
-                    # 재시도 여부에 따라 대기 시간 조정 (플랫폼과 동기화)
+                    # 재시도 여부에 따라 대기 시간 조정
                     if (self.cnt < len(self.num_retries_list) and
                             self.current_retry < self.num_retries_list[self.cnt] - 1):
                         self.time_pre = time.time()
@@ -1872,18 +3308,45 @@ class MyApp(QWidget):
                 self.tick_timer.stop()
                 self.valResult.append("검증 절차가 완료되었습니다.")
 
+                # ✅ 현재 spec 데이터 저장
+                self.save_current_spec_data()
+
                 self.processing_response = False
                 self.post_flag = False
 
                 self.cnt = 0
-                self.current_retry = 0  # 재시도 카운터도 리셋
-                self.final_report += "전체 점수: " + str(
-                    (self.total_pass_cnt / (self.total_pass_cnt + self.total_error_cnt) * 100)) + "\n"
-                self.final_report += "전체 결과: " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(
-                    self.total_error_cnt) + "(누적 오류 필드 수)" + "\n"
-                self.final_report += "\n"
-                self.final_report += "메시지 검증 세부 결과 \n"
-                self.final_report += self.valResult.toPlainText()
+                self.current_retry = 0
+
+                # 최종 리포트 생성
+                total_fields = self.total_pass_cnt + self.total_error_cnt
+                if total_fields > 0:
+                    final_score = (self.total_pass_cnt / total_fields) * 100
+                else:
+                    final_score = 0
+
+                # ✅ 전체 점수 최종 확인 로그
+                global_total = self.global_pass_cnt + self.global_error_cnt
+                global_score = (self.global_pass_cnt / global_total * 100) if global_total > 0 else 0
+                print(
+                    f"[FINAL] 분야별 점수: pass={self.total_pass_cnt}, error={self.total_error_cnt}, score={final_score:.1f}%")
+                print(
+                    f"[FINAL] 전체 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}, score={global_score:.1f}%")
+
+                # ✅ JSON 결과 자동 저장 추가
+                try:
+                    self.run_status = "완료"
+                    result_json = build_result_json(self)
+                    json_path = os.path.join(result_dir, "response_results.json")
+                    with open(json_path, "w", encoding="utf-8") as f:
+                        json.dump(result_json, f, ensure_ascii=False, indent=2)
+                    print(f"✅ 시험 결과가 '{json_path}'에 자동 저장되었습니다.")
+                    self.valResult.append(f"\n📄 결과 파일 저장 완료: {json_path}")
+                except Exception as e:
+                    print(f"❌ JSON 저장 중 오류 발생: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    self.valResult.append(f"\n⚠️ 결과 저장 실패: {str(e)}")
+
                 self.sbtn.setEnabled(True)
                 self.stop_btn.setDisabled(True)
 
@@ -1956,11 +3419,13 @@ class MyApp(QWidget):
                 self.step9_msg += msg
 
     def initUI(self):
+
         # 배경 이미지 설정
         self.setObjectName("system_main")
         self.setAttribute(Qt.WA_StyledBackground, True)
 
         bg_path = resource_path("assets/image/common/bg.png").replace("\\", "/")
+
         self.setStyleSheet(f"""
             #system_main {{
                 background-image: url('{bg_path}');
@@ -1970,8 +3435,10 @@ class MyApp(QWidget):
             }}
         """)
 
+
         if not self.embedded:
             self.setWindowTitle('시스템 연동 검증')
+
 
         # 메인 레이아웃
         mainLayout = QVBoxLayout()
@@ -1983,18 +3450,23 @@ class MyApp(QWidget):
         header_container.setFixedSize(1680, 56)
         header_container_layout = QHBoxLayout()
         header_container_layout.setContentsMargins(0, 8, 0, 0) # 왼, 위, 오, 아
+
         header_container_layout.setSpacing(0)
 
         header_widget = QWidget()
         header_widget.setFixedSize(1680, 56)
 
+
         # 헤더 레이아웃 (로고 + 타이틀)
+
         header_layout = QHBoxLayout(header_widget)
         header_layout.setContentsMargins(0, 0, 0, 0)
         header_layout.setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
         header_layout.setSpacing(10)
 
+
         # 헤더 로고 (36x36px)
+
         logo_label = QLabel(header_widget)
         logo_pixmap = QPixmap(resource_path("assets/image/common/header_logo.png"))
         logo_label.setPixmap(logo_pixmap.scaled(36, 36, Qt.KeepAspectRatio, Qt.SmoothTransformation))
@@ -2021,6 +3493,7 @@ class MyApp(QWidget):
         mainLayout.addWidget(header_container)
 
         # ✅ 배경을 칠할 전용 컨테이너(헤더 제외 영역)
+
         bg_root = QWidget()
         bg_root.setObjectName("bg_root")
         bg_root.setAttribute(Qt.WA_StyledBackground, True)
@@ -2028,10 +3501,12 @@ class MyApp(QWidget):
         bg_root_layout.setContentsMargins(0, 0, 0, 0)
         bg_root_layout.setSpacing(0)
 
+
         # 2컬럼 레이아웃 생성
         columns_layout = QHBoxLayout()
         columns_layout.setContentsMargins(0, 0, 0, 0)
         columns_layout.setSpacing(0)
+
 
         # 왼쪽 컬럼 (479x906)
         left_col = QWidget()
@@ -2039,6 +3514,7 @@ class MyApp(QWidget):
         left_layout = QVBoxLayout()
         left_layout.setContentsMargins(0, 0, 0, 0)
         left_layout.setSpacing(0)
+
         # 시험 분야 선택 영역
         self.create_spec_selection_panel(left_layout)
         left_layout.addStretch()
@@ -2058,10 +3534,12 @@ class MyApp(QWidget):
         contentWidget = QWidget()
         contentWidget.setLayout(self.centerLayout)
         right_layout.addWidget(contentWidget)
+
         # 수신 메시지 실시간 모니터링
         monitor_label = QLabel("수신 메시지 실시간 모니터링")
         monitor_label.setStyleSheet('font-size: 16px; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-top: 20px; margin-bottom: 6px;')
         right_layout.addWidget(monitor_label)
+
         self.valResult = QTextBrowser(self)
         self.valResult.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.valResult.setFixedHeight(174)
@@ -2080,6 +3558,7 @@ class MyApp(QWidget):
         self.valmsg.setStyleSheet('font-size: 16px; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-top: 20px; margin-bottom: 6px;')
         right_layout.addWidget(self.valmsg)  # ← 오른쪽에 추가!
 
+
         # 평가 점수 표시
         spec_score_group = self.create_spec_score_display_widget()
         right_layout.addWidget(spec_score_group)
@@ -2087,127 +3566,134 @@ class MyApp(QWidget):
         total_score_group = self.create_total_score_display_widget()
         right_layout.addWidget(total_score_group)
 
-        # 버튼 그룹 (평가 시작, 일시 정지, 종료) - 아래쪽, 가운데 정렬
+        # ✅ 버튼 그룹 (이미지 기반으로 변경)
         buttonGroup = QWidget()
+        buttonGroup.setFixedWidth(1064)
         buttonLayout = QHBoxLayout()
-        buttonLayout.setAlignment(Qt.AlignCenter)
+        buttonLayout.setAlignment(Qt.AlignLeft)
+        buttonLayout.setContentsMargins(0, 0, 0, 0)
 
+        # 평가 시작 버튼
         self.sbtn = QPushButton(self)
-        self.sbtn.setText('평가 시작')
-        self.sbtn.setFixedSize(140, 50)
-        self.sbtn.setStyleSheet("""
-            QPushButton {
-                background-color: #FFB6C1;  /* 파스텔 핑크 */
-                border: 2px solid #FF69B4;
-                border-radius: 5px;
-                padding: 5px;
-                font-weight: bold;
-                color: #8B0000;  /* 진한 빨간색 텍스트 */
-            }
-            QPushButton:hover {
-                background-color: #FFC0CB;  /* 호버시 더 밝은 핑크 */
-                border: 2px solid #FF1493;
-            }
-            QPushButton:pressed {
-                background-color: #FF69B4;  /* 클릭시 더 진한 핑크 */
-            }
-            QPushButton:disabled {
-                background-color: #F0F0F0;
-                border: 2px solid #CCCCCC;
-                color: #999999;
-            }
+        self.sbtn.setFixedSize(255, 50)
+        start_enabled = resource_path("assets/image/test_runner/btn_평가시작_enabled.png").replace("\\", "/")
+        start_hover = resource_path("assets/image/test_runner/btn_평가시작_hover.png").replace("\\", "/")
+        start_disabled = resource_path("assets/image/test_runner/btn_평가시작_disabled.png").replace("\\", "/")
+        self.sbtn.setStyleSheet(f"""
+            QPushButton {{
+                border: none;
+                background-image: url('{start_enabled}');
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: contain;
+                background-color: transparent;
+            }}
+            QPushButton:hover {{
+                background-image: url('{start_hover}');
+            }}
+            QPushButton:pressed {{
+                background-image: url('{start_hover}');
+                opacity: 0.8;
+            }}
+            QPushButton:disabled {{
+                background-image: url('{start_disabled}');
+            }}
         """)
         self.sbtn.clicked.connect(self.start_btn_clicked)
 
+        # 정지 버튼
         self.stop_btn = QPushButton(self)
-        self.stop_btn.setText('일시 정지')
-        self.stop_btn.setFixedSize(140, 50)
-        self.stop_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #FFB6C1;  /* 파스텔 핑크 */
-                border: 2px solid #FF69B4;
-                border-radius: 5px;
-                padding: 5px;
-                font-weight: bold;
-                color: #8B0000;  /* 진한 빨간색 텍스트 */
-            }
-            QPushButton:hover {
-                background-color: #FFC0CB;  /* 호버시 더 밝은 핑크 */
-                border: 2px solid #FF1493;
-            }
-            QPushButton:pressed {
-                background-color: #FF69B4;  /* 클릭시 더 진한 핑크 */
-            }
-            QPushButton:disabled {
-                background-color: #F0F0F0;
-                border: 2px solid #CCCCCC;
-                color: #999999;
-            }
+        self.stop_btn.setFixedSize(255, 50)
+        stop_enabled = resource_path("assets/image/test_runner/btn_일시정지_enabled.png").replace("\\", "/")
+        stop_hover = resource_path("assets/image/test_runner/btn_일시정지_hover.png").replace("\\", "/")
+        stop_disabled = resource_path("assets/image/test_runner/btn_일시정지_disabled.png").replace("\\", "/")
+        self.stop_btn.setStyleSheet(f"""
+            QPushButton {{
+                border: none;
+                background-image: url('{stop_enabled}');
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: contain;
+                background-color: transparent;
+            }}
+            QPushButton:hover {{
+                background-image: url('{stop_hover}');
+            }}
+            QPushButton:pressed {{
+                background-image: url('{stop_hover}');
+                opacity: 0.8;
+            }}
+            QPushButton:disabled {{
+                background-image: url('{stop_disabled}');
+            }}
         """)
         self.stop_btn.clicked.connect(self.stop_btn_clicked)
         self.stop_btn.setDisabled(True)
 
+        # 종료 버튼
         self.rbtn = QPushButton(self)
-        self.rbtn.setText('종료')
-        self.rbtn.setFixedSize(140, 50)
-        self.rbtn.setStyleSheet("""
-            QPushButton {
-                background-color: #FFB6C1;
-                border: 2px solid #FF69B4;
-                border-radius: 5px;
-                padding: 5px;
-                font-weight: bold;
-                color: #8B0000;
-            }
-            QPushButton:hover {
-                background-color: #FFC0CB;
-                border: 2px solid #FF1493;
-            }
-            QPushButton:pressed {
-                background-color: #FF69B4;
-            }
-            QPushButton:disabled {
-                background-color: #F0F0F0;
-                border: 2px solid #CCCCCC;
-                color: #999999;
-            }
+        self.rbtn.setFixedSize(255, 50)
+        exit_enabled = resource_path("assets/image/test_runner/btn_종료_enabled.png").replace("\\", "/")
+        exit_hover = resource_path("assets/image/test_runner/btn_종료_hover.png").replace("\\", "/")
+        exit_disabled = resource_path("assets/image/test_runner/btn_종료_disabled.png").replace("\\", "/")
+        self.rbtn.setStyleSheet(f"""
+            QPushButton {{
+                border: none;
+                background-image: url('{exit_enabled}');
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: contain;
+                background-color: transparent;
+            }}
+            QPushButton:hover {{
+                background-image: url('{exit_hover}');
+            }}
+            QPushButton:pressed {{
+                background-image: url('{exit_hover}');
+                opacity: 0.8;
+            }}
+            QPushButton:disabled {{
+                background-image: url('{exit_disabled}');
+            }}
         """)
         self.rbtn.clicked.connect(self.exit_btn_clicked)
 
+        # 시험 결과 버튼
         self.result_btn = QPushButton(self)
-        self.result_btn.setText('시험 결과')
-        self.result_btn.setFixedSize(140, 50)
-        self.result_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #FFB6C1;
-                border: 2px solid #FF69B4;
-                border-radius: 5px;
-                padding: 5px;
-                font-weight: bold;
-                color: #8B0000;
-            }
-            QPushButton:hover {
-                background-color: #FFC0CB;
-                border: 2px solid #FF1493;
-            }
-            QPushButton:pressed {
-                background-color: #FF69B4;
-            }
-            QPushButton:disabled {
-                background-color: #F0F0F0;
-                border: 2px solid #CCCCCC;
-                color: #999999;
-            }
+        self.result_btn.setFixedSize(255, 50)
+        result_enabled = resource_path("assets/image/test_runner/btn_시험결과_enabled.png").replace("\\", "/")
+        result_hover = resource_path("assets/image/test_runner/btn_시험결과_hover.png").replace("\\", "/")
+        result_disabled = resource_path("assets/image/test_runner/btn_시험결과_disabled.png").replace("\\", "/")
+        self.result_btn.setStyleSheet(f"""
+            QPushButton {{
+                border: none;
+                background-image: url('{result_enabled}');
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: contain;
+                background-color: transparent;
+            }}
+            QPushButton:hover {{
+                background-image: url('{result_hover}');
+            }}
+            QPushButton:pressed {{
+                background-image: url('{result_hover}');
+                opacity: 0.8;
+            }}
+            QPushButton:disabled {{
+                background-image: url('{result_disabled}');
+            }}
         """)
         self.result_btn.clicked.connect(self.show_result_page)
 
         buttonLayout.addWidget(self.sbtn)
-        buttonLayout.addSpacing(20)
+        buttonLayout.addSpacing(18)
         buttonLayout.addWidget(self.stop_btn)
-        buttonLayout.addSpacing(20)
+        buttonLayout.addSpacing(18)
         buttonLayout.addWidget(self.rbtn)
-        buttonLayout.addSpacing(20)
+        buttonLayout.addSpacing(18)
         buttonLayout.addWidget(self.result_btn)
+        
         buttonGroup.setLayout(buttonLayout)
         right_layout.addSpacing(20)
         right_layout.addWidget(buttonGroup)
@@ -2215,23 +3701,50 @@ class MyApp(QWidget):
         left_col.setLayout(left_layout)
         right_col.setLayout(right_layout)
 
+
         # 컬럼 레이아웃에 추가
         columns_layout.addWidget(left_col)
         columns_layout.addWidget(right_col)
+
 
         bg_root_layout.addLayout(columns_layout)
         bg_root.setLayout(bg_root_layout)
         mainLayout.addWidget(bg_root)
 
+
         self.setLayout(mainLayout)
 
-        # tableWidget이 생성된 후에 초기 시험 분야 선택 처리
-        if hasattr(self, '_initial_spec_index'):
-            self.on_test_field_selected(self._initial_spec_index, 0)
+
+        QTimer.singleShot(100, self.select_first_scenario)
 
         if not self.embedded:
             self.show()
 
+    def select_first_scenario(self):
+        """프로그램 시작 시 첫 번째 그룹의 첫 번째 시나리오 자동 선택"""
+        try:
+            print(f"[DEBUG] 초기 시나리오 자동 선택 시작")
+
+            # 1. 첫 번째 그룹이 있는지 확인
+            if self.group_table.rowCount() > 0:
+                self.group_table.selectRow(0)
+                print(f"[DEBUG] 첫 번째 그룹 선택: {self.index_to_group_name.get(0)}")
+                self.on_group_selected(0, 0)
+
+            # 2. 시나리오 테이블에 첫 번째 항목이 있는지 확인
+            if self.test_field_table.rowCount() > 0:
+                self.test_field_table.selectRow(0)
+                first_spec_id = self.index_to_spec_id.get(0)
+                print(f"[DEBUG] 첫 번째 시나리오 선택: spec_id={first_spec_id}")
+                self.on_test_field_selected(0, 0)
+
+            print(f"[DEBUG] 초기 시나리오 자동 선택 완료: {self.spec_description}")
+            QApplication.processEvents()
+
+        except Exception as e:
+            print(f"[ERROR] 초기 시나리오 선택 실패: {e}")
+            import traceback
+            traceback.print_exc()
     def init_centerLayout(self):
         # 표 형태로 변경 - 동적 API 개수
         api_count = len(self.videoMessages)
@@ -2455,29 +3968,64 @@ class MyApp(QWidget):
         return sgroup
 
     def update_score_display(self):
-        """평가 점수 디스플레이 업데이트"""
-        # 메인 화면의 평가 점수 레이블 업데이트
+        """평가 점수 디스플레이를 업데이트"""
         if not (hasattr(self, "spec_pass_label") and hasattr(self, "spec_total_label") and hasattr(self,
                                                                                                    "spec_score_label")):
             return
 
-        total_fields = self.total_pass_cnt + self.total_error_cnt
-        if total_fields > 0:
-            score = (self.total_pass_cnt / total_fields) * 100
+        # ✅ 1️⃣ 분야별 점수 (현재 spec만)
+        spec_total_fields = self.total_pass_cnt + self.total_error_cnt
+        if spec_total_fields > 0:
+            spec_score = (self.total_pass_cnt / spec_total_fields) * 100
         else:
-            score = 0
+            spec_score = 0
 
-        # 시험 분야별 점수 업데이트
-        self.spec_pass_label.setText(f"통과 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-style: Medium; color: #000000; margin-left: 20px;'>{self.total_pass_cnt}</span>")
-        self.spec_total_label.setText(f"전체 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-style: Medium; color: #000000; margin-left: 20px;'>{total_fields}</span>")
-        self.spec_score_label.setText(f"종합 평가 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-style: Medium; color: #000000; margin-left: 20px;'>{score:.1f}%</span>")
+        self.spec_pass_label.setText(
+            f"통과 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-style: Medium; color: #000000; margin-left: 20px;'>"
+            f"{self.total_pass_cnt}</span>"
+        )
+        self.spec_total_label.setText(
+            f"전체 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-style: Medium; color: #000000; margin-left: 20px;'>"
+            f"{spec_total_fields}</span>"
+        )
+        self.spec_score_label.setText(
+            f"종합 평가 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-style: Medium; color: #000000; margin-left: 20px;'>"
+            f"{spec_score:.1f}%</span>"
+        )
 
-        # 전체 점수 업데이트 (현재는 1개 spec만 실행하므로 동일한 값)
+        # ✅ 2️⃣ 전체 점수 (모든 spec 합산)
         if hasattr(self, "total_pass_label") and hasattr(self, "total_total_label") and hasattr(self,
                                                                                                 "total_score_label"):
-            self.total_pass_label.setText(f"통과 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-style: Medium; color: #000000; margin-left: 20px;'>{self.total_pass_cnt}</span>")
-            self.total_total_label.setText(f"전체 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-style: Medium; color: #000000; margin-left: 20px;'>{total_fields}</span>")
-            self.total_score_label.setText(f"종합 평가 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-style: Medium; color: #000000; margin-left: 20px;'>{score:.1f}%</span>")
+            global_total_fields = self.global_pass_cnt + self.global_error_cnt
+            if global_total_fields > 0:
+                global_score = (self.global_pass_cnt / global_total_fields) * 100
+            else:
+                global_score = 0
+
+            self.total_pass_label.setText(
+                f"통과 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+                f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-style: Medium; color: #000000; margin-left: 20px;'>"
+                f"{self.global_pass_cnt}</span>"
+            )
+            self.total_total_label.setText(
+                f"전체 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+                f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-style: Medium; color: #000000; margin-left: 20px;'>"
+                f"{global_total_fields}</span>"
+            )
+            self.total_score_label.setText(
+                f"종합 평가 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+                f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-style: Medium; color: #000000; margin-left: 20px;'>"
+                f"{global_score:.1f}%</span>"
+            )
+
+            # ✅ 디버그 로그 추가
+            print(
+                f"[SCORE UPDATE] 분야별 - pass: {self.total_pass_cnt}, error: {self.total_error_cnt}, score: {spec_score:.1f}%")
+            print(
+                f"[SCORE UPDATE] 전체 - pass: {self.global_pass_cnt}, error: {self.global_error_cnt}, score: {global_score:.1f}%")
 
     def table_cell_clicked(self, row, col):
         """테이블 셀 클릭 시 호출되는 함수"""
@@ -2490,7 +4038,6 @@ class MyApp(QWidget):
     def create_spec_score_display_widget(self):
         """메인 화면에 표시할 시험 분야별 평가 점수 위젯 생성"""
 
-        # 시험 분야별 점수 그룹
         spec_group = QGroupBox()
         spec_group.setFixedWidth(1064)
         spec_group.setFixedHeight(106)
@@ -2502,8 +4049,15 @@ class MyApp(QWidget):
             }
         """)
 
+        # ✅ 분야별 점수 아이콘 추가
+        icon_label = QLabel()
+        icon_pixmap = QPixmap(resource_path("assets/image/test_runner/icn_분야별점수.png"))
+        icon_label.setPixmap(icon_pixmap.scaled(40, 40, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        icon_label.setFixedSize(40, 40)
+        icon_label.setAlignment(Qt.AlignCenter)
+
         # 분야명 레이블
-        self.spec_name_label = QLabel(f"분야별 점수    |    {self.spec_description} ({len(self.videoMessages)}개 API)")
+        self.spec_name_label = QLabel(f"분야별 점수      |      {self.spec_description} ({len(self.videoMessages)}개 API)")
         self.spec_name_label.setStyleSheet("""
             color: #000;
             font-family: "Noto Sans KR";
@@ -2567,10 +4121,25 @@ class MyApp(QWidget):
         self.spec_score_label.setFont(font)
 
         spec_layout = QVBoxLayout()
-        spec_layout.setContentsMargins(32, 15, 32, 15)  # 내부 여백
-        spec_layout.addWidget(self.spec_name_label)
+        spec_layout.setContentsMargins(32, 15, 32, 15)
+
+        # ✅ 아이콘을 위한 수직 레이아웃
+        icon_vlayout = QVBoxLayout()
+        icon_vlayout.setContentsMargins(0, 0, 0, 0)
+        icon_vlayout.setSpacing(0)
+        icon_vlayout.addSpacing(0)
+        icon_vlayout.addWidget(icon_label, alignment=Qt.AlignHCenter | Qt.AlignTop)
+        icon_vlayout.addStretch()
+
+        # ✅ 아이콘 + 분야명 레이아웃
+        header_layout = QHBoxLayout()
+        header_layout.addLayout(icon_vlayout)
+        header_layout.addWidget(self.spec_name_label)
+        header_layout.addStretch()
+
+        spec_layout.addLayout(header_layout)
         spec_layout.addSpacing(5)
-        spec_layout.addWidget(separator)  # 구분선 추가
+        spec_layout.addWidget(separator)
         spec_layout.addSpacing(5)
 
         spec_score_layout = QHBoxLayout()
@@ -2587,7 +4156,6 @@ class MyApp(QWidget):
 
     def create_total_score_display_widget(self):
         """메인 화면에 표시할 전체 평가 점수 위젯 생성"""
-        # 전체 점수
         total_group = QGroupBox()
         total_group.setFixedWidth(1064)
         total_group.setFixedHeight(106)
@@ -2599,8 +4167,14 @@ class MyApp(QWidget):
             }
         """)
 
-        # 점수 레이블들 (전체 점수는 볼드체로 강조)
-        total_name_label = QLabel("전체 점수")
+        # ✅ 전체 점수 아이콘 추가
+        icon_label = QLabel()
+        icon_pixmap = QPixmap(resource_path("assets/image/test_runner/icn_전체점수.png"))
+        icon_label.setPixmap(icon_pixmap.scaled(40, 40, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        icon_label.setFixedSize(40, 40)
+
+        # 전체 점수 레이블
+        total_name_label = QLabel("전체 점수 (모든 시험 분야 합산)")
         total_name_label.setStyleSheet("""
             color: #000;
             font-family: "Noto Sans KR";
@@ -2664,10 +4238,26 @@ class MyApp(QWidget):
         self.total_score_label.setFont(font)
 
         total_layout = QVBoxLayout()
-        total_layout.setContentsMargins(32, 15, 32, 15)  # 내부 여백
-        total_layout.addWidget(total_name_label)
+        total_layout.setContentsMargins(32, 15, 32, 15)
+
+        # ✅ 아이콘을 위한 수직 레이아웃
+        icon_vlayout = QVBoxLayout()
+        icon_vlayout.setContentsMargins(0, 0, 0, 0)
+        icon_vlayout.setSpacing(0)
+        icon_vlayout.addSpacing(0)
+        icon_vlayout.addWidget(icon_label, alignment=Qt.AlignHCenter | Qt.AlignTop)
+        icon_vlayout.addStretch()
+
+        # ✅ 아이콘 + 전체 점수 텍스트 레이아웃
+        header_layout = QHBoxLayout()
+        header_layout.setSpacing(8)
+        header_layout.addLayout(icon_vlayout)
+        header_layout.addWidget(total_name_label)
+        header_layout.addStretch()
+        total_layout.addLayout(header_layout)
+
         total_layout.addSpacing(5)
-        total_layout.addWidget(separator)  # 구분선 추가
+        total_layout.addWidget(separator)
         total_layout.addSpacing(5)
 
         score_layout = QHBoxLayout()
@@ -2694,47 +4284,118 @@ class MyApp(QWidget):
                     pass
 
     def start_btn_clicked(self):
+        """평가 시작 버튼 클릭"""
+        # ✅ 1. 시나리오 선택 확인
+        if not hasattr(self, 'current_spec_id') or not self.current_spec_id:
+            QMessageBox.warning(self, "알림", "시험 시나리오를 먼저 선택하세요.")
+            return
+
+        print(f"[START] 시험 시작: {self.current_spec_id} - {self.spec_description}")
+        self.update_result_table_structure(self.videoMessages)
+
+        # ✅ 2. trace 디렉토리 초기화
         self._clean_trace_dir_once()
+
+        # ✅ 3. JSON 데이터 준비
         json_to_data("video")
+
+        # ✅ 4. 버튼 상태 변경
         self.sbtn.setDisabled(True)
         self.stop_btn.setEnabled(True)
 
-        self.init_win()
-        self.valResult.clear()
+        # ✅ 5. 이전 시험 결과가 global 점수에 포함되어 있으면 제거
+        if self.current_spec_id in self.spec_table_data:
+            prev_data = self.spec_table_data[self.current_spec_id]
+            prev_pass = prev_data.get('total_pass_cnt', 0)
+            prev_error = prev_data.get('total_error_cnt', 0)
+            print(f"[SCORE RESET] 기존 {self.current_spec_id} 점수 제거: pass={prev_pass}, error={prev_error}")
 
-        # 상태 변수들 초기화
-        self.final_report = ""
-        self.post_flag = False
-        self.processing_response = False  # 응답 처리 중 플래그 추가
+            # ✅ global 점수에서 해당 spec 점수 제거
+            self.global_pass_cnt = max(0, self.global_pass_cnt - prev_pass)
+            self.global_error_cnt = max(0, self.global_error_cnt - prev_error)
+
+            print(f"[SCORE RESET] 조정 후 global 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}")
+
+        # ✅ 6. 현재 spec의 점수만 초기화 (global은 유지)
         self.total_error_cnt = 0
         self.total_pass_cnt = 0
+        self.cnt = 0
+        self.current_retry = 0
+        self.time_pre = 0
+        self.cnt_pre = 0
+        self.post_flag = False
+        self.processing_response = False
         self.message_in_cnt = 0
         self.message_error = []
-        self.cnt = 0
-        self.current_retry = 0  # 반복 카운터 초기화
-        self.cnt_pre = 0
-        self.time_pre = time.time()  # 0 대신 현재 시간으로 설정
         self.res = None
         self.webhook_res = None
         self.realtime_flag = False
         self.tmp_msg_append_flag = False
 
-        # 플랫폼과 동일한 누적 카운트 초기화 - 동적 API 개수
+        # ✅ 7. 현재 spec에 맞게 누적 카운트 초기화
         api_count = len(self.videoMessages)
         self.step_pass_counts = [0] * api_count
         self.step_error_counts = [0] * api_count
         self.step_pass_flags = [0] * api_count
 
-        # 점수 디스플레이 초기화
+        # ✅ 8. step_buffers 재생성 (현재 API 개수에 맞게)
+        self.step_buffers = [
+            {"data": "", "error": "", "result": "PASS"} for _ in range(api_count)
+        ]
+
+        # ✅ 9. trace 초기화
+        self.trace.clear()
+        self.latest_events = {}
+
+        # ✅ 10. 테이블 초기화
+        print(f"[START] 테이블 초기화: {api_count}개 API")
+        for i in range(self.tableWidget.rowCount()):
+            # 아이콘 초기화
+            icon_widget = QWidget()
+            icon_layout = QHBoxLayout()
+            icon_layout.setContentsMargins(0, 0, 0, 0)
+            icon_label = QLabel()
+            icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
+            icon_label.setAlignment(Qt.AlignCenter)
+            icon_layout.addWidget(icon_label)
+            icon_layout.setAlignment(Qt.AlignCenter)
+            icon_widget.setLayout(icon_layout)
+            self.tableWidget.setCellWidget(i, 1, icon_widget)
+
+            # 카운트 초기화
+            for col, value in [(2, "0"), (3, "0"), (4, "0"), (5, "0"), (6, "0%")]:
+                if self.tableWidget.item(i, col):
+                    self.tableWidget.item(i, col).setText(value)
+
+        # ✅ 11. 인증 정보 설정
+        auth_temp, auth_temp2 = set_auth("config/config.txt")
+        self.digestInfo = [auth_temp2[0], auth_temp2[1]]
+        self.token = auth_temp
+
+        # ✅ 12. 평가 점수 디스플레이 초기화 (전체 점수 포함)
         self.update_score_display()
 
-        # CONSTANTS.py에서 URL 가져오기
+        # ✅ 13. 결과 텍스트 초기화
+        self.valResult.clear()
+
+        # ✅ 14. URL 설정
         self.pathUrl = CONSTANTS.url
-        self.valResult.append("Start Validation...\n")
-        self.valResult.append("시스템이 플랫폼에 요청을 전송하여 응답을 검증합니다")
-        self.webhook_cnt = 99
-        # 타이머를 1초 간격으로 시작 (CONSTANTS timeout과 조화)
+
+        # ✅ 15. 시작 메시지
+        self.valResult.append("=" * 60)
+        self.valResult.append(f"🚀 시험 시작: {self.spec_description}")
+        self.valResult.append(f"📋 Spec ID: {self.current_spec_id}")
+        self.valResult.append(f"📊 API 개수: {len(self.videoMessages)}개")
+        self.valResult.append(f"📋 API 목록: {self.videoMessages}")
+        self.valResult.append(f"📊 전체 누적 점수: {self.global_pass_cnt}(통과) / {self.global_error_cnt}(실패)")
+        self.valResult.append("=" * 60)
+        self.valResult.append("\n시스템이 플랫폼에 요청을 전송하여 응답을 검증합니다\n")
+
+        # ✅ 16. 타이머 시작 (1초 간격)
         self.tick_timer.start(1000)
+
+        print(f"[START] 타이머 시작 완료")
+        print(f"[START] 현재 global 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}")
 
     def stop_btn_clicked(self):
         self.tick_timer.stop()
@@ -2742,54 +4403,67 @@ class MyApp(QWidget):
         self.sbtn.setEnabled(True)
         self.stop_btn.setDisabled(True)
 
+        self.save_current_spec_data()
+
+        # ✅ JSON 결과 저장 추가
+        try:
+            self.run_status = "진행중"
+            result_json = build_result_json(self)
+            json_path = os.path.join(result_dir, "response_results.json")
+            with open(json_path, "w", encoding="utf-8") as f:
+                json.dump(result_json, f, ensure_ascii=False, indent=2)
+            print(f"✅ 진행 중 결과가 '{json_path}'에 저장되었습니다.")
+            self.valResult.append(f"\n📄 진행 상황 저장 완료: {json_path}")
+            self.valResult.append("(일시정지 시점까지의 결과가 저장되었습니다)")
+        except Exception as e:
+            print(f"❌ JSON 저장 중 오류 발생: {e}")
+            import traceback
+            traceback.print_exc()
+            self.valResult.append(f"\n⚠️ 결과 저장 실패: {str(e)}")
+
     def init_win(self):
-        self.cnt = 0
-        self.current_retry = 0  # 재시도 카운터 초기화
+        def init_win(self):
+            """검증 시작 전 초기화"""
+            self.cnt = 0
+            self.current_retry = 0
 
-        # 버퍼 초기화 - 동적 API 개수
-        api_count = len(self.videoMessages)
-        self.step_buffers = [{"data": "", "result": "", "error": ""} for _ in range(api_count)]
+            # 현재 spec의 API 개수에 맞게 버퍼 생성
+            api_count = len(self.videoMessages) if self.videoMessages else 0
+            print(f"[INIT] 초기화: {api_count}개 API")
 
-        # 누적 카운트 초기화 - 동적 API 개수
-        self.step_pass_counts = [0] * api_count
-        self.step_error_counts = [0] * api_count
-        self.step_pass_flags = [0] * api_count
+            # 버퍼 초기화
+            self.step_buffers = [
+                {"data": "", "result": "", "error": ""} for _ in range(api_count)
+            ]
 
-        self.valResult.clear()
-        self.step1_msg = ""
-        self.step2_msg = ""
-        self.step3_msg = ""
-        self.step4_msg = ""
-        self.step5_msg = ""
-        self.step6_msg = ""
-        self.step7_msg = ""
-        self.step8_msg = ""
-        self.step9_msg = ""
+            # 누적 카운트 초기화
+            self.step_pass_counts = [0] * api_count
+            self.step_error_counts = [0] * api_count
+            self.step_pass_flags = [0] * api_count
 
-        # 테이블 아이콘들 초기화
-        for i in range(self.tableWidget.rowCount()):
-            if i < len(self.step_names) and self.step_names[i]:
+            self.valResult.clear()
+
+            # 메시지 초기화
+            for i in range(1, 10):
+                setattr(self, f"step{i}_msg", "")
+
+            # 테이블 아이콘 및 카운트 초기화
+            for i in range(self.tableWidget.rowCount()):
                 icon_widget = QWidget()
                 icon_layout = QHBoxLayout()
                 icon_layout.setContentsMargins(0, 0, 0, 0)
-
                 icon_label = QLabel()
                 icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
                 icon_label.setAlignment(Qt.AlignCenter)
-
                 icon_layout.addWidget(icon_label)
                 icon_layout.setAlignment(Qt.AlignCenter)
                 icon_widget.setLayout(icon_layout)
-
                 self.tableWidget.setCellWidget(i, 1, icon_widget)
 
-                # 카운트들도 초기화
-                self.tableWidget.setItem(i, 2, QTableWidgetItem("0"))
-                self.tableWidget.item(i, 2).setTextAlignment(Qt.AlignCenter)
-                self.tableWidget.setItem(i, 3, QTableWidgetItem("0"))
-                self.tableWidget.item(i, 3).setTextAlignment(Qt.AlignCenter)
-                self.tableWidget.setItem(i, 4, QTableWidgetItem("0"))
-                self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
+                for col, value in ((2, "0"), (3, "0"), (4, "0"), (5, "0"), (6, "0%")):
+                    item = QTableWidgetItem(value)
+                    item.setTextAlignment(Qt.AlignCenter)
+                    self.tableWidget.setItem(i, col, item)
 
     def show_result_page(self):
         """시험 결과 페이지 표시"""
@@ -2855,62 +4529,13 @@ class MyApp(QWidget):
             print(f"전체화면 전환 오류: {e}")
 
     def exit_btn_clicked(self):
-        """프로그램 종료"""
-        # 타이머 정지
-        if hasattr(self, 'tick_timer'):
-            self.tick_timer.stop()
-
-        # print문 추가 -> 나중에 기능 수정해야함 (09/30)
-        total_pass = getattr(self, 'total_pass_cnt', 0)
-        total_error = getattr(self, 'total_error_cnt', 0)
-        grand_total = total_pass + total_error
-        overall_score = (total_pass / grand_total * 100) if grand_total > 0 else 0
-
-        # 스텝별 결과 수집
-        rows = self.tableWidget.rowCount()
-        step_lines = []
-        for i in range(rows):
-            name = self.tableWidget.item(i, 0).text() if self.tableWidget.item(i, 0) else "N/A"
-            get_txt = lambda col: self.tableWidget.item(i, col).text() if self.tableWidget.item(i, col) else "N/A"
-            retries = get_txt(2)
-            pass_cnt = get_txt(3)
-            total_cnt = get_txt(4)
-            fail_cnt = get_txt(5)
-            score = get_txt(6)
-            # step_buffer에 최종 판정 가져오기
-            final_res = self.step_buffers[i]["result"] if i < len(self.step_buffers) else "N/A"
-            step_lines.append(
-                f"{name} | 결과: {final_res} | 검증 횟수: {retries} | 통과 필드 수: {pass_cnt} | 전체 필드 수: {total_cnt} | 실패 필드 수: {fail_cnt} | 평가 점수: {score}")
-
-            # 로그 원문
-            raw_log = self.valResult.toPlainText() if hasattr(self, 'valResult') else ""
-
-            # 최종 페이로드 구성
-            header = "=== 시험 결과 ==="
-            overall = f"통과 필드 수: {total_pass}\n전체 필드 수: {grand_total}\n종합 평가 점수: {overall_score:.1f}%"
-            steps_text = "=== 스텝별 결과 ===\n" + "\n".join(step_lines) if step_lines else "스텝별 결과 없음"
-            logs_text = "=== 전체 로그 ===\n" + raw_log if raw_log else "로그 없음"
-            final_text = f"{header}\n{overall}\n\n{steps_text}\n\n{logs_text}\n"
-
-            # print(final_text)  # 나중에 대체
-
-            import os
-            result_dir = os.path.join(os.getcwd(), "results")
-            os.makedirs(result_dir, exist_ok=True)
-            results_path = os.path.join(result_dir, "response_results.txt")  # 파일 저장명 수정
-
-            with open(results_path, "w", encoding="utf-8") as f:
-                f.write(final_text)
-
-            print(f"시험 결과가 '{results_path}'에 저장되었습니다.")
-
-        # 확인 대화상자
         reply = QMessageBox.question(self, '프로그램 종료',
                                      '정말로 프로그램을 종료하시겠습니까?',
                                      QMessageBox.Yes | QMessageBox.No,
                                      QMessageBox.No)
 
         if reply == QMessageBox.Yes:
+            result_payload = self.build_result_payload()
             QApplication.quit()
 
     def get_setting(self):
@@ -2933,7 +4558,6 @@ class MyApp(QWidget):
             self.webhookInSchema = []
 
         self.webhookSchema = self.webhookInSchema
-        self.final_report = f"{self.spec_description} 검증 결과\n"
 
         # 기본 인증 설정 (CONSTANTS.py에서 가져옴)
         self.r2 = CONSTANTS.auth_type
