@@ -5,6 +5,20 @@ from json_checker import OptionalKey
 
 
 # Authentication
+cmh1ua7b00021gxc3rjepbkrm_Authentication_out_schema = {
+    "code": str,
+    "message": str,
+    "userName": str,
+    "userAff": str,
+    "accessToken": str,
+}
+
+# cmh1ua7b00021gxc3rjepbkrm 스키마 리스트
+cmh1ua7b00021gxc3rjepbkrm_outSchema = [
+    cmh1ua7b00021gxc3rjepbkrm_Authentication_out_schema,
+]
+
+# Authentication
 cmgyv3rzl014nvsveidu5jpzp_Authentication_out_schema = {
     "code": str,
     "message": str,

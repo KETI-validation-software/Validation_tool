@@ -34,7 +34,10 @@ from pathlib import Path
 import spec.Data_request as data_request_module
 import spec.Schema_response as schema_response_module
 import spec.Constraints_request as constraints_request_module
-
+import importlib
+importlib.reload(data_request_module)
+importlib.reload(schema_response_module)
+importlib.reload(constraints_request_module)
 import os
 
 result_dir = os.path.join(os.getcwd(), "results")
@@ -296,7 +299,6 @@ class ResultPageWidget(QWidget):
         self.img_none = resource_path("assets/image/icon/icn_basic.png")
 
         self.initUI()
-
     def initUI(self):
         # ✅ 메인 레이아웃
         mainLayout = QVBoxLayout()
@@ -759,78 +761,86 @@ class ResultPageWidget(QWidget):
             self.index_to_spec_id[idx] = spec_id
 
     def on_test_field_selected(self, row, col):
-        """시험 분야 클릭 시 해당 시스템으로 동적 전환"""
+        """시나리오 선택 시 해당 결과 표시 (결과 없어도 API 정보 표시)"""
+        if row not in self.index_to_spec_id:
+            return
+
+        selected_spec_id = self.index_to_spec_id[row]
+
+        # 선택된 시나리오가 현재와 같으면 무시
+        if selected_spec_id == self.current_spec_id:
+            return
+
+        print(f"[RESULT] 시나리오 전환: {self.current_spec_id} → {selected_spec_id}")
+
+        # ✅ parent의 spec 전환 (API 목록 로드)
+        old_spec_id = self.parent.current_spec_id
+        old_step_buffers = self.parent.step_buffers.copy() if hasattr(self.parent, 'step_buffers') else []
+
         try:
-            self.selected_test_field_row = row
+            # ✅ 1. spec_id 업데이트
+            self.parent.current_spec_id = selected_spec_id
+            self.current_spec_id = selected_spec_id
 
-            if row in self.index_to_spec_id:
-                new_spec_id = self.index_to_spec_id[row]
+            # ✅ 2. spec 데이터 다시 로드 (스키마, API 목록 등) - parent의 함수 호출
+            self.parent.load_specs_from_constants()
 
-                if new_spec_id == self.current_spec_id:
-                    print(f"[SELECT] 이미 선택된 시나리오: {new_spec_id}")
-                    return
+            # ✅ 3. 설정 다시 로드 (웹훅 스키마 포함) - parent의 함수 호출
+            self.parent.get_setting()
 
-                print(f"[SELECT] 🔄 시험 분야 전환: {self.current_spec_id} → {new_spec_id}")
+            print(f"[RESULT] API 개수: {len(self.parent.videoMessages)}")
+            print(f"[RESULT] outSchema 개수: {len(self.parent.outSchema)}")
+            print(f"[RESULT] webhookSchema 개수: {len(self.parent.webhookSchema)}")
 
-                # ✅ 1. 현재 spec의 테이블 데이터 저장
-                self.save_current_spec_data()
+            # ✅ 4. 저장된 결과 데이터가 있으면 로드
+            if selected_spec_id in self.parent.spec_table_data:
+                saved_data = self.parent.spec_table_data[selected_spec_id]
 
-                # ✅ 2. spec_id 업데이트
-                self.current_spec_id = new_spec_id
-
-                # ✅ 3. spec 데이터 다시 로드
-                self.load_specs_from_constants()
-
-                print(f"[SELECT] 로드된 API 개수: {len(self.videoMessages)}")
-                print(f"[SELECT] API 목록: {self.videoMessages}")
-
-                # ✅ 4. 기본 변수 초기화
-                self.cnt = 0
-                self.current_retry = 0
-                self.message_error = []
-
-                # ✅ 5. 테이블 완전 재구성 (API 이름 먼저 설정!)
-                print(f"[SELECT] 테이블 완전 재구성 시작")
-                self.update_result_table_structure(self.videoMessages)
-
-                # ✅ 6. 저장된 데이터가 있으면 복원 (API 이름은 유지!)
-                if new_spec_id in self.spec_table_data:
-                    print(f"[SELECT] 저장된 데이터 복원 시작")
-                    restored = self.restore_spec_data_without_api_names(new_spec_id)
-
-                    if restored:
-                        print(f"[SELECT] {new_spec_id} 저장된 결과 로드 완료")
-                    else:
-                        print(f"[SELECT] 저장된 데이터 복원 실패 - 초기화")
-                        self.initialize_empty_table()
+                # step_buffers 복원
+                saved_buffers = saved_data.get('step_buffers', [])
+                if saved_buffers:
+                    self.parent.step_buffers = [buf.copy() for buf in saved_buffers]
+                    print(f"[RESULT] step_buffers 복원 완료: {len(self.parent.step_buffers)}개")
                 else:
-                    # 저장된 데이터가 없으면 초기화
-                    print(f"[SELECT] {new_spec_id} 저장된 데이터 없음 - 초기화")
-                    self.initialize_empty_table()
+                    # 저장된 버퍼가 없으면 빈 버퍼 생성
+                    api_count = len(self.parent.videoMessages)
+                    self.parent.step_buffers = [
+                        {"data": "저장된 데이터가 없습니다.", "error": "", "result": "PASS"}
+                        for _ in range(api_count)
+                    ]
 
-                # ✅ 7. trace 및 latest_events 초기화
-                self.trace.clear()
-                self.latest_events = {}
+                # 점수 정보 복원
+                self.parent.total_pass_cnt = saved_data.get('total_pass_cnt', 0)
+                self.parent.total_error_cnt = saved_data.get('total_error_cnt', 0)
 
-                # ✅ 8. 설정 다시 로드
-                self.get_setting()
+                # 테이블 및 점수 표시 업데이트
+                self.reload_result_table(saved_data)
+                self.update_score_displays(saved_data)
 
-                # ✅ 9. 평가 점수 디스플레이 업데이트
-                self.update_score_display()
-
-                # ✅ 10. 결과 텍스트 초기화
-                self.valResult.clear()
-                self.valResult.append(f"✅ 시스템 전환 완료: {self.spec_description}")
-                self.valResult.append(f"📋 Spec ID: {self.current_spec_id}")
-                self.valResult.append(f"📊 API 개수: {len(self.videoMessages)}개")
-                self.valResult.append(f"📋 API 목록: {self.videoMessages}\n")
-
-                print(f"[SELECT] ✅ 시스템 전환 완료")
+                print(f"[RESULT] {selected_spec_id} 저장된 결과 로드 완료")
+            else:
+                # 결과가 없으면 빈 테이블 표시
+                print(f"[RESULT] {selected_spec_id} 결과 없음 - 빈 테이블 표시")
+                self.show_empty_result_table()
 
         except Exception as e:
-            print(f"[SELECT] 시험 분야 선택 처리 실패: {e}")
+            print(f"[ERROR] 시나리오 전환 실패: {e}")
             import traceback
             traceback.print_exc()
+
+            # ✅ 복구 처리
+            self.parent.current_spec_id = old_spec_id
+            self.current_spec_id = old_spec_id
+            if old_step_buffers:
+                self.parent.step_buffers = old_step_buffers
+
+            try:
+                self.parent.load_specs_from_constants()
+                self.parent.get_setting()
+            except:
+                pass
+
+            QMessageBox.warning(self, "오류", f"시나리오 전환 중 오류가 발생했습니다.\n{str(e)}")
 
     def restore_spec_data_without_api_names(self, spec_id):
         """저장된 spec 데이터 복원 (API 이름은 건드리지 않음!)"""
@@ -950,40 +960,6 @@ class ResultPageWidget(QWidget):
 
         print(f"[INIT] 테이블 초기화 완료")
 
-    def save_current_spec_data(self):
-        """현재 spec의 테이블 데이터와 상태를 저장"""
-        if not hasattr(self, 'current_spec_id'):
-            return
-
-        # 테이블 데이터 저장 (현재 videoMessages 기준으로!)
-        table_data = []
-        for row in range(self.tableWidget.rowCount()):
-            # ✅ 실제 API 이름을 videoMessages에서 가져옴 (테이블 텍스트 아님!)
-            if row < len(self.videoMessages):
-                api_name = f"{row + 1}. {self.videoMessages[row]}"
-            else:
-                api_item = self.tableWidget.item(row, 0)
-                api_name = api_item.text() if api_item else ""
-
-            row_data = {
-                'api_name': api_name,  # ✅ 올바른 API 이름 저장
-                'icon_state': self._get_icon_state(row),
-                'retry_count': self.tableWidget.item(row, 2).text() if self.tableWidget.item(row, 2) else "0",
-                'pass_count': self.tableWidget.item(row, 3).text() if self.tableWidget.item(row, 3) else "0",
-                'total_count': self.tableWidget.item(row, 4).text() if self.tableWidget.item(row, 4) else "0",
-                'fail_count': self.tableWidget.item(row, 5).text() if self.tableWidget.item(row, 5) else "0",
-                'score': self.tableWidget.item(row, 6).text() if self.tableWidget.item(row, 6) else "0%",
-            }
-            table_data.append(row_data)
-
-        # 전체 데이터 저장
-        self.spec_table_data[self.current_spec_id] = {
-            'table_data': table_data,
-            'step_buffers': [buf.copy() for buf in self.step_buffers],
-            'total_pass_cnt': self.total_pass_cnt,
-            'total_error_cnt': self.total_error_cnt,
-        }
-        print(f"[DEBUG] {self.current_spec_id} 데이터 저장 완료")
     def show_empty_result_table(self):
         """결과가 없을 때 빈 테이블 표시 (API 목록만)"""
         api_list = self.parent.videoMessages
@@ -1847,30 +1823,45 @@ class MyApp(QWidget):
     def save_current_spec_data(self):
         """현재 spec의 테이블 데이터와 상태를 저장"""
         if not hasattr(self, 'current_spec_id'):
+            print("[SAVE] current_spec_id가 없습니다.")
             return
 
-        # 테이블 데이터 저장
-        table_data = []
-        for row in range(self.tableWidget.rowCount()):
-            row_data = {
-                'api_name': self.tableWidget.item(row, 0).text() if self.tableWidget.item(row, 0) else "",
-                'icon_state': self._get_icon_state(row),
-                'retry_count': self.tableWidget.item(row, 2).text() if self.tableWidget.item(row, 2) else "0",
-                'pass_count': self.tableWidget.item(row, 3).text() if self.tableWidget.item(row, 3) else "0",
-                'total_count': self.tableWidget.item(row, 4).text() if self.tableWidget.item(row, 4) else "0",
-                'fail_count': self.tableWidget.item(row, 5).text() if self.tableWidget.item(row, 5) else "0",
-                'score': self.tableWidget.item(row, 6).text() if self.tableWidget.item(row, 6) else "0%",
-            }
-            table_data.append(row_data)
+        try:
+            # 테이블 데이터 저장 (API 이름 포함)
+            table_data = []
+            for row in range(self.tableWidget.rowCount()):
+                # ✅ videoMessages에서 실제 API 이름 가져오기
+                if row < len(self.videoMessages):
+                    api_name = f"{row + 1}. {self.videoMessages[row]}"
+                else:
+                    api_item = self.tableWidget.item(row, 0)
+                    api_name = api_item.text() if api_item else ""
 
-        # 전체 데이터 저장
-        self.spec_table_data[self.current_spec_id] = {
-            'table_data': table_data,
-            'step_buffers': [buf.copy() for buf in self.step_buffers],
-            'total_pass_cnt': self.total_pass_cnt,
-            'total_error_cnt': self.total_error_cnt,
-        }
-        print(f"[DEBUG] {self.current_spec_id} 데이터 저장 완료")
+                row_data = {
+                    'api_name': api_name,
+                    'icon_state': self._get_icon_state(row),
+                    'retry_count': self.tableWidget.item(row, 2).text() if self.tableWidget.item(row, 2) else "0",
+                    'pass_count': self.tableWidget.item(row, 3).text() if self.tableWidget.item(row, 3) else "0",
+                    'total_count': self.tableWidget.item(row, 4).text() if self.tableWidget.item(row, 4) else "0",
+                    'fail_count': self.tableWidget.item(row, 5).text() if self.tableWidget.item(row, 5) else "0",
+                    'score': self.tableWidget.item(row, 6).text() if self.tableWidget.item(row, 6) else "0%",
+                }
+                table_data.append(row_data)
+
+            # 전체 데이터 저장
+            self.spec_table_data[self.current_spec_id] = {
+                'table_data': table_data,
+                'step_buffers': [buf.copy() for buf in self.step_buffers] if self.step_buffers else [],
+                'total_pass_cnt': self.total_pass_cnt,
+                'total_error_cnt': self.total_error_cnt,
+            }
+
+            print(f"[SAVE] {self.current_spec_id} 데이터 저장 완료: {len(table_data)}개 API")
+
+        except Exception as e:
+            print(f"[ERROR] save_current_spec_data 실패: {e}")
+            import traceback
+            traceback.print_exc()
 
     def _get_icon_state(self, row):
         """테이블 행의 아이콘 상태 반환 (PASS/FAIL/NONE)"""
@@ -2027,9 +2018,14 @@ class MyApp(QWidget):
 
         # 시스템은 response schema / request data 사용
         print(f"[SYSTEM] 📁 모듈: spec (센서/바이오/영상 통합)")
-        # import spec.Data_request as data_request_module
-        # import spec.Schema_response as schema_response_module
-        # import spec.Constraints_request as constraints_request_module
+
+        import spec.Data_request as data_request_module
+        import spec.Schema_response as schema_response_module
+        import spec.Constraints_request as constraints_request_module
+        import importlib
+        importlib.reload(data_request_module)
+        importlib.reload(schema_response_module)
+        importlib.reload(constraints_request_module)
 
         # ✅ 시스템은 응답 검증 + 요청 전송 (outSchema/inData 사용)
         print(f"[SYSTEM] 🔧 타입: 응답 검증 + 요청 전송")
@@ -2472,7 +2468,7 @@ class MyApp(QWidget):
                 self.current_retry = 0
                 self.message_error = []
 
-                # ✅ 5. 테이블 완전 재구성 (이전 데이터 완전 삭제)
+                # ✅ 5. 테이블 완전 재구성
                 print(f"[SELECT] 테이블 완전 재구성 시작")
                 self.update_result_table_structure(self.videoMessages)
 

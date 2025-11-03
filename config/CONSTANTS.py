@@ -9,19 +9,23 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소
 # test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
-company_name = "물리보안기업"
-product_name = "물리보안테스트제품"
+company_name = "물리보안테스트2"
+product_name = "물리보안테스트시스템"
 version = "v1.0"
 test_category = "MAIN_TEST"
-test_target = "물리보안"
+test_target = "영상보안그룹"
 test_range = "ALL_FIELDS"
 auth_type = "Bearer Token"
 auth_info = "a"
+<<<<<<< HEAD
 admin_code = "1234"
+=======
+admin_code = "1"
+>>>>>>> 53aab043afc8bb81ddd3f54fe1ef11dc32f55793
 url = "https://10.252.219.53:8080"
 contact_person = "김철수"
 model_name = "v1.0"
-request_id = "cmh2sdyj70001ry7uvsgugy25"
+request_id = "cmhfpjibz000c5t1uxmf2urvj"
 specs = [
     ["cmgvieyak001b6cd04cgaawmm_inSchema", "cmgvieyak001b6cd04cgaawmm_outData", "cmgvieyak001b6cd04cgaawmm_messages",
      ""],
@@ -64,8 +68,18 @@ WEBHOOK_URL = f"https://{WEBHOOK_HOST}:{WEBHOOK_PORT}"  # 전체 웹훅 URL
 
 SPEC_CONFIG = [
     {
-        "group_name": "물리보안",
-        "group_id": "cmgzwohuq01y8vsvep0hpuuf4",
+        "group_name": "영상보안그룹",
+        "group_id": "cmh1ybbyb000d9y0jxtlgp2nf",
+        "cmh1ua7b00021gxc3rjepbkrm": {
+    "test_name": "영상보안시스템_시나리오2",
+    "specs": ['cmh1ua7b00021gxc3rjepbkrm_outSchema', 'cmh1ua7b00021gxc3rjepbkrm_inData', 'cmh1ua7b00021gxc3rjepbkrm_messages'],
+    "api_name": ['인증'],
+    "api_id": ['step-1-ckssr4n2h'],
+    "api_endpoint": ['/Authentication'],
+    "trans_protocol": ['basic'],
+    "time_out": [5000],
+    "num_retries": [10]
+},
         "cmgyv3rzl014nvsveidu5jpzp": {
     "test_name": "영상보안시스템_new",
     "specs": ['cmgyv3rzl014nvsveidu5jpzp_outSchema', 'cmgyv3rzl014nvsveidu5jpzp_inData', 'cmgyv3rzl014nvsveidu5jpzp_messages', 'cmgyv3rzl014nvsveidu5jpzp_webhook_inSchema', 'cmgyv3rzl014nvsveidu5jpzp_webhook_outData'],
