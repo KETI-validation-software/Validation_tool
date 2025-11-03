@@ -18,7 +18,7 @@ test_range = "ALL_FIELDS"
 auth_type = "Bearer Token"
 auth_info = "a"
 admin_code = "1234"
-url = "https://127.0.0.1:8080"
+url = "https://10.252.219.95:8080"
 contact_person = "김철수"
 model_name = "v1.0"
 request_id = "cmh2sdyj70001ry7uvsgugy25"
@@ -32,12 +32,6 @@ specs = [
 flag_opt = False
 if test_range == "ALL_FIELDS":
     flag_opt = True
-
-# 시험 분야별 spec 정의 (인덱스 순서 중요!)
-# specs = [
-#     ["spec_001_inSchema", "spec_001_outData", "spec_001_messages", "spec_001_webhookSchema", "spec_001_webhookData", "영상보안 시스템 요청 메시지 검증 API 명세서"],
-#     ["spec_0011_inSchema", "spec_0011_outData", "spec_0011_messages", "spec_0011_webhookSchema", "spec_0011_webhookData", "보안용 센서 시스템(요청검증)"]
-# ]
 
 # 선택된 시험 분야의 인덱스 (0: 영상보안, 1: 보안용센서)
 selected_spec_index = 0
@@ -53,14 +47,26 @@ enable_retry_delay = False  # False 권장: 불필요한 sleep 제거
 - num_retries: 메시지별 검증 반복 횟수
 '''
 
-# ✅ specification.id별 설정 (신규 통합 방식)
-# 플랫폼(cmg90, cmg7e, cmg7b)
-# 시스템(cmgat, cmgas, cmga0)
-
 # ✅ 웹훅 서버 설정 (전역)
-WEBHOOK_HOST = "0.0.0.0"  # 모든 인터페이스에서 수신
+WEBHOOK_HOST = "0.0.0.0"  # 서버 바인딩 주소 (모든 인터페이스에서 수신)
 WEBHOOK_PORT = 8090       # 웹훅 수신 포트
-WEBHOOK_URL = f"https://{WEBHOOK_HOST}:{WEBHOOK_PORT}"  # 전체 웹훅 URL
+
+# ✅ 웹훅 공개 IP는 현재 PC의 실제 IP 자동 감지 (socket 사용)
+# 플랫폼/시스템이 웹훅 이벤트를 보낼 주소 = 이 PC의 IP:8090
+try:
+    import socket
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))  # 구글 DNS로 연결 시도 (실제 전송 안 함)
+    WEBHOOK_PUBLIC_IP = s.getsockname()[0]  # 현재 PC의 실제 네트워크 IP
+    s.close()
+    print(f"[CONSTANTS] 웹훅 서버 IP 자동 감지: {WEBHOOK_PUBLIC_IP}")
+except Exception as e:
+    # 최후의 수단: localhost (네트워크 연결 없는 경우)
+    print(f"[CONSTANTS] IP 자동 감지 실패 ({e}), localhost 사용")
+    WEBHOOK_PUBLIC_IP = "127.0.0.1"
+
+WEBHOOK_URL = f"https://{WEBHOOK_PUBLIC_IP}:{WEBHOOK_PORT}"  # 플랫폼/시스템이 웹훅을 보낼 주소
+print(f"[CONSTANTS] 웹훅 콜백 URL: {WEBHOOK_URL} (플랫폼/시스템 접속 URL: {url})")
 
 SPEC_CONFIG = [
     {

@@ -316,12 +316,13 @@ class Server(BaseHTTPRequestHandler):
                             protocol_type = trans_protocols[message_cnt]
 
                             if protocol_type == 'WebHook':
-                                webhook_url = "https://127.0.0.1:8008"
+                                # ✅ CONSTANTS에서 웹훅 URL 가져오기 (10.252.219.95:8090)
+                                webhook_url = CONSTANTS.WEBHOOK_URL
                                 trans_protocol = {
                                     "transProtocolType": "WebHook",
                                     "transProtocolDesc": webhook_url
                                 }
-                                print(f"[DEBUG][SERVER] 기본 WebHook 프로토콜 설정")
+                                print(f"[DEBUG][SERVER] 기본 WebHook 프로토콜 설정: {webhook_url}")
                                 break
                         if trans_protocol:
                             break
@@ -368,10 +369,10 @@ class Server(BaseHTTPRequestHandler):
                         # 2단계: 잘못된 주소인 경우
                         url_tmp = str(url_tmp).strip()
 
-                        # 0.0.0.0 도 추가?
-                        if any(local in url_tmp.lower() for local in ["localhost", "127.0.0.1", "0.0.0.0"]):
+                        # 로컬 주소인 경우 CONSTANTS.WEBHOOK_URL로 대체
+                        if any(local in url_tmp.lower() for local in ["localhost", "127.0.0.1"]):
                             print(f"[SERVER ERROR] Webhook URL이 로컬 주소임: {url_tmp}, 실제 주소로 맵핑 시작")
-                            url_tmp = f"https://{CONSTANTS.url.split('//')[1].split(':')[0]}:8090"
+                            url_tmp = CONSTANTS.WEBHOOK_URL  # ✅ https://10.252.219.95:8090
                             print(f"[SERVER] 맵핑된 Webhook URL: {url_tmp}")
                         else:
                             # 로컬호스트가 아니더라도 포트가 8008이 아니면 일단은 수정하게 해놨는데, 추후 수정해야함
