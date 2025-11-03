@@ -441,56 +441,16 @@ class ResultPageWidget(QWidget):
         right_layout.addSpacing(10)
 
         result_label = QLabel('시험 점수 요약')
-        mainLayout.addWidget(result_label)
-
-        # 결과 테이블 (parent의 테이블 데이터 복사) - 동적 API 개수
-        api_count = self.parent.tableWidget.rowCount()
-        self.tableWidget = QTableWidget(api_count, 8)
-        self.tableWidget.setFixedHeight(274)
-        self.tableWidget.setFixedWidth(1064)
-        self.tableWidget.setStyleSheet(f"""
-            background: #FFF;
-            border-radius: 8px;
-            border: 1px solid #CECECE;
-            font-size: 15px;
-            color: #222;
-        """)
-        self.tableWidget.setHorizontalHeaderLabels([
-            "API 명", "결과", "검증 횟수", "통과 필드 수",
-            "전체 필드 수", "실패 필드 수", "평가 점수", "상세 내용"
-        ])
-        self.tableWidget.verticalHeader().setVisible(False)
-        self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.tableWidget.setSelectionMode(QAbstractItemView.NoSelection)
-        self.tableWidget.setIconSize(QtCore.QSize(16, 16))
-
-        # 테이블 크기 설정
-        self.tableWidget.setMinimumSize(950, 300)
-        self.tableWidget.resize(1050, 400)
-
-        # 컬럼 너비 설정
-        self.tableWidget.setColumnWidth(0, 240)
-        self.tableWidget.setColumnWidth(1, 90)
-        self.tableWidget.setColumnWidth(2, 100)
-        self.tableWidget.setColumnWidth(3, 110)
-        self.tableWidget.setColumnWidth(4, 110)
-        self.tableWidget.setColumnWidth(5, 100)
-        self.tableWidget.setColumnWidth(6, 110)
-        self.tableWidget.setColumnWidth(7, 130)
-
-        # 행 높이 설정
-        for i in range(api_count):
-            self.tableWidget.setRowHeight(i, 40)
-
-        # parent 테이블 데이터 복사
-        self._copy_table_data()
-
-        # 상세 내용 버튼 클릭 이벤트
-        self.tableWidget.cellClicked.connect(self.table_cell_clicked)
-
-        mainLayout.addWidget(self.tableWidget)
-
-        mainLayout.addSpacing(15)
+        result_label.setStyleSheet("""
+                    font-size: 16px; 
+                    font-style: normal; 
+                    font-family: "Noto Sans KR"; 
+                    font-weight: 600; 
+                    color: #222; 
+                    margin-bottom: 6px;
+                    letter-spacing: -0.3px;
+                """)
+        right_layout.addWidget(result_label)
 
         # 시험 분야별 점수 표시
         self.spec_score_group = self._create_spec_score_display()
@@ -2184,24 +2144,22 @@ class MyApp(QWidget):
         ]
 
     def create_spec_selection_panel(self, parent_layout):
-
-        """시험 분야 선택 패널 생성"""
-
-        parent_layout.setSpacing(0)  # 라벨-테이블 간격 최소화
-
-        # 시험 분야 확인 문구
-        title = QLabel("시험 분야")
-        title.setStyleSheet("font-size: 16px; font-family: 'Noto Sans KR'; font-style: normal; font-weight: 500; line-height: normal; letter-spacing: -0.16px; margin-bottom: 6px;")
+        """시험 선택 패널 - 플랫폼과 동일한 스타일"""
+        title = QLabel("시험 선택")
+        title.setStyleSheet("font-size: 16px; font-weight: bold; margin-bottom: 6px;")
         parent_layout.addWidget(title)
 
-        # 시험 그룹 선택 테이블 추가
-        group_table = self.create_group_selection_table()
-        parent_layout.addWidget(group_table)
-        
-        # 시험 분야 선택 테이블 추가
-        field_table = self.create_test_field_table()
-        parent_layout.addWidget(field_table)
+        # 배경 이미지가 보이도록 투명 처리
+        parent_layout.setContentsMargins(0, 0, 0, 0)
+        parent_layout.setSpacing(0)
 
+        # 그룹 테이블 추가
+        self.group_table_widget = self.create_group_selection_table()
+        parent_layout.addWidget(self.group_table_widget)
+
+        # 시험 분야 테이블
+        self.field_group = self.create_test_field_group()
+        parent_layout.addWidget(self.field_group)
 
     def create_group_selection_table(self):
         """시험 분야명 테이블 - 투명 배경 효과"""
@@ -2318,12 +2276,37 @@ class MyApp(QWidget):
             self.test_field_table.setItem(idx, 0, item)
             self.spec_id_to_index[spec_id] = idx
             self.index_to_spec_id[idx] = spec_id
+    def on_group_selected(self, row, col):
+        """
+        ✅ 시험 그룹 선택 시 해당 그룹의 시험 분야 목록을 자동 갱신
+        """
+        # 선택된 그룹명 가져오기
+        if not hasattr(self, "index_to_group_name"):
+            return
 
-    def create_test_field_table(self):
-        """시험 분야 선택 테이블 생성"""
+        group_name = self.index_to_group_name.get(row)
+        if not group_name:
+            return
+
+        # CONSTANTS.SPEC_CONFIG에서 선택된 그룹 데이터 찾기
+        selected_group = None
+        for group_data in CONSTANTS.SPEC_CONFIG:
+            if group_data.get("group_name") == group_name:
+                selected_group = group_data
+                break
+
+        if selected_group is None:
+            print(f"[WARN] 선택된 그룹({group_name}) 데이터를 찾을 수 없습니다.")
+            return
+
+        # 시험 분야 테이블 갱신
+        self.update_test_field_table(selected_group)
+
+    def create_test_field_group(self):
+        """시험 시나리오 테이블 - 플랫폼과 동일한 스타일"""
         group_box = QWidget()
         group_box.setFixedSize(459, 760)
-        group_box.setStyleSheet("background: transparent;")
+        group_box.setStyleSheet("background: transparent;")  # ✅ 투명 배경
 
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
@@ -2337,7 +2320,7 @@ class MyApp(QWidget):
         self.test_field_table.verticalHeader().setVisible(False)
         self.test_field_table.setFixedHeight(759)
 
-        # 플랫폼과 동일한 스타일 적용
+        # ✅ 플랫폼과 완전히 동일한 스타일
         self.test_field_table.setStyleSheet("""
             QTableWidget {
                 background-color: #FFFFFF;
@@ -2677,16 +2660,18 @@ class MyApp(QWidget):
         # ✅ Webhook 처리 (transProtocol 기반으로만 판단)
         try:
             json_data_dict = json.loads(json_data.decode('utf-8'))
-            trans_protocol = json_data_dict.get("transProtocol", {})    # 이 부분 수정해야함
+            trans_protocol = json_data_dict.get("transProtocol", {})
             
             if not trans_protocol:
                 if self.cnt < len(self.trans_protocols):
                     current_protocol = self.trans_protocols[self.cnt]
 
                     if current_protocol == "WebHook":
+                        # ✅ CONSTANTS에서 웹훅 주소 가져오기
+                        webhook_url = getattr(self.CONSTANTS, 'WEBHOOK_URL', 'https://0.0.0.0:8090')
                         trans_protocol = {
                             "transProtocolType": "WebHook",
-                            "transProtocolDesc": "https://127.0.0.1:8008"
+                            "transProtocolDesc": webhook_url
                         }
                         json_data_dict["transProtocol"] = trans_protocol
                         # 재직렬화
@@ -2698,14 +2683,27 @@ class MyApp(QWidget):
                 if "WebHook".lower() in str(trans_protocol_type).lower():
                     time.sleep(0.1)
                     path_tmp = trans_protocol.get("transProtocolDesc", {})
+                    
+                    # ✅ CONSTANTS에서 기본 웹훅 주소 가져오기
+                    default_webhook_url = getattr(self.CONSTANTS, 'WEBHOOK_URL', 'https://0.0.0.0:8090')
+                    
                     # http/https 접두어 보정
                     if not path_tmp or str(path_tmp).strip() in ["None", "", "desc"]:
-                        path_tmp = "https://127.0.0.1:8008"
+                        path_tmp = default_webhook_url
+                        print(f"[WEBHOOK] 기본 웹훅 주소 사용: {path_tmp}")
                     if not str(path_tmp).startswith("http"):
                         path_tmp = "https://" + str(path_tmp)
+                    
                     parsed = urlparse(str(path_tmp))
-                    url = parsed.hostname if parsed.hostname is not None else "127.0.0.1"
-                    port = parsed.port if parsed.port is not None else 8008
+                    
+                    # ✅ CONSTANTS에서 기본값 가져오기
+                    default_host = getattr(self.CONSTANTS, 'WEBHOOK_HOST', '0.0.0.0')
+                    default_port = getattr(self.CONSTANTS, 'WEBHOOK_PORT', 8090)
+                    
+                    url = parsed.hostname if parsed.hostname is not None else default_host
+                    port = parsed.port if parsed.port is not None else default_port
+                    
+                    print(f"[WEBHOOK] 웹훅 서버 시작: {url}:{port}")
 
                     msg = {}
                     self.webhook_flag = True
@@ -3464,54 +3462,50 @@ class MyApp(QWidget):
                 self.step9_msg += msg
 
     def initUI(self):
-
-        # 배경 이미지 설정
+        # ✅ 배경 이미지 설정
         self.setObjectName("system_main")
         self.setAttribute(Qt.WA_StyledBackground, True)
 
         bg_path = resource_path("assets/image/common/bg.png").replace("\\", "/")
 
+        # ✅ 배경 투명 처리를 위한 스타일시트
         self.setStyleSheet(f"""
-            #system_main {{
-                background-image: url('{bg_path}');
-                background-repeat: no-repeat;
-                background-position: center;
-                background-size: cover;
-            }}
-        """)
-
+                #system_main {{
+                    background-image: url('{bg_path}');
+                    background-repeat: no-repeat;
+                    background-position: center;
+                    background-size: cover;
+                }}
+                QScrollArea, QScrollArea QWidget, QScrollArea::viewport,
+                QGroupBox, QWidget#scroll_widget, QLabel {{
+                    background: transparent;
+                }}
+            """)
 
         if not self.embedded:
             self.setWindowTitle('시스템 연동 검증')
 
-
-        # 메인 레이아웃
+        # ✅ 메인 레이아웃
         mainLayout = QVBoxLayout()
-        mainLayout.setContentsMargins(0, 0, 0, 0)  # 여백 제거
-        mainLayout.setSpacing(0)  # 간격 제거
+        mainLayout.setContentsMargins(0, 0, 0, 0)
+        mainLayout.setSpacing(0)
 
-        # 헤더 영역 (1680x56px)
+        # ✅ 헤더 영역 추가
         header_container = QWidget()
         header_container.setFixedSize(1680, 56)
         header_container_layout = QHBoxLayout()
-        header_container_layout.setContentsMargins(0, 8, 0, 0) # 왼, 위, 오, 아
-
+        header_container_layout.setContentsMargins(0, 8, 0, 0)
         header_container_layout.setSpacing(0)
 
         header_widget = QWidget()
         header_widget.setFixedSize(1680, 56)
-
-
-        # 헤더 레이아웃 (로고 + 타이틀)
 
         header_layout = QHBoxLayout(header_widget)
         header_layout.setContentsMargins(0, 0, 0, 0)
         header_layout.setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
         header_layout.setSpacing(10)
 
-
-        # 헤더 로고 (36x36px)
-
+        # 헤더 로고
         logo_label = QLabel(header_widget)
         logo_pixmap = QPixmap(resource_path("assets/image/common/header_logo.png"))
         logo_label.setPixmap(logo_pixmap.scaled(36, 36, Qt.KeepAspectRatio, Qt.SmoothTransformation))
@@ -3534,11 +3528,9 @@ class MyApp(QWidget):
 
         header_container_layout.addWidget(header_widget)
         header_container.setLayout(header_container_layout)
-
         mainLayout.addWidget(header_container)
 
-        # ✅ 배경을 칠할 전용 컨테이너(헤더 제외 영역)
-
+        # ✅ 2컬럼 레이아웃 적용
         bg_root = QWidget()
         bg_root.setObjectName("bg_root")
         bg_root.setAttribute(Qt.WA_StyledBackground, True)
@@ -3546,35 +3538,34 @@ class MyApp(QWidget):
         bg_root_layout.setContentsMargins(0, 0, 0, 0)
         bg_root_layout.setSpacing(0)
 
-
-        # 2컬럼 레이아웃 생성
         columns_layout = QHBoxLayout()
         columns_layout.setContentsMargins(0, 0, 0, 0)
         columns_layout.setSpacing(0)
 
-
-        # 왼쪽 컬럼 (479x906)
+        # ✅ 왼쪽 컬럼 (시험 분야 선택)
         left_col = QWidget()
         left_col.setFixedSize(479, 906)
         left_layout = QVBoxLayout()
         left_layout.setContentsMargins(0, 0, 0, 0)
         left_layout.setSpacing(0)
 
-        # 시험 분야 선택 영역
         self.create_spec_selection_panel(left_layout)
         left_layout.addStretch()
+        left_col.setLayout(left_layout)
 
-        # 오른쪽 컬럼 (1112x906)
+        # ✅ 오른쪽 컬럼 (나머지 UI)
         right_col = QWidget()
-        right_col.setFixedSize(1112, 906)
+        right_col.setFixedSize(1064, 906)
         right_layout = QVBoxLayout()
         right_layout.setContentsMargins(0, 0, 0, 0)
         right_layout.setSpacing(0)
-        # 시험 결과 테이블 및 기타 정보
-        # 시험 API 라벨 추가
+
+        # 시험 API 라벨
         api_label = QLabel('시험 API')
-        api_label.setStyleSheet('font-size: 16px; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-bottom: 6px;')
+        api_label.setStyleSheet(
+            'font-size: 16px; font-style: normal; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-bottom: 6px;')
         right_layout.addWidget(api_label)
+
         self.init_centerLayout()
         contentWidget = QWidget()
         contentWidget.setLayout(self.centerLayout)
@@ -3582,13 +3573,14 @@ class MyApp(QWidget):
 
         # 수신 메시지 실시간 모니터링
         monitor_label = QLabel("수신 메시지 실시간 모니터링")
-        monitor_label.setStyleSheet('font-size: 16px; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-top: 20px; margin-bottom: 6px;')
+        monitor_label.setStyleSheet(
+            'font-size: 16px; font-style: normal; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-top: 20px; margin-bottom: 6px;')
         right_layout.addWidget(monitor_label)
 
         self.valResult = QTextBrowser(self)
         self.valResult.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.valResult.setFixedHeight(174)
-        self.valResult.setFixedWidth(1064)  # 가로 길이 1064px로 고정
+        self.valResult.setFixedWidth(1064)
         self.valResult.setStyleSheet(f"""
             background: #FFF;
             border-radius: 8px;
@@ -3600,14 +3592,14 @@ class MyApp(QWidget):
 
         # 시험 결과
         self.valmsg = QLabel('시험 점수 요약', self)
-        self.valmsg.setStyleSheet('font-size: 16px; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-top: 20px; margin-bottom: 6px;')
-        right_layout.addWidget(self.valmsg)  # ← 오른쪽에 추가!
-
+        self.valmsg.setStyleSheet(
+            'font-size: 16px; font-style: normal; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-top: 20px; margin-bottom: 6px;')
+        right_layout.addWidget(self.valmsg)
 
         # 평가 점수 표시
         spec_score_group = self.create_spec_score_display_widget()
         right_layout.addWidget(spec_score_group)
-        # 전체 점수 표시
+
         total_score_group = self.create_total_score_display_widget()
         right_layout.addWidget(total_score_group)
 
@@ -3738,27 +3730,25 @@ class MyApp(QWidget):
         buttonLayout.addWidget(self.rbtn)
         buttonLayout.addSpacing(18)
         buttonLayout.addWidget(self.result_btn)
-        
+        buttonLayout.addStretch()
         buttonGroup.setLayout(buttonLayout)
-        right_layout.addSpacing(20)
+
+        right_layout.addSpacing(32)
         right_layout.addWidget(buttonGroup)
         right_layout.addStretch()
-        left_col.setLayout(left_layout)
         right_col.setLayout(right_layout)
 
-
-        # 컬럼 레이아웃에 추가
         columns_layout.addWidget(left_col)
         columns_layout.addWidget(right_col)
-
 
         bg_root_layout.addLayout(columns_layout)
         bg_root.setLayout(bg_root_layout)
         mainLayout.addWidget(bg_root)
 
-
         self.setLayout(mainLayout)
 
+        if not self.embedded:
+            self.setWindowTitle('물리보안 시스템 연동 검증 소프트웨어')
 
         QTimer.singleShot(100, self.select_first_scenario)
 
@@ -4528,16 +4518,16 @@ class MyApp(QWidget):
             super().resizeEvent(event)
 
             # 테이블 위젯 크기 조정
-            # if hasattr(self, 'tableWidget'):
+            if hasattr(self, 'tableWidget'):
                 # 현재 창 너비의 95%를 테이블 너비로 설정
-            # new_width = int(self.width() * 0.95)
-            # new_width = max(950, new_width)  # 최소 950px
+                new_width = int(self.width() * 0.95)
+                new_width = max(950, new_width)  # 최소 950px
 
                 # 컬럼 너비를 창 크기에 맞춰 조정
-            # total_width = new_width - 50  # 여백 고려
-            # col_widths = [0.22, 0.09, 0.10, 0.11, 0.11, 0.10, 0.11, 0.16]  # 비율
-            # for col, ratio in enumerate(col_widths):
-            # self.tableWidget.setColumnWidth(col, int(total_width * ratio))
+                total_width = new_width - 50  # 여백 고려
+                col_widths = [0.22, 0.09, 0.10, 0.11, 0.11, 0.10, 0.11, 0.16]  # 비율
+                for col, ratio in enumerate(col_widths):
+                    self.tableWidget.setColumnWidth(col, int(total_width * ratio))
 
         except Exception as e:
             print(f"resizeEvent 오류: {e}")
