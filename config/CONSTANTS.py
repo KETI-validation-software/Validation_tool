@@ -28,6 +28,7 @@ specs = [
     ["cmh1u5pef000sgxc3bzl4y9v0_inSchema", "cmh1u5pef000sgxc3bzl4y9v0_outData", "cmh1u5pef000sgxc3bzl4y9v0_messages",
      ""]]
 
+
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황
 flag_opt = False
 if test_range == "ALL_FIELDS":
