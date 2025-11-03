@@ -993,7 +993,7 @@ class ResultPageWidget(QWidget):
             # API 명
             api_name = f"{row + 1}. {api_list[row]}"
             api_item = QTableWidgetItem(api_name)
-            api_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)  # 가운데 정렬
             self.tableWidget.setItem(row, 0, api_item)
 
             # ✅ 기본 아이콘 (결과 페이지 전용 아이콘 사용)
@@ -1056,7 +1056,7 @@ class ResultPageWidget(QWidget):
         for row, row_data in enumerate(table_data):
             # API 명
             api_item = QTableWidgetItem(row_data['api_name'])
-            api_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)  # 가운데 정렬
             self.tableWidget.setItem(row, 0, api_item)
 
             # ✅ 아이콘 상태 복원 (결과 페이지 전용 아이콘 사용)
@@ -1287,7 +1287,9 @@ class ResultPageWidget(QWidget):
             # API 명
             api_item = self.parent.tableWidget.item(row, 0)
             if api_item:
-                self.tableWidget.setItem(row, 0, QTableWidgetItem(api_item.text()))
+                new_item = QTableWidgetItem(api_item.text())
+                new_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)  # 가운데 정렬
+                self.tableWidget.setItem(row, 0, new_item)
 
             # ✅ 결과 아이콘 (결과 페이지 전용 아이콘으로 교체)
             icon_widget = self.parent.tableWidget.cellWidget(row, 1)
@@ -2473,7 +2475,7 @@ class MyApp(QWidget):
         # 테이블 갱신
         for idx, (spec_id, config) in enumerate(spec_items):
             description = config.get("test_name", f"시험 분야 {idx + 1}")
-            description_with_role = f"{description} (요청 검증)"
+            description_with_role = f"{description} (응답 검증)"
             item = QTableWidgetItem(description_with_role)
             item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self.test_field_table.setItem(idx, 0, item)
@@ -2719,9 +2721,10 @@ class MyApp(QWidget):
                     current_protocol = self.trans_protocols[self.cnt]
 
                     if current_protocol == "WebHook":
+                        # ✅ CONSTANTS에서 웹훅 URL 가져오기 (socket 자동 감지된 내 PC IP)
                         trans_protocol = {
                             "transProtocolType": "WebHook",
-                            "transProtocolDesc": "https://127.0.0.1:8008"
+                            "transProtocolDesc": CONSTANTS.WEBHOOK_URL  # ✅ https://10.252.219.95:8090
                         }
                         json_data_dict["transProtocol"] = trans_protocol
                         # 재직렬화
@@ -2735,12 +2738,13 @@ class MyApp(QWidget):
                     path_tmp = trans_protocol.get("transProtocolDesc", {})
                     # http/https 접두어 보정
                     if not path_tmp or str(path_tmp).strip() in ["None", "", "desc"]:
-                        path_tmp = "https://127.0.0.1:8008"
+                        # ✅ 기본값도 CONSTANTS에서 가져오기
+                        path_tmp = CONSTANTS.WEBHOOK_URL  # ✅ https://10.252.219.95:8090
                     if not str(path_tmp).startswith("http"):
                         path_tmp = "https://" + str(path_tmp)
                     parsed = urlparse(str(path_tmp))
-                    url = parsed.hostname if parsed.hostname is not None else "127.0.0.1"
-                    port = parsed.port if parsed.port is not None else 8008
+                    url = parsed.hostname if parsed.hostname is not None else "0.0.0.0"  # ✅ 기본값 수정
+                    port = parsed.port if parsed.port is not None else 8090  # ✅ 포트도 8090으로
 
                     msg = {}
                     self.webhook_flag = True
@@ -3911,6 +3915,7 @@ class MyApp(QWidget):
                 font-style: normal;
                 font-weight: 400;
                 letter-spacing: 0.098px;
+                text-align: center;  /* 모든 셀 가운데 정렬 */
             }}
             QHeaderView::section {{
                 background-color: #EDF0F3;
@@ -3949,7 +3954,9 @@ class MyApp(QWidget):
         self.step_names = self.videoMessages
         for i, name in enumerate(self.step_names):
             # API 명
-            self.tableWidget.setItem(i, 0, QTableWidgetItem(f"{i + 1}. {name}"))
+            api_item = QTableWidgetItem(f"{i + 1}. {name}")
+            api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)  # 가운데 정렬
+            self.tableWidget.setItem(i, 0, api_item)
             # 결과 아이콘
             icon_widget = QWidget()
             icon_layout = QHBoxLayout()
