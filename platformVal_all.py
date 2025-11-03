@@ -2416,8 +2416,8 @@ class MyApp(QWidget):
         ]
 
     def create_spec_selection_panel(self, parent_layout):
-        title = QLabel("시험 선택")
-        title.setStyleSheet("font-size: 16px; font-weight: bold; margin-bottom: 6px;")
+        title = QLabel("시험 분야")
+        title.setStyleSheet("font-size: 16px; font-family: 'Noto Sans KR'; font-style: normal; font-weight: 500; line-height: normal; letter-spacing: -0.16px; margin-bottom: 6px;")
         parent_layout.addWidget(title)
 
         # 그룹 테이블 추가
