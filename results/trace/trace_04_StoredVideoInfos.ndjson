@@ -1,2 +1,0 @@
-{"time": "2025-11-03T02:16:31.294351Z", "api": "StoredVideoInfos", "dir": "REQUEST", "data": {"timePeriod": {"startTime": 1760948700000, "endTime": 1761121500000}, "camList": [{"camID": ""}]}}
-{"time": "2025-11-03T02:16:32.291418Z", "api": "StoredVideoInfos", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "camList": [{"camID": "", "timeList": [{"startTime": 1761083669655, "endTime": 1761093465310}]}]}}
