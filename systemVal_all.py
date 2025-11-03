@@ -3548,7 +3548,7 @@ class MyApp(QWidget):
         # 시험 API 라벨
         api_label = QLabel('시험 API')
         api_label.setStyleSheet(
-            'font-size: 16px; font-style: normal; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-bottom: 6px;')
+            'font-size: 16px; font-style: normal; font-family: "Noto Sans KR"; font-weight: 600; color: #222; margin-bottom: 6px;')
         right_layout.addWidget(api_label)
 
         self.init_centerLayout()
@@ -3559,7 +3559,7 @@ class MyApp(QWidget):
         # 수신 메시지 실시간 모니터링
         monitor_label = QLabel("수신 메시지 실시간 모니터링")
         monitor_label.setStyleSheet(
-            'font-size: 16px; font-style: normal; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-top: 20px; margin-bottom: 6px;')
+            'font-size: 16px; font-style: normal; font-family: "Noto Sans KR"; font-weight: 600; color: #222; margin-top: 20px; margin-bottom: 6px;')
         right_layout.addWidget(monitor_label)
 
         self.valResult = QTextBrowser(self)
@@ -3578,7 +3578,7 @@ class MyApp(QWidget):
         # 시험 결과
         self.valmsg = QLabel('시험 점수 요약', self)
         self.valmsg.setStyleSheet(
-            'font-size: 16px; font-style: normal; font-family: "Noto Sans KR"; font-weight: 500; color: #222; margin-top: 20px; margin-bottom: 6px;')
+            'font-size: 16px; font-style: normal; font-family: "Noto Sans KR"; font-weight: 600; color: #222; margin-top: 20px; margin-bottom: 6px;')
         right_layout.addWidget(self.valmsg)
 
         # 평가 점수 표시
