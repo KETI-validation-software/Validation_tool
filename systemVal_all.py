@@ -2016,6 +2016,10 @@ class MyApp(QWidget):
             if api not in self.latest_events:
                 self.latest_events[api] = {}
             self.latest_events[api][direction] = evt
+            
+            # ✅ 디버그 로그 추가
+            print(f"[PUSH_EVENT] API={api}, Direction={direction}")
+            print(f"[PUSH_EVENT] latest_events 키 목록: {list(self.latest_events.keys())}")
 
             # (옵션) 즉시 파일로도 남김 - append-only ndjson
             os.makedirs(CONSTANTS.trace_path, exist_ok=True)
@@ -2940,8 +2944,9 @@ class MyApp(QWidget):
                 current_timeout = self.time_outs[self.cnt] / 1000 if self.cnt < len(self.time_outs) else 5.0
                 path = self.pathUrl + "/" + (self.message[self.cnt] if self.cnt < len(self.message) else "")
                 inMessage = self.inMessage[self.cnt] if self.cnt < len(self.inMessage) else {}
-                # ✅ Data Mapper 적용 - 이전 응답 데이터로 요청 업데이트 (trace 파일 != ui)
-                self.generator.latest_events = self.latest_events
+                # ✅ Data Mapper 적용 - 이전 응답 데이터로 요청 업데이트
+                # generator는 이미 self.latest_events를 참조하고 있으므로 재할당 불필요
+                print(f"[DEBUG][MAPPER] latest_events 상태: {list(self.latest_events.keys())}")
                 inMessage = self._apply_request_constraints(inMessage, self.cnt)
 
                 json_data = json.dumps(inMessage).encode('utf-8')

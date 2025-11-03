@@ -66,8 +66,14 @@ class Server(BaseHTTPRequestHandler):
                 "data": payload
             }
 
+            print(f"[_push_event] 저장 시도: api={api_name}, dir={direction}")
+            print(f"[_push_event] 저장 전 latest_event 키: {list(Server.latest_event.keys())}")
+            
             Server.trace[api_name].append(evt)  # ✅ 클래스 변수 사용
             Server.latest_event[api_name][direction] = evt  # ✅ 클래스 변수 사용
+            
+            print(f"[_push_event] 저장 후 latest_event 키: {list(Server.latest_event.keys())}")
+            print(f"[_push_event] 저장된 데이터: {api_name} -> {list(Server.latest_event[api_name].keys())}")
 
             # 파일 쓰기는 선택적으로 (환경 변수나 설정으로 제어 가능)
             # 성능이 중요하면 주석 처리하거나 비동기로 처리
@@ -78,11 +84,12 @@ class Server(BaseHTTPRequestHandler):
                     trace_path = os.path.join(CONSTANTS.trace_path, f"trace_{safe_api}.ndjson")
                     with open(trace_path, "a", encoding="utf-8") as f:
                         f.write(json.dumps(evt, ensure_ascii=False) + "\n")
-                except Exception:
-                    pass  # 파일 쓰기 실패해도 메모리에는 저장됨
-        except Exception:
-            pass
-            pass
+                except Exception as e:
+                    print(f"[_push_event] 파일 쓰기 실패: {e}")
+        except Exception as e:
+            print(f"[_push_event] ❌ 에러 발생: {e}")
+            import traceback
+            traceback.print_exc()
 
     def get_latest_event(self, api_name, direction="RESPONSE"):
         """
@@ -167,7 +174,9 @@ class Server(BaseHTTPRequestHandler):
                 # 요청 데이터 기록
                 self._push_event(api_name, "REQUEST", self.request_data)
                 
+                # ✅ 저장 확인 로그 추가
                 print(f"[TRACE WRITE] ✅ trace 파일에 저장 완료")
+                print(f"[TRACE WRITE] latest_event 키 목록: {list(Server.latest_event.keys())}")
             except Exception as e:
                 print(f"[ERROR] 요청 본문 파싱 실패: {e}")
                 self.request_data = {}
@@ -243,6 +252,8 @@ class Server(BaseHTTPRequestHandler):
             # Bearer Auth
             elif self.auth_type == "B":
                 print(f"[DEBUG][SERVER] Checking Bearer, auth={auth}")
+                print(f"[DEBUG][SERVER][AUTH] self.auth_Info={getattr(self, 'auth_Info', None)}")
+                print(f"[DEBUG][SERVER][AUTH] Server.auth_Info={Server.auth_Info}")
                 if auth:
                     auth_parts = auth.split(" ")
                     if len(auth_parts) > 1 and auth_parts[0] == 'Bearer':
@@ -259,6 +270,10 @@ class Server(BaseHTTPRequestHandler):
 
                         if stored_token is not None and token == str(stored_token).strip():
                             auth_pass = True
+                        else:
+                            print(f"[DEBUG][SERVER][AUTH] ❌ Bearer 토큰 불일치!")
+                else:
+                    print(f"[DEBUG][SERVER][AUTH] ❌ Authorization 헤더 없음!")
             # 기타: 특정 path 우회
             elif self.path == "/" + self.message[0]:
                 auth_pass = True
@@ -469,6 +484,9 @@ class Server(BaseHTTPRequestHandler):
             print(f"[DEBUG][CONSTRAINTS] out_con type: {type(out_con)}")
             print(f"[DEBUG][CONSTRAINTS] out_con value: {out_con}")
             print(f"[DEBUG][CONSTRAINTS] out_con length: {len(out_con) if isinstance(out_con, dict) else 'N/A'}")
+            print(f"[DEBUG][CONSTRAINTS] 원본 message 내용: {json.dumps(message, ensure_ascii=False)[:200]}")
+            print(f"[DEBUG][CONSTRAINTS] ★ latest_event 키 목록: {list(Server.latest_event.keys())}")
+            print(f"[DEBUG][CONSTRAINTS] ★ generator.latest_events 동일 객체?: {id(self.generator.latest_events) == id(Server.latest_event)}")
 
             # constraints가 있을 때만 _applied_constraints 호출 (성능 최적화)
             if out_con and isinstance(out_con, dict) and len(out_con) > 0:
@@ -485,6 +503,7 @@ class Server(BaseHTTPRequestHandler):
                     constraints=out_con,
                     n=len(num_data)
                 )
+                print(f"[DEBUG][CONSTRAINTS] 업데이트된 message 내용: {json.dumps(updated_message, ensure_ascii=False)[:200]}")
                 self._push_event(self.path[1:], "RESPONSE", updated_message)
 
                 # 업데이트된 메시지를 응답으로 전송

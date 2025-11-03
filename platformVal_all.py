@@ -1773,7 +1773,8 @@ class MyApp(QWidget):
         """direction: 'REQUEST'|'RESPONSE'|'WEBHOOK'"""
         try:
             if not hasattr(self.Server, "trace") or self.Server.trace is None:
-                self.Server.trace = {}
+                from collections import defaultdict, deque
+                self.Server.trace = defaultdict(lambda: deque(maxlen=500))
             if api_name not in self.Server.trace:
                 from collections import deque
                 self.Server.trace[api_name] = deque(maxlen=500)
@@ -3914,7 +3915,11 @@ class MyApp(QWidget):
 
             # ✅ 10. Server 객체 상태 초기화
             if hasattr(self.Server, 'trace'):
-                self.Server.trace = {}
+                from collections import defaultdict, deque
+                self.Server.trace = defaultdict(lambda: deque(maxlen=1000))
+            if hasattr(self.Server, 'latest_event'):
+                from collections import defaultdict
+                self.Server.latest_event = defaultdict(dict)
             if hasattr(self.Server, 'request_counter'):
                 self.Server.request_counter = {}
             if hasattr(self.Server, 'webhook_thread'):

@@ -222,7 +222,7 @@
                   "transProtocolDesc": "127.0.0.1:8090"
                 },
                 "eventFilter": "배회",
-                "classFilter": "트럭",
+                "classFilter": "사람",
                 "startTime": 1761110160000
               },
               "validationErrors": [
@@ -295,5 +295,5 @@
       ]
     }
   ],
-  "completedDate": "2025-11-03T16:36:00Z"
+  "completedDate": "2025-11-03T17:17:14Z"
 }
