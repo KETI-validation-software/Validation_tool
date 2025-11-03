@@ -1,0 +1,230 @@
+{
+  "requestId": "cmh2sdyj70001ry7uvsgugy25",
+  "evaluationTarget": {
+    "companyName": "물리보안기업",
+    "contactPerson": "김철수",
+    "productName": "물리보안테스트제품",
+    "modelName": "v1.0",
+    "version": "v1.0"
+  },
+  "testGroup": {
+    "id": "cmgzwohuq01y8vsvep0hpuuf4",
+    "name": "물리보안",
+    "testRange": "ALL_FIELDS",
+    "testSpecIds": [
+      "cmgyv3rzl014nvsveidu5jpzp"
+    ]
+  },
+  "status": "완료",
+  "authMethod": "Bearer Token",
+  "testScore": {
+    "score": 89.47,
+    "totalFields": 76,
+    "passedFields": 68,
+    "failedFields": 8
+  },
+  "testResult": [
+    {
+      "testSpecId": "cmgyv3rzl014nvsveidu5jpzp",
+      "testSpecName": "영상보안시스템_new",
+      "score": 89.47,
+      "totalFields": 76,
+      "passedFields": 68,
+      "failedFields": 8,
+      "apis": [
+        {
+          "id": "step-1-s9942zltt",
+          "name": "인증",
+          "method": "POST",
+          "endpoint": "/Authentication",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 5,
+          "passFields": 5,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "step-1-vps6mosa3",
+          "name": "전송 지원 기능 정보 연동",
+          "method": "POST",
+          "endpoint": "/Capabilities",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 8,
+          "passFields": 8,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "step-3-dpd47yeve",
+          "name": "카메라 목록 연동",
+          "method": "POST",
+          "endpoint": "/CameraProfiles",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 12,
+          "passFields": 12,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "step-4-nbpd1rfle",
+          "name": "저장된 영상 목록 연동",
+          "method": "POST",
+          "endpoint": "/StoredVideoInfos",
+          "score": 86.0,
+          "validationCnt": 1,
+          "totalFields": 7,
+          "passFields": 6,
+          "failFields": 1,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "[시도 1/1]",
+                "[구조] 타입 불일치: camList.timeList - 예상: 모든 요소가 list, 실패한 항목들: [0] {'startTime': 1760993645785, 'endTime': 1760996711177} (타입: dict)"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "step-5-6juqjc7zt",
+          "name": "실시간 영상 정보 연동",
+          "method": "POST",
+          "endpoint": "/StreamURLs",
+          "score": 92.0,
+          "validationCnt": 1,
+          "totalFields": 12,
+          "passFields": 11,
+          "failFields": 1,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "[시도 1/1]",
+                "[의미] camList.camURL: 스트림 연결 실패: rtsp://127.0.01:8554"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "step-6-2hxrdvfry",
+          "name": "저장된 영상 정보 연동",
+          "method": "POST",
+          "endpoint": "/ReplayURL",
+          "score": 93.0,
+          "validationCnt": 1,
+          "totalFields": 14,
+          "passFields": 13,
+          "failFields": 1,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "[시도 1/1]",
+                "[구조] 타입 불일치: camList.startTime (예상: str, 실제: int, 값: 1760981590563)"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "step-7-jgj9l9vf4-registration",
+          "name": "실시간 이벤트 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/RealtimeVideoEventInfos",
+          "score": 67.0,
+          "validationCnt": 1,
+          "totalFields": 9,
+          "passFields": 6,
+          "failFields": 3,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다.",
+                "--- Webhook 검증 ---",
+                "[구조] 필수 필드 누락: camList.eventName",
+                "[구조] 필수 필드 누락: camList.eventUUID",
+                "[구조] 필수 필드 누락: camList.startTime"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "step-7-jgj9l9vf4-webhook",
+          "name": "실시간 이벤트 분석 정보 연동 (Webhook)",
+          "method": "POST",
+          "endpoint": "/RealtimeVideoEventInfos/webhook",
+          "score": 0,
+          "validationCnt": 1,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": []
+            }
+          ]
+        },
+        {
+          "id": "step-8-57zrt6i4l",
+          "name": "저장된 이벤트 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/StoredVideoEventInfos",
+          "score": 78.0,
+          "validationCnt": 1,
+          "totalFields": 9,
+          "passFields": 7,
+          "failFields": 2,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "[시도 1/1]",
+                "[구조] 타입 불일치: camList.endTime (예상: str, 실제: int, 값: 9246453728527)",
+                "[구조] 타입 불일치: camList.startTime (예상: str, 실제: int, 값: 6302771116441)"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "completedDate": "2025-11-03T09:55:12Z"
+}
