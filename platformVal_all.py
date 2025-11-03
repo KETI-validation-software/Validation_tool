@@ -664,9 +664,9 @@ class ResultPageWidget(QWidget):
         return group_box
 
     def create_test_field_group(self):
-        """시험 시나리오 테이블 (크기 줄임: 280px)"""
+        """시험 시나리오 테이블"""
         group_box = QWidget()
-        group_box.setFixedSize(459, 760)
+        group_box.setFixedSize(459, 650)  # ✅ 더 줄임
         group_box.setStyleSheet("background: transparent;")
 
         layout = QVBoxLayout()
@@ -679,7 +679,7 @@ class ResultPageWidget(QWidget):
         self.test_field_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.test_field_table.cellClicked.connect(self.on_test_field_selected)
         self.test_field_table.verticalHeader().setVisible(False)
-        self.test_field_table.setFixedHeight(759)
+        self.test_field_table.setFixedHeight(645)  # ✅ 5px 여유 확보
 
         self.test_field_table.setStyleSheet("""
             QTableWidget {
@@ -2416,8 +2416,8 @@ class MyApp(QWidget):
         ]
 
     def create_spec_selection_panel(self, parent_layout):
-        title = QLabel("시험 선택")
-        title.setStyleSheet("font-size: 16px; font-weight: bold; margin-bottom: 6px;")
+        title = QLabel("시험 분야")
+        title.setStyleSheet("font-size: 16px; font-family: 'Noto Sans KR'; font-style: normal; font-weight: 500; line-height: normal; letter-spacing: -0.16px; margin-bottom: 6px;")
         parent_layout.addWidget(title)
 
         # 그룹 테이블 추가
@@ -2466,6 +2466,7 @@ class MyApp(QWidget):
         """시험 그룹명 테이블"""
         group_box = QWidget()
         group_box.setFixedSize(459, 220)
+        group_box.setStyleSheet("background: transparent;")  # ✅ 투명 배경 추가
 
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
@@ -2545,7 +2546,8 @@ class MyApp(QWidget):
     def create_test_field_group(self):
         """시험 시나리오 테이블"""
         group_box = QWidget()
-        group_box.setFixedSize(459, 760)
+        group_box.setFixedSize(459, 650)  # ✅ 더 줄임
+        group_box.setStyleSheet("background: transparent;")
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
@@ -2556,7 +2558,7 @@ class MyApp(QWidget):
         self.test_field_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.test_field_table.cellClicked.connect(self.on_test_field_selected)
         self.test_field_table.verticalHeader().setVisible(False)
-        self.test_field_table.setFixedHeight(759)
+        self.test_field_table.setFixedHeight(645)  # ✅ 5px 여유 확보
 
         self.test_field_table.setStyleSheet("""
             QTableWidget {
