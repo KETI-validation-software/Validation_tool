@@ -18,19 +18,19 @@
   "status": "완료",
   "authMethod": "Bearer Token",
   "testScore": {
-    "score": 90.79,
+    "score": 85.53,
     "totalFields": 76,
-    "passedFields": 69,
-    "failedFields": 7
+    "passedFields": 65,
+    "failedFields": 11
   },
   "testResult": [
     {
       "testSpecId": "cmgyv3rzl014nvsveidu5jpzp",
       "testSpecName": "영상보안시스템_new",
-      "score": 90.79,
+      "score": 85.53,
       "totalFields": 76,
-      "passedFields": 69,
-      "failedFields": 7,
+      "passedFields": 65,
+      "failedFields": 11,
       "apis": [
         {
           "id": "step-1-s9942zltt",
@@ -100,18 +100,18 @@
           "name": "저장된 영상 목록 연동",
           "method": "POST",
           "endpoint": "/StoredVideoInfos",
-          "score": 100.0,
+          "score": 86.0,
           "validationCnt": 1,
           "totalFields": 7,
-          "passFields": 7,
-          "failFields": 0,
+          "passFields": 6,
+          "failFields": 1,
           "validations": [
             {
               "attempt": 1,
               "validationData": {},
               "validationErrors": [
                 "[시도 1/1]",
-                "오류가 없습니다."
+                "[의미] camList.camID: 값 불일치:  (index 0),  (index 1),  (index 2)가 camID(['cam0001', 'cam0002'])에 없음"
               ]
             }
           ]
@@ -142,18 +142,19 @@
           "name": "저장된 영상 정보 연동",
           "method": "POST",
           "endpoint": "/ReplayURL",
-          "score": 93.0,
+          "score": 86.0,
           "validationCnt": 1,
           "totalFields": 14,
-          "passFields": 13,
-          "failFields": 1,
+          "passFields": 12,
+          "failFields": 2,
           "validations": [
             {
               "attempt": 1,
               "validationData": {},
               "validationErrors": [
                 "[시도 1/1]",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761019459928 (타입: int), [1] 1761092993568 (타입: int), [2] 1761075652693 (타입: int)"
+                "[의미] camList.camID: 값 불일치:  (index 0),  (index 1),  (index 2)가 camID(['cam0001', 'cam0002'])에 없음",
+                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761151578140 (타입: int), [1] 1760993974577 (타입: int), [2] 1761169972442 (타입: int)"
               ]
             }
           ]
@@ -206,19 +207,21 @@
           "name": "저장된 이벤트 분석 정보 연동",
           "method": "POST",
           "endpoint": "/StoredVideoEventInfos",
-          "score": 78.0,
+          "score": 56.0,
           "validationCnt": 1,
           "totalFields": 9,
-          "passFields": 7,
-          "failFields": 2,
+          "passFields": 5,
+          "failFields": 4,
           "validations": [
             {
               "attempt": 1,
               "validationData": {},
               "validationErrors": [
                 "[시도 1/1]",
-                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 9841670158776 (타입: int), [1] 9674200697302 (타입: int), [2] 9152546424259 (타입: int)",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 8059825800210 (타입: int), [1] 8390481491518 (타입: int), [2] 7370437531935 (타입: int)"
+                "[의미] camList.camID: 값 불일치:  (index 0),  (index 1),  (index 2)가 camID(['cam0001', 'cam0002'])에 없음",
+                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 3628590701386 (타입: int), [1] 2881112479733 (타입: int), [2] 4669757583293 (타입: int)",
+                "[의미] camList.eventName: 값 불일치: ['', '', ''] != 예상값 배회",
+                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 2995300180926 (타입: int), [1] 2089789840515 (타입: int), [2] 2578498542848 (타입: int)"
               ]
             }
           ]
@@ -226,5 +229,5 @@
       ]
     }
   ],
-  "completedDate": "2025-11-03T14:14:07Z"
+  "completedDate": "2025-11-03T16:25:14Z"
 }
