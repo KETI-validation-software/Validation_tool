@@ -3067,6 +3067,10 @@ class MyApp(QWidget):
                     try:
                         self.run_status = "완료"
                         result_json = build_result_json(self)
+                        url = f"http://ect2.iptime.org:20223/api/integration/test-results"
+                        response = requests.post(url, json=result_json)
+                        print("✅ 시험 결과 전송 상태 코드:", response.status_code)
+                        print("📥  시험 결과 전송 응답:", response.text)
                         json_path = os.path.join(result_dir, "response_results.json")
                         with open(json_path, "w", encoding="utf-8") as f:
                             json.dump(result_json, f, ensure_ascii=False, indent=2)
@@ -3430,6 +3434,10 @@ class MyApp(QWidget):
                 try:
                     self.run_status = "완료"
                     result_json = build_result_json(self)
+                    url = f"http://ect2.iptime.org:20223/api/integration/test-results"
+                    response = requests.post(url, json=result_json)
+                    print("✅ 시험 결과 전송 상태 코드:", response.status_code)
+                    print("📥  시험 결과 전송 응답:", response.text)
                     json_path = os.path.join(result_dir, "response_results.json")
                     with open(json_path, "w", encoding="utf-8") as f:
                         json.dump(result_json, f, ensure_ascii=False, indent=2)
@@ -4578,6 +4586,10 @@ class MyApp(QWidget):
         try:
             self.run_status = "진행중"
             result_json = build_result_json(self)
+            url = f"http://ect2.iptime.org:20223/api/integration/test-results"
+            response = requests.post(url, json=result_json)
+            print("✅ 시험 결과 전송 상태 코드:", response.status_code)
+            print("📥  시험 결과 전송 응답:", response.text)
             json_path = os.path.join(result_dir, "response_results.json")
             with open(json_path, "w", encoding="utf-8") as f:
                 json.dump(result_json, f, ensure_ascii=False, indent=2)
