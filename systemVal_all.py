@@ -2938,7 +2938,7 @@ class MyApp(QWidget):
                 inMessage = self.inMessage[self.cnt] if self.cnt < len(self.inMessage) else {}
                 # ✅ Data Mapper 적용 - 이전 응답 데이터로 요청 업데이트 (trace 파일 != ui)
                 self.generator.latest_events = self.latest_events
-                #inMessage = self._apply_request_constraints(inMessage, self.cnt)
+                inMessage = self._apply_request_constraints(inMessage, self.cnt)
 
                 json_data = json.dumps(inMessage).encode('utf-8')
 
