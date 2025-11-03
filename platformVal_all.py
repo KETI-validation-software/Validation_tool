@@ -911,7 +911,7 @@ class ResultPageWidget(QWidget):
             icon_layout = QHBoxLayout()
             icon_layout.setContentsMargins(0, 0, 0, 0)
             icon_label = QLabel()
-            icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
+            icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))  # icn_basic.png는 16x16
             icon_label.setAlignment(Qt.AlignCenter)
             icon_layout.addWidget(icon_label)
             icon_layout.setAlignment(Qt.AlignCenter)
@@ -973,16 +973,19 @@ class ResultPageWidget(QWidget):
             icon_state = row_data['icon_state']
             if icon_state == "PASS":
                 img = self.img_pass
+                icon_size = (84, 20)  # tag_성공.png
             elif icon_state == "FAIL":
                 img = self.img_fail
+                icon_size = (84, 20)  # tag_실패.png
             else:
                 img = self.img_none
+                icon_size = (16, 16)  # icn_basic.png
 
             icon_widget = QWidget()
             icon_layout = QHBoxLayout()
             icon_layout.setContentsMargins(0, 0, 0, 0)
             icon_label = QLabel()
-            icon_label.setPixmap(QIcon(img).pixmap(16, 16))
+            icon_label.setPixmap(QIcon(img).pixmap(*icon_size))
             icon_label.setAlignment(Qt.AlignCenter)
             icon_layout.addWidget(icon_label)
             icon_layout.setAlignment(Qt.AlignCenter)
@@ -1188,7 +1191,7 @@ class ResultPageWidget(QWidget):
         self.backRequested.emit()
 
     def _copy_table_data(self):
-        """parent의 테이블 데이터를 복사"""
+        """parent의 테이블 데이터를 복사 (결과 페이지 전용 아이콘 사용)"""
         api_count = self.parent.tableWidget.rowCount()
         for row in range(api_count):
             # API 명
@@ -1196,18 +1199,32 @@ class ResultPageWidget(QWidget):
             if api_item:
                 self.tableWidget.setItem(row, 0, QTableWidgetItem(api_item.text()))
 
-            # 결과 아이콘
+            # ✅ 결과 아이콘 (결과 페이지 전용 아이콘으로 교체)
             icon_widget = self.parent.tableWidget.cellWidget(row, 1)
             if icon_widget:
-                new_icon_widget = QWidget()
-                new_icon_layout = QHBoxLayout()
-                new_icon_layout.setContentsMargins(0, 0, 0, 0)
-
                 old_label = icon_widget.findChild(QLabel)
                 if old_label:
+                    # ✅ tooltip에서 결과 상태 추출
+                    tooltip = old_label.toolTip()
+                    
+                    # ✅ 결과에 따라 결과 페이지 전용 아이콘 선택
+                    if "Result: PASS" in tooltip or "Result: OK" in tooltip:
+                        img = self.img_pass  # tag_성공.png
+                        icon_size = (84, 20)
+                    elif "Result: FAIL" in tooltip or "Result: ERROR" in tooltip:
+                        img = self.img_fail  # tag_실패.png
+                        icon_size = (84, 20)
+                    else:
+                        img = self.img_none  # icn_basic.png
+                        icon_size = (16, 16)
+
+                    new_icon_widget = QWidget()
+                    new_icon_layout = QHBoxLayout()
+                    new_icon_layout.setContentsMargins(0, 0, 0, 0)
+
                     new_icon_label = QLabel()
-                    new_icon_label.setPixmap(old_label.pixmap())
-                    new_icon_label.setToolTip(old_label.toolTip())
+                    new_icon_label.setPixmap(QIcon(img).pixmap(*icon_size))
+                    new_icon_label.setToolTip(tooltip)
                     new_icon_label.setAlignment(Qt.AlignCenter)
 
                     new_icon_layout.addWidget(new_icon_label)
@@ -1767,7 +1784,7 @@ class MyApp(QWidget):
         icon_layout.setContentsMargins(0, 0, 0, 0)
 
         icon_label = QLabel()
-        icon_label.setPixmap(QIcon(img).pixmap(16, 16))
+        icon_label.setPixmap(QIcon(img).pixmap(84, 20))
         icon_label.setToolTip(msg)
         icon_label.setAlignment(Qt.AlignCenter)
 
@@ -2394,7 +2411,7 @@ class MyApp(QWidget):
         icon_layout.setContentsMargins(0, 0, 0, 0)
 
         icon_label = QLabel()
-        icon_label.setPixmap(QIcon(img).pixmap(16, 16))
+        icon_label.setPixmap(QIcon(img).pixmap(84, 20))
         icon_label.setToolTip(msg)
         icon_label.setAlignment(Qt.AlignCenter)
 
@@ -2730,7 +2747,7 @@ class MyApp(QWidget):
             icon_layout = QHBoxLayout()
             icon_layout.setContentsMargins(0, 0, 0, 0)
             icon_label = QLabel()
-            icon_label.setPixmap(QIcon(img).pixmap(16, 16))
+            icon_label.setPixmap(QIcon(img).pixmap(84, 20))
             icon_label.setAlignment(Qt.AlignCenter)
             icon_layout.addWidget(icon_label)
             icon_layout.setAlignment(Qt.AlignCenter)
@@ -2908,7 +2925,7 @@ class MyApp(QWidget):
             icon_layout = QHBoxLayout()
             icon_layout.setContentsMargins(0, 0, 0, 0)
             icon_label = QLabel()
-            icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
+            icon_label.setPixmap(QIcon(self.img_none).pixmap(84, 20))
             icon_label.setAlignment(Qt.AlignCenter)
             icon_layout.addWidget(icon_label)
             icon_layout.setAlignment(Qt.AlignCenter)
