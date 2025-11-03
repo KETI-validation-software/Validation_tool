@@ -1,2 +1,0 @@
-{"time": "2025-11-03T02:16:25.319307Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
-{"time": "2025-11-03T02:16:25.320305Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "streamingSupport": [{"streamProtocolType": "RTSP", "streamProtocolDesc": "Unicast"}], "transportSupport": [{"transProtocolType": "WebHook", "transProtocolDesc": ""}]}}
