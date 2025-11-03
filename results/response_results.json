@@ -18,19 +18,19 @@
   "status": "완료",
   "authMethod": "Bearer Token",
   "testScore": {
-    "score": 85.53,
+    "score": 90.79,
     "totalFields": 76,
-    "passedFields": 65,
-    "failedFields": 11
+    "passedFields": 69,
+    "failedFields": 7
   },
   "testResult": [
     {
       "testSpecId": "cmgyv3rzl014nvsveidu5jpzp",
       "testSpecName": "영상보안시스템_new",
-      "score": 85.53,
+      "score": 90.79,
       "totalFields": 76,
-      "passedFields": 65,
-      "failedFields": 11,
+      "passedFields": 69,
+      "failedFields": 7,
       "apis": [
         {
           "id": "step-1-s9942zltt",
@@ -100,18 +100,18 @@
           "name": "저장된 영상 목록 연동",
           "method": "POST",
           "endpoint": "/StoredVideoInfos",
-          "score": 86.0,
+          "score": 100.0,
           "validationCnt": 1,
           "totalFields": 7,
-          "passFields": 6,
-          "failFields": 1,
+          "passFields": 7,
+          "failFields": 0,
           "validations": [
             {
               "attempt": 1,
               "validationData": {},
               "validationErrors": [
                 "[시도 1/1]",
-                "[의미] camList.camID: 값 불일치:  (index 0),  (index 1),  (index 2)가 camID(['cam0001', 'cam0002'])에 없음"
+                "오류가 없습니다."
               ]
             }
           ]
@@ -132,7 +132,7 @@
               "validationData": {},
               "validationErrors": [
                 "[시도 1/1]",
-                "[의미] camList.camURL: camURL=['rtsp://127.0.01:8554', 'rtsp://127.0.01:8554', 'rtsp://127.0.01:8554']에 해당하는 camURL을 찾을 수 없음"
+                "[의미] camList.camURL: camURL=['rtsp://127.0.01:8554', 'rtsp://127.0.01:8554']에 해당하는 camURL을 찾을 수 없음"
               ]
             }
           ]
@@ -142,19 +142,18 @@
           "name": "저장된 영상 정보 연동",
           "method": "POST",
           "endpoint": "/ReplayURL",
-          "score": 86.0,
+          "score": 93.0,
           "validationCnt": 1,
           "totalFields": 14,
-          "passFields": 12,
-          "failFields": 2,
+          "passFields": 13,
+          "failFields": 1,
           "validations": [
             {
               "attempt": 1,
               "validationData": {},
               "validationErrors": [
                 "[시도 1/1]",
-                "[의미] camList.camID: 값 불일치:  (index 0),  (index 1),  (index 2)가 camID(['cam0001', 'cam0002'])에 없음",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761029006630 (타입: int), [1] 1761158737808 (타입: int), [2] 1761058801040 (타입: int)"
+                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761029893312 (타입: int), [1] 1760984204302 (타입: int)"
               ]
             }
           ]
@@ -207,21 +206,19 @@
           "name": "저장된 이벤트 분석 정보 연동",
           "method": "POST",
           "endpoint": "/StoredVideoEventInfos",
-          "score": 56.0,
+          "score": 78.0,
           "validationCnt": 1,
           "totalFields": 9,
-          "passFields": 5,
-          "failFields": 4,
+          "passFields": 7,
+          "failFields": 2,
           "validations": [
             {
               "attempt": 1,
               "validationData": {},
               "validationErrors": [
                 "[시도 1/1]",
-                "[의미] camList.camID: 값 불일치:  (index 0),  (index 1),  (index 2)가 camID(['cam0001', 'cam0002'])에 없음",
-                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 6938688590895 (타입: int), [1] 8513731560445 (타입: int), [2] 9228496771804 (타입: int)",
-                "[의미] camList.eventName: 값 불일치: ['', '', ''] != 예상값 화재",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 6781577804607 (타입: int), [1] 6783791697278 (타입: int), [2] 6808559943277 (타입: int)"
+                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 7197981591880 (타입: int), [1] 9643642863921 (타입: int)",
+                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 6533051714542 (타입: int), [1] 8991424704337 (타입: int)"
               ]
             }
           ]
@@ -229,5 +226,5 @@
       ]
     }
   ],
-  "completedDate": "2025-11-03T16:36:00Z"
+  "completedDate": "2025-11-03T17:17:14Z"
 }
