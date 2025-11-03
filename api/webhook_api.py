@@ -108,7 +108,7 @@ class WebhookThread(QThread):
         # ✅ 웹훅 서버는 항상 0.0.0.0에 바인딩 (모든 인터페이스에서 수신)
         # safe_url은 로깅/디버깅용으로만 사용
         server_address = ("0.0.0.0", self.port)
-        print(f"[Webhook] 서버 바인딩: 0.0.0.0:{self.port} (외부 접근 주소: {safe_url}:{self.port})")
+        print(f"[Webhook] 서버 바인딩: 0.0.0.0:{self.port}")
         
         # SSL 인증서 설정
         certificate_private = resource_path('config/key0627/server.crt')

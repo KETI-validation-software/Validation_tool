@@ -47,12 +47,12 @@ class Server(BaseHTTPRequestHandler):
 
     trace = defaultdict(lambda: deque(maxlen=1000))  # api_name -> deque(events)
     request_counter = {}  # ✅ API별 시스템 요청 카운터 (클래스 변수)
+    latest_event = defaultdict(dict)  # ✅ API별 최신 이벤트 저장 (클래스 변수)
 
     def __init__(self, *args, **kwargs):
         self.result = ""
         self.webhook_flag = False
-        self.latest_event = defaultdict(dict)
-        self.generator = ConstraintDataGenerator(self.latest_event)
+        self.generator = ConstraintDataGenerator(Server.latest_event)  # ✅ 클래스 변수 참조
 
         # super().__init__()를 마지막에 호출 (이때 handle()이 실행되어 do_POST가 호출됨)
         super().__init__(*args, **kwargs)
@@ -66,8 +66,8 @@ class Server(BaseHTTPRequestHandler):
                 "data": payload
             }
 
-            self.trace[api_name].append(evt)
-            self.latest_event[api_name][direction] = evt
+            Server.trace[api_name].append(evt)  # ✅ 클래스 변수 사용
+            Server.latest_event[api_name][direction] = evt  # ✅ 클래스 변수 사용
 
             # 파일 쓰기는 선택적으로 (환경 변수나 설정으로 제어 가능)
             # 성능이 중요하면 주석 처리하거나 비동기로 처리
@@ -89,8 +89,8 @@ class Server(BaseHTTPRequestHandler):
         메시지별 가장 최근 이벤트를 반환
         """
         direction = direction.upper()
-        if api_name in self.latest_event:
-            return self.latest_event[api_name].get(direction)
+        if api_name in Server.latest_event:  # ✅ 클래스 변수 사용
+            return Server.latest_event[api_name].get(direction)  # ✅ 클래스 변수 사용
         return None
 
     def _set_headers(self):
@@ -673,7 +673,7 @@ class Server(BaseHTTPRequestHandler):
         return i, data, out_con
 
 
-# 확인용 - 기본값 설정하기(system 들어냄)
+# 확인용 - 안쓰이는 코드임
 def run(server_class=HTTPServer, handler_class=Server, address='127.0.0.1', port=8008, system="video"):
     server_address = (address, port)
     certificate_private = resource_path('config/key0627/server.crt')
