@@ -1649,7 +1649,11 @@ class MyApp(QWidget):
         import spec.Schema_request as schema_request_module
         import spec.Data_response as data_response_module
         import spec.Constraints_response as constraints_response_module
-
+        import importlib
+        # 파일이 업데이트된 경우를 대비해 강제 reload
+        importlib.reload(schema_request_module)
+        importlib.reload(data_response_module)
+        importlib.reload(constraints_response_module)
         print(f"[PLATFORM] 🔧 타입: 요청 검증 + 응답 전송")
 
         # Request 검증용 데이터 로드
