@@ -1,17 +1,18 @@
 {
-  "requestId": "cmh2sdyj70001ry7uvsgugy25",
+  "requestId": "cmhfpjibz000c5t1uxmf2urvj",
   "evaluationTarget": {
-    "companyName": "물리보안기업",
+    "companyName": "물리보안테스트2",
     "contactPerson": "김철수",
-    "productName": "물리보안테스트제품",
+    "productName": "물리보안테스트시스템",
     "modelName": "v1.0",
     "version": "v1.0"
   },
   "testGroup": {
-    "id": "cmgzwohuq01y8vsvep0hpuuf4",
-    "name": "물리보안",
+    "id": "cmh1ybbyb000d9y0jxtlgp2nf",
+    "name": "영상보안그룹",
     "testRange": "ALL_FIELDS",
     "testSpecIds": [
+      "cmh1ua7b00021gxc3rjepbkrm",
       "cmgyv3rzl014nvsveidu5jpzp"
     ]
   },
@@ -24,6 +25,28 @@
     "failedFields": 7
   },
   "testResult": [
+    {
+      "testSpecId": "cmh1ua7b00021gxc3rjepbkrm",
+      "testSpecName": "영상보안시스템_시나리오2",
+      "score": 0,
+      "totalFields": 0,
+      "passedFields": 0,
+      "failedFields": 0,
+      "apis": [
+        {
+          "id": "step-1-ckssr4n2h",
+          "name": "인증",
+          "method": "POST",
+          "endpoint": "/Authentication",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        }
+      ]
+    },
     {
       "testSpecId": "cmgyv3rzl014nvsveidu5jpzp",
       "testSpecName": "영상보안시스템_new",
@@ -153,7 +176,7 @@
               "validationData": {},
               "validationErrors": [
                 "[시도 1/1]",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761029893312 (타입: int), [1] 1760984204302 (타입: int)"
+                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761022037304 (타입: int), [1] 1760983676126 (타입: int)"
               ]
             }
           ]
@@ -217,8 +240,8 @@
               "validationData": {},
               "validationErrors": [
                 "[시도 1/1]",
-                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 7197981591880 (타입: int), [1] 9643642863921 (타입: int)",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 6533051714542 (타입: int), [1] 8991424704337 (타입: int)"
+                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 6436570260705 (타입: int), [1] 8057123416083 (타입: int)",
+                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 5946283976654 (타입: int), [1] 4073889538937 (타입: int)"
               ]
             }
           ]
@@ -226,5 +249,5 @@
       ]
     }
   ],
-  "completedDate": "2025-11-03T17:17:14Z"
+  "completedDate": "2025-11-04T09:56:09Z"
 }
