@@ -19,10 +19,10 @@
   "status": "완료",
   "authMethod": "Bearer Token",
   "testScore": {
-    "score": 90.79,
+    "score": 92.11,
     "totalFields": 76,
-    "passedFields": 69,
-    "failedFields": 7
+    "passedFields": 70,
+    "failedFields": 6
   },
   "testResult": [
     {
@@ -50,10 +50,10 @@
     {
       "testSpecId": "cmgyv3rzl014nvsveidu5jpzp",
       "testSpecName": "영상보안시스템_new",
-      "score": 90.79,
+      "score": 92.11,
       "totalFields": 76,
-      "passedFields": 69,
-      "failedFields": 7,
+      "passedFields": 70,
+      "failedFields": 6,
       "apis": [
         {
           "id": "step-1-s9942zltt",
@@ -144,18 +144,18 @@
           "name": "실시간 영상 정보 연동",
           "method": "POST",
           "endpoint": "/StreamURLs",
-          "score": 92.0,
+          "score": 100.0,
           "validationCnt": 1,
           "totalFields": 12,
-          "passFields": 11,
-          "failFields": 1,
+          "passFields": 12,
+          "failFields": 0,
           "validations": [
             {
               "attempt": 1,
               "validationData": {},
               "validationErrors": [
                 "[시도 1/1]",
-                "[의미] camList.camURL: camURL=['rtsp://127.0.01:8554', 'rtsp://127.0.01:8554']에 해당하는 camURL을 찾을 수 없음"
+                "오류가 없습니다."
               ]
             }
           ]
@@ -176,7 +176,7 @@
               "validationData": {},
               "validationErrors": [
                 "[시도 1/1]",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1760961796018 (타입: int), [1] 1761203591611 (타입: int)"
+                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761092181938 (타입: int), [1] 1760997901603 (타입: int)"
               ]
             }
           ]
@@ -240,8 +240,8 @@
               "validationData": {},
               "validationErrors": [
                 "[시도 1/1]",
-                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 8937941554518 (타입: int), [1] 7180406429281 (타입: int)",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 8576415071195 (타입: int), [1] 3407743606582 (타입: int)"
+                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 9985488548161 (타입: int), [1] 8914793034075 (타입: int)",
+                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 8461115654932 (타입: int), [1] 8872567117053 (타입: int)"
               ]
             }
           ]
@@ -249,5 +249,5 @@
       ]
     }
   ],
-  "completedDate": "2025-11-03T18:31:26Z"
+  "completedDate": "2025-11-04T15:47:37Z"
 }
