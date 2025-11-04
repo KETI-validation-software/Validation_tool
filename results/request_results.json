@@ -1,17 +1,18 @@
 {
-  "requestId": "cmh1yg49v000t9y0jdr1wwuja",
+  "requestId": "cmhba7ldg000g6zcrxdqwdcje",
   "evaluationTarget": {
-    "companyName": "통합플랫폼테스트",
+    "companyName": "테스트",
     "contactPerson": "김철수",
-    "productName": "통합플랫폼테스트제품",
+    "productName": "통합플랫폼",
     "modelName": "v1.0",
     "version": "v1.0"
   },
   "testGroup": {
-    "id": "cmgzwocpp01y6vsve880sfysm",
-    "name": "통합플랫폼",
-    "testRange": "ALL_FIELDS",
+    "id": "cmh1yc1yn000g9y0jk37caeqv",
+    "name": "통합시스템그룹",
+    "testRange": "ALL_FIELDS, ALL_FIELDS",
     "testSpecIds": [
+      "cmh1u5pef000sgxc3bzl4y9v0",
       "cmgvieyak001b6cd04cgaawmm"
     ]
   },
@@ -24,6 +25,28 @@
     "failedFields": 6
   },
   "testResult": [
+    {
+      "testSpecId": "cmh1u5pef000sgxc3bzl4y9v0",
+      "testSpecName": "영상보안시스템_시나리오2",
+      "score": 0,
+      "totalFields": 0,
+      "passedFields": 0,
+      "failedFields": 0,
+      "apis": [
+        {
+          "id": "step-1-dfyzdlda0",
+          "name": "실시간 이벤트 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/RealtimeVideoEventInfos",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        }
+      ]
+    },
     {
       "testSpecId": "cmgvieyak001b6cd04cgaawmm",
       "testSpecName": "영상보안시스템_new",
