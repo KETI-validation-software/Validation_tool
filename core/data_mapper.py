@@ -42,6 +42,8 @@ class ConstraintDataGenerator:
 
         print(f"[DEBUG][BUILD_MAP] constraints: {constraints}")
         print(f"[DEBUG][BUILD_MAP] request_data: {request_data}")
+        print(f"[DEBUG][BUILD_MAP] 🔍 self.latest_events 키 목록: {list(self.latest_events.keys())}")
+        print(f"[DEBUG][BUILD_MAP] 🔍 self.latest_events 전체: {self.latest_events}")
 
         for path, rule in constraints.items():
             print(f"[DEBUG][BUILD_MAP] Processing path: {path}, rule: {rule}")
