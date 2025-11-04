@@ -65,7 +65,8 @@ class FormValidator:
         """API에서 response-codes를 가져와 spec/ResponseCode.py 파일 생성"""
         try:
             import requests
-            from core.functions import resource_path
+            import sys
+            import os
 
             url = "http://ect2.iptime.org:20223/api/integration/response-codes"
             print(f"ResponseCode API 호출 중: {url}")
@@ -91,11 +92,21 @@ class FormValidator:
                 content += "]\n"
 
                 # 파일 저장
-                output_path = resource_path("spec/ResponseCode.py")
+                # ===== PyInstaller 환경에서 외부 spec 디렉토리 우선 사용 =====
+                if getattr(sys, 'frozen', False):
+                    exe_dir = os.path.dirname(sys.executable)
+                    spec_dir = os.path.join(exe_dir, "spec")
+                    os.makedirs(spec_dir, exist_ok=True)
+                    output_path = os.path.join(spec_dir, "ResponseCode.py")
+                else:
+                    from core.functions import resource_path
+                    output_path = resource_path("spec/ResponseCode.py")
+
                 with open(output_path, 'w', encoding='utf-8') as f:
                     f.write(content)
 
                 print(f"ResponseCode.py 생성 완료: {len(error_message)}개 응답 코드")
+                print(f"[SPEC FILES] ResponseCode.py 저장 경로: {output_path}")
                 return True
             else:
                 print("ResponseCode API 응답에 데이터가 없습니다.")
@@ -279,11 +290,29 @@ class FormValidator:
                 all_spec_list_names.extend(spec_list_names)
 
             # 파일 저장
-            from core.functions import resource_path
-            schema_output = resource_path(f"spec/Schema_{schema_type}.py")
-            data_output = resource_path(f"spec/Data_{file_type}.py")
-            validation_output = resource_path(f"spec/validation_{schema_type}.py")
-            constraints_output = resource_path(f"spec/Constraints_{file_type}.py")
+            import sys
+            import os
+
+            # ===== PyInstaller 환경에서 외부 spec 디렉토리 우선 사용 =====
+            if getattr(sys, 'frozen', False):
+                # PyInstaller 환경: 외부 디렉토리 사용 (CONSTANTS.py와 동일)
+                exe_dir = os.path.dirname(sys.executable)
+                spec_dir = os.path.join(exe_dir, "spec")
+                # spec 폴더가 없으면 생성
+                os.makedirs(spec_dir, exist_ok=True)
+                print(f"[SPEC FILES] 외부 spec 디렉토리 사용: {spec_dir}")
+
+                schema_output = os.path.join(spec_dir, f"Schema_{schema_type}.py")
+                data_output = os.path.join(spec_dir, f"Data_{file_type}.py")
+                validation_output = os.path.join(spec_dir, f"validation_{schema_type}.py")
+                constraints_output = os.path.join(spec_dir, f"Constraints_{file_type}.py")
+            else:
+                # 일반 실행: resource_path 사용
+                from core.functions import resource_path
+                schema_output = resource_path(f"spec/Schema_{schema_type}.py")
+                data_output = resource_path(f"spec/Data_{file_type}.py")
+                validation_output = resource_path(f"spec/validation_{schema_type}.py")
+                constraints_output = resource_path(f"spec/Constraints_{file_type}.py")
 
             output_files = [
                 (schema_output, schema_content, "Schema"),
@@ -308,7 +337,11 @@ class FormValidator:
                     with open(path, 'w', encoding='utf-8') as f:
                         f.write(content)
 
+                    # ===== 절대 경로 로그 추가 =====
+                    abs_path = os.path.abspath(path)
                     print(f"[생성 완료] {label} 파일 생성: {path} ({len(content.splitlines())} lines)")
+                    print(f"[생성 완료] 절대 경로: {abs_path}")
+                    # ===== 로그 끝 =====
 
                 except Exception as e:
                     print(f"[경고] {label} 파일 생성 실패: {path}, 사유: {e}")

@@ -14,6 +14,7 @@ from datetime import datetime
 import json
 from pathlib import Path
 from core.functions import build_result_json
+import requests
 
 import config.CONSTANTS as CONSTANTS
 from core.functions import json_check_, save_result, resource_path, json_to_data, set_auth, timeout_field_finder
@@ -319,6 +320,9 @@ class ResultPageWidget(QWidget):
         self.embedded = embedded
         self.setWindowTitle('통합플랫폼 연동 시험 결과')
         self.resize(1680, 1080)
+
+        # CONSTANTS 초기화
+        self.CONSTANTS = parent.CONSTANTS
 
         # 현재 선택된 spec_id 저장
         self.current_spec_id = parent.current_spec_id
@@ -642,9 +646,39 @@ class ResultPageWidget(QWidget):
         """)
 
         # SPEC_CONFIG 기반 그룹 로드
+        # ===== 외부 로드된 SPEC_CONFIG 사용 (fallback: CONSTANTS 모듈) =====
+        import sys
+        import os
+
+        SPEC_CONFIG = self.CONSTANTS.SPEC_CONFIG  # 기본값
+
+        if getattr(sys, 'frozen', False):
+            # PyInstaller 환경: 외부 CONSTANTS.py에서 SPEC_CONFIG 읽기
+            exe_dir = os.path.dirname(sys.executable)
+            external_constants_path = os.path.join(exe_dir, "config", "CONSTANTS.py")
+
+            if os.path.exists(external_constants_path):
+                print(f"[GROUP TABLE] 외부 CONSTANTS.py에서 SPEC_CONFIG 로드: {external_constants_path}")
+                try:
+                    with open(external_constants_path, 'r', encoding='utf-8') as f:
+                        constants_code = f.read()
+
+                    namespace = {}
+                    exec(constants_code, namespace)
+                    SPEC_CONFIG = namespace.get('SPEC_CONFIG', self.CONSTANTS.SPEC_CONFIG)
+                    print(f"[GROUP TABLE] ✅ 외부 SPEC_CONFIG 로드 완료: {len(SPEC_CONFIG)}개 그룹")
+                    # 디버그: 그룹 이름 출력
+                    for i, g in enumerate(SPEC_CONFIG):
+                        group_name = g.get('group_name', '이름없음')
+                        group_keys = [k for k in g.keys() if k not in ['group_name', 'group_id']]
+                        print(f"[GROUP TABLE DEBUG] 그룹 {i}: {group_name}, spec_id 개수: {len(group_keys)}, spec_ids: {group_keys}")
+                except Exception as e:
+                    print(f"[GROUP TABLE] ⚠️ 외부 CONSTANTS 로드 실패, 기본값 사용: {e}")
+        # ===== 외부 CONSTANTS 로드 끝 =====
+
         group_items = [
             (g.get("group_name", "미지정 그룹"), g.get("group_id", ""))
-            for g in self.CONSTANTS.SPEC_CONFIG
+            for g in SPEC_CONFIG
         ]
         self.group_table.setRowCount(len(group_items))
 
@@ -762,9 +796,12 @@ class ResultPageWidget(QWidget):
         if not group_name:
             return
 
+        # ===== 외부 로드된 SPEC_CONFIG 사용 (fallback: CONSTANTS 모듈) =====
+        SPEC_CONFIG = getattr(self.parent, 'LOADED_SPEC_CONFIG', self.parent.CONSTANTS.SPEC_CONFIG)
         selected_group = next(
-            (g for g in self.CONSTANTS.SPEC_CONFIG if g.get("group_name") == group_name), None
+            (g for g in SPEC_CONFIG if g.get("group_name") == group_name), None
         )
+        # ===== 수정 끝 =====
 
         if selected_group:
             self.update_test_field_table(selected_group)
@@ -1572,35 +1609,8 @@ class MyApp(QWidget):
             return None
 
     def __init__(self, embedded=False, mode=None, spec_id=None):
-        # CONSTANTS를 fresh import
-        import sys
-        import os
-
-        if getattr(sys, 'frozen', False):
-            # PyInstaller 환경: 외부 config 디렉토리 우선 사용 (main.py와 동일)
-            exe_dir = os.path.dirname(sys.executable)
-            constants_file = os.path.join(exe_dir, "config", "CONSTANTS.py")
-
-            print(f"[PLATFORM] 외부 CONSTANTS 파일 로드: {constants_file}")
-            print(f"[PLATFORM] exe_dir: {exe_dir}")
-            print(f"[PLATFORM] sys.executable: {sys.executable}")
-
-            if not os.path.exists(constants_file):
-                raise FileNotFoundError(f"CONSTANTS.py 파일을 찾을 수 없습니다: {constants_file}")
-
-            import types
-            constants_module = types.ModuleType('config.CONSTANTS')
-            with open(constants_file, 'r', encoding='utf-8') as f:
-                exec(f.read(), constants_module.__dict__)
-
-            self.CONSTANTS = constants_module
-            print(f"[PLATFORM] CONSTANTS 직접 로드 완료 - SPEC_CONFIG: {len(constants_module.SPEC_CONFIG)}개 그룹")
-        else:
-            if 'config.CONSTANTS' in sys.modules:
-                del sys.modules['config.CONSTANTS']
-            import config.CONSTANTS
-            self.CONSTANTS = config.CONSTANTS
-            print(f"[PLATFORM] CONSTANTS reload 완료 - SPEC_CONFIG: {len(config.CONSTANTS.SPEC_CONFIG)}개 그룹")
+        # CONSTANTS 사용
+        self.CONSTANTS = CONSTANTS
 
         super().__init__()
         self.embedded = embedded
@@ -1677,14 +1687,50 @@ class MyApp(QWidget):
 
     def load_specs_from_constants(self):
         """SPEC_CONFIG 기반으로 spec 데이터 동적 로드"""
-        if not hasattr(self.CONSTANTS, 'SPEC_CONFIG'):
+        # ===== PyInstaller 환경에서 외부 CONSTANTS.py에서 SPEC_CONFIG 로드 =====
+        import sys
+        import os
+
+        SPEC_CONFIG = self.CONSTANTS.SPEC_CONFIG if hasattr(self.CONSTANTS, 'SPEC_CONFIG') else []
+
+        if getattr(sys, 'frozen', False):
+            # PyInstaller 환경: 외부 CONSTANTS.py에서 SPEC_CONFIG 읽기
+            exe_dir = os.path.dirname(sys.executable)
+            external_constants_path = os.path.join(exe_dir, "config", "CONSTANTS.py")
+
+            if os.path.exists(external_constants_path):
+                print(f"[PLATFORM] 외부 CONSTANTS.py에서 SPEC_CONFIG 로드: {external_constants_path}")
+                try:
+                    # 외부 파일 읽어서 SPEC_CONFIG만 추출
+                    with open(external_constants_path, 'r', encoding='utf-8') as f:
+                        constants_code = f.read()
+
+                    # SPEC_CONFIG만 추출하기 위해 exec 실행
+                    namespace = {}
+                    exec(constants_code, namespace)
+                    SPEC_CONFIG = namespace.get('SPEC_CONFIG', SPEC_CONFIG)
+                    print(f"[PLATFORM] ✅ 외부 SPEC_CONFIG 로드 완료: {len(SPEC_CONFIG)}개 그룹")
+                    # 디버그: 그룹 이름 출력
+                    for i, g in enumerate(SPEC_CONFIG):
+                        group_name = g.get('group_name', '이름없음')
+                        group_keys = [k for k in g.keys() if k not in ['group_name', 'group_id']]
+                        print(f"[PLATFORM DEBUG] 그룹 {i}: {group_name}, spec_id 개수: {len(group_keys)}, spec_ids: {group_keys}")
+                except Exception as e:
+                    print(f"[PLATFORM] ⚠️ 외부 CONSTANTS 로드 실패, 기본값 사용: {e}")
+        # ===== 외부 CONSTANTS 로드 끝 =====
+
+        # ===== 인스턴스 변수에 저장 (다른 메서드에서 사용) =====
+        self.LOADED_SPEC_CONFIG = SPEC_CONFIG
+        # ===== 저장 완료 =====
+
+        if not SPEC_CONFIG:
             raise ValueError("CONSTANTS.SPEC_CONFIG가 정의되지 않았습니다!")
 
-        print(f"[PLATFORM DEBUG] SPEC_CONFIG 개수: {len(self.CONSTANTS.SPEC_CONFIG)}")
+        print(f"[PLATFORM DEBUG] SPEC_CONFIG 개수: {len(SPEC_CONFIG)}")
         print(f"[PLATFORM DEBUG] 찾을 spec_id: {self.current_spec_id}")
 
         config = {}
-        for group in self.CONSTANTS.SPEC_CONFIG:
+        for group in SPEC_CONFIG:
             if self.current_spec_id in group:
                 config = group[self.current_spec_id]
                 break
@@ -1706,14 +1752,111 @@ class MyApp(QWidget):
         print(f"[PLATFORM] 📋 Spec 로딩 시작: {self.spec_description} (ID: {self.current_spec_id})")
 
         print(f"[PLATFORM] 📁 모듈: spec (센서/바이오/영상 통합)")
-        import spec.Schema_request as schema_request_module
-        import spec.Data_response as data_response_module
-        import spec.Constraints_response as constraints_response_module
+
+        # ===== PyInstaller 환경에서 외부 spec 디렉토리 우선 사용 =====
+        import sys
+        import os
         import importlib
-        # 파일이 업데이트된 경우를 대비해 강제 reload
-        importlib.reload(schema_request_module)
-        importlib.reload(data_response_module)
-        importlib.reload(constraints_response_module)
+
+        if getattr(sys, 'frozen', False):
+            # PyInstaller 환경: 외부 spec 디렉토리를 sys.path 맨 앞에 추가
+            exe_dir = os.path.dirname(sys.executable)
+            external_spec_parent = exe_dir  # exe_dir/spec을 찾기 위해 exe_dir을 추가
+
+            # 외부 spec 폴더 파일 존재 확인
+            external_spec_dir = os.path.join(external_spec_parent, 'spec')
+            print(f"[PLATFORM SPEC DEBUG] 외부 spec 폴더: {external_spec_dir}")
+            print(f"[PLATFORM SPEC DEBUG] 외부 spec 폴더 존재: {os.path.exists(external_spec_dir)}")
+            if os.path.exists(external_spec_dir):
+                files = [f for f in os.listdir(external_spec_dir) if f.endswith('.py')]
+                print(f"[PLATFORM SPEC DEBUG] 외부 spec 폴더 .py 파일: {files}")
+
+            # sys.path 전체 출력 (디버깅)
+            print(f"[PLATFORM SPEC DEBUG] sys.path 전체 개수: {len(sys.path)}")
+            for i, p in enumerate(sys.path):
+                print(f"[PLATFORM SPEC DEBUG]   [{i}] {p}")
+
+            # 이미 있더라도 제거 후 맨 앞에 추가 (우선순위 보장)
+            if external_spec_parent in sys.path:
+                sys.path.remove(external_spec_parent)
+            sys.path.insert(0, external_spec_parent)
+            print(f"[PLATFORM SPEC] sys.path에 외부 디렉토리 추가: {external_spec_parent}")
+
+        # sys.modules에서 기존 spec 모듈 제거 (캐시 초기화)
+        # 주의: 'spec' 패키지 자체는 유지 (parent 패키지 필요)
+        modules_to_remove = [
+            'spec.Schema_request',
+            'spec.Data_response',
+            'spec.Constraints_response'
+        ]
+        for mod_name in modules_to_remove:
+            if mod_name in sys.modules:
+                del sys.modules[mod_name]
+                print(f"[PLATFORM SPEC] 모듈 캐시 삭제: {mod_name}")
+            else:
+                print(f"[PLATFORM SPEC] 모듈 캐시 없음: {mod_name}")
+
+        # spec 패키지가 없으면 빈 모듈로 등록
+        if 'spec' not in sys.modules:
+            import types
+            sys.modules['spec'] = types.ModuleType('spec')
+            print(f"[PLATFORM SPEC] 빈 'spec' 패키지 생성")
+
+        # PyInstaller 환경에서는 importlib.util로 명시적으로 외부 파일 로드
+        if getattr(sys, 'frozen', False):
+            import importlib.util
+
+            # 외부 spec 파일 경로
+            schema_file = os.path.join(exe_dir, 'spec', 'Schema_request.py')
+            data_file = os.path.join(exe_dir, 'spec', 'Data_response.py')
+            constraints_file = os.path.join(exe_dir, 'spec', 'Constraints_response.py')
+
+            print(f"[PLATFORM SPEC] 명시적 로드 시도:")
+            print(f"  - Schema: {schema_file} (존재: {os.path.exists(schema_file)})")
+            print(f"  - Data: {data_file} (존재: {os.path.exists(data_file)})")
+            print(f"  - Constraints: {constraints_file} (존재: {os.path.exists(constraints_file)})")
+
+            # importlib.util로 명시적 로드
+            spec = importlib.util.spec_from_file_location('spec.Schema_request', schema_file)
+            schema_request_module = importlib.util.module_from_spec(spec)
+            sys.modules['spec.Schema_request'] = schema_request_module
+            spec.loader.exec_module(schema_request_module)
+
+            spec = importlib.util.spec_from_file_location('spec.Data_response', data_file)
+            data_response_module = importlib.util.module_from_spec(spec)
+            sys.modules['spec.Data_response'] = data_response_module
+            spec.loader.exec_module(data_response_module)
+
+            spec = importlib.util.spec_from_file_location('spec.Constraints_response', constraints_file)
+            constraints_response_module = importlib.util.module_from_spec(spec)
+            sys.modules['spec.Constraints_response'] = constraints_response_module
+            spec.loader.exec_module(constraints_response_module)
+
+            print(f"[PLATFORM SPEC] ✅ importlib.util로 외부 파일 로드 완료")
+        else:
+            # 일반 환경에서는 기존 방식 사용
+            import spec.Schema_request as schema_request_module
+            import spec.Data_response as data_response_module
+            import spec.Constraints_response as constraints_response_module
+
+        # ===== spec 파일 경로 로그 추가 =====
+        print(f"[PLATFORM SPEC] Schema_request.py 로드 경로: {schema_request_module.__file__}")
+        print(f"[PLATFORM SPEC] Data_response.py 로드 경로: {data_response_module.__file__}")
+        print(f"[PLATFORM SPEC] Constraints_response.py 로드 경로: {constraints_response_module.__file__}")
+
+        # 파일 수정 시간 확인
+        for module, name in [(schema_request_module, 'Schema_request'),
+                              (data_response_module, 'Data_response'),
+                              (constraints_response_module, 'Constraints_response')]:
+            file_path = module.__file__
+            if file_path.endswith('.pyc'):
+                file_path = file_path[:-1]  # .pyc -> .py
+            if os.path.exists(file_path):
+                mtime = os.path.getmtime(file_path)
+                from datetime import datetime
+                mtime_str = datetime.fromtimestamp(mtime).strftime('%Y-%m-%d %H:%M:%S')
+                print(f"[PLATFORM SPEC] {name}.py 수정 시간: {mtime_str}")
+        # ===== 로그 끝 =====
         print(f"[PLATFORM] 🔧 타입: 요청 검증 + 응답 전송")
 
         # Request 검증용 데이터 로드
@@ -2534,9 +2677,12 @@ class MyApp(QWidget):
         if not group_name:
             return
 
+        # ===== 외부 로드된 SPEC_CONFIG 사용 (fallback: CONSTANTS 모듈) =====
+        SPEC_CONFIG = getattr(self, 'LOADED_SPEC_CONFIG', self.CONSTANTS.SPEC_CONFIG)
         selected_group = next(
-            (g for g in self.CONSTANTS.SPEC_CONFIG if g.get("group_name") == group_name), None
+            (g for g in SPEC_CONFIG if g.get("group_name") == group_name), None
         )
+        # ===== 수정 끝 =====
 
         if selected_group:
             self.update_test_field_table(selected_group)
@@ -2621,9 +2767,39 @@ class MyApp(QWidget):
         """)
 
         # SPEC_CONFIG 기반 그룹 로드
+        # ===== 외부 로드된 SPEC_CONFIG 사용 (fallback: CONSTANTS 모듈) =====
+        import sys
+        import os
+
+        SPEC_CONFIG = self.CONSTANTS.SPEC_CONFIG  # 기본값
+
+        if getattr(sys, 'frozen', False):
+            # PyInstaller 환경: 외부 CONSTANTS.py에서 SPEC_CONFIG 읽기
+            exe_dir = os.path.dirname(sys.executable)
+            external_constants_path = os.path.join(exe_dir, "config", "CONSTANTS.py")
+
+            if os.path.exists(external_constants_path):
+                print(f"[GROUP TABLE] 외부 CONSTANTS.py에서 SPEC_CONFIG 로드: {external_constants_path}")
+                try:
+                    with open(external_constants_path, 'r', encoding='utf-8') as f:
+                        constants_code = f.read()
+
+                    namespace = {}
+                    exec(constants_code, namespace)
+                    SPEC_CONFIG = namespace.get('SPEC_CONFIG', self.CONSTANTS.SPEC_CONFIG)
+                    print(f"[GROUP TABLE] ✅ 외부 SPEC_CONFIG 로드 완료: {len(SPEC_CONFIG)}개 그룹")
+                    # 디버그: 그룹 이름 출력
+                    for i, g in enumerate(SPEC_CONFIG):
+                        group_name = g.get('group_name', '이름없음')
+                        group_keys = [k for k in g.keys() if k not in ['group_name', 'group_id']]
+                        print(f"[GROUP TABLE DEBUG] 그룹 {i}: {group_name}, spec_id 개수: {len(group_keys)}, spec_ids: {group_keys}")
+                except Exception as e:
+                    print(f"[GROUP TABLE] ⚠️ 외부 CONSTANTS 로드 실패, 기본값 사용: {e}")
+        # ===== 외부 CONSTANTS 로드 끝 =====
+
         group_items = [
             (g.get("group_name", "미지정 그룹"), g.get("group_id", ""))
-            for g in self.CONSTANTS.SPEC_CONFIG
+            for g in SPEC_CONFIG
         ]
         self.group_table.setRowCount(len(group_items))
 

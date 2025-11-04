@@ -56,11 +56,11 @@ def build_validation_registry(
 
     """
     검증 규칙 레지스트리 빌드
-    
+
     구조:
         - Validation_request.py: _in_validation (플랫폼→시스템 요청)
         - validation_response.py: _out_validation (시스템→플랫폼 응답)
-    
+
     Returns:
         {
             'spec_id': {
@@ -69,28 +69,63 @@ def build_validation_registry(
             }
         }
     """
+    import sys
+    import os
+
     reg: Dict[str, Dict[str, Dict[str, Any]]] = {}
-    
+
     # 각 모듈에서 규칙 수집
     for path in (request_module_path, response_module_path):
         try:
-            mod = importlib.import_module(path)
+            # PyInstaller 환경에서는 importlib.util로 외부 파일 명시적 로드
+            if getattr(sys, 'frozen', False):
+                import importlib.util
+
+                exe_dir = os.path.dirname(sys.executable)
+
+                # 모듈 경로를 파일 경로로 변환 (예: "spec.validation_request" -> "validation_request.py")
+                module_name = path.split('.')[-1]
+                file_path = os.path.join(exe_dir, 'spec', f'{module_name}.py')
+
+                print(f"[VALIDATION REGISTRY] 외부 파일 로드 시도: {file_path}")
+                print(f"[VALIDATION REGISTRY] 파일 존재 여부: {os.path.exists(file_path)}")
+
+                if not os.path.exists(file_path):
+                    print(f"[WARNING] 파일이 존재하지 않음: {file_path}")
+                    continue
+
+                # importlib.util로 명시적 로드
+                spec = importlib.util.spec_from_file_location(path, file_path)
+                mod = importlib.util.module_from_spec(spec)
+                sys.modules[path] = mod
+                spec.loader.exec_module(mod)
+
+                print(f"[VALIDATION REGISTRY] ✅ 외부 파일 로드 완료: {file_path}")
+                print(f"[VALIDATION REGISTRY] 모듈 __file__: {mod.__file__}")
+            else:
+                # 일반 환경에서는 기존 import 방식 사용
+                mod = importlib.import_module(path)
+
             part = _collect_from_module(mod)
-            
+
             # 레지스트리 병합
             for spec, dmap in part.items():
                 reg.setdefault(spec, {})
                 for direction, amap in dmap.items():
                     reg[spec].setdefault(direction, {})
                     reg[spec][direction].update(amap)
-                    
+
         except ImportError as e:
             print(f"[WARNING] 모듈 로드 실패: {path} - {e}")
+            import traceback
+            traceback.print_exc()
             continue
         except Exception as e:
             print(f"[ERROR] 예상치 못한 오류: {path} - {e}")
+            import traceback
+            traceback.print_exc()
             continue
-    
+
     return reg
 
 
