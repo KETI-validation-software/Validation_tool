@@ -613,7 +613,7 @@ class ResultPageWidget(QWidget):
         # SPEC_CONFIG 기반 그룹 로드
         group_items = [
             (g.get("group_name", "미지정 그룹"), g.get("group_id", ""))
-            for g in CONSTANTS.SPEC_CONFIG
+            for g in self.CONSTANTS.SPEC_CONFIG
         ]
         self.group_table.setRowCount(len(group_items))
 
@@ -705,7 +705,7 @@ class ResultPageWidget(QWidget):
         """초기 시나리오 로드 및 현재 선택된 항목 하이라이트"""
         # 현재 spec_id가 속한 그룹 찾기
         current_group = None
-        for group_data in CONSTANTS.SPEC_CONFIG:
+        for group_data in self.CONSTANTS.SPEC_CONFIG:
             if self.current_spec_id in group_data:
                 current_group = group_data
                 break
@@ -732,7 +732,7 @@ class ResultPageWidget(QWidget):
             return
 
         selected_group = next(
-            (g for g in CONSTANTS.SPEC_CONFIG if g.get("group_name") == group_name), None
+            (g for g in self.CONSTANTS.SPEC_CONFIG if g.get("group_name") == group_name), None
         )
 
         if selected_group:
@@ -2314,7 +2314,7 @@ class MyApp(QWidget):
         # SPEC_CONFIG 기반 그룹 로드
         group_items = [
             (g.get("group_name", "미지정 그룹"), g.get("group_id", ""))
-            for g in CONSTANTS.SPEC_CONFIG
+            for g in self.CONSTANTS.SPEC_CONFIG
         ]
         self.group_table.setRowCount(len(group_items))
 
@@ -2341,7 +2341,7 @@ class MyApp(QWidget):
             return
 
         selected_group = next(
-            (g for g in CONSTANTS.SPEC_CONFIG if g.get("group_name") == group_name), None
+            (g for g in self.CONSTANTS.SPEC_CONFIG if g.get("group_name") == group_name), None
         )
 
         if selected_group:
@@ -2382,7 +2382,7 @@ class MyApp(QWidget):
 
         # CONSTANTS.SPEC_CONFIG에서 선택된 그룹 데이터 찾기
         selected_group = None
-        for group_data in CONSTANTS.SPEC_CONFIG:
+        for group_data in self.CONSTANTS.SPEC_CONFIG:
             if group_data.get("group_name") == group_name:
                 selected_group = group_data
                 break
@@ -2458,7 +2458,7 @@ class MyApp(QWidget):
 
         # SPEC_CONFIG에서 spec_id와 config 추출
         spec_items = []
-        for group_data in CONSTANTS.SPEC_CONFIG:
+        for group_data in self.CONSTANTS.SPEC_CONFIG:
             for key, value in group_data.items():
                 if key not in ['group_name', 'group_id'] and isinstance(value, dict):
                     spec_items.append((key, value))
