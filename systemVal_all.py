@@ -2737,52 +2737,16 @@ class MyApp(QWidget):
         # self.r2 == "None"이면 그대로 None
 
         try:
-            print(f"[DEBUG] [post] Sending request to {path} with auth_type={self.r2}, token={self.token}")
-            self.res = requests.post(
-                path,
-                headers=headers,
-                data=json_data,
-                auth=auth,
-                verify=False,
-                timeout=time_out
-            )
-        except Exception as e:
-            print(e)
-
-        # ✅ Webhook 처리 (transProtocol 기반으로만 판단)
-        try:
             json_data_dict = json.loads(json_data.decode('utf-8'))
             trans_protocol = json_data_dict.get("transProtocol", {})    # 이 부분 수정해야함
-            
-            if not trans_protocol:
-                if self.cnt < len(self.trans_protocols):
-                    current_protocol = self.trans_protocols[self.cnt]
-
-                    if current_protocol == "WebHook":
-                        # ✅ CONSTANTS에서 웹훅 URL 가져오기 (socket 자동 감지된 내 PC IP)
-                        trans_protocol = {
-                            "transProtocolType": "WebHook",
-                            "transProtocolDesc": CONSTANTS.WEBHOOK_URL  # ✅ https://10.252.219.95:8090
-                        }
-                        json_data_dict["transProtocol"] = trans_protocol
-                        # 재직렬화
-                        json_data = json.dumps(json_data_dict).encode('utf-8')
-                        print(f"[DEBUG] [post] transProtocol 설정 추가됨: {trans_protocol}")
             if trans_protocol:
-                trans_protocol_type = trans_protocol.get("transProtocolType", {})
                 # 웹훅 서버 시작 (transProtocolType이 WebHook인 경우만)
+                trans_protocol_type = trans_protocol.get("transProtocolType", {})
                 if "WebHook".lower() in str(trans_protocol_type).lower():
+
                     time.sleep(0.1)
-                    path_tmp = trans_protocol.get("transProtocolDesc", {})
-                    # http/https 접두어 보정
-                    if not path_tmp or str(path_tmp).strip() in ["None", "", "desc"]:
-                        # ✅ 기본값도 CONSTANTS에서 가져오기
-                        path_tmp = CONSTANTS.WEBHOOK_URL  # ✅ https://10.252.219.95:8090
-                    if not str(path_tmp).startswith("http"):
-                        path_tmp = "https://" + str(path_tmp)
-                    parsed = urlparse(str(path_tmp))
-                    url = parsed.hostname if parsed.hostname is not None else "0.0.0.0"  # ✅ 기본값 수정
-                    port = parsed.port if parsed.port is not None else 8090  # ✅ 포트도 8090으로
+                    url = "0.0.0.0"  # ✅ 기본값 수정
+                    port = 8090  # ✅ 포트도 8090으로
 
                     msg = {}
                     self.webhook_flag = True
@@ -2796,6 +2760,19 @@ class MyApp(QWidget):
             print(e)
             import traceback
             traceback.print_exc()
+
+        try:
+            print(f"[DEBUG] [post] Sending request to {path} with auth_type={self.r2}, token={self.token}")
+            self.res = requests.post(
+                path,
+                headers=headers,
+                data=json_data,
+                auth=auth,
+                verify=False,
+                timeout=time_out
+            )
+        except Exception as e:
+            print(e)
 
     def handle_webhook_result(self, result):
         self.webhook_flag = True
@@ -2983,6 +2960,26 @@ class MyApp(QWidget):
                 print(f"[DEBUG][MAPPER] latest_events 상태: {list(self.latest_events.keys())}")
                 inMessage = self._apply_request_constraints(inMessage, self.cnt)
 
+                trans_protocol = inMessage.get("transProtocol", {})  # 이 부분 수정해야함
+                if trans_protocol:
+                    trans_protocol_type = trans_protocol.get("transProtocolType", {})
+                    if "WebHook".lower() in str(trans_protocol_type).lower():
+                        import socket
+                        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                        s.connect(("8.8.8.8", 80))  # 구글 DNS로 연결 시도 (실제 전송 안 함)
+                        WEBHOOK_PUBLIC_IP = s.getsockname()[0]  # 현재 PC의 실제 네트워크 IP
+                        s.close()
+                        print(f"[CONSTANTS] 웹훅 서버 IP 자동 감지: {WEBHOOK_PUBLIC_IP}")
+                        WEBHOOK_PORT = 8090  # 웹훅 수신 포트
+                        WEBHOOK_URL = f"https://{WEBHOOK_PUBLIC_IP}:{WEBHOOK_PORT}"  # 플랫폼/시스템이 웹훅을 보낼 주소
+
+                        trans_protocol = {
+                            "transProtocolType": "WebHook",
+                            "transProtocolDesc": WEBHOOK_URL  # ✅ https://10.252.219.95:8090
+                        }
+                        inMessage["transProtocol"] = trans_protocol
+                        # 재직렬화
+                        print(f"[DEBUG] [post] transProtocol 설정 추가됨: {inMessage}")
                 json_data = json.dumps(inMessage).encode('utf-8')
 
                 self._push_event(self.cnt, "REQUEST", inMessage)
@@ -3104,6 +3101,10 @@ class MyApp(QWidget):
                     try:
                         self.run_status = "완료"
                         result_json = build_result_json(self)
+                        url = f"http://ect2.iptime.org:20223/api/integration/test-results"
+                        response = requests.post(url, json=result_json)
+                        print("✅ 시험 결과 전송 상태 코드:", response.status_code)
+                        print("📥  시험 결과 전송 응답:", response.text)
                         json_path = os.path.join(result_dir, "response_results.json")
                         with open(json_path, "w", encoding="utf-8") as f:
                             json.dump(result_json, f, ensure_ascii=False, indent=2)
@@ -3467,6 +3468,10 @@ class MyApp(QWidget):
                 try:
                     self.run_status = "완료"
                     result_json = build_result_json(self)
+                    url = f"http://ect2.iptime.org:20223/api/integration/test-results"
+                    response = requests.post(url, json=result_json)
+                    print("✅ 시험 결과 전송 상태 코드:", response.status_code)
+                    print("📥  시험 결과 전송 응답:", response.text)
                     json_path = os.path.join(result_dir, "response_results.json")
                     with open(json_path, "w", encoding="utf-8") as f:
                         json.dump(result_json, f, ensure_ascii=False, indent=2)
@@ -4615,6 +4620,10 @@ class MyApp(QWidget):
         try:
             self.run_status = "진행중"
             result_json = build_result_json(self)
+            url = f"http://ect2.iptime.org:20223/api/integration/test-results"
+            response = requests.post(url, json=result_json)
+            print("✅ 시험 결과 전송 상태 코드:", response.status_code)
+            print("📥  시험 결과 전송 응답:", response.text)
             json_path = os.path.join(result_dir, "response_results.json")
             with open(json_path, "w", encoding="utf-8") as f:
                 json.dump(result_json, f, ensure_ascii=False, indent=2)

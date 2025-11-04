@@ -242,7 +242,7 @@
                 "duration": "100",
                 "transProtocol": {
                   "transProtocolType": "WebHook",
-                  "transProtocolDesc": "127.0.0.1:8090"
+                  "transProtocolDesc": "https://10.252.219.119:8090"
                 },
                 "eventFilter": "화재",
                 "classFilter": "버스",
@@ -306,8 +306,8 @@
                   }
                 ],
                 "maxCount": 3,
-                "eventFilter": "배회",
-                "classFilter": "트럭"
+                "eventFilter": "화재",
+                "classFilter": "버스"
               },
               "validationErrors": [
                 "오류가 없습니다."
@@ -318,5 +318,5 @@
       ]
     }
   ],
-  "completedDate": "2025-11-04T09:56:08Z"
+  "completedDate": "2025-11-03T18:31:26Z"
 }

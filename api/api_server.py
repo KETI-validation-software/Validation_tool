@@ -384,46 +384,6 @@ class Server(BaseHTTPRequestHandler):
                         # 2단계: 잘못된 주소인 경우
                         url_tmp = str(url_tmp).strip()
 
-                        # 로컬 주소인 경우 CONSTANTS.WEBHOOK_URL로 대체
-                        if any(local in url_tmp.lower() for local in ["localhost", "127.0.0.1"]):
-                            print(f"[SERVER ERROR] Webhook URL이 로컬 주소임: {url_tmp}, 실제 주소로 맵핑 시작")
-                            url_tmp = CONSTANTS.WEBHOOK_URL  # ✅ https://10.252.219.95:8090
-                            print(f"[SERVER] 맵핑된 Webhook URL: {url_tmp}")
-                        else:
-                            # 로컬호스트가 아니더라도 포트가 8008이 아니면 일단은 수정하게 해놨는데, 추후 수정해야함
-                            if ":" in url_tmp:
-                                base_url = url_tmp.split(":")[0]
-                                current_port = url_tmp.split(":")[-1].split("/")[0]
-
-                                if current_port != "8090":
-                                    print(f"[SERVER ERROR] Webhook URL 포트가 8008이 아님: {current_port}, 포트 수정 시작")
-                                    if "/" in url_tmp.split[":"][-1]:
-                                        path = "/" + "/".join(url_tmp.split(":")[-1].split("/")[1:])
-                                        url_tmp = f"{base_url}:8090{path}"
-                                    else:
-                                        url_tmp = f"{base_url}:8090"
-                            else:
-                                url_tmp = f"{url_tmp}:8090"
-                                print(f"[SERVER] 포트 추가된 Webhook URL: {url_tmp}")
-                        
-                        # 3단계: https 앞에 붙이기
-                        if not url_tmp.lower().startswith("https://") and not url_tmp.lower().startswith("http://"):
-                            url_tmp = "https://" + url_tmp
-                            print(f"[SERVER] 스킴 추가된 Webhook URL: {url_tmp}")
-                        
-                        if url_tmp.lower().startswith("http://"):
-                            url_tmp = url_tmp.replace("http://", "https://", 1)
-                            print(f"[SERVER] HTTPS로 변환된 Webhook URL: {url_tmp}")
-                        
-                        if "https" not in url_tmp.lower():
-                            message = {
-                                "code": "400",
-                                "message": "잘못된 요청: HTTPS 필요 - 진짜 문제"
-                            }
-                            self._set_headers()
-                            self.wfile.write(json.dumps(message).encode('utf-8'))
-                            return
-
                         # 4단계: 올바른 인덱스 사용
                         message = self.outMessage[message_cnt]
 
