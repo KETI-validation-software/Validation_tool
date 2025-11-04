@@ -491,6 +491,11 @@ class Server(BaseHTTPRequestHandler):
             # constraints가 있을 때만 _applied_constraints 호출 (성능 최적화)
             if out_con and isinstance(out_con, dict) and len(out_con) > 0:
                 print(f"[DEBUG][CONSTRAINTS] _applied_constraints 호출 예정")
+                
+                # ✅ generator의 latest_events를 명시적으로 업데이트 (참조 동기화)
+                self.generator.latest_events = Server.latest_event
+                print(f"[DEBUG][CONSTRAINTS] 🔄 generator.latest_events 동기화 완료: {list(self.generator.latest_events.keys())}")
+                
                 num_data = [random.randint(0, 9) for _ in range(3)]
 
                 print(f"[DEBUG][CONSTRAINTS] request_data: {self.request_data}")
@@ -570,6 +575,8 @@ class Server(BaseHTTPRequestHandler):
                 print(f"[DEBUG][SERVER] 웹훅 데이터 사용: webhookData[{webhook_index}]")
                 print(
                     f"[DEBUG][SERVER] 원본 웹훅 페이로드: {json.dumps(webhook_payload, ensure_ascii=False) if webhook_payload else 'None'}")
+                print(f"[DEBUG][SERVER] 원본 웹훅 페이로드 타입: {type(webhook_payload)}")
+                print(f"[DEBUG][SERVER] 원본 웹훅 페이로드 내용 상세: {webhook_payload}")
 
                 # None이면 웹훅 전송하지 않음
                 if webhook_payload is None:
@@ -589,6 +596,13 @@ class Server(BaseHTTPRequestHandler):
 
                             if webhook_con and isinstance(webhook_con, dict) and len(webhook_con) > 0:
                                 print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 웹훅 constraints 적용 시작")
+                                print(f"[DEBUG][WEBHOOK_CONSTRAINTS] webhook_con keys: {list(webhook_con.keys())}")
+                                print(f"[DEBUG][WEBHOOK_CONSTRAINTS] latest_events keys: {list(Server.latest_event.keys())}")
+                                
+                                # ✅ generator의 latest_events를 명시적으로 업데이트 (참조 동기화)
+                                self.generator.latest_events = Server.latest_event
+                                print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 🔄 generator.latest_events 동기화 완료")
+                                
                                 # 웹훅 페이로드에 constraints 적용
                                 num_data = [random.randint(0, 9) for _ in range(3)]
                                 webhook_payload = self.generator._applied_constraints(
@@ -598,6 +612,7 @@ class Server(BaseHTTPRequestHandler):
                                     n=len(num_data)
                                 )
                                 print(f"[DEBUG][WEBHOOK_CONSTRAINTS] constraints 적용 완료")
+                                print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 업데이트된 webhook_payload: {json.dumps(webhook_payload, ensure_ascii=False)[:300]}")
                             else:
                                 print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 웹훅 constraints가 비어있음 - 원본 페이로드 사용")
                         else:

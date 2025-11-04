@@ -935,7 +935,7 @@ class ResultPageWidget(QWidget):
                 if row < len(self.videoMessages):
                     display_name = f"{row + 1}. {self.videoMessages[row]}"
                     api_item = QTableWidgetItem(display_name)
-                    api_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+                    api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)  # 가운데 정렬
                     self.tableWidget.setItem(row, 0, api_item)
                     print(f"[INIT] Row {row} API 이름 재설정: {display_name}")
 
@@ -1234,6 +1234,7 @@ class ResultPageWidget(QWidget):
                 font-style: normal;
                 font-weight: 400;
                 letter-spacing: 0.098px;
+                text-align: center;  /* 모든 셀 가운데 정렬 */
             }}
             QHeaderView::section {{
                 background-color: #EDF0F3;
@@ -1592,27 +1593,40 @@ class MyApp(QWidget):
             # API 이름에서 슬래시 제거
             api_name_clean = api_name.lstrip("/")
             
-            # 번호 prefix 제거 (예: "01_Authentication" -> "Authentication")
-            # 패턴: 숫자로 시작하고 '_'가 있는 경우
-            import re
-            api_name_no_prefix = re.sub(r'^\d+_', '', api_name_clean)
+            print(f"[DEBUG] trace 파일 찾기: api_name={api_name}, direction={direction}")
             
-            print(f"[DEBUG] trace 파일 찾기: 원본={api_name}, 정제={api_name_clean}, prefix제거={api_name_no_prefix}")
-            
-            # trace 파일 이름 생성 (두 가지 모두 시도)
-            # 1. prefix 포함된 이름으로 시도
-            safe_api = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in str(api_name_clean))
-            trace_file = Path("results/trace") / f"trace_{safe_api}.ndjson"
-            
-            # 2. prefix 제거된 이름으로 시도
-            if not trace_file.exists():
-                safe_api_no_prefix = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in str(api_name_no_prefix))
-                trace_file = Path("results/trace") / f"trace_{safe_api_no_prefix}.ndjson"
-                print(f"[DEBUG] prefix 포함 파일 없음, prefix 제거 파일 시도: {trace_file}")
-
-            if not trace_file.exists():
-                print(f"[DEBUG] trace 파일 없음: {trace_file}")
+            # trace 디렉토리의 모든 파일 검색
+            trace_dir = Path("results/trace")
+            if not trace_dir.exists():
+                print(f"[DEBUG] trace 디렉토리 없음: {trace_dir}")
                 return None
+            
+            # API 이름과 매칭되는 파일 찾기
+            # 우선순위: 1) 번호 있는 파일 → 2) 번호 없는 파일
+            safe_api = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in str(api_name_clean))
+            
+            trace_file = None
+            
+            # ✅ 우선순위 1: 번호 prefix 포함된 형식 찾기 (trace_XX_API.ndjson)
+            numbered_files = list(trace_dir.glob(f"trace_*_{safe_api}.ndjson"))
+            if numbered_files:
+                # 번호가 있는 파일 중 가장 최근 파일 사용
+                trace_file = max(numbered_files, key=lambda f: f.stat().st_mtime)
+                print(f"[DEBUG] 번호 있는 trace 파일 발견: {trace_file.name}")
+            
+            # ✅ 우선순위 2: 번호 없는 형식 찾기 (trace_API.ndjson)
+            if not trace_file:
+                unnumbered_files = list(trace_dir.glob(f"trace_{safe_api}.ndjson"))
+                if unnumbered_files:
+                    # 번호 없는 파일 중 가장 최근 파일 사용
+                    trace_file = max(unnumbered_files, key=lambda f: f.stat().st_mtime)
+                    print(f"[DEBUG] 번호 없는 trace 파일 발견: {trace_file.name}")
+            
+            if not trace_file:
+                print(f"[DEBUG] trace 파일 없음 (패턴: trace_*_{safe_api}.ndjson 또는 trace_{safe_api}.ndjson)")
+                return None
+            
+            print(f"[DEBUG] 사용할 trace 파일: {trace_file.name}")
 
             # 파일에서 가장 최근의 해당 direction 이벤트 찾기
             latest_event = None
@@ -1627,12 +1641,28 @@ class MyApp(QWidget):
                         continue
 
             if latest_event:
-                # latest_events 업데이트
+                # latest_events 업데이트 - 여러 키 형식으로 저장
                 api_key = latest_event.get("api", api_name)
+                
+                # ✅ 1. 원본 API 이름으로 저장
                 if api_key not in self.latest_events:
                     self.latest_events[api_key] = {}
                 self.latest_events[api_key][direction] = latest_event
-                print(f"[DEBUG] trace 파일에서 {api_name} {direction} 데이터 로드 완료: {len(str(latest_event.get('data', {})))} bytes")
+                
+                # ✅ 2. 슬래시 제거한 형식으로도 저장 (예: "CameraProfiles")
+                api_key_clean = api_key.lstrip('/')
+                if api_key_clean not in self.latest_events:
+                    self.latest_events[api_key_clean] = {}
+                self.latest_events[api_key_clean][direction] = latest_event
+                
+                # ✅ 3. 슬래시 포함한 형식으로도 저장 (예: "/CameraProfiles")
+                api_key_with_slash = f"/{api_key_clean}" if not api_key_clean.startswith('/') else api_key_clean
+                if api_key_with_slash not in self.latest_events:
+                    self.latest_events[api_key_with_slash] = {}
+                self.latest_events[api_key_with_slash][direction] = latest_event
+                
+                print(f"[DEBUG] trace 파일에서 {api_name} {direction} 데이터 로드 완료")
+                print(f"[DEBUG] latest_events에 저장된 키들: {api_key}, {api_key_clean}, {api_key_with_slash}")
                 return latest_event.get("data")
             else:
                 print(f"[DEBUG] trace 파일에서 {api_name} {direction} 데이터 없음")
@@ -1677,6 +1707,10 @@ class MyApp(QWidget):
                         print(f"[DATA_MAPPER] trace 파일에서 {ref_endpoint} RESPONSE 로드 시도")
                         self._load_from_trace_file(ref_key, "RESPONSE")
 
+            # ✅ generator의 latest_events를 명시적으로 업데이트 (참조 동기화)
+            self.generator.latest_events = self.latest_events
+            print(f"[DATA_MAPPER] 🔄 generator.latest_events 동기화 완료: {list(self.generator.latest_events.keys())}")
+            
             # data mapper 적용
             # request_data를 template로, constraints 적용하여 업데이트
             # 빈 dict를 template로 사용하지 않고 request_data 자체를 업데이트
@@ -2580,7 +2614,7 @@ class MyApp(QWidget):
 
             # 컬럼 0: API 명 - 강제로 새로 생성!
             api_item = QTableWidgetItem(display_name)
-            api_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)  # 가운데 정렬
             self.tableWidget.setItem(row, 0, api_item)
 
             print(f"[TABLE] Row {row}: {display_name} 설정 완료")
@@ -2650,7 +2684,7 @@ class MyApp(QWidget):
         for row in range(api_count):
             # API 명
             api_item = QTableWidgetItem(api_list[row])
-            api_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)  # 가운데 정렬
             self.tableWidget.setItem(row, 0, api_item)
 
             # 나머지 컬럼 초기화
