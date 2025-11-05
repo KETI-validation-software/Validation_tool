@@ -1,2 +1,2 @@
-{"time": "2025-11-05T06:41:17.808906Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
-{"time": "2025-11-05T06:41:18.807942Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "streamingSupport": [{"streamProtocolType": "RTSP", "streamProtocolDesc": "Unicast"}], "transportSupport": [{"transProtocolType": "WebHook", "transProtocolDesc": ""}]}}
+{"time": "2025-11-05T08:25:01.588648Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
+{"time": "2025-11-05T08:25:02.590620Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 URL 형식"}}

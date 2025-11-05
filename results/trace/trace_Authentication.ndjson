@@ -1,2 +1,0 @@
-{"time": "2025-11-05T06:41:14.865934Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "userA", "userPW": "passA"}}
-{"time": "2025-11-05T06:41:14.866939Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "userName": "관리자", "userAff": "오산시청", "accessToken": "Bearer_6416cccb13354c4cae00658c19529bfb_1762324874"}}
