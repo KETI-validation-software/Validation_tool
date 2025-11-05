@@ -154,7 +154,7 @@ class Server(BaseHTTPRequestHandler):
     # POST echoes the message adding a JSON field
     def do_POST(self):
         spec_id, api_name = self.parse_path()
-        if not api_name or Server.current_spec_id!=spec_id:# "cmgyv3rzl014nvsveidu5jpzp" != spec_id:
+        if not api_name or  "cmgyv3rzl014nvsveidu5jpzp" != spec_id:
             print(f"[ERROR] 잘못된 path 형식: {self.path}")
             self.send_response(400)
             self.send_header('Content-type', 'application/json')
@@ -181,9 +181,6 @@ class Server(BaseHTTPRequestHandler):
                 print(f"[TRACE WRITE] API 이름: {api_name}")
                 print(f"[TRACE WRITE] spec_id: {spec_id}")
                 print(f"[TRACE WRITE] Direction: REQUEST")
-
-                # 요청 데이터 기록
-                self._push_event(api_name, "REQUEST", self.request_data)
 
                 print(f"[TRACE WRITE] ✅ trace 파일에 저장 완료")
                 print(f"[TRACE WRITE] latest_event 키 목록: {list(Server.latest_event.keys())}")
@@ -245,6 +242,7 @@ class Server(BaseHTTPRequestHandler):
 
                 # 성공 응답 전송
                 try:
+                    self._push_event(api_name, "REQUEST", self.request_data)
                     self._push_event(api_name, "RESPONSE", data)
                     response_json = json.dumps(data).encode('utf-8')
                     self._set_headers()
@@ -600,21 +598,26 @@ class Server(BaseHTTPRequestHandler):
                     n=len(num_data)
                 )
                 print(f"[DEBUG][CONSTRAINTS] 업데이트된 message 내용: {json.dumps(updated_message, ensure_ascii=False)[:200]}")
-                self._push_event(self.path[1:], "RESPONSE", updated_message)
+
+                self._push_event(api_name, "REQUEST", self.request_data)
+                self._push_event(api_name, "RESPONSE", updated_message)
 
                 # 업데이트된 메시지를 응답으로 전송
                 a = json.dumps(updated_message).encode('utf-8')
             else:
                 print(f"[DEBUG][CONSTRAINTS] constraints 없음 - 원본 메시지 사용")
                 # constraints가 없으면 원본 메시지 그대로 사용
-                self._push_event(self.path[1:], "RESPONSE", message)
+
+                self._push_event(api_name, "REQUEST", self.request_data)
+                self._push_event(api_name, "RESPONSE", message)
                 a = json.dumps(message).encode('utf-8')
         except Exception as e:
             print(f"[ERROR] _applied_constraints 실행 중 오류: {e}")
             import traceback
             traceback.print_exc()
             # 에러 발생 시 원본 메시지 사용
-            self._push_event(self.path[1:], "RESPONSE", message)
+            self._push_event(api_name, "REQUEST", self.request_data)
+            self._push_event(api_name, "RESPONSE", message)
             a = json.dumps(message).encode('utf-8')
 
         # 응답 전송 (연결 끊김 에러 처리)
@@ -726,7 +729,6 @@ class Server(BaseHTTPRequestHandler):
             print(f"[DEBUG][SERVER] 최종 webhook_payload: {json.dumps(webhook_payload, ensure_ascii=False)[:200]}")
 
             # ✅ 웹훅 이벤트 전송 기록 (trace) - constraints 적용 후의 페이로드 기록
-            api_name = self.path[1:] if self.path else "unknown"
             self._push_event(api_name, "WEBHOOK_OUT", webhook_payload)
 
             # ✅ 웹훅 응답 초기화 (클래스 변수)
@@ -753,7 +755,7 @@ class Server(BaseHTTPRequestHandler):
                 print(f"[DEBUG][SERVER] webhook_response 저장됨 (클래스 변수): {Server.webhook_response}")
                 
                 # ✅ 웹훅 응답 기록 (trace)
-                api_name = self.path[1:] if hasattr(self, 'path') and self.path else "unknown"
+                spec_id, api_name = self.parse_path()
                 self._push_event(api_name, "WEBHOOK_IN", Server.webhook_response)
                 
                 # JSON 파일 저장 제거 - spec/video/videoData_response.py 사용
