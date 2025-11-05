@@ -1885,9 +1885,8 @@ class MyApp(QWidget):
         self.message_error = []
         self.message_name = ""
 
-        auth_temp, auth_temp2 = set_auth("config/config.txt")
-        self.digestInfo = [auth_temp2[0], auth_temp2[1]]
-        self.token = auth_temp
+        auth_temp = set_auth()
+        self.accessInfo = [auth_temp[0], auth_temp[1]]
 
         # Load specs dynamically from CONSTANTS
         self.load_specs_from_constants()
@@ -2917,7 +2916,7 @@ class MyApp(QWidget):
             if self.token:
                 headers['Authorization'] = f"Bearer {self.token}"
         elif self.r2 == "D":  # Digest
-            auth = HTTPDigestAuth(self.digestInfo[0], self.digestInfo[1])
+            auth = HTTPDigestAuth(self.accessInfo[0], self.accessInfo[1])
         # self.r2 == "None"이면 그대로 None
 
         try:
@@ -2929,8 +2928,8 @@ class MyApp(QWidget):
                 if "WebHook".lower() in str(trans_protocol_type).lower():
 
                     time.sleep(0.1)
-                    url = "0.0.0.0"  # ✅ 기본값 수정
-                    port = 8090  # ✅ 포트도 8090으로
+                    url = CONSTANTS.WEBHOOK_HOST  # ✅ 기본값 수정
+                    port = CONSTANTS.WEBHOOK_PORT  # ✅ 포트도 2001로
 
                     msg = {}
                     self.webhook_flag = True
@@ -3154,16 +3153,19 @@ class MyApp(QWidget):
                         WEBHOOK_PUBLIC_IP = s.getsockname()[0]  # 현재 PC의 실제 네트워크 IP
                         s.close()
                         print(f"[CONSTANTS] 웹훅 서버 IP 자동 감지: {WEBHOOK_PUBLIC_IP}")
-                        WEBHOOK_PORT = 8090  # 웹훅 수신 포트
+                        WEBHOOK_PORT = CONSTANTS.WEBHOOK_PORT  # 웹훅 수신 포트
                         WEBHOOK_URL = f"https://{WEBHOOK_PUBLIC_IP}:{WEBHOOK_PORT}"  # 플랫폼/시스템이 웹훅을 보낼 주소
 
                         trans_protocol = {
                             "transProtocolType": "WebHook",
-                            "transProtocolDesc": WEBHOOK_URL  # ✅ https://10.252.219.95:8090
+                            "transProtocolDesc": WEBHOOK_URL
                         }
                         inMessage["transProtocol"] = trans_protocol
                         # 재직렬화
                         print(f"[DEBUG] [post] transProtocol 설정 추가됨: {inMessage}")
+                elif self.r2 == "B" and self.message[self.cnt] == "Authentication":
+                    inMessage["userID"] = self.accessInfo[0]
+                    inMessage["userPW"] = self.accessInfo[1]
                 json_data = json.dumps(inMessage).encode('utf-8')
 
                 self._push_event(self.cnt, "REQUEST", inMessage)
@@ -4757,9 +4759,9 @@ class MyApp(QWidget):
         print(f"[START] 테이블 초기화 완료")
 
         # ✅ 14. 인증 정보 설정
-        auth_temp, auth_temp2 = set_auth("config/config.txt")
-        self.digestInfo = [auth_temp2[0], auth_temp2[1]]
-        self.token = auth_temp
+        auth_temp = set_auth()
+        self.accessInfo = [auth_temp[0], auth_temp[1]]
+        self.token = None
 
         # ✅ 15. 평가 점수 디스플레이 초기화 (전체 점수 포함)
         self.update_score_display()
@@ -4962,8 +4964,6 @@ class MyApp(QWidget):
             self.r2 = "D"
         elif self.r2 == "Bearer Token":
             self.r2 = "B"
-        else:
-            self.r2 = "None"
 
     def closeEvent(self, event):
         """창 닫기 이벤트 - 타이머 정리"""

@@ -1070,12 +1070,11 @@ class FormValidator:
         """인증 정보 수집"""
         if self.parent.digest_radio.isChecked():
             auth_type = "Digest Auth"
-            auth_info = f"{self.parent.id_input.text().strip()},{self.parent.pw_input.text().strip()}"
         else:
             auth_type = "Bearer Token"
-            auth_info = self.parent.token_input.text().strip()
-            updated = False
-            
+        auth_info = f"{self.parent.id_input.text().strip()},{self.parent.pw_input.text().strip()}"
+        '''
+            updated = False 
             for name, value in vars(Data_response).items():
                 # 리스트 이름에 'Authentication'이 포함된 변수만 찾기
                 if "authentication" in name.lower() and isinstance(value, dict):
@@ -1110,8 +1109,9 @@ class FormValidator:
                     # PyInstaller 환경에서는 메모리만 업데이트 (파일은 read-only)
                     print(f"[PyInstaller] Data_response 메모리에만 토큰 반영 완료")
                 # ===== 수정 끝 =====
+                
             else:
-                print("Authentication 관련 변수를 찾지 못했습니다.")
+                print("Authentication 관련 변수를 찾지 못했습니다.")'''
 
         return auth_type, auth_info
 

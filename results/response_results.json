@@ -1,59 +1,36 @@
 {
-  "requestId": "cmhfpjibz000c5t1uxmf2urvj",
+  "requestId": "cmh2sdyj70001ry7uvsgugy25",
   "evaluationTarget": {
-    "companyName": "물리보안테스트2",
+    "companyName": "물리보안기업",
     "contactPerson": "김철수",
-    "productName": "물리보안테스트시스템",
+    "productName": "물리보안테스트제품",
     "modelName": "v1.0",
     "version": "v1.0"
   },
   "testGroup": {
-    "id": "cmh1ybbyb000d9y0jxtlgp2nf",
-    "name": "영상보안그룹",
+    "id": "cmgzwohuq01y8vsvep0hpuuf4",
+    "name": "물리보안",
     "testRange": "ALL_FIELDS",
     "testSpecIds": [
-      "cmh1ua7b00021gxc3rjepbkrm",
       "cmgyv3rzl014nvsveidu5jpzp"
     ]
   },
   "status": "완료",
   "authMethod": "Bearer Token",
   "testScore": {
-    "score": 92.11,
+    "score": 90.79,
     "totalFields": 76,
-    "passedFields": 70,
-    "failedFields": 6
+    "passedFields": 69,
+    "failedFields": 7
   },
   "testResult": [
     {
-      "testSpecId": "cmh1ua7b00021gxc3rjepbkrm",
-      "testSpecName": "영상보안시스템_시나리오2",
-      "score": 0,
-      "totalFields": 0,
-      "passedFields": 0,
-      "failedFields": 0,
-      "apis": [
-        {
-          "id": "step-1-ckssr4n2h",
-          "name": "인증",
-          "method": "POST",
-          "endpoint": "/Authentication",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        }
-      ]
-    },
-    {
       "testSpecId": "cmgyv3rzl014nvsveidu5jpzp",
       "testSpecName": "영상보안시스템_new",
-      "score": 92.11,
+      "score": 90.79,
       "totalFields": 76,
-      "passedFields": 70,
-      "failedFields": 6,
+      "passedFields": 69,
+      "failedFields": 7,
       "apis": [
         {
           "id": "step-1-s9942zltt",
@@ -144,18 +121,18 @@
           "name": "실시간 영상 정보 연동",
           "method": "POST",
           "endpoint": "/StreamURLs",
-          "score": 100.0,
+          "score": 92.0,
           "validationCnt": 1,
           "totalFields": 12,
-          "passFields": 12,
-          "failFields": 0,
+          "passFields": 11,
+          "failFields": 1,
           "validations": [
             {
               "attempt": 1,
               "validationData": {},
               "validationErrors": [
                 "[시도 1/1]",
-                "오류가 없습니다."
+                "[의미] camList.camURL: camURL=['rtsp://127.0.01:8554', 'rtsp://127.0.01:8554']에 해당하는 camURL을 찾을 수 없음"
               ]
             }
           ]
@@ -176,7 +153,7 @@
               "validationData": {},
               "validationErrors": [
                 "[시도 1/1]",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761092181938 (타입: int), [1] 1760997901603 (타입: int)"
+                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761046638971 (타입: int), [1] 1761171610117 (타입: int)"
               ]
             }
           ]
@@ -240,8 +217,8 @@
               "validationData": {},
               "validationErrors": [
                 "[시도 1/1]",
-                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 9985488548161 (타입: int), [1] 8914793034075 (타입: int)",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 8461115654932 (타입: int), [1] 8872567117053 (타입: int)"
+                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 9082011881702 (타입: int), [1] 9595727835728 (타입: int)",
+                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 4420809614470 (타입: int), [1] 9436092369831 (타입: int)"
               ]
             }
           ]
@@ -249,5 +226,5 @@
       ]
     }
   ],
-  "completedDate": "2025-11-04T15:47:37Z"
+  "completedDate": "2025-11-05T15:41:36Z"
 }
