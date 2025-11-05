@@ -9,24 +9,18 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소
 # test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
-company_name = "테스트"
-product_name = "통합플랫폼"
+company_name = "통합플랫폼테스트"
+product_name = "통합플랫폼테스트제품"
 version = "v1.0"
 test_category = "MAIN_TEST"
-test_target = "통합시스템그룹, 통합플랫폼"
-test_range = "ALL_FIELDS, ALL_FIELDS"
+test_target = "통합플랫폼"
+test_range = "ALL_FIELDS"
 auth_type = "Bearer Token"
-auth_info = "a"
-admin_code = "1234"
-url = "https://127.0.0.1:8080"
+auth_info = "userA,passA"
+admin_code = "1"
+url = "https://10.252.219.119:8080"
 contact_person = "김철수"
 model_name = "v1.0"
-request_id = "cmhba7ldg000g6zcrxdqwdcje"
-specs = [
-    ["cmgvieyak001b6cd04cgaawmm_inSchema", "cmgvieyak001b6cd04cgaawmm_outData", "cmgvieyak001b6cd04cgaawmm_messages",
-     ""],
-    ["cmh1u5pef000sgxc3bzl4y9v0_inSchema", "cmh1u5pef000sgxc3bzl4y9v0_outData", "cmh1u5pef000sgxc3bzl4y9v0_messages",
-     ""]]
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황
 flag_opt = False
@@ -49,7 +43,7 @@ enable_retry_delay = False  # False 권장: 불필요한 sleep 제거
 
 # ✅ 웹훅 서버 설정 (전역)
 WEBHOOK_HOST = "0.0.0.0"  # 서버 바인딩 주소 (모든 인터페이스에서 수신)
-WEBHOOK_PORT = 8090       # 웹훅 수신 포트
+WEBHOOK_PORT = 2001       # 웹훅 수신 포트
 
 # ✅ 웹훅 공개 IP는 현재 PC의 실제 IP 자동 감지 (socket 사용)
 # 플랫폼/시스템이 웹훅 이벤트를 보낼 주소 = 이 PC의 IP:8090
@@ -69,30 +63,6 @@ WEBHOOK_URL = f"https://{WEBHOOK_PUBLIC_IP}:{WEBHOOK_PORT}"  # 플랫폼/시스�
 print(f"[CONSTANTS] 웹훅 콜백 URL: {WEBHOOK_URL} (플랫폼/시스템 접속 URL: {url})")
 
 SPEC_CONFIG = [
-    {
-        "group_name": "통합시스템그룹",
-        "group_id": "cmh1yc1yn000g9y0jk37caeqv",
-        "cmh1u5pef000sgxc3bzl4y9v0": {
-    "test_name": "영상보안시스템_시나리오2",
-    "specs": ['cmh1u5pef000sgxc3bzl4y9v0_inSchema', 'cmh1u5pef000sgxc3bzl4y9v0_outData', 'cmh1u5pef000sgxc3bzl4y9v0_messages', 'cmh1u5pef000sgxc3bzl4y9v0_webhook_OutSchema', 'cmh1u5pef000sgxc3bzl4y9v0_webhook_inData'],
-    "api_name": ['실시간 이벤트 분석 정보 연동'],
-    "api_id": ['step-1-dfyzdlda0'],
-    "api_endpoint": ['/RealtimeVideoEventInfos'],
-    "trans_protocol": ['WebHook'],
-    "time_out": [5000],
-    "num_retries": [10]
-},
-        "cmgvieyak001b6cd04cgaawmm": {
-    "test_name": "영상보안시스템_new",
-    "specs": ['cmgvieyak001b6cd04cgaawmm_inSchema', 'cmgvieyak001b6cd04cgaawmm_outData', 'cmgvieyak001b6cd04cgaawmm_messages', 'cmgvieyak001b6cd04cgaawmm_webhook_OutSchema', 'cmgvieyak001b6cd04cgaawmm_webhook_inData'],
-    "api_name": ['인증', '전송 지원 기능 정보 연동', '카메라 목록 연동', '저장된 영상 목록 연동', '실시간 영상 정보 연동', '저장된 영상 정보 연동', '실시간 이벤트 분석 정보 연동', '저장된 이벤트 분석 정보 연동'],
-    "api_id": ['step-1-77lxvxrit', 'step-2-ln57b7ahz', 'step-1-354py0pz2', 'step-2-hyto4xrf1', 'step-5-dfxmyzzsw', 'step-6-pflcyt2cp', 'step-7-166n5ivbf', 'step-8-fff2u2432'],
-    "api_endpoint": ['/Authentication', '/Capabilities', '/CameraProfiles', '/StoredVideoInfos', '/StreamURLs', '/ReplayURL', '/RealtimeVideoEventInfos', '/StoredVideoEventInfos'],
-    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'WebHook', 'basic'],
-    "time_out": [5000, 5000, 10000, 5000, 5000, 5000, 5000, 5000],
-    "num_retries": [1, 1, 1, 1, 1, 1, 1, 1]
-}
-    },
     {
         "group_name": "통합플랫폼",
         "group_id": "cmgzwocpp01y6vsve880sfysm",

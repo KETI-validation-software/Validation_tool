@@ -1,18 +1,17 @@
 {
-  "requestId": "cmhba7ldg000g6zcrxdqwdcje",
+  "requestId": "cmh1yg49v000t9y0jdr1wwuja",
   "evaluationTarget": {
-    "companyName": "테스트",
+    "companyName": "통합플랫폼테스트",
     "contactPerson": "김철수",
-    "productName": "통합플랫폼",
+    "productName": "통합플랫폼테스트제품",
     "modelName": "v1.0",
     "version": "v1.0"
   },
   "testGroup": {
-    "id": "cmh1yc1yn000g9y0jk37caeqv",
-    "name": "통합시스템그룹",
-    "testRange": "ALL_FIELDS, ALL_FIELDS",
+    "id": "cmgzwocpp01y6vsve880sfysm",
+    "name": "통합플랫폼",
+    "testRange": "ALL_FIELDS",
     "testSpecIds": [
-      "cmh1u5pef000sgxc3bzl4y9v0",
       "cmgvieyak001b6cd04cgaawmm"
     ]
   },
@@ -25,28 +24,6 @@
     "failedFields": 6
   },
   "testResult": [
-    {
-      "testSpecId": "cmh1u5pef000sgxc3bzl4y9v0",
-      "testSpecName": "영상보안시스템_시나리오2",
-      "score": 0,
-      "totalFields": 0,
-      "passedFields": 0,
-      "failedFields": 0,
-      "apis": [
-        {
-          "id": "step-1-dfyzdlda0",
-          "name": "실시간 이벤트 분석 정보 연동",
-          "method": "POST",
-          "endpoint": "/RealtimeVideoEventInfos",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        }
-      ]
-    },
     {
       "testSpecId": "cmgvieyak001b6cd04cgaawmm",
       "testSpecName": "영상보안시스템_new",
@@ -69,8 +46,8 @@
             {
               "attempt": 1,
               "validationData": {
-                "userID": "user0001",
-                "userPW": "pass0001"
+                "userID": "userA",
+                "userPW": "passA"
               },
               "validationErrors": [
                 "오류가 없습니다."
@@ -242,10 +219,10 @@
                 "duration": "100",
                 "transProtocol": {
                   "transProtocolType": "WebHook",
-                  "transProtocolDesc": "https://192.168.0.3:8090"
+                  "transProtocolDesc": "https://10.252.219.119:8090"
                 },
                 "eventFilter": "배회",
-                "classFilter": "트럭",
+                "classFilter": "사람",
                 "startTime": 1761110160000
               },
               "validationErrors": [
@@ -306,7 +283,7 @@
                   }
                 ],
                 "maxCount": 3,
-                "eventFilter": "화재",
+                "eventFilter": "배회",
                 "classFilter": "사람"
               },
               "validationErrors": [
@@ -318,5 +295,5 @@
       ]
     }
   ],
-  "completedDate": "2025-11-04T15:47:36Z"
+  "completedDate": "2025-11-05T15:41:36Z"
 }
