@@ -1339,7 +1339,6 @@ class InfoWidget(QWidget):
                 color: #868686;
             }}
         """)
-        self.pw_input.setEchoMode(QLineEdit.Password)  # ← 비밀번호 숨김
         password_layout.addWidget(self.pw_input)
         password_layout.addStretch()
         password_widget.setLayout(password_layout)
