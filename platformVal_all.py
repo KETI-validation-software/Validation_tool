@@ -1636,9 +1636,8 @@ class MyApp(QWidget):
         self.Server = Server
         self.server_th = None  # ✅ 서버 스레드 변수 초기화
 
-        auth_temp, auth_temp2 = set_auth("config/config.txt")
-        self.digestInfo = [auth_temp2[0], auth_temp2[1]]
-        self.token = auth_temp
+        auth_temp = set_auth()
+        self.accessInfo = [auth_temp[0], auth_temp[1]]
 
         # spec_id 초기화
         if spec_id:
@@ -1948,17 +1947,6 @@ class MyApp(QWidget):
                 return str(val_text)
         return str(val_text)
 
-    def _update_server_bearer_token(self, token):
-        """서버 스레드가 참조하는 Bearer 토큰을 일관된 형태로 저장"""
-        server_auth = getattr(self.Server, "auth_Info", [])
-        if not isinstance(server_auth, list):
-            server_auth = [server_auth]
-        if len(server_auth) == 0:
-            server_auth.append(None)
-
-        server_auth[0] = None if token is None else str(token).strip()
-        self.Server.auth_Info = server_auth
-
     def update_table_row_with_retries(self, row, result, pass_count, error_count, data, error_text, retries):
         if row >= self.tableWidget.rowCount():
             return
@@ -2059,19 +2047,6 @@ class MyApp(QWidget):
             else:
                 time_interval = time.time() - self.time_pre
                 print(f"[DEBUG] 시간 간격: {time_interval}초")
-
-            if self.cnt == 1 and self.r2 == "B":
-                data = self.Server.outMessage[0]
-                try:
-                    self.auth_Info = str(data['accessToken']).strip()
-                    self._update_server_bearer_token(self.auth_Info)
-                except (KeyError, TypeError):
-                    pass
-
-            if self.r2 == "B":
-                token = None
-                if hasattr(self, 'auth_Info'):
-                    token = self.auth_Info
 
             if self.realtime_flag is True:
                 print(f"[json_check] do_checker 호출")
@@ -4130,11 +4105,6 @@ class MyApp(QWidget):
             timeout = 5
             default_timeout = 5
 
-            # ✅ 14. 인증 토큰 설정
-            if self.r2 == "B":
-                token_value = None if self.token is None else str(self.token).strip()
-                self.videoOutMessage[0]['accessToken'] = token_value
-
             # ✅ 15. Server 설정
             print(f"[DEBUG] Server 설정 시작")
             self.Server.message = self.videoMessages
@@ -4179,14 +4149,12 @@ class MyApp(QWidget):
             self.pathUrl = CONSTANTS.url
             if self.r2 == "B":
                 self.Server.auth_type = "B"
-                self._update_server_bearer_token(self.token)
+                self.Server.bearer_credentials[0] = self.accessInfo[0]
+                self.Server.bearer_credentials[1] = self.accessInfo[1]
             elif self.r2 == "D":
                 self.Server.auth_type = "D"
-                self.Server.auth_Info[0] = self.digestInfo[0]
-                self.Server.auth_Info[1] = self.digestInfo[1]
-            elif self.r2 == "None":
-                self.Server.auth_type = "None"
-                self.Server.auth_Info[0] = None
+                self.Server.auth_Info[0] = self.accessInfo[0]
+                self.Server.auth_Info[1] = self.accessInfo[1]
 
             self.Server.transProtocolInput = "LongPolling"
             

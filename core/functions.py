@@ -771,23 +771,13 @@ def save_result(str_in, path):
         print(err)
 
 
-def set_auth(file=None):
+def set_auth():
     """CONSTANTS.py에서 인증 정보를 읽어옵니다."""
     try:
         from config.CONSTANTS import auth_type, auth_info
-        info = "None"
-        info2 = ["", ""]
-
-        if auth_type == "Bearer Token":
-            info = auth_info
-        elif auth_type == "Digest Auth":
-            if "," in auth_info:
-                parts = auth_info.split(",")
-                info2 = [parts[0], parts[1] if len(parts) > 1 else ""]
-            else:
-                info2 = [auth_info, ""]
-
-        return info, info2
+        parts = auth_info.split(",")
+        info = [parts[0], parts[1] if len(parts) > 1 else ""]
+        return info
     except ImportError as e:
         print(f"CONSTANTS.py를 찾을 수 없습니다: {e}")
         return "None", ["", ""]
@@ -1276,7 +1266,7 @@ def _validate_url_video(field_path, field_value, rule, reference_context, field_
         parts = field_path.split(".")
         parent_path = ".".join(parts[:-1])  # "camList"
         child_field = parts[-1]  # "camID"
-
+        print("!!!", field_path)
         # 참조 데이터에서 해당 객체 찾기
         # ref_data가 리스트인 경우 각 항목에서 매칭되는 객체 찾기
         if isinstance(ref_data, list):

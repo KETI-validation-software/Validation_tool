@@ -6,7 +6,7 @@ import importlib
 import re
 from functools import lru_cache
 from types import ModuleType
-
+import importlib
 from typing import Dict, Any, Optional
 
 
@@ -104,6 +104,7 @@ def build_validation_registry(
                 print(f"[VALIDATION REGISTRY] 모듈 __file__: {mod.__file__}")
             else:
                 # 일반 환경에서는 기존 import 방식 사용
+                import importlib
                 mod = importlib.import_module(path)
 
             part = _collect_from_module(mod)

@@ -42,7 +42,8 @@ class Server(BaseHTTPRequestHandler):
     auth_Info = ['admin', '1234', 'user', 'abcd1234', 'SHA-256', None]  # 저장된 상태로 main 입력하지 않으면 digest auth 인증 x
     digest_res = ""
     transProtocolInput = ""
-
+    #bearer_credentials = ['PlatformID','PlatformPW']
+    bearer_credentials = ['user0001', 'pass0001']
     url_tmp = None
 
     trace = defaultdict(lambda: deque(maxlen=1000))  # api_name -> deque(events)
@@ -135,6 +136,9 @@ class Server(BaseHTTPRequestHandler):
                             self.auth_Info[3] + '",' + ' ' + 'algorithm="' + self.auth_Info[4] + '"'
 
         self.send_header('WWW-Authenticate', digest_header)
+        print(f"[DEBUG][DIGEST] 401 챌린지 전송 완료")
+        print(f"[DEBUG][DIGEST] Digest Header: {digest_header}")
+        print(f"[DEBUG][DIGEST] 클라이언트가 재요청을 보내야 합니다")
         self.end_headers()
 
     def do_HEAD(self):
@@ -151,12 +155,8 @@ class Server(BaseHTTPRequestHandler):
         print(
             f"[DEBUG][SERVER] do_POST called, path={self.path}, auth_type={self.auth_type}, headers={dict(self.headers)}")
         ctype, pdict = cgi.parse_header(self.headers.get_content_type())
-        auth = self.headers.get('Authorization')
-        if auth is None:
-            auth = self.headers.get('authorization')
-        auth_pass = False
 
-        # 요청 본문 읽기 (재사용을 위해 저장)
+        # ✅ 1단계: 요청 본문 먼저 읽기 (self.request_data 생성)
         content_length = int(self.headers.get('Content-Length', 0))
         print(f"[DEBUG][SERVER] Content-Length: {content_length}")
         if content_length > 0:
@@ -165,16 +165,15 @@ class Server(BaseHTTPRequestHandler):
             try:
                 self.request_data = json.loads(request_body.decode('utf-8'))
                 print(f"[DEBUG][SERVER] 파싱된 요청 데이터: {self.request_data}")
-                
-                # ✅ API 이름 추출 및 로깅
+
+                # API 이름 추출 및 로깅
                 api_name = self.path[1:]  # 슬래시 제거
                 print(f"[TRACE WRITE] API 이름: {api_name}")
                 print(f"[TRACE WRITE] Direction: REQUEST")
-                
+
                 # 요청 데이터 기록
                 self._push_event(api_name, "REQUEST", self.request_data)
-                
-                # ✅ 저장 확인 로그 추가
+
                 print(f"[TRACE WRITE] ✅ trace 파일에 저장 완료")
                 print(f"[TRACE WRITE] latest_event 키 목록: {list(Server.latest_event.keys())}")
             except Exception as e:
@@ -184,9 +183,103 @@ class Server(BaseHTTPRequestHandler):
             print(f"[DEBUG][SERVER] 요청 본문 없음 (Content-Length=0)")
             self.request_data = {}
 
+        # ✅ 2단계: Authentication API 특별 처리 (Bearer Token 발급)
+        if self.path == "/Authentication" and self.auth_type == "B":
+            print(f"[DEBUG][AUTH] Bearer 인증 시작 - userID/userPW 검증")
+
+            # 요청 본문에서 자격 증명 추출
+            user_id = self.request_data.get('userID', '')
+            user_pw = self.request_data.get('userPW', '')
+
+            print(f"[DEBUG][AUTH] 요청 userID: {user_id}")
+            print(f"[DEBUG][AUTH] 요청 userPW: {user_pw}")
+
+            print(f"[DEBUG][AUTH] 서버 userID: {Server.bearer_credentials[0]}")
+            print(f"[DEBUG][AUTH] 서버 userPW: {Server.bearer_credentials[0]}")
+            # 자격 증명 검증
+            if (user_id == Server.bearer_credentials[0] and
+                    user_pw == Server.bearer_credentials[1]):
+
+                print(f"[DEBUG][AUTH] ✅ 자격 증명 검증 성공!")
+
+                # ✅ request_counter 증가 (return 전에!)
+                api_name = self.path[1:]  # "Authentication"
+                if api_name not in Server.request_counter:
+                    Server.request_counter[api_name] = 0
+                Server.request_counter[api_name] += 1
+                print(f"[API_SERVER] 요청 수신: {api_name} (카운트: {Server.request_counter[api_name]})")
+
+                # 토큰 생성 및 저장
+                import uuid
+                import time
+                new_token = f"Bearer_{uuid.uuid4().hex}_{int(time.time())}"
+                if not isinstance(Server.auth_Info, list):
+                    Server.auth_Info = []
+                if len(Server.auth_Info) == 0:
+                    Server.auth_Info.append(None)
+                Server.auth_Info[0] = str(new_token).strip()
+
+                print(f"[DEBUG][AUTH] 생성된 토큰: {new_token}")
+
+                # api_res() 호출하여 응답 데이터 가져오기
+                message_cnt, data, out_con = self.api_res()
+
+                if message_cnt is None:
+                    self._set_headers()
+                    self.wfile.write(json.dumps(data).encode('utf-8'))
+                    return
+
+                # 응답에 토큰 포함
+                if isinstance(data, dict):
+                    data = data.copy()
+                    data['accessToken'] = new_token
+                    print(f"[DEBUG][AUTH] ✅ 응답에 토큰 포함")
+
+                # 성공 응답 전송
+                try:
+                    self._push_event(self.path[1:], "RESPONSE", data)
+                    response_json = json.dumps(data).encode('utf-8')
+                    self._set_headers()
+                    self.wfile.write(response_json)
+                    print(f"[DEBUG][AUTH] ✅ 인증 성공 응답 전송 완료")
+                except Exception as e:
+                    print(f"[ERROR] 응답 전송 중 오류: {e}")
+                    import traceback
+                    traceback.print_exc()
+                return
+
+            else:
+                print(f"[DEBUG][AUTH] ❌ 자격 증명 불일치!")
+
+                # ✅ 실패 시에도 카운터 증가
+                api_name = self.path[1:]
+                if api_name not in Server.request_counter:
+                    Server.request_counter[api_name] = 0
+                Server.request_counter[api_name] += 1
+                print(f"[API_SERVER] 요청 수신: {api_name} (카운트: {Server.request_counter[api_name]})")
+
+                error_response = {
+                    "code": "401",
+                    "message": "인증 실패: 잘못된 사용자 ID 또는 비밀번호"
+                }
+                self._push_event(self.path[1:], "RESPONSE", error_response)
+                self.send_response(401)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                error_msg = json.dumps(error_response)
+                self.wfile.write(error_msg.encode('utf-8'))
+                return
+
+        # ✅ 3단계: 기존 인증 로직 (Bearer Token 검증 / Digest Auth)
+        auth = self.headers.get('Authorization')
+        if auth is None:
+            auth = self.headers.get('authorization')
+        auth_pass = False
+
+        # api_res() 호출 (Authentication이 아닌 경우)
         message_cnt, data, out_con = self.api_res()
 
-        # api_res()가 에러를 반환한 경우 (Server.message가 None)
+        # api_res()가 에러를 반환한 경우
         if message_cnt is None:
             self._set_headers()
             self.wfile.write(json.dumps(data).encode('utf-8'))
@@ -207,7 +300,7 @@ class Server(BaseHTTPRequestHandler):
                 if parts[0] != "Digest":
                     self._set_digest_headers()
                     return
-                # 3) response 추출 실패/불일치 → 401 챌린지
+                # 3) response 추출 및 검증
                 try:
                     digest_header = parts[1]
                     digest_items = {}
@@ -215,6 +308,7 @@ class Server(BaseHTTPRequestHandler):
                         if '=' in item:
                             k, v = item.strip().split('=', 1)
                             digest_items[k.strip()] = v.strip().strip('"')
+
                     # 필수 파라미터 추출
                     username = digest_items.get('username')
                     realm = digest_items.get('realm')
@@ -225,9 +319,13 @@ class Server(BaseHTTPRequestHandler):
                     cnonce = digest_items.get('cnonce')
                     response = digest_items.get('response')
                     method = self.command  # 'POST'
-                    password = self.auth_Info[1] if hasattr(self, 'auth_Info') and self.auth_Info else ''
 
-                    # SHA-256로 해시 계산 (RFC 7616, qop 없이)
+                    # password 가져오기
+                    password = ''
+                    if isinstance(Server.auth_Info, list) and len(Server.auth_Info) > 1:
+                        password = Server.auth_Info[1]
+
+                    # SHA-256로 해시 계산
                     def sha256_hex(s):
                         return hashlib.sha256(s.encode('utf-8')).hexdigest()
 
@@ -239,6 +337,7 @@ class Server(BaseHTTPRequestHandler):
                         expected_response = sha256_hex(f"{ha1}:{nonce}:{nc}:{cnonce}:{qop}:{ha2}")
                     else:
                         expected_response = sha256_hex(f"{ha1}:{nonce}:{ha2}")
+
                     # 디버그 로그
                     print(f"[DEBUG][SERVER][Digest] client_response={response}, expected_response={expected_response}")
                     if not response or not expected_response or response != expected_response:
@@ -249,32 +348,58 @@ class Server(BaseHTTPRequestHandler):
                     print(f"[DEBUG][SERVER][Digest] Exception: {e}")
                     self._set_digest_headers()
                     return
-            # Bearer Auth
+
+            # Bearer Auth (다른 API들)
             elif self.auth_type == "B":
-                print(f"[DEBUG][SERVER] Checking Bearer, auth={auth}")
-                print(f"[DEBUG][SERVER][AUTH] self.auth_Info={getattr(self, 'auth_Info', None)}")
-                print(f"[DEBUG][SERVER][AUTH] Server.auth_Info={Server.auth_Info}")
-                if auth:
-                    auth_parts = auth.split(" ")
-                    if len(auth_parts) > 1 and auth_parts[0] == 'Bearer':
-                        token = auth_parts[1].replace('"', "").strip()
-                        stored_token = None
-                        if isinstance(self.auth_Info, list):
-                            if self.auth_Info:
-                                stored_token = self.auth_Info[0]
-                        else:
-                            stored_token = self.auth_Info
+                print(f"[DEBUG][SERVER] Bearer 토큰 검증 시작")
 
-                        # 디버그 로그 추가: Bearer 토큰 비교 직전
-                        print(f"[DEBUG][SERVER] Bearer token in header: {token}, stored_token: {stored_token}")
-
-                        if stored_token is not None and token == str(stored_token).strip():
-                            auth_pass = True
-                        else:
-                            print(f"[DEBUG][SERVER][AUTH] ❌ Bearer 토큰 불일치!")
-                else:
+                # 1단계: Authorization 헤더 존재 확인
+                if not auth:
                     print(f"[DEBUG][SERVER][AUTH] ❌ Authorization 헤더 없음!")
-            # 기타: 특정 path 우회
+                    self.send_response(401)
+                    self.send_header('Content-type', 'application/json')
+                    self.send_header('WWW-Authenticate', 'Bearer realm="API"')
+                    self.end_headers()
+                    error_msg = json.dumps({"code": "401", "message": "인증 헤더 누락"})
+                    self.wfile.write(error_msg.encode('utf-8'))
+                    return
+
+                # 2단계: Bearer 스킴 확인
+                auth_parts = auth.split(" ", 1)
+                if len(auth_parts) != 2 or auth_parts[0] != 'Bearer':
+                    print(f"[DEBUG][SERVER][AUTH] ❌ 잘못된 인증 스킴: {auth_parts[0] if auth_parts else 'None'}")
+                    self.send_response(401)
+                    self.send_header('Content-type', 'application/json')
+                    self.send_header('WWW-Authenticate', 'Bearer realm="API"')
+                    self.end_headers()
+                    error_msg = json.dumps({"code": "401", "message": "잘못된 인증 스킴"})
+                    self.wfile.write(error_msg.encode('utf-8'))
+                    return
+
+                # 3단계: 토큰 추출
+                token = auth_parts[1].strip().strip('"')
+
+                # 4단계: 저장된 토큰 가져오기
+                stored_token = Server.auth_Info[0]
+
+                print(f"[DEBUG][SERVER] Bearer token in header: {token}")
+                print(f"[DEBUG][SERVER] Stored token: {stored_token}")
+
+                # 5단계: 토큰 비교
+                if stored_token and token == str(stored_token).strip():
+                    print(f"[DEBUG][SERVER][AUTH] ✅ Bearer 토큰 인증 성공!")
+                    auth_pass = True
+                else:
+                    print(f"[DEBUG][SERVER][AUTH] ❌ Bearer 토큰 불일치!")
+                    self.send_response(401)
+                    self.send_header('Content-type', 'application/json')
+                    self.send_header('WWW-Authenticate', 'Bearer realm="API", error="invalid_token"')
+                    self.end_headers()
+                    error_msg = json.dumps({"code": "401", "message": "유효하지 않은 토큰"})
+                    self.wfile.write(error_msg.encode('utf-8'))
+                    return
+
+            # 특정 path 우회
             elif self.path == "/" + self.message[0]:
                 auth_pass = True
 
@@ -641,29 +766,17 @@ class Server(BaseHTTPRequestHandler):
 
     def api_res(self):
         i, data = None, None
-        # message가 None이거나 빈 리스트인 경우 방어 코드
         if not self.message:
             print("[ERROR] Server.message is None or empty!")
-            return None, {"code": "500", "message": "Server not initialized"}
+            return None, {"code": "500", "message": "Server not initialized"}, None
 
         for i in range(0, len(self.message)):
             data = ""
             if self.path == "/" + self.message[i]:
                 data = self.outMessage[i]
                 out_con = self.outCon[i]
-                if i == 0 and self.auth_type == "B":
-                    try:
-                        token = data['accessToken']
-                    except Exception:
-                        pass
-                    else:
-                        if isinstance(self.auth_Info, list):
-                            if not self.auth_Info:
-                                self.auth_Info.append(None)
-                            self.auth_Info[0] = str(token).strip()
-                        else:
-                            self.auth_Info = [str(token).strip()]
                 break
+
         return i, data, out_con
 
 
