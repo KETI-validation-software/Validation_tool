@@ -16,39 +16,41 @@
     ]
   },
   "status": "완료",
-  "authMethod": "Bearer Token",
+  "authMethod": "Digest Auth",
   "testScore": {
-    "score": 90.79,
-    "totalFields": 76,
-    "passedFields": 69,
-    "failedFields": 7
+    "score": 50.65,
+    "totalFields": 77,
+    "passedFields": 39,
+    "failedFields": 38
   },
   "testResult": [
     {
       "testSpecId": "cmgyv3rzl014nvsveidu5jpzp",
       "testSpecName": "영상보안시스템_new",
-      "score": 90.79,
-      "totalFields": 76,
-      "passedFields": 69,
-      "failedFields": 7,
+      "score": 50.65,
+      "totalFields": 77,
+      "passedFields": 39,
+      "failedFields": 38,
       "apis": [
         {
           "id": "step-1-s9942zltt",
           "name": "인증",
           "method": "POST",
           "endpoint": "/Authentication",
-          "score": 100.0,
+          "score": 50.0,
           "validationCnt": 1,
-          "totalFields": 5,
-          "passFields": 5,
-          "failFields": 0,
+          "totalFields": 6,
+          "passFields": 3,
+          "failFields": 3,
           "validations": [
             {
               "attempt": 1,
               "validationData": {},
               "validationErrors": [
                 "[시도 1/1]",
-                "오류가 없습니다."
+                "응답 실패: code=400, message=잘못된 URL 형식",
+                "[구조] 필수 필드 누락: userAff",
+                "[구조] 필수 필드 누락: userName"
               ]
             }
           ]
@@ -58,18 +60,24 @@
           "name": "전송 지원 기능 정보 연동",
           "method": "POST",
           "endpoint": "/Capabilities",
-          "score": 100.0,
+          "score": 22.0,
           "validationCnt": 1,
-          "totalFields": 8,
-          "passFields": 8,
-          "failFields": 0,
+          "totalFields": 9,
+          "passFields": 2,
+          "failFields": 7,
           "validations": [
             {
               "attempt": 1,
               "validationData": {},
               "validationErrors": [
                 "[시도 1/1]",
-                "오류가 없습니다."
+                "응답 실패: code=400, message=잘못된 URL 형식",
+                "[구조] 필수 필드 누락: streamingSupport",
+                "[구조] 필수 필드 누락: streamingSupport.streamProtocolDesc",
+                "[구조] 필수 필드 누락: streamingSupport.streamProtocolType",
+                "[구조] 필수 필드 누락: transportSupport",
+                "[구조] 필수 필드 누락: transportSupport.transProtocolDesc",
+                "[구조] 필수 필드 누락: transportSupport.transProtocolType"
               ]
             }
           ]
@@ -79,18 +87,21 @@
           "name": "카메라 목록 연동",
           "method": "POST",
           "endpoint": "/CameraProfiles",
-          "score": 100.0,
+          "score": 69.0,
           "validationCnt": 1,
-          "totalFields": 12,
-          "passFields": 12,
-          "failFields": 0,
+          "totalFields": 13,
+          "passFields": 9,
+          "failFields": 4,
           "validations": [
             {
               "attempt": 1,
               "validationData": {},
               "validationErrors": [
                 "[시도 1/1]",
-                "오류가 없습니다."
+                "응답 실패: code=400, message=잘못된 URL 형식",
+                "[구조] 필수 필드 누락: camList",
+                "[구조] 필수 필드 누락: camList.camID",
+                "[구조] 필수 필드 누락: camList.camName"
               ]
             }
           ]
@@ -100,18 +111,23 @@
           "name": "저장된 영상 목록 연동",
           "method": "POST",
           "endpoint": "/StoredVideoInfos",
-          "score": 100.0,
+          "score": 25.0,
           "validationCnt": 1,
-          "totalFields": 7,
-          "passFields": 7,
-          "failFields": 0,
+          "totalFields": 8,
+          "passFields": 2,
+          "failFields": 6,
           "validations": [
             {
               "attempt": 1,
               "validationData": {},
               "validationErrors": [
                 "[시도 1/1]",
-                "오류가 없습니다."
+                "응답 실패: code=400, message=잘못된 URL 형식",
+                "[구조] 필수 필드 누락: camList",
+                "[구조] 필수 필드 누락: camList.camID",
+                "[구조] 필수 필드 누락: camList.timeList",
+                "[구조] 필수 필드 누락: camList.timeList.endTime",
+                "[구조] 필수 필드 누락: camList.timeList.startTime"
               ]
             }
           ]
@@ -121,18 +137,21 @@
           "name": "실시간 영상 정보 연동",
           "method": "POST",
           "endpoint": "/StreamURLs",
-          "score": 92.0,
+          "score": 69.0,
           "validationCnt": 1,
-          "totalFields": 12,
-          "passFields": 11,
-          "failFields": 1,
+          "totalFields": 13,
+          "passFields": 9,
+          "failFields": 4,
           "validations": [
             {
               "attempt": 1,
               "validationData": {},
               "validationErrors": [
                 "[시도 1/1]",
-                "[의미] camList.camURL: camURL=['rtsp://127.0.01:8554', 'rtsp://127.0.01:8554']에 해당하는 camURL을 찾을 수 없음"
+                "응답 실패: code=400, message=잘못된 URL 형식",
+                "[구조] 필수 필드 누락: camList",
+                "[구조] 필수 필드 누락: camList.camID",
+                "[구조] 필수 필드 누락: camList.camURL"
               ]
             }
           ]
@@ -142,18 +161,22 @@
           "name": "저장된 영상 정보 연동",
           "method": "POST",
           "endpoint": "/ReplayURL",
-          "score": 93.0,
+          "score": 67.0,
           "validationCnt": 1,
-          "totalFields": 14,
-          "passFields": 13,
-          "failFields": 1,
+          "totalFields": 15,
+          "passFields": 10,
+          "failFields": 5,
           "validations": [
             {
               "attempt": 1,
               "validationData": {},
               "validationErrors": [
                 "[시도 1/1]",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761046638971 (타입: int), [1] 1761171610117 (타입: int)"
+                "응답 실패: code=400, message=잘못된 URL 형식",
+                "[구조] 필수 필드 누락: camList",
+                "[구조] 필수 필드 누락: camList.camID",
+                "[구조] 필수 필드 누락: camList.camURL",
+                "[구조] 필수 필드 누락: camList.startTime"
               ]
             }
           ]
@@ -165,20 +188,17 @@
           "endpoint": "/RealtimeVideoEventInfos",
           "score": 67.0,
           "validationCnt": 1,
-          "totalFields": 9,
-          "passFields": 6,
-          "failFields": 3,
+          "totalFields": 3,
+          "passFields": 2,
+          "failFields": 1,
           "validations": [
             {
               "attempt": 1,
               "validationData": {},
               "validationErrors": [
                 "[시도 1/1]",
-                "오류가 없습니다.",
-                "--- Webhook 검증 ---",
-                "[구조] 필수 필드 누락: camList.eventName",
-                "[구조] 필수 필드 누락: camList.eventUUID",
-                "[구조] 필수 필드 누락: camList.startTime"
+                "응답 실패: code=400, message=잘못된 URL 형식",
+                "오류 없음"
               ]
             }
           ]
@@ -206,19 +226,25 @@
           "name": "저장된 이벤트 분석 정보 연동",
           "method": "POST",
           "endpoint": "/StoredVideoEventInfos",
-          "score": 78.0,
+          "score": 20.0,
           "validationCnt": 1,
-          "totalFields": 9,
-          "passFields": 7,
-          "failFields": 2,
+          "totalFields": 10,
+          "passFields": 2,
+          "failFields": 8,
           "validations": [
             {
               "attempt": 1,
               "validationData": {},
               "validationErrors": [
                 "[시도 1/1]",
-                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 9082011881702 (타입: int), [1] 9595727835728 (타입: int)",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 4420809614470 (타입: int), [1] 9436092369831 (타입: int)"
+                "응답 실패: code=400, message=잘못된 URL 형식",
+                "[구조] 필수 필드 누락: camList",
+                "[구조] 필수 필드 누락: camList.camID",
+                "[구조] 필수 필드 누락: camList.endTime",
+                "[구조] 필수 필드 누락: camList.eventDesc",
+                "[구조] 필수 필드 누락: camList.eventName",
+                "[구조] 필수 필드 누락: camList.eventUUID",
+                "[구조] 필수 필드 누락: camList.startTime"
               ]
             }
           ]
@@ -226,5 +252,5 @@
       ]
     }
   ],
-  "completedDate": "2025-11-05T15:41:36Z"
+  "completedDate": "2025-11-05T17:25:20Z"
 }

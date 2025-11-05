@@ -45,6 +45,7 @@ class Server(BaseHTTPRequestHandler):
     #bearer_credentials = ['PlatformID','PlatformPW']
     bearer_credentials = ['user0001', 'pass0001']
     url_tmp = None
+    current_spec_id = None
 
     trace = defaultdict(lambda: deque(maxlen=1000))  # api_name -> deque(events)
     request_counter = {}  # ✅ API별 시스템 요청 카운터 (클래스 변수)
@@ -152,11 +153,21 @@ class Server(BaseHTTPRequestHandler):
 
     # POST echoes the message adding a JSON field
     def do_POST(self):
+        spec_id, api_name = self.parse_path()
+        if not api_name or Server.current_spec_id!=spec_id:# "cmgyv3rzl014nvsveidu5jpzp" != spec_id:
+            print(f"[ERROR] 잘못된 path 형식: {self.path}")
+            self.send_response(400)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            error_msg = json.dumps({"code": "400", "message": "잘못된 URL 형식"})
+            self.wfile.write(error_msg.encode('utf-8'))
+            return
         print(
             f"[DEBUG][SERVER] do_POST called, path={self.path}, auth_type={self.auth_type}, headers={dict(self.headers)}")
         ctype, pdict = cgi.parse_header(self.headers.get_content_type())
 
         # ✅ 1단계: 요청 본문 먼저 읽기 (self.request_data 생성)
+        # ✅ 1단계: 요청 본문 먼저 읽기
         content_length = int(self.headers.get('Content-Length', 0))
         print(f"[DEBUG][SERVER] Content-Length: {content_length}")
         if content_length > 0:
@@ -166,9 +177,9 @@ class Server(BaseHTTPRequestHandler):
                 self.request_data = json.loads(request_body.decode('utf-8'))
                 print(f"[DEBUG][SERVER] 파싱된 요청 데이터: {self.request_data}")
 
-                # API 이름 추출 및 로깅
-                api_name = self.path[1:]  # 슬래시 제거
+                # ✅ API 이름으로 로깅 (spec_id 제외)
                 print(f"[TRACE WRITE] API 이름: {api_name}")
+                print(f"[TRACE WRITE] spec_id: {spec_id}")
                 print(f"[TRACE WRITE] Direction: REQUEST")
 
                 # 요청 데이터 기록
@@ -184,7 +195,7 @@ class Server(BaseHTTPRequestHandler):
             self.request_data = {}
 
         # ✅ 2단계: Authentication API 특별 처리 (Bearer Token 발급)
-        if self.path == "/Authentication" and self.auth_type == "B":
+        if api_name == "Authentication" and self.auth_type == "B":
             print(f"[DEBUG][AUTH] Bearer 인증 시작 - userID/userPW 검증")
 
             # 요청 본문에서 자격 증명 추출
@@ -194,8 +205,6 @@ class Server(BaseHTTPRequestHandler):
             print(f"[DEBUG][AUTH] 요청 userID: {user_id}")
             print(f"[DEBUG][AUTH] 요청 userPW: {user_pw}")
 
-            print(f"[DEBUG][AUTH] 서버 userID: {Server.bearer_credentials[0]}")
-            print(f"[DEBUG][AUTH] 서버 userPW: {Server.bearer_credentials[0]}")
             # 자격 증명 검증
             if (user_id == Server.bearer_credentials[0] and
                     user_pw == Server.bearer_credentials[1]):
@@ -203,7 +212,6 @@ class Server(BaseHTTPRequestHandler):
                 print(f"[DEBUG][AUTH] ✅ 자격 증명 검증 성공!")
 
                 # ✅ request_counter 증가 (return 전에!)
-                api_name = self.path[1:]  # "Authentication"
                 if api_name not in Server.request_counter:
                     Server.request_counter[api_name] = 0
                 Server.request_counter[api_name] += 1
@@ -219,10 +227,10 @@ class Server(BaseHTTPRequestHandler):
                     Server.auth_Info.append(None)
                 Server.auth_Info[0] = str(new_token).strip()
 
-                print(f"[DEBUG][AUTH] 생성된 토큰: {new_token}")
+                print(f"[DEBUG][AUTH] Bearer 토큰 저장 완료: {new_token}")
 
                 # api_res() 호출하여 응답 데이터 가져오기
-                message_cnt, data, out_con = self.api_res()
+                message_cnt, data, out_con = self.api_res(api_name)
 
                 if message_cnt is None:
                     self._set_headers()
@@ -237,7 +245,7 @@ class Server(BaseHTTPRequestHandler):
 
                 # 성공 응답 전송
                 try:
-                    self._push_event(self.path[1:], "RESPONSE", data)
+                    self._push_event(api_name, "RESPONSE", data)
                     response_json = json.dumps(data).encode('utf-8')
                     self._set_headers()
                     self.wfile.write(response_json)
@@ -252,7 +260,6 @@ class Server(BaseHTTPRequestHandler):
                 print(f"[DEBUG][AUTH] ❌ 자격 증명 불일치!")
 
                 # ✅ 실패 시에도 카운터 증가
-                api_name = self.path[1:]
                 if api_name not in Server.request_counter:
                     Server.request_counter[api_name] = 0
                 Server.request_counter[api_name] += 1
@@ -262,7 +269,7 @@ class Server(BaseHTTPRequestHandler):
                     "code": "401",
                     "message": "인증 실패: 잘못된 사용자 ID 또는 비밀번호"
                 }
-                self._push_event(self.path[1:], "RESPONSE", error_response)
+                self._push_event(api_name, "RESPONSE", error_response)
                 self.send_response(401)
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
@@ -277,7 +284,7 @@ class Server(BaseHTTPRequestHandler):
         auth_pass = False
 
         # api_res() 호출 (Authentication이 아닌 경우)
-        message_cnt, data, out_con = self.api_res()
+        message_cnt, data, out_con = self.api_res(api_name)
 
         # api_res()가 에러를 반환한 경우
         if message_cnt is None:
@@ -410,7 +417,6 @@ class Server(BaseHTTPRequestHandler):
 
         # 클래스 변수 request_counter 사용하여 API별 요청 횟수 추적
         try:
-            api_name = self.path[1:]  # 예: "Authentication", "storedVideoInfos"
             if api_name not in Server.request_counter:
                 Server.request_counter[api_name] = 0
             Server.request_counter[api_name] += 1
@@ -764,20 +770,64 @@ class Server(BaseHTTPRequestHandler):
                 # print(traceback.format_exc())
                 #  self.res.emit(str("err from WebhookRequest"))
 
-    def api_res(self):
-        i, data = None, None
+    def api_res(self, api_name = None):
+        i, data, out_con = None, None, None
+
         if not self.message:
             print("[ERROR] Server.message is None or empty!")
             return None, {"code": "500", "message": "Server not initialized"}, None
 
         for i in range(0, len(self.message)):
-            data = ""
-            if self.path == "/" + self.message[i]:
+            if api_name == self.message[i]:
                 data = self.outMessage[i]
                 out_con = self.outCon[i]
+                print(f"[DEBUG][API_RES] API 매칭 성공: {api_name} (index={i})")
                 break
 
+        if data is None:
+            print(f"[WARNING][API_RES] API를 찾을 수 없음: {api_name}")
+            return None, {"code": "404", "message": f"API를 찾을 수 없습니다: {api_name}"}, None
+
         return i, data, out_con
+
+    def parse_path(self):
+        """
+        URL path를 파싱하여 spec_id와 api_name을 추출
+
+        지원 형식:
+        1. /spec_id/api_name  (예: /cmgvieyak001b6cd04cgaawmm/Authentication)
+        2. /api_name          (예: /Authentication - 하위 호환성)
+
+        Returns:
+            tuple: (spec_id, api_name) 또는 (None, api_name)
+        """
+        try:
+            path = self.path.strip('/')
+
+            # path가 비어있으면
+            if not path:
+                return None, None
+
+            # '/'로 분리
+            parts = path.split('/')
+
+            if len(parts) >= 2:
+                # 형식 1: /spec_id/api_name
+                spec_id = parts[0]
+                api_name = parts[1]
+                print(f"[DEBUG][PARSE_PATH] spec_id={spec_id}, api_name={api_name}")
+                return spec_id, api_name
+            elif len(parts) == 1:
+                # 형식 2: /api_name (하위 호환성)
+                api_name = parts[0]
+                print(f"[DEBUG][PARSE_PATH] api_name={api_name} (spec_id 없음)")
+                return None, api_name
+            else:
+                return None, None
+
+        except Exception as e:
+            print(f"[ERROR][PARSE_PATH] path 파싱 실패: {e}")
+            return None, None
 
 
 # 확인용 - 안쓰이는 코드임
