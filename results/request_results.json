@@ -16,41 +16,38 @@
     ]
   },
   "status": "완료",
-  "authMethod": "Bearer Token",
+  "authMethod": "Digest Auth",
   "testScore": {
-    "score": 82.35,
-    "totalFields": 34,
-    "passedFields": 28,
-    "failedFields": 6
+    "score": 0.0,
+    "totalFields": 32,
+    "passedFields": 0,
+    "failedFields": 32
   },
   "testResult": [
     {
       "testSpecId": "cmgvieyak001b6cd04cgaawmm",
       "testSpecName": "영상보안시스템_new",
-      "score": 82.35,
-      "totalFields": 34,
-      "passedFields": 28,
-      "failedFields": 6,
+      "score": 0.0,
+      "totalFields": 32,
+      "passedFields": 0,
+      "failedFields": 32,
       "apis": [
         {
           "id": "step-1-77lxvxrit",
           "name": "인증",
           "method": "POST",
           "endpoint": "/Authentication",
-          "score": 100.0,
+          "score": 0.0,
           "validationCnt": 1,
           "totalFields": 2,
-          "passFields": 2,
-          "failFields": 0,
+          "passFields": 0,
+          "failFields": 2,
           "validations": [
             {
               "attempt": 1,
-              "validationData": {
-                "userID": "userA",
-                "userPW": "passA"
-              },
+              "validationData": {},
               "validationErrors": [
-                "오류가 없습니다."
+                "Message Missing!"
               ]
             }
           ]
@@ -60,17 +57,17 @@
           "name": "전송 지원 기능 정보 연동",
           "method": "POST",
           "endpoint": "/Capabilities",
-          "score": 100.0,
+          "score": 0.0,
           "validationCnt": 1,
           "totalFields": 1,
-          "passFields": 1,
-          "failFields": 0,
+          "passFields": 0,
+          "failFields": 1,
           "validations": [
             {
               "attempt": 1,
               "validationData": {},
               "validationErrors": [
-                "오류가 없습니다."
+                "Message Missing!"
               ]
             }
           ]
@@ -80,17 +77,17 @@
           "name": "카메라 목록 연동",
           "method": "POST",
           "endpoint": "/CameraProfiles",
-          "score": 100.0,
+          "score": 0.0,
           "validationCnt": 1,
           "totalFields": 1,
-          "passFields": 1,
-          "failFields": 0,
+          "passFields": 0,
+          "failFields": 1,
           "validations": [
             {
               "attempt": 1,
               "validationData": {},
               "validationErrors": [
-                "오류가 없습니다."
+                "Message Missing!"
               ]
             }
           ]
@@ -100,30 +97,17 @@
           "name": "저장된 영상 목록 연동",
           "method": "POST",
           "endpoint": "/StoredVideoInfos",
-          "score": 100.0,
+          "score": 0.0,
           "validationCnt": 1,
           "totalFields": 5,
-          "passFields": 5,
-          "failFields": 0,
+          "passFields": 0,
+          "failFields": 5,
           "validations": [
             {
               "attempt": 1,
-              "validationData": {
-                "timePeriod": {
-                  "startTime": 1760948700000,
-                  "endTime": 1761121500000
-                },
-                "camList": [
-                  {
-                    "camID": "cam0001"
-                  },
-                  {
-                    "camID": "cam0002"
-                  }
-                ]
-              },
+              "validationData": {},
               "validationErrors": [
-                "오류가 없습니다."
+                "Message Missing!"
               ]
             }
           ]
@@ -133,28 +117,17 @@
           "name": "실시간 영상 정보 연동",
           "method": "POST",
           "endpoint": "/StreamURLs",
-          "score": 100.0,
+          "score": 0.0,
           "validationCnt": 1,
           "totalFields": 3,
-          "passFields": 3,
-          "failFields": 0,
+          "passFields": 0,
+          "failFields": 3,
           "validations": [
             {
               "attempt": 1,
-              "validationData": {
-                "camList": [
-                  {
-                    "camID": "cam0001",
-                    "streamProtocolType": "RTSP"
-                  },
-                  {
-                    "camID": "cam0002",
-                    "streamProtocolType": "RTSP"
-                  }
-                ]
-              },
+              "validationData": {},
               "validationErrors": [
-                "오류가 없습니다."
+                "Message Missing!"
               ]
             }
           ]
@@ -164,95 +137,38 @@
           "name": "저장된 영상 정보 연동",
           "method": "POST",
           "endpoint": "/ReplayURL",
-          "score": 100.0,
+          "score": 0.0,
           "validationCnt": 1,
           "totalFields": 5,
-          "passFields": 5,
-          "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "camList": [
-                  {
-                    "camID": "cam0001",
-                    "startTime": 1760949060000,
-                    "endTime": 1761208260000,
-                    "streamProtocolType": "RTSP"
-                  },
-                  {
-                    "camID": "cam0002",
-                    "startTime": 1760949060000,
-                    "endTime": 1761208260000,
-                    "streamProtocolType": "RTSP"
-                  }
-                ]
-              },
-              "validationErrors": [
-                "오류가 없습니다."
-              ]
-            }
-          ]
-        },
-        {
-          "id": "step-7-166n5ivbf-registration",
-          "name": "실시간 이벤트 분석 정보 연동",
-          "method": "POST",
-          "endpoint": "/RealtimeVideoEventInfos",
-          "score": 33.0,
-          "validationCnt": 1,
-          "totalFields": 9,
-          "passFields": 3,
-          "failFields": 6,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "camList": [
-                  {
-                    "camID": "cam0001"
-                  },
-                  {
-                    "camID": "cam0002"
-                  }
-                ],
-                "duration": "100",
-                "transProtocol": {
-                  "transProtocolType": "WebHook",
-                  "transProtocolDesc": "https://10.252.219.119:8090"
-                },
-                "eventFilter": "배회",
-                "classFilter": "사람",
-                "startTime": 1761110160000
-              },
-              "validationErrors": [
-                "[Inbound]",
-                "[구조] 필수 필드 누락: camList.endTime",
-                "[구조] 필수 필드 누락: camList.eventDesc",
-                "[구조] 필수 필드 누락: camList.eventName",
-                "[구조] 필수 필드 누락: camList.eventUUID",
-                "[구조] 필수 필드 누락: camList.startTime",
-                "--- Webhook 검증 ---",
-                "[구조] 타입 불일치: code (예상: str, 실제: int)"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "step-7-166n5ivbf-webhook",
-          "name": "실시간 이벤트 분석 정보 연동 (Webhook)",
-          "method": "POST",
-          "endpoint": "/RealtimeVideoEventInfos/webhook",
-          "score": 0,
-          "validationCnt": 1,
-          "totalFields": 0,
           "passFields": 0,
-          "failFields": 0,
+          "failFields": 5,
           "validations": [
             {
               "attempt": 1,
               "validationData": {},
-              "validationErrors": []
+              "validationErrors": [
+                "Message Missing!"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "step-7-166n5ivbf",
+          "name": "실시간 이벤트 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/RealtimeVideoEventInfos",
+          "score": 0.0,
+          "validationCnt": 1,
+          "totalFields": 7,
+          "passFields": 0,
+          "failFields": 7,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "Message Missing!"
+              ]
             }
           ]
         },
@@ -261,33 +177,17 @@
           "name": "저장된 이벤트 분석 정보 연동",
           "method": "POST",
           "endpoint": "/StoredVideoEventInfos",
-          "score": 100.0,
+          "score": 0.0,
           "validationCnt": 1,
           "totalFields": 8,
-          "passFields": 8,
-          "failFields": 0,
+          "passFields": 0,
+          "failFields": 8,
           "validations": [
             {
               "attempt": 1,
-              "validationData": {
-                "timePeriod": {
-                  "startTime": 1759221900000,
-                  "endTime": 1761727500000
-                },
-                "camList": [
-                  {
-                    "camID": "cam0001"
-                  },
-                  {
-                    "camID": "cam0002"
-                  }
-                ],
-                "maxCount": 3,
-                "eventFilter": "배회",
-                "classFilter": "사람"
-              },
+              "validationData": {},
               "validationErrors": [
-                "오류가 없습니다."
+                "Message Missing!"
               ]
             }
           ]
@@ -295,5 +195,5 @@
       ]
     }
   ],
-  "completedDate": "2025-11-05T15:41:36Z"
+  "completedDate": "2025-11-05T17:25:57Z"
 }

@@ -15,12 +15,13 @@ version = "v1.0"
 test_category = "MAIN_TEST"
 test_target = "통합플랫폼"
 test_range = "ALL_FIELDS"
-auth_type = "Bearer Token"
-auth_info = "userA,passA"
+auth_type = "Digest Auth"
+auth_info = "a,a"
 admin_code = "1"
 url = "https://10.252.219.119:8080"
 contact_person = "김철수"
 model_name = "v1.0"
+request_id = "cmh1yg49v000t9y0jdr1wwuja"
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황
 flag_opt = False

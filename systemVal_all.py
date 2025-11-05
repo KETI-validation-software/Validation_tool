@@ -2768,6 +2768,10 @@ class MyApp(QWidget):
                 # ✅ 9. 평가 점수 디스플레이 업데이트
                 self.update_score_display()
 
+                # URL 업데이트
+                self.pathUrl = CONSTANTS.url + "/" + self.current_spec_id
+                self.url_text_box.setText(self.pathUrl)
+
                 # ✅ 10. 결과 텍스트 초기화
                 self.valResult.clear()
                 self.valResult.append(f"✅ 시스템 전환 완료: {self.spec_description}")
@@ -3839,6 +3843,53 @@ class MyApp(QWidget):
         right_layout.setContentsMargins(0, 0, 0, 0)
         right_layout.setSpacing(0)
 
+        # ✅ 시험 URL 라벨 + 텍스트 박스 (가로 배치)
+        url_row = QWidget()
+        url_row.setFixedWidth(1064)
+        url_row_layout = QHBoxLayout()
+        url_row_layout.setContentsMargins(0, 20, 0, 6)
+        url_row_layout.setSpacing(12)  # 라벨과 텍스트 박스 사이 간격
+
+        # 시험 URL 라벨
+        result_label = QLabel('시험 URL')
+        result_label.setFixedWidth(100)  # 라벨 너비 고정
+        result_label.setStyleSheet("""
+            font-size: 16px; 
+            font-style: normal; 
+            font-family: "Noto Sans KR"; 
+            font-weight: 600; 
+            color: #222; 
+            letter-spacing: -0.3px;
+        """)
+        url_row_layout.addWidget(result_label)
+
+        # ✅ URL 텍스트 박스 (복사 가능)
+        self.url_text_box = QLineEdit()
+        self.url_text_box.setFixedHeight(40)
+        self.url_text_box.setReadOnly(True)  # 읽기 전용
+        self.url_text_box.setPlaceholderText("시험 URL이 여기에 표시됩니다")
+        self.url_text_box.setStyleSheet("""
+            QLineEdit {
+                background-color: #FFFFFF;  /* ← 하얀색으로 변경 */
+                border: 1px solid #CECECE;
+                border-radius: 4px;
+                padding: 0 12px;
+                font-family: "Noto Sans KR";
+                font-size: 14px;
+                color: #222;
+                selection-background-color: #4A90E2;
+                selection-color: white;
+            }
+            QLineEdit:focus {
+                border: 1px solid #4A90E2;
+                background-color: #FFFFFF;  /* 포커스 시에도 하얀색 유지 */
+            }
+        """)
+        url_row_layout.addWidget(self.url_text_box, 1)  # stretch 적용
+
+        url_row.setLayout(url_row_layout)
+        right_layout.addWidget(url_row)
+
         # 시험 API 라벨
         api_label = QLabel('시험 API')
         api_label.setStyleSheet(
@@ -4097,6 +4148,8 @@ class MyApp(QWidget):
                 first_spec_id = self.index_to_spec_id.get(0)
                 print(f"[DEBUG] 첫 번째 시나리오 선택: spec_id={first_spec_id}")
                 self.on_test_field_selected(0, 0)
+                self.pathUrl = CONSTANTS.url + "/" + first_spec_id
+                self.url_text_box.setText(self.pathUrl)
 
             print(f"[DEBUG] 초기 시나리오 자동 선택 완료: {self.spec_description}")
             QApplication.processEvents()
@@ -4770,7 +4823,8 @@ class MyApp(QWidget):
         self.valResult.clear()
 
         # ✅ 17. URL 설정
-        self.pathUrl = CONSTANTS.url
+        self.pathUrl = CONSTANTS.url + "/" + self.current_spec_id
+        self.url_text_box.setText(self.pathUrl)
 
         # ✅ 18. 시작 메시지
         self.valResult.append("=" * 60)
