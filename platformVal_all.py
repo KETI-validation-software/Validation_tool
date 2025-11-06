@@ -1651,6 +1651,7 @@ class MyApp(QWidget):
 
         self.CONSTANTS = CONSTANTS
         self.current_spec_id = spec_id
+        self.url = CONSTANTS.url
 
         self.load_specs_from_constants()
         self.CONSTANTS = CONSTANTS
@@ -3109,7 +3110,7 @@ class MyApp(QWidget):
                 self.update_score_display()
 
                 # URL 업데이트
-                self.pathUrl = CONSTANTS.url + "/" + self.current_spec_id
+                self.pathUrl = self.url + "/" + self.current_spec_id
                 self.url_text_box.setText(self.pathUrl)
                 self.Server.current_spec_id = self.current_spec_id
                 # 결과 텍스트 초기화
@@ -3623,7 +3624,7 @@ class MyApp(QWidget):
                 self.test_field_table.selectRow(0)
                 first_spec_id = self.index_to_spec_id.get(0)
                 print(f"[DEBUG] 첫 번째 시나리오 선택: spec_id={first_spec_id}")
-                self.pathUrl = CONSTANTS.url + "/" + first_spec_id
+                self.pathUrl = self.url + "/" + first_spec_id
                 self.Server.current_spec_id = first_spec_id
                 # 시나리오 선택 이벤트 수동 트리거 (테이블 업데이트)
                 self.on_test_field_selected(0, 0)
@@ -4263,12 +4264,12 @@ class MyApp(QWidget):
 
             # ✅ 20. 서버 시작
             print(f"[DEBUG] 서버 시작 준비")
-            url = CONSTANTS.url.split(":")
+            url = self.url.split(":")
             address_port = int(url[-1])
             # ✅ 0.0.0.0으로 바인딩 (모든 네트워크 인터페이스에서 수신)
             address_ip = "0.0.0.0"
 
-            print(f"[DEBUG] 플랫폼 서버 시작: {address_ip}:{address_port} (외부 접근: {CONSTANTS.url})")
+            print(f"[DEBUG] 플랫폼 서버 시작: {address_ip}:{address_port} (외부 접근: {self.url})")
             self.server_th = server_th(handler_class=self.Server, address=address_ip, port=address_port)
             self.server_th.start()
 
