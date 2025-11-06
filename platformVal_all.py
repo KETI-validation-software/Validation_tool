@@ -1651,10 +1651,8 @@ class MyApp(QWidget):
 
         self.CONSTANTS = CONSTANTS
         self.current_spec_id = spec_id
-        self.url = CONSTANTS.url
 
         self.load_specs_from_constants()
-        self.CONSTANTS = CONSTANTS
         self.embedded = embedded
         self.mode = mode
         self.radio_check_flag = "video"
@@ -1728,8 +1726,8 @@ class MyApp(QWidget):
         import sys
         import os
 
-        SPEC_CONFIG = self.CONSTANTS.SPEC_CONFIG if hasattr(self.CONSTANTS, 'SPEC_CONFIG') else []
-
+        SPEC_CONFIG = getattr(self.CONSTANTS, 'SPEC_CONFIG', [])
+        url_value = getattr(self.CONSTANTS, 'url', None)
         if getattr(sys, 'frozen', False):
             # PyInstaller 환경: 외부 CONSTANTS.py에서 SPEC_CONFIG 읽기
             exe_dir = os.path.dirname(sys.executable)
@@ -1746,6 +1744,7 @@ class MyApp(QWidget):
                     namespace = {}
                     exec(constants_code, namespace)
                     SPEC_CONFIG = namespace.get('SPEC_CONFIG', SPEC_CONFIG)
+                    url_value = namespace.get('url', url_value)
                     print(f"[PLATFORM] ✅ 외부 SPEC_CONFIG 로드 완료: {len(SPEC_CONFIG)}개 그룹")
                     # 디버그: 그룹 이름 출력
                     for i, g in enumerate(SPEC_CONFIG):
@@ -1758,6 +1757,8 @@ class MyApp(QWidget):
 
         # ===== 인스턴스 변수에 저장 (다른 메서드에서 사용) =====
         self.LOADED_SPEC_CONFIG = SPEC_CONFIG
+        self.url = url_value  # ✅ 외부 CONSTANTS.py에 정의된 url도 반영
+
         # ===== 저장 완료 =====
 
         if not SPEC_CONFIG:
