@@ -1221,7 +1221,16 @@ class ResultPageWidget(QWidget):
         # 상세 내용 버튼 클릭 이벤트
         self.tableWidget.cellClicked.connect(self.table_cell_clicked)
 
-        parent_layout.addWidget(self.tableWidget)
+        # ✅ QScrollArea로 감싸기
+        scroll_area = QScrollArea()
+        scroll_area.setWidget(self.tableWidget)
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        # 가로 스크롤 숨김
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        # 세로 스크롤 자동 표시
+        scroll_area.setFixedWidth(1064)
+        parent_layout.addWidget(scroll_area)
 
     def _on_back_clicked(self):
         """뒤로가기 버튼 클릭 시 시그널 발생"""
@@ -3615,15 +3624,13 @@ class MyApp(QWidget):
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Fixed)
 
         # 테이블 크기 설정
-        self.tableWidget.setFixedHeight(274)
+        self.tableWidget.setFixedHeight(270)
         self.tableWidget.setFixedWidth(1064)
 
         main_path = resource_path("assets/image/test_runner/main_table.png").replace("\\", "/")
         self.tableWidget.setStyleSheet(f"""
             QTableWidget {{
-                background: #FFF;
-                background-image: url('{main_path}');
-                background-repeat: no-repeat;
+                background: #FFF;  
                 background-position: center;
                 border-radius: 8px;
                 border: 1px solid #CECECE;
@@ -3740,11 +3747,20 @@ class MyApp(QWidget):
 
         # 결과 컬럼만 클릭 가능
         self.tableWidget.cellClicked.connect(self.table_cell_clicked)
-
+        # ✅ QScrollArea로 감싸기
+        scroll_area = QScrollArea()
+        scroll_area.setWidget(self.tableWidget)
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        # 가로 스크롤 숨김
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        # 세로 스크롤 자동 표시
+        scroll_area.setFixedWidth(1064)
+        # scroll_area.setFixedHeight(274)
         # centerLayout 초기화
         self.centerLayout = QVBoxLayout()
         self.centerLayout.setContentsMargins(0, 0, 0, 0)
-        self.centerLayout.addWidget(self.tableWidget)
+        self.centerLayout.addWidget(scroll_area)
 
     def show_combined_result(self, row):
         """통합 상세 내용 확인"""
