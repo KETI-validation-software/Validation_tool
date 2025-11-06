@@ -43,8 +43,8 @@ class NetworkScanWorker(QObject):
             )
 
             if ports:
-                # 상위 3개 포트만 반환
-                urls = [f"{local_ip}:{p}" for p in ports[:3]]
+                # 상위 10개 포트만 반환
+                urls = [f"{local_ip}:{p}" for p in ports[:10]]
                 self.scan_completed.emit(urls)
             else:
                 self.scan_failed.emit("검색된 사용가능 포트 없음")
@@ -168,8 +168,8 @@ class ARPScanWorker(QObject):
                 )
                 return
 
-            # 4. 최대 3개로 제한
-            found_ips = found_ips[:3]
+            # 4. 최대 10개로 제한
+            found_ips = found_ips[:10]
 
             # 5. IP:Port 형식으로 변환
             if self.test_port:
