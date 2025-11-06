@@ -1651,10 +1651,9 @@ class MyApp(QWidget):
 
         self.CONSTANTS = CONSTANTS
         self.current_spec_id = spec_id
-        self.url = CONSTANTS.url
 
         self.load_specs_from_constants()
-        self.CONSTANTS = CONSTANTS
+        self.url = self.CONSTANTS.url
         self.embedded = embedded
         self.mode = mode
         self.radio_check_flag = "video"
@@ -1777,6 +1776,7 @@ class MyApp(QWidget):
 
         self.spec_description = config.get('test_name', 'Unknown Test')
         spec_names = config.get('specs', [])
+        self.url = config.get('url')
 
         # trans_protocol, time_out, num_retries 저장
         self.trans_protocols = config.get('trans_protocol', [])
