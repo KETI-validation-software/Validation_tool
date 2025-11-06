@@ -1252,8 +1252,7 @@ class ResultPageWidget(QWidget):
         main_path = resource_path("assets/image/test_runner/main_table.png").replace("\\", "/")
         self.tableWidget.setStyleSheet(f"""
             QTableWidget {{
-                background: #FFF;
-                background-image: url('{main_path}');
+                background: #FFF; 
                 background-repeat: no-repeat;
                 background-position: center;
                 border-radius: 8px;
@@ -1310,8 +1309,15 @@ class ResultPageWidget(QWidget):
 
         # 상세 내용 버튼 클릭 이벤트
         self.tableWidget.cellClicked.connect(self.table_cell_clicked)
-
-        parent_layout.addWidget(self.tableWidget)
+        scroll_area = QScrollArea()
+        scroll_area.setWidget(self.tableWidget)
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        # 가로 스크롤 숨김
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        # 세로 스크롤 자동 표시
+        scroll_area.setFixedWidth(1064)
+        parent_layout.addWidget(scroll_area)
 
     def _on_back_clicked(self):
         """뒤로가기 버튼 클릭 시 시그널 발생"""
@@ -4295,21 +4301,19 @@ class MyApp(QWidget):
         # 결과 컬럼만 클릭 가능하도록 설정 (기존 기능 유지)
         self.tableWidget.cellClicked.connect(self.table_cell_clicked)
 
+        scroll_area = QScrollArea()
+        scroll_area.setWidget(self.tableWidget)
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        # 가로 스크롤 숨김
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        # 세로 스크롤 자동 표시
+        scroll_area.setFixedWidth(1064)
+
         # centerLayout을 초기화하고 테이블 추가
         self.centerLayout = QVBoxLayout()
         self.centerLayout.setContentsMargins(0, 0, 0, 0)  # ← 추가
-        self.centerLayout.addWidget(self.tableWidget)
-
-        # step 메시지 초기화
-        self.step1_msg = ""
-        self.step2_msg = ""
-        self.step3_msg = ""
-        self.step4_msg = ""
-        self.step5_msg = ""
-        self.step6_msg = ""
-        self.step7_msg = ""
-        self.step8_msg = ""
-        self.step9_msg = ""
+        self.centerLayout.addWidget(scroll_area)
 
     def show_combined_result(self, row):
         """통합 상세 내용 확인 - 데이터, 규격, 오류를 모두 보여주는 3열 팝업"""
