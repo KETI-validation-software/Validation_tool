@@ -12,7 +12,7 @@ import urllib3
 import warnings
 from datetime import datetime
 from collections import defaultdict
-
+import importlib
 # SSL 경고 비활성화 (자체 서명 인증서 사용 시)
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 warnings.filterwarnings('ignore')
@@ -1230,7 +1230,34 @@ class ResultPageWidget(QWidget):
         layout.addWidget(info_label)
         layout.addStretch()
         info_widget.setLayout(layout)
-        return info_widget
+
+        # ✅ 스크롤 영역 추가
+        scroll_area = QScrollArea()
+        scroll_area.setWidget(info_widget)
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setFixedSize(1064, 150)  # 기존과 동일한 전체 크기
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+        # ✅ 스크롤바 스타일 (선택 사항)
+        scroll_area.setStyleSheet("""
+               QScrollBar:vertical {
+                   border: none;
+                   background: #F1F1F1;
+                   width: 8px;
+                   margin: 0px;
+                   border-radius: 4px;
+               }
+               QScrollBar::handle:vertical {
+                   background: #C1C1C1;
+                   min-height: 20px;
+                   border-radius: 4px;
+               }
+               QScrollBar::handle:vertical:hover {
+                   background: #A0A0A0;
+               }
+           """)
+        return scroll_area
 
     def create_result_table(self, parent_layout):
         """결과 테이블 생성 (크기 키움: 350px)"""
@@ -1849,6 +1876,10 @@ class MyApp(QWidget):
 
         # CONSTANTS 사용
         self.CONSTANTS = CONSTANTS
+        self.current_spec_id = spec_id
+
+        self.load_specs_from_constants()
+        self.CONSTANTS = CONSTANTS
         super().__init__()
         self.embedded = embedded
 
@@ -1893,9 +1924,6 @@ class MyApp(QWidget):
 
         auth_temp = set_auth()
         self.accessInfo = [auth_temp[0], auth_temp[1]]
-
-        # Load specs dynamically from CONSTANTS
-        self.load_specs_from_constants()
 
         # step_buffers 동적 생성 (API 개수에 따라)
         self.step_buffers = [
@@ -2775,8 +2803,7 @@ class MyApp(QWidget):
                 self.update_score_display()
 
                 # URL 업데이트
-                self.pathUrl = CONSTANTS.url + "/" + self.current_spec_id
-                self.url_text_box.setText(self.pathUrl)
+                self.url_text_box.setPlaceholderText("시험 URL을 입력하세요")  # 안내 문구 변경
 
                 # ✅ 10. 결과 텍스트 초기화
                 self.valResult.clear()
@@ -3872,11 +3899,11 @@ class MyApp(QWidget):
         # ✅ URL 텍스트 박스 (복사 가능)
         self.url_text_box = QLineEdit()
         self.url_text_box.setFixedHeight(40)
-        self.url_text_box.setReadOnly(True)  # 읽기 전용
-        self.url_text_box.setPlaceholderText("시험 URL이 여기에 표시됩니다")
+        self.url_text_box.setReadOnly(False)  # ✅ 읽기 전용 해제 → 입력 가능
+        self.url_text_box.setPlaceholderText("시험 URL을 입력하세요")  # 안내 문구 변경
         self.url_text_box.setStyleSheet("""
             QLineEdit {
-                background-color: #FFFFFF;  /* ← 하얀색으로 변경 */
+                background-color: #FFFFFF;
                 border: 1px solid #CECECE;
                 border-radius: 4px;
                 padding: 0 12px;
@@ -3888,10 +3915,10 @@ class MyApp(QWidget):
             }
             QLineEdit:focus {
                 border: 1px solid #4A90E2;
-                background-color: #FFFFFF;  /* 포커스 시에도 하얀색 유지 */
+                background-color: #FFFFFF;
             }
         """)
-        url_row_layout.addWidget(self.url_text_box, 1)  # stretch 적용
+        url_row_layout.addWidget(self.url_text_box, 1)
 
         url_row.setLayout(url_row_layout)
         right_layout.addWidget(url_row)
@@ -4154,9 +4181,7 @@ class MyApp(QWidget):
                 first_spec_id = self.index_to_spec_id.get(0)
                 print(f"[DEBUG] 첫 번째 시나리오 선택: spec_id={first_spec_id}")
                 self.on_test_field_selected(0, 0)
-                self.pathUrl = CONSTANTS.url + "/" + first_spec_id
-                self.url_text_box.setText(self.pathUrl)
-
+                self.url_text_box.setPlaceholderText("시험 URL을 입력하세요")  # 안내 문구 변경
             print(f"[DEBUG] 초기 시나리오 자동 선택 완료: {self.spec_description}")
             QApplication.processEvents()
 
@@ -4716,7 +4741,9 @@ class MyApp(QWidget):
             QMessageBox.warning(self, "알림", "시험 시나리오를 먼저 선택하세요.")
             return
 
+        self.pathUrl = self.url_text_box.text()
         print(f"[START] ========== 검증 시작: 완전 초기화 ==========")
+        print(f"[START] 시험 URL : ", self.pathUrl)
         print(f"[START] 시험: {self.current_spec_id} - {self.spec_description}")
         
         self.update_result_table_structure(self.videoMessages)
@@ -4827,8 +4854,7 @@ class MyApp(QWidget):
         self.valResult.clear()
 
         # ✅ 17. URL 설정
-        self.pathUrl = CONSTANTS.url + "/" + self.current_spec_id
-        self.url_text_box.setText(self.pathUrl)
+        self.url_text_box.setPlaceholderText("시험 URL을 입력하세요")  # 안내 문구 변경
 
         # ✅ 18. 시작 메시지
         self.valResult.append("=" * 60)

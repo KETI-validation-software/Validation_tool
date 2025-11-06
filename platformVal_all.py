@@ -830,6 +830,7 @@ class ResultPageWidget(QWidget):
 
     def on_test_field_selected(self, row, col):
         """시나리오 선택 시 해당 결과 표시 (결과 없어도 API 정보 표시)"""
+
         if row not in self.index_to_spec_id:
             return
 
@@ -1141,7 +1142,34 @@ class ResultPageWidget(QWidget):
         layout.addWidget(info_label)
         layout.addStretch()
         info_widget.setLayout(layout)
-        return info_widget
+
+        # ✅ 스크롤 영역 추가
+        scroll_area = QScrollArea()
+        scroll_area.setWidget(info_widget)
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setFixedSize(1064, 150)  # 기존과 동일한 전체 크기
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+        # ✅ 스크롤바 스타일 (선택 사항)
+        scroll_area.setStyleSheet("""
+               QScrollBar:vertical {
+                   border: none;
+                   background: #F1F1F1;
+                   width: 8px;
+                   margin: 0px;
+                   border-radius: 4px;
+               }
+               QScrollBar::handle:vertical {
+                   background: #C1C1C1;
+                   min-height: 20px;
+                   border-radius: 4px;
+               }
+               QScrollBar::handle:vertical:hover {
+                   background: #A0A0A0;
+               }
+           """)
+        return scroll_area
 
     def create_result_table(self, parent_layout):
         """결과 테이블 생성 (크기 키움: 350px)"""
@@ -1619,9 +1647,13 @@ class MyApp(QWidget):
 
     def __init__(self, embedded=False, mode=None, spec_id=None):
         # CONSTANTS 사용
-        self.CONSTANTS = CONSTANTS
-
         super().__init__()
+
+        self.CONSTANTS = CONSTANTS
+        self.current_spec_id = spec_id
+
+        self.load_specs_from_constants()
+        self.CONSTANTS = CONSTANTS
         self.embedded = embedded
         self.mode = mode
         self.radio_check_flag = "video"
@@ -1652,12 +1684,8 @@ class MyApp(QWidget):
         if spec_id:
             self.current_spec_id = spec_id
             print(f"[PLATFORM] 📌 전달받은 spec_id 사용: {spec_id}")
-        else:
-            self.current_spec_id = "cmgatbdp000bqihlexmywusvq"
-            print(f"[PLATFORM] 📌 기본 spec_id 사용: {self.current_spec_id}")
 
         # Load specs dynamically from CONSTANTS
-        self.load_specs_from_constants()
 
         self.initUI()
         self.realtime_flag = False
