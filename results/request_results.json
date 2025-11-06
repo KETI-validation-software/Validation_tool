@@ -219,10 +219,10 @@
                 "duration": "100",
                 "transProtocol": {
                   "transProtocolType": "WebHook",
-                  "transProtocolDesc": "https://10.252.219.119:2001"
+                  "transProtocolDesc": "https://192.168.1.50:2001"
                 },
-                "eventFilter": "화재",
-                "classFilter": "사람",
+                "eventFilter": "배회",
+                "classFilter": "버스",
                 "startTime": 1761110160000
               },
               "validationErrors": [
@@ -284,7 +284,7 @@
                 ],
                 "maxCount": 3,
                 "eventFilter": "화재",
-                "classFilter": "트럭"
+                "classFilter": "사람"
               },
               "validationErrors": [
                 "오류가 없습니다."
@@ -295,5 +295,5 @@
       ]
     }
   ],
-  "completedDate": "2025-11-06T12:40:53Z"
+  "completedDate": "2025-11-06T16:41:49Z"
 }
