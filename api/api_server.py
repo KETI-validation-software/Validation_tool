@@ -154,7 +154,7 @@ class Server(BaseHTTPRequestHandler):
     # POST echoes the message adding a JSON field
     def do_POST(self):
         spec_id, api_name = self.parse_path()
-        if not api_name or  "cmgyv3rzl014nvsveidu5jpzp" != spec_id:
+        if not api_name or "cmgyv3rzl014nvsveidu5jpzp" != spec_id:
             print(f"[ERROR] 잘못된 path 형식: {self.path}")
             self.send_response(400)
             self.send_header('Content-type', 'application/json')
@@ -576,6 +576,7 @@ class Server(BaseHTTPRequestHandler):
             print(f"[DEBUG][CONSTRAINTS] 원본 message 내용: {json.dumps(message, ensure_ascii=False)[:200]}")
             print(f"[DEBUG][CONSTRAINTS] ★ latest_event 키 목록: {list(Server.latest_event.keys())}")
             print(f"[DEBUG][CONSTRAINTS] ★ generator.latest_events 동일 객체?: {id(self.generator.latest_events) == id(Server.latest_event)}")
+            self._push_event(api_name, "REQUEST", self.request_data)
 
             # constraints가 있을 때만 _applied_constraints 호출 (성능 최적화)
             if out_con and isinstance(out_con, dict) and len(out_con) > 0:
@@ -599,7 +600,6 @@ class Server(BaseHTTPRequestHandler):
                 )
                 print(f"[DEBUG][CONSTRAINTS] 업데이트된 message 내용: {json.dumps(updated_message, ensure_ascii=False)[:200]}")
 
-                self._push_event(api_name, "REQUEST", self.request_data)
                 self._push_event(api_name, "RESPONSE", updated_message)
 
                 # 업데이트된 메시지를 응답으로 전송
@@ -608,7 +608,6 @@ class Server(BaseHTTPRequestHandler):
                 print(f"[DEBUG][CONSTRAINTS] constraints 없음 - 원본 메시지 사용")
                 # constraints가 없으면 원본 메시지 그대로 사용
 
-                self._push_event(api_name, "REQUEST", self.request_data)
                 self._push_event(api_name, "RESPONSE", message)
                 a = json.dumps(message).encode('utf-8')
         except Exception as e:

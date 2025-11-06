@@ -222,7 +222,7 @@
                   "transProtocolDesc": "https://10.252.219.119:2001"
                 },
                 "eventFilter": "화재",
-                "classFilter": "버스",
+                "classFilter": "사람",
                 "startTime": 1761110160000
               },
               "validationErrors": [
@@ -284,7 +284,7 @@
                 ],
                 "maxCount": 3,
                 "eventFilter": "화재",
-                "classFilter": "사람"
+                "classFilter": "트럭"
               },
               "validationErrors": [
                 "오류가 없습니다."
@@ -295,5 +295,5 @@
       ]
     }
   ],
-  "completedDate": "2025-11-05T18:15:16Z"
+  "completedDate": "2025-11-06T12:40:53Z"
 }
