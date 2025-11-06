@@ -2119,8 +2119,8 @@ class MyApp(QWidget):
         import sys
         import os
 
-        SPEC_CONFIG = self.CONSTANTS.SPEC_CONFIG  # 기본값
-
+        SPEC_CONFIG = getattr(self.CONSTANTS, 'SPEC_CONFIG', [])
+        url_value = getattr(self.CONSTANTS, 'url', None)
         if getattr(sys, 'frozen', False):
             # PyInstaller 환경: 외부 CONSTANTS.py에서 SPEC_CONFIG 읽기
             exe_dir = os.path.dirname(sys.executable)
@@ -2137,6 +2137,8 @@ class MyApp(QWidget):
                     namespace = {}
                     exec(constants_code, namespace)
                     SPEC_CONFIG = namespace.get('SPEC_CONFIG', self.CONSTANTS.SPEC_CONFIG)
+                    url_value = namespace.get('url', url_value)
+
                     print(f"[SYSTEM] ✅ 외부 SPEC_CONFIG 로드 완료: {len(SPEC_CONFIG)}개 그룹")
                     # 디버그: 그룹 이름 출력
                     for i, g in enumerate(SPEC_CONFIG):
@@ -2149,6 +2151,8 @@ class MyApp(QWidget):
 
         # ===== 인스턴스 변수에 저장 (다른 메서드에서 사용) =====
         self.LOADED_SPEC_CONFIG = SPEC_CONFIG
+        self.url = url_value  # ✅ 외부 CONSTANTS.py에 정의된 url도 반영
+
         # ===== 저장 완료 =====
 
         # ===== 디버그 로그 추가 =====
@@ -2803,7 +2807,9 @@ class MyApp(QWidget):
                 self.update_score_display()
 
                 # URL 업데이트
-                self.url_text_box.setPlaceholderText("시험 URL을 입력하세요")  # 안내 문구 변경
+
+                self.pathUrl = self.url + "/" + self.current_spec_id
+                self.url_text_box.setText(self.pathUrl)  # 안내 문구 변경
 
                 # ✅ 10. 결과 텍스트 초기화
                 self.valResult.clear()
@@ -3900,7 +3906,10 @@ class MyApp(QWidget):
         self.url_text_box = QLineEdit()
         self.url_text_box.setFixedHeight(40)
         self.url_text_box.setReadOnly(False)  # ✅ 읽기 전용 해제 → 입력 가능
-        self.url_text_box.setPlaceholderText("시험 URL을 입력하세요")  # 안내 문구 변경
+
+        self.pathUrl = self.url + "/" + self.current_spec_id
+        self.url_text_box.setText(self.pathUrl)  # 안내 문구 변경
+
         self.url_text_box.setStyleSheet("""
             QLineEdit {
                 background-color: #FFFFFF;
@@ -4181,7 +4190,8 @@ class MyApp(QWidget):
                 first_spec_id = self.index_to_spec_id.get(0)
                 print(f"[DEBUG] 첫 번째 시나리오 선택: spec_id={first_spec_id}")
                 self.on_test_field_selected(0, 0)
-                self.url_text_box.setPlaceholderText("시험 URL을 입력하세요")  # 안내 문구 변경
+                self.pathUrl = self.url + "/" + self.current_spec_id
+                self.url_text_box.setText(self.pathUrl)  # 안내 문구 변경
             print(f"[DEBUG] 초기 시나리오 자동 선택 완료: {self.spec_description}")
             QApplication.processEvents()
 
@@ -4854,7 +4864,8 @@ class MyApp(QWidget):
         self.valResult.clear()
 
         # ✅ 17. URL 설정
-        self.url_text_box.setPlaceholderText("시험 URL을 입력하세요")  # 안내 문구 변경
+        self.pathUrl = self.url + "/" + self.current_spec_id
+        self.url_text_box.setText(self.pathUrl)  # 안내 문구 변경
 
         # ✅ 18. 시작 메시지
         self.valResult.append("=" * 60)
