@@ -137,7 +137,7 @@ class Server(BaseHTTPRequestHandler):
                             self.auth_Info[3] + '",' + ' ' + 'algorithm="' + self.auth_Info[4] + '"'
 
         self.send_header('WWW-Authenticate', digest_header)
-        print(f"[DEBUG][DIGEST] 401 챌린지 전송 완료")
+        print(f"[DEBUG][DIGEST] 401 전송 완료")
         print(f"[DEBUG][DIGEST] Digest Header: {digest_header}")
         print(f"[DEBUG][DIGEST] 클라이언트가 재요청을 보내야 합니다")
         self.end_headers()
@@ -154,7 +154,7 @@ class Server(BaseHTTPRequestHandler):
     # POST echoes the message adding a JSON field
     def do_POST(self):
         spec_id, api_name = self.parse_path()
-        if not api_name or "cmgyv3rzl014nvsveidu5jpzp" != spec_id:
+        if not api_name or self.current_spec_id!=spec_id:#"cmgyv3rzl014nvsveidu5jpzp" != spec_id:
             print(f"[ERROR] 잘못된 path 형식: {self.path}")
             self.send_response(400)
             self.send_header('Content-type', 'application/json')
@@ -218,6 +218,7 @@ class Server(BaseHTTPRequestHandler):
                 import uuid
                 import time
                 new_token = f"Bearer_{uuid.uuid4().hex}_{int(time.time())}"
+                new_token = "abcd1234"
                 if not isinstance(Server.auth_Info, list):
                     Server.auth_Info = []
                 if len(Server.auth_Info) == 0:
@@ -291,6 +292,9 @@ class Server(BaseHTTPRequestHandler):
             return
 
         if self.auth_type == "None":
+            auth_pass = True
+        elif api_name == "Authentication":
+            print(f"[DEBUG][AUTH] Authentication API - 인증 건너뛰기")
             auth_pass = True
         else:
             # Digest Auth
