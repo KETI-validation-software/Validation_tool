@@ -217,8 +217,7 @@ class Server(BaseHTTPRequestHandler):
                 # 토큰 생성 및 저장
                 import uuid
                 import time
-                new_token = f"Bearer_{uuid.uuid4().hex}_{int(time.time())}"
-                new_token = "abcd1234"
+                new_token = f"{uuid.uuid4().hex}_{int(time.time())}"
                 if not isinstance(Server.auth_Info, list):
                     Server.auth_Info = []
                 if len(Server.auth_Info) == 0:
