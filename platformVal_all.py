@@ -17,7 +17,7 @@ from core.functions import build_result_json
 import requests
 
 import config.CONSTANTS as CONSTANTS
-from core.functions import json_check_, save_result, resource_path, json_to_data, set_auth, timeout_field_finder
+from core.functions import json_check_, save_result, resource_path, json_to_data, timeout_field_finder
 from core.json_checker_new import check_message_data, check_message_schema, check_message_error
 import spec.Data_response as data_response_module
 import spec.Schema_response as schema_response_module
@@ -1676,8 +1676,9 @@ class MyApp(QWidget):
         self.Server = Server
         self.server_th = None  # ✅ 서버 스레드 변수 초기화
 
-        auth_temp = set_auth()
-        self.accessInfo = [auth_temp[0], auth_temp[1]]
+        parts = self.auth_info.split(",")
+        auth = [parts[0], parts[1] if len(parts) > 1 else ""]
+        self.accessInfo = [auth[0], auth[1]]
 
         # spec_id 초기화
         if spec_id:
@@ -1728,6 +1729,8 @@ class MyApp(QWidget):
 
         SPEC_CONFIG = getattr(self.CONSTANTS, 'SPEC_CONFIG', [])
         url_value = getattr(self.CONSTANTS, 'url', None)
+        auth_type = getattr(self.CONSTANTS, 'auth_type', None)
+        auth_info = getattr(self.CONSTANTS, 'auth_info', None)
         if getattr(sys, 'frozen', False):
             # PyInstaller 환경: 외부 CONSTANTS.py에서 SPEC_CONFIG 읽기
             exe_dir = os.path.dirname(sys.executable)
@@ -1745,6 +1748,14 @@ class MyApp(QWidget):
                     exec(constants_code, namespace)
                     SPEC_CONFIG = namespace.get('SPEC_CONFIG', SPEC_CONFIG)
                     url_value = namespace.get('url', url_value)
+                    auth_type = namespace.get('auth_type', auth_type)
+                    auth_info = namespace.get('auth_info', auth_info)
+                    self.CONSTANTS.company_name = namespace.get('company_name', self.CONSTANTS.company_name)
+                    self.CONSTANTS.product_name = namespace.get('product_name', self.CONSTANTS.product_name)
+                    self.CONSTANTS.version = namespace.get('version', self.CONSTANTS.version)
+                    self.CONSTANTS.test_category = namespace.get('test_category', self.CONSTANTS.test_category)
+                    self.CONSTANTS.test_target = namespace.get('test_target', self.CONSTANTS.test_target)
+                    self.CONSTANTS.test_range = namespace.get('test_range', self.CONSTANTS.test_range)
                     print(f"[PLATFORM] ✅ 외부 SPEC_CONFIG 로드 완료: {len(SPEC_CONFIG)}개 그룹")
                     # 디버그: 그룹 이름 출력
                     for i, g in enumerate(SPEC_CONFIG):
@@ -1758,7 +1769,8 @@ class MyApp(QWidget):
         # ===== 인스턴스 변수에 저장 (다른 메서드에서 사용) =====
         self.LOADED_SPEC_CONFIG = SPEC_CONFIG
         self.url = url_value  # ✅ 외부 CONSTANTS.py에 정의된 url도 반영
-
+        self.auth_type = auth_type
+        self.auth_info = auth_info
         # ===== 저장 완료 =====
 
         if not SPEC_CONFIG:
@@ -2655,14 +2667,14 @@ class MyApp(QWidget):
     def load_test_info_from_constants(self):
         """CONSTANTS.py에서 시험정보를 로드"""
         return [
-            ("기업명", CONSTANTS.company_name),
-            ("제품명", CONSTANTS.product_name),
-            ("버전", CONSTANTS.version),
-            ("시험유형", CONSTANTS.test_category),
-            ("시험대상", CONSTANTS.test_target),
-            ("시험범위", CONSTANTS.test_range),
-            ("사용자 인증 방식", CONSTANTS.auth_type),
-            ("시험 접속 정보", CONSTANTS.url)
+            ("기업명", self.CONSTANTS.company_name),
+            ("제품명", self.CONSTANTS.product_name),
+            ("버전", self.CONSTANTS.version),
+            ("시험유형", self.CONSTANTS.test_category),
+            ("시험대상", self.CONSTANTS.test_target),
+            ("시험범위", self.CONSTANTS.test_range),
+            ("사용자 인증 방식", self.auth_type),
+            ("시험 접속 정보", self.url)
         ]
 
     def create_spec_selection_panel(self, parent_layout):
@@ -4244,6 +4256,8 @@ class MyApp(QWidget):
 
             # ✅ 18. 인증 설정
             print(f"[DEBUG] 인증 설정 시작")
+            print(f"[DEBUG] 사용자 인증 방식 : ", self.CONSTANTS.auth_type)
+
             if self.r2 == "B":
                 self.Server.auth_type = "B"
                 self.Server.bearer_credentials[0] = self.accessInfo[0]
@@ -4414,7 +4428,7 @@ class MyApp(QWidget):
             print(f"Error loading webhook schema: {e}")
             self.webhookSchema = []
 
-        self.r2 = CONSTANTS.auth_type
+        self.r2 = self.auth_type
         if self.r2 == "Digest Auth":
             self.r2 = "D"
         elif self.r2 == "Bearer Token":
