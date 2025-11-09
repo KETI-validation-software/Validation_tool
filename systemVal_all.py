@@ -3321,10 +3321,6 @@ class MyApp(QWidget):
 
                     # 최종 리포트 생성
                     total_fields = self.total_pass_cnt + self.total_error_cnt
-                    if total_fields > 0:
-                        final_score = (self.total_pass_cnt / total_fields) * 100
-                    else:
-                        final_score = 0
 
                     # ✅ JSON 결과 자동 저장 추가
                     try:
@@ -3610,8 +3606,9 @@ class MyApp(QWidget):
                     self.valResult.append(f"\n검증 결과: {final_result}")
 
                     # ✅ 이번 회차의 결과만 현재 spec 점수에 추가
+                    '''
                     self.total_error_cnt += key_error_cnt
-                    self.total_pass_cnt += key_psss_cnt
+                    self.total_pass_cnt += key_psss_cnt'''
 
                     # ✅ 평가 점수 디스플레이 업데이트 (분야별만)
                     self.update_score_display()
@@ -3636,6 +3633,10 @@ class MyApp(QWidget):
                         print(f"[SCORE] API {self.cnt} 완료: pass={total_pass_count}, error={total_error_count}")
 
                         # ✅ 전체 누적 점수 업데이트 (재시도 완료 후 한 번만!)
+                        # 임시 카운트 1회 검증 조건
+                        self.total_error_cnt += total_error_count
+                        self.total_pass_cnt += total_pass_count
+
                         self.global_error_cnt += total_error_count
                         self.global_pass_cnt += total_pass_count
 
@@ -4864,7 +4865,8 @@ class MyApp(QWidget):
         self.valResult.clear()
 
         # ✅ 17. URL 설정
-        self.pathUrl = self.url + "/" + self.current_spec_id
+        #self.pathUrl = self.url + "/" + self.current_spec_id
+        self.pathUrl = self.url_text_box.text()
         self.url_text_box.setText(self.pathUrl)  # 안내 문구 변경
 
         # ✅ 18. 시작 메시지
