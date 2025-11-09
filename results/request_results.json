@@ -1,22 +1,23 @@
 {
-  "requestId": "cmh1yg49v000t9y0jdr1wwuja",
+  "requestId": "cmhba7ldg000g6zcrxdqwdcje",
   "evaluationTarget": {
-    "companyName": "통합플랫폼테스트",
+    "companyName": "테스트",
     "contactPerson": "김철수",
-    "productName": "통합플랫폼테스트제품",
+    "productName": "통합플랫폼",
     "modelName": "v1.0",
     "version": "v1.0"
   },
   "testGroup": {
-    "id": "cmgzwocpp01y6vsve880sfysm",
-    "name": "통합플랫폼",
-    "testRange": "ALL_FIELDS",
+    "id": "cmh1yc1yn000g9y0jk37caeqv",
+    "name": "통합시스템그룹",
+    "testRange": "ALL_FIELDS, ALL_FIELDS",
     "testSpecIds": [
+      "cmh1u5pef000sgxc3bzl4y9v0",
       "cmgvieyak001b6cd04cgaawmm"
     ]
   },
   "status": "완료",
-  "authMethod": "Digest Auth",
+  "authMethod": "Bearer Token",
   "testScore": {
     "score": 82.35,
     "totalFields": 34,
@@ -24,6 +25,28 @@
     "failedFields": 6
   },
   "testResult": [
+    {
+      "testSpecId": "cmh1u5pef000sgxc3bzl4y9v0",
+      "testSpecName": "영상보안시스템_시나리오2",
+      "score": 0,
+      "totalFields": 0,
+      "passedFields": 0,
+      "failedFields": 0,
+      "apis": [
+        {
+          "id": "step-1-dfyzdlda0",
+          "name": "실시간 이벤트 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/RealtimeVideoEventInfos",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        }
+      ]
+    },
     {
       "testSpecId": "cmgvieyak001b6cd04cgaawmm",
       "testSpecName": "영상보안시스템_new",
@@ -46,8 +69,8 @@
             {
               "attempt": 1,
               "validationData": {
-                "userID": "user0001",
-                "userPW": "pass0001"
+                "userID": "a",
+                "userPW": "a"
               },
               "validationErrors": [
                 "오류가 없습니다."
@@ -219,10 +242,10 @@
                 "duration": "100",
                 "transProtocol": {
                   "transProtocolType": "WebHook",
-                  "transProtocolDesc": "https://192.168.1.50:2001"
+                  "transProtocolDesc": "https://10.252.219.119:2001"
                 },
-                "eventFilter": "배회",
-                "classFilter": "버스",
+                "eventFilter": "화재",
+                "classFilter": "트럭",
                 "startTime": 1761110160000
               },
               "validationErrors": [
@@ -284,7 +307,7 @@
                 ],
                 "maxCount": 3,
                 "eventFilter": "화재",
-                "classFilter": "사람"
+                "classFilter": "트럭"
               },
               "validationErrors": [
                 "오류가 없습니다."
@@ -295,5 +318,5 @@
       ]
     }
   ],
-  "completedDate": "2025-11-06T16:41:49Z"
+  "completedDate": "2025-11-09T10:50:50Z"
 }
