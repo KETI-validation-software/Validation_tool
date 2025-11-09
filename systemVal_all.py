@@ -23,7 +23,7 @@ from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor, QPixmap
 from PyQt5.QtCore import *
 from PyQt5 import QtCore
 from api.webhook_api import WebhookThread
-from core.functions import json_check_, resource_path, set_auth, json_to_data, timeout_field_finder
+from core.functions import json_check_, resource_path, json_to_data, timeout_field_finder
 from core.data_mapper import ConstraintDataGenerator
 from requests.auth import HTTPDigestAuth
 import config.CONSTANTS as CONSTANTS
@@ -1908,8 +1908,6 @@ class MyApp(QWidget):
         self.flag_opt = self.CONSTANTS.flag_opt
         self.tick_timer = QTimer()
         self.tick_timer.timeout.connect(self.update_view)
-        self.pathUrl = None
-        self.auth_type = None
         self.cnt = 0
         self.current_retry = 0  # 현재 API의 반복 횟수 카운터
         self.auth_flag = True
@@ -1922,8 +1920,10 @@ class MyApp(QWidget):
         self.message_error = []
         self.message_name = ""
 
-        auth_temp = set_auth()
-        self.accessInfo = [auth_temp[0], auth_temp[1]]
+
+        parts = self.auth_info.split(",")
+        auth = [parts[0], parts[1] if len(parts) > 1 else ""]
+        self.accessInfo = [auth[0], auth[1]]
 
         # step_buffers 동적 생성 (API 개수에 따라)
         self.step_buffers = [
@@ -2121,6 +2121,8 @@ class MyApp(QWidget):
 
         SPEC_CONFIG = getattr(self.CONSTANTS, 'SPEC_CONFIG', [])
         url_value = getattr(self.CONSTANTS, 'url', None)
+        auth_type = getattr(self.CONSTANTS, 'auth_type', None)
+        auth_info = getattr(self.CONSTANTS, 'auth_info', None)
         if getattr(sys, 'frozen', False):
             # PyInstaller 환경: 외부 CONSTANTS.py에서 SPEC_CONFIG 읽기
             exe_dir = os.path.dirname(sys.executable)
@@ -2138,6 +2140,14 @@ class MyApp(QWidget):
                     exec(constants_code, namespace)
                     SPEC_CONFIG = namespace.get('SPEC_CONFIG', self.CONSTANTS.SPEC_CONFIG)
                     url_value = namespace.get('url', url_value)
+                    auth_type = namespace.get('auth_type', auth_type)
+                    auth_info = namespace.get('auth_info', auth_info)
+                    self.CONSTANTS.company_name = namespace.get('company_name', self.CONSTANTS.company_name)
+                    self.CONSTANTS.product_name = namespace.get('product_name', self.CONSTANTS.product_name)
+                    self.CONSTANTS.version = namespace.get('version', self.CONSTANTS.version)
+                    self.CONSTANTS.test_category = namespace.get('test_category', self.CONSTANTS.test_category)
+                    self.CONSTANTS.test_target = namespace.get('test_target', self.CONSTANTS.test_target)
+                    self.CONSTANTS.test_range = namespace.get('test_range', self.CONSTANTS.test_range)
 
                     print(f"[SYSTEM] ✅ 외부 SPEC_CONFIG 로드 완료: {len(SPEC_CONFIG)}개 그룹")
                     # 디버그: 그룹 이름 출력
@@ -2152,7 +2162,8 @@ class MyApp(QWidget):
         # ===== 인스턴스 변수에 저장 (다른 메서드에서 사용) =====
         self.LOADED_SPEC_CONFIG = SPEC_CONFIG
         self.url = url_value  # ✅ 외부 CONSTANTS.py에 정의된 url도 반영
-
+        self.auth_type = auth_type
+        self.auth_info = auth_info
         # ===== 저장 완료 =====
 
         # ===== 디버그 로그 추가 =====
@@ -2402,14 +2413,14 @@ class MyApp(QWidget):
 
     def load_test_info_from_constants(self):
         return [
-            ("기업명", CONSTANTS.company_name),
-            ("제품명", CONSTANTS.product_name),
-            ("버전", CONSTANTS.version),
-            ("시험유형", CONSTANTS.test_category),
-            ("시험대상", CONSTANTS.test_target),
-            ("시험범위", CONSTANTS.test_range),
-            ("사용자 인증 방식", CONSTANTS.auth_type),
-            ("시험 접속 정보", CONSTANTS.url)
+            ("기업명", self.CONSTANTS.company_name),
+            ("제품명", self.CONSTANTS.product_name),
+            ("버전", self.CONSTANTS.version),
+            ("시험유형", self.CONSTANTS.test_category),
+            ("시험대상", self.CONSTANTS.test_target),
+            ("시험범위", self.CONSTANTS.test_range),
+            ("사용자 인증 방식", self.auth_type),
+            ("시험 접속 정보", self.url)
         ]
 
     def create_spec_selection_panel(self, parent_layout):
@@ -4756,7 +4767,8 @@ class MyApp(QWidget):
         print(f"[START] ========== 검증 시작: 완전 초기화 ==========")
         print(f"[START] 시험 URL : ", self.pathUrl)
         print(f"[START] 시험: {self.current_spec_id} - {self.spec_description}")
-        
+        print(f"[START] 사용자 인증 방식 : ", self.CONSTANTS.auth_type)
+
         self.update_result_table_structure(self.videoMessages)
 
         # ✅ 2. 기존 타이머 정지 (중복 실행 방지)
@@ -4854,8 +4866,9 @@ class MyApp(QWidget):
         print(f"[START] 테이블 초기화 완료")
 
         # ✅ 14. 인증 정보 설정
-        auth_temp = set_auth()
-        self.accessInfo = [auth_temp[0], auth_temp[1]]
+        parts = self.auth_info.split(",")
+        auth = [parts[0], parts[1] if len(parts) > 1 else ""]
+        self.accessInfo = [auth[0], auth[1]]
         self.token = None
 
         # ✅ 15. 평가 점수 디스플레이 초기화 (전체 점수 포함)
@@ -5056,7 +5069,7 @@ class MyApp(QWidget):
         self.webhookSchema = self.webhookInSchema
 
         # 기본 인증 설정 (CONSTANTS.py에서 가져옴)
-        self.r2 = CONSTANTS.auth_type
+        self.r2 = self.auth_type
         if self.r2 == "Digest Auth":
             self.r2 = "D"
         elif self.r2 == "Bearer Token":
