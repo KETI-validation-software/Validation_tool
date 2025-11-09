@@ -786,22 +786,6 @@ def save_result(str_in, path):
     except Exception as err:
         print(err)
 
-
-def set_auth():
-    """CONSTANTS.py에서 인증 정보를 읽어옵니다."""
-    try:
-        from config.CONSTANTS import auth_type, auth_info
-        parts = auth_info.split(",")
-        info = [parts[0], parts[1] if len(parts) > 1 else ""]
-        return info
-    except ImportError as e:
-        print(f"CONSTANTS.py를 찾을 수 없습니다: {e}")
-        return "None", ["", ""]
-    except Exception as e:
-        print(f"인증 정보 로드 중 오류: {e}")
-        return "None", ["", ""]
-
-
 def set_message(path_):
     try:
         with open(resource_path(path_), 'r', encoding="UTF-8") as fp:
