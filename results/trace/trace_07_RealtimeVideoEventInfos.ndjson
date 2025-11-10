@@ -1,2 +1,0 @@
-{"time": "2025-11-10T03:23:54.086969Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "cam0001"}, {"camID": "cam0002"}], "duration": "100", "transProtocol": {"transProtocolType": "WebHook", "transProtocolDesc": "https://10.252.219.95:2001"}, "eventFilter": "화재", "classFilter": "트럭", "startTime": 1761110160000}}
-{"time": "2025-11-10T03:23:55.090729Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "", "message": ""}}
