@@ -1278,10 +1278,10 @@ class ResultPageWidget(QWidget):
         scroll_area.setWidget(self.tableWidget)
         scroll_area.setWidgetResizable(True)
         scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        # 가로 스크롤 숨김
         scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        # 세로 스크롤 자동 표시
         scroll_area.setFixedWidth(1064)
+        scroll_area.setStyleSheet("QScrollArea { border: none; background: transparent; }")
+        
         parent_layout.addWidget(scroll_area)
 
     def _on_back_clicked(self):
@@ -3830,16 +3830,16 @@ class MyApp(QWidget):
 
         # 결과 컬럼만 클릭 가능
         self.tableWidget.cellClicked.connect(self.table_cell_clicked)
+        
         # ✅ QScrollArea로 감싸기
         scroll_area = QScrollArea()
         scroll_area.setWidget(self.tableWidget)
         scroll_area.setWidgetResizable(True)
         scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        # 가로 스크롤 숨김
         scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        # 세로 스크롤 자동 표시
         scroll_area.setFixedWidth(1064)
-        # scroll_area.setFixedHeight(274)
+        scroll_area.setStyleSheet("QScrollArea { border: none; background: transparent; }")
+        
         # centerLayout 초기화
         self.centerLayout = QVBoxLayout()
         self.centerLayout.setContentsMargins(0, 0, 0, 0)
