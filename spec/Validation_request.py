@@ -7,7 +7,24 @@ cmh1u5pef000sgxc3bzl4y9v0_inValidation = [
 ]
 
 # Authentication
-cmgvieyak001b6cd04cgaawmm_Authentication_in_validation = {}
+cmgvieyak001b6cd04cgaawmm_Authentication_in_validation = {
+  "userID": {
+    "enabled": True,
+    "allowedValues": [
+      "kisaID"
+    ],
+    "validationType": "specified-value-match",
+    "score": 0
+  },
+  "userPW": {
+    "enabled": True,
+    "allowedValues": [
+      "kisaPW"
+    ],
+    "validationType": "specified-value-match",
+    "score": 0
+  }
+}
 
 # Capabilities
 cmgvieyak001b6cd04cgaawmm_Capabilities_in_validation = {}

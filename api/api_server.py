@@ -42,8 +42,10 @@ class Server(BaseHTTPRequestHandler):
     auth_Info = ['admin', '1234', 'user', 'abcd1234', 'SHA-256', None]  # 저장된 상태로 main 입력하지 않으면 digest auth 인증 x
     digest_res = ""
     transProtocolInput = ""
-
+    #bearer_credentials = ['PlatformID','PlatformPW']
+    bearer_credentials = ['user0001', 'pass0001']
     url_tmp = None
+    current_spec_id = None
 
     trace = defaultdict(lambda: deque(maxlen=1000))  # api_name -> deque(events)
     request_counter = {}  # ✅ API별 시스템 요청 카운터 (클래스 변수)
@@ -135,6 +137,9 @@ class Server(BaseHTTPRequestHandler):
                             self.auth_Info[3] + '",' + ' ' + 'algorithm="' + self.auth_Info[4] + '"'
 
         self.send_header('WWW-Authenticate', digest_header)
+        print(f"[DEBUG][DIGEST] 401 전송 완료")
+        print(f"[DEBUG][DIGEST] Digest Header: {digest_header}")
+        print(f"[DEBUG][DIGEST] 클라이언트가 재요청을 보내야 합니다")
         self.end_headers()
 
     def do_HEAD(self):
@@ -148,35 +153,37 @@ class Server(BaseHTTPRequestHandler):
 
     # POST echoes the message adding a JSON field
     def do_POST(self):
+        spec_id, api_name = self.parse_path()
+        if not api_name or self.current_spec_id!=spec_id:#"cmgyv3rzl014nvsveidu5jpzp" != spec_id:
+            print(f"[ERROR] 잘못된 path 형식: {self.path}")
+            self.send_response(400)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            error_msg = json.dumps({"code": "400", "message": "잘못된 URL 형식"})
+            self.wfile.write(error_msg.encode('utf-8'))
+            return
         print(
             f"[DEBUG][SERVER] do_POST called, path={self.path}, auth_type={self.auth_type}, headers={dict(self.headers)}")
         ctype, pdict = cgi.parse_header(self.headers.get_content_type())
-        auth = self.headers.get('Authorization')
-        if auth is None:
-            auth = self.headers.get('authorization')
-        auth_pass = False
 
-        # 요청 본문 읽기 (재사용을 위해 저장)
+        # ✅ 1단계: 요청 본문 먼저 읽기 (self.request_data 생성)
+        # ✅ 1단계: 요청 본문 먼저 읽기
         content_length = int(self.headers.get('Content-Length', 0))
-        # print(f"[DEBUG][SERVER] Content-Length: {content_length}")
+        print(f"[DEBUG][SERVER] Content-Length: {content_length}")
         if content_length > 0:
             request_body = self.rfile.read(content_length)
-            # print(f"[DEBUG][SERVER] 요청 본문 읽음: {len(request_body)} bytes")
+            print(f"[DEBUG][SERVER] 요청 본문 읽음: {len(request_body)} bytes")
             try:
                 self.request_data = json.loads(request_body.decode('utf-8'))
                 print(f"[DEBUG][SERVER] 파싱된 요청 데이터: {self.request_data}")
-                
-                # ✅ API 이름 추출 및 로깅
-                api_name = self.path[1:]  # 슬래시 제거
+
+                # ✅ API 이름으로 로깅 (spec_id 제외)
                 print(f"[TRACE WRITE] API 이름: {api_name}")
+                print(f"[TRACE WRITE] spec_id: {spec_id}")
                 print(f"[TRACE WRITE] Direction: REQUEST")
-                
-                # 요청 데이터 기록
-                self._push_event(api_name, "REQUEST", self.request_data)
-                
-                # ✅ 저장 확인 로그 추가
+
                 print(f"[TRACE WRITE] ✅ trace 파일에 저장 완료")
-                # print(f"[TRACE WRITE] latest_event 키 목록: {list(Server.latest_event.keys())}")
+                print(f"[TRACE WRITE] latest_event 키 목록: {list(Server.latest_event.keys())}")
             except Exception as e:
                 print(f"[ERROR] 요청 본문 파싱 실패: {e}")
                 self.request_data = {}
@@ -184,15 +191,109 @@ class Server(BaseHTTPRequestHandler):
             print(f"[DEBUG][SERVER] 요청 본문 없음 (Content-Length=0)")
             self.request_data = {}
 
-        message_cnt, data, out_con = self.api_res()
+        # ✅ 2단계: Authentication API 특별 처리 (Bearer Token 발급)
+        if api_name == "Authentication" and self.auth_type == "B":
+            print(f"[DEBUG][AUTH] Bearer 인증 시작 - userID/userPW 검증")
 
-        # api_res()가 에러를 반환한 경우 (Server.message가 None)
+            # 요청 본문에서 자격 증명 추출
+            user_id = self.request_data.get('userID', '')
+            user_pw = self.request_data.get('userPW', '')
+
+            print(f"[DEBUG][AUTH] 요청 userID: {user_id}")
+            print(f"[DEBUG][AUTH] 요청 userPW: {user_pw}")
+
+            # 자격 증명 검증
+            if (user_id == Server.bearer_credentials[0] and
+                    user_pw == Server.bearer_credentials[1]):
+
+                print(f"[DEBUG][AUTH] ✅ 자격 증명 검증 성공!")
+
+                # ✅ request_counter 증가 (return 전에!)
+                if api_name not in Server.request_counter:
+                    Server.request_counter[api_name] = 0
+                Server.request_counter[api_name] += 1
+                print(f"[API_SERVER] 요청 수신: {api_name} (카운트: {Server.request_counter[api_name]})")
+
+                # 토큰 생성 및 저장
+                import uuid
+                import time
+                new_token = f"{uuid.uuid4().hex}_{int(time.time())}"
+                if not isinstance(Server.auth_Info, list):
+                    Server.auth_Info = []
+                if len(Server.auth_Info) == 0:
+                    Server.auth_Info.append(None)
+                Server.auth_Info[0] = str(new_token).strip()
+
+                print(f"[DEBUG][AUTH] Bearer 토큰 저장 완료: {new_token}")
+
+                # api_res() 호출하여 응답 데이터 가져오기
+                message_cnt, data, out_con = self.api_res(api_name)
+
+                if message_cnt is None:
+                    self._set_headers()
+                    self.wfile.write(json.dumps(data).encode('utf-8'))
+                    return
+
+                # 응답에 토큰 포함
+                if isinstance(data, dict):
+                    data = data.copy()
+                    data['accessToken'] = new_token
+                    print(f"[DEBUG][AUTH] ✅ 응답에 토큰 포함")
+
+                # 성공 응답 전송
+                try:
+                    self._push_event(api_name, "REQUEST", self.request_data)
+                    self._push_event(api_name, "RESPONSE", data)
+                    response_json = json.dumps(data).encode('utf-8')
+                    self._set_headers()
+                    self.wfile.write(response_json)
+                    print(f"[DEBUG][AUTH] ✅ 인증 성공 응답 전송 완료")
+                except Exception as e:
+                    print(f"[ERROR] 응답 전송 중 오류: {e}")
+                    import traceback
+                    traceback.print_exc()
+                return
+
+            else:
+                print(f"[DEBUG][AUTH] ❌ 자격 증명 불일치!")
+
+                # ✅ 실패 시에도 카운터 증가
+                if api_name not in Server.request_counter:
+                    Server.request_counter[api_name] = 0
+                Server.request_counter[api_name] += 1
+                print(f"[API_SERVER] 요청 수신: {api_name} (카운트: {Server.request_counter[api_name]})")
+
+                error_response = {
+                    "code": "401",
+                    "message": "인증 실패: 잘못된 사용자 ID 또는 비밀번호"
+                }
+                self._push_event(api_name, "RESPONSE", error_response)
+                self.send_response(401)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                error_msg = json.dumps(error_response)
+                self.wfile.write(error_msg.encode('utf-8'))
+                return
+
+        # ✅ 3단계: 기존 인증 로직 (Bearer Token 검증 / Digest Auth)
+        auth = self.headers.get('Authorization')
+        if auth is None:
+            auth = self.headers.get('authorization')
+        auth_pass = False
+
+        # api_res() 호출 (Authentication이 아닌 경우)
+        message_cnt, data, out_con = self.api_res(api_name)
+
+        # api_res()가 에러를 반환한 경우
         if message_cnt is None:
             self._set_headers()
             self.wfile.write(json.dumps(data).encode('utf-8'))
             return
 
         if self.auth_type == "None":
+            auth_pass = True
+        elif api_name == "Authentication":
+            print(f"[DEBUG][AUTH] Authentication API - 인증 건너뛰기")
             auth_pass = True
         else:
             # Digest Auth
@@ -207,7 +308,7 @@ class Server(BaseHTTPRequestHandler):
                 if parts[0] != "Digest":
                     self._set_digest_headers()
                     return
-                # 3) response 추출 실패/불일치 → 401 챌린지
+                # 3) response 추출 및 검증
                 try:
                     digest_header = parts[1]
                     digest_items = {}
@@ -215,6 +316,7 @@ class Server(BaseHTTPRequestHandler):
                         if '=' in item:
                             k, v = item.strip().split('=', 1)
                             digest_items[k.strip()] = v.strip().strip('"')
+
                     # 필수 파라미터 추출
                     username = digest_items.get('username')
                     realm = digest_items.get('realm')
@@ -225,9 +327,13 @@ class Server(BaseHTTPRequestHandler):
                     cnonce = digest_items.get('cnonce')
                     response = digest_items.get('response')
                     method = self.command  # 'POST'
-                    password = self.auth_Info[1] if hasattr(self, 'auth_Info') and self.auth_Info else ''
 
-                    # SHA-256로 해시 계산 (RFC 7616, qop 없이)
+                    # password 가져오기
+                    password = ''
+                    if isinstance(Server.auth_Info, list) and len(Server.auth_Info) > 1:
+                        password = Server.auth_Info[1]
+
+                    # SHA-256로 해시 계산
                     def sha256_hex(s):
                         return hashlib.sha256(s.encode('utf-8')).hexdigest()
 
@@ -239,6 +345,7 @@ class Server(BaseHTTPRequestHandler):
                         expected_response = sha256_hex(f"{ha1}:{nonce}:{nc}:{cnonce}:{qop}:{ha2}")
                     else:
                         expected_response = sha256_hex(f"{ha1}:{nonce}:{ha2}")
+
                     # 디버그 로그
                     print(f"[DEBUG][SERVER][Digest] client_response={response}, expected_response={expected_response}")
                     if not response or not expected_response or response != expected_response:
@@ -249,32 +356,58 @@ class Server(BaseHTTPRequestHandler):
                     print(f"[DEBUG][SERVER][Digest] Exception: {e}")
                     self._set_digest_headers()
                     return
-            # Bearer Auth
+
+            # Bearer Auth (다른 API들)
             elif self.auth_type == "B":
-                # print(f"[DEBUG][SERVER] Checking Bearer, auth={auth}")
-                # print(f"[DEBUG][SERVER][AUTH] self.auth_Info={getattr(self, 'auth_Info', None)}")
-                # print(f"[DEBUG][SERVER][AUTH] Server.auth_Info={Server.auth_Info}")
-                if auth:
-                    auth_parts = auth.split(" ")
-                    if len(auth_parts) > 1 and auth_parts[0] == 'Bearer':
-                        token = auth_parts[1].replace('"', "").strip()
-                        stored_token = None
-                        if isinstance(self.auth_Info, list):
-                            if self.auth_Info:
-                                stored_token = self.auth_Info[0]
-                        else:
-                            stored_token = self.auth_Info
+                print(f"[DEBUG][SERVER] Bearer 토큰 검증 시작")
 
-                        # 디버그 로그 추가: Bearer 토큰 비교 직전
-                        print(f"[DEBUG][SERVER] Bearer token in header: {token}, stored_token: {stored_token}")
-
-                        if stored_token is not None and token == str(stored_token).strip():
-                            auth_pass = True
-                        else:
-                            print(f"[DEBUG][SERVER][AUTH] ❌ Bearer 토큰 불일치!")
-                else:
+                # 1단계: Authorization 헤더 존재 확인
+                if not auth:
                     print(f"[DEBUG][SERVER][AUTH] ❌ Authorization 헤더 없음!")
-            # 기타: 특정 path 우회
+                    self.send_response(401)
+                    self.send_header('Content-type', 'application/json')
+                    self.send_header('WWW-Authenticate', 'Bearer realm="API"')
+                    self.end_headers()
+                    error_msg = json.dumps({"code": "401", "message": "인증 헤더 누락"})
+                    self.wfile.write(error_msg.encode('utf-8'))
+                    return
+
+                # 2단계: Bearer 스킴 확인
+                auth_parts = auth.split(" ", 1)
+                if len(auth_parts) != 2 or auth_parts[0] != 'Bearer':
+                    print(f"[DEBUG][SERVER][AUTH] ❌ 잘못된 인증 스킴: {auth_parts[0] if auth_parts else 'None'}")
+                    self.send_response(401)
+                    self.send_header('Content-type', 'application/json')
+                    self.send_header('WWW-Authenticate', 'Bearer realm="API"')
+                    self.end_headers()
+                    error_msg = json.dumps({"code": "401", "message": "잘못된 인증 스킴"})
+                    self.wfile.write(error_msg.encode('utf-8'))
+                    return
+
+                # 3단계: 토큰 추출
+                token = auth_parts[1].strip().strip('"')
+
+                # 4단계: 저장된 토큰 가져오기
+                stored_token = Server.auth_Info[0]
+
+                print(f"[DEBUG][SERVER] Bearer token in header: {token}")
+                print(f"[DEBUG][SERVER] Stored token: {stored_token}")
+
+                # 5단계: 토큰 비교
+                if stored_token and token == str(stored_token).strip():
+                    print(f"[DEBUG][SERVER][AUTH] ✅ Bearer 토큰 인증 성공!")
+                    auth_pass = True
+                else:
+                    print(f"[DEBUG][SERVER][AUTH] ❌ Bearer 토큰 불일치!")
+                    self.send_response(401)
+                    self.send_header('Content-type', 'application/json')
+                    self.send_header('WWW-Authenticate', 'Bearer realm="API", error="invalid_token"')
+                    self.end_headers()
+                    error_msg = json.dumps({"code": "401", "message": "유효하지 않은 토큰"})
+                    self.wfile.write(error_msg.encode('utf-8'))
+                    return
+
+            # 특정 path 우회
             elif self.path == "/" + self.message[0]:
                 auth_pass = True
 
@@ -285,7 +418,6 @@ class Server(BaseHTTPRequestHandler):
 
         # 클래스 변수 request_counter 사용하여 API별 요청 횟수 추적
         try:
-            api_name = self.path[1:]  # 예: "Authentication", "storedVideoInfos"
             if api_name not in Server.request_counter:
                 Server.request_counter[api_name] = 0
             Server.request_counter[api_name] += 1
@@ -347,11 +479,11 @@ class Server(BaseHTTPRequestHandler):
             # transProtocol이 데이터에 들어가있으면 -> 지금 있어서 앞에 https 붙여주어야함 + 시스템이 보낼때 제대로 다시 맵핑하도록 수정해야함
             if trans_protocol:
                 trans_protocol_type = trans_protocol.get("transProtocolType", {})
-                # print(f"[DEBUG][SERVER] transProtocolType: {trans_protocol_type}")
+                print(f"[DEBUG][SERVER] transProtocolType: {trans_protocol_type}")
 
                 # 동적으로 프로토콜 업데이트 해야함 (기존에는 롱풀링으로 하드코딩 - 10/14)
                 self.transProtocolInput = str(trans_protocol_type)
-                # print(f"[DEBUG][SERVER] transProtocolInput 업데이트: {self.transProtocolInput}")
+                print(f"[DEBUG][SERVER] transProtocolInput 업데이트: {self.transProtocolInput}")
 
                 if "WebHook".lower() in str(trans_protocol_type).lower():
                     print(f"[DEBUG][SERVER] WebHook 모드 감지, auth_pass={auth_pass}")
@@ -383,46 +515,6 @@ class Server(BaseHTTPRequestHandler):
                         
                         # 2단계: 잘못된 주소인 경우
                         url_tmp = str(url_tmp).strip()
-
-                        # 로컬 주소인 경우 CONSTANTS.WEBHOOK_URL로 대체
-                        if any(local in url_tmp.lower() for local in ["localhost", "127.0.0.1"]):
-                            print(f"[SERVER ERROR] Webhook URL이 로컬 주소임: {url_tmp}, 실제 주소로 맵핑 시작")
-                            url_tmp = CONSTANTS.WEBHOOK_URL  # ✅ https://10.252.219.95:8090
-                            print(f"[SERVER] 맵핑된 Webhook URL: {url_tmp}")
-                        else:
-                            # 로컬호스트가 아니더라도 포트가 8008이 아니면 일단은 수정하게 해놨는데, 추후 수정해야함
-                            if ":" in url_tmp:
-                                base_url = url_tmp.split(":")[0]
-                                current_port = url_tmp.split(":")[-1].split("/")[0]
-
-                                if current_port != "8090":
-                                    print(f"[SERVER ERROR] Webhook URL 포트가 8008이 아님: {current_port}, 포트 수정 시작")
-                                    if "/" in url_tmp.split[":"][-1]:
-                                        path = "/" + "/".join(url_tmp.split(":")[-1].split("/")[1:])
-                                        url_tmp = f"{base_url}:8090{path}"
-                                    else:
-                                        url_tmp = f"{base_url}:8090"
-                            else:
-                                url_tmp = f"{url_tmp}:8090"
-                                print(f"[SERVER] 포트 추가된 Webhook URL: {url_tmp}")
-                        
-                        # 3단계: https 앞에 붙이기
-                        if not url_tmp.lower().startswith("https://") and not url_tmp.lower().startswith("http://"):
-                            url_tmp = "https://" + url_tmp
-                            print(f"[SERVER] 스킴 추가된 Webhook URL: {url_tmp}")
-                        
-                        if url_tmp.lower().startswith("http://"):
-                            url_tmp = url_tmp.replace("http://", "https://", 1)
-                            print(f"[SERVER] HTTPS로 변환된 Webhook URL: {url_tmp}")
-                        
-                        if "https" not in url_tmp.lower():
-                            message = {
-                                "code": "400",
-                                "message": "잘못된 요청: HTTPS 필요 - 진짜 문제"
-                            }
-                            self._set_headers()
-                            self.wfile.write(json.dumps(message).encode('utf-8'))
-                            return
 
                         # 4단계: 올바른 인덱스 사용
                         message = self.outMessage[message_cnt]
@@ -481,25 +573,26 @@ class Server(BaseHTTPRequestHandler):
         # send the message back
         try:
             # constraints 디버그 로그
-            # print(f"[DEBUG][CONSTRAINTS] out_con type: {type(out_con)}")
-            # print(f"[DEBUG][CONSTRAINTS] out_con value: {out_con}")
-            # print(f"[DEBUG][CONSTRAINTS] out_con length: {len(out_con) if isinstance(out_con, dict) else 'N/A'}")
-            # print(f"[DEBUG][CONSTRAINTS] 원본 message 내용: {json.dumps(message, ensure_ascii=False)[:200]}")
-            # print(f"[DEBUG][CONSTRAINTS] ★ latest_event 키 목록: {list(Server.latest_event.keys())}")
-            # print(f"[DEBUG][CONSTRAINTS] ★ generator.latest_events 동일 객체?: {id(self.generator.latest_events) == id(Server.latest_event)}")
+            print(f"[DEBUG][CONSTRAINTS] out_con type: {type(out_con)}")
+            print(f"[DEBUG][CONSTRAINTS] out_con value: {out_con}")
+            print(f"[DEBUG][CONSTRAINTS] out_con length: {len(out_con) if isinstance(out_con, dict) else 'N/A'}")
+            print(f"[DEBUG][CONSTRAINTS] 원본 message 내용: {json.dumps(message, ensure_ascii=False)[:200]}")
+            print(f"[DEBUG][CONSTRAINTS] ★ latest_event 키 목록: {list(Server.latest_event.keys())}")
+            print(f"[DEBUG][CONSTRAINTS] ★ generator.latest_events 동일 객체?: {id(self.generator.latest_events) == id(Server.latest_event)}")
+            self._push_event(api_name, "REQUEST", self.request_data)
 
             # constraints가 있을 때만 _applied_constraints 호출 (성능 최적화)
             if out_con and isinstance(out_con, dict) and len(out_con) > 0:
-                # print(f"[DEBUG][CONSTRAINTS] _applied_constraints 호출 예정")
+                print(f"[DEBUG][CONSTRAINTS] _applied_constraints 호출 예정")
                 
                 # ✅ generator의 latest_events를 명시적으로 업데이트 (참조 동기화)
                 self.generator.latest_events = Server.latest_event
-                # print(f"[DEBUG][CONSTRAINTS] 🔄 generator.latest_events 동기화 완료: {list(self.generator.latest_events.keys())}")
+                print(f"[DEBUG][CONSTRAINTS] 🔄 generator.latest_events 동기화 완료: {list(self.generator.latest_events.keys())}")
                 
                 num_data = [random.randint(0, 9) for _ in range(3)]
 
-                # print(f"[DEBUG][CONSTRAINTS] request_data: {self.request_data}")
-                # print(f"[DEBUG][CONSTRAINTS] message keys: {message.keys() if isinstance(message, dict) else 'N/A'}")
+                print(f"[DEBUG][CONSTRAINTS] request_data: {self.request_data}")
+                print(f"[DEBUG][CONSTRAINTS] message keys: {message.keys() if isinstance(message, dict) else 'N/A'}")
 
                 # request_data, template_data, constraints, n 순서로 전달
                 updated_message = self.generator._applied_constraints(
@@ -508,22 +601,25 @@ class Server(BaseHTTPRequestHandler):
                     constraints=out_con,
                     n=len(num_data)
                 )
-                # print(f"[DEBUG][CONSTRAINTS] 업데이트된 message 내용: {json.dumps(updated_message, ensure_ascii=False)[:200]}")
-                self._push_event(self.path[1:], "RESPONSE", updated_message)
+                print(f"[DEBUG][CONSTRAINTS] 업데이트된 message 내용: {json.dumps(updated_message, ensure_ascii=False)[:200]}")
+
+                self._push_event(api_name, "RESPONSE", updated_message)
 
                 # 업데이트된 메시지를 응답으로 전송
                 a = json.dumps(updated_message).encode('utf-8')
             else:
-                # print(f"[DEBUG][CONSTRAINTS] constraints 없음 - 원본 메시지 사용")
+                print(f"[DEBUG][CONSTRAINTS] constraints 없음 - 원본 메시지 사용")
                 # constraints가 없으면 원본 메시지 그대로 사용
-                self._push_event(self.path[1:], "RESPONSE", message)
+
+                self._push_event(api_name, "RESPONSE", message)
                 a = json.dumps(message).encode('utf-8')
         except Exception as e:
             print(f"[ERROR] _applied_constraints 실행 중 오류: {e}")
             import traceback
             traceback.print_exc()
             # 에러 발생 시 원본 메시지 사용
-            self._push_event(self.path[1:], "RESPONSE", message)
+            self._push_event(api_name, "REQUEST", self.request_data)
+            self._push_event(api_name, "RESPONSE", message)
             a = json.dumps(message).encode('utf-8')
 
         # 응답 전송 (연결 끊김 에러 처리)
@@ -541,10 +637,10 @@ class Server(BaseHTTPRequestHandler):
 
         if self.webhook_flag:
             print(f"[DEBUG][SERVER] 웹훅 전송 준비 중...")
-            # print(
-            #     f"[DEBUG][SERVER] self.webhookData: {self.webhookData is not None}, len: {len(self.webhookData) if self.webhookData else 0}")
-            # print(f"[DEBUG][SERVER] message_cnt: {message_cnt}")
-            # print(f"[DEBUG][SERVER] url_tmp: {url_tmp}")
+            print(
+                f"[DEBUG][SERVER] self.webhookData: {self.webhookData is not None}, len: {len(self.webhookData) if self.webhookData else 0}")
+            print(f"[DEBUG][SERVER] message_cnt: {message_cnt}")
+            print(f"[DEBUG][SERVER] url_tmp: {url_tmp}")
 
             # ✅ API 이름으로 webhookData 매칭
             if self.webhookData and len(self.webhookData) > 0:
@@ -573,10 +669,10 @@ class Server(BaseHTTPRequestHandler):
 
                 webhook_payload = self.webhookData[webhook_index]
                 print(f"[DEBUG][SERVER] 웹훅 데이터 사용: webhookData[{webhook_index}]")
-                # print(
-                #     f"[DEBUG][SERVER] 원본 웹훅 페이로드: {json.dumps(webhook_payload, ensure_ascii=False) if webhook_payload else 'None'}")
-                # print(f"[DEBUG][SERVER] 원본 웹훅 페이로드 타입: {type(webhook_payload)}")
-                # print(f"[DEBUG][SERVER] 원본 웹훅 페이로드 내용 상세: {webhook_payload}")
+                print(
+                    f"[DEBUG][SERVER] 원본 웹훅 페이로드: {json.dumps(webhook_payload, ensure_ascii=False) if webhook_payload else 'None'}")
+                print(f"[DEBUG][SERVER] 원본 웹훅 페이로드 타입: {type(webhook_payload)}")
+                print(f"[DEBUG][SERVER] 원본 웹훅 페이로드 내용 상세: {webhook_payload}")
 
                 # None이면 웹훅 전송하지 않음
                 if webhook_payload is None:
@@ -587,21 +683,21 @@ class Server(BaseHTTPRequestHandler):
                 try:
                     # webhookCon 리스트가 있는 경우
                     if self.webhookCon and isinstance(self.webhookCon, list):
-                        # print(f"[DEBUG][WEBHOOK_CONSTRAINTS] self.webhookCon 타입: {type(self.webhookCon)}")
-                        # print(f"[DEBUG][WEBHOOK_CONSTRAINTS] self.webhookCon 길이: {len(self.webhookCon)}")
+                        print(f"[DEBUG][WEBHOOK_CONSTRAINTS] self.webhookCon 타입: {type(self.webhookCon)}")
+                        print(f"[DEBUG][WEBHOOK_CONSTRAINTS] self.webhookCon 길이: {len(self.webhookCon)}")
 
                         # webhookCon에서 해당 인덱스의 constraint 가져오기
                         if len(self.webhookCon) > webhook_index:
                             webhook_con = self.webhookCon[webhook_index]
 
                             if webhook_con and isinstance(webhook_con, dict) and len(webhook_con) > 0:
-                                # print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 웹훅 constraints 적용 시작")
-                                # print(f"[DEBUG][WEBHOOK_CONSTRAINTS] webhook_con keys: {list(webhook_con.keys())}")
-                                # print(f"[DEBUG][WEBHOOK_CONSTRAINTS] latest_events keys: {list(Server.latest_event.keys())}")
+                                print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 웹훅 constraints 적용 시작")
+                                print(f"[DEBUG][WEBHOOK_CONSTRAINTS] webhook_con keys: {list(webhook_con.keys())}")
+                                print(f"[DEBUG][WEBHOOK_CONSTRAINTS] latest_events keys: {list(Server.latest_event.keys())}")
                                 
                                 # ✅ generator의 latest_events를 명시적으로 업데이트 (참조 동기화)
                                 self.generator.latest_events = Server.latest_event
-                                # print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 🔄 generator.latest_events 동기화 완료")
+                                print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 🔄 generator.latest_events 동기화 완료")
                                 
                                 # 웹훅 페이로드에 constraints 적용
                                 num_data = [random.randint(0, 9) for _ in range(3)]
@@ -611,8 +707,8 @@ class Server(BaseHTTPRequestHandler):
                                     constraints=webhook_con,
                                     n=len(num_data)
                                 )
-                                # print(f"[DEBUG][WEBHOOK_CONSTRAINTS] constraints 적용 완료")
-                                # print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 업데이트된 webhook_payload: {json.dumps(webhook_payload, ensure_ascii=False)[:300]}")
+                                print(f"[DEBUG][WEBHOOK_CONSTRAINTS] constraints 적용 완료")
+                                print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 업데이트된 webhook_payload: {json.dumps(webhook_payload, ensure_ascii=False)[:300]}")
                             else:
                                 print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 웹훅 constraints가 비어있음 - 원본 페이로드 사용")
                         else:
@@ -635,7 +731,6 @@ class Server(BaseHTTPRequestHandler):
             print(f"[DEBUG][SERVER] 최종 webhook_payload: {json.dumps(webhook_payload, ensure_ascii=False)[:200]}")
 
             # ✅ 웹훅 이벤트 전송 기록 (trace) - constraints 적용 후의 페이로드 기록
-            api_name = self.path[1:] if self.path else "unknown"
             self._push_event(api_name, "WEBHOOK_OUT", webhook_payload)
 
             # ✅ 웹훅 응답 초기화 (클래스 변수)
@@ -644,7 +739,7 @@ class Server(BaseHTTPRequestHandler):
             json_data_tmp = json.dumps(webhook_payload).encode('utf-8')
             webhook_thread = threading.Thread(target=self.webhook_req, args=(url_tmp, json_data_tmp, 5))
             Server.webhook_thread = webhook_thread  # ✅ 클래스 변수에 저장
-            # print(f"[DEBUG][SERVER] webhook_thread 저장됨 (클래스 변수): thread={id(webhook_thread)}")
+            print(f"[DEBUG][SERVER] webhook_thread 저장됨 (클래스 변수): thread={id(webhook_thread)}")
             webhook_thread.start()
             print(f"[DEBUG][SERVER] 웹훅 스레드 시작됨")
 
@@ -659,10 +754,10 @@ class Server(BaseHTTPRequestHandler):
                 print(f"[DEBUG][SERVER] 웹훅 응답 수신: {result.text}")
                 self.result = result
                 Server.webhook_response = json.loads(result.text)  # ✅ 클래스 변수에 저장
-                # print(f"[DEBUG][SERVER] webhook_response 저장됨 (클래스 변수): {Server.webhook_response}")
+                print(f"[DEBUG][SERVER] webhook_response 저장됨 (클래스 변수): {Server.webhook_response}")
                 
                 # ✅ 웹훅 응답 기록 (trace)
-                api_name = self.path[1:] if hasattr(self, 'path') and self.path else "unknown"
+                spec_id, api_name = self.parse_path()
                 self._push_event(api_name, "WEBHOOK_IN", Server.webhook_response)
                 
                 # JSON 파일 저장 제거 - spec/video/videoData_response.py 사용
@@ -679,32 +774,64 @@ class Server(BaseHTTPRequestHandler):
                 # print(traceback.format_exc())
                 #  self.res.emit(str("err from WebhookRequest"))
 
-    def api_res(self):
-        i, data = None, None
-        # message가 None이거나 빈 리스트인 경우 방어 코드
+    def api_res(self, api_name = None):
+        i, data, out_con = None, None, None
+
         if not self.message:
             print("[ERROR] Server.message is None or empty!")
-            return None, {"code": "500", "message": "Server not initialized"}
+            return None, {"code": "500", "message": "Server not initialized"}, None
 
         for i in range(0, len(self.message)):
-            data = ""
-            if self.path == "/" + self.message[i]:
+            if api_name == self.message[i]:
                 data = self.outMessage[i]
                 out_con = self.outCon[i]
-                if i == 0 and self.auth_type == "B":
-                    try:
-                        token = data['accessToken']
-                    except Exception:
-                        pass
-                    else:
-                        if isinstance(self.auth_Info, list):
-                            if not self.auth_Info:
-                                self.auth_Info.append(None)
-                            self.auth_Info[0] = str(token).strip()
-                        else:
-                            self.auth_Info = [str(token).strip()]
+                print(f"[DEBUG][API_RES] API 매칭 성공: {api_name} (index={i})")
                 break
+
+        if data is None:
+            print(f"[WARNING][API_RES] API를 찾을 수 없음: {api_name}")
+            return None, {"code": "404", "message": f"API를 찾을 수 없습니다: {api_name}"}, None
+
         return i, data, out_con
+
+    def parse_path(self):
+        """
+        URL path를 파싱하여 spec_id와 api_name을 추출
+
+        지원 형식:
+        1. /spec_id/api_name  (예: /cmgvieyak001b6cd04cgaawmm/Authentication)
+        2. /api_name          (예: /Authentication - 하위 호환성)
+
+        Returns:
+            tuple: (spec_id, api_name) 또는 (None, api_name)
+        """
+        try:
+            path = self.path.strip('/')
+
+            # path가 비어있으면
+            if not path:
+                return None, None
+
+            # '/'로 분리
+            parts = path.split('/')
+
+            if len(parts) >= 2:
+                # 형식 1: /spec_id/api_name
+                spec_id = parts[0]
+                api_name = parts[1]
+                print(f"[DEBUG][PARSE_PATH] spec_id={spec_id}, api_name={api_name}")
+                return spec_id, api_name
+            elif len(parts) == 1:
+                # 형식 2: /api_name (하위 호환성)
+                api_name = parts[0]
+                print(f"[DEBUG][PARSE_PATH] api_name={api_name} (spec_id 없음)")
+                return None, api_name
+            else:
+                return None, None
+
+        except Exception as e:
+            print(f"[ERROR][PARSE_PATH] path 파싱 실패: {e}")
+            return None, None
 
 
 # 확인용 - 안쓰이는 코드임

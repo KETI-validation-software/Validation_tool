@@ -14,9 +14,10 @@ from datetime import datetime
 import json
 from pathlib import Path
 from core.functions import build_result_json
+import requests
 
 import config.CONSTANTS as CONSTANTS
-from core.functions import json_check_, save_result, resource_path, json_to_data, set_auth, timeout_field_finder
+from core.functions import json_check_, save_result, resource_path, json_to_data, timeout_field_finder
 from core.json_checker_new import check_message_data, check_message_schema, check_message_error
 import spec.Data_response as data_response_module
 import spec.Schema_response as schema_response_module
@@ -319,6 +320,9 @@ class ResultPageWidget(QWidget):
         self.embedded = embedded
         self.setWindowTitle('통합플랫폼 연동 시험 결과')
         self.resize(1680, 1080)
+
+        # CONSTANTS 초기화
+        self.CONSTANTS = parent.CONSTANTS
 
         # 현재 선택된 spec_id 저장
         self.current_spec_id = parent.current_spec_id
@@ -642,9 +646,39 @@ class ResultPageWidget(QWidget):
         """)
 
         # SPEC_CONFIG 기반 그룹 로드
+        # ===== 외부 로드된 SPEC_CONFIG 사용 (fallback: CONSTANTS 모듈) =====
+        import sys
+        import os
+
+        SPEC_CONFIG = self.CONSTANTS.SPEC_CONFIG  # 기본값
+
+        if getattr(sys, 'frozen', False):
+            # PyInstaller 환경: 외부 CONSTANTS.py에서 SPEC_CONFIG 읽기
+            exe_dir = os.path.dirname(sys.executable)
+            external_constants_path = os.path.join(exe_dir, "config", "CONSTANTS.py")
+
+            if os.path.exists(external_constants_path):
+                print(f"[GROUP TABLE] 외부 CONSTANTS.py에서 SPEC_CONFIG 로드: {external_constants_path}")
+                try:
+                    with open(external_constants_path, 'r', encoding='utf-8') as f:
+                        constants_code = f.read()
+
+                    namespace = {}
+                    exec(constants_code, namespace)
+                    SPEC_CONFIG = namespace.get('SPEC_CONFIG', self.CONSTANTS.SPEC_CONFIG)
+                    print(f"[GROUP TABLE] ✅ 외부 SPEC_CONFIG 로드 완료: {len(SPEC_CONFIG)}개 그룹")
+                    # 디버그: 그룹 이름 출력
+                    for i, g in enumerate(SPEC_CONFIG):
+                        group_name = g.get('group_name', '이름없음')
+                        group_keys = [k for k in g.keys() if k not in ['group_name', 'group_id']]
+                        print(f"[GROUP TABLE DEBUG] 그룹 {i}: {group_name}, spec_id 개수: {len(group_keys)}, spec_ids: {group_keys}")
+                except Exception as e:
+                    print(f"[GROUP TABLE] ⚠️ 외부 CONSTANTS 로드 실패, 기본값 사용: {e}")
+        # ===== 외부 CONSTANTS 로드 끝 =====
+
         group_items = [
             (g.get("group_name", "미지정 그룹"), g.get("group_id", ""))
-            for g in CONSTANTS.SPEC_CONFIG
+            for g in SPEC_CONFIG
         ]
         self.group_table.setRowCount(len(group_items))
 
@@ -736,7 +770,7 @@ class ResultPageWidget(QWidget):
         """초기 시나리오 로드 및 현재 선택된 항목 하이라이트"""
         # 현재 spec_id가 속한 그룹 찾기
         current_group = None
-        for group_data in CONSTANTS.SPEC_CONFIG:
+        for group_data in self.CONSTANTS.SPEC_CONFIG:
             if self.current_spec_id in group_data:
                 current_group = group_data
                 break
@@ -762,9 +796,12 @@ class ResultPageWidget(QWidget):
         if not group_name:
             return
 
+        # ===== 외부 로드된 SPEC_CONFIG 사용 (fallback: CONSTANTS 모듈) =====
+        SPEC_CONFIG = getattr(self.parent, 'LOADED_SPEC_CONFIG', self.parent.CONSTANTS.SPEC_CONFIG)
         selected_group = next(
-            (g for g in CONSTANTS.SPEC_CONFIG if g.get("group_name") == group_name), None
+            (g for g in SPEC_CONFIG if g.get("group_name") == group_name), None
         )
+        # ===== 수정 끝 =====
 
         if selected_group:
             self.update_test_field_table(selected_group)
@@ -793,6 +830,7 @@ class ResultPageWidget(QWidget):
 
     def on_test_field_selected(self, row, col):
         """시나리오 선택 시 해당 결과 표시 (결과 없어도 API 정보 표시)"""
+
         if row not in self.index_to_spec_id:
             return
 
@@ -1128,7 +1166,34 @@ class ResultPageWidget(QWidget):
         layout.addWidget(info_label)
         layout.addStretch()
         info_widget.setLayout(layout)
-        return info_widget
+
+        # ✅ 스크롤 영역 추가
+        scroll_area = QScrollArea()
+        scroll_area.setWidget(info_widget)
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setFixedSize(1064, 150)  # 기존과 동일한 전체 크기
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+        # ✅ 스크롤바 스타일 (선택 사항)
+        scroll_area.setStyleSheet("""
+               QScrollBar:vertical {
+                   border: none;
+                   background: #F1F1F1;
+                   width: 8px;
+                   margin: 0px;
+                   border-radius: 4px;
+               }
+               QScrollBar::handle:vertical {
+                   background: #C1C1C1;
+                   min-height: 20px;
+                   border-radius: 4px;
+               }
+               QScrollBar::handle:vertical:hover {
+                   background: #A0A0A0;
+               }
+           """)
+        return scroll_area
 
     def create_result_table(self, parent_layout):
         """결과 테이블 생성 (크기 키움: 350px)"""
@@ -1208,7 +1273,16 @@ class ResultPageWidget(QWidget):
         # 상세 내용 버튼 클릭 이벤트
         self.tableWidget.cellClicked.connect(self.table_cell_clicked)
 
-        parent_layout.addWidget(self.tableWidget)
+        # ✅ QScrollArea로 감싸기
+        scroll_area = QScrollArea()
+        scroll_area.setWidget(self.tableWidget)
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        # 가로 스크롤 숨김
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        # 세로 스크롤 자동 표시
+        scroll_area.setFixedWidth(1064)
+        parent_layout.addWidget(scroll_area)
 
     def _on_back_clicked(self):
         """뒤로가기 버튼 클릭 시 시그널 발생"""
@@ -1596,34 +1670,13 @@ class MyApp(QWidget):
             return None
 
     def __init__(self, embedded=False, mode=None, spec_id=None):
-        # CONSTANTS를 fresh import
-        import sys
-        import os
-
-        if getattr(sys, 'frozen', False):
-            exe_dir = os.path.dirname(sys.executable)
-            constants_file = os.path.join(exe_dir, "config", "CONSTANTS.py")
-
-            print(f"[PLATFORM] 외부 CONSTANTS 파일 로드: {constants_file}")
-
-            if not os.path.exists(constants_file):
-                raise FileNotFoundError(f"CONSTANTS.py 파일을 찾을 수 없습니다: {constants_file}")
-
-            import types
-            constants_module = types.ModuleType('config.CONSTANTS')
-            with open(constants_file, 'r', encoding='utf-8') as f:
-                exec(f.read(), constants_module.__dict__)
-
-            self.CONSTANTS = constants_module
-            print(f"[PLATFORM] CONSTANTS 직접 로드 완료 - SPEC_CONFIG: {len(constants_module.SPEC_CONFIG)}개 그룹")
-        else:
-            if 'config.CONSTANTS' in sys.modules:
-                del sys.modules['config.CONSTANTS']
-            import config.CONSTANTS
-            self.CONSTANTS = config.CONSTANTS
-            print(f"[PLATFORM] CONSTANTS reload 완료 - SPEC_CONFIG: {len(config.CONSTANTS.SPEC_CONFIG)}개 그룹")
-
+        # CONSTANTS 사용
         super().__init__()
+
+        self.CONSTANTS = CONSTANTS
+        self.current_spec_id = spec_id
+
+        self.load_specs_from_constants()
         self.embedded = embedded
         self.mode = mode
         self.radio_check_flag = "video"
@@ -1647,20 +1700,16 @@ class MyApp(QWidget):
         self.Server = Server
         self.server_th = None  # ✅ 서버 스레드 변수 초기화
 
-        auth_temp, auth_temp2 = set_auth("config/config.txt")
-        self.digestInfo = [auth_temp2[0], auth_temp2[1]]
-        self.token = auth_temp
+        parts = self.auth_info.split(",")
+        auth = [parts[0], parts[1] if len(parts) > 1 else ""]
+        self.accessInfo = [auth[0], auth[1]]
 
         # spec_id 초기화
         if spec_id:
             self.current_spec_id = spec_id
             print(f"[PLATFORM] 📌 전달받은 spec_id 사용: {spec_id}")
-        else:
-            self.current_spec_id = "cmgatbdp000bqihlexmywusvq"
-            print(f"[PLATFORM] 📌 기본 spec_id 사용: {self.current_spec_id}")
 
         # Load specs dynamically from CONSTANTS
-        self.load_specs_from_constants()
 
         self.initUI()
         self.realtime_flag = False
@@ -1698,14 +1747,64 @@ class MyApp(QWidget):
 
     def load_specs_from_constants(self):
         """SPEC_CONFIG 기반으로 spec 데이터 동적 로드"""
-        if not hasattr(self.CONSTANTS, 'SPEC_CONFIG'):
+        # ===== PyInstaller 환경에서 외부 CONSTANTS.py에서 SPEC_CONFIG 로드 =====
+        import sys
+        import os
+
+        SPEC_CONFIG = getattr(self.CONSTANTS, 'SPEC_CONFIG', [])
+        url_value = getattr(self.CONSTANTS, 'url', None)
+        auth_type = getattr(self.CONSTANTS, 'auth_type', None)
+        auth_info = getattr(self.CONSTANTS, 'auth_info', None)
+        if getattr(sys, 'frozen', False):
+            # PyInstaller 환경: 외부 CONSTANTS.py에서 SPEC_CONFIG 읽기
+            exe_dir = os.path.dirname(sys.executable)
+            external_constants_path = os.path.join(exe_dir, "config", "CONSTANTS.py")
+
+            if os.path.exists(external_constants_path):
+                print(f"[PLATFORM] 외부 CONSTANTS.py에서 SPEC_CONFIG 로드: {external_constants_path}")
+                try:
+                    # 외부 파일 읽어서 SPEC_CONFIG만 추출
+                    with open(external_constants_path, 'r', encoding='utf-8') as f:
+                        constants_code = f.read()
+
+                    # SPEC_CONFIG만 추출하기 위해 exec 실행
+                    namespace = {}
+                    exec(constants_code, namespace)
+                    SPEC_CONFIG = namespace.get('SPEC_CONFIG', SPEC_CONFIG)
+                    url_value = namespace.get('url', url_value)
+                    auth_type = namespace.get('auth_type', auth_type)
+                    auth_info = namespace.get('auth_info', auth_info)
+                    self.CONSTANTS.company_name = namespace.get('company_name', self.CONSTANTS.company_name)
+                    self.CONSTANTS.product_name = namespace.get('product_name', self.CONSTANTS.product_name)
+                    self.CONSTANTS.version = namespace.get('version', self.CONSTANTS.version)
+                    self.CONSTANTS.test_category = namespace.get('test_category', self.CONSTANTS.test_category)
+                    self.CONSTANTS.test_target = namespace.get('test_target', self.CONSTANTS.test_target)
+                    self.CONSTANTS.test_range = namespace.get('test_range', self.CONSTANTS.test_range)
+                    print(f"[PLATFORM] ✅ 외부 SPEC_CONFIG 로드 완료: {len(SPEC_CONFIG)}개 그룹")
+                    # 디버그: 그룹 이름 출력
+                    for i, g in enumerate(SPEC_CONFIG):
+                        group_name = g.get('group_name', '이름없음')
+                        group_keys = [k for k in g.keys() if k not in ['group_name', 'group_id']]
+                        print(f"[PLATFORM DEBUG] 그룹 {i}: {group_name}, spec_id 개수: {len(group_keys)}, spec_ids: {group_keys}")
+                except Exception as e:
+                    print(f"[PLATFORM] ⚠️ 외부 CONSTANTS 로드 실패, 기본값 사용: {e}")
+        # ===== 외부 CONSTANTS 로드 끝 =====
+
+        # ===== 인스턴스 변수에 저장 (다른 메서드에서 사용) =====
+        self.LOADED_SPEC_CONFIG = SPEC_CONFIG
+        self.url = url_value  # ✅ 외부 CONSTANTS.py에 정의된 url도 반영
+        self.auth_type = auth_type
+        self.auth_info = auth_info
+        # ===== 저장 완료 =====
+
+        if not SPEC_CONFIG:
             raise ValueError("CONSTANTS.SPEC_CONFIG가 정의되지 않았습니다!")
 
-        print(f"[PLATFORM DEBUG] SPEC_CONFIG 개수: {len(self.CONSTANTS.SPEC_CONFIG)}")
+        print(f"[PLATFORM DEBUG] SPEC_CONFIG 개수: {len(SPEC_CONFIG)}")
         print(f"[PLATFORM DEBUG] 찾을 spec_id: {self.current_spec_id}")
 
         config = {}
-        for group in self.CONSTANTS.SPEC_CONFIG:
+        for group in SPEC_CONFIG:
             if self.current_spec_id in group:
                 config = group[self.current_spec_id]
                 break
@@ -1727,14 +1826,111 @@ class MyApp(QWidget):
         print(f"[PLATFORM] 📋 Spec 로딩 시작: {self.spec_description} (ID: {self.current_spec_id})")
 
         print(f"[PLATFORM] 📁 모듈: spec (센서/바이오/영상 통합)")
-        import spec.Schema_request as schema_request_module
-        import spec.Data_response as data_response_module
-        import spec.Constraints_response as constraints_response_module
+
+        # ===== PyInstaller 환경에서 외부 spec 디렉토리 우선 사용 =====
+        import sys
+        import os
         import importlib
-        # 파일이 업데이트된 경우를 대비해 강제 reload
-        importlib.reload(schema_request_module)
-        importlib.reload(data_response_module)
-        importlib.reload(constraints_response_module)
+
+        if getattr(sys, 'frozen', False):
+            # PyInstaller 환경: 외부 spec 디렉토리를 sys.path 맨 앞에 추가
+            exe_dir = os.path.dirname(sys.executable)
+            external_spec_parent = exe_dir  # exe_dir/spec을 찾기 위해 exe_dir을 추가
+
+            # 외부 spec 폴더 파일 존재 확인
+            external_spec_dir = os.path.join(external_spec_parent, 'spec')
+            print(f"[PLATFORM SPEC DEBUG] 외부 spec 폴더: {external_spec_dir}")
+            print(f"[PLATFORM SPEC DEBUG] 외부 spec 폴더 존재: {os.path.exists(external_spec_dir)}")
+            if os.path.exists(external_spec_dir):
+                files = [f for f in os.listdir(external_spec_dir) if f.endswith('.py')]
+                print(f"[PLATFORM SPEC DEBUG] 외부 spec 폴더 .py 파일: {files}")
+
+            # sys.path 전체 출력 (디버깅)
+            print(f"[PLATFORM SPEC DEBUG] sys.path 전체 개수: {len(sys.path)}")
+            for i, p in enumerate(sys.path):
+                print(f"[PLATFORM SPEC DEBUG]   [{i}] {p}")
+
+            # 이미 있더라도 제거 후 맨 앞에 추가 (우선순위 보장)
+            if external_spec_parent in sys.path:
+                sys.path.remove(external_spec_parent)
+            sys.path.insert(0, external_spec_parent)
+            print(f"[PLATFORM SPEC] sys.path에 외부 디렉토리 추가: {external_spec_parent}")
+
+        # sys.modules에서 기존 spec 모듈 제거 (캐시 초기화)
+        # 주의: 'spec' 패키지 자체는 유지 (parent 패키지 필요)
+        modules_to_remove = [
+            'spec.Schema_request',
+            'spec.Data_response',
+            'spec.Constraints_response'
+        ]
+        for mod_name in modules_to_remove:
+            if mod_name in sys.modules:
+                del sys.modules[mod_name]
+                print(f"[PLATFORM SPEC] 모듈 캐시 삭제: {mod_name}")
+            else:
+                print(f"[PLATFORM SPEC] 모듈 캐시 없음: {mod_name}")
+
+        # spec 패키지가 없으면 빈 모듈로 등록
+        if 'spec' not in sys.modules:
+            import types
+            sys.modules['spec'] = types.ModuleType('spec')
+            print(f"[PLATFORM SPEC] 빈 'spec' 패키지 생성")
+
+        # PyInstaller 환경에서는 importlib.util로 명시적으로 외부 파일 로드
+        if getattr(sys, 'frozen', False):
+            import importlib.util
+
+            # 외부 spec 파일 경로
+            schema_file = os.path.join(exe_dir, 'spec', 'Schema_request.py')
+            data_file = os.path.join(exe_dir, 'spec', 'Data_response.py')
+            constraints_file = os.path.join(exe_dir, 'spec', 'Constraints_response.py')
+
+            print(f"[PLATFORM SPEC] 명시적 로드 시도:")
+            print(f"  - Schema: {schema_file} (존재: {os.path.exists(schema_file)})")
+            print(f"  - Data: {data_file} (존재: {os.path.exists(data_file)})")
+            print(f"  - Constraints: {constraints_file} (존재: {os.path.exists(constraints_file)})")
+
+            # importlib.util로 명시적 로드
+            spec = importlib.util.spec_from_file_location('spec.Schema_request', schema_file)
+            schema_request_module = importlib.util.module_from_spec(spec)
+            sys.modules['spec.Schema_request'] = schema_request_module
+            spec.loader.exec_module(schema_request_module)
+
+            spec = importlib.util.spec_from_file_location('spec.Data_response', data_file)
+            data_response_module = importlib.util.module_from_spec(spec)
+            sys.modules['spec.Data_response'] = data_response_module
+            spec.loader.exec_module(data_response_module)
+
+            spec = importlib.util.spec_from_file_location('spec.Constraints_response', constraints_file)
+            constraints_response_module = importlib.util.module_from_spec(spec)
+            sys.modules['spec.Constraints_response'] = constraints_response_module
+            spec.loader.exec_module(constraints_response_module)
+
+            print(f"[PLATFORM SPEC] ✅ importlib.util로 외부 파일 로드 완료")
+        else:
+            # 일반 환경에서는 기존 방식 사용
+            import spec.Schema_request as schema_request_module
+            import spec.Data_response as data_response_module
+            import spec.Constraints_response as constraints_response_module
+
+        # ===== spec 파일 경로 로그 추가 =====
+        print(f"[PLATFORM SPEC] Schema_request.py 로드 경로: {schema_request_module.__file__}")
+        print(f"[PLATFORM SPEC] Data_response.py 로드 경로: {data_response_module.__file__}")
+        print(f"[PLATFORM SPEC] Constraints_response.py 로드 경로: {constraints_response_module.__file__}")
+
+        # 파일 수정 시간 확인
+        for module, name in [(schema_request_module, 'Schema_request'),
+                              (data_response_module, 'Data_response'),
+                              (constraints_response_module, 'Constraints_response')]:
+            file_path = module.__file__
+            if file_path.endswith('.pyc'):
+                file_path = file_path[:-1]  # .pyc -> .py
+            if os.path.exists(file_path):
+                mtime = os.path.getmtime(file_path)
+                from datetime import datetime
+                mtime_str = datetime.fromtimestamp(mtime).strftime('%Y-%m-%d %H:%M:%S')
+                print(f"[PLATFORM SPEC] {name}.py 수정 시간: {mtime_str}")
+        # ===== 로그 끝 =====
         print(f"[PLATFORM] 🔧 타입: 요청 검증 + 응답 전송")
 
         # Request 검증용 데이터 로드
@@ -1781,6 +1977,9 @@ class MyApp(QWidget):
         print(f"[PLATFORM] 📋 API 목록: {self.videoMessages}")
         print(f"[PLATFORM] 🔄 프로토콜 설정: {self.trans_protocols}")
 
+        # ✅ spec_config 저장 (URL 생성에 필요)
+        self.spec_config = config
+
     def _redact(self, payload):
         try:
             if isinstance(payload, dict):
@@ -1825,17 +2024,6 @@ class MyApp(QWidget):
             except Exception:
                 return str(val_text)
         return str(val_text)
-
-    def _update_server_bearer_token(self, token):
-        """서버 스레드가 참조하는 Bearer 토큰을 일관된 형태로 저장"""
-        server_auth = getattr(self.Server, "auth_Info", [])
-        if not isinstance(server_auth, list):
-            server_auth = [server_auth]
-        if len(server_auth) == 0:
-            server_auth.append(None)
-
-        server_auth[0] = None if token is None else str(token).strip()
-        self.Server.auth_Info = server_auth
 
     def update_table_row_with_retries(self, row, result, pass_count, error_count, data, error_text, retries):
         if row >= self.tableWidget.rowCount():
@@ -1910,6 +2098,11 @@ class MyApp(QWidget):
                 try:
                     self.run_status = "완료"
                     result_json = build_result_json(self)
+                    url = f"http://ect2.iptime.org:20223/api/integration/test-results"
+                    response = requests.post(url, json=result_json)
+                    print("✅ 시험 결과 전송 상태 코드:", response.status_code)
+                    print("📥  시험 결과 전송 응답:", response.text)
+
                     json_path = os.path.join(result_dir, "request_results.json")
                     with open(json_path, "w", encoding="utf-8") as f:
                         json.dump(result_json, f, ensure_ascii=False, indent=2)
@@ -1932,19 +2125,6 @@ class MyApp(QWidget):
             else:
                 time_interval = time.time() - self.time_pre
                 print(f"[DEBUG] 시간 간격: {time_interval}초")
-
-            if self.cnt == 1 and self.r2 == "B":
-                data = self.Server.outMessage[0]
-                try:
-                    self.auth_Info = str(data['accessToken']).strip()
-                    self._update_server_bearer_token(self.auth_Info)
-                except (KeyError, TypeError):
-                    pass
-
-            if self.r2 == "B":
-                token = None
-                if hasattr(self, 'auth_Info'):
-                    token = self.auth_Info
 
             if self.realtime_flag is True:
                 print(f"[json_check] do_checker 호출")
@@ -2385,6 +2565,11 @@ class MyApp(QWidget):
                 try:
                     self.run_status = "완료"
                     result_json = build_result_json(self)
+                    url = f"http://ect2.iptime.org:20223/api/integration/test-results"
+                    response = requests.post(url, json=result_json)
+                    print("✅ 시험 결과 전송 상태 코드:", response.status_code)
+                    print("📥  시험 결과 전송 응답:", response.text)
+
                     json_path = os.path.join(result_dir, "request_results.json")
                     with open(json_path, "w", encoding="utf-8") as f:
                         json.dump(result_json, f, ensure_ascii=False, indent=2)
@@ -2509,14 +2694,14 @@ class MyApp(QWidget):
     def load_test_info_from_constants(self):
         """CONSTANTS.py에서 시험정보를 로드"""
         return [
-            ("기업명", CONSTANTS.company_name),
-            ("제품명", CONSTANTS.product_name),
-            ("버전", CONSTANTS.version),
-            ("시험유형", CONSTANTS.test_category),
-            ("시험대상", CONSTANTS.test_target),
-            ("시험범위", CONSTANTS.test_range),
-            ("사용자 인증 방식", CONSTANTS.auth_type),
-            ("시험 접속 정보", CONSTANTS.url)
+            ("기업명", self.CONSTANTS.company_name),
+            ("제품명", self.CONSTANTS.product_name),
+            ("버전", self.CONSTANTS.version),
+            ("시험유형", self.CONSTANTS.test_category),
+            ("시험대상", self.CONSTANTS.test_target),
+            ("시험범위", self.CONSTANTS.test_range),
+            ("사용자 인증 방식", self.auth_type),
+            ("시험 접속 정보", self.url)
         ]
 
     def create_spec_selection_panel(self, parent_layout):
@@ -2545,9 +2730,12 @@ class MyApp(QWidget):
         if not group_name:
             return
 
+        # ===== 외부 로드된 SPEC_CONFIG 사용 (fallback: CONSTANTS 모듈) =====
+        SPEC_CONFIG = getattr(self, 'LOADED_SPEC_CONFIG', self.CONSTANTS.SPEC_CONFIG)
         selected_group = next(
-            (g for g in CONSTANTS.SPEC_CONFIG if g.get("group_name") == group_name), None
+            (g for g in SPEC_CONFIG if g.get("group_name") == group_name), None
         )
+        # ===== 수정 끝 =====
 
         if selected_group:
             self.update_test_field_table(selected_group)
@@ -2632,9 +2820,39 @@ class MyApp(QWidget):
         """)
 
         # SPEC_CONFIG 기반 그룹 로드
+        # ===== 외부 로드된 SPEC_CONFIG 사용 (fallback: CONSTANTS 모듈) =====
+        import sys
+        import os
+
+        SPEC_CONFIG = self.CONSTANTS.SPEC_CONFIG  # 기본값
+
+        if getattr(sys, 'frozen', False):
+            # PyInstaller 환경: 외부 CONSTANTS.py에서 SPEC_CONFIG 읽기
+            exe_dir = os.path.dirname(sys.executable)
+            external_constants_path = os.path.join(exe_dir, "config", "CONSTANTS.py")
+
+            if os.path.exists(external_constants_path):
+                print(f"[GROUP TABLE] 외부 CONSTANTS.py에서 SPEC_CONFIG 로드: {external_constants_path}")
+                try:
+                    with open(external_constants_path, 'r', encoding='utf-8') as f:
+                        constants_code = f.read()
+
+                    namespace = {}
+                    exec(constants_code, namespace)
+                    SPEC_CONFIG = namespace.get('SPEC_CONFIG', self.CONSTANTS.SPEC_CONFIG)
+                    print(f"[GROUP TABLE] ✅ 외부 SPEC_CONFIG 로드 완료: {len(SPEC_CONFIG)}개 그룹")
+                    # 디버그: 그룹 이름 출력
+                    for i, g in enumerate(SPEC_CONFIG):
+                        group_name = g.get('group_name', '이름없음')
+                        group_keys = [k for k in g.keys() if k not in ['group_name', 'group_id']]
+                        print(f"[GROUP TABLE DEBUG] 그룹 {i}: {group_name}, spec_id 개수: {len(group_keys)}, spec_ids: {group_keys}")
+                except Exception as e:
+                    print(f"[GROUP TABLE] ⚠️ 외부 CONSTANTS 로드 실패, 기본값 사용: {e}")
+        # ===== 외부 CONSTANTS 로드 끝 =====
+
         group_items = [
             (g.get("group_name", "미지정 그룹"), g.get("group_id", ""))
-            for g in CONSTANTS.SPEC_CONFIG
+            for g in SPEC_CONFIG
         ]
         self.group_table.setRowCount(len(group_items))
 
@@ -2717,7 +2935,7 @@ class MyApp(QWidget):
 
         # SPEC_CONFIG에서 spec_id와 config 추출
         spec_items = []
-        for group_data in CONSTANTS.SPEC_CONFIG:
+        for group_data in self.CONSTANTS.SPEC_CONFIG:
             for key, value in group_data.items():
                 if key not in ['group_name', 'group_id'] and isinstance(value, dict):
                     spec_items.append((key, value))
@@ -2931,6 +3149,14 @@ class MyApp(QWidget):
                 # 평가 점수 디스플레이 업데이트
                 self.update_score_display()
 
+                # URL 업데이트 (test_name 사용)
+                if hasattr(self, 'spec_config'):
+                    test_name = self.spec_config.get('test_name', self.current_spec_id)
+                    self.pathUrl = self.url + "/" + test_name
+                else:
+                    self.pathUrl = self.url + "/" + self.current_spec_id
+                self.url_text_box.setText(self.pathUrl)
+                self.Server.current_spec_id = self.current_spec_id
                 # 결과 텍스트 초기화
                 self.valResult.clear()
                 self.valResult.append(f"✅ 시스템 전환 완료: {self.spec_description}")
@@ -3126,6 +3352,53 @@ class MyApp(QWidget):
         right_layout.setSpacing(0)
 
         # 시험 API 라벨
+        # ✅ 시험 URL 라벨 + 텍스트 박스 (가로 배치)
+        url_row = QWidget()
+        url_row.setFixedWidth(1064)
+        url_row_layout = QHBoxLayout()
+        url_row_layout.setContentsMargins(0, 20, 0, 6)
+        url_row_layout.setSpacing(12)  # 라벨과 텍스트 박스 사이 간격
+
+        # 시험 URL 라벨
+        result_label = QLabel('시험 URL')
+        result_label.setFixedWidth(100)  # 라벨 너비 고정
+        result_label.setStyleSheet("""
+            font-size: 16px; 
+            font-style: normal; 
+            font-family: "Noto Sans KR"; 
+            font-weight: 600; 
+            color: #222; 
+            letter-spacing: -0.3px;
+        """)
+        url_row_layout.addWidget(result_label)
+
+        # ✅ URL 텍스트 박스 (복사 가능)
+        self.url_text_box = QLineEdit()
+        self.url_text_box.setFixedHeight(40)
+        self.url_text_box.setReadOnly(True)  # 읽기 전용
+        self.url_text_box.setPlaceholderText("시험 URL이 여기에 표시됩니다")
+        self.url_text_box.setStyleSheet("""
+            QLineEdit {
+                background-color: #FFFFFF;  /* ← 하얀색으로 변경 */
+                border: 1px solid #CECECE;
+                border-radius: 4px;
+                padding: 0 12px;
+                font-family: "Noto Sans KR";
+                font-size: 14px;
+                color: #222;
+                selection-background-color: #4A90E2;
+                selection-color: white;
+            }
+            QLineEdit:focus {
+                border: 1px solid #4A90E2;
+                background-color: #FFFFFF;  /* 포커스 시에도 하얀색 유지 */
+            }
+        """)
+        url_row_layout.addWidget(self.url_text_box, 1)  # stretch 적용
+
+        url_row.setLayout(url_row_layout)
+        right_layout.addWidget(url_row)
+
         api_label = QLabel('시험 API')
         api_label.setStyleSheet("""
             font-size: 16px; 
@@ -3395,10 +3668,16 @@ class MyApp(QWidget):
                 self.test_field_table.selectRow(0)
                 first_spec_id = self.index_to_spec_id.get(0)
                 print(f"[DEBUG] 첫 번째 시나리오 선택: spec_id={first_spec_id}")
-
+                # URL 생성 (test_name 사용)
+                if hasattr(self, 'spec_config'):
+                    test_name = self.spec_config.get('test_name', first_spec_id)
+                    self.pathUrl = self.url + "/" + test_name
+                else:
+                    self.pathUrl = self.url + "/" + first_spec_id
+                self.Server.current_spec_id = first_spec_id
                 # 시나리오 선택 이벤트 수동 트리거 (테이블 업데이트)
                 self.on_test_field_selected(0, 0)
-
+            self.url_text_box.setText(self.pathUrl)
             print(f"[DEBUG] 초기 시나리오 자동 선택 완료: {self.spec_description}")
 
             # 3. UI 업데이트
@@ -3423,15 +3702,13 @@ class MyApp(QWidget):
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Fixed)
 
         # 테이블 크기 설정
-        self.tableWidget.setFixedHeight(274)
+        self.tableWidget.setFixedHeight(270)
         self.tableWidget.setFixedWidth(1064)
 
         main_path = resource_path("assets/image/test_runner/main_table.png").replace("\\", "/")
         self.tableWidget.setStyleSheet(f"""
             QTableWidget {{
-                background: #FFF;
-                background-image: url('{main_path}');
-                background-repeat: no-repeat;
+                background: #FFF;  
                 background-position: center;
                 border-radius: 8px;
                 border: 1px solid #CECECE;
@@ -3548,11 +3825,20 @@ class MyApp(QWidget):
 
         # 결과 컬럼만 클릭 가능
         self.tableWidget.cellClicked.connect(self.table_cell_clicked)
-
+        # ✅ QScrollArea로 감싸기
+        scroll_area = QScrollArea()
+        scroll_area.setWidget(self.tableWidget)
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        # 가로 스크롤 숨김
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        # 세로 스크롤 자동 표시
+        scroll_area.setFixedWidth(1064)
+        # scroll_area.setFixedHeight(274)
         # centerLayout 초기화
         self.centerLayout = QVBoxLayout()
         self.centerLayout.setContentsMargins(0, 0, 0, 0)
-        self.centerLayout.addWidget(self.tableWidget)
+        self.centerLayout.addWidget(scroll_area)
 
     def show_combined_result(self, row):
         """통합 상세 내용 확인"""
@@ -3965,11 +4251,6 @@ class MyApp(QWidget):
             timeout = 5
             default_timeout = 5
 
-            # ✅ 14. 인증 토큰 설정
-            if self.r2 == "B":
-                token_value = None if self.token is None else str(self.token).strip()
-                self.videoOutMessage[0]['accessToken'] = token_value
-
             # ✅ 15. Server 설정
             print(f"[DEBUG] Server 설정 시작")
             self.Server.message = self.videoMessages
@@ -4011,17 +4292,16 @@ class MyApp(QWidget):
 
             # ✅ 18. 인증 설정
             print(f"[DEBUG] 인증 설정 시작")
-            self.pathUrl = CONSTANTS.url
+            print(f"[DEBUG] 사용자 인증 방식 : ", self.CONSTANTS.auth_type)
+
             if self.r2 == "B":
                 self.Server.auth_type = "B"
-                self._update_server_bearer_token(self.token)
+                self.Server.bearer_credentials[0] = self.accessInfo[0]
+                self.Server.bearer_credentials[1] = self.accessInfo[1]
             elif self.r2 == "D":
                 self.Server.auth_type = "D"
-                self.Server.auth_Info[0] = self.digestInfo[0]
-                self.Server.auth_Info[1] = self.digestInfo[1]
-            elif self.r2 == "None":
-                self.Server.auth_type = "None"
-                self.Server.auth_Info[0] = None
+                self.Server.auth_Info[0] = self.accessInfo[0]
+                self.Server.auth_Info[1] = self.accessInfo[1]
 
             self.Server.transProtocolInput = "LongPolling"
             
@@ -4035,12 +4315,12 @@ class MyApp(QWidget):
 
             # ✅ 20. 서버 시작
             print(f"[DEBUG] 서버 시작 준비")
-            url = CONSTANTS.url.split(":")
+            url = self.url.split(":")
             address_port = int(url[-1])
             # ✅ 0.0.0.0으로 바인딩 (모든 네트워크 인터페이스에서 수신)
             address_ip = "0.0.0.0"
 
-            print(f"[DEBUG] 플랫폼 서버 시작: {address_ip}:{address_port} (외부 접근: {CONSTANTS.url})")
+            print(f"[DEBUG] 플랫폼 서버 시작: {address_ip}:{address_port} (외부 접근: {self.url})")
             self.server_th = server_th(handler_class=self.Server, address=address_ip, port=address_port)
             self.server_th.start()
 
@@ -4093,6 +4373,10 @@ class MyApp(QWidget):
         try:
             self.run_status = "진행중"
             result_json = build_result_json(self)
+            url = f"http://ect2.iptime.org:20223/api/integration/test-results"
+            response = requests.post(url, json=result_json)
+            print("✅ 시험 결과 전송 상태 코드:", response.status_code)
+            print("📥  시험 결과 전송 응답:", response.text)
             json_path = os.path.join(result_dir, "request_results.json")
             with open(json_path, "w", encoding="utf-8") as f:
                 json.dump(result_json, f, ensure_ascii=False, indent=2)
@@ -4180,13 +4464,20 @@ class MyApp(QWidget):
             print(f"Error loading webhook schema: {e}")
             self.webhookSchema = []
 
-        self.r2 = CONSTANTS.auth_type
+        self.r2 = self.auth_type
         if self.r2 == "Digest Auth":
             self.r2 = "D"
         elif self.r2 == "Bearer Token":
             self.r2 = "B"
         else:
             self.r2 = "None"
+
+        # ✅ URL 업데이트 (test_name 사용) - spec_config가 로드된 후 실행
+        if hasattr(self, 'spec_config') and hasattr(self, 'url_text_box'):
+            test_name = self.spec_config.get('test_name', self.current_spec_id)
+            self.pathUrl = self.url + "/" + test_name
+            self.url_text_box.setText(self.pathUrl)
+            print(f"[URL] 시험 URL 업데이트: {self.pathUrl}")
 
     def closeEvent(self, event):
         """창 닫기 이벤트 - 서버 스레드 정리"""

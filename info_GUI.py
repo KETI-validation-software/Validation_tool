@@ -1103,7 +1103,7 @@ class InfoWidget(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        # 콘텐츠 영역 (744x238px, 테두리 #CECECE 1px, padding: 8, 8, 20, 18)
+        # 콘텐츠 영역 (744x238px)
         content_widget = QWidget()
         content_widget.setFixedSize(744, 238)
         content_widget.setStyleSheet("""
@@ -1128,22 +1128,22 @@ class InfoWidget(QWidget):
         content_widget.setObjectName("content_widget")
 
         content_layout = QVBoxLayout()
-        content_layout.setContentsMargins(8, 8, 20, 18)  # 좌, 상, 우, 하
+        content_layout.setContentsMargins(8, 8, 20, 18)
         content_layout.setSpacing(0)
 
-        # Digest Auth 영역 (716x100px)
-        digest_widget = QWidget()
-        digest_widget.setFixedSize(716, 100)
-        digest_layout = QVBoxLayout()
-        digest_layout.setContentsMargins(0, 0, 0, 0)
-        digest_layout.setSpacing(0)
+        # ✅ 상단: 인증 방식 선택 영역 - 세로 배치 (716x70px)
+        auth_type_widget = QWidget()
+        auth_type_widget.setFixedSize(716, 70)
+        auth_type_layout = QVBoxLayout()  # ← 세로 배치로 변경
+        auth_type_layout.setContentsMargins(0, 0, 0, 0)
+        auth_type_layout.setSpacing(10)  # 두 라디오 버튼 사이 간격
 
-        # 라디오 버튼 + 텍스트 (716x30px)
-        digest_radio_row = QWidget()
-        digest_radio_row.setFixedSize(716, 30)
-        digest_radio_layout = QHBoxLayout()
-        digest_radio_layout.setContentsMargins(0, 0, 0, 0)
-        digest_radio_layout.setSpacing(8)  # 라디오 버튼과 텍스트 사이 8px gap
+        # Digest Auth 라디오 버튼 (716x30px)
+        digest_option = QWidget()
+        digest_option.setFixedSize(716, 30)
+        digest_option_layout = QHBoxLayout()
+        digest_option_layout.setContentsMargins(0, 0, 0, 0)
+        digest_option_layout.setSpacing(8)
 
         self.digest_radio = QRadioButton()
         self.digest_radio.setFixedSize(30, 30)
@@ -1157,10 +1157,10 @@ class InfoWidget(QWidget):
                 height: 20px;
             }
         """)
-        digest_radio_layout.addWidget(self.digest_radio)
+        digest_option_layout.addWidget(self.digest_radio)
 
         digest_label = QLabel("Digest Auth")
-        digest_label.setFixedSize(678, 30)
+        digest_label.setFixedHeight(30)
         digest_label.setStyleSheet("""
             QLabel {
                 font-family: 'Noto Sans KR';
@@ -1172,30 +1172,87 @@ class InfoWidget(QWidget):
                 background-color: transparent;
             }
         """)
-        digest_radio_layout.addWidget(digest_label)
+        digest_option_layout.addWidget(digest_label)
+        digest_option_layout.addStretch()
+        digest_option.setLayout(digest_option_layout)
+        auth_type_layout.addWidget(digest_option)
 
-        digest_radio_row.setLayout(digest_radio_layout)
-        digest_layout.addWidget(digest_radio_row)
+        # Bearer Token 라디오 버튼 (716x30px)
+        bearer_option = QWidget()
+        bearer_option.setFixedSize(716, 30)
+        bearer_option_layout = QHBoxLayout()
+        bearer_option_layout.setContentsMargins(0, 0, 0, 0)
+        bearer_option_layout.setSpacing(8)
 
-        # 2px gap
-        digest_layout.addSpacing(2)
+        self.bearer_radio = QRadioButton()
+        self.bearer_radio.setFixedSize(30, 30)
+        self.bearer_radio.setStyleSheet("""
+            QRadioButton {
+                padding-left: 5px;
+            }
+            QRadioButton::indicator {
+                width: 20px;
+                height: 20px;
+            }
+        """)
+        bearer_option_layout.addWidget(self.bearer_radio)
 
-        # ID/PW 입력 영역 (716x68px, 좌측 padding 38px)
-        digest_input_widget = QWidget()
-        digest_input_widget.setFixedSize(716, 68)
-        digest_input_layout = QHBoxLayout()
-        digest_input_layout.setContentsMargins(38, 0, 0, 0)  # 좌측 38px
-        digest_input_layout.setSpacing(20)  # User ID와 Password 사이 20px gap
+        bearer_label = QLabel("Bearer Token")
+        bearer_label.setFixedHeight(30)
+        bearer_label.setStyleSheet("""
+            QLabel {
+                font-family: 'Noto Sans KR';
+                font-weight: 500;
+                font-size: 16px;
+                letter-spacing: -0.16px;
+                color: #000000;
+                border: none;
+                background-color: transparent;
+            }
+        """)
+        bearer_option_layout.addWidget(bearer_label)
+        bearer_option_layout.addStretch()
+        bearer_option.setLayout(bearer_option_layout)
+        auth_type_layout.addWidget(bearer_option)
 
-        # User ID 영역 (329x68px)
+        auth_type_widget.setLayout(auth_type_layout)
+        content_layout.addWidget(auth_type_widget)
+
+        # 간격
+        content_layout.addSpacing(12)
+
+        # 구분선
+        divider = QLabel()
+        divider.setFixedSize(716, 1)
+        divider.setStyleSheet("background-color: #E8E8E8;")
+        content_layout.addWidget(divider)
+
+        # 간격
+        content_layout.addSpacing(12)
+
+        # 하단: 공통 User ID/Password 입력 영역 (716x100px)
+        common_input_widget = QWidget()
+        common_input_widget.setFixedSize(716, 100)
+        common_input_layout = QVBoxLayout()
+        common_input_layout.setContentsMargins(0, 0, 0, 0)
+        common_input_layout.setSpacing(0)
+
+        # User ID/Password 행 (716x100px)
+        id_pw_row = QWidget()
+        id_pw_row.setFixedSize(716, 100)
+        id_pw_layout = QHBoxLayout()
+        id_pw_layout.setContentsMargins(0, 0, 0, 0)
+        id_pw_layout.setSpacing(20)
+
+        # User ID 영역 (348x100px)
         userid_widget = QWidget()
-        userid_widget.setFixedSize(329, 68)
+        userid_widget.setFixedSize(348, 100)
         userid_layout = QVBoxLayout()
         userid_layout.setContentsMargins(0, 0, 0, 0)
         userid_layout.setSpacing(0)
 
         userid_label = QLabel("User ID")
-        userid_label.setFixedSize(329, 26)
+        userid_label.setFixedSize(348, 26)
         userid_label.setStyleSheet("""
             QLabel {
                 font-family: 'Noto Sans KR';
@@ -1208,11 +1265,10 @@ class InfoWidget(QWidget):
             }
         """)
         userid_layout.addWidget(userid_label)
-
-        userid_layout.addSpacing(4)  # 라벨과 입력칸 사이 4px gap
+        userid_layout.addSpacing(4)
 
         self.id_input = QLineEdit()
-        self.id_input.setFixedSize(329, 38)
+        self.id_input.setFixedSize(348, 38)
         digest_enabled = resource_path("assets/image/test_config/input_DigestAuth_enabled.png").replace(chr(92), "/")
         digest_disabled = resource_path("assets/image/test_config/input_DigestAuth_disabled.png").replace(chr(92), "/")
         self.id_input.setStyleSheet(f"""
@@ -1235,19 +1291,19 @@ class InfoWidget(QWidget):
             }}
         """)
         userid_layout.addWidget(self.id_input)
-
+        userid_layout.addStretch()
         userid_widget.setLayout(userid_layout)
-        digest_input_layout.addWidget(userid_widget)
+        id_pw_layout.addWidget(userid_widget)
 
-        # Password 영역 (329x68px)
+        # Password 영역 (348x100px)
         password_widget = QWidget()
-        password_widget.setFixedSize(329, 68)
+        password_widget.setFixedSize(348, 100)
         password_layout = QVBoxLayout()
         password_layout.setContentsMargins(0, 0, 0, 0)
         password_layout.setSpacing(0)
 
         password_label = QLabel("Password")
-        password_label.setFixedSize(329, 26)
+        password_label.setFixedSize(348, 26)
         password_label.setStyleSheet("""
             QLabel {
                 font-family: 'Noto Sans KR';
@@ -1260,11 +1316,10 @@ class InfoWidget(QWidget):
             }
         """)
         password_layout.addWidget(password_label)
-
-        password_layout.addSpacing(4)  # 라벨과 입력칸 사이 4px gap
+        password_layout.addSpacing(4)
 
         self.pw_input = QLineEdit()
-        self.pw_input.setFixedSize(329, 38)
+        self.pw_input.setFixedSize(348, 38)
         self.pw_input.setStyleSheet(f"""
             QLineEdit {{
                 padding-left: 20px;
@@ -1284,146 +1339,35 @@ class InfoWidget(QWidget):
                 color: #868686;
             }}
         """)
-        self.pw_input.setEchoMode(QLineEdit.Password)
         password_layout.addWidget(self.pw_input)
-
+        password_layout.addStretch()
         password_widget.setLayout(password_layout)
-        digest_input_layout.addWidget(password_widget)
+        id_pw_layout.addWidget(password_widget)
 
-        digest_input_widget.setLayout(digest_input_layout)
-        digest_layout.addWidget(digest_input_widget)
+        id_pw_row.setLayout(id_pw_layout)
+        common_input_layout.addWidget(id_pw_row)
 
-        digest_widget.setLayout(digest_layout)
-        content_layout.addWidget(digest_widget)
-
-        # Digest와 Bearer 사이 간격 12px
-        content_layout.addSpacing(12)
-
-        # Bearer Token 영역 (716x100px)
-        bearer_widget = QWidget()
-        bearer_widget.setFixedSize(716, 100)
-        bearer_layout = QVBoxLayout()
-        bearer_layout.setContentsMargins(0, 0, 0, 0)
-        bearer_layout.setSpacing(0)
-
-        # 라디오 버튼 + 텍스트 (716x30px)
-        bearer_radio_row = QWidget()
-        bearer_radio_row.setFixedSize(716, 30)
-        bearer_radio_layout = QHBoxLayout()
-        bearer_radio_layout.setContentsMargins(0, 0, 0, 0)
-        bearer_radio_layout.setSpacing(8)  # 라디오 버튼과 텍스트 사이 8px gap
-
-        self.bearer_radio = QRadioButton()
-        self.bearer_radio.setFixedSize(30, 30)
-        self.bearer_radio.setStyleSheet("""
-            QRadioButton {
-                padding-left: 5px;
-            }
-            QRadioButton::indicator {
-                width: 20px;
-                height: 20px;
-            }
-        """)
-        bearer_radio_layout.addWidget(self.bearer_radio)
-
-        bearer_label = QLabel("Bearer Token")
-        bearer_label.setFixedSize(678, 30)
-        bearer_label.setStyleSheet("""
-            QLabel {
-                font-family: 'Noto Sans KR';
-                font-weight: 500;
-                font-size: 16px;
-                letter-spacing: -0.16px;
-                color: #000000;
-                border: none;
-                background-color: transparent;
-            }
-        """)
-        bearer_radio_layout.addWidget(bearer_label)
-
-        bearer_radio_row.setLayout(bearer_radio_layout)
-        bearer_layout.addWidget(bearer_radio_row)
-
-        # 2px gap
-        bearer_layout.addSpacing(2)
-
-        # Token 입력 영역 (716x68px, 좌측 padding 38px)
-        token_input_widget = QWidget()
-        token_input_widget.setFixedSize(716, 68)
-        token_input_layout = QVBoxLayout()
-        token_input_layout.setContentsMargins(38, 0, 0, 0)  # 좌측 38px
-        token_input_layout.setSpacing(0)
-
-        token_label = QLabel("Token")
-        token_label.setFixedSize(678, 26)  # 716 - 38(좌측 padding) = 678
-        token_label.setStyleSheet("""
-            QLabel {
-                font-family: 'Noto Sans KR';
-                font-weight: 500;
-                font-size: 16px;
-                letter-spacing: -0.16px;
-                color: #000000;
-                border: none;
-                background-color: transparent;
-            }
-        """)
-        token_input_layout.addWidget(token_label)
-
-        token_input_layout.addSpacing(4)  # 라벨과 입력칸 사이 4px gap
-
-        self.token_input = QLineEdit()
-        self.token_input.setFixedSize(678, 38)  # 716 - 38(좌측 padding) = 678
-        token_enabled = resource_path("assets/image/test_config/input_Token_enabled.png").replace(chr(92), "/")
-        token_disabled = resource_path("assets/image/test_config/input_Token_disabled.png").replace(chr(92), "/")
-        self.token_input.setStyleSheet(f"""
-            QLineEdit {{
-                padding-left: 20px;
-                border: none;
-                background-color: #F5F5F5;
-                background-image: url({token_enabled});
-                background-repeat: no-repeat;
-                background-position: center;
-                font-family: 'Noto Sans KR';
-                font-weight: 400;
-                font-size: 17px;
-                letter-spacing: -0.17px;
-                color: #000000;
-            }}
-            QLineEdit:disabled {{
-                background-image: url({token_disabled});
-                color: #868686;
-            }}
-        """)
-        token_input_layout.addWidget(self.token_input)
-
-        token_input_widget.setLayout(token_input_layout)
-        bearer_layout.addWidget(token_input_widget)
-
-        bearer_widget.setLayout(bearer_layout)
-        content_layout.addWidget(bearer_widget)
+        common_input_widget.setLayout(common_input_layout)
+        content_layout.addWidget(common_input_widget)
 
         content_widget.setLayout(content_layout)
         layout.addWidget(content_widget)
 
-        # 라디오 버튼 그룹 설정 (상호 배타적으로 동작)
+        # 라디오 버튼 그룹 설정
         from PyQt5.QtWidgets import QButtonGroup
         self.auth_button_group = QButtonGroup()
         self.auth_button_group.addButton(self.digest_radio)
         self.auth_button_group.addButton(self.bearer_radio)
 
         # 라디오 버튼 연결
-        self.digest_radio.toggled.connect(self.update_auth_fields)
-        self.bearer_radio.toggled.connect(self.update_auth_fields)
+        self.digest_radio.toggled.connect(self.update_start_button_state)
+        self.bearer_radio.toggled.connect(self.update_start_button_state)
 
         # 입력 필드 변경 시 버튼 상태 체크
         self.id_input.textChanged.connect(self.check_start_button_state)
         self.pw_input.textChanged.connect(self.check_start_button_state)
-        self.token_input.textChanged.connect(self.check_start_button_state)
 
         section.setLayout(layout)
-
-        # 초기 상태 설정
-        self.update_auth_fields()
 
         return section
 
@@ -1670,40 +1614,31 @@ class InfoWidget(QWidget):
         auth_label.setStyleSheet("font-weight: bold; margin-top: 10px;")
         layout.addWidget(auth_label)
 
-        # Digest
-        from PyQt5.QtWidgets import QRadioButton
+        # 라디오 버튼
+        auth_radio_layout = QHBoxLayout()
         self.digest_radio = QRadioButton("Digest Auth")
         self.digest_radio.setChecked(True)
-        layout.addWidget(self.digest_radio)
-        digest_row = QHBoxLayout()
+        self.bearer_radio = QRadioButton("Bearer Token")
+        auth_radio_layout.addWidget(self.digest_radio)
+        auth_radio_layout.addWidget(self.bearer_radio)
+        auth_radio_layout.addStretch()
+        layout.addLayout(auth_radio_layout)
+
+        # 공통 입력 필드
+        common_row = QHBoxLayout()
         self.id_input = QLineEdit()
         self.pw_input = QLineEdit()
-        digest_row.addWidget(QLabel("ID:"))
-        digest_row.addWidget(self.id_input)
-        digest_row.addWidget(QLabel("PW:"))
-        digest_row.addWidget(self.pw_input)
-        digest_w = QWidget(); digest_w.setLayout(digest_row)
-        digest_row.setContentsMargins(20, 0, 0, 0)
-        layout.addWidget(digest_w)
+        common_row.addWidget(QLabel("ID:"))
+        common_row.addWidget(self.id_input)
+        common_row.addWidget(QLabel("PW:"))
+        common_row.addWidget(self.pw_input)
+        layout.addLayout(common_row)
 
-        # Bearer
-        self.bearer_radio = QRadioButton("Bearer Token")
-        layout.addWidget(self.bearer_radio)
-        token_row = QHBoxLayout()
-        self.token_input = QLineEdit()
-        token_row.addWidget(QLabel("Token:"))
-        token_row.addWidget(self.token_input)
-        token_w = QWidget(); token_w.setLayout(token_row)
-        token_row.setContentsMargins(20, 0, 0, 0)
-        layout.addWidget(token_w)
-
+        # 연결
         self.digest_radio.toggled.connect(self.update_auth_fields)
         self.bearer_radio.toggled.connect(self.update_auth_fields)
-        
-        # 입력 필드 변경 시 버튼 상태 체크
         self.id_input.textChanged.connect(self.check_start_button_state)
         self.pw_input.textChanged.connect(self.check_start_button_state)
-        self.token_input.textChanged.connect(self.check_start_button_state)
 
         self.update_auth_fields()
 
@@ -1737,26 +1672,6 @@ class InfoWidget(QWidget):
 
     # ---------- 동작 ----------
     def _on_start_clicked(self):
-        self.startTestRequested.emit()
-
-    def update_auth_fields(self):
-        if self.digest_radio.isChecked():
-            # Digest Auth 활성화
-            self.id_input.setEnabled(True)
-            self.pw_input.setEnabled(True)
-            # Token 비활성화, 값 비움
-            self.token_input.setEnabled(False)
-            self.token_input.clear()
-        else:
-            # Bearer Token 활성화
-            self.token_input.setEnabled(True)
-            # ID, PW 비활성화, 값 비움
-            self.id_input.setEnabled(False)
-            self.pw_input.setEnabled(False)
-            self.id_input.clear()
-            self.pw_input.clear()
-
-        # 필드 변경 시 버튼 상태 업데이트
         self.update_start_button_state()
     
     def update_start_button_state(self):
@@ -1986,20 +1901,16 @@ class InfoWidget(QWidget):
         return None
 
     def _check_required_fields(self):
-        """필수 입력 필드 검증 - 누락된 항목 리스트 반환 (인증 정보 및 접속 URL만 체크)"""
+        """필수 입력 필드 검증 - 누락된 항목 리스트 반환"""
         missing_fields = []
 
-        # 1. 인증 정보 확인
-        if self.digest_radio.isChecked():
-            if not self.id_input.text().strip():
-                missing_fields.append("• 인증 ID (Digest Auth)")
-            if not self.pw_input.text().strip():
-                missing_fields.append("• 인증 PW (Digest Auth)")
-        else:  # Bearer Token
-            if not self.token_input.text().strip():
-                missing_fields.append("• 인증 토큰 (Bearer Token)")
+        # 1. 인증 정보 확인 (공통 필드)
+        if not self.id_input.text().strip():
+            missing_fields.append("• 인증 ID")
+        if not self.pw_input.text().strip():
+            missing_fields.append("• 인증 PW")
 
-        # 2. 접속 정보 확인 (URL 선택됨)
+        # 2. 접속 정보 확인
         if not self.get_selected_url():
             missing_fields.append("• 접속 URL 선택")
 
@@ -2111,8 +2022,7 @@ class InfoWidget(QWidget):
             # 인증 정보에 입력값이 있는지 확인
             auth_fields = [
                 self.id_input.text().strip(),
-                self.pw_input.text().strip(),
-                self.token_input.text().strip()
+                self.pw_input.text().strip()
             ]
 
             if any(field for field in auth_fields):
@@ -2129,10 +2039,6 @@ class InfoWidget(QWidget):
 
             # URL 테이블에 데이터가 있는지 확인
             if self.url_table.rowCount() > 0:
-                return True
-
-            # 인증 방식이 Bearer Token으로 선택되어 있다면 초기화 필요
-            if self.bearer_radio.isChecked():
                 return True
 
             return False
@@ -2166,7 +2072,6 @@ class InfoWidget(QWidget):
             # 인증 정보 초기화
             self.id_input.clear()
             self.pw_input.clear()
-            self.token_input.clear()
 
             # 인증 방식을 Digest Auth로 초기화
             self.digest_radio.setChecked(True)

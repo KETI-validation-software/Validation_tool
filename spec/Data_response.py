@@ -41,7 +41,7 @@ cmgvieyak001b6cd04cgaawmm_Authentication_out_data = {
     "message": "성공",
     "userName": "관리자",
     "userAff": "오산시청",
-    "accessToken": "a"
+    "accessToken": "abcde1234"
 }
 
 # Capabilities

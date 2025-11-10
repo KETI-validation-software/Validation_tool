@@ -324,7 +324,7 @@ def data_finder(schema_):
 def get_flat_fields_from_schema(schema):
     """
     스키마를 재귀적으로 순회하여 평탄화
-    
+
     Returns:
         tuple: (flat_fields, opt_fields)
             - flat_fields: {path_str: type_or_container}
@@ -335,21 +335,24 @@ def get_flat_fields_from_schema(schema):
 
     def _norm_key(k):
         """OptionalKey 객체를 실제 키 이름으로 변환"""
-        try:
-            if isinstance(k, OptionalKey):
-                if hasattr(k, 'key'):
-                    return str(k.key)
-                return str(k)
-        except Exception:
-            pass
+        if isinstance(k, OptionalKey):
+            # OptionalKey의 실제 키 값 추출
+            if hasattr(k, 'key'):
+                return str(k.key)
+            # fallback: OptionalKey를 문자열로 변환
+            key_str = str(k)
+            # "OptionalKey(accessToken)" 형태에서 키 이름만 추출
+            if key_str.startswith('OptionalKey(') and key_str.endswith(')'):
+                return key_str[12:-1]
+            return key_str
         return str(k)
 
-    def walk(node, path, parent_optional=False):
+    def walk(node, path, is_current_optional=False):
         """재귀적으로 스키마 탐색"""
         if isinstance(node, list):
             if path:
                 flat_fields[path] = list
-                if parent_optional:
+                if is_current_optional:
                     opt_fields.add(path)
 
             if len(node) == 0:
@@ -361,23 +364,23 @@ def get_flat_fields_from_schema(schema):
                     keyname = _norm_key(k)
                     is_opt = isinstance(k, OptionalKey)
                     child_path = f"{path}.{keyname}" if path else keyname
-                    walk(v, child_path, parent_optional or is_opt)
+                    walk(v, child_path, is_opt)
             else:
                 child_path = f"{path}[]"
-                walk(first, child_path, parent_optional)
-                
+                walk(first, child_path, False)
+
         elif isinstance(node, dict):
             if path:
                 flat_fields[path] = dict
-                if parent_optional:
+                if is_current_optional:
                     opt_fields.add(path)
 
             for k, v in node.items():
                 keyname = _norm_key(k)
                 is_opt = isinstance(k, OptionalKey)
                 child_path = f"{path}.{keyname}" if path else keyname
-                walk(v, child_path, parent_optional or is_opt)
-                
+                walk(v, child_path, is_opt)
+
         else:
             # primitive 타입
             if not path:
@@ -386,7 +389,7 @@ def get_flat_fields_from_schema(schema):
                 flat_fields[path] = node
             else:
                 flat_fields[path] = type(node)
-            if parent_optional:
+            if is_current_optional:
                 opt_fields.add(path)
 
     # 진입점
@@ -395,7 +398,7 @@ def get_flat_fields_from_schema(schema):
             keyname = _norm_key(k)
             is_opt = isinstance(k, OptionalKey)
             top_path = keyname
-            walk(v, top_path, parent_optional=is_opt)
+            walk(v, top_path, is_opt)
     else:
         walk(schema, "", False)
 
