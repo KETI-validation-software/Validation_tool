@@ -2041,10 +2041,10 @@ class MyApp(QWidget):
                 print(f"[RESTORE] 경고: row={row}가 범위 초과, 건너뜀")
                 break
 
-            # API 이름
-            api_item = self.tableWidget.item(row, 0)
-            if api_item:
-                api_item.setText(row_data['api_name'])
+            # API 이름 - 항상 새 아이템 생성
+            api_item = QTableWidgetItem(row_data['api_name'])
+            api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+            self.tableWidget.setItem(row, 0, api_item)
 
             # 아이콘 상태 복원
             icon_state = row_data['icon_state']
@@ -2069,16 +2069,12 @@ class MyApp(QWidget):
             icon_widget.setLayout(icon_layout)
             self.tableWidget.setCellWidget(row, 1, icon_widget)
 
-            # 나머지 컬럼 복원 (안전하게)
+            # 나머지 컬럼 복원 - 항상 새 아이템 생성
             for col, key in [(2, 'retry_count'), (3, 'pass_count'),
                              (4, 'total_count'), (5, 'fail_count'), (6, 'score')]:
-                item = self.tableWidget.item(row, col)
-                if item:
-                    item.setText(row_data[key])
-                else:
-                    new_item = QTableWidgetItem(row_data[key])
-                    new_item.setTextAlignment(Qt.AlignCenter)
-                    self.tableWidget.setItem(row, col, new_item)
+                new_item = QTableWidgetItem(row_data[key])
+                new_item.setTextAlignment(Qt.AlignCenter)
+                self.tableWidget.setItem(row, col, new_item)
 
         # step_buffers 복원
         self.step_buffers = [buf.copy() for buf in saved_data['step_buffers']]
