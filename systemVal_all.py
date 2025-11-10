@@ -468,7 +468,7 @@ class ResultPageWidget(QWidget):
         total_score_group = self._create_total_score_display()
         right_layout.addWidget(total_score_group)
 
-        right_layout.addSpacing(32)
+        right_layout.addSpacing(80) 
 
         # ✅ 버튼 그룹 (가운데 정렬)
         buttonGroup = QWidget()
@@ -1263,24 +1263,32 @@ class ResultPageWidget(QWidget):
         scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
-        # ✅ 스크롤바 스타일 (선택 사항)
+        # ✅ 스크롤바 스타일
         scroll_area.setStyleSheet("""
-               QScrollBar:vertical {
-                   border: none;
-                   background: #F1F1F1;
-                   width: 8px;
-                   margin: 0px;
-                   border-radius: 4px;
-               }
-               QScrollBar::handle:vertical {
-                   background: #C1C1C1;
-                   min-height: 20px;
-                   border-radius: 4px;
-               }
-               QScrollBar::handle:vertical:hover {
-                   background: #A0A0A0;
-               }
-           """)
+            QScrollArea { 
+                border: none; 
+                background: transparent; 
+            }
+            QScrollBar:vertical {
+                border: none;
+                background: #F1F1F1;
+                width: 8px;
+                margin: 0px;
+                border-radius: 4px;
+            }
+            QScrollBar::handle:vertical {
+                background: #C1C1C1;
+                min-height: 20px;
+                border-radius: 4px;
+            }
+            QScrollBar::handle:vertical:hover {
+                background: #A0A0A0;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                border: none;
+                background: none;
+            }
+        """)
         return scroll_area
 
     def create_result_table(self, parent_layout):
@@ -1368,7 +1376,31 @@ class ResultPageWidget(QWidget):
         scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         scroll_area.setFixedWidth(1064)
-        scroll_area.setStyleSheet("QScrollArea { border: none; background: transparent; }")
+        scroll_area.setStyleSheet("""
+            QScrollArea { 
+                border: none; 
+                background: transparent; 
+            }
+            QScrollBar:vertical {
+                border: none;
+                background: #F1F1F1;
+                width: 8px;
+                margin: 0px;
+                border-radius: 4px;
+            }
+            QScrollBar::handle:vertical {
+                background: #C1C1C1;
+                min-height: 20px;
+                border-radius: 4px;
+            }
+            QScrollBar::handle:vertical:hover {
+                background: #A0A0A0;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                border: none;
+                background: none;
+            }
+        """)
         
         parent_layout.addWidget(scroll_area)
 
