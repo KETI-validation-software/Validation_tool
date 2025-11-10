@@ -1093,10 +1093,10 @@ class FormValidator:
                 print(f"경고: spec_id={spec_id}에 대한 steps 캐시가 없습니다.")
                 return None
 
-            print(f"\n[DEBUG] _extract_spec_config_from_api 호출")
-            print(f"  spec_id: {spec_id}")
-            print(f"  _steps_cache의 step 개수: {len(steps)}")
-            print(f"  steps: {[s.get('id') for s in steps]}")
+            # print(f"\n[DEBUG] _extract_spec_config_from_api 호출")
+            # print(f"  spec_id: {spec_id}")
+            # print(f"  _steps_cache의 step 개수: {len(steps)}")
+            # print(f"  steps: {[s.get('id') for s in steps]}")
 
             time_out = []
             num_retries = []
@@ -1275,8 +1275,8 @@ class FormValidator:
             # 그룹 정보 추가 (리스트 형태로 여러 그룹 지원)
             # parent에 저장된 모든 그룹 정보 사용
             test_groups = getattr(self.parent, 'test_groups', [])
-            print(f"[DEBUG] overwrite_spec_config_from_mapping - test_groups: {test_groups}")
-            print(f"[DEBUG] test_groups 개수: {len(test_groups)}")
+            # print(f"[DEBUG] overwrite_spec_config_from_mapping - test_groups: {test_groups}")
+            # print(f"[DEBUG] test_groups 개수: {len(test_groups)}")
 
             if not test_groups:
                 # 그룹 정보가 없으면 기존 방식 사용
@@ -1373,9 +1373,9 @@ class FormValidator:
             if os.path.exists(constants_path):
                 file_size = os.path.getsize(constants_path)
                 print(f"[DEBUG] CONSTANTS.py 업데이트 완료:")
-                print(f"  경로: {constants_path}")
-                print(f"  파일 크기: {file_size} bytes")
-                print(f"  파일 존재: True")
+                # print(f"  경로: {constants_path}")
+                # print(f"  파일 크기: {file_size} bytes")
+                # print(f"  파일 존재: True")
             else:
                 print(f"[WARNING] 파일이 존재하지 않습니다: {constants_path}")
 
@@ -1615,9 +1615,9 @@ class FormValidator:
         if os.path.exists(file_path):
             file_size = os.path.getsize(file_path)
             print(f"[DEBUG] CONSTANTS.py 변수 업데이트 완료:")
-            print(f"  경로: {file_path}")
-            print(f"  파일 크기: {file_size} bytes")
-            print(f"  업데이트된 변수: {list(variables.keys())}")
+            # print(f"  경로: {file_path}")
+            # print(f"  파일 크기: {file_size} bytes")
+            # print(f"  업데이트된 변수: {list(variables.keys())}")
         else:
             print(f"[WARNING] 파일이 존재하지 않습니다: {file_path}")
 

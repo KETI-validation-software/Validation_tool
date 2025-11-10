@@ -73,7 +73,8 @@ cmgvieyak001b6cd04cgaawmm_StoredVideoEventInfos_in_validation = {
     "allowedValues": [
       "사람",
       "트럭",
-      "버스"
+      "버스",
+      "Human"
     ],
     "score": 0
   },
@@ -85,7 +86,10 @@ cmgvieyak001b6cd04cgaawmm_StoredVideoEventInfos_in_validation = {
     "validValueMatchType": "validation-field",
     "allowedValues": [
       "화재",
-      "배회"
+      "배회",
+      "침입",
+      "Loitering",
+      "Intrusion"
     ],
     "score": 0
   }
