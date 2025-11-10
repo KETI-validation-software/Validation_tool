@@ -1082,7 +1082,7 @@ class ResultPageWidget(QWidget):
 
         # spec_score_group 재생성
         if hasattr(self, 'spec_score_group'):
-            # 기존 위젯 제거
+            # 기존 위젯의 위치 기억
             parent_widget = self.spec_score_group.parent()
             if parent_widget:
                 layout = parent_widget.layout()
@@ -1091,25 +1091,17 @@ class ResultPageWidget(QWidget):
                     if idx >= 0:
                         layout.removeWidget(self.spec_score_group)
                         self.spec_score_group.deleteLater()
-
-        # 새로운 점수 위젯 생성
-        self.spec_score_group = self._create_spec_score_display_with_data(
-            total_pass, total_error, score
-        )
-
-        # 오른쪽 컬럼의 레이아웃 찾기
-        right_col = self.findChildren(QWidget)
-        for widget in right_col:
-            if widget.width() == 1064 and widget.height() == 906:
-                right_layout = widget.layout()
-                if right_layout:
-                    # 테이블 다음, 전체 점수 앞에 삽입 (인덱스 조정)
-                    right_layout.insertWidget(6, self.spec_score_group)
-                break
+                        
+                        # 새로운 점수 위젯 생성
+                        self.spec_score_group = self._create_spec_score_display_with_data(
+                            total_pass, total_error, score
+                        )
+                        # 같은 위치에 다시 삽입
+                        layout.insertWidget(idx, self.spec_score_group)
 
         # ✅ 전체 점수 표시도 업데이트
         if hasattr(self, 'total_score_group'):
-            # 기존 위젯 제거
+            # 기존 위젯의 위치 기억
             parent_widget = self.total_score_group.parent()
             if parent_widget:
                 layout = parent_widget.layout()
@@ -1118,18 +1110,11 @@ class ResultPageWidget(QWidget):
                     if idx >= 0:
                         layout.removeWidget(self.total_score_group)
                         self.total_score_group.deleteLater()
-
-        # 새로운 전체 점수 위젯 생성
-        self.total_score_group = self._create_total_score_display()
-
-        # 오른쪽 컬럼의 레이아웃에 추가
-        for widget in right_col:
-            if widget.width() == 1064 and widget.height() == 906:
-                right_layout = widget.layout()
-                if right_layout:
-                    # 분야별 점수 다음에 삽입
-                    right_layout.insertWidget(7, self.total_score_group)
-                break
+                        
+                        # 새로운 전체 점수 위젯 생성
+                        self.total_score_group = self._create_total_score_display()
+                        # 같은 위치에 다시 삽입
+                        layout.insertWidget(idx, self.total_score_group)
 
     def _create_simple_info_display(self):
         """심플한 시험 정보 표시 (단일 텍스트, 테두리 유지)"""
