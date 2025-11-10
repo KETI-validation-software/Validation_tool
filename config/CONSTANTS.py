@@ -79,6 +79,7 @@ SPEC_CONFIG = [
     "trans_protocol": ['basic', 'basic'],
     "time_out": [60000, 60000],
     "num_retries": [10, 10]
+
 }
     }
 ]

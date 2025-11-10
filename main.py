@@ -402,11 +402,28 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
 
-    # 폰트 적용 (원본과 동일)
+    # ===== 스플래시 스크린 표시 (즉시!) =====
+    from splash_screen import SplashScreen
+    splash = SplashScreen()
+    splash.show()
+    splash.update_progress(10, "프로그램 시작 중...")
+
+    # 폰트 로딩
+    splash.update_progress(20, "폰트 로딩 중...")
     fontDB = QFontDatabase()
     fontDB.addApplicationFont(resource_path('NanumGothic.ttf'))
     app.setFont(QFont('NanumGothic'))
 
+    # 메인 윈도우 생성 (무거운 모듈들 자동 로딩)
+    splash.update_progress(40, "GUI 모듈 로딩 중...")
     win = MainWindow()
+    splash.update_progress(90, "화면 초기화 중...")
+
+    # 완료
+    splash.update_progress(100, "시작 완료!")
+
+    # 스플래시 종료 및 메인 윈도우 표시
+    splash.finish_with_window(win)
     win.show()
+
     sys.exit(app.exec_())
