@@ -9,19 +9,19 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소
 # test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
-company_name = "테스트"
-product_name = "통합플랫폼시스템"
+company_name = "통합플랫폼테스트"
+product_name = "통합플랫폼테스트제품"
 version = "v1.0"
 test_category = "MAIN_TEST"
-test_target = "시험테스트"
+test_target = "통합플랫폼"
 test_range = "ALL_FIELDS"
 auth_type = "Digest Auth"
 auth_info = "abcd,1234"
 admin_code = "1234"
-url = "https://192.168.0.10:2000"
-contact_person = "강정민"
+url = "https://10.252.219.95:8080"
+contact_person = "김철수"
 model_name = "v1.0"
-request_id = "cmhsm9wys00x23gfr0pco2xh1"
+request_id = "cmh1yg49v000t9y0jdr1wwuja"
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황
 flag_opt = False
@@ -68,9 +68,9 @@ WEBHOOK_URL = f"https://{WEBHOOK_PUBLIC_IP}:{WEBHOOK_PORT}"
 
 SPEC_CONFIG = [
     {
-        "group_name": "시험테스트",
-        "group_id": "cmhsm87zn00w83gfrd6ymamo9",
-        "cmhs9hq0c00yy1fcqzkocftta": {
+        "group_name": "통합플랫폼",
+        "group_id": "cmgzwocpp01y6vsve880sfysm",
+        "cmgvieyak001b6cd04cgaawmm": {
     "test_name": "vid001",
     "specs": ['cmhs9hq0c00yy1fcqzkocftta_inSchema', 'cmhs9hq0c00yy1fcqzkocftta_outData', 'cmhs9hq0c00yy1fcqzkocftta_messages'],
     "api_name": ['인증', '지원 기능 정보'],
