@@ -1,4 +1,12 @@
 # Authentication
+cmh1ua7b00021gxc3rjepbkrm_Authentication_in_constraints = {}
+
+# cmh1ua7b00021gxc3rjepbkrm 검증 리스트
+cmh1ua7b00021gxc3rjepbkrm_inConstraints = [
+    cmh1ua7b00021gxc3rjepbkrm_Authentication_in_constraints,
+]
+
+# Authentication
 cmgyv3rzl014nvsveidu5jpzp_Authentication_in_constraints = {}
 
 # Capabilities
@@ -51,7 +59,10 @@ cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_in_constraints = {
     "validValueField": "eventFilter",
     "validValues": [
       "화재",
-      "배회"
+      "배회",
+      "침입",
+      "Loitering",
+      "Intrusion"
     ]
   },
   "classFilter": {
@@ -61,7 +72,8 @@ cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_in_constraints = {
     "validValues": [
       "사람",
       "트럭",
-      "버스"
+      "버스",
+      "Human"
     ]
   }
 }
@@ -83,7 +95,10 @@ cmgyv3rzl014nvsveidu5jpzp_StoredVideoEventInfos_in_constraints = {
     "validValueField": "eventFilter",
     "validValues": [
       "화재",
-      "배회"
+      "배회",
+      "침입",
+      "Loitering",
+      "Intrusion"
     ]
   },
   "classFilter": {
@@ -93,7 +108,8 @@ cmgyv3rzl014nvsveidu5jpzp_StoredVideoEventInfos_in_constraints = {
     "validValues": [
       "사람",
       "트럭",
-      "버스"
+      "버스",
+      "Human"
     ]
   }
 }

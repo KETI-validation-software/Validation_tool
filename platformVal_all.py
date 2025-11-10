@@ -1106,6 +1106,30 @@ class ResultPageWidget(QWidget):
                     right_layout.insertWidget(6, self.spec_score_group)
                 break
 
+        # ✅ 전체 점수 표시도 업데이트
+        if hasattr(self, 'total_score_group'):
+            # 기존 위젯 제거
+            parent_widget = self.total_score_group.parent()
+            if parent_widget:
+                layout = parent_widget.layout()
+                if layout:
+                    idx = layout.indexOf(self.total_score_group)
+                    if idx >= 0:
+                        layout.removeWidget(self.total_score_group)
+                        self.total_score_group.deleteLater()
+
+        # 새로운 전체 점수 위젯 생성
+        self.total_score_group = self._create_total_score_display()
+
+        # 오른쪽 컬럼의 레이아웃에 추가
+        for widget in right_col:
+            if widget.width() == 1064 and widget.height() == 906:
+                right_layout = widget.layout()
+                if right_layout:
+                    # 분야별 점수 다음에 삽입
+                    right_layout.insertWidget(7, self.total_score_group)
+                break
+
     def _create_simple_info_display(self):
         """심플한 시험 정보 표시 (단일 텍스트, 테두리 유지)"""
         info_widget = QWidget()
@@ -1476,9 +1500,9 @@ class ResultPageWidget(QWidget):
         icon_label.setPixmap(icon_pixmap.scaled(40, 40, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         icon_label.setFixedSize(40, 40)
 
-        # 전체 누적 점수 사용
-        total_pass = self.parent.global_pass_cnt
-        total_error = self.parent.global_error_cnt
+        # ✅ 현재 시나리오의 점수 사용 (시나리오별 점수)
+        total_pass = self.parent.total_pass_cnt
+        total_error = self.parent.total_error_cnt
         total_fields = total_pass + total_error
         score = (total_pass / total_fields * 100) if total_fields > 0 else 0
 
@@ -1581,7 +1605,7 @@ class MyApp(QWidget):
             import re
             api_name_no_prefix = re.sub(r'^\d+_', '', api_name_clean)
             
-            print(f"[DEBUG] trace 파일 찾기: 원본={api_name}, 정제={api_name_clean}, prefix제거={api_name_no_prefix}")
+            # print(f"[DEBUG] trace 파일 찾기: 원본={api_name}, 정제={api_name_clean}, prefix제거={api_name_no_prefix}")
             
             # ✅ 실제 trace 폴더에서 매칭되는 파일 찾기
             trace_folder = Path("results/trace")
@@ -1953,6 +1977,9 @@ class MyApp(QWidget):
         print(f"[PLATFORM] 📋 API 목록: {self.videoMessages}")
         print(f"[PLATFORM] 🔄 프로토콜 설정: {self.trans_protocols}")
 
+        # ✅ spec_config 저장 (URL 생성에 필요)
+        self.spec_config = config
+
     def _redact(self, payload):
         try:
             if isinstance(payload, dict):
@@ -2110,7 +2137,7 @@ class MyApp(QWidget):
                 # 시스템 요청 확인
                 api_name = self.Server.message[self.cnt]
                 print(f"[DEBUG] API 처리 시작: {api_name}")
-                print(f"[DEBUG] cnt={self.cnt}, current_retry={self.current_retry}")
+               #  print(f"[DEBUG] cnt={self.cnt}, current_retry={self.current_retry}")
 
                 current_validation = {}
 
@@ -2199,8 +2226,8 @@ class MyApp(QWidget):
                 QApplication.processEvents()
 
                 # 1. request 검증용 데이터 로드
-                print(f"[DATA LOAD] API: {api_name}, 시도: {retry_attempt + 1}/{current_retries}")
-                print(f"[DATA LOAD] trace 폴더 확인: {list(Path('results/trace').glob('*.ndjson')) if Path('results/trace').exists() else '폴더 없음'}")
+                # print(f"[DATA LOAD] API: {api_name}, 시도: {retry_attempt + 1}/{current_retries}")
+                # print(f"[DATA LOAD] trace 폴더 확인: {list(Path('results/trace').glob('*.ndjson')) if Path('results/trace').exists() else '폴더 없음'}")
                 
                 current_data = self._load_from_trace_file(api_name, "REQUEST") or {}
                 
@@ -2213,17 +2240,17 @@ class MyApp(QWidget):
 
                 # 2. 맥락 검증용
                 if current_validation:
-                    print("=" * 50)
-                    print("★★★ reference_context 채우기 시작!")
-                    print("=" * 50)
+                    # print("=" * 50)
+                    # print("★★★ reference_context 채우기 시작!")
+                    # print("=" * 50)
 
                     for field_path, validation_rule in current_validation.items():
                         validation_type = validation_rule.get("validationType", "")
                         direction = "REQUEST" if "request-field" in validation_type else "RESPONSE"
 
-                        print(f"★★★ field={field_path}")
-                        print(f"★★★ validationType={validation_type}")
-                        print(f"★★★ direction={direction}")
+                        # print(f"★★★ field={field_path}")
+                        # print(f"★★★ validationType={validation_type}")
+                        # print(f"★★★ direction={direction}")
 
                         ref_endpoint = validation_rule.get("referenceEndpoint", "")
                         if ref_endpoint:
@@ -2239,7 +2266,7 @@ class MyApp(QWidget):
                             ref_data_max = self._load_from_trace_file(ref_api_name_max, direction)
                             if ref_data_max and isinstance(ref_data_max, dict):
                                 self.reference_context[ref_endpoint_max] = ref_data_max
-                                print(f"★★★ 저장완료: {ref_endpoint_max} → {direction} 데이터")
+                                # print(f"★★★ 저장완료: {ref_endpoint_max} → {direction} 데이터")
                                 print(f"[TRACE] {ref_endpoint_max} {direction}를 trace 파일에서 로드 (from validation rule)")
 
                         ref_endpoint_min = validation_rule.get("referenceEndpointMin", "")
@@ -3122,8 +3149,12 @@ class MyApp(QWidget):
                 # 평가 점수 디스플레이 업데이트
                 self.update_score_display()
 
-                # URL 업데이트
-                self.pathUrl = self.url + "/" + self.current_spec_id
+                # URL 업데이트 (test_name 사용)
+                if hasattr(self, 'spec_config'):
+                    test_name = self.spec_config.get('test_name', self.current_spec_id)
+                    self.pathUrl = self.url + "/" + test_name
+                else:
+                    self.pathUrl = self.url + "/" + self.current_spec_id
                 self.url_text_box.setText(self.pathUrl)
                 self.Server.current_spec_id = self.current_spec_id
                 # 결과 텍스트 초기화
@@ -3637,7 +3668,12 @@ class MyApp(QWidget):
                 self.test_field_table.selectRow(0)
                 first_spec_id = self.index_to_spec_id.get(0)
                 print(f"[DEBUG] 첫 번째 시나리오 선택: spec_id={first_spec_id}")
-                self.pathUrl = self.url + "/" + first_spec_id
+                # URL 생성 (test_name 사용)
+                if hasattr(self, 'spec_config'):
+                    test_name = self.spec_config.get('test_name', first_spec_id)
+                    self.pathUrl = self.url + "/" + test_name
+                else:
+                    self.pathUrl = self.url + "/" + first_spec_id
                 self.Server.current_spec_id = first_spec_id
                 # 시나리오 선택 이벤트 수동 트리거 (테이블 업데이트)
                 self.on_test_field_selected(0, 0)
@@ -4435,6 +4471,13 @@ class MyApp(QWidget):
             self.r2 = "B"
         else:
             self.r2 = "None"
+
+        # ✅ URL 업데이트 (test_name 사용) - spec_config가 로드된 후 실행
+        if hasattr(self, 'spec_config') and hasattr(self, 'url_text_box'):
+            test_name = self.spec_config.get('test_name', self.current_spec_id)
+            self.pathUrl = self.url + "/" + test_name
+            self.url_text_box.setText(self.pathUrl)
+            print(f"[URL] 시험 URL 업데이트: {self.pathUrl}")
 
     def closeEvent(self, event):
         """창 닫기 이벤트 - 서버 스레드 정리"""
