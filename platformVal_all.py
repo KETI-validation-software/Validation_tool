@@ -1676,6 +1676,11 @@ class MyApp(QWidget):
         self.CONSTANTS = CONSTANTS
         self.current_spec_id = spec_id
 
+        # ✅ 웹훅 관련 변수 미리 초기화 (load_specs_from_constants 호출 전)
+        self.videoWebhookSchema = []
+        self.videoWebhookData = []
+        self.videoWebhookConstraint = []
+
         self.load_specs_from_constants()
         self.embedded = embedded
         self.mode = mode
@@ -1966,12 +1971,14 @@ class MyApp(QWidget):
                 print(f"[PLATFORM] ⚠️ 웹훅 스키마 및 데이터가 SPEC_CONFIG에 정의되어 있지 않습니다.")
                 self.videoWebhookSchema = []
                 self.videoWebhookData = []
+                self.videoWebhookConstraint = []
         except Exception as e:
             print(f"[PLATFORM] ⚠️ 웹훅 스키마 및 데이터 로드 중 오류 발생: {e}")
             import traceback
             traceback.print_exc()
             self.videoWebhookSchema = []
             self.videoWebhookData = []
+            self.videoWebhookConstraint = []
 
         print(f"[PLATFORM] ✅ 로딩 완료: {len(self.videoMessages)}개 API")
         print(f"[PLATFORM] 📋 API 목록: {self.videoMessages}")
@@ -3023,9 +3030,10 @@ class MyApp(QWidget):
             if row >= self.tableWidget.rowCount():
                 break
 
-            # API 이름
-            if self.tableWidget.item(row, 0):
-                self.tableWidget.item(row, 0).setText(row_data['api_name'])
+            # API 이름 - 항상 새 아이템 생성
+            api_item = QTableWidgetItem(row_data['api_name'])
+            api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+            self.tableWidget.setItem(row, 0, api_item)
 
             # 아이콘 상태 복원
             icon_state = row_data['icon_state']
@@ -3047,15 +3055,12 @@ class MyApp(QWidget):
             icon_widget.setLayout(icon_layout)
             self.tableWidget.setCellWidget(row, 1, icon_widget)
 
-            # 나머지 컬럼 복원
+            # 나머지 컬럼 복원 - 항상 새 아이템 생성
             for col, key in [(2, 'retry_count'), (3, 'pass_count'),
                              (4, 'total_count'), (5, 'fail_count'), (6, 'score')]:
-                if self.tableWidget.item(row, col):
-                    self.tableWidget.item(row, col).setText(row_data[key])
-                else:
-                    item = QTableWidgetItem(row_data[key])
-                    item.setTextAlignment(Qt.AlignCenter)
-                    self.tableWidget.setItem(row, col, item)
+                new_item = QTableWidgetItem(row_data[key])
+                new_item.setTextAlignment(Qt.AlignCenter)
+                self.tableWidget.setItem(row, col, new_item)
 
         # step_buffers 복원
         self.step_buffers = [buf.copy() for buf in saved_data['step_buffers']]

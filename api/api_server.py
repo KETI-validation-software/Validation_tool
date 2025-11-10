@@ -800,7 +800,8 @@ class Server(BaseHTTPRequestHandler):
 
         지원 형식:
         1. /spec_id/api_name  (예: /cmgvieyak001b6cd04cgaawmm/Authentication)
-        2. /api_name          (예: /Authentication - 하위 호환성)
+        2. /test_name/api_name (예: /test_video_001/Authentication - test_name을 spec_id로 변환)
+        3. /api_name          (예: /Authentication - 하위 호환성)
 
         Returns:
             tuple: (spec_id, api_name) 또는 (None, api_name)
@@ -816,13 +817,17 @@ class Server(BaseHTTPRequestHandler):
             parts = path.split('/')
 
             if len(parts) >= 2:
-                # 형식 1: /spec_id/api_name
-                spec_id = parts[0]
+                # 형식 1/2: /spec_id_or_test_name/api_name
+                spec_id_or_name = parts[0]
                 api_name = parts[1]
-                print(f"[DEBUG][PARSE_PATH] spec_id={spec_id}, api_name={api_name}")
-                return spec_id, api_name
+                
+                # ✅ test_name을 spec_id로 변환 시도
+                actual_spec_id = self._resolve_spec_id(spec_id_or_name)
+                
+                print(f"[DEBUG][PARSE_PATH] 입력={spec_id_or_name}, 변환={actual_spec_id}, api_name={api_name}")
+                return actual_spec_id, api_name
             elif len(parts) == 1:
-                # 형식 2: /api_name (하위 호환성)
+                # 형식 3: /api_name (하위 호환성)
                 api_name = parts[0]
                 print(f"[DEBUG][PARSE_PATH] api_name={api_name} (spec_id 없음)")
                 return None, api_name
@@ -832,6 +837,60 @@ class Server(BaseHTTPRequestHandler):
         except Exception as e:
             print(f"[ERROR][PARSE_PATH] path 파싱 실패: {e}")
             return None, None
+
+    def _resolve_spec_id(self, spec_id_or_name):
+        """
+        test_name 또는 spec_id를 실제 spec_id로 변환
+        
+        Args:
+            spec_id_or_name: URL에서 추출한 spec_id 또는 test_name
+            
+        Returns:
+            str: 실제 spec_id (변환 실패 시 원본 반환)
+        """
+        try:
+            # ✅ 1. 이미 spec_id 형식이면 그대로 반환 (cm으로 시작하는 cuid)
+            if spec_id_or_name.startswith('cm') and len(spec_id_or_name) == 25:
+                return spec_id_or_name
+            
+            # ✅ 2. CONSTANTS에서 SPEC_CONFIG 로드
+            import config.CONSTANTS as CONSTANTS
+            import sys
+            import os
+            
+            SPEC_CONFIG = getattr(CONSTANTS, 'SPEC_CONFIG', [])
+            
+            # PyInstaller 환경에서 외부 CONSTANTS.py 로드
+            if getattr(sys, 'frozen', False):
+                exe_dir = os.path.dirname(sys.executable)
+                external_constants_path = os.path.join(exe_dir, "config", "CONSTANTS.py")
+                
+                if os.path.exists(external_constants_path):
+                    with open(external_constants_path, 'r', encoding='utf-8') as f:
+                        constants_code = f.read()
+                    
+                    namespace = {}
+                    exec(constants_code, namespace)
+                    SPEC_CONFIG = namespace.get('SPEC_CONFIG', SPEC_CONFIG)
+            
+            # ✅ 3. test_name으로 spec_id 찾기
+            for group in SPEC_CONFIG:
+                for key, value in group.items():
+                    if key in ['group_name', 'group_id']:
+                        continue
+                    if isinstance(value, dict):
+                        test_name = value.get('test_name', '')
+                        if test_name == spec_id_or_name:
+                            print(f"[RESOLVE] test_name '{spec_id_or_name}' → spec_id '{key}'")
+                            return key
+            
+            # ✅ 4. 변환 실패 시 원본 반환
+            print(f"[RESOLVE] '{spec_id_or_name}' 변환 실패, 원본 사용")
+            return spec_id_or_name
+            
+        except Exception as e:
+            print(f"[ERROR][RESOLVE] spec_id 변환 실패: {e}")
+            return spec_id_or_name
 
 
 # 확인용 - 안쓰이는 코드임
