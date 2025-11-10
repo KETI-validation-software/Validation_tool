@@ -4505,6 +4505,10 @@ class MyApp(QWidget):
                                                                                                    "spec_score_label")):
             return
 
+        # ✅ 분야별 점수 제목 업데이트 (시나리오 명 변경 반영)
+        if hasattr(self, "spec_name_label"):
+            self.spec_name_label.setText(f"분야별 점수      |      {self.spec_description} ({len(self.videoMessages)}개 API)")
+
         # ✅ 1️⃣ 분야별 점수 (현재 spec만)
         spec_total_fields = self.total_pass_cnt + self.total_error_cnt
         if spec_total_fields > 0:
