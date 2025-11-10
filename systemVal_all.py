@@ -1194,6 +1194,30 @@ class ResultPageWidget(QWidget):
                     right_layout.insertWidget(6, self.spec_score_group)
                 break
 
+        # ✅ 전체 점수 표시도 업데이트
+        if hasattr(self, 'total_score_group'):
+            # 기존 위젯 제거
+            parent_widget = self.total_score_group.parent()
+            if parent_widget:
+                layout = parent_widget.layout()
+                if layout:
+                    idx = layout.indexOf(self.total_score_group)
+                    if idx >= 0:
+                        layout.removeWidget(self.total_score_group)
+                        self.total_score_group.deleteLater()
+
+        # 새로운 전체 점수 위젯 생성
+        self.total_score_group = self._create_total_score_display()
+
+        # 오른쪽 컬럼의 레이아웃에 추가
+        for widget in right_col:
+            if widget.width() == 1064 and widget.height() == 906:
+                right_layout = widget.layout()
+                if right_layout:
+                    # 분야별 점수 다음에 삽입
+                    right_layout.insertWidget(7, self.total_score_group)
+                break
+
     def _create_simple_info_display(self):
         """심플한 시험 정보 표시 (단일 텍스트, 테두리 유지)"""
         info_widget = QWidget()
@@ -1562,9 +1586,9 @@ class ResultPageWidget(QWidget):
         icon_label.setPixmap(icon_pixmap.scaled(40, 40, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         icon_label.setFixedSize(40, 40)
 
-        # 전체 누적 점수 사용
-        total_pass = self.parent.global_pass_cnt
-        total_error = self.parent.global_error_cnt
+        # ✅ 현재 시나리오의 점수 사용 (시나리오별 점수)
+        total_pass = self.parent.total_pass_cnt
+        total_error = self.parent.total_error_cnt
         total_fields = total_pass + total_error
         score = (total_pass / total_fields * 100) if total_fields > 0 else 0
 
@@ -1761,8 +1785,8 @@ class MyApp(QWidget):
                 print(f"[DATA_MAPPER] constraints가 비어있거나 dict가 아님")
                 return request_data
 
-            print(f"[DATA_MAPPER] 요청 데이터 업데이트 시작 (API: {self.message[cnt]})")
-            print(f"[DATA_MAPPER] constraints: {list(constraints.keys())}")
+            # print(f"[DATA_MAPPER] 요청 데이터 업데이트 시작 (API: {self.message[cnt]})")
+            # print(f"[DATA_MAPPER] constraints: {list(constraints.keys())}")
 
             # trace 파일에서 이전 응답 데이터 로드 (필요한 경우)
             for path, rule in constraints.items():
@@ -1778,7 +1802,7 @@ class MyApp(QWidget):
 
             # ✅ generator의 latest_events를 명시적으로 업데이트 (참조 동기화)
             self.generator.latest_events = self.latest_events
-            print(f"[DATA_MAPPER] 🔄 generator.latest_events 동기화 완료: {list(self.generator.latest_events.keys())}")
+            # print(f"[DATA_MAPPER] 🔄 generator.latest_events 동기화 완료: {list(self.generator.latest_events.keys())}")
             
             # data mapper 적용
             # request_data를 template로, constraints 적용하여 업데이트
@@ -1790,8 +1814,8 @@ class MyApp(QWidget):
                 n=3  # 기본 생성 개수
             )
 
-            print(f"[DATA_MAPPER] 요청 데이터 업데이트 완료")
-            print(f"[DATA_MAPPER] 업데이트된 필드: {list(updated_request.keys())}")
+            # print(f"[DATA_MAPPER] 요청 데이터 업데이트 완료")
+            # print(f"[DATA_MAPPER] 업데이트된 필드: {list(updated_request.keys())}")
 
             return updated_request
 
@@ -2331,6 +2355,9 @@ class MyApp(QWidget):
         print(f"[SYSTEM] 📋 API 목록: {self.videoMessages}")
         print(f"[SYSTEM] 🔄 프로토콜 설정: {self.trans_protocols}")
 
+        # ✅ spec_config 저장 (URL 생성에 필요)
+        self.spec_config = config
+
     def _to_detail_text(self, val_text):
         """검증 결과 텍스트를 항상 사람이 읽을 문자열로 표준화"""
         if val_text is None:
@@ -2817,9 +2844,12 @@ class MyApp(QWidget):
                 # ✅ 9. 평가 점수 디스플레이 업데이트
                 self.update_score_display()
 
-                # URL 업데이트
-
-                self.pathUrl = self.url + "/" + self.current_spec_id
+                # URL 업데이트 (test_name 사용)
+                if hasattr(self, 'spec_config'):
+                    test_name = self.spec_config.get('test_name', self.current_spec_id)
+                    self.pathUrl = self.url + "/" + test_name
+                else:
+                    self.pathUrl = self.url + "/" + self.current_spec_id
                 self.url_text_box.setText(self.pathUrl)  # 안내 문구 변경
 
                 # ✅ 10. 결과 텍스트 초기화
@@ -3397,7 +3427,7 @@ class MyApp(QWidget):
                             f"[DEBUG] cnt={self.cnt}, API={self.message[self.cnt] if self.cnt < len(self.message) else 'N/A'}")
                         print(f"[DEBUG] webhook_flag={self.webhook_flag}")
                         print(f"[DEBUG] current_protocol={current_protocol}")
-                        print(f"[DEBUG] outSchema 총 개수={len(self.outSchema)}")
+                        # print(f"[DEBUG] outSchema 총 개수={len(self.outSchema)}")
 
                         # ✅ 웹훅 API의 구독 응답은 일반 스키마 사용
                         # webhook_flag는 실제 웹훅 이벤트 수신 시에만 True
@@ -3919,6 +3949,7 @@ class MyApp(QWidget):
         self.url_text_box.setFixedHeight(40)
         self.url_text_box.setReadOnly(False)  # ✅ 읽기 전용 해제 → 입력 가능
 
+        # URL 생성 (초기에는 spec_id 사용, get_setting() 후 test_name으로 업데이트됨)
         self.pathUrl = self.url + "/" + self.current_spec_id
         self.url_text_box.setText(self.pathUrl)  # 안내 문구 변경
 
@@ -4202,7 +4233,12 @@ class MyApp(QWidget):
                 first_spec_id = self.index_to_spec_id.get(0)
                 print(f"[DEBUG] 첫 번째 시나리오 선택: spec_id={first_spec_id}")
                 self.on_test_field_selected(0, 0)
-                self.pathUrl = self.url + "/" + self.current_spec_id
+                # URL 생성 (test_name 사용)
+                if hasattr(self, 'spec_config'):
+                    test_name = self.spec_config.get('test_name', self.current_spec_id)
+                    self.pathUrl = self.url + "/" + test_name
+                else:
+                    self.pathUrl = self.url + "/" + self.current_spec_id
                 self.url_text_box.setText(self.pathUrl)  # 안내 문구 변경
             print(f"[DEBUG] 초기 시나리오 자동 선택 완료: {self.spec_description}")
             QApplication.processEvents()
@@ -5074,6 +5110,12 @@ class MyApp(QWidget):
             self.r2 = "D"
         elif self.r2 == "Bearer Token":
             self.r2 = "B"
+
+        # ✅ URL 업데이트 (test_name 사용) - spec_config가 로드된 후 실행
+        if hasattr(self, 'spec_config') and hasattr(self, 'url_text_box'):
+            test_name = self.spec_config.get('test_name', self.current_spec_id)
+            self.pathUrl = self.url + "/" + test_name
+            self.url_text_box.setText(self.pathUrl)
 
     def closeEvent(self, event):
         """창 닫기 이벤트 - 타이머 정리"""

@@ -1,0 +1,2 @@
+{"time": "2025-11-10T02:02:17.908751Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "cam0001"}, {"camID": "cam0002"}], "duration": "100", "transProtocol": {"transProtocolType": "WebHook", "transProtocolDesc": "127.0.0.1:8090"}, "eventFilter": "Loitering", "classFilter": "트럭", "startTime": 1761110160000}}
+{"time": "2025-11-10T02:02:18.899756Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "", "message": ""}}
