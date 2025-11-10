@@ -18,7 +18,7 @@ test_range = "ALL_FIELDS"
 auth_type = "Digest Auth"
 auth_info = "abcd,1234"
 admin_code = "1234"
-url = "https://10.252.219.95:2000"
+url = "https://192.168.0.10:2000"
 contact_person = "강정민"
 model_name = "v1.0"
 request_id = "cmhsm9wys00x23gfr0pco2xh1"
@@ -46,22 +46,25 @@ enable_retry_delay = False  # False 권장: 불필요한 sleep 제거
 WEBHOOK_HOST = "0.0.0.0"  # 서버 바인딩 주소 (모든 인터페이스에서 수신)
 WEBHOOK_PORT = 2001       # 웹훅 수신 포트
 
-# ✅ 웹훅 공개 IP는 현재 PC의 실제 IP 자동 감지 (socket 사용)
-# 플랫폼/시스템이 웹훅 이벤트를 보낼 주소 = 이 PC의 IP:8090
+# ✅ 웹훅 공개 IP 설정: info_GUI에서 선택한 시험 URL의 IP 사용
+# 초기값은 URL에서 추출, info_GUI에서 주소 선택 후 자동 업데이트됨
 try:
-    import socket
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.connect(("8.8.8.8", 80))  # 구글 DNS로 연결 시도 (실제 전송 안 함)
-    WEBHOOK_PUBLIC_IP = s.getsockname()[0]  # 현재 PC의 실제 네트워크 IP
-    s.close()
-    print(f"[CONSTANTS] 웹훅 서버 IP 자동 감지: {WEBHOOK_PUBLIC_IP}")
+    from urllib.parse import urlparse
+    parsed_url = urlparse(url)
+    WEBHOOK_PUBLIC_IP = parsed_url.hostname  # URL에서 호스트명(IP) 추출
 except Exception as e:
-    # 최후의 수단: localhost (네트워크 연결 없는 경우)
-    print(f"[CONSTANTS] IP 자동 감지 실패 ({e}), localhost 사용")
-    WEBHOOK_PUBLIC_IP = "127.0.0.1"
+    # Fallback: 자동 감지
+    try:
+        import socket
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        WEBHOOK_PUBLIC_IP = s.getsockname()[0]
+        s.close()
+    except Exception as e2:
+        WEBHOOK_PUBLIC_IP = "127.0.0.1"
 
-WEBHOOK_URL = f"https://{WEBHOOK_PUBLIC_IP}:{WEBHOOK_PORT}"  # 플랫폼/시스템이 웹훅을 보낼 주소
-print(f"[CONSTANTS] 웹훅 콜백 URL: {WEBHOOK_URL} ")
+WEBHOOK_URL = f"https://{WEBHOOK_PUBLIC_IP}:{WEBHOOK_PORT}"
+# 주소 선택 후 form_validator.py에서 자동으로 업데이트됨
 
 SPEC_CONFIG = [
     {
