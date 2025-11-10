@@ -158,10 +158,10 @@ class Server(BaseHTTPRequestHandler):
 
         # 요청 본문 읽기 (재사용을 위해 저장)
         content_length = int(self.headers.get('Content-Length', 0))
-        print(f"[DEBUG][SERVER] Content-Length: {content_length}")
+        # print(f"[DEBUG][SERVER] Content-Length: {content_length}")
         if content_length > 0:
             request_body = self.rfile.read(content_length)
-            print(f"[DEBUG][SERVER] 요청 본문 읽음: {len(request_body)} bytes")
+            # print(f"[DEBUG][SERVER] 요청 본문 읽음: {len(request_body)} bytes")
             try:
                 self.request_data = json.loads(request_body.decode('utf-8'))
                 print(f"[DEBUG][SERVER] 파싱된 요청 데이터: {self.request_data}")
@@ -176,7 +176,7 @@ class Server(BaseHTTPRequestHandler):
                 
                 # ✅ 저장 확인 로그 추가
                 print(f"[TRACE WRITE] ✅ trace 파일에 저장 완료")
-                print(f"[TRACE WRITE] latest_event 키 목록: {list(Server.latest_event.keys())}")
+                # print(f"[TRACE WRITE] latest_event 키 목록: {list(Server.latest_event.keys())}")
             except Exception as e:
                 print(f"[ERROR] 요청 본문 파싱 실패: {e}")
                 self.request_data = {}
@@ -251,9 +251,9 @@ class Server(BaseHTTPRequestHandler):
                     return
             # Bearer Auth
             elif self.auth_type == "B":
-                print(f"[DEBUG][SERVER] Checking Bearer, auth={auth}")
-                print(f"[DEBUG][SERVER][AUTH] self.auth_Info={getattr(self, 'auth_Info', None)}")
-                print(f"[DEBUG][SERVER][AUTH] Server.auth_Info={Server.auth_Info}")
+                # print(f"[DEBUG][SERVER] Checking Bearer, auth={auth}")
+                # print(f"[DEBUG][SERVER][AUTH] self.auth_Info={getattr(self, 'auth_Info', None)}")
+                # print(f"[DEBUG][SERVER][AUTH] Server.auth_Info={Server.auth_Info}")
                 if auth:
                     auth_parts = auth.split(" ")
                     if len(auth_parts) > 1 and auth_parts[0] == 'Bearer':
@@ -347,11 +347,11 @@ class Server(BaseHTTPRequestHandler):
             # transProtocol이 데이터에 들어가있으면 -> 지금 있어서 앞에 https 붙여주어야함 + 시스템이 보낼때 제대로 다시 맵핑하도록 수정해야함
             if trans_protocol:
                 trans_protocol_type = trans_protocol.get("transProtocolType", {})
-                print(f"[DEBUG][SERVER] transProtocolType: {trans_protocol_type}")
+                # print(f"[DEBUG][SERVER] transProtocolType: {trans_protocol_type}")
 
                 # 동적으로 프로토콜 업데이트 해야함 (기존에는 롱풀링으로 하드코딩 - 10/14)
                 self.transProtocolInput = str(trans_protocol_type)
-                print(f"[DEBUG][SERVER] transProtocolInput 업데이트: {self.transProtocolInput}")
+                # print(f"[DEBUG][SERVER] transProtocolInput 업데이트: {self.transProtocolInput}")
 
                 if "WebHook".lower() in str(trans_protocol_type).lower():
                     print(f"[DEBUG][SERVER] WebHook 모드 감지, auth_pass={auth_pass}")
@@ -481,25 +481,25 @@ class Server(BaseHTTPRequestHandler):
         # send the message back
         try:
             # constraints 디버그 로그
-            print(f"[DEBUG][CONSTRAINTS] out_con type: {type(out_con)}")
-            print(f"[DEBUG][CONSTRAINTS] out_con value: {out_con}")
-            print(f"[DEBUG][CONSTRAINTS] out_con length: {len(out_con) if isinstance(out_con, dict) else 'N/A'}")
-            print(f"[DEBUG][CONSTRAINTS] 원본 message 내용: {json.dumps(message, ensure_ascii=False)[:200]}")
-            print(f"[DEBUG][CONSTRAINTS] ★ latest_event 키 목록: {list(Server.latest_event.keys())}")
-            print(f"[DEBUG][CONSTRAINTS] ★ generator.latest_events 동일 객체?: {id(self.generator.latest_events) == id(Server.latest_event)}")
+            # print(f"[DEBUG][CONSTRAINTS] out_con type: {type(out_con)}")
+            # print(f"[DEBUG][CONSTRAINTS] out_con value: {out_con}")
+            # print(f"[DEBUG][CONSTRAINTS] out_con length: {len(out_con) if isinstance(out_con, dict) else 'N/A'}")
+            # print(f"[DEBUG][CONSTRAINTS] 원본 message 내용: {json.dumps(message, ensure_ascii=False)[:200]}")
+            # print(f"[DEBUG][CONSTRAINTS] ★ latest_event 키 목록: {list(Server.latest_event.keys())}")
+            # print(f"[DEBUG][CONSTRAINTS] ★ generator.latest_events 동일 객체?: {id(self.generator.latest_events) == id(Server.latest_event)}")
 
             # constraints가 있을 때만 _applied_constraints 호출 (성능 최적화)
             if out_con and isinstance(out_con, dict) and len(out_con) > 0:
-                print(f"[DEBUG][CONSTRAINTS] _applied_constraints 호출 예정")
+                # print(f"[DEBUG][CONSTRAINTS] _applied_constraints 호출 예정")
                 
                 # ✅ generator의 latest_events를 명시적으로 업데이트 (참조 동기화)
                 self.generator.latest_events = Server.latest_event
-                print(f"[DEBUG][CONSTRAINTS] 🔄 generator.latest_events 동기화 완료: {list(self.generator.latest_events.keys())}")
+                # print(f"[DEBUG][CONSTRAINTS] 🔄 generator.latest_events 동기화 완료: {list(self.generator.latest_events.keys())}")
                 
                 num_data = [random.randint(0, 9) for _ in range(3)]
 
-                print(f"[DEBUG][CONSTRAINTS] request_data: {self.request_data}")
-                print(f"[DEBUG][CONSTRAINTS] message keys: {message.keys() if isinstance(message, dict) else 'N/A'}")
+                # print(f"[DEBUG][CONSTRAINTS] request_data: {self.request_data}")
+                # print(f"[DEBUG][CONSTRAINTS] message keys: {message.keys() if isinstance(message, dict) else 'N/A'}")
 
                 # request_data, template_data, constraints, n 순서로 전달
                 updated_message = self.generator._applied_constraints(
@@ -508,13 +508,13 @@ class Server(BaseHTTPRequestHandler):
                     constraints=out_con,
                     n=len(num_data)
                 )
-                print(f"[DEBUG][CONSTRAINTS] 업데이트된 message 내용: {json.dumps(updated_message, ensure_ascii=False)[:200]}")
+                # print(f"[DEBUG][CONSTRAINTS] 업데이트된 message 내용: {json.dumps(updated_message, ensure_ascii=False)[:200]}")
                 self._push_event(self.path[1:], "RESPONSE", updated_message)
 
                 # 업데이트된 메시지를 응답으로 전송
                 a = json.dumps(updated_message).encode('utf-8')
             else:
-                print(f"[DEBUG][CONSTRAINTS] constraints 없음 - 원본 메시지 사용")
+                # print(f"[DEBUG][CONSTRAINTS] constraints 없음 - 원본 메시지 사용")
                 # constraints가 없으면 원본 메시지 그대로 사용
                 self._push_event(self.path[1:], "RESPONSE", message)
                 a = json.dumps(message).encode('utf-8')
@@ -541,10 +541,10 @@ class Server(BaseHTTPRequestHandler):
 
         if self.webhook_flag:
             print(f"[DEBUG][SERVER] 웹훅 전송 준비 중...")
-            print(
-                f"[DEBUG][SERVER] self.webhookData: {self.webhookData is not None}, len: {len(self.webhookData) if self.webhookData else 0}")
-            print(f"[DEBUG][SERVER] message_cnt: {message_cnt}")
-            print(f"[DEBUG][SERVER] url_tmp: {url_tmp}")
+            # print(
+            #     f"[DEBUG][SERVER] self.webhookData: {self.webhookData is not None}, len: {len(self.webhookData) if self.webhookData else 0}")
+            # print(f"[DEBUG][SERVER] message_cnt: {message_cnt}")
+            # print(f"[DEBUG][SERVER] url_tmp: {url_tmp}")
 
             # ✅ API 이름으로 webhookData 매칭
             if self.webhookData and len(self.webhookData) > 0:
@@ -573,10 +573,10 @@ class Server(BaseHTTPRequestHandler):
 
                 webhook_payload = self.webhookData[webhook_index]
                 print(f"[DEBUG][SERVER] 웹훅 데이터 사용: webhookData[{webhook_index}]")
-                print(
-                    f"[DEBUG][SERVER] 원본 웹훅 페이로드: {json.dumps(webhook_payload, ensure_ascii=False) if webhook_payload else 'None'}")
-                print(f"[DEBUG][SERVER] 원본 웹훅 페이로드 타입: {type(webhook_payload)}")
-                print(f"[DEBUG][SERVER] 원본 웹훅 페이로드 내용 상세: {webhook_payload}")
+                # print(
+                #     f"[DEBUG][SERVER] 원본 웹훅 페이로드: {json.dumps(webhook_payload, ensure_ascii=False) if webhook_payload else 'None'}")
+                # print(f"[DEBUG][SERVER] 원본 웹훅 페이로드 타입: {type(webhook_payload)}")
+                # print(f"[DEBUG][SERVER] 원본 웹훅 페이로드 내용 상세: {webhook_payload}")
 
                 # None이면 웹훅 전송하지 않음
                 if webhook_payload is None:
@@ -587,21 +587,21 @@ class Server(BaseHTTPRequestHandler):
                 try:
                     # webhookCon 리스트가 있는 경우
                     if self.webhookCon and isinstance(self.webhookCon, list):
-                        print(f"[DEBUG][WEBHOOK_CONSTRAINTS] self.webhookCon 타입: {type(self.webhookCon)}")
-                        print(f"[DEBUG][WEBHOOK_CONSTRAINTS] self.webhookCon 길이: {len(self.webhookCon)}")
+                        # print(f"[DEBUG][WEBHOOK_CONSTRAINTS] self.webhookCon 타입: {type(self.webhookCon)}")
+                        # print(f"[DEBUG][WEBHOOK_CONSTRAINTS] self.webhookCon 길이: {len(self.webhookCon)}")
 
                         # webhookCon에서 해당 인덱스의 constraint 가져오기
                         if len(self.webhookCon) > webhook_index:
                             webhook_con = self.webhookCon[webhook_index]
 
                             if webhook_con and isinstance(webhook_con, dict) and len(webhook_con) > 0:
-                                print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 웹훅 constraints 적용 시작")
-                                print(f"[DEBUG][WEBHOOK_CONSTRAINTS] webhook_con keys: {list(webhook_con.keys())}")
-                                print(f"[DEBUG][WEBHOOK_CONSTRAINTS] latest_events keys: {list(Server.latest_event.keys())}")
+                                # print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 웹훅 constraints 적용 시작")
+                                # print(f"[DEBUG][WEBHOOK_CONSTRAINTS] webhook_con keys: {list(webhook_con.keys())}")
+                                # print(f"[DEBUG][WEBHOOK_CONSTRAINTS] latest_events keys: {list(Server.latest_event.keys())}")
                                 
                                 # ✅ generator의 latest_events를 명시적으로 업데이트 (참조 동기화)
                                 self.generator.latest_events = Server.latest_event
-                                print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 🔄 generator.latest_events 동기화 완료")
+                                # print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 🔄 generator.latest_events 동기화 완료")
                                 
                                 # 웹훅 페이로드에 constraints 적용
                                 num_data = [random.randint(0, 9) for _ in range(3)]
@@ -611,8 +611,8 @@ class Server(BaseHTTPRequestHandler):
                                     constraints=webhook_con,
                                     n=len(num_data)
                                 )
-                                print(f"[DEBUG][WEBHOOK_CONSTRAINTS] constraints 적용 완료")
-                                print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 업데이트된 webhook_payload: {json.dumps(webhook_payload, ensure_ascii=False)[:300]}")
+                                # print(f"[DEBUG][WEBHOOK_CONSTRAINTS] constraints 적용 완료")
+                                # print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 업데이트된 webhook_payload: {json.dumps(webhook_payload, ensure_ascii=False)[:300]}")
                             else:
                                 print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 웹훅 constraints가 비어있음 - 원본 페이로드 사용")
                         else:
@@ -644,7 +644,7 @@ class Server(BaseHTTPRequestHandler):
             json_data_tmp = json.dumps(webhook_payload).encode('utf-8')
             webhook_thread = threading.Thread(target=self.webhook_req, args=(url_tmp, json_data_tmp, 5))
             Server.webhook_thread = webhook_thread  # ✅ 클래스 변수에 저장
-            print(f"[DEBUG][SERVER] webhook_thread 저장됨 (클래스 변수): thread={id(webhook_thread)}")
+            # print(f"[DEBUG][SERVER] webhook_thread 저장됨 (클래스 변수): thread={id(webhook_thread)}")
             webhook_thread.start()
             print(f"[DEBUG][SERVER] 웹훅 스레드 시작됨")
 
@@ -659,7 +659,7 @@ class Server(BaseHTTPRequestHandler):
                 print(f"[DEBUG][SERVER] 웹훅 응답 수신: {result.text}")
                 self.result = result
                 Server.webhook_response = json.loads(result.text)  # ✅ 클래스 변수에 저장
-                print(f"[DEBUG][SERVER] webhook_response 저장됨 (클래스 변수): {Server.webhook_response}")
+                # print(f"[DEBUG][SERVER] webhook_response 저장됨 (클래스 변수): {Server.webhook_response}")
                 
                 # ✅ 웹훅 응답 기록 (trace)
                 api_name = self.path[1:] if hasattr(self, 'path') and self.path else "unknown"

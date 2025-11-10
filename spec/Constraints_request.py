@@ -59,7 +59,10 @@ cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_in_constraints = {
     "validValueField": "eventFilter",
     "validValues": [
       "화재",
-      "배회"
+      "배회",
+      "침입",
+      "Loitering",
+      "Intrusion"
     ]
   },
   "classFilter": {
@@ -69,7 +72,8 @@ cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_in_constraints = {
     "validValues": [
       "사람",
       "트럭",
-      "버스"
+      "버스",
+      "Human"
     ]
   }
 }
@@ -91,7 +95,10 @@ cmgyv3rzl014nvsveidu5jpzp_StoredVideoEventInfos_in_constraints = {
     "validValueField": "eventFilter",
     "validValues": [
       "화재",
-      "배회"
+      "배회",
+      "침입",
+      "Loitering",
+      "Intrusion"
     ]
   },
   "classFilter": {
@@ -101,7 +108,8 @@ cmgyv3rzl014nvsveidu5jpzp_StoredVideoEventInfos_in_constraints = {
     "validValues": [
       "사람",
       "트럭",
-      "버스"
+      "버스",
+      "Human"
     ]
   }
 }
