@@ -72,13 +72,14 @@ SPEC_CONFIG = [
         "group_id": "cmgzwocpp01y6vsve880sfysm",
         "cmgvieyak001b6cd04cgaawmm": {
     "test_name": "vid001",
-    "specs": ['cmgvieyak001b6cd04cgaawmm_inSchema', 'cmgvieyak001b6cd04cgaawmm_outData', 'cmgvieyak001b6cd04cgaawmm_messages', 'cmgvieyak001b6cd04cgaawmm_webhook_OutSchema', 'cmgvieyak001b6cd04cgaawmm_webhook_inData'],
-    "api_name": ['인증', '전송 지원 기능 정보 연동', '카메라 목록 연동', '저장된 영상 목록 연동', '실시간 영상 정보 연동', '저장된 영상 정보 연동', '실시간 이벤트 분석 정보 연동', '저장된 이벤트 분석 정보 연동'],
-    "api_id": ['step-1-77lxvxrit', 'step-2-ln57b7ahz', 'step-1-354py0pz2', 'step-2-hyto4xrf1', 'step-5-dfxmyzzsw', 'step-6-pflcyt2cp', 'step-7-166n5ivbf', 'step-8-fff2u2432'],
-    "api_endpoint": ['/Authentication', '/Capabilities', '/CameraProfiles', '/StoredVideoInfos', '/StreamURLs', '/ReplayURL', '/RealtimeVideoEventInfos', '/StoredVideoEventInfos'],
-    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'WebHook', 'basic'],
-    "time_out": [60000, 60000, 60000, 60000, 60000, 60000, 60000, 60000],
-    "num_retries": [1, 1, 1, 1, 1, 1, 1, 1]
+    "specs": ['cmhs9hq0c00yy1fcqzkocftta_inSchema', 'cmhs9hq0c00yy1fcqzkocftta_outData', 'cmhs9hq0c00yy1fcqzkocftta_messages'],
+    "api_name": ['인증', '지원 기능 정보'],
+    "api_id": ['step-1-wbttka41b', 'step-1-kzuecf17n'],
+    "api_endpoint": ['/Authentication', '/Capabilities'],
+    "trans_protocol": ['basic', 'basic'],
+    "time_out": [60000, 60000],
+    "num_retries": [10, 10]
+
 }
     }
 ]
