@@ -69,8 +69,8 @@
             {
               "attempt": 1,
               "validationData": {
-                "userID": "user0001",
-                "userPW": "pass0001"
+                "userID": "a",
+                "userPW": "a"
               },
               "validationErrors": [
                 "오류가 없습니다."
@@ -242,9 +242,9 @@
                 "duration": "100",
                 "transProtocol": {
                   "transProtocolType": "WebHook",
-                  "transProtocolDesc": "127.0.0.1:8090"
+                  "transProtocolDesc": "https://10.252.219.119:2001"
                 },
-                "eventFilter": "Loitering",
+                "eventFilter": "화재",
                 "classFilter": "트럭",
                 "startTime": 1761110160000
               },
@@ -307,7 +307,7 @@
                 ],
                 "maxCount": 3,
                 "eventFilter": "화재",
-                "classFilter": "사람"
+                "classFilter": "트럭"
               },
               "validationErrors": [
                 "오류가 없습니다."
@@ -318,5 +318,5 @@
       ]
     }
   ],
-  "completedDate": "2025-11-10T11:02:21Z"
+  "completedDate": "2025-11-09T10:50:50Z"
 }

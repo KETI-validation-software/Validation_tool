@@ -19,10 +19,10 @@
   "status": "완료",
   "authMethod": "Bearer Token",
   "testScore": {
-    "score": 90.79,
+    "score": 84.21,
     "totalFields": 76,
-    "passedFields": 69,
-    "failedFields": 7
+    "passedFields": 64,
+    "failedFields": 12
   },
   "testResult": [
     {
@@ -50,10 +50,10 @@
     {
       "testSpecId": "cmgyv3rzl014nvsveidu5jpzp",
       "testSpecName": "영상보안시스템_new",
-      "score": 90.79,
+      "score": 84.21,
       "totalFields": 76,
-      "passedFields": 69,
-      "failedFields": 7,
+      "passedFields": 64,
+      "failedFields": 12,
       "apis": [
         {
           "id": "step-1-s9942zltt",
@@ -144,18 +144,20 @@
           "name": "실시간 영상 정보 연동",
           "method": "POST",
           "endpoint": "/StreamURLs",
-          "score": 92.0,
+          "score": 83.0,
           "validationCnt": 1,
           "totalFields": 12,
-          "passFields": 11,
-          "failFields": 1,
+          "passFields": 10,
+          "failFields": 2,
           "validations": [
             {
               "attempt": 1,
               "validationData": {},
               "validationErrors": [
                 "[시도 1/1]",
-                "[의미] camList.camURL: camURL=['rtsp://127.0.01:8554', 'rtsp://127.0.01:8554']에 해당하는 camURL을 찾을 수 없음"
+                "[의미] camList.camURL[0]: [0] 스트림 연결 실패: rtsp://conn0001:1234@127.0.01:8554",
+                "[의미] camList.camURL[1]: [1] 스트림 연결 실패: rtsp://conn0001:1234@127.0.01:8554",
+                "[구조] 타입 불일치: camList.videoInfo.fps (예상: int, 실제: str, 값: 30)"
               ]
             }
           ]
@@ -165,18 +167,20 @@
           "name": "저장된 영상 정보 연동",
           "method": "POST",
           "endpoint": "/ReplayURL",
-          "score": 93.0,
+          "score": 79.0,
           "validationCnt": 1,
           "totalFields": 14,
-          "passFields": 13,
-          "failFields": 1,
+          "passFields": 11,
+          "failFields": 3,
           "validations": [
             {
               "attempt": 1,
               "validationData": {},
               "validationErrors": [
                 "[시도 1/1]",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761044731916 (타입: int), [1] 1761026002561 (타입: int)"
+                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761182356808 (타입: int), [1] 1761151620832 (타입: int)",
+                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761091956822 (타입: int), [1] 1761114416682 (타입: int)",
+                "[구조] 타입 불일치: camList.videoInfo.fps (예상: int, 실제: str, 값: 30)"
               ]
             }
           ]
@@ -186,11 +190,11 @@
           "name": "실시간 이벤트 분석 정보 연동",
           "method": "POST",
           "endpoint": "/RealtimeVideoEventInfos",
-          "score": 67.0,
+          "score": 44.0,
           "validationCnt": 1,
           "totalFields": 9,
-          "passFields": 6,
-          "failFields": 3,
+          "passFields": 4,
+          "failFields": 5,
           "validations": [
             {
               "attempt": 1,
@@ -199,6 +203,8 @@
                 "[시도 1/1]",
                 "오류가 없습니다.",
                 "--- Webhook 검증 ---",
+                "[구조] 선택 필드 누락: camList.endTime",
+                "[구조] 선택 필드 누락: camList.eventDesc",
                 "[구조] 필수 필드 누락: camList.eventName",
                 "[구조] 필수 필드 누락: camList.eventUUID",
                 "[구조] 필수 필드 누락: camList.startTime"
@@ -240,8 +246,8 @@
               "validationData": {},
               "validationErrors": [
                 "[시도 1/1]",
-                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 8625499856270 (타입: int), [1] 8409769206436 (타입: int)",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 5283901780222 (타입: int), [1] 7323560356997 (타입: int)"
+                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 7806294694497 (타입: int), [1] 8758649611390 (타입: int)",
+                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 7205592075589 (타입: int), [1] 8647079508664 (타입: int)"
               ]
             }
           ]
@@ -249,5 +255,5 @@
       ]
     }
   ],
-  "completedDate": "2025-11-10T11:02:21Z"
+  "completedDate": "2025-11-09T10:50:50Z"
 }

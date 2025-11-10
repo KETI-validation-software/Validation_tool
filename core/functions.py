@@ -25,8 +25,6 @@ def resource_path(relative_path):
         base_path = os.path.abspath(".")
 
     return os.path.join(base_path, relative_path)
-
-
 # ================================================================
 # 필드별 순차 검증 (구조 → 의미)
 # ================================================================
@@ -68,6 +66,7 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
 
         # 4) 각 필드에 대해 순차 검증
         for field_path in sorted(flat_fields.keys()):
+
             print(f"\n--- 필드 검증: {field_path} ---")
 
             field_results[field_path] = {
@@ -77,24 +76,41 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
             }
 
             expected_type = flat_fields[field_path]
-
             # 4-1) 구조 검증: 필드 존재 여부
             if field_path not in flat_data:
-                if field_path not in opt_fields:
-                    # 필수 필드 누락
-                    error_msg = f"필수 필드 누락: {field_path}"
-                    field_results[field_path]["errors"].append(error_msg)
-                    error_messages.append(f"[구조] {error_msg}")
-                    total_error += 1
-                    print(f"  ❌ 구조: 필수 필드 누락")
-                    continue
+
+                if CONSTANTS.flag_opt:
+                    if field_path not in opt_fields:
+                        # 필수 필드 누락
+                        error_msg = f"필수 필드 누락: {field_path}"
+                        field_results[field_path]["errors"].append(error_msg)
+                        error_messages.append(f"[구조] {error_msg}")
+                        total_error += 1
+                        print(f"  ❌ 구조: 필수 필드 누락")
+                        continue
+                    else:
+                        error_msg = f"선택 필드 누락: {field_path}"
+                        field_results[field_path]["errors"].append(error_msg)
+                        error_messages.append(f"[구조] {error_msg}")
+                        total_error += 1
+                        print(f"  ❌ 구조: 선택 필드 누락")
+                        continue
                 else:
-                    # Optional 필드는 누락 가능 → PASS
-                    print(f"  ✅ 구조: Optional 필드 누락 허용")
-                    field_results[field_path]["struct_pass"] = True
-                    field_results[field_path]["semantic_pass"] = True  # 의미 검증도 자동 PASS
-                    total_correct += 1
-                    continue
+                    if field_path not in opt_fields:
+                        # 필수 필드 누락
+                        error_msg = f"필수 필드 누락: {field_path}"
+                        field_results[field_path]["errors"].append(error_msg)
+                        error_messages.append(f"[구조] {error_msg}")
+                        total_error += 1
+                        print(f"  ❌ 구조: 필수 필드 누락")
+                        continue
+                    else:
+                        # Optional 필드는 누락 가능 → PASS
+                        print(f"  ✅ 구조: Optional 필드 누락 허용")
+                        field_results[field_path]["struct_pass"] = True
+                        field_results[field_path]["semantic_pass"] = True  # 의미 검증도 자동 PASS
+                        total_correct += 1
+                        continue
 
             field_value = flat_data[field_path]
 
@@ -770,32 +786,6 @@ def save_result(str_in, path):
     except Exception as err:
         print(err)
 
-
-def set_auth(file=None):
-    """CONSTANTS.py에서 인증 정보를 읽어옵니다."""
-    try:
-        from config.CONSTANTS import auth_type, auth_info
-        info = "None"
-        info2 = ["", ""]
-
-        if auth_type == "Bearer Token":
-            info = auth_info
-        elif auth_type == "Digest Auth":
-            if "," in auth_info:
-                parts = auth_info.split(",")
-                info2 = [parts[0], parts[1] if len(parts) > 1 else ""]
-            else:
-                info2 = [auth_info, ""]
-
-        return info, info2
-    except ImportError as e:
-        print(f"CONSTANTS.py를 찾을 수 없습니다: {e}")
-        return "None", ["", ""]
-    except Exception as e:
-        print(f"인증 정보 로드 중 오류: {e}")
-        return "None", ["", ""]
-
-
 def set_message(path_):
     try:
         with open(resource_path(path_), 'r', encoding="UTF-8") as fp:
@@ -1237,141 +1227,157 @@ def save_result_json(myapp_instance, output_path="results/validation_result.json
 
     print(f"검증 결과가 '{output_path}'에 저장되었습니다.")
     return output_path
+
 def _validate_url_video(field_path, field_value, rule, reference_context, field_errors, global_errors):
-    """
-    RTSP URL 스트리밍 가능 여부 검증
-
-    Args:
-        field_path: 필드 경로 (예: "camList.camID")
-        field_value: 현재 필드 값 (예: camID 값)
-        rule: 검증 규칙 (urlField, referenceEndpoint 등 포함)
-        reference_context: 참조 엔드포인트 응답 데이터
-        field_errors: 필드별 에러 목록
-        global_errors: 전역 에러 목록
-
-    Returns:
-        bool: 검증 성공 여부
-    """
+    """RTSP URL 스트리밍 가능 여부 검증"""
     from core.json_checker_new import collect_all_values_by_key, get_by_path
+    import time
 
-    url_field = rule.get("urlField")  # 예: "camURL"
-    ref_endpoint = rule.get("referenceEndpoint")  # 예: "/StreamURLs"
+    access_id_field = rule.get("accessIDField", "accessID")
+    access_pw_field = rule.get("accessPWField", "accessPW")
+    ref_endpoint = rule.get("referenceEndpoint")
 
-    if not url_field:
-        error_msg = "urlField가 지정되지 않음"
+    # ✅ 1. field_value를 리스트로 정규화
+    url_list = field_value if isinstance(field_value, list) else [field_value]
+
+    if not url_list:
+        error_msg = f"URL이 비어있습니다"
         field_errors.append(error_msg)
         global_errors.append(f"[의미] {field_path}: {error_msg}")
         return False
 
-    if not reference_context or ref_endpoint not in reference_context:
-        error_msg = f"참조 엔드포인트 없음: {ref_endpoint}"
-        field_errors.append(error_msg)
-        global_errors.append(f"[의미] {error_msg}")
-        return False
+    print(f"    [url-video] 검증할 URL 개수: {len(url_list)}")
 
-    ref_data = reference_context[ref_endpoint]
+    # ✅ 2. 각 URL 검증
+    all_success = True
+    for idx, target_url in enumerate(url_list):
+        url_index = f"[{idx}]" if isinstance(field_value, list) else ""
+        print(f"    [url-video] {url_index} 검증 시작: {target_url}")
 
-    # field_path가 "camList.camID" 형식인 경우
-    if "." in field_path:
-        parts = field_path.split(".")
-        parent_path = ".".join(parts[:-1])  # "camList"
-        child_field = parts[-1]  # "camID"
+        access_id = None
+        access_pw = None
 
-        # 참조 데이터에서 해당 객체 찾기
-        # ref_data가 리스트인 경우 각 항목에서 매칭되는 객체 찾기
-        if isinstance(ref_data, list):
-            target_url = None
-            for item in ref_data:
-                if isinstance(item, dict) and item.get(child_field) == field_value:
-                    target_url = item.get(url_field)
-                    break
-
-            if not target_url:
-                error_msg = f"{child_field}={field_value}에 해당하는 {url_field}을 찾을 수 없음"
-                field_errors.append(error_msg)
-                global_errors.append(f"[의미] {field_path}: {error_msg}")
-                return False
-
-        # ref_data가 dict이고 리스트를 포함하는 경우
-        elif isinstance(ref_data, dict):
-            # parent_path에 해당하는 리스트 찾기
-            parent_list = get_by_path(ref_data, parent_path)
-
-            if not isinstance(parent_list, list):
-                error_msg = f"참조 경로가 리스트가 아님: {parent_path}"
-                field_errors.append(error_msg)
-                global_errors.append(f"[의미] {field_path}: {error_msg}")
-                return False
-
-            target_url = None
-            for item in parent_list:
-                if isinstance(item, dict) and item.get(child_field) == field_value:
-                    target_url = item.get(url_field)
-                    break
-
-            if not target_url:
-                error_msg = f"{child_field}={field_value}에 해당하는 {url_field}을 찾을 수 없음"
-                field_errors.append(error_msg)
-                global_errors.append(f"[의미] {field_path}: {error_msg}")
-                return False
-        else:
-            error_msg = f"참조 데이터 형식이 올바르지 않음"
+        # 유효성 체크
+        if not target_url or not isinstance(target_url, str):
+            error_msg = f"{url_index} 유효하지 않은 URL 형식: {target_url}"
             field_errors.append(error_msg)
-            global_errors.append(f"[의미] {field_path}: {error_msg}")
-            return False
+            global_errors.append(f"[의미] {field_path}{url_index}: {error_msg}")
+            all_success = False
+            continue
 
-    # 단일 필드인 경우 (field_value 자체가 URL)
-    else:
-        target_url = field_value
+        # ✅ 3. 인증 정보는 reference_context에서 가져오기
+        if reference_context and ref_endpoint and ref_endpoint in reference_context:
+            ref_data = reference_context[ref_endpoint]
 
-    # RTSP URL 검증
-    print(f"    [url-video] 검증할 URL: {target_url}")
+            # field_path가 "camList.camURL" 형식인 경우
+            if "." in field_path:
+                parts = field_path.split(".")
+                parent_path = ".".join(parts[:-1])  # "camList"
 
-    if not target_url or not isinstance(target_url, str):
-        error_msg = f"유효하지 않은 URL: {target_url}"
-        field_errors.append(error_msg)
-        global_errors.append(f"[의미] {field_path}: {error_msg}")
-        return False
+                # ref_data에서 해당 리스트 가져오기
+                if isinstance(ref_data, dict):
+                    parent_list = get_by_path(ref_data, parent_path)
+                elif isinstance(ref_data, list):
+                    parent_list = ref_data
+                else:
+                    parent_list = None
 
-    # URL 형식 기본 검증 (rtsp://)
-    if not target_url.startswith("rtsp://"):
-        error_msg = f"RTSP URL이 아님: {target_url} (rtsp:// 로 시작해야 함)"
-        field_errors.append(error_msg)
-        global_errors.append(f"[의미] {field_path}: {error_msg}")
-        return False
+                # 현재 URL과 매칭되는 항목에서 인증 정보 찾기
+                if isinstance(parent_list, list):
+                    for item in parent_list:
+                        if isinstance(item, dict):
+                            # 리스트인 경우 해당 인덱스의 값과 비교
+                            item_url = item.get(parts[-1])
+                            if isinstance(item_url, list) and idx < len(item_url):
+                                if item_url[idx] == target_url:
+                                    access_id = item.get(access_id_field)
+                                    access_pw = item.get(access_pw_field)
+                                    break
+                            elif item_url == target_url:
+                                access_id = item.get(access_id_field)
+                                access_pw = item.get(access_pw_field)
+                                break
+            else:
+                # 단일 필드인 경우 ref_data에서 직접 가져오기
+                if isinstance(ref_data, dict):
+                    access_id = ref_data.get(access_id_field)
+                    access_pw = ref_data.get(access_pw_field)
 
-    # OpenCV로 스트림 연결 테스트
-    cap = None
-    try:
-        print(f"    [url-video] OpenCV로 연결 시도 중...")
-        cap = cv2.VideoCapture(target_url)
-
-        # 연결 성공 여부 확인
-        if not cap.isOpened():
-            error_msg = f"스트림 연결 실패: {target_url}"
+        # ✅ 4. RTSP URL 형식 체크
+        if not target_url.startswith("rtsp://"):
+            error_msg = f"{url_index} RTSP URL이 아님: {target_url} (rtsp:// 로 시작해야 함)"
             field_errors.append(error_msg)
-            global_errors.append(f"[의미] {field_path}: {error_msg}")
-            return False
+            global_errors.append(f"[의미] {field_path}{url_index}: {error_msg}")
+            all_success = False
+            continue
 
-        # 첫 프레임 읽기 시도
-        ret, frame = cap.read()
+        # ✅ 5. 인증 정보 포함
+        actual_test_url = target_url
+        if access_id and access_pw:
+            # 이미 인증정보가 있는 경우 제거 후 재추가
+            if '@' in actual_test_url:
+                protocol, rest = actual_test_url.split("://", 1)
+                if '@' in rest:
+                    _, host = rest.split('@', 1)
+                    actual_test_url = f"{protocol}://{host}"
 
-        if not ret or frame is None:
-            error_msg = f"프레임 읽기 실패: {target_url}"
+            url_without_protocol = actual_test_url.replace("rtsp://", "")
+            actual_test_url = f"rtsp://{access_id}:{access_pw}@{url_without_protocol}"
+            print(f"    [url-video] {url_index} 인증 정보 포함된 URL로 변경됨", actual_test_url)
+
+        # ✅ 6. OpenCV로 스트림 검증
+        cap = None
+        try:
+            print(f"    [url-video] {url_index} 연결 시도 중...")
+            cap = cv2.VideoCapture(actual_test_url)
+
+            try:
+                cap.set(cv2.CAP_PROP_OPEN_TIMEOUT_MSEC, 5000)
+                cap.set(cv2.CAP_PROP_READ_TIMEOUT_MSEC, 3000)
+            except:
+                print(f"    [url-video] {url_index} ⚠️ 타임아웃 설정 실패")
+
+            if not cap.isOpened():
+                error_msg = f"{url_index} 스트림 연결 실패: {actual_test_url}"
+                field_errors.append(error_msg)
+                global_errors.append(f"[의미] {field_path}{url_index}: {error_msg}")
+                all_success = False
+                continue
+
+            # 여러 프레임으로 안정성 확인
+            success_count = 0
+            for i in range(3):
+                ret, frame = cap.read()
+                if ret and frame is not None:
+                    success_count += 1
+                    if i == 0:
+                        print(f"    [url-video] {url_index} 프레임 크기: {frame.shape}")
+                time.sleep(0.3)
+
+            if success_count < 2:
+                error_msg = f"{url_index} 프레임 읽기 불안정: {actual_test_url} ({success_count}/3 성공)"
+                field_errors.append(error_msg)
+                global_errors.append(f"[의미] {field_path}{url_index}: {error_msg}")
+                all_success = False
+                continue
+
+            print(f"    [url-video] {url_index} ✅ 스트림 검증 성공: {actual_test_url} ({success_count}/3 프레임)")
+
+        except Exception as e:
+            if hasattr(cv2, 'error') and isinstance(e, cv2.error):
+                error_msg = f"{url_index}  에러: {actual_test_url} - {str(e)}"
+            elif isinstance(e, TimeoutError):
+                error_msg = f"{url_index} 연결 타임아웃: {actual_test_url}"
+            else:
+                error_msg = f"{url_index} 스트림 검증 중 오류: {actual_test_url} - {type(e).__name__}"
+
             field_errors.append(error_msg)
-            global_errors.append(f"[의미] {field_path}: {error_msg}")
-            return False
+            global_errors.append(f"[의미] {field_path}{url_index}: {error_msg}")
+            all_success = False
 
-        print(f"    [url-video] ✅ 스트림 검증 성공: {target_url} (프레임 크기: {frame.shape})")
-        return True
+        finally:
+            if cap is not None:
+                cap.release()
+                print(f"    [url-video] {url_index} 연결 해제 완료")
 
-    except Exception as e:
-        error_msg = f"스트림 검증 중 오류 발생: {target_url} - {str(e)}"
-        field_errors.append(error_msg)
-        global_errors.append(f"[의미] {field_path}: {error_msg}")
-        return False
-
-    finally:
-        if cap is not None:
-            cap.release()
-            print(f"    [url-video] 연결 해제 완료")
+    return all_success
