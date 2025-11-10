@@ -1625,6 +1625,28 @@ class FormValidator:
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
 
+        # ✅ URL이 업데이트되면 WEBHOOK_PUBLIC_IP도 함께 업데이트
+        if 'url' in variables:
+            try:
+                from urllib.parse import urlparse
+                parsed_url = urlparse(variables['url'])
+                webhook_ip = parsed_url.hostname
+                if webhook_ip:
+                    # WEBHOOK_PUBLIC_IP 업데이트
+                    pattern_ip = r'^WEBHOOK_PUBLIC_IP\s*=.*$'
+                    new_ip_line = f'WEBHOOK_PUBLIC_IP = "{webhook_ip}"'
+                    content = re.sub(pattern_ip, new_ip_line, content, flags=re.MULTILINE)
+                    
+                    # WEBHOOK_URL 업데이트
+                    pattern_url = r'^WEBHOOK_URL\s*=.*$'
+                    new_url_line = f'WEBHOOK_URL = f"https://{{WEBHOOK_PUBLIC_IP}}:{{WEBHOOK_PORT}}"'
+                    content = re.sub(pattern_url, new_url_line, content, flags=re.MULTILINE)
+                    
+                    print(f"[WEBHOOK] 시험 URL에서 IP 추출: {webhook_ip}")
+                    print(f"[WEBHOOK] 웹훅 콜백 URL 업데이트: https://{webhook_ip}:2001")
+            except Exception as e:
+                print(f"[WEBHOOK] URL 파싱 실패: {e}")
+
         for var_name, var_value in variables.items():
             # 변수 형태에 따른 패턴 매칭
             if isinstance(var_value, str):
