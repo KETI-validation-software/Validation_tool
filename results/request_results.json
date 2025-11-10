@@ -17,12 +17,12 @@
     ]
   },
   "status": "완료",
-  "authMethod": "Bearer Token",
+  "authMethod": "Digest Auth",
   "testScore": {
-    "score": 82.35,
+    "score": 76.47,
     "totalFields": 34,
-    "passedFields": 28,
-    "failedFields": 6
+    "passedFields": 26,
+    "failedFields": 8
   },
   "testResult": [
     {
@@ -49,31 +49,33 @@
     },
     {
       "testSpecId": "cmgvieyak001b6cd04cgaawmm",
-      "testSpecName": "영상보안시스템_new",
-      "score": 82.35,
+      "testSpecName": "test_video_001",
+      "score": 76.47,
       "totalFields": 34,
-      "passedFields": 28,
-      "failedFields": 6,
+      "passedFields": 26,
+      "failedFields": 8,
       "apis": [
         {
           "id": "step-1-77lxvxrit",
           "name": "인증",
           "method": "POST",
           "endpoint": "/Authentication",
-          "score": 100.0,
+          "score": 0.0,
           "validationCnt": 1,
           "totalFields": 2,
-          "passFields": 2,
-          "failFields": 0,
+          "passFields": 0,
+          "failFields": 2,
           "validations": [
             {
               "attempt": 1,
               "validationData": {
-                "userID": "a",
-                "userPW": "a"
+                "userID": "user0001",
+                "userPW": "pass0001"
               },
               "validationErrors": [
-                "오류가 없습니다."
+                "[Inbound]",
+                "[의미] userID: 값 불일치: user0001가 지정값 ['kisaID']에 없음",
+                "[의미] userPW: 값 불일치: pass0001가 지정값 ['kisaPW']에 없음"
               ]
             }
           ]
@@ -242,7 +244,7 @@
                 "duration": "100",
                 "transProtocol": {
                   "transProtocolType": "WebHook",
-                  "transProtocolDesc": "https://10.252.219.119:2001"
+                  "transProtocolDesc": "https://10.252.219.95:2001"
                 },
                 "eventFilter": "화재",
                 "classFilter": "트럭",
@@ -307,7 +309,7 @@
                 ],
                 "maxCount": 3,
                 "eventFilter": "화재",
-                "classFilter": "트럭"
+                "classFilter": "사람"
               },
               "validationErrors": [
                 "오류가 없습니다."
@@ -318,5 +320,5 @@
       ]
     }
   ],
-  "completedDate": "2025-11-09T10:50:50Z"
+  "completedDate": "2025-11-10T12:23:57Z"
 }
