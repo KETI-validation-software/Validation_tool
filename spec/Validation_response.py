@@ -1,12 +1,4 @@
 # Authentication
-cmh1ua7b00021gxc3rjepbkrm_Authentication_out_validation = {}
-
-# cmh1ua7b00021gxc3rjepbkrm 검증 리스트
-cmh1ua7b00021gxc3rjepbkrm_outValidation = [
-    cmh1ua7b00021gxc3rjepbkrm_Authentication_out_validation,
-]
-
-# Authentication
 cmgyv3rzl014nvsveidu5jpzp_Authentication_out_validation = {}
 
 # Capabilities
