@@ -119,8 +119,63 @@ class InfoWidget(QWidget):
         illust_label.lower()  # 다른 위젯들 뒤로 배치 (하지만 bg.png 앞에)
         illust_label.setAttribute(Qt.WA_TransparentForMouseEvents)  # 마우스 이벤트 통과
 
+        # 관리자시스템 주소 입력 필드
+        management_url_container = QWidget(page)
+        management_url_container.setFixedSize(600, 60)
+        # 오른쪽 하단에 배치: x = 1680 - 600 - 48, y = 1032 - 60 - 48
+        management_url_container.setGeometry(1032, 924, 600, 60)
+        management_url_container.setStyleSheet("""
+            QWidget {
+                background-color: rgba(255, 255, 255, 0.95);
+                border-radius: 4px;
+                border: 1px solid #E8E8E8;
+            }
+        """)
+
+        management_url_layout = QHBoxLayout(management_url_container)
+        management_url_layout.setContentsMargins(12, 10, 12, 10)
+        management_url_layout.setSpacing(8)
+
+        # 라벨
+        management_url_label = QLabel("관리자시스템 주소:")
+        management_url_label.setStyleSheet("""
+            QLabel {
+                font-family: 'Noto Sans KR';
+                font-size: 13px;
+                font-weight: 400;
+                color: #333;
+                background-color: transparent;
+                border: none;
+            }
+        """)
+        management_url_label.setFixedWidth(120)
+        management_url_layout.addWidget(management_url_label)
+
+        # 입력 필드
+        self.management_url_edit = QLineEdit()
+        self.management_url_edit.setText(CONSTANTS.management_url)  # 초기값 설정
+        self.management_url_edit.setPlaceholderText("http://ect2.iptime.org:20223")
+        self.management_url_edit.setStyleSheet("""
+            QLineEdit {
+                font-family: 'Noto Sans KR';
+                font-size: 13px;
+                padding: 6px 10px;
+                border: 1px solid #CECECE;
+                border-radius: 3px;
+                background-color: #FFFFFF;
+            }
+            QLineEdit:focus {
+                border: 1px solid #4A90E2;
+            }
+        """)
+        self.management_url_edit.textChanged.connect(self.on_management_url_changed)
+        management_url_layout.addWidget(self.management_url_edit)
+
         # 헤더를 최상위로 올림
         header_widget.raise_()
+
+        # 관리자시스템 주소 컨테이너를 위로 올림 (일러스트 위에 표시)
+        management_url_container.raise_()
 
         return page
 
@@ -2260,7 +2315,21 @@ class InfoWidget(QWidget):
             import traceback
             traceback.print_exc()
             QMessageBox.critical(self, "오류", f"시험 정보를 불러오는 중 오류가 발생했습니다:\n{str(e)}")
-    
+
+    def on_management_url_changed(self):
+        """관리자시스템 주소 변경 시 처리"""
+        try:
+            new_url = self.management_url_edit.text().strip()
+            if new_url:
+                # CONSTANTS에 저장 (메모리 + config.txt 파일)
+                success = CONSTANTS.save_management_url(new_url)
+                if success:
+                    print(f"관리자시스템 주소가 업데이트되었습니다: {new_url}")
+                else:
+                    print("관리자시스템 주소 저장에 실패했습니다.")
+        except Exception as e:
+            print(f"관리자시스템 주소 변경 처리 실패: {e}")
+
     def _validate_ip_address(self, ip):
         """IP 주소 형식 검증"""
         # IP 주소 정규식 패턴
