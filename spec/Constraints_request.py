@@ -1,4 +1,12 @@
 # Authentication
+cmh1ua7b00021gxc3rjepbkrm_Authentication_in_constraints = {}
+
+# cmh1ua7b00021gxc3rjepbkrm 검증 리스트
+cmh1ua7b00021gxc3rjepbkrm_inConstraints = [
+    cmh1ua7b00021gxc3rjepbkrm_Authentication_in_constraints,
+]
+
+# Authentication
 cmgyv3rzl014nvsveidu5jpzp_Authentication_in_constraints = {}
 
 # Capabilities
