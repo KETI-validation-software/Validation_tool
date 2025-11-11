@@ -632,7 +632,7 @@ class ResultPageWidget(QWidget):
                     with open(external_constants_path, 'r', encoding='utf-8') as f:
                         constants_code = f.read()
 
-                    namespace = {}
+                    namespace = {'__file__': external_constants_path}
                     exec(constants_code, namespace)
                     SPEC_CONFIG = namespace.get('SPEC_CONFIG', self.CONSTANTS.SPEC_CONFIG)
                     print(f"[GROUP TABLE] ✅ 외부 SPEC_CONFIG 로드 완료: {len(SPEC_CONFIG)}개 그룹")
@@ -2179,7 +2179,7 @@ class MyApp(QWidget):
                         constants_code = f.read()
 
                     # SPEC_CONFIG만 추출하기 위해 exec 실행
-                    namespace = {}
+                    namespace = {'__file__': external_constants_path}
                     exec(constants_code, namespace)
                     SPEC_CONFIG = namespace.get('SPEC_CONFIG', self.CONSTANTS.SPEC_CONFIG)
                     url_value = namespace.get('url', url_value)
@@ -2571,7 +2571,7 @@ class MyApp(QWidget):
                     with open(external_constants_path, 'r', encoding='utf-8') as f:
                         constants_code = f.read()
 
-                    namespace = {}
+                    namespace = {'__file__': external_constants_path}
                     exec(constants_code, namespace)
                     SPEC_CONFIG = namespace.get('SPEC_CONFIG', self.CONSTANTS.SPEC_CONFIG)
                     print(f"[GROUP TABLE] ✅ 외부 SPEC_CONFIG 로드 완료: {len(SPEC_CONFIG)}개 그룹")
