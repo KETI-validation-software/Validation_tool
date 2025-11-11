@@ -1,0 +1,3 @@
+# 관리자시스템 주소 설정
+# 주소 변경이 필요한 경우 아래 URL만 수정하세요
+management_url=http://ect2.iptime.org:20223
