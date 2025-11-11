@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Dict, List
 import inspect
 import spec.Data_response as Data_response
+import config.CONSTANTS as CONSTANTS
 
 class FormValidator:
     """
@@ -68,7 +69,7 @@ class FormValidator:
             import sys
             import os
 
-            url = "http://ect2.iptime.org:20223/api/integration/response-codes"
+            url = f"{CONSTANTS.management_url}/api/integration/response-codes"
             print(f"ResponseCode API 호출 중: {url}")
 
             response = requests.get(url, timeout=10)
@@ -873,9 +874,15 @@ class FormValidator:
                 # 기존 specs가 있으면 교체
                 new_content = re.sub(pattern, specs_str, content, flags=re.DOTALL)
             else:
-                # specs가 없으면 추가 (url 다음에)
-                url_pattern = r'(url\s*=\s*"[^"]*"\n\n)'
-                new_content = re.sub(url_pattern, r'\1\n' + specs_str + '\n', content)
+                # specs가 없으면 추가 (management_url 라인 다음에)
+                # management_url은 전역 변수이므로 함수 밖에 있음
+                url_pattern = r'(# 관리자시스템 주소\nmanagement_url\s*=\s*load_management_url\(\)\n)'
+                if re.search(url_pattern, content):
+                    new_content = re.sub(url_pattern, r'\1' + specs_str + '\n', content)
+                else:
+                    # management_url도 없으면 none_request_message 앞에 추가
+                    none_msg_pattern = r'(none_request_message\s*=)'
+                    new_content = re.sub(none_msg_pattern, specs_str + '\n' + r'\1', content)
 
             # 파일에 쓰기
             with open(constants_path, 'w', encoding='utf-8') as f:
@@ -1821,7 +1828,7 @@ class FormValidator:
 
     def fetch_test_info_by_ip(self, ip_address):
         """IP 주소로 시험 정보 조회"""
-        url = f"http://ect2.iptime.org:20223/api/integration/test-requests/by-ip?ipAddress={ip_address}"
+        url = f"{CONSTANTS.management_url}/api/integration/test-requests/by-ip?ipAddress={ip_address}"
         try:
             response = requests.get(url, timeout=10)
             response.raise_for_status()
@@ -1879,7 +1886,7 @@ class FormValidator:
 
     def fetch_specification_by_id(self, spec_id):
         """spec_id로 specification 상세 정보 조회 (API 기반)"""
-        url = f"http://ect2.iptime.org:20223/api/integration/specifications/{spec_id}"
+        url = f"{CONSTANTS.management_url}/api/integration/specifications/{spec_id}"
         try:
             print(f"Specification API 호출 중: {spec_id}")
             response = requests.get(url, timeout=10)
@@ -2020,7 +2027,7 @@ class FormValidator:
 
     def fetch_test_step_by_id(self, step_id):
         """step_id로 test-step 상세 정보 조회 (API 기반)"""
-        url = f"http://ect2.iptime.org:20223/api/integration/test-steps/{step_id}"
+        url = f"{CONSTANTS.management_url}/api/integration/test-steps/{step_id}"
         try:
             print(f"Test-Step API 호출 중: {step_id}")
             resp = requests.get(url, timeout=10)

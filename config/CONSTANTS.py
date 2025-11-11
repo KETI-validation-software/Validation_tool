@@ -2,6 +2,52 @@
 import os
 
 headers = {"Content-type": "application/json", "User-Agent": 'test'}
+
+# 관리자시스템 주소 설정 로딩
+def load_management_url():
+    """config.txt에서 관리자시스템 주소를 읽어옴"""
+    config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config.txt")
+    default_url = "http://ect2.iptime.org:20223"
+
+    try:
+        if os.path.exists(config_path):
+            with open(config_path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith('#'):
+                        if '=' in line:
+                            key, value = line.split('=', 1)
+                            if key.strip() == 'management_url':
+                                return value.strip()
+    except Exception as e:
+        print(f"config.txt 읽기 실패: {e}")
+
+    return default_url
+
+def save_management_url(new_url):
+    """관리자시스템 주소를 config.txt에 저장"""
+    config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config.txt")
+
+    try:
+        with open(config_path, 'w', encoding='utf-8') as f:
+            f.write("# 관리자시스템 주소 설정\n")
+            f.write("# 주소 변경이 필요한 경우 아래 URL만 수정하세요\n")
+            f.write(f"management_url={new_url}\n")
+
+        # 메모리상의 값도 업데이트
+        global management_url
+        management_url = new_url
+
+        return True
+    except Exception as e:
+        print(f"config.txt 저장 실패: {e}")
+        return False
+
+# 관리자시스템 주소
+management_url = load_management_url()
+
+specs = [["cmh1u5pef000sgxc3bzl4y9v0_inSchema","cmh1u5pef000sgxc3bzl4y9v0_outData","cmh1u5pef000sgxc3bzl4y9v0_messages",""],
+         ["cmgvieyak001b6cd04cgaawmm_inSchema","cmgvieyak001b6cd04cgaawmm_outData","cmgvieyak001b6cd04cgaawmm_messages",""]]
 none_request_message = ['Capabilities',
                         'CameraProfiles',
                         'DoorProfiles',
@@ -15,10 +61,10 @@ version = "v1.0"
 test_category = "MAIN_TEST"
 test_target = "통합시스템그룹, 통합플랫폼"
 test_range = "ALL_FIELDS, ALL_FIELDS"
-auth_type = "Digest Auth"
-auth_info = "abcd,1234"
+auth_type = "Bearer Token"
+auth_info = "admin,1234"
 admin_code = "1234"
-url = "https://10.252.219.95:8080"
+url = "https://192.168.0.3:8080"
 contact_person = "김철수"
 model_name = "v1.0"
 request_id = "cmhba7ldg000g6zcrxdqwdcje"

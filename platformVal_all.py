@@ -2123,7 +2123,7 @@ class MyApp(QWidget):
                 try:
                     self.run_status = "완료"
                     result_json = build_result_json(self)
-                    url = f"http://ect2.iptime.org:20223/api/integration/test-results"
+                    url = f"{CONSTANTS.management_url}/api/integration/test-results"
                     response = requests.post(url, json=result_json)
                     print("✅ 시험 결과 전송 상태 코드:", response.status_code)
                     print("📥  시험 결과 전송 응답:", response.text)
@@ -2590,7 +2590,7 @@ class MyApp(QWidget):
                 try:
                     self.run_status = "완료"
                     result_json = build_result_json(self)
-                    url = f"http://ect2.iptime.org:20223/api/integration/test-results"
+                    url = f"{CONSTANTS.management_url}/api/integration/test-results"
                     response = requests.post(url, json=result_json)
                     print("✅ 시험 결과 전송 상태 코드:", response.status_code)
                     print("📥  시험 결과 전송 응답:", response.text)
@@ -4400,7 +4400,7 @@ class MyApp(QWidget):
         try:
             self.run_status = "진행중"
             result_json = build_result_json(self)
-            url = f"http://ect2.iptime.org:20223/api/integration/test-results"
+            url = f"{CONSTANTS.management_url}/api/integration/test-results"
             response = requests.post(url, json=result_json)
             print("✅ 시험 결과 전송 상태 코드:", response.status_code)
             print("📥  시험 결과 전송 응답:", response.text)
