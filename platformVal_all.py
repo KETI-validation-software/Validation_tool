@@ -19,6 +19,7 @@ import requests
 import config.CONSTANTS as CONSTANTS
 from core.functions import json_check_, save_result, resource_path, json_to_data, timeout_field_finder
 from core.json_checker_new import check_message_data, check_message_schema, check_message_error
+from splash_screen import LoadingPopup
 import spec.Data_response as data_response_module
 import spec.Schema_response as schema_response_module
 import spec.Schema_request as schema_request_module
@@ -1710,6 +1711,9 @@ class MyApp(QWidget):
         self._is_fullscreen = False
         self._saved_geom = None
         self._saved_state = None
+
+        # 로딩 팝업 인스턴스 변수
+        self.loading_popup = None
 
         # 아이콘 경로 (메인 페이지용)
         self.img_pass = resource_path("assets/image/icon/icn_success.png")
@@ -4189,6 +4193,11 @@ class MyApp(QWidget):
                 return
             self.save_current_spec_data()
 
+            # ✅ 로딩 팝업 표시
+            self.loading_popup = LoadingPopup()
+            self.loading_popup.show()
+            QApplication.processEvents()  # UI 즉시 업데이트
+
             selected_spec_ids = [self.index_to_spec_id[r.row()] for r in selected_rows]
             for spec_id in selected_spec_ids:
                 self.current_spec_id = spec_id
@@ -4368,10 +4377,20 @@ class MyApp(QWidget):
             self.tick_timer.start(1000)
             print(f"[DEBUG] ========== 검증 시작 준비 완료 ==========")
 
+            # ✅ 로딩 팝업 닫기
+            if self.loading_popup:
+                self.loading_popup.close()
+                self.loading_popup = None
+
         except Exception as e:
             print(f"[ERROR] sbtn_push에서 예외 발생: {e}")
             import traceback
             traceback.print_exc()
+
+            # ✅ 에러 발생 시 로딩 팝업 닫기
+            if self.loading_popup:
+                self.loading_popup.close()
+                self.loading_popup = None
 
             self.sbtn.setEnabled(True)
             self.stop_btn.setDisabled(True)
