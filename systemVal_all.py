@@ -25,6 +25,7 @@ from PyQt5 import QtCore
 from api.webhook_api import WebhookThread
 from core.functions import json_check_, resource_path, json_to_data, timeout_field_finder
 from core.data_mapper import ConstraintDataGenerator
+from splash_screen import LoadingPopup
 from requests.auth import HTTPDigestAuth
 import config.CONSTANTS as CONSTANTS
 import traceback
@@ -1934,6 +1935,9 @@ class MyApp(QWidget):
         self.webhook_res = None
         self.res = None
         self.radio_check_flag = "video"  # 영상보안 시스템으로 고정
+
+        # 로딩 팝업 인스턴스 변수
+        self.loading_popup = None
 
         # ✅ spec_id 초기화 (info_GUI에서 전달받거나 기본값 사용)
         if spec_id:
@@ -4818,6 +4822,11 @@ class MyApp(QWidget):
             QMessageBox.warning(self, "알림", "시험 시나리오를 먼저 선택하세요.")
             return
 
+        # ✅ 로딩 팝업 표시
+        self.loading_popup = LoadingPopup()
+        self.loading_popup.show()
+        QApplication.processEvents()  # UI 즉시 업데이트
+
         self.pathUrl = self.url_text_box.text()
         print(f"[START] ========== 검증 시작: 완전 초기화 ==========")
         print(f"[START] 시험 URL : ", self.pathUrl)
@@ -4951,6 +4960,11 @@ class MyApp(QWidget):
         print(f"[START] 타이머 시작")
         self.tick_timer.start(1000)
         print(f"[START] ========== 검증 시작 준비 완료 ==========")
+
+        # ✅ 로딩 팝업 닫기
+        if self.loading_popup:
+            self.loading_popup.close()
+            self.loading_popup = None
 
         print(f"[START] 현재 global 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}")
 
