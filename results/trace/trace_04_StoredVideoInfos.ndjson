@@ -1,2 +1,0 @@
-{"time": "2025-11-10T06:31:25.084895Z", "api": "StoredVideoInfos", "dir": "REQUEST", "data": {"timePeriod": {"startTime": 1760948700000, "endTime": 1761121500000}, "camList": [{"camID": ""}, {"camID": ""}, {"camID": ""}]}}
-{"time": "2025-11-10T06:31:26.087443Z", "api": "StoredVideoInfos", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 URL 형식"}}
