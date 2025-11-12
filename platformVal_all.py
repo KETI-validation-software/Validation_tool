@@ -2440,6 +2440,18 @@ class MyApp(QWidget):
                 accumulated['total_pass'] += add_pass
                 accumulated['total_error'] += add_err
 
+                # ✅ 매 시도마다 테이블 실시간 업데이트 (시스템과 동일)
+                self.update_table_row_with_retries(
+                    self.cnt, 
+                    "진행중" if self.current_retry + 1 < current_retries else step_result,
+                    accumulated['total_pass'],
+                    accumulated['total_error'],
+                    tmp_res_auth if 'tmp_res_auth' in locals() else "검증 진행중...",
+                    f"시도 {self.current_retry + 1}/{current_retries}",
+                    self.current_retry + 1
+                )
+                QApplication.processEvents()
+
                 # current_retry 증가
                 self.current_retry += 1
 
