@@ -18,19 +18,19 @@
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 76.72,
-    "totalFields": 408,
-    "passedFields": 313,
-    "failedFields": 95
+    "score": 67.31,
+    "totalFields": 104,
+    "passedFields": 70,
+    "failedFields": 34
   },
   "testResult": [
     {
       "testSpecId": "cmgyv3rzl014nvsveidu5jpzp",
       "testSpecName": "vid001",
-      "score": 80.26,
-      "totalFields": 380,
-      "passedFields": 305,
-      "failedFields": 75,
+      "score": 81.58,
+      "totalFields": 76,
+      "passedFields": 62,
+      "failedFields": 14,
       "apis": [
         {
           "id": "step-1-s9942zltt",
@@ -39,8 +39,8 @@
           "endpoint": "/Authentication",
           "score": 100.0,
           "validationCnt": 5,
-          "totalFields": 25,
-          "passFields": 25,
+          "totalFields": 5,
+          "passFields": 5,
           "failFields": 0,
           "validations": [
             {
@@ -88,8 +88,8 @@
           "endpoint": "/Capabilities",
           "score": 100.0,
           "validationCnt": 5,
-          "totalFields": 40,
-          "passFields": 40,
+          "totalFields": 8,
+          "passFields": 8,
           "failFields": 0,
           "validations": [
             {
@@ -137,8 +137,8 @@
           "endpoint": "/CameraProfiles",
           "score": 100.0,
           "validationCnt": 5,
-          "totalFields": 60,
-          "passFields": 60,
+          "totalFields": 12,
+          "passFields": 12,
           "failFields": 0,
           "validations": [
             {
@@ -186,23 +186,23 @@
           "endpoint": "/StoredVideoInfos",
           "score": 71.0,
           "validationCnt": 5,
-          "totalFields": 35,
-          "passFields": 25,
-          "failFields": 10,
+          "totalFields": 7,
+          "passFields": 5,
+          "failFields": 2,
           "validations": [
             {
               "attempt": 1,
               "validationData": {},
               "validationErrors": [
                 "[시도 5/5]",
-                "[의미] camList.timeList.endTime[0]: 범위 검증 실패: min=1761110160000, max=None, operator=between",
-                "[의미] camList.timeList.endTime[1]: 범위 검증 실패: min=1761110160000, max=None, operator=between",
-                "[의미] camList.timeList.endTime[2]: 범위 검증 실패: min=1761110160000, max=None, operator=between",
-                "[의미] camList.timeList.endTime[3]: 범위 검증 실패: min=1761110160000, max=None, operator=between",
-                "[의미] camList.timeList.startTime[0]: 범위 검증 실패: min=1761110160000, max=None, operator=between",
-                "[의미] camList.timeList.startTime[1]: 범위 검증 실패: min=1761110160000, max=None, operator=between",
-                "[의미] camList.timeList.startTime[2]: 범위 검증 실패: min=1761110160000, max=None, operator=between",
-                "[의미] camList.timeList.startTime[3]: 범위 검증 실패: min=1761110160000, max=None, operator=between"
+                "[의미] camList.timeList.endTime[0]: 범위 검증 실패: min=None, max=None, operator=between",
+                "[의미] camList.timeList.endTime[1]: 범위 검증 실패: min=None, max=None, operator=between",
+                "[의미] camList.timeList.endTime[2]: 범위 검증 실패: min=None, max=None, operator=between",
+                "[의미] camList.timeList.endTime[3]: 범위 검증 실패: min=None, max=None, operator=between",
+                "[의미] camList.timeList.startTime[0]: 범위 검증 실패: min=None, max=None, operator=between",
+                "[의미] camList.timeList.startTime[1]: 범위 검증 실패: min=None, max=None, operator=between",
+                "[의미] camList.timeList.startTime[2]: 범위 검증 실패: min=None, max=None, operator=between",
+                "[의미] camList.timeList.startTime[3]: 범위 검증 실패: min=None, max=None, operator=between"
               ]
             },
             {
@@ -234,9 +234,9 @@
           "endpoint": "/StreamURLs",
           "score": 83.0,
           "validationCnt": 5,
-          "totalFields": 60,
-          "passFields": 50,
-          "failFields": 10,
+          "totalFields": 12,
+          "passFields": 10,
+          "failFields": 2,
           "validations": [
             {
               "attempt": 1,
@@ -277,17 +277,17 @@
           "endpoint": "/ReplayURL",
           "score": 79.0,
           "validationCnt": 5,
-          "totalFields": 70,
-          "passFields": 55,
-          "failFields": 15,
+          "totalFields": 14,
+          "passFields": 11,
+          "failFields": 3,
           "validations": [
             {
               "attempt": 1,
               "validationData": {},
               "validationErrors": [
                 "[시도 5/5]",
-                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761063522920 (타입: int), [1] 1761151491158 (타입: int)",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761031993726 (타입: int), [1] 1761121295847 (타입: int)",
+                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761172150813 (타입: int), [1] 1761115976792 (타입: int)",
+                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761155821377 (타입: int), [1] 1761114265887 (타입: int)",
                 "[구조] 타입 불일치: camList.videoInfo.fps (예상: int, 실제: str, 값: 30)"
               ]
             },
@@ -320,9 +320,9 @@
           "endpoint": "/RealtimeVideoEventInfos",
           "score": 44.0,
           "validationCnt": 5,
-          "totalFields": 45,
-          "passFields": 20,
-          "failFields": 25,
+          "totalFields": 9,
+          "passFields": 4,
+          "failFields": 5,
           "validations": [
             {
               "attempt": 1,
@@ -435,20 +435,19 @@
           "name": "저장된 이벤트 분석 정보 연동",
           "method": "POST",
           "endpoint": "/StoredVideoEventInfos",
-          "score": 67.0,
+          "score": 78.0,
           "validationCnt": 5,
-          "totalFields": 45,
-          "passFields": 30,
-          "failFields": 15,
+          "totalFields": 9,
+          "passFields": 7,
+          "failFields": 2,
           "validations": [
             {
               "attempt": 1,
               "validationData": {},
               "validationErrors": [
                 "[시도 5/5]",
-                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 7751614519355 (타입: int), [1] 7076806793885 (타입: int)",
-                "[의미] camList.eventName: 값 불일치: ['침입', '침입'] != 예상값 배회",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 6974162556862 (타입: int), [1] 5072247938744 (타입: int)"
+                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 4809864646835 (타입: int), [1] 7506325642640 (타입: int)",
+                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 3207562511559 (타입: int), [1] 5637482494507 (타입: int)"
               ]
             },
             {
@@ -476,5 +475,5 @@
       ]
     }
   ],
-  "completedDate": "2025-11-12T14:15:45Z"
+  "completedDate": "2025-11-12T14:55:44Z"
 }

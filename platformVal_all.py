@@ -2437,8 +2437,9 @@ class MyApp(QWidget):
                 # 이번 회차 결과를 누적 데이터에 저장
                 accumulated['validation_results'].append(step_result)
                 accumulated['error_messages'].extend(combined_error_parts)
-                accumulated['total_pass'] += add_pass
-                accumulated['total_error'] += add_err
+                # ✅ 필드 수는 마지막 시도로 덮어쓰기 (누적 X)
+                accumulated['total_pass'] = add_pass
+                accumulated['total_error'] = add_err
 
                 # ✅ 매 시도마다 테이블 실시간 업데이트 (시스템과 동일)
                 self.update_table_row_with_retries(
