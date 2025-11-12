@@ -46,7 +46,7 @@ def save_management_url(new_url):
 # 관리자시스템 주소
 management_url = load_management_url()
 
-specs = [["cmgvieyak001b6cd04cgaawmm_inSchema","cmgvieyak001b6cd04cgaawmm_outData","cmgvieyak001b6cd04cgaawmm_messages",""]]
+specs = [["cmgyv3rzl014nvsveidu5jpzp_outSchema","cmgyv3rzl014nvsveidu5jpzp_inData","cmgyv3rzl014nvsveidu5jpzp_messages",""]]
 none_request_message = ['Capabilities',
                         'CameraProfiles',
                         'DoorProfiles',
