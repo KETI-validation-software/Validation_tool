@@ -4968,13 +4968,10 @@ class MyApp(QWidget):
 
         # ✅ 18. 시작 메시지
         self.valResult.append("=" * 60)
-        self.valResult.append(f"🚀 시험 시작: {self.spec_description}")
+        self.valResult.append(f"🚀 시스템 검증 시작: {self.spec_description}")
         self.valResult.append(f"📋 Spec ID: {self.current_spec_id}")
         self.valResult.append(f"📊 API 개수: {len(self.videoMessages)}개")
-        self.valResult.append(f"📋 API 목록: {self.videoMessages}")
-        self.valResult.append(f"📊 전체 누적 점수: {self.global_pass_cnt}(통과) / {self.global_error_cnt}(실패)")
         self.valResult.append("=" * 60)
-        self.valResult.append("\n시스템이 플랫폼에 요청을 전송하여 응답을 검증합니다\n")
 
         # ✅ 19. 타이머 시작 (모든 초기화 완료 후)
         print(f"[START] 타이머 시작")
