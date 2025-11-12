@@ -770,9 +770,29 @@ class ResultPageWidget(QWidget):
 
     def load_initial_scenarios(self):
         """초기 시나리오 로드 및 현재 선택된 항목 하이라이트"""
+        # ✅ 외부 CONSTANTS.py에서 SPEC_CONFIG 다시 로드
+        import sys, os
+        SPEC_CONFIG = self.CONSTANTS.SPEC_CONFIG  # 기본값
+
+        if getattr(sys, 'frozen', False):
+            # PyInstaller 환경: 외부 CONSTANTS.py 로드
+            exe_dir = os.path.dirname(sys.executable)
+            external_constants_path = os.path.join(exe_dir, "config", "CONSTANTS.py")
+
+            if os.path.exists(external_constants_path):
+                try:
+                    with open(external_constants_path, 'r', encoding='utf-8') as f:
+                        constants_code = f.read()
+                    namespace = {'__file__': external_constants_path}
+                    exec(constants_code, namespace)
+                    SPEC_CONFIG = namespace.get('SPEC_CONFIG', self.CONSTANTS.SPEC_CONFIG)
+                    print(f"[RESULT INIT] ✅ 외부 CONSTANTS 로드 완료: {len(SPEC_CONFIG)}개 그룹")
+                except Exception as e:
+                    print(f"[RESULT INIT] ⚠️ 외부 CONSTANTS 로드 실패, 기본값 사용: {e}")
+
         # 현재 spec_id가 속한 그룹 찾기
         current_group = None
-        for group_data in self.CONSTANTS.SPEC_CONFIG:
+        for group_data in SPEC_CONFIG:
             if self.current_spec_id in group_data:
                 current_group = group_data
                 break
