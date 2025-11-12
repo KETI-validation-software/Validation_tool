@@ -3594,16 +3594,16 @@ class MyApp(QWidget):
                     # 이번 시도의 결과
                     final_result = val_result
 
-                    # 누적 카운트 로직
+                    # ✅ 마지막 시도 결과로 덮어쓰기 (누적 X)
                     if not hasattr(self, 'step_pass_counts'):
                         api_count = len(self.videoMessages)
                         self.step_pass_counts = [0] * api_count
                         self.step_error_counts = [0] * api_count
                         self.step_pass_flags = [0] * api_count
 
-                    # 이번 시도 결과를 누적
-                    self.step_pass_counts[self.cnt] += key_psss_cnt
-                    self.step_error_counts[self.cnt] += key_error_cnt
+                    # ✅ 이번 시도 결과로 덮어쓰기 (누적하지 않음!)
+                    self.step_pass_counts[self.cnt] = key_psss_cnt
+                    self.step_error_counts[self.cnt] = key_error_cnt
 
                     if final_result == "PASS":
                         self.step_pass_flags[self.cnt] += 1
