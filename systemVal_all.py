@@ -25,6 +25,7 @@ from PyQt5 import QtCore
 from api.webhook_api import WebhookThread
 from core.functions import json_check_, resource_path, json_to_data, timeout_field_finder
 from core.data_mapper import ConstraintDataGenerator
+from splash_screen import LoadingPopup
 from requests.auth import HTTPDigestAuth
 import config.CONSTANTS as CONSTANTS
 import traceback
@@ -631,7 +632,7 @@ class ResultPageWidget(QWidget):
                     with open(external_constants_path, 'r', encoding='utf-8') as f:
                         constants_code = f.read()
 
-                    namespace = {}
+                    namespace = {'__file__': external_constants_path}
                     exec(constants_code, namespace)
                     SPEC_CONFIG = namespace.get('SPEC_CONFIG', self.CONSTANTS.SPEC_CONFIG)
                     print(f"[GROUP TABLE] ✅ 외부 SPEC_CONFIG 로드 완료: {len(SPEC_CONFIG)}개 그룹")
@@ -1935,6 +1936,9 @@ class MyApp(QWidget):
         self.res = None
         self.radio_check_flag = "video"  # 영상보안 시스템으로 고정
 
+        # 로딩 팝업 인스턴스 변수
+        self.loading_popup = None
+
         # ✅ spec_id 초기화 (info_GUI에서 전달받거나 기본값 사용)
         if spec_id:
             self.current_spec_id = spec_id
@@ -2175,7 +2179,7 @@ class MyApp(QWidget):
                         constants_code = f.read()
 
                     # SPEC_CONFIG만 추출하기 위해 exec 실행
-                    namespace = {}
+                    namespace = {'__file__': external_constants_path}
                     exec(constants_code, namespace)
                     SPEC_CONFIG = namespace.get('SPEC_CONFIG', self.CONSTANTS.SPEC_CONFIG)
                     url_value = namespace.get('url', url_value)
@@ -2567,7 +2571,7 @@ class MyApp(QWidget):
                     with open(external_constants_path, 'r', encoding='utf-8') as f:
                         constants_code = f.read()
 
-                    namespace = {}
+                    namespace = {'__file__': external_constants_path}
                     exec(constants_code, namespace)
                     SPEC_CONFIG = namespace.get('SPEC_CONFIG', self.CONSTANTS.SPEC_CONFIG)
                     print(f"[GROUP TABLE] ✅ 외부 SPEC_CONFIG 로드 완료: {len(SPEC_CONFIG)}개 그룹")
@@ -3382,7 +3386,7 @@ class MyApp(QWidget):
                     try:
                         self.run_status = "완료"
                         result_json = build_result_json(self)
-                        url = f"http://ect2.iptime.org:20223/api/integration/test-results"
+                        url = f"{CONSTANTS.management_url}/api/integration/test-results"
                         response = requests.post(url, json=result_json)
                         print("✅ 시험 결과 전송 상태 코드:", response.status_code)
                         print("📥  시험 결과 전송 응답:", response.text)
@@ -3754,7 +3758,7 @@ class MyApp(QWidget):
                 try:
                     self.run_status = "완료"
                     result_json = build_result_json(self)
-                    url = f"http://ect2.iptime.org:20223/api/integration/test-results"
+                    url = f"{CONSTANTS.management_url}/api/integration/test-results"
                     response = requests.post(url, json=result_json)
                     print("✅ 시험 결과 전송 상태 코드:", response.status_code)
                     print("📥  시험 결과 전송 응답:", response.text)
@@ -4818,6 +4822,11 @@ class MyApp(QWidget):
             QMessageBox.warning(self, "알림", "시험 시나리오를 먼저 선택하세요.")
             return
 
+        # ✅ 로딩 팝업 표시
+        self.loading_popup = LoadingPopup()
+        self.loading_popup.show()
+        QApplication.processEvents()  # UI 즉시 업데이트
+
         self.pathUrl = self.url_text_box.text()
         print(f"[START] ========== 검증 시작: 완전 초기화 ==========")
         print(f"[START] 시험 URL : ", self.pathUrl)
@@ -4952,6 +4961,11 @@ class MyApp(QWidget):
         self.tick_timer.start(1000)
         print(f"[START] ========== 검증 시작 준비 완료 ==========")
 
+        # ✅ 로딩 팝업 닫기
+        if self.loading_popup:
+            self.loading_popup.close()
+            self.loading_popup = None
+
         print(f"[START] 현재 global 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}")
 
     def stop_btn_clicked(self):
@@ -4971,7 +4985,7 @@ class MyApp(QWidget):
         try:
             self.run_status = "진행중"
             result_json = build_result_json(self)
-            url = f"http://ect2.iptime.org:20223/api/integration/test-results"
+            url = f"{CONSTANTS.management_url}/api/integration/test-results"
             response = requests.post(url, json=result_json)
             print("✅ 시험 결과 전송 상태 코드:", response.status_code)
             print("📥  시험 결과 전송 응답:", response.text)

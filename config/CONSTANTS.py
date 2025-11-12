@@ -2,6 +2,51 @@
 import os
 
 headers = {"Content-type": "application/json", "User-Agent": 'test'}
+
+# 관리자시스템 주소 설정 로딩
+def load_management_url():
+    """config.txt에서 관리자시스템 주소를 읽어옴"""
+    config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config.txt")
+    default_url = "http://ect2.iptime.org:20223"
+
+    try:
+        if os.path.exists(config_path):
+            with open(config_path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith('#'):
+                        if '=' in line:
+                            key, value = line.split('=', 1)
+                            if key.strip() == 'management_url':
+                                return value.strip()
+    except Exception as e:
+        print(f"config.txt 읽기 실패: {e}")
+
+    return default_url
+
+def save_management_url(new_url):
+    """관리자시스템 주소를 config.txt에 저장"""
+    config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config.txt")
+
+    try:
+        with open(config_path, 'w', encoding='utf-8') as f:
+            f.write("# 관리자시스템 주소 설정\n")
+            f.write("# 주소 변경이 필요한 경우 아래 URL만 수정하세요\n")
+            f.write(f"management_url={new_url}\n")
+
+        # 메모리상의 값도 업데이트
+        global management_url
+        management_url = new_url
+
+        return True
+    except Exception as e:
+        print(f"config.txt 저장 실패: {e}")
+        return False
+
+# 관리자시스템 주소
+management_url = load_management_url()
+
+specs = [["cmgvieyak001b6cd04cgaawmm_inSchema","cmgvieyak001b6cd04cgaawmm_outData","cmgvieyak001b6cd04cgaawmm_messages",""]]
 none_request_message = ['Capabilities',
                         'CameraProfiles',
                         'DoorProfiles',
@@ -9,19 +54,19 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소
 # test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
-company_name = "물리보안테스트2"
-product_name = "물리보안테스트시스템"
+company_name = "통합플랫폼테스트"
+product_name = "통합플랫폼테스트제품"
 version = "v1.0"
 test_category = "MAIN_TEST"
-test_target = "영상보안그룹"
+test_target = "통합플랫폼"
 test_range = "ALL_FIELDS"
 auth_type = "Digest Auth"
-auth_info = "abcd,1234"
+auth_info = "admin,1234"
 admin_code = "1234"
-url = "https://10.252.219.70:8080"
+url = "https://127.0.0.1:8080"
 contact_person = "김철수"
 model_name = "v1.0"
-request_id = "cmhfpjibz000c5t1uxmf2urvj"
+request_id = "cmh1yg49v000t9y0jdr1wwuja"
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황
 flag_opt = False
@@ -68,26 +113,16 @@ WEBHOOK_URL = f"https://{WEBHOOK_PUBLIC_IP}:{WEBHOOK_PORT}"
 
 SPEC_CONFIG = [
     {
-        "group_name": "영상보안그룹",
-        "group_id": "cmh1ybbyb000d9y0jxtlgp2nf",
-        "cmh1ua7b00021gxc3rjepbkrm": {
-    "test_name": "영상보안시스템_시나리오2",
-    "specs": ['cmh1ua7b00021gxc3rjepbkrm_outSchema', 'cmh1ua7b00021gxc3rjepbkrm_inData', 'cmh1ua7b00021gxc3rjepbkrm_messages'],
-    "api_name": ['인증'],
-    "api_id": ['step-1-ckssr4n2h'],
-    "api_endpoint": ['/Authentication'],
-    "trans_protocol": ['basic'],
-    "time_out": [5000],
-    "num_retries": [10]
-},
-        "cmgyv3rzl014nvsveidu5jpzp": {
-    "test_name": "test_video_001",
-    "specs": ['cmgyv3rzl014nvsveidu5jpzp_outSchema', 'cmgyv3rzl014nvsveidu5jpzp_inData', 'cmgyv3rzl014nvsveidu5jpzp_messages', 'cmgyv3rzl014nvsveidu5jpzp_webhook_inSchema', 'cmgyv3rzl014nvsveidu5jpzp_webhook_outData'],
+        "group_name": "통합플랫폼",
+        "group_id": "cmgzwocpp01y6vsve880sfysm",
+        "cmgvieyak001b6cd04cgaawmm": {
+    "test_name": "vid001",
+    "specs": ['cmgvieyak001b6cd04cgaawmm_inSchema', 'cmgvieyak001b6cd04cgaawmm_outData', 'cmgvieyak001b6cd04cgaawmm_messages', 'cmgvieyak001b6cd04cgaawmm_webhook_OutSchema', 'cmgvieyak001b6cd04cgaawmm_webhook_inData'],
     "api_name": ['인증', '전송 지원 기능 정보 연동', '카메라 목록 연동', '저장된 영상 목록 연동', '실시간 영상 정보 연동', '저장된 영상 정보 연동', '실시간 이벤트 분석 정보 연동', '저장된 이벤트 분석 정보 연동'],
-    "api_id": ['step-1-s9942zltt', 'step-1-vps6mosa3', 'step-3-dpd47yeve', 'step-4-nbpd1rfle', 'step-5-6juqjc7zt', 'step-6-2hxrdvfry', 'step-7-jgj9l9vf4', 'step-8-57zrt6i4l'],
+    "api_id": ['step-1-77lxvxrit', 'step-2-ln57b7ahz', 'step-1-354py0pz2', 'step-2-hyto4xrf1', 'step-5-dfxmyzzsw', 'step-6-pflcyt2cp', 'step-7-166n5ivbf', 'step-8-fff2u2432'],
     "api_endpoint": ['/Authentication', '/Capabilities', '/CameraProfiles', '/StoredVideoInfos', '/StreamURLs', '/ReplayURL', '/RealtimeVideoEventInfos', '/StoredVideoEventInfos'],
     "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'WebHook', 'basic'],
-    "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
+    "time_out": [60000, 60000, 60000, 60000, 60000, 60000, 60000, 60000],
     "num_retries": [1, 1, 1, 1, 1, 1, 1, 1]
 }
     }
