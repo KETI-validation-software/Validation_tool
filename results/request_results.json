@@ -45,14 +45,11 @@
           "validations": [
             {
               "attempt": 1,
-              "validationData": {
-                "userID": "user0001",
-                "userPW": "pass0001"
-              },
+              "validationData": {},
               "validationErrors": [
                 "[Inbound]",
-                "[의미] userID: 값 불일치: user0001가 지정값 ['kisa']에 없음",
-                "[의미] userPW: 값 불일치: pass0001가 지정값 ['kisa_k1!2@']에 없음"
+                "[구조] 필수 필드 누락: userID",
+                "[구조] 필수 필드 누락: userPW"
               ]
             }
           ]
@@ -223,8 +220,8 @@
                   "transProtocolType": "WebHook",
                   "transProtocolDesc": "https://10.252.219.95:2001"
                 },
-                "eventFilter": "Intrusion",
-                "classFilter": "버스",
+                "eventFilter": "침입",
+                "classFilter": "트럭",
                 "startTime": 1761110160000
               },
               "validationErrors": [
@@ -285,8 +282,8 @@
                   }
                 ],
                 "maxCount": 3,
-                "eventFilter": "침입",
-                "classFilter": "Human"
+                "eventFilter": "배회",
+                "classFilter": "사람"
               },
               "validationErrors": [
                 "오류가 없습니다."
@@ -297,5 +294,5 @@
       ]
     }
   ],
-  "completedDate": "2025-11-12T11:41:40Z"
+  "completedDate": "2025-11-12T12:11:23Z"
 }
