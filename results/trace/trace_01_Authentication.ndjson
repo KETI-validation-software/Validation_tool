@@ -1,2 +1,0 @@
-{"time": "2025-11-10T06:31:16.095187Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "user0001", "userPW": "pass0001"}}
-{"time": "2025-11-10T06:31:17.088527Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 URL 형식"}}

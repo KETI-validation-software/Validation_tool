@@ -1,2 +1,0 @@
-{"time": "2025-11-10T06:31:28.084104Z", "api": "StreamURLs", "dir": "REQUEST", "data": {"camList": [{"camID": "", "streamProtocolType": "RTSP"}, {"camID": "", "streamProtocolType": "RTSP"}, {"camID": "", "streamProtocolType": "RTSP"}]}}
-{"time": "2025-11-10T06:31:29.088497Z", "api": "StreamURLs", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 URL 형식"}}

@@ -1,2 +1,0 @@
-{"time": "2025-11-10T06:31:19.083351Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
-{"time": "2025-11-10T06:31:20.087815Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 URL 형식"}}
