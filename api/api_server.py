@@ -869,7 +869,7 @@ class Server(BaseHTTPRequestHandler):
                     with open(external_constants_path, 'r', encoding='utf-8') as f:
                         constants_code = f.read()
                     
-                    namespace = {}
+                    namespace = {'__file__': external_constants_path}
                     exec(constants_code, namespace)
                     SPEC_CONFIG = namespace.get('SPEC_CONFIG', SPEC_CONFIG)
             
