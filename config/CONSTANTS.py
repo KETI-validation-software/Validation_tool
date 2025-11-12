@@ -61,9 +61,9 @@ test_category = "MAIN_TEST"
 test_target = "통합플랫폼"
 test_range = "ALL_FIELDS"
 auth_type = "Digest Auth"
-auth_info = "admin,1234"
+auth_info = "asdf,f"
 admin_code = "1234"
-url = "https://127.0.0.1:8080"
+url = "https://10.252.219.95:8080"
 contact_person = "김철수"
 model_name = "v1.0"
 request_id = "cmh1yg49v000t9y0jdr1wwuja"
@@ -123,7 +123,7 @@ SPEC_CONFIG = [
     "api_endpoint": ['/Authentication', '/Capabilities', '/CameraProfiles', '/StoredVideoInfos', '/StreamURLs', '/ReplayURL', '/RealtimeVideoEventInfos', '/StoredVideoEventInfos'],
     "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'WebHook', 'basic'],
     "time_out": [60000, 60000, 60000, 60000, 60000, 60000, 60000, 60000],
-    "num_retries": [1, 1, 1, 1, 1, 1, 1, 1]
+    "num_retries": [5, 5, 5, 5, 5, 5, 5, 5]
 }
     }
 ]
