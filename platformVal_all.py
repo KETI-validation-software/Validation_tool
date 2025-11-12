@@ -3319,6 +3319,10 @@ class MyApp(QWidget):
                 background-repeat: no-repeat;
                 background-position: center;
             }}
+            QScrollArea, QScrollArea QWidget, QScrollArea::viewport,
+            QGroupBox, QWidget#scroll_widget, QLabel {{
+                background: transparent;
+            }}
         """)
 
         if not self.embedded:
@@ -3759,7 +3763,9 @@ class MyApp(QWidget):
         main_path = resource_path("assets/image/test_runner/main_table.png").replace("\\", "/")
         self.tableWidget.setStyleSheet(f"""
             QTableWidget {{
-                background: #FFF;  
+                background: #FFF;
+                background-image: url('{main_path}');
+                background-repeat: no-repeat;
                 background-position: center;
                 border-radius: 8px;
                 border: 1px solid #CECECE;

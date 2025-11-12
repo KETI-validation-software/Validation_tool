@@ -1,0 +1,2 @@
+{"time": "2025-11-12T03:11:19.654550Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "cam0001"}, {"camID": "cam0002"}], "duration": "100", "transProtocol": {"transProtocolType": "WebHook", "transProtocolDesc": "https://10.252.219.95:2001"}, "eventFilter": "침입", "classFilter": "트럭", "startTime": 1761110160000}}
+{"time": "2025-11-12T03:11:20.648608Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "", "message": ""}}
