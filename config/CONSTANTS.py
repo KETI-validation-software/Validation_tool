@@ -46,7 +46,10 @@ def save_management_url(new_url):
 # 관리자시스템 주소
 management_url = load_management_url()
 
-specs = [["cmgyv3rzl014nvsveidu5jpzp_outSchema","cmgyv3rzl014nvsveidu5jpzp_inData","cmgyv3rzl014nvsveidu5jpzp_messages",""]]
+specs = [["cmh1u5pef000sgxc3bzl4y9v0_inSchema","cmh1u5pef000sgxc3bzl4y9v0_outData","cmh1u5pef000sgxc3bzl4y9v0_messages",""],
+         ["cmgvieyak001b6cd04cgaawmm_inSchema","cmgvieyak001b6cd04cgaawmm_outData","cmgvieyak001b6cd04cgaawmm_messages",""],
+         ["cmh1ua7b00021gxc3rjepbkrm_outSchema","cmh1ua7b00021gxc3rjepbkrm_inData","cmh1ua7b00021gxc3rjepbkrm_messages",""],
+         ["cmgyv3rzl014nvsveidu5jpzp_outSchema","cmgyv3rzl014nvsveidu5jpzp_inData","cmgyv3rzl014nvsveidu5jpzp_messages",""]]
 none_request_message = ['Capabilities',
                         'CameraProfiles',
                         'DoorProfiles',
@@ -54,11 +57,11 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소
 # test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
-company_name = "물리보안기업"
-product_name = "물리보안테스트제품"
+company_name = "통합플랫폼테스트"
+product_name = "통합플랫폼테스트제품"
 version = "v1.0"
 test_category = "MAIN_TEST"
-test_target = "물리보안"
+test_target = "통합플랫폼"
 test_range = "ALL_FIELDS"
 auth_type = "Digest Auth"
 auth_info = "admin,1234"
@@ -66,7 +69,7 @@ admin_code = "1234"
 url = "https://192.168.0.3:8080"
 contact_person = "김철수"
 model_name = "v1.0"
-request_id = "cmh2sdyj70001ry7uvsgugy25"
+request_id = "cmh1yg49v000t9y0jdr1wwuja"
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황
 flag_opt = False
@@ -113,8 +116,18 @@ WEBHOOK_URL = f"https://{WEBHOOK_PUBLIC_IP}:{WEBHOOK_PORT}"
 
 SPEC_CONFIG = [
     {
-        "group_name": "물리보안",
-        "group_id": "cmgzwohuq01y8vsvep0hpuuf4",
+        "group_name": "영상보안그룹",
+        "group_id": "cmh1ybbyb000d9y0jxtlgp2nf",
+        "cmh1ua7b00021gxc3rjepbkrm": {
+    "test_name": "영상보안시스템_시나리오2",
+    "specs": ['cmh1ua7b00021gxc3rjepbkrm_outSchema', 'cmh1ua7b00021gxc3rjepbkrm_inData', 'cmh1ua7b00021gxc3rjepbkrm_messages'],
+    "api_name": ['인증'],
+    "api_id": ['step-1-ckssr4n2h'],
+    "api_endpoint": ['/Authentication'],
+    "trans_protocol": ['basic'],
+    "time_out": [5000],
+    "num_retries": [10]
+},
         "cmgyv3rzl014nvsveidu5jpzp": {
     "test_name": "vid001",
     "specs": ['cmgyv3rzl014nvsveidu5jpzp_outSchema', 'cmgyv3rzl014nvsveidu5jpzp_inData', 'cmgyv3rzl014nvsveidu5jpzp_messages', 'cmgyv3rzl014nvsveidu5jpzp_webhook_inSchema', 'cmgyv3rzl014nvsveidu5jpzp_webhook_outData'],

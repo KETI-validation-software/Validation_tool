@@ -13,6 +13,7 @@ from core.functions import resource_path
 from network_scanner import NetworkScanWorker, ARPScanWorker
 from form_validator import FormValidator
 import config.CONSTANTS as CONSTANTS
+from splash_screen import LoadingPopup
 
 
 class InfoWidget(QWidget):
@@ -2209,22 +2210,32 @@ class InfoWidget(QWidget):
 
     def on_load_test_info_clicked(self):
         """시험정보 불러오기 버튼 클릭 이벤트 (API 기반)"""
+        # IP 입력창에서 IP 주소 가져오기
+        ip_address = self.ip_input_edit.text().strip()
+
+        if not ip_address:
+            QMessageBox.warning(self, "경고", "주소를 입력해주세요.")
+            return
+
+        # IP 주소 형식 검증
+        if not self._validate_ip_address(ip_address):
+            QMessageBox.warning(self, "경고",
+                "올바른 IP 주소 형식이 아닙니다.\n"
+                "예: 192.168.1.1")
+            return
+
+        print(f"입력된 IP 주소: {ip_address}")
+
+        # 로딩 팝업 생성 및 표시 (스피너 애니메이션 포함)
+        loading_popup = LoadingPopup(width=400, height=200)
+        loading_popup.update_message("시험 정보 불러오는 중...", "잠시만 기다려주세요")
+        loading_popup.show()
+
+        # UI 즉시 업데이트를 위한 이벤트 루프 처리
+        from PyQt5.QtWidgets import QApplication
+        QApplication.processEvents()
+
         try:
-            # IP 입력창에서 IP 주소 가져오기
-            ip_address = self.ip_input_edit.text().strip()
-
-            if not ip_address:
-                QMessageBox.warning(self, "경고", "주소를 입력해주세요.")
-                return
-
-            # IP 주소 형식 검증
-            if not self._validate_ip_address(ip_address):
-                QMessageBox.warning(self, "경고",
-                    "올바른 IP 주소 형식이 아닙니다.\n"
-                    "예: 192.168.1.1")
-                return
-
-            print(f"입력된 IP 주소: {ip_address}")
 
             # API 호출하여 시험 정보 가져오기
             test_data = self.form_validator.fetch_test_info_by_ip(ip_address)
@@ -2315,6 +2326,10 @@ class InfoWidget(QWidget):
             import traceback
             traceback.print_exc()
             QMessageBox.critical(self, "오류", f"시험 정보를 불러오는 중 오류가 발생했습니다:\n{str(e)}")
+
+        finally:
+            # 로딩 팝업 닫기 (성공/실패 여부와 관계없이 항상 실행)
+            loading_popup.close()
 
     def on_management_url_changed(self):
         """관리자시스템 주소 변경 시 처리"""

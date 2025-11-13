@@ -1,3 +1,19 @@
+# RealtimeVideoEventInfos
+cmh1u5pef000sgxc3bzl4y9v0_RealtimeVideoEventInfos_out_constraints = {}
+
+# RealtimeVideoEventInfos WebHook IN Constraints
+cmh1u5pef000sgxc3bzl4y9v0_RealtimeVideoEventInfos_webhook_in_constraints = {}
+
+# cmh1u5pef000sgxc3bzl4y9v0 검증 리스트
+cmh1u5pef000sgxc3bzl4y9v0_outConstraints = [
+    cmh1u5pef000sgxc3bzl4y9v0_RealtimeVideoEventInfos_out_constraints,
+]
+
+# cmh1u5pef000sgxc3bzl4y9v0 WebHook Constraints 리스트
+cmh1u5pef000sgxc3bzl4y9v0_webhook_inConstraints = [
+    cmh1u5pef000sgxc3bzl4y9v0_RealtimeVideoEventInfos_webhook_in_constraints,
+]
+
 # Authentication
 cmgvieyak001b6cd04cgaawmm_Authentication_out_constraints = {}
 
