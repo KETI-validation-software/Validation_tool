@@ -2437,8 +2437,9 @@ class MyApp(QWidget):
                 # 이번 회차 결과를 누적 데이터에 저장
                 accumulated['validation_results'].append(step_result)
                 accumulated['error_messages'].extend(combined_error_parts)
-                accumulated['total_pass'] += add_pass
-                accumulated['total_error'] += add_err
+                # ✅ 필드 수는 마지막 시도로 덮어쓰기 (누적 X)
+                accumulated['total_pass'] = add_pass
+                accumulated['total_error'] = add_err
 
                 # ✅ 매 시도마다 테이블 실시간 업데이트 (시스템과 동일)
                 self.update_table_row_with_retries(
@@ -2459,6 +2460,16 @@ class MyApp(QWidget):
                 if self.current_retry >= current_retries:
                     # 최종 결과
                     final_result = "FAIL" if "FAIL" in accumulated['validation_results'] else "PASS"
+
+                    # ✅ step_pass_counts 배열에 저장 (배열이 없으면 생성)
+                    api_count = len(self.videoMessages)
+                    if not hasattr(self, 'step_pass_counts') or len(self.step_pass_counts) != api_count:
+                        self.step_pass_counts = [0] * api_count
+                        self.step_error_counts = [0] * api_count
+                    
+                    # 이번 API의 결과 저장
+                    self.step_pass_counts[self.cnt] = accumulated['total_pass']
+                    self.step_error_counts[self.cnt] = accumulated['total_error']
 
                     # 스텝 버퍼 저장
                     data_text = "\n".join(accumulated['data_parts']) if accumulated[
@@ -2493,16 +2504,13 @@ class MyApp(QWidget):
                     self.valResult.append("\n" + data_text)
                     self.valResult.append(final_result)
 
-                    # ✅ 분야별 누적 점수 업데이트 (현재 spec)
-                    self.total_error_cnt += accumulated['total_error']
-                    self.total_pass_cnt += accumulated['total_pass']
-
-                    # ✅ 전체 누적 점수 업데이트 (모든 spec)
+                    # ✅ 전체 누적 점수 업데이트 (모든 spec) - API당 1회만 추가
                     self.global_error_cnt += accumulated['total_error']
                     self.global_pass_cnt += accumulated['total_pass']
 
                     self.update_score_display()
 
+                    # ✅ 점수 계산은 step_pass_counts 배열의 합으로 (누적 아님!)
                     total_fields = self.total_pass_cnt + self.total_error_cnt
                     if total_fields > 0:
                         score_text = str((self.total_pass_cnt / total_fields * 100))
@@ -2511,8 +2519,8 @@ class MyApp(QWidget):
 
                     self.valResult.append("Score : " + score_text)
                     self.valResult.append(
-                        "Score details : " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(
-                            self.total_error_cnt) + "(누적 오류 필드 수)\n")
+                        "Score details : " + str(self.total_pass_cnt) + "(통과 필드 수), " + str(
+                            self.total_error_cnt) + "(오류 필드 수)\n")
 
                     self.cnt += 1
                     self.current_retry = 0
@@ -2668,7 +2676,11 @@ class MyApp(QWidget):
         if hasattr(self, "spec_name_label"):
             self.spec_name_label.setText(f"분야별 점수      |      {self.spec_description} ({len(self.videoMessages)}개 API)")
 
-        # ✅ 1️⃣ 분야별 점수 (현재 spec만)
+        # ✅ 1️⃣ 분야별 점수 (현재 spec만) - step_pass_counts 배열의 합으로 계산
+        if hasattr(self, 'step_pass_counts') and hasattr(self, 'step_error_counts'):
+            self.total_pass_cnt = sum(self.step_pass_counts)
+            self.total_error_cnt = sum(self.step_error_counts)
+        
         spec_total_fields = self.total_pass_cnt + self.total_error_cnt
         if spec_total_fields > 0:
             spec_score = (self.total_pass_cnt / spec_total_fields) * 100
@@ -4216,6 +4228,11 @@ class MyApp(QWidget):
         # ✅ 현재 시험 시나리오(spec)의 점수만 초기화
         self.total_error_cnt = 0
         self.total_pass_cnt = 0
+        # ✅ step_pass_counts, step_error_counts 배열도 초기화
+        if hasattr(self, 'step_pass_counts'):
+            api_count = len(self.videoMessages)
+            self.step_pass_counts = [0] * api_count
+            self.step_error_counts = [0] * api_count
         # global_pass_cnt, global_error_cnt는 유지 (다른 spec 영향 없음)
 
         self.cnt = 0

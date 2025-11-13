@@ -39,8 +39,8 @@
           "endpoint": "/Authentication",
           "score": 100.0,
           "validationCnt": 5,
-          "totalFields": 25,
-          "passFields": 25,
+          "totalFields": 5,
+          "passFields": 5,
           "failFields": 0,
           "validations": [
             {
@@ -88,8 +88,8 @@
           "endpoint": "/Capabilities",
           "score": 100.0,
           "validationCnt": 5,
-          "totalFields": 40,
-          "passFields": 40,
+          "totalFields": 8,
+          "passFields": 8,
           "failFields": 0,
           "validations": [
             {
@@ -137,8 +137,8 @@
           "endpoint": "/CameraProfiles",
           "score": 100.0,
           "validationCnt": 5,
-          "totalFields": 60,
-          "passFields": 60,
+          "totalFields": 12,
+          "passFields": 12,
           "failFields": 0,
           "validations": [
             {
@@ -186,9 +186,9 @@
           "endpoint": "/StoredVideoInfos",
           "score": 71.0,
           "validationCnt": 5,
-          "totalFields": 35,
-          "passFields": 25,
-          "failFields": 10,
+          "totalFields": 7,
+          "passFields": 5,
+          "failFields": 2,
           "validations": [
             {
               "attempt": 1,
@@ -234,9 +234,9 @@
           "endpoint": "/StreamURLs",
           "score": 83.0,
           "validationCnt": 5,
-          "totalFields": 60,
-          "passFields": 50,
-          "failFields": 10,
+          "totalFields": 12,
+          "passFields": 10,
+          "failFields": 2,
           "validations": [
             {
               "attempt": 1,
@@ -277,9 +277,9 @@
           "endpoint": "/ReplayURL",
           "score": 79.0,
           "validationCnt": 5,
-          "totalFields": 70,
-          "passFields": 55,
-          "failFields": 15,
+          "totalFields": 14,
+          "passFields": 11,
+          "failFields": 3,
           "validations": [
             {
               "attempt": 1,
@@ -320,9 +320,9 @@
           "endpoint": "/RealtimeVideoEventInfos",
           "score": 44.0,
           "validationCnt": 5,
-          "totalFields": 45,
-          "passFields": 20,
-          "failFields": 25,
+          "totalFields": 9,
+          "passFields": 4,
+          "failFields": 5,
           "validations": [
             {
               "attempt": 1,

@@ -3141,24 +3141,11 @@ class MyApp(QWidget):
         else:
             self.valResult.append("\n✅ 웹훅 데이터 검증 성공")
 
-        # ✅ 이번 회차의 결과만 전체 점수에 추가 (누적된 값이 아님!)
-        self.total_error_cnt += key_error_cnt
-        self.total_pass_cnt += key_psss_cnt
+        # ✅ step_pass_counts 배열에 웹훅 결과 추가 (배열이 없으면 생성하지 않음)
+        # 점수 업데이트는 모든 재시도 완료 후에 일괄 처리됨 (플랫폼과 동일)
 
-        # ✅ 전체 누적 점수 업데이트 추가
-        self.global_error_cnt += key_error_cnt
-        self.global_pass_cnt += key_psss_cnt
-        # 평가 점수 디스플레이 업데이트
-        self.update_score_display()
-
-        total_fields = self.total_pass_cnt + self.total_error_cnt
-        if total_fields > 0:
-            score = (self.total_pass_cnt / total_fields) * 100
-        else:
-            score = 0
-        self.valResult.append("Score : " + str(score))
-        self.valResult.append("Score details : " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(
-            self.total_error_cnt) + "(누적 오류 필드 수)\n")
+        # ✅ 점수는 표시하지 않음 (재시도 완료 후에만 표시)
+        # 평가 점수 디스플레이 업데이트는 재시도 완료 시에만 호출
 
         if val_result == "PASS":
             msg = "\n" + tmp_webhook_res + "\n\n" + "Result: " + val_text + "\n"
@@ -3171,9 +3158,12 @@ class MyApp(QWidget):
         if self.webhook_cnt < self.tableWidget.rowCount():
             # 기존 누적 필드 수 가져오기
             if hasattr(self, 'step_pass_counts') and hasattr(self, 'step_error_counts'):
-                # 웹훅 결과를 기존 누적에 추가
+                # ✅ 웹훅 결과를 기존 step_pass_counts에 추가 (inbound + webhook)
                 self.step_pass_counts[self.webhook_cnt] += key_psss_cnt
                 self.step_error_counts[self.webhook_cnt] += key_error_cnt
+
+                # ✅ 전체 점수 업데이트는 재시도 완료 후에만 (중복 방지)
+                # global_pass_cnt는 update_view()의 재시도 완료 시점에서 한 번만 += 처리됨
 
                 # 누적된 총 필드 수로 테이블 업데이트
                 accumulated_pass = self.step_pass_counts[self.webhook_cnt]
@@ -3357,9 +3347,12 @@ class MyApp(QWidget):
                     self.step_buffers[self.cnt]["result"] = "FAIL"
                     self.step_buffers[self.cnt]["events"] = list(self.trace.get(self.cnt, []))
 
-                    self.total_error_cnt += add_err
-                    self.total_pass_cnt += 0
-                    # ✅ 전체 누적 점수 업데이트 추가
+                    # ✅ step_pass_counts 배열에 저장 (배열이 있는 경우에만)
+                    if hasattr(self, 'step_pass_counts') and self.cnt < len(self.step_pass_counts):
+                        self.step_pass_counts[self.cnt] = 0
+                        self.step_error_counts[self.cnt] = add_err
+                    
+                    # ✅ 전체 점수 업데이트 (모든 spec 합산)
                     self.global_error_cnt += add_err
                     self.global_pass_cnt += 0
 
@@ -3594,16 +3587,16 @@ class MyApp(QWidget):
                     # 이번 시도의 결과
                     final_result = val_result
 
-                    # 누적 카운트 로직
+                    # ✅ 마지막 시도 결과로 덮어쓰기 (누적 X)
                     if not hasattr(self, 'step_pass_counts'):
                         api_count = len(self.videoMessages)
                         self.step_pass_counts = [0] * api_count
                         self.step_error_counts = [0] * api_count
                         self.step_pass_flags = [0] * api_count
 
-                    # 이번 시도 결과를 누적
-                    self.step_pass_counts[self.cnt] += key_psss_cnt
-                    self.step_error_counts[self.cnt] += key_error_cnt
+                    # ✅ 이번 시도 결과로 덮어쓰기 (누적하지 않음!)
+                    self.step_pass_counts[self.cnt] = key_psss_cnt
+                    self.step_error_counts[self.cnt] = key_error_cnt
 
                     if final_result == "PASS":
                         self.step_pass_flags[self.cnt] += 1
@@ -3690,40 +3683,47 @@ class MyApp(QWidget):
                     self.total_error_cnt += key_error_cnt
                     self.total_pass_cnt += key_psss_cnt'''
 
-                    # ✅ 평가 점수 디스플레이 업데이트 (분야별만)
-                    self.update_score_display()
-
-                    total_fields = self.total_pass_cnt + self.total_error_cnt
-                    if total_fields > 0:
-                        score = (self.total_pass_cnt / total_fields) * 100
-                    else:
-                        score = 0
-                    self.valResult.append("Score : " + str(score))
-                    self.valResult.append(
-                        "Score details : " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(
-                            self.total_error_cnt) + "(누적 오류 필드 수)\n")
+                    # ✅ 점수 업데이트는 모든 재시도 완료 후에만 (플랫폼과 동일)
+                    # 매 시도마다 점수를 표시하지 않음
 
                     # 재시도 카운터 증가
                     self.current_retry += 1
 
+                    # ✅ 웹훅 처리를 재시도 완료 체크 전에 실행 (step_pass_counts 업데이트를 위해)
+                    if self.webhook_flag and self.webhook_res is not None:
+                        print(f"[WEBHOOK] 웹훅 처리 시작 (API {self.cnt})")
+                        self.get_webhook_result()
+
                     # ✅ 현재 API의 모든 재시도가 완료되었는지 확인
                     if (self.cnt < len(self.num_retries_list) and
                             self.current_retry >= self.num_retries_list[self.cnt]):
-                        # ✅ 모든 재시도 완료 - 이제 전체 점수에 반영!
-                        print(f"[SCORE] API {self.cnt} 완료: pass={total_pass_count}, error={total_error_count}")
+                        # ✅ 모든 재시도 완료
+                        # ✅ 웹훅 API의 경우 step_pass_counts가 이미 업데이트되었을 수 있으므로 배열에서 직접 가져옴
+                        final_pass_count = self.step_pass_counts[self.cnt]
+                        final_error_count = self.step_error_counts[self.cnt]
+                        
+                        print(f"[SCORE] API {self.cnt} 완료: pass={final_pass_count}, error={final_error_count}")
 
-                        # ✅ 전체 누적 점수 업데이트 (재시도 완료 후 한 번만!)
-                        # 임시 카운트 1회 검증 조건
-                        self.total_error_cnt += total_error_count
-                        self.total_pass_cnt += total_pass_count
+                        # ✅ 전체 점수 업데이트 (모든 spec 합산) - API당 1회만 추가
+                        self.global_error_cnt += final_error_count
+                        self.global_pass_cnt += final_pass_count
 
-                        self.global_error_cnt += total_error_count
-                        self.global_pass_cnt += total_pass_count
+                        print(f"[SCORE] step_pass_counts 합계: {sum(self.step_pass_counts) if hasattr(self, 'step_pass_counts') else 0}")
+                        print(f"[SCORE] 전체 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}")
 
-                        print(f"[SCORE] 전체 점수 업데이트: pass={self.global_pass_cnt}, error={self.global_error_cnt}")
-
-                        # ✅ 전체 점수 포함하여 디스플레이 업데이트
+                        # ✅ 전체 점수 포함하여 디스플레이 업데이트 (재시도 완료 후에만)
                         self.update_score_display()
+                        
+                        # ✅ 최종 점수 표시
+                        total_fields = self.total_pass_cnt + self.total_error_cnt
+                        if total_fields > 0:
+                            score = (self.total_pass_cnt / total_fields) * 100
+                        else:
+                            score = 0
+                        self.valResult.append("Score : " + str(score))
+                        self.valResult.append(
+                            "Score details : " + str(self.total_pass_cnt) + "(통과 필드 수), " + str(
+                                self.total_error_cnt) + "(오류 필드 수)\n")
 
                         self.step_buffers[self.cnt]["events"] = list(self.trace.get(self.cnt, []))
 
@@ -3743,8 +3743,7 @@ class MyApp(QWidget):
                         self.time_pre = time.time()
                     self.message_in_cnt = 0
 
-                    if self.webhook_flag and self.webhook_res is not None:
-                        self.get_webhook_result()
+                    # ✅ 웹훅 처리는 이미 위에서 완료됨 (중복 제거)
 
             if self.cnt >= len(self.message):
                 self.tick_timer.stop()
@@ -4518,7 +4517,11 @@ class MyApp(QWidget):
         if hasattr(self, "spec_name_label"):
             self.spec_name_label.setText(f"분야별 점수      |      {self.spec_description} ({len(self.videoMessages)}개 API)")
 
-        # ✅ 1️⃣ 분야별 점수 (현재 spec만)
+        # ✅ 1️⃣ 분야별 점수 (현재 spec만) - step_pass_counts 배열의 합으로 계산
+        if hasattr(self, 'step_pass_counts') and hasattr(self, 'step_error_counts'):
+            self.total_pass_cnt = sum(self.step_pass_counts)
+            self.total_error_cnt = sum(self.step_error_counts)
+        
         spec_total_fields = self.total_pass_cnt + self.total_error_cnt
         if spec_total_fields > 0:
             spec_score = (self.total_pass_cnt / spec_total_fields) * 100
@@ -4544,6 +4547,10 @@ class MyApp(QWidget):
         # ✅ 2️⃣ 전체 점수 (모든 spec 합산)
         if hasattr(self, "total_pass_label") and hasattr(self, "total_total_label") and hasattr(self,
                                                                                                 "total_score_label"):
+            # ✅ 전체 점수는 별도로 누적됨 (여러 spec을 실행할 경우 합산)
+            # 현재는 spec이 1개뿐이므로 분야별 점수와 동일하지만, 
+            # 나중에 여러 spec을 실행하면 달라짐
+            
             global_total_fields = self.global_pass_cnt + self.global_error_cnt
             if global_total_fields > 0:
                 global_score = (self.global_pass_cnt / global_total_fields) * 100
