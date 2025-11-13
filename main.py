@@ -40,36 +40,38 @@ import systemVal_all as system_app
 import config.CONSTANTS as CONSTANTS
 import importlib
 
-# ===== 로그 파일 설정 (주석 처리) =====
-# 로그 파일 생성을 원하면 아래 주석을 해제하세요
-# log_filename = f"validation_tool_error_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
-# logging.basicConfig(
-#     level=logging.DEBUG,
-#     format='%(asctime)s - %(levelname)s - %(message)s',
-#     handlers=[
-#         logging.FileHandler(log_filename, encoding='utf-8'),
-#         logging.StreamHandler(sys.stdout)
-#     ]
-# )
-# logger = logging.getLogger(__name__)
+# ===== 로그 파일 설정 (windowed 모드 대응) =====
+# windowed 모드에서도 로그를 파일로 기록
+log_filename = f"validation_tool_debug_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+handlers = [logging.FileHandler(log_filename, encoding='utf-8')]
 
-# 콘솔 출력만 활성화 (파일 생성 안 함)
+# 콘솔 모드일 때만 StreamHandler 추가
+if sys.stdout is not None:
+    handlers.append(logging.StreamHandler(sys.stdout))
+
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,  # 디버깅을 위해 DEBUG로 변경
     format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(sys.stdout)
-    ]
+    handlers=handlers
 )
 logger = logging.getLogger(__name__)
+logger.info(f"로그 파일 생성: {log_filename}")
 
-# ===== 처리되지 않은 예외를 로그에 기록 (주석 처리) =====
-# def exception_hook(exctype, value, tb):
-#     logger.error("처리되지 않은 예외 발생!")
-#     logger.error(''.join(traceback.format_exception(exctype, value, tb)))
-#     sys.__excepthook__(exctype, value, tb)
-#
-# sys.excepthook = exception_hook
+# ===== windowed 모드에서 stdout/stderr를 파일로 리다이렉트 =====
+if sys.stdout is None or sys.stderr is None:
+    stdout_filename = f"validation_tool_stdout_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+    stderr_filename = f"validation_tool_stderr_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+    sys.stdout = open(stdout_filename, 'w', encoding='utf-8')
+    sys.stderr = open(stderr_filename, 'w', encoding='utf-8')
+    logger.info(f"stdout/stderr 리다이렉트: {stdout_filename}, {stderr_filename}")
+
+# ===== 처리되지 않은 예외를 로그에 기록 =====
+def exception_hook(exctype, value, tb):
+    logger.error("처리되지 않은 예외 발생!")
+    logger.error(''.join(traceback.format_exception(exctype, value, tb)))
+    sys.__excepthook__(exctype, value, tb)
+
+sys.excepthook = exception_hook
 
 
 class MainWindow(QMainWindow):
