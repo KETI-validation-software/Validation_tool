@@ -1421,6 +1421,16 @@ class FormValidator:
 
             print("CONSTANTS.py SPEC_CONFIG 전체 덮어쓰기 완료")
 
+            # ✅ 메모리의 CONSTANTS.SPEC_CONFIG도 업데이트
+            try:
+                namespace = {}
+                exec(new_spec_config_block, namespace)
+                if 'SPEC_CONFIG' in namespace:
+                    CONSTANTS.SPEC_CONFIG = namespace['SPEC_CONFIG']
+                    print(f"[MEMORY] CONSTANTS.SPEC_CONFIG 메모리 업데이트 완료: {len(CONSTANTS.SPEC_CONFIG)}개 그룹")
+            except Exception as mem_err:
+                print(f"[WARNING] SPEC_CONFIG 메모리 업데이트 실패: {mem_err}")
+
         except Exception as e:
             print(f"SPEC_CONFIG 덮어쓰기 실패: {e}")
             import traceback
@@ -1682,6 +1692,12 @@ class FormValidator:
             # print(f"  업데이트된 변수: {list(variables.keys())}")
         else:
             print(f"[WARNING] 파일이 존재하지 않습니다: {file_path}")
+
+        # ✅ 메모리의 CONSTANTS 모듈도 업데이트 (중요!)
+        for var_name, var_value in variables.items():
+            if hasattr(CONSTANTS, var_name):
+                setattr(CONSTANTS, var_name, var_value)
+                print(f"[MEMORY] CONSTANTS.{var_name} 메모리 업데이트 완료")
 
 
     def load_opt_files_from_api(self, test_data):
