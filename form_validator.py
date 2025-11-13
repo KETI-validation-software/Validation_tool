@@ -1243,12 +1243,35 @@ class FormValidator:
             mode = self.parent.target_system_edit.text().strip()
 
             from core.functions import resource_path
+
+            # ===== 수정: PyInstaller 환경에서 외부 spec 디렉토리 우선 사용 =====
+            if getattr(sys, 'frozen', False):
+                # PyInstaller로 실행 중 - 외부 경로 사용
+                exe_dir = os.path.dirname(sys.executable)
+                spec_dir = os.path.join(exe_dir, "spec")
+            else:
+                # 일반 실행 - resource_path 사용
+                spec_dir = None  # resource_path로 처리
+            # ===== 수정 끝 =====
+
             if mode == "물리보안시스템":
                 priority_order = ["outSchema", "inData", "messages", "webhook"]
-                merged_result = self.merge_list_prefix_mappings(resource_path("spec/Schema_response.py"), resource_path("spec/Data_request.py"))
+                if spec_dir:
+                    schema_file = os.path.join(spec_dir, "Schema_response.py")
+                    data_file = os.path.join(spec_dir, "Data_request.py")
+                else:
+                    schema_file = resource_path("spec/Schema_response.py")
+                    data_file = resource_path("spec/Data_request.py")
+                merged_result = self.merge_list_prefix_mappings(schema_file, data_file)
             elif mode == "통합플랫폼시스템":
                 priority_order = ["inSchema", "outData", "messages", "webhook"]
-                merged_result = self.merge_list_prefix_mappings(resource_path("spec/Schema_request.py"), resource_path("spec/Data_response.py"))
+                if spec_dir:
+                    schema_file = os.path.join(spec_dir, "Schema_request.py")
+                    data_file = os.path.join(spec_dir, "Data_response.py")
+                else:
+                    schema_file = resource_path("spec/Schema_request.py")
+                    data_file = resource_path("spec/Data_response.py")
+                merged_result = self.merge_list_prefix_mappings(schema_file, data_file)
             else:
                 print("[CONFIG SPEC]: 모드 확인해주세요. mode: ", mode)
 
