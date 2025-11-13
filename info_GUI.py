@@ -1661,45 +1661,51 @@ class InfoWidget(QWidget):
     # ---------- 공통 기능 메서드들 ----------
 
     # ---------- 우측 패널 ----------
-    def create_right_panel(self):
-        panel = QGroupBox("시험 입력 정보")
-        layout = QVBoxLayout()
-
-        # 인증 방식
-        auth_label = QLabel("사용자 인증 방식")
-        auth_label.setStyleSheet("font-weight: bold; margin-top: 10px;")
-        layout.addWidget(auth_label)
-
-        # 라디오 버튼
-        auth_radio_layout = QHBoxLayout()
-        self.digest_radio = QRadioButton("Digest Auth")
-        self.digest_radio.setChecked(True)
-        self.bearer_radio = QRadioButton("Bearer Token")
-        auth_radio_layout.addWidget(self.digest_radio)
-        auth_radio_layout.addWidget(self.bearer_radio)
-        auth_radio_layout.addStretch()
-        layout.addLayout(auth_radio_layout)
-
-        # 공통 입력 필드
-        common_row = QHBoxLayout()
-        self.id_input = QLineEdit()
-        self.pw_input = QLineEdit()
-        common_row.addWidget(QLabel("ID:"))
-        common_row.addWidget(self.id_input)
-        common_row.addWidget(QLabel("PW:"))
-        common_row.addWidget(self.pw_input)
-        layout.addLayout(common_row)
-
-        # 연결
-        self.digest_radio.toggled.connect(self.update_auth_fields)
-        self.bearer_radio.toggled.connect(self.update_auth_fields)
-        self.id_input.textChanged.connect(self.check_start_button_state)
-        self.pw_input.textChanged.connect(self.check_start_button_state)
-
-        self.update_auth_fields()
-
-        panel.setLayout(layout)
-        return panel
+    # ========== 데드 코드: 2025-11-13 주석처리 ==========
+    # 원래 설계: Digest Auth(ID/PW)와 Bearer Token(별도 필드)이 분리되어 있었음
+    # 변경 후: 두 방식 모두 통합된 ID/Password 필드 사용으로 변경
+    # 현재: create_auth_section() 메서드가 실제 사용됨 (info_GUI.py:1133)
+    #
+    # def create_right_panel(self):
+    #     panel = QGroupBox("시험 입력 정보")
+    #     layout = QVBoxLayout()
+    #
+    #     # 인증 방식
+    #     auth_label = QLabel("사용자 인증 방식")
+    #     auth_label.setStyleSheet("font-weight: bold; margin-top: 10px;")
+    #     layout.addWidget(auth_label)
+    #
+    #     # 라디오 버튼
+    #     auth_radio_layout = QHBoxLayout()
+    #     self.digest_radio = QRadioButton("Digest Auth")
+    #     self.digest_radio.setChecked(True)
+    #     self.bearer_radio = QRadioButton("Bearer Token")
+    #     auth_radio_layout.addWidget(self.digest_radio)
+    #     auth_radio_layout.addWidget(self.bearer_radio)
+    #     auth_radio_layout.addStretch()
+    #     layout.addLayout(auth_radio_layout)
+    #
+    #     # 공통 입력 필드
+    #     common_row = QHBoxLayout()
+    #     self.id_input = QLineEdit()
+    #     self.pw_input = QLineEdit()
+    #     common_row.addWidget(QLabel("ID:"))
+    #     common_row.addWidget(self.id_input)
+    #     common_row.addWidget(QLabel("PW:"))
+    #     common_row.addWidget(self.pw_input)
+    #     layout.addLayout(common_row)
+    #
+    #     # 연결
+    #     self.digest_radio.toggled.connect(self.update_auth_fields)
+    #     self.bearer_radio.toggled.connect(self.update_auth_fields)
+    #     self.id_input.textChanged.connect(self.check_start_button_state)
+    #     self.pw_input.textChanged.connect(self.check_start_button_state)
+    #
+    #     self.update_auth_fields()
+    #
+    #     panel.setLayout(layout)
+    #     return panel
+    # ========== 데드 코드 끝 ==========
 
     def create_bottom_buttons(self):
         """하단 버튼 바"""
@@ -1742,6 +1748,20 @@ class InfoWidget(QWidget):
 
         except Exception as e:
             print(f"버튼 상태 업데이트 실패: {e}")
+
+    # 2025-11-13: update_auth_fields 메서드 제거
+    # 호출하는 곳이 모두 주석처리되어 사용되지 않음
+    # 실제 사용: update_start_button_state()가 대체 역할 수행
+    #
+    # def update_auth_fields(self):
+    #     """인증 방식에 따른 필드 업데이트 (현재는 공통 필드 사용으로 별도 처리 없음)"""
+    #     try:
+    #         # 현재 UI 구조에서는 Digest Auth와 Bearer Token 모두 ID/PW 필드를 공통으로 사용
+    #         # 나중에 인증 방식별로 다른 필드가 필요한 경우 여기에 로직 추가
+    #         pass
+    #
+    #     except Exception as e:
+    #         print(f"인증 필드 업데이트 실패: {e}")
 
     def start_scan(self):
         """실제 네트워크 스캔으로 사용 가능한 주소 탐지"""
@@ -2142,8 +2162,10 @@ class InfoWidget(QWidget):
             # 현재 모드 초기화
             self.current_mode = None
 
-            # update_auth_fields() 호출하여 필드 상태 초기화
-            self.update_auth_fields()
+            # 2025-11-13: update_auth_fields() 호출 제거
+            # 이유: 인증 방식이 통합되면서 더 이상 필요 없음
+            # 라디오 버튼 변경 시 update_start_button_state()가 자동으로 호출됨
+            # self.update_auth_fields()
 
             # 버튼 상태 업데이트
             self.check_start_button_state()
