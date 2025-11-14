@@ -812,33 +812,39 @@ def json_to_data(type_):
     return True
 
 
-def get_test_group_info():
-    """CONSTANTS의 SPEC_CONFIG에서 테스트 그룹 정보 추출"""
+def get_test_groups_info():
+    """CONSTANTS의 SPEC_CONFIG에서 모든 테스트 그룹 정보 추출 (배열 반환)"""
     if not CONSTANTS.SPEC_CONFIG:
-        return {
+        return [{
             "id": "group-001",
             "name": CONSTANTS.test_target,
             "testRange": CONSTANTS.test_range,
             "testSpecIds": []
-        }
+        }]
 
-    # 첫 번째 그룹 정보 가져오기
-    first_group = CONSTANTS.SPEC_CONFIG[0]
-    group_id = first_group.get("group_id", "group-001")
-    group_name = first_group.get("group_name", CONSTANTS.test_target)
+    # 모든 그룹을 순회하면서 배열로 반환
+    test_groups = []
+    for group in CONSTANTS.SPEC_CONFIG:
+        group_id = group.get("group_id", "group-001")
+        group_name = group.get("group_name", CONSTANTS.test_target)
 
-    # 그룹 내 모든 spec ID 수집
-    test_spec_ids = []
-    for key, value in first_group.items():
-        if key not in ["group_name", "group_id"] and isinstance(value, dict):
-            test_spec_ids.append(key)
+        # 그룹 내 모든 spec ID 수집
+        test_spec_ids = []
+        for key, value in group.items():
+            if key not in ["group_name", "group_id"] and isinstance(value, dict):
+                test_spec_ids.append(key)
 
-    return {
-        "id": group_id,
-        "name": group_name,
-        "testRange": CONSTANTS.test_range,
-        "testSpecIds": test_spec_ids
-    }
+        # testRange는 testSpecIds 개수에 맞춰 생성
+        test_range = ", ".join(["ALL_FIELDS"] * len(test_spec_ids))
+
+        test_groups.append({
+            "id": group_id,
+            "name": group_name,
+            "testRange": test_range,
+            "testSpecIds": test_spec_ids
+        })
+
+    return test_groups
 
 
 def get_spec_test_name(spec_id):
@@ -975,7 +981,7 @@ def build_result_json(myapp_instance):
     }
 
     # 3. 테스트 그룹 정보
-    test_group = get_test_group_info()
+    test_groups = get_test_groups_info()
 
     # 4. 인증 방식
     auth_method = map_auth_method(CONSTANTS.auth_type)
@@ -1038,7 +1044,7 @@ def build_result_json(myapp_instance):
     result_json = {
         "requestId": request_id,
         "evaluationTarget": evaluation_target,
-        "testGroup": test_group,
+        "testGroups": test_groups,
         "status": status,
         "authMethod": auth_method,
         "testScore": test_score,

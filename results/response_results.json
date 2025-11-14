@@ -1,36 +1,61 @@
 {
-  "requestId": "cmh2sdyj70001ry7uvsgugy25",
+  "requestId": "cmhfpjibz000c5t1uxmf2urvj",
   "evaluationTarget": {
-    "companyName": "물리보안기업",
+    "companyName": "물리보안테스트2",
     "contactPerson": "김철수",
-    "productName": "물리보안테스트제품",
+    "productName": "물리보안테스트시스템",
     "modelName": "v1.0",
     "version": "v1.0"
   },
-  "testGroup": {
-    "id": "cmgzwohuq01y8vsvep0hpuuf4",
-    "name": "물리보안",
-    "testRange": "ALL_FIELDS",
-    "testSpecIds": [
-      "cmgyv3rzl014nvsveidu5jpzp"
-    ]
-  },
+  "testGroups": [
+    {
+      "id": "cmh1ybbyb000d9y0jxtlgp2nf",
+      "name": "영상보안그룹",
+      "testRange": "ALL_FIELDS, ALL_FIELDS",
+      "testSpecIds": [
+        "cmh1ua7b00021gxc3rjepbkrm",
+        "cmgyv3rzl014nvsveidu5jpzp"
+      ]
+    }
+  ],
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 81.58,
+    "score": 80.26,
     "totalFields": 76,
-    "passedFields": 62,
-    "failedFields": 14
+    "passedFields": 61,
+    "failedFields": 15
   },
   "testResult": [
     {
+      "testSpecId": "cmh1ua7b00021gxc3rjepbkrm",
+      "testSpecName": "영상보안시스템_시나리오2",
+      "score": 0,
+      "totalFields": 0,
+      "passedFields": 0,
+      "failedFields": 0,
+      "apis": [
+        {
+          "id": "step-1-ckssr4n2h",
+          "name": "인증",
+          "method": "POST",
+          "endpoint": "/Authentication",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        }
+      ]
+    },
+    {
       "testSpecId": "cmgyv3rzl014nvsveidu5jpzp",
       "testSpecName": "vid001",
-      "score": 81.58,
+      "score": 80.26,
       "totalFields": 76,
-      "passedFields": 62,
-      "failedFields": 14,
+      "passedFields": 61,
+      "failedFields": 15,
       "apis": [
         {
           "id": "step-1-s9942zltt",
@@ -286,8 +311,8 @@
               "validationData": {},
               "validationErrors": [
                 "[시도 5/5]",
-                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761190383096 (타입: int), [1] 1761184212236 (타입: int)",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761175377855 (타입: int), [1] 1761016854312 (타입: int)",
+                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761195948075 (타입: int), [1] 1761197395583 (타입: int)",
+                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761186239612 (타입: int), [1] 1761191666500 (타입: int)",
                 "[구조] 타입 불일치: camList.videoInfo.fps (예상: int, 실제: str, 값: 30)"
               ]
             },
@@ -435,19 +460,20 @@
           "name": "저장된 이벤트 분석 정보 연동",
           "method": "POST",
           "endpoint": "/StoredVideoEventInfos",
-          "score": 78.0,
+          "score": 67.0,
           "validationCnt": 5,
           "totalFields": 9,
-          "passFields": 7,
-          "failFields": 2,
+          "passFields": 6,
+          "failFields": 3,
           "validations": [
             {
               "attempt": 1,
               "validationData": {},
               "validationErrors": [
                 "[시도 5/5]",
-                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 9826394330011 (타입: int), [1] 8449160189380 (타입: int)",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 9583241813456 (타입: int), [1] 7977111348076 (타입: int)"
+                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 9997213812153 (타입: int), [1] 8168221580365 (타입: int)",
+                "[의미] camList.eventName: 값 불일치: ['화재', '화재'] != 예상값 Loitering",
+                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 8894037665653 (타입: int), [1] 7864365297540 (타입: int)"
               ]
             },
             {
@@ -475,5 +501,5 @@
       ]
     }
   ],
-  "completedDate": "2025-11-13T12:10:14Z"
+  "completedDate": "2025-11-13T17:01:51Z"
 }
