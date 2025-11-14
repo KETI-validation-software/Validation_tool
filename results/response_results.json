@@ -21,10 +21,10 @@
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 76.83,
+    "score": 78.05,
     "totalFields": 82,
-    "passedFields": 63,
-    "failedFields": 19
+    "passedFields": 64,
+    "failedFields": 18
   },
   "testResult": [
     {
@@ -109,10 +109,10 @@
     {
       "testSpecId": "cmgyv3rzl014nvsveidu5jpzp",
       "testSpecName": "vid001",
-      "score": 80.26,
+      "score": 81.58,
       "totalFields": 76,
-      "passedFields": 61,
-      "failedFields": 15,
+      "passedFields": 62,
+      "failedFields": 14,
       "apis": [
         {
           "id": "step-1-s9942zltt",
@@ -277,14 +277,14 @@
               "validationData": {},
               "validationErrors": [
                 "[시도 5/5]",
-                "[의미] camList.timeList.endTime[0]: 범위 검증 실패: min=1761110160000, max=None, operator=between",
-                "[의미] camList.timeList.endTime[1]: 범위 검증 실패: min=1761110160000, max=None, operator=between",
-                "[의미] camList.timeList.endTime[2]: 범위 검증 실패: min=1761110160000, max=None, operator=between",
-                "[의미] camList.timeList.endTime[3]: 범위 검증 실패: min=1761110160000, max=None, operator=between",
-                "[의미] camList.timeList.startTime[0]: 범위 검증 실패: min=1761110160000, max=None, operator=between",
-                "[의미] camList.timeList.startTime[1]: 범위 검증 실패: min=1761110160000, max=None, operator=between",
-                "[의미] camList.timeList.startTime[2]: 범위 검증 실패: min=1761110160000, max=None, operator=between",
-                "[의미] camList.timeList.startTime[3]: 범위 검증 실패: min=1761110160000, max=None, operator=between"
+                "[의미] camList.timeList.endTime[0]: 범위 검증 실패: min=None, max=None, operator=between",
+                "[의미] camList.timeList.endTime[1]: 범위 검증 실패: min=None, max=None, operator=between",
+                "[의미] camList.timeList.endTime[2]: 범위 검증 실패: min=None, max=None, operator=between",
+                "[의미] camList.timeList.endTime[3]: 범위 검증 실패: min=None, max=None, operator=between",
+                "[의미] camList.timeList.startTime[0]: 범위 검증 실패: min=None, max=None, operator=between",
+                "[의미] camList.timeList.startTime[1]: 범위 검증 실패: min=None, max=None, operator=between",
+                "[의미] camList.timeList.startTime[2]: 범위 검증 실패: min=None, max=None, operator=between",
+                "[의미] camList.timeList.startTime[3]: 범위 검증 실패: min=None, max=None, operator=between"
               ]
             },
             {
@@ -368,8 +368,8 @@
               "validationData": {},
               "validationErrors": [
                 "[시도 5/5]",
-                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761173008248 (타입: int), [1] 1761202330880 (타입: int)",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1760975123547 (타입: int), [1] 1761130477158 (타입: int)",
+                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761002190437 (타입: int), [1] 1761138121845 (타입: int)",
+                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1760958623890 (타입: int), [1] 1761135103889 (타입: int)",
                 "[구조] 타입 불일치: camList.videoInfo.fps (예상: int, 실제: str, 값: 30)"
               ]
             },
@@ -517,20 +517,19 @@
           "name": "저장된 이벤트 분석 정보 연동",
           "method": "POST",
           "endpoint": "/StoredVideoEventInfos",
-          "score": 67.0,
+          "score": 78.0,
           "validationCnt": 5,
           "totalFields": 9,
-          "passFields": 6,
-          "failFields": 3,
+          "passFields": 7,
+          "failFields": 2,
           "validations": [
             {
               "attempt": 1,
               "validationData": {},
               "validationErrors": [
                 "[시도 5/5]",
-                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 8814497163366 (타입: int), [1] 7198460909218 (타입: int)",
-                "[의미] camList.eventName: 값 불일치: ['화재', '화재'] != 예상값 배회",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 6545023807422 (타입: int), [1] 7178927368594 (타입: int)"
+                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 9025725225862 (타입: int), [1] 8629666148027 (타입: int)",
+                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 7286516036790 (타입: int), [1] 8609198801672 (타입: int)"
               ]
             },
             {
@@ -558,5 +557,5 @@
       ]
     }
   ],
-  "completedDate": "2025-11-14T12:16:36Z"
+  "completedDate": "2025-11-14T14:36:27Z"
 }

@@ -873,6 +873,12 @@ class ResultPageWidget(QWidget):
                 self.parent.total_pass_cnt = saved_data.get('total_pass_cnt', 0)
                 self.parent.total_error_cnt = saved_data.get('total_error_cnt', 0)
 
+                # ✅ step_pass_counts와 step_error_counts 배열 복원
+                self.parent.step_pass_counts = saved_data.get('step_pass_counts', [0] * len(self.parent.videoMessages))[:]
+                self.parent.step_error_counts = saved_data.get('step_error_counts', [0] * len(self.parent.videoMessages))[:]
+                print(f"[RESULT] step_pass_counts 복원: {self.parent.step_pass_counts}")
+                print(f"[RESULT] step_error_counts 복원: {self.parent.step_error_counts}")
+
                 # 테이블 및 점수 표시 업데이트
                 self.reload_result_table(saved_data)
                 self.update_score_displays(saved_data)
@@ -2051,6 +2057,9 @@ class MyApp(QWidget):
                 'step_buffers': [buf.copy() for buf in self.step_buffers] if self.step_buffers else [],
                 'total_pass_cnt': self.total_pass_cnt,
                 'total_error_cnt': self.total_error_cnt,
+                # ✅ step_pass_counts와 step_error_counts 배열도 저장
+                'step_pass_counts': self.step_pass_counts[:] if hasattr(self, 'step_pass_counts') else [],
+                'step_error_counts': self.step_error_counts[:] if hasattr(self, 'step_error_counts') else [],
             }
 
             print(f"[SAVE] {composite_key} 데이터 저장 완료: {len(table_data)}개 API")
@@ -2131,6 +2140,12 @@ class MyApp(QWidget):
         # 점수 복원
         self.total_pass_cnt = saved_data['total_pass_cnt']
         self.total_error_cnt = saved_data['total_error_cnt']
+
+        # ✅ step_pass_counts와 step_error_counts 배열 복원
+        self.step_pass_counts = saved_data.get('step_pass_counts', [0] * len(self.videoMessages))[:]
+        self.step_error_counts = saved_data.get('step_error_counts', [0] * len(self.videoMessages))[:]
+        print(f"[RESTORE] step_pass_counts 복원: {self.step_pass_counts}")
+        print(f"[RESTORE] step_error_counts 복원: {self.step_error_counts}")
 
         print(f"[RESTORE] {spec_id} 데이터 복원 완료")
         return True
@@ -2876,6 +2891,11 @@ class MyApp(QWidget):
                     # 점수 초기화
                     self.total_pass_cnt = 0
                     self.total_error_cnt = 0
+
+                    # ✅ step_pass_counts와 step_error_counts 배열 초기화
+                    api_count = len(self.videoMessages)
+                    self.step_pass_counts = [0] * api_count
+                    self.step_error_counts = [0] * api_count
 
                     # step_buffers 초기화
                     self.step_buffers = [
@@ -4532,7 +4552,9 @@ class MyApp(QWidget):
         if hasattr(self, 'step_pass_counts') and hasattr(self, 'step_error_counts'):
             self.total_pass_cnt = sum(self.step_pass_counts)
             self.total_error_cnt = sum(self.step_error_counts)
-        
+            print(f"[SCORE UPDATE] step_pass_counts: {self.step_pass_counts}, sum: {self.total_pass_cnt}")
+            print(f"[SCORE UPDATE] step_error_counts: {self.step_error_counts}, sum: {self.total_error_cnt}")
+
         spec_total_fields = self.total_pass_cnt + self.total_error_cnt
         if spec_total_fields > 0:
             spec_score = (self.total_pass_cnt / spec_total_fields) * 100

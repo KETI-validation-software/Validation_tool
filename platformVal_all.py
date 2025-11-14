@@ -907,6 +907,12 @@ class ResultPageWidget(QWidget):
                 self.parent.total_pass_cnt = saved_data.get('total_pass_cnt', 0)
                 self.parent.total_error_cnt = saved_data.get('total_error_cnt', 0)
 
+                # ✅ step_pass_counts와 step_error_counts 배열 복원
+                self.parent.step_pass_counts = saved_data.get('step_pass_counts', [0] * len(self.parent.videoMessages))[:]
+                self.parent.step_error_counts = saved_data.get('step_error_counts', [0] * len(self.parent.videoMessages))[:]
+                print(f"[RESULT] step_pass_counts 복원: {self.parent.step_pass_counts}")
+                print(f"[RESULT] step_error_counts 복원: {self.parent.step_error_counts}")
+
                 # 테이블 및 점수 표시 업데이트
                 self.reload_result_table(saved_data)
                 self.update_score_displays(saved_data)
@@ -2684,7 +2690,9 @@ class MyApp(QWidget):
         if hasattr(self, 'step_pass_counts') and hasattr(self, 'step_error_counts'):
             self.total_pass_cnt = sum(self.step_pass_counts)
             self.total_error_cnt = sum(self.step_error_counts)
-        
+            print(f"[SCORE UPDATE] step_pass_counts: {self.step_pass_counts}, sum: {self.total_pass_cnt}")
+            print(f"[SCORE UPDATE] step_error_counts: {self.step_error_counts}, sum: {self.total_error_cnt}")
+
         spec_total_fields = self.total_pass_cnt + self.total_error_cnt
         if spec_total_fields > 0:
             spec_score = (self.total_pass_cnt / spec_total_fields) * 100
@@ -3075,7 +3083,10 @@ class MyApp(QWidget):
             'step_buffers': [buf.copy() for buf in self.step_buffers],  # 깊은 복사
             'total_pass_cnt': self.total_pass_cnt,
             'total_error_cnt': self.total_error_cnt,
-            'api_accumulated_data': self.api_accumulated_data.copy() if hasattr(self, 'api_accumulated_data') else {}
+            'api_accumulated_data': self.api_accumulated_data.copy() if hasattr(self, 'api_accumulated_data') else {},
+            # ✅ step_pass_counts와 step_error_counts 배열도 저장
+            'step_pass_counts': self.step_pass_counts[:] if hasattr(self, 'step_pass_counts') else [],
+            'step_error_counts': self.step_error_counts[:] if hasattr(self, 'step_error_counts') else [],
         }
 
         print(f"[DEBUG] {composite_key} 데이터 저장 완료")
@@ -3147,6 +3158,12 @@ class MyApp(QWidget):
         self.total_pass_cnt = saved_data['total_pass_cnt']
         self.total_error_cnt = saved_data['total_error_cnt']
 
+        # ✅ step_pass_counts와 step_error_counts 배열 복원
+        self.step_pass_counts = saved_data.get('step_pass_counts', [0] * len(self.videoMessages))[:]
+        self.step_error_counts = saved_data.get('step_error_counts', [0] * len(self.videoMessages))[:]
+        print(f"[RESTORE] step_pass_counts 복원: {self.step_pass_counts}")
+        print(f"[RESTORE] step_error_counts 복원: {self.step_error_counts}")
+
         # api_accumulated_data 복원
         if 'api_accumulated_data' in saved_data:
             self.api_accumulated_data = saved_data['api_accumulated_data'].copy()
@@ -3189,6 +3206,12 @@ class MyApp(QWidget):
                     # 저장된 데이터가 없으면 초기화
                     self.total_pass_cnt = 0
                     self.total_error_cnt = 0
+
+                    # ✅ step_pass_counts와 step_error_counts 배열 초기화
+                    api_count = len(self.videoMessages)
+                    self.step_pass_counts = [0] * api_count
+                    self.step_error_counts = [0] * api_count
+
                     self.step_buffers = [
                         {"data": "", "error": "", "result": "PASS"} for _ in range(len(self.videoMessages))
                     ]
