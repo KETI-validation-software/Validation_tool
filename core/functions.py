@@ -1002,9 +1002,17 @@ def build_result_json(myapp_instance):
     # 6. 모든 시험 시나리오 결과 수집
     all_spec_results = {}
 
-    # 6-1. 저장된 spec 데이터 처리
+    # 6-1. 저장된 spec 데이터 처리 (✅ 복합키 지원)
     if hasattr(myapp_instance, 'spec_table_data'):
-        for spec_id, saved_data in myapp_instance.spec_table_data.items():
+        for composite_key, saved_data in myapp_instance.spec_table_data.items():
+            # 복합키 파싱: "group_id_spec_id" → spec_id 추출
+            if '_' in composite_key:
+                parts = composite_key.split('_', 1)
+                spec_id = parts[1] if len(parts) == 2 else composite_key
+            else:
+                # 하위 호환: 복합키가 아닌 경우 그대로 사용
+                spec_id = composite_key
+
             spec_result = _build_spec_result(
                 myapp_instance,
                 spec_id,
@@ -1012,19 +1020,22 @@ def build_result_json(myapp_instance):
                 saved_data.get('table_data', [])
             )
             if spec_result:
-                all_spec_results[spec_id] = spec_result
+                all_spec_results[composite_key] = spec_result  # 복합키로 저장
 
-    # 6-2. 현재 spec 데이터 처리 (저장되지 않은 경우)
+    # 6-2. 현재 spec 데이터 처리 (저장되지 않은 경우) (✅ 복합키 지원)
     current_spec_id = getattr(myapp_instance, 'current_spec_id', None)
-    if current_spec_id and current_spec_id not in all_spec_results:
-        spec_result = _build_spec_result(
-            myapp_instance,
-            current_spec_id,
-            getattr(myapp_instance, 'step_buffers', []),
-            None  # 현재 테이블에서 직접 읽음
-        )
-        if spec_result:
-            all_spec_results[current_spec_id] = spec_result
+    current_group_id = getattr(myapp_instance, 'current_group_id', None)
+    if current_spec_id:
+        composite_key = f"{current_group_id}_{current_spec_id}" if current_group_id else current_spec_id
+        if composite_key not in all_spec_results:
+            spec_result = _build_spec_result(
+                myapp_instance,
+                current_spec_id,
+                getattr(myapp_instance, 'step_buffers', []),
+                None  # 현재 테이블에서 직접 읽음
+            )
+            if spec_result:
+                all_spec_results[composite_key] = spec_result
 
     test_result = list(all_spec_results.values())
 
