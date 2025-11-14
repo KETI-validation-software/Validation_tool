@@ -793,6 +793,8 @@ class ResultPageWidget(QWidget):
         # ===== 수정 끝 =====
 
         if selected_group:
+            # ✅ 그룹 ID 저장
+            self.parent.current_group_id = selected_group.get('group_id')
             self.update_test_field_table(selected_group)
 
     def update_test_field_table(self, group_data):
@@ -849,9 +851,10 @@ class ResultPageWidget(QWidget):
             print(f"[RESULT] outSchema 개수: {len(self.parent.outSchema)}")
             print(f"[RESULT] webhookSchema 개수: {len(self.parent.webhookSchema)}")
 
-            # ✅ 4. 저장된 결과 데이터가 있으면 로드
-            if selected_spec_id in self.parent.spec_table_data:
-                saved_data = self.parent.spec_table_data[selected_spec_id]
+            # ✅ 4. 저장된 결과 데이터가 있으면 로드 (복합키 사용)
+            composite_key = f"{self.parent.current_group_id}_{selected_spec_id}"
+            if composite_key in self.parent.spec_table_data:
+                saved_data = self.parent.spec_table_data[composite_key]
 
                 # step_buffers 복원
                 saved_buffers = saved_data.get('step_buffers', [])
@@ -1941,6 +1944,7 @@ class MyApp(QWidget):
         # CONSTANTS 사용
         self.CONSTANTS = CONSTANTS
         self.current_spec_id = spec_id
+        self.current_group_id = None  # ✅ 그룹 ID 저장용
 
         self.load_specs_from_constants()
         self.CONSTANTS = CONSTANTS
@@ -2040,15 +2044,16 @@ class MyApp(QWidget):
                 }
                 table_data.append(row_data)
 
-            # 전체 데이터 저장
-            self.spec_table_data[self.current_spec_id] = {
+            # 전체 데이터 저장 (✅ 복합키 사용: group_id_spec_id)
+            composite_key = f"{self.current_group_id}_{self.current_spec_id}"
+            self.spec_table_data[composite_key] = {
                 'table_data': table_data,
                 'step_buffers': [buf.copy() for buf in self.step_buffers] if self.step_buffers else [],
                 'total_pass_cnt': self.total_pass_cnt,
                 'total_error_cnt': self.total_error_cnt,
             }
 
-            print(f"[SAVE] {self.current_spec_id} 데이터 저장 완료: {len(table_data)}개 API")
+            print(f"[SAVE] {composite_key} 데이터 저장 완료: {len(table_data)}개 API")
 
         except Exception as e:
             print(f"[ERROR] save_current_spec_data 실패: {e}")
@@ -2069,13 +2074,14 @@ class MyApp(QWidget):
         return "NONE"
 
     def restore_spec_data(self, spec_id):
-        """저장된 spec 데이터 복원 (안전성 강화)"""
-        if spec_id not in self.spec_table_data:
-            print(f"[RESTORE] {spec_id} 저장된 데이터 없음")
+        """저장된 spec 데이터 복원 (✅ 복합키 사용)"""
+        composite_key = f"{self.current_group_id}_{spec_id}"
+        if composite_key not in self.spec_table_data:
+            print(f"[RESTORE] {composite_key} 저장된 데이터 없음")
             return False
 
-        saved_data = self.spec_table_data[spec_id]
-        print(f"[RESTORE] {spec_id} 데이터 복원 시작")
+        saved_data = self.spec_table_data[composite_key]
+        print(f"[RESTORE] {composite_key} 데이터 복원 시작")
 
         # 테이블 복원
         table_data = saved_data['table_data']
@@ -2640,6 +2646,8 @@ class MyApp(QWidget):
         # ===== 수정 끝 =====
 
         if selected_group:
+            # ✅ 그룹 ID 저장
+            self.current_group_id = selected_group.get('group_id')
             self.update_test_field_table(selected_group)
 
     def update_test_field_table(self, group_data):
@@ -2688,6 +2696,9 @@ class MyApp(QWidget):
         if selected_group is None:
             print(f"[WARN] 선택된 그룹({group_name}) 데이터를 찾을 수 없습니다.")
             return
+
+        # ✅ 그룹 ID 저장
+        self.current_group_id = selected_group.get('group_id')
 
         # 시험 분야 테이블 갱신
         self.update_test_field_table(selected_group)
@@ -4877,12 +4888,13 @@ class MyApp(QWidget):
         self.sbtn.setDisabled(True)
         self.stop_btn.setEnabled(True)
 
-        # ✅ 6. 이전 시험 결과가 global 점수에 포함되어 있으면 제거
-        if self.current_spec_id in self.spec_table_data:
-            prev_data = self.spec_table_data[self.current_spec_id]
+        # ✅ 6. 이전 시험 결과가 global 점수에 포함되어 있으면 제거 (복합키 사용)
+        composite_key = f"{self.current_group_id}_{self.current_spec_id}"
+        if composite_key in self.spec_table_data:
+            prev_data = self.spec_table_data[composite_key]
             prev_pass = prev_data.get('total_pass_cnt', 0)
             prev_error = prev_data.get('total_error_cnt', 0)
-            print(f"[SCORE RESET] 기존 {self.current_spec_id} 점수 제거: pass={prev_pass}, error={prev_error}")
+            print(f"[SCORE RESET] 기존 {composite_key} 점수 제거: pass={prev_pass}, error={prev_error}")
 
             # ✅ global 점수에서 해당 spec 점수 제거
             self.global_pass_cnt = max(0, self.global_pass_cnt - prev_pass)

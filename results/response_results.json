@@ -21,31 +21,88 @@
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 80.26,
-    "totalFields": 76,
-    "passedFields": 61,
-    "failedFields": 15
+    "score": 76.83,
+    "totalFields": 82,
+    "passedFields": 63,
+    "failedFields": 19
   },
   "testResult": [
     {
       "testSpecId": "cmh1ua7b00021gxc3rjepbkrm",
       "testSpecName": "영상보안시스템_시나리오2",
-      "score": 0,
-      "totalFields": 0,
-      "passedFields": 0,
-      "failedFields": 0,
+      "score": 33.33,
+      "totalFields": 6,
+      "passedFields": 2,
+      "failedFields": 4,
       "apis": [
         {
           "id": "step-1-ckssr4n2h",
           "name": "인증",
           "method": "POST",
           "endpoint": "/Authentication",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
+          "score": 33.0,
+          "validationCnt": 10,
+          "totalFields": 6,
+          "passFields": 2,
+          "failFields": 4,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "[시도 10/10]",
+                "응답 실패: code=400, message=잘못된 URL 형식",
+                "[구조] 필수 필드 누락: accessToken",
+                "[구조] 필수 필드 누락: userAff",
+                "[구조] 필수 필드 누락: userName"
+              ]
+            },
+            {
+              "attempt": 2,
+              "validationData": {},
+              "validationErrors": []
+            },
+            {
+              "attempt": 3,
+              "validationData": {},
+              "validationErrors": []
+            },
+            {
+              "attempt": 4,
+              "validationData": {},
+              "validationErrors": []
+            },
+            {
+              "attempt": 5,
+              "validationData": {},
+              "validationErrors": []
+            },
+            {
+              "attempt": 6,
+              "validationData": {},
+              "validationErrors": []
+            },
+            {
+              "attempt": 7,
+              "validationData": {},
+              "validationErrors": []
+            },
+            {
+              "attempt": 8,
+              "validationData": {},
+              "validationErrors": []
+            },
+            {
+              "attempt": 9,
+              "validationData": {},
+              "validationErrors": []
+            },
+            {
+              "attempt": 10,
+              "validationData": {},
+              "validationErrors": []
+            }
+          ]
         }
       ]
     },
@@ -220,14 +277,14 @@
               "validationData": {},
               "validationErrors": [
                 "[시도 5/5]",
-                "[의미] camList.timeList.endTime[0]: 범위 검증 실패: min=None, max=None, operator=between",
-                "[의미] camList.timeList.endTime[1]: 범위 검증 실패: min=None, max=None, operator=between",
-                "[의미] camList.timeList.endTime[2]: 범위 검증 실패: min=None, max=None, operator=between",
-                "[의미] camList.timeList.endTime[3]: 범위 검증 실패: min=None, max=None, operator=between",
-                "[의미] camList.timeList.startTime[0]: 범위 검증 실패: min=None, max=None, operator=between",
-                "[의미] camList.timeList.startTime[1]: 범위 검증 실패: min=None, max=None, operator=between",
-                "[의미] camList.timeList.startTime[2]: 범위 검증 실패: min=None, max=None, operator=between",
-                "[의미] camList.timeList.startTime[3]: 범위 검증 실패: min=None, max=None, operator=between"
+                "[의미] camList.timeList.endTime[0]: 범위 검증 실패: min=1761110160000, max=None, operator=between",
+                "[의미] camList.timeList.endTime[1]: 범위 검증 실패: min=1761110160000, max=None, operator=between",
+                "[의미] camList.timeList.endTime[2]: 범위 검증 실패: min=1761110160000, max=None, operator=between",
+                "[의미] camList.timeList.endTime[3]: 범위 검증 실패: min=1761110160000, max=None, operator=between",
+                "[의미] camList.timeList.startTime[0]: 범위 검증 실패: min=1761110160000, max=None, operator=between",
+                "[의미] camList.timeList.startTime[1]: 범위 검증 실패: min=1761110160000, max=None, operator=between",
+                "[의미] camList.timeList.startTime[2]: 범위 검증 실패: min=1761110160000, max=None, operator=between",
+                "[의미] camList.timeList.startTime[3]: 범위 검증 실패: min=1761110160000, max=None, operator=between"
               ]
             },
             {
@@ -311,8 +368,8 @@
               "validationData": {},
               "validationErrors": [
                 "[시도 5/5]",
-                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761195948075 (타입: int), [1] 1761197395583 (타입: int)",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761186239612 (타입: int), [1] 1761191666500 (타입: int)",
+                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761173008248 (타입: int), [1] 1761202330880 (타입: int)",
+                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1760975123547 (타입: int), [1] 1761130477158 (타입: int)",
                 "[구조] 타입 불일치: camList.videoInfo.fps (예상: int, 실제: str, 값: 30)"
               ]
             },
@@ -471,9 +528,9 @@
               "validationData": {},
               "validationErrors": [
                 "[시도 5/5]",
-                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 9997213812153 (타입: int), [1] 8168221580365 (타입: int)",
-                "[의미] camList.eventName: 값 불일치: ['화재', '화재'] != 예상값 Loitering",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 8894037665653 (타입: int), [1] 7864365297540 (타입: int)"
+                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 8814497163366 (타입: int), [1] 7198460909218 (타입: int)",
+                "[의미] camList.eventName: 값 불일치: ['화재', '화재'] != 예상값 배회",
+                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 6545023807422 (타입: int), [1] 7178927368594 (타입: int)"
               ]
             },
             {
@@ -501,5 +558,5 @@
       ]
     }
   ],
-  "completedDate": "2025-11-13T17:01:51Z"
+  "completedDate": "2025-11-14T12:16:36Z"
 }
