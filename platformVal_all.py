@@ -826,6 +826,8 @@ class ResultPageWidget(QWidget):
         # ===== 수정 끝 =====
 
         if selected_group:
+            # ✅ 그룹 ID 저장
+            self.parent.current_group_id = selected_group.get('group_id')
             self.update_test_field_table(selected_group)
 
     def update_test_field_table(self, group_data):
@@ -883,9 +885,10 @@ class ResultPageWidget(QWidget):
             print(f"[RESULT] inSchema 개수: {len(self.parent.inSchema)}")
             print(f"[RESULT] webhookSchema 개수: {len(self.parent.webhookSchema)}")
 
-            # ✅ 4. 저장된 결과 데이터가 있으면 로드
-            if selected_spec_id in self.parent.spec_table_data:
-                saved_data = self.parent.spec_table_data[selected_spec_id]
+            # ✅ 4. 저장된 결과 데이터가 있으면 로드 (복합키 사용)
+            composite_key = f"{self.parent.current_group_id}_{selected_spec_id}"
+            if composite_key in self.parent.spec_table_data:
+                saved_data = self.parent.spec_table_data[composite_key]
 
                 # step_buffers 복원
                 saved_buffers = saved_data.get('step_buffers', [])
@@ -1714,6 +1717,7 @@ class MyApp(QWidget):
 
         self.CONSTANTS = CONSTANTS
         self.current_spec_id = spec_id
+        self.current_group_id = None  # ✅ 그룹 ID 저장용
 
         # ✅ 웹훅 관련 변수 미리 초기화 (load_specs_from_constants 호출 전)
         self.videoWebhookSchema = []
@@ -2815,6 +2819,8 @@ class MyApp(QWidget):
         # ===== 수정 끝 =====
 
         if selected_group:
+            # ✅ 그룹 ID 저장
+            self.current_group_id = selected_group.get('group_id')
             self.update_test_field_table(selected_group)
 
     def update_test_field_table(self, group_data):
@@ -3062,8 +3068,9 @@ class MyApp(QWidget):
             }
             table_data.append(row_data)
 
-        # 전체 데이터 저장
-        self.spec_table_data[self.current_spec_id] = {
+        # 전체 데이터 저장 (✅ 복합키 사용: group_id_spec_id)
+        composite_key = f"{self.current_group_id}_{self.current_spec_id}"
+        self.spec_table_data[composite_key] = {
             'table_data': table_data,
             'step_buffers': [buf.copy() for buf in self.step_buffers],  # 깊은 복사
             'total_pass_cnt': self.total_pass_cnt,
@@ -3071,7 +3078,7 @@ class MyApp(QWidget):
             'api_accumulated_data': self.api_accumulated_data.copy() if hasattr(self, 'api_accumulated_data') else {}
         }
 
-        print(f"[DEBUG] {self.current_spec_id} 데이터 저장 완료")
+        print(f"[DEBUG] {composite_key} 데이터 저장 완료")
 
     def _get_icon_state(self, row):
         """테이블 행의 아이콘 상태 반환 (PASS/FAIL/NONE)"""
@@ -3087,12 +3094,13 @@ class MyApp(QWidget):
         return "NONE"
 
     def restore_spec_data(self, spec_id):
-        """저장된 spec 데이터 복원"""
-        if spec_id not in self.spec_table_data:
-            print(f"[DEBUG] {spec_id} 저장된 데이터 없음 - 초기화")
+        """저장된 spec 데이터 복원 (✅ 복합키 사용)"""
+        composite_key = f"{self.current_group_id}_{spec_id}"
+        if composite_key not in self.spec_table_data:
+            print(f"[DEBUG] {composite_key} 저장된 데이터 없음 - 초기화")
             return False
 
-        saved_data = self.spec_table_data[spec_id]
+        saved_data = self.spec_table_data[composite_key]
 
         # 테이블 복원
         table_data = saved_data['table_data']
@@ -4214,12 +4222,13 @@ class MyApp(QWidget):
         """단일 spec_id에 대한 시험 실행"""
         self._clean_trace_dir_once()
 
-        # ✅ 이전 시험 결과가 global 점수에 포함되어 있으면 제거
-        if self.current_spec_id in self.spec_table_data:
-            prev_data = self.spec_table_data[self.current_spec_id]
+        # ✅ 이전 시험 결과가 global 점수에 포함되어 있으면 제거 (복합키 사용)
+        composite_key = f"{self.current_group_id}_{self.current_spec_id}"
+        if composite_key in self.spec_table_data:
+            prev_data = self.spec_table_data[composite_key]
             prev_pass = prev_data.get('total_pass_cnt', 0)
             prev_error = prev_data.get('total_error_cnt', 0)
-            print(f"[SCORE RESET] 기존 {self.current_spec_id} 점수 제거: pass={prev_pass}, error={prev_error}")
+            print(f"[SCORE RESET] 기존 {composite_key} 점수 제거: pass={prev_pass}, error={prev_error}")
 
             # global 점수에서 해당 spec 점수 제거
             self.global_pass_cnt = max(0, self.global_pass_cnt - prev_pass)
