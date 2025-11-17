@@ -826,8 +826,18 @@ class ResultPageWidget(QWidget):
         # ===== 수정 끝 =====
 
         if selected_group:
+            new_group_id = selected_group.get('group_id')
+            old_group_id = getattr(self.parent, 'current_group_id', None)
+
+            print(f"[RESULT DEBUG] 🔄 그룹 선택: {old_group_id} → {new_group_id}")
+
+            # ✅ 그룹이 변경되면 current_spec_id 초기화
+            if old_group_id != new_group_id:
+                self.current_spec_id = None
+                print(f"[RESULT DEBUG] ✨ 그룹 변경으로 current_spec_id 초기화")
+
             # ✅ 그룹 ID 저장
-            self.parent.current_group_id = selected_group.get('group_id')
+            self.parent.current_group_id = new_group_id
             self.update_test_field_table(selected_group)
 
     def update_test_field_table(self, group_data):
@@ -865,6 +875,7 @@ class ResultPageWidget(QWidget):
             return
 
         print(f"[RESULT] 시나리오 전환: {self.current_spec_id} → {selected_spec_id}")
+        print(f"[RESULT DEBUG] 현재 그룹: {self.parent.current_group_id}")
 
         # ✅ parent의 spec 전환 (API 목록 로드)
         old_spec_id = self.parent.current_spec_id
@@ -887,6 +898,7 @@ class ResultPageWidget(QWidget):
 
             # ✅ 4. 저장된 결과 데이터가 있으면 로드 (복합키 사용)
             composite_key = f"{self.parent.current_group_id}_{selected_spec_id}"
+            print(f"[RESULT DEBUG] 📂 데이터 복원 시도: {composite_key}")
             if composite_key in self.parent.spec_table_data:
                 saved_data = self.parent.spec_table_data[composite_key]
 
@@ -2827,8 +2839,18 @@ class MyApp(QWidget):
         # ===== 수정 끝 =====
 
         if selected_group:
+            new_group_id = selected_group.get('group_id')
+            old_group_id = getattr(self, 'current_group_id', None)
+
+            print(f"[DEBUG] 🔄 그룹 선택: {old_group_id} → {new_group_id}")
+
+            # ✅ 그룹이 변경되면 current_spec_id 초기화 (다음 시나리오 선택 시 무조건 다시 로드되도록)
+            if old_group_id != new_group_id:
+                self.current_spec_id = None
+                print(f"[DEBUG] ✨ 그룹 변경으로 current_spec_id 초기화")
+
             # ✅ 그룹 ID 저장
-            self.current_group_id = selected_group.get('group_id')
+            self.current_group_id = new_group_id
             self.update_test_field_table(selected_group)
 
     def update_test_field_table(self, group_data):
@@ -3078,6 +3100,11 @@ class MyApp(QWidget):
 
         # 전체 데이터 저장 (✅ 복합키 사용: group_id_spec_id)
         composite_key = f"{self.current_group_id}_{self.current_spec_id}"
+
+        print(f"[DEBUG] 💾 데이터 저장: {composite_key}")
+        print(f"[DEBUG]   - 테이블 행 수: {len(table_data)}")
+        print(f"[DEBUG]   - step_pass_counts: {self.step_pass_counts[:] if hasattr(self, 'step_pass_counts') else []}")
+
         self.spec_table_data[composite_key] = {
             'table_data': table_data,
             'step_buffers': [buf.copy() for buf in self.step_buffers],  # 깊은 복사
@@ -3089,7 +3116,7 @@ class MyApp(QWidget):
             'step_error_counts': self.step_error_counts[:] if hasattr(self, 'step_error_counts') else [],
         }
 
-        print(f"[DEBUG] {composite_key} 데이터 저장 완료")
+        print(f"[DEBUG] ✅ 데이터 저장 완료")
 
     def _get_icon_state(self, row):
         """테이블 행의 아이콘 상태 반환 (PASS/FAIL/NONE)"""
@@ -3107,11 +3134,16 @@ class MyApp(QWidget):
     def restore_spec_data(self, spec_id):
         """저장된 spec 데이터 복원 (✅ 복합키 사용)"""
         composite_key = f"{self.current_group_id}_{spec_id}"
+        print(f"[DEBUG] 📂 데이터 복원 시도: {composite_key}")
+
         if composite_key not in self.spec_table_data:
-            print(f"[DEBUG] {composite_key} 저장된 데이터 없음 - 초기화")
+            print(f"[DEBUG] ❌ {composite_key} 저장된 데이터 없음 - 초기화 필요")
             return False
 
         saved_data = self.spec_table_data[composite_key]
+        print(f"[DEBUG] ✅ 저장된 데이터 발견!")
+        print(f"[DEBUG]   - 테이블 행 수: {len(saved_data['table_data'])}")
+        print(f"[DEBUG]   - step_pass_counts: {saved_data.get('step_pass_counts', [])}")
 
         # 테이블 복원
         table_data = saved_data['table_data']
@@ -3183,9 +3215,14 @@ class MyApp(QWidget):
                     return
 
                 print(f"[PLATFORM] 🔄 시험 분야 전환: {self.current_spec_id} → {new_spec_id}")
+                print(f"[DEBUG] 현재 그룹: {self.current_group_id}")
 
-                # ✅ 1. 현재 spec의 테이블 데이터 저장
-                self.save_current_spec_data()
+                # ✅ 1. 현재 spec의 테이블 데이터 저장 (current_spec_id가 None이 아닐 때만)
+                if self.current_spec_id is not None:
+                    print(f"[DEBUG] 데이터 저장 전 - 테이블 행 수: {self.tableWidget.rowCount()}")
+                    self.save_current_spec_data()
+                else:
+                    print(f"[DEBUG] ⚠️ current_spec_id가 None - 저장 스킵 (그룹 전환 직후)")
 
                 # ✅ 2. spec_id 업데이트
                 self.current_spec_id = new_spec_id
@@ -3216,6 +3253,7 @@ class MyApp(QWidget):
                         {"data": "", "error": "", "result": "PASS"} for _ in range(len(self.videoMessages))
                     ]
                     # 테이블 초기화
+                    print(f"[DEBUG] 💥 저장된 데이터 없음 - 테이블 초기화 시작 ({self.tableWidget.rowCount()}개 행)")
                     for i in range(self.tableWidget.rowCount()):
                         # 아이콘 초기화
                         icon_widget = QWidget()
@@ -3229,10 +3267,17 @@ class MyApp(QWidget):
                         icon_widget.setLayout(icon_layout)
                         self.tableWidget.setCellWidget(i, 1, icon_widget)
 
-                        # 카운트 초기화
+                        # 카운트 초기화 - ✅ 아이템이 없으면 새로 생성
                         for col, value in [(2, "0"), (3, "0"), (4, "0"), (5, "0"), (6, "0%")]:
-                            if self.tableWidget.item(i, col):
-                                self.tableWidget.item(i, col).setText(value)
+                            item = self.tableWidget.item(i, col)
+                            if item:
+                                item.setText(value)
+                            else:
+                                # ✅ 아이템이 없으면 새로 생성
+                                new_item = QTableWidgetItem(value)
+                                new_item.setTextAlignment(Qt.AlignCenter)
+                                self.tableWidget.setItem(i, col, new_item)
+                    print(f"[DEBUG] ✅ 테이블 초기화 완료")
 
                 # trace 초기화 (선택사항 - 필요시)
                 # if hasattr(self.Server, 'trace'):
