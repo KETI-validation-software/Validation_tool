@@ -793,8 +793,18 @@ class ResultPageWidget(QWidget):
         # ===== 수정 끝 =====
 
         if selected_group:
+            new_group_id = selected_group.get('group_id')
+            old_group_id = getattr(self.parent, 'current_group_id', None)
+
+            print(f"[RESULT DEBUG] 🔄 그룹 선택: {old_group_id} → {new_group_id}")
+
+            # ✅ 그룹이 변경되면 current_spec_id 초기화
+            if old_group_id != new_group_id:
+                self.current_spec_id = None
+                print(f"[RESULT DEBUG] ✨ 그룹 변경으로 current_spec_id 초기화")
+
             # ✅ 그룹 ID 저장
-            self.parent.current_group_id = selected_group.get('group_id')
+            self.parent.current_group_id = new_group_id
             self.update_test_field_table(selected_group)
 
     def update_test_field_table(self, group_data):
@@ -831,6 +841,7 @@ class ResultPageWidget(QWidget):
             return
 
         print(f"[RESULT] 시나리오 전환: {self.current_spec_id} → {selected_spec_id}")
+        print(f"[RESULT DEBUG] 현재 그룹: {self.parent.current_group_id}")
 
         # ✅ parent의 spec 전환 (API 목록 로드)
         old_spec_id = self.parent.current_spec_id
@@ -853,6 +864,7 @@ class ResultPageWidget(QWidget):
 
             # ✅ 4. 저장된 결과 데이터가 있으면 로드 (복합키 사용)
             composite_key = f"{self.parent.current_group_id}_{selected_spec_id}"
+            print(f"[RESULT DEBUG] 📂 데이터 복원 시도: {composite_key}")
             if composite_key in self.parent.spec_table_data:
                 saved_data = self.parent.spec_table_data[composite_key]
 
@@ -2052,6 +2064,12 @@ class MyApp(QWidget):
 
             # 전체 데이터 저장 (✅ 복합키 사용: group_id_spec_id)
             composite_key = f"{self.current_group_id}_{self.current_spec_id}"
+
+            print(f"[DEBUG] 💾 데이터 저장: {composite_key}")
+            print(f"[DEBUG]   - 테이블 행 수: {len(table_data)}")
+            print(f"[DEBUG]   - step_pass_counts: {self.step_pass_counts[:] if hasattr(self, 'step_pass_counts') else []}")
+            print(f"[DEBUG]   - step_error_counts: {self.step_error_counts[:] if hasattr(self, 'step_error_counts') else []}")
+
             self.spec_table_data[composite_key] = {
                 'table_data': table_data,
                 'step_buffers': [buf.copy() for buf in self.step_buffers] if self.step_buffers else [],
@@ -2062,7 +2080,7 @@ class MyApp(QWidget):
                 'step_error_counts': self.step_error_counts[:] if hasattr(self, 'step_error_counts') else [],
             }
 
-            print(f"[SAVE] {composite_key} 데이터 저장 완료: {len(table_data)}개 API")
+            print(f"[SAVE] ✅ {composite_key} 데이터 저장 완료")
 
         except Exception as e:
             print(f"[ERROR] save_current_spec_data 실패: {e}")
@@ -2085,11 +2103,17 @@ class MyApp(QWidget):
     def restore_spec_data(self, spec_id):
         """저장된 spec 데이터 복원 (✅ 복합키 사용)"""
         composite_key = f"{self.current_group_id}_{spec_id}"
+        print(f"[DEBUG] 📂 데이터 복원 시도: {composite_key}")
+
         if composite_key not in self.spec_table_data:
-            print(f"[RESTORE] {composite_key} 저장된 데이터 없음")
+            print(f"[DEBUG] ❌ {composite_key} 저장된 데이터 없음 - 초기화 필요")
             return False
 
         saved_data = self.spec_table_data[composite_key]
+        print(f"[DEBUG] ✅ 저장된 데이터 발견!")
+        print(f"[DEBUG]   - 테이블 행 수: {len(saved_data['table_data'])}")
+        print(f"[DEBUG]   - step_pass_counts: {saved_data.get('step_pass_counts', [])}")
+        print(f"[DEBUG]   - step_error_counts: {saved_data.get('step_error_counts', [])}")
         print(f"[RESTORE] {composite_key} 데이터 복원 시작")
 
         # 테이블 복원
@@ -2661,8 +2685,18 @@ class MyApp(QWidget):
         # ===== 수정 끝 =====
 
         if selected_group:
+            new_group_id = selected_group.get('group_id')
+            old_group_id = getattr(self, 'current_group_id', None)
+
+            print(f"[DEBUG] 🔄 그룹 선택: {old_group_id} → {new_group_id}")
+
+            # ✅ 그룹이 변경되면 current_spec_id 초기화 (다음 시나리오 선택 시 무조건 다시 로드되도록)
+            if old_group_id != new_group_id:
+                self.current_spec_id = None
+                print(f"[DEBUG] ✨ 그룹 변경으로 current_spec_id 초기화")
+
             # ✅ 그룹 ID 저장
-            self.current_group_id = selected_group.get('group_id')
+            self.current_group_id = new_group_id
             self.update_test_field_table(selected_group)
 
     def update_test_field_table(self, group_data):
@@ -2712,8 +2746,19 @@ class MyApp(QWidget):
             print(f"[WARN] 선택된 그룹({group_name}) 데이터를 찾을 수 없습니다.")
             return
 
+        # ✅ 그룹 변경 감지 및 current_spec_id 초기화
+        new_group_id = selected_group.get('group_id')
+        old_group_id = getattr(self, 'current_group_id', None)
+
+        print(f"[DEBUG] 🔄 그룹 선택: {old_group_id} → {new_group_id}")
+
+        # ✅ 그룹이 변경되면 current_spec_id 초기화 (다음 시나리오 선택 시 무조건 다시 로드되도록)
+        if old_group_id != new_group_id:
+            self.current_spec_id = None
+            print(f"[DEBUG] ✨ 그룹 변경으로 current_spec_id 초기화")
+
         # ✅ 그룹 ID 저장
-        self.current_group_id = selected_group.get('group_id')
+        self.current_group_id = new_group_id
 
         # 시험 분야 테이블 갱신
         self.update_test_field_table(selected_group)
@@ -2860,10 +2905,15 @@ class MyApp(QWidget):
                     print(f"[SELECT] 이미 선택된 시나리오: {new_spec_id}")
                     return
 
-                print(f"[SELECT] 🔄 시험 분야 전환: {self.current_spec_id} → {new_spec_id}")
+                print(f"[SYSTEM] 🔄 시험 분야 전환: {self.current_spec_id} → {new_spec_id}")
+                print(f"[DEBUG] 현재 그룹: {self.current_group_id}")
 
-                # ✅ 1. 현재 spec의 테이블 데이터 저장
-                self.save_current_spec_data()
+                # ✅ 1. 현재 spec의 테이블 데이터 저장 (current_spec_id가 None이 아닐 때만)
+                if self.current_spec_id is not None:
+                    print(f"[DEBUG] 데이터 저장 전 - 테이블 행 수: {self.tableWidget.rowCount()}")
+                    self.save_current_spec_data()
+                else:
+                    print(f"[DEBUG] ⚠️ current_spec_id가 None - 저장 스킵 (그룹 전환 직후)")
 
                 # ✅ 2. spec_id 업데이트
                 self.current_spec_id = new_spec_id
