@@ -21,98 +21,41 @@
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 78.05,
-    "totalFields": 82,
-    "passedFields": 64,
-    "failedFields": 18
+    "score": 80.26,
+    "totalFields": 76,
+    "passedFields": 61,
+    "failedFields": 15
   },
   "testResult": [
     {
       "testSpecId": "cmh1ua7b00021gxc3rjepbkrm",
       "testSpecName": "영상보안시스템_시나리오2",
-      "score": 33.33,
-      "totalFields": 6,
-      "passedFields": 2,
-      "failedFields": 4,
+      "score": 0,
+      "totalFields": 0,
+      "passedFields": 0,
+      "failedFields": 0,
       "apis": [
         {
           "id": "step-1-ckssr4n2h",
           "name": "인증",
           "method": "POST",
           "endpoint": "/Authentication",
-          "score": 33.0,
-          "validationCnt": 10,
-          "totalFields": 6,
-          "passFields": 2,
-          "failFields": 4,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {},
-              "validationErrors": [
-                "[시도 10/10]",
-                "응답 실패: code=400, message=잘못된 URL 형식",
-                "[구조] 필수 필드 누락: accessToken",
-                "[구조] 필수 필드 누락: userAff",
-                "[구조] 필수 필드 누락: userName"
-              ]
-            },
-            {
-              "attempt": 2,
-              "validationData": {},
-              "validationErrors": []
-            },
-            {
-              "attempt": 3,
-              "validationData": {},
-              "validationErrors": []
-            },
-            {
-              "attempt": 4,
-              "validationData": {},
-              "validationErrors": []
-            },
-            {
-              "attempt": 5,
-              "validationData": {},
-              "validationErrors": []
-            },
-            {
-              "attempt": 6,
-              "validationData": {},
-              "validationErrors": []
-            },
-            {
-              "attempt": 7,
-              "validationData": {},
-              "validationErrors": []
-            },
-            {
-              "attempt": 8,
-              "validationData": {},
-              "validationErrors": []
-            },
-            {
-              "attempt": 9,
-              "validationData": {},
-              "validationErrors": []
-            },
-            {
-              "attempt": 10,
-              "validationData": {},
-              "validationErrors": []
-            }
-          ]
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
         }
       ]
     },
     {
       "testSpecId": "cmgyv3rzl014nvsveidu5jpzp",
       "testSpecName": "vid001",
-      "score": 81.58,
+      "score": 80.26,
       "totalFields": 76,
-      "passedFields": 62,
-      "failedFields": 14,
+      "passedFields": 61,
+      "failedFields": 15,
       "apis": [
         {
           "id": "step-1-s9942zltt",
@@ -368,8 +311,8 @@
               "validationData": {},
               "validationErrors": [
                 "[시도 5/5]",
-                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761002190437 (타입: int), [1] 1761138121845 (타입: int)",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1760958623890 (타입: int), [1] 1761135103889 (타입: int)",
+                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761205963954 (타입: int), [1] 1761198569654 (타입: int)",
+                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1760981498110 (타입: int), [1] 1761045821436 (타입: int)",
                 "[구조] 타입 불일치: camList.videoInfo.fps (예상: int, 실제: str, 값: 30)"
               ]
             },
@@ -517,19 +460,20 @@
           "name": "저장된 이벤트 분석 정보 연동",
           "method": "POST",
           "endpoint": "/StoredVideoEventInfos",
-          "score": 78.0,
+          "score": 67.0,
           "validationCnt": 5,
           "totalFields": 9,
-          "passFields": 7,
-          "failFields": 2,
+          "passFields": 6,
+          "failFields": 3,
           "validations": [
             {
               "attempt": 1,
               "validationData": {},
               "validationErrors": [
                 "[시도 5/5]",
-                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 9025725225862 (타입: int), [1] 8629666148027 (타입: int)",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 7286516036790 (타입: int), [1] 8609198801672 (타입: int)"
+                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 6290696014833 (타입: int), [1] 9528294065717 (타입: int)",
+                "[의미] camList.eventName: 값 불일치: ['배회', '배회'] != 예상값 침입",
+                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 5389220820678 (타입: int), [1] 9507148047420 (타입: int)"
               ]
             },
             {
@@ -557,5 +501,5 @@
       ]
     }
   ],
-  "completedDate": "2025-11-14T14:36:27Z"
+  "completedDate": "2025-11-17T10:26:12Z"
 }
