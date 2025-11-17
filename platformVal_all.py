@@ -2522,6 +2522,7 @@ class MyApp(QWidget):
                                                        current_retries)
 
                     # 모니터링 창에 최종 결과 표시
+                    self.valResult.append(f"📤 플랫폼 응답 송신 완료 [{retry_attempt + 1}/{current_retries}]")
                     self.valResult.append(f"\n✅ 부하테스트 완료: {current_retries}회 검증 완료")
                     self.valResult.append(f"프로토콜: {current_protocol}")
                     self.valResult.append("\n" + data_text)

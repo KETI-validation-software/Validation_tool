@@ -3326,8 +3326,13 @@ class MyApp(QWidget):
                 else:
                     self.message_name = f"step {self.cnt + 1}: (index out of range)" + retry_info
 
-                # if self.tmp_msg_append_flag:
-                #     self.valResult.append(self.message_name)
+                # 첫 번째 시도일 때만 메시지 표시
+                if self.current_retry == 0:
+                    self.valResult.append(self.message_name)
+
+                # 요청 송신 메시지 표시
+                self.valResult.append(f"📤 시스템 요청 송신, 플랫폼 응답 대기 중... [{self.current_retry + 1}/{self.num_retries_list[self.cnt]}]")
+
                 if self.cnt == 0 and self.current_retry == 0:
                     self.tmp_msg_append_flag = True
 
@@ -3512,6 +3517,9 @@ class MyApp(QWidget):
 
                         if self.cnt == 0 or self.tmp_msg_append_flag:
                             self.valResult.append(self.message_name)
+
+                        # 응답 수신 메시지 표시
+                        self.valResult.append(f"📨 플랫폼 응답 수신, 검증 중... [{self.current_retry + 1}/{self.num_retries_list[self.cnt]}]")
 
                         res_data = self.res.text
 
