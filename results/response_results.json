@@ -311,8 +311,8 @@
               "validationData": {},
               "validationErrors": [
                 "[시도 5/5]",
-                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761205963954 (타입: int), [1] 1761198569654 (타입: int)",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1760981498110 (타입: int), [1] 1761045821436 (타입: int)",
+                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761173900656 (타입: int), [1] 1761115864618 (타입: int)",
+                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761155657095 (타입: int), [1] 1761060710430 (타입: int)",
                 "[구조] 타입 불일치: camList.videoInfo.fps (예상: int, 실제: str, 값: 30)"
               ]
             },
@@ -471,9 +471,9 @@
               "validationData": {},
               "validationErrors": [
                 "[시도 5/5]",
-                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 6290696014833 (타입: int), [1] 9528294065717 (타입: int)",
-                "[의미] camList.eventName: 값 불일치: ['배회', '배회'] != 예상값 침입",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 5389220820678 (타입: int), [1] 9507148047420 (타입: int)"
+                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 8985057297952 (타입: int), [1] 4312165279588 (타입: int)",
+                "[의미] camList.eventName: 값 불일치: ['Intrusion', 'Intrusion'] != 예상값 Loitering",
+                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 2411371326253 (타입: int), [1] 2967659048639 (타입: int)"
               ]
             },
             {
@@ -501,5 +501,5 @@
       ]
     }
   ],
-  "completedDate": "2025-11-17T10:26:12Z"
+  "completedDate": "2025-11-17T11:43:48Z"
 }

@@ -1068,6 +1068,7 @@ class ResultPageWidget(QWidget):
             icon_label = QLabel()
             icon_label.setPixmap(QIcon(img).pixmap(*icon_size))
             icon_label.setAlignment(Qt.AlignCenter)
+            icon_label.setToolTip(f"Result: {icon_state}")  # tooltip 설정으로 재저장 시 상태 유지
             icon_layout.addWidget(icon_label)
             icon_layout.setAlignment(Qt.AlignCenter)
             icon_widget.setLayout(icon_layout)
@@ -3171,6 +3172,7 @@ class MyApp(QWidget):
             icon_label = QLabel()
             icon_label.setPixmap(QIcon(img).pixmap(84, 20))
             icon_label.setAlignment(Qt.AlignCenter)
+            icon_label.setToolTip(f"Result: {icon_state}")  # tooltip 설정으로 재저장 시 상태 유지
             icon_layout.addWidget(icon_label)
             icon_layout.setAlignment(Qt.AlignCenter)
             icon_widget.setLayout(icon_layout)
