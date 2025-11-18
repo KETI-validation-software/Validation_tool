@@ -485,12 +485,12 @@
                     "camID": "cam0001",
                     "timeList": [
                       {
-                        "startTime": 1760955753896,
-                        "endTime": 1761025273879
+                        "startTime": 1761096197699,
+                        "endTime": 1761117155380
                       },
                       {
-                        "startTime": 1761105327592,
-                        "endTime": 1761105962501
+                        "startTime": 1761039711316,
+                        "endTime": 1761070930364
                       }
                     ]
                   },
@@ -498,12 +498,12 @@
                     "camID": "cam0002",
                     "timeList": [
                       {
-                        "startTime": 1761006433174,
-                        "endTime": 1761061126891
+                        "startTime": 1761019090058,
+                        "endTime": 1761088534550
                       },
                       {
-                        "startTime": 1761120806862,
-                        "endTime": 1761120950336
+                        "startTime": 1760953358856,
+                        "endTime": 1761086698027
                       }
                     ]
                   }
@@ -531,12 +531,12 @@
                     "camID": "cam0001",
                     "timeList": [
                       {
-                        "startTime": 1761038189862,
-                        "endTime": 1761076088529
+                        "startTime": 1760979012533,
+                        "endTime": 1760987812091
                       },
                       {
-                        "startTime": 1761012875379,
-                        "endTime": 1761055663627
+                        "startTime": 1760955671855,
+                        "endTime": 1761096602331
                       }
                     ]
                   },
@@ -544,12 +544,12 @@
                     "camID": "cam0002",
                     "timeList": [
                       {
-                        "startTime": 1760950188737,
-                        "endTime": 1760979463311
+                        "startTime": 1760949929777,
+                        "endTime": 1761012015456
                       },
                       {
-                        "startTime": 1760979690240,
-                        "endTime": 1761016105358
+                        "startTime": 1761048150799,
+                        "endTime": 1761094589718
                       }
                     ]
                   }
@@ -567,12 +567,12 @@
                     "camID": "cam0001",
                     "timeList": [
                       {
-                        "startTime": 1761090518276,
-                        "endTime": 1761112914115
+                        "startTime": 1760953276251,
+                        "endTime": 1760977784011
                       },
                       {
-                        "startTime": 1761033923616,
-                        "endTime": 1761038562859
+                        "startTime": 1761099706072,
+                        "endTime": 1761101356246
                       }
                     ]
                   },
@@ -580,12 +580,12 @@
                     "camID": "cam0002",
                     "timeList": [
                       {
-                        "startTime": 1761038898152,
-                        "endTime": 1761046949330
+                        "startTime": 1761071117039,
+                        "endTime": 1761072481002
                       },
                       {
-                        "startTime": 1761073991148,
-                        "endTime": 1761089011381
+                        "startTime": 1761047055870,
+                        "endTime": 1761065365143
                       }
                     ]
                   }
@@ -603,12 +603,12 @@
                     "camID": "cam0001",
                     "timeList": [
                       {
-                        "startTime": 1761029645849,
-                        "endTime": 1761112098414
+                        "startTime": 1761107556360,
+                        "endTime": 1761108389849
                       },
                       {
-                        "startTime": 1761075727751,
-                        "endTime": 1761119101518
+                        "startTime": 1761085977883,
+                        "endTime": 1761117433193
                       }
                     ]
                   },
@@ -616,12 +616,12 @@
                     "camID": "cam0002",
                     "timeList": [
                       {
-                        "startTime": 1760970964658,
-                        "endTime": 1761090317308
+                        "startTime": 1760972413723,
+                        "endTime": 1760981464209
                       },
                       {
-                        "startTime": 1761117887241,
-                        "endTime": 1761118323047
+                        "startTime": 1761024994636,
+                        "endTime": 1761100600384
                       }
                     ]
                   }
@@ -639,12 +639,12 @@
                     "camID": "cam0001",
                     "timeList": [
                       {
-                        "startTime": 1761097305204,
-                        "endTime": 1761112383748
+                        "startTime": 1761071344360,
+                        "endTime": 1761096873858
                       },
                       {
-                        "startTime": 1760950772195,
-                        "endTime": 1761064939110
+                        "startTime": 1761107566207,
+                        "endTime": 1761120240237
                       }
                     ]
                   },
@@ -652,12 +652,12 @@
                     "camID": "cam0002",
                     "timeList": [
                       {
-                        "startTime": 1761034821532,
-                        "endTime": 1761066587477
+                        "startTime": 1760955162368,
+                        "endTime": 1761041327789
                       },
                       {
-                        "startTime": 1761110629487,
-                        "endTime": 1761116194113
+                        "startTime": 1761078899007,
+                        "endTime": 1761098808717
                       }
                     ]
                   }
@@ -876,8 +876,8 @@
                     "camID": "cam0001",
                     "accessID": "cam0001",
                     "accessPW": "conn0001",
-                    "startTime": 1761169885639,
-                    "endTime": 1761170321426,
+                    "startTime": 1760975588421,
+                    "endTime": 1761183570765,
                     "camURL": "rtsp://192.168.0.5:8000",
                     "videoInfo": {
                       "resolution": "1920x1080",
@@ -890,8 +890,8 @@
                     "camID": "cam0002",
                     "accessID": "cam0001",
                     "accessPW": "conn0001",
-                    "startTime": 1761105219688,
-                    "endTime": 1761180287092,
+                    "startTime": 1760996737358,
+                    "endTime": 1761131832527,
                     "camURL": "rtsp://192.168.0.5:8000",
                     "videoInfo": {
                       "resolution": "1920x1080",
@@ -904,8 +904,8 @@
               },
               "validationErrors": [
                 "[시도 5/5]",
-                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761163088982 (타입: int), [1] 1761196660791 (타입: int)",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761162451557 (타입: int), [1] 1761164186256 (타입: int)",
+                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761137356099 (타입: int), [1] 1761190616553 (타입: int)",
+                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761061908344 (타입: int), [1] 1761170255750 (타입: int)",
                 "[구조] 타입 불일치: camList.videoInfo.fps (예상: int, 실제: str, 값: 30)"
               ]
             },
@@ -919,8 +919,8 @@
                     "camID": "cam0001",
                     "accessID": "cam0001",
                     "accessPW": "conn0001",
-                    "startTime": 1761043331379,
-                    "endTime": 1761153414469,
+                    "startTime": 1761022629665,
+                    "endTime": 1761074611956,
                     "camURL": "rtsp://192.168.0.5:8000",
                     "videoInfo": {
                       "resolution": "1920x1080",
@@ -933,8 +933,8 @@
                     "camID": "cam0002",
                     "accessID": "cam0001",
                     "accessPW": "conn0001",
-                    "startTime": 1761134367814,
-                    "endTime": 1761140097070,
+                    "startTime": 1761011330179,
+                    "endTime": 1761181080538,
                     "camURL": "rtsp://192.168.0.5:8000",
                     "videoInfo": {
                       "resolution": "1920x1080",
@@ -957,8 +957,8 @@
                     "camID": "cam0001",
                     "accessID": "cam0001",
                     "accessPW": "conn0001",
-                    "startTime": 1761003288190,
-                    "endTime": 1761081140243,
+                    "startTime": 1761140110437,
+                    "endTime": 1761177527101,
                     "camURL": "rtsp://192.168.0.5:8000",
                     "videoInfo": {
                       "resolution": "1920x1080",
@@ -971,8 +971,8 @@
                     "camID": "cam0002",
                     "accessID": "cam0001",
                     "accessPW": "conn0001",
-                    "startTime": 1761006890054,
-                    "endTime": 1761106496308,
+                    "startTime": 1761100671169,
+                    "endTime": 1761180715067,
                     "camURL": "rtsp://192.168.0.5:8000",
                     "videoInfo": {
                       "resolution": "1920x1080",
@@ -995,8 +995,8 @@
                     "camID": "cam0001",
                     "accessID": "cam0001",
                     "accessPW": "conn0001",
-                    "startTime": 1760955417073,
-                    "endTime": 1761116259164,
+                    "startTime": 1760983300063,
+                    "endTime": 1761112699740,
                     "camURL": "rtsp://192.168.0.5:8000",
                     "videoInfo": {
                       "resolution": "1920x1080",
@@ -1009,8 +1009,8 @@
                     "camID": "cam0002",
                     "accessID": "cam0001",
                     "accessPW": "conn0001",
-                    "startTime": 1761108060565,
-                    "endTime": 1761180884961,
+                    "startTime": 1761204976132,
+                    "endTime": 1761207251393,
                     "camURL": "rtsp://192.168.0.5:8000",
                     "videoInfo": {
                       "resolution": "1920x1080",
@@ -1033,8 +1033,8 @@
                     "camID": "cam0001",
                     "accessID": "cam0001",
                     "accessPW": "conn0001",
-                    "startTime": 1761162451557,
-                    "endTime": 1761163088982,
+                    "startTime": 1761061908344,
+                    "endTime": 1761137356099,
                     "camURL": "rtsp://192.168.0.5:8000",
                     "videoInfo": {
                       "resolution": "1920x1080",
@@ -1047,8 +1047,8 @@
                     "camID": "cam0002",
                     "accessID": "cam0001",
                     "accessPW": "conn0001",
-                    "startTime": 1761164186256,
-                    "endTime": 1761196660791,
+                    "startTime": 1761170255750,
+                    "endTime": 1761190616553,
                     "camURL": "rtsp://192.168.0.5:8000",
                     "videoInfo": {
                       "resolution": "1920x1080",
@@ -1215,26 +1215,26 @@
                   {
                     "camID": "cam0001",
                     "eventUUID": "event01",
-                    "eventName": "침입",
-                    "startTime": 7065436154383,
-                    "endTime": 8888149171191,
+                    "eventName": "화재",
+                    "startTime": 6320551717205,
+                    "endTime": 9192649539807,
                     "eventDesc": "aaabbbAAA"
                   },
                   {
                     "camID": "cam0002",
                     "eventUUID": "event01",
-                    "eventName": "침입",
-                    "startTime": 6397654535622,
-                    "endTime": 8004292707956,
+                    "eventName": "화재",
+                    "startTime": 4692712042764,
+                    "endTime": 6796316772978,
                     "eventDesc": "aaabbbAAA"
                   }
                 ]
               },
               "validationErrors": [
                 "[시도 5/5]",
-                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 9075326604507 (타입: int), [1] 7400301642344 (타입: int)",
-                "[의미] camList.eventName: 값 불일치: ['화재', '화재'] != 예상값 Loitering",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 7839936922040 (타입: int), [1] 4175266865938 (타입: int)"
+                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 7287867803852 (타입: int), [1] 9825141731698 (타입: int)",
+                "[의미] camList.eventName: 값 불일치: ['Intrusion', 'Intrusion'] != 예상값 침입",
+                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 3941300262401 (타입: int), [1] 7886891734174 (타입: int)"
               ]
             },
             {
@@ -1246,17 +1246,17 @@
                   {
                     "camID": "cam0001",
                     "eventUUID": "event01",
-                    "eventName": "Loitering",
-                    "startTime": 9097680309015,
-                    "endTime": 9340146659171,
+                    "eventName": "침입",
+                    "startTime": 3925812363016,
+                    "endTime": 4259979789987,
                     "eventDesc": "aaabbbAAA"
                   },
                   {
                     "camID": "cam0002",
                     "eventUUID": "event01",
-                    "eventName": "Loitering",
-                    "startTime": 1968730223189,
-                    "endTime": 8710299193715,
+                    "eventName": "침입",
+                    "startTime": 5827510871911,
+                    "endTime": 9328087026591,
                     "eventDesc": "aaabbbAAA"
                   }
                 ]
@@ -1273,16 +1273,16 @@
                     "camID": "cam0001",
                     "eventUUID": "event01",
                     "eventName": "침입",
-                    "startTime": 9730771750706,
-                    "endTime": 9859995389772,
+                    "startTime": 9723053080784,
+                    "endTime": 9967565849846,
                     "eventDesc": "aaabbbAAA"
                   },
                   {
                     "camID": "cam0002",
                     "eventUUID": "event01",
                     "eventName": "침입",
-                    "startTime": 8913543906932,
-                    "endTime": 9320869250995,
+                    "startTime": 7112745794692,
+                    "endTime": 7713021676444,
                     "eventDesc": "aaabbbAAA"
                   }
                 ]
@@ -1298,17 +1298,17 @@
                   {
                     "camID": "cam0001",
                     "eventUUID": "event01",
-                    "eventName": "침입",
-                    "startTime": 5591860615154,
-                    "endTime": 6781478685923,
+                    "eventName": "화재",
+                    "startTime": 9973044274636,
+                    "endTime": 9995092271941,
                     "eventDesc": "aaabbbAAA"
                   },
                   {
                     "camID": "cam0002",
                     "eventUUID": "event01",
-                    "eventName": "침입",
-                    "startTime": 1979984907475,
-                    "endTime": 7389480000428,
+                    "eventName": "화재",
+                    "startTime": 2062542977311,
+                    "endTime": 6481157722972,
                     "eventDesc": "aaabbbAAA"
                   }
                 ]
@@ -1324,17 +1324,17 @@
                   {
                     "camID": "cam0001",
                     "eventUUID": "event01",
-                    "eventName": "화재",
-                    "startTime": 7839936922040,
-                    "endTime": 9075326604507,
+                    "eventName": "Intrusion",
+                    "startTime": 3941300262401,
+                    "endTime": 7287867803852,
                     "eventDesc": "aaabbbAAA"
                   },
                   {
                     "camID": "cam0002",
                     "eventUUID": "event01",
-                    "eventName": "화재",
-                    "startTime": 4175266865938,
-                    "endTime": 7400301642344,
+                    "eventName": "Intrusion",
+                    "startTime": 7886891734174,
+                    "endTime": 9825141731698,
                     "eventDesc": "aaabbbAAA"
                   }
                 ]
@@ -1346,5 +1346,5 @@
       ]
     }
   ],
-  "completedDate": "2025-11-18T11:47:25Z"
+  "completedDate": "2025-11-18T12:27:41Z"
 }
