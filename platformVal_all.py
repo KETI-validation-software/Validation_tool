@@ -1854,6 +1854,12 @@ class MyApp(QWidget):
             {"data": "", "error": "", "result": "PASS", "raw_data_list": []} for _ in range(len(self.videoMessages))
         ]
 
+        # ✅ 현재 spec에 맞게 누적 카운트 초기화
+        api_count = len(self.videoMessages)
+        self.step_pass_counts = [0] * api_count
+        self.step_error_counts = [0] * api_count
+        self.step_pass_flags = [0] * api_count
+
         self.get_setting()
         self.first_run = True
 
@@ -2656,6 +2662,20 @@ class MyApp(QWidget):
                     self.global_error_cnt += 1
                 if self.flag_opt:
                     self.global_error_cnt += tmp_fields_opt_cnt
+
+                # ✅ step_error_counts 배열에도 저장 (타임아웃 경우)
+                api_count = len(self.videoMessages)
+                if not hasattr(self, 'step_error_counts') or len(self.step_error_counts) != api_count:
+                    self.step_error_counts = [0] * api_count
+                    self.step_pass_counts = [0] * api_count
+
+                # 이미 계산된 값을 배열에 저장
+                step_err = tmp_fields_rqd_cnt if tmp_fields_rqd_cnt > 0 else 1
+                if self.flag_opt:
+                    step_err += tmp_fields_opt_cnt
+
+                self.step_error_counts[self.cnt] = step_err
+                self.step_pass_counts[self.cnt] = 0
 
                 # 평가 점수 디스플레이 업데이트
                 self.update_score_display()
@@ -4483,7 +4503,12 @@ class MyApp(QWidget):
                 ]
                 print(f"[DEBUG] step_buffers 재생성 완료: {len(self.step_buffers)}개")
 
-                # ✅ 10. Server 객체 상태 초기화
+                # ✅ 10. 현재 spec에 맞게 누적 카운트 초기화
+                self.step_pass_counts = [0] * api_count
+                self.step_error_counts = [0] * api_count
+                print(f"[DEBUG] step_pass_counts, step_error_counts 초기화 완료: {api_count}개")
+
+                # ✅ 11. Server 객체 상태 초기화
                 if hasattr(self.Server, 'trace'):
                     from collections import defaultdict, deque
                     self.Server.trace = defaultdict(lambda: deque(maxlen=1000))
@@ -4495,7 +4520,7 @@ class MyApp(QWidget):
                 if hasattr(self.Server, 'webhook_thread'):
                     self.Server.webhook_thread = None
 
-                # ✅ 11. 평가 점수 디스플레이 초기화
+                # ✅ 12. 평가 점수 디스플레이 초기화
                 self.update_score_display()
             else:
                 # ========== 재개 모드: 저장된 상태 사용, 초기화 건너뛰기 ==========
