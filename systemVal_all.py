@@ -3489,6 +3489,7 @@ class MyApp(QWidget):
                     total_fields = self.total_pass_cnt + self.total_error_cnt
 
                     # ✅ JSON 결과 자동 저장 추가
+                    print(f"[DEBUG] 평가 완료 - 자동 저장 시작")
                     try:
                         self.run_status = "완료"
                         result_json = build_result_json(self)
@@ -3501,16 +3502,20 @@ class MyApp(QWidget):
                             json.dump(result_json, f, ensure_ascii=False, indent=2)
                         print(f"✅ 시험 결과가 '{json_path}'에 자동 저장되었습니다.")
                         self.valResult.append(f"\n📄 결과 파일 저장 완료: {json_path}")
+                        print(f"[DEBUG] try 블록 정상 완료")
 
                     except Exception as e:
                         print(f"❌ JSON 저장 중 오류 발생: {e}")
                         import traceback
                         traceback.print_exc()
                         self.valResult.append(f"\n⚠️ 결과 저장 실패: {str(e)}")
+                        print(f"[DEBUG] except 블록 실행됨")
 
                     finally:
                         # ✅ 평가 완료 시 일시정지 파일 정리 (에러 발생 여부와 무관하게 항상 실행)
+                        print(f"[DEBUG] ========== finally 블록 진입 ==========")
                         self.cleanup_paused_file()
+                        print(f"[DEBUG] ========== finally 블록 종료 ==========")
 
                     self.sbtn.setEnabled(True)
                     self.stop_btn.setDisabled(True)
@@ -3878,6 +3883,7 @@ class MyApp(QWidget):
                     f"[FINAL] 전체 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}, score={global_score:.1f}%")
 
                 # ✅ JSON 결과 자동 저장 추가
+                print(f"[DEBUG] 평가 완료 - 자동 저장 시작 (경로2)")
                 try:
                     self.run_status = "완료"
                     result_json = build_result_json(self)
@@ -3890,11 +3896,18 @@ class MyApp(QWidget):
                         json.dump(result_json, f, ensure_ascii=False, indent=2)
                     print(f"✅ 시험 결과가 '{json_path}'에 자동 저장되었습니다.")
                     self.valResult.append(f"\n📄 결과 파일 저장 완료: {json_path}")
+                    print(f"[DEBUG] try 블록 정상 완료 (경로2)")
                 except Exception as e:
                     print(f"❌ JSON 저장 중 오류 발생: {e}")
                     import traceback
                     traceback.print_exc()
                     self.valResult.append(f"\n⚠️ 결과 저장 실패: {str(e)}")
+                    print(f"[DEBUG] except 블록 실행됨 (경로2)")
+                finally:
+                    # ✅ 평가 완료 시 일시정지 파일 정리 (에러 발생 여부와 무관하게 항상 실행)
+                    print(f"[DEBUG] ========== finally 블록 진입 (경로2) ==========")
+                    self.cleanup_paused_file()
+                    print(f"[DEBUG] ========== finally 블록 종료 (경로2) ==========")
 
                 self.sbtn.setEnabled(True)
                 self.stop_btn.setDisabled(True)
@@ -5300,10 +5313,15 @@ class MyApp(QWidget):
         """평가 완료 후 일시정지 파일 삭제 및 상태 초기화"""
         try:
             paused_file_path = os.path.join(result_dir, "response_results_paused.json")
+            print(f"[CLEANUP] cleanup_paused_file() 호출됨")
+            print(f"[CLEANUP] 파일 경로: {paused_file_path}")
+            print(f"[CLEANUP] 파일 존재 여부: {os.path.exists(paused_file_path)}")
 
             if os.path.exists(paused_file_path):
                 os.remove(paused_file_path)
                 print("✅ 일시정지 중간 파일 삭제 완료")
+            else:
+                print("[CLEANUP] 일시정지 파일이 존재하지 않음 (일시정지하지 않았거나 이미 삭제됨)")
 
             # 일시정지 상태 초기화
             self.is_paused = False
