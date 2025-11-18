@@ -1,20 +1,10 @@
-{"time": "2025-11-18T05:11:19.409284Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "user0001", "userPW": "pass0001"}}
-{"time": "2025-11-18T05:11:20.435505Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 URL 형식"}}
-{"time": "2025-11-18T05:11:21.445322Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "user0001", "userPW": "pass0001"}}
-{"time": "2025-11-18T05:11:22.448828Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 URL 형식"}}
-{"time": "2025-11-18T05:11:23.455489Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "user0001", "userPW": "pass0001"}}
-{"time": "2025-11-18T05:11:24.445338Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 URL 형식"}}
-{"time": "2025-11-18T05:11:25.455111Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "user0001", "userPW": "pass0001"}}
-{"time": "2025-11-18T05:11:26.455535Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 URL 형식"}}
-{"time": "2025-11-18T05:11:27.463224Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "user0001", "userPW": "pass0001"}}
-{"time": "2025-11-18T05:11:28.468626Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 URL 형식"}}
-{"time": "2025-11-18T05:11:29.475430Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "user0001", "userPW": "pass0001"}}
-{"time": "2025-11-18T05:11:30.489467Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 URL 형식"}}
-{"time": "2025-11-18T05:11:31.508455Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "user0001", "userPW": "pass0001"}}
-{"time": "2025-11-18T05:11:32.514887Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 URL 형식"}}
-{"time": "2025-11-18T05:11:33.507827Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "user0001", "userPW": "pass0001"}}
-{"time": "2025-11-18T05:11:34.529944Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 URL 형식"}}
-{"time": "2025-11-18T05:11:35.524992Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "user0001", "userPW": "pass0001"}}
-{"time": "2025-11-18T05:11:36.530377Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 URL 형식"}}
-{"time": "2025-11-18T05:11:37.521062Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "user0001", "userPW": "pass0001"}}
-{"time": "2025-11-18T05:11:38.543210Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 URL 형식"}}
+{"time": "2025-11-18T06:43:05.261929Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "user0001", "userPW": "pass0001"}}
+{"time": "2025-11-18T06:43:06.261148Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "userName": "관리자", "userAff": "오산시청", "accessToken": "***"}}
+{"time": "2025-11-18T06:43:07.271819Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "user0001", "userPW": "pass0001"}}
+{"time": "2025-11-18T06:43:08.265478Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "userName": "관리자", "userAff": "오산시청", "accessToken": "***"}}
+{"time": "2025-11-18T06:43:09.261183Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "user0001", "userPW": "pass0001"}}
+{"time": "2025-11-18T06:43:10.273069Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "userName": "관리자", "userAff": "오산시청", "accessToken": "***"}}
+{"time": "2025-11-18T06:43:11.270240Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "user0001", "userPW": "pass0001"}}
+{"time": "2025-11-18T06:43:12.268535Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "userName": "관리자", "userAff": "오산시청", "accessToken": "***"}}
+{"time": "2025-11-18T06:43:13.263446Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "user0001", "userPW": "pass0001"}}
+{"time": "2025-11-18T06:43:14.260792Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "userName": "관리자", "userAff": "오산시청", "accessToken": "***"}}
