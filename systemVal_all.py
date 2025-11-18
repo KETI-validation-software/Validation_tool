@@ -2011,6 +2011,10 @@ class MyApp(QWidget):
         self.message_error = []
         self.message_name = ""
 
+        # ✅ 일시정지 및 재개 관련 변수
+        self.is_paused = False
+        self.last_completed_api_index = -1
+        self.paused_valResult_text = ""
 
         parts = self.auth_info.split(",")
         auth = [parts[0], parts[1] if len(parts) > 1 else ""]
@@ -2018,7 +2022,7 @@ class MyApp(QWidget):
 
         # step_buffers 동적 생성 (API 개수에 따라)
         self.step_buffers = [
-            {"data": "", "error": "", "result": "PASS"} for _ in range(len(self.videoMessages))
+            {"data": "", "error": "", "result": "PASS", "raw_data_list": []} for _ in range(len(self.videoMessages))
         ]
 
         self.trace = defaultdict(list)
@@ -2952,7 +2956,7 @@ class MyApp(QWidget):
 
                     # step_buffers 초기화
                     self.step_buffers = [
-                        {"data": "", "error": "", "result": "PASS"} for _ in range(len(self.videoMessages))
+                        {"data": "", "error": "", "result": "PASS", "raw_data_list": []} for _ in range(len(self.videoMessages))
                     ]
                 else:
                     print(f"[SELECT] 저장된 데이터 복원 완료")
@@ -3497,6 +3501,10 @@ class MyApp(QWidget):
                             json.dump(result_json, f, ensure_ascii=False, indent=2)
                         print(f"✅ 시험 결과가 '{json_path}'에 자동 저장되었습니다.")
                         self.valResult.append(f"\n📄 결과 파일 저장 완료: {json_path}")
+
+                        # ✅ 평가 완료 시 일시정지 파일 정리
+                        self.cleanup_paused_file()
+
                     except Exception as e:
                         print(f"❌ JSON 저장 중 오류 발생: {e}")
                         import traceback
@@ -3711,6 +3719,9 @@ class MyApp(QWidget):
                         error_text = self._to_detail_text(val_text)
                     else:
                         error_text = "오류가 없습니다."
+
+                    # ✅ raw_data_list에 현재 응답 데이터 추가 (재개 시 retry count 복원용)
+                    self.step_buffers[self.cnt]["raw_data_list"].append(platform_data)
 
                     # 기존 버퍼에 누적 (재시도 정보와 함께)
                     if self.current_retry == 0:
@@ -4927,12 +4938,16 @@ class MyApp(QWidget):
 
     def _clean_trace_dir_once(self):
         """results/trace 폴더 안의 파일들을 삭제"""
+        print(f"[TRACE_CLEAN] ⚠️  _clean_trace_dir_once() 호출됨!")
+        import traceback
+        print(f"[TRACE_CLEAN] 호출 스택:\n{''.join(traceback.format_stack()[-3:-1])}")
         os.makedirs(CONSTANTS.trace_path, exist_ok=True)
         for name in os.listdir(CONSTANTS.trace_path):
             path = os.path.join(CONSTANTS.trace_path, name)
             if os.path.isfile(path):
                 try:
                     os.remove(path)
+                    print(f"[TRACE_CLEAN] 삭제: {name}")
                 except OSError:
                     pass
 
@@ -4943,13 +4958,29 @@ class MyApp(QWidget):
             QMessageBox.warning(self, "알림", "시험 시나리오를 먼저 선택하세요.")
             return
 
+        # ✅ 일시정지 파일 존재 여부 확인
+        paused_file_path = os.path.join(result_dir, "response_results_paused.json")
+        resume_mode = os.path.exists(paused_file_path)
+
+        if resume_mode:
+            print(f"[DEBUG] ========== 재개 모드: 일시정지 상태 복원 ==========")
+            # 재개 모드: 저장된 상태 복원
+            if self.load_paused_state():
+                self.is_paused = False  # 재개 시작이므로 paused 플래그 해제
+                print(f"[DEBUG] 재개 모드: {self.last_completed_api_index + 2}번째 API부터 시작")
+            else:
+                # 복원 실패 시 신규 시작으로 전환
+                print(f"[WARN] 상태 복원 실패, 신규 시작으로 전환")
+                resume_mode = False
+
         # ✅ 로딩 팝업 표시
         self.loading_popup = LoadingPopup()
         self.loading_popup.show()
         QApplication.processEvents()  # UI 즉시 업데이트
 
         self.pathUrl = self.url_text_box.text()
-        print(f"[START] ========== 검증 시작: 완전 초기화 ==========")
+        if not resume_mode:
+            print(f"[START] ========== 검증 시작: 완전 초기화 ==========")
         print(f"[START] 시험 URL : ", self.pathUrl)
         print(f"[START] 시험: {self.current_spec_id} - {self.spec_description}")
         print(f"[START] 사용자 인증 방식 : ", self.CONSTANTS.auth_type)
@@ -4961,119 +4992,204 @@ class MyApp(QWidget):
             print(f"[START] 기존 타이머 중지")
             self.tick_timer.stop()
 
-        # ✅ 3. trace 디렉토리 초기화
-        self._clean_trace_dir_once()
+        if not resume_mode:
+            # ========== 신규 시작 모드: 완전 초기화 ==========
+            print(f"[START] ========== 신규 시작: 완전 초기화 ==========")
 
-        # ✅ 4. JSON 데이터 준비
-        json_to_data("video")
+            # ✅ 3. trace 디렉토리 초기화
+            self._clean_trace_dir_once()
 
-        # ✅ 5. 버튼 상태 변경
+            # ✅ 4. JSON 데이터 준비
+            json_to_data("video")
+
+            # ✅ 6. 이전 시험 결과가 global 점수에 포함되어 있으면 제거 (복합키 사용)
+            composite_key = f"{self.current_group_id}_{self.current_spec_id}"
+            if composite_key in self.spec_table_data:
+                prev_data = self.spec_table_data[composite_key]
+                prev_pass = prev_data.get('total_pass_cnt', 0)
+                prev_error = prev_data.get('total_error_cnt', 0)
+                print(f"[SCORE RESET] 기존 {composite_key} 점수 제거: pass={prev_pass}, error={prev_error}")
+
+                # ✅ global 점수에서 해당 spec 점수 제거
+                self.global_pass_cnt = max(0, self.global_pass_cnt - prev_pass)
+                self.global_error_cnt = max(0, self.global_error_cnt - prev_error)
+
+                print(f"[SCORE RESET] 조정 후 global 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}")
+
+            # ✅ 7. 모든 카운터 및 플래그 초기화 (첫 실행처럼)
+            self.cnt = 0
+            self.cnt_pre = 0
+            self.time_pre = 0
+            self.current_retry = 0
+            self.post_flag = False
+            self.processing_response = False
+            self.message_in_cnt = 0
+            self.realtime_flag = False
+            self.tmp_msg_append_flag = False
+
+            # ✅ 8. 현재 spec의 점수만 초기화 (global은 유지)
+            self.total_error_cnt = 0
+            self.total_pass_cnt = 0
+
+            # ✅ 9. 메시지 및 에러 관련 변수 초기화
+            self.message_error = []
+            self.res = None
+            self.webhook_res = None
+
+            # ✅ 10. 현재 spec에 맞게 누적 카운트 초기화
+            api_count = len(self.videoMessages)
+            self.step_pass_counts = [0] * api_count
+            self.step_error_counts = [0] * api_count
+            self.step_pass_flags = [0] * api_count
+
+            # ✅ 11. step_buffers 완전 재생성
+            self.step_buffers = [
+                {"data": "", "error": "", "result": "PASS", "raw_data_list": []} for _ in range(api_count)
+            ]
+            print(f"[START] step_buffers 재생성 완료: {len(self.step_buffers)}개")
+
+            # ✅ 12. trace 초기화
+            if hasattr(self, 'trace'):
+                self.trace.clear()
+            else:
+                self.trace = {}
+
+            if hasattr(self, 'latest_events'):
+                self.latest_events.clear()
+            else:
+                self.latest_events = {}
+
+            # ✅ 13. 테이블 완전 초기화
+            print(f"[START] 테이블 초기화: {api_count}개 API")
+            for i in range(self.tableWidget.rowCount()):
+                # 아이콘 초기화
+                icon_widget = QWidget()
+                icon_layout = QHBoxLayout()
+                icon_layout.setContentsMargins(0, 0, 0, 0)
+                icon_label = QLabel()
+                icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
+                icon_label.setAlignment(Qt.AlignCenter)
+                icon_layout.addWidget(icon_label)
+                icon_layout.setAlignment(Qt.AlignCenter)
+                icon_widget.setLayout(icon_layout)
+                self.tableWidget.setCellWidget(i, 1, icon_widget)
+
+                # 카운트 초기화
+                for col, value in [(2, "0"), (3, "0"), (4, "0"), (5, "0"), (6, "0%")]:
+                    item = QTableWidgetItem(value) if not self.tableWidget.item(i, col) else self.tableWidget.item(i, col)
+                    item.setText(value)
+                    item.setTextAlignment(Qt.AlignCenter)
+                    self.tableWidget.setItem(i, col, item)
+            print(f"[START] 테이블 초기화 완료")
+
+            # ✅ 14. 인증 정보 설정
+            parts = self.auth_info.split(",")
+            auth = [parts[0], parts[1] if len(parts) > 1 else ""]
+            self.accessInfo = [auth[0], auth[1]]
+            self.token = None
+
+            # ✅ 15. 평가 점수 디스플레이 초기화 (전체 점수 포함)
+            self.update_score_display()
+
+            # ✅ 16. 결과 텍스트 초기화
+            self.valResult.clear()
+
+            # ✅ 17. URL 설정
+            #self.pathUrl = self.url + "/" + self.current_spec_id
+            self.pathUrl = self.url_text_box.text()
+            self.url_text_box.setText(self.pathUrl)  # 안내 문구 변경
+
+            # ✅ 18. 시작 메시지
+            self.valResult.append("=" * 60)
+            self.valResult.append(f"🚀 시스템 검증 시작: {self.spec_description}")
+            self.valResult.append(f"📋 Spec ID: {self.current_spec_id}")
+            self.valResult.append(f"📊 API 개수: {len(self.videoMessages)}개")
+            self.valResult.append("=" * 60)
+        else:
+            # ========== 재개 모드: 저장된 상태 사용, 초기화 건너뛰기 ==========
+            print(f"[DEBUG] 재개 모드: 초기화 건너뛰기, 저장된 상태 사용")
+            # cnt는 last_completed_api_index + 1로 설정
+            self.cnt = self.last_completed_api_index + 1
+            print(f"[DEBUG] 재개 모드: cnt = {self.cnt}")
+
+            # ✅ 재개 모드에서도 실행 상태 변수는 초기화 필요
+            self.current_retry = 0  # 재시도 카운터 초기화 (중요!)
+            self.post_flag = False
+            self.processing_response = False
+            self.message_in_cnt = 0
+            self.realtime_flag = False
+            self.tmp_msg_append_flag = False
+            self.cnt_pre = 0
+            self.time_pre = 0
+            self.res = None
+            self.webhook_res = None
+            self.message_error = []
+            print(f"[DEBUG] 재개 모드: 실행 상태 변수 초기화 완료")
+
+            # ✅ 미완료 API의 trace 파일 삭제 (완료된 API는 유지)
+            trace_dir = os.path.join(result_dir, "trace")
+            if os.path.exists(trace_dir):
+                print(f"[DEBUG] 미완료 API trace 파일 삭제 시작 (완료: 0~{self.last_completed_api_index})")
+                for i in range(self.last_completed_api_index + 1, len(self.videoMessages)):
+                    api_name = self.videoMessages[i]
+                    # ✅ 두 가지 형식 모두 삭제 (trace_API.ndjson, trace_NN_API.ndjson)
+                    trace_patterns = [
+                        f"trace_{api_name}.ndjson",
+                        f"trace_{i:02d}_{api_name}.ndjson"
+                    ]
+                    for pattern in trace_patterns:
+                        trace_file = os.path.join(trace_dir, pattern)
+                        if os.path.exists(trace_file):
+                            try:
+                                os.remove(trace_file)
+                                print(f"[DEBUG] 삭제: {pattern}")
+                            except Exception as e:
+                                print(f"[WARN] trace 파일 삭제 실패: {e}")
+                print(f"[DEBUG] 미완료 API trace 파일 정리 완료")
+
+            # 점수 디스플레이 업데이트 (복원된 점수로)
+            self.update_score_display()
+
+            # 모니터링 메시지 복원
+            self.valResult.clear()
+            if self.paused_valResult_text:
+                self.valResult.setPlainText(self.paused_valResult_text)
+                self.valResult.append("\n========== 재개 ==========")
+                self.valResult.append(f"마지막 완료 API: {self.last_completed_api_index + 1}번째")
+                self.valResult.append(f"{self.last_completed_api_index + 2}번째 API부터 재개합니다.\n")
+                print(f"[DEBUG] 모니터링 메시지 복원 완료: {len(self.paused_valResult_text)} 문자")
+
+            # ✅ 테이블 데이터 복원 (완료된 API들만)
+            print(f"[DEBUG] 테이블 데이터 복원 시작: 0 ~ {self.last_completed_api_index}번째 API")
+            for i in range(self.last_completed_api_index + 1):
+                if i < len(self.step_buffers):
+                    buffer = self.step_buffers[i]
+                    # 실제 데이터가 있는 경우만 테이블 업데이트
+                    has_data = (
+                        buffer.get('raw_data_list') or
+                        buffer.get('data') or
+                        buffer.get('error')
+                    )
+                    if has_data:
+                        result = buffer.get('result', 'PASS')
+                        data = buffer.get('data', '')
+                        error = buffer.get('error', '')
+                        pass_count = self.step_pass_counts[i] if i < len(self.step_pass_counts) else 0
+                        error_count = self.step_error_counts[i] if i < len(self.step_error_counts) else 0
+
+                        # 부하테스트의 경우 검증 횟수는 raw_data_list 길이
+                        retries = len(buffer.get('raw_data_list', [])) if buffer.get('raw_data_list') else 1
+
+                        # 테이블 행 업데이트
+                        self.update_table_row_with_retries(
+                            i, result, pass_count, error_count, data, error, retries
+                        )
+                        print(f"[DEBUG] 테이블 복원: API {i+1} - result={result}, pass={pass_count}, error={error_count}, retries={retries}")
+            print(f"[DEBUG] 테이블 데이터 복원 완료")
+
+        # ✅ 5. 버튼 상태 변경 (신규/재개 공통)
         self.sbtn.setDisabled(True)
         self.stop_btn.setEnabled(True)
-
-        # ✅ 6. 이전 시험 결과가 global 점수에 포함되어 있으면 제거 (복합키 사용)
-        composite_key = f"{self.current_group_id}_{self.current_spec_id}"
-        if composite_key in self.spec_table_data:
-            prev_data = self.spec_table_data[composite_key]
-            prev_pass = prev_data.get('total_pass_cnt', 0)
-            prev_error = prev_data.get('total_error_cnt', 0)
-            print(f"[SCORE RESET] 기존 {composite_key} 점수 제거: pass={prev_pass}, error={prev_error}")
-
-            # ✅ global 점수에서 해당 spec 점수 제거
-            self.global_pass_cnt = max(0, self.global_pass_cnt - prev_pass)
-            self.global_error_cnt = max(0, self.global_error_cnt - prev_error)
-
-            print(f"[SCORE RESET] 조정 후 global 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}")
-
-        # ✅ 7. 모든 카운터 및 플래그 초기화 (첫 실행처럼)
-        self.cnt = 0
-        self.cnt_pre = 0
-        self.time_pre = 0
-        self.current_retry = 0
-        self.post_flag = False
-        self.processing_response = False
-        self.message_in_cnt = 0
-        self.realtime_flag = False
-        self.tmp_msg_append_flag = False
-        
-        # ✅ 8. 현재 spec의 점수만 초기화 (global은 유지)
-        self.total_error_cnt = 0
-        self.total_pass_cnt = 0
-
-        # ✅ 9. 메시지 및 에러 관련 변수 초기화
-        self.message_error = []
-        self.res = None
-        self.webhook_res = None
-
-        # ✅ 10. 현재 spec에 맞게 누적 카운트 초기화
-        api_count = len(self.videoMessages)
-        self.step_pass_counts = [0] * api_count
-        self.step_error_counts = [0] * api_count
-        self.step_pass_flags = [0] * api_count
-
-        # ✅ 11. step_buffers 완전 재생성
-        self.step_buffers = [
-            {"data": "", "error": "", "result": "PASS"} for _ in range(api_count)
-        ]
-        print(f"[START] step_buffers 재생성 완료: {len(self.step_buffers)}개")
-
-        # ✅ 12. trace 초기화
-        if hasattr(self, 'trace'):
-            self.trace.clear()
-        else:
-            self.trace = {}
-        
-        if hasattr(self, 'latest_events'):
-            self.latest_events.clear()
-        else:
-            self.latest_events = {}
-
-        # ✅ 13. 테이블 완전 초기화
-        print(f"[START] 테이블 초기화: {api_count}개 API")
-        for i in range(self.tableWidget.rowCount()):
-            # 아이콘 초기화
-            icon_widget = QWidget()
-            icon_layout = QHBoxLayout()
-            icon_layout.setContentsMargins(0, 0, 0, 0)
-            icon_label = QLabel()
-            icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
-            icon_label.setAlignment(Qt.AlignCenter)
-            icon_layout.addWidget(icon_label)
-            icon_layout.setAlignment(Qt.AlignCenter)
-            icon_widget.setLayout(icon_layout)
-            self.tableWidget.setCellWidget(i, 1, icon_widget)
-
-            # 카운트 초기화
-            for col, value in [(2, "0"), (3, "0"), (4, "0"), (5, "0"), (6, "0%")]:
-                item = QTableWidgetItem(value) if not self.tableWidget.item(i, col) else self.tableWidget.item(i, col)
-                item.setText(value)
-                item.setTextAlignment(Qt.AlignCenter)
-                self.tableWidget.setItem(i, col, item)
-        print(f"[START] 테이블 초기화 완료")
-
-        # ✅ 14. 인증 정보 설정
-        parts = self.auth_info.split(",")
-        auth = [parts[0], parts[1] if len(parts) > 1 else ""]
-        self.accessInfo = [auth[0], auth[1]]
-        self.token = None
-
-        # ✅ 15. 평가 점수 디스플레이 초기화 (전체 점수 포함)
-        self.update_score_display()
-
-        # ✅ 16. 결과 텍스트 초기화
-        self.valResult.clear()
-
-        # ✅ 17. URL 설정
-        #self.pathUrl = self.url + "/" + self.current_spec_id
-        self.pathUrl = self.url_text_box.text()
-        self.url_text_box.setText(self.pathUrl)  # 안내 문구 변경
-
-        # ✅ 18. 시작 메시지
-        self.valResult.append("=" * 60)
-        self.valResult.append(f"🚀 시스템 검증 시작: {self.spec_description}")
-        self.valResult.append(f"📋 Spec ID: {self.current_spec_id}")
-        self.valResult.append(f"📊 API 개수: {len(self.videoMessages)}개")
-        self.valResult.append("=" * 60)
 
         # ✅ 19. 타이머 시작 (모든 초기화 완료 후)
         print(f"[START] 타이머 시작")
@@ -5087,6 +5203,115 @@ class MyApp(QWidget):
 
         print(f"[START] 현재 global 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}")
 
+    def save_paused_state(self):
+        """일시정지 시 현재 상태를 JSON 파일로 저장"""
+        try:
+            from datetime import datetime
+
+            # 마지막 완료된 API 인덱스 계산
+            # 모든 retry가 완료된 API만 완료로 간주
+            last_completed = -1
+            for i, buffer in enumerate(self.step_buffers):
+                # ✅ 부하테스트의 경우 모든 retry가 완료되어야 "완료"로 판단
+                raw_data_list = buffer.get('raw_data_list', [])
+                expected_retries = self.num_retries_list[i] if i < len(self.num_retries_list) else 1
+
+                # 실제 완료된 retry 수가 예상 retry 수와 같거나 크면 완료
+                if len(raw_data_list) >= expected_retries:
+                    last_completed = i
+                # timeout 등으로 데이터 없이 FAIL 처리된 경우도 완료로 간주
+                elif buffer.get('result') == 'FAIL' and (buffer.get('data') or buffer.get('error')):
+                    has_timeout_error = 'Message Missing' in str(buffer.get('error', ''))
+                    if has_timeout_error:
+                        last_completed = i
+
+            self.last_completed_api_index = last_completed
+
+            # 저장할 상태 데이터 구성
+            paused_state = {
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "last_completed_api_index": self.last_completed_api_index,
+                "step_buffers": self.step_buffers,
+                "step_pass_counts": getattr(self, 'step_pass_counts', [0] * len(self.videoMessages)),
+                "step_error_counts": getattr(self, 'step_error_counts', [0] * len(self.videoMessages)),
+                "total_pass_cnt": self.total_pass_cnt,
+                "total_error_cnt": self.total_error_cnt,
+                "valResult_text": self.valResult.toPlainText(),
+                "current_spec_id": self.current_spec_id,
+                "global_pass_cnt": self.global_pass_cnt,
+                "global_error_cnt": self.global_error_cnt
+            }
+
+            # JSON 파일로 저장
+            paused_file_path = os.path.join(result_dir, "response_results_paused.json")
+            with open(paused_file_path, "w", encoding="utf-8") as f:
+                json.dump(paused_state, f, ensure_ascii=False, indent=2)
+
+            print(f"✅ 일시정지 상태 저장 완료: {paused_file_path}")
+            print(f"   마지막 완료 API 인덱스: {last_completed}")
+
+            # 모니터링 창에 로그 추가
+            self.valResult.append(f"\n💾 재개 정보 저장 완료: {paused_file_path}")
+            self.valResult.append(f"   (마지막 완료 API: {last_completed + 1}번째, 다음 재시작 시 {last_completed + 2}번째 API부터 이어서 실행)")
+
+        except Exception as e:
+            print(f"❌ 일시정지 상태 저장 실패: {e}")
+            import traceback
+            traceback.print_exc()
+
+    def load_paused_state(self):
+        """일시정지된 상태를 JSON 파일에서 복원"""
+        try:
+            paused_file_path = os.path.join(result_dir, "response_results_paused.json")
+
+            if not os.path.exists(paused_file_path):
+                print("[INFO] 일시정지 파일이 존재하지 않습니다.")
+                return False
+
+            with open(paused_file_path, "r", encoding="utf-8") as f:
+                paused_state = json.load(f)
+
+            # 상태 복원
+            self.last_completed_api_index = paused_state.get("last_completed_api_index", -1)
+            self.step_buffers = paused_state.get("step_buffers", [])
+            self.step_pass_counts = paused_state.get("step_pass_counts", [0] * len(self.videoMessages))
+            self.step_error_counts = paused_state.get("step_error_counts", [0] * len(self.videoMessages))
+            self.total_pass_cnt = paused_state.get("total_pass_cnt", 0)
+            self.total_error_cnt = paused_state.get("total_error_cnt", 0)
+            self.paused_valResult_text = paused_state.get("valResult_text", "")
+            self.global_pass_cnt = paused_state.get("global_pass_cnt", 0)
+            self.global_error_cnt = paused_state.get("global_error_cnt", 0)
+
+            print(f"✅ 일시정지 상태 복원 완료")
+            print(f"   타임스탬프: {paused_state.get('timestamp')}")
+            print(f"   마지막 완료 API 인덱스: {self.last_completed_api_index}")
+            print(f"   복원된 점수: PASS={self.total_pass_cnt}, FAIL={self.total_error_cnt}")
+
+            return True
+
+        except Exception as e:
+            print(f"❌ 일시정지 상태 복원 실패: {e}")
+            import traceback
+            traceback.print_exc()
+            return False
+
+    def cleanup_paused_file(self):
+        """평가 완료 후 일시정지 파일 삭제 및 상태 초기화"""
+        try:
+            paused_file_path = os.path.join(result_dir, "response_results_paused.json")
+
+            if os.path.exists(paused_file_path):
+                os.remove(paused_file_path)
+                print("✅ 일시정지 중간 파일 삭제 완료")
+
+            # 일시정지 상태 초기화
+            self.is_paused = False
+            self.last_completed_api_index = -1
+            self.paused_valResult_text = ""
+
+        except Exception as e:
+            print(f"❌ 일시정지 파일 정리 실패: {e}")
+
     def stop_btn_clicked(self):
         """평가 중지 버튼 클릭"""
         # ✅ 타이머 중지
@@ -5099,6 +5324,10 @@ class MyApp(QWidget):
         self.stop_btn.setDisabled(True)
 
         self.save_current_spec_data()
+
+        # ✅ 일시정지 상태 저장
+        self.is_paused = True
+        self.save_paused_state()
 
         # ✅ JSON 결과 저장 추가
         try:
@@ -5132,7 +5361,7 @@ class MyApp(QWidget):
 
             # 버퍼 초기화
             self.step_buffers = [
-                {"data": "", "result": "", "error": ""} for _ in range(api_count)
+                {"data": "", "result": "", "error": "", "raw_data_list": []} for _ in range(api_count)
             ]
 
             # 누적 카운트 초기화
@@ -5233,6 +5462,10 @@ class MyApp(QWidget):
 
         if reply == QMessageBox.Yes:
             result_payload = self.build_result_payload()
+
+            # ✅ 종료 시 일시정지 파일 삭제
+            self.cleanup_paused_file()
+
             QApplication.quit()
 
     def get_setting(self):
