@@ -390,9 +390,28 @@ class MainWindow(QMainWindow):
             # ===== 예외 처리 로깅 추가 끝 =====
 
     def closeEvent(self, event):
+        print(f"[MAIN_CLOSE] MainWindow closeEvent 호출됨")
+
         reply = QMessageBox.question(self, '종료', '프로그램을 종료하시겠습니까?',
                                      QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+
+        print(f"[MAIN_CLOSE] 사용자 응답: {'Yes' if reply == QMessageBox.Yes else 'No'}")
+
         if reply == QMessageBox.Yes:
+            # ✅ 플랫폼 검증 위젯의 일시정지 파일 정리
+            if hasattr(self, '_platform_widget') and self._platform_widget is not None:
+                print(f"[MAIN_CLOSE] 플랫폼 검증 위젯 정리 중...")
+                if hasattr(self._platform_widget, 'cleanup_paused_file'):
+                    self._platform_widget.cleanup_paused_file()
+                    print(f"[MAIN_CLOSE] 플랫폼 일시정지 파일 삭제 완료")
+
+            # ✅ 시스템 검증 위젯의 일시정지 파일 정리
+            if hasattr(self, '_system_widget') and self._system_widget is not None:
+                print(f"[MAIN_CLOSE] 시스템 검증 위젯 정리 중...")
+                if hasattr(self._system_widget, 'cleanup_paused_file'):
+                    self._system_widget.cleanup_paused_file()
+                    print(f"[MAIN_CLOSE] 시스템 일시정지 파일 삭제 완료")
+
             event.accept()
         else:
             event.ignore()
