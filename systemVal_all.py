@@ -3502,14 +3502,15 @@ class MyApp(QWidget):
                         print(f"✅ 시험 결과가 '{json_path}'에 자동 저장되었습니다.")
                         self.valResult.append(f"\n📄 결과 파일 저장 완료: {json_path}")
 
-                        # ✅ 평가 완료 시 일시정지 파일 정리
-                        self.cleanup_paused_file()
-
                     except Exception as e:
                         print(f"❌ JSON 저장 중 오류 발생: {e}")
                         import traceback
                         traceback.print_exc()
                         self.valResult.append(f"\n⚠️ 결과 저장 실패: {str(e)}")
+
+                    finally:
+                        # ✅ 평가 완료 시 일시정지 파일 정리 (에러 발생 여부와 무관하게 항상 실행)
+                        self.cleanup_paused_file()
 
                     self.sbtn.setEnabled(True)
                     self.stop_btn.setDisabled(True)
@@ -5507,7 +5508,6 @@ class MyApp(QWidget):
         # ✅ 타이머 중지
         if hasattr(self, 'tick_timer') and self.tick_timer.isActive():
             self.tick_timer.stop()
-            print(f"[CLOSE] 타이머 중지됨")
 
         event.accept()
 

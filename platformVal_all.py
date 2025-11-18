@@ -79,6 +79,48 @@ class PlatformValidationWindow(QMainWindow):
         """뒤로가기: 시험 결과에서 검증 화면으로 복귀"""
         self.stack.setCurrentWidget(self.validation_widget)
 
+    def closeEvent(self, event):
+        """래퍼 윈도우 닫기 이벤트 - validation_widget의 정리 작업 호출"""
+        print(f"[WRAPPER_CLOSE] PlatformValidationWindow closeEvent 호출됨")
+
+        # ✅ 종료 확인 대화상자
+        reply = QMessageBox.question(
+            self, '프로그램 종료',
+            '정말로 프로그램을 종료하시겠습니까?',
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+
+        print(f"[WRAPPER_CLOSE] 사용자 응답: {'Yes' if reply == QMessageBox.Yes else 'No'}")
+
+        if reply == QMessageBox.Yes:
+            # ✅ validation_widget의 정리 작업 호출
+            if self.validation_widget is not None:
+                print(f"[WRAPPER_CLOSE] validation_widget 정리 시작")
+                # 타이머 중지
+                if hasattr(self.validation_widget, 'tick_timer') and self.validation_widget.tick_timer.isActive():
+                    self.validation_widget.tick_timer.stop()
+                    print(f"[WRAPPER_CLOSE] 타이머 중지됨")
+
+                # 서버 스레드 종료
+                if hasattr(self.validation_widget, 'server_th') and self.validation_widget.server_th is not None and self.validation_widget.server_th.isRunning():
+                    print(f"[WRAPPER_CLOSE] 서버 스레드 종료 중...")
+                    try:
+                        self.validation_widget.server_th.httpd.shutdown()
+                        self.validation_widget.server_th.wait(2000)
+                        print(f"[WRAPPER_CLOSE] 서버 스레드 종료 완료")
+                    except Exception as e:
+                        print(f"[WARN] 서버 종료 중 오류 (무시): {e}")
+
+                # 일시정지 파일 삭제
+                print(f"[WRAPPER_CLOSE] cleanup_paused_file() 호출")
+                self.validation_widget.cleanup_paused_file()
+                print(f"[WRAPPER_CLOSE] 정리 완료")
+
+            event.accept()
+        else:
+            event.ignore()
+
 
 # 통합된 상세 내용 확인 팝업창 클래스
 class CombinedDetailDialog(QDialog):
@@ -2186,14 +2228,15 @@ class MyApp(QWidget):
                     print(f"✅ 시험 결과가 '{json_path}'에 자동 저장되었습니다.")
                     self.valResult.append(f"\n📄 결과 파일 저장 완료: {json_path}")
 
-                    # ✅ 평가 완료 시 일시정지 파일 정리
-                    self.cleanup_paused_file()
-
                 except Exception as e:
                     print(f"❌ JSON 저장 중 오류 발생: {e}")
                     import traceback
                     traceback.print_exc()
                     self.valResult.append(f"\n⚠️ 결과 저장 실패: {str(e)}")
+
+                finally:
+                    # ✅ 평가 완료 시 일시정지 파일 정리 (에러 발생 여부와 무관하게 항상 실행)
+                    self.cleanup_paused_file()
 
                 return
 
@@ -4906,15 +4949,12 @@ class MyApp(QWidget):
         # ✅ 타이머 중지
         if hasattr(self, 'tick_timer') and self.tick_timer.isActive():
             self.tick_timer.stop()
-            print(f"[DEBUG] 종료 시 타이머 중지됨")
 
         # ✅ 서버 스레드 종료
         if hasattr(self, 'server_th') and self.server_th is not None and self.server_th.isRunning():
-            print(f"[DEBUG] 종료 시 서버 스레드 종료 중...")
             try:
                 self.server_th.httpd.shutdown()
                 self.server_th.wait(2000)  # 최대 2초 대기
-                print(f"[DEBUG] 서버 스레드 종료 완료")
             except Exception as e:
                 print(f"[WARN] 서버 종료 중 오류 (무시): {e}")
 
