@@ -1603,9 +1603,9 @@ class ResultPageWidget(QWidget):
         icon_label.setPixmap(icon_pixmap.scaled(40, 40, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         icon_label.setFixedSize(40, 40)
 
-        # ✅ 현재 시나리오의 점수 사용 (시나리오별 점수)
-        total_pass = self.parent.total_pass_cnt
-        total_error = self.parent.total_error_cnt
+        # ✅ 전체 점수 사용 (모든 시험 분야 합산)
+        total_pass = self.parent.global_pass_cnt
+        total_error = self.parent.global_error_cnt
         total_fields = total_pass + total_error
         score = (total_pass / total_fields * 100) if total_fields > 0 else 0
 
