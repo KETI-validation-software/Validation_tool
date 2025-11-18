@@ -70,7 +70,13 @@
           "validations": [
             {
               "attempt": 1,
-              "validationData": {},
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "userName": "관리자",
+                "userAff": "오산시청",
+                "accessToken": "abcde1234"
+              },
               "validationErrors": [
                 "[시도 1/5]",
                 "오류가 없습니다.",
@@ -86,22 +92,46 @@
             },
             {
               "attempt": 2,
-              "validationData": {},
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "userName": "관리자",
+                "userAff": "오산시청",
+                "accessToken": "abcde1234"
+              },
               "validationErrors": []
             },
             {
               "attempt": 3,
-              "validationData": {},
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "userName": "관리자",
+                "userAff": "오산시청",
+                "accessToken": "abcde1234"
+              },
               "validationErrors": []
             },
             {
               "attempt": 4,
-              "validationData": {},
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "userName": "관리자",
+                "userAff": "오산시청",
+                "accessToken": "abcde1234"
+              },
               "validationErrors": []
             },
             {
               "attempt": 5,
-              "validationData": {},
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "userName": "관리자",
+                "userAff": "오산시청",
+                "accessToken": "abcde1234"
+              },
               "validationErrors": []
             }
           ]
@@ -119,7 +149,22 @@
           "validations": [
             {
               "attempt": 1,
-              "validationData": {},
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "streamingSupport": [
+                  {
+                    "streamProtocolType": "RTSP",
+                    "streamProtocolDesc": "Unicast"
+                  }
+                ],
+                "transportSupport": [
+                  {
+                    "transProtocolType": "WebHook",
+                    "transProtocolDesc": ""
+                  }
+                ]
+              },
               "validationErrors": [
                 "[시도 1/5]",
                 "오류가 없습니다.",
@@ -135,22 +180,82 @@
             },
             {
               "attempt": 2,
-              "validationData": {},
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "streamingSupport": [
+                  {
+                    "streamProtocolType": "RTSP",
+                    "streamProtocolDesc": "Unicast"
+                  }
+                ],
+                "transportSupport": [
+                  {
+                    "transProtocolType": "WebHook",
+                    "transProtocolDesc": ""
+                  }
+                ]
+              },
               "validationErrors": []
             },
             {
               "attempt": 3,
-              "validationData": {},
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "streamingSupport": [
+                  {
+                    "streamProtocolType": "RTSP",
+                    "streamProtocolDesc": "Unicast"
+                  }
+                ],
+                "transportSupport": [
+                  {
+                    "transProtocolType": "WebHook",
+                    "transProtocolDesc": ""
+                  }
+                ]
+              },
               "validationErrors": []
             },
             {
               "attempt": 4,
-              "validationData": {},
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "streamingSupport": [
+                  {
+                    "streamProtocolType": "RTSP",
+                    "streamProtocolDesc": "Unicast"
+                  }
+                ],
+                "transportSupport": [
+                  {
+                    "transProtocolType": "WebHook",
+                    "transProtocolDesc": ""
+                  }
+                ]
+              },
               "validationErrors": []
             },
             {
               "attempt": 5,
-              "validationData": {},
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "streamingSupport": [
+                  {
+                    "streamProtocolType": "RTSP",
+                    "streamProtocolDesc": "Unicast"
+                  }
+                ],
+                "transportSupport": [
+                  {
+                    "transProtocolType": "WebHook",
+                    "transProtocolDesc": ""
+                  }
+                ]
+              },
               "validationErrors": []
             }
           ]
@@ -168,7 +273,38 @@
           "validations": [
             {
               "attempt": 1,
-              "validationData": {},
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "camName": "카메라1",
+                    "camLoc": {
+                      "lon": "127.127730",
+                      "lat": "38.439801",
+                      "alt": "32.131",
+                      "desc": "3층복도"
+                    },
+                    "camConfig": {
+                      "camType": "PTZ"
+                    }
+                  },
+                  {
+                    "camID": "cam0002",
+                    "camName": "카메라2",
+                    "camLoc": {
+                      "lon": "126",
+                      "lat": "32",
+                      "alt": "31",
+                      "desc": "2층복도"
+                    },
+                    "camConfig": {
+                      "camType": "PTZ"
+                    }
+                  }
+                ]
+              },
               "validationErrors": [
                 "[시도 1/5]",
                 "오류가 없습니다.",
@@ -184,22 +320,146 @@
             },
             {
               "attempt": 2,
-              "validationData": {},
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "camName": "카메라1",
+                    "camLoc": {
+                      "lon": "127.127730",
+                      "lat": "38.439801",
+                      "alt": "32.131",
+                      "desc": "3층복도"
+                    },
+                    "camConfig": {
+                      "camType": "PTZ"
+                    }
+                  },
+                  {
+                    "camID": "cam0002",
+                    "camName": "카메라2",
+                    "camLoc": {
+                      "lon": "126",
+                      "lat": "32",
+                      "alt": "31",
+                      "desc": "2층복도"
+                    },
+                    "camConfig": {
+                      "camType": "PTZ"
+                    }
+                  }
+                ]
+              },
               "validationErrors": []
             },
             {
               "attempt": 3,
-              "validationData": {},
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "camName": "카메라1",
+                    "camLoc": {
+                      "lon": "127.127730",
+                      "lat": "38.439801",
+                      "alt": "32.131",
+                      "desc": "3층복도"
+                    },
+                    "camConfig": {
+                      "camType": "PTZ"
+                    }
+                  },
+                  {
+                    "camID": "cam0002",
+                    "camName": "카메라2",
+                    "camLoc": {
+                      "lon": "126",
+                      "lat": "32",
+                      "alt": "31",
+                      "desc": "2층복도"
+                    },
+                    "camConfig": {
+                      "camType": "PTZ"
+                    }
+                  }
+                ]
+              },
               "validationErrors": []
             },
             {
               "attempt": 4,
-              "validationData": {},
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "camName": "카메라1",
+                    "camLoc": {
+                      "lon": "127.127730",
+                      "lat": "38.439801",
+                      "alt": "32.131",
+                      "desc": "3층복도"
+                    },
+                    "camConfig": {
+                      "camType": "PTZ"
+                    }
+                  },
+                  {
+                    "camID": "cam0002",
+                    "camName": "카메라2",
+                    "camLoc": {
+                      "lon": "126",
+                      "lat": "32",
+                      "alt": "31",
+                      "desc": "2층복도"
+                    },
+                    "camConfig": {
+                      "camType": "PTZ"
+                    }
+                  }
+                ]
+              },
               "validationErrors": []
             },
             {
               "attempt": 5,
-              "validationData": {},
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "camName": "카메라1",
+                    "camLoc": {
+                      "lon": "127.127730",
+                      "lat": "38.439801",
+                      "alt": "32.131",
+                      "desc": "3층복도"
+                    },
+                    "camConfig": {
+                      "camType": "PTZ"
+                    }
+                  },
+                  {
+                    "camID": "cam0002",
+                    "camName": "카메라2",
+                    "camLoc": {
+                      "lon": "126",
+                      "lat": "32",
+                      "alt": "31",
+                      "desc": "2층복도"
+                    },
+                    "camConfig": {
+                      "camType": "PTZ"
+                    }
+                  }
+                ]
+              },
               "validationErrors": []
             }
           ]
@@ -217,37 +477,192 @@
           "validations": [
             {
               "attempt": 1,
-              "validationData": {},
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "timeList": [
+                      {
+                        "startTime": 1761044332831,
+                        "endTime": 1761081844869
+                      },
+                      {
+                        "startTime": 1761063724857,
+                        "endTime": 1761068387968
+                      }
+                    ]
+                  },
+                  {
+                    "camID": "cam0002",
+                    "timeList": [
+                      {
+                        "startTime": 1760951646474,
+                        "endTime": 1760968638715
+                      },
+                      {
+                        "startTime": 1760992816058,
+                        "endTime": 1761094838224
+                      }
+                    ]
+                  }
+                ]
+              },
               "validationErrors": [
                 "[시도 5/5]",
-                "[의미] camList.timeList.endTime[0]: 범위 검증 실패: min=1761110160000, max=None, operator=between",
-                "[의미] camList.timeList.endTime[1]: 범위 검증 실패: min=1761110160000, max=None, operator=between",
-                "[의미] camList.timeList.endTime[2]: 범위 검증 실패: min=1761110160000, max=None, operator=between",
-                "[의미] camList.timeList.endTime[3]: 범위 검증 실패: min=1761110160000, max=None, operator=between",
-                "[의미] camList.timeList.startTime[0]: 범위 검증 실패: min=1761110160000, max=None, operator=between",
-                "[의미] camList.timeList.startTime[1]: 범위 검증 실패: min=1761110160000, max=None, operator=between",
-                "[의미] camList.timeList.startTime[2]: 범위 검증 실패: min=1761110160000, max=None, operator=between",
-                "[의미] camList.timeList.startTime[3]: 범위 검증 실패: min=1761110160000, max=None, operator=between"
+                "[의미] camList.timeList.endTime[0]: 범위 검증 실패: min=None, max=None, operator=between",
+                "[의미] camList.timeList.endTime[1]: 범위 검증 실패: min=None, max=None, operator=between",
+                "[의미] camList.timeList.endTime[2]: 범위 검증 실패: min=None, max=None, operator=between",
+                "[의미] camList.timeList.endTime[3]: 범위 검증 실패: min=None, max=None, operator=between",
+                "[의미] camList.timeList.startTime[0]: 범위 검증 실패: min=None, max=None, operator=between",
+                "[의미] camList.timeList.startTime[1]: 범위 검증 실패: min=None, max=None, operator=between",
+                "[의미] camList.timeList.startTime[2]: 범위 검증 실패: min=None, max=None, operator=between",
+                "[의미] camList.timeList.startTime[3]: 범위 검증 실패: min=None, max=None, operator=between"
               ]
             },
             {
               "attempt": 2,
-              "validationData": {},
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "timeList": [
+                      {
+                        "startTime": 1761093859828,
+                        "endTime": 1761119885791
+                      },
+                      {
+                        "startTime": 1761077909506,
+                        "endTime": 1761083400186
+                      }
+                    ]
+                  },
+                  {
+                    "camID": "cam0002",
+                    "timeList": [
+                      {
+                        "startTime": 1761047624493,
+                        "endTime": 1761106543862
+                      },
+                      {
+                        "startTime": 1761107073840,
+                        "endTime": 1761110698592
+                      }
+                    ]
+                  }
+                ]
+              },
               "validationErrors": []
             },
             {
               "attempt": 3,
-              "validationData": {},
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "timeList": [
+                      {
+                        "startTime": 1761059769582,
+                        "endTime": 1761106435258
+                      },
+                      {
+                        "startTime": 1761098684145,
+                        "endTime": 1761099681356
+                      }
+                    ]
+                  },
+                  {
+                    "camID": "cam0002",
+                    "timeList": [
+                      {
+                        "startTime": 1761066473606,
+                        "endTime": 1761067208645
+                      },
+                      {
+                        "startTime": 1761088983006,
+                        "endTime": 1761108605184
+                      }
+                    ]
+                  }
+                ]
+              },
               "validationErrors": []
             },
             {
               "attempt": 4,
-              "validationData": {},
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "timeList": [
+                      {
+                        "startTime": 1761056067957,
+                        "endTime": 1761077273395
+                      },
+                      {
+                        "startTime": 1760959249171,
+                        "endTime": 1761108010570
+                      }
+                    ]
+                  },
+                  {
+                    "camID": "cam0002",
+                    "timeList": [
+                      {
+                        "startTime": 1760972868139,
+                        "endTime": 1761111904252
+                      },
+                      {
+                        "startTime": 1760984745596,
+                        "endTime": 1761037142683
+                      }
+                    ]
+                  }
+                ]
+              },
               "validationErrors": []
             },
             {
               "attempt": 5,
-              "validationData": {},
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "timeList": [
+                      {
+                        "startTime": 1760949091568,
+                        "endTime": 1761039250981
+                      },
+                      {
+                        "startTime": 1760969908916,
+                        "endTime": 1761079983602
+                      }
+                    ]
+                  },
+                  {
+                    "camID": "cam0002",
+                    "timeList": [
+                      {
+                        "startTime": 1761054216747,
+                        "endTime": 1761080847800
+                      },
+                      {
+                        "startTime": 1760978447939,
+                        "endTime": 1760980536495
+                      }
+                    ]
+                  }
+                ]
+              },
               "validationErrors": []
             }
           ]
@@ -265,7 +680,36 @@
           "validations": [
             {
               "attempt": 1,
-              "validationData": {},
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "accessID": "conn0001",
+                    "accessPW": "1234",
+                    "camURL": "rtsp://127.0.01:8554",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": "30",
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  },
+                  {
+                    "camID": "cam0002",
+                    "accessID": "conn0001",
+                    "accessPW": "1234",
+                    "camURL": "rtsp://127.0.01:8554",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": "30",
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  }
+                ]
+              },
               "validationErrors": [
                 "[시도 5/5]",
                 "[의미] camList.camURL[0]: [0] 스트림 연결 실패: rtsp://conn0001:1234@127.0.01:8554",
@@ -275,22 +719,138 @@
             },
             {
               "attempt": 2,
-              "validationData": {},
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "accessID": "conn0001",
+                    "accessPW": "1234",
+                    "camURL": "rtsp://127.0.01:8554",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": "30",
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  },
+                  {
+                    "camID": "cam0002",
+                    "accessID": "conn0001",
+                    "accessPW": "1234",
+                    "camURL": "rtsp://127.0.01:8554",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": "30",
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  }
+                ]
+              },
               "validationErrors": []
             },
             {
               "attempt": 3,
-              "validationData": {},
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "accessID": "conn0001",
+                    "accessPW": "1234",
+                    "camURL": "rtsp://127.0.01:8554",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": "30",
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  },
+                  {
+                    "camID": "cam0002",
+                    "accessID": "conn0001",
+                    "accessPW": "1234",
+                    "camURL": "rtsp://127.0.01:8554",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": "30",
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  }
+                ]
+              },
               "validationErrors": []
             },
             {
               "attempt": 4,
-              "validationData": {},
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "accessID": "conn0001",
+                    "accessPW": "1234",
+                    "camURL": "rtsp://127.0.01:8554",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": "30",
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  },
+                  {
+                    "camID": "cam0002",
+                    "accessID": "conn0001",
+                    "accessPW": "1234",
+                    "camURL": "rtsp://127.0.01:8554",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": "30",
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  }
+                ]
+              },
               "validationErrors": []
             },
             {
               "attempt": 5,
-              "validationData": {},
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "accessID": "conn0001",
+                    "accessPW": "1234",
+                    "camURL": "rtsp://127.0.01:8554",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": "30",
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  },
+                  {
+                    "camID": "cam0002",
+                    "accessID": "conn0001",
+                    "accessPW": "1234",
+                    "camURL": "rtsp://127.0.01:8554",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": "30",
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  }
+                ]
+              },
               "validationErrors": []
             }
           ]
@@ -308,32 +868,197 @@
           "validations": [
             {
               "attempt": 1,
-              "validationData": {},
+              "validationData": {
+                "code": "성공",
+                "message": "200",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "accessID": "cam0001",
+                    "accessPW": "conn0001",
+                    "startTime": 1761202693160,
+                    "endTime": 1761206793797,
+                    "camURL": "rtsp://192.168.0.5:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": "30",
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  },
+                  {
+                    "camID": "cam0002",
+                    "accessID": "cam0001",
+                    "accessPW": "conn0001",
+                    "startTime": 1761184591898,
+                    "endTime": 1761191197338,
+                    "camURL": "rtsp://192.168.0.5:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": "30",
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  }
+                ]
+              },
               "validationErrors": [
                 "[시도 5/5]",
-                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761175736952 (타입: int), [1] 1761202313912 (타입: int)",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761086308853 (타입: int), [1] 1761198272266 (타입: int)",
+                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761199272216 (타입: int), [1] 1761188816430 (타입: int)",
+                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761187094687 (타입: int), [1] 1761170056829 (타입: int)",
                 "[구조] 타입 불일치: camList.videoInfo.fps (예상: int, 실제: str, 값: 30)"
               ]
             },
             {
               "attempt": 2,
-              "validationData": {},
+              "validationData": {
+                "code": "성공",
+                "message": "200",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "accessID": "cam0001",
+                    "accessPW": "conn0001",
+                    "startTime": 1760967432093,
+                    "endTime": 1761108657860,
+                    "camURL": "rtsp://192.168.0.5:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": "30",
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  },
+                  {
+                    "camID": "cam0002",
+                    "accessID": "cam0001",
+                    "accessPW": "conn0001",
+                    "startTime": 1760990057808,
+                    "endTime": 1761066154810,
+                    "camURL": "rtsp://192.168.0.5:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": "30",
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  }
+                ]
+              },
               "validationErrors": []
             },
             {
               "attempt": 3,
-              "validationData": {},
+              "validationData": {
+                "code": "성공",
+                "message": "200",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "accessID": "cam0001",
+                    "accessPW": "conn0001",
+                    "startTime": 1760973841200,
+                    "endTime": 1761130192677,
+                    "camURL": "rtsp://192.168.0.5:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": "30",
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  },
+                  {
+                    "camID": "cam0002",
+                    "accessID": "cam0001",
+                    "accessPW": "conn0001",
+                    "startTime": 1761195312342,
+                    "endTime": 1761206485403,
+                    "camURL": "rtsp://192.168.0.5:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": "30",
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  }
+                ]
+              },
               "validationErrors": []
             },
             {
               "attempt": 4,
-              "validationData": {},
+              "validationData": {
+                "code": "성공",
+                "message": "200",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "accessID": "cam0001",
+                    "accessPW": "conn0001",
+                    "startTime": 1761081673177,
+                    "endTime": 1761200293133,
+                    "camURL": "rtsp://192.168.0.5:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": "30",
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  },
+                  {
+                    "camID": "cam0002",
+                    "accessID": "cam0001",
+                    "accessPW": "conn0001",
+                    "startTime": 1761065562843,
+                    "endTime": 1761083107265,
+                    "camURL": "rtsp://192.168.0.5:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": "30",
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  }
+                ]
+              },
               "validationErrors": []
             },
             {
               "attempt": 5,
-              "validationData": {},
+              "validationData": {
+                "code": "성공",
+                "message": "200",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "accessID": "cam0001",
+                    "accessPW": "conn0001",
+                    "startTime": 1761187094687,
+                    "endTime": 1761199272216,
+                    "camURL": "rtsp://192.168.0.5:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": "30",
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  },
+                  {
+                    "camID": "cam0002",
+                    "accessID": "cam0001",
+                    "accessPW": "conn0001",
+                    "startTime": 1761170056829,
+                    "endTime": 1761188816430,
+                    "camURL": "rtsp://192.168.0.5:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": "30",
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  }
+                ]
+              },
               "validationErrors": []
             }
           ]
@@ -351,7 +1076,10 @@
           "validations": [
             {
               "attempt": 1,
-              "validationData": {},
+              "validationData": {
+                "code": "",
+                "message": ""
+              },
               "validationErrors": [
                 "[시도 1/5]",
                 "오류가 없습니다.",
@@ -397,22 +1125,34 @@
             },
             {
               "attempt": 2,
-              "validationData": {},
+              "validationData": {
+                "code": "",
+                "message": ""
+              },
               "validationErrors": []
             },
             {
               "attempt": 3,
-              "validationData": {},
+              "validationData": {
+                "code": "",
+                "message": ""
+              },
               "validationErrors": []
             },
             {
               "attempt": 4,
-              "validationData": {},
+              "validationData": {
+                "code": "",
+                "message": ""
+              },
               "validationErrors": []
             },
             {
               "attempt": 5,
-              "validationData": {},
+              "validationData": {
+                "code": "",
+                "message": ""
+              },
               "validationErrors": []
             }
           ]
@@ -468,31 +1208,136 @@
           "validations": [
             {
               "attempt": 1,
-              "validationData": {},
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "eventUUID": "event01",
+                    "eventName": "Loitering",
+                    "startTime": 3957339083523,
+                    "endTime": 6099867034156,
+                    "eventDesc": "aaabbbAAA"
+                  },
+                  {
+                    "camID": "cam0002",
+                    "eventUUID": "event01",
+                    "eventName": "Loitering",
+                    "startTime": 4170174099758,
+                    "endTime": 8291441350179,
+                    "eventDesc": "aaabbbAAA"
+                  }
+                ]
+              },
               "validationErrors": [
                 "[시도 5/5]",
-                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 9778648617885 (타입: int), [1] 9619317730028 (타입: int)",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 8806479813826 (타입: int), [1] 7635679627922 (타입: int)"
+                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 9112656394554 (타입: int), [1] 7843416218711 (타입: int)",
+                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 7722512941931 (타입: int), [1] 3277019397986 (타입: int)"
               ]
             },
             {
               "attempt": 2,
-              "validationData": {},
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "eventUUID": "event01",
+                    "eventName": "Loitering",
+                    "startTime": 3150037365923,
+                    "endTime": 8345497913714,
+                    "eventDesc": "aaabbbAAA"
+                  },
+                  {
+                    "camID": "cam0002",
+                    "eventUUID": "event01",
+                    "eventName": "Loitering",
+                    "startTime": 6771033360477,
+                    "endTime": 9043402519220,
+                    "eventDesc": "aaabbbAAA"
+                  }
+                ]
+              },
               "validationErrors": []
             },
             {
               "attempt": 3,
-              "validationData": {},
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "eventUUID": "event01",
+                    "eventName": "화재",
+                    "startTime": 4877765722461,
+                    "endTime": 5085187455177,
+                    "eventDesc": "aaabbbAAA"
+                  },
+                  {
+                    "camID": "cam0002",
+                    "eventUUID": "event01",
+                    "eventName": "화재",
+                    "startTime": 9342926202040,
+                    "endTime": 9377190106878,
+                    "eventDesc": "aaabbbAAA"
+                  }
+                ]
+              },
               "validationErrors": []
             },
             {
               "attempt": 4,
-              "validationData": {},
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "eventUUID": "event01",
+                    "eventName": "화재",
+                    "startTime": 6608757181048,
+                    "endTime": 7972346671090,
+                    "eventDesc": "aaabbbAAA"
+                  },
+                  {
+                    "camID": "cam0002",
+                    "eventUUID": "event01",
+                    "eventName": "화재",
+                    "startTime": 3788584150771,
+                    "endTime": 8949631231203,
+                    "eventDesc": "aaabbbAAA"
+                  }
+                ]
+              },
               "validationErrors": []
             },
             {
               "attempt": 5,
-              "validationData": {},
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "eventUUID": "event01",
+                    "eventName": "화재",
+                    "startTime": 7722512941931,
+                    "endTime": 9112656394554,
+                    "eventDesc": "aaabbbAAA"
+                  },
+                  {
+                    "camID": "cam0002",
+                    "eventUUID": "event01",
+                    "eventName": "화재",
+                    "startTime": 3277019397986,
+                    "endTime": 7843416218711,
+                    "eventDesc": "aaabbbAAA"
+                  }
+                ]
+              },
               "validationErrors": []
             }
           ]
@@ -500,5 +1345,5 @@
       ]
     }
   ],
-  "completedDate": "2025-11-17T12:24:49Z"
+  "completedDate": "2025-11-18T10:34:22Z"
 }
