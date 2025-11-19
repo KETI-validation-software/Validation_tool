@@ -1,9 +1,5 @@
 from json_checker import OptionalKey
 
-
-from json_checker import OptionalKey
-
-
 # Authentication
 cmgyv3rzl014nvsveidu5jpzp_Authentication_out_schema = {
     "code": str,

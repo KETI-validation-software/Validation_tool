@@ -282,7 +282,6 @@ class FormValidator:
                 }
                 spec_list_names.append(spec_info)
 
-            schema_content = "from json_checker import OptionalKey\n\n\n" + schema_content
             data_content = f"# {file_type} 모드\n\n" + data_content
 
             all_spec_list_names = []
