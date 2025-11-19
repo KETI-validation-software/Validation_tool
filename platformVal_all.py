@@ -2352,7 +2352,7 @@ class MyApp(QWidget):
                 print(
                     f"[PLATFORM] 시스템 요청 수신: {self.Server.message[self.cnt]} (시도 {retry_attempt + 1}/{current_retries})")
 
-                self.valResult.append(f"📨 시스템 요청 수신 [{retry_attempt + 1}/{current_retries}]")
+                self.valResult.append(f"📨 요청 메시지 수신 [{retry_attempt + 1}/{current_retries}]")
 
                 # 테이블에 실시간 진행률 표시
                 self.update_table_row_with_retries(self.cnt, "진행중", 0, 0, "검증 진행중...",
@@ -2564,7 +2564,7 @@ class MyApp(QWidget):
                 QApplication.processEvents()
 
                 # 각 시도마다 송신 메시지 표시
-                self.valResult.append(f"\n📤 플랫폼 응답 송신 [{retry_attempt + 1}/{current_retries}]")
+                self.valResult.append(f"\n📤 응답 메시지 송신 [{retry_attempt + 1}/{current_retries}]")
                 # 실시간 모니터링 창에 응답 데이터 표시
                 if 'tmp_response' in locals():
                     self.valResult.append(tmp_response)
