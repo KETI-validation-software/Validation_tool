@@ -1,22 +1,6 @@
 # request 모드
 
 # Authentication
-cmh1ua7b00021gxc3rjepbkrm_Authentication_in_data = {
-    "userID": "user0001",
-    "userPW": "pass0001"
-}
-
-# cmh1ua7b00021gxc3rjepbkrm 데이터 리스트
-cmh1ua7b00021gxc3rjepbkrm_inData = [
-    cmh1ua7b00021gxc3rjepbkrm_Authentication_in_data,
-]
-
-# cmh1ua7b00021gxc3rjepbkrm API endpoint
-cmh1ua7b00021gxc3rjepbkrm_messages = [
-    "Authentication",
-]
-
-# Authentication
 cmgyv3rzl014nvsveidu5jpzp_Authentication_in_data = {
     "userID": "user0001",
     "userPW": "pass0001"
