@@ -1525,7 +1525,7 @@ class InfoWidget(QWidget):
         # IP:Port 직접 입력창 - 항상 활성화 (데모용)
         self.page2_ip_direct_input = QLineEdit()
         self.page2_ip_direct_input.setFixedHeight(30)
-        self.page2_ip_direct_input.setPlaceholderText("예: 192.168.1.1:8080")
+        self.page2_ip_direct_input.setPlaceholderText("IP 주소를 입력해주세요. (예: 192.168.1.1)")
         self.page2_ip_direct_input.setStyleSheet("""
             QLineEdit {
                 font-family: 'Noto Sans KR';
@@ -1777,8 +1777,8 @@ class InfoWidget(QWidget):
                         QMessageBox.warning(
                             self, "네트워크 IP 검색 실패",
                             "네트워크 IP 주소를 검색할 수 없습니다.\n\n"
-                            "아래 '직접 입력' 기능을 사용하여 IP:Port를 수동으로 입력해주세요.\n"
-                            "예: 192.168.1.1:8080"
+                            "아래 '직접 입력' 기능을 사용하여 IP 주소를 수동으로 입력해주세요.\n"
+                            "예: 192.168.1.1"
                         )
                         return
 
@@ -1899,40 +1899,31 @@ class InfoWidget(QWidget):
             ip_port = self.page2_ip_direct_input.text().strip()
 
             if not ip_port:
-                QMessageBox.warning(self, "입력 오류", "IP:Port를 입력해주세요.\n예: 192.168.1.1:8080")
+                QMessageBox.warning(self, "입력 오류", "IP 주소를 입력해주세요.\n예: 192.168.1.1")
                 return
 
-            # 기본적인 형식 검증 (IP:Port)
-            if ':' not in ip_port:
-                QMessageBox.warning(self, "형식 오류", "올바른 형식으로 입력해주세요.\n예: 192.168.1.1:8080")
+            # Port 포함 여부 확인 - Port는 입력하지 않아야 함
+            if ':' in ip_port:
+                QMessageBox.warning(self, "입력 오류", "IP 주소만 입력해주세요.\nPort는 시험정보의 testPort로 자동 설정됩니다.\n예: 192.168.1.1")
                 return
-
-            parts = ip_port.split(':')
-            if len(parts) != 2:
-                QMessageBox.warning(self, "형식 오류", "올바른 형식으로 입력해주세요.\n예: 192.168.1.1:8080")
-                return
-
-            ip_part = parts[0]
-            port_part = parts[1]
 
             # IP 검증
-            if not self._validate_ip_address(ip_part):
+            if not self._validate_ip_address(ip_port):
                 QMessageBox.warning(self, "IP 오류", "올바른 IP 주소를 입력해주세요.\n예: 192.168.1.100")
                 return
 
-            # Port 검증
-            try:
-                port = int(port_part)
-                if port < 1 or port > 65535:
-                    raise ValueError
-            except ValueError:
-                QMessageBox.warning(self, "Port 오류", "올바른 Port 번호를 입력해주세요. (1-65535)")
+            # testPort 확인 및 자동 추가
+            if not hasattr(self, 'test_port') or not self.test_port:
+                QMessageBox.warning(self, "testPort 없음", "시험정보를 먼저 불러와주세요.\ntestPort 정보가 필요합니다.")
                 return
+
+            # IP와 testPort 결합
+            final_url = f"{ip_port}:{self.test_port}"
 
             # 중복 확인
             for row in range(self.url_table.rowCount()):
                 item = self.url_table.item(row, 0)
-                if item and item.text() == ip_port:
+                if item and item.text() == final_url:
                     QMessageBox.information(self, "알림", "이미 추가된 주소입니다.")
                     return
 
@@ -1941,14 +1932,14 @@ class InfoWidget(QWidget):
             self.url_table.insertRow(row)
 
             # URL 텍스트 추가
-            url_item = QTableWidgetItem(ip_port)
+            url_item = QTableWidgetItem(final_url)
             url_item.setTextAlignment(Qt.AlignCenter)
             self.url_table.setItem(row, 0, url_item)
 
             # 입력창 초기화
             self.page2_ip_direct_input.clear()
 
-            QMessageBox.information(self, "추가 완료", f"주소가 추가되었습니다.\n{ip_port}")
+            QMessageBox.information(self, "추가 완료", f"주소가 추가되었습니다.\n{final_url}")
 
         except Exception as e:
             print(f"IP 추가 오류: {e}")
@@ -2333,6 +2324,47 @@ class InfoWidget(QWidget):
 
             self.test_specs = all_test_specs
             self.test_port = test_data.get("schedule", {}).get("testPort", None)
+
+            # testPort 기반 WEBHOOK_PORT 업데이트
+            if self.test_port:
+                # 1. 메모리상의 값 업데이트
+                CONSTANTS.WEBHOOK_PORT = self.test_port + 1
+                CONSTANTS.WEBHOOK_URL = f"https://{CONSTANTS.WEBHOOK_PUBLIC_IP}:{CONSTANTS.WEBHOOK_PORT}"
+
+                # 2. CONSTANTS.py 파일 자체도 수정
+                try:
+                    import re
+                    import sys
+                    import os
+                    from core.functions import resource_path
+
+                    # CONSTANTS.py 파일 경로 설정
+                    if getattr(sys, 'frozen', False):
+                        exe_dir = os.path.dirname(sys.executable)
+                        constants_path = os.path.join(exe_dir, "config", "CONSTANTS.py")
+                    else:
+                        constants_path = resource_path("config/CONSTANTS.py")
+
+                    # 파일 읽기
+                    with open(constants_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+
+                    # WEBHOOK_PORT = 숫자 패턴 찾아서 치환
+                    pattern_port = r'^WEBHOOK_PORT\s*=\s*\d+.*$'
+                    new_port_line = f'WEBHOOK_PORT = {self.test_port + 1}       # 웹훅 수신 포트'
+                    content = re.sub(pattern_port, new_port_line, content, flags=re.MULTILINE)
+
+                    # 파일 저장
+                    with open(constants_path, 'w', encoding='utf-8') as f:
+                        f.write(content)
+
+                    print(f"WEBHOOK_PORT 업데이트 완료: {CONSTANTS.WEBHOOK_PORT} (testPort: {self.test_port})")
+                    print(f"  - 메모리: {CONSTANTS.WEBHOOK_PORT}")
+                    print(f"  - 파일: CONSTANTS.py 수정 완료")
+
+                except Exception as e:
+                    print(f"CONSTANTS.py 파일 수정 실패: {e}")
+                    # 파일 수정 실패해도 메모리상의 값은 이미 업데이트되었으므로 계속 진행
 
             # verificationType 기반 모드 설정 (API 기반)
             self.current_mode = self._determine_mode_from_api(test_data)
