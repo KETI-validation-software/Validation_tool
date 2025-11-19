@@ -3335,7 +3335,7 @@ class MyApp(QWidget):
                     self.valResult.append(self.message_name)
 
                 # 요청 송신 메시지 표시
-                self.valResult.append(f"📤 시스템 요청 송신, 플랫폼 응답 대기 중... [{self.current_retry + 1}/{self.num_retries_list[self.cnt]}]")
+                self.valResult.append(f"📤 시스템 요청 송신 [{self.current_retry + 1}/{self.num_retries_list[self.cnt]}]")
 
                 if self.cnt == 0 and self.current_retry == 0:
                     self.tmp_msg_append_flag = True
@@ -3372,6 +3372,11 @@ class MyApp(QWidget):
                 elif self.r2 == "B" and self.message[self.cnt] == "Authentication":
                     inMessage["userID"] = self.accessInfo[0]
                     inMessage["userPW"] = self.accessInfo[1]
+
+                # 실시간 모니터링 창에 요청 데이터 표시
+                tmp_request = json.dumps(inMessage, indent=4, ensure_ascii=False)
+                self.valResult.append(tmp_request)
+
                 json_data = json.dumps(inMessage).encode('utf-8')
 
                 self._push_event(self.cnt, "REQUEST", inMessage)
@@ -3533,7 +3538,7 @@ class MyApp(QWidget):
                             self.valResult.append(self.message_name)
 
                         # 응답 수신 메시지 표시
-                        self.valResult.append(f"📨 플랫폼 응답 수신, 검증 중... [{self.current_retry + 1}/{self.num_retries_list[self.cnt]}]")
+                        self.valResult.append(f"\n📨 플랫폼 응답 수신 [{self.current_retry + 1}/{self.num_retries_list[self.cnt]}]")
 
                         res_data = self.res.text
 
@@ -3557,6 +3562,9 @@ class MyApp(QWidget):
 
                         # 단일 응답에 대한 검증 처리
                         tmp_res_auth = json.dumps(res_data, indent=4, ensure_ascii=False)
+
+                        # 실시간 모니터링 창에 응답 데이터 표시
+                        self.valResult.append(tmp_res_auth)
 
                     # ✅ 디버깅: 어떤 스키마로 검증하는지 확인
                     if self.current_retry == 0:  # 첫 시도에만 출력
