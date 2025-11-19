@@ -3335,7 +3335,7 @@ class MyApp(QWidget):
                     self.valResult.append(self.message_name)
 
                 # 요청 송신 메시지 표시
-                self.valResult.append(f"📤 시스템 요청 송신 [{self.current_retry + 1}/{self.num_retries_list[self.cnt]}]")
+                self.valResult.append(f"📤 요청 메시지 송신 [{self.current_retry + 1}/{self.num_retries_list[self.cnt]}]")
 
                 if self.cnt == 0 and self.current_retry == 0:
                     self.tmp_msg_append_flag = True
@@ -3538,7 +3538,7 @@ class MyApp(QWidget):
                             self.valResult.append(self.message_name)
 
                         # 응답 수신 메시지 표시
-                        self.valResult.append(f"\n📨 플랫폼 응답 수신 [{self.current_retry + 1}/{self.num_retries_list[self.cnt]}]")
+                        self.valResult.append(f"\n📨 응답 메시지 수신 [{self.current_retry + 1}/{self.num_retries_list[self.cnt]}]")
 
                         res_data = self.res.text
 
