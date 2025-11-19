@@ -2372,6 +2372,9 @@ class InfoWidget(QWidget):
             # API 데이터를 이용하여 OPT 파일 로드 및 스키마 생성
             self.form_validator.load_opt_files_from_api(test_data)
 
+            # 플랫폼 검증일 경우 Authentication 정보 자동 입력
+            self.auto_fill_authentication_for_platform()
+
             # 다음 버튼 상태 업데이트
             self.check_next_button_state()
 
@@ -2384,6 +2387,65 @@ class InfoWidget(QWidget):
         finally:
             # 로딩 팝업 닫기 (성공/실패 여부와 관계없이 항상 실행)
             loading_popup.close()
+
+    def auto_fill_authentication_for_platform(self):
+        """
+        플랫폼 검증일 경우 Authentication 정보를 자동으로 채우고 필드를 disabled 상태로 설정
+        """
+        try:
+            # 플랫폼 검증인지 확인
+            if not hasattr(self, 'target_system') or self.target_system != "통합플랫폼시스템":
+                print("[INFO] 시스템 검증이므로 Authentication 자동 입력을 건너뜁니다.")
+                # 시스템 검증일 경우 필드를 활성화하고 비워둠
+                self.id_input.setEnabled(True)
+                self.pw_input.setEnabled(True)
+                self.id_input.clear()
+                self.pw_input.clear()
+                return
+
+            print("[INFO] 플랫폼 검증 감지 - Authentication 자동 입력을 시도합니다.")
+
+            # test_specs에서 첫 번째 spec_id 가져오기
+            if not hasattr(self, 'test_specs') or not self.test_specs:
+                print("[WARNING] test_specs가 없어서 Authentication 자동 입력을 건너뜁니다.")
+                return
+
+            first_spec = self.test_specs[0]
+            spec_id = first_spec.get("id", "")
+
+            if not spec_id:
+                print("[WARNING] spec_id를 찾을 수 없어서 Authentication 자동 입력을 건너뜁니다.")
+                return
+
+            print(f"[INFO] spec_id={spec_id}로 Authentication 정보를 추출합니다.")
+
+            # FormValidator의 get_authentication_credentials 메서드 호출
+            user_id, password = self.form_validator.get_authentication_credentials(spec_id)
+
+            if user_id and password:
+                # 필드에 값 설정
+                self.id_input.setText(user_id)
+                self.pw_input.setText(password)
+
+                # 필드를 disabled 상태로 설정
+                self.id_input.setEnabled(False)
+                self.pw_input.setEnabled(False)
+
+                print(f"[SUCCESS] 플랫폼 검증: Authentication 자동 입력 완료 (User ID={user_id})")
+                print(f"[INFO] id_input과 pw_input 필드가 disabled 상태로 설정되었습니다.")
+            else:
+                print("[WARNING] Authentication 정보를 찾을 수 없습니다. 필드를 활성화합니다.")
+                # Authentication 정보가 없으면 필드를 활성화
+                self.id_input.setEnabled(True)
+                self.pw_input.setEnabled(True)
+
+        except Exception as e:
+            print(f"[ERROR] Authentication 자동 입력 중 오류 발생: {e}")
+            import traceback
+            traceback.print_exc()
+            # 오류 발생 시 필드를 활성화
+            self.id_input.setEnabled(True)
+            self.pw_input.setEnabled(True)
 
     def on_management_url_changed(self):
         """관리자시스템 주소 변경 시 처리"""
