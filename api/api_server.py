@@ -70,10 +70,10 @@ class Server(BaseHTTPRequestHandler):
 
             print(f"[_push_event] 저장 시도: api={api_name}, dir={direction}")
             print(f"[_push_event] 저장 전 latest_event 키: {list(Server.latest_event.keys())}")
-            
+
             Server.trace[api_name].append(evt)  # ✅ 클래스 변수 사용
             Server.latest_event[api_name][direction] = evt  # ✅ 클래스 변수 사용
-            
+
             print(f"[_push_event] 저장 후 latest_event 키: {list(Server.latest_event.keys())}")
             print(f"[_push_event] 저장된 데이터: {api_name} -> {list(Server.latest_event[api_name].keys())}")
 
@@ -83,9 +83,23 @@ class Server(BaseHTTPRequestHandler):
                 try:
                     os.makedirs(CONSTANTS.trace_path, exist_ok=True)
                     safe_api = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in str(api_name))
+
+                    # ✅ 1. 번호 없는 파일 (기존 방식)
                     trace_path = os.path.join(CONSTANTS.trace_path, f"trace_{safe_api}.ndjson")
                     with open(trace_path, "a", encoding="utf-8") as f:
                         f.write(json.dumps(evt, ensure_ascii=False) + "\n")
+
+                    # ✅ 2. 번호 포함 파일 (systemVal_all.py 방식과 동일)
+                    # Server.message에서 api_name의 인덱스 찾기
+                    if hasattr(Server, 'message') and Server.message:
+                        try:
+                            step_idx = Server.message.index(api_name)
+                            trace_path_with_num = os.path.join(CONSTANTS.trace_path, f"trace_{step_idx + 1:02d}_{safe_api}.ndjson")
+                            with open(trace_path_with_num, "a", encoding="utf-8") as f:
+                                f.write(json.dumps(evt, ensure_ascii=False) + "\n")
+                        except ValueError:
+                            # api_name이 message 리스트에 없는 경우 (예: webhook)
+                            pass
                 except Exception as e:
                     print(f"[_push_event] 파일 쓰기 실패: {e}")
         except Exception as e:

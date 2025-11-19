@@ -4545,10 +4545,13 @@ class MyApp(QWidget):
                     print(f"[DEBUG] 미완료 API trace 파일 삭제 시작 (완료: 0~{self.last_completed_api_index})")
                     for i in range(self.last_completed_api_index + 1, len(self.videoMessages)):
                         api_name = self.videoMessages[i]
-                        # ✅ 두 가지 형식 모두 삭제 (trace_API.ndjson, trace_NN_API.ndjson)
+                        # ✅ api_server.py와 동일한 방식으로 파일명 변환
+                        safe_api = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in str(api_name))
+                        # ✅ 실제 생성되는 파일명 패턴으로 삭제
+                        # 주의: api_server.py에서는 step_idx + 1을 사용하므로 여기서도 i + 1 사용
                         trace_patterns = [
-                            f"trace_{api_name}.ndjson",
-                            f"trace_{i:02d}_{api_name}.ndjson"
+                            f"trace_{safe_api}.ndjson",
+                            f"trace_{i + 1:02d}_{safe_api}.ndjson"
                         ]
                         for pattern in trace_patterns:
                             trace_file = os.path.join(trace_dir, pattern)
