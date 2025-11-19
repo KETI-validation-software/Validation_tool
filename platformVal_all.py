@@ -2352,7 +2352,7 @@ class MyApp(QWidget):
                 print(
                     f"[PLATFORM] 시스템 요청 수신: {self.Server.message[self.cnt]} (시도 {retry_attempt + 1}/{current_retries})")
 
-                self.valResult.append(f"📨 시스템 요청 수신, 검증 중... [{retry_attempt + 1}/{current_retries}]")
+                self.valResult.append(f"📨 시스템 요청 수신 [{retry_attempt + 1}/{current_retries}]")
 
                 # 테이블에 실시간 진행률 표시
                 self.update_table_row_with_retries(self.cnt, "진행중", 0, 0, "검증 진행중...",
@@ -2363,15 +2363,25 @@ class MyApp(QWidget):
                 # 1. request 검증용 데이터 로드
                 # print(f"[DATA LOAD] API: {api_name}, 시도: {retry_attempt + 1}/{current_retries}")
                 # print(f"[DATA LOAD] trace 폴더 확인: {list(Path('results/trace').glob('*.ndjson')) if Path('results/trace').exists() else '폴더 없음'}")
-                
+
                 current_data = self._load_from_trace_file(api_name, "REQUEST") or {}
-                
+
                 if not current_data:
-                    print(f"[WARNING] ⚠️ trace 파일에서 데이터를 불러오지 못했습니다!")
+                    print(f"[WARNING] ⚠️ trace 파일에서 요청 데이터를 불러오지 못했습니다!")
                     print(f"[WARNING] API 이름: {api_name}")
                     print(f"[WARNING] Direction: REQUEST")
                 else:
-                    print(f"[SUCCESS] ✅ trace 파일에서 데이터 로드 완료: {len(str(current_data))} bytes")
+                    print(f"[SUCCESS] ✅ trace 파일에서 요청 데이터 로드 완료: {len(str(current_data))} bytes")
+
+                # 1-1. response 데이터 로드
+                response_data = self._load_from_trace_file(api_name, "RESPONSE") or {}
+
+                if not response_data:
+                    print(f"[WARNING] ⚠️ trace 파일에서 응답 데이터를 불러오지 못했습니다!")
+                    print(f"[WARNING] API 이름: {api_name}")
+                    print(f"[WARNING] Direction: RESPONSE")
+                else:
+                    print(f"[SUCCESS] ✅ trace 파일에서 응답 데이터 로드 완료: {len(str(response_data))} bytes")
 
                 # 2. 맥락 검증용
                 if current_validation:
@@ -2415,10 +2425,17 @@ class MyApp(QWidget):
                 if self.Server.message[self.cnt] in CONSTANTS.none_request_message:
                     # 매 시도마다 데이터 수집
                     tmp_res_auth = json.dumps(current_data, indent=4, ensure_ascii=False)
+                    tmp_response = json.dumps(response_data, indent=4, ensure_ascii=False)
+
                     if retry_attempt == 0:
-                        accumulated['data_parts'].append(f"[시도 {retry_attempt + 1}회차]\n{tmp_res_auth}")
+                        accumulated['data_parts'].append(f"[요청 {retry_attempt + 1}회차]\n{tmp_res_auth}")
+                        accumulated['data_parts'].append(f"\n[응답 {retry_attempt + 1}회차]\n{tmp_response}")
                     else:
-                        accumulated['data_parts'].append(f"\n[시도 {retry_attempt + 1}회차]\n{tmp_res_auth}")
+                        accumulated['data_parts'].append(f"\n[요청 {retry_attempt + 1}회차]\n{tmp_res_auth}")
+                        accumulated['data_parts'].append(f"\n[응답 {retry_attempt + 1}회차]\n{tmp_response}")
+
+                    # 실시간 모니터링 창에 요청 데이터 표시
+                    self.valResult.append(tmp_res_auth)
 
                     accumulated['raw_data_list'].append(current_data)
 
@@ -2433,10 +2450,17 @@ class MyApp(QWidget):
                 else:
                     # 매 시도마다 입력 데이터 수집
                     tmp_res_auth = json.dumps(current_data, indent=4, ensure_ascii=False)
+                    tmp_response = json.dumps(response_data, indent=4, ensure_ascii=False)
+
                     if retry_attempt == 0:
-                        accumulated['data_parts'].append(f"[시도 {retry_attempt + 1}회차]\n{tmp_res_auth}")
+                        accumulated['data_parts'].append(f"[요청 {retry_attempt + 1}회차]\n{tmp_res_auth}")
+                        accumulated['data_parts'].append(f"\n[응답 {retry_attempt + 1}회차]\n{tmp_response}")
                     else:
-                        accumulated['data_parts'].append(f"\n[시도 {retry_attempt + 1}회차]\n{tmp_res_auth}")
+                        accumulated['data_parts'].append(f"\n[요청 {retry_attempt + 1}회차]\n{tmp_res_auth}")
+                        accumulated['data_parts'].append(f"\n[응답 {retry_attempt + 1}회차]\n{tmp_response}")
+
+                    # 실시간 모니터링 창에 요청 데이터 표시
+                    self.valResult.append(tmp_res_auth)
 
                     accumulated['raw_data_list'].append(current_data)
 
@@ -2540,7 +2564,10 @@ class MyApp(QWidget):
                 QApplication.processEvents()
 
                 # 각 시도마다 송신 메시지 표시
-                self.valResult.append(f"📤 플랫폼 응답 송신 완료 [{retry_attempt + 1}/{current_retries}]")
+                self.valResult.append(f"\n📤 플랫폼 응답 송신 [{retry_attempt + 1}/{current_retries}]")
+                # 실시간 모니터링 창에 응답 데이터 표시
+                if 'tmp_response' in locals():
+                    self.valResult.append(tmp_response)
 
                 # current_retry 증가
                 self.current_retry += 1

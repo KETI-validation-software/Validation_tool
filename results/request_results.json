@@ -560,7 +560,7 @@
                   "transProtocolType": "WebHook",
                   "transProtocolDesc": "https://192.168.0.3:2001"
                 },
-                "eventFilter": "Intrusion",
+                "eventFilter": "화재",
                 "classFilter": "사람",
                 "startTime": 1761110160000
               },
@@ -592,7 +592,7 @@
                   "transProtocolDesc": "https://192.168.0.3:2001"
                 },
                 "eventFilter": "Intrusion",
-                "classFilter": "버스",
+                "classFilter": "사람",
                 "startTime": 1761110160000
               },
               "validationErrors": [
@@ -622,8 +622,8 @@
                   "transProtocolType": "WebHook",
                   "transProtocolDesc": "https://192.168.0.3:2001"
                 },
-                "eventFilter": "침입",
-                "classFilter": "사람",
+                "eventFilter": "배회",
+                "classFilter": "트럭",
                 "startTime": 1761110160000
               },
               "validationErrors": [
@@ -654,7 +654,7 @@
                   "transProtocolDesc": "https://192.168.0.3:2001"
                 },
                 "eventFilter": "Loitering",
-                "classFilter": "사람",
+                "classFilter": "트럭",
                 "startTime": 1761110160000
               },
               "validationErrors": [
@@ -684,8 +684,8 @@
                   "transProtocolType": "WebHook",
                   "transProtocolDesc": "https://192.168.0.3:2001"
                 },
-                "eventFilter": "Intrusion",
-                "classFilter": "버스",
+                "eventFilter": "Loitering",
+                "classFilter": "Human",
                 "startTime": 1761110160000
               },
               "validationErrors": [
@@ -767,7 +767,7 @@
                 ],
                 "maxCount": 3,
                 "eventFilter": "Intrusion",
-                "classFilter": "사람"
+                "classFilter": "버스"
               },
               "validationErrors": [
                 "오류가 없습니다."
@@ -789,7 +789,7 @@
                   }
                 ],
                 "maxCount": 3,
-                "eventFilter": "침입",
+                "eventFilter": "Loitering",
                 "classFilter": "버스"
               },
               "validationErrors": []
@@ -810,7 +810,7 @@
                   }
                 ],
                 "maxCount": 3,
-                "eventFilter": "화재",
+                "eventFilter": "배회",
                 "classFilter": "Human"
               },
               "validationErrors": []
@@ -831,8 +831,8 @@
                   }
                 ],
                 "maxCount": 3,
-                "eventFilter": "Intrusion",
-                "classFilter": "사람"
+                "eventFilter": "배회",
+                "classFilter": "트럭"
               },
               "validationErrors": []
             },
@@ -852,8 +852,8 @@
                   }
                 ],
                 "maxCount": 3,
-                "eventFilter": "Intrusion",
-                "classFilter": "버스"
+                "eventFilter": "침입",
+                "classFilter": "트럭"
               },
               "validationErrors": []
             }
@@ -862,5 +862,5 @@
       ]
     }
   ],
-  "completedDate": "2025-11-19T09:17:04Z"
+  "completedDate": "2025-11-19T10:35:24Z"
 }
