@@ -2140,3 +2140,56 @@ class FormValidator:
             f"로드:{loaded}, 스킵:{skipped}, id없음:{empty}, "
             f"총 step 수(대략): {sum(len(v) for v in self._steps_cache.values())}"
         )
+
+    def get_authentication_credentials(self, spec_id):
+        """
+        플랫폼 검증 시 spec_id로부터 Authentication 인증 정보를 추출
+
+        Args:
+            spec_id: 스펙 ID (예: 'cmgvieyak001b6cd04cgaawmm')
+
+        Returns:
+            tuple: (user_id, password) 또는 (None, None) if not found
+
+        Example:
+            >>> user_id, password = self.get_authentication_credentials('cmgvieyak001b6cd04cgaawmm')
+            >>> # Returns: ('kisa', 'kisa_k1!2@')
+        """
+        try:
+            from core.validation_registry import get_validation_rules
+
+            # Authentication API의 검증 규칙 가져오기 (direction='in'은 플랫폼→시스템 요청)
+            rules = get_validation_rules(spec_id, 'Authentication', 'in')
+
+            if not rules:
+                print(f"[WARNING] spec_id={spec_id}에 대한 Authentication 검증 규칙을 찾을 수 없습니다.")
+                return None, None
+
+            # userID 추출
+            user_id = None
+            if 'userID' in rules:
+                user_id_rule = rules['userID']
+                allowed_values = user_id_rule.get('allowedValues', [])
+                if allowed_values and len(allowed_values) > 0:
+                    user_id = allowed_values[0]
+
+            # userPW 추출
+            password = None
+            if 'userPW' in rules:
+                user_pw_rule = rules['userPW']
+                allowed_values = user_pw_rule.get('allowedValues', [])
+                if allowed_values and len(allowed_values) > 0:
+                    password = allowed_values[0]
+
+            if user_id and password:
+                print(f"[INFO] Authentication 인증 정보 추출 완료: user_id={user_id}")
+                return user_id, password
+            else:
+                print(f"[WARNING] Authentication 규칙에서 userID 또는 userPW를 찾을 수 없습니다.")
+                return None, None
+
+        except Exception as e:
+            print(f"[ERROR] Authentication 인증 정보 추출 실패: {e}")
+            import traceback
+            traceback.print_exc()
+            return None, None
