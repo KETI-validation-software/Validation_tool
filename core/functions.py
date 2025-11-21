@@ -1005,19 +1005,26 @@ def build_result_json(myapp_instance):
     # 6-1. 저장된 spec 데이터 처리 (✅ 복합키 지원)
     if hasattr(myapp_instance, 'spec_table_data'):
         for composite_key, saved_data in myapp_instance.spec_table_data.items():
-            # 복합키 파싱: "group_id_spec_id" → spec_id 추출
+            # 복합키 파싱: "group_id_spec_id" → group_id, spec_id 추출
             if '_' in composite_key:
                 parts = composite_key.split('_', 1)
-                spec_id = parts[1] if len(parts) == 2 else composite_key
+                if len(parts) == 2:
+                    group_id = parts[0]
+                    spec_id = parts[1]
+                else:
+                    group_id = None
+                    spec_id = composite_key
             else:
                 # 하위 호환: 복합키가 아닌 경우 그대로 사용
+                group_id = None
                 spec_id = composite_key
 
             spec_result = _build_spec_result(
                 myapp_instance,
                 spec_id,
                 saved_data['step_buffers'],
-                saved_data.get('table_data', [])
+                saved_data.get('table_data', []),
+                group_id
             )
             if spec_result:
                 all_spec_results[composite_key] = spec_result  # 복합키로 저장
@@ -1032,7 +1039,8 @@ def build_result_json(myapp_instance):
                 myapp_instance,
                 current_spec_id,
                 getattr(myapp_instance, 'step_buffers', []),
-                None  # 현재 테이블에서 직접 읽음
+                None,  # 현재 테이블에서 직접 읽음
+                current_group_id
             )
             if spec_result:
                 all_spec_results[composite_key] = spec_result
@@ -1066,7 +1074,7 @@ def build_result_json(myapp_instance):
     return result_json
 
 
-def _build_spec_result(myapp_instance, spec_id, step_buffers, table_data=None):
+def _build_spec_result(myapp_instance, spec_id, step_buffers, table_data=None, group_id=None):
     """
     단일 시험 시나리오(spec)의 결과 구성
 
@@ -1075,6 +1083,7 @@ def _build_spec_result(myapp_instance, spec_id, step_buffers, table_data=None):
         spec_id: 시험 시나리오 ID
         step_buffers: 스텝 버퍼 리스트
         table_data: 테이블 데이터 (None인 경우 현재 테이블에서 읽음)
+        group_id: 테스트 그룹 ID (None인 경우 기본값 사용)
 
     Returns:
         dict: spec 결과 데이터 또는 None (데이터가 없는 경우)
@@ -1206,8 +1215,12 @@ def _build_spec_result(myapp_instance, spec_id, step_buffers, table_data=None):
     # 5. spec 이름 가져오기
     spec_name = get_spec_test_name(spec_id)
 
-    # 6. 최종 결과 반환
+    # 6. group_id 기본값 처리
+    final_group_id = group_id if group_id is not None else ""
+
+    # 7. 최종 결과 반환
     return {
+        "testGroup": final_group_id,
         "testSpecId": spec_id,
         "testSpecName": spec_name,
         "score": round(spec_score, 2),
