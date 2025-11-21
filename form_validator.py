@@ -943,7 +943,7 @@ class FormValidator:
         if test_category in ["본시험", "사전시험"]:
             if test_category == "본시험":
                 self.parent.admin_code_edit.setEnabled(True)
-                self.parent.admin_code_edit.setPlaceholderText("내용을 입력해주세요")
+                self.parent.admin_code_edit.setPlaceholderText("")
             else:  # "사전시험"
                 self.parent.admin_code_edit.setEnabled(False)
                 self.parent.admin_code_edit.clear()
@@ -957,7 +957,7 @@ class FormValidator:
         if test_category == "MAIN_TEST":
             self.parent.test_category_edit.setText("본시험")
             self.parent.admin_code_edit.setEnabled(True)
-            self.parent.admin_code_edit.setPlaceholderText("내용을 입력해주세요")
+            self.parent.admin_code_edit.setPlaceholderText("")
         else:
             # MAIN_TEST 이외의 모든 값은 UI에 "사전시험"으로 표시
             self.parent.test_category_edit.setText("사전시험")
