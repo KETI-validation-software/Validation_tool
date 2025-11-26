@@ -1,9 +1,77 @@
 # Authentication
 cmh1ua7b00021gxc3rjepbkrm_Authentication_in_constraints = {}
 
+# DoorProfiles
+cmh1ua7b00021gxc3rjepbkrm_DoorProfiles_in_constraints = {}
+
+# RealtimeDoorStatus
+cmh1ua7b00021gxc3rjepbkrm_RealtimeDoorStatus_in_constraints = {
+  "doorList.doorID": {
+    "valueType": "response-based",
+    "required": True,
+    "referenceEndpoint": "/DoorProfiles",
+    "referenceField": "doorID"
+  },
+  "transProtocol.transProtocolDesc": {
+    "valueType": "test-time",
+    "required": True
+  }
+}
+
+# RealtimeDoorStatus WebHook OUT Constraints
+cmh1ua7b00021gxc3rjepbkrm_RealtimeDoorStatus_webhook_out_constraints = {}
+
+# DoorControl
+cmh1ua7b00021gxc3rjepbkrm_DoorControl_in_constraints = {
+  "doorID": {
+    "valueType": "response-based",
+    "required": True,
+    "referenceEndpoint": "/RealtimeDoorStatus",
+    "referenceField": "doorID"
+  },
+  "commandType": {
+    "valueType": "random",
+    "required": True,
+    "randomType": "exclude-value",
+    "validValueField": "eventFilter_bio",
+    "validValues": [
+      "Lock",
+      "UnLock"
+    ],
+    "validValueFieldName": "doorSensor"
+  }
+}
+
+# RealtimeDoorStatus
+cmh1ua7b00021gxc3rjepbkrm_RealtimeDoorStatus_in_constraints = {
+  "doorList.doorID": {
+    "valueType": "response-based",
+    "required": True,
+    "referenceEndpoint": "/RealtimeDoorStatus",
+    "referenceField": "doorID"
+  },
+  "transProtocol.transProtocolDesc": {
+    "valueType": "preset",
+    "required": True
+  }
+}
+
+# RealtimeDoorStatus WebHook OUT Constraints
+cmh1ua7b00021gxc3rjepbkrm_RealtimeDoorStatus_webhook_out_constraints = {}
+
 # cmh1ua7b00021gxc3rjepbkrm 검증 리스트
 cmh1ua7b00021gxc3rjepbkrm_inConstraints = [
     cmh1ua7b00021gxc3rjepbkrm_Authentication_in_constraints,
+    cmh1ua7b00021gxc3rjepbkrm_DoorProfiles_in_constraints,
+    cmh1ua7b00021gxc3rjepbkrm_RealtimeDoorStatus_in_constraints,
+    cmh1ua7b00021gxc3rjepbkrm_DoorControl_in_constraints,
+    cmh1ua7b00021gxc3rjepbkrm_RealtimeDoorStatus_in_constraints,
+]
+
+# cmh1ua7b00021gxc3rjepbkrm WebHook Constraints 리스트
+cmh1ua7b00021gxc3rjepbkrm_webhook_outConstraints = [
+    cmh1ua7b00021gxc3rjepbkrm_RealtimeDoorStatus_webhook_out_constraints,
+    cmh1ua7b00021gxc3rjepbkrm_RealtimeDoorStatus_webhook_out_constraints,
 ]
 
 # Authentication

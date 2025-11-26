@@ -1,7 +1,7 @@
 import re
 import requests
-from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem, QLabel
+from PyQt5.QtCore import Qt, pyqtSignal
 from core.functions import resource_path
 from core.opt_loader import OptLoader
 import os
@@ -16,6 +16,21 @@ from typing import Dict, List
 import inspect
 import spec.Data_response as Data_response
 import config.CONSTANTS as CONSTANTS
+
+class ClickableLabel(QLabel):
+    """클릭 가능한 QLabel - 시험 분야 셀용"""
+    clicked = pyqtSignal(int, int)  # row, column 전달
+
+    def __init__(self, text, row, col, parent=None):
+        super().__init__(text, parent)
+        self.row = row
+        self.col = col
+        self.setCursor(Qt.PointingHandCursor)  # 마우스 커서를 포인터로
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.clicked.emit(self.row, self.col)
+        super().mousePressEvent(event)
 
 class FormValidator:
     """
@@ -147,6 +162,10 @@ class FormValidator:
                 webhook_data_names = []    # webhook 전용 데이터 리스트
                 webhook_constraints_names = []  # webhook 전용 constraints 리스트
 
+                # 기본값 설정 (steps가 비어있거나 ts가 없는 경우 대비)
+                schema_type = None
+                file_type = None
+
                 temp_spec_id = spec_id+"_"
                 for s in steps:
                     step_id = s.get("id")
@@ -176,6 +195,11 @@ class FormValidator:
                             webhook_constraints_names=webhook_constraints_names,
                             spec_id = temp_spec_id
                         )
+                # schema_type이 설정되지 않았으면 이 spec 건너뛰기
+                if schema_type is None:
+                    print(f"[WARNING] spec_id={spec_id}: schema_type이 설정되지 않음, 건너뜁니다.")
+                    continue
+
                 if schema_type == "request":
                     list_name = f"{spec_id}_inSchema"
                 else:
@@ -282,7 +306,6 @@ class FormValidator:
                 }
                 spec_list_names.append(spec_info)
 
-            data_content = f"# {file_type} 모드\n\n" + data_content
 
             all_spec_list_names = []
 
@@ -1240,6 +1263,7 @@ class FormValidator:
             entries = []
 
             mode = self.parent.target_system_edit.text().strip()
+            print(f"[DEBUG] SPEC_CONFIG 업데이트 - mode: '{mode}'")
 
             from core.functions import resource_path
 
@@ -1272,7 +1296,9 @@ class FormValidator:
                     data_file = resource_path("spec/Data_response.py")
                 merged_result = self.merge_list_prefix_mappings(schema_file, data_file)
             else:
-                print("[CONFIG SPEC]: 모드 확인해주세요. mode: ", mode)
+                print(f"[CONFIG SPEC]: 모드 확인해주세요. mode: '{mode}'")
+                print("[CONFIG SPEC]: '물리보안시스템' 또는 '통합플랫폼시스템'이어야 합니다.")
+                return  # 모드가 올바르지 않으면 조기 종료
 
             for spec_id in sorted(merged_result.keys()):
                 # test_name은 이미 캐시된 이름 사용(없으면 빈 문자열)
@@ -1788,78 +1814,80 @@ class FormValidator:
 
 
     def _fill_test_field_table_from_api(self, test_specs):
-        """API testSpecs 배열로부터 시험 시나리오 테이블 채우기 (2개 컬럼: 시험 분야명, 시험 시나리오명)"""
+        """API testSpecs 배열로부터 시험 분야 목록 채우기 (첫 번째 컬럼만)"""
         try:
             from PyQt5.QtGui import QFont, QBrush, QColor
 
             table = self.parent.test_field_table
             table.setRowCount(0)
 
-            # 그룹별로 행 범위를 추적하기 위한 딕셔너리 {group_name: [start_row, end_row]}
-            group_ranges = {}
-            current_group = None
+            # 그룹별로 spec들을 저장 {group_name: [spec1, spec2, ...]}
+            self._group_specs = {}
 
-            for i, spec in enumerate(test_specs):
+            for spec in test_specs:
                 spec_id = spec.get("id", "")
                 spec_name = spec.get("name", "")
-                group_name = spec.get("group_name", "")  # 그룹 이름
+                group_name = spec.get("group_name", "")
 
                 # spec_name을 캐시에 저장
                 self._spec_names_cache[spec_id] = spec_name
 
+                # 그룹별로 spec 저장
+                if group_name not in self._group_specs:
+                    self._group_specs[group_name] = []
+                self._group_specs[group_name].append({
+                    "id": spec_id,
+                    "name": spec_name
+                })
+
+            # 폰트 설정 (Noto Sans KR, Regular 400, 19px)
+            font = QFont("Noto Sans KR")
+            font.setPixelSize(19)
+            font.setWeight(400)
+            font.setLetterSpacing(QFont.PercentageSpacing, 100.7)
+
+            # 그룹별로 한 행씩 추가 (첫 번째 컬럼에만 시험 분야명)
+            for i, group_name in enumerate(self._group_specs.keys()):
                 table.insertRow(i)
 
-                # 폰트 설정 (Noto Sans KR, Regular 400, 14px)
-                font = QFont("Noto Sans KR")
-                font.setPixelSize(14)
-                font.setWeight(400)
-                font.setLetterSpacing(QFont.PercentageSpacing, 100.7)
+                # 첫 번째 컬럼: 시험 분야명 (배경 이미지 적용, 클릭 가능)
+                label = ClickableLabel(group_name, i, 0)
+                label.setAlignment(Qt.AlignCenter)
+                label.setStyleSheet("""
+                    QLabel {
+                        background-image: url('assets/image/test_config/row.png');
+                        background-position: center;
+                        background-repeat: no-repeat;
+                        font-family: 'Noto Sans KR';
+                        font-size: 19px;
+                        font-weight: 400;
+                        color: #000000;
+                        min-width: 371.5px;
+                        min-height: 39px;
+                    }
+                """)
+                label.clicked.connect(self.parent.on_test_field_selected)
+                table.setCellWidget(i, 0, label)
 
-                # 그룹 범위 추적
-                if group_name != current_group:
-                    # 새로운 그룹 시작
-                    if current_group is not None and current_group in group_ranges:
-                        # 이전 그룹의 끝 행 번호 설정
-                        group_ranges[current_group][1] = i - 1
+            # 초기 상태: 아무것도 선택하지 않음
+            table.clearSelection()
+            table.setCurrentCell(-1, -1)
+            self.parent.selected_test_field_row = None
 
-                    # 새 그룹 시작
-                    group_ranges[group_name] = [i, i]
-                    current_group = group_name
-                else:
-                    # 같은 그룹 계속
-                    group_ranges[group_name][1] = i
+            # 시나리오 테이블 초기화
+            if hasattr(self.parent, 'scenario_table'):
+                self.parent.scenario_table.setRowCount(0)
+                self.parent.scenario_table.clearContents()
 
-                # 첫 번째 컬럼: 시험 분야명 (일단 모든 행에 설정)
-                group_item = QTableWidgetItem(group_name)
-                group_item.setFont(font)
-                group_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)  # 가운데 정렬
-                # 선택되어도 배경색이 변하지 않도록 배경색 고정
-                group_item.setBackground(QBrush(QColor("#FFFFFF")))
-                # 선택 불가능하게 설정
-                group_item.setFlags(group_item.flags() & ~Qt.ItemIsSelectable)
-                table.setItem(i, 0, group_item)
+            # placeholder label 표시 (시나리오 테이블 위에 오버레이)
+            if hasattr(self.parent, 'scenario_placeholder_label'):
+                self.parent.scenario_placeholder_label.show()
+                self.parent.scenario_placeholder_label.raise_()
 
-                # 두 번째 컬럼: 시험 시나리오명
-                scenario_item = QTableWidgetItem(spec_name)
-                scenario_item.setData(Qt.UserRole, spec_id)  # spec_id 저장
-                scenario_item.setFont(font)
-                scenario_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)  # 가운데 정렬
-                table.setItem(i, 1, scenario_item)
-
-            # 마지막 그룹의 끝 설정
-            if current_group is not None:
-                group_ranges[current_group][1] = len(test_specs) - 1
-
-            # 그룹별로 셀 병합 적용
-            for group_name, (start_row, end_row) in group_ranges.items():
-                if start_row < end_row:
-                    # 같은 그룹이 2개 이상의 행을 차지하면 병합
-                    table.setSpan(start_row, 0, end_row - start_row + 1, 1)
-
-            print(f"시험 시나리오 테이블 채우기 완료: {len(test_specs)}개 항목, {len(group_ranges)}개 그룹")
+            print(f"시험 분야 테이블 채우기 완료: {len(self._group_specs)}개 그룹")
 
         except Exception as e:
-            print(f"시험 시나리오 테이블 채우기 실패: {e}")
+            print(f"시험 분야 테이블 채우기 실패: {e}")
             import traceback
             traceback.print_exc()
 
@@ -1944,57 +1972,257 @@ class FormValidator:
 
 
     def preload_all_spec_steps(self):
-        """test_field_table에 있는 모든 spec_id의 steps(id, name)만 미리 캐싱"""
+        """_group_specs에 있는 모든 spec_id의 steps(id, name)만 미리 캐싱"""
 
-        table = self.parent.test_field_table
-        row_count = table.rowCount()
         loaded, skipped = 0, 0
+        total_specs = 0
 
-        for row in range(row_count):
-            # spec_id는 두 번째 컬럼(1번)에 저장되어 있음
-            item = table.item(row, 1)
-            if not item:
-                continue
-            spec_id = item.data(Qt.UserRole)
-            if not spec_id:
-                continue
+        # _group_specs 딕셔너리에서 모든 spec 가져오기
+        if not hasattr(self, '_group_specs') or not self._group_specs:
+            print(f"[preload_all_spec_steps] 경고: _group_specs가 비어있습니다.")
+            return
 
-            if spec_id in self._steps_cache:
-                skipped += 1
-                continue
+        for group_name, specs in self._group_specs.items():
+            for spec in specs:
+                total_specs += 1
+                spec_id = spec.get("id")
+                if not spec_id:
+                    continue
 
-            spec_data = self.fetch_specification_by_id(spec_id)
-            if not spec_data:
-                continue
+                if spec_id in self._steps_cache:
+                    skipped += 1
+                    continue
 
-            steps = spec_data.get("specification", {}).get("steps", [])
-            # hasApi만 필터링하고, webhook callback step 제외 (id에 '-'가 2번 이상 있는 경우)
-            trimmed = [
-                {"id": s.get("id"), "name": s.get("name", "")}
-                for s in steps
-                if s.get("hasApi") and s.get("id", "").count("-") <= 1  # webhook callback step 제외
-            ]
+                spec_data = self.fetch_specification_by_id(spec_id)
+                if not spec_data:
+                    continue
 
-            print(f"[DEBUG] preload_all_spec_steps - spec_id: {spec_id}")
-            print(f"  전체 steps: {len(steps)}개")
-            print(f"  hasApi=True인 steps (callback 제외): {len(trimmed)}개")
-            print(f"  step IDs: {[t.get('id') for t in trimmed]}")
+                steps = spec_data.get("specification", {}).get("steps", [])
+                # hasApi만 필터링하고, webhook callback step 제외 (id에 '-'가 2번 이상 있는 경우)
+                trimmed = [
+                    {"id": s.get("id"), "name": s.get("name", "")}
+                    for s in steps
+                    if s.get("hasApi") and s.get("id", "").count("-") <= 1  # webhook callback step 제외
+                ]
 
-            self._steps_cache[spec_id] = trimmed
-            loaded += 1
+                print(f"[DEBUG] preload_all_spec_steps - spec_id: {spec_id}")
+                print(f"  전체 steps: {len(steps)}개")
+                print(f"  hasApi=True인 steps (callback 제외): {len(trimmed)}개")
+                print(f"  step IDs: {[t.get('id') for t in trimmed]}")
 
-        print(f"[preload_all_spec_steps] 로드:{loaded}, 스킵:{skipped}, 총행:{row_count}")
+                self._steps_cache[spec_id] = trimmed
+                loaded += 1
 
+        print(f"[preload_all_spec_steps] 로드:{loaded}, 스킵:{skipped}, 총 spec 수:{total_specs}")
+
+
+    def _show_initial_scenario_message(self):
+        """시험 시나리오 컬럼에 초기 메시지 표시"""
+        try:
+            from PyQt5.QtGui import QFont, QBrush, QColor
+
+            table = self.parent.test_field_table
+            row_count = table.rowCount()
+
+            if row_count > 0:
+                # 첫 번째 행의 두 번째 컬럼에 메시지 표시
+                message_item = QTableWidgetItem("시험 분야를 선택하면\n시나리오가 표시됩니다.")
+                font = QFont("Noto Sans KR")
+                font.setPixelSize(16)
+                message_item.setFont(font)
+                message_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+                message_item.setFlags(Qt.ItemIsEnabled)  # 선택 불가
+                message_item.setBackground(QBrush(QColor("#FFFFFF")))  # 흰색 배경
+
+                table.setItem(0, 1, message_item)
+                # 모든 행의 두 번째 컬럼 병합
+                table.setSpan(0, 1, row_count, 1)
+
+        except Exception as e:
+            print(f"초기 시나리오 메시지 표시 실패: {e}")
+
+    def _show_scenario_placeholder(self):
+        """시험 시나리오 안내 문구 표시 (테이블 위에 오버레이)"""
+        try:
+            scenario_table = self.parent.scenario_table
+
+            # 시나리오 테이블 비우기
+            scenario_table.setRowCount(0)
+            scenario_table.clearContents()
+
+            # 시험 시나리오 배경 숨김
+            if hasattr(self.parent, 'scenario_column_background'):
+                self.parent.scenario_column_background.hide()
+
+            # placeholder label 표시
+            if hasattr(self.parent, 'scenario_placeholder_label'):
+                self.parent.scenario_placeholder_label.show()
+                self.parent.scenario_placeholder_label.raise_()
+
+            print("시험 시나리오 안내 문구 표시")
+        except Exception as e:
+            print(f"시험 시나리오 안내 문구 표시 실패: {e}")
+
+    def _show_initial_api_message(self):
+        """시험 API 테이블에 초기 메시지 표시"""
+        try:
+            table = self.parent.api_test_table
+            table.setRowCount(0)  # 모든 행 제거
+
+            # placeholder label 표시
+            if hasattr(self.parent, 'api_placeholder_label'):
+                self.parent.api_placeholder_label.show()
+
+        except Exception as e:
+            print(f"초기 API 메시지 표시 실패: {e}")
+
+    def _fill_scenarios_for_group(self, clicked_row, group_name):
+        """선택된 시험 분야의 시나리오를 시나리오 테이블에 표시"""
+        try:
+            from PyQt5.QtGui import QFont, QBrush, QColor
+
+            field_table = self.parent.test_field_table
+            scenario_table = self.parent.scenario_table
+
+            # 시그널 차단 시작
+            field_table.blockSignals(True)
+            scenario_table.blockSignals(True)
+
+            # 안내 문구 QLabel 숨김
+            if hasattr(self.parent, 'scenario_placeholder_label'):
+                self.parent.scenario_placeholder_label.hide()
+
+            # 시험 시나리오 배경 표시 (#E3F2FF)
+            if hasattr(self.parent, 'scenario_column_background'):
+                self.parent.scenario_column_background.show()
+                print(f"배경 위젯 표시: visible={self.parent.scenario_column_background.isVisible()}")
+
+            # 선택된 그룹의 시나리오 가져오기
+            scenarios = self._group_specs.get(group_name, [])
+            scenario_count = len(scenarios)
+            group_count = len(self._group_specs)
+
+            print(f"\n=== 테이블 재구성 시작 ===")
+            print(f"선택된 그룹: {group_name} (시나리오 {scenario_count}개)")
+            print(f"전체 시험분야 개수: {group_count}")
+
+            # === 시험 분야 테이블 재구성 ===
+            field_table.setRowCount(0)
+            field_table.clearContents()
+            field_table.setRowCount(group_count)
+
+            print(f"\n시험 분야 테이블:")
+            for i, gname in enumerate(self._group_specs.keys()):
+                # 선택된 시험분야는 row_selected.png, 나머지는 row.png
+                if gname == group_name:
+                    label = ClickableLabel(gname, i, 0)
+                    label.setAlignment(Qt.AlignCenter)
+                    label.setStyleSheet("""
+                        QLabel {
+                            background-image: url('assets/image/test_config/row_selected.png');
+                            background-position: center;
+                            background-repeat: no-repeat;
+                            font-family: 'Noto Sans KR';
+                            font-size: 19px;
+                            font-weight: 400;
+                            color: #000000;
+                            min-width: 371.5px;
+                            min-height: 39px;
+                        }
+                    """)
+                    print(f"  행 {i}: [시험분야: {gname}] (선택됨) - 배경: row_selected.png")
+                else:
+                    label = ClickableLabel(gname, i, 0)
+                    label.setAlignment(Qt.AlignCenter)
+                    label.setStyleSheet("""
+                        QLabel {
+                            background-image: url('assets/image/test_config/row.png');
+                            background-position: center;
+                            background-repeat: no-repeat;
+                            font-family: 'Noto Sans KR';
+                            font-size: 19px;
+                            font-weight: 400;
+                            color: #000000;
+                            min-width: 371.5px;
+                            min-height: 39px;
+                        }
+                    """)
+                    print(f"  행 {i}: [시험분야: {gname}] - 배경: row.png")
+
+                label.clicked.connect(self.parent.on_test_field_selected)
+                field_table.setCellWidget(i, 0, label)
+                field_table.setRowHeight(i, 39)
+
+            # === 시나리오 테이블 재구성 ===
+            scenario_table.setRowCount(0)
+            scenario_table.clearContents()
+            scenario_table.setRowCount(scenario_count)
+
+            print(f"\n시나리오 테이블:")
+            for i, scenario in enumerate(scenarios):
+                # 시나리오명을 표시하는 ClickableLabel 생성
+                label = ClickableLabel(scenario["name"], i, 0)  # 시나리오 테이블의 첫 번째(유일한) 컬럼
+                label.setAlignment(Qt.AlignCenter)
+                # 초기 상태: 모든 시나리오는 체크 안 된 상태로 표시
+                label.setStyleSheet("""
+                    QLabel {
+                        background-image: url('assets/image/test_config/row_checkbox_unchecked.png');
+                        background-position: center;
+                        background-repeat: no-repeat;
+                        border: none;
+                        border-bottom: 1px solid #CCCCCC;
+                        font-family: 'Noto Sans KR';
+                        font-size: 19px;
+                        font-weight: 400;
+                        color: #000000;
+                        margin: 0px;
+                        padding: 0px;
+                        min-width: 371.5px;
+                        min-height: 39px;
+                    }
+                """)
+                # spec_id를 label의 property로 저장
+                label.setProperty("spec_id", scenario["id"])
+                label.clicked.connect(self.parent.on_scenario_selected)
+                scenario_table.setCellWidget(i, 0, label)
+                scenario_table.setRowHeight(i, 39)
+                print(f"  행 {i}: [시나리오: {scenario['name']}] - 배경: row_checkbox_unchecked.png")
+
+            print(f"\n=== 테이블 재구성 완료 ===")
+            print(f"시험 분야 테이블 행 수: {field_table.rowCount()}")
+            print(f"시나리오 테이블 행 수: {scenario_table.rowCount()}\n")
+
+            # 선택 상태 제거
+            field_table.clearSelection()
+            field_table.setCurrentCell(-1, -1)
+            scenario_table.clearSelection()
+            scenario_table.setCurrentCell(-1, -1)
+
+            # 시그널 차단 해제
+            field_table.blockSignals(False)
+            scenario_table.blockSignals(False)
+
+            print(f"시나리오 채우기 완료: {group_name} - {scenario_count}개 시나리오 표시")
+
+        except Exception as e:
+            print(f"시나리오 채우기 실패: {e}")
+            import traceback
+            traceback.print_exc()
+            # 에러 발생 시에도 시그널 차단 해제
+            if 'field_table' in locals():
+                field_table.blockSignals(False)
+            if 'scenario_table' in locals():
+                scenario_table.blockSignals(False)
 
     def _fill_api_table_for_selected_field_from_api(self, row):
         """선택된 시험 시나리오의 API 테이블 채우기 (API 기반)"""
         try:
-            # spec_id 추출 (두 번째 컬럼: 시험 시나리오명에서 가져오기)
-            item = self.parent.test_field_table.item(row, 1)
-            if not item:
+            # spec_id 추출 (시나리오 테이블의 위젯에서 가져오기)
+            widget = self.parent.scenario_table.cellWidget(row, 0)
+            if not widget:
                 return
 
-            spec_id = item.data(Qt.UserRole)
+            spec_id = widget.property("spec_id")
             if not spec_id:
                 return
 
@@ -2013,6 +2241,10 @@ class FormValidator:
                 self._steps_cache[spec_id] = cached_steps
             # API 테이블 초기화
             self.parent.api_test_table.setRowCount(0)
+
+            # placeholder label 숨기기
+            if hasattr(self.parent, 'api_placeholder_label'):
+                self.parent.api_placeholder_label.hide()
 
             # steps 순회하여 테이블 채우기
             for step in cached_steps:

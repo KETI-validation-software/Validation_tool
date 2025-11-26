@@ -10,9 +10,85 @@ cmh1ua7b00021gxc3rjepbkrm_Authentication_out_schema = {
     "accessToken": str,
 }
 
+# DoorProfiles
+cmh1ua7b00021gxc3rjepbkrm_DoorProfiles_out_schema = {
+    "code": str,
+    "message": str,
+    "doorList": [{
+    "doorID": str,
+    "doorName": str,
+    "doorRelayStatus": str,
+    "doorSensor": str,
+    "doorLoc": {
+    "lon": str,
+    "lat": str,
+    "alt": str,
+    "desc": str,
+},
+    "bioDeviceList": [{
+    "bioDeviceID": str,
+    "bioDeviceName": str,
+    "bioDeviceAuthTypeList": [str],
+}],
+    "otherDeviceList": [{
+    "otherDeviceID": str,
+    "otherDeviceName": str,
+    "otherDeviceAuthTypeList": [str],
+}],
+}],
+}
+
+# RealtimeDoorStatus
+cmh1ua7b00021gxc3rjepbkrm_RealtimeDoorStatus_out_schema = {
+    "code": str,
+    "message": str,
+}
+
+# RealtimeDoorStatus WebHook IN Schema
+cmh1ua7b00021gxc3rjepbkrm_RealtimeDoorStatus_webhook_in_schema = {
+    "doorList": [{
+    "doorID": str,
+    "doorName": str,
+    "doorRelaySensor": str,
+    "doorSensor": str,
+}],
+}
+
+# DoorControl
+cmh1ua7b00021gxc3rjepbkrm_DoorControl_out_schema = {
+    "code": str,
+    "message": str,
+}
+
+# RealtimeDoorStatus
+cmh1ua7b00021gxc3rjepbkrm_RealtimeDoorStatus_out_schema = {
+    "code": str,
+    "message": str,
+}
+
+# RealtimeDoorStatus WebHook IN Schema
+cmh1ua7b00021gxc3rjepbkrm_RealtimeDoorStatus_webhook_in_schema = {
+    "doorList": [{
+    "doorID": str,
+    "doorName": str,
+    "doorRelaySensor": str,
+    "doorSensor": str,
+}],
+}
+
 # cmh1ua7b00021gxc3rjepbkrm 스키마 리스트
 cmh1ua7b00021gxc3rjepbkrm_outSchema = [
     cmh1ua7b00021gxc3rjepbkrm_Authentication_out_schema,
+    cmh1ua7b00021gxc3rjepbkrm_DoorProfiles_out_schema,
+    cmh1ua7b00021gxc3rjepbkrm_RealtimeDoorStatus_out_schema,
+    cmh1ua7b00021gxc3rjepbkrm_DoorControl_out_schema,
+    cmh1ua7b00021gxc3rjepbkrm_RealtimeDoorStatus_out_schema,
+]
+
+# cmh1ua7b00021gxc3rjepbkrm WebHook 스키마 리스트
+cmh1ua7b00021gxc3rjepbkrm_webhook_inSchema = [
+    cmh1ua7b00021gxc3rjepbkrm_RealtimeDoorStatus_webhook_in_schema,
+    cmh1ua7b00021gxc3rjepbkrm_RealtimeDoorStatus_webhook_in_schema,
 ]
 
 # Authentication

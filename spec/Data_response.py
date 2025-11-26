@@ -1,38 +1,144 @@
-# response 모드
-
-# RealtimeVideoEventInfos
-cmh1u5pef000sgxc3bzl4y9v0_RealtimeVideoEventInfos_out_data = {
+# Authentication
+cmh1u5pef000sgxc3bzl4y9v0_Authentication_out_data = {
     "code": "200",
-    "message": "성공"
+    "message": "성공",
+    "userName": "관리자",
+    "userAff": "오산시청",
+    "accessToken": ""
 }
 
-# RealtimeVideoEventInfos WebHook IN Data
-cmh1u5pef000sgxc3bzl4y9v0_RealtimeVideoEventInfos_webhook_in_data = {
-    "camList": [
+# DoorProfiles
+cmh1u5pef000sgxc3bzl4y9v0_DoorProfiles_out_data = {
+    "code": "200",
+    "message": "성공",
+    "doorList": [
         {
-        "camID": "",
-        "eventUUID": "",
-        "eventName": "",
-        "startTime": "",
-        "endTime": "",
-        "eventDesc": ""
+        "doorID": "door0001",
+        "doorName": "출입문",
+        "doorRelayStatus": "일반",
+        "doorSensor": "",
+        "doorLoc": {
+        "lon": "123",
+        "lat": "231",
+        "alt": "221",
+        "desc": "복도"
+    },
+        "bioDeviceList": [
+            {
+            "bioDeviceID": "bio0001",
+            "bioDeviceName": "홍채 인식기기",
+            "bioDeviceAuthTypeList": []
+        }
+    ],
+        "otherDeviceList": [
+            {
+            "otherDeviceID": "other0001",
+            "otherDeviceName": "카드 인식기기",
+            "otherDeviceAuthTypeList": []
+        }
+    ]
+    },
+        {
+        "doorID": "door0002",
+        "doorName": "출입문",
+        "doorRelayStatus": "일반",
+        "doorSensor": "",
+        "doorLoc": {
+        "lon": "111",
+        "lat": "222",
+        "alt": "333",
+        "desc": "복도"
+    },
+        "bioDeviceList": [
+            {
+            "bioDeviceID": "bio0002",
+            "bioDeviceName": "지문인식기기",
+            "bioDeviceAuthTypeList": []
+        }
+    ],
+        "otherDeviceList": [
+            {
+            "otherDeviceID": "other0002",
+            "otherDeviceName": "카드 인식기기",
+            "otherDeviceAuthTypeList": []
+        }
+    ]
+    },
+        {
+        "doorID": "door0003",
+        "doorName": "출입문",
+        "doorRelayStatus": "일반",
+        "doorSensor": "",
+        "doorLoc": {
+        "lon": "123",
+        "lat": "123",
+        "alt": "232",
+        "desc": "복도"
+    },
+        "bioDeviceList": [
+            {
+            "bioDeviceID": "bio0003",
+            "bioDeviceName": "홍채 인식기기",
+            "bioDeviceAuthTypeList": "홍채"
+        }
+    ],
+        "otherDeviceList": [
+            {
+            "otherDeviceID": "other0003",
+            "otherDeviceName": "카드 인식기기",
+            "otherDeviceAuthTypeList": "카드"
+        }
+    ]
     }
 ]
 }
 
+# RealtimeDoorStatus
+cmh1u5pef000sgxc3bzl4y9v0_RealtimeDoorStatus_out_data = {
+    "code": "",
+    "message": ""
+}
+
+# RealtimeDoorStatus WebHook IN Data
+cmh1u5pef000sgxc3bzl4y9v0_RealtimeDoorStatus_webhook_in_data = {
+    "doorList": [
+        {
+        "doorID": ""
+    }
+],
+    "duration": 0,
+    "transProtocol": {
+    "transProtocolType": "",
+    "transProtocolDesc": ""
+},
+    "startTime": 0
+}
+
+# DoorControl
+cmh1u5pef000sgxc3bzl4y9v0_DoorControl_out_data = {
+    "code": "200",
+    "message": "성공"
+}
+
 # cmh1u5pef000sgxc3bzl4y9v0 데이터 리스트
 cmh1u5pef000sgxc3bzl4y9v0_outData = [
-    cmh1u5pef000sgxc3bzl4y9v0_RealtimeVideoEventInfos_out_data,
+    cmh1u5pef000sgxc3bzl4y9v0_Authentication_out_data,
+    cmh1u5pef000sgxc3bzl4y9v0_DoorProfiles_out_data,
+    cmh1u5pef000sgxc3bzl4y9v0_RealtimeDoorStatus_out_data,
+    cmh1u5pef000sgxc3bzl4y9v0_DoorControl_out_data,
 ]
 
 # cmh1u5pef000sgxc3bzl4y9v0 WebHook 데이터 리스트
 cmh1u5pef000sgxc3bzl4y9v0_webhook_inData = [
-    cmh1u5pef000sgxc3bzl4y9v0_RealtimeVideoEventInfos_webhook_in_data,
+    cmh1u5pef000sgxc3bzl4y9v0_RealtimeDoorStatus_webhook_in_data,
 ]
 
 # cmh1u5pef000sgxc3bzl4y9v0 API endpoint
 cmh1u5pef000sgxc3bzl4y9v0_messages = [
-    "RealtimeVideoEventInfos",
+    "Authentication",
+    "DoorProfiles",
+    "RealtimeDoorStatus",
+    "DoorControl",
 ]
 
 # Authentication
