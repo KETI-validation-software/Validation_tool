@@ -167,6 +167,8 @@ cmh1u5pef000sgxc3bzl4y9v0_DoorProfiles_out_constraints = {
   "doorList.doorSensor": {
     "valueType": "random",
     "required": False,
+    "referenceField": "(참조 필드 미선택)",
+    "referenceEndpoint": "/DoorProfiles",
     "validValueField": "eventFilter_bio",
     "validValues": [
       "Lock",
