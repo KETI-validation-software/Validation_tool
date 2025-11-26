@@ -1,48 +1,4 @@
 # Authentication
-cmh1u5pef000sgxc3bzl4y9v0_Authentication_in_validation = {}
-
-# DoorProfiles
-cmh1u5pef000sgxc3bzl4y9v0_DoorProfiles_in_validation = {}
-
-# RealtimeDoorStatus
-cmh1u5pef000sgxc3bzl4y9v0_RealtimeDoorStatus_in_validation = {}
-
-# DoorControl
-cmh1u5pef000sgxc3bzl4y9v0_DoorControl_in_validation = {
-  "doorID": {
-    "score": 1,
-    "enabled": True,
-    "allowedValues": [],
-    "validationType": "response-field-list-match",
-    "referenceListField": "doorID",
-    "referenceListEndpoint": "/RealtimeDoorStatus",
-    "referenceEndpoint": "/RealtimeDoorStatus"
-  },
-  "commandType": {
-    "score": 1,
-    "enabled": True,
-    "allowedValues": [
-      "Lock",
-      "UnLock"
-    ],
-    "referenceField": "doorSensor",
-    "validationType": "valid-value-match",
-    "referenceEndpoint": "/DoorProfiles",
-    "validValueOperator": "not-equal",
-    "validValueFieldName": "eventFilter_bio",
-    "validValueMatchType": "validation-field"
-  }
-}
-
-# cmh1u5pef000sgxc3bzl4y9v0 검증 리스트
-cmh1u5pef000sgxc3bzl4y9v0_inValidation = [
-    cmh1u5pef000sgxc3bzl4y9v0_Authentication_in_validation,
-    cmh1u5pef000sgxc3bzl4y9v0_DoorProfiles_in_validation,
-    cmh1u5pef000sgxc3bzl4y9v0_RealtimeDoorStatus_in_validation,
-    cmh1u5pef000sgxc3bzl4y9v0_DoorControl_in_validation,
-]
-
-# Authentication
 cmgvieyak001b6cd04cgaawmm_Authentication_in_validation = {
   "userID": {
     "enabled": True,
@@ -158,5 +114,49 @@ cmgvieyak001b6cd04cgaawmm_inValidation = [
     cmgvieyak001b6cd04cgaawmm_ReplayURL_in_validation,
     cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_in_validation,
     cmgvieyak001b6cd04cgaawmm_StoredVideoEventInfos_in_validation,
+]
+
+# Authentication
+cmh1u5pef000sgxc3bzl4y9v0_Authentication_in_validation = {}
+
+# DoorProfiles
+cmh1u5pef000sgxc3bzl4y9v0_DoorProfiles_in_validation = {}
+
+# RealtimeDoorStatus
+cmh1u5pef000sgxc3bzl4y9v0_RealtimeDoorStatus_in_validation = {}
+
+# DoorControl
+cmh1u5pef000sgxc3bzl4y9v0_DoorControl_in_validation = {
+  "doorID": {
+    "score": 1,
+    "enabled": True,
+    "allowedValues": [],
+    "validationType": "response-field-list-match",
+    "referenceListField": "doorID",
+    "referenceListEndpoint": "/RealtimeDoorStatus",
+    "referenceEndpoint": "/RealtimeDoorStatus"
+  },
+  "commandType": {
+    "score": 1,
+    "enabled": True,
+    "allowedValues": [
+      "Lock",
+      "UnLock"
+    ],
+    "referenceField": "doorSensor",
+    "validationType": "valid-value-match",
+    "referenceEndpoint": "/DoorProfiles",
+    "validValueOperator": "not-equal",
+    "validValueFieldName": "eventFilter_bio",
+    "validValueMatchType": "validation-field"
+  }
+}
+
+# cmh1u5pef000sgxc3bzl4y9v0 검증 리스트
+cmh1u5pef000sgxc3bzl4y9v0_inValidation = [
+    cmh1u5pef000sgxc3bzl4y9v0_Authentication_in_validation,
+    cmh1u5pef000sgxc3bzl4y9v0_DoorProfiles_in_validation,
+    cmh1u5pef000sgxc3bzl4y9v0_RealtimeDoorStatus_in_validation,
+    cmh1u5pef000sgxc3bzl4y9v0_DoorControl_in_validation,
 ]
 

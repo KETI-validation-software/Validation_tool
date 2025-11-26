@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QGroupBox, QLineEdit,
     QPushButton, QMessageBox, QTableWidget, QHeaderView, QAbstractItemView, QTableWidgetItem,
-    QStackedWidget, QRadioButton, QFrame, QApplication
+    QStackedWidget, QRadioButton, QFrame, QApplication, QSizePolicy
 )
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QPixmap, QColor, QFont, QBrush, QPainter, QPen
@@ -78,49 +78,108 @@ class InfoWidget(QWidget):
         main_layout.addWidget(self.stacked_widget)
         self.setLayout(main_layout)
 
+    def resizeEvent(self, event):
+        """창 크기 변경 시 page1 요소들 위치 재조정"""
+        super().resizeEvent(event)
+        
+        # page1의 요소들 위치 재조정
+        if hasattr(self, 'page1') and self.page1:
+            page_width = self.page1.width()
+            page_height = self.page1.height()
+            
+            # content_widget 크기 (ip_input_edit, load_test_info_btn의 부모)
+            if hasattr(self, 'page1_content') and self.page1_content:
+                content_width = self.page1_content.width()
+                content_height = self.page1_content.height()
+                
+                # 배경 이미지 크기 조정
+                if hasattr(self, 'page1_bg_label'):
+                    self.page1_bg_label.setGeometry(0, 0, content_width, content_height)
+                
+                # ip_input_edit: 오른쪽에서 211px, 위에서 24px (content_widget 기준)
+                if hasattr(self, 'ip_input_edit'):
+                    self.ip_input_edit.setGeometry(content_width - 211 - 200, 24, 200, 40)
+                
+                # load_test_info_btn: 오른쪽에서 5px, 위에서 13px (content_widget 기준)
+                if hasattr(self, 'load_test_info_btn'):
+                    self.load_test_info_btn.setGeometry(content_width - 5 - 198, 13, 198, 62)
+            
+            # management_url_container: 오른쪽에서 10px, 아래에서 48px (page1 기준)
+            if hasattr(self, 'management_url_container'):
+                self.management_url_container.setGeometry(page_width - 10 - 380, page_height - 48 - 60, 380, 60)
+
     def create_page1(self):
         """첫 번째 페이지: 시험 정보 확인"""
-        page = QWidget()
-        page.setObjectName("page1")
+        self.page1 = QWidget()
+        self.page1.setObjectName("page1")
 
         # 페이지 크기 설정
-        page.setFixedSize(1680, 1006)
+        self.page1.setMinimumSize(1680, 1006)  # 반응형: 최소 크기 설정
 
         # 전체 레이아웃 (헤더 포함)
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
 
-        # 상단 헤더 영역 (1680x64px)
-        header_widget = QLabel()
-        header_widget.setFixedSize(1680, 64)
-        header_widget.setContentsMargins(0, 0, 0, 0)
-        header_widget.setStyleSheet("QLabel { margin: 0px; padding: 0px; border: none; }")
+        # 상단 헤더 영역 (반응형 - 배경 늘어남, 로고/타이틀 가운데 고정)
+        header_widget = QWidget()
+        header_widget.setFixedHeight(64)
+        header_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
-        # 헤더 이미지 설정
-        header_pixmap = QPixmap(resource_path("assets/image/test_info/header.png"))
-        header_widget.setPixmap(header_pixmap.scaled(1680, 64, Qt.IgnoreAspectRatio, Qt.SmoothTransformation))
-        header_widget.setScaledContents(True)
-        main_layout.addWidget(header_widget, 0, Qt.AlignTop)
-
-        # 본문 영역 컨테이너 (1680x942px, padding: 32/56/0/0)
-        content_widget = QWidget()
-        content_widget.setFixedSize(1680, 942)
-
-        # 배경 이미지 설정
-        bg_path = resource_path("assets/image/test_info/bg-illust 1.png").replace(chr(92), "/")
-        content_widget.setStyleSheet(f"""
+        # 배경 이미지 설정 (늘어남 - border-image 사용)
+        header_bg_path = resource_path("assets/image/test_info/header.png").replace(chr(92), "/")
+        header_widget.setStyleSheet(f"""
             QWidget {{
-                background-image: url({bg_path});
-                background-repeat: no-repeat;
-                background-position: center;
-                margin: 0px;
-                padding: 0px;
-                border: none;
+                border-image: url({header_bg_path}) 0 0 0 0 stretch stretch;
+            }}
+            QLabel {{
+                border-image: none;
+                background: transparent;
             }}
         """)
 
-        content_layout = QVBoxLayout(content_widget)
+        # 헤더 레이아웃 (가운데 정렬)
+        header_layout = QHBoxLayout(header_widget)
+        header_layout.setContentsMargins(0, 0, 0, 0)
+        header_layout.setSpacing(0)
+
+        # 왼쪽 stretch (가운데 정렬용)
+        header_layout.addStretch()
+
+        # 로고 이미지 (90x32)
+        logo_label = QLabel()
+        logo_pixmap = QPixmap(resource_path("assets/image/test_info/logo_KISA.png"))
+        logo_label.setPixmap(logo_pixmap)
+        logo_label.setFixedSize(90, 32)
+        header_layout.addWidget(logo_label)
+
+        # 로고와 타이틀 사이 간격 20px
+        header_layout.addSpacing(20)
+
+        # 타이틀 이미지 (269x30)
+        header_title_label = QLabel()
+        header_title_pixmap = QPixmap(resource_path("assets/image/test_info/header_title.png"))
+        header_title_label.setPixmap(header_title_pixmap)
+        header_title_label.setFixedSize(269, 30)
+        header_layout.addWidget(header_title_label)
+
+        # 오른쪽 stretch (가운데 정렬용)
+        header_layout.addStretch()
+
+        main_layout.addWidget(header_widget)
+
+        # 본문 영역 컨테이너 (1680x942px, padding: 32/56/0/0)
+        self.page1_content = QWidget()
+        self.page1_content.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+        # 배경 이미지를 QLabel로 설정 (절대 위치)
+        bg_path = resource_path("assets/image/test_info/bg-illust.png").replace(chr(92), "/")
+        self.page1_bg_label = QLabel(self.page1_content)
+        self.page1_bg_label.setPixmap(QPixmap(bg_path))
+        self.page1_bg_label.setScaledContents(True)
+        self.page1_bg_label.lower()  # 맨 뒤로 보내기
+
+        content_layout = QVBoxLayout(self.page1_content)
         content_layout.setContentsMargins(32, 0, 56, 0)  # left: 32, top: 0, right: 56, bottom: 0
         content_layout.setSpacing(0)
 
@@ -129,7 +188,7 @@ class InfoWidget(QWidget):
         content_layout.addWidget(info_panel, alignment=Qt.AlignHCenter)
 
         # IP 입력창 (content_widget에 절대 위치로 배치 - 오른쪽 상단)
-        self.ip_input_edit = QLineEdit(content_widget)
+        self.ip_input_edit = QLineEdit(self.page1_content)
         self.ip_input_edit.setFixedSize(200, 40)
         self.ip_input_edit.setPlaceholderText("주소를 입력해주세요.")
         self.ip_input_edit.setGeometry(1269, 24, 200, 40)  # x: 1680-5(우측여백)-200-8-198, y: 24
@@ -150,7 +209,7 @@ class InfoWidget(QWidget):
         """)
 
         # 불러오기 버튼 (content_widget에 절대 위치로 배치 - 오른쪽 상단)
-        self.load_test_info_btn = QPushButton(content_widget)
+        self.load_test_info_btn = QPushButton(self.page1_content)
         self.load_test_info_btn.setFixedSize(198, 62)
         self.load_test_info_btn.setGeometry(1477, 13, 198, 62)  # x: 1680-5(우측여백)-198, y: 13
 
@@ -170,15 +229,15 @@ class InfoWidget(QWidget):
         """)
         self.load_test_info_btn.clicked.connect(self.on_load_test_info_clicked)
 
-        main_layout.addWidget(content_widget, 0, Qt.AlignTop)
-        page.setLayout(main_layout)
+        main_layout.addWidget(self.page1_content, 1)  # 반응형: stretch=1로 남은 공간 채움
+        self.page1.setLayout(main_layout)
 
         # 관리자시스템 주소 입력 필드
-        management_url_container = QWidget(page)
-        management_url_container.setFixedSize(380, 60)  # 라벨 텍스트가 잘 보이도록 증가
+        self.management_url_container = QWidget(self.page1)
+        self.management_url_container.setFixedSize(380, 60)  # 라벨 텍스트가 잘 보이도록 증가
         # 오른쪽 끝으로 배치: x = 1680 - 10 - 380, y = 1006 - 60 - 48
-        management_url_container.setGeometry(1290, 898, 380, 60)
-        management_url_container.setStyleSheet("""
+        self.management_url_container.setGeometry(1290, 898, 380, 60)
+        self.management_url_container.setStyleSheet("""
             QWidget {
                 background-color: rgba(255, 255, 255, 0.95);
                 border-radius: 4px;
@@ -186,7 +245,7 @@ class InfoWidget(QWidget):
             }
         """)
 
-        management_url_layout = QHBoxLayout(management_url_container)
+        management_url_layout = QHBoxLayout(self.management_url_container)
         management_url_layout.setContentsMargins(12, 10, 12, 10)
         management_url_layout.setSpacing(8)
 
@@ -226,9 +285,9 @@ class InfoWidget(QWidget):
         management_url_layout.addWidget(self.management_url_edit)
 
         # 관리자시스템 주소 컨테이너를 위로 올림
-        management_url_container.raise_()
+        self.management_url_container.raise_()
 
-        return page
+        return self.page1
 
     def create_page2(self):
         """두 번째 페이지: 시험 설정"""
