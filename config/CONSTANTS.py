@@ -46,8 +46,8 @@ def save_management_url(new_url):
 # 관리자시스템 주소
 management_url = load_management_url()
 
-specs = [["cmh1u5pef000sgxc3bzl4y9v0_inSchema","cmh1u5pef000sgxc3bzl4y9v0_outData","cmh1u5pef000sgxc3bzl4y9v0_messages",""],
-         ["cmgvieyak001b6cd04cgaawmm_inSchema","cmgvieyak001b6cd04cgaawmm_outData","cmgvieyak001b6cd04cgaawmm_messages",""]]
+specs = [["cmgvieyak001b6cd04cgaawmm_inSchema","cmgvieyak001b6cd04cgaawmm_outData","cmgvieyak001b6cd04cgaawmm_messages",""],
+         ["cmh1u5pef000sgxc3bzl4y9v0_inSchema","cmh1u5pef000sgxc3bzl4y9v0_outData","cmh1u5pef000sgxc3bzl4y9v0_messages",""]]
 none_request_message = ['Capabilities',
                         'CameraProfiles',
                         'DoorProfiles',
@@ -55,19 +55,19 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소
 # test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
-company_name = "테스트"
-product_name = "통합플랫폼"
+company_name = "통합플랫폼테스트"
+product_name = "통합플랫폼테스트제품"
 version = "v1.0"
 test_category = "MAIN_TEST"
-test_target = "통합시스템그룹, 통합플랫폼"
-test_range = "ALL_FIELDS, ALL_FIELDS"
-auth_type = "Digest Auth"
-auth_info = "admin,1234"
+test_target = "통합플랫폼"
+test_range = "ALL_FIELDS"
+auth_type = "Bearer Token"
+auth_info = "kisa,kisa_k1!2@"
 admin_code = "1234"
 url = "https://192.168.0.3:8080"
 contact_person = "김철수"
 model_name = "v1.0"
-request_id = "cmhba7ldg000g6zcrxdqwdcje"
+request_id = "cmh1yg49v000t9y0jdr1wwuja"
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황
 flag_opt = False
@@ -113,30 +113,6 @@ WEBHOOK_URL = f"https://{WEBHOOK_PUBLIC_IP}:{WEBHOOK_PORT}"
 # 주소 선택 후 form_validator.py에서 자동으로 업데이트됨
 
 SPEC_CONFIG = [
-    {
-        "group_name": "통합시스템그룹",
-        "group_id": "cmh1yc1yn000g9y0jk37caeqv",
-        "cmh1u5pef000sgxc3bzl4y9v0": {
-    "test_name": "출입통제시스템_new",
-    "specs": ['cmh1u5pef000sgxc3bzl4y9v0_inSchema', 'cmh1u5pef000sgxc3bzl4y9v0_outData', 'cmh1u5pef000sgxc3bzl4y9v0_messages', 'cmh1u5pef000sgxc3bzl4y9v0_webhook_OutSchema', 'cmh1u5pef000sgxc3bzl4y9v0_webhook_inData'],
-    "api_name": ['인증', '바이오 및 출입통제 장치 목록 정보', '실시간 출입통제 장치 상태 정보 연동', '출입 통제 장치 제어 정보 연동'],
-    "api_id": ['step-1-n98lp4ycz', 'step-2-koi3uz7qa', 'step-3-w3ms6ohgy', 'step-4-9fqdmyoou'],
-    "api_endpoint": ['/Authentication', '/DoorProfiles', '/RealtimeDoorStatus', '/DoorControl'],
-    "trans_protocol": ['basic', 'basic', 'WebHook', 'basic'],
-    "time_out": [5000, 5000, 5000, 5000],
-    "num_retries": [1, 1, 1, 1]
-},
-        "cmgvieyak001b6cd04cgaawmm": {
-    "test_name": "vid001",
-    "specs": ['cmgvieyak001b6cd04cgaawmm_inSchema', 'cmgvieyak001b6cd04cgaawmm_outData', 'cmgvieyak001b6cd04cgaawmm_messages', 'cmgvieyak001b6cd04cgaawmm_webhook_OutSchema', 'cmgvieyak001b6cd04cgaawmm_webhook_inData'],
-    "api_name": ['인증', '전송 지원 기능 정보 연동', '카메라 목록 연동', '저장된 영상 목록 연동', '실시간 영상 정보 연동', '저장된 영상 정보 연동', '실시간 이벤트 분석 정보 연동', '저장된 이벤트 분석 정보 연동'],
-    "api_id": ['step-1-77lxvxrit', 'step-2-ln57b7ahz', 'step-1-354py0pz2', 'step-2-hyto4xrf1', 'step-5-dfxmyzzsw', 'step-6-pflcyt2cp', 'step-7-166n5ivbf', 'step-8-fff2u2432'],
-    "api_endpoint": ['/Authentication', '/Capabilities', '/CameraProfiles', '/StoredVideoInfos', '/StreamURLs', '/ReplayURL', '/RealtimeVideoEventInfos', '/StoredVideoEventInfos'],
-    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'WebHook', 'basic'],
-    "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
-    "num_retries": [5, 5, 5, 5, 5, 5, 5, 5]
-}
-    },
     {
         "group_name": "통합플랫폼",
         "group_id": "cmgzwocpp01y6vsve880sfysm",
