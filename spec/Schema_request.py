@@ -1,35 +1,48 @@
 from json_checker import OptionalKey
 
 
-# RealtimeVideoEventInfos
-cmh1u5pef000sgxc3bzl4y9v0_RealtimeVideoEventInfos_in_schema = {
-    "camList": [{
-    "camID": str,
-}],
-    "duration": str,
-    "transProtocol": {
-    "transProtocolType": str,
-    "transProtocolDesc": str,
-},
-    "eventFilter": str,
-    "classFilter": str,
-    "startTime": int,
+# Authentication
+cmh1u5pef000sgxc3bzl4y9v0_Authentication_in_schema = {
+    "userID": str,
+    "userPW": str,
 }
 
-# RealtimeVideoEventInfos WebHook OUT Schema
-cmh1u5pef000sgxc3bzl4y9v0_RealtimeVideoEventInfos_webhook_out_schema = {
+# DoorProfiles
+cmh1u5pef000sgxc3bzl4y9v0_DoorProfiles_in_schema = {}
+
+# RealtimeDoorStatus
+cmh1u5pef000sgxc3bzl4y9v0_RealtimeDoorStatus_in_schema = {
+    "doorList": [{
+    "doorID": str,
+    "doorName": str,
+    "doorRelaySensor": str,
+    "doorSensor": str,
+}],
+}
+
+# RealtimeDoorStatus WebHook OUT Schema
+cmh1u5pef000sgxc3bzl4y9v0_RealtimeDoorStatus_webhook_out_schema = {
     "code": str,
     "message": str,
 }
 
+# DoorControl
+cmh1u5pef000sgxc3bzl4y9v0_DoorControl_in_schema = {
+    "doorID": str,
+    "commandType": str,
+}
+
 # cmh1u5pef000sgxc3bzl4y9v0 스키마 리스트
 cmh1u5pef000sgxc3bzl4y9v0_inSchema = [
-    cmh1u5pef000sgxc3bzl4y9v0_RealtimeVideoEventInfos_in_schema,
+    cmh1u5pef000sgxc3bzl4y9v0_Authentication_in_schema,
+    cmh1u5pef000sgxc3bzl4y9v0_DoorProfiles_in_schema,
+    cmh1u5pef000sgxc3bzl4y9v0_RealtimeDoorStatus_in_schema,
+    cmh1u5pef000sgxc3bzl4y9v0_DoorControl_in_schema,
 ]
 
 # cmh1u5pef000sgxc3bzl4y9v0 WebHook 스키마 리스트
 cmh1u5pef000sgxc3bzl4y9v0_webhook_OutSchema = [
-    cmh1u5pef000sgxc3bzl4y9v0_RealtimeVideoEventInfos_webhook_out_schema,
+    cmh1u5pef000sgxc3bzl4y9v0_RealtimeDoorStatus_webhook_out_schema,
 ]
 
 # Authentication
