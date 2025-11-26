@@ -59,6 +59,7 @@ class InfoWidget(QWidget):
         self.scan_thread = None
         self.scan_worker = None
         self.current_mode = None
+        self.target_system = "물리보안시스템"  # 임시: 시험대상 시스템 (물리보안시스템/통합플랫폼시스템)
         self.test_group_name = None  # testGroup.name 저장
         self.test_specs = []  # testSpecs 리스트 저장
         self.current_page = 0
@@ -661,11 +662,12 @@ class InfoWidget(QWidget):
     # ---------- 페이지 전환 메서드 ----------
     def go_to_next_page(self):
         """다음 페이지로 이동 (조건 검증 후)"""
-        is_complete = self._is_page1_complete()
-
-        if not is_complete:
-            QMessageBox.warning(self,"입력 필요", "시험 정보 페이지의 모든 필수 항목을 입력해주세요.")
-            return
+        # TODO: 시험정보 불러오기 링크 수정 완료 후 아래 유효성 검사 주석 해제 필요
+        # is_complete = self._is_page1_complete()
+        #
+        # if not is_complete:
+        #     QMessageBox.warning(self,"입력 필요", "시험 정보 페이지의 모든 필수 항목을 입력해주세요.")
+        #     return
 
         if self.current_page < 1:
             self.current_page += 1
@@ -2913,33 +2915,47 @@ class InfoWidget(QWidget):
                 import config.CONSTANTS  # 모듈이 없으면 새로 import
         # ===== 수정 끝 =====
         try:
-            # 필수 입력 필드 검증
-            missing_fields = self._check_required_fields()
-            if missing_fields:
-                message = "다음 정보를 입력해주세요:\n\n" + "\n".join(missing_fields)
-                QMessageBox.warning(self, "입력 정보 부족", message)
-                return
+            # TODO: 시험정보 불러오기 링크 수정 완료 후 아래 유효성 검사 주석 해제 필요
+            # # 필수 입력 필드 검증
+            # missing_fields = self._check_required_fields()
+            # if missing_fields:
+            #     message = "다음 정보를 입력해주세요:\n\n" + "\n".join(missing_fields)
+            #     QMessageBox.warning(self, "입력 정보 부족", message)
+            #     return
 
-            # spec_id 추출 (testSpecs의 첫 번째 항목)
-            if not self.test_specs or len(self.test_specs) == 0:
-                QMessageBox.warning(self, "오류", "시험 시나리오 정보가 없습니다.")
-                return
+            # TODO: 시험정보 불러오기 링크 수정 완료 후 아래 시험 시나리오 검사 주석 해제 필요
+            # # spec_id 추출 (testSpecs의 첫 번째 항목)
+            # if not self.test_specs or len(self.test_specs) == 0:
+            #     QMessageBox.warning(self, "오류", "시험 시나리오 정보가 없습니다.")
+            #     return
+            #
+            # # test_specs[0]이 딕셔너리인지 확인
+            # first_spec = self.test_specs[0]
+            # if isinstance(first_spec, dict):
+            #     spec_id = first_spec.get("id", "")
+            # else:
+            #     QMessageBox.warning(self, "오류", f"시험 시나리오 데이터 형식이 올바르지 않습니다: {type(first_spec)}")
+            #     return
 
-            # test_specs[0]이 딕셔너리인지 확인
-            first_spec = self.test_specs[0]
-            if isinstance(first_spec, dict):
-                spec_id = first_spec.get("id", "")
-            else:
-                QMessageBox.warning(self, "오류", f"시험 시나리오 데이터 형식이 올바르지 않습니다: {type(first_spec)}")
-                return
+            # 임시: test_specs가 있으면 사용, 없으면 기본 spec_id 사용
+            spec_id = "cmgvieyak001b6cd04cgaawmm"  # 임시 기본값 (vid001)
+            if self.test_specs and len(self.test_specs) > 0:
+                first_spec = self.test_specs[0]
+                if isinstance(first_spec, dict):
+                    spec_id = first_spec.get("id", "cmgvieyak001b6cd04cgaawmm")
 
-            # CONSTANTS.py 업데이트
-            if self.form_validator.update_constants_py():
-                # test_group_name, verification_type(current_mode), spec_id를 함께 전달
-                print(f"시험 시작: testTarget.name={self.target_system}, verificationType={self.current_mode}, spec_id={spec_id}")
-                self.startTestRequested.emit(self.target_system, self.current_mode, spec_id)
-            else:
-                QMessageBox.warning(self, "저장 실패", "CONSTANTS.py 업데이트에 실패했습니다.")
+            # TODO: 시험정보 불러오기 링크 수정 완료 후 아래 CONSTANTS.py 업데이트 주석 해제 필요
+            # # CONSTANTS.py 업데이트
+            # if self.form_validator.update_constants_py():
+            #     # test_group_name, verification_type(current_mode), spec_id를 함께 전달
+            #     print(f"시험 시작: testTarget.name={self.target_system}, verificationType={self.current_mode}, spec_id={spec_id}")
+            #     self.startTestRequested.emit(self.target_system, self.current_mode, spec_id)
+            # else:
+            #     QMessageBox.warning(self, "저장 실패", "CONSTANTS.py 업데이트에 실패했습니다.")
+
+            # 임시: CONSTANTS.py 업데이트 없이 바로 시험 시작
+            print(f"시험 시작: testTarget.name={self.target_system}, verificationType={self.current_mode}, spec_id={spec_id}")
+            self.startTestRequested.emit(self.target_system, self.current_mode, spec_id)
 
         except Exception as e:
             QMessageBox.critical(self, "오류", f"시험 시작 중 오류가 발생했습니다:\n{str(e)}")    

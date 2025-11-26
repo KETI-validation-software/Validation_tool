@@ -127,43 +127,98 @@ class CombinedDetailDialog(QDialog):
     def __init__(self, api_name, step_buffer, schema_data, webhook_schema=None):
         super().__init__()
 
-        self.setWindowTitle(f"{api_name} - 통합 상세 정보")
-        self.setGeometry(400, 300, 1200, 600)
+        self.setWindowTitle(f"{api_name} 상세 정보")
+        self.setGeometry(400, 300, 1520, 921)
         self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
         self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
+        self.setStyleSheet("background-color: #FFFFFF;")
 
         # 전체 레이아웃
         main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(48, 32, 48, 40)  # 좌, 상, 우, 하
 
         # webhook_schema 저장
         self.webhook_schema = webhook_schema
 
         # 상단 제목
-        title_label = QLabel(f"{api_name} API 상세 정보")
-        title_font = title_label.font()
-        title_font.setPointSize(14)
-        title_font.setBold(True)
-        title_label.setFont(title_font)
+        title_label = QLabel(f"{api_name} 상세 정보")
+        title_label.setFixedSize(1424, 38)
+        title_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 26px; font-weight: 500;")
         title_label.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(title_label)
+        main_layout.addSpacing(16)  # 제목 아래 gap
 
-        # 3열 테이블
-        content_layout = QHBoxLayout()
+        # 서브 제목 컨테이너 (message.png 배경 - 체크 아이콘 포함)
+        subtitle_container = QWidget()
+        subtitle_container.setFixedSize(1424, 47)
+        subtitle_container.setStyleSheet("""
+            background-image: url(assets/image/common/message.png);
+            background-repeat: no-repeat;
+            background-position: center;
+        """)
+        subtitle_layout = QHBoxLayout(subtitle_container)
+        subtitle_layout.setContentsMargins(45, 12, 48, 12)  # 좌45(14+18+13), 상12, 우48, 하12
+        
+        # 텍스트
+        subtitle_label = QLabel(f"{api_name} API 정보에 대한 상세 내용을 확인합니다.")
+        subtitle_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 400; background: transparent;")
+        subtitle_layout.addWidget(subtitle_label)
+        subtitle_layout.addStretch()
+        
+        main_layout.addWidget(subtitle_container)
+        main_layout.addSpacing(12)  # message.png 아래 gap
+
+        # 3열 콘텐츠 영역 컨테이너 (1424x664)
+        content_container = QWidget()
+        content_container.setFixedSize(1424, 664)
+        content_layout = QHBoxLayout(content_container)
+        content_layout.setContentsMargins(0, 0, 0, 0)
+        content_layout.setSpacing(12)  # 열 사이 gap
+
+        # 공통 스타일
+        title_style = "font-family: 'Noto Sans KR'; font-size: 18px; font-weight: 600;"
+        box_style = "border: 1px solid #CECECE; border-radius: 4px; background-color: #FFFFFF; font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 400; padding: 12px;"
 
         # 1열: 메시지 데이터
-        data_group = QGroupBox("메시지 데이터")
-        data_layout = QVBoxLayout()
+        data_column = QWidget()
+        data_column.setFixedWidth(466)
+        data_column_layout = QVBoxLayout(data_column)
+        data_column_layout.setContentsMargins(0, 0, 0, 0)
+        data_column_layout.setSpacing(0)
+
+        data_title = QLabel("메시지 데이터")
+        data_title.setFixedSize(466, 24)
+        data_title.setStyleSheet(title_style)
+        data_column_layout.addWidget(data_title)
+        data_column_layout.addSpacing(8)
+
         self.data_browser = QTextBrowser()
+        self.data_browser.setFixedSize(466, 602)
+        self.data_browser.setStyleSheet(box_style)
         self.data_browser.setAcceptRichText(True)
-        data_text = step_buffer["data"] if step_buffer["data"] else "아직 수신된 데이터가 없습니다."
-        self.data_browser.setPlainText(data_text)
-        data_layout.addWidget(self.data_browser)
-        data_group.setLayout(data_layout)
+        if step_buffer["data"]:
+            data_text = step_buffer["data"]
+            self.data_browser.setPlainText(data_text)
+        else:
+            self.data_browser.setHtml('<span style="color: #CECECE;">아직 수신된 데이터가 없습니다.</span>')
+        data_column_layout.addWidget(self.data_browser)
 
         # 2열: 메시지 규격
-        schema_group = QGroupBox("메시지 규격")
-        schema_layout = QVBoxLayout()
+        schema_column = QWidget()
+        schema_column.setFixedWidth(466)
+        schema_column_layout = QVBoxLayout(schema_column)
+        schema_column_layout.setContentsMargins(0, 0, 0, 0)
+        schema_column_layout.setSpacing(0)
+
+        schema_title = QLabel("메시지 규격")
+        schema_title.setFixedSize(466, 24)
+        schema_title.setStyleSheet(title_style)
+        schema_column_layout.addWidget(schema_title)
+        schema_column_layout.addSpacing(8)
+
         self.schema_browser = QTextBrowser()
+        self.schema_browser.setFixedSize(466, 602)
+        self.schema_browser.setStyleSheet(box_style)
         self.schema_browser.setAcceptRichText(True)
 
         # 기본 스키마 + 웹훅 스키마 결합
@@ -173,13 +228,24 @@ class CombinedDetailDialog(QDialog):
             schema_text += self._format_schema(self.webhook_schema)
 
         self.schema_browser.setPlainText(schema_text)
-        schema_layout.addWidget(self.schema_browser)
-        schema_group.setLayout(schema_layout)
+        schema_column_layout.addWidget(self.schema_browser)
 
         # 3열: 검증 오류
-        error_group = QGroupBox("검증 오류")
-        error_layout = QVBoxLayout()
+        error_column = QWidget()
+        error_column.setFixedWidth(466)
+        error_column_layout = QVBoxLayout(error_column)
+        error_column_layout.setContentsMargins(0, 0, 0, 0)
+        error_column_layout.setSpacing(0)
+
+        error_title = QLabel("검증 오류")
+        error_title.setFixedSize(466, 24)
+        error_title.setStyleSheet(title_style)
+        error_column_layout.addWidget(error_title)
+        error_column_layout.addSpacing(8)
+
         self.error_browser = QTextBrowser()
+        self.error_browser.setFixedSize(466, 602)
+        self.error_browser.setStyleSheet(box_style)
         self.error_browser.setAcceptRichText(True)
         result = step_buffer["result"]
         error_text = step_buffer["error"] if step_buffer["error"] else ("오류가 없습니다." if result == "PASS" else "")
@@ -189,21 +255,44 @@ class CombinedDetailDialog(QDialog):
         else:
             error_msg += "오류가 없습니다."
         self.error_browser.setPlainText(error_msg)
-        error_layout.addWidget(self.error_browser)
-        error_group.setLayout(error_layout)
+        error_column_layout.addWidget(self.error_browser)
 
-        content_layout.addWidget(data_group)
-        content_layout.addWidget(schema_group)
-        content_layout.addWidget(error_group)
+        # 3개 열을 가로로 배치
+        content_layout.addWidget(data_column)
+        content_layout.addWidget(schema_column)
+        content_layout.addWidget(error_column)
 
-        # 확인 버튼
-        QBtn = QDialogButtonBox.Ok
-        self.buttonBox = QDialogButtonBox(QBtn)
-        self.buttonBox.accepted.connect(self.accept)
 
-        # 레이아웃 구성
-        main_layout.addLayout(content_layout)
-        main_layout.addWidget(self.buttonBox)
+        main_layout.addWidget(content_container)
+        main_layout.addSpacing(24)  # 콘텐츠 영역 아래 gap
+
+        # 확인 버튼 영역 (1424x48)
+        button_container = QWidget()
+        button_container.setFixedSize(1424, 48)
+        button_layout = QHBoxLayout(button_container)
+        button_layout.setContentsMargins(0, 0, 0, 0)
+        
+        # 확인 버튼 (434x48)
+        confirm_button = QPushButton("")
+        confirm_button.setFixedSize(434, 48)
+        confirm_button.setStyleSheet("""
+            QPushButton {
+                border: none;
+                background-image: url(assets/image/test_runner/btn_확인_enabled.png);
+                background-repeat: no-repeat;
+                background-position: center;
+            }
+            QPushButton:hover {
+                background-image: url(assets/image/test_runner/btn_확인_Hover.png);
+            }
+        """)
+        confirm_button.clicked.connect(self.accept)
+        
+        button_layout.addStretch()
+        button_layout.addWidget(confirm_button)
+        button_layout.addStretch()
+
+        main_layout.addWidget(button_container)
 
         self.setLayout(main_layout)
 
