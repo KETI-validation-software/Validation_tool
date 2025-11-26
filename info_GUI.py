@@ -1,10 +1,10 @@
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QGroupBox, QLineEdit,
     QPushButton, QMessageBox, QTableWidget, QHeaderView, QAbstractItemView, QTableWidgetItem,
-    QStackedWidget, QRadioButton, QFrame
+    QStackedWidget, QRadioButton, QFrame, QApplication
 )
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
-from PyQt5.QtGui import QPixmap, QColor
+from PyQt5.QtGui import QPixmap, QColor, QFont, QBrush, QPainter, QPen
 import importlib
 import re
 from core.functions import resource_path
@@ -14,6 +14,36 @@ from network_scanner import NetworkScanWorker, ARPScanWorker
 from form_validator import FormValidator
 import config.CONSTANTS as CONSTANTS
 from splash_screen import LoadingPopup
+
+
+class TestFieldTableWidget(QTableWidget):
+    """시험 분야별 시나리오 테이블 - 세로 구분선이 전체 높이까지 표시되는 커스텀 테이블"""
+
+    def __init__(self, rows, columns):
+        super().__init__(rows, columns)
+
+    def paintEvent(self, event):
+        """기본 paintEvent 실행 후 세로 구분선 추가"""
+        # 기본 테이블 그리기
+        super().paintEvent(event)
+
+        # 세로 구분선 그리기
+        painter = QPainter(self.viewport())
+        pen = QPen(QColor("#CCCCCC"))
+        pen.setWidth(1)
+        painter.setPen(pen)
+
+        # 첫 번째 컬럼과 두 번째 컬럼 사이의 세로선
+        # 첫 번째 컬럼 너비: 371px
+        x_position = 371
+
+        # 헤더 높이만큼 아래부터 viewport 끝까지 선 그리기
+        header_height = self.horizontalHeader().height()
+        viewport_height = self.viewport().height()
+
+        painter.drawLine(x_position, 0, x_position, viewport_height)
+
+        painter.end()
 
 
 class InfoWidget(QWidget):
@@ -206,95 +236,91 @@ class InfoWidget(QWidget):
         page.setObjectName("page2")
 
         # 페이지 크기 설정
-        page.setFixedSize(1680, 1032)
+        page.setFixedSize(1680, 1006)
 
-        # 배경 이미지 설정 (bg.png)
-        bg_path2 = resource_path("assets/image/common/bg.png").replace(chr(92), "/")
-        page.setStyleSheet(f"""
-            #page2 {{
+        # 전체 레이아웃 (헤더 포함)
+        main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
+
+        # 상단 헤더 영역 (1680x64px)
+        header_widget = QLabel()
+        header_widget.setFixedSize(1680, 64)
+        header_widget.setContentsMargins(0, 0, 0, 0)
+        header_widget.setStyleSheet("QLabel { margin: 0px; padding: 0px; border: none; }")
+
+        # 헤더 이미지 설정
+        header_pixmap = QPixmap(resource_path("assets/image/test_config/시험정보설정_header.png"))
+        header_widget.setPixmap(header_pixmap.scaled(1680, 64, Qt.IgnoreAspectRatio, Qt.SmoothTransformation))
+        header_widget.setScaledContents(True)
+        main_layout.addWidget(header_widget, 0, Qt.AlignTop)
+
+        # 본문 영역 컨테이너 (1680x942px, 헤더 제외)
+        content_widget = QWidget()
+        content_widget.setFixedSize(1680, 942)
+        content_widget.setObjectName("content_widget_page2")
+
+        # 배경 이미지 설정 (시험정보설정_main.png)
+        bg_path2 = resource_path("assets/image/test_config/시험정보설정_main.png").replace(chr(92), "/")
+        content_widget.setStyleSheet(f"""
+            #content_widget_page2 {{
                 background-image: url({bg_path2});
                 background-repeat: no-repeat;
-                background-position: center;
+                background-position: top center;
+                margin: 0px;
+                padding: 0px;
+                border: none;
             }}
         """)
 
-        layout = QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-
-        # 헤더 영역 (1632x56px)
-        header_container = QWidget()
-        header_container.setFixedSize(1680, 56)
-        header_container_layout = QHBoxLayout()
-        header_container_layout.setContentsMargins(24, 0, 24, 0)
-        header_container_layout.setSpacing(0)
-
-        header_widget = QWidget()
-        header_widget.setFixedSize(1632, 56)
-
-        # 헤더 레이아웃 (로고 + 타이틀)
-        header_layout = QHBoxLayout(header_widget)
-        header_layout.setContentsMargins(0, 0, 0, 0)
-        header_layout.setAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-        header_layout.setSpacing(10)
-
-        # 헤더 로고 (36x36px)
-        logo_label = QLabel(header_widget)
-        logo_pixmap = QPixmap(resource_path("assets/image/common/header_logo.png"))
-        logo_label.setPixmap(logo_pixmap.scaled(36, 36, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        logo_label.setFixedSize(36, 36)
-        header_layout.addWidget(logo_label)
-
-        # 헤더 타이틀 이미지 (133x36px)
-        header_title_label = QLabel(header_widget)
-        header_title_pixmap = QPixmap(resource_path("assets/image/test_config/header_title.png"))
-        header_title_label.setPixmap(header_title_pixmap.scaled(133, 36, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        header_title_label.setFixedSize(133, 36)
-        header_layout.addWidget(header_title_label)
-
-        header_container_layout.addWidget(header_widget)
-        header_container.setLayout(header_container_layout)
-
-        layout.addWidget(header_container)
-
-        # 콘텐츠 영역 (1680x976px, Fill: #F5F5F5, Padding: 48px 0px 48px 44px)
-        content_widget = QWidget()
-        content_widget.setFixedSize(1680, 976)
-        content_widget.setStyleSheet("""
-            QWidget {
-                background-color: #F5F5F5;
-            }
-        """)
-
         content_layout = QVBoxLayout()
-        content_layout.setContentsMargins(48, 0, 48, 44)  # 좌, 상, 우, 하
+        content_layout.setContentsMargins(0, 36, 0, 44)  # 좌, 상(padding36), 우, 하
         content_layout.setSpacing(0)
 
-        # 기존 콘텐츠 (좌우 패널)
-        main_layout = QHBoxLayout()
+        # 타이틀 이미지 (1680x47px)
+        title_label = QLabel()
+        title_label.setFixedSize(1680, 47)
+        title_label.setContentsMargins(0, 0, 0, 0)
+        title_label.setStyleSheet("QLabel { margin: 0px; padding: 0px; border: none; background: transparent; }")
 
-        # 좌측 패널 (792x932px, padding: 24px 28px 24px 80px)
+        # 타이틀 이미지 설정
+        title_pixmap = QPixmap(resource_path("assets/image/test_config/시험정보설정_title.png"))
+        title_label.setPixmap(title_pixmap.scaled(1680, 47, Qt.IgnoreAspectRatio, Qt.SmoothTransformation))
+        title_label.setScaledContents(True)
+        content_layout.addWidget(title_label, 0, Qt.AlignTop)
+
+        # 타이틀과 콘텐츠 사이 간격
+        content_layout.addSpacing(8)
+
+        # 기존 콘텐츠 (좌우 패널) - 좌우 48px padding
+        panels_layout = QHBoxLayout()
+        panels_layout.setContentsMargins(48, 0, 48, 0)  # 좌, 상, 우, 하
+        panels_layout.setSpacing(0)
+
+        # 좌측 패널 (792x802px) - 배경 이미지: 시험 분야별 시나리오 + 시험 API
         left_panel = QGroupBox()
-        left_panel.setFixedSize(792, 932)
-        left_panel.setStyleSheet("QGroupBox { border: none; }")
+        left_panel.setFixedSize(792, 802)
+
+        left_bg_path = resource_path("assets/image/test_config/left_title_sub.png").replace(chr(92), "/")
+        left_panel.setStyleSheet(f"""
+            QGroupBox {{
+                border: none;
+                background-image: url({left_bg_path});
+                background-repeat: no-repeat;
+                background-position: top left;
+            }}
+        """)
 
         left_layout = QVBoxLayout()
-        left_layout.setContentsMargins(24, 28, 24, 80)  # 좌, 상, 우, 하
+        left_layout.setContentsMargins(24, 44, 24, 80)  # 좌, 상(12+24+8), 우, 하
         left_layout.setSpacing(0)
 
-        # 타이틀 영역 (744x26px)
-        title_widget = QLabel()
-        title_pixmap = QPixmap(resource_path("assets/image/test_config/left_title_sub.png"))
-        title_widget.setPixmap(title_pixmap.scaled(744, 26, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        title_widget.setFixedSize(744, 26)
-        left_layout.addWidget(title_widget)
-
-        # 시험 시나리오명 테이블 (QGroupBox로 감싸기)
+        # 시험 분야별 시나리오 테이블
         field_group = self.create_test_field_group()
         left_layout.addWidget(field_group)
 
-        # 시험 시나리오와 시험 API 사이 간격 16px
-        left_layout.addSpacing(16)
+        # 간격: 16px(gap) + 38px(시험 API 제목) + 8px(gap) = 62px
+        left_layout.addSpacing(62)
 
         # 시험 API 테이블 (QGroupBox로 감싸기)
         api_group = self.create_test_api_group()
@@ -302,38 +328,215 @@ class InfoWidget(QWidget):
 
         left_panel.setLayout(left_layout)
 
-        # 우측 패널 (792x932px, padding: 24px 28px 24px 80px)
+        # 우측 패널 (792x802px)
         right_panel = QGroupBox()
-        right_panel.setFixedSize(792, 932)
-        right_panel.setStyleSheet("QGroupBox { border: none; }")
+        right_panel.setFixedSize(792, 802)
+        right_panel.setStyleSheet("QGroupBox { border: none; background: transparent; }")
 
         right_layout = QVBoxLayout()
-        right_layout.setContentsMargins(24, 28, 24, 24)  # 좌, 상, 우, 하 (하단 padding 조정)
+        right_layout.setContentsMargins(24, 12, 24, 0)  # 좌, 상, 우, 하
         right_layout.setSpacing(0)
 
-        # 타이틀 영역 (744x26px)
-        title_widget = QLabel()
-        title_pixmap = QPixmap(resource_path("assets/image/test_config/right_title_sub.png"))
-        title_widget.setPixmap(title_pixmap.scaled(744, 26, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        title_widget.setFixedSize(744, 26)
-        right_layout.addWidget(title_widget)
+        # 사용자 인증 방식 타이틀 이미지 (744x24px)
+        auth_title_widget = QLabel()
+        auth_title_pixmap = QPixmap(resource_path("assets/image/test_config/사용자인증방식_title.png"))
+        auth_title_widget.setPixmap(auth_title_pixmap.scaled(744, 24, Qt.IgnoreAspectRatio, Qt.SmoothTransformation))
+        auth_title_widget.setFixedSize(744, 24)
+        right_layout.addWidget(auth_title_widget)
 
-        # 기존 우측 패널 내용
+        # gap 8px
+        right_layout.addSpacing(8)
+
+        # 사용자 인증 방식 박스 (744x240px)
         auth_section = self.create_auth_section()
         right_layout.addWidget(auth_section)
 
-        # 사용자 인증방식과 접속 주소 탐색 사이 12px gap
-        right_layout.addSpacing(12)
+        # gap 16px
+        right_layout.addSpacing(16)
 
+        # 접속주소 탐색 타이틀 + 주소탐색 버튼 행 (744x38px)
+        connection_title_row = QWidget()
+        connection_title_row.setFixedSize(744, 38)
+        connection_title_layout = QHBoxLayout()
+        connection_title_layout.setContentsMargins(0, 0, 0, 0)
+        connection_title_layout.setSpacing(0)
+
+        # 접속주소 탐색 타이틀 이미지
+        connection_title_widget = QLabel()
+        connection_title_pixmap = QPixmap(resource_path("assets/image/test_config/접속주소탐색_title.png"))
+        connection_title_widget.setPixmap(connection_title_pixmap)
+        connection_title_widget.setFixedHeight(38)
+        connection_title_layout.addWidget(connection_title_widget)
+
+        connection_title_layout.addStretch()
+
+        # 버튼 그룹 (주소탐색 + 추가)
+        buttons_widget = QWidget()
+        buttons_widget.setFixedHeight(38)
+        buttons_layout = QHBoxLayout()
+        buttons_layout.setContentsMargins(0, 0, 0, 0)
+        buttons_layout.setSpacing(16)  # gap 16px
+
+        # 주소탐색 버튼 (120x38px)
+        scan_btn = QPushButton("")
+        scan_btn.setFixedSize(120, 38)
+
+        btn_scan_enabled = resource_path("assets/image/test_config/btn_주소탐색_enabled.png").replace(chr(92), "/")
+        btn_scan_hover = resource_path("assets/image/test_config/btn_주소탐색_Hover.png").replace(chr(92), "/")
+
+        scan_btn.setStyleSheet(f"""
+            QPushButton {{
+                border: none;
+                background-image: url({btn_scan_enabled});
+                background-repeat: no-repeat;
+                background-position: center;
+            }}
+            QPushButton:hover {{
+                background-image: url({btn_scan_hover});
+            }}
+        """)
+        scan_btn.clicked.connect(self.start_scan)
+        buttons_layout.addWidget(scan_btn)
+
+        # 추가 버튼 (90x38px)
+        self.add_btn = QPushButton("")
+        self.add_btn.setFixedSize(90, 38)
+        self.add_btn.setCheckable(True)  # 토글 가능하도록 설정
+
+        btn_add_enabled = resource_path("assets/image/test_config/btn_추가_enabled.png").replace(chr(92), "/")
+        btn_add_hover = resource_path("assets/image/test_config/btn_추가_Hover.png").replace(chr(92), "/")
+        btn_add_selected = resource_path("assets/image/test_config/btn_추가_selected.png").replace(chr(92), "/")
+
+        self.add_btn.setStyleSheet(f"""
+            QPushButton {{
+                border: none;
+                background-image: url({btn_add_enabled});
+                background-repeat: no-repeat;
+                background-position: center;
+            }}
+            QPushButton:hover {{
+                background-image: url({btn_add_hover});
+            }}
+            QPushButton:checked {{
+                background-image: url({btn_add_selected});
+            }}
+            QPushButton:checked:hover {{
+                background-image: url({btn_add_selected});
+            }}
+        """)
+        # 추가 버튼 클릭 이벤트 연결
+        self.add_btn.clicked.connect(self.toggle_address_popover)
+        buttons_layout.addWidget(self.add_btn)
+
+        buttons_widget.setLayout(buttons_layout)
+        connection_title_layout.addWidget(buttons_widget)
+        connection_title_row.setLayout(connection_title_layout)
+        right_layout.addWidget(connection_title_row)
+
+        # 주소 추가 팝오버 (392x102px)
+        self.address_popover = QWidget()
+        self.address_popover.setFixedSize(392, 102)
+        self.address_popover.setStyleSheet("""
+            QWidget {
+                background-color: #FFFFFF;
+                border: 1px solid #CECECE;
+                border-radius: 12px;
+            }
+        """)
+
+        popover_layout = QVBoxLayout()
+        popover_layout.setContentsMargins(16, 16, 16, 16)
+        popover_layout.setSpacing(0)
+
+        # "주소 추가" 문구 (358x26)
+        popover_title = QLabel("주소 추가")
+        popover_title.setFixedSize(358, 26)
+        popover_title.setStyleSheet("""
+            QLabel {
+                font-family: 'Noto Sans KR';
+                font-weight: 400;
+                font-size: 18px;
+                letter-spacing: -0.18px;
+                color: #000000;
+                border: none;
+                background-color: transparent;
+            }
+        """)
+        popover_layout.addWidget(popover_title)
+
+        # 4px gap
+        popover_layout.addSpacing(4)
+
+        # 입력창 + 추가 버튼 (수평 레이아웃)
+        input_row_layout = QHBoxLayout()
+        input_row_layout.setContentsMargins(0, 0, 0, 0)
+        input_row_layout.setSpacing(6)  # 6px gap
+
+        # 입력창 (287x40)
+        self.address_input = QLineEdit()
+        self.address_input.setFixedSize(287, 40)
+        self.address_input.setPlaceholderText("추가할 주소를 입력해주세요")
+
+        self.address_input.setStyleSheet("""
+            QLineEdit {
+                padding-left: 24px;
+                padding-right: 24px;
+                border: 1px solid #868686;
+                border-radius: 4px;
+                background-color: #FFFFFF;
+                font-family: 'Noto Sans KR';
+                font-weight: 400;
+                font-size: 18px;
+                letter-spacing: -0.18px;
+                color: #000000;
+            }
+            QLineEdit::placeholder {
+                color: #868686;
+                font-size: 18px;
+            }
+        """)
+        input_row_layout.addWidget(self.address_input)
+
+        # 추가 버튼 (65x40)
+        popover_add_btn = QPushButton("")
+        popover_add_btn.setFixedSize(65, 40)
+
+        btn_add_img = resource_path("assets/image/test_config/btn_추가.png").replace(chr(92), "/")
+        popover_add_btn.setStyleSheet(f"""
+            QPushButton {{
+                border: none;
+                border-radius: 4px;
+                background-image: url({btn_add_img});
+                background-repeat: no-repeat;
+                background-position: center;
+            }}
+        """)
+        popover_add_btn.clicked.connect(self.add_address_from_popover)
+        input_row_layout.addWidget(popover_add_btn)
+
+        popover_layout.addLayout(input_row_layout)
+        self.address_popover.setLayout(popover_layout)
+
+        # 팝오버를 절대 위치로 배치 (레이아웃에 추가하지 않음)
+        # parent를 page2_widget으로 설정하여 상대 좌표 사용
+        self.address_popover.setParent(self)
+
+        # 초기에는 숨김
+        self.address_popover.hide()
+
+        # gap 8px
+        right_layout.addSpacing(8)
+
+        # URL 박스 테이블 (744x376px)
         connection_section = self.create_connection_section()
         right_layout.addWidget(connection_section)
 
-        # URL 테이블과 버튼 사이 32px gap
+        # padding 32px
         right_layout.addSpacing(32)
 
-        # 하단 버튼 (초기화, 시험시작) - 각 364x48px, gap 20px
+        # 하단 버튼 (초기화, 시험시작) - 전체 744x48px, 각 버튼 364x48px, gap 16px
         button_layout = QHBoxLayout()
-        button_layout.setSpacing(20)  # 버튼 간격 20px
+        button_layout.setSpacing(16)  # 버튼 간격 16px
 
         # 초기화 버튼 (364x48px)
         reset_btn = QPushButton("")
@@ -382,17 +585,17 @@ class InfoWidget(QWidget):
 
         right_panel.setLayout(right_layout)
 
-        main_layout.addWidget(left_panel, 1)
-        main_layout.addWidget(right_panel, 1)
+        panels_layout.addWidget(left_panel, 1)
+        panels_layout.addWidget(right_panel, 1)
 
-        content_layout.addLayout(main_layout, 1)
+        content_layout.addLayout(panels_layout, 1)
 
         content_widget.setLayout(content_layout)
 
         # 메인 레이아웃에 콘텐츠 영역 추가
-        layout.addWidget(content_widget)
+        main_layout.addWidget(content_widget)
 
-        page.setLayout(layout)
+        page.setLayout(main_layout)
 
         return page
 
@@ -1293,27 +1496,23 @@ class InfoWidget(QWidget):
         }
 
     def create_test_field_group(self):
-        """시험 시나리오명 그룹 (QGroupBox)"""
-        group = QGroupBox("시험 시나리오")
-        group.setFixedSize(744, 280)
+        """시험 분야별 시나리오 그룹 (QGroupBox)"""
+        group = QGroupBox()  # 타이틀 제거 (배경 이미지에 포함)
+        group.setFixedSize(744, 240)
+
+        # 배경 불투명 설정
+        group.setAutoFillBackground(True)
+        palette = group.palette()
+        palette.setColor(group.backgroundRole(), QColor("#FFFFFF"))
+        group.setPalette(palette)
 
         # QGroupBox 스타일 설정
         group.setStyleSheet("""
             QGroupBox {
                 border: none;
                 margin-top: 0px;
-                padding-top: 42px;
-                font-family: 'Noto Sans KR';
-                font-weight: 500;
-                font-size: 16px;
-                letter-spacing: -0.16px;
-                color: #000000;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                subcontrol-position: top left;
-                left: 0px;
-                top: 12px;
+                padding-top: 0px;
+                background-color: #FFFFFF;
             }
         """)
 
@@ -1321,93 +1520,224 @@ class InfoWidget(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        # 시험 시나리오명 테이블 (744x238px) - 2개 컬럼: 시험 분야명, 시험 시나리오명
-        self.test_field_table = QTableWidget(0, 2)
-        self.test_field_table.setFixedSize(744, 238)
-        self.test_field_table.setHorizontalHeaderLabels(["시험 분야명", "시험 시나리오명"])
+        # 두 개의 독립적인 테이블을 나란히 배치하기 위한 수평 레이아웃
+        tables_layout = QHBoxLayout()
+        tables_layout.setContentsMargins(0, 0, 0, 0)
+        tables_layout.setSpacing(0)
 
-        # 컬럼 너비 설정 (시험 분야명: 360px, 시험 시나리오명: 나머지 전체)
-        header = self.test_field_table.horizontalHeader()
-        header.setFixedHeight(24)
-        header.setSectionResizeMode(0, QHeaderView.Fixed)
-        header.resizeSection(0, 360)
-        header.setSectionResizeMode(1, QHeaderView.Stretch)
-        self.test_field_table.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.test_field_table.cellClicked.connect(self.on_test_field_selected)
+        # 시험 분야 테이블 (372px x 240px) - 1개 컬럼
+        self.test_field_table = TestFieldTableWidget(0, 1)
+        self.test_field_table.setFixedSize(372, 240)
+        self.test_field_table.setHorizontalHeaderLabels(["시험 분야"])
+
+        # 시험 시나리오 테이블 (372px x 240px) - 1개 컬럼
+        self.scenario_table = TestFieldTableWidget(0, 1)
+        self.scenario_table.setFixedSize(372, 240)
+        self.scenario_table.setHorizontalHeaderLabels(["시험 시나리오"])
+
+        # === 시험 분야 테이블 설정 ===
+        # 컬럼 너비 설정
+        field_header = self.test_field_table.horizontalHeader()
+        field_header.setFixedHeight(31)
+        field_header.setSectionResizeMode(0, QHeaderView.Fixed)
+        field_header.resizeSection(0, 371)
+
+        # 행 높이 설정
+        self.test_field_table.verticalHeader().setDefaultSectionSize(39)
         self.test_field_table.verticalHeader().setVisible(False)
 
-        # 테이블 스타일 설정
-        self.test_field_table.setStyleSheet("""
+        # 편집 불가 설정
+        self.test_field_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.test_field_table.setAlternatingRowColors(False)
+        self.test_field_table.setSelectionMode(QAbstractItemView.NoSelection)
+        self.test_field_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.test_field_table.cellClicked.connect(self.on_test_field_selected)
+
+        # === 시험 시나리오 테이블 설정 ===
+        # 컬럼 너비 설정
+        scenario_header = self.scenario_table.horizontalHeader()
+        scenario_header.setFixedHeight(31)
+        scenario_header.setSectionResizeMode(0, QHeaderView.Fixed)
+        scenario_header.resizeSection(0, 371)
+
+        # 행 높이 설정
+        self.scenario_table.verticalHeader().setDefaultSectionSize(39)
+        self.scenario_table.verticalHeader().setVisible(False)
+
+        # 편집 불가 설정
+        self.scenario_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.scenario_table.setAlternatingRowColors(False)
+        self.scenario_table.setSelectionMode(QAbstractItemView.NoSelection)
+        self.scenario_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.scenario_table.cellClicked.connect(self.on_scenario_selected)
+
+        # === 공통 스타일 정의 ===
+        table_style = """
             QTableWidget {
-                background-color: #FFFFFF;
                 border: 1px solid #CECECE;
-                border-radius: 4px;
                 gridline-color: #CCCCCC;
-                font-family: 'Noto Sans KR';
-                font-weight: 400;
-                font-size: 14px;
-                letter-spacing: 0.098px;
+                show-decoration-selected: 0;
             }
             QTableWidget::item {
-                height: 26px;
-                background-color: #FFFFFF;
                 border-bottom: 1px solid #CCCCCC;
                 padding-right: 14px;
-                font-family: 'Noto Sans KR';
-                font-weight: 400;
-                font-size: 14px;
-                letter-spacing: 0.098px;
                 color: #000000;
+                outline: 0;
+                background-color: transparent;
             }
             QTableWidget::item:selected {
-                background-color: #E3F2FF;
                 color: #000000;
+                background-color: transparent;
+            }
+            QTableWidget::item:focus {
+                outline: none;
+                border: none;
             }
             QHeaderView::section {
                 background-color: #EDF0F3;
                 border: none;
                 border-bottom: 1px solid #CCCCCC;
                 border-right: 1px solid #CCCCCC;
-                font-family: 'Noto Sans KR';
-                font-weight: 600;
-                font-size: 13px;
-                letter-spacing: -0.156px;
                 color: #000000;
             }
             QHeaderView::section:last {
                 border-right: none;
+            }
+            QTableWidget QTableCornerButton::section {
+                background-color: #EDF0F3;
+            }
+        """
+
+        # 시험 분야 테이블 스타일 (왼쪽 테두리 + 오른쪽 세로선)
+        self.test_field_table.setStyleSheet(table_style + """
+            QTableWidget {
+                border-top-left-radius: 4px;
+                border-bottom-left-radius: 4px;
+                border-right: 1px solid #CCCCCC;
+                border-top-right-radius: 0px;
+                border-bottom-right-radius: 0px;
+            }
+        """)
+
+        # 시험 시나리오 테이블 스타일 (오른쪽 테두리만)
+        self.scenario_table.setStyleSheet(table_style + """
+            QTableWidget {
+                border-top-right-radius: 4px;
+                border-bottom-right-radius: 4px;
+                border-left: none;
             }
         """)
 
         # 마지막으로 클릭된 시험 분야의 행을 추적
         self.selected_test_field_row = None
 
-        layout.addWidget(self.test_field_table)
+        # 폰트 설정 (stylesheet 이후에 강제 적용)
+        cell_font = QFont("Noto Sans KR")
+        cell_font.setPixelSize(19)
+        cell_font.setWeight(QFont.Normal)
+
+        header_font = QFont("Noto Sans KR")
+        header_font.setPixelSize(18)
+        header_font.setWeight(QFont.DemiBold)
+
+        # 시험 분야 테이블 폰트
+        self.test_field_table.setFont(cell_font)
+        self.test_field_table.horizontalHeader().setFont(header_font)
+
+        # 시험 시나리오 테이블 폰트
+        self.scenario_table.setFont(cell_font)
+        self.scenario_table.horizontalHeader().setFont(header_font)
+
+        # 시험 분야 테이블 배경색 설정
+        from PyQt5.QtGui import QPalette
+        self.test_field_table.setAutoFillBackground(True)
+        self.test_field_table.setAttribute(Qt.WA_OpaquePaintEvent, True)
+        palette = self.test_field_table.palette()
+        palette.setColor(QPalette.Base, QColor("#FFFFFF"))
+        palette.setColor(QPalette.Window, QColor("#FFFFFF"))
+        self.test_field_table.setPalette(palette)
+
+        self.test_field_table.viewport().setAutoFillBackground(True)
+        viewport_palette = self.test_field_table.viewport().palette()
+        viewport_palette.setColor(QPalette.Base, QColor("#FFFFFF"))
+        viewport_palette.setColor(QPalette.Window, QColor("#FFFFFF"))
+        self.test_field_table.viewport().setPalette(viewport_palette)
+
+        # 시험 시나리오 테이블 배경색 설정
+        self.scenario_table.setAutoFillBackground(True)
+        self.scenario_table.setAttribute(Qt.WA_OpaquePaintEvent, True)
+        scenario_palette = self.scenario_table.palette()
+        scenario_palette.setColor(QPalette.Base, QColor("#FFFFFF"))
+        scenario_palette.setColor(QPalette.Window, QColor("#FFFFFF"))
+        self.scenario_table.setPalette(scenario_palette)
+
+        self.scenario_table.viewport().setAutoFillBackground(True)
+        scenario_viewport_palette = self.scenario_table.viewport().palette()
+        scenario_viewport_palette.setColor(QPalette.Base, QColor("#FFFFFF"))
+        scenario_viewport_palette.setColor(QPalette.Window, QColor("#FFFFFF"))
+        self.scenario_table.viewport().setPalette(scenario_viewport_palette)
+
+        # 시험 시나리오 테이블 배경 (viewport 위에 오버레이, 시험 분야 선택 시 #E3F2FF 배경)
+        self.scenario_column_background = QLabel("")
+        self.scenario_column_background.setParent(self.scenario_table.viewport())
+        self.scenario_column_background.setStyleSheet("""
+            QLabel {
+                background-color: #E3F2FF;
+            }
+        """)
+        # viewport 기준으로 전체 영역 커버
+        self.scenario_column_background.setGeometry(0, 0, 371, 240)
+        self.scenario_column_background.lower()  # 셀들 뒤로 배치
+        self.scenario_column_background.hide()  # 초기에는 숨김
+
+        # 시험 시나리오 안내 문구 QLabel (시나리오 테이블 위에 오버레이)
+        self.scenario_placeholder_label = QLabel("시험분야를 선택하면\n시나리오가 표시됩니다.")
+        self.scenario_placeholder_label.setParent(self.scenario_table)
+        self.scenario_placeholder_label.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
+        self.scenario_placeholder_label.setStyleSheet("""
+            QLabel {
+                font-family: 'Noto Sans KR';
+                font-size: 18px;
+                font-weight: 400;
+                color: #6B6B6B;
+                background-color: #FFFFFF;
+                border: 1px solid #CECECE;
+                border-bottom-right-radius: 4px;
+                padding-top: 40px;
+            }
+        """)
+        # 헤더 아래 영역에 배치
+        self.scenario_placeholder_label.setGeometry(0, 31, 371, 209)  # x, y, width, height
+        self.scenario_placeholder_label.hide()  # 초기에는 숨김
+
+        # 두 테이블을 수평 레이아웃에 추가
+        tables_layout.addWidget(self.test_field_table)
+        tables_layout.addWidget(self.scenario_table)
+
+        # 수평 레이아웃을 메인 레이아웃에 추가
+        layout.addLayout(tables_layout)
+
         group.setLayout(layout)
         return group
 
     def create_test_api_group(self):
         """시험 API 그룹 (QGroupBox)"""
-        group = QGroupBox("시험 API")
-        group.setFixedSize(744, 480)
+        group = QGroupBox()  # 타이틀 제거 (배경 이미지에 포함)
+        group.setFixedSize(744, 376)
+
+        # 배경 불투명 설정
+        group.setAutoFillBackground(True)
+        palette = group.palette()
+        palette.setColor(group.backgroundRole(), QColor("#FFFFFF"))
+        group.setPalette(palette)
 
         # QGroupBox 스타일 설정
         group.setStyleSheet("""
             QGroupBox {
                 border: none;
                 margin-top: 0px;
-                padding-top: 42px;
-                font-family: 'Noto Sans KR';
-                font-weight: 500;
-                font-size: 16px;
-                letter-spacing: -0.16px;
-                color: #000000;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                subcontrol-position: top left;
-                left: 0px;
-                top: 12px;
+                padding-top: 0px;
+                background-color: #FFFFFF;
             }
         """)
 
@@ -1415,22 +1745,56 @@ class InfoWidget(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        # 시험 API 테이블 (744x390px)
+        # 시험 API 테이블 (744x376px)
         self.api_test_table = QTableWidget(0, 2)
-        self.api_test_table.setFixedSize(744, 390)
+        self.api_test_table.setFixedSize(744, 376)
+
         self.api_test_table.setHorizontalHeaderLabels(["기능명", "API명"])
 
+        # 헤더 설정
         header = self.api_test_table.horizontalHeader()
-        header.setFixedHeight(24)
-        header.setSectionResizeMode(QHeaderView.Stretch)
+        header.setFixedHeight(31)  # 31px로 변경
+
+        # 행 번호 열 너비 설정
+        self.api_test_table.verticalHeader().setFixedWidth(50)
+
+        # 컬럼 너비 설정 (여유 공간 고려하여 조정)
+        header.resizeSection(0, 346)
+        header.resizeSection(1, 346)
+
+        # 헤더 폰트 설정 (18px)
+        header_font = QFont("Noto Sans KR")
+        header_font.setPixelSize(18)
+        header_font.setWeight(QFont.DemiBold)
+        self.api_test_table.horizontalHeader().setFont(header_font)
+
+        # 셀 높이 설정 (39px)
+        self.api_test_table.verticalHeader().setDefaultSectionSize(39)
+
+        # 셀 폰트 설정 (19px)
+        cell_font = QFont("Noto Sans KR")
+        cell_font.setPixelSize(19)
+        self.api_test_table.setFont(cell_font)
+
+        # 편집 비활성화
+        self.api_test_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
         # 왼쪽 행 번호 헤더 설정
         vertical_header = self.api_test_table.verticalHeader()
         vertical_header.setDefaultAlignment(Qt.AlignCenter)
+
+        # 행 번호 폰트 설정 (19px)
+        row_number_font = QFont("Noto Sans KR")
+        row_number_font.setPixelSize(19)
+        vertical_header.setFont(row_number_font)
+
         vertical_header.setStyleSheet("QHeaderView { background-color: #FFFFFF; }")
 
         # 세로 grid line 제거
         self.api_test_table.setShowGrid(False)
+
+        # 스크롤바 비활성화
+        self.api_test_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         # 테이블 스타일 설정
         self.api_test_table.setStyleSheet("""
@@ -1440,11 +1804,9 @@ class InfoWidget(QWidget):
                 border-radius: 4px;
                 font-family: 'Noto Sans KR';
                 font-weight: 400;
-                font-size: 14px;
                 letter-spacing: 0.098px;
             }
             QTableWidget::item {
-                height: 26px;
                 background-color: #FFFFFF;
                 border-bottom: 1px solid #CCCCCC;
                 border-right: none;
@@ -1461,7 +1823,6 @@ class InfoWidget(QWidget):
                 border-bottom: 1px solid #CCCCCC;
                 font-family: 'Noto Sans KR';
                 font-weight: 600;
-                font-size: 13px;
                 letter-spacing: -0.156px;
                 color: #000000;
             }
@@ -1472,7 +1833,6 @@ class InfoWidget(QWidget):
                 border-bottom: 1px solid #CCCCCC;
                 font-family: 'Noto Sans KR';
                 font-weight: 400;
-                font-size: 14px;
                 letter-spacing: 0.098px;
                 color: #000000;
             }
@@ -1481,49 +1841,70 @@ class InfoWidget(QWidget):
                 border: none;
                 border-bottom: 1px solid #CCCCCC;
             }
+            QTableWidget::viewport {
+                background-color: #FFFFFF;
+            }
         """)
+
+        # Stylesheet 이후 배경색 강제 설정 (stylesheet보다 나중에 적용)
+        self.api_test_table.setAutoFillBackground(True)
+        self.api_test_table.setAttribute(Qt.WA_OpaquePaintEvent, True)
+
+        from PyQt5.QtGui import QPalette
+        palette = self.api_test_table.palette()
+        palette.setColor(QPalette.Base, QColor("#FFFFFF"))
+        palette.setColor(QPalette.Window, QColor("#FFFFFF"))
+        self.api_test_table.setPalette(palette)
+
+        # Viewport 배경색 마지막에 강제 설정
+        self.api_test_table.viewport().setAutoFillBackground(True)
+        viewport_palette = self.api_test_table.viewport().palette()
+        viewport_palette.setColor(QPalette.Base, QColor("#FFFFFF"))
+        viewport_palette.setColor(QPalette.Window, QColor("#FFFFFF"))
+        self.api_test_table.viewport().setPalette(viewport_palette)
+
+        # 시험 API 안내 문구 QLabel (테이블 위에 오버레이)
+        self.api_placeholder_label = QLabel("시험 시나리오를 선택하면\nAPI가 표시됩니다.")
+        self.api_placeholder_label.setParent(self.api_test_table)
+        self.api_placeholder_label.setAlignment(Qt.AlignCenter)
+        self.api_placeholder_label.setStyleSheet("""
+            QLabel {
+                font-family: 'Noto Sans KR';
+                font-size: 18px;
+                font-weight: 400;
+                color: #6B6B6B;
+                background-color: transparent;
+                padding-top: 10px;
+            }
+        """)
+        # 헤더 높이(31px) + 행 번호 너비(50px) 고려하여 테이블 중앙에 배치
+        self.api_placeholder_label.setGeometry(50, 31, 694, 345)  # x, y, width, height
+        self.api_placeholder_label.show()  # 초기에는 표시
 
         layout.addWidget(self.api_test_table)
         group.setLayout(layout)
         return group
 
     def create_auth_section(self):
-        """인증 방식 섹션"""
-        section = QGroupBox("사용자 인증 방식")
-        section.setFixedSize(744, 280)
-
-        # QGroupBox 스타일 설정
-        section.setStyleSheet("""
-            QGroupBox {
-                border: none;
-                margin-top: 0px;
-                padding-top: 42px;
-                font-family: 'Noto Sans KR';
-                font-weight: 500;
-                font-size: 16px;
-                letter-spacing: -0.16px;
-                color: #000000;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                subcontrol-position: top left;
-                left: 0px;
-                top: 12px;
-            }
-        """)
+        """인증 방식 섹션 (타이틀 제외, 744x240px)"""
+        section = QGroupBox()
+        section.setFixedSize(744, 240)
+        section.setStyleSheet("QGroupBox { border: none; background-color: transparent; }")
 
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        # 콘텐츠 영역 (744x238px)
+        # 콘텐츠 영역 (744x240px)
         content_widget = QWidget()
-        content_widget.setFixedSize(744, 238)
+        content_widget.setFixedSize(744, 240)
+
+        # 배경 색상 설정
         content_widget.setStyleSheet("""
             #content_widget {
+                background-color: #FFFFFF;
                 border: 1px solid #CECECE;
                 border-radius: 4px;
-                background-color: #F5F5F5;
             }
             QRadioButton {
                 border: none;
@@ -1535,137 +1916,233 @@ class InfoWidget(QWidget):
             }
             QLineEdit {
                 border: none;
-                background-color: #F5F5F5;
             }
         """)
         content_widget.setObjectName("content_widget")
 
-        content_layout = QVBoxLayout()
-        content_layout.setContentsMargins(8, 8, 20, 18)
+        content_layout = QHBoxLayout()
+        content_layout.setContentsMargins(24, 16, 24, 16)
         content_layout.setSpacing(0)
 
-        # ✅ 상단: 인증 방식 선택 영역 - 세로 배치 (716x70px)
+        # 왼쪽: 인증 방식 선택 영역 (289x208px)
         auth_type_widget = QWidget()
-        auth_type_widget.setFixedSize(716, 70)
-        auth_type_layout = QVBoxLayout()  # ← 세로 배치로 변경
-        auth_type_layout.setContentsMargins(0, 0, 0, 0)
-        auth_type_layout.setSpacing(10)  # 두 라디오 버튼 사이 간격
+        auth_type_widget.setFixedSize(289, 208)
+        auth_type_widget.setStyleSheet("background-color: transparent;")
+        auth_type_layout = QVBoxLayout()
+        auth_type_layout.setContentsMargins(0, 12, 0, 12)  # 상하 12px
+        auth_type_layout.setSpacing(12)  # gap 12px
 
-        # Digest Auth 라디오 버튼 (716x30px)
-        digest_option = QWidget()
-        digest_option.setFixedSize(716, 30)
-        digest_option_layout = QHBoxLayout()
-        digest_option_layout.setContentsMargins(0, 0, 0, 0)
-        digest_option_layout.setSpacing(8)
+        # Digest Auth 박스 (289x86px)
+        self.digest_option = QWidget()
+        self.digest_option.setFixedSize(289, 86)
+        # 초기 상태: 선택됨 (digest_radio가 기본 체크되어 있음)
+        self.digest_option.setStyleSheet("""
+            QWidget {
+                background-color: #E9F6FE;
+                border: 1px solid #2B96ED;
+                border-radius: 8px;
+            }
+        """)
+        digest_option_main_layout = QHBoxLayout()
+        digest_option_main_layout.setContentsMargins(16, 16, 16, 16)  # 상하좌우 16px
+        digest_option_main_layout.setSpacing(0)
 
+        # 라디오 버튼 (30x54)
         self.digest_radio = QRadioButton()
-        self.digest_radio.setFixedSize(30, 30)
+        self.digest_radio.setFixedSize(30, 54)
         self.digest_radio.setChecked(True)
         self.digest_radio.setStyleSheet("""
             QRadioButton {
-                padding-left: 5px;
+                border: none;
+                background: transparent;
+                padding-bottom: 26px;
             }
             QRadioButton::indicator {
-                width: 20px;
-                height: 20px;
+                width: 28px;
+                height: 28px;
             }
         """)
-        digest_option_layout.addWidget(self.digest_radio)
+        digest_option_main_layout.addWidget(self.digest_radio, alignment=Qt.AlignTop)
 
+        # 8px gap
+        digest_option_main_layout.addSpacing(8)
+
+        # 텍스트 영역 (수직 레이아웃)
+        digest_text_layout = QVBoxLayout()
+        digest_text_layout.setContentsMargins(0, 0, 0, 0)
+        digest_text_layout.setSpacing(0)
+
+        # "Digest Auth" 제목 (120x26)
         digest_label = QLabel("Digest Auth")
-        digest_label.setFixedHeight(30)
+        digest_label.setFixedSize(120, 26)
         digest_label.setStyleSheet("""
             QLabel {
                 font-family: 'Noto Sans KR';
-                font-weight: 500;
-                font-size: 16px;
-                letter-spacing: -0.16px;
+                font-weight: 700;
+                font-size: 20px;
+                letter-spacing: -0.20px;
                 color: #000000;
                 border: none;
                 background-color: transparent;
             }
         """)
-        digest_option_layout.addWidget(digest_label)
-        digest_option_layout.addStretch()
-        digest_option.setLayout(digest_option_layout)
-        auth_type_layout.addWidget(digest_option)
+        digest_text_layout.addWidget(digest_label)
 
-        # Bearer Token 라디오 버튼 (716x30px)
-        bearer_option = QWidget()
-        bearer_option.setFixedSize(716, 30)
-        bearer_option_layout = QHBoxLayout()
-        bearer_option_layout.setContentsMargins(0, 0, 0, 0)
-        bearer_option_layout.setSpacing(8)
+        # 2px gap
+        digest_text_layout.addSpacing(2)
 
-        self.bearer_radio = QRadioButton()
-        self.bearer_radio.setFixedSize(30, 30)
-        self.bearer_radio.setStyleSheet("""
-            QRadioButton {
-                padding-left: 5px;
-            }
-            QRadioButton::indicator {
-                width: 20px;
-                height: 20px;
+        # "ID,PW 기반 인증 방식" 설명 (163x26)
+        digest_desc = QLabel("ID,PW 기반 인증 방식")
+        digest_desc.setFixedSize(163, 26)
+        digest_desc.setStyleSheet("""
+            QLabel {
+                font-family: 'Noto Sans KR';
+                font-weight: 400;
+                font-size: 18px;
+                letter-spacing: -0.18px;
+                color: #6B6B6B;
+                border: none;
+                background-color: transparent;
             }
         """)
-        bearer_option_layout.addWidget(self.bearer_radio)
+        digest_text_layout.addWidget(digest_desc)
 
+        digest_option_main_layout.addLayout(digest_text_layout)
+        digest_option_main_layout.addStretch()
+
+        self.digest_option.setLayout(digest_option_main_layout)
+        auth_type_layout.addWidget(self.digest_option)
+
+        # Bearer Token 박스 (289x86px)
+        self.bearer_option = QWidget()
+        self.bearer_option.setFixedSize(289, 86)
+        # 초기 상태: 선택 안됨
+        self.bearer_option.setStyleSheet("""
+            QWidget {
+                background-color: #FFFFFF;
+                border: 1px solid #CECECE;
+                border-radius: 8px;
+            }
+        """)
+        bearer_option_main_layout = QHBoxLayout()
+        bearer_option_main_layout.setContentsMargins(16, 16, 16, 16)  # 상하좌우 16px
+        bearer_option_main_layout.setSpacing(0)
+
+        # 라디오 버튼 (30x54)
+        self.bearer_radio = QRadioButton()
+        self.bearer_radio.setFixedSize(30, 54)
+        self.bearer_radio.setStyleSheet("""
+            QRadioButton {
+                border: none;
+                background: transparent;
+                padding-bottom: 26px;
+            }
+            QRadioButton::indicator {
+                width: 27px;
+                height: 27px;
+            }
+        """)
+        bearer_option_main_layout.addWidget(self.bearer_radio, alignment=Qt.AlignTop)
+
+        # 8px gap
+        bearer_option_main_layout.addSpacing(8)
+
+        # 텍스트 영역 (수직 레이아웃)
+        bearer_text_layout = QVBoxLayout()
+        bearer_text_layout.setContentsMargins(0, 0, 0, 0)
+        bearer_text_layout.setSpacing(0)
+
+        # "Bearer Token" 제목 (130x26)
         bearer_label = QLabel("Bearer Token")
-        bearer_label.setFixedHeight(30)
+        bearer_label.setFixedSize(130, 26)
         bearer_label.setStyleSheet("""
             QLabel {
                 font-family: 'Noto Sans KR';
-                font-weight: 500;
-                font-size: 16px;
-                letter-spacing: -0.16px;
+                font-weight: 700;
+                font-size: 20px;
+                letter-spacing: -0.20px;
                 color: #000000;
                 border: none;
                 background-color: transparent;
             }
         """)
-        bearer_option_layout.addWidget(bearer_label)
-        bearer_option_layout.addStretch()
-        bearer_option.setLayout(bearer_option_layout)
-        auth_type_layout.addWidget(bearer_option)
+        bearer_text_layout.addWidget(bearer_label)
+
+        # 2px gap
+        bearer_text_layout.addSpacing(2)
+
+        # "토큰 기반 인증 방식" 설명 (163x26)
+        bearer_desc = QLabel("토큰 기반 인증 방식")
+        bearer_desc.setFixedSize(163, 26)
+        bearer_desc.setStyleSheet("""
+            QLabel {
+                font-family: 'Noto Sans KR';
+                font-weight: 400;
+                font-size: 18px;
+                letter-spacing: -0.18px;
+                color: #6B6B6B;
+                border: none;
+                background-color: transparent;
+            }
+        """)
+        bearer_text_layout.addWidget(bearer_desc)
+
+        bearer_option_main_layout.addLayout(bearer_text_layout)
+        bearer_option_main_layout.addStretch()
+
+        self.bearer_option.setLayout(bearer_option_main_layout)
+        auth_type_layout.addWidget(self.bearer_option)
 
         auth_type_widget.setLayout(auth_type_layout)
         content_layout.addWidget(auth_type_widget)
 
-        # 간격
+        # 라디오 버튼 토글 시 박스 스타일 변경
+        self.digest_radio.toggled.connect(self.on_auth_type_changed)
+        self.bearer_radio.toggled.connect(self.on_auth_type_changed)
+
+        # divider 왼쪽 gap 12px
         content_layout.addSpacing(12)
 
-        # 구분선
+        # 수직 divider (1x208px)
         divider = QLabel()
-        divider.setFixedSize(716, 1)
-        divider.setStyleSheet("background-color: #E8E8E8;")
+        divider.setFixedSize(1, 208)
+        divider_pixmap = QPixmap(resource_path("assets/image/test_config/divider.png"))
+        divider.setPixmap(divider_pixmap.scaled(1, 208, Qt.IgnoreAspectRatio, Qt.SmoothTransformation))
         content_layout.addWidget(divider)
 
-        # 간격
+        # divider 오른쪽 gap 12px
         content_layout.addSpacing(12)
 
-        # 하단: 공통 User ID/Password 입력 영역 (716x100px)
+        # 오른쪽: User ID/Password 입력 영역 (358x208px)
         common_input_widget = QWidget()
-        common_input_widget.setFixedSize(716, 100)
+        common_input_widget.setFixedSize(358, 208)
+        common_input_widget.setStyleSheet("background-color: transparent;")
         common_input_layout = QVBoxLayout()
-        common_input_layout.setContentsMargins(0, 0, 0, 0)
+        common_input_layout.setContentsMargins(0, 12, 0, 12)  # 상하 12px, 12px
         common_input_layout.setSpacing(0)
 
-        # User ID/Password 행 (716x100px)
-        id_pw_row = QWidget()
-        id_pw_row.setFixedSize(716, 100)
-        id_pw_layout = QHBoxLayout()
-        id_pw_layout.setContentsMargins(0, 0, 0, 0)
-        id_pw_layout.setSpacing(20)
+        # "사용자 ID입력" 문구 (358x29px)
+        auth_input_title = QLabel("사용자 ID입력")
+        auth_input_title.setFixedSize(358, 29)
+        auth_input_title.setStyleSheet("""
+            QLabel {
+                font-family: 'Noto Sans KR';
+                font-weight: 700;
+                font-size: 18px;
+                letter-spacing: -0.18px;
+                color: #000000;
+                border: none;
+                background-color: transparent;
+            }
+        """)
+        common_input_layout.addWidget(auth_input_title)
 
-        # User ID 영역 (348x100px)
-        userid_widget = QWidget()
-        userid_widget.setFixedSize(348, 100)
-        userid_layout = QVBoxLayout()
-        userid_layout.setContentsMargins(0, 0, 0, 0)
-        userid_layout.setSpacing(0)
+        # gap 10px
+        common_input_layout.addSpacing(10)
 
+        # "User ID" 문구 (358x26px)
         userid_label = QLabel("User ID")
-        userid_label.setFixedSize(348, 26)
+        userid_label.setFixedSize(358, 26)
         userid_label.setStyleSheet("""
             QLabel {
                 font-family: 'Noto Sans KR';
@@ -1677,46 +2154,49 @@ class InfoWidget(QWidget):
                 background-color: transparent;
             }
         """)
-        userid_layout.addWidget(userid_label)
-        userid_layout.addSpacing(4)
+        common_input_layout.addWidget(userid_label)
 
+        # gap 4px
+        common_input_layout.addSpacing(4)
+
+        # 아이디 입력칸 (358x40px)
         self.id_input = QLineEdit()
-        self.id_input.setFixedSize(348, 38)
+        self.id_input.setFixedSize(358, 40)
+        self.id_input.setPlaceholderText("사용자 ID를 입력해주세요")
         digest_enabled = resource_path("assets/image/test_config/input_DigestAuth_enabled.png").replace(chr(92), "/")
         digest_disabled = resource_path("assets/image/test_config/input_DigestAuth_disabled.png").replace(chr(92), "/")
         self.id_input.setStyleSheet(f"""
             QLineEdit {{
-                padding-left: 20px;
+                padding-left: 24px;
+                padding-right: 24px;
                 border: none;
-                background-color: #F5F5F5;
+                background-color: #FFFFFF;
                 background-image: url({digest_enabled});
                 background-repeat: no-repeat;
                 background-position: center;
                 font-family: 'Noto Sans KR';
                 font-weight: 400;
-                font-size: 17px;
-                letter-spacing: -0.17px;
+                font-size: 18px;
+                letter-spacing: -0.18px;
                 color: #000000;
+            }}
+            QLineEdit::placeholder {{
+                color: #868686;
+                font-size: 18px;
             }}
             QLineEdit:disabled {{
                 background-image: url({digest_disabled});
                 color: #868686;
             }}
         """)
-        userid_layout.addWidget(self.id_input)
-        userid_layout.addStretch()
-        userid_widget.setLayout(userid_layout)
-        id_pw_layout.addWidget(userid_widget)
+        common_input_layout.addWidget(self.id_input)
 
-        # Password 영역 (348x100px)
-        password_widget = QWidget()
-        password_widget.setFixedSize(348, 100)
-        password_layout = QVBoxLayout()
-        password_layout.setContentsMargins(0, 0, 0, 0)
-        password_layout.setSpacing(0)
+        # gap 6px
+        common_input_layout.addSpacing(6)
 
+        # "Password" 문구 (358x26px)
         password_label = QLabel("Password")
-        password_label.setFixedSize(348, 26)
+        password_label.setFixedSize(358, 26)
         password_label.setStyleSheet("""
             QLabel {
                 font-family: 'Noto Sans KR';
@@ -1728,37 +2208,40 @@ class InfoWidget(QWidget):
                 background-color: transparent;
             }
         """)
-        password_layout.addWidget(password_label)
-        password_layout.addSpacing(4)
+        common_input_layout.addWidget(password_label)
 
+        # gap 4px
+        common_input_layout.addSpacing(4)
+
+        # password 입력칸 (358x40px)
         self.pw_input = QLineEdit()
-        self.pw_input.setFixedSize(348, 38)
+        self.pw_input.setFixedSize(358, 40)
+        self.pw_input.setPlaceholderText("암호를 입력해 주세요")
         self.pw_input.setStyleSheet(f"""
             QLineEdit {{
-                padding-left: 20px;
+                padding-left: 24px;
+                padding-right: 24px;
                 border: none;
-                background-color: #F5F5F5;
+                background-color: #FFFFFF;
                 background-image: url({digest_enabled});
                 background-repeat: no-repeat;
                 background-position: center;
                 font-family: 'Noto Sans KR';
                 font-weight: 400;
-                font-size: 17px;
-                letter-spacing: -0.17px;
+                font-size: 18px;
+                letter-spacing: -0.18px;
                 color: #000000;
+            }}
+            QLineEdit::placeholder {{
+                color: #868686;
+                font-size: 18px;
             }}
             QLineEdit:disabled {{
                 background-image: url({digest_disabled});
                 color: #868686;
             }}
         """)
-        password_layout.addWidget(self.pw_input)
-        password_layout.addStretch()
-        password_widget.setLayout(password_layout)
-        id_pw_layout.addWidget(password_widget)
-
-        id_pw_row.setLayout(id_pw_layout)
-        common_input_layout.addWidget(id_pw_row)
+        common_input_layout.addWidget(self.pw_input)
 
         common_input_widget.setLayout(common_input_layout)
         content_layout.addWidget(common_input_widget)
@@ -1784,79 +2267,52 @@ class InfoWidget(QWidget):
 
         return section
 
+    def on_auth_type_changed(self):
+        """인증 방식 변경 시 박스 스타일 업데이트"""
+        if self.digest_radio.isChecked():
+            # Digest Auth 선택됨
+            self.digest_option.setStyleSheet("""
+                QWidget {
+                    background-color: #E9F6FE;
+                    border: 1px solid #2B96ED;
+                    border-radius: 8px;
+                }
+            """)
+            # Bearer Token 선택 안됨
+            self.bearer_option.setStyleSheet("""
+                QWidget {
+                    background-color: #FFFFFF;
+                    border: 1px solid #CECECE;
+                    border-radius: 8px;
+                }
+            """)
+        else:
+            # Bearer Token 선택됨
+            self.bearer_option.setStyleSheet("""
+                QWidget {
+                    background-color: #E9F6FE;
+                    border: 1px solid #2B96ED;
+                    border-radius: 8px;
+                }
+            """)
+            # Digest Auth 선택 안됨
+            self.digest_option.setStyleSheet("""
+                QWidget {
+                    background-color: #FFFFFF;
+                    border: 1px solid #CECECE;
+                    border-radius: 8px;
+                }
+            """)
+
     def create_connection_section(self):
-        """접속 정보 섹션"""
+        """접속 정보 섹션 (타이틀 제외, 744x376px)"""
         section = QGroupBox()
-        section.setFixedSize(744, 466)
+        section.setFixedSize(744, 376)
         section.setStyleSheet("QGroupBox { border: none; }")
 
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
-
-        # 접속 주소 탐색 + 주소탐색버튼 영역 (744x36px)
-        scan_row = QWidget()
-        scan_row.setFixedSize(744, 36)
-        scan_layout = QHBoxLayout()
-        scan_layout.setContentsMargins(0, 0, 0, 0)
-        scan_layout.setSpacing(0)
-
-        # 접속 주소 탐색 라벨 (위로 padding 12px)
-        scan_label_widget = QWidget()
-        scan_label_layout = QVBoxLayout()
-        scan_label_layout.setContentsMargins(0, 12, 0, 0)
-        scan_label_layout.setSpacing(0)
-
-        scan_label = QLabel("접속 주소 탐색")
-        scan_label.setStyleSheet("""
-            QLabel {
-                font-family: 'Noto Sans KR';
-                font-weight: 500;
-                font-size: 16px;
-                letter-spacing: -0.16px;
-                color: #000000;
-            }
-        """)
-        scan_label_layout.addWidget(scan_label)
-        scan_label_widget.setLayout(scan_label_layout)
-        scan_layout.addWidget(scan_label_widget)
-
-        scan_layout.addStretch()
-
-        # 주소탐색 버튼 (120x30px, 위 padding 4px, 아래 padding 2px)
-        scan_btn_widget = QWidget()
-        scan_btn_widget.setFixedSize(120, 36)
-        scan_btn_layout = QVBoxLayout()
-        scan_btn_layout.setContentsMargins(0, 4, 0, 2)
-        scan_btn_layout.setSpacing(0)
-
-        scan_btn = QPushButton("")
-        scan_btn.setFixedSize(120, 30)
-
-        btn_scan_enabled = resource_path("assets/image/test_config/btn_주소탐색_enabled.png").replace(chr(92), "/")
-        btn_scan_hover = resource_path("assets/image/test_config/btn_주소탐색_Hover.png").replace(chr(92), "/")
-
-        scan_btn.setStyleSheet(f"""
-            QPushButton {{
-                border: none;
-                background-image: url({btn_scan_enabled});
-                background-repeat: no-repeat;
-                background-position: center;
-            }}
-            QPushButton:hover {{
-                background-image: url({btn_scan_hover});
-            }}
-        """)
-        scan_btn.clicked.connect(self.start_scan)
-        scan_btn_layout.addWidget(scan_btn)
-        scan_btn_widget.setLayout(scan_btn_layout)
-
-        scan_layout.addWidget(scan_btn_widget)
-        scan_row.setLayout(scan_layout)
-        layout.addWidget(scan_row)
-
-        # 6px gap
-        layout.addSpacing(6)
 
         # IP 직접 입력 영역 (744x36px) - 기본적으로 비활성화
         ip_direct_row = QWidget()
@@ -1923,23 +2379,28 @@ class InfoWidget(QWidget):
 
         ip_direct_row.setLayout(ip_direct_layout)
         layout.addWidget(ip_direct_row)
+        # UI 상에서 숨김 처리 (팝오버로 구현 예정)
+        ip_direct_row.setVisible(False)
 
         # 6px gap
         layout.addSpacing(6)
 
-        # URL 테이블 (744x370px)
-        self.url_table = QTableWidget(0, 1)
+        # URL 테이블 (744x370px) - 체크박스 + URL 컬럼
+        self.url_table = QTableWidget(0, 2)  # 2개 컬럼: 체크박스, URL
         self.url_table.setFixedSize(744, 370)
-        self.url_table.setHorizontalHeaderLabels(["URL"])
+        self.url_table.setHorizontalHeaderLabels(["", "URL"])  # 첫 번째는 체크박스용 빈 헤더
         self.url_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.url_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.url_table.setSelectionMode(QAbstractItemView.SingleSelection)
 
         # 헤더 설정
         header = self.url_table.horizontalHeader()
-        header.setFixedHeight(24)
-        header.setStretchLastSection(True)
+        header.setFixedHeight(31)  # 744x31
         header.setDefaultAlignment(Qt.AlignCenter)  # 헤더 가운데 정렬
+
+        # 컬럼 너비 설정
+        self.url_table.setColumnWidth(0, 40)  # 체크박스 컬럼: 40px
+        header.setSectionResizeMode(1, QHeaderView.Stretch)  # URL 컬럼: 나머지 공간
 
         # 왼쪽 행 번호 헤더 설정
         vertical_header = self.url_table.verticalHeader()
@@ -1947,69 +2408,81 @@ class InfoWidget(QWidget):
         vertical_header.setDefaultAlignment(Qt.AlignCenter)
         vertical_header.setStyleSheet("QHeaderView { background-color: #FFFFFF; }")
 
-        # 컬럼 너비 설정 (URL 컬럼이 자동으로 확장됨)
-
         # 세로 grid line 제거
         self.url_table.setShowGrid(False)
 
-        # 행 높이 설정
-        self.url_table.verticalHeader().setDefaultSectionSize(26)
+        # 행 높이 설정 (데이터 셀: 744x39)
+        self.url_table.verticalHeader().setDefaultSectionSize(39)
 
         # 스타일 설정
-        self.url_table.setStyleSheet("""
-            QTableWidget {
+        checkbox_unchecked = resource_path("assets/image/test_config/checkbox_unchecked.png").replace(chr(92), "/")
+        checkbox_checked = resource_path("assets/image/test_config/checkbox_checked.png").replace(chr(92), "/")
+
+        self.url_table.setStyleSheet(f"""
+            QTableWidget {{
                 background-color: #FFFFFF;
                 border: 1px solid #CECECE;
                 border-radius: 4px;
                 font-family: 'Noto Sans KR';
                 font-weight: 400;
-                font-size: 14px;
-                letter-spacing: 0.098px;
-            }
-            QTableWidget::item {
+                font-size: 19px;
+                letter-spacing: -0.19px;
+            }}
+            QTableWidget::item {{
                 background-color: #FFFFFF;
                 border-bottom: 1px solid #CCCCCC;
                 border-right: none;
                 padding-right: 14px;
                 color: #000000;
-            }
-            QTableWidget::item:selected {
+            }}
+            QTableWidget::item:selected {{
                 background-color: #E3F2FF;
                 color: #000000;
-            }
-            QHeaderView::section {
+            }}
+            QTableWidget::indicator {{
+                width: 20px;
+                height: 20px;
+            }}
+            QTableWidget::indicator:unchecked {{
+                image: url({checkbox_unchecked});
+            }}
+            QTableWidget::indicator:checked {{
+                image: url({checkbox_checked});
+            }}
+            QHeaderView::section {{
                 background-color: #EDF0F3;
                 border: none;
                 border-bottom: 1px solid #CCCCCC;
                 padding: 4px;
-                height: 24px;
+                height: 31px;
                 font-family: 'Noto Sans KR';
-                font-size: 13px;
+                font-size: 18px;
                 font-weight: 600;
-                letter-spacing: -0.156px;
-            }
-            QHeaderView::section:vertical {
+                letter-spacing: -0.18px;
+            }}
+            QHeaderView::section:vertical {{
                 background-color: #FFFFFF;
                 border: none;
                 border-right: none;
                 border-bottom: 1px solid #CCCCCC;
                 font-family: 'Noto Sans KR';
                 font-weight: 400;
-                font-size: 14px;
-                letter-spacing: 0.098px;
+                font-size: 19px;
+                letter-spacing: -0.19px;
                 color: #000000;
-            }
-            QHeaderView::section:vertical:checked {
+            }}
+            QHeaderView::section:vertical:checked {{
                 background-color: #E3F2FF;
-            }
-            QTableCornerButton::section {
+            }}
+            QTableCornerButton::section {{
                 background-color: #EDF0F3;
                 border: none;
                 border-bottom: 1px solid #CCCCCC;
-            }
+            }}
         """)
 
         self.url_table.cellClicked.connect(self.select_url_row)
+        self.url_table.itemChanged.connect(self.on_checkbox_changed)
         layout.addWidget(self.url_table)
 
         section.setLayout(layout)
@@ -2237,10 +2710,17 @@ class InfoWidget(QWidget):
                 row = self.url_table.rowCount()
                 self.url_table.insertRow(row)
 
-                # URL 텍스트
+                # 체크박스 (컬럼 0)
+                checkbox_item = QTableWidgetItem()
+                checkbox_item.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled | Qt.ItemIsSelectable)
+                checkbox_item.setCheckState(Qt.Unchecked)
+                checkbox_item.setTextAlignment(Qt.AlignCenter)
+                self.url_table.setItem(row, 0, checkbox_item)
+
+                # URL 텍스트 (컬럼 1)
                 url_item = QTableWidgetItem(url)
                 url_item.setTextAlignment(Qt.AlignCenter)
-                self.url_table.setItem(row, 0, url_item)
+                self.url_table.setItem(row, 1, url_item)
 
         except Exception as e:
             self._show_scan_error(f"테이블 업데이트 중 오류:\n{str(e)}")
@@ -2279,7 +2759,7 @@ class InfoWidget(QWidget):
 
             # 중복 확인
             for row in range(self.url_table.rowCount()):
-                item = self.url_table.item(row, 0)
+                item = self.url_table.item(row, 1)  # 컬럼 1 (URL)
                 if item and item.text() == final_url:
                     QMessageBox.information(self, "알림", "이미 추가된 주소입니다.")
                     return
@@ -2288,10 +2768,17 @@ class InfoWidget(QWidget):
             row = self.url_table.rowCount()
             self.url_table.insertRow(row)
 
-            # URL 텍스트 추가
+            # 체크박스 (컬럼 0)
+            checkbox_item = QTableWidgetItem()
+            checkbox_item.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled | Qt.ItemIsSelectable)
+            checkbox_item.setCheckState(Qt.Unchecked)
+            checkbox_item.setTextAlignment(Qt.AlignCenter)
+            self.url_table.setItem(row, 0, checkbox_item)
+
+            # URL 텍스트 추가 (컬럼 1)
             url_item = QTableWidgetItem(final_url)
             url_item.setTextAlignment(Qt.AlignCenter)
-            self.url_table.setItem(row, 0, url_item)
+            self.url_table.setItem(row, 1, url_item)
 
             # 입력창 초기화
             self.page2_ip_direct_input.clear()
@@ -2303,19 +2790,27 @@ class InfoWidget(QWidget):
             QMessageBox.critical(self, "오류", f"주소 추가 중 오류가 발생했습니다:\n{str(e)}")
 
     def select_url_row(self, row, col):
-        """행 클릭 시: 행 선택"""
-        # 행 선택 (stylesheet의 :selected로 배경색 자동 적용)
-        self.url_table.selectRow(row)
+        """행 클릭 시: 행 선택 및 체크박스 자동 체크"""
+        # 체크박스 컬럼(0) 클릭 시에는 체크박스가 자동으로 토글되므로 처리 안 함
+        if col == 0:
+            return
+
+        # 클릭한 행의 체크박스를 체크 (on_checkbox_changed가 자동 호출됨)
+        checkbox_item = self.url_table.item(row, 0)
+        if checkbox_item:
+            checkbox_item.setCheckState(Qt.Checked)
 
         # URL 선택 변경 시 버튼 상태 체크
         self.check_start_button_state()
 
     def get_selected_url(self):
         """URL 테이블에서 선택된 URL 반환"""
-        selected_rows = self.url_table.selectedItems()
-        if selected_rows:
-            # 선택된 행의 첫 번째 아이템 (URL)
-            url_item = selected_rows[0]
+        # 선택된 행 번호 가져오기
+        selected_indexes = self.url_table.selectionModel().selectedRows()
+        if selected_indexes:
+            row = selected_indexes[0].row()
+            # 컬럼 1에서 URL 가져오기 (컬럼 0은 체크박스)
+            url_item = self.url_table.item(row, 1)
             if url_item:
                 selected_url = url_item.text().strip()
                 # http://가 없으면 추가
@@ -2440,7 +2935,7 @@ class InfoWidget(QWidget):
                 return True
 
             # 테이블들에 데이터가 있는지 확인
-            if self.test_field_table.rowCount() > 0 or self.api_test_table.rowCount() > 0:
+            if self.test_field_table.rowCount() > 0 or self.scenario_table.rowCount() > 0 or self.api_test_table.rowCount() > 0:
                 return True
 
             # 인증 정보에 입력값이 있는지 확인
@@ -2491,7 +2986,12 @@ class InfoWidget(QWidget):
 
             # 테이블들 초기화
             self.test_field_table.setRowCount(0)
+            self.scenario_table.setRowCount(0)
             self.api_test_table.setRowCount(0)
+
+            # 시나리오 테이블 관련 UI 요소 초기화
+            self.scenario_column_background.hide()
+            self.scenario_placeholder_label.hide()
 
             # 인증 정보 초기화
             self.id_input.clear()
@@ -2919,13 +3419,199 @@ class InfoWidget(QWidget):
             return False
 
     def on_test_field_selected(self, row, col):
-        """시험 분야명 행 클릭 시 해당 API 테이블 표시 (API 기반)"""
+        """시험 분야 테이블 클릭 시 시나리오 테이블 업데이트"""
         try:
             # 클릭된 행 번호 저장
             self.selected_test_field_row = row
 
-            # specifications API 호출하여 API 테이블 채우기
-            self.form_validator._fill_api_table_for_selected_field_from_api(row)
+            # 선택된 그룹명 가져오기 (위젯에서 가져오기)
+            selected_widget = self.test_field_table.cellWidget(row, 0)
+            if selected_widget:
+                group_name = selected_widget.text()
+                # 해당 그룹의 시나리오들을 시나리오 테이블에 채우기
+                self.form_validator._fill_scenarios_for_group(row, group_name)
+
+            # 테이블 강제 업데이트
+            self.test_field_table.viewport().update()
+            self.scenario_table.viewport().update()
+
+            # API 테이블 초기 메시지로 리셋
+            self.form_validator._show_initial_api_message()
+
         except Exception as e:
             print(f"시험 분야 선택 처리 실패: {e}")
             QMessageBox.warning(self, "오류", f"시험 분야 데이터 로드 중 오류가 발생했습니다:\n{str(e)}")
+
+    def on_scenario_selected(self, row, col):
+        """시나리오 테이블 클릭 시 체크박스 이미지 변경 및 API 테이블 업데이트"""
+        try:
+            # 모든 시나리오 행의 배경 이미지 업데이트
+            for i in range(self.scenario_table.rowCount()):
+                widget = self.scenario_table.cellWidget(i, 0)
+                if widget:
+                    if i == row:
+                        # 클릭된 행: 체크된 이미지로 변경
+                        widget.setStyleSheet("""
+                            QLabel {
+                                background-image: url('assets/image/test_config/row_checkbox_checked.png');
+                                background-position: center;
+                                background-repeat: no-repeat;
+                                border: none;
+                                border-bottom: 1px solid #CCCCCC;
+                                font-family: 'Noto Sans KR';
+                                font-size: 19px;
+                                font-weight: 400;
+                                color: #000000;
+                                margin: 0px;
+                                padding: 0px;
+                                min-width: 371.5px;
+                                min-height: 39px;
+                            }
+                        """)
+                    else:
+                        # 나머지 행: 체크 안 된 이미지로 변경
+                        widget.setStyleSheet("""
+                            QLabel {
+                                background-image: url('assets/image/test_config/row_checkbox_unchecked.png');
+                                background-position: center;
+                                background-repeat: no-repeat;
+                                border: none;
+                                border-bottom: 1px solid #CCCCCC;
+                                font-family: 'Noto Sans KR';
+                                font-size: 19px;
+                                font-weight: 400;
+                                color: #000000;
+                                margin: 0px;
+                                padding: 0px;
+                                min-width: 371.5px;
+                                min-height: 39px;
+                            }
+                        """)
+
+            # UI 업데이트 강제 (체크박스 이미지가 먼저 보이도록)
+            QApplication.processEvents()
+
+            # specifications API 호출하여 API 테이블 채우기
+            self.form_validator._fill_api_table_for_selected_field_from_api(row)
+
+        except Exception as e:
+            print(f"시나리오 선택 처리 실패: {e}")
+            QMessageBox.warning(self, "오류", f"시나리오 데이터 로드 중 오류가 발생했습니다:\n{str(e)}")
+
+    def toggle_address_popover(self):
+        """주소 추가 팝오버 표시/숨김 토글"""
+        if self.address_popover.isVisible():
+            self.address_popover.hide()
+            self.add_btn.setChecked(False)
+        else:
+            # 추가 버튼의 전역 좌표를 가져옴
+            btn_global_pos = self.add_btn.mapToGlobal(self.add_btn.rect().bottomLeft())
+            # InfoWidget의 전역 좌표를 가져와서 상대 좌표로 변환
+            widget_global_pos = self.mapToGlobal(self.rect().topLeft())
+            relative_x = btn_global_pos.x() - widget_global_pos.x()
+            relative_y = btn_global_pos.y() - widget_global_pos.y()
+
+            # 팝오버를 오른쪽 정렬 (추가 버튼 오른쪽 끝 기준)
+            popover_x = relative_x + self.add_btn.width() - self.address_popover.width()
+            popover_y = relative_y + 4  # 버튼 아래 4px gap
+
+            # 팝오버 위치 설정
+            self.address_popover.move(popover_x, popover_y)
+            self.address_popover.raise_()  # 최상위로 올림
+            self.address_popover.show()
+            self.add_btn.setChecked(True)
+            self.address_input.setFocus()  # 입력창에 포커스
+
+    def add_address_from_popover(self):
+        """팝오버에서 IP 주소 추가"""
+        try:
+            # 입력값 가져오기
+            ip_port = self.address_input.text().strip()
+
+            if not ip_port:
+                QMessageBox.warning(self, "입력 오류", "IP 주소를 입력해주세요.\n예: 192.168.1.1")
+                return
+
+            # Port 포함 여부 확인 - Port는 입력하지 않아야 함
+            if ':' in ip_port:
+                QMessageBox.warning(self, "입력 오류", "IP 주소만 입력해주세요.\nPort는 시험정보의 testPort로 자동 설정됩니다.\n예: 192.168.1.1")
+                return
+
+            # IP 검증
+            if not self._validate_ip_address(ip_port):
+                QMessageBox.warning(self, "IP 오류", "올바른 IP 주소를 입력해주세요.\n예: 192.168.1.100")
+                return
+
+            # testPort 확인 및 자동 추가
+            if not hasattr(self, 'test_port') or not self.test_port:
+                QMessageBox.warning(self, "testPort 없음", "시험정보를 먼저 불러와주세요.\ntestPort 정보가 필요합니다.")
+                return
+
+            # IP와 testPort 결합
+            final_url = f"{ip_port}:{self.test_port}"
+
+            # 중복 확인
+            for row in range(self.url_table.rowCount()):
+                item = self.url_table.item(row, 1)  # 컬럼 1 (URL)
+                if item and item.text() == final_url:
+                    QMessageBox.information(self, "알림", "이미 추가된 주소입니다.")
+                    return
+
+            # 테이블에 추가
+            row = self.url_table.rowCount()
+            self.url_table.insertRow(row)
+
+            # 체크박스 (컬럼 0)
+            checkbox_item = QTableWidgetItem()
+            checkbox_item.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled | Qt.ItemIsSelectable)
+            checkbox_item.setCheckState(Qt.Unchecked)
+            checkbox_item.setTextAlignment(Qt.AlignCenter)
+            self.url_table.setItem(row, 0, checkbox_item)
+
+            # URL 텍스트 추가 (컬럼 1)
+            url_item = QTableWidgetItem(final_url)
+            url_item.setTextAlignment(Qt.AlignCenter)
+            self.url_table.setItem(row, 1, url_item)
+
+            # 입력창 초기화
+            self.address_input.clear()
+
+            # 팝오버 닫기
+            self.address_popover.hide()
+            self.add_btn.setChecked(False)
+
+            QMessageBox.information(self, "추가 완료", f"주소가 추가되었습니다.\n{final_url}")
+
+        except Exception as e:
+            print(f"IP 추가 오류: {e}")
+            QMessageBox.critical(self, "오류", f"주소 추가 중 오류가 발생했습니다:\n{str(e)}")
+
+    def on_checkbox_changed(self, item):
+        """체크박스 상태 변경 시 행 선택 (라디오 버튼처럼 한 번에 하나만 선택)"""
+        # 체크박스 컬럼(0)의 아이템만 처리
+        if item.column() != 0:
+            return
+
+        row = item.row()
+        is_checked = item.checkState() == Qt.Checked
+
+        # 체크된 경우
+        if is_checked:
+            # itemChanged 시그널 일시 차단 (무한 루프 방지)
+            self.url_table.blockSignals(True)
+
+            # 다른 모든 행의 체크박스 해제
+            for r in range(self.url_table.rowCount()):
+                if r != row:
+                    checkbox = self.url_table.item(r, 0)
+                    if checkbox:
+                        checkbox.setCheckState(Qt.Unchecked)
+
+            # 시그널 재활성화
+            self.url_table.blockSignals(False)
+
+            # 현재 행 선택 (전체 행이 #E3F2FF로 변경됨)
+            self.url_table.selectRow(row)
+        else:
+            # 체크 해제 시 선택 해제
+            self.url_table.clearSelection()

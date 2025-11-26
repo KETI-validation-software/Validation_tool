@@ -582,14 +582,14 @@ class ResultPageWidget(QWidget):
                 border-radius: 4px;
                 outline: none;
                 font-family: "Noto Sans KR";
-                font-size: 14px;
+                font-size: 19px;
                 color: #1B1B1C;
             }
             QTableWidget::item {
                 border-bottom: 1px solid #E0E0E0;
                 color: #1B1B1C;
                 font-family: 'Noto Sans KR';
-                font-size: 14px;
+                font-size: 19px;
                 font-weight: 400;
                 padding: 8px;
                 text-align: center;
@@ -608,7 +608,7 @@ class ResultPageWidget(QWidget):
                 color: #1B1B1C;
                 text-align: center;
                 font-family: 'Noto Sans KR';
-                font-size: 13px;
+                font-size: 18px;
                 font-weight: 600;
                 letter-spacing: -0.156px;
             }
@@ -691,7 +691,7 @@ class ResultPageWidget(QWidget):
                 border: 1px solid #CECECE;
                 border-radius: 4px;
                 font-family: "Noto Sans KR";
-                font-size: 14px;
+                font-size: 19px;
                 color: #1B1B1C;
             }
             QTableWidget::item {
@@ -699,7 +699,7 @@ class ResultPageWidget(QWidget):
                 border-right: 0px solid transparent;
                 color: #1B1B1C;
                 font-family: 'Noto Sans KR';
-                font-size: 14px;
+                font-size: 19px;
                 font-style: normal;
                 font-weight: 400;
                 letter-spacing: 0.098px;
@@ -720,7 +720,7 @@ class ResultPageWidget(QWidget):
                 color: #1B1B1C;
                 text-align: center;
                 font-family: 'Noto Sans KR';
-                font-size: 13px;
+                font-size: 18px;
                 font-style: normal;
                 font-weight: 600;
                 line-height: normal;
@@ -1353,7 +1353,7 @@ class ResultPageWidget(QWidget):
                 border-right: 0px solid transparent;
                 color: #1B1B1C;
                 font-family: 'Noto Sans KR';
-                font-size: 14px;
+                font-size: 19px;
                 font-style: normal;
                 font-weight: 400;
                 letter-spacing: 0.098px;
@@ -1368,7 +1368,7 @@ class ResultPageWidget(QWidget):
                 color: #1B1B1C;
                 text-align: center;
                 font-family: 'Noto Sans KR';
-                font-size: 13px;
+                font-size: 18px;
                 font-style: normal;
                 font-weight: 600;
                 line-height: normal;
@@ -2593,14 +2593,14 @@ class MyApp(QWidget):
                 border-radius: 4px;
                 outline: none;
                 font-family: "Noto Sans KR";
-                font-size: 14px;
+                font-size: 19px;
                 color: #1B1B1C;
             }
             QTableWidget::item {
                 border-bottom: 1px solid #E0E0E0;
                 color: #1B1B1C;
                 font-family: 'Noto Sans KR';
-                font-size: 14px;
+                font-size: 19px;
                 font-weight: 400;
                 padding: 8px;
                 text-align: center;
@@ -2619,7 +2619,7 @@ class MyApp(QWidget):
                 color: #1B1B1C;
                 text-align: center;
                 font-family: 'Noto Sans KR';
-                font-size: 13px;
+                font-size: 18px;
                 font-weight: 600;
                 letter-spacing: -0.156px;
             }
@@ -2795,7 +2795,7 @@ class MyApp(QWidget):
                 border: 1px solid #CECECE;
                 border-radius: 4px;
                 font-family: "Noto Sans KR";
-                font-size: 14px;
+                font-size: 19px;
                 color: #1B1B1C;
             }
             QTableWidget::item {
@@ -2803,7 +2803,7 @@ class MyApp(QWidget):
                 border-right: 0px solid transparent;
                 color: #1B1B1C;
                 font-family: 'Noto Sans KR';
-                font-size: 14px;
+                font-size: 19px;
                 font-style: normal;
                 font-weight: 400;
                 letter-spacing: 0.098px;
@@ -2824,7 +2824,7 @@ class MyApp(QWidget):
                 color: #1B1B1C;
                 text-align: center;
                 font-family: 'Noto Sans KR';
-                font-size: 13px;
+                font-size: 18px;
                 font-style: normal;
                 font-weight: 600;
                 line-height: normal;
@@ -4123,7 +4123,7 @@ class MyApp(QWidget):
                 border-radius: 4px;
                 padding: 0 12px;
                 font-family: "Noto Sans KR";
-                font-size: 14px;
+                font-size: 19px;
                 color: #222;
                 selection-background-color: #4A90E2;
                 selection-color: white;
@@ -4193,7 +4193,7 @@ class MyApp(QWidget):
             QLabel {
                 color: #CECECE;
                 font-family: "Noto Sans KR";
-                font-size: 14px;
+                font-size: 19px;
                 font-weight: 400;
                 background: transparent;
             }
@@ -4446,7 +4446,7 @@ class MyApp(QWidget):
                 border-right: 0px solid transparent;
                 color: #1B1B1C;
                 font-family: 'Noto Sans KR';
-                font-size: 14px;
+                font-size: 19px;
                 font-style: normal;
                 font-weight: 400;
                 letter-spacing: 0.098px;
@@ -4461,7 +4461,7 @@ class MyApp(QWidget):
                 color: #1B1B1C;
                 text-align: center;
                 font-family: 'Noto Sans KR';
-                font-size: 13px;
+                font-size: 18px;
                 font-style: normal;
                 font-weight: 600;
                 line-height: normal;

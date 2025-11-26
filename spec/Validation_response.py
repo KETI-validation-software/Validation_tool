@@ -1,9 +1,25 @@
 # Authentication
 cmh1ua7b00021gxc3rjepbkrm_Authentication_out_validation = {}
 
+# DoorProfiles
+cmh1ua7b00021gxc3rjepbkrm_DoorProfiles_out_validation = {}
+
+# RealtimeDoorStatus
+cmh1ua7b00021gxc3rjepbkrm_RealtimeDoorStatus_out_validation = {}
+
+# DoorControl
+cmh1ua7b00021gxc3rjepbkrm_DoorControl_out_validation = {}
+
+# RealtimeDoorStatus
+cmh1ua7b00021gxc3rjepbkrm_RealtimeDoorStatus_out_validation = {}
+
 # cmh1ua7b00021gxc3rjepbkrm 검증 리스트
 cmh1ua7b00021gxc3rjepbkrm_outValidation = [
     cmh1ua7b00021gxc3rjepbkrm_Authentication_out_validation,
+    cmh1ua7b00021gxc3rjepbkrm_DoorProfiles_out_validation,
+    cmh1ua7b00021gxc3rjepbkrm_RealtimeDoorStatus_out_validation,
+    cmh1ua7b00021gxc3rjepbkrm_DoorControl_out_validation,
+    cmh1ua7b00021gxc3rjepbkrm_RealtimeDoorStatus_out_validation,
 ]
 
 # Authentication
