@@ -1,17 +1,39 @@
-# RealtimeVideoEventInfos
-cmh1u5pef000sgxc3bzl4y9v0_RealtimeVideoEventInfos_out_constraints = {}
+# Authentication
+cmh1u5pef000sgxc3bzl4y9v0_Authentication_out_constraints = {}
 
-# RealtimeVideoEventInfos WebHook IN Constraints
-cmh1u5pef000sgxc3bzl4y9v0_RealtimeVideoEventInfos_webhook_in_constraints = {}
+# DoorProfiles
+cmh1u5pef000sgxc3bzl4y9v0_DoorProfiles_out_constraints = {
+  "doorList.doorSensor": {
+    "valueType": "random",
+    "required": False,
+    "validValueField": "eventFilter_bio",
+    "validValues": [
+      "Lock",
+      "UnLock"
+    ]
+  }
+}
+
+# RealtimeDoorStatus
+cmh1u5pef000sgxc3bzl4y9v0_RealtimeDoorStatus_out_constraints = {}
+
+# RealtimeDoorStatus WebHook IN Constraints
+cmh1u5pef000sgxc3bzl4y9v0_RealtimeDoorStatus_webhook_in_constraints = {}
+
+# DoorControl
+cmh1u5pef000sgxc3bzl4y9v0_DoorControl_out_constraints = {}
 
 # cmh1u5pef000sgxc3bzl4y9v0 검증 리스트
 cmh1u5pef000sgxc3bzl4y9v0_outConstraints = [
-    cmh1u5pef000sgxc3bzl4y9v0_RealtimeVideoEventInfos_out_constraints,
+    cmh1u5pef000sgxc3bzl4y9v0_Authentication_out_constraints,
+    cmh1u5pef000sgxc3bzl4y9v0_DoorProfiles_out_constraints,
+    cmh1u5pef000sgxc3bzl4y9v0_RealtimeDoorStatus_out_constraints,
+    cmh1u5pef000sgxc3bzl4y9v0_DoorControl_out_constraints,
 ]
 
 # cmh1u5pef000sgxc3bzl4y9v0 WebHook Constraints 리스트
 cmh1u5pef000sgxc3bzl4y9v0_webhook_inConstraints = [
-    cmh1u5pef000sgxc3bzl4y9v0_RealtimeVideoEventInfos_webhook_in_constraints,
+    cmh1u5pef000sgxc3bzl4y9v0_RealtimeDoorStatus_webhook_in_constraints,
 ]
 
 # Authentication
