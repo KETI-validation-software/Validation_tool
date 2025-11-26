@@ -124,7 +124,7 @@ SPEC_CONFIG = [
     "api_endpoint": ['/Authentication', '/DoorProfiles', '/RealtimeDoorStatus', '/DoorControl'],
     "trans_protocol": ['basic', 'basic', 'WebHook', 'basic'],
     "time_out": [5000, 5000, 5000, 5000],
-    "num_retries": [10, 10, 10, 10]
+    "num_retries": [1, 1, 1, 1]
 },
         "cmgvieyak001b6cd04cgaawmm": {
     "test_name": "vid001",
@@ -158,7 +158,7 @@ SPEC_CONFIG = [
     "api_endpoint": ['/Authentication', '/DoorProfiles', '/RealtimeDoorStatus', '/DoorControl'],
     "trans_protocol": ['basic', 'basic', 'WebHook', 'basic'],
     "time_out": [5000, 5000, 5000, 5000],
-    "num_retries": [10, 10, 10, 10]
+    "num_retries": [1, 1, 1, 1]
 }
     }
 ]
