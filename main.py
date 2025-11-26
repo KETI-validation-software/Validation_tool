@@ -78,11 +78,12 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("검증 소프트웨어 통합 실행기")
-        self.resize(1200, 720)
+        self.setMinimumSize(1680, 1006)  # 최소 크기 설정 (반응형)
         self.setWindowFlags(
             Qt.Window |
             Qt.WindowTitleHint |
             Qt.WindowMinimizeButtonHint |
+            Qt.WindowMaximizeButtonHint |
             Qt.WindowCloseButtonHint
         )
         self._orig_flags = self.windowFlags()
@@ -282,6 +283,7 @@ class MainWindow(QMainWindow):
             # 제목표시줄 + 최소화 + 최대화(최대화 시 '이전크기'로 표기) + 종료
             flags = (Qt.Window | Qt.WindowTitleHint |
                      Qt.WindowMinimizeButtonHint |
+            Qt.WindowMaximizeButtonHint |
                      Qt.WindowMaximizeButtonHint |
                      Qt.WindowCloseButtonHint)
             self.setWindowFlags(flags)
