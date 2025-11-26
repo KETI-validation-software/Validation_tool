@@ -1195,7 +1195,11 @@ class FormValidator:
 
                 # loadTest.concurrentUsers 추출 (num_retries)
                 load_test = settings.get("loadTest", {})
-                num_retries.append(load_test.get("concurrentUsers", 1))
+                # loadTest.enabled가 false이면 검증 횟수는 1로 설정
+                if load_test.get("enabled", False):
+                    num_retries.append(load_test.get("concurrentUsers", 1))
+                else:
+                    num_retries.append(1)
 
                 # transProtocol 추출
                 trans_protocol_obj = settings.get("transProtocol")
