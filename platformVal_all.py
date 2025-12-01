@@ -1175,13 +1175,17 @@ class ResultPageWidget(QWidget):
         self.tableWidget.setRowCount(api_count)
 
         for row in range(api_count):
-            # API 명
-            api_name = f"{row + 1}. {api_list[row]}"
-            api_item = QTableWidgetItem(api_name)
-            api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)  # 가운데 정렬
-            self.tableWidget.setItem(row, 0, api_item)
+            # No. (숫자) - 컬럼 0
+            no_item = QTableWidgetItem(f"{row + 1}")
+            no_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+            self.tableWidget.setItem(row, 0, no_item)
 
-            # ✅ 기본 아이콘 (결과 페이지 전용 아이콘 사용)
+            # API 명 - 컬럼 1
+            api_item = QTableWidgetItem(api_list[row])
+            api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+            self.tableWidget.setItem(row, 1, api_item)
+
+            # ✅ 기본 아이콘 (결과 페이지 전용 아이콘 사용) - 컬럼 2
             icon_widget = QWidget()
             icon_layout = QHBoxLayout()
             icon_layout.setContentsMargins(0, 0, 0, 0)
@@ -1193,13 +1197,13 @@ class ResultPageWidget(QWidget):
             icon_widget.setLayout(icon_layout)
             self.tableWidget.setCellWidget(row, 2, icon_widget)
 
-            # 모든 값 0으로 초기화 (9컬럼 구조)
+            # 모든 값 0으로 초기화 (9컬럼 구조) - 컬럼 3-7
             for col, value in [(3, "0"), (4, "0"), (5, "0"), (6, "0"), (7, "0%")]:
                 item = QTableWidgetItem(value)
                 item.setTextAlignment(Qt.AlignCenter)
                 self.tableWidget.setItem(row, col, item)
 
-            # 상세 내용 버튼
+            # 상세 내용 버튼 - 컬럼 8
             detail_label = QLabel()
             try:
                 img_path = resource_path("assets/image/test_runner/btn_상세내용확인.png").replace("\\", "/")
@@ -1222,7 +1226,7 @@ class ResultPageWidget(QWidget):
             layout.setContentsMargins(0, 0, 0, 0)
             container.setLayout(layout)
 
-            self.tableWidget.setCellWidget(row, 7, container)
+            self.tableWidget.setCellWidget(row, 8, container)
 
         # 점수 표시도 0으로 업데이트
         empty_data = {
@@ -1239,12 +1243,17 @@ class ResultPageWidget(QWidget):
         self.tableWidget.setRowCount(len(table_data))
 
         for row, row_data in enumerate(table_data):
-            # API 명
-            api_item = QTableWidgetItem(row_data['api_name'])
-            api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)  # 가운데 정렬
-            self.tableWidget.setItem(row, 0, api_item)
+            # No. (숫자) - 컬럼 0
+            no_item = QTableWidgetItem(f"{row + 1}")
+            no_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+            self.tableWidget.setItem(row, 0, no_item)
 
-            # ✅ 아이콘 상태 복원 (결과 페이지 전용 아이콘 사용)
+            # API 명 - 컬럼 1
+            api_item = QTableWidgetItem(row_data['api_name'])
+            api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+            self.tableWidget.setItem(row, 1, api_item)
+
+            # ✅ 아이콘 상태 복원 (결과 페이지 전용 아이콘 사용) - 컬럼 2
             icon_state = row_data['icon_state']
             if icon_state == "PASS":
                 img = self.img_pass
@@ -1262,20 +1271,20 @@ class ResultPageWidget(QWidget):
             icon_label = QLabel()
             icon_label.setPixmap(QIcon(img).pixmap(*icon_size))
             icon_label.setAlignment(Qt.AlignCenter)
-            icon_label.setToolTip(f"Result: {icon_state}")  # tooltip 설정으로 재저장 시 상태 유지
+            icon_label.setToolTip(f"Result: {icon_state}")
             icon_layout.addWidget(icon_label)
             icon_layout.setAlignment(Qt.AlignCenter)
             icon_widget.setLayout(icon_layout)
-            self.tableWidget.setCellWidget(row, 1, icon_widget)
+            self.tableWidget.setCellWidget(row, 2, icon_widget)
 
-            # 나머지 컬럼 복원
-            for col, key in [(2, 'retry_count'), (3, 'pass_count'),
-                             (4, 'total_count'), (5, 'fail_count'), (6, 'score')]:
+            # 나머지 컬럼 복원 - 컬럼 3-7
+            for col, key in [(3, 'retry_count'), (4, 'pass_count'),
+                             (5, 'total_count'), (6, 'fail_count'), (7, 'score')]:
                 item = QTableWidgetItem(row_data[key])
                 item.setTextAlignment(Qt.AlignCenter)
                 self.tableWidget.setItem(row, col, item)
 
-            # 상세 내용 버튼
+            # 상세 내용 버튼 - 컬럼 8
             detail_label = QLabel()
             try:
                 img_path = resource_path("assets/image/test_runner/btn_상세내용확인.png").replace("\\", "/")
@@ -1298,7 +1307,7 @@ class ResultPageWidget(QWidget):
             layout.setContentsMargins(0, 0, 0, 0)
             container.setLayout(layout)
 
-            self.tableWidget.setCellWidget(row, 7, container)
+            self.tableWidget.setCellWidget(row, 8, container)
 
     def _show_detail(self, row):
         """상세 내용 확인 - parent의 show_combined_result 호출"""
@@ -3549,35 +3558,43 @@ class MyApp(QWidget):
             if row >= self.tableWidget.rowCount():
                 break
 
-            # API 이름 - 항상 새 아이템 생성
+            # No. (숫자) - 컬럼 0
+            no_item = QTableWidgetItem(f"{row + 1}")
+            no_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+            self.tableWidget.setItem(row, 0, no_item)
+
+            # API 이름 - 컬럼 1
             api_item = QTableWidgetItem(row_data['api_name'])
             api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-            self.tableWidget.setItem(row, 0, api_item)
+            self.tableWidget.setItem(row, 1, api_item)
 
-            # 아이콘 상태 복원
+            # 아이콘 상태 복원 - 컬럼 2
             icon_state = row_data['icon_state']
             if icon_state == "PASS":
                 img = self.img_pass
+                icon_size = (84, 20)
             elif icon_state == "FAIL":
                 img = self.img_fail
+                icon_size = (84, 20)
             else:
                 img = self.img_none
+                icon_size = (16, 16)
 
             icon_widget = QWidget()
             icon_layout = QHBoxLayout()
             icon_layout.setContentsMargins(0, 0, 0, 0)
             icon_label = QLabel()
-            icon_label.setPixmap(QIcon(img).pixmap(84, 20))
+            icon_label.setPixmap(QIcon(img).pixmap(*icon_size))
             icon_label.setAlignment(Qt.AlignCenter)
-            icon_label.setToolTip(f"Result: {icon_state}")  # tooltip 설정으로 재저장 시 상태 유지
+            icon_label.setToolTip(f"Result: {icon_state}")
             icon_layout.addWidget(icon_label)
             icon_layout.setAlignment(Qt.AlignCenter)
             icon_widget.setLayout(icon_layout)
-            self.tableWidget.setCellWidget(row, 1, icon_widget)
+            self.tableWidget.setCellWidget(row, 2, icon_widget)
 
-            # 나머지 컬럼 복원 - 항상 새 아이템 생성
-            for col, key in [(2, 'retry_count'), (3, 'pass_count'),
-                             (4, 'total_count'), (5, 'fail_count'), (6, 'score')]:
+            # 나머지 컬럼 복원 - 컬럼 3-7
+            for col, key in [(3, 'retry_count'), (4, 'pass_count'),
+                             (5, 'total_count'), (6, 'fail_count'), (7, 'score')]:
                 new_item = QTableWidgetItem(row_data[key])
                 new_item.setTextAlignment(Qt.AlignCenter)
                 self.tableWidget.setItem(row, col, new_item)
@@ -4408,9 +4425,7 @@ class MyApp(QWidget):
 
         # 테이블 본문 (헤더 숨김)
         self.tableWidget = QTableWidget(api_count, 9)  # 9개 컬럼
-        table_height = api_count * 40  # 행 개수 × 행 높이
         # self.tableWidget.setFixedWidth(1050)  # setWidgetResizable(True) 사용으로 주석 처리
-        self.tableWidget.setFixedHeight(table_height)
         self.tableWidget.horizontalHeader().setVisible(False)
         self.tableWidget.verticalHeader().setVisible(False)
         self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
