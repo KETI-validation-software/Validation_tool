@@ -729,7 +729,7 @@ class ResultPageWidget(QWidget):
                 color: #1B1B1C;
             }
             QTableWidget::item {
-                border-bottom: 1px solid #E0E0E0;
+                border-bottom: 1px solid #CCCCCC;
                 color: #1B1B1C;
                 font-family: 'Noto Sans KR';
                 font-size: 19px;
@@ -840,7 +840,7 @@ class ResultPageWidget(QWidget):
                 color: #1B1B1C;
             }
             QTableWidget::item {
-                border-bottom: 1px solid #E0E0E0;
+                border-bottom: 1px solid #CCCCCC;
                 border-right: 0px solid transparent;
                 color: #1B1B1C;
                 font-family: 'Noto Sans KR';
@@ -1454,26 +1454,26 @@ class ResultPageWidget(QWidget):
 
         # ✅ 스크롤바 스타일
         scroll_area.setStyleSheet("""
-            QScrollArea { 
+            QScrollArea {
                 border: 1px solid #CECECE;
                 border-radius: 4px;
                 background-color: #FFFFFF;
             }
             QScrollBar:vertical {
                 border: none;
-                background: #F1F1F1;
+                background: #DFDFDF;
                 width: 14px;
                 margin: 0px;
                 border-radius: 4px;
             }
             QScrollBar::handle:vertical {
-                background: #C1C1C1;
+                background: #A3A9AD;
                 min-height: 20px;
                 border-radius: 4px;
                 margin: 0px 3px;
             }
             QScrollBar::handle:vertical:hover {
-                background: #A0A0A0;
+                background: #8A9094;
             }
             QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
                 border: none;
@@ -1565,7 +1565,7 @@ class ResultPageWidget(QWidget):
                 color: #222;
             }
             QTableWidget::item {
-                border-bottom: 1px solid #E0E0E0;
+                border-bottom: 1px solid #CCCCCC;
                 border-right: 0px solid transparent;
                 color: #1B1B1C;
                 font-family: 'Noto Sans KR';
@@ -1617,19 +1617,19 @@ class ResultPageWidget(QWidget):
             }
             QScrollBar:vertical {
                 border: none;
-                background: #F1F1F1;
+                background: #DFDFDF;
                 width: 14px;
                 margin: 0px;
                 border-radius: 4px;
             }
             QScrollBar::handle:vertical {
-                background: #C1C1C1;
+                background: #A3A9AD;
                 min-height: 20px;
                 border-radius: 4px;
                 margin: 0px 3px;
             }
             QScrollBar::handle:vertical:hover {
-                background: #A0A0A0;
+                background: #8A9094;
             }
             QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
                 border: none;
@@ -1885,7 +1885,7 @@ class ResultPageWidget(QWidget):
         total_group.setStyleSheet("""
             QGroupBox {
                 background-color: #F0F6FB;
-                border: 1px solid #E0E0E0;
+                border: 1px solid #CECECE;
                 border-top-left-radius: 0px;
                 border-top-right-radius: 0px;
                 border-bottom-left-radius: 4px;
@@ -2886,7 +2886,7 @@ class MyApp(QWidget):
                 color: #1B1B1C;
             }
             QTableWidget::item {
-                border-bottom: 1px solid #E0E0E0;
+                border-bottom: 1px solid #CCCCCC;
                 color: #1B1B1C;
                 font-family: 'Noto Sans KR';
                 font-size: 19px;
@@ -3090,7 +3090,7 @@ class MyApp(QWidget):
                 color: #1B1B1C;
             }
             QTableWidget::item {
-                border-bottom: 1px solid #E0E0E0;
+                border-bottom: 1px solid #CCCCCC;
                 border-right: 0px solid transparent;
                 color: #1B1B1C;
                 font-family: 'Noto Sans KR';
@@ -4420,7 +4420,7 @@ class MyApp(QWidget):
         self.url_text_box.setStyleSheet("""
             QLineEdit {
                 background-color: #FFFFFF;
-                border: 1px solid #CECECE;
+                border: 1px solid #868686;
                 border-radius: 4px;
                 padding: 0 24px;
                 font-family: "Noto Sans KR";
@@ -4859,7 +4859,7 @@ class MyApp(QWidget):
                 color: #222;
             }
             QTableWidget::item {
-                border-bottom: 1px solid #E0E0E0;
+                border-bottom: 1px solid #CCCCCC;
                 border-right: 0px solid transparent;
                 color: #1B1B1C;
                 font-family: 'Noto Sans KR';
@@ -5171,7 +5171,7 @@ class MyApp(QWidget):
         spec_group.setStyleSheet("""
             QGroupBox {
                 background-color: #FFF;
-                border: 1px solid #E0E0E0;
+                border: 1px solid #CECECE;
                 border-top-left-radius: 4px;
                 border-top-right-radius: 4px;
                 border-bottom-left-radius: 0px;
@@ -5319,7 +5319,7 @@ class MyApp(QWidget):
         total_group.setStyleSheet("""
             QGroupBox {
                 background-color: #F0F6FB;
-                border: 1px solid #E0E0E0;
+                border: 1px solid #CECECE;
                 border-top-left-radius: 0px;
                 border-top-right-radius: 0px;
                 border-bottom-left-radius: 4px;
