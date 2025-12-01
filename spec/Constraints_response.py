@@ -1,201 +1,112 @@
 # Authentication
-cmgvieyak001b6cd04cgaawmm_Authentication_out_constraints = {}
-
-# Capabilities
-cmgvieyak001b6cd04cgaawmm_Capabilities_out_constraints = {}
-
-# CameraProfiles
-cmgvieyak001b6cd04cgaawmm_CameraProfiles_out_constraints = {}
-
-# StoredVideoInfos
-cmgvieyak001b6cd04cgaawmm_StoredVideoInfos_out_constraints = {
-  "camList.camID": {
-    "valueType": "request-based",
-    "required": True,
-    "referenceEndpoint": "/StoredVideoInfos",
-    "referenceField": "camID"
+cmii7shen005i8z1tagevx4qh_Authentication_out_constraints = {
+  "code": {
+    "valueType": "preset",
+    "required": True
   },
-  "camList.timeList.startTime": {
-    "valueType": "request-range",
-    "required": True,
-    "requestRange": {
-      "maxField": "endTime",
-      "minField": "startTime",
-      "operator": "between",
-      "minEndpoint": "/StoredVideoInfos"
-    },
-    "requestRangeMinEndpoint": "/StoredVideoInfos",
-    "requestRangeMaxEndpoint": "/RealtimeVideoEventInfos"
+  "message": {
+    "valueType": "preset",
+    "required": True
   },
-  "camList.timeList.endTime": {
-    "valueType": "request-range",
-    "required": True,
-    "requestRange": {
-      "maxField": "endTime",
-      "minField": "startTime",
-      "operator": "between",
-      "minEndpoint": "/StoredVideoInfos"
-    },
-    "requestRangeMinEndpoint": "/StoredVideoInfos",
-    "requestRangeMaxEndpoint": "/RealtimeVideoEventInfos"
+  "userName": {
+    "valueType": "preset",
+    "required": True
+  },
+  "userAff": {
+    "valueType": "preset",
+    "required": True
+  },
+  "accessToken": {
+    "valueType": "preset",
+    "required": True
   }
 }
 
-# StreamURLs
-cmgvieyak001b6cd04cgaawmm_StreamURLs_out_constraints = {
-  "camList.camID": {
-    "valueType": "request-based",
-    "required": True,
-    "referenceEndpoint": "/StreamURLs",
-    "referenceField": "camID"
-  }
-}
-
-# ReplayURL
-cmgvieyak001b6cd04cgaawmm_ReplayURL_out_constraints = {
-  "camList.camID": {
-    "valueType": "request-based",
-    "required": True,
-    "referenceEndpoint": "/ReplayURL",
-    "referenceField": "camID"
-  },
-  "camList.startTime": {
-    "valueType": "request-range",
-    "required": True,
-    "requestRange": {
-      "maxField": "endTime",
-      "minField": "startTime",
-      "operator": "between",
-      "maxEndpoint": "/ReplayURL",
-      "minEndpoint": "/ReplayURL"
-    },
-    "requestRangeMinEndpoint": "/ReplayURL",
-    "requestRangeMaxEndpoint": "/ReplayURL"
-  },
-  "camList.endTime": {
-    "valueType": "request-range",
-    "required": True,
-    "requestRange": {
-      "maxField": "endTime",
-      "minField": "startTime",
-      "operator": "between",
-      "maxEndpoint": "/ReplayURL",
-      "minEndpoint": "/ReplayURL"
-    },
-    "requestRangeMinEndpoint": "/ReplayURL",
-    "requestRangeMaxEndpoint": "/ReplayURL"
-  }
-}
-
-# RealtimeVideoEventInfos
-cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_out_constraints = {}
-
-# RealtimeVideoEventInfos WebHook IN Constraints
-cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_webhook_in_constraints = {
-  "camList.camID": {
-    "valueType": "request-based",
-    "required": True,
-    "referenceEndpoint": "/RealtimeVideoEventInfos",
-    "referenceField": "camID"
-  },
-  "eventFilter": {
-    "valueType": "request-based",
-    "required": True,
-    "referenceEndpoint": "/RealtimeVideoEventInfos",
-    "referenceField": "eventFilter"
-  }
-}
-
-# StoredVideoEventInfos
-cmgvieyak001b6cd04cgaawmm_StoredVideoEventInfos_out_constraints = {
-  "camList.camID": {
-    "valueType": "request-based",
-    "required": True,
-    "referenceEndpoint": "/StoredVideoEventInfos",
-    "referenceField": "camID"
-  },
-  "camList.eventName": {
-    "valueType": "request-based",
-    "required": True,
-    "referenceEndpoint": "/StoredVideoEventInfos",
-    "referenceField": "eventFilter"
-  },
-  "camList.startTime": {
-    "valueType": "request-range",
-    "required": True,
-    "requestRange": {
-      "minField": "startTime",
-      "operator": "greater-equal",
-      "minEndpoint": "/StoredVideoEventInfos"
-    },
-    "requestRangeMinEndpoint": "/StoredVideoEventInfos"
-  },
-  "camList.endTime": {
-    "valueType": "request-range",
-    "required": True,
-    "requestRange": {
-      "minField": "startTime",
-      "operator": "greater-equal",
-      "minEndpoint": "/StoredVideoEventInfos"
-    },
-    "requestRangeMinEndpoint": "/StoredVideoEventInfos"
-  }
-}
-
-# cmgvieyak001b6cd04cgaawmm 검증 리스트
-cmgvieyak001b6cd04cgaawmm_outConstraints = [
-    cmgvieyak001b6cd04cgaawmm_Authentication_out_constraints,
-    cmgvieyak001b6cd04cgaawmm_Capabilities_out_constraints,
-    cmgvieyak001b6cd04cgaawmm_CameraProfiles_out_constraints,
-    cmgvieyak001b6cd04cgaawmm_StoredVideoInfos_out_constraints,
-    cmgvieyak001b6cd04cgaawmm_StreamURLs_out_constraints,
-    cmgvieyak001b6cd04cgaawmm_ReplayURL_out_constraints,
-    cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_out_constraints,
-    cmgvieyak001b6cd04cgaawmm_StoredVideoEventInfos_out_constraints,
-]
-
-# cmgvieyak001b6cd04cgaawmm WebHook Constraints 리스트
-cmgvieyak001b6cd04cgaawmm_webhook_inConstraints = [
-    cmgvieyak001b6cd04cgaawmm_RealtimeVideoEventInfos_webhook_in_constraints,
+# cmii7shen005i8z1tagevx4qh 검증 리스트
+cmii7shen005i8z1tagevx4qh_outConstraints = [
+    cmii7shen005i8z1tagevx4qh_Authentication_out_constraints,
 ]
 
 # Authentication
-cmh1u5pef000sgxc3bzl4y9v0_Authentication_out_constraints = {}
-
-# DoorProfiles
-cmh1u5pef000sgxc3bzl4y9v0_DoorProfiles_out_constraints = {
-  "doorList.doorSensor": {
-    "valueType": "random",
-    "required": False,
-    "referenceField": "(참조 필드 미선택)",
-    "referenceEndpoint": "/DoorProfiles",
-    "validValueField": "eventFilter_bio",
-    "validValues": [
-      "Lock",
-      "UnLock"
-    ]
+cmii7pysb004k8z1tts0npxfm_Authentication_out_constraints = {
+  "code": {
+    "valueType": "preset",
+    "required": True
+  },
+  "message": {
+    "valueType": "preset",
+    "required": True
+  },
+  "userName": {
+    "valueType": "preset",
+    "required": True
+  },
+  "userAff": {
+    "valueType": "preset",
+    "required": True
+  },
+  "accessToken": {
+    "valueType": "preset",
+    "required": False
   }
 }
 
-# RealtimeDoorStatus
-cmh1u5pef000sgxc3bzl4y9v0_RealtimeDoorStatus_out_constraints = {}
+# Capabilities
+cmii7pysb004k8z1tts0npxfm_Capabilities_out_constraints = {
+  "code": {
+    "valueType": "preset",
+    "required": True
+  },
+  "message": {
+    "valueType": "preset",
+    "required": True
+  },
+  "transportSupport": {
+    "valueType": "preset",
+    "required": True
+  },
+  "transportSupport.transProtocolType": {
+    "valueType": "preset",
+    "required": True
+  },
+  "transportSupport.transProtocolDesc": {
+    "valueType": "preset",
+    "required": False
+  }
+}
 
-# RealtimeDoorStatus WebHook IN Constraints
-cmh1u5pef000sgxc3bzl4y9v0_RealtimeDoorStatus_webhook_in_constraints = {}
-
-# DoorControl
-cmh1u5pef000sgxc3bzl4y9v0_DoorControl_out_constraints = {}
-
-# cmh1u5pef000sgxc3bzl4y9v0 검증 리스트
-cmh1u5pef000sgxc3bzl4y9v0_outConstraints = [
-    cmh1u5pef000sgxc3bzl4y9v0_Authentication_out_constraints,
-    cmh1u5pef000sgxc3bzl4y9v0_DoorProfiles_out_constraints,
-    cmh1u5pef000sgxc3bzl4y9v0_RealtimeDoorStatus_out_constraints,
-    cmh1u5pef000sgxc3bzl4y9v0_DoorControl_out_constraints,
+# cmii7pysb004k8z1tts0npxfm 검증 리스트
+cmii7pysb004k8z1tts0npxfm_outConstraints = [
+    cmii7pysb004k8z1tts0npxfm_Authentication_out_constraints,
+    cmii7pysb004k8z1tts0npxfm_Capabilities_out_constraints,
 ]
 
-# cmh1u5pef000sgxc3bzl4y9v0 WebHook Constraints 리스트
-cmh1u5pef000sgxc3bzl4y9v0_webhook_inConstraints = [
-    cmh1u5pef000sgxc3bzl4y9v0_RealtimeDoorStatus_webhook_in_constraints,
+# Authentication
+cmii7lxbn002s8z1t1i9uudf0_Authentication_out_constraints = {
+  "code": {
+    "valueType": "preset",
+    "required": True
+  },
+  "message": {
+    "valueType": "preset",
+    "required": True
+  },
+  "userName": {
+    "valueType": "preset",
+    "required": True
+  },
+  "userAff": {
+    "valueType": "preset",
+    "required": True
+  },
+  "accessToken": {
+    "valueType": "preset",
+    "required": False
+  }
+}
+
+# cmii7lxbn002s8z1t1i9uudf0 검증 리스트
+cmii7lxbn002s8z1t1i9uudf0_outConstraints = [
+    cmii7lxbn002s8z1t1i9uudf0_Authentication_out_constraints,
 ]
 
