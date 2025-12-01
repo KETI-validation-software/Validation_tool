@@ -474,7 +474,7 @@ class ResultPageWidget(QWidget):
             font-style: normal;
             font-family: "Noto Sans KR";
             font-weight: 500;
-            color: #1B1B1C;
+            color: #000000;
             letter-spacing: -0.3px;
         """)
         left_layout.addWidget(title)
@@ -544,7 +544,7 @@ class ResultPageWidget(QWidget):
             font-size: 20px;
             font-family: "Noto Sans KR";
             font-weight: 500;
-            color: #222;
+            color: #000000;
             letter-spacing: -0.3px;
         """)
         right_layout.addWidget(result_label)
@@ -1431,10 +1431,11 @@ class ResultPageWidget(QWidget):
         # ✅ 한 개의 라벨로 출력
         info_label = QLabel(info_text)
         info_label.setWordWrap(True)  # 줄바꿈 자동 처리
-        info_label.setFont(QFont("Noto Sans KR", 16))
         info_label.setStyleSheet("""
-            color: #222;
+            font-family: "Noto Sans KR";
+            font-size: 16px;
             font-weight: 400;
+            color: #1B1B1C;
             line-height: 1.8;
             border: none;
         """)
@@ -1768,7 +1769,7 @@ class ResultPageWidget(QWidget):
         # 분야별 점수 레이블 (500 Medium 20px)
         score_type_label = QLabel("분야별 점수")
         score_type_label.setStyleSheet("""
-            color: #000;
+            color: #000000;
             font-family: "Noto Sans KR";
             font-size: 20px;
             font-style: normal;
@@ -1789,7 +1790,7 @@ class ResultPageWidget(QWidget):
         api_count = len(self.parent.videoMessages)
         spec_info_label = QLabel(f"{spec_description} ({api_count}개 API)")
         spec_info_label.setStyleSheet("""
-            color: #000;
+            color: #000000;
             font-family: "Noto Sans KR";
             font-size: 20px;
             font-style: normal;
@@ -2834,7 +2835,7 @@ class MyApp(QWidget):
             font-style: normal;
             font-family: "Noto Sans KR";
             font-weight: 500;
-            color: #1B1B1C;
+            color: #000000;
             letter-spacing: -0.3px;
         """)
         parent_layout.addWidget(title)
@@ -4424,7 +4425,7 @@ class MyApp(QWidget):
                 padding: 0 24px;
                 font-family: "Noto Sans KR";
                 font-size: 18px;
-                font-weight: 500;
+                font-weight: 400;
                 color: #000000;
                 selection-background-color: #4A90E2;
                 selection-color: white;
@@ -4515,7 +4516,7 @@ class MyApp(QWidget):
                 font-family: "Noto Sans KR";
                 font-size: 19px;
                 font-weight: 400;
-                color: #000000;
+                color: #1B1B1C;
             }
             QScrollBar:vertical {
                 border: none;
