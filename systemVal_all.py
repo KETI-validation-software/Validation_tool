@@ -4842,9 +4842,7 @@ class MyApp(QWidget):
 
         # 테이블 본문 (헤더 숨김)
         self.tableWidget = QTableWidget(api_count, 9)  # 9개 컬럼
-        table_height = api_count * 40  # 행 개수 × 행 높이
         # self.tableWidget.setFixedWidth(1050)  # setWidgetResizable(True) 사용으로 주석 처리
-        self.tableWidget.setFixedHeight(table_height)
         self.tableWidget.horizontalHeader().setVisible(False)
         self.tableWidget.verticalHeader().setVisible(False)
         self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
