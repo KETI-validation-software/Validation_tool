@@ -424,8 +424,8 @@ class ResultPageWidget(QWidget):
         # 타이틀 이미지 (408x36) - result_title.png 사용
         header_title_label = QLabel()
         header_title_pixmap = QPixmap(resource_path("assets/image/test_runner/result_title.png"))
-        header_title_label.setPixmap(header_title_pixmap.scaled(408, 36, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        header_title_label.setFixedSize(408, 36)
+        header_title_label.setPixmap(header_title_pixmap.scaled(407, 36, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        header_title_label.setFixedSize(407, 36)
         header_layout.addWidget(header_title_label)
 
         # 오른쪽 stretch (나머지 공간 채우기)
@@ -4334,8 +4334,8 @@ class MyApp(QWidget):
         # 타이틀 이미지 (408x36)
         header_title_label = QLabel()
         header_title_pixmap = QPixmap(resource_path("assets/image/test_runner/runner_title.png"))
-        header_title_label.setPixmap(header_title_pixmap.scaled(408, 36, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        header_title_label.setFixedSize(408, 36)
+        header_title_label.setPixmap(header_title_pixmap.scaled(407, 36, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        header_title_label.setFixedSize(407, 36)
         header_layout.addWidget(header_title_label)
 
         # 오른쪽 stretch (나머지 공간 채우기)
