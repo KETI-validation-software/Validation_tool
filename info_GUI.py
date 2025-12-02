@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QGroupBox, QLineEdit,
     QPushButton, QMessageBox, QTableWidget, QHeaderView, QAbstractItemView, QTableWidgetItem,
-    QStackedWidget, QRadioButton, QFrame, QApplication, QSizePolicy
+    QStackedWidget, QRadioButton, QFrame, QApplication, QSizePolicy, QGraphicsDropShadowEffect
 )
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QPixmap, QColor, QFont, QBrush, QPainter, QPen
@@ -549,6 +549,14 @@ class InfoWidget(QWidget):
                 border-radius: 12px;
             }
         """)
+
+        # 팝오버 그림자 효과 (Figma: X:0, Y:0, Blur:5, Spread:0, #6B6B6B 80%)
+        popover_shadow = QGraphicsDropShadowEffect()
+        popover_shadow.setBlurRadius(5)
+        popover_shadow.setXOffset(0)
+        popover_shadow.setYOffset(0)
+        popover_shadow.setColor(QColor(107, 107, 107, 204))  # #6B6B6B 80%
+        self.address_popover.setGraphicsEffect(popover_shadow)
 
         popover_layout = QVBoxLayout()
         popover_layout.setContentsMargins(16, 16, 16, 16)
