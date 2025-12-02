@@ -591,7 +591,7 @@ class InfoWidget(QWidget):
                 border-radius: 4px;
                 background-color: #FFFFFF;
                 font-family: 'Noto Sans KR';
-                font-weight: 400;
+                font-weight: 500;
                 font-size: 18px;
                 letter-spacing: -0.18px;
                 color: #000000;
@@ -599,6 +599,7 @@ class InfoWidget(QWidget):
             QLineEdit::placeholder {
                 color: #868686;
                 font-size: 18px;
+                font-weight: 500;
             }
         """)
         input_row_layout.addWidget(self.address_input)
