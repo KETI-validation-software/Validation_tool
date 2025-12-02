@@ -28,7 +28,14 @@ class SplashScreen(QSplashScreen):
         """UI 구성 요소 생성"""
         # 메인 위젯 (레이아웃 사용 위해)
         widget = QWidget()
+        widget.setObjectName("splashContainer")
         widget.setFixedSize(self.width, self.height)
+        widget.setStyleSheet("""
+            #splashContainer {
+                background-color: #FFFFFF;
+                border: 3px solid #A3A9AD;
+            }
+        """)
 
         layout = QVBoxLayout()
         layout.setContentsMargins(40, 40, 40, 40)
@@ -55,8 +62,10 @@ class SplashScreen(QSplashScreen):
         self.subtitle_label.setAlignment(Qt.AlignCenter)
         self.subtitle_label.setStyleSheet("""
             QLabel {
+                font-family: 'Noto Sans KR';
                 color: #666666;
-                font-size: 11pt;
+                font-size: 18pt;
+                font-weight: 500;
                 padding: 5px;
             }
         """)
@@ -73,11 +82,12 @@ class SplashScreen(QSplashScreen):
         self.progress_bar.setFixedHeight(25)
         self.progress_bar.setStyleSheet("""
             QProgressBar {
+                font-family: 'Noto Sans KR';
                 border: 1px solid #cfd6e4;
                 border-radius: 4px;
                 background-color: #ffffff;
                 text-align: center;
-                font-size: 10pt;
+                font-size: 14pt;
                 color: #333333;
             }
             QProgressBar::chunk {
@@ -92,8 +102,10 @@ class SplashScreen(QSplashScreen):
         self.status_label.setAlignment(Qt.AlignCenter)
         self.status_label.setStyleSheet("""
             QLabel {
+                font-family: 'Noto Sans KR';
                 color: #888888;
-                font-size: 9pt;
+                font-size: 12pt;
+                font-weight: 400;
                 padding: 5px;
             }
         """)
@@ -217,7 +229,7 @@ class LoadingPopup(QSplashScreen):
     """
     평가 시작 시 로딩 상태를 표시하는 팝업
     """
-    def __init__(self, width=400, height=200):
+    def __init__(self, width=400, height=250):
         # 빈 픽스맵 생성 (배경용)
         pixmap = QPixmap(width, height)
         pixmap.fill(QColor("#f5f6f8"))
@@ -237,11 +249,18 @@ class LoadingPopup(QSplashScreen):
         """UI 구성 요소 생성"""
         # 메인 위젯 (레이아웃 사용 위해)
         widget = QWidget()
+        widget.setObjectName("loadingContainer")
         widget.setFixedSize(self.width, self.height)
+        widget.setStyleSheet("""
+            #loadingContainer {
+                background-color: #FFFFFF;
+                border: 3px solid #A3A9AD;
+            }
+        """)
 
         layout = QVBoxLayout()
-        layout.setContentsMargins(30, 30, 30, 30)
-        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(10)
 
         # ===== 상단 여백 =====
         layout.addStretch(1)
@@ -251,9 +270,10 @@ class LoadingPopup(QSplashScreen):
         self.message_label.setAlignment(Qt.AlignCenter)
         self.message_label.setStyleSheet("""
             QLabel {
+                font-family: 'Noto Sans KR';
                 color: #163971;
                 font-size: 14pt;
-                font-weight: bold;
+                font-weight: 500;
                 padding: 10px;
             }
         """)
@@ -264,8 +284,10 @@ class LoadingPopup(QSplashScreen):
         self.subtitle_label.setAlignment(Qt.AlignCenter)
         self.subtitle_label.setStyleSheet("""
             QLabel {
+                font-family: 'Noto Sans KR';
                 color: #666666;
-                font-size: 10pt;
+                font-size: 12pt;
+                font-weight: 400;
                 padding: 5px;
             }
         """)
