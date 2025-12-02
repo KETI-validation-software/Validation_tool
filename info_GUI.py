@@ -34,8 +34,8 @@ class TestFieldTableWidget(QTableWidget):
         painter.setPen(pen)
 
         # 첫 번째 컬럼과 두 번째 컬럼 사이의 세로선
-        # 첫 번째 컬럼 너비: 371px
-        x_position = 371
+        # 첫 번째 컬럼 너비: 372px
+        x_position = 372
 
         # 헤더 높이만큼 아래부터 viewport 끝까지 선 그리기
         header_height = self.horizontalHeader().height()
@@ -1656,7 +1656,7 @@ class InfoWidget(QWidget):
         field_header = self.test_field_table.horizontalHeader()
         field_header.setFixedHeight(31)
         field_header.setSectionResizeMode(0, QHeaderView.Fixed)
-        field_header.resizeSection(0, 371)
+        field_header.resizeSection(0, 372)
 
         # 행 높이 설정
         self.test_field_table.verticalHeader().setDefaultSectionSize(39)
@@ -1673,7 +1673,7 @@ class InfoWidget(QWidget):
         scenario_header = self.scenario_table.horizontalHeader()
         scenario_header.setFixedHeight(31)
         scenario_header.setSectionResizeMode(0, QHeaderView.Fixed)
-        scenario_header.resizeSection(0, 371)
+        scenario_header.resizeSection(0, 372)
 
         # 행 높이 설정
         self.scenario_table.verticalHeader().setDefaultSectionSize(39)
@@ -1801,7 +1801,7 @@ class InfoWidget(QWidget):
             }
         """)
         # viewport 기준으로 전체 영역 커버
-        self.scenario_column_background.setGeometry(0, 0, 371, 240)
+        self.scenario_column_background.setGeometry(0, 0, 372, 240)
         self.scenario_column_background.lower()  # 셀들 뒤로 배치
         self.scenario_column_background.hide()  # 초기에는 숨김
 
@@ -1822,7 +1822,7 @@ class InfoWidget(QWidget):
             }
         """)
         # 헤더 아래 영역에 배치
-        self.scenario_placeholder_label.setGeometry(0, 31, 371, 209)  # x, y, width, height
+        self.scenario_placeholder_label.setGeometry(0, 31, 372, 209)  # x, y, width, height
         self.scenario_placeholder_label.hide()  # 초기에는 숨김
 
         # 두 테이블을 수평 레이아웃에 추가
