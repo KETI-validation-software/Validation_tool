@@ -11,7 +11,7 @@ from core.functions import resource_path
 
 # 분리된 모듈들 import
 from network_scanner import NetworkScanWorker, ARPScanWorker
-from form_validator import FormValidator
+from form_validator import FormValidator, ClickableLabel
 import config.CONSTANTS as CONSTANTS
 from splash_screen import LoadingPopup
 
@@ -1644,7 +1644,6 @@ class InfoWidget(QWidget):
         self.scenario_table.setHorizontalHeaderLabels(["시험 시나리오"])
 
         # === 시험 분야 테이블 설정 ===
-        # 컬럼 너비 설정
         field_header = self.test_field_table.horizontalHeader()
         field_header.setFixedHeight(31)
         field_header.setSectionResizeMode(0, QHeaderView.Fixed)
@@ -1662,7 +1661,6 @@ class InfoWidget(QWidget):
         self.test_field_table.cellClicked.connect(self.on_test_field_selected)
 
         # === 시험 시나리오 테이블 설정 ===
-        # 컬럼 너비 설정
         scenario_header = self.scenario_table.horizontalHeader()
         scenario_header.setFixedHeight(31)
         scenario_header.setSectionResizeMode(0, QHeaderView.Fixed)
@@ -1866,7 +1864,6 @@ class InfoWidget(QWidget):
         # 행 번호 열 너비 설정
         self.api_test_table.verticalHeader().setFixedWidth(50)
 
-        # 컬럼 너비 설정 (여유 공간 고려하여 조정)
         header.resizeSection(0, 346)
         header.resizeSection(1, 346)
 
@@ -1889,6 +1886,7 @@ class InfoWidget(QWidget):
 
         # 왼쪽 행 번호 헤더 설정
         vertical_header = self.api_test_table.verticalHeader()
+        vertical_header.setFixedWidth(50)  # 행 번호 너비 고정 (시험 API 테이블과 동일)
         vertical_header.setDefaultAlignment(Qt.AlignCenter)
 
         # 행 번호 폰트 설정 (19px)
@@ -1896,7 +1894,6 @@ class InfoWidget(QWidget):
         row_number_font.setPixelSize(19)
         vertical_header.setFont(row_number_font)
 
-        vertical_header.setStyleSheet("QHeaderView { background-color: #FFFFFF; }")
 
         # 세로 grid line 제거
         self.api_test_table.setShowGrid(False)
@@ -2493,41 +2490,38 @@ class InfoWidget(QWidget):
         # 6px gap
         layout.addSpacing(6)
 
-        # URL 테이블 (744x370px) - 체크박스 + URL 컬럼
-        self.url_table = QTableWidget(0, 2)  # 2개 컬럼: 체크박스, URL
+        # URL 테이블 (744x370px) - 2개 컬럼 (행번호 + URL)
+        self.url_table = QTableWidget(0, 2)  # 2개 컬럼: 행번호(50px) + URL(694px)
         self.url_table.setFixedSize(744, 370)
-        self.url_table.setHorizontalHeaderLabels(["", "URL"])  # 첫 번째는 체크박스용 빈 헤더
+        self.url_table.setHorizontalHeaderLabels(["", "URL"])
         self.url_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.url_table.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.url_table.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.url_table.setSelectionMode(QAbstractItemView.NoSelection)  # 선택 비활성화 (이미지로 처리)
 
         # 헤더 설정
         header = self.url_table.horizontalHeader()
-        header.setFixedHeight(31)  # 744x31
-        header.setDefaultAlignment(Qt.AlignCenter)  # 헤더 가운데 정렬
+        header.setFixedHeight(31)
+        header.setDefaultAlignment(Qt.AlignCenter)
+        header.setSectionResizeMode(0, QHeaderView.Fixed)  # 행번호 컬럼: 고정
+        header.setSectionResizeMode(1, QHeaderView.Stretch)  # URL 컬럼: 전체 공간
+        self.url_table.setColumnWidth(0, 50)  # 행번호 컬럼 50px
 
-        # 컬럼 너비 설정
-        self.url_table.setColumnWidth(0, 40)  # 체크박스 컬럼: 40px
-        header.setSectionResizeMode(1, QHeaderView.Stretch)  # URL 컬럼: 나머지 공간
-
-        # 왼쪽 행 번호 헤더 설정
+        # 왼쪽 행 번호 헤더 숨김 (컬럼 0으로 대체)
         vertical_header = self.url_table.verticalHeader()
-        vertical_header.setVisible(True)
-        vertical_header.setDefaultAlignment(Qt.AlignCenter)
-        vertical_header.setStyleSheet("QHeaderView { background-color: #FFFFFF; }")
+        vertical_header.setVisible(False)
 
         # 세로 grid line 제거
         self.url_table.setShowGrid(False)
 
-        # 행 높이 설정 (데이터 셀: 744x39)
+        # 행 높이 설정
         self.url_table.verticalHeader().setDefaultSectionSize(39)
 
-        # 스타일 설정
-        checkbox_unchecked = resource_path("assets/image/test_config/checkbox_unchecked.png").replace(chr(92), "/")
-        checkbox_checked = resource_path("assets/image/test_config/checkbox_checked.png").replace(chr(92), "/")
+        # 선택된 URL 행 추적 변수
+        self.selected_url_row = None
 
-        self.url_table.setStyleSheet(f"""
-            QTableWidget {{
+        # 스타일 설정 (이미지 배경 방식 - setCellWidget 사용)
+        self.url_table.setStyleSheet("""
+            QTableWidget {
                 background-color: #FFFFFF;
                 border: 1px solid #CECECE;
                 border-radius: 4px;
@@ -2535,29 +2529,17 @@ class InfoWidget(QWidget):
                 font-weight: 400;
                 font-size: 19px;
                 letter-spacing: -0.19px;
-            }}
-            QTableWidget::item {{
-                background-color: #FFFFFF;
-                border-bottom: 1px solid #CCCCCC;
-                border-right: none;
-                padding-right: 14px;
-                color: #000000;
-            }}
-            QTableWidget::item:selected {{
-                background-color: #E3F2FF;
-                color: #000000;
-            }}
-            QTableWidget::indicator {{
-                width: 20px;
-                height: 20px;
-            }}
-            QTableWidget::indicator:unchecked {{
-                image: url({checkbox_unchecked});
-            }}
-            QTableWidget::indicator:checked {{
-                image: url({checkbox_checked});
-            }}
-            QHeaderView::section {{
+            }
+            QTableWidget::item {
+                background-color: transparent;
+                border: none;
+                padding: 0px;
+                margin: 0px;
+            }
+            QTableWidget::item:selected {
+                background-color: transparent;
+            }
+            QHeaderView::section {
                 background-color: #EDF0F3;
                 border: none;
                 border-bottom: 1px solid #CCCCCC;
@@ -2567,30 +2549,15 @@ class InfoWidget(QWidget):
                 font-size: 18px;
                 font-weight: 600;
                 letter-spacing: -0.18px;
-            }}
-            QHeaderView::section:vertical {{
-                background-color: #FFFFFF;
-                border: none;
-                border-right: none;
-                border-bottom: 1px solid #CCCCCC;
-                font-family: 'Noto Sans KR';
-                font-weight: 400;
-                font-size: 19px;
-                letter-spacing: -0.19px;
-                color: #000000;
-            }}
-            QHeaderView::section:vertical:checked {{
-                background-color: #E3F2FF;
-            }}
-            QTableCornerButton::section {{
+            }
+            QTableCornerButton::section {
                 background-color: #EDF0F3;
                 border: none;
                 border-bottom: 1px solid #CCCCCC;
-            }}
+            }
         """)
 
-        self.url_table.cellClicked.connect(self.select_url_row)
-        self.url_table.itemChanged.connect(self.on_checkbox_changed)
+        # cellClicked는 사용하지 않음 - ClickableLabel의 clicked 시그널 사용
         layout.addWidget(self.url_table)
 
         section.setLayout(layout)
@@ -2810,25 +2777,58 @@ class InfoWidget(QWidget):
         QMessageBox.warning(self, "ARP 스캔 실패", msg)
 
     def _populate_url_table(self, urls):
-        """URL 테이블에 스캔 결과 채우기"""
+        """URL 테이블에 스캔 결과 채우기 (2컬럼: 행번호 + URL)"""
         try:
             self.url_table.setRowCount(0)
+            self.selected_url_row = None
+
+            # 이미지 경로 (Windows 경로 슬래시 변환)
+            unchecked_img = resource_path("assets/image/test_config/url_row_checkbox_unchecked.png").replace(chr(92), "/")
 
             for i, url in enumerate(urls):
                 row = self.url_table.rowCount()
                 self.url_table.insertRow(row)
 
-                # 체크박스 (컬럼 0)
-                checkbox_item = QTableWidgetItem()
-                checkbox_item.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled | Qt.ItemIsSelectable)
-                checkbox_item.setCheckState(Qt.Unchecked)
-                checkbox_item.setTextAlignment(Qt.AlignCenter)
-                self.url_table.setItem(row, 0, checkbox_item)
+                # 컬럼 0: 행 번호 (ClickableLabel - 배경색으로 선택 표시)
+                row_num_label = ClickableLabel(str(row + 1), row, 0)
+                row_num_label.setAlignment(Qt.AlignCenter)
+                row_num_label.setStyleSheet("""
+                    QLabel {
+                        background-color: #FFFFFF;
+                        border: none;
+                        border-bottom: 1px solid #CCCCCC;
+                        font-family: 'Noto Sans KR';
+                        font-size: 19px;
+                        font-weight: 400;
+                        color: #000000;
+                    }
+                """)
+                row_num_label.clicked.connect(self.on_url_row_selected)
+                self.url_table.setCellWidget(row, 0, row_num_label)
 
-                # URL 텍스트 (컬럼 1)
-                url_item = QTableWidgetItem(url)
-                url_item.setTextAlignment(Qt.AlignCenter)
-                self.url_table.setItem(row, 1, url_item)
+                # 컬럼 1: URL (ClickableLabel - 이미지 배경)
+                url_label = ClickableLabel(url, row, 1)
+                url_label.setAlignment(Qt.AlignCenter)
+                url_label.setStyleSheet(f"""
+                    QLabel {{
+                        background-image: url('{unchecked_img}');
+                        background-position: left center;
+                        background-repeat: no-repeat;
+                        border: none;
+                        border-bottom: 1px solid #CCCCCC;
+                        font-family: 'Noto Sans KR';
+                        font-size: 19px;
+                        font-weight: 400;
+                        color: #000000;
+                        margin: 0px;
+                        padding: 0px;
+                    }}
+                """)
+                url_label.setProperty("url", url)
+                url_label.clicked.connect(self.on_url_row_selected)
+                self.url_table.setCellWidget(row, 1, url_label)
+
+                self.url_table.setRowHeight(row, 39)
 
         except Exception as e:
             self._show_scan_error(f"테이블 업데이트 중 오류:\n{str(e)}")
@@ -2838,7 +2838,7 @@ class InfoWidget(QWidget):
         QMessageBox.warning(self, "주소 탐색 실패", message)
 
     def add_ip_to_table(self):
-        """직접 입력한 IP:Port를 URL 테이블에 추가"""
+        """직접 입력한 IP:Port를 URL 테이블에 추가 (2컬럼: 행번호 + URL)"""
         try:
             # 입력값 가져오기
             ip_port = self.page2_ip_direct_input.text().strip()
@@ -2865,28 +2865,60 @@ class InfoWidget(QWidget):
             # IP와 testPort 결합
             final_url = f"{ip_port}:{self.test_port}"
 
-            # 중복 확인
+            # 중복 확인 (컬럼 1의 ClickableLabel에서 url property 가져오기)
             for row in range(self.url_table.rowCount()):
-                item = self.url_table.item(row, 1)  # 컬럼 1 (URL)
-                if item and item.text() == final_url:
+                widget = self.url_table.cellWidget(row, 1)
+                if widget and widget.property("url") == final_url:
                     QMessageBox.information(self, "알림", "이미 추가된 주소입니다.")
                     return
+
+            # 이미지 경로 (Windows 경로 슬래시 변환)
+            unchecked_img = resource_path("assets/image/test_config/url_row_checkbox_unchecked.png").replace(chr(92), "/")
 
             # 테이블에 추가
             row = self.url_table.rowCount()
             self.url_table.insertRow(row)
 
-            # 체크박스 (컬럼 0)
-            checkbox_item = QTableWidgetItem()
-            checkbox_item.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled | Qt.ItemIsSelectable)
-            checkbox_item.setCheckState(Qt.Unchecked)
-            checkbox_item.setTextAlignment(Qt.AlignCenter)
-            self.url_table.setItem(row, 0, checkbox_item)
+            # 컬럼 0: 행 번호 (ClickableLabel - 배경색으로 선택 표시)
+            row_num_label = ClickableLabel(str(row + 1), row, 0)
+            row_num_label.setAlignment(Qt.AlignCenter)
+            row_num_label.setStyleSheet("""
+                QLabel {
+                    background-color: #FFFFFF;
+                    border: none;
+                    border-bottom: 1px solid #CCCCCC;
+                    font-family: 'Noto Sans KR';
+                    font-size: 19px;
+                    font-weight: 400;
+                    color: #000000;
+                }
+            """)
+            row_num_label.clicked.connect(self.on_url_row_selected)
+            self.url_table.setCellWidget(row, 0, row_num_label)
 
-            # URL 텍스트 추가 (컬럼 1)
-            url_item = QTableWidgetItem(final_url)
-            url_item.setTextAlignment(Qt.AlignCenter)
-            self.url_table.setItem(row, 1, url_item)
+            # 컬럼 1: URL (ClickableLabel - 이미지 배경)
+            url_label = ClickableLabel(final_url, row, 1)
+            url_label.setAlignment(Qt.AlignCenter)
+            url_label.setStyleSheet(f"""
+                QLabel {{
+                    background-image: url('{unchecked_img}');
+                    background-position: left center;
+                    background-repeat: no-repeat;
+                    border: none;
+                    border-bottom: 1px solid #CCCCCC;
+                    font-family: 'Noto Sans KR';
+                    font-size: 19px;
+                    font-weight: 400;
+                    color: #000000;
+                    margin: 0px;
+                    padding: 0px;
+                }}
+            """)
+            url_label.setProperty("url", final_url)
+            url_label.clicked.connect(self.on_url_row_selected)
+            self.url_table.setCellWidget(row, 1, url_label)
+
+            self.url_table.setRowHeight(row, 39)
 
             # 입력창 초기화
             self.page2_ip_direct_input.clear()
@@ -2897,34 +2929,18 @@ class InfoWidget(QWidget):
             print(f"IP 추가 오류: {e}")
             QMessageBox.critical(self, "오류", f"주소 추가 중 오류가 발생했습니다:\n{str(e)}")
 
-    def select_url_row(self, row, col):
-        """행 클릭 시: 행 선택 및 체크박스 자동 체크"""
-        # 체크박스 컬럼(0) 클릭 시에는 체크박스가 자동으로 토글되므로 처리 안 함
-        if col == 0:
-            return
-
-        # 클릭한 행의 체크박스를 체크 (on_checkbox_changed가 자동 호출됨)
-        checkbox_item = self.url_table.item(row, 0)
-        if checkbox_item:
-            checkbox_item.setCheckState(Qt.Checked)
-
-        # URL 선택 변경 시 버튼 상태 체크
-        self.check_start_button_state()
-
     def get_selected_url(self):
-        """URL 테이블에서 선택된 URL 반환"""
-        # 선택된 행 번호 가져오기
-        selected_indexes = self.url_table.selectionModel().selectedRows()
-        if selected_indexes:
-            row = selected_indexes[0].row()
-            # 컬럼 1에서 URL 가져오기 (컬럼 0은 체크박스)
-            url_item = self.url_table.item(row, 1)
-            if url_item:
-                selected_url = url_item.text().strip()
-                # http://가 없으면 추가
-                if not selected_url.startswith(('http://', 'https://')):
-                    selected_url = f"https://{selected_url}"
-                return selected_url
+        """URL 테이블에서 선택된 URL 반환 (2컬럼 방식 - 컬럼 1에서 URL 가져오기)"""
+        # 선택된 행 번호 확인
+        if self.selected_url_row is not None:
+            widget = self.url_table.cellWidget(self.selected_url_row, 1)  # 컬럼 1: URL
+            if widget:
+                selected_url = widget.property("url")
+                if selected_url:
+                    # http://가 없으면 추가
+                    if not selected_url.startswith(('http://', 'https://')):
+                        selected_url = f"https://{selected_url}"
+                    return selected_url
         return None
 
     def _check_required_fields(self):
@@ -3631,7 +3647,7 @@ class InfoWidget(QWidget):
             self.address_input.setFocus()  # 입력창에 포커스
 
     def add_address_from_popover(self):
-        """팝오버에서 IP 주소 추가"""
+        """팝오버에서 IP 주소 추가 (2컬럼: 행번호 + URL)"""
         try:
             # 입력값 가져오기
             ip_port = self.address_input.text().strip()
@@ -3658,28 +3674,60 @@ class InfoWidget(QWidget):
             # IP와 testPort 결합
             final_url = f"{ip_port}:{self.test_port}"
 
-            # 중복 확인
+            # 중복 확인 (컬럼 1의 ClickableLabel에서 url property 가져오기)
             for row in range(self.url_table.rowCount()):
-                item = self.url_table.item(row, 1)  # 컬럼 1 (URL)
-                if item and item.text() == final_url:
+                widget = self.url_table.cellWidget(row, 1)
+                if widget and widget.property("url") == final_url:
                     QMessageBox.information(self, "알림", "이미 추가된 주소입니다.")
                     return
+
+            # 이미지 경로 (Windows 경로 슬래시 변환)
+            unchecked_img = resource_path("assets/image/test_config/url_row_checkbox_unchecked.png").replace(chr(92), "/")
 
             # 테이블에 추가
             row = self.url_table.rowCount()
             self.url_table.insertRow(row)
 
-            # 체크박스 (컬럼 0)
-            checkbox_item = QTableWidgetItem()
-            checkbox_item.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled | Qt.ItemIsSelectable)
-            checkbox_item.setCheckState(Qt.Unchecked)
-            checkbox_item.setTextAlignment(Qt.AlignCenter)
-            self.url_table.setItem(row, 0, checkbox_item)
+            # 컬럼 0: 행 번호 (ClickableLabel - 배경색으로 선택 표시)
+            row_num_label = ClickableLabel(str(row + 1), row, 0)
+            row_num_label.setAlignment(Qt.AlignCenter)
+            row_num_label.setStyleSheet("""
+                QLabel {
+                    background-color: #FFFFFF;
+                    border: none;
+                    border-bottom: 1px solid #CCCCCC;
+                    font-family: 'Noto Sans KR';
+                    font-size: 19px;
+                    font-weight: 400;
+                    color: #000000;
+                }
+            """)
+            row_num_label.clicked.connect(self.on_url_row_selected)
+            self.url_table.setCellWidget(row, 0, row_num_label)
 
-            # URL 텍스트 추가 (컬럼 1)
-            url_item = QTableWidgetItem(final_url)
-            url_item.setTextAlignment(Qt.AlignCenter)
-            self.url_table.setItem(row, 1, url_item)
+            # 컬럼 1: URL (ClickableLabel - 이미지 배경)
+            url_label = ClickableLabel(final_url, row, 1)
+            url_label.setAlignment(Qt.AlignCenter)
+            url_label.setStyleSheet(f"""
+                QLabel {{
+                    background-image: url('{unchecked_img}');
+                    background-position: left center;
+                    background-repeat: no-repeat;
+                    border: none;
+                    border-bottom: 1px solid #CCCCCC;
+                    font-family: 'Noto Sans KR';
+                    font-size: 19px;
+                    font-weight: 400;
+                    color: #000000;
+                    margin: 0px;
+                    padding: 0px;
+                }}
+            """)
+            url_label.setProperty("url", final_url)
+            url_label.clicked.connect(self.on_url_row_selected)
+            self.url_table.setCellWidget(row, 1, url_label)
+
+            self.url_table.setRowHeight(row, 39)
 
             # 입력창 초기화
             self.address_input.clear()
@@ -3694,32 +3742,87 @@ class InfoWidget(QWidget):
             print(f"IP 추가 오류: {e}")
             QMessageBox.critical(self, "오류", f"주소 추가 중 오류가 발생했습니다:\n{str(e)}")
 
-    def on_checkbox_changed(self, item):
-        """체크박스 상태 변경 시 행 선택 (라디오 버튼처럼 한 번에 하나만 선택)"""
-        # 체크박스 컬럼(0)의 아이템만 처리
-        if item.column() != 0:
-            return
+    def on_url_row_selected(self, row, col):
+        """URL 테이블 행 클릭 시 두 컬럼 모두 스타일 변경 (2컬럼 방식)"""
+        try:
+            # 이미지 경로 (Windows 경로 슬래시 변환)
+            checked_img = resource_path("assets/image/test_config/url_row_checkbox_checked.png").replace(chr(92), "/")
+            unchecked_img = resource_path("assets/image/test_config/url_row_checkbox_unchecked.png").replace(chr(92), "/")
 
-        row = item.row()
-        is_checked = item.checkState() == Qt.Checked
+            # 모든 URL 행의 스타일 업데이트
+            for i in range(self.url_table.rowCount()):
+                row_num_widget = self.url_table.cellWidget(i, 0)  # 행 번호 컬럼
+                url_widget = self.url_table.cellWidget(i, 1)  # URL 컬럼
 
-        # 체크된 경우
-        if is_checked:
-            # itemChanged 시그널 일시 차단 (무한 루프 방지)
-            self.url_table.blockSignals(True)
+                if i == row:
+                    # 클릭된 행: 선택 스타일 적용
+                    if row_num_widget:
+                        row_num_widget.setStyleSheet("""
+                            QLabel {
+                                background-color: #E3F2FF;
+                                border: none;
+                                border-bottom: 1px solid #CCCCCC;
+                                font-family: 'Noto Sans KR';
+                                font-size: 19px;
+                                font-weight: 400;
+                                color: #000000;
+                            }
+                        """)
+                    if url_widget:
+                        url_widget.setStyleSheet(f"""
+                            QLabel {{
+                                background-image: url('{checked_img}');
+                                background-position: left center;
+                                background-repeat: no-repeat;
+                                border: none;
+                                border-bottom: 1px solid #CCCCCC;
+                                font-family: 'Noto Sans KR';
+                                font-size: 19px;
+                                font-weight: 400;
+                                color: #000000;
+                                margin: 0px;
+                                padding: 0px;
+                            }}
+                        """)
+                else:
+                    # 나머지 행: 기본 스타일 적용
+                    if row_num_widget:
+                        row_num_widget.setStyleSheet("""
+                            QLabel {
+                                background-color: #FFFFFF;
+                                border: none;
+                                border-bottom: 1px solid #CCCCCC;
+                                font-family: 'Noto Sans KR';
+                                font-size: 19px;
+                                font-weight: 400;
+                                color: #000000;
+                            }
+                        """)
+                    if url_widget:
+                        url_widget.setStyleSheet(f"""
+                            QLabel {{
+                                background-image: url('{unchecked_img}');
+                                background-position: left center;
+                                background-repeat: no-repeat;
+                                border: none;
+                                border-bottom: 1px solid #CCCCCC;
+                                font-family: 'Noto Sans KR';
+                                font-size: 19px;
+                                font-weight: 400;
+                                color: #000000;
+                                margin: 0px;
+                                padding: 0px;
+                            }}
+                        """)
 
-            # 다른 모든 행의 체크박스 해제
-            for r in range(self.url_table.rowCount()):
-                if r != row:
-                    checkbox = self.url_table.item(r, 0)
-                    if checkbox:
-                        checkbox.setCheckState(Qt.Unchecked)
+            # 선택된 행 추적
+            self.selected_url_row = row
 
-            # 시그널 재활성화
-            self.url_table.blockSignals(False)
+            # UI 업데이트 강제
+            QApplication.processEvents()
 
-            # 현재 행 선택 (전체 행이 #E3F2FF로 변경됨)
-            self.url_table.selectRow(row)
-        else:
-            # 체크 해제 시 선택 해제
-            self.url_table.clearSelection()
+            # 시작 버튼 상태 체크
+            self.check_start_button_state()
+
+        except Exception as e:
+            print(f"URL 행 선택 처리 실패: {e}")
