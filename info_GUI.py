@@ -1916,11 +1916,11 @@ class InfoWidget(QWidget):
                 border-bottom: 1px solid #CCCCCC;
                 border-right: none;
                 padding-right: 14px;
-                color: #000000;
+                color: #1B1B1C;
             }
             QTableWidget::item:selected {
                 background-color: #FFFFFF;
-                color: #000000;
+                color: #1B1B1C;
             }
             QHeaderView::section {
                 background-color: #EDF0F3;
@@ -1929,7 +1929,7 @@ class InfoWidget(QWidget):
                 font-family: 'Noto Sans KR';
                 font-weight: 600;
                 letter-spacing: -0.156px;
-                color: #000000;
+                color: #1B1B1C;
             }
             QHeaderView::section:vertical {
                 background-color: #FFFFFF;
@@ -1939,7 +1939,7 @@ class InfoWidget(QWidget):
                 font-family: 'Noto Sans KR';
                 font-weight: 400;
                 letter-spacing: 0.098px;
-                color: #000000;
+                color: #1B1B1C;
             }
             QTableCornerButton::section {
                 background-color: #EDF0F3;
