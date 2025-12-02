@@ -2419,77 +2419,6 @@ class InfoWidget(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        # IP 직접 입력 영역 (744x36px) - 기본적으로 비활성화
-        ip_direct_row = QWidget()
-        ip_direct_row.setFixedSize(744, 36)
-        ip_direct_layout = QHBoxLayout()
-        ip_direct_layout.setContentsMargins(0, 0, 0, 0)
-        ip_direct_layout.setSpacing(8)
-
-        # 직접 입력 라벨
-        direct_label = QLabel("")
-        direct_label.setFixedWidth(120)
-        direct_label.setStyleSheet("""
-            QLabel {
-                font-family: 'Noto Sans KR';
-                font-weight: 400;
-                font-size: 14px;
-                letter-spacing: -0.14px;
-                color: #666666;
-            }
-        """)
-        ip_direct_layout.addWidget(direct_label)
-
-        # IP:Port 직접 입력창 - 항상 활성화 (데모용)
-        self.page2_ip_direct_input = QLineEdit()
-        self.page2_ip_direct_input.setFixedHeight(30)
-        self.page2_ip_direct_input.setPlaceholderText("IP 주소를 입력해주세요. (예: 192.168.1.1)")
-        self.page2_ip_direct_input.setStyleSheet("""
-            QLineEdit {
-                font-family: 'Noto Sans KR';
-                font-size: 13px;
-                padding: 6px 10px;
-                border: 1px solid #CECECE;
-                border-radius: 4px;
-                background-color: #FFFFFF;
-            }
-            QLineEdit:focus {
-                border: 1px solid #4A90E2;
-            }
-        """)
-        ip_direct_layout.addWidget(self.page2_ip_direct_input)
-
-        # "추가" 버튼 - 항상 활성화 (데모용)
-        self.add_ip_btn = QPushButton("추가")
-        self.add_ip_btn.setFixedSize(80, 30)
-        self.add_ip_btn.setStyleSheet("""
-            QPushButton {
-                font-family: 'Noto Sans KR';
-                font-size: 13px;
-                font-weight: 500;
-                background-color: #4A90E2;
-                color: white;
-                border: none;
-                border-radius: 4px;
-            }
-            QPushButton:hover {
-                background-color: #357ABD;
-            }
-            QPushButton:pressed {
-                background-color: #2E6DA4;
-            }
-        """)
-        self.add_ip_btn.clicked.connect(self.add_ip_to_table)
-        ip_direct_layout.addWidget(self.add_ip_btn)
-
-        ip_direct_row.setLayout(ip_direct_layout)
-        layout.addWidget(ip_direct_row)
-        # UI 상에서 숨김 처리 (팝오버로 구현 예정)
-        ip_direct_row.setVisible(False)
-
-        # 6px gap
-        layout.addSpacing(6)
-
         # URL 테이블 (744x370px) - 2개 컬럼 (행번호 + URL)
         self.url_table = QTableWidget(0, 2)  # 2개 컬럼: 행번호(50px) + URL(694px)
         self.url_table.setFixedSize(744, 370)
@@ -2837,98 +2766,6 @@ class InfoWidget(QWidget):
         """스캔 오류 메시지 표시"""
         QMessageBox.warning(self, "주소 탐색 실패", message)
 
-    def add_ip_to_table(self):
-        """직접 입력한 IP:Port를 URL 테이블에 추가 (2컬럼: 행번호 + URL)"""
-        try:
-            # 입력값 가져오기
-            ip_port = self.page2_ip_direct_input.text().strip()
-
-            if not ip_port:
-                QMessageBox.warning(self, "입력 오류", "IP 주소를 입력해주세요.\n예: 192.168.1.1")
-                return
-
-            # Port 포함 여부 확인 - Port는 입력하지 않아야 함
-            if ':' in ip_port:
-                QMessageBox.warning(self, "입력 오류", "IP 주소만 입력해주세요.\nPort는 시험정보의 testPort로 자동 설정됩니다.\n예: 192.168.1.1")
-                return
-
-            # IP 검증
-            if not self._validate_ip_address(ip_port):
-                QMessageBox.warning(self, "IP 오류", "올바른 IP 주소를 입력해주세요.\n예: 192.168.1.100")
-                return
-
-            # testPort 확인 및 자동 추가
-            if not hasattr(self, 'test_port') or not self.test_port:
-                QMessageBox.warning(self, "testPort 없음", "시험정보를 먼저 불러와주세요.\ntestPort 정보가 필요합니다.")
-                return
-
-            # IP와 testPort 결합
-            final_url = f"{ip_port}:{self.test_port}"
-
-            # 중복 확인 (컬럼 1의 ClickableLabel에서 url property 가져오기)
-            for row in range(self.url_table.rowCount()):
-                widget = self.url_table.cellWidget(row, 1)
-                if widget and widget.property("url") == final_url:
-                    QMessageBox.information(self, "알림", "이미 추가된 주소입니다.")
-                    return
-
-            # 이미지 경로 (Windows 경로 슬래시 변환)
-            unchecked_img = resource_path("assets/image/test_config/url_row_checkbox_unchecked.png").replace(chr(92), "/")
-
-            # 테이블에 추가
-            row = self.url_table.rowCount()
-            self.url_table.insertRow(row)
-
-            # 컬럼 0: 행 번호 (ClickableLabel - 배경색으로 선택 표시)
-            row_num_label = ClickableLabel(str(row + 1), row, 0)
-            row_num_label.setAlignment(Qt.AlignCenter)
-            row_num_label.setStyleSheet("""
-                QLabel {
-                    background-color: #FFFFFF;
-                    border: none;
-                    border-bottom: 1px solid #CCCCCC;
-                    font-family: 'Noto Sans KR';
-                    font-size: 19px;
-                    font-weight: 400;
-                    color: #000000;
-                }
-            """)
-            row_num_label.clicked.connect(self.on_url_row_selected)
-            self.url_table.setCellWidget(row, 0, row_num_label)
-
-            # 컬럼 1: URL (ClickableLabel - 이미지 배경)
-            url_label = ClickableLabel(final_url, row, 1)
-            url_label.setAlignment(Qt.AlignCenter)
-            url_label.setStyleSheet(f"""
-                QLabel {{
-                    background-image: url('{unchecked_img}');
-                    background-position: left center;
-                    background-repeat: no-repeat;
-                    border: none;
-                    border-bottom: 1px solid #CCCCCC;
-                    font-family: 'Noto Sans KR';
-                    font-size: 19px;
-                    font-weight: 400;
-                    color: #000000;
-                    margin: 0px;
-                    padding: 0px;
-                }}
-            """)
-            url_label.setProperty("url", final_url)
-            url_label.clicked.connect(self.on_url_row_selected)
-            self.url_table.setCellWidget(row, 1, url_label)
-
-            self.url_table.setRowHeight(row, 39)
-
-            # 입력창 초기화
-            self.page2_ip_direct_input.clear()
-
-            QMessageBox.information(self, "추가 완료", f"주소가 추가되었습니다.\n{final_url}")
-
-        except Exception as e:
-            print(f"IP 추가 오류: {e}")
-            QMessageBox.critical(self, "오류", f"주소 추가 중 오류가 발생했습니다:\n{str(e)}")
-
     def get_selected_url(self):
         """URL 테이블에서 선택된 URL 반환 (2컬럼 방식 - 컬럼 1에서 URL 가져오기)"""
         # 선택된 행 번호 확인
@@ -3073,8 +2910,7 @@ class InfoWidget(QWidget):
 
             # 주소 입력창들에 입력값이 있는지 확인
             address_fields = [
-                self.ip_input_edit.text().strip(),
-                self.page2_ip_direct_input.text().strip()
+                self.ip_input_edit.text().strip()
             ]
 
             if any(field for field in address_fields):
@@ -3124,9 +2960,8 @@ class InfoWidget(QWidget):
             # 인증 방식을 Digest Auth로 초기화
             self.digest_radio.setChecked(True)
 
-            # 주소 입력창들 초기화
+            # 주소 입력창 초기화
             self.ip_input_edit.clear()
-            self.page2_ip_direct_input.clear()
 
             # 주소 탐색 테이블 초기화
             self.url_table.setRowCount(0)
