@@ -80,34 +80,43 @@ class InfoWidget(QWidget):
         self.setLayout(main_layout)
 
     def resizeEvent(self, event):
-        """창 크기 변경 시 page1 요소들 위치 재조정"""
+        """창 크기 변경 시 page1, page2 요소들 위치 재조정"""
         super().resizeEvent(event)
-        
+
         # page1의 요소들 위치 재조정
         if hasattr(self, 'page1') and self.page1:
             page_width = self.page1.width()
             page_height = self.page1.height()
-            
+
             # content_widget 크기 (ip_input_edit, load_test_info_btn의 부모)
             if hasattr(self, 'page1_content') and self.page1_content:
                 content_width = self.page1_content.width()
                 content_height = self.page1_content.height()
-                
+
                 # 배경 이미지 크기 조정
                 if hasattr(self, 'page1_bg_label'):
                     self.page1_bg_label.setGeometry(0, 0, content_width, content_height)
-                
+
                 # ip_input_edit: 오른쪽에서 211px, 위에서 24px (content_widget 기준)
                 if hasattr(self, 'ip_input_edit'):
                     self.ip_input_edit.setGeometry(content_width - 211 - 200, 24, 200, 40)
-                
+
                 # load_test_info_btn: 오른쪽에서 5px, 위에서 13px (content_widget 기준)
                 if hasattr(self, 'load_test_info_btn'):
                     self.load_test_info_btn.setGeometry(content_width - 5 - 198, 13, 198, 62)
-            
+
             # management_url_container: 오른쪽에서 10px, 아래에서 48px (page1 기준)
             if hasattr(self, 'management_url_container'):
                 self.management_url_container.setGeometry(page_width - 10 - 380, page_height - 48 - 60, 380, 60)
+
+        # page2의 배경 이미지 크기 재조정
+        if hasattr(self, 'page2_content') and self.page2_content:
+            content_width = self.page2_content.width()
+            content_height = self.page2_content.height()
+
+            # 배경 이미지 크기 조정
+            if hasattr(self, 'page2_bg_label'):
+                self.page2_bg_label.setGeometry(0, 0, content_width, content_height)
 
     def create_page1(self):
         """첫 번째 페이지: 시험 정보 확인"""
@@ -292,52 +301,89 @@ class InfoWidget(QWidget):
 
     def create_page2(self):
         """두 번째 페이지: 시험 설정"""
-        page = QWidget()
-        page.setObjectName("page2")
+        self.page2 = QWidget()
+        self.page2.setObjectName("page2")
 
-        # 페이지 크기 설정
-        page.setFixedSize(1680, 1006)
+        # 페이지 크기 설정 (반응형: 최소 크기만 설정)
+        self.page2.setMinimumSize(1680, 1006)
 
         # 전체 레이아웃 (헤더 포함)
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
 
-        # 상단 헤더 영역 (1680x64px)
-        header_widget = QLabel()
-        header_widget.setFixedSize(1680, 64)
-        header_widget.setContentsMargins(0, 0, 0, 0)
-        header_widget.setStyleSheet("QLabel { margin: 0px; padding: 0px; border: none; }")
+        # 상단 헤더 영역 (반응형 - 배경 늘어남, 로고/타이틀 좌측 정렬)
+        header_widget = QWidget()
+        header_widget.setFixedHeight(64)
+        header_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
-        # 헤더 이미지 설정
-        header_pixmap = QPixmap(resource_path("assets/image/test_config/시험정보설정_header.png"))
-        header_widget.setPixmap(header_pixmap.scaled(1680, 64, Qt.IgnoreAspectRatio, Qt.SmoothTransformation))
-        header_widget.setScaledContents(True)
-        main_layout.addWidget(header_widget, 0, Qt.AlignTop)
-
-        # 본문 영역 컨테이너 (1680x942px, 헤더 제외)
-        content_widget = QWidget()
-        content_widget.setFixedSize(1680, 942)
-        content_widget.setObjectName("content_widget_page2")
-
-        # 배경 이미지 설정 (시험정보설정_main.png)
-        bg_path2 = resource_path("assets/image/test_config/시험정보설정_main.png").replace(chr(92), "/")
-        content_widget.setStyleSheet(f"""
-            #content_widget_page2 {{
-                background-image: url({bg_path2});
-                background-repeat: no-repeat;
-                background-position: top center;
-                margin: 0px;
-                padding: 0px;
-                border: none;
+        # 배경 이미지 설정 (늘어남 - border-image 사용)
+        header_bg_path = resource_path("assets/image/common/header.png").replace(chr(92), "/")
+        header_widget.setStyleSheet(f"""
+            QWidget {{
+                border-image: url({header_bg_path}) 0 0 0 0 stretch stretch;
+            }}
+            QLabel {{
+                border-image: none;
+                background: transparent;
             }}
         """)
 
-        content_layout = QVBoxLayout()
-        content_layout.setContentsMargins(0, 36, 0, 44)  # 좌, 상(padding36), 우, 하
+        # 헤더 레이아웃 (좌측 정렬, padding: 좌우 48px, 상하 10px)
+        header_layout = QHBoxLayout(header_widget)
+        header_layout.setContentsMargins(48, 10, 48, 10)
+        header_layout.setSpacing(0)
+
+        # 로고 이미지 (90x32)
+        logo_label = QLabel()
+        logo_pixmap = QPixmap(resource_path("assets/image/common/logo_KISA.png"))
+        logo_label.setPixmap(logo_pixmap)
+        logo_label.setFixedSize(90, 32)
+        header_layout.addWidget(logo_label)
+
+        # 로고와 타이틀 사이 간격 20px
+        header_layout.addSpacing(20)
+
+        # 타이틀 이미지 (458x36)
+        header_title_label = QLabel()
+        header_title_pixmap = QPixmap(resource_path("assets/image/test_config/config_title.png"))
+        header_title_label.setPixmap(header_title_pixmap.scaled(458, 36, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        header_title_label.setFixedSize(458, 36)
+        header_layout.addWidget(header_title_label)
+
+        # 오른쪽 stretch (나머지 공간 채우기)
+        header_layout.addStretch()
+
+        main_layout.addWidget(header_widget)
+
+        # 본문 영역 컨테이너 (반응형 - 가로세로 확장)
+        self.page2_content = QWidget()
+        self.page2_content.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.page2_content.setObjectName("content_widget_page2")
+
+        # 배경 이미지를 QLabel로 설정 (절대 위치, 반응형으로 늘어남)
+        bg_path2 = resource_path("assets/image/test_config/시험정보설정_main.png").replace(chr(92), "/")
+        self.page2_bg_label = QLabel(self.page2_content)
+        self.page2_bg_label.setPixmap(QPixmap(bg_path2))
+        self.page2_bg_label.setScaledContents(True)
+        self.page2_bg_label.lower()  # 맨 뒤로 보내기
+
+        # content_layout: page2_content에 설정 (가운데 정렬용)
+        content_layout = QVBoxLayout(self.page2_content)
+        content_layout.setContentsMargins(0, 0, 0, 0)
         content_layout.setSpacing(0)
 
-        # 타이틀 이미지 (1680x47px)
+        # 내부 콘텐츠 컨테이너 (bg_root) - 고정 크기, 가운데 정렬됨
+        bg_root = QWidget()
+        bg_root.setFixedSize(1680, 897)  # 타이틀(47) + 간격(8) + 패널(802) + padding(상36+하4)
+        bg_root.setStyleSheet("background: transparent;")
+
+        # bg_root 내부 레이아웃
+        bg_root_layout = QVBoxLayout(bg_root)
+        bg_root_layout.setContentsMargins(0, 36, 0, 4)  # 좌, 상(padding36), 우, 하
+        bg_root_layout.setSpacing(0)
+
+        # 타이틀 이미지 (1680x47px, 고정 크기)
         title_label = QLabel()
         title_label.setFixedSize(1680, 47)
         title_label.setContentsMargins(0, 0, 0, 0)
@@ -347,10 +393,10 @@ class InfoWidget(QWidget):
         title_pixmap = QPixmap(resource_path("assets/image/test_config/시험정보설정_title.png"))
         title_label.setPixmap(title_pixmap.scaled(1680, 47, Qt.IgnoreAspectRatio, Qt.SmoothTransformation))
         title_label.setScaledContents(True)
-        content_layout.addWidget(title_label, 0, Qt.AlignTop)
+        bg_root_layout.addWidget(title_label, 0, Qt.AlignTop)
 
         # 타이틀과 콘텐츠 사이 간격
-        content_layout.addSpacing(8)
+        bg_root_layout.addSpacing(8)
 
         # 기존 콘텐츠 (좌우 패널) - 좌우 48px padding
         panels_layout = QHBoxLayout()
@@ -648,16 +694,18 @@ class InfoWidget(QWidget):
         panels_layout.addWidget(left_panel, 1)
         panels_layout.addWidget(right_panel, 1)
 
-        content_layout.addLayout(panels_layout, 1)
+        # panels_layout을 bg_root_layout에 추가
+        bg_root_layout.addLayout(panels_layout, 1)
 
-        content_widget.setLayout(content_layout)
+        # bg_root를 content_layout에 가운데 정렬로 추가
+        content_layout.addWidget(bg_root, 0, Qt.AlignHCenter | Qt.AlignVCenter)
 
-        # 메인 레이아웃에 콘텐츠 영역 추가
-        main_layout.addWidget(content_widget)
+        # 메인 레이아웃에 콘텐츠 영역 추가 (반응형: stretch=1)
+        main_layout.addWidget(self.page2_content, 1)
 
-        page.setLayout(main_layout)
+        self.page2.setLayout(main_layout)
 
-        return page
+        return self.page2
 
     # ---------- 페이지 전환 메서드 ----------
     def go_to_next_page(self):
