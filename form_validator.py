@@ -1866,7 +1866,7 @@ class FormValidator:
                         font-size: 19px;
                         font-weight: 400;
                         color: #000000;
-                        min-width: 371.5px;
+                        min-width: 372px;
                         min-height: 39px;
                     }
                 """)
@@ -2130,7 +2130,7 @@ class FormValidator:
                             font-size: 19px;
                             font-weight: 400;
                             color: #000000;
-                            min-width: 371.5px;
+                            min-width: 372px;
                             min-height: 39px;
                         }
                     """)
@@ -2147,7 +2147,7 @@ class FormValidator:
                             font-size: 19px;
                             font-weight: 400;
                             color: #000000;
-                            min-width: 371.5px;
+                            min-width: 372px;
                             min-height: 39px;
                         }
                     """)
@@ -2181,7 +2181,7 @@ class FormValidator:
                         color: #000000;
                         margin: 0px;
                         padding: 0px;
-                        min-width: 371.5px;
+                        min-width: 372px;
                         min-height: 39px;
                     }
                 """)
