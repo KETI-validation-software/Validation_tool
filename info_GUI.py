@@ -1696,12 +1696,12 @@ class InfoWidget(QWidget):
             QTableWidget::item {
                 border-bottom: 1px solid #CCCCCC;
                 padding-right: 14px;
-                color: #000000;
+                color: #1B1B1C;
                 outline: 0;
                 background-color: transparent;
             }
             QTableWidget::item:selected {
-                color: #000000;
+                color: #1B1B1C;
                 background-color: transparent;
             }
             QTableWidget::item:focus {
@@ -1713,7 +1713,7 @@ class InfoWidget(QWidget):
                 border: none;
                 border-bottom: 1px solid #CCCCCC;
                 border-right: 1px solid #CCCCCC;
-                color: #000000;
+                color: #1B1B1C;
             }
             QHeaderView::section:last {
                 border-right: none;
