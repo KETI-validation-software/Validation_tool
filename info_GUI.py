@@ -2083,7 +2083,7 @@ class InfoWidget(QWidget):
         digest_label.setStyleSheet("""
             QLabel {
                 font-family: 'Noto Sans KR';
-                font-weight: 700;
+                font-weight: 500;
                 font-size: 20px;
                 letter-spacing: -0.20px;
                 color: #000000;
@@ -2163,7 +2163,7 @@ class InfoWidget(QWidget):
         bearer_label.setStyleSheet("""
             QLabel {
                 font-family: 'Noto Sans KR';
-                font-weight: 700;
+                font-weight: 500;
                 font-size: 20px;
                 letter-spacing: -0.20px;
                 color: #000000;
@@ -2176,8 +2176,8 @@ class InfoWidget(QWidget):
         # 2px gap
         bearer_text_layout.addSpacing(2)
 
-        # "토큰 기반 인증 방식" 설명 (163x26)
-        bearer_desc = QLabel("토큰 기반 인증 방식")
+        # "Token 기반 인증 방식" 설명 (163x26)
+        bearer_desc = QLabel("Token 기반 인증 방식")
         bearer_desc.setFixedSize(163, 26)
         bearer_desc.setStyleSheet("""
             QLabel {
@@ -2232,9 +2232,9 @@ class InfoWidget(QWidget):
         auth_input_title.setStyleSheet("""
             QLabel {
                 font-family: 'Noto Sans KR';
-                font-weight: 700;
-                font-size: 18px;
-                letter-spacing: -0.18px;
+                font-weight: 500;
+                font-size: 20px;
+                letter-spacing: -0.20px;
                 color: #000000;
                 border: none;
                 background-color: transparent;
@@ -2251,9 +2251,9 @@ class InfoWidget(QWidget):
         userid_label.setStyleSheet("""
             QLabel {
                 font-family: 'Noto Sans KR';
-                font-weight: 500;
-                font-size: 16px;
-                letter-spacing: -0.16px;
+                font-weight: 400;
+                font-size: 18px;
+                letter-spacing: -0.18px;
                 color: #000000;
                 border: none;
                 background-color: transparent;
@@ -2288,6 +2288,7 @@ class InfoWidget(QWidget):
             QLineEdit::placeholder {{
                 color: #868686;
                 font-size: 18px;
+                font-weight: 500;
             }}
             QLineEdit:disabled {{
                 background-image: url({digest_disabled});
@@ -2305,9 +2306,9 @@ class InfoWidget(QWidget):
         password_label.setStyleSheet("""
             QLabel {
                 font-family: 'Noto Sans KR';
-                font-weight: 500;
-                font-size: 16px;
-                letter-spacing: -0.16px;
+                font-weight: 400;
+                font-size: 18px;
+                letter-spacing: -0.18px;
                 color: #000000;
                 border: none;
                 background-color: transparent;
@@ -2340,6 +2341,7 @@ class InfoWidget(QWidget):
             QLineEdit::placeholder {{
                 color: #868686;
                 font-size: 18px;
+                font-weight: 500;
             }}
             QLineEdit:disabled {{
                 background-image: url({digest_disabled});
