@@ -56,11 +56,11 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소
 # test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
-company_name = "물리보안기업"
-product_name = "물리보안시스템-기본"
+company_name = "통합플랫폼기업"
+product_name = "통합플랫폼 시스템-기본"
 version = "v1.0"
 test_category = "MAIN_TEST"
-test_target = "기본 기능 시험-물리보안"
+test_target = "기본 기능 시험-통합시스템"
 test_range = "ALL_FIELDS"
 auth_type = "Digest Auth"
 auth_info = "admin,1234"
@@ -68,7 +68,7 @@ admin_code = "1234"
 url = "https://192.168.0.3:2000"
 contact_person = "김철수"
 model_name = "v1.0"
-request_id = "cmii85wjq009z8z1tv0d3d7r1"
+request_id = "cmii86ssr00a48z1tqmco6ke8"
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황
 flag_opt = False
@@ -115,11 +115,11 @@ WEBHOOK_URL = f"https://{WEBHOOK_PUBLIC_IP}:{WEBHOOK_PORT}"
 
 SPEC_CONFIG = [
     {
-        "group_name": "기본 기능 시험-물리보안",
-        "group_id": "cmii831gk009j8z1thiahf6ro",
-        "cmii7wfuf006i8z1tcds6q69g": {
+        "group_name": "기본 기능 시험-통합시스템",
+        "group_id": "cmii82nib009f8z1tvo6fz8j2",
+        "cmii7shen005i8z1tagevx4qh": {
     "test_name": "sensor001",
-    "specs": ['cmii7wfuf006i8z1tcds6q69g_outSchema', 'cmii7wfuf006i8z1tcds6q69g_inData', 'cmii7wfuf006i8z1tcds6q69g_messages'],
+    "specs": ['cmii7shen005i8z1tagevx4qh_inSchema', 'cmii7shen005i8z1tagevx4qh_outData', 'cmii7shen005i8z1tagevx4qh_messages'],
     "api_name": [],
     "api_id": [],
     "api_endpoint": [],
@@ -127,25 +127,25 @@ SPEC_CONFIG = [
     "time_out": [5000],
     "num_retries": [1]
 },
-        "cmii7w683006h8z1t7usnin5g": {
+        "cmii7pysb004k8z1tts0npxfm": {
     "test_name": "bio001",
-    "specs": ['cmii7w683006h8z1t7usnin5g_outSchema', 'cmii7w683006h8z1t7usnin5g_inData', 'cmii7w683006h8z1t7usnin5g_messages'],
+    "specs": ['cmii7pysb004k8z1tts0npxfm_inSchema', 'cmii7pysb004k8z1tts0npxfm_outData', 'cmii7pysb004k8z1tts0npxfm_messages'],
     "api_name": [],
     "api_id": [],
     "api_endpoint": [],
-    "trans_protocol": [None],
-    "time_out": [5000],
-    "num_retries": [1]
+    "trans_protocol": [None, None],
+    "time_out": [5000, 5000],
+    "num_retries": [1, 1]
 },
-        "cmii7v8pr006g8z1tvo55a50u": {
+        "cmii7lxbn002s8z1t1i9uudf0": {
     "test_name": "vid001",
-    "specs": ['cmii7v8pr006g8z1tvo55a50u_outSchema', 'cmii7v8pr006g8z1tvo55a50u_inData', 'cmii7v8pr006g8z1tvo55a50u_messages'],
+    "specs": ['cmii7lxbn002s8z1t1i9uudf0_inSchema', 'cmii7lxbn002s8z1t1i9uudf0_outData', 'cmii7lxbn002s8z1t1i9uudf0_messages'],
     "api_name": [],
     "api_id": [],
     "api_endpoint": [],
-    "trans_protocol": [None],
-    "time_out": [5000],
-    "num_retries": [1]
+    "trans_protocol": [None, None],
+    "time_out": [5000, 5000],
+    "num_retries": [1, 1]
 }
     }
 ]

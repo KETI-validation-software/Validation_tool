@@ -128,7 +128,8 @@ class CombinedDetailDialog(QDialog):
         super().__init__()
 
         self.setWindowTitle(f"{api_name} 상세 정보")
-        self.setGeometry(400, 300, 1520, 921)
+        self.setMinimumSize(1520, 921)  # 반응형: 최소 크기 설정
+        self.resize(1520, 921)  # 초기 크기
         self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
         self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
         self.setStyleSheet("background-color: #FFFFFF;")
@@ -140,37 +141,52 @@ class CombinedDetailDialog(QDialog):
         # webhook_schema 저장
         self.webhook_schema = webhook_schema
 
-        # 상단 제목
+        # 상단 제목 - 반응형: 높이만 고정, 가로 확장
         title_label = QLabel(f"{api_name} 상세 정보")
-        title_label.setFixedSize(1424, 38)
+        title_label.setMinimumHeight(38)
+        title_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         title_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 26px; font-weight: 500;")
         title_label.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(title_label)
         main_layout.addSpacing(16)  # 제목 아래 gap
 
-        # 서브 제목 컨테이너 (message.png 배경 - 체크 아이콘 포함)
+        # 서브 제목 컨테이너 - 반응형: 높이만 고정, 가로 확장
         subtitle_container = QWidget()
-        subtitle_container.setFixedSize(1424, 47)
+        subtitle_container.setObjectName("subtitle_container")
+        subtitle_container.setMinimumHeight(47)
+        subtitle_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         subtitle_container.setStyleSheet("""
-            background-image: url(assets/image/common/message.png);
-            background-repeat: no-repeat;
-            background-position: center;
+            #subtitle_container {
+                border-image: url(assets/image/common/message.png) 0 0 0 0 stretch stretch;
+            }
+            #subtitle_container QLabel {
+                border-image: none;
+                background: transparent;
+            }
         """)
         subtitle_layout = QHBoxLayout(subtitle_container)
-        subtitle_layout.setContentsMargins(45, 12, 48, 12)  # 좌45(14+18+13), 상12, 우48, 하12
-        
+        subtitle_layout.setContentsMargins(14, 12, 48, 12)  # 좌14, 상12, 우48, 하12
+
+        # 체크 아이콘 (고정 크기)
+        check_icon = QLabel()
+        check_icon.setPixmap(QPixmap(resource_path("assets/image/common/icn_check.png")))
+        check_icon.setFixedSize(18, 18)
+        subtitle_layout.addWidget(check_icon)
+
+        subtitle_layout.addSpacing(13)  # 아이콘과 텍스트 사이 간격
+
         # 텍스트
         subtitle_label = QLabel(f"{api_name} API 정보에 대한 상세 내용을 확인합니다.")
-        subtitle_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 400; background: transparent;")
+        subtitle_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 400;")
         subtitle_layout.addWidget(subtitle_label)
         subtitle_layout.addStretch()
         
         main_layout.addWidget(subtitle_container)
         main_layout.addSpacing(12)  # message.png 아래 gap
 
-        # 3열 콘텐츠 영역 컨테이너 (1424x664)
+        # 3열 콘텐츠 영역 컨테이너 - 반응형: 전체 확장
         content_container = QWidget()
-        content_container.setFixedSize(1424, 664)
+        content_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         content_layout = QHBoxLayout(content_container)
         content_layout.setContentsMargins(0, 0, 0, 0)
         content_layout.setSpacing(12)  # 열 사이 gap
@@ -179,21 +195,22 @@ class CombinedDetailDialog(QDialog):
         title_style = "font-family: 'Noto Sans KR'; font-size: 18px; font-weight: 600;"
         box_style = "border: 1px solid #CECECE; border-radius: 4px; background-color: #FFFFFF; font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 400; padding: 12px;"
 
-        # 1열: 메시지 데이터
+        # 1열: 메시지 데이터 - 반응형: 동일 비율 확장
         data_column = QWidget()
-        data_column.setFixedWidth(466)
+        data_column.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         data_column_layout = QVBoxLayout(data_column)
         data_column_layout.setContentsMargins(0, 0, 0, 0)
         data_column_layout.setSpacing(0)
 
         data_title = QLabel("메시지 데이터")
-        data_title.setFixedSize(466, 24)
+        data_title.setMinimumHeight(24)
+        data_title.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         data_title.setStyleSheet(title_style)
         data_column_layout.addWidget(data_title)
         data_column_layout.addSpacing(8)
 
         self.data_browser = QTextBrowser()
-        self.data_browser.setFixedSize(466, 602)
+        self.data_browser.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.data_browser.setStyleSheet(box_style)
         self.data_browser.setAcceptRichText(True)
         if step_buffer["data"]:
@@ -203,21 +220,22 @@ class CombinedDetailDialog(QDialog):
             self.data_browser.setHtml('<span style="color: #CECECE;">아직 수신된 데이터가 없습니다.</span>')
         data_column_layout.addWidget(self.data_browser)
 
-        # 2열: 메시지 규격
+        # 2열: 메시지 규격 - 반응형: 동일 비율 확장
         schema_column = QWidget()
-        schema_column.setFixedWidth(466)
+        schema_column.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         schema_column_layout = QVBoxLayout(schema_column)
         schema_column_layout.setContentsMargins(0, 0, 0, 0)
         schema_column_layout.setSpacing(0)
 
         schema_title = QLabel("메시지 규격")
-        schema_title.setFixedSize(466, 24)
+        schema_title.setMinimumHeight(24)
+        schema_title.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         schema_title.setStyleSheet(title_style)
         schema_column_layout.addWidget(schema_title)
         schema_column_layout.addSpacing(8)
 
         self.schema_browser = QTextBrowser()
-        self.schema_browser.setFixedSize(466, 602)
+        self.schema_browser.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.schema_browser.setStyleSheet(box_style)
         self.schema_browser.setAcceptRichText(True)
 
@@ -230,21 +248,22 @@ class CombinedDetailDialog(QDialog):
         self.schema_browser.setPlainText(schema_text)
         schema_column_layout.addWidget(self.schema_browser)
 
-        # 3열: 검증 오류
+        # 3열: 검증 오류 - 반응형: 동일 비율 확장
         error_column = QWidget()
-        error_column.setFixedWidth(466)
+        error_column.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         error_column_layout = QVBoxLayout(error_column)
         error_column_layout.setContentsMargins(0, 0, 0, 0)
         error_column_layout.setSpacing(0)
 
         error_title = QLabel("검증 오류")
-        error_title.setFixedSize(466, 24)
+        error_title.setMinimumHeight(24)
+        error_title.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         error_title.setStyleSheet(title_style)
         error_column_layout.addWidget(error_title)
         error_column_layout.addSpacing(8)
 
         self.error_browser = QTextBrowser()
-        self.error_browser.setFixedSize(466, 602)
+        self.error_browser.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.error_browser.setStyleSheet(box_style)
         self.error_browser.setAcceptRichText(True)
         result = step_buffer["result"]
@@ -257,18 +276,19 @@ class CombinedDetailDialog(QDialog):
         self.error_browser.setPlainText(error_msg)
         error_column_layout.addWidget(self.error_browser)
 
-        # 3개 열을 가로로 배치
-        content_layout.addWidget(data_column)
-        content_layout.addWidget(schema_column)
-        content_layout.addWidget(error_column)
+        # 3개 열을 가로로 배치 - 반응형: 동일 비율(stretch=1)
+        content_layout.addWidget(data_column, stretch=1)
+        content_layout.addWidget(schema_column, stretch=1)
+        content_layout.addWidget(error_column, stretch=1)
 
 
-        main_layout.addWidget(content_container)
+        main_layout.addWidget(content_container, stretch=1)  # 콘텐츠 영역 확장
         main_layout.addSpacing(24)  # 콘텐츠 영역 아래 gap
 
-        # 확인 버튼 영역 (1424x48)
+        # 확인 버튼 영역 - 반응형: 높이만 고정, 가로 확장
         button_container = QWidget()
-        button_container.setFixedSize(1424, 48)
+        button_container.setFixedHeight(48)
+        button_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         button_layout = QHBoxLayout(button_container)
         button_layout.setContentsMargins(0, 0, 0, 0)
         
