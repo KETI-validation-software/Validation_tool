@@ -1,7 +1,8 @@
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QGroupBox, QLineEdit,
     QPushButton, QMessageBox, QTableWidget, QHeaderView, QAbstractItemView, QTableWidgetItem,
-    QStackedWidget, QRadioButton, QFrame, QApplication, QSizePolicy, QGraphicsDropShadowEffect
+    QStackedWidget, QRadioButton, QFrame, QApplication, QSizePolicy, QGraphicsDropShadowEffect,
+    QScrollArea
 )
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QPixmap, QColor, QFont, QBrush, QPainter, QPen
@@ -1958,6 +1959,29 @@ class InfoWidget(QWidget):
             QTableWidget::viewport {
                 background-color: #FFFFFF;
             }
+            QScrollBar:vertical {
+                border: none;
+                background: #DFDFDF;
+                width: 14px;
+                margin-top: 31px;
+                margin-bottom: 0px;
+                margin-left: 0px;
+                margin-right: 0px;
+                border-radius: 4px;
+            }
+            QScrollBar::handle:vertical {
+                background: #A3A9AD;
+                min-height: 20px;
+                border-radius: 4px;
+                margin: 0px 3px;
+            }
+            QScrollBar::handle:vertical:hover {
+                background: #8A9094;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                border: none;
+                background: none;
+            }
         """)
 
         # Stylesheet 이후 배경색 강제 설정 (stylesheet보다 나중에 적용)
@@ -1976,6 +2000,51 @@ class InfoWidget(QWidget):
         viewport_palette.setColor(QPalette.Base, QColor("#FFFFFF"))
         viewport_palette.setColor(QPalette.Window, QColor("#FFFFFF"))
         self.api_test_table.viewport().setPalette(viewport_palette)
+
+        # 헤더 오버레이 위젯 (테이블 헤더 위에 덮어씌우기)
+        header_overlay = QWidget()
+        header_overlay.setParent(self.api_test_table)
+        header_overlay.setGeometry(0, 0, 744, 31)  # 테이블 상단 전체
+        header_overlay.setStyleSheet("""
+            QWidget {
+                background-color: #EDF0F3;
+                border: 1px solid #CECECE;
+                border-bottom: none;
+                border-top-left-radius: 4px;
+                border-top-right-radius: 4px;
+            }
+        """)
+
+        header_layout = QHBoxLayout(header_overlay)
+        header_layout.setContentsMargins(0, 0, 0, 0)
+        header_layout.setSpacing(0)
+
+        # 헤더 컬럼: 행번호(50) + 기능명(346) + API명(348)
+        header_columns = [
+            (50, ""),
+            (346, "기능명"),
+            (348, "API명")
+        ]
+
+        for width, text in header_columns:
+            label = QLabel(text)
+            label.setFixedSize(width, 31)
+            label.setAlignment(Qt.AlignCenter)
+            label.setStyleSheet("""
+                QLabel {
+                    background-color: transparent;
+                    border: none;
+                    color: #1B1B1C;
+                    font-family: 'Noto Sans KR';
+                    font-size: 18px;
+                    font-weight: 600;
+                    letter-spacing: -0.156px;
+                }
+            """)
+            header_layout.addWidget(label)
+
+        header_overlay.show()
+        header_overlay.raise_()  # 최상위로 올리기
 
         # 시험 API 안내 문구 QLabel (테이블 위에 오버레이)
         self.api_placeholder_label = QLabel("시험 시나리오를 선택하면\nAPI가 표시됩니다.")
