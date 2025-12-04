@@ -143,9 +143,9 @@ SPEC_CONFIG = [
     "api_name": [],
     "api_id": [],
     "api_endpoint": [],
-    "trans_protocol": [None, None],
-    "time_out": [5000, 5000],
-    "num_retries": [1, 1]
+    "trans_protocol": [None, None, None, None, None, None, None, None, None],
+    "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
+    "num_retries": [1, 1, 1, 1, 1, 1, 1, 1, 1]
 }
     }
 ]
