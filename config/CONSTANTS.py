@@ -46,9 +46,9 @@ def save_management_url(new_url):
 # 관리자시스템 주소
 management_url = load_management_url()
 
-specs = [["cmii7wfuf006i8z1tcds6q69g_outSchema","cmii7wfuf006i8z1tcds6q69g_inData","cmii7wfuf006i8z1tcds6q69g_messages",""],
-         ["cmii7w683006h8z1t7usnin5g_outSchema","cmii7w683006h8z1t7usnin5g_inData","cmii7w683006h8z1t7usnin5g_messages",""],
-         ["cmii7v8pr006g8z1tvo55a50u_outSchema","cmii7v8pr006g8z1tvo55a50u_inData","cmii7v8pr006g8z1tvo55a50u_messages",""]]
+specs = [["cmii7shen005i8z1tagevx4qh_inSchema","cmii7shen005i8z1tagevx4qh_outData","cmii7shen005i8z1tagevx4qh_messages",""],
+         ["cmii7pysb004k8z1tts0npxfm_inSchema","cmii7pysb004k8z1tts0npxfm_outData","cmii7pysb004k8z1tts0npxfm_messages",""],
+         ["cmii7lxbn002s8z1t1i9uudf0_inSchema","cmii7lxbn002s8z1t1i9uudf0_outData","cmii7lxbn002s8z1t1i9uudf0_messages",""]]
 none_request_message = ['Capabilities',
                         'CameraProfiles',
                         'DoorProfiles',
@@ -63,7 +63,7 @@ test_category = "MAIN_TEST"
 test_target = "기본 기능 시험-물리보안"
 test_range = "ALL_FIELDS"
 auth_type = "Digest Auth"
-auth_info = "admin,1234"
+auth_info = "kisa,kisa_k1!2@"
 admin_code = "1234"
 url = "https://10.252.219.95:2000"
 contact_person = "김철수"
@@ -119,9 +119,9 @@ SPEC_CONFIG = [
         "group_id": "cmii831gk009j8z1thiahf6ro",
         "cmii7wfuf006i8z1tcds6q69g": {
     "test_name": "sensor001",
-    "specs": ['cmii7wfuf006i8z1tcds6q69g_outSchema', 'cmii7wfuf006i8z1tcds6q69g_inData', 'cmii7wfuf006i8z1tcds6q69g_messages'],
+    "specs": ['cmii7shen005i8z1tagevx4qh_inSchema', 'cmii7shen005i8z1tagevx4qh_outData', 'cmii7shen005i8z1tagevx4qh_messages'],
     "api_name": ['사용자 인증'],
-    "api_id": ['step-1-vh5wditno'],
+    "api_id": ['step-1-ul4l0o5qg'],
     "api_endpoint": ['/Authentication'],
     "trans_protocol": ['basic'],
     "time_out": [5000],
@@ -129,23 +129,23 @@ SPEC_CONFIG = [
 },
         "cmii7w683006h8z1t7usnin5g": {
     "test_name": "bio001",
-    "specs": ['cmii7w683006h8z1t7usnin5g_outSchema', 'cmii7w683006h8z1t7usnin5g_inData', 'cmii7w683006h8z1t7usnin5g_messages'],
-    "api_name": ['사용자 인증'],
-    "api_id": ['step-1-y5m65sgo6'],
-    "api_endpoint": ['/Authentication'],
-    "trans_protocol": ['basic'],
-    "time_out": [5000],
-    "num_retries": [1]
+    "specs": ['cmii7pysb004k8z1tts0npxfm_inSchema', 'cmii7pysb004k8z1tts0npxfm_outData', 'cmii7pysb004k8z1tts0npxfm_messages'],
+    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동'],
+    "api_id": ['step-1-ve056coia', 'step-2-g0s3yjcf4'],
+    "api_endpoint": ['/Authentication', '/Capabilities'],
+    "trans_protocol": ['basic', 'basic'],
+    "time_out": [5000, 5000],
+    "num_retries": [1, 1]
 },
         "cmii7v8pr006g8z1tvo55a50u": {
     "test_name": "vid001",
-    "specs": ['cmii7v8pr006g8z1tvo55a50u_outSchema', 'cmii7v8pr006g8z1tvo55a50u_inData', 'cmii7v8pr006g8z1tvo55a50u_messages', 'cmii7v8pr006g8z1tvo55a50u_webhook_inSchema', 'cmii7v8pr006g8z1tvo55a50u_webhook_outData'],
-    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '카메라 목록 연동', '실시간 영상(CCTV) 전송 ', '실시간 이벤트 분석 정보 연동'],
-    "api_id": ['step-1-t9b5f4zi2', 'step-2-744wsnnj1', 'step-3-x2ylvolzp', 'step-4-bum9plo3a', 'step-5-j7tdov6r1'],
-    "api_endpoint": ['/Authentication', '/Capabilities', '/CameraProfiles', '/StreamURLs', '/RealtimeVideoEventInfos'],
-    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'WebHook'],
-    "time_out": [5000, 5000, 5000, 5000, 5000],
-    "num_retries": [1, 1, 1, 1, 1]
+    "specs": ['cmii7lxbn002s8z1t1i9uudf0_inSchema', 'cmii7lxbn002s8z1t1i9uudf0_outData', 'cmii7lxbn002s8z1t1i9uudf0_messages', 'cmii7lxbn002s8z1t1i9uudf0_webhook_OutSchema', 'cmii7lxbn002s8z1t1i9uudf0_webhook_inData'],
+    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '카메라 목록 연동', '실시간 영상(CCTV) 전송', '실시간 이벤트 분석 정보 연동', '저장된 영상 목록 연동', '저장된 영상(CCTV) 전송', '저장된 이벤트 분석 정보 연동', '저장된 객체 분석 정보 연동'],
+    "api_id": ['step-1-dgo2i8y6u', 'step-2-o7zemidp7', 'step-3-zyh98qlgl', 'step-4-1sf8k51nd', 'step-5-kx0x774ns', 'step-6-cabyqccnm', 'step-7-cgrfotqw3', 'step-8-0ovskx2mm', 'step-9-t3r21jjeh'],
+    "api_endpoint": ['/Authentication', '/Capabilities', '/CameraProfiles', '/StreamURLs', '/RealtimeVideoEventInfos', '/StoredVideoInfos', '/ReplayURL', '/StoredVideoEventInfos', '/StoredObjectAnalyticsInfos'],
+    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'WebHook', 'basic', 'basic', 'basic', 'basic'],
+    "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
+    "num_retries": [1, 1, 1, 1, 1, 1, 1, 1, 1]
 }
     }
 ]

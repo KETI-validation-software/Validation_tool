@@ -2915,6 +2915,16 @@ class InfoWidget(QWidget):
                 QMessageBox.warning(self, "오류", f"시험 시나리오 데이터 형식이 올바르지 않습니다: {type(first_spec)}")
                 return
 
+            # 물리보안(시스템 검증)일 경우: UI에서 수정한 ID/PW로 Data_request.py 업데이트
+            if not hasattr(self, 'target_system') or self.target_system != "통합플랫폼시스템":
+                user_id = self.id_input.text().strip()
+                password = self.pw_input.text().strip()
+                if user_id and password:
+                    print(f"[INFO] 물리보안 시험 시작 - Data_request.py 업데이트 (userID={user_id})")
+                    update_success = self.form_validator.update_data_request_authentication(spec_id, user_id, password)
+                    if not update_success:
+                        print("[WARNING] Data_request.py 업데이트 실패, 기존 값으로 진행합니다.")
+
             # CONSTANTS.py 업데이트
             if self.form_validator.update_constants_py():
                 # test_group_name, verification_type(current_mode), spec_id를 함께 전달
@@ -3286,21 +3296,11 @@ class InfoWidget(QWidget):
 
     def auto_fill_authentication_for_platform(self):
         """
-        플랫폼 검증일 경우 Authentication 정보를 자동으로 채우고 필드를 disabled 상태로 설정
+        플랫폼 검증/시스템 검증에 따라 Authentication 정보를 자동으로 채움
+        - 통합플랫폼: Validation_request.py에서 읽어와서 disabled
+        - 물리보안(시스템 검증): Data_request.py에서 읽어와서 enabled (수정 가능)
         """
         try:
-            # 플랫폼 검증인지 확인
-            if not hasattr(self, 'target_system') or self.target_system != "통합플랫폼시스템":
-                print("[INFO] 시스템 검증이므로 Authentication 자동 입력을 건너뜁니다.")
-                # 시스템 검증일 경우 필드를 활성화하고 비워둠
-                self.id_input.setEnabled(True)
-                self.pw_input.setEnabled(True)
-                self.id_input.clear()
-                self.pw_input.clear()
-                return
-
-            print("[INFO] 플랫폼 검증 감지 - Authentication 자동 입력을 시도합니다.")
-
             # test_specs에서 첫 번째 spec_id 가져오기
             if not hasattr(self, 'test_specs') or not self.test_specs:
                 print("[WARNING] test_specs가 없어서 Authentication 자동 입력을 건너뜁니다.")
@@ -3313,6 +3313,35 @@ class InfoWidget(QWidget):
                 print("[WARNING] spec_id를 찾을 수 없어서 Authentication 자동 입력을 건너뜁니다.")
                 return
 
+            # 플랫폼 검증인지 확인
+            if not hasattr(self, 'target_system') or self.target_system != "통합플랫폼시스템":
+                # 물리보안(시스템 검증): Data_request.py에서 읽어옴
+                print("[INFO] 시스템 검증(물리보안) 감지 - Data_request.py에서 Authentication 정보를 읽어옵니다.")
+                print(f"[INFO] spec_id={spec_id}로 Data_request.py에서 Authentication 정보를 추출합니다.")
+
+                user_id, password = self.form_validator.get_authentication_from_data_request(spec_id)
+
+                if user_id and password:
+                    # 필드에 값 설정
+                    self.id_input.setText(user_id)
+                    self.pw_input.setText(password)
+
+                    # 필드를 enabled 상태로 설정 (수정 가능)
+                    self.id_input.setEnabled(True)
+                    self.pw_input.setEnabled(True)
+
+                    print(f"[SUCCESS] 시스템 검증: Authentication 자동 입력 완료 (User ID={user_id})")
+                    print(f"[INFO] id_input과 pw_input 필드가 enabled 상태로 설정되었습니다. (수정 가능)")
+                else:
+                    print("[WARNING] Data_request.py에서 Authentication 정보를 찾을 수 없습니다. 필드를 비워둡니다.")
+                    self.id_input.setEnabled(True)
+                    self.pw_input.setEnabled(True)
+                    self.id_input.clear()
+                    self.pw_input.clear()
+                return
+
+            # 통합플랫폼: Validation_request.py에서 읽어옴
+            print("[INFO] 플랫폼 검증 감지 - Validation_request.py에서 Authentication 자동 입력을 시도합니다.")
             print(f"[INFO] spec_id={spec_id}로 Authentication 정보를 추출합니다.")
 
             # FormValidator의 get_authentication_credentials 메서드 호출
