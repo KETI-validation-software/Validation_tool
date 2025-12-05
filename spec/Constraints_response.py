@@ -445,7 +445,7 @@ cmii7lxbn002s8z1t1i9uudf0_StoredObjectAnalyticsInfos_out_constraints = {
   },
   "camList.anlayticsResultList.analyticsAttribute": {
     "valueType": "preset",
-    "required": False
+    "required": True
   },
   "camList.anlayticsResultList.analyticsConfidence": {
     "valueType": "preset",
