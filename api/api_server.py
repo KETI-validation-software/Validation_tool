@@ -50,11 +50,13 @@ class Server(BaseHTTPRequestHandler):
     trace = defaultdict(lambda: deque(maxlen=1000))  # api_name -> deque(events)
     request_counter = {}  # ✅ API별 시스템 요청 카운터 (클래스 변수)
     latest_event = defaultdict(dict)  # ✅ API별 최신 이벤트 저장 (클래스 변수)
+    request_has_error = {}  # ✅ API별 요청 오류 flag (내부용, 응답 JSON에 포함 안 됨)
 
     def __init__(self, *args, **kwargs):
         self.result = ""
         self.webhook_flag = False
         self.generator = ConstraintDataGenerator(Server.latest_event)  # ✅ 클래스 변수 참조
+        self.current_api_name = None  # ✅ 현재 처리 중인 API 이름
 
         # super().__init__()를 마지막에 호출 (이때 handle()이 실행되어 do_POST가 호출됨)
         super().__init__(*args, **kwargs)
@@ -131,27 +133,33 @@ class Server(BaseHTTPRequestHandler):
             print(f"[ERROR_CHECK] 스키마를 찾을 수 없음: {api_name}")
             return None  # 스키마 없으면 검사 안 함
         
-        # 1. 타입 불일치 검사 → 400
+        # 1. 타입 불일치 검사 → flag만 설정하고 200 응답 계속
         type_error = self._check_type_mismatch(request_data, schema)
         if type_error:
-            print(f"[ERROR_CHECK] 타입 불일치 감지: {type_error}")
-            return {"code": "400", "message": "잘못된 요청"}
+            print(f"[ERROR_CHECK] 타입 불일치 감지: {type_error} (flag만 설정, 200 응답 계속)")
+            # ✅ 내부 flag 설정 (요청에 오류가 있음을 표시)
+            Server.request_has_error[api_name] = True
+            # return 하지 않고 계속 진행 (200 응답)
         
-        # 2. 시간 구간 검사 → 201 (startTime, endTime 있는 API만)
+        # 2. 시간 구간 검사 → flag만 설정
         if "startTime" in request_data or "endTime" in request_data:
             time_error = self._check_time_range(request_data)
             if time_error:
-                print(f"[ERROR_CHECK] 시간 범위 오류 감지: {time_error}")
-                return {"code": "201", "message": "정보 없음"}
+                print(f"[ERROR_CHECK] 시간 범위 오류 감지: {time_error} (flag만 설정, 200 응답 계속)")
+                Server.request_has_error[api_name] = True
         
-        # 3. 장치 존재 검사 → 404 (camID, camList 있는 API만)
+        # 3. 장치 존재 검사 → flag만 설정
         if "camID" in request_data or "camList" in request_data:
             device_error = self._check_device_exists(request_data)
             if device_error:
-                print(f"[ERROR_CHECK] 장치 없음 감지: {device_error}")
-                return {"code": "404", "message": "장치 없음"}
+                print(f"[ERROR_CHECK] 장치 없음 감지: {device_error} (flag만 설정, 200 응답 계속)")
+                Server.request_has_error[api_name] = True
         
-        return None  # 오류 없음
+        # ✅ 오류 없으면 flag 초기화
+        if api_name not in Server.request_has_error or not Server.request_has_error[api_name]:
+            Server.request_has_error[api_name] = False
+        
+        return None  # 오류 응답 없음 (정상 처리 계속)
 
     def _get_request_schema(self, api_name):
         """API의 요청 스키마 가져오기"""
@@ -799,6 +807,15 @@ class Server(BaseHTTPRequestHandler):
                 )
                 print(f"[DEBUG][CONSTRAINTS] 업데이트된 message 내용: {json.dumps(updated_message, ensure_ascii=False)[:200]}")
 
+                # ✅ code_value 추가 (내부 flag)
+                if isinstance(updated_message, dict):
+                    if api_name in Server.request_has_error and Server.request_has_error[api_name]:
+                        updated_message['code_value'] = 400
+                        print(f"[DEBUG] code_value=400 추가 (요청 오류 있음)")
+                    else:
+                        updated_message['code_value'] = 200
+                        print(f"[DEBUG] code_value=200 추가 (정상)")
+
                 self._push_event(api_name, "RESPONSE", updated_message)
 
                 # 업데이트된 메시지를 응답으로 전송
@@ -807,6 +824,15 @@ class Server(BaseHTTPRequestHandler):
                 print(f"[DEBUG][CONSTRAINTS] constraints 없음 - 원본 메시지 사용")
                 # constraints가 없으면 원본 메시지 그대로 사용
 
+                # ✅ code_value 추가 (내부 flag)
+                if isinstance(message, dict):
+                    if api_name in Server.request_has_error and Server.request_has_error[api_name]:
+                        message['code_value'] = 400
+                        print(f"[DEBUG] code_value=400 추가 (요청 오류 있음)")
+                    else:
+                        message['code_value'] = 200
+                        print(f"[DEBUG] code_value=200 추가 (정상)")
+
                 self._push_event(api_name, "RESPONSE", message)
                 a = json.dumps(message).encode('utf-8')
         except Exception as e:
@@ -814,6 +840,14 @@ class Server(BaseHTTPRequestHandler):
             import traceback
             traceback.print_exc()
             # 에러 발생 시 원본 메시지 사용
+            
+            # ✅ code_value 추가 (내부 flag)
+            if isinstance(message, dict):
+                if api_name in Server.request_has_error and Server.request_has_error[api_name]:
+                    message['code_value'] = 400
+                else:
+                    message['code_value'] = 200
+            
             self._push_event(api_name, "REQUEST", self.request_data)
             self._push_event(api_name, "RESPONSE", message)
             a = json.dumps(message).encode('utf-8')
