@@ -295,7 +295,9 @@ cmii7lxbn002s8z1t1i9uudf0_StoredObjectAnalyticsInfos_out_data = {
             {
             "anayticsID": "object001",
             "analyticsClass": "트럭",
-            "analyticsAttribute": [],
+            "analyticsAttribute": [
+            "빨간색"
+        ],
             "analyticsConfidence": 0.8,
             "analyticsBoundingBox": {
             "left": 0.2,
@@ -314,7 +316,10 @@ cmii7lxbn002s8z1t1i9uudf0_StoredObjectAnalyticsInfos_out_data = {
             {
             "anayticsID": "object002",
             "analyticsClass": "사람",
-            "analyticsAttribute": [],
+            "analyticsAttribute": [
+            "여자",
+            "안경"
+        ],
             "analyticsConfidence": 0.9,
             "analyticsBoundingBox": {
             "left": 0.3,
