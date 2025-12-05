@@ -4000,9 +4000,35 @@ class MyApp(QWidget):
                     if isinstance(res_data, dict):
                         response_code = str(res_data.get("code", "")).strip()
                         response_message = res_data.get("message", "")
+                        code_value = res_data.get("code_value", 200)  # ✅ 내부 flag 읽기
+                        
+                        # ✅ code_value 읽은 후 제거 (저장/UI에 포함 안 됨)
+                        if "code_value" in res_data:
+                            del res_data["code_value"]
+                            print(f"[CODE_VALUE] code_value={code_value} 읽고 제거 완료")
+                        
+                        print(f"[CODE_VALUE] response_code={response_code}, code_value={code_value}")
 
-                        # ✅ 에러 코드 (400/201/404) 처리 - 동적으로 모든 필드 PASS 처리
-                        if response_code in ["400", "201", "404"]:
+                        # ✅ 케이스 1: code_value=400이고 response_code가 200인 경우
+                        # → 잘못된 요청인데 200으로 응답 → 모든 필드 FAIL
+                        if code_value == 400 and response_code in ["200", "성공", "Success", ""]:
+                            print(f"[SYSTEM] 잘못된 요청인데 200 응답: code_value={code_value}, response_code={response_code}")
+                            print(f"[SYSTEM] 모든 필드 FAIL 처리")
+                            
+                            # json_check_에서 계산한 전체 필드 개수
+                            total_schema_fields = key_psss_cnt + key_error_cnt
+                            
+                            # 모든 필드를 FAIL로 처리
+                            key_psss_cnt = 0
+                            key_error_cnt = total_schema_fields
+                            val_result = "FAIL"
+                            val_text = f"잘못된 요청 (code_value=400): 모든 필드 자동 FAIL 처리됨"
+                            
+                            print(f"[SYSTEM] 잘못된 요청 처리 완료: 전체 {total_schema_fields}개 필드 FAIL")
+                        
+                        # ✅ 케이스 2: code_value=400이고 response_code도 400/201/404인 경우
+                        # → 의도적 오류 요청, 올바르게 에러 응답 → 모든 필드 PASS
+                        elif code_value == 400 and response_code in ["400", "201", "404"]:
                             print(f"[SYSTEM] 에러 응답 감지: code={response_code}, message={response_message}")
                             print(f"[SYSTEM] 동적으로 스키마 필드 자동 PASS 처리 시작")
                             
