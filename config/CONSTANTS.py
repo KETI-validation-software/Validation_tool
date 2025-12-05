@@ -46,7 +46,9 @@ def save_management_url(new_url):
 # 관리자시스템 주소
 management_url = load_management_url()
 
-specs = [["cmgvieyak001b6cd04cgaawmm_inSchema","cmgvieyak001b6cd04cgaawmm_outData","cmgvieyak001b6cd04cgaawmm_messages",""]]
+specs = [["cmii7wfuf006i8z1tcds6q69g_outSchema","cmii7wfuf006i8z1tcds6q69g_inData","cmii7wfuf006i8z1tcds6q69g_messages",""],
+         ["cmii7w683006h8z1t7usnin5g_outSchema","cmii7w683006h8z1t7usnin5g_inData","cmii7w683006h8z1t7usnin5g_messages",""],
+         ["cmii7v8pr006g8z1tvo55a50u_outSchema","cmii7v8pr006g8z1tvo55a50u_inData","cmii7v8pr006g8z1tvo55a50u_messages",""]]
 none_request_message = ['Capabilities',
                         'CameraProfiles',
                         'DoorProfiles',
@@ -54,19 +56,19 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소
 # test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
-company_name = "통합플랫폼테스트"
-product_name = "통합플랫폼테스트제품"
+company_name = "통합플랫폼기업"
+product_name = "통합플랫폼 시스템-기본"
 version = "v1.0"
 test_category = "MAIN_TEST"
-test_target = "통합플랫폼"
+test_target = "기본 기능 시험-통합시스템"
 test_range = "ALL_FIELDS"
 auth_type = "Digest Auth"
 auth_info = "admin,1234"
 admin_code = "1234"
-url = "https://10.252.219.95:8080"
+url = "https://192.168.0.3:2000"
 contact_person = "김철수"
 model_name = "v1.0"
-request_id = "cmh1yg49v000t9y0jdr1wwuja"
+request_id = "cmii86ssr00a48z1tqmco6ke8"
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황
 flag_opt = False
@@ -113,17 +115,37 @@ WEBHOOK_URL = f"https://{WEBHOOK_PUBLIC_IP}:{WEBHOOK_PORT}"
 
 SPEC_CONFIG = [
     {
-        "group_name": "통합플랫폼",
-        "group_id": "cmgzwocpp01y6vsve880sfysm",
-        "cmgvieyak001b6cd04cgaawmm": {
+        "group_name": "기본 기능 시험-통합시스템",
+        "group_id": "cmii82nib009f8z1tvo6fz8j2",
+        "cmii7shen005i8z1tagevx4qh": {
+    "test_name": "sensor001",
+    "specs": ['cmii7shen005i8z1tagevx4qh_inSchema', 'cmii7shen005i8z1tagevx4qh_outData', 'cmii7shen005i8z1tagevx4qh_messages'],
+    "api_name": [],
+    "api_id": [],
+    "api_endpoint": [],
+    "trans_protocol": [None],
+    "time_out": [5000],
+    "num_retries": [1]
+},
+        "cmii7pysb004k8z1tts0npxfm": {
+    "test_name": "bio001",
+    "specs": ['cmii7pysb004k8z1tts0npxfm_inSchema', 'cmii7pysb004k8z1tts0npxfm_outData', 'cmii7pysb004k8z1tts0npxfm_messages'],
+    "api_name": [],
+    "api_id": [],
+    "api_endpoint": [],
+    "trans_protocol": [None, None],
+    "time_out": [5000, 5000],
+    "num_retries": [1, 1]
+},
+        "cmii7lxbn002s8z1t1i9uudf0": {
     "test_name": "vid001",
-    "specs": ['cmgvieyak001b6cd04cgaawmm_inSchema', 'cmgvieyak001b6cd04cgaawmm_outData', 'cmgvieyak001b6cd04cgaawmm_messages', 'cmgvieyak001b6cd04cgaawmm_webhook_OutSchema', 'cmgvieyak001b6cd04cgaawmm_webhook_inData'],
-    "api_name": ['인증', '전송 지원 기능 정보 연동', '카메라 목록 연동', '저장된 영상 목록 연동', '실시간 영상 정보 연동', '저장된 영상 정보 연동', '실시간 이벤트 분석 정보 연동', '저장된 이벤트 분석 정보 연동'],
-    "api_id": ['step-1-77lxvxrit', 'step-2-ln57b7ahz', 'step-1-354py0pz2', 'step-2-hyto4xrf1', 'step-5-dfxmyzzsw', 'step-6-pflcyt2cp', 'step-7-166n5ivbf', 'step-8-fff2u2432'],
-    "api_endpoint": ['/Authentication', '/Capabilities', '/CameraProfiles', '/StoredVideoInfos', '/StreamURLs', '/ReplayURL', '/RealtimeVideoEventInfos', '/StoredVideoEventInfos'],
-    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'WebHook', 'basic'],
-    "time_out": [60000, 60000, 60000, 60000, 60000, 60000, 60000, 60000],
-    "num_retries": [5, 5, 5, 5, 5, 5, 5, 5]
+    "specs": ['cmii7lxbn002s8z1t1i9uudf0_inSchema', 'cmii7lxbn002s8z1t1i9uudf0_outData', 'cmii7lxbn002s8z1t1i9uudf0_messages'],
+    "api_name": [],
+    "api_id": [],
+    "api_endpoint": [],
+    "trans_protocol": [None, None, None, None, None, None, None, None, None],
+    "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
+    "num_retries": [1, 1, 1, 1, 1, 1, 1, 1, 1]
 }
     }
 ]

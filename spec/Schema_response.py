@@ -1,148 +1,27 @@
 from json_checker import OptionalKey
 
 
-from json_checker import OptionalKey
-
-
 # Authentication
-cmgyv3rzl014nvsveidu5jpzp_Authentication_out_schema = {
-    "code": str,
-    "message": str,
-    "userName": str,
-    "userAff": str,
-    OptionalKey("accessToken"): str,
-}
+cmii7wfuf006i8z1tcds6q69g_Authentication_out_schema = {}
 
-# Capabilities
-cmgyv3rzl014nvsveidu5jpzp_Capabilities_out_schema = {
-    "code": str,
-    "message": str,
-    "streamingSupport": [{
-    "streamProtocolType": str,
-    "streamProtocolDesc": str,
-}],
-    "transportSupport": [{
-    "transProtocolType": str,
-    "transProtocolDesc": str,
-}],
-}
-
-# CameraProfiles
-cmgyv3rzl014nvsveidu5jpzp_CameraProfiles_out_schema = {
-    "code": str,
-    "message": str,
-    "camList": [{
-    "camID": str,
-    "camName": str,
-    OptionalKey("camLoc"): {
-    "lon": str,
-    "lat": str,
-    OptionalKey("alt"): str,
-    OptionalKey("desc"): str,
-},
-    OptionalKey("camConfig"): {
-    "camType": str,
-},
-}],
-}
-
-# StoredVideoInfos
-cmgyv3rzl014nvsveidu5jpzp_StoredVideoInfos_out_schema = {
-    "code": str,
-    "message": str,
-    "camList": [{
-    "camID": str,
-    "timeList": [{
-    "startTime": int,
-    "endTime": int,
-}],
-}],
-}
-
-# StreamURLs
-cmgyv3rzl014nvsveidu5jpzp_StreamURLs_out_schema = {
-    "code": str,
-    "message": str,
-    "camList": [{
-    "camID": str,
-    OptionalKey("accessID"): str,
-    OptionalKey("accessPW"): str,
-    "camURL": str,
-    OptionalKey("videoInfo"): {
-    OptionalKey("resolution"): str,
-    OptionalKey("fps"): int,
-    OptionalKey("videoCodec"): str,
-    OptionalKey("audioCodec"): str,
-},
-}],
-}
-
-# ReplayURL
-cmgyv3rzl014nvsveidu5jpzp_ReplayURL_out_schema = {
-    "code": str,
-    "message": str,
-    "camList": [{
-    "camID": str,
-    OptionalKey("accessID"): str,
-    OptionalKey("accessPW"): str,
-    "startTime": str,
-    OptionalKey("endTime"): str,
-    "camURL": str,
-    OptionalKey("videoInfo"): {
-    OptionalKey("resolution"): str,
-    OptionalKey("fps"): int,
-    OptionalKey("videoCodec"): str,
-    OptionalKey("audioCodec"): str,
-},
-}],
-}
-
-# RealtimeVideoEventInfos
-cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_out_schema = {
-    "code": str,
-    "message": str,
-}
-
-# RealtimeVideoEventInfos WebHook IN Schema
-cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_webhook_in_schema = {
-    "camList": [{
-    "camID": str,
-    "eventUUID": str,
-    "eventName": str,
-    "startTime": int,
-    OptionalKey("endTime"): int,
-    OptionalKey("eventDesc"): str,
-}],
-}
-
-# StoredVideoEventInfos
-cmgyv3rzl014nvsveidu5jpzp_StoredVideoEventInfos_out_schema = {
-    "code": str,
-    "message": str,
-    "camList": [{
-    "camID": str,
-    "eventUUID": str,
-    "eventName": str,
-    "startTime": str,
-    "endTime": str,
-    "eventDesc": str,
-}],
-}
-
-# cmgyv3rzl014nvsveidu5jpzp 스키마 리스트
-cmgyv3rzl014nvsveidu5jpzp_outSchema = [
-    cmgyv3rzl014nvsveidu5jpzp_Authentication_out_schema,
-    cmgyv3rzl014nvsveidu5jpzp_Capabilities_out_schema,
-    cmgyv3rzl014nvsveidu5jpzp_CameraProfiles_out_schema,
-    cmgyv3rzl014nvsveidu5jpzp_StoredVideoInfos_out_schema,
-    cmgyv3rzl014nvsveidu5jpzp_StreamURLs_out_schema,
-    cmgyv3rzl014nvsveidu5jpzp_ReplayURL_out_schema,
-    cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_out_schema,
-    cmgyv3rzl014nvsveidu5jpzp_StoredVideoEventInfos_out_schema,
+# cmii7wfuf006i8z1tcds6q69g 스키마 리스트
+cmii7wfuf006i8z1tcds6q69g_outSchema = [
+    cmii7wfuf006i8z1tcds6q69g_Authentication_out_schema,
 ]
 
-# cmgyv3rzl014nvsveidu5jpzp WebHook 스키마 리스트
-cmgyv3rzl014nvsveidu5jpzp_webhook_inSchema = [
-    cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_webhook_in_schema,
+# Authentication
+cmii7w683006h8z1t7usnin5g_Authentication_out_schema = {}
+
+# cmii7w683006h8z1t7usnin5g 스키마 리스트
+cmii7w683006h8z1t7usnin5g_outSchema = [
+    cmii7w683006h8z1t7usnin5g_Authentication_out_schema,
+]
+
+# Authentication
+cmii7v8pr006g8z1tvo55a50u_Authentication_out_schema = {}
+
+# cmii7v8pr006g8z1tvo55a50u 스키마 리스트
+cmii7v8pr006g8z1tvo55a50u_outSchema = [
+    cmii7v8pr006g8z1tvo55a50u_Authentication_out_schema,
 ]
 
