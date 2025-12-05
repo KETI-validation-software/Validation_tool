@@ -812,33 +812,39 @@ def json_to_data(type_):
     return True
 
 
-def get_test_group_info():
-    """CONSTANTS의 SPEC_CONFIG에서 테스트 그룹 정보 추출"""
+def get_test_groups_info():
+    """CONSTANTS의 SPEC_CONFIG에서 모든 테스트 그룹 정보 추출 (배열 반환)"""
     if not CONSTANTS.SPEC_CONFIG:
-        return {
+        return [{
             "id": "group-001",
             "name": CONSTANTS.test_target,
             "testRange": CONSTANTS.test_range,
             "testSpecIds": []
-        }
+        }]
 
-    # 첫 번째 그룹 정보 가져오기
-    first_group = CONSTANTS.SPEC_CONFIG[0]
-    group_id = first_group.get("group_id", "group-001")
-    group_name = first_group.get("group_name", CONSTANTS.test_target)
+    # 모든 그룹을 순회하면서 배열로 반환
+    test_groups = []
+    for group in CONSTANTS.SPEC_CONFIG:
+        group_id = group.get("group_id", "group-001")
+        group_name = group.get("group_name", CONSTANTS.test_target)
 
-    # 그룹 내 모든 spec ID 수집
-    test_spec_ids = []
-    for key, value in first_group.items():
-        if key not in ["group_name", "group_id"] and isinstance(value, dict):
-            test_spec_ids.append(key)
+        # 그룹 내 모든 spec ID 수집
+        test_spec_ids = []
+        for key, value in group.items():
+            if key not in ["group_name", "group_id"] and isinstance(value, dict):
+                test_spec_ids.append(key)
 
-    return {
-        "id": group_id,
-        "name": group_name,
-        "testRange": CONSTANTS.test_range,
-        "testSpecIds": test_spec_ids
-    }
+        # testRange는 testSpecIds 개수에 맞춰 생성
+        test_range = ", ".join(["ALL_FIELDS"] * len(test_spec_ids))
+
+        test_groups.append({
+            "id": group_id,
+            "name": group_name,
+            "testRange": test_range,
+            "testSpecIds": test_spec_ids
+        })
+
+    return test_groups
 
 
 def get_spec_test_name(spec_id):
@@ -975,7 +981,7 @@ def build_result_json(myapp_instance):
     }
 
     # 3. 테스트 그룹 정보
-    test_group = get_test_group_info()
+    test_groups = get_test_groups_info()
 
     # 4. 인증 방식
     auth_method = map_auth_method(CONSTANTS.auth_type)
@@ -996,29 +1002,48 @@ def build_result_json(myapp_instance):
     # 6. 모든 시험 시나리오 결과 수집
     all_spec_results = {}
 
-    # 6-1. 저장된 spec 데이터 처리
+    # 6-1. 저장된 spec 데이터 처리 (✅ 복합키 지원)
     if hasattr(myapp_instance, 'spec_table_data'):
-        for spec_id, saved_data in myapp_instance.spec_table_data.items():
+        for composite_key, saved_data in myapp_instance.spec_table_data.items():
+            # 복합키 파싱: "group_id_spec_id" → group_id, spec_id 추출
+            if '_' in composite_key:
+                parts = composite_key.split('_', 1)
+                if len(parts) == 2:
+                    group_id = parts[0]
+                    spec_id = parts[1]
+                else:
+                    group_id = None
+                    spec_id = composite_key
+            else:
+                # 하위 호환: 복합키가 아닌 경우 그대로 사용
+                group_id = None
+                spec_id = composite_key
+
             spec_result = _build_spec_result(
                 myapp_instance,
                 spec_id,
                 saved_data['step_buffers'],
-                saved_data.get('table_data', [])
+                saved_data.get('table_data', []),
+                group_id
             )
             if spec_result:
-                all_spec_results[spec_id] = spec_result
+                all_spec_results[composite_key] = spec_result  # 복합키로 저장
 
-    # 6-2. 현재 spec 데이터 처리 (저장되지 않은 경우)
+    # 6-2. 현재 spec 데이터 처리 (저장되지 않은 경우) (✅ 복합키 지원)
     current_spec_id = getattr(myapp_instance, 'current_spec_id', None)
-    if current_spec_id and current_spec_id not in all_spec_results:
-        spec_result = _build_spec_result(
-            myapp_instance,
-            current_spec_id,
-            getattr(myapp_instance, 'step_buffers', []),
-            None  # 현재 테이블에서 직접 읽음
-        )
-        if spec_result:
-            all_spec_results[current_spec_id] = spec_result
+    current_group_id = getattr(myapp_instance, 'current_group_id', None)
+    if current_spec_id:
+        composite_key = f"{current_group_id}_{current_spec_id}" if current_group_id else current_spec_id
+        if composite_key not in all_spec_results:
+            spec_result = _build_spec_result(
+                myapp_instance,
+                current_spec_id,
+                getattr(myapp_instance, 'step_buffers', []),
+                None,  # 현재 테이블에서 직접 읽음
+                current_group_id
+            )
+            if spec_result:
+                all_spec_results[composite_key] = spec_result
 
     test_result = list(all_spec_results.values())
 
@@ -1038,7 +1063,7 @@ def build_result_json(myapp_instance):
     result_json = {
         "requestId": request_id,
         "evaluationTarget": evaluation_target,
-        "testGroup": test_group,
+        "testGroups": test_groups,
         "status": status,
         "authMethod": auth_method,
         "testScore": test_score,
@@ -1049,7 +1074,7 @@ def build_result_json(myapp_instance):
     return result_json
 
 
-def _build_spec_result(myapp_instance, spec_id, step_buffers, table_data=None):
+def _build_spec_result(myapp_instance, spec_id, step_buffers, table_data=None, group_id=None):
     """
     단일 시험 시나리오(spec)의 결과 구성
 
@@ -1058,6 +1083,7 @@ def _build_spec_result(myapp_instance, spec_id, step_buffers, table_data=None):
         spec_id: 시험 시나리오 ID
         step_buffers: 스텝 버퍼 리스트
         table_data: 테이블 데이터 (None인 경우 현재 테이블에서 읽음)
+        group_id: 테스트 그룹 ID (None인 경우 기본값 사용)
 
     Returns:
         dict: spec 결과 데이터 또는 None (데이터가 없는 경우)
@@ -1189,8 +1215,12 @@ def _build_spec_result(myapp_instance, spec_id, step_buffers, table_data=None):
     # 5. spec 이름 가져오기
     spec_name = get_spec_test_name(spec_id)
 
-    # 6. 최종 결과 반환
+    # 6. group_id 기본값 처리
+    final_group_id = group_id if group_id is not None else ""
+
+    # 7. 최종 결과 반환
     return {
+        "testGroup": final_group_id,
         "testSpecId": spec_id,
         "testSpecName": spec_name,
         "score": round(spec_score, 2),

@@ -78,11 +78,12 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("검증 소프트웨어 통합 실행기")
-        self.resize(1200, 720)
+        self.setMinimumSize(1680, 1006)  # 최소 크기 설정 (반응형)
         self.setWindowFlags(
             Qt.Window |
             Qt.WindowTitleHint |
             Qt.WindowMinimizeButtonHint |
+            Qt.WindowMaximizeButtonHint |
             Qt.WindowCloseButtonHint
         )
         self._orig_flags = self.windowFlags()
@@ -282,6 +283,7 @@ class MainWindow(QMainWindow):
             # 제목표시줄 + 최소화 + 최대화(최대화 시 '이전크기'로 표기) + 종료
             flags = (Qt.Window | Qt.WindowTitleHint |
                      Qt.WindowMinimizeButtonHint |
+            Qt.WindowMaximizeButtonHint |
                      Qt.WindowMaximizeButtonHint |
                      Qt.WindowCloseButtonHint)
             self.setWindowFlags(flags)
@@ -390,9 +392,28 @@ class MainWindow(QMainWindow):
             # ===== 예외 처리 로깅 추가 끝 =====
 
     def closeEvent(self, event):
+        print(f"[MAIN_CLOSE] MainWindow closeEvent 호출됨")
+
         reply = QMessageBox.question(self, '종료', '프로그램을 종료하시겠습니까?',
                                      QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+
+        print(f"[MAIN_CLOSE] 사용자 응답: {'Yes' if reply == QMessageBox.Yes else 'No'}")
+
         if reply == QMessageBox.Yes:
+            # ✅ 플랫폼 검증 위젯의 일시정지 파일 정리
+            if hasattr(self, '_platform_widget') and self._platform_widget is not None:
+                print(f"[MAIN_CLOSE] 플랫폼 검증 위젯 정리 중...")
+                if hasattr(self._platform_widget, 'cleanup_paused_file'):
+                    self._platform_widget.cleanup_paused_file()
+                    print(f"[MAIN_CLOSE] 플랫폼 일시정지 파일 삭제 완료")
+
+            # ✅ 시스템 검증 위젯의 일시정지 파일 정리
+            if hasattr(self, '_system_widget') and self._system_widget is not None:
+                print(f"[MAIN_CLOSE] 시스템 검증 위젯 정리 중...")
+                if hasattr(self._system_widget, 'cleanup_paused_file'):
+                    self._system_widget.cleanup_paused_file()
+                    print(f"[MAIN_CLOSE] 시스템 일시정지 파일 삭제 완료")
+
             event.accept()
         else:
             event.ignore()
