@@ -15,20 +15,20 @@ class ConstraintDataGenerator:
         constraints: 제약 조건
         n: 생성 개수
         """
-        print(f"[DEBUG][DATA_MAPPER] _applied_constraints 호출됨")
-        print(f"[DEBUG][DATA_MAPPER] request_data: {request_data}")
-        print(f"[DEBUG][DATA_MAPPER] constraints keys: {list(constraints.keys()) if constraints else []}")
-        print(
-            f"[DEBUG][DATA_MAPPER] template_data keys: {list(template_data.keys()) if isinstance(template_data, dict) else 'N/A'}")
-        print(f"[DEBUG][DATA_MAPPER] n: {n}")
+        # print(f"[DEBUG][DATA_MAPPER] _applied_constraints 호출됨")
+        # print(f"[DEBUG][DATA_MAPPER] request_data: {request_data}")
+        # print(f"[DEBUG][DATA_MAPPER] constraints keys: {list(constraints.keys()) if constraints else []}")
+        # print(
+        #     f"[DEBUG][DATA_MAPPER] template_data keys: {list(template_data.keys()) if isinstance(template_data, dict) else 'N/A'}")
+        # print(f"[DEBUG][DATA_MAPPER] n: {n}")
 
         # constraints 분석 및 참조 값 수집
         constraint_map = self._build_constraint_map(constraints, request_data)
-        print(f"[DEBUG][DATA_MAPPER] constraint_map: {constraint_map}")
+        # print(f"[DEBUG][DATA_MAPPER] constraint_map: {constraint_map}")
 
         # 템플릿 기반 데이터 생성
         response = self._generate_from_template(template_data, constraint_map, n)
-        print(f"[DEBUG][DATA_MAPPER] generated response: {response}")
+        # print(f"[DEBUG][DATA_MAPPER] generated response: {response}")
 
         # template_data 업데이트 (원본 수정)
         template_data.update(response)
