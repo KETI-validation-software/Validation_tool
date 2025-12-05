@@ -44,8 +44,68 @@ cmii7v8pr006g8z1tvo55a50u_Authentication_in_constraints = {
   }
 }
 
+# Capabilities
+cmii7v8pr006g8z1tvo55a50u_Capabilities_in_constraints = {}
+
+# CameraProfiles
+cmii7v8pr006g8z1tvo55a50u_CameraProfiles_in_constraints = {}
+
+# StreamURLs
+cmii7v8pr006g8z1tvo55a50u_StreamURLs_in_constraints = {
+  "camList": {
+    "valueType": "preset",
+    "required": True,
+    "arrayElementType": "object"
+  },
+  "streamProtocolType": {
+    "valueType": "preset",
+    "required": True
+  }
+}
+
+# RealtimeVideoEventInfos
+cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_in_constraints = {
+  "camList": {
+    "valueType": "preset",
+    "required": True,
+    "arrayElementType": "object"
+  },
+  "duration": {
+    "valueType": "preset",
+    "required": False
+  },
+  "transProtocol": {
+    "valueType": "preset",
+    "required": True
+  },
+  "eventFilter": {
+    "valueType": "preset",
+    "required": False
+  },
+  "classFilter": {
+    "valueType": "preset",
+    "required": False
+  },
+  "startTime": {
+    "valueType": "preset",
+    "required": False
+  }
+}
+
+# RealtimeVideoEventInfos WebHook OUT Constraints
+cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_webhook_out_constraints = {}
+
 # cmii7v8pr006g8z1tvo55a50u 검증 리스트
 cmii7v8pr006g8z1tvo55a50u_inConstraints = [
     cmii7v8pr006g8z1tvo55a50u_Authentication_in_constraints,
+    cmii7v8pr006g8z1tvo55a50u_Capabilities_in_constraints,
+    cmii7v8pr006g8z1tvo55a50u_CameraProfiles_in_constraints,
+    cmii7v8pr006g8z1tvo55a50u_StreamURLs_in_constraints,
+    cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_in_constraints,
+]
+
+# cmii7v8pr006g8z1tvo55a50u WebHook Constraints 리스트
+cmii7v8pr006g8z1tvo55a50u_webhook_outConstraints = [
+    cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_webhook_out_constraints,
 ]
 

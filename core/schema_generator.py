@@ -150,7 +150,7 @@ class SchemaGenerator:
         # endpoint에서 변수명 생성 (/ 제거, 첫 글자 대문자)
         if endpoint.startswith("/"):
             endpoint = endpoint[1:]
-        
+
         schema_name = f"{endpoint}{suffix}"
 
         # validation이 비어있거나 properties가 없으면 빈 딕셔너리
