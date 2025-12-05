@@ -1,5 +1,22 @@
 # Authentication
-cmii7shen005i8z1tagevx4qh_Authentication_in_validation = {}
+cmii7shen005i8z1tagevx4qh_Authentication_in_validation = {
+  "userID": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "kisa"
+    ],
+    "score": 0
+  },
+  "userPW": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "kisa_k1!2@"
+    ],
+    "score": 0
+  }
+}
 
 # cmii7shen005i8z1tagevx4qh 검증 리스트
 cmii7shen005i8z1tagevx4qh_inValidation = [
@@ -7,7 +24,24 @@ cmii7shen005i8z1tagevx4qh_inValidation = [
 ]
 
 # Authentication
-cmii7pysb004k8z1tts0npxfm_Authentication_in_validation = {}
+cmii7pysb004k8z1tts0npxfm_Authentication_in_validation = {
+  "userID": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "kisa"
+    ],
+    "score": 0
+  },
+  "userPW": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "kisa_k1!2@"
+    ],
+    "score": 0
+  }
+}
 
 # Capabilities
 cmii7pysb004k8z1tts0npxfm_Capabilities_in_validation = {}
