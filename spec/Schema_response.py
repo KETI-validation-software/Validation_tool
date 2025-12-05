@@ -39,16 +39,31 @@ cmii7v8pr006g8z1tvo55a50u_Authentication_out_schema = {
 }
 
 # Capabilities
-cmii7v8pr006g8z1tvo55a50u_Capabilities_out_schema = {}
+cmii7v8pr006g8z1tvo55a50u_Capabilities_out_schema = {
+    "code": str,
+    "message": str,
+    "streamingSupport": [str],
+    "transportSupport": [str],
+}
 
 # CameraProfiles
-cmii7v8pr006g8z1tvo55a50u_CameraProfiles_out_schema = {}
+cmii7v8pr006g8z1tvo55a50u_CameraProfiles_out_schema = {
+    "code": str,
+    "message": str,
+    "camList": [str],
+}
 
 # StreamURLs
-cmii7v8pr006g8z1tvo55a50u_StreamURLs_out_schema = {}
+cmii7v8pr006g8z1tvo55a50u_StreamURLs_out_schema = {
+    "code": str,
+    "message": str,
+    "camList": [str],
+}
 
 # RealtimeVideoEventInfos
-cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_out_schema = {}
+cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_out_schema = {
+    "": str,
+}
 
 # RealtimeVideoEventInfos WebHook IN Schema
 cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_webhook_in_schema = {}

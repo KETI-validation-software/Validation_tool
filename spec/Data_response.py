@@ -290,11 +290,41 @@ cmii7lxbn002s8z1t1i9uudf0_StoredObjectAnalyticsInfos_out_data = {
     "camList": [
         {
         "camID": "cam0001",
-        "analyticsTime": 20220822163022124
+        "analyticsTime": 20220822163022124,
+        "anlayticsResultList": [
+            {
+            "anayticsID": "object001",
+            "analyticsClass": "트럭",
+            "analyticsAttribute": [],
+            "analyticsConfidence": 0.8,
+            "analyticsBoundingBox": {
+            "left": 0.2,
+            "top": 0.1,
+            "right": 0.5,
+            "bottom": 0.6
+        },
+            "analyticsDesc": "13가 4567"
+        }
+    ]
     },
         {
         "camID": "cam0002",
-        "analyticsTime": 20220822163022123
+        "analyticsTime": 20220822163022123,
+        "anlayticsResultList": [
+            {
+            "anayticsID": "object002",
+            "analyticsClass": "사람",
+            "analyticsAttribute": [],
+            "analyticsConfidence": 0.9,
+            "analyticsBoundingBox": {
+            "left": 0.3,
+            "top": 0.1,
+            "right": 0.5,
+            "bottom": 0.7
+        },
+            "analyticsDesc": ""
+        }
+    ]
     }
 ]
 }

@@ -153,10 +153,9 @@ class SchemaGenerator:
 
         schema_name = f"{endpoint}{suffix}"
 
-        # validation이 비어있거나 properties가 없으면 빈 딕셔너리
+        # bodyJson이 없으면 빈 딕셔너리 (validation 체크 제거)
         if (not isinstance(validation_data, dict) or
-                not isinstance(validation_data.get("bodyJson"), list) or not validation_data["bodyJson"] or
-                not isinstance(validation_data.get("validation"), list) or not validation_data["validation"]):
+                not isinstance(validation_data.get("bodyJson"), list) or not validation_data["bodyJson"]):
             schema_content = {}
         else:
             # properties가 있으면 각 필드를 변환
