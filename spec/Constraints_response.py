@@ -105,8 +105,349 @@ cmii7lxbn002s8z1t1i9uudf0_Authentication_out_constraints = {
   }
 }
 
+# Capabilities
+cmii7lxbn002s8z1t1i9uudf0_Capabilities_out_constraints = {
+  "code": {
+    "valueType": "preset",
+    "required": True
+  },
+  "message": {
+    "valueType": "preset",
+    "required": True
+  },
+  "streamingSupport": {
+    "valueType": "preset",
+    "required": True
+  },
+  "streamingSupport.streamProtocolType": {
+    "valueType": "preset",
+    "required": False
+  },
+  "transportSupport": {
+    "valueType": "preset",
+    "required": True
+  },
+  "transportSupport.transportProtocolType": {
+    "valueType": "preset",
+    "required": True
+  },
+  "transportSupport.transProtocolDesc": {
+    "valueType": "preset",
+    "required": False
+  }
+}
+
+# CameraProfiles
+cmii7lxbn002s8z1t1i9uudf0_CameraProfiles_out_constraints = {
+  "code": {
+    "valueType": "preset",
+    "required": True
+  },
+  "message": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.camID": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.camName": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.camLoc": {
+    "valueType": "preset",
+    "required": False
+  },
+  "camList.camLoc.lon": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.camLoc.lat": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.camLoc.alt": {
+    "valueType": "preset",
+    "required": False
+  },
+  "camList.camLoc.desc": {
+    "valueType": "preset",
+    "required": False
+  },
+  "camList.camConfig": {
+    "valueType": "preset",
+    "required": False
+  },
+  "camList.camConfig.camType": {
+    "valueType": "preset",
+    "required": True
+  }
+}
+
+# StreamURLs
+cmii7lxbn002s8z1t1i9uudf0_StreamURLs_out_constraints = {
+  "code": {
+    "valueType": "preset",
+    "required": True
+  },
+  "message": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.camID": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.accessID": {
+    "valueType": "preset",
+    "required": False
+  },
+  "camList.accessPW": {
+    "valueType": "preset",
+    "required": False
+  },
+  "camList.camURL": {
+    "valueType": "preset",
+    "required": False
+  },
+  "camList.videoInfo": {
+    "valueType": "preset",
+    "required": False
+  },
+  "camList.videoInfo.resolution": {
+    "valueType": "preset",
+    "required": False
+  },
+  "camList.videoInfo.fps": {
+    "valueType": "preset",
+    "required": False
+  },
+  "camList.videoInfo.videoCodec": {
+    "valueType": "preset",
+    "required": False
+  },
+  "camList.videoInfo.audioCodec": {
+    "valueType": "preset",
+    "required": False
+  }
+}
+
+# RealtimeVideoEventInfos
+cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_out_constraints = {
+  "code": {
+    "valueType": "preset",
+    "required": True
+  },
+  "message": {
+    "valueType": "preset",
+    "required": True
+  }
+}
+
+# RealtimeVideoEventInfos WebHook IN Constraints
+cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_webhook_in_constraints = {
+  "camList": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.camID": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.eventUUID": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.eventName": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.startTime": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.endTime": {
+    "valueType": "preset",
+    "required": False
+  },
+  "camList.eventDesc": {
+    "valueType": "preset",
+    "required": False
+  }
+}
+
+# StoredVideoInfos
+cmii7lxbn002s8z1t1i9uudf0_StoredVideoInfos_out_constraints = {
+  "code": {
+    "valueType": "preset",
+    "required": True
+  },
+  "message": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.camID": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.timeList": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.timeList.startTime": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.timeList.endTime": {
+    "valueType": "preset",
+    "required": False
+  }
+}
+
+# ReplayURL
+cmii7lxbn002s8z1t1i9uudf0_ReplayURL_out_constraints = {
+  "code": {
+    "valueType": "preset",
+    "required": True
+  },
+  "message": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.camID": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.accessID": {
+    "valueType": "preset",
+    "required": False
+  },
+  "camList.accessPW": {
+    "valueType": "preset",
+    "required": False
+  },
+  "camList.camURL": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.videoInfo": {
+    "valueType": "preset",
+    "required": False
+  },
+  "camList.videoInfo.resolution": {
+    "valueType": "preset",
+    "required": False
+  },
+  "camList.videoInfo.fps": {
+    "valueType": "preset",
+    "required": False
+  },
+  "camList.videoInfo.videoCodec": {
+    "valueType": "preset",
+    "required": False
+  },
+  "camList.videoInfo.audioCodec": {
+    "valueType": "preset",
+    "required": False
+  }
+}
+
+# StoredVideoEventInfos
+cmii7lxbn002s8z1t1i9uudf0_StoredVideoEventInfos_out_constraints = {
+  "code": {
+    "valueType": "preset",
+    "required": True
+  },
+  "message": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.camID": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.eventUUID": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.eventName": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.startTime": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.endTime": {
+    "valueType": "preset",
+    "required": False
+  },
+  "camList.eventDesc": {
+    "valueType": "preset",
+    "required": False
+  }
+}
+
+# StoredObjectAnalyticsInfos
+cmii7lxbn002s8z1t1i9uudf0_StoredObjectAnalyticsInfos_out_constraints = {
+  "code": {
+    "valueType": "preset",
+    "required": True
+  },
+  "message": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.camID": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.analyticsTime": {
+    "valueType": "preset",
+    "required": True
+  }
+}
+
 # cmii7lxbn002s8z1t1i9uudf0 검증 리스트
 cmii7lxbn002s8z1t1i9uudf0_outConstraints = [
     cmii7lxbn002s8z1t1i9uudf0_Authentication_out_constraints,
+    cmii7lxbn002s8z1t1i9uudf0_Capabilities_out_constraints,
+    cmii7lxbn002s8z1t1i9uudf0_CameraProfiles_out_constraints,
+    cmii7lxbn002s8z1t1i9uudf0_StreamURLs_out_constraints,
+    cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_out_constraints,
+    cmii7lxbn002s8z1t1i9uudf0_StoredVideoInfos_out_constraints,
+    cmii7lxbn002s8z1t1i9uudf0_ReplayURL_out_constraints,
+    cmii7lxbn002s8z1t1i9uudf0_StoredVideoEventInfos_out_constraints,
+    cmii7lxbn002s8z1t1i9uudf0_StoredObjectAnalyticsInfos_out_constraints,
+]
+
+# cmii7lxbn002s8z1t1i9uudf0 WebHook Constraints 리스트
+cmii7lxbn002s8z1t1i9uudf0_webhook_inConstraints = [
+    cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_webhook_in_constraints,
 ]
 
