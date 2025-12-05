@@ -18,19 +18,19 @@
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 80.26,
+    "score": 81.58,
     "totalFields": 76,
-    "passedFields": 61,
-    "failedFields": 15
+    "passedFields": 62,
+    "failedFields": 14
   },
   "testResult": [
     {
       "testSpecId": "cmgyv3rzl014nvsveidu5jpzp",
       "testSpecName": "vid001",
-      "score": 80.26,
+      "score": 81.58,
       "totalFields": 76,
-      "passedFields": 61,
-      "failedFields": 15,
+      "passedFields": 62,
+      "failedFields": 14,
       "apis": [
         {
           "id": "step-1-s9942zltt",
@@ -286,8 +286,8 @@
               "validationData": {},
               "validationErrors": [
                 "[시도 5/5]",
-                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761070432279 (타입: int), [1] 1761014417802 (타입: int)",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1760991819464 (타입: int), [1] 1760982500063 (타입: int)",
+                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761190383096 (타입: int), [1] 1761184212236 (타입: int)",
+                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 1761175377855 (타입: int), [1] 1761016854312 (타입: int)",
                 "[구조] 타입 불일치: camList.videoInfo.fps (예상: int, 실제: str, 값: 30)"
               ]
             },
@@ -435,20 +435,19 @@
           "name": "저장된 이벤트 분석 정보 연동",
           "method": "POST",
           "endpoint": "/StoredVideoEventInfos",
-          "score": 67.0,
+          "score": 78.0,
           "validationCnt": 5,
           "totalFields": 9,
-          "passFields": 6,
-          "failFields": 3,
+          "passFields": 7,
+          "failFields": 2,
           "validations": [
             {
               "attempt": 1,
               "validationData": {},
               "validationErrors": [
                 "[시도 5/5]",
-                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 9957484322064 (타입: int), [1] 8162144952396 (타입: int)",
-                "[의미] camList.eventName: 값 불일치: ['Loitering', 'Loitering'] != 예상값 침입",
-                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 9713021099145 (타입: int), [1] 7871878781304 (타입: int)"
+                "[구조] 타입 불일치: camList.endTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 9826394330011 (타입: int), [1] 8449160189380 (타입: int)",
+                "[구조] 타입 불일치: camList.startTime - 예상: 모든 요소가 str, 실패한 항목들: [0] 9583241813456 (타입: int), [1] 7977111348076 (타입: int)"
               ]
             },
             {
@@ -476,5 +475,5 @@
       ]
     }
   ],
-  "completedDate": "2025-11-13T10:03:55Z"
+  "completedDate": "2025-11-13T12:10:14Z"
 }
