@@ -1,6 +1,6 @@
 # Authentication
 cmii7wfuf006i8z1tcds6q69g_Authentication_in_data = {
-    "userID": "kisa",
+    "userID": 1234,
     "userPW": "kisa_k1!2@"
 }
 
