@@ -161,6 +161,17 @@ class dataGenerator:
             obj = self._build_object_from_children(real_children, required=True)
             return [obj]
 
+        # ✅ primitive 배열(string, number 등)인데 children에 값이 있는 경우 처리
+        if array_elem_type != "object" and isinstance(children, list) and children:
+            result = []
+            for child in children:
+                if isinstance(child, dict):
+                    child_value = child.get("value")
+                    if child_value is not None and child_value != "":
+                        result.append(child_value)
+            if result:
+                return result
+
         # ✅ value 기반 처리 (primitive/문자열 리스트)
         if value is None or value == "":
             return [] if required else []

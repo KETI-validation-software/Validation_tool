@@ -22,73 +22,26 @@
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 50.0,
-    "totalFields": 2,
-    "passedFields": 1,
-    "failedFields": 1
+    "score": 20.0,
+    "totalFields": 10,
+    "passedFields": 2,
+    "failedFields": 8
   },
   "testResult": [
     {
       "testGroup": "cmii82nib009f8z1tvo6fz8j2",
       "testSpecId": "cmii7shen005i8z1tagevx4qh",
       "testSpecName": "sensor001",
-      "score": 50.0,
-      "totalFields": 2,
-      "passedFields": 1,
-      "failedFields": 1,
-      "apis": [
-        {
-          "id": "step-1-ul4l0o5qg",
-          "name": "사용자 인증",
-          "method": "POST",
-          "endpoint": "/Authentication",
-          "score": 50.0,
-          "validationCnt": 1,
-          "totalFields": 2,
-          "passFields": 1,
-          "failFields": 1,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "userID": 1234,
-                "userPW": "kisa_k1!2@"
-              },
-              "validationErrors": [
-                "[Inbound]",
-                "[구조] 타입 불일치: userID (예상: str, 실제: int)"
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "testGroup": "cmii82nib009f8z1tvo6fz8j2",
-      "testSpecId": "cmii7pysb004k8z1tts0npxfm",
-      "testSpecName": "bio001",
       "score": 0,
       "totalFields": 0,
       "passedFields": 0,
       "failedFields": 0,
       "apis": [
         {
-          "id": "step-1-ve056coia",
+          "id": "step-1-ul4l0o5qg",
           "name": "사용자 인증",
           "method": "POST",
           "endpoint": "/Authentication",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "step-2-g0s3yjcf4",
-          "name": "전송 지원 기능 정보 연동",
-          "method": "POST",
-          "endpoint": "/Capabilities",
           "score": 0.0,
           "validationCnt": 0,
           "totalFields": 0,
@@ -102,22 +55,33 @@
       "testGroup": "cmii82nib009f8z1tvo6fz8j2",
       "testSpecId": "cmii7lxbn002s8z1t1i9uudf0",
       "testSpecName": "vid001",
-      "score": 0,
-      "totalFields": 0,
-      "passedFields": 0,
-      "failedFields": 0,
+      "score": 20.0,
+      "totalFields": 10,
+      "passedFields": 2,
+      "failedFields": 8,
       "apis": [
         {
           "id": "step-1-dgo2i8y6u",
           "name": "사용자 인증",
           "method": "POST",
           "endpoint": "/Authentication",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 2,
+          "passFields": 2,
           "failFields": 0,
-          "validations": []
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "userID": "kisa",
+                "userPW": "kisa_k1!2@"
+              },
+              "validationErrors": [
+                "오류가 없습니다."
+              ]
+            }
+          ]
         },
         {
           "id": "step-2-o7zemidp7",
@@ -125,11 +89,19 @@
           "method": "POST",
           "endpoint": "/Capabilities",
           "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
+          "validationCnt": 1,
+          "totalFields": 1,
           "passFields": 0,
-          "failFields": 0,
-          "validations": []
+          "failFields": 1,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "Message Missing!"
+              ]
+            }
+          ]
         },
         {
           "id": "step-3-zyh98qlgl",
@@ -137,11 +109,19 @@
           "method": "POST",
           "endpoint": "/CameraProfiles",
           "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
+          "validationCnt": 1,
+          "totalFields": 1,
           "passFields": 0,
-          "failFields": 0,
-          "validations": []
+          "failFields": 1,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "Message Missing!"
+              ]
+            }
+          ]
         },
         {
           "id": "step-4-1sf8k51nd",
@@ -149,11 +129,19 @@
           "method": "POST",
           "endpoint": "/StreamURLs",
           "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
+          "validationCnt": 1,
+          "totalFields": 1,
           "passFields": 0,
-          "failFields": 0,
-          "validations": []
+          "failFields": 1,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "Message Missing!"
+              ]
+            }
+          ]
         },
         {
           "id": "step-5-kx0x774ns",
@@ -161,11 +149,19 @@
           "method": "POST",
           "endpoint": "/RealtimeVideoEventInfos",
           "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
+          "validationCnt": 1,
+          "totalFields": 1,
           "passFields": 0,
-          "failFields": 0,
-          "validations": []
+          "failFields": 1,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "Message Missing!"
+              ]
+            }
+          ]
         },
         {
           "id": "step-6-cabyqccnm",
@@ -173,11 +169,19 @@
           "method": "POST",
           "endpoint": "/StoredVideoInfos",
           "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
+          "validationCnt": 1,
+          "totalFields": 1,
           "passFields": 0,
-          "failFields": 0,
-          "validations": []
+          "failFields": 1,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "Message Missing!"
+              ]
+            }
+          ]
         },
         {
           "id": "step-7-cgrfotqw3",
@@ -185,11 +189,19 @@
           "method": "POST",
           "endpoint": "/ReplayURL",
           "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
+          "validationCnt": 1,
+          "totalFields": 1,
           "passFields": 0,
-          "failFields": 0,
-          "validations": []
+          "failFields": 1,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "Message Missing!"
+              ]
+            }
+          ]
         },
         {
           "id": "step-8-0ovskx2mm",
@@ -197,11 +209,19 @@
           "method": "POST",
           "endpoint": "/StoredVideoEventInfos",
           "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
+          "validationCnt": 1,
+          "totalFields": 1,
           "passFields": 0,
-          "failFields": 0,
-          "validations": []
+          "failFields": 1,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "Message Missing!"
+              ]
+            }
+          ]
         },
         {
           "id": "step-9-t3r21jjeh",
@@ -209,14 +229,22 @@
           "method": "POST",
           "endpoint": "/StoredObjectAnalyticsInfos",
           "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
+          "validationCnt": 1,
+          "totalFields": 1,
           "passFields": 0,
-          "failFields": 0,
-          "validations": []
+          "failFields": 1,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "Message Missing!"
+              ]
+            }
+          ]
         }
       ]
     }
   ],
-  "completedDate": "2025-12-05T16:26:59Z"
+  "completedDate": "2025-12-05T12:56:17Z"
 }
