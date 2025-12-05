@@ -430,6 +430,50 @@ cmii7lxbn002s8z1t1i9uudf0_StoredObjectAnalyticsInfos_out_constraints = {
   "camList.analyticsTime": {
     "valueType": "preset",
     "required": True
+  },
+  "camList.anlayticsResultList": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.anlayticsResultList.anayticsID": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.anlayticsResultList.analyticsClass": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.anlayticsResultList.analyticsAttribute": {
+    "valueType": "preset",
+    "required": False
+  },
+  "camList.anlayticsResultList.analyticsConfidence": {
+    "valueType": "preset",
+    "required": False
+  },
+  "camList.anlayticsResultList.analyticsBoundingBox": {
+    "valueType": "preset",
+    "required": False
+  },
+  "camList.anlayticsResultList.analyticsBoundingBox.left": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.anlayticsResultList.analyticsBoundingBox.top": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.anlayticsResultList.analyticsBoundingBox.right": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.anlayticsResultList.analyticsBoundingBox.bottom": {
+    "valueType": "preset",
+    "required": True
+  },
+  "camList.anlayticsResultList.analyticsDesc": {
+    "valueType": "preset",
+    "required": False
   }
 }
 
