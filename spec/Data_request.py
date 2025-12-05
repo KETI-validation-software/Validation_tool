@@ -36,13 +36,51 @@ cmii7v8pr006g8z1tvo55a50u_Authentication_in_data = {
     "userPW": "kisa_k1!2@"
 }
 
+# Capabilities
+cmii7v8pr006g8z1tvo55a50u_Capabilities_in_data = {}
+
+# CameraProfiles
+cmii7v8pr006g8z1tvo55a50u_CameraProfiles_in_data = {}
+
+# StreamURLs
+cmii7v8pr006g8z1tvo55a50u_StreamURLs_in_data = {
+    "camList": [],
+    "streamProtocolType": "RSTP"
+}
+
+# RealtimeVideoEventInfos
+cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_in_data = {
+    "camList": [],
+    "duration": 0,
+    "transProtocol": {},
+    "eventFilter": "",
+    "classFilter": "",
+    "startTime": 0
+}
+
+# RealtimeVideoEventInfos WebHook OUT Data
+cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_webhook_out_data = {}
+
 # cmii7v8pr006g8z1tvo55a50u 데이터 리스트
 cmii7v8pr006g8z1tvo55a50u_inData = [
     cmii7v8pr006g8z1tvo55a50u_Authentication_in_data,
+    cmii7v8pr006g8z1tvo55a50u_Capabilities_in_data,
+    cmii7v8pr006g8z1tvo55a50u_CameraProfiles_in_data,
+    cmii7v8pr006g8z1tvo55a50u_StreamURLs_in_data,
+    cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_in_data,
+]
+
+# cmii7v8pr006g8z1tvo55a50u WebHook 데이터 리스트
+cmii7v8pr006g8z1tvo55a50u_webhook_outData = [
+    cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_webhook_out_data,
 ]
 
 # cmii7v8pr006g8z1tvo55a50u API endpoint
 cmii7v8pr006g8z1tvo55a50u_messages = [
     "Authentication",
+    "Capabilities",
+    "CameraProfiles",
+    "StreamURLs",
+    "RealtimeVideoEventInfos",
 ]
 
