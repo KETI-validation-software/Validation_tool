@@ -116,6 +116,150 @@ class Server(BaseHTTPRequestHandler):
             return Server.latest_event[api_name].get(direction)  # ✅ 클래스 변수 사용
         return None
 
+    # ========== 오류 검사 함수들 (400/201/404) ==========
+    
+    def _check_request_errors(self, api_name, request_data):
+        """
+        요청 데이터 오류 검사
+        
+        Returns:
+            dict: 오류 응답 (오류 있을 때) 또는 None (정상)
+        """
+        # 해당 API의 스키마 가져오기
+        schema = self._get_request_schema(api_name)
+        if not schema:
+            print(f"[ERROR_CHECK] 스키마를 찾을 수 없음: {api_name}")
+            return None  # 스키마 없으면 검사 안 함
+        
+        # 1. 타입 불일치 검사 → 400
+        type_error = self._check_type_mismatch(request_data, schema)
+        if type_error:
+            print(f"[ERROR_CHECK] 타입 불일치 감지: {type_error}")
+            return {"code": "400", "message": "잘못된 요청"}
+        
+        # 2. 시간 구간 검사 → 201 (startTime, endTime 있는 API만)
+        if "startTime" in request_data or "endTime" in request_data:
+            time_error = self._check_time_range(request_data)
+            if time_error:
+                print(f"[ERROR_CHECK] 시간 범위 오류 감지: {time_error}")
+                return {"code": "201", "message": "정보 없음"}
+        
+        # 3. 장치 존재 검사 → 404 (camID, camList 있는 API만)
+        if "camID" in request_data or "camList" in request_data:
+            device_error = self._check_device_exists(request_data)
+            if device_error:
+                print(f"[ERROR_CHECK] 장치 없음 감지: {device_error}")
+                return {"code": "404", "message": "장치 없음"}
+        
+        return None  # 오류 없음
+
+    def _get_request_schema(self, api_name):
+        """API의 요청 스키마 가져오기"""
+        try:
+            if self.inSchema and self.message:
+                for i, msg in enumerate(self.message):
+                    if msg == api_name and i < len(self.inSchema):
+                        return self.inSchema[i]
+        except Exception as e:
+            print(f"[ERROR] 스키마 가져오기 실패: {e}")
+        return None
+
+    def _check_type_mismatch(self, request_data, schema):
+        """
+        타입 불일치 검사
+        
+        Returns:
+            str: 오류 필드명 (오류 있을 때) 또는 None (정상)
+        """
+        try:
+            for field, expected_type in schema.items():
+                # OptionalKey 처리
+                field_name = field.key if hasattr(field, 'key') else field
+                
+                if field_name in request_data:
+                    value = request_data[field_name]
+                    
+                    # None 값은 검사 스킵
+                    if value is None:
+                        continue
+                    
+                    # 타입 검사
+                    if expected_type == str:
+                        if not isinstance(value, str):
+                            print(f"[TYPE_CHECK] {field_name}: expected str, got {type(value).__name__}")
+                            return field_name
+                    elif expected_type == int:
+                        if not isinstance(value, int) or isinstance(value, bool):
+                            print(f"[TYPE_CHECK] {field_name}: expected int, got {type(value).__name__}")
+                            return field_name
+                    elif expected_type == list:
+                        if not isinstance(value, list):
+                            print(f"[TYPE_CHECK] {field_name}: expected list, got {type(value).__name__}")
+                            return field_name
+                    elif expected_type == dict:
+                        if not isinstance(value, dict):
+                            print(f"[TYPE_CHECK] {field_name}: expected dict, got {type(value).__name__}")
+                            return field_name
+        except Exception as e:
+            print(f"[ERROR] 타입 검사 중 오류: {e}")
+        
+        return None
+
+    def _check_time_range(self, request_data):
+        """
+        시간 구간 검사 - 현재 시간 기준으로 과거 데이터 요청인지 확인
+        
+        Returns:
+            str: 오류 메시지 (오류 있을 때) 또는 None (정상)
+        """
+        current_time = int(time.time())
+        
+        start_time = request_data.get("startTime")
+        end_time = request_data.get("endTime")
+        
+        try:
+            if start_time is not None and end_time is not None:
+                # Unix timestamp로 가정 (정수형)
+                # 2년 전보다 과거 데이터면 "정보 없음"
+                two_years_ago = current_time - (2 * 365 * 24 * 60 * 60)
+                
+                if isinstance(start_time, int) and isinstance(end_time, int):
+                    if end_time < two_years_ago:
+                        return "시간 구간이 너무 과거입니다"
+        except Exception as e:
+            print(f"[ERROR] 시간 검사 실패: {e}")
+        
+        return None
+
+    def _check_device_exists(self, request_data):
+        """
+        장치 존재 검사 - 유효한 camID인지 확인
+        
+        Returns:
+            str: 오류 메시지 (오류 있을 때) 또는 None (정상)
+        """
+        # 유효한 카메라 ID 목록
+        # TODO: 실제로는 DB나 설정에서 가져와야 함
+        valid_cam_ids = ["cam001", "cam002", "keti", "camera1", "camera2"]
+        
+        # camID 검사
+        cam_id = request_data.get("camID")
+        if cam_id is not None:
+            if cam_id not in valid_cam_ids:
+                return f"존재하지 않는 장치: {cam_id}"
+        
+        # camList 검사
+        cam_list = request_data.get("camList")
+        if cam_list is not None and isinstance(cam_list, list):
+            for cam in cam_list:
+                cam_id_in_list = cam.get("camID") if isinstance(cam, dict) else cam
+                if cam_id_in_list and cam_id_in_list not in valid_cam_ids:
+                    return f"존재하지 않는 장치: {cam_id_in_list}"
+        
+        return None
+
+    # ========== 오류 검사 함수들 끝 ==========
+
     def _set_headers(self):
         self.send_response(200, None)
         self.send_header('Content-type', 'application/json')
@@ -248,6 +392,20 @@ class Server(BaseHTTPRequestHandler):
                     self.wfile.write(json.dumps(data).encode('utf-8'))
                     return
 
+                # ========== 오류 검사 전 REQUEST 이벤트 기록 ==========
+                self._push_event(api_name, "REQUEST", self.request_data)
+                # ===================================================
+
+                # ========== Authentication API도 오류 검사 (400/201/404) ==========
+                error_response = self._check_request_errors(api_name, self.request_data)
+                if error_response:
+                    print(f"[DEBUG][SERVER] Authentication 오류 감지: {error_response}")
+                    self._push_event(api_name, "RESPONSE", error_response)
+                    self._set_headers()
+                    self.wfile.write(json.dumps(error_response).encode('utf-8'))
+                    return
+                # ================================================================
+
                 # 응답에 토큰 포함
                 if isinstance(data, dict):
                     data = data.copy()
@@ -303,6 +461,30 @@ class Server(BaseHTTPRequestHandler):
             self._set_headers()
             self.wfile.write(json.dumps(data).encode('utf-8'))
             return
+
+        # ========== 오류 검사 전 REQUEST 이벤트 기록 및 카운터 증가 ==========
+        self._push_event(api_name, "REQUEST", self.request_data)
+        
+        # 클래스 변수 request_counter 사용하여 API별 요청 횟수 추적
+        try:
+            if api_name not in Server.request_counter:
+                Server.request_counter[api_name] = 0
+            Server.request_counter[api_name] += 1
+            print(f"[API_SERVER] 요청 수신: {api_name} (카운트: {Server.request_counter[api_name]})")
+        except Exception as e:
+            print(f"[API_SERVER] request_counter 에러: {e}")
+        # ================================================================
+
+        # ========== 오류 검사 로직 (400/201/404) ==========
+        # ✅ api_res() 호출 후에 검사 (self.message, self.inSchema가 설정된 후)
+        error_response = self._check_request_errors(api_name, self.request_data)
+        if error_response:
+            print(f"[DEBUG][SERVER] 오류 감지: {error_response}")
+            self._push_event(api_name, "RESPONSE", error_response)
+            self._set_headers()
+            self.wfile.write(json.dumps(error_response).encode('utf-8'))
+            return
+        # ================================================
 
         if self.auth_type == "None":
             auth_pass = True
