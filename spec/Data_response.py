@@ -38,16 +38,63 @@ cmii7pysb004k8z1tts0npxfm_Capabilities_out_data = {
 ]
 }
 
+# DoorProfiles
+cmii7pysb004k8z1tts0npxfm_DoorProfiles_out_data = {
+    "code": "200",
+    "message": "성공",
+    "doorList": [
+        {
+        "doorID": "door0001",
+        "doorName": "A건물 출입문",
+        "doorRelayStatus": "일반",
+        "doorSensor": "0",
+        "doorLoc": {
+        "lon": "127.127730",
+        "lat": "38.439801",
+        "alt": "32.131",
+        "desc": "3층복도"
+    },
+        "bioDeviceList": [
+            {
+            "bioDeviceID": "bio0001",
+            "bioDeviceName": "출입문홍채인식기기",
+            "bioDeviceAuthTypeList": [
+            "홍채, 지문"
+        ]
+        },
+            {
+            "bioDeviceID": "bio0002",
+            "bioDeviceName": "출입문지문인식기기",
+            "bioDeviceAuthTypeList": [
+            "지문"
+        ]
+        }
+    ],
+        "otherDeviceList": [
+            {
+            "otherDeviceID": "other0001",
+            "otherDeviceName": "출입문카드인식기기",
+            "otherDeviceAuthTypeList": [
+            "카드"
+        ]
+        }
+    ]
+    }
+]
+}
+
 # cmii7pysb004k8z1tts0npxfm 데이터 리스트
 cmii7pysb004k8z1tts0npxfm_outData = [
     cmii7pysb004k8z1tts0npxfm_Authentication_out_data,
     cmii7pysb004k8z1tts0npxfm_Capabilities_out_data,
+    cmii7pysb004k8z1tts0npxfm_DoorProfiles_out_data,
 ]
 
 # cmii7pysb004k8z1tts0npxfm API endpoint
 cmii7pysb004k8z1tts0npxfm_messages = [
     "Authentication",
     "Capabilities",
+    "DoorProfiles",
 ]
 
 # Authentication
