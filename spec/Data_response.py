@@ -83,11 +83,15 @@ cmii7pysb004k8z1tts0npxfm_DoorProfiles_out_data = {
 ]
 }
 
+# AccessUserInfos
+cmii7pysb004k8z1tts0npxfm_AccessUserInfos_out_data = {}
+
 # cmii7pysb004k8z1tts0npxfm 데이터 리스트
 cmii7pysb004k8z1tts0npxfm_outData = [
     cmii7pysb004k8z1tts0npxfm_Authentication_out_data,
     cmii7pysb004k8z1tts0npxfm_Capabilities_out_data,
     cmii7pysb004k8z1tts0npxfm_DoorProfiles_out_data,
+    cmii7pysb004k8z1tts0npxfm_AccessUserInfos_out_data,
 ]
 
 # cmii7pysb004k8z1tts0npxfm API endpoint
@@ -95,6 +99,7 @@ cmii7pysb004k8z1tts0npxfm_messages = [
     "Authentication",
     "Capabilities",
     "DoorProfiles",
+    "AccessUserInfos",
 ]
 
 # Authentication
