@@ -135,7 +135,7 @@ class Server(BaseHTTPRequestHandler):
             print(f"[ERROR_CHECK] 타입 불일치 감지: {type_error}")
             # ✅ 내부 flag 설정 (요청에 오류가 있음을 표시)
             Server.request_has_error[api_name] = True
-            return {"code": "400", "message": "잘못된 요청"}    # 주석처리 하면 all field fail 테스트 할 수 있음
+            # return {"code": "400", "message": "잘못된 요청"}    # 주석처리 하면 all field fail 테스트 할 수 있음
         
         # 2. 시간 구간 검사 → 201 (startTime, endTime 있는 API만)
         if "startTime" in request_data or "endTime" in request_data:
