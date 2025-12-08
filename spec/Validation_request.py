@@ -46,10 +46,14 @@ cmii7pysb004k8z1tts0npxfm_Authentication_in_validation = {
 # Capabilities
 cmii7pysb004k8z1tts0npxfm_Capabilities_in_validation = {}
 
+# DoorProfiles
+cmii7pysb004k8z1tts0npxfm_DoorProfiles_in_validation = {}
+
 # cmii7pysb004k8z1tts0npxfm 검증 리스트
 cmii7pysb004k8z1tts0npxfm_inValidation = [
     cmii7pysb004k8z1tts0npxfm_Authentication_in_validation,
     cmii7pysb004k8z1tts0npxfm_Capabilities_in_validation,
+    cmii7pysb004k8z1tts0npxfm_DoorProfiles_in_validation,
 ]
 
 # Authentication
