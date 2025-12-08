@@ -135,7 +135,14 @@ class Server(BaseHTTPRequestHandler):
             print(f"[ERROR_CHECK] 타입 불일치 감지: {type_error}")
             # ✅ 내부 flag 설정 (요청에 오류가 있음을 표시)
             Server.request_has_error[api_name] = True
-            # return {"code": "400", "message": "잘못된 요청"}    # 주석처리 하면 all field fail 테스트 할 수 있음
+            
+            # 테스트 스위치: True = 정상 동작 (400 응답), False = 200으로 잘못 응답
+            SEND_ERROR_RESPONSE = True  # ← 이걸 False로 바꾸면 200 응답 테스트
+            if SEND_ERROR_RESPONSE:
+                return {"code": "400", "message": "잘못된 요청"}
+            else:
+                # 에러 감지했지만 응답은 보내지 않음 (flag는 유지)
+                return None
         
         # 2. 시간 구간 검사 → 201 (startTime, endTime 있는 API만)
         if "startTime" in request_data or "endTime" in request_data:
@@ -264,12 +271,10 @@ class Server(BaseHTTPRequestHandler):
 
     # ========== 오류 검사 함수들 끝 ==========
 
-    def _set_headers(self, code_value=None):
+    def _set_headers(self):
         self.send_response(200, None)
         self.send_header('Content-type', 'application/json')
         self.send_header('User-Agent', 'test')
-        if code_value is not None:
-            self.send_header('X-Code-Value', str(code_value))
         self.end_headers()
 
     def _set_digest_headers(self):
@@ -408,9 +413,10 @@ class Server(BaseHTTPRequestHandler):
                     print(f"[DEBUG][SERVER] Authentication 오류 감지: {error_response}")
                     # ✅ trace 저장 (_push_event 내부에서 deepcopy 수행)
                     self._push_event(api_name, "RESPONSE", error_response)
-                    # ✅ HTTP 헤더에 code_value 추가 (JSON 데이터에는 포함 안 됨)
-                    self._set_headers(code_value=400)
-                    print(f"[DEBUG][SERVER] Authentication 에러 응답 헤더에 X-Code-Value: 400 추가")
+                    # ✅ JSON에 code_value 추가
+                    error_response["code_value"] = 400
+                    print(f"[DEBUG][SERVER] Authentication 에러 응답에 code_value=400 추가")
+                    self._set_headers()
                     self.wfile.write(json.dumps(error_response).encode('utf-8'))
                     return
                 # ================================================================
@@ -491,9 +497,10 @@ class Server(BaseHTTPRequestHandler):
             print(f"[DEBUG][SERVER] 오류 감지: {error_response}")
             # ✅ trace 저장 (_push_event 내부에서 deepcopy 수행)
             self._push_event(api_name, "RESPONSE", error_response)
-            # ✅ HTTP 헤더에 code_value 추가 (JSON 데이터에는 포함 안 됨)
-            self._set_headers(code_value=400)
-            print(f"[DEBUG][SERVER] 에러 응답 헤더에 X-Code-Value: 400 추가")
+            # ✅ JSON에 code_value 추가
+            error_response["code_value"] = 400
+            print(f"[DEBUG][SERVER] 에러 응답에 code_value=400 추가")
+            self._set_headers()
             self.wfile.write(json.dumps(error_response).encode('utf-8'))
             return
         # ================================================
@@ -814,11 +821,16 @@ class Server(BaseHTTPRequestHandler):
                 # ✅ trace 저장 (_push_event 내부에서 deepcopy 수행)
                 self._push_event(api_name, "RESPONSE", updated_message)
 
-                # ✅ code_value 결정 (헤더로 전달하기 위해)
-                code_value = 400 if (api_name in Server.request_has_error and Server.request_has_error[api_name]) else 200
-                print(f"[DEBUG] code_value={code_value} 결정 ({'요청 오류 있음' if code_value == 400 else '정상'})")
+                # ✅ JSON에 code_value 추가
+                if isinstance(updated_message, dict):
+                    if api_name in Server.request_has_error and Server.request_has_error[api_name]:
+                        updated_message['code_value'] = 400
+                        print(f"[DEBUG] code_value=400 추가 (요청 오류 있음)")
+                    else:
+                        updated_message['code_value'] = 200
+                        print(f"[DEBUG] code_value=200 추가 (정상)")
 
-                # JSON 응답 준비 (code_value 포함 안 함)
+                # JSON 응답 준비
                 a = json.dumps(updated_message).encode('utf-8')
             else:
                 print(f"[DEBUG][CONSTRAINTS] constraints 없음 - 원본 메시지 사용")
@@ -827,11 +839,16 @@ class Server(BaseHTTPRequestHandler):
                 # ✅ trace 저장 (_push_event 내부에서 deepcopy 수행)
                 self._push_event(api_name, "RESPONSE", message)
 
-                # ✅ code_value 결정 (헤더로 전달하기 위해)
-                code_value = 400 if (api_name in Server.request_has_error and Server.request_has_error[api_name]) else 200
-                print(f"[DEBUG] code_value={code_value} 결정 ({'요청 오류 있음' if code_value == 400 else '정상'})")
+                # ✅ JSON에 code_value 추가
+                if isinstance(message, dict):
+                    if api_name in Server.request_has_error and Server.request_has_error[api_name]:
+                        message['code_value'] = 400
+                        print(f"[DEBUG] code_value=400 추가 (요청 오류 있음)")
+                    else:
+                        message['code_value'] = 200
+                        print(f"[DEBUG] code_value=200 추가 (정상)")
 
-                # JSON 응답 준비 (code_value 포함 안 함)
+                # JSON 응답 준비
                 a = json.dumps(message).encode('utf-8')
         except Exception as e:
             print(f"[ERROR] _applied_constraints 실행 중 오류: {e}")
@@ -843,16 +860,19 @@ class Server(BaseHTTPRequestHandler):
             self._push_event(api_name, "REQUEST", self.request_data)
             self._push_event(api_name, "RESPONSE", message)
             
-            # ✅ code_value 결정 (헤더로 전달하기 위해)
-            code_value = 400 if (api_name in Server.request_has_error and Server.request_has_error[api_name]) else 200
+            # ✅ JSON에 code_value 추가
+            if isinstance(message, dict):
+                if api_name in Server.request_has_error and Server.request_has_error[api_name]:
+                    message['code_value'] = 400
+                else:
+                    message['code_value'] = 200
             
-            # JSON 응답 준비 (code_value 포함 안 함)
+            # JSON 응답 준비
             a = json.dumps(message).encode('utf-8')
 
         # 응답 전송 (연결 끊김 에러 처리)
         try:
-            # ✅ 헤더에 code_value 포함하여 전송
-            self._set_headers(code_value=code_value)
+            self._set_headers()
             self.wfile.write(a)
         except (ConnectionAbortedError, BrokenPipeError, ConnectionResetError) as e:
             print(f"[WARNING] 클라이언트 연결 끊김: {e}")

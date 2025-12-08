@@ -4000,15 +4000,12 @@ class MyApp(QWidget):
                     if isinstance(res_data, dict):
                         response_code = str(res_data.get("code", "")).strip()
                         response_message = res_data.get("message", "")
+                        code_value = res_data.get("code_value", 200)  # ✅ 내부 flag 읽기
                         
-                        # ✅ HTTP 헤더에서 code_value 읽기 (JSON에는 포함 안 됨)
-                        code_value = 200  # 기본값
-                        if hasattr(self, 'res') and hasattr(self.res, 'headers'):
-                            code_value_header = self.res.headers.get('X-Code-Value', '200')
-                            code_value = int(code_value_header)
-                            print(f"[CODE_VALUE] HTTP 헤더에서 X-Code-Value={code_value} 읽음")
-                        else:
-                            print(f"[CODE_VALUE] HTTP 헤더 없음, 기본값 200 사용")
+                        # ✅ code_value 읽은 후 제거 (저장/UI에 포함 안 됨)
+                        if "code_value" in res_data:
+                            del res_data["code_value"]
+                            print(f"[CODE_VALUE] code_value={code_value} 읽고 제거 완료")
                         
                         print(f"[CODE_VALUE] response_code={response_code}, code_value={code_value}")
 
