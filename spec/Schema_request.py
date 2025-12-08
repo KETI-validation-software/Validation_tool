@@ -24,11 +24,15 @@ cmii7pysb004k8z1tts0npxfm_Capabilities_in_schema = {}
 # DoorProfiles
 cmii7pysb004k8z1tts0npxfm_DoorProfiles_in_schema = {}
 
+# AccessUserInfos
+cmii7pysb004k8z1tts0npxfm_AccessUserInfos_in_schema = {}
+
 # cmii7pysb004k8z1tts0npxfm 스키마 리스트
 cmii7pysb004k8z1tts0npxfm_inSchema = [
     cmii7pysb004k8z1tts0npxfm_Authentication_in_schema,
     cmii7pysb004k8z1tts0npxfm_Capabilities_in_schema,
     cmii7pysb004k8z1tts0npxfm_DoorProfiles_in_schema,
+    cmii7pysb004k8z1tts0npxfm_AccessUserInfos_in_schema,
 ]
 
 # Authentication
