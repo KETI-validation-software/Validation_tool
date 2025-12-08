@@ -19,10 +19,10 @@
       ]
     }
   ],
-  "status": "완료",
+  "status": "진행중",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 50.0,
+    "score": 0.0,
     "totalFields": 2,
     "passedFields": 1,
     "failedFields": 1
@@ -32,13 +32,13 @@
       "testGroup": "cmii82nib009f8z1tvo6fz8j2",
       "testSpecId": "cmii7shen005i8z1tagevx4qh",
       "testSpecName": "sensor001",
-      "score": 50.0,
+      "score": 0.0,
       "totalFields": 2,
       "passedFields": 1,
       "failedFields": 1,
       "apis": [
         {
-          "id": "step-1-ul4l0o5qg",
+          "id": "cmii7ubap005m8z1tyhf1yc1r",
           "name": "사용자 인증",
           "method": "POST",
           "endpoint": "/Authentication",
@@ -60,32 +60,9 @@
               ]
             }
           ]
-        }
-      ]
-    },
-    {
-      "testGroup": "cmii82nib009f8z1tvo6fz8j2",
-      "testSpecId": "cmii7pysb004k8z1tts0npxfm",
-      "testSpecName": "bio001",
-      "score": 0,
-      "totalFields": 0,
-      "passedFields": 0,
-      "failedFields": 0,
-      "apis": [
-        {
-          "id": "step-1-ve056coia",
-          "name": "사용자 인증",
-          "method": "POST",
-          "endpoint": "/Authentication",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
         },
         {
-          "id": "step-2-g0s3yjcf4",
+          "id": "cmiwkc2st000a844gm9yjeqhp",
           "name": "전송 지원 기능 정보 연동",
           "method": "POST",
           "endpoint": "/Capabilities",
@@ -97,7 +74,90 @@
           "validations": []
         },
         {
-          "id": "step-3-e20vlgf8c",
+          "id": "cmiwkf9cp003k844gk2elz2wz",
+          "name": "보안용 센서 단말 목록 정보 연동",
+          "method": "POST",
+          "endpoint": "/SensorDeviceProfiles",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmiwkqkje01dz844gz2h21eva",
+          "name": "실시간 보안용 센서 데이터 정보 연동",
+          "method": "POST",
+          "endpoint": "/RealtimeSensorData",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmiwl0xkh02yi844gg45hcjop",
+          "name": "실시간 보안용 센서 이벤트 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/RealtimeSensorEventInfos",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmiwl9g9003nh844gv5scoe1y",
+          "name": "저장된 보안용 센서 이벤트 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/StoredSensorEventInfos",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        }
+      ]
+    },
+    {
+      "testGroup": "cmii82nib009f8z1tvo6fz8j2",
+      "testSpecId": "cmii7pysb004k8z1tts0npxfm",
+      "testSpecName": "bio001",
+      "score": 0.0,
+      "totalFields": 0,
+      "passedFields": 0,
+      "failedFields": 0,
+      "apis": [
+        {
+          "id": "cmii7roh5004o8z1t47spn819",
+          "name": "사용자 인증",
+          "method": "POST",
+          "endpoint": "/Authentication",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmiiby4fo003chl2h8hzgu7m3",
+          "name": "전송 지원 기능 정보 연동",
+          "method": "POST",
+          "endpoint": "/Capabilities",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmisjhwhq09hi5vy7n59tvsht",
           "name": "바이오 및 출입통제 장치 목록 정보",
           "method": "POST",
           "endpoint": "/DoorProfiles",
@@ -109,10 +169,153 @@
           "validations": []
         },
         {
-          "id": "step-4-8eqsl35wj",
+          "id": "cmiwhz2il00epugxnzh3d9iuc",
           "name": "사용자 권한 정보 연동",
           "method": "POST",
           "endpoint": "/AccessUserInfos",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmiwj1hq302myugxn8a5c6f48",
+          "name": "실시간 출입인증 목록 정보 연동",
+          "method": "POST",
+          "endpoint": "/RealtimeVerifEventInfos",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmiwjtg8i03wjugxnqkustaqj",
+          "name": "저장된 출입인증 목록 정보 연동",
+          "method": "POST",
+          "endpoint": "/StoredVerifEventInfos",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        }
+      ]
+    },
+    {
+      "testGroup": "cmii82nib009f8z1tvo6fz8j2",
+      "testSpecId": "cmii7lxbn002s8z1t1i9uudf0",
+      "testSpecName": "vid001",
+      "score": 0.0,
+      "totalFields": 0,
+      "passedFields": 0,
+      "failedFields": 0,
+      "apis": [
+        {
+          "id": "cmii7p0dp002w8z1tcikv3cji",
+          "name": "사용자 인증",
+          "method": "POST",
+          "endpoint": "/Authentication",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmio328yj007zie8ffqfnxwnl",
+          "name": "전송 지원 기능 정보 연동",
+          "method": "POST",
+          "endpoint": "/Capabilities",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmiqs6rjd00khie8frmm5c83g",
+          "name": "카메라 목록 연동",
+          "method": "POST",
+          "endpoint": "/CameraProfiles",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmiqsc74800leie8fsshjqpok",
+          "name": "실시간 영상(CCTV) 전송",
+          "method": "POST",
+          "endpoint": "/StreamURLs",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmiqsim3j00mwie8fumvg1qnf",
+          "name": "실시간 이벤트 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/RealtimeVideoEventInfos",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmiqsrgr100p7ie8fzdzjr4hn",
+          "name": "저장된 영상 목록 연동",
+          "method": "POST",
+          "endpoint": "/StoredVideoInfos",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmiqsw7ou00qgie8fjt03g03i",
+          "name": "저장된 영상(CCTV) 전송",
+          "method": "POST",
+          "endpoint": "/ReplayURL",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmiqt02wa00rhie8fewnh1pn3",
+          "name": "저장된 이벤트 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/StoredVideoEventInfos",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmiqt4e5z00t6ie8fxsb3tkbc",
+          "name": "저장된 객체 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/StoredObjectAnalyticsInfos",
           "score": 0.0,
           "validationCnt": 0,
           "totalFields": 0,
@@ -123,5 +326,5 @@
       ]
     }
   ],
-  "completedDate": "2025-12-08T11:12:31Z"
+  "completedDate": "2025-12-08T14:48:37Z"
 }

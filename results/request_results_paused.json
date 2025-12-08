@@ -1,0 +1,89 @@
+{
+  "timestamp": "2025-12-08 14:48:37",
+  "last_completed_api_index": 0,
+  "step_buffers": [
+    {
+      "data": "[요청 1회차]\n{\n    \"userID\": 1234,\n    \"userPW\": \"kisa_k1!2@\"\n}",
+      "error": "[검증 1회차] [Inbound]\n[구조] 타입 불일치: userID (예상: str, 실제: int)",
+      "result": "FAIL",
+      "raw_data_list": [
+        {
+          "userID": 1234,
+          "userPW": "kisa_k1!2@"
+        }
+      ],
+      "events": [
+        {
+          "time": "2025-12-08T05:48:32.791187Z",
+          "api": "Authentication",
+          "dir": "REQUEST",
+          "data": {
+            "userID": 1234,
+            "userPW": "kisa_k1!2@"
+          }
+        },
+        {
+          "time": "2025-12-08T05:48:32.793181Z",
+          "api": "Authentication",
+          "dir": "RESPONSE",
+          "data": {
+            "code": "400",
+            "message": "잘못된 요청"
+          }
+        }
+      ]
+    },
+    {
+      "data": "",
+      "error": "",
+      "result": "PASS",
+      "raw_data_list": []
+    },
+    {
+      "data": "",
+      "error": "",
+      "result": "PASS",
+      "raw_data_list": []
+    },
+    {
+      "data": "",
+      "error": "",
+      "result": "PASS",
+      "raw_data_list": []
+    },
+    {
+      "data": "",
+      "error": "",
+      "result": "PASS",
+      "raw_data_list": []
+    },
+    {
+      "data": "",
+      "error": "",
+      "result": "PASS",
+      "raw_data_list": []
+    }
+  ],
+  "step_pass_counts": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "step_error_counts": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "total_pass_cnt": 1,
+  "total_error_cnt": 1,
+  "valResult_text": "============================================================\n🚀 플랫폼 검증 시작\n📋 Spec ID: cmii7shen005i8z1tagevx4qh\n📊 API 개수: 6개\n============================================================\n\nStart Validation...\n\n🔄 플랫폼 서버 초기화 중...\n✅ 플랫폼 서버 준비 완료\nstep 1: Authentication\n🔄 부하테스트 시작: 총 1회 검증 예정\n📨 요청 메시지 수신 [1/1]\n{\n    \"userID\": 1234,\n    \"userPW\": \"kisa_k1!2@\"\n}\n\n✅ 부하테스트 완료: 1회 검증 완료\n프로토콜: basic\n\n[요청 1회차]\n{\n    \"userID\": 1234,\n    \"userPW\": \"kisa_k1!2@\"\n}\nFAIL\nScore : 50.0\nScore details : 1(통과 필드 수), 1(오류 필드 수)\n\n검증 절차가 중지되었습니다.",
+  "current_spec_id": "cmii7shen005i8z1tagevx4qh",
+  "global_pass_cnt": 1,
+  "global_error_cnt": 1
+}
