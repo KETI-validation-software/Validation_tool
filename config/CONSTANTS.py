@@ -130,12 +130,12 @@ SPEC_CONFIG = [
         "cmii7pysb004k8z1tts0npxfm": {
     "test_name": "bio001",
     "specs": ['cmii7pysb004k8z1tts0npxfm_inSchema', 'cmii7pysb004k8z1tts0npxfm_outData', 'cmii7pysb004k8z1tts0npxfm_messages'],
-    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '바이오 및 출입통제 장치 목록 정보'],
-    "api_id": ['step-1-ve056coia', 'step-2-g0s3yjcf4', 'step-3-e20vlgf8c'],
-    "api_endpoint": ['/Authentication', '/Capabilities', '/DoorProfiles'],
-    "trans_protocol": ['basic', 'basic', 'basic'],
-    "time_out": [5000, 5000, 5000],
-    "num_retries": [1, 1, 1]
+    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '바이오 및 출입통제 장치 목록 정보', '사용자 권한 정보 연동'],
+    "api_id": ['step-1-ve056coia', 'step-2-g0s3yjcf4', 'step-3-e20vlgf8c', 'step-4-8eqsl35wj'],
+    "api_endpoint": ['/Authentication', '/Capabilities', '/DoorProfiles', '/AccessUserInfos'],
+    "trans_protocol": ['basic', 'basic', 'basic', 'basic'],
+    "time_out": [5000, 5000, 5000, 5000],
+    "num_retries": [1, 1, 1, 1]
 },
         "cmii7lxbn002s8z1t1i9uudf0": {
     "test_name": "vid001",

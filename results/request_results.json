@@ -107,9 +107,21 @@
           "passFields": 0,
           "failFields": 0,
           "validations": []
+        },
+        {
+          "id": "step-4-8eqsl35wj",
+          "name": "사용자 권한 정보 연동",
+          "method": "POST",
+          "endpoint": "/AccessUserInfos",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
         }
       ]
     }
   ],
-  "completedDate": "2025-12-05T17:15:41Z"
+  "completedDate": "2025-12-08T11:12:31Z"
 }
