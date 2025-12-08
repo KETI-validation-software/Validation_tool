@@ -4000,9 +4000,56 @@ class MyApp(QWidget):
                     if isinstance(res_data, dict):
                         response_code = str(res_data.get("code", "")).strip()
                         response_message = res_data.get("message", "")
+                        code_value = res_data.get("code_value", 200)  # ✅ 내부 flag 읽기
+                        
+                        # ✅ code_value 읽은 후 제거 (저장/UI에 포함 안 됨)
+                        if "code_value" in res_data:
+                            del res_data["code_value"]
+                            print(f"[CODE_VALUE] code_value={code_value} 읽고 제거 완료")
+                        
+                        print(f"[CODE_VALUE] response_code={response_code}, code_value={code_value}")
 
-                        # 성공 코드가 아니면 FAIL 처리 (10/29)
-                        if response_code not in ["200", "201", "성공", "Success", ""]:
+                        # ✅ 케이스 1: code_value=400이고 response_code가 200인 경우
+                        # → 잘못된 요청인데 200으로 응답 → 모든 필드 FAIL
+                        if code_value == 400 and response_code in ["200", "성공", "Success", ""]:
+                            print(f"[SYSTEM] 잘못된 요청인데 200 응답: code_value={code_value}, response_code={response_code}")
+                            print(f"[SYSTEM] 모든 필드 FAIL 처리")
+                            
+                            # json_check_에서 계산한 전체 필드 개수
+                            total_schema_fields = key_psss_cnt + key_error_cnt
+                            
+                            # 모든 필드를 FAIL로 처리
+                            key_psss_cnt = 0
+                            key_error_cnt = total_schema_fields
+                            val_result = "FAIL"
+                            val_text = f"잘못된 요청 (code_value=400): 모든 필드 자동 FAIL 처리됨"
+                            
+                            print(f"[SYSTEM] 잘못된 요청 처리 완료: 전체 {total_schema_fields}개 필드 FAIL")
+                        
+                        # ✅ 케이스 2: code_value=400이고 response_code도 400/201/404인 경우
+                        # → 의도적 오류 요청, 올바르게 에러 응답 → 모든 필드 PASS
+                        elif code_value == 400 and response_code in ["400", "201", "404"]:
+                            print(f"[SYSTEM] 에러 응답 감지: code={response_code}, message={response_message}")
+                            print(f"[SYSTEM] 동적으로 스키마 필드 자동 PASS 처리 시작")
+                            
+                            # json_check_에서 이미 계산한 전체 필드 개수 사용
+                            # key_psss_cnt + key_error_cnt = 전체 필드 개수
+                            total_schema_fields = key_psss_cnt + key_error_cnt
+                            
+                            print(f"[SYSTEM] json_check_ 결과: pass={key_psss_cnt}, error={key_error_cnt}")
+                            print(f"[SYSTEM] 스키마 전체 필드 개수: {total_schema_fields}")
+                            print(f"[SYSTEM] 실제 응답 필드: code={response_code}, message={response_message}")
+                            
+                            # 에러 응답은 모든 필드를 PASS로 처리
+                            key_psss_cnt = total_schema_fields
+                            key_error_cnt = 0
+                            val_result = "PASS"
+                            val_text = f"에러 응답 (code={response_code}): 모든 필드 자동 PASS 처리됨"
+                            
+                            print(f"[SYSTEM] 에러 응답 처리 완료: 전체 {total_schema_fields}개 필드 PASS")
+                        
+                        # 성공 코드가 아니면서 에러 코드도 아닌 경우 FAIL 처리
+                        elif response_code not in ["200", "201", "성공", "Success", ""]:
                             # print(f"[SYSTEM] 응답 코드 검증 실패: code={response_code}, message={response_message}")
                             val_result = "FAIL"
                             # 기존 오류 메시지에 응답 코드 오류 추가
@@ -4030,6 +4077,10 @@ class MyApp(QWidget):
                     # ✅ 이번 시도 결과로 덮어쓰기 (누적하지 않음!)
                     self.step_pass_counts[self.cnt] = key_psss_cnt
                     self.step_error_counts[self.cnt] = key_error_cnt
+                    
+                    print(f"[SCORE DEBUG] API {self.cnt} 시도 {self.current_retry + 1}: pass={key_psss_cnt}, error={key_error_cnt}")
+                    print(f"[SCORE DEBUG] step_pass_counts[{self.cnt}] = {self.step_pass_counts[self.cnt]}")
+                    print(f"[SCORE DEBUG] step_error_counts[{self.cnt}] = {self.step_error_counts[self.cnt]}")
 
                     if final_result == "PASS":
                         self.step_pass_flags[self.cnt] += 1
@@ -4051,7 +4102,8 @@ class MyApp(QWidget):
                     if val_result == "FAIL":
                         error_text = self._to_detail_text(val_text)
                     else:
-                        error_text = "오류가 없습니다."
+                        # PASS일 때는 val_text를 그대로 사용 (400 에러 응답 메시지 포함)
+                        error_text = val_text if isinstance(val_text, str) else "오류가 없습니다."
 
                     # ✅ raw_data_list에 현재 응답 데이터 추가 (재개 시 retry count 복원용)
                     self.step_buffers[self.cnt]["raw_data_list"].append(platform_data)
@@ -4114,11 +4166,6 @@ class MyApp(QWidget):
                     self.valResult.append("\n" + data_text)
                     self.valResult.append(f"\n검증 결과: {final_result}")
 
-                    # ✅ 이번 회차의 결과만 현재 spec 점수에 추가
-                    '''
-                    self.total_error_cnt += key_error_cnt
-                    self.total_pass_cnt += key_psss_cnt'''
-
                     # ✅ 점수 업데이트는 모든 재시도 완료 후에만 (플랫폼과 동일)
                     # 매 시도마다 점수를 표시하지 않음
 
@@ -4140,11 +4187,15 @@ class MyApp(QWidget):
                         
                         print(f"[SCORE] API {self.cnt} 완료: pass={final_pass_count}, error={final_error_count}")
 
+                        # ✅ 분야별 점수 업데이트 (현재 spec만)
+                        self.total_pass_cnt += final_pass_count
+                        self.total_error_cnt += final_error_count
+
                         # ✅ 전체 점수 업데이트 (모든 spec 합산) - API당 1회만 추가
                         self.global_error_cnt += final_error_count
                         self.global_pass_cnt += final_pass_count
 
-                        print(f"[SCORE] step_pass_counts 합계: {sum(self.step_pass_counts) if hasattr(self, 'step_pass_counts') else 0}")
+                        print(f"[SCORE] 분야별 점수: pass={self.total_pass_cnt}, error={self.total_error_cnt}")
                         print(f"[SCORE] 전체 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}")
 
                         # ✅ 전체 점수 포함하여 디스플레이 업데이트 (재시도 완료 후에만)
