@@ -1,4 +1,4 @@
-{"time": "2025-12-08T02:12:27.504624Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": 1234, "userPW": "kisa_k1!2@"}}
-{"time": "2025-12-08T02:12:27.536538Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": 1234, "userPW": "kisa_k1!2@"}}
-{"time": "2025-12-08T02:12:27.538533Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}
-{"time": "2025-12-08T02:12:28.497083Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}
+{"time": "2025-12-08T05:48:32.770275Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": 1234, "userPW": "kisa_k1!2@"}}
+{"time": "2025-12-08T05:48:32.791187Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": 1234, "userPW": "kisa_k1!2@"}}
+{"time": "2025-12-08T05:48:32.793181Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}
+{"time": "2025-12-08T05:48:33.757626Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청", "code_value": 400}}

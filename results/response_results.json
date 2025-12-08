@@ -38,7 +38,7 @@
       "failedFields": 0,
       "apis": [
         {
-          "id": "step-1-vh5wditno",
+          "id": "cmii82age008k8z1t71s85tbz",
           "name": "사용자 인증",
           "method": "POST",
           "endpoint": "/Authentication",
@@ -73,7 +73,7 @@
       "failedFields": 0,
       "apis": [
         {
-          "id": "step-1-t9b5f4zi2",
+          "id": "cmii7ylxn006m8z1tqq8dard1",
           "name": "사용자 인증",
           "method": "POST",
           "endpoint": "/Authentication",
@@ -85,7 +85,7 @@
           "validations": []
         },
         {
-          "id": "step-2-744wsnnj1",
+          "id": "cmiqtf9x600upie8ft45b1h1w",
           "name": "전송 지원 기능 정보 연동",
           "method": "POST",
           "endpoint": "/Capabilities",
@@ -97,7 +97,7 @@
           "validations": []
         },
         {
-          "id": "step-3-x2ylvolzp",
+          "id": "cmiqthu4900voie8f1evs0kfm",
           "name": "카메라 목록 연동",
           "method": "POST",
           "endpoint": "/CameraProfiles",
@@ -109,7 +109,7 @@
           "validations": []
         },
         {
-          "id": "step-4-bum9plo3a",
+          "id": "cmiqtkefj00whie8fd8odtc1m",
           "name": "실시간 영상(CCTV) 전송 ",
           "method": "POST",
           "endpoint": "/StreamURLs",
@@ -121,7 +121,7 @@
           "validations": []
         },
         {
-          "id": "step-5-j7tdov6r1",
+          "id": "cmiqtnwm200xoie8fxzfhodj5",
           "name": "실시간 이벤트 분석 정보 연동",
           "method": "POST",
           "endpoint": "/RealtimeVideoEventInfos",
@@ -144,7 +144,7 @@
       "failedFields": 0,
       "apis": [
         {
-          "id": "step-1-y5m65sgo6",
+          "id": "cmii80zqn007k8z1t85trpyps",
           "name": "사용자 인증",
           "method": "POST",
           "endpoint": "/Authentication",
@@ -158,5 +158,5 @@
       ]
     }
   ],
-  "completedDate": "2025-12-08T11:12:28Z"
+  "completedDate": "2025-12-08T14:48:33Z"
 }
