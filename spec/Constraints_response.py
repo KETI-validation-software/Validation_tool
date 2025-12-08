@@ -159,11 +159,20 @@ cmii7pysb004k8z1tts0npxfm_DoorProfiles_out_constraints = {
   }
 }
 
+# AccessUserInfos
+cmii7pysb004k8z1tts0npxfm_AccessUserInfos_out_constraints = {
+  "": {
+    "valueType": "preset",
+    "required": True
+  }
+}
+
 # cmii7pysb004k8z1tts0npxfm 검증 리스트
 cmii7pysb004k8z1tts0npxfm_outConstraints = [
     cmii7pysb004k8z1tts0npxfm_Authentication_out_constraints,
     cmii7pysb004k8z1tts0npxfm_Capabilities_out_constraints,
     cmii7pysb004k8z1tts0npxfm_DoorProfiles_out_constraints,
+    cmii7pysb004k8z1tts0npxfm_AccessUserInfos_out_constraints,
 ]
 
 # Authentication
