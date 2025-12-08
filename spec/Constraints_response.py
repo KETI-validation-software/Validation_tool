@@ -75,10 +75,95 @@ cmii7pysb004k8z1tts0npxfm_Capabilities_out_constraints = {
   }
 }
 
+# DoorProfiles
+cmii7pysb004k8z1tts0npxfm_DoorProfiles_out_constraints = {
+  "code": {
+    "valueType": "preset",
+    "required": True
+  },
+  "message": {
+    "valueType": "preset",
+    "required": True
+  },
+  "doorList": {
+    "valueType": "preset",
+    "required": True
+  },
+  "doorList.doorID": {
+    "valueType": "preset",
+    "required": True
+  },
+  "doorList.doorName": {
+    "valueType": "preset",
+    "required": True
+  },
+  "doorList.doorRelayStatus": {
+    "valueType": "preset",
+    "required": True
+  },
+  "doorList.doorSensor": {
+    "valueType": "preset",
+    "required": False
+  },
+  "doorList.doorLoc": {
+    "valueType": "preset",
+    "required": False
+  },
+  "doorList.doorLoc.lon": {
+    "valueType": "preset",
+    "required": True
+  },
+  "doorList.doorLoc.lat": {
+    "valueType": "preset",
+    "required": True
+  },
+  "doorList.doorLoc.alt": {
+    "valueType": "preset",
+    "required": False
+  },
+  "doorList.doorLoc.desc": {
+    "valueType": "preset",
+    "required": False
+  },
+  "doorList.bioDeviceList": {
+    "valueType": "preset",
+    "required": True
+  },
+  "doorList.bioDeviceList.bioDeviceID": {
+    "valueType": "preset",
+    "required": False
+  },
+  "doorList.bioDeviceList.bioDeviceName": {
+    "valueType": "preset",
+    "required": False
+  },
+  "doorList.bioDeviceList.bioDeviceAuthTypeList": {
+    "valueType": "preset",
+    "required": True
+  },
+  "doorList.otherDeviceList": {
+    "valueType": "preset",
+    "required": True
+  },
+  "doorList.otherDeviceList.otherDeviceID": {
+    "valueType": "preset",
+    "required": False
+  },
+  "doorList.otherDeviceList.otherDeviceName": {
+    "valueType": "preset",
+    "required": False
+  },
+  "doorList.otherDeviceList.otherDeviceAuthTypeList": {
+    "valueType": "preset",
+    "required": True
+  }
+}
+
 # cmii7pysb004k8z1tts0npxfm 검증 리스트
 cmii7pysb004k8z1tts0npxfm_outConstraints = [
     cmii7pysb004k8z1tts0npxfm_Authentication_out_constraints,
     cmii7pysb004k8z1tts0npxfm_Capabilities_out_constraints,
+    cmii7pysb004k8z1tts0npxfm_DoorProfiles_out_constraints,
 ]
 
 # Authentication

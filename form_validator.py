@@ -1187,7 +1187,7 @@ class FormValidator:
                 settings = detail.get("step", {}).get("api", {}).get("settings", {})
 
                 api_name.append(detail.get("step", {}).get("api", {}).get("name", {}))
-                api_id.append(detail.get("step", {}).get("id", {}))
+                api_id.append(step_id)
                 api_endpoint.append(detail.get("step", {}).get("api", {}).get("endpoint", {}))
 
                 # connectTimeout 추출
