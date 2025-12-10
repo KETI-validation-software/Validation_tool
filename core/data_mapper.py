@@ -56,8 +56,13 @@ class ConstraintDataGenerator:
             print(f"[DEBUG][BUILD_MAP]   referenceEndpoint: {ref_endpoint}")
             print(f"[DEBUG][BUILD_MAP]   referenceField: {ref_field}")
 
+            # valueType이 "random"이고 randomType이 있으면 아래에서 별도 처리
+            random_type = rule.get("randomType")
+            
             # referenceEndpoint가 있으면 latest_events에서 데이터 찾기
-            if ref_endpoint:
+            # 단, referenceField가 "(참조 필드 미선택)"이면 참조 안 함
+            # 단, valueType이 "random"이고 randomType이 있으면 건너뜀 (아래에서 처리)
+            if ref_endpoint and ref_field and ref_field != "(참조 필드 미선택)" and not (value_type == "random" and random_type):
                 values = []
 
                 # referenceEndpoint의 슬래시 처리 (있든 없든 찾을 수 있도록)
@@ -110,6 +115,31 @@ class ConstraintDataGenerator:
             elif value_type == "random":
                 # validValues에서 랜덤 선택
                 valid_values = rule.get("validValues", [])
+                random_type = rule.get("randomType")  # exclude-reference-valid-values 등
+                
+                # exclude-reference-valid-values: 참조 필드 값 제외
+                if random_type == "exclude-reference-valid-values":
+                    ref_key = ref_endpoint.lstrip('/') if ref_endpoint else None
+                    
+                    print(f"[DEBUG][BUILD_MAP]   randomType: exclude-reference-valid-values")
+                    print(f"[DEBUG][BUILD_MAP]   ref_key: {ref_key}")
+                    
+                    if ref_key and ref_key in self.latest_events:
+                        # RESPONSE에서 참조 필드 값 가져오기
+                        event = self.latest_events[ref_key].get("RESPONSE", {})
+                        event_data = event.get("data", {})
+                        reference_values = self.find_key(event_data, ref_field)
+                        
+                        print(f"[DEBUG][BUILD_MAP]   reference_values from RESPONSE: {reference_values}")
+                        print(f"[DEBUG][BUILD_MAP]   validValues before exclude: {valid_values}")
+                        
+                        # 참조 값을 제외한 validValues 필터링
+                        if reference_values:
+                            filtered_values = [v for v in valid_values if v not in reference_values]
+                            valid_values = filtered_values if filtered_values else valid_values
+                        
+                        print(f"[DEBUG][BUILD_MAP]   validValues after exclude: {valid_values}")
+                
                 constraint_map[path] = {
                     "type": "random",
                     "values": valid_values
@@ -236,9 +266,17 @@ class ConstraintDataGenerator:
                         result[key] = value
             elif isinstance(value, list) and len(value) > 0 and isinstance(value[0], dict):
                 # 리스트 형태의 구조 처리
-                result[key] = self._generate_list_items(
-                    key, value[0], constraint_map, n
-                )
+                # ✅ constraints가 없으면 원본 리스트를 그대로 사용
+                has_constraints = any(f"{key}.{field}" in constraint_map for field in value[0].keys())
+                
+                if has_constraints:
+                    # constraints가 있으면 동적 생성
+                    result[key] = self._generate_list_items(
+                        key, value[0], constraint_map, n
+                    )
+                else:
+                    # constraints가 없으면 원본 리스트 그대로 사용 (preset)
+                    result[key] = value
             elif isinstance(value, dict):
                 # 중첩된 딕셔너리 구조는 그대로 유지 (최상위 레벨)
                 result[key] = value

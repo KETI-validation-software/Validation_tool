@@ -1,0 +1,3 @@
+{"time": "2025-12-10T08:21:14.895269Z", "api": "SensorDeviceControl2", "dir": "REQUEST", "data": {"sensorDeviceID": "iot0003", "commandType": "AlarmOn"}}
+{"time": "2025-12-10T08:21:14.915215Z", "api": "SensorDeviceControl2", "dir": "REQUEST", "data": {"sensorDeviceID": "iot0003", "commandType": "AlarmOn"}}
+{"time": "2025-12-10T08:21:14.919204Z", "api": "SensorDeviceControl2", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "sensorDeviceID": "iot0003", "sensorDeviceStatus": "AlarmOn"}}
