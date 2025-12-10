@@ -114,7 +114,7 @@
             {
               "attempt": 1,
               "validationData": {
-                "sensorDeviceID": "iot0001",
+                "sensorDeviceID": "iot0003",
                 "commandType": ""
               },
               "validationErrors": [
@@ -137,12 +137,12 @@
             {
               "attempt": 1,
               "validationData": {
-                "sensorDeviceID": "iot0001",
-                "commandType": "AlarmOff"
+                "sensorDeviceID": "iot0003",
+                "commandType": "AlarmOn"
               },
               "validationErrors": [
                 "[Inbound]",
-                "[의미] sensorDeviceID: 값 불일치: ['iot0001'] != 예상값 None"
+                "[의미] sensorDeviceID: 값 불일치: ['iot0003'] != ['iot0001', 'iot0002', 'iot0003', 'iot0004']"
               ]
             }
           ]
@@ -150,5 +150,5 @@
       ]
     }
   ],
-  "completedDate": "2025-12-10T16:54:50Z"
+  "completedDate": "2025-12-10T17:21:15Z"
 }
