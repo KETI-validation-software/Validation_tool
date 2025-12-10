@@ -56,8 +56,13 @@ class ConstraintDataGenerator:
             print(f"[DEBUG][BUILD_MAP]   referenceEndpoint: {ref_endpoint}")
             print(f"[DEBUG][BUILD_MAP]   referenceField: {ref_field}")
 
+            # valueType이 "random"이고 randomType이 있으면 아래에서 별도 처리
+            random_type = rule.get("randomType")
+            
             # referenceEndpoint가 있으면 latest_events에서 데이터 찾기
-            if ref_endpoint:
+            # 단, referenceField가 "(참조 필드 미선택)"이면 참조 안 함
+            # 단, valueType이 "random"이고 randomType이 있으면 건너뜀 (아래에서 처리)
+            if ref_endpoint and ref_field and ref_field != "(참조 필드 미선택)" and not (value_type == "random" and random_type):
                 values = []
 
                 # referenceEndpoint의 슬래시 처리 (있든 없든 찾을 수 있도록)
