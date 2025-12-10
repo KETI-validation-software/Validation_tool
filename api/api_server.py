@@ -1,6 +1,5 @@
 import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
-
 import ssl
 import json
 import cgi
@@ -9,20 +8,13 @@ import datetime
 import time
 import traceback
 import os
+import copy  # deepcopy를 위해 추가
 import config.CONSTANTS as CONSTANTS
-# from spec.video.videoRequest import videoMessages, videoOutMessage, videoInMessage
-# from spec.video.videoSchema import videoInSchema, videoOutSchema
-# from spec.bio.bioRequest import bioMessages, bioOutMessage, bioInMessage
-# from spec.bio.bioSchema import  bioInSchema, bioOutSchema
-# from spec.security.securityRequest import securityMessages, securityOutMessage, securityInMessage
-# from spec.security.securitySchema import securityInSchema, securityOutSchema
-
 from core.functions import resource_path
 from core.data_mapper import ConstraintDataGenerator
 from requests.auth import HTTPDigestAuth
 from config.CONSTANTS import none_request_message
 from collections import defaultdict
-
 import random
 
 
@@ -63,11 +55,15 @@ class Server(BaseHTTPRequestHandler):
 
     def _push_event(self, api_name, direction, payload):
         try:
+            # ✅ payload를 deepcopy하여 완전히 독립된 복사본 생성
+            # 이후 원본이 수정되어도 trace에는 영향 없음
+            payload_copy = copy.deepcopy(payload)
+            
             evt = {
                 "time": datetime.datetime.utcnow().isoformat() + "Z",
                 "api": api_name,
                 "dir": direction,  # "REQUEST" | "RESPONSE" | "WEBHOOK"
-                "data": payload
+                "data": payload_copy
             }
 
             print(f"[_push_event] 저장 시도: api={api_name}, dir={direction}")
@@ -133,33 +129,40 @@ class Server(BaseHTTPRequestHandler):
             print(f"[ERROR_CHECK] 스키마를 찾을 수 없음: {api_name}")
             return None  # 스키마 없으면 검사 안 함
         
-        # 1. 타입 불일치 검사 → flag만 설정하고 200 응답 계속
+        # 1. 타입 불일치 검사 → 400
         type_error = self._check_type_mismatch(request_data, schema)
         if type_error:
-            print(f"[ERROR_CHECK] 타입 불일치 감지: {type_error} (flag만 설정, 200 응답 계속)")
+            print(f"[ERROR_CHECK] 타입 불일치 감지: {type_error}")
             # ✅ 내부 flag 설정 (요청에 오류가 있음을 표시)
             Server.request_has_error[api_name] = True
-            # return 하지 않고 계속 진행 (200 응답)
+            
+            # 테스트 스위치: True = 정상 동작 (400 응답), False = 200으로 잘못 응답
+            SEND_ERROR_RESPONSE = True  # ← 이걸 False로 바꾸면 200 응답 테스트
+            if SEND_ERROR_RESPONSE:
+                return {"code": "400", "message": "잘못된 요청"}
+            else:
+                # 에러 감지했지만 응답은 보내지 않음 (flag는 유지)
+                return None
         
-        # 2. 시간 구간 검사 → flag만 설정
+        # 2. 시간 구간 검사 → 201 (startTime, endTime 있는 API만)
         if "startTime" in request_data or "endTime" in request_data:
             time_error = self._check_time_range(request_data)
             if time_error:
-                print(f"[ERROR_CHECK] 시간 범위 오류 감지: {time_error} (flag만 설정, 200 응답 계속)")
+                print(f"[ERROR_CHECK] 시간 범위 오류 감지: {time_error}")
                 Server.request_has_error[api_name] = True
+                return {"code": "201", "message": "정보 없음"}
         
-        # 3. 장치 존재 검사 → flag만 설정
+        # 3. 장치 존재 검사 → 404 (camID, camList 있는 API만)
         if "camID" in request_data or "camList" in request_data:
             device_error = self._check_device_exists(request_data)
             if device_error:
-                print(f"[ERROR_CHECK] 장치 없음 감지: {device_error} (flag만 설정, 200 응답 계속)")
+                print(f"[ERROR_CHECK] 장치 없음 감지: {device_error}")
                 Server.request_has_error[api_name] = True
+                return {"code": "404", "message": "장치 없음"}
         
         # ✅ 오류 없으면 flag 초기화
-        if api_name not in Server.request_has_error or not Server.request_has_error[api_name]:
-            Server.request_has_error[api_name] = False
-        
-        return None  # 오류 응답 없음 (정상 처리 계속)
+        Server.request_has_error[api_name] = False
+        return None  # 오류 없음
 
     def _get_request_schema(self, api_name):
         """API의 요청 스키마 가져오기"""
@@ -408,7 +411,11 @@ class Server(BaseHTTPRequestHandler):
                 error_response = self._check_request_errors(api_name, self.request_data)
                 if error_response:
                     print(f"[DEBUG][SERVER] Authentication 오류 감지: {error_response}")
+                    # ✅ trace 저장 (_push_event 내부에서 deepcopy 수행)
                     self._push_event(api_name, "RESPONSE", error_response)
+                    # ✅ JSON에 code_value 추가
+                    error_response["code_value"] = 400
+                    print(f"[DEBUG][SERVER] Authentication 에러 응답에 code_value=400 추가")
                     self._set_headers()
                     self.wfile.write(json.dumps(error_response).encode('utf-8'))
                     return
@@ -488,7 +495,11 @@ class Server(BaseHTTPRequestHandler):
         error_response = self._check_request_errors(api_name, self.request_data)
         if error_response:
             print(f"[DEBUG][SERVER] 오류 감지: {error_response}")
+            # ✅ trace 저장 (_push_event 내부에서 deepcopy 수행)
             self._push_event(api_name, "RESPONSE", error_response)
+            # ✅ JSON에 code_value 추가
+            error_response["code_value"] = 400
+            print(f"[DEBUG][SERVER] 에러 응답에 code_value=400 추가")
             self._set_headers()
             self.wfile.write(json.dumps(error_response).encode('utf-8'))
             return
@@ -807,7 +818,10 @@ class Server(BaseHTTPRequestHandler):
                 )
                 print(f"[DEBUG][CONSTRAINTS] 업데이트된 message 내용: {json.dumps(updated_message, ensure_ascii=False)[:200]}")
 
-                # ✅ code_value 추가 (내부 flag)
+                # ✅ trace 저장 (_push_event 내부에서 deepcopy 수행)
+                self._push_event(api_name, "RESPONSE", updated_message)
+
+                # ✅ JSON에 code_value 추가
                 if isinstance(updated_message, dict):
                     if api_name in Server.request_has_error and Server.request_has_error[api_name]:
                         updated_message['code_value'] = 400
@@ -816,15 +830,16 @@ class Server(BaseHTTPRequestHandler):
                         updated_message['code_value'] = 200
                         print(f"[DEBUG] code_value=200 추가 (정상)")
 
-                self._push_event(api_name, "RESPONSE", updated_message)
-
-                # 업데이트된 메시지를 응답으로 전송
+                # JSON 응답 준비
                 a = json.dumps(updated_message).encode('utf-8')
             else:
                 print(f"[DEBUG][CONSTRAINTS] constraints 없음 - 원본 메시지 사용")
                 # constraints가 없으면 원본 메시지 그대로 사용
 
-                # ✅ code_value 추가 (내부 flag)
+                # ✅ trace 저장 (_push_event 내부에서 deepcopy 수행)
+                self._push_event(api_name, "RESPONSE", message)
+
+                # ✅ JSON에 code_value 추가
                 if isinstance(message, dict):
                     if api_name in Server.request_has_error and Server.request_has_error[api_name]:
                         message['code_value'] = 400
@@ -833,7 +848,7 @@ class Server(BaseHTTPRequestHandler):
                         message['code_value'] = 200
                         print(f"[DEBUG] code_value=200 추가 (정상)")
 
-                self._push_event(api_name, "RESPONSE", message)
+                # JSON 응답 준비
                 a = json.dumps(message).encode('utf-8')
         except Exception as e:
             print(f"[ERROR] _applied_constraints 실행 중 오류: {e}")
@@ -841,15 +856,18 @@ class Server(BaseHTTPRequestHandler):
             traceback.print_exc()
             # 에러 발생 시 원본 메시지 사용
             
-            # ✅ code_value 추가 (내부 flag)
+            # ✅ trace 저장 (_push_event 내부에서 deepcopy 수행)
+            self._push_event(api_name, "REQUEST", self.request_data)
+            self._push_event(api_name, "RESPONSE", message)
+            
+            # ✅ JSON에 code_value 추가
             if isinstance(message, dict):
                 if api_name in Server.request_has_error and Server.request_has_error[api_name]:
                     message['code_value'] = 400
                 else:
                     message['code_value'] = 200
             
-            self._push_event(api_name, "REQUEST", self.request_data)
-            self._push_event(api_name, "RESPONSE", message)
+            # JSON 응답 준비
             a = json.dumps(message).encode('utf-8')
 
         # 응답 전송 (연결 끊김 에러 처리)

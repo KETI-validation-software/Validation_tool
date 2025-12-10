@@ -1,5 +1,4 @@
-{"time": "2025-12-05T08:15:37.514256Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": 1234, "userPW": "kisa_k1!2@"}}
-{"time": "2025-12-05T08:15:37.536197Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": 1234, "userPW": "kisa_k1!2@"}}
-{"time": "2025-12-05T08:15:37.538191Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": 1234, "userPW": "kisa_k1!2@"}}
-{"time": "2025-12-05T08:15:37.540186Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "userName": "관리자", "userAff": "오산시청", "accessToken": "abcde1234", "code_value": 400}}
-{"time": "2025-12-05T08:15:38.506137Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "userName": "관리자", "userAff": "오산시청", "accessToken": "***", "code_value": 400}}
+{"time": "2025-12-08T05:48:32.770275Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": 1234, "userPW": "kisa_k1!2@"}}
+{"time": "2025-12-08T05:48:32.791187Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": 1234, "userPW": "kisa_k1!2@"}}
+{"time": "2025-12-08T05:48:32.793181Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}
+{"time": "2025-12-08T05:48:33.757626Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청", "code_value": 400}}
