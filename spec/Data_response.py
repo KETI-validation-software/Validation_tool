@@ -194,7 +194,8 @@ cmii7pysb004k8z1tts0npxfm_DoorProfiles_out_data = {
             "bioDeviceID": "bio0001",
             "bioDeviceName": "출입문홍채인식기기",
             "bioDeviceAuthTypeList": [
-            "홍채, 지문"
+            "홍채",
+            "지문"
         ]
         },
             {
@@ -275,7 +276,8 @@ cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_webhook_in_data = {
         "doorID": "door0001",
         "userID": "user0001",
         "bioAuthTypeList": [
-        "지문, 얼굴"
+        "지문",
+        "얼굴"
     ],
         "otherAuthTypeList": [
         "카드"
@@ -309,7 +311,8 @@ cmii7pysb004k8z1tts0npxfm_StoredVerifEventInfos_out_data = {
         "doorID": "door0001",
         "userID": "user0001",
         "bioAuthTypeList": [
-        "지문, 얼굴"
+        "지문",
+        "얼굴"
     ],
         "otherAuthTypeList": [
         "카드"

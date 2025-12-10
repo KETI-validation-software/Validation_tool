@@ -3359,10 +3359,12 @@ class InfoWidget(QWidget):
                 print(f"[SUCCESS] 플랫폼 검증: Authentication 자동 입력 완료 (User ID={user_id})")
                 print(f"[INFO] id_input과 pw_input 필드가 disabled 상태로 설정되었습니다.")
             else:
-                print("[WARNING] Authentication 정보를 찾을 수 없습니다. 필드를 활성화합니다.")
-                # Authentication 정보가 없으면 필드를 활성화
+                print("[WARNING] Authentication 정보를 찾을 수 없습니다. 필드를 비워둡니다.")
+                # Authentication 정보가 없으면 필드를 활성화하고 비움
                 self.id_input.setEnabled(True)
                 self.pw_input.setEnabled(True)
+                self.id_input.clear()
+                self.pw_input.clear()
 
         except Exception as e:
             print(f"[ERROR] Authentication 자동 입력 중 오류 발생: {e}")
