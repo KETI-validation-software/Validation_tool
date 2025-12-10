@@ -1,5 +1,5 @@
-{"time": "2025-12-10T07:54:41.045018Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
-{"time": "2025-12-10T07:54:41.069951Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
-{"time": "2025-12-10T07:54:41.092890Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
-{"time": "2025-12-10T07:54:41.096879Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "", "message": "", "transportSupport": [{"transProtocolType": "LongPolling", "transProtocolDesc": "none"}, {"transProtocolType": "Webhook", "transProtocolDesc": "none"}]}}
-{"time": "2025-12-10T07:54:42.038938Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "", "message": "", "transportSupport": [{"transProtocolType": "LongPolling", "transProtocolDesc": "none"}, {"transProtocolType": "Webhook", "transProtocolDesc": "none"}], "code_value": 200}}
+{"time": "2025-12-10T08:21:05.875667Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
+{"time": "2025-12-10T08:21:05.896640Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
+{"time": "2025-12-10T08:21:05.917585Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
+{"time": "2025-12-10T08:21:05.920577Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "", "message": "", "transportSupport": [{"transProtocolType": "LongPolling", "transProtocolDesc": "none"}, {"transProtocolType": "Webhook", "transProtocolDesc": "none"}]}}
+{"time": "2025-12-10T08:21:06.867115Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "", "message": "", "transportSupport": [{"transProtocolType": "LongPolling", "transProtocolDesc": "none"}, {"transProtocolType": "Webhook", "transProtocolDesc": "none"}], "code_value": 200}}

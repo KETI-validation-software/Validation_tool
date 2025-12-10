@@ -411,6 +411,11 @@ def _validate_field_match(field_path, field_value, rule, reference_context,
     ref_endpoint = rule.get("referenceEndpoint")
     ref_field = rule.get("referenceField")
 
+    print(f"[DEBUG][VALIDATE] field_path: {field_path}, field_value: {field_value}")
+    print(f"[DEBUG][VALIDATE] ref_endpoint: {ref_endpoint}, ref_field: {ref_field}")
+    print(f"[DEBUG][VALIDATE] reference_context keys: {list(reference_context.keys()) if reference_context else None}")
+    print(f"[DEBUG][VALIDATE] reference_context: {reference_context}")
+
     if not reference_context or ref_endpoint not in reference_context:
         error_msg = f"참조 엔드포인트 없음: {ref_endpoint}"
         field_errors.append(error_msg)
@@ -418,7 +423,22 @@ def _validate_field_match(field_path, field_value, rule, reference_context,
         return False
 
     ref_data = reference_context[ref_endpoint]
+    print(f"[DEBUG][VALIDATE] ref_data: {ref_data}")
     ref_value = get_by_path(ref_data, ref_field)
+    
+    # ref_value가 None이면 배열 필드 안을 자동 탐색
+    if ref_value is None:
+        print(f"[DEBUG][VALIDATE] ref_field '{ref_field}' not found, searching in arrays...")
+        for key, value in ref_data.items():
+            if isinstance(value, list) and value:
+                # 배열 안의 객체에서 ref_field 찾기
+                array_path = f"{key}.{ref_field}"
+                ref_value = get_by_path(ref_data, array_path)
+                print(f"[DEBUG][VALIDATE] Tried array_path: {array_path}, result: {ref_value}")
+                if ref_value is not None:
+                    break
+
+    print(f"[DEBUG][VALIDATE] Final ref_value: {ref_value}")
 
     # 보완
     def to_list(v):
