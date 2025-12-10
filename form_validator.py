@@ -16,6 +16,7 @@ from typing import Dict, List
 import inspect
 import spec.Data_response as Data_response
 import config.CONSTANTS as CONSTANTS
+from core.key_generator import KeyIdGenerator
 
 class ClickableLabel(QLabel):
     """클릭 가능한 QLabel - 시험 분야 셀용"""
@@ -55,6 +56,7 @@ class FormValidator:
         self.data_gen = dataGenerator()
         self.validation_gen = ValidationGenerator()
         self.const_gen = constraintGeneractor()
+        self.key_id_gen = KeyIdGenerator()
 
     def _convert_webhook_spec_to_schema(self, webhook_spec):
         """webhook.integrationSpec을 스키마 형식으로 변환"""
@@ -153,6 +155,7 @@ class FormValidator:
             for spec_id, steps in self._steps_cache.items():
                 if not isinstance(steps, list):
                     continue
+
                 schema_names = []
                 data_names = []
                 endpoint_names = []
@@ -177,6 +180,11 @@ class FormValidator:
                             file_type = 'response'
                         elif schema_type == 'response':
                             file_type = 'request'
+                        self.key_id_gen.generate_keyid_files(
+                            self._steps_cache,
+                            self._test_step_cache,
+                            file_type
+                        )
                         schema_content, data_content, validation_content,constraints_content = self._generate_files_for_each_steps(
                             schema_type=schema_type,
                             file_type=file_type,
