@@ -1,29 +1,68 @@
 # Authentication
-cmii7wfuf006i8z1tcds6q69g_Authentication_in_data = {
+cmiqr2b9j00i9ie8frw439h8i_Authentication_in_data = {
     "userID": "kisa",
     "userPW": "kisa_k1!2@"
 }
 
 # Capabilities
-cmii7wfuf006i8z1tcds6q69g_Capabilities_in_data = {}
+cmiqr2b9j00i9ie8frw439h8i_Capabilities_in_data = {}
 
 # SensorDeviceProfiles
-cmii7wfuf006i8z1tcds6q69g_SensorDeviceProfiles_in_data = {}
+cmiqr2b9j00i9ie8frw439h8i_SensorDeviceProfiles_in_data = {}
 
-# RealtimeSensorData
-cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_in_data = {
-    "sensorDeviceList": [
+# SensorDeviceControl
+cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl_in_data = {
+    "sensorDeviceID": "",
+    "commandType": ""
+}
+
+# SensorDeviceControl2
+cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl2_in_data = {
+    "sensorDeviceID": "",
+    "commandType": ""
+}
+
+# cmiqr2b9j00i9ie8frw439h8i 데이터 리스트
+cmiqr2b9j00i9ie8frw439h8i_inData = [
+    cmiqr2b9j00i9ie8frw439h8i_Authentication_in_data,
+    cmiqr2b9j00i9ie8frw439h8i_Capabilities_in_data,
+    cmiqr2b9j00i9ie8frw439h8i_SensorDeviceProfiles_in_data,
+    cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl_in_data,
+    cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl2_in_data,
+]
+
+# cmiqr2b9j00i9ie8frw439h8i API endpoint
+cmiqr2b9j00i9ie8frw439h8i_messages = [
+    "Authentication",
+    "Capabilities",
+    "SensorDeviceProfiles",
+    "SensorDeviceControl",
+    "SensorDeviceControl2",
+]
+
+# Authentication
+cmiqr1jha00i6ie8fb1scb3go_Authentication_in_data = {
+    "userID": "kisa",
+    "userPW": "kisa_k1!2@"
+}
+
+# Capabilities
+cmiqr1jha00i6ie8fb1scb3go_Capabilities_in_data = {}
+
+# DoorProfiles
+cmiqr1jha00i6ie8fb1scb3go_DoorProfiles_in_data = {}
+
+# RealtimeDoorStatus
+cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_in_data = {
+    "doorList": [
         {
-        "sensorDeviceID": "iot0001"
+        "doorID": "door0001"
     },
         {
-        "sensorDeviceID": "iot0002"
-    },
-        {
-        "sensorDeviceID": "iot0003"
+        "doorID": "door0002"
     }
 ],
-    "duration": 100,
+    "duration": 200,
     "transProtocol": {
     "transProtocolType": "LongPolling",
     "transProtocolDesc": ""
@@ -31,318 +70,118 @@ cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_in_data = {
     "startTime": 20251105163010124
 }
 
-# RealtimeSensorData WebHook OUT Data
-cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_webhook_out_data = {
+# RealtimeDoorStatus WebHook OUT Data
+cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_webhook_out_data = {
     "code": "200",
     "message": "성공"
 }
 
-# RealtimeSensorEventInfos
-cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_in_data = {}
-
-# RealtimeSensorEventInfos WebHook OUT Data
-cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_webhook_out_data = {}
-
-# StoredSensorEventInfos
-cmii7wfuf006i8z1tcds6q69g_StoredSensorEventInfos_in_data = {
-    "timePeriod": {
-    "startTime": 20251105163010124,
-    "endTime": 20251115163010124
-},
-    "sensorDeviceList": [
-        {
-        "sensorDeviceID": "iot0001"
-    },
-        {
-        "sensorDeviceID": "iot0002"
-    }
-],
-    "maxCount": 8,
-    "eventFilter": "화재"
+# DoorControl
+cmiqr1jha00i6ie8fb1scb3go_DoorControl_in_data = {
+    "doorID": "door0001",
+    "commandType": "unlock"
 }
 
-# cmii7wfuf006i8z1tcds6q69g 데이터 리스트
-cmii7wfuf006i8z1tcds6q69g_inData = [
-    cmii7wfuf006i8z1tcds6q69g_Authentication_in_data,
-    cmii7wfuf006i8z1tcds6q69g_Capabilities_in_data,
-    cmii7wfuf006i8z1tcds6q69g_SensorDeviceProfiles_in_data,
-    cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_in_data,
-    cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_in_data,
-    cmii7wfuf006i8z1tcds6q69g_StoredSensorEventInfos_in_data,
-]
-
-# cmii7wfuf006i8z1tcds6q69g WebHook 데이터 리스트
-cmii7wfuf006i8z1tcds6q69g_webhook_outData = [
-    cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_webhook_out_data,
-    cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_webhook_out_data,
-]
-
-# cmii7wfuf006i8z1tcds6q69g API endpoint
-cmii7wfuf006i8z1tcds6q69g_messages = [
-    "Authentication",
-    "Capabilities",
-    "SensorDeviceProfiles",
-    "RealtimeSensorData",
-    "RealtimeSensorEventInfos",
-    "StoredSensorEventInfos",
-]
-
-# Authentication
-cmii7w683006h8z1t7usnin5g_Authentication_in_data = {
-    "userID": "kisa",
-    "userPW": "kisa_k1!2@"
-}
-
-# Capabilities
-cmii7w683006h8z1t7usnin5g_Capabilities_in_data = {}
-
-# DoorProfiles
-cmii7w683006h8z1t7usnin5g_DoorProfiles_in_data = {}
-
-# AccessUserInfos
-cmii7w683006h8z1t7usnin5g_AccessUserInfos_in_data = {}
-
-# RealtimeVerifEventInfos
-cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_in_data = {
+# RealtimeDoorStatus
+cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_in_data = {
     "doorList": [
         {
-        "doorID": "door0001"
-    },
-        {
-        "doorID": "door0002"
-    },
-        {
-        "doorID": "door0003"
+        "doorID": ""
     }
 ],
-    "duration": 500,
+    "duration": 10000,
     "transProtocol": {
-    "transProtocolType": "LongPolling",
+    "transProtocolType": "Webhook",
     "transProtocolDesc": ""
 },
-    "eventFilter": "",
-    "startTime": 20251105163010124
+    "startTime": "20251105163010124"
 }
 
-# RealtimeVerifEventInfos WebHook OUT Data
-cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_webhook_out_data = {
-    "code": "200",
-    "message": ""
+# RealtimeDoorStatus WebHook OUT Data
+cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_webhook_out_data = {
+    "code": "2000",
+    "message": "성공"
 }
 
-# StoredVerifEventInfos
-cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_in_data = {
-    "timePeriod": {
-    "startTime": 20251105163010124,
-    "endTime": 20251115163010124
-},
-    "doorList": [
-        {
-        "doorID": "door0001"
-    },
-        {
-        "doorID": "door0002"
-    }
-],
-    "maxCount": 10,
-    "eventFilter": "성공"
-}
-
-# cmii7w683006h8z1t7usnin5g 데이터 리스트
-cmii7w683006h8z1t7usnin5g_inData = [
-    cmii7w683006h8z1t7usnin5g_Authentication_in_data,
-    cmii7w683006h8z1t7usnin5g_Capabilities_in_data,
-    cmii7w683006h8z1t7usnin5g_DoorProfiles_in_data,
-    cmii7w683006h8z1t7usnin5g_AccessUserInfos_in_data,
-    cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_in_data,
-    cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_in_data,
+# cmiqr1jha00i6ie8fb1scb3go 데이터 리스트
+cmiqr1jha00i6ie8fb1scb3go_inData = [
+    cmiqr1jha00i6ie8fb1scb3go_Authentication_in_data,
+    cmiqr1jha00i6ie8fb1scb3go_Capabilities_in_data,
+    cmiqr1jha00i6ie8fb1scb3go_DoorProfiles_in_data,
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_in_data,
+    cmiqr1jha00i6ie8fb1scb3go_DoorControl_in_data,
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_in_data,
 ]
 
-# cmii7w683006h8z1t7usnin5g WebHook 데이터 리스트
-cmii7w683006h8z1t7usnin5g_webhook_outData = [
-    cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_webhook_out_data,
+# cmiqr1jha00i6ie8fb1scb3go WebHook 데이터 리스트
+cmiqr1jha00i6ie8fb1scb3go_webhook_outData = [
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_webhook_out_data,
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_webhook_out_data,
 ]
 
-# cmii7w683006h8z1t7usnin5g API endpoint
-cmii7w683006h8z1t7usnin5g_messages = [
+# cmiqr1jha00i6ie8fb1scb3go API endpoint
+cmiqr1jha00i6ie8fb1scb3go_messages = [
     "Authentication",
     "Capabilities",
     "DoorProfiles",
-    "AccessUserInfos",
-    "RealtimeVerifEventInfos",
-    "StoredVerifEventInfos",
+    "RealtimeDoorStatus",
+    "DoorControl",
+    "RealtimeDoorStatus",
 ]
 
 # Authentication
-cmii7v8pr006g8z1tvo55a50u_Authentication_in_data = {
+cmiqr0kdw00i4ie8fr3firjtg_Authentication_in_data = {
     "userID": "kisa",
     "userPW": "kisa_k1!2@"
 }
 
 # Capabilities
-cmii7v8pr006g8z1tvo55a50u_Capabilities_in_data = {}
+cmiqr0kdw00i4ie8fr3firjtg_Capabilities_in_data = {}
 
 # CameraProfiles
-cmii7v8pr006g8z1tvo55a50u_CameraProfiles_in_data = {}
+cmiqr0kdw00i4ie8fr3firjtg_CameraProfiles_in_data = {}
 
-# StreamURLs
-cmii7v8pr006g8z1tvo55a50u_StreamURLs_in_data = {
-    "camList": [],
-    "streamProtocolType": "RSTP"
+# PtzStatus
+cmiqr0kdw00i4ie8fr3firjtg_PtzStatus_in_data = {
+    "camID": "cam0001"
 }
 
-# RealtimeVideoEventInfos
-cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_in_data = {
-    "camList": [
-        {
-        "camID": "cam0001"
-    },
-        {
-        "camID": "cam0002"
-    }
-],
-    "transProtocol": {
-    "transProtocolType": "LongPolling",
-    "transProtocolDesc": ""
+# PtzContinuousMove
+cmiqr0kdw00i4ie8fr3firjtg_PtzContinuousMove_in_data = {
+    "camID": "cam0001",
+    "velocity": {
+    "pan  ": 10,
+    "tilt": -20,
+    "zoom": 30
 },
-    "duration": 10,
-    "eventFilter": "배회",
-    "classFilter": "",
-    "startTime": 20220822163022124
+    "timeOut": 5
 }
 
-# RealtimeVideoEventInfos WebHook OUT Data
-cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_webhook_out_data = {}
-
-# StoredVideoInfos
-cmii7v8pr006g8z1tvo55a50u_StoredVideoInfos_in_data = {
-    "timePeriod": {
-    "startTime": 20251105163010124,
-    "endTime": 20251115163010124
-},
-    "camList": [
-        {
-        "camID": "cam0001"
-    },
-        {
-        "camID": "cam0002"
-    }
-]
+# PtzStop
+cmiqr0kdw00i4ie8fr3firjtg_PtzStop_in_data = {
+    "camID": "cam0001",
+    "pan": True,
+    "tilt": True,
+    "zoom": False
 }
 
-# ReplayURL
-cmii7v8pr006g8z1tvo55a50u_ReplayURL_in_data = {
-    "camList": [
-        {
-        "camID": "cam0001",
-        "startTime": 20251105163010124,
-        "endTime": "20251115163010123",
-        "streamProtocolType": "RTSP"
-    },
-        {
-        "camID": "cam0002",
-        "startTime": "20251105163010123",
-        "endTime": 20251115163010123,
-        "streamProtocolType": "RTSP"
-    },
-        {
-        "camID": "cam0003",
-        "startTime": 20251105163010123,
-        "endTime": 20251115163010123,
-        "streamProtocolType": "RTSP"
-    }
-]
-}
-
-# StoredVideoEventInfos
-cmii7v8pr006g8z1tvo55a50u_StoredVideoEventInfos_in_data = {
-    "timePeriod": {
-    "startTime": 20251105163010124,
-    "endTime": 20251115163010124
-},
-    "camList": [
-        {
-        "camID": "cam0001"
-    },
-        {
-        "camID": "cam0002"
-    },
-        {
-        "camID": "cam0003"
-    }
-],
-    "maxCount": 3,
-    "eventFilter": "배회",
-    "classFilter": ""
-}
-
-# StoredObjectAnalyticsInfos
-cmii7v8pr006g8z1tvo55a50u_StoredObjectAnalyticsInfos_in_data = {
-    "timePeriod": {
-    "startTime": 20251105163010124,
-    "endTime": 20251115163010124
-},
-    "camList": [
-        {
-        "camID": "cam0001"
-    },
-        {
-        "camID": "cam0002"
-    },
-        {
-        "camID": "cam0003"
-    }
-],
-    "filterList": [
-        {
-        "classFilter": [
-        "사람"
-    ],
-        "attributeFilter": [
-        "여자",
-        "안경"
-    ]
-    },
-        {
-        "classFilter": [
-        "트럭",
-        "버스"
-    ],
-        "attributeFilter": [
-        "빨간색"
-    ]
-    }
-]
-}
-
-# cmii7v8pr006g8z1tvo55a50u 데이터 리스트
-cmii7v8pr006g8z1tvo55a50u_inData = [
-    cmii7v8pr006g8z1tvo55a50u_Authentication_in_data,
-    cmii7v8pr006g8z1tvo55a50u_Capabilities_in_data,
-    cmii7v8pr006g8z1tvo55a50u_CameraProfiles_in_data,
-    cmii7v8pr006g8z1tvo55a50u_StreamURLs_in_data,
-    cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_in_data,
-    cmii7v8pr006g8z1tvo55a50u_StoredVideoInfos_in_data,
-    cmii7v8pr006g8z1tvo55a50u_ReplayURL_in_data,
-    cmii7v8pr006g8z1tvo55a50u_StoredVideoEventInfos_in_data,
-    cmii7v8pr006g8z1tvo55a50u_StoredObjectAnalyticsInfos_in_data,
+# cmiqr0kdw00i4ie8fr3firjtg 데이터 리스트
+cmiqr0kdw00i4ie8fr3firjtg_inData = [
+    cmiqr0kdw00i4ie8fr3firjtg_Authentication_in_data,
+    cmiqr0kdw00i4ie8fr3firjtg_Capabilities_in_data,
+    cmiqr0kdw00i4ie8fr3firjtg_CameraProfiles_in_data,
+    cmiqr0kdw00i4ie8fr3firjtg_PtzStatus_in_data,
+    cmiqr0kdw00i4ie8fr3firjtg_PtzContinuousMove_in_data,
+    cmiqr0kdw00i4ie8fr3firjtg_PtzStop_in_data,
 ]
 
-# cmii7v8pr006g8z1tvo55a50u WebHook 데이터 리스트
-cmii7v8pr006g8z1tvo55a50u_webhook_outData = [
-    cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_webhook_out_data,
-]
-
-# cmii7v8pr006g8z1tvo55a50u API endpoint
-cmii7v8pr006g8z1tvo55a50u_messages = [
+# cmiqr0kdw00i4ie8fr3firjtg API endpoint
+cmiqr0kdw00i4ie8fr3firjtg_messages = [
     "Authentication",
     "Capabilities",
     "CameraProfiles",
-    "StreamURLs",
-    "RealtimeVideoEventInfos",
-    "StoredVideoInfos",
-    "ReplayURL",
-    "StoredVideoEventInfos",
-    "StoredObjectAnalyticsInfos",
+    "PtzStatus",
+    "PtzContinuousMove",
+    "PtzStop",
 ]
 
