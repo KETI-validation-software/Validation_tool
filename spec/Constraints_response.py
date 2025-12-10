@@ -1,51 +1,290 @@
 # Authentication
 cmii7shen005i8z1tagevx4qh_Authentication_out_constraints = {
   "code": {
+    "id": "cmii7ubcb00668z1tz2db96pa",
     "valueType": "preset",
     "required": True
   },
   "message": {
+    "id": "cmii7ubcc00688z1t5ww43oyh",
     "valueType": "preset",
     "required": True
   },
   "userName": {
+    "id": "cmii7ubcc006a8z1tiysoivn3",
     "valueType": "preset",
     "required": True
   },
   "userAff": {
+    "id": "cmii7ubcd006c8z1t5znhxevt",
     "valueType": "preset",
     "required": True
   },
   "accessToken": {
+    "id": "cmii7ubcd006e8z1tdsy8yzmg",
     "valueType": "preset",
     "required": True
+  }
+}
+
+# Capabilities
+cmii7shen005i8z1tagevx4qh_Capabilities_out_constraints = {
+  "code": {
+    "id": "cmiwkddjg000t844g314b5617",
+    "valueType": "preset",
+    "required": True
+  },
+  "message": {
+    "id": "cmiwkdp0c0019844gm7dcd6x7",
+    "valueType": "preset",
+    "required": True
+  },
+  "transportSupport": {
+    "id": "cmiwkenym003a844gtft12q3n",
+    "valueType": "preset",
+    "required": True
+  },
+  "transportSupport.transProtocolType": {
+    "id": "cmiwkenyq003c844g8076pb6b",
+    "valueType": "preset",
+    "required": True
+  },
+  "transportSupport.transProtocolDesc": {
+    "id": "cmiwkenyq003e844gceq8juz9",
+    "valueType": "preset",
+    "required": False
+  }
+}
+
+# SensorDeviceProfiles
+cmii7shen005i8z1tagevx4qh_SensorDeviceProfiles_out_constraints = {
+  "code": {
+    "id": "cmiwkjjd5003y844g1zy7wxlg",
+    "valueType": "preset",
+    "required": True
+  },
+  "message": {
+    "id": "cmiwkjq080048844gqxgoo5kt",
+    "valueType": "preset",
+    "required": True
+  },
+  "sensorDeviceList": {
+    "id": "cmiwkpl7w01dd844gn18xqo4y",
+    "valueType": "preset",
+    "required": True
+  },
+  "sensorDeviceList.sensorDeviceID": {
+    "id": "cmiwkpl7z01df844gtz32y9f5",
+    "valueType": "preset",
+    "required": True
+  },
+  "sensorDeviceList.sensorDeviceType": {
+    "id": "cmiwkpl8001dh844g75gn8pnr",
+    "valueType": "preset",
+    "required": True
+  },
+  "sensorDeviceList.sensorDeviceName": {
+    "id": "cmiwkpl8001dj844gft5bvtk3",
+    "valueType": "preset",
+    "required": True
+  },
+  "sensorDeviceList.sensorDeviceLoc": {
+    "id": "cmiwkpl8101dl844gkgmxvh73",
+    "valueType": "preset",
+    "required": False
+  },
+  "sensorDeviceList.sensorDeviceLoc.lon": {
+    "id": "cmiwkpl9001dn844gcfhlhmuf",
+    "valueType": "preset",
+    "required": True
+  },
+  "sensorDeviceList.sensorDeviceLoc.lat": {
+    "id": "cmiwkpl9101dp844g7ipf3rd7",
+    "valueType": "preset",
+    "required": True
+  },
+  "sensorDeviceList.sensorDeviceLoc.alt": {
+    "id": "cmiwkpl9101dr844gmhas0h0i",
+    "valueType": "preset",
+    "required": False
+  },
+  "sensorDeviceList.sensorDeviceLoc.desc": {
+    "id": "cmiwkpl9201dt844gpk2spohg",
+    "valueType": "preset",
+    "required": False
+  }
+}
+
+# RealtimeSensorData
+cmii7shen005i8z1tagevx4qh_RealtimeSensorData_out_constraints = {
+  "code": {
+    "id": "cmiwkumay01qo844gast85yvr",
+    "valueType": "preset",
+    "required": True
+  },
+  "message": {
+    "id": "cmiwkuog901qt844gswj7kaas",
+    "valueType": "preset",
+    "required": True
+  }
+}
+
+# RealtimeSensorData WebHook IN Constraints
+cmii7shen005i8z1tagevx4qh_RealtimeSensorData_webhook_in_constraints = {
+  "sensorDeviceList": {
+    "id": "cmiwkzuqt02xi844gygy0ft63",
+    "valueType": "preset",
+    "required": True
+  },
+  "sensorDeviceList.sensorDeviceID": {
+    "id": "cmiwkzuqx02xk844gd9lr6k8p",
+    "valueType": "preset",
+    "required": True
+  },
+  "sensorDeviceList.measureTime": {
+    "id": "cmiwkzuqx02xm844ghyx3o5j7",
+    "valueType": "preset",
+    "required": True
+  },
+  "sensorDeviceList.sensorDeviceType": {
+    "id": "cmiwkzuqy02xo844glk3msr3k",
+    "valueType": "preset",
+    "required": True
+  },
+  "sensorDeviceList.sensorDeviceUnit": {
+    "id": "cmiwkzuqy02xq844gh7csg9af",
+    "valueType": "preset",
+    "required": True
+  },
+  "sensorDeviceList.sensorDeviceValue": {
+    "id": "cmiwkzuqz02xs844gqt2i349j",
+    "valueType": "preset",
+    "required": True
+  }
+}
+
+# RealtimeSensorEventInfos
+cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_out_constraints = {
+  "code": {
+    "id": "cmiwl4h5d0376844g98gk5nbd",
+    "valueType": "preset",
+    "required": True
+  },
+  "message": {
+    "id": "cmiwl4nzq037g844gtbfrqmvy",
+    "valueType": "preset",
+    "required": True
+  }
+}
+
+# RealtimeSensorEventInfos WebHook IN Constraints
+cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_webhook_in_constraints = {
+  "sensorDeviceList": {
+    "id": "cmiwl7u0o03mj844gwgfyhk68",
+    "valueType": "preset",
+    "required": True
+  },
+  "sensorDeviceList.sensorDeviceID": {
+    "id": "cmiwl7u0q03ml844gweorjcdn",
+    "valueType": "preset",
+    "required": True
+  },
+  "sensorDeviceList.eventName": {
+    "id": "cmiwl7u0r03mn844gbfn9dth8",
+    "valueType": "preset",
+    "required": True
+  },
+  "sensorDeviceList.eventTime": {
+    "id": "cmiwl7u0r03mp844gvwnnmebq",
+    "valueType": "preset",
+    "required": True
+  },
+  "sensorDeviceList.eventDesc": {
+    "id": "cmiwl7u0r03mr844gh5mxdrd6",
+    "valueType": "preset",
+    "required": False
+  }
+}
+
+# StoredSensorEventInfos
+cmii7shen005i8z1tagevx4qh_StoredSensorEventInfos_out_constraints = {
+  "code": {
+    "id": "cmiwllxwf03uk844gapewtuco",
+    "valueType": "preset",
+    "required": True
+  },
+  "message": {
+    "id": "cmiwlm39u03uu844g8drw39o8",
+    "valueType": "preset",
+    "required": True
+  },
+  "sensorDeviceList": {
+    "id": "cmiwlopxw04ab844g2qwo5mtf",
+    "valueType": "preset",
+    "required": True
+  },
+  "sensorDeviceList.sensorDeviceID": {
+    "id": "cmiwlopxz04ad844gebji2zjq",
+    "valueType": "preset",
+    "required": True
+  },
+  "sensorDeviceList.eventName": {
+    "id": "cmiwlopy004af844g94noxcxw",
+    "valueType": "preset",
+    "required": True
+  },
+  "sensorDeviceList.eventTime": {
+    "id": "cmiwlopy104ah844gpjxk8egi",
+    "valueType": "preset",
+    "required": True
+  },
+  "sensorDeviceList.eventDesc": {
+    "id": "cmiwlopy104aj844gynv5ujea",
+    "valueType": "preset",
+    "required": False
   }
 }
 
 # cmii7shen005i8z1tagevx4qh 검증 리스트
 cmii7shen005i8z1tagevx4qh_outConstraints = [
     cmii7shen005i8z1tagevx4qh_Authentication_out_constraints,
+    cmii7shen005i8z1tagevx4qh_Capabilities_out_constraints,
+    cmii7shen005i8z1tagevx4qh_SensorDeviceProfiles_out_constraints,
+    cmii7shen005i8z1tagevx4qh_RealtimeSensorData_out_constraints,
+    cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_out_constraints,
+    cmii7shen005i8z1tagevx4qh_StoredSensorEventInfos_out_constraints,
+]
+
+# cmii7shen005i8z1tagevx4qh WebHook Constraints 리스트
+cmii7shen005i8z1tagevx4qh_webhook_inConstraints = [
+    cmii7shen005i8z1tagevx4qh_RealtimeSensorData_webhook_in_constraints,
+    cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_webhook_in_constraints,
 ]
 
 # Authentication
 cmii7pysb004k8z1tts0npxfm_Authentication_out_constraints = {
   "code": {
+    "id": "cmii7rok300588z1tf4jcuvz6",
     "valueType": "preset",
     "required": True
   },
   "message": {
+    "id": "cmii7rok3005a8z1twi4otb03",
     "valueType": "preset",
     "required": True
   },
   "userName": {
+    "id": "cmii7rok4005c8z1tgr5tzegk",
     "valueType": "preset",
     "required": True
   },
   "userAff": {
+    "id": "cmii7rok4005e8z1tcbqpnnxe",
     "valueType": "preset",
     "required": True
   },
   "accessToken": {
+    "id": "cmii7rok5005g8z1tpldy9e57",
     "valueType": "preset",
     "required": False
   }
@@ -54,22 +293,27 @@ cmii7pysb004k8z1tts0npxfm_Authentication_out_constraints = {
 # Capabilities
 cmii7pysb004k8z1tts0npxfm_Capabilities_out_constraints = {
   "code": {
+    "id": "cmiiby4h9003ihl2hmn3ghbvl",
     "valueType": "preset",
     "required": True
   },
   "message": {
+    "id": "cmiiby4ha003khl2hx6u7i1ps",
     "valueType": "preset",
     "required": True
   },
   "transportSupport": {
+    "id": "cmiiby4hr003shl2hohihzouw",
     "valueType": "preset",
     "required": True
   },
   "transportSupport.transProtocolType": {
+    "id": "cmiiby4hy003yhl2hh2puktr0",
     "valueType": "preset",
     "required": True
   },
   "transportSupport.transProtocolDesc": {
+    "id": "cmiiby4hz0040hl2hev5ljfq9",
     "valueType": "preset",
     "required": False
   }
@@ -78,84 +322,275 @@ cmii7pysb004k8z1tts0npxfm_Capabilities_out_constraints = {
 # DoorProfiles
 cmii7pysb004k8z1tts0npxfm_DoorProfiles_out_constraints = {
   "code": {
+    "id": "cmisjisee09hw5vy7ajj18xo1",
     "valueType": "preset",
     "required": True
   },
   "message": {
+    "id": "cmisjj68n09i65vy7bhj2lnxi",
     "valueType": "preset",
     "required": True
   },
   "doorList": {
+    "id": "cmisk9y5g0db15vy7zk3c777g",
     "valueType": "preset",
     "required": True
   },
   "doorList.doorID": {
+    "id": "cmisk9y5l0db35vy74nn3utak",
     "valueType": "preset",
     "required": True
   },
   "doorList.doorName": {
+    "id": "cmisk9y5m0db55vy7m42cq0u0",
     "valueType": "preset",
     "required": True
   },
   "doorList.doorRelayStatus": {
+    "id": "cmisk9y5m0db75vy7nrgitysd",
     "valueType": "preset",
     "required": True
   },
   "doorList.doorSensor": {
+    "id": "cmisk9y5n0db95vy7cpkpvnlh",
     "valueType": "preset",
     "required": False
   },
   "doorList.doorLoc": {
+    "id": "cmisk9y5n0dbb5vy78079wnwa",
     "valueType": "preset",
     "required": False
   },
   "doorList.doorLoc.lon": {
+    "id": "cmisk9y600dbh5vy7585nx241",
     "valueType": "preset",
     "required": True
   },
   "doorList.doorLoc.lat": {
+    "id": "cmisk9y610dbj5vy757umjzmd",
     "valueType": "preset",
     "required": True
   },
   "doorList.doorLoc.alt": {
+    "id": "cmisk9y620dbl5vy7729uz0ee",
     "valueType": "preset",
     "required": False
   },
   "doorList.doorLoc.desc": {
+    "id": "cmisk9y620dbn5vy707sb9da3",
     "valueType": "preset",
     "required": False
   },
   "doorList.bioDeviceList": {
+    "id": "cmisk9y630dbr5vy7zjq09mnh",
     "valueType": "preset",
     "required": True
   },
   "doorList.bioDeviceList.bioDeviceID": {
+    "id": "cmisk9y6t0dc15vy7y7tv0ftk",
     "valueType": "preset",
     "required": False
   },
   "doorList.bioDeviceList.bioDeviceName": {
+    "id": "cmisk9y6t0dc35vy7mkqcjckn",
     "valueType": "preset",
     "required": False
   },
   "doorList.bioDeviceList.bioDeviceAuthTypeList": {
+    "id": "cmisk9y770dcf5vy7ucj3icmd",
     "valueType": "preset",
     "required": True
   },
   "doorList.otherDeviceList": {
+    "id": "cmisk9y640dbt5vy73ab2q8f0",
     "valueType": "preset",
     "required": True
   },
   "doorList.otherDeviceList.otherDeviceID": {
+    "id": "cmisk9y6u0dc75vy7s3znthpa",
     "valueType": "preset",
     "required": False
   },
   "doorList.otherDeviceList.otherDeviceName": {
+    "id": "cmisk9y6v0dc95vy7fj06dgu6",
     "valueType": "preset",
     "required": False
   },
   "doorList.otherDeviceList.otherDeviceAuthTypeList": {
+    "id": "cmisk9y780dch5vy7p4e0wkqi",
     "valueType": "preset",
     "required": True
+  }
+}
+
+# AccessUserInfos
+cmii7pysb004k8z1tts0npxfm_AccessUserInfos_out_constraints = {
+  "code": {
+    "id": "cmiwiplu600gpugxnl33vzh64",
+    "valueType": "preset",
+    "required": True
+  },
+  "message": {
+    "id": "cmiwipydg00gzugxny5b0z1h8",
+    "valueType": "preset",
+    "required": True
+  },
+  "userList": {
+    "id": "cmiwj0n6902m0ugxnxtjk2wge",
+    "valueType": "preset",
+    "required": True
+  },
+  "userList.userID": {
+    "id": "cmiwj0n6b02m2ugxnw1xpebou",
+    "valueType": "preset",
+    "required": True
+  },
+  "userList.userName": {
+    "id": "cmiwj0n6b02m4ugxnbuikeax0",
+    "valueType": "preset",
+    "required": True
+  },
+  "userList.userDesc": {
+    "id": "cmiwj0n6b02m6ugxnsaqjrk5l",
+    "valueType": "preset",
+    "required": False
+  },
+  "userList.doorList": {
+    "id": "cmiwj0n6f02mcugxnh76v915v",
+    "valueType": "preset",
+    "required": True
+  },
+  "userList.doorList.doorID": {
+    "id": "cmiwj0n6i02miugxn26i0v7ni",
+    "valueType": "preset",
+    "required": True
+  },
+  "userList.doorList.timePeriod": {
+    "id": "cmiwj0n6j02mkugxneilxzvra",
+    "valueType": "preset",
+    "required": True
+  },
+  "userList.doorList.timePeriod.startTime": {
+    "id": "cmiwj0n6n02mqugxn455p44hm",
+    "valueType": "preset",
+    "required": True
+  },
+  "userList.doorList.timePeriod.endTime": {
+    "id": "cmiwj0n6n02msugxnnqmanlio",
+    "valueType": "preset",
+    "required": True
+  }
+}
+
+# RealtimeVerifEventInfos
+cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_out_constraints = {
+  "code": {
+    "id": "cmiwjhjom03dpugxnralbx29s",
+    "valueType": "preset",
+    "required": True
+  },
+  "message": {
+    "id": "cmiwjhpe303dzugxnf1hyc6o1",
+    "valueType": "preset",
+    "required": True
+  }
+}
+
+# RealtimeVerifEventInfos WebHook IN Constraints
+cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_webhook_in_constraints = {
+  "doorList": {
+    "id": "cmiwjcsve030hugxnh4gwx5wk",
+    "valueType": "preset",
+    "required": True
+  },
+  "doorList.eventTime": {
+    "id": "cmiwjcsvh030jugxnc1c8mp0i",
+    "valueType": "preset",
+    "required": True
+  },
+  "doorList.doorID": {
+    "id": "cmiwjk7x203f4ugxntk7vq03e",
+    "valueType": "preset",
+    "required": True
+  },
+  "doorList.userID": {
+    "id": "cmiwjkpyu03fuugxndy6x6dru",
+    "valueType": "preset",
+    "required": False
+  },
+  "doorList.bioAuthTypeList": {
+    "id": "cmiwjqsxj03uzugxn4snecdje",
+    "valueType": "preset",
+    "required": False
+  },
+  "doorList.otherAuthTypeList": {
+    "id": "cmiwjqsxs03v1ugxnvmb1ilw1",
+    "valueType": "preset",
+    "required": False
+  },
+  "doorList.eventName": {
+    "id": "cmiwjq08303s7ugxn6myjuphm",
+    "valueType": "preset",
+    "required": True
+  },
+  "doorList.eventDesc": {
+    "id": "cmiwjqo0i03ujugxnk865norb",
+    "valueType": "preset",
+    "required": False
+  }
+}
+
+# StoredVerifEventInfos
+cmii7pysb004k8z1tts0npxfm_StoredVerifEventInfos_out_constraints = {
+  "code": {
+    "id": "cmiwjxur6041pugxn4ok6u2j8",
+    "valueType": "preset",
+    "required": True
+  },
+  "message": {
+    "id": "cmiwjy12o041zugxnw6zc56a0",
+    "valueType": "preset",
+    "required": True
+  },
+  "doorList": {
+    "id": "cmiwk4eb505txugxnu31pqzg8",
+    "valueType": "preset",
+    "required": True
+  },
+  "doorList.eventTime": {
+    "id": "cmiwk4eba05tzugxnq0px7hne",
+    "valueType": "preset",
+    "required": True
+  },
+  "doorList.doorID": {
+    "id": "cmiwk4eba05u1ugxns4zuooum",
+    "valueType": "preset",
+    "required": True
+  },
+  "doorList.userID": {
+    "id": "cmiwk4ebb05u3ugxn0t4mnthm",
+    "valueType": "preset",
+    "required": False
+  },
+  "doorList.bioAuthTypeList": {
+    "id": "cmiwk4ebl05udugxnrifqngdj",
+    "valueType": "preset",
+    "required": False
+  },
+  "doorList.otherAuthTypeList": {
+    "id": "cmiwk4ecb05ufugxnskw9wjj6",
+    "valueType": "preset",
+    "required": False
+  },
+  "doorList.eventName": {
+    "id": "cmiwk4ebc05u9ugxnv9gbzft5",
+    "valueType": "preset",
+    "required": True
+  },
+  "doorList.eventDesc": {
+    "id": "cmiwk4ebd05ubugxnbjd55r70",
+    "valueType": "preset",
+    "required": False
   }
 }
 
@@ -164,27 +599,40 @@ cmii7pysb004k8z1tts0npxfm_outConstraints = [
     cmii7pysb004k8z1tts0npxfm_Authentication_out_constraints,
     cmii7pysb004k8z1tts0npxfm_Capabilities_out_constraints,
     cmii7pysb004k8z1tts0npxfm_DoorProfiles_out_constraints,
+    cmii7pysb004k8z1tts0npxfm_AccessUserInfos_out_constraints,
+    cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_out_constraints,
+    cmii7pysb004k8z1tts0npxfm_StoredVerifEventInfos_out_constraints,
+]
+
+# cmii7pysb004k8z1tts0npxfm WebHook Constraints 리스트
+cmii7pysb004k8z1tts0npxfm_webhook_inConstraints = [
+    cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_webhook_in_constraints,
 ]
 
 # Authentication
 cmii7lxbn002s8z1t1i9uudf0_Authentication_out_constraints = {
   "code": {
+    "id": "cmii7p9cw004a8z1td2ihlpuf",
     "valueType": "preset",
     "required": True
   },
   "message": {
+    "id": "cmii7p9cw004c8z1tom7291lc",
     "valueType": "preset",
     "required": True
   },
   "userName": {
+    "id": "cmii7p9cx004e8z1t4lb6n36d",
     "valueType": "preset",
     "required": True
   },
   "userAff": {
+    "id": "cmii7p9cx004g8z1t5qbkhnr8",
     "valueType": "preset",
     "required": True
   },
   "accessToken": {
+    "id": "cmii7p9cy004i8z1tlescd7jn",
     "valueType": "preset",
     "required": False
   }
@@ -193,30 +641,37 @@ cmii7lxbn002s8z1t1i9uudf0_Authentication_out_constraints = {
 # Capabilities
 cmii7lxbn002s8z1t1i9uudf0_Capabilities_out_constraints = {
   "code": {
+    "id": "cmio33qet008gie8f4s1le4k0",
     "valueType": "preset",
     "required": True
   },
   "message": {
+    "id": "cmio340c2008mie8fm3cyrhpm",
     "valueType": "preset",
     "required": True
   },
   "streamingSupport": {
+    "id": "cmir08cxp004w4m39k1dxpjf0",
     "valueType": "preset",
     "required": True
   },
   "streamingSupport.streamProtocolType": {
+    "id": "cmir08cxt00504m398extfmmm",
     "valueType": "preset",
     "required": False
   },
   "transportSupport": {
+    "id": "cmir08cy400524m399hipe38c",
     "valueType": "preset",
     "required": True
   },
   "transportSupport.transportProtocolType": {
+    "id": "cmir08cy700544m394xn1tysc",
     "valueType": "preset",
     "required": True
   },
   "transportSupport.transProtocolDesc": {
+    "id": "cmir08cy700564m39nxhqfzfg",
     "valueType": "preset",
     "required": False
   }
@@ -225,50 +680,62 @@ cmii7lxbn002s8z1t1i9uudf0_Capabilities_out_constraints = {
 # CameraProfiles
 cmii7lxbn002s8z1t1i9uudf0_CameraProfiles_out_constraints = {
   "code": {
+    "id": "cmiqs7the00ksie8fj0vrxmcy",
     "valueType": "preset",
     "required": True
   },
   "message": {
+    "id": "cmiqs8b7e00kyie8facb9c4sh",
     "valueType": "preset",
     "required": True
   },
   "camList": {
+    "id": "cmir0ll0k00bu4m39buqwuv6i",
     "valueType": "preset",
     "required": True
   },
   "camList.camID": {
+    "id": "cmir0ll0o00bw4m39kqayyk7r",
     "valueType": "preset",
     "required": True
   },
   "camList.camName": {
+    "id": "cmir0ll0p00by4m39uwgiy19u",
     "valueType": "preset",
     "required": True
   },
   "camList.camLoc": {
+    "id": "cmir0ll0q00c04m39om950768",
     "valueType": "preset",
     "required": False
   },
   "camList.camLoc.lon": {
+    "id": "cmir0ll0x00c44m39zwdnatab",
     "valueType": "preset",
     "required": True
   },
   "camList.camLoc.lat": {
+    "id": "cmir0ll0y00c64m39ukpos071",
     "valueType": "preset",
     "required": True
   },
   "camList.camLoc.alt": {
+    "id": "cmir0ll0y00c84m39yhv6zkua",
     "valueType": "preset",
     "required": False
   },
   "camList.camLoc.desc": {
+    "id": "cmir0e9xg006f4m393tqpkwxj",
     "valueType": "preset",
     "required": False
   },
   "camList.camConfig": {
+    "id": "cmir0ll0q00c24m397lcok7iw",
     "valueType": "preset",
     "required": False
   },
   "camList.camConfig.camType": {
+    "id": "cmir0ll0z00ca4m39txuezlro",
     "valueType": "preset",
     "required": True
   }
@@ -277,50 +744,62 @@ cmii7lxbn002s8z1t1i9uudf0_CameraProfiles_out_constraints = {
 # StreamURLs
 cmii7lxbn002s8z1t1i9uudf0_StreamURLs_out_constraints = {
   "code": {
+    "id": "cmiqsg09500maie8f451y1im1",
     "valueType": "preset",
     "required": True
   },
   "message": {
+    "id": "cmiqsgaxz00mgie8fnbfjb40u",
     "valueType": "preset",
     "required": True
   },
   "camList": {
+    "id": "cmir1ncw202bo4m393sgzc3rg",
     "valueType": "preset",
     "required": True
   },
   "camList.camID": {
+    "id": "cmir1ncw602bq4m39qm4p037c",
     "valueType": "preset",
     "required": True
   },
   "camList.accessID": {
+    "id": "cmir1ncw702bs4m39rjk0chez",
     "valueType": "preset",
     "required": False
   },
   "camList.accessPW": {
+    "id": "cmir1ncw702bu4m39yhzsrzjp",
     "valueType": "preset",
     "required": False
   },
   "camList.camURL": {
+    "id": "cmir1ncw802bw4m39kvbh7d0d",
     "valueType": "preset",
     "required": False
   },
   "camList.videoInfo": {
+    "id": "cmir1ncw802by4m39mmmqq78m",
     "valueType": "preset",
     "required": False
   },
   "camList.videoInfo.resolution": {
+    "id": "cmir1ncwg02c04m39lbd0bf7e",
     "valueType": "preset",
     "required": False
   },
   "camList.videoInfo.fps": {
+    "id": "cmir1ncwg02c24m39nd5kgmm6",
     "valueType": "preset",
     "required": False
   },
   "camList.videoInfo.videoCodec": {
+    "id": "cmir1ncwh02c44m39tfgvkv8s",
     "valueType": "preset",
     "required": False
   },
   "camList.videoInfo.audioCodec": {
+    "id": "cmir1ncwh02c64m39umcgr8wq",
     "valueType": "preset",
     "required": False
   }
@@ -329,10 +808,12 @@ cmii7lxbn002s8z1t1i9uudf0_StreamURLs_out_constraints = {
 # RealtimeVideoEventInfos
 cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_out_constraints = {
   "code": {
+    "id": "cmiqsmn3c00o9ie8fq1o6xxnj",
     "valueType": "preset",
     "required": True
   },
   "message": {
+    "id": "cmiqsmzhf00ofie8fazf3jz05",
     "valueType": "preset",
     "required": True
   }
@@ -341,30 +822,37 @@ cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_out_constraints = {
 # RealtimeVideoEventInfos WebHook IN Constraints
 cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_webhook_in_constraints = {
   "camList": {
+    "id": "cmir2mfj402x34m39azjqh5ms",
     "valueType": "preset",
     "required": True
   },
   "camList.camID": {
+    "id": "cmir2mfj802x54m39ovsi5ohs",
     "valueType": "preset",
     "required": True
   },
   "camList.eventUUID": {
+    "id": "cmir2mfj802x74m39rmn1ayqc",
     "valueType": "preset",
     "required": True
   },
   "camList.eventName": {
+    "id": "cmir2mfj902x94m39bi2uybx3",
     "valueType": "preset",
     "required": True
   },
   "camList.startTime": {
+    "id": "cmir2mfj902xb4m39dem07ktk",
     "valueType": "preset",
     "required": True
   },
   "camList.endTime": {
+    "id": "cmir2mfja02xd4m39q4thhwom",
     "valueType": "preset",
     "required": False
   },
   "camList.eventDesc": {
+    "id": "cmir2mfja02xf4m39l9ldz578",
     "valueType": "preset",
     "required": False
   }
@@ -373,30 +861,37 @@ cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_webhook_in_constraints = {
 # StoredVideoInfos
 cmii7lxbn002s8z1t1i9uudf0_StoredVideoInfos_out_constraints = {
   "code": {
+    "id": "cmiqst6rs00pxie8fx00h13gx",
     "valueType": "preset",
     "required": True
   },
   "message": {
+    "id": "cmiqstktk00q3ie8ffuhyz1up",
     "valueType": "preset",
     "required": True
   },
   "camList": {
+    "id": "cmir2znhh03704m393pdg0gzk",
     "valueType": "preset",
     "required": True
   },
   "camList.camID": {
+    "id": "cmir2znhj03724m39ieknfvrd",
     "valueType": "preset",
     "required": True
   },
   "camList.timeList": {
+    "id": "cmir2znhm03764m39aoc8zth2",
     "valueType": "preset",
     "required": True
   },
   "camList.timeList.startTime": {
+    "id": "cmir2znho03784m39a2zt0g5n",
     "valueType": "preset",
     "required": True
   },
   "camList.timeList.endTime": {
+    "id": "cmir2znho037a4m391jf8mc81",
     "valueType": "preset",
     "required": False
   }
@@ -405,50 +900,62 @@ cmii7lxbn002s8z1t1i9uudf0_StoredVideoInfos_out_constraints = {
 # ReplayURL
 cmii7lxbn002s8z1t1i9uudf0_ReplayURL_out_constraints = {
   "code": {
+    "id": "cmiqsxbw000qzie8fqg6ai3cf",
     "valueType": "preset",
     "required": True
   },
   "message": {
+    "id": "cmiqsxsv000r5ie8fb8dk0hz4",
     "valueType": "preset",
     "required": True
   },
   "camList": {
+    "id": "cmir3npg2058r4m39kdtq649c",
     "valueType": "preset",
     "required": True
   },
   "camList.camID": {
+    "id": "cmir3npg5058t4m39hkbe5r1w",
     "valueType": "preset",
     "required": True
   },
   "camList.accessID": {
+    "id": "cmir3npg5058v4m39fojm5j1u",
     "valueType": "preset",
     "required": False
   },
   "camList.accessPW": {
+    "id": "cmir3npg6058x4m39s10iitg3",
     "valueType": "preset",
     "required": False
   },
   "camList.camURL": {
+    "id": "cmir3npg6058z4m391j0jmt16",
     "valueType": "preset",
     "required": True
   },
   "camList.videoInfo": {
+    "id": "cmir3npg705914m397juucnit",
     "valueType": "preset",
     "required": False
   },
   "camList.videoInfo.resolution": {
+    "id": "cmir3npgd05934m39y8fg7mko",
     "valueType": "preset",
     "required": False
   },
   "camList.videoInfo.fps": {
+    "id": "cmir3npge05954m39pz9ivz1d",
     "valueType": "preset",
     "required": False
   },
   "camList.videoInfo.videoCodec": {
+    "id": "cmir3npgf05974m39y48av0t0",
     "valueType": "preset",
     "required": False
   },
   "camList.videoInfo.audioCodec": {
+    "id": "cmir3npgf05994m396c0b9dbk",
     "valueType": "preset",
     "required": False
   }
@@ -457,38 +964,47 @@ cmii7lxbn002s8z1t1i9uudf0_ReplayURL_out_constraints = {
 # StoredVideoEventInfos
 cmii7lxbn002s8z1t1i9uudf0_StoredVideoEventInfos_out_constraints = {
   "code": {
+    "id": "cmiqt2r8m00soie8fz1k7xxiq",
     "valueType": "preset",
     "required": True
   },
   "message": {
+    "id": "cmiqt30s200suie8f9y0r5v8i",
     "valueType": "preset",
     "required": True
   },
   "camList": {
+    "id": "cmir5bj7j05j14m39tsnywm63",
     "valueType": "preset",
     "required": True
   },
   "camList.camID": {
+    "id": "cmir5bj7n05j34m39jyws9fhy",
     "valueType": "preset",
     "required": True
   },
   "camList.eventUUID": {
+    "id": "cmir5bj7n05j54m39qqsctl3w",
     "valueType": "preset",
     "required": True
   },
   "camList.eventName": {
+    "id": "cmir5bj7o05j74m399e80pplr",
     "valueType": "preset",
     "required": True
   },
   "camList.startTime": {
+    "id": "cmis586r40024t4pq8wprxjv3",
     "valueType": "preset",
     "required": True
   },
   "camList.endTime": {
+    "id": "cmis59dhx002mt4pqxrhnb4d8",
     "valueType": "preset",
     "required": False
   },
   "camList.eventDesc": {
+    "id": "cmis5b2810034t4pqrgd5m7fc",
     "valueType": "preset",
     "required": False
   }
@@ -497,66 +1013,82 @@ cmii7lxbn002s8z1t1i9uudf0_StoredVideoEventInfos_out_constraints = {
 # StoredObjectAnalyticsInfos
 cmii7lxbn002s8z1t1i9uudf0_StoredObjectAnalyticsInfos_out_constraints = {
   "code": {
+    "id": "cmiqt66q400u1ie8f5tuowt4m",
     "valueType": "preset",
     "required": True
   },
   "message": {
+    "id": "cmiqt6i6500u7ie8f2897rtwv",
     "valueType": "preset",
     "required": True
   },
   "camList": {
+    "id": "cmis5m2yc00ejt4pq3j01nq65",
     "valueType": "preset",
     "required": True
   },
   "camList.camID": {
+    "id": "cmis5m2yf00elt4pqv4vqp4ni",
     "valueType": "preset",
     "required": True
   },
   "camList.analyticsTime": {
+    "id": "cmis5m2yg00ent4pq04iz9uod",
     "valueType": "preset",
     "required": True
   },
   "camList.anlayticsResultList": {
+    "id": "cmiseswtm03cg5vy7x2kpmwpn",
     "valueType": "preset",
     "required": True
   },
   "camList.anlayticsResultList.anayticsID": {
+    "id": "cmiseswtq03ci5vy7fjc83b44",
     "valueType": "preset",
     "required": True
   },
   "camList.anlayticsResultList.analyticsClass": {
+    "id": "cmiseswtr03ck5vy71bm4858q",
     "valueType": "preset",
     "required": True
   },
   "camList.anlayticsResultList.analyticsAttribute": {
+    "id": "cmisine9w099p5vy7b9lyiesm",
     "valueType": "preset",
     "required": True
   },
   "camList.anlayticsResultList.analyticsConfidence": {
+    "id": "cmiseswts03co5vy7mzc1og5w",
     "valueType": "preset",
     "required": False
   },
   "camList.anlayticsResultList.analyticsBoundingBox": {
+    "id": "cmiseswts03cq5vy7azl4y4kp",
     "valueType": "preset",
     "required": False
   },
   "camList.anlayticsResultList.analyticsBoundingBox.left": {
+    "id": "cmiseswu203cw5vy7bn44p0bq",
     "valueType": "preset",
     "required": True
   },
   "camList.anlayticsResultList.analyticsBoundingBox.top": {
+    "id": "cmiseswu203cy5vy7yjow35au",
     "valueType": "preset",
     "required": True
   },
   "camList.anlayticsResultList.analyticsBoundingBox.right": {
+    "id": "cmiseswu303d05vy79wjh7qr8",
     "valueType": "preset",
     "required": True
   },
   "camList.anlayticsResultList.analyticsBoundingBox.bottom": {
+    "id": "cmiseswu303d25vy7z0ithyff",
     "valueType": "preset",
     "required": True
   },
   "camList.anlayticsResultList.analyticsDesc": {
+    "id": "cmiseswtt03cs5vy70p2fj8m8",
     "valueType": "preset",
     "required": False
   }
