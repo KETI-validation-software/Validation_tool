@@ -130,6 +130,17 @@ def build_validation_registry(
     return reg
 
 
+def clear_validation_cache():
+    """
+    레지스트리 캐시 클리어
+
+    Validation_request.py 또는 validation_response.py가 업데이트된 후 호출하여
+    다음 조회 시 새로운 데이터로 레지스트리를 다시 빌드하도록 함
+    """
+    build_validation_registry.cache_clear()
+    print("[INFO] validation_registry 캐시가 클리어되었습니다.")
+
+
 def get_validation_rules(
     spec_id: str,
     api_name: str,
