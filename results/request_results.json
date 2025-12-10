@@ -22,20 +22,20 @@
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 75.0,
+    "score": 87.5,
     "totalFields": 8,
-    "passedFields": 6,
-    "failedFields": 2
+    "passedFields": 7,
+    "failedFields": 1
   },
   "testResult": [
     {
       "testGroup": "cmisfix8407te5vy7fleq8pkf",
       "testSpecId": "cmiqr201z00i8ie8fitdg5t1b",
       "testSpecName": "sensor002",
-      "score": 75.0,
+      "score": 87.5,
       "totalFields": 8,
-      "passedFields": 6,
-      "failedFields": 2,
+      "passedFields": 7,
+      "failedFields": 1,
       "apis": [
         {
           "id": "cmise5c9900jr5vy7j5kdk1z6",
@@ -128,21 +128,20 @@
           "name": "보안용 센서 단말 제어 정보 연동-제어",
           "method": "POST",
           "endpoint": "/SensorDeviceControl2",
-          "score": 0.0,
+          "score": 50.0,
           "validationCnt": 1,
           "totalFields": 2,
-          "passFields": 0,
-          "failFields": 2,
+          "passFields": 1,
+          "failFields": 1,
           "validations": [
             {
               "attempt": 1,
               "validationData": {
                 "sensorDeviceID": "iot0001",
-                "commandType": ""
+                "commandType": "AlarmOff"
               },
               "validationErrors": [
                 "[Inbound]",
-                "[의미] commandType: 값 불일치: 가 허용값 목록 ['AlarmOn', 'AlarmOff']에 없음",
                 "[의미] sensorDeviceID: 값 불일치: ['iot0001'] != 예상값 None"
               ]
             }
@@ -151,5 +150,5 @@
       ]
     }
   ],
-  "completedDate": "2025-12-10T15:26:11Z"
+  "completedDate": "2025-12-10T16:54:50Z"
 }

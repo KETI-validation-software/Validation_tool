@@ -173,32 +173,6 @@
           "name": "보안용 센서 단말 제어 정보 연동-상태연동",
           "method": "POST",
           "endpoint": "/SensorDeviceControl",
-          "score": 75.0,
-          "validationCnt": 1,
-          "totalFields": 4,
-          "passFields": 3,
-          "failFields": 1,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "code": "200",
-                "message": "성공",
-                "sensorDeviceID": "iot0001",
-                "sensorDeviceStatus": ""
-              },
-              "validationErrors": [
-                "[시도 1/1]",
-                "[의미] sensorDeviceStatus: 값 불일치: 가 허용값 목록 ['AlarmOn', 'AlarmOff']에 없음"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cmisg86id08bm5vy7ezcbr7oy",
-          "name": "보안용 센서 단말 제어 정보 연동-제어",
-          "method": "POST",
-          "endpoint": "/SensorDeviceControl2",
           "score": 100.0,
           "validationCnt": 1,
           "totalFields": 4,
@@ -211,7 +185,7 @@
                 "code": "200",
                 "message": "성공",
                 "sensorDeviceID": "iot0001",
-                "sensorDeviceStatus": ""
+                "sensorDeviceStatus": "AlarmOn"
               },
               "validationErrors": [
                 "[시도 1/1]",
@@ -219,9 +193,35 @@
               ]
             }
           ]
+        },
+        {
+          "id": "cmisg86id08bm5vy7ezcbr7oy",
+          "name": "보안용 센서 단말 제어 정보 연동-제어",
+          "method": "POST",
+          "endpoint": "/SensorDeviceControl2",
+          "score": 75.0,
+          "validationCnt": 1,
+          "totalFields": 4,
+          "passFields": 3,
+          "failFields": 1,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "sensorDeviceID": "iot0001",
+                "sensorDeviceStatus": "AlarmOff"
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "[의미] sensorDeviceStatus: 값 불일치: ['AlarmOff'] != 예상값"
+              ]
+            }
+          ]
         }
       ]
     }
   ],
-  "completedDate": "2025-12-10T15:26:11Z"
+  "completedDate": "2025-12-10T16:54:51Z"
 }
