@@ -1330,29 +1330,29 @@ class InfoWidget(QWidget):
         # 관리자 코드와 버튼 사이 간격 32px
         layout.addSpacing(32)
 
-        # 하단 버튼 (초기화: 왼쪽, 다음: 오른쪽) - 각 378x48px, gap 20px, 전체 776x48px
+        # 하단 버튼 (종료: 왼쪽, 다음: 오른쪽) - 각 378x48px, gap 20px, 전체 776x48px
         button_layout = QHBoxLayout()
         button_layout.setSpacing(20)  # 버튼 간격 20px
 
-        # 초기화 버튼 (왼쪽) - 378x48px
-        reset_btn = QPushButton()
-        reset_btn.setFixedSize(378, 48)
+        # 종료 버튼 (왼쪽) - 378x48px
+        exit_btn = QPushButton()
+        exit_btn.setFixedSize(378, 48)
         import os
-        btn_reset_enabled = resource_path("assets/image/test_info/btn_초기화_enabled.png").replace(chr(92), "/")
-        btn_reset_hover = resource_path("assets/image/test_info/btn_초기화_Hover.png").replace(chr(92), "/")
-        reset_btn.setStyleSheet(f"""
+        btn_exit_enabled = resource_path("assets/image/test_info/btn_종료_enabled.png").replace(chr(92), "/")
+        btn_exit_hover = resource_path("assets/image/test_info/btn_종료_Hover.png").replace(chr(92), "/")
+        exit_btn.setStyleSheet(f"""
             QPushButton {{
                 border: none;
-                background-image: url({btn_reset_enabled});
+                background-image: url({btn_exit_enabled});
                 background-repeat: no-repeat;
                 background-position: center;
             }}
             QPushButton:hover {{
-                background-image: url({btn_reset_hover});
+                background-image: url({btn_exit_hover});
             }}
         """)
-        reset_btn.clicked.connect(self.reset_all_fields)
-        button_layout.addWidget(reset_btn)
+        exit_btn.clicked.connect(self.exit_btn_clicked)
+        button_layout.addWidget(exit_btn)
 
         # 다음 버튼 (오른쪽) - 378x48px
         self.next_btn = QPushButton()
@@ -2950,6 +2950,14 @@ class InfoWidget(QWidget):
             print(f"버튼 상태 체크 실패: {e}")
             self.start_btn.setEnabled(True)  # 오류 발생 시에도 활성화 유지
 
+    def exit_btn_clicked(self):
+        """종료 버튼 클릭 시 프로그램 종료"""
+        reply = QMessageBox.question(self, '프로그램 종료',
+                                     '정말로 프로그램을 종료하시겠습니까?',
+                                     QMessageBox.Yes | QMessageBox.No,
+                                     QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            QApplication.quit()
 
     def reset_all_fields(self):
         """모든 필드 초기화"""
