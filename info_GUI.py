@@ -785,9 +785,9 @@ class InfoWidget(QWidget):
         layout.setContentsMargins(48, 32, 48, 40)  # left: 48, top: 32, right: 48, bottom: 40
         layout.setSpacing(0)
 
-        # 타이틀 이미지 (776x106px - 시험기본정보확인.png)
+        # 타이틀 이미지 (776x106px - 시험기본정보확인_header.png)
         title_widget = QLabel()
-        title_pixmap = QPixmap(resource_path("assets/image/test_info/시험기본정보확인.png"))
+        title_pixmap = QPixmap(resource_path("assets/image/test_info/시험기본정보확인_header.png"))
         title_widget.setPixmap(title_pixmap.scaled(776, 106, Qt.IgnoreAspectRatio, Qt.SmoothTransformation))
         title_widget.setFixedSize(776, 106)
         title_widget.setScaledContents(True)
