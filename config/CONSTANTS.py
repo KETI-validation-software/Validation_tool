@@ -56,11 +56,11 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소
 # test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
-company_name = "물리보안기업"
-product_name = "물리보안시스템-기본"
+company_name = "통합플랫폼기업"
+product_name = "통합플랫폼 시스템-기본"
 version = "v1.0"
 test_category = "MAIN_TEST"
-test_target = "기본 기능 시험-물리보안"
+test_target = "기본 기능 시험-통합시스템"
 test_range = "ALL_FIELDS"
 auth_type = "Digest Auth"
 auth_info = "kisa,kisa_k1!2@"
@@ -68,7 +68,7 @@ admin_code = "1234"
 url = "https://192.168.0.3:2000"
 contact_person = "김철수"
 model_name = "v1.0"
-request_id = "cmii85wjq009z8z1tv0d3d7r1"
+request_id = "cmii86ssr00a48z1tqmco6ke8"
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황
 flag_opt = False
