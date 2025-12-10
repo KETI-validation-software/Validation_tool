@@ -1330,11 +1330,30 @@ class InfoWidget(QWidget):
         # 관리자 코드와 버튼 사이 간격 32px
         layout.addSpacing(32)
 
-        # 하단 버튼 (종료: 왼쪽, 다음: 오른쪽) - 각 378x48px, gap 20px, 전체 776x48px
+        # 하단 버튼 (다음: 왼쪽, 종료: 오른쪽) - 각 378x48px, gap 20px, 전체 776x48px
         button_layout = QHBoxLayout()
         button_layout.setSpacing(20)  # 버튼 간격 20px
 
-        # 종료 버튼 (왼쪽) - 378x48px
+        # 다음 버튼 (왼쪽) - 378x48px
+        self.next_btn = QPushButton()
+        self.next_btn.setFixedSize(378, 48)
+        btn_next_enabled = resource_path("assets/image/test_info/btn_다음_enabled.png").replace(chr(92), "/")
+        btn_next_hover = resource_path("assets/image/test_info/btn_다음_Hover.png").replace(chr(92), "/")
+        self.next_btn.setStyleSheet(f"""
+            QPushButton {{
+                border: none;
+                background-image: url({btn_next_enabled});
+                background-repeat: no-repeat;
+                background-position: center;
+            }}
+            QPushButton:hover {{
+                background-image: url({btn_next_hover});
+            }}
+        """)
+        self.next_btn.clicked.connect(self.go_to_next_page)
+        button_layout.addWidget(self.next_btn)
+
+        # 종료 버튼 (오른쪽) - 378x48px
         exit_btn = QPushButton()
         exit_btn.setFixedSize(378, 48)
         import os
@@ -1353,25 +1372,6 @@ class InfoWidget(QWidget):
         """)
         exit_btn.clicked.connect(self.exit_btn_clicked)
         button_layout.addWidget(exit_btn)
-
-        # 다음 버튼 (오른쪽) - 378x48px
-        self.next_btn = QPushButton()
-        self.next_btn.setFixedSize(378, 48)
-        btn_next_enabled = resource_path("assets/image/test_info/btn_다음_enabled.png").replace(chr(92), "/")
-        btn_next_hover = resource_path("assets/image/test_info/btn_다음_Hover.png").replace(chr(92), "/")
-        self.next_btn.setStyleSheet(f"""
-            QPushButton {{
-                border: none;
-                background-image: url({btn_next_enabled});
-                background-repeat: no-repeat;
-                background-position: center;
-            }}
-            QPushButton:hover {{
-                background-image: url({btn_next_hover});
-            }}
-        """)
-        self.next_btn.clicked.connect(self.go_to_next_page)
-        button_layout.addWidget(self.next_btn)
 
         layout.addLayout(button_layout)
 
