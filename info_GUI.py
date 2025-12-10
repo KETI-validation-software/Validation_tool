@@ -2931,6 +2931,24 @@ class InfoWidget(QWidget):
 
             # CONSTANTS.py 업데이트
             if self.form_validator.update_constants_py():
+                # Heartbeat (busy) 전송 - 시험 시작 시
+                test_info = {
+                    "testRequestId": getattr(self, 'request_id', ''),
+                    "companyName": self.company_edit.text().strip(),
+                    "contactPerson": getattr(self, 'contact_person', ''),
+                    "productName": self.product_edit.text().strip(),
+                    "modelName": self.model_edit.text().strip(),
+                    "version": self.version_edit.text().strip(),
+                    "testGroups": [
+                        {
+                            "id": g.get("id", ""),
+                            "name": g.get("name", ""),
+                            "testRange": g.get("testRange", "")
+                        } for g in getattr(self, 'test_groups', [])
+                    ]
+                }
+                self.form_validator.send_heartbeat_busy(test_info)
+
                 # test_group_name, verification_type(current_mode), spec_id를 함께 전달
                 print(f"시험 시작: testTarget.name={self.target_system}, verificationType={self.current_mode}, spec_id={spec_id}")
                 self.startTestRequested.emit(self.target_system, self.current_mode, spec_id)
@@ -3167,6 +3185,9 @@ class InfoWidget(QWidget):
 
             # 다음 버튼 상태 업데이트
             self.check_next_button_state()
+
+            # Heartbeat (idle) 전송 - 시험 정보 불러오기 성공 시
+            self.form_validator.send_heartbeat_idle()
 
         except Exception as e:
             print(f"시험정보 불러오기 실패: {e}")
