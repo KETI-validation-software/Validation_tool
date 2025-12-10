@@ -2572,3 +2572,52 @@ class FormValidator:
             import traceback
             traceback.print_exc()
             return False
+
+    def get_local_ip_address(self):
+        """현재 PC의 로컬 IP 주소를 가져옴"""
+        import socket
+        try:
+            # 외부에 연결을 시도하여 로컬 IP 확인 (실제 연결하지 않음)
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))
+            ip = s.getsockname()[0]
+            s.close()
+            return ip
+        except Exception as e:
+            print(f"[WARNING] IP 주소 가져오기 실패: {e}")
+            return "127.0.0.1"
+
+    def send_heartbeat_idle(self):
+        """시험 정보 불러오기 시 idle 상태 전송"""
+        url = "http://ect2.iptime.org:20223/api/heartbeat"
+        try:
+            ip_address = self.get_local_ip_address()
+            payload = {
+                "ipAddress": ip_address,
+                "status": "idle"
+            }
+            response = requests.post(url, json=payload, timeout=10)
+            response.raise_for_status()
+            print(f"[INFO] Heartbeat (idle) 전송 성공: {payload}")
+            return True
+        except Exception as e:
+            print(f"[WARNING] Heartbeat (idle) 전송 실패: {e}")
+            return False
+
+    def send_heartbeat_busy(self, test_info):
+        """시험 시작 시 busy 상태 + 시험 정보 전송"""
+        url = "http://ect2.iptime.org:20223/api/heartbeat"
+        try:
+            ip_address = self.get_local_ip_address()
+            payload = {
+                "ipAddress": ip_address,
+                "status": "busy",
+                "testInfo": test_info
+            }
+            response = requests.post(url, json=payload, timeout=10)
+            response.raise_for_status()
+            print(f"[INFO] Heartbeat (busy) 전송 성공: ipAddress={ip_address}")
+            return True
+        except Exception as e:
+            print(f"[WARNING] Heartbeat (busy) 전송 실패: {e}")
+            return False
