@@ -650,32 +650,11 @@ class InfoWidget(QWidget):
         # padding 32px
         right_layout.addSpacing(32)
 
-        # 하단 버튼 (초기화, 시험시작) - 전체 744x48px, 각 버튼 364x48px, gap 16px
+        # 하단 버튼 (시험시작, 종료) - 전체 744x48px, 각 버튼 364x48px, gap 16px
         button_layout = QHBoxLayout()
         button_layout.setSpacing(16)  # 버튼 간격 16px
 
-        # 초기화 버튼 (364x48px)
-        reset_btn = QPushButton("")
-        reset_btn.setFixedSize(364, 48)
-
-        btn_reset_enabled = resource_path("assets/image/test_config/btn_초기화_enabled.png").replace(chr(92), "/")
-        btn_reset_hover = resource_path("assets/image/test_config/btn_초기화_Hover.png").replace(chr(92), "/")
-
-        reset_btn.setStyleSheet(f"""
-            QPushButton {{
-                border: none;
-                background-image: url({btn_reset_enabled});
-                background-repeat: no-repeat;
-                background-position: center;
-            }}
-            QPushButton:hover {{
-                background-image: url({btn_reset_hover});
-            }}
-        """)
-        reset_btn.clicked.connect(self.reset_all_fields)
-        button_layout.addWidget(reset_btn)
-
-        # 시험 시작 버튼 (364x48px)
+        # 시험 시작 버튼 (왼쪽) - 364x48px
         self.start_btn = QPushButton("")
         self.start_btn.setFixedSize(364, 48)
 
@@ -696,6 +675,27 @@ class InfoWidget(QWidget):
         self.start_btn.clicked.connect(self.start_test)
         self.start_btn.setEnabled(True)
         button_layout.addWidget(self.start_btn)
+
+        # 종료 버튼 (오른쪽) - 364x48px
+        exit_btn = QPushButton("")
+        exit_btn.setFixedSize(364, 48)
+
+        btn_exit_enabled = resource_path("assets/image/test_config/btn_종료_enabled.png").replace(chr(92), "/")
+        btn_exit_hover = resource_path("assets/image/test_config/btn_종료_Hover.png").replace(chr(92), "/")
+
+        exit_btn.setStyleSheet(f"""
+            QPushButton {{
+                border: none;
+                background-image: url({btn_exit_enabled});
+                background-repeat: no-repeat;
+                background-position: center;
+            }}
+            QPushButton:hover {{
+                background-image: url({btn_exit_hover});
+            }}
+        """)
+        exit_btn.clicked.connect(self.exit_btn_clicked)
+        button_layout.addWidget(exit_btn)
 
         right_layout.addLayout(button_layout)
 
@@ -2958,134 +2958,6 @@ class InfoWidget(QWidget):
                                      QMessageBox.No)
         if reply == QMessageBox.Yes:
             QApplication.quit()
-
-    def reset_all_fields(self):
-        """모든 필드 초기화"""
-        try:
-            # 초기화할 내용이 있는지 확인
-            if not self._has_data_to_reset():
-                QMessageBox.information(self, "초기화", "초기화할 입력값이 없습니다.")
-                return
-
-            # 확인 메시지
-            reply = QMessageBox.question(self, '초기화',
-                                       '모든 입력값을 초기화하시겠습니까?',
-                                       QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-
-            if reply == QMessageBox.Yes:
-                self._perform_reset()
-
-        except Exception as e:
-            QMessageBox.critical(self, "오류", f"초기화 중 오류가 발생했습니다:\n{str(e)}")
-
-    def _has_data_to_reset(self):
-        """초기화할 데이터가 있는지 확인"""
-        try:
-            # 기본 정보 필드에 입력값이 있는지 확인
-            basic_fields = [
-                self.company_edit.text().strip(),
-                self.product_edit.text().strip(),
-                self.version_edit.text().strip(),
-                self.model_edit.text().strip(),
-                self.test_category_edit.text().strip(),
-                self.target_system_edit.text().strip(),
-                self.test_group_edit.text().strip(),
-                self.test_range_edit.text().strip(),
-                self.admin_code_edit.text().strip()
-            ]
-
-            if any(field for field in basic_fields):
-                return True
-
-            # 테이블들에 데이터가 있는지 확인
-            if self.test_field_table.rowCount() > 0 or self.scenario_table.rowCount() > 0 or self.api_test_table.rowCount() > 0:
-                return True
-
-            # 인증 정보에 입력값이 있는지 확인
-            auth_fields = [
-                self.id_input.text().strip(),
-                self.pw_input.text().strip()
-            ]
-
-            if any(field for field in auth_fields):
-                return True
-
-            # 주소 입력창들에 입력값이 있는지 확인
-            address_fields = [
-                self.ip_input_edit.text().strip()
-            ]
-
-            if any(field for field in address_fields):
-                return True
-
-            # URL 테이블에 데이터가 있는지 확인
-            if self.url_table.rowCount() > 0:
-                return True
-
-            return False
-
-        except Exception as e:
-            print(f"데이터 확인 중 오류: {e}")
-            return True
-
-    def _perform_reset(self):
-        """실제 초기화 작업 수행"""
-        try:
-            # 기본 정보 필드 초기화
-            self.company_edit.clear()
-            self.product_edit.clear()
-            self.version_edit.clear()
-            self.model_edit.clear()
-            self.test_category_edit.clear()
-            self.target_system_edit.clear()
-            self.test_group_edit.clear()
-            self.test_range_edit.clear()
-            self.admin_code_edit.clear()
-
-            # 관리자 코드 필드를 초기 상태로 되돌림 (비활성화, placeholder 제거)
-            self.admin_code_edit.setEnabled(False)
-            self.admin_code_edit.setPlaceholderText("")
-
-            # 테이블들 초기화
-            self.test_field_table.setRowCount(0)
-            self.scenario_table.setRowCount(0)
-            self.api_test_table.setRowCount(0)
-
-            # 시나리오 테이블 관련 UI 요소 초기화
-            self.scenario_column_background.hide()
-            self.scenario_placeholder_label.hide()
-
-            # 인증 정보 초기화
-            self.id_input.clear()
-            self.pw_input.clear()
-
-            # 인증 방식을 Digest Auth로 초기화
-            self.digest_radio.setChecked(True)
-
-            # 주소 입력창 초기화
-            self.ip_input_edit.clear()
-
-            # 주소 탐색 테이블 초기화
-            self.url_table.setRowCount(0)
-
-            # 현재 모드 초기화
-            self.current_mode = None
-
-            # 2025-11-13: update_auth_fields() 호출 제거
-            # 이유: 인증 방식이 통합되면서 더 이상 필요 없음
-            # 라디오 버튼 변경 시 update_start_button_state()가 자동으로 호출됨
-            # self.update_auth_fields()
-
-            # 버튼 상태 업데이트
-            self.check_start_button_state()
-            self.check_next_button_state()  # 다음 버튼 상태도 업데이트
-
-            print("모든 필드 초기화 완료")
-            QMessageBox.information(self, "초기화 완료", "모든 입력값이 초기화되었습니다.")
-
-        except Exception as e:
-            print(f"초기화 실패: {e}")
-            raise
 
     def _determine_mode_from_api(self, test_data):
         """
