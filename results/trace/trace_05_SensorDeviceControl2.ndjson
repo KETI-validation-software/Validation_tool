@@ -1,0 +1,5 @@
+{"time": "2025-12-10T06:26:10.836359Z", "api": "SensorDeviceControl2", "dir": "REQUEST", "data": {"sensorDeviceID": "iot0001", "commandType": ""}}
+{"time": "2025-12-10T06:26:10.858301Z", "api": "SensorDeviceControl2", "dir": "REQUEST", "data": {"sensorDeviceID": "iot0001", "commandType": ""}}
+{"time": "2025-12-10T06:26:10.878248Z", "api": "SensorDeviceControl2", "dir": "REQUEST", "data": {"sensorDeviceID": "iot0001", "commandType": ""}}
+{"time": "2025-12-10T06:26:10.883234Z", "api": "SensorDeviceControl2", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "sensorDeviceID": "iot0001", "sensorDeviceStatus": ""}}
+{"time": "2025-12-10T06:26:11.833995Z", "api": "SensorDeviceControl2", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "sensorDeviceID": "iot0001", "sensorDeviceStatus": "", "code_value": 200}}
