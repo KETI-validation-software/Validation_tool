@@ -236,9 +236,17 @@ class ConstraintDataGenerator:
                         result[key] = value
             elif isinstance(value, list) and len(value) > 0 and isinstance(value[0], dict):
                 # 리스트 형태의 구조 처리
-                result[key] = self._generate_list_items(
-                    key, value[0], constraint_map, n
-                )
+                # ✅ constraints가 없으면 원본 리스트를 그대로 사용
+                has_constraints = any(f"{key}.{field}" in constraint_map for field in value[0].keys())
+                
+                if has_constraints:
+                    # constraints가 있으면 동적 생성
+                    result[key] = self._generate_list_items(
+                        key, value[0], constraint_map, n
+                    )
+                else:
+                    # constraints가 없으면 원본 리스트 그대로 사용 (preset)
+                    result[key] = value
             elif isinstance(value, dict):
                 # 중첩된 딕셔너리 구조는 그대로 유지 (최상위 레벨)
                 result[key] = value
