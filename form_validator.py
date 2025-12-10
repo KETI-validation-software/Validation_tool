@@ -376,6 +376,10 @@ class FormValidator:
             # ResponseCode 파일 생성
             self._generate_response_code_file()
 
+            # Validation 파일 업데이트 후 캐시 클리어 (새로운 spec_id 반영)
+            from core.validation_registry import clear_validation_cache
+            clear_validation_cache()
+
             print(f"\n=== 산출물 생성 완료 ===\n")
 
         except Exception as e:
