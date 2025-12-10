@@ -2283,6 +2283,10 @@ class InfoWidget(QWidget):
         self.digest_radio.toggled.connect(self.on_auth_type_changed)
         self.bearer_radio.toggled.connect(self.on_auth_type_changed)
 
+        # 박스 전체 영역 클릭 시 라디오 버튼 선택되도록 클릭 이벤트 추가
+        self.digest_option.mousePressEvent = lambda event: self.digest_radio.setChecked(True)
+        self.bearer_option.mousePressEvent = lambda event: self.bearer_radio.setChecked(True)
+
         # divider 왼쪽 gap 12px
         content_layout.addSpacing(12)
 
