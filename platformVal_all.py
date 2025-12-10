@@ -4304,9 +4304,9 @@ class MyApp(QWidget):
         buttonLayout.addSpacing(16)
         buttonLayout.addWidget(self.stop_btn)
         buttonLayout.addSpacing(16)
-        buttonLayout.addWidget(self.rbtn)
-        buttonLayout.addSpacing(16)
         buttonLayout.addWidget(self.result_btn)
+        buttonLayout.addSpacing(16)
+        buttonLayout.addWidget(self.rbtn)
         buttonGroup.setLayout(buttonLayout)
         right_layout.addWidget(buttonGroup)
         right_layout.addStretch()  # 남는 공간을 아래로 밀기
