@@ -7,14 +7,149 @@ cmii7shen005i8z1tagevx4qh_Authentication_out_data = {
     "accessToken": "abcde1234"
 }
 
+# Capabilities
+cmii7shen005i8z1tagevx4qh_Capabilities_out_data = {
+    "code": "200",
+    "message": "성공",
+    "transportSupport": [
+        {
+        "transProtocolType": "LongPolling",
+        "transProtocolDesc": ""
+    }
+]
+}
+
+# SensorDeviceProfiles
+cmii7shen005i8z1tagevx4qh_SensorDeviceProfiles_out_data = {
+    "code": "200",
+    "message": "성공",
+    "sensorDeviceList": [
+        {
+        "sensorDeviceID": "iot0001",
+        "sensorDeviceType": "온도",
+        "sensorDeviceName": "온도 센서",
+        "sensorDeviceLoc": {
+        "lon": "127.127730",
+        "lat": "38.439801",
+        "alt": "32.131",
+        "desc": "3층복도"
+    }
+    },
+        {
+        "sensorDeviceID": "iot0002",
+        "sensorDeviceType": "온도",
+        "sensorDeviceName": "온도 센서",
+        "sensorDeviceLoc": {
+        "lon": "127.127730",
+        "lat": "38.439801",
+        "alt": "",
+        "desc": ""
+    }
+    }
+]
+}
+
+# RealtimeSensorData
+cmii7shen005i8z1tagevx4qh_RealtimeSensorData_out_data = {
+    "code": "200",
+    "message": "성공"
+}
+
+# RealtimeSensorData WebHook IN Data
+cmii7shen005i8z1tagevx4qh_RealtimeSensorData_webhook_in_data = {
+    "sensorDeviceList": [
+        {
+        "sensorDeviceID": "iot0001",
+        "measureTime": 20220822163022124,
+        "sensorDeviceType": "온도",
+        "sensorDeviceUnit": "섭씨",
+        "sensorDeviceValue": "90"
+    },
+        {
+        "sensorDeviceID": "iot0002",
+        "measureTime": 20220822163022124,
+        "sensorDeviceType": "온도",
+        "sensorDeviceUnit": "섭씨",
+        "sensorDeviceValue": "36"
+    },
+        {
+        "sensorDeviceID": "iot0003",
+        "measureTime": 20220822163022124,
+        "sensorDeviceType": "온도",
+        "sensorDeviceUnit": "섭씨",
+        "sensorDeviceValue": "36"
+    }
+]
+}
+
+# RealtimeSensorEventInfos
+cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_out_data = {
+    "code": "200",
+    "message": "성공"
+}
+
+# RealtimeSensorEventInfos WebHook IN Data
+cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_webhook_in_data = {
+    "sensorDeviceList": [
+        {
+        "sensorDeviceID": "iot0001",
+        "eventName": "화재",
+        "eventTime": 20220822163022124,
+        "eventDesc": "100도"
+    },
+        {
+        "sensorDeviceID": "iot0002",
+        "eventName": "화재",
+        "eventTime": 20220822163022124,
+        "eventDesc": "200도"
+    }
+]
+}
+
+# StoredSensorEventInfos
+cmii7shen005i8z1tagevx4qh_StoredSensorEventInfos_out_data = {
+    "code": "200",
+    "message": "성공",
+    "sensorDeviceList": [
+        {
+        "sensorDeviceID": "iot0001",
+        "eventName": "화재",
+        "eventTime": 20220822163022124,
+        "eventDesc": "100도"
+    },
+        {
+        "sensorDeviceID": "iot0002",
+        "eventName": "화재",
+        "eventTime": 20220822163022123,
+        "eventDesc": "100도"
+    }
+]
+}
+
 # cmii7shen005i8z1tagevx4qh 데이터 리스트
 cmii7shen005i8z1tagevx4qh_outData = [
     cmii7shen005i8z1tagevx4qh_Authentication_out_data,
+    cmii7shen005i8z1tagevx4qh_Capabilities_out_data,
+    cmii7shen005i8z1tagevx4qh_SensorDeviceProfiles_out_data,
+    cmii7shen005i8z1tagevx4qh_RealtimeSensorData_out_data,
+    cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_out_data,
+    cmii7shen005i8z1tagevx4qh_StoredSensorEventInfos_out_data,
+]
+
+# cmii7shen005i8z1tagevx4qh WebHook 데이터 리스트
+cmii7shen005i8z1tagevx4qh_webhook_inData = [
+    cmii7shen005i8z1tagevx4qh_RealtimeSensorData_webhook_in_data,
+    cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_webhook_in_data,
 ]
 
 # cmii7shen005i8z1tagevx4qh API endpoint
 cmii7shen005i8z1tagevx4qh_messages = [
     "Authentication",
+    "Capabilities",
+    "SensorDeviceProfiles",
+    "RealtimeSensorData",
+    "RealtimeSensorEventInfos",
+    "StoredSensorEventInfos",
 ]
 
 # Authentication
@@ -59,7 +194,8 @@ cmii7pysb004k8z1tts0npxfm_DoorProfiles_out_data = {
             "bioDeviceID": "bio0001",
             "bioDeviceName": "출입문홍채인식기기",
             "bioDeviceAuthTypeList": [
-            "홍채, 지문"
+            "홍채",
+            "지문"
         ]
         },
             {
@@ -83,11 +219,136 @@ cmii7pysb004k8z1tts0npxfm_DoorProfiles_out_data = {
 ]
 }
 
+# AccessUserInfos
+cmii7pysb004k8z1tts0npxfm_AccessUserInfos_out_data = {
+    "code": "200",
+    "message": "성공",
+    "userList": [
+        {
+        "userID": "user0001",
+        "userName": "홍길동",
+        "userDesc": "일반사용자",
+        "doorList": [
+            {
+            "doorID": "door0001",
+            "timePeriod": {
+            "startTime": 20251105163010124,
+            "endTime": 20251115163010124
+        }
+        }
+    ]
+    },
+        {
+        "userID": "user0002",
+        "userName": "김철수",
+        "userDesc": "관리자",
+        "doorList": [
+            {
+            "doorID": "door0002",
+            "timePeriod": {
+            "startTime": 20251105163010124,
+            "endTime": 20251115163010120
+        }
+        },
+            {
+            "doorID": "door0003",
+            "timePeriod": {
+            "startTime": 20251105163010124,
+            "endTime": 20251115163010124
+        }
+        }
+    ]
+    }
+]
+}
+
+# RealtimeVerifEventInfos
+cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_out_data = {
+    "code": "200",
+    "message": "성공"
+}
+
+# RealtimeVerifEventInfos WebHook IN Data
+cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_webhook_in_data = {
+    "doorList": [
+        {
+        "eventTime": 20220822163022124,
+        "doorID": "door0001",
+        "userID": "user0001",
+        "bioAuthTypeList": [
+        "지문",
+        "얼굴"
+    ],
+        "otherAuthTypeList": [
+        "카드"
+    ],
+        "eventName": "성공",
+        "eventDesc": ""
+    },
+        {
+        "eventTime": 20220822163022124,
+        "doorID": "door0002",
+        "userID": "user0002",
+        "bioAuthTypeList": [
+        "홍채"
+    ],
+        "otherAuthTypeList": [
+        "카드"
+    ],
+        "eventName": "성공",
+        "eventDesc": "36.5"
+    }
+]
+}
+
+# StoredVerifEventInfos
+cmii7pysb004k8z1tts0npxfm_StoredVerifEventInfos_out_data = {
+    "code": "200",
+    "message": "성공",
+    "doorList": [
+        {
+        "eventTime": 20220822163022124,
+        "doorID": "door0001",
+        "userID": "user0001",
+        "bioAuthTypeList": [
+        "지문",
+        "얼굴"
+    ],
+        "otherAuthTypeList": [
+        "카드"
+    ],
+        "eventName": "성공",
+        "eventDesc": "36.5"
+    },
+        {
+        "eventTime": 20220822163022124,
+        "doorID": "door0002",
+        "userID": "user0002",
+        "bioAuthTypeList": [
+        "홍채"
+    ],
+        "otherAuthTypeList": [
+        "카드"
+    ],
+        "eventName": "성공",
+        "eventDesc": ""
+    }
+]
+}
+
 # cmii7pysb004k8z1tts0npxfm 데이터 리스트
 cmii7pysb004k8z1tts0npxfm_outData = [
     cmii7pysb004k8z1tts0npxfm_Authentication_out_data,
     cmii7pysb004k8z1tts0npxfm_Capabilities_out_data,
     cmii7pysb004k8z1tts0npxfm_DoorProfiles_out_data,
+    cmii7pysb004k8z1tts0npxfm_AccessUserInfos_out_data,
+    cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_out_data,
+    cmii7pysb004k8z1tts0npxfm_StoredVerifEventInfos_out_data,
+]
+
+# cmii7pysb004k8z1tts0npxfm WebHook 데이터 리스트
+cmii7pysb004k8z1tts0npxfm_webhook_inData = [
+    cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_webhook_in_data,
 ]
 
 # cmii7pysb004k8z1tts0npxfm API endpoint
@@ -95,6 +356,9 @@ cmii7pysb004k8z1tts0npxfm_messages = [
     "Authentication",
     "Capabilities",
     "DoorProfiles",
+    "AccessUserInfos",
+    "RealtimeVerifEventInfos",
+    "StoredVerifEventInfos",
 ]
 
 # Authentication

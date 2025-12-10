@@ -18,9 +18,29 @@ cmii7shen005i8z1tagevx4qh_Authentication_in_validation = {
   }
 }
 
+# Capabilities
+cmii7shen005i8z1tagevx4qh_Capabilities_in_validation = {}
+
+# SensorDeviceProfiles
+cmii7shen005i8z1tagevx4qh_SensorDeviceProfiles_in_validation = {}
+
+# RealtimeSensorData
+cmii7shen005i8z1tagevx4qh_RealtimeSensorData_in_validation = {}
+
+# RealtimeSensorEventInfos
+cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_in_validation = {}
+
+# StoredSensorEventInfos
+cmii7shen005i8z1tagevx4qh_StoredSensorEventInfos_in_validation = {}
+
 # cmii7shen005i8z1tagevx4qh 검증 리스트
 cmii7shen005i8z1tagevx4qh_inValidation = [
     cmii7shen005i8z1tagevx4qh_Authentication_in_validation,
+    cmii7shen005i8z1tagevx4qh_Capabilities_in_validation,
+    cmii7shen005i8z1tagevx4qh_SensorDeviceProfiles_in_validation,
+    cmii7shen005i8z1tagevx4qh_RealtimeSensorData_in_validation,
+    cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_in_validation,
+    cmii7shen005i8z1tagevx4qh_StoredSensorEventInfos_in_validation,
 ]
 
 # Authentication
@@ -49,11 +69,23 @@ cmii7pysb004k8z1tts0npxfm_Capabilities_in_validation = {}
 # DoorProfiles
 cmii7pysb004k8z1tts0npxfm_DoorProfiles_in_validation = {}
 
+# AccessUserInfos
+cmii7pysb004k8z1tts0npxfm_AccessUserInfos_in_validation = {}
+
+# RealtimeVerifEventInfos
+cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_in_validation = {}
+
+# StoredVerifEventInfos
+cmii7pysb004k8z1tts0npxfm_StoredVerifEventInfos_in_validation = {}
+
 # cmii7pysb004k8z1tts0npxfm 검증 리스트
 cmii7pysb004k8z1tts0npxfm_inValidation = [
     cmii7pysb004k8z1tts0npxfm_Authentication_in_validation,
     cmii7pysb004k8z1tts0npxfm_Capabilities_in_validation,
     cmii7pysb004k8z1tts0npxfm_DoorProfiles_in_validation,
+    cmii7pysb004k8z1tts0npxfm_AccessUserInfos_in_validation,
+    cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_in_validation,
+    cmii7pysb004k8z1tts0npxfm_StoredVerifEventInfos_in_validation,
 ]
 
 # Authentication
