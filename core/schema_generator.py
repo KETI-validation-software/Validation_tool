@@ -52,6 +52,8 @@ class SchemaGenerator:
             if not isinstance(field, dict):
                 continue
             key = field.get("key")
+            if not key or key.strip() == "":    # 새로 추가
+                continue
             ftype = str(field.get("type", "string")).lower()
             required = bool(field.get("required", False))
             children = field.get("children", [])

@@ -403,9 +403,8 @@ class Server(BaseHTTPRequestHandler):
                     self.wfile.write(json.dumps(data).encode('utf-8'))
                     return
 
-                # ========== 오류 검사 전 REQUEST 이벤트 기록 ==========
+                # ✅ Authentication API REQUEST 이벤트 기록 (한 번만)
                 self._push_event(api_name, "REQUEST", self.request_data)
-                # ===================================================
 
                 # ========== Authentication API도 오류 검사 (400/201/404) ==========
                 error_response = self._check_request_errors(api_name, self.request_data)
@@ -429,12 +428,13 @@ class Server(BaseHTTPRequestHandler):
 
                 # 성공 응답 전송
                 try:
-                    self._push_event(api_name, "REQUEST", self.request_data)
+                    # ✅ Authentication API RESPONSE 이벤트 기록 (한 번만)
                     self._push_event(api_name, "RESPONSE", data)
+                    
                     response_json = json.dumps(data).encode('utf-8')
                     self._set_headers()
                     self.wfile.write(response_json)
-                    print(f"[DEBUG][AUTH] ✅ 인증 성공 응답 전송 완료")
+                    print(f"[DEBUG][AUTH] ✅ 인증 성답 전송 완료")
                 except Exception as e:
                     print(f"[ERROR] 응답 전송 중 오류: {e}")
                     import traceback
@@ -449,6 +449,9 @@ class Server(BaseHTTPRequestHandler):
                     Server.request_counter[api_name] = 0
                 Server.request_counter[api_name] += 1
                 print(f"[API_SERVER] 요청 수신: {api_name} (카운트: {Server.request_counter[api_name]})")
+
+                # ✅ 실패 시에도 REQUEST 이벤트 기록
+                self._push_event(api_name, "REQUEST", self.request_data)
 
                 error_response = {
                     "code": "401",
@@ -794,7 +797,6 @@ class Server(BaseHTTPRequestHandler):
             print(f"[DEBUG][CONSTRAINTS] 원본 message 내용: {json.dumps(message, ensure_ascii=False)[:200]}")
             print(f"[DEBUG][CONSTRAINTS] ★ latest_event 키 목록: {list(Server.latest_event.keys())}")
             print(f"[DEBUG][CONSTRAINTS] ★ generator.latest_events 동일 객체?: {id(self.generator.latest_events) == id(Server.latest_event)}")
-            self._push_event(api_name, "REQUEST", self.request_data)
 
             # constraints가 있을 때만 _applied_constraints 호출 (성능 최적화)
             if out_con and isinstance(out_con, dict) and len(out_con) > 0:
@@ -812,7 +814,7 @@ class Server(BaseHTTPRequestHandler):
                 # request_data, template_data, constraints, n 순서로 전달
                 updated_message = self.generator._applied_constraints(
                     request_data=self.request_data,
-                    template_data=message,  # copy() 제거 - 성능 향상
+                    template_data=copy.deepcopy(message),  # deepcopy로 원본 보호
                     constraints=out_con,
                     n=len(num_data)
                 )
@@ -855,10 +857,6 @@ class Server(BaseHTTPRequestHandler):
             import traceback
             traceback.print_exc()
             # 에러 발생 시 원본 메시지 사용
-            
-            # ✅ trace 저장 (_push_event 내부에서 deepcopy 수행)
-            self._push_event(api_name, "REQUEST", self.request_data)
-            self._push_event(api_name, "RESPONSE", message)
             
             # ✅ JSON에 code_value 추가
             if isinstance(message, dict):
