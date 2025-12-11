@@ -167,6 +167,7 @@ cmiqr1jha00i6ie8fb1scb3go_webhook_inSchema = [
 cmiqr0kdw00i4ie8fr3firjtg_Authentication_out_schema = {
     "code": str,
     "message": str,
+    "": str,
     "userName": str,
     "userAff": str,
     OptionalKey("accessToken"): str,
