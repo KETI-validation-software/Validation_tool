@@ -112,6 +112,14 @@ cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_in_validation = {
 
 # DoorControl
 cmiqr1acx00i5ie8fi022t1hp_DoorControl_in_validation = {
+  "doorID": {
+    "enabled": True,
+    "validationType": "request-field-list-match",
+    "referenceEndpoint": "/RealtimeDoorStatus",
+    "referenceListField": "doorID",
+    "referenceListEndpoint": "/RealtimeDoorStatus",
+    "score": 0
+  },
   "commandType": {
     "enabled": True,
     "validationType": "valid-value-match",
@@ -129,8 +137,8 @@ cmiqr1acx00i5ie8fi022t1hp_DoorControl_in_validation = {
   }
 }
 
-# RealtimeDoorStatus2
-cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_in_validation = {
+# RealtimeDoorStatus
+cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_in_validation = {
   "doorList.doorID": {
     "enabled": True,
     "validationType": "request-field-match",
@@ -149,7 +157,7 @@ cmiqr1acx00i5ie8fi022t1hp_inValidation = [
     cmiqr1acx00i5ie8fi022t1hp_DoorProfiles_in_validation,
     cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_in_validation,
     cmiqr1acx00i5ie8fi022t1hp_DoorControl_in_validation,
-    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_in_validation,
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_in_validation,
 ]
 
 # Authentication
