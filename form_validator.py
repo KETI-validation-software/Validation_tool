@@ -169,6 +169,9 @@ class FormValidator:
                 schema_type = None
                 file_type = None
 
+                # 중복 API명 처리를 위한 카운터 (spec별로 초기화)
+                endpoint_count = {}
+
                 temp_spec_id = spec_id+"_"
                 for s in steps:
                     step_id = s.get("id")
@@ -180,11 +183,25 @@ class FormValidator:
                             file_type = 'response'
                         elif schema_type == 'response':
                             file_type = 'request'
-                        self.key_id_gen.generate_keyid_files(
-                            self._steps_cache,
-                            self._test_step_cache,
-                            file_type
-                        )
+
+                        # endpoint명 추출 및 numbered_endpoint 계산
+                        detail = ts.get("detail", {})
+                        step_data = detail.get("step", {})
+                        api = step_data.get("api", {})
+                        raw_endpoint = api.get("endpoint", "")
+                        base_endpoint = raw_endpoint[1:] if raw_endpoint.startswith("/") else raw_endpoint
+
+                        # 등장 횟수 카운트 및 numbered_endpoint 생성
+                        if base_endpoint in endpoint_count:
+                            endpoint_count[base_endpoint] += 1
+                            numbered_endpoint = f"{base_endpoint}{endpoint_count[base_endpoint]}"
+                        else:
+                            endpoint_count[base_endpoint] = 1
+                            numbered_endpoint = base_endpoint  # 첫 번째는 숫자 없이
+
+                        # ts에 _numbered_endpoint 저장 (KeyIdGenerator에서 사용)
+                        ts["_numbered_endpoint"] = numbered_endpoint
+
                         schema_content, data_content, validation_content,constraints_content = self._generate_files_for_each_steps(
                             schema_type=schema_type,
                             file_type=file_type,
@@ -201,8 +218,18 @@ class FormValidator:
                             webhook_schema_names=webhook_schema_names,
                             webhook_data_names=webhook_data_names,
                             webhook_constraints_names=webhook_constraints_names,
-                            spec_id = temp_spec_id
+                            spec_id=temp_spec_id,
+                            numbered_endpoint=numbered_endpoint
                         )
+
+                # 모든 step 처리 후 KeyId 파일 생성 (numbered_endpoint가 모두 설정된 후)
+                if file_type:
+                    self.key_id_gen.generate_keyid_files(
+                        self._steps_cache,
+                        self._test_step_cache,
+                        file_type
+                    )
+
                 # schema_type이 설정되지 않았으면 이 spec 건너뛰기
                 if schema_type is None:
                     print(f"[WARNING] spec_id={spec_id}: schema_type이 설정되지 않음, 건너뜁니다.")
@@ -399,7 +426,8 @@ class FormValidator:
                                        data_content, schema_names, data_names, endpoint_names,
                                        validation_content, validation_names,
                                    constraints_content, constraints_names,
-                                   webhook_schema_names, webhook_data_names, webhook_constraints_names, spec_id):
+                                   webhook_schema_names, webhook_data_names, webhook_constraints_names, spec_id,
+                                   numbered_endpoint=None):
 
         # step 레벨에서 protocolType 확인 (소문자 "webhook")
         detail = ts.get("detail", {})
@@ -419,12 +447,19 @@ class FormValidator:
         #     print(f"[DEBUG] webhook.requestSpec 존재: {'requestSpec' in settings.get('webhook', {})}")
 
         schema_info = self.schema_gen.generate_endpoint_schema(ts, schema_type)
-        schema_name = schema_info["name"]
+        schema_name_orig = schema_info["name"]
         schema_obj = schema_info["content"]
         endpoint_name = schema_info["endpoint"]
 
+        # numbered_endpoint가 전달되지 않은 경우 기존 endpoint_name 사용
+        if numbered_endpoint is None:
+            numbered_endpoint = endpoint_name
+
+        # schema_name에서 endpoint_name을 numbered_endpoint로 교체
+        schema_name = schema_name_orig.replace(endpoint_name, numbered_endpoint)
+
         # 스키마 내용 추가
-        schema_content += f"# {endpoint_name}\n"
+        schema_content += f"# {numbered_endpoint}\n"
         formatted = self.schema_gen.format_schema_content(schema_obj)
         schema_content += f"{spec_id}{schema_name} = {formatted}\n\n"
         schema_names.append(schema_name)
@@ -432,9 +467,9 @@ class FormValidator:
         # WebHook 처리 - schema_type="request"일 때 webhook_out_schema 생성
         if protocol_type == "webhook" and schema_type == "request":
             webhook_spec = settings.get("webhook", {}).get("integrationSpec") or {}
-            webhook_schema_name = f"{endpoint_name}_webhook_out_schema"
+            webhook_schema_name = f"{numbered_endpoint}_webhook_out_schema"
             webhook_schema_obj = self._convert_webhook_spec_to_schema(webhook_spec)
-            schema_content += f"# {endpoint_name} WebHook OUT Schema\n"
+            schema_content += f"# {numbered_endpoint} WebHook OUT Schema\n"
             formatted_webhook = self.schema_gen.format_schema_content(webhook_schema_obj)
             schema_content += f"{spec_id}{webhook_schema_name} = {formatted_webhook}\n\n"
             webhook_schema_names.append(webhook_schema_name)  # webhook 전용 리스트에 추가
@@ -443,9 +478,9 @@ class FormValidator:
         # WebHook 처리 - schema_type="response"일 때 webhook_in_schema 생성
         if protocol_type == "webhook" and schema_type == "response":
             webhook_spec = settings.get("webhook", {}).get("requestSpec") or {}
-            webhook_schema_name = f"{endpoint_name}_webhook_in_schema"
+            webhook_schema_name = f"{numbered_endpoint}_webhook_in_schema"
             webhook_schema_obj = self._convert_webhook_spec_to_schema(webhook_spec)
-            schema_content += f"# {endpoint_name} WebHook IN Schema\n"
+            schema_content += f"# {numbered_endpoint} WebHook IN Schema\n"
             formatted_webhook = self.schema_gen.format_schema_content(webhook_schema_obj)
             schema_content += f"{spec_id}{webhook_schema_name} = {formatted_webhook}\n\n"
             webhook_schema_names.append(webhook_schema_name)  # webhook 전용 리스트에 추가
@@ -453,13 +488,17 @@ class FormValidator:
 
         # Data 생성 (spec별로)
         data_info = self.data_gen.extract_endpoint_data(ts, file_type)
-        data_name = data_info["name"]
+        data_name_orig = data_info["name"]
         data_obj = data_info["content"]
-        endpoint_name = data_info["endpoint"]
+        # endpoint_name은 이미 위에서 가져왔으므로 다시 가져오지 않음
         if isinstance(data_obj, dict) and isinstance(data_obj.get("bodyJson"), list):
             data_obj = self.data_gen.build_data_from_spec(data_obj["bodyJson"])
+
+        # data_name에서 endpoint_name을 numbered_endpoint로 교체
+        data_name = data_name_orig.replace(endpoint_name, numbered_endpoint)
+
         # 데이터 내용 추가
-        data_content += f"# {endpoint_name}\n"
+        data_content += f"# {numbered_endpoint}\n"
         formatted = self.data_gen.format_data_content(data_obj)
         data_content += f"{spec_id}{data_name} = {formatted}\n\n"
         data_names.append(data_name)
@@ -467,7 +506,7 @@ class FormValidator:
         # WebHook 처리 - file_type="response"일 때 webhook_in_data 생성
         if protocol_type == "webhook" and file_type == "request":
             webhook_request_spec = settings.get("webhook", {}).get("integrationSpec") or {}
-            webhook_data_name = f"{endpoint_name}_webhook_out_data"
+            webhook_data_name = f"{numbered_endpoint}_webhook_out_data"
 
             # requestSpec이 리스트인 경우 (bodyJson 배열이 직접 들어있음)
             if isinstance(webhook_request_spec, list):
@@ -476,7 +515,7 @@ class FormValidator:
                 # requestSpec이 딕셔너리인 경우 (bodyJson 키가 있을 수 있음)
                 webhook_data_obj = self._convert_webhook_spec_to_data(webhook_request_spec)
 
-            data_content += f"# {endpoint_name} WebHook OUT Data\n"
+            data_content += f"# {numbered_endpoint} WebHook OUT Data\n"
             formatted_webhook_data = self.data_gen.format_data_content(webhook_data_obj)
             data_content += f"{spec_id}{webhook_data_name} = {formatted_webhook_data}\n\n"
             webhook_data_names.append(webhook_data_name)  # webhook 전용 리스트에 추가
@@ -485,7 +524,7 @@ class FormValidator:
         # WebHook 처리 - file_type="request"일 때 webhook_out_data 생성
         if protocol_type == "webhook" and file_type == "response":
             webhook_request_spec = settings.get("webhook", {}).get("requestSpec") or {}
-            webhook_data_name = f"{endpoint_name}_webhook_in_data"
+            webhook_data_name = f"{numbered_endpoint}_webhook_in_data"
 
             # requestSpec이 리스트인 경우 (bodyJson 배열이 직접 들어있음)
             if isinstance(webhook_request_spec, list):
@@ -494,18 +533,19 @@ class FormValidator:
                 # requestSpec이 딕셔너리인 경우 (bodyJson 키가 있을 수 있음)
                 webhook_data_obj = self._convert_webhook_spec_to_data(webhook_request_spec)
 
-            data_content += f"# {endpoint_name} WebHook IN Data\n"
+            data_content += f"# {numbered_endpoint} WebHook IN Data\n"
             formatted_webhook_data = self.data_gen.format_data_content(webhook_data_obj)
             data_content += f"{spec_id}{webhook_data_name} = {formatted_webhook_data}\n\n"
             webhook_data_names.append(webhook_data_name)  # webhook 전용 리스트에 추가
             print(f"  ✓ WebHook IN Data 생성: {webhook_data_name}" + (" (빈 딕셔너리)" if not webhook_request_spec else ""))
 
-        endpoint_names.append(endpoint_name)
+        endpoint_names.append(numbered_endpoint)
 
         #validation 생성
         vinfo = self.validation_gen.extract_enabled_validations(ts,
                                                                 schema_type)  # {"endpoint":..., "validation": {...}}
-        v_endpoint = vinfo.get("endpoint") or endpoint_name
+        # numbered_endpoint 사용
+        v_endpoint = numbered_endpoint
         v_suffix = "_in_validation" if schema_type == "request" else "_out_validation"
         v_var_name = f"{spec_id}{v_endpoint}{v_suffix}"
 
@@ -524,7 +564,8 @@ class FormValidator:
 
         # constraints 생성
         cinfo = self.const_gen.extract_value_type_fields(ts, file_type)
-        c_endpoint = cinfo.get("endpoint") or endpoint_name
+        # numbered_endpoint 사용
+        c_endpoint = numbered_endpoint
         c_suffix = "_in_constraints" if file_type == "request" else "_out_constraints"
         c_var_name = f"{spec_id}{c_endpoint}{c_suffix}"
 
@@ -545,7 +586,7 @@ class FormValidator:
         # WebHook Constraints 처리 - file_type="response"일 때 webhook_in_constraints 생성
         if protocol_type == "webhook" and file_type == "response":
             webhook_request_spec = settings.get("webhook", {}).get("requestSpec") or {}
-            webhook_c_name = f"{endpoint_name}_webhook_in_constraints"
+            webhook_c_name = f"{numbered_endpoint}_webhook_in_constraints"
 
             # requestSpec에서 bodyJson 추출하여 valueType 필드 찾기
             webhook_body_json = None
@@ -559,7 +600,7 @@ class FormValidator:
             if webhook_body_json:
                 webhook_c_map = self.const_gen.build_validation_map(webhook_body_json)
 
-            constraints_content += f"# {endpoint_name} WebHook IN Constraints\n"
+            constraints_content += f"# {numbered_endpoint} WebHook IN Constraints\n"
             if not webhook_c_map:
                 constraints_content += f"{spec_id}{webhook_c_name} = {{}}\n\n"
             else:
@@ -573,7 +614,7 @@ class FormValidator:
         # WebHook Constraints 처리 - file_type="request"일 때 webhook_out_constraints 생성
         if protocol_type == "webhook" and file_type == "request":
             webhook_request_spec = settings.get("webhook", {}).get("integrationSpec") or {}
-            webhook_c_name = f"{endpoint_name}_webhook_out_constraints"
+            webhook_c_name = f"{numbered_endpoint}_webhook_out_constraints"
 
             # requestSpec에서 bodyJson 추출하여 valueType 필드 찾기
             webhook_body_json = None
@@ -587,7 +628,7 @@ class FormValidator:
             if webhook_body_json:
                 webhook_c_map = self.const_gen.build_validation_map(webhook_body_json)
 
-            constraints_content += f"# {endpoint_name} WebHook OUT Constraints\n"
+            constraints_content += f"# {numbered_endpoint} WebHook OUT Constraints\n"
             if not webhook_c_map:
                 constraints_content += f"{spec_id}{webhook_c_name} = {{}}\n\n"
             else:
