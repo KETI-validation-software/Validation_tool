@@ -3698,7 +3698,8 @@ class MyApp(QWidget):
 
                 json_data = json.dumps(inMessage).encode('utf-8')
 
-                self._push_event(self.cnt, "REQUEST", inMessage)
+                # ✅ REQUEST 기록 제거 - 서버(api_server.py)에서만 기록하도록 변경
+                # self._push_event(self.cnt, "REQUEST", inMessage)
 
                 api_name = self.message[self.cnt] if self.cnt < len(self.message) else ""
                 if api_name and isinstance(inMessage, dict):
@@ -3871,7 +3872,8 @@ class MyApp(QWidget):
                             self.current_retry += 1
                             return
 
-                        self._push_event(self.cnt, "RESPONSE", res_data)
+                        # ✅ RESPONSE 기록 제거 - 서버(api_server.py)에서만 기록하도록 변경
+                        # self._push_event(self.cnt, "RESPONSE", res_data)
 
                         # 현재 재시도 정보
                         current_retries = self.num_retries_list[self.cnt] if self.cnt < len(

@@ -184,8 +184,8 @@
               "validationData": {
                 "code": "200",
                 "message": "성공",
-                "sensorDeviceID": "iot0003",
-                "sensorDeviceStatus": "AlarmOff"
+                "sensorDeviceID": "iot0001",
+                "sensorDeviceStatus": "AlarmOn"
               },
               "validationErrors": [
                 "[시도 1/1]",
@@ -210,12 +210,12 @@
               "validationData": {
                 "code": "200",
                 "message": "성공",
-                "sensorDeviceID": "iot0003",
-                "sensorDeviceStatus": "AlarmOn"
+                "sensorDeviceID": "iot0001",
+                "sensorDeviceStatus": "AlarmOff"
               },
               "validationErrors": [
                 "[시도 1/1]",
-                "[의미] sensorDeviceStatus: 값 불일치: ['AlarmOn'] != 예상값"
+                "[의미] sensorDeviceStatus: 값 불일치: ['AlarmOff'] != 예상값"
               ]
             }
           ]
@@ -223,5 +223,5 @@
       ]
     }
   ],
-  "completedDate": "2025-12-10T17:21:15Z"
+  "completedDate": "2025-12-11T12:36:55Z"
 }
