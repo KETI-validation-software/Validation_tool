@@ -795,18 +795,16 @@ class Server(BaseHTTPRequestHandler):
                 # ✅ generator의 latest_events를 명시적으로 업데이트 (참조 동기화)
                 self.generator.latest_events = Server.latest_event
                 print(f"[DEBUG][CONSTRAINTS] 🔄 generator.latest_events 동기화 완료: {list(self.generator.latest_events.keys())}")
-                
-                num_data = [random.randint(0, 9) for _ in range(3)]
 
                 print(f"[DEBUG][CONSTRAINTS] request_data: {self.request_data}")
                 print(f"[DEBUG][CONSTRAINTS] message keys: {message.keys() if isinstance(message, dict) else 'N/A'}")
 
-                # request_data, template_data, constraints, n 순서로 전달
+                # ✅ 템플릿 그대로 사용 (n 파라미터 제거)
+                # request_data, template_data, constraints 순서로 전달
                 updated_message = self.generator._applied_constraints(
                     request_data=self.request_data,
                     template_data=copy.deepcopy(message),  # deepcopy로 원본 보호
-                    constraints=out_con,
-                    n=len(num_data)
+                    constraints=out_con
                 )
                 print(f"[DEBUG][CONSTRAINTS] 업데이트된 message 내용: {json.dumps(updated_message, ensure_ascii=False)[:200]}")
 
@@ -935,13 +933,12 @@ class Server(BaseHTTPRequestHandler):
                                 self.generator.latest_events = Server.latest_event
                                 print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 🔄 generator.latest_events 동기화 완료")
                                 
+                                # ✅ 템플릿 그대로 사용 (n 파라미터 제거)
                                 # 웹훅 페이로드에 constraints 적용
-                                num_data = [random.randint(0, 9) for _ in range(3)]
                                 webhook_payload = self.generator._applied_constraints(
                                     request_data=self.request_data,
                                     template_data=webhook_payload,
-                                    constraints=webhook_con,
-                                    n=len(num_data)
+                                    constraints=webhook_con
                                 )
                                 print(f"[DEBUG][WEBHOOK_CONSTRAINTS] constraints 적용 완료")
                                 print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 업데이트된 webhook_payload: {json.dumps(webhook_payload, ensure_ascii=False)[:300]}")

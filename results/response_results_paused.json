@@ -1,0 +1,64 @@
+{
+  "timestamp": "2025-12-11 17:35:14",
+  "last_completed_api_index": -1,
+  "step_buffers": [
+    {
+      "data": "",
+      "error": "",
+      "result": "PASS",
+      "raw_data_list": []
+    },
+    {
+      "data": "",
+      "error": "",
+      "result": "PASS",
+      "raw_data_list": []
+    },
+    {
+      "data": "",
+      "error": "",
+      "result": "PASS",
+      "raw_data_list": []
+    },
+    {
+      "data": "",
+      "error": "",
+      "result": "PASS",
+      "raw_data_list": []
+    },
+    {
+      "data": "",
+      "error": "",
+      "result": "PASS",
+      "raw_data_list": []
+    },
+    {
+      "data": "",
+      "error": "",
+      "result": "PASS",
+      "raw_data_list": []
+    }
+  ],
+  "step_pass_counts": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "step_error_counts": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "total_pass_cnt": 0,
+  "total_error_cnt": 0,
+  "valResult_text": "============================================================\n🚀 시스템 검증 시작: sensor001\n📋 Spec ID: cmii7wfuf006i8z1tcds6q69g\n📊 API 개수: 6개\n============================================================\n검증 절차가 중지되었습니다.",
+  "current_spec_id": "cmii7wfuf006i8z1tcds6q69g",
+  "global_pass_cnt": 0,
+  "global_error_cnt": 0
+}

@@ -1,2 +1,0 @@
-{"time": "2025-12-11T03:36:54.153319Z", "api": "SensorDeviceControl2", "dir": "REQUEST", "data": {"sensorDeviceID": "iot0001", "commandType": "AlarmOff"}}
-{"time": "2025-12-11T03:36:54.157309Z", "api": "SensorDeviceControl2", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "sensorDeviceID": "iot0001", "sensorDeviceStatus": "AlarmOff"}}

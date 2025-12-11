@@ -1,0 +1,2 @@
+{"time": "2025-12-11T08:35:32.717568Z", "api": "StreamURLs", "dir": "REQUEST", "data": {"camList": [], "streamProtocolType": "RSTP"}}
+{"time": "2025-12-11T08:35:32.723552Z", "api": "StreamURLs", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "camList": [{"camID": "", "accessID": "", "accessPW": "", "camURL": "", "videoInfo": {"resolution": "1920x1080", "fps": 30, "videoCodec": "H.264", "audioCodec": "G.711"}}]}}
