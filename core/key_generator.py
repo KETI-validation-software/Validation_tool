@@ -113,6 +113,7 @@ class KeyIdGenerator:
     def extract_key_field_id_mapping(self, ts: Dict) -> Dict[str, Dict[str, str]]:
         """
         step의 request/response bodyJson에서 key -> field ID 매핑 추출
+        WebHook이 있는 경우 requestSpec, integrationSpec도 추출
 
         Args:
             ts: _test_step_cache에서 가져온 step 데이터
@@ -141,6 +142,46 @@ class KeyIdGenerator:
                     self._collect_key_field_id_mapping(
                         body_json,
                         result[direction],
+                        prefix=""
+                    )
+
+        # WebHook 데이터 처리
+        settings = api.get("settings", {})
+        webhook = settings.get("webhook", {})
+        if webhook:
+            # requestSpec → response_key_ids에 병합
+            request_spec = webhook.get("requestSpec")
+            if request_spec:
+                if isinstance(request_spec, list):
+                    # requestSpec이 리스트인 경우 (bodyJson 배열이 직접 들어있음)
+                    self._collect_key_field_id_mapping(
+                        request_spec,
+                        result["response"],
+                        prefix=""
+                    )
+                elif isinstance(request_spec, dict) and "bodyJson" in request_spec:
+                    # requestSpec이 딕셔너리인 경우 (bodyJson 키가 있음)
+                    self._collect_key_field_id_mapping(
+                        request_spec.get("bodyJson", []),
+                        result["response"],
+                        prefix=""
+                    )
+
+            # integrationSpec → request_key_ids에 병합
+            integration_spec = webhook.get("integrationSpec")
+            if integration_spec:
+                if isinstance(integration_spec, list):
+                    # integrationSpec이 리스트인 경우 (bodyJson 배열이 직접 들어있음)
+                    self._collect_key_field_id_mapping(
+                        integration_spec,
+                        result["request"],
+                        prefix=""
+                    )
+                elif isinstance(integration_spec, dict) and "bodyJson" in integration_spec:
+                    # integrationSpec이 딕셔너리인 경우 (bodyJson 키가 있음)
+                    self._collect_key_field_id_mapping(
+                        integration_spec.get("bodyJson", []),
+                        result["request"],
                         prefix=""
                     )
 
