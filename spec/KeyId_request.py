@@ -33,6 +33,21 @@ cmiqr1jha00i6ie8fb1scb3go_Authentication_request_key_ids = {
 }
 
 cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_request_key_ids = {
+    "doorList": "cmixuoz8e0grnp0020xzn3bck",
+    "doorList.doorID": "cmixuqxeb0h0np002mwczcz4g",
+    "duration": "cmixupira0gudp0025a627ml4",
+    "transProtocol": "cmixupvnn0gw1p002t4oynlxp",
+    "transProtocol.transProtocolType": "cmixuq3qa0gxmp0023qvxro6p",
+    "transProtocol.transProtocolDesc": "cmixuq6xh0gxzp002nbmk4kcc",
+    "startTime": "cmixuqodk0h00p002xkjhnyca",
+}
+
+cmiqr1jha00i6ie8fb1scb3go_DoorControl_request_key_ids = {
+    "doorID": "cmixuu5os0hc9p002st12cpzi",
+    "commandType": "cmixuu94o0hchp002wh8j30df",
+}
+
+cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_request_key_ids = {
     "doorList": "cmize6nzh000f96qhvk7bjdr8",
     "doorList.doorID": "cmize9v8b00a296qh1vooije0",
     "duration": "cmize7lki002a96qhe5181nqj",
@@ -42,16 +57,12 @@ cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_request_key_ids = {
     "startTime": "cmize9f5s009v96qhrbr6kzd5",
 }
 
-cmiqr1jha00i6ie8fb1scb3go_DoorControl_request_key_ids = {
-    "doorID": "cmixuu5os0hc9p002st12cpzi",
-    "commandType": "cmixuu94o0hchp002wh8j30df",
-}
-
 # cmiqr1jha00i6ie8fb1scb3go Request Key-ID Mapping 리스트
 cmiqr1jha00i6ie8fb1scb3go_request_key_ids = [
     cmiqr1jha00i6ie8fb1scb3go_Authentication_request_key_ids,
     cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_request_key_ids,
     cmiqr1jha00i6ie8fb1scb3go_DoorControl_request_key_ids,
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_request_key_ids,
 ]
 
 # cmiqr0kdw00i4ie8fr3firjtg
@@ -186,13 +197,18 @@ cmiqr1jha00i6ie8fb1scb3go_DoorProfiles_response_key_ids = {
 }
 
 cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_response_key_ids = {
-    "code": "cmizea7th00ao96qhtccvs2gv",
-    "message": "cmizea94s00at96qh5tv1j1x9",
+    "code": "cmixur2k30h12p0021dj2dqwu",
+    "message": "cmixur54k0h18p0025u2ok46q",
 }
 
 cmiqr1jha00i6ie8fb1scb3go_DoorControl_response_key_ids = {
     "code": "cmixuums70hcrp0022uu12x05",
     "message": "cmixuupod0hcxp002anplrma0",
+}
+
+cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_response_key_ids = {
+    "code": "cmizea7th00ao96qhtccvs2gv",
+    "message": "cmizea94s00at96qh5tv1j1x9",
 }
 
 # cmiqr1jha00i6ie8fb1scb3go Response Key-ID Mapping 리스트
@@ -202,6 +218,7 @@ cmiqr1jha00i6ie8fb1scb3go_response_key_ids = [
     cmiqr1jha00i6ie8fb1scb3go_DoorProfiles_response_key_ids,
     cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_response_key_ids,
     cmiqr1jha00i6ie8fb1scb3go_DoorControl_response_key_ids,
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_response_key_ids,
 ]
 
 # cmiqr0kdw00i4ie8fr3firjtg
