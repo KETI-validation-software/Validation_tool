@@ -480,34 +480,7 @@ class Server(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(data).encode('utf-8'))
             return
 
-        # ========== 오류 검사 전 REQUEST 이벤트 기록 및 카운터 증가 ==========
-        self._push_event(api_name, "REQUEST", self.request_data)
-        
-        # 클래스 변수 request_counter 사용하여 API별 요청 횟수 추적
-        try:
-            if api_name not in Server.request_counter:
-                Server.request_counter[api_name] = 0
-            Server.request_counter[api_name] += 1
-            print(f"[API_SERVER] 요청 수신: {api_name} (카운트: {Server.request_counter[api_name]})")
-        except Exception as e:
-            print(f"[API_SERVER] request_counter 에러: {e}")
-        # ================================================================
-
-        # ========== 오류 검사 로직 (400/201/404) ==========
-        # ✅ api_res() 호출 후에 검사 (self.message, self.inSchema가 설정된 후)
-        error_response = self._check_request_errors(api_name, self.request_data)
-        if error_response:
-            print(f"[DEBUG][SERVER] 오류 감지: {error_response}")
-            # ✅ trace 저장 (_push_event 내부에서 deepcopy 수행)
-            self._push_event(api_name, "RESPONSE", error_response)
-            # ✅ JSON에 code_value 추가
-            error_response["code_value"] = 400
-            print(f"[DEBUG][SERVER] 에러 응답에 code_value=400 추가")
-            self._set_headers()
-            self.wfile.write(json.dumps(error_response).encode('utf-8'))
-            return
-        # ================================================
-
+        # ========== 인증 로직 먼저 실행 (REQUEST 기록 전에) ==========
         if self.auth_type == "None":
             auth_pass = True
         elif api_name == "Authentication":
@@ -629,11 +602,10 @@ class Server(BaseHTTPRequestHandler):
             elif self.path == "/" + self.message[0]:
                 auth_pass = True
 
-        # ✅ 요청 본문은 이미 do_POST 시작 부분에서 self.request_data에 저장됨
-        # 중복 읽기 방지를 위해 이미 저장된 데이터 사용
-        dict_data = self.request_data
-        print(f"[DEBUG][SERVER] dict_data 사용: {dict_data}")
-
+        # ========== 인증 성공 후 REQUEST 이벤트 기록 및 카운터 증가 ==========
+        # ✅ 인증이 성공한 경우에만 실행됨 (401 return 후에는 여기 도달 안 함)
+        self._push_event(api_name, "REQUEST", self.request_data)
+        
         # 클래스 변수 request_counter 사용하여 API별 요청 횟수 추적
         try:
             if api_name not in Server.request_counter:
@@ -642,9 +614,27 @@ class Server(BaseHTTPRequestHandler):
             print(f"[API_SERVER] 요청 수신: {api_name} (카운트: {Server.request_counter[api_name]})")
         except Exception as e:
             print(f"[API_SERVER] request_counter 에러: {e}")
-            pass
-        except Exception:
-            pass
+        # ================================================================
+
+        # ========== 오류 검사 로직 (400/201/404) ==========
+        # ✅ api_res() 호출 후에 검사 (self.message, self.inSchema가 설정된 후)
+        error_response = self._check_request_errors(api_name, self.request_data)
+        if error_response:
+            print(f"[DEBUG][SERVER] 오류 감지: {error_response}")
+            # ✅ trace 저장 (_push_event 내부에서 deepcopy 수행)
+            self._push_event(api_name, "RESPONSE", error_response)
+            # ✅ JSON에 code_value 추가
+            error_response["code_value"] = 400
+            print(f"[DEBUG][SERVER] 에러 응답에 code_value=400 추가")
+            self._set_headers()
+            self.wfile.write(json.dumps(error_response).encode('utf-8'))
+            return
+        # ================================================
+
+        # ✅ 요청 본문은 이미 do_POST 시작 부분에서 self.request_data에 저장됨
+        # 중복 읽기 방지를 위해 이미 저장된 데이터 사용
+        dict_data = self.request_data
+        print(f"[DEBUG][SERVER] dict_data 사용: {dict_data}")
 
         #  refuse to receive non-json content
         if ctype == 'text/plain':
