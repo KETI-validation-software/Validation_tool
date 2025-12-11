@@ -2605,6 +2605,7 @@ class FormValidator:
                 "status": "idle"
             }
             response = requests.post(url, json=payload, timeout=10)
+            print(f"[INFO] Heartbeat (idle) 응답 코드: {response.status_code}")
             response.raise_for_status()
             print(f"[INFO] Heartbeat (idle) 전송 성공: {payload}")
             return True
@@ -2623,6 +2624,7 @@ class FormValidator:
                 "testInfo": test_info
             }
             response = requests.post(url, json=payload, timeout=10)
+            print(f"[INFO] Heartbeat (busy) 응답 코드: {response.status_code}")
             response.raise_for_status()
             print(f"[INFO] Heartbeat (busy) 전송 성공: ipAddress={ip_address}")
             return True
