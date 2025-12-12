@@ -22,10 +22,10 @@
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 82.35,
+    "score": 80.0,
     "totalFields": 85,
-    "passedFields": 70,
-    "failedFields": 15
+    "passedFields": 68,
+    "failedFields": 17
   },
   "testResult": [
     {
@@ -115,31 +115,35 @@
       "testGroup": "cmii831gk009j8z1thiahf6ro",
       "testSpecId": "cmii7v8pr006g8z1tvo55a50u",
       "testSpecName": "vid001",
-      "score": 82.35,
+      "score": 80.0,
       "totalFields": 85,
-      "passedFields": 70,
-      "failedFields": 15,
+      "passedFields": 68,
+      "failedFields": 17,
       "apis": [
         {
           "id": "cmii7ylxn006m8z1tqq8dard1",
           "name": "사용자 인증",
           "method": "POST",
           "endpoint": "/Authentication",
-          "score": 100.0,
+          "score": 60.0,
           "validationCnt": 1,
           "totalFields": 5,
-          "passFields": 5,
-          "failFields": 0,
+          "passFields": 3,
+          "failFields": 2,
           "validations": [
             {
               "attempt": 1,
               "validationData": {
-                "code": "400",
-                "message": "잘못된 요청"
+                "code": "200",
+                "message": "성공",
+                "userName": "관리자",
+                "userAff": "오산시청",
+                "accessToken": "abcde1234"
               },
               "validationErrors": [
                 "[시도 1/1]",
-                "에러 응답 (code=400): 모든 필드 자동 PASS 처리됨"
+                "[의미] code: 값 불일치: 200가 지정값 ['400']에 없음",
+                "[의미] message: 값 불일치: 성공가 지정값 ['잘못된 요청']에 없음"
               ]
             }
           ]
@@ -339,8 +343,8 @@
                     "camID": "cam0001",
                     "timeList": [
                       {
-                        "startTime": 7545558644992,
-                        "endTime": 7732039360960
+                        "startTime": 5798585408650,
+                        "endTime": 9914997108097
                       }
                     ]
                   }
@@ -348,9 +352,9 @@
               },
               "validationErrors": [
                 "[시도 1/1]",
-                "[구조] 타입 불일치: camList.timeList - 예상: 모든 요소가 list, 실패한 항목들: [0] {'startTime': 7545558644992, 'endTime': 7732039360960} (타입: dict)",
-                "[의미] camList.timeList.endTime: 범위 초과: 7732039360960가 [20251105163010124, 20251115163010124] 범위를 벗어남",
-                "[의미] camList.timeList.startTime: 범위 초과: 7545558644992가 [20251105163010124, 20251115163010124] 범위를 벗어남"
+                "[구조] 타입 불일치: camList.timeList - 예상: 모든 요소가 list, 실패한 항목들: [0] {'startTime': 5798585408650, 'endTime': 9914997108097} (타입: dict)",
+                "[의미] camList.timeList.endTime: 범위 초과: 9914997108097가 [20251105163010124, 20251115163010124] 범위를 벗어남",
+                "[의미] camList.timeList.startTime: 범위 초과: 5798585408650가 [20251105163010124, 20251115163010124] 범위를 벗어남"
               ]
             }
           ]
@@ -415,16 +419,16 @@
                     "camID": "cam0001",
                     "eventUUID": "event01",
                     "eventName": "Intrusion",
-                    "startTime": 8868137874779,
-                    "endTime": 9657305988027,
+                    "startTime": 5499834434654,
+                    "endTime": 8928760439302,
                     "eventDesc": "AAABVVVVCCCDDssvfdd"
                   }
                 ]
               },
               "validationErrors": [
                 "[시도 1/1]",
-                "[의미] camList.endTime: 범위 초과: 9657305988027가 [20251105163010124, 20251115163010124] 범위를 벗어남",
-                "[의미] camList.startTime: 범위 초과: 8868137874779가 [20251105163010124, 20251115163010124] 범위를 벗어남"
+                "[의미] camList.endTime: 범위 초과: 8928760439302가 [20251105163010124, 20251115163010124] 범위를 벗어남",
+                "[의미] camList.startTime: 범위 초과: 5499834434654가 [20251105163010124, 20251115163010124] 범위를 벗어남"
               ]
             }
           ]
@@ -448,7 +452,7 @@
                 "camList": [
                   {
                     "camID": "cam0001",
-                    "analyticsTime": 2682928245188,
+                    "analyticsTime": 3678286791167,
                     "anlayticsResultList": [
                       {
                         "anayticsID": "object001",
@@ -473,7 +477,7 @@
               },
               "validationErrors": [
                 "[시도 1/1]",
-                "[의미] camList.analyticsTime: 범위 초과: 2682928245188가 [20251105163010124, 20251115163010124] 범위를 벗어남",
+                "[의미] camList.analyticsTime: 범위 초과: 3678286791167가 [20251105163010124, 20251115163010124] 범위를 벗어남",
                 "[구조] 타입 불일치: camList.anlayticsResultList - 예상: 모든 요소가 list, 실패한 항목들: [0] {'anayticsID': 'object001', 'analyticsClass': ['사람'], 'analyticsAttribute': ['빨간색'], 'analyticsConfidence': 0.8, 'analyticsBoundingBox': {'left': 0.2, 'top': 0.1, 'right': 0.5, 'bottom': 0.6}, 'analyticsDesc': '13가 4567'} (타입: dict)",
                 "[구조] 타입 불일치: camList.anlayticsResultList.analyticsBoundingBox.bottom (예상: int, 실제: float, 값: 0.6)",
                 "[구조] 타입 불일치: camList.anlayticsResultList.analyticsBoundingBox.left (예상: int, 실제: float, 값: 0.2)",
@@ -485,90 +489,7 @@
           ]
         }
       ]
-    },
-    {
-      "testGroup": "cmii831gk009j8z1thiahf6ro",
-      "testSpecId": "cmii7w683006h8z1t7usnin5g",
-      "testSpecName": "bio001",
-      "score": 0,
-      "totalFields": 0,
-      "passedFields": 0,
-      "failedFields": 0,
-      "apis": [
-        {
-          "id": "cmii80zqn007k8z1t85trpyps",
-          "name": "사용자 인증",
-          "method": "POST",
-          "endpoint": "/Authentication",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmiwslyqi049np002cgziiglj",
-          "name": "전송 지원 기능 정보 연동",
-          "method": "POST",
-          "endpoint": "/Capabilities",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmiwso2p204bup002k9s8z9ph",
-          "name": "바이오 및 출입통제 장치 목록 정보",
-          "method": "POST",
-          "endpoint": "/DoorProfiles",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmiwstny705pnp002qw73yzs3",
-          "name": "사용자 권한 정보 연동",
-          "method": "POST",
-          "endpoint": "/AccessUserInfos",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmiwsz3sr079dp002xooui9id",
-          "name": "실시간 출입인증 목록 정보 연동",
-          "method": "POST",
-          "endpoint": "/RealtimeVerifEventInfos",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmiwtf61309slp002fna2xzbi",
-          "name": "저장된 출입인증 목록 정보 연동",
-          "method": "POST",
-          "endpoint": "/StoredVerifEventInfos",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        }
-      ]
     }
   ],
-  "completedDate": "2025-12-12T15:32:09Z"
+  "completedDate": "2025-12-12T16:11:30Z"
 }

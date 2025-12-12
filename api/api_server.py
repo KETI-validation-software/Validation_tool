@@ -811,14 +811,19 @@ class Server(BaseHTTPRequestHandler):
                 # ✅ trace 저장 (_push_event 내부에서 deepcopy 수행)
                 self._push_event(api_name, "RESPONSE", updated_message)
 
-                # ✅ CameraProfiles 응답인 경우 camID들을 valid_device_ids에 추가
+                # ✅ CameraProfiles 응답인 경우 camID들을 valid_device_ids에 업데이트 (리셋 후 추가)
                 if "CameraProfiles" in api_name and isinstance(updated_message, dict):
                     cam_list = updated_message.get("camList", [])
                     if cam_list:
+                        # 기본 ID들 유지하고 CameraProfiles ID들만 리셋
+                        base_ids = {"cam001", "cam002", "keti", "camera1", "camera2"}
+                        Server.valid_device_ids = base_ids.copy()
+                        
+                        # CameraProfiles에서 받은 ID 추가
                         for cam in cam_list:
                             if isinstance(cam, dict) and "camID" in cam:
                                 Server.valid_device_ids.add(cam["camID"])
-                        print(f"[DEVICE_UPDATE] CameraProfiles에서 {len(cam_list)}개 camID 추가")
+                        print(f"[DEVICE_UPDATE] CameraProfiles에서 {len(cam_list)}개 camID로 리셋+추가")
                         print(f"[DEVICE_UPDATE] 현재 유효한 장치 목록: {Server.valid_device_ids}")
 
                 # ✅ JSON에 code_value 추가
@@ -839,14 +844,19 @@ class Server(BaseHTTPRequestHandler):
                 # ✅ trace 저장 (_push_event 내부에서 deepcopy 수행)
                 self._push_event(api_name, "RESPONSE", message)
 
-                # ✅ CameraProfiles 응답인 경우 camID들을 valid_device_ids에 추가
+                # ✅ CameraProfiles 응답인 경우 camID들을 valid_device_ids에 업데이트 (리셋 후 추가)
                 if "CameraProfiles" in api_name and isinstance(message, dict):
                     cam_list = message.get("camList", [])
                     if cam_list:
+                        # 기본 ID들 유지하고 CameraProfiles ID들만 리셋
+                        base_ids = {"cam001", "cam002", "keti", "camera1", "camera2"}
+                        Server.valid_device_ids = base_ids.copy()
+                        
+                        # CameraProfiles에서 받은 ID 추가
                         for cam in cam_list:
                             if isinstance(cam, dict) and "camID" in cam:
                                 Server.valid_device_ids.add(cam["camID"])
-                        print(f"[DEVICE_UPDATE] CameraProfiles에서 {len(cam_list)}개 camID 추가")
+                        print(f"[DEVICE_UPDATE] CameraProfiles에서 {len(cam_list)}개 camID로 리셋+추가")
                         print(f"[DEVICE_UPDATE] 현재 유효한 장치 목록: {Server.valid_device_ids}")
 
                 # ✅ JSON에 code_value 추가
