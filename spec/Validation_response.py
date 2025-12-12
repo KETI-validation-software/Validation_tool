@@ -38,7 +38,7 @@ cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl2_out_validation = {
     "validationType": "request-field-match",
     "referenceFieldId": "cmisg8fmw08c55vy7eby9fson",
     "referenceField": "sensorDeviceID",
-    "referenceEndpoint": "/SensorDeviceControl2",
+    "referenceEndpoint": "/SensorDeviceControl",
     "score": 0
   },
   "sensorDeviceStatus": {
@@ -46,7 +46,7 @@ cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl2_out_validation = {
     "validationType": "request-field-match",
     "referenceFieldId": "cmisg8hg208ca5vy7ijzfeelo",
     "referenceField": "commandType",
-    "referenceEndpoint": "/SensorDeviceControl2",
+    "referenceEndpoint": "/SensorDeviceControl",
     "score": 0
   }
 }
