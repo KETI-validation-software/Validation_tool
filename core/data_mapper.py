@@ -8,26 +8,25 @@ class ConstraintDataGenerator:
         """
         self.latest_events = latest_events if latest_events is not None else {}
 
-    def _applied_constraints(self, request_data, template_data, constraints, n=5):
+    def _applied_constraints(self, request_data, template_data, constraints):
         """
         request_data: 요청 데이터 (camID 후보 등)
         template_data: response 템플릿
         constraints: 제약 조건
-        n: 생성 개수
+        ✅ 템플릿의 리스트 길이를 그대로 유지하며 constraint만 적용
         """
         # print(f"[DEBUG][DATA_MAPPER] _applied_constraints 호출됨")
         # print(f"[DEBUG][DATA_MAPPER] request_data: {request_data}")
         # print(f"[DEBUG][DATA_MAPPER] constraints keys: {list(constraints.keys()) if constraints else []}")
         # print(
         #     f"[DEBUG][DATA_MAPPER] template_data keys: {list(template_data.keys()) if isinstance(template_data, dict) else 'N/A'}")
-        # print(f"[DEBUG][DATA_MAPPER] n: {n}")
 
         # constraints 분석 및 참조 값 수집
         constraint_map = self._build_constraint_map(constraints, request_data)
         # print(f"[DEBUG][DATA_MAPPER] constraint_map: {constraint_map}")
 
-        # 템플릿 기반 데이터 생성
-        response = self._generate_from_template(template_data, constraint_map, n)
+        # 템플릿 기반 데이터 생성 (템플릿 리스트 길이 자동 감지)
+        response = self._generate_from_template(template_data, constraint_map)
         # print(f"[DEBUG][DATA_MAPPER] generated response: {response}")
 
         # template_data 업데이트 (원본 수정)
@@ -250,8 +249,8 @@ class ConstraintDataGenerator:
 
         return constraint_map
 
-    def _generate_from_template(self, template, constraint_map, n):
-        """템플릿을 재귀적으로 순회하며 데이터 생성"""
+    def _generate_from_template(self, template, constraint_map):
+        """템플릿을 재귀적으로 순회하며 데이터 생성 (템플릿 구조 유지)"""
         result = {}
 
         for key, value in template.items():
@@ -266,11 +265,14 @@ class ConstraintDataGenerator:
                         result[key] = value
             elif isinstance(value, list) and len(value) > 0 and isinstance(value[0], dict):
                 # 리스트 형태의 구조 처리
+                # ✅ 템플릿의 리스트 길이 자동 감지
+                n = len(value)
+                
                 # ✅ constraints가 없으면 원본 리스트를 그대로 사용
                 has_constraints = any(f"{key}.{field}" in constraint_map for field in value[0].keys())
                 
                 if has_constraints:
-                    # constraints가 있으면 동적 생성
+                    # constraints가 있으면 동적 생성 (템플릿 길이만큼)
                     result[key] = self._generate_list_items(
                         key, value[0], constraint_map, n
                     )
