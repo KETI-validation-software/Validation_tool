@@ -1,2 +1,2 @@
-{"time": "2025-12-12T01:02:46.618580Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "cam0001"}], "transProtocol": {"transProtocolType": "LongPolling", "transProtocolDesc": ""}, "duration": 10, "eventFilter": "배회", "classFilter": "", "startTime": 20220822163022124}}
-{"time": "2025-12-12T01:02:46.619578Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "404", "message": "장치 없음"}}
+{"time": "2025-12-12T06:31:56.964479Z", "api": "RealtimeVideoEventInfos", "dir": "REQUEST", "data": {"camList": [{"camID": "cam0001"}], "transProtocol": {"transProtocolType": "LongPolling", "transProtocolDesc": ""}, "duration": 10, "eventFilter": "배회", "classFilter": "", "startTime": 20220822163022124}}
+{"time": "2025-12-12T06:31:56.968468Z", "api": "RealtimeVideoEventInfos", "dir": "RESPONSE", "data": {"code": "200", "message": "성공"}}
