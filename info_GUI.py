@@ -86,6 +86,188 @@ class InfoWidget(QWidget):
 
         # page1의 요소들 위치 재조정
         if hasattr(self, 'page1') and self.page1:
+            # 시험 기본 정보 패널 비율 조정
+            if hasattr(self, 'info_panel') and hasattr(self, 'original_window_size') and hasattr(self, 'original_panel_size'):
+                current_width = self.page1.width()
+                current_height = self.page1.height()
+
+                # 비율 계산 (가로/세로 독립적으로)
+                width_ratio = current_width / self.original_window_size[0]
+                height_ratio = current_height / self.original_window_size[1]
+
+                # 최소 비율은 1.0 (원본 크기 이하로 줄어들지 않음)
+                width_ratio = max(1.0, width_ratio)
+                height_ratio = max(1.0, height_ratio)
+
+                # 새 패널 크기 계산 (가로/세로 독립적으로 적용)
+                new_width = int(self.original_panel_size[0] * width_ratio)
+                new_height = int(self.original_panel_size[1] * height_ratio)
+
+                self.info_panel.setFixedSize(new_width, new_height)
+
+                # 타이틀 컨테이너 크기 조정 (가로만 늘어남, 세로는 고정)
+                if hasattr(self, 'panel_title_container') and hasattr(self, 'original_title_size'):
+                    new_title_width = int(self.original_title_size[0] * width_ratio)
+                    new_title_height = self.original_title_size[1]  # 세로는 원본 유지
+                    self.panel_title_container.setFixedSize(new_title_width, new_title_height)
+
+                    # 타이틀 텍스트 크기 조정
+                    if hasattr(self, 'panel_title_text') and hasattr(self, 'original_title_text_size'):
+                        new_text_width = int(self.original_title_text_size[0] * width_ratio)
+                        self.panel_title_text.setFixedSize(new_text_width, self.original_title_text_size[1])
+
+                    # 타이틀 설명 영역 크기 조정
+                    if hasattr(self, 'panel_title_desc') and hasattr(self, 'original_title_desc_size'):
+                        new_desc_width = int(self.original_title_desc_size[0] * width_ratio)
+                        new_desc_height = self.original_title_desc_size[1]  # 세로는 원본 유지
+                        self.panel_title_desc.setFixedSize(new_desc_width, new_desc_height)
+
+                # 인풋박스 컨테이너 크기 조정
+                if hasattr(self, 'input_container') and hasattr(self, 'original_input_container_size'):
+                    new_input_container_width = int(self.original_input_container_size[0] * width_ratio)
+                    self.input_container.setFixedSize(new_input_container_width, self.original_input_container_size[1])
+
+                # 기업명 필드 크기 조정
+                if hasattr(self, 'company_field_widget') and hasattr(self, 'original_company_field_size'):
+                    new_company_width = int(self.original_company_field_size[0] * width_ratio)
+                    self.company_field_widget.setFixedSize(new_company_width, self.original_company_field_size[1])
+
+                    # 기업명 라벨 크기 조정
+                    if hasattr(self, 'company_label') and hasattr(self, 'original_company_label_size'):
+                        new_label_width = int(self.original_company_label_size[0] * width_ratio)
+                        self.company_label.setFixedSize(new_label_width, self.original_company_label_size[1])
+
+                    # 기업명 입력칸 크기 조정
+                    if hasattr(self, 'company_edit') and hasattr(self, 'original_company_edit_size'):
+                        new_edit_width = int(self.original_company_edit_size[0] * width_ratio)
+                        self.company_edit.setFixedSize(new_edit_width, self.original_company_edit_size[1])
+
+                # 제품명 필드 크기 조정
+                if hasattr(self, 'product_field_widget') and hasattr(self, 'original_product_field_size'):
+                    new_product_width = int(self.original_product_field_size[0] * width_ratio)
+                    self.product_field_widget.setFixedSize(new_product_width, self.original_product_field_size[1])
+
+                    # 제품명 라벨 크기 조정
+                    if hasattr(self, 'product_label') and hasattr(self, 'original_product_label_size'):
+                        new_label_width = int(self.original_product_label_size[0] * width_ratio)
+                        self.product_label.setFixedSize(new_label_width, self.original_product_label_size[1])
+
+                    # 제품명 입력칸 크기 조정
+                    if hasattr(self, 'product_edit') and hasattr(self, 'original_product_edit_size'):
+                        new_edit_width = int(self.original_product_edit_size[0] * width_ratio)
+                        self.product_edit.setFixedSize(new_edit_width, self.original_product_edit_size[1])
+
+                # 버전/모델명 행 크기 조정
+                if hasattr(self, 'version_model_row') and hasattr(self, 'original_version_model_row_size'):
+                    new_row_width = int(self.original_version_model_row_size[0] * width_ratio)
+                    self.version_model_row.setFixedSize(new_row_width, self.original_version_model_row_size[1])
+
+                    # 버전 필드 크기 조정
+                    if hasattr(self, 'version_field_widget') and hasattr(self, 'original_version_field_size'):
+                        new_version_width = int(self.original_version_field_size[0] * width_ratio)
+                        self.version_field_widget.setFixedSize(new_version_width, self.original_version_field_size[1])
+
+                        if hasattr(self, 'version_label') and hasattr(self, 'original_version_label_size'):
+                            new_label_width = int(self.original_version_label_size[0] * width_ratio)
+                            self.version_label.setFixedSize(new_label_width, self.original_version_label_size[1])
+
+                        if hasattr(self, 'version_edit') and hasattr(self, 'original_version_edit_size'):
+                            new_edit_width = int(self.original_version_edit_size[0] * width_ratio)
+                            self.version_edit.setFixedSize(new_edit_width, self.original_version_edit_size[1])
+
+                    # 모델명 필드 크기 조정
+                    if hasattr(self, 'model_field_widget') and hasattr(self, 'original_model_field_size'):
+                        new_model_width = int(self.original_model_field_size[0] * width_ratio)
+                        self.model_field_widget.setFixedSize(new_model_width, self.original_model_field_size[1])
+
+                        if hasattr(self, 'model_label') and hasattr(self, 'original_model_label_size'):
+                            new_label_width = int(self.original_model_label_size[0] * width_ratio)
+                            self.model_label.setFixedSize(new_label_width, self.original_model_label_size[1])
+
+                        if hasattr(self, 'model_edit') and hasattr(self, 'original_model_edit_size'):
+                            new_edit_width = int(self.original_model_edit_size[0] * width_ratio)
+                            self.model_edit.setFixedSize(new_edit_width, self.original_model_edit_size[1])
+
+                # 시험유형/시험대상 행 크기 조정
+                if hasattr(self, 'category_target_row') and hasattr(self, 'original_category_target_row_size'):
+                    new_row_width = int(self.original_category_target_row_size[0] * width_ratio)
+                    self.category_target_row.setFixedSize(new_row_width, self.original_category_target_row_size[1])
+
+                    # 시험유형 필드 크기 조정
+                    if hasattr(self, 'test_category_widget') and hasattr(self, 'original_test_category_field_size'):
+                        new_field_width = int(self.original_test_category_field_size[0] * width_ratio)
+                        self.test_category_widget.setFixedSize(new_field_width, self.original_test_category_field_size[1])
+
+                        if hasattr(self, 'test_category_label') and hasattr(self, 'original_test_category_label_size'):
+                            new_label_width = int(self.original_test_category_label_size[0] * width_ratio)
+                            self.test_category_label.setFixedSize(new_label_width, self.original_test_category_label_size[1])
+
+                        if hasattr(self, 'test_category_edit') and hasattr(self, 'original_test_category_edit_size'):
+                            new_edit_width = int(self.original_test_category_edit_size[0] * width_ratio)
+                            self.test_category_edit.setFixedSize(new_edit_width, self.original_test_category_edit_size[1])
+
+                    # 시험대상 필드 크기 조정
+                    if hasattr(self, 'target_system_widget') and hasattr(self, 'original_target_system_field_size'):
+                        new_field_width = int(self.original_target_system_field_size[0] * width_ratio)
+                        self.target_system_widget.setFixedSize(new_field_width, self.original_target_system_field_size[1])
+
+                        if hasattr(self, 'target_system_label') and hasattr(self, 'original_target_system_label_size'):
+                            new_label_width = int(self.original_target_system_label_size[0] * width_ratio)
+                            self.target_system_label.setFixedSize(new_label_width, self.original_target_system_label_size[1])
+
+                        if hasattr(self, 'target_system_edit') and hasattr(self, 'original_target_system_edit_size'):
+                            new_edit_width = int(self.original_target_system_edit_size[0] * width_ratio)
+                            self.target_system_edit.setFixedSize(new_edit_width, self.original_target_system_edit_size[1])
+
+                # 시험분야/시험범위 행 크기 조정
+                if hasattr(self, 'group_range_row') and hasattr(self, 'original_group_range_row_size'):
+                    new_row_width = int(self.original_group_range_row_size[0] * width_ratio)
+                    self.group_range_row.setFixedSize(new_row_width, self.original_group_range_row_size[1])
+
+                    # 시험분야 필드 크기 조정
+                    if hasattr(self, 'test_group_widget') and hasattr(self, 'original_test_group_field_size'):
+                        new_field_width = int(self.original_test_group_field_size[0] * width_ratio)
+                        self.test_group_widget.setFixedSize(new_field_width, self.original_test_group_field_size[1])
+
+                        if hasattr(self, 'test_group_label') and hasattr(self, 'original_test_group_label_size'):
+                            new_label_width = int(self.original_test_group_label_size[0] * width_ratio)
+                            self.test_group_label.setFixedSize(new_label_width, self.original_test_group_label_size[1])
+
+                        if hasattr(self, 'test_group_edit') and hasattr(self, 'original_test_group_edit_size'):
+                            new_edit_width = int(self.original_test_group_edit_size[0] * width_ratio)
+                            self.test_group_edit.setFixedSize(new_edit_width, self.original_test_group_edit_size[1])
+
+                    # 시험범위 필드 크기 조정
+                    if hasattr(self, 'test_range_widget') and hasattr(self, 'original_test_range_field_size'):
+                        new_field_width = int(self.original_test_range_field_size[0] * width_ratio)
+                        self.test_range_widget.setFixedSize(new_field_width, self.original_test_range_field_size[1])
+
+                        if hasattr(self, 'test_range_label') and hasattr(self, 'original_test_range_label_size'):
+                            new_label_width = int(self.original_test_range_label_size[0] * width_ratio)
+                            self.test_range_label.setFixedSize(new_label_width, self.original_test_range_label_size[1])
+
+                        if hasattr(self, 'test_range_edit') and hasattr(self, 'original_test_range_edit_size'):
+                            new_edit_width = int(self.original_test_range_edit_size[0] * width_ratio)
+                            self.test_range_edit.setFixedSize(new_edit_width, self.original_test_range_edit_size[1])
+
+                # Divider 크기 조정 (가로만 늘어남)
+                if hasattr(self, 'divider') and hasattr(self, 'original_divider_size'):
+                    new_divider_width = int(self.original_divider_size[0] * width_ratio)
+                    self.divider.setFixedSize(new_divider_width, self.original_divider_size[1])
+
+                # 관리자 코드 필드 크기 조정 (가로만 늘어남)
+                if hasattr(self, 'admin_code_widget') and hasattr(self, 'original_admin_code_widget_size'):
+                    new_widget_width = int(self.original_admin_code_widget_size[0] * width_ratio)
+                    self.admin_code_widget.setFixedSize(new_widget_width, self.original_admin_code_widget_size[1])
+
+                    if hasattr(self, 'admin_code_label') and hasattr(self, 'original_admin_code_label_size'):
+                        new_label_width = int(self.original_admin_code_label_size[0] * width_ratio)
+                        self.admin_code_label.setFixedSize(new_label_width, self.original_admin_code_label_size[1])
+
+                    if hasattr(self, 'admin_code_input') and hasattr(self, 'original_admin_code_input_size'):
+                        new_input_width = int(self.original_admin_code_input_size[0] * width_ratio)
+                        self.admin_code_input.setFixedSize(new_input_width, self.original_admin_code_input_size[1])
+
             page_width = self.page1.width()
             page_height = self.page1.height()
 
@@ -195,8 +377,12 @@ class InfoWidget(QWidget):
         content_layout.setSpacing(0)
 
         # 시험 기본 정보 (수평 중앙 정렬)
-        info_panel = self.create_basic_info_panel()
-        content_layout.addWidget(info_panel, alignment=Qt.AlignHCenter)
+        # 원본 크기 저장 (비율 계산용)
+        self.original_window_size = (1680, 1006)
+        self.original_panel_size = (872, 843)
+
+        self.info_panel = self.create_basic_info_panel()
+        content_layout.addWidget(self.info_panel, alignment=Qt.AlignHCenter)
 
         # IP 입력창 (content_widget에 절대 위치로 배치 - 오른쪽 상단)
         self.ip_input_edit = QLineEdit(self.page1_content)
@@ -771,13 +957,12 @@ class InfoWidget(QWidget):
         # 패널 크기 및 스타일 설정 (872x843px, 배경: 시험기본정보입력.png)
         panel.setFixedSize(872, 843)
 
-        # 배경 이미지 설정
+        # 배경 이미지 설정 (border-image로 크기에 맞게 늘어남)
         bg_panel_path = resource_path("assets/image/test_info/시험기본정보입력.png").replace(chr(92), "/")
+        panel.setObjectName("basic_info_panel")
         panel.setStyleSheet(f"""
-            QWidget {{
-                background-image: url({bg_panel_path});
-                background-repeat: no-repeat;
-                background-position: center;
+            QWidget#basic_info_panel {{
+                border-image: url({bg_panel_path}) 0 0 0 0 stretch stretch;
             }}
         """)
 
@@ -785,57 +970,126 @@ class InfoWidget(QWidget):
         layout.setContentsMargins(48, 32, 48, 40)  # left: 48, top: 32, right: 48, bottom: 40
         layout.setSpacing(0)
 
-        # 타이틀 이미지 (776x106px - 시험기본정보확인_header.png)
-        title_widget = QLabel()
-        title_pixmap = QPixmap(resource_path("assets/image/test_info/시험기본정보확인_header.png"))
-        title_widget.setPixmap(title_pixmap.scaled(776, 106, Qt.IgnoreAspectRatio, Qt.SmoothTransformation))
-        title_widget.setFixedSize(776, 106)
-        title_widget.setScaledContents(True)
-        layout.addWidget(title_widget)
+        # 타이틀 컨테이너 (776x106px)
+        self.panel_title_container = QWidget()
+        self.panel_title_container.setFixedSize(776, 106)
+        self.panel_title_container.setStyleSheet("QWidget { background: transparent; }")
+        self.original_title_size = (776, 106)  # 원본 크기 저장
+
+        title_layout = QVBoxLayout(self.panel_title_container)
+        title_layout.setContentsMargins(0, 0, 0, 0)
+        title_layout.setSpacing(0)
+
+        # 타이틀 텍스트 (776x38px)
+        self.panel_title_text = QLabel("시험 기본 정보 확인")
+        self.panel_title_text.setFixedSize(776, 38)
+        self.panel_title_text.setAlignment(Qt.AlignCenter)
+        self.panel_title_text.setStyleSheet("""
+            QLabel {
+                font-family: 'Noto Sans KR';
+                font-size: 26px;
+                font-weight: 500;
+                color: #000000;
+                background: transparent;
+            }
+        """)
+        self.original_title_text_size = (776, 38)  # 원본 크기 저장
+        title_layout.addWidget(self.panel_title_text)
+
+        # gap 16px
+        title_layout.addSpacing(16)
+
+        # 타이틀 설명 영역 (776x52px)
+        self.panel_title_desc = QWidget()
+        self.panel_title_desc.setFixedSize(776, 52)
+        self.panel_title_desc.setObjectName("panel_title_desc")
+        title_desc_bg_path = resource_path("assets/image/test_info/시험기본정보확인_header.png").replace(chr(92), "/")
+        self.panel_title_desc.setStyleSheet(f"""
+            QWidget#panel_title_desc {{
+                border-image: url({title_desc_bg_path}) 0 0 0 0 stretch stretch;
+            }}
+        """)
+        self.original_title_desc_size = (776, 52)  # 원본 크기 저장
+
+        desc_layout = QHBoxLayout(self.panel_title_desc)
+        desc_layout.setContentsMargins(14, 12, 48, 12)  # 좌 14, 상 12, 우 48, 하 12
+        desc_layout.setSpacing(13)  # 아이콘과 텍스트 사이 gap
+
+        # 체크 아이콘 (18x18px)
+        self.panel_check_icon = QLabel()
+        check_icon_pixmap = QPixmap(resource_path("assets/image/icon/icn_check.png"))
+        self.panel_check_icon.setPixmap(check_icon_pixmap.scaled(18, 18, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        self.panel_check_icon.setFixedSize(18, 18)
+        desc_layout.addWidget(self.panel_check_icon, alignment=Qt.AlignVCenter)
+
+        # 설명 텍스트
+        self.panel_desc_text = QLabel("시험 기본 정보를 확인하고 다음 버튼을 눌러주세요.")
+        self.panel_desc_text.setStyleSheet("""
+            QLabel {
+                font-family: 'Noto Sans KR';
+                font-size: 19px;
+                font-weight: 400;
+                color: #000000;
+                background: transparent;
+            }
+        """)
+        self.panel_desc_text.setAlignment(Qt.AlignVCenter)
+        desc_layout.addWidget(self.panel_desc_text, alignment=Qt.AlignVCenter)
+        desc_layout.addStretch()  # 오른쪽 여백 채우기
+
+        title_layout.addWidget(self.panel_title_desc)
+
+        layout.addWidget(self.panel_title_container, alignment=Qt.AlignHCenter)
 
         # 타이틀과 인풋박스 컨테이너 사이 간격
         layout.addSpacing(12)
 
         # 인풋박스 컨테이너 (776x479px - 기업명~시험범위)
-        input_container = QWidget()
-        input_container.setFixedSize(776, 479)
-        input_container.setStyleSheet("QWidget { background: transparent; }")  # 투명 배경
-        input_layout = QVBoxLayout()
+        self.input_container = QWidget()
+        self.input_container.setFixedSize(776, 479)
+        self.input_container.setStyleSheet("QWidget { background: transparent; }")  # 투명 배경
+        self.original_input_container_size = (776, 479)  # 원본 크기 저장
+        input_layout = QVBoxLayout(self.input_container)
         input_layout.setContentsMargins(0, 0, 0, 0)
         input_layout.setSpacing(12)  # 필드 간 gap 12px
 
-        # 기업명 필드 (776x82px - 전체 너비) - 기업명.png 배경 사용
-        company_field_widget = QWidget()
-        company_field_widget.setFixedSize(776, 82)
+        # 기업명 필드 (776x82px - 전체 너비)
+        self.company_field_widget = QWidget()
+        self.company_field_widget.setFixedSize(776, 82)
+        self.company_field_widget.setStyleSheet("QWidget { background: transparent; }")
+        self.original_company_field_size = (776, 82)  # 원본 크기 저장
 
-        # 배경 이미지 설정
-        company_bg_path = resource_path("assets/image/test_info/기업명.png").replace(chr(92), "/")
-        company_field_widget.setStyleSheet(f"""
-            QWidget {{
-                background: transparent;
-                background-image: url({company_bg_path});
-                background-repeat: no-repeat;
-                background-position: center;
-            }}
-        """)
-
-        company_field_layout = QVBoxLayout()
+        company_field_layout = QVBoxLayout(self.company_field_widget)
         company_field_layout.setContentsMargins(0, 0, 0, 0)
         company_field_layout.setSpacing(6)
 
-        # 상단 여백 (라벨 영역 28px)
-        company_field_layout.addSpacing(28)
+        # 기업명 라벨 (776x28px)
+        self.company_label = QLabel("기업명")
+        self.company_label.setFixedSize(776, 28)
+        self.company_label.setStyleSheet("""
+            QLabel {
+                font-family: 'Noto Sans KR';
+                font-size: 18px;
+                font-weight: 400;
+                color: #000000;
+                background: transparent;
+            }
+        """)
+        self.original_company_label_size = (776, 28)  # 원본 크기 저장
+        company_field_layout.addWidget(self.company_label)
 
         # 입력칸 (768x48px)
         self.company_edit = QLineEdit()
         self.company_edit.setFixedSize(768, 48)
         self.company_edit.setReadOnly(True)
+        self.original_company_edit_size = (768, 48)  # 원본 크기 저장
 
         company_input_default = resource_path("assets/image/test_info/불러온정보_w_default.png").replace(chr(92), "/")
         company_input_filled = resource_path("assets/image/test_info/불러온정보_w_filled.png").replace(chr(92), "/")
 
+        self.company_edit.setObjectName("company_edit")
         self.company_edit.setStyleSheet(f"""
-            QLineEdit {{
+            QLineEdit#company_edit {{
                 font-family: 'Noto Sans KR';
                 font-size: 18px;
                 font-weight: 400;
@@ -843,10 +1097,10 @@ class InfoWidget(QWidget):
                 color: #000000;
                 padding: 0 24px;
                 border: none;
-                background: transparent url({company_input_default}) no-repeat center;
+                border-image: url({company_input_default}) 0 0 0 0 stretch stretch;
             }}
-            QLineEdit[hasText="true"] {{
-                background: transparent url({company_input_filled}) no-repeat center;
+            QLineEdit#company_edit[hasText="true"] {{
+                border-image: url({company_input_filled}) 0 0 0 0 stretch stretch;
             }}
         """)
 
@@ -860,42 +1114,46 @@ class InfoWidget(QWidget):
         self.company_edit.textChanged.connect(update_company_background)
         self.company_edit.setProperty("hasText", "false")
 
-        company_field_layout.addWidget(self.company_edit)
-        company_field_widget.setLayout(company_field_layout)
-        input_layout.addWidget(company_field_widget)
+        company_field_layout.addWidget(self.company_edit, alignment=Qt.AlignHCenter)
+        input_layout.addWidget(self.company_field_widget, alignment=Qt.AlignHCenter)
 
-        # 제품명 필드 (776x82px - 전체 너비) - 제품명.png 배경 사용
-        product_field_widget = QWidget()
-        product_field_widget.setFixedSize(776, 82)
+        # 제품명 필드 (776x82px - 전체 너비)
+        self.product_field_widget = QWidget()
+        self.product_field_widget.setFixedSize(776, 82)
+        self.product_field_widget.setStyleSheet("QWidget { background: transparent; }")
+        self.original_product_field_size = (776, 82)  # 원본 크기 저장
 
-        # 배경 이미지 설정
-        product_bg_path = resource_path("assets/image/test_info/제품명.png").replace(chr(92), "/")
-        product_field_widget.setStyleSheet(f"""
-            QWidget {{
-                background: transparent;
-                background-image: url({product_bg_path});
-                background-repeat: no-repeat;
-                background-position: center;
-            }}
-        """)
-
-        product_field_layout = QVBoxLayout()
+        product_field_layout = QVBoxLayout(self.product_field_widget)
         product_field_layout.setContentsMargins(0, 0, 0, 0)
         product_field_layout.setSpacing(6)
 
-        # 상단 여백 (라벨 영역 28px)
-        product_field_layout.addSpacing(28)
+        # 제품명 라벨 (776x28px)
+        self.product_label = QLabel("제품명")
+        self.product_label.setFixedSize(776, 28)
+        self.product_label.setStyleSheet("""
+            QLabel {
+                font-family: 'Noto Sans KR';
+                font-size: 18px;
+                font-weight: 400;
+                color: #000000;
+                background: transparent;
+            }
+        """)
+        self.original_product_label_size = (776, 28)  # 원본 크기 저장
+        product_field_layout.addWidget(self.product_label)
 
         # 입력칸 (768x48px)
         self.product_edit = QLineEdit()
         self.product_edit.setFixedSize(768, 48)
         self.product_edit.setReadOnly(True)
+        self.original_product_edit_size = (768, 48)  # 원본 크기 저장
 
         product_input_default = resource_path("assets/image/test_info/불러온정보_w_default.png").replace(chr(92), "/")
         product_input_filled = resource_path("assets/image/test_info/불러온정보_w_filled.png").replace(chr(92), "/")
 
+        self.product_edit.setObjectName("product_edit")
         self.product_edit.setStyleSheet(f"""
-            QLineEdit {{
+            QLineEdit#product_edit {{
                 font-family: 'Noto Sans KR';
                 font-size: 18px;
                 font-weight: 400;
@@ -903,10 +1161,10 @@ class InfoWidget(QWidget):
                 color: #000000;
                 padding: 0 24px;
                 border: none;
-                background: transparent url({product_input_default}) no-repeat center;
+                border-image: url({product_input_default}) 0 0 0 0 stretch stretch;
             }}
-            QLineEdit[hasText="true"] {{
-                background: transparent url({product_input_filled}) no-repeat center;
+            QLineEdit#product_edit[hasText="true"] {{
+                border-image: url({product_input_filled}) 0 0 0 0 stretch stretch;
             }}
         """)
 
@@ -920,45 +1178,55 @@ class InfoWidget(QWidget):
         self.product_edit.textChanged.connect(update_product_background)
         self.product_edit.setProperty("hasText", "false")
 
-        product_field_layout.addWidget(self.product_edit)
-        product_field_widget.setLayout(product_field_layout)
-        input_layout.addWidget(product_field_widget)
+        product_field_layout.addWidget(self.product_edit, alignment=Qt.AlignHCenter)
+        input_layout.addWidget(self.product_field_widget, alignment=Qt.AlignHCenter)
 
-        # 버전, 모델명 행 (776x82px) - 이미지 배경 사용
-        version_model_row = QWidget()
-        version_model_row.setFixedSize(776, 82)
-        version_model_layout = QHBoxLayout()
+        # 버전, 모델명 행 (776x82px)
+        self.version_model_row = QWidget()
+        self.version_model_row.setFixedSize(776, 82)
+        self.version_model_row.setStyleSheet("QWidget { background: transparent; }")
+        self.original_version_model_row_size = (776, 82)  # 원본 크기 저장
+        version_model_layout = QHBoxLayout(self.version_model_row)
         version_model_layout.setContentsMargins(0, 0, 0, 0)
         version_model_layout.setSpacing(20)  # 간격 20px
 
-        # 버전 필드 (378x82px) - 버전.png 배경 사용
-        version_field_widget = QWidget()
-        version_field_widget.setFixedSize(378, 82)
+        # 버전 필드 (378x82px)
+        self.version_field_widget = QWidget()
+        self.version_field_widget.setFixedSize(378, 82)
+        self.version_field_widget.setStyleSheet("QWidget { background: transparent; }")
+        self.original_version_field_size = (378, 82)  # 원본 크기 저장
 
-        version_bg_path = resource_path("assets/image/test_info/버전.png").replace(chr(92), "/")
-        version_field_widget.setStyleSheet(f"""
-            QWidget {{
-                background: transparent;
-                background-image: url({version_bg_path});
-                background-repeat: no-repeat;
-                background-position: center;
-            }}
-        """)
-
-        version_field_layout = QVBoxLayout()
+        version_field_layout = QVBoxLayout(self.version_field_widget)
         version_field_layout.setContentsMargins(0, 0, 0, 0)
         version_field_layout.setSpacing(6)
-        version_field_layout.addSpacing(28)
 
+        # 버전 라벨 (378x28px)
+        self.version_label = QLabel("버전")
+        self.version_label.setFixedSize(378, 28)
+        self.version_label.setStyleSheet("""
+            QLabel {
+                font-family: 'Noto Sans KR';
+                font-size: 18px;
+                font-weight: 400;
+                color: #000000;
+                background: transparent;
+            }
+        """)
+        self.original_version_label_size = (378, 28)  # 원본 크기 저장
+        version_field_layout.addWidget(self.version_label)
+
+        # 버전 입력칸 (378x48px)
         self.version_edit = QLineEdit()
         self.version_edit.setFixedSize(378, 48)
         self.version_edit.setReadOnly(True)
+        self.original_version_edit_size = (378, 48)  # 원본 크기 저장
 
         version_input_default = resource_path("assets/image/test_info/불러온정보_s_default.png").replace(chr(92), "/")
         version_input_filled = resource_path("assets/image/test_info/불러온정보_s_filled.png").replace(chr(92), "/")
 
+        self.version_edit.setObjectName("version_edit")
         self.version_edit.setStyleSheet(f"""
-            QLineEdit {{
+            QLineEdit#version_edit {{
                 font-family: 'Noto Sans KR';
                 font-size: 18px;
                 font-weight: 400;
@@ -966,10 +1234,10 @@ class InfoWidget(QWidget):
                 color: #000000;
                 padding: 0 24px;
                 border: none;
-                background: transparent url({version_input_default}) no-repeat center;
+                border-image: url({version_input_default}) 0 0 0 0 stretch stretch;
             }}
-            QLineEdit[hasText="true"] {{
-                background: transparent url({version_input_filled}) no-repeat center;
+            QLineEdit#version_edit[hasText="true"] {{
+                border-image: url({version_input_filled}) 0 0 0 0 stretch stretch;
             }}
         """)
 
@@ -983,37 +1251,45 @@ class InfoWidget(QWidget):
         self.version_edit.setProperty("hasText", "false")
 
         version_field_layout.addWidget(self.version_edit)
-        version_field_widget.setLayout(version_field_layout)
-        version_model_layout.addWidget(version_field_widget)
+        version_model_layout.addWidget(self.version_field_widget)
 
-        # 모델명 필드 (378x82px) - 모델명.png 배경 사용
-        model_field_widget = QWidget()
-        model_field_widget.setFixedSize(378, 82)
+        # 모델명 필드 (378x82px)
+        self.model_field_widget = QWidget()
+        self.model_field_widget.setFixedSize(378, 82)
+        self.model_field_widget.setStyleSheet("QWidget { background: transparent; }")
+        self.original_model_field_size = (378, 82)  # 원본 크기 저장
 
-        model_bg_path = resource_path("assets/image/test_info/모델명.png").replace(chr(92), "/")
-        model_field_widget.setStyleSheet(f"""
-            QWidget {{
-                background: transparent;
-                background-image: url({model_bg_path});
-                background-repeat: no-repeat;
-                background-position: center;
-            }}
-        """)
-
-        model_field_layout = QVBoxLayout()
+        model_field_layout = QVBoxLayout(self.model_field_widget)
         model_field_layout.setContentsMargins(0, 0, 0, 0)
         model_field_layout.setSpacing(6)
-        model_field_layout.addSpacing(28)
 
+        # 모델명 라벨 (378x28px)
+        self.model_label = QLabel("모델명")
+        self.model_label.setFixedSize(378, 28)
+        self.model_label.setStyleSheet("""
+            QLabel {
+                font-family: 'Noto Sans KR';
+                font-size: 18px;
+                font-weight: 400;
+                color: #000000;
+                background: transparent;
+            }
+        """)
+        self.original_model_label_size = (378, 28)  # 원본 크기 저장
+        model_field_layout.addWidget(self.model_label)
+
+        # 모델명 입력칸 (378x48px)
         self.model_edit = QLineEdit()
         self.model_edit.setFixedSize(378, 48)
         self.model_edit.setReadOnly(True)
+        self.original_model_edit_size = (378, 48)  # 원본 크기 저장
 
         model_input_default = resource_path("assets/image/test_info/불러온정보_s_default.png").replace(chr(92), "/")
         model_input_filled = resource_path("assets/image/test_info/불러온정보_s_filled.png").replace(chr(92), "/")
 
+        self.model_edit.setObjectName("model_edit")
         self.model_edit.setStyleSheet(f"""
-            QLineEdit {{
+            QLineEdit#model_edit {{
                 font-family: 'Noto Sans KR';
                 font-size: 18px;
                 font-weight: 400;
@@ -1021,10 +1297,10 @@ class InfoWidget(QWidget):
                 color: #000000;
                 padding: 0 24px;
                 border: none;
-                background: transparent url({model_input_default}) no-repeat center;
+                border-image: url({model_input_default}) 0 0 0 0 stretch stretch;
             }}
-            QLineEdit[hasText="true"] {{
-                background: transparent url({model_input_filled}) no-repeat center;
+            QLineEdit#model_edit[hasText="true"] {{
+                border-image: url({model_input_filled}) 0 0 0 0 stretch stretch;
             }}
         """)
 
@@ -1038,47 +1314,56 @@ class InfoWidget(QWidget):
         self.model_edit.setProperty("hasText", "false")
 
         model_field_layout.addWidget(self.model_edit)
-        model_field_widget.setLayout(model_field_layout)
-        version_model_layout.addWidget(model_field_widget)
+        version_model_layout.addWidget(self.model_field_widget)
 
-        version_model_row.setLayout(version_model_layout)
-        input_layout.addWidget(version_model_row)
+        input_layout.addWidget(self.version_model_row, alignment=Qt.AlignHCenter)
 
-        # 시험유형, 시험대상 행 (776x82px) - 이미지 배경 사용
-        category_target_row = QWidget()
-        category_target_row.setFixedSize(776, 82)
-        category_target_layout = QHBoxLayout()
+        # 시험유형, 시험대상 행 (776x82px)
+        self.category_target_row = QWidget()
+        self.category_target_row.setFixedSize(776, 82)
+        self.category_target_row.setStyleSheet("QWidget { background: transparent; }")
+        self.original_category_target_row_size = (776, 82)  # 원본 크기 저장
+        category_target_layout = QHBoxLayout(self.category_target_row)
         category_target_layout.setContentsMargins(0, 0, 0, 0)
         category_target_layout.setSpacing(20)  # 간격 20px
 
-        # 시험유형 필드 (378x82px) - 시험유형.png 배경 사용
-        test_category_widget = QWidget()
-        test_category_widget.setFixedSize(378, 82)
+        # 시험유형 필드 (378x82px)
+        self.test_category_widget = QWidget()
+        self.test_category_widget.setFixedSize(378, 82)
+        self.test_category_widget.setStyleSheet("QWidget { background: transparent; }")
+        self.original_test_category_field_size = (378, 82)  # 원본 크기 저장
 
-        test_category_bg_path = resource_path("assets/image/test_info/시험유형.png").replace(chr(92), "/")
-        test_category_widget.setStyleSheet(f"""
-            QWidget {{
-                background: transparent;
-                background-image: url({test_category_bg_path});
-                background-repeat: no-repeat;
-                background-position: center;
-            }}
-        """)
-
-        test_category_layout = QVBoxLayout()
+        test_category_layout = QVBoxLayout(self.test_category_widget)
         test_category_layout.setContentsMargins(0, 0, 0, 0)
         test_category_layout.setSpacing(6)
-        test_category_layout.addSpacing(28)
 
+        # 시험유형 라벨 (378x28px)
+        self.test_category_label = QLabel("시험유형")
+        self.test_category_label.setFixedSize(378, 28)
+        self.test_category_label.setStyleSheet("""
+            QLabel {
+                font-family: 'Noto Sans KR';
+                font-size: 18px;
+                font-weight: 400;
+                color: #000000;
+                background: transparent;
+            }
+        """)
+        self.original_test_category_label_size = (378, 28)  # 원본 크기 저장
+        test_category_layout.addWidget(self.test_category_label)
+
+        # 시험유형 입력칸 (378x48px)
         self.test_category_edit = QLineEdit()
         self.test_category_edit.setFixedSize(378, 48)
         self.test_category_edit.setReadOnly(True)
+        self.original_test_category_edit_size = (378, 48)  # 원본 크기 저장
 
         test_category_input_default = resource_path("assets/image/test_info/불러온정보_s_default.png").replace(chr(92), "/")
         test_category_input_filled = resource_path("assets/image/test_info/불러온정보_s_filled.png").replace(chr(92), "/")
 
+        self.test_category_edit.setObjectName("test_category_edit")
         self.test_category_edit.setStyleSheet(f"""
-            QLineEdit {{
+            QLineEdit#test_category_edit {{
                 font-family: 'Noto Sans KR';
                 font-size: 18px;
                 font-weight: 400;
@@ -1086,10 +1371,10 @@ class InfoWidget(QWidget):
                 color: #000000;
                 padding: 0 24px;
                 border: none;
-                background: transparent url({test_category_input_default}) no-repeat center;
+                border-image: url({test_category_input_default}) 0 0 0 0 stretch stretch;
             }}
-            QLineEdit[hasText="true"] {{
-                background: transparent url({test_category_input_filled}) no-repeat center;
+            QLineEdit#test_category_edit[hasText="true"] {{
+                border-image: url({test_category_input_filled}) 0 0 0 0 stretch stretch;
             }}
         """)
 
@@ -1103,37 +1388,45 @@ class InfoWidget(QWidget):
         self.test_category_edit.setProperty("hasText", "false")
 
         test_category_layout.addWidget(self.test_category_edit)
-        test_category_widget.setLayout(test_category_layout)
-        category_target_layout.addWidget(test_category_widget)
+        category_target_layout.addWidget(self.test_category_widget)
 
-        # 시험대상 필드 (378x82px) - 시험대상.png 배경 사용
-        target_system_widget = QWidget()
-        target_system_widget.setFixedSize(378, 82)
+        # 시험대상 필드 (378x82px)
+        self.target_system_widget = QWidget()
+        self.target_system_widget.setFixedSize(378, 82)
+        self.target_system_widget.setStyleSheet("QWidget { background: transparent; }")
+        self.original_target_system_field_size = (378, 82)  # 원본 크기 저장
 
-        target_system_bg_path = resource_path("assets/image/test_info/시험대상.png").replace(chr(92), "/")
-        target_system_widget.setStyleSheet(f"""
-            QWidget {{
-                background: transparent;
-                background-image: url({target_system_bg_path});
-                background-repeat: no-repeat;
-                background-position: center;
-            }}
-        """)
-
-        target_system_layout = QVBoxLayout()
+        target_system_layout = QVBoxLayout(self.target_system_widget)
         target_system_layout.setContentsMargins(0, 0, 0, 0)
         target_system_layout.setSpacing(6)
-        target_system_layout.addSpacing(28)
 
+        # 시험대상 라벨 (378x28px)
+        self.target_system_label = QLabel("시험대상")
+        self.target_system_label.setFixedSize(378, 28)
+        self.target_system_label.setStyleSheet("""
+            QLabel {
+                font-family: 'Noto Sans KR';
+                font-size: 18px;
+                font-weight: 400;
+                color: #000000;
+                background: transparent;
+            }
+        """)
+        self.original_target_system_label_size = (378, 28)  # 원본 크기 저장
+        target_system_layout.addWidget(self.target_system_label)
+
+        # 시험대상 입력칸 (378x48px)
         self.target_system_edit = QLineEdit()
         self.target_system_edit.setFixedSize(378, 48)
         self.target_system_edit.setReadOnly(True)
+        self.original_target_system_edit_size = (378, 48)  # 원본 크기 저장
 
         target_system_input_default = resource_path("assets/image/test_info/불러온정보_s_default.png").replace(chr(92), "/")
         target_system_input_filled = resource_path("assets/image/test_info/불러온정보_s_filled.png").replace(chr(92), "/")
 
+        self.target_system_edit.setObjectName("target_system_edit")
         self.target_system_edit.setStyleSheet(f"""
-            QLineEdit {{
+            QLineEdit#target_system_edit {{
                 font-family: 'Noto Sans KR';
                 font-size: 18px;
                 font-weight: 400;
@@ -1141,10 +1434,10 @@ class InfoWidget(QWidget):
                 color: #000000;
                 padding: 0 24px;
                 border: none;
-                background: transparent url({target_system_input_default}) no-repeat center;
+                border-image: url({target_system_input_default}) 0 0 0 0 stretch stretch;
             }}
-            QLineEdit[hasText="true"] {{
-                background: transparent url({target_system_input_filled}) no-repeat center;
+            QLineEdit#target_system_edit[hasText="true"] {{
+                border-image: url({target_system_input_filled}) 0 0 0 0 stretch stretch;
             }}
         """)
 
@@ -1158,47 +1451,56 @@ class InfoWidget(QWidget):
         self.target_system_edit.setProperty("hasText", "false")
 
         target_system_layout.addWidget(self.target_system_edit)
-        target_system_widget.setLayout(target_system_layout)
-        category_target_layout.addWidget(target_system_widget)
+        category_target_layout.addWidget(self.target_system_widget)
 
-        category_target_row.setLayout(category_target_layout)
-        input_layout.addWidget(category_target_row)
+        input_layout.addWidget(self.category_target_row, alignment=Qt.AlignHCenter)
 
-        # 시험분야, 시험범위 행 (776x82px) - 이미지 배경 사용
-        group_range_row = QWidget()
-        group_range_row.setFixedSize(776, 82)
-        group_range_layout = QHBoxLayout()
+        # 시험분야, 시험범위 행 (776x82px)
+        self.group_range_row = QWidget()
+        self.group_range_row.setFixedSize(776, 82)
+        self.group_range_row.setStyleSheet("QWidget { background: transparent; }")
+        self.original_group_range_row_size = (776, 82)  # 원본 크기 저장
+        group_range_layout = QHBoxLayout(self.group_range_row)
         group_range_layout.setContentsMargins(0, 0, 0, 0)
         group_range_layout.setSpacing(20)  # 간격 20px
 
-        # 시험분야 필드 (378x82px) - 시험분야.png 배경 사용
-        test_group_widget = QWidget()
-        test_group_widget.setFixedSize(378, 82)
+        # 시험분야 필드 (378x82px)
+        self.test_group_widget = QWidget()
+        self.test_group_widget.setFixedSize(378, 82)
+        self.test_group_widget.setStyleSheet("QWidget { background: transparent; }")
+        self.original_test_group_field_size = (378, 82)  # 원본 크기 저장
 
-        test_group_bg_path = resource_path("assets/image/test_info/시험분야.png").replace(chr(92), "/")
-        test_group_widget.setStyleSheet(f"""
-            QWidget {{
-                background: transparent;
-                background-image: url({test_group_bg_path});
-                background-repeat: no-repeat;
-                background-position: center;
-            }}
-        """)
-
-        test_group_layout = QVBoxLayout()
+        test_group_layout = QVBoxLayout(self.test_group_widget)
         test_group_layout.setContentsMargins(0, 0, 0, 0)
         test_group_layout.setSpacing(6)
-        test_group_layout.addSpacing(28)
 
+        # 시험분야 라벨 (378x28px)
+        self.test_group_label = QLabel("시험분야")
+        self.test_group_label.setFixedSize(378, 28)
+        self.test_group_label.setStyleSheet("""
+            QLabel {
+                font-family: 'Noto Sans KR';
+                font-size: 18px;
+                font-weight: 400;
+                color: #000000;
+                background: transparent;
+            }
+        """)
+        self.original_test_group_label_size = (378, 28)  # 원본 크기 저장
+        test_group_layout.addWidget(self.test_group_label)
+
+        # 시험분야 입력칸 (378x48px)
         self.test_group_edit = QLineEdit()
         self.test_group_edit.setFixedSize(378, 48)
         self.test_group_edit.setReadOnly(True)
+        self.original_test_group_edit_size = (378, 48)  # 원본 크기 저장
 
         test_group_input_default = resource_path("assets/image/test_info/불러온정보_s_default.png").replace(chr(92), "/")
         test_group_input_filled = resource_path("assets/image/test_info/불러온정보_s_filled.png").replace(chr(92), "/")
 
+        self.test_group_edit.setObjectName("test_group_edit")
         self.test_group_edit.setStyleSheet(f"""
-            QLineEdit {{
+            QLineEdit#test_group_edit {{
                 font-family: 'Noto Sans KR';
                 font-size: 18px;
                 font-weight: 400;
@@ -1206,10 +1508,10 @@ class InfoWidget(QWidget):
                 color: #000000;
                 padding: 0 24px;
                 border: none;
-                background: transparent url({test_group_input_default}) no-repeat center;
+                border-image: url({test_group_input_default}) 0 0 0 0 stretch stretch;
             }}
-            QLineEdit[hasText="true"] {{
-                background: transparent url({test_group_input_filled}) no-repeat center;
+            QLineEdit#test_group_edit[hasText="true"] {{
+                border-image: url({test_group_input_filled}) 0 0 0 0 stretch stretch;
             }}
         """)
 
@@ -1223,37 +1525,45 @@ class InfoWidget(QWidget):
         self.test_group_edit.setProperty("hasText", "false")
 
         test_group_layout.addWidget(self.test_group_edit)
-        test_group_widget.setLayout(test_group_layout)
-        group_range_layout.addWidget(test_group_widget)
+        group_range_layout.addWidget(self.test_group_widget)
 
-        # 시험범위 필드 (378x82px) - 시험범위.png 배경 사용
-        test_range_widget = QWidget()
-        test_range_widget.setFixedSize(378, 82)
+        # 시험범위 필드 (378x82px)
+        self.test_range_widget = QWidget()
+        self.test_range_widget.setFixedSize(378, 82)
+        self.test_range_widget.setStyleSheet("QWidget { background: transparent; }")
+        self.original_test_range_field_size = (378, 82)  # 원본 크기 저장
 
-        test_range_bg_path = resource_path("assets/image/test_info/시험범위.png").replace(chr(92), "/")
-        test_range_widget.setStyleSheet(f"""
-            QWidget {{
-                background: transparent;
-                background-image: url({test_range_bg_path});
-                background-repeat: no-repeat;
-                background-position: center;
-            }}
-        """)
-
-        test_range_layout = QVBoxLayout()
+        test_range_layout = QVBoxLayout(self.test_range_widget)
         test_range_layout.setContentsMargins(0, 0, 0, 0)
         test_range_layout.setSpacing(6)
-        test_range_layout.addSpacing(28)
 
+        # 시험범위 라벨 (378x28px)
+        self.test_range_label = QLabel("시험범위")
+        self.test_range_label.setFixedSize(378, 28)
+        self.test_range_label.setStyleSheet("""
+            QLabel {
+                font-family: 'Noto Sans KR';
+                font-size: 18px;
+                font-weight: 400;
+                color: #000000;
+                background: transparent;
+            }
+        """)
+        self.original_test_range_label_size = (378, 28)  # 원본 크기 저장
+        test_range_layout.addWidget(self.test_range_label)
+
+        # 시험범위 입력칸 (378x48px)
         self.test_range_edit = QLineEdit()
         self.test_range_edit.setFixedSize(378, 48)
         self.test_range_edit.setReadOnly(True)
+        self.original_test_range_edit_size = (378, 48)  # 원본 크기 저장
 
         test_range_input_default = resource_path("assets/image/test_info/불러온정보_s_default.png").replace(chr(92), "/")
         test_range_input_filled = resource_path("assets/image/test_info/불러온정보_s_filled.png").replace(chr(92), "/")
 
+        self.test_range_edit.setObjectName("test_range_edit")
         self.test_range_edit.setStyleSheet(f"""
-            QLineEdit {{
+            QLineEdit#test_range_edit {{
                 font-family: 'Noto Sans KR';
                 font-size: 18px;
                 font-weight: 400;
@@ -1261,10 +1571,10 @@ class InfoWidget(QWidget):
                 color: #000000;
                 padding: 0 24px;
                 border: none;
-                background: transparent url({test_range_input_default}) no-repeat center;
+                border-image: url({test_range_input_default}) 0 0 0 0 stretch stretch;
             }}
-            QLineEdit[hasText="true"] {{
-                background: transparent url({test_range_input_filled}) no-repeat center;
+            QLineEdit#test_range_edit[hasText="true"] {{
+                border-image: url({test_range_input_filled}) 0 0 0 0 stretch stretch;
             }}
         """)
 
@@ -1278,11 +1588,9 @@ class InfoWidget(QWidget):
         self.test_range_edit.setProperty("hasText", "false")
 
         test_range_layout.addWidget(self.test_range_edit)
-        test_range_widget.setLayout(test_range_layout)
-        group_range_layout.addWidget(test_range_widget)
+        group_range_layout.addWidget(self.test_range_widget)
 
-        group_range_row.setLayout(group_range_layout)
-        input_layout.addWidget(group_range_row)
+        input_layout.addWidget(self.group_range_row, alignment=Qt.AlignHCenter)
 
         # 시험유형 변경 시 관리자 코드 필드 활성화/비활성화
         self.test_category_edit.textChanged.connect(self.form_validator.handle_test_category_change)
@@ -1294,27 +1602,28 @@ class InfoWidget(QWidget):
         # Input Container 하단 여백 20px
         input_layout.addSpacing(20)
 
-        input_container.setLayout(input_layout)
-        layout.addWidget(input_container)
+        layout.addWidget(self.input_container, alignment=Qt.AlignHCenter)
 
-        # Divider 이미지
-        divider = QLabel()
-        divider_pixmap = QPixmap(resource_path("assets/image/test_info/divider.png"))
-        divider.setPixmap(divider_pixmap)
-        divider.setScaledContents(True)
-        divider.setFixedSize(776, divider_pixmap.height() if divider_pixmap.height() > 0 else 1)
-        layout.addWidget(divider)
+        # Divider 이미지 (반응형)
+        self.divider = QLabel()
+        self.divider_pixmap = QPixmap(resource_path("assets/image/test_info/divider.png"))
+        self.divider.setPixmap(self.divider_pixmap)
+        self.divider.setScaledContents(True)
+        divider_height = self.divider_pixmap.height() if self.divider_pixmap.height() > 0 else 1
+        self.divider.setFixedSize(776, divider_height)
+        self.original_divider_size = (776, divider_height)
+        layout.addWidget(self.divider, alignment=Qt.AlignHCenter)
 
         # Divider와 관리자 코드 사이 간격 12px
         layout.addSpacing(12)
 
-        # 관리자 코드 필드 (776x82px - 전체 너비) - 이미지 배경 사용
+        # 관리자 코드 필드 (776x82px - 전체 너비) - 반응형
         admin_code_field = self.create_admin_code_field()
         self.admin_code_edit = admin_code_field["input"]
         self.admin_code_edit.setEchoMode(QLineEdit.Password)  # 비밀번호 모드
-        self.admin_code_edit.setPlaceholderText("")  # 초기에는 placeholder 없음
+        self.admin_code_edit.setPlaceholderText("관리자 코드를 입력해주세요")
         self.admin_code_edit.setEnabled(False)  # 초기에는 비활성화 (시험 정보 불러오기 전)
-        layout.addWidget(admin_code_field["widget"])
+        layout.addWidget(admin_code_field["widget"], alignment=Qt.AlignHCenter)
 
         # 관리자 코드 입력 시 숫자 검증 및 버튼 상태 업데이트
         self.admin_code_edit.textChanged.connect(self.form_validator.validate_admin_code)
@@ -1331,7 +1640,11 @@ class InfoWidget(QWidget):
         layout.addSpacing(32)
 
         # 하단 버튼 (다음: 왼쪽, 종료: 오른쪽) - 각 378x48px, gap 20px, 전체 776x48px
-        button_layout = QHBoxLayout()
+        # 고정 크기 컨테이너로 감싸서 간격 유지
+        button_container = QWidget()
+        button_container.setFixedSize(776, 48)
+        button_layout = QHBoxLayout(button_container)
+        button_layout.setContentsMargins(0, 0, 0, 0)
         button_layout.setSpacing(20)  # 버튼 간격 20px
 
         # 다음 버튼 (왼쪽) - 378x48px
@@ -1356,7 +1669,6 @@ class InfoWidget(QWidget):
         # 종료 버튼 (오른쪽) - 378x48px
         exit_btn = QPushButton()
         exit_btn.setFixedSize(378, 48)
-        import os
         btn_exit_enabled = resource_path("assets/image/test_info/btn_종료_enabled.png").replace(chr(92), "/")
         btn_exit_hover = resource_path("assets/image/test_info/btn_종료_Hover.png").replace(chr(92), "/")
         exit_btn.setStyleSheet(f"""
@@ -1373,7 +1685,7 @@ class InfoWidget(QWidget):
         exit_btn.clicked.connect(self.exit_btn_clicked)
         button_layout.addWidget(exit_btn)
 
-        layout.addLayout(button_layout)
+        layout.addWidget(button_container, alignment=Qt.AlignHCenter)
 
         panel.setLayout(layout)
         return panel
@@ -1531,34 +1843,39 @@ class InfoWidget(QWidget):
     def create_admin_code_field(self):
         """
         관리자 코드 입력 필드 생성 (776x82px)
-        - 배경 이미지: 776x82px (관리자 코드 입력.png)
-        - 입력칸: 배경 이미지 위에 배치
+        - 라벨: 776x28px (font 18px weight 400)
+        - gap: 6px
+        - 입력칸: 768x48px
         """
-        field_widget = QWidget()
-        field_widget.setFixedSize(776, 82)
-
-        # field_widget에 배경 이미지 설정
-        bg_img_path = resource_path("assets/image/test_info/관리자 코드 입력.png").replace(chr(92), "/")
-        field_widget.setStyleSheet(f"""
-            QWidget {{
-                background: transparent;
-                background-image: url({bg_img_path});
-                background-repeat: no-repeat;
-                background-position: center;
-            }}
-        """)
+        # 필드 위젯 (776x82px)
+        self.admin_code_widget = QWidget()
+        self.admin_code_widget.setFixedSize(776, 82)
+        self.original_admin_code_widget_size = (776, 82)
 
         # 레이아웃 설정
-        field_layout = QVBoxLayout()
+        field_layout = QVBoxLayout(self.admin_code_widget)
         field_layout.setContentsMargins(0, 0, 0, 0)
         field_layout.setSpacing(6)
 
-        # 상단 여백 (라벨 영역 28px)
-        field_layout.addSpacing(28)
+        # 라벨 "관리자 코드 입력" (776x28px)
+        self.admin_code_label = QLabel("관리자 코드 입력")
+        self.admin_code_label.setFixedSize(776, 28)
+        self.original_admin_code_label_size = (776, 28)
+        self.admin_code_label.setStyleSheet("""
+            QLabel {
+                font-family: 'Noto Sans KR';
+                font-size: 18px;
+                font-weight: 400;
+                color: #000000;
+                background: transparent;
+            }
+        """)
+        field_layout.addWidget(self.admin_code_label)
 
         # 입력칸 (768x48px)
         input_field = QLineEdit()
         input_field.setFixedSize(768, 48)
+        input_field.setObjectName("admin_code_input")
 
         # 입력 필드 배경 이미지
         input_enabled = resource_path("assets/image/test_info/input_enabled.png").replace(chr(92), "/")
@@ -1567,7 +1884,7 @@ class InfoWidget(QWidget):
         input_filled = resource_path("assets/image/test_info/input_filled.png").replace(chr(92), "/")
 
         input_field.setStyleSheet(f"""
-            QLineEdit {{
+            QLineEdit#admin_code_input {{
                 font-family: 'Noto Sans KR';
                 font-size: 18px;
                 font-weight: 400;
@@ -1576,21 +1893,26 @@ class InfoWidget(QWidget):
                 padding: 0 24px;
                 border: none;
                 outline: none;
-                background: transparent url({input_enabled}) no-repeat center;
+                border-image: url({input_enabled}) 0 0 0 0 stretch stretch;
             }}
-            QLineEdit:focus {{
+            QLineEdit#admin_code_input::placeholder {{
+                font-size: 18px;
+                font-weight: 500;
+                color: #868686;
+            }}
+            QLineEdit#admin_code_input:focus {{
                 border: none;
                 outline: none;
-                background: transparent url({input_enabled}) no-repeat center;
+                border-image: url({input_enabled}) 0 0 0 0 stretch stretch;
             }}
-            QLineEdit:hover:enabled:!focus[hasText="false"] {{
-                background: transparent url({input_hover}) no-repeat center;
+            QLineEdit#admin_code_input:hover:enabled:!focus[hasText="false"] {{
+                border-image: url({input_hover}) 0 0 0 0 stretch stretch;
             }}
-            QLineEdit:disabled {{
-                background: transparent url({input_disabled}) no-repeat center;
+            QLineEdit#admin_code_input:disabled {{
+                border-image: url({input_disabled}) 0 0 0 0 stretch stretch;
             }}
-            QLineEdit[hasText="true"] {{
-                background: transparent url({input_filled}) no-repeat center;
+            QLineEdit#admin_code_input[hasText="true"] {{
+                border-image: url({input_filled}) 0 0 0 0 stretch stretch;
             }}
         """)
 
@@ -1604,12 +1926,14 @@ class InfoWidget(QWidget):
         input_field.textChanged.connect(update_background)
         input_field.setProperty("hasText", "false")
 
+        # 인스턴스 변수로 저장 (반응형용)
+        self.admin_code_input = input_field
+        self.original_admin_code_input_size = (768, 48)
+
         field_layout.addWidget(input_field)
 
-        field_widget.setLayout(field_layout)
-
         return {
-            "widget": field_widget,
+            "widget": self.admin_code_widget,
             "input": input_field
         }
 
