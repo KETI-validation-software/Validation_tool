@@ -460,25 +460,17 @@ cmii7pysb004k8z1tts0npxfm_AccessUserInfos_out_constraints = {
     "valueType": "preset",
     "required": True
   },
-  "userList.doorList.doorID": {
-    "id": "cmiwj0n6i02miugxn26i0v7ni",
-    "valueType": "preset",
-    "required": True
-  },
-  "userList.doorList.timePeriod": {
-    "id": "cmiwj0n6j02mkugxneilxzvra",
-    "valueType": "preset",
-    "required": True
-  },
-  "userList.doorList.timePeriod.startTime": {
-    "id": "cmiwj0n6n02mqugxn455p44hm",
-    "valueType": "preset",
-    "required": True
-  },
-  "userList.doorList.timePeriod.endTime": {
-    "id": "cmiwj0n6n02msugxnnqmanlio",
-    "valueType": "preset",
-    "required": True
+  "doorList.doorSensor": {
+    "id": "cmj13a9eu01vx12s9wja5mxt7",
+    "valueType": "random",
+    "required": True,
+    "referenceField": "(참조 필드 미선택)",
+    "referenceEndpoint": "/RealtimeDoorStatus",
+    "validValueField": "acControl",
+    "validValues": [
+      "Lock",
+      "Unlock"
+    ]
   }
 }
 
@@ -496,10 +488,10 @@ cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_out_constraints = {
   }
 }
 
-# RealtimeVerifEventInfos WebHook IN Constraints
-cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_webhook_in_constraints = {
-  "doorList": {
-    "id": "cmiwjcsve030hugxnh4gwx5wk",
+# RealtimeDoorStatus2
+cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_out_constraints = {
+  "code": {
+    "id": "cmiwqsqrw0b7y844gtn3rzf7y",
     "valueType": "preset",
     "required": True
   },
@@ -540,18 +532,8 @@ cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_webhook_in_constraints = {
   }
 }
 
-# StoredVerifEventInfos
-cmii7pysb004k8z1tts0npxfm_StoredVerifEventInfos_out_constraints = {
-  "code": {
-    "id": "cmiwjxur6041pugxn4ok6u2j8",
-    "valueType": "preset",
-    "required": True
-  },
-  "message": {
-    "id": "cmiwjy12o041zugxnw6zc56a0",
-    "valueType": "preset",
-    "required": True
-  },
+# RealtimeDoorStatus2 WebHook IN Constraints
+cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_in_constraints = {
   "doorList": {
     "id": "cmiwk4eb505txugxnu31pqzg8",
     "valueType": "preset",
@@ -594,19 +576,20 @@ cmii7pysb004k8z1tts0npxfm_StoredVerifEventInfos_out_constraints = {
   }
 }
 
-# cmii7pysb004k8z1tts0npxfm 검증 리스트
-cmii7pysb004k8z1tts0npxfm_outConstraints = [
-    cmii7pysb004k8z1tts0npxfm_Authentication_out_constraints,
-    cmii7pysb004k8z1tts0npxfm_Capabilities_out_constraints,
-    cmii7pysb004k8z1tts0npxfm_DoorProfiles_out_constraints,
-    cmii7pysb004k8z1tts0npxfm_AccessUserInfos_out_constraints,
-    cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_out_constraints,
-    cmii7pysb004k8z1tts0npxfm_StoredVerifEventInfos_out_constraints,
+# cmiqr1acx00i5ie8fi022t1hp 검증 리스트
+cmiqr1acx00i5ie8fi022t1hp_outConstraints = [
+    cmiqr1acx00i5ie8fi022t1hp_Authentication_out_constraints,
+    cmiqr1acx00i5ie8fi022t1hp_Capabilities_out_constraints,
+    cmiqr1acx00i5ie8fi022t1hp_DoorProfiles_out_constraints,
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_out_constraints,
+    cmiqr1acx00i5ie8fi022t1hp_DoorControl_out_constraints,
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_out_constraints,
 ]
 
-# cmii7pysb004k8z1tts0npxfm WebHook Constraints 리스트
-cmii7pysb004k8z1tts0npxfm_webhook_inConstraints = [
-    cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_webhook_in_constraints,
+# cmiqr1acx00i5ie8fi022t1hp WebHook Constraints 리스트
+cmiqr1acx00i5ie8fi022t1hp_webhook_inConstraints = [
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_webhook_in_constraints,
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_in_constraints,
 ]
 
 # Authentication

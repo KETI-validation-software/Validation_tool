@@ -90,9 +90,17 @@ cmii7pysb004k8z1tts0npxfm_DoorProfiles_in_schema = {}
 # AccessUserInfos
 cmii7pysb004k8z1tts0npxfm_AccessUserInfos_in_schema = {}
 
-# RealtimeVerifEventInfos
-cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_in_schema = {
-    "doorList": [{}],
+# DoorControl
+cmiqr1acx00i5ie8fi022t1hp_DoorControl_in_schema = {
+    "doorID": str,
+    "commandType": str,
+}
+
+# RealtimeDoorStatus2
+cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_in_schema = {
+    "doorList": [{
+    "doorID": str,
+}],
     OptionalKey("duration"): int,
     "transProtocol": {
     "transProtocolType": str,
@@ -102,36 +110,26 @@ cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_in_schema = {
     OptionalKey("startTime"): int,
 }
 
-# RealtimeVerifEventInfos WebHook OUT Schema
-cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_webhook_out_schema = {
+# RealtimeDoorStatus2 WebHook OUT Schema
+cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_out_schema = {
     "code": str,
     "message": str,
 }
 
-# StoredVerifEventInfos
-cmii7pysb004k8z1tts0npxfm_StoredVerifEventInfos_in_schema = {
-    "timePeriod": {
-    "startTime": int,
-    "endTime": int,
-},
-    "doorList": [{}],
-    OptionalKey("maxCount"): int,
-    OptionalKey("eventFilter"): str,
-}
-
-# cmii7pysb004k8z1tts0npxfm 스키마 리스트
-cmii7pysb004k8z1tts0npxfm_inSchema = [
-    cmii7pysb004k8z1tts0npxfm_Authentication_in_schema,
-    cmii7pysb004k8z1tts0npxfm_Capabilities_in_schema,
-    cmii7pysb004k8z1tts0npxfm_DoorProfiles_in_schema,
-    cmii7pysb004k8z1tts0npxfm_AccessUserInfos_in_schema,
-    cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_in_schema,
-    cmii7pysb004k8z1tts0npxfm_StoredVerifEventInfos_in_schema,
+# cmiqr1acx00i5ie8fi022t1hp 스키마 리스트
+cmiqr1acx00i5ie8fi022t1hp_inSchema = [
+    cmiqr1acx00i5ie8fi022t1hp_Authentication_in_schema,
+    cmiqr1acx00i5ie8fi022t1hp_Capabilities_in_schema,
+    cmiqr1acx00i5ie8fi022t1hp_DoorProfiles_in_schema,
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_in_schema,
+    cmiqr1acx00i5ie8fi022t1hp_DoorControl_in_schema,
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_in_schema,
 ]
 
-# cmii7pysb004k8z1tts0npxfm WebHook 스키마 리스트
-cmii7pysb004k8z1tts0npxfm_webhook_OutSchema = [
-    cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_webhook_out_schema,
+# cmiqr1acx00i5ie8fi022t1hp WebHook 스키마 리스트
+cmiqr1acx00i5ie8fi022t1hp_webhook_OutSchema = [
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_webhook_out_schema,
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_out_schema,
 ]
 
 # Authentication

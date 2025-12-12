@@ -134,17 +134,31 @@ cmii7lxbn002s8z1t1i9uudf0_StreamURLs_in_validation = {
   }
 }
 
-# RealtimeVideoEventInfos
-cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_in_validation = {
-  "camList.camID": {
+# RealtimeDoorStatus2
+cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_in_validation = {
+  "doorList.doorID": {
     "enabled": True,
     "validationType": "response-field-list-match",
     "referenceEndpoint": "/CameraProfiles",
     "referenceListField": "camID",
     "referenceListEndpoint": "/CameraProfiles",
     "score": 0
-  },
-  "transProtocol.transProtocolType": {
+  }
+}
+
+# cmiqr1acx00i5ie8fi022t1hp 검증 리스트
+cmiqr1acx00i5ie8fi022t1hp_inValidation = [
+    cmiqr1acx00i5ie8fi022t1hp_Authentication_in_validation,
+    cmiqr1acx00i5ie8fi022t1hp_Capabilities_in_validation,
+    cmiqr1acx00i5ie8fi022t1hp_DoorProfiles_in_validation,
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_in_validation,
+    cmiqr1acx00i5ie8fi022t1hp_DoorControl_in_validation,
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_in_validation,
+]
+
+# Authentication
+cmiqqzrjz00i3ie8figf79cur_Authentication_in_validation = {
+  "userID": {
     "enabled": True,
     "validationType": "specified-value-match",
     "allowedValues": [

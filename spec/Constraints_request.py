@@ -258,25 +258,10 @@ cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_in_constraints = {
   }
 }
 
-# cmii7w683006h8z1t7usnin5g 검증 리스트
-cmii7w683006h8z1t7usnin5g_inConstraints = [
-    cmii7w683006h8z1t7usnin5g_Authentication_in_constraints,
-    cmii7w683006h8z1t7usnin5g_Capabilities_in_constraints,
-    cmii7w683006h8z1t7usnin5g_DoorProfiles_in_constraints,
-    cmii7w683006h8z1t7usnin5g_AccessUserInfos_in_constraints,
-    cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_in_constraints,
-    cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_in_constraints,
-]
-
-# cmii7w683006h8z1t7usnin5g WebHook Constraints 리스트
-cmii7w683006h8z1t7usnin5g_webhook_outConstraints = [
-    cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_webhook_out_constraints,
-]
-
-# Authentication
-cmii7v8pr006g8z1tvo55a50u_Authentication_in_constraints = {
-  "userID": {
-    "id": "cmii7ym04006z8z1tr9r06hrb",
+# RealtimeDoorStatus2
+cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_in_constraints = {
+  "doorList": {
+    "id": "cmize9v8a00a096qh8bxm7fe2",
     "valueType": "preset",
     "required": True
   },
@@ -367,8 +352,8 @@ cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_in_constraints = {
   }
 }
 
-# RealtimeVideoEventInfos WebHook OUT Constraints
-cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_webhook_out_constraints = {
+# RealtimeDoorStatus2 WebHook OUT Constraints
+cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_webhook_out_constraints = {
   "code": {
     "id": "cmiwrhxdj0ci0844gogcg394u",
     "valueType": "preset",
@@ -381,10 +366,26 @@ cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_webhook_out_constraints = {
   }
 }
 
-# StoredVideoInfos
-cmii7v8pr006g8z1tvo55a50u_StoredVideoInfos_in_constraints = {
-  "timePeriod": {
-    "id": "cmiwrl7dr000knkglwk60tug6",
+# cmiqr1jha00i6ie8fb1scb3go 검증 리스트
+cmiqr1jha00i6ie8fb1scb3go_inConstraints = [
+    cmiqr1jha00i6ie8fb1scb3go_Authentication_in_constraints,
+    cmiqr1jha00i6ie8fb1scb3go_Capabilities_in_constraints,
+    cmiqr1jha00i6ie8fb1scb3go_DoorProfiles_in_constraints,
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_in_constraints,
+    cmiqr1jha00i6ie8fb1scb3go_DoorControl_in_constraints,
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_in_constraints,
+]
+
+# cmiqr1jha00i6ie8fb1scb3go WebHook Constraints 리스트
+cmiqr1jha00i6ie8fb1scb3go_webhook_outConstraints = [
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_webhook_out_constraints,
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_webhook_out_constraints,
+]
+
+# Authentication
+cmiqr0kdw00i4ie8fr3firjtg_Authentication_in_constraints = {
+  "userID": {
+    "id": "cmish1o9m08wq5vy7wvz8a61y",
     "valueType": "preset",
     "required": True
   },

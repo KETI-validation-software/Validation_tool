@@ -301,10 +301,20 @@ cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_webhook_in_data = {
 ]
 }
 
-# StoredVerifEventInfos
-cmii7pysb004k8z1tts0npxfm_StoredVerifEventInfos_out_data = {
+# DoorControl
+cmiqr1acx00i5ie8fi022t1hp_DoorControl_out_data = {
     "code": "200",
-    "message": "성공",
+    "message": "성공"
+}
+
+# RealtimeDoorStatus2
+cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_out_data = {
+    "code": "200",
+    "message": "성공"
+}
+
+# RealtimeDoorStatus2 WebHook IN Data
+cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_in_data = {
     "doorList": [
         {
         "eventTime": 20220822163022124,
@@ -336,19 +346,20 @@ cmii7pysb004k8z1tts0npxfm_StoredVerifEventInfos_out_data = {
 ]
 }
 
-# cmii7pysb004k8z1tts0npxfm 데이터 리스트
-cmii7pysb004k8z1tts0npxfm_outData = [
-    cmii7pysb004k8z1tts0npxfm_Authentication_out_data,
-    cmii7pysb004k8z1tts0npxfm_Capabilities_out_data,
-    cmii7pysb004k8z1tts0npxfm_DoorProfiles_out_data,
-    cmii7pysb004k8z1tts0npxfm_AccessUserInfos_out_data,
-    cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_out_data,
-    cmii7pysb004k8z1tts0npxfm_StoredVerifEventInfos_out_data,
+# cmiqr1acx00i5ie8fi022t1hp 데이터 리스트
+cmiqr1acx00i5ie8fi022t1hp_outData = [
+    cmiqr1acx00i5ie8fi022t1hp_Authentication_out_data,
+    cmiqr1acx00i5ie8fi022t1hp_Capabilities_out_data,
+    cmiqr1acx00i5ie8fi022t1hp_DoorProfiles_out_data,
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_out_data,
+    cmiqr1acx00i5ie8fi022t1hp_DoorControl_out_data,
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_out_data,
 ]
 
-# cmii7pysb004k8z1tts0npxfm WebHook 데이터 리스트
-cmii7pysb004k8z1tts0npxfm_webhook_inData = [
-    cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_webhook_in_data,
+# cmiqr1acx00i5ie8fi022t1hp WebHook 데이터 리스트
+cmiqr1acx00i5ie8fi022t1hp_webhook_inData = [
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_webhook_in_data,
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_in_data,
 ]
 
 # cmii7pysb004k8z1tts0npxfm API endpoint
@@ -356,9 +367,9 @@ cmii7pysb004k8z1tts0npxfm_messages = [
     "Authentication",
     "Capabilities",
     "DoorProfiles",
-    "AccessUserInfos",
-    "RealtimeVerifEventInfos",
-    "StoredVerifEventInfos",
+    "RealtimeDoorStatus",
+    "DoorControl",
+    "RealtimeDoorStatus2",
 ]
 
 # Authentication

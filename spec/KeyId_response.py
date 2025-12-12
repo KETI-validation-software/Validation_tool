@@ -238,94 +238,80 @@ cmii7shen005i8z1tagevx4qh_response_key_ids = [
     cmii7shen005i8z1tagevx4qh_StoredSensorEventInfos_response_key_ids,
 ]
 
-# cmii7pysb004k8z1tts0npxfm
-cmii7pysb004k8z1tts0npxfm_Authentication_response_key_ids = {
-    "code": "cmii7rok300588z1tf4jcuvz6",
-    "message": "cmii7rok3005a8z1twi4otb03",
-    "userName": "cmii7rok4005c8z1tgr5tzegk",
-    "userAff": "cmii7rok4005e8z1tcbqpnnxe",
-    "accessToken": "cmii7rok5005g8z1tpldy9e57",
+# cmiqr1acx00i5ie8fi022t1hp
+cmiqr1acx00i5ie8fi022t1hp_Authentication_response_key_ids = {
+    "code": "cmisgxzw808ul5vy7gr8s98dc",
+    "message": "cmisgy1gp08uq5vy7194x1gfs",
+    "userName": "cmisgy8mc08v85vy7nzg2ozx6",
+    "userAff": "cmisgyadj08vd5vy7s0zp2y9b",
+    "accessToken": "cmisgzrk508w65vy79bmeve7p",
 }
 
-cmii7pysb004k8z1tts0npxfm_Capabilities_response_key_ids = {
-    "code": "cmiiby4h9003ihl2hmn3ghbvl",
-    "message": "cmiiby4ha003khl2hx6u7i1ps",
-    "transportSupport": "cmiiby4hb003ohl2hema5s6r2",
-    "transportSupport.transProtocolType": "cmiiby4hy003yhl2hh2puktr0",
-    "transportSupport.transProtocolDesc": "cmiiby4hz0040hl2hev5ljfq9",
+cmiqr1acx00i5ie8fi022t1hp_Capabilities_response_key_ids = {
+    "code": "cmisjt9640bnb5vy7c6mmpnzy",
+    "message": "cmisjtb5g0bol5vy730bd9uun",
+    "transportSupport": "cmisjthqq0br35vy7uwzp6z7j",
+    "transportSupport.transProtocolType": "cmisjubeb0c0u5vy736142p3j",
+    "transportSupport.transProtocolDesc": "cmisjubec0c0w5vy7rtgcn5qu",
 }
 
-cmii7pysb004k8z1tts0npxfm_DoorProfiles_response_key_ids = {
-    "code": "cmisjisee09hw5vy7ajj18xo1",
-    "message": "cmisjj68n09i65vy7bhj2lnxi",
-    "doorList": "cmisjjjw309ij5vy7klz54kvh",
-    "doorList.doorID": "cmisk9y5l0db35vy74nn3utak",
-    "doorList.doorName": "cmisk9y5m0db55vy7m42cq0u0",
-    "doorList.doorRelayStatus": "cmisk9y5m0db75vy7nrgitysd",
-    "doorList.doorSensor": "cmisk9y5n0db95vy7cpkpvnlh",
-    "doorList.doorLoc": "cmisk9y5n0dbb5vy78079wnwa",
-    "doorList.doorLoc.lon": "cmisk9y600dbh5vy7585nx241",
-    "doorList.doorLoc.lat": "cmisk9y610dbj5vy757umjzmd",
-    "doorList.doorLoc.alt": "cmisk9y620dbl5vy7729uz0ee",
-    "doorList.doorLoc.desc": "cmisk9y620dbn5vy707sb9da3",
-    "doorList.bioDeviceList": "cmisk9y5o0dbd5vy75p2klvsn",
-    "doorList.bioDeviceList.bioDeviceID": "cmisk9y6t0dc15vy7y7tv0ftk",
-    "doorList.bioDeviceList.bioDeviceName": "cmisk9y6t0dc35vy7mkqcjckn",
-    "doorList.bioDeviceList.bioDeviceAuthTypeList": "cmisk9y6u0dc55vy7j4xovvyy",
-    "doorList.otherDeviceList": "cmisk9y5o0dbf5vy765j03uof",
-    "doorList.otherDeviceList.otherDeviceID": "cmisk9y6u0dc75vy7s3znthpa",
-    "doorList.otherDeviceList.otherDeviceName": "cmisk9y6v0dc95vy7fj06dgu6",
-    "doorList.otherDeviceList.otherDeviceAuthTypeList": "cmisk9y6v0dcb5vy77eqohj9u",
+cmiqr1acx00i5ie8fi022t1hp_DoorProfiles_response_key_ids = {
+    "code": "cmiwq39sh07fz844gn5ojv8iv",
+    "message": "cmiwq3ewx07g8844gfdjstgru",
+    "doorList": "cmiwq3uw807gf844ghslodnb9",
+    "doorList.doorID": "cmizh2j7y028k7eoekmch7neb",
+    "doorList.doorName": "cmizh2j7y028m7eoe561v1og0",
+    "doorList.doorRelayStatus": "cmizh2j7y028o7eoe7oum45e5",
+    "doorList.doorSensor": "cmizh2j7z028q7eoeh327meza",
+    "doorList.doorLoc": "cmizh2j7z028s7eoem1q5umty",
+    "doorList.doorLoc.lon": "cmizh2j86028y7eoe7rnz5oci",
+    "doorList.doorLoc.lat": "cmizh2j8702907eoe17manciv",
+    "doorList.doorLoc.alt": "cmizh2j8702927eoetki8hmas",
+    "doorList.doorLoc.desc": "cmizh2j8702947eoe5ivm78fe",
+    "doorList.bioDeviceList": "cmizh2j7z028u7eoevg49hsoc",
+    "doorList.bioDeviceList.bioDeviceID": "cmizh2j8f029a7eoenj3oor7e",
+    "doorList.bioDeviceList.otherDeviceName": "cmiwqea340abf844g15xesdtc",
+    "doorList.bioDeviceList.bioDeviceAuthTypeList": "cmizh2j8g029e7eoeblmqcqdd",
+    "doorList.bioDeviceList.bioDeviceName": "cmizh2j8f029c7eoemcuopjxw",
+    "doorList.otherDeviceList": "cmizh2j7z028w7eoedx1yphoo",
+    "doorList.otherDeviceList.otherDeviceID": "cmizh2j8g029g7eoe4aae2xlo",
+    "doorList.otherDeviceList.otherDeviceName": "cmizh2j8g029i7eoeps66od7e",
+    "doorList.otherDeviceList.otherDeviceAuthTypeList": "cmizh2j8h029k7eoeaadch6yi",
 }
 
-cmii7pysb004k8z1tts0npxfm_AccessUserInfos_response_key_ids = {
-    "code": "cmiwiplu600gpugxnl33vzh64",
-    "message": "cmiwipydg00gzugxny5b0z1h8",
-    "userList": "cmiwiqao200h9ugxn0brcef9o",
-    "userList.userID": "cmiwj0n6b02m2ugxnw1xpebou",
-    "userList.userName": "cmiwj0n6b02m4ugxnbuikeax0",
-    "userList.userDesc": "cmiwj0n6b02m6ugxnsaqjrk5l",
-    "userList.doorList": "cmiwj0n6c02m8ugxnifph5nei",
-    "userList.doorList.doorID": "cmiwj0n6i02miugxn26i0v7ni",
-    "userList.doorList.timePeriod": "cmiwj0n6j02mkugxneilxzvra",
-    "userList.doorList.timePeriod.startTime": "cmiwj0n6n02mqugxn455p44hm",
-    "userList.doorList.timePeriod.endTime": "cmiwj0n6n02msugxnnqmanlio",
+cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_response_key_ids = {
+    "code": "cmizg2tx300fg7eoezo3qr162",
+    "message": "cmizg2xab00fm7eoe1bhmlgrw",
+    "doorList": "cmiwqj4780acp844g8i3ahbt7",
+    "doorList.doorID": "cmiwqkuoj0aj9844g5oec97p9",
+    "doorList.doorName": "cmizg3epb00gy7eoeiefmp1lr",
+    "doorList.doorRelaySensor": "cmizg3ghq00h67eoeuthieru9",
+    "doorList.doorSensor": "cmj13a9eu01vx12s9wja5mxt7",
 }
 
-cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_response_key_ids = {
-    "code": "cmiwjhjom03dpugxnralbx29s",
-    "message": "cmiwjhpe303dzugxnf1hyc6o1",
-    "doorList": "cmiwja6z602ncugxniczia9hh",
-    "doorList.eventTime": "cmiwjcsvh030jugxnc1c8mp0i",
-    "doorList.doorID": "cmiwjk7x203f4ugxntk7vq03e",
-    "doorList.userID": "cmiwjkpyu03fuugxndy6x6dru",
-    "doorList.bioAuthTypeList": "cmiwjl6g803ghugxn9aa35o8d",
-    "doorList.otherAuthTypeList": "cmiwjo9z503maugxnc7knwwwc",
-    "doorList.eventName": "cmiwjq08303s7ugxn6myjuphm",
-    "doorList.eventDesc": "cmiwjqo0i03ujugxnk865norb",
+cmiqr1acx00i5ie8fi022t1hp_DoorControl_response_key_ids = {
+    "code": "cmiwqp4z80azq844gf2xm9qtt",
+    "message": "cmiwqpbp70b00844gr7gg59fr",
 }
 
-cmii7pysb004k8z1tts0npxfm_StoredVerifEventInfos_response_key_ids = {
-    "code": "cmiwjxur6041pugxn4ok6u2j8",
-    "message": "cmiwjy12o041zugxnw6zc56a0",
-    "doorList": "cmiwjy7fm0429ugxnzkvyhgxk",
-    "doorList.eventTime": "cmiwk4eba05tzugxnq0px7hne",
-    "doorList.doorID": "cmiwk4eba05u1ugxns4zuooum",
-    "doorList.userID": "cmiwk4ebb05u3ugxn0t4mnthm",
-    "doorList.bioAuthTypeList": "cmiwk4ebb05u5ugxn52fvy1bo",
-    "doorList.otherAuthTypeList": "cmiwk4ebc05u7ugxn3bo1cw5a",
-    "doorList.eventName": "cmiwk4ebc05u9ugxnv9gbzft5",
-    "doorList.eventDesc": "cmiwk4ebd05ubugxnbjd55r70",
+cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_response_key_ids = {
+    "code": "cmiwqsqrw0b7y844gtn3rzf7y",
+    "message": "cmiwqsvzu0b88844gjdzch27v",
+    "doorList": "cmiwqtb8p0b8k844gt18dcxkk",
+    "doorList.doorID": "cmiwqvxnv0bni844g3f2pyz9t",
+    "doorList.doorName": "cmiwqvxnv0bnk844gwotx0gqu",
+    "doorList.doorRelaySensor": "cmiwqvxnv0bnm844g0ndzntyu",
+    "doorList.doorSensor": "cmiwqvxnw0bno844gj9p4t49o",
 }
 
-# cmii7pysb004k8z1tts0npxfm Response Key-ID Mapping 리스트
-cmii7pysb004k8z1tts0npxfm_response_key_ids = [
-    cmii7pysb004k8z1tts0npxfm_Authentication_response_key_ids,
-    cmii7pysb004k8z1tts0npxfm_Capabilities_response_key_ids,
-    cmii7pysb004k8z1tts0npxfm_DoorProfiles_response_key_ids,
-    cmii7pysb004k8z1tts0npxfm_AccessUserInfos_response_key_ids,
-    cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_response_key_ids,
-    cmii7pysb004k8z1tts0npxfm_StoredVerifEventInfos_response_key_ids,
+# cmiqr1acx00i5ie8fi022t1hp Response Key-ID Mapping 리스트
+cmiqr1acx00i5ie8fi022t1hp_response_key_ids = [
+    cmiqr1acx00i5ie8fi022t1hp_Authentication_response_key_ids,
+    cmiqr1acx00i5ie8fi022t1hp_Capabilities_response_key_ids,
+    cmiqr1acx00i5ie8fi022t1hp_DoorProfiles_response_key_ids,
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_response_key_ids,
+    cmiqr1acx00i5ie8fi022t1hp_DoorControl_response_key_ids,
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_response_key_ids,
 ]
 
 # cmii7lxbn002s8z1t1i9uudf0
