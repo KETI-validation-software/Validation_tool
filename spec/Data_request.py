@@ -187,7 +187,11 @@ cmii7v8pr006g8z1tvo55a50u_CameraProfiles_in_data = {}
 
 # StreamURLs
 cmii7v8pr006g8z1tvo55a50u_StreamURLs_in_data = {
-    "camList": [],
+    "camList": [
+        {
+        "camID": ""
+    }
+],
     "streamProtocolType": "RSTP"
 }
 
@@ -195,10 +199,7 @@ cmii7v8pr006g8z1tvo55a50u_StreamURLs_in_data = {
 cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_in_data = {
     "camList": [
         {
-        "camID": "cam0001"
-    },
-        {
-        "camID": "cam0002"
+        "camID": ""
     }
 ],
     "transProtocol": {
@@ -212,7 +213,10 @@ cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_in_data = {
 }
 
 # RealtimeVideoEventInfos WebHook OUT Data
-cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_webhook_out_data = {}
+cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_webhook_out_data = {
+    "code": "200",
+    "message": "성공"
+}
 
 # StoredVideoInfos
 cmii7v8pr006g8z1tvo55a50u_StoredVideoInfos_in_data = {
@@ -222,10 +226,7 @@ cmii7v8pr006g8z1tvo55a50u_StoredVideoInfos_in_data = {
 },
     "camList": [
         {
-        "camID": "cam0001"
-    },
-        {
-        "camID": "cam0002"
+        "camID": ""
     }
 ]
 }
@@ -234,21 +235,9 @@ cmii7v8pr006g8z1tvo55a50u_StoredVideoInfos_in_data = {
 cmii7v8pr006g8z1tvo55a50u_ReplayURL_in_data = {
     "camList": [
         {
-        "camID": "cam0001",
+        "camID": "",
         "startTime": 20251105163010124,
         "endTime": "20251115163010123",
-        "streamProtocolType": "RTSP"
-    },
-        {
-        "camID": "cam0002",
-        "startTime": "20251105163010123",
-        "endTime": 20251115163010123,
-        "streamProtocolType": "RTSP"
-    },
-        {
-        "camID": "cam0003",
-        "startTime": 20251105163010123,
-        "endTime": 20251115163010123,
         "streamProtocolType": "RTSP"
     }
 ]
@@ -262,17 +251,11 @@ cmii7v8pr006g8z1tvo55a50u_StoredVideoEventInfos_in_data = {
 },
     "camList": [
         {
-        "camID": "cam0001"
-    },
-        {
-        "camID": "cam0002"
-    },
-        {
-        "camID": "cam0003"
+        "camID": ""
     }
 ],
     "maxCount": 3,
-    "eventFilter": "배회",
+    "eventFilter": "",
     "classFilter": ""
 }
 
@@ -284,13 +267,7 @@ cmii7v8pr006g8z1tvo55a50u_StoredObjectAnalyticsInfos_in_data = {
 },
     "camList": [
         {
-        "camID": "cam0001"
-    },
-        {
-        "camID": "cam0002"
-    },
-        {
-        "camID": "cam0003"
+        "camID": ""
     }
 ],
     "filterList": [
@@ -299,17 +276,7 @@ cmii7v8pr006g8z1tvo55a50u_StoredObjectAnalyticsInfos_in_data = {
         "사람"
     ],
         "attributeFilter": [
-        "여자",
         "안경"
-    ]
-    },
-        {
-        "classFilter": [
-        "트럭",
-        "버스"
-    ],
-        "attributeFilter": [
-        "빨간색"
     ]
     }
 ]

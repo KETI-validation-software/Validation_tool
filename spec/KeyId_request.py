@@ -17,6 +17,8 @@ cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_request_key_ids = {
     "transProtocol.transProtocolType": "cmiwuxd090cfbp002sihhj47s",
     "transProtocol.transProtocolDesc": "cmiwuxhpy0cgkp002vjpiq17v",
     "startTime": "cmiwuxprg0ci6p002aq1y8z2s",
+    "code": "cmiwttqdg0c1kp002y3l9weoo",
+    "message": "cmiwv0k5n0ddfp0023v94f65d",
 }
 
 cmii7wfuf006i8z1tcds6q69g_StoredSensorEventInfos_request_key_ids = {
@@ -42,7 +44,6 @@ cmii7w683006h8z1t7usnin5g_Authentication_request_key_ids = {
     "userPW": "cmii80zrr007z8z1tt0cfjh2a",
 }
 
-<<<<<<< HEAD
 cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_request_key_ids = {
     "doorList": "cmiwt6ndf08gnp002om7rr4si",
     "doorList.doorID": "cmiwt9k7708t5p002r3f7arn6",
@@ -52,18 +53,8 @@ cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_request_key_ids = {
     "transProtocol.transProtocolDesc": "cmiwt90i808pxp002d7eykna8",
     "eventFilter": "cmiwt94g908r6p00262pdfkog",
     "startTime": "cmiwt9aqf08sfp0027rytqfgj",
-=======
-cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_request_key_ids = {
-    "doorList": "cmixuoz8e0grnp0020xzn3bck",
-    "doorList.doorID": "cmixuqxeb0h0np002mwczcz4g",
-    "duration": "cmixupira0gudp0025a627ml4",
-    "transProtocol": "cmixupvnn0gw1p002t4oynlxp",
-    "transProtocol.transProtocolType": "cmixuq3qa0gxmp0023qvxro6p",
-    "transProtocol.transProtocolDesc": "cmixuq6xh0gxzp002nbmk4kcc",
-    "startTime": "cmixuqodk0h00p002xkjhnyca",
-    "code": "cmixussd70hbkp002351v2o5r",
-    "message": "cmixusvcf0hbqp002tdeowl0t",
->>>>>>> 2b3fac75cefb6c010cf4732e0e4d152ddbfddbed
+    "code": "cmiwtb4o008ubp002kpiy0iwu",
+    "message": "cmiwtb79608ujp002utlpf4wa",
 }
 
 cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_request_key_ids = {
@@ -76,32 +67,11 @@ cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_request_key_ids = {
     "eventFilter": "cmiwth4c209xkp002mm4lfebj",
 }
 
-<<<<<<< HEAD
 # cmii7w683006h8z1t7usnin5g Request Key-ID Mapping 리스트
 cmii7w683006h8z1t7usnin5g_request_key_ids = [
     cmii7w683006h8z1t7usnin5g_Authentication_request_key_ids,
     cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_request_key_ids,
     cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_request_key_ids,
-=======
-cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_request_key_ids = {
-    "doorList": "cmize6nzh000f96qhvk7bjdr8",
-    "doorList.doorID": "cmize9v8b00a296qh1vooije0",
-    "duration": "cmize7lki002a96qhe5181nqj",
-    "transProtocol": "cmize811g003m96qhzuj5k87j",
-    "transProtocol.transProtocolType": "cmize8g5l006w96qhvnt0i28e",
-    "transProtocol.transProtocolDesc": "cmize8y8y008q96qhgmcgwvmc",
-    "startTime": "cmize9f5s009v96qhrbr6kzd5",
-    "code": "cmixuyvrh0hmqp0025mr6ni0i",
-    "message": "cmixuyy530hmzp002tlmh000j",
-}
-
-# cmiqr1jha00i6ie8fb1scb3go Request Key-ID Mapping 리스트
-cmiqr1jha00i6ie8fb1scb3go_request_key_ids = [
-    cmiqr1jha00i6ie8fb1scb3go_Authentication_request_key_ids,
-    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_request_key_ids,
-    cmiqr1jha00i6ie8fb1scb3go_DoorControl_request_key_ids,
-    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_request_key_ids,
->>>>>>> 2b3fac75cefb6c010cf4732e0e4d152ddbfddbed
 ]
 
 # cmii7v8pr006g8z1tvo55a50u
@@ -112,12 +82,13 @@ cmii7v8pr006g8z1tvo55a50u_Authentication_request_key_ids = {
 
 cmii7v8pr006g8z1tvo55a50u_StreamURLs_request_key_ids = {
     "camList": "cmiqtkzfm00wsie8f9qmwp4l1",
+    "camList.camID": "cmj17qhrz026o12s9jozkqym7",
     "streamProtocolType": "cmiqtlgv700wyie8f8us68hws",
 }
 
 cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_request_key_ids = {
     "camList": "cmiqtoihq00y2ie8f3urrjlbh",
-    "camList.camID": "cmiwrf69l0bua844gymhbqwgg",
+    "camList.camID": "cmiwrf69i0bu6844g22ccsjtr",
     "transProtocol": "cmiqtpoov00yeie8fv3h8pllf",
     "transProtocol.transProtocolType": "cmiwrdzrw0bs4844gzg8kzcsq",
     "transProtocol.transProtocolDesc": "cmiwre3fr0bt1844gwguauq4q",
@@ -125,6 +96,8 @@ cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_request_key_ids = {
     "eventFilter": "cmiqtq1xn00ykie8fqjmg6au9",
     "classFilter": "cmiqtqegc00yqie8foi0sc1u9",
     "startTime": "cmiqtqxt400ywie8f4ir49gl1",
+    "code": "cmiwrhxdj0ci0844gogcg394u",
+    "message": "cmj1820zz02m012s9cxe2wcfn",
 }
 
 cmii7v8pr006g8z1tvo55a50u_StoredVideoInfos_request_key_ids = {
@@ -132,15 +105,15 @@ cmii7v8pr006g8z1tvo55a50u_StoredVideoInfos_request_key_ids = {
     "timePeriod.startTime": "cmiwrltxz000vnkgl3m4u2f2s",
     "timePeriod.endTime": "cmiwrlxaj0013nkgl40nosy7z",
     "camList": "cmiwrmm95001fnkglx47nenkk",
-    "camList.camID": "cmiwrn6ae003tnkgl2p9ngmur",
+    "camList.camID": "cmiwrn6ab003pnkgl7f78y9t6",
 }
 
 cmii7v8pr006g8z1tvo55a50u_ReplayURL_request_key_ids = {
     "camList": "cmiwrqopk00l1nkgl3szz44s6",
-    "camList.camID": "cmiwrtoke01e6nkglueywsrx6",
-    "camList.startTime": "cmiwrtoke01e8nkgl21unl4r9",
-    "camList.endTime": "cmiwrtoke01eankglhefop5cq",
-    "camList.streamProtocolType": "cmiwrtokf01ecnkgl581rzlxf",
+    "camList.camID": "cmiwrtok201dmnkgl6gzxhft5",
+    "camList.startTime": "cmiwrtok201donkglhwulnxos",
+    "camList.endTime": "cmiwrtok301dqnkgl0k66p4py",
+    "camList.streamProtocolType": "cmiwrtok301dsnkgl3t29d3op",
 }
 
 cmii7v8pr006g8z1tvo55a50u_StoredVideoEventInfos_request_key_ids = {
@@ -148,7 +121,7 @@ cmii7v8pr006g8z1tvo55a50u_StoredVideoEventInfos_request_key_ids = {
     "timePeriod.startTime": "cmiws3ab605bknkglsndw6cp5",
     "timePeriod.endTime": "cmiws41yv0005p002amxfzrhq",
     "camList": "cmiws41z00007p002zof3yx8d",
-    "camList.camID": "cmiws5hex00avp0027u5iks5j",
+    "camList.camID": "cmiws5hes00anp002ng50q3fc",
     "maxCount": "cmiws4rcl005up002n2yhi3pu",
     "eventFilter": "cmiws56xa008jp002vhqm6yfn",
     "classFilter": "cmiws5ggr00aip0022iuh6at3",
@@ -159,10 +132,10 @@ cmii7v8pr006g8z1tvo55a50u_StoredObjectAnalyticsInfos_request_key_ids = {
     "timePeriod.startTime": "cmiwsa3je01lnp002owjbqng1",
     "timePeriod.endTime": "cmiwsa57401lsp0021esg4kr1",
     "camList": "cmiwsaj3401m4p002rukj2l01",
-    "camList.camID": "cmiwsgzs202x8p0028vugkp8f",
+    "camList.camID": "cmiwsgzrw02x0p002fnxf1f08",
     "filterList": "cmiwscsb501vhp002i6nu3tli",
-    "filterList.classFilter": "cmiwsgzsm02xop002eaez510p",
-    "filterList.attributeFilter": "cmiwsgzsm02xqp0024wufb9ia",
+    "filterList.classFilter": "cmiwsgzse02xcp002b6pfp72a",
+    "filterList.attributeFilter": "cmiwsgzse02xep0024ycdnvrw",
 }
 
 # cmii7v8pr006g8z1tvo55a50u Request Key-ID Mapping 리스트
@@ -213,6 +186,12 @@ cmii7wfuf006i8z1tcds6q69g_SensorDeviceProfiles_response_key_ids = {
 cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_response_key_ids = {
     "code": "cmiwuy0wz0cjhp0022kotjgup",
     "message": "cmiwuy3d90cjpp002uisu9j7r",
+    "sensorDeviceList": "cmiwuy7tk0cjyp002h1fs7wro",
+    "sensorDeviceList.sensorDeviceID": "cmiwv06nd0dcxp002w4c59oqw",
+    "sensorDeviceList.measureTime": "cmiwv06nd0dczp0020clcee29",
+    "sensorDeviceList.sensorDeviceType": "cmiwv06ne0dd1p0025cbybfu6",
+    "sensorDeviceList.sensorDeviceUnit": "cmiwv06ne0dd3p002ahsu8wnr",
+    "sensorDeviceList.sensorDeviceValue": "cmiwv06ne0dd5p002ixl40sgs",
 }
 
 cmii7wfuf006i8z1tcds6q69g_StoredSensorEventInfos_response_key_ids = {
@@ -274,7 +253,6 @@ cmii7w683006h8z1t7usnin5g_DoorProfiles_response_key_ids = {
     "doorList.otherDeviceList.otherDeviceAuthTypeList": "cmiwst3ft05php0020qs55vra",
 }
 
-<<<<<<< HEAD
 cmii7w683006h8z1t7usnin5g_AccessUserInfos_response_key_ids = {
     "code": "cmiwstyev05pyp002vo0omxx8",
     "message": "cmiwsu14n05q4p002d4zfzh34",
@@ -287,24 +265,21 @@ cmii7w683006h8z1t7usnin5g_AccessUserInfos_response_key_ids = {
     "userList.doorList.timePeriod": "cmiwsyc2n078zp002uwvelefc",
     "userList.doorList.timePeriod.startTime": "cmiwsyc2r0795p002ep7p3x7v",
     "userList.doorList.timePeriod.endTime": "cmiwsyc2r0797p002db0elmvs",
-=======
-cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_response_key_ids = {
-    "code": "cmixur2k30h12p0021dj2dqwu",
-    "message": "cmixur54k0h18p0025u2ok46q",
-    "doorList": "cmixurclc0h1gp0027apvg6ez",
-    "doorList.doorID": "cmixusnx90hatp002m3rnln60",
-    "doorList.doorName": "cmixusnx90havp0024dgra9az",
-    "doorList.doorRelaySensor": "cmixusnx90haxp002vctfavqr",
-    "doorList.doorSensor": "cmixusnxa0hazp002h9lu2gt7",
->>>>>>> 2b3fac75cefb6c010cf4732e0e4d152ddbfddbed
 }
 
 cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_response_key_ids = {
     "code": "cmiwt9te508tgp0025455w1ph",
     "message": "cmiwt9w1f08top002aj3t42gm",
+    "doorList": "cmiwtbfz208utp002f1d2ayny",
+    "doorList.eventTime": "cmiwtei2h09pnp002s794m0h8",
+    "doorList.doorID": "cmiwtei2h09ppp002wzu7qgn0",
+    "doorList.userID": "cmiwtei2h09prp002mr8riivw",
+    "doorList.bioAuthTypeList": "cmiwtei2i09ptp002kr29aoel",
+    "doorList.otherAuthTypeList": "cmiwtei2i09pvp002decmisnt",
+    "doorList.eventName": "cmiwtei2i09pxp002rq8u0h41",
+    "doorList.eventDesc": "cmiwtei2i09pzp002sg03pywh",
 }
 
-<<<<<<< HEAD
 cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_response_key_ids = {
     "code": "cmiwthi4809yjp002avhbunqy",
     "message": "cmiwthksr09yrp0025hej2mjs",
@@ -325,26 +300,6 @@ cmii7w683006h8z1t7usnin5g_response_key_ids = [
     cmii7w683006h8z1t7usnin5g_AccessUserInfos_response_key_ids,
     cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_response_key_ids,
     cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_response_key_ids,
-=======
-cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_response_key_ids = {
-    "code": "cmizea7th00ao96qhtccvs2gv",
-    "message": "cmizea94s00at96qh5tv1j1x9",
-    "doorList": "cmixuwob20hdhp002hcun4fpz",
-    "doorList.doorID": "cmixuykwk0hmep002xddae990",
-    "doorList.doorName": "cmizeau3w00bf96qhexvnyb0x",
-    "doorList.doorRelaySensor": "cmizeavm100bk96qhc5k8x3lo",
-    "doorList.doorSensor": "cmizeaz5o00bt96qh9mdvx33k",
-}
-
-# cmiqr1jha00i6ie8fb1scb3go Response Key-ID Mapping 리스트
-cmiqr1jha00i6ie8fb1scb3go_response_key_ids = [
-    cmiqr1jha00i6ie8fb1scb3go_Authentication_response_key_ids,
-    cmiqr1jha00i6ie8fb1scb3go_Capabilities_response_key_ids,
-    cmiqr1jha00i6ie8fb1scb3go_DoorProfiles_response_key_ids,
-    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_response_key_ids,
-    cmiqr1jha00i6ie8fb1scb3go_DoorControl_response_key_ids,
-    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_response_key_ids,
->>>>>>> 2b3fac75cefb6c010cf4732e0e4d152ddbfddbed
 ]
 
 # cmii7v8pr006g8z1tvo55a50u
@@ -386,62 +341,85 @@ cmii7v8pr006g8z1tvo55a50u_StreamURLs_response_key_ids = {
     "code": "cmiqtlss200x6ie8f7pu1f23c",
     "message": "cmiqtlyto00xcie8fn3fbocfh",
     "camList": "cmiqtma5m00xiie8fuly6thwh",
+    "camList.camID": "cmj17rvsh02ki12s9h05zrodz",
+    "camList.accessID": "cmj17rvsh02kk12s9vpei1lm3",
+    "camList.accessPW": "cmj17rvsh02km12s9zhsg7ogj",
+    "camList.camURL": "cmj17rvsi02ko12s9b6ucezhj",
+    "camList.videoInfo": "cmj17rvsi02kq12s9u06k8ix6",
+    "camList.videoInfo.resolution": "cmj17rvsn02ks12s9lrc90chn",
+    "camList.videoInfo.fps": "cmj17rvsn02ku12s9mz0gwgcx",
+    "camList.videoInfo.videoCodec": "cmj17rvsn02kw12s9jgf73dat",
+    "camList.videoInfo.audioCodec": "cmj17rvsn02ky12s9sgltoz5h",
 }
 
 cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_response_key_ids = {
     "code": "cmiqtr21700z1ie8f2gb2pxw4",
     "message": "cmiwrfgls0buk844gegf6h5nd",
+    "camList": "cmiwrfquy0buv844gfufg2j30",
+    "camList.camID": "cmiwrhv3l0ch4844g7qzbakmx",
+    "camList.eventUUID": "cmiwrhv3m0ch6844g1lux0upw",
+    "camList.eventName": "cmiwrhv3m0ch8844gqnoxrtsi",
+    "camList.startTime": "cmiwrhv3m0cha844gwp8thxsx",
+    "camList.endTime": "cmiwrhv3n0chc844geaa6w099",
+    "camList.eventDesc": "cmiwrhv3n0che844gqfrgim1r",
 }
 
 cmii7v8pr006g8z1tvo55a50u_StoredVideoInfos_response_key_ids = {
     "code": "cmiwrncyp0041nkglw6ylrgkd",
     "message": "cmiwrnfl60049nkgld7j8vz90",
     "camList": "cmiwrniqz004hnkglkap6vspc",
-    "camList.camID": "cmiwrp98u00kcnkgl11plpxd6",
-    "camList.timeList": "cmiwrp98v00kenkglfbekyvmn",
-    "camList.timeList.startTime": "cmiwrp98y00kinkglyy7yue8b",
-    "camList.timeList.endTime": "cmiwrp98y00kknkglv83bctve",
+    "camList.camID": "cmiwrp98m00k0nkglgjjm6lpy",
+    "camList.timeList": "cmiwrp98m00k2nkgl0dorq4k8",
+    "camList.timeList.startTime": "cmiwrp98q00k6nkgl2fopmr38",
+    "camList.timeList.endTime": "cmiwrp98q00k8nkgl38r8o9je",
 }
 
 cmii7v8pr006g8z1tvo55a50u_ReplayURL_response_key_ids = {
     "code": "cmiwru2lz01ennkglgut1l9g7",
     "message": "cmiwru5fx01evnkgl7kr2ap5k",
     "camList": "cmiwruc5m01fjnkglfb5808qt",
-    "camList.camID": "cmiws0cwr059rnkgldtbegi86",
-    "camList.accessID": "cmiws0cwr059tnkglh3k9jlcn",
-    "camList.accessPW": "cmiws0cws059vnkgl6lp8q50c",
-    "camList.startTime": "cmiws0cws059xnkglw7p9w3mo",
-    "camList.endTime": "cmiws0cws059znkgl9n8buevi",
-    "camList.camURL": "cmiws0cws05a1nkglys3ih6l4",
-    "camList.videoInfo": "cmiws0cwt05a3nkgliar7vjnj",
-    "camList.videoInfo.resolution": "cmiws0cwy05a5nkglz0pf5hwe",
-    "camList.videoInfo.fps": "cmiws0cwz05a7nkglgb75q8u4",
-    "camList.videoInfo.videoCodec": "cmiws0cwz05a9nkgl7e1b8u4m",
-    "camList.videoInfo.audioCodec": "cmiws0cwz05abnkgldqef2iyh",
+    "camList.camID": "cmiws0cvy058fnkglfht15n64",
+    "camList.accessID": "cmiws0cvy058hnkgl6jlrc6bu",
+    "camList.accessPW": "cmiws0cvy058jnkglor0futar",
+    "camList.startTime": "cmiws0cvy058lnkglfs3qy75c",
+    "camList.endTime": "cmiws0cvz058nnkgl3b4g59v6",
+    "camList.camURL": "cmiws0cvz058pnkgllee02xjt",
+    "camList.videoInfo": "cmiws0cvz058rnkgla4dbi4ep",
+    "camList.videoInfo.resolution": "cmiws0cw5058tnkglgh6liq5j",
+    "camList.videoInfo.fps": "cmiws0cw5058vnkglhps56lsg",
+    "camList.videoInfo.videoCodec": "cmiws0cw6058xnkgldn18k152",
+    "camList.videoInfo.audioCodec": "cmiws0cw6058znkglop8r5368",
 }
 
 cmii7v8pr006g8z1tvo55a50u_StoredVideoEventInfos_response_key_ids = {
     "code": "cmiws5la500b6p002ehfpwl91",
     "message": "cmiws5o2500bep002ksv0kruy",
     "camList": "cmiws5sie00bnp002mhjjpdm9",
-    "camList.camID": "cmiws8l5g01kcp002kgp7ghrf",
-    "camList.eventUUID": "cmiws8l5g01kep002crwuukf1",
-    "camList.eventName": "cmiws8l5g01kgp002xg7lt08s",
-    "camList.startTime": "cmiws8l5g01kip002y7byvybg",
-    "camList.endTime": "cmiws8l5h01kkp0025ugno01w",
-    "camList.eventDesc": "cmiws8l5h01kmp0029pmw12bz",
+    "camList.camID": "cmiws8l4y01jkp002veo9vtsv",
+    "camList.eventUUID": "cmiws8l4y01jmp0025i9yxipb",
+    "camList.eventName": "cmiws8l4y01jop002nczpx3or",
+    "camList.startTime": "cmiws8l4z01jqp0020oxveqiq",
+    "camList.endTime": "cmiws8l4z01jsp00212xgr4qb",
+    "camList.eventDesc": "cmiws8l4z01jup0022zlb61is",
 }
 
 cmii7v8pr006g8z1tvo55a50u_StoredObjectAnalyticsInfos_response_key_ids = {
     "code": "cmiwsh9m502y7p0022i73n1po",
     "message": "cmiwshcj002yfp002dkiz4vt7",
     "camList": "cmiwshfet02ynp002zkcg7gej",
-    "camList.camID": "cmiwsk9lk0494p002h0npbbsr",
-    "camList.eventUUID": "cmiwsk9lk0496p002dqslnqo2",
-    "camList.eventName": "cmiwsk9lk0498p002l3g88mon",
-    "camList.startTime": "cmiwsk9ll049ap002ujpklkb7",
-    "camList.endTime": "cmiwsk9ll049cp002tkgsikwc",
-    "camList.eventDesc": "cmiwsk9ll049ep0024liar5gw",
+    "camList.camID": "cmiwsk9l4048cp002u3itb9wc",
+    "camList.analyticsTime": "cmiwsk9l4048ep002oozd2o0r",
+    "camList.anlayticsResultList": "cmiwsk9l4048gp0020kib5lae",
+    "camList.anlayticsResultList.anayticsID": "cmj18hgdz03zk12s9hubxe0fk",
+    "camList.anlayticsResultList.analyticsClass": "cmj18hgdz03zm12s907dfl848",
+    "camList.anlayticsResultList.analyticsAttribute": "cmj18hge003zo12s9tb8883af",
+    "camList.anlayticsResultList.analyticsConfidence": "cmj18hge003zq12s9auut749x",
+    "camList.anlayticsResultList.analyticsBoundingBox": "cmj18hge003zs12s9b8iw2mzc",
+    "camList.anlayticsResultList.analyticsBoundingBox.left": "cmj18hge8040012s96yafbp4g",
+    "camList.anlayticsResultList.analyticsBoundingBox.top": "cmj18hge8040212s98m872xsr",
+    "camList.anlayticsResultList.analyticsBoundingBox.right": "cmj18hge8040412s9tzx8g4ca",
+    "camList.anlayticsResultList.analyticsBoundingBox.bottom": "cmj18hge9040612s9mg22oxxt",
+    "camList.anlayticsResultList.analyticsDesc": "cmj18hge103zu12s94p8o91au",
 }
 
 # cmii7v8pr006g8z1tvo55a50u Response Key-ID Mapping 리스트

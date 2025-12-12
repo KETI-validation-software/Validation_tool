@@ -121,16 +121,151 @@ cmii7v8pr006g8z1tvo55a50u_StreamURLs_out_validation = {}
 cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_out_validation = {}
 
 # StoredVideoInfos
-cmii7v8pr006g8z1tvo55a50u_StoredVideoInfos_out_validation = {}
+cmii7v8pr006g8z1tvo55a50u_StoredVideoInfos_out_validation = {
+  "camList.camID": {
+    "enabled": True,
+    "validationType": "request-field-list-match",
+    "referenceEndpoint": "/StoredVideoInfos",
+    "referenceListField": "camID",
+    "referenceListEndpoint": "/StoredVideoInfos",
+    "score": 0
+  },
+  "camList.timeList.startTime": {
+    "enabled": True,
+    "validationType": "request-field-range-match",
+    "rangeOperator": "between",
+    "referenceFieldMin": "startTime",
+    "referenceFieldMax": "endTime",
+    "referenceEndpointMin": "/StoredVideoInfos",
+    "referenceEndpointMax": "/StoredVideoInfos",
+    "score": 0
+  },
+  "camList.timeList.endTime": {
+    "enabled": True,
+    "validationType": "request-field-range-match",
+    "rangeOperator": "between",
+    "referenceFieldMin": "startTime",
+    "referenceFieldMax": "endTime",
+    "referenceEndpointMin": "/StoredVideoInfos",
+    "referenceEndpointMax": "/StoredVideoInfos",
+    "score": 0
+  }
+}
 
 # ReplayURL
-cmii7v8pr006g8z1tvo55a50u_ReplayURL_out_validation = {}
+cmii7v8pr006g8z1tvo55a50u_ReplayURL_out_validation = {
+  "camList.camID": {
+    "enabled": True,
+    "validationType": "request-field-list-match",
+    "referenceEndpoint": "/ReplayURL",
+    "referenceListField": "camID",
+    "referenceListEndpoint": "/ReplayURL",
+    "score": 0
+  },
+  "camList.startTime": {
+    "enabled": True,
+    "validationType": "request-field-range-match",
+    "rangeOperator": "between",
+    "referenceFieldMin": "startTime",
+    "referenceFieldMax": "endTime",
+    "referenceEndpointMin": "/ReplayURL",
+    "referenceEndpointMax": "/ReplayURL",
+    "score": 0
+  },
+  "camList.endTime": {
+    "enabled": True,
+    "validationType": "request-field-range-match",
+    "rangeOperator": "between",
+    "referenceFieldMin": "startTime",
+    "referenceFieldMax": "endTime",
+    "referenceEndpointMin": "/ReplayURL",
+    "referenceEndpointMax": "/ReplayURL",
+    "score": 0
+  }
+}
 
 # StoredVideoEventInfos
-cmii7v8pr006g8z1tvo55a50u_StoredVideoEventInfos_out_validation = {}
+cmii7v8pr006g8z1tvo55a50u_StoredVideoEventInfos_out_validation = {
+  "camList.camID": {
+    "enabled": True,
+    "validationType": "request-field-list-match",
+    "referenceEndpoint": "/StoredVideoEventInfos",
+    "referenceListField": "camID",
+    "referenceListEndpoint": "/StoredVideoEventInfos",
+    "score": 0
+  },
+  "camList.eventName": {
+    "enabled": True,
+    "validationType": "request-field-match",
+    "referenceFieldId": "cmiws56xa008jp002vhqm6yfn",
+    "referenceField": "eventFilter",
+    "referenceEndpoint": "/StoredVideoEventInfos",
+    "score": 0
+  },
+  "camList.startTime": {
+    "enabled": True,
+    "validationType": "request-field-range-match",
+    "rangeOperator": "between",
+    "referenceFieldMin": "startTime",
+    "referenceFieldMax": "endTime",
+    "referenceEndpointMin": "/StoredVideoEventInfos",
+    "referenceEndpointMax": "/StoredVideoEventInfos",
+    "score": 0
+  },
+  "camList.endTime": {
+    "enabled": True,
+    "validationType": "request-field-range-match",
+    "rangeOperator": "between",
+    "referenceFieldMin": "startTime",
+    "referenceFieldMax": "endTime",
+    "referenceEndpointMin": "/StoredVideoEventInfos",
+    "referenceEndpointMax": "/StoredVideoEventInfos",
+    "score": 0
+  }
+}
 
 # StoredObjectAnalyticsInfos
-cmii7v8pr006g8z1tvo55a50u_StoredObjectAnalyticsInfos_out_validation = {}
+cmii7v8pr006g8z1tvo55a50u_StoredObjectAnalyticsInfos_out_validation = {
+  "camList.camID": {
+    "enabled": True,
+    "validationType": "request-field-list-match",
+    "referenceEndpoint": "/StoredObjectAnalyticsInfos",
+    "referenceListField": "camID",
+    "referenceListEndpoint": "/StoredObjectAnalyticsInfos",
+    "score": 0
+  },
+  "camList.analyticsTime": {
+    "enabled": True,
+    "validationType": "request-field-range-match",
+    "rangeOperator": "between",
+    "referenceFieldMin": "startTime",
+    "referenceFieldMax": "endTime",
+    "referenceEndpointMin": "/StoredObjectAnalyticsInfos",
+    "referenceEndpointMax": "/StoredObjectAnalyticsInfos",
+    "score": 0
+  },
+  "camList.anlayticsResultList": {
+    "enabled": True,
+    "validationType": "request-field-match",
+    "score": 0
+  },
+  "camList.anlayticsResultList.analyticsClass": {
+    "enabled": True,
+    "validationType": "request-field-list-match",
+    "referenceEndpoint": "/StoredObjectAnalyticsInfos",
+    "referenceListField": "classFilter",
+    "referenceListEndpoint": "/StoredObjectAnalyticsInfos",
+    "score": 0
+  },
+  "camList.anlayticsResultList.analyticsAttribute": {
+    "enabled": True,
+    "validationType": "request-field-list-match",
+    "referenceEndpoint": "/StoredObjectAnalyticsInfos",
+    "referenceListField": "attributeFilter",
+    "referenceListEndpoint": "/StoredObjectAnalyticsInfos",
+    "score": 0
+  }
+}
 
 # cmii7v8pr006g8z1tvo55a50u 검증 리스트
 cmii7v8pr006g8z1tvo55a50u_outValidation = [

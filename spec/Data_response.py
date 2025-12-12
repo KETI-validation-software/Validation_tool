@@ -381,7 +381,7 @@ cmii7lxbn002s8z1t1i9uudf0_Capabilities_out_data = {
 ],
     "transportSupport": [
         {
-        "transportProtocolType": "LongPolling",
+        "transProtocolType": "LongPolling",
         "transProtocolDesc": ""
     }
 ]
@@ -455,7 +455,7 @@ cmii7lxbn002s8z1t1i9uudf0_StreamURLs_out_data = {
         "camID": "",
         "accessID": "",
         "accessPW": "",
-        "camURL": "",
+        "camURL": "rtsp://192.168.0.1:8000",
         "videoInfo": {
         "resolution": "1920x1080",
         "fps": 30,
@@ -492,20 +492,11 @@ cmii7lxbn002s8z1t1i9uudf0_StoredVideoInfos_out_data = {
     "message": "성공",
     "camList": [
         {
-        "camID": "cam0001",
+        "camID": "",
         "timeList": [
             {
-            "startTime": 20251105163010124,
-            "endTime": 20251115163010124
-        }
-    ]
-    },
-        {
-        "camID": "cam0002",
-        "timeList": [
-            {
-            "startTime": 20251105163010124,
-            "endTime": 20251115163010124
+            "startTime": 0,
+            "endTime": 0
         }
     ]
     }
@@ -518,7 +509,7 @@ cmii7lxbn002s8z1t1i9uudf0_ReplayURL_out_data = {
     "message": "성공",
     "camList": [
         {
-        "camID": "cam0001",
+        "camID": "",
         "accessID": "conn0001",
         "accessPW": "1234",
         "camURL": "rtsp://192.168.0.1:8000",
@@ -527,30 +518,6 @@ cmii7lxbn002s8z1t1i9uudf0_ReplayURL_out_data = {
         "fps": 30,
         "videoCodec": "H.264",
         "audioCodec": "G.711"
-    }
-    },
-        {
-        "camID": "cam0002",
-        "accessID": "conn0002",
-        "accessPW": "1234",
-        "camURL": "rtsp://192.168.0.2:8000",
-        "videoInfo": {
-        "resolution": "1920x1080",
-        "fps": 30,
-        "videoCodec": "H.264",
-        "audioCodec": "G.711"
-    }
-    },
-        {
-        "camID": "cam0003",
-        "accessID": "conn0003",
-        "accessPW": "1234",
-        "camURL": "rtsp://192.168.0.3:8000",
-        "videoInfo": {
-        "resolution": "",
-        "fps": 0,
-        "videoCodec": "",
-        "audioCodec": ""
     }
     }
 ]
@@ -562,28 +529,12 @@ cmii7lxbn002s8z1t1i9uudf0_StoredVideoEventInfos_out_data = {
     "message": "성공",
     "camList": [
         {
-        "camID": "cam0001",
+        "camID": "",
         "eventUUID": "event01",
-        "eventName": "배회",
-        "startTime": 20251105163010124,
-        "endTime": 20251115163010124,
+        "eventName": "",
+        "startTime": 0,
+        "endTime": 0,
         "eventDesc": "AAABVVVVCCCDDssvfdd"
-    },
-        {
-        "camID": "cam0002",
-        "eventUUID": "event01",
-        "eventName": "배회",
-        "startTime": 20251105163010123,
-        "endTime": 20251115163010124,
-        "eventDesc": "FFFeeiiiWWkdjflskdjfoEKK"
-    },
-        {
-        "camID": "cam0003",
-        "eventUUID": "event01",
-        "eventName": "배회",
-        "startTime": 20251105163010123,
-        "endTime": 20251115163010124,
-        "eventDesc": "iVUhEUgAAACAAAAAgCAYAAA"
     }
 ]
 }
@@ -594,12 +545,12 @@ cmii7lxbn002s8z1t1i9uudf0_StoredObjectAnalyticsInfos_out_data = {
     "message": "성공",
     "camList": [
         {
-        "camID": "cam0001",
-        "analyticsTime": 20220822163022124,
+        "camID": "",
+        "analyticsTime": 0,
         "anlayticsResultList": [
             {
             "anayticsID": "object001",
-            "analyticsClass": "트럭",
+            "analyticsClass": "",
             "analyticsAttribute": [
             "빨간색"
         ],
@@ -611,28 +562,6 @@ cmii7lxbn002s8z1t1i9uudf0_StoredObjectAnalyticsInfos_out_data = {
             "bottom": 0.6
         },
             "analyticsDesc": "13가 4567"
-        }
-    ]
-    },
-        {
-        "camID": "cam0002",
-        "analyticsTime": 20220822163022123,
-        "anlayticsResultList": [
-            {
-            "anayticsID": "object002",
-            "analyticsClass": "사람",
-            "analyticsAttribute": [
-            "여자",
-            "안경"
-        ],
-            "analyticsConfidence": 0.9,
-            "analyticsBoundingBox": {
-            "left": 0.3,
-            "top": 0.1,
-            "right": 0.5,
-            "bottom": 0.7
-        },
-            "analyticsDesc": ""
         }
     ]
     }
