@@ -1,0 +1,2 @@
+{"time": "2025-12-12T01:02:55.662378Z", "api": "StoredVideoEventInfos", "dir": "REQUEST", "data": {"timePeriod": {"startTime": 20251105163010124, "endTime": 20251115163010124}, "camList": [{"camID": "cam0001"}], "maxCount": 3, "eventFilter": "Loitering", "classFilter": "Human"}}
+{"time": "2025-12-12T01:02:55.664373Z", "api": "StoredVideoEventInfos", "dir": "RESPONSE", "data": {"code": "404", "message": "장치 없음"}}

@@ -2172,8 +2172,7 @@ class MyApp(QWidget):
             updated_request = self.generator._applied_constraints(
                 request_data={},  # 이전 요청 데이터는 필요 없음
                 template_data=request_data.copy(),  # 현재 요청 데이터를 템플릿으로
-                constraints=constraints,
-                n=3  # 기본 생성 개수
+                constraints=constraints
             )
 
             # print(f"[DATA_MAPPER] 요청 데이터 업데이트 완료")
