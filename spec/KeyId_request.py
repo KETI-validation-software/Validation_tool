@@ -42,6 +42,7 @@ cmii7w683006h8z1t7usnin5g_Authentication_request_key_ids = {
     "userPW": "cmii80zrr007z8z1tt0cfjh2a",
 }
 
+<<<<<<< HEAD
 cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_request_key_ids = {
     "doorList": "cmiwt6ndf08gnp002om7rr4si",
     "doorList.doorID": "cmiwt9k7708t5p002r3f7arn6",
@@ -51,6 +52,18 @@ cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_request_key_ids = {
     "transProtocol.transProtocolDesc": "cmiwt90i808pxp002d7eykna8",
     "eventFilter": "cmiwt94g908r6p00262pdfkog",
     "startTime": "cmiwt9aqf08sfp0027rytqfgj",
+=======
+cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_request_key_ids = {
+    "doorList": "cmixuoz8e0grnp0020xzn3bck",
+    "doorList.doorID": "cmixuqxeb0h0np002mwczcz4g",
+    "duration": "cmixupira0gudp0025a627ml4",
+    "transProtocol": "cmixupvnn0gw1p002t4oynlxp",
+    "transProtocol.transProtocolType": "cmixuq3qa0gxmp0023qvxro6p",
+    "transProtocol.transProtocolDesc": "cmixuq6xh0gxzp002nbmk4kcc",
+    "startTime": "cmixuqodk0h00p002xkjhnyca",
+    "code": "cmixussd70hbkp002351v2o5r",
+    "message": "cmixusvcf0hbqp002tdeowl0t",
+>>>>>>> 2b3fac75cefb6c010cf4732e0e4d152ddbfddbed
 }
 
 cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_request_key_ids = {
@@ -63,11 +76,32 @@ cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_request_key_ids = {
     "eventFilter": "cmiwth4c209xkp002mm4lfebj",
 }
 
+<<<<<<< HEAD
 # cmii7w683006h8z1t7usnin5g Request Key-ID Mapping 리스트
 cmii7w683006h8z1t7usnin5g_request_key_ids = [
     cmii7w683006h8z1t7usnin5g_Authentication_request_key_ids,
     cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_request_key_ids,
     cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_request_key_ids,
+=======
+cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_request_key_ids = {
+    "doorList": "cmize6nzh000f96qhvk7bjdr8",
+    "doorList.doorID": "cmize9v8b00a296qh1vooije0",
+    "duration": "cmize7lki002a96qhe5181nqj",
+    "transProtocol": "cmize811g003m96qhzuj5k87j",
+    "transProtocol.transProtocolType": "cmize8g5l006w96qhvnt0i28e",
+    "transProtocol.transProtocolDesc": "cmize8y8y008q96qhgmcgwvmc",
+    "startTime": "cmize9f5s009v96qhrbr6kzd5",
+    "code": "cmixuyvrh0hmqp0025mr6ni0i",
+    "message": "cmixuyy530hmzp002tlmh000j",
+}
+
+# cmiqr1jha00i6ie8fb1scb3go Request Key-ID Mapping 리스트
+cmiqr1jha00i6ie8fb1scb3go_request_key_ids = [
+    cmiqr1jha00i6ie8fb1scb3go_Authentication_request_key_ids,
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_request_key_ids,
+    cmiqr1jha00i6ie8fb1scb3go_DoorControl_request_key_ids,
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_request_key_ids,
+>>>>>>> 2b3fac75cefb6c010cf4732e0e4d152ddbfddbed
 ]
 
 # cmii7v8pr006g8z1tvo55a50u
@@ -240,6 +274,7 @@ cmii7w683006h8z1t7usnin5g_DoorProfiles_response_key_ids = {
     "doorList.otherDeviceList.otherDeviceAuthTypeList": "cmiwst3ft05php0020qs55vra",
 }
 
+<<<<<<< HEAD
 cmii7w683006h8z1t7usnin5g_AccessUserInfos_response_key_ids = {
     "code": "cmiwstyev05pyp002vo0omxx8",
     "message": "cmiwsu14n05q4p002d4zfzh34",
@@ -252,6 +287,16 @@ cmii7w683006h8z1t7usnin5g_AccessUserInfos_response_key_ids = {
     "userList.doorList.timePeriod": "cmiwsyc2n078zp002uwvelefc",
     "userList.doorList.timePeriod.startTime": "cmiwsyc2r0795p002ep7p3x7v",
     "userList.doorList.timePeriod.endTime": "cmiwsyc2r0797p002db0elmvs",
+=======
+cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_response_key_ids = {
+    "code": "cmixur2k30h12p0021dj2dqwu",
+    "message": "cmixur54k0h18p0025u2ok46q",
+    "doorList": "cmixurclc0h1gp0027apvg6ez",
+    "doorList.doorID": "cmixusnx90hatp002m3rnln60",
+    "doorList.doorName": "cmixusnx90havp0024dgra9az",
+    "doorList.doorRelaySensor": "cmixusnx90haxp002vctfavqr",
+    "doorList.doorSensor": "cmixusnxa0hazp002h9lu2gt7",
+>>>>>>> 2b3fac75cefb6c010cf4732e0e4d152ddbfddbed
 }
 
 cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_response_key_ids = {
@@ -259,6 +304,7 @@ cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_response_key_ids = {
     "message": "cmiwt9w1f08top002aj3t42gm",
 }
 
+<<<<<<< HEAD
 cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_response_key_ids = {
     "code": "cmiwthi4809yjp002avhbunqy",
     "message": "cmiwthksr09yrp0025hej2mjs",
@@ -279,6 +325,26 @@ cmii7w683006h8z1t7usnin5g_response_key_ids = [
     cmii7w683006h8z1t7usnin5g_AccessUserInfos_response_key_ids,
     cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_response_key_ids,
     cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_response_key_ids,
+=======
+cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_response_key_ids = {
+    "code": "cmizea7th00ao96qhtccvs2gv",
+    "message": "cmizea94s00at96qh5tv1j1x9",
+    "doorList": "cmixuwob20hdhp002hcun4fpz",
+    "doorList.doorID": "cmixuykwk0hmep002xddae990",
+    "doorList.doorName": "cmizeau3w00bf96qhexvnyb0x",
+    "doorList.doorRelaySensor": "cmizeavm100bk96qhc5k8x3lo",
+    "doorList.doorSensor": "cmizeaz5o00bt96qh9mdvx33k",
+}
+
+# cmiqr1jha00i6ie8fb1scb3go Response Key-ID Mapping 리스트
+cmiqr1jha00i6ie8fb1scb3go_response_key_ids = [
+    cmiqr1jha00i6ie8fb1scb3go_Authentication_response_key_ids,
+    cmiqr1jha00i6ie8fb1scb3go_Capabilities_response_key_ids,
+    cmiqr1jha00i6ie8fb1scb3go_DoorProfiles_response_key_ids,
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_response_key_ids,
+    cmiqr1jha00i6ie8fb1scb3go_DoorControl_response_key_ids,
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_response_key_ids,
+>>>>>>> 2b3fac75cefb6c010cf4732e0e4d152ddbfddbed
 ]
 
 # cmii7v8pr006g8z1tvo55a50u
