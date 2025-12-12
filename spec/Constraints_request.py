@@ -296,10 +296,17 @@ cmii7v8pr006g8z1tvo55a50u_CameraProfiles_in_constraints = {}
 # StreamURLs
 cmii7v8pr006g8z1tvo55a50u_StreamURLs_in_constraints = {
   "camList": {
-    "id": "cmiqtkzfm00wsie8f9qmwp4l1",
+    "id": "cmj17qhrx026m12s9s5t7vm2m",
     "valueType": "preset",
+    "required": True
+  },
+  "camList.camID": {
+    "id": "cmj17qhrz026o12s9jozkqym7",
+    "referenceFieldId": "cmizre5yl00gq117lhvg7sqp7",
+    "valueType": "response-based",
     "required": True,
-    "arrayElementType": "object"
+    "referenceEndpoint": "/CameraProfiles",
+    "referenceField": "camID"
   },
   "streamProtocolType": {
     "id": "cmiqtlgv700wyie8f8us68hws",
@@ -311,14 +318,17 @@ cmii7v8pr006g8z1tvo55a50u_StreamURLs_in_constraints = {
 # RealtimeVideoEventInfos
 cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_in_constraints = {
   "camList": {
-    "id": "cmiwrf69k0bu8844g1h4w1ynp",
+    "id": "cmiwrf69g0bu4844gps2e9ac1",
     "valueType": "preset",
     "required": True
   },
   "camList.camID": {
-    "id": "cmiwrf69l0bua844gymhbqwgg",
-    "valueType": "preset",
-    "required": True
+    "id": "cmiwrf69i0bu6844g22ccsjtr",
+    "referenceFieldId": "cmizre5yl00gq117lhvg7sqp7",
+    "valueType": "response-based",
+    "required": True,
+    "referenceEndpoint": "/CameraProfiles",
+    "referenceField": "camID"
   },
   "transProtocol": {
     "id": "cmiqtpoov00yeie8fv3h8pllf",
@@ -359,8 +369,13 @@ cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_in_constraints = {
 
 # RealtimeVideoEventInfos WebHook OUT Constraints
 cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_webhook_out_constraints = {
-  "": {
+  "code": {
     "id": "cmiwrhxdj0ci0844gogcg394u",
+    "valueType": "preset",
+    "required": True
+  },
+  "message": {
+    "id": "cmj1820zz02m012s9cxe2wcfn",
     "valueType": "preset",
     "required": True
   }
@@ -384,41 +399,47 @@ cmii7v8pr006g8z1tvo55a50u_StoredVideoInfos_in_constraints = {
     "required": True
   },
   "camList": {
-    "id": "cmiwrn6ac003rnkglstontwxr",
+    "id": "cmiwrn6a9003nnkglvme2ccl1",
     "valueType": "preset",
     "required": True
   },
   "camList.camID": {
-    "id": "cmiwrn6ae003tnkgl2p9ngmur",
-    "valueType": "preset",
-    "required": True
+    "id": "cmiwrn6ab003pnkgl7f78y9t6",
+    "referenceFieldId": "cmizre5yl00gq117lhvg7sqp7",
+    "valueType": "response-based",
+    "required": True,
+    "referenceEndpoint": "/CameraProfiles",
+    "referenceField": "camID"
   }
 }
 
 # ReplayURL
 cmii7v8pr006g8z1tvo55a50u_ReplayURL_in_constraints = {
   "camList": {
-    "id": "cmiwrtokc01e4nkglvx2ptl9i",
+    "id": "cmiwrtok001dknkgluevidcla",
     "valueType": "preset",
     "required": True
   },
   "camList.camID": {
-    "id": "cmiwrtoke01e6nkglueywsrx6",
-    "valueType": "preset",
-    "required": True
+    "id": "cmiwrtok201dmnkgl6gzxhft5",
+    "referenceFieldId": "cmizre5yl00gq117lhvg7sqp7",
+    "valueType": "response-based",
+    "required": True,
+    "referenceEndpoint": "/CameraProfiles",
+    "referenceField": "camID"
   },
   "camList.startTime": {
-    "id": "cmiwrtoke01e8nkgl21unl4r9",
+    "id": "cmiwrtok201donkglhwulnxos",
     "valueType": "preset",
     "required": True
   },
   "camList.endTime": {
-    "id": "cmiwrtoke01eankglhefop5cq",
+    "id": "cmiwrtok301dqnkgl0k66p4py",
     "valueType": "preset",
     "required": True
   },
   "camList.streamProtocolType": {
-    "id": "cmiwrtokf01ecnkgl581rzlxf",
+    "id": "cmiwrtok301dsnkgl3t29d3op",
     "valueType": "preset",
     "required": True
   }
@@ -442,14 +463,17 @@ cmii7v8pr006g8z1tvo55a50u_StoredVideoEventInfos_in_constraints = {
     "required": True
   },
   "camList": {
-    "id": "cmiws5hew00atp0027lyj4268",
+    "id": "cmiws5her00alp002y1uhjddp",
     "valueType": "preset",
     "required": True
   },
   "camList.camID": {
-    "id": "cmiws5hex00avp0027u5iks5j",
-    "valueType": "preset",
-    "required": True
+    "id": "cmiws5hes00anp002ng50q3fc",
+    "referenceFieldId": "cmizre5yl00gq117lhvg7sqp7",
+    "valueType": "response-based",
+    "required": True,
+    "referenceEndpoint": "/CameraProfiles",
+    "referenceField": "camID"
   },
   "maxCount": {
     "id": "cmiws4rcl005up002n2yhi3pu",
@@ -458,13 +482,26 @@ cmii7v8pr006g8z1tvo55a50u_StoredVideoEventInfos_in_constraints = {
   },
   "eventFilter": {
     "id": "cmiws56xa008jp002vhqm6yfn",
-    "valueType": "preset",
-    "required": False
+    "valueType": "random",
+    "required": False,
+    "referenceField": "(참조 필드 미선택)",
+    "referenceEndpoint": "/StoredVideoEventInfos",
+    "validValueField": "videoEvent",
+    "validValues": [
+      "Loitering",
+      "Intrusion"
+    ]
   },
   "classFilter": {
     "id": "cmiws5ggr00aip0022iuh6at3",
-    "valueType": "preset",
-    "required": False
+    "valueType": "random",
+    "required": False,
+    "referenceField": "(참조 필드 미선택)",
+    "referenceEndpoint": "/StoredVideoEventInfos",
+    "validValueField": "videoObject",
+    "validValues": [
+      "Human"
+    ]
   }
 }
 
@@ -486,27 +523,30 @@ cmii7v8pr006g8z1tvo55a50u_StoredObjectAnalyticsInfos_in_constraints = {
     "required": True
   },
   "camList": {
-    "id": "cmiwsgzs102x6p002ng0c1djh",
+    "id": "cmiwsgzru02wyp0022uq3k278",
     "valueType": "preset",
     "required": True
   },
   "camList.camID": {
-    "id": "cmiwsgzs202x8p0028vugkp8f",
-    "valueType": "preset",
-    "required": True
+    "id": "cmiwsgzrw02x0p002fnxf1f08",
+    "referenceFieldId": "cmizre5yl00gq117lhvg7sqp7",
+    "valueType": "response-based",
+    "required": True,
+    "referenceEndpoint": "/CameraProfiles",
+    "referenceField": "camID"
   },
   "filterList": {
-    "id": "cmiwsgzsk02xmp002crwv84aq",
+    "id": "cmiwsgzsc02xap002gifjhi5v",
     "valueType": "preset",
     "required": False
   },
   "filterList.classFilter": {
-    "id": "cmiwsgzsp02xup002nt32c37q",
+    "id": "cmiwsgzsh02xgp002vn3dr1fq",
     "valueType": "preset",
     "required": False
   },
   "filterList.attributeFilter": {
-    "id": "cmiwsgzsp02xwp002ldmr2dk6",
+    "id": "cmiwsgzsh02xkp002xn001108",
     "valueType": "preset",
     "required": False
   }

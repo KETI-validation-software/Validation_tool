@@ -181,12 +181,19 @@ cmii7lxbn002s8z1t1i9uudf0_StoredVideoInfos_in_schema = {
     "startTime": int,
     "endTime": int,
 },
-    OptionalKey("camList"): [{}],
+    OptionalKey("camList"): [{
+    "camID": str,
+}],
 }
 
 # ReplayURL
 cmii7lxbn002s8z1t1i9uudf0_ReplayURL_in_schema = {
-    "camList": [{}],
+    "camList": [{
+    "camID": str,
+    "startTime": int,
+    "endTime": int,
+    "streamProtocolType": str,
+}],
 }
 
 # StoredVideoEventInfos
@@ -195,7 +202,9 @@ cmii7lxbn002s8z1t1i9uudf0_StoredVideoEventInfos_in_schema = {
     "startTime": int,
     "endTime": int,
 },
-    OptionalKey("camList"): [{}],
+    OptionalKey("camList"): [{
+    "camID": str,
+}],
     OptionalKey("maxCount"): int,
     OptionalKey("eventFilter"): str,
     OptionalKey("classFilter"): str,
@@ -207,8 +216,13 @@ cmii7lxbn002s8z1t1i9uudf0_StoredObjectAnalyticsInfos_in_schema = {
     "startTime": int,
     "endTime": int,
 },
-    OptionalKey("camList"): [{}],
-    OptionalKey("filterList"): [{}],
+    OptionalKey("camList"): [{
+    "camID": str,
+}],
+    OptionalKey("filterList"): [{
+    OptionalKey("classFilter"): [str],
+    OptionalKey("attributeFilter"): [str],
+}],
 }
 
 # cmii7lxbn002s8z1t1i9uudf0 스키마 리스트

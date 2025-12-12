@@ -1,2 +1,0 @@
-{"time": "2025-12-11T08:35:38.713264Z", "api": "StoredVideoInfos", "dir": "REQUEST", "data": {"timePeriod": {"startTime": 20251105163010124, "endTime": 20251115163010124}, "camList": [{"camID": "cam0001"}, {"camID": "cam0002"}]}}
-{"time": "2025-12-11T08:35:38.714262Z", "api": "StoredVideoInfos", "dir": "RESPONSE", "data": {"code": "404", "message": "장치 없음"}}

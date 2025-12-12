@@ -1,2 +1,0 @@
-{"time": "2025-12-11T08:35:26.741483Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
-{"time": "2025-12-11T08:35:26.745472Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "streamingSupport": [{"streamProtocolType": "Unicast"}], "transportSupport": [{"transportProtocolType": "LongPolling", "transProtocolDesc": ""}]}}

@@ -665,7 +665,7 @@ cmii7lxbn002s8z1t1i9uudf0_Capabilities_out_constraints = {
     "valueType": "preset",
     "required": True
   },
-  "transportSupport.transportProtocolType": {
+  "transportSupport.transProtocolType": {
     "id": "cmir08cy700544m394xn1tysc",
     "valueType": "preset",
     "required": True
@@ -792,7 +792,7 @@ cmii7lxbn002s8z1t1i9uudf0_StreamURLs_out_constraints = {
   },
   "camList.camURL": {
     "id": "cmir1ncup02as4m39y4q1dws1",
-    "valueType": "test-time",
+    "valueType": "preset",
     "required": False
   },
   "camList.videoInfo": {
@@ -904,29 +904,47 @@ cmii7lxbn002s8z1t1i9uudf0_StoredVideoInfos_out_constraints = {
     "required": True
   },
   "camList": {
-    "id": "cmir2znhh03704m393pdg0gzk",
+    "id": "cmir2znh7036o4m391v38j6vc",
     "valueType": "preset",
     "required": True
   },
   "camList.camID": {
-    "id": "cmir2znhj03724m39ieknfvrd",
-    "valueType": "preset",
-    "required": True
+    "id": "cmir2znh9036q4m390xb4tu0b",
+    "referenceFieldId": "cmir2ux9n02ys4m39wn9sa5sh",
+    "valueType": "request-based",
+    "required": True,
+    "referenceEndpoint": "/StoredVideoInfos",
+    "referenceField": "camID"
   },
   "camList.timeList": {
-    "id": "cmir2znhm03764m39aoc8zth2",
+    "id": "cmir2znhc036u4m392puqvdor",
     "valueType": "preset",
     "required": True
   },
   "camList.timeList.startTime": {
-    "id": "cmir2znho03784m39a2zt0g5n",
-    "valueType": "preset",
-    "required": True
+    "id": "cmir2znhe036w4m39kk3ja65l",
+    "referenceFieldId": "cmir2tvo102xo4m399ambl3jc",
+    "valueType": "request-range",
+    "required": True,
+    "referenceEndpoint": "/StoredVideoInfos",
+    "referenceField": "startTime",
+    "requestRange": {
+      "maxFieldId": "cmir2u35f02xu4m39386364rm",
+      "minFieldId": "cmir2tvo102xo4m399ambl3jc",
+      "maxEndpoint": "/StoredVideoInfos",
+      "minEndpoint": "/StoredVideoInfos"
+    }
   },
   "camList.timeList.endTime": {
-    "id": "cmir2znho037a4m391jf8mc81",
-    "valueType": "preset",
-    "required": False
+    "id": "cmir2znhe036y4m3943paxdvq",
+    "valueType": "request-range",
+    "required": False,
+    "requestRange": {
+      "maxFieldId": "cmir2u35f02xu4m39386364rm",
+      "minFieldId": "cmir2tvo102xo4m399ambl3jc",
+      "maxEndpoint": "/StoredVideoInfos",
+      "minEndpoint": "/StoredVideoInfos"
+    }
   }
 }
 
@@ -943,52 +961,55 @@ cmii7lxbn002s8z1t1i9uudf0_ReplayURL_out_constraints = {
     "required": True
   },
   "camList": {
-    "id": "cmir3npg2058r4m39kdtq649c",
+    "id": "cmir3npez057n4m39iap76r75",
     "valueType": "preset",
     "required": True
   },
   "camList.camID": {
-    "id": "cmir3npg5058t4m39hkbe5r1w",
-    "valueType": "preset",
-    "required": True
+    "id": "cmir3npf2057p4m39bp2ukn6j",
+    "referenceFieldId": "cmir35uma03my4m39s5d6jggk",
+    "valueType": "request-based",
+    "required": True,
+    "referenceEndpoint": "/ReplayURL",
+    "referenceField": "camID"
   },
   "camList.accessID": {
-    "id": "cmir3npg5058v4m39fojm5j1u",
+    "id": "cmir3npf3057r4m398ypagqxu",
     "valueType": "preset",
     "required": False
   },
   "camList.accessPW": {
-    "id": "cmir3npg6058x4m39s10iitg3",
+    "id": "cmir3npf4057t4m39chpyyb44",
     "valueType": "preset",
     "required": False
   },
   "camList.camURL": {
-    "id": "cmir3npg6058z4m391j0jmt16",
+    "id": "cmir3npf4057v4m39a32yuml9",
     "valueType": "preset",
     "required": True
   },
   "camList.videoInfo": {
-    "id": "cmir3npg705914m397juucnit",
+    "id": "cmir3npf5057x4m39xnl7sph4",
     "valueType": "preset",
     "required": False
   },
   "camList.videoInfo.resolution": {
-    "id": "cmir3npgd05934m39y8fg7mko",
+    "id": "cmir3npfc057z4m39gv6h8ci4",
     "valueType": "preset",
     "required": False
   },
   "camList.videoInfo.fps": {
-    "id": "cmir3npge05954m39pz9ivz1d",
+    "id": "cmir3npfd05814m39t5syait5",
     "valueType": "preset",
     "required": False
   },
   "camList.videoInfo.videoCodec": {
-    "id": "cmir3npgf05974m39y48av0t0",
+    "id": "cmir3npfd05834m39t9m4rdmu",
     "valueType": "preset",
     "required": False
   },
   "camList.videoInfo.audioCodec": {
-    "id": "cmir3npgf05994m396c0b9dbk",
+    "id": "cmir3npfe05854m398cp4ur96",
     "valueType": "preset",
     "required": False
   }
@@ -1007,37 +1028,55 @@ cmii7lxbn002s8z1t1i9uudf0_StoredVideoEventInfos_out_constraints = {
     "required": True
   },
   "camList": {
-    "id": "cmir5bj7j05j14m39tsnywm63",
+    "id": "cmir5bj7305il4m39i90z1cs4",
     "valueType": "preset",
     "required": True
   },
   "camList.camID": {
-    "id": "cmir5bj7n05j34m39jyws9fhy",
-    "valueType": "preset",
-    "required": True
+    "id": "cmir5bj7605in4m39u6jdfihu",
+    "referenceFieldId": "cmir57lfa05aa4m3921t17dse",
+    "valueType": "request-based",
+    "required": True,
+    "referenceEndpoint": "/StoredVideoEventInfos",
+    "referenceField": "camID"
   },
   "camList.eventUUID": {
-    "id": "cmir5bj7n05j54m39qqsctl3w",
+    "id": "cmir5bj7605ip4m39eu3lwye9",
     "valueType": "preset",
     "required": True
   },
   "camList.eventName": {
-    "id": "cmir5bj7o05j74m399e80pplr",
-    "valueType": "preset",
-    "required": True
+    "id": "cmir5bj7705ir4m394w640k6j",
+    "referenceFieldId": "cmiqt1xb600saie8far6hiccy",
+    "valueType": "request-based",
+    "required": True,
+    "referenceEndpoint": "/StoredVideoEventInfos",
+    "referenceField": "eventFilter"
   },
   "camList.startTime": {
-    "id": "cmis586r40024t4pq8wprxjv3",
-    "valueType": "preset",
-    "required": True
+    "id": "cmis57ht9001st4pq2htah7em",
+    "valueType": "request-range",
+    "required": True,
+    "requestRange": {
+      "maxFieldId": "cmir578rm059x4m39obwdkixj",
+      "minFieldId": "cmir56xvt059r4m39ng9fpixs",
+      "maxEndpoint": "/StoredVideoEventInfos",
+      "minEndpoint": "/StoredVideoEventInfos"
+    }
   },
   "camList.endTime": {
-    "id": "cmis59dhx002mt4pqxrhnb4d8",
-    "valueType": "preset",
-    "required": False
+    "id": "cmis58snx002at4pquxzko80q",
+    "valueType": "request-range",
+    "required": False,
+    "requestRange": {
+      "maxFieldId": "cmir578rm059x4m39obwdkixj",
+      "minFieldId": "cmir56xvt059r4m39ng9fpixs",
+      "maxEndpoint": "/StoredVideoEventInfos",
+      "minEndpoint": "/StoredVideoEventInfos"
+    }
   },
   "camList.eventDesc": {
-    "id": "cmis5b2810034t4pqrgd5m7fc",
+    "id": "cmis5a2tl002st4pq3o7gwdug",
     "valueType": "preset",
     "required": False
   }
@@ -1056,72 +1095,84 @@ cmii7lxbn002s8z1t1i9uudf0_StoredObjectAnalyticsInfos_out_constraints = {
     "required": True
   },
   "camList": {
-    "id": "cmis5m2yc00ejt4pq3j01nq65",
+    "id": "cmis5m2y500edt4pq4v0e8411",
     "valueType": "preset",
     "required": True
   },
   "camList.camID": {
-    "id": "cmis5m2yf00elt4pqv4vqp4ni",
-    "valueType": "preset",
-    "required": True
+    "id": "cmis5m2y800eft4pqy70zoak1",
+    "referenceFieldId": "cmis5gwfi00b8t4pqmp438c9j",
+    "valueType": "request-based",
+    "required": True,
+    "referenceEndpoint": "/StoredObjectAnalyticsInfos",
+    "referenceField": "camID"
   },
   "camList.analyticsTime": {
-    "id": "cmis5m2yg00ent4pq04iz9uod",
-    "valueType": "preset",
-    "required": True
+    "id": "cmis5m2y800eht4pqhzi2mq5d",
+    "valueType": "request-range",
+    "required": True,
+    "requestRange": {
+      "maxFieldId": "cmis5e5kx003lt4pqtfogwd0g",
+      "minFieldId": "cmis5dxva003ft4pqhigxna18",
+      "maxEndpoint": "/StoredObjectAnalyticsInfos",
+      "minEndpoint": "/StoredObjectAnalyticsInfos"
+    }
   },
   "camList.anlayticsResultList": {
-    "id": "cmiseswtm03cg5vy7x2kpmwpn",
+    "id": "cmiseswra03bs5vy7c7h99m2t",
     "valueType": "preset",
     "required": True
   },
   "camList.anlayticsResultList.anayticsID": {
-    "id": "cmiseswtq03ci5vy7fjc83b44",
+    "id": "cmiseswre03bu5vy7f9bv6570",
     "valueType": "preset",
     "required": True
   },
   "camList.anlayticsResultList.analyticsClass": {
-    "id": "cmiseswtr03ck5vy71bm4858q",
-    "valueType": "preset",
-    "required": True
+    "id": "cmiseswrf03bw5vy7iefvw5f0",
+    "referenceFieldId": "cmis5gwgv00bkt4pqbubymyqs",
+    "valueType": "request-based",
+    "required": True,
+    "referenceEndpoint": "/StoredObjectAnalyticsInfos",
+    "referenceField": "classFilter"
   },
   "camList.anlayticsResultList.analyticsAttribute": {
-    "id": "cmisine9w099p5vy7b9lyiesm",
+    "id": "cmiseswrq03c65vy7q1gxhmjb",
     "valueType": "preset",
-    "required": True
+    "required": False
   },
   "camList.anlayticsResultList.analyticsConfidence": {
-    "id": "cmiseswts03co5vy7mzc1og5w",
+    "id": "cmiseswrg03c05vy7b19khldt",
     "valueType": "preset",
     "required": False
   },
   "camList.anlayticsResultList.analyticsBoundingBox": {
-    "id": "cmiseswts03cq5vy7azl4y4kp",
+    "id": "cmiseswrg03c25vy7x292ueus",
     "valueType": "preset",
     "required": False
   },
   "camList.anlayticsResultList.analyticsBoundingBox.left": {
-    "id": "cmiseswu203cw5vy7bn44p0bq",
+    "id": "cmiseswrq03c85vy7ex3827kd",
     "valueType": "preset",
     "required": True
   },
   "camList.anlayticsResultList.analyticsBoundingBox.top": {
-    "id": "cmiseswu203cy5vy7yjow35au",
+    "id": "cmiseswrr03ca5vy7wihjatly",
     "valueType": "preset",
     "required": True
   },
   "camList.anlayticsResultList.analyticsBoundingBox.right": {
-    "id": "cmiseswu303d05vy79wjh7qr8",
+    "id": "cmiseswrr03cc5vy71g9v8uh1",
     "valueType": "preset",
     "required": True
   },
   "camList.anlayticsResultList.analyticsBoundingBox.bottom": {
-    "id": "cmiseswu303d25vy7z0ithyff",
+    "id": "cmiseswrs03ce5vy7aktc2lgd",
     "valueType": "preset",
     "required": True
   },
   "camList.anlayticsResultList.analyticsDesc": {
-    "id": "cmiseswtt03cs5vy70p2fj8m8",
+    "id": "cmiseswrh03c45vy7y3iyzsd7",
     "valueType": "preset",
     "required": False
   }
