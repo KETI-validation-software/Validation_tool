@@ -1381,6 +1381,9 @@ class FormValidator:
             api_id = []
             api_endpoint = []
 
+            # 중복 API명 처리를 위한 카운터
+            endpoint_count = {}
+
             for step in steps:
                 step_id = step.get("id")
                 if not step_id:
@@ -1402,7 +1405,24 @@ class FormValidator:
 
                 api_name.append(detail.get("step", {}).get("api", {}).get("name", {}))
                 api_id.append(step_id)
-                api_endpoint.append(detail.get("step", {}).get("api", {}).get("endpoint", {}))
+
+                # endpoint 중복 처리
+                raw_endpoint = detail.get("step", {}).get("api", {}).get("endpoint", "")
+                if raw_endpoint:
+                    # /를 제거한 base_endpoint
+                    base_endpoint = raw_endpoint[1:] if raw_endpoint.startswith("/") else raw_endpoint
+
+                    # 등장 횟수 카운트 및 numbered_endpoint 생성
+                    if base_endpoint in endpoint_count:
+                        endpoint_count[base_endpoint] += 1
+                        numbered_endpoint = f"/{base_endpoint}{endpoint_count[base_endpoint]}"
+                    else:
+                        endpoint_count[base_endpoint] = 1
+                        numbered_endpoint = raw_endpoint  # 첫 번째는 그대로
+
+                    api_endpoint.append(numbered_endpoint)
+                else:
+                    api_endpoint.append(raw_endpoint)
 
                 # connectTimeout 추출
                 time_out.append(settings.get("connectTimeout", 5000))
