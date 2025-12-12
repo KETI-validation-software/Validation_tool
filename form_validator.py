@@ -152,6 +152,9 @@ class FormValidator:
             constraints_content = ""
             spec_list_names = []
 
+            # 모든 spec의 중복 API명을 모으기 위한 전체 목록
+            all_duplicate_endpoints = []
+
             for spec_id, steps in self._steps_cache.items():
                 if not isinstance(steps, list):
                     continue
@@ -171,6 +174,9 @@ class FormValidator:
 
                 # 중복 API명 처리를 위한 카운터 (spec별로 초기화)
                 endpoint_count = {}
+
+                # 이 spec의 중복 API명을 전체 목록에 추가하기 위한 변수
+                spec_duplicate_endpoints = []
 
                 temp_spec_id = spec_id+"_"
                 for s in steps:
@@ -229,6 +235,12 @@ class FormValidator:
                         self._test_step_cache,
                         file_type
                     )
+
+                # 이 spec의 중복 API명 추출 (count >= 2) 및 전체 목록에 추가
+                spec_duplicate_endpoints = [ep for ep, count in endpoint_count.items() if count >= 2]
+                if spec_duplicate_endpoints:
+                    all_duplicate_endpoints.extend(spec_duplicate_endpoints)
+                    print(f"  [spec_id={spec_id}] 중복 API 감지: {spec_duplicate_endpoints}")
 
                 # schema_type이 설정되지 않았으면 이 spec 건너뛰기
                 if schema_type is None:
@@ -347,6 +359,35 @@ class FormValidator:
             if spec_list_names:
                 all_spec_list_names.extend(spec_list_names)
 
+            # 역매핑 생성 및 referenceEndpoint 업데이트
+            # referenceFieldId는 request/response 어느 쪽이든 참조할 수 있으므로 모든 fieldId를 합침
+            if file_type and all_duplicate_endpoints:
+                print(f"\n  [전체 중복 API 목록] {all_duplicate_endpoints}")
+
+                # response 필드의 역매핑
+                response_reverse_map = self.key_id_gen.build_field_id_to_endpoint_map(
+                    self._steps_cache,
+                    self._test_step_cache,
+                    "response"
+                )
+                # request 필드의 역매핑
+                request_reverse_map = self.key_id_gen.build_field_id_to_endpoint_map(
+                    self._steps_cache,
+                    self._test_step_cache,
+                    "request"
+                )
+
+                # 두 역매핑을 합침 (request + response 모두 검색 가능)
+                combined_reverse_map = {**request_reverse_map, **response_reverse_map}
+
+                # 모든 파일에 동일한 combined_reverse_map 적용
+                if schema_type == "request":
+                    validation_content = self._update_reference_endpoints(validation_content, combined_reverse_map, "Validation_request", all_duplicate_endpoints)
+                    constraints_content = self._update_reference_endpoints(constraints_content, combined_reverse_map, "Constraints_response", all_duplicate_endpoints)
+                else:
+                    validation_content = self._update_reference_endpoints(validation_content, combined_reverse_map, "Validation_response", all_duplicate_endpoints)
+                    constraints_content = self._update_reference_endpoints(constraints_content, combined_reverse_map, "Constraints_request", all_duplicate_endpoints)
+
             # 파일 저장
             import sys
             import os
@@ -421,6 +462,126 @@ class FormValidator:
             print(f"스키마 파일 생성 실패: {e}")
             import traceback
             traceback.print_exc()
+
+    def _update_reference_endpoints(self, content: str, reverse_map: dict, file_label: str = "", duplicate_endpoints: list = None) -> str:
+        """
+        validation/constraints 내용에서 referenceFieldId를 기반으로 referenceEndpoint를 업데이트
+        (중복 API명에 대해서만 처리)
+
+        Args:
+            content: validation 또는 constraints 파일 내용 문자열
+            reverse_map: {fieldId: numbered_endpoint} 역매핑 딕셔너리
+            file_label: 출력용 파일 라벨 (예: "Validation_request", "Constraints_response")
+            duplicate_endpoints: 중복 API명 목록 (예: ["RealtimeDoorStatus", "SensorDeviceControl"])
+
+        Returns:
+            업데이트된 내용 문자열
+        """
+        import re
+
+        # 통계 변수
+        total_duplicate_endpoints = 0  # 중복 API referenceEndpoint 총 개수
+        success_list = []  # 매핑 성공 목록
+        fail_no_field_id = []  # 실패: referenceFieldId 없음
+        fail_not_in_keyid = []  # 실패: KeyId에 없음
+
+        if not reverse_map:
+            return content
+
+        if not duplicate_endpoints:
+            duplicate_endpoints = []
+
+        # referenceFieldId와 referenceEndpoint 쌍을 찾아서 업데이트
+        # 패턴: "referenceFieldId": "xxx", ... "referenceEndpoint": "/YYY"
+        # 같은 블록 내에서 referenceFieldId를 찾고, 해당 referenceEndpoint를 업데이트
+
+        lines = content.split('\n')
+        result_lines = []
+        current_field_id = None
+        current_block_key = None  # 현재 블록의 key (예: "commandType")
+
+        for line in lines:
+            # 블록 key 찾기 (예: "commandType": {)
+            block_key_match = re.search(r'"(\w+)":\s*\{', line)
+            if block_key_match:
+                current_block_key = block_key_match.group(1)
+
+            # referenceFieldId 찾기
+            field_id_match = re.search(r'"referenceFieldId":\s*"([^"]+)"', line)
+            if field_id_match:
+                current_field_id = field_id_match.group(1)
+
+            # referenceEndpoint 찾기 및 업데이트
+            endpoint_match = re.search(r'"referenceEndpoint":\s*"(/[^"]+)"', line)
+            if endpoint_match:
+                old_endpoint = endpoint_match.group(1)
+                # /를 제거한 endpoint명
+                endpoint_name = old_endpoint[1:] if old_endpoint.startswith("/") else old_endpoint
+
+                # 중복 API명인 경우에만 처리
+                if endpoint_name in duplicate_endpoints:
+                    total_duplicate_endpoints += 1
+
+                    if current_field_id:
+                        # referenceFieldId가 있는 경우
+                        if current_field_id in reverse_map:
+                            # 매핑 성공
+                            new_endpoint_name = reverse_map[current_field_id]
+                            new_endpoint = f"/{new_endpoint_name}"
+                            if old_endpoint != new_endpoint:
+                                line = line.replace(f'"referenceEndpoint": "{old_endpoint}"', f'"referenceEndpoint": "{new_endpoint}"')
+                            success_list.append({
+                                "key": current_block_key,
+                                "referenceEndpoint": old_endpoint,
+                                "referenceFieldId": current_field_id,
+                                "newReferenceEndpoint": new_endpoint
+                            })
+                        else:
+                            # 실패: KeyId에 없음
+                            fail_not_in_keyid.append({
+                                "key": current_block_key,
+                                "referenceEndpoint": old_endpoint,
+                                "referenceFieldId": current_field_id
+                            })
+                    else:
+                        # 실패: referenceFieldId 없음
+                        fail_no_field_id.append({
+                            "key": current_block_key,
+                            "referenceEndpoint": old_endpoint
+                        })
+
+            # 블록이 끝나면 (}로 끝나는 라인) 초기화
+            if line.strip() == '}' or line.strip() == '},':
+                current_field_id = None
+                current_block_key = None
+
+            result_lines.append(line)
+
+        # 통계 출력
+        if total_duplicate_endpoints > 0:
+            fail_count = len(fail_no_field_id) + len(fail_not_in_keyid)
+            print(f"\n  [{file_label}] 중복 API referenceEndpoint 매핑 통계:")
+            print(f"    - 중복 API명 목록: {duplicate_endpoints}")
+            print(f"    - 중복 API referenceEndpoint 개수: {total_duplicate_endpoints}")
+            print(f"    - 매핑 성공: {len(success_list)}")
+            print(f"    - 매핑 실패: {fail_count}")
+
+            if success_list:
+                print(f"\n    [성공] ({len(success_list)}개):")
+                for item in success_list:
+                    print(f"      - key: {item['key']}, referenceEndpoint: {item['referenceEndpoint']} → {item['newReferenceEndpoint']}, referenceFieldId: {item['referenceFieldId']}")
+
+            if fail_no_field_id:
+                print(f"\n    [실패 - referenceFieldId 없음] ({len(fail_no_field_id)}개):")
+                for item in fail_no_field_id:
+                    print(f"      - key: {item['key']}, referenceEndpoint: {item['referenceEndpoint']}")
+
+            if fail_not_in_keyid:
+                print(f"\n    [실패 - KeyId 파일에 없음] ({len(fail_not_in_keyid)}개):")
+                for item in fail_not_in_keyid:
+                    print(f"      - key: {item['key']}, referenceEndpoint: {item['referenceEndpoint']}, referenceFieldId: {item['referenceFieldId']}")
+
+        return '\n'.join(result_lines)
 
     def _generate_files_for_each_steps(self, schema_type, file_type, ts, schema_content,
                                        data_content, schema_names, data_names, endpoint_names,
@@ -1220,6 +1381,9 @@ class FormValidator:
             api_id = []
             api_endpoint = []
 
+            # 중복 API명 처리를 위한 카운터
+            endpoint_count = {}
+
             for step in steps:
                 step_id = step.get("id")
                 if not step_id:
@@ -1241,7 +1405,24 @@ class FormValidator:
 
                 api_name.append(detail.get("step", {}).get("api", {}).get("name", {}))
                 api_id.append(step_id)
-                api_endpoint.append(detail.get("step", {}).get("api", {}).get("endpoint", {}))
+
+                # endpoint 중복 처리
+                raw_endpoint = detail.get("step", {}).get("api", {}).get("endpoint", "")
+                if raw_endpoint:
+                    # /를 제거한 base_endpoint
+                    base_endpoint = raw_endpoint[1:] if raw_endpoint.startswith("/") else raw_endpoint
+
+                    # 등장 횟수 카운트 및 numbered_endpoint 생성
+                    if base_endpoint in endpoint_count:
+                        endpoint_count[base_endpoint] += 1
+                        numbered_endpoint = f"/{base_endpoint}{endpoint_count[base_endpoint]}"
+                    else:
+                        endpoint_count[base_endpoint] = 1
+                        numbered_endpoint = raw_endpoint  # 첫 번째는 그대로
+
+                    api_endpoint.append(numbered_endpoint)
+                else:
+                    api_endpoint.append(raw_endpoint)
 
                 # connectTimeout 추출
                 time_out.append(settings.get("connectTimeout", 5000))
