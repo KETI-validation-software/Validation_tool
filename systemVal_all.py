@@ -2172,8 +2172,7 @@ class MyApp(QWidget):
             updated_request = self.generator._applied_constraints(
                 request_data={},  # 이전 요청 데이터는 필요 없음
                 template_data=request_data.copy(),  # 현재 요청 데이터를 템플릿으로
-                constraints=constraints,
-                n=3  # 기본 생성 개수
+                constraints=constraints
             )
 
             # print(f"[DATA_MAPPER] 요청 데이터 업데이트 완료")
@@ -2320,9 +2319,15 @@ class MyApp(QWidget):
         self.accessInfo = [auth[0], auth[1]]
 
         # step_buffers 동적 생성 (API 개수에 따라)
+        api_count = len(self.videoMessages)
         self.step_buffers = [
-            {"data": "", "error": "", "result": "PASS", "raw_data_list": []} for _ in range(len(self.videoMessages))
+            {"data": "", "error": "", "result": "PASS", "raw_data_list": []} for _ in range(api_count)
         ]
+
+        # ✅ 누적 카운트 초기화
+        self.step_pass_counts = [0] * api_count
+        self.step_error_counts = [0] * api_count
+        self.step_pass_flags = [0] * api_count
 
         self.trace = defaultdict(list)
 
@@ -4293,6 +4298,7 @@ class MyApp(QWidget):
                 self.stop_btn.setDisabled(True)
 
         except Exception as err:
+            import traceback
             print(f"[ERROR] Exception in update_view: {err}")
             print(f"[ERROR] Current state - cnt={self.cnt}, current_retry={self.current_retry}")
             print(f"[ERROR] Traceback:")
