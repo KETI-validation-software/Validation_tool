@@ -130,12 +130,8 @@ cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_webhook_out_data = {
     "message": ""
 }
 
-# StoredVerifEventInfos
-cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_in_data = {
-    "timePeriod": {
-    "startTime": 20251105163010124,
-    "endTime": 20251115163010124
-},
+# RealtimeDoorStatus2
+cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_in_data = {
     "doorList": [
         {
         "doorID": "door0001"
@@ -148,19 +144,26 @@ cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_in_data = {
     "eventFilter": "성공"
 }
 
-# cmii7w683006h8z1t7usnin5g 데이터 리스트
-cmii7w683006h8z1t7usnin5g_inData = [
-    cmii7w683006h8z1t7usnin5g_Authentication_in_data,
-    cmii7w683006h8z1t7usnin5g_Capabilities_in_data,
-    cmii7w683006h8z1t7usnin5g_DoorProfiles_in_data,
-    cmii7w683006h8z1t7usnin5g_AccessUserInfos_in_data,
-    cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_in_data,
-    cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_in_data,
+# RealtimeDoorStatus2 WebHook OUT Data
+cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_webhook_out_data = {
+    "code": "2000",
+    "message": "성공"
+}
+
+# cmiqr1jha00i6ie8fb1scb3go 데이터 리스트
+cmiqr1jha00i6ie8fb1scb3go_inData = [
+    cmiqr1jha00i6ie8fb1scb3go_Authentication_in_data,
+    cmiqr1jha00i6ie8fb1scb3go_Capabilities_in_data,
+    cmiqr1jha00i6ie8fb1scb3go_DoorProfiles_in_data,
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_in_data,
+    cmiqr1jha00i6ie8fb1scb3go_DoorControl_in_data,
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_in_data,
 ]
 
-# cmii7w683006h8z1t7usnin5g WebHook 데이터 리스트
-cmii7w683006h8z1t7usnin5g_webhook_outData = [
-    cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_webhook_out_data,
+# cmiqr1jha00i6ie8fb1scb3go WebHook 데이터 리스트
+cmiqr1jha00i6ie8fb1scb3go_webhook_outData = [
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_webhook_out_data,
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_webhook_out_data,
 ]
 
 # cmii7w683006h8z1t7usnin5g API endpoint
@@ -168,9 +171,9 @@ cmii7w683006h8z1t7usnin5g_messages = [
     "Authentication",
     "Capabilities",
     "DoorProfiles",
-    "AccessUserInfos",
-    "RealtimeVerifEventInfos",
-    "StoredVerifEventInfos",
+    "RealtimeDoorStatus",
+    "DoorControl",
+    "RealtimeDoorStatus2",
 ]
 
 # Authentication

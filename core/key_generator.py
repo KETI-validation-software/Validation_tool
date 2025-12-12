@@ -298,3 +298,54 @@ class KeyIdGenerator:
         abs_path = os.path.abspath(output_path)
         print(f"[생성 완료] {filename}: {output_path}")
         print(f"[생성 완료] 절대 경로: {abs_path}")
+
+    def build_field_id_to_endpoint_map(
+            self,
+            steps_cache: Dict,
+            test_step_cache: Dict,
+            direction: str
+    ) -> Dict[str, str]:
+        """
+        fieldId -> numbered_endpoint 역매핑 생성
+        referenceFieldId로 referenceEndpoint를 찾을 때 사용
+
+        Args:
+            steps_cache: spec_id -> steps 매핑 딕셔너리
+            test_step_cache: step_id -> step detail 매핑 딕셔너리
+            direction: "request" 또는 "response"
+
+        Returns:
+            dict: {fieldId: numbered_endpoint, ...}
+            예: {"cmiwqovgn0az6844g1iuqahpi": "DoorControl", "cmiwqkuoj0aj9844g5oec97p9": "RealtimeDoorStatus2", ...}
+        """
+        reverse_map = {}
+
+        for spec_id, steps in steps_cache.items():
+            if not isinstance(steps, list):
+                continue
+
+            for s in steps:
+                step_id = s.get("id")
+                ts = test_step_cache.get(step_id)
+
+                if not ts:
+                    continue
+
+                # numbered_endpoint 가져오기
+                numbered_endpoint = ts.get("_numbered_endpoint")
+                if not numbered_endpoint:
+                    detail = ts.get("detail", {})
+                    step_data = detail.get("step", {})
+                    api = step_data.get("api", {})
+                    endpoint = api.get("endpoint", "")
+                    numbered_endpoint = endpoint[1:] if endpoint.startswith("/") else endpoint
+
+                # key-fieldID 매핑 추출
+                key_id_mappings = self.extract_key_field_id_mapping(ts)
+
+                # direction에 해당하는 데이터에서 fieldId -> endpoint 역매핑 생성
+                if key_id_mappings[direction]:
+                    for key, field_id in key_id_mappings[direction].items():
+                        reverse_map[field_id] = numbered_endpoint
+
+        return reverse_map

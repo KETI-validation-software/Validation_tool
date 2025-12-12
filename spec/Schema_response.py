@@ -127,31 +127,36 @@ cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_out_schema = {
     "message": str,
 }
 
-# RealtimeVerifEventInfos WebHook IN Schema
-cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_webhook_in_schema = {
-    "doorList": [{}],
-}
-
-# StoredVerifEventInfos
-cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_out_schema = {
+# RealtimeDoorStatus2
+cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_out_schema = {
     "code": str,
     "message": str,
-    "doorList": [{}],
 }
 
-# cmii7w683006h8z1t7usnin5g 스키마 리스트
-cmii7w683006h8z1t7usnin5g_outSchema = [
-    cmii7w683006h8z1t7usnin5g_Authentication_out_schema,
-    cmii7w683006h8z1t7usnin5g_Capabilities_out_schema,
-    cmii7w683006h8z1t7usnin5g_DoorProfiles_out_schema,
-    cmii7w683006h8z1t7usnin5g_AccessUserInfos_out_schema,
-    cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_out_schema,
-    cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_out_schema,
+# RealtimeDoorStatus2 WebHook IN Schema
+cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_webhook_in_schema = {
+    "doorList": [{
+    "doorID": str,
+    "doorName": str,
+    "doorRelaySensor": str,
+    "doorSensor": str,
+}],
+}
+
+# cmiqr1jha00i6ie8fb1scb3go 스키마 리스트
+cmiqr1jha00i6ie8fb1scb3go_outSchema = [
+    cmiqr1jha00i6ie8fb1scb3go_Authentication_out_schema,
+    cmiqr1jha00i6ie8fb1scb3go_Capabilities_out_schema,
+    cmiqr1jha00i6ie8fb1scb3go_DoorProfiles_out_schema,
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_out_schema,
+    cmiqr1jha00i6ie8fb1scb3go_DoorControl_out_schema,
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_out_schema,
 ]
 
-# cmii7w683006h8z1t7usnin5g WebHook 스키마 리스트
-cmii7w683006h8z1t7usnin5g_webhook_inSchema = [
-    cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_webhook_in_schema,
+# cmiqr1jha00i6ie8fb1scb3go WebHook 스키마 리스트
+cmiqr1jha00i6ie8fb1scb3go_webhook_inSchema = [
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_webhook_in_schema,
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_webhook_in_schema,
 ]
 
 # Authentication
