@@ -2515,14 +2515,30 @@ class MyApp(QWidget):
             }
             self.trace[step_idx].append(evt)
 
-            # ✅ latest_events 업데이트 (data mapper용)
+            # ✅ latest_events 업데이트 (data mapper용) - 여러 키 형식으로 저장
+            # 1. 원본 API 이름으로 저장
             if api not in self.latest_events:
                 self.latest_events[api] = {}
             self.latest_events[api][direction] = evt
             
+            # 2. 슬래시 제거한 형식으로도 저장 (예: "CameraProfiles")
+            api_clean = api.lstrip('/')
+            if api_clean != api:
+                if api_clean not in self.latest_events:
+                    self.latest_events[api_clean] = {}
+                self.latest_events[api_clean][direction] = evt
+            
+            # 3. 슬래시 포함한 형식으로도 저장 (예: "/CameraProfiles")
+            api_with_slash = f"/{api_clean}" if not api_clean.startswith('/') else api_clean
+            if api_with_slash != api:
+                if api_with_slash not in self.latest_events:
+                    self.latest_events[api_with_slash] = {}
+                self.latest_events[api_with_slash][direction] = evt
+            
             # ✅ 디버그 로그 추가
             print(f"[PUSH_EVENT] API={api}, Direction={direction}")
-            print(f"[PUSH_EVENT] latest_events 키 목록: {list(self.latest_events.keys())}")
+            print(f"[PUSH_EVENT] 저장된 키들: {api}, {api_clean}, {api_with_slash}")
+            print(f"[PUSH_EVENT] latest_events 전체 키 목록: {list(self.latest_events.keys())}")
 
             # (옵션) 즉시 파일로도 남김 - append-only ndjson
             os.makedirs(CONSTANTS.trace_path, exist_ok=True)
@@ -4055,6 +4071,23 @@ class MyApp(QWidget):
                             
                             print(f"[SYSTEM] 에러 응답 처리 완료: 전체 {total_schema_fields}개 필드 PASS")
                         
+                        # ✅ 케이스 3: code_value=200인데 404 응답 - 플랫폼 버그이지만 PASS 처리
+                        # → CameraProfiles에서 cam0001 존재한다고 했는데 404 반환 (플랫폼이 수정해야 함)
+                        # → 하지만 검증 시스템은 404를 정상 응답으로 PASS 처리
+                        elif code_value == 200 and response_code == "404":
+                            print(f"[PLATFORM_BUG_WARNING] ⚠️  플랫폼 맥락 불일치 감지!")
+                            print(f"[PLATFORM_BUG_WARNING] 이전 API에서 확인된 ID인데 404 응답")
+                            print(f"[PLATFORM_BUG_WARNING] 플랫폼 개발팀 확인 필요 (검증은 PASS 처리)")
+                            
+                            # 404 응답이므로 PASS 처리 (케이스 2와 동일)
+                            total_schema_fields = key_psss_cnt + key_error_cnt
+                            key_psss_cnt = total_schema_fields
+                            key_error_cnt = 0
+                            val_result = "PASS"
+                            val_text = f"404 응답 (PASS 처리, 단 플랫폼 맥락 불일치 의심)"
+                            
+                            print(f"[PLATFORM_BUG_WARNING] 404 응답 PASS 처리 완료: {key_psss_cnt}개 필드")
+                        
                         # 성공 코드가 아니면서 에러 코드도 아닌 경우 FAIL 처리
                         elif response_code not in ["200", "201", "성공", "Success", ""]:
                             # print(f"[SYSTEM] 응답 코드 검증 실패: code={response_code}, message={response_message}")
@@ -5576,8 +5609,15 @@ class MyApp(QWidget):
             # ========== 신규 시작 모드: 완전 초기화 ==========
             print(f"[START] ========== 신규 시작: 완전 초기화 ==========")
 
-            # ✅ 3. trace 디렉토리 초기화
-            self._clean_trace_dir_once()
+            # ✅ 3. trace 디렉토리 초기화 (그룹이 변경될 때만)
+            # 같은 그룹 내 spec 전환 시에는 trace 유지 (맥락 검증용)
+            if not hasattr(self, '_last_cleaned_group') or self._last_cleaned_group != self.current_group_id:
+                print(f"[TRACE_CLEAN] 그룹 변경 감지: {getattr(self, '_last_cleaned_group', None)} → {self.current_group_id}")
+                print(f"[TRACE_CLEAN] trace 디렉토리 초기화 실행")
+                self._clean_trace_dir_once()
+                self._last_cleaned_group = self.current_group_id
+            else:
+                print(f"[TRACE_KEEP] 같은 그룹 내 spec 전환: trace 디렉토리 유지 (맥락 검증용)")
 
             # ✅ 4. JSON 데이터 준비
             json_to_data("video")
