@@ -347,6 +347,33 @@ class FormValidator:
             if spec_list_names:
                 all_spec_list_names.extend(spec_list_names)
 
+            # 역매핑 생성 및 referenceEndpoint 업데이트
+            # Validation_request.py, Constraints_response.py → KeyId_response.py 참조
+            # Validation_response.py, Constraints_request.py → KeyId_request.py 참조
+            if file_type:
+                # request 파일용 역매핑 (response key_ids에서 생성)
+                response_reverse_map = self.key_id_gen.build_field_id_to_endpoint_map(
+                    self._steps_cache,
+                    self._test_step_cache,
+                    "response"
+                )
+                # response 파일용 역매핑 (request key_ids에서 생성)
+                request_reverse_map = self.key_id_gen.build_field_id_to_endpoint_map(
+                    self._steps_cache,
+                    self._test_step_cache,
+                    "request"
+                )
+
+                # schema_type에 따라 적절한 역매핑 적용
+                # schema_type="request" → Validation_request.py, Constraints_response.py
+                # schema_type="response" → Validation_response.py, Constraints_request.py
+                if schema_type == "request":
+                    validation_content = self._update_reference_endpoints(validation_content, response_reverse_map)
+                    constraints_content = self._update_reference_endpoints(constraints_content, response_reverse_map)
+                else:
+                    validation_content = self._update_reference_endpoints(validation_content, request_reverse_map)
+                    constraints_content = self._update_reference_endpoints(constraints_content, request_reverse_map)
+
             # 파일 저장
             import sys
             import os
@@ -421,6 +448,56 @@ class FormValidator:
             print(f"스키마 파일 생성 실패: {e}")
             import traceback
             traceback.print_exc()
+
+    def _update_reference_endpoints(self, content: str, reverse_map: dict) -> str:
+        """
+        validation/constraints 내용에서 referenceFieldId를 기반으로 referenceEndpoint를 업데이트
+
+        Args:
+            content: validation 또는 constraints 파일 내용 문자열
+            reverse_map: {fieldId: numbered_endpoint} 역매핑 딕셔너리
+
+        Returns:
+            업데이트된 내용 문자열
+        """
+        import re
+
+        if not reverse_map:
+            return content
+
+        # referenceFieldId와 referenceEndpoint 쌍을 찾아서 업데이트
+        # 패턴: "referenceFieldId": "xxx", ... "referenceEndpoint": "/YYY"
+        # 같은 블록 내에서 referenceFieldId를 찾고, 해당 referenceEndpoint를 업데이트
+
+        lines = content.split('\n')
+        result_lines = []
+        current_field_id = None
+
+        for line in lines:
+            # referenceFieldId 찾기
+            field_id_match = re.search(r'"referenceFieldId":\s*"([^"]+)"', line)
+            if field_id_match:
+                current_field_id = field_id_match.group(1)
+
+            # referenceEndpoint 찾기 및 업데이트
+            endpoint_match = re.search(r'"referenceEndpoint":\s*"(/[^"]+)"', line)
+            if endpoint_match and current_field_id:
+                old_endpoint = endpoint_match.group(1)
+                # 역매핑에서 실제 endpoint 찾기
+                if current_field_id in reverse_map:
+                    new_endpoint_name = reverse_map[current_field_id]
+                    new_endpoint = f"/{new_endpoint_name}"
+                    if old_endpoint != new_endpoint:
+                        line = line.replace(f'"referenceEndpoint": "{old_endpoint}"', f'"referenceEndpoint": "{new_endpoint}"')
+                        print(f"  [referenceEndpoint 업데이트] {old_endpoint} → {new_endpoint} (fieldId: {current_field_id})")
+
+            # 블록이 끝나면 (}로 끝나는 라인) current_field_id 초기화
+            if line.strip() == '}' or line.strip() == '},':
+                current_field_id = None
+
+            result_lines.append(line)
+
+        return '\n'.join(result_lines)
 
     def _generate_files_for_each_steps(self, schema_type, file_type, ts, schema_content,
                                        data_content, schema_names, data_names, endpoint_names,

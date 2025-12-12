@@ -38,7 +38,7 @@ cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl2_out_validation = {
     "validationType": "request-field-match",
     "referenceFieldId": "cmisg8fmw08c55vy7eby9fson",
     "referenceField": "sensorDeviceID",
-    "referenceEndpoint": "/SensorDeviceControl",
+    "referenceEndpoint": "/SensorDeviceControl2",
     "score": 0
   },
   "sensorDeviceStatus": {
@@ -46,7 +46,7 @@ cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl2_out_validation = {
     "validationType": "request-field-match",
     "referenceFieldId": "cmisg8hg208ca5vy7ijzfeelo",
     "referenceField": "commandType",
-    "referenceEndpoint": "/SensorDeviceControl",
+    "referenceEndpoint": "/SensorDeviceControl2",
     "score": 0
   }
 }
@@ -75,8 +75,8 @@ cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_out_validation = {}
 # DoorControl
 cmiqr1jha00i6ie8fb1scb3go_DoorControl_out_validation = {}
 
-# RealtimeDoorStatus
-cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_out_validation = {}
+# RealtimeDoorStatus2
+cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_out_validation = {}
 
 # cmiqr1jha00i6ie8fb1scb3go 검증 리스트
 cmiqr1jha00i6ie8fb1scb3go_outValidation = [
@@ -85,7 +85,7 @@ cmiqr1jha00i6ie8fb1scb3go_outValidation = [
     cmiqr1jha00i6ie8fb1scb3go_DoorProfiles_out_validation,
     cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_out_validation,
     cmiqr1jha00i6ie8fb1scb3go_DoorControl_out_validation,
-    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_out_validation,
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_out_validation,
 ]
 
 # Authentication
