@@ -1,2 +1,2 @@
-{"time": "2025-12-12T06:31:53.992264Z", "api": "StreamURLs", "dir": "REQUEST", "data": {"camList": [{"camID": "cam0001"}], "streamProtocolType": "RSTP"}}
-{"time": "2025-12-12T06:31:53.998249Z", "api": "StreamURLs", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "camList": [{"camID": "cam0001", "accessID": "", "accessPW": "", "camURL": "rtsp://192.168.0.1:8000", "videoInfo": {"resolution": "1920x1080", "fps": 30, "videoCodec": "H.264", "audioCodec": "G.711"}}]}}
+{"time": "2025-12-12T07:11:14.518110Z", "api": "StreamURLs", "dir": "REQUEST", "data": {"camList": [{"camID": "cam0001"}], "streamProtocolType": "RSTP"}}
+{"time": "2025-12-12T07:11:14.524094Z", "api": "StreamURLs", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "camList": [{"camID": "cam0001", "accessID": "", "accessPW": "", "camURL": "rtsp://192.168.0.1:8000", "videoInfo": {"resolution": "1920x1080", "fps": 30, "videoCodec": "H.264", "audioCodec": "G.711"}}]}}
