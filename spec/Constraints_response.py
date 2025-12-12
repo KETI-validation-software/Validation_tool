@@ -166,7 +166,7 @@ cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl2_out_constraints = {
     "referenceFieldId": "cmisgef0108e15vy7pvj4b2yg",
     "valueType": "request-based",
     "required": True,
-    "referenceEndpoint": "/SensorDeviceControl",
+    "referenceEndpoint": "/SensorDeviceControl2",
     "referenceField": "sensorDeviceID"
   },
   "sensorDeviceStatus": {
