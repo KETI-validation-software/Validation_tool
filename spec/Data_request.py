@@ -175,7 +175,7 @@ cmii7w683006h8z1t7usnin5g_messages = [
 
 # Authentication
 cmii7v8pr006g8z1tvo55a50u_Authentication_in_data = {
-    "userID": "kisa",
+    "userID": 1234,
     "userPW": "kisa_k1!2@"
 }
 

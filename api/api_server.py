@@ -43,6 +43,7 @@ class Server(BaseHTTPRequestHandler):
     request_counter = {}  # ✅ API별 시스템 요청 카운터 (클래스 변수)
     latest_event = defaultdict(dict)  # ✅ API별 최신 이벤트 저장 (클래스 변수)
     request_has_error = {}  # ✅ API별 요청 오류 flag (내부용, 응답 JSON에 포함 안 됨)
+    valid_device_ids = set(["cam0001", "cam0002", "cam003", "cam004"])  # ✅ 유효한 장치 ID 목록 (동적 업데이트)
 
     def __init__(self, *args, **kwargs):
         self.result = ""
@@ -249,9 +250,8 @@ class Server(BaseHTTPRequestHandler):
         Returns:
             str: 오류 메시지 (오류 있을 때) 또는 None (정상)
         """
-        # 유효한 카메라 ID 목록
-        # TODO: 실제로는 DB나 설정에서 가져와야 함
-        valid_cam_ids = ["cam001", "cam002", "keti", "camera1", "camera2"]
+        # ✅ 유효한 카메라 ID 목록 (클래스 변수 사용 - 동적으로 업데이트됨)
+        valid_cam_ids = Server.valid_device_ids
         
         # camID 검사
         cam_id = request_data.get("camID")
@@ -811,6 +811,16 @@ class Server(BaseHTTPRequestHandler):
                 # ✅ trace 저장 (_push_event 내부에서 deepcopy 수행)
                 self._push_event(api_name, "RESPONSE", updated_message)
 
+                # ✅ CameraProfiles 응답인 경우 camID들을 valid_device_ids에 추가
+                if "CameraProfiles" in api_name and isinstance(updated_message, dict):
+                    cam_list = updated_message.get("camList", [])
+                    if cam_list:
+                        for cam in cam_list:
+                            if isinstance(cam, dict) and "camID" in cam:
+                                Server.valid_device_ids.add(cam["camID"])
+                        print(f"[DEVICE_UPDATE] CameraProfiles에서 {len(cam_list)}개 camID 추가")
+                        print(f"[DEVICE_UPDATE] 현재 유효한 장치 목록: {Server.valid_device_ids}")
+
                 # ✅ JSON에 code_value 추가
                 if isinstance(updated_message, dict):
                     if api_name in Server.request_has_error and Server.request_has_error[api_name]:
@@ -828,6 +838,16 @@ class Server(BaseHTTPRequestHandler):
 
                 # ✅ trace 저장 (_push_event 내부에서 deepcopy 수행)
                 self._push_event(api_name, "RESPONSE", message)
+
+                # ✅ CameraProfiles 응답인 경우 camID들을 valid_device_ids에 추가
+                if "CameraProfiles" in api_name and isinstance(message, dict):
+                    cam_list = message.get("camList", [])
+                    if cam_list:
+                        for cam in cam_list:
+                            if isinstance(cam, dict) and "camID" in cam:
+                                Server.valid_device_ids.add(cam["camID"])
+                        print(f"[DEVICE_UPDATE] CameraProfiles에서 {len(cam_list)}개 camID 추가")
+                        print(f"[DEVICE_UPDATE] 현재 유효한 장치 목록: {Server.valid_device_ids}")
 
                 # ✅ JSON에 code_value 추가
                 if isinstance(message, dict):
