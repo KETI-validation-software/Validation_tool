@@ -208,7 +208,7 @@ cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_response_key_ids = {
     "doorList.doorID": "cmiwqkuoj0aj9844g5oec97p9",
     "doorList.doorName": "cmizg3epb00gy7eoeiefmp1lr",
     "doorList.doorRelaySensor": "cmizg3ghq00h67eoeuthieru9",
-    "doorList.doorSensor": "cmizg3i4700hc7eoegzha5m0l",
+    "doorList.doorSensor": "cmj13a9eu01vx12s9wja5mxt7",
 }
 
 cmiqr1acx00i5ie8fi022t1hp_DoorControl_response_key_ids = {
