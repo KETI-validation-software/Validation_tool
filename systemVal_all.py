@@ -1185,11 +1185,11 @@ class ResultPageWidget(QWidget):
                 print(f"[INIT] Row {row} API 이름 확인: {api_item.text()}")
             else:
                 # API 이름이 없으면 다시 설정
-                if row < len(self.videoMessages):
-                    api_item = QTableWidgetItem(self.videoMessages[row])
+                if row < len(self.message_display):
+                    api_item = QTableWidgetItem(self.message_display[row])
                     api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
                     self.tableWidget.setItem(row, 1, api_item)
-                    print(f"[INIT] Row {row} API 이름 재설정: {self.videoMessages[row]}")
+                    print(f"[INIT] Row {row} API 이름 재설정: {self.message_display[row]}")
 
             # 아이콘 초기화 (컬럼 2)
             icon_widget = QWidget()
@@ -1217,7 +1217,7 @@ class ResultPageWidget(QWidget):
 
     def show_empty_result_table(self):
         """결과가 없을 때 빈 테이블 표시 (API 목록만)"""
-        api_list = self.parent.videoMessages
+        api_list = self.parent.videoMessagesDisplay  # 표시용 이름 사용
         api_count = len(api_list)
 
         print(f"[RESULT] 빈 테이블 생성: {api_count}개 API")
@@ -1247,7 +1247,7 @@ class ResultPageWidget(QWidget):
             no_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 0, no_item)
 
-            # API 명 - 컬럼 1
+            # API 명 - 컬럼 1 (이미 숫자가 제거된 리스트 사용)
             api_item = QTableWidgetItem(api_list[row])
             api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 1, api_item)
@@ -1315,8 +1315,9 @@ class ResultPageWidget(QWidget):
             no_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 0, no_item)
 
-            # API 명 - 컬럼 1
-            api_item = QTableWidgetItem(row_data['api_name'])
+            # API 명 - 컬럼 1 (숫자 제거된 이름 표시)
+            display_name = self.parent._remove_api_number_suffix(row_data['api_name'])
+            api_item = QTableWidgetItem(display_name)
             api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 1, api_item)
 
@@ -2761,6 +2762,8 @@ class MyApp(QWidget):
         # ✅ Request 전송용 데이터 로드 (시스템이 플랫폼에게 보낼 요청) - inData
         self.videoInMessage = getattr(data_request_module, spec_names[1], [])
         self.videoMessages = getattr(data_request_module, spec_names[2], [])
+        # 표시용 API 이름 (숫자 제거)
+        self.videoMessagesDisplay = [self._remove_api_number_suffix(msg) for msg in self.videoMessages]
         self.videoInConstraint = getattr(constraints_request_module, self.current_spec_id + "_inConstraints", [])
 
         # ✅ Webhook 관련 (현재 미사용)
@@ -3316,7 +3319,7 @@ class MyApp(QWidget):
                 self.valResult.clear()
                 self.append_monitor_log(
                     step_name=f"시스템 전환 완료: {self.spec_description}",
-                    details=f"Spec ID: {self.current_spec_id} | API 개수: {len(self.videoMessages)}개 | API 목록: {', '.join(self.videoMessages)}"
+                    details=f"Spec ID: {self.current_spec_id} | API 개수: {len(self.videoMessages)}개 | API 목록: {', '.join(self.videoMessagesDisplay)}"
                 )
 
                 print(f"[SELECT] ✅ 시스템 전환 완료")
@@ -3337,18 +3340,20 @@ class MyApp(QWidget):
         # ✅ 2. 각 행을 완전히 초기화
         for row in range(api_count):
             api_name = api_list[row]
+            # 표시용 이름 (숫자 제거)
+            display_name = self._remove_api_number_suffix(api_name)
 
             # 컬럼 0: No. (숫자)
             no_item = QTableWidgetItem(f"{row + 1}")
             no_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 0, no_item)
 
-            # 컬럼 1: API 명
-            api_item = QTableWidgetItem(api_name)
+            # 컬럼 1: API 명 (숫자 제거)
+            api_item = QTableWidgetItem(display_name)
             api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 1, api_item)
 
-            print(f"[TABLE] Row {row}: {api_name} 설정 완료")
+            print(f"[TABLE] Row {row}: {display_name} 설정 완료")
 
             # 컬럼 2: 결과 아이콘
             icon_widget = QWidget()
@@ -3418,8 +3423,9 @@ class MyApp(QWidget):
             no_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 0, no_item)
 
-            # API 명 - 컬럼 1
-            api_item = QTableWidgetItem(api_list[row])
+            # API 명 - 컬럼 1 (숫자 제거)
+            display_name = self.parent._remove_api_number_suffix(api_list[row])
+            api_item = QTableWidgetItem(display_name)
             api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 1, api_item)
 
@@ -3667,7 +3673,8 @@ class MyApp(QWidget):
 
                 retry_info = f" (시도 {self.current_retry + 1}/{self.num_retries_list[self.cnt]})"
                 if self.cnt < len(self.message):
-                    self.message_name = "step " + str(self.cnt + 1) + ": " + self.message[self.cnt] + retry_info
+                    display_name = self.message_display[self.cnt] if self.cnt < len(self.message_display) else self.message[self.cnt]
+                    self.message_name = "step " + str(self.cnt + 1) + ": " + display_name + retry_info
                 else:
                     self.message_name = f"step {self.cnt + 1}: (index out of range)" + retry_info
 
@@ -3934,16 +3941,18 @@ class MyApp(QWidget):
                         # 첫 번째 응답일 때만 API 명과 검증 예정 횟수 표시
                         if self.current_retry == 0:
                             api_name = self.message[self.cnt] if self.cnt < len(self.message) else "Unknown"
+                            display_name = self.message_display[self.cnt] if self.cnt < len(self.message_display) else api_name
                             self.append_monitor_log(
-                                step_name=f"Step {self.cnt + 1}: {api_name} ({self.current_retry + 1}/{current_retries})",
+                                step_name=f"Step {self.cnt + 1}: {display_name} ({self.current_retry + 1}/{current_retries})",
                                 details=f"총 {current_retries}회 검증 예정",
                                 request_json=tmp_res_auth
                             )
                         else:
                             # 2회차 이상: API 명과 회차만 표시
                             api_name = self.message[self.cnt] if self.cnt < len(self.message) else "Unknown"
+                            display_name = self.message_display[self.cnt] if self.cnt < len(self.message_display) else api_name
                             self.append_monitor_log(
-                                step_name=f"Step {self.cnt + 1}: {api_name} ({self.current_retry + 1}/{current_retries})",
+                                step_name=f"Step {self.cnt + 1}: {display_name} ({self.current_retry + 1}/{current_retries})",
                                 request_json=tmp_res_auth
                             )
 
@@ -4215,7 +4224,8 @@ class MyApp(QWidget):
                                 "error"] = f"[시도 {self.current_retry + 1}/{current_retries}]\n{error_text}"
 
                     # 진행 중 표시 (플랫폼과 동일하게)
-                    message_name = "step " + str(self.cnt + 1) + ": " + self.message[self.cnt]
+                    display_name = self.message_display[self.cnt] if self.cnt < len(self.message_display) else self.message[self.cnt]
+                    message_name = "step " + str(self.cnt + 1) + ": " + display_name
                     # 각 시도별로 pass/error count는 누적이 아니라 이번 시도만 반영해야 함
                     # key_psss_cnt, key_error_cnt는 이번 시도에 대한 값임
                     if self.current_retry + 1 < current_retries:
@@ -4248,10 +4258,12 @@ class MyApp(QWidget):
                         formatted_data = data_text
                     
                     # 웹훅 여부에 따라 다른 표시
+                    api_name = self.message[self.cnt] if self.cnt < len(self.message) else "Unknown"
+                    display_name = self.message_display[self.cnt] if self.cnt < len(self.message_display) else api_name
                     if current_protocol == "WebHook":
-                        step_title = f"결과: {api_name} - 웹훅 구독 ({self.current_retry + 1}/{current_retries})"
+                        step_title = f"결과: {display_name} - 웹훅 구독 ({self.current_retry + 1}/{current_retries})"
                     else:
-                        step_title = f"결과: {api_name} ({self.current_retry + 1}/{current_retries})"
+                        step_title = f"결과: {display_name} ({self.current_retry + 1}/{current_retries})"
                     
                     # 마지막 시도에만 점수 표시, 진행중에는 표시 안함
                     if self.current_retry + 1 >= current_retries:
@@ -5335,6 +5347,14 @@ class MyApp(QWidget):
         else:
             self.placeholder_label.show()
 
+    def _remove_api_number_suffix(self, api_name):
+        """API 이름 뒤의 숫자 제거 (화면 표시용)
+        예: Authentication2 -> Authentication, RealTimeDoorStatus3 -> RealTimeDoorStatus
+        """
+        import re
+        # 마지막에 숫자만 있으면 제거
+        return re.sub(r'\d+$', '', api_name)
+
     def append_monitor_log(self, step_name, request_json="", result_status="진행중", score=None, details=""):
         """
         Qt 호환성이 보장된 HTML 테이블 구조 로그 출력 함수
@@ -6256,7 +6276,8 @@ class MyApp(QWidget):
 
         # 기본 시스템 설정
         self.radio_check_flag = "video"
-        self.message = self.videoMessages
+        self.message = self.videoMessages  # 실제 API 이름 (통신용)
+        self.message_display = self.videoMessagesDisplay  # 표시용 이름
         self.inMessage = self.videoInMessage
         self.outSchema = self.videoOutSchema
         self.inCon = self.videoInConstraint
