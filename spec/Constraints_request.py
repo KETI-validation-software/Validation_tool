@@ -72,10 +72,72 @@ cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_webhook_out_constraints = {
 }
 
 # RealtimeSensorEventInfos
-cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_in_constraints = {}
+cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_in_constraints = {
+  "sensorDeviceList": {
+    "id": "cmj6feinp01agxei0i4jq7q14",
+    "valueType": "preset",
+    "required": True
+  },
+  "sensorDeviceList.sensorDeviceID": {
+    "id": "cmj6feinr01aixei0iwq8v8ia",
+    "referenceFieldId": "cmiwtqkuz0bnop0021598be5a",
+    "valueType": "response-based",
+    "required": True,
+    "referenceEndpoint": "/SensorDeviceProfiles",
+    "referenceField": "sensorDeviceID"
+  },
+  "duration": {
+    "id": "cmj6fctgn0140xei0xxeg3jq0",
+    "valueType": "preset",
+    "required": True
+  },
+  "transProtocol": {
+    "id": "cmj6fcvlz014cxei08bwvc2j4",
+    "valueType": "preset",
+    "required": False
+  },
+  "transProtocol.transProtocolType": {
+    "id": "cmj6fd4lb016axei0p8g5qjvz",
+    "valueType": "preset",
+    "required": True
+  },
+  "transProtocol.transProtocolDesc": {
+    "id": "cmj6fd608016mxei081nl2t2v",
+    "valueType": "preset",
+    "required": False
+  },
+  "eventFilter": {
+    "id": "cmj6fdgsb0184xei0mr9kacqd",
+    "valueType": "random",
+    "required": True,
+    "referenceField": "(참조 필드 미선택)",
+    "referenceEndpoint": "/RealtimeSensorEventInfos",
+    "validValueField": "sensorEvent",
+    "validValues": [
+      "MotionDetection",
+      "Leak"
+    ]
+  },
+  "startTime": {
+    "id": "cmj6fdk4e018yxei03fzh2owz",
+    "valueType": "preset",
+    "required": False
+  }
+}
 
 # RealtimeSensorEventInfos WebHook OUT Constraints
-cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_webhook_out_constraints = {}
+cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_webhook_out_constraints = {
+  "code": {
+    "id": "cmj6fgmz201jaxei0x0a0oeio",
+    "valueType": "preset",
+    "required": True
+  },
+  "message": {
+    "id": "cmj6fgodk01jgxei0cxvcsc7x",
+    "valueType": "preset",
+    "required": True
+  }
+}
 
 # StoredSensorEventInfos
 cmii7wfuf006i8z1tcds6q69g_StoredSensorEventInfos_in_constraints = {
@@ -95,14 +157,17 @@ cmii7wfuf006i8z1tcds6q69g_StoredSensorEventInfos_in_constraints = {
     "required": True
   },
   "sensorDeviceList": {
-    "id": "cmixtx2dz0dlyp002akqenu1b",
+    "id": "cmixtx2dw0dlup002aj6sjed8",
     "valueType": "preset",
     "required": True
   },
   "sensorDeviceList.sensorDeviceID": {
-    "id": "cmixtx2e00dm0p0028pfhtwei",
-    "valueType": "preset",
-    "required": True
+    "id": "cmixtx2dx0dlwp002gtco28w8",
+    "referenceFieldId": "cmiwtqkuz0bnop0021598be5a",
+    "valueType": "random-response",
+    "required": True,
+    "referenceEndpoint": "/SensorDeviceProfiles",
+    "referenceField": "sensorDeviceID"
   },
   "maxCount": {
     "id": "cmixtwo5i0dkcp00280zysdrq",
@@ -111,8 +176,15 @@ cmii7wfuf006i8z1tcds6q69g_StoredSensorEventInfos_in_constraints = {
   },
   "eventFilter": {
     "id": "cmixtwwqg0dlip002jrqkcbsv",
-    "valueType": "preset",
-    "required": False
+    "valueType": "random",
+    "required": False,
+    "referenceField": "(참조 필드 미선택)",
+    "referenceEndpoint": "/StoredSensorEventInfos",
+    "validValueField": "sensorEvent",
+    "validValues": [
+      "MotionDetection",
+      "Leak"
+    ]
   }
 }
 
@@ -150,13 +222,7 @@ cmii7w683006h8z1t7usnin5g_Authentication_in_constraints = {
 cmii7w683006h8z1t7usnin5g_Capabilities_in_constraints = {}
 
 # DoorProfiles
-cmii7w683006h8z1t7usnin5g_DoorProfiles_in_constraints = {
-  "": {
-    "id": "cmiwsoco904e1p002pqjmtdrc",
-    "valueType": "preset",
-    "required": True
-  }
-}
+cmii7w683006h8z1t7usnin5g_DoorProfiles_in_constraints = {}
 
 # AccessUserInfos
 cmii7w683006h8z1t7usnin5g_AccessUserInfos_in_constraints = {}
@@ -164,14 +230,17 @@ cmii7w683006h8z1t7usnin5g_AccessUserInfos_in_constraints = {}
 # RealtimeVerifEventInfos
 cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_in_constraints = {
   "doorList": {
-    "id": "cmiwt9k7608t3p0028xpf85fa",
+    "id": "cmiwt9k7008svp002na1owhl9",
     "valueType": "preset",
     "required": True
   },
   "doorList.doorID": {
-    "id": "cmiwt9k7708t5p002r3f7arn6",
-    "valueType": "preset",
-    "required": True
+    "id": "cmiwt9k7208sxp002x2a5b3x3",
+    "referenceFieldId": "cmiwst3fc05ohp002ocni6ynq",
+    "valueType": "response-based",
+    "required": True,
+    "referenceEndpoint": "/DoorProfiles",
+    "referenceField": "doorID"
   },
   "duration": {
     "id": "cmiwt8b2s08lvp002w46fm85z",
@@ -195,8 +264,15 @@ cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_in_constraints = {
   },
   "eventFilter": {
     "id": "cmiwt94g908r6p00262pdfkog",
-    "valueType": "preset",
-    "required": False
+    "valueType": "random",
+    "required": False,
+    "referenceField": "(참조 필드 미선택)",
+    "referenceEndpoint": "/RealtimeVerifEventInfos",
+    "validValueField": "acEvent",
+    "validValues": [
+      "AuthSuccess",
+      "AuthFail"
+    ]
   },
   "startTime": {
     "id": "cmiwt9aqf08sfp0027rytqfgj",
@@ -237,14 +313,17 @@ cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_in_constraints = {
     "required": True
   },
   "doorList": {
-    "id": "cmiwthcyl09y9p002wpikk7v0",
+    "id": "cmiwthcyj09y5p002062nkgud",
     "valueType": "preset",
     "required": True
   },
   "doorList.doorID": {
-    "id": "cmiwthcyn09ybp002m6il7q9m",
-    "valueType": "preset",
-    "required": True
+    "id": "cmiwthcyk09y7p002ovmv3d43",
+    "referenceFieldId": "cmiwst3fc05ohp002ocni6ynq",
+    "valueType": "response-based",
+    "required": True,
+    "referenceEndpoint": "/DoorProfiles",
+    "referenceField": "doorID"
   },
   "maxCount": {
     "id": "cmiwtgzxs09wnp002naveumda",
@@ -253,8 +332,15 @@ cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_in_constraints = {
   },
   "eventFilter": {
     "id": "cmiwth4c209xkp002mm4lfebj",
-    "valueType": "preset",
-    "required": False
+    "valueType": "random",
+    "required": False,
+    "referenceField": "(참조 필드 미선택)",
+    "referenceEndpoint": "/StoredVerifEventInfos",
+    "validValueField": "acEvent",
+    "validValues": [
+      "AuthSuccess",
+      "AuthFail"
+    ]
   }
 }
 

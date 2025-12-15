@@ -25,6 +25,158 @@ def resource_path(relative_path):
         base_path = os.path.abspath(".")
 
     return os.path.join(base_path, relative_path)
+
+
+# ================================================================
+# 오류 메시지 트리 구조 포매팅
+# ================================================================
+def format_errors_as_tree(error_messages):
+    """
+    검증 오류 메시지를 트리 구조로 포매팅
+    
+    입력 예시:
+    [
+        "[구조] 타입 불일치: doorList.bioDeviceList - 예상: 모든 요소가 list, 실패한 항목들: [0] {...} (타입: dict)",
+        "[구조] 필수 필드 누락: doorList.bioDeviceList.bioDeviceAuthTypeList[]"
+    ]
+    
+    출력 예시:
+    ▼ [doorList.bioDeviceList] (2건)
+        ├── [X] [타입 오류] index[0] : List가 와야 하는데 Dict가 왔습니다.
+        └── [!] [필드 누락] bioDeviceAuthTypeList[]
+    """
+    if not error_messages:
+        return "오류가 없습니다."
+    
+    # 1. 오류 메시지를 파싱하여 계층 구조로 그룹화
+    error_tree = {}
+    
+    for error_msg in error_messages:
+        # [구조] 또는 [의미] 제거
+        msg = error_msg.replace("[구조] ", "").replace("[의미] ", "")
+        
+        # 오류 타입과 필드 경로 파싱
+        if "타입 불일치:" in msg:
+            error_type = "타입 오류"
+            field_info = msg.split("타입 불일치:")[1].strip()
+            
+            # 필드 경로 추출 (- 이전까지)
+            if " - " in field_info:
+                field_path = field_info.split(" - ")[0].strip()
+                detail = field_info.split(" - ", 1)[1].strip()
+            else:
+                field_path = field_info.split("(")[0].strip()
+                detail = field_info
+            
+            # 그룹핑 키: 필드 경로 자체
+            parent_path = field_path
+            
+            # 인덱스 정보 파싱
+            if "실패한 항목들:" in detail:
+                items_str = detail.split("실패한 항목들:")[1].strip()
+                # [0] {...} (타입: dict), [1] {...} (타입: dict) 형식 파싱
+                matches = re.findall(r'\[(\d+)\].*?\(타입: (\w+)\)', items_str)
+                
+                if parent_path not in error_tree:
+                    error_tree[parent_path] = []
+                
+                for idx, actual_type in matches:
+                    # 예상 타입 추출
+                    expected_match = re.search(r'예상: 모든 요소가 (\w+)', detail)
+                    expected_type = expected_match.group(1) if expected_match else "List"
+                    
+                    error_tree[parent_path].append({
+                        "type": error_type,
+                        "detail": f"index[{idx}] : {expected_type.capitalize()}가 와야 하는데 {actual_type.capitalize()}가 왔습니다."
+                    })
+            else:
+                # 단일 타입 오류
+                if parent_path not in error_tree:
+                    error_tree[parent_path] = []
+                
+                # 예상/실제 타입 추출
+                expected_match = re.search(r'예상: (\w+)', detail)
+                actual_match = re.search(r'실제: (\w+)', detail)
+                
+                expected = expected_match.group(1) if expected_match else "?"
+                actual = actual_match.group(1) if actual_match else "?"
+                
+                # 필드명만 표시
+                field_name = field_path.split(".")[-1] if "." in field_path else field_path
+                
+                error_tree[parent_path].append({
+                    "type": error_type,
+                    "detail": f"{field_name} : {expected.capitalize()}가 와야 하는데 {actual.capitalize()}가 왔습니다."
+                })
+        
+        elif "필수 필드 누락:" in msg or "선택 필드 누락:" in msg:
+            error_type = "필드 누락"
+            field_path = msg.split("필드 누락:")[1].strip()
+            
+            # 상위 경로 추출
+            if "." in field_path:
+                parent_path = ".".join(field_path.split(".")[:-1])
+                field_name = field_path.split(".")[-1]
+            else:
+                parent_path = "최상위"
+                field_name = field_path
+            
+            if parent_path not in error_tree:
+                error_tree[parent_path] = []
+            
+            error_tree[parent_path].append({
+                "type": error_type,
+                "detail": field_name
+            })
+        
+        else:
+            # 기타 오류 (의미 검증 등) - 최상위 필드는 그룹핑하지 않음
+            # 필드명 추출 시도
+            field_match = re.match(r'^(\w+):', msg)
+            if field_match:
+                field_name = field_match.group(1)
+                # 최상위 필드로 직접 저장 (점이 없는 경우)
+                parent_path = "__top_level__"  # 특수 키로 최상위 표시
+            else:
+                parent_path = "기타"
+            
+            if parent_path not in error_tree:
+                error_tree[parent_path] = []
+            
+            error_tree[parent_path].append({
+                "type": "맥락 오류",
+                "detail": msg
+            })
+    
+    # 2. 트리 구조로 포매팅
+    result_lines = []
+    
+    # 최상위 레벨 오류 먼저 처리 (그룹핑 없이)
+    if "__top_level__" in error_tree:
+        top_errors = error_tree.pop("__top_level__")
+        for error in top_errors:
+            result_lines.append(f"- [{error['type']}] {error['detail']}")
+        # 최상위 오류 뒤에 빈 줄 추가 (다른 그룹이 있을 경우)
+        if error_tree:
+            result_lines.append("")
+    
+    # 나머지 그룹화된 오류들 처리
+    for idx, (parent_path, errors) in enumerate(sorted(error_tree.items())):
+        # 그룹 헤더 - 필드 경로를 진하게 표시
+        error_count = len(errors)
+        result_lines.append(f"<b>[{parent_path}]</b> ({error_count}건)")
+        
+        # 각 오류 출력 (들여쓰기 유지)
+        for error in errors:
+            result_lines.append(f"- [{error['type']}] {error['detail']}")
+        
+        # 마지막 그룹이 아니면 빈 줄 추가
+        if idx < len(error_tree) - 1:
+            result_lines.append("")
+    
+    return "\n".join(result_lines)
+
+
 # ================================================================
 # 필드별 순차 검증 (구조 → 의미)
 # ================================================================
@@ -48,6 +200,16 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
         flat_fields, opt_fields = get_flat_fields_from_schema(schema)
         flat_data = get_flat_data_from_response(data)
         print(f"[json_check_] 필드 수: {len(flat_fields)}, 선택 필드: {len(opt_fields)}, 데이터 필드: {len(flat_data)}")
+        
+        # ✅ 디버그: primitive 배열 필드 확인
+        for field_path in flat_fields.keys():
+            if field_path.endswith("[]"):
+                print(f"[DEBUG] 스키마에 primitive 배열 필드 발견: {field_path} -> {flat_fields[field_path]}")
+        
+        for field_path in flat_data.keys():
+            if field_path.endswith("[]"):
+                print(f"[DEBUG] 데이터에 primitive 배열 필드 발견: {field_path} -> {flat_data[field_path]}")
+
 
         # 2) 의미 검증 규칙 평탄화
         rules_dict = {}
@@ -174,7 +336,12 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
 
         # 5) 최종 결과 결정
         final_result = "FAIL" if total_error > 0 else "PASS"
-        error_msg = "\n".join(error_messages) if error_messages else "오류 없음"
+        
+        # ✅ 오류 메시지를 트리 구조로 포매팅
+        if error_messages:
+            error_msg = format_errors_as_tree(error_messages)
+        else:
+            error_msg = "오류가 없습니다."
 
         print(f"\n============ 검증 완료 ============")
         print(f"최종 결과: {final_result}")
@@ -203,6 +370,7 @@ def _validate_field_type(field_path, field_value, expected_type):
 
     핵심 규칙:
     - 최상위 필드 (경로에 점 없음): 값 자체만 검증
+    - Primitive 배열 (경로가 []로 끝남): 배열의 각 요소가 expected_type인지 검증
     - 리스트 내부 필드 (경로에 점 있음): 리스트면 모든 요소 검증
 
     Args:
@@ -213,6 +381,39 @@ def _validate_field_type(field_path, field_value, expected_type):
     Returns:
         (is_valid: bool, error_msg: str or None)
     """
+
+    # ✅ 새로 추가: Primitive 타입 배열 처리 (예: bioDeviceAuthTypeList[] → str)
+    # 필드 경로가 []로 끝나면 "문자열 배열" 같은 primitive 배열을 의미
+    if field_path.endswith("[]"):
+        # 실제 필드명 ([] 제거)
+        actual_field = field_path[:-2]
+        
+        # 값이 리스트인지 확인
+        if not isinstance(field_value, list):
+            error_msg = (
+                f"타입 불일치: {actual_field} "
+                f"(예상: {expected_type.__name__} 배열, "
+                f"실제: {type(field_value).__name__})"
+            )
+            return False, error_msg
+        
+        # 배열의 각 요소가 expected_type인지 검증
+        invalid_items = []
+        for i, item in enumerate(field_value):
+            if not isinstance(item, expected_type):
+                invalid_items.append(
+                    f"[{i}] {item} (타입: {type(item).__name__})"
+                )
+        
+        if invalid_items:
+            error_msg = (
+                f"타입 불일치: {actual_field} - "
+                f"예상: 모든 요소가 {expected_type.__name__}, "
+                f"실패한 항목들: {', '.join(invalid_items)}"
+            )
+            return False, error_msg
+        
+        return True, None
 
     # 최상위 필드 판별 (경로에 점이 없음)
     is_top_level = "." not in field_path

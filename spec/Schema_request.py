@@ -15,7 +15,9 @@ cmii7shen005i8z1tagevx4qh_SensorDeviceProfiles_in_schema = {}
 
 # RealtimeSensorData
 cmii7shen005i8z1tagevx4qh_RealtimeSensorData_in_schema = {
-    "sensorDeviceList": [{}],
+    "sensorDeviceList": [{
+    "sensorDeviceID": str,
+}],
     "duration": int,
     "transProtocol": {
     "transProtocolType": str,
@@ -32,7 +34,9 @@ cmii7shen005i8z1tagevx4qh_RealtimeSensorData_webhook_out_schema = {
 
 # RealtimeSensorEventInfos
 cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_in_schema = {
-    "sensorDeviceList": [{}],
+    "sensorDeviceList": [{
+    "sensorDeviceID": str,
+}],
     "transProtocol": {
     "transProtocolType": str,
     OptionalKey("transProtocolDesc"): str,
@@ -92,7 +96,9 @@ cmii7pysb004k8z1tts0npxfm_AccessUserInfos_in_schema = {}
 
 # RealtimeVerifEventInfos
 cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_in_schema = {
-    "doorList": [{}],
+    "doorList": [{
+    "doorID": str,
+}],
     OptionalKey("duration"): int,
     "transProtocol": {
     "transProtocolType": str,
@@ -114,7 +120,9 @@ cmii7pysb004k8z1tts0npxfm_StoredVerifEventInfos_in_schema = {
     "startTime": int,
     "endTime": int,
 },
-    "doorList": [{}],
+    "doorList": [{
+    "doorID": str,
+}],
     OptionalKey("maxCount"): int,
     OptionalKey("eventFilter"): str,
 }

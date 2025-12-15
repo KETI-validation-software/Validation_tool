@@ -273,7 +273,9 @@ class CombinedDetailDialog(QDialog):
             error_msg += "오류 세부사항:\n" + error_text
         else:
             error_msg += "오류가 없습니다."
-        self.error_browser.setPlainText(error_msg)
+        # HTML 렌더링을 위해 setHtml 사용 (줄바꿈을 <br>로 변환)
+        error_msg_html = error_msg.replace('\n', '<br>')
+        self.error_browser.setHtml(error_msg_html)
         error_column_layout.addWidget(self.error_browser)
 
         # 3개 열을 가로로 배치 - 반응형: 동일 비율(stretch=1)

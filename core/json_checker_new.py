@@ -350,22 +350,26 @@ def get_flat_fields_from_schema(schema):
     def walk(node, path, is_current_optional=False):
         """재귀적으로 스키마 탐색"""
         if isinstance(node, list):
-            if path:
-                flat_fields[path] = list
-                if is_current_optional:
-                    opt_fields.add(path)
-
             if len(node) == 0:
+                # 빈 리스트는 무시
                 return
 
             first = node[0]
             if isinstance(first, dict):
+                # List of dicts: 현재 path에 list 타입 저장
+                if path:
+                    flat_fields[path] = list
+                    if is_current_optional:
+                        opt_fields.add(path)
+                
                 for k, v in first.items():
                     keyname = _norm_key(k)
                     is_opt = isinstance(k, OptionalKey)
                     child_path = f"{path}.{keyname}" if path else keyname
                     walk(v, child_path, is_opt)
             else:
+                # Primitive array ([str], [int] 등): 
+                # 현재 path는 저장하지 않고, path[]만 생성
                 child_path = f"{path}[]"
                 walk(first, child_path, False)
 
@@ -461,11 +465,21 @@ def get_flat_data_from_response(data):
                         # 값이 하나면 스칼라, 여러 개면 리스트
                         flat_data[child_path] = values[0] if len(values) == 1 else values
 
-                        # 중첩 구조 재귀 탐색
-                        if len(values) > 0 and isinstance(values[0], dict):
-                            walk(values[0], child_path)
-                        elif len(values) > 0 and isinstance(values[0], list):
-                            walk_list_of_lists(values, child_path)
+                        # ✅ primitive 타입 배열 처리 추가
+                        is_primitive_array = False
+                        if isinstance(values[0], list) and len(values[0]) > 0:
+                            first_elem = values[0][0]
+                            if not isinstance(first_elem, (dict, list)):
+                                # primitive 배열 전체를 저장 (예: ["홍채", "지문"])
+                                flat_data[f"{child_path}[]"] = values[0]
+                                is_primitive_array = True
+                        
+                        # primitive 배열이 아닐 때만 재귀 호출
+                        if not is_primitive_array:
+                            if len(values) > 0 and isinstance(values[0], dict):
+                                walk(values[0], child_path)
+                            elif len(values) > 0 and isinstance(values[0], list):
+                                walk_list_of_lists(values, child_path)
             else:
                 # 리스트 항목이 primitive 타입인 경우
                 if path:
@@ -499,7 +513,18 @@ def get_flat_data_from_response(data):
                 if len(values) > 0:
                     flat_data[child_path] = values[0] if len(values) == 1 else values
 
-                    if len(values) > 0 and isinstance(values[0], dict):
+                    # ✅ primitive 배열 체크 추가
+                    is_primitive_array = False
+                    if isinstance(values[0], list) and len(values[0]) > 0:
+                        first_elem = values[0][0]
+                        if not isinstance(first_elem, (dict, list)):
+                            # primitive 배열 전체를 저장 (예: ["홍채", "지문"])
+                            flat_data[f"{child_path}[]"] = values[0]
+                            is_primitive_array = True
+                            print(f"[DEBUG][FLATTEN_DATA] Primitive 배열 감지: {child_path}[] = {values[0]}")
+                    
+                    # primitive 배열이 아닐 때만 재귀 호출
+                    if not is_primitive_array and len(values) > 0 and isinstance(values[0], dict):
                         walk(values[0], child_path)
 
     # 진입점

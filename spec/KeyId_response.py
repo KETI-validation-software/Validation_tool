@@ -11,7 +11,7 @@ cmii7shen005i8z1tagevx4qh_Authentication_request_key_ids = {
 
 cmii7shen005i8z1tagevx4qh_RealtimeSensorData_request_key_ids = {
     "sensorDeviceList": "cmiwks7mu01ed844gsf300h90",
-    "sensorDeviceList.sensorDeviceID": "cmiwku6pn01q6844griu7nwqm",
+    "sensorDeviceList.sensorDeviceID": "cmiwku6pd01py844gs8pdfqk7",
     "duration": "cmiwktcwm01iz844go8txcmqw",
     "transProtocol": "cmiwktiqh01kl844gjwbaiw73",
     "transProtocol.transProtocolType": "cmiwktrzi01n5844gxocqtjht",
@@ -23,7 +23,7 @@ cmii7shen005i8z1tagevx4qh_RealtimeSensorData_request_key_ids = {
 
 cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_request_key_ids = {
     "sensorDeviceList": "cmiwl2mx502yz844g7dmcpkb0",
-    "sensorDeviceList.sensorDeviceID": "cmiwl4bej036v844giwjwmhmo",
+    "sensorDeviceList.sensorDeviceID": "cmiwl4bee036r844g6223h6b1",
     "transProtocol": "cmiwl3bql031h844ggjq05wzn",
     "transProtocol.transProtocolType": "cmiwl3kx6032n844gecy77dtd",
     "transProtocol.transProtocolDesc": "cmiwl3o1y033b844g05sp9bx3",
@@ -60,7 +60,7 @@ cmii7pysb004k8z1tts0npxfm_Authentication_request_key_ids = {
 
 cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_request_key_ids = {
     "doorList": "cmiwjfozy0311ugxne4h1z9ay",
-    "doorList.doorID": "cmiwjh6so03deugxnysuv0866",
+    "doorList.doorID": "cmiwjh6se03d6ugxnx0n5o5e4",
     "duration": "cmiwjgdfi035eugxndjuhyn3x",
     "transProtocol": "cmiwjgjmy037dugxn78zvsydm",
     "transProtocol.transProtocolType": "cmiwjgqun038kugxnbvj80nir",
@@ -76,7 +76,7 @@ cmii7pysb004k8z1tts0npxfm_StoredVerifEventInfos_request_key_ids = {
     "timePeriod.startTime": "cmiwjueh103x7ugxnddzlsgf8",
     "timePeriod.endTime": "cmiwjui2h03xgugxnjrynv87r",
     "doorList": "cmiwjuof203xqugxnpjv9rjuk",
-    "doorList.doorID": "cmiwjvspq041eugxnn1gs21kv",
+    "doorList.doorID": "cmiwjvspl041augxn53k2pct5",
     "maxCount": "cmiwjvjql03zzugxnjebu1vnq",
     "eventFilter": "cmiwjvqme0415ugxnzwbgt3n5",
 }
