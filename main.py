@@ -41,29 +41,33 @@ import config.CONSTANTS as CONSTANTS
 import importlib
 
 # ===== 로그 파일 설정 (windowed 모드 대응) =====
-# windowed 모드에서도 로그를 파일로 기록
-log_filename = f"validation_tool_debug_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
-handlers = [logging.FileHandler(log_filename, encoding='utf-8')]
+# ✅ 로그 파일 생성 비활성화 (디버그용 로그 파일 생성하지 않음)
+# log_filename = f"validation_tool_debug_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+# handlers = [logging.FileHandler(log_filename, encoding='utf-8')]
+handlers = []
 
 # 콘솔 모드일 때만 StreamHandler 추가
 if sys.stdout is not None:
     handlers.append(logging.StreamHandler(sys.stdout))
 
-logging.basicConfig(
-    level=logging.DEBUG,  # 디버깅을 위해 DEBUG로 변경
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=handlers
-)
+# 최소한의 로깅 설정 (파일 없이 콘솔만)
+if handlers:  # handlers가 비어있지 않을 때만 설정
+    logging.basicConfig(
+        level=logging.WARNING,  # WARNING 이상만 출력 (INFO, DEBUG 제외)
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        handlers=handlers
+    )
 logger = logging.getLogger(__name__)
-logger.info(f"로그 파일 생성: {log_filename}")
+# logger.info(f"로그 파일 생성: {log_filename}")  # 주석 처리
 
 # ===== windowed 모드에서 stdout/stderr를 파일로 리다이렉트 =====
-if sys.stdout is None or sys.stderr is None:
-    stdout_filename = f"validation_tool_stdout_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
-    stderr_filename = f"validation_tool_stderr_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
-    sys.stdout = open(stdout_filename, 'w', encoding='utf-8')
-    sys.stderr = open(stderr_filename, 'w', encoding='utf-8')
-    logger.info(f"stdout/stderr 리다이렉트: {stdout_filename}, {stderr_filename}")
+# ✅ stdout/stderr 리다이렉트 비활성화
+# if sys.stdout is None or sys.stderr is None:
+#     stdout_filename = f"validation_tool_stdout_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+#     stderr_filename = f"validation_tool_stderr_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+#     sys.stdout = open(stdout_filename, 'w', encoding='utf-8')
+#     sys.stderr = open(stderr_filename, 'w', encoding='utf-8')
+#     logger.info(f"stdout/stderr 리다이렉트: {stdout_filename}, {stderr_filename}")
 
 # ===== 처리되지 않은 예외를 로그에 기록 =====
 def exception_hook(exctype, value, tb):

@@ -328,6 +328,15 @@ def _validate_field_semantic(field_path, field_value, rule, data, reference_cont
     elif validation_type == "url-video":
         return _validate_url_video(field_path, field_value, rule, reference_context,
                                    field_errors, global_errors)
+    
+    elif validation_type == "array-validation":
+        return _validate_array(field_path, field_value, rule, data, reference_context,
+                              field_errors, global_errors)
+    
+    elif validation_type == "object-validation":
+        return _validate_object(field_path, field_value, rule, data, reference_context,
+                               field_errors, global_errors)
+    
     else:
         print(f"  ⚠ 미지원 validationType: {validation_type}")
         return True
@@ -778,6 +787,142 @@ def _validate_custom(field_path, field_value, rule, field_errors, global_errors)
         return False
 
     return True
+
+
+def _validate_array(field_path, field_value, rule, data, reference_context,
+                    field_errors, global_errors):
+    """배열 검증 (array-validation)"""
+    if not isinstance(field_value, list):
+        error_msg = f"배열이 아님 (타입: {type(field_value).__name__})"
+        field_errors.append(error_msg)
+        global_errors.append(f"[의미] {field_path}: {error_msg}")
+        return False
+    
+    all_valid = True
+    
+    # 1. arrayConstraints 검증 (minItems, maxItems)
+    array_constraints = rule.get("arrayConstraints", {})
+    if array_constraints:
+        min_items = array_constraints.get("minItems")
+        max_items = array_constraints.get("maxItems")
+        
+        if min_items is not None and len(field_value) < min_items:
+            error_msg = f"배열 최소 길이 미달: {len(field_value)} < {min_items}"
+            field_errors.append(error_msg)
+            global_errors.append(f"[의미] {field_path}: {error_msg}")
+            all_valid = False
+        
+        if max_items is not None and len(field_value) > max_items:
+            error_msg = f"배열 최대 길이 초과: {len(field_value)} > {max_items}"
+            field_errors.append(error_msg)
+            global_errors.append(f"[의미] {field_path}: {error_msg}")
+            all_valid = False
+    
+    # 2. arrayItemValidation 검증 (배열 요소 개별 검증)
+    array_item_validation = rule.get("arrayItemValidation")
+    if array_item_validation:
+        for idx, item in enumerate(field_value):
+            item_path = f"{field_path}[{idx}]"
+            item_valid = _validate_field_semantic(
+                item_path, item, array_item_validation, data, reference_context,
+                field_errors, global_errors
+            )
+            if not item_valid:
+                all_valid = False
+    
+    # 3. arrayItemSchema 검증 (객체 배열 스키마 검증)
+    array_item_schema = rule.get("arrayItemSchema")
+    if array_item_schema:
+        for idx, item in enumerate(field_value):
+            if not isinstance(item, dict):
+                error_msg = f"배열 요소가 객체가 아님 (index {idx}, 타입: {type(item).__name__})"
+                field_errors.append(error_msg)
+                global_errors.append(f"[의미] {field_path}[{idx}]: {error_msg}")
+                all_valid = False
+                continue
+            
+            # 각 필드 스키마에 대해 검증
+            for field_schema in array_item_schema:
+                field_key = field_schema.get("key")
+                field_validation = field_schema.get("validation", {})
+                
+                if not field_validation.get("enabled", False):
+                    continue
+                
+                item_field_path = f"{field_path}[{idx}].{field_key}"
+                item_field_value = item.get(field_key)
+                
+                # children이 있으면 object-validation 처리
+                if field_schema.get("children"):
+                    child_rule = {
+                        "validationType": "object-validation",
+                        "enabled": field_validation.get("enabled", True),
+                        "children": field_schema.get("children")
+                    }
+                    child_valid = _validate_object(
+                        item_field_path, item_field_value, child_rule, data, reference_context,
+                        field_errors, global_errors
+                    )
+                    if not child_valid:
+                        all_valid = False
+                else:
+                    # 일반 필드 검증
+                    field_valid = _validate_field_semantic(
+                        item_field_path, item_field_value, field_validation, 
+                        data, reference_context, field_errors, global_errors
+                    )
+                    if not field_valid:
+                        all_valid = False
+    
+    return all_valid
+
+
+def _validate_object(field_path, field_value, rule, data, reference_context,
+                     field_errors, global_errors):
+    """객체 검증 (object-validation)"""
+    if not isinstance(field_value, dict):
+        error_msg = f"객체가 아님 (타입: {type(field_value).__name__})"
+        field_errors.append(error_msg)
+        global_errors.append(f"[의미] {field_path}: {error_msg}")
+        return False
+    
+    all_valid = True
+    
+    # children 필드 검증
+    children = rule.get("children", [])
+    for child_schema in children:
+        child_key = child_schema.get("key")
+        child_validation = child_schema.get("validation", {})
+        
+        if not child_validation.get("enabled", False):
+            continue
+        
+        child_path = f"{field_path}.{child_key}"
+        child_value = field_value.get(child_key)
+        
+        # 중첩 객체 처리
+        if child_schema.get("children"):
+            nested_rule = {
+                "validationType": "object-validation",
+                "enabled": child_validation.get("enabled", True),
+                "children": child_schema.get("children")
+            }
+            child_valid = _validate_object(
+                child_path, child_value, nested_rule, data, reference_context,
+                field_errors, global_errors
+            )
+            if not child_valid:
+                all_valid = False
+        else:
+            # 일반 필드 검증
+            child_valid = _validate_field_semantic(
+                child_path, child_value, child_validation, data, reference_context,
+                field_errors, global_errors
+            )
+            if not child_valid:
+                all_valid = False
+    
+    return all_valid
 
 
 # ================================================================
