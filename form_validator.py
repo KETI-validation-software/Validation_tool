@@ -336,7 +336,7 @@ class FormValidator:
                 webhook_schema_names = []  # webhook 전용 스키마 리스트
                 webhook_data_names = []    # webhook 전용 데이터 리스트
                 webhook_constraints_names = []  # webhook 전용 constraints 리스트
-
+                webhook_validation_names = []
                 # 기본값 설정 (steps가 비어있거나 ts가 없는 경우 대비)
                 schema_type = None
                 file_type = None
@@ -393,6 +393,7 @@ class FormValidator:
                             webhook_schema_names=webhook_schema_names,
                             webhook_data_names=webhook_data_names,
                             webhook_constraints_names=webhook_constraints_names,
+                            webhook_validation_names=webhook_validation_names,
                             spec_id=temp_spec_id,
                             numbered_endpoint=numbered_endpoint
                         )
@@ -442,6 +443,18 @@ class FormValidator:
                     for name in webhook_schema_names:
                         schema_content += f"    {temp_spec_id}{name},\n"
                     schema_content += "]\n\n"
+
+                if webhook_validation_names:
+                    if schema_type == "request":
+                        webhook_v_list_name = f"{spec_id}_webhook_outValidation"
+                    else:
+                        webhook_v_list_name = f"{spec_id}_webhook_inValidation"
+
+                    validation_content += f"# {spec_id} WebHook 검증 리스트\n"
+                    validation_content += f"{webhook_v_list_name} = [\n"
+                    for vname in webhook_validation_names:
+                        validation_content += f"    {temp_spec_id}{vname},\n"  # ✅ temp_spec_id 추가
+                    validation_content += "]\n\n"
 
                 if file_type == "request":
                     data_list_name = f"{spec_id}_inData"
@@ -666,23 +679,30 @@ class FormValidator:
 
         lines = content.split('\n')
         result_lines = []
-        current_field_id = None
-        current_block_key = None  # 현재 블록의 key (예: "commandType")
+        skip_current_block = False
 
         for line in lines:
             # 블록 key 찾기 (예: "commandType": {)
             block_key_match = re.search(r'"(\w+)":\s*\{', line)
             if block_key_match:
                 current_block_key = block_key_match.group(1)
+                skip_current_block = False  # 새 블록 시작 시 초기화
 
+            # referenceField 찾기
+            reference_field_match = re.search(r'"referenceField":\s*"([^"]+)"', line)
+            if reference_field_match:
+                reference_field_value = reference_field_match.group(1)
+                # "(참조 필드 미선택)"이면 현재 블록을 스킵하도록 플래그 설정
+                if reference_field_value == "(참조 필드 미선택)":
+                    skip_current_block = True  # continue 대신 플래그 사용
             # referenceFieldId 찾기
             field_id_match = re.search(r'"referenceFieldId":\s*"([^"]+)"', line)
-            if field_id_match:
+            if field_id_match and not skip_current_block:
                 current_field_id = field_id_match.group(1)
 
             # referenceEndpoint 찾기 및 업데이트
             endpoint_match = re.search(r'"referenceEndpoint":\s*"(/[^"]+)"', line)
-            if endpoint_match:
+            if endpoint_match and not skip_current_block:
                 old_endpoint = endpoint_match.group(1)
                 # /를 제거한 endpoint명
                 endpoint_name = old_endpoint[1:] if old_endpoint.startswith("/") else old_endpoint
@@ -756,7 +776,7 @@ class FormValidator:
                                        data_content, schema_names, data_names, endpoint_names,
                                        validation_content, validation_names,
                                    constraints_content, constraints_names,
-                                   webhook_schema_names, webhook_data_names, webhook_constraints_names, spec_id,
+                                   webhook_schema_names, webhook_data_names, webhook_constraints_names, webhook_validation_names,spec_id,
                                    numbered_endpoint=None):
 
         # step 레벨에서 protocolType 확인 (소문자 "webhook")
@@ -968,6 +988,48 @@ class FormValidator:
                 constraints_content += f"{spec_id}{webhook_c_name} = {webhook_c_py_style_json}\n\n"
             webhook_constraints_names.append(webhook_c_name)
             print(f"  ✓ WebHook OUT Constraints 생성: {webhook_c_name}" + (" (빈 딕셔너리)" if not webhook_c_map else ""))
+
+            # ✅ WebHook OUT Validation 처리 - schema_type="request"일 때
+        if protocol_type == "webhook" and schema_type == "request":
+            webhook_spec = settings.get("webhook", {}).get("integrationSpec") or []
+            webhook_v_name = f"{numbered_endpoint}_webhook_out_validation"
+
+            # webhook spec에서 validation 추출
+            webhook_v_map = self.validation_gen._extract_webhook_validation(webhook_spec)
+
+            validation_content += f"# {numbered_endpoint} WebHook OUT Validation\n"
+            if not webhook_v_map:
+                validation_content += f"{spec_id}{webhook_v_name} = {{}}\n\n"
+            else:
+                raw_json = json.dumps(webhook_v_map, ensure_ascii=False, indent=2)
+                py_style_json = re.sub(r'\btrue\b', 'True', raw_json)
+                py_style_json = re.sub(r'\bfalse\b', 'False', py_style_json)
+                validation_content += f"{spec_id}{webhook_v_name} = {py_style_json}\n\n"
+
+            webhook_validation_names.append(webhook_v_name)
+            print(f"  ✓ WebHook OUT Validation 생성: {webhook_v_name}" +
+                  (" (빈 딕셔너리)" if not webhook_v_map else ""))
+
+            # ✅ WebHook IN Validation 처리 - schema_type="response"일 때
+        if protocol_type == "webhook" and schema_type == "response":
+            webhook_spec = settings.get("webhook", {}).get("requestSpec") or []
+            webhook_v_name = f"{numbered_endpoint}_webhook_in_validation"
+
+            # webhook spec에서 validation 추출
+            webhook_v_map = self.validation_gen._extract_webhook_validation(webhook_spec)
+
+            validation_content += f"# {numbered_endpoint} WebHook IN Validation\n"
+            if not webhook_v_map:
+                validation_content += f"{spec_id}{webhook_v_name} = {{}}\n\n"
+            else:
+                raw_json = json.dumps(webhook_v_map, ensure_ascii=False, indent=2)
+                py_style_json = re.sub(r'\btrue\b', 'True', raw_json)
+                py_style_json = re.sub(r'\bfalse\b', 'False', py_style_json)
+                validation_content += f"{spec_id}{webhook_v_name} = {py_style_json}\n\n"
+
+            webhook_validation_names.append(webhook_v_name)
+            print(f"  ✓ WebHook IN Validation 생성: {webhook_v_name}" +
+                  (" (빈 딕셔너리)" if not webhook_v_map else ""))
 
         # 기존과 동일하게 누적본 반환 + validation도 함께 반환
         return schema_content, data_content, validation_content, constraints_content

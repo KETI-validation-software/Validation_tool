@@ -1,0 +1,6 @@
+<b>[doorList.bioDeviceList]</b> (3건)
+    ├── [타입 오류] index[0] : List가 와야 하는데 Dict가 왔습니다.
+    ├── [타입 오류] index[1] : List가 와야 하는데 Dict가 왔습니다.
+    └── [필드 누락] bioDeviceAuthTypeList[]
+<b>[doorList.otherDeviceList]</b> (1건)
+    └── [타입 오류] index[0] : List가 와야 하는데 Dict가 왔습니다.
