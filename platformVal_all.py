@@ -3922,7 +3922,7 @@ class MyApp(QWidget):
                 self.valResult.clear()
                 self.append_monitor_log(
                     step_name=f"플랫폼 전환 완료: {self.spec_description}",
-                    details=f"API 목록 ({len(self.videoMessages)}개): {', '.join(self.videoMessages)}"
+                    details=f"API 목록 ({len(self.videoMessages)}개): {', '.join(self.videoMessagesDisplay)}"
                 )
 
                 print(f"[PLATFORM] ✅ 플랫폼 전환 완료: {self.spec_description}, API 수: {len(self.videoMessages)}")
