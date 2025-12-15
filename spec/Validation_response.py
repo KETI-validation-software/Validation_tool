@@ -31,7 +31,16 @@ cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_out_validation = {}
 cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_out_validation = {}
 
 # StoredSensorEventInfos
-cmii7wfuf006i8z1tcds6q69g_StoredSensorEventInfos_out_validation = {}
+cmii7wfuf006i8z1tcds6q69g_StoredSensorEventInfos_out_validation = {
+  "sensorDeviceList.sensorDeviceID": {
+    "enabled": True,
+    "validationType": "request-field-list-match",
+    "referenceEndpoint": "/StoredSensorEventInfos",
+    "referenceListField": "sensorDeviceID",
+    "referenceListEndpoint": "/StoredSensorEventInfos",
+    "score": 0
+  }
+}
 
 # cmii7wfuf006i8z1tcds6q69g 검증 리스트
 cmii7wfuf006i8z1tcds6q69g_outValidation = [
@@ -47,18 +56,18 @@ cmii7wfuf006i8z1tcds6q69g_outValidation = [
 cmii7w683006h8z1t7usnin5g_Authentication_out_validation = {
   "code": {
     "enabled": True,
-    "validationType": "request-field-match",
-    "referenceFieldId": "cmisg8fmw08c55vy7eby9fson",
-    "referenceField": "sensorDeviceID",
-    "referenceEndpoint": "/SensorDeviceControl2",
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "400"
+    ],
     "score": 0
   },
   "message": {
     "enabled": True,
-    "validationType": "request-field-match",
-    "referenceFieldId": "cmisg8hg208ca5vy7ijzfeelo",
-    "referenceField": "commandType",
-    "referenceEndpoint": "/SensorDeviceControl2",
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "잘못된 요청"
+    ],
     "score": 0
   }
 }
@@ -76,7 +85,24 @@ cmii7w683006h8z1t7usnin5g_AccessUserInfos_out_validation = {}
 cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_out_validation = {}
 
 # StoredVerifEventInfos
-cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_out_validation = {}
+cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_out_validation = {
+  "doorList.doorID": {
+    "enabled": True,
+    "validationType": "request-field-list-match",
+    "referenceEndpoint": "/StoredVerifEventInfos",
+    "referenceListField": "doorID",
+    "referenceListEndpoint": "/StoredVerifEventInfos",
+    "score": 0
+  },
+  "doorList.eventName": {
+    "enabled": True,
+    "validationType": "request-field-match",
+    "referenceFieldId": "cmiwth4c209xkp002mm4lfebj",
+    "referenceField": "eventFilter",
+    "referenceEndpoint": "/StoredVerifEventInfos",
+    "score": 0
+  }
+}
 
 # cmii7w683006h8z1t7usnin5g 검증 리스트
 cmii7w683006h8z1t7usnin5g_outValidation = [

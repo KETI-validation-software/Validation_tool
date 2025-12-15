@@ -24,7 +24,17 @@ cmii7wfuf006i8z1tcds6q69g_Capabilities_out_schema = {
 cmii7wfuf006i8z1tcds6q69g_SensorDeviceProfiles_out_schema = {
     "code": str,
     "message": str,
-    "sensorDeviceList": [{}],
+    "sensorDeviceList": [{
+    "sensorDeviceID": str,
+    "sensorDeviceType": str,
+    "sensorDeviceName": str,
+    OptionalKey("sensorDeviceLoc"): {
+    "lon": str,
+    "lat": str,
+    OptionalKey("alt"): str,
+    OptionalKey("desc"): str,
+},
+}],
 }
 
 # RealtimeSensorData
@@ -35,20 +45,41 @@ cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_out_schema = {
 
 # RealtimeSensorData WebHook IN Schema
 cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_webhook_in_schema = {
-    "sensorDeviceList": [{}],
+    "sensorDeviceList": [{
+    "sensorDeviceID": str,
+    "measureTime": int,
+    "sensorDeviceType": str,
+    "sensorDeviceUnit": str,
+    "sensorDeviceValue": str,
+}],
 }
 
 # RealtimeSensorEventInfos
-cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_out_schema = {}
+cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_out_schema = {
+    "code": str,
+    "message": str,
+}
 
 # RealtimeSensorEventInfos WebHook IN Schema
-cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_webhook_in_schema = {}
+cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_webhook_in_schema = {
+    "sensorDeviceList": [{
+    "sensorDeviceID": str,
+    "eventName": str,
+    "eventTime": int,
+    OptionalKey("eventDesc"): str,
+}],
+}
 
 # StoredSensorEventInfos
 cmii7wfuf006i8z1tcds6q69g_StoredSensorEventInfos_out_schema = {
     "code": str,
     "message": str,
-    "sensorDeviceList": [{}],
+    "sensorDeviceList": [{
+    "sensorDeviceID": str,
+    "eventName": str,
+    "eventTime": int,
+    OptionalKey("eventDesc"): str,
+}],
 }
 
 # cmii7wfuf006i8z1tcds6q69g 스키마 리스트
@@ -118,7 +149,18 @@ cmii7w683006h8z1t7usnin5g_DoorProfiles_out_schema = {
 cmii7w683006h8z1t7usnin5g_AccessUserInfos_out_schema = {
     "code": str,
     "message": str,
-    "userList": [{}],
+    "userList": [{
+    "userID": str,
+    "userName": str,
+    OptionalKey("userDesc"): str,
+    "doorList": [{
+    "doorID": str,
+    "timePeriod": {
+    "startTime": int,
+    "endTime": int,
+},
+}],
+}],
 }
 
 # RealtimeVerifEventInfos
@@ -129,14 +171,29 @@ cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_out_schema = {
 
 # RealtimeVerifEventInfos WebHook IN Schema
 cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_webhook_in_schema = {
-    "doorList": [{}],
+    "doorList": [{
+    "eventTime": int,
+    "doorID": str,
+    OptionalKey("userID"): str,
+    OptionalKey("bioAuthTypeList"): [str],
+    OptionalKey("otherAuthTypeList"): [str],
+    "eventName": str,
+    OptionalKey("eventDesc"): str,
+}],
 }
 
 # StoredVerifEventInfos
 cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_out_schema = {
     "code": str,
     "message": str,
-    "doorList": [{}],
+    "doorList": [{
+    "eventTime": int,
+    "doorID": str,
+    OptionalKey("userID"): str,
+    OptionalKey("bioAuthTypeList"): [str],
+    OptionalKey("otherAuthTypeList"): [str],
+    "eventName": str,
+}],
 }
 
 # cmii7w683006h8z1t7usnin5g 스키마 리스트

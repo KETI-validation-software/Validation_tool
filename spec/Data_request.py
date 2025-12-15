@@ -38,10 +38,26 @@ cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_webhook_out_data = {
 }
 
 # RealtimeSensorEventInfos
-cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_in_data = {}
+cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_in_data = {
+    "sensorDeviceList": [
+        {
+        "sensorDeviceID": ""
+    }
+],
+    "duration": "1000",
+    "transProtocol": {
+    "transProtocolType": "Webhook",
+    "transProtocolDesc": ""
+},
+    "eventFilter": "",
+    "startTime": 20251105163010123
+}
 
 # RealtimeSensorEventInfos WebHook OUT Data
-cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_webhook_out_data = {}
+cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_webhook_out_data = {
+    "code": "200",
+    "message": "성공"
+}
 
 # StoredSensorEventInfos
 cmii7wfuf006i8z1tcds6q69g_StoredSensorEventInfos_in_data = {
@@ -51,14 +67,11 @@ cmii7wfuf006i8z1tcds6q69g_StoredSensorEventInfos_in_data = {
 },
     "sensorDeviceList": [
         {
-        "sensorDeviceID": "iot0001"
-    },
-        {
-        "sensorDeviceID": "iot0002"
+        "sensorDeviceID": ""
     }
 ],
     "maxCount": 8,
-    "eventFilter": "화재"
+    "eventFilter": ""
 }
 
 # cmii7wfuf006i8z1tcds6q69g 데이터 리스트
@@ -106,18 +119,12 @@ cmii7w683006h8z1t7usnin5g_AccessUserInfos_in_data = {}
 cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_in_data = {
     "doorList": [
         {
-        "doorID": "door0001"
-    },
-        {
-        "doorID": "door0002"
-    },
-        {
-        "doorID": "door0003"
+        "doorID": ""
     }
 ],
     "duration": 500,
     "transProtocol": {
-    "transProtocolType": "LongPolling",
+    "transProtocolType": "WebHook",
     "transProtocolDesc": ""
 },
     "eventFilter": "",
@@ -138,14 +145,11 @@ cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_in_data = {
 },
     "doorList": [
         {
-        "doorID": "door0001"
-    },
-        {
-        "doorID": "door0002"
+        "doorID": ""
     }
 ],
     "maxCount": 10,
-    "eventFilter": "성공"
+    "eventFilter": ""
 }
 
 # cmii7w683006h8z1t7usnin5g 데이터 리스트
