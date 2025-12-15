@@ -1172,7 +1172,7 @@ class ResultPageWidget(QWidget):
 
     def show_empty_result_table(self):
         """결과가 없을 때 빈 테이블 표시 (API 목록만)"""
-        api_list = self.parent.videoMessages
+        api_list = self.parent.videoMessagesDisplay  # 표시용 이름 사용
         api_count = len(api_list)
 
         print(f"[RESULT] 빈 테이블 생성: {api_count}개 API")
@@ -1202,7 +1202,7 @@ class ResultPageWidget(QWidget):
             no_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 0, no_item)
 
-            # API 명 - 컬럼 1
+            # API 명 - 컬럼 1 (이미 숫자가 제거된 리스트 사용)
             api_item = QTableWidgetItem(api_list[row])
             api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 1, api_item)
@@ -1270,8 +1270,9 @@ class ResultPageWidget(QWidget):
             no_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 0, no_item)
 
-            # API 명 - 컬럼 1
-            api_item = QTableWidgetItem(row_data['api_name'])
+            # API 명 - 컬럼 1 (숫자 제거된 이름 표시)
+            display_name = self.parent._remove_api_number_suffix(row_data['api_name'])
+            api_item = QTableWidgetItem(display_name)
             api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 1, api_item)
 
@@ -2364,6 +2365,8 @@ class MyApp(QWidget):
         # Response 전송용 데이터 로드
         self.videoOutMessage = getattr(data_response_module, spec_names[1], [])
         self.videoMessages = getattr(data_response_module, spec_names[2], [])
+        # 표시용 API 이름 (숫자 제거)
+        self.videoMessagesDisplay = [self._remove_api_number_suffix(msg) for msg in self.videoMessages]
         self.videoOutConstraint = getattr(constraints_response_module, self.current_spec_id + "_outConstraints", [])
 
         # Webhook 관련
@@ -2619,7 +2622,8 @@ class MyApp(QWidget):
                 expected_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
                 print(f"[TIMING_DEBUG] ✅ 요청 도착 감지! API: {api_name}, 시도: {self.current_retry + 1}/{expected_retries}")
 
-                message_name = "step " + str(self.cnt + 1) + ": " + self.Server.message[self.cnt]
+                display_name = self.Server.message_display[self.cnt] if self.cnt < len(self.Server.message_display) else "Unknown"
+                message_name = "step " + str(self.cnt + 1) + ": " + display_name
 
                 # SPEC_CONFIG에서 검증 설정 가져오기
                 current_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
@@ -2770,8 +2774,9 @@ class MyApp(QWidget):
 
                     # 실시간 모니터링 창에 요청 데이터 표시 (Step 번호 없이)
                     if retry_attempt == 0:
+                        display_name = self.Server.message_display[self.cnt] if self.cnt < len(self.Server.message_display) else "Unknown"
                         self.append_monitor_log(
-                            step_name=f"{self.Server.message[self.cnt]} ({retry_attempt + 1}/{current_retries})",
+                            step_name=f"{display_name} ({retry_attempt + 1}/{current_retries})",
                             request_json=tmp_res_auth
                         )
 
@@ -2982,10 +2987,11 @@ class MyApp(QWidget):
 
                     # 모니터링 창에 최종 결과 표시 (HTML 카드 형식)
                     api_name = self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else "Unknown"
+                    display_name = self.Server.message_display[self.cnt] if self.cnt < len(self.Server.message_display) else "Unknown"
                     
                     # 최종 결과는 데이터 없이 점수와 상태만 표시 (데이터는 이미 실시간으로 출력됨)
                     self.append_monitor_log(
-                        step_name=f"결과: {api_name} ({current_retries}회 검증 완료)",
+                        step_name=f"결과: {display_name} ({current_retries}회 검증 완료)",
                         request_json="",  # 데이터는 이미 출력되었으므로 빈 문자열
                         result_status=final_result,
                         score=score_value,
@@ -3017,7 +3023,8 @@ class MyApp(QWidget):
                 self.realtime_flag = False
 
             elif time_interval > current_timeout and self.cnt == self.cnt_pre:
-                message_name = "step " + str(self.cnt + 1) + ": " + self.Server.message[self.cnt]
+                display_name = self.Server.message_display[self.cnt] if self.cnt < len(self.Server.message_display) else "Unknown"
+                message_name = "step " + str(self.cnt + 1) + ": " + display_name
 
                 # message missing인 경우 버퍼 업데이트
                 self.step_buffers[self.cnt]["data"] = "아직 수신된 데이터가 없습니다."
@@ -3270,6 +3277,14 @@ class MyApp(QWidget):
                 self.placeholder_label.hide()
             else:
                 self.placeholder_label.show()
+
+    def _remove_api_number_suffix(self, api_name):
+        """API 이름 뒤의 숫자 제거 (화면 표시용)
+        예: Authentication2 -> Authentication, RealTimeDoorStatus3 -> RealTimeDoorStatus
+        """
+        import re
+        # 마지막에 숫자만 있으면 제거
+        return re.sub(r'\d+$', '', api_name)
 
     def append_monitor_log(self, step_name, request_json="", result_status="진행중", score=None, details=""):
         """
@@ -3880,7 +3895,8 @@ class MyApp(QWidget):
                 # Server 객체 초기화
                 if hasattr(self, 'Server'):
                     self.Server.cnt = 0
-                    self.Server.message = self.videoMessages
+                    self.Server.message = self.videoMessages  # 실제 API 이름 (통신용)
+                    self.Server.message_display = self.videoMessagesDisplay  # 표시용 이름
                     self.Server.outMessage = self.videoOutMessage
                     self.Server.outCon = self.videoOutConstraint
                     self.Server.inSchema = self.videoInSchema
@@ -3906,7 +3922,7 @@ class MyApp(QWidget):
                 self.valResult.clear()
                 self.append_monitor_log(
                     step_name=f"플랫폼 전환 완료: {self.spec_description}",
-                    details=f"API 목록 ({len(self.videoMessages)}개): {', '.join(self.videoMessages)}"
+                    details=f"API 목록 ({len(self.videoMessages)}개): {', '.join(self.videoMessagesDisplay)}"
                 )
 
                 print(f"[PLATFORM] ✅ 플랫폼 전환 완료: {self.spec_description}, API 수: {len(self.videoMessages)}")
@@ -3926,6 +3942,9 @@ class MyApp(QWidget):
 
         # API 이름만 업데이트
         for row, api_name in enumerate(api_list):
+            # 표시용 이름 (숫자 제거)
+            display_name = self._remove_api_number_suffix(api_name)
+            
             # No. (숫자) - 컬럼 0
             if self.tableWidget.item(row, 0):
                 self.tableWidget.item(row, 0).setText(f"{row + 1}")
@@ -3934,11 +3953,11 @@ class MyApp(QWidget):
                 no_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
                 self.tableWidget.setItem(row, 0, no_item)
 
-            # API 명 - 컬럼 1
+            # API 명 - 컬럼 1 (숫자 제거)
             if self.tableWidget.item(row, 1):
-                self.tableWidget.item(row, 1).setText(api_name)
+                self.tableWidget.item(row, 1).setText(display_name)
             else:
-                api_item = QTableWidgetItem(api_name)
+                api_item = QTableWidgetItem(display_name)
                 api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
                 self.tableWidget.setItem(row, 1, api_item)
 
@@ -4005,7 +4024,8 @@ class MyApp(QWidget):
             self.tableWidget.setItem(row, 0, no_item)
 
             # API 명 - 컬럼 1
-            api_item = QTableWidgetItem(api_name)
+            display_name = self.parent._remove_api_number_suffix(api_name)
+            api_item = QTableWidgetItem(display_name)
             api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 1, api_item)
 
@@ -5332,7 +5352,8 @@ class MyApp(QWidget):
 
             # ✅ 15. Server 설정
             print(f"[DEBUG] Server 설정 시작")
-            self.Server.message = self.videoMessages
+            self.Server.message = self.videoMessages  # 실제 API 이름 (통신용)
+            self.Server.message_display = self.videoMessagesDisplay  # 표시용 이름
             self.Server.outMessage = self.videoOutMessage
             self.Server.inSchema = self.videoInSchema
             self.Server.outCon = self.videoOutConstraint
