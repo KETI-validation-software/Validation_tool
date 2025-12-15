@@ -56,19 +56,19 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소
 # test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
-company_name = "물리보안기업"
-product_name = "물리보안시스템-제어"
+company_name = "통합플랫폼기업"
+product_name = "통합플랫폼 시스템-기본"
 version = "v1.0"
 test_category = "MAIN_TEST"
-test_target = "제어기능-물리보안"
+test_target = "기본 기능 시험-통합시스템"
 test_range = "ALL_FIELDS"
 auth_type = "Digest Auth"
 auth_info = "kisa,kisa_k1!2@"
 admin_code = "1234"
-url = "https://192.168.0.3:8080"
+url = "https://10.252.219.95:2000"
 contact_person = "김철수"
 model_name = "v1.0"
-request_id = "cmisfmr3907tv5vy71y0276gp"
+request_id = "cmii86ssr00a48z1tqmco6ke8"
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황
 flag_opt = False
@@ -91,7 +91,7 @@ enable_retry_delay = False  # False 권장: 불필요한 sleep 제거
 
 # ✅ 웹훅 서버 설정 (전역)
 WEBHOOK_HOST = "0.0.0.0"  # 서버 바인딩 주소 (모든 인터페이스에서 수신)
-WEBHOOK_PORT = 8081       # 웹훅 수신 포트
+WEBHOOK_PORT = 2001       # 웹훅 수신 포트
 
 # ✅ 웹훅 공개 IP 설정: info_GUI에서 선택한 시험 URL의 IP 사용
 # 초기값은 URL에서 추출, info_GUI에서 주소 선택 후 자동 업데이트됨
@@ -146,6 +146,16 @@ SPEC_CONFIG = [
     "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic'],
     "time_out": [5000, 5000, 5000, 5000, 5000, 5000],
     "num_retries": [1, 1, 1, 1, 1, 1]
+},
+        "cmii7lxbn002s8z1t1i9uudf0": {
+    "test_name": "vid001",
+    "specs": ['cmii7lxbn002s8z1t1i9uudf0_inSchema', 'cmii7lxbn002s8z1t1i9uudf0_outData', 'cmii7lxbn002s8z1t1i9uudf0_messages', 'cmii7lxbn002s8z1t1i9uudf0_webhook_OutSchema', 'cmii7lxbn002s8z1t1i9uudf0_webhook_inData'],
+    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '카메라 목록 연동', '실시간 영상(CCTV) 전송', '실시간 이벤트 분석 정보 연동', '저장된 영상 목록 연동', '저장된 영상(CCTV) 전송', '저장된 이벤트 분석 정보 연동', '저장된 객체 분석 정보 연동'],
+    "api_id": ['cmii7p0dp002w8z1tcikv3cji', 'cmio328yj007zie8ffqfnxwnl', 'cmiqs6rjd00khie8frmm5c83g', 'cmiqsc74800leie8fsshjqpok', 'cmiqsim3j00mwie8fumvg1qnf', 'cmiqsrgr100p7ie8fzdzjr4hn', 'cmiqsw7ou00qgie8fjt03g03i', 'cmiqt02wa00rhie8fewnh1pn3', 'cmiqt4e5z00t6ie8fxsb3tkbc'],
+    "api_endpoint": ['/Authentication', '/Capabilities', '/CameraProfiles', '/StreamURLs', '/RealtimeVideoEventInfos', '/StoredVideoInfos', '/ReplayURL', '/StoredVideoEventInfos', '/StoredObjectAnalyticsInfos'],
+    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'WebHook', 'basic', 'basic', 'basic', 'basic'],
+    "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
+    "num_retries": [1, 1, 1, 1, 1, 1, 1, 1, 1]
 }
     }
 ]
