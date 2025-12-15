@@ -1,135 +1,52 @@
 {
-  "requestId": "cmii85wjq009z8z1tv0d3d7r1",
+  "requestId": "cmisfmr3907tv5vy71y0276gp",
   "evaluationTarget": {
     "companyName": "물리보안기업",
     "contactPerson": "김철수",
-    "productName": "물리보안시스템-기본",
+    "productName": "물리보안시스템-제어",
     "modelName": "v1.0",
     "version": "v1.0"
   },
   "testGroups": [
     {
-      "id": "cmii831gk009j8z1thiahf6ro",
-      "name": "기본 기능 시험-물리보안",
+      "id": "cmisfjfzt07tm5vy7qslmisks",
+      "name": "제어기능-물리보안",
       "testRange": "ALL_FIELDS, ALL_FIELDS, ALL_FIELDS",
       "testSpecIds": [
-        "cmii7wfuf006i8z1tcds6q69g",
-        "cmii7w683006h8z1t7usnin5g",
-        "cmii7v8pr006g8z1tvo55a50u"
+        "cmiqr2b9j00i9ie8frw439h8i",
+        "cmiqr1jha00i6ie8fb1scb3go",
+        "cmiqr0kdw00i4ie8fr3firjtg"
       ]
     }
   ],
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 93.33,
-    "totalFields": 60,
-    "passedFields": 56,
-    "failedFields": 4
+    "score": 100.0,
+    "totalFields": 29,
+    "passedFields": 29,
+    "failedFields": 0
   },
   "testResult": [
     {
-      "testGroup": "cmii831gk009j8z1thiahf6ro",
-      "testSpecId": "cmii7wfuf006i8z1tcds6q69g",
-      "testSpecName": "sensor001",
-      "score": 0,
-      "totalFields": 0,
-      "passedFields": 0,
+      "testGroup": "cmisfjfzt07tm5vy7qslmisks",
+      "testSpecId": "cmiqr2b9j00i9ie8frw439h8i",
+      "testSpecName": "sensor002",
+      "score": 100.0,
+      "totalFields": 29,
+      "passedFields": 29,
       "failedFields": 0,
       "apis": [
         {
-          "id": "cmii82age008k8z1t71s85tbz",
+          "id": "cmise849o00nv5vy7mu76wa69",
           "name": "사용자 인증",
           "method": "POST",
           "endpoint": "/Authentication",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmiwtm84f0an2p002pthrkfbj",
-          "name": "전송 지원 기능 정보 연동",
-          "method": "POST",
-          "endpoint": "/Capabilities",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmiwtnnvx0ar8p002dcz8llaf",
-          "name": "보안용 센서 단말 목록 정보 연동",
-          "method": "POST",
-          "endpoint": "/SensorDeviceProfiles",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmiwtr5xt0boqp002melvctad",
-          "name": "실시간 보안용 센서 데이터 정보 연동",
-          "method": "POST",
-          "endpoint": "/RealtimeSensorData",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmiwv1ifx0ddmp0023tuwdhoi",
-          "name": "실시간 보안용 센서 이벤트 분석 정보 연동",
-          "method": "POST",
-          "endpoint": "/RealtimeSensorEventInfos",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmixtu5uk0dg5p002kq3htt9b",
-          "name": "저장된 보안용 센서 이벤트 분석 정보 연동",
-          "method": "POST",
-          "endpoint": "/StoredSensorEventInfos",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        }
-      ]
-    },
-    {
-      "testGroup": "cmii831gk009j8z1thiahf6ro",
-      "testSpecId": "cmii7w683006h8z1t7usnin5g",
-      "testSpecName": "bio001",
-      "score": 93.33,
-      "totalFields": 60,
-      "passedFields": 56,
-      "failedFields": 4,
-      "apis": [
-        {
-          "id": "cmii80zqn007k8z1t85trpyps",
-          "name": "사용자 인증",
-          "method": "POST",
-          "endpoint": "/Authentication",
-          "score": 60.0,
+          "score": 100.0,
           "validationCnt": 1,
           "totalFields": 5,
-          "passFields": 3,
-          "failFields": 2,
+          "passFields": 5,
+          "failFields": 0,
           "validations": [
             {
               "attempt": 1,
@@ -137,19 +54,18 @@
                 "code": "200",
                 "message": "성공",
                 "userName": "관리자",
-                "userAff": "오산시청",
+                "userAff": "오산시",
                 "accessToken": "abcde1234"
               },
               "validationErrors": [
                 "[시도 1/1]",
-                "- [맥락 오류] code: 값 불일치: 200가 지정값 ['400']에 없음",
-                "- [맥락 오류] message: 값 불일치: 성공가 지정값 ['잘못된 요청']에 없음"
+                "오류가 없습니다."
               ]
             }
           ]
         },
         {
-          "id": "cmiwslyqi049np002cgziiglj",
+          "id": "cmise9yk200pv5vy7ktxtva7c",
           "name": "전송 지원 기능 정보 연동",
           "method": "POST",
           "endpoint": "/Capabilities",
@@ -162,12 +78,16 @@
             {
               "attempt": 1,
               "validationData": {
-                "code": "200",
-                "message": "성공",
+                "code": "",
+                "message": "",
                 "transportSupport": [
                   {
-                    "transProtocolType": "WebHook",
-                    "transProtocolDesc": ""
+                    "transProtocolType": "LongPolling",
+                    "transProtocolDesc": "none"
+                  },
+                  {
+                    "transProtocolType": "Webhook",
+                    "transProtocolDesc": "none"
                   }
                 ]
               },
@@ -179,78 +99,10 @@
           ]
         },
         {
-          "id": "cmiwso2p204bup002k9s8z9ph",
-          "name": "바이오 및 출입통제 장치 목록 정보",
+          "id": "cmisepin301uv5vy78nai1drd",
+          "name": "보안용 센서 단말 목록 정보 연동",
           "method": "POST",
-          "endpoint": "/DoorProfiles",
-          "score": 90.0,
-          "validationCnt": 1,
-          "totalFields": 20,
-          "passFields": 18,
-          "failFields": 2,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "code": "200",
-                "message": "성공",
-                "doorList": [
-                  {
-                    "doorID": "door0001",
-                    "doorName": "A건물 출입문",
-                    "doorRelayStatus": "일반",
-                    "doorSensor": "0",
-                    "doorLoc": {
-                      "lon": "127.127730",
-                      "lat": "38.439801",
-                      "alt": "32.131",
-                      "desc": "3층복도"
-                    },
-                    "bioDeviceList": [
-                      {
-                        "bioDeviceID": "bio0001",
-                        "bioDeviceName": "출입문홍채인식기기",
-                        "bioDeviceAuthTypeList": [
-                          "홍채",
-                          "지문"
-                        ]
-                      },
-                      {
-                        "bioDeviceID": "bio0002",
-                        "bioDeviceName": "출입문지문인식기기",
-                        "bioDeviceAuthTypeList": [
-                          "지문"
-                        ]
-                      }
-                    ],
-                    "otherDeviceList": [
-                      {
-                        "otherDeviceID": "other0001",
-                        "otherDeviceName": "출입문카드인식기기",
-                        "otherDeviceAuthTypeList": [
-                          "카드"
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              },
-              "validationErrors": [
-                "[시도 1/1]",
-                "<b>[doorList.bioDeviceList]</b> (2건)",
-                "- [타입 오류] index[0] : List가 와야 하는데 Dict가 왔습니다.",
-                "- [타입 오류] index[1] : List가 와야 하는데 Dict가 왔습니다.",
-                "<b>[doorList.otherDeviceList]</b> (1건)",
-                "- [타입 오류] index[0] : List가 와야 하는데 Dict가 왔습니다."
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cmiwstny705pnp002qw73yzs3",
-          "name": "사용자 권한 정보 연동",
-          "method": "POST",
-          "endpoint": "/AccessUserInfos",
+          "endpoint": "/SensorDeviceProfiles",
           "score": 100.0,
           "validationCnt": 1,
           "totalFields": 11,
@@ -260,43 +112,52 @@
             {
               "attempt": 1,
               "validationData": {
-                "code": "200",
-                "message": "성공",
-                "userList": [
+                "code": "",
+                "message": "",
+                "sensorDeviceList": [
                   {
-                    "userID": "user0001",
-                    "userName": "홍길동",
-                    "userDesc": "일반사용자",
-                    "doorList": [
-                      {
-                        "doorID": "door0001",
-                        "timePeriod": {
-                          "startTime": 20251105163010124,
-                          "endTime": 20251115163010124
-                        }
-                      }
-                    ]
+                    "sensorDeviceID": "iot0001",
+                    "sensorDeviceType": "홍채인식",
+                    "sensorDeviceName": "홍채 센서",
+                    "sensorDeviceLoc": {
+                      "lon": "12",
+                      "lat": "233",
+                      "alt": "122",
+                      "desc": "복도"
+                    }
                   },
                   {
-                    "userID": "user0002",
-                    "userName": "김철수",
-                    "userDesc": "관리자",
-                    "doorList": [
-                      {
-                        "doorID": "door0002",
-                        "timePeriod": {
-                          "startTime": 20251105163010124,
-                          "endTime": 20251115163010120
-                        }
-                      },
-                      {
-                        "doorID": "door0003",
-                        "timePeriod": {
-                          "startTime": 20251105163010124,
-                          "endTime": 20251115163010124
-                        }
-                      }
-                    ]
+                    "sensorDeviceID": "iot0002",
+                    "sensorDeviceType": "온도",
+                    "sensorDeviceName": "온도센서",
+                    "sensorDeviceLoc": {
+                      "lon": "24",
+                      "lat": "367",
+                      "alt": "234",
+                      "desc": "출입구"
+                    }
+                  },
+                  {
+                    "sensorDeviceID": "iot0003",
+                    "sensorDeviceType": "지문",
+                    "sensorDeviceName": "지문센서",
+                    "sensorDeviceLoc": {
+                      "lon": "486",
+                      "lat": "54",
+                      "alt": "6",
+                      "desc": "후문"
+                    }
+                  },
+                  {
+                    "sensorDeviceID": "iot0004",
+                    "sensorDeviceType": "온도",
+                    "sensorDeviceName": "온도센서",
+                    "sensorDeviceLoc": {
+                      "lon": "123",
+                      "lat": "42",
+                      "alt": "55",
+                      "desc": "복도"
+                    }
                   }
                 ]
               },
@@ -308,58 +169,14 @@
           ]
         },
         {
-          "id": "cmiwsz3sr079dp002xooui9id-registration",
-          "name": "실시간 출입인증 목록 정보 연동",
+          "id": "cmisfqfip07tz5vy7de6x5d6r",
+          "name": "보안용 센서 단말 제어 정보 연동-상태연동",
           "method": "POST",
-          "endpoint": "/RealtimeVerifEventInfos",
+          "endpoint": "/SensorDeviceControl",
           "score": 100.0,
           "validationCnt": 1,
-          "totalFields": 10,
-          "passFields": 10,
-          "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "code": "200",
-                "message": "성공"
-              },
-              "validationErrors": [
-                "[시도 1/1]",
-                "오류가 없습니다.",
-                "--- Webhook 검증 ---",
-                "오류가 없습니다."
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cmiwsz3sr079dp002xooui9id-webhook",
-          "name": "실시간 출입인증 목록 정보 연동 (Webhook)",
-          "method": "POST",
-          "endpoint": "/RealtimeVerifEventInfos/webhook",
-          "score": 0,
-          "validationCnt": 1,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {},
-              "validationErrors": []
-            }
-          ]
-        },
-        {
-          "id": "cmiwtf61309slp002fna2xzbi",
-          "name": "저장된 출입인증 목록 정보 연동",
-          "method": "POST",
-          "endpoint": "/StoredVerifEventInfos",
-          "score": 100.0,
-          "validationCnt": 1,
-          "totalFields": 9,
-          "passFields": 9,
+          "totalFields": 4,
+          "passFields": 4,
           "failFields": 0,
           "validations": [
             {
@@ -367,36 +184,34 @@
               "validationData": {
                 "code": "200",
                 "message": "성공",
-                "doorList": [
-                  {
-                    "eventTime": 20220822163022124,
-                    "doorID": "door0001",
-                    "userID": "user0001",
-                    "bioAuthTypeList": [
-                      "지문",
-                      "얼굴"
-                    ],
-                    "otherAuthTypeList": [
-                      "카드"
-                    ],
-                    "eventName": "AuthFail",
-                    "eventDesc": "36.5"
-                  },
-                  {
-                    "eventTime": 20220822163022124,
-                    "doorID": "door0001",
-                    "userID": "user0001",
-                    "bioAuthTypeList": [
-                      "지문",
-                      "얼굴"
-                    ],
-                    "otherAuthTypeList": [
-                      "카드"
-                    ],
-                    "eventName": "AuthFail",
-                    "eventDesc": "36.5"
-                  }
-                ]
+                "sensorDeviceID": "iot0003",
+                "sensorDeviceStatus": "AlarmOn"
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmisg86id08bm5vy7ezcbr7oy",
+          "name": "보안용 센서 단말 제어 정보 연동-제어",
+          "method": "POST",
+          "endpoint": "/SensorDeviceControl2",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 4,
+          "passFields": 4,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "sensorDeviceID": "iot0003",
+                "sensorDeviceStatus": "AlarmOff"
               },
               "validationErrors": [
                 "[시도 1/1]",
@@ -408,5 +223,5 @@
       ]
     }
   ],
-  "completedDate": "2025-12-15T11:45:35Z"
+  "completedDate": "2025-12-15T17:05:19Z"
 }
