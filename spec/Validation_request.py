@@ -110,6 +110,9 @@ cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_in_validation = {
   }
 }
 
+# RealtimeDoorStatus WebHook OUT Validation
+cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_webhook_out_validation = {}
+
 # DoorControl
 cmiqr1acx00i5ie8fi022t1hp_DoorControl_in_validation = {
   "doorID": {
@@ -149,6 +152,15 @@ cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_in_validation = {
     "score": 0
   }
 }
+
+# RealtimeDoorStatus2 WebHook OUT Validation
+cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_out_validation = {}
+
+# cmiqr1acx00i5ie8fi022t1hp WebHook 검증 리스트
+cmiqr1acx00i5ie8fi022t1hp_webhook_outValidation = [
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_webhook_out_validation,
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_out_validation,
+]
 
 # cmiqr1acx00i5ie8fi022t1hp 검증 리스트
 cmiqr1acx00i5ie8fi022t1hp_inValidation = [
