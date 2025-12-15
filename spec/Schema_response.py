@@ -121,7 +121,7 @@ cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_webhook_in_schema = {
     "doorID": str,
     "doorName": str,
     OptionalKey("doorRelaySensor"): str,
-    OptionalKey("doorSensor"): str,
+    "doorSensor": str,
 }],
 }
 
