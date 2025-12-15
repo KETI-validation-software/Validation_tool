@@ -3319,7 +3319,7 @@ class MyApp(QWidget):
                 self.valResult.clear()
                 self.append_monitor_log(
                     step_name=f"시스템 전환 완료: {self.spec_description}",
-                    details=f"Spec ID: {self.current_spec_id} | API 개수: {len(self.videoMessages)}개 | API 목록: {', '.join(self.videoMessages)}"
+                    details=f"Spec ID: {self.current_spec_id} | API 개수: {len(self.videoMessages)}개 | API 목록: {', '.join(self.videoMessagesDisplay)}"
                 )
 
                 print(f"[SELECT] ✅ 시스템 전환 완료")
