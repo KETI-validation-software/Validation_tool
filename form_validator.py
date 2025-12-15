@@ -497,23 +497,30 @@ class FormValidator:
 
         lines = content.split('\n')
         result_lines = []
-        current_field_id = None
-        current_block_key = None  # 현재 블록의 key (예: "commandType")
+        skip_current_block = False
 
         for line in lines:
             # 블록 key 찾기 (예: "commandType": {)
             block_key_match = re.search(r'"(\w+)":\s*\{', line)
             if block_key_match:
                 current_block_key = block_key_match.group(1)
+                skip_current_block = False  # 새 블록 시작 시 초기화
 
+            # referenceField 찾기
+            reference_field_match = re.search(r'"referenceField":\s*"([^"]+)"', line)
+            if reference_field_match:
+                reference_field_value = reference_field_match.group(1)
+                # "(참조 필드 미선택)"이면 현재 블록을 스킵하도록 플래그 설정
+                if reference_field_value == "(참조 필드 미선택)":
+                    skip_current_block = True  # continue 대신 플래그 사용
             # referenceFieldId 찾기
             field_id_match = re.search(r'"referenceFieldId":\s*"([^"]+)"', line)
-            if field_id_match:
+            if field_id_match and not skip_current_block:
                 current_field_id = field_id_match.group(1)
 
             # referenceEndpoint 찾기 및 업데이트
             endpoint_match = re.search(r'"referenceEndpoint":\s*"(/[^"]+)"', line)
-            if endpoint_match:
+            if endpoint_match and not skip_current_block:
                 old_endpoint = endpoint_match.group(1)
                 # /를 제거한 endpoint명
                 endpoint_name = old_endpoint[1:] if old_endpoint.startswith("/") else old_endpoint
