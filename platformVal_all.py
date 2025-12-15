@@ -2956,12 +2956,6 @@ class MyApp(QWidget):
                                                        accumulated['total_error'], tmp_res_auth, error_text,
                                                        current_retries)
 
-                    # 모니터링 창에 최종 결과 표시
-                    self.valResult.append(f"\n✅ 부하테스트 완료: {current_retries}회 검증 완료")
-                    self.valResult.append(f"프로토콜: {current_protocol}")
-                    self.valResult.append("\n" + data_text)
-                    self.valResult.append(final_result)
-
                     # ✅ 전체 누적 점수 업데이트 (모든 spec) - API당 1회만 추가
                     self.global_error_cnt += accumulated['total_error']
                     self.global_pass_cnt += accumulated['total_pass']
@@ -2971,14 +2965,31 @@ class MyApp(QWidget):
                     # ✅ 점수 계산은 step_pass_counts 배열의 합으로 (누적 아님!)
                     total_fields = self.total_pass_cnt + self.total_error_cnt
                     if total_fields > 0:
-                        score_text = str((self.total_pass_cnt / total_fields * 100))
+                        score_value = (self.total_pass_cnt / total_fields * 100)
                     else:
-                        score_text = "0"
+                        score_value = 0
 
-                    self.valResult.append("Score : " + score_text)
-                    self.valResult.append(
-                        "Score details : " + str(self.total_pass_cnt) + "(통과 필드 수), " + str(
-                            self.total_error_cnt) + "(오류 필드 수)\n")
+                    # 모니터링 창에 최종 결과 표시 (HTML 카드 형식)
+                    import json
+                    api_name = self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else "Unknown"
+                    
+                    # 데이터 포맷팅 (JSON 형식으로)
+                    try:
+                        if data_text and data_text.strip():
+                            json_obj = json.loads(data_text)
+                            formatted_data = json.dumps(json_obj, indent=2, ensure_ascii=False)
+                        else:
+                            formatted_data = data_text
+                    except:
+                        formatted_data = data_text
+                    
+                    self.append_monitor_log(
+                        step_name=f"Step {self.cnt + 1}: {api_name} ({current_retries}회 검증 완료)",
+                        request_json=formatted_data,
+                        result_status=final_result,
+                        score=score_value,
+                        details=f"통과: {self.total_pass_cnt}, 오류: {self.total_error_cnt} | 프로토콜: {current_protocol}"
+                    )
 
                     self.cnt += 1
                     self.current_retry = 0
@@ -3012,9 +3023,6 @@ class MyApp(QWidget):
                 self.step_buffers[self.cnt]["error"] = "Message Missing!"
                 self.step_buffers[self.cnt]["result"] = "FAIL"
 
-                self.valResult.append(message_name)
-                self.valResult.append(f"Timeout: {current_timeout}초")
-                self.valResult.append("Message Missing!")
                 tmp_fields_rqd_cnt, tmp_fields_opt_cnt = timeout_field_finder(self.Server.inSchema[self.cnt])
 
                 self.total_error_cnt += tmp_fields_rqd_cnt
@@ -3051,13 +3059,19 @@ class MyApp(QWidget):
 
                 total_fields = self.total_pass_cnt + self.total_error_cnt
                 if total_fields > 0:
-                    score_text = str((self.total_pass_cnt / total_fields * 100))
+                    score_value = (self.total_pass_cnt / total_fields * 100)
                 else:
-                    score_text = "0"
+                    score_value = 0
 
-                self.valResult.append("Score : " + score_text)
-                self.valResult.append("Score details : " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(
-                    self.total_error_cnt) + "(누적 오류 필드 수)\n")
+                # 타임아웃 결과를 HTML 카드로 출력
+                api_name = self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else "Unknown"
+                self.append_monitor_log(
+                    step_name=f"Step {self.cnt + 1}: {api_name}",
+                    request_json="",
+                    result_status="FAIL",
+                    score=score_value,
+                    details=f"⏱️ Timeout ({current_timeout}초) - Message Missing! | 통과: {self.total_pass_cnt}, 오류: {self.total_error_cnt}"
+                )
 
                 # 테이블 업데이트 (Message Missing)
                 add_err = tmp_fields_rqd_cnt if tmp_fields_rqd_cnt > 0 else 1
@@ -3081,7 +3095,12 @@ class MyApp(QWidget):
 
             if self.cnt == len(self.Server.message):
                 self.tick_timer.stop()
-                self.valResult.append("검증 절차가 완료되었습니다.")
+                self.append_monitor_log(
+                    step_name="시험 완료",
+                    request_json="",
+                    result_status="PASS",
+                    details="검증 절차가 완료되었습니다."
+                )
                 self.cnt = 0
 
                 total_fields = self.total_pass_cnt + self.total_error_cnt
@@ -3249,6 +3268,106 @@ class MyApp(QWidget):
                 self.placeholder_label.hide()
             else:
                 self.placeholder_label.show()
+
+    def append_monitor_log(self, step_name, request_json="", result_status="진행중", score=None, details=""):
+        """
+        모니터링 로그를 예쁜 HTML 카드로 변환하여 출력하는 함수
+        :param step_name: 단계 이름 (예: Step 5: API명)
+        :param request_json: 요청/응답 JSON 문자열
+        :param result_status: "PASS", "FAIL", "진행중"
+        :param score: 점수 (선택)
+        :param details: 추가 상세 정보 (선택)
+        """
+        from datetime import datetime
+        
+        # 1. 상태에 따른 색상 테마 설정
+        if result_status == "PASS":
+            border_color = "#28a745"  # 녹색
+            bg_color = "#f0fff4"      # 연한 녹색 배경
+            badge_color = "#28a745"
+            status_icon = "✅"
+        elif result_status == "FAIL":
+            border_color = "#dc3545"  # 빨간색
+            bg_color = "#fff5f5"      # 연한 빨강 배경
+            badge_color = "#dc3545"
+            status_icon = "🚨"
+        else:  # 진행중
+            border_color = "#6c757d"  # 회색
+            bg_color = "#f8f9fa"      # 연한 회색 배경
+            badge_color = "#6c757d"
+            status_icon = "🔄"
+
+        current_time = datetime.now().strftime("%H:%M:%S")
+
+        # 2. HTML 템플릿 생성
+        html_parts = []
+        html_parts.append(f"""
+        <div style="
+            border-left: 6px solid {border_color};
+            background-color: {bg_color};
+            margin-bottom: 12px;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: 'Noto Sans KR';
+        ">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-weight: bold; font-size: 14px; color: #333;">
+                    {status_icon} {step_name}
+                </span>
+                <span style="color: #666; font-size: 12px;">{current_time}</span>
+            </div>
+        """)
+
+        # JSON 데이터가 있으면 표시
+        if request_json and request_json.strip():
+            html_parts.append(f"""
+            <div style="
+                background-color: #ffffff;
+                border: 1px solid #e0e0e0;
+                padding: 8px;
+                border-radius: 4px;
+                font-family: 'Consolas', 'Courier New', monospace;
+                font-size: 12px;
+                color: #444;
+                margin-bottom: 8px;
+                white-space: pre-wrap;
+                max-height: 200px;
+                overflow-y: auto;
+            ">
+{request_json}
+            </div>
+            """)
+
+        # 상태 뱃지 및 점수
+        score_html = f"Score: <b>{score:.1f}%</b>" if score is not None else ""
+        details_html = f" | {details}" if details else ""
+        
+        html_parts.append(f"""
+            <div style="margin-top: 4px;">
+                <span style="
+                    background-color: {badge_color};
+                    color: white;
+                    padding: 3px 8px;
+                    border-radius: 12px;
+                    font-size: 11px;
+                    font-weight: bold;
+                ">
+                    {result_status}
+                </span>
+                <span style="color: #555; font-size: 12px; margin-left: 8px;">
+                    {score_html}{details_html}
+                </span>
+            </div>
+        </div>
+        """)
+
+        # 3. QTextBrowser에 HTML 추가
+        self.valResult.append("".join(html_parts))
+        
+        # 자동 스크롤: 항상 최신 로그 보여주기
+        self.valResult.verticalScrollBar().setValue(
+            self.valResult.verticalScrollBar().maximum()
+        )
 
     def load_test_info_from_constants(self):
         """CONSTANTS.py에서 시험정보를 로드"""

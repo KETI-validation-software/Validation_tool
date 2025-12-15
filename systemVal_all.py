@@ -3746,7 +3746,6 @@ class MyApp(QWidget):
                     self.message_error.append([f"index out of range: {self.cnt}"])
                 self.message_in_cnt = 0
                 current_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
-                self.valResult.append(f"Message Missing! (시도 {self.current_retry + 1}/{current_retries})")
 
                 # 현재 시도에 대한 타임아웃 처리
                 if self.cnt < len(self.outSchema):
@@ -3759,12 +3758,20 @@ class MyApp(QWidget):
 
                 total_fields = self.total_pass_cnt + self.total_error_cnt
                 if total_fields > 0:
-                    score = (self.total_pass_cnt / total_fields) * 100
+                    score_value = (self.total_pass_cnt / total_fields) * 100
                 else:
-                    score = 0
-                self.valResult.append("Score : " + str(score))
-                self.valResult.append("Score details : " + str(self.total_pass_cnt) + "(누적 검증 통과 필드 수), " + str(
-                    self.total_error_cnt) + "(누적 검증 오류 필드 수)\n")
+                    score_value = 0
+                
+                # 타임아웃 로그를 HTML 카드로 출력
+                api_name = self.message[self.cnt] if self.cnt < len(self.message) else "Unknown"
+                timeout_sec = self.time_outs[self.cnt] / 1000 if self.cnt < len(self.time_outs) else 0
+                self.append_monitor_log(
+                    step_name=f"Step {self.cnt + 1}: {api_name}",
+                    request_json="",
+                    result_status="FAIL",
+                    score=score_value,
+                    details=f"⏱️ Timeout ({timeout_sec}초) - Message Missing! (시도 {self.current_retry + 1}/{current_retries}) | 통과: {self.total_pass_cnt}, 오류: {self.total_error_cnt}"
+                )
 
                 # 재시도 카운터 증가
                 self.current_retry += 1
@@ -4197,19 +4204,46 @@ class MyApp(QWidget):
                     # UI 즉시 업데이트 (화면에 반영)
                     QApplication.processEvents()
 
-                    # ✅ 웹훅 API인 경우 명확하게 구분 표시 (transProtocol 기반으로만 판단)
+                    # ✅ 검증 진행 중 로그를 HTML 카드로 출력
+                    import json
+                    api_name = self.message[self.cnt] if self.cnt < len(self.message) else "Unknown"
+                    
+                    # 데이터 포맷팅 (JSON 형식으로)
+                    try:
+                        if data_text and data_text.strip():
+                            json_obj = json.loads(data_text)
+                            formatted_data = json.dumps(json_obj, indent=2, ensure_ascii=False)
+                        else:
+                            formatted_data = data_text
+                    except:
+                        formatted_data = data_text
+                    
+                    # 웹훅 여부에 따라 다른 표시
                     if current_protocol == "WebHook":
-                        self.valResult.append(f"\n=== 웹훅 구독 요청 응답 ===")
-                        self.valResult.append(f"[시도 {self.current_retry + 1}/{current_retries}]")
+                        step_title = f"Step {self.cnt + 1}: {api_name} - 웹훅 구독 ({self.current_retry + 1}/{current_retries})"
                     else:
-                        self.valResult.append(f"\n검증 진행: {self.current_retry + 1}/{current_retries}회")
-
-                    self.valResult.append(f"프로토콜: {current_protocol}")
-                    self.valResult.append("\n" + data_text)
-                    self.valResult.append(f"\n검증 결과: {final_result}")
-
-                    # ✅ 점수 업데이트는 모든 재시도 완료 후에만 (플랫폼과 동일)
-                    # 매 시도마다 점수를 표시하지 않음
+                        step_title = f"Step {self.cnt + 1}: {api_name} ({self.current_retry + 1}/{current_retries})"
+                    
+                    # 마지막 시도에만 점수 표시, 진행중에는 표시 안함
+                    if self.current_retry + 1 >= current_retries:
+                        # 마지막 시도 - 최종 결과 표시
+                        total_fields = total_pass_count + total_error_count
+                        score_value = (total_pass_count / total_fields * 100) if total_fields > 0 else 0
+                        self.append_monitor_log(
+                            step_name=step_title,
+                            request_json=formatted_data,
+                            result_status=final_result,
+                            score=score_value,
+                            details=f"통과: {total_pass_count}, 오류: {total_error_count} | 프로토콜: {current_protocol}"
+                        )
+                    else:
+                        # 중간 시도 - 진행중 표시
+                        self.append_monitor_log(
+                            step_name=step_title,
+                            request_json=formatted_data,
+                            result_status="진행중",
+                            details=f"검증 진행 중... | 프로토콜: {current_protocol}"
+                        )
 
                     # 재시도 카운터 증가
                     self.current_retry += 1
@@ -4243,16 +4277,7 @@ class MyApp(QWidget):
                         # ✅ 전체 점수 포함하여 디스플레이 업데이트 (재시도 완료 후에만)
                         self.update_score_display()
                         
-                        # ✅ 최종 점수 표시
-                        total_fields = self.total_pass_cnt + self.total_error_cnt
-                        if total_fields > 0:
-                            score = (self.total_pass_cnt / total_fields) * 100
-                        else:
-                            score = 0
-                        self.valResult.append("Score : " + str(score))
-                        self.valResult.append(
-                            "Score details : " + str(self.total_pass_cnt) + "(통과 필드 수), " + str(
-                                self.total_error_cnt) + "(오류 필드 수)\n")
+                        # ✅ 최종 점수는 이미 HTML 카드에 포함되어 있으므로 별도 표시 안함
 
                         self.step_buffers[self.cnt]["events"] = list(self.trace.get(self.cnt, []))
 
@@ -4276,7 +4301,12 @@ class MyApp(QWidget):
 
             if self.cnt >= len(self.message):
                 self.tick_timer.stop()
-                self.valResult.append("검증 절차가 완료되었습니다.")
+                self.append_monitor_log(
+                    step_name="시험 완료",
+                    request_json="",
+                    result_status="PASS",
+                    details="검증 절차가 완료되었습니다."
+                )
 
                 # ✅ 현재 spec 데이터 저장
                 self.save_current_spec_data()
@@ -5275,6 +5305,106 @@ class MyApp(QWidget):
             self.placeholder_label.hide()
         else:
             self.placeholder_label.show()
+
+    def append_monitor_log(self, step_name, request_json="", result_status="진행중", score=None, details=""):
+        """
+        모니터링 로그를 예쁜 HTML 카드로 변환하여 출력하는 함수
+        :param step_name: 단계 이름 (예: Step 5: API명)
+        :param request_json: 요청/응답 JSON 문자열
+        :param result_status: "PASS", "FAIL", "진행중"
+        :param score: 점수 (선택)
+        :param details: 추가 상세 정보 (선택)
+        """
+        from datetime import datetime
+        
+        # 1. 상태에 따른 색상 테마 설정
+        if result_status == "PASS":
+            border_color = "#28a745"  # 녹색
+            bg_color = "#f0fff4"      # 연한 녹색 배경
+            badge_color = "#28a745"
+            status_icon = "✅"
+        elif result_status == "FAIL":
+            border_color = "#dc3545"  # 빨간색
+            bg_color = "#fff5f5"      # 연한 빨강 배경
+            badge_color = "#dc3545"
+            status_icon = "🚨"
+        else:  # 진행중
+            border_color = "#6c757d"  # 회색
+            bg_color = "#f8f9fa"      # 연한 회색 배경
+            badge_color = "#6c757d"
+            status_icon = "🔄"
+
+        current_time = datetime.now().strftime("%H:%M:%S")
+
+        # 2. HTML 템플릿 생성
+        html_parts = []
+        html_parts.append(f"""
+        <div style="
+            border-left: 6px solid {border_color};
+            background-color: {bg_color};
+            margin-bottom: 12px;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: 'Noto Sans KR';
+        ">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-weight: bold; font-size: 14px; color: #333;">
+                    {status_icon} {step_name}
+                </span>
+                <span style="color: #666; font-size: 12px;">{current_time}</span>
+            </div>
+        """)
+
+        # JSON 데이터가 있으면 표시
+        if request_json and request_json.strip():
+            html_parts.append(f"""
+            <div style="
+                background-color: #ffffff;
+                border: 1px solid #e0e0e0;
+                padding: 8px;
+                border-radius: 4px;
+                font-family: 'Consolas', 'Courier New', monospace;
+                font-size: 12px;
+                color: #444;
+                margin-bottom: 8px;
+                white-space: pre-wrap;
+                max-height: 200px;
+                overflow-y: auto;
+            ">
+{request_json}
+            </div>
+            """)
+
+        # 상태 뱃지 및 점수
+        score_html = f"Score: <b>{score:.1f}%</b>" if score is not None else ""
+        details_html = f" | {details}" if details else ""
+        
+        html_parts.append(f"""
+            <div style="margin-top: 4px;">
+                <span style="
+                    background-color: {badge_color};
+                    color: white;
+                    padding: 3px 8px;
+                    border-radius: 12px;
+                    font-size: 11px;
+                    font-weight: bold;
+                ">
+                    {result_status}
+                </span>
+                <span style="color: #555; font-size: 12px; margin-left: 8px;">
+                    {score_html}{details_html}
+                </span>
+            </div>
+        </div>
+        """)
+
+        # 3. QTextBrowser에 HTML 추가
+        self.valResult.append("".join(html_parts))
+        
+        # 자동 스크롤: 항상 최신 로그 보여주기
+        self.valResult.verticalScrollBar().setValue(
+            self.valResult.verticalScrollBar().maximum()
+        )
 
     def create_spec_score_display_widget(self):
         """메인 화면에 표시할 시험 분야별 평가 점수 위젯"""
