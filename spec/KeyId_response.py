@@ -58,17 +58,16 @@ cmii7pysb004k8z1tts0npxfm_Authentication_request_key_ids = {
     "userPW": "cmii7roje00538z1tze658e9r",
 }
 
-cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_request_key_ids = {
-    "doorList": "cmiwjfozy0311ugxne4h1z9ay",
-    "doorList.doorID": "cmiwjh6se03d6ugxnx0n5o5e4",
-    "duration": "cmiwjgdfi035eugxndjuhyn3x",
-    "transProtocol": "cmiwjgjmy037dugxn78zvsydm",
-    "transProtocol.transProtocolType": "cmiwjgqun038kugxnbvj80nir",
-    "transProtocol.transProtocolDesc": "cmiwjgv7q039tugxna1he24eh",
-    "eventFilter": "cmiwjgzhs03b2ugxn1wamkmk9",
-    "startTime": "cmiwjh4du03cougxnlvwx7ptl",
-    "code": "cmiwjr3ou03vcugxncy1mjzec",
-    "message": "cmiwjradt03vlugxnw9mgdy0n",
+cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_request_key_ids = {
+    "doorList": "cmizg13y0008m7eoenzoxiz6y",
+    "doorList.doorID": "cmj6i9tmk023gxei0fwmi1vp0",
+    "duration": "cmizg1z3900b47eoep7yokzej",
+    "transProtocol": "cmizg20xz00bg7eoerj8khw25",
+    "transProtocol.transProtocolType": "cmizg295g00d67eoedi8masm6",
+    "transProtocol.transProtocolDesc": "cmizg2anl00di7eoeazzupedc",
+    "startTime": "cmizg2frh00ec7eoe48aaufo2",
+    "code": "cmizg5khh00iq7eoexenwo9i9",
+    "message": "cmizg5lyh00iw7eoe7wbhcxaj",
 }
 
 cmii7pysb004k8z1tts0npxfm_StoredVerifEventInfos_request_key_ids = {
@@ -197,15 +196,11 @@ cmii7shen005i8z1tagevx4qh_SensorDeviceProfiles_response_key_ids = {
     "sensorDeviceList.sensorDeviceLoc.desc": "cmiwkpl9201dt844gpk2spohg",
 }
 
-cmii7shen005i8z1tagevx4qh_RealtimeSensorData_response_key_ids = {
-    "code": "cmiwkumay01qo844gast85yvr",
-    "message": "cmiwkuog901qt844gswj7kaas",
-    "sensorDeviceList": "cmiwkvlgi01r6844g0inyggzl",
-    "sensorDeviceList.sensorDeviceID": "cmiwkzuqx02xk844gd9lr6k8p",
-    "sensorDeviceList.measureTime": "cmiwkzuqx02xm844ghyx3o5j7",
-    "sensorDeviceList.sensorDeviceType": "cmiwkzuqy02xo844glk3msr3k",
-    "sensorDeviceList.sensorDeviceUnit": "cmiwkzuqy02xq844gh7csg9af",
-    "sensorDeviceList.sensorDeviceValue": "cmiwkzuqz02xs844gqt2i349j",
+cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_response_key_ids = {
+    "code": "cmisg4vxz089s5vy7qhna151g",
+    "message": "cmisg4zcn08a05vy7gzrw0rbp",
+    "sensorDeviceID": "cmisg51v408a85vy7mrhteunz",
+    "sensorDeviceStatus": "cmj6hdjek01qsxei0ydzyxlg3",
 }
 
 cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_response_key_ids = {
