@@ -110,6 +110,14 @@ cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_webhook_in_validation = {
     "referenceField": "doorID",
     "referenceEndpoint": "/RealtimeDoorStatus2",
     "score": 0
+  },
+  "doorList.doorSensor": {
+    "enabled": True,
+    "validationType": "request-field-match",
+    "referenceFieldId": "cmixuu94o0hchp002wh8j30df",
+    "referenceField": "commandType",
+    "referenceEndpoint": "/DoorControl",
+    "score": 0
   }
 }
 
