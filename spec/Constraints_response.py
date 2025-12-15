@@ -136,7 +136,7 @@ cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_out_constraints = {
     "referenceField": "sensorDeviceID"
   },
   "sensorDeviceStatus": {
-    "id": "cmizexb5a001c7eoe0cbjb715",
+    "id": "cmj6hdjek01qsxei0ydzyxlg3",
     "valueType": "random",
     "required": True,
     "referenceField": "(참조 필드 미선택)",
