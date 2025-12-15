@@ -184,39 +184,13 @@ cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_webhook_in_constraints = {
     "valueType": "preset",
     "required": True
   },
-  "sensorDeviceList.sensorDeviceID": {
-    "id": "cmiwl7u0q03ml844gweorjcdn",
-    "valueType": "preset",
-    "required": True
-  },
-  "sensorDeviceList.eventName": {
-    "id": "cmiwl7u0r03mn844gbfn9dth8",
-    "valueType": "preset",
-    "required": True
-  },
-  "sensorDeviceList.eventTime": {
-    "id": "cmiwl7u0r03mp844gvwnnmebq",
-    "valueType": "preset",
-    "required": True
-  },
-  "sensorDeviceList.eventDesc": {
-    "id": "cmiwl7u0r03mr844gh5mxdrd6",
-    "valueType": "preset",
-    "required": False
-  }
-}
-
-# StoredSensorEventInfos
-cmii7shen005i8z1tagevx4qh_StoredSensorEventInfos_out_constraints = {
-  "code": {
-    "id": "cmiwllxwf03uk844gapewtuco",
-    "valueType": "preset",
-    "required": True
-  },
-  "message": {
-    "id": "cmiwlm39u03uu844g8drw39o8",
-    "valueType": "preset",
-    "required": True
+  "sensorDeviceID": {
+    "id": "cmisgsuft08nf5vy70cyl59az",
+    "referenceFieldId": "cmisgef0108e15vy7pvj4b2yg",
+    "valueType": "request-based",
+    "required": True,
+    "referenceEndpoint": "/SensorDeviceControl2",
+    "referenceField": "sensorDeviceID"
   },
   "sensorDeviceList": {
     "id": "cmiwlopxw04ab844g2qwo5mtf",
