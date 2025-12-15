@@ -56,7 +56,7 @@ cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl2_in_validation = {
       "AlarmOn",
       "AlarmOff"
     ],
-    "referenceFieldId": "cmizexb5a001c7eoe0cbjb715",
+    "referenceFieldId": "cmj6hdjek01qsxei0ydzyxlg3",
     "referenceField": "sensorDeviceStatus",
     "referenceEndpoint": "/SensorDeviceControl",
     "score": 0
@@ -102,10 +102,10 @@ cmiqr1acx00i5ie8fi022t1hp_DoorProfiles_in_validation = {}
 cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_in_validation = {
   "doorList.doorID": {
     "enabled": True,
-    "validationType": "request-field-list-match",
-    "referenceEndpoint": "/RealtimeDoorStatus",
+    "validationType": "response-field-list-match",
+    "referenceEndpoint": "/DoorProfiles",
     "referenceListField": "doorID",
-    "referenceListEndpoint": "/RealtimeDoorStatus",
+    "referenceListEndpoint": "/DoorProfiles",
     "score": 0
   }
 }
@@ -130,7 +130,7 @@ cmiqr1acx00i5ie8fi022t1hp_DoorControl_in_validation = {
       "Lock",
       "Unlock"
     ],
-    "referenceFieldId": "cmizg3i4700hc7eoegzha5m0l",
+    "referenceFieldId": "cmj13a9eu01vx12s9wja5mxt7",
     "referenceField": "doorSensor",
     "referenceEndpoint": "/RealtimeDoorStatus",
     "score": 0

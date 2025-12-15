@@ -155,8 +155,16 @@ cmiqr1jha00i6ie8fb1scb3go_DoorControl_in_constraints = {
   },
   "commandType": {
     "id": "cmixuu94o0hchp002wh8j30df",
-    "valueType": "preset",
-    "required": True
+    "valueType": "random",
+    "required": True,
+    "referenceField": "(참조 필드 미선택)",
+    "referenceEndpoint": "/DoorControl",
+    "randomType": "exclude-reference-valid-values",
+    "validValueField": "acControl",
+    "validValues": [
+      "Lock",
+      "Unlock"
+    ]
   }
 }
 

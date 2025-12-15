@@ -34,7 +34,7 @@ cmiqr1acx00i5ie8fi022t1hp_Authentication_request_key_ids = {
 
 cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_request_key_ids = {
     "doorList": "cmizg13y0008m7eoenzoxiz6y",
-    "doorList.doorID": "cmizg2l6400eq7eoeofq6fk18",
+    "doorList.doorID": "cmj6i9tmk023gxei0fwmi1vp0",
     "duration": "cmizg1z3900b47eoep7yokzej",
     "transProtocol": "cmizg20xz00bg7eoerj8khw25",
     "transProtocol.transProtocolType": "cmizg295g00d67eoedi8masm6",
@@ -141,7 +141,7 @@ cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_response_key_ids = {
     "code": "cmisg4vxz089s5vy7qhna151g",
     "message": "cmisg4zcn08a05vy7gzrw0rbp",
     "sensorDeviceID": "cmisg51v408a85vy7mrhteunz",
-    "sensorDeviceStatus": "cmizexb5a001c7eoe0cbjb715",
+    "sensorDeviceStatus": "cmj6hdjek01qsxei0ydzyxlg3",
 }
 
 cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl2_response_key_ids = {

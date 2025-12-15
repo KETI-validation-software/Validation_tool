@@ -1,2 +1,0 @@
-{"time": "2025-12-12T06:31:44.949239Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": 1234, "userPW": "kisa_k1!2@"}}
-{"time": "2025-12-12T06:31:44.951235Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "400", "message": "잘못된 요청"}}
