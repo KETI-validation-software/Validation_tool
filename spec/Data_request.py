@@ -76,7 +76,7 @@ cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_webhook_out_data = {
 # DoorControl
 cmiqr1jha00i6ie8fb1scb3go_DoorControl_in_data = {
     "doorID": "door0001",
-    "commandType": "unlock"
+    "commandType": ""
 }
 
 # RealtimeDoorStatus2

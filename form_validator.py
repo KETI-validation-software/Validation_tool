@@ -1,7 +1,8 @@
 import re
 import requests
-from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem, QLabel
+from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem, QLabel, QWidget, QHBoxLayout
 from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtGui import QPixmap
 from core.functions import resource_path
 from core.opt_loader import OptLoader
 import os
@@ -19,7 +20,7 @@ import config.CONSTANTS as CONSTANTS
 from core.key_generator import KeyIdGenerator
 
 class ClickableLabel(QLabel):
-    """클릭 가능한 QLabel - 시험 분야 셀용"""
+    """클릭 가능한 QLabel - 시험 분야 셀용 (기존 호환용)"""
     clicked = pyqtSignal(int, int)  # row, column 전달
 
     def __init__(self, text, row, col, parent=None):
@@ -32,6 +33,174 @@ class ClickableLabel(QLabel):
         if event.button() == Qt.LeftButton:
             self.clicked.emit(self.row, self.col)
         super().mousePressEvent(event)
+
+
+class ClickableRowWidget(QWidget):
+    """클릭 가능한 QWidget - 시험 분야 셀용 (텍스트 + 화살표 분리)"""
+    clicked = pyqtSignal(int, int)  # row, column 전달
+
+    def __init__(self, text, row, col, bg_image_path, arrow_image_path, parent=None):
+        super().__init__(parent)
+        self.row = row
+        self.col = col
+        self._text = text
+        self.setCursor(Qt.PointingHandCursor)
+        self.setFixedHeight(39)  # 행 높이 고정
+
+        # 배경 이미지 설정 (paintEvent에서 그림)
+        self.bg_pixmap = QPixmap(resource_path(bg_image_path))
+
+        # 레이아웃 설정: padding 좌32, 상8, 우24, 하8
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(32, 8, 24, 8)
+        layout.setSpacing(8)
+
+        # 텍스트 라벨
+        self.text_label = QLabel(text)
+        self.text_label.setAlignment(Qt.AlignCenter)
+        self.text_label.setStyleSheet("""
+            QLabel {
+                background: transparent;
+                font-family: 'Noto Sans KR';
+                font-size: 19px;
+                font-weight: 400;
+                color: #000000;
+            }
+        """)
+        layout.addWidget(self.text_label, 1)  # stretch=1로 남은 공간 채우기
+
+        # 화살표 이미지
+        self.arrow_label = QLabel()
+        self.arrow_label.setStyleSheet("background: transparent;")
+        arrow_pixmap = QPixmap(resource_path(arrow_image_path))
+        self.arrow_label.setPixmap(arrow_pixmap)
+        self.arrow_label.setFixedSize(arrow_pixmap.width(), arrow_pixmap.height())
+        layout.addWidget(self.arrow_label)
+
+    def paintEvent(self, event):
+        """배경 이미지를 위젯 크기에 맞게 그리기"""
+        from PyQt5.QtGui import QPainter
+        painter = QPainter(self)
+        if not self.bg_pixmap.isNull():
+            # 위젯 크기에 맞게 이미지 스케일링
+            scaled_pixmap = self.bg_pixmap.scaled(
+                self.size(),
+                Qt.IgnoreAspectRatio,
+                Qt.SmoothTransformation
+            )
+            painter.drawPixmap(0, 0, scaled_pixmap)
+        super().paintEvent(event)
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.clicked.emit(self.row, self.col)
+        super().mousePressEvent(event)
+
+    def text(self):
+        """기존 ClickableLabel과 호환을 위한 text() 메서드"""
+        return self._text
+
+    def setBackgroundImage(self, bg_image_path):
+        """배경 이미지 변경"""
+        self.bg_pixmap = QPixmap(resource_path(bg_image_path))
+        self.update()  # 다시 그리기
+
+
+class ClickableCheckboxRowWidget(QWidget):
+    """클릭 가능한 QWidget - 시나리오 셀용 (체크박스 + 텍스트 분리)"""
+    clicked = pyqtSignal(int, int)  # row, column 전달
+
+    def __init__(self, text, row, col, bg_image_path, bg_selected_image_path, checkbox_unchecked_path, checkbox_checked_path, parent=None):
+        super().__init__(parent)
+        self.row = row
+        self.col = col
+        self._text = text
+        self._is_checked = False
+        self.setCursor(Qt.PointingHandCursor)
+        self.setFixedHeight(39)  # 행 높이 고정
+
+        # 배경 이미지 경로 저장
+        self.bg_image_path = bg_image_path
+        self.bg_selected_image_path = bg_selected_image_path
+
+        # 배경 이미지 설정 (paintEvent에서 그림)
+        self.bg_pixmap = QPixmap(resource_path(bg_image_path))
+
+        # 체크박스 이미지 경로 저장
+        self.checkbox_unchecked_path = checkbox_unchecked_path
+        self.checkbox_checked_path = checkbox_checked_path
+
+        # 레이아웃 설정: padding 좌24, 상8, 우32, 하8
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(24, 8, 32, 8)
+        layout.setSpacing(8)
+
+        # 체크박스 이미지 (왼쪽)
+        self.checkbox_label = QLabel()
+        self.checkbox_label.setStyleSheet("background: transparent;")
+        checkbox_pixmap = QPixmap(resource_path(checkbox_unchecked_path))
+        self.checkbox_label.setPixmap(checkbox_pixmap)
+        self.checkbox_label.setFixedSize(checkbox_pixmap.width(), checkbox_pixmap.height())
+        layout.addWidget(self.checkbox_label)
+
+        # 텍스트 라벨
+        self.text_label = QLabel(text)
+        self.text_label.setAlignment(Qt.AlignCenter)
+        self.text_label.setStyleSheet("""
+            QLabel {
+                background: transparent;
+                font-family: 'Noto Sans KR';
+                font-size: 19px;
+                font-weight: 400;
+                color: #000000;
+            }
+        """)
+        layout.addWidget(self.text_label, 1)  # stretch=1로 남은 공간 채우기
+
+    def paintEvent(self, event):
+        """배경 이미지를 위젯 크기에 맞게 그리기"""
+        from PyQt5.QtGui import QPainter
+        painter = QPainter(self)
+        if not self.bg_pixmap.isNull():
+            scaled_pixmap = self.bg_pixmap.scaled(
+                self.size(),
+                Qt.IgnoreAspectRatio,
+                Qt.SmoothTransformation
+            )
+            painter.drawPixmap(0, 0, scaled_pixmap)
+        super().paintEvent(event)
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.clicked.emit(self.row, self.col)
+        super().mousePressEvent(event)
+
+    def text(self):
+        """기존 ClickableLabel과 호환을 위한 text() 메서드"""
+        return self._text
+
+    def isChecked(self):
+        """체크 상태 반환"""
+        return self._is_checked
+
+    def setChecked(self, checked):
+        """체크 상태 변경 (체크박스 + 배경 이미지 모두 변경)"""
+        self._is_checked = checked
+        if checked:
+            checkbox_pixmap = QPixmap(resource_path(self.checkbox_checked_path))
+            self.bg_pixmap = QPixmap(resource_path(self.bg_selected_image_path))
+        else:
+            checkbox_pixmap = QPixmap(resource_path(self.checkbox_unchecked_path))
+            self.bg_pixmap = QPixmap(resource_path(self.bg_image_path))
+        self.checkbox_label.setPixmap(checkbox_pixmap)
+        self.checkbox_label.setFixedSize(checkbox_pixmap.width(), checkbox_pixmap.height())
+        self.update()  # 배경 다시 그리기
+
+    def setBackgroundImage(self, bg_image_path):
+        """배경 이미지 변경"""
+        self.bg_pixmap = QPixmap(resource_path(bg_image_path))
+        self.update()
+
 
 class FormValidator:
     """
@@ -2150,24 +2319,15 @@ class FormValidator:
             for i, group_name in enumerate(self._group_specs.keys()):
                 table.insertRow(i)
 
-                # 첫 번째 컬럼: 시험 분야명 (배경 이미지 적용, 클릭 가능)
-                label = ClickableLabel(group_name, i, 0)
-                label.setAlignment(Qt.AlignCenter)
-                label.setStyleSheet("""
-                    QLabel {
-                        background-image: url('assets/image/test_config/row.png');
-                        background-position: center;
-                        background-repeat: no-repeat;
-                        font-family: 'Noto Sans KR';
-                        font-size: 19px;
-                        font-weight: 400;
-                        color: #000000;
-                        min-width: 372px;
-                        min-height: 39px;
-                    }
-                """)
+                # 첫 번째 컬럼: 시험 분야명 (배경 이미지 + 화살표 분리, 클릭 가능)
+                label = ClickableRowWidget(
+                    group_name, i, 0,
+                    'assets/image/test_config/row.png',
+                    'assets/image/test_config/arrow.png'
+                )
                 label.clicked.connect(self.parent.on_test_field_selected)
                 table.setCellWidget(i, 0, label)
+                table.setRowHeight(i, 39)
 
             # 초기 상태: 아무것도 선택하지 않음
             table.clearSelection()
@@ -2415,38 +2575,18 @@ class FormValidator:
             for i, gname in enumerate(self._group_specs.keys()):
                 # 선택된 시험분야는 row_selected.png, 나머지는 row.png
                 if gname == group_name:
-                    label = ClickableLabel(gname, i, 0)
-                    label.setAlignment(Qt.AlignCenter)
-                    label.setStyleSheet("""
-                        QLabel {
-                            background-image: url('assets/image/test_config/row_selected.png');
-                            background-position: center;
-                            background-repeat: no-repeat;
-                            font-family: 'Noto Sans KR';
-                            font-size: 19px;
-                            font-weight: 400;
-                            color: #000000;
-                            min-width: 372px;
-                            min-height: 39px;
-                        }
-                    """)
+                    label = ClickableRowWidget(
+                        gname, i, 0,
+                        'assets/image/test_config/row_selected.png',
+                        'assets/image/test_config/arrow.png'
+                    )
                     print(f"  행 {i}: [시험분야: {gname}] (선택됨) - 배경: row_selected.png")
                 else:
-                    label = ClickableLabel(gname, i, 0)
-                    label.setAlignment(Qt.AlignCenter)
-                    label.setStyleSheet("""
-                        QLabel {
-                            background-image: url('assets/image/test_config/row.png');
-                            background-position: center;
-                            background-repeat: no-repeat;
-                            font-family: 'Noto Sans KR';
-                            font-size: 19px;
-                            font-weight: 400;
-                            color: #000000;
-                            min-width: 372px;
-                            min-height: 39px;
-                        }
-                    """)
+                    label = ClickableRowWidget(
+                        gname, i, 0,
+                        'assets/image/test_config/row.png',
+                        'assets/image/test_config/arrow.png'
+                    )
                     print(f"  행 {i}: [시험분야: {gname}] - 배경: row.png")
 
                 label.clicked.connect(self.parent.on_test_field_selected)
@@ -2460,33 +2600,21 @@ class FormValidator:
 
             print(f"\n시나리오 테이블:")
             for i, scenario in enumerate(scenarios):
-                # 시나리오명을 표시하는 ClickableLabel 생성
-                label = ClickableLabel(scenario["name"], i, 0)  # 시나리오 테이블의 첫 번째(유일한) 컬럼
-                label.setAlignment(Qt.AlignCenter)
-                # 초기 상태: 모든 시나리오는 체크 안 된 상태로 표시
-                label.setStyleSheet("""
-                    QLabel {
-                        background-image: url('assets/image/test_config/row_checkbox_unchecked.png');
-                        background-position: center;
-                        background-repeat: no-repeat;
-                        border: none;
-                        border-bottom: 1px solid #CCCCCC;
-                        font-family: 'Noto Sans KR';
-                        font-size: 19px;
-                        font-weight: 400;
-                        color: #000000;
-                        margin: 0px;
-                        padding: 0px;
-                        min-width: 372px;
-                        min-height: 39px;
-                    }
-                """)
+                # 시나리오명을 표시하는 ClickableCheckboxRowWidget 생성
+                # 시나리오 테이블은 선택된 시험분야에 속하므로 모든 행이 row_selected.png 사용
+                label = ClickableCheckboxRowWidget(
+                    scenario["name"], i, 0,
+                    'assets/image/test_config/row_selected.png',
+                    'assets/image/test_config/row_selected.png',
+                    'assets/image/test_config/checkbox_unchecked.png',
+                    'assets/image/test_config/checkbox_checked.png'
+                )
                 # spec_id를 label의 property로 저장
                 label.setProperty("spec_id", scenario["id"])
                 label.clicked.connect(self.parent.on_scenario_selected)
                 scenario_table.setCellWidget(i, 0, label)
                 scenario_table.setRowHeight(i, 39)
-                print(f"  행 {i}: [시나리오: {scenario['name']}] - 배경: row_checkbox_unchecked.png")
+                print(f"  행 {i}: [시나리오: {scenario['name']}] - 체크박스 분리")
 
             print(f"\n=== 테이블 재구성 완료 ===")
             print(f"시험 분야 테이블 행 수: {field_table.rowCount()}")

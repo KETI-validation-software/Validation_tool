@@ -12,7 +12,7 @@ from core.functions import resource_path
 
 # 분리된 모듈들 import
 from network_scanner import NetworkScanWorker, ARPScanWorker
-from form_validator import FormValidator, ClickableLabel
+from form_validator import FormValidator, ClickableLabel, ClickableCheckboxRowWidget
 import config.CONSTANTS as CONSTANTS
 from splash_screen import LoadingPopup
 
@@ -34,9 +34,8 @@ class TestFieldTableWidget(QTableWidget):
         pen.setWidth(1)
         painter.setPen(pen)
 
-        # 첫 번째 컬럼과 두 번째 컬럼 사이의 세로선
-        # 첫 번째 컬럼 너비: 372px
-        x_position = 372
+        # 첫 번째 컬럼과 두 번째 컬럼 사이의 세로선 (동적으로 컬럼 너비 사용)
+        x_position = self.columnWidth(0)
 
         # 헤더 높이만큼 아래부터 viewport 끝까지 선 그리기
         header_height = self.horizontalHeader().height()
@@ -301,6 +300,198 @@ class InfoWidget(QWidget):
             if hasattr(self, 'page2_bg_label'):
                 self.page2_bg_label.setGeometry(0, 0, content_width, content_height)
 
+            # Page2 반응형 크기 조정
+            if hasattr(self, 'page2') and self.page2:
+                page2_width = self.page2.width()
+
+                # Page2 기준 원본 크기
+                original_page2_width = 1680
+
+                # 비율 계산
+                width_ratio_p2 = page2_width / original_page2_width
+                width_ratio_p2 = max(1.0, width_ratio_p2)
+
+                # bg_root 크기 조정 (가로만)
+                if hasattr(self, 'bg_root') and hasattr(self, 'original_bg_root_size'):
+                    new_bg_root_width = int(self.original_bg_root_size[0] * width_ratio_p2)
+                    self.bg_root.setFixedSize(new_bg_root_width, self.original_bg_root_size[1])
+
+                    # 타이틀 컨테이너는 bg_root와 같은 너비
+                    if hasattr(self, 'page2_title_container') and hasattr(self, 'original_page2_title_container_size'):
+                        self.page2_title_container.setFixedSize(new_bg_root_width, self.original_page2_title_container_size[1])
+
+                    # 타이틀 배경 영역 크기 조정 (비율 적용)
+                    if hasattr(self, 'page2_title_bg') and hasattr(self, 'original_page2_title_bg_size'):
+                        new_title_bg_width = int(self.original_page2_title_bg_size[0] * width_ratio_p2)
+                        self.page2_title_bg.setFixedSize(new_title_bg_width, self.original_page2_title_bg_size[1])
+
+                        # panels_container도 타이틀 배경과 같은 너비로 조정
+                        if hasattr(self, 'panels_container') and hasattr(self, 'original_panels_container_size'):
+                            self.panels_container.setFixedSize(new_title_bg_width, self.original_panels_container_size[1])
+
+                # 좌측 패널 크기 조정 (가로만)
+                if hasattr(self, 'left_panel') and hasattr(self, 'original_left_panel_size'):
+                    new_left_panel_width = int(self.original_left_panel_size[0] * width_ratio_p2)
+                    self.left_panel.setFixedSize(new_left_panel_width, self.original_left_panel_size[1])
+
+                    # "시험 분야별 시나리오" 타이틀 라벨 크기 조정
+                    if hasattr(self, 'field_scenario_title') and hasattr(self, 'original_field_scenario_title_size'):
+                        new_title_width = int(self.original_field_scenario_title_size[0] * width_ratio_p2)
+                        self.field_scenario_title.setFixedSize(new_title_width, self.original_field_scenario_title_size[1])
+
+                    # 시험 분야별 시나리오 그룹 크기 조정
+                    if hasattr(self, 'field_group') and hasattr(self, 'original_field_group_size'):
+                        new_field_group_width = int(self.original_field_group_size[0] * width_ratio_p2)
+                        self.field_group.setFixedSize(new_field_group_width, self.original_field_group_size[1])
+
+                        # 내부 테이블 크기 조정 (시험 분야 테이블, 시나리오 테이블)
+                        if hasattr(self, 'test_field_table') and hasattr(self, 'original_test_field_table_size'):
+                            new_table_width = int(self.original_test_field_table_size[0] * width_ratio_p2)
+                            self.test_field_table.setFixedSize(new_table_width, self.original_test_field_table_size[1])
+                            # Stretch 모드이므로 컬럼이 자동으로 테이블 너비를 채움
+
+                        if hasattr(self, 'scenario_table') and hasattr(self, 'original_scenario_table_size'):
+                            new_table_width = int(self.original_scenario_table_size[0] * width_ratio_p2)
+                            self.scenario_table.setFixedSize(new_table_width, self.original_scenario_table_size[1])
+                            # Stretch 모드이므로 컬럼이 자동으로 테이블 너비를 채움
+
+                            # 시나리오 테이블 배경 크기 조정
+                            if hasattr(self, 'scenario_column_background') and hasattr(self, 'original_scenario_column_background_geometry'):
+                                orig = self.original_scenario_column_background_geometry
+                                new_width = int(orig[2] * width_ratio_p2)
+                                self.scenario_column_background.setGeometry(orig[0], orig[1], new_width, orig[3])
+
+                            # 시나리오 placeholder 라벨 크기 조정
+                            if hasattr(self, 'scenario_placeholder_label') and hasattr(self, 'original_scenario_placeholder_geometry'):
+                                orig = self.original_scenario_placeholder_geometry
+                                new_width = int(orig[2] * width_ratio_p2)
+                                self.scenario_placeholder_label.setGeometry(orig[0], orig[1], new_width, orig[3])
+
+                    # "시험 API" 타이틀 라벨 크기 조정
+                    if hasattr(self, 'api_title') and hasattr(self, 'original_api_title_size'):
+                        new_api_title_width = int(self.original_api_title_size[0] * width_ratio_p2)
+                        self.api_title.setFixedSize(new_api_title_width, self.original_api_title_size[1])
+
+                    # 시험 API 그룹 크기 조정
+                    if hasattr(self, 'api_group') and hasattr(self, 'original_api_group_size'):
+                        new_api_group_width = int(self.original_api_group_size[0] * width_ratio_p2)
+                        self.api_group.setFixedSize(new_api_group_width, self.original_api_group_size[1])
+
+                        # API 테이블 크기 조정
+                        if hasattr(self, 'api_test_table') and hasattr(self, 'original_api_test_table_size'):
+                            new_api_table_width = int(self.original_api_test_table_size[0] * width_ratio_p2)
+                            self.api_test_table.setFixedSize(new_api_table_width, self.original_api_test_table_size[1])
+                            # 컬럼 너비 조정 (두 컬럼 균등 분배, 행번호 50px 제외)
+                            col_width = (new_api_table_width - 50) // 2
+                            self.api_test_table.horizontalHeader().resizeSection(0, col_width)
+                            self.api_test_table.horizontalHeader().resizeSection(1, col_width)
+
+                            # API 헤더 오버레이 크기 조정
+                            if hasattr(self, 'api_header_overlay') and hasattr(self, 'original_api_header_overlay_geometry'):
+                                orig = self.original_api_header_overlay_geometry
+                                self.api_header_overlay.setGeometry(orig[0], orig[1], new_api_table_width, orig[3])
+
+                            # API 헤더 기능명 라벨 크기 조정
+                            if hasattr(self, 'api_header_func_label') and hasattr(self, 'original_api_header_func_label_size'):
+                                self.api_header_func_label.setFixedSize(col_width, self.original_api_header_func_label_size[1])
+
+                            # API 헤더 API명 라벨 크기 조정
+                            if hasattr(self, 'api_header_api_label') and hasattr(self, 'original_api_header_api_label_size'):
+                                self.api_header_api_label.setFixedSize(col_width, self.original_api_header_api_label_size[1])
+
+                            # API placeholder 라벨 크기 조정
+                            if hasattr(self, 'api_placeholder_label') and hasattr(self, 'original_api_placeholder_geometry'):
+                                orig = self.original_api_placeholder_geometry
+                                new_width = new_api_table_width - 50  # 행번호 너비 제외
+                                self.api_placeholder_label.setGeometry(orig[0], orig[1], new_width, orig[3])
+
+                # 우측 패널 크기 조정 (가로만)
+                if hasattr(self, 'right_panel') and hasattr(self, 'original_right_panel_size'):
+                    new_right_panel_width = int(self.original_right_panel_size[0] * width_ratio_p2)
+                    self.right_panel.setFixedSize(new_right_panel_width, self.original_right_panel_size[1])
+
+                    # 사용자 인증 방식 타이틀 크기 조정
+                    if hasattr(self, 'auth_title_widget') and hasattr(self, 'original_auth_title_size'):
+                        new_auth_title_width = int(self.original_auth_title_size[0] * width_ratio_p2)
+                        self.auth_title_widget.setFixedSize(new_auth_title_width, self.original_auth_title_size[1])
+
+                    # 사용자 인증 방식 박스 크기 조정
+                    if hasattr(self, 'auth_section') and hasattr(self, 'original_auth_section_size'):
+                        new_auth_section_width = int(self.original_auth_section_size[0] * width_ratio_p2)
+                        self.auth_section.setFixedSize(new_auth_section_width, self.original_auth_section_size[1])
+
+                        # 사용자 인증 방식 내부 요소들 크기 조정
+                        if hasattr(self, 'auth_content_widget') and hasattr(self, 'original_auth_content_widget_size'):
+                            new_content_width = int(self.original_auth_content_widget_size[0] * width_ratio_p2)
+                            self.auth_content_widget.setFixedSize(new_content_width, self.original_auth_content_widget_size[1])
+
+                        if hasattr(self, 'auth_type_widget') and hasattr(self, 'original_auth_type_widget_size'):
+                            new_auth_type_width = int(self.original_auth_type_widget_size[0] * width_ratio_p2)
+                            self.auth_type_widget.setFixedSize(new_auth_type_width, self.original_auth_type_widget_size[1])
+
+                            # Digest Auth 박스 크기 조정
+                            if hasattr(self, 'digest_option') and hasattr(self, 'original_digest_option_size'):
+                                new_digest_width = int(self.original_digest_option_size[0] * width_ratio_p2)
+                                self.digest_option.setFixedSize(new_digest_width, self.original_digest_option_size[1])
+
+                            # Bearer Token 박스 크기 조정
+                            if hasattr(self, 'bearer_option') and hasattr(self, 'original_bearer_option_size'):
+                                new_bearer_width = int(self.original_bearer_option_size[0] * width_ratio_p2)
+                                self.bearer_option.setFixedSize(new_bearer_width, self.original_bearer_option_size[1])
+
+                        if hasattr(self, 'common_input_widget') and hasattr(self, 'original_common_input_widget_size'):
+                            new_common_input_width = int(self.original_common_input_widget_size[0] * width_ratio_p2)
+                            self.common_input_widget.setFixedSize(new_common_input_width, self.original_common_input_widget_size[1])
+
+                            # ID/Password 입력 필드 크기 조정
+                            if hasattr(self, 'id_input') and hasattr(self, 'original_id_input_size'):
+                                new_id_input_width = int(self.original_id_input_size[0] * width_ratio_p2)
+                                self.id_input.setFixedSize(new_id_input_width, self.original_id_input_size[1])
+
+                            if hasattr(self, 'pw_input') and hasattr(self, 'original_pw_input_size'):
+                                new_pw_input_width = int(self.original_pw_input_size[0] * width_ratio_p2)
+                                self.pw_input.setFixedSize(new_pw_input_width, self.original_pw_input_size[1])
+
+                    # 접속주소 탐색 타이틀 행 크기 조정
+                    if hasattr(self, 'connection_title_row') and hasattr(self, 'original_connection_title_row_size'):
+                        new_connection_title_width = int(self.original_connection_title_row_size[0] * width_ratio_p2)
+                        self.connection_title_row.setFixedSize(new_connection_title_width, self.original_connection_title_row_size[1])
+
+                    # URL 박스 섹션 크기 조정
+                    if hasattr(self, 'connection_section') and hasattr(self, 'original_connection_section_size'):
+                        new_connection_section_width = int(self.original_connection_section_size[0] * width_ratio_p2)
+                        self.connection_section.setFixedSize(new_connection_section_width, self.original_connection_section_size[1])
+
+                        # URL 테이블 크기 조정
+                        if hasattr(self, 'url_table') and hasattr(self, 'original_url_table_size'):
+                            new_url_table_width = int(self.original_url_table_size[0] * width_ratio_p2)
+                            self.url_table.setFixedSize(new_url_table_width, self.original_url_table_size[1])
+
+                            # URL 테이블 컬럼 너비 조정 (행번호 50px 고정, URL 컬럼 가변)
+                            url_col_width = new_url_table_width - 50
+                            self.url_table.setColumnWidth(1, url_col_width)
+
+                            # URL 테이블 셀 위젯 크기 조정 (ClickableCheckboxRowWidget)
+                            for row in range(self.url_table.rowCount()):
+                                url_widget = self.url_table.cellWidget(row, 1)
+                                if url_widget:
+                                    url_widget.setFixedWidth(url_col_width)
+
+                    # 하단 버튼 컨테이너 크기 조정
+                    if hasattr(self, 'button_container') and hasattr(self, 'original_button_container_size'):
+                        new_button_container_width = int(self.original_button_container_size[0] * width_ratio_p2)
+                        self.button_container.setFixedSize(new_button_container_width, self.original_button_container_size[1])
+
+                        # 시험 시작 버튼 크기 조정
+                        if hasattr(self, 'start_btn') and hasattr(self, 'original_start_btn_size'):
+                            new_start_btn_width = int(self.original_start_btn_size[0] * width_ratio_p2)
+                            self.start_btn.setFixedSize(new_start_btn_width, self.original_start_btn_size[1])
+
+                        # 종료 버튼 크기 조정
+                        if hasattr(self, 'exit_btn') and hasattr(self, 'original_exit_btn_size'):
+                            new_exit_btn_width = int(self.original_exit_btn_size[0] * width_ratio_p2)
+                            self.exit_btn.setFixedSize(new_exit_btn_width, self.original_exit_btn_size[1])
+
     def create_page1(self):
         """첫 번째 페이지: 시험 정보 확인"""
         self.page1 = QWidget()
@@ -560,96 +751,189 @@ class InfoWidget(QWidget):
         content_layout.setContentsMargins(0, 0, 0, 0)
         content_layout.setSpacing(0)
 
-        # 내부 콘텐츠 컨테이너 (bg_root) - 고정 크기, 가운데 정렬됨
-        bg_root = QWidget()
-        bg_root.setFixedSize(1680, 897)  # 타이틀(47) + 간격(8) + 패널(802) + padding(상36+하4)
-        bg_root.setStyleSheet("background: transparent;")
+        # 내부 콘텐츠 컨테이너 (bg_root) - 반응형
+        self.bg_root = QWidget()
+        self.bg_root.setFixedSize(1680, 897)  # 타이틀(52) + 간격(8) + 패널(802) + padding(상36+하4) = 902 → 897 유지
+        self.original_bg_root_size = (1680, 897)
+        self.bg_root.setStyleSheet("background: transparent;")
 
         # bg_root 내부 레이아웃
-        bg_root_layout = QVBoxLayout(bg_root)
+        bg_root_layout = QVBoxLayout(self.bg_root)
         bg_root_layout.setContentsMargins(0, 36, 0, 4)  # 좌, 상(padding36), 우, 하
         bg_root_layout.setSpacing(0)
 
-        # 타이틀 이미지 (1680x47px, 고정 크기)
-        title_label = QLabel()
-        title_label.setFixedSize(1680, 47)
-        title_label.setContentsMargins(0, 0, 0, 0)
-        title_label.setStyleSheet("QLabel { margin: 0px; padding: 0px; border: none; background: transparent; }")
+        # 타이틀 컨테이너 (1680x52px) - 반응형
+        self.page2_title_container = QWidget()
+        self.page2_title_container.setFixedSize(1680, 52)
+        self.original_page2_title_container_size = (1680, 52)
+        self.page2_title_container.setStyleSheet("background: transparent;")
 
-        # 타이틀 이미지 설정
-        title_pixmap = QPixmap(resource_path("assets/image/test_config/시험정보설정_title.png"))
-        title_label.setPixmap(title_pixmap.scaled(1680, 47, Qt.IgnoreAspectRatio, Qt.SmoothTransformation))
-        title_label.setScaledContents(True)
-        bg_root_layout.addWidget(title_label, 0, Qt.AlignTop)
+        title_container_layout = QHBoxLayout(self.page2_title_container)
+        title_container_layout.setContentsMargins(0, 0, 0, 0)
+        title_container_layout.setSpacing(0)
+
+        # 좌우 stretch로 자동 가운데 정렬
+        title_container_layout.addStretch()
+
+        # 타이틀 배경 영역 (1584x52px) - border-image로 배경 (패널들과 같은 너비)
+        self.page2_title_bg = QWidget()
+        self.page2_title_bg.setFixedSize(1584, 52)
+        self.original_page2_title_bg_size = (1584, 52)
+        self.page2_title_bg.setObjectName("page2_title_bg")
+
+        title_bg_path = resource_path("assets/image/test_config/시험정보설정_title.png").replace(chr(92), "/")
+        self.page2_title_bg.setStyleSheet(f"""
+            QWidget#page2_title_bg {{
+                border-image: url({title_bg_path}) 0 0 0 0 stretch stretch;
+            }}
+        """)
+
+        # 타이틀 내부 레이아웃 (padding: 좌14, 우48, 상하12)
+        title_inner_layout = QHBoxLayout(self.page2_title_bg)
+        title_inner_layout.setContentsMargins(14, 12, 48, 12)
+        title_inner_layout.setSpacing(0)
+
+        # 아이콘 (icn_notification.png, 18x18)
+        self.page2_title_icon = QLabel()
+        self.page2_title_icon.setFixedSize(18, 18)
+        icon_path = resource_path("assets/image/icon/icn_notification.png")
+        self.page2_title_icon.setPixmap(QPixmap(icon_path).scaled(18, 18, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        title_inner_layout.addWidget(self.page2_title_icon)
+
+        # gap 13px
+        title_inner_layout.addSpacing(13)
+
+        # 텍스트 "시험 분야별 시나리오 확인 및 시험 환경을 설정하세요."
+        self.page2_title_text = QLabel("시험 분야별 시나리오 확인 및 시험 환경을 설정하세요.")
+        self.page2_title_text.setStyleSheet("""
+            QLabel {
+                font-family: 'Noto Sans KR';
+                font-size: 19px;
+                font-weight: 400;
+                color: #000000;
+                background: transparent;
+            }
+        """)
+        title_inner_layout.addWidget(self.page2_title_text)
+        title_inner_layout.addStretch()
+
+        title_container_layout.addWidget(self.page2_title_bg)
+        title_container_layout.addStretch()  # 우측 stretch
+        bg_root_layout.addWidget(self.page2_title_container, 0, Qt.AlignTop | Qt.AlignHCenter)
 
         # 타이틀과 콘텐츠 사이 간격
         bg_root_layout.addSpacing(8)
 
-        # 기존 콘텐츠 (좌우 패널) - 좌우 48px padding
-        panels_layout = QHBoxLayout()
-        panels_layout.setContentsMargins(48, 0, 48, 0)  # 좌, 상, 우, 하
+        # 기존 콘텐츠 (좌우 패널) - 타이틀 배경과 같은 너비로 제한
+        self.panels_container = QWidget()
+        self.panels_container.setFixedSize(1584, 802)  # 좌우 패널 합 (792 + 792)
+        self.original_panels_container_size = (1584, 802)
+
+        panels_layout = QHBoxLayout(self.panels_container)
+        panels_layout.setContentsMargins(0, 0, 0, 0)
         panels_layout.setSpacing(0)
 
-        # 좌측 패널 (792x802px) - 배경 이미지: 시험 분야별 시나리오 + 시험 API
-        left_panel = QGroupBox()
-        left_panel.setFixedSize(792, 802)
+        # 좌측 패널 (792x802px) - 배경 이미지: 시험 분야별 시나리오 + 시험 API (반응형)
+        self.left_panel = QGroupBox()
+        self.left_panel.setFixedSize(792, 802)
+        self.original_left_panel_size = (792, 802)
+        self.left_panel.setObjectName("left_panel")
 
         left_bg_path = resource_path("assets/image/test_config/left_title_sub.png").replace(chr(92), "/")
-        left_panel.setStyleSheet(f"""
-            QGroupBox {{
+        self.left_panel.setStyleSheet(f"""
+            QGroupBox#left_panel {{
                 border: none;
-                background-image: url({left_bg_path});
-                background-repeat: no-repeat;
-                background-position: top left;
+                border-image: url({left_bg_path}) 0 0 0 0 stretch stretch;
             }}
         """)
 
         left_layout = QVBoxLayout()
-        left_layout.setContentsMargins(24, 44, 24, 80)  # 좌, 상(12+24+8), 우, 하
+        left_layout.setContentsMargins(24, 12, 24, 80)  # 좌, 상(12px 패딩), 우, 하
         left_layout.setSpacing(0)
 
-        # 시험 분야별 시나리오 테이블
-        field_group = self.create_test_field_group()
-        left_layout.addWidget(field_group)
+        # "시험 분야별 시나리오" 타이틀 라벨 (744x24px)
+        self.field_scenario_title = QLabel("시험 분야별 시나리오")
+        self.field_scenario_title.setFixedSize(744, 24)
+        self.original_field_scenario_title_size = (744, 24)
+        self.field_scenario_title.setStyleSheet("""
+            QLabel {
+                font-family: 'Noto Sans KR';
+                font-size: 20px;
+                font-weight: 500;
+                color: #000000;
+                background: transparent;
+            }
+        """)
+        left_layout.addWidget(self.field_scenario_title)
 
-        # 간격: 16px(gap) + 38px(시험 API 제목) + 8px(gap) = 62px
-        left_layout.addSpacing(62)
+        # gap 8px
+        left_layout.addSpacing(8)
 
-        # 시험 API 테이블 (QGroupBox로 감싸기)
-        api_group = self.create_test_api_group()
-        left_layout.addWidget(api_group)
+        # 시험 분야별 시나리오 테이블 (반응형)
+        self.field_group = self.create_test_field_group()
+        self.original_field_group_size = (744, 240)
+        left_layout.addWidget(self.field_group)
 
-        left_panel.setLayout(left_layout)
+        # gap 16px
+        left_layout.addSpacing(16)
 
-        # 우측 패널 (792x802px)
-        right_panel = QGroupBox()
-        right_panel.setFixedSize(792, 802)
-        right_panel.setStyleSheet("QGroupBox { border: none; background: transparent; }")
+        # "시험 API" 타이틀 라벨 (744x24px)
+        self.api_title = QLabel("시험 API")
+        self.api_title.setFixedSize(744, 24)
+        self.original_api_title_size = (744, 24)
+        self.api_title.setStyleSheet("""
+            QLabel {
+                font-family: 'Noto Sans KR';
+                font-size: 20px;
+                font-weight: 500;
+                color: #000000;
+                background: transparent;
+            }
+        """)
+        left_layout.addWidget(self.api_title)
+
+        # gap 8px
+        left_layout.addSpacing(8)
+
+        # 시험 API 테이블 (QGroupBox로 감싸기) (반응형)
+        self.api_group = self.create_test_api_group()
+        self.original_api_group_size = (744, 376)
+        left_layout.addWidget(self.api_group)
+
+        self.left_panel.setLayout(left_layout)
+
+        # 우측 패널 (792x802px) - 반응형
+        self.right_panel = QGroupBox()
+        self.right_panel.setFixedSize(792, 802)
+        self.original_right_panel_size = (792, 802)
+        self.right_panel.setStyleSheet("QGroupBox { border: none; background: transparent; }")
 
         right_layout = QVBoxLayout()
         right_layout.setContentsMargins(24, 12, 24, 0)  # 좌, 상, 우, 하
         right_layout.setSpacing(0)
 
-        # 사용자 인증 방식 타이틀 이미지 (744x24px)
-        auth_title_widget = QLabel()
+        # 사용자 인증 방식 타이틀 이미지 (744x24px) - 반응형
+        self.auth_title_widget = QLabel()
         auth_title_pixmap = QPixmap(resource_path("assets/image/test_config/사용자인증방식_title.png"))
-        auth_title_widget.setPixmap(auth_title_pixmap.scaled(744, 24, Qt.IgnoreAspectRatio, Qt.SmoothTransformation))
-        auth_title_widget.setFixedSize(744, 24)
-        right_layout.addWidget(auth_title_widget)
+        self.auth_title_widget.setPixmap(auth_title_pixmap.scaled(744, 24, Qt.IgnoreAspectRatio, Qt.SmoothTransformation))
+        self.auth_title_widget.setFixedSize(744, 24)
+        self.original_auth_title_size = (744, 24)
+        right_layout.addWidget(self.auth_title_widget)
 
         # gap 8px
         right_layout.addSpacing(8)
 
-        # 사용자 인증 방식 박스 (744x240px)
-        auth_section = self.create_auth_section()
-        right_layout.addWidget(auth_section)
+        # 사용자 인증 방식 박스 (744x240px) - 반응형
+        self.auth_section = self.create_auth_section()
+        right_layout.addWidget(self.auth_section)
 
         # gap 16px
         right_layout.addSpacing(16)
 
-        # 접속주소 탐색 타이틀 + 주소탐색 버튼 행 (744x38px)
-        connection_title_row = QWidget()
-        connection_title_row.setFixedSize(744, 38)
+        # 접속주소 탐색 타이틀 + 주소탐색 버튼 행 (744x38px) - 반응형
+        self.connection_title_row = QWidget()
+        self.connection_title_row.setFixedSize(744, 38)
+        self.original_connection_title_row_size = (744, 38)
         connection_title_layout = QHBoxLayout()
         connection_title_layout.setContentsMargins(0, 0, 0, 0)
         connection_title_layout.setSpacing(0)
@@ -723,8 +1007,8 @@ class InfoWidget(QWidget):
 
         buttons_widget.setLayout(buttons_layout)
         connection_title_layout.addWidget(buttons_widget)
-        connection_title_row.setLayout(connection_title_layout)
-        right_layout.addWidget(connection_title_row)
+        self.connection_title_row.setLayout(connection_title_layout)
+        right_layout.addWidget(self.connection_title_row)
 
         # 주소 추가 팝오버 (392x102px)
         self.address_popover = QWidget()
@@ -829,20 +1113,25 @@ class InfoWidget(QWidget):
         # gap 8px
         right_layout.addSpacing(8)
 
-        # URL 박스 테이블 (744x376px)
-        connection_section = self.create_connection_section()
-        right_layout.addWidget(connection_section)
+        # URL 박스 테이블 (744x376px) - 반응형
+        self.connection_section = self.create_connection_section()
+        right_layout.addWidget(self.connection_section)
 
         # padding 32px
         right_layout.addSpacing(32)
 
-        # 하단 버튼 (시험시작, 종료) - 전체 744x48px, 각 버튼 364x48px, gap 16px
-        button_layout = QHBoxLayout()
-        button_layout.setSpacing(16)  # 버튼 간격 16px
+        # 하단 버튼 (시험시작, 종료) - 반응형 컨테이너 (744x48px)
+        self.button_container = QWidget()
+        self.button_container.setFixedSize(744, 48)
+        self.original_button_container_size = (744, 48)
+        button_layout = QHBoxLayout(self.button_container)
+        button_layout.setContentsMargins(0, 0, 0, 0)
+        button_layout.setSpacing(16)  # 버튼 간격 16px 고정
 
-        # 시험 시작 버튼 (왼쪽) - 364x48px
-        self.start_btn = QPushButton("")
+        # 시험 시작 버튼 (왼쪽) - 364x48px 반응형 (텍스트 분리)
+        self.start_btn = QPushButton("시험 시작")
         self.start_btn.setFixedSize(364, 48)
+        self.original_start_btn_size = (364, 48)
 
         btn_start_enabled = resource_path("assets/image/test_config/btn_시험시작_enabled.png").replace(chr(92), "/")
         btn_start_hover = resource_path("assets/image/test_config/btn_시험시작_Hover.png").replace(chr(92), "/")
@@ -850,51 +1139,60 @@ class InfoWidget(QWidget):
         self.start_btn.setStyleSheet(f"""
             QPushButton {{
                 border: none;
-                background-image: url({btn_start_enabled});
-                background-repeat: no-repeat;
-                background-position: center;
+                border-image: url({btn_start_enabled}) 0 0 0 0 stretch stretch;
+                padding-left: 20px;
+                padding-right: 20px;
+                font-family: 'Noto Sans KR';
+                font-size: 20px;
+                font-weight: 500;
+                color: #FFFFFF;
             }}
             QPushButton:hover {{
-                background-image: url({btn_start_hover});
+                border-image: url({btn_start_hover}) 0 0 0 0 stretch stretch;
             }}
         """)
         self.start_btn.clicked.connect(self.start_test)
         self.start_btn.setEnabled(True)
         button_layout.addWidget(self.start_btn)
 
-        # 종료 버튼 (오른쪽) - 364x48px
-        exit_btn = QPushButton("")
-        exit_btn.setFixedSize(364, 48)
+        # 종료 버튼 (오른쪽) - 364x48px 반응형 (텍스트 분리)
+        self.exit_btn = QPushButton("종료")
+        self.exit_btn.setFixedSize(364, 48)
+        self.original_exit_btn_size = (364, 48)
 
         btn_exit_enabled = resource_path("assets/image/test_config/btn_종료_enabled.png").replace(chr(92), "/")
         btn_exit_hover = resource_path("assets/image/test_config/btn_종료_Hover.png").replace(chr(92), "/")
 
-        exit_btn.setStyleSheet(f"""
+        self.exit_btn.setStyleSheet(f"""
             QPushButton {{
                 border: none;
-                background-image: url({btn_exit_enabled});
-                background-repeat: no-repeat;
-                background-position: center;
+                border-image: url({btn_exit_enabled}) 0 0 0 0 stretch stretch;
+                padding-left: 20px;
+                padding-right: 20px;
+                font-family: 'Noto Sans KR';
+                font-size: 20px;
+                font-weight: 500;
+                color: #6B6B6B;
             }}
             QPushButton:hover {{
-                background-image: url({btn_exit_hover});
+                border-image: url({btn_exit_hover}) 0 0 0 0 stretch stretch;
             }}
         """)
-        exit_btn.clicked.connect(self.exit_btn_clicked)
-        button_layout.addWidget(exit_btn)
+        self.exit_btn.clicked.connect(self.exit_btn_clicked)
+        button_layout.addWidget(self.exit_btn)
 
-        right_layout.addLayout(button_layout)
+        right_layout.addWidget(self.button_container)
 
-        right_panel.setLayout(right_layout)
+        self.right_panel.setLayout(right_layout)
 
-        panels_layout.addWidget(left_panel, 1)
-        panels_layout.addWidget(right_panel, 1)
+        panels_layout.addWidget(self.left_panel)
+        panels_layout.addWidget(self.right_panel)
 
-        # panels_layout을 bg_root_layout에 추가
-        bg_root_layout.addLayout(panels_layout, 1)
+        # panels_container를 bg_root_layout에 가운데 정렬로 추가
+        bg_root_layout.addWidget(self.panels_container, 1, Qt.AlignHCenter)
 
         # bg_root를 content_layout에 가운데 정렬로 추가
-        content_layout.addWidget(bg_root, 0, Qt.AlignHCenter | Qt.AlignVCenter)
+        content_layout.addWidget(self.bg_root, 0, Qt.AlignHCenter | Qt.AlignVCenter)
 
         # 메인 레이아웃에 콘텐츠 영역 추가 (반응형: stretch=1)
         main_layout.addWidget(self.page2_content, 1)
@@ -1967,21 +2265,22 @@ class InfoWidget(QWidget):
         tables_layout.setContentsMargins(0, 0, 0, 0)
         tables_layout.setSpacing(0)
 
-        # 시험 분야 테이블 (372px x 240px) - 1개 컬럼
+        # 시험 분야 테이블 (372px x 240px) - 1개 컬럼 (반응형)
         self.test_field_table = TestFieldTableWidget(0, 1)
         self.test_field_table.setFixedSize(372, 240)
+        self.original_test_field_table_size = (372, 240)
         self.test_field_table.setHorizontalHeaderLabels(["시험 분야"])
 
-        # 시험 시나리오 테이블 (372px x 240px) - 1개 컬럼
+        # 시험 시나리오 테이블 (372px x 240px) - 1개 컬럼 (반응형)
         self.scenario_table = TestFieldTableWidget(0, 1)
         self.scenario_table.setFixedSize(372, 240)
+        self.original_scenario_table_size = (372, 240)
         self.scenario_table.setHorizontalHeaderLabels(["시험 시나리오"])
 
         # === 시험 분야 테이블 설정 ===
         field_header = self.test_field_table.horizontalHeader()
         field_header.setFixedHeight(31)
-        field_header.setSectionResizeMode(0, QHeaderView.Fixed)
-        field_header.resizeSection(0, 372)
+        field_header.setSectionResizeMode(0, QHeaderView.Stretch)  # 자동으로 테이블 너비 채우기
 
         # 행 높이 설정
         self.test_field_table.verticalHeader().setDefaultSectionSize(39)
@@ -1993,12 +2292,14 @@ class InfoWidget(QWidget):
         self.test_field_table.setSelectionMode(QAbstractItemView.NoSelection)
         self.test_field_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.test_field_table.cellClicked.connect(self.on_test_field_selected)
+        # 스크롤바 비활성화 (공백 방지)
+        self.test_field_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.test_field_table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         # === 시험 시나리오 테이블 설정 ===
         scenario_header = self.scenario_table.horizontalHeader()
         scenario_header.setFixedHeight(31)
-        scenario_header.setSectionResizeMode(0, QHeaderView.Fixed)
-        scenario_header.resizeSection(0, 372)
+        scenario_header.setSectionResizeMode(0, QHeaderView.Stretch)  # 자동으로 테이블 너비 채우기
 
         # 행 높이 설정
         self.scenario_table.verticalHeader().setDefaultSectionSize(39)
@@ -2010,6 +2311,9 @@ class InfoWidget(QWidget):
         self.scenario_table.setSelectionMode(QAbstractItemView.NoSelection)
         self.scenario_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.scenario_table.cellClicked.connect(self.on_scenario_selected)
+        # 스크롤바 비활성화 (공백 방지)
+        self.scenario_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scenario_table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         # === 공통 스타일 정의 ===
         table_style = """
@@ -2020,10 +2324,11 @@ class InfoWidget(QWidget):
             }
             QTableWidget::item {
                 border-bottom: 1px solid #CCCCCC;
-                padding-right: 14px;
                 color: #1B1B1C;
                 outline: 0;
                 background-color: transparent;
+                padding: 0px;
+                margin: 0px;
             }
             QTableWidget::item:selected {
                 color: #1B1B1C;
@@ -2125,8 +2430,9 @@ class InfoWidget(QWidget):
                 background-color: #E3F2FF;
             }
         """)
-        # viewport 기준으로 전체 영역 커버
+        # viewport 기준으로 전체 영역 커버 (반응형)
         self.scenario_column_background.setGeometry(0, 0, 372, 240)
+        self.original_scenario_column_background_geometry = (0, 0, 372, 240)
         self.scenario_column_background.lower()  # 셀들 뒤로 배치
         self.scenario_column_background.hide()  # 초기에는 숨김
 
@@ -2146,8 +2452,9 @@ class InfoWidget(QWidget):
                 padding-top: 40px;
             }
         """)
-        # 헤더 아래 영역에 배치
+        # 헤더 아래 영역에 배치 (반응형)
         self.scenario_placeholder_label.setGeometry(0, 31, 372, 209)  # x, y, width, height
+        self.original_scenario_placeholder_geometry = (0, 31, 372, 209)
         self.scenario_placeholder_label.hide()  # 초기에는 숨김
 
         # 두 테이블을 수평 레이아웃에 추가
@@ -2185,9 +2492,10 @@ class InfoWidget(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        # 시험 API 테이블 (744x376px)
+        # 시험 API 테이블 (744x376px) (반응형)
         self.api_test_table = QTableWidget(0, 2)
         self.api_test_table.setFixedSize(744, 376)
+        self.original_api_test_table_size = (744, 376)
 
         self.api_test_table.setHorizontalHeaderLabels(["기능명", "API명"])
 
@@ -2325,11 +2633,12 @@ class InfoWidget(QWidget):
         viewport_palette.setColor(QPalette.Window, QColor("#FFFFFF"))
         self.api_test_table.viewport().setPalette(viewport_palette)
 
-        # 헤더 오버레이 위젯 (테이블 헤더 위에 덮어씌우기)
-        header_overlay = QWidget()
-        header_overlay.setParent(self.api_test_table)
-        header_overlay.setGeometry(0, 0, 744, 31)  # 테이블 상단 전체
-        header_overlay.setStyleSheet("""
+        # 헤더 오버레이 위젯 (테이블 헤더 위에 덮어씌우기) (반응형)
+        self.api_header_overlay = QWidget()
+        self.api_header_overlay.setParent(self.api_test_table)
+        self.api_header_overlay.setGeometry(0, 0, 744, 31)  # 테이블 상단 전체
+        self.original_api_header_overlay_geometry = (0, 0, 744, 31)
+        self.api_header_overlay.setStyleSheet("""
             QWidget {
                 background-color: #EDF0F3;
                 border: 1px solid #CECECE;
@@ -2339,36 +2648,61 @@ class InfoWidget(QWidget):
             }
         """)
 
-        header_layout = QHBoxLayout(header_overlay)
+        header_layout = QHBoxLayout(self.api_header_overlay)
         header_layout.setContentsMargins(0, 0, 0, 0)
         header_layout.setSpacing(0)
 
-        # 헤더 컬럼: 행번호(50) + 기능명(346) + API명(348)
-        header_columns = [
-            (50, ""),
-            (346, "기능명"),
-            (348, "API명")
-        ]
+        # 헤더 컬럼: 행번호(50 고정) + 기능명(비율) + API명(비율)
+        # 행번호 라벨
+        self.api_header_row_label = QLabel("")
+        self.api_header_row_label.setFixedSize(50, 31)
+        self.api_header_row_label.setAlignment(Qt.AlignCenter)
+        self.api_header_row_label.setStyleSheet("""
+            QLabel {
+                background-color: transparent;
+                border: none;
+            }
+        """)
+        header_layout.addWidget(self.api_header_row_label)
 
-        for width, text in header_columns:
-            label = QLabel(text)
-            label.setFixedSize(width, 31)
-            label.setAlignment(Qt.AlignCenter)
-            label.setStyleSheet("""
-                QLabel {
-                    background-color: transparent;
-                    border: none;
-                    color: #1B1B1C;
-                    font-family: 'Noto Sans KR';
-                    font-size: 18px;
-                    font-weight: 600;
-                    letter-spacing: -0.156px;
-                }
-            """)
-            header_layout.addWidget(label)
+        # 기능명 라벨 (반응형)
+        self.api_header_func_label = QLabel("기능명")
+        self.api_header_func_label.setFixedSize(346, 31)
+        self.original_api_header_func_label_size = (346, 31)
+        self.api_header_func_label.setAlignment(Qt.AlignCenter)
+        self.api_header_func_label.setStyleSheet("""
+            QLabel {
+                background-color: transparent;
+                border: none;
+                color: #1B1B1C;
+                font-family: 'Noto Sans KR';
+                font-size: 18px;
+                font-weight: 600;
+                letter-spacing: -0.156px;
+            }
+        """)
+        header_layout.addWidget(self.api_header_func_label)
 
-        header_overlay.show()
-        header_overlay.raise_()  # 최상위로 올리기
+        # API명 라벨 (반응형)
+        self.api_header_api_label = QLabel("API명")
+        self.api_header_api_label.setFixedSize(348, 31)
+        self.original_api_header_api_label_size = (348, 31)
+        self.api_header_api_label.setAlignment(Qt.AlignCenter)
+        self.api_header_api_label.setStyleSheet("""
+            QLabel {
+                background-color: transparent;
+                border: none;
+                color: #1B1B1C;
+                font-family: 'Noto Sans KR';
+                font-size: 18px;
+                font-weight: 600;
+                letter-spacing: -0.156px;
+            }
+        """)
+        header_layout.addWidget(self.api_header_api_label)
+
+        self.api_header_overlay.show()
+        self.api_header_overlay.raise_()  # 최상위로 올리기
 
         # 시험 API 안내 문구 QLabel (테이블 위에 오버레이)
         self.api_placeholder_label = QLabel("시험 시나리오를 선택하면\nAPI가 표시됩니다.")
@@ -2386,6 +2720,7 @@ class InfoWidget(QWidget):
         """)
         # 헤더 높이(31px) + 행 번호 너비(50px) 고려하여 테이블 중앙에 배치
         self.api_placeholder_label.setGeometry(50, 31, 694, 345)  # x, y, width, height
+        self.original_api_placeholder_geometry = (50, 31, 694, 345)
         self.api_placeholder_label.show()  # 초기에는 표시
 
         layout.addWidget(self.api_test_table)
@@ -2393,21 +2728,23 @@ class InfoWidget(QWidget):
         return group
 
     def create_auth_section(self):
-        """인증 방식 섹션 (타이틀 제외, 744x240px)"""
+        """인증 방식 섹션 (타이틀 제외, 744x240px) - 반응형"""
         section = QGroupBox()
         section.setFixedSize(744, 240)
+        self.original_auth_section_size = (744, 240)
         section.setStyleSheet("QGroupBox { border: none; background-color: transparent; }")
 
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        # 콘텐츠 영역 (744x240px)
-        content_widget = QWidget()
-        content_widget.setFixedSize(744, 240)
+        # 콘텐츠 영역 (744x240px) - 반응형
+        self.auth_content_widget = QWidget()
+        self.auth_content_widget.setFixedSize(744, 240)
+        self.original_auth_content_widget_size = (744, 240)
 
         # 배경 색상 설정
-        content_widget.setStyleSheet("""
+        self.auth_content_widget.setStyleSheet("""
             #content_widget {
                 background-color: #FFFFFF;
                 border: 1px solid #CECECE;
@@ -2425,23 +2762,25 @@ class InfoWidget(QWidget):
                 border: none;
             }
         """)
-        content_widget.setObjectName("content_widget")
+        self.auth_content_widget.setObjectName("content_widget")
 
         content_layout = QHBoxLayout()
         content_layout.setContentsMargins(24, 16, 24, 16)
         content_layout.setSpacing(0)
 
-        # 왼쪽: 인증 방식 선택 영역 (289x208px)
-        auth_type_widget = QWidget()
-        auth_type_widget.setFixedSize(289, 208)
-        auth_type_widget.setStyleSheet("background-color: transparent;")
+        # 왼쪽: 인증 방식 선택 영역 (289x208px) - 반응형
+        self.auth_type_widget = QWidget()
+        self.auth_type_widget.setFixedSize(289, 208)
+        self.original_auth_type_widget_size = (289, 208)
+        self.auth_type_widget.setStyleSheet("background-color: transparent;")
         auth_type_layout = QVBoxLayout()
         auth_type_layout.setContentsMargins(0, 12, 0, 12)  # 상하 12px
         auth_type_layout.setSpacing(12)  # gap 12px
 
-        # Digest Auth 박스 (289x86px)
+        # Digest Auth 박스 (289x86px) - 반응형
         self.digest_option = QWidget()
         self.digest_option.setFixedSize(289, 86)
+        self.original_digest_option_size = (289, 86)
         # 초기 상태: 선택됨 (digest_radio가 기본 체크되어 있음)
         self.digest_option.setStyleSheet("""
             QWidget {
@@ -2520,9 +2859,10 @@ class InfoWidget(QWidget):
         self.digest_option.setLayout(digest_option_main_layout)
         auth_type_layout.addWidget(self.digest_option)
 
-        # Bearer Token 박스 (289x86px)
+        # Bearer Token 박스 (289x86px) - 반응형
         self.bearer_option = QWidget()
         self.bearer_option.setFixedSize(289, 86)
+        self.original_bearer_option_size = (289, 86)
         # 초기 상태: 선택 안됨
         self.bearer_option.setStyleSheet("""
             QWidget {
@@ -2600,8 +2940,8 @@ class InfoWidget(QWidget):
         self.bearer_option.setLayout(bearer_option_main_layout)
         auth_type_layout.addWidget(self.bearer_option)
 
-        auth_type_widget.setLayout(auth_type_layout)
-        content_layout.addWidget(auth_type_widget)
+        self.auth_type_widget.setLayout(auth_type_layout)
+        content_layout.addWidget(self.auth_type_widget)
 
         # 라디오 버튼 토글 시 박스 스타일 변경
         self.digest_radio.toggled.connect(self.on_auth_type_changed)
@@ -2614,20 +2954,22 @@ class InfoWidget(QWidget):
         # divider 왼쪽 gap 12px
         content_layout.addSpacing(12)
 
-        # 수직 divider (1x208px)
-        divider = QLabel()
-        divider.setFixedSize(1, 208)
+        # 수직 divider (1x208px) - 반응형
+        self.auth_divider = QLabel()
+        self.auth_divider.setFixedSize(1, 208)
+        self.original_auth_divider_size = (1, 208)
         divider_pixmap = QPixmap(resource_path("assets/image/test_config/divider.png"))
-        divider.setPixmap(divider_pixmap.scaled(1, 208, Qt.IgnoreAspectRatio, Qt.SmoothTransformation))
-        content_layout.addWidget(divider)
+        self.auth_divider.setPixmap(divider_pixmap.scaled(1, 208, Qt.IgnoreAspectRatio, Qt.SmoothTransformation))
+        content_layout.addWidget(self.auth_divider)
 
         # divider 오른쪽 gap 12px
         content_layout.addSpacing(12)
 
-        # 오른쪽: User ID/Password 입력 영역 (358x208px)
-        common_input_widget = QWidget()
-        common_input_widget.setFixedSize(358, 208)
-        common_input_widget.setStyleSheet("background-color: transparent;")
+        # 오른쪽: User ID/Password 입력 영역 (358x208px) - 반응형
+        self.common_input_widget = QWidget()
+        self.common_input_widget.setFixedSize(358, 208)
+        self.original_common_input_widget_size = (358, 208)
+        self.common_input_widget.setStyleSheet("background-color: transparent;")
         common_input_layout = QVBoxLayout()
         common_input_layout.setContentsMargins(0, 12, 0, 12)  # 상하 12px, 12px
         common_input_layout.setSpacing(0)
@@ -2670,9 +3012,10 @@ class InfoWidget(QWidget):
         # gap 4px
         common_input_layout.addSpacing(4)
 
-        # 아이디 입력칸 (358x40px)
+        # 아이디 입력칸 (358x40px) - 반응형
         self.id_input = QLineEdit()
         self.id_input.setFixedSize(358, 40)
+        self.original_id_input_size = (358, 40)
         self.id_input.setPlaceholderText("사용자 ID를 입력해주세요")
         digest_enabled = resource_path("assets/image/test_config/input_DigestAuth_enabled.png").replace(chr(92), "/")
         digest_disabled = resource_path("assets/image/test_config/input_DigestAuth_disabled.png").replace(chr(92), "/")
@@ -2681,10 +3024,7 @@ class InfoWidget(QWidget):
                 padding-left: 24px;
                 padding-right: 24px;
                 border: none;
-                background-color: #FFFFFF;
-                background-image: url({digest_enabled});
-                background-repeat: no-repeat;
-                background-position: center;
+                border-image: url({digest_enabled}) 0 0 0 0 stretch stretch;
                 font-family: 'Noto Sans KR';
                 font-weight: 400;
                 font-size: 18px;
@@ -2697,7 +3037,7 @@ class InfoWidget(QWidget):
                 font-weight: 500;
             }}
             QLineEdit:disabled {{
-                background-image: url({digest_disabled});
+                border-image: url({digest_disabled}) 0 0 0 0 stretch stretch;
                 color: #868686;
             }}
         """)
@@ -2725,19 +3065,17 @@ class InfoWidget(QWidget):
         # gap 4px
         common_input_layout.addSpacing(4)
 
-        # password 입력칸 (358x40px)
+        # password 입력칸 (358x40px) - 반응형
         self.pw_input = QLineEdit()
         self.pw_input.setFixedSize(358, 40)
+        self.original_pw_input_size = (358, 40)
         self.pw_input.setPlaceholderText("암호를 입력해 주세요")
         self.pw_input.setStyleSheet(f"""
             QLineEdit {{
                 padding-left: 24px;
                 padding-right: 24px;
                 border: none;
-                background-color: #FFFFFF;
-                background-image: url({digest_enabled});
-                background-repeat: no-repeat;
-                background-position: center;
+                border-image: url({digest_enabled}) 0 0 0 0 stretch stretch;
                 font-family: 'Noto Sans KR';
                 font-weight: 400;
                 font-size: 18px;
@@ -2750,17 +3088,17 @@ class InfoWidget(QWidget):
                 font-weight: 500;
             }}
             QLineEdit:disabled {{
-                background-image: url({digest_disabled});
+                border-image: url({digest_disabled}) 0 0 0 0 stretch stretch;
                 color: #868686;
             }}
         """)
         common_input_layout.addWidget(self.pw_input)
 
-        common_input_widget.setLayout(common_input_layout)
-        content_layout.addWidget(common_input_widget)
+        self.common_input_widget.setLayout(common_input_layout)
+        content_layout.addWidget(self.common_input_widget)
 
-        content_widget.setLayout(content_layout)
-        layout.addWidget(content_widget)
+        self.auth_content_widget.setLayout(content_layout)
+        layout.addWidget(self.auth_content_widget)
 
         # 라디오 버튼 그룹 설정
         from PyQt5.QtWidgets import QButtonGroup
@@ -2818,18 +3156,20 @@ class InfoWidget(QWidget):
             """)
 
     def create_connection_section(self):
-        """접속 정보 섹션 (타이틀 제외, 744x376px)"""
+        """접속 정보 섹션 (타이틀 제외, 744x376px) - 반응형"""
         section = QGroupBox()
         section.setFixedSize(744, 376)
+        self.original_connection_section_size = (744, 376)
         section.setStyleSheet("QGroupBox { border: none; }")
 
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        # URL 테이블 (744x370px) - 2개 컬럼 (행번호 + URL)
+        # URL 테이블 (744x370px) - 2개 컬럼 (행번호 + URL) - 반응형
         self.url_table = QTableWidget(0, 2)  # 2개 컬럼: 행번호(50px) + URL(694px)
         self.url_table.setFixedSize(744, 370)
+        self.original_url_table_size = (744, 370)
         self.url_table.setHorizontalHeaderLabels(["", "URL"])
         self.url_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.url_table.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -3119,8 +3459,11 @@ class InfoWidget(QWidget):
             self.url_table.setRowCount(0)
             self.selected_url_row = None
 
-            # 이미지 경로 (Windows 경로 슬래시 변환)
-            unchecked_img = resource_path("assets/image/test_config/url_row_checkbox_unchecked.png").replace(chr(92), "/")
+            # 이미지 경로 (체크박스 분리 - 반응형)
+            bg_image = "assets/image/test_config/row.png"
+            bg_selected_image = "assets/image/test_config/row_selected.png"
+            checkbox_unchecked = "assets/image/test_config/checkbox_unchecked.png"
+            checkbox_checked = "assets/image/test_config/checkbox_checked.png"
 
             for i, url in enumerate(urls):
                 row = self.url_table.rowCount()
@@ -3143,27 +3486,15 @@ class InfoWidget(QWidget):
                 row_num_label.clicked.connect(self.on_url_row_selected)
                 self.url_table.setCellWidget(row, 0, row_num_label)
 
-                # 컬럼 1: URL (ClickableLabel - 이미지 배경)
-                url_label = ClickableLabel(url, row, 1)
-                url_label.setAlignment(Qt.AlignCenter)
-                url_label.setStyleSheet(f"""
-                    QLabel {{
-                        background-image: url('{unchecked_img}');
-                        background-position: left center;
-                        background-repeat: no-repeat;
-                        border: none;
-                        border-bottom: 1px solid #CCCCCC;
-                        font-family: 'Noto Sans KR';
-                        font-size: 19px;
-                        font-weight: 400;
-                        color: #000000;
-                        margin: 0px;
-                        padding: 0px;
-                    }}
-                """)
-                url_label.setProperty("url", url)
-                url_label.clicked.connect(self.on_url_row_selected)
-                self.url_table.setCellWidget(row, 1, url_label)
+                # 컬럼 1: URL (ClickableCheckboxRowWidget - 체크박스 분리, paintEvent 배경)
+                url_widget = ClickableCheckboxRowWidget(
+                    url, row, 1,
+                    bg_image, bg_selected_image,
+                    checkbox_unchecked, checkbox_checked
+                )
+                url_widget.setProperty("url", url)
+                url_widget.clicked.connect(self.on_url_row_selected)
+                self.url_table.setCellWidget(row, 1, url_widget)
 
                 self.url_table.setRowHeight(row, 39)
 
@@ -3742,50 +4073,14 @@ class InfoWidget(QWidget):
             QMessageBox.warning(self, "오류", f"시험 분야 데이터 로드 중 오류가 발생했습니다:\n{str(e)}")
 
     def on_scenario_selected(self, row, col):
-        """시나리오 테이블 클릭 시 체크박스 이미지 변경 및 API 테이블 업데이트"""
+        """시나리오 테이블 클릭 시 체크박스 상태 변경 및 API 테이블 업데이트"""
         try:
-            # 모든 시나리오 행의 배경 이미지 업데이트
+            # 모든 시나리오 행의 체크박스 상태 업데이트
             for i in range(self.scenario_table.rowCount()):
                 widget = self.scenario_table.cellWidget(i, 0)
-                if widget:
-                    if i == row:
-                        # 클릭된 행: 체크된 이미지로 변경
-                        widget.setStyleSheet("""
-                            QLabel {
-                                background-image: url('assets/image/test_config/row_checkbox_checked.png');
-                                background-position: center;
-                                background-repeat: no-repeat;
-                                border: none;
-                                border-bottom: 1px solid #CCCCCC;
-                                font-family: 'Noto Sans KR';
-                                font-size: 19px;
-                                font-weight: 400;
-                                color: #000000;
-                                margin: 0px;
-                                padding: 0px;
-                                min-width: 371.5px;
-                                min-height: 39px;
-                            }
-                        """)
-                    else:
-                        # 나머지 행: 체크 안 된 이미지로 변경
-                        widget.setStyleSheet("""
-                            QLabel {
-                                background-image: url('assets/image/test_config/row_checkbox_unchecked.png');
-                                background-position: center;
-                                background-repeat: no-repeat;
-                                border: none;
-                                border-bottom: 1px solid #CCCCCC;
-                                font-family: 'Noto Sans KR';
-                                font-size: 19px;
-                                font-weight: 400;
-                                color: #000000;
-                                margin: 0px;
-                                padding: 0px;
-                                min-width: 371.5px;
-                                min-height: 39px;
-                            }
-                        """)
+                if widget and hasattr(widget, 'setChecked'):
+                    # 클릭된 행은 체크, 나머지는 체크 해제
+                    widget.setChecked(i == row)
 
             # UI 업데이트 강제 (체크박스 이미지가 먼저 보이도록)
             QApplication.processEvents()
@@ -3856,8 +4151,11 @@ class InfoWidget(QWidget):
                     QMessageBox.information(self, "알림", "이미 추가된 주소입니다.")
                     return
 
-            # 이미지 경로 (Windows 경로 슬래시 변환)
-            unchecked_img = resource_path("assets/image/test_config/url_row_checkbox_unchecked.png").replace(chr(92), "/")
+            # 이미지 경로 (체크박스 분리 - 반응형)
+            bg_image = "assets/image/test_config/row.png"
+            bg_selected_image = "assets/image/test_config/row_selected.png"
+            checkbox_unchecked = "assets/image/test_config/checkbox_unchecked.png"
+            checkbox_checked = "assets/image/test_config/checkbox_checked.png"
 
             # 테이블에 추가
             row = self.url_table.rowCount()
@@ -3880,27 +4178,15 @@ class InfoWidget(QWidget):
             row_num_label.clicked.connect(self.on_url_row_selected)
             self.url_table.setCellWidget(row, 0, row_num_label)
 
-            # 컬럼 1: URL (ClickableLabel - 이미지 배경)
-            url_label = ClickableLabel(final_url, row, 1)
-            url_label.setAlignment(Qt.AlignCenter)
-            url_label.setStyleSheet(f"""
-                QLabel {{
-                    background-image: url('{unchecked_img}');
-                    background-position: left center;
-                    background-repeat: no-repeat;
-                    border: none;
-                    border-bottom: 1px solid #CCCCCC;
-                    font-family: 'Noto Sans KR';
-                    font-size: 19px;
-                    font-weight: 400;
-                    color: #000000;
-                    margin: 0px;
-                    padding: 0px;
-                }}
-            """)
-            url_label.setProperty("url", final_url)
-            url_label.clicked.connect(self.on_url_row_selected)
-            self.url_table.setCellWidget(row, 1, url_label)
+            # 컬럼 1: URL (ClickableCheckboxRowWidget - 체크박스 분리, paintEvent 배경)
+            url_widget = ClickableCheckboxRowWidget(
+                final_url, row, 1,
+                bg_image, bg_selected_image,
+                checkbox_unchecked, checkbox_checked
+            )
+            url_widget.setProperty("url", final_url)
+            url_widget.clicked.connect(self.on_url_row_selected)
+            self.url_table.setCellWidget(row, 1, url_widget)
 
             self.url_table.setRowHeight(row, 39)
 
@@ -3918,16 +4204,12 @@ class InfoWidget(QWidget):
             QMessageBox.critical(self, "오류", f"주소 추가 중 오류가 발생했습니다:\n{str(e)}")
 
     def on_url_row_selected(self, row, col):
-        """URL 테이블 행 클릭 시 두 컬럼 모두 스타일 변경 (2컬럼 방식)"""
+        """URL 테이블 행 클릭 시 두 컬럼 모두 스타일 변경 (2컬럼 방식 - ClickableCheckboxRowWidget 사용)"""
         try:
-            # 이미지 경로 (Windows 경로 슬래시 변환)
-            checked_img = resource_path("assets/image/test_config/url_row_checkbox_checked.png").replace(chr(92), "/")
-            unchecked_img = resource_path("assets/image/test_config/url_row_checkbox_unchecked.png").replace(chr(92), "/")
-
             # 모든 URL 행의 스타일 업데이트
             for i in range(self.url_table.rowCount()):
                 row_num_widget = self.url_table.cellWidget(i, 0)  # 행 번호 컬럼
-                url_widget = self.url_table.cellWidget(i, 1)  # URL 컬럼
+                url_widget = self.url_table.cellWidget(i, 1)  # URL 컬럼 (ClickableCheckboxRowWidget)
 
                 if i == row:
                     # 클릭된 행: 선택 스타일 적용
@@ -3943,22 +4225,8 @@ class InfoWidget(QWidget):
                                 color: #000000;
                             }
                         """)
-                    if url_widget:
-                        url_widget.setStyleSheet(f"""
-                            QLabel {{
-                                background-image: url('{checked_img}');
-                                background-position: left center;
-                                background-repeat: no-repeat;
-                                border: none;
-                                border-bottom: 1px solid #CCCCCC;
-                                font-family: 'Noto Sans KR';
-                                font-size: 19px;
-                                font-weight: 400;
-                                color: #000000;
-                                margin: 0px;
-                                padding: 0px;
-                            }}
-                        """)
+                    if url_widget and hasattr(url_widget, 'setChecked'):
+                        url_widget.setChecked(True)
                 else:
                     # 나머지 행: 기본 스타일 적용
                     if row_num_widget:
@@ -3973,22 +4241,8 @@ class InfoWidget(QWidget):
                                 color: #000000;
                             }
                         """)
-                    if url_widget:
-                        url_widget.setStyleSheet(f"""
-                            QLabel {{
-                                background-image: url('{unchecked_img}');
-                                background-position: left center;
-                                background-repeat: no-repeat;
-                                border: none;
-                                border-bottom: 1px solid #CCCCCC;
-                                font-family: 'Noto Sans KR';
-                                font-size: 19px;
-                                font-weight: 400;
-                                color: #000000;
-                                margin: 0px;
-                                padding: 0px;
-                            }}
-                        """)
+                    if url_widget and hasattr(url_widget, 'setChecked'):
+                        url_widget.setChecked(False)
 
             # 선택된 행 추적
             self.selected_url_row = row
