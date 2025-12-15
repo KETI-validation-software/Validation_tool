@@ -39,6 +39,9 @@ cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_in_validation = {
       "MotionDetection",
       "Leak"
     ],
+    "referenceFieldId": "cmj6hdjek01qsxei0ydzyxlg3",
+    "referenceField": "sensorDeviceStatus",
+    "referenceEndpoint": "/SensorDeviceControl",
     "score": 0
   }
 }
@@ -94,6 +97,18 @@ cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_in_validation = {
     "referenceListField": "doorID",
     "referenceListEndpoint": "/DoorProfiles",
     "score": 0
+  }
+}
+
+# DoorControl
+cmiqr1acx00i5ie8fi022t1hp_DoorControl_in_validation = {
+  "doorID": {
+    "enabled": True,
+    "validationType": "request-field-list-match",
+    "referenceEndpoint": "/RealtimeDoorStatus",
+    "referenceListField": "doorID",
+    "referenceListEndpoint": "/RealtimeDoorStatus",
+    "score": 0
   },
   "eventFilter": {
     "enabled": True,
@@ -105,6 +120,9 @@ cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_in_validation = {
       "AuthSuccess",
       "AuthFail"
     ],
+    "referenceFieldId": "cmj13a9eu01vx12s9wja5mxt7",
+    "referenceField": "doorSensor",
+    "referenceEndpoint": "/RealtimeDoorStatus",
     "score": 0
   }
 }

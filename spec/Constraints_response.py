@@ -136,30 +136,25 @@ cmii7shen005i8z1tagevx4qh_RealtimeSensorData_webhook_in_constraints = {
     "valueType": "preset",
     "required": True
   },
-  "sensorDeviceList.sensorDeviceID": {
-    "id": "cmiwkzuqx02xk844gd9lr6k8p",
-    "valueType": "preset",
-    "required": True
+  "sensorDeviceID": {
+    "id": "cmisg51v408a85vy7mrhteunz",
+    "referenceFieldId": "cmisg3n7u088o5vy75dl8ge3h",
+    "valueType": "request-based",
+    "required": True,
+    "referenceEndpoint": "/SensorDeviceControl",
+    "referenceField": "sensorDeviceID"
   },
-  "sensorDeviceList.measureTime": {
-    "id": "cmiwkzuqx02xm844ghyx3o5j7",
-    "valueType": "preset",
-    "required": True
-  },
-  "sensorDeviceList.sensorDeviceType": {
-    "id": "cmiwkzuqy02xo844glk3msr3k",
-    "valueType": "preset",
-    "required": True
-  },
-  "sensorDeviceList.sensorDeviceUnit": {
-    "id": "cmiwkzuqy02xq844gh7csg9af",
-    "valueType": "preset",
-    "required": True
-  },
-  "sensorDeviceList.sensorDeviceValue": {
-    "id": "cmiwkzuqz02xs844gqt2i349j",
-    "valueType": "preset",
-    "required": True
+  "sensorDeviceStatus": {
+    "id": "cmj6hdjek01qsxei0ydzyxlg3",
+    "valueType": "random",
+    "required": True,
+    "referenceField": "(참조 필드 미선택)",
+    "referenceEndpoint": "/SensorDeviceControl",
+    "validValueField": "sensorControl",
+    "validValues": [
+      "AlarmOn",
+      "AlarmOff"
+    ]
   }
 }
 
