@@ -77,8 +77,9 @@ cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_webhook_in_validation = {
   "doorList.doorID": {
     "enabled": True,
     "validationType": "request-field-list-match",
-    "referenceListField": "doorID",
-    "referenceListEndpoint": "/RealtimeDoorStatus",
+    "referenceFieldId": "cmixusnx90hatp002m3rnln60",
+    "referenceField": "doorID",
+    "referenceEndpoint": "/RealtimeDoorStatus",
     "score": 0
   },
   "doorList.doorSensor": {
@@ -115,7 +116,6 @@ cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_webhook_in_validation = {
     "enabled": True,
     "validationType": "request-field-match",
     "referenceFieldId": "cmixuu94o0hchp002wh8j30df",
-    "referenceField": "commandType",
     "referenceEndpoint": "/DoorControl",
     "score": 0
   }
