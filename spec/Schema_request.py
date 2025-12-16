@@ -51,7 +51,7 @@ cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_in_schema = {
     "doorList": [{
     "doorID": str,
 }],
-    "duration": str,
+    "duration": int,
     "transProtocol": {
     "transProtocolType": str,
     "transProtocolDesc": str,
