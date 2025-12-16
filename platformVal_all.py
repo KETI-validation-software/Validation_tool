@@ -2746,12 +2746,12 @@ class MyApp(QWidget):
                     else:
                         accumulated['data_parts'].append(f"\n{tmp_res_auth}")
 
-                    # 실시간 모니터링 창에 요청 데이터 표시 (중복 제거)
-                    # if retry_attempt == 0:
-                    #     self.append_monitor_log(
-                    #         step_name=f"{self.Server.message[self.cnt]} ({retry_attempt + 1}/{current_retries})",
-                    #         request_json=tmp_res_auth
-                    #     )
+                    # 실시간 모니터링 창에 요청 데이터 표시 (API 이름 중복 없이 데이터만)
+                    if retry_attempt == 0:
+                        self.append_monitor_log(
+                            step_name="",
+                            request_json=tmp_res_auth
+                        )
 
                     accumulated['raw_data_list'].append(current_data)
 
@@ -2772,13 +2772,12 @@ class MyApp(QWidget):
                     else:
                         accumulated['data_parts'].append(f"\n{tmp_res_auth}")
 
-                    # 실시간 모니터링 창에 요청 데이터 표시 (중복 제거)
-                    # if retry_attempt == 0:
-                    #     display_name = self.Server.message_display[self.cnt] if self.cnt < len(self.Server.message_display) else "Unknown"
-                    #     self.append_monitor_log(
-                    #         step_name=f"{display_name} ({retry_attempt + 1}/{current_retries})",
-                    #         request_json=tmp_res_auth
-                    #     )
+                    # 실시간 모니터링 창에 요청 데이터 표시 (API 이름 중복 없이 데이터만)
+                    if retry_attempt == 0:
+                        self.append_monitor_log(
+                            step_name="",
+                            request_json=tmp_res_auth
+                        )
 
                     accumulated['raw_data_list'].append(current_data)
 

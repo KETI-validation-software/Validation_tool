@@ -1,0 +1,2 @@
+{"time": "2025-12-16T02:52:15.169798Z", "api": "DoorControl", "dir": "REQUEST", "data": {"doorID": "door0001", "commandType": "Lock"}}
+{"time": "2025-12-16T02:52:15.173787Z", "api": "DoorControl", "dir": "RESPONSE", "data": {"code": "200", "message": "성공"}}
