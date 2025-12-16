@@ -22,9 +22,9 @@
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 99.12,
-    "totalFields": 114,
-    "passedFields": 113,
+    "score": 98.97,
+    "totalFields": 97,
+    "passedFields": 96,
     "failedFields": 1
   },
   "testResult": [
@@ -33,8 +33,8 @@
       "testSpecId": "cmiqr2b9j00i9ie8frw439h8i",
       "testSpecName": "sensor002",
       "score": 100.0,
-      "totalFields": 29,
-      "passedFields": 29,
+      "totalFields": 26,
+      "passedFields": 26,
       "failedFields": 0,
       "apis": [
         {
@@ -71,8 +71,8 @@
           "endpoint": "/Capabilities",
           "score": 100.0,
           "validationCnt": 1,
-          "totalFields": 5,
-          "passFields": 5,
+          "totalFields": 4,
+          "passFields": 4,
           "failFields": 0,
           "validations": [
             {
@@ -105,8 +105,8 @@
           "endpoint": "/SensorDeviceProfiles",
           "score": 100.0,
           "validationCnt": 1,
-          "totalFields": 11,
-          "passFields": 11,
+          "totalFields": 9,
+          "passFields": 9,
           "failFields": 0,
           "validations": [
             {
@@ -185,7 +185,7 @@
                 "code": "200",
                 "message": "성공",
                 "sensorDeviceID": "iot0004",
-                "sensorDeviceStatus": "AlarmOff"
+                "sensorDeviceStatus": "AlarmOn"
               },
               "validationErrors": [
                 "[시도 1/1]",
@@ -198,7 +198,7 @@
           "id": "cmisg86id08bm5vy7ezcbr7oy",
           "name": "보안용 센서 단말 제어 정보 연동-제어",
           "method": "POST",
-          "endpoint": "/SensorDeviceControl2",
+          "endpoint": "/SensorDeviceControl",
           "score": 100.0,
           "validationCnt": 1,
           "totalFields": 4,
@@ -211,7 +211,7 @@
                 "code": "200",
                 "message": "성공",
                 "sensorDeviceID": "iot0004",
-                "sensorDeviceStatus": "AlarmOn"
+                "sensorDeviceStatus": "AlarmOff"
               },
               "validationErrors": [
                 "[시도 1/1]",
@@ -227,8 +227,8 @@
       "testSpecId": "cmiqr1jha00i6ie8fb1scb3go",
       "testSpecName": "ac002",
       "score": 100.0,
-      "totalFields": 46,
-      "passedFields": 46,
+      "totalFields": 39,
+      "passedFields": 39,
       "failedFields": 0,
       "apis": [
         {
@@ -265,8 +265,8 @@
           "endpoint": "/Capabilities",
           "score": 100.0,
           "validationCnt": 1,
-          "totalFields": 5,
-          "passFields": 5,
+          "totalFields": 4,
+          "passFields": 4,
           "failFields": 0,
           "validations": [
             {
@@ -299,8 +299,8 @@
           "endpoint": "/DoorProfiles",
           "score": 100.0,
           "validationCnt": 1,
-          "totalFields": 20,
-          "passFields": 20,
+          "totalFields": 16,
+          "passFields": 16,
           "failFields": 0,
           "validations": [
             {
@@ -391,8 +391,8 @@
           "endpoint": "/RealtimeDoorStatus",
           "score": 100.0,
           "validationCnt": 1,
-          "totalFields": 7,
-          "passFields": 7,
+          "totalFields": 6,
+          "passFields": 6,
           "failFields": 0,
           "validations": [
             {
@@ -456,11 +456,11 @@
           "id": "cmixuvzks0hd3p002rcrvqdt4-registration",
           "name": "실시간 출입통제 장치 상태 정보 연동-결과조회",
           "method": "POST",
-          "endpoint": "/RealtimeDoorStatus2",
+          "endpoint": "/RealtimeDoorStatus",
           "score": 100.0,
           "validationCnt": 1,
-          "totalFields": 7,
-          "passFields": 7,
+          "totalFields": 6,
+          "passFields": 6,
           "failFields": 0,
           "validations": [
             {
@@ -482,7 +482,7 @@
           "id": "cmixuvzks0hd3p002rcrvqdt4-webhook",
           "name": "실시간 출입통제 장치 상태 정보 연동-결과조회 (Webhook)",
           "method": "POST",
-          "endpoint": "/RealtimeDoorStatus2/webhook",
+          "endpoint": "/RealtimeDoorStatus/webhook",
           "score": 0,
           "validationCnt": 1,
           "totalFields": 0,
@@ -502,9 +502,9 @@
       "testGroup": "cmisfjfzt07tm5vy7qslmisks",
       "testSpecId": "cmiqr0kdw00i4ie8fr3firjtg",
       "testSpecName": "vid002",
-      "score": 97.44,
-      "totalFields": 39,
-      "passedFields": 38,
+      "score": 96.88,
+      "totalFields": 32,
+      "passedFields": 31,
       "failedFields": 1,
       "apis": [
         {
@@ -541,8 +541,8 @@
           "endpoint": "/Capabilities",
           "score": 100.0,
           "validationCnt": 1,
-          "totalFields": 8,
-          "passFields": 8,
+          "totalFields": 6,
+          "passFields": 6,
           "failFields": 0,
           "validations": [
             {
@@ -575,10 +575,10 @@
           "name": "카메라 목록 연동",
           "method": "POST",
           "endpoint": "/CameraProfiles",
-          "score": 92.0,
+          "score": 89.0,
           "validationCnt": 1,
-          "totalFields": 12,
-          "passFields": 11,
+          "totalFields": 9,
+          "passFields": 8,
           "failFields": 1,
           "validations": [
             {
@@ -630,8 +630,8 @@
           "endpoint": "/PtzStatus",
           "score": 100.0,
           "validationCnt": 1,
-          "totalFields": 10,
-          "passFields": 10,
+          "totalFields": 8,
+          "passFields": 8,
           "failFields": 0,
           "validations": [
             {
@@ -708,5 +708,5 @@
       ]
     }
   ],
-  "completedDate": "2025-12-16T14:12:36Z"
+  "completedDate": "2025-12-16T16:49:18Z"
 }
