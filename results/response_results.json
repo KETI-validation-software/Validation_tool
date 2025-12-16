@@ -221,7 +221,90 @@
           ]
         }
       ]
+    },
+    {
+      "testGroup": "cmisfjfzt07tm5vy7qslmisks",
+      "testSpecId": "cmiqr1jha00i6ie8fb1scb3go",
+      "testSpecName": "ac002",
+      "score": 0,
+      "totalFields": 0,
+      "passedFields": 0,
+      "failedFields": 0,
+      "apis": [
+        {
+          "id": "cmisgv0ua08o55vy7yvk4aw0a",
+          "name": "사용자 인증",
+          "method": "POST",
+          "endpoint": "/Authentication",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmisjr2u40au05vy7kt6bb6zl",
+          "name": "전송 지원 기능 정보 연동",
+          "method": "POST",
+          "endpoint": "/Capabilities",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmiskf6w20dcm5vy7cjao08fw",
+          "name": "바이오 및 출입통제 장치 목록 정보",
+          "method": "POST",
+          "endpoint": "/DoorProfiles",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmixuoetf0gr9p002gy101xid",
+          "name": "실시간 출입통제 장치 상태 정보 연동-상태조회",
+          "method": "POST",
+          "endpoint": "/RealtimeDoorStatus",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmixuttgv0hbyp002h6os6wjc",
+          "name": "출입 통제 장치 제어 정보 연동",
+          "method": "POST",
+          "endpoint": "/DoorControl",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmixuvzks0hd3p002rcrvqdt4",
+          "name": "실시간 출입통제 장치 상태 정보 연동-결과조회",
+          "method": "POST",
+          "endpoint": "/RealtimeDoorStatus2",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        }
+      ]
     }
   ],
-  "completedDate": "2025-12-16T09:33:18Z"
+  "completedDate": "2025-12-16T10:24:37Z"
 }

@@ -22,20 +22,20 @@
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 87.5,
+    "score": 100.0,
     "totalFields": 8,
-    "passedFields": 7,
-    "failedFields": 1
+    "passedFields": 8,
+    "failedFields": 0
   },
   "testResult": [
     {
       "testGroup": "cmisfix8407te5vy7fleq8pkf",
       "testSpecId": "cmiqr201z00i8ie8fitdg5t1b",
       "testSpecName": "sensor002",
-      "score": 87.5,
+      "score": 100.0,
       "totalFields": 8,
-      "passedFields": 7,
-      "failedFields": 1,
+      "passedFields": 8,
+      "failedFields": 0,
       "apis": [
         {
           "id": "cmise5c9900jr5vy7j5kdk1z6",
@@ -128,11 +128,11 @@
           "name": "보안용 센서 단말 제어 정보 연동-제어",
           "method": "POST",
           "endpoint": "/SensorDeviceControl2",
-          "score": 50.0,
+          "score": 100.0,
           "validationCnt": 1,
           "totalFields": 2,
-          "passFields": 1,
-          "failFields": 1,
+          "passFields": 2,
+          "failFields": 0,
           "validations": [
             {
               "attempt": 1,
@@ -141,8 +141,7 @@
                 "commandType": "AlarmOn"
               },
               "validationErrors": [
-                "[Inbound]",
-                "- [맥락 오류] sensorDeviceID: 값 불일치: ['iot0003'] != ['iot0001', 'iot0002', 'iot0003', 'iot0004']"
+                "오류가 없습니다."
               ]
             }
           ]
@@ -150,5 +149,5 @@
       ]
     }
   ],
-  "completedDate": "2025-12-16T09:33:17Z"
+  "completedDate": "2025-12-16T10:24:36Z"
 }
