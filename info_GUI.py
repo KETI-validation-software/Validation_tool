@@ -95,8 +95,9 @@ class InfoWidget(QWidget):
                 height_ratio = current_height / self.original_window_size[1]
 
                 # 최소 비율은 1.0 (원본 크기 이하로 줄어들지 않음)
+                # Page1 세로 비율은 최대 1.2로 제한 (과도한 여백 방지)
                 width_ratio = max(1.0, width_ratio)
-                height_ratio = max(1.0, height_ratio)
+                height_ratio = max(1.0, min(1.2, height_ratio))
 
                 # 새 패널 크기 계산 (가로/세로 독립적으로 적용)
                 new_width = int(self.original_panel_size[0] * width_ratio)
@@ -1368,6 +1369,9 @@ class InfoWidget(QWidget):
         layout = QVBoxLayout()
         layout.setContentsMargins(48, 32, 48, 40)  # left: 48, top: 32, right: 48, bottom: 40
         layout.setSpacing(0)
+
+        # 세로 확장 시 컨텐츠를 중앙에 배치 (상단 여백)
+        layout.addStretch()
 
         # 타이틀 컨테이너 (776x106px)
         self.panel_title_container = QWidget()
