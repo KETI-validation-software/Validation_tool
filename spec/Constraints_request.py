@@ -159,7 +159,7 @@ cmiqr1jha00i6ie8fb1scb3go_DoorControl_in_constraints = {
     "required": True,
     "referenceField": "(참조 필드 미선택)",
     "referenceEndpoint": "/DoorControl",
-    "randomType": "exclude-reference-valid-values",
+    "randomType": "valid-values",
     "validValueField": "acControl",
     "validValues": [
       "Lock",
