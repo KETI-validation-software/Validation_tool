@@ -154,11 +154,12 @@ cmiqr1jha00i6ie8fb1scb3go_DoorControl_in_constraints = {
     "required": True
   },
   "commandType": {
-    "id": "cmixuu94o0hchp002wh8j30df",
+    "id": "cmj83qob2000isnx0rwhvblif",
+    "referenceFieldId": "cmixumswj0gq7p0020kzg25w8",
     "valueType": "random",
     "required": True,
-    "referenceField": "(참조 필드 미선택)",
-    "referenceEndpoint": "/DoorControl",
+    "referenceEndpoint": "/DoorProfiles",
+    "referenceField": "doorSensor",
     "randomType": "valid-values",
     "validValueField": "acControl",
     "validValues": [

@@ -2086,6 +2086,9 @@ class InfoWidget(QWidget):
 
         layout.addWidget(button_container, alignment=Qt.AlignHCenter)
 
+        # 세로 확장 시 여분의 공간을 하단으로 밀어냄
+        layout.addStretch()
+
         panel.setLayout(layout)
         return panel
 
