@@ -3319,7 +3319,7 @@ class MyApp(QWidget):
                 self.valResult.clear()
                 self.append_monitor_log(
                     step_name=f"시스템 전환 완료: {self.spec_description}",
-                    details=f"Spec ID: {self.current_spec_id} | API 개수: {len(self.videoMessages)}개 | API 목록: {', '.join(self.videoMessagesDisplay)}"
+                    details=f"API 개수: {len(self.videoMessages)}개 | API 목록: {', '.join(self.videoMessagesDisplay)}"
                 )
 
                 print(f"[SELECT] ✅ 시스템 전환 완료")
@@ -4673,11 +4673,11 @@ class MyApp(QWidget):
         monitor_section_layout.setContentsMargins(0, 0, 0, 0)
         monitor_section_layout.setSpacing(0)
 
-        # 수신 메시지 실시간 모니터링 라벨 (1064 × 24, 20px Medium)
+        # 수신 메시지 실시간 모니터링 라벨 (1064 × 24, 22px Medium)
         monitor_label = QLabel("수신 메시지 실시간 모니터링")
         monitor_label.setFixedSize(1064, 24)
         monitor_label.setStyleSheet("""
-            font-size: 20px;
+            font-size: 22px;
             font-family: "Noto Sans KR";
             font-weight: 500;
             color: #000000;
@@ -4699,7 +4699,7 @@ class MyApp(QWidget):
                 border-radius: 4px;
                 border: 1px solid #CECECE;
                 font-family: "Noto Sans KR";
-                font-size: 19px;
+                font-size: 32px;
                 font-weight: 400;
                 color: #1B1B1C;
             }
@@ -4734,7 +4734,7 @@ class MyApp(QWidget):
             QLabel {
                 color: #CECECE;
                 font-family: "Noto Sans KR";
-                font-size: 18px;
+                font-size: 20px;
                 font-weight: 400;
                 background: transparent;
             }
@@ -5382,8 +5382,8 @@ class MyApp(QWidget):
         <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 15px;">
             <tr>
                 <td valign="middle">
-                    <span style="font-size: 14px; font-weight: bold; color: {text_color}; font-family: 'Noto Sans KR';">{step_name}</span>
-                    <span style="font-size: 11px; color: #9ca3af; font-family: 'Consolas', monospace; margin-left: 8px;">{timestamp}</span>
+                    <span style="font-size: 20px; font-weight: bold; color: {text_color}; font-family: 'Noto Sans KR';">{step_name}</span>
+                    <span style="font-size: 16px; color: #9ca3af; font-family: 'Consolas', monospace; margin-left: 8px;">{timestamp}</span>
                 </td>
             </tr>
         </table>
@@ -5399,7 +5399,7 @@ class MyApp(QWidget):
         # 2-1. 상세 내용 (Details)
         if details:
             html_content += f"""
-                <div style="margin-bottom: 8px; font-size: 12px; color: #6b7280; font-family: 'Noto Sans KR';">
+                <div style="margin-bottom: 8px; font-size: 18px; color: #6b7280; font-family: 'Noto Sans KR';">
                     {details}
                 </div>
             """
@@ -5412,9 +5412,9 @@ class MyApp(QWidget):
             if is_json_structure:
                 html_content += f"""
                 <div style="margin-top: 5px; margin-bottom: 10px;">
-                    <div style="font-size: 10px; color: #9ca3af; font-weight: bold; margin-bottom: 4px;">📦 DATA PAYLOAD</div>
+                    <div style="font-size: 15px; color: #9ca3af; font-weight: bold; margin-bottom: 4px;">📦 데이터</div>
                     <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 10px;">
-                        <pre style="margin: 0; font-family: 'Consolas', monospace; font-size: 12px; color: #1f2937;">{escaped_json}</pre>
+                        <pre style="margin: 0; font-family: 'Consolas', monospace; font-size: 18px; color: #1f2937;">{escaped_json}</pre>
                     </div>
                 </div>
                 """
@@ -5422,15 +5422,15 @@ class MyApp(QWidget):
                 # JSON이 아닌 일반 텍스트일 경우
                 html_content += f"""
                 <div style="margin-top: 5px; margin-bottom: 10px;">
-                    <pre style="font-size: 12px; color: #6b7280; font-family: 'Consolas', monospace;">{escaped_json}</pre>
+                    <pre style="font-size: 18px; color: #6b7280; font-family: 'Consolas', monospace;">{escaped_json}</pre>
                 </div>
                 """
 
         # 2-3. 점수 (Score)
         if score is not None:
             html_content += f"""
-                <div style="margin-top: 5px; font-size: 12px; color: #6b7280; font-weight: bold; font-family: 'Consolas', monospace;">
-                    Score: {score:.1f}%
+                <div style="margin-top: 5px; font-size: 18px; color: #6b7280; font-weight: bold; font-family: 'Consolas', monospace;">
+                    점수: {score:.1f}%
                 </div>
             """
 
@@ -5897,7 +5897,7 @@ class MyApp(QWidget):
             # ✅ 18. 시작 메시지
             self.append_monitor_log(
                 step_name=f"시스템 검증 시작: {self.spec_description}",
-                details=f"Spec ID: {self.current_spec_id} | API 개수: {len(self.videoMessages)}개"
+                details=f"API 개수: {len(self.videoMessages)}개"
             )
         else:
             # ========== 재개 모드: 저장된 상태 사용, 초기화 건너뛰기 ==========

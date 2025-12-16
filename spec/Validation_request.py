@@ -40,10 +40,10 @@ cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_in_validation = {
 cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl2_in_validation = {
   "sensorDeviceID": {
     "enabled": True,
-    "validationType": "response-field-match",
-    "referenceFieldId": "cmisfgtvs07sy5vy7f2hjy5aa",
+    "validationType": "request-field-match",
+    "referenceFieldId": "cmisg3n7u088o5vy75dl8ge3h",
     "referenceField": "sensorDeviceID",
-    "referenceEndpoint": "/SensorDeviceProfiles",
+    "referenceEndpoint": "/SensorDeviceControl",
     "score": 0
   },
   "commandType": {
