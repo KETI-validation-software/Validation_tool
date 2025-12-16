@@ -837,8 +837,11 @@ class InfoWidget(QWidget):
 
         # bg_root 내부 레이아웃
         bg_root_layout = QVBoxLayout(self.bg_root)
-        bg_root_layout.setContentsMargins(0, 36, 0, 4)  # 좌, 상(padding36), 우, 하
+        bg_root_layout.setContentsMargins(0, 36, 0, 44)  # 좌, 상(padding36), 우, 하(padding44)
         bg_root_layout.setSpacing(0)
+
+        # 세로 확장 시 컨텐츠를 중앙에 배치 (상단 여백)
+        bg_root_layout.addStretch()
 
         # 타이틀 컨테이너 (1680x52px) - 반응형
         self.page2_title_container = QWidget()
@@ -982,7 +985,7 @@ class InfoWidget(QWidget):
         self.original_api_group_size = (744, 376)
         left_layout.addWidget(self.api_group)
 
-        # 여분의 공간을 하단으로 보내 컨텐츠를 상단에 고정
+        # 좌우 패널 정렬 유지를 위한 하단 stretch
         left_layout.addStretch()
 
         self.left_panel.setLayout(left_layout)
@@ -1282,7 +1285,7 @@ class InfoWidget(QWidget):
 
         right_layout.addWidget(self.button_container)
 
-        # 여분의 공간을 버튼 아래로 밀어냄 (URL과 버튼 사이 간격 고정)
+        # 좌우 패널 정렬 유지를 위한 하단 stretch
         right_layout.addStretch()
 
         self.right_panel.setLayout(right_layout)
@@ -1292,6 +1295,9 @@ class InfoWidget(QWidget):
 
         # panels_container를 bg_root_layout에 상단 가운데 정렬로 추가
         bg_root_layout.addWidget(self.panels_container, 1, Qt.AlignTop | Qt.AlignHCenter)
+
+        # 세로 확장 시 컨텐츠를 중앙에 배치 (하단 여백)
+        bg_root_layout.addStretch()
 
         # bg_root를 content_layout에 가운데 정렬로 추가
         content_layout.addWidget(self.bg_root, 0, Qt.AlignHCenter | Qt.AlignVCenter)
