@@ -1215,9 +1215,6 @@ class InfoWidget(QWidget):
         self.connection_section = self.create_connection_section()
         right_layout.addWidget(self.connection_section)
 
-        # 여분의 공간을 여기로 보내 컨텐츠를 상단에 고정 (버튼은 하단에 유지)
-        right_layout.addStretch()
-
         # padding 32px
         right_layout.addSpacing(32)
 
@@ -1283,6 +1280,9 @@ class InfoWidget(QWidget):
         button_layout.addWidget(self.exit_btn)
 
         right_layout.addWidget(self.button_container)
+
+        # 여분의 공간을 버튼 아래로 밀어냄 (URL과 버튼 사이 간격 고정)
+        right_layout.addStretch()
 
         self.right_panel.setLayout(right_layout)
 
