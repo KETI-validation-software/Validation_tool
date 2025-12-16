@@ -3343,7 +3343,7 @@ class MyApp(QWidget):
             if is_json_structure:
                 html_content += f"""
                 <div style="margin-top: 5px; margin-bottom: 10px;">
-                    <div style="font-size: 15px; color: #9ca3af; font-weight: bold; margin-bottom: 4px;">📦 DATA PAYLOAD</div>
+                    <div style="font-size: 15px; color: #9ca3af; font-weight: bold; margin-bottom: 4px;">📦 데이터</div>
                     <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 10px;">
                         <pre style="margin: 0; font-family: 'Consolas', monospace; font-size: 18px; color: #1f2937;">{escaped_json}</pre>
                     </div>
@@ -3361,7 +3361,7 @@ class MyApp(QWidget):
         if score is not None:
             html_content += f"""
                 <div style="margin-top: 5px; font-size: 18px; color: #6b7280; font-weight: bold; font-family: 'Consolas', monospace;">
-                    Score: {score:.1f}%
+                    점수: {score:.1f}%
                 </div>
             """
 
