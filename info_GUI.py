@@ -341,6 +341,7 @@ class InfoWidget(QWidget):
                     new_left_panel_height = int(self.original_left_panel_size[1] * height_ratio_p2)
                     self.left_panel.setFixedSize(new_left_panel_width, new_left_panel_height)
 
+
                     # "시험 분야별 시나리오" 타이틀 라벨 크기 조정 (높이 고정)
                     if hasattr(self, 'field_scenario_title') and hasattr(self, 'original_field_scenario_title_size'):
                         new_title_width = int(self.original_field_scenario_title_size[0] * width_ratio_p2)
@@ -352,11 +353,24 @@ class InfoWidget(QWidget):
                         new_field_group_height = int(self.original_field_group_size[1] * height_ratio_p2)
                         self.field_group.setFixedSize(new_field_group_width, new_field_group_height)
 
-                        # 내부 테이블 크기 조정 (시험 분야 테이블 - 높이 고정)
+                        # 내부 테이블 크기 조정 (시험 분야 테이블 - 가로 + 세로)
                         if hasattr(self, 'test_field_table') and hasattr(self, 'original_test_field_table_size'):
                             new_table_width = int(self.original_test_field_table_size[0] * width_ratio_p2)
-                            self.test_field_table.setFixedSize(new_table_width, self.original_test_field_table_size[1])
+                            new_table_height = int(self.original_test_field_table_size[1] * height_ratio_p2)
+                            self.test_field_table.setFixedSize(new_table_width, new_table_height)
                             # Stretch 모드이므로 컬럼이 자동으로 테이블 너비를 채움
+
+                            # 시험 분야 테이블 행 높이 조정
+                            if hasattr(self, 'original_test_field_row_height'):
+                                new_row_height = int(self.original_test_field_row_height * height_ratio_p2)
+                                self.test_field_table.verticalHeader().setDefaultSectionSize(new_row_height)
+                                # 기존 행들의 높이 및 셀 위젯 높이 업데이트
+                                for row in range(self.test_field_table.rowCount()):
+                                    self.test_field_table.setRowHeight(row, new_row_height)
+                                    # 셀 위젯 높이도 조정 (ClickableRowWidget)
+                                    cell_widget = self.test_field_table.cellWidget(row, 0)
+                                    if cell_widget:
+                                        cell_widget.setFixedHeight(new_row_height)
 
                         # 시나리오 테이블 크기 조정 (가로 + 세로)
                         if hasattr(self, 'scenario_table') and hasattr(self, 'original_scenario_table_size'):
@@ -365,19 +379,32 @@ class InfoWidget(QWidget):
                             self.scenario_table.setFixedSize(new_table_width, new_table_height)
                             # Stretch 모드이므로 컬럼이 자동으로 테이블 너비를 채움
 
-                            # 시나리오 테이블 배경 크기 조정 (가로 + 세로)
+                            # 시나리오 테이블 행 높이 조정
+                            if hasattr(self, 'original_scenario_row_height'):
+                                new_row_height = int(self.original_scenario_row_height * height_ratio_p2)
+                                self.scenario_table.verticalHeader().setDefaultSectionSize(new_row_height)
+                                # 기존 행들의 높이 및 셀 위젯 높이 업데이트
+                                for row in range(self.scenario_table.rowCount()):
+                                    self.scenario_table.setRowHeight(row, new_row_height)
+                                    # 셀 위젯 높이도 조정 (ClickableCheckboxRowWidget)
+                                    cell_widget = self.scenario_table.cellWidget(row, 0)
+                                    if cell_widget:
+                                        cell_widget.setFixedHeight(new_row_height)
+
+                            # 시나리오 테이블 배경 크기 조정 (테이블과 동일한 크기)
                             if hasattr(self, 'scenario_column_background') and hasattr(self, 'original_scenario_column_background_geometry'):
                                 orig = self.original_scenario_column_background_geometry
                                 new_width = int(orig[2] * width_ratio_p2)
-                                new_height = int(orig[3] * height_ratio_p2)
-                                self.scenario_column_background.setGeometry(orig[0], orig[1], new_width, new_height)
+                                # 테이블과 동일한 높이 사용
+                                self.scenario_column_background.setGeometry(orig[0], orig[1], new_width, new_table_height)
 
                             # 시나리오 placeholder 라벨 크기 조정 (가로 + 세로)
+                            # 높이는 (테이블 높이 - 헤더 높이)로 계산해야 테이블과 일치함
                             if hasattr(self, 'scenario_placeholder_label') and hasattr(self, 'original_scenario_placeholder_geometry'):
                                 orig = self.original_scenario_placeholder_geometry
                                 new_width = int(orig[2] * width_ratio_p2)
-                                new_height = int(orig[3] * height_ratio_p2)
-                                self.scenario_placeholder_label.setGeometry(orig[0], orig[1], new_width, new_height)
+                                new_placeholder_height = new_table_height - 31  # 헤더 높이 31px 제외
+                                self.scenario_placeholder_label.setGeometry(orig[0], orig[1], new_width, new_placeholder_height)
 
                     # "시험 API" 타이틀 라벨 크기 조정 (높이 고정)
                     if hasattr(self, 'api_title') and hasattr(self, 'original_api_title_size'):
@@ -399,6 +426,14 @@ class InfoWidget(QWidget):
                             col_width = (new_api_table_width - 50) // 2
                             self.api_test_table.horizontalHeader().resizeSection(0, col_width)
                             self.api_test_table.horizontalHeader().resizeSection(1, col_width)
+
+                            # API 테이블 행 높이 조정
+                            if hasattr(self, 'original_api_row_height'):
+                                new_row_height = int(self.original_api_row_height * height_ratio_p2)
+                                self.api_test_table.verticalHeader().setDefaultSectionSize(new_row_height)
+                                # 기존 행들의 높이도 업데이트
+                                for row in range(self.api_test_table.rowCount()):
+                                    self.api_test_table.setRowHeight(row, new_row_height)
 
                             # API 헤더 오버레이 크기 조정 (높이 고정)
                             if hasattr(self, 'api_header_overlay') and hasattr(self, 'original_api_header_overlay_geometry'):
@@ -431,35 +466,48 @@ class InfoWidget(QWidget):
                         new_auth_title_width = int(self.original_auth_title_size[0] * width_ratio_p2)
                         self.auth_title_widget.setFixedSize(new_auth_title_width, self.original_auth_title_size[1])
 
-                    # 사용자 인증 방식 박스 크기 조정 (높이 고정 - 내부 고정 요소)
+                    # 사용자 인증 방식 박스 크기 조정 (가로 + 세로)
                     if hasattr(self, 'auth_section') and hasattr(self, 'original_auth_section_size'):
                         new_auth_section_width = int(self.original_auth_section_size[0] * width_ratio_p2)
-                        self.auth_section.setFixedSize(new_auth_section_width, self.original_auth_section_size[1])
+                        new_auth_section_height = int(self.original_auth_section_size[1] * height_ratio_p2)
+                        self.auth_section.setFixedSize(new_auth_section_width, new_auth_section_height)
 
-                        # 사용자 인증 방식 내부 요소들 크기 조정 (높이 고정)
+                        # 사용자 인증 방식 내부 요소들 크기 조정 (가로 + 세로)
                         if hasattr(self, 'auth_content_widget') and hasattr(self, 'original_auth_content_widget_size'):
                             new_content_width = int(self.original_auth_content_widget_size[0] * width_ratio_p2)
-                            self.auth_content_widget.setFixedSize(new_content_width, self.original_auth_content_widget_size[1])
+                            new_content_height = int(self.original_auth_content_widget_size[1] * height_ratio_p2)
+                            self.auth_content_widget.setFixedSize(new_content_width, new_content_height)
+
+                        # 수직 구분선 크기 조정 (세로만) + pixmap 재설정
+                        if hasattr(self, 'auth_divider') and hasattr(self, 'original_auth_divider_size'):
+                            new_divider_height = int(self.original_auth_divider_size[1] * height_ratio_p2)
+                            self.auth_divider.setFixedSize(1, new_divider_height)
+                            divider_pixmap = QPixmap(resource_path("assets/image/test_config/divider.png"))
+                            self.auth_divider.setPixmap(divider_pixmap.scaled(1, new_divider_height, Qt.IgnoreAspectRatio, Qt.SmoothTransformation))
 
                         if hasattr(self, 'auth_type_widget') and hasattr(self, 'original_auth_type_widget_size'):
                             new_auth_type_width = int(self.original_auth_type_widget_size[0] * width_ratio_p2)
-                            self.auth_type_widget.setFixedSize(new_auth_type_width, self.original_auth_type_widget_size[1])
+                            new_auth_type_height = int(self.original_auth_type_widget_size[1] * height_ratio_p2)
+                            self.auth_type_widget.setFixedSize(new_auth_type_width, new_auth_type_height)
 
-                            # Digest Auth 박스 크기 조정 (높이 고정)
+                            # Digest Auth 박스 크기 조정 (가로 + 세로)
                             if hasattr(self, 'digest_option') and hasattr(self, 'original_digest_option_size'):
                                 new_digest_width = int(self.original_digest_option_size[0] * width_ratio_p2)
-                                self.digest_option.setFixedSize(new_digest_width, self.original_digest_option_size[1])
+                                new_digest_height = int(self.original_digest_option_size[1] * height_ratio_p2)
+                                self.digest_option.setFixedSize(new_digest_width, new_digest_height)
 
-                            # Bearer Token 박스 크기 조정 (높이 고정)
+                            # Bearer Token 박스 크기 조정 (가로 + 세로)
                             if hasattr(self, 'bearer_option') and hasattr(self, 'original_bearer_option_size'):
                                 new_bearer_width = int(self.original_bearer_option_size[0] * width_ratio_p2)
-                                self.bearer_option.setFixedSize(new_bearer_width, self.original_bearer_option_size[1])
+                                new_bearer_height = int(self.original_bearer_option_size[1] * height_ratio_p2)
+                                self.bearer_option.setFixedSize(new_bearer_width, new_bearer_height)
 
                         if hasattr(self, 'common_input_widget') and hasattr(self, 'original_common_input_widget_size'):
                             new_common_input_width = int(self.original_common_input_widget_size[0] * width_ratio_p2)
-                            self.common_input_widget.setFixedSize(new_common_input_width, self.original_common_input_widget_size[1])
+                            new_common_input_height = int(self.original_common_input_widget_size[1] * height_ratio_p2)
+                            self.common_input_widget.setFixedSize(new_common_input_width, new_common_input_height)
 
-                            # ID/Password 입력 필드 크기 조정 (높이 고정)
+                            # ID/Password 입력 필드 크기 조정 (가로만, 높이 고정)
                             if hasattr(self, 'id_input') and hasattr(self, 'original_id_input_size'):
                                 new_id_input_width = int(self.original_id_input_size[0] * width_ratio_p2)
                                 self.id_input.setFixedSize(new_id_input_width, self.original_id_input_size[1])
@@ -489,11 +537,22 @@ class InfoWidget(QWidget):
                             url_col_width = new_url_table_width - 50
                             self.url_table.setColumnWidth(1, url_col_width)
 
+                            # URL 테이블 행 높이 조정
+                            if hasattr(self, 'original_url_row_height'):
+                                new_row_height = int(self.original_url_row_height * height_ratio_p2)
+                                self.url_table.verticalHeader().setDefaultSectionSize(new_row_height)
+
                             # URL 테이블 셀 위젯 크기 조정 (ClickableCheckboxRowWidget)
                             for row in range(self.url_table.rowCount()):
+                                # 행 높이 조정
+                                if hasattr(self, 'original_url_row_height'):
+                                    self.url_table.setRowHeight(row, new_row_height)
+                                # 셀 위젯 크기 조정 (너비 + 높이)
                                 url_widget = self.url_table.cellWidget(row, 1)
                                 if url_widget:
                                     url_widget.setFixedWidth(url_col_width)
+                                    if hasattr(self, 'original_url_row_height'):
+                                        url_widget.setFixedHeight(new_row_height)
 
                     # 하단 버튼 컨테이너 크기 조정 (높이 고정)
                     if hasattr(self, 'button_container') and hasattr(self, 'original_button_container_size'):
@@ -861,6 +920,10 @@ class InfoWidget(QWidget):
         self.left_panel.setStyleSheet(f"""
             QGroupBox#left_panel {{
                 border: none;
+                margin: 0px;
+                padding: 0px;
+                margin-top: 0px;
+                padding-top: 0px;
                 border-image: url({left_bg_path}) 0 0 0 0 stretch stretch;
             }}
         """)
@@ -895,10 +958,10 @@ class InfoWidget(QWidget):
         # gap 16px
         left_layout.addSpacing(16)
 
-        # "시험 API" 타이틀 라벨 (744x24px)
+        # "시험 API" 타이틀 라벨 (744x38px) - 접속 주소 탐색과 동일한 높이
         self.api_title = QLabel("시험 API")
-        self.api_title.setFixedSize(744, 24)
-        self.original_api_title_size = (744, 24)
+        self.api_title.setFixedSize(744, 38)
+        self.original_api_title_size = (744, 38)
         self.api_title.setStyleSheet("""
             QLabel {
                 font-family: 'Noto Sans KR';
@@ -918,24 +981,34 @@ class InfoWidget(QWidget):
         self.original_api_group_size = (744, 376)
         left_layout.addWidget(self.api_group)
 
+        # 여분의 공간을 하단으로 보내 컨텐츠를 상단에 고정
+        left_layout.addStretch()
+
         self.left_panel.setLayout(left_layout)
 
         # 우측 패널 (792x802px) - 반응형
         self.right_panel = QGroupBox()
         self.right_panel.setFixedSize(792, 802)
         self.original_right_panel_size = (792, 802)
-        self.right_panel.setStyleSheet("QGroupBox { border: none; background: transparent; }")
+        self.right_panel.setStyleSheet("QGroupBox { border: none; margin: 0px; padding: 0px; margin-top: 0px; padding-top: 0px; background: transparent; }")
 
         right_layout = QVBoxLayout()
         right_layout.setContentsMargins(24, 12, 24, 0)  # 좌, 상, 우, 하
         right_layout.setSpacing(0)
 
-        # 사용자 인증 방식 타이틀 이미지 (744x24px) - 반응형
-        self.auth_title_widget = QLabel()
-        auth_title_pixmap = QPixmap(resource_path("assets/image/test_config/사용자인증방식_title.png"))
-        self.auth_title_widget.setPixmap(auth_title_pixmap.scaled(744, 24, Qt.IgnoreAspectRatio, Qt.SmoothTransformation))
+        # "사용자 인증 방식" 타이틀 라벨 (744x24px) - 반응형
+        self.auth_title_widget = QLabel("사용자 인증 방식")
         self.auth_title_widget.setFixedSize(744, 24)
         self.original_auth_title_size = (744, 24)
+        self.auth_title_widget.setStyleSheet("""
+            QLabel {
+                font-family: 'Noto Sans KR';
+                font-size: 20px;
+                font-weight: 500;
+                color: #000000;
+                background: transparent;
+            }
+        """)
         right_layout.addWidget(self.auth_title_widget)
 
         # gap 8px
@@ -956,11 +1029,18 @@ class InfoWidget(QWidget):
         connection_title_layout.setContentsMargins(0, 0, 0, 0)
         connection_title_layout.setSpacing(0)
 
-        # 접속주소 탐색 타이틀 이미지
-        connection_title_widget = QLabel()
-        connection_title_pixmap = QPixmap(resource_path("assets/image/test_config/접속주소탐색_title.png"))
-        connection_title_widget.setPixmap(connection_title_pixmap)
+        # "접속 주소 탐색" 타이틀 라벨
+        connection_title_widget = QLabel("접속 주소 탐색")
         connection_title_widget.setFixedHeight(38)
+        connection_title_widget.setStyleSheet("""
+            QLabel {
+                font-family: 'Noto Sans KR';
+                font-size: 20px;
+                font-weight: 500;
+                color: #000000;
+                background: transparent;
+            }
+        """)
         connection_title_layout.addWidget(connection_title_widget)
 
         connection_title_layout.addStretch()
@@ -1135,6 +1215,9 @@ class InfoWidget(QWidget):
         self.connection_section = self.create_connection_section()
         right_layout.addWidget(self.connection_section)
 
+        # 여분의 공간을 여기로 보내 컨텐츠를 상단에 고정 (버튼은 하단에 유지)
+        right_layout.addStretch()
+
         # padding 32px
         right_layout.addSpacing(32)
 
@@ -1203,11 +1286,11 @@ class InfoWidget(QWidget):
 
         self.right_panel.setLayout(right_layout)
 
-        panels_layout.addWidget(self.left_panel)
-        panels_layout.addWidget(self.right_panel)
+        panels_layout.addWidget(self.left_panel, 0, Qt.AlignTop)
+        panels_layout.addWidget(self.right_panel, 0, Qt.AlignTop)
 
-        # panels_container를 bg_root_layout에 가운데 정렬로 추가
-        bg_root_layout.addWidget(self.panels_container, 1, Qt.AlignHCenter)
+        # panels_container를 bg_root_layout에 상단 가운데 정렬로 추가
+        bg_root_layout.addWidget(self.panels_container, 1, Qt.AlignTop | Qt.AlignHCenter)
 
         # bg_root를 content_layout에 가운데 정렬로 추가
         content_layout.addWidget(self.bg_root, 0, Qt.AlignHCenter | Qt.AlignVCenter)
@@ -2303,6 +2386,7 @@ class InfoWidget(QWidget):
         # 행 높이 설정
         self.test_field_table.verticalHeader().setDefaultSectionSize(39)
         self.test_field_table.verticalHeader().setVisible(False)
+        self.original_test_field_row_height = 39  # 원본 행 높이 저장
 
         # 편집 불가 설정
         self.test_field_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -2322,6 +2406,7 @@ class InfoWidget(QWidget):
         # 행 높이 설정
         self.scenario_table.verticalHeader().setDefaultSectionSize(39)
         self.scenario_table.verticalHeader().setVisible(False)
+        self.original_scenario_row_height = 39  # 원본 행 높이 저장
 
         # 편집 불가 설정
         self.scenario_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -2535,6 +2620,7 @@ class InfoWidget(QWidget):
 
         # 셀 높이 설정 (39px)
         self.api_test_table.verticalHeader().setDefaultSectionSize(39)
+        self.original_api_row_height = 39  # 원본 행 높이 저장
 
         # 셀 폰트 설정 (19px)
         cell_font = QFont("Noto Sans KR")
@@ -2750,7 +2836,7 @@ class InfoWidget(QWidget):
         section = QGroupBox()
         section.setFixedSize(744, 240)
         self.original_auth_section_size = (744, 240)
-        section.setStyleSheet("QGroupBox { border: none; background-color: transparent; }")
+        section.setStyleSheet("QGroupBox { border: none; margin-top: 0px; padding-top: 0px; background-color: transparent; }")
 
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
@@ -3178,16 +3264,16 @@ class InfoWidget(QWidget):
         section = QGroupBox()
         section.setFixedSize(744, 376)
         self.original_connection_section_size = (744, 376)
-        section.setStyleSheet("QGroupBox { border: none; }")
+        section.setStyleSheet("QGroupBox { border: none; margin-top: 0px; padding-top: 0px; }")
 
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-        # URL 테이블 (744x370px) - 2개 컬럼 (행번호 + URL) - 반응형
+        # URL 테이블 (744x376px) - 2개 컬럼 (행번호 + URL) - 반응형 (api_test_table과 동일)
         self.url_table = QTableWidget(0, 2)  # 2개 컬럼: 행번호(50px) + URL(694px)
-        self.url_table.setFixedSize(744, 370)
-        self.original_url_table_size = (744, 370)
+        self.url_table.setFixedSize(744, 376)
+        self.original_url_table_size = (744, 376)
         self.url_table.setHorizontalHeaderLabels(["", "URL"])
         self.url_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.url_table.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -3210,6 +3296,7 @@ class InfoWidget(QWidget):
 
         # 행 높이 설정
         self.url_table.verticalHeader().setDefaultSectionSize(39)
+        self.original_url_row_height = 39  # 원본 행 높이 저장
 
         # 선택된 URL 행 추적 변수
         self.selected_url_row = None
