@@ -1,0 +1,2 @@
+{"time": "2025-12-16T05:12:36.000570Z", "api": "PtzStop", "dir": "REQUEST", "data": {"camID": "cam0002", "pan": true, "tilt": true, "zoom": false}}
+{"time": "2025-12-16T05:12:36.003570Z", "api": "PtzStop", "dir": "RESPONSE", "data": {"code": "200", "message": "성공"}}
