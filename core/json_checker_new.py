@@ -321,237 +321,105 @@ def data_finder(schema_):
     return all_field
 
 
-def get_flat_fields_from_schema(schema):
+def get_flat_fields_from_schema(schema, prefix=""):
     """
-    스키마를 재귀적으로 순회하여 평탄화
-
-    Returns:
-        tuple: (flat_fields, opt_fields)
-            - flat_fields: {path_str: type_or_container}
-            - opt_fields: set(path_str) - OptionalKey로 표시된 필드들
+    스키마를 평탄화하여 {경로: 타입} 형태로 반환
+    - primitive 배열은 '경로[]' 형태로 저장
+    - object 배열은 각 필드별로 '경로[].field' 형태로 저장
     """
-    flat_fields = {}
-    opt_fields = set()
+    fields = {}
+    opt_fields = []
 
-    def _norm_key(k):
-        """OptionalKey 객체를 실제 키 이름으로 변환"""
-        if isinstance(k, OptionalKey):
-            # OptionalKey의 실제 키 값 추출
-            if hasattr(k, 'key'):
-                return str(k.key)
-            # fallback: OptionalKey를 문자열로 변환
-            key_str = str(k)
-            # "OptionalKey(accessToken)" 형태에서 키 이름만 추출
-            if key_str.startswith('OptionalKey(') and key_str.endswith(')'):
-                return key_str[12:-1]
-            return key_str
-        return str(k)
+    if not isinstance(schema, dict):
+        return fields, opt_fields
 
-    def walk(node, path, is_current_optional=False):
-        """재귀적으로 스키마 탐색"""
-        if isinstance(node, list):
-            if len(node) == 0:
-                # 빈 리스트는 무시
-                return
+    for key, value in schema.items():
+        # OptionalKey 처리
+        is_optional = isinstance(key, OptionalKey)
+        actual_key = key.expected_data if is_optional else key
+        current_path = f"{prefix}.{actual_key}" if prefix else actual_key
 
-            first = node[0]
-            if isinstance(first, dict):
-                # List of dicts: 현재 path에 list 타입 저장
-                if path:
-                    flat_fields[path] = list
-                    if is_current_optional:
-                        opt_fields.add(path)
-                
-                for k, v in first.items():
-                    keyname = _norm_key(k)
-                    is_opt = isinstance(k, OptionalKey)
-                    child_path = f"{path}.{keyname}" if path else keyname
-                    walk(v, child_path, is_opt)
+        if is_optional:
+            opt_fields.append(current_path)
+
+        if isinstance(value, list):
+            if len(value) == 0:
+                continue
+            elif isinstance(value[0], dict):
+                # ✅ 수정: Object 배열 - 재귀적으로 처리하되 prefix에 [] 추가
+                nested_fields, nested_opts = get_flat_fields_from_schema(
+                    value[0],
+                    f"{current_path}[]"  # array[].field 형태로 경로 생성
+                )
+                fields.update(nested_fields)
+                opt_fields.extend(nested_opts)
+            elif isinstance(value[0], type):
+                # Primitive 배열
+                fields[f"{current_path}[]"] = value[0]
+
+        elif isinstance(value, dict):
+            # 중첩 객체
+            nested_fields, nested_opts = get_flat_fields_from_schema(value, current_path)
+            fields.update(nested_fields)
+            opt_fields.extend(nested_opts)
+        elif isinstance(value, type):
+            # 단일 필드
+            fields[current_path] = value
+
+    return fields, opt_fields
+
+
+def get_flat_data_from_response(data, prefix=""):
+    """
+    실제 응답 데이터를 평탄화하여 {경로: 값} 형태로 반환
+    - primitive 배열은 '경로[]' 형태로 저장
+    - object 배열은 각 인덱스별로 '경로[idx].field' 형태로 저장
+    """
+    result = {}
+
+    if not isinstance(data, dict):
+        return result
+
+    for key, value in data.items():
+        current_path = f"{prefix}.{key}" if prefix else key
+
+        if isinstance(value, list):
+            if len(value) == 0:
+                # 빈 배열
+                result[f"{current_path}[]"] = []
+            elif isinstance(value[0], dict):
+                # ✅ 수정: Object 배열 - 모든 인덱스를 순회하며 재귀 처리
+                for idx, item in enumerate(value):
+                    # 각 object의 필드를 재귀적으로 처리
+                    nested = get_flat_data_from_response(item, f"{current_path}[]")
+
+                    # 중첩 배열 처리: nested에 이미 [] 형태의 키가 있으면 그대로 병합
+                    for nested_key, nested_value in nested.items():
+                        if nested_key.endswith("[]"):
+                            # primitive 배열인 경우
+                            if nested_key not in result:
+                                result[nested_key] = []
+                            # ✅ 모든 인덱스의 배열 값을 수집
+                            if isinstance(nested_value, list):
+                                result[nested_key].extend(nested_value)
+                            else:
+                                result[nested_key].append(nested_value)
+                        else:
+                            # 일반 필드는 첫 번째 인덱스 값만 저장 (타입 검증용)
+                            if nested_key not in result:
+                                result[nested_key] = nested_value
             else:
-                # Primitive array ([str], [int] 등): 
-                # 현재 path는 저장하지 않고, path[]만 생성
-                child_path = f"{path}[]"
-                walk(first, child_path, False)
+                # Primitive 배열
+                result[f"{current_path}[]"] = value
 
-        elif isinstance(node, dict):
-            if path:
-                flat_fields[path] = dict
-                if is_current_optional:
-                    opt_fields.add(path)
-
-            for k, v in node.items():
-                keyname = _norm_key(k)
-                is_opt = isinstance(k, OptionalKey)
-                child_path = f"{path}.{keyname}" if path else keyname
-                walk(v, child_path, is_opt)
-
+        elif isinstance(value, dict):
+            # 중첩 객체
+            nested = get_flat_data_from_response(value, current_path)
+            result.update(nested)
         else:
-            # primitive 타입
-            if not path:
-                return
-            if isinstance(node, type):
-                flat_fields[path] = node
-            else:
-                flat_fields[path] = type(node)
-            if is_current_optional:
-                opt_fields.add(path)
-
-    # 진입점
-    if isinstance(schema, dict):
-        for k, v in schema.items():
-            keyname = _norm_key(k)
-            is_opt = isinstance(k, OptionalKey)
-            top_path = keyname
-            walk(v, top_path, is_opt)
-    else:
-        walk(schema, "", False)
-
-    return flat_fields, opt_fields
-
-
-def get_flat_data_from_response(data):
-    """
-    응답 데이터를 재귀적으로 평탄화하여 모든 필드경로별 값을 추출
-    
-    리스트 내 딕셔너리의 경우:
-    - camList -> 전체 리스트 저장
-    - camList.camID -> 모든 아이템의 camID 값들을 리스트로 저장
-    - camList.timeList -> 모든 아이템의 timeList를 리스트로 저장
-    - camList.timeList.startTime -> 모든 timeList의 모든 startTime 평탄화
-    
-    Args:
-        data: 응답 데이터 (dict or list)
-    
-    Returns:
-        dict: {필드경로: 값} 형태
-    """
-    flat_data = {}
-
-    def walk(node, path):
-        """재귀적으로 데이터 구조 탐색"""
-        if isinstance(node, dict):
-            if path:
-                flat_data[path] = node
-
-            for k, v in node.items():
-                child_path = f"{path}.{k}" if path else k
-                walk(v, child_path)
-
-        elif isinstance(node, list):
-            if path:
-                flat_data[path] = node
-
-            if len(node) == 0:
-                return
-
-            # 리스트의 첫 번째 항목이 딕셔너리인 경우
-            if isinstance(node[0], dict):
-                # 모든 딕셔너리의 키를 수집
-                all_keys = set()
-                for item in node:
-                    if isinstance(item, dict):
-                        all_keys.update(item.keys())
-
-                # 각 키에 대해 모든 아이템의 값들을 수집
-                for key in all_keys:
-                    child_path = f"{path}.{key}"
-                    values = []
-
-                    for item in node:
-                        if isinstance(item, dict) and key in item:
-                            values.append(item[key])
-
-                    if len(values) > 0:
-                        # 값이 하나면 스칼라, 여러 개면 리스트
-                        flat_data[child_path] = values[0] if len(values) == 1 else values
-
-                        # ✅ primitive 타입 배열 처리 추가
-                        is_primitive_array = False
-                        if isinstance(values[0], list) and len(values[0]) > 0:
-                            first_elem = values[0][0]
-                            if not isinstance(first_elem, (dict, list)):
-                                # primitive 배열 전체를 저장 (예: ["홍채", "지문"])
-                                flat_data[f"{child_path}[]"] = values[0]
-                                is_primitive_array = True
-                        
-                        # primitive 배열이 아닐 때만 재귀 호출
-                        if not is_primitive_array:
-                            if len(values) > 0 and isinstance(values[0], dict):
-                                walk(values[0], child_path)
-                            elif len(values) > 0 and isinstance(values[0], list):
-                                walk_list_of_lists(values, child_path)
-            else:
-                # 리스트 항목이 primitive 타입인 경우
-                if path:
-                    flat_data[f"{path}[]"] = node[0] if len(node) == 1 else node
-
-        else:
-            # leaf value
-            if path:
-                flat_data[path] = node
-
-    def walk_list_of_lists(lists, path):
-        """list of lists 처리"""
-        all_items = []
-        for lst in lists:
-            if isinstance(lst, list):
-                all_items.extend(lst)
-
-        if len(all_items) == 0:
-            return
-
-        if isinstance(all_items[0], dict):
-            all_keys = set()
-            for item in all_items:
-                if isinstance(item, dict):
-                    all_keys.update(item.keys())
-
-            for key in all_keys:
-                child_path = f"{path}.{key}"
-                values = [item[key] for item in all_items if isinstance(item, dict) and key in item]
-
-                if len(values) > 0:
-                    flat_data[child_path] = values[0] if len(values) == 1 else values
-
-                    # ✅ primitive 배열 체크 추가
-                    is_primitive_array = False
-                    if isinstance(values[0], list) and len(values[0]) > 0:
-                        first_elem = values[0][0]
-                        if not isinstance(first_elem, (dict, list)):
-                            # primitive 배열 전체를 저장 (예: ["홍채", "지문"])
-                            flat_data[f"{child_path}[]"] = values[0]
-                            is_primitive_array = True
-                            print(f"[DEBUG][FLATTEN_DATA] Primitive 배열 감지: {child_path}[] = {values[0]}")
-                    
-                    # primitive 배열이 아닐 때만 재귀 호출
-                    if not is_primitive_array and len(values) > 0 and isinstance(values[0], dict):
-                        walk(values[0], child_path)
-
-    # 진입점
-    if isinstance(data, dict):
-        walk(data, "")
-    elif isinstance(data, list):
-        flat_data["root"] = data
-        if len(data) > 0 and isinstance(data[0], dict):
-            all_keys = set()
-            for item in data:
-                if isinstance(item, dict):
-                    all_keys.update(item.keys())
-
-            for key in all_keys:
-                values = [item[key] for item in data if isinstance(item, dict) and key in item]
-
-                if len(values) > 0:
-                    flat_data[f"root.{key}"] = values[0] if len(values) == 1 else values
-
-                    if len(values) > 0 and isinstance(values[0], dict):
-                        walk(values[0], f"root.{key}")
-                    elif len(values) > 0 and isinstance(values[0], list):
-                        walk_list_of_lists(values, f"root.{key}")
-    else:
-        raise TypeError(f"Invalid data type: {type(data)}")
-
-    return flat_data
+            # 단일 값
+            result[current_path] = value
+    return result
 
 
 # ================================================================
