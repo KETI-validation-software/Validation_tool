@@ -382,37 +382,51 @@ def _validate_field_type(field_path, field_value, expected_type):
         (is_valid: bool, error_msg: str or None)
     """
 
+    # ✅ 숫자 타입 통합 검증 함수 추가
+    def is_numeric_type_match(value, expected):
+        """int 또는 float가 예상될 때 둘 다 허용"""
+        if expected in (int, float):
+            return isinstance(value, (int, float))
+        return isinstance(value, expected)
+
+    # ✅ 타입명 표시 함수 추가
+    def get_type_name(type_obj):
+        """int/float는 'number'로 표시"""
+        if type_obj in (int, float):
+            return "number"
+        return type_obj.__name__
+
     # ✅ 새로 추가: Primitive 타입 배열 처리 (예: bioDeviceAuthTypeList[] → str)
     # 필드 경로가 []로 끝나면 "문자열 배열" 같은 primitive 배열을 의미
     if field_path.endswith("[]"):
         # 실제 필드명 ([] 제거)
         actual_field = field_path[:-2]
-        
+
         # 값이 리스트인지 확인
         if not isinstance(field_value, list):
             error_msg = (
                 f"타입 불일치: {actual_field} "
-                f"(예상: {expected_type.__name__} 배열, "
+                f"(예상: {get_type_name(expected_type)} 배열, "
                 f"실제: {type(field_value).__name__})"
             )
             return False, error_msg
-        
+
         # 배열의 각 요소가 expected_type인지 검증
         invalid_items = []
         for i, item in enumerate(field_value):
-            if not isinstance(item, expected_type):
+            if not is_numeric_type_match(item, expected_type):
                 invalid_items.append(
-                    f"[{i}] {item} (타입: {type(item).__name__})"
+                    f"[{i}] {item} (타입: {get_type_name(type(item))})"
                 )
-        
+
         if invalid_items:
             error_msg = (
                 f"타입 불일치: {actual_field} - "
-                f"예상: 모든 요소가 {expected_type.__name__}, "
+                f"예상: 모든 요소가 {get_type_name(expected_type)}, "
                 f"실패한 항목들: {', '.join(invalid_items)}"
             )
             return False, error_msg
-        
+
         return True, None
 
     # 최상위 필드 판별 (경로에 점이 없음)
@@ -420,11 +434,11 @@ def _validate_field_type(field_path, field_value, expected_type):
 
     # 최상위 필드: 값 자체만 검증
     if is_top_level:
-        if not isinstance(field_value, expected_type):
+        if not is_numeric_type_match(field_value, expected_type):
             error_msg = (
                 f"타입 불일치: {field_path} "
-                f"(예상: {expected_type.__name__}, "
-                f"실제: {type(field_value).__name__})"
+                f"(예상: {get_type_name(expected_type)}, "
+                f"실제: {get_type_name(type(field_value))})"
             )
             return False, error_msg
         return True, None
@@ -435,15 +449,15 @@ def _validate_field_type(field_path, field_value, expected_type):
             invalid_items = []
 
             for i, item in enumerate(field_value):
-                if not isinstance(item, expected_type):
+                if not is_numeric_type_match(item, expected_type):
                     invalid_items.append(
-                        f"[{i}] {item} (타입: {type(item).__name__})"
+                        f"[{i}] {item} (타입: {get_type_name(type(item))})"
                     )
 
             if invalid_items:
                 error_msg = (
                     f"타입 불일치: {field_path} - "
-                    f"예상: 모든 요소가 {expected_type.__name__}, "
+                    f"예상: 모든 요소가 {get_type_name(expected_type)}, "
                     f"실패한 항목들: {', '.join(invalid_items)}"
                 )
                 return False, error_msg
@@ -452,11 +466,11 @@ def _validate_field_type(field_path, field_value, expected_type):
 
         # 단일 값
         else:
-            if not isinstance(field_value, expected_type):
+            if not is_numeric_type_match(field_value, expected_type):
                 error_msg = (
                     f"타입 불일치: {field_path} "
-                    f"(예상: {expected_type.__name__}, "
-                    f"실제: {type(field_value).__name__}, "
+                    f"(예상: {get_type_name(expected_type)}, "
+                    f"실제: {get_type_name(type(field_value))}, "
                     f"값: {field_value})"
                 )
                 return False, error_msg
