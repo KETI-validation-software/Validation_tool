@@ -61,7 +61,7 @@ cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_in_data = {
 ],
     "duration": 200,
     "transProtocol": {
-    "transProtocolType": "LongPolling",
+    "transProtocolType": "Webhook",
     "transProtocolDesc": ""
 },
     "startTime": 20251105163010124
