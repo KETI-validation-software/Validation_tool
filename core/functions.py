@@ -1581,6 +1581,25 @@ def build_result_json(myapp_instance):
     return result_json
 
 
+def _remove_number_suffix(name):
+    """
+    API명 뒤에 붙은 숫자 suffix 제거 (결과 파일 저장용)
+
+    예시:
+        - "SensorControl2" → "SensorControl"
+        - "/SensorControl3" → "/SensorControl"
+        - "SensorControl" → "SensorControl" (숫자 없으면 그대로)
+
+    Args:
+        name: 숫자가 붙은 API명 또는 endpoint
+
+    Returns:
+        str: 숫자 suffix가 제거된 이름
+    """
+    import re
+    return re.sub(r'\d+$', '', name)
+
+
 def _build_spec_result(myapp_instance, spec_id, step_buffers, table_data=None, group_id=None):
     """
     단일 시험 시나리오(spec)의 결과 구성
@@ -1643,10 +1662,12 @@ def _build_spec_result(myapp_instance, spec_id, step_buffers, table_data=None, g
             api_score_str = table_widget.item(i, 6).text() if table_widget.item(i, 6) else "0%"
             api_score = float(api_score_str.replace('%', ''))
 
-        # 3-2. API 기본 정보 설정
-        api_name = api_names_list[i] if i < len(api_names_list) else f"API-{i + 1}"
+        # 3-2. API 기본 정보 설정 (결과 저장 시 숫자 suffix 제거)
+        api_name_raw = api_names_list[i] if i < len(api_names_list) else f"API-{i + 1}"
+        api_name = _remove_number_suffix(api_name_raw)
         api_id = api_ids_list[i] if i < len(api_ids_list) else f"api-{i + 1}"
-        api_endpoint = api_endpoints_list[i] if i < len(api_endpoints_list) else f"/api{i + 1}"
+        api_endpoint_raw = api_endpoints_list[i] if i < len(api_endpoints_list) else f"/api{i + 1}"
+        api_endpoint = _remove_number_suffix(api_endpoint_raw)
 
         # API 메서드 가져오기 (기본값: POST)
         method = step_buffer.get("api_info", {}).get("method", "POST")
