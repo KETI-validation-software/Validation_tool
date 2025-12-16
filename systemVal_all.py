@@ -2180,9 +2180,22 @@ class MyApp(QWidget):
 
             # print(f"[DATA_MAPPER] 요청 데이터 업데이트 완료")
             # print(f"[DATA_MAPPER] 업데이트된 필드: {list(updated_request.keys())}")
+            self.resp_rules = get_validation_rules(
+                spec_id=self.current_spec_id,
+                api_name=self.message[self.cnt] if self.cnt < len(self.message) else "",
+                direction="out"  # 응답 검증
 
-            return updated_request
-
+            )
+            try:
+                code_value = self.resp_rules.get("code")
+                allowed_value = code_value.get("allowedValues", [])[0]
+                updated_request = self.generator._applied_codevalue(
+                    request_data=updated_request,
+                    allowed_value=allowed_value
+                )
+                return updated_request
+            except :
+                return updated_request
         except Exception as e:
             print(f"[ERROR] _apply_request_constraints 실행 중 오류: {e}")
             import traceback
@@ -3981,13 +3994,7 @@ class MyApp(QWidget):
                     # val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.outSchema[self.cnt], res_data, self.flag_opt)
                     resp_rules = {}
                     try:
-                        resp_rules = get_validation_rules(
-                            spec_id=self.current_spec_id,
-                            api_name=self.message[self.cnt] if self.cnt < len(self.message) else "",
-
-                            direction="out"  # 응답 검증
-
-                        ) or {}
+                        resp_rules = self.resp_rules or {}
                     except Exception as e:
                         resp_rules = {}
                         print(f"[ERROR] 응답 검증 규칙 로드 실패: {e}")
