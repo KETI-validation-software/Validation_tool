@@ -2784,7 +2784,7 @@ class MyApp(QWidget):
                     try:
                         print(f"[DEBUG] json_check_ 호출 시작")
 
-                        val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(
+                        val_result, val_text, key_psss_cnt, key_error_cnt, opt_correct, opt_error = json_check_(
                             self.videoInSchema[self.cnt],
                             current_data,
                             self.flag_opt,
@@ -2796,7 +2796,7 @@ class MyApp(QWidget):
                             f"[DEBUG] json_check_ 성공: result={val_result}, pass={key_psss_cnt}, error={key_error_cnt}")
                     except TypeError as e:
                         print(f"[DEBUG] TypeError 발생, 맥락 검증 제외 하고 다시 시도: {e}")
-                        val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(
+                        val_result, val_text, key_psss_cnt, key_error_cnt, opt_correct, opt_error = json_check_(
                             self.videoInSchema[self.cnt],
                             current_data,
                             self.flag_opt
@@ -2882,7 +2882,7 @@ class MyApp(QWidget):
                                 self.step_buffers[self.cnt]["is_webhook_api"] = True
                             # 웹훅 응답 검증
                             if len(self.videoWebhookSchema) > 0:
-                                webhook_resp_val_result, webhook_resp_val_text, webhook_resp_key_psss_cnt, webhook_resp_key_error_cnt = json_check_(
+                                webhook_resp_val_result, webhook_resp_val_text, webhook_resp_key_psss_cnt, webhook_resp_key_error_cnt, opt_correct, opt_error = json_check_(
                                     self.videoWebhookSchema[0], webhook_response, self.flag_opt
                                 )
 
