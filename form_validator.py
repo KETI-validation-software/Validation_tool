@@ -2,7 +2,7 @@ import re
 import requests
 from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem, QLabel, QWidget, QHBoxLayout
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QResizeEvent
 from core.functions import resource_path
 from core.opt_loader import OptLoader
 import os
@@ -2631,6 +2631,9 @@ class FormValidator:
             scenario_table.blockSignals(False)
 
             print(f"시나리오 채우기 완료: {group_name} - {scenario_count}개 시나리오 표시")
+
+            # 셀 생성 후 현재 창 크기에 맞게 반응형 적용
+            self.parent.resizeEvent(QResizeEvent(self.parent.size(), self.parent.size()))
 
         except Exception as e:
             print(f"시나리오 채우기 실패: {e}")
