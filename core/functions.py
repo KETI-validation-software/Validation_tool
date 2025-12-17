@@ -18,6 +18,7 @@ import config.CONSTANTS as CONSTANTS
 import re
 import cv2
 
+
 def resource_path(relative_path):
     try:
         base_path = sys._MEIPASS
@@ -33,13 +34,13 @@ def resource_path(relative_path):
 def format_errors_as_tree(error_messages):
     """
     검증 오류 메시지를 트리 구조로 포매팅
-    
+
     입력 예시:
     [
         "[구조] 타입 불일치: doorList.bioDeviceList - 예상: 모든 요소가 list, 실패한 항목들: [0] {...} (타입: dict)",
         "[구조] 필수 필드 누락: doorList.bioDeviceList.bioDeviceAuthTypeList[]"
     ]
-    
+
     출력 예시:
     ▼ [doorList.bioDeviceList] (2건)
         ├── [X] [타입 오류] index[0] : List가 와야 하는데 Dict가 왔습니다.
@@ -47,19 +48,19 @@ def format_errors_as_tree(error_messages):
     """
     if not error_messages:
         return "오류가 없습니다."
-    
+
     # 1. 오류 메시지를 파싱하여 계층 구조로 그룹화
     error_tree = {}
-    
+
     for error_msg in error_messages:
         # [구조] 또는 [의미] 제거
         msg = error_msg.replace("[구조] ", "").replace("[의미] ", "")
-        
+
         # 오류 타입과 필드 경로 파싱
         if "타입 불일치:" in msg:
             error_type = "타입 오류"
             field_info = msg.split("타입 불일치:")[1].strip()
-            
+
             # 필드 경로 추출 (- 이전까지)
             if " - " in field_info:
                 field_path = field_info.split(" - ")[0].strip()
@@ -67,24 +68,24 @@ def format_errors_as_tree(error_messages):
             else:
                 field_path = field_info.split("(")[0].strip()
                 detail = field_info
-            
+
             # 그룹핑 키: 필드 경로 자체
             parent_path = field_path
-            
+
             # 인덱스 정보 파싱
             if "실패한 항목들:" in detail:
                 items_str = detail.split("실패한 항목들:")[1].strip()
                 # [0] {...} (타입: dict), [1] {...} (타입: dict) 형식 파싱
                 matches = re.findall(r'\[(\d+)\].*?\(타입: (\w+)\)', items_str)
-                
+
                 if parent_path not in error_tree:
                     error_tree[parent_path] = []
-                
+
                 for idx, actual_type in matches:
                     # 예상 타입 추출
                     expected_match = re.search(r'예상: 모든 요소가 (\w+)', detail)
                     expected_type = expected_match.group(1) if expected_match else "List"
-                    
+
                     error_tree[parent_path].append({
                         "type": error_type,
                         "detail": f"index[{idx}] : {expected_type.capitalize()}가 와야 하는데 {actual_type.capitalize()}가 왔습니다."
@@ -93,26 +94,26 @@ def format_errors_as_tree(error_messages):
                 # 단일 타입 오류
                 if parent_path not in error_tree:
                     error_tree[parent_path] = []
-                
+
                 # 예상/실제 타입 추출
                 expected_match = re.search(r'예상: (\w+)', detail)
                 actual_match = re.search(r'실제: (\w+)', detail)
-                
+
                 expected = expected_match.group(1) if expected_match else "?"
                 actual = actual_match.group(1) if actual_match else "?"
-                
+
                 # 필드명만 표시
                 field_name = field_path.split(".")[-1] if "." in field_path else field_path
-                
+
                 error_tree[parent_path].append({
                     "type": error_type,
                     "detail": f"{field_name} : {expected.capitalize()}가 와야 하는데 {actual.capitalize()}가 왔습니다."
                 })
-        
+
         elif "필수 필드 누락:" in msg or "선택 필드 누락:" in msg:
             error_type = "필드 누락"
             field_path = msg.split("필드 누락:")[1].strip()
-            
+
             # 상위 경로 추출
             if "." in field_path:
                 parent_path = ".".join(field_path.split(".")[:-1])
@@ -120,15 +121,15 @@ def format_errors_as_tree(error_messages):
             else:
                 parent_path = "최상위"
                 field_name = field_path
-            
+
             if parent_path not in error_tree:
                 error_tree[parent_path] = []
-            
+
             error_tree[parent_path].append({
                 "type": error_type,
                 "detail": field_name
             })
-        
+
         else:
             # 기타 오류 (의미 검증 등) - 최상위 필드는 그룹핑하지 않음
             # 필드명 추출 시도
@@ -139,18 +140,18 @@ def format_errors_as_tree(error_messages):
                 parent_path = "__top_level__"  # 특수 키로 최상위 표시
             else:
                 parent_path = "기타"
-            
+
             if parent_path not in error_tree:
                 error_tree[parent_path] = []
-            
+
             error_tree[parent_path].append({
                 "type": "맥락 오류",
                 "detail": msg
             })
-    
+
     # 2. 트리 구조로 포매팅
     result_lines = []
-    
+
     # 최상위 레벨 오류 먼저 처리 (그룹핑 없이)
     if "__top_level__" in error_tree:
         top_errors = error_tree.pop("__top_level__")
@@ -159,21 +160,21 @@ def format_errors_as_tree(error_messages):
         # 최상위 오류 뒤에 빈 줄 추가 (다른 그룹이 있을 경우)
         if error_tree:
             result_lines.append("")
-    
+
     # 나머지 그룹화된 오류들 처리
     for idx, (parent_path, errors) in enumerate(sorted(error_tree.items())):
         # 그룹 헤더 - 필드 경로를 진하게 표시
         error_count = len(errors)
         result_lines.append(f"<b>[{parent_path}]</b> ({error_count}건)")
-        
+
         # 각 오류 출력 (들여쓰기 유지)
         for error in errors:
             result_lines.append(f"- [{error['type']}] {error['detail']}")
-        
+
         # 마지막 그룹이 아니면 빈 줄 추가
         if idx < len(error_tree) - 1:
             result_lines.append("")
-    
+
     return "\n".join(result_lines)
 
 
@@ -200,16 +201,22 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
         flat_fields, opt_fields = get_flat_fields_from_schema(schema)
         flat_data = get_flat_data_from_response(data)
         print(f"[json_check_] 필드 수: {len(flat_fields)}, 선택 필드: {len(opt_fields)}, 데이터 필드: {len(flat_data)}")
-        
+        required_fields = [f for f in flat_fields.keys() if f not in opt_fields]
+        optional_fields = list(opt_fields)
+
+        print(f"\n📊 필드 분류:")
+        print(f"  - 필수 필드 ({len(required_fields)}개): {required_fields}")
+        print(f"  - 선택 필드 ({len(optional_fields)}개): {optional_fields}")
+        print(f"  - 데이터에 존재하는 필드 ({len(flat_data)}개): {list(flat_data.keys())}")
+
         # ✅ 디버그: primitive 배열 필드 확인
         for field_path in flat_fields.keys():
             if field_path.endswith("[]"):
                 print(f"[DEBUG] 스키마에 primitive 배열 필드 발견: {field_path} -> {flat_fields[field_path]}")
-        
+
         for field_path in flat_data.keys():
             if field_path.endswith("[]"):
                 print(f"[DEBUG] 데이터에 primitive 배열 필드 발견: {field_path} -> {flat_data[field_path]}")
-
 
         # 2) 의미 검증 규칙 평탄화
         rules_dict = {}
@@ -227,6 +234,11 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
         error_messages = []
         context_validation_failed = False
         code_message_error = None
+        # 필수 필드 카운트
+        required_correct = 0
+        required_error = 0
+        opt_correct = 0
+        opt_error = 0
 
         # code와 message 필드의 맥락 검증 수행
         for field_name in ['code', 'message']:
@@ -336,12 +348,22 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
             total_error = len(flat_fields)
             total_correct = 0
 
+            # ✅ 선택 필드 카운트 계산
+            required_fields = [f for f in flat_fields.keys() if f not in opt_fields]
+            optional_fields = [f for f in flat_fields.keys() if f in opt_fields]
+
+            required_error = len(required_fields)
+            required_correct = 0
+            opt_error = len(optional_fields)
+            opt_correct = 0
+
             # 모든 필드에 대해 실패 상태 기록
             for field_path in flat_fields.keys():
                 field_results[field_path] = {
                     "struct_pass": False,
                     "semantic_pass": False,
-                    "errors": [code_message_error]
+                    "errors": [code_message_error],
+                    "is_optional": field_path in opt_fields  # 선택 필드 표시
                 }
 
             # 최종 결과 반환 (모든 필드 실패)
@@ -349,90 +371,109 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
             error_msg = format_errors_as_tree(error_messages)
 
             print(f"\n============ 맥락 검증 실패로 조기 종료 ============")
-            print(f"최종 결과: {final_result}")
-            print(f"통과: {total_correct}, 실패: {total_error}")
+            print(f"📊 최종 카운트 요약:")
+            print(f"  전체 필드: {len(flat_fields)}개")
+            print(f"    ├─ 필수 필드: {len(required_fields)}개")
+            print(f"    └─ 선택 필드: {len(optional_fields)}개")
+            print(f"\n  검증 결과:")
+            print(f"    ├─ 전체 통과: {total_correct}개")
+            print(f"    ├─ 전체 실패: {total_error}개")
+            print(f"    ├─ 필수 통과: {required_correct}개")
+            print(f"    ├─ 필수 실패: {required_error}개")
+            print(f"    ├─ 선택 통과: {opt_correct}개")
+            print(f"    └─ 선택 실패: {opt_error}개")
+            print(f"\n  검증 상태: {final_result}")
 
-            return final_result, error_msg, total_correct, total_error
+            return final_result, error_msg, total_correct, total_error, opt_correct, opt_error
         # 4) 각 필드에 대해 순차 검증
         for field_path in sorted(flat_fields.keys()):
-
             print(f"\n--- 필드 검증: {field_path} ---")
+
+            # 선택 필드 여부 확인
+            is_optional = field_path in opt_fields
+            print(f"  📌 필드 타입: {'선택 필드' if is_optional else '필수 필드'}")
 
             field_results[field_path] = {
                 "struct_pass": False,
-                "semantic_pass": None,  # None: 미수행, True: 통과, False: 실패
-                "errors": []
+                "semantic_pass": None,
+                "errors": [],
+                "is_optional": is_optional
             }
 
             expected_type = flat_fields[field_path]
+
             # 4-1) 구조 검증: 필드 존재 여부
             if field_path not in flat_data:
-
                 if CONSTANTS.flag_opt:
-                    if field_path not in opt_fields:
+                    if not is_optional:
                         # 필수 필드 누락
                         error_msg = f"필수 필드 누락: {field_path}"
                         field_results[field_path]["errors"].append(error_msg)
                         error_messages.append(f"[구조] {error_msg}")
                         total_error += 1
-                        print(f"  ❌ 구조: 필수 필드 누락")
+                        required_error += 1
+                        print(f"  ❌ 구조: 필수 필드 누락 (required_error +1)")
                         continue
                     else:
+                        # 선택 필드 누락
                         error_msg = f"선택 필드 누락: {field_path}"
                         field_results[field_path]["errors"].append(error_msg)
                         error_messages.append(f"[구조] {error_msg}")
                         total_error += 1
-                        print(f"  ❌ 구조: 선택 필드 누락")
+                        opt_error += 1
+                        print(f"  ❌ 구조: 선택 필드 누락 (opt_error +1)")
                         continue
                 else:
-                    if field_path not in opt_fields:
+                    if not is_optional:
                         # 필수 필드 누락
                         error_msg = f"필수 필드 누락: {field_path}"
                         field_results[field_path]["errors"].append(error_msg)
                         error_messages.append(f"[구조] {error_msg}")
                         total_error += 1
-                        print(f"  ❌ 구조: 필수 필드 누락")
+                        required_error += 1
+                        print(f"  ❌ 구조: 필수 필드 누락 (required_error +1)")
                         continue
                     else:
                         # Optional 필드는 누락 가능 → PASS
-                        print(f"  ✅ 구조: Optional 필드 누락 허용")
+                        print(f"  ✅ 구조: Optional 필드 누락 허용 (opt_correct +1)")
                         field_results[field_path]["struct_pass"] = True
-                        field_results[field_path]["semantic_pass"] = True  # 의미 검증도 자동 PASS
+                        field_results[field_path]["semantic_pass"] = True
                         total_correct += 1
+                        opt_correct += 1
                         continue
 
             field_value = flat_data[field_path]
 
-            # 4-2) 구조 검증: 타입 체크 (리스트 내 모든 값 검증 지원)
+            # 4-2) 구조 검증: 타입 체크
             is_valid, type_error_msg = _validate_field_type(field_path, field_value, expected_type)
 
             if not is_valid:
                 field_results[field_path]["errors"].append(type_error_msg)
                 error_messages.append(f"[구조] {type_error_msg}")
                 total_error += 1
-                print(f"  ❌ 구조: {type_error_msg}")
-                continue  # 구조 실패 시 의미 검증 건너뜀
-            else:
-                # dict, list인 경우 내부 구조는 최소 검증
-                if isinstance(field_value, dict):
-                    print(f"  ✅ 구조: dict 타입 검증 통과")
-                elif isinstance(field_value, list):
-                    # 리스트의 경우 내부 요소들도 검증했으므로
-                    if len(field_value) > 0:
-                        print(f"  ✅ 구조: list 타입 검증 통과 ({len(field_value)}개 요소 모두 {expected_type.__name__})")
-                    else:
-                        print(f"  ✅ 구조: 빈 list 검증 통과")
+                if is_optional:
+                    opt_error += 1
+                    print(f"  ❌ 구조: {type_error_msg} (opt_error +1)")
                 else:
-                    print(f"  ✅ 구조: 타입 일치 ({expected_type.__name__})")
+                    required_error += 1
+                    print(f"  ❌ 구조: {type_error_msg} (required_error +1)")
+                continue
+
             # 구조 검증 통과
             field_results[field_path]["struct_pass"] = True
+            print(f"  ✅ 구조: 타입 검증 통과")
 
-            # 4-3) 의미 검증 (구조 통과한 경우에만 수행)
+            # 4-3) 의미 검증
             if field_path not in rules_dict:
                 # 의미 검증 규칙 없음 → 자동 PASS
                 field_results[field_path]["semantic_pass"] = True
-                print(f"  ⊙ 의미: 검증 규칙 없음 (자동 PASS)")
-                total_correct += 1  # 구조 + 의미(자동) 통과 → 카운트 1회
+                total_correct += 1
+                if is_optional:
+                    opt_correct += 1
+                    print(f"  ⊙ 의미: 검증 규칙 없음 (자동 PASS) (opt_correct +1)")
+                else:
+                    required_correct += 1
+                    print(f"  ⊙ 의미: 검증 규칙 없음 (자동 PASS) (required_correct +1)")
                 continue
 
             rule = rules_dict[field_path]
@@ -440,8 +481,13 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
             if not rule.get("enabled", False):
                 # 비활성화된 규칙 → 자동 PASS
                 field_results[field_path]["semantic_pass"] = True
-                print(f"  ⊙ 의미: 규칙 비활성화 (자동 PASS)")
-                total_correct += 1  # 구조 + 의미(비활성화) 통과 → 카운트 1회
+                total_correct += 1
+                if is_optional:
+                    opt_correct += 1
+                    print(f"  ⊙ 의미: 규칙 비활성화 (자동 PASS) (opt_correct +1)")
+                else:
+                    required_correct += 1
+                    print(f"  ⊙ 의미: 규칙 비활성화 (자동 PASS) (required_correct +1)")
                 continue
 
             print(f"  → 의미 검증 시작: {rule.get('validationType', 'UNKNOWN')}")
@@ -456,33 +502,63 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
 
             if semantic_pass:
                 total_correct += 1
-                print(f"  ✅ 의미: 검증 통과")
+                if is_optional:
+                    opt_correct += 1
+                    print(f"  ✅ 의미: 검증 통과 (opt_correct +1)")
+                else:
+                    required_correct += 1
+                    print(f"  ✅ 의미: 검증 통과 (required_correct +1)")
             else:
                 total_error += 1
-                print(f"  ❌ 의미: 검증 실패")
+                if is_optional:
+                    opt_error += 1
+                    print(f"  ❌ 의미: 검증 실패 (opt_error +1)")
+                else:
+                    required_error += 1
+                    print(f"  ❌ 의미: 검증 실패 (required_error +1)")
 
-        # 5) 최종 결과 결정
+            # 5) 최종 결과 결정
         final_result = "FAIL" if total_error > 0 else "PASS"
-        
-        # ✅ 오류 메시지를 트리 구조로 포매팅
+
         if error_messages:
             error_msg = format_errors_as_tree(error_messages)
         else:
             error_msg = "오류가 없습니다."
 
         print(f"\n============ 검증 완료 ============")
-        print(f"최종 결과: {final_result}")
-        print(f"통과: {total_correct}, 실패: {total_error}")
-        print(f"\n필드별 상세 결과:")
-        for fp, res in field_results.items():
-            struct_icon = "✅" if res["struct_pass"] else "❌"
-            sem_icon = "✅" if res["semantic_pass"] is True else ("❌" if res["semantic_pass"] is False else "⊙")
-            print(f"  {struct_icon}{sem_icon} {fp}")
-            if res["errors"]:
-                for err in res["errors"]:
-                    print(f"      └─ {err}")
+        print(f"📊 최종 카운트 요약:")
+        print(f"  전체 필드: {len(flat_fields)}개")
+        print(f"    ├─ 필수 필드: {len(required_fields)}개")
+        print(f"    └─ 선택 필드: {len(optional_fields)}개")
+        print(f"\n  검증 결과:")
+        print(f"    ├─ 전체 통과: {total_correct}개")
+        print(f"    ├─ 전체 실패: {total_error}개")
+        print(f"    ├─ 필수 통과: {required_correct}개")
+        print(f"    ├─ 필수 실패: {required_error}개")
+        print(f"    ├─ 선택 통과: {opt_correct}개")
+        print(f"    └─ 선택 실패: {opt_error}개")
+        print(f"\n  검증 상태: {final_result}")
 
-        return final_result, error_msg, total_correct, total_error
+        # ✅ 검증: 카운트가 맞는지 확인
+        total_check = total_correct + total_error
+        required_check = required_correct + required_error
+        opt_check = opt_correct + opt_error
+
+        print(f"\n🔍 카운트 검증:")
+        print(
+            f"  total_correct({total_correct}) + total_error({total_error}) = {total_check} (should be {len(flat_fields)})")
+        print(
+            f"  required_correct({required_correct}) + required_error({required_error}) = {required_check} (should be {len(required_fields)})")
+        print(f"  opt_correct({opt_correct}) + opt_error({opt_error}) = {opt_check} (should be {len(optional_fields)})")
+
+        if total_check != len(flat_fields):
+            print(f"  ⚠️ 경고: 전체 카운트 불일치! ({total_check} != {len(flat_fields)})")
+        if required_check != len(required_fields):
+            print(f"  ⚠️ 경고: 필수 필드 카운트 불일치! ({required_check} != {len(required_fields)})")
+        if opt_check != len(optional_fields):
+            print(f"  ⚠️ 경고: 선택 필드 카운트 불일치! ({opt_check} != {len(optional_fields)})")
+
+        return final_result, error_msg, total_correct, total_error, opt_correct, opt_error
 
     except Exception as e:
         print(f"[json_check_] 에러: {e}")
@@ -670,15 +746,15 @@ def _validate_field_semantic(field_path, field_value, rule, data, reference_cont
     elif validation_type == "url-video":
         return _validate_url_video(field_path, field_value, rule, reference_context,
                                    field_errors, global_errors)
-    
+
     elif validation_type == "array-validation":
         return _validate_array(field_path, field_value, rule, data, reference_context,
-                              field_errors, global_errors)
-    
+                               field_errors, global_errors)
+
     elif validation_type == "object-validation":
         return _validate_object(field_path, field_value, rule, data, reference_context,
-                               field_errors, global_errors)
-    
+                                field_errors, global_errors)
+
     else:
         print(f"  ⚠ 미지원 validationType: {validation_type}")
         return True
@@ -690,7 +766,7 @@ def _validate_list_match(field_path, field_value, rule, data, reference_context,
     from core.json_checker_new import collect_all_values_by_key
 
     ref_endpoint = rule.get("referenceEndpoint")
-    ref_list_field = rule.get("referenceListField")
+    ref_list_field = rule.get("referenceListField") or rule.get("referenceField")
 
     if not reference_context or ref_endpoint not in reference_context:
         error_msg = f"참조 엔드포인트 없음: {ref_endpoint}"
@@ -776,7 +852,7 @@ def _validate_field_match(field_path, field_value, rule, reference_context,
     ref_data = reference_context[ref_endpoint]
     print(f"[DEBUG][VALIDATE] ref_data: {ref_data}")
     ref_value = get_by_path(ref_data, ref_field)
-    
+
     # ref_value가 None이면 배열 필드 안을 자동 탐색
     if ref_value is None:
         print(f"[DEBUG][VALIDATE] ref_field '{ref_field}' not found, searching in arrays...")
@@ -1139,27 +1215,27 @@ def _validate_array(field_path, field_value, rule, data, reference_context,
         field_errors.append(error_msg)
         global_errors.append(f"[의미] {field_path}: {error_msg}")
         return False
-    
+
     all_valid = True
-    
+
     # 1. arrayConstraints 검증 (minItems, maxItems)
     array_constraints = rule.get("arrayConstraints", {})
     if array_constraints:
         min_items = array_constraints.get("minItems")
         max_items = array_constraints.get("maxItems")
-        
+
         if min_items is not None and len(field_value) < min_items:
             error_msg = f"배열 최소 길이 미달: {len(field_value)} < {min_items}"
             field_errors.append(error_msg)
             global_errors.append(f"[의미] {field_path}: {error_msg}")
             all_valid = False
-        
+
         if max_items is not None and len(field_value) > max_items:
             error_msg = f"배열 최대 길이 초과: {len(field_value)} > {max_items}"
             field_errors.append(error_msg)
             global_errors.append(f"[의미] {field_path}: {error_msg}")
             all_valid = False
-    
+
     # 2. arrayItemValidation 검증 (배열 요소 개별 검증)
     array_item_validation = rule.get("arrayItemValidation")
     if array_item_validation:
@@ -1171,7 +1247,7 @@ def _validate_array(field_path, field_value, rule, data, reference_context,
             )
             if not item_valid:
                 all_valid = False
-    
+
     # 3. arrayItemSchema 검증 (객체 배열 스키마 검증)
     array_item_schema = rule.get("arrayItemSchema")
     if array_item_schema:
@@ -1182,18 +1258,18 @@ def _validate_array(field_path, field_value, rule, data, reference_context,
                 global_errors.append(f"[의미] {field_path}[{idx}]: {error_msg}")
                 all_valid = False
                 continue
-            
+
             # 각 필드 스키마에 대해 검증
             for field_schema in array_item_schema:
                 field_key = field_schema.get("key")
                 field_validation = field_schema.get("validation", {})
-                
+
                 if not field_validation.get("enabled", False):
                     continue
-                
+
                 item_field_path = f"{field_path}[{idx}].{field_key}"
                 item_field_value = item.get(field_key)
-                
+
                 # children이 있으면 object-validation 처리
                 if field_schema.get("children"):
                     child_rule = {
@@ -1210,12 +1286,12 @@ def _validate_array(field_path, field_value, rule, data, reference_context,
                 else:
                     # 일반 필드 검증
                     field_valid = _validate_field_semantic(
-                        item_field_path, item_field_value, field_validation, 
+                        item_field_path, item_field_value, field_validation,
                         data, reference_context, field_errors, global_errors
                     )
                     if not field_valid:
                         all_valid = False
-    
+
     return all_valid
 
 
@@ -1227,21 +1303,21 @@ def _validate_object(field_path, field_value, rule, data, reference_context,
         field_errors.append(error_msg)
         global_errors.append(f"[의미] {field_path}: {error_msg}")
         return False
-    
+
     all_valid = True
-    
+
     # children 필드 검증
     children = rule.get("children", [])
     for child_schema in children:
         child_key = child_schema.get("key")
         child_validation = child_schema.get("validation", {})
-        
+
         if not child_validation.get("enabled", False):
             continue
-        
+
         child_path = f"{field_path}.{child_key}"
         child_value = field_value.get(child_key)
-        
+
         # 중첩 객체 처리
         if child_schema.get("children"):
             nested_rule = {
@@ -1263,7 +1339,7 @@ def _validate_object(field_path, field_value, rule, data, reference_context,
             )
             if not child_valid:
                 all_valid = False
-    
+
     return all_valid
 
 
@@ -1292,6 +1368,7 @@ def save_result(str_in, path):
         pdf.output(path, 'F')
     except Exception as err:
         print(err)
+
 
 def set_message(path_):
     try:
@@ -1463,6 +1540,7 @@ def generate_validation_data_from_step_buffer(step_buffer, attempt_num):
         "validationData": validation_data,
         "validationErrors": validation_errors
     }
+
 
 def build_result_json(myapp_instance):
     """
@@ -1758,6 +1836,7 @@ def _build_spec_result(myapp_instance, spec_id, step_buffers, table_data=None, g
         "apis": apis
     }
 
+
 def save_result_json(myapp_instance, output_path="results/validation_result.json"):
     """
     검증 결과를 JSON 파일로 저장
@@ -1785,6 +1864,7 @@ def save_result_json(myapp_instance, output_path="results/validation_result.json
 
     print(f"검증 결과가 '{output_path}'에 저장되었습니다.")
     return output_path
+
 
 def _validate_url_video(field_path, field_value, rule, reference_context, field_errors, global_errors):
     """RTSP URL 스트리밍 가능 여부 검증"""
