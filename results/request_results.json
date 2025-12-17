@@ -22,10 +22,10 @@
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 90.48,
+    "score": 92.86,
     "totalFields": 42,
-    "passedFields": 38,
-    "failedFields": 4
+    "passedFields": 39,
+    "failedFields": 3
   },
   "testResult": [
     {
@@ -115,10 +115,10 @@
       "testGroup": "cmii82nib009f8z1tvo6fz8j2",
       "testSpecId": "cmii7lxbn002s8z1t1i9uudf0",
       "testSpecName": "vid001",
-      "score": 90.48,
+      "score": 92.86,
       "totalFields": 42,
-      "passedFields": 38,
-      "failedFields": 4,
+      "passedFields": 39,
+      "failedFields": 3,
       "apis": [
         {
           "id": "cmii7p0dp002w8z1tcikv3cji",
@@ -283,11 +283,11 @@
           "name": "저장된 영상(CCTV) 전송",
           "method": "POST",
           "endpoint": "/ReplayURL",
-          "score": 80.0,
+          "score": 100.0,
           "validationCnt": 1,
           "totalFields": 5,
-          "passFields": 4,
-          "failFields": 1,
+          "passFields": 5,
+          "failFields": 0,
           "validations": [
             {
               "attempt": 1,
@@ -302,9 +302,7 @@
                 ]
               },
               "validationErrors": [
-                "[시도 1/1]",
-                "<b>[기타]</b> (1건)",
-                "- [맥락 오류] camList.camID: 값 불일치: ['cam0001'] != ['cam0001', 'cam0002', 'cam003', 'cam004']"
+                "오류가 없습니다."
               ]
             }
           ]
@@ -385,5 +383,5 @@
       ]
     }
   ],
-  "completedDate": "2025-12-17T14:30:40Z"
+  "completedDate": "2025-12-17T15:12:19Z"
 }
