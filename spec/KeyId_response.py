@@ -3,53 +3,27 @@
 
 # ========== REQUEST MAPPINGS ==========
 
-# cmii7shen005i8z1tagevx4qh
-cmii7shen005i8z1tagevx4qh_Authentication_request_key_ids = {
-    "userID": "cmii7ubbm005z8z1tehq9fr86",
-    "userPW": "cmii7ubbn00618z1t8tq43wxl",
+# cmiqr201z00i8ie8fitdg5t1b
+cmiqr201z00i8ie8fitdg5t1b_Authentication_request_key_ids = {
+    "userID": "cmise5oir00k35vy7pfsj3tdb",
+    "userPW": "cmise5rbw00kb5vy72k0v1dr9",
 }
 
-cmii7shen005i8z1tagevx4qh_RealtimeSensorData_request_key_ids = {
-    "sensorDeviceList": "cmiwks7mu01ed844gsf300h90",
-    "sensorDeviceList.sensorDeviceID": "cmiwku6pd01py844gs8pdfqk7",
-    "duration": "cmiwktcwm01iz844go8txcmqw",
-    "transProtocol": "cmiwktiqh01kl844gjwbaiw73",
-    "transProtocol.transProtocolType": "cmiwktrzi01n5844gxocqtjht",
-    "transProtocol.transProtocolDesc": "cmiwktx0r01ok844gn28t482z",
-    "startTime": "cmiwku3u101pg844gejhlznpv",
-    "code": "cmiwkzzwa02y3844gljxs30eu",
-    "message": "cmiwl037902yc844gagayjzkj",
+cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_request_key_ids = {
+    "sensorDeviceID": "cmisg3n7u088o5vy75dl8ge3h",
+    "commandType": "cmiwkyi4402a0844gkokgga8t",
 }
 
-cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_request_key_ids = {
-    "sensorDeviceList": "cmiwl2mx502yz844g7dmcpkb0",
-    "sensorDeviceList.sensorDeviceID": "cmiwl4bee036r844g6223h6b1",
-    "transProtocol": "cmiwl3bql031h844ggjq05wzn",
-    "transProtocol.transProtocolType": "cmiwl3kx6032n844gecy77dtd",
-    "transProtocol.transProtocolDesc": "cmiwl3o1y033b844g05sp9bx3",
-    "duration": "cmiwl3s3c0348844gd51vd4xv",
-    "eventFilter": "cmiwl41m8035g844gcx08uyjj",
-    "startTime": "cmiwl48s4036d844gftsr8d5e",
-    "code": "cmiwl7ytq03n2844g34lomsvs",
-    "message": "cmiwl81k103nb844gd7iiue6b",
+cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl2_request_key_ids = {
+    "sensorDeviceID": "cmisgef0108e15vy7pvj4b2yg",
+    "commandType": "cmiskmz17000kugxnuas8675t",
 }
 
-cmii7shen005i8z1tagevx4qh_StoredSensorEventInfos_request_key_ids = {
-    "timePeriod": "cmiwljyk703pj844gnqjb4im6",
-    "timePeriod.startTime": "cmiwlk5bz03q0844g7oomi66i",
-    "timePeriod.endTime": "cmiwlk8e003q8844gd2f442h5",
-    "sensorDeviceList": "cmiwlkeb803qh844gnr7ujlru",
-    "sensorDeviceList.sensorDeviceID": "cmiwlli7703u9844graoc4jdn",
-    "maxCount": "cmiwlkv3q03rp844gzzp5dbqi",
-    "eventFilter": "cmiwllfp703tr844g17037vsi",
-}
-
-# cmii7shen005i8z1tagevx4qh Request Key-ID Mapping 리스트
-cmii7shen005i8z1tagevx4qh_request_key_ids = [
-    cmii7shen005i8z1tagevx4qh_Authentication_request_key_ids,
-    cmii7shen005i8z1tagevx4qh_RealtimeSensorData_request_key_ids,
-    cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_request_key_ids,
-    cmii7shen005i8z1tagevx4qh_StoredSensorEventInfos_request_key_ids,
+# cmiqr201z00i8ie8fitdg5t1b Request Key-ID Mapping 리스트
+cmiqr201z00i8ie8fitdg5t1b_request_key_ids = [
+    cmiqr201z00i8ie8fitdg5t1b_Authentication_request_key_ids,
+    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_request_key_ids,
+    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl2_request_key_ids,
 ]
 
 # cmii7pysb004k8z1tts0npxfm
@@ -166,76 +140,58 @@ cmii7lxbn002s8z1t1i9uudf0_request_key_ids = [
 
 # ========== RESPONSE MAPPINGS ==========
 
-# cmii7shen005i8z1tagevx4qh
-cmii7shen005i8z1tagevx4qh_Authentication_response_key_ids = {
-    "code": "cmii7ubcb00668z1tz2db96pa",
-    "message": "cmii7ubcc00688z1t5ww43oyh",
-    "userName": "cmii7ubcc006a8z1tiysoivn3",
-    "userAff": "cmii7ubcd006c8z1t5znhxevt",
-    "accessToken": "cmii7ubcd006e8z1tdsy8yzmg",
+# cmiqr201z00i8ie8fitdg5t1b
+cmiqr201z00i8ie8fitdg5t1b_Authentication_response_key_ids = {
+    "code": "cmise6h0700lj5vy7s4v9c10v",
+    "message": "cmise6px400my5vy7g75s15nw",
+    "userName": "cmise6roq00n75vy7ybrbiod8",
+    "userAff": "cmise6tse00ne5vy7nh2re28j",
+    "accessToken": "cmise6vhr00nj5vy79f6dpfuy",
 }
 
-cmii7shen005i8z1tagevx4qh_Capabilities_response_key_ids = {
-    "code": "cmiwkddjg000t844g314b5617",
-    "message": "cmiwkdp0c0019844gm7dcd6x7",
-    "transportSupport": "cmiwke1ip001l844ga022dkuo",
-    "transportSupport.transProtocolType": "cmiwkenyq003c844g8076pb6b",
-    "transportSupport.transProtocolDesc": "cmiwkenyq003e844gceq8juz9",
+cmiqr201z00i8ie8fitdg5t1b_Capabilities_response_key_ids = {
+    "code": "cmisel8x7017z5vy7ec1e56cu",
+    "message": "cmisele87018w5vy7kc760njz",
+    "transportSupport": "cmiselgo201935vy7dbfm26ct",
+    "transportSupport.transProtocolType": "cmisencfx01go5vy7jrh8pa2a",
+    "transportSupport.transProtocolDesc": "cmisencfx01gq5vy7uokgn8u3",
 }
 
-cmii7shen005i8z1tagevx4qh_SensorDeviceProfiles_response_key_ids = {
-    "code": "cmiwkjjd5003y844g1zy7wxlg",
-    "message": "cmiwkjq080048844gqxgoo5kt",
-    "sensorDeviceList": "cmiwkjxse004i844g6dzk9xuk",
-    "sensorDeviceList.sensorDeviceID": "cmiwkpl7z01df844gtz32y9f5",
-    "sensorDeviceList.sensorDeviceType": "cmiwkpl8001dh844g75gn8pnr",
-    "sensorDeviceList.sensorDeviceName": "cmiwkpl8001dj844gft5bvtk3",
-    "sensorDeviceList.sensorDeviceLoc": "cmiwkpl8101dl844gkgmxvh73",
-    "sensorDeviceList.sensorDeviceLoc.lon": "cmiwkpl9001dn844gcfhlhmuf",
-    "sensorDeviceList.sensorDeviceLoc.lat": "cmiwkpl9101dp844g7ipf3rd7",
-    "sensorDeviceList.sensorDeviceLoc.alt": "cmiwkpl9101dr844gmhas0h0i",
-    "sensorDeviceList.sensorDeviceLoc.desc": "cmiwkpl9201dt844gpk2spohg",
+cmiqr201z00i8ie8fitdg5t1b_SensorDeviceProfiles_response_key_ids = {
+    "code": "cmisev4br03dj5vy7q8tww5gm",
+    "message": "cmiseva9203e25vy7xh9ygo6s",
+    "sensorDeviceList": "cmisevcbu03e75vy761meayab",
+    "sensorDeviceList.sensorDeviceID": "cmisfgtvs07sy5vy7f2hjy5aa",
+    "sensorDeviceList.sensorDeviceType": "cmisfgtvt07t05vy7qd9tbtc9",
+    "sensorDeviceList.sensorDeviceName": "cmisfgtvt07t25vy79eg4cnlj",
+    "sensorDeviceList.sensorDeviceLoc": "cmisfgtvu07t45vy7oxufjeba",
+    "sensorDeviceList.sensorDeviceLoc.lon": "cmisfgtvz07t65vy7n4m3aoe0",
+    "sensorDeviceList.sensorDeviceLoc.lat": "cmisfgtw007t85vy7jrmgllyc",
+    "sensorDeviceList.sensorDeviceLoc.alt": "cmisfgtw007ta5vy7ut58i0y3",
+    "sensorDeviceList.sensorDeviceLoc.desc": "cmisfgtw107tc5vy7as5hqx5m",
 }
 
-cmii7shen005i8z1tagevx4qh_RealtimeSensorData_response_key_ids = {
-    "code": "cmiwkumay01qo844gast85yvr",
-    "message": "cmiwkuog901qt844gswj7kaas",
-    "sensorDeviceList": "cmiwkvlgi01r6844g0inyggzl",
-    "sensorDeviceList.sensorDeviceID": "cmiwkzuqx02xk844gd9lr6k8p",
-    "sensorDeviceList.measureTime": "cmiwkzuqx02xm844ghyx3o5j7",
-    "sensorDeviceList.sensorDeviceType": "cmiwkzuqy02xo844glk3msr3k",
-    "sensorDeviceList.sensorDeviceUnit": "cmiwkzuqy02xq844gh7csg9af",
-    "sensorDeviceList.sensorDeviceValue": "cmiwkzuqz02xs844gqt2i349j",
+cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_response_key_ids = {
+    "code": "cmisg4vxz089s5vy7qhna151g",
+    "message": "cmisg4zcn08a05vy7gzrw0rbp",
+    "sensorDeviceID": "cmisg51v408a85vy7mrhteunz",
+    "sensorDeviceStatus": "cmj6hdjek01qsxei0ydzyxlg3",
 }
 
-cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_response_key_ids = {
-    "code": "cmiwl4h5d0376844g98gk5nbd",
-    "message": "cmiwl4nzq037g844gtbfrqmvy",
-    "sensorDeviceList": "cmiwl5mdp037y844g0xqmnmgo",
-    "sensorDeviceList.sensorDeviceID": "cmiwl7u0q03ml844gweorjcdn",
-    "sensorDeviceList.eventName": "cmiwl7u0r03mn844gbfn9dth8",
-    "sensorDeviceList.eventTime": "cmiwl7u0r03mp844gvwnnmebq",
-    "sensorDeviceList.eventDesc": "cmiwl7u0r03mr844gh5mxdrd6",
+cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl2_response_key_ids = {
+    "code": "cmisgsmo108me5vy7a070ga4t",
+    "message": "cmisgsssu08n85vy7rhriw5bx",
+    "sensorDeviceID": "cmisgsuft08nf5vy70cyl59az",
+    "sensorDeviceStatus": "cmisgsyrq08nn5vy7ggcm5ezc",
 }
 
-cmii7shen005i8z1tagevx4qh_StoredSensorEventInfos_response_key_ids = {
-    "code": "cmiwllxwf03uk844gapewtuco",
-    "message": "cmiwlm39u03uu844g8drw39o8",
-    "sensorDeviceList": "cmiwlmdjq03v4844gn0z12qco",
-    "sensorDeviceList.sensorDeviceID": "cmiwlopxz04ad844gebji2zjq",
-    "sensorDeviceList.eventName": "cmiwlopy004af844g94noxcxw",
-    "sensorDeviceList.eventTime": "cmiwlopy104ah844gpjxk8egi",
-    "sensorDeviceList.eventDesc": "cmiwlopy104aj844gynv5ujea",
-}
-
-# cmii7shen005i8z1tagevx4qh Response Key-ID Mapping 리스트
-cmii7shen005i8z1tagevx4qh_response_key_ids = [
-    cmii7shen005i8z1tagevx4qh_Authentication_response_key_ids,
-    cmii7shen005i8z1tagevx4qh_Capabilities_response_key_ids,
-    cmii7shen005i8z1tagevx4qh_SensorDeviceProfiles_response_key_ids,
-    cmii7shen005i8z1tagevx4qh_RealtimeSensorData_response_key_ids,
-    cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_response_key_ids,
-    cmii7shen005i8z1tagevx4qh_StoredSensorEventInfos_response_key_ids,
+# cmiqr201z00i8ie8fitdg5t1b Response Key-ID Mapping 리스트
+cmiqr201z00i8ie8fitdg5t1b_response_key_ids = [
+    cmiqr201z00i8ie8fitdg5t1b_Authentication_response_key_ids,
+    cmiqr201z00i8ie8fitdg5t1b_Capabilities_response_key_ids,
+    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceProfiles_response_key_ids,
+    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_response_key_ids,
+    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl2_response_key_ids,
 ]
 
 # cmii7pysb004k8z1tts0npxfm
