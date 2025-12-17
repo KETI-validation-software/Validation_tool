@@ -59,7 +59,7 @@ class Server(BaseHTTPRequestHandler):
             # ✅ payload를 deepcopy하여 완전히 독립된 복사본 생성
             # 이후 원본이 수정되어도 trace에는 영향 없음
             payload_copy = copy.deepcopy(payload)
-            
+
             evt = {
                 "time": datetime.datetime.utcnow().isoformat() + "Z",
                 "api": api_name,
@@ -116,7 +116,7 @@ class Server(BaseHTTPRequestHandler):
         return None
 
     # ========== 오류 검사 함수들 (400/201/404) ==========
-    
+    '''
     def _check_request_errors(self, api_name, request_data):
         """
         요청 데이터 오류 검사
@@ -163,7 +163,7 @@ class Server(BaseHTTPRequestHandler):
         
         # ✅ 오류 없으면 flag 초기화
         Server.request_has_error[api_name] = False
-        return None  # 오류 없음
+        return None  # 오류 없음'''
 
     def _get_request_schema(self, api_name):
         """API의 요청 스키마 가져오기"""
@@ -179,7 +179,7 @@ class Server(BaseHTTPRequestHandler):
     def _check_type_mismatch(self, request_data, schema):
         """
         타입 불일치 검사
-        
+
         Returns:
             str: 오류 필드명 (오류 있을 때) 또는 None (정상)
         """
@@ -187,14 +187,14 @@ class Server(BaseHTTPRequestHandler):
             for field, expected_type in schema.items():
                 # OptionalKey 처리
                 field_name = field.key if hasattr(field, 'key') else field
-                
+
                 if field_name in request_data:
                     value = request_data[field_name]
-                    
+
                     # None 값은 검사 스킵
                     if value is None:
                         continue
-                    
+
                     # 타입 검사
                     if expected_type == str:
                         if not isinstance(value, str):
@@ -214,51 +214,51 @@ class Server(BaseHTTPRequestHandler):
                             return field_name
         except Exception as e:
             print(f"[ERROR] 타입 검사 중 오류: {e}")
-        
+
         return None
 
     def _check_time_range(self, request_data):
         """
         시간 구간 검사 - 현재 시간 기준으로 과거 데이터 요청인지 확인
-        
+
         Returns:
             str: 오류 메시지 (오류 있을 때) 또는 None (정상)
         """
         current_time = int(time.time())
-        
+
         start_time = request_data.get("startTime")
         end_time = request_data.get("endTime")
-        
+
         try:
             if start_time is not None and end_time is not None:
                 # Unix timestamp로 가정 (정수형)
                 # 2년 전보다 과거 데이터면 "정보 없음"
                 two_years_ago = current_time - (2 * 365 * 24 * 60 * 60)
-                
+
                 if isinstance(start_time, int) and isinstance(end_time, int):
                     if end_time < two_years_ago:
                         return "시간 구간이 너무 과거입니다"
         except Exception as e:
             print(f"[ERROR] 시간 검사 실패: {e}")
-        
+
         return None
 
     def _check_device_exists(self, request_data):
         """
         장치 존재 검사 - 유효한 camID인지 확인
-        
+
         Returns:
             str: 오류 메시지 (오류 있을 때) 또는 None (정상)
         """
         # ✅ 유효한 카메라 ID 목록 (클래스 변수 사용 - 동적으로 업데이트됨)
         valid_cam_ids = Server.valid_device_ids
-        
+
         # camID 검사
         cam_id = request_data.get("camID")
         if cam_id is not None:
             if cam_id not in valid_cam_ids:
                 return f"존재하지 않는 장치: {cam_id}"
-        
+
         # camList 검사
         cam_list = request_data.get("camList")
         if cam_list is not None and isinstance(cam_list, list):
@@ -266,7 +266,7 @@ class Server(BaseHTTPRequestHandler):
                 cam_id_in_list = cam.get("camID") if isinstance(cam, dict) else cam
                 if cam_id_in_list and cam_id_in_list not in valid_cam_ids:
                     return f"존재하지 않는 장치: {cam_id_in_list}"
-        
+
         return None
 
     # ========== 오류 검사 함수들 끝 ==========
@@ -405,7 +405,7 @@ class Server(BaseHTTPRequestHandler):
 
                 # ✅ Authentication API REQUEST 이벤트 기록 (한 번만)
                 self._push_event(api_name, "REQUEST", self.request_data)
-
+                '''
                 # ========== Authentication API도 오류 검사 (400/201/404) ==========
                 error_response = self._check_request_errors(api_name, self.request_data)
                 if error_response:
@@ -419,7 +419,7 @@ class Server(BaseHTTPRequestHandler):
                     self.wfile.write(json.dumps(error_response).encode('utf-8'))
                     return
                 # ================================================================
-
+                '''
                 # 응답에 토큰 포함
                 if isinstance(data, dict):
                     data = data.copy()
@@ -430,7 +430,7 @@ class Server(BaseHTTPRequestHandler):
                 try:
                     # ✅ Authentication API RESPONSE 이벤트 기록 (한 번만)
                     self._push_event(api_name, "RESPONSE", data)
-                    
+
                     response_json = json.dumps(data).encode('utf-8')
                     self._set_headers()
                     self.wfile.write(response_json)
@@ -605,7 +605,7 @@ class Server(BaseHTTPRequestHandler):
         # ========== 인증 성공 후 REQUEST 이벤트 기록 및 카운터 증가 ==========
         # ✅ 인증이 성공한 경우에만 실행됨 (401 return 후에는 여기 도달 안 함)
         self._push_event(api_name, "REQUEST", self.request_data)
-        
+
         # 클래스 변수 request_counter 사용하여 API별 요청 횟수 추적
         try:
             if api_name not in Server.request_counter:
@@ -615,7 +615,7 @@ class Server(BaseHTTPRequestHandler):
         except Exception as e:
             print(f"[API_SERVER] request_counter 에러: {e}")
         # ================================================================
-
+        '''
         # ========== 오류 검사 로직 (400/201/404) ==========
         # ✅ api_res() 호출 후에 검사 (self.message, self.inSchema가 설정된 후)
         error_response = self._check_request_errors(api_name, self.request_data)
@@ -629,7 +629,7 @@ class Server(BaseHTTPRequestHandler):
             self._set_headers()
             self.wfile.write(json.dumps(error_response).encode('utf-8'))
             return
-        # ================================================
+        # ================================================'''
 
         # ✅ 요청 본문은 이미 do_POST 시작 부분에서 self.request_data에 저장됨
         # 중복 읽기 방지를 위해 이미 저장된 데이터 사용
@@ -665,7 +665,7 @@ class Server(BaseHTTPRequestHandler):
                         for spec_id, config in group.items():
                             if spec_id in ["group_name", "group_id"]:
                                 continue
-                        
+
                         trans_protocols = config.get('trans_protocol', [])
                         if message_cnt < len(trans_protocols):
                             protocol_type = trans_protocols[message_cnt]
@@ -720,7 +720,7 @@ class Server(BaseHTTPRequestHandler):
                             self._set_headers()
                             self.wfile.write(json.dumps(message).encode('utf-8'))
                             return
-                        
+
                         # 2단계: 잘못된 주소인 경우
                         url_tmp = str(url_tmp).strip()
 
@@ -791,7 +791,7 @@ class Server(BaseHTTPRequestHandler):
             # constraints가 있을 때만 _applied_constraints 호출 (성능 최적화)
             if out_con and isinstance(out_con, dict) and len(out_con) > 0:
                 print(f"[DEBUG][CONSTRAINTS] _applied_constraints 호출 예정")
-                
+
                 # ✅ generator의 latest_events를 명시적으로 업데이트 (참조 동기화)
                 self.generator.latest_events = Server.latest_event
                 print(f"[DEBUG][CONSTRAINTS] 🔄 generator.latest_events 동기화 완료: {list(self.generator.latest_events.keys())}")
@@ -818,14 +818,14 @@ class Server(BaseHTTPRequestHandler):
                         # 기본 ID들 유지하고 CameraProfiles ID들만 리셋
                         base_ids = {"cam001", "cam002", "keti", "camera1", "camera2"}
                         Server.valid_device_ids = base_ids.copy()
-                        
+
                         # CameraProfiles에서 받은 ID 추가
                         for cam in cam_list:
                             if isinstance(cam, dict) and "camID" in cam:
                                 Server.valid_device_ids.add(cam["camID"])
                         print(f"[DEVICE_UPDATE] CameraProfiles에서 {len(cam_list)}개 camID로 리셋+추가")
                         print(f"[DEVICE_UPDATE] 현재 유효한 장치 목록: {Server.valid_device_ids}")
-
+                '''
                 # ✅ JSON에 code_value 추가
                 if isinstance(updated_message, dict):
                     if api_name in Server.request_has_error and Server.request_has_error[api_name]:
@@ -833,7 +833,7 @@ class Server(BaseHTTPRequestHandler):
                         print(f"[DEBUG] code_value=400 추가 (요청 오류 있음)")
                     else:
                         updated_message['code_value'] = 200
-                        print(f"[DEBUG] code_value=200 추가 (정상)")
+                        print(f"[DEBUG] code_value=200 추가 (정상)")'''
 
                 # JSON 응답 준비
                 a = json.dumps(updated_message).encode('utf-8')
@@ -851,14 +851,14 @@ class Server(BaseHTTPRequestHandler):
                         # 기본 ID들 유지하고 CameraProfiles ID들만 리셋
                         base_ids = {"cam001", "cam002", "keti", "camera1", "camera2"}
                         Server.valid_device_ids = base_ids.copy()
-                        
+
                         # CameraProfiles에서 받은 ID 추가
                         for cam in cam_list:
                             if isinstance(cam, dict) and "camID" in cam:
                                 Server.valid_device_ids.add(cam["camID"])
                         print(f"[DEVICE_UPDATE] CameraProfiles에서 {len(cam_list)}개 camID로 리셋+추가")
                         print(f"[DEVICE_UPDATE] 현재 유효한 장치 목록: {Server.valid_device_ids}")
-
+                '''
                 # ✅ JSON에 code_value 추가
                 if isinstance(message, dict):
                     if api_name in Server.request_has_error and Server.request_has_error[api_name]:
@@ -866,7 +866,7 @@ class Server(BaseHTTPRequestHandler):
                         print(f"[DEBUG] code_value=400 추가 (요청 오류 있음)")
                     else:
                         message['code_value'] = 200
-                        print(f"[DEBUG] code_value=200 추가 (정상)")
+                        print(f"[DEBUG] code_value=200 추가 (정상)")'''
 
                 # JSON 응답 준비
                 a = json.dumps(message).encode('utf-8')
@@ -875,14 +875,14 @@ class Server(BaseHTTPRequestHandler):
             import traceback
             traceback.print_exc()
             # 에러 발생 시 원본 메시지 사용
-            
+            '''
             # ✅ JSON에 code_value 추가
             if isinstance(message, dict):
                 if api_name in Server.request_has_error and Server.request_has_error[api_name]:
                     message['code_value'] = 400
                 else:
-                    message['code_value'] = 200
-            
+                    message['code_value'] = 200'''
+
             # JSON 응답 준비
             a = json.dumps(message).encode('utf-8')
 
@@ -958,11 +958,11 @@ class Server(BaseHTTPRequestHandler):
                                 print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 웹훅 constraints 적용 시작")
                                 print(f"[DEBUG][WEBHOOK_CONSTRAINTS] webhook_con keys: {list(webhook_con.keys())}")
                                 print(f"[DEBUG][WEBHOOK_CONSTRAINTS] latest_events keys: {list(Server.latest_event.keys())}")
-                                
+
                                 # ✅ generator의 latest_events를 명시적으로 업데이트 (참조 동기화)
                                 self.generator.latest_events = Server.latest_event
                                 print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 🔄 generator.latest_events 동기화 완료")
-                                
+
                                 # ✅ 템플릿 그대로 사용 (n 파라미터 제거)
                                 # 웹훅 페이로드에 constraints 적용
                                 webhook_payload = self.generator._applied_constraints(
@@ -1018,11 +1018,11 @@ class Server(BaseHTTPRequestHandler):
                 self.result = result
                 Server.webhook_response = json.loads(result.text)  # ✅ 클래스 변수에 저장
                 print(f"[DEBUG][SERVER] webhook_response 저장됨 (클래스 변수): {Server.webhook_response}")
-                
+
                 # ✅ 웹훅 응답 기록 (trace)
                 spec_id, api_name = self.parse_path()
                 self._push_event(api_name, "WEBHOOK_IN", Server.webhook_response)
-                
+
                 # JSON 파일 저장 제거 - spec/video/videoData_response.py 사용
                 # with open(resource_path("spec/" + self.system + "/" + "webhook_" + self.path[1:] + ".json"),
                 #           "w", encoding="UTF-8") as out_file2:
@@ -1083,10 +1083,10 @@ class Server(BaseHTTPRequestHandler):
                 # 형식 1/2: /spec_id_or_test_name/api_name
                 spec_id_or_name = parts[0]
                 api_name = parts[1]
-                
+
                 # ✅ test_name을 spec_id로 변환 시도
                 actual_spec_id = self._resolve_spec_id(spec_id_or_name)
-                
+
                 print(f"[DEBUG][PARSE_PATH] 입력={spec_id_or_name}, 변환={actual_spec_id}, api_name={api_name}")
                 return actual_spec_id, api_name
             elif len(parts) == 1:
@@ -1104,10 +1104,10 @@ class Server(BaseHTTPRequestHandler):
     def _resolve_spec_id(self, spec_id_or_name):
         """
         test_name 또는 spec_id를 실제 spec_id로 변환
-        
+
         Args:
             spec_id_or_name: URL에서 추출한 spec_id 또는 test_name
-            
+
         Returns:
             str: 실제 spec_id (변환 실패 시 원본 반환)
         """
@@ -1115,27 +1115,27 @@ class Server(BaseHTTPRequestHandler):
             # ✅ 1. 이미 spec_id 형식이면 그대로 반환 (cm으로 시작하는 cuid)
             if spec_id_or_name.startswith('cm') and len(spec_id_or_name) == 25:
                 return spec_id_or_name
-            
+
             # ✅ 2. CONSTANTS에서 SPEC_CONFIG 로드
             import config.CONSTANTS as CONSTANTS
             import sys
             import os
-            
+
             SPEC_CONFIG = getattr(CONSTANTS, 'SPEC_CONFIG', [])
-            
+
             # PyInstaller 환경에서 외부 CONSTANTS.py 로드
             if getattr(sys, 'frozen', False):
                 exe_dir = os.path.dirname(sys.executable)
                 external_constants_path = os.path.join(exe_dir, "config", "CONSTANTS.py")
-                
+
                 if os.path.exists(external_constants_path):
                     with open(external_constants_path, 'r', encoding='utf-8') as f:
                         constants_code = f.read()
-                    
+
                     namespace = {'__file__': external_constants_path}
                     exec(constants_code, namespace)
                     SPEC_CONFIG = namespace.get('SPEC_CONFIG', SPEC_CONFIG)
-            
+
             # ✅ 3. test_name으로 spec_id 찾기
             for group in SPEC_CONFIG:
                 for key, value in group.items():
@@ -1146,11 +1146,11 @@ class Server(BaseHTTPRequestHandler):
                         if test_name == spec_id_or_name:
                             print(f"[RESOLVE] test_name '{spec_id_or_name}' → spec_id '{key}'")
                             return key
-            
+
             # ✅ 4. 변환 실패 시 원본 반환
             print(f"[RESOLVE] '{spec_id_or_name}' 변환 실패, 원본 사용")
             return spec_id_or_name
-            
+
         except Exception as e:
             print(f"[ERROR][RESOLVE] spec_id 변환 실패: {e}")
             return spec_id_or_name
