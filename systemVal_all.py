@@ -6063,7 +6063,7 @@ class MyApp(QWidget):
                 json.dump(result_json, f, ensure_ascii=False, indent=2)
             print(f"✅ 진행 중 결과가 '{json_path}'에 저장되었습니다.")
             self.append_monitor_log(
-                step_name="진행 상황 저장 완룼",
+                step_name="진행 상황 저장 완료",
                 details=f"{json_path} (일시정지 시점까지의 결과가 저장되었습니다)"
             )
         except Exception as e:
