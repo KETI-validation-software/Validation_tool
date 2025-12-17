@@ -270,7 +270,7 @@ class CombinedDetailDialog(QDialog):
         error_text = step_buffer["error"] if step_buffer["error"] else ("오류가 없습니다." if result == "PASS" else "")
         error_msg = f"검증 결과: {result}\n\n"
         if result == "FAIL":
-            error_msg += "오류 세부사항:\n" + error_text
+            error_msg += error_text
         else:
             error_msg += "오류가 없습니다."
         # HTML 렌더링을 위해 setHtml 사용 (줄바꿈을 <br>로 변환)
@@ -2746,19 +2746,19 @@ class MyApp(QWidget):
                     else:
                         accumulated['data_parts'].append(f"\n{tmp_res_auth}")
 
-                    # 실시간 모니터링 창에 요청 데이터 표시 (중복 제거)
-                    # if retry_attempt == 0:
-                    #     self.append_monitor_log(
-                    #         step_name=f"{self.Server.message[self.cnt]} ({retry_attempt + 1}/{current_retries})",
-                    #         request_json=tmp_res_auth
-                    #     )
+                    # 실시간 모니터링 창에 요청 데이터 표시 (API 이름 중복 없이 데이터만)
+                    if retry_attempt == 0:
+                        self.append_monitor_log(
+                            step_name="",
+                            request_json=tmp_res_auth
+                        )
 
                     accumulated['raw_data_list'].append(current_data)
 
                     if (len(current_data) != 0) and current_data != "{}":
                         step_result = "FAIL"
                         add_err = 1
-                        combined_error_parts.append(f"[검증 {retry_attempt + 1}회차] [None Request] 데이터가 있으면 안 됩니다.")
+                        combined_error_parts.append(f"[시도 {retry_attempt + 1}/{current_retries}] [None Request] 데이터가 있으면 안 됩니다.")
                     elif (len(current_data) == 0) or current_data == "{}":
                         step_result = "PASS"
                         add_pass = 1
@@ -2772,13 +2772,12 @@ class MyApp(QWidget):
                     else:
                         accumulated['data_parts'].append(f"\n{tmp_res_auth}")
 
-                    # 실시간 모니터링 창에 요청 데이터 표시 (중복 제거)
-                    # if retry_attempt == 0:
-                    #     display_name = self.Server.message_display[self.cnt] if self.cnt < len(self.Server.message_display) else "Unknown"
-                    #     self.append_monitor_log(
-                    #         step_name=f"{display_name} ({retry_attempt + 1}/{current_retries})",
-                    #         request_json=tmp_res_auth
-                    #     )
+                    # 실시간 모니터링 창에 요청 데이터 표시 (API 이름 중복 없이 데이터만)
+                    if retry_attempt == 0:
+                        self.append_monitor_log(
+                            step_name="",
+                            request_json=tmp_res_auth
+                        )
 
                     accumulated['raw_data_list'].append(current_data)
 
@@ -2856,7 +2855,7 @@ class MyApp(QWidget):
                     inbound_err_txt = self._to_detail_text(val_text)
                     if val_result == "FAIL":
                         step_result = "FAIL"
-                        combined_error_parts.append(f"[검증 {retry_attempt + 1}회차] [Inbound]\n" + inbound_err_txt)
+                        combined_error_parts.append(f"[시도 {retry_attempt + 1}/{current_retries}]\n" + inbound_err_txt)
 
                     # WebHook 프로토콜인 경우
                     if current_protocol == "WebHook":
@@ -2893,7 +2892,7 @@ class MyApp(QWidget):
                                 webhook_resp_err_txt = self._to_detail_text(webhook_resp_val_text)
                                 if webhook_resp_val_result == "FAIL":
                                     step_result = "FAIL"
-                                    combined_error_parts.append(f"--- Webhook 검증 ---\n" + webhook_resp_err_txt)
+                                    combined_error_parts.append(f"\n--- Webhook 검증 ---\n" + webhook_resp_err_txt)
                         else:
                             accumulated['data_parts'].append(f"\n--- Webhook 응답 ---\nnull")
 

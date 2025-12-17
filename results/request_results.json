@@ -184,13 +184,16 @@
               "validationData": {
                 "doorList": [
                   {
-                    "doorID": ""
+                    "doorID": "door0001"
+                  },
+                  {
+                    "doorID": "door0002"
                   }
                 ],
                 "duration": 200,
                 "transProtocol": {
                   "transProtocolType": "WebHook",
-                  "transProtocolDesc": "https://192.168.0.3:8081"
+                  "transProtocolDesc": "https://10.252.219.95:8081"
                 },
                 "startTime": 20251105163010124
               },
@@ -238,7 +241,7 @@
                 "commandType": "Unlock"
               },
               "validationErrors": [
-                "[Inbound]",
+                "[시도 1/1]",
                 "- [맥락 오류] doorID: 값 불일치: door0001가 None([])에 없음"
               ]
             }
@@ -266,12 +269,12 @@
                 "duration": 10000,
                 "transProtocol": {
                   "transProtocolType": "WebHook",
-                  "transProtocolDesc": "https://192.168.0.3:8081"
+                  "transProtocolDesc": "https://10.252.219.95:8081"
                 },
                 "startTime": "20251105163010124"
               },
               "validationErrors": [
-                "[Inbound]",
+                "[시도 1/1]",
                 "<b>[startTime]</b> (1건)",
                 "- [타입 오류] startTime : Number가 와야 하는데 Str가 왔습니다.",
                 "--- Webhook 검증 ---",
