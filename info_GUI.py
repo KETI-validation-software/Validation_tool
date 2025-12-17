@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import (
     QScrollArea
 )
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
-from PyQt5.QtGui import QPixmap, QColor, QFont, QBrush, QPainter, QPen
+from PyQt5.QtGui import QPixmap, QColor, QFont, QBrush, QPainter, QPen, QResizeEvent
 import importlib
 import re
 from core.functions import resource_path
@@ -365,13 +365,13 @@ class InfoWidget(QWidget):
                             if hasattr(self, 'original_test_field_row_height'):
                                 new_row_height = int(self.original_test_field_row_height * height_ratio_p2)
                                 self.test_field_table.verticalHeader().setDefaultSectionSize(new_row_height)
-                                # 기존 행들의 높이 및 셀 위젯 높이 업데이트
+                                # 기존 행들의 높이 및 셀 위젯 크기 업데이트
                                 for row in range(self.test_field_table.rowCount()):
                                     self.test_field_table.setRowHeight(row, new_row_height)
-                                    # 셀 위젯 높이도 조정 (ClickableRowWidget)
+                                    # 셀 위젯 크기 조정 (ClickableRowWidget) - 너비와 높이 모두
                                     cell_widget = self.test_field_table.cellWidget(row, 0)
                                     if cell_widget:
-                                        cell_widget.setFixedHeight(new_row_height)
+                                        cell_widget.setFixedSize(new_table_width, new_row_height)
 
                         # 시나리오 테이블 크기 조정 (가로 + 세로)
                         if hasattr(self, 'scenario_table') and hasattr(self, 'original_scenario_table_size'):
@@ -384,13 +384,13 @@ class InfoWidget(QWidget):
                             if hasattr(self, 'original_scenario_row_height'):
                                 new_row_height = int(self.original_scenario_row_height * height_ratio_p2)
                                 self.scenario_table.verticalHeader().setDefaultSectionSize(new_row_height)
-                                # 기존 행들의 높이 및 셀 위젯 높이 업데이트
+                                # 기존 행들의 높이 및 셀 위젯 크기 업데이트
                                 for row in range(self.scenario_table.rowCount()):
                                     self.scenario_table.setRowHeight(row, new_row_height)
-                                    # 셀 위젯 높이도 조정 (ClickableCheckboxRowWidget)
+                                    # 셀 위젯 크기 조정 (ClickableCheckboxRowWidget) - 너비와 높이 모두
                                     cell_widget = self.scenario_table.cellWidget(row, 0)
                                     if cell_widget:
-                                        cell_widget.setFixedHeight(new_row_height)
+                                        cell_widget.setFixedSize(new_table_width, new_row_height)
 
                             # 시나리오 테이블 배경 크기 조정 (테이블과 동일한 크기)
                             if hasattr(self, 'scenario_column_background') and hasattr(self, 'original_scenario_column_background_geometry'):
@@ -1321,12 +1321,16 @@ class InfoWidget(QWidget):
         if self.current_page < 1:
             self.current_page += 1
             self.stacked_widget.setCurrentIndex(self.current_page)
+            # 페이지 전환 후 반응형 레이아웃 적용을 위해 resize 이벤트 강제 트리거
+            self.resizeEvent(QResizeEvent(self.size(), self.size()))
 
     def go_to_previous_page(self):
         """이전 페이지로 이동"""
         if self.current_page > 0:
             self.current_page -= 1
             self.stacked_widget.setCurrentIndex(self.current_page)
+            # 페이지 전환 후 반응형 레이아웃 적용을 위해 resize 이벤트 강제 트리거
+            self.resizeEvent(QResizeEvent(self.size(), self.size()))
             # 1페이지로 돌아갈 때 다음 버튼 상태 업데이트
             if self.current_page == 0:
                 self.check_next_button_state()
@@ -3616,9 +3620,12 @@ class InfoWidget(QWidget):
 
                 self.url_table.setRowHeight(row, 39)
 
+            # 셀 생성 후 현재 창 크기에 맞게 반응형 적용
+            self.resizeEvent(QResizeEvent(self.size(), self.size()))
+
         except Exception as e:
             self._show_scan_error(f"테이블 업데이트 중 오류:\n{str(e)}")
-    
+
     def _show_scan_error(self, message):
         """스캔 오류 메시지 표시"""
         QMessageBox.warning(self, "주소 탐색 실패", message)
@@ -4307,6 +4314,9 @@ class InfoWidget(QWidget):
             self.url_table.setCellWidget(row, 1, url_widget)
 
             self.url_table.setRowHeight(row, 39)
+
+            # 셀 생성 후 현재 창 크기에 맞게 반응형 적용
+            self.resizeEvent(QResizeEvent(self.size(), self.size()))
 
             # 입력창 초기화
             self.address_input.clear()
