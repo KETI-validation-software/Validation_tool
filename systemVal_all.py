@@ -3591,11 +3591,17 @@ class MyApp(QWidget):
         except Exception as e:
             print(e)
 
+    # 임시 수정 (12/17)
     def handle_webhook_result(self, result):
         self.webhook_flag = True
+
+        if not hasattr(self, 'webhook_res_list'):
+            self.webhook_res_list = []
+        self.webhook_res_list.append(result)
+
         self.webhook_res = result
-        a = self.webhook_thread.stop()
-        self.webhook_thread.wait()
+        # a = self.webhook_thread.stop()
+        # self.webhook_thread.wait()
         # tmp_res_auth =
 
     # 웹훅 검증
@@ -3603,8 +3609,15 @@ class MyApp(QWidget):
         tmp_webhook_res = json.dumps(self.webhook_res, indent=4, ensure_ascii=False)
         if self.webhook_cnt < len(self.message):
             message_name = "step " + str(self.webhook_cnt + 1) + ": " + self.message[self.webhook_cnt]
+        # 처리할 목록 가져오기 (리스트 누적 지원)
+        if hasattr(self, 'webhook_res_list') and self.webhook_res_list:
+            results_to_process = list(self.webhook_res_list)
+            self.webhook_res_list = []  # 초기화
+        elif self.webhook_res:
+            results_to_process = [self.webhook_res]
         else:
             message_name = f"step {self.webhook_cnt + 1}: (index out of range)"
+            results_to_process = []
 
         # ✅ 디버깅: 웹훅 이벤트 스키마 검증 (첫 호출에만 출력)
         if not hasattr(self, '_webhook_debug_printed'):
@@ -3613,14 +3626,46 @@ class MyApp(QWidget):
             print(
                 f"[DEBUG] webhook_cnt={self.webhook_cnt}, API={self.message[self.webhook_cnt] if self.webhook_cnt < len(self.message) else 'N/A'}")
             print(f"[DEBUG] webhookSchema 총 개수={len(self.webhookSchema)}")
+        for current_res in results_to_process:
+            self.webhook_res = current_res  # 현재 처리할 데이터 설정
+            
+            tmp_webhook_res = json.dumps(self.webhook_res, indent=4, ensure_ascii=False)
+            if self.webhook_cnt < len(self.message):
+                message_name = "step " + str(self.webhook_cnt + 1) + ": " + self.message[self.webhook_cnt]
+            else:
+                message_name = f"step {self.webhook_cnt + 1}: (index out of range)"
 
             # (RealtimeVideoEventInfos 웹훅은 spec_002_webhookSchema[0])
+            # ✅ 디버깅: 웹훅 이벤트 스키마 검증 (첫 호출에만 출력)
+            if not hasattr(self, '_webhook_debug_printed'):
+                self._webhook_debug_printed = True
+                print(f"\n[DEBUG] ========== 웹훅 이벤트 검증 디버깅 ==========")
+                print(
+                    f"[DEBUG] webhook_cnt={self.webhook_cnt}, API={self.message[self.webhook_cnt] if self.webhook_cnt < len(self.message) else 'N/A'}")
+                print(f"[DEBUG] webhookSchema 총 개수={len(self.webhookSchema)}")
+
+                # (RealtimeVideoEventInfos 웹훅은 spec_002_webhookSchema[0])
+                if len(self.webhookSchema) > 0:
+                    schema_to_check = self.webhookSchema[0]  # 웹훅 스키마는 첫 번째 요소
+                    print(f"[DEBUG] 사용 스키마: webhookSchema[0]")
+                    if isinstance(schema_to_check, dict):
+                        schema_keys = list(schema_to_check.keys())[:5]
+                        print(f"[DEBUG] 웹훅 스키마 필드 (first 5): {schema_keys}")
+
+            # 실제 검증
             if len(self.webhookSchema) > 0:
                 schema_to_check = self.webhookSchema[0]  # 웹훅 스키마는 첫 번째 요소
                 print(f"[DEBUG] 사용 스키마: webhookSchema[0]")
                 if isinstance(schema_to_check, dict):
                     schema_keys = list(schema_to_check.keys())[:5]
                     print(f"[DEBUG] 웹훅 스키마 필드 (first 5): {schema_keys}")
+                schema_to_check = self.webhookSchema[0]
+                val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(
+                    schema=schema_to_check,
+                    data=self.webhook_res,
+                    flag=self.flag_opt,
+                    reference_context=self.reference_context
+                )
 
         # 실제 검증
         if len(self.webhookSchema) > 0:
@@ -3631,6 +3676,12 @@ class MyApp(QWidget):
                 flag=self.flag_opt,
                 reference_context=self.reference_context
             )
+                if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
+                    print(f"[DEBUG] 웹훅 검증 결과: {val_result}, pass={key_psss_cnt}, error={key_error_cnt}")
+            else:
+                val_result, val_text, key_psss_cnt, key_error_cnt = "FAIL", "webhookSchema not found", 0, 0
+                if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
+                    print(f"[DEBUG] webhookSchema가 없습니다!")
 
             if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
                 print(f"[DEBUG] 웹훅 검증 결과: {val_result}, pass={key_psss_cnt}, error={key_error_cnt}")
@@ -3638,9 +3689,17 @@ class MyApp(QWidget):
             val_result, val_text, key_psss_cnt, key_error_cnt = "FAIL", "webhookSchema not found", 0, 0
             if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
                 print(f"[DEBUG] webhookSchema가 없습니다!")
+                print(f"[DEBUG] ==========================================\n")
 
         if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
             print(f"[DEBUG] ==========================================\n")
+            # 웹훅 데이터를 append_monitor_log 형식으로 출력
+            self.append_monitor_log(
+                step_name=message_name,
+                request_json=tmp_webhook_res,
+                result_status=val_result,
+                details=f"웹훅 검증 결과: {val_result} | {'웹훅 데이터 검증 성공' if val_result == 'PASS' else '웹훅 데이터 검증 실패'}"
+            )
 
         # 웹훅 데이터를 append_monitor_log 형식으로 출력
         self.append_monitor_log(
@@ -3649,12 +3708,22 @@ class MyApp(QWidget):
             result_status=val_result,
             details=f"웹훅 검증 결과: {val_result} | {'웹훅 데이터 검증 성공' if val_result == 'PASS' else '웹훅 데이터 검증 실패'}"
         )
+            # ✅ step_pass_counts 배열에 웹훅 결과 추가 (배열이 없으면 생성하지 않음)
+            # 점수 업데이트는 모든 재시도 완료 후에 일괄 처리됨 (플랫폼과 동일)
 
         # ✅ step_pass_counts 배열에 웹훅 결과 추가 (배열이 없으면 생성하지 않음)
         # 점수 업데이트는 모든 재시도 완료 후에 일괄 처리됨 (플랫폼과 동일)
+            # ✅ 점수는 표시하지 않음 (재시도 완료 후에만 표시)
+            # 평가 점수 디스플레이 업데이트는 재시도 완료 시에만 호출
 
         # ✅ 점수는 표시하지 않음 (재시도 완료 후에만 표시)
         # 평가 점수 디스플레이 업데이트는 재시도 완료 시에만 호출
+            if val_result == "PASS":
+                msg = "\n" + tmp_webhook_res + "\n\n" + "Result: " + val_text + "\n"
+                img = self.img_pass
+            else:
+                msg = "\n" + tmp_webhook_res + "\n\n" + "Result: " + val_result + "\nResult details:\n" + val_text + "\n"
+                img = self.img_fail
 
         if val_result == "PASS":
             msg = "\n" + tmp_webhook_res + "\n\n" + "Result: " + val_text + "\n"
@@ -3662,6 +3731,13 @@ class MyApp(QWidget):
         else:
             msg = "\n" + tmp_webhook_res + "\n\n" + "Result: " + val_result + "\nResult details:\n" + val_text + "\n"
             img = self.img_fail
+            # ✅ 웹훅 검증 결과를 기존 누적 필드 수에 추가
+            if self.webhook_cnt < self.tableWidget.rowCount():
+                # 기존 누적 필드 수 가져오기
+                if hasattr(self, 'step_pass_counts') and hasattr(self, 'step_error_counts'):
+                    # ✅ 웹훅 결과를 기존 step_pass_counts에 추가 (inbound + webhook)
+                    self.step_pass_counts[self.webhook_cnt] += key_psss_cnt
+                    self.step_error_counts[self.webhook_cnt] += key_error_cnt
 
         # ✅ 웹훅 검증 결과를 기존 누적 필드 수에 추가
         if self.webhook_cnt < self.tableWidget.rowCount():
@@ -3670,9 +3746,18 @@ class MyApp(QWidget):
                 # ✅ 웹훅 결과를 기존 step_pass_counts에 추가 (inbound + webhook)
                 self.step_pass_counts[self.webhook_cnt] += key_psss_cnt
                 self.step_error_counts[self.webhook_cnt] += key_error_cnt
+                    # ✅ 전체 점수 업데이트는 재시도 완료 후에만 (중복 방지)
+                    # global_pass_cnt는 update_view()의 재시도 완료 시점에서 한 번만 += 처리됨
 
                 # ✅ 전체 점수 업데이트는 재시도 완료 후에만 (중복 방지)
                 # global_pass_cnt는 update_view()의 재시도 완료 시점에서 한 번만 += 처리됨
+                    # 누적된 총 필드 수로 테이블 업데이트
+                    accumulated_pass = self.step_pass_counts[self.webhook_cnt]
+                    accumulated_error = self.step_error_counts[self.webhook_cnt]
+                else:
+                    # 누적 배열이 없으면 웹훅 결과만 사용
+                    accumulated_pass = key_psss_cnt
+                    accumulated_error = key_error_cnt
 
                 # 누적된 총 필드 수로 테이블 업데이트
                 accumulated_pass = self.step_pass_counts[self.webhook_cnt]
@@ -3681,15 +3766,30 @@ class MyApp(QWidget):
                 # 누적 배열이 없으면 웹훅 결과만 사용
                 accumulated_pass = key_psss_cnt
                 accumulated_error = key_error_cnt
+                if self.webhook_cnt < len(self.num_retries_list):
+                    current_retries = self.num_retries_list[self.webhook_cnt]
+                else:
+                    current_retries = 1
 
             if self.webhook_cnt < len(self.num_retries_list):
                 current_retries = self.num_retries_list[self.webhook_cnt]
             else:
                 current_retries = 1
+                # 누적된 필드 수로 테이블 업데이트
+                self.update_table_row_with_retries(self.webhook_cnt, val_result, accumulated_pass, accumulated_error,
+                                                tmp_webhook_res, self._to_detail_text(val_text), current_retries)
 
             # 누적된 필드 수로 테이블 업데이트
             self.update_table_row_with_retries(self.webhook_cnt, val_result, accumulated_pass, accumulated_error,
                                                tmp_webhook_res, self._to_detail_text(val_text), current_retries)
+            # step_buffers 업데이트 추가 (실시간 모니터링과 상세보기 일치)
+            if self.webhook_cnt < len(self.step_buffers):
+                webhook_data_text = tmp_webhook_res
+                webhook_error_text = self._to_detail_text(val_text) if val_result == "FAIL" else "오류가 없습니다."
+                # ✅ 웹훅 이벤트 데이터를 명확히 표시
+                self.step_buffers[self.webhook_cnt]["data"] += f"\n\n--- Webhook 이벤트 데이터 ---\n{webhook_data_text}"
+                self.step_buffers[self.webhook_cnt]["error"] += f"\n\n--- Webhook 검증 ---\n{webhook_error_text}"   # 얘가 문제임 화딱지가 난다
+                self.step_buffers[self.webhook_cnt]["result"] = val_result  
 
         # step_buffers 업데이트 추가 (실시간 모니터링과 상세보기 일치)
         if self.webhook_cnt < len(self.step_buffers):
@@ -3699,6 +3799,13 @@ class MyApp(QWidget):
             self.step_buffers[self.webhook_cnt]["data"] += f"\n\n--- Webhook 이벤트 데이터 ---\n{webhook_data_text}"
             self.step_buffers[self.webhook_cnt]["error"] += f"\n\n--- Webhook 검증 ---\n{webhook_error_text}"   # 얘가 문제임 화딱지가 난다
             self.step_buffers[self.webhook_cnt]["result"] = val_result  
+            # 메시지 저장
+            if self.webhook_cnt == 6:
+                self.step7_msg += msg
+            elif self.webhook_cnt == 4:
+                self.step5_msg += msg
+            elif self.webhook_cnt == 3:
+                self.step4_msg += msg
 
         # 메시지 저장
         if self.webhook_cnt == 6:
@@ -3735,6 +3842,7 @@ class MyApp(QWidget):
                 print(
                     f"[TIMING_DEBUG] 웹훅 이벤트 수신 완료 (API: {self.message[self.cnt] if self.cnt < len(self.message) else 'N/A'})")
                 print(f"[TIMING_DEBUG] ✅ 웹훅 스레드의 wait()이 동기화 처리 완료 (수동 sleep 제거됨)")
+                self.get_webhook_result()  # ✅ 웹훅 결과 즉시 처리 (post_flag와 무관하게)
 
             if (self.post_flag is False and
                     self.processing_response is False and
@@ -3994,7 +4102,7 @@ class MyApp(QWidget):
 
                             if isinstance(res_data, dict) and "code_value" in res_data:
                                 del res_data["code_value"]
-                                
+
                         except Exception as e:
                             self._append_text(f"응답 JSON 파싱 오류: {e}")
                             self._append_text({"raw_response": self.res.text})

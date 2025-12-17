@@ -125,6 +125,38 @@ class ConstraintDataGenerator:
                         template_data["doorList"] = new_door_list
                         print(f"[DATA_MAPPER] ✅ Step 4 요청 doorList 맵핑 완료 ({len(new_door_list)}개)")
                         return template_data
+            else:
+                # 응답 (WEBHOOK_OUT) 생성 단계
+                print(f"[DATA_MAPPER] RealtimeDoorStatus (Step 4) 응답(웹훅) 생성")
+                
+                # 요청 데이터에서 doorID 목록 추출
+                requested_doors = self.find_key(request_data, "doorID")
+                print(f"[DATA_MAPPER] 요청된 doorID 목록: {requested_doors}")
+                
+                new_door_list = []
+                if requested_doors:
+                    for door_id in requested_doors:
+                        # door_memory에서 정보 가져오기 (없으면 기본값)
+                        if door_memory and door_id in door_memory:
+                            door_info = door_memory[door_id].copy()
+                            door_info["doorID"] = door_id
+                            new_door_list.append(door_info)
+                            print(f"[DATA_MAPPER] {door_id} 정보 추가 (from memory): {door_info}")
+                        else:
+                            # 기본값 생성
+                            default_info = {
+                                "doorID": door_id,
+                                "doorName": f"{door_id} Name",
+                                "doorRelaySensor": "일반",
+                                "doorSensor": "Lock"
+                            }
+                            new_door_list.append(default_info)
+                            print(f"[DATA_MAPPER] {door_id} 정보 추가 (default): {default_info}")
+                
+                if new_door_list:
+                    template_data["doorList"] = new_door_list
+                    print(f"[DATA_MAPPER] ✅ Step 4 응답 doorList 맵핑 완료 ({len(new_door_list)}개)")
+                    return template_data
 
         # [복구 2] RealtimeDoorStatus2 (Step 6) 및 응답 처리 (기존 로직 유지)
         if api_name and "RealtimeDoorStatus2" in api_name and door_memory and "doorList" in template_data:
