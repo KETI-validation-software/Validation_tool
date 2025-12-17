@@ -3169,7 +3169,7 @@ class MyApp(QWidget):
             msg.setWindowTitle("Error")
             msg.exec_()
             self.tick_timer.stop()
-            self.valResult.append("검증 절차가 중지되었습니다.")
+            self.valResult.append('<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">검증 절차가 중지되었습니다.</div>')
             self.sbtn.setEnabled(True)
             self.stop_btn.setDisabled(True)
 
@@ -5302,10 +5302,10 @@ class MyApp(QWidget):
                 # 모니터링 메시지 복원
                 self.valResult.clear()
                 if self.paused_valResult_text:
-                    self.valResult.setPlainText(self.paused_valResult_text)
-                    self.valResult.append("\n========== 재개 ==========")
-                    self.valResult.append(f"마지막 완료 API: {self.last_completed_api_index + 1}번째")
-                    self.valResult.append(f"{self.last_completed_api_index + 2}번째 API부터 재개합니다.\n")
+                    self.valResult.setHtml(self.paused_valResult_text)
+                    self.valResult.append('<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-top: 10px;">========== 재개 ==========</div>')
+                    self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">마지막 완료 API: {self.last_completed_api_index + 1}번째</div>')
+                    self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-bottom: 10px;">{self.last_completed_api_index + 2}번째 API부터 재개합니다.</div>')
                     print(f"[DEBUG] 모니터링 메시지 복원 완료: {len(self.paused_valResult_text)} 문자")
 
                 # ✅ 테이블 데이터 복원 (완료된 API들만)
@@ -5371,10 +5371,10 @@ class MyApp(QWidget):
                 # 재개 모드: 저장된 모니터링 메시지 복원
                 self.valResult.clear()  # 일단 클리어
                 if self.paused_valResult_text:
-                    self.valResult.setPlainText(self.paused_valResult_text)
-                    self.valResult.append("\n========== 재개 ==========")
-                    self.valResult.append(f"마지막 완료 API: {self.last_completed_api_index + 1}번째")
-                    self.valResult.append(f"{self.last_completed_api_index + 2}번째 API부터 재개합니다.\n")
+                    self.valResult.setHtml(self.paused_valResult_text)
+                    self.valResult.append('<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-top: 10px;">========== 재개 ==========</div>')
+                    self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">마지막 완료 API: {self.last_completed_api_index + 1}번째</div>')
+                    self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-bottom: 10px;">{self.last_completed_api_index + 2}번째 API부터 재개합니다.</div>')
                     print(f"[DEBUG] 모니터링 메시지 복원 완료: {len(self.paused_valResult_text)} 문자")
             print(f"[DEBUG] UI 초기화 완료")
 
@@ -5509,7 +5509,7 @@ class MyApp(QWidget):
                 "step_error_counts": getattr(self, 'step_error_counts', [0] * len(self.videoMessages)),
                 "total_pass_cnt": self.total_pass_cnt,
                 "total_error_cnt": self.total_error_cnt,
-                "valResult_text": self.valResult.toPlainText(),
+                "valResult_text": self.valResult.toHtml(),
                 "current_spec_id": self.current_spec_id,
                 "global_pass_cnt": self.global_pass_cnt,
                 "global_error_cnt": self.global_error_cnt
@@ -5524,14 +5524,14 @@ class MyApp(QWidget):
             print(f"   마지막 완료 API 인덱스: {last_completed}")
 
             # 모니터링 창에 로그 추가
-            self.valResult.append(f"\n💾 재개 정보 저장 완료: {paused_file_path}")
-            self.valResult.append(f"   (마지막 완료 API: {last_completed + 1}번째, 다음 재시작 시 {last_completed + 2}번째 API부터 이어서 실행)")
+            self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-top: 10px;">💾 재개 정보 저장 완료: {paused_file_path}</div>')
+            self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">   (마지막 완료 API: {last_completed + 1}번째, 다음 재시작 시 {last_completed + 2}번째 API부터 이어서 실행)</div>')
 
         except Exception as e:
             print(f"❌ 일시정지 상태 저장 실패: {e}")
             import traceback
             traceback.print_exc()
-            self.valResult.append(f"\n재개 정보 저장 실패: {str(e)}")
+            self.valResult.append(f'<div style="font-size: 18px; color: #ef4444; font-family: \'Noto Sans KR\'; margin-top: 10px;">재개 정보 저장 실패: {str(e)}</div>')
 
     def load_paused_state(self):
         """일시정지된 상태를 JSON 파일에서 복원"""
@@ -5608,7 +5608,7 @@ class MyApp(QWidget):
                 print(f"[WARN] 서버 종료 중 오류 (무시): {e}")
             self.server_th = None
 
-        self.valResult.append("검증 절차가 중지되었습니다.")
+        self.valResult.append('<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">검증 절차가 중지되었습니다.</div>')
         self.sbtn.setEnabled(True)
         self.stop_btn.setDisabled(True)
         self.save_current_spec_data()

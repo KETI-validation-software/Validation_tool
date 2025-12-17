@@ -1,4 +1,11 @@
+<<<<<<< HEAD
 {"time": "2025-12-17T01:12:07.024756Z", "api": "RealtimeDoorStatus", "dir": "REQUEST", "data": {"doorList": [{"doorID": "door0001"}, {"doorID": "door0002"}], "duration": 200, "transProtocol": {"transProtocolType": "WebHook", "transProtocolDesc": "https://10.252.219.95:8081"}, "startTime": 20251105163010124}}
 {"time": "2025-12-17T01:12:07.028744Z", "api": "RealtimeDoorStatus", "dir": "RESPONSE", "data": {"code": "성공", "message": "200"}}
 {"time": "2025-12-17T01:12:07.034728Z", "api": "RealtimeDoorStatus", "dir": "WEBHOOK_OUT", "data": {"doorList": [{"doorID": "door0001", "doorName": "A건물 출입문", "doorRelaySensor": "일반", "doorSensor": "Lock"}]}}
 {"time": "2025-12-17T01:12:07.056666Z", "api": "RealtimeDoorStatus", "dir": "WEBHOOK_IN", "data": {"code": 200, "message": "성공"}}
+=======
+{"time": "2025-12-17T01:02:26.207087Z", "api": "RealtimeDoorStatus", "dir": "REQUEST", "data": {"doorList": [{"doorID": ""}], "duration": 200, "transProtocol": {"transProtocolType": "WebHook", "transProtocolDesc": "https://192.168.0.3:8081"}, "startTime": 20251105163010124}}
+{"time": "2025-12-17T01:02:26.209089Z", "api": "RealtimeDoorStatus", "dir": "RESPONSE", "data": {"code": "성공", "message": "200"}}
+{"time": "2025-12-17T01:02:26.212087Z", "api": "RealtimeDoorStatus", "dir": "WEBHOOK_OUT", "data": {"doorList": [{"doorID": "", "doorName": "A건물 출입문", "doorRelaySensor": "일반", "doorSensor": "Lock"}]}}
+{"time": "2025-12-17T01:02:26.223639Z", "api": "RealtimeDoorStatus", "dir": "WEBHOOK_IN", "data": {"code": 200, "message": "성공"}}
+>>>>>>> 4c50f4c326c419e3390924c1bbde645413f508fc
