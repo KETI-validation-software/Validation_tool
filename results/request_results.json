@@ -22,10 +22,10 @@
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 75.0,
-    "totalFields": 24,
-    "passedFields": 18,
-    "failedFields": 6
+    "score": 80.0,
+    "totalFields": 20,
+    "passedFields": 16,
+    "failedFields": 4
   },
   "testResult": [
     {
@@ -89,7 +89,7 @@
           "id": "cmisge6mr08di5vy7hirl5jp1",
           "name": "보안용 센서 단말 제어 정보 연동-제어",
           "method": "POST",
-          "endpoint": "/SensorDeviceControl2",
+          "endpoint": "/SensorDeviceControl",
           "score": 0.0,
           "validationCnt": 0,
           "totalFields": 0,
@@ -103,10 +103,10 @@
       "testGroup": "cmisfix8407te5vy7fleq8pkf",
       "testSpecId": "cmiqr1acx00i5ie8fi022t1hp",
       "testSpecName": "ac002",
-      "score": 75.0,
-      "totalFields": 24,
-      "passedFields": 18,
-      "failedFields": 6,
+      "score": 80.0,
+      "totalFields": 20,
+      "passedFields": 16,
+      "failedFields": 4,
       "apis": [
         {
           "id": "cmisgwlsx08r25vy7s0uys91u",
@@ -176,11 +176,11 @@
           "name": "실시간 출입통제 장치 상태 정보 연동-상태 조회",
           "method": "POST",
           "endpoint": "/RealtimeDoorStatus",
-          "score": 78.0,
+          "score": 86.0,
           "validationCnt": 1,
-          "totalFields": 9,
-          "passFields": 7,
-          "failFields": 2,
+          "totalFields": 7,
+          "passFields": 6,
+          "failFields": 1,
           "validations": [
             {
               "attempt": 1,
@@ -201,9 +201,6 @@
                 "startTime": 20251105163010124
               },
               "validationErrors": [
-                "[시도 1/1]",
-                "<b>[기타]</b> (1건)",
-                "- [맥락 오류] doorList.doorID: 값 불일치: door0001 (index 0), door0002 (index 1)가 None([])에 없음",
                 "--- Webhook 검증 ---",
                 "<b>[code]</b> (1건)",
                 "- [타입 오류] code : Str가 와야 하는데 Number가 왔습니다."
@@ -244,7 +241,7 @@
               "attempt": 1,
               "validationData": {
                 "doorID": "door0001",
-                "commandType": "Lock"
+                "commandType": "Unlock"
               },
               "validationErrors": [
                 "[시도 1/1]",
@@ -257,12 +254,12 @@
           "id": "cmiwqq5880b07844gyqot66cj-registration",
           "name": "실시간 출입통제 장치 상태 정보 연동-결과 조회",
           "method": "POST",
-          "endpoint": "/RealtimeDoorStatus2",
-          "score": 67.0,
+          "endpoint": "/RealtimeDoorStatus",
+          "score": 71.0,
           "validationCnt": 1,
-          "totalFields": 9,
-          "passFields": 6,
-          "failFields": 3,
+          "totalFields": 7,
+          "passFields": 5,
+          "failFields": 2,
           "validations": [
             {
               "attempt": 1,
@@ -283,8 +280,6 @@
                 "[시도 1/1]",
                 "<b>[startTime]</b> (1건)",
                 "- [타입 오류] startTime : Number가 와야 하는데 Str가 왔습니다.",
-                "<b>[기타]</b> (1건)",
-                "- [맥락 오류] doorList.doorID: 값 불일치: [''] != 예상값 door0001",
                 "--- Webhook 검증 ---",
                 "<b>[code]</b> (1건)",
                 "- [타입 오류] code : Str가 와야 하는데 Number가 왔습니다."
@@ -296,7 +291,7 @@
           "id": "cmiwqq5880b07844gyqot66cj-webhook",
           "name": "실시간 출입통제 장치 상태 정보 연동-결과 조회 (Webhook)",
           "method": "POST",
-          "endpoint": "/RealtimeDoorStatus2/webhook",
+          "endpoint": "/RealtimeDoorStatus/webhook",
           "score": 0,
           "validationCnt": 1,
           "totalFields": 0,
@@ -313,5 +308,5 @@
       ]
     }
   ],
-  "completedDate": "2025-12-16T16:57:32Z"
+  "completedDate": "2025-12-17T10:12:13Z"
 }

@@ -75,9 +75,32 @@ cmiqr0kdw00i4ie8fr3firjtg_Authentication_request_key_ids = {
     "userPW": "cmish1r4l08wy5vy7up1s9dse",
 }
 
+cmiqr0kdw00i4ie8fr3firjtg_PtzStatus_request_key_ids = {
+    "camID": "cmixuacz20f85p002l1xbtf6i",
+}
+
+cmiqr0kdw00i4ie8fr3firjtg_PtzContinuousMove_request_key_ids = {
+    "camID": "cmixuddil0fbfp00232n3befi",
+    "velocity": "cmixudm8a0fbop002igjf7hdo",
+    "velocity.pan  ": "cmixudtav0fbyp002unvnsqca",
+    "velocity.tilt": "cmixue23t0fc9p002q0o9u5ml",
+    "velocity.zoom": "cmixueccs0fclp002h9uzky0u",
+    "timeOut": "cmixuen0z0fcxp002zjz5mexm",
+}
+
+cmiqr0kdw00i4ie8fr3firjtg_PtzStop_request_key_ids = {
+    "camID": "cmixufxre0fe1p002m1w57aeb",
+    "pan": "cmixugh5u0fesp0024z3tedlc",
+    "tilt": "cmixugfb10fepp002bv1rp8qr",
+    "zoom": "cmixugrm30ff3p002dpby0eh7",
+}
+
 # cmiqr0kdw00i4ie8fr3firjtg Request Key-ID Mapping 리스트
 cmiqr0kdw00i4ie8fr3firjtg_request_key_ids = [
     cmiqr0kdw00i4ie8fr3firjtg_Authentication_request_key_ids,
+    cmiqr0kdw00i4ie8fr3firjtg_PtzStatus_request_key_ids,
+    cmiqr0kdw00i4ie8fr3firjtg_PtzContinuousMove_request_key_ids,
+    cmiqr0kdw00i4ie8fr3firjtg_PtzStop_request_key_ids,
 ]
 
 
@@ -247,10 +270,36 @@ cmiqr0kdw00i4ie8fr3firjtg_CameraProfiles_response_key_ids = {
     "camList.camConfig.camType": "cmixu969r0f71p002gj151b1e",
 }
 
+cmiqr0kdw00i4ie8fr3firjtg_PtzStatus_response_key_ids = {
+    "code": "cmixuaolm0f8hp002nvyxlf8n",
+    "message": "cmixuare50f8pp0029oqeejzu",
+    "position": "cmixuaun10f8yp002w3ktua7y",
+    "position.pan": "cmixub3550f99p002cxowg6d4",
+    "position.tilt": "cmixub8tn0f9jp002avmpu603",
+    "position.zoom": "cmixubett0f9up0021n780w56",
+    "moveStatus": "cmixubnvr0fa5p002flpu8bsq",
+    "moveStatus.pan": "cmixubu290fafp002hvo30ohk",
+    "moveStatus.tilt": "cmixuc00z0faop002n9czhinr",
+    "moveStatus.zoom": "cmixuc6ug0fayp002fgl2kqn7",
+}
+
+cmiqr0kdw00i4ie8fr3firjtg_PtzContinuousMove_response_key_ids = {
+    "code": "cmixuf25f0fdbp002dvwqr8ha",
+    "message": "cmixuf4qu0fdhp002dfxm567d",
+}
+
+cmiqr0kdw00i4ie8fr3firjtg_PtzStop_response_key_ids = {
+    "code": "cmixuh19s0ffgp002trz88up8",
+    "message": "cmixuh3sa0ffop002cdckdjbx",
+}
+
 # cmiqr0kdw00i4ie8fr3firjtg Response Key-ID Mapping 리스트
 cmiqr0kdw00i4ie8fr3firjtg_response_key_ids = [
     cmiqr0kdw00i4ie8fr3firjtg_Authentication_response_key_ids,
     cmiqr0kdw00i4ie8fr3firjtg_Capabilities_response_key_ids,
     cmiqr0kdw00i4ie8fr3firjtg_CameraProfiles_response_key_ids,
+    cmiqr0kdw00i4ie8fr3firjtg_PtzStatus_response_key_ids,
+    cmiqr0kdw00i4ie8fr3firjtg_PtzContinuousMove_response_key_ids,
+    cmiqr0kdw00i4ie8fr3firjtg_PtzStop_response_key_ids,
 ]
 

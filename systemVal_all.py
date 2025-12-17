@@ -2196,8 +2196,24 @@ class MyApp(QWidget):
                 door_memory=Server.door_memory  # ✅ 문 상태 저장소 전달
             )
 
-            return updated_request
-        
+            # print(f"[DATA_MAPPER] 요청 데이터 업데이트 완료")
+            # print(f"[DATA_MAPPER] 업데이트된 필드: {list(updated_request.keys())}")
+            self.resp_rules = get_validation_rules(
+                spec_id=self.current_spec_id,
+                api_name=self.message[self.cnt] if self.cnt < len(self.message) else "",
+                direction="out"  # 응답 검증
+
+            )
+            try:
+                code_value = self.resp_rules.get("code")
+                allowed_value = code_value.get("allowedValues", [])[0]
+                updated_request = self.generator._applied_codevalue(
+                    request_data=updated_request,
+                    allowed_value=allowed_value
+                )
+                return updated_request
+            except :
+                return updated_request
         except Exception as e:
             print(f"[ERROR] _apply_request_constraints 실행 중 오류: {e}")
             import traceback
@@ -3975,6 +3991,10 @@ class MyApp(QWidget):
 
                         try:
                             res_data = json.loads(res_data)
+
+                            if isinstance(res_data, dict) and "code_value" in res_data:
+                                del res_data["code_value"]
+                                
                         except Exception as e:
                             self._append_text(f"응답 JSON 파싱 오류: {e}")
                             self._append_text({"raw_response": self.res.text})
@@ -4039,13 +4059,7 @@ class MyApp(QWidget):
                     # val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.outSchema[self.cnt], res_data, self.flag_opt)
                     resp_rules = {}
                     try:
-                        resp_rules = get_validation_rules(
-                            spec_id=self.current_spec_id,
-                            api_name=self.message[self.cnt] if self.cnt < len(self.message) else "",
-
-                            direction="out"  # 응답 검증
-
-                        ) or {}
+                        resp_rules = self.resp_rules or {}
                     except Exception as e:
                         resp_rules = {}
                         print(f"[ERROR] 응답 검증 규칙 로드 실패: {e}")
@@ -4124,91 +4138,6 @@ class MyApp(QWidget):
                     if self.current_retry == 0:  # 첫 시도에만 출력
                         print(f"[DEBUG] 검증 결과: {val_result}, pass={key_psss_cnt}, error={key_error_cnt}")
                         print(f"[DEBUG] ==========================================\n")
-
-                    # ✅ 의미 검증: 응답 코드가 성공인지 확인
-                    if isinstance(res_data, dict):
-                        response_code = str(res_data.get("code", "")).strip()
-                        response_message = res_data.get("message", "")
-                        code_value = res_data.get("code_value", 200)  # ✅ 내부 flag 읽기
-                        
-                        # ✅ code_value 읽은 후 제거 (저장/UI에 포함 안 됨)
-                        if "code_value" in res_data:
-                            del res_data["code_value"]
-                            print(f"[CODE_VALUE] code_value={code_value} 읽고 제거 완료")
-                        
-                        print(f"[CODE_VALUE] response_code={response_code}, code_value={code_value}")
-
-                        # ✅ 케이스 1: code_value=400이고 response_code가 200인 경우
-                        # → 잘못된 요청인데 200으로 응답 → 모든 필드 FAIL
-                        if code_value == 400 and response_code in ["200", "성공", "Success", ""]:
-                            print(f"[SYSTEM] 잘못된 요청인데 200 응답: code_value={code_value}, response_code={response_code}")
-                            print(f"[SYSTEM] 모든 필드 FAIL 처리")
-                            
-                            # json_check_에서 계산한 전체 필드 개수
-                            total_schema_fields = key_psss_cnt + key_error_cnt
-                            
-                            # 모든 필드를 FAIL로 처리
-                            key_psss_cnt = 0
-                            key_error_cnt = total_schema_fields
-                            val_result = "FAIL"
-                            val_text = f"잘못된 요청 (code_value=400): 모든 필드 자동 FAIL 처리됨"
-                            
-                            print(f"[SYSTEM] 잘못된 요청 처리 완료: 전체 {total_schema_fields}개 필드 FAIL")
-                        
-                        # ✅ 케이스 2: code_value=400이고 response_code도 400/201/404인 경우
-                        # → 의도적 오류 요청, 올바르게 에러 응답 → 모든 필드 PASS
-                        elif code_value == 400 and response_code in ["400", "201", "404"]:
-                            print(f"[SYSTEM] 에러 응답 감지: code={response_code}, message={response_message}")
-                            print(f"[SYSTEM] 동적으로 스키마 필드 자동 PASS 처리 시작")
-                            
-                            # json_check_에서 이미 계산한 전체 필드 개수 사용
-                            # key_psss_cnt + key_error_cnt = 전체 필드 개수
-                            total_schema_fields = key_psss_cnt + key_error_cnt
-                            
-                            print(f"[SYSTEM] json_check_ 결과: pass={key_psss_cnt}, error={key_error_cnt}")
-                            print(f"[SYSTEM] 스키마 전체 필드 개수: {total_schema_fields}")
-                            print(f"[SYSTEM] 실제 응답 필드: code={response_code}, message={response_message}")
-                            
-                            # 에러 응답은 모든 필드를 PASS로 처리
-                            key_psss_cnt = total_schema_fields
-                            key_error_cnt = 0
-                            val_result = "PASS"
-                            val_text = f"에러 응답 (code={response_code}): 모든 필드 자동 PASS 처리됨"
-                            
-                            print(f"[SYSTEM] 에러 응답 처리 완료: 전체 {total_schema_fields}개 필드 PASS")
-                        
-                        # ✅ 케이스 3: code_value=200인데 404 응답 - 플랫폼 버그이지만 PASS 처리
-                        # → CameraProfiles에서 cam0001 존재한다고 했는데 404 반환 (플랫폼이 수정해야 함)
-                        # → 하지만 검증 시스템은 404를 정상 응답으로 PASS 처리
-                        elif code_value == 200 and response_code == "404":
-                            print(f"[PLATFORM_BUG_WARNING] ⚠️  플랫폼 맥락 불일치 감지!")
-                            print(f"[PLATFORM_BUG_WARNING] 이전 API에서 확인된 ID인데 404 응답")
-                            print(f"[PLATFORM_BUG_WARNING] 플랫폼 개발팀 확인 필요 (검증은 PASS 처리)")
-                            
-                            # 404 응답이므로 PASS 처리 (케이스 2와 동일)
-                            total_schema_fields = key_psss_cnt + key_error_cnt
-                            key_psss_cnt = total_schema_fields
-                            key_error_cnt = 0
-                            val_result = "PASS"
-                            val_text = f"404 응답 (PASS 처리, 단 플랫폼 맥락 불일치 의심)"
-                            
-                            print(f"[PLATFORM_BUG_WARNING] 404 응답 PASS 처리 완료: {key_psss_cnt}개 필드")
-                        
-                        # 성공 코드가 아니면서 에러 코드도 아닌 경우 FAIL 처리
-                        elif response_code not in ["200", "201", "성공", "Success", ""]:
-                            # print(f"[SYSTEM] 응답 코드 검증 실패: code={response_code}, message={response_message}")
-                            val_result = "FAIL"
-                            # 기존 오류 메시지에 응답 코드 오류 추가
-                            code_error_msg = f"응답 실패: code={response_code}, message={response_message}"
-                            if isinstance(val_text, str):
-                                val_text = code_error_msg if val_text == "오류가 없습니다." else f"{code_error_msg}\n\n{val_text}"
-                            elif isinstance(val_text, list):
-                                val_text.insert(0, code_error_msg)
-                            else:
-                                val_text = code_error_msg
-
-                            # 응답 실패는 오류로 카운트 (스키마는 맞지만 의미상 실패)
-                            key_error_cnt += 1
 
                     # 이번 시도의 결과
                     final_result = val_result
