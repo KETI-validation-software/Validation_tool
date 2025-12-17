@@ -810,7 +810,8 @@ class Server(BaseHTTPRequestHandler):
                     template_data=copy.deepcopy(message),  # deepcopy로 원본 보호
                     constraints=out_con,
                     api_name=api_name,  # ✅ API 이름 전달
-                    door_memory=Server.door_memory  # ✅ 문 상태 저장소 전달
+                    door_memory=Server.door_memory,  # ✅ 문 상태 저장소 전달
+                    is_webhook=False
                 )
                 print(f"[DEBUG][CONSTRAINTS] 업데이트된 message 내용: {json.dumps(updated_message, ensure_ascii=False)[:200]}")
 
@@ -978,7 +979,10 @@ class Server(BaseHTTPRequestHandler):
                                 webhook_payload = self.generator._applied_constraints(
                                     request_data=self.request_data,
                                     template_data=webhook_payload,
-                                    constraints=webhook_con
+                                    constraints=webhook_con,
+                                    api_name=api_name, 
+                                    door_memory=Server.door_memory,  
+                                    is_webhook=True  
                                 )
                                 print(f"[DEBUG][WEBHOOK_CONSTRAINTS] constraints 적용 완료")
                                 print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 업데이트된 webhook_payload: {json.dumps(webhook_payload, ensure_ascii=False)[:300]}")
