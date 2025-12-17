@@ -1,21 +1,21 @@
 {
-  "requestId": "cmisfmr3907tv5vy71y0276gp",
+  "requestId": "cmii85wjq009z8z1tv0d3d7r1",
   "evaluationTarget": {
     "companyName": "물리보안기업",
     "contactPerson": "김철수",
-    "productName": "물리보안시스템-제어",
+    "productName": "물리보안시스템-기본",
     "modelName": "v1.0",
     "version": "v1.0"
   },
   "testGroups": [
     {
-      "id": "cmisfjfzt07tm5vy7qslmisks",
-      "name": "제어기능-물리보안",
+      "id": "cmii831gk009j8z1thiahf6ro",
+      "name": "기본 기능 시험-물리보안",
       "testRange": "ALL_FIELDS, ALL_FIELDS, ALL_FIELDS",
       "testSpecIds": [
-        "cmiqr2b9j00i9ie8frw439h8i",
-        "cmiqr1jha00i6ie8fb1scb3go",
-        "cmiqr0kdw00i4ie8fr3firjtg"
+        "cmii7wfuf006i8z1tcds6q69g",
+        "cmii7w683006h8z1t7usnin5g",
+        "cmii7v8pr006g8z1tvo55a50u"
       ]
     }
   ],
@@ -38,7 +38,7 @@
       "failedFields": 0,
       "apis": [
         {
-          "id": "cmise849o00nv5vy7mu76wa69",
+          "id": "cmii82age008k8z1t71s85tbz",
           "name": "사용자 인증",
           "method": "POST",
           "endpoint": "/Authentication",
@@ -65,7 +65,7 @@
           ]
         },
         {
-          "id": "cmise9yk200pv5vy7ktxtva7c",
+          "id": "cmiwtm84f0an2p002pthrkfbj",
           "name": "전송 지원 기능 정보 연동",
           "method": "POST",
           "endpoint": "/Capabilities",
@@ -99,7 +99,7 @@
           ]
         },
         {
-          "id": "cmisepin301uv5vy78nai1drd",
+          "id": "cmiwtnnvx0ar8p002dcz8llaf",
           "name": "보안용 센서 단말 목록 정보 연동",
           "method": "POST",
           "endpoint": "/SensorDeviceProfiles",
@@ -169,8 +169,8 @@
           ]
         },
         {
-          "id": "cmisfqfip07tz5vy7de6x5d6r",
-          "name": "보안용 센서 단말 제어 정보 연동-상태연동",
+          "id": "cmiwtr5xt0boqp002melvctad",
+          "name": "실시간 보안용 센서 데이터 정보 연동",
           "method": "POST",
           "endpoint": "/SensorDeviceControl",
           "score": 100.0,
@@ -195,8 +195,8 @@
           ]
         },
         {
-          "id": "cmisg86id08bm5vy7ezcbr7oy",
-          "name": "보안용 센서 단말 제어 정보 연동-제어",
+          "id": "cmiwv1ifx0ddmp0023tuwdhoi",
+          "name": "실시간 보안용 센서 이벤트 분석 정보 연동",
           "method": "POST",
           "endpoint": "/SensorDeviceControl",
           "score": 100.0,
@@ -232,7 +232,7 @@
       "failedFields": 0,
       "apis": [
         {
-          "id": "cmisgv0ua08o55vy7yvk4aw0a",
+          "id": "cmii7ylxn006m8z1tqq8dard1",
           "name": "사용자 인증",
           "method": "POST",
           "endpoint": "/Authentication",
@@ -259,48 +259,50 @@
           ]
         },
         {
-          "id": "cmisjr2u40au05vy7kt6bb6zl",
+          "id": "cmiqtf9x600upie8ft45b1h1w",
           "name": "전송 지원 기능 정보 연동",
           "method": "POST",
           "endpoint": "/Capabilities",
-          "score": 100.0,
+          "score": 88.0,
           "validationCnt": 1,
-          "totalFields": 4,
-          "passFields": 4,
-          "failFields": 0,
+          "totalFields": 8,
+          "passFields": 7,
+          "failFields": 1,
           "validations": [
             {
               "attempt": 1,
               "validationData": {
                 "code": "200",
                 "message": "성공",
+                "streamingSupport": [
+                  {
+                    "streamProtocolType": "Unicast"
+                  }
+                ],
                 "transportSupport": [
                   {
                     "transProtocolType": "LongPolling",
-                    "transProtocolDesc": ""
-                  },
-                  {
-                    "transProtocolType": "Webhook",
                     "transProtocolDesc": ""
                   }
                 ]
               },
               "validationErrors": [
                 "[시도 1/1]",
-                "오류가 없습니다."
+                "<b>[streamingSupport]</b> (1건)",
+                "- [필드 누락] streamProtocolDesc"
               ]
             }
           ]
         },
         {
-          "id": "cmiskf6w20dcm5vy7cjao08fw",
-          "name": "바이오 및 출입통제 장치 목록 정보",
+          "id": "cmiqthu4900voie8f1evs0kfm",
+          "name": "카메라 목록 연동",
           "method": "POST",
-          "endpoint": "/DoorProfiles",
+          "endpoint": "/CameraProfiles",
           "score": 100.0,
           "validationCnt": 1,
-          "totalFields": 16,
-          "passFields": 16,
+          "totalFields": 12,
+          "passFields": 12,
           "failFields": 0,
           "validations": [
             {
@@ -308,72 +310,57 @@
               "validationData": {
                 "code": "200",
                 "message": "성공",
-                "doorList": [
+                "camList": [
                   {
-                    "doorID": "door0001",
-                    "doorName": "A건물 출입문",
-                    "doorRelayStatus": "일반",
-                    "doorSensor": "0",
-                    "doorLoc": {
+                    "camID": "cam0001",
+                    "camName": "카메라1",
+                    "camLoc": {
                       "lon": "127.127730",
                       "lat": "38.439801",
                       "alt": "32.131",
                       "desc": "3층복도"
                     },
-                    "bioDeviceList": [
-                      {
-                        "bioDeviceID": "bio0001",
-                        "otherDeviceName": "출입문홍채인식기기",
-                        "bioDeviceAuthTypeList": [
-                          "홍채",
-                          "지문"
-                        ]
-                      },
-                      {
-                        "bioDeviceID": "bio0002",
-                        "bioDeviceName": "출입문지문인식기기",
-                        "bioDeviceAuthTypeList": [
-                          "지문"
-                        ]
-                      }
-                    ],
-                    "otherDeviceList": [
-                      {
-                        "otherDeviceID": "other0001",
-                        "otherDeviceName": "출입문카드인식기기",
-                        "otherDeviceAuthTypeList": [
-                          "카드"
-                        ]
-                      }
-                    ]
+                    "camConfig": {
+                      "camType": "PTZ"
+                    }
                   },
                   {
-                    "doorID": "door0002",
-                    "doorName": "B건물 출입문",
-                    "doorRelayStatus": "수동 개방",
-                    "doorSensor": "0",
-                    "doorLoc": {
-                      "lon": "233",
-                      "lat": "123",
-                      "alt": "23",
-                      "desc": "333"
+                    "camID": "cam0002",
+                    "camName": "카메라2",
+                    "camLoc": {
+                      "lon": "127.2887",
+                      "lat": "37.33671",
+                      "alt": ""
                     },
-                    "bioDeviceList": [
-                      {
-                        "bioDeviceID": "bio0002",
-                        "bioDeviceName": "정맥인식기기",
-                        "bioDeviceAuthTypeList": [
-                          "정맥"
-                        ]
-                      }
-                    ],
-                    "otherDeviceList": [
-                      {
-                        "otherDeviceID": "other0002",
-                        "otherDeviceName": "카드인식기기",
-                        "otherDeviceAuthTypeList": "카드"
-                      }
-                    ]
+                    "camConfig": {
+                      "camType": "dome"
+                    }
+                  },
+                  {
+                    "camID": "cam003",
+                    "camName": "카메라3",
+                    "camLoc": {
+                      "lon": "75",
+                      "lat": "585",
+                      "alt": "122",
+                      "desc": "2층출입문"
+                    },
+                    "camConfig": {
+                      "camType": "PTZ"
+                    }
+                  },
+                  {
+                    "camID": "cam004",
+                    "camName": "카메라4",
+                    "camLoc": {
+                      "lon": "44",
+                      "lat": "211",
+                      "alt": "23",
+                      "desc": "1층 출입문"
+                    },
+                    "camConfig": {
+                      "camType": "dome"
+                    }
                   }
                 ]
               },
@@ -385,14 +372,14 @@
           ]
         },
         {
-          "id": "cmixuoetf0gr9p002gy101xid-registration",
-          "name": "실시간 출입통제 장치 상태 정보 연동-상태조회",
+          "id": "cmiqtkefj00whie8fd8odtc1m",
+          "name": "실시간 영상(CCTV) 전송 ",
           "method": "POST",
-          "endpoint": "/RealtimeDoorStatus",
+          "endpoint": "/StreamURLs",
           "score": 100.0,
           "validationCnt": 1,
-          "totalFields": 6,
-          "passFields": 6,
+          "totalFields": 12,
+          "passFields": 12,
           "failFields": 0,
           "validations": [
             {
@@ -403,36 +390,16 @@
               },
               "validationErrors": [
                 "[시도 1/1]",
-                "오류가 없습니다.",
-                "--- Webhook 검증 ---",
                 "오류가 없습니다."
               ]
             }
           ]
         },
         {
-          "id": "cmixuoetf0gr9p002gy101xid-webhook",
-          "name": "실시간 출입통제 장치 상태 정보 연동-상태조회 (Webhook)",
+          "id": "cmiqtnwm200xoie8fxzfhodj5",
+          "name": "실시간 이벤트 분석 정보 연동",
           "method": "POST",
-          "endpoint": "/RealtimeDoorStatus/webhook",
-          "score": 0,
-          "validationCnt": 1,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {},
-              "validationErrors": []
-            }
-          ]
-        },
-        {
-          "id": "cmixuttgv0hbyp002h6os6wjc",
-          "name": "출입 통제 장치 제어 정보 연동",
-          "method": "POST",
-          "endpoint": "/DoorControl",
+          "endpoint": "/RealtimeVideoEventInfos",
           "score": 100.0,
           "validationCnt": 1,
           "totalFields": 2,
@@ -453,15 +420,15 @@
           ]
         },
         {
-          "id": "cmixuvzks0hd3p002rcrvqdt4-registration",
-          "name": "실시간 출입통제 장치 상태 정보 연동-결과조회",
+          "id": "cmiwrkvjq0005nkgl04g93wwy",
+          "name": "저장된 영상 목록 연동",
           "method": "POST",
-          "endpoint": "/RealtimeDoorStatus",
-          "score": 100.0,
+          "endpoint": "/StoredVideoInfos",
+          "score": 71.0,
           "validationCnt": 1,
-          "totalFields": 6,
-          "passFields": 6,
-          "failFields": 0,
+          "totalFields": 7,
+          "passFields": 5,
+          "failFields": 2,
           "validations": [
             {
               "attempt": 1,
@@ -471,28 +438,124 @@
               },
               "validationErrors": [
                 "[시도 1/1]",
-                "오류가 없습니다.",
-                "--- Webhook 검증 ---",
-                "오류가 없습니다."
+                "<b>[기타]</b> (2건)",
+                "- [맥락 오류] camList.timeList.endTime[0]: 범위 초과: 8653032800267가 [20251105163010124, 20251115163010124] 범위를 벗어남",
+                "- [맥락 오류] camList.timeList.startTime[0]: 범위 초과: 6862501834804가 [20251105163010124, 20251115163010124] 범위를 벗어남"
               ]
             }
           ]
         },
         {
-          "id": "cmixuvzks0hd3p002rcrvqdt4-webhook",
-          "name": "실시간 출입통제 장치 상태 정보 연동-결과조회 (Webhook)",
+          "id": "cmiwrq4r200kqnkgluspxeyu7",
+          "name": "저장된 영상(CCTV) 전송",
           "method": "POST",
-          "endpoint": "/RealtimeDoorStatus/webhook",
-          "score": 0,
+          "endpoint": "/ReplayURL",
+          "score": 0.0,
           "validationCnt": 1,
-          "totalFields": 0,
+          "totalFields": 14,
           "passFields": 0,
-          "failFields": 0,
+          "failFields": 14,
           "validations": [
             {
               "attempt": 1,
-              "validationData": {},
-              "validationErrors": []
+              "validationData": {
+                "code": "200",
+                "message": "성공"
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "<b>[기타]</b> (1건)",
+                "- [맥락 오류] code 맥락 검증 실패: 예상값 400, 실제값 200"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmiws2qij05apnkgli7hun3bl",
+          "name": "저장된 이벤트 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/StoredVideoEventInfos",
+          "score": 78.0,
+          "validationCnt": 1,
+          "totalFields": 9,
+          "passFields": 7,
+          "failFields": 2,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "eventUUID": "event01",
+                    "eventName": "Loitering",
+                    "startTime": 4239821079697,
+                    "endTime": 8881771109185,
+                    "eventDesc": "AAABVVVVCCCDDssvfdd"
+                  }
+                ]
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "<b>[기타]</b> (2건)",
+                "- [맥락 오류] camList.endTime[0]: 범위 초과: 8881771109185가 [20251105163010124, 20251115163010124] 범위를 벗어남",
+                "- [맥락 오류] camList.startTime[0]: 범위 초과: 4239821079697가 [20251105163010124, 20251115163010124] 범위를 벗어남"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmiws9btu01ksp0028h4uc4az",
+          "name": "저장된 객체 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/StoredObjectAnalyticsInfos",
+          "score": 81.0,
+          "validationCnt": 1,
+          "totalFields": 16,
+          "passFields": 13,
+          "failFields": 3,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "analyticsTime": 5145833839813,
+                    "anlayticsResultList": [
+                      {
+                        "anayticsID": "object001",
+                        "analyticsClass": [
+                          "사람"
+                        ],
+                        "analyticsAttribute": [
+                          "빨간색"
+                        ],
+                        "analyticsConfidence": 0.8,
+                        "analyticsBoundingBox": {
+                          "left": 0.2,
+                          "top": 0.1,
+                          "right": 0.5,
+                          "bottom": 0.6
+                        },
+                        "analyticsDesc": "13가 4567"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "<b>[camList.anlayticsResultList.analyticsClass]</b> (1건)",
+                "- [타입 오류] index[0] : Str가 와야 하는데 List가 왔습니다.",
+                "<b>[기타]</b> (2건)",
+                "- [맥락 오류] camList.analyticsTime[0]: 범위 초과: 5145833839813가 [20251105163010124, 20251115163010124] 범위를 벗어남",
+                "- [맥락 오류] 참조 엔드포인트 없음: None"
+              ]
             }
           ]
         }
