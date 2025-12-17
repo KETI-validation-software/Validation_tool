@@ -1,0 +1,2 @@
+{"time": "2025-12-17T06:14:12.965718Z", "api": "PtzContinuousMove", "dir": "REQUEST", "data": {"camID": "cam0001", "velocity": {"pan  ": 10, "tilt": -20, "zoom": 30}, "timeOut": 5}}
+{"time": "2025-12-17T06:14:12.968718Z", "api": "PtzContinuousMove", "dir": "RESPONSE", "data": {"code": "200", "message": "성공"}}
