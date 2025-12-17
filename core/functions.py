@@ -225,7 +225,134 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
         total_correct = 0
         total_error = 0
         error_messages = []
+        context_validation_failed = False
+        code_message_error = None
 
+        # code와 message 필드의 맥락 검증 수행
+        for field_name in ['code', 'message']:
+            if field_name in flat_data and field_name in rules_dict:
+                rule = rules_dict[field_name]
+
+                print(f"\n[맥락검증] {field_name} 필드 검증 시작")
+                print(f"[맥락검증] rule: {rule}")
+
+                if not rule.get("enabled", False):
+                    print(f"[맥락검증] {field_name} 규칙이 비활성화됨 - 건너뜀")
+                    continue
+
+                validation_type = rule.get("validationType")
+                print(f"[맥락검증] validationType: {validation_type}")
+
+                if validation_type != "specified-value-match":
+                    print(f"[맥락검증] {field_name}은 specified-value-match가 아님 - 건너뜀")
+                    continue
+
+                actual_value = flat_data[field_name]
+
+                # ===================================================================
+                # allowedValues에서 예상값 추출
+                # ===================================================================
+                allowed_values = rule.get("allowedValues", [])
+                print(f"[맥락검증] allowedValues: {allowed_values}")
+
+                if not allowed_values or len(allowed_values) == 0:
+                    print(f"[경고] {field_name}의 allowedValues가 비어있음 - 맥락 검증 건너뜀")
+                    continue
+
+                # 단일 값만 허용하는 경우에만 맥락 검증 수행
+                if len(allowed_values) > 1:
+                    print(f"[맥락검증] {field_name}이 여러 값을 허용 ({allowed_values}) - 맥락 검증 건너뜀")
+                    continue
+
+                expected_value = allowed_values[0]
+                print(f"[맥락검증] expected_value: {expected_value} (type: {type(expected_value).__name__})")
+                print(f"[맥락검증] actual_value: {actual_value} (type: {type(actual_value).__name__})")
+
+                # ===================================================================
+                # 맥락 검증 수행 (타입 안전한 비교)
+                # ===================================================================
+
+                # 타입 통일 (문자열 "400" vs 숫자 400 비교 문제 방지)
+                try:
+                    # 숫자로 변환 시도
+                    if isinstance(expected_value, str) and expected_value.isdigit():
+                        expected_num = int(expected_value)
+                    elif isinstance(expected_value, (int, float)):
+                        expected_num = int(expected_value)
+                    else:
+                        # 숫자가 아닌 경우 (message 필드 등)
+                        expected_num = None
+
+                    if isinstance(actual_value, str) and actual_value.isdigit():
+                        actual_num = int(actual_value)
+                    elif isinstance(actual_value, (int, float)):
+                        actual_num = int(actual_value)
+                    else:
+                        actual_num = None
+
+                    print(f"[맥락검증] 변환 후 - expected_num: {expected_num}, actual_num: {actual_num}")
+
+                    # 숫자 비교가 가능한 경우
+                    if expected_num is not None and actual_num is not None:
+                        # 200이 아닌 값을 기대하는데 실제로 다른 값이 온 경우
+                        if expected_num != 200 and actual_num != expected_num:
+                            context_validation_failed = True
+                            code_message_error = f"{field_name} 맥락 검증 실패: 예상값 {expected_num}, 실제값 {actual_num}"
+                            error_messages.append(f"[의미] {code_message_error}")
+                            print(f"  ❌ 맥락 검증 실패: {code_message_error}")
+                            print(f"  ⚠️ 모든 필드를 실패로 처리합니다.")
+                            break
+                        else:
+                            print(f"[맥락검증] ✅ {field_name} 숫자 검증 통과")
+
+                    # 문자열 비교 (message 필드 등)
+                    else:
+                        expected_str = str(expected_value)
+                        actual_str = str(actual_value)
+
+                        # "200" 또는 200이 아닌 값을 기대하는 경우
+                        if expected_str not in ["200", "OK", "Success"] and actual_str != expected_str:
+                            context_validation_failed = True
+                            code_message_error = f"{field_name} 맥락 검증 실패: 예상값 '{expected_str}', 실제값 '{actual_str}'"
+                            error_messages.append(f"[의미] {code_message_error}")
+                            print(f"  ❌ 맥락 검증 실패: {code_message_error}")
+                            print(f"  ⚠️ 모든 필드를 실패로 처리합니다.")
+                            break
+                        else:
+                            print(f"[맥락검증] ✅ {field_name} 문자열 검증 통과")
+
+                except Exception as e:
+                    print(f"[경고] {field_name} 맥락 검증 중 예외 발생: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    continue
+
+        print(f"\n[맥락검증] 최종 결과: {'실패' if context_validation_failed else '통과'}")
+
+        # ===================================================================
+        # 맥락 검증 실패 시 모든 필드를 실패로 카운트
+        # ===================================================================
+        if context_validation_failed:
+            total_error = len(flat_fields)
+            total_correct = 0
+
+            # 모든 필드에 대해 실패 상태 기록
+            for field_path in flat_fields.keys():
+                field_results[field_path] = {
+                    "struct_pass": False,
+                    "semantic_pass": False,
+                    "errors": [code_message_error]
+                }
+
+            # 최종 결과 반환 (모든 필드 실패)
+            final_result = "FAIL"
+            error_msg = format_errors_as_tree(error_messages)
+
+            print(f"\n============ 맥락 검증 실패로 조기 종료 ============")
+            print(f"최종 결과: {final_result}")
+            print(f"통과: {total_correct}, 실패: {total_error}")
+
+            return final_result, error_msg, total_correct, total_error
         # 4) 각 필드에 대해 순차 검증
         for field_path in sorted(flat_fields.keys()):
 
@@ -1454,6 +1581,25 @@ def build_result_json(myapp_instance):
     return result_json
 
 
+def _remove_number_suffix(name):
+    """
+    API명 뒤에 붙은 숫자 suffix 제거 (결과 파일 저장용)
+
+    예시:
+        - "SensorControl2" → "SensorControl"
+        - "/SensorControl3" → "/SensorControl"
+        - "SensorControl" → "SensorControl" (숫자 없으면 그대로)
+
+    Args:
+        name: 숫자가 붙은 API명 또는 endpoint
+
+    Returns:
+        str: 숫자 suffix가 제거된 이름
+    """
+    import re
+    return re.sub(r'\d+$', '', name)
+
+
 def _build_spec_result(myapp_instance, spec_id, step_buffers, table_data=None, group_id=None):
     """
     단일 시험 시나리오(spec)의 결과 구성
@@ -1516,10 +1662,12 @@ def _build_spec_result(myapp_instance, spec_id, step_buffers, table_data=None, g
             api_score_str = table_widget.item(i, 6).text() if table_widget.item(i, 6) else "0%"
             api_score = float(api_score_str.replace('%', ''))
 
-        # 3-2. API 기본 정보 설정
-        api_name = api_names_list[i] if i < len(api_names_list) else f"API-{i + 1}"
+        # 3-2. API 기본 정보 설정 (결과 저장 시 숫자 suffix 제거)
+        api_name_raw = api_names_list[i] if i < len(api_names_list) else f"API-{i + 1}"
+        api_name = _remove_number_suffix(api_name_raw)
         api_id = api_ids_list[i] if i < len(api_ids_list) else f"api-{i + 1}"
-        api_endpoint = api_endpoints_list[i] if i < len(api_endpoints_list) else f"/api{i + 1}"
+        api_endpoint_raw = api_endpoints_list[i] if i < len(api_endpoints_list) else f"/api{i + 1}"
+        api_endpoint = _remove_number_suffix(api_endpoint_raw)
 
         # API 메서드 가져오기 (기본값: POST)
         method = step_buffer.get("api_info", {}).get("method", "POST")

@@ -1,5 +1,5 @@
 import random
-
+import copy
 
 class ConstraintDataGenerator:
     def __init__(self, latest_events=None):
@@ -172,6 +172,13 @@ class ConstraintDataGenerator:
         response = self._generate_from_template(template_data, constraint_map)
         template_data.update(response)
         return template_data
+
+    def _applied_codevalue(self, request_data, allowed_value):
+        if allowed_value == "201":
+            updated_data = self.change_random_field_type(request_data)
+        elif allowed_value == "400":
+            updated_data = self.replace_start_time(request_data)
+        return updated_data
 
     def _build_constraint_map(self, constraints, request_data):
         """constraints를 분석하여 각 필드의 제약 조건과 참조 값을 매핑"""
@@ -582,6 +589,68 @@ class ConstraintDataGenerator:
                 item[field] = value
 
         return item
+    def change_random_field_type(self, data):
+        new_data = copy.deepcopy(data)
+        leaf_paths = []
+
+        # 1️⃣ leaf 경로 수집
+        def collect(data, path):
+            if isinstance(data, dict):
+                for k, v in data.items():
+                    collect(v, path + [k])
+            elif isinstance(data, list):
+                for i, v in enumerate(data):
+                    collect(v, path + [i])
+            else:
+                leaf_paths.append(path)
+
+        collect(new_data, [])
+
+        if not leaf_paths:
+            return new_data, None, None, None
+
+        # 2️⃣ 랜덤 경로 선택
+        path = random.choice(leaf_paths)
+
+        # 3️⃣ 값 접근
+        target = new_data
+        for key in path[:-1]:
+            target = target[key]
+
+        old_value = target[path[-1]]
+
+        # 4️⃣ 타입만 변경
+        if isinstance(old_value, int):
+            new_value = str(old_value)
+        elif isinstance(old_value, float):
+            new_value = str(old_value)
+        elif isinstance(old_value, str):
+            new_value = 1
+        elif isinstance(old_value, bool):
+            new_value = "true"
+        else:
+            new_value = None
+
+        target[path[-1]] = new_value
+
+        return new_data
+
+    def replace_start_time(self, data):
+        new_data = copy.deepcopy(data)
+
+        def traverse(obj):
+            if isinstance(obj, dict):
+                for key, value in obj.items():
+                    if key == "startTime":
+                        obj[key] = 00000000000000000
+                    else:
+                        traverse(value)
+            elif isinstance(obj, list):
+                for item in obj:
+                    traverse(item)
+
+        traverse(new_data)
+        return new_data
 
     def find_key(self, data, target_key):
         """재귀적으로 데이터에서 키 찾기"""
