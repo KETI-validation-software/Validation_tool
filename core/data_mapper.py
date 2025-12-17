@@ -178,6 +178,13 @@ class ConstraintDataGenerator:
         template_data.update(response)
         return template_data
 
+    def _applied_codevalue(self, request_data, allowed_value):
+        if allowed_value == "201":
+            updated_data = self.replace_start_time(request_data)
+        elif allowed_value == "400":
+            updated_data = self.change_random_field_type(request_data)
+        return updated_data
+
     def _build_constraint_map(self, constraints, request_data):
         """constraints를 분석하여 각 필드의 제약 조건과 참조 값을 매핑"""
         constraint_map = {}

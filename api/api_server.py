@@ -119,7 +119,7 @@ class Server(BaseHTTPRequestHandler):
         return None
 
     # ========== 오류 검사 함수들 (400/201/404) ==========
-    
+    '''
     def _check_request_errors(self, api_name, request_data):
         """
         요청 데이터 오류 검사
@@ -166,7 +166,7 @@ class Server(BaseHTTPRequestHandler):
         
         # ✅ 오류 없으면 flag 초기화
         Server.request_has_error[api_name] = False
-        return None  # 오류 없음
+        return None  # 오류 없음'''
 
     def _get_request_schema(self, api_name):
         """API의 요청 스키마 가져오기"""
@@ -408,7 +408,7 @@ class Server(BaseHTTPRequestHandler):
 
                 # ✅ Authentication API REQUEST 이벤트 기록 (한 번만)
                 self._push_event(api_name, "REQUEST", self.request_data)
-
+                '''
                 # ========== Authentication API도 오류 검사 (400/201/404) ==========
                 error_response = self._check_request_errors(api_name, self.request_data)
                 if error_response:
@@ -422,7 +422,7 @@ class Server(BaseHTTPRequestHandler):
                     self.wfile.write(json.dumps(error_response).encode('utf-8'))
                     return
                 # ================================================================
-
+                '''
                 # 응답에 토큰 포함
                 if isinstance(data, dict):
                     data = data.copy()
@@ -618,7 +618,7 @@ class Server(BaseHTTPRequestHandler):
         except Exception as e:
             print(f"[API_SERVER] request_counter 에러: {e}")
         # ================================================================
-
+        '''
         # ========== 오류 검사 로직 (400/201/404) ==========
         # ✅ api_res() 호출 후에 검사 (self.message, self.inSchema가 설정된 후)
         error_response = self._check_request_errors(api_name, self.request_data)
@@ -632,7 +632,7 @@ class Server(BaseHTTPRequestHandler):
             self._set_headers()
             self.wfile.write(json.dumps(error_response).encode('utf-8'))
             return
-        # ================================================
+        # ================================================'''
 
         # ✅ 요청 본문은 이미 do_POST 시작 부분에서 self.request_data에 저장됨
         # 중복 읽기 방지를 위해 이미 저장된 데이터 사용
@@ -832,7 +832,7 @@ class Server(BaseHTTPRequestHandler):
                                 Server.valid_device_ids.add(cam["camID"])
                         print(f"[DEVICE_UPDATE] CameraProfiles에서 {len(cam_list)}개 camID로 리셋+추가")
                         print(f"[DEVICE_UPDATE] 현재 유효한 장치 목록: {Server.valid_device_ids}")
-
+                '''
                 # ✅ JSON에 code_value 추가
                 if isinstance(updated_message, dict):
                     if api_name in Server.request_has_error and Server.request_has_error[api_name]:
@@ -840,7 +840,7 @@ class Server(BaseHTTPRequestHandler):
                         print(f"[DEBUG] code_value=400 추가 (요청 오류 있음)")
                     else:
                         updated_message['code_value'] = 200
-                        print(f"[DEBUG] code_value=200 추가 (정상)")
+                        print(f"[DEBUG] code_value=200 추가 (정상)")'''
 
                 # JSON 응답 준비
                 a = json.dumps(updated_message).encode('utf-8')
@@ -865,7 +865,7 @@ class Server(BaseHTTPRequestHandler):
                                 Server.valid_device_ids.add(cam["camID"])
                         print(f"[DEVICE_UPDATE] CameraProfiles에서 {len(cam_list)}개 camID로 리셋+추가")
                         print(f"[DEVICE_UPDATE] 현재 유효한 장치 목록: {Server.valid_device_ids}")
-
+                '''
                 # ✅ JSON에 code_value 추가
                 if isinstance(message, dict):
                     if api_name in Server.request_has_error and Server.request_has_error[api_name]:
@@ -873,7 +873,7 @@ class Server(BaseHTTPRequestHandler):
                         print(f"[DEBUG] code_value=400 추가 (요청 오류 있음)")
                     else:
                         message['code_value'] = 200
-                        print(f"[DEBUG] code_value=200 추가 (정상)")
+                        print(f"[DEBUG] code_value=200 추가 (정상)")'''
 
                 # JSON 응답 준비
                 a = json.dumps(message).encode('utf-8')
@@ -882,13 +882,13 @@ class Server(BaseHTTPRequestHandler):
             import traceback
             traceback.print_exc()
             # 에러 발생 시 원본 메시지 사용
-            
+            '''
             # ✅ JSON에 code_value 추가
             if isinstance(message, dict):
                 if api_name in Server.request_has_error and Server.request_has_error[api_name]:
                     message['code_value'] = 400
                 else:
-                    message['code_value'] = 200
+                    message['code_value'] = 200'''
             
             # JSON 응답 준비
             a = json.dumps(message).encode('utf-8')

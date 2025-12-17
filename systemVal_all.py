@@ -3631,7 +3631,7 @@ class MyApp(QWidget):
         # 실제 검증
         if len(self.webhookSchema) > 0:
             schema_to_check = self.webhookSchema[0]
-            val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(
+            val_result, val_text, key_psss_cnt, key_error_cnt, opt_correct, opt_error = json_check_(
                 schema=schema_to_check,
                 data=self.webhook_res,
                 flag=self.flag_opt,
@@ -3644,13 +3644,19 @@ class MyApp(QWidget):
             if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
                 print(f"[DEBUG] webhookSchema가 없습니다!")
 
-        # 웹훅 데이터를 append_monitor_log 형식으로 출력
-        self.append_monitor_log(
-            step_name=message_name,
-            request_json=tmp_webhook_res,
-            result_status=val_result,
-            details=f"웹훅 검증 결과: {val_result} | {'웹훅 데이터 검증 성공' if val_result == 'PASS' else '웹훅 데이터 검증 실패'}"
-        )
+        if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
+            print(f"[DEBUG] ==========================================\n")
+
+        self.valResult.append(f'<div style="font-size: 20px; font-weight: bold; color: #333; font-family: \'Noto Sans KR\'; margin-top: 10px;">{message_name}</div>')
+        self.valResult.append('<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-top: 5px;">=== 웹훅 이벤트 데이터 ===</div>')
+        self.valResult.append(f'<pre style="font-size: 18px; color: #1f2937; font-family: \'Consolas\', monospace; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 10px; margin: 5px 0;">{tmp_webhook_res}</pre>')
+
+        if val_result == "PASS":
+            self.valResult.append(f'<div style="font-size: 18px; color: #10b981; font-family: \'Noto Sans KR\'; margin-top: 5px;">웹훅 검증 결과: {val_result}</div>')
+            self.valResult.append('<div style="font-size: 18px; color: #10b981; font-family: \'Noto Sans KR\';">웹훅 데이터 검증 성공</div>')
+        else:
+            self.valResult.append(f'<div style="font-size: 18px; color: #ef4444; font-family: \'Noto Sans KR\'; margin-top: 5px;">웹훅 검증 결과: {val_result}</div>')
+            self.valResult.append('<div style="font-size: 18px; color: #ef4444; font-family: \'Noto Sans KR\';">웹훅 데이터 검증 실패</div>')
 
         # ✅ step_pass_counts 배열에 웹훅 결과 추가 (배열이 없으면 생성하지 않음)
         # 점수 업데이트는 모든 재시도 완료 후에 일괄 처리됨 (플랫폼과 동일)
@@ -4120,7 +4126,7 @@ class MyApp(QWidget):
                                         self.reference_context[ref_endpoint_min] = event_data.get("data", {})
 
                     try:
-                        val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(
+                        val_result, val_text, key_psss_cnt, key_error_cnt, opt_correct, opt_error = json_check_(
                             self.outSchema[self.cnt],
                             res_data,
                             self.flag_opt,
@@ -4129,7 +4135,7 @@ class MyApp(QWidget):
                         )
                     except TypeError as te:
                         print(f"[ERROR] 응답 검증 중 TypeError 발생: {te}, 일반 검증으로 재시도")
-                        val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(
+                        val_result, val_text, key_psss_cnt, key_error_cnt, opt_correct, opt_error = json_check_(
                             self.outSchema[self.cnt],
                             res_data,
                             self.flag_opt
