@@ -1,4 +1,0 @@
-{"time": "2025-12-17T01:35:54.078463Z", "api": "RealtimeDoorStatus2", "dir": "REQUEST", "data": {"doorList": [{"doorID": ""}], "duration": 10000, "transProtocol": {"transProtocolType": "WebHook", "transProtocolDesc": "https://192.168.0.3:8081"}, "startTime": "20251105163010124"}}
-{"time": "2025-12-17T01:35:54.080971Z", "api": "RealtimeDoorStatus2", "dir": "RESPONSE", "data": {"code": "200", "message": "성공"}}
-{"time": "2025-12-17T01:35:54.084970Z", "api": "RealtimeDoorStatus2", "dir": "WEBHOOK_OUT", "data": {"doorList": [{"doorID": "door0001", "doorName": "A건물 출입문", "doorRelaySensor": "일반", "doorSensor": "Unlock"}]}}
-{"time": "2025-12-17T01:35:54.097660Z", "api": "RealtimeDoorStatus2", "dir": "WEBHOOK_IN", "data": {"code": 200, "message": "성공"}}

@@ -23,6 +23,7 @@ from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor, QPixmap
 from PyQt5.QtCore import *
 from PyQt5 import QtCore
 from api.webhook_api import WebhookThread
+from api.api_server import Server  # ✅ door_memory 접근을 위한 import 추가
 from core.functions import json_check_, resource_path, json_to_data, timeout_field_finder
 from core.data_mapper import ConstraintDataGenerator
 from splash_screen import LoadingPopup
@@ -2140,42 +2141,59 @@ class MyApp(QWidget):
         """
         try:
             # constraints 가져오기
+            # if cnt >= len(self.inCon) or not self.inCon[cnt]:
+            #     print(f"[DATA_MAPPER] constraints 없음 (cnt={cnt})")
+            #     return request_data
+
+            # constraints = self.inCon[cnt]
+
+            # if not constraints or not isinstance(constraints, dict):
+            #     print(f"[DATA_MAPPER] constraints가 비어있거나 dict가 아님")
+            #     return request_data
+            # constraints 가져오기
             if cnt >= len(self.inCon) or not self.inCon[cnt]:
-                print(f"[DATA_MAPPER] constraints 없음 (cnt={cnt})")
-                return request_data
+                # constraints가 없더라도 강제 로드 로직은 타야 하므로 바로 리턴하지 않고 빈 dict 할당
+                constraints = {}
+            else:
+                constraints = self.inCon[cnt]
 
-            constraints = self.inCon[cnt]
-
-            if not constraints or not isinstance(constraints, dict):
-                print(f"[DATA_MAPPER] constraints가 비어있거나 dict가 아님")
-                return request_data
+            if not isinstance(constraints, dict):
+                constraints = {}
 
             # print(f"[DATA_MAPPER] 요청 데이터 업데이트 시작 (API: {self.message[cnt]})")
             # print(f"[DATA_MAPPER] constraints: {list(constraints.keys())}")
 
-            # trace 파일에서 이전 응답 데이터 로드 (필요한 경우)
-            for path, rule in constraints.items():
-                ref_endpoint = rule.get("referenceEndpoint")
-                if ref_endpoint:
-                    # 슬래시 제거하여 키 생성
-                    ref_key = ref_endpoint.lstrip('/')
+            required_endpoints = set()
 
-                    # latest_events에 없으면 trace 파일에서 로드
-                    if ref_key not in self.latest_events or "RESPONSE" not in self.latest_events.get(ref_key, {}):
-                        print(f"[DATA_MAPPER] trace 파일에서 {ref_endpoint} RESPONSE 로드 시도")
-                        self._load_from_trace_file(ref_key, "RESPONSE")
+            for field, rule in constraints.items():
+                if isinstance(rule, dict):
+                    ref_endpoint = rule.get("referenceEndpoint")
+                    if ref_endpoint:
+                        required_endpoints.add(ref_endpoint.lstrip('/'))
 
-            # ✅ generator의 latest_events를 명시적으로 업데이트 (참조 동기화)
-            self.generator.latest_events = self.latest_events
-            # print(f"[DATA_MAPPER] 🔄 generator.latest_events 동기화 완료: {list(self.generator.latest_events.keys())}")
+            for endpoint in required_endpoints:
+                if endpoint not in self.latest_events or "RESPONSE" not in self.latest_events.get(endpoint, {}):
+                    print(f"[DATA_MAPPER] trace 파일에서 {endpoint} RESPONSE 로드 시도")
+                    self._load_from_trace_file(endpoint, "RESPONSE")
+                else:
+                    print(f"[DATA_MAPPER] latest_events에 이미 {endpoint} RESPONSE 존재")
             
-            # data mapper 적용
-            # request_data를 template로, constraints 적용하여 업데이트
-            # 빈 dict를 template로 사용하지 않고 request_data 자체를 업데이트
+            api_name = self.message[cnt] if cnt < len(self.message) else ""
+
+            # 둘 다 무조건 맵핑 되어야 함
+            if "RealtimeDoorStatus" in api_name:
+                if "DoorProfiles" not in self.latest_events or "RESPONSE" not in self.latest_events.get("DoorProfiles", {}):
+                    print(f"[DATA_MAPPER] RealtimeDoorStatus용 DoorProfiles RESPONSE 로드 시도")
+                    self._load_from_trace_file("DoorProfiles", "RESPONSE")
+            
+            self.generator.latest_events = self.latest_events
+
             updated_request = self.generator._applied_constraints(
                 request_data={},  # 이전 요청 데이터는 필요 없음
                 template_data=request_data.copy(),  # 현재 요청 데이터를 템플릿으로
-                constraints=constraints
+                constraints=constraints,
+                api_name=api_name,  # ✅ API 이름 전달
+                door_memory=Server.door_memory  # ✅ 문 상태 저장소 전달
             )
 
             # print(f"[DATA_MAPPER] 요청 데이터 업데이트 완료")
@@ -2199,8 +2217,53 @@ class MyApp(QWidget):
         except Exception as e:
             print(f"[ERROR] _apply_request_constraints 실행 중 오류: {e}")
             import traceback
-            traceback.print_exc()
+            
             return request_data
+
+            # # trace 파일에서 이전 응답 데이터 로드 (필요한 경우)
+            # for path, rule in constraints.items():
+            #     ref_endpoint = rule.get("referenceEndpoint")
+            #     if ref_endpoint:
+            #         # 슬래시 제거하여 키 생성
+            #         ref_key = ref_endpoint.lstrip('/')
+
+            #         # latest_events에 없으면 trace 파일에서 로드
+            #         if ref_key not in self.latest_events or "RESPONSE" not in self.latest_events.get(ref_key, {}):
+            #             print(f"[DATA_MAPPER] trace 파일에서 {ref_endpoint} RESPONSE 로드 시도")
+            #             self._load_from_trace_file(ref_key, "RESPONSE")
+
+            # # ✅ generator의 latest_events를 명시적으로 업데이트 (참조 동기화)
+            # self.generator.latest_events = self.latest_events
+            # # print(f"[DATA_MAPPER] 🔄 generator.latest_events 동기화 완료: {list(self.generator.latest_events.keys())}")
+            
+            # # data mapper 적용
+            # # request_data를 template로, constraints 적용하여 업데이트
+            # # 빈 dict를 template로 사용하지 않고 request_data 자체를 업데이트
+            # # ✅ RealtimeDoorStatus2 대응: api_name과 door_memory 전달
+            # api_name = self.message[cnt] if cnt < len(self.message) else ""
+            # print(f"[DEBUG][SYSTEM] api_name: {api_name}")
+            # print(f"[DEBUG][SYSTEM] door_memory: {Server.door_memory}")
+            # print(f"[DEBUG][SYSTEM] request_data before: {request_data}")
+            
+            # updated_request = self.generator._applied_constraints(
+            #     request_data={},  # 이전 요청 데이터는 필요 없음
+            #     template_data=request_data.copy(),  # 현재 요청 데이터를 템플릿으로
+            #     constraints=constraints,
+            #     api_name=api_name,  # ✅ API 이름 전달
+            #     door_memory=Server.door_memory  # ✅ 문 상태 저장소 전달
+            # )
+
+            # print(f"[DEBUG][SYSTEM] request_data after: {updated_request}")
+            # # print(f"[DATA_MAPPER] 요청 데이터 업데이트 완료")
+            # # print(f"[DATA_MAPPER] 업데이트된 필드: {list(updated_request.keys())}")
+
+            # return updated_request
+
+        # except Exception as e:
+        #     print(f"[ERROR] _apply_request_constraints 실행 중 오류: {e}")
+        #     import traceback
+        #     traceback.print_exc()
+        #     return request_data
 
     def _load_from_trace_file_OLD(self, api_name, direction="RESPONSE"):
         try:
@@ -3579,6 +3642,7 @@ class MyApp(QWidget):
         if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
             print(f"[DEBUG] ==========================================\n")
 
+<<<<<<< HEAD
         self.valResult.append(f'<div style="font-size: 20px; font-weight: bold; color: #333; font-family: \'Noto Sans KR\'; margin-top: 10px;">{message_name}</div>')
         self.valResult.append('<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-top: 5px;">=== 웹훅 이벤트 데이터 ===</div>')
         self.valResult.append(f'<pre style="font-size: 18px; color: #1f2937; font-family: \'Consolas\', monospace; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 10px; margin: 5px 0;">{tmp_webhook_res}</pre>')
@@ -3589,6 +3653,15 @@ class MyApp(QWidget):
         else:
             self.valResult.append(f'<div style="font-size: 18px; color: #ef4444; font-family: \'Noto Sans KR\'; margin-top: 5px;">웹훅 검증 결과: {val_result}</div>')
             self.valResult.append('<div style="font-size: 18px; color: #ef4444; font-family: \'Noto Sans KR\';">웹훅 데이터 검증 실패</div>')
+=======
+        # 웹훅 데이터를 append_monitor_log 형식으로 출력
+        self.append_monitor_log(
+            step_name=message_name,
+            request_json=tmp_webhook_res,
+            result_status=val_result,
+            details=f"웹훅 검증 결과: {val_result} | {'웹훅 데이터 검증 성공' if val_result == 'PASS' else '웹훅 데이터 검증 실패'}"
+        )
+>>>>>>> origin/main
 
         # ✅ step_pass_counts 배열에 웹훅 결과 추가 (배열이 없으면 생성하지 않음)
         # 점수 업데이트는 모든 재시도 완료 후에 일괄 처리됨 (플랫폼과 동일)
@@ -3931,6 +4004,10 @@ class MyApp(QWidget):
 
                         try:
                             res_data = json.loads(res_data)
+
+                            if isinstance(res_data, dict) and "code_value" in res_data:
+                                del res_data["code_value"]
+                                
                         except Exception as e:
                             self._append_text(f"응답 JSON 파싱 오류: {e}")
                             self._append_text({"raw_response": self.res.text})
