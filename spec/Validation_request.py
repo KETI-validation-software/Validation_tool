@@ -19,74 +19,61 @@ cmiqr201z00i8ie8fitdg5t1b_Authentication_in_validation = {
 }
 
 # Capabilities
-cmii7pysb004k8z1tts0npxfm_Capabilities_in_validation = {}
+cmiqr201z00i8ie8fitdg5t1b_Capabilities_in_validation = {}
 
-# DoorProfiles
-cmii7pysb004k8z1tts0npxfm_DoorProfiles_in_validation = {}
+# SensorDeviceProfiles
+cmiqr201z00i8ie8fitdg5t1b_SensorDeviceProfiles_in_validation = {}
 
-# AccessUserInfos
-cmii7pysb004k8z1tts0npxfm_AccessUserInfos_in_validation = {}
-
-# RealtimeVerifEventInfos
-cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_in_validation = {
-  "doorList.doorID": {
+# SensorDeviceControl
+cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_in_validation = {
+  "sensorDeviceID": {
     "enabled": True,
     "validationType": "response-field-list-match",
-    "referenceFieldId": "cmisk9y5l0db35vy74nn3utak",
-    "referenceField": "doorID",
-    "referenceEndpoint": "/DoorProfiles",
+    "referenceFieldId": "cmisfgtvs07sy5vy7f2hjy5aa",
+    "referenceField": "sensorDeviceID",
+    "referenceEndpoint": "/SensorDeviceProfiles",
+    "score": 0
+  }
+}
+
+# SensorDeviceControl2
+cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl2_in_validation = {
+  "sensorDeviceID": {
+    "enabled": True,
+    "validationType": "request-field-match",
+    "referenceFieldId": "cmisg3n7u088o5vy75dl8ge3h",
+    "referenceField": "sensorDeviceID",
+    "referenceEndpoint": "/SensorDeviceControl",
     "score": 0
   },
-  "eventFilter": {
+  "commandType": {
     "enabled": True,
     "validationType": "valid-value-match",
     "validValueMatchType": "validation-field",
-    "validValueFieldName": "acEvent",
-    "validValueOperator": "equalsAny",
+    "validValueFieldName": "sensorControl",
+    "validValueOperator": "excludeReference",
     "allowedValues": [
-      "AuthSuccess",
-      "AuthFail"
+      "AlarmOn",
+      "AlarmOff"
     ],
+    "referenceFieldId": "cmj6hdjek01qsxei0ydzyxlg3",
+    "referenceField": "sensorDeviceStatus",
+    "referenceEndpoint": "/SensorDeviceControl",
     "score": 0
   }
 }
 
-# RealtimeVerifEventInfos WebHook OUT Validation
-cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_webhook_out_validation = {}
-
-# StoredVerifEventInfos
-cmii7pysb004k8z1tts0npxfm_StoredVerifEventInfos_in_validation = {
-  "eventFilter": {
-    "enabled": True,
-    "validationType": "valid-value-match",
-    "validValueMatchType": "validation-field",
-    "validValueFieldName": "acEvent",
-    "validValueOperator": "equalsAny",
-    "allowedValues": [
-      "AuthSuccess",
-      "AuthFail"
-    ],
-    "score": 0
-  }
-}
-
-# cmii7pysb004k8z1tts0npxfm WebHook 검증 리스트
-cmii7pysb004k8z1tts0npxfm_webhook_outValidation = [
-    cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_webhook_out_validation,
-]
-
-# cmii7pysb004k8z1tts0npxfm 검증 리스트
-cmii7pysb004k8z1tts0npxfm_inValidation = [
-    cmii7pysb004k8z1tts0npxfm_Authentication_in_validation,
-    cmii7pysb004k8z1tts0npxfm_Capabilities_in_validation,
-    cmii7pysb004k8z1tts0npxfm_DoorProfiles_in_validation,
-    cmii7pysb004k8z1tts0npxfm_AccessUserInfos_in_validation,
-    cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_in_validation,
-    cmii7pysb004k8z1tts0npxfm_StoredVerifEventInfos_in_validation,
+# cmiqr201z00i8ie8fitdg5t1b 검증 리스트
+cmiqr201z00i8ie8fitdg5t1b_inValidation = [
+    cmiqr201z00i8ie8fitdg5t1b_Authentication_in_validation,
+    cmiqr201z00i8ie8fitdg5t1b_Capabilities_in_validation,
+    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceProfiles_in_validation,
+    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_in_validation,
+    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl2_in_validation,
 ]
 
 # Authentication
-cmii7lxbn002s8z1t1i9uudf0_Authentication_in_validation = {
+cmiqr1acx00i5ie8fi022t1hp_Authentication_in_validation = {
   "userID": {
     "enabled": True,
     "validationType": "specified-value-match",
@@ -106,187 +93,155 @@ cmii7lxbn002s8z1t1i9uudf0_Authentication_in_validation = {
 }
 
 # Capabilities
-cmii7lxbn002s8z1t1i9uudf0_Capabilities_in_validation = {}
+cmiqr1acx00i5ie8fi022t1hp_Capabilities_in_validation = {}
 
-# CameraProfiles
-cmii7lxbn002s8z1t1i9uudf0_CameraProfiles_in_validation = {}
+# DoorProfiles
+cmiqr1acx00i5ie8fi022t1hp_DoorProfiles_in_validation = {}
 
-# StreamURLs
-cmii7lxbn002s8z1t1i9uudf0_StreamURLs_in_validation = {
-  "camList.camID": {
+# RealtimeDoorStatus
+cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_in_validation = {
+  "doorList.doorID": {
     "enabled": True,
     "validationType": "response-field-list-match",
-    "referenceFieldId": "cmir0b7u9005f4m396k05nfzt",
-    "referenceField": "camID",
-    "referenceEndpoint": "/CameraProfiles",
-    "score": 0
-  },
-  "camList.streamProtocolType": {
-    "enabled": True,
-    "validationType": "specified-value-match",
-    "allowedValues": [
-      "RTSP"
-    ],
+    "referenceFieldId": "cmizh2j7y028k7eoekmch7neb",
+    "referenceField": "doorID",
+    "referenceEndpoint": "/DoorProfiles",
     "score": 0
   }
 }
 
-# RealtimeVideoEventInfos
-cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_in_validation = {
-  "camList.camID": {
+# RealtimeDoorStatus WebHook OUT Validation
+cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_webhook_out_validation = {}
+
+# DoorControl
+cmiqr1acx00i5ie8fi022t1hp_DoorControl_in_validation = {
+  "doorID": {
     "enabled": True,
-    "validationType": "response-field-list-match",
-    "referenceFieldId": "cmir0b7u9005f4m396k05nfzt",
-    "referenceField": "camID",
-    "referenceEndpoint": "/CameraProfiles",
+    "validationType": "request-field-list-match",
+    "referenceFieldId": "cmiwqkuoj0aj9844g5oec97p9",
+    "referenceField": "doorID",
+    "referenceEndpoint": "/RealtimeDoorStatus",
     "score": 0
   },
-  "transProtocol.transProtocolType": {
-    "enabled": True,
-    "validationType": "specified-value-match",
-    "allowedValues": [
-      "LongPolling",
-      "Webhook"
-    ],
-    "score": 0
-  },
-  "eventFilter": {
+  "commandType": {
     "enabled": True,
     "validationType": "valid-value-match",
     "validValueMatchType": "validation-field",
-    "validValueFieldName": "videoEvent",
-    "validValueOperator": "equalsAny",
+    "validValueFieldName": "acControl",
+    "validValueOperator": "excludeReference",
     "allowedValues": [
-      "Loitering",
-      "Intrusion"
+      "Lock",
+      "Unlock"
     ],
-    "score": 0
-  },
-  "classFilter": {
-    "enabled": True,
-    "validationType": "valid-value-match",
-    "validValueMatchType": "validation-field",
-    "validValueFieldName": "videoObject",
-    "validValueOperator": "equalsAny",
-    "allowedValues": [
-      "Human"
-    ],
+    "referenceFieldId": "cmj13a9eu01vx12s9wja5mxt7",
+    "referenceField": "doorSensor",
+    "referenceEndpoint": "/RealtimeDoorStatus",
     "score": 0
   }
 }
 
-# RealtimeVideoEventInfos WebHook OUT Validation
-cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_webhook_out_validation = {}
-
-# StoredVideoInfos
-cmii7lxbn002s8z1t1i9uudf0_StoredVideoInfos_in_validation = {
-  "camList.camID": {
+# RealtimeDoorStatus2
+cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_in_validation = {
+  "doorList.doorID": {
     "enabled": True,
-    "validationType": "response-field-list-match",
-    "referenceFieldId": "cmir0b7u9005f4m396k05nfzt",
-    "referenceField": "camID",
-    "referenceEndpoint": "/CameraProfiles",
+    "validationType": "request-field-match",
+    "referenceFieldId": "cmiwqovgn0az6844g1iuqahpi",
+    "referenceField": "doorID",
+    "referenceEndpoint": "/DoorControl",
+    "referenceListField": "doorID",
+    "referenceListFieldId": "cmiwqkuoj0aj9844g5oec97p9",
     "score": 0
   }
 }
 
-# ReplayURL
-cmii7lxbn002s8z1t1i9uudf0_ReplayURL_in_validation = {
-  "camList.camID": {
-    "enabled": True,
-    "validationType": "response-field-match",
-    "referenceFieldId": "cmir0b7u9005f4m396k05nfzt",
-    "referenceField": "camID",
-    "referenceEndpoint": "/CameraProfiles",
-    "score": 0
-  }
-}
+# RealtimeDoorStatus2 WebHook OUT Validation
+cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_out_validation = {}
 
-# StoredVideoEventInfos
-cmii7lxbn002s8z1t1i9uudf0_StoredVideoEventInfos_in_validation = {
-  "camList.camID": {
-    "enabled": True,
-    "validationType": "response-field-list-match",
-    "referenceFieldId": "cmir0b7u9005f4m396k05nfzt",
-    "referenceField": "camID",
-    "referenceEndpoint": "/CameraProfiles",
-    "score": 0
-  },
-  "eventFilter": {
-    "enabled": True,
-    "validationType": "valid-value-match",
-    "validValueMatchType": "validation-field",
-    "validValueFieldName": "videoEvent",
-    "validValueOperator": "equalsAny",
-    "allowedValues": [
-      "Loitering",
-      "Intrusion"
-    ],
-    "score": 0
-  },
-  "classFilter": {
-    "enabled": True,
-    "validationType": "valid-value-match",
-    "validValueMatchType": "validation-field",
-    "validValueFieldName": "videoObject",
-    "validValueOperator": "equalsAny",
-    "allowedValues": [
-      "Human"
-    ],
-    "score": 0
-  }
-}
-
-# StoredObjectAnalyticsInfos
-cmii7lxbn002s8z1t1i9uudf0_StoredObjectAnalyticsInfos_in_validation = {
-  "camList.camID": {
-    "enabled": True,
-    "validationType": "response-field-list-match",
-    "referenceFieldId": "cmir0b7u9005f4m396k05nfzt",
-    "referenceField": "camID",
-    "referenceEndpoint": "/CameraProfiles",
-    "score": 0
-  },
-  "filterList.classFilter": {
-    "enabled": True,
-    "validationType": "valid-value-match",
-    "validValueMatchType": "validation-field",
-    "validValueFieldName": "videoObject",
-    "validValueOperator": "equalsAny",
-    "allowedValues": [
-      "Human"
-    ],
-    "score": 0
-  },
-  "filterList.attributeFilter": {
-    "enabled": True,
-    "validationType": "valid-value-match",
-    "validValueMatchType": "validation-field",
-    "validValueFieldName": "videoAttribute",
-    "validValueOperator": "equalsAny",
-    "allowedValues": [
-      "Male",
-      "Female"
-    ],
-    "score": 0
-  }
-}
-
-# cmii7lxbn002s8z1t1i9uudf0 WebHook 검증 리스트
-cmii7lxbn002s8z1t1i9uudf0_webhook_outValidation = [
-    cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_webhook_out_validation,
+# cmiqr1acx00i5ie8fi022t1hp WebHook 검증 리스트
+cmiqr1acx00i5ie8fi022t1hp_webhook_outValidation = [
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_webhook_out_validation,
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_out_validation,
 ]
 
-# cmii7lxbn002s8z1t1i9uudf0 검증 리스트
-cmii7lxbn002s8z1t1i9uudf0_inValidation = [
-    cmii7lxbn002s8z1t1i9uudf0_Authentication_in_validation,
-    cmii7lxbn002s8z1t1i9uudf0_Capabilities_in_validation,
-    cmii7lxbn002s8z1t1i9uudf0_CameraProfiles_in_validation,
-    cmii7lxbn002s8z1t1i9uudf0_StreamURLs_in_validation,
-    cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_in_validation,
-    cmii7lxbn002s8z1t1i9uudf0_StoredVideoInfos_in_validation,
-    cmii7lxbn002s8z1t1i9uudf0_ReplayURL_in_validation,
-    cmii7lxbn002s8z1t1i9uudf0_StoredVideoEventInfos_in_validation,
-    cmii7lxbn002s8z1t1i9uudf0_StoredObjectAnalyticsInfos_in_validation,
+# cmiqr1acx00i5ie8fi022t1hp 검증 리스트
+cmiqr1acx00i5ie8fi022t1hp_inValidation = [
+    cmiqr1acx00i5ie8fi022t1hp_Authentication_in_validation,
+    cmiqr1acx00i5ie8fi022t1hp_Capabilities_in_validation,
+    cmiqr1acx00i5ie8fi022t1hp_DoorProfiles_in_validation,
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_in_validation,
+    cmiqr1acx00i5ie8fi022t1hp_DoorControl_in_validation,
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_in_validation,
+]
+
+# Authentication
+cmiqqzrjz00i3ie8figf79cur_Authentication_in_validation = {
+  "userID": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "kisa"
+    ],
+    "score": 0
+  },
+  "userPW": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "kisa_k1!2@"
+    ],
+    "score": 0
+  }
+}
+
+# Capabilities
+cmiqqzrjz00i3ie8figf79cur_Capabilities_in_validation = {}
+
+# CameraProfiles
+cmiqqzrjz00i3ie8figf79cur_CameraProfiles_in_validation = {}
+
+# PtzStatus
+cmiqqzrjz00i3ie8figf79cur_PtzStatus_in_validation = {
+  "camID": {
+    "enabled": True,
+    "validationType": "response-field-list-match",
+    "referenceFieldId": "cmiwpi3sm076e844gan3rcpwr",
+    "referenceField": "camID",
+    "referenceEndpoint": "/CameraProfiles",
+    "score": 0
+  }
+}
+
+# PtzContinuousMove
+cmiqqzrjz00i3ie8figf79cur_PtzContinuousMove_in_validation = {
+  "camID": {
+    "enabled": True,
+    "validationType": "response-field-list-match",
+    "referenceFieldId": "cmiwpi3sm076e844gan3rcpwr",
+    "referenceField": "camID",
+    "referenceEndpoint": "/CameraProfiles",
+    "score": 0
+  }
+}
+
+# PtzStop
+cmiqqzrjz00i3ie8figf79cur_PtzStop_in_validation = {
+  "camID": {
+    "enabled": True,
+    "validationType": "response-field-list-match",
+    "referenceFieldId": "cmiwpi3sz076y844gftp3b99j",
+    "referenceField": "camID",
+    "referenceEndpoint": "/CameraProfiles",
+    "score": 0
+  }
+}
+
+# cmiqqzrjz00i3ie8figf79cur 검증 리스트
+cmiqqzrjz00i3ie8figf79cur_inValidation = [
+    cmiqqzrjz00i3ie8figf79cur_Authentication_in_validation,
+    cmiqqzrjz00i3ie8figf79cur_Capabilities_in_validation,
+    cmiqqzrjz00i3ie8figf79cur_CameraProfiles_in_validation,
+    cmiqqzrjz00i3ie8figf79cur_PtzStatus_in_validation,
+    cmiqqzrjz00i3ie8figf79cur_PtzContinuousMove_in_validation,
+    cmiqqzrjz00i3ie8figf79cur_PtzStop_in_validation,
 ]
 
