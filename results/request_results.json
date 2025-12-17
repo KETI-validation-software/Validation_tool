@@ -22,10 +22,10 @@
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 80.0,
+    "score": 70.0,
     "totalFields": 20,
-    "passedFields": 16,
-    "failedFields": 4
+    "passedFields": 14,
+    "failedFields": 6
   },
   "testResult": [
     {
@@ -103,30 +103,27 @@
       "testGroup": "cmisfix8407te5vy7fleq8pkf",
       "testSpecId": "cmiqr1acx00i5ie8fi022t1hp",
       "testSpecName": "ac002",
-      "score": 80.0,
+      "score": 70.0,
       "totalFields": 20,
-      "passedFields": 16,
-      "failedFields": 4,
+      "passedFields": 14,
+      "failedFields": 6,
       "apis": [
         {
           "id": "cmisgwlsx08r25vy7s0uys91u",
           "name": "사용자 인증",
           "method": "POST",
           "endpoint": "/Authentication",
-          "score": 100.0,
+          "score": 0.0,
           "validationCnt": 1,
           "totalFields": 2,
-          "passFields": 2,
-          "failFields": 0,
+          "passFields": 0,
+          "failFields": 2,
           "validations": [
             {
               "attempt": 1,
-              "validationData": {
-                "userID": "kisa",
-                "userPW": "kisa_k1!2@"
-              },
+              "validationData": {},
               "validationErrors": [
-                "오류가 없습니다."
+                "Message Missing!"
               ]
             }
           ]
@@ -241,7 +238,7 @@
               "attempt": 1,
               "validationData": {
                 "doorID": "door0001",
-                "commandType": "Lock"
+                "commandType": "Unlock"
               },
               "validationErrors": [
                 "[시도 1/1]",
@@ -308,5 +305,5 @@
       ]
     }
   ],
-  "completedDate": "2025-12-17T10:02:34Z"
+  "completedDate": "2025-12-17T10:35:54Z"
 }
