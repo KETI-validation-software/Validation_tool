@@ -3625,7 +3625,7 @@ class MyApp(QWidget):
         # 실제 검증
         if len(self.webhookSchema) > 0:
             schema_to_check = self.webhookSchema[0]
-            val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(
+            val_result, val_text, key_psss_cnt, key_error_cnt, opt_correct, opt_error = json_check_(
                 schema=schema_to_check,
                 data=self.webhook_res,
                 flag=self.flag_opt,
@@ -4121,7 +4121,7 @@ class MyApp(QWidget):
                                         self.reference_context[ref_endpoint_min] = event_data.get("data", {})
 
                     try:
-                        val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(
+                        val_result, val_text, key_psss_cnt, key_error_cnt, opt_correct, opt_error = json_check_(
                             self.outSchema[self.cnt],
                             res_data,
                             self.flag_opt,
@@ -4130,7 +4130,7 @@ class MyApp(QWidget):
                         )
                     except TypeError as te:
                         print(f"[ERROR] 응답 검증 중 TypeError 발생: {te}, 일반 검증으로 재시도")
-                        val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(
+                        val_result, val_text, key_psss_cnt, key_error_cnt, opt_correct, opt_error = json_check_(
                             self.outSchema[self.cnt],
                             res_data,
                             self.flag_opt
