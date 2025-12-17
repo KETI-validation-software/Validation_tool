@@ -241,7 +241,7 @@
               "attempt": 1,
               "validationData": {
                 "doorID": "door0001",
-                "commandType": "Unlock"
+                "commandType": "Lock"
               },
               "validationErrors": [
                 "[시도 1/1]",
@@ -266,7 +266,10 @@
               "validationData": {
                 "doorList": [
                   {
-                    "doorID": ""
+                    "doorID": "door0001"
+                  },
+                  {
+                    "doorID": "door0002"
                   }
                 ],
                 "duration": 10000,
@@ -308,5 +311,5 @@
       ]
     }
   ],
-  "completedDate": "2025-12-17T14:53:59Z"
+  "completedDate": "2025-12-17T15:05:37Z"
 }
