@@ -472,11 +472,10 @@ cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_in_constraints = {
   },
   "doorList.doorSensor": {
     "id": "cmiwqvxnw0bno844gj9p4t49o",
-    "referenceFieldId": "cmiwqozju0azf844gr4zk31m8",
     "valueType": "request-based",
     "required": False,
-    "referenceEndpoint": "/DoorControl",
-    "referenceField": "commandType"
+    "referenceField": "(참조 필드 미선택)",
+    "referenceEndpoint": "/RealtimeDoorStatus"
   }
 }
 

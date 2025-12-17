@@ -160,7 +160,7 @@ cmiqr1jha00i6ie8fb1scb3go_DoorControl_in_constraints = {
     "required": True,
     "referenceEndpoint": "/RealtimeDoorStatus",
     "referenceField": "doorSensor",
-    "randomType": "valid-values",
+    "randomType": "exclude-reference-valid-values",
     "validValueField": "acControl",
     "validValues": [
       "Lock",
