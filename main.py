@@ -60,14 +60,13 @@ if handlers:  # handlers가 비어있지 않을 때만 설정
 logger = logging.getLogger(__name__)
 # logger.info(f"로그 파일 생성: {log_filename}")  # 주석 처리
 
-# ===== windowed 모드에서 stdout/stderr를 파일로 리다이렉트 =====
-# ✅ stdout/stderr 리다이렉트 비활성화
-# if sys.stdout is None or sys.stderr is None:
-#     stdout_filename = f"validation_tool_stdout_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
-#     stderr_filename = f"validation_tool_stderr_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
-#     sys.stdout = open(stdout_filename, 'w', encoding='utf-8')
-#     sys.stderr = open(stderr_filename, 'w', encoding='utf-8')
-#     logger.info(f"stdout/stderr 리다이렉트: {stdout_filename}, {stderr_filename}")
+# ===== windowed 모드에서 stdout/stderr를 devnull로 리다이렉트 =====
+# Windowed 모드(console=False)에서는 sys.stdout/stderr가 None이 됨
+# print() 호출 시 서버 스레드 등에서 에러가 발생할 수 있으므로 devnull로 리다이렉트
+if sys.stdout is None:
+    sys.stdout = open(os.devnull, 'w', encoding='utf-8')
+if sys.stderr is None:
+    sys.stderr = open(os.devnull, 'w', encoding='utf-8')
 
 # ===== 처리되지 않은 예외를 로그에 기록 =====
 def exception_hook(exctype, value, tb):
