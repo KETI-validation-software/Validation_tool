@@ -44,6 +44,9 @@ class Server(BaseHTTPRequestHandler):
     latest_event = defaultdict(dict)  # ✅ API별 최신 이벤트 저장 (클래스 변수)
     request_has_error = {}  # ✅ API별 요청 오류 flag (내부용, 응답 JSON에 포함 안 됨)
     valid_device_ids = set(["cam0001", "cam0002", "cam003", "cam004"])  # ✅ 유효한 장치 ID 목록 (동적 업데이트)
+    
+    # ✅ 데이터 맵핑 저장소 (ac002 시나리오용)
+    door_memory = {}  # doorID를 키로 하는 문 정보 저장소
 
     def __init__(self, *args, **kwargs):
         self.result = ""
@@ -801,10 +804,13 @@ class Server(BaseHTTPRequestHandler):
 
                 # ✅ 템플릿 그대로 사용 (n 파라미터 제거)
                 # request_data, template_data, constraints 순서로 전달
+                # ✅ RealtimeDoorStatus2 대응: api_name과 door_memory 전달
                 updated_message = self.generator._applied_constraints(
                     request_data=self.request_data,
                     template_data=copy.deepcopy(message),  # deepcopy로 원본 보호
-                    constraints=out_con
+                    constraints=out_con,
+                    api_name=api_name,  # ✅ API 이름 전달
+                    door_memory=Server.door_memory  # ✅ 문 상태 저장소 전달
                 )
                 print(f"[DEBUG][CONSTRAINTS] 업데이트된 message 내용: {json.dumps(updated_message, ensure_ascii=False)[:200]}")
 
@@ -890,6 +896,10 @@ class Server(BaseHTTPRequestHandler):
         try:
             self._set_headers()
             self.wfile.write(a)
+            
+            # ✅ 데이터 맵핑: 응답 전송 직후 처리
+            self._process_data_mapping(api_name, updated_message if out_con else message)
+            
         except (ConnectionAbortedError, BrokenPipeError, ConnectionResetError) as e:
             print(f"[WARNING] 클라이언트 연결 끊김: {e}")
             # 연결이 끊겼으므로 더 이상 처리하지 않음
@@ -1154,6 +1164,86 @@ class Server(BaseHTTPRequestHandler):
         except Exception as e:
             print(f"[ERROR][RESOLVE] spec_id 변환 실패: {e}")
             return spec_id_or_name
+
+    def _process_data_mapping(self, api_name, response_data):
+        """
+        데이터 맵핑 처리 (ac002 시나리오용)
+        - RealtimeDoorStatus: doorList 데이터를 door_memory에 저장
+        - DoorControl: commandType에 따라 doorSensor 상태 업데이트
+        """
+        try:
+            print(f"[DATA_MAPPING] API: {api_name}")
+            
+            # RealtimeDoorStatus (첫 번째 호출) - 응답 데이터 저장
+            # ✅ 일반 응답에는 doorList가 없을 수 있으므로 latest_events의 WEBHOOK_OUT 확인
+            if "RealtimeDoorStatus" in api_name and "2" not in api_name:
+                # 먼저 response_data 확인
+                door_list = None
+                if isinstance(response_data, dict) and "doorList" in response_data:
+                    door_list = response_data.get("doorList", [])
+                    print(f"[DATA_MAPPING] RealtimeDoorStatus 응답에서 doorList 발견")
+                
+                # response_data에 없으면 latest_events의 WEBHOOK_OUT에서 확인
+                if not door_list:
+                    api_key = api_name.lstrip('/')
+                    if api_key in Server.latest_events:
+                        webhook_out = Server.latest_events[api_key].get("WEBHOOK_OUT", {})
+                        webhook_data = webhook_out.get("data", {})
+                        if "doorList" in webhook_data:
+                            door_list = webhook_data.get("doorList", [])
+                            print(f"[DATA_MAPPING] WEBHOOK_OUT에서 doorList 발견")
+                
+                if door_list:
+                    print(f"[DATA_MAPPING] RealtimeDoorStatus에서 {len(door_list)}개 문 정보 저장")
+                    
+                    for door in door_list:
+                        if isinstance(door, dict) and "doorID" in door:
+                            door_id = door["doorID"]
+                            if not door_id or door_id.strip() == "":
+                                print(f"[DATA_MAPPING] 경고: doorID가 비어있음, 건너뜀")
+                                continue
+                            
+                            # 모든 필드 저장 (doorName, doorRelaySensor, doorSensor 등)
+                            Server.door_memory[door_id] = {
+                                key: value for key, value in door.items()
+                                if key != "doorID"  # doorID는 키로 사용하므로 중복 저장 안 함
+                            }
+                            print(f"[DATA_MAPPING] 저장: {door_id} -> {Server.door_memory[door_id]}")
+                else:
+                    print(f"[DATA_MAPPING] 경고: doorList를 찾을 수 없음")
+            
+            # DoorControl - commandType에 따라 doorSensor 상태 업데이트
+            elif "DoorControl" in api_name:
+                if isinstance(self.request_data, dict):
+                    door_id = self.request_data.get("doorID")
+                    command_type = self.request_data.get("commandType")
+                    
+                    if door_id and command_type:
+                        print(f"[DATA_MAPPING] DoorControl: {door_id} -> commandType: {command_type}")
+                        
+                        # door_memory에 해당 doorID가 있으면 doorSensor 업데이트
+                        if door_id in Server.door_memory:
+                            # commandType에 따라 doorSensor 값 변경
+                            # unlock -> Unlock, lock -> Lock 등
+                            if command_type.lower() == "unlock":
+                                Server.door_memory[door_id]["doorSensor"] = "Unlock"
+                            elif command_type.lower() == "lock":
+                                Server.door_memory[door_id]["doorSensor"] = "Lock"
+                            else:
+                                # 기타 commandType은 첫 글자만 대문자로
+                                Server.door_memory[door_id]["doorSensor"] = command_type.capitalize()
+                            
+                            print(f"[DATA_MAPPING] 업데이트: {door_id} doorSensor -> {Server.door_memory[door_id]['doorSensor']}")
+                        else:
+                            print(f"[DATA_MAPPING] 경고: {door_id}가 door_memory에 없음")
+            
+            # RealtimeDoorStatus2 (두 번째 호출) - 저장된 데이터 활용은 constraints에서 처리
+            # 여기서는 별도 처리 불필요
+                    
+        except Exception as e:
+            print(f"[ERROR][DATA_MAPPING] 데이터 맵핑 처리 중 오류: {e}")
+            import traceback
+            traceback.print_exc()
 
 
 # 확인용 - 안쓰이는 코드임
