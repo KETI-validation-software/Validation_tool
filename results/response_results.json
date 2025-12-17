@@ -23,8 +23,8 @@
   "authMethod": "Digest Auth",
   "testScore": {
     "score": 100.0,
-    "totalFields": 41,
-    "passedFields": 41,
+    "totalFields": 46,
+    "passedFields": 46,
     "failedFields": 0
   },
   "testResult": [
@@ -104,8 +104,8 @@
       "testSpecId": "cmiqr1jha00i6ie8fb1scb3go",
       "testSpecName": "ac002",
       "score": 100.0,
-      "totalFields": 41,
-      "passedFields": 41,
+      "totalFields": 46,
+      "passedFields": 46,
       "failedFields": 0,
       "apis": [
         {
@@ -268,19 +268,21 @@
           "endpoint": "/RealtimeDoorStatus",
           "score": 100.0,
           "validationCnt": 1,
-          "totalFields": 2,
-          "passFields": 2,
+          "totalFields": 7,
+          "passFields": 7,
           "failFields": 0,
           "validations": [
             {
               "attempt": 1,
               "validationData": {
-                "code": "400",
-                "message": "잘못된 요청"
+                "code": "성공",
+                "message": "200"
               },
               "validationErrors": [
                 "[시도 1/1]",
-                "에러 응답 (code=400): 모든 필드 자동 PASS 처리됨"
+                "오류가 없습니다.",
+                "--- Webhook 검증 ---",
+                "오류가 없습니다."
               ]
             }
           ]
@@ -374,5 +376,5 @@
       ]
     }
   ],
-  "completedDate": "2025-12-16T11:52:19Z"
+  "completedDate": "2025-12-16T16:57:32Z"
 }

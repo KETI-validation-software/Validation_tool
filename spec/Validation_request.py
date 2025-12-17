@@ -29,9 +29,9 @@ cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_in_validation = {
   "sensorDeviceID": {
     "enabled": True,
     "validationType": "response-field-list-match",
+    "referenceFieldId": "cmisfgtvs07sy5vy7f2hjy5aa",
+    "referenceField": "sensorDeviceID",
     "referenceEndpoint": "/SensorDeviceProfiles",
-    "referenceListField": "sensorDeviceID",
-    "referenceListEndpoint": "/SensorDeviceProfiles",
     "score": 0
   }
 }
@@ -103,9 +103,9 @@ cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_in_validation = {
   "doorList.doorID": {
     "enabled": True,
     "validationType": "response-field-list-match",
+    "referenceFieldId": "cmizh2j7y028k7eoekmch7neb",
+    "referenceField": "doorID",
     "referenceEndpoint": "/DoorProfiles",
-    "referenceListField": "doorID",
-    "referenceListEndpoint": "/DoorProfiles",
     "score": 0
   }
 }
@@ -118,9 +118,9 @@ cmiqr1acx00i5ie8fi022t1hp_DoorControl_in_validation = {
   "doorID": {
     "enabled": True,
     "validationType": "request-field-list-match",
+    "referenceFieldId": "cmiwqkuoj0aj9844g5oec97p9",
+    "referenceField": "doorID",
     "referenceEndpoint": "/RealtimeDoorStatus",
-    "referenceListField": "doorID",
-    "referenceListEndpoint": "/RealtimeDoorStatus",
     "score": 0
   },
   "commandType": {
@@ -149,6 +149,7 @@ cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_in_validation = {
     "referenceField": "doorID",
     "referenceEndpoint": "/DoorControl",
     "referenceListField": "doorID",
+    "referenceListFieldId": "cmiwqkuoj0aj9844g5oec97p9",
     "score": 0
   }
 }
@@ -203,9 +204,9 @@ cmiqqzrjz00i3ie8figf79cur_PtzStatus_in_validation = {
   "camID": {
     "enabled": True,
     "validationType": "response-field-list-match",
+    "referenceFieldId": "cmiwpi3sm076e844gan3rcpwr",
+    "referenceField": "camID",
     "referenceEndpoint": "/CameraProfiles",
-    "referenceListField": "camID",
-    "referenceListEndpoint": "/CameraProfiles",
     "score": 0
   }
 }
@@ -215,9 +216,9 @@ cmiqqzrjz00i3ie8figf79cur_PtzContinuousMove_in_validation = {
   "camID": {
     "enabled": True,
     "validationType": "response-field-list-match",
+    "referenceFieldId": "cmiwpi3sm076e844gan3rcpwr",
+    "referenceField": "camID",
     "referenceEndpoint": "/CameraProfiles",
-    "referenceListField": "camID",
-    "referenceListEndpoint": "/CameraProfiles",
     "score": 0
   }
 }
@@ -227,9 +228,9 @@ cmiqqzrjz00i3ie8figf79cur_PtzStop_in_validation = {
   "camID": {
     "enabled": True,
     "validationType": "response-field-list-match",
+    "referenceFieldId": "cmiwpi3sz076y844gftp3b99j",
+    "referenceField": "camID",
     "referenceEndpoint": "/CameraProfiles",
-    "referenceListField": "camID",
-    "referenceListEndpoint": "/CameraProfiles",
     "score": 0
   }
 }
