@@ -46,7 +46,7 @@ cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_request_key_ids = {
 
 cmiqr1acx00i5ie8fi022t1hp_DoorControl_request_key_ids = {
     "doorID": "cmiwqovgn0az6844g1iuqahpi",
-    "commandType": "cmiwqozju0azf844gr4zk31m8",
+    "commandType": "cmj9mmuzw015hrznn0edaxogz",
 }
 
 cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_request_key_ids = {
