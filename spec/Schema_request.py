@@ -35,120 +35,111 @@ cmiqr201z00i8ie8fitdg5t1b_inSchema = [
 ]
 
 # Authentication
-cmiqr1acx00i5ie8fi022t1hp_Authentication_in_schema = {
+cmii7lxbn002s8z1t1i9uudf0_Authentication_in_schema = {
     "userID": str,
     "userPW": str,
 }
 
 # Capabilities
-cmiqr1acx00i5ie8fi022t1hp_Capabilities_in_schema = {}
+cmii7lxbn002s8z1t1i9uudf0_Capabilities_in_schema = {}
 
-# DoorProfiles
-cmiqr1acx00i5ie8fi022t1hp_DoorProfiles_in_schema = {}
+# CameraProfiles
+cmii7lxbn002s8z1t1i9uudf0_CameraProfiles_in_schema = {}
 
-# RealtimeDoorStatus
-cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_in_schema = {
-    "doorList": [{
-    "doorID": str,
+# StreamURLs
+cmii7lxbn002s8z1t1i9uudf0_StreamURLs_in_schema = {
+    "camList": [{
+    "camID": str,
+    "streamProtocolType": str,
 }],
-    "duration": int,
-    "transProtocol": {
-    "transProtocolType": str,
-    "transProtocolDesc": str,
-},
-    "startTime": int,
 }
 
-# RealtimeDoorStatus WebHook OUT Schema
-cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_webhook_out_schema = {
-    "code": str,
-    "message": str,
-}
-
-# DoorControl
-cmiqr1acx00i5ie8fi022t1hp_DoorControl_in_schema = {
-    "doorID": str,
-    "commandType": str,
-}
-
-# RealtimeDoorStatus2
-cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_in_schema = {
-    "doorList": [{
-    "doorID": str,
+# RealtimeVideoEventInfos
+cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_in_schema = {
+    "camList": [{
+    "camID": str,
 }],
-    OptionalKey("duration"): int,
     "transProtocol": {
     "transProtocolType": str,
     OptionalKey("transProtocolDesc"): str,
 },
+    OptionalKey("duration"): int,
+    OptionalKey("eventFilter"): str,
+    OptionalKey("classFilter"): str,
     OptionalKey("startTime"): int,
 }
 
-# RealtimeDoorStatus2 WebHook OUT Schema
-cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_out_schema = {
+# RealtimeVideoEventInfos WebHook OUT Schema
+cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_webhook_out_schema = {
     "code": str,
     "message": str,
 }
 
-# cmiqr1acx00i5ie8fi022t1hp 스키마 리스트
-cmiqr1acx00i5ie8fi022t1hp_inSchema = [
-    cmiqr1acx00i5ie8fi022t1hp_Authentication_in_schema,
-    cmiqr1acx00i5ie8fi022t1hp_Capabilities_in_schema,
-    cmiqr1acx00i5ie8fi022t1hp_DoorProfiles_in_schema,
-    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_in_schema,
-    cmiqr1acx00i5ie8fi022t1hp_DoorControl_in_schema,
-    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_in_schema,
-]
-
-# cmiqr1acx00i5ie8fi022t1hp WebHook 스키마 리스트
-cmiqr1acx00i5ie8fi022t1hp_webhook_OutSchema = [
-    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_webhook_out_schema,
-    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_out_schema,
-]
-
-# Authentication
-cmiqqzrjz00i3ie8figf79cur_Authentication_in_schema = {
-    "userID": str,
-    "userPW": str,
-}
-
-# Capabilities
-cmiqqzrjz00i3ie8figf79cur_Capabilities_in_schema = {}
-
-# CameraProfiles
-cmiqqzrjz00i3ie8figf79cur_CameraProfiles_in_schema = {}
-
-# PtzStatus
-cmiqqzrjz00i3ie8figf79cur_PtzStatus_in_schema = {
-    "camID": str,
-}
-
-# PtzContinuousMove
-cmiqqzrjz00i3ie8figf79cur_PtzContinuousMove_in_schema = {
-    "camID": str,
-    "velocity": {
-    OptionalKey("pan"): int,
-    OptionalKey("tilt"): int,
-    OptionalKey("zoom"): int,
+# StoredVideoInfos
+cmii7lxbn002s8z1t1i9uudf0_StoredVideoInfos_in_schema = {
+    "timePeriod": {
+    "startTime": int,
+    "endTime": int,
 },
-    OptionalKey("timeOut"): int,
-}
-
-# PtzStop
-cmiqqzrjz00i3ie8figf79cur_PtzStop_in_schema = {
+    OptionalKey("camList"): [{
     "camID": str,
-    OptionalKey("pan"): bool,
-    OptionalKey("tilt"): bool,
-    OptionalKey("zoom"): bool,
+}],
 }
 
-# cmiqqzrjz00i3ie8figf79cur 스키마 리스트
-cmiqqzrjz00i3ie8figf79cur_inSchema = [
-    cmiqqzrjz00i3ie8figf79cur_Authentication_in_schema,
-    cmiqqzrjz00i3ie8figf79cur_Capabilities_in_schema,
-    cmiqqzrjz00i3ie8figf79cur_CameraProfiles_in_schema,
-    cmiqqzrjz00i3ie8figf79cur_PtzStatus_in_schema,
-    cmiqqzrjz00i3ie8figf79cur_PtzContinuousMove_in_schema,
-    cmiqqzrjz00i3ie8figf79cur_PtzStop_in_schema,
+# ReplayURL
+cmii7lxbn002s8z1t1i9uudf0_ReplayURL_in_schema = {
+    "camList": [{
+    "camID": str,
+    "startTime": int,
+    "endTime": int,
+    "streamProtocolType": str,
+}],
+}
+
+# StoredVideoEventInfos
+cmii7lxbn002s8z1t1i9uudf0_StoredVideoEventInfos_in_schema = {
+    "timePeriod": {
+    "startTime": int,
+    "endTime": int,
+},
+    OptionalKey("camList"): [{
+    "camID": str,
+}],
+    OptionalKey("maxCount"): int,
+    OptionalKey("eventFilter"): str,
+    OptionalKey("classFilter"): str,
+}
+
+# StoredObjectAnalyticsInfos
+cmii7lxbn002s8z1t1i9uudf0_StoredObjectAnalyticsInfos_in_schema = {
+    "timePeriod": {
+    "startTime": int,
+    "endTime": int,
+},
+    OptionalKey("camList"): [{
+    "camID": str,
+}],
+    OptionalKey("filterList"): [{
+    OptionalKey("classFilter"): [str],
+    OptionalKey("attributeFilter"): [str],
+}],
+}
+
+# cmii7lxbn002s8z1t1i9uudf0 스키마 리스트
+cmii7lxbn002s8z1t1i9uudf0_inSchema = [
+    cmii7lxbn002s8z1t1i9uudf0_Authentication_in_schema,
+    cmii7lxbn002s8z1t1i9uudf0_Capabilities_in_schema,
+    cmii7lxbn002s8z1t1i9uudf0_CameraProfiles_in_schema,
+    cmii7lxbn002s8z1t1i9uudf0_StreamURLs_in_schema,
+    cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_in_schema,
+    cmii7lxbn002s8z1t1i9uudf0_StoredVideoInfos_in_schema,
+    cmii7lxbn002s8z1t1i9uudf0_ReplayURL_in_schema,
+    cmii7lxbn002s8z1t1i9uudf0_StoredVideoEventInfos_in_schema,
+    cmii7lxbn002s8z1t1i9uudf0_StoredObjectAnalyticsInfos_in_schema,
+]
+
+# cmii7lxbn002s8z1t1i9uudf0 WebHook 스키마 리스트
+cmii7lxbn002s8z1t1i9uudf0_webhook_OutSchema = [
+    cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_webhook_out_schema,
 ]
 
