@@ -8,31 +8,169 @@ class ConstraintDataGenerator:
         """
         self.latest_events = latest_events if latest_events is not None else {}
 
-    def _applied_constraints(self, request_data, template_data, constraints):
+    # def _applied_constraints(self, request_data, template_data, constraints, api_name=None, door_memory=None):
+    #     """
+    #     request_data: 요청 데이터 (camID 후보 등)
+    #     template_data: request 또는 response 템플릿
+    #     constraints: 제약 조건
+    #     api_name: API 이름 (RealtimeDoorStatus2 등)
+    #     door_memory: 문 상태 저장소
+    #     ✅ 템플릿의 리스트 길이를 그대로 유지하며 constraint만 적용
+    #     """
+    #     # print(f"[DEBUG][DATA_MAPPER] _applied_constraints 호출됨")
+    #     # print(f"[DEBUG][DATA_MAPPER] request_data: {request_data}")
+    #     # print(f"[DEBUG][DATA_MAPPER] constraints keys: {list(constraints.keys()) if constraints else []}")
+    #     # print(
+    #     #     f"[DEBUG][DATA_MAPPER] template_data keys: {list(template_data.keys()) if isinstance(template_data, dict) else 'N/A'}")
+
+    #     # ✅ RealtimeDoorStatus2 요청인 경우 door_memory에서 doorID 목록 가져오기
+    #     if api_name and "RealtimeDoorStatus2" in api_name and door_memory and "doorList" in template_data:
+    #         # request_data가 비어있으면 요청, 아니면 응답
+    #         is_request = not request_data or len(request_data) == 0
+            
+    #         if is_request:
+    #             # 요청: door_memory에서 doorID 목록만 구성
+    #             print(f"[DATA_MAPPER] RealtimeDoorStatus2 요청 감지 - door_memory에서 doorID 목록 구성")
+    #             print(f"[DATA_MAPPER] door_memory 키 목록: {list(door_memory.keys())}")
+                
+    #             door_list = []
+    #             for door_id in door_memory.keys():
+    #                 door_list.append({"doorID": door_id})
+    #                 print(f"[DATA_MAPPER] doorList 추가: {door_id}")
+                
+    #             if door_list:
+    #                 template_data["doorList"] = door_list
+    #                 print(f"[DATA_MAPPER] 요청 doorList 구성 완료 ({len(door_list)}개)")
+    #             else:
+    #                 print(f"[DATA_MAPPER] 경고: door_memory가 비어있음")
+    #         else:
+    #             # 응답: request_data에서 doorID 추출 후 door_memory에서 전체 정보 가져오기
+    #             print(f"[DATA_MAPPER] RealtimeDoorStatus2 응답 감지 - door_memory에서 전체 정보 구성")
+    #             print(f"[DATA_MAPPER] door_memory: {door_memory}")
+    #             print(f"[DATA_MAPPER] request_data: {request_data}")
+                
+    #             # request_data에서 doorID 목록 추출
+    #             door_ids = self.find_key(request_data, "doorID")
+    #             print(f"[DATA_MAPPER] 요청된 doorID 목록: {door_ids}")
+                
+    #             if door_ids:
+    #                 door_list = []
+    #                 for door_id in door_ids:
+    #                     if door_id in door_memory:
+    #                         # door_memory에서 전체 정보 가져오기 (업데이트된 doorSensor 포함)
+    #                         door_info = door_memory[door_id].copy()
+    #                         door_info["doorID"] = door_id
+    #                         door_list.append(door_info)
+    #                         print(f"[DATA_MAPPER] {door_id} 정보 추가: {door_info}")
+    #                     else:
+    #                         print(f"[DATA_MAPPER] 경고: {door_id}가 door_memory에 없음")
+                    
+    #                 if door_list:
+    #                     template_data["doorList"] = door_list
+    #                     print(f"[DATA_MAPPER] 응답 doorList 업데이트 완료 ({len(door_list)}개)")
+    #                     return template_data
+
+    #     # constraints 분석 및 참조 값 수집
+    #     constraint_map = self._build_constraint_map(constraints, request_data)
+    #     # print(f"[DEBUG][DATA_MAPPER] constraint_map: {constraint_map}")
+
+    #     # 템플릿 기반 데이터 생성 (템플릿 리스트 길이 자동 감지)
+    #     response = self._generate_from_template(template_data, constraint_map)
+    #     # print(f"[DEBUG][DATA_MAPPER] generated response: {response}")
+
+    #     # template_data 업데이트 (원본 수정)
+    #     template_data.update(response)
+
+    #     # 전체 메시지 반환 (업데이트된 template_data)
+    #     return template_data
+
+    # data_mapper.py
+
+    def _applied_constraints(self, request_data, template_data, constraints, api_name=None, door_memory=None):
         """
         request_data: 요청 데이터 (camID 후보 등)
-        template_data: response 템플릿
+        template_data: request 또는 response 템플릿
         constraints: 제약 조건
+        api_name: API 이름 (RealtimeDoorStatus2 등)
+        door_memory: 문 상태 저장소
         ✅ 템플릿의 리스트 길이를 그대로 유지하며 constraint만 적용
         """
-        # print(f"[DEBUG][DATA_MAPPER] _applied_constraints 호출됨")
-        # print(f"[DEBUG][DATA_MAPPER] request_data: {request_data}")
-        # print(f"[DEBUG][DATA_MAPPER] constraints keys: {list(constraints.keys()) if constraints else []}")
-        # print(
-        #     f"[DEBUG][DATA_MAPPER] template_data keys: {list(template_data.keys()) if isinstance(template_data, dict) else 'N/A'}")
+        
+        # [복구 & 수정 1] RealtimeDoorStatus (Step 4) 요청 처리
+        # 목적: DoorProfiles 응답을 참조하여 doorList 채우기
+        if api_name and "RealtimeDoorStatus" in api_name and "2" not in api_name and "doorList" in template_data:
+            # request_data가 비어있으면(또는 템플릿 형태면) 요청 생성 단계로 판단
+            is_request_generation = not request_data or "doorID" not in str(request_data)
+            
+            if is_request_generation:
+                print(f"[DATA_MAPPER] RealtimeDoorStatus (Step 4) 요청 생성 - DoorProfiles 참조")
+                
+                # DoorProfiles 데이터 찾기
+                door_profiles_data = None
+                keys_to_search = ["DoorProfiles", "/DoorProfiles"]
+                for key in keys_to_search:
+                    if key in self.latest_events and "RESPONSE" in self.latest_events[key]:
+                        door_profiles_data = self.latest_events[key]["RESPONSE"].get("data", {})
+                        break
+                
+                # doorList 맵핑
+                if door_profiles_data and "doorList" in door_profiles_data:
+                    new_door_list = []
+                    for profile in door_profiles_data.get("doorList", []):
+                        door_id = profile.get("doorID")
+                        if door_id:
+                            new_door_list.append({"doorID": door_id})
+                    
+                    if new_door_list:
+                        template_data["doorList"] = new_door_list
+                        print(f"[DATA_MAPPER] ✅ Step 4 요청 doorList 맵핑 완료 ({len(new_door_list)}개)")
+                        return template_data
 
-        # constraints 분석 및 참조 값 수집
+        # [복구 2] RealtimeDoorStatus2 (Step 6) 및 응답 처리 (기존 로직 유지)
+        if api_name and "RealtimeDoorStatus2" in api_name and door_memory and "doorList" in template_data:
+            # request_data가 비어있으면 요청, 아니면 응답
+            is_request = not request_data or len(request_data) == 0
+            
+            if is_request:
+                # 요청: door_memory에서 doorID 목록만 구성
+                print(f"[DATA_MAPPER] RealtimeDoorStatus2 요청 감지")
+                door_list = []
+                for door_id in door_memory.keys():
+                    door_list.append({"doorID": door_id})
+                
+                if door_list:
+                    template_data["doorList"] = door_list
+                    return template_data
+            else:
+                # 응답: door_memory 데이터 반영
+                print(f"[DATA_MAPPER] RealtimeDoorStatus2 응답 감지")
+                door_ids = self.find_key(request_data, "doorID")
+                if door_ids:
+                    door_list = []
+                    for door_id in door_ids:
+                        if door_id in door_memory:
+                            door_info = door_memory[door_id].copy()
+                            door_info["doorID"] = door_id
+                            door_list.append(door_info)
+                        else:
+                            # ★ 핵심 수정: 메모리에 없어도 기본값 생성 (이 부분이 중요!)
+                            default_info = {
+                                "doorID": door_id,
+                                "doorName": f"{door_id} 출입문",
+                                "doorRelaySensor": "일반",
+                                "doorSensor": "Lock"
+                            }
+                            door_list.append(default_info)
+                            print(f"[DATA_MAPPER] {door_id}: 메모리 없음 -> 기본값 생성")
+                    
+                    if door_list:
+                        template_data["doorList"] = door_list
+                        return template_data
+
+        # [복구 3] 기본 Constraints 처리
         constraint_map = self._build_constraint_map(constraints, request_data)
-        # print(f"[DEBUG][DATA_MAPPER] constraint_map: {constraint_map}")
-
-        # 템플릿 기반 데이터 생성 (템플릿 리스트 길이 자동 감지)
         response = self._generate_from_template(template_data, constraint_map)
-        # print(f"[DEBUG][DATA_MAPPER] generated response: {response}")
-
-        # template_data 업데이트 (원본 수정)
         template_data.update(response)
-
-        # 전체 메시지 반환 (업데이트된 template_data)
         return template_data
 
     def _build_constraint_map(self, constraints, request_data):
