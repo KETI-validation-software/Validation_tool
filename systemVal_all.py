@@ -2841,6 +2841,11 @@ class MyApp(QWidget):
         # 표시용 API 이름 (숫자 제거)
         self.videoMessagesDisplay = [self._remove_api_number_suffix(msg) for msg in self.videoMessages]
         self.videoInConstraint = getattr(constraints_request_module, self.current_spec_id + "_inConstraints", [])
+        try:
+            self.webhookInSchema = getattr(schema_response_module, spec_names[3], [])
+        except Exception as e:
+            print(f"Error loading webhook schema: {e}")
+            self.webhookInSchema = []
 
         # ✅ Webhook 관련 (현재 미사용)
         # self.videoWebhookSchema = []
@@ -5200,16 +5205,6 @@ class MyApp(QWidget):
                 current_protocol = self.trans_protocols[row]
                 if current_protocol == "WebHook":
                     try:
-                        # import spec.Schema_response as schema_response_module
-                        webhook_schema = f"{self.current_spec_id}_webhook_inSchema"
-                        self.webhookInSchema = getattr(schema_response_module, webhook_schema, [])
-
-                        # 확인하고 있는 부분 - 현재 여기 기능은 platformVal에 내장되어 있는 상황
-                            # webhook_indices = [i for i, name in enumerate(self.videoMessages) if name is not None]
-                            # if webhook_indices:
-                            #     print(f"[DEBUG] 웹훅 스키마 인덱스: {webhook_indices}")
-                            # else:
-                            #     print(f"[DEBUG] 웹훅 스키마 인덱스가 없습니다.")
                         webhook_schema = self.webhookInSchema[0] if len(self.webhookInSchema) > 0 else None
                     except Exception as e:
                         print(f"[ERROR] 웹훅 스키마 로드 실패: {e}")
@@ -6276,15 +6271,6 @@ class MyApp(QWidget):
         self.inMessage = self.videoInMessage
         self.outSchema = self.videoOutSchema
         self.inCon = self.videoInConstraint
-
-        # 이 부분 수정해야함
-        try:
-            webhook_schema_name = f"{self.current_spec_id}_webhook_inSchema"
-            self.webhookInSchema = getattr(schema_response_module, webhook_schema_name, [])
-        except Exception as e:
-            print(f"Error loading webhook schema: {e}")
-            self.webhookInSchema = []
-
         self.webhookSchema = self.webhookInSchema
 
         # 기본 인증 설정 (CONSTANTS.py에서 가져옴)
