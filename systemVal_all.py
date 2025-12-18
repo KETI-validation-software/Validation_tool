@@ -2441,6 +2441,7 @@ class MyApp(QWidget):
         self.webhook_msg = "."
         self.webhook_cnt = 99
         self.reference_context = {}  # 맥락검증 참조 컨텍스트
+        self.webhook_schema_idx = 0  # ✅ 웹훅 스키마 인덱스 추가
 
     def save_current_spec_data(self):
         """현재 spec의 테이블 데이터와 상태를 저장"""
@@ -2885,6 +2886,7 @@ class MyApp(QWidget):
         print(f"[SYSTEM] ✅ 로딩 완료: {len(self.videoMessages)}개 API")
         print(f"[SYSTEM] 📋 API 목록: {self.videoMessages}")
         print(f"[SYSTEM] 🔄 프로토콜 설정: {self.trans_protocols}")
+        self.webhook_schema_idx = 0
 
         # ✅ spec_config 저장 (URL 생성에 필요)
         self.spec_config = config
@@ -3099,7 +3101,8 @@ class MyApp(QWidget):
                 except Exception as e:
                     print(f"[GROUP TABLE] ⚠️ 외부 CONSTANTS 로드 실패, 기본값 사용: {e}")
         # ===== 외부 CONSTANTS 로드 끝 =====
-
+        self.webhook_schema_idx = 0
+        self.webhookInSchema = []
         group_items = [
             (g.get("group_name", "미지정 그룹"), g.get("group_id", ""))
             for g in SPEC_CONFIG
@@ -3656,17 +3659,22 @@ class MyApp(QWidget):
                 f"[DEBUG] webhook_cnt={self.webhook_cnt}, API={self.message[self.webhook_cnt] if self.webhook_cnt < len(self.message) else 'N/A'}")
             print(f"[DEBUG] webhookSchema 총 개수={len(self.webhookSchema)}")
 
-            # (RealtimeVideoEventInfos 웹훅은 spec_002_webhookSchema[0])
-            if len(self.webhookSchema) > 0:
-                schema_to_check = self.webhookSchema[0]  # 웹훅 스키마는 첫 번째 요소
-                print(f"[DEBUG] 사용 스키마: webhookSchema[0]")
-                if isinstance(schema_to_check, dict):
-                    schema_keys = list(schema_to_check.keys())[:5]
-                    print(f"[DEBUG] 웹훅 스키마 필드 (first 5): {schema_keys}")
+        # ✅ 수정: webhookSchema가 1개만 있으면 항상 인덱스 0 사용
+        if len(self.webhookSchema) == 1:
+            self.webhook_schema_idx = 0
 
-        # 실제 검증
-        if len(self.webhookSchema) > 0:
-            schema_to_check = self.webhookSchema[0]
+        # ✅ 수정: 인덱스 범위 체크 추가
+        if len(self.webhookSchema) > 0 and self.webhook_schema_idx < len(self.webhookSchema):
+            schema_to_check = self.webhookSchema[self.webhook_schema_idx]
+            print(f"[DEBUG] 사용 스키마: webhookSchema[{self.webhook_schema_idx}]")
+
+            if isinstance(schema_to_check, dict):
+                schema_keys = list(schema_to_check.keys())[:5]
+                print(f"[DEBUG] 웹훅 스키마 필드 (first 5): {schema_keys}")
+                # ✅ 인덱스 증가는 범위 내에서만
+                if self.webhook_schema_idx < len(self.webhookSchema) - 1:
+                    self.webhook_schema_idx += 1
+
             val_result, val_text, key_psss_cnt, key_error_cnt, opt_correct, opt_error = json_check_(
                 schema=schema_to_check,
                 data=self.webhook_res,
@@ -3676,23 +3684,30 @@ class MyApp(QWidget):
             if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
                 print(f"[DEBUG] 웹훅 검증 결과: {val_result}, pass={key_psss_cnt}, error={key_error_cnt}")
         else:
-            val_result, val_text, key_psss_cnt, key_error_cnt = "FAIL", "webhookSchema not found", 0, 0
-            if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
-                print(f"[DEBUG] webhookSchema가 없습니다!")
+            # ✅ 스키마가 없거나 인덱스가 범위를 벗어난 경우
+            print(f"[WARN] webhookSchema 접근 불가: idx={self.webhook_schema_idx}, 전체={len(self.webhookSchema)}")
+            val_result, val_text, key_psss_cnt, key_error_cnt, opt_correct, opt_error = "FAIL", "webhookSchema not found or index out of range", 0, 0, 0, 0
 
         if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
             print(f"[DEBUG] ==========================================\n")
 
-        self.valResult.append(f'<div style="font-size: 20px; font-weight: bold; color: #333; font-family: \'Noto Sans KR\'; margin-top: 10px;">{message_name}</div>')
-        self.valResult.append('<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-top: 5px;">=== 웹훅 이벤트 데이터 ===</div>')
-        self.valResult.append(f'<pre style="font-size: 18px; color: #1f2937; font-family: \'Consolas\', monospace; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 10px; margin: 5px 0;">{tmp_webhook_res}</pre>')
+        self.valResult.append(
+            f'<div style="font-size: 20px; font-weight: bold; color: #333; font-family: \'Noto Sans KR\'; margin-top: 10px;">{message_name}</div>')
+        self.valResult.append(
+            '<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-top: 5px;">=== 웹훅 이벤트 데이터 ===</div>')
+        self.valResult.append(
+            f'<pre style="font-size: 18px; color: #1f2937; font-family: \'Consolas\', monospace; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 10px; margin: 5px 0;">{tmp_webhook_res}</pre>')
 
         if val_result == "PASS":
-            self.valResult.append(f'<div style="font-size: 18px; color: #10b981; font-family: \'Noto Sans KR\'; margin-top: 5px;">웹훅 검증 결과: {val_result}</div>')
-            self.valResult.append('<div style="font-size: 18px; color: #10b981; font-family: \'Noto Sans KR\';">웹훅 데이터 검증 성공</div>')
+            self.valResult.append(
+                f'<div style="font-size: 18px; color: #10b981; font-family: \'Noto Sans KR\'; margin-top: 5px;">웹훅 검증 결과: {val_result}</div>')
+            self.valResult.append(
+                '<div style="font-size: 18px; color: #10b981; font-family: \'Noto Sans KR\';">웹훅 데이터 검증 성공</div>')
         else:
-            self.valResult.append(f'<div style="font-size: 18px; color: #ef4444; font-family: \'Noto Sans KR\'; margin-top: 5px;">웹훅 검증 결과: {val_result}</div>')
-            self.valResult.append('<div style="font-size: 18px; color: #ef4444; font-family: \'Noto Sans KR\';">웹훅 데이터 검증 실패</div>')
+            self.valResult.append(
+                f'<div style="font-size: 18px; color: #ef4444; font-family: \'Noto Sans KR\'; margin-top: 5px;">웹훅 검증 결과: {val_result}</div>')
+            self.valResult.append(
+                '<div style="font-size: 18px; color: #ef4444; font-family: \'Noto Sans KR\';">웹훅 데이터 검증 실패</div>')
 
         # ✅ step_pass_counts 배열에 웹훅 결과 추가 (배열이 없으면 생성하지 않음)
         # 점수 업데이트는 모든 재시도 완료 후에 일괄 처리됨 (플랫폼과 동일)
@@ -3741,10 +3756,11 @@ class MyApp(QWidget):
             webhook_error_text = self._to_detail_text(val_text) if val_result == "FAIL" else "오류가 없습니다."
             # ✅ 웹훅 이벤트 데이터를 명확히 표시
             self.step_buffers[self.webhook_cnt]["data"] += f"\n\n--- Webhook 이벤트 데이터 ---\n{webhook_data_text}"
-            self.step_buffers[self.webhook_cnt]["error"] += f"\n\n--- Webhook 검증 ---\n{webhook_error_text}"   # 얘가 문제임 화딱지가 난다
-            self.step_buffers[self.webhook_cnt]["result"] = val_result  
+            self.step_buffers[self.webhook_cnt][
+                "error"] += f"\n\n--- Webhook 검증 ---\n{webhook_error_text}"  # 얘가 문제임 화딱지가 난다
+            self.step_buffers[self.webhook_cnt]["result"] = val_result
 
-        # 메시지 저장
+            # 메시지 저장
         if self.webhook_cnt == 6:
             self.step7_msg += msg
         elif self.webhook_cnt == 4:
@@ -5246,7 +5262,20 @@ class MyApp(QWidget):
                 current_protocol = self.trans_protocols[row]
                 if current_protocol == "WebHook":
                     try:
-                        webhook_schema = self.webhookInSchema[0] if len(self.webhookInSchema) > 0 else None
+                        # ✅ row에 해당하는 웹훅 API의 순서를 계산
+                        # row 이전까지의 WebHook 개수를 세어서 인덱스 결정
+                        webhook_idx = 0
+                        for i in range(row):
+                            if i < len(self.trans_protocols) and self.trans_protocols[i] == "WebHook":
+                                webhook_idx += 1
+
+                        # ✅ 계산된 인덱스로 스키마 가져오기
+                        if webhook_idx < len(self.webhookInSchema):
+                            webhook_schema = self.webhookInSchema[webhook_idx]
+                            print(f"[DEBUG] UI 웹훅 스키마: row={row}, webhook_idx={webhook_idx}")
+                        else:
+                            webhook_schema = None
+                            print(f"[WARN] 웹훅 스키마 인덱스 초과: webhook_idx={webhook_idx}, 전체={len(self.webhookInSchema)}")
                     except Exception as e:
                         print(f"[ERROR] 웹훅 스키마 로드 실패: {e}")
                         import traceback
@@ -5821,6 +5850,7 @@ class MyApp(QWidget):
                 # 복원 실패 시 신규 시작으로 전환
                 print(f"[WARN] 상태 복원 실패, 신규 시작으로 전환")
                 resume_mode = False
+        self.webhook_schema_idx = 0
 
         # ✅ 로딩 팝업 표시
         self.loading_popup = LoadingPopup()
@@ -6230,7 +6260,6 @@ class MyApp(QWidget):
             """검증 시작 전 초기화"""
             self.cnt = 0
             self.current_retry = 0
-
             # 현재 spec의 API 개수에 맞게 버퍼 생성
             api_count = len(self.videoMessages) if self.videoMessages else 0
             print(f"[INIT] 초기화: {api_count}개 API")
@@ -6246,6 +6275,7 @@ class MyApp(QWidget):
             self.step_opt_pass_counts = [0] * api_count  # 선택 필드 통과 수
             self.step_opt_error_counts = [0] * api_count  # 선택 필드 에러 수
             self.step_pass_flags = [0] * api_count
+            self.webhook_schema_idx = 0
 
             self.valResult.clear()
 
