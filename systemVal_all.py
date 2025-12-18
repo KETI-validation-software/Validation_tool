@@ -3591,11 +3591,17 @@ class MyApp(QWidget):
         except Exception as e:
             print(e)
 
+    # 임시 수정 
     def handle_webhook_result(self, result):
         self.webhook_flag = True
+
+        if not hasattr(self, 'webhook_res_list'):
+            self.webhook_res_list = []
+        self.webhook_res_list.append(result)
+
         self.webhook_res = result
-        a = self.webhook_thread.stop()
-        self.webhook_thread.wait()
+        # a = self.webhook_thread.stop()
+        # self.webhook_thread.wait()
         # tmp_res_auth =
 
     # 웹훅 검증
@@ -3631,7 +3637,6 @@ class MyApp(QWidget):
                 flag=self.flag_opt,
                 reference_context=self.reference_context
             )
-
             if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
                 print(f"[DEBUG] 웹훅 검증 결과: {val_result}, pass={key_psss_cnt}, error={key_error_cnt}")
         else:
@@ -3997,7 +4002,7 @@ class MyApp(QWidget):
 
                             if isinstance(res_data, dict) and "code_value" in res_data:
                                 del res_data["code_value"]
-                                
+
                         except Exception as e:
                             self._append_text(f"응답 JSON 파싱 오류: {e}")
                             self._append_text({"raw_response": self.res.text})
