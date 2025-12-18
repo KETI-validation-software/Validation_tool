@@ -1854,7 +1854,7 @@ class ResultPageWidget(QWidget):
         pass_label = QLabel()
         pass_label.setFixedSize(325, 60)
         pass_label.setText(
-            f"통과 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            f"통과 필드 수 (필수/선택)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
             f"{required_pass}/{opt_pass}</span>"
         )
@@ -1876,7 +1876,7 @@ class ResultPageWidget(QWidget):
         total_label = QLabel()
         total_label.setFixedSize(325, 60)
         total_label.setText(
-            f"전체 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            f"전체 필드 수 (필수/선택)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
             f"{required_total}/{opt_total}</span>"
         )
@@ -1991,7 +1991,7 @@ class ResultPageWidget(QWidget):
         pass_label = QLabel()
         pass_label.setFixedSize(325, 60)
         pass_label.setText(
-            f"통과 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            f"통과 필드 수 (필수/선택)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
             f"{required_pass}/{opt_pass}</span>"
         )
@@ -2014,7 +2014,7 @@ class ResultPageWidget(QWidget):
         total_label = QLabel()
         total_label.setFixedSize(325, 60)
         total_label.setText(
-            f"전체 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            f"전체 필드 수 (필수/선택)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
             f"{required_total}/{opt_total}</span>"
         )
@@ -2068,7 +2068,7 @@ class MyApp(QWidget):
             print(f"[DEBUG] trace 파일 찾기: api_name={api_name}, direction={direction}")
             
             # trace 디렉토리의 모든 파일 검색
-            trace_dir = Path("results/trace")
+            trace_dir = Path(CONSTANTS.trace_path)
             if not trace_dir.exists():
                 print(f"[DEBUG] trace 디렉토리 없음: {trace_dir}")
                 return None
@@ -2539,8 +2539,9 @@ class MyApp(QWidget):
             no_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 0, no_item)
 
-            # API 이름 - 컬럼 1
-            api_item = QTableWidgetItem(row_data['api_name'])
+            # API 이름 - 컬럼 1 (숫자 제거된 이름으로 표시)
+            display_name = self._remove_api_number_suffix(row_data['api_name'])
+            api_item = QTableWidgetItem(display_name)
             api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 1, api_item)
 
@@ -5335,12 +5336,12 @@ class MyApp(QWidget):
 
         # 필수/선택 형식으로 표시
         self.spec_pass_label.setText(
-            f"통과 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            f"통과 필드 수 (필수/선택)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
             f"{spec_required_pass}/{self.total_opt_pass_cnt}</span>"
         )
         self.spec_total_label.setText(
-            f"전체 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            f"전체 필드 수 (필수/선택)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
             f"{spec_required_total}/{spec_opt_total}</span>"
         )
@@ -5371,12 +5372,12 @@ class MyApp(QWidget):
             global_required_total = global_total_fields - global_opt_total
 
             self.total_pass_label.setText(
-                f"통과 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+                f"통과 필드 수 (필수/선택)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
                 f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
                 f"{global_required_pass}/{self.global_opt_pass_cnt}</span>"
             )
             self.total_total_label.setText(
-                f"전체 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+                f"전체 필드 수 (필수/선택)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
                 f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
                 f"{global_required_total}/{global_opt_total}</span>"
             )

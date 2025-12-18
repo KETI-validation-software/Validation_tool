@@ -284,28 +284,47 @@ class ConstraintDataGenerator:
                 # 범위 제약 조건 처리
                 req_range = rule.get("requestRange", {})
                 operator = req_range.get("operator")
-
+                min_field = req_range.get("minField")
+                max_field = req_range.get("maxField")
+                if min_field != None and max_field != None:
+                    operator = "between"
                 print(f"[DEBUG][BUILD_MAP]   request-range operator: {operator}")
-
                 if operator == "between":
+                    ref_endpoint = req_range.get("maxEndpoint")
+
                     min_field = req_range.get("minField")
                     max_field = req_range.get("maxField")
+                    min_endpoint = req_range.get("minEndpoint")
+                    max_endpoint = req_range.get("maxEndpoint")
 
-                    # referenceEndpoint가 있으면 latest_events에서, 없으면 request_data에서 찾기
-                    # 슬래시 제거하여 키 매칭
-                    ref_key = ref_endpoint.lstrip('/') if ref_endpoint else None
+                    # referenceEndpoint 또는 minEndpoint/maxEndpoint 처리
+                    ref_key_min = (min_endpoint or ref_endpoint or "").lstrip('/')
+                    ref_key_max = (max_endpoint or ref_endpoint or "").lstrip('/')
 
-                    if ref_key and ref_key in self.latest_events:
-                        event = self.latest_events[ref_key].get("REQUEST", {})
-                        event_data = event.get("data", {})
-                        min_vals = self.find_key(event_data, min_field) if min_field else []
-                        max_vals = self.find_key(event_data, max_field) if max_field else []
-                    else:
-                        min_vals = self.find_key(request_data, min_field) if min_field else []
-                        max_vals = self.find_key(request_data, max_field) if max_field else []
+                    min_val = 0
+                    max_val = 9999999999999
 
-                    min_val = min_vals[0] if min_vals else 0
-                    max_val = max_vals[0] if max_vals else 9999999999999
+                    # min 값 찾기
+                    if min_field:
+                        if ref_key_min and ref_key_min in self.latest_events:
+                            event = self.latest_events[ref_key_min].get("REQUEST", {})
+                            event_data = event.get("data", {})
+                            min_vals = self.find_key(event_data, min_field)
+                        else:
+                            min_vals = self.find_key(request_data, min_field)
+                        min_val = min_vals[0] if min_vals else 0
+
+                    # max 값 찾기
+                    if max_field:
+                        if ref_key_max and ref_key_max in self.latest_events:
+                            event = self.latest_events[ref_key_max].get("REQUEST", {})
+                            event_data = event.get("data", {})
+                            max_vals = self.find_key(event_data, max_field)
+                        else:
+                            max_vals = self.find_key(request_data, max_field)
+                        max_val = max_vals[0] if max_vals else 9999999999999
+
+                    print(f"[DEBUG][BUILD_MAP]   request-range: min={min_val}, max={max_val}")
 
                     constraint_map[path] = {
                         "type": "request-range",
@@ -313,7 +332,6 @@ class ConstraintDataGenerator:
                         "min": min_val,
                         "max": max_val
                     }
-
                 elif operator in ["greater-equal", "greater", "less-equal", "less"]:
                     # greater-equal, greater, less-equal, less 연산자 처리
                     min_field = req_range.get("minField")
