@@ -118,7 +118,7 @@ cmiqr1acx00i5ie8fi022t1hp_DoorControl_in_validation = {
   "doorID": {
     "enabled": True,
     "validationType": "request-field-list-match",
-    "referenceFieldId": "cmiwqkuoj0aj9844g5oec97p9",
+    "referenceFieldId": "cmj6i9tmk023gxei0fwmi1vp0",
     "referenceField": "doorID",
     "referenceEndpoint": "/RealtimeDoorStatus",
     "score": 0
@@ -145,9 +145,9 @@ cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_in_validation = {
   "doorList.doorID": {
     "enabled": True,
     "validationType": "request-field-match",
-    "referenceFieldId": "cmiwqovgn0az6844g1iuqahpi",
+    "referenceFieldId": "cmj6i9tmk023gxei0fwmi1vp0",
     "referenceField": "doorID",
-    "referenceEndpoint": "/DoorControl",
+    "referenceEndpoint": "/RealtimeDoorStatus",
     "referenceListField": "doorID",
     "referenceListFieldId": "cmiwqkuoj0aj9844g5oec97p9",
     "score": 0

@@ -104,6 +104,15 @@ class ConstraintDataGenerator:
         
         if api_name and "DoorControl" in api_name:
 
+            # 이거는 request 템플릿에만 적용 -> 응답에는 적용 x
+            needs_command_generation = False
+
+            if "commandType" in template_data:  # 응답에는 무조건 상태 변경 명령어가 포함되지 않으니까
+                needs_command_generation = True
+            
+            if not needs_command_generation:
+                return template_data
+
             target_door_id = None
             if request_data and "doorID" in request_data:
                 target_door_id = request_data["doorID"]
