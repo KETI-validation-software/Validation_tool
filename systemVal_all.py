@@ -1854,7 +1854,7 @@ class ResultPageWidget(QWidget):
         pass_label = QLabel()
         pass_label.setFixedSize(325, 60)
         pass_label.setText(
-            f"통과 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            f"통과 필드 수 (필수/선택)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
             f"{required_pass}/{opt_pass}</span>"
         )
@@ -1876,7 +1876,7 @@ class ResultPageWidget(QWidget):
         total_label = QLabel()
         total_label.setFixedSize(325, 60)
         total_label.setText(
-            f"전체 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            f"전체 필드 수 (필수/선택)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
             f"{required_total}/{opt_total}</span>"
         )
@@ -1991,7 +1991,7 @@ class ResultPageWidget(QWidget):
         pass_label = QLabel()
         pass_label.setFixedSize(325, 60)
         pass_label.setText(
-            f"통과 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            f"통과 필드 수 (필수/선택)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
             f"{required_pass}/{opt_pass}</span>"
         )
@@ -2014,7 +2014,7 @@ class ResultPageWidget(QWidget):
         total_label = QLabel()
         total_label.setFixedSize(325, 60)
         total_label.setText(
-            f"전체 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            f"전체 필드 수 (필수/선택)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
             f"{required_total}/{opt_total}</span>"
         )
@@ -5335,12 +5335,12 @@ class MyApp(QWidget):
 
         # 필수/선택 형식으로 표시
         self.spec_pass_label.setText(
-            f"통과 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            f"통과 필드 수 (필수/선택)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
             f"{spec_required_pass}/{self.total_opt_pass_cnt}</span>"
         )
         self.spec_total_label.setText(
-            f"전체 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            f"전체 필드 수 (필수/선택)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
             f"{spec_required_total}/{spec_opt_total}</span>"
         )
@@ -5371,12 +5371,12 @@ class MyApp(QWidget):
             global_required_total = global_total_fields - global_opt_total
 
             self.total_pass_label.setText(
-                f"통과 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+                f"통과 필드 수 (필수/선택)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
                 f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
                 f"{global_required_pass}/{self.global_opt_pass_cnt}</span>"
             )
             self.total_total_label.setText(
-                f"전체 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+                f"전체 필드 수 (필수/선택)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
                 f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
                 f"{global_required_total}/{global_opt_total}</span>"
             )
