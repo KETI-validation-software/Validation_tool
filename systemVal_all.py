@@ -2539,8 +2539,9 @@ class MyApp(QWidget):
             no_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 0, no_item)
 
-            # API 이름 - 컬럼 1
-            api_item = QTableWidgetItem(row_data['api_name'])
+            # API 이름 - 컬럼 1 (숫자 제거된 이름으로 표시)
+            display_name = self._remove_api_number_suffix(row_data['api_name'])
+            api_item = QTableWidgetItem(display_name)
             api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 1, api_item)
 
