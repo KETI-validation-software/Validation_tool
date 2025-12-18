@@ -22,19 +22,19 @@
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 84.38,
-    "totalFields": 32,
-    "passedFields": 27,
-    "failedFields": 5
+    "score": 83.33,
+    "totalFields": 24,
+    "passedFields": 20,
+    "failedFields": 4
   },
   "testResult": [
     {
       "testGroup": "cmisfix8407te5vy7fleq8pkf",
       "testSpecId": "cmiqr201z00i8ie8fitdg5t1b",
       "testSpecName": "sensor002",
-      "score": 100.0,
-      "totalFields": 8,
-      "passedFields": 8,
+      "score": 0,
+      "totalFields": 0,
+      "passedFields": 0,
       "failedFields": 0,
       "apis": [
         {
@@ -42,109 +42,60 @@
           "name": "사용자 인증",
           "method": "POST",
           "endpoint": "/Authentication",
-          "score": 100.0,
-          "validationCnt": 1,
-          "totalFields": 2,
-          "passFields": 2,
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
           "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "userID": "kisa",
-                "userPW": "kisa_k1!2@"
-              },
-              "validationErrors": [
-                "오류가 없습니다."
-              ]
-            }
-          ]
+          "validations": []
         },
         {
           "id": "cmisebj3b00s65vy7377edoan",
           "name": "전송 지원 기능 정보 연동",
           "method": "POST",
           "endpoint": "/Capabilities",
-          "score": 100.0,
-          "validationCnt": 1,
-          "totalFields": 1,
-          "passFields": 1,
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
           "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {},
-              "validationErrors": [
-                "오류가 없습니다."
-              ]
-            }
-          ]
+          "validations": []
         },
         {
           "id": "cmiseuulh03d75vy7wmr8iroc",
           "name": "보안용 센서 단말 목록 정보 연동",
           "method": "POST",
           "endpoint": "/SensorDeviceProfiles",
-          "score": 100.0,
-          "validationCnt": 1,
-          "totalFields": 1,
-          "passFields": 1,
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
           "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {},
-              "validationErrors": [
-                "오류가 없습니다."
-              ]
-            }
-          ]
+          "validations": []
         },
         {
           "id": "cmisfu13v07xs5vy7gthbhp0p",
           "name": "보안용 센서 단말 제어 정보 연동-상태연동",
           "method": "POST",
           "endpoint": "/SensorDeviceControl",
-          "score": 100.0,
-          "validationCnt": 1,
-          "totalFields": 2,
-          "passFields": 2,
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
           "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "sensorDeviceID": "iot0002",
-                "commandType": ""
-              },
-              "validationErrors": [
-                "오류가 없습니다."
-              ]
-            }
-          ]
+          "validations": []
         },
         {
           "id": "cmisge6mr08di5vy7hirl5jp1",
           "name": "보안용 센서 단말 제어 정보 연동-제어",
           "method": "POST",
           "endpoint": "/SensorDeviceControl",
-          "score": 100.0,
-          "validationCnt": 1,
-          "totalFields": 2,
-          "passFields": 2,
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
           "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "sensorDeviceID": "iot0002",
-                "commandType": "AlarmOff"
-              },
-              "validationErrors": [
-                "오류가 없습니다."
-              ]
-            }
-          ]
+          "validations": []
         }
       ]
     },
@@ -152,10 +103,10 @@
       "testGroup": "cmisfix8407te5vy7fleq8pkf",
       "testSpecId": "cmiqr1acx00i5ie8fi022t1hp",
       "testSpecName": "ac002",
-      "score": 79.17,
+      "score": 83.33,
       "totalFields": 24,
-      "passedFields": 19,
-      "failedFields": 5,
+      "passedFields": 20,
+      "failedFields": 4,
       "apis": [
         {
           "id": "cmisgwlsx08r25vy7s0uys91u",
@@ -245,7 +196,7 @@
                 "duration": 200,
                 "transProtocol": {
                   "transProtocolType": "WebHook",
-                  "transProtocolDesc": "https://192.168.0.3:8081"
+                  "transProtocolDesc": "https://10.252.219.95:8081"
                 },
                 "startTime": 20251105163010124
               },
@@ -304,24 +255,27 @@
           "name": "실시간 출입통제 장치 상태 정보 연동-결과 조회",
           "method": "POST",
           "endpoint": "/RealtimeDoorStatus",
-          "score": 67.0,
+          "score": 78.0,
           "validationCnt": 1,
           "totalFields": 9,
-          "passFields": 6,
-          "failFields": 3,
+          "passFields": 7,
+          "failFields": 2,
           "validations": [
             {
               "attempt": 1,
               "validationData": {
                 "doorList": [
                   {
-                    "doorID": ""
+                    "doorID": "door0001"
+                  },
+                  {
+                    "doorID": "door0002"
                   }
                 ],
                 "duration": 10000,
                 "transProtocol": {
                   "transProtocolType": "WebHook",
-                  "transProtocolDesc": "https://192.168.0.3:8081"
+                  "transProtocolDesc": "https://10.252.219.95:8081"
                 },
                 "startTime": "20251105163010124"
               },
@@ -329,8 +283,6 @@
                 "[시도 1/1]",
                 "<b>[startTime]</b> (1건)",
                 "- [타입 오류] startTime : Number가 와야 하는데 Str가 왔습니다.",
-                "<b>[기타]</b> (1건)",
-                "- [맥락 오류] doorList.doorID: 값 불일치: [''] != 예상값 door0001",
                 "--- Webhook 검증 ---",
                 "<b>[code]</b> (1건)",
                 "- [타입 오류] code : Str가 와야 하는데 Number가 왔습니다."
@@ -359,5 +311,5 @@
       ]
     }
   ],
-  "completedDate": "2025-12-18T10:30:17Z"
+  "completedDate": "2025-12-18T11:35:33Z"
 }
