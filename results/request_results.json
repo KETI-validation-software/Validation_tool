@@ -138,7 +138,7 @@
               "attempt": 1,
               "validationData": {
                 "sensorDeviceID": "iot0002",
-                "commandType": "AlarmOn"
+                "commandType": "AlarmOff"
               },
               "validationErrors": [
                 "오류가 없습니다."
@@ -245,7 +245,7 @@
                 "duration": 200,
                 "transProtocol": {
                   "transProtocolType": "WebHook",
-                  "transProtocolDesc": "https://10.252.219.95:8081"
+                  "transProtocolDesc": "https://192.168.0.3:8081"
                 },
                 "startTime": 20251105163010124
               },
@@ -315,16 +315,13 @@
               "validationData": {
                 "doorList": [
                   {
-                    "doorID": "door0001"
-                  },
-                  {
-                    "doorID": "door0002"
+                    "doorID": ""
                   }
                 ],
                 "duration": 10000,
                 "transProtocol": {
                   "transProtocolType": "WebHook",
-                  "transProtocolDesc": "https://10.252.219.95:8081"
+                  "transProtocolDesc": "https://192.168.0.3:8081"
                 },
                 "startTime": "20251105163010124"
               },
@@ -333,7 +330,7 @@
                 "<b>[startTime]</b> (1건)",
                 "- [타입 오류] startTime : Number가 와야 하는데 Str가 왔습니다.",
                 "<b>[기타]</b> (1건)",
-                "- [맥락 오류] doorList.doorID: 값 불일치: ['door0001', 'door0002'] != 예상값 door0001",
+                "- [맥락 오류] doorList.doorID: 값 불일치: [''] != 예상값 door0001",
                 "--- Webhook 검증 ---",
                 "<b>[code]</b> (1건)",
                 "- [타입 오류] code : Str가 와야 하는데 Number가 왔습니다."
@@ -362,5 +359,5 @@
       ]
     }
   ],
-  "completedDate": "2025-12-18T11:23:59Z"
+  "completedDate": "2025-12-18T10:30:17Z"
 }
