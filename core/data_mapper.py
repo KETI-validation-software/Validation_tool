@@ -18,20 +18,13 @@ class ConstraintDataGenerator:
         """
         if api_name and "RealtimeDoorStatus" in api_name and "doorList" in template_data:
             
-            # -------------------------------------------------------------
-            # 상황 1: 플랫폼 일반 응답 (Response)
-            # 조건: 웹훅이 아님(False) AND 템플릿에 'code' 필드가 있음(응답 메시지)
-            # 동작: doorList를 깔끔하게 삭제 (code, message만 전송)
-            # -------------------------------------------------------------
             is_response_template = "code" in template_data
             if not is_webhook and is_response_template:
                 if "doorList" in template_data:
-                    # print(f"[DATA_MAPPER] 일반 응답 생성 중: doorList 삭제")
                     del template_data["doorList"]
                 return template_data
 
             if is_webhook:
-                # print(f"[DATA_MAPPER] 웹훅 데이터 생성 중: 요청된 doorID 반영")
                 requested_ids = self.find_key(request_data, "doorID")
                 new_door_list = []
 
@@ -108,6 +101,63 @@ class ConstraintDataGenerator:
                 return template_data
 
             return template_data
+        
+        if api_name and "DoorControl" in api_name:
+
+            # 이거는 request 템플릿에만 적용 -> 응답에는 적용 x
+            needs_command_generation = False
+
+            if "commandType" in template_data:  # 응답에는 무조건 상태 변경 명령어가 포함되지 않으니까
+                needs_command_generation = True
+            
+            if not needs_command_generation:
+                return template_data
+
+            target_door_id = None
+            if request_data and "doorID" in request_data:
+                target_door_id = request_data["doorID"]
+
+            elif door_memory:
+                target_door_id = random.choice(list(door_memory.keys()))
+
+            else:
+                target_door_id = "door0001"
+            
+            template_data["doorID"] = target_door_id
+
+            current_status = "Lock" # 기본값
+            if door_memory and target_door_id in door_memory:
+                current_status = door_memory[target_door_id].get("doorSensor", "Lock")
+            
+            # 동적으로
+            allowed_values = []
+
+            if constraints:
+                for key, rule in constraints.items():
+                    if "commandType" in key and "allowedValues" in rule:
+                            allowed_values = rule["allowedValues"]
+                            # print(f"[DATA_MAPPER] 설정 파일에서 allowedValues 발견: {allowed_values}")
+                            break
+            
+            candidates = [
+                val for val in allowed_values
+                if str(val).lower() != str(current_status).lower()
+            ]
+
+            command = None
+            
+            if candidates:
+                command = random.choice(candidates)
+            
+            elif allowed_values:
+                command = random.choice(allowed_values)
+
+            else:
+                command = "Unlock"  # 진짜 비상용 하드코딩값.. (추후 수정)
+            
+            template_data["commandType"] = command
+            return template_data
+
 
         constraint_map = self._build_constraint_map(constraints, request_data)
         response = self._generate_from_template(template_data, constraint_map)
@@ -548,9 +598,6 @@ class ConstraintDataGenerator:
         return results
 
 
-# -----------------------
-# 테스트
-# -----------------------
 if __name__ == "__main__":
     # latest_events 모의 데이터 생성 (Server.latest_events 형식)
     import datetime
