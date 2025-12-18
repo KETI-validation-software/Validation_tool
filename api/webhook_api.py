@@ -49,7 +49,7 @@ class WebhookServer(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-Type', 'application/json; charset=utf-8')
             self.end_headers()
-            resp = {"code": 200, "message": "성공"}
+            resp = {"code": "200", "message": "성공"}
             self.wfile.write(json.dumps(resp, ensure_ascii=False).encode('utf-8'))
             self.wfile.flush()
             
