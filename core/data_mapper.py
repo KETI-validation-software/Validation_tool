@@ -118,22 +118,61 @@ class ConstraintDataGenerator:
                 # print(f"[DATA_MAPPER] 웹훅 데이터 생성 중: 요청된 doorID 반영")
                 requested_ids = self.find_key(request_data, "doorID")
                 new_door_list = []
+
+                allowed_keys = set()
+                if "doorList" in template_data and isinstance(template_data["doorList"], list) and len(template_data["doorList"]) > 0:
+                    allowed_keys = set(template_data["doorList"][0].keys())
+                
+                # 안전장치
+                if not allowed_keys:
+                    allowed_keys = {"doorID", "doorName", "doorRelaySensor", "doorSensor"}
                 
                 if requested_ids:
                     for door_id in requested_ids:
-                        # 메모리(Server.door_memory)에 있으면 가져오고, 없으면 기본값 생성
                         if door_memory and door_id in door_memory:
-                            door_info = door_memory[door_id].copy()
-                            door_info["doorID"] = door_id
-                            new_door_list.append(door_info)
+                            raw_info = door_memory[door_id]
+
+                            filtered_info = {}
+                            for key in allowed_keys:
+                                if key == "doorID":
+                                    filtered_info[key] = door_id
+                                else:
+                                    val = raw_info.get(key)
+                                    if val is None:
+                                        if key == "doorRelaySensor":
+                                            val = "일반"
+                                        elif key == "doorSensor":
+                                            val = "Lock"
+                                        else:
+                                            val = ""
+                                    filtered_info[key] = val
+                            new_door_list.append(filtered_info)
                         else:
                             default_info = {
                                 "doorID": door_id,
-                                "doorName": f"{door_id} Name",
+                                "doorName": "",
                                 "doorRelaySensor": "일반",
                                 "doorSensor": "Lock"
                             }
-                            new_door_list.append(default_info)
+                            # allowed_keys에 맞게 필터링
+                            filtered_default = {k: v for k, v in default_info.items() if k in allowed_keys}
+                            new_door_list.append(filtered_default)
+                
+                # if requested_ids:
+                #     for door_id in requested_ids:
+                #         # 메모리(Server.door_memory)에 있으면 가져오고, 없으면 기본값 생성
+                #         if door_memory and door_id in door_memory:
+                #             door_info = door_memory[door_id].copy()
+                #             door_info["doorID"] = door_id
+                #             new_door_list.append(door_info)
+                #         else:
+                #             default_info = {
+                #                 "doorID": door_id,
+                #                 "doorName": f"{door_id} Name",
+                #                 "doorRelaySensor": "일반",
+                #                 "doorSensor": "Lock"
+                #             }
+                #             new_door_list.append(default_info)
                 
                 if new_door_list:
                     template_data["doorList"] = new_door_list
