@@ -121,7 +121,7 @@ class ConstraintDataGenerator:
                 target_door_id = random.choice(list(door_memory.keys()))
 
             else:
-                target_door_id = "door0001"
+                target_door_id = "door0001" # 얘도 일단은 기본값 하드코딩
             
             template_data["doorID"] = target_door_id
 

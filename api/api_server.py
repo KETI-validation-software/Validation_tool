@@ -1198,6 +1198,9 @@ class Server(BaseHTTPRequestHandler):
                             
                             if "doorSensor" not in save_data or save_data["doorSensor"] == "0":
                                 save_data["doorSensor"] = "Lock"
+
+                            if "doorSensor" not in save_data or save_data["doorSensor"] == "1":
+                                save_data["doorSensor"] = "Unlock"
                             
                             Server.door_memory[door_id] = {
                                 key: value for key, value in save_data.items()
