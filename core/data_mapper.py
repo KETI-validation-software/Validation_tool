@@ -18,20 +18,13 @@ class ConstraintDataGenerator:
         """
         if api_name and "RealtimeDoorStatus" in api_name and "doorList" in template_data:
             
-            # -------------------------------------------------------------
-            # 상황 1: 플랫폼 일반 응답 (Response)
-            # 조건: 웹훅이 아님(False) AND 템플릿에 'code' 필드가 있음(응답 메시지)
-            # 동작: doorList를 깔끔하게 삭제 (code, message만 전송)
-            # -------------------------------------------------------------
             is_response_template = "code" in template_data
             if not is_webhook and is_response_template:
                 if "doorList" in template_data:
-                    # print(f"[DATA_MAPPER] 일반 응답 생성 중: doorList 삭제")
                     del template_data["doorList"]
                 return template_data
 
             if is_webhook:
-                # print(f"[DATA_MAPPER] 웹훅 데이터 생성 중: 요청된 doorID 반영")
                 requested_ids = self.find_key(request_data, "doorID")
                 new_door_list = []
 
@@ -548,9 +541,6 @@ class ConstraintDataGenerator:
         return results
 
 
-# -----------------------
-# 테스트
-# -----------------------
 if __name__ == "__main__":
     # latest_events 모의 데이터 생성 (Server.latest_events 형식)
     import datetime
