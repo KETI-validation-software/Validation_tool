@@ -288,7 +288,7 @@ cmiqr0kdw00i4ie8fr3firjtg_PtzContinuousMove_in_constraints = {
     "valueType": "preset",
     "required": True
   },
-  "velocity.pan  ": {
+  "velocity.pan": {
     "id": "cmixudtav0fbyp002unvnsqca",
     "valueType": "preset",
     "required": False
