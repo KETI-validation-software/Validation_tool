@@ -2068,7 +2068,7 @@ class MyApp(QWidget):
             print(f"[DEBUG] trace 파일 찾기: api_name={api_name}, direction={direction}")
             
             # trace 디렉토리의 모든 파일 검색
-            trace_dir = Path("results/trace")
+            trace_dir = Path(CONSTANTS.trace_path)
             if not trace_dir.exists():
                 print(f"[DEBUG] trace 디렉토리 없음: {trace_dir}")
                 return None

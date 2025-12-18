@@ -82,7 +82,7 @@ cmiqr0kdw00i4ie8fr3firjtg_PtzStatus_request_key_ids = {
 cmiqr0kdw00i4ie8fr3firjtg_PtzContinuousMove_request_key_ids = {
     "camID": "cmixuddil0fbfp00232n3befi",
     "velocity": "cmixudm8a0fbop002igjf7hdo",
-    "velocity.pan  ": "cmixudtav0fbyp002unvnsqca",
+    "velocity.pan": "cmixudtav0fbyp002unvnsqca",
     "velocity.tilt": "cmixue23t0fc9p002q0o9u5ml",
     "velocity.zoom": "cmixueccs0fclp002h9uzky0u",
     "timeOut": "cmixuen0z0fcxp002zjz5mexm",
