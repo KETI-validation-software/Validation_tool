@@ -1759,12 +1759,14 @@ class ResultPageWidget(QWidget):
         api_count = len(self.parent.videoMessages)
         total_pass = self.parent.total_pass_cnt
         total_error = self.parent.total_error_cnt
+        opt_pass = getattr(self.parent, 'total_opt_pass_cnt', 0)  # 선택 필드 통과 수
+        opt_error = getattr(self.parent, 'total_opt_error_cnt', 0)  # 선택 필드 에러 수
         total_fields = total_pass + total_error
         score = (total_pass / total_fields * 100) if total_fields > 0 else 0
 
-        return self._create_spec_score_display_with_data(total_pass, total_error, score)
+        return self._create_spec_score_display_with_data(total_pass, total_error, score, opt_pass, opt_error)
 
-    def _create_spec_score_display_with_data(self, total_pass, total_error, score):
+    def _create_spec_score_display_with_data(self, total_pass, total_error, score, opt_pass=0, opt_error=0):
         """데이터를 받아서 분야별 점수 표시 위젯 생성 (1064 × 128)"""
         spec_group = QWidget()
         spec_group.setFixedSize(1064, 128)
@@ -1835,6 +1837,12 @@ class ResultPageWidget(QWidget):
 
         # 데이터 영역 (1064 × 76)
         total_fields = total_pass + total_error
+        required_pass = total_pass - opt_pass  # 필수 필드 통과 수
+        # 선택 필드 전체 수 = 선택 통과 + 선택 에러
+        opt_total = opt_pass + opt_error
+        # 필수 필드 전체 수 = 전체 필드 - 선택 필드
+        required_total = total_fields - opt_total
+
         data_area = QWidget()
         data_area.setFixedSize(1064, 76)
         data_area.setStyleSheet("background: transparent;")
@@ -1842,13 +1850,13 @@ class ResultPageWidget(QWidget):
         data_layout.setContentsMargins(56, 8, 32, 8)
         data_layout.setSpacing(0)
 
-        # 통과 필드 수 (325 × 60)
+        # 통과 필드 수 (325 × 60) - 필수/선택 형식
         pass_label = QLabel()
         pass_label.setFixedSize(325, 60)
         pass_label.setText(
             f"통과 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
-            f"{total_pass}</span>"
+            f"{required_pass}/{opt_pass}</span>"
         )
         pass_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 20px; font-weight: 500; color: #000000;")
         data_layout.addWidget(pass_label)
@@ -1864,13 +1872,13 @@ class ResultPageWidget(QWidget):
         spacer1.setFixedSize(24, 60)
         data_layout.addWidget(spacer1)
 
-        # 전체 필드 수 (325 × 60)
+        # 전체 필드 수 (325 × 60) - 필수/선택 형식
         total_label = QLabel()
         total_label.setFixedSize(325, 60)
         total_label.setText(
             f"전체 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
-            f"{total_fields}</span>"
+            f"{required_total}/{opt_total}</span>"
         )
         total_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 20px; font-weight: 500; color: #000000;")
         data_layout.addWidget(total_label)
@@ -1964,7 +1972,12 @@ class ResultPageWidget(QWidget):
         # 데이터 영역 (1064 × 76)
         total_pass = self.parent.global_pass_cnt
         total_error = self.parent.global_error_cnt
+        opt_pass = getattr(self.parent, 'global_opt_pass_cnt', 0)  # 선택 필드 통과 수
+        opt_error = getattr(self.parent, 'global_opt_error_cnt', 0)  # 선택 필드 에러 수
+        required_pass = total_pass - opt_pass  # 필수 필드 통과 수
         total_fields = total_pass + total_error
+        opt_total = opt_pass + opt_error  # 선택 전체 필드 수
+        required_total = total_fields - opt_total  # 필수 전체 필드 수
         score = (total_pass / total_fields * 100) if total_fields > 0 else 0
 
         data_area = QWidget()
@@ -1974,13 +1987,13 @@ class ResultPageWidget(QWidget):
         data_layout.setContentsMargins(56, 8, 32, 8)
         data_layout.setSpacing(0)
 
-        # 통과 필드 수 (325 × 60)
+        # 통과 필드 수 (325 × 60) - 필수/선택 형식
         pass_label = QLabel()
         pass_label.setFixedSize(325, 60)
         pass_label.setText(
             f"통과 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
-            f"{total_pass}</span>"
+            f"{required_pass}/{opt_pass}</span>"
         )
         pass_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 20px; font-weight: 500; color: #000000; border: none;")
         data_layout.addWidget(pass_label)
@@ -1997,13 +2010,13 @@ class ResultPageWidget(QWidget):
         spacer1.setStyleSheet("border: none;")
         data_layout.addWidget(spacer1)
 
-        # 전체 필드 수 (325 × 60)
+        # 전체 필드 수 (325 × 60) - 필수/선택 형식
         total_label = QLabel()
         total_label.setFixedSize(325, 60)
         total_label.setText(
             f"전체 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
-            f"{total_fields}</span>"
+            f"{required_total}/{opt_total}</span>"
         )
         total_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 20px; font-weight: 500; color: #000000; border: none;")
         data_layout.addWidget(total_label)
@@ -2330,10 +2343,14 @@ class MyApp(QWidget):
         self.current_retry = 0
         self.total_error_cnt = 0
         self.total_pass_cnt = 0
+        self.total_opt_pass_cnt = 0  # 선택 필드 통과 수
+        self.total_opt_error_cnt = 0  # 선택 필드 에러 수
 
         # ✅ 전체 점수 (모든 spec 합산) - 추가
         self.global_pass_cnt = 0
         self.global_error_cnt = 0
+        self.global_opt_pass_cnt = 0  # 전체 선택 필드 통과 수
+        self.global_opt_error_cnt = 0  # 전체 선택 필드 에러 수
 
         # ✅ 각 spec_id별 테이블 데이터 저장 (시나리오 전환 시 결과 유지) - 추가
         self.spec_table_data = {}  # {spec_id: {table_data, step_buffers, scores}}
@@ -2406,6 +2423,8 @@ class MyApp(QWidget):
         # ✅ 누적 카운트 초기화
         self.step_pass_counts = [0] * api_count
         self.step_error_counts = [0] * api_count
+        self.step_opt_pass_counts = [0] * api_count  # 선택 필드 통과 수
+        self.step_opt_error_counts = [0] * api_count  # 선택 필드 에러 수
         self.step_pass_flags = [0] * api_count
 
         self.trace = defaultdict(list)
@@ -2467,6 +2486,9 @@ class MyApp(QWidget):
                 # ✅ step_pass_counts와 step_error_counts 배열도 저장
                 'step_pass_counts': self.step_pass_counts[:] if hasattr(self, 'step_pass_counts') else [],
                 'step_error_counts': self.step_error_counts[:] if hasattr(self, 'step_error_counts') else [],
+                # ✅ 선택 필드 통과/에러 수도 저장
+                'step_opt_pass_counts': self.step_opt_pass_counts[:] if hasattr(self, 'step_opt_pass_counts') else [],
+                'step_opt_error_counts': self.step_opt_error_counts[:] if hasattr(self, 'step_opt_error_counts') else [],
             }
 
             print(f"[SAVE] ✅ {composite_key} 데이터 저장 완료")
@@ -2565,6 +2587,12 @@ class MyApp(QWidget):
         self.step_error_counts = saved_data.get('step_error_counts', [0] * len(self.videoMessages))[:]
         print(f"[RESTORE] step_pass_counts 복원: {self.step_pass_counts}")
         print(f"[RESTORE] step_error_counts 복원: {self.step_error_counts}")
+
+        # ✅ 선택 필드 통과/에러 수 배열 복원
+        self.step_opt_pass_counts = saved_data.get('step_opt_pass_counts', [0] * len(self.videoMessages))[:]
+        self.step_opt_error_counts = saved_data.get('step_opt_error_counts', [0] * len(self.videoMessages))[:]
+        print(f"[RESTORE] step_opt_pass_counts 복원: {self.step_opt_pass_counts}")
+        print(f"[RESTORE] step_opt_error_counts 복원: {self.step_opt_error_counts}")
 
         print(f"[RESTORE] {spec_id} 데이터 복원 완료")
         return True
@@ -3370,6 +3398,8 @@ class MyApp(QWidget):
                     api_count = len(self.videoMessages)
                     self.step_pass_counts = [0] * api_count
                     self.step_error_counts = [0] * api_count
+                    self.step_opt_pass_counts = [0] * api_count  # 선택 필드 통과 수
+                    self.step_opt_error_counts = [0] * api_count  # 선택 필드 에러 수
 
                     # step_buffers 초기화
                     self.step_buffers = [
@@ -4160,11 +4190,15 @@ class MyApp(QWidget):
                         api_count = len(self.videoMessages)
                         self.step_pass_counts = [0] * api_count
                         self.step_error_counts = [0] * api_count
+                        self.step_opt_pass_counts = [0] * api_count  # 선택 필드 통과 수
+                        self.step_opt_error_counts = [0] * api_count  # 선택 필드 에러 수
                         self.step_pass_flags = [0] * api_count
 
                     # ✅ 이번 시도 결과로 덮어쓰기 (누적하지 않음!)
                     self.step_pass_counts[self.cnt] = key_psss_cnt
                     self.step_error_counts[self.cnt] = key_error_cnt
+                    self.step_opt_pass_counts[self.cnt] = opt_correct  # 선택 필드 통과 수
+                    self.step_opt_error_counts[self.cnt] = opt_error  # 선택 필드 에러 수
                     
                     print(f"[SCORE DEBUG] API {self.cnt} 시도 {self.current_retry + 1}: pass={key_psss_cnt}, error={key_error_cnt}")
                     print(f"[SCORE DEBUG] step_pass_counts[{self.cnt}] = {self.step_pass_counts[self.cnt]}")
@@ -4310,6 +4344,12 @@ class MyApp(QWidget):
                         # ✅ 전체 점수 업데이트 (모든 spec 합산) - API당 1회만 추가
                         self.global_error_cnt += final_error_count
                         self.global_pass_cnt += final_pass_count
+                        # ✅ 선택 필드 통과 수도 전체 점수에 누적
+                        final_opt_pass_count = self.step_opt_pass_counts[self.cnt]
+                        self.global_opt_pass_cnt += final_opt_pass_count
+                        # ✅ 선택 필드 에러 수도 전체 점수에 누적
+                        final_opt_error_count = self.step_opt_error_counts[self.cnt]
+                        self.global_opt_error_cnt += final_opt_error_count
 
                         print(f"[SCORE] 분야별 점수: pass={self.total_pass_cnt}, error={self.total_error_cnt}")
                         print(f"[SCORE] 전체 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}")
@@ -5265,21 +5305,44 @@ class MyApp(QWidget):
             print(f"[SCORE UPDATE] step_pass_counts: {self.step_pass_counts}, sum: {self.total_pass_cnt}")
             print(f"[SCORE UPDATE] step_error_counts: {self.step_error_counts}, sum: {self.total_error_cnt}")
 
+        # ✅ 선택 필드 통과 수 계산
+        if hasattr(self, 'step_opt_pass_counts'):
+            self.total_opt_pass_cnt = sum(self.step_opt_pass_counts)
+            print(f"[SCORE UPDATE] step_opt_pass_counts: {self.step_opt_pass_counts}, sum: {self.total_opt_pass_cnt}")
+        else:
+            self.total_opt_pass_cnt = 0
+
+        # ✅ 선택 필드 에러 수 계산
+        if hasattr(self, 'step_opt_error_counts'):
+            self.total_opt_error_cnt = sum(self.step_opt_error_counts)
+            print(f"[SCORE UPDATE] step_opt_error_counts: {self.step_opt_error_counts}, sum: {self.total_opt_error_cnt}")
+        else:
+            self.total_opt_error_cnt = 0
+
+        # 필수 필드 통과 수 = 전체 통과 - 선택 통과
+        spec_required_pass = self.total_pass_cnt - self.total_opt_pass_cnt
+
         spec_total_fields = self.total_pass_cnt + self.total_error_cnt
+        # 선택 필드 전체 수 = 선택 통과 + 선택 에러
+        spec_opt_total = self.total_opt_pass_cnt + self.total_opt_error_cnt
+        # 필수 필드 전체 수 = 전체 필드 - 선택 필드
+        spec_required_total = spec_total_fields - spec_opt_total
+
         if spec_total_fields > 0:
             spec_score = (self.total_pass_cnt / spec_total_fields) * 100
         else:
             spec_score = 0
 
+        # 필수/선택 형식으로 표시
         self.spec_pass_label.setText(
             f"통과 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
-            f"{self.total_pass_cnt}</span>"
+            f"{spec_required_pass}/{self.total_opt_pass_cnt}</span>"
         )
         self.spec_total_label.setText(
             f"전체 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
-            f"{spec_total_fields}</span>"
+            f"{spec_required_total}/{spec_opt_total}</span>"
         )
         self.spec_score_label.setText(
             f"종합 평가 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
@@ -5291,24 +5354,31 @@ class MyApp(QWidget):
         if hasattr(self, "total_pass_label") and hasattr(self, "total_total_label") and hasattr(self,
                                                                                                 "total_score_label"):
             # ✅ 전체 점수는 별도로 누적됨 (여러 spec을 실행할 경우 합산)
-            # 현재는 spec이 1개뿐이므로 분야별 점수와 동일하지만, 
+            # 현재는 spec이 1개뿐이므로 분야별 점수와 동일하지만,
             # 나중에 여러 spec을 실행하면 달라짐
-            
+
             global_total_fields = self.global_pass_cnt + self.global_error_cnt
             if global_total_fields > 0:
                 global_score = (self.global_pass_cnt / global_total_fields) * 100
             else:
                 global_score = 0
 
+            # 전체 필수 필드 통과 수 = 전체 통과 - 전체 선택 통과
+            global_required_pass = self.global_pass_cnt - self.global_opt_pass_cnt
+            # 전체 선택 필드 수 = 전체 선택 통과 + 전체 선택 에러
+            global_opt_total = self.global_opt_pass_cnt + self.global_opt_error_cnt
+            # 전체 필수 필드 수 = 전체 필드 - 전체 선택 필드
+            global_required_total = global_total_fields - global_opt_total
+
             self.total_pass_label.setText(
                 f"통과 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
                 f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
-                f"{self.global_pass_cnt}</span>"
+                f"{global_required_pass}/{self.global_opt_pass_cnt}</span>"
             )
             self.total_total_label.setText(
                 f"전체 필드 수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
                 f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
-                f"{global_total_fields}</span>"
+                f"{global_required_total}/{global_opt_total}</span>"
             )
             self.total_score_label.setText(
                 f"종합 평가 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
@@ -5793,13 +5863,21 @@ class MyApp(QWidget):
                 prev_data = self.spec_table_data[composite_key]
                 prev_pass = prev_data.get('total_pass_cnt', 0)
                 prev_error = prev_data.get('total_error_cnt', 0)
+                # ✅ 선택 필드 통과/에러 수 계산
+                prev_opt_pass = sum(prev_data.get('step_opt_pass_counts', []))
+                prev_opt_error = sum(prev_data.get('step_opt_error_counts', []))
                 print(f"[SCORE RESET] 기존 {composite_key} 점수 제거: pass={prev_pass}, error={prev_error}")
+                print(f"[SCORE RESET] 기존 {composite_key} 선택 점수 제거: opt_pass={prev_opt_pass}, opt_error={prev_opt_error}")
 
                 # ✅ global 점수에서 해당 spec 점수 제거
                 self.global_pass_cnt = max(0, self.global_pass_cnt - prev_pass)
                 self.global_error_cnt = max(0, self.global_error_cnt - prev_error)
+                # ✅ global 선택 점수에서 해당 spec 점수 제거
+                self.global_opt_pass_cnt = max(0, self.global_opt_pass_cnt - prev_opt_pass)
+                self.global_opt_error_cnt = max(0, self.global_opt_error_cnt - prev_opt_error)
 
                 print(f"[SCORE RESET] 조정 후 global 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}")
+                print(f"[SCORE RESET] 조정 후 global 선택 점수: opt_pass={self.global_opt_pass_cnt}, opt_error={self.global_opt_error_cnt}")
 
             # ✅ 7. 모든 카운터 및 플래그 초기화 (첫 실행처럼)
             self.cnt = 0
@@ -5825,6 +5903,8 @@ class MyApp(QWidget):
             api_count = len(self.videoMessages)
             self.step_pass_counts = [0] * api_count
             self.step_error_counts = [0] * api_count
+            self.step_opt_pass_counts = [0] * api_count  # 선택 필드 통과 수
+            self.step_opt_error_counts = [0] * api_count  # 선택 필드 에러 수
             self.step_pass_flags = [0] * api_count
 
             # ✅ 11. step_buffers 완전 재생성
@@ -6018,6 +6098,8 @@ class MyApp(QWidget):
                 "step_buffers": self.step_buffers,
                 "step_pass_counts": getattr(self, 'step_pass_counts', [0] * len(self.videoMessages)),
                 "step_error_counts": getattr(self, 'step_error_counts', [0] * len(self.videoMessages)),
+                "step_opt_pass_counts": getattr(self, 'step_opt_pass_counts', [0] * len(self.videoMessages)),
+                "step_opt_error_counts": getattr(self, 'step_opt_error_counts', [0] * len(self.videoMessages)),
                 "total_pass_cnt": self.total_pass_cnt,
                 "total_error_cnt": self.total_error_cnt,
                 "valResult_text": self.valResult.toHtml(),
@@ -6060,6 +6142,8 @@ class MyApp(QWidget):
             self.step_buffers = paused_state.get("step_buffers", [])
             self.step_pass_counts = paused_state.get("step_pass_counts", [0] * len(self.videoMessages))
             self.step_error_counts = paused_state.get("step_error_counts", [0] * len(self.videoMessages))
+            self.step_opt_pass_counts = paused_state.get("step_opt_pass_counts", [0] * len(self.videoMessages))
+            self.step_opt_error_counts = paused_state.get("step_opt_error_counts", [0] * len(self.videoMessages))
             self.total_pass_cnt = paused_state.get("total_pass_cnt", 0)
             self.total_error_cnt = paused_state.get("total_error_cnt", 0)
             self.paused_valResult_text = paused_state.get("valResult_text", "")
@@ -6158,6 +6242,8 @@ class MyApp(QWidget):
             # 누적 카운트 초기화
             self.step_pass_counts = [0] * api_count
             self.step_error_counts = [0] * api_count
+            self.step_opt_pass_counts = [0] * api_count  # 선택 필드 통과 수
+            self.step_opt_error_counts = [0] * api_count  # 선택 필드 에러 수
             self.step_pass_flags = [0] * api_count
 
             self.valResult.clear()
