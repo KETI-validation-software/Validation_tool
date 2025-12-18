@@ -3638,7 +3638,7 @@ class MyApp(QWidget):
         self.webhook_res = result
         # a = self.webhook_thread.stop()
         # self.webhook_thread.wait()
-        # tmp_res_auth =
+        self._push_event(self.webhook_cnt, "WEBHOOK", result)
 
     # 웹훅 검증
     def get_webhook_result(self):
@@ -3855,7 +3855,7 @@ class MyApp(QWidget):
                 json_data = json.dumps(inMessage).encode('utf-8')
 
                 # ✅ REQUEST 기록 제거 - 서버(api_server.py)에서만 기록하도록 변경
-                # self._push_event(self.cnt, "REQUEST", inMessage)
+                self._push_event(self.cnt, "REQUEST", inMessage)
 
                 api_name = self.message[self.cnt] if self.cnt < len(self.message) else ""
                 if api_name and isinstance(inMessage, dict):
@@ -4048,7 +4048,7 @@ class MyApp(QWidget):
                             return
 
                         # ✅ RESPONSE 기록 제거 - 서버(api_server.py)에서만 기록하도록 변경
-                        # self._push_event(self.cnt, "RESPONSE", res_data)
+                        self._push_event(self.cnt, "RESPONSE", res_data)
 
                         # 현재 재시도 정보
                         current_retries = self.num_retries_list[self.cnt] if self.cnt < len(
