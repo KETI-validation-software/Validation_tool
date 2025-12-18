@@ -2728,36 +2728,35 @@ class MyApp(QWidget):
                             if ref_data and isinstance(ref_data, dict):
                                 
                                 # (12/18) 하드코딩
-                                if "RealtimeDoorStatus" in ref_api_name:
-                                    try:
-                                        print(f"[PATCH] {ref_api_name} 데이터 전처리 시작")
-                                        extracted_ids = []
+                                # if "RealtimeDoorStatus" in ref_api_name and "DoorControl" in api_name:
+                                #     try:
+                                #         # 1. 실제 Trace 데이터에서 'doorList' 꺼내기
+                                #         door_list = ref_data.get("doorList")
                                         
-                                        # 1. doorList에서 ID 추출 시도
-                                        door_list = ref_data.get("doorList", [])
-                                        if isinstance(door_list, list):
-                                            for item in door_list:
-                                                if isinstance(item, dict):
-                                                    # 대소문자 실수 방지를 위해 둘 다 체크
-                                                    if "doorID" in item:
-                                                        extracted_ids.append(item["doorID"])
-                                                    elif "doorId" in item:
-                                                        extracted_ids.append(item["doorId"])
-                                                elif isinstance(item, str): 
-                                                    extracted_ids.append(item)
-                                        
-                                        # 2. [중요] 추출 실패 시 강제 하드코딩 (무조건 통과시키는 치트키)
-                                        if not extracted_ids:
-                                            print("[PATCH] ⚠️ ID 추출 실패! 비상용 하드코딩 값(door0001)을 주입합니다.")
-                                            extracted_ids = ["door0001", "door0002"] 
-                                        
-                                        # 3. ref_data에 'doorID' 키로 추가 (기존 데이터 삭제 안 함!)
-                                        ref_data["doorID"] = extracted_ids
-                                        print(f"[PATCH] 최종 적용된 doorID 목록: {ref_data['doorID']}")
+                                #         # 2. 리스트가 존재하면 내부 순회하며 실제 'doorID' 값 수집
+                                #         if isinstance(door_list, list):
+                                #             real_ids = []
+                                #             for item in door_list:
+                                #                 if isinstance(item, dict):
+                                #                     # 실제 데이터에 있는 doorID 값을 가져옴
+                                #                     if "doorID" in item:
+                                #                         real_ids.append(item["doorID"])
+                                #                     elif "doorId" in item: # 대소문자 예외 처리
+                                #                         real_ids.append(item["doorId"])
+                                            
+                                #             # 3. 수집된 '실제 값'들을 검증기가 찾는 위치(doorID)에 연결
+                                #             # (가짜 데이터를 만드는 게 아니라, 위치만 옮겨주는 것임)
+                                #             if real_ids:
+                                #                 ref_data["doorID"] = real_ids
+                                #                 print(f"[PATCH] 경로 매핑 성공: doorList.doorID -> doorID ({real_ids})")
+                                #             else:
+                                #                 print(f"[PATCH] 경고: doorList는 있지만 내부에 doorID가 없습니다.")
+                                                
+                                #     except Exception as e:
+                                #         print(f"[PATCH] 경로 매핑 중 에러: {e}")
+                                # ▲▲▲▲▲▲▲▲▲▲ [여기까지] ▲▲▲▲▲▲▲▲▲▲
 
-                                    except Exception as e:
-                                        print(f"[PATCH] 처리 중 에러 발생(무시하고 강제주입): {e}")
-                                        ref_data["doorID"] = ["door0001", "door0002"]
+                                self.reference_context[ref_endpoint] = ref_data
                                 
                                 self.reference_context[ref_endpoint] = ref_data
                                 print(f"[TRACE] {ref_endpoint} {direction}를 trace 파일에서 로드 (from validation rule)")
@@ -2822,6 +2821,53 @@ class MyApp(QWidget):
 
                     accumulated['raw_data_list'].append(current_data)
 
+                    if "DoorControl" in api_name:
+                        # 1. 검증 규칙 강제 수정 (혹시 doorList.doorID로 되어있다면 다시 doorID로 원복)
+                        if "doorID" in current_validation:
+                            current_validation["doorID"]["referenceField"] = "doorID"
+                            print(f"[PATCH] 규칙 강제 설정: referenceField = 'doorID'")
+
+                        # 2. 데이터 강제 평탄화 (Flattening)
+                        target_key = "/RealtimeDoorStatus"
+
+                        ref_data = self.reference_context.get(target_key, {})
+                        
+                        # 데이터가 없으면 Trace 파일에서 비상 로드
+                        if "doorList" not in ref_data or not ref_data.get("doorList"):
+                            try:
+                                webhook_data = self._load_from_trace_file("RealtimeDoorStatus", "WEBHOOK_OUT")
+                                if webhook_data and "doorList" in webhook_data:
+                                    ref_data = webhook_data
+                                    print(f"[PATCH] reference_context에 RealtimeDoorStatus 데이터가 없어 WEBHOOK에서 로드함")
+                            except:
+                                pass
+                        
+                        if "doorList" not in ref_data or not ref_data.get("doorList"):
+                            try:
+                                response_data = self._load_from_trace_file("RealtimeDoorStatus", "REQUEST")
+                                if response_data and "doorList" in response_data:
+                                    ref_data = response_data
+                                    print(f"[PATCH] reference_context에 RealtimeDoorStatus 데이터가 없어 REQUEST에서 로드함")
+                            except:
+                                pass
+                        
+                        extracted_ids = []
+                        if "doorList" in ref_data and isinstance(ref_data["doorList"], list):
+                            for item in ref_data["doorList"]:
+                                if isinstance(item, dict):
+                                    val = item.get("doorID") or item.get("doorId")
+                                    if val: extracted_ids.append(val)
+
+                        if extracted_ids:
+                            ref_data["doorID"] = extracted_ids
+
+                            self.reference_context[target_key] = ref_data
+                            print(f"[PATCH] 데이터 평탄화 성공: {extracted_ids}")
+
+                        else:
+                            print(f"[PATCH] 경고: doorList는 있지만 내부에 doorID가 없습니다.")                       
+                        
+                                
                     try:
                         print(f"[DEBUG] json_check_ 호출 시작")
 
@@ -2938,6 +2984,11 @@ class MyApp(QWidget):
                                 if webhook_resp_val_result == "FAIL":
                                     step_result = "FAIL"
                                     combined_error_parts.append(f"\n--- Webhook 검증 ---\n" + webhook_resp_err_txt)
+                            
+                            webhook_context_key = f"/{api_name}"
+                            self.reference_context[webhook_context_key] = webhook_response
+                            print(f"[CONTEXT] webhook 응답을 reference_context에 저장: {webhook_context_key}")
+                            
                         else:
                             accumulated['data_parts'].append(f"\n--- Webhook 응답 ---\nnull")
 

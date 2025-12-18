@@ -91,12 +91,12 @@ cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_in_data = {
     "transProtocolType": "Webhook",
     "transProtocolDesc": ""
 },
-    "startTime": "20251105163010124"
+    "startTime": 20251105163010124
 }
 
 # RealtimeDoorStatus2 WebHook OUT Data
 cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_webhook_out_data = {
-    "code": "2000",
+    "code": "200",
     "message": "성공"
 }
 
