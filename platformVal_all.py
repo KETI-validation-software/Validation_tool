@@ -2688,21 +2688,12 @@ class MyApp(QWidget):
                 print(
                     f"[PLATFORM] 시스템 요청 수신: {self.Server.message[self.cnt]} (시도 {retry_attempt + 1}/{current_retries})")
 
-                # 플랫폼은 요청 수신 메시지 표시 안 함 (받은 데이터만 표시)
-                # self.append_monitor_log(
-                #     step_name=f"요청 메시지 수신 [{retry_attempt + 1}/{current_retries}]",
-                #     result_status="진행중"
-                # )
 
                 # 테이블에 실시간 진행률 표시
                 self.update_table_row_with_retries(self.cnt, "진행중", 0, 0, "검증 진행중...",
                                                    f"시도 {retry_attempt + 1}/{current_retries}", retry_attempt + 1)
 
                 QApplication.processEvents()
-
-                # 1. request 검증용 데이터 로드
-                # print(f"[DATA LOAD] API: {api_name}, 시도: {retry_attempt + 1}/{current_retries}")
-                # print(f"[DATA LOAD] trace 폴더 확인: {list(Path('results/trace').glob('*.ndjson')) if Path('results/trace').exists() else '폴더 없음'}")
 
                 current_data = self._load_from_trace_file(api_name, "REQUEST") or {}
 
@@ -2725,17 +2716,10 @@ class MyApp(QWidget):
 
                 # 2. 맥락 검증용
                 if current_validation:
-                    # print("=" * 50)
-                    # print("★★★ reference_context 채우기 시작!")
-                    # print("=" * 50)
 
                     for field_path, validation_rule in current_validation.items():
                         validation_type = validation_rule.get("validationType", "")
                         direction = "REQUEST" if "request-field" in validation_type else "RESPONSE"
-
-                        # print(f"★★★ field={field_path}")
-                        # print(f"★★★ validationType={validation_type}")
-                        # print(f"★★★ direction={direction}")
 
                         ref_endpoint = validation_rule.get("referenceEndpoint", "")
                         if ref_endpoint:
@@ -2751,7 +2735,6 @@ class MyApp(QWidget):
                             ref_data_max = self._load_from_trace_file(ref_api_name_max, direction)
                             if ref_data_max and isinstance(ref_data_max, dict):
                                 self.reference_context[ref_endpoint_max] = ref_data_max
-                                # print(f"★★★ 저장완료: {ref_endpoint_max} → {direction} 데이터")
                                 print(f"[TRACE] {ref_endpoint_max} {direction}를 trace 파일에서 로드 (from validation rule)")
 
                         ref_endpoint_min = validation_rule.get("referenceEndpointMin", "")
@@ -2772,11 +2755,11 @@ class MyApp(QWidget):
                         accumulated['data_parts'].append(f"\n{tmp_res_auth}")
 
                     # 실시간 모니터링 창에 요청 데이터 표시 (API 이름 중복 없이 데이터만)
-                    if retry_attempt == 0:
-                        self.append_monitor_log(
-                            step_name="",
-                            request_json=tmp_res_auth
-                        )
+                    # if retry_attempt == 0:
+                    #     self.append_monitor_log(
+                    #         step_name="",
+                    #         request_json=tmp_res_auth
+                    #     )
 
                     accumulated['raw_data_list'].append(current_data)
 
@@ -2798,11 +2781,11 @@ class MyApp(QWidget):
                         accumulated['data_parts'].append(f"\n{tmp_res_auth}")
 
                     # 실시간 모니터링 창에 요청 데이터 표시 (API 이름 중복 없이 데이터만)
-                    if retry_attempt == 0:
-                        self.append_monitor_log(
-                            step_name="",
-                            request_json=tmp_res_auth
-                        )
+                    # if retry_attempt == 0:
+                    #     self.append_monitor_log(
+                    #         step_name="",
+                    #         request_json=tmp_res_auth
+                    #     )
 
                     accumulated['raw_data_list'].append(current_data)
 
