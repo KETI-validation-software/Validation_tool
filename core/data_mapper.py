@@ -101,6 +101,54 @@ class ConstraintDataGenerator:
                 return template_data
 
             return template_data
+        
+        if api_name and "DoorControl" in api_name:
+
+            target_door_id = None
+            if request_data and "doorID" in request_data:
+                target_door_id = request_data["doorID"]
+
+            elif door_memory:
+                target_door_id = random.choice(list(door_memory.keys()))
+
+            else:
+                target_door_id = "door0001"
+            
+            template_data["doorID"] = target_door_id
+
+            current_status = "Lock" # 기본값
+            if door_memory and target_door_id in door_memory:
+                current_status = door_memory[target_door_id].get("doorSensor", "Lock")
+            
+            # 동적으로
+            allowed_values = []
+
+            if constraints:
+                for key, rule in constraints.items():
+                    if "commandType" in key and "allowedValues" in rule:
+                            allowed_values = rule["allowedValues"]
+                            # print(f"[DATA_MAPPER] 설정 파일에서 allowedValues 발견: {allowed_values}")
+                            break
+            
+            candidates = [
+                val for val in allowed_values
+                if str(val).lower() != str(current_status).lower()
+            ]
+
+            command = None
+            
+            if candidates:
+                command = random.choice(candidates)
+            
+            elif allowed_values:
+                command = random.choice(allowed_values)
+
+            else:
+                command = "Unlock"  # 진짜 비상용 하드코딩값.. (추후 수정)
+            
+            template_data["commandType"] = command
+            return template_data
+
 
         constraint_map = self._build_constraint_map(constraints, request_data)
         response = self._generate_from_template(template_data, constraint_map)
