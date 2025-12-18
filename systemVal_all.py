@@ -13,6 +13,7 @@ import warnings
 from datetime import datetime
 from collections import defaultdict
 import importlib
+
 # SSL 경고 비활성화 (자체 서명 인증서 사용 시)
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 warnings.filterwarnings('ignore')
@@ -37,6 +38,7 @@ import spec.Data_request as data_request_module
 import spec.Schema_response as schema_response_module
 import spec.Constraints_request as constraints_request_module
 import importlib
+
 importlib.reload(data_request_module)
 importlib.reload(schema_response_module)
 importlib.reload(constraints_request_module)
@@ -44,6 +46,8 @@ import os
 
 result_dir = os.path.join(os.getcwd(), "results")
 os.makedirs(result_dir, exist_ok=True)
+
+
 # 통합된 상세 내용 확인 팝업창 클래스
 class CombinedDetailDialog(QDialog):
     def __init__(self, api_name, step_buffer, schema_data, webhook_schema=None):
@@ -62,7 +66,7 @@ class CombinedDetailDialog(QDialog):
 
         # webhook_schema 저장
         self.webhook_schema = webhook_schema
-        #self.webhookInSchema = []
+        # self.webhookInSchema = []
 
         # 상단 제목 - 반응형: 높이만 고정, 가로 확장
         title_label = QLabel(f"{api_name} 상세 정보")
@@ -103,7 +107,7 @@ class CombinedDetailDialog(QDialog):
         subtitle_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 400;")
         subtitle_layout.addWidget(subtitle_label)
         subtitle_layout.addStretch()
-        
+
         main_layout.addWidget(subtitle_container)
         main_layout.addSpacing(12)  # message.png 아래 gap
 
@@ -202,7 +206,6 @@ class CombinedDetailDialog(QDialog):
         content_layout.addWidget(schema_column, stretch=1)
         content_layout.addWidget(error_column, stretch=1)
 
-
         main_layout.addWidget(content_container, stretch=1)  # 콘텐츠 영역 확장
         main_layout.addSpacing(24)  # 콘텐츠 영역 아래 gap
 
@@ -212,7 +215,7 @@ class CombinedDetailDialog(QDialog):
         button_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         button_layout = QHBoxLayout(button_container)
         button_layout.setContentsMargins(0, 0, 0, 0)
-        
+
         # 확인 버튼 (434x48)
         confirm_button = QPushButton("")
         confirm_button.setFixedSize(434, 48)
@@ -228,7 +231,7 @@ class CombinedDetailDialog(QDialog):
             }
         """)
         confirm_button.clicked.connect(self.accept)
-        
+
         button_layout.addStretch()
         button_layout.addWidget(confirm_button)
         button_layout.addStretch()
@@ -403,6 +406,7 @@ class ResultPageWidget(QWidget):
         self.img_none = resource_path("assets/image/icon/icn_basic.png")
 
         self.initUI()
+
     def initUI(self):
         # ✅ 반응형: 최소 크기 설정
         self.setMinimumSize(1680, 1006)
@@ -541,7 +545,7 @@ class ResultPageWidget(QWidget):
 
         info_widget = self._create_simple_info_display()
         right_layout.addWidget(info_widget)
-        
+
         # 시험 결과 라벨
         api_name_label = QLabel('시험 결과')
         api_name_label.setStyleSheet("""
@@ -806,7 +810,8 @@ class ResultPageWidget(QWidget):
                     for i, g in enumerate(SPEC_CONFIG):
                         group_name = g.get('group_name', '이름없음')
                         group_keys = [k for k in g.keys() if k not in ['group_name', 'group_id']]
-                        print(f"[GROUP TABLE DEBUG] 그룹 {i}: {group_name}, spec_id 개수: {len(group_keys)}, spec_ids: {group_keys}")
+                        print(
+                            f"[GROUP TABLE DEBUG] 그룹 {i}: {group_name}, spec_id 개수: {len(group_keys)}, spec_ids: {group_keys}")
                 except Exception as e:
                     print(f"[GROUP TABLE] ⚠️ 외부 CONSTANTS 로드 실패, 기본값 사용: {e}")
         # ===== 외부 CONSTANTS 로드 끝 =====
@@ -1054,8 +1059,10 @@ class ResultPageWidget(QWidget):
                 self.parent.total_error_cnt = saved_data.get('total_error_cnt', 0)
 
                 # ✅ step_pass_counts와 step_error_counts 배열 복원
-                self.parent.step_pass_counts = saved_data.get('step_pass_counts', [0] * len(self.parent.videoMessages))[:]
-                self.parent.step_error_counts = saved_data.get('step_error_counts', [0] * len(self.parent.videoMessages))[:]
+                self.parent.step_pass_counts = saved_data.get('step_pass_counts', [0] * len(self.parent.videoMessages))[
+                                               :]
+                self.parent.step_error_counts = saved_data.get('step_error_counts',
+                                                               [0] * len(self.parent.videoMessages))[:]
                 print(f"[RESULT] step_pass_counts 복원: {self.parent.step_pass_counts}")
                 print(f"[RESULT] step_error_counts 복원: {self.parent.step_error_counts}")
 
@@ -1406,7 +1413,7 @@ class ResultPageWidget(QWidget):
                     if idx >= 0:
                         layout.removeWidget(self.spec_score_group)
                         self.spec_score_group.deleteLater()
-                        
+
                         # 새로운 점수 위젯 생성
                         self.spec_score_group = self._create_spec_score_display_with_data(
                             total_pass, total_error, score
@@ -1425,7 +1432,7 @@ class ResultPageWidget(QWidget):
                     if idx >= 0:
                         layout.removeWidget(self.total_score_group)
                         self.total_score_group.deleteLater()
-                        
+
                         # 새로운 전체 점수 위젯 생성
                         self.total_score_group = self._create_total_score_display()
                         # 같은 위치에 다시 삽입
@@ -1535,7 +1542,7 @@ class ResultPageWidget(QWidget):
 
         # 헤더 컬럼 정의 (너비, 텍스트) - 9컬럼 구조
         header_columns = [
-            (40, ""),            # No.
+            (40, ""),  # No.
             (261, "API 명"),
             (100, "결과"),
             (94, "검증 횟수"),
@@ -1603,15 +1610,15 @@ class ResultPageWidget(QWidget):
         self.tableWidget.setShowGrid(False)
 
         # 컬럼 너비 설정 (본문용) - 9컬럼 구조
-        self.tableWidget.setColumnWidth(0, 40)    # No. (숫자)
-        self.tableWidget.setColumnWidth(1, 261)   # API 명
-        self.tableWidget.setColumnWidth(2, 100)   # 결과
-        self.tableWidget.setColumnWidth(3, 94)    # 검증 횟수
-        self.tableWidget.setColumnWidth(4, 116)   # 통과 필드 수
-        self.tableWidget.setColumnWidth(5, 116)   # 전체 필드 수
-        self.tableWidget.setColumnWidth(6, 94)    # 실패 횟수
-        self.tableWidget.setColumnWidth(7, 94)    # 평가 점수
-        self.tableWidget.setColumnWidth(8, 133)   # 상세 내용
+        self.tableWidget.setColumnWidth(0, 40)  # No. (숫자)
+        self.tableWidget.setColumnWidth(1, 261)  # API 명
+        self.tableWidget.setColumnWidth(2, 100)  # 결과
+        self.tableWidget.setColumnWidth(3, 94)  # 검증 횟수
+        self.tableWidget.setColumnWidth(4, 116)  # 통과 필드 수
+        self.tableWidget.setColumnWidth(5, 116)  # 전체 필드 수
+        self.tableWidget.setColumnWidth(6, 94)  # 실패 횟수
+        self.tableWidget.setColumnWidth(7, 94)  # 평가 점수
+        self.tableWidget.setColumnWidth(8, 133)  # 상세 내용
         self.tableWidget.horizontalHeader().setStretchLastSection(True)  # 마지막 컬럼 자동 확장
 
         # 행 높이 설정
@@ -1995,7 +2002,8 @@ class ResultPageWidget(QWidget):
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
             f"{required_pass}/{opt_pass}</span>"
         )
-        pass_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 20px; font-weight: 500; color: #000000; border: none;")
+        pass_label.setStyleSheet(
+            "font-family: 'Noto Sans KR'; font-size: 20px; font-weight: 500; color: #000000; border: none;")
         data_layout.addWidget(pass_label)
 
         # 구분선 1
@@ -2018,7 +2026,8 @@ class ResultPageWidget(QWidget):
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
             f"{required_total}/{opt_total}</span>"
         )
-        total_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 20px; font-weight: 500; color: #000000; border: none;")
+        total_label.setStyleSheet(
+            "font-family: 'Noto Sans KR'; font-size: 20px; font-weight: 500; color: #000000; border: none;")
         data_layout.addWidget(total_label)
 
         # 구분선 2
@@ -2041,7 +2050,8 @@ class ResultPageWidget(QWidget):
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
             f"{score:.1f}%</span>"
         )
-        score_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 20px; font-weight: 500; color: #000000; border: none;")
+        score_label.setStyleSheet(
+            "font-family: 'Noto Sans KR'; font-size: 20px; font-weight: 500; color: #000000; border: none;")
         data_layout.addWidget(score_label)
         data_layout.addStretch()
         main_layout.addWidget(data_area)
@@ -2064,28 +2074,28 @@ class MyApp(QWidget):
         try:
             # API 이름에서 슬래시 제거
             api_name_clean = api_name.lstrip("/")
-            
+
             print(f"[DEBUG] trace 파일 찾기: api_name={api_name}, direction={direction}")
-            
+
             # trace 디렉토리의 모든 파일 검색
             trace_dir = Path(CONSTANTS.trace_path)
             if not trace_dir.exists():
                 print(f"[DEBUG] trace 디렉토리 없음: {trace_dir}")
                 return None
-            
+
             # API 이름과 매칭되는 파일 찾기
             # 우선순위: 1) 번호 있는 파일 → 2) 번호 없는 파일
             safe_api = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in str(api_name_clean))
-            
+
             trace_file = None
-            
+
             # ✅ 우선순위 1: 번호 prefix 포함된 형식 찾기 (trace_XX_API.ndjson)
             numbered_files = list(trace_dir.glob(f"trace_*_{safe_api}.ndjson"))
             if numbered_files:
                 # 번호가 있는 파일 중 가장 최근 파일 사용
                 trace_file = max(numbered_files, key=lambda f: f.stat().st_mtime)
                 print(f"[DEBUG] 번호 있는 trace 파일 발견: {trace_file.name}")
-            
+
             # ✅ 우선순위 2: 번호 없는 형식 찾기 (trace_API.ndjson)
             if not trace_file:
                 unnumbered_files = list(trace_dir.glob(f"trace_{safe_api}.ndjson"))
@@ -2093,11 +2103,11 @@ class MyApp(QWidget):
                     # 번호 없는 파일 중 가장 최근 파일 사용
                     trace_file = max(unnumbered_files, key=lambda f: f.stat().st_mtime)
                     print(f"[DEBUG] 번호 없는 trace 파일 발견: {trace_file.name}")
-            
+
             if not trace_file:
                 print(f"[DEBUG] trace 파일 없음 (패턴: trace_*_{safe_api}.ndjson 또는 trace_{safe_api}.ndjson)")
                 return None
-            
+
             print(f"[DEBUG] 사용할 trace 파일: {trace_file.name}")
 
             # 파일에서 가장 최근의 해당 direction 이벤트 찾기
@@ -2115,24 +2125,24 @@ class MyApp(QWidget):
             if latest_event:
                 # latest_events 업데이트 - 여러 키 형식으로 저장
                 api_key = latest_event.get("api", api_name)
-                
+
                 # ✅ 1. 원본 API 이름으로 저장
                 if api_key not in self.latest_events:
                     self.latest_events[api_key] = {}
                 self.latest_events[api_key][direction] = latest_event
-                
+
                 # ✅ 2. 슬래시 제거한 형식으로도 저장 (예: "CameraProfiles")
                 api_key_clean = api_key.lstrip('/')
                 if api_key_clean not in self.latest_events:
                     self.latest_events[api_key_clean] = {}
                 self.latest_events[api_key_clean][direction] = latest_event
-                
+
                 # ✅ 3. 슬래시 포함한 형식으로도 저장 (예: "/CameraProfiles")
                 api_key_with_slash = f"/{api_key_clean}" if not api_key_clean.startswith('/') else api_key_clean
                 if api_key_with_slash not in self.latest_events:
                     self.latest_events[api_key_with_slash] = {}
                 self.latest_events[api_key_with_slash][direction] = latest_event
-                
+
                 print(f"[DEBUG] trace 파일에서 {api_name} {direction} 데이터 로드 완료")
                 print(f"[DEBUG] latest_events에 저장된 키들: {api_key}, {api_key_clean}, {api_key_with_slash}")
                 return latest_event.get("data")
@@ -2146,7 +2156,7 @@ class MyApp(QWidget):
             traceback.print_exc()
             return None
 
-    # 
+    #
     def _apply_request_constraints(self, request_data, cnt):
         """
         이전 응답 데이터를 기반으로 요청 데이터 업데이트
@@ -2190,15 +2200,16 @@ class MyApp(QWidget):
                     self._load_from_trace_file(endpoint, "RESPONSE")
                 else:
                     print(f"[DATA_MAPPER] latest_events에 이미 {endpoint} RESPONSE 존재")
-            
+
             api_name = self.message[cnt] if cnt < len(self.message) else ""
 
             # 둘 다 무조건 맵핑 되어야 함
             if "RealtimeDoorStatus" in api_name:
-                if "DoorProfiles" not in self.latest_events or "RESPONSE" not in self.latest_events.get("DoorProfiles", {}):
+                if "DoorProfiles" not in self.latest_events or "RESPONSE" not in self.latest_events.get("DoorProfiles",
+                                                                                                        {}):
                     print(f"[DATA_MAPPER] RealtimeDoorStatus용 DoorProfiles RESPONSE 로드 시도")
                     self._load_from_trace_file("DoorProfiles", "RESPONSE")
-            
+
             self.generator.latest_events = self.latest_events
 
             updated_request = self.generator._applied_constraints(
@@ -2225,12 +2236,12 @@ class MyApp(QWidget):
                     allowed_value=allowed_value
                 )
                 return updated_request
-            except :
+            except:
                 return updated_request
         except Exception as e:
             print(f"[ERROR] _apply_request_constraints 실행 중 오류: {e}")
             import traceback
-            
+
             return request_data
 
             # # trace 파일에서 이전 응답 데이터 로드 (필요한 경우)
@@ -2248,7 +2259,7 @@ class MyApp(QWidget):
             # # ✅ generator의 latest_events를 명시적으로 업데이트 (참조 동기화)
             # self.generator.latest_events = self.latest_events
             # # print(f"[DATA_MAPPER] 🔄 generator.latest_events 동기화 완료: {list(self.generator.latest_events.keys())}")
-            
+
             # # data mapper 적용
             # # request_data를 template로, constraints 적용하여 업데이트
             # # 빈 dict를 template로 사용하지 않고 request_data 자체를 업데이트
@@ -2257,7 +2268,7 @@ class MyApp(QWidget):
             # print(f"[DEBUG][SYSTEM] api_name: {api_name}")
             # print(f"[DEBUG][SYSTEM] door_memory: {Server.door_memory}")
             # print(f"[DEBUG][SYSTEM] request_data before: {request_data}")
-            
+
             # updated_request = self.generator._applied_constraints(
             #     request_data={},  # 이전 요청 데이터는 필요 없음
             #     template_data=request_data.copy(),  # 현재 요청 데이터를 템플릿으로
@@ -2384,7 +2395,7 @@ class MyApp(QWidget):
         else:
             self.current_spec_id = "cmgatbdp000bqihlexmywusvq"  # 기본값: 보안용센서 시스템 (7개 API) -> 지금은 잠깐 없어짐
             print(f"[SYSTEM] 📌 기본 spec_id 사용: {self.current_spec_id}")
-        
+
         # 아이콘 경로 (메인 페이지용)
         self.img_pass = resource_path("assets/image/icon/icn_success.png")
         self.img_fail = resource_path("assets/image/icon/icn_fail.png")
@@ -2475,8 +2486,10 @@ class MyApp(QWidget):
 
             print(f"[DEBUG] 💾 데이터 저장: {composite_key}")
             print(f"[DEBUG]   - 테이블 행 수: {len(table_data)}")
-            print(f"[DEBUG]   - step_pass_counts: {self.step_pass_counts[:] if hasattr(self, 'step_pass_counts') else []}")
-            print(f"[DEBUG]   - step_error_counts: {self.step_error_counts[:] if hasattr(self, 'step_error_counts') else []}")
+            print(
+                f"[DEBUG]   - step_pass_counts: {self.step_pass_counts[:] if hasattr(self, 'step_pass_counts') else []}")
+            print(
+                f"[DEBUG]   - step_error_counts: {self.step_error_counts[:] if hasattr(self, 'step_error_counts') else []}")
 
             self.spec_table_data[composite_key] = {
                 'table_data': table_data,
@@ -2488,7 +2501,8 @@ class MyApp(QWidget):
                 'step_error_counts': self.step_error_counts[:] if hasattr(self, 'step_error_counts') else [],
                 # ✅ 선택 필드 통과/에러 수도 저장
                 'step_opt_pass_counts': self.step_opt_pass_counts[:] if hasattr(self, 'step_opt_pass_counts') else [],
-                'step_opt_error_counts': self.step_opt_error_counts[:] if hasattr(self, 'step_opt_error_counts') else [],
+                'step_opt_error_counts': self.step_opt_error_counts[:] if hasattr(self,
+                                                                                  'step_opt_error_counts') else [],
             }
 
             print(f"[SAVE] ✅ {composite_key} 데이터 저장 완료")
@@ -2628,21 +2642,21 @@ class MyApp(QWidget):
             if api not in self.latest_events:
                 self.latest_events[api] = {}
             self.latest_events[api][direction] = evt
-            
+
             # 2. 슬래시 제거한 형식으로도 저장 (예: "CameraProfiles")
             api_clean = api.lstrip('/')
             if api_clean != api:
                 if api_clean not in self.latest_events:
                     self.latest_events[api_clean] = {}
                 self.latest_events[api_clean][direction] = evt
-            
+
             # 3. 슬래시 포함한 형식으로도 저장 (예: "/CameraProfiles")
             api_with_slash = f"/{api_clean}" if not api_clean.startswith('/') else api_clean
             if api_with_slash != api:
                 if api_with_slash not in self.latest_events:
                     self.latest_events[api_with_slash] = {}
                 self.latest_events[api_with_slash][direction] = evt
-            
+
             # ✅ 디버그 로그 추가
             print(f"[PUSH_EVENT] API={api}, Direction={direction}")
             print(f"[PUSH_EVENT] 저장된 키들: {api}, {api_clean}, {api_with_slash}")
@@ -2702,7 +2716,8 @@ class MyApp(QWidget):
                     for i, g in enumerate(SPEC_CONFIG):
                         group_name = g.get('group_name', '이름없음')
                         group_keys = [k for k in g.keys() if k not in ['group_name', 'group_id']]
-                        print(f"[SYSTEM DEBUG] 그룹 {i}: {group_name}, spec_id 개수: {len(group_keys)}, spec_ids: {group_keys}")
+                        print(
+                            f"[SYSTEM DEBUG] 그룹 {i}: {group_name}, spec_id 개수: {len(group_keys)}, spec_ids: {group_keys}")
                 except Exception as e:
                     print(f"[SYSTEM] ⚠️ 외부 CONSTANTS 로드 실패, 기본값 사용: {e}")
         # ===== 외부 CONSTANTS 로드 끝 =====
@@ -3095,7 +3110,8 @@ class MyApp(QWidget):
                     for i, g in enumerate(SPEC_CONFIG):
                         group_name = g.get('group_name', '이름없음')
                         group_keys = [k for k in g.keys() if k not in ['group_name', 'group_id']]
-                        print(f"[GROUP TABLE DEBUG] 그룹 {i}: {group_name}, spec_id 개수: {len(group_keys)}, spec_ids: {group_keys}")
+                        print(
+                            f"[GROUP TABLE DEBUG] 그룹 {i}: {group_name}, spec_id 개수: {len(group_keys)}, spec_ids: {group_keys}")
                 except Exception as e:
                     print(f"[GROUP TABLE] ⚠️ 외부 CONSTANTS 로드 실패, 기본값 사용: {e}")
         # ===== 외부 CONSTANTS 로드 끝 =====
@@ -3171,6 +3187,7 @@ class MyApp(QWidget):
             self.test_field_table.setItem(idx, 0, item)
             self.spec_id_to_index[spec_id] = idx
             self.index_to_spec_id[idx] = spec_id
+
     def on_group_selected(self, row, col):
         """
         ✅ 시험 그룹 선택 시 해당 그룹의 시험 분야 목록을 자동 갱신
@@ -3404,7 +3421,8 @@ class MyApp(QWidget):
 
                     # step_buffers 초기화
                     self.step_buffers = [
-                        {"data": "", "error": "", "result": "PASS", "raw_data_list": []} for _ in range(len(self.videoMessages))
+                        {"data": "", "error": "", "result": "PASS", "raw_data_list": []} for _ in
+                        range(len(self.videoMessages))
                     ]
                 else:
                     print(f"[SELECT] 저장된 데이터 복원 완료")
@@ -3591,12 +3609,11 @@ class MyApp(QWidget):
 
         try:
             json_data_dict = json.loads(json_data.decode('utf-8'))
-            trans_protocol = json_data_dict.get("transProtocol", {})    # 이 부분 수정해야함
+            trans_protocol = json_data_dict.get("transProtocol", {})  # 이 부분 수정해야함
             if trans_protocol:
                 # 웹훅 서버 시작 (transProtocolType이 WebHook인 경우만)
                 trans_protocol_type = trans_protocol.get("transProtocolType", {})
                 if "WebHook".lower() in str(trans_protocol_type).lower():
-
                     time.sleep(0.1)
                     url = CONSTANTS.WEBHOOK_HOST  # ✅ 기본값 수정
                     port = CONSTANTS.WEBHOOK_PORT  # ✅ 포트도 2001로
@@ -3627,7 +3644,7 @@ class MyApp(QWidget):
         except Exception as e:
             print(e)
 
-    # 임시 수정 
+    # 임시 수정
     def handle_webhook_result(self, result):
         self.webhook_flag = True
 
@@ -3639,6 +3656,7 @@ class MyApp(QWidget):
         # a = self.webhook_thread.stop()
         # self.webhook_thread.wait()
         # tmp_res_auth =
+        self._push_event(self.webhook_cnt, "WEBHOOK", result)
 
     # 웹훅 검증
     def get_webhook_result(self):
@@ -3683,16 +3701,23 @@ class MyApp(QWidget):
         if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
             print(f"[DEBUG] ==========================================\n")
 
-        self.valResult.append(f'<div style="font-size: 20px; font-weight: bold; color: #333; font-family: \'Noto Sans KR\'; margin-top: 10px;">{message_name}</div>')
-        self.valResult.append('<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-top: 5px;">=== 웹훅 이벤트 데이터 ===</div>')
-        self.valResult.append(f'<pre style="font-size: 18px; color: #1f2937; font-family: \'Consolas\', monospace; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 10px; margin: 5px 0;">{tmp_webhook_res}</pre>')
+        self.valResult.append(
+            f'<div style="font-size: 20px; font-weight: bold; color: #333; font-family: \'Noto Sans KR\'; margin-top: 10px;">{message_name}</div>')
+        self.valResult.append(
+            '<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-top: 5px;">=== 웹훅 이벤트 데이터 ===</div>')
+        self.valResult.append(
+            f'<pre style="font-size: 18px; color: #1f2937; font-family: \'Consolas\', monospace; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 10px; margin: 5px 0;">{tmp_webhook_res}</pre>')
 
         if val_result == "PASS":
-            self.valResult.append(f'<div style="font-size: 18px; color: #10b981; font-family: \'Noto Sans KR\'; margin-top: 5px;">웹훅 검증 결과: {val_result}</div>')
-            self.valResult.append('<div style="font-size: 18px; color: #10b981; font-family: \'Noto Sans KR\';">웹훅 데이터 검증 성공</div>')
+            self.valResult.append(
+                f'<div style="font-size: 18px; color: #10b981; font-family: \'Noto Sans KR\'; margin-top: 5px;">웹훅 검증 결과: {val_result}</div>')
+            self.valResult.append(
+                '<div style="font-size: 18px; color: #10b981; font-family: \'Noto Sans KR\';">웹훅 데이터 검증 성공</div>')
         else:
-            self.valResult.append(f'<div style="font-size: 18px; color: #ef4444; font-family: \'Noto Sans KR\'; margin-top: 5px;">웹훅 검증 결과: {val_result}</div>')
-            self.valResult.append('<div style="font-size: 18px; color: #ef4444; font-family: \'Noto Sans KR\';">웹훅 데이터 검증 실패</div>')
+            self.valResult.append(
+                f'<div style="font-size: 18px; color: #ef4444; font-family: \'Noto Sans KR\'; margin-top: 5px;">웹훅 검증 결과: {val_result}</div>')
+            self.valResult.append(
+                '<div style="font-size: 18px; color: #ef4444; font-family: \'Noto Sans KR\';">웹훅 데이터 검증 실패</div>')
 
         # ✅ step_pass_counts 배열에 웹훅 결과 추가 (배열이 없으면 생성하지 않음)
         # 점수 업데이트는 모든 재시도 완료 후에 일괄 처리됨 (플랫폼과 동일)
@@ -3741,10 +3766,11 @@ class MyApp(QWidget):
             webhook_error_text = self._to_detail_text(val_text) if val_result == "FAIL" else "오류가 없습니다."
             # ✅ 웹훅 이벤트 데이터를 명확히 표시
             self.step_buffers[self.webhook_cnt]["data"] += f"\n\n--- Webhook 이벤트 데이터 ---\n{webhook_data_text}"
-            self.step_buffers[self.webhook_cnt]["error"] += f"\n\n--- Webhook 검증 ---\n{webhook_error_text}"   # 얘가 문제임 화딱지가 난다
-            self.step_buffers[self.webhook_cnt]["result"] = val_result  
+            self.step_buffers[self.webhook_cnt][
+                "error"] += f"\n\n--- Webhook 검증 ---\n{webhook_error_text}"  # 얘가 문제임 화딱지가 난다
+            self.step_buffers[self.webhook_cnt]["result"] = val_result
 
-        # 메시지 저장
+            # 메시지 저장
         if self.webhook_cnt == 6:
             self.step7_msg += msg
         elif self.webhook_cnt == 4:
@@ -3791,7 +3817,8 @@ class MyApp(QWidget):
 
                 retry_info = f" (시도 {self.current_retry + 1}/{self.num_retries_list[self.cnt]})"
                 if self.cnt < len(self.message):
-                    display_name = self.message_display[self.cnt] if self.cnt < len(self.message_display) else self.message[self.cnt]
+                    display_name = self.message_display[self.cnt] if self.cnt < len(self.message_display) else \
+                    self.message[self.cnt]
                     self.message_name = "step " + str(self.cnt + 1) + ": " + display_name + retry_info
                 else:
                     self.message_name = f"step {self.cnt + 1}: (index out of range)" + retry_info
@@ -3855,7 +3882,7 @@ class MyApp(QWidget):
                 json_data = json.dumps(inMessage).encode('utf-8')
 
                 # ✅ REQUEST 기록 제거 - 서버(api_server.py)에서만 기록하도록 변경
-                # self._push_event(self.cnt, "REQUEST", inMessage)
+                self._push_event(self.cnt, "REQUEST", inMessage)
 
                 api_name = self.message[self.cnt] if self.cnt < len(self.message) else ""
                 if api_name and isinstance(inMessage, dict):
@@ -3894,7 +3921,7 @@ class MyApp(QWidget):
                     score_value = (self.total_pass_cnt / total_fields) * 100
                 else:
                     score_value = 0
-                
+
                 # 타임아웃 로그를 HTML 카드로 출력
                 api_name = self.message[self.cnt] if self.cnt < len(self.message) else "Unknown"
                 timeout_sec = self.time_outs[self.cnt] / 1000 if self.cnt < len(self.time_outs) else 0
@@ -3912,8 +3939,8 @@ class MyApp(QWidget):
                     "진행중",  # ← 검정색 아이콘
                     0, 0,  # ← 아직 결과 없음
                     "검증 진행중...",
-                    f"시도 {self.current_retry }/{current_retries}",
-                    self.current_retry   # ← 검증 횟수: 1, 2, 3...
+                    f"시도 {self.current_retry}/{current_retries}",
+                    self.current_retry  # ← 검증 횟수: 1, 2, 3...
                 )
                 QApplication.processEvents()  # UI 즉시 반영
 
@@ -3931,7 +3958,7 @@ class MyApp(QWidget):
                     if hasattr(self, 'step_pass_counts') and self.cnt < len(self.step_pass_counts):
                         self.step_pass_counts[self.cnt] = 0
                         self.step_error_counts[self.cnt] = add_err
-                    
+
                     # ✅ 전체 점수 업데이트 (모든 spec 합산)
                     self.global_error_cnt += add_err
                     self.global_pass_cnt += 0
@@ -4048,7 +4075,7 @@ class MyApp(QWidget):
                             return
 
                         # ✅ RESPONSE 기록 제거 - 서버(api_server.py)에서만 기록하도록 변경
-                        # self._push_event(self.cnt, "RESPONSE", res_data)
+                        self._push_event(self.cnt, "RESPONSE", res_data)
 
                         # 현재 재시도 정보
                         current_retries = self.num_retries_list[self.cnt] if self.cnt < len(
@@ -4063,7 +4090,8 @@ class MyApp(QWidget):
                         # 첫 번째 응답일 때만 API 명과 검증 예정 횟수 표시
                         if self.current_retry == 0:
                             api_name = self.message[self.cnt] if self.cnt < len(self.message) else "Unknown"
-                            display_name = self.message_display[self.cnt] if self.cnt < len(self.message_display) else api_name
+                            display_name = self.message_display[self.cnt] if self.cnt < len(
+                                self.message_display) else api_name
                             self.append_monitor_log(
                                 step_name=f"Step {self.cnt + 1}: {display_name} ({self.current_retry + 1}/{current_retries})",
                                 details=f"총 {current_retries}회 검증 예정",
@@ -4072,7 +4100,8 @@ class MyApp(QWidget):
                         else:
                             # 2회차 이상: API 명과 회차만 표시
                             api_name = self.message[self.cnt] if self.cnt < len(self.message) else "Unknown"
-                            display_name = self.message_display[self.cnt] if self.cnt < len(self.message_display) else api_name
+                            display_name = self.message_display[self.cnt] if self.cnt < len(
+                                self.message_display) else api_name
                             self.append_monitor_log(
                                 step_name=f"Step {self.cnt + 1}: {display_name} ({self.current_retry + 1}/{current_retries})",
                                 request_json=tmp_res_auth
@@ -4119,7 +4148,8 @@ class MyApp(QWidget):
                             if ref_endpoint:
                                 ref_api_name = ref_endpoint.lstrip("/")
                                 # latest_events에 없으면 trace 파일에서 로드
-                                if ref_api_name not in self.latest_events or direction not in self.latest_events.get(ref_api_name, {}):
+                                if ref_api_name not in self.latest_events or direction not in self.latest_events.get(
+                                        ref_api_name, {}):
                                     print(f"[TRACE] {ref_endpoint} {direction}를 trace 파일에서 로드 시도")
                                     response_data = self._load_from_trace_file(ref_api_name, direction)
                                     if response_data and isinstance(response_data, dict):
@@ -4130,12 +4160,13 @@ class MyApp(QWidget):
                                     event_data = self.latest_events.get(ref_api_name, {}).get(direction, {})
                                     if event_data and isinstance(event_data, dict):
                                         self.reference_context[ref_endpoint] = event_data.get("data", {})
-                            
+
                             # referenceEndpointMax 처리
                             ref_endpoint_max = validation_rule.get("referenceEndpointMax", "")
                             if ref_endpoint_max:
                                 ref_api_name_max = ref_endpoint_max.lstrip("/")
-                                if ref_api_name_max not in self.latest_events or direction not in self.latest_events.get(ref_api_name_max, {}):
+                                if ref_api_name_max not in self.latest_events or direction not in self.latest_events.get(
+                                        ref_api_name_max, {}):
                                     print(f"[TRACE] {ref_endpoint_max} {direction}를 trace 파일에서 로드 시도 (Max)")
                                     response_data_max = self._load_from_trace_file(ref_api_name_max, direction)
                                     if response_data_max and isinstance(response_data_max, dict):
@@ -4145,12 +4176,13 @@ class MyApp(QWidget):
                                     event_data = self.latest_events.get(ref_api_name_max, {}).get(direction, {})
                                     if event_data and isinstance(event_data, dict):
                                         self.reference_context[ref_endpoint_max] = event_data.get("data", {})
-                            
+
                             # referenceEndpointMin 처리
                             ref_endpoint_min = validation_rule.get("referenceEndpointMin", "")
                             if ref_endpoint_min:
                                 ref_api_name_min = ref_endpoint_min.lstrip("/")
-                                if ref_api_name_min not in self.latest_events or direction not in self.latest_events.get(ref_api_name_min, {}):
+                                if ref_api_name_min not in self.latest_events or direction not in self.latest_events.get(
+                                        ref_api_name_min, {}):
                                     print(f"[TRACE] {ref_endpoint_min} {direction}를 trace 파일에서 로드 시도 (Min)")
                                     response_data_min = self._load_from_trace_file(ref_api_name_min, direction)
                                     if response_data_min and isinstance(response_data_min, dict):
@@ -4200,8 +4232,9 @@ class MyApp(QWidget):
                     self.step_error_counts[self.cnt] = key_error_cnt
                     self.step_opt_pass_counts[self.cnt] = opt_correct  # 선택 필드 통과 수
                     self.step_opt_error_counts[self.cnt] = opt_error  # 선택 필드 에러 수
-                    
-                    print(f"[SCORE DEBUG] API {self.cnt} 시도 {self.current_retry + 1}: pass={key_psss_cnt}, error={key_error_cnt}")
+
+                    print(
+                        f"[SCORE DEBUG] API {self.cnt} 시도 {self.current_retry + 1}: pass={key_psss_cnt}, error={key_error_cnt}")
                     print(f"[SCORE DEBUG] step_pass_counts[{self.cnt}] = {self.step_pass_counts[self.cnt]}")
                     print(f"[SCORE DEBUG] step_error_counts[{self.cnt}] = {self.step_error_counts[self.cnt]}")
 
@@ -4259,7 +4292,8 @@ class MyApp(QWidget):
                                 "error"] = f"[시도 {self.current_retry + 1}/{current_retries}]\n{error_text}"
 
                     # 진행 중 표시 (플랫폼과 동일하게)
-                    display_name = self.message_display[self.cnt] if self.cnt < len(self.message_display) else self.message[self.cnt]
+                    display_name = self.message_display[self.cnt] if self.cnt < len(self.message_display) else \
+                    self.message[self.cnt]
                     message_name = "step " + str(self.cnt + 1) + ": " + display_name
                     # 각 시도별로 pass/error count는 누적이 아니라 이번 시도만 반영해야 함
                     # key_psss_cnt, key_error_cnt는 이번 시도에 대한 값임
@@ -4281,7 +4315,7 @@ class MyApp(QWidget):
 
                     # ✅ 검증 진행 중 로그를 HTML 카드로 출력
                     api_name = self.message[self.cnt] if self.cnt < len(self.message) else "Unknown"
-                    
+
                     # 데이터 포맷팅 (JSON 형식으로)
                     try:
                         if data_text and data_text.strip():
@@ -4291,7 +4325,7 @@ class MyApp(QWidget):
                             formatted_data = data_text
                     except:
                         formatted_data = data_text
-                    
+
                     # 웹훅 여부에 따라 다른 표시
                     api_name = self.message[self.cnt] if self.cnt < len(self.message) else "Unknown"
                     display_name = self.message_display[self.cnt] if self.cnt < len(self.message_display) else api_name
@@ -4299,7 +4333,7 @@ class MyApp(QWidget):
                         step_title = f"결과: {display_name} - 웹훅 구독 ({self.current_retry + 1}/{current_retries})"
                     else:
                         step_title = f"결과: {display_name} ({self.current_retry + 1}/{current_retries})"
-                    
+
                     # 마지막 시도에만 점수 표시, 진행중에는 표시 안함
                     if self.current_retry + 1 >= current_retries:
                         # 마지막 시도 - 최종 결과 표시 (데이터는 이미 출력되었으므로 생략)
@@ -4335,7 +4369,7 @@ class MyApp(QWidget):
                         # ✅ 웹훅 API의 경우 step_pass_counts가 이미 업데이트되었을 수 있으므로 배열에서 직접 가져옴
                         final_pass_count = self.step_pass_counts[self.cnt]
                         final_error_count = self.step_error_counts[self.cnt]
-                        
+
                         print(f"[SCORE] API {self.cnt} 완료: pass={final_pass_count}, error={final_error_count}")
 
                         # ✅ 분야별 점수 업데이트 (현재 spec만)
@@ -4357,7 +4391,7 @@ class MyApp(QWidget):
 
                         # ✅ 전체 점수 포함하여 디스플레이 업데이트 (재시도 완료 후에만)
                         self.update_score_display()
-                        
+
                         # ✅ 최종 점수는 이미 HTML 카드에 포함되어 있으므로 별도 표시 안함
 
                         self.step_buffers[self.cnt]["events"] = list(self.trace.get(self.cnt, []))
@@ -4458,7 +4492,8 @@ class MyApp(QWidget):
             msg.setWindowTitle("Error")
             msg.exec_()
             self.tick_timer.stop()
-            self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">검증 절차가 중지되었습니다. (오류 위치: Step {self.cnt + 1})</div>')
+            self.valResult.append(
+                f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">검증 절차가 중지되었습니다. (오류 위치: Step {self.cnt + 1})</div>')
             self.sbtn.setEnabled(True)
             self.stop_btn.setDisabled(True)
 
@@ -5013,6 +5048,7 @@ class MyApp(QWidget):
             print(f"[ERROR] 초기 시나리오 선택 실패: {e}")
             import traceback
             traceback.print_exc()
+
     def init_centerLayout(self):
         # 표 형태로 변경 - 동적 API 개수
         api_count = len(self.videoMessages)
@@ -5035,7 +5071,7 @@ class MyApp(QWidget):
 
         # 헤더 컬럼 정의 (너비, 텍스트) - 9컬럼 구조
         header_columns = [
-            (40, ""),            # No.
+            (40, ""),  # No.
             (261, "API 명"),
             (100, "결과"),
             (94, "검증 횟수"),
@@ -5099,15 +5135,15 @@ class MyApp(QWidget):
         self.tableWidget.setShowGrid(False)
 
         # 컬럼 너비 설정 - 9컬럼 구조
-        self.tableWidget.setColumnWidth(0, 40)    # No.
-        self.tableWidget.setColumnWidth(1, 261)   # API 명
-        self.tableWidget.setColumnWidth(2, 100)   # 결과
-        self.tableWidget.setColumnWidth(3, 94)    # 검증 횟수
-        self.tableWidget.setColumnWidth(4, 116)   # 통과 필드 수
-        self.tableWidget.setColumnWidth(5, 116)   # 전체 필드 수
-        self.tableWidget.setColumnWidth(6, 94)    # 실패 횟수
-        self.tableWidget.setColumnWidth(7, 94)    # 평가 점수
-        self.tableWidget.setColumnWidth(8, 133)   # 상세 내용
+        self.tableWidget.setColumnWidth(0, 40)  # No.
+        self.tableWidget.setColumnWidth(1, 261)  # API 명
+        self.tableWidget.setColumnWidth(2, 100)  # 결과
+        self.tableWidget.setColumnWidth(3, 94)  # 검증 횟수
+        self.tableWidget.setColumnWidth(4, 116)  # 통과 필드 수
+        self.tableWidget.setColumnWidth(5, 116)  # 전체 필드 수
+        self.tableWidget.setColumnWidth(6, 94)  # 실패 횟수
+        self.tableWidget.setColumnWidth(7, 94)  # 평가 점수
+        self.tableWidget.setColumnWidth(8, 133)  # 상세 내용
         self.tableWidget.horizontalHeader().setStretchLastSection(True)  # 마지막 컬럼 자동 확장
 
         # 행 높이 설정 (40px)
@@ -5316,7 +5352,8 @@ class MyApp(QWidget):
         # ✅ 선택 필드 에러 수 계산
         if hasattr(self, 'step_opt_error_counts'):
             self.total_opt_error_cnt = sum(self.step_opt_error_counts)
-            print(f"[SCORE UPDATE] step_opt_error_counts: {self.step_opt_error_counts}, sum: {self.total_opt_error_cnt}")
+            print(
+                f"[SCORE UPDATE] step_opt_error_counts: {self.step_opt_error_counts}, sum: {self.total_opt_error_cnt}")
         else:
             self.total_opt_error_cnt = 0
 
@@ -5400,7 +5437,7 @@ class MyApp(QWidget):
             if msg:
                 api_name = self.step_names[row] if row < len(self.step_names) else f"Step {row + 1}"
                 CustomDialog(msg, api_name)
-    
+
     def _toggle_placeholder(self):
         """QTextBrowser에 텍스트가 있으면 placeholder 숨기기, 없으면 표시"""
         if self.valResult.toPlainText().strip():
@@ -5584,7 +5621,7 @@ class MyApp(QWidget):
             font-family: "Noto Sans KR";
             font-size: 20px;
             font-weight: 500;
-            
+
         """)
         self.spec_total_label = QLabel("전체 필드 수")
         self.spec_total_label.setFixedSize(325, 60)
@@ -5593,7 +5630,7 @@ class MyApp(QWidget):
             font-family: "Noto Sans KR";
             font-size: 20px;
             font-weight: 500;
-            
+
         """)
         self.spec_score_label = QLabel("종합 평가 점수")
         self.spec_score_label.setFixedSize(325, 60)
@@ -5602,7 +5639,7 @@ class MyApp(QWidget):
             font-family: "Noto Sans KR";
             font-size: 20px;
             font-weight: 500;
-            
+
         """)
 
         spec_layout = QVBoxLayout()
@@ -5629,7 +5666,7 @@ class MyApp(QWidget):
         spec_score_layout = QHBoxLayout(data_widget)
         spec_score_layout.setContentsMargins(56, 8, 32, 8)
         spec_score_layout.setSpacing(0)
-        
+
         # 통과 필드 수 + 구분선 + spacer
         spec_score_layout.addWidget(self.spec_pass_label)
         spec_vline1 = QFrame()
@@ -5639,7 +5676,7 @@ class MyApp(QWidget):
         spec_spacer1 = QWidget()
         spec_spacer1.setFixedSize(24, 60)
         spec_score_layout.addWidget(spec_spacer1)
-        
+
         # 전체 필드 수 + 구분선 + spacer
         spec_score_layout.addWidget(self.spec_total_label)
         spec_vline2 = QFrame()
@@ -5649,7 +5686,7 @@ class MyApp(QWidget):
         spec_spacer2 = QWidget()
         spec_spacer2.setFixedSize(24, 60)
         spec_score_layout.addWidget(spec_spacer2)
-        
+
         # 종합 평가 점수
         spec_score_layout.addWidget(self.spec_score_label)
         spec_score_layout.addStretch()
@@ -5712,7 +5749,7 @@ class MyApp(QWidget):
             font-family: "Noto Sans KR";
             font-size: 20px;
             font-weight: 500;
-            
+
         """)
         self.total_total_label = QLabel("전체 필드 수")
         self.total_total_label.setFixedSize(325, 60)
@@ -5721,7 +5758,7 @@ class MyApp(QWidget):
             font-family: "Noto Sans KR";
             font-size: 20px;
             font-weight: 500;
-            
+
         """)
         self.total_score_label = QLabel("종합 평가 점수")
         self.total_score_label.setFixedSize(325, 60)
@@ -5730,7 +5767,7 @@ class MyApp(QWidget):
             font-family: "Noto Sans KR";
             font-size: 20px;
             font-weight: 500;
-            
+
         """)
 
         total_layout = QVBoxLayout()
@@ -5755,7 +5792,7 @@ class MyApp(QWidget):
         score_layout = QHBoxLayout(data_widget)
         score_layout.setContentsMargins(56, 8, 32, 8)
         score_layout.setSpacing(0)
-        
+
         # 통과 필드 수 + 구분선 + spacer
         score_layout.addWidget(self.total_pass_label)
         total_vline1 = QFrame()
@@ -5765,7 +5802,7 @@ class MyApp(QWidget):
         total_spacer1 = QWidget()
         total_spacer1.setFixedSize(24, 60)
         score_layout.addWidget(total_spacer1)
-        
+
         # 전체 필드 수 + 구분선 + spacer
         score_layout.addWidget(self.total_total_label)
         total_vline2 = QFrame()
@@ -5775,7 +5812,7 @@ class MyApp(QWidget):
         total_spacer2 = QWidget()
         total_spacer2.setFixedSize(24, 60)
         score_layout.addWidget(total_spacer2)
-        
+
         # 종합 평가 점수
         score_layout.addWidget(self.total_score_label)
         score_layout.addStretch()
@@ -5868,7 +5905,8 @@ class MyApp(QWidget):
                 prev_opt_pass = sum(prev_data.get('step_opt_pass_counts', []))
                 prev_opt_error = sum(prev_data.get('step_opt_error_counts', []))
                 print(f"[SCORE RESET] 기존 {composite_key} 점수 제거: pass={prev_pass}, error={prev_error}")
-                print(f"[SCORE RESET] 기존 {composite_key} 선택 점수 제거: opt_pass={prev_opt_pass}, opt_error={prev_opt_error}")
+                print(
+                    f"[SCORE RESET] 기존 {composite_key} 선택 점수 제거: opt_pass={prev_opt_pass}, opt_error={prev_opt_error}")
 
                 # ✅ global 점수에서 해당 spec 점수 제거
                 self.global_pass_cnt = max(0, self.global_pass_cnt - prev_pass)
@@ -5878,7 +5916,8 @@ class MyApp(QWidget):
                 self.global_opt_error_cnt = max(0, self.global_opt_error_cnt - prev_opt_error)
 
                 print(f"[SCORE RESET] 조정 후 global 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}")
-                print(f"[SCORE RESET] 조정 후 global 선택 점수: opt_pass={self.global_opt_pass_cnt}, opt_error={self.global_opt_error_cnt}")
+                print(
+                    f"[SCORE RESET] 조정 후 global 선택 점수: opt_pass={self.global_opt_pass_cnt}, opt_error={self.global_opt_error_cnt}")
 
             # ✅ 7. 모든 카운터 및 플래그 초기화 (첫 실행처럼)
             self.cnt = 0
@@ -5942,7 +5981,8 @@ class MyApp(QWidget):
 
                 # 카운트 초기화 (9컬럼 구조)
                 for col, value in [(3, "0"), (4, "0"), (5, "0"), (6, "0"), (7, "0%")]:
-                    item = QTableWidgetItem(value) if not self.tableWidget.item(i, col) else self.tableWidget.item(i, col)
+                    item = QTableWidgetItem(value) if not self.tableWidget.item(i, col) else self.tableWidget.item(i,
+                                                                                                                   col)
                     item.setText(value)
                     item.setTextAlignment(Qt.AlignCenter)
                     self.tableWidget.setItem(i, col, item)
@@ -5961,7 +6001,7 @@ class MyApp(QWidget):
             self.valResult.clear()
 
             # ✅ 17. URL 설정
-            #self.pathUrl = self.url + "/" + self.current_spec_id
+            # self.pathUrl = self.url + "/" + self.current_spec_id
             self.pathUrl = self.url_text_box.text()
             self.url_text_box.setText(self.pathUrl)  # 안내 문구 변경
 
@@ -6019,9 +6059,12 @@ class MyApp(QWidget):
             self.valResult.clear()
             if self.paused_valResult_text:
                 self.valResult.setHtml(self.paused_valResult_text)
-                self.valResult.append('<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-top: 10px;">========== 재개 ==========</div>')
-                self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">마지막 완료 API: {self.last_completed_api_index + 1}번째</div>')
-                self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-bottom: 10px;">{self.last_completed_api_index + 2}번째 API부터 재개합니다.</div>')
+                self.valResult.append(
+                    '<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-top: 10px;">========== 재개 ==========</div>')
+                self.valResult.append(
+                    f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">마지막 완료 API: {self.last_completed_api_index + 1}번째</div>')
+                self.valResult.append(
+                    f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-bottom: 10px;">{self.last_completed_api_index + 2}번째 API부터 재개합니다.</div>')
                 print(f"[DEBUG] 모니터링 메시지 복원 완료: {len(self.paused_valResult_text)} 문자")
 
             # ✅ 테이블 데이터 복원 (완료된 API들만)
@@ -6031,9 +6074,9 @@ class MyApp(QWidget):
                     buffer = self.step_buffers[i]
                     # 실제 데이터가 있는 경우만 테이블 업데이트
                     has_data = (
-                        buffer.get('raw_data_list') or
-                        buffer.get('data') or
-                        buffer.get('error')
+                            buffer.get('raw_data_list') or
+                            buffer.get('data') or
+                            buffer.get('error')
                     )
                     if has_data:
                         result = buffer.get('result', 'PASS')
@@ -6049,7 +6092,8 @@ class MyApp(QWidget):
                         self.update_table_row_with_retries(
                             i, result, pass_count, error_count, data, error, retries
                         )
-                        print(f"[DEBUG] 테이블 복원: API {i+1} - result={result}, pass={pass_count}, error={error_count}, retries={retries}")
+                        print(
+                            f"[DEBUG] 테이블 복원: API {i + 1} - result={result}, pass={pass_count}, error={error_count}, retries={retries}")
             print(f"[DEBUG] 테이블 데이터 복원 완료")
 
         # ✅ 5. 버튼 상태 변경 (신규/재개 공통)
@@ -6118,8 +6162,10 @@ class MyApp(QWidget):
             print(f"   마지막 완료 API 인덱스: {last_completed}")
 
             # 모니터링 창에 로그 추가
-            self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-top: 10px;">💾 재개 정보 저장 완료: {paused_file_path}</div>')
-            self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">   (마지막 완료 API: {last_completed + 1}번째, 다음 재시작 시 {last_completed + 2}번째 API부터 이어서 실행)</div>')
+            self.valResult.append(
+                f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-top: 10px;">💾 재개 정보 저장 완료: {paused_file_path}</div>')
+            self.valResult.append(
+                f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">   (마지막 완료 API: {last_completed + 1}번째, 다음 재시작 시 {last_completed + 2}번째 API부터 이어서 실행)</div>')
 
         except Exception as e:
             print(f"❌ 일시정지 상태 저장 실패: {e}")
@@ -6193,7 +6239,8 @@ class MyApp(QWidget):
             self.tick_timer.stop()
             print(f"[STOP] 타이머 중지됨")
 
-        self.valResult.append('<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">검증 절차가 중지되었습니다.</div>')
+        self.valResult.append(
+            '<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">검증 절차가 중지되었습니다.</div>')
         self.sbtn.setEnabled(True)
         self.stop_btn.setDisabled(True)
 
