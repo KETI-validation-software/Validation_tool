@@ -46,9 +46,9 @@ def save_management_url(new_url):
 # 관리자시스템 주소
 management_url = load_management_url()
 
-specs = [["cmiqr2b9j00i9ie8frw439h8i_outSchema","cmiqr2b9j00i9ie8frw439h8i_inData","cmiqr2b9j00i9ie8frw439h8i_messages",""],
-         ["cmiqr1jha00i6ie8fb1scb3go_outSchema","cmiqr1jha00i6ie8fb1scb3go_inData","cmiqr1jha00i6ie8fb1scb3go_messages",""],
-         ["cmiqr0kdw00i4ie8fr3firjtg_outSchema","cmiqr0kdw00i4ie8fr3firjtg_inData","cmiqr0kdw00i4ie8fr3firjtg_messages",""]]
+specs = [["cmiqr201z00i8ie8fitdg5t1b_inSchema","cmiqr201z00i8ie8fitdg5t1b_outData","cmiqr201z00i8ie8fitdg5t1b_messages",""],
+         ["cmiqr1acx00i5ie8fi022t1hp_inSchema","cmiqr1acx00i5ie8fi022t1hp_outData","cmiqr1acx00i5ie8fi022t1hp_messages",""],
+         ["cmiqqzrjz00i3ie8figf79cur_inSchema","cmiqqzrjz00i3ie8figf79cur_outData","cmiqqzrjz00i3ie8figf79cur_messages",""]]
 none_request_message = ['Capabilities',
                         'CameraProfiles',
                         'DoorProfiles',
@@ -56,11 +56,11 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소
 # test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
-company_name = "물리보안기업"
-product_name = "물리보안시스템-제어"
+company_name = "통합플랫폼기업"
+product_name = "통합플랫폼 시스템-제어"
 version = "v1.0"
 test_category = "MAIN_TEST"
-test_target = "제어기능-물리보안"
+test_target = "제어 기능-통합플랫폼"
 test_range = "ALL_FIELDS"
 auth_type = "Digest Auth"
 auth_info = "kisa,kisa_k1!2@"
@@ -68,7 +68,7 @@ admin_code = "1234"
 url = "https://10.252.219.95:8080"
 contact_person = "김철수"
 model_name = "v1.0"
-request_id = "cmisfmr3907tv5vy71y0276gp"
+request_id = "cmisflgy307tr5vy7clzgjaln"
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황
 flag_opt = False
@@ -115,33 +115,33 @@ WEBHOOK_URL = f"https://{WEBHOOK_PUBLIC_IP}:{WEBHOOK_PORT}"
 
 SPEC_CONFIG = [
     {
-        "group_name": "제어기능-물리보안",
-        "group_id": "cmisfjfzt07tm5vy7qslmisks",
-        "cmiqr2b9j00i9ie8frw439h8i": {
+        "group_name": "제어 기능-통합플랫폼",
+        "group_id": "cmisfix8407te5vy7fleq8pkf",
+        "cmiqr201z00i8ie8fitdg5t1b": {
     "test_name": "sensor002",
-    "specs": ['cmiqr2b9j00i9ie8frw439h8i_outSchema', 'cmiqr2b9j00i9ie8frw439h8i_inData', 'cmiqr2b9j00i9ie8frw439h8i_messages'],
+    "specs": ['cmiqr201z00i8ie8fitdg5t1b_inSchema', 'cmiqr201z00i8ie8fitdg5t1b_outData', 'cmiqr201z00i8ie8fitdg5t1b_messages'],
     "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '보안용 센서 단말 목록 정보 연동', '보안용 센서 단말 제어 정보 연동-상태연동', '보안용 센서 단말 제어 정보 연동-제어'],
-    "api_id": ['cmise849o00nv5vy7mu76wa69', 'cmise9yk200pv5vy7ktxtva7c', 'cmisepin301uv5vy78nai1drd', 'cmisfqfip07tz5vy7de6x5d6r', 'cmisg86id08bm5vy7ezcbr7oy'],
+    "api_id": ['cmise5c9900jr5vy7j5kdk1z6', 'cmisebj3b00s65vy7377edoan', 'cmiseuulh03d75vy7wmr8iroc', 'cmisfu13v07xs5vy7gthbhp0p', 'cmisge6mr08di5vy7hirl5jp1'],
     "api_endpoint": ['/Authentication', '/Capabilities', '/SensorDeviceProfiles', '/SensorDeviceControl', '/SensorDeviceControl2'],
     "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic'],
     "time_out": [5000, 5000, 5000, 5000, 5000],
     "num_retries": [1, 1, 1, 1, 1]
 },
-        "cmiqr1jha00i6ie8fb1scb3go": {
+        "cmiqr1acx00i5ie8fi022t1hp": {
     "test_name": "ac002",
-    "specs": ['cmiqr1jha00i6ie8fb1scb3go_outSchema', 'cmiqr1jha00i6ie8fb1scb3go_inData', 'cmiqr1jha00i6ie8fb1scb3go_messages', 'cmiqr1jha00i6ie8fb1scb3go_webhook_inSchema', 'cmiqr1jha00i6ie8fb1scb3go_webhook_outData'],
-    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '바이오 및 출입통제 장치 목록 정보', '실시간 출입통제 장치 상태 정보 연동-상태조회', '출입 통제 장치 제어 정보 연동', '실시간 출입통제 장치 상태 정보 연동-결과조회'],
-    "api_id": ['cmisgv0ua08o55vy7yvk4aw0a', 'cmisjr2u40au05vy7kt6bb6zl', 'cmiskf6w20dcm5vy7cjao08fw', 'cmixuoetf0gr9p002gy101xid', 'cmixuttgv0hbyp002h6os6wjc', 'cmixuvzks0hd3p002rcrvqdt4'],
+    "specs": ['cmiqr1acx00i5ie8fi022t1hp_inSchema', 'cmiqr1acx00i5ie8fi022t1hp_outData', 'cmiqr1acx00i5ie8fi022t1hp_messages', 'cmiqr1acx00i5ie8fi022t1hp_webhook_OutSchema', 'cmiqr1acx00i5ie8fi022t1hp_webhook_inData'],
+    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '바이오 및 출입통제 장치 목록 정보', '실시간 출입통제 장치 상태 정보 연동-상태 조회', '출입 통제 장치 제어 정보 연동', '실시간 출입통제 장치 상태 정보 연동-결과 조회'],
+    "api_id": ['cmisgwlsx08r25vy7s0uys91u', 'cmisjsrxy0bd75vy78umc8kos', 'cmiwq2e7z07fi844gof4cw167', 'cmiwqiqjn0acb844gb9f4qqd0', 'cmiwqol4l0ayv844g134sbbu7', 'cmiwqq5880b07844gyqot66cj'],
     "api_endpoint": ['/Authentication', '/Capabilities', '/DoorProfiles', '/RealtimeDoorStatus', '/DoorControl', '/RealtimeDoorStatus2'],
     "trans_protocol": ['basic', 'basic', 'basic', 'WebHook', 'basic', 'WebHook'],
     "time_out": [5000, 5000, 5000, 5000, 5000, 5000],
     "num_retries": [1, 1, 1, 1, 1, 1]
 },
-        "cmiqr0kdw00i4ie8fr3firjtg": {
+        "cmiqqzrjz00i3ie8figf79cur": {
     "test_name": "vid002",
-    "specs": ['cmiqr0kdw00i4ie8fr3firjtg_outSchema', 'cmiqr0kdw00i4ie8fr3firjtg_inData', 'cmiqr0kdw00i4ie8fr3firjtg_messages'],
+    "specs": ['cmiqqzrjz00i3ie8figf79cur_inSchema', 'cmiqqzrjz00i3ie8figf79cur_outData', 'cmiqqzrjz00i3ie8figf79cur_messages'],
     "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '카메라 목록 연동', 'PTZ 상태 정보 연동', 'PTZ 연속 이동 제어 정보 연동', 'PTZ 정지 제어 정보 연동'],
-    "api_id": ['cmish1fu408we5vy7dp3ltj00', 'cmixu0dt70dyzp002xhm24l3h', 'cmixu2m200e4up002g73csf12', 'cmixu9wn10f7rp002rgzkx3au', 'cmixucv8a0fb4p002pnvfe6ay', 'cmixufkri0fdnp002fouuoqsg'],
+    "api_id": ['cmish2vdi08z35vy7gtz574hy', 'cmiwp7fqs05kc844gxsjq6rfs', 'cmiwpag8n05re844gh1o3fc2u', 'cmiwpjpff077k844gx4u1vvdf', 'cmiwpsaxt07b1844gx73rs8gp', 'cmiwpvh1v07dl844gap4brs86'],
     "api_endpoint": ['/Authentication', '/Capabilities', '/CameraProfiles', '/PtzStatus', '/PtzContinuousMove', '/PtzStop'],
     "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic'],
     "time_out": [5000, 5000, 5000, 5000, 5000, 5000],
