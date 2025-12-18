@@ -305,7 +305,7 @@ cmiqqzrjz00i3ie8figf79cur_Capabilities_out_data = {
 
 # CameraProfiles
 cmiqqzrjz00i3ie8figf79cur_CameraProfiles_out_data = {
-    "code ": "200",
+    "code": "200",
     "message": "성공",
     "camList": [
         {

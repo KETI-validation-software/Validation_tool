@@ -45,7 +45,7 @@ cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_request_key_ids = {
 }
 
 cmiqr1acx00i5ie8fi022t1hp_DoorControl_request_key_ids = {
-    "doorID": "cmiwqovgn0az6844g1iuqahpi",
+    "doorID": "cmjb22p3704qldmvoz5hcneem",
     "commandType": "cmj9mmuzw015hrznn0edaxogz",
 }
 
@@ -257,7 +257,7 @@ cmiqqzrjz00i3ie8figf79cur_Capabilities_response_key_ids = {
 }
 
 cmiqqzrjz00i3ie8figf79cur_CameraProfiles_response_key_ids = {
-    "code ": "cmiwpbac505rs844g0w11qcj8",
+    "code": "cmiwpbac505rs844g0w11qcj8",
     "message": "cmiwpbir605s2844gy6l7ht7i",
     "camList": "cmiwpbog505sb844gsj63hn8q",
     "camList.camID": "cmiwpi3sz076y844gftp3b99j",

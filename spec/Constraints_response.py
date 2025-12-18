@@ -451,11 +451,10 @@ cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_in_constraints = {
   },
   "doorList.doorID": {
     "id": "cmiwqvxnv0bni844g3f2pyz9t",
-    "referenceFieldId": "cmiwqovgn0az6844g1iuqahpi",
     "valueType": "request-based",
     "required": True,
-    "referenceEndpoint": "/DoorControl",
-    "referenceField": "doorID"
+    "referenceField": "(참조 필드 미선택)",
+    "referenceEndpoint": "/RealtimeDoorStatus"
   },
   "doorList.doorName": {
     "id": "cmiwqvxnv0bnk844gwotx0gqu",
@@ -570,7 +569,7 @@ cmiqqzrjz00i3ie8figf79cur_Capabilities_out_constraints = {
 
 # CameraProfiles
 cmiqqzrjz00i3ie8figf79cur_CameraProfiles_out_constraints = {
-  "code ": {
+  "code": {
     "id": "cmiwpbac505rs844g0w11qcj8",
     "valueType": "preset",
     "required": True

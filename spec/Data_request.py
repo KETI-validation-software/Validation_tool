@@ -147,7 +147,7 @@ cmiqr0kdw00i4ie8fr3firjtg_PtzStatus_in_data = {
 cmiqr0kdw00i4ie8fr3firjtg_PtzContinuousMove_in_data = {
     "camID": "",
     "velocity": {
-    "pan  ": 10,
+    "pan": 10,
     "tilt": -20,
     "zoom": 30
 },
