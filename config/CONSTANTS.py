@@ -1,5 +1,6 @@
 # API-info
 import os
+import sys
 
 headers = {"Content-type": "application/json", "User-Agent": 'test'}
 
@@ -64,8 +65,8 @@ test_target = "제어 기능-통합플랫폼"
 test_range = "ALL_FIELDS"
 auth_type = "Digest Auth"
 auth_info = "kisa,kisa_k1!2@"
-admin_code = "1234"
-url = "https://10.252.219.95:8080"
+admin_code = "1"
+url = "https://127.0.0.1:8080"
 contact_person = "김철수"
 model_name = "v1.0"
 request_id = "cmisflgy307tr5vy7clzgjaln"
@@ -77,7 +78,22 @@ if test_range == "ALL_FIELDS":
 
 # 선택된 시험 분야의 인덱스 (0: 영상보안, 1: 보안용센서)
 selected_spec_index = 0
-trace_path = os.path.join("results", "trace")
+# ===== 기본 경로 설정 =====
+if getattr(sys, 'frozen', False):
+    # PyInstaller 실행파일
+    BASE_DIR = os.path.dirname(sys.executable)
+else:
+    # 일반 Python 실행 (config 폴더 기준)
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# ===== 결과 디렉토리 설정 =====
+result_dir = os.path.join(BASE_DIR, "results")
+trace_path = os.path.join(result_dir, "trace")
+
+# 디렉토리 생성
+os.makedirs(result_dir, exist_ok=True)
+os.makedirs(trace_path, exist_ok=True)
+
 enable_retry_delay = False  # False 권장: 불필요한 sleep 제거
 
 # test-opt
