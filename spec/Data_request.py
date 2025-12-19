@@ -1,122 +1,184 @@
-# request 모드
-
 # Authentication
-cmgyv3rzl014nvsveidu5jpzp_Authentication_in_data = {
-    "userID": "user0001",
-    "userPW": "pass0001"
+cmiqr2b9j00i9ie8frw439h8i_Authentication_in_data = {
+    "userID": "kisa",
+    "userPW": "kisa_k1!2@"
 }
 
 # Capabilities
-cmgyv3rzl014nvsveidu5jpzp_Capabilities_in_data = {}
+cmiqr2b9j00i9ie8frw439h8i_Capabilities_in_data = {}
+
+# SensorDeviceProfiles
+cmiqr2b9j00i9ie8frw439h8i_SensorDeviceProfiles_in_data = {}
+
+# SensorDeviceControl
+cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl_in_data = {
+    "sensorDeviceID": "",
+    "commandType": ""
+}
+
+# SensorDeviceControl2
+cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl2_in_data = {
+    "sensorDeviceID": "",
+    "commandType": ""
+}
+
+# cmiqr2b9j00i9ie8frw439h8i 데이터 리스트
+cmiqr2b9j00i9ie8frw439h8i_inData = [
+    cmiqr2b9j00i9ie8frw439h8i_Authentication_in_data,
+    cmiqr2b9j00i9ie8frw439h8i_Capabilities_in_data,
+    cmiqr2b9j00i9ie8frw439h8i_SensorDeviceProfiles_in_data,
+    cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl_in_data,
+    cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl2_in_data,
+]
+
+# cmiqr2b9j00i9ie8frw439h8i API endpoint
+cmiqr2b9j00i9ie8frw439h8i_messages = [
+    "Authentication",
+    "Capabilities",
+    "SensorDeviceProfiles",
+    "SensorDeviceControl",
+    "SensorDeviceControl2",
+]
+
+# Authentication
+cmiqr1jha00i6ie8fb1scb3go_Authentication_in_data = {
+    "userID": "kisa",
+    "userPW": "kisa_k1!2@"
+}
+
+# Capabilities
+cmiqr1jha00i6ie8fb1scb3go_Capabilities_in_data = {}
+
+# DoorProfiles
+cmiqr1jha00i6ie8fb1scb3go_DoorProfiles_in_data = {}
+
+# RealtimeDoorStatus
+cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_in_data = {
+    "doorList": [
+        {
+        "doorID": ""
+    }
+],
+    "duration": 200,
+    "transProtocol": {
+    "transProtocolType": "Webhook",
+    "transProtocolDesc": ""
+},
+    "startTime": 20251105163010124
+}
+
+# RealtimeDoorStatus WebHook OUT Data
+cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_webhook_out_data = {
+    "code": "200",
+    "message": "성공"
+}
+
+# DoorControl
+cmiqr1jha00i6ie8fb1scb3go_DoorControl_in_data = {
+    "doorID": "door0001",
+    "commandType": ""
+}
+
+# RealtimeDoorStatus2
+cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_in_data = {
+    "doorList": [
+        {
+        "doorID": ""
+    }
+],
+    "duration": 10000,
+    "transProtocol": {
+    "transProtocolType": "Webhook",
+    "transProtocolDesc": ""
+},
+    "startTime": 20251105163010124
+}
+
+# RealtimeDoorStatus2 WebHook OUT Data
+cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_webhook_out_data = {
+    "code": "200",
+    "message": "성공"
+}
+
+# cmiqr1jha00i6ie8fb1scb3go 데이터 리스트
+cmiqr1jha00i6ie8fb1scb3go_inData = [
+    cmiqr1jha00i6ie8fb1scb3go_Authentication_in_data,
+    cmiqr1jha00i6ie8fb1scb3go_Capabilities_in_data,
+    cmiqr1jha00i6ie8fb1scb3go_DoorProfiles_in_data,
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_in_data,
+    cmiqr1jha00i6ie8fb1scb3go_DoorControl_in_data,
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_in_data,
+]
+
+# cmiqr1jha00i6ie8fb1scb3go WebHook 데이터 리스트
+cmiqr1jha00i6ie8fb1scb3go_webhook_outData = [
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_webhook_out_data,
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_webhook_out_data,
+]
+
+# cmiqr1jha00i6ie8fb1scb3go API endpoint
+cmiqr1jha00i6ie8fb1scb3go_messages = [
+    "Authentication",
+    "Capabilities",
+    "DoorProfiles",
+    "RealtimeDoorStatus",
+    "DoorControl",
+    "RealtimeDoorStatus2",
+]
+
+# Authentication
+cmiqr0kdw00i4ie8fr3firjtg_Authentication_in_data = {
+    "userID": "kisa",
+    "userPW": "kisa_k1!2@"
+}
+
+# Capabilities
+cmiqr0kdw00i4ie8fr3firjtg_Capabilities_in_data = {}
 
 # CameraProfiles
-cmgyv3rzl014nvsveidu5jpzp_CameraProfiles_in_data = {}
+cmiqr0kdw00i4ie8fr3firjtg_CameraProfiles_in_data = {}
 
-# StoredVideoInfos
-cmgyv3rzl014nvsveidu5jpzp_StoredVideoInfos_in_data = {
-    "timePeriod": {
-    "startTime": 1760948700000,
-    "endTime": 1761121500000
+# PtzStatus
+cmiqr0kdw00i4ie8fr3firjtg_PtzStatus_in_data = {
+    "camID": ""
+}
+
+# PtzContinuousMove
+cmiqr0kdw00i4ie8fr3firjtg_PtzContinuousMove_in_data = {
+    "camID": "",
+    "velocity": {
+    "pan": 10,
+    "tilt": -20,
+    "zoom": 30
 },
-    "camList": [
-        {
-        "camID": ""
-    }
-]
+    "timeOut": 5
 }
 
-# StreamURLs
-cmgyv3rzl014nvsveidu5jpzp_StreamURLs_in_data = {
-    "camList": [
-        {
-        "camID": "",
-        "streamProtocolType": "RTSP"
-    }
-]
+# PtzStop
+cmiqr0kdw00i4ie8fr3firjtg_PtzStop_in_data = {
+    "camID": "",
+    "pan": True,
+    "tilt": True,
+    "zoom": False
 }
 
-# ReplayURL
-cmgyv3rzl014nvsveidu5jpzp_ReplayURL_in_data = {
-    "camList": [
-        {
-        "camID": "",
-        "startTime": 1760949060000,
-        "endTime": 1761208260000,
-        "streamProtocolType": "RTSP"
-    }
-]
-}
-
-# RealtimeVideoEventInfos
-cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_in_data = {
-    "camList": [
-        {
-        "camID": "",
-        "eventUUID": "",
-        "eventName": "",
-        "startTime": 0,
-        "endTime": 0,
-        "eventDesc": ""
-    }
-]
-}
-
-# RealtimeVideoEventInfos WebHook OUT Data
-cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_webhook_out_data = {
-    "camList": [
-        {
-        "camID": ""
-    }
-],
-    "duration": 100,
-    "transProtocol": {},
-    "eventFilter": "",
-    "classFilter": "",
-    "startTime": 1761035760000
-}
-
-# StoredVideoEventInfos
-cmgyv3rzl014nvsveidu5jpzp_StoredVideoEventInfos_in_data = {
-    "timePeriod": {
-    "startTime": 1759221900000,
-    "endTime": 1761727500000
-},
-    "camList": [
-        {
-        "camID": ""
-    }
-],
-    "maxCount": 3,
-    "eventFilter": "",
-    "classFilter": ""
-}
-
-# cmgyv3rzl014nvsveidu5jpzp 데이터 리스트
-cmgyv3rzl014nvsveidu5jpzp_inData = [
-    cmgyv3rzl014nvsveidu5jpzp_Authentication_in_data,
-    cmgyv3rzl014nvsveidu5jpzp_Capabilities_in_data,
-    cmgyv3rzl014nvsveidu5jpzp_CameraProfiles_in_data,
-    cmgyv3rzl014nvsveidu5jpzp_StoredVideoInfos_in_data,
-    cmgyv3rzl014nvsveidu5jpzp_StreamURLs_in_data,
-    cmgyv3rzl014nvsveidu5jpzp_ReplayURL_in_data,
-    cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_in_data,
-    cmgyv3rzl014nvsveidu5jpzp_StoredVideoEventInfos_in_data,
+# cmiqr0kdw00i4ie8fr3firjtg 데이터 리스트
+cmiqr0kdw00i4ie8fr3firjtg_inData = [
+    cmiqr0kdw00i4ie8fr3firjtg_Authentication_in_data,
+    cmiqr0kdw00i4ie8fr3firjtg_Capabilities_in_data,
+    cmiqr0kdw00i4ie8fr3firjtg_CameraProfiles_in_data,
+    cmiqr0kdw00i4ie8fr3firjtg_PtzStatus_in_data,
+    cmiqr0kdw00i4ie8fr3firjtg_PtzContinuousMove_in_data,
+    cmiqr0kdw00i4ie8fr3firjtg_PtzStop_in_data,
 ]
 
-# cmgyv3rzl014nvsveidu5jpzp WebHook 데이터 리스트
-cmgyv3rzl014nvsveidu5jpzp_webhook_outData = [
-    cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_webhook_out_data,
-]
-
-# cmgyv3rzl014nvsveidu5jpzp API endpoint
-cmgyv3rzl014nvsveidu5jpzp_messages = [
+# cmiqr0kdw00i4ie8fr3firjtg API endpoint
+cmiqr0kdw00i4ie8fr3firjtg_messages = [
     "Authentication",
     "Capabilities",
     "CameraProfiles",
-    "StoredVideoInfos",
-    "StreamURLs",
-    "ReplayURL",
-    "RealtimeVideoEventInfos",
-    "StoredVideoEventInfos",
+    "PtzStatus",
+    "PtzContinuousMove",
+    "PtzStop",
 ]
 

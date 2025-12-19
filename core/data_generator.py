@@ -127,9 +127,31 @@ class dataGenerator:
             children: Any,
             required: bool
     ) -> List[Any]:
-        # object 배열 + children 정의가 있으면, 자식들로 구성된 객체 1개 리스트
+        # ✅ object 배열 처리 강화
         if array_elem_type == "object" and isinstance(children, list):
-            # ✅ 래퍼(unwrapped): children에 key==""인 object가 1개 있고 그 안에 실제 필드가 있을 때
+            # (A) children에 여러 개의 object 항목이 이미 "나열"되어 있는 경우
+            object_items = [
+                c for c in children
+                if isinstance(c, dict) and (c.get("type", "").lower() == "object")
+            ]
+            if len(object_items) > 1:
+                result = []
+                for c in object_items:
+                    sub_children = c.get("children")
+
+                    # unwrap: "children=[{key:'', type:'object', children:[...]}]" 형태 방어
+                    if (isinstance(sub_children, list) and len(sub_children) == 1 and
+                            isinstance(sub_children[0], dict) and
+                            sub_children[0].get("type", "").lower() == "object" and
+                            sub_children[0].get("key", "") == "" and
+                            isinstance(sub_children[0].get("children"), list)):
+                        sub_children = sub_children[0]["children"]
+
+                    obj = self._build_object_from_children(sub_children, required=True)
+                    result.append(obj)
+                return result
+
+            # (B) 기존 로직: 템플릿 1개인 경우 한 개 객체로 리스트 구성
             real_children = children
             if len(children) == 1 and isinstance(children[0], dict):
                 c0 = children[0]
@@ -139,7 +161,18 @@ class dataGenerator:
             obj = self._build_object_from_children(real_children, required=True)
             return [obj]
 
-        # value 기반 처리 (원소 타입이 primitive/문자열 리스트인 경우)
+        # ✅ primitive 배열(string, number 등)인데 children에 값이 있는 경우 처리
+        if array_elem_type != "object" and isinstance(children, list) and children:
+            result = []
+            for child in children:
+                if isinstance(child, dict):
+                    child_value = child.get("value")
+                    if child_value is not None and child_value != "":
+                        result.append(child_value)
+            if result:
+                return result
+
+        # ✅ value 기반 처리 (primitive/문자열 리스트)
         if value is None or value == "":
             return [] if required else []
 
