@@ -1,0 +1,4 @@
+{"time": "2025-12-19T03:09:05.840352Z", "api": "SensorDeviceControl2", "dir": "REQUEST", "data": {"sensorDeviceID": "iot0002", "commandType": "AlarmOff"}}
+{"time": "2025-12-19T03:09:05.863291Z", "api": "SensorDeviceControl2", "dir": "REQUEST", "data": {"sensorDeviceID": "iot0002", "commandType": "AlarmOff"}}
+{"time": "2025-12-19T03:09:05.868278Z", "api": "SensorDeviceControl2", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "sensorDeviceID": "iot0002", "sensorDeviceStatus": "AlarmOff"}}
+{"time": "2025-12-19T03:09:06.847662Z", "api": "SensorDeviceControl2", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "sensorDeviceID": "iot0002", "sensorDeviceStatus": "AlarmOff"}}

@@ -22,37 +22,40 @@
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 87.5,
+    "score": 100.0,
     "totalFields": 32,
-    "passedFields": 28,
-    "failedFields": 4
+    "passedFields": 32,
+    "failedFields": 0
   },
   "testResult": [
     {
       "testGroup": "cmisfix8407te5vy7fleq8pkf",
       "testSpecId": "cmiqr201z00i8ie8fitdg5t1b",
       "testSpecName": "sensor002",
-      "score": 75.0,
+      "score": 100.0,
       "totalFields": 8,
-      "passedFields": 6,
-      "failedFields": 2,
+      "passedFields": 8,
+      "failedFields": 0,
       "apis": [
         {
           "id": "cmise5c9900jr5vy7j5kdk1z6",
           "name": "사용자 인증",
           "method": "POST",
           "endpoint": "/Authentication",
-          "score": 0.0,
+          "score": 100.0,
           "validationCnt": 1,
           "totalFields": 2,
-          "passFields": 0,
-          "failFields": 2,
+          "passFields": 2,
+          "failFields": 0,
           "validations": [
             {
               "attempt": 1,
-              "validationData": {},
+              "validationData": {
+                "userID": "kisa",
+                "userPW": "kisa_k1!2@"
+              },
               "validationErrors": [
-                "Message Missing!"
+                "오류가 없습니다."
               ]
             }
           ]
@@ -111,7 +114,7 @@
             {
               "attempt": 1,
               "validationData": {
-                "sensorDeviceID": "iot0004",
+                "sensorDeviceID": "iot0002",
                 "commandType": ""
               },
               "validationErrors": [
@@ -134,8 +137,8 @@
             {
               "attempt": 1,
               "validationData": {
-                "sensorDeviceID": "iot0004",
-                "commandType": "AlarmOn"
+                "sensorDeviceID": "iot0002",
+                "commandType": "AlarmOff"
               },
               "validationErrors": [
                 "오류가 없습니다."
@@ -149,27 +152,30 @@
       "testGroup": "cmisfix8407te5vy7fleq8pkf",
       "testSpecId": "cmiqr1acx00i5ie8fi022t1hp",
       "testSpecName": "ac002",
-      "score": 91.67,
+      "score": 100.0,
       "totalFields": 24,
-      "passedFields": 22,
-      "failedFields": 2,
+      "passedFields": 24,
+      "failedFields": 0,
       "apis": [
         {
           "id": "cmisgwlsx08r25vy7s0uys91u",
           "name": "사용자 인증",
           "method": "POST",
           "endpoint": "/Authentication",
-          "score": 0.0,
+          "score": 100.0,
           "validationCnt": 1,
           "totalFields": 2,
-          "passFields": 0,
-          "failFields": 2,
+          "passFields": 2,
+          "failFields": 0,
           "validations": [
             {
               "attempt": 1,
-              "validationData": {},
+              "validationData": {
+                "userID": "kisa",
+                "userPW": "kisa_k1!2@"
+              },
               "validationErrors": [
-                "Message Missing!"
+                "오류가 없습니다."
               ]
             }
           ]
@@ -239,7 +245,7 @@
                 "duration": 200,
                 "transProtocol": {
                   "transProtocolType": "WebHook",
-                  "transProtocolDesc": "https://10.252.219.119:8081"
+                  "transProtocolDesc": "https://10.252.219.95:8081"
                 },
                 "startTime": 20251105163010124
               },
@@ -315,7 +321,7 @@
                 "duration": 10000,
                 "transProtocol": {
                   "transProtocolType": "WebHook",
-                  "transProtocolDesc": "https://10.252.219.119:8081"
+                  "transProtocolDesc": "https://10.252.219.95:8081"
                 },
                 "startTime": 20251105163010124
               },
@@ -344,7 +350,90 @@
           ]
         }
       ]
+    },
+    {
+      "testGroup": "cmisfix8407te5vy7fleq8pkf",
+      "testSpecId": "cmiqqzrjz00i3ie8figf79cur",
+      "testSpecName": "vid002",
+      "score": 0,
+      "totalFields": 0,
+      "passedFields": 0,
+      "failedFields": 0,
+      "apis": [
+        {
+          "id": "cmish2vdi08z35vy7gtz574hy",
+          "name": "사용자 인증",
+          "method": "POST",
+          "endpoint": "/Authentication",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmiwp7fqs05kc844gxsjq6rfs",
+          "name": "전송 지원 기능 정보 연동",
+          "method": "POST",
+          "endpoint": "/Capabilities",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmiwpag8n05re844gh1o3fc2u",
+          "name": "카메라 목록 연동",
+          "method": "POST",
+          "endpoint": "/CameraProfiles",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmiwpjpff077k844gx4u1vvdf",
+          "name": "PTZ 상태 정보 연동",
+          "method": "POST",
+          "endpoint": "/PtzStatus",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmiwpsaxt07b1844gx73rs8gp",
+          "name": "PTZ 연속 이동 제어 정보 연동",
+          "method": "POST",
+          "endpoint": "/PtzContinuousMove",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmiwpvh1v07dl844gap4brs86",
+          "name": "PTZ 정지 제어 정보 연동",
+          "method": "POST",
+          "endpoint": "/PtzStop",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        }
+      ]
     }
   ],
-  "completedDate": "2025-12-19T08:31:49Z"
+  "completedDate": "2025-12-19T12:09:06Z"
 }
