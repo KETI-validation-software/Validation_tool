@@ -178,11 +178,11 @@ cmiqr0kdw00i4ie8fr3firjtg_Capabilities_out_schema = {
     "message": str,
     "streamingSupport": [{
     "streamProtocolType": str,
-    OptionalKey("streamProtocolDesc"): str,
+    "streamProtocolDesc": str,
 }],
     "transportSupport": [{
     "transProtocolType": str,
-    OptionalKey("transProtocolDesc"): str,
+    "transProtocolDesc": str,
 }],
 }
 
