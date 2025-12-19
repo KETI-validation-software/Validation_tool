@@ -12,3 +12,5 @@ config/key0627/
 pro2/
 summary/
 doc/
+dist/
+*.zip
