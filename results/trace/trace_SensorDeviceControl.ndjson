@@ -1,4 +1,4 @@
-{"time": "2025-10-21T01:40:50.257369Z", "api": "SensorDeviceControl", "dir": "REQUEST", "data": {"sensorDeviceID": "", "commandType": ""}}
-{"time": "2025-10-21T01:40:50.258367Z", "api": "SensorDeviceControl", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "sensorDeviceID": "", "sensorDeviceStatus": ""}}
-{"time": "2025-10-21T01:40:52.259835Z", "api": "SensorDeviceControl", "dir": "REQUEST", "data": {"sensorDeviceID": "", "commandType": ""}}
-{"time": "2025-10-21T01:40:52.259835Z", "api": "SensorDeviceControl", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "sensorDeviceID": "", "sensorDeviceStatus": ""}}
+{"time": "2025-10-21T01:51:42.626151Z", "api": "SensorDeviceControl", "dir": "REQUEST", "data": {"sensorDeviceID": "", "commandType": ""}}
+{"time": "2025-10-21T01:51:42.627165Z", "api": "SensorDeviceControl", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "sensorDeviceID": "", "sensorDeviceStatus": ""}}
+{"time": "2025-10-21T01:51:44.618163Z", "api": "SensorDeviceControl", "dir": "REQUEST", "data": {"sensorDeviceID": "", "commandType": ""}}
+{"time": "2025-10-21T01:51:44.618163Z", "api": "SensorDeviceControl", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "sensorDeviceID": "", "sensorDeviceStatus": ""}}

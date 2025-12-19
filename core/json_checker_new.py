@@ -106,15 +106,26 @@ def extract_validation_rules(validation_dict):
     validation_dict: 각 API별 _in_validation dict
     반환: {필드명: 검증규칙 dict, ...} 형태로 평탄화
     """
+    print(f"\n🔍 [EXTRACT VALIDATION RULES] 시작")
+    print(f"📋 입력 데이터 타입: {type(validation_dict)}")
+    print(f"📊 입력 데이터 크기: {len(validation_dict) if isinstance(validation_dict, dict) else 'N/A'}")
+    
     rules = {}
     def _flatten(prefix, d):
         for k, v in d.items():
             field_name = f"{prefix}.{k}" if prefix else k
             if isinstance(v, dict) and ("validationType" in v or "enabled" in v):
                 rules[field_name] = v
+                print(f"   ✅ 규칙 발견: '{field_name}' -> {v.get('validationType', 'N/A')}")
             elif isinstance(v, dict):
+                print(f"   🔍 중첩 구조 탐색: '{field_name}'")
                 _flatten(field_name, v)
+    
     _flatten("", validation_dict)
+    
+    print(f"📊 추출된 규칙 개수: {len(rules)}")
+    print(f"📝 규칙 목록: {list(rules.keys())}")
+    
     return rules
 
 # 2단계: semantic validation logic
@@ -124,88 +135,139 @@ def do_semantic_checker(rules_dict, data_dict):
     data_dict: 실제 데이터(dict)
     반환: {필드명: {'result': PASS/FAIL, 'score': int, 'msg': str}} + total_score
     """
+    print(f"\n🔍 [SEMANTIC CHECKER] 시작")
+    print(f"📋 검증 규칙 개수: {len(rules_dict)}")
+    print(f"📊 데이터 필드 개수: {len(data_dict) if isinstance(data_dict, dict) else 'N/A'}")
+    
     results = {}
     total_score = 0
     max_score = 0
     
-    for field, rule in rules_dict.items():
+    for field_idx, (field, rule) in enumerate(rules_dict.items()):
+        print(f"\n📝 [필드 {field_idx + 1}/{len(rules_dict)}] '{field}' 검증 중...")
+        print(f"   규칙: {rule.get('validationType', 'N/A')}")
+        print(f"   점수: {rule.get('score', 1)}")
+        print(f"   활성화: {rule.get('enabled', True)}")
+        # 필드 값 추출
         keys = field.split('.')
         value = data_dict
+        print(f"   🔍 필드 경로: {keys}")
+        
         for k in keys:
             if isinstance(value, dict) and k in value:
                 value = value[k]
+                print(f"   ✅ '{k}' 발견: {type(value)} = {repr(value)}")
             else:
                 value = None
+                print(f"   ❌ '{k}' 누락 또는 타입 오류")
                 break
+        
+        print(f"   📊 최종 값: {type(value)} = {repr(value)}")
         
         score = rule.get('score', 1)
         max_score += score
         
         if not rule.get('enabled', True):
+            print(f"   ⏭️  검증 비활성화 - SKIP")
             results[field] = {'result': 'SKIP', 'score': 0, 'msg': 'Validation disabled'}
             continue
         
         vtype = rule.get('validationType', None)
         msg = ''
         passed = True
+        
+        print(f"   🔧 검증 타입: {vtype}")
 
         # valid-value-match
         if vtype == 'valid-value-match':
             allowed = rule.get('allowedValues', [])
             operator = rule.get('validValueOperator', 'equalsAny')
+            print(f"   🎯 valid-value-match: 허용값={allowed}, 연산자={operator}")
             
             if operator == 'equals':
                 if not safe_in_check(value, allowed):
                     passed = False
                     msg = f"Value '{value}' not in allowedValues {allowed} (equals)"
+                    print(f"   ❌ 실패: {msg}")
+                else:
+                    print(f"   ✅ 통과: 값이 허용 목록에 있음")
             elif operator == 'equalsAny':
                 if not safe_in_check(value, allowed):
                     passed = False
                     msg = f"Value '{value}' not in allowedValues {allowed} (equalsAny)"
+                    print(f"   ❌ 실패: {msg}")
+                else:
+                    print(f"   ✅ 통과: 값이 허용 목록에 있음")
 
         # specified-value-match
         elif vtype == 'specified-value-match':
             specified = rule.get('allowedValues', [])
             value_input_type = rule.get('valueInputType', 'single')
+            print(f"   🎯 specified-value-match: 지정값={specified}, 입력타입={value_input_type}")
             
             if not safe_in_check(value, specified):
                 passed = False
                 msg = f"Value '{value}' does not match specifiedValue {specified}"
+                print(f"   ❌ 실패: {msg}")
+            else:
+                print(f"   ✅ 통과: 값이 지정값과 일치")
 
         # range-match
         elif vtype == 'range-match':
             operator = rule.get('rangeOperator', None)
             minv = rule.get('rangeMin', None)
             maxv = rule.get('rangeMax', None)
+            print(f"   🎯 range-match: 연산자={operator}, 최소={minv}, 최대={maxv}")
+            
             try:
                 v = float(value)
+                print(f"   📊 변환된 값: {v}")
+                
                 if operator == 'less-than':
                     if maxv is not None and v >= maxv:
                         passed = False
                         msg = f"Value {v} not less than {maxv}"
+                        print(f"   ❌ 실패: {msg}")
+                    else:
+                        print(f"   ✅ 통과: {v} < {maxv}")
                 elif operator == 'less-equal':
                     if maxv is not None and v > maxv:
                         passed = False
                         msg = f"Value {v} not less or equal to {maxv}"
+                        print(f"   ❌ 실패: {msg}")
+                    else:
+                        print(f"   ✅ 통과: {v} <= {maxv}")
                 elif operator == 'between':
                     if (minv is not None and v < minv) or (maxv is not None and v > maxv):
                         passed = False
                         msg = f"Value {v} not between [{minv}, {maxv}]"
+                        print(f"   ❌ 실패: {msg}")
+                    else:
+                        print(f"   ✅ 통과: {v}이 [{minv}, {maxv}] 범위 내")
                 elif operator == 'greater-equal':
                     if minv is not None and v < minv:
                         passed = False
                         msg = f"Value {v} not greater or equal to {minv}"
+                        print(f"   ❌ 실패: {msg}")
+                    else:
+                        print(f"   ✅ 통과: {v} >= {minv}")
                 elif operator == 'greater-than':
                     if minv is not None and v <= minv:
                         passed = False
                         msg = f"Value {v} not greater than {minv}"
-            except Exception:
+                        print(f"   ❌ 실패: {msg}")
+                    else:
+                        print(f"   ✅ 통과: {v} > {minv}")
+            except Exception as e:
                 passed = False
                 msg = f"Value '{value}' is not a number"
+                print(f"   ❌ 실패: 숫자 변환 오류 - {e}")
 
         # request-field-match
         elif vtype == 'request-field-match':
             ref_field = rule.get('referenceField', None)
+            print(f"   🎯 request-field-match: 참조필드={ref_field}")
+            
             ref_value = None
             if ref_field:
                 ref_keys = ref_field.split('.')
@@ -216,13 +278,21 @@ def do_semantic_checker(rules_dict, data_dict):
                     else:
                         ref_value = None
                         break
+            
+            print(f"   📊 참조값: {type(ref_value)} = {repr(ref_value)}")
+            
             if not safe_compare(value, ref_value):
                 passed = False
                 msg = f"Value '{value}' does not match referenceField '{ref_field}' value '{ref_value}'"
+                print(f"   ❌ 실패: {msg}")
+            else:
+                print(f"   ✅ 통과: 값이 참조 필드와 일치")
 
         # response-field-match
         elif vtype == 'response-field-match':
             ref_field = rule.get('referenceField', None)
+            print(f"   🎯 response-field-match: 참조필드={ref_field}")
+            
             ref_value = None
             if ref_field:
                 ref_keys = ref_field.split('.')
@@ -233,9 +303,15 @@ def do_semantic_checker(rules_dict, data_dict):
                     else:
                         ref_value = None
                         break
+            
+            print(f"   📊 참조값: {type(ref_value)} = {repr(ref_value)}")
+            
             if not safe_compare(value, ref_value):
                 passed = False
                 msg = f"Value '{value}' does not match responseField '{ref_field}' value '{ref_value}'"
+                print(f"   ❌ 실패: {msg}")
+            else:
+                print(f"   ✅ 통과: 값이 응답 필드와 일치")
 
         # request-field-list-match
         elif vtype == 'request-field-list-match':
@@ -283,45 +359,74 @@ def do_semantic_checker(rules_dict, data_dict):
         elif vtype == 'length':
             minl = rule.get('minLength', None)
             maxl = rule.get('maxLength', None)
+            print(f"   🎯 length: 최소길이={minl}, 최대길이={maxl}")
+            
             try:
                 l = len(value)
+                print(f"   📊 실제 길이: {l}")
+                
                 if (minl is not None and l < minl) or (maxl is not None and l > maxl):
                     passed = False
                     msg = f"Length {l} not in range [{minl}, {maxl}]"
-            except Exception:
+                    print(f"   ❌ 실패: {msg}")
+                else:
+                    print(f"   ✅ 통과: 길이가 범위 내")
+            except Exception as e:
                 passed = False
                 msg = f"Value '{value}' has no length"
+                print(f"   ❌ 실패: 길이 측정 오류 - {e}")
         
         # regex
         elif vtype == 'regex':
             pattern = rule.get('pattern', None)
+            print(f"   🎯 regex: 패턴={pattern}")
+            
             if pattern is not None:
                 try:
                     if not re.fullmatch(pattern, str(value)):
                         passed = False
                         msg = f"Value '{value}' does not match regex '{pattern}'"
+                        print(f"   ❌ 실패: {msg}")
+                    else:
+                        print(f"   ✅ 통과: 정규식 패턴 일치")
                 except Exception as e:
                     passed = False
                     msg = f"Regex error: {e}"
+                    print(f"   ❌ 실패: 정규식 오류 - {e}")
             else:
                 passed = False
                 msg = "No regex pattern specified"
+                print(f"   ❌ 실패: 정규식 패턴 없음")
         
         # required
         elif vtype == 'required':
+            print(f"   🎯 required: 필수 필드 검증")
+            
             if value is None or value == '':
                 passed = False
                 msg = "Field is required but missing or empty"
+                print(f"   ❌ 실패: {msg}")
+            else:
+                print(f"   ✅ 통과: 필수 필드 존재")
         
         # unique
         elif vtype == 'unique':
+            print(f"   🎯 unique: 중복값 검증")
+            
             if isinstance(value, list):
+                print(f"   📊 리스트 길이: {len(value)}")
                 try:
                     hashable_value = [safe_hash(v) for v in value]
+                    print(f"   🔍 해시 변환 완료: {len(hashable_value)}개 항목")
+                    
                     try:
-                        if len(hashable_value) != len(set(hashable_value)):
+                        unique_set = set(hashable_value)
+                        if len(hashable_value) != len(unique_set):
                             passed = False
                             msg = "List contains duplicate values"
+                            print(f"   ❌ 실패: {msg} (중복 발견)")
+                        else:
+                            print(f"   ✅ 통과: 모든 값이 고유함")
                     except TypeError as e:
                         import traceback
                         print("[DEBUG][unhashable] unique validation error in do_semantic_checker")
@@ -330,6 +435,7 @@ def do_semantic_checker(rules_dict, data_dict):
                         traceback.print_exc()
                         passed = False
                         msg = f"Unique validation error: {e}"
+                        print(f"   ❌ 실패: 해시 불가능한 타입 - {e}")
                 except Exception as e:
                     import traceback
                     print("[DEBUG][exception] unique validation error in do_semantic_checker")
@@ -337,30 +443,56 @@ def do_semantic_checker(rules_dict, data_dict):
                     traceback.print_exc()
                     passed = False
                     msg = f"Unique validation error: {e}"
+                    print(f"   ❌ 실패: 처리 오류 - {e}")
             else:
                 passed = False
                 msg = "Field is not a list for unique validation"
+                print(f"   ❌ 실패: {msg}")
         
         # custom
         elif vtype == 'custom':
             func = rule.get('customFunction', None)
+            print(f"   🎯 custom: 사용자 정의 함수 검증")
+            
             if callable(func):
+                print(f"   🔧 함수: {func.__name__ if hasattr(func, '__name__') else 'anonymous'}")
                 try:
-                    if not func(value):
+                    result = func(value)
+                    print(f"   📊 함수 결과: {result}")
+                    
+                    if not result:
                         passed = False
                         msg = f"Custom function failed for value '{value}'"
+                        print(f"   ❌ 실패: {msg}")
+                    else:
+                        print(f"   ✅ 통과: 사용자 정의 함수 검증 성공")
                 except Exception as e:
                     passed = False
                     msg = f"Custom function error: {e}"
+                    print(f"   ❌ 실패: 함수 실행 오류 - {e}")
             else:
                 passed = False
                 msg = "No custom function provided"
+                print(f"   ❌ 실패: {msg}")
         
+        # 최종 결과 처리
         if passed:
             results[field] = {'result': 'PASS', 'score': score, 'msg': msg}
             total_score += score
+            print(f"   ✅ 최종 결과: PASS (점수: {score})")
         else:
             results[field] = {'result': 'FAIL', 'score': 0, 'msg': msg}
+            print(f"   ❌ 최종 결과: FAIL (점수: 0)")
+            print(f"   📝 오류 메시지: {msg}")
+    
+    # 전체 결과 요약
+    print(f"\n📊 [SEMANTIC CHECKER] 완료")
+    print(f"   총 필드 수: {len(rules_dict)}")
+    print(f"   통과 필드: {sum(1 for r in results.values() if r['result'] == 'PASS')}")
+    print(f"   실패 필드: {sum(1 for r in results.values() if r['result'] == 'FAIL')}")
+    print(f"   건너뛴 필드: {sum(1 for r in results.values() if r['result'] == 'SKIP')}")
+    print(f"   총 점수: {total_score}/{max_score}")
+    print(f"   점수 비율: {(total_score/max_score*100):.1f}%" if max_score > 0 else "0%")
     
     results['total_score'] = total_score
     results['max_score'] = max_score

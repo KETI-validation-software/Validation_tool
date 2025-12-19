@@ -27,24 +27,24 @@ def resource_path(relative_path):
 # pass/fail 판별 -> 여기에 연동 맥락 ㄱㅓㅁ증 추가하기
 def json_check_(schema, data, flag):
     try:
-        print(f"[DEBUG] json_check_ 시작")
-        print(f"[DEBUG] schema type: {type(schema)}")
-        print(f"[DEBUG] data type: {type(data)}")
-        print(f"[DEBUG] flag: {flag}")
+        print(f"~~~~~~~~~~~~~~~~~~~~~~~검증시작~~~~~~~~~~~~~~~~~~~~~~~")
+        print(f"[check] schema type: {type(schema)}")
+        print(f"[check] data type: {type(data)}")
+        print(f"[check] flag: {flag}")
         
         all_field, opt_field = field_finder(schema)
-        print(f"[DEBUG] field_finder 완료: all_field 개수={len(all_field)}, opt_field 개수={len(opt_field)}")
+        print(f"[check] field_finder 완료: all_field 개수={len(all_field)}, opt_field 개수={len(opt_field)}")
         
         all_data = data_finder(data)
-        print(f"[DEBUG] data_finder 완료: all_data 개수={len(all_data)}")
+        print(f"[check] data_finder 완료: all_data 개수={len(all_data)}")
         
         # 구조 검증만 수행 (기존 호환성 유지)
         result, error_msg, correct_cnt, error_cnt = do_checker(all_field, all_data, opt_field, flag)
-        print(f"[DEBUG] do_checker 완료: result={result}, correct_cnt={correct_cnt}, error_cnt={error_cnt}")
+        print(f"[check] do_checker 완료: result={result}, correct_cnt={correct_cnt}, error_cnt={error_cnt}")
         
         return result, error_msg, correct_cnt, error_cnt
     except Exception as e:
-        print(f"[DEBUG] json_check_ 에러: {e}")
+        print(f"[check] json_check_ 에러: {e}")
         import traceback
         traceback.print_exc()
         raise

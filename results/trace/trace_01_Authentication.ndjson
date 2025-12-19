@@ -1,4 +1,4 @@
-{"time": "2025-10-21T01:40:20.252198Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "", "userPW": ""}}
-{"time": "2025-10-21T01:40:21.245452Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "", "message": "", "userName": "", "userAff": "", "accessToken": "***"}}
-{"time": "2025-10-21T01:40:22.255660Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "", "userPW": ""}}
-{"time": "2025-10-21T01:40:23.249910Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "", "message": "", "userName": "", "userAff": "", "accessToken": "***"}}
+{"time": "2025-10-21T01:51:12.598193Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "", "userPW": ""}}
+{"time": "2025-10-21T01:51:13.599472Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "", "message": "", "userName": "", "userAff": "", "accessToken": "***"}}
+{"time": "2025-10-21T01:51:14.590104Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "", "userPW": ""}}
+{"time": "2025-10-21T01:51:15.593380Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "", "message": "", "userName": "", "userAff": "", "accessToken": "***"}}
