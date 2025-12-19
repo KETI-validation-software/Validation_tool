@@ -1,14 +1,31 @@
 {
+<<<<<<< HEAD
+  "requestId": "cmii85wjq009z8z1tv0d3d7r1",
+  "evaluationTarget": {
+    "companyName": "물리보안기업",
+    "contactPerson": "김철수",
+    "productName": "물리보안시스템-기본",
+=======
   "requestId": "cmisfmr3907tv5vy71y0276gp",
   "evaluationTarget": {
     "companyName": "물리보안기업",
     "contactPerson": "김철수",
     "productName": "물리보안시스템-제어",
+>>>>>>> 9fd9b3246611a93fa76179b792a61ddcb68a8a23
     "modelName": "v1.0",
     "version": "v1.0"
   },
   "testGroups": [
     {
+<<<<<<< HEAD
+      "id": "cmii831gk009j8z1thiahf6ro",
+      "name": "기본 기능 시험-물리보안",
+      "testRange": "ALL_FIELDS, ALL_FIELDS, ALL_FIELDS",
+      "testSpecIds": [
+        "cmii7wfuf006i8z1tcds6q69g",
+        "cmii7w683006h8z1t7usnin5g",
+        "cmii7v8pr006g8z1tvo55a50u"
+=======
       "id": "cmisfjfzt07tm5vy7qslmisks",
       "name": "제어기능-물리보안",
       "testRange": "ALL_FIELDS, ALL_FIELDS, ALL_FIELDS",
@@ -16,12 +33,101 @@
         "cmiqr2b9j00i9ie8frw439h8i",
         "cmiqr1jha00i6ie8fb1scb3go",
         "cmiqr0kdw00i4ie8fr3firjtg"
+>>>>>>> 9fd9b3246611a93fa76179b792a61ddcb68a8a23
       ]
     }
   ],
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
+<<<<<<< HEAD
+    "score": 97.83,
+    "totalFields": 92,
+    "passedFields": 90,
+    "failedFields": 2
+  },
+  "testResult": [
+    {
+      "testGroup": "cmii831gk009j8z1thiahf6ro",
+      "testSpecId": "cmii7wfuf006i8z1tcds6q69g",
+      "testSpecName": "sensor001",
+      "score": 0,
+      "totalFields": 0,
+      "passedFields": 0,
+      "failedFields": 0,
+      "apis": [
+        {
+          "id": "cmii82age008k8z1t71s85tbz",
+          "name": "사용자 인증",
+          "method": "POST",
+          "endpoint": "/Authentication",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmiwtm84f0an2p002pthrkfbj",
+          "name": "전송 지원 기능 정보 연동",
+          "method": "POST",
+          "endpoint": "/Capabilities",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmiwtnnvx0ar8p002dcz8llaf",
+          "name": "보안용 센서 단말 목록 정보 연동",
+          "method": "POST",
+          "endpoint": "/SensorDeviceProfiles",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmiwtr5xt0boqp002melvctad",
+          "name": "실시간 보안용 센서 데이터 정보 연동",
+          "method": "POST",
+          "endpoint": "/RealtimeSensorData",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmiwv1ifx0ddmp0023tuwdhoi",
+          "name": "실시간 보안용 센서 이벤트 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/RealtimeSensorEventInfos",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmixtu5uk0dg5p002kq3htt9b",
+          "name": "저장된 보안용 센서 이벤트 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/StoredSensorEventInfos",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+=======
     "score": 100.0,
     "totalFields": 75,
     "passedFields": 75,
@@ -219,10 +325,23 @@
               ]
             }
           ]
+>>>>>>> 9fd9b3246611a93fa76179b792a61ddcb68a8a23
         }
       ]
     },
     {
+<<<<<<< HEAD
+      "testGroup": "cmii831gk009j8z1thiahf6ro",
+      "testSpecId": "cmii7v8pr006g8z1tvo55a50u",
+      "testSpecName": "vid001",
+      "score": 97.83,
+      "totalFields": 92,
+      "passedFields": 90,
+      "failedFields": 2,
+      "apis": [
+        {
+          "id": "cmii7ylxn006m8z1tqq8dard1",
+=======
       "testGroup": "cmisfjfzt07tm5vy7qslmisks",
       "testSpecId": "cmiqr1jha00i6ie8fb1scb3go",
       "testSpecName": "ac002",
@@ -233,6 +352,7 @@
       "apis": [
         {
           "id": "cmisgv0ua08o55vy7yvk4aw0a",
+>>>>>>> 9fd9b3246611a93fa76179b792a61ddcb68a8a23
           "name": "사용자 인증",
           "method": "POST",
           "endpoint": "/Authentication",
@@ -249,7 +369,11 @@
                 "message": "성공",
                 "userName": "관리자",
                 "userAff": "오산시청",
+<<<<<<< HEAD
+                "accessToken": "abcde1234"
+=======
                 "accessToken": ""
+>>>>>>> 9fd9b3246611a93fa76179b792a61ddcb68a8a23
               },
               "validationErrors": [
                 "[시도 1/1]",
@@ -259,14 +383,23 @@
           ]
         },
         {
+<<<<<<< HEAD
+          "id": "cmiqtf9x600upie8ft45b1h1w",
+=======
           "id": "cmisjr2u40au05vy7kt6bb6zl",
+>>>>>>> 9fd9b3246611a93fa76179b792a61ddcb68a8a23
           "name": "전송 지원 기능 정보 연동",
           "method": "POST",
           "endpoint": "/Capabilities",
           "score": 100.0,
           "validationCnt": 1,
+<<<<<<< HEAD
+          "totalFields": 8,
+          "passFields": 8,
+=======
           "totalFields": 5,
           "passFields": 5,
+>>>>>>> 9fd9b3246611a93fa76179b792a61ddcb68a8a23
           "failFields": 0,
           "validations": [
             {
@@ -274,12 +407,23 @@
               "validationData": {
                 "code": "200",
                 "message": "성공",
+<<<<<<< HEAD
+                "streamingSupport": [
+                  {
+                    "streamProtocolType": "RTSP",
+                    "streamProtocolDesc": "Unicast"
+                  }
+                ],
+                "transportSupport": [
+                  {
+=======
                 "transportSupport": [
                   {
                     "transProtocolType": "LongPolling",
                     "transProtocolDesc": ""
                   },
                   {
+>>>>>>> 9fd9b3246611a93fa76179b792a61ddcb68a8a23
                     "transProtocolType": "Webhook",
                     "transProtocolDesc": ""
                   }
@@ -293,6 +437,16 @@
           ]
         },
         {
+<<<<<<< HEAD
+          "id": "cmiqthu4900voie8f1evs0kfm",
+          "name": "카메라 목록 연동",
+          "method": "POST",
+          "endpoint": "/CameraProfiles",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 12,
+          "passFields": 12,
+=======
           "id": "cmiskf6w20dcm5vy7cjao08fw",
           "name": "바이오 및 출입통제 장치 목록 정보",
           "method": "POST",
@@ -301,6 +455,7 @@
           "validationCnt": 1,
           "totalFields": 20,
           "passFields": 20,
+>>>>>>> 9fd9b3246611a93fa76179b792a61ddcb68a8a23
           "failFields": 0,
           "validations": [
             {
@@ -308,6 +463,13 @@
               "validationData": {
                 "code": "200",
                 "message": "성공",
+<<<<<<< HEAD
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "camName": "카메라1",
+                    "camLoc": {
+=======
                 "doorList": [
                   {
                     "doorID": "door0001",
@@ -315,11 +477,55 @@
                     "doorRelayStatus": "일반",
                     "doorSensor": "0",
                     "doorLoc": {
+>>>>>>> 9fd9b3246611a93fa76179b792a61ddcb68a8a23
                       "lon": "127.127730",
                       "lat": "38.439801",
                       "alt": "32.131",
                       "desc": "3층복도"
                     },
+<<<<<<< HEAD
+                    "camConfig": {
+                      "camType": "PTZ"
+                    }
+                  },
+                  {
+                    "camID": "cam0002",
+                    "camName": "카메라2",
+                    "camLoc": {
+                      "lon": "127.2887",
+                      "lat": "37.33671",
+                      "alt": ""
+                    },
+                    "camConfig": {
+                      "camType": "dome"
+                    }
+                  },
+                  {
+                    "camID": "cam003",
+                    "camName": "카메라3",
+                    "camLoc": {
+                      "lon": "75",
+                      "lat": "585",
+                      "alt": "122",
+                      "desc": "2층출입문"
+                    },
+                    "camConfig": {
+                      "camType": "PTZ"
+                    }
+                  },
+                  {
+                    "camID": "cam004",
+                    "camName": "카메라4",
+                    "camLoc": {
+                      "lon": "44",
+                      "lat": "211",
+                      "alt": "23",
+                      "desc": "1층 출입문"
+                    },
+                    "camConfig": {
+                      "camType": "dome"
+                    }
+=======
                     "bioDeviceList": [
                       {
                         "bioDeviceID": "bio0001",
@@ -374,6 +580,7 @@
                         "otherDeviceAuthTypeList": "카드"
                       }
                     ]
+>>>>>>> 9fd9b3246611a93fa76179b792a61ddcb68a8a23
                   }
                 ]
               },
@@ -385,6 +592,16 @@
           ]
         },
         {
+<<<<<<< HEAD
+          "id": "cmiqtkefj00whie8fd8odtc1m",
+          "name": "실시간 영상(CCTV) 전송 ",
+          "method": "POST",
+          "endpoint": "/StreamURLs",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 12,
+          "passFields": 12,
+=======
           "id": "cmixuoetf0gr9p002gy101xid-registration",
           "name": "실시간 출입통제 장치 상태 정보 연동-상태조회",
           "method": "POST",
@@ -437,13 +654,44 @@
           "validationCnt": 1,
           "totalFields": 2,
           "passFields": 2,
+>>>>>>> 9fd9b3246611a93fa76179b792a61ddcb68a8a23
           "failFields": 0,
           "validations": [
             {
               "attempt": 1,
               "validationData": {
                 "code": "200",
+<<<<<<< HEAD
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "accessID": "",
+                    "accessPW": "",
+                    "camURL": "rtsp://192.168.0.1:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": 30,
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  },
+                  {
+                    "camID": "cam0002",
+                    "accessID": "",
+                    "accessPW": "",
+                    "camURL": "rtsp://192.168.0.1:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": 30,
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  }
+                ]
+=======
                 "message": "성공"
+>>>>>>> 9fd9b3246611a93fa76179b792a61ddcb68a8a23
               },
               "validationErrors": [
                 "[시도 1/1]",
@@ -453,6 +701,16 @@
           ]
         },
         {
+<<<<<<< HEAD
+          "id": "cmiqtnwm200xoie8fxzfhodj5-registration",
+          "name": "실시간 이벤트 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/RealtimeVideoEventInfos",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 9,
+          "passFields": 9,
+=======
           "id": "cmixuvzks0hd3p002rcrvqdt4-registration",
           "name": "실시간 출입통제 장치 상태 정보 연동-결과조회",
           "method": "POST",
@@ -461,6 +719,7 @@
           "validationCnt": 1,
           "totalFields": 7,
           "passFields": 7,
+>>>>>>> 9fd9b3246611a93fa76179b792a61ddcb68a8a23
           "failFields": 0,
           "validations": [
             {
@@ -479,10 +738,17 @@
           ]
         },
         {
+<<<<<<< HEAD
+          "id": "cmiqtnwm200xoie8fxzfhodj5-webhook",
+          "name": "실시간 이벤트 분석 정보 연동 (Webhook)",
+          "method": "POST",
+          "endpoint": "/RealtimeVideoEventInfos/webhook",
+=======
           "id": "cmixuvzks0hd3p002rcrvqdt4-webhook",
           "name": "실시간 출입통제 장치 상태 정보 연동-결과조회 (Webhook)",
           "method": "POST",
           "endpoint": "/RealtimeDoorStatus/webhook",
+>>>>>>> 9fd9b3246611a93fa76179b792a61ddcb68a8a23
           "score": 0,
           "validationCnt": 1,
           "totalFields": 0,
@@ -495,6 +761,180 @@
               "validationErrors": []
             }
           ]
+<<<<<<< HEAD
+        },
+        {
+          "id": "cmiwrkvjq0005nkgl04g93wwy",
+          "name": "저장된 영상 목록 연동",
+          "method": "POST",
+          "endpoint": "/StoredVideoInfos",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 7,
+          "passFields": 7,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "timeList": [
+                      {
+                        "startTime": 20251111144500196,
+                        "endTime": 20251112725701160
+                      }
+                    ]
+                  }
+                ]
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmiwrq4r200kqnkgluspxeyu7",
+          "name": "저장된 영상(CCTV) 전송",
+          "method": "POST",
+          "endpoint": "/ReplayURL",
+          "score": 86.0,
+          "validationCnt": 1,
+          "totalFields": 14,
+          "passFields": 12,
+          "failFields": 2,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "accessID": "conn0001",
+                    "accessPW": "1234",
+                    "camURL": "rtsp://192.168.0.1:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": 30,
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  }
+                ]
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "<b>[camList]</b> (2건)",
+                "- [필드 누락] endTime",
+                "- [필드 누락] startTime"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmiws2qij05apnkgli7hun3bl",
+          "name": "저장된 이벤트 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/StoredVideoEventInfos",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 9,
+          "passFields": 9,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "eventUUID": "event01",
+                    "eventName": "Intrusion",
+                    "startTime": 20251107396533686,
+                    "endTime": 20251110068565064,
+                    "eventDesc": "AAABVVVVCCCDDssvfdd"
+                  },
+                  {
+                    "camID": "cam0002",
+                    "eventUUID": "event01",
+                    "eventName": "Intrusion",
+                    "startTime": 20251107756988054,
+                    "endTime": 20251114117041874,
+                    "eventDesc": "AAABVVVVCCCDDssvfdd"
+                  },
+                  {
+                    "camID": "cam003",
+                    "eventUUID": "event01",
+                    "eventName": "Intrusion",
+                    "startTime": 20251109997593297,
+                    "endTime": 20251112379687274,
+                    "eventDesc": "AAABVVVVCCCDDssvfdd"
+                  }
+                ]
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmiws9btu01ksp0028h4uc4az",
+          "name": "저장된 객체 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/StoredObjectAnalyticsInfos",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 16,
+          "passFields": 16,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "analyticsTime": 20251106942245347,
+                    "anlayticsResultList": [
+                      {
+                        "anayticsID": "object001",
+                        "analyticsClass": "Human",
+                        "analyticsAttribute": [
+                          "빨간색"
+                        ],
+                        "analyticsConfidence": 0.8,
+                        "analyticsBoundingBox": {
+                          "left": 0.2,
+                          "top": 0.1,
+                          "right": 0.5,
+                          "bottom": 0.6
+                        },
+                        "analyticsDesc": "13가 4567"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다."
+              ]
+            }
+          ]
+=======
         }
       ]
     },
@@ -578,9 +1018,14 @@
           "passFields": 0,
           "failFields": 0,
           "validations": []
+>>>>>>> 9fd9b3246611a93fa76179b792a61ddcb68a8a23
         }
       ]
     }
   ],
+<<<<<<< HEAD
+  "completedDate": "2025-12-19T12:57:51Z"
+=======
   "completedDate": "2025-12-19T12:09:06Z"
+>>>>>>> 9fd9b3246611a93fa76179b792a61ddcb68a8a23
 }
