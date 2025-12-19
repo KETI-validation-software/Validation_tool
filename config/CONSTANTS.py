@@ -65,8 +65,8 @@ test_target = "제어 기능-통합플랫폼"
 test_range = "ALL_FIELDS"
 auth_type = "Digest Auth"
 auth_info = "kisa,kisa_k1!2@"
-admin_code = "1"
-url = "https://127.0.0.1:8080"
+admin_code = "1234"
+url = "https://10.252.219.95:8080"
 contact_person = "김철수"
 model_name = "v1.0"
 request_id = "cmisflgy307tr5vy7clzgjaln"
@@ -140,7 +140,7 @@ SPEC_CONFIG = [
     "api_id": ['cmise5c9900jr5vy7j5kdk1z6', 'cmisebj3b00s65vy7377edoan', 'cmiseuulh03d75vy7wmr8iroc', 'cmisfu13v07xs5vy7gthbhp0p', 'cmisge6mr08di5vy7hirl5jp1'],
     "api_endpoint": ['/Authentication', '/Capabilities', '/SensorDeviceProfiles', '/SensorDeviceControl', '/SensorDeviceControl2'],
     "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic'],
-    "time_out": [5000, 5000, 5000, 5000, 5000],
+    "time_out": [10000, 10000, 10000, 10000, 10000],
     "num_retries": [1, 1, 1, 1, 1]
 },
         "cmiqr1acx00i5ie8fi022t1hp": {
@@ -150,7 +150,7 @@ SPEC_CONFIG = [
     "api_id": ['cmisgwlsx08r25vy7s0uys91u', 'cmisjsrxy0bd75vy78umc8kos', 'cmiwq2e7z07fi844gof4cw167', 'cmiwqiqjn0acb844gb9f4qqd0', 'cmiwqol4l0ayv844g134sbbu7', 'cmiwqq5880b07844gyqot66cj'],
     "api_endpoint": ['/Authentication', '/Capabilities', '/DoorProfiles', '/RealtimeDoorStatus', '/DoorControl', '/RealtimeDoorStatus2'],
     "trans_protocol": ['basic', 'basic', 'basic', 'WebHook', 'basic', 'WebHook'],
-    "time_out": [5000, 5000, 5000, 5000, 5000, 5000],
+    "time_out": [10000, 10000, 10000, 10000, 10000, 10000],
     "num_retries": [1, 1, 1, 1, 1, 1]
 },
         "cmiqqzrjz00i3ie8figf79cur": {
@@ -160,7 +160,7 @@ SPEC_CONFIG = [
     "api_id": ['cmish2vdi08z35vy7gtz574hy', 'cmiwp7fqs05kc844gxsjq6rfs', 'cmiwpag8n05re844gh1o3fc2u', 'cmiwpjpff077k844gx4u1vvdf', 'cmiwpsaxt07b1844gx73rs8gp', 'cmiwpvh1v07dl844gap4brs86'],
     "api_endpoint": ['/Authentication', '/Capabilities', '/CameraProfiles', '/PtzStatus', '/PtzContinuousMove', '/PtzStop'],
     "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic'],
-    "time_out": [5000, 5000, 5000, 5000, 5000, 5000],
+    "time_out": [10000, 10000, 10000, 10000, 10000, 10000],
     "num_retries": [1, 1, 1, 1, 1, 1]
 }
     }
