@@ -1,0 +1,4 @@
+{"time": "2025-12-19T08:23:18.927611Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
+{"time": "2025-12-19T08:23:18.974486Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
+{"time": "2025-12-19T08:23:18.978756Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "streamingSupport": [{"streamProtocolType": "RTSP", "streamProtocolDesc": "Unicast"}], "transportSupport": [{"transProtocolType": "Webhook", "transProtocolDesc": ""}]}}
+{"time": "2025-12-19T08:23:19.917790Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "streamingSupport": [{"streamProtocolType": "RTSP", "streamProtocolDesc": "Unicast"}], "transportSupport": [{"transProtocolType": "Webhook", "transProtocolDesc": ""}]}}

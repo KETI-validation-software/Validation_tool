@@ -1,19 +1,14 @@
 import requests
-from json_checker import Checker, OptionalKey
 from core.json_checker_new import (
-    data_finder, do_checker,
-    timeout_field_finder, extract_validation_rules,
+    extract_validation_rules,
     get_flat_fields_from_schema, get_flat_data_from_response
 )
 from fpdf import FPDF
 import sys
 import os
 import json
-from lxml import etree
 from PyQt5.QtWidgets import QMessageBox
-import json
 from datetime import datetime
-import uuid
 import config.CONSTANTS as CONSTANTS
 import re
 import cv2
@@ -28,9 +23,6 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 
-# ================================================================
-# 오류 메시지 트리 구조 포매팅
-# ================================================================
 def format_errors_as_tree(error_messages):
     """
     검증 오류 메시지를 트리 구조로 포매팅

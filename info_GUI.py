@@ -9,8 +9,6 @@ from PyQt5.QtGui import QPixmap, QColor, QFont, QBrush, QPainter, QPen, QResizeE
 import importlib
 import re
 from core.functions import resource_path
-
-# 분리된 모듈들 import
 from network_scanner import NetworkScanWorker, ARPScanWorker
 from form_validator import FormValidator, ClickableLabel, ClickableCheckboxRowWidget
 import config.CONSTANTS as CONSTANTS
@@ -18,7 +16,7 @@ from splash_screen import LoadingPopup
 
 
 class TestFieldTableWidget(QTableWidget):
-    """시험 분야별 시나리오 테이블 - 세로 구분선이 전체 높이까지 표시되는 커스텀 테이블"""
+    """시험 분야별 시나리오 테이블 - 세로 구분선이 전체 높이까지 표s시되는 커스텀 테이블"""
 
     def __init__(self, rows, columns):
         super().__init__(rows, columns)

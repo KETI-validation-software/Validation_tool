@@ -24,7 +24,8 @@ from PyQt5.QtCore import *
 from PyQt5 import QtCore
 from api.webhook_api import WebhookThread
 from api.api_server import Server  # ✅ door_memory 접근을 위한 import 추가
-from core.functions import json_check_, resource_path, json_to_data, timeout_field_finder
+from core.json_checker_new import timeout_field_finder
+from core.functions import json_check_, resource_path, json_to_data
 from core.data_mapper import ConstraintDataGenerator
 from splash_screen import LoadingPopup
 from requests.auth import HTTPDigestAuth
