@@ -2195,8 +2195,9 @@ class MyApp(QWidget):
     def load_specs_from_constants(self):
         """SPEC_CONFIG 기반으로 spec 데이터 동적 로드"""
         # ===== PyInstaller 환경에서 외부 CONSTANTS.py에서 SPEC_CONFIG 로드 =====
-        import sys  # ✅ 함수 내에서 명시적으로 import
-        
+        import sys
+        import os
+
         SPEC_CONFIG = getattr(self.CONSTANTS, 'SPEC_CONFIG', [])
         url_value = getattr(self.CONSTANTS, 'url', None)
         auth_type = getattr(self.CONSTANTS, 'auth_type', None)
@@ -2380,11 +2381,15 @@ class MyApp(QWidget):
         print(f"[PLATFORM] 🔧 타입: 요청 검증 + 응답 전송")
 
         # Request 검증용 데이터 로드
-        self.videoInSchema = getattr(schema_request_module, spec_names[0], [])
+        # spec_names 순서: [outData, messages, in_schema, ...]
+        # 따라서 in_schema는 spec_names[2]에 있음
+        self.videoInSchema = getattr(schema_request_module, spec_names[2] if len(spec_names) > 2 else '', [])
 
         # Response 전송용 데이터 로드
-        self.videoOutMessage = getattr(data_response_module, spec_names[1], [])
-        self.videoMessages = getattr(data_response_module, spec_names[2], [])
+        # outData는 spec_names[0]에 있음
+        self.videoOutMessage = getattr(data_response_module, spec_names[0] if len(spec_names) > 0 else '', [])
+        # messages는 spec_names[1]에 있음
+        self.videoMessages = getattr(data_response_module, spec_names[1] if len(spec_names) > 1 else '', [])
         # 표시용 API 이름 (숫자 제거)
         self.videoMessagesDisplay = [self._remove_api_number_suffix(msg) for msg in self.videoMessages]
         self.videoOutConstraint = getattr(constraints_response_module, self.current_spec_id + "_outConstraints", [])
@@ -2404,30 +2409,6 @@ class MyApp(QWidget):
                 print(f"[PLATFORM] 📦 웹훅 스키마 개수: {len(self.videoWebhookSchema)}개 API")
                 print(f"[PLATFORM] 📋 웹훅 데이터 개수: {len(self.videoWebhookData)}개")
                 print(f"[PLATFORM] 📋 웹훅 constraints 개수: {len(self.videoWebhookConstraint)}개")
-
-                # 웹훅 스키마 이름 맞춰야함
-                # webhook_resp_name = webhook_schema_name + "_Response"
-                # self.videoWebhookOutSchema = getattr(schema_response_module, webhook_resp_name, [])
-                self.videoWebhookOutSchema = []
-                try:
-                    # 1. 스키마 모듈의 모든 변수 목록을 가져옵니다.
-                    import spec.Schema_response as schema_response_module
-                    all_variables = dir(schema_response_module)
-
-                    # 2. 반복문으로 진짜 변수명을 찾습니다.
-                    # 조건: API 이름("RealtimeVideoEventInfos")이 포함되어 있고, "_webhook_out_schema"로 끝나는 것
-                    for var_name in all_variables:
-                        if webhook_schema_name in var_name and var_name.endswith("_webhook_out_schema"):
-                            self.videoWebhookOutSchema = getattr(schema_response_module, var_name)
-                            print(f"[PLATFORM] ✅ 웹훅 응답 스키마 자동 로드 성공: {var_name}")
-                            break # 찾았으면 중단
-                    
-                    if not self.videoWebhookOutSchema:
-                        print(f"[PLATFORM] ⚠️ 경고: {webhook_schema_name}에 대한 웹훅 응답 스키마를 찾지 못했습니다.")
-
-                except Exception as e:
-                    print(f"[PLATFORM] 스키마 로드 중 에러: {e}")
-                    self.videoWebhookOutSchema = []
 
                 webhook_indices = [i for i, msg in enumerate(self.videoMessages) if "Webhook" in msg]
                 if webhook_indices:
@@ -3067,6 +3048,12 @@ class MyApp(QWidget):
                     self.current_retry + 1
                 )
                 QApplication.processEvents()
+
+                # 플랫폼은 응답 메시지 표시 안 함 (요청만 표시)
+                # self.valResult.append(f"\n📤 응답 메시지 송신 [{retry_attempt + 1}/{current_retries}]")
+                # if 'tmp_response' in locals():
+                #     self.valResult.append(tmp_response)
+
                 # current_retry 증가
                 self.current_retry += 1
 
@@ -3178,27 +3165,22 @@ class MyApp(QWidget):
                 self.step_buffers[self.cnt]["result"] = "FAIL"
 
                 tmp_fields_rqd_cnt, tmp_fields_opt_cnt = timeout_field_finder(self.Server.inSchema[self.cnt])
-                self.total_error_cnt += tmp_fields_rqd_cnt
 
+                # ✅ 웹훅 API인 경우 웹훅 스키마 필드 수도 추가
+                current_protocol = self.trans_protocols[self.cnt] if self.cnt < len(self.trans_protocols) else "basic"
+                if current_protocol == "WebHook" and len(self.videoWebhookSchema) > 0:
+                    webhook_rqd_cnt, webhook_opt_cnt = timeout_field_finder(self.videoWebhookSchema[0])
+                    tmp_fields_rqd_cnt += webhook_rqd_cnt
+                    tmp_fields_opt_cnt += webhook_opt_cnt
+                    print(f"[PLATFORM] 웹훅 필드 수 추가: 필수={webhook_rqd_cnt}, 선택={webhook_opt_cnt}")
+                    # 웹훅 API임을 step_buffers에 표시
+                    self.step_buffers[self.cnt]["is_webhook_api"] = True
+
+                self.total_error_cnt += tmp_fields_rqd_cnt
                 if tmp_fields_rqd_cnt == 0:
                     self.total_error_cnt += 1
                 if self.flag_opt:
                     self.total_error_cnt += tmp_fields_opt_cnt
-
-                is_webhook = "Webhook" in self.Server.message[self.cnt] or self.step_buffers[self.cnt].get("is_webhook_api", False)
-
-                if is_webhook:
-                    if hasattr(self, 'videoWebhookSchema') and len(self.videoWebhookSchema) > 0:
-                        wh_req_rqd, wh_req_opt = timeout_field_finder(self.videoWebhookSchema[0])
-                        self.total_error_cnt += wh_req_rqd
-                        if self.flag_opt:
-                            self.total_error_cnt += wh_req_opt
-
-                    if hasattr(self, 'videoWebhookOutSchema') and len(self.videoWebhookOutSchema) > 0:
-                        wh_res_rqd, wh_res_opt = timeout_field_finder(self.videoWebhookOutSchema[0])
-                        self.total_error_cnt += wh_res_rqd
-                        if self.flag_opt:
-                            self.total_error_cnt += wh_res_opt
 
                 self.total_pass_cnt += 0
 
@@ -5939,34 +5921,11 @@ class MyApp(QWidget):
         self.outCon = self.videoOutConstraint
 
         # 이 부분 수정해야함
-        # try:
-        #     webhook_schema_name = f"{self.current_spec_id}_webhook_out_schema"
-        #     self.webhookSchema = getattr(schema_response_module, webhook_schema_name, [])
-        # except Exception as e:
-        #     print(f"Error loading webhook schema: {e}")
-        #     self.webhookSchema = []
-
         try:
-            self.webhookSchema = []
-            
-            # 현재 API 이름 가져오기 (설정에서 3번째 항목이 API 이름)
-            target_api_name = ""
-            if hasattr(self, 'spec_config') and 'specs' in self.spec_config and len(self.spec_config['specs']) >= 4:
-                target_api_name = self.spec_config['specs'][3]
-
-            if target_api_name:
-                import spec.Schema_response as schema_response_module
-                all_variables = dir(schema_response_module)
-
-                # 파일 내부를 뒤져서 맞는 변수 찾기
-                for var_name in all_variables:
-                    if target_api_name in var_name and var_name.endswith("_webhook_out_schema"):
-                        self.webhookSchema = getattr(schema_response_module, var_name)
-                        print(f"[SERVER] ✅ 서버용 웹훅 스키마 로드 성공: {var_name}")
-                        break
-        
+            webhook_schema_name = f"{self.current_spec_id}_webhook_inSchema"
+            self.webhookSchema = getattr(schema_response_module, webhook_schema_name, [])
         except Exception as e:
-            print(f"[SERVER] 웹훅 스키마 로드 실패: {e}")
+            print(f"Error loading webhook schema: {e}")
             self.webhookSchema = []
 
         self.r2 = self.auth_type

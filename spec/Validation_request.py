@@ -25,7 +25,15 @@ cmii7shen005i8z1tagevx4qh_Capabilities_in_validation = {}
 cmii7shen005i8z1tagevx4qh_SensorDeviceProfiles_in_validation = {}
 
 # RealtimeSensorData
-cmii7shen005i8z1tagevx4qh_RealtimeSensorData_in_validation = {}
+cmii7shen005i8z1tagevx4qh_RealtimeSensorData_in_validation = {
+  "sensorDeviceList": {
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueMatchType": "validation-field",
+    "validValueOperator": "equals",
+    "score": 0
+  }
+}
 
 # RealtimeSensorData WebHook OUT Validation
 cmii7shen005i8z1tagevx4qh_RealtimeSensorData_webhook_out_validation = {}

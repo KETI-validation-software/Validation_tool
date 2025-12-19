@@ -1024,59 +1024,32 @@ class Server(BaseHTTPRequestHandler):
 
     def webhook_req(self, url, json_data_tmp, max_retries=3):
         import requests
-        from requests.exceptions import Timeout, ConnectionError
-        
         for attempt in range(max_retries):
+
             try:
-                # ✅ timeout 설정 (5초)
-                result = requests.post(url, data=json_data_tmp, verify=False, timeout=5)
+                result = requests.post(url, data=json_data_tmp, verify=False)
                 print(f"[DEBUG][SERVER] 웹훅 응답 수신: {result.text}")
                 self.result = result
-                Server.webhook_response = json.loads(result.text)  # 클래스 변수에 저장
+                Server.webhook_response = json.loads(result.text)  # ✅ 클래스 변수에 저장
                 print(f"[DEBUG][SERVER] webhook_response 저장됨 (클래스 변수): {Server.webhook_response}")
-        
+                
                 # ✅ 웹훅 응답 기록 (trace)
                 spec_id, api_name = self.parse_path()
-                
-                # 테스트용: RealtimeVideoEventInfos의 웹훅 응답을 null로 강제 설정 (웹훅 실패 카운트 확인용) -> 주석 해제하면 테스트 가능
-                # if api_name == "RealtimeVideoEventInfos":
-                #     print(f"[TEST] RealtimeVideoEventInfos 웹훅 응답을 null로 강제 설정 (실패 카운트 테스트용)")
-                #     Server.webhook_response = None
-                # else:
-                #     Server.webhook_response = json.loads(result.text)  
-                
                 self._push_event(api_name, "WEBHOOK_IN", Server.webhook_response)
+                
+                # JSON 파일 저장 제거 - spec/video/videoData_response.py 사용
+                # with open(resource_path("spec/" + self.system + "/" + "webhook_" + self.path[1:] + ".json"),
+                #           "w", encoding="UTF-8") as out_file2:
+                #     json.dump(json.loads(str(self.result.text)), out_file2, ensure_ascii=False)
                 break
-
-            except Timeout:
-                # ✅ timeout 발생 시 webhook_response를 None으로 설정하여 실패로 카운트되도록 함
-                print(f"[ERROR][SERVER] 웹훅 요청 timeout 발생 (시도 {attempt + 1}/{max_retries})")
-                spec_id, api_name = self.parse_path()
-                Server.webhook_response = None
-                self._push_event(api_name, "WEBHOOK_IN", None)
-                # 마지막 시도가 아니면 재시도
-                if attempt < max_retries - 1:
-                    continue
-                else:
-                    break
-            except ConnectionError as e:
-                print(f"[ERROR][SERVER] 웹훅 연결 오류: {e} (시도 {attempt + 1}/{max_retries})")
-                spec_id, api_name = self.parse_path()
-                Server.webhook_response = None
-                self._push_event(api_name, "WEBHOOK_IN", None)
-                if attempt < max_retries - 1:
-                    continue
-                else:
-                    break
+                #  self.res.emit(str(self.result.text))
+            # except requests.ConnectionError:
+            #    print("..")
+            #    time.sleep(1)
             except Exception as e:
-                print(f"[ERROR][SERVER] 웹훅 요청 오류: {e} (시도 {attempt + 1}/{max_retries})")
-                spec_id, api_name = self.parse_path()
-                Server.webhook_response = None
-                self._push_event(api_name, "WEBHOOK_IN", None)
-                if attempt < max_retries - 1:
-                    continue
-                else:
-                    break
+                print(e)
+                # print(traceback.format_exc())
+                #  self.res.emit(str("err from WebhookRequest"))
 
     def api_res(self, api_name = None):
         i, data, out_con = None, None, None

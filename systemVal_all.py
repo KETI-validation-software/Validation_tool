@@ -3949,50 +3949,19 @@ class MyApp(QWidget):
                     self.step_buffers[self.cnt]["result"] = "FAIL"
                     self.step_buffers[self.cnt]["events"] = list(self.trace.get(self.cnt, []))
 
-                    # ✅ 웹훅 검증 추가 (message missing인 경우에도 웹훅 검증 수행하여 11개 필드로 계산)
-                    webhook_req_key_psss_cnt = 0
-                    webhook_req_key_error_cnt = 0
-                    webhook_req_opt_correct = 0
-                    webhook_req_opt_error = 0
-                    
-                    # 웹훅 API인지 확인 (is_webhook_api 플래그 또는 API 이름으로 확인)
-                    is_webhook_api = self.step_buffers[self.cnt].get("is_webhook_api", False)
-                    # message missing인 경우 플래그가 설정되지 않았을 수 있으므로 API 이름으로도 확인
-                    if not is_webhook_api and self.cnt < len(self.message):
-                        api_name = self.message[self.cnt]
-                        is_webhook_api = "Realtime" in api_name
-                    
-                    if is_webhook_api and len(self.webhookSchema) > 0:
-                        # 웹훅 요청 데이터가 있는 경우 사용, 없거나 message missing인 경우 빈 딕셔너리로 처리
-                        webhook_request_data = {}  # message missing 또는 데이터 없음
-                        
-                        webhook_req_val_result, webhook_req_val_text, webhook_req_key_psss_cnt, webhook_req_key_error_cnt, webhook_req_opt_correct, webhook_req_opt_error = json_check_(
-                            self.webhookSchema[0], webhook_request_data, self.flag_opt
-                        )
-                        
-                        # 웹훅 검증 결과를 add_err에 추가
-                        add_err += webhook_req_key_error_cnt
-                        if self.flag_opt:
-                            add_err += webhook_req_opt_error
-                        
-                        # 웹훅 검증 오류 메시지 추가
-                        if webhook_req_val_result == "FAIL":
-                            webhook_req_err_txt = self._to_detail_text(webhook_req_val_text)
-                            self.step_buffers[self.cnt]["error"] += f"\n\n--- Webhook 요청 검증 (Message Missing) ---\n{webhook_req_err_txt}"
-
                     # ✅ step_pass_counts 배열에 저장 (배열이 있는 경우에만)
                     if hasattr(self, 'step_pass_counts') and self.cnt < len(self.step_pass_counts):
-                        self.step_pass_counts[self.cnt] = webhook_req_key_psss_cnt
+                        self.step_pass_counts[self.cnt] = 0
                         self.step_error_counts[self.cnt] = add_err
                     
                     # ✅ 전체 점수 업데이트 (모든 spec 합산)
                     self.global_error_cnt += add_err
-                    self.global_pass_cnt += webhook_req_key_psss_cnt
+                    self.global_pass_cnt += 0
 
                     # 평가 점수 디스플레이 업데이트
                     self.update_score_display()
                     # 테이블 업데이트 (Message Missing)
-                    self.update_table_row_with_retries(self.cnt, "FAIL", webhook_req_key_psss_cnt, add_err, "", "Message Missing!",
+                    self.update_table_row_with_retries(self.cnt, "FAIL", 0, add_err, "", "Message Missing!",
                                                        current_retries)
 
                     # 다음 API로 이동
