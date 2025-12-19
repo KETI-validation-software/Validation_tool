@@ -244,3 +244,4 @@ cmiqqzrjz00i3ie8figf79cur_inValidation = [
     cmiqqzrjz00i3ie8figf79cur_PtzContinuousMove_in_validation,
     cmiqqzrjz00i3ie8figf79cur_PtzStop_in_validation,
 ]
+
