@@ -3162,6 +3162,16 @@ class MyApp(QWidget):
 
                 tmp_fields_rqd_cnt, tmp_fields_opt_cnt = timeout_field_finder(self.Server.inSchema[self.cnt])
 
+                # ✅ 웹훅 API인 경우 웹훅 스키마 필드 수도 추가
+                current_protocol = self.trans_protocols[self.cnt] if self.cnt < len(self.trans_protocols) else "basic"
+                if current_protocol == "WebHook" and len(self.videoWebhookSchema) > 0:
+                    webhook_rqd_cnt, webhook_opt_cnt = timeout_field_finder(self.videoWebhookSchema[0])
+                    tmp_fields_rqd_cnt += webhook_rqd_cnt
+                    tmp_fields_opt_cnt += webhook_opt_cnt
+                    print(f"[PLATFORM] 웹훅 필드 수 추가: 필수={webhook_rqd_cnt}, 선택={webhook_opt_cnt}")
+                    # 웹훅 API임을 step_buffers에 표시
+                    self.step_buffers[self.cnt]["is_webhook_api"] = True
+
                 self.total_error_cnt += tmp_fields_rqd_cnt
                 if tmp_fields_rqd_cnt == 0:
                     self.total_error_cnt += 1
