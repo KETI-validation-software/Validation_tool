@@ -13,7 +13,7 @@ cmii7shen005i8z1tagevx4qh_Capabilities_out_data = {
     "message": "성공",
     "transportSupport": [
         {
-        "transProtocolType": "LongPolling",
+        "transProtocolType": "Webhook",
         "transProtocolDesc": ""
     }
 ]

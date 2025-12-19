@@ -1024,13 +1024,15 @@ class Server(BaseHTTPRequestHandler):
 
     def webhook_req(self, url, json_data_tmp, max_retries=3):
         import requests
+        from requests.exceptions import Timeout, ConnectionError
+        
         for attempt in range(max_retries):
-
             try:
-                result = requests.post(url, data=json_data_tmp, verify=False)
+                # ✅ timeout 설정 (5초)
+                result = requests.post(url, data=json_data_tmp, verify=False, timeout=5)
                 print(f"[DEBUG][SERVER] 웹훅 응답 수신: {result.text}")
                 self.result = result
-                Server.webhook_response = json.loads(result.text)  # 클래스 변수에 저장 (아래 테스트 할 시 주석 처리)
+                Server.webhook_response = json.loads(result.text)  # 클래스 변수에 저장
                 print(f"[DEBUG][SERVER] webhook_response 저장됨 (클래스 변수): {Server.webhook_response}")
         
                 # ✅ 웹훅 응답 기록 (trace)
@@ -1046,8 +1048,35 @@ class Server(BaseHTTPRequestHandler):
                 self._push_event(api_name, "WEBHOOK_IN", Server.webhook_response)
                 break
 
+            except Timeout:
+                # ✅ timeout 발생 시 webhook_response를 None으로 설정하여 실패로 카운트되도록 함
+                print(f"[ERROR][SERVER] 웹훅 요청 timeout 발생 (시도 {attempt + 1}/{max_retries})")
+                spec_id, api_name = self.parse_path()
+                Server.webhook_response = None
+                self._push_event(api_name, "WEBHOOK_IN", None)
+                # 마지막 시도가 아니면 재시도
+                if attempt < max_retries - 1:
+                    continue
+                else:
+                    break
+            except ConnectionError as e:
+                print(f"[ERROR][SERVER] 웹훅 연결 오류: {e} (시도 {attempt + 1}/{max_retries})")
+                spec_id, api_name = self.parse_path()
+                Server.webhook_response = None
+                self._push_event(api_name, "WEBHOOK_IN", None)
+                if attempt < max_retries - 1:
+                    continue
+                else:
+                    break
             except Exception as e:
-                print(e)
+                print(f"[ERROR][SERVER] 웹훅 요청 오류: {e} (시도 {attempt + 1}/{max_retries})")
+                spec_id, api_name = self.parse_path()
+                Server.webhook_response = None
+                self._push_event(api_name, "WEBHOOK_IN", None)
+                if attempt < max_retries - 1:
+                    continue
+                else:
+                    break
 
     def api_res(self, api_name = None):
         i, data, out_con = None, None, None

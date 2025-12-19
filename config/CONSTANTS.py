@@ -57,8 +57,8 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소
 # test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
-company_name = "통합플랫폼기업"
-product_name = "통합플랫폼 시스템-기본"
+company_name = "이노뎁"
+product_name = "VURIX-TMS"
 version = "v1.0"
 test_category = "MAIN_TEST"
 test_target = "기본 기능 시험-통합시스템"
@@ -67,7 +67,7 @@ auth_type = "Digest Auth"
 auth_info = "kisa,kisa_k1!2@"
 admin_code = "1234"
 url = "https://10.252.219.95:2000"
-contact_person = "김철수"
+contact_person = "배성환"
 model_name = "v1.0"
 request_id = "cmii86ssr00a48z1tqmco6ke8"
 
@@ -140,7 +140,7 @@ SPEC_CONFIG = [
     "api_id": ['cmii7ubap005m8z1tyhf1yc1r', 'cmiwkc2st000a844gm9yjeqhp', 'cmiwkf9cp003k844gk2elz2wz', 'cmiwkqkje01dz844gz2h21eva', 'cmiwl0xkh02yi844gg45hcjop', 'cmiwl9g9003nh844gv5scoe1y'],
     "api_endpoint": ['/Authentication', '/Capabilities', '/SensorDeviceProfiles', '/RealtimeSensorData', '/RealtimeSensorEventInfos', '/StoredSensorEventInfos'],
     "trans_protocol": ['basic', 'basic', 'basic', 'WebHook', 'WebHook', 'basic'],
-    "time_out": [10000, 10000, 10000, 10000, 10000, 10000],
+    "time_out": [5000, 5000, 5000, 5000, 5000, 5000],
     "num_retries": [1, 1, 1, 1, 1, 1]
 },
         "cmii7pysb004k8z1tts0npxfm": {
@@ -150,7 +150,7 @@ SPEC_CONFIG = [
     "api_id": ['cmii7roh5004o8z1t47spn819', 'cmiiby4fo003chl2h8hzgu7m3', 'cmisjhwhq09hi5vy7n59tvsht', 'cmiwhz2il00epugxnzh3d9iuc', 'cmiwj1hq302myugxn8a5c6f48', 'cmiwjtg8i03wjugxnqkustaqj'],
     "api_endpoint": ['/Authentication', '/Capabilities', '/DoorProfiles', '/AccessUserInfos', '/RealtimeVerifEventInfos', '/StoredVerifEventInfos'],
     "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'WebHook', 'basic'],
-    "time_out": [10000, 10000, 10000, 10000, 10000, 10000],
+    "time_out": [5000, 5000, 5000, 5000, 5000, 5000],
     "num_retries": [1, 1, 1, 1, 1, 1]
 },
         "cmii7lxbn002s8z1t1i9uudf0": {
@@ -160,7 +160,7 @@ SPEC_CONFIG = [
     "api_id": ['cmii7p0dp002w8z1tcikv3cji', 'cmio328yj007zie8ffqfnxwnl', 'cmiqs6rjd00khie8frmm5c83g', 'cmiqsc74800leie8fsshjqpok', 'cmiqsim3j00mwie8fumvg1qnf', 'cmiqsrgr100p7ie8fzdzjr4hn', 'cmiqsw7ou00qgie8fjt03g03i', 'cmiqt02wa00rhie8fewnh1pn3', 'cmiqt4e5z00t6ie8fxsb3tkbc'],
     "api_endpoint": ['/Authentication', '/Capabilities', '/CameraProfiles', '/StreamURLs', '/RealtimeVideoEventInfos', '/StoredVideoInfos', '/ReplayURL', '/StoredVideoEventInfos', '/StoredObjectAnalyticsInfos'],
     "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'WebHook', 'basic', 'basic', 'basic', 'basic'],
-    "time_out": [60000, 60000, 60000, 60000, 60000, 60000, 60000, 60000, 60000],
+    "time_out": [5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000, 5000],
     "num_retries": [1, 1, 1, 1, 1, 1, 1, 1, 1]
 }
     }

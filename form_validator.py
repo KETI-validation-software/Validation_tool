@@ -418,9 +418,9 @@ class FormValidator:
                     continue
 
                 if schema_type == "request":
-                    list_name = f"{spec_id}_inSchema"
+                    list_name = f"{spec_id}_in_schema"
                 else:
-                    list_name = f"{spec_id}_outSchema"
+                    list_name = f"{spec_id}_out_schema"
 
                 schema_content += f"# {spec_id} 스키마 리스트\n"
                 schema_content += f"{list_name} = [\n"
@@ -1156,9 +1156,9 @@ class FormValidator:
 
                 # Schema 리스트 생성 (spec별로) - spec_id_safe 사용
                 if schema_type == "request":
-                    list_name = f"{spec_id_safe}_inSchema"
+                    list_name = f"{spec_id_safe}_in_schema"
                 else:
-                    list_name = f"{spec_id_safe}_outSchema"
+                    list_name = f"{spec_id_safe}_out_schema"
 
                 schema_content += f"# {spec_id_safe} 스키마 리스트\n"
                 schema_content += f"{list_name} = [\n"
@@ -1656,7 +1656,8 @@ class FormValidator:
                     api_endpoint.append(raw_endpoint)
 
                 # connectTimeout 추출
-                time_out.append(settings.get("timeout", 60000))
+                # time_out.append(settings.get("timeout",60000)) -> 얘로 다시
+                time_out.append(settings.get("connectTimeout",5000))
 
                 # loadTest.concurrentUsers 추출 (num_retries)
                 load_test = settings.get("loadTest", {})

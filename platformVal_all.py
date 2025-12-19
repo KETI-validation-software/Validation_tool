@@ -2195,9 +2195,8 @@ class MyApp(QWidget):
     def load_specs_from_constants(self):
         """SPEC_CONFIG 기반으로 spec 데이터 동적 로드"""
         # ===== PyInstaller 환경에서 외부 CONSTANTS.py에서 SPEC_CONFIG 로드 =====
-        import sys
-        import os
-
+        import sys  # ✅ 함수 내에서 명시적으로 import
+        
         SPEC_CONFIG = getattr(self.CONSTANTS, 'SPEC_CONFIG', [])
         url_value = getattr(self.CONSTANTS, 'url', None)
         auth_type = getattr(self.CONSTANTS, 'auth_type', None)
@@ -2405,6 +2404,30 @@ class MyApp(QWidget):
                 print(f"[PLATFORM] 📦 웹훅 스키마 개수: {len(self.videoWebhookSchema)}개 API")
                 print(f"[PLATFORM] 📋 웹훅 데이터 개수: {len(self.videoWebhookData)}개")
                 print(f"[PLATFORM] 📋 웹훅 constraints 개수: {len(self.videoWebhookConstraint)}개")
+
+                # 웹훅 스키마 이름 맞춰야함
+                # webhook_resp_name = webhook_schema_name + "_Response"
+                # self.videoWebhookOutSchema = getattr(schema_response_module, webhook_resp_name, [])
+                self.videoWebhookOutSchema = []
+                try:
+                    # 1. 스키마 모듈의 모든 변수 목록을 가져옵니다.
+                    import spec.Schema_response as schema_response_module
+                    all_variables = dir(schema_response_module)
+
+                    # 2. 반복문으로 진짜 변수명을 찾습니다.
+                    # 조건: API 이름("RealtimeVideoEventInfos")이 포함되어 있고, "_webhook_out_schema"로 끝나는 것
+                    for var_name in all_variables:
+                        if webhook_schema_name in var_name and var_name.endswith("_webhook_out_schema"):
+                            self.videoWebhookOutSchema = getattr(schema_response_module, var_name)
+                            print(f"[PLATFORM] ✅ 웹훅 응답 스키마 자동 로드 성공: {var_name}")
+                            break # 찾았으면 중단
+                    
+                    if not self.videoWebhookOutSchema:
+                        print(f"[PLATFORM] ⚠️ 경고: {webhook_schema_name}에 대한 웹훅 응답 스키마를 찾지 못했습니다.")
+
+                except Exception as e:
+                    print(f"[PLATFORM] 스키마 로드 중 에러: {e}")
+                    self.videoWebhookOutSchema = []
 
                 webhook_indices = [i for i, msg in enumerate(self.videoMessages) if "Webhook" in msg]
                 if webhook_indices:
@@ -2957,57 +2980,47 @@ class MyApp(QWidget):
                             time.sleep(0.1)
                             wait_count += 1
 
-                        # 웹훅 스레드 완료 대기 및 완료 여부 확인
-                        webhook_thread_completed = False
+                        # 웹훅 스레드 완료 대기
                         if hasattr(self.Server, 'webhook_thread') and self.Server.webhook_thread:
                             self.Server.webhook_thread.join(timeout=5)
-                            # 스레드가 완료되었는지 확인 (is_alive()가 False면 완료됨)
-                            webhook_thread_completed = not self.Server.webhook_thread.is_alive()
-                            print(f"[DEBUG] 웹훅 스레드 완료 여부: {webhook_thread_completed}")
 
-                        # ✅ 웹훅 응답 처리: 스레드 완료 여부와 응답 존재 여부를 모두 확인
+                        # 실제 웹훅 응답 사용
+                        # ✅ 웹훅 응답이 null인 경우에도 검증을 수행하여 실패로 카운트
                         if hasattr(self.Server, 'webhook_response'):
-                            # 웹훅 스레드가 완료되었고 응답이 None인 경우 → null 응답으로 처리
-                            # 웹훅 스레드가 완료되지 않았고 응답이 None인 경우 → 아직 응답이 오지 않음 (검증 건너뜀)
-                            if webhook_thread_completed:
-                                # 스레드가 완료되었으므로 현재 webhook_response가 최종 응답
-                                webhook_response = self.Server.webhook_response if self.Server.webhook_response else {}
-                                
-                                if webhook_response:
-                                    tmp_webhook_response = json.dumps(webhook_response, indent=4, ensure_ascii=False)
-                                    accumulated['data_parts'].append(
-                                        f"\n--- Webhook 응답 (시도 {retry_attempt + 1}회차) ---\n{tmp_webhook_response}")
-                                else:
-                                    accumulated['data_parts'].append(f"\n--- Webhook 응답 (시도 {retry_attempt + 1}회차) ---\nnull")
-                                
-                                if self.cnt < len(self.step_buffers):
-                                    self.step_buffers[self.cnt]["is_webhook_api"] = True
-                                
-                                # 웹훅 응답 검증 (null인 경우에도 검증 수행)
-                                if len(self.videoWebhookSchema) > 0:
-                                    webhook_resp_val_result, webhook_resp_val_text, webhook_resp_key_psss_cnt, webhook_resp_key_error_cnt, opt_correct, opt_error = json_check_(
-                                        self.videoWebhookSchema[0], webhook_response, self.flag_opt
-                                    )
-
-                                    add_pass += webhook_resp_key_psss_cnt
-                                    add_err += webhook_resp_key_error_cnt
-                                    add_opt_pass += opt_correct  # 웹훅 선택 필드 통과 수 누적
-                                    add_opt_error += opt_error  # 웹훅 선택 필드 에러 수 누적
-
-                                    webhook_resp_err_txt = self._to_detail_text(webhook_resp_val_text)
-                                    if webhook_resp_val_result == "FAIL":
-                                        step_result = "FAIL"
-                                        combined_error_parts.append(f"\n--- Webhook 검증 ---\n" + webhook_resp_err_txt)
-                                
-                                # webhook_response가 None이 아닌 경우에만 reference_context에 저장
-                                if webhook_response:
-                                    webhook_context_key = f"/{api_name}"
-                                    self.reference_context[webhook_context_key] = webhook_response
-                                    print(f"[CONTEXT] webhook 응답을 reference_context에 저장: {webhook_context_key}")
+                            # webhook_response가 None이거나 빈 값인 경우 빈 딕셔너리로 처리
+                            webhook_response = self.Server.webhook_response if self.Server.webhook_response else {}
+                            
+                            if webhook_response:
+                                tmp_webhook_response = json.dumps(webhook_response, indent=4, ensure_ascii=False)
+                                accumulated['data_parts'].append(
+                                    f"\n--- Webhook 응답 (시도 {retry_attempt + 1}회차) ---\n{tmp_webhook_response}")
                             else:
-                                # 웹훅 스레드가 아직 완료되지 않음 → 응답 대기 중
-                                print(f"[WARN] 웹훅 스레드가 아직 완료되지 않음. 응답 대기 중...")
-                                accumulated['data_parts'].append(f"\n--- Webhook 응답 (시도 {retry_attempt + 1}회차) ---\n웹훅 응답 대기 중...")
+                                accumulated['data_parts'].append(f"\n--- Webhook 응답 (시도 {retry_attempt + 1}회차) ---\nnull")
+                            
+                            if self.cnt < len(self.step_buffers):
+                                self.step_buffers[self.cnt]["is_webhook_api"] = True
+                            
+                            # 웹훅 응답 검증 (null인 경우에도 검증 수행)
+                            if len(self.videoWebhookSchema) > 0:
+                                webhook_resp_val_result, webhook_resp_val_text, webhook_resp_key_psss_cnt, webhook_resp_key_error_cnt, opt_correct, opt_error = json_check_(
+                                    self.videoWebhookSchema[0], webhook_response, self.flag_opt
+                                )
+
+                                add_pass += webhook_resp_key_psss_cnt
+                                add_err += webhook_resp_key_error_cnt
+                                add_opt_pass += opt_correct  # 웹훅 선택 필드 통과 수 누적
+                                add_opt_error += opt_error  # 웹훅 선택 필드 에러 수 누적
+
+                                webhook_resp_err_txt = self._to_detail_text(webhook_resp_val_text)
+                                if webhook_resp_val_result == "FAIL":
+                                    step_result = "FAIL"
+                                    combined_error_parts.append(f"\n--- Webhook 검증 ---\n" + webhook_resp_err_txt)
+                            
+                            # webhook_response가 None이 아닌 경우에만 reference_context에 저장
+                            if webhook_response:
+                                webhook_context_key = f"/{api_name}"
+                                self.reference_context[webhook_context_key] = webhook_response
+                                print(f"[CONTEXT] webhook 응답을 reference_context에 저장: {webhook_context_key}")
                         else:
                             # webhook_response 속성이 없는 경우 (초기화되지 않은 경우)
                             accumulated['data_parts'].append(f"\n--- Webhook 응답 ---\nnull")
@@ -3054,12 +3067,6 @@ class MyApp(QWidget):
                     self.current_retry + 1
                 )
                 QApplication.processEvents()
-
-                # 플랫폼은 응답 메시지 표시 안 함 (요청만 표시)
-                # self.valResult.append(f"\n📤 응답 메시지 송신 [{retry_attempt + 1}/{current_retries}]")
-                # if 'tmp_response' in locals():
-                #     self.valResult.append(tmp_response)
-
                 # current_retry 증가
                 self.current_retry += 1
 
@@ -3171,12 +3178,27 @@ class MyApp(QWidget):
                 self.step_buffers[self.cnt]["result"] = "FAIL"
 
                 tmp_fields_rqd_cnt, tmp_fields_opt_cnt = timeout_field_finder(self.Server.inSchema[self.cnt])
-
                 self.total_error_cnt += tmp_fields_rqd_cnt
+
                 if tmp_fields_rqd_cnt == 0:
                     self.total_error_cnt += 1
                 if self.flag_opt:
                     self.total_error_cnt += tmp_fields_opt_cnt
+
+                is_webhook = "Webhook" in self.Server.message[self.cnt] or self.step_buffers[self.cnt].get("is_webhook_api", False)
+
+                if is_webhook:
+                    if hasattr(self, 'videoWebhookSchema') and len(self.videoWebhookSchema) > 0:
+                        wh_req_rqd, wh_req_opt = timeout_field_finder(self.videoWebhookSchema[0])
+                        self.total_error_cnt += wh_req_rqd
+                        if self.flag_opt:
+                            self.total_error_cnt += wh_req_opt
+
+                    if hasattr(self, 'videoWebhookOutSchema') and len(self.videoWebhookOutSchema) > 0:
+                        wh_res_rqd, wh_res_opt = timeout_field_finder(self.videoWebhookOutSchema[0])
+                        self.total_error_cnt += wh_res_rqd
+                        if self.flag_opt:
+                            self.total_error_cnt += wh_res_opt
 
                 self.total_pass_cnt += 0
 
@@ -5917,11 +5939,34 @@ class MyApp(QWidget):
         self.outCon = self.videoOutConstraint
 
         # 이 부분 수정해야함
+        # try:
+        #     webhook_schema_name = f"{self.current_spec_id}_webhook_out_schema"
+        #     self.webhookSchema = getattr(schema_response_module, webhook_schema_name, [])
+        # except Exception as e:
+        #     print(f"Error loading webhook schema: {e}")
+        #     self.webhookSchema = []
+
         try:
-            webhook_schema_name = f"{self.current_spec_id}_webhook_inSchema"
-            self.webhookSchema = getattr(schema_response_module, webhook_schema_name, [])
+            self.webhookSchema = []
+            
+            # 현재 API 이름 가져오기 (설정에서 3번째 항목이 API 이름)
+            target_api_name = ""
+            if hasattr(self, 'spec_config') and 'specs' in self.spec_config and len(self.spec_config['specs']) >= 4:
+                target_api_name = self.spec_config['specs'][3]
+
+            if target_api_name:
+                import spec.Schema_response as schema_response_module
+                all_variables = dir(schema_response_module)
+
+                # 파일 내부를 뒤져서 맞는 변수 찾기
+                for var_name in all_variables:
+                    if target_api_name in var_name and var_name.endswith("_webhook_out_schema"):
+                        self.webhookSchema = getattr(schema_response_module, var_name)
+                        print(f"[SERVER] ✅ 서버용 웹훅 스키마 로드 성공: {var_name}")
+                        break
+        
         except Exception as e:
-            print(f"Error loading webhook schema: {e}")
+            print(f"[SERVER] 웹훅 스키마 로드 실패: {e}")
             self.webhookSchema = []
 
         self.r2 = self.auth_type
