@@ -1,4 +1,0 @@
-{"time": "2025-10-21T01:51:37.587738Z", "api": "StoredSensorEventInfos", "dir": "REQUEST", "data": {"timePeriod": {"startTime": 1759494660000, "endTime": 1761827460000}, "sensorDeviceList": [{"sensorDeviceID": ""}], "maxCount": 0, "eventFilter": ""}}
-{"time": "2025-10-21T01:51:38.589208Z", "api": "StoredSensorEventInfos", "dir": "RESPONSE", "data": {"code": "", "message": "", "sensorDeviceList": [{"sensorDeviceID": "", "eventName": "", "eventTime": "", "eventDesc": "100도"}]}}
-{"time": "2025-10-21T01:51:39.594459Z", "api": "StoredSensorEventInfos", "dir": "REQUEST", "data": {"timePeriod": {"startTime": 1759494660000, "endTime": 1761827460000}, "sensorDeviceList": [{"sensorDeviceID": ""}], "maxCount": 0, "eventFilter": ""}}
-{"time": "2025-10-21T01:51:40.585744Z", "api": "StoredSensorEventInfos", "dir": "RESPONSE", "data": {"code": "", "message": "", "sensorDeviceList": [{"sensorDeviceID": "", "eventName": "", "eventTime": "", "eventDesc": "100도"}]}}

@@ -3645,7 +3645,11 @@ class MyApp(QWidget):
 
     # 웹훅 검증
     def get_webhook_result(self):
-        tmp_webhook_res = json.dumps(self.webhook_res, indent=4, ensure_ascii=False)
+        # ✅ 웹훅 응답이 null인 경우에도 검증을 수행하여 실패로 카운트
+        # None이거나 빈 값인 경우 빈 딕셔너리로 처리
+        webhook_data = self.webhook_res if self.webhook_res else {}
+        tmp_webhook_res = json.dumps(webhook_data, indent=4, ensure_ascii=False) if webhook_data else "null"
+        
         if self.webhook_cnt < len(self.message):
             message_name = "step " + str(self.webhook_cnt + 1) + ": " + self.message[self.webhook_cnt]
         else:
@@ -3658,6 +3662,7 @@ class MyApp(QWidget):
             print(
                 f"[DEBUG] webhook_cnt={self.webhook_cnt}, API={self.message[self.webhook_cnt] if self.webhook_cnt < len(self.message) else 'N/A'}")
             print(f"[DEBUG] webhookSchema 총 개수={len(self.webhookSchema)}")
+            print(f"[DEBUG] webhook_res is None: {self.webhook_res is None}")
 
         # ✅ 수정: webhookSchema가 1개만 있으면 항상 인덱스 0 사용
         if len(self.webhookSchema) == 1:
@@ -3675,9 +3680,10 @@ class MyApp(QWidget):
                 if self.webhook_schema_idx < len(self.webhookSchema) - 1:
                     self.webhook_schema_idx += 1
 
+            # ✅ webhook_data가 None이 아닌 경우에도 검증 수행 (빈 딕셔너리로 처리)
             val_result, val_text, key_psss_cnt, key_error_cnt, opt_correct, opt_error = json_check_(
                 schema=schema_to_check,
-                data=self.webhook_res,
+                data=webhook_data,
                 flag=self.flag_opt,
                 reference_context=self.reference_context
             )
