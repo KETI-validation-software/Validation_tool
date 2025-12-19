@@ -2957,47 +2957,57 @@ class MyApp(QWidget):
                             time.sleep(0.1)
                             wait_count += 1
 
-                        # 웹훅 스레드 완료 대기
+                        # 웹훅 스레드 완료 대기 및 완료 여부 확인
+                        webhook_thread_completed = False
                         if hasattr(self.Server, 'webhook_thread') and self.Server.webhook_thread:
                             self.Server.webhook_thread.join(timeout=5)
+                            # 스레드가 완료되었는지 확인 (is_alive()가 False면 완료됨)
+                            webhook_thread_completed = not self.Server.webhook_thread.is_alive()
+                            print(f"[DEBUG] 웹훅 스레드 완료 여부: {webhook_thread_completed}")
 
-                        # 실제 웹훅 응답 사용
-                        # ✅ 웹훅 응답이 null인 경우에도 검증을 수행하여 실패로 카운트
+                        # ✅ 웹훅 응답 처리: 스레드 완료 여부와 응답 존재 여부를 모두 확인
                         if hasattr(self.Server, 'webhook_response'):
-                            # webhook_response가 None이거나 빈 값인 경우 빈 딕셔너리로 처리
-                            webhook_response = self.Server.webhook_response if self.Server.webhook_response else {}
-                            
-                            if webhook_response:
-                                tmp_webhook_response = json.dumps(webhook_response, indent=4, ensure_ascii=False)
-                                accumulated['data_parts'].append(
-                                    f"\n--- Webhook 응답 (시도 {retry_attempt + 1}회차) ---\n{tmp_webhook_response}")
+                            # 웹훅 스레드가 완료되었고 응답이 None인 경우 → null 응답으로 처리
+                            # 웹훅 스레드가 완료되지 않았고 응답이 None인 경우 → 아직 응답이 오지 않음 (검증 건너뜀)
+                            if webhook_thread_completed:
+                                # 스레드가 완료되었으므로 현재 webhook_response가 최종 응답
+                                webhook_response = self.Server.webhook_response if self.Server.webhook_response else {}
+                                
+                                if webhook_response:
+                                    tmp_webhook_response = json.dumps(webhook_response, indent=4, ensure_ascii=False)
+                                    accumulated['data_parts'].append(
+                                        f"\n--- Webhook 응답 (시도 {retry_attempt + 1}회차) ---\n{tmp_webhook_response}")
+                                else:
+                                    accumulated['data_parts'].append(f"\n--- Webhook 응답 (시도 {retry_attempt + 1}회차) ---\nnull")
+                                
+                                if self.cnt < len(self.step_buffers):
+                                    self.step_buffers[self.cnt]["is_webhook_api"] = True
+                                
+                                # 웹훅 응답 검증 (null인 경우에도 검증 수행)
+                                if len(self.videoWebhookSchema) > 0:
+                                    webhook_resp_val_result, webhook_resp_val_text, webhook_resp_key_psss_cnt, webhook_resp_key_error_cnt, opt_correct, opt_error = json_check_(
+                                        self.videoWebhookSchema[0], webhook_response, self.flag_opt
+                                    )
+
+                                    add_pass += webhook_resp_key_psss_cnt
+                                    add_err += webhook_resp_key_error_cnt
+                                    add_opt_pass += opt_correct  # 웹훅 선택 필드 통과 수 누적
+                                    add_opt_error += opt_error  # 웹훅 선택 필드 에러 수 누적
+
+                                    webhook_resp_err_txt = self._to_detail_text(webhook_resp_val_text)
+                                    if webhook_resp_val_result == "FAIL":
+                                        step_result = "FAIL"
+                                        combined_error_parts.append(f"\n--- Webhook 검증 ---\n" + webhook_resp_err_txt)
+                                
+                                # webhook_response가 None이 아닌 경우에만 reference_context에 저장
+                                if webhook_response:
+                                    webhook_context_key = f"/{api_name}"
+                                    self.reference_context[webhook_context_key] = webhook_response
+                                    print(f"[CONTEXT] webhook 응답을 reference_context에 저장: {webhook_context_key}")
                             else:
-                                accumulated['data_parts'].append(f"\n--- Webhook 응답 (시도 {retry_attempt + 1}회차) ---\nnull")
-                            
-                            if self.cnt < len(self.step_buffers):
-                                self.step_buffers[self.cnt]["is_webhook_api"] = True
-                            
-                            # 웹훅 응답 검증 (null인 경우에도 검증 수행)
-                            if len(self.videoWebhookSchema) > 0:
-                                webhook_resp_val_result, webhook_resp_val_text, webhook_resp_key_psss_cnt, webhook_resp_key_error_cnt, opt_correct, opt_error = json_check_(
-                                    self.videoWebhookSchema[0], webhook_response, self.flag_opt
-                                )
-
-                                add_pass += webhook_resp_key_psss_cnt
-                                add_err += webhook_resp_key_error_cnt
-                                add_opt_pass += opt_correct  # 웹훅 선택 필드 통과 수 누적
-                                add_opt_error += opt_error  # 웹훅 선택 필드 에러 수 누적
-
-                                webhook_resp_err_txt = self._to_detail_text(webhook_resp_val_text)
-                                if webhook_resp_val_result == "FAIL":
-                                    step_result = "FAIL"
-                                    combined_error_parts.append(f"\n--- Webhook 검증 ---\n" + webhook_resp_err_txt)
-                            
-                            # webhook_response가 None이 아닌 경우에만 reference_context에 저장
-                            if webhook_response:
-                                webhook_context_key = f"/{api_name}"
-                                self.reference_context[webhook_context_key] = webhook_response
-                                print(f"[CONTEXT] webhook 응답을 reference_context에 저장: {webhook_context_key}")
+                                # 웹훅 스레드가 아직 완료되지 않음 → 응답 대기 중
+                                print(f"[WARN] 웹훅 스레드가 아직 완료되지 않음. 응답 대기 중...")
+                                accumulated['data_parts'].append(f"\n--- Webhook 응답 (시도 {retry_attempt + 1}회차) ---\n웹훅 응답 대기 중...")
                         else:
                             # webhook_response 속성이 없는 경우 (초기화되지 않은 경우)
                             accumulated['data_parts'].append(f"\n--- Webhook 응답 ---\nnull")
