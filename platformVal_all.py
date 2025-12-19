@@ -3162,6 +3162,7 @@ class MyApp(QWidget):
 
                 tmp_fields_rqd_cnt, tmp_fields_opt_cnt = timeout_field_finder(self.Server.inSchema[self.cnt])
 
+                # ✅ 웹훅 API인 경우 웹훅 스키마 필드 수도 추가
                 current_protocol = self.trans_protocols[self.cnt] if self.cnt < len(self.trans_protocols) else "basic"
                 if current_protocol == "WebHook" and len(self.videoWebhookSchema) > 0:
                     webhook_rqd_cnt, webhook_opt_cnt = timeout_field_finder(self.videoWebhookSchema[0])

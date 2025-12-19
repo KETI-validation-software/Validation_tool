@@ -11,6 +11,10 @@ build/
 config/key0627/
 pro2/
 summary/
+<<<<<<< HEAD
 doc/
 dist/
 *.zip
+=======
+doc/
+>>>>>>> 9fd9b3246611a93fa76179b792a61ddcb68a8a23

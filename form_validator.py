@@ -1656,8 +1656,8 @@ class FormValidator:
                     api_endpoint.append(raw_endpoint)
 
                 # connectTimeout 추출
-                # time_out.append(settings.get("timeout",60000)) -> 얘로 다시
-                time_out.append(settings.get("connectTimeout",5000))
+                time_out.append(settings.get("timeout", 60000))
+                # ime_out.append(settings.get("connectTime4out", 5000))
 
                 # loadTest.concurrentUsers 추출 (num_retries)
                 load_test = settings.get("loadTest", {})
