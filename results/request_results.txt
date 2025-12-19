@@ -1,19 +1,229 @@
 === 시험 결과 ===
-통과 필드 수: 0
-전체 필드 수: 0
-종합 평가 점수: 0.0%
+통과 필드 수: 52
+전체 필드 수: 70
+종합 평가 점수: 74.3%
 
 === 스텝별 결과 ===
-1. Authentication | 결과:  | 검증 횟수: 1 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-2. Capabilities | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-3. SensorDeviceProfiles | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-4. RealtimeSensorData | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-5. RealtimeSensorEventInfos | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-6. StoredSensorEventInfos | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-7. SensorDeviceControl | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
+Authentication | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 4 | 전체 필드 수: 4 | 실패 필드 수: 0 | 평가 점수: 100.0%
+Capabilities | 결과: PASS | 검증 횟수: 3 | 통과 필드 수: 3 | 전체 필드 수: 3 | 실패 필드 수: 0 | 평가 점수: 100.0%
+SensorDeviceProfiles | 결과: PASS | 검증 횟수: 2 | 통과 필드 수: 2 | 전체 필드 수: 2 | 실패 필드 수: 0 | 평가 점수: 100.0%
+RealtimeSensorData | 결과: FAIL | 검증 횟수: 3 | 통과 필드 수: 15 | 전체 필드 수: 21 | 실패 필드 수: 6 | 평가 점수: 71.4%
+RealtimeSensorEventInfos | 결과: FAIL | 검증 횟수: 3 | 통과 필드 수: 18 | 전체 필드 수: 24 | 실패 필드 수: 6 | 평가 점수: 75.0%
+StoredSensorEventInfos | 결과: FAIL | 검증 횟수: 2 | 통과 필드 수: 8 | 전체 필드 수: 14 | 실패 필드 수: 6 | 평가 점수: 57.1%
+SensorDeviceControl | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 2 | 전체 필드 수: 2 | 실패 필드 수: 0 | 평가 점수: 100.0%
 
 === 전체 로그 ===
 Start Validation...
 
-step 1: Authentication
-검증 절차가 중지되었습니다.
+
+✅ 부하테스트 완료: 1회 검증 완료
+프로토콜: basic
+
+[시도 1회차]
+{
+    "userID": "",
+    "userPW": ""
+}
+
+[시도 3회차]
+{
+    "userID": "",
+    "userPW": ""
+}
+PASS
+Score : 100.0
+Score details : 4(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 2: Capabilities
+
+✅ 부하테스트 완료: 3회 검증 완료
+프로토콜: LongPolling
+
+[시도 1회차]
+{}
+
+[시도 2회차]
+{}
+
+[시도 3회차]
+{}
+PASS
+Score : 100.0
+Score details : 7(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 3: SensorDeviceProfiles
+
+✅ 부하테스트 완료: 2회 검증 완료
+프로토콜: basic
+
+[시도 1회차]
+{}
+
+[시도 2회차]
+{}
+PASS
+Score : 100.0
+Score details : 9(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 4: RealtimeSensorData
+
+✅ 부하테스트 완료: 3회 검증 완료
+프로토콜: LongPolling
+
+[시도 1회차]
+{
+    "sensorDeviceList": [
+        {
+            "sensorDeviceID": ""
+        }
+    ],
+    "duration": 0,
+    "transProtocol": {
+        "transProtocolType": "",
+        "transProtocolDesc": ""
+    },
+    "startTime": 1759494300000
+}
+
+[시도 2회차]
+{
+    "sensorDeviceList": [
+        {
+            "sensorDeviceID": ""
+        }
+    ],
+    "duration": 0,
+    "transProtocol": {
+        "transProtocolType": "",
+        "transProtocolDesc": ""
+    },
+    "startTime": 1759494300000
+}
+
+[시도 3회차]
+{
+    "sensorDeviceList": [
+        {
+            "sensorDeviceID": ""
+        }
+    ],
+    "duration": 0,
+    "transProtocol": {
+        "transProtocolType": "",
+        "transProtocolDesc": ""
+    },
+    "startTime": 1759494300000
+}
+FAIL
+Score : 80.0
+Score details : 24(누적 통과 필드 수), 6(누적 오류 필드 수)
+
+step 5: RealtimeSensorEventInfos
+
+✅ 부하테스트 완료: 3회 검증 완료
+프로토콜: LongPolling
+
+[시도 1회차]
+{
+    "sensorDeviceList": [
+        {
+            "sensorDeviceID": ""
+        }
+    ],
+    "duration": 0,
+    "transProtocol": {
+        "transProtocolType": "",
+        "transProtocolDesc": ""
+    },
+    "eventFilter": "",
+    "startTime": 1759494540000
+}
+
+[시도 2회차]
+{
+    "sensorDeviceList": [
+        {
+            "sensorDeviceID": ""
+        }
+    ],
+    "duration": 0,
+    "transProtocol": {
+        "transProtocolType": "",
+        "transProtocolDesc": ""
+    },
+    "eventFilter": "",
+    "startTime": 1759494540000
+}
+
+[시도 3회차]
+{
+    "sensorDeviceList": [
+        {
+            "sensorDeviceID": ""
+        }
+    ],
+    "duration": 0,
+    "transProtocol": {
+        "transProtocolType": "",
+        "transProtocolDesc": ""
+    },
+    "eventFilter": "",
+    "startTime": 1759494540000
+}
+FAIL
+Score : 77.77777777777779
+Score details : 42(누적 통과 필드 수), 12(누적 오류 필드 수)
+
+step 6: StoredSensorEventInfos
+
+✅ 부하테스트 완료: 2회 검증 완료
+프로토콜: basic
+
+[시도 1회차]
+{
+    "timePeriod": {
+        "startTime": 1759494660000,
+        "endTime": 1761827460000
+    },
+    "sensorDeviceList": [
+        {
+            "sensorDeviceID": ""
+        }
+    ],
+    "maxCount": 0,
+    "eventFilter": ""
+}
+
+[시도 2회차]
+{
+    "timePeriod": {
+        "startTime": 1759494660000,
+        "endTime": 1761827460000
+    },
+    "sensorDeviceList": [
+        {
+            "sensorDeviceID": ""
+        }
+    ],
+    "maxCount": 0,
+    "eventFilter": ""
+}
+FAIL
+Score : 73.52941176470588
+Score details : 50(누적 통과 필드 수), 18(누적 오류 필드 수)
+
+step 7: SensorDeviceControl
+
+✅ 부하테스트 완료: 1회 검증 완료
+프로토콜: basic
+
+[시도 1회차]
+{
+    "sensorDeviceID": "",
+    "commandType": ""
+}
+PASS
+Score : 74.28571428571429
+Score details : 52(누적 통과 필드 수), 18(누적 오류 필드 수)
+
+검증 절차가 완료되었습니다.

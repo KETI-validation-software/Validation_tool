@@ -1,4 +1,4 @@
-{"time": "2025-10-21T01:40:30.252608Z", "api": "SensorDeviceProfiles", "dir": "REQUEST", "data": {}}
-{"time": "2025-10-21T01:40:31.241873Z", "api": "SensorDeviceProfiles", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "sensorDeviceList": [{"sensorDeviceID": "iot0001", "sensorDeviceType": "온도", "sensorDeviceName": "홍채 센서", "sensorDeviceLoc": {"lon": "12.7127730", "lat": "38.439801", "alt": "32.131", "desc": "3층복도"}}]}}
-{"time": "2025-10-21T01:40:32.249088Z", "api": "SensorDeviceProfiles", "dir": "REQUEST", "data": {}}
-{"time": "2025-10-21T01:40:33.243339Z", "api": "SensorDeviceProfiles", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "sensorDeviceList": [{"sensorDeviceID": "iot0001", "sensorDeviceType": "온도", "sensorDeviceName": "홍채 센서", "sensorDeviceLoc": {"lon": "12.7127730", "lat": "38.439801", "alt": "32.131", "desc": "3층복도"}}]}}
+{"time": "2025-10-21T01:51:22.593306Z", "api": "SensorDeviceProfiles", "dir": "REQUEST", "data": {}}
+{"time": "2025-10-21T01:51:23.586797Z", "api": "SensorDeviceProfiles", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "sensorDeviceList": [{"sensorDeviceID": "iot0001", "sensorDeviceType": "온도", "sensorDeviceName": "홍채 센서", "sensorDeviceLoc": {"lon": "12.7127730", "lat": "38.439801", "alt": "32.131", "desc": "3층복도"}}]}}
+{"time": "2025-10-21T01:51:24.594581Z", "api": "SensorDeviceProfiles", "dir": "REQUEST", "data": {}}
+{"time": "2025-10-21T01:51:25.585942Z", "api": "SensorDeviceProfiles", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "sensorDeviceList": [{"sensorDeviceID": "iot0001", "sensorDeviceType": "온도", "sensorDeviceName": "홍채 센서", "sensorDeviceLoc": {"lon": "12.7127730", "lat": "38.439801", "alt": "32.131", "desc": "3층복도"}}]}}

@@ -1,16 +1,16 @@
 === 시험 결과 ===
-통과 필드 수: 31
-전체 필드 수: 35
-종합 평가 점수: 88.6%
+통과 필드 수: 88
+전체 필드 수: 104
+종합 평가 점수: 84.6%
 
 === 스텝별 결과 ===
-1. Authentication | 결과: FAIL | 검증 횟수: 2 | 통과 필드 수: 10 | 전체 필드 수: 12 | 실패 필드 수: 2 | 평가 점수: 83.3%
-2. Capabilities | 결과: FAIL | 검증 횟수: 2 | 통과 필드 수: 10 | 전체 필드 수: 12 | 실패 필드 수: 2 | 평가 점수: 83.3%
-3. SensorDeviceProfiles | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 11 | 전체 필드 수: 11 | 실패 필드 수: 0 | 평가 점수: 100.0%
-4. RealtimeSensorData | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-5. RealtimeSensorEventInfos | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-6. StoredSensorEventInfos | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
-7. SensorDeviceControl | 결과:  | 검증 횟수: 0 | 통과 필드 수: 0 | 전체 필드 수: 0 | 실패 필드 수: 0 | 평가 점수: 0%
+Authentication | 결과: FAIL | 검증 횟수: 2 | 통과 필드 수: 10 | 전체 필드 수: 12 | 실패 필드 수: 2 | 평가 점수: 83.3%
+Capabilities | 결과: FAIL | 검증 횟수: 2 | 통과 필드 수: 10 | 전체 필드 수: 12 | 실패 필드 수: 2 | 평가 점수: 83.3%
+SensorDeviceProfiles | 결과: PASS | 검증 횟수: 2 | 통과 필드 수: 22 | 전체 필드 수: 22 | 실패 필드 수: 0 | 평가 점수: 100.0%
+RealtimeSensorData | 결과: FAIL | 검증 횟수: 2 | 통과 필드 수: 14 | 전체 필드 수: 18 | 실패 필드 수: 4 | 평가 점수: 77.8%
+RealtimeSensorEventInfos | 결과: FAIL | 검증 횟수: 2 | 통과 필드 수: 12 | 전체 필드 수: 16 | 실패 필드 수: 4 | 평가 점수: 75.0%
+StoredSensorEventInfos | 결과: FAIL | 검증 횟수: 2 | 통과 필드 수: 12 | 전체 필드 수: 16 | 실패 필드 수: 4 | 평가 점수: 75.0%
+SensorDeviceControl | 결과: PASS | 검증 횟수: 2 | 통과 필드 수: 8 | 전체 필드 수: 8 | 실패 필드 수: 0 | 평가 점수: 100.0%
 
 === 전체 로그 ===
 Start Validation...
@@ -121,4 +121,203 @@ step 3: SensorDeviceProfiles (시도 1/2)
 Score : 88.57142857142857
 Score details : 31(누적 통과 필드 수), 4(누적 오류 필드 수)
 
-검증 절차가 중지되었습니다.
+step 3: SensorDeviceProfiles (시도 2/2)
+
+검증 진행: 2/2회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "sensorDeviceList": [
+        {
+            "sensorDeviceID": "iot0001",
+            "sensorDeviceType": "온도",
+            "sensorDeviceName": "홍채 센서",
+            "sensorDeviceLoc": {
+                "lon": "12.7127730",
+                "lat": "38.439801",
+                "alt": "32.131",
+                "desc": "3층복도"
+            }
+        }
+    ]
+}
+
+검증 결과: PASS
+Score : 91.30434782608695
+Score details : 42(누적 통과 필드 수), 4(누적 오류 필드 수)
+
+step 4: RealtimeSensorData (시도 1/2)
+
+검증 진행: 1/2회
+프로토콜: LongPolling
+
+{
+    "code": "",
+    "message": "",
+    "sensorDeviceList": [
+        {
+            "sensorDeviceID": "",
+            "measureTime": 0,
+            "sensorDeviceType": "온도",
+            "sensorDeviceUnit": "섭씨",
+            "sensorDeviceValue": "100"
+        }
+    ]
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 89.0909090909091
+Score details : 49(누적 통과 필드 수), 6(누적 오류 필드 수)
+
+step 4: RealtimeSensorData (시도 2/2)
+
+검증 진행: 2/2회
+프로토콜: LongPolling
+
+{
+    "code": "",
+    "message": "",
+    "sensorDeviceList": [
+        {
+            "sensorDeviceID": "",
+            "measureTime": 0,
+            "sensorDeviceType": "온도",
+            "sensorDeviceUnit": "섭씨",
+            "sensorDeviceValue": "100"
+        }
+    ]
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 87.5
+Score details : 56(누적 통과 필드 수), 8(누적 오류 필드 수)
+
+step 5: RealtimeSensorEventInfos (시도 1/2)
+
+검증 진행: 1/2회
+프로토콜: LongPolling
+
+{
+    "code": "",
+    "message": "",
+    "sensorDeviceList": [
+        {
+            "sensorDeviceID": "",
+            "eventName": "",
+            "eventTime": "",
+            "eventDesc": "100도"
+        }
+    ]
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 86.11111111111111
+Score details : 62(누적 통과 필드 수), 10(누적 오류 필드 수)
+
+step 5: RealtimeSensorEventInfos (시도 2/2)
+
+검증 진행: 2/2회
+프로토콜: LongPolling
+
+{
+    "code": "",
+    "message": "",
+    "sensorDeviceList": [
+        {
+            "sensorDeviceID": "",
+            "eventName": "",
+            "eventTime": "",
+            "eventDesc": "100도"
+        }
+    ]
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 85.0
+Score details : 68(누적 통과 필드 수), 12(누적 오류 필드 수)
+
+step 6: StoredSensorEventInfos (시도 1/2)
+
+검증 진행: 1/2회
+프로토콜: basic
+
+{
+    "code": "",
+    "message": "",
+    "sensorDeviceList": [
+        {
+            "sensorDeviceID": "",
+            "eventName": "",
+            "eventTime": "",
+            "eventDesc": "100도"
+        }
+    ]
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 84.0909090909091
+Score details : 74(누적 통과 필드 수), 14(누적 오류 필드 수)
+
+step 6: StoredSensorEventInfos (시도 2/2)
+
+검증 진행: 2/2회
+프로토콜: basic
+
+{
+    "code": "",
+    "message": "",
+    "sensorDeviceList": [
+        {
+            "sensorDeviceID": "",
+            "eventName": "",
+            "eventTime": "",
+            "eventDesc": "100도"
+        }
+    ]
+}
+
+검증 결과: FAIL
+⚠️  구독 실패: 플랫폼이 웹훅을 보내지 않습니다.
+Score : 83.33333333333334
+Score details : 80(누적 통과 필드 수), 16(누적 오류 필드 수)
+
+step 7: SensorDeviceControl (시도 1/2)
+
+검증 진행: 1/2회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "sensorDeviceID": "",
+    "sensorDeviceStatus": ""
+}
+
+검증 결과: PASS
+Score : 84.0
+Score details : 84(누적 통과 필드 수), 16(누적 오류 필드 수)
+
+step 7: SensorDeviceControl (시도 2/2)
+
+검증 진행: 2/2회
+프로토콜: basic
+
+{
+    "code": "200",
+    "message": "성공",
+    "sensorDeviceID": "",
+    "sensorDeviceStatus": ""
+}
+
+검증 결과: PASS
+Score : 84.61538461538461
+Score details : 88(누적 통과 필드 수), 16(누적 오류 필드 수)
+
+검증 절차가 완료되었습니다.
