@@ -52,6 +52,8 @@ class SchemaGenerator:
             if not isinstance(field, dict):
                 continue
             key = field.get("key")
+            if not key or key.strip() == "":    # 새로 추가
+                continue
             ftype = str(field.get("type", "string")).lower()
             required = bool(field.get("required", False))
             children = field.get("children", [])
@@ -119,7 +121,7 @@ class SchemaGenerator:
         if t == "integer":
             return int
         if t == "number":
-            return float
+            return int
         if t == "boolean":
             return bool
         return str
@@ -150,13 +152,12 @@ class SchemaGenerator:
         # endpoint에서 변수명 생성 (/ 제거, 첫 글자 대문자)
         if endpoint.startswith("/"):
             endpoint = endpoint[1:]
-        
+
         schema_name = f"{endpoint}{suffix}"
 
-        # validation이 비어있거나 properties가 없으면 빈 딕셔너리
+        # bodyJson이 없으면 빈 딕셔너리 (validation 체크 제거)
         if (not isinstance(validation_data, dict) or
-                not isinstance(validation_data.get("bodyJson"), list) or not validation_data["bodyJson"] or
-                not isinstance(validation_data.get("validation"), list) or not validation_data["validation"]):
+                not isinstance(validation_data.get("bodyJson"), list) or not validation_data["bodyJson"]):
             schema_content = {}
         else:
             # properties가 있으면 각 필드를 변환

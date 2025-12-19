@@ -2,7 +2,7 @@ from json_checker import OptionalKey
 
 
 # Authentication
-cmgyv3rzl014nvsveidu5jpzp_Authentication_out_schema = {
+cmiqr2b9j00i9ie8frw439h8i_Authentication_out_schema = {
     "code": str,
     "message": str,
     "userName": str,
@@ -11,7 +11,169 @@ cmgyv3rzl014nvsveidu5jpzp_Authentication_out_schema = {
 }
 
 # Capabilities
-cmgyv3rzl014nvsveidu5jpzp_Capabilities_out_schema = {
+cmiqr2b9j00i9ie8frw439h8i_Capabilities_out_schema = {
+    "code": str,
+    "message": str,
+    "transportSupport": [{
+    "transProtocolType": str,
+    OptionalKey("transProtocolDesc"): str,
+}],
+}
+
+# SensorDeviceProfiles
+cmiqr2b9j00i9ie8frw439h8i_SensorDeviceProfiles_out_schema = {
+    "code": str,
+    "message": str,
+    "sensorDeviceList": [{
+    "sensorDeviceID": str,
+    "sensorDeviceType": str,
+    "sensorDeviceName": str,
+    OptionalKey("sensorDeviceLoc"): {
+    "lon": str,
+    "lat": str,
+    OptionalKey("alt"): str,
+    OptionalKey("desc"): str,
+},
+}],
+}
+
+# SensorDeviceControl
+cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl_out_schema = {
+    "code": str,
+    "message": str,
+    "sensorDeviceID": str,
+    "sensorDeviceStatus": str,
+}
+
+# SensorDeviceControl2
+cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl2_out_schema = {
+    "code": str,
+    "message": str,
+    "sensorDeviceID": str,
+    "sensorDeviceStatus": str,
+}
+
+# cmiqr2b9j00i9ie8frw439h8i 스키마 리스트
+cmiqr2b9j00i9ie8frw439h8i_outSchema = [
+    cmiqr2b9j00i9ie8frw439h8i_Authentication_out_schema,
+    cmiqr2b9j00i9ie8frw439h8i_Capabilities_out_schema,
+    cmiqr2b9j00i9ie8frw439h8i_SensorDeviceProfiles_out_schema,
+    cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl_out_schema,
+    cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl2_out_schema,
+]
+
+# Authentication
+cmiqr1jha00i6ie8fb1scb3go_Authentication_out_schema = {
+    "code": str,
+    "message": str,
+    "userName": str,
+    "userAff": str,
+    OptionalKey("accessToken"): str,
+}
+
+# Capabilities
+cmiqr1jha00i6ie8fb1scb3go_Capabilities_out_schema = {
+    "code": str,
+    "message": str,
+    "transportSupport": [{
+    "transProtocolType": str,
+    OptionalKey("transProtocolDesc"): str,
+}],
+}
+
+# DoorProfiles
+cmiqr1jha00i6ie8fb1scb3go_DoorProfiles_out_schema = {
+    "code": str,
+    "message": str,
+    "doorList": [{
+    "doorID": str,
+    "doorName": str,
+    "doorRelayStatus": str,
+    OptionalKey("doorSensor"): str,
+    OptionalKey("doorLoc"): {
+    "lon": str,
+    "lat": str,
+    OptionalKey("alt"): str,
+    OptionalKey("desc"): str,
+},
+    OptionalKey("bioDeviceList"): [{
+    OptionalKey("bioDeviceID"): str,
+    OptionalKey("bioDeviceName"): str,
+    "bioDeviceAuthTypeList": [str],
+}],
+    OptionalKey("otherDeviceList"): [{
+    OptionalKey("otherDeviceID"): str,
+    OptionalKey("otherDeviceName"): str,
+    "otherDeviceAuthTypeList": [str],
+}],
+}],
+}
+
+# RealtimeDoorStatus
+cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_out_schema = {
+    "code": str,
+    "message": str,
+}
+
+# RealtimeDoorStatus WebHook IN Schema
+cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_webhook_in_schema = {
+    "doorList": [{
+    "doorID": str,
+    "doorName": str,
+    OptionalKey("doorRelaySensor"): str,
+    "doorSensor": str,
+}],
+}
+
+# DoorControl
+cmiqr1jha00i6ie8fb1scb3go_DoorControl_out_schema = {
+    "code": str,
+    "message": str,
+}
+
+# RealtimeDoorStatus2
+cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_out_schema = {
+    "code": str,
+    "message": str,
+}
+
+# RealtimeDoorStatus2 WebHook IN Schema
+cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_webhook_in_schema = {
+    "doorList": [{
+    "doorID": str,
+    "doorName": str,
+    "doorRelaySensor": str,
+    "doorSensor": str,
+}],
+}
+
+# cmiqr1jha00i6ie8fb1scb3go 스키마 리스트
+cmiqr1jha00i6ie8fb1scb3go_outSchema = [
+    cmiqr1jha00i6ie8fb1scb3go_Authentication_out_schema,
+    cmiqr1jha00i6ie8fb1scb3go_Capabilities_out_schema,
+    cmiqr1jha00i6ie8fb1scb3go_DoorProfiles_out_schema,
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_out_schema,
+    cmiqr1jha00i6ie8fb1scb3go_DoorControl_out_schema,
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_out_schema,
+]
+
+# cmiqr1jha00i6ie8fb1scb3go WebHook 스키마 리스트
+cmiqr1jha00i6ie8fb1scb3go_webhook_inSchema = [
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_webhook_in_schema,
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_webhook_in_schema,
+]
+
+# Authentication
+cmiqr0kdw00i4ie8fr3firjtg_Authentication_out_schema = {
+    "code": str,
+    "message": str,
+    "userName": str,
+    "userAff": str,
+    OptionalKey("accessToken"): str,
+}
+
+# Capabilities
+cmiqr0kdw00i4ie8fr3firjtg_Capabilities_out_schema = {
     "code": str,
     "message": str,
     "streamingSupport": [{
@@ -25,7 +187,7 @@ cmgyv3rzl014nvsveidu5jpzp_Capabilities_out_schema = {
 }
 
 # CameraProfiles
-cmgyv3rzl014nvsveidu5jpzp_CameraProfiles_out_schema = {
+cmiqr0kdw00i4ie8fr3firjtg_CameraProfiles_out_schema = {
     "code": str,
     "message": str,
     "camList": [{
@@ -43,94 +205,41 @@ cmgyv3rzl014nvsveidu5jpzp_CameraProfiles_out_schema = {
 }],
 }
 
-# StoredVideoInfos
-cmgyv3rzl014nvsveidu5jpzp_StoredVideoInfos_out_schema = {
+# PtzStatus
+cmiqr0kdw00i4ie8fr3firjtg_PtzStatus_out_schema = {
     "code": str,
     "message": str,
-    "camList": [{
-    "camID": str,
-    "timeList": [{
-    "startTime": float,
-    "endTime": float,
-}],
-}],
-}
-
-# StreamURLs
-cmgyv3rzl014nvsveidu5jpzp_StreamURLs_out_schema = {
-    "code": str,
-    "message": str,
-    "camList": [{
-    "camID": str,
-    OptionalKey("accessID"): str,
-    OptionalKey("accessPW"): str,
-    "camURL": str,
-    OptionalKey("videoInfo"): {
-    OptionalKey("resolution"): str,
-    OptionalKey("fps"): float,
-    OptionalKey("videoCodec"): str,
-    OptionalKey("audioCodec"): str,
+    OptionalKey("position"): {
+    OptionalKey("pan"): int,
+    OptionalKey("tilt"): int,
+    OptionalKey("zoom"): int,
 },
-}],
-}
-
-# ReplayURL
-cmgyv3rzl014nvsveidu5jpzp_ReplayURL_out_schema = {
-    "code": str,
-    "message": str,
-    "camList": [{
-    "camID": str,
-    OptionalKey("accessID"): str,
-    OptionalKey("accessPW"): str,
-    "startTime": str,
-    OptionalKey("endTime"): str,
-    "camURL": str,
-    OptionalKey("videoInfo"): {
-    OptionalKey("resolution"): str,
-    OptionalKey("fps"): float,
-    OptionalKey("videoCodec"): str,
-    OptionalKey("audioCodec"): str,
+    "moveStatus": {
+    OptionalKey("pan"): str,
+    OptionalKey("tilt"): str,
+    OptionalKey("zoom"): str,
 },
-}],
 }
 
-# RealtimeVideoEventInfos
-cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_out_schema = {
+# PtzContinuousMove
+cmiqr0kdw00i4ie8fr3firjtg_PtzContinuousMove_out_schema = {
     "code": str,
     "message": str,
 }
 
-# RealtimeVideoEventInfos WebHook IN Schema
-cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_webhook_in_schema = {}
-
-# StoredVideoEventInfos
-cmgyv3rzl014nvsveidu5jpzp_StoredVideoEventInfos_out_schema = {
+# PtzStop
+cmiqr0kdw00i4ie8fr3firjtg_PtzStop_out_schema = {
     "code": str,
     "message": str,
-    "camList": [{
-    "camID": str,
-    "eventUUID": str,
-    "eventName": str,
-    "startTime": str,
-    "endTime": str,
-    "eventDesc": str,
-}],
 }
 
-# cmgyv3rzl014nvsveidu5jpzp 스키마 리스트
-cmgyv3rzl014nvsveidu5jpzp_outSchema = [
-    cmgyv3rzl014nvsveidu5jpzp_Authentication_out_schema,
-    cmgyv3rzl014nvsveidu5jpzp_Capabilities_out_schema,
-    cmgyv3rzl014nvsveidu5jpzp_CameraProfiles_out_schema,
-    cmgyv3rzl014nvsveidu5jpzp_StoredVideoInfos_out_schema,
-    cmgyv3rzl014nvsveidu5jpzp_StreamURLs_out_schema,
-    cmgyv3rzl014nvsveidu5jpzp_ReplayURL_out_schema,
-    cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_out_schema,
-    cmgyv3rzl014nvsveidu5jpzp_StoredVideoEventInfos_out_schema,
-]
-
-# cmgyv3rzl014nvsveidu5jpzp WebHook 스키마 리스트
-cmgyv3rzl014nvsveidu5jpzp_webhook_inSchema = [
-    cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_webhook_in_schema,
+# cmiqr0kdw00i4ie8fr3firjtg 스키마 리스트
+cmiqr0kdw00i4ie8fr3firjtg_outSchema = [
+    cmiqr0kdw00i4ie8fr3firjtg_Authentication_out_schema,
+    cmiqr0kdw00i4ie8fr3firjtg_Capabilities_out_schema,
+    cmiqr0kdw00i4ie8fr3firjtg_CameraProfiles_out_schema,
+    cmiqr0kdw00i4ie8fr3firjtg_PtzStatus_out_schema,
+    cmiqr0kdw00i4ie8fr3firjtg_PtzContinuousMove_out_schema,
+    cmiqr0kdw00i4ie8fr3firjtg_PtzStop_out_schema,
 ]
 

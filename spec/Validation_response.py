@@ -1,350 +1,167 @@
 # Authentication
-cmgyv3rzl014nvsveidu5jpzp_Authentication_out_validation = {
-  "code": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "message": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "userName": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "userAff": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "accessToken": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  }
-}
+cmiqr2b9j00i9ie8frw439h8i_Authentication_out_validation = {}
 
 # Capabilities
-cmgyv3rzl014nvsveidu5jpzp_Capabilities_out_validation = {
-  "code": {
-    "enabled": False,
-    "validationType": "specified-value-match"
+cmiqr2b9j00i9ie8frw439h8i_Capabilities_out_validation = {}
+
+# SensorDeviceProfiles
+cmiqr2b9j00i9ie8frw439h8i_SensorDeviceProfiles_out_validation = {}
+
+# SensorDeviceControl
+cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl_out_validation = {
+  "sensorDeviceID": {
+    "enabled": True,
+    "validationType": "request-field-match",
+    "referenceFieldId": "cmisfqqxc07ub5vy7ao1d67bu",
+    "referenceField": "sensorDeviceID",
+    "referenceEndpoint": "/SensorDeviceControl",
+    "score": 0
   },
-  "message": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "streamingSupport": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "streamingSupport.streamProtocolType": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "streamingSupport.streamProtocolDesc": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "transportSupport": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "transportSupport.transProtocolType": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "transportSupport.transProtocolDesc": {
-    "enabled": False,
-    "validationType": "specified-value-match"
+  "sensorDeviceStatus": {
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueMatchType": "validation-field",
+    "validValueFieldName": "sensorControl",
+    "validValueOperator": "equalsAny",
+    "allowedValues": [
+      "AlarmOn",
+      "AlarmOff"
+    ],
+    "score": 0
   }
 }
+
+# SensorDeviceControl2
+cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl2_out_validation = {
+  "sensorDeviceID": {
+    "enabled": True,
+    "validationType": "request-field-match",
+    "referenceFieldId": "cmisg8fmw08c55vy7eby9fson",
+    "referenceField": "sensorDeviceID",
+    "referenceEndpoint": "/SensorDeviceControl2",
+    "score": 0
+  },
+  "sensorDeviceStatus": {
+    "enabled": True,
+    "validationType": "request-field-match",
+    "referenceFieldId": "cmisg8hg208ca5vy7ijzfeelo",
+    "referenceField": "commandType",
+    "referenceEndpoint": "/SensorDeviceControl2",
+    "score": 0
+  }
+}
+
+# cmiqr2b9j00i9ie8frw439h8i 검증 리스트
+cmiqr2b9j00i9ie8frw439h8i_outValidation = [
+    cmiqr2b9j00i9ie8frw439h8i_Authentication_out_validation,
+    cmiqr2b9j00i9ie8frw439h8i_Capabilities_out_validation,
+    cmiqr2b9j00i9ie8frw439h8i_SensorDeviceProfiles_out_validation,
+    cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl_out_validation,
+    cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl2_out_validation,
+]
+
+# Authentication
+cmiqr1jha00i6ie8fb1scb3go_Authentication_out_validation = {}
+
+# Capabilities
+cmiqr1jha00i6ie8fb1scb3go_Capabilities_out_validation = {}
+
+# DoorProfiles
+cmiqr1jha00i6ie8fb1scb3go_DoorProfiles_out_validation = {}
+
+# RealtimeDoorStatus
+cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_out_validation = {}
+
+# RealtimeDoorStatus WebHook IN Validation
+cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_webhook_in_validation = {
+  "doorList.doorID": {
+    "enabled": True,
+    "validationType": "request-field-list-match",
+    "referenceFieldId": "cmixusnx90hatp002m3rnln60",
+    "referenceField": "doorID",
+    "referenceEndpoint": "/RealtimeDoorStatus",
+    "score": 0
+  },
+  "doorList.doorSensor": {
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueMatchType": "validation-field",
+    "validValueFieldName": "acControl",
+    "validValueOperator": "equalsAny",
+    "allowedValues": [
+      "Lock",
+      "Unlock"
+    ],
+    "score": 0
+  }
+}
+
+# DoorControl
+cmiqr1jha00i6ie8fb1scb3go_DoorControl_out_validation = {}
+
+# RealtimeDoorStatus2
+cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_out_validation = {}
+
+# RealtimeDoorStatus2 WebHook IN Validation
+cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_webhook_in_validation = {
+  "doorList.doorID": {
+    "enabled": True,
+    "validationType": "request-field-match",
+    "referenceFieldId": "cmixuykwk0hmep002xddae990",
+    "referenceField": "doorID",
+    "referenceEndpoint": "/RealtimeDoorStatus2",
+    "score": 0
+  },
+  "doorList.doorSensor": {
+    "enabled": True,
+    "validationType": "request-field-match",
+    "referenceFieldId": "cmixuu94o0hchp002wh8j30df",
+    "referenceEndpoint": "/DoorControl",
+    "score": 0
+  }
+}
+
+# cmiqr1jha00i6ie8fb1scb3go WebHook 검증 리스트
+cmiqr1jha00i6ie8fb1scb3go_webhook_inValidation = [
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_webhook_in_validation,
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_webhook_in_validation,
+]
+
+# cmiqr1jha00i6ie8fb1scb3go 검증 리스트
+cmiqr1jha00i6ie8fb1scb3go_outValidation = [
+    cmiqr1jha00i6ie8fb1scb3go_Authentication_out_validation,
+    cmiqr1jha00i6ie8fb1scb3go_Capabilities_out_validation,
+    cmiqr1jha00i6ie8fb1scb3go_DoorProfiles_out_validation,
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_out_validation,
+    cmiqr1jha00i6ie8fb1scb3go_DoorControl_out_validation,
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_out_validation,
+]
+
+# Authentication
+cmiqr0kdw00i4ie8fr3firjtg_Authentication_out_validation = {}
+
+# Capabilities
+cmiqr0kdw00i4ie8fr3firjtg_Capabilities_out_validation = {}
 
 # CameraProfiles
-cmgyv3rzl014nvsveidu5jpzp_CameraProfiles_out_validation = {
-  "code": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "message": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.camID": {
-    "enabled": False,
-    "validationType": "request-field-list-match"
-  },
-  "camList.camName": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.camLoc": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.camLoc.lon": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.camLoc.lat": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.camLoc.alt": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.camLoc.desc": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.camConfig": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.camConfig.camType": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  }
-}
+cmiqr0kdw00i4ie8fr3firjtg_CameraProfiles_out_validation = {}
 
-# StoredVideoInfos
-cmgyv3rzl014nvsveidu5jpzp_StoredVideoInfos_out_validation = {
-  "code": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "message": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.camID": {
-    "enabled": True,
-    "validationType": "request-field-list-match",
-    "referenceListField": "camID",
-    "referenceListEndpoint": "/StoredVideoInfos",
-    "referenceEndpoint": "/StoredVideoInfos"
-  },
-  "camList.timeList": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.timeList.startTime": {
-    "enabled": True,
-    "validationType": "request-field-range-match",
-    "referenceFieldMax": "endTime",
-    "referenceFieldMin": "startTime",
-    "referenceEndpointMax": "/StoredVideoInfos",
-    "referenceEndpointMin": "/StoredVideoInfos",
-    "referenceRangeOperator": "between"
-  },
-  "camList.timeList.endTime": {
-    "enabled": True,
-    "validationType": "request-field-range-match",
-    "referenceFieldMax": "endTime",
-    "referenceFieldMin": "startTime",
-    "referenceEndpointMax": "/StoredVideoInfos",
-    "referenceEndpointMin": "/StoredVideoInfos",
-    "referenceRangeOperator": "between"
-  }
-}
+# PtzStatus
+cmiqr0kdw00i4ie8fr3firjtg_PtzStatus_out_validation = {}
 
-# StreamURLs
-cmgyv3rzl014nvsveidu5jpzp_StreamURLs_out_validation = {
-  "code": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "message": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.camID": {
-    "enabled": True,
-    "validationType": "request-field-list-match",
-    "referenceEndpoint": "/StreamURLs",
-    "referenceListField": "camID",
-    "referenceListEndpoint": "/StreamURLs"
-  },
-  "camList.accessID": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.accessPW": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.camURL": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.videoInfo": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.videoInfo.resolution": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.videoInfo.fps": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.videoInfo.videoCodec": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.videoInfo.audioCodec": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  }
-}
+# PtzContinuousMove
+cmiqr0kdw00i4ie8fr3firjtg_PtzContinuousMove_out_validation = {}
 
-# ReplayURL
-cmgyv3rzl014nvsveidu5jpzp_ReplayURL_out_validation = {
-  "code": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "message": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.camID": {
-    "enabled": True,
-    "validationType": "request-field-list-match",
-    "referenceListField": "camID",
-    "referenceListEndpoint": "/ReplayURL",
-    "referenceEndpoint": "/ReplayURL"
-  },
-  "camList.accessID": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.accessPW": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.startTime": {
-    "enabled": True,
-    "validationType": "request-field-range-match",
-    "referenceFieldMax": "endTime",
-    "referenceFieldMin": "startTime",
-    "referenceEndpointMax": "/ReplayURL",
-    "referenceEndpointMin": "/ReplayURL",
-    "referenceRangeOperator": "between"
-  },
-  "camList.endTime": {
-    "enabled": True,
-    "validationType": "request-field-range-match",
-    "referenceFieldMax": "endTime",
-    "referenceFieldMin": "startTime",
-    "referenceEndpointMax": "/ReplayURL",
-    "referenceEndpointMin": "/ReplayURL",
-    "referenceRangeOperator": "between"
-  },
-  "camList.camURL": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.videoInfo": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.videoInfo.resolution": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.videoInfo.fps": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.videoInfo.videoCodec": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.videoInfo.audioCodec": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  }
-}
+# PtzStop
+cmiqr0kdw00i4ie8fr3firjtg_PtzStop_out_validation = {}
 
-# RealtimeVideoEventInfos
-cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_out_validation = {
-  "code": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "message": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  }
-}
-
-# StoredVideoEventInfos
-cmgyv3rzl014nvsveidu5jpzp_StoredVideoEventInfos_out_validation = {
-  "code": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "message": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.camID": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.eventUUID": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.eventName": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.startTime": {
-    "enabled": False,
-    "validationType": "request-field-range-match",
-    "referenceRangeOperator": "between"
-  },
-  "camList.endTime": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  },
-  "camList.eventDesc": {
-    "enabled": False,
-    "validationType": "specified-value-match"
-  }
-}
-
-# cmgyv3rzl014nvsveidu5jpzp 검증 리스트
-cmgyv3rzl014nvsveidu5jpzp_outValidation = [
-    cmgyv3rzl014nvsveidu5jpzp_Authentication_out_validation,
-    cmgyv3rzl014nvsveidu5jpzp_Capabilities_out_validation,
-    cmgyv3rzl014nvsveidu5jpzp_CameraProfiles_out_validation,
-    cmgyv3rzl014nvsveidu5jpzp_StoredVideoInfos_out_validation,
-    cmgyv3rzl014nvsveidu5jpzp_StreamURLs_out_validation,
-    cmgyv3rzl014nvsveidu5jpzp_ReplayURL_out_validation,
-    cmgyv3rzl014nvsveidu5jpzp_RealtimeVideoEventInfos_out_validation,
-    cmgyv3rzl014nvsveidu5jpzp_StoredVideoEventInfos_out_validation,
+# cmiqr0kdw00i4ie8fr3firjtg 검증 리스트
+cmiqr0kdw00i4ie8fr3firjtg_outValidation = [
+    cmiqr0kdw00i4ie8fr3firjtg_Authentication_out_validation,
+    cmiqr0kdw00i4ie8fr3firjtg_Capabilities_out_validation,
+    cmiqr0kdw00i4ie8fr3firjtg_CameraProfiles_out_validation,
+    cmiqr0kdw00i4ie8fr3firjtg_PtzStatus_out_validation,
+    cmiqr0kdw00i4ie8fr3firjtg_PtzContinuousMove_out_validation,
+    cmiqr0kdw00i4ie8fr3firjtg_PtzStop_out_validation,
 ]
 

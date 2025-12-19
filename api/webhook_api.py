@@ -49,7 +49,7 @@ class WebhookServer(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-Type', 'application/json; charset=utf-8')
             self.end_headers()
-            resp = {"code": 200, "message": "성공"}
+            resp = {"code": "200", "message": "성공"}
             self.wfile.write(json.dumps(resp, ensure_ascii=False).encode('utf-8'))
             self.wfile.flush()
             
@@ -105,7 +105,11 @@ class WebhookThread(QThread):
             print(f"[Webhook] URL 파싱 오류, 기본값 사용: {e}")
             safe_url = "127.0.0.1"
 
-        server_address = (safe_url, self.port)
+        # ✅ 웹훅 서버는 항상 0.0.0.0에 바인딩 (모든 인터페이스에서 수신)
+        # safe_url은 로깅/디버깅용으로만 사용
+        server_address = ("0.0.0.0", self.port)
+        print(f"[Webhook] 서버 바인딩: 0.0.0.0:{self.port}")
+        
         # SSL 인증서 설정
         certificate_private = resource_path('config/key0627/server.crt')
         certificate_key = resource_path('config/key0627/server.key')
@@ -118,7 +122,7 @@ class WebhookThread(QThread):
         # SSL 설정
         self.httpd.socket = ssl_context.wrap_socket(self.httpd.socket, server_side=True)
 
-        print('Starting on ' + "('" + str(safe_url) + "', " + str(self.port) + ")")
+        print(f'[Webhook] 웹훅 서버 시작됨: 0.0.0.0:{self.port}')
 
         try:
             self.httpd.serve_forever()

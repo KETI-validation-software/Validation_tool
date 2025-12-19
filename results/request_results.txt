@@ -1,229 +1,198 @@
 === 시험 결과 ===
-통과 필드 수: 52
-전체 필드 수: 70
-종합 평가 점수: 74.3%
+통과 필드 수: 27
+전체 필드 수: 36
+종합 평가 점수: 75.0%
 
 === 스텝별 결과 ===
-Authentication | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 4 | 전체 필드 수: 4 | 실패 필드 수: 0 | 평가 점수: 100.0%
-Capabilities | 결과: PASS | 검증 횟수: 3 | 통과 필드 수: 3 | 전체 필드 수: 3 | 실패 필드 수: 0 | 평가 점수: 100.0%
-SensorDeviceProfiles | 결과: PASS | 검증 횟수: 2 | 통과 필드 수: 2 | 전체 필드 수: 2 | 실패 필드 수: 0 | 평가 점수: 100.0%
-RealtimeSensorData | 결과: FAIL | 검증 횟수: 3 | 통과 필드 수: 15 | 전체 필드 수: 21 | 실패 필드 수: 6 | 평가 점수: 71.4%
-RealtimeSensorEventInfos | 결과: FAIL | 검증 횟수: 3 | 통과 필드 수: 18 | 전체 필드 수: 24 | 실패 필드 수: 6 | 평가 점수: 75.0%
-StoredSensorEventInfos | 결과: FAIL | 검증 횟수: 2 | 통과 필드 수: 8 | 전체 필드 수: 14 | 실패 필드 수: 6 | 평가 점수: 57.1%
-SensorDeviceControl | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 2 | 전체 필드 수: 2 | 실패 필드 수: 0 | 평가 점수: 100.0%
+1. Authentication | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 2 | 전체 필드 수: 2 | 실패 필드 수: 0 | 평가 점수: 100.0%
+2. Capabilities | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 1 | 전체 필드 수: 1 | 실패 필드 수: 0 | 평가 점수: 100.0%
+3. CameraProfiles | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 1 | 전체 필드 수: 1 | 실패 필드 수: 0 | 평가 점수: 100.0%
+4. StoredVideoInfos | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 5 | 전체 필드 수: 5 | 실패 필드 수: 0 | 평가 점수: 100.0%
+5. StreamURLs | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 3 | 전체 필드 수: 3 | 실패 필드 수: 0 | 평가 점수: 100.0%
+6. ReplayURL | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 5 | 전체 필드 수: 5 | 실패 필드 수: 0 | 평가 점수: 100.0%
+7. RealtimeVideoEventInfos | 결과: FAIL | 검증 횟수: 1 | 통과 필드 수: 2 | 전체 필드 수: 11 | 실패 필드 수: 9 | 평가 점수: 18.2%
+8. StoredVideoEventInfos | 결과: PASS | 검증 횟수: 1 | 통과 필드 수: 8 | 전체 필드 수: 8 | 실패 필드 수: 0 | 평가 점수: 100.0%
 
 === 전체 로그 ===
 Start Validation...
 
+step 1: Authentication
+🔄 부하테스트 시작: 총 1회 검증 예정
+📨 시스템 요청 수신, 검증 중... [1/1]
 
 ✅ 부하테스트 완료: 1회 검증 완료
 프로토콜: basic
 
 [시도 1회차]
 {
-    "userID": "",
-    "userPW": ""
+    "userID": "user0001",
+    "userPW": "pass0001"
 }
+PASS
+Score : 100.0
+Score details : 2(누적 통과 필드 수), 0(누적 오류 필드 수)
 
-[시도 3회차]
-{
-    "userID": "",
-    "userPW": ""
-}
+step 2: Capabilities
+🔄 부하테스트 시작: 총 1회 검증 예정
+📨 시스템 요청 수신, 검증 중... [1/1]
+
+✅ 부하테스트 완료: 1회 검증 완료
+프로토콜: basic
+
+[시도 1회차]
+{}
+PASS
+Score : 100.0
+Score details : 3(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 3: CameraProfiles
+🔄 부하테스트 시작: 총 1회 검증 예정
+📨 시스템 요청 수신, 검증 중... [1/1]
+
+✅ 부하테스트 완료: 1회 검증 완료
+프로토콜: basic
+
+[시도 1회차]
+{}
 PASS
 Score : 100.0
 Score details : 4(누적 통과 필드 수), 0(누적 오류 필드 수)
 
-step 2: Capabilities
-
-✅ 부하테스트 완료: 3회 검증 완료
-프로토콜: LongPolling
-
-[시도 1회차]
-{}
-
-[시도 2회차]
-{}
-
-[시도 3회차]
-{}
-PASS
-Score : 100.0
-Score details : 7(누적 통과 필드 수), 0(누적 오류 필드 수)
-
-step 3: SensorDeviceProfiles
-
-✅ 부하테스트 완료: 2회 검증 완료
-프로토콜: basic
-
-[시도 1회차]
-{}
-
-[시도 2회차]
-{}
-PASS
-Score : 100.0
-Score details : 9(누적 통과 필드 수), 0(누적 오류 필드 수)
-
-step 4: RealtimeSensorData
-
-✅ 부하테스트 완료: 3회 검증 완료
-프로토콜: LongPolling
-
-[시도 1회차]
-{
-    "sensorDeviceList": [
-        {
-            "sensorDeviceID": ""
-        }
-    ],
-    "duration": 0,
-    "transProtocol": {
-        "transProtocolType": "",
-        "transProtocolDesc": ""
-    },
-    "startTime": 1759494300000
-}
-
-[시도 2회차]
-{
-    "sensorDeviceList": [
-        {
-            "sensorDeviceID": ""
-        }
-    ],
-    "duration": 0,
-    "transProtocol": {
-        "transProtocolType": "",
-        "transProtocolDesc": ""
-    },
-    "startTime": 1759494300000
-}
-
-[시도 3회차]
-{
-    "sensorDeviceList": [
-        {
-            "sensorDeviceID": ""
-        }
-    ],
-    "duration": 0,
-    "transProtocol": {
-        "transProtocolType": "",
-        "transProtocolDesc": ""
-    },
-    "startTime": 1759494300000
-}
-FAIL
-Score : 80.0
-Score details : 24(누적 통과 필드 수), 6(누적 오류 필드 수)
-
-step 5: RealtimeSensorEventInfos
-
-✅ 부하테스트 완료: 3회 검증 완료
-프로토콜: LongPolling
-
-[시도 1회차]
-{
-    "sensorDeviceList": [
-        {
-            "sensorDeviceID": ""
-        }
-    ],
-    "duration": 0,
-    "transProtocol": {
-        "transProtocolType": "",
-        "transProtocolDesc": ""
-    },
-    "eventFilter": "",
-    "startTime": 1759494540000
-}
-
-[시도 2회차]
-{
-    "sensorDeviceList": [
-        {
-            "sensorDeviceID": ""
-        }
-    ],
-    "duration": 0,
-    "transProtocol": {
-        "transProtocolType": "",
-        "transProtocolDesc": ""
-    },
-    "eventFilter": "",
-    "startTime": 1759494540000
-}
-
-[시도 3회차]
-{
-    "sensorDeviceList": [
-        {
-            "sensorDeviceID": ""
-        }
-    ],
-    "duration": 0,
-    "transProtocol": {
-        "transProtocolType": "",
-        "transProtocolDesc": ""
-    },
-    "eventFilter": "",
-    "startTime": 1759494540000
-}
-FAIL
-Score : 77.77777777777779
-Score details : 42(누적 통과 필드 수), 12(누적 오류 필드 수)
-
-step 6: StoredSensorEventInfos
-
-✅ 부하테스트 완료: 2회 검증 완료
-프로토콜: basic
-
-[시도 1회차]
-{
-    "timePeriod": {
-        "startTime": 1759494660000,
-        "endTime": 1761827460000
-    },
-    "sensorDeviceList": [
-        {
-            "sensorDeviceID": ""
-        }
-    ],
-    "maxCount": 0,
-    "eventFilter": ""
-}
-
-[시도 2회차]
-{
-    "timePeriod": {
-        "startTime": 1759494660000,
-        "endTime": 1761827460000
-    },
-    "sensorDeviceList": [
-        {
-            "sensorDeviceID": ""
-        }
-    ],
-    "maxCount": 0,
-    "eventFilter": ""
-}
-FAIL
-Score : 73.52941176470588
-Score details : 50(누적 통과 필드 수), 18(누적 오류 필드 수)
-
-step 7: SensorDeviceControl
+step 4: StoredVideoInfos
+🔄 부하테스트 시작: 총 1회 검증 예정
+📨 시스템 요청 수신, 검증 중... [1/1]
 
 ✅ 부하테스트 완료: 1회 검증 완료
 프로토콜: basic
 
 [시도 1회차]
 {
-    "sensorDeviceID": "",
-    "commandType": ""
+    "timePeriod": {
+        "startTime": 1760948700000,
+        "endTime": 1761121500000
+    },
+    "camList": [
+        {
+            "camID": "cam0001"
+        },
+        {
+            "camID": "cam0002"
+        }
+    ]
 }
 PASS
-Score : 74.28571428571429
-Score details : 52(누적 통과 필드 수), 18(누적 오류 필드 수)
+Score : 100.0
+Score details : 9(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 5: StreamURLs
+🔄 부하테스트 시작: 총 1회 검증 예정
+📨 시스템 요청 수신, 검증 중... [1/1]
+
+✅ 부하테스트 완료: 1회 검증 완료
+프로토콜: basic
+
+[시도 1회차]
+{
+    "camList": [
+        {
+            "camID": "cam0001",
+            "streamProtocolType": "RTSP"
+        },
+        {
+            "camID": "cam0002",
+            "streamProtocolType": "RTSP"
+        }
+    ]
+}
+PASS
+Score : 100.0
+Score details : 12(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 6: ReplayURL
+🔄 부하테스트 시작: 총 1회 검증 예정
+📨 시스템 요청 수신, 검증 중... [1/1]
+
+✅ 부하테스트 완료: 1회 검증 완료
+프로토콜: basic
+
+[시도 1회차]
+{
+    "camList": [
+        {
+            "camID": "cam0001",
+            "startTime": 1760949060000,
+            "endTime": 1761208260000,
+            "streamProtocolType": "RTSP"
+        },
+        {
+            "camID": "cam0002",
+            "startTime": 1760949060000,
+            "endTime": 1761208260000,
+            "streamProtocolType": "RTSP"
+        }
+    ]
+}
+PASS
+Score : 100.0
+Score details : 17(누적 통과 필드 수), 0(누적 오류 필드 수)
+
+step 7: RealtimeVideoEventInfos
+🔄 부하테스트 시작: 총 1회 검증 예정
+📨 시스템 요청 수신, 검증 중... [1/1]
+
+✅ 부하테스트 완료: 1회 검증 완료
+프로토콜: WebHook
+
+[시도 1회차]
+{
+    "camList": [
+        {
+            "camID": "",
+            "eventUUID": "",
+            "eventName": "",
+            "startTime": 0,
+            "endTime": 0,
+            "eventDesc": ""
+        }
+    ]
+}
+
+--- Webhook 응답 (시도 1회차) ---
+{
+    "code": 200,
+    "message": "성공"
+}
+FAIL
+Score : 67.85714285714286
+Score details : 19(누적 통과 필드 수), 9(누적 오류 필드 수)
+
+step 8: StoredVideoEventInfos
+🔄 부하테스트 시작: 총 1회 검증 예정
+📨 시스템 요청 수신, 검증 중... [1/1]
+
+✅ 부하테스트 완료: 1회 검증 완료
+프로토콜: basic
+
+[시도 1회차]
+{
+    "timePeriod": {
+        "startTime": 1759221900000,
+        "endTime": 1761727500000
+    },
+    "camList": [
+        {
+            "camID": "cam0001"
+        },
+        {
+            "camID": "cam0002"
+        }
+    ],
+    "maxCount": 3,
+    "eventFilter": "화재",
+    "classFilter": "사람"
+}
+PASS
+Score : 75.0
+Score details : 27(누적 통과 필드 수), 9(누적 오류 필드 수)
 
 검증 절차가 완료되었습니다.
