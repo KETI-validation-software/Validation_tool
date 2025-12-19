@@ -54,7 +54,7 @@ def safe_compare(a, b):
         return False
 
 
-def safe_field_in_opt(field_name, opt_field_list):
+def safe_field_in_opt(fField_name, opt_field_list):
     """필드가 opt_field_list에 있는지 안전하게 확인"""
     try:
         for tmp in opt_field_list:
@@ -1072,8 +1072,16 @@ def timeout_field_finder(schema):
         elif type(fields_tmp) == list and type(fields_tmp[-1]) == dict:
             for field_tmp in fields_tmp[-1]:
                 if isinstance(field_tmp, json_checker.core.checkers.OptionalKey):
+                    print(f"[DEBUG_CNT] ⚠️ (중첩 선택-누락됨) PASS: {field_tmp.expected_data}") 
                     pass
                 else:
                     all_field_cnt += 1
+                    # print(f"[DEBUG_CNT] (중첩 필수) +1: {field_tmp}") # DEBUG
+    
+    print(f"[DEBUG_CNT] ---------------------------")
+    print(f"[DEBUG_CNT] 필수 필드 합계: {all_field_cnt}")
+    print(f"[DEBUG_CNT] 선택 필드 합계: {fields_opt_cnt}")
+    print(f"[DEBUG_CNT] 총 합계: {all_field_cnt + fields_opt_cnt}")
+    print(f"[DEBUG_CNT] ---------------------------\n")
 
     return all_field_cnt, fields_opt_cnt

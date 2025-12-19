@@ -418,9 +418,9 @@ class FormValidator:
                     continue
 
                 if schema_type == "request":
-                    list_name = f"{spec_id}_in_schema"
+                    list_name = f"{spec_id}_inSchema"
                 else:
-                    list_name = f"{spec_id}_out_schema"
+                    list_name = f"{spec_id}_outSchema"
 
                 schema_content += f"# {spec_id} 스키마 리스트\n"
                 schema_content += f"{list_name} = [\n"
@@ -1156,9 +1156,9 @@ class FormValidator:
 
                 # Schema 리스트 생성 (spec별로) - spec_id_safe 사용
                 if schema_type == "request":
-                    list_name = f"{spec_id_safe}_in_schema"
+                    list_name = f"{spec_id_safe}_inSchema"
                 else:
-                    list_name = f"{spec_id_safe}_out_schema"
+                    list_name = f"{spec_id_safe}_outSchema"
 
                 schema_content += f"# {spec_id_safe} 스키마 리스트\n"
                 schema_content += f"{list_name} = [\n"

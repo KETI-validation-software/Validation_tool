@@ -2381,15 +2381,11 @@ class MyApp(QWidget):
         print(f"[PLATFORM] 🔧 타입: 요청 검증 + 응답 전송")
 
         # Request 검증용 데이터 로드
-        # spec_names 순서: [outData, messages, in_schema, ...]
-        # 따라서 in_schema는 spec_names[2]에 있음
-        self.videoInSchema = getattr(schema_request_module, spec_names[2] if len(spec_names) > 2 else '', [])
+        self.videoInSchema = getattr(schema_request_module, spec_names[0], [])
 
         # Response 전송용 데이터 로드
-        # outData는 spec_names[0]에 있음
-        self.videoOutMessage = getattr(data_response_module, spec_names[0] if len(spec_names) > 0 else '', [])
-        # messages는 spec_names[1]에 있음
-        self.videoMessages = getattr(data_response_module, spec_names[1] if len(spec_names) > 1 else '', [])
+        self.videoOutMessage = getattr(data_response_module, spec_names[1], [])
+        self.videoMessages = getattr(data_response_module, spec_names[2], [])
         # 표시용 API 이름 (숫자 제거)
         self.videoMessagesDisplay = [self._remove_api_number_suffix(msg) for msg in self.videoMessages]
         self.videoOutConstraint = getattr(constraints_response_module, self.current_spec_id + "_outConstraints", [])
@@ -3166,7 +3162,6 @@ class MyApp(QWidget):
 
                 tmp_fields_rqd_cnt, tmp_fields_opt_cnt = timeout_field_finder(self.Server.inSchema[self.cnt])
 
-                # ✅ 웹훅 API인 경우 웹훅 스키마 필드 수도 추가
                 current_protocol = self.trans_protocols[self.cnt] if self.cnt < len(self.trans_protocols) else "basic"
                 if current_protocol == "WebHook" and len(self.videoWebhookSchema) > 0:
                     webhook_rqd_cnt, webhook_opt_cnt = timeout_field_finder(self.videoWebhookSchema[0])
