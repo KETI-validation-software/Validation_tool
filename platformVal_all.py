@@ -4003,6 +4003,8 @@ class MyApp(QWidget):
                     self.pathUrl = self.url + "/" + self.current_spec_id
                 self.url_text_box.setText(self.pathUrl)
                 self.Server.current_spec_id = self.current_spec_id
+                self.Server.num_retries = self.spec_config.get('num_retries', self.current_spec_id)
+
                 # 결과 텍스트 초기화
                 self.valResult.clear()
                 self.append_monitor_log(
@@ -4641,7 +4643,9 @@ class MyApp(QWidget):
                     self.pathUrl = self.url + "/" + test_name
                 else:
                     self.pathUrl = self.url + "/" + first_spec_id
+
                 self.Server.current_spec_id = first_spec_id
+                self.Server.num_retries = self.spec_config.get('num_retries', first_spec_id)
                 # 시나리오 선택 이벤트 수동 트리거 (테이블 업데이트)
                 self.on_test_field_selected(0, 0)
             self.url_text_box.setText(self.pathUrl)
