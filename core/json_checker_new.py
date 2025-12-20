@@ -54,7 +54,7 @@ def safe_compare(a, b):
         return False
 
 
-def safe_field_in_opt(fField_name, opt_field_list):
+def safe_field_in_opt(field_name, opt_field_list):
     """필드가 opt_field_list에 있는지 안전하게 확인"""
     try:
         for tmp in opt_field_list:

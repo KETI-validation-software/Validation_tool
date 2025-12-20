@@ -1,2 +1,0 @@
-{"time": "2025-12-19T08:23:24.982863Z", "api": "StreamURLs", "dir": "REQUEST", "data": {"camList": [{"camID": "cam0001", "streamProtocolType": "RTSP"}]}}
-{"time": "2025-12-19T08:23:24.988846Z", "api": "StreamURLs", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "camList": [{"camID": "cam0001", "accessID": "", "accessPW": "", "camURL": "rtsp://192.168.0.1:8000", "videoInfo": {"resolution": "1920x1080", "fps": 30, "videoCodec": "H.264", "audioCodec": "G.711"}}]}}
