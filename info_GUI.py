@@ -3915,7 +3915,7 @@ class InfoWidget(QWidget):
             if self.test_port:
                 # 1. 메모리상의 값 업데이트
                 CONSTANTS.WEBHOOK_PORT = self.test_port + 1
-                CONSTANTS.WEBHOOK_URL = f"https://{CONSTANTS.WEBHOOK_PUBLIC_IP}:{CONSTANTS.WEBHOOK_PORT}"
+                CONSTANTS.WEBHOOK_URL = f"https://{CONSTANTS.url}:{CONSTANTS.WEBHOOK_PORT}"
 
                 # 2. CONSTANTS.py 파일 자체도 수정
                 try:

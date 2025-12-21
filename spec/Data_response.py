@@ -258,6 +258,11 @@ cmiqr1acx00i5ie8fi022t1hp_outData = [
 
 # cmiqr1acx00i5ie8fi022t1hp WebHook 데이터 리스트
 cmiqr1acx00i5ie8fi022t1hp_webhook_inData = [
+    None,
+    None,
+    None,
+    None,
+    None,
     cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_in_data,
 ]
 

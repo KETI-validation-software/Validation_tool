@@ -466,6 +466,11 @@ cmiqr1acx00i5ie8fi022t1hp_outConstraints = [
 
 # cmiqr1acx00i5ie8fi022t1hp WebHook Constraints 리스트
 cmiqr1acx00i5ie8fi022t1hp_webhook_inConstraints = [
+    None,
+    None,
+    None,
+    None,
+    None,
     cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_in_constraints,
 ]
 

@@ -345,8 +345,8 @@
             {
               "attempt": 1,
               "validationData": {
-                "code": "400",
-                "message": "잘못된 요청"
+                "code": "200",
+                "message": "성공"
               },
               "validationErrors": [
                 "[시도 1/1]",
@@ -358,5 +358,5 @@
       ]
     }
   ],
-  "completedDate": "2025-12-20T23:54:24Z"
+  "completedDate": "2025-12-22T00:03:41Z"
 }

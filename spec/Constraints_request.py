@@ -181,18 +181,23 @@ cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_in_constraints = {
     "valueType": "preset",
     "required": True
   },
-  "doorList.doorName": {
-    "id": "cmizeau3w00bf96qhexvnyb0x",
+  "transProtocol": {
+    "id": "cmjfhm2ja0cc5cfb3x8u0p0ma",
     "valueType": "preset",
     "required": True
   },
-  "doorList.doorRelaySensor": {
-    "id": "cmizeavm100bk96qhc5k8x3lo",
+  "transProtocol.transProtocolType": {
+    "id": "cmjfhsoh90chwcfb3e0v85qiz",
     "valueType": "preset",
     "required": True
   },
-  "doorList.doorSensor": {
-    "id": "cmizeaz5o00bt96qh9mdvx33k",
+  "transProtocol.transProtocolDesc": {
+    "id": "cmjfhszsp0ciscfb34zwpfr09",
+    "valueType": "preset",
+    "required": True
+  },
+  "startTime": {
+    "id": "cmjfhmu3m0cfrcfb3txo2wic2",
     "valueType": "preset",
     "required": True
   }
@@ -210,7 +215,12 @@ cmiqr1jha00i6ie8fb1scb3go_inConstraints = [
 
 # cmiqr1jha00i6ie8fb1scb3go WebHook Constraints 리스트
 cmiqr1jha00i6ie8fb1scb3go_webhook_outConstraints = [
+    None,
+    None,
+    None,
     cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_webhook_out_constraints,
+    None,
+    None,
 ]
 
 # Authentication
