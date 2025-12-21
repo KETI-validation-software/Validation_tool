@@ -83,28 +83,6 @@ class WebhookThread(QThread):
         self.httpd = None
 
     def run(self):
-        # self.url이 잘못된 값(desc, None, 빈 문자열 등)이면 127.0.0.1로 대체
-        safe_url = "127.0.0.1"  # 기본값
-        
-        # URL 파싱 및 검증
-        try:
-            if self.url and str(self.url).strip():
-                url_str = str(self.url).strip()
-                # 잘못된 값들 체크
-                if url_str.lower() not in ["none", "", "desc", "null"]:
-                    # URL이 http:// 또는 https://로 시작하는 경우 파싱
-                    if url_str.lower().startswith(('http://', 'https://')):
-                        parsed = urlparse(url_str)
-                        if parsed.hostname:
-                            safe_url = parsed.hostname
-                    # 그냥 IP 주소나 도메인인 경우
-                    elif '.' in url_str and not ' ' in url_str:
-                        safe_url = url_str
-            print(f"[Webhook] 사용할 호스트: {safe_url}")
-        except Exception as e:
-            print(f"[Webhook] URL 파싱 오류, 기본값 사용: {e}")
-            safe_url = "127.0.0.1"
-
         # ✅ 웹훅 서버는 항상 0.0.0.0에 바인딩 (모든 인터페이스에서 수신)
         # safe_url은 로깅/디버깅용으로만 사용
         server_address = ("0.0.0.0", self.port)

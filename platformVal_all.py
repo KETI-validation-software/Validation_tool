@@ -2882,21 +2882,20 @@ class MyApp(QWidget):
                                 self.step_buffers[self.cnt]["is_webhook_api"] = True
                             
                             # 웹훅 응답 검증 (null인 경우에도 검증 수행)
-                            if len(self.videoWebhookSchema) > 0:
-                                webhook_resp_val_result, webhook_resp_val_text, webhook_resp_key_psss_cnt, webhook_resp_key_error_cnt, opt_correct, opt_error = json_check_(
-                                    self.videoWebhookSchema[0], webhook_response, self.flag_opt
-                                )
+                            webhook_resp_val_result, webhook_resp_val_text, webhook_resp_key_psss_cnt, webhook_resp_key_error_cnt, opt_correct, opt_error = json_check_(
+                                self.videoWebhookSchema[self.cnt], webhook_response, self.flag_opt
+                            )
 
-                                add_pass += webhook_resp_key_psss_cnt
-                                add_err += webhook_resp_key_error_cnt
-                                add_opt_pass += opt_correct  # 웹훅 선택 필드 통과 수 누적
-                                add_opt_error += opt_error  # 웹훅 선택 필드 에러 수 누적
+                            add_pass += webhook_resp_key_psss_cnt
+                            add_err += webhook_resp_key_error_cnt
+                            add_opt_pass += opt_correct  # 웹훅 선택 필드 통과 수 누적
+                            add_opt_error += opt_error  # 웹훅 선택 필드 에러 수 누적
 
-                                webhook_resp_err_txt = to_detail_text(webhook_resp_val_text)
-                                if webhook_resp_val_result == "FAIL":
-                                    step_result = "FAIL"
-                                    combined_error_parts.append(f"\n--- Webhook 검증 ---\n" + webhook_resp_err_txt)
-                            
+                            webhook_resp_err_txt = to_detail_text(webhook_resp_val_text)
+                            if webhook_resp_val_result == "FAIL":
+                                step_result = "FAIL"
+                                combined_error_parts.append(f"\n--- Webhook 검증 ---\n" + webhook_resp_err_txt)
+
                             # webhook_response가 None이 아닌 경우에만 reference_context에 저장
                             if webhook_response:
                                 webhook_context_key = f"/{api_name}"
@@ -2906,21 +2905,21 @@ class MyApp(QWidget):
                             # webhook_response 속성이 없는 경우 (초기화되지 않은 경우)
                             accumulated['data_parts'].append(f"\n--- Webhook 응답 ---\nnull")
                             # 웹훅 스키마가 있는 경우 빈 딕셔너리로 검증 수행
-                            if len(self.videoWebhookSchema) > 0:
-                                webhook_response = {}
-                                webhook_resp_val_result, webhook_resp_val_text, webhook_resp_key_psss_cnt, webhook_resp_key_error_cnt, opt_correct, opt_error = json_check_(
-                                    self.videoWebhookSchema[0], webhook_response, self.flag_opt
-                                )
+                            webhook_response = {}
+                            webhook_resp_val_result, webhook_resp_val_text, webhook_resp_key_psss_cnt, webhook_resp_key_error_cnt, opt_correct, opt_error = json_check_(
+                                self.videoWebhookSchema[self.cnt], webhook_response, self.flag_opt
+                            )
 
-                                add_pass += webhook_resp_key_psss_cnt
-                                add_err += webhook_resp_key_error_cnt
-                                add_opt_pass += opt_correct  # 웹훅 선택 필드 통과 수 누적
-                                add_opt_error += opt_error  # 웹훅 선택 필드 에러 수 누적
+                            add_pass += webhook_resp_key_psss_cnt
+                            add_err += webhook_resp_key_error_cnt
+                            add_opt_pass += opt_correct  # 웹훅 선택 필드 통과 수 누적
+                            add_opt_error += opt_error  # 웹훅 선택 필드 에러 수 누적
 
-                                webhook_resp_err_txt = to_detail_text(webhook_resp_val_text)
-                                if webhook_resp_val_result == "FAIL":
-                                    step_result = "FAIL"
-                                    combined_error_parts.append(f"\n--- Webhook 검증 ---\n" + webhook_resp_err_txt)
+                            webhook_resp_err_txt = to_detail_text(webhook_resp_val_text)
+                            if webhook_resp_val_result == "FAIL":
+                                step_result = "FAIL"
+                                combined_error_parts.append(f"\n--- Webhook 검증 ---\n" + webhook_resp_err_txt)
+
 
                     # LongPolling 프로토콜인 경우
                     elif current_protocol == "LongPolling":
@@ -3068,8 +3067,8 @@ class MyApp(QWidget):
 
                 # ✅ 웹훅 API인 경우 웹훅 스키마 필드 수도 추가
                 current_protocol = self.trans_protocols[self.cnt] if self.cnt < len(self.trans_protocols) else "basic"
-                if current_protocol == "WebHook" and len(self.videoWebhookSchema) > 0:
-                    webhook_rqd_cnt, webhook_opt_cnt = timeout_field_finder(self.videoWebhookSchema[0])
+                if current_protocol == "WebHook" :
+                    webhook_rqd_cnt, webhook_opt_cnt = timeout_field_finder(self.videoWebhookSchema[self.cnt])
                     tmp_fields_rqd_cnt += webhook_rqd_cnt
                     tmp_fields_opt_cnt += webhook_opt_cnt
                     print(f"[PLATFORM] 웹훅 필드 수 추가: 필수={webhook_rqd_cnt}, 선택={webhook_opt_cnt}")
@@ -4894,7 +4893,7 @@ class MyApp(QWidget):
                 current_protocol = self.trans_protocols[row]
                 if current_protocol == "WebHook":
                     try:
-                        webhook_schema = self.videoWebhookSchema[0] if len(self.videoWebhookSchema) > 0 else None
+                        webhook_schema = self.videoWebhookSchema[self.cnt]
                     except:
                         webhook_schema = None
 

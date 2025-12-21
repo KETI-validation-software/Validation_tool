@@ -149,7 +149,12 @@ cmiqr1jha00i6ie8fb1scb3go_outSchema = [
 
 # cmiqr1jha00i6ie8fb1scb3go WebHook 스키마 리스트
 cmiqr1jha00i6ie8fb1scb3go_webhook_inSchema = [
+    None,
+    None,
+    None,
     cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_webhook_in_schema,
+    None,
+    None,
 ]
 
 # Authentication

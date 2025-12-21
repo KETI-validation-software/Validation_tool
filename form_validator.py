@@ -437,11 +437,19 @@ class FormValidator:
                     else:
                         webhook_schema_list_name = f"{spec_id}_webhook_OutSchema"
 
-                if webhook_schema_list_name:  # ✅ 실제 값이 있을 때만 추가
                     schema_content += f"# {spec_id} WebHook 스키마 리스트\n"
                     schema_content += f"{webhook_schema_list_name} = [\n"
-                    for name in webhook_schema_names:
-                        schema_content += f"    {temp_spec_id}{name},\n"
+
+                    # endpoint_names 순서대로 순회하며 webhook 스키마가 있으면 추가, 없으면 None
+                    for endpoint in endpoint_names:
+                        # 해당 endpoint의 webhook 스키마명 찾기
+                        webhook_schema_name = f"{endpoint}_webhook_in_schema" if file_type == "request" else f"{endpoint}_webhook_out_schema"
+
+                        if webhook_schema_name in webhook_schema_names:
+                            schema_content += f"    {temp_spec_id}{webhook_schema_name},\n"
+                        else:
+                            schema_content += f"    None,\n"
+
                     schema_content += "]\n\n"
 
                 if webhook_validation_names:
@@ -471,12 +479,22 @@ class FormValidator:
                 if webhook_data_names:
                     if file_type == "response":
                         webhook_data_list_name = f"{spec_id}_webhook_inData"
-                    else :
+                    else:
                         webhook_data_list_name = f"{spec_id}_webhook_outData"
+
                     data_content += f"# {spec_id} WebHook 데이터 리스트\n"
                     data_content += f"{webhook_data_list_name} = [\n"
-                    for name in webhook_data_names:
-                        data_content += f"    {temp_spec_id}{name},\n"
+
+                    # endpoint_names 순서대로 순회하며 webhook 데이터가 있으면 추가, 없으면 None
+                    for endpoint in endpoint_names:
+                        # 해당 endpoint의 webhook 데이터명 찾기
+                        webhook_data_name = f"{endpoint}_webhook_out_data" if file_type == "request" else f"{endpoint}_webhook_in_data"
+
+                        if webhook_data_name in webhook_data_names:
+                            data_content += f"    {temp_spec_id}{webhook_data_name},\n"
+                        else:
+                            data_content += f"    None,\n"
+
                     data_content += "]\n\n"
 
                 # Messages 리스트 생성 (spec별로) - spec_id_safe 사용
@@ -520,8 +538,17 @@ class FormValidator:
 
                     constraints_content += f"# {spec_id} WebHook Constraints 리스트\n"
                     constraints_content += f"{webhook_c_list_name} = [\n"
-                    for cname in webhook_constraints_names:
-                        constraints_content += f"    {temp_spec_id}{cname},\n"
+
+                    # endpoint_names 순서대로 순회하며 webhook constraints가 있으면 추가, 없으면 None
+                    for endpoint in endpoint_names:
+                        # 해당 endpoint의 webhook constraints명 찾기
+                        webhook_c_name = f"{endpoint}_webhook_in_constraints" if file_type == "response" else f"{endpoint}_webhook_out_constraints"
+
+                        if webhook_c_name in webhook_constraints_names:
+                            constraints_content += f"    {temp_spec_id}{webhook_c_name},\n"
+                        else:
+                            constraints_content += f"    None,\n"
+
                     constraints_content += "]\n\n"
 
                 # CONSTANTS.py 업데이트용 리스트 저장

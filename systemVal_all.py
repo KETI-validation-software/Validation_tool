@@ -3598,15 +3598,13 @@ class MyApp(QWidget):
             trans_protocol = json_data_dict.get("transProtocol", {})    # 이 부분 수정해야함
             if trans_protocol:
                 # 웹훅 서버 시작 (transProtocolType이 WebHook인 경우만)
-                trans_protocol_type = trans_protocol.get("transProtocolType", {})
-                if "WebHook".lower() in str(trans_protocol_type).lower():
-
-                    time.sleep(0.1)
+                if "WebHook" == self.spec_config.get('trans_protocol', self.current_spec_id)[self.cnt]:
+                    self.webhook_flag = True
+                    time.sleep(0.001)
                     url = CONSTANTS.WEBHOOK_HOST  # ✅ 기본값 수정
                     port = CONSTANTS.WEBHOOK_PORT  # ✅ 포트도 2001로
 
                     msg = {}
-                    self.webhook_flag = True
                     self.step_buffers[self.cnt]["is_webhook_api"] = True
 
                     self.webhook_cnt = self.cnt
@@ -3634,15 +3632,8 @@ class MyApp(QWidget):
 
     # 임시 수정 
     def handle_webhook_result(self, result):
-        self.webhook_flag = True
-
-        if not hasattr(self, 'webhook_res_list'):
-            self.webhook_res_list = []
-        self.webhook_res_list.append(result)
-
         self.webhook_res = result
-        # a = self.webhook_thread.stop()
-        # self.webhook_thread.wait()
+        self.webhook_thread.stop()
         self._push_event(self.webhook_cnt, "WEBHOOK", result)
 
     # 웹훅 검증
@@ -3666,45 +3657,30 @@ class MyApp(QWidget):
             print(f"[DEBUG] webhookSchema 총 개수={len(self.webhookSchema)}")
             print(f"[DEBUG] webhook_res is None: {self.webhook_res is None}")
 
-        # ✅ 수정: webhookSchema가 1개만 있으면 항상 인덱스 0 사용
-        if len(self.webhookSchema) == 1:
-            self.webhook_schema_idx = 0
+        schema_to_check = self.webhookSchema[self.cnt]
 
-        # ✅ 수정: 인덱스 범위 체크 추가
-        if len(self.webhookSchema) > 0 and self.webhook_schema_idx < len(self.webhookSchema):
-            schema_to_check = self.webhookSchema[self.webhook_schema_idx]
+        # ⭐ 추가: webhook_res가 None이면 timeout 처리
+        if self.webhook_res is None:
+            # timeout_field_finder로 스키마의 필드 개수 계산
+            from core.json_checker_new import timeout_field_finder
+            tmp_fields_rqd_cnt, tmp_fields_opt_cnt = timeout_field_finder(schema_to_check)
+            key_error_cnt = tmp_fields_rqd_cnt if tmp_fields_rqd_cnt > 0 else 1
+            if self.flag_opt:
+                key_error_cnt += tmp_fields_opt_cnt
 
-            # ⭐ 추가: webhook_res가 None이면 timeout 처리
-            if self.webhook_res is None:
-                # timeout_field_finder로 스키마의 필드 개수 계산
-                from core.json_checker_new import timeout_field_finder
-                tmp_fields_rqd_cnt, tmp_fields_opt_cnt = timeout_field_finder(schema_to_check)
-                key_error_cnt = tmp_fields_rqd_cnt if tmp_fields_rqd_cnt > 0 else 1
-                if self.flag_opt:
-                    key_error_cnt += tmp_fields_opt_cnt
-
-                val_result = "FAIL"
-                val_text = "Webhook Message Missing!"
-                key_psss_cnt = 0
-                opt_correct = 0
-                opt_error = tmp_fields_opt_cnt if self.flag_opt else 0
-            else:
-                # ✅ 정상적으로 webhook 데이터가 있는 경우 검증
-                val_result, val_text, key_psss_cnt, key_error_cnt, opt_correct, opt_error = json_check_(
-                    schema=schema_to_check,
-                    data=webhook_data,
-                    flag=self.flag_opt,
-                    reference_context=self.reference_context
-                )
-
-            if isinstance(schema_to_check, dict):
-                schema_keys = list(schema_to_check.keys())[:5]
-                # ✅ 인덱스 증가는 범위 내에서만
-                if self.webhook_schema_idx < len(self.webhookSchema) - 1:
-                    self.webhook_schema_idx += 1
+            val_result = "FAIL"
+            val_text = "Webhook Message Missing!"
+            key_psss_cnt = 0
+            opt_correct = 0
+            opt_error = tmp_fields_opt_cnt if self.flag_opt else 0
         else:
-            # ✅ 스키마가 없거나 인덱스가 범위를 벗어난 경우
-            val_result, val_text, key_psss_cnt, key_error_cnt, opt_correct, opt_error = "FAIL", "webhookSchema not found or index out of range", 0, 0, 0, 0
+            # ✅ 정상적으로 webhook 데이터가 있는 경우 검증
+            val_result, val_text, key_psss_cnt, key_error_cnt, opt_correct, opt_error = json_check_(
+                schema=schema_to_check,
+                data=webhook_data,
+                flag=self.flag_opt,
+                reference_context=self.reference_context
+            )
 
         if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
             print(f"[DEBUG] ==========================================\n")
@@ -3866,22 +3842,15 @@ class MyApp(QWidget):
                 # ✅ Data Mapper 적용 - 이전 응답 데이터로 요청 업데이트
                 # generator는 이미 self.latest_events를 참조하고 있으므로 재할당 불필요
                 print(f"[DEBUG][MAPPER] latest_events 상태: {list(self.latest_events.keys())}")
-                print("!!!", inMessage)
                 inMessage = self._apply_request_constraints(inMessage, self.cnt)
-                print("!!!2", inMessage)
 
                 trans_protocol = inMessage.get("transProtocol", {})  # 이 부분 수정해야함
                 if trans_protocol:
                     trans_protocol_type = trans_protocol.get("transProtocolType", {})
                     if "WebHook".lower() in str(trans_protocol_type).lower():
-                        import socket
-                        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                        s.connect(("8.8.8.8", 80))  # 구글 DNS로 연결 시도 (실제 전송 안 함)
-                        WEBHOOK_PUBLIC_IP = s.getsockname()[0]  # 현재 PC의 실제 네트워크 IP
-                        s.close()
-                        print(f"[CONSTANTS] 웹훅 서버 IP 자동 감지: {WEBHOOK_PUBLIC_IP}")
+                        WEBHOOK_IP = CONSTANTS.WEBHOOK_PUBLIC_IP
                         WEBHOOK_PORT = CONSTANTS.WEBHOOK_PORT  # 웹훅 수신 포트
-                        WEBHOOK_URL = f"https://{WEBHOOK_PUBLIC_IP}:{WEBHOOK_PORT}"  # 플랫폼/시스템이 웹훅을 보낼 주소
+                        WEBHOOK_URL = f"https://{WEBHOOK_IP}:{WEBHOOK_PORT}"  # 플랫폼/시스템이 웹훅을 보낼 주소
 
                         trans_protocol = {
                             "transProtocolType": "WebHook",
