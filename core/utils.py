@@ -7,6 +7,7 @@ import sys
 import importlib
 import importlib.util
 import types
+import html
 
 # ==========================================
 # 가벼운 공용 기능 함수들 (독립 모듈)
@@ -305,4 +306,3 @@ def setup_external_spec_modules():
     except Exception as e:
         print(f"[ERROR] 내부 모듈 로드 실패: {e}")
         return None, None, None
-        

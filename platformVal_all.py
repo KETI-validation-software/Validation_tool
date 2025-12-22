@@ -3701,6 +3701,7 @@ class MyApp(QWidget):
                 self.url_text_box.setText(self.pathUrl)
                 self.Server.current_spec_id = self.current_spec_id
                 self.Server.num_retries = self.spec_config.get('num_retries', self.current_spec_id)
+                self.Server.trans_protocol = self.spec_config.get('trans_protocol', self.current_spec_id)
 
                 # 결과 텍스트 초기화
                 self.valResult.clear()
@@ -4609,6 +4610,7 @@ class MyApp(QWidget):
 
                 self.Server.current_spec_id = first_spec_id
                 self.Server.num_retries = self.spec_config.get('num_retries', first_spec_id)
+                self.Server.trans_protocol = self.spec_config.get('trans_protocol', self.current_spec_id)
                 # 시나리오 선택 이벤트 수동 트리거 (테이블 업데이트)
                 self.on_test_field_selected(0, 0)
             self.url_text_box.setText(self.pathUrl)
@@ -4853,9 +4855,14 @@ class MyApp(QWidget):
                 current_protocol = self.trans_protocols[row]
                 if current_protocol == "WebHook":
                     try:
-                        webhook_schema = self.videoWebhookSchema[self.cnt]
-                    except:
+                        # ✅ row 인덱스 사용 (self.cnt 아님!)
+                        webhook_schema = self.videoWebhookSchema[row] if row < len(self.videoWebhookSchema) else None
+                        print(f"[DEBUG] 웹훅 스키마 로드: row={row}, schema={'있음' if webhook_schema else '없음'}")
+                    except Exception as e:
+                        print(f"[ERROR] 웹훅 스키마 로드 실패: {e}")
                         webhook_schema = None
+                else:
+                    print(f"[DEBUG] 일반 API (프로토콜: {current_protocol})")
 
             # 통합 팝업창
             dialog = CombinedDetailDialog(api_name, buf, schema_data, webhook_schema)
