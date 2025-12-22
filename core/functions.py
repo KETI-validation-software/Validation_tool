@@ -186,6 +186,19 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
     반환: (result, error_msg, correct_cnt, error_cnt)
     """
     try:
+        # ✅ 데이터가 문자열이면 JSON으로 파싱
+        if isinstance(data, str):
+            # 빈 문자열은 빈 딕셔너리로 처리
+            if not data.strip():
+                data = {}
+            else:
+                try:
+                    data = json.loads(data)
+                except json.JSONDecodeError as e:
+                    # 파싱 실패 시, 상세 오류와 함께 즉시 FAIL 반환
+                    error_msg = f"응답 데이터가 유효한 JSON 형식이 아닙니다. (오류: {e})"
+                    # flat_fields를 얻을 수 없으므로 전체 필드 수는 0으로 처리
+                    return "FAIL", error_msg, 0, 0, 0, 0
 
         print("============ 필드별 순차 검증 시작 ============")
 

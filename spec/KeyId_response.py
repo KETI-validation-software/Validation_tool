@@ -58,12 +58,17 @@ cmii7pysb004k8z1tts0npxfm_Authentication_request_key_ids = {
     "userPW": "cmii7roje00538z1tze658e9r",
 }
 
-cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_request_key_ids = {
-    "doorList": "cmiwqj4780acp844g8i3ahbt7",
-    "doorList.doorID": "cmiwqkuoj0aj9844g5oec97p9",
-    "doorList.doorName": "cmizg3epb00gy7eoeiefmp1lr",
-    "doorList.doorRelaySensor": "cmizg3ghq00h67eoeuthieru9",
-    "doorList.doorSensor": "cmj13a9eu01vx12s9wja5mxt7",
+cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_request_key_ids = {
+    "doorList": "cmiwjfozy0311ugxne4h1z9ay",
+    "doorList.doorID": "cmiwjh6se03d6ugxnx0n5o5e4",
+    "duration": "cmiwjgdfi035eugxndjuhyn3x",
+    "transProtocol": "cmiwjgjmy037dugxn78zvsydm",
+    "transProtocol.transProtocolType": "cmiwjgqun038kugxnbvj80nir",
+    "transProtocol.transProtocolDesc": "cmiwjgv7q039tugxna1he24eh",
+    "eventFilter": "cmiwjgzhs03b2ugxn1wamkmk9",
+    "startTime": "cmiwjh4du03cougxnlvwx7ptl",
+    "code": "cmiwjr3ou03vcugxncy1mjzec",
+    "message": "cmiwjradt03vlugxnw9mgdy0n",
 }
 
 cmii7pysb004k8z1tts0npxfm_StoredVerifEventInfos_request_key_ids = {
@@ -192,12 +197,15 @@ cmii7shen005i8z1tagevx4qh_SensorDeviceProfiles_response_key_ids = {
     "sensorDeviceList.sensorDeviceLoc.desc": "cmiwkpl9201dt844gpk2spohg",
 }
 
-cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_response_key_ids = {
-    "code": "cmisg4vxz089s5vy7qhna151g",
-    "message": "cmisg4zcn08a05vy7gzrw0rbp",
-    "sensorDeviceID": "cmisg51v408a85vy7mrhteunz",
-    "sensorDeviceStatus": "cmj6hdjek01qsxei0ydzyxlg3",
-    "testest": "cmjch95z9089fcfb3ztyk54i0",
+cmii7shen005i8z1tagevx4qh_RealtimeSensorData_response_key_ids = {
+    "code": "cmiwkumay01qo844gast85yvr",
+    "message": "cmiwkuog901qt844gswj7kaas",
+    "sensorDeviceList": "cmiwkvlgi01r6844g0inyggzl",
+    "sensorDeviceList.sensorDeviceID": "cmiwkzuqx02xk844gd9lr6k8p",
+    "sensorDeviceList.measureTime": "cmiwkzuqx02xm844ghyx3o5j7",
+    "sensorDeviceList.sensorDeviceType": "cmiwkzuqy02xo844glk3msr3k",
+    "sensorDeviceList.sensorDeviceUnit": "cmiwkzuqy02xq844gh7csg9af",
+    "sensorDeviceList.sensorDeviceValue": "cmiwkzuqz02xs844gqt2i349j",
 }
 
 cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_response_key_ids = {
@@ -270,9 +278,18 @@ cmii7pysb004k8z1tts0npxfm_DoorProfiles_response_key_ids = {
     "doorList.otherDeviceList.otherDeviceAuthTypeList": "cmisk9y6v0dcb5vy77eqohj9u",
 }
 
-cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_response_key_ids = {
-    "code": "cmizg5khh00iq7eoexenwo9i9",
-    "message": "cmizg5lyh00iw7eoe7wbhcxaj",
+cmii7pysb004k8z1tts0npxfm_AccessUserInfos_response_key_ids = {
+    "code": "cmiwiplu600gpugxnl33vzh64",
+    "message": "cmiwipydg00gzugxny5b0z1h8",
+    "userList": "cmiwiqao200h9ugxn0brcef9o",
+    "userList.userID": "cmiwj0n6b02m2ugxnw1xpebou",
+    "userList.userName": "cmiwj0n6b02m4ugxnbuikeax0",
+    "userList.userDesc": "cmiwj0n6b02m6ugxnsaqjrk5l",
+    "userList.doorList": "cmiwj0n6c02m8ugxnifph5nei",
+    "userList.doorList.doorID": "cmiwj0n6i02miugxn26i0v7ni",
+    "userList.doorList.timePeriod": "cmiwj0n6j02mkugxneilxzvra",
+    "userList.doorList.timePeriod.startTime": "cmiwj0n6n02mqugxn455p44hm",
+    "userList.doorList.timePeriod.endTime": "cmiwj0n6n02msugxnnqmanlio",
 }
 
 cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_response_key_ids = {
