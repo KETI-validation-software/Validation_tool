@@ -203,6 +203,18 @@
                       "videoCodec": "H.264",
                       "audioCodec": "G.711"
                     }
+                  },
+                  {
+                    "camID": "cam0002",
+                    "accessID": "",
+                    "accessPW": "",
+                    "camURL": "rtsp://192.168.0.1:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": 30,
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
                   }
                 ]
               },
@@ -278,25 +290,8 @@
                     "camID": "cam0001",
                     "timeList": [
                       {
-                        "startTime": 20251111731225375,
-                        "endTime": 20251111822498247
-                      },
-                      {
-                        "startTime": 20251105440253014,
-                        "endTime": 20251106745317292
-                      }
-                    ]
-                  },
-                  {
-                    "camID": "cam0002",
-                    "timeList": [
-                      {
-                        "startTime": 20251112306315532,
-                        "endTime": 20251112638551642
-                      },
-                      {
-                        "startTime": 20251114561677359,
-                        "endTime": 20251115076003459
+                        "startTime": 20251110875224878,
+                        "endTime": 20251114197184104
                       }
                     ]
                   }
@@ -370,8 +365,8 @@
                     "camID": "cam0001",
                     "eventUUID": "event01",
                     "eventName": "Intrusion",
-                    "startTime": 20251107242252580,
-                    "endTime": 20251109422035786,
+                    "startTime": 20251110945743579,
+                    "endTime": 20251112835818652,
                     "eventDesc": "AAABVVVVCCCDDssvfdd"
                   }
                 ]
@@ -402,7 +397,7 @@
                 "camList": [
                   {
                     "camID": "cam0001",
-                    "analyticsTime": 20251112970871889,
+                    "analyticsTime": 20251107265398927,
                     "anlayticsResultList": [
                       {
                         "anayticsID": "object001",
@@ -438,7 +433,7 @@
                   },
                   {
                     "camID": "cam0002",
-                    "analyticsTime": 20251105442650419,
+                    "analyticsTime": 20251113918153796,
                     "anlayticsResultList": [
                       {
                         "anayticsID": "object001",
@@ -484,5 +479,5 @@
       ]
     }
   ],
-  "completedDate": "2025-12-22T11:07:14Z"
+  "completedDate": "2025-12-22T12:19:56Z"
 }
