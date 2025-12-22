@@ -3733,26 +3733,16 @@ class MyApp(QWidget):
                 self.step_pass_counts[self.webhook_cnt] += key_psss_cnt
                 self.step_error_counts[self.webhook_cnt] += key_error_cnt
 
-                # ⭐ 추가: 선택 필드 합산
+                # ⭐ 선택 필드 합산
                 if hasattr(self, 'step_opt_pass_counts') and hasattr(self, 'step_opt_error_counts'):
                     self.step_opt_pass_counts[self.webhook_cnt] += opt_correct
                     self.step_opt_error_counts[self.webhook_cnt] += opt_error
-                    print(f"[WEBHOOK] 선택 필드 합산: opt_pass={opt_correct}, opt_error={opt_error}")
-                else:
-                    # 선택 필드 배열 초기화 (없는 경우)
-                    api_count = len(self.videoMessages)
-                    self.step_opt_pass_counts = [0] * api_count
-                    self.step_opt_error_counts = [0] * api_count
-                    self.step_opt_pass_counts[self.webhook_cnt] = opt_correct
-                    self.step_opt_error_counts[self.webhook_cnt] = opt_error
 
                 # 누적된 총 필드 수로 테이블 업데이트
                 accumulated_pass = self.step_pass_counts[self.webhook_cnt]
                 accumulated_error = self.step_error_counts[self.webhook_cnt]
 
                 print(f"[WEBHOOK] 누적 결과: pass={accumulated_pass}, error={accumulated_error}")
-                print(
-                    f"[WEBHOOK] 선택 필드 누적: opt_pass={self.step_opt_pass_counts[self.webhook_cnt]}, opt_error={self.step_opt_error_counts[self.webhook_cnt]}")
             else:
                 # 누적 배열이 없으면 웹훅 결과만 사용
                 accumulated_pass = key_psss_cnt
@@ -3763,9 +3753,11 @@ class MyApp(QWidget):
             else:
                 current_retries = 1
 
-            # 누적된 필드 수로 테이블 업데이트
-            self.update_table_row_with_retries(self.webhook_cnt, val_result, accumulated_pass, accumulated_error,
-                                               tmp_webhook_res, self._to_detail_text(val_text), current_retries)
+                # 누적된 필드 수로 테이블 업데이트
+            self.update_table_row_with_retries(
+                self.webhook_cnt, val_result, accumulated_pass, accumulated_error,
+                tmp_webhook_res, self._to_detail_text(val_text), current_retries
+            )
 
         # step_buffers 업데이트 추가 (실시간 모니터링과 상세보기 일치)
         if self.webhook_cnt < len(self.step_buffers):
@@ -3913,6 +3905,18 @@ class MyApp(QWidget):
                     tmp_fields_rqd_cnt, tmp_fields_opt_cnt = timeout_field_finder(self.outSchema[self.cnt])
                 else:
                     tmp_fields_rqd_cnt, tmp_fields_opt_cnt = 0, 0
+
+                # ✅ 웹훅 API인 경우 웹훅 스키마 필드 수도 추가
+                if self.cnt < len(self.trans_protocols):
+                    current_protocol = self.trans_protocols[self.cnt]
+                    if current_protocol == "WebHook" and self.cnt < len(self.webhookSchema):
+                        webhook_schema = self.webhookSchema[self.cnt]
+                        if webhook_schema:
+                            webhook_rqd_cnt, webhook_opt_cnt = timeout_field_finder(webhook_schema)
+                            tmp_fields_rqd_cnt += webhook_rqd_cnt
+                            tmp_fields_opt_cnt += webhook_opt_cnt
+                            print(f"[TIMEOUT] 웹훅 스키마 필드 추가: rqd={webhook_rqd_cnt}, opt={webhook_opt_cnt}")
+
                 add_err = tmp_fields_rqd_cnt if tmp_fields_rqd_cnt > 0 else 1
                 if self.flag_opt:
                     add_err += tmp_fields_opt_cnt
