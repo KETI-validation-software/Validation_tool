@@ -4507,9 +4507,6 @@ class MyApp(QWidget):
             width_ratio = max(1.0, current_width / self.original_window_size[0])
             height_ratio = max(1.0, current_height / self.original_window_size[1])
 
-            # 디버그 로그
-            print(f"[RESIZE] 현재 크기: {current_width}x{current_height}, 비율: {width_ratio:.2f}x{height_ratio:.2f}")
-
             # ✅ 왼쪽/오른쪽 패널 정렬을 위한 확장량 계산
             # 컬럼의 추가 높이를 계산하고, 그 추가분만 확장 요소들에 분배
             original_column_height = 898  # 원본 컬럼 높이
