@@ -78,15 +78,9 @@ cmiqr201z00i8ie8fitdg5t1b_SensorDeviceProfiles_out_data = {
 # SensorDeviceControl
 cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_out_data = {
     "code": "200",
-    "message": [
-    {}
-],
+    "message": "성공",
     "sensorDeviceID": "",
-    "sensorDeviceStatus": "",
-    "testest": {
-    "f1": "1123",
-    "f2": "11233"
-}
+    "sensorDeviceStatus": ""
 }
 
 # SensorDeviceControl2
@@ -218,8 +212,20 @@ cmiqr1acx00i5ie8fi022t1hp_DoorProfiles_out_data = {
 
 # RealtimeDoorStatus
 cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_out_data = {
-    "code": "",
-    "message": ""
+    "code": "성공",
+    "message": "200"
+}
+
+# RealtimeDoorStatus WebHook IN Data
+cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_webhook_in_data = {
+    "doorList": [
+        {
+        "doorID": "",
+        "doorName": "",
+        "doorRelaySensor": "일반",
+        "doorSensor": ""
+    }
+]
 }
 
 # DoorControl
@@ -261,7 +267,7 @@ cmiqr1acx00i5ie8fi022t1hp_webhook_inData = [
     None,
     None,
     None,
-    None,
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_webhook_in_data,
     None,
     cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_in_data,
 ]
