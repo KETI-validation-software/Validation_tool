@@ -1234,29 +1234,13 @@ cmii7lxbn002s8z1t1i9uudf0_StoredObjectAnalyticsInfos_out_constraints = {
   }
 }
 
-# cmii7lxbn002s8z1t1i9uudf0 검증 리스트
-cmii7lxbn002s8z1t1i9uudf0_outConstraints = [
-    cmii7lxbn002s8z1t1i9uudf0_Authentication_out_constraints,
-    cmii7lxbn002s8z1t1i9uudf0_Capabilities_out_constraints,
-    cmii7lxbn002s8z1t1i9uudf0_CameraProfiles_out_constraints,
-    cmii7lxbn002s8z1t1i9uudf0_StreamURLs_out_constraints,
-    cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_out_constraints,
-    cmii7lxbn002s8z1t1i9uudf0_StoredVideoInfos_out_constraints,
-    cmii7lxbn002s8z1t1i9uudf0_ReplayURL_out_constraints,
-    cmii7lxbn002s8z1t1i9uudf0_StoredVideoEventInfos_out_constraints,
-    cmii7lxbn002s8z1t1i9uudf0_StoredObjectAnalyticsInfos_out_constraints,
-]
-
-# cmii7lxbn002s8z1t1i9uudf0 WebHook Constraints 리스트
-cmii7lxbn002s8z1t1i9uudf0_webhook_inConstraints = [
-    None,
-    None,
-    None,
-    None,
-    cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_webhook_in_constraints,
-    None,
-    None,
-    None,
-    None,
+# cmiqqzrjz00i3ie8figf79cur 검증 리스트
+cmiqqzrjz00i3ie8figf79cur_outConstraints = [
+    cmiqqzrjz00i3ie8figf79cur_Authentication_out_constraints,
+    cmiqqzrjz00i3ie8figf79cur_Capabilities_out_constraints,
+    cmiqqzrjz00i3ie8figf79cur_CameraProfiles_out_constraints,
+    cmiqqzrjz00i3ie8figf79cur_PtzStatus_out_constraints,
+    cmiqqzrjz00i3ie8figf79cur_PtzContinuousMove_out_constraints,
+    cmiqqzrjz00i3ie8figf79cur_PtzStop_out_constraints,
 ]
 

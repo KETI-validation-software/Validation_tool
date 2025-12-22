@@ -597,11 +597,8 @@ cmii7lxbn002s8z1t1i9uudf0_messages = [
     "Authentication",
     "Capabilities",
     "CameraProfiles",
-    "StreamURLs",
-    "RealtimeVideoEventInfos",
-    "StoredVideoInfos",
-    "ReplayURL",
-    "StoredVideoEventInfos",
-    "StoredObjectAnalyticsInfos",
+    "PtzStatus",
+    "PtzContinuousMove",
+    "PtzStop",
 ]
 

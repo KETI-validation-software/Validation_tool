@@ -141,14 +141,14 @@ cmii7pysb004k8z1tts0npxfm_inSchema = [
     cmii7pysb004k8z1tts0npxfm_StoredVerifEventInfos_in_schema,
 ]
 
-# cmii7pysb004k8z1tts0npxfm WebHook 스키마 리스트
-cmii7pysb004k8z1tts0npxfm_webhook_OutSchema = [
+# cmiqr1acx00i5ie8fi022t1hp WebHook 스키마 리스트
+cmiqr1acx00i5ie8fi022t1hp_webhook_OutSchema = [
     None,
     None,
     None,
     None,
-    cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_webhook_out_schema,
     None,
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_out_schema,
 ]
 
 # Authentication
@@ -235,36 +235,18 @@ cmii7lxbn002s8z1t1i9uudf0_StoredObjectAnalyticsInfos_in_schema = {
 },
     OptionalKey("camList"): [{
     "camID": str,
-}],
-    OptionalKey("filterList"): [{
-    OptionalKey("classFilter"): [str],
-    OptionalKey("attributeFilter"): [str],
-}],
+    OptionalKey("pan"): bool,
+    OptionalKey("tilt"): bool,
+    OptionalKey("zoom"): bool,
 }
 
-# cmii7lxbn002s8z1t1i9uudf0 스키마 리스트
-cmii7lxbn002s8z1t1i9uudf0_inSchema = [
-    cmii7lxbn002s8z1t1i9uudf0_Authentication_in_schema,
-    cmii7lxbn002s8z1t1i9uudf0_Capabilities_in_schema,
-    cmii7lxbn002s8z1t1i9uudf0_CameraProfiles_in_schema,
-    cmii7lxbn002s8z1t1i9uudf0_StreamURLs_in_schema,
-    cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_in_schema,
-    cmii7lxbn002s8z1t1i9uudf0_StoredVideoInfos_in_schema,
-    cmii7lxbn002s8z1t1i9uudf0_ReplayURL_in_schema,
-    cmii7lxbn002s8z1t1i9uudf0_StoredVideoEventInfos_in_schema,
-    cmii7lxbn002s8z1t1i9uudf0_StoredObjectAnalyticsInfos_in_schema,
-]
-
-# cmii7lxbn002s8z1t1i9uudf0 WebHook 스키마 리스트
-cmii7lxbn002s8z1t1i9uudf0_webhook_OutSchema = [
-    None,
-    None,
-    None,
-    None,
-    cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_webhook_out_schema,
-    None,
-    None,
-    None,
-    None,
+# cmiqqzrjz00i3ie8figf79cur 스키마 리스트
+cmiqqzrjz00i3ie8figf79cur_inSchema = [
+    cmiqqzrjz00i3ie8figf79cur_Authentication_in_schema,
+    cmiqqzrjz00i3ie8figf79cur_Capabilities_in_schema,
+    cmiqqzrjz00i3ie8figf79cur_CameraProfiles_in_schema,
+    cmiqqzrjz00i3ie8figf79cur_PtzStatus_in_schema,
+    cmiqqzrjz00i3ie8figf79cur_PtzContinuousMove_in_schema,
+    cmiqqzrjz00i3ie8figf79cur_PtzStop_in_schema,
 ]
 
