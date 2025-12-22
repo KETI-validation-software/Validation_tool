@@ -5533,31 +5533,17 @@ class MyApp(QWidget):
             except:
                 schema_data = None
 
-            # 웹훅 스키마 데이터 가져오기 (transProtocol 기반으로만 판단)
+            # ✅ 웹훅 스키마 데이터 가져오기 (수정됨)
             webhook_schema = None
             if row < len(self.trans_protocols):
                 current_protocol = self.trans_protocols[row]
                 if current_protocol == "WebHook":
-                    try:
-                        # ✅ row에 해당하는 웹훅 API의 순서를 계산
-                        # row 이전까지의 WebHook 개수를 세어서 인덱스 결정
-                        webhook_idx = 0
-                        for i in range(row):
-                            if i < len(self.trans_protocols) and self.trans_protocols[i] == "WebHook":
-                                webhook_idx += 1
-
-                        # ✅ 계산된 인덱스로 스키마 가져오기
-                        if webhook_idx < len(self.webhookInSchema):
-                            webhook_schema = self.webhookInSchema[webhook_idx]
-                            print(f"[DEBUG] UI 웹훅 스키마: row={row}, webhook_idx={webhook_idx}")
-                        else:
-                            webhook_schema = None
-                            print(f"[WARN] 웹훅 스키마 인덱스 초과: webhook_idx={webhook_idx}, 전체={len(self.webhookInSchema)}")
-                    except Exception as e:
-                        print(f"[ERROR] 웹훅 스키마 로드 실패: {e}")
-                        import traceback
-                        traceback.print_exc()
-                        webhook_schema = None
+                    # ✅ row를 직접 사용 (webhookInSchema는 전체 API 리스트와 1:1 매칭)
+                    if row < len(self.webhookInSchema):
+                        webhook_schema = self.webhookInSchema[row]
+                        print(f"[DEBUG] 웹훅 스키마 로드: row={row}, schema={'있음' if webhook_schema else '없음'}")
+                    else:
+                        print(f"[WARN] 웹훅 스키마 인덱스 초과: row={row}, 전체={len(self.webhookInSchema)}")
 
             # 통합 팝업창 띄우기
             dialog = CombinedDetailDialog(api_name, buf, schema_data, webhook_schema)

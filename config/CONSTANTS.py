@@ -65,8 +65,8 @@ test_target = "제어 기능-통합플랫폼"
 test_range = "ALL_FIELDS"
 auth_type = "Digest Auth"
 auth_info = "kisa,kisa_k1!2@"
-admin_code = "1234"
-url = "https://192.168.0.3:2000"
+admin_code = "1"
+url = "https://127.0.0.1:2000"
 contact_person = "빙영진"
 model_name = "v1.0"
 request_id = "cmisflgy307tr5vy7clzgjaln"
@@ -108,7 +108,7 @@ enable_retry_delay = False  # False 권장: 불필요한 sleep 제거
 # ✅ 웹훅 서버 설정 (전역)
 WEBHOOK_HOST = "0.0.0.0"  # 서버 바인딩 주소 (모든 인터페이스에서 수신)
 WEBHOOK_PORT = 2001       # 웹훅 수신 포트
-WEBHOOK_PUBLIC_IP = "192.168.0.3"
+WEBHOOK_PUBLIC_IP = "127.0.0.1"
 # ✅ 웹훅 공개 IP 설정: info_GUI에서 선택한 시험 URL의 IP 사용
 # 초기값은 URL에서 추출, info_GUI에서 주소 선택 후 자동 업데이트됨
 
