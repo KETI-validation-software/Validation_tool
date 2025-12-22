@@ -67,7 +67,7 @@ class Server(BaseHTTPRequestHandler):
             # ✅ payload를 deepcopy하여 완전히 독립된 복사본 생성
             # 이후 원본이 수정되어도 trace에는 영향 없음
             payload_copy = copy.deepcopy(payload)
-            
+
             evt = {
                 "time": datetime.datetime.utcnow().isoformat() + "Z",
                 "api": api_name,
@@ -195,14 +195,14 @@ class Server(BaseHTTPRequestHandler):
             for field, expected_type in schema.items():
                 # OptionalKey 처리
                 field_name = field.key if hasattr(field, 'key') else field
-                
+
                 if field_name in request_data:
                     value = request_data[field_name]
-                    
+
                     # None 값은 검사 스킵
                     if value is None:
                         continue
-                    
+
                     # 타입 검사
                     if expected_type == str:
                         if not isinstance(value, str):
@@ -222,7 +222,7 @@ class Server(BaseHTTPRequestHandler):
                             return field_name
         except Exception as e:
             print(f"[ERROR] 타입 검사 중 오류: {e}")
-        
+
         return None
 
     def _check_time_range(self, request_data):
@@ -233,22 +233,22 @@ class Server(BaseHTTPRequestHandler):
             str: 오류 메시지 (오류 있을 때) 또는 None (정상)
         """
         current_time = int(time.time())
-        
+
         start_time = request_data.get("startTime")
         end_time = request_data.get("endTime")
-        
+
         try:
             if start_time is not None and end_time is not None:
                 # Unix timestamp로 가정 (정수형)
                 # 2년 전보다 과거 데이터면 "정보 없음"
                 two_years_ago = current_time - (2 * 365 * 24 * 60 * 60)
-                
+
                 if isinstance(start_time, int) and isinstance(end_time, int):
                     if end_time < two_years_ago:
                         return "시간 구간이 너무 과거입니다"
         except Exception as e:
             print(f"[ERROR] 시간 검사 실패: {e}")
-        
+
         return None
 
     def _check_device_exists(self, request_data):
@@ -260,13 +260,13 @@ class Server(BaseHTTPRequestHandler):
         """
         # ✅ 유효한 카메라 ID 목록 (클래스 변수 사용 - 동적으로 업데이트됨)
         valid_cam_ids = Server.valid_device_ids
-        
+
         # camID 검사
         cam_id = request_data.get("camID")
         if cam_id is not None:
             if cam_id not in valid_cam_ids:
                 return f"존재하지 않는 장치: {cam_id}"
-        
+
         # camList 검사
         cam_list = request_data.get("camList")
         if cam_list is not None and isinstance(cam_list, list):
@@ -274,7 +274,7 @@ class Server(BaseHTTPRequestHandler):
                 cam_id_in_list = cam.get("camID") if isinstance(cam, dict) else cam
                 if cam_id_in_list and cam_id_in_list not in valid_cam_ids:
                     return f"존재하지 않는 장치: {cam_id_in_list}"
-        
+
         return None
 
     # ========== 오류 검사 함수들 끝 ==========
@@ -331,10 +331,13 @@ class Server(BaseHTTPRequestHandler):
     # POST echoes the message adding a JSON field
     def do_POST(self):
         spec_id, api_name = self.parse_path()
-        if Server.trans_protocol[self.valid_counter] == "WebHook":
-            self.webhook_flag = True
-        else :
-            self.webhook_flag = False
+        try:
+            if Server.trans_protocol[self.valid_counter] == "WebHook":
+                self.webhook_flag = True
+            else:
+                self.webhook_flag = False
+        except:
+            pass
         if not api_name or self.current_spec_id!=spec_id:#"cmgyv3rzl014nvsveidu5jpzp" != spec_id:
             print(f"[ERROR] 잘못된 path 형식: {self.path}")
             self.send_response(400)
@@ -438,7 +441,7 @@ class Server(BaseHTTPRequestHandler):
                 try:
                     # ✅ Authentication API RESPONSE 이벤트 기록 (한 번만)
                     self._push_event(self.current_valid_api, "RESPONSE", data)
-                    
+
                     response_json = json.dumps(data).encode('utf-8')
                     self._set_headers()
                     self.wfile.write(response_json)
@@ -699,7 +702,7 @@ class Server(BaseHTTPRequestHandler):
             # constraints가 있을 때만 _applied_constraints 호출 (성능 최적화)
             if out_con and isinstance(out_con, dict) and len(out_con) > 0:
                 print(f"[DEBUG][CONSTRAINTS] _applied_constraints 호출 예정")
-                
+
                 # ✅ generator의 latest_events를 명시적으로 업데이트 (참조 동기화)
                 self.generator.latest_events = Server.latest_event
                 print(f"[DEBUG][CONSTRAINTS] 🔄 generator.latest_events 동기화 완료: {list(self.generator.latest_events.keys())}")
@@ -730,7 +733,7 @@ class Server(BaseHTTPRequestHandler):
                         # 기본 ID들 유지하고 CameraProfiles ID들만 리셋
                         base_ids = {"cam001", "cam002", "keti", "camera1", "camera2"}
                         Server.valid_device_ids = base_ids.copy()
-                        
+
                         # CameraProfiles에서 받은 ID 추가
                         for cam in cam_list:
                             if isinstance(cam, dict) and "camID" in cam:
@@ -763,7 +766,7 @@ class Server(BaseHTTPRequestHandler):
                         # 기본 ID들 유지하고 CameraProfiles ID들만 리셋
                         base_ids = {"cam001", "cam002", "keti", "camera1", "camera2"}
                         Server.valid_device_ids = base_ids.copy()
-                        
+
                         # CameraProfiles에서 받은 ID 추가
                         for cam in cam_list:
                             if isinstance(cam, dict) and "camID" in cam:
@@ -794,7 +797,7 @@ class Server(BaseHTTPRequestHandler):
                     message['code_value'] = 400
                 else:
                     message['code_value'] = 200'''
-            
+
             # JSON 응답 준비
             a = json.dumps(message).encode('utf-8')
 
@@ -802,10 +805,10 @@ class Server(BaseHTTPRequestHandler):
         try:
             self._set_headers()
             self.wfile.write(a)
-            
+
             # ✅ 데이터 맵핑: 응답 전송 직후 처리
             self._process_data_mapping(self.current_valid_api, updated_message if out_con else message)
-            
+
         except (ConnectionAbortedError, BrokenPipeError, ConnectionResetError) as e:
             print(f"[WARNING] 클라이언트 연결 끊김: {e}")
             # 연결이 끊겼으므로 더 이상 처리하지 않음
@@ -882,11 +885,11 @@ class Server(BaseHTTPRequestHandler):
             # ✅ 웹훅에도 constraints 적용
             try:
                 # webhookCon 리스트가 있는 경우
-                if self.webhookCon and isinstance(self.webhookCon, dict):
+                if len(self.webhookCon)>0:
                     print(f"[DEBUG][WEBHOOK_CONSTRAINTS] self.webhookCon 타입: {type(self.webhookCon)}")
                     webhook_con = self.webhookCon[self.valid_counter]
 
-                    if webhook_con and isinstance(webhook_con, dict) and len(webhook_con) > 0:
+                    if webhook_con is not None:
                         print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 웹훅 constraints 적용 시작")
                         print(f"[DEBUG][WEBHOOK_CONSTRAINTS] webhook_con keys: {list(webhook_con.keys())}")
                         print(
@@ -980,10 +983,10 @@ class Server(BaseHTTPRequestHandler):
                 # 형식 1/2: /spec_id_or_test_name/api_name
                 spec_id_or_name = parts[0]
                 api_name = parts[1]
-                
+
                 # ✅ test_name을 spec_id로 변환 시도
                 actual_spec_id = self._resolve_spec_id(spec_id_or_name)
-                
+
                 print(f"[DEBUG][PARSE_PATH] 입력={spec_id_or_name}, 변환={actual_spec_id}, api_name={api_name}")
                 return actual_spec_id, api_name
             elif len(parts) == 1:
@@ -1012,23 +1015,23 @@ class Server(BaseHTTPRequestHandler):
             # ✅ 1. 이미 spec_id 형식이면 그대로 반환 (cm으로 시작하는 cuid)
             if spec_id_or_name.startswith('cm') and len(spec_id_or_name) == 25:
                 return spec_id_or_name
-            
+
             # ✅ 2. CONSTANTS에서 SPEC_CONFIG 로드
             import config.CONSTANTS as CONSTANTS
             import sys
             import os
-            
+
             SPEC_CONFIG = getattr(CONSTANTS, 'SPEC_CONFIG', [])
-            
+
             # PyInstaller 환경에서 외부 CONSTANTS.py 로드
             if getattr(sys, 'frozen', False):
                 exe_dir = os.path.dirname(sys.executable)
                 external_constants_path = os.path.join(exe_dir, "config", "CONSTANTS.py")
-                
+
                 if os.path.exists(external_constants_path):
                     with open(external_constants_path, 'r', encoding='utf-8') as f:
                         constants_code = f.read()
-                    
+
                     namespace = {'__file__': external_constants_path}
                     exec(constants_code, namespace)
                     SPEC_CONFIG = namespace.get('SPEC_CONFIG', SPEC_CONFIG)
@@ -1042,11 +1045,11 @@ class Server(BaseHTTPRequestHandler):
                         if test_name == spec_id_or_name:
                             print(f"[RESOLVE] test_name '{spec_id_or_name}' → spec_id '{key}'")
                             return key
-            
+
             # ✅ 4. 변환 실패 시 원본 반환
             print(f"[RESOLVE] '{spec_id_or_name}' 변환 실패, 원본 사용")
             return spec_id_or_name
-            
+
         except Exception as e:
             print(f"[ERROR][RESOLVE] spec_id 변환 실패: {e}")
             return spec_id_or_name
@@ -1059,14 +1062,14 @@ class Server(BaseHTTPRequestHandler):
         """
         try:
             print(f"[DATA_MAPPING] API: {api_name}")
-            
+
             if "DoorProfiles" in api_name:
                 print(f"[DATA_MAPPING] DoorProfiles 응답 - 별도 처리 없음")
-                
+
                 door_list = None
                 if isinstance(response_data, dict) and "doorList" in response_data:
                     door_list = response_data.get("doorList", [])
-                    
+
                 if door_list:
                     for door in door_list:
                         if isinstance(door, dict) and "doorID" in door:
@@ -1074,16 +1077,16 @@ class Server(BaseHTTPRequestHandler):
                             save_data = door.copy()
                             if "doorRelayStatus" in save_data:
                                 save_data["doorRelaySensor"] = save_data.pop("doorRelayStatus")
-                            
+
                             if "doorRelaySensor" not in save_data or not save_data["doorRelaySensor"]:
-                                save_data["doorRelaySensor"] = "일반" 
-                            
+                                save_data["doorRelaySensor"] = "일반"
+
                             if "doorSensor" not in save_data or save_data["doorSensor"] == "0":
                                 save_data["doorSensor"] = "Lock"
 
                             if "doorSensor" not in save_data or save_data["doorSensor"] == "1":
                                 save_data["doorSensor"] = "Unlock"
-                            
+
                             Server.door_memory[door_id] = {
                                 key: value for key, value in save_data.items()
                                 if key != "doorID"
@@ -1099,7 +1102,7 @@ class Server(BaseHTTPRequestHandler):
                 if isinstance(response_data, dict) and "doorList" in response_data:
                     door_list = response_data.get("doorList", [])
                     print(f"[DATA_MAPPING] RealtimeDoorStatus 응답에서 doorList 발견")
-                
+
                 # response_data에 없으면 latest_events의 WEBHOOK_OUT에서 확인
                 if not door_list:
                     api_key = api_name.lstrip('/')
@@ -1109,17 +1112,17 @@ class Server(BaseHTTPRequestHandler):
                         if "doorList" in webhook_data:
                             door_list = webhook_data.get("doorList", [])
                             print(f"[DATA_MAPPING] WEBHOOK_OUT에서 doorList 발견")
-                
+
                 if door_list:
                     print(f"[DATA_MAPPING] RealtimeDoorStatus에서 {len(door_list)}개 문 정보 저장")
-                    
+
                     for door in door_list:
                         if isinstance(door, dict) and "doorID" in door:
                             door_id = door["doorID"]
                             if not door_id or door_id.strip() == "":
                                 print(f"[DATA_MAPPING] 경고: doorID가 비어있음, 건너뜀")
                                 continue
-                            
+
                             # 모든 필드 저장 (doorName, doorRelaySensor, doorSensor 등)
                             Server.door_memory[door_id] = {
                                 key: value for key, value in door.items()
@@ -1128,16 +1131,16 @@ class Server(BaseHTTPRequestHandler):
                             print(f"[DATA_MAPPING] 저장: {door_id} -> {Server.door_memory[door_id]}")
                 else:
                     print(f"[DATA_MAPPING] 경고: doorList를 찾을 수 없음")
-            
+
             # DoorControl - commandType에 따라 doorSensor 상태 업데이트
             elif "DoorControl" in api_name:
                 if isinstance(self.request_data, dict):
                     door_id = self.request_data.get("doorID")
                     command_type = self.request_data.get("commandType")
-                    
+
                     if door_id and command_type:
                         print(f"[DATA_MAPPING] DoorControl: {door_id} -> commandType: {command_type}")
-                        
+
                         # door_memory에 해당 doorID가 있으면 doorSensor 업데이트
                         if door_id in Server.door_memory:
                             # commandType에 따라 doorSensor 값 변경
@@ -1149,14 +1152,14 @@ class Server(BaseHTTPRequestHandler):
                             else:
                                 # 기타 commandType은 첫 글자만 대문자로
                                 Server.door_memory[door_id]["doorSensor"] = command_type.capitalize()
-                            
+
                             print(f"[DATA_MAPPING] 업데이트: {door_id} doorSensor -> {Server.door_memory[door_id]['doorSensor']}")
                         else:
                             print(f"[DATA_MAPPING] 경고: {door_id}가 door_memory에 없음")
-            
+
             # RealtimeDoorStatus2 (두 번째 호출) - 저장된 데이터 활용은 constraints에서 처리
             # 여기서는 별도 처리 불필요
-                    
+
         except Exception as e:
             print(f"[ERROR][DATA_MAPPING] 데이터 맵핑 처리 중 오류: {e}")
             import traceback

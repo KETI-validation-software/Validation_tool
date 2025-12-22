@@ -3626,8 +3626,8 @@ class MyApp(QWidget):
             traceback.print_exc()
 
         try:
-            print(f"[DEBUG] [post] Sending request to {path} with auth_type={self.r2}, token={self.token}")
             path = re.sub(r'\d+$', '', path)
+            print(f"[DEBUG] [post] Sending request to {path} with auth_type={self.r2}, token={self.token}")
             self.res = requests.post(
                 path,
                 headers=headers,
