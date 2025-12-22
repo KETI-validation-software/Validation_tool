@@ -2242,16 +2242,11 @@ class MyApp(QWidget):
 
             # 첫 틱에서는 대기만
             if self.time_pre == 0 or self.cnt != self.cnt_pre:
-                print(f"[DEBUG] 첫 틱 대기: time_pre={self.time_pre}, cnt={self.cnt}, cnt_pre={self.cnt_pre}")
                 self.time_pre = time.time()
                 self.cnt_pre = self.cnt
                 return
             else:
                 time_interval = time.time() - self.time_pre
-                print(f"[DEBUG] 시간 간격: {time_interval}초")
-
-            if self.realtime_flag is True:
-                print(f"[json_check] do_checker 호출")
 
             # SPEC_CONFIG에서 timeout
             current_timeout = (self.time_outs[self.cnt] / 1000) if self.cnt < len(self.time_outs) else 5.0
@@ -2260,8 +2255,6 @@ class MyApp(QWidget):
             if current_timeout == 0 or time_interval < current_timeout:
                 # 시스템 요청 확인
                 api_name = self.Server.message[self.cnt]
-                print(f"[DEBUG] API 처리 시작: {api_name}")
-               #  print(f"[DEBUG] cnt={self.cnt}, current_retry={self.current_retry}")
 
                 current_validation = {}
 
@@ -2750,25 +2743,6 @@ class MyApp(QWidget):
                     self.cnt += 1
                     self.current_retry = 0
 
-                    if CONSTANTS.enable_retry_delay:
-                        print(
-                            f"[TIMING_DEBUG] ⚠️ 수동 지연(SLEEP): API 완료 후 2초 대기 추가")
-                        self.time_pre = time.time()
-                    else:
-                        print(
-                            f"[TIMING_DEBUG] ✅ 수동 지연 비활성화: API 완료, 다음 시스템 요청 대기")
-                        self.time_pre = time.time()
-                else:
-                    # 재시도인 경우
-                    if CONSTANTS.enable_retry_delay:
-                        print(
-                            f"[TIMING_DEBUG] ⚠️ 수동 지연(SLEEP): 재시도 후 2초 대기 추가")
-                        self.time_pre = time.time()
-                    else:
-                        print(
-                            f"[TIMING_DEBUG] ✅ 수동 지연 비활성화: 재시도 완료, 다음 시스템 요청 대기")
-                        self.time_pre = time.time()
-
                 self.realtime_flag = False
 
             elif time_interval > current_timeout and self.cnt == self.cnt_pre:
@@ -2940,8 +2914,7 @@ class MyApp(QWidget):
 
     def update_score_display(self):
         """평가 점수 디스플레이를 업데이트"""
-        if not (hasattr(self, "spec_pass_label") and hasattr(self, "spec_total_label") and hasattr(self,
-                                                                                                   "spec_score_label")):
+        if not (hasattr(self, "spec_pass_label") and hasattr(self, "spec_total_label") and hasattr(self, "spec_score_label")):
             return
 
         # ✅ 분야별 점수 제목 업데이트 (시나리오 명 변경 반영)

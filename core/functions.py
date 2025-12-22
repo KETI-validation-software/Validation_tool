@@ -344,8 +344,6 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
                     traceback.print_exc()
                     continue
 
-        print(f"\n[맥락검증] 최종 결과: {'실패' if context_validation_failed else '통과'}")
-
         # ===================================================================
         # 맥락 검증 실패 시 모든 필드를 실패로 카운트
         # ===================================================================
