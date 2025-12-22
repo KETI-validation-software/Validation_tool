@@ -65,8 +65,8 @@ test_target = "제어기능-물리보안"
 test_range = "ALL_FIELDS"
 auth_type = "Digest Auth"
 auth_info = "kisa,kisa_k1!2@"
-admin_code = "1234"
-url = "https://192.168.0.1:2000"
+admin_code = "1"
+url = "https://127.0.0.1:2000"
 contact_person = "빙영진"
 model_name = "v1.0"
 request_id = "cmisfmr3907tv5vy71y0276gp"
@@ -108,23 +108,9 @@ enable_retry_delay = False  # False 권장: 불필요한 sleep 제거
 # ✅ 웹훅 서버 설정 (전역)
 WEBHOOK_HOST = "0.0.0.0"  # 서버 바인딩 주소 (모든 인터페이스에서 수신)
 WEBHOOK_PORT = 2001       # 웹훅 수신 포트
-
+WEBHOOK_PUBLIC_IP = "127.0.0.1"
 # ✅ 웹훅 공개 IP 설정: info_GUI에서 선택한 시험 URL의 IP 사용
 # 초기값은 URL에서 추출, info_GUI에서 주소 선택 후 자동 업데이트됨
-try:
-    from urllib.parse import urlparse
-    parsed_url = urlparse(url)
-    WEBHOOK_PUBLIC_IP = parsed_url.hostname  # URL에서 호스트명(IP) 추출
-except Exception as e:
-    # Fallback: 자동 감지
-    try:
-        import socket
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
-        WEBHOOK_PUBLIC_IP = s.getsockname()[0]
-        s.close()
-    except Exception as e2:
-        WEBHOOK_PUBLIC_IP = "127.0.0.1"
 
 WEBHOOK_URL = f"https://{WEBHOOK_PUBLIC_IP}:{WEBHOOK_PORT}"
 # 주소 선택 후 form_validator.py에서 자동으로 업데이트됨

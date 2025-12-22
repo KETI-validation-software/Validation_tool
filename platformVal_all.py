@@ -15,24 +15,17 @@ import json
 from pathlib import Path
 from core.functions import build_result_json
 import requests
-
 import config.CONSTANTS as CONSTANTS
-from core.functions import json_check_, save_result, resource_path, json_to_data, timeout_field_finder
-from core.json_checker_new import check_message_data, check_message_schema, check_message_error
+from core.json_checker_new import timeout_field_finder
+from core.functions import json_check_, resource_path, json_to_data
 from splash_screen import LoadingPopup
-import spec.Data_response as data_response_module
 import spec.Schema_response as schema_response_module
-import spec.Schema_request as schema_request_module
 from http.server import HTTPServer
-import json
-import traceback
 import warnings
-import importlib
 from core.validation_registry import get_validation_rules
+from core.utils import remove_api_number_suffix, to_detail_text, redact, clean_trace_directory, format_schema
 
 warnings.filterwarnings('ignore')
-import os
-
 result_dir = os.path.join(os.getcwd(), "results")
 os.makedirs(result_dir, exist_ok=True)
 
@@ -240,10 +233,10 @@ class CombinedDetailDialog(QDialog):
         self.schema_browser.setAcceptRichText(True)
 
         # 기본 스키마 + 웹훅 스키마 결합
-        schema_text = self._format_schema(schema_data)
+        schema_text = format_schema(schema_data)
         if self.webhook_schema:
             schema_text += "\n\n=== 웹훅 응답 스키마 (시스템→플랫폼) ===\n"
-            schema_text += self._format_schema(self.webhook_schema)
+            schema_text += format_schema(self.webhook_schema)
 
         self.schema_browser.setPlainText(schema_text)
         schema_column_layout.addWidget(self.schema_browser)
@@ -317,37 +310,6 @@ class CombinedDetailDialog(QDialog):
         main_layout.addWidget(button_container)
 
         self.setLayout(main_layout)
-
-    def _format_schema(self, schema):
-        """스키마 구조를 문자열로 변환"""
-        if not schema:
-            return "빈 스키마"
-
-        def schema_to_string(schema_obj, indent=0):
-            result = ""
-            spaces = "  " * indent
-
-            if isinstance(schema_obj, dict):
-                for key, value in schema_obj.items():
-                    if hasattr(key, 'expected_data'):  # OptionalKey인 경우
-                        key_name = f"{key.expected_data} (선택사항)"
-                    else:
-                        key_name = str(key)
-
-                    if isinstance(value, dict):
-                        result += f"{spaces}{key_name}: {{\n"
-                        result += schema_to_string(value, indent + 1)
-                        result += f"{spaces}}}\n"
-                    elif isinstance(value, list) and len(value) > 0 and isinstance(value[0], dict):
-                        result += f"{spaces}{key_name}: [\n"
-                        result += schema_to_string(value[0], indent + 1)
-                        result += f"{spaces}]\n"
-                    else:
-                        result += f"{spaces}{key_name}: {value.__name__ if hasattr(value, '__name__') else str(value)}\n"
-            return result
-
-        return schema_to_string(schema)
-
 
 # 팝업창 설정하는 함수
 class CustomDialog(QDialog):
@@ -1271,7 +1233,7 @@ class ResultPageWidget(QWidget):
             self.tableWidget.setItem(row, 0, no_item)
 
             # API 명 - 컬럼 1 (숫자 제거된 이름 표시)
-            display_name = self.parent._remove_api_number_suffix(row_data['api_name'])
+            display_name = remove_api_number_suffix(row_data['api_name'])
             api_item = QTableWidgetItem(display_name)
             api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 1, api_item)
@@ -2387,7 +2349,7 @@ class MyApp(QWidget):
         self.videoOutMessage = getattr(data_response_module, spec_names[1], [])
         self.videoMessages = getattr(data_response_module, spec_names[2], [])
         # 표시용 API 이름 (숫자 제거)
-        self.videoMessagesDisplay = [self._remove_api_number_suffix(msg) for msg in self.videoMessages]
+        self.videoMessagesDisplay = [remove_api_number_suffix(msg) for msg in self.videoMessages]
         self.videoOutConstraint = getattr(constraints_response_module, self.current_spec_id + "_outConstraints", [])
 
         # Webhook 관련
@@ -2431,18 +2393,6 @@ class MyApp(QWidget):
         # ✅ spec_config 저장 (URL 생성에 필요)
         self.spec_config = config
 
-    def _redact(self, payload):
-        try:
-            if isinstance(payload, dict):
-                p = dict(payload)
-                for k in ["accessToken", "token", "Authorization", "password", "secret", "apiKey"]:
-                    if k in p and isinstance(p[k], (str, bytes)):
-                        p[k] = "***"
-                return p
-            return payload
-        except Exception:
-            return payload
-
     def _push_event(self, api_name, direction, payload):
         """direction: 'REQUEST'|'RESPONSE'|'WEBHOOK'"""
         try:
@@ -2456,25 +2406,11 @@ class MyApp(QWidget):
                 "time": datetime.utcnow().isoformat() + "Z",
                 "api": api_name,
                 "dir": direction,
-                "data": self._redact(payload),
+                "data": redact(payload),
             }
             self.Server.trace[api_name].append(evt)
         except Exception:
             pass
-
-    def _to_detail_text(self, val_text):
-        """검증 결과 텍스트를 항상 사람이 읽을 문자열로 표준화"""
-        if val_text is None:
-            return "오류가 없습니다."
-        if isinstance(val_text, list):
-            return "\n".join(str(x) for x in val_text) if val_text else "오류가 없습니다."
-        if isinstance(val_text, dict):
-            try:
-                import json
-                return json.dumps(val_text, indent=2, ensure_ascii=False)
-            except Exception:
-                return str(val_text)
-        return str(val_text)
 
     def update_table_row_with_retries(self, row, result, pass_count, error_count, data, error_text, retries):
         if row >= self.tableWidget.rowCount():
@@ -2726,38 +2662,6 @@ class MyApp(QWidget):
                             ref_api_name = ref_endpoint.lstrip("/")
                             ref_data = self._load_from_trace_file(ref_api_name, direction)
                             if ref_data and isinstance(ref_data, dict):
-                                
-                                # (12/18) 하드코딩
-                                # if "RealtimeDoorStatus" in ref_api_name and "DoorControl" in api_name:
-                                #     try:
-                                #         # 1. 실제 Trace 데이터에서 'doorList' 꺼내기
-                                #         door_list = ref_data.get("doorList")
-                                        
-                                #         # 2. 리스트가 존재하면 내부 순회하며 실제 'doorID' 값 수집
-                                #         if isinstance(door_list, list):
-                                #             real_ids = []
-                                #             for item in door_list:
-                                #                 if isinstance(item, dict):
-                                #                     # 실제 데이터에 있는 doorID 값을 가져옴
-                                #                     if "doorID" in item:
-                                #                         real_ids.append(item["doorID"])
-                                #                     elif "doorId" in item: # 대소문자 예외 처리
-                                #                         real_ids.append(item["doorId"])
-                                            
-                                #             # 3. 수집된 '실제 값'들을 검증기가 찾는 위치(doorID)에 연결
-                                #             # (가짜 데이터를 만드는 게 아니라, 위치만 옮겨주는 것임)
-                                #             if real_ids:
-                                #                 ref_data["doorID"] = real_ids
-                                #                 print(f"[PATCH] 경로 매핑 성공: doorList.doorID -> doorID ({real_ids})")
-                                #             else:
-                                #                 print(f"[PATCH] 경고: doorList는 있지만 내부에 doorID가 없습니다.")
-                                                
-                                #     except Exception as e:
-                                #         print(f"[PATCH] 경로 매핑 중 에러: {e}")
-                                # ▲▲▲▲▲▲▲▲▲▲ [여기까지] ▲▲▲▲▲▲▲▲▲▲
-
-                                self.reference_context[ref_endpoint] = ref_data
-                                
                                 self.reference_context[ref_endpoint] = ref_data
                                 print(f"[TRACE] {ref_endpoint} {direction}를 trace 파일에서 로드 (from validation rule)")
 
@@ -2941,7 +2845,7 @@ class MyApp(QWidget):
                     add_opt_pass += opt_correct  # 선택 필드 통과 수 누적
                     add_opt_error += opt_error  # 선택 필드 에러 수 누적
 
-                    inbound_err_txt = self._to_detail_text(val_text)
+                    inbound_err_txt = to_detail_text(val_text)
                     if val_result == "FAIL":
                         step_result = "FAIL"
                         combined_error_parts.append(f"[시도 {retry_attempt + 1}/{current_retries}]\n" + inbound_err_txt)
@@ -2978,21 +2882,20 @@ class MyApp(QWidget):
                                 self.step_buffers[self.cnt]["is_webhook_api"] = True
                             
                             # 웹훅 응답 검증 (null인 경우에도 검증 수행)
-                            if len(self.videoWebhookSchema) > 0:
-                                webhook_resp_val_result, webhook_resp_val_text, webhook_resp_key_psss_cnt, webhook_resp_key_error_cnt, opt_correct, opt_error = json_check_(
-                                    self.videoWebhookSchema[0], webhook_response, self.flag_opt
-                                )
+                            webhook_resp_val_result, webhook_resp_val_text, webhook_resp_key_psss_cnt, webhook_resp_key_error_cnt, opt_correct, opt_error = json_check_(
+                                self.videoWebhookSchema[self.cnt], webhook_response, self.flag_opt
+                            )
 
-                                add_pass += webhook_resp_key_psss_cnt
-                                add_err += webhook_resp_key_error_cnt
-                                add_opt_pass += opt_correct  # 웹훅 선택 필드 통과 수 누적
-                                add_opt_error += opt_error  # 웹훅 선택 필드 에러 수 누적
+                            add_pass += webhook_resp_key_psss_cnt
+                            add_err += webhook_resp_key_error_cnt
+                            add_opt_pass += opt_correct  # 웹훅 선택 필드 통과 수 누적
+                            add_opt_error += opt_error  # 웹훅 선택 필드 에러 수 누적
 
-                                webhook_resp_err_txt = self._to_detail_text(webhook_resp_val_text)
-                                if webhook_resp_val_result == "FAIL":
-                                    step_result = "FAIL"
-                                    combined_error_parts.append(f"\n--- Webhook 검증 ---\n" + webhook_resp_err_txt)
-                            
+                            webhook_resp_err_txt = to_detail_text(webhook_resp_val_text)
+                            if webhook_resp_val_result == "FAIL":
+                                step_result = "FAIL"
+                                combined_error_parts.append(f"\n--- Webhook 검증 ---\n" + webhook_resp_err_txt)
+
                             # webhook_response가 None이 아닌 경우에만 reference_context에 저장
                             if webhook_response:
                                 webhook_context_key = f"/{api_name}"
@@ -3002,21 +2905,21 @@ class MyApp(QWidget):
                             # webhook_response 속성이 없는 경우 (초기화되지 않은 경우)
                             accumulated['data_parts'].append(f"\n--- Webhook 응답 ---\nnull")
                             # 웹훅 스키마가 있는 경우 빈 딕셔너리로 검증 수행
-                            if len(self.videoWebhookSchema) > 0:
-                                webhook_response = {}
-                                webhook_resp_val_result, webhook_resp_val_text, webhook_resp_key_psss_cnt, webhook_resp_key_error_cnt, opt_correct, opt_error = json_check_(
-                                    self.videoWebhookSchema[0], webhook_response, self.flag_opt
-                                )
+                            webhook_response = {}
+                            webhook_resp_val_result, webhook_resp_val_text, webhook_resp_key_psss_cnt, webhook_resp_key_error_cnt, opt_correct, opt_error = json_check_(
+                                self.videoWebhookSchema[self.cnt], webhook_response, self.flag_opt
+                            )
 
-                                add_pass += webhook_resp_key_psss_cnt
-                                add_err += webhook_resp_key_error_cnt
-                                add_opt_pass += opt_correct  # 웹훅 선택 필드 통과 수 누적
-                                add_opt_error += opt_error  # 웹훅 선택 필드 에러 수 누적
+                            add_pass += webhook_resp_key_psss_cnt
+                            add_err += webhook_resp_key_error_cnt
+                            add_opt_pass += opt_correct  # 웹훅 선택 필드 통과 수 누적
+                            add_opt_error += opt_error  # 웹훅 선택 필드 에러 수 누적
 
-                                webhook_resp_err_txt = self._to_detail_text(webhook_resp_val_text)
-                                if webhook_resp_val_result == "FAIL":
-                                    step_result = "FAIL"
-                                    combined_error_parts.append(f"\n--- Webhook 검증 ---\n" + webhook_resp_err_txt)
+                            webhook_resp_err_txt = to_detail_text(webhook_resp_val_text)
+                            if webhook_resp_val_result == "FAIL":
+                                step_result = "FAIL"
+                                combined_error_parts.append(f"\n--- Webhook 검증 ---\n" + webhook_resp_err_txt)
+
 
                     # LongPolling 프로토콜인 경우
                     elif current_protocol == "LongPolling":
@@ -3164,8 +3067,8 @@ class MyApp(QWidget):
 
                 # ✅ 웹훅 API인 경우 웹훅 스키마 필드 수도 추가
                 current_protocol = self.trans_protocols[self.cnt] if self.cnt < len(self.trans_protocols) else "basic"
-                if current_protocol == "WebHook" and len(self.videoWebhookSchema) > 0:
-                    webhook_rqd_cnt, webhook_opt_cnt = timeout_field_finder(self.videoWebhookSchema[0])
+                if current_protocol == "WebHook" :
+                    webhook_rqd_cnt, webhook_opt_cnt = timeout_field_finder(self.videoWebhookSchema[self.cnt])
                     tmp_fields_rqd_cnt += webhook_rqd_cnt
                     tmp_fields_opt_cnt += webhook_opt_cnt
                     print(f"[PLATFORM] 웹훅 필드 수 추가: 필수={webhook_rqd_cnt}, 선택={webhook_opt_cnt}")
@@ -3451,14 +3354,6 @@ class MyApp(QWidget):
                 self.placeholder_label.hide()
             else:
                 self.placeholder_label.show()
-
-    def _remove_api_number_suffix(self, api_name):
-        """API 이름 뒤의 숫자 제거 (화면 표시용)
-        예: Authentication2 -> Authentication, RealTimeDoorStatus3 -> RealTimeDoorStatus
-        """
-        import re
-        # 마지막에 숫자만 있으면 제거
-        return re.sub(r'\d+$', '', api_name)
 
     def append_monitor_log(self, step_name, request_json="", result_status="진행중", score=None, details=""):
         """
@@ -3945,7 +3840,7 @@ class MyApp(QWidget):
             self.tableWidget.setItem(row, 0, no_item)
 
             # API 이름 - 컬럼 1 (숫자 제거된 이름으로 표시)
-            display_name = self._remove_api_number_suffix(row_data['api_name'])
+            display_name = remove_api_number_suffix(row_data['api_name'])
             api_item = QTableWidgetItem(display_name)
             api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 1, api_item)
@@ -4117,6 +4012,8 @@ class MyApp(QWidget):
                     self.pathUrl = self.url + "/" + self.current_spec_id
                 self.url_text_box.setText(self.pathUrl)
                 self.Server.current_spec_id = self.current_spec_id
+                self.Server.num_retries = self.spec_config.get('num_retries', self.current_spec_id)
+
                 # 결과 텍스트 초기화
                 self.valResult.clear()
                 self.append_monitor_log(
@@ -4142,7 +4039,7 @@ class MyApp(QWidget):
         # API 이름만 업데이트
         for row, api_name in enumerate(api_list):
             # 표시용 이름 (숫자 제거)
-            display_name = self._remove_api_number_suffix(api_name)
+            display_name = remove_api_number_suffix(api_name)
             
             # No. (숫자) - 컬럼 0
             if self.tableWidget.item(row, 0):
@@ -4223,7 +4120,7 @@ class MyApp(QWidget):
             self.tableWidget.setItem(row, 0, no_item)
 
             # API 명 - 컬럼 1
-            display_name = self.parent._remove_api_number_suffix(api_name)
+            display_name = remove_api_number_suffix(api_name)
             api_item = QTableWidgetItem(display_name)
             api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 1, api_item)
@@ -5031,7 +4928,9 @@ class MyApp(QWidget):
                     self.pathUrl = self.url + "/" + test_name
                 else:
                     self.pathUrl = self.url + "/" + first_spec_id
+
                 self.Server.current_spec_id = first_spec_id
+                self.Server.num_retries = self.spec_config.get('num_retries', first_spec_id)
                 # 시나리오 선택 이벤트 수동 트리거 (테이블 업데이트)
                 self.on_test_field_selected(0, 0)
             self.url_text_box.setText(self.pathUrl)
@@ -5276,7 +5175,7 @@ class MyApp(QWidget):
                 current_protocol = self.trans_protocols[row]
                 if current_protocol == "WebHook":
                     try:
-                        webhook_schema = self.videoWebhookSchema[0] if len(self.videoWebhookSchema) > 0 else None
+                        webhook_schema = self.videoWebhookSchema[self.cnt]
                     except:
                         webhook_schema = None
 
@@ -5568,20 +5467,12 @@ class MyApp(QWidget):
 
         return total_group
 
-    def _clean_trace_dir_once(self):
-        """results/trace 폴더 안의 파일들을 삭제"""
-        print(f"[TRACE_CLEAN] ⚠️  _clean_trace_dir_once() 호출됨!")
-        import traceback
-        print(f"[TRACE_CLEAN] 호출 스택:\n{''.join(traceback.format_stack()[-3:-1])}")
-        os.makedirs(CONSTANTS.trace_path, exist_ok=True)
-        for name in os.listdir(CONSTANTS.trace_path):
-            path = os.path.join(CONSTANTS.trace_path, name)
-            if os.path.isfile(path):
-                try:
-                    os.remove(path)
-                    print(f"[TRACE_CLEAN] 삭제: {name}")
-                except OSError:
-                    pass
+    def resizeEvent(self, event):
+        """창 크기 변경 시 반응형 UI 조정"""
+        try:
+            super().resizeEvent(event)
+        except Exception as e:
+            print(f"resizeEvent 오류: {e}")
 
     def run_single_spec_test(self):
         """단일 spec_id에 대한 시험 실행"""
@@ -5674,7 +5565,7 @@ class MyApp(QWidget):
                 print(f"[DEBUG] ========== 검증 시작: 완전 초기화 ==========")
 
                 # ✅ 3. trace 디렉토리 초기화
-                self._clean_trace_dir_once()
+                clean_trace_directory(self.CONSTANTS.trace_path)
 
                 # ✅ 4. 모든 카운터 및 플래그 초기화 (첫 실행처럼)
                 self.cnt = 0

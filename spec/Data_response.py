@@ -85,7 +85,15 @@ cmii7shen005i8z1tagevx4qh_RealtimeSensorData_webhook_in_data = {
 # RealtimeSensorEventInfos
 cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_out_data = {
     "code": "200",
-    "message": "성공"
+    "message": [
+    {}
+],
+    "sensorDeviceID": "",
+    "sensorDeviceStatus": "",
+    "testest": {
+    "f1": "1123",
+    "f2": "11233"
+}
 }
 
 # RealtimeSensorEventInfos WebHook IN Data
@@ -239,19 +247,25 @@ cmii7pysb004k8z1tts0npxfm_AccessUserInfos_out_data = {
         }
         },
             {
-            "doorID": "door0003",
-            "timePeriod": {
-            "startTime": 20251105163010124,
-            "endTime": 20251115163010124
-        }
+            "otherDeviceID": "other0002",
+            "otherDeviceName": "카드인식기기",
+            "otherDeviceAuthTypeList": [
+            "카드"
+        ]
         }
     ]
     }
 ]
 }
 
-# RealtimeVerifEventInfos
-cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_out_data = {
+# RealtimeDoorStatus
+cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_out_data = {
+    "code": "",
+    "message": ""
+}
+
+# DoorControl
+cmiqr1acx00i5ie8fi022t1hp_DoorControl_out_data = {
     "code": "200",
     "message": "성공"
 }
@@ -334,9 +348,14 @@ cmii7pysb004k8z1tts0npxfm_outData = [
     cmii7pysb004k8z1tts0npxfm_StoredVerifEventInfos_out_data,
 ]
 
-# cmii7pysb004k8z1tts0npxfm WebHook 데이터 리스트
-cmii7pysb004k8z1tts0npxfm_webhook_inData = [
-    cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_webhook_in_data,
+# cmiqr1acx00i5ie8fi022t1hp WebHook 데이터 리스트
+cmiqr1acx00i5ie8fi022t1hp_webhook_inData = [
+    None,
+    None,
+    None,
+    None,
+    None,
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_in_data,
 ]
 
 # cmii7pysb004k8z1tts0npxfm API endpoint

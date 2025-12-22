@@ -17,19 +17,44 @@ cmii7shen005i8z1tagevx4qh_SensorDeviceProfiles_in_schema = {}
 cmii7shen005i8z1tagevx4qh_RealtimeSensorData_in_schema = {
     "sensorDeviceList": [{
     "sensorDeviceID": str,
-}],
-    "duration": int,
-    "transProtocol": {
-    "transProtocolType": str,
-    OptionalKey("transProtocolDesc"): str,
-},
-    OptionalKey("startTime"): int,
+    "commandType": str,
 }
 
-# RealtimeSensorData WebHook OUT Schema
-cmii7shen005i8z1tagevx4qh_RealtimeSensorData_webhook_out_schema = {
-    "code": str,
-    "message": str,
+# SensorDeviceControl2
+cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl2_in_schema = {
+    "sensorDeviceID": str,
+    "commandType": str,
+}
+
+# cmiqr201z00i8ie8fitdg5t1b 스키마 리스트
+cmiqr201z00i8ie8fitdg5t1b_inSchema = [
+    cmiqr201z00i8ie8fitdg5t1b_Authentication_in_schema,
+    cmiqr201z00i8ie8fitdg5t1b_Capabilities_in_schema,
+    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceProfiles_in_schema,
+    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_in_schema,
+    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl2_in_schema,
+]
+
+# Authentication
+cmiqr1acx00i5ie8fi022t1hp_Authentication_in_schema = {
+    "userID": str,
+    "userPW": str,
+}
+
+# Capabilities
+cmiqr1acx00i5ie8fi022t1hp_Capabilities_in_schema = {}
+
+# DoorProfiles
+cmiqr1acx00i5ie8fi022t1hp_DoorProfiles_in_schema = {}
+
+# RealtimeDoorStatus
+cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_in_schema = {
+    "doorList": [{
+    "doorID": str,
+    "doorName": str,
+    "doorRelaySensor": str,
+    "doorSensor": str,
+}],
 }
 
 # RealtimeSensorEventInfos
@@ -137,9 +162,9 @@ cmii7pysb004k8z1tts0npxfm_inSchema = [
     cmii7pysb004k8z1tts0npxfm_StoredVerifEventInfos_in_schema,
 ]
 
-# cmii7pysb004k8z1tts0npxfm WebHook 스키마 리스트
-cmii7pysb004k8z1tts0npxfm_webhook_OutSchema = [
-    cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_webhook_out_schema,
+# cmiqr1acx00i5ie8fi022t1hp WebHook 스키마 리스트
+cmiqr1acx00i5ie8fi022t1hp_webhook_OutSchema = [
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_out_schema,
 ]
 
 # Authentication

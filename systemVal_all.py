@@ -16,7 +16,7 @@ import importlib
 # SSL 경고 비활성화 (자체 서명 인증서 사용 시)
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 warnings.filterwarnings('ignore')
-
+import re
 from urllib.parse import urlparse
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor, QPixmap
@@ -24,7 +24,8 @@ from PyQt5.QtCore import *
 from PyQt5 import QtCore
 from api.webhook_api import WebhookThread
 from api.api_server import Server  # ✅ door_memory 접근을 위한 import 추가
-from core.functions import json_check_, resource_path, json_to_data, timeout_field_finder
+from core.json_checker_new import timeout_field_finder
+from core.functions import json_check_, resource_path, json_to_data
 from core.data_mapper import ConstraintDataGenerator
 from splash_screen import LoadingPopup
 from requests.auth import HTTPDigestAuth
@@ -3606,15 +3607,13 @@ class MyApp(QWidget):
             trans_protocol = json_data_dict.get("transProtocol", {})    # 이 부분 수정해야함
             if trans_protocol:
                 # 웹훅 서버 시작 (transProtocolType이 WebHook인 경우만)
-                trans_protocol_type = trans_protocol.get("transProtocolType", {})
-                if "WebHook".lower() in str(trans_protocol_type).lower():
-
-                    time.sleep(0.1)
+                if "WebHook" == self.spec_config.get('trans_protocol', self.current_spec_id)[self.cnt]:
+                    self.webhook_flag = True
+                    time.sleep(0.001)
                     url = CONSTANTS.WEBHOOK_HOST  # ✅ 기본값 수정
                     port = CONSTANTS.WEBHOOK_PORT  # ✅ 포트도 2001로
 
                     msg = {}
-                    self.webhook_flag = True
                     self.step_buffers[self.cnt]["is_webhook_api"] = True
 
                     self.webhook_cnt = self.cnt
@@ -3628,6 +3627,7 @@ class MyApp(QWidget):
 
         try:
             print(f"[DEBUG] [post] Sending request to {path} with auth_type={self.r2}, token={self.token}")
+            path = re.sub(r'\d+$', '', path)
             self.res = requests.post(
                 path,
                 headers=headers,
@@ -3641,15 +3641,8 @@ class MyApp(QWidget):
 
     # 임시 수정 
     def handle_webhook_result(self, result):
-        self.webhook_flag = True
-
-        if not hasattr(self, 'webhook_res_list'):
-            self.webhook_res_list = []
-        self.webhook_res_list.append(result)
-
         self.webhook_res = result
-        # a = self.webhook_thread.stop()
-        # self.webhook_thread.wait()
+        self.webhook_thread.stop()
         self._push_event(self.webhook_cnt, "WEBHOOK", result)
 
     # 웹훅 검증
@@ -3673,35 +3666,30 @@ class MyApp(QWidget):
             print(f"[DEBUG] webhookSchema 총 개수={len(self.webhookSchema)}")
             print(f"[DEBUG] webhook_res is None: {self.webhook_res is None}")
 
-        # ✅ 수정: webhookSchema가 1개만 있으면 항상 인덱스 0 사용
-        if len(self.webhookSchema) == 1:
-            self.webhook_schema_idx = 0
+        schema_to_check = self.webhookSchema[self.cnt]
 
-        # ✅ 수정: 인덱스 범위 체크 추가
-        if len(self.webhookSchema) > 0 and self.webhook_schema_idx < len(self.webhookSchema):
-            schema_to_check = self.webhookSchema[self.webhook_schema_idx]
-            print(f"[DEBUG] 사용 스키마: webhookSchema[{self.webhook_schema_idx}]")
+        # ⭐ 추가: webhook_res가 None이면 timeout 처리
+        if self.webhook_res is None:
+            # timeout_field_finder로 스키마의 필드 개수 계산
+            from core.json_checker_new import timeout_field_finder
+            tmp_fields_rqd_cnt, tmp_fields_opt_cnt = timeout_field_finder(schema_to_check)
+            key_error_cnt = tmp_fields_rqd_cnt if tmp_fields_rqd_cnt > 0 else 1
+            if self.flag_opt:
+                key_error_cnt += tmp_fields_opt_cnt
 
-            if isinstance(schema_to_check, dict):
-                schema_keys = list(schema_to_check.keys())[:5]
-                print(f"[DEBUG] 웹훅 스키마 필드 (first 5): {schema_keys}")
-                # ✅ 인덱스 증가는 범위 내에서만
-                if self.webhook_schema_idx < len(self.webhookSchema) - 1:
-                    self.webhook_schema_idx += 1
-
-            # ✅ webhook_data가 None이 아닌 경우에도 검증 수행 (빈 딕셔너리로 처리)
+            val_result = "FAIL"
+            val_text = "Webhook Message Missing!"
+            key_psss_cnt = 0
+            opt_correct = 0
+            opt_error = tmp_fields_opt_cnt if self.flag_opt else 0
+        else:
+            # ✅ 정상적으로 webhook 데이터가 있는 경우 검증
             val_result, val_text, key_psss_cnt, key_error_cnt, opt_correct, opt_error = json_check_(
                 schema=schema_to_check,
                 data=webhook_data,
                 flag=self.flag_opt,
                 reference_context=self.reference_context
             )
-            if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
-                print(f"[DEBUG] 웹훅 검증 결과: {val_result}, pass={key_psss_cnt}, error={key_error_cnt}")
-        else:
-            # ✅ 스키마가 없거나 인덱스가 범위를 벗어난 경우
-            print(f"[WARN] webhookSchema 접근 불가: idx={self.webhook_schema_idx}, 전체={len(self.webhookSchema)}")
-            val_result, val_text, key_psss_cnt, key_error_cnt, opt_correct, opt_error = "FAIL", "webhookSchema not found or index out of range", 0, 0, 0, 0
 
         if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
             print(f"[DEBUG] ==========================================\n")
@@ -3745,12 +3733,26 @@ class MyApp(QWidget):
                 self.step_pass_counts[self.webhook_cnt] += key_psss_cnt
                 self.step_error_counts[self.webhook_cnt] += key_error_cnt
 
-                # ✅ 전체 점수 업데이트는 재시도 완료 후에만 (중복 방지)
-                # global_pass_cnt는 update_view()의 재시도 완료 시점에서 한 번만 += 처리됨
+                # ⭐ 추가: 선택 필드 합산
+                if hasattr(self, 'step_opt_pass_counts') and hasattr(self, 'step_opt_error_counts'):
+                    self.step_opt_pass_counts[self.webhook_cnt] += opt_correct
+                    self.step_opt_error_counts[self.webhook_cnt] += opt_error
+                    print(f"[WEBHOOK] 선택 필드 합산: opt_pass={opt_correct}, opt_error={opt_error}")
+                else:
+                    # 선택 필드 배열 초기화 (없는 경우)
+                    api_count = len(self.videoMessages)
+                    self.step_opt_pass_counts = [0] * api_count
+                    self.step_opt_error_counts = [0] * api_count
+                    self.step_opt_pass_counts[self.webhook_cnt] = opt_correct
+                    self.step_opt_error_counts[self.webhook_cnt] = opt_error
 
                 # 누적된 총 필드 수로 테이블 업데이트
                 accumulated_pass = self.step_pass_counts[self.webhook_cnt]
                 accumulated_error = self.step_error_counts[self.webhook_cnt]
+
+                print(f"[WEBHOOK] 누적 결과: pass={accumulated_pass}, error={accumulated_error}")
+                print(
+                    f"[WEBHOOK] 선택 필드 누적: opt_pass={self.step_opt_pass_counts[self.webhook_cnt]}, opt_error={self.step_opt_error_counts[self.webhook_cnt]}")
             else:
                 # 누적 배열이 없으면 웹훅 결과만 사용
                 accumulated_pass = key_psss_cnt
@@ -3855,14 +3857,9 @@ class MyApp(QWidget):
                 if trans_protocol:
                     trans_protocol_type = trans_protocol.get("transProtocolType", {})
                     if "WebHook".lower() in str(trans_protocol_type).lower():
-                        import socket
-                        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                        s.connect(("8.8.8.8", 80))  # 구글 DNS로 연결 시도 (실제 전송 안 함)
-                        WEBHOOK_PUBLIC_IP = s.getsockname()[0]  # 현재 PC의 실제 네트워크 IP
-                        s.close()
-                        print(f"[CONSTANTS] 웹훅 서버 IP 자동 감지: {WEBHOOK_PUBLIC_IP}")
+                        WEBHOOK_IP = CONSTANTS.WEBHOOK_PUBLIC_IP
                         WEBHOOK_PORT = CONSTANTS.WEBHOOK_PORT  # 웹훅 수신 포트
-                        WEBHOOK_URL = f"https://{WEBHOOK_PUBLIC_IP}:{WEBHOOK_PORT}"  # 플랫폼/시스템이 웹훅을 보낼 주소
+                        WEBHOOK_URL = f"https://{WEBHOOK_IP}:{WEBHOOK_PORT}"  # 플랫폼/시스템이 웹훅을 보낼 주소
 
                         trans_protocol = {
                             "transProtocolType": "WebHook",
@@ -4351,13 +4348,13 @@ class MyApp(QWidget):
                             details=f"검증 진행 중... | 프로토콜: {current_protocol}"
                         )
 
-                    # 재시도 카운터 증가
-                    self.current_retry += 1
-
                     # ✅ 웹훅 처리를 재시도 완료 체크 전에 실행 (step_pass_counts 업데이트를 위해)
-                    if self.webhook_flag and self.webhook_res is not None:
+                    if self.webhook_flag:
                         print(f"[WEBHOOK] 웹훅 처리 시작 (API {self.cnt})")
                         self.get_webhook_result()
+
+                    # 재시도 카운터 증가
+                    self.current_retry += 1
 
                     # ✅ 현재 API의 모든 재시도가 완료되었는지 확인
                     if (self.cnt < len(self.num_retries_list) and

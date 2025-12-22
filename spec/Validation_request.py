@@ -24,9 +24,34 @@ cmii7shen005i8z1tagevx4qh_Capabilities_in_validation = {}
 # SensorDeviceProfiles
 cmii7shen005i8z1tagevx4qh_SensorDeviceProfiles_in_validation = {}
 
-# RealtimeSensorData
-cmii7shen005i8z1tagevx4qh_RealtimeSensorData_in_validation = {
-  "sensorDeviceList": {
+# SensorDeviceControl
+cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_in_validation = {
+  "sensorDeviceID": {
+    "enabled": True,
+    "validationType": "response-field-list-match",
+    "referenceFieldId": "cmisfgtvs07sy5vy7f2hjy5aa",
+    "referenceField": "sensorDeviceID",
+    "referenceEndpoint": "/SensorDeviceProfiles",
+    "score": 0
+  },
+  "commandType": {
+    "enabled": True,
+    "validationType": "response-field-list-match",
+    "score": 0
+  }
+}
+
+# SensorDeviceControl2
+cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl2_in_validation = {
+  "sensorDeviceID": {
+    "enabled": True,
+    "validationType": "request-field-match",
+    "referenceFieldId": "cmisg3n7u088o5vy75dl8ge3h",
+    "referenceField": "sensorDeviceID",
+    "referenceEndpoint": "/SensorDeviceControl",
+    "score": 0
+  },
+  "commandType": {
     "enabled": True,
     "validationType": "valid-value-match",
     "validValueMatchType": "validation-field",
@@ -102,17 +127,17 @@ cmii7pysb004k8z1tts0npxfm_Capabilities_in_validation = {}
 # DoorProfiles
 cmii7pysb004k8z1tts0npxfm_DoorProfiles_in_validation = {}
 
-# AccessUserInfos
-cmii7pysb004k8z1tts0npxfm_AccessUserInfos_in_validation = {}
+# RealtimeDoorStatus
+cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_in_validation = {}
 
-# RealtimeVerifEventInfos
-cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_in_validation = {
-  "doorList.doorID": {
+# DoorControl
+cmiqr1acx00i5ie8fi022t1hp_DoorControl_in_validation = {
+  "doorID": {
     "enabled": True,
-    "validationType": "response-field-list-match",
-    "referenceFieldId": "cmisk9y5l0db35vy74nn3utak",
+    "validationType": "request-field-list-match",
+    "referenceFieldId": "cmj6i9tmk023gxei0fwmi1vp0",
     "referenceField": "doorID",
-    "referenceEndpoint": "/DoorProfiles",
+    "referenceEndpoint": "/RealtimeDoorStatus",
     "score": 0
   },
   "eventFilter": {
@@ -148,9 +173,12 @@ cmii7pysb004k8z1tts0npxfm_StoredVerifEventInfos_in_validation = {
   }
 }
 
-# cmii7pysb004k8z1tts0npxfm WebHook 검증 리스트
-cmii7pysb004k8z1tts0npxfm_webhook_outValidation = [
-    cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_webhook_out_validation,
+# RealtimeDoorStatus2 WebHook OUT Validation
+cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_out_validation = {}
+
+# cmiqr1acx00i5ie8fi022t1hp WebHook 검증 리스트
+cmiqr1acx00i5ie8fi022t1hp_webhook_outValidation = [
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_out_validation,
 ]
 
 # cmii7pysb004k8z1tts0npxfm 검증 리스트

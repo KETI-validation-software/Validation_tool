@@ -123,7 +123,45 @@ cmii7shen005i8z1tagevx4qh_RealtimeSensorData_out_constraints = {
     "required": True
   },
   "message": {
-    "id": "cmiwkuog901qt844gswj7kaas",
+    "id": "cmjch5wmv086jcfb3d2zeu1un",
+    "valueType": "preset",
+    "required": True
+  },
+  "sensorDeviceID": {
+    "id": "cmisg51v408a85vy7mrhteunz",
+    "referenceFieldId": "cmisg3n7u088o5vy75dl8ge3h",
+    "valueType": "request-based",
+    "required": True,
+    "referenceEndpoint": "/SensorDeviceControl",
+    "referenceField": "sensorDeviceID"
+  },
+  "sensorDeviceStatus": {
+    "id": "cmj6hdjek01qsxei0ydzyxlg3",
+    "valueType": "random",
+    "required": True,
+    "referenceField": "(참조 필드 미선택)",
+    "referenceEndpoint": "/SensorDeviceControl",
+    "validValueField": "sensorControl",
+    "validValues": [
+      "AlarmOn",
+      "AlarmOff"
+    ]
+  },
+  "testest": {
+    "id": "cmjch95z9089fcfb3ztyk54i0",
+    "valueType": "preset",
+    "required": True
+  },
+  "testest.f1": {
+    "valueType": "preset",
+    "required": True
+  },
+  "testest.f2": {
+    "valueType": "preset",
+    "required": True
+  },
+  "": {
+    "id": "cmjchan1p089vcfb3x51vqdar",
     "valueType": "preset",
     "required": True
   }
@@ -436,7 +474,88 @@ cmii7pysb004k8z1tts0npxfm_DoorProfiles_out_constraints = {
     "required": True
   },
   "doorList.otherDeviceList.otherDeviceID": {
-    "id": "cmisk9y6u0dc75vy7s3znthpa",
+    "id": "cmizh2j8g029g7eoe4aae2xlo",
+    "valueType": "preset",
+    "required": True
+  },
+  "doorList.otherDeviceList.otherDeviceName": {
+    "id": "cmizh2j8g029i7eoeps66od7e",
+    "valueType": "preset",
+    "required": True
+  },
+  "doorList.otherDeviceList.otherDeviceAuthTypeList": {
+    "id": "cmjcmaawo0ab2cfb3ta97x4wn",
+    "valueType": "preset",
+    "required": True
+  }
+}
+
+# RealtimeDoorStatus
+cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_out_constraints = {
+  "code": {
+    "id": "cmizg5khh00iq7eoexenwo9i9",
+    "valueType": "preset",
+    "required": True
+  },
+  "message": {
+    "id": "cmizg5lyh00iw7eoe7wbhcxaj",
+    "valueType": "preset",
+    "required": True
+  }
+}
+
+# DoorControl
+cmiqr1acx00i5ie8fi022t1hp_DoorControl_out_constraints = {
+  "code": {
+    "id": "cmiwqp4z80azq844gf2xm9qtt",
+    "valueType": "preset",
+    "required": True
+  },
+  "message": {
+    "id": "cmiwqpbp70b00844gr7gg59fr",
+    "valueType": "preset",
+    "required": True
+  }
+}
+
+# RealtimeDoorStatus2
+cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_out_constraints = {
+  "code": {
+    "id": "cmiwqsqrw0b7y844gtn3rzf7y",
+    "valueType": "preset",
+    "required": True
+  },
+  "message": {
+    "id": "cmiwqsvzu0b88844gjdzch27v",
+    "valueType": "preset",
+    "required": True
+  }
+}
+
+# RealtimeDoorStatus2 WebHook IN Constraints
+cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_in_constraints = {
+  "doorList": {
+    "id": "cmiwqvxns0bng844g9w4ruqq0",
+    "valueType": "preset",
+    "required": True
+  },
+  "doorList.doorID": {
+    "id": "cmiwqvxnv0bni844g3f2pyz9t",
+    "valueType": "request-based",
+    "required": True,
+    "referenceField": "(참조 필드 미선택)",
+    "referenceEndpoint": "/RealtimeDoorStatus"
+  },
+  "doorList.doorName": {
+    "id": "cmiwqvxnv0bnk844gwotx0gqu",
+    "referenceFieldId": "cmizh2j7y028m7eoe561v1og0",
+    "valueType": "response-based",
+    "required": True,
+    "referenceEndpoint": "/DoorProfiles",
+    "referenceField": "doorName"
+  },
+  "doorList.doorRelaySensor": {
+    "id": "cmiwqvxnv0bnm844g0ndzntyu",
     "valueType": "preset",
     "required": False
   },
@@ -452,8 +571,28 @@ cmii7pysb004k8z1tts0npxfm_DoorProfiles_out_constraints = {
   }
 }
 
-# AccessUserInfos
-cmii7pysb004k8z1tts0npxfm_AccessUserInfos_out_constraints = {
+# cmiqr1acx00i5ie8fi022t1hp 검증 리스트
+cmiqr1acx00i5ie8fi022t1hp_outConstraints = [
+    cmiqr1acx00i5ie8fi022t1hp_Authentication_out_constraints,
+    cmiqr1acx00i5ie8fi022t1hp_Capabilities_out_constraints,
+    cmiqr1acx00i5ie8fi022t1hp_DoorProfiles_out_constraints,
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_out_constraints,
+    cmiqr1acx00i5ie8fi022t1hp_DoorControl_out_constraints,
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_out_constraints,
+]
+
+# cmiqr1acx00i5ie8fi022t1hp WebHook Constraints 리스트
+cmiqr1acx00i5ie8fi022t1hp_webhook_inConstraints = [
+    None,
+    None,
+    None,
+    None,
+    None,
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_in_constraints,
+]
+
+# Authentication
+cmiqqzrjz00i3ie8figf79cur_Authentication_out_constraints = {
   "code": {
     "id": "cmiwiplu600gpugxnl33vzh64",
     "valueType": "preset",
