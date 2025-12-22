@@ -137,16 +137,6 @@ cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_out_schema = {
     "message": str,
 }
 
-# RealtimeDoorStatus2 WebHook IN Schema
-cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_webhook_in_schema = {
-    "doorList": [{
-    "doorID": str,
-    "doorName": str,
-    "doorRelaySensor": str,
-    "doorSensor": str,
-}],
-}
-
 # cmiqr1jha00i6ie8fb1scb3go 스키마 리스트
 cmiqr1jha00i6ie8fb1scb3go_outSchema = [
     cmiqr1jha00i6ie8fb1scb3go_Authentication_out_schema,
@@ -160,7 +150,6 @@ cmiqr1jha00i6ie8fb1scb3go_outSchema = [
 # cmiqr1jha00i6ie8fb1scb3go WebHook 스키마 리스트
 cmiqr1jha00i6ie8fb1scb3go_webhook_inSchema = [
     cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_webhook_in_schema,
-    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_webhook_in_schema,
 ]
 
 # Authentication

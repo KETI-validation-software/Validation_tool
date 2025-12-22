@@ -172,54 +172,32 @@ cmiqr1jha00i6ie8fb1scb3go_DoorControl_in_constraints = {
 # RealtimeDoorStatus2
 cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_in_constraints = {
   "doorList": {
-    "id": "cmize9v8a00a096qh8bxm7fe2",
+    "id": "cmixuykwh0hmcp002klwr4ehj",
     "valueType": "preset",
     "required": True
   },
   "doorList.doorID": {
-    "id": "cmize9v8b00a296qh1vooije0",
-    "referenceFieldId": "cmixusnx90hatp002m3rnln60",
-    "valueType": "request-based",
-    "required": True,
-    "referenceEndpoint": "/RealtimeDoorStatus",
-    "referenceField": "doorID"
-  },
-  "duration": {
-    "id": "cmize7lki002a96qhe5181nqj",
+    "id": "cmixuykwk0hmep002xddae990",
     "valueType": "preset",
     "required": True
   },
   "transProtocol": {
-    "id": "cmize811g003m96qhzuj5k87j",
+    "id": "cmjfhm2ja0cc5cfb3x8u0p0ma",
     "valueType": "preset",
     "required": True
   },
   "transProtocol.transProtocolType": {
-    "id": "cmize8m4g007l96qhwaouhm9t",
+    "id": "cmjfhsoh90chwcfb3e0v85qiz",
     "valueType": "preset",
     "required": True
   },
   "transProtocol.transProtocolDesc": {
-    "id": "cmize8y8y008q96qhgmcgwvmc",
+    "id": "cmjfhszsp0ciscfb34zwpfr09",
     "valueType": "preset",
     "required": True
   },
   "startTime": {
-    "id": "cmize9f5s009v96qhrbr6kzd5",
-    "valueType": "preset",
-    "required": True
-  }
-}
-
-# RealtimeDoorStatus2 WebHook OUT Constraints
-cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_webhook_out_constraints = {
-  "code": {
-    "id": "cmixuyvrh0hmqp0025mr6ni0i",
-    "valueType": "preset",
-    "required": True
-  },
-  "message": {
-    "id": "cmixuyy530hmzp002tlmh000j",
+    "id": "cmjfhmu3m0cfrcfb3txo2wic2",
     "valueType": "preset",
     "required": True
   }
@@ -238,7 +216,6 @@ cmiqr1jha00i6ie8fb1scb3go_inConstraints = [
 # cmiqr1jha00i6ie8fb1scb3go WebHook Constraints 리스트
 cmiqr1jha00i6ie8fb1scb3go_webhook_outConstraints = [
     cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_webhook_out_constraints,
-    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_webhook_out_constraints,
 ]
 
 # Authentication

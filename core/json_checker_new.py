@@ -1072,7 +1072,7 @@ def timeout_field_finder(schema):
         elif type(fields_tmp) == list and type(fields_tmp[-1]) == dict:
             for field_tmp in fields_tmp[-1]:
                 if isinstance(field_tmp, json_checker.core.checkers.OptionalKey):
-                    pass
+                    fields_opt_cnt += 1
                 else:
                     all_field_cnt += 1
 

@@ -83,21 +83,14 @@ cmiqr1jha00i6ie8fb1scb3go_DoorControl_in_data = {
 cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_in_data = {
     "doorList": [
         {
-        "doorID": ""
+        "doorID": "door0001"
     }
 ],
-    "duration": 10000,
     "transProtocol": {
     "transProtocolType": "Webhook",
     "transProtocolDesc": ""
 },
-    "startTime": 20251105163010124
-}
-
-# RealtimeDoorStatus2 WebHook OUT Data
-cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_webhook_out_data = {
-    "code": "200",
-    "message": "성공"
+    "startTime": "20251105163010123"
 }
 
 # cmiqr1jha00i6ie8fb1scb3go 데이터 리스트
@@ -113,7 +106,6 @@ cmiqr1jha00i6ie8fb1scb3go_inData = [
 # cmiqr1jha00i6ie8fb1scb3go WebHook 데이터 리스트
 cmiqr1jha00i6ie8fb1scb3go_webhook_outData = [
     cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_webhook_out_data,
-    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_webhook_out_data,
 ]
 
 # cmiqr1jha00i6ie8fb1scb3go API endpoint
