@@ -77,496 +77,239 @@ class InfoWidget(QWidget):
         main_layout.addWidget(self.stacked_widget)
         self.setLayout(main_layout)
 
+    # ---------- 반응형 크기 조정 헬퍼 함수들 ----------
+    def _resize_widget(self, widget_attr, size_attr, width_ratio, height_ratio=None):
+        """위젯 크기 조정 헬퍼 (가로만 또는 가로+세로)"""
+        widget = getattr(self, widget_attr, None)
+        original_size = getattr(self, size_attr, None)
+        if widget and original_size:
+            new_width = int(original_size[0] * width_ratio)
+            new_height = int(original_size[1] * height_ratio) if height_ratio else original_size[1]
+            widget.setFixedSize(new_width, new_height)
+
+    def _resize_table_rows(self, table, row_height_attr, height_ratio, cell_width=None):
+        """테이블 행 높이 및 셀 위젯 크기 조정"""
+        original_row_height = getattr(self, row_height_attr, None)
+        if not original_row_height:
+            return
+        new_row_height = int(original_row_height * height_ratio)
+        table.verticalHeader().setDefaultSectionSize(new_row_height)
+        for row in range(table.rowCount()):
+            table.setRowHeight(row, new_row_height)
+            cell_widget = table.cellWidget(row, 0) or table.cellWidget(row, 1)
+            if cell_widget:
+                if cell_width:
+                    cell_widget.setFixedSize(cell_width, new_row_height)
+                else:
+                    cell_widget.setFixedHeight(new_row_height)
+
     def resizeEvent(self, event):
         """창 크기 변경 시 page1, page2 요소들 위치 재조정"""
         super().resizeEvent(event)
 
-        # page1의 요소들 위치 재조정
+        # ========== Page1 크기 조정 ==========
         if hasattr(self, 'page1') and self.page1:
-            # 시험 기본 정보 패널 비율 조정
             if hasattr(self, 'info_panel') and hasattr(self, 'original_window_size') and hasattr(self, 'original_panel_size'):
-                current_width = self.page1.width()
-                current_height = self.page1.height()
+                # 비율 계산
+                width_ratio = max(1.0, self.page1.width() / self.original_window_size[0])
+                height_ratio = max(1.0, min(1.2, self.page1.height() / self.original_window_size[1]))
 
-                # 비율 계산 (가로/세로 독립적으로)
-                width_ratio = current_width / self.original_window_size[0]
-                height_ratio = current_height / self.original_window_size[1]
+                # 메인 패널
+                self._resize_widget('info_panel', 'original_panel_size', width_ratio, height_ratio)
 
-                # 최소 비율은 1.0 (원본 크기 이하로 줄어들지 않음)
-                # Page1 세로 비율은 최대 1.2로 제한 (과도한 여백 방지)
-                width_ratio = max(1.0, width_ratio)
-                height_ratio = max(1.0, min(1.2, height_ratio))
+                # 타이틀 영역 (가로만)
+                self._resize_widget('panel_title_container', 'original_title_size', width_ratio)
+                self._resize_widget('panel_title_text', 'original_title_text_size', width_ratio)
+                self._resize_widget('panel_title_desc', 'original_title_desc_size', width_ratio)
 
-                # 새 패널 크기 계산 (가로/세로 독립적으로 적용)
-                new_width = int(self.original_panel_size[0] * width_ratio)
-                new_height = int(self.original_panel_size[1] * height_ratio)
+                # 인풋 컨테이너 (가로만)
+                self._resize_widget('input_container', 'original_input_container_size', width_ratio)
 
-                self.info_panel.setFixedSize(new_width, new_height)
+                # 기업명/제품명 필드 (가로만)
+                for prefix in ['company', 'product']:
+                    self._resize_widget(f'{prefix}_field_widget', f'original_{prefix}_field_size', width_ratio)
+                    self._resize_widget(f'{prefix}_label', f'original_{prefix}_label_size', width_ratio)
+                    self._resize_widget(f'{prefix}_edit', f'original_{prefix}_edit_size', width_ratio)
 
-                # 타이틀 컨테이너 크기 조정 (가로만 늘어남, 세로는 고정)
-                if hasattr(self, 'panel_title_container') and hasattr(self, 'original_title_size'):
-                    new_title_width = int(self.original_title_size[0] * width_ratio)
-                    new_title_height = self.original_title_size[1]  # 세로는 원본 유지
-                    self.panel_title_container.setFixedSize(new_title_width, new_title_height)
+                # 버전/모델명 행 (가로만)
+                self._resize_widget('version_model_row', 'original_version_model_row_size', width_ratio)
+                for prefix in ['version', 'model']:
+                    self._resize_widget(f'{prefix}_field_widget', f'original_{prefix}_field_size', width_ratio)
+                    self._resize_widget(f'{prefix}_label', f'original_{prefix}_label_size', width_ratio)
+                    self._resize_widget(f'{prefix}_edit', f'original_{prefix}_edit_size', width_ratio)
 
-                    # 타이틀 텍스트 크기 조정
-                    if hasattr(self, 'panel_title_text') and hasattr(self, 'original_title_text_size'):
-                        new_text_width = int(self.original_title_text_size[0] * width_ratio)
-                        self.panel_title_text.setFixedSize(new_text_width, self.original_title_text_size[1])
+                # 시험유형/시험대상 행 (가로만)
+                self._resize_widget('category_target_row', 'original_category_target_row_size', width_ratio)
+                for prefix, attr in [('test_category', 'test_category'), ('target_system', 'target_system')]:
+                    self._resize_widget(f'{prefix}_widget', f'original_{attr}_field_size', width_ratio)
+                    self._resize_widget(f'{prefix}_label', f'original_{attr}_label_size', width_ratio)
+                    self._resize_widget(f'{prefix}_edit', f'original_{attr}_edit_size', width_ratio)
 
-                    # 타이틀 설명 영역 크기 조정
-                    if hasattr(self, 'panel_title_desc') and hasattr(self, 'original_title_desc_size'):
-                        new_desc_width = int(self.original_title_desc_size[0] * width_ratio)
-                        new_desc_height = self.original_title_desc_size[1]  # 세로는 원본 유지
-                        self.panel_title_desc.setFixedSize(new_desc_width, new_desc_height)
+                # 시험분야/시험범위 행 (가로만)
+                self._resize_widget('group_range_row', 'original_group_range_row_size', width_ratio)
+                for prefix, attr in [('test_group', 'test_group'), ('test_range', 'test_range')]:
+                    self._resize_widget(f'{prefix}_widget', f'original_{attr}_field_size', width_ratio)
+                    self._resize_widget(f'{prefix}_label', f'original_{attr}_label_size', width_ratio)
+                    self._resize_widget(f'{prefix}_edit', f'original_{attr}_edit_size', width_ratio)
 
-                # 인풋박스 컨테이너 크기 조정
-                if hasattr(self, 'input_container') and hasattr(self, 'original_input_container_size'):
-                    new_input_container_width = int(self.original_input_container_size[0] * width_ratio)
-                    self.input_container.setFixedSize(new_input_container_width, self.original_input_container_size[1])
+                # Divider, 관리자 코드 (가로만)
+                self._resize_widget('divider', 'original_divider_size', width_ratio)
+                self._resize_widget('admin_code_widget', 'original_admin_code_widget_size', width_ratio)
+                self._resize_widget('admin_code_label', 'original_admin_code_label_size', width_ratio)
+                self._resize_widget('admin_code_input', 'original_admin_code_input_size', width_ratio)
 
-                # 기업명 필드 크기 조정
-                if hasattr(self, 'company_field_widget') and hasattr(self, 'original_company_field_size'):
-                    new_company_width = int(self.original_company_field_size[0] * width_ratio)
-                    self.company_field_widget.setFixedSize(new_company_width, self.original_company_field_size[1])
-
-                    # 기업명 라벨 크기 조정
-                    if hasattr(self, 'company_label') and hasattr(self, 'original_company_label_size'):
-                        new_label_width = int(self.original_company_label_size[0] * width_ratio)
-                        self.company_label.setFixedSize(new_label_width, self.original_company_label_size[1])
-
-                    # 기업명 입력칸 크기 조정
-                    if hasattr(self, 'company_edit') and hasattr(self, 'original_company_edit_size'):
-                        new_edit_width = int(self.original_company_edit_size[0] * width_ratio)
-                        self.company_edit.setFixedSize(new_edit_width, self.original_company_edit_size[1])
-
-                # 제품명 필드 크기 조정
-                if hasattr(self, 'product_field_widget') and hasattr(self, 'original_product_field_size'):
-                    new_product_width = int(self.original_product_field_size[0] * width_ratio)
-                    self.product_field_widget.setFixedSize(new_product_width, self.original_product_field_size[1])
-
-                    # 제품명 라벨 크기 조정
-                    if hasattr(self, 'product_label') and hasattr(self, 'original_product_label_size'):
-                        new_label_width = int(self.original_product_label_size[0] * width_ratio)
-                        self.product_label.setFixedSize(new_label_width, self.original_product_label_size[1])
-
-                    # 제품명 입력칸 크기 조정
-                    if hasattr(self, 'product_edit') and hasattr(self, 'original_product_edit_size'):
-                        new_edit_width = int(self.original_product_edit_size[0] * width_ratio)
-                        self.product_edit.setFixedSize(new_edit_width, self.original_product_edit_size[1])
-
-                # 버전/모델명 행 크기 조정
-                if hasattr(self, 'version_model_row') and hasattr(self, 'original_version_model_row_size'):
-                    new_row_width = int(self.original_version_model_row_size[0] * width_ratio)
-                    self.version_model_row.setFixedSize(new_row_width, self.original_version_model_row_size[1])
-
-                    # 버전 필드 크기 조정
-                    if hasattr(self, 'version_field_widget') and hasattr(self, 'original_version_field_size'):
-                        new_version_width = int(self.original_version_field_size[0] * width_ratio)
-                        self.version_field_widget.setFixedSize(new_version_width, self.original_version_field_size[1])
-
-                        if hasattr(self, 'version_label') and hasattr(self, 'original_version_label_size'):
-                            new_label_width = int(self.original_version_label_size[0] * width_ratio)
-                            self.version_label.setFixedSize(new_label_width, self.original_version_label_size[1])
-
-                        if hasattr(self, 'version_edit') and hasattr(self, 'original_version_edit_size'):
-                            new_edit_width = int(self.original_version_edit_size[0] * width_ratio)
-                            self.version_edit.setFixedSize(new_edit_width, self.original_version_edit_size[1])
-
-                    # 모델명 필드 크기 조정
-                    if hasattr(self, 'model_field_widget') and hasattr(self, 'original_model_field_size'):
-                        new_model_width = int(self.original_model_field_size[0] * width_ratio)
-                        self.model_field_widget.setFixedSize(new_model_width, self.original_model_field_size[1])
-
-                        if hasattr(self, 'model_label') and hasattr(self, 'original_model_label_size'):
-                            new_label_width = int(self.original_model_label_size[0] * width_ratio)
-                            self.model_label.setFixedSize(new_label_width, self.original_model_label_size[1])
-
-                        if hasattr(self, 'model_edit') and hasattr(self, 'original_model_edit_size'):
-                            new_edit_width = int(self.original_model_edit_size[0] * width_ratio)
-                            self.model_edit.setFixedSize(new_edit_width, self.original_model_edit_size[1])
-
-                # 시험유형/시험대상 행 크기 조정
-                if hasattr(self, 'category_target_row') and hasattr(self, 'original_category_target_row_size'):
-                    new_row_width = int(self.original_category_target_row_size[0] * width_ratio)
-                    self.category_target_row.setFixedSize(new_row_width, self.original_category_target_row_size[1])
-
-                    # 시험유형 필드 크기 조정
-                    if hasattr(self, 'test_category_widget') and hasattr(self, 'original_test_category_field_size'):
-                        new_field_width = int(self.original_test_category_field_size[0] * width_ratio)
-                        self.test_category_widget.setFixedSize(new_field_width, self.original_test_category_field_size[1])
-
-                        if hasattr(self, 'test_category_label') and hasattr(self, 'original_test_category_label_size'):
-                            new_label_width = int(self.original_test_category_label_size[0] * width_ratio)
-                            self.test_category_label.setFixedSize(new_label_width, self.original_test_category_label_size[1])
-
-                        if hasattr(self, 'test_category_edit') and hasattr(self, 'original_test_category_edit_size'):
-                            new_edit_width = int(self.original_test_category_edit_size[0] * width_ratio)
-                            self.test_category_edit.setFixedSize(new_edit_width, self.original_test_category_edit_size[1])
-
-                    # 시험대상 필드 크기 조정
-                    if hasattr(self, 'target_system_widget') and hasattr(self, 'original_target_system_field_size'):
-                        new_field_width = int(self.original_target_system_field_size[0] * width_ratio)
-                        self.target_system_widget.setFixedSize(new_field_width, self.original_target_system_field_size[1])
-
-                        if hasattr(self, 'target_system_label') and hasattr(self, 'original_target_system_label_size'):
-                            new_label_width = int(self.original_target_system_label_size[0] * width_ratio)
-                            self.target_system_label.setFixedSize(new_label_width, self.original_target_system_label_size[1])
-
-                        if hasattr(self, 'target_system_edit') and hasattr(self, 'original_target_system_edit_size'):
-                            new_edit_width = int(self.original_target_system_edit_size[0] * width_ratio)
-                            self.target_system_edit.setFixedSize(new_edit_width, self.original_target_system_edit_size[1])
-
-                # 시험분야/시험범위 행 크기 조정
-                if hasattr(self, 'group_range_row') and hasattr(self, 'original_group_range_row_size'):
-                    new_row_width = int(self.original_group_range_row_size[0] * width_ratio)
-                    self.group_range_row.setFixedSize(new_row_width, self.original_group_range_row_size[1])
-
-                    # 시험분야 필드 크기 조정
-                    if hasattr(self, 'test_group_widget') and hasattr(self, 'original_test_group_field_size'):
-                        new_field_width = int(self.original_test_group_field_size[0] * width_ratio)
-                        self.test_group_widget.setFixedSize(new_field_width, self.original_test_group_field_size[1])
-
-                        if hasattr(self, 'test_group_label') and hasattr(self, 'original_test_group_label_size'):
-                            new_label_width = int(self.original_test_group_label_size[0] * width_ratio)
-                            self.test_group_label.setFixedSize(new_label_width, self.original_test_group_label_size[1])
-
-                        if hasattr(self, 'test_group_edit') and hasattr(self, 'original_test_group_edit_size'):
-                            new_edit_width = int(self.original_test_group_edit_size[0] * width_ratio)
-                            self.test_group_edit.setFixedSize(new_edit_width, self.original_test_group_edit_size[1])
-
-                    # 시험범위 필드 크기 조정
-                    if hasattr(self, 'test_range_widget') and hasattr(self, 'original_test_range_field_size'):
-                        new_field_width = int(self.original_test_range_field_size[0] * width_ratio)
-                        self.test_range_widget.setFixedSize(new_field_width, self.original_test_range_field_size[1])
-
-                        if hasattr(self, 'test_range_label') and hasattr(self, 'original_test_range_label_size'):
-                            new_label_width = int(self.original_test_range_label_size[0] * width_ratio)
-                            self.test_range_label.setFixedSize(new_label_width, self.original_test_range_label_size[1])
-
-                        if hasattr(self, 'test_range_edit') and hasattr(self, 'original_test_range_edit_size'):
-                            new_edit_width = int(self.original_test_range_edit_size[0] * width_ratio)
-                            self.test_range_edit.setFixedSize(new_edit_width, self.original_test_range_edit_size[1])
-
-                # Divider 크기 조정 (가로만 늘어남)
-                if hasattr(self, 'divider') and hasattr(self, 'original_divider_size'):
-                    new_divider_width = int(self.original_divider_size[0] * width_ratio)
-                    self.divider.setFixedSize(new_divider_width, self.original_divider_size[1])
-
-                # 관리자 코드 필드 크기 조정 (가로만 늘어남)
-                if hasattr(self, 'admin_code_widget') and hasattr(self, 'original_admin_code_widget_size'):
-                    new_widget_width = int(self.original_admin_code_widget_size[0] * width_ratio)
-                    self.admin_code_widget.setFixedSize(new_widget_width, self.original_admin_code_widget_size[1])
-
-                    if hasattr(self, 'admin_code_label') and hasattr(self, 'original_admin_code_label_size'):
-                        new_label_width = int(self.original_admin_code_label_size[0] * width_ratio)
-                        self.admin_code_label.setFixedSize(new_label_width, self.original_admin_code_label_size[1])
-
-                    if hasattr(self, 'admin_code_input') and hasattr(self, 'original_admin_code_input_size'):
-                        new_input_width = int(self.original_admin_code_input_size[0] * width_ratio)
-                        self.admin_code_input.setFixedSize(new_input_width, self.original_admin_code_input_size[1])
-
+            # 절대 위치 요소들
             page_width = self.page1.width()
             page_height = self.page1.height()
 
-            # content_widget 크기 (ip_input_edit, load_test_info_btn의 부모)
             if hasattr(self, 'page1_content') and self.page1_content:
                 content_width = self.page1_content.width()
                 content_height = self.page1_content.height()
 
-                # 배경 이미지 크기 조정
                 if hasattr(self, 'page1_bg_label'):
                     self.page1_bg_label.setGeometry(0, 0, content_width, content_height)
-
-                # ip_input_edit: 오른쪽에서 211px, 위에서 24px (content_widget 기준)
                 if hasattr(self, 'ip_input_edit'):
-                    self.ip_input_edit.setGeometry(content_width - 211 - 200, 24, 200, 40)
-
-                # load_test_info_btn: 오른쪽에서 5px, 위에서 13px (content_widget 기준)
+                    self.ip_input_edit.setGeometry(content_width - 411, 24, 200, 40)
                 if hasattr(self, 'load_test_info_btn'):
-                    self.load_test_info_btn.setGeometry(content_width - 5 - 198, 13, 198, 62)
+                    self.load_test_info_btn.setGeometry(content_width - 203, 13, 198, 62)
 
-            # management_url_container: 오른쪽에서 10px, 아래에서 48px (page1 기준)
             if hasattr(self, 'management_url_container'):
-                self.management_url_container.setGeometry(page_width - 10 - 380, page_height - 48 - 60, 380, 60)
+                self.management_url_container.setGeometry(page_width - 390, page_height - 108, 380, 60)
 
-        # page2의 배경 이미지 크기 재조정
+        # ========== Page2 크기 조정 ==========
         if hasattr(self, 'page2_content') and self.page2_content:
             content_width = self.page2_content.width()
             content_height = self.page2_content.height()
 
-            # 배경 이미지 크기 조정
             if hasattr(self, 'page2_bg_label'):
                 self.page2_bg_label.setGeometry(0, 0, content_width, content_height)
 
-            # Page2 반응형 크기 조정
             if hasattr(self, 'page2') and self.page2:
-                page2_width = self.page2.width()
-                page2_height = self.page2.height()
+                # 비율 계산
+                width_ratio = max(1.0, self.page2.width() / 1680)
+                height_ratio = max(1.0, self.page2.height() / 1006)
 
-                # Page2 기준 원본 크기
-                original_page2_width = 1680
-                original_page2_height = 1006
-
-                # 비율 계산 (가로/세로 독립적)
-                width_ratio_p2 = page2_width / original_page2_width
-                height_ratio_p2 = page2_height / original_page2_height
-                width_ratio_p2 = max(1.0, width_ratio_p2)
-                height_ratio_p2 = max(1.0, height_ratio_p2)
-
-                # bg_root 크기 조정 (가로 + 세로)
+                # bg_root 및 타이틀 컨테이너
                 if hasattr(self, 'bg_root') and hasattr(self, 'original_bg_root_size'):
-                    new_bg_root_width = int(self.original_bg_root_size[0] * width_ratio_p2)
-                    new_bg_root_height = int(self.original_bg_root_size[1] * height_ratio_p2)
+                    new_bg_root_width = int(self.original_bg_root_size[0] * width_ratio)
+                    new_bg_root_height = int(self.original_bg_root_size[1] * height_ratio)
                     self.bg_root.setFixedSize(new_bg_root_width, new_bg_root_height)
 
-                    # 타이틀 컨테이너는 bg_root와 같은 너비 (높이는 고정)
                     if hasattr(self, 'page2_title_container') and hasattr(self, 'original_page2_title_container_size'):
                         self.page2_title_container.setFixedSize(new_bg_root_width, self.original_page2_title_container_size[1])
 
-                    # 타이틀 배경 영역 크기 조정 (비율 적용, 높이 고정)
                     if hasattr(self, 'page2_title_bg') and hasattr(self, 'original_page2_title_bg_size'):
-                        new_title_bg_width = int(self.original_page2_title_bg_size[0] * width_ratio_p2)
+                        new_title_bg_width = int(self.original_page2_title_bg_size[0] * width_ratio)
                         self.page2_title_bg.setFixedSize(new_title_bg_width, self.original_page2_title_bg_size[1])
 
-                        # panels_container도 타이틀 배경과 같은 너비로 조정 (높이는 비율 적용)
                         if hasattr(self, 'panels_container') and hasattr(self, 'original_panels_container_size'):
-                            new_panels_height = int(self.original_panels_container_size[1] * height_ratio_p2)
+                            new_panels_height = int(self.original_panels_container_size[1] * height_ratio)
                             self.panels_container.setFixedSize(new_title_bg_width, new_panels_height)
 
-                # 좌측 패널 크기 조정 (가로 + 세로)
-                if hasattr(self, 'left_panel') and hasattr(self, 'original_left_panel_size'):
-                    new_left_panel_width = int(self.original_left_panel_size[0] * width_ratio_p2)
-                    new_left_panel_height = int(self.original_left_panel_size[1] * height_ratio_p2)
-                    self.left_panel.setFixedSize(new_left_panel_width, new_left_panel_height)
+                # 좌측 패널
+                self._resize_widget('left_panel', 'original_left_panel_size', width_ratio, height_ratio)
+                self._resize_widget('field_scenario_title', 'original_field_scenario_title_size', width_ratio)
+                self._resize_widget('field_group', 'original_field_group_size', width_ratio, height_ratio)
 
+                # 시험 분야 테이블
+                if hasattr(self, 'test_field_table') and hasattr(self, 'original_test_field_table_size'):
+                    new_table_width = int(self.original_test_field_table_size[0] * width_ratio)
+                    new_table_height = int(self.original_test_field_table_size[1] * height_ratio)
+                    self.test_field_table.setFixedSize(new_table_width, new_table_height)
+                    self._resize_table_rows(self.test_field_table, 'original_test_field_row_height', height_ratio, new_table_width)
 
-                    # "시험 분야별 시나리오" 타이틀 라벨 크기 조정 (높이 고정)
-                    if hasattr(self, 'field_scenario_title') and hasattr(self, 'original_field_scenario_title_size'):
-                        new_title_width = int(self.original_field_scenario_title_size[0] * width_ratio_p2)
-                        self.field_scenario_title.setFixedSize(new_title_width, self.original_field_scenario_title_size[1])
+                # 시나리오 테이블
+                if hasattr(self, 'scenario_table') and hasattr(self, 'original_scenario_table_size'):
+                    new_table_width = int(self.original_scenario_table_size[0] * width_ratio)
+                    new_table_height = int(self.original_scenario_table_size[1] * height_ratio)
+                    self.scenario_table.setFixedSize(new_table_width, new_table_height)
+                    self._resize_table_rows(self.scenario_table, 'original_scenario_row_height', height_ratio, new_table_width)
 
-                    # 시험 분야별 시나리오 그룹 크기 조정 (가로 + 세로)
-                    if hasattr(self, 'field_group') and hasattr(self, 'original_field_group_size'):
-                        new_field_group_width = int(self.original_field_group_size[0] * width_ratio_p2)
-                        new_field_group_height = int(self.original_field_group_size[1] * height_ratio_p2)
-                        self.field_group.setFixedSize(new_field_group_width, new_field_group_height)
+                    if hasattr(self, 'scenario_column_background') and hasattr(self, 'original_scenario_column_background_geometry'):
+                        orig = self.original_scenario_column_background_geometry
+                        self.scenario_column_background.setGeometry(orig[0], orig[1], int(orig[2] * width_ratio), new_table_height)
 
-                        # 내부 테이블 크기 조정 (시험 분야 테이블 - 가로 + 세로)
-                        if hasattr(self, 'test_field_table') and hasattr(self, 'original_test_field_table_size'):
-                            new_table_width = int(self.original_test_field_table_size[0] * width_ratio_p2)
-                            new_table_height = int(self.original_test_field_table_size[1] * height_ratio_p2)
-                            self.test_field_table.setFixedSize(new_table_width, new_table_height)
-                            # Stretch 모드이므로 컬럼이 자동으로 테이블 너비를 채움
+                    if hasattr(self, 'scenario_placeholder_label') and hasattr(self, 'original_scenario_placeholder_geometry'):
+                        orig = self.original_scenario_placeholder_geometry
+                        self.scenario_placeholder_label.setGeometry(orig[0], orig[1], int(orig[2] * width_ratio), new_table_height - 31)
 
-                            # 시험 분야 테이블 행 높이 조정
-                            if hasattr(self, 'original_test_field_row_height'):
-                                new_row_height = int(self.original_test_field_row_height * height_ratio_p2)
-                                self.test_field_table.verticalHeader().setDefaultSectionSize(new_row_height)
-                                # 기존 행들의 높이 및 셀 위젯 크기 업데이트
-                                for row in range(self.test_field_table.rowCount()):
-                                    self.test_field_table.setRowHeight(row, new_row_height)
-                                    # 셀 위젯 크기 조정 (ClickableRowWidget) - 너비와 높이 모두
-                                    cell_widget = self.test_field_table.cellWidget(row, 0)
-                                    if cell_widget:
-                                        cell_widget.setFixedSize(new_table_width, new_row_height)
+                # 시험 API 그룹
+                self._resize_widget('api_title', 'original_api_title_size', width_ratio)
+                self._resize_widget('api_group', 'original_api_group_size', width_ratio, height_ratio)
 
-                        # 시나리오 테이블 크기 조정 (가로 + 세로)
-                        if hasattr(self, 'scenario_table') and hasattr(self, 'original_scenario_table_size'):
-                            new_table_width = int(self.original_scenario_table_size[0] * width_ratio_p2)
-                            new_table_height = int(self.original_scenario_table_size[1] * height_ratio_p2)
-                            self.scenario_table.setFixedSize(new_table_width, new_table_height)
-                            # Stretch 모드이므로 컬럼이 자동으로 테이블 너비를 채움
+                if hasattr(self, 'api_test_table') and hasattr(self, 'original_api_test_table_size'):
+                    new_api_table_width = int(self.original_api_test_table_size[0] * width_ratio)
+                    new_api_table_height = int(self.original_api_test_table_size[1] * height_ratio)
+                    self.api_test_table.setFixedSize(new_api_table_width, new_api_table_height)
 
-                            # 시나리오 테이블 행 높이 조정
-                            if hasattr(self, 'original_scenario_row_height'):
-                                new_row_height = int(self.original_scenario_row_height * height_ratio_p2)
-                                self.scenario_table.verticalHeader().setDefaultSectionSize(new_row_height)
-                                # 기존 행들의 높이 및 셀 위젯 크기 업데이트
-                                for row in range(self.scenario_table.rowCount()):
-                                    self.scenario_table.setRowHeight(row, new_row_height)
-                                    # 셀 위젯 크기 조정 (ClickableCheckboxRowWidget) - 너비와 높이 모두
-                                    cell_widget = self.scenario_table.cellWidget(row, 0)
-                                    if cell_widget:
-                                        cell_widget.setFixedSize(new_table_width, new_row_height)
+                    col_width = (new_api_table_width - 50) // 2
+                    self.api_test_table.horizontalHeader().resizeSection(0, col_width)
+                    self.api_test_table.horizontalHeader().resizeSection(1, col_width)
 
-                            # 시나리오 테이블 배경 크기 조정 (테이블과 동일한 크기)
-                            if hasattr(self, 'scenario_column_background') and hasattr(self, 'original_scenario_column_background_geometry'):
-                                orig = self.original_scenario_column_background_geometry
-                                new_width = int(orig[2] * width_ratio_p2)
-                                # 테이블과 동일한 높이 사용
-                                self.scenario_column_background.setGeometry(orig[0], orig[1], new_width, new_table_height)
+                    if hasattr(self, 'original_api_row_height'):
+                        new_row_height = int(self.original_api_row_height * height_ratio)
+                        self.api_test_table.verticalHeader().setDefaultSectionSize(new_row_height)
+                        for row in range(self.api_test_table.rowCount()):
+                            self.api_test_table.setRowHeight(row, new_row_height)
 
-                            # 시나리오 placeholder 라벨 크기 조정 (가로 + 세로)
-                            # 높이는 (테이블 높이 - 헤더 높이)로 계산해야 테이블과 일치함
-                            if hasattr(self, 'scenario_placeholder_label') and hasattr(self, 'original_scenario_placeholder_geometry'):
-                                orig = self.original_scenario_placeholder_geometry
-                                new_width = int(orig[2] * width_ratio_p2)
-                                new_placeholder_height = new_table_height - 31  # 헤더 높이 31px 제외
-                                self.scenario_placeholder_label.setGeometry(orig[0], orig[1], new_width, new_placeholder_height)
+                    if hasattr(self, 'api_header_overlay') and hasattr(self, 'original_api_header_overlay_geometry'):
+                        orig = self.original_api_header_overlay_geometry
+                        self.api_header_overlay.setGeometry(orig[0], orig[1], new_api_table_width, orig[3])
 
-                    # "시험 API" 타이틀 라벨 크기 조정 (높이 고정)
-                    if hasattr(self, 'api_title') and hasattr(self, 'original_api_title_size'):
-                        new_api_title_width = int(self.original_api_title_size[0] * width_ratio_p2)
-                        self.api_title.setFixedSize(new_api_title_width, self.original_api_title_size[1])
+                    if hasattr(self, 'api_header_func_label') and hasattr(self, 'original_api_header_func_label_size'):
+                        self.api_header_func_label.setFixedSize(col_width, self.original_api_header_func_label_size[1])
+                    if hasattr(self, 'api_header_api_label') and hasattr(self, 'original_api_header_api_label_size'):
+                        self.api_header_api_label.setFixedSize(col_width, self.original_api_header_api_label_size[1])
 
-                    # 시험 API 그룹 크기 조정 (가로 + 세로)
-                    if hasattr(self, 'api_group') and hasattr(self, 'original_api_group_size'):
-                        new_api_group_width = int(self.original_api_group_size[0] * width_ratio_p2)
-                        new_api_group_height = int(self.original_api_group_size[1] * height_ratio_p2)
-                        self.api_group.setFixedSize(new_api_group_width, new_api_group_height)
+                    if hasattr(self, 'api_placeholder_label') and hasattr(self, 'original_api_placeholder_geometry'):
+                        orig = self.original_api_placeholder_geometry
+                        self.api_placeholder_label.setGeometry(orig[0], orig[1], new_api_table_width - 50, int(orig[3] * height_ratio))
 
-                        # API 테이블 크기 조정 (가로 + 세로)
-                        if hasattr(self, 'api_test_table') and hasattr(self, 'original_api_test_table_size'):
-                            new_api_table_width = int(self.original_api_test_table_size[0] * width_ratio_p2)
-                            new_api_table_height = int(self.original_api_test_table_size[1] * height_ratio_p2)
-                            self.api_test_table.setFixedSize(new_api_table_width, new_api_table_height)
-                            # 컬럼 너비 조정 (두 컬럼 균등 분배, 행번호 50px 제외)
-                            col_width = (new_api_table_width - 50) // 2
-                            self.api_test_table.horizontalHeader().resizeSection(0, col_width)
-                            self.api_test_table.horizontalHeader().resizeSection(1, col_width)
+                # 우측 패널
+                self._resize_widget('right_panel', 'original_right_panel_size', width_ratio, height_ratio)
+                self._resize_widget('auth_title_widget', 'original_auth_title_size', width_ratio)
+                self._resize_widget('auth_section', 'original_auth_section_size', width_ratio, height_ratio)
+                self._resize_widget('auth_content_widget', 'original_auth_content_widget_size', width_ratio, height_ratio)
 
-                            # API 테이블 행 높이 조정
-                            if hasattr(self, 'original_api_row_height'):
-                                new_row_height = int(self.original_api_row_height * height_ratio_p2)
-                                self.api_test_table.verticalHeader().setDefaultSectionSize(new_row_height)
-                                # 기존 행들의 높이도 업데이트
-                                for row in range(self.api_test_table.rowCount()):
-                                    self.api_test_table.setRowHeight(row, new_row_height)
+                # 수직 구분선 (특수 처리)
+                if hasattr(self, 'auth_divider') and hasattr(self, 'original_auth_divider_size'):
+                    new_divider_height = int(self.original_auth_divider_size[1] * height_ratio)
+                    self.auth_divider.setFixedSize(1, new_divider_height)
+                    divider_pixmap = QPixmap(resource_path("assets/image/test_config/divider.png"))
+                    self.auth_divider.setPixmap(divider_pixmap.scaled(1, new_divider_height, Qt.IgnoreAspectRatio, Qt.SmoothTransformation))
 
-                            # API 헤더 오버레이 크기 조정 (높이 고정)
-                            if hasattr(self, 'api_header_overlay') and hasattr(self, 'original_api_header_overlay_geometry'):
-                                orig = self.original_api_header_overlay_geometry
-                                self.api_header_overlay.setGeometry(orig[0], orig[1], new_api_table_width, orig[3])
+                self._resize_widget('auth_type_widget', 'original_auth_type_widget_size', width_ratio, height_ratio)
+                self._resize_widget('digest_option', 'original_digest_option_size', width_ratio, height_ratio)
+                self._resize_widget('bearer_option', 'original_bearer_option_size', width_ratio, height_ratio)
+                self._resize_widget('common_input_widget', 'original_common_input_widget_size', width_ratio, height_ratio)
+                self._resize_widget('id_input', 'original_id_input_size', width_ratio)
+                self._resize_widget('pw_input', 'original_pw_input_size', width_ratio)
 
-                            # API 헤더 기능명 라벨 크기 조정 (높이 고정)
-                            if hasattr(self, 'api_header_func_label') and hasattr(self, 'original_api_header_func_label_size'):
-                                self.api_header_func_label.setFixedSize(col_width, self.original_api_header_func_label_size[1])
+                # 접속주소 탐색
+                self._resize_widget('connection_title_row', 'original_connection_title_row_size', width_ratio)
+                self._resize_widget('connection_section', 'original_connection_section_size', width_ratio, height_ratio)
 
-                            # API 헤더 API명 라벨 크기 조정 (높이 고정)
-                            if hasattr(self, 'api_header_api_label') and hasattr(self, 'original_api_header_api_label_size'):
-                                self.api_header_api_label.setFixedSize(col_width, self.original_api_header_api_label_size[1])
+                if hasattr(self, 'url_table') and hasattr(self, 'original_url_table_size'):
+                    new_url_table_width = int(self.original_url_table_size[0] * width_ratio)
+                    new_url_table_height = int(self.original_url_table_size[1] * height_ratio)
+                    self.url_table.setFixedSize(new_url_table_width, new_url_table_height)
 
-                            # API placeholder 라벨 크기 조정 (가로 + 세로)
-                            if hasattr(self, 'api_placeholder_label') and hasattr(self, 'original_api_placeholder_geometry'):
-                                orig = self.original_api_placeholder_geometry
-                                new_width = new_api_table_width - 50  # 행번호 너비 제외
-                                new_height = int(orig[3] * height_ratio_p2)
-                                self.api_placeholder_label.setGeometry(orig[0], orig[1], new_width, new_height)
+                    url_col_width = new_url_table_width - 50
+                    self.url_table.setColumnWidth(1, url_col_width)
 
-                # 우측 패널 크기 조정 (가로 + 세로)
-                if hasattr(self, 'right_panel') and hasattr(self, 'original_right_panel_size'):
-                    new_right_panel_width = int(self.original_right_panel_size[0] * width_ratio_p2)
-                    new_right_panel_height = int(self.original_right_panel_size[1] * height_ratio_p2)
-                    self.right_panel.setFixedSize(new_right_panel_width, new_right_panel_height)
+                    if hasattr(self, 'original_url_row_height'):
+                        new_row_height = int(self.original_url_row_height * height_ratio)
+                        self.url_table.verticalHeader().setDefaultSectionSize(new_row_height)
+                        for row in range(self.url_table.rowCount()):
+                            self.url_table.setRowHeight(row, new_row_height)
+                            url_widget = self.url_table.cellWidget(row, 1)
+                            if url_widget:
+                                url_widget.setFixedSize(url_col_width, new_row_height)
 
-                    # 사용자 인증 방식 타이틀 크기 조정 (높이 고정)
-                    if hasattr(self, 'auth_title_widget') and hasattr(self, 'original_auth_title_size'):
-                        new_auth_title_width = int(self.original_auth_title_size[0] * width_ratio_p2)
-                        self.auth_title_widget.setFixedSize(new_auth_title_width, self.original_auth_title_size[1])
-
-                    # 사용자 인증 방식 박스 크기 조정 (가로 + 세로)
-                    if hasattr(self, 'auth_section') and hasattr(self, 'original_auth_section_size'):
-                        new_auth_section_width = int(self.original_auth_section_size[0] * width_ratio_p2)
-                        new_auth_section_height = int(self.original_auth_section_size[1] * height_ratio_p2)
-                        self.auth_section.setFixedSize(new_auth_section_width, new_auth_section_height)
-
-                        # 사용자 인증 방식 내부 요소들 크기 조정 (가로 + 세로)
-                        if hasattr(self, 'auth_content_widget') and hasattr(self, 'original_auth_content_widget_size'):
-                            new_content_width = int(self.original_auth_content_widget_size[0] * width_ratio_p2)
-                            new_content_height = int(self.original_auth_content_widget_size[1] * height_ratio_p2)
-                            self.auth_content_widget.setFixedSize(new_content_width, new_content_height)
-
-                        # 수직 구분선 크기 조정 (세로만) + pixmap 재설정
-                        if hasattr(self, 'auth_divider') and hasattr(self, 'original_auth_divider_size'):
-                            new_divider_height = int(self.original_auth_divider_size[1] * height_ratio_p2)
-                            self.auth_divider.setFixedSize(1, new_divider_height)
-                            divider_pixmap = QPixmap(resource_path("assets/image/test_config/divider.png"))
-                            self.auth_divider.setPixmap(divider_pixmap.scaled(1, new_divider_height, Qt.IgnoreAspectRatio, Qt.SmoothTransformation))
-
-                        if hasattr(self, 'auth_type_widget') and hasattr(self, 'original_auth_type_widget_size'):
-                            new_auth_type_width = int(self.original_auth_type_widget_size[0] * width_ratio_p2)
-                            new_auth_type_height = int(self.original_auth_type_widget_size[1] * height_ratio_p2)
-                            self.auth_type_widget.setFixedSize(new_auth_type_width, new_auth_type_height)
-
-                            # Digest Auth 박스 크기 조정 (가로 + 세로)
-                            if hasattr(self, 'digest_option') and hasattr(self, 'original_digest_option_size'):
-                                new_digest_width = int(self.original_digest_option_size[0] * width_ratio_p2)
-                                new_digest_height = int(self.original_digest_option_size[1] * height_ratio_p2)
-                                self.digest_option.setFixedSize(new_digest_width, new_digest_height)
-
-                            # Bearer Token 박스 크기 조정 (가로 + 세로)
-                            if hasattr(self, 'bearer_option') and hasattr(self, 'original_bearer_option_size'):
-                                new_bearer_width = int(self.original_bearer_option_size[0] * width_ratio_p2)
-                                new_bearer_height = int(self.original_bearer_option_size[1] * height_ratio_p2)
-                                self.bearer_option.setFixedSize(new_bearer_width, new_bearer_height)
-
-                        if hasattr(self, 'common_input_widget') and hasattr(self, 'original_common_input_widget_size'):
-                            new_common_input_width = int(self.original_common_input_widget_size[0] * width_ratio_p2)
-                            new_common_input_height = int(self.original_common_input_widget_size[1] * height_ratio_p2)
-                            self.common_input_widget.setFixedSize(new_common_input_width, new_common_input_height)
-
-                            # ID/Password 입력 필드 크기 조정 (가로만, 높이 고정)
-                            if hasattr(self, 'id_input') and hasattr(self, 'original_id_input_size'):
-                                new_id_input_width = int(self.original_id_input_size[0] * width_ratio_p2)
-                                self.id_input.setFixedSize(new_id_input_width, self.original_id_input_size[1])
-
-                            if hasattr(self, 'pw_input') and hasattr(self, 'original_pw_input_size'):
-                                new_pw_input_width = int(self.original_pw_input_size[0] * width_ratio_p2)
-                                self.pw_input.setFixedSize(new_pw_input_width, self.original_pw_input_size[1])
-
-                    # 접속주소 탐색 타이틀 행 크기 조정 (높이 고정)
-                    if hasattr(self, 'connection_title_row') and hasattr(self, 'original_connection_title_row_size'):
-                        new_connection_title_width = int(self.original_connection_title_row_size[0] * width_ratio_p2)
-                        self.connection_title_row.setFixedSize(new_connection_title_width, self.original_connection_title_row_size[1])
-
-                    # URL 박스 섹션 크기 조정 (가로 + 세로)
-                    if hasattr(self, 'connection_section') and hasattr(self, 'original_connection_section_size'):
-                        new_connection_section_width = int(self.original_connection_section_size[0] * width_ratio_p2)
-                        new_connection_section_height = int(self.original_connection_section_size[1] * height_ratio_p2)
-                        self.connection_section.setFixedSize(new_connection_section_width, new_connection_section_height)
-
-                        # URL 테이블 크기 조정 (가로 + 세로)
-                        if hasattr(self, 'url_table') and hasattr(self, 'original_url_table_size'):
-                            new_url_table_width = int(self.original_url_table_size[0] * width_ratio_p2)
-                            new_url_table_height = int(self.original_url_table_size[1] * height_ratio_p2)
-                            self.url_table.setFixedSize(new_url_table_width, new_url_table_height)
-
-                            # URL 테이블 컬럼 너비 조정 (행번호 50px 고정, URL 컬럼 가변)
-                            url_col_width = new_url_table_width - 50
-                            self.url_table.setColumnWidth(1, url_col_width)
-
-                            # URL 테이블 행 높이 조정
-                            if hasattr(self, 'original_url_row_height'):
-                                new_row_height = int(self.original_url_row_height * height_ratio_p2)
-                                self.url_table.verticalHeader().setDefaultSectionSize(new_row_height)
-
-                            # URL 테이블 셀 위젯 크기 조정 (ClickableCheckboxRowWidget)
-                            for row in range(self.url_table.rowCount()):
-                                # 행 높이 조정
-                                if hasattr(self, 'original_url_row_height'):
-                                    self.url_table.setRowHeight(row, new_row_height)
-                                # 셀 위젯 크기 조정 (너비 + 높이)
-                                url_widget = self.url_table.cellWidget(row, 1)
-                                if url_widget:
-                                    url_widget.setFixedWidth(url_col_width)
-                                    if hasattr(self, 'original_url_row_height'):
-                                        url_widget.setFixedHeight(new_row_height)
-
-                    # 하단 버튼 컨테이너 크기 조정 (높이 고정)
-                    if hasattr(self, 'button_container') and hasattr(self, 'original_button_container_size'):
-                        new_button_container_width = int(self.original_button_container_size[0] * width_ratio_p2)
-                        self.button_container.setFixedSize(new_button_container_width, self.original_button_container_size[1])
-
-                        # 시험 시작 버튼 크기 조정 (높이 고정)
-                        if hasattr(self, 'start_btn') and hasattr(self, 'original_start_btn_size'):
-                            new_start_btn_width = int(self.original_start_btn_size[0] * width_ratio_p2)
-                            self.start_btn.setFixedSize(new_start_btn_width, self.original_start_btn_size[1])
-
-                        # 종료 버튼 크기 조정 (높이 고정)
-                        if hasattr(self, 'exit_btn') and hasattr(self, 'original_exit_btn_size'):
-                            new_exit_btn_width = int(self.original_exit_btn_size[0] * width_ratio_p2)
-                            self.exit_btn.setFixedSize(new_exit_btn_width, self.original_exit_btn_size[1])
+                # 하단 버튼
+                self._resize_widget('button_container', 'original_button_container_size', width_ratio)
+                self._resize_widget('start_btn', 'original_start_btn_size', width_ratio)
+                self._resize_widget('exit_btn', 'original_exit_btn_size', width_ratio)
 
     def create_page1(self):
         """첫 번째 페이지: 시험 정보 확인"""

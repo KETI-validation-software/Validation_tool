@@ -61,7 +61,7 @@ company_name = "엣지디엑스"
 product_name = "AIBridge"
 version = "v1.0"
 test_category = "MAIN_TEST"
-test_target = "제어 기능-통합플랫폼"
+test_target = "제어기능-물리보안"
 test_range = "ALL_FIELDS"
 auth_type = "Digest Auth"
 auth_info = "kisa,kisa_k1!2@"
@@ -69,7 +69,7 @@ admin_code = "1234"
 url = "https://192.168.0.3:2000"
 contact_person = "빙영진"
 model_name = "v1.0"
-request_id = "cmisflgy307tr5vy7clzgjaln"
+request_id = "cmisfmr3907tv5vy71y0276gp"
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황
 flag_opt = False
