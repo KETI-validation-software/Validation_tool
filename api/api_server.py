@@ -17,7 +17,7 @@ from config.CONSTANTS import none_request_message
 from collections import defaultdict
 import random
 import re
-
+import requests
 
 class Server(BaseHTTPRequestHandler):
     message = None
@@ -40,6 +40,7 @@ class Server(BaseHTTPRequestHandler):
     url_tmp = None
     current_spec_id = None
     num_retries = None
+    trans_protocol = None
     trace = defaultdict(lambda: deque(maxlen=1000))  # api_name -> deque(events)
     request_counter = {}  # ✅ API별 시스템 요청 카운터 (클래스 변수)
     valid_counter = 0
@@ -330,6 +331,10 @@ class Server(BaseHTTPRequestHandler):
     # POST echoes the message adding a JSON field
     def do_POST(self):
         spec_id, api_name = self.parse_path()
+        if Server.trans_protocol[self.valid_counter] == "WebHook":
+            self.webhook_flag = True
+        else :
+            self.webhook_flag = False
         if not api_name or self.current_spec_id!=spec_id:#"cmgyv3rzl014nvsveidu5jpzp" != spec_id:
             print(f"[ERROR] 잘못된 path 형식: {self.path}")
             self.send_response(400)
@@ -668,137 +673,19 @@ class Server(BaseHTTPRequestHandler):
             self.end_headers()
             return
 
-        self.webhook_flag = False
         message = ""
         url_tmp = ""  # ✅ 스코프 확장을 위해 먼저 선언
         webhook_url = ""  # ✅ 웹훅 URL 저장용
 
+
         # do_POST 함수 출신 - 지금은 realtime이라는 단어가 들어간 api에 한해서 웹훅 하는걸로 하드코딩 되어있음
-        if "Realtime".lower() in self.message[message_cnt].lower():
-            print(f"[DEBUG][SERVER] Realtime API 감지: {self.message[message_cnt]}")
-            trans_protocol = dict_data.get("transProtocol", {})
-            print(f"[DEBUG][SERVER] transProtocol: {trans_protocol}")
-
-            # transProtocol이 데이터에 없으면 constants에서 로드 시도
-            if not trans_protocol:
-                try:
-                    for group in CONSTANTS.SPEC_CONFIG:
-                        for spec_id, config in group.items():
-                            if spec_id in ["group_name", "group_id"]:
-                                continue
-                        
-                        trans_protocols = config.get('trans_protocol', [])
-                        if message_cnt < len(trans_protocols):
-                            protocol_type = trans_protocols[message_cnt]
-
-                            if protocol_type == 'WebHook':
-                                # ✅ CONSTANTS에서 웹훅 URL 가져오기 (10.252.219.95:8090)
-                                webhook_url = CONSTANTS.WEBHOOK_URL
-                                trans_protocol = {
-                                    "transProtocolType": "WebHook",
-                                    "transProtocolDesc": webhook_url
-                                }
-                                print(f"[DEBUG][SERVER] 기본 WebHook 프로토콜 설정: {webhook_url}")
-                                break
-                        if trans_protocol:
-                            break
-                except Exception as e:
-                    print(f"[DEBUG][SERVER] constants에서 프로토콜 로드 실패: {e}")
-
-            # transProtocol이 데이터에 들어가있으면 -> 지금 있어서 앞에 https 붙여주어야함 + 시스템이 보낼때 제대로 다시 맵핑하도록 수정해야함
-            if trans_protocol:
-                trans_protocol_type = trans_protocol.get("transProtocolType", {})
-                print(f"[DEBUG][SERVER] transProtocolType: {trans_protocol_type}")
-
-                # 동적으로 프로토콜 업데이트 해야함 (기존에는 롱풀링으로 하드코딩 - 10/14)
-                self.transProtocolInput = str(trans_protocol_type)
-                print(f"[DEBUG][SERVER] transProtocolInput 업데이트: {self.transProtocolInput}")
-
-                if "WebHook".lower() in str(trans_protocol_type).lower():
-                    print(f"[DEBUG][SERVER] WebHook 모드 감지, auth_pass={auth_pass}")
-                    try:
-                        url_tmp = trans_protocol.get("transProtocolDesc", {})
-                        print(f"[DEBUG][SERVER] Webhook URL: {url_tmp}")
-
-                        # ✅ 인증 확인 추가
-                        if not auth_pass:
-                            print(f"[SERVER ERROR] 인증 실패!")
-                            message = {
-                                "code": "401",
-                                "message": "인증 오류"
-                            }
-                            self._set_headers()
-                            self.wfile.write(json.dumps(message).encode('utf-8'))
-                            return
-
-                        # url 유효성 검사 -> 없거나 잘못되면 400
-                        if not url_tmp or str(url_tmp).strip() in ["None", "", "desc"]:
-                            print(f"[SERVER ERROR] Webhook URL이 유효하지 않음: {url_tmp}")
-                            message = {
-                                "code": "400",
-                                "message": "잘못된 Webhook URL"
-                            }
-                            self._set_headers()
-                            self.wfile.write(json.dumps(message).encode('utf-8'))
-                            return
-                        
-                        # 2단계: 잘못된 주소인 경우
-                        url_tmp = str(url_tmp).strip()
-
-                        # 4단계: 올바른 인덱스 사용
-                        message = self.outMessage[message_cnt]
-
-                        print("!!! update message", message)
-                        self.webhook_flag = True
-                        print(f"[DEBUG][SERVER] 웹훅 플래그 설정 완료, message={message}")
-
-                        # 웹훅인데 롱풀링으로 하려고 할 때 문제..??
-                        if "longpolling" in str(self.transProtocolInput).lower():
-                            print(f"[SERVER ERROR] transProtocolInput이 longpolling: {self.transProtocolInput}")
-                            message = {
-                                "code": "400",
-                                "message": "잘못된 요청: 프로토콜 불일치"
-                            }
-
-                    except Exception as e:
-                        print(f"[SERVER ERROR] WebHook 처리 중 예외 발생: {e}")
-                        import traceback
-                        traceback.print_exc()
-                        message = {
-                            "code": "400",
-                            "message": f"잘못된 요청: {str(e)}"
-                        }
-                else:
-                    # LongPolloing 인 경우
-                    if auth_pass:
-                        message = data
-                        # LongPolloing 이면서 웹훅으로 하려고 할 때 문제
-                        if "webhook".lower() in str(self.transProtocolInput).lower():
-                            message = {
-                                "code": "400",
-                                "message": "잘못된 요청"
-                            }
-                    else:
-                        # LongPolloing 이면서 인증 실패
-                        message = {
-                            "code": "401",
-                            "message": "인증 오류"
-                        }
-            else:
-                # webhook, LongPolloing 둘다 아닌 경우
-                message = {
-                    "code": "400",
-                    "message": "잘못된 요청"
-                }
-        else:  # Realtime 메시지아니면서 Webhook 요청 없는 메시지
-            if auth_pass:
-                message = data
-            else:
-                message = {
-                    "code": "401",
-                    "message": "인증 오류"
-                }
-
+        if auth_pass:
+            message = data
+        else:
+            message = {
+                "code": "401",
+                "message": "인증 오류"
+            }
         # send the message back
         try:
             # constraints 디버그 로그
@@ -930,79 +817,106 @@ class Server(BaseHTTPRequestHandler):
 
         if self.webhook_flag:
             print(f"[DEBUG][SERVER] 웹훅 전송 준비 중...")
+            trans_protocol = dict_data.get("transProtocol", {})
+            print(f"[DEBUG][SERVER] transProtocol: {trans_protocol}")
+            if trans_protocol:
+                try:
+                    trans_protocol_type = trans_protocol.get("transProtocolType", {})
+                    print(f"[DEBUG][SERVER] transProtocolType: {trans_protocol_type}")
+
+                    # 동적으로 프로토콜 업데이트 해야함 (기존에는 롱풀링으로 하드코딩 - 10/14)
+                    self.transProtocolInput = str(trans_protocol_type)
+                    print(f"[DEBUG][SERVER] transProtocolInput 업데이트: {self.transProtocolInput}")
+
+                    if "WebHook".lower() in str(trans_protocol_type).lower():
+                        url_tmp = trans_protocol.get("transProtocolDesc", {})
+                        print(f"[DEBUG][SERVER] Webhook URL: {url_tmp}")
+
+                        # url 유효성 검사 -> 없거나 잘못되면 400
+                        if not url_tmp or str(url_tmp).strip() in ["None", "", "desc"]:
+                            print(f"[SERVER ERROR] Webhook URL이 유효하지 않음: {url_tmp}")
+                            message = {
+                                "code": "400",
+                                "message": "잘못된 Webhook URL"
+                            }
+                            self._set_headers()
+                            self.wfile.write(json.dumps(message).encode('utf-8'))
+                            return
+
+                        # 2단계: 잘못된 주소인 경우
+                        url_tmp = str(url_tmp).strip()
+
+                    else:
+                            # webhook, LongPolloing 둘다 아닌 경우
+                            message = {
+                                "code": "400",
+                                "message": "잘못된 요청"
+                            }
+                except Exception as e:
+                    print(f"[SERVER ERROR] WebHook 처리 중 예외 발생: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    message = {
+                        "code": "400",
+                        "message": f"잘못된 요청: {str(e)}"
+                    }
+
+
             print(
                 f"[DEBUG][SERVER] self.webhookData: {self.webhookData is not None}, len: {len(self.webhookData) if self.webhookData else 0}")
             print(f"[DEBUG][SERVER] message_cnt: {message_cnt}")
             print(f"[DEBUG][SERVER] url_tmp: {url_tmp}")
 
-            # ✅ API 이름으로 webhookData 매칭
-            if self.webhookData and len(self.webhookData) > 0:
-                # ✅ API 이름으로 직접 웹훅 데이터 가져오기
-                if self.current_valid_api not in self.webhookData:
-                    print(f"[DEBUG][SERVER] '{api_name}'에 대한 웹훅 데이터 없음, 웹훅 전송 건너뛰기")
-                    return
+            webhook_payload = self.webhookData[self.valid_counter]
+            print(f"[DEBUG][SERVER] 웹훅 데이터 사용: webhookData['{self.valid_counter}']")
+            print(
+                f"[DEBUG][SERVER] 원본 웹훅 페이로드: {json.dumps(webhook_payload, ensure_ascii=False) if webhook_payload else 'None'}")
+            print(f"[DEBUG][SERVER] 원본 웹훅 페이로드 타입: {type(webhook_payload)}")
+            print(f"[DEBUG][SERVER] 원본 웹훅 페이로드 내용 상세: {webhook_payload}")
 
-                webhook_payload = self.webhookData[self.current_valid_api]
-                print(f"[DEBUG][SERVER] 웹훅 데이터 사용: webhookData['{self.current_valid_api}']")
-                print(
-                    f"[DEBUG][SERVER] 원본 웹훅 페이로드: {json.dumps(webhook_payload, ensure_ascii=False) if webhook_payload else 'None'}")
-                print(f"[DEBUG][SERVER] 원본 웹훅 페이로드 타입: {type(webhook_payload)}")
-                print(f"[DEBUG][SERVER] 원본 웹훅 페이로드 내용 상세: {webhook_payload}")
-
-                # None이면 웹훅 전송하지 않음
-                if webhook_payload is None:
-                    print(f"[DEBUG][SERVER] 웹훅 데이터가 None, 웹훅 전송 건너뛰기")
-                    return
-
-                # ✅ 웹훅에도 constraints 적용
-                try:
-                    # webhookCon 리스트가 있는 경우
-                    if self.webhookCon and isinstance(self.webhookCon, dict):
-                        print(f"[DEBUG][WEBHOOK_CONSTRAINTS] self.webhookCon 타입: {type(self.webhookCon)}")
-
-                        # ✅ API 이름으로 직접 constraint 가져오기
-                        if self.current_valid_api in self.webhookCon:
-                            webhook_con = self.webhookCon[self.current_valid_api]
-
-                            if webhook_con and isinstance(webhook_con, dict) and len(webhook_con) > 0:
-                                print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 웹훅 constraints 적용 시작")
-                                print(f"[DEBUG][WEBHOOK_CONSTRAINTS] webhook_con keys: {list(webhook_con.keys())}")
-                                print(f"[DEBUG][WEBHOOK_CONSTRAINTS] latest_events keys: {list(Server.latest_event.keys())}")
-                                
-                                # ✅ generator의 latest_events를 명시적으로 업데이트 (참조 동기화)
-                                self.generator.latest_events = Server.latest_event
-                                print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 🔄 generator.latest_events 동기화 완료")
-                                
-                                # ✅ 템플릿 그대로 사용 (n 파라미터 제거)
-                                # 웹훅 페이로드에 constraints 적용
-                                webhook_payload = self.generator._applied_constraints(
-                                    request_data=self.request_data,
-                                    template_data=webhook_payload,
-                                    constraints=webhook_con,
-                                    api_name=self.current_valid_api,
-                                    door_memory=Server.door_memory,  
-                                    is_webhook=True  
-                                )
-                                print(f"[DEBUG][WEBHOOK_CONSTRAINTS] constraints 적용 완료")
-                                print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 업데이트된 webhook_payload: {json.dumps(webhook_payload, ensure_ascii=False)[:300]}")
-                            else:
-                                print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 웹훅 constraints가 비어있음 - 원본 페이로드 사용")
-                        else:
-                            print(
-                                f"[DEBUG][WEBHOOK_CONSTRAINTS] webhookCon 인덱스 범위 초과: {len(self.webhookCon)}")
-                    else:
-                        print(f"[DEBUG][WEBHOOK_CONSTRAINTS] webhookCon이 없거나 리스트가 아님")
-
-                except Exception as e:
-                    print(f"[ERROR][WEBHOOK_CONSTRAINTS] 웹훅 constraints 적용 중 오류: {e}")
-                    import traceback
-                    traceback.print_exc()
-                    # 에러 발생 시 원본 페이로드 사용
-                    pass
-
-            else:
-                print(f"[DEBUG][SERVER] webhookData가 없거나 비어있음, 웹훅 전송 건너뛰기")
+            # None이면 웹훅 전송하지 않음
+            if webhook_payload is None:
+                print(f"[DEBUG][SERVER] 웹훅 데이터가 None, 웹훅 전송 건너뛰기")
                 return
+
+            # ✅ 웹훅에도 constraints 적용
+            try:
+                # webhookCon 리스트가 있는 경우
+                if self.webhookCon and isinstance(self.webhookCon, dict):
+                    print(f"[DEBUG][WEBHOOK_CONSTRAINTS] self.webhookCon 타입: {type(self.webhookCon)}")
+                    webhook_con = self.webhookCon[self.valid_counter]
+
+                    if webhook_con and isinstance(webhook_con, dict) and len(webhook_con) > 0:
+                        print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 웹훅 constraints 적용 시작")
+                        print(f"[DEBUG][WEBHOOK_CONSTRAINTS] webhook_con keys: {list(webhook_con.keys())}")
+                        print(
+                            f"[DEBUG][WEBHOOK_CONSTRAINTS] latest_events keys: {list(Server.latest_event.keys())}")
+
+                        # ✅ generator의 latest_events를 명시적으로 업데이트 (참조 동기화)
+                        self.generator.latest_events = Server.latest_event
+                        print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 🔄 generator.latest_events 동기화 완료")
+
+                        # ✅ 템플릿 그대로 사용 (n 파라미터 제거)
+                        # 웹훅 페이로드에 constraints 적용
+                        webhook_payload = self.generator._applied_constraints(
+                            request_data=self.request_data,
+                            template_data=webhook_payload,
+                            constraints=webhook_con,
+                            api_name=self.current_valid_api,
+                            door_memory=Server.door_memory,
+                            is_webhook=True
+                        )
+                        print(f"[DEBUG][WEBHOOK_CONSTRAINTS] constraints 적용 완료")
+                        print(
+                            f"[DEBUG][WEBHOOK_CONSTRAINTS] 업데이트된 webhook_payload: {json.dumps(webhook_payload, ensure_ascii=False)[:300]}")
+                    else:
+                        print(f"[DEBUG][WEBHOOK_CONSTRAINTS] 웹훅 constraints가 비어있음 - 원본 페이로드 사용")
+            except Exception as e:
+                print(f"[ERROR][WEBHOOK_CONSTRAINTS] 웹훅 constraints 적용 중 오류: {e}")
+                import traceback
+                traceback.print_exc()
+                # 에러 발생 시 원본 페이로드 사용
+                pass
 
             print(f"[DEBUG][SERVER] 최종 webhook_payload: {json.dumps(webhook_payload, ensure_ascii=False)[:200]}")
 
@@ -1012,43 +926,15 @@ class Server(BaseHTTPRequestHandler):
             # ✅ 웹훅 응답 초기화 (클래스 변수)
             Server.webhook_response = None
 
+
             json_data_tmp = json.dumps(webhook_payload).encode('utf-8')
-            webhook_thread = threading.Thread(target=self.webhook_req, args=(url_tmp, json_data_tmp, 5))
-            Server.webhook_thread = webhook_thread  # ✅ 클래스 변수에 저장
-            print(f"[DEBUG][SERVER] webhook_thread 저장됨 (클래스 변수): thread={id(webhook_thread)}")
-            webhook_thread.start()
-            print(f"[DEBUG][SERVER] 웹훅 스레드 시작됨")
+            result = requests.post(url_tmp, data=json_data_tmp, verify=False)
+            print(f"[DEBUG][SERVER] 웹훅 응답 수신: {result.text}")
+            self.result = result
+            Server.webhook_response = json.loads(result.text)  # ✅ 클래스 변수에 저장
+            print(f"[DEBUG][SERVER] webhook_response 저장됨 (클래스 변수): {Server.webhook_response}")
 
-        # print("통플검증sw이 보낸 메시지", a)
-
-    def webhook_req(self, url, json_data_tmp, max_retries=3):
-        import requests
-        for attempt in range(max_retries):
-
-            try:
-                result = requests.post(url, data=json_data_tmp, verify=False)
-                print(f"[DEBUG][SERVER] 웹훅 응답 수신: {result.text}")
-                self.result = result
-                Server.webhook_response = json.loads(result.text)  # ✅ 클래스 변수에 저장
-                print(f"[DEBUG][SERVER] webhook_response 저장됨 (클래스 변수): {Server.webhook_response}")
-                
-                # ✅ 웹훅 응답 기록 (trace)
-                spec_id, api_name = self.parse_path()
-                self._push_event(api_name, "WEBHOOK_IN", Server.webhook_response)
-                
-                # JSON 파일 저장 제거 - spec/video/videoData_response.py 사용
-                # with open(resource_path("spec/" + self.system + "/" + "webhook_" + self.path[1:] + ".json"),
-                #           "w", encoding="UTF-8") as out_file2:
-                #     json.dump(json.loads(str(self.result.text)), out_file2, ensure_ascii=False)
-                break
-                #  self.res.emit(str(self.result.text))
-            # except requests.ConnectionError:
-            #    print("..")
-            #    time.sleep(1)
-            except Exception as e:
-                print(e)
-                # print(traceback.format_exc())
-                #  self.res.emit(str("err from WebhookRequest"))
+            self._push_event(self.current_valid_api, "WEBHOOK_IN", Server.webhook_response)
 
     def api_res(self, api_name = None):
         i, data, out_con = None, None, None
@@ -1146,7 +1032,6 @@ class Server(BaseHTTPRequestHandler):
                     namespace = {'__file__': external_constants_path}
                     exec(constants_code, namespace)
                     SPEC_CONFIG = namespace.get('SPEC_CONFIG', SPEC_CONFIG)
-            
             # ✅ 3. test_name으로 spec_id 찾기
             for group in SPEC_CONFIG:
                 for key, value in group.items():
