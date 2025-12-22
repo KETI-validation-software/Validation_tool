@@ -484,11 +484,10 @@ class Server(BaseHTTPRequestHandler):
             f"[DEBUG][COUNTER] num_retries: {self.num_retries[Server.valid_counter] if self.num_retries and len(self.num_retries) > Server.valid_counter else 'N/A'}")
 
         if api_name == "Authentication":
-            if self.message[Server.valid_counter] not in Server.request_counter:
-                Server.valid_counter = 0
-                self.current_valid_api = self.message[Server.valid_counter]
-                Server.request_counter[self.current_valid_api] = 1
-                print(f"[DEBUG][COUNTER] Authentication - 카운터 초기화: {self.current_valid_api}")
+            Server.valid_counter = 0
+            self.current_valid_api = self.message[Server.valid_counter]
+            Server.request_counter[self.current_valid_api] = 1
+            print(f"[DEBUG][COUNTER] Authentication - 카운터 초기화: {self.current_valid_api}")
         elif Server.request_counter[self.current_valid_api] == self.num_retries[Server.valid_counter]:
             old_counter = Server.valid_counter
             Server.valid_counter += 1
@@ -504,7 +503,6 @@ class Server(BaseHTTPRequestHandler):
             Server.request_counter[self.current_valid_api] += 1
             print(f"[DEBUG][COUNTER] request_counter 증가: {Server.request_counter[self.current_valid_api]}")
         print(f"[API_SERVER] 요청 수신: {api_name} (카운트: {Server.request_counter[self.current_valid_api]})")
-        print("!!!", Server.request_counter[self.current_valid_api], self.current_valid_api, self.num_retries[self.valid_counter], self.num_retries, self.valid_counter)
 
         message_cnt, data, out_con = self.api_res(api_name)
 
