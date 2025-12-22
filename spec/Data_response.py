@@ -85,7 +85,9 @@ cmii7shen005i8z1tagevx4qh_RealtimeSensorData_webhook_in_data = {
 # RealtimeSensorEventInfos
 cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_out_data = {
     "code": "200",
-    "message": "성공"
+    "message": "성공",
+    "sensorDeviceID": "",
+    "sensorDeviceStatus": ""
 }
 
 # RealtimeSensorEventInfos WebHook IN Data

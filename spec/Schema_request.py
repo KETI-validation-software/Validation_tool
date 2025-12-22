@@ -18,7 +18,7 @@ cmii7shen005i8z1tagevx4qh_RealtimeSensorData_in_schema = {
     "sensorDeviceList": [{
     "sensorDeviceID": str,
 }],
-    "duration": int,
+    OptionalKey("duration"): int,
     "transProtocol": {
     "transProtocolType": str,
     OptionalKey("transProtocolDesc"): str,

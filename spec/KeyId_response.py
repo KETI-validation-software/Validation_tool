@@ -197,15 +197,11 @@ cmii7shen005i8z1tagevx4qh_SensorDeviceProfiles_response_key_ids = {
     "sensorDeviceList.sensorDeviceLoc.desc": "cmiwkpl9201dt844gpk2spohg",
 }
 
-cmii7shen005i8z1tagevx4qh_RealtimeSensorData_response_key_ids = {
-    "code": "cmiwkumay01qo844gast85yvr",
-    "message": "cmiwkuog901qt844gswj7kaas",
-    "sensorDeviceList": "cmiwkvlgi01r6844g0inyggzl",
-    "sensorDeviceList.sensorDeviceID": "cmiwkzuqx02xk844gd9lr6k8p",
-    "sensorDeviceList.measureTime": "cmiwkzuqx02xm844ghyx3o5j7",
-    "sensorDeviceList.sensorDeviceType": "cmiwkzuqy02xo844glk3msr3k",
-    "sensorDeviceList.sensorDeviceUnit": "cmiwkzuqy02xq844gh7csg9af",
-    "sensorDeviceList.sensorDeviceValue": "cmiwkzuqz02xs844gqt2i349j",
+cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_response_key_ids = {
+    "code": "cmisg4vxz089s5vy7qhna151g",
+    "message": "cmisg4zcn08a05vy7gzrw0rbp",
+    "sensorDeviceID": "cmisg51v408a85vy7mrhteunz",
+    "sensorDeviceStatus": "cmj6hdjek01qsxei0ydzyxlg3",
 }
 
 cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_response_key_ids = {
