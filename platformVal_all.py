@@ -12,7 +12,6 @@ import sys
 import ssl
 from datetime import datetime
 import json
-from pathlib import Path
 from core.functions import build_result_json
 import requests
 import config.CONSTANTS as CONSTANTS
@@ -23,7 +22,7 @@ import spec.Schema_response as schema_response_module
 from http.server import HTTPServer
 import warnings
 from core.validation_registry import get_validation_rules
-from core.utils import remove_api_number_suffix, to_detail_text, redact, clean_trace_directory, format_schema
+from core.utils import remove_api_number_suffix, to_detail_text, redact, clean_trace_directory, format_schema, load_from_trace_file
 
 warnings.filterwarnings('ignore')
 result_dir = os.path.join(os.getcwd(), "results")
@@ -1977,81 +1976,6 @@ class MyApp(QWidget):
     # 시험 결과 표시 요청 시그널
     showResultRequested = pyqtSignal(object)
 
-    def _load_from_trace_file(self, api_name, direction="RESPONSE"):
-        """trace 파일에서 특정 API의 RESPONSE 데이터를 읽어옴"""
-        try:
-            # API 이름에서 슬래시 제거
-            api_name_clean = api_name.lstrip("/")
-            
-            # 번호 prefix 제거 (예: "01_Authentication" -> "Authentication")
-            # 패턴: 숫자로 시작하고 '_'가 있는 경우
-            import re
-            api_name_no_prefix = re.sub(r'^\d+_', '', api_name_clean)
-            
-            # print(f"[DEBUG] trace 파일 찾기: 원본={api_name}, 정제={api_name_clean}, prefix제거={api_name_no_prefix}")
-            
-            # ✅ 실제 trace 폴더에서 매칭되는 파일 찾기
-            trace_folder = Path("results/trace")
-            trace_file = None
-            
-            if trace_folder.exists():
-                # 가능한 파일명 패턴들
-                possible_patterns = [
-                    f"trace_{api_name_clean}.ndjson",  # trace_CameraProfiles.ndjson
-                    f"trace_{api_name_no_prefix}.ndjson",  # 동일하면 중복이지만 안전장치
-                ]
-                
-                # 실제 파일 목록에서 검색
-                for ndjson_file in trace_folder.glob("trace_*.ndjson"):
-                    file_name = ndjson_file.name
-                    # trace_03_CameraProfiles.ndjson → 03_CameraProfiles
-                    api_part = file_name.replace("trace_", "").replace(".ndjson", "")
-                    
-                    # prefix 제거하고 비교 (03_CameraProfiles → CameraProfiles)
-                    api_part_no_prefix = re.sub(r'^\d+_', '', api_part)
-                    
-                    # 매칭 확인
-                    if api_part == api_name_clean or api_part_no_prefix == api_name_no_prefix:
-                        trace_file = ndjson_file
-                        print(f"[DEBUG] ✅ 매칭 성공: {file_name} (검색어: {api_name_clean})")
-                        break
-            
-            if trace_file is None or not trace_file.exists():
-                print(f"[DEBUG] trace 파일 없음 (검색어: {api_name_clean})")
-                return None
-
-            latest_data = None
-
-            with open(trace_file, 'r', encoding='utf-8') as f:
-                for line in f:
-                    line = line.strip()
-                    if not line:
-                        continue
-
-                    try:
-                        entry = json.loads(line)
-                        
-                        # direction만 확인 (api는 이미 파일명으로 필터링됨)
-                        if entry.get('dir') == direction:
-                            latest_data = entry.get('data', {})
-                            # 계속 읽어서 가장 마지막 데이터를 가져옴
-
-                    except json.JSONDecodeError:
-                        continue
-
-            if latest_data:
-                print(f"[DEBUG] trace 파일에서 {api_name} {direction} 로드 완료: {len(str(latest_data))} bytes")
-                return latest_data
-            else:
-                print(f"[DEBUG] trace 파일에 {api_name} {direction} 없음")
-                return None
-
-        except Exception as e:
-            print(f"[ERROR] trace 파일 로드 실패: {e}")
-            import traceback
-            traceback.print_exc()
-            return None
-
     def __init__(self, embedded=False, mode=None, spec_id=None):
         # CONSTANTS 사용
         super().__init__()
@@ -2631,7 +2555,7 @@ class MyApp(QWidget):
 
                 QApplication.processEvents()
 
-                current_data = self._load_from_trace_file(api_name, "REQUEST") or {}
+                current_data = load_from_trace_file(api_name, "REQUEST") or {}
 
                 if not current_data:
                     print(f"[WARNING] ⚠️ trace 파일에서 요청 데이터를 불러오지 못했습니다!")
@@ -2641,7 +2565,7 @@ class MyApp(QWidget):
                     print(f"[SUCCESS] ✅ trace 파일에서 요청 데이터 로드 완료: {len(str(current_data))} bytes")
 
                 # 1-1. response 데이터 로드
-                response_data = self._load_from_trace_file(api_name, "RESPONSE") or {}
+                response_data = load_from_trace_file(api_name, "RESPONSE") or {}
 
                 if not response_data:
                     print(f"[WARNING] ⚠️ trace 파일에서 응답 데이터를 불러오지 못했습니다!")
@@ -2660,7 +2584,7 @@ class MyApp(QWidget):
                         ref_endpoint = validation_rule.get("referenceEndpoint", "")
                         if ref_endpoint:
                             ref_api_name = ref_endpoint.lstrip("/")
-                            ref_data = self._load_from_trace_file(ref_api_name, direction)
+                            ref_data = load_from_trace_file(ref_api_name, direction)
                             if ref_data and isinstance(ref_data, dict):
                                 self.reference_context[ref_endpoint] = ref_data
                                 print(f"[TRACE] {ref_endpoint} {direction}를 trace 파일에서 로드 (from validation rule)")
@@ -2668,7 +2592,7 @@ class MyApp(QWidget):
                         ref_endpoint_max = validation_rule.get("referenceEndpointMax", "")
                         if ref_endpoint_max:
                             ref_api_name_max = ref_endpoint_max.lstrip("/")
-                            ref_data_max = self._load_from_trace_file(ref_api_name_max, direction)
+                            ref_data_max = load_from_trace_file(ref_api_name_max, direction)
                             if ref_data_max and isinstance(ref_data_max, dict):
                                 self.reference_context[ref_endpoint_max] = ref_data_max
                                 print(f"[TRACE] {ref_endpoint_max} {direction}를 trace 파일에서 로드 (from validation rule)")
@@ -2676,7 +2600,7 @@ class MyApp(QWidget):
                         ref_endpoint_min = validation_rule.get("referenceEndpointMin", "")
                         if ref_endpoint_min:
                             ref_api_name_min = ref_endpoint_min.lstrip("/")
-                            ref_data_min = self._load_from_trace_file(ref_api_name_min, direction)
+                            ref_data_min = load_from_trace_file(ref_api_name_min, direction)
                             if ref_data_min and isinstance(ref_data_min, dict):
                                 self.reference_context[ref_endpoint_min] = ref_data_min
                                 print(f"[TRACE] {ref_endpoint_min} {direction}를 trace 파일에서 로드 (from validation rule)")
@@ -2716,13 +2640,6 @@ class MyApp(QWidget):
                     else:
                         accumulated['data_parts'].append(f"\n{tmp_res_auth}")
 
-                    # 실시간 모니터링 창에 요청 데이터 표시 (API 이름 중복 없이 데이터만)
-                    # if retry_attempt == 0:
-                    #     self.append_monitor_log(
-                    #         step_name="",
-                    #         request_json=tmp_res_auth
-                    #     )
-
                     accumulated['raw_data_list'].append(current_data)
 
                     if "DoorControl" in api_name:
@@ -2739,7 +2656,7 @@ class MyApp(QWidget):
                         # 데이터가 없으면 Trace 파일에서 비상 로드
                         if "doorList" not in ref_data or not ref_data.get("doorList"):
                             try:
-                                webhook_data = self._load_from_trace_file("RealtimeDoorStatus", "WEBHOOK_OUT")
+                                webhook_data = load_from_trace_file("RealtimeDoorStatus", "WEBHOOK_OUT")
                                 if webhook_data and "doorList" in webhook_data:
                                     ref_data = webhook_data
                                     print(f"[PATCH] reference_context에 RealtimeDoorStatus 데이터가 없어 WEBHOOK에서 로드함")
@@ -2748,7 +2665,7 @@ class MyApp(QWidget):
                         
                         if "doorList" not in ref_data or not ref_data.get("doorList"):
                             try:
-                                response_data = self._load_from_trace_file("RealtimeDoorStatus", "REQUEST")
+                                response_data = load_from_trace_file("RealtimeDoorStatus", "REQUEST")
                                 if response_data and "doorList" in response_data:
                                     ref_data = response_data
                                     print(f"[PATCH] reference_context에 RealtimeDoorStatus 데이터가 없어 REQUEST에서 로드함")
