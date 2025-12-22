@@ -5467,13 +5467,6 @@ class MyApp(QWidget):
 
         return total_group
 
-    def resizeEvent(self, event):
-        """창 크기 변경 시 반응형 UI 조정"""
-        try:
-            super().resizeEvent(event)
-        except Exception as e:
-            print(f"resizeEvent 오류: {e}")
-
     def run_single_spec_test(self):
         """단일 spec_id에 대한 시험 실행"""
         # ✅ trace 초기화는 sbtn_push()의 신규 시작 모드에서만 수행

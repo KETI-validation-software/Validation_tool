@@ -93,6 +93,11 @@ cmiqr1acx00i5ie8fi022t1hp_inSchema = [
 
 # cmiqr1acx00i5ie8fi022t1hp WebHook 스키마 리스트
 cmiqr1acx00i5ie8fi022t1hp_webhook_OutSchema = [
+    None,
+    None,
+    None,
+    None,
+    None,
     cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_out_schema,
 ]
 
@@ -141,3 +146,4 @@ cmiqqzrjz00i3ie8figf79cur_inSchema = [
     cmiqqzrjz00i3ie8figf79cur_PtzContinuousMove_in_schema,
     cmiqqzrjz00i3ie8figf79cur_PtzStop_in_schema,
 ]
+

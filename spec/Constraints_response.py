@@ -702,3 +702,4 @@ cmiqqzrjz00i3ie8figf79cur_outConstraints = [
     cmiqqzrjz00i3ie8figf79cur_PtzContinuousMove_out_constraints,
     cmiqqzrjz00i3ie8figf79cur_PtzStop_out_constraints,
 ]
+

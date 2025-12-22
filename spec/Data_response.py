@@ -384,3 +384,4 @@ cmiqqzrjz00i3ie8figf79cur_messages = [
     "PtzContinuousMove",
     "PtzStop",
 ]
+
