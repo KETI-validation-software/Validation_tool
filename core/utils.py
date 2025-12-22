@@ -2,9 +2,11 @@ import re
 import os
 import json
 from pathlib import Path
-from datetime import datetime
 import traceback
 import sys
+import importlib
+import importlib.util
+import types
 
 # ==========================================
 # 가벼운 공용 기능 함수들 (독립 모듈)
@@ -184,10 +186,9 @@ def load_from_trace_file(api_name, direction="RESPONSE"):
         traceback.print_exc() 
         return None
 
+# constants에서 설정값 읽어오는 함수
 def load_external_constants(constants_module):
-    """
-    외부 constants 모듈에서 설정값들을 로드하여 딕셔너리로 반환
-    """
+
     spec_config = getattr(constants_module, "SPEC_CONFIG", [])
 
     if getattr(sys, 'frozen', False):
@@ -225,3 +226,83 @@ def load_external_constants(constants_module):
                 print(f"[ERROR] 외부 CONSTANTS.py 로드 실패: {e}")
                 
     return spec_config
+
+# spec폴더에서 모듈 로드하는 함수
+def setup_external_spec_modules():
+    if getattr(sys, 'frozen', False):
+        exe_dir = os.path.dirname(sys.executable)
+        external_spec_parent = exe_dir
+    
+    else:
+        current_file_path = os.path.abspath(__file__)
+        current_dir = os.path.dirname(current_file_path)
+
+        exe_dir = os.path.dirname(current_dir)
+        external_spec_parent = exe_dir
+    
+    external_spec_dir = os.path.join(external_spec_parent, 'spec')
+    if os.path.exists(external_spec_dir):
+        if external_spec_parent in sys.path:
+            sys.path.remove(external_spec_parent)
+        sys.path.insert(0, external_spec_parent)
+
+        modules_to_remove = [
+            'spec.Schema_request',
+            'spec.Schema_response',
+            'spec.Constraints_response'
+        ]
+        for mod_name in modules_to_remove:
+            if mod_name in sys.modules:
+                del sys.modules[mod_name]
+        
+        if 'spec' not in sys.modules:
+            sys.modules['spec'] = types.ModuleType('spec')
+        
+        try:
+            schema_file = os.path.join(exe_dir, 'spec', 'Schema_request.py')
+            data_file = os.path.join(exe_dir, 'spec', 'Data_response.py')
+            constraints_file = os.path.join(exe_dir, 'spec', 'Constraints_response.py')
+
+            # Schema_request 모듈 로드
+            spec = importlib.util.spec_from_file_location('spec.Schema_request', schema_file)
+            schema_module = importlib.util.module_from_spec(spec)
+            sys.modules['spec.Schema_request'] = schema_module
+            spec.loader.exec_module(schema_module)
+
+            # Data_response 모듈 로드
+            spec = importlib.util.spec_from_file_location('spec.Data_response', data_file)
+            data_module = importlib.util.module_from_spec(spec)
+            sys.modules['spec.Data_response'] = data_module
+            spec.loader.exec_module(data_module)
+
+            # Constraints_response 모듈 로드
+            spec = importlib.util.spec_from_file_location('spec.Constraints_response', constraints_file)
+            constraints_module = importlib.util.module_from_spec(spec)
+            sys.modules['spec.Constraints_response'] = constraints_module
+            spec.loader.exec_module(constraints_module)
+
+            return schema_module, data_module, constraints_module
+        
+        except Exception as e:
+            print(f"[ERROR] 외부 모듈 로드 실패: {e}")
+
+    try:
+        if 'spec.Schema_request' in sys.modules:
+            import spec.Schema_request
+            importlib.reload(spec.Schema_request)
+        if 'spec.Data_response' in sys.modules:
+            import spec.Data_response
+            importlib.reload(spec.Data_response)
+        if 'spec.Constraints_response' in sys.modules:
+            import spec.Constraints_response
+            importlib.reload(spec.Constraints_response)
+        
+        import spec.Schema_request as schema
+        import spec.Data_response as data
+        import spec.Constraints_response as constraints
+        return schema, data, constraints
+    
+    except Exception as e:
+        print(f"[ERROR] 내부 모듈 로드 실패: {e}")
+        return None, None, None
+        

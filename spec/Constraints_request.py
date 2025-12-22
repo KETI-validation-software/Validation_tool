@@ -172,32 +172,54 @@ cmiqr1jha00i6ie8fb1scb3go_DoorControl_in_constraints = {
 # RealtimeDoorStatus2
 cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_in_constraints = {
   "doorList": {
-    "id": "cmixuykwh0hmcp002klwr4ehj",
+    "id": "cmize9v8a00a096qh8bxm7fe2",
     "valueType": "preset",
     "required": True
   },
   "doorList.doorID": {
-    "id": "cmixuykwk0hmep002xddae990",
+    "id": "cmize9v8b00a296qh1vooije0",
+    "referenceFieldId": "cmixuu5os0hc9p002st12cpzi",
+    "valueType": "request-based",
+    "required": True,
+    "referenceEndpoint": "/DoorControl",
+    "referenceField": "doorID"
+  },
+  "duration": {
+    "id": "cmize7lki002a96qhe5181nqj",
     "valueType": "preset",
     "required": True
   },
   "transProtocol": {
-    "id": "cmjfhm2ja0cc5cfb3x8u0p0ma",
+    "id": "cmize811g003m96qhzuj5k87j",
     "valueType": "preset",
     "required": True
   },
   "transProtocol.transProtocolType": {
-    "id": "cmjfhsoh90chwcfb3e0v85qiz",
+    "id": "cmize8m4g007l96qhwaouhm9t",
     "valueType": "preset",
     "required": True
   },
   "transProtocol.transProtocolDesc": {
-    "id": "cmjfhszsp0ciscfb34zwpfr09",
+    "id": "cmize8y8y008q96qhgmcgwvmc",
     "valueType": "preset",
     "required": True
   },
   "startTime": {
-    "id": "cmjfhmu3m0cfrcfb3txo2wic2",
+    "id": "cmize9f5s009v96qhrbr6kzd5",
+    "valueType": "preset",
+    "required": True
+  }
+}
+
+# RealtimeDoorStatus2 WebHook OUT Constraints
+cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_webhook_out_constraints = {
+  "code": {
+    "id": "cmixuyvrh0hmqp0025mr6ni0i",
+    "valueType": "preset",
+    "required": True
+  },
+  "message": {
+    "id": "cmixuyy530hmzp002tlmh000j",
     "valueType": "preset",
     "required": True
   }
@@ -220,7 +242,7 @@ cmiqr1jha00i6ie8fb1scb3go_webhook_outConstraints = [
     None,
     cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_webhook_out_constraints,
     None,
-    None,
+    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_webhook_out_constraints,
 ]
 
 # Authentication

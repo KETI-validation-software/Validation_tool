@@ -50,10 +50,19 @@ cmiqr1acx00i5ie8fi022t1hp_DoorProfiles_in_schema = {}
 cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_in_schema = {
     "doorList": [{
     "doorID": str,
-    "doorName": str,
-    "doorRelaySensor": str,
-    "doorSensor": str,
 }],
+    "duration": int,
+    "transProtocol": {
+    "transProtocolType": str,
+    "transProtocolDesc": str,
+},
+    "startTime": int,
+}
+
+# RealtimeDoorStatus WebHook OUT Schema
+cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_webhook_out_schema = {
+    "code": str,
+    "message": str,
 }
 
 # DoorControl
@@ -96,7 +105,7 @@ cmiqr1acx00i5ie8fi022t1hp_webhook_OutSchema = [
     None,
     None,
     None,
-    None,
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_webhook_out_schema,
     None,
     cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_out_schema,
 ]

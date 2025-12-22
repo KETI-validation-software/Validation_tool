@@ -379,14 +379,56 @@ cmiqr1acx00i5ie8fi022t1hp_DoorProfiles_out_constraints = {
 # RealtimeDoorStatus
 cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_out_constraints = {
   "code": {
-    "id": "cmizg5khh00iq7eoexenwo9i9",
+    "id": "cmizg2tx300fg7eoezo3qr162",
     "valueType": "preset",
     "required": True
   },
   "message": {
-    "id": "cmizg5lyh00iw7eoe7wbhcxaj",
+    "id": "cmizg2xab00fm7eoe1bhmlgrw",
     "valueType": "preset",
     "required": True
+  }
+}
+
+# RealtimeDoorStatus WebHook IN Constraints
+cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_webhook_in_constraints = {
+  "doorList": {
+    "id": "cmiwqkuoh0aj7844gfnoaur3g",
+    "valueType": "preset",
+    "required": True
+  },
+  "doorList.doorID": {
+    "id": "cmiwqkuoj0aj9844g5oec97p9",
+    "referenceFieldId": "cmiwqkuoj0aj9844g5oec97p9",
+    "valueType": "request-based",
+    "required": True,
+    "referenceEndpoint": "/RealtimeDoorStatus",
+    "referenceField": "doorID"
+  },
+  "doorList.doorName": {
+    "id": "cmizg3epb00gy7eoeiefmp1lr",
+    "referenceFieldId": "cmizh2j7y028m7eoe561v1og0",
+    "valueType": "response-based",
+    "required": True,
+    "referenceEndpoint": "/DoorProfiles",
+    "referenceField": "doorName"
+  },
+  "doorList.doorRelaySensor": {
+    "id": "cmizg3ghq00h67eoeuthieru9",
+    "valueType": "preset",
+    "required": True
+  },
+  "doorList.doorSensor": {
+    "id": "cmj13a9eu01vx12s9wja5mxt7",
+    "valueType": "random",
+    "required": True,
+    "referenceField": "(참조 필드 미선택)",
+    "referenceEndpoint": "/RealtimeDoorStatus",
+    "validValueField": "acControl",
+    "validValues": [
+      "Lock",
+      "Unlock"
+    ]
   }
 }
 
@@ -469,7 +511,7 @@ cmiqr1acx00i5ie8fi022t1hp_webhook_inConstraints = [
     None,
     None,
     None,
-    None,
+    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_webhook_in_constraints,
     None,
     cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_in_constraints,
 ]

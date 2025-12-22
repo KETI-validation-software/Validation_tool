@@ -50,12 +50,15 @@ cmiqr1jha00i6ie8fb1scb3go_DoorControl_request_key_ids = {
 }
 
 cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_request_key_ids = {
-    "doorList": "cmixuwob20hdhp002hcun4fpz",
-    "doorList.doorID": "cmixuykwk0hmep002xddae990",
-    "transProtocol": "cmjfhm2ja0cc5cfb3x8u0p0ma",
-    "transProtocol.transProtocolType": "cmjfhsoh90chwcfb3e0v85qiz",
-    "transProtocol.transProtocolDesc": "cmjfhszsp0ciscfb34zwpfr09",
-    "startTime": "cmjfhmu3m0cfrcfb3txo2wic2",
+    "doorList": "cmize6nzh000f96qhvk7bjdr8",
+    "doorList.doorID": "cmize9v8b00a296qh1vooije0",
+    "duration": "cmize7lki002a96qhe5181nqj",
+    "transProtocol": "cmize811g003m96qhzuj5k87j",
+    "transProtocol.transProtocolType": "cmize8g5l006w96qhvnt0i28e",
+    "transProtocol.transProtocolDesc": "cmize8y8y008q96qhgmcgwvmc",
+    "startTime": "cmize9f5s009v96qhrbr6kzd5",
+    "code": "cmixuyvrh0hmqp0025mr6ni0i",
+    "message": "cmixuyy530hmzp002tlmh000j",
 }
 
 # cmiqr1jha00i6ie8fb1scb3go Request Key-ID Mapping 리스트
@@ -213,8 +216,13 @@ cmiqr1jha00i6ie8fb1scb3go_DoorControl_response_key_ids = {
 }
 
 cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_response_key_ids = {
-    "code": "cmixuyvrh0hmqp0025mr6ni0i",
-    "message": "cmixuyy530hmzp002tlmh000j",
+    "code": "cmizea7th00ao96qhtccvs2gv",
+    "message": "cmizea94s00at96qh5tv1j1x9",
+    "doorList": "cmixuwob20hdhp002hcun4fpz",
+    "doorList.doorID": "cmixuykwk0hmep002xddae990",
+    "doorList.doorName": "cmjgs2dj30ez2cfb3659utj1s",
+    "doorList.doorRelaySensor": "cmjgs2g8p0ezgcfb34mo5cfu4",
+    "doorList.doorSensor": "cmjgs2iun0ezycfb3ilp8j2k7",
 }
 
 # cmiqr1jha00i6ie8fb1scb3go Response Key-ID Mapping 리스트
