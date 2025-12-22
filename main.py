@@ -394,6 +394,37 @@ class MainWindow(QMainWindow):
             raise
             # ===== 예외 처리 로깅 추가 끝 =====
 
+    def resizeEvent(self, event):
+        """창 크기 변경 시 자식 위젯들에 전파"""
+        super().resizeEvent(event)
+
+        # 현재 보이는 위젯 가져오기
+        current_widget = self.stack.currentWidget()
+
+        # 절대 경로로 로그 파일 생성 (PyInstaller 호환)
+        try:
+            import os
+            import sys
+            if getattr(sys, 'frozen', False):
+                # PyInstaller exe 실행
+                base_dir = os.path.dirname(sys.executable)
+            else:
+                # 일반 Python 실행
+                base_dir = os.path.dirname(os.path.abspath(__file__))
+            log_path = os.path.join(base_dir, "resize_debug.log")
+            with open(log_path, "a", encoding="utf-8") as f:
+                widget_name = type(current_widget).__name__ if current_widget else "None"
+                f.write(f"[MAIN] size={self.width()}x{self.height()}, widget={widget_name}\n")
+        except Exception as e:
+            pass  # 로깅 실패 시 무시
+
+        # 현재 보이는 위젯의 resizeEvent 강제 호출
+        if current_widget is not None:
+            # QResizeEvent를 생성하여 전달
+            from PyQt5.QtGui import QResizeEvent
+            resize_event = QResizeEvent(current_widget.size(), current_widget.size())
+            current_widget.resizeEvent(resize_event)
+
     def closeEvent(self, event):
         print(f"[MAIN_CLOSE] MainWindow closeEvent 호출됨")
 

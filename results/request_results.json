@@ -1,5 +1,5 @@
 {
-  "requestId": "cmisflgy307tr5vy7clzgjaln",
+  "requestId": "cmii86ssr00a48z1tqmco6ke8",
   "evaluationTarget": {
     "companyName": "엣지디엑스",
     "contactPerson": "빙영진",
@@ -9,17 +9,17 @@
   },
   "testGroups": [
     {
-      "id": "cmisfix8407te5vy7fleq8pkf",
-      "name": "제어 기능-통합플랫폼",
+      "id": "cmii82nib009f8z1tvo6fz8j2",
+      "name": "기본 기능 시험-통합시스템",
       "testRange": "ALL_FIELDS, ALL_FIELDS, ALL_FIELDS",
       "testSpecIds": [
-        "cmiqr201z00i8ie8fitdg5t1b",
-        "cmiqr1acx00i5ie8fi022t1hp",
-        "cmiqqzrjz00i3ie8figf79cur"
+        "cmii7shen005i8z1tagevx4qh",
+        "cmii7pysb004k8z1tts0npxfm",
+        "cmii7lxbn002s8z1t1i9uudf0"
       ]
     }
   ],
-  "status": "완료",
+  "status": "진행중",
   "authMethod": "Digest Auth",
   "testScore": {
     "score": 65.0,

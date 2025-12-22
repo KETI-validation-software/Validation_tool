@@ -3465,9 +3465,9 @@ class MyApp(QWidget):
     def create_spec_selection_panel(self, parent_layout):
         """시험 선택 패널 - 424px 너비"""
         # 타이틀: 424*24, 폰트 20px Medium
-        title = QLabel("시험 선택")
-        title.setFixedSize(424, 24)
-        title.setStyleSheet("""
+        self.spec_panel_title = QLabel("시험 선택")
+        self.spec_panel_title.setFixedSize(424, 24)
+        self.spec_panel_title.setStyleSheet("""
             font-size: 20px;
             font-style: normal;
             font-family: "Noto Sans KR";
@@ -3475,7 +3475,10 @@ class MyApp(QWidget):
             color: #000000;
             letter-spacing: -0.3px;
         """)
-        parent_layout.addWidget(title)
+        parent_layout.addWidget(self.spec_panel_title)
+
+        # ✅ 반응형: 원본 크기 저장
+        self.original_spec_panel_title_size = (424, 24)
 
         # 타이틀 아래 8px gap
         parent_layout.addSpacing(8)
@@ -3545,6 +3548,9 @@ class MyApp(QWidget):
         group_box = QWidget()
         group_box.setFixedSize(424, 204)
         group_box.setStyleSheet("background: transparent;")
+
+        # ✅ 반응형: 원본 크기 저장
+        self.original_group_table_widget_size = (424, 204)
 
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
@@ -3658,6 +3664,10 @@ class MyApp(QWidget):
         group_box = QWidget()
         group_box.setFixedSize(424, 526)
         group_box.setStyleSheet("background: transparent;")
+
+        # ✅ 반응형: 원본 크기 저장
+        self.original_field_group_size = (424, 526)
+
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
@@ -4217,11 +4227,15 @@ class MyApp(QWidget):
         self.content_bg_label.lower()  # 맨 뒤로 보내기
 
         # 배경을 칠할 전용 컨테이너
-        bg_root = QWidget(self.content_widget)
-        bg_root.setObjectName("bg_root")
-        bg_root.setFixedSize(1584, 898)  # left_col(472) + right_col(1112) = 1584
-        bg_root.setAttribute(Qt.WA_StyledBackground, True)
-        bg_root.setStyleSheet("QWidget#bg_root { background: transparent; }")
+        self.bg_root = QWidget(self.content_widget)
+        self.bg_root.setObjectName("bg_root")
+        self.bg_root.setFixedSize(1584, 898)  # left_col(472) + right_col(1112) = 1584
+        self.bg_root.setAttribute(Qt.WA_StyledBackground, True)
+        self.bg_root.setStyleSheet("QWidget#bg_root { background: transparent; }")
+
+        # ✅ 반응형: 원본 크기 저장
+        self.original_window_size = (1680, 1006)
+        self.original_bg_root_size = (1584, 898)
         bg_root_layout = QVBoxLayout()
         bg_root_layout.setContentsMargins(0, 0, 0, 0)
         bg_root_layout.setSpacing(0)
@@ -4232,31 +4246,41 @@ class MyApp(QWidget):
         columns_layout.setSpacing(0)
 
         # 왼쪽 컬럼 - 472*898, padding: 좌우 24px, 상 36px, 하 80px
-        left_col = QWidget()
-        left_col.setFixedSize(472, 898)
-        left_col.setStyleSheet("background: transparent;")
-        left_layout = QVBoxLayout()
-        left_layout.setContentsMargins(24, 36, 24, 80)
-        left_layout.setSpacing(0)
+        self.left_col = QWidget()
+        self.left_col.setFixedSize(472, 898)
+        self.left_col.setStyleSheet("background: transparent;")
+        self.left_layout = QVBoxLayout()
+        self.left_layout.setContentsMargins(24, 36, 24, 80)
+        self.left_layout.setSpacing(0)
+
+        # ✅ 반응형: 왼쪽 패널 원본 크기 저장
+        self.original_left_col_size = (472, 898)
+
         # 시험 분야 선택 영역
-        self.create_spec_selection_panel(left_layout)
+        self.create_spec_selection_panel(self.left_layout)
 
         # 오른쪽 컬럼
-        right_col = QWidget()
-        right_col.setFixedSize(1112, 898)
-        right_col.setStyleSheet("background: transparent;")
-        right_layout = QVBoxLayout()
-        right_layout.setContentsMargins(24, 30, 24, 0)
-        right_layout.setSpacing(0)
+        self.right_col = QWidget()
+        self.right_col.setFixedSize(1112, 898)
+        self.right_col.setStyleSheet("background: transparent;")
+        self.right_layout = QVBoxLayout()
+        self.right_layout.setContentsMargins(24, 30, 24, 0)
+        self.right_layout.setSpacing(0)
+        self.right_layout.setAlignment(Qt.AlignLeft | Qt.AlignTop)  # 왼쪽 상단 정렬
+
+        # ✅ 반응형: 오른쪽 패널 원본 크기 저장
+        self.original_right_col_size = (1112, 898)
 
         # 시험 API 라벨
         # ✅ 시험 URL 라벨 + 텍스트 박스 (가로 배치)
-        url_row = QWidget()
-        url_row.setFixedSize(1064, 36)
-        url_row.setStyleSheet("background: transparent;")
+        self.url_row = QWidget()
+        self.url_row.setFixedSize(1064, 36)
+        self.original_url_row_size = (1064, 36)
+        self.url_row.setStyleSheet("background: transparent;")
         url_row_layout = QHBoxLayout()
         url_row_layout.setContentsMargins(0, 0, 0, 0)
         url_row_layout.setSpacing(8)  # 라벨과 텍스트 박스 사이 8px gap
+        url_row_layout.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)  # 왼쪽 정렬
 
         # 시험 URL 라벨 (96 × 24, 20px Medium)
         result_label = QLabel('시험 URL')
@@ -4273,6 +4297,7 @@ class MyApp(QWidget):
         # ✅ URL 텍스트 박스 (960 × 36, 내부 좌우 24px padding, 18px Medium)
         self.url_text_box = QLineEdit()
         self.url_text_box.setFixedSize(960, 36)
+        self.original_url_text_box_size = (960, 36)
         self.url_text_box.setReadOnly(True)
         self.url_text_box.setPlaceholderText("접속 주소를 입력하세요.")
         self.url_text_box.setStyleSheet("""
@@ -4298,74 +4323,81 @@ class MyApp(QWidget):
         """)
         url_row_layout.addWidget(self.url_text_box)
 
-        url_row.setLayout(url_row_layout)
-        right_layout.addWidget(url_row)
+        self.url_row.setLayout(url_row_layout)
+        self.right_layout.addWidget(self.url_row)
 
         # 20px gap
-        right_layout.addSpacing(20)
+        self.right_layout.addSpacing(20)
 
         # ========== 시험 API 영역 (1064 × 251) ==========
-        api_section = QWidget()
-        api_section.setFixedSize(1064, 251)
-        api_section.setStyleSheet("background: transparent;")
+        self.api_section = QWidget()
+        self.api_section.setFixedSize(1064, 251)
+        self.api_section.setStyleSheet("background: transparent;")
+        self.original_api_section_size = (1064, 251)
 
-        api_section_layout = QVBoxLayout(api_section)
+        api_section_layout = QVBoxLayout(self.api_section)
         api_section_layout.setContentsMargins(0, 0, 0, 0)
         api_section_layout.setSpacing(8)
 
         # 시험 API 라벨 (1064 × 24, 20px Medium)
-        api_label = QLabel('시험 API')
-        api_label.setFixedSize(1064, 24)
-        api_label.setStyleSheet("""
+        self.api_label = QLabel('시험 API')
+        self.api_label.setFixedSize(1064, 24)
+        self.original_api_label_size = (1064, 24)
+        self.api_label.setStyleSheet("""
             font-size: 20px;
             font-family: "Noto Sans KR";
             font-weight: 500;
             color: #000000;
         """)
-        api_section_layout.addWidget(api_label)
+        api_section_layout.addWidget(self.api_label)
 
         # 시험 API 테이블 (1064 × 219)
         self.init_centerLayout()
-        contentWidget = QWidget()
-        contentWidget.setFixedSize(1064, 219)
-        contentWidget.setStyleSheet("background: transparent;")
-        contentWidget.setLayout(self.centerLayout)
-        api_section_layout.addWidget(contentWidget)
+        self.api_content_widget = QWidget()
+        self.api_content_widget.setFixedSize(1064, 219)
+        self.original_api_content_widget_size = (1064, 219)
+        self.api_content_widget.setStyleSheet("background: transparent;")
+        self.api_content_widget.setLayout(self.centerLayout)
+        api_section_layout.addWidget(self.api_content_widget)
 
-        right_layout.addWidget(api_section)
+        self.right_layout.addWidget(self.api_section)
 
         # 20px gap
-        right_layout.addSpacing(20)
+        self.right_layout.addSpacing(20)
 
         # ========== 수신 메시지 실시간 모니터링 영역 (1064 × 157) ==========
-        monitor_section = QWidget()
-        monitor_section.setFixedSize(1064, 157)
-        monitor_section.setStyleSheet("background: transparent;")
+        self.monitor_section = QWidget()
+        self.monitor_section.setFixedSize(1064, 157)
+        self.monitor_section.setStyleSheet("background: transparent;")
+        self.original_monitor_section_size = (1064, 157)
 
-        monitor_section_layout = QVBoxLayout(monitor_section)
+        monitor_section_layout = QVBoxLayout(self.monitor_section)
         monitor_section_layout.setContentsMargins(0, 0, 0, 0)
         monitor_section_layout.setSpacing(0)
 
-        # 수신 메시지 실시간 모니터링 라벨 (1064 × 24, 22px Medium)
-        monitor_label = QLabel("수신 메시지 실시간 모니터링")
-        monitor_label.setFixedSize(1064, 24)
-        monitor_label.setStyleSheet("""
-            font-size: 22px;
+        # 수신 메시지 실시간 모니터링 라벨 (1064 × 24, 20px Medium)
+        self.monitor_label = QLabel("수신 메시지 실시간 모니터링")
+        self.monitor_label.setFixedSize(1064, 24)
+        self.original_monitor_label_size = (1064, 24)
+        self.monitor_label.setStyleSheet("""
+            font-size: 20px;
             font-family: "Noto Sans KR";
             font-weight: 500;
             color: #000000;
         """)
-        monitor_section_layout.addWidget(monitor_label)
+        monitor_section_layout.addWidget(self.monitor_label)
 
         # 8px gap
         monitor_section_layout.addSpacing(8)
 
         # ✅ QTextBrowser를 담을 컨테이너 생성 (1064 × 125)
-        text_browser_container = QWidget()
-        text_browser_container.setFixedSize(1064, 125)
+        self.text_browser_container = QWidget()
+        self.text_browser_container.setFixedSize(1064, 125)
+        self.original_text_browser_container_size = (1064, 125)
 
-        self.valResult = QTextBrowser(text_browser_container)
+        self.valResult = QTextBrowser(self.text_browser_container)
         self.valResult.setFixedSize(1064, 125)
+        self.original_valResult_size = (1064, 125)
         self.valResult.setStyleSheet("""
             QTextBrowser {
                 background: #FFF;
@@ -4401,7 +4433,7 @@ class MyApp(QWidget):
         self.valResult.setViewportMargins(24, 0, 12, 0)
 
         # ✅ 커스텀 placeholder 라벨
-        self.placeholder_label = QLabel("모니터링 내용이 표출됩니다", text_browser_container)
+        self.placeholder_label = QLabel("모니터링 내용이 표출됩니다", self.text_browser_container)
         self.placeholder_label.setGeometry(24, 16, 1000, 30)
         self.placeholder_label.setStyleSheet("""
             QLabel {
@@ -4417,181 +4449,183 @@ class MyApp(QWidget):
         # ✅ 텍스트 변경 시 placeholder 숨기기
         self.valResult.textChanged.connect(self._toggle_placeholder)
 
-        monitor_section_layout.addWidget(text_browser_container)
-        right_layout.addWidget(monitor_section)
+        monitor_section_layout.addWidget(self.text_browser_container)
+        self.right_layout.addWidget(self.monitor_section)
 
         # 초기 상태 설정
         self._toggle_placeholder()
 
         # 20px gap
-        right_layout.addSpacing(20)
+        self.right_layout.addSpacing(20)
 
         self.valmsg = QLabel('시험 점수 요약', self)
         self.valmsg.setFixedSize(1064, 24)
+        self.original_valmsg_size = (1064, 24)
         self.valmsg.setStyleSheet("""
             font-size: 20px;
             font-family: "Noto Sans KR";
             font-weight: 500;
             color: #000000;
         """)
-        right_layout.addWidget(self.valmsg)
+        self.right_layout.addWidget(self.valmsg)
 
         # 6px gap
-        right_layout.addSpacing(6)
+        self.right_layout.addSpacing(6)
 
         # 평가 점수 표시
-        spec_score_group = self.create_spec_score_display_widget()
-        right_layout.addWidget(spec_score_group)
+        self.spec_score_group = self.create_spec_score_display_widget()
+        self.right_layout.addWidget(self.spec_score_group)
         # 전체 점수 표시
-        total_score_group = self.create_total_score_display_widget()
-        right_layout.addWidget(total_score_group)
+        self.total_score_group = self.create_total_score_display_widget()
+        self.right_layout.addWidget(self.total_score_group)
 
         # 30px gap
-        right_layout.addSpacing(30)
+        self.right_layout.addSpacing(30)
 
-        # 버튼 그룹
-        buttonGroup = QWidget()
-        buttonGroup.setFixedSize(1064, 48)
-        buttonLayout = QHBoxLayout()
-        buttonLayout.setAlignment(Qt.AlignLeft)
-        buttonLayout.setContentsMargins(0, 0, 0, 0)
-        buttonLayout.setSpacing(0)
+        # 버튼 그룹 (레이아웃 없이 직접 위치 설정)
+        self.buttonGroup = QWidget()
+        self.buttonGroup.setFixedSize(1064, 48)
+        self.original_buttonGroup_size = (1064, 48)
+        self.button_spacing = 16  # 버튼 간격 고정
 
         # 평가 시작 버튼
-        self.sbtn = QPushButton(self)
-        self.sbtn.setFixedSize(254, 48)
+        self.sbtn = QPushButton("시험 시작", self.buttonGroup)  # 텍스트 추가, 부모를 buttonGroup으로 설정
+        self.original_button_size = (254, 48)  # 버튼 원본 크기 저장
         start_enabled = resource_path("assets/image/test_runner/btn_평가시작_enabled.png").replace("\\", "/")
         start_hover = resource_path("assets/image/test_runner/btn_평가시작_hover.png").replace("\\", "/")
         start_disabled = resource_path("assets/image/test_runner/btn_평가시작_disabled.png").replace("\\", "/")
         self.sbtn.setStyleSheet(f"""
             QPushButton {{
                 border: none;
-                background-image: url('{start_enabled}');
-                background-repeat: no-repeat;
-                background-position: center;
-                background-color: transparent;
+                border-image: url('{start_enabled}') 0 0 0 0 stretch stretch;
+                padding-left: 20px;
+                padding-right: 20px;
+                font-family: 'Noto Sans KR';
+                font-size: 20px;
+                font-weight: 500;
+                color: #FFFFFF;
             }}
             QPushButton:hover {{
-                background-image: url('{start_hover}');
+                border-image: url('{start_hover}') 0 0 0 0 stretch stretch;
             }}
             QPushButton:pressed {{
-                background-image: url('{start_hover}');
-                opacity: 0.8;
+                border-image: url('{start_hover}') 0 0 0 0 stretch stretch;
             }}
             QPushButton:disabled {{
-                background-image: url('{start_disabled}');
+                border-image: url('{start_disabled}') 0 0 0 0 stretch stretch;
+                color: #CECECE;
             }}
         """)
         self.sbtn.clicked.connect(self.sbtn_push)
 
         # 정지 버튼
-        self.stop_btn = QPushButton(self)
-        self.stop_btn.setFixedSize(254, 48)
+        self.stop_btn = QPushButton("일시 정지", self.buttonGroup)  # 텍스트 추가
         stop_enabled = resource_path("assets/image/test_runner/btn_일시정지_enabled.png").replace("\\", "/")
         stop_hover = resource_path("assets/image/test_runner/btn_일시정지_hover.png").replace("\\", "/")
         stop_disabled = resource_path("assets/image/test_runner/btn_일시정지_disabled.png").replace("\\", "/")
         self.stop_btn.setStyleSheet(f"""
             QPushButton {{
                 border: none;
-                background-image: url('{stop_enabled}');
-                background-repeat: no-repeat;
-                background-position: center;
-                background-color: transparent;
+                border-image: url('{stop_enabled}') 0 0 0 0 stretch stretch;
+                padding-left: 20px;
+                padding-right: 20px;
+                font-family: 'Noto Sans KR';
+                font-size: 20px;
+                font-weight: 500;
+                color: #6B6B6B;
             }}
             QPushButton:hover {{
-                background-image: url('{stop_hover}');
+                border-image: url('{stop_hover}') 0 0 0 0 stretch stretch;
             }}
             QPushButton:pressed {{
-                background-image: url('{stop_hover}');
-                opacity: 0.8;
+                border-image: url('{stop_hover}') 0 0 0 0 stretch stretch;
             }}
             QPushButton:disabled {{
-                background-image: url('{stop_disabled}');
+                border-image: url('{stop_disabled}') 0 0 0 0 stretch stretch;
+                color: #CECECE;
             }}
         """)
         self.stop_btn.clicked.connect(self.stop_btn_clicked)
         self.stop_btn.setDisabled(True)
 
         # 종료 버튼
-        self.rbtn = QPushButton(self)
-        self.rbtn.setFixedSize(254, 48)
+        self.rbtn = QPushButton("종료", self.buttonGroup)  # 텍스트 추가
         exit_enabled = resource_path("assets/image/test_runner/btn_종료_enabled.png").replace("\\", "/")
         exit_hover = resource_path("assets/image/test_runner/btn_종료_hover.png").replace("\\", "/")
         exit_disabled = resource_path("assets/image/test_runner/btn_종료_disabled.png").replace("\\", "/")
         self.rbtn.setStyleSheet(f"""
             QPushButton {{
                 border: none;
-                background-image: url('{exit_enabled}');
-                background-repeat: no-repeat;
-                background-position: center;
-                background-color: transparent;
+                border-image: url('{exit_enabled}') 0 0 0 0 stretch stretch;
+                padding-left: 20px;
+                padding-right: 20px;
+                font-family: 'Noto Sans KR';
+                font-size: 20px;
+                font-weight: 500;
+                color: #6B6B6B;
             }}
             QPushButton:hover {{
-                background-image: url('{exit_hover}');
+                border-image: url('{exit_hover}') 0 0 0 0 stretch stretch;
             }}
             QPushButton:pressed {{
-                background-image: url('{exit_hover}');
-                opacity: 0.8;
+                border-image: url('{exit_hover}') 0 0 0 0 stretch stretch;
             }}
             QPushButton:disabled {{
-                background-image: url('{exit_disabled}');
+                border-image: url('{exit_disabled}') 0 0 0 0 stretch stretch;
+                color: #CECECE;
             }}
         """)
         self.rbtn.clicked.connect(self.exit_btn_clicked)
 
         # 시험 결과 버튼
-        self.result_btn = QPushButton(self)
-        self.result_btn.setFixedSize(254, 48)
+        self.result_btn = QPushButton("시험 결과", self.buttonGroup)  # 텍스트 추가
         result_enabled = resource_path("assets/image/test_runner/btn_시험결과_enabled.png").replace("\\", "/")
         result_hover = resource_path("assets/image/test_runner/btn_시험결과_hover.png").replace("\\", "/")
         result_disabled = resource_path("assets/image/test_runner/btn_시험결과_disabled.png").replace("\\", "/")
         self.result_btn.setStyleSheet(f"""
             QPushButton {{
                 border: none;
-                background-image: url('{result_enabled}');
-                background-repeat: no-repeat;
-                background-position: center;
-                background-color: transparent;
+                border-image: url('{result_enabled}') 0 0 0 0 stretch stretch;
+                padding-left: 20px;
+                padding-right: 20px;
+                font-family: 'Noto Sans KR';
+                font-size: 20px;
+                font-weight: 500;
+                color: #6B6B6B;
             }}
             QPushButton:hover {{
-                background-image: url('{result_hover}');
+                border-image: url('{result_hover}') 0 0 0 0 stretch stretch;
             }}
             QPushButton:pressed {{
-                background-image: url('{result_hover}');
-                opacity: 0.8;
+                border-image: url('{result_hover}') 0 0 0 0 stretch stretch;
             }}
             QPushButton:disabled {{
-                background-image: url('{result_disabled}');
+                border-image: url('{result_disabled}') 0 0 0 0 stretch stretch;
+                color: #CECECE;
             }}
         """)
         self.result_btn.clicked.connect(self.show_result_page)
 
-        buttonLayout.addWidget(self.sbtn)
-        buttonLayout.addSpacing(16)
-        buttonLayout.addWidget(self.stop_btn)
-        buttonLayout.addSpacing(16)
-        buttonLayout.addWidget(self.result_btn)
-        buttonLayout.addSpacing(16)
-        buttonLayout.addWidget(self.rbtn)
-        buttonGroup.setLayout(buttonLayout)
-        right_layout.addWidget(buttonGroup)
-        right_layout.addStretch()  # 남는 공간을 아래로 밀기
+        # 초기 버튼 위치 설정 (레이아웃 없이 직접 배치)
+        self._update_button_positions()
+        self.right_layout.addWidget(self.buttonGroup)
+        self.right_layout.addStretch()  # 남는 공간을 아래로 밀기
 
-        left_col.setLayout(left_layout)
-        right_col.setLayout(right_layout)
+        self.left_col.setLayout(self.left_layout)
+        self.right_col.setLayout(self.right_layout)
 
         # 컬럼 레이아웃에 추가
-        columns_layout.addWidget(left_col)
-        columns_layout.addWidget(right_col)
+        columns_layout.addWidget(self.left_col)
+        columns_layout.addWidget(self.right_col)
 
         bg_root_layout.addLayout(columns_layout)
-        bg_root.setLayout(bg_root_layout)
+        self.bg_root.setLayout(bg_root_layout)
 
         # content_widget 레이아웃 설정 (좌우 48px, 하단 44px padding, 가운데 정렬)
         content_layout = QVBoxLayout(self.content_widget)
         content_layout.setContentsMargins(48, 0, 48, 44)
         content_layout.setSpacing(0)
-        content_layout.addWidget(bg_root, 0, Qt.AlignHCenter | Qt.AlignVCenter)
+        content_layout.addWidget(self.bg_root, 0, Qt.AlignHCenter | Qt.AlignVCenter)
 
         mainLayout.addWidget(self.content_widget, 1)  # 반응형: stretch=1로 남은 공간 채움
 
@@ -4605,9 +4639,54 @@ class MyApp(QWidget):
         if not self.embedded:
             self.show()
 
+    def _update_button_positions(self, group_width=None, group_height=None):
+        """버튼 위치 직접 설정 (간격 16px 고정)"""
+        if not hasattr(self, 'buttonGroup'):
+            return
+
+        # 크기가 전달되지 않으면 현재 크기 사용
+        if group_width is None:
+            group_width = self.buttonGroup.width()
+        if group_height is None:
+            group_height = self.buttonGroup.height()
+
+        spacing = self.button_spacing  # 16px
+
+        # 버튼 너비 = (전체 너비 - 간격 3개) / 4
+        btn_width = (group_width - spacing * 3) // 4
+        btn_height = group_height
+
+        # 각 버튼 크기 및 위치 설정
+        x = 0
+        self.sbtn.setFixedSize(btn_width, btn_height)
+        self.sbtn.move(x, 0)
+        x += btn_width + spacing
+        self.stop_btn.setFixedSize(btn_width, btn_height)
+        self.stop_btn.move(x, 0)
+        x += btn_width + spacing
+        self.result_btn.setFixedSize(btn_width, btn_height)
+        self.result_btn.move(x, 0)
+        x += btn_width + spacing
+        self.rbtn.setFixedSize(btn_width, btn_height)
+        self.rbtn.move(x, 0)
+
     def resizeEvent(self, event):
-        """창 크기 변경 시 배경 이미지 크기 재조정"""
+        """창 크기 변경 시 배경 이미지 및 왼쪽 패널 크기 재조정"""
         super().resizeEvent(event)
+
+        # 파일 로그로 resizeEvent 호출 확인 (PyInstaller 호환)
+        try:
+            import os
+            import sys
+            if getattr(sys, 'frozen', False):
+                base_dir = os.path.dirname(sys.executable)
+            else:
+                base_dir = os.path.dirname(os.path.abspath(__file__))
+            log_path = os.path.join(base_dir, "resize_debug.log")
+            with open(log_path, "a", encoding="utf-8") as f:
+                f.write(f"[PLATFORM] width={self.width()}, height={self.height()}\n")
+        except:
+            pass
 
         # content_widget의 배경 이미지 크기 조정
         if hasattr(self, 'content_widget') and self.content_widget:
@@ -4615,6 +4694,213 @@ class MyApp(QWidget):
                 content_width = self.content_widget.width()
                 content_height = self.content_widget.height()
                 self.content_bg_label.setGeometry(0, 0, content_width, content_height)
+
+        # ✅ 반응형: 왼쪽 패널 크기 조정
+        if hasattr(self, 'original_window_size') and hasattr(self, 'left_col'):
+            current_width = self.width()
+            current_height = self.height()
+
+            # 비율 계산 (최소 1.0 - 원본 크기 이하로 줄어들지 않음)
+            width_ratio = max(1.0, current_width / self.original_window_size[0])
+            height_ratio = max(1.0, current_height / self.original_window_size[1])
+
+            # 디버그 로그
+            print(f"[RESIZE] 현재 크기: {current_width}x{current_height}, 비율: {width_ratio:.2f}x{height_ratio:.2f}")
+
+            # ✅ 왼쪽/오른쪽 패널 정렬을 위한 확장량 계산
+            # 컬럼의 추가 높이를 계산하고, 그 추가분만 확장 요소들에 분배
+            original_column_height = 898  # 원본 컬럼 높이
+            extra_column_height = original_column_height * (height_ratio - 1)
+
+            # 왼쪽 패널 확장 요소: group_table(204) + field_group(526) = 730px
+            left_expandable_total = 204 + 526  # 730
+
+            # 오른쪽 패널 확장 요소: api_section(251) + monitor_section(157) = 408px
+            right_expandable_total = 251 + 157  # 408
+
+            # bg_root 크기 조정
+            if hasattr(self, 'bg_root') and hasattr(self, 'original_bg_root_size'):
+                new_bg_width = int(self.original_bg_root_size[0] * width_ratio)
+                new_bg_height = int(self.original_bg_root_size[1] * height_ratio)
+                self.bg_root.setFixedSize(new_bg_width, new_bg_height)
+
+            # 왼쪽 컬럼 크기 조정
+            if hasattr(self, 'original_left_col_size'):
+                new_left_width = int(self.original_left_col_size[0] * width_ratio)
+                new_left_height = int(self.original_left_col_size[1] * height_ratio)
+                self.left_col.setFixedSize(new_left_width, new_left_height)
+
+            # 시험 선택 타이틀 크기 조정
+            if hasattr(self, 'spec_panel_title') and hasattr(self, 'original_spec_panel_title_size'):
+                new_title_width = int(self.original_spec_panel_title_size[0] * width_ratio)
+                self.spec_panel_title.setFixedSize(new_title_width, self.original_spec_panel_title_size[1])
+
+            # 그룹 테이블 위젯 크기 조정 (extra_column_height 비례 분배)
+            if hasattr(self, 'group_table_widget') and hasattr(self, 'original_group_table_widget_size'):
+                new_group_width = int(self.original_group_table_widget_size[0] * width_ratio)
+                group_extra = extra_column_height * (204 / left_expandable_total)
+                new_group_height = int(204 + group_extra)
+                self.group_table_widget.setFixedSize(new_group_width, new_group_height)
+                # 내부 테이블 크기도 조정
+                if hasattr(self, 'group_table'):
+                    self.group_table.setFixedHeight(new_group_height)
+
+            # 시험 시나리오 테이블 크기 조정 (extra_column_height 비례 분배)
+            if hasattr(self, 'field_group') and hasattr(self, 'original_field_group_size'):
+                new_field_width = int(self.original_field_group_size[0] * width_ratio)
+                field_extra = extra_column_height * (526 / left_expandable_total)
+                new_field_height = int(526 + field_extra)
+                self.field_group.setFixedSize(new_field_width, new_field_height)
+                # 내부 테이블 크기도 조정
+                if hasattr(self, 'test_field_table'):
+                    self.test_field_table.setFixedHeight(new_field_height)
+
+            # ✅ 오른쪽 컬럼 크기 조정
+            if hasattr(self, 'right_col') and hasattr(self, 'original_right_col_size'):
+                new_right_width = int(self.original_right_col_size[0] * width_ratio)
+                new_right_height = int(self.original_right_col_size[1] * height_ratio)
+                self.right_col.setFixedSize(new_right_width, new_right_height)
+
+            # URL 행 크기 조정
+            if hasattr(self, 'url_row') and hasattr(self, 'original_url_row_size'):
+                new_url_width = int(self.original_url_row_size[0] * width_ratio)
+                self.url_row.setFixedSize(new_url_width, self.original_url_row_size[1])
+
+            # API 섹션 크기 조정 (extra_column_height 비례 분배)
+            if hasattr(self, 'api_section') and hasattr(self, 'original_api_section_size'):
+                new_api_width = int(self.original_api_section_size[0] * width_ratio)
+                api_extra = extra_column_height * (251 / right_expandable_total)
+                new_api_height = int(251 + api_extra)
+                self.api_section.setFixedSize(new_api_width, new_api_height)
+
+            # 모니터링 섹션 크기 조정 (extra_column_height 비례 분배)
+            if hasattr(self, 'monitor_section') and hasattr(self, 'original_monitor_section_size'):
+                new_monitor_width = int(self.original_monitor_section_size[0] * width_ratio)
+                monitor_extra = extra_column_height * (157 / right_expandable_total)
+                new_monitor_height = int(157 + monitor_extra)
+                self.monitor_section.setFixedSize(new_monitor_width, new_monitor_height)
+
+            # ✅ 버튼 그룹 및 버튼 크기 조정 (간격 16px 고정, 세로 크기 고정)
+            if hasattr(self, 'original_buttonGroup_size'):
+                new_group_width = int(self.original_buttonGroup_size[0] * width_ratio)
+                btn_height = self.original_buttonGroup_size[1]  # 세로 크기 고정
+                self.buttonGroup.setFixedSize(new_group_width, btn_height)
+                self._update_button_positions(new_group_width, btn_height)
+
+            # ✅ 내부 위젯 크기 조정
+            # URL 텍스트 박스
+            if hasattr(self, 'url_text_box') and hasattr(self, 'original_url_text_box_size'):
+                new_url_tb_width = int(self.original_url_text_box_size[0] * width_ratio)
+                self.url_text_box.setFixedSize(new_url_tb_width, self.original_url_text_box_size[1])
+
+            # API 라벨
+            if hasattr(self, 'api_label') and hasattr(self, 'original_api_label_size'):
+                new_api_label_width = int(self.original_api_label_size[0] * width_ratio)
+                self.api_label.setFixedSize(new_api_label_width, self.original_api_label_size[1])
+
+            # API 콘텐츠 위젯 (api_section 내부 - 라벨 24px 제외)
+            if hasattr(self, 'api_content_widget') and hasattr(self, 'original_api_content_widget_size'):
+                new_api_cw_width = int(self.original_api_content_widget_size[0] * width_ratio)
+                new_api_cw_height = int(219 + api_extra)  # api_section에서 라벨 제외한 부분
+                self.api_content_widget.setFixedSize(new_api_cw_width, new_api_cw_height)
+
+            # 모니터링 라벨
+            if hasattr(self, 'monitor_label') and hasattr(self, 'original_monitor_label_size'):
+                new_mon_label_width = int(self.original_monitor_label_size[0] * width_ratio)
+                self.monitor_label.setFixedSize(new_mon_label_width, self.original_monitor_label_size[1])
+
+            # 텍스트 브라우저 컨테이너 (monitor_section 내부 - 라벨 24px 제외)
+            if hasattr(self, 'text_browser_container') and hasattr(self, 'original_text_browser_container_size'):
+                new_tbc_width = int(self.original_text_browser_container_size[0] * width_ratio)
+                new_tbc_height = int(125 + monitor_extra)  # monitor_section에서 라벨 제외한 부분
+                self.text_browser_container.setFixedSize(new_tbc_width, new_tbc_height)
+
+            # valResult (QTextBrowser) (monitor_section 내부)
+            if hasattr(self, 'valResult') and hasattr(self, 'original_valResult_size'):
+                new_vr_width = int(self.original_valResult_size[0] * width_ratio)
+                new_vr_height = int(125 + monitor_extra)
+                self.valResult.setFixedSize(new_vr_width, new_vr_height)
+
+            # ✅ 시험 점수 요약 섹션
+            # 시험 점수 요약 라벨
+            if hasattr(self, 'valmsg') and hasattr(self, 'original_valmsg_size'):
+                new_valmsg_width = int(self.original_valmsg_size[0] * width_ratio)
+                self.valmsg.setFixedSize(new_valmsg_width, self.original_valmsg_size[1])
+
+            # 분야별 점수 그룹
+            if hasattr(self, 'spec_score_group') and hasattr(self, 'original_spec_group_size'):
+                new_spec_width = int(self.original_spec_group_size[0] * width_ratio)
+                self.spec_score_group.setFixedSize(new_spec_width, self.original_spec_group_size[1])
+
+            # 전체 점수 그룹
+            if hasattr(self, 'total_score_group') and hasattr(self, 'original_total_group_size'):
+                new_total_width = int(self.original_total_group_size[0] * width_ratio)
+                self.total_score_group.setFixedSize(new_total_width, self.original_total_group_size[1])
+
+            # ✅ 시험 점수 요약 내부 데이터 영역 비례 조정
+            if hasattr(self, 'spec_data_widget') and hasattr(self, 'original_spec_data_widget_size'):
+                new_spec_data_width = int(self.original_spec_data_widget_size[0] * width_ratio)
+                self.spec_data_widget.setFixedSize(new_spec_data_width, self.original_spec_data_widget_size[1])
+
+            if hasattr(self, 'total_data_widget') and hasattr(self, 'original_total_data_widget_size'):
+                new_total_data_width = int(self.original_total_data_widget_size[0] * width_ratio)
+                self.total_data_widget.setFixedSize(new_total_data_width, self.original_total_data_widget_size[1])
+
+            # ✅ 시험 점수 요약 내부 라벨 너비 비례 조정
+            if hasattr(self, 'original_score_label_width'):
+                new_label_width = int(self.original_score_label_width * width_ratio)
+                # 분야별 점수 라벨
+                if hasattr(self, 'spec_pass_label'):
+                    self.spec_pass_label.setFixedSize(new_label_width, 60)
+                if hasattr(self, 'spec_total_label'):
+                    self.spec_total_label.setFixedSize(new_label_width, 60)
+                if hasattr(self, 'spec_score_label'):
+                    self.spec_score_label.setFixedSize(new_label_width, 60)
+                # 전체 점수 라벨
+                if hasattr(self, 'total_pass_label'):
+                    self.total_pass_label.setFixedSize(new_label_width, 60)
+                if hasattr(self, 'total_total_label'):
+                    self.total_total_label.setFixedSize(new_label_width, 60)
+                if hasattr(self, 'total_score_label'):
+                    self.total_score_label.setFixedSize(new_label_width, 60)
+
+            # ✅ 시험 API 테이블 헤더
+            if hasattr(self, 'api_header_widget') and hasattr(self, 'original_api_header_widget_size'):
+                new_header_width = int(self.original_api_header_widget_size[0] * width_ratio)
+                self.api_header_widget.setFixedSize(new_header_width, self.original_api_header_widget_size[1])
+
+            # ✅ 시험 API 테이블 본문 (scroll_area) - 세로도 확장 (api_extra 사용)
+            if hasattr(self, 'api_scroll_area') and hasattr(self, 'original_api_scroll_area_size'):
+                new_scroll_width = int(self.original_api_scroll_area_size[0] * width_ratio)
+                new_scroll_height = int(189 + api_extra)  # api_content_widget 내부 (헤더 30px 제외)
+                self.api_scroll_area.setFixedSize(new_scroll_width, new_scroll_height)
+
+            # ✅ 시험 API 테이블 컬럼 너비 비례 조정 (마지막 컬럼이 남은 공간 채움)
+            if hasattr(self, 'tableWidget') and hasattr(self, 'original_column_widths'):
+                # 스크롤바 표시 여부 확인 (테이블 전체 높이 > 스크롤 영역 높이)
+                row_count = self.tableWidget.rowCount()
+                total_row_height = row_count * 40  # 각 행 40px
+                scrollbar_visible = total_row_height > new_scroll_height
+                scrollbar_width = 16 if scrollbar_visible else 2  # 여유분 2px
+
+                available_width = new_scroll_width - scrollbar_width
+
+                # 마지막 컬럼을 제외한 나머지 컬럼 너비 설정
+                used_width = 0
+                for i, orig_width in enumerate(self.original_column_widths[:-1]):
+                    new_col_width = int(orig_width * width_ratio)
+                    self.tableWidget.setColumnWidth(i, new_col_width)
+                    used_width += new_col_width
+
+                # 마지막 컬럼은 남은 공간을 채움
+                last_col_width = available_width - used_width
+                self.tableWidget.setColumnWidth(len(self.original_column_widths) - 1, last_col_width)
+
+            # ✅ 시험 API 테이블 헤더 라벨 너비 비례 조정
+            if hasattr(self, 'header_labels') and hasattr(self, 'original_header_widths'):
+                for i, label in enumerate(self.header_labels):
+                    new_label_width = int(self.original_header_widths[i] * width_ratio)
+                    label.setFixedSize(new_label_width, 30)
 
     def select_first_scenario(self):
         """프로그램 시작 시 첫 번째 그룹의 첫 번째 시나리오 자동 선택"""
@@ -4662,9 +4948,10 @@ class MyApp(QWidget):
         api_count = len(self.videoMessages)
 
         # 별도 헤더 위젯 (1064px 전체 너비)
-        header_widget = QWidget()
-        header_widget.setFixedSize(1064, 30)
-        header_widget.setStyleSheet("""
+        self.api_header_widget = QWidget()
+        self.api_header_widget.setFixedSize(1064, 30)
+        self.original_api_header_widget_size = (1064, 30)
+        self.api_header_widget.setStyleSheet("""
             QWidget {
                 background-color: #EDF0F3;
                 border: 1px solid #CECECE;
@@ -4673,7 +4960,7 @@ class MyApp(QWidget):
                 border-top-right-radius: 4px;
             }
         """)
-        header_layout = QHBoxLayout(header_widget)
+        header_layout = QHBoxLayout(self.api_header_widget)
         header_layout.setContentsMargins(0, 0, 14, 0)  # 오른쪽 14px (스크롤바 영역)
         header_layout.setSpacing(0)
 
@@ -4690,14 +4977,13 @@ class MyApp(QWidget):
             (133, "상세 내용")
         ]
 
+        # 헤더 라벨 저장 (반응형 조정용)
+        self.header_labels = []
+        self.original_header_widths = [col[0] for col in header_columns]
+
         for i, (width, text) in enumerate(header_columns):
             label = QLabel(text)
-            if i == len(header_columns) - 1:  # 마지막 컬럼
-                label.setMinimumWidth(width)
-                label.setFixedHeight(30)
-                label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-            else:
-                label.setFixedSize(width, 30)
+            label.setFixedSize(width, 30)
             label.setAlignment(Qt.AlignCenter)
             label.setStyleSheet("""
                 QLabel {
@@ -4709,6 +4995,7 @@ class MyApp(QWidget):
                     font-weight: 600;
                 }
             """)
+            self.header_labels.append(label)
             header_layout.addWidget(label)
 
         # 테이블 본문 (헤더 숨김)
@@ -4742,17 +5029,11 @@ class MyApp(QWidget):
 
         self.tableWidget.setShowGrid(False)
 
-        # 컬럼 너비 설정 - 9컬럼 구조
-        self.tableWidget.setColumnWidth(0, 40)    # No.
-        self.tableWidget.setColumnWidth(1, 261)   # API 명
-        self.tableWidget.setColumnWidth(2, 100)   # 결과
-        self.tableWidget.setColumnWidth(3, 94)    # 검증 횟수
-        self.tableWidget.setColumnWidth(4, 116)   # 통과 필드 수
-        self.tableWidget.setColumnWidth(5, 116)   # 전체 필드 수
-        self.tableWidget.setColumnWidth(6, 94)    # 실패 횟수
-        self.tableWidget.setColumnWidth(7, 94)    # 평가 점수
-        self.tableWidget.setColumnWidth(8, 133)   # 상세 내용
-        self.tableWidget.horizontalHeader().setStretchLastSection(True)  # 마지막 컬럼 자동 확장
+        # 컬럼 너비 설정 - 9컬럼 구조 (원본 너비 저장)
+        self.original_column_widths = [40, 261, 100, 94, 116, 116, 94, 94, 133]
+        for i, width in enumerate(self.original_column_widths):
+            self.tableWidget.setColumnWidth(i, width)
+        self.tableWidget.horizontalHeader().setStretchLastSection(False)  # 비례 조정을 위해 비활성화
 
         # 행 높이 설정 (40px)
         for i in range(api_count):
@@ -4831,14 +5112,14 @@ class MyApp(QWidget):
         self.tableWidget.cellClicked.connect(self.table_cell_clicked)
 
         # ✅ QScrollArea로 본문만 감싸기 (헤더 아래부터 스크롤)
-        scroll_area = QScrollArea()
-        scroll_area.setWidget(self.tableWidget)
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)  # 필요할 때만 스크롤바 표시
-        scroll_area.setFixedWidth(1064)
-        scroll_area.setFixedHeight(189)  # 헤더 제외 (219 - 30)
-        scroll_area.setStyleSheet("""
+        self.api_scroll_area = QScrollArea()
+        self.api_scroll_area.setWidget(self.tableWidget)
+        self.api_scroll_area.setWidgetResizable(True)
+        self.api_scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.api_scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)  # 필요할 때만 스크롤바 표시
+        self.api_scroll_area.setFixedSize(1064, 189)  # 헤더 제외 (219 - 30)
+        self.original_api_scroll_area_size = (1064, 189)
+        self.api_scroll_area.setStyleSheet("""
             QScrollArea {
                 border: 1px solid #CECECE;
                 border-top: none;
@@ -4872,8 +5153,9 @@ class MyApp(QWidget):
         self.centerLayout = QVBoxLayout()
         self.centerLayout.setContentsMargins(0, 0, 0, 0)
         self.centerLayout.setSpacing(0)
-        self.centerLayout.addWidget(header_widget)
-        self.centerLayout.addWidget(scroll_area)
+        self.centerLayout.addWidget(self.api_header_widget)
+        self.centerLayout.addWidget(self.api_scroll_area)
+        self.centerLayout.addStretch()  # 세로 확장 시 여분 공간을 하단으로
 
     def show_combined_result(self, row):
         """통합 상세 내용 확인"""
@@ -4915,8 +5197,8 @@ class MyApp(QWidget):
         """메인 화면에 표시할 시험 분야별 평가 점수 위젯"""
 
         spec_group = QGroupBox()
-        spec_group.setFixedWidth(1064)
-        spec_group.setFixedHeight(128)
+        spec_group.setFixedSize(1064, 128)
+        self.original_spec_group_size = (1064, 128)
         spec_group.setStyleSheet("""
             QGroupBox {
                 background-color: #FFF;
@@ -4978,6 +5260,9 @@ class MyApp(QWidget):
         separator.setFixedHeight(1)
 
         # 점수 레이블들 (500 Medium 20px #000000, 325 × 60)
+        # 원본 크기 저장 (반응형 조정용)
+        self.original_score_label_width = 325
+
         self.spec_pass_label = QLabel("통과 필드 수")
         self.spec_pass_label.setFixedSize(325, 60)
         self.spec_pass_label.setStyleSheet("""
@@ -5022,12 +5307,13 @@ class MyApp(QWidget):
         spec_layout.addWidget(separator)
 
         # 데이터 영역 (1064 × 76)
-        data_widget = QWidget()
-        data_widget.setFixedSize(1064, 76)
-        spec_score_layout = QHBoxLayout(data_widget)
+        self.spec_data_widget = QWidget()
+        self.spec_data_widget.setFixedSize(1064, 76)
+        self.original_spec_data_widget_size = (1064, 76)
+        spec_score_layout = QHBoxLayout(self.spec_data_widget)
         spec_score_layout.setContentsMargins(56, 8, 32, 8)
         spec_score_layout.setSpacing(0)
-        
+
         # 통과 필드 수 + 구분선 + spacer
         spec_score_layout.addWidget(self.spec_pass_label)
         spec_vline1 = QFrame()
@@ -5037,7 +5323,7 @@ class MyApp(QWidget):
         spec_spacer1 = QWidget()
         spec_spacer1.setFixedSize(24, 60)
         spec_score_layout.addWidget(spec_spacer1)
-        
+
         # 전체 필드 수 + 구분선 + spacer
         spec_score_layout.addWidget(self.spec_total_label)
         spec_vline2 = QFrame()
@@ -5047,12 +5333,12 @@ class MyApp(QWidget):
         spec_spacer2 = QWidget()
         spec_spacer2.setFixedSize(24, 60)
         spec_score_layout.addWidget(spec_spacer2)
-        
+
         # 종합 평가 점수
         spec_score_layout.addWidget(self.spec_score_label)
         spec_score_layout.addStretch()
 
-        spec_layout.addWidget(data_widget)
+        spec_layout.addWidget(self.spec_data_widget)
         spec_group.setLayout(spec_layout)
 
         return spec_group
@@ -5060,8 +5346,8 @@ class MyApp(QWidget):
     def create_total_score_display_widget(self):
         """메인 화면에 표시할 전체 평가 점수 위젯"""
         total_group = QGroupBox()
-        total_group.setFixedWidth(1064)
-        total_group.setFixedHeight(128)
+        total_group.setFixedSize(1064, 128)
+        self.original_total_group_size = (1064, 128)
         total_group.setStyleSheet("""
             QGroupBox {
                 background-color: #F0F6FB;
@@ -5145,12 +5431,13 @@ class MyApp(QWidget):
         total_layout.addWidget(separator)
 
         # 데이터 영역 (1064 × 76)
-        data_widget = QWidget()
-        data_widget.setFixedSize(1064, 76)
-        score_layout = QHBoxLayout(data_widget)
+        self.total_data_widget = QWidget()
+        self.total_data_widget.setFixedSize(1064, 76)
+        self.original_total_data_widget_size = (1064, 76)
+        score_layout = QHBoxLayout(self.total_data_widget)
         score_layout.setContentsMargins(56, 8, 32, 8)
         score_layout.setSpacing(0)
-        
+
         # 통과 필드 수 + 구분선 + spacer
         score_layout.addWidget(self.total_pass_label)
         total_vline1 = QFrame()
@@ -5160,7 +5447,7 @@ class MyApp(QWidget):
         total_spacer1 = QWidget()
         total_spacer1.setFixedSize(24, 60)
         score_layout.addWidget(total_spacer1)
-        
+
         # 전체 필드 수 + 구분선 + spacer
         score_layout.addWidget(self.total_total_label)
         total_vline2 = QFrame()
@@ -5170,12 +5457,12 @@ class MyApp(QWidget):
         total_spacer2 = QWidget()
         total_spacer2.setFixedSize(24, 60)
         score_layout.addWidget(total_spacer2)
-        
+
         # 종합 평가 점수
         score_layout.addWidget(self.total_score_label)
         score_layout.addStretch()
 
-        total_layout.addWidget(data_widget)
+        total_layout.addWidget(self.total_data_widget)
         total_group.setLayout(total_layout)
 
         return total_group
