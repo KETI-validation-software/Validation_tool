@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 from datetime import datetime
 import traceback
+import sys
 
 # ==========================================
 # 가벼운 공용 기능 함수들 (독립 모듈)
@@ -121,10 +122,6 @@ def format_schema(schema):
 
     return schema_to_string(schema)
 
-# ==========================================
-# Trace 파일 관련 함수들
-# ==========================================
-
 def load_from_trace_file(api_name, direction="RESPONSE"):
     """trace 파일에서 특정 API의 RESPONSE 데이터를 읽어옴"""
     try:
@@ -186,3 +183,45 @@ def load_from_trace_file(api_name, direction="RESPONSE"):
         print(f"[ERROR] trace 파일 로드 실패: {e}")
         traceback.print_exc() 
         return None
+
+def load_external_constants(constants_module):
+    """
+    외부 constants 모듈에서 설정값들을 로드하여 딕셔너리로 반환
+    """
+    spec_config = getattr(constants_module, "SPEC_CONFIG", [])
+
+    if getattr(sys, 'frozen', False):
+        exe_dir = os.path.dirname(sys.executable)
+        external_constants_path = os.path.join(exe_dir, "config", "CONSTANTS.py")
+
+        if os.path.exists(external_constants_path):
+            try:
+                with open(external_constants_path, 'r', encoding='utf-8') as f:
+                    constants_code = f.read()
+                
+                namespace = {'__file__': external_constants_path}
+                exec(constants_code, namespace)
+
+                if 'SPEC_CONFIG' in namespace:
+                    spec_config = namespace['SPEC_CONFIG']
+                    if hasattr(constants_module, 'SPEC_CONFIG'):
+                        setattr(constants_module, 'SPEC_CONFIG', spec_config)
+                
+                keys_to_update = [
+                    'url', 'auth_type', 'auth_info', 'company_name', 'product_name',
+                    'version', 'test_category', 'test_target', 'test_range'
+                ]
+
+                for key in keys_to_update:
+                    if key in namespace and hasattr(constants_module, key):
+                        setattr(constants_module, key, namespace[key])
+                
+                for i, g in enumerate(spec_config):
+                    group_name = g.get('group_name', '이름없음')
+                    group_keys = [k for k in g.keys() if k not in ['group_name', 'group_id']]
+                    print(f"[LOAD_CONSTANTS] 그룹 {i}: {group_name} - 키: {group_keys}")
+            
+            except Exception as e:
+                print(f"[ERROR] 외부 CONSTANTS.py 로드 실패: {e}")
+                
+    return spec_config
