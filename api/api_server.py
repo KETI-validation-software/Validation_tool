@@ -707,10 +707,7 @@ class Server(BaseHTTPRequestHandler):
 
                 print(f"[DEBUG][CONSTRAINTS] request_data: {self.request_data}")
                 print(f"[DEBUG][CONSTRAINTS] message keys: {message.keys() if isinstance(message, dict) else 'N/A'}")
-
-                # ✅ 템플릿 그대로 사용 (n 파라미터 제거)
-                # request_data, template_data, constraints 순서로 전달
-                # ✅ RealtimeDoorStatus2 대응: api_name과 door_memory 전달
+                
                 updated_message = self.generator._applied_constraints(
                     request_data=self.request_data,
                     template_data=copy.deepcopy(message),  # deepcopy로 원본 보호
@@ -738,15 +735,6 @@ class Server(BaseHTTPRequestHandler):
                                 Server.valid_device_ids.add(cam["camID"])
                         print(f"[DEVICE_UPDATE] CameraProfiles에서 {len(cam_list)}개 camID로 리셋+추가")
                         print(f"[DEVICE_UPDATE] 현재 유효한 장치 목록: {Server.valid_device_ids}")
-                '''
-                # ✅ JSON에 code_value 추가
-                if isinstance(updated_message, dict):
-                    if api_name in Server.request_has_error and Server.request_has_error[api_name]:
-                        updated_message['code_value'] = 400
-                        print(f"[DEBUG] code_value=400 추가 (요청 오류 있음)")
-                    else:
-                        updated_message['code_value'] = 200
-                        print(f"[DEBUG] code_value=200 추가 (정상)")'''
 
                 # JSON 응답 준비
                 a = json.dumps(updated_message).encode('utf-8')
