@@ -35,6 +35,7 @@ class Server(BaseHTTPRequestHandler):
     auth_Info = ['admin', '1234', 'user', 'abcd1234', 'SHA-256', None]  # 저장된 상태로 main 입력하지 않으면 digest auth 인증 x
     digest_res = ""
     transProtocolInput = ""
+    request_counter = defaultdict(int)
     #bearer_credentials = ['PlatformID','PlatformPW']
     bearer_credentials = ['user0001', 'pass0001']
     url_tmp = None
@@ -377,9 +378,12 @@ class Server(BaseHTTPRequestHandler):
 
         # ✅ 2단계: Authentication API 특별 처리 (Bearer Token 발급)
 
-
         if api_name == "Authentication" and self.auth_type == "B":
             print(f"[DEBUG][AUTH] Bearer 인증 시작 - userID/userPW 검증")
+
+            # ✅ 카운터 초기화 추가
+            if self.current_valid_api not in Server.request_counter:
+                Server.request_counter[self.current_valid_api] = 0
 
             # 요청 본문에서 자격 증명 추출
             user_id = self.request_data.get('userID', '')
@@ -707,7 +711,10 @@ class Server(BaseHTTPRequestHandler):
 
                 print(f"[DEBUG][CONSTRAINTS] request_data: {self.request_data}")
                 print(f"[DEBUG][CONSTRAINTS] message keys: {message.keys() if isinstance(message, dict) else 'N/A'}")
-                
+
+                # ✅ 템플릿 그대로 사용 (n 파라미터 제거)
+                # request_data, template_data, constraints 순서로 전달
+                # ✅ RealtimeDoorStatus2 대응: api_name과 door_memory 전달
                 updated_message = self.generator._applied_constraints(
                     request_data=self.request_data,
                     template_data=copy.deepcopy(message),  # deepcopy로 원본 보호
@@ -735,6 +742,15 @@ class Server(BaseHTTPRequestHandler):
                                 Server.valid_device_ids.add(cam["camID"])
                         print(f"[DEVICE_UPDATE] CameraProfiles에서 {len(cam_list)}개 camID로 리셋+추가")
                         print(f"[DEVICE_UPDATE] 현재 유효한 장치 목록: {Server.valid_device_ids}")
+                '''
+                # ✅ JSON에 code_value 추가
+                if isinstance(updated_message, dict):
+                    if api_name in Server.request_has_error and Server.request_has_error[api_name]:
+                        updated_message['code_value'] = 400
+                        print(f"[DEBUG] code_value=400 추가 (요청 오류 있음)")
+                    else:
+                        updated_message['code_value'] = 200
+                        print(f"[DEBUG] code_value=200 추가 (정상)")'''
 
                 # JSON 응답 준비
                 a = json.dumps(updated_message).encode('utf-8')
@@ -792,9 +808,9 @@ class Server(BaseHTTPRequestHandler):
             self._set_headers()
             self.wfile.write(a)
 
-            # ✅ 데이터 맵핑: 응답 전송 직후 처리
-            self._process_data_mapping(self.current_valid_api, updated_message if out_con else message)
-
+        # (12/23) 기존에 응답 전송 직후에 처리하던 데이터 매핑 부분 주석 처리
+        # self._process_data_mapping(self.current_valid_api, updated_message if out_con else message)
+        
         except (ConnectionAbortedError, BrokenPipeError, ConnectionResetError) as e:
             print(f"[WARNING] 클라이언트 연결 끊김: {e}")
             # 연결이 끊겼으므로 더 이상 처리하지 않음
@@ -924,6 +940,10 @@ class Server(BaseHTTPRequestHandler):
             print(f"[DEBUG][SERVER] webhook_response 저장됨 (클래스 변수): {Server.webhook_response}")
 
             self._push_event(self.current_valid_api, "WEBHOOK_IN", Server.webhook_response)
+
+        # (12/23 수정함) - 처리(웹훅 & 응답) 끝난 후에 데이터 맵핑 처리로 순서 바꿈
+        final_response = updated_message if (out_con and 'updated_message' in locals()) else message
+        self._process_data_mapping(self.current_valid_api, final_response)
 
     def api_res(self, api_name = None):
         i, data, out_con = None, None, None

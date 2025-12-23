@@ -1,191 +1,230 @@
 # Authentication
-cmiqr201z00i8ie8fitdg5t1b_Authentication_out_constraints = {
+cmiqqzrjz00i3ie8figf79cur_Authentication_out_constraints = {
   "code": {
-    "id": "cmise6h0700lj5vy7s4v9c10v",
+    "id": "cmish3lv5090t5vy7ppk8nh5y",
     "valueType": "preset",
     "required": True
   },
   "message": {
-    "id": "cmise6px400my5vy7g75s15nw",
+    "id": "cmish3n4c090y5vy7vozpz3c9",
     "valueType": "preset",
     "required": True
   },
   "userName": {
-    "id": "cmise6roq00n75vy7ybrbiod8",
+    "id": "cmish3roj091m5vy70dja7bsr",
     "valueType": "preset",
     "required": True
   },
   "userAff": {
-    "id": "cmise6tse00ne5vy7nh2re28j",
+    "id": "cmish3th3091t5vy7hnm0qk5t",
     "valueType": "preset",
     "required": True
   },
   "accessToken": {
-    "id": "cmise6vhr00nj5vy79f6dpfuy",
-    "valueType": "preset",
+    "id": "cmish3v9b091y5vy7b8isryog",
+    "valueType": "test-time",
     "required": False
   }
 }
 
 # Capabilities
-cmiqr201z00i8ie8fitdg5t1b_Capabilities_out_constraints = {
+cmiqqzrjz00i3ie8figf79cur_Capabilities_out_constraints = {
   "code": {
-    "id": "cmisel8x7017z5vy7ec1e56cu",
+    "id": "cmiwp7rmz05kq844gqqw69i5s",
     "valueType": "preset",
     "required": True
   },
   "message": {
-    "id": "cmisele87018w5vy7kc760njz",
+    "id": "cmiwp7ycr05kz844gpry7r479",
     "valueType": "preset",
     "required": True
   },
+  "streamingSupport": {
+    "id": "cmiwp9wl305qy844gnfzg8d6v",
+    "valueType": "preset",
+    "required": True
+  },
+  "streamingSupport.streamProtocolType": {
+    "id": "cmiwp9wl405r0844gevqq7thx",
+    "valueType": "preset",
+    "required": True
+  },
+  "streamingSupport.streamProtocolDesc": {
+    "id": "cmiwp9wl505r2844gnotixjmo",
+    "valueType": "preset",
+    "required": False
+  },
   "transportSupport": {
-    "id": "cmisencfu01gm5vy7g5psolwh",
+    "id": "cmiwp9wld05r4844gwbrgvweo",
     "valueType": "preset",
     "required": True
   },
   "transportSupport.transProtocolType": {
-    "id": "cmisencfx01go5vy7jrh8pa2a",
+    "id": "cmiwp9wlf05r6844g337ki5mc",
     "valueType": "preset",
     "required": True
   },
   "transportSupport.transProtocolDesc": {
-    "id": "cmisencfx01gq5vy7uokgn8u3",
+    "id": "cmiwp9wlf05r8844gnxagb6rb",
     "valueType": "preset",
     "required": False
   }
 }
 
-# SensorDeviceProfiles
-cmiqr201z00i8ie8fitdg5t1b_SensorDeviceProfiles_out_constraints = {
+# CameraProfiles
+cmiqqzrjz00i3ie8figf79cur_CameraProfiles_out_constraints = {
   "code": {
-    "id": "cmisev4br03dj5vy7q8tww5gm",
+    "id": "cmiwpbac505rs844g0w11qcj8",
     "valueType": "preset",
     "required": True
   },
   "message": {
-    "id": "cmiseva9203e25vy7xh9ygo6s",
+    "id": "cmiwpbir605s2844gy6l7ht7i",
     "valueType": "preset",
     "required": True
   },
-  "sensorDeviceList": {
-    "id": "cmisfgtvo07sw5vy7k8kfq13x",
+  "camList": {
+    "id": "cmiwpi3sx076w844g20jekxkx",
     "valueType": "preset",
     "required": True
   },
-  "sensorDeviceList.sensorDeviceID": {
-    "id": "cmisfgtvs07sy5vy7f2hjy5aa",
+  "camList.camID": {
+    "id": "cmiwpi3sz076y844gftp3b99j",
     "valueType": "preset",
     "required": True
   },
-  "sensorDeviceList.sensorDeviceType": {
-    "id": "cmisfgtvt07t05vy7qd9tbtc9",
+  "camList.camName": {
+    "id": "cmiwpi3t00770844gdctr9fw1",
     "valueType": "preset",
     "required": True
   },
-  "sensorDeviceList.sensorDeviceName": {
-    "id": "cmisfgtvt07t25vy79eg4cnlj",
-    "valueType": "preset",
-    "required": True
-  },
-  "sensorDeviceList.sensorDeviceLoc": {
-    "id": "cmisfgtvu07t45vy7oxufjeba",
+  "camList.camLoc": {
+    "id": "cmiwpi3t00772844gts4nv5ql",
     "valueType": "preset",
     "required": False
   },
-  "sensorDeviceList.sensorDeviceLoc.lon": {
-    "id": "cmisfgtvz07t65vy7n4m3aoe0",
+  "camList.camLoc.lon": {
+    "id": "cmiwpi3t50776844gcy9byurz",
     "valueType": "preset",
     "required": True
   },
-  "sensorDeviceList.sensorDeviceLoc.lat": {
-    "id": "cmisfgtw007t85vy7jrmgllyc",
+  "camList.camLoc.lat": {
+    "id": "cmiwpi3t50778844guj8t5it2",
     "valueType": "preset",
     "required": True
   },
-  "sensorDeviceList.sensorDeviceLoc.alt": {
-    "id": "cmisfgtw007ta5vy7ut58i0y3",
+  "camList.camLoc.alt": {
+    "id": "cmiwpi3t6077a844g0b0yeqx8",
     "valueType": "preset",
     "required": False
   },
-  "sensorDeviceList.sensorDeviceLoc.desc": {
-    "id": "cmisfgtw107tc5vy7as5hqx5m",
+  "camList.camLoc.desc": {
+    "id": "cmiwpi3t6077c844gk3w5sd4w",
     "valueType": "preset",
     "required": False
+  },
+  "camList.camConfig": {
+    "id": "cmiwpi3t00774844g2zghfgzy",
+    "valueType": "preset",
+    "required": False
+  },
+  "camList.camConfig.camType": {
+    "id": "cmiwpi3t6077e844gn2ohl1ou",
+    "valueType": "preset",
+    "required": True
   }
 }
 
-# SensorDeviceControl
-cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_out_constraints = {
+# PtzStatus
+cmiqqzrjz00i3ie8figf79cur_PtzStatus_out_constraints = {
   "code": {
-    "id": "cmisg4vxz089s5vy7qhna151g",
+    "id": "cmiwpo8gz0789844gz619d01h",
     "valueType": "preset",
     "required": True
   },
   "message": {
-    "id": "cmjch5wmv086jcfb3d2zeu1un",
+    "id": "cmiwpoeoi078i844g85lop6oe",
     "valueType": "preset",
     "required": True
   },
-  "sensorDeviceID": {
-    "id": "cmisg51v408a85vy7mrhteunz",
-    "referenceFieldId": "cmisg3n7u088o5vy75dl8ge3h",
-    "valueType": "request-based",
-    "required": True,
-    "referenceEndpoint": "/SensorDeviceControl",
-    "referenceField": "sensorDeviceID"
+  "position": {
+    "id": "cmiwpojna078r844g6ulioxop",
+    "valueType": "preset",
+    "required": False
   },
-  "sensorDeviceStatus": {
-    "id": "cmj6hdjek01qsxei0ydzyxlg3",
-    "valueType": "random",
-    "required": True,
-    "referenceField": "(참조 필드 미선택)",
-    "referenceEndpoint": "/SensorDeviceControl",
-    "validValueField": "sensorControl",
-    "validValues": [
-      "AlarmOn",
-      "AlarmOff"
-    ]
+  "position.pan": {
+    "id": "cmiwppn930791844g4wbst740",
+    "valueType": "preset",
+    "required": False
+  },
+  "position.tilt": {
+    "id": "cmiwpptx8079b844g1f7xa2y6",
+    "valueType": "preset",
+    "required": False
+  },
+  "position.zoom": {
+    "id": "cmiwpq2d4079l844gn2uy03vw",
+    "valueType": "preset",
+    "required": False
+  },
+  "moveStatus": {
+    "id": "cmiwpqqwx079z844gkr7zhzg3",
+    "valueType": "preset",
+    "required": True
+  },
+  "moveStatus.pan": {
+    "id": "cmiwpqw4u07a9844g8w3hl36p",
+    "valueType": "preset",
+    "required": False
+  },
+  "moveStatus.tilt": {
+    "id": "cmiwpr18g07aj844g12ft2m11",
+    "valueType": "preset",
+    "required": False
+  },
+  "moveStatus.zoom": {
+    "id": "cmiwpr6ja07as844gp1ll94fb",
+    "valueType": "preset",
+    "required": False
   }
 }
 
-# SensorDeviceControl2
-cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl2_out_constraints = {
+# PtzContinuousMove
+cmiqqzrjz00i3ie8figf79cur_PtzContinuousMove_out_constraints = {
   "code": {
-    "id": "cmisgsmo108me5vy7a070ga4t",
+    "id": "cmiwpuitl07d5844gzj2zay1m",
     "valueType": "preset",
     "required": True
   },
   "message": {
-    "id": "cmisgsssu08n85vy7rhriw5bx",
+    "id": "cmiwpupho07de844ghl7x9u0q",
     "valueType": "preset",
     "required": True
-  },
-  "sensorDeviceID": {
-    "id": "cmisgsuft08nf5vy70cyl59az",
-    "referenceFieldId": "cmisgef0108e15vy7pvj4b2yg",
-    "valueType": "request-based",
-    "required": True,
-    "referenceEndpoint": "/SensorDeviceControl2",
-    "referenceField": "sensorDeviceID"
-  },
-  "sensorDeviceStatus": {
-    "id": "cmisgsyrq08nn5vy7ggcm5ezc",
-    "referenceFieldId": "cmiskmz17000kugxnuas8675t",
-    "valueType": "request-based",
-    "required": True,
-    "referenceEndpoint": "/SensorDeviceControl2",
-    "referenceField": "commandType"
   }
 }
 
-# cmiqr201z00i8ie8fitdg5t1b 검증 리스트
-cmiqr201z00i8ie8fitdg5t1b_outConstraints = [
-    cmiqr201z00i8ie8fitdg5t1b_Authentication_out_constraints,
-    cmiqr201z00i8ie8fitdg5t1b_Capabilities_out_constraints,
-    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceProfiles_out_constraints,
-    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_out_constraints,
-    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl2_out_constraints,
+# PtzStop
+cmiqqzrjz00i3ie8figf79cur_PtzStop_out_constraints = {
+  "code": {
+    "id": "cmiwpx90h07f1844glcuw528e",
+    "valueType": "preset",
+    "required": True
+  },
+  "message": {
+    "id": "cmiwpxflk07fb844ge0ye0ib7",
+    "valueType": "preset",
+    "required": True
+  }
+}
+
+# cmiqqzrjz00i3ie8figf79cur 검증 리스트
+cmiqqzrjz00i3ie8figf79cur_outConstraints = [
+    cmiqqzrjz00i3ie8figf79cur_Authentication_out_constraints,
+    cmiqqzrjz00i3ie8figf79cur_Capabilities_out_constraints,
+    cmiqqzrjz00i3ie8figf79cur_CameraProfiles_out_constraints,
+    cmiqqzrjz00i3ie8figf79cur_PtzStatus_out_constraints,
+    cmiqqzrjz00i3ie8figf79cur_PtzContinuousMove_out_constraints,
+    cmiqqzrjz00i3ie8figf79cur_PtzStop_out_constraints,
 ]
 
 # Authentication
@@ -499,231 +538,192 @@ cmiqr1acx00i5ie8fi022t1hp_webhook_inConstraints = [
 ]
 
 # Authentication
-cmiqqzrjz00i3ie8figf79cur_Authentication_out_constraints = {
+cmiqr201z00i8ie8fitdg5t1b_Authentication_out_constraints = {
   "code": {
-    "id": "cmish3lv5090t5vy7ppk8nh5y",
+    "id": "cmise6h0700lj5vy7s4v9c10v",
     "valueType": "preset",
     "required": True
   },
   "message": {
-    "id": "cmish3n4c090y5vy7vozpz3c9",
+    "id": "cmise6px400my5vy7g75s15nw",
     "valueType": "preset",
     "required": True
   },
   "userName": {
-    "id": "cmish3roj091m5vy70dja7bsr",
+    "id": "cmise6roq00n75vy7ybrbiod8",
     "valueType": "preset",
     "required": True
   },
   "userAff": {
-    "id": "cmish3th3091t5vy7hnm0qk5t",
+    "id": "cmise6tse00ne5vy7nh2re28j",
     "valueType": "preset",
     "required": True
   },
   "accessToken": {
-    "id": "cmish3v9b091y5vy7b8isryog",
-    "valueType": "test-time",
+    "id": "cmise6vhr00nj5vy79f6dpfuy",
+    "valueType": "preset",
     "required": False
   }
 }
 
 # Capabilities
-cmiqqzrjz00i3ie8figf79cur_Capabilities_out_constraints = {
+cmiqr201z00i8ie8fitdg5t1b_Capabilities_out_constraints = {
   "code": {
-    "id": "cmiwp7rmz05kq844gqqw69i5s",
+    "id": "cmisel8x7017z5vy7ec1e56cu",
     "valueType": "preset",
     "required": True
   },
   "message": {
-    "id": "cmiwp7ycr05kz844gpry7r479",
+    "id": "cmisele87018w5vy7kc760njz",
     "valueType": "preset",
     "required": True
-  },
-  "streamingSupport": {
-    "id": "cmiwp9wl305qy844gnfzg8d6v",
-    "valueType": "preset",
-    "required": True
-  },
-  "streamingSupport.streamProtocolType": {
-    "id": "cmiwp9wl405r0844gevqq7thx",
-    "valueType": "preset",
-    "required": True
-  },
-  "streamingSupport.streamProtocolDesc": {
-    "id": "cmiwp9wl505r2844gnotixjmo",
-    "valueType": "preset",
-    "required": False
   },
   "transportSupport": {
-    "id": "cmiwp9wld05r4844gwbrgvweo",
+    "id": "cmisencfu01gm5vy7g5psolwh",
     "valueType": "preset",
     "required": True
   },
   "transportSupport.transProtocolType": {
-    "id": "cmiwp9wlf05r6844g337ki5mc",
+    "id": "cmisencfx01go5vy7jrh8pa2a",
     "valueType": "preset",
     "required": True
   },
   "transportSupport.transProtocolDesc": {
-    "id": "cmiwp9wlf05r8844gnxagb6rb",
+    "id": "cmisencfx01gq5vy7uokgn8u3",
     "valueType": "preset",
     "required": False
   }
 }
 
-# CameraProfiles
-cmiqqzrjz00i3ie8figf79cur_CameraProfiles_out_constraints = {
+# SensorDeviceProfiles
+cmiqr201z00i8ie8fitdg5t1b_SensorDeviceProfiles_out_constraints = {
   "code": {
-    "id": "cmiwpbac505rs844g0w11qcj8",
+    "id": "cmisev4br03dj5vy7q8tww5gm",
     "valueType": "preset",
     "required": True
   },
   "message": {
-    "id": "cmiwpbir605s2844gy6l7ht7i",
+    "id": "cmiseva9203e25vy7xh9ygo6s",
     "valueType": "preset",
     "required": True
   },
-  "camList": {
-    "id": "cmiwpi3sx076w844g20jekxkx",
+  "sensorDeviceList": {
+    "id": "cmisfgtvo07sw5vy7k8kfq13x",
     "valueType": "preset",
     "required": True
   },
-  "camList.camID": {
-    "id": "cmiwpi3sz076y844gftp3b99j",
+  "sensorDeviceList.sensorDeviceID": {
+    "id": "cmisfgtvs07sy5vy7f2hjy5aa",
     "valueType": "preset",
     "required": True
   },
-  "camList.camName": {
-    "id": "cmiwpi3t00770844gdctr9fw1",
+  "sensorDeviceList.sensorDeviceType": {
+    "id": "cmisfgtvt07t05vy7qd9tbtc9",
     "valueType": "preset",
     "required": True
   },
-  "camList.camLoc": {
-    "id": "cmiwpi3t00772844gts4nv5ql",
+  "sensorDeviceList.sensorDeviceName": {
+    "id": "cmisfgtvt07t25vy79eg4cnlj",
+    "valueType": "preset",
+    "required": True
+  },
+  "sensorDeviceList.sensorDeviceLoc": {
+    "id": "cmisfgtvu07t45vy7oxufjeba",
     "valueType": "preset",
     "required": False
   },
-  "camList.camLoc.lon": {
-    "id": "cmiwpi3t50776844gcy9byurz",
+  "sensorDeviceList.sensorDeviceLoc.lon": {
+    "id": "cmisfgtvz07t65vy7n4m3aoe0",
     "valueType": "preset",
     "required": True
   },
-  "camList.camLoc.lat": {
-    "id": "cmiwpi3t50778844guj8t5it2",
+  "sensorDeviceList.sensorDeviceLoc.lat": {
+    "id": "cmisfgtw007t85vy7jrmgllyc",
     "valueType": "preset",
     "required": True
   },
-  "camList.camLoc.alt": {
-    "id": "cmiwpi3t6077a844g0b0yeqx8",
+  "sensorDeviceList.sensorDeviceLoc.alt": {
+    "id": "cmisfgtw007ta5vy7ut58i0y3",
     "valueType": "preset",
     "required": False
   },
-  "camList.camLoc.desc": {
-    "id": "cmiwpi3t6077c844gk3w5sd4w",
+  "sensorDeviceList.sensorDeviceLoc.desc": {
+    "id": "cmisfgtw107tc5vy7as5hqx5m",
     "valueType": "preset",
     "required": False
-  },
-  "camList.camConfig": {
-    "id": "cmiwpi3t00774844g2zghfgzy",
-    "valueType": "preset",
-    "required": False
-  },
-  "camList.camConfig.camType": {
-    "id": "cmiwpi3t6077e844gn2ohl1ou",
-    "valueType": "preset",
-    "required": True
   }
 }
 
-# PtzStatus
-cmiqqzrjz00i3ie8figf79cur_PtzStatus_out_constraints = {
+# SensorDeviceControl
+cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_out_constraints = {
   "code": {
-    "id": "cmiwpo8gz0789844gz619d01h",
+    "id": "cmisg4vxz089s5vy7qhna151g",
     "valueType": "preset",
     "required": True
   },
   "message": {
-    "id": "cmiwpoeoi078i844g85lop6oe",
+    "id": "cmjch5wmv086jcfb3d2zeu1un",
     "valueType": "preset",
     "required": True
   },
-  "position": {
-    "id": "cmiwpojna078r844g6ulioxop",
-    "valueType": "preset",
-    "required": False
+  "sensorDeviceID": {
+    "id": "cmisg51v408a85vy7mrhteunz",
+    "referenceFieldId": "cmisg3n7u088o5vy75dl8ge3h",
+    "valueType": "request-based",
+    "required": True,
+    "referenceEndpoint": "/SensorDeviceControl",
+    "referenceField": "sensorDeviceID"
   },
-  "position.pan": {
-    "id": "cmiwppn930791844g4wbst740",
-    "valueType": "preset",
-    "required": False
-  },
-  "position.tilt": {
-    "id": "cmiwpptx8079b844g1f7xa2y6",
-    "valueType": "preset",
-    "required": False
-  },
-  "position.zoom": {
-    "id": "cmiwpq2d4079l844gn2uy03vw",
-    "valueType": "preset",
-    "required": False
-  },
-  "moveStatus": {
-    "id": "cmiwpqqwx079z844gkr7zhzg3",
-    "valueType": "preset",
-    "required": True
-  },
-  "moveStatus.pan": {
-    "id": "cmiwpqw4u07a9844g8w3hl36p",
-    "valueType": "preset",
-    "required": False
-  },
-  "moveStatus.tilt": {
-    "id": "cmiwpr18g07aj844g12ft2m11",
-    "valueType": "preset",
-    "required": False
-  },
-  "moveStatus.zoom": {
-    "id": "cmiwpr6ja07as844gp1ll94fb",
-    "valueType": "preset",
-    "required": False
+  "sensorDeviceStatus": {
+    "id": "cmj6hdjek01qsxei0ydzyxlg3",
+    "valueType": "random",
+    "required": True,
+    "referenceField": "(참조 필드 미선택)",
+    "referenceEndpoint": "/SensorDeviceControl",
+    "validValueField": "sensorControl",
+    "validValues": [
+      "AlarmOn",
+      "AlarmOff"
+    ]
   }
 }
 
-# PtzContinuousMove
-cmiqqzrjz00i3ie8figf79cur_PtzContinuousMove_out_constraints = {
+# SensorDeviceControl2
+cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl2_out_constraints = {
   "code": {
-    "id": "cmiwpuitl07d5844gzj2zay1m",
+    "id": "cmisgsmo108me5vy7a070ga4t",
     "valueType": "preset",
     "required": True
   },
   "message": {
-    "id": "cmiwpupho07de844ghl7x9u0q",
-    "valueType": "preset",
-    "required": True
-  }
-}
-
-# PtzStop
-cmiqqzrjz00i3ie8figf79cur_PtzStop_out_constraints = {
-  "code": {
-    "id": "cmiwpx90h07f1844glcuw528e",
+    "id": "cmisgsssu08n85vy7rhriw5bx",
     "valueType": "preset",
     "required": True
   },
-  "message": {
-    "id": "cmiwpxflk07fb844ge0ye0ib7",
-    "valueType": "preset",
-    "required": True
+  "sensorDeviceID": {
+    "id": "cmisgsuft08nf5vy70cyl59az",
+    "referenceFieldId": "cmisgef0108e15vy7pvj4b2yg",
+    "valueType": "request-based",
+    "required": True,
+    "referenceEndpoint": "/SensorDeviceControl2",
+    "referenceField": "sensorDeviceID"
+  },
+  "sensorDeviceStatus": {
+    "id": "cmisgsyrq08nn5vy7ggcm5ezc",
+    "referenceFieldId": "cmiskmz17000kugxnuas8675t",
+    "valueType": "request-based",
+    "required": True,
+    "referenceEndpoint": "/SensorDeviceControl2",
+    "referenceField": "commandType"
   }
 }
 
-# cmiqqzrjz00i3ie8figf79cur 검증 리스트
-cmiqqzrjz00i3ie8figf79cur_outConstraints = [
-    cmiqqzrjz00i3ie8figf79cur_Authentication_out_constraints,
-    cmiqqzrjz00i3ie8figf79cur_Capabilities_out_constraints,
-    cmiqqzrjz00i3ie8figf79cur_CameraProfiles_out_constraints,
-    cmiqqzrjz00i3ie8figf79cur_PtzStatus_out_constraints,
-    cmiqqzrjz00i3ie8figf79cur_PtzContinuousMove_out_constraints,
-    cmiqqzrjz00i3ie8figf79cur_PtzStop_out_constraints,
+# cmiqr201z00i8ie8fitdg5t1b 검증 리스트
+cmiqr201z00i8ie8fitdg5t1b_outConstraints = [
+    cmiqr201z00i8ie8fitdg5t1b_Authentication_out_constraints,
+    cmiqr201z00i8ie8fitdg5t1b_Capabilities_out_constraints,
+    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceProfiles_out_constraints,
+    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_out_constraints,
+    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl2_out_constraints,
 ]
 

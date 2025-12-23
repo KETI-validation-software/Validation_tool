@@ -2,36 +2,49 @@ from json_checker import OptionalKey
 
 
 # Authentication
-cmiqr201z00i8ie8fitdg5t1b_Authentication_in_schema = {
+cmiqqzrjz00i3ie8figf79cur_Authentication_in_schema = {
     "userID": str,
     "userPW": str,
 }
 
 # Capabilities
-cmiqr201z00i8ie8fitdg5t1b_Capabilities_in_schema = {}
+cmiqqzrjz00i3ie8figf79cur_Capabilities_in_schema = {}
 
-# SensorDeviceProfiles
-cmiqr201z00i8ie8fitdg5t1b_SensorDeviceProfiles_in_schema = {}
+# CameraProfiles
+cmiqqzrjz00i3ie8figf79cur_CameraProfiles_in_schema = {}
 
-# SensorDeviceControl
-cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_in_schema = {
-    "sensorDeviceID": str,
-    "commandType": str,
+# PtzStatus
+cmiqqzrjz00i3ie8figf79cur_PtzStatus_in_schema = {
+    "camID": str,
 }
 
-# SensorDeviceControl2
-cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl2_in_schema = {
-    "sensorDeviceID": str,
-    "commandType": str,
+# PtzContinuousMove
+cmiqqzrjz00i3ie8figf79cur_PtzContinuousMove_in_schema = {
+    "camID": str,
+    "velocity": {
+    OptionalKey("pan"): int,
+    OptionalKey("tilt"): int,
+    OptionalKey("zoom"): int,
+},
+    OptionalKey("timeOut"): int,
 }
 
-# cmiqr201z00i8ie8fitdg5t1b 스키마 리스트
-cmiqr201z00i8ie8fitdg5t1b_inSchema = [
-    cmiqr201z00i8ie8fitdg5t1b_Authentication_in_schema,
-    cmiqr201z00i8ie8fitdg5t1b_Capabilities_in_schema,
-    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceProfiles_in_schema,
-    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_in_schema,
-    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl2_in_schema,
+# PtzStop
+cmiqqzrjz00i3ie8figf79cur_PtzStop_in_schema = {
+    "camID": str,
+    OptionalKey("pan"): bool,
+    OptionalKey("tilt"): bool,
+    OptionalKey("zoom"): bool,
+}
+
+# cmiqqzrjz00i3ie8figf79cur 스키마 리스트
+cmiqqzrjz00i3ie8figf79cur_inSchema = [
+    cmiqqzrjz00i3ie8figf79cur_Authentication_in_schema,
+    cmiqqzrjz00i3ie8figf79cur_Capabilities_in_schema,
+    cmiqqzrjz00i3ie8figf79cur_CameraProfiles_in_schema,
+    cmiqqzrjz00i3ie8figf79cur_PtzStatus_in_schema,
+    cmiqqzrjz00i3ie8figf79cur_PtzContinuousMove_in_schema,
+    cmiqqzrjz00i3ie8figf79cur_PtzStop_in_schema,
 ]
 
 # Authentication
@@ -111,48 +124,35 @@ cmiqr1acx00i5ie8fi022t1hp_webhook_OutSchema = [
 ]
 
 # Authentication
-cmiqqzrjz00i3ie8figf79cur_Authentication_in_schema = {
+cmiqr201z00i8ie8fitdg5t1b_Authentication_in_schema = {
     "userID": str,
     "userPW": str,
 }
 
 # Capabilities
-cmiqqzrjz00i3ie8figf79cur_Capabilities_in_schema = {}
+cmiqr201z00i8ie8fitdg5t1b_Capabilities_in_schema = {}
 
-# CameraProfiles
-cmiqqzrjz00i3ie8figf79cur_CameraProfiles_in_schema = {}
+# SensorDeviceProfiles
+cmiqr201z00i8ie8fitdg5t1b_SensorDeviceProfiles_in_schema = {}
 
-# PtzStatus
-cmiqqzrjz00i3ie8figf79cur_PtzStatus_in_schema = {
-    "camID": str,
+# SensorDeviceControl
+cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_in_schema = {
+    "sensorDeviceID": str,
+    "commandType": str,
 }
 
-# PtzContinuousMove
-cmiqqzrjz00i3ie8figf79cur_PtzContinuousMove_in_schema = {
-    "camID": str,
-    "velocity": {
-    OptionalKey("pan"): int,
-    OptionalKey("tilt"): int,
-    OptionalKey("zoom"): int,
-},
-    OptionalKey("timeOut"): int,
+# SensorDeviceControl2
+cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl2_in_schema = {
+    "sensorDeviceID": str,
+    "commandType": str,
 }
 
-# PtzStop
-cmiqqzrjz00i3ie8figf79cur_PtzStop_in_schema = {
-    "camID": str,
-    OptionalKey("pan"): bool,
-    OptionalKey("tilt"): bool,
-    OptionalKey("zoom"): bool,
-}
-
-# cmiqqzrjz00i3ie8figf79cur 스키마 리스트
-cmiqqzrjz00i3ie8figf79cur_inSchema = [
-    cmiqqzrjz00i3ie8figf79cur_Authentication_in_schema,
-    cmiqqzrjz00i3ie8figf79cur_Capabilities_in_schema,
-    cmiqqzrjz00i3ie8figf79cur_CameraProfiles_in_schema,
-    cmiqqzrjz00i3ie8figf79cur_PtzStatus_in_schema,
-    cmiqqzrjz00i3ie8figf79cur_PtzContinuousMove_in_schema,
-    cmiqqzrjz00i3ie8figf79cur_PtzStop_in_schema,
+# cmiqr201z00i8ie8fitdg5t1b 스키마 리스트
+cmiqr201z00i8ie8fitdg5t1b_inSchema = [
+    cmiqr201z00i8ie8fitdg5t1b_Authentication_in_schema,
+    cmiqr201z00i8ie8fitdg5t1b_Capabilities_in_schema,
+    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceProfiles_in_schema,
+    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_in_schema,
+    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl2_in_schema,
 ]
 

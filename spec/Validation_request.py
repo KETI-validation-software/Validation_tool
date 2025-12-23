@@ -1,5 +1,5 @@
 # Authentication
-cmiqr201z00i8ie8fitdg5t1b_Authentication_in_validation = {
+cmiqqzrjz00i3ie8figf79cur_Authentication_in_validation = {
   "userID": {
     "enabled": True,
     "validationType": "specified-value-match",
@@ -19,62 +19,55 @@ cmiqr201z00i8ie8fitdg5t1b_Authentication_in_validation = {
 }
 
 # Capabilities
-cmiqr201z00i8ie8fitdg5t1b_Capabilities_in_validation = {}
+cmiqqzrjz00i3ie8figf79cur_Capabilities_in_validation = {}
 
-# SensorDeviceProfiles
-cmiqr201z00i8ie8fitdg5t1b_SensorDeviceProfiles_in_validation = {}
+# CameraProfiles
+cmiqqzrjz00i3ie8figf79cur_CameraProfiles_in_validation = {}
 
-# SensorDeviceControl
-cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_in_validation = {
-  "sensorDeviceID": {
+# PtzStatus
+cmiqqzrjz00i3ie8figf79cur_PtzStatus_in_validation = {
+  "camID": {
     "enabled": True,
     "validationType": "response-field-list-match",
-    "referenceFieldId": "cmisfgtvs07sy5vy7f2hjy5aa",
-    "referenceField": "sensorDeviceID",
-    "referenceEndpoint": "/SensorDeviceProfiles",
-    "score": 0
-  },
-  "commandType": {
-    "enabled": True,
-    "validationType": "response-field-list-match",
+    "referenceFieldId": "cmiwpi3sm076e844gan3rcpwr",
+    "referenceField": "camID",
+    "referenceEndpoint": "/CameraProfiles",
     "score": 0
   }
 }
 
-# SensorDeviceControl2
-cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl2_in_validation = {
-  "sensorDeviceID": {
+# PtzContinuousMove
+cmiqqzrjz00i3ie8figf79cur_PtzContinuousMove_in_validation = {
+  "camID": {
     "enabled": True,
-    "validationType": "request-field-match",
-    "referenceFieldId": "cmisg3n7u088o5vy75dl8ge3h",
-    "referenceField": "sensorDeviceID",
-    "referenceEndpoint": "/SensorDeviceControl",
-    "score": 0
-  },
-  "commandType": {
-    "enabled": True,
-    "validationType": "valid-value-match",
-    "validValueMatchType": "validation-field",
-    "validValueFieldName": "sensorControl",
-    "validValueOperator": "excludeReference",
-    "allowedValues": [
-      "AlarmOn",
-      "AlarmOff"
-    ],
-    "referenceFieldId": "cmj6hdjek01qsxei0ydzyxlg3",
-    "referenceField": "sensorDeviceStatus",
-    "referenceEndpoint": "/SensorDeviceControl",
+    "validationType": "response-field-list-match",
+    "referenceFieldId": "cmiwpi3sm076e844gan3rcpwr",
+    "referenceField": "camID",
+    "referenceEndpoint": "/CameraProfiles",
     "score": 0
   }
 }
 
-# cmiqr201z00i8ie8fitdg5t1b 검증 리스트
-cmiqr201z00i8ie8fitdg5t1b_inValidation = [
-    cmiqr201z00i8ie8fitdg5t1b_Authentication_in_validation,
-    cmiqr201z00i8ie8fitdg5t1b_Capabilities_in_validation,
-    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceProfiles_in_validation,
-    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_in_validation,
-    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl2_in_validation,
+# PtzStop
+cmiqqzrjz00i3ie8figf79cur_PtzStop_in_validation = {
+  "camID": {
+    "enabled": True,
+    "validationType": "response-field-list-match",
+    "referenceFieldId": "cmiwpi3sz076y844gftp3b99j",
+    "referenceField": "camID",
+    "referenceEndpoint": "/CameraProfiles",
+    "score": 0
+  }
+}
+
+# cmiqqzrjz00i3ie8figf79cur 검증 리스트
+cmiqqzrjz00i3ie8figf79cur_inValidation = [
+    cmiqqzrjz00i3ie8figf79cur_Authentication_in_validation,
+    cmiqqzrjz00i3ie8figf79cur_Capabilities_in_validation,
+    cmiqqzrjz00i3ie8figf79cur_CameraProfiles_in_validation,
+    cmiqqzrjz00i3ie8figf79cur_PtzStatus_in_validation,
+    cmiqqzrjz00i3ie8figf79cur_PtzContinuousMove_in_validation,
+    cmiqqzrjz00i3ie8figf79cur_PtzStop_in_validation,
 ]
 
 # Authentication
@@ -179,7 +172,7 @@ cmiqr1acx00i5ie8fi022t1hp_inValidation = [
 ]
 
 # Authentication
-cmiqqzrjz00i3ie8figf79cur_Authentication_in_validation = {
+cmiqr201z00i8ie8fitdg5t1b_Authentication_in_validation = {
   "userID": {
     "enabled": True,
     "validationType": "specified-value-match",
@@ -199,54 +192,61 @@ cmiqqzrjz00i3ie8figf79cur_Authentication_in_validation = {
 }
 
 # Capabilities
-cmiqqzrjz00i3ie8figf79cur_Capabilities_in_validation = {}
+cmiqr201z00i8ie8fitdg5t1b_Capabilities_in_validation = {}
 
-# CameraProfiles
-cmiqqzrjz00i3ie8figf79cur_CameraProfiles_in_validation = {}
+# SensorDeviceProfiles
+cmiqr201z00i8ie8fitdg5t1b_SensorDeviceProfiles_in_validation = {}
 
-# PtzStatus
-cmiqqzrjz00i3ie8figf79cur_PtzStatus_in_validation = {
-  "camID": {
+# SensorDeviceControl
+cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_in_validation = {
+  "sensorDeviceID": {
     "enabled": True,
     "validationType": "response-field-list-match",
-    "referenceFieldId": "cmiwpi3sm076e844gan3rcpwr",
-    "referenceField": "camID",
-    "referenceEndpoint": "/CameraProfiles",
+    "referenceFieldId": "cmisfgtvs07sy5vy7f2hjy5aa",
+    "referenceField": "sensorDeviceID",
+    "referenceEndpoint": "/SensorDeviceProfiles",
+    "score": 0
+  },
+  "commandType": {
+    "enabled": True,
+    "validationType": "response-field-list-match",
     "score": 0
   }
 }
 
-# PtzContinuousMove
-cmiqqzrjz00i3ie8figf79cur_PtzContinuousMove_in_validation = {
-  "camID": {
+# SensorDeviceControl2
+cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl2_in_validation = {
+  "sensorDeviceID": {
     "enabled": True,
-    "validationType": "response-field-list-match",
-    "referenceFieldId": "cmiwpi3sm076e844gan3rcpwr",
-    "referenceField": "camID",
-    "referenceEndpoint": "/CameraProfiles",
+    "validationType": "request-field-match",
+    "referenceFieldId": "cmisg3n7u088o5vy75dl8ge3h",
+    "referenceField": "sensorDeviceID",
+    "referenceEndpoint": "/SensorDeviceControl",
+    "score": 0
+  },
+  "commandType": {
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueMatchType": "validation-field",
+    "validValueFieldName": "sensorControl",
+    "validValueOperator": "excludeReference",
+    "allowedValues": [
+      "AlarmOn",
+      "AlarmOff"
+    ],
+    "referenceFieldId": "cmj6hdjek01qsxei0ydzyxlg3",
+    "referenceField": "sensorDeviceStatus",
+    "referenceEndpoint": "/SensorDeviceControl",
     "score": 0
   }
 }
 
-# PtzStop
-cmiqqzrjz00i3ie8figf79cur_PtzStop_in_validation = {
-  "camID": {
-    "enabled": True,
-    "validationType": "response-field-list-match",
-    "referenceFieldId": "cmiwpi3sz076y844gftp3b99j",
-    "referenceField": "camID",
-    "referenceEndpoint": "/CameraProfiles",
-    "score": 0
-  }
-}
-
-# cmiqqzrjz00i3ie8figf79cur 검증 리스트
-cmiqqzrjz00i3ie8figf79cur_inValidation = [
-    cmiqqzrjz00i3ie8figf79cur_Authentication_in_validation,
-    cmiqqzrjz00i3ie8figf79cur_Capabilities_in_validation,
-    cmiqqzrjz00i3ie8figf79cur_CameraProfiles_in_validation,
-    cmiqqzrjz00i3ie8figf79cur_PtzStatus_in_validation,
-    cmiqqzrjz00i3ie8figf79cur_PtzContinuousMove_in_validation,
-    cmiqqzrjz00i3ie8figf79cur_PtzStop_in_validation,
+# cmiqr201z00i8ie8fitdg5t1b 검증 리스트
+cmiqr201z00i8ie8fitdg5t1b_inValidation = [
+    cmiqr201z00i8ie8fitdg5t1b_Authentication_in_validation,
+    cmiqr201z00i8ie8fitdg5t1b_Capabilities_in_validation,
+    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceProfiles_in_validation,
+    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_in_validation,
+    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl2_in_validation,
 ]
 

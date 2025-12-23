@@ -1,112 +1,110 @@
 # Authentication
-cmiqr201z00i8ie8fitdg5t1b_Authentication_out_data = {
+cmiqqzrjz00i3ie8figf79cur_Authentication_out_data = {
     "code": "200",
     "message": "성공",
     "userName": "관리자",
-    "userAff": "오산시",
-    "accessToken": "abcde1234"
+    "userAff": "오산시청",
+    "accessToken": ""
 }
 
 # Capabilities
-cmiqr201z00i8ie8fitdg5t1b_Capabilities_out_data = {
-    "code": "",
-    "message": "",
+cmiqqzrjz00i3ie8figf79cur_Capabilities_out_data = {
+    "code": "200",
+    "message": "성공",
+    "streamingSupport": [
+        {
+        "streamProtocolType": "RTSP",
+        "streamProtocolDesc": "Unicast"
+    }
+],
     "transportSupport": [
         {
         "transProtocolType": "LongPolling",
-        "transProtocolDesc": "none"
-    },
-        {
-        "transProtocolType": "Webhook",
-        "transProtocolDesc": "none"
+        "transProtocolDesc": ""
     }
 ]
 }
 
-# SensorDeviceProfiles
-cmiqr201z00i8ie8fitdg5t1b_SensorDeviceProfiles_out_data = {
-    "code": "",
-    "message": "",
-    "sensorDeviceList": [
-        {
-        "sensorDeviceID": "iot0001",
-        "sensorDeviceType": "홍채인식",
-        "sensorDeviceName": "홍채 센서",
-        "sensorDeviceLoc": {
-        "lon": "12",
-        "lat": "233",
-        "alt": "122",
-        "desc": "복도"
-    }
-    },
-        {
-        "sensorDeviceID": "iot0002",
-        "sensorDeviceType": "온도",
-        "sensorDeviceName": "온도센서",
-        "sensorDeviceLoc": {
-        "lon": "24",
-        "lat": "367",
-        "alt": "234",
-        "desc": "출입구"
-    }
-    },
-        {
-        "sensorDeviceID": "iot0003",
-        "sensorDeviceType": "지문",
-        "sensorDeviceName": "지문센서",
-        "sensorDeviceLoc": {
-        "lon": "486",
-        "lat": "54",
-        "alt": "6",
-        "desc": "후문"
-    }
-    },
-        {
-        "sensorDeviceID": "iot0004",
-        "sensorDeviceType": "온도",
-        "sensorDeviceName": "온도센서",
-        "sensorDeviceLoc": {
-        "lon": "123",
-        "lat": "42",
-        "alt": "55",
-        "desc": "복도"
-    }
-    }
-]
-}
-
-# SensorDeviceControl
-cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_out_data = {
+# CameraProfiles
+cmiqqzrjz00i3ie8figf79cur_CameraProfiles_out_data = {
     "code": "200",
     "message": "성공",
-    "sensorDeviceID": "",
-    "sensorDeviceStatus": ""
+    "camList": [
+        {
+        "camID": "cam0001",
+        "camName": "카메라1",
+        "camLoc": {
+        "lon": "127.127730",
+        "lat": "38.439801",
+        "alt": "32.131",
+        "desc": "3층복도"
+    },
+        "camConfig": {
+        "camType": "PTZ"
+    }
+    },
+        {
+        "camID": "cam0002",
+        "camName": "카메라2",
+        "camLoc": {
+        "lon": "127.127730",
+        "lat": "37.33671",
+        "alt": "",
+        "desc": ""
+    },
+        "camConfig": {
+        "camType": "dome"
+    }
+    }
+]
 }
 
-# SensorDeviceControl2
-cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl2_out_data = {
+# PtzStatus
+cmiqqzrjz00i3ie8figf79cur_PtzStatus_out_data = {
     "code": "200",
     "message": "성공",
-    "sensorDeviceID": "",
-    "sensorDeviceStatus": ""
+    "position": {
+    "pan": 10,
+    "tilt": 20,
+    "zoom": 30
+},
+    "moveStatus": {
+    "pan": "정지",
+    "tilt": "이동중",
+    "zoom": "정지"
+}
 }
 
-# cmiqr201z00i8ie8fitdg5t1b 데이터 리스트
-cmiqr201z00i8ie8fitdg5t1b_outData = [
-    cmiqr201z00i8ie8fitdg5t1b_Authentication_out_data,
-    cmiqr201z00i8ie8fitdg5t1b_Capabilities_out_data,
-    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceProfiles_out_data,
-    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_out_data,
-    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl2_out_data,
+# PtzContinuousMove
+cmiqqzrjz00i3ie8figf79cur_PtzContinuousMove_out_data = {
+    "code": "200",
+    "message": "성공"
+}
+
+# PtzStop
+cmiqqzrjz00i3ie8figf79cur_PtzStop_out_data = {
+    "code": "200",
+    "message": "성공"
+}
+
+# cmiqqzrjz00i3ie8figf79cur 데이터 리스트
+cmiqqzrjz00i3ie8figf79cur_outData = [
+    cmiqqzrjz00i3ie8figf79cur_Authentication_out_data,
+    cmiqqzrjz00i3ie8figf79cur_Capabilities_out_data,
+    cmiqqzrjz00i3ie8figf79cur_CameraProfiles_out_data,
+    cmiqqzrjz00i3ie8figf79cur_PtzStatus_out_data,
+    cmiqqzrjz00i3ie8figf79cur_PtzContinuousMove_out_data,
+    cmiqqzrjz00i3ie8figf79cur_PtzStop_out_data,
 ]
 
-# cmiqr201z00i8ie8fitdg5t1b API endpoint
-cmiqr201z00i8ie8fitdg5t1b_messages = [
+# cmiqqzrjz00i3ie8figf79cur API endpoint
+cmiqqzrjz00i3ie8figf79cur_messages = [
     "Authentication",
     "Capabilities",
-    "SensorDeviceProfiles",
-    "SensorDeviceControl",
-    "SensorDeviceControl2",
+    "CameraProfiles",
+    "PtzStatus",
+    "PtzContinuousMove",
+    "PtzStop",
 ]
 
 # Authentication
@@ -283,111 +281,113 @@ cmiqr1acx00i5ie8fi022t1hp_messages = [
 ]
 
 # Authentication
-cmiqqzrjz00i3ie8figf79cur_Authentication_out_data = {
+cmiqr201z00i8ie8fitdg5t1b_Authentication_out_data = {
     "code": "200",
     "message": "성공",
     "userName": "관리자",
-    "userAff": "오산시청",
-    "accessToken": ""
+    "userAff": "오산시",
+    "accessToken": "abcde1234"
 }
 
 # Capabilities
-cmiqqzrjz00i3ie8figf79cur_Capabilities_out_data = {
-    "code": "200",
-    "message": "성공",
-    "streamingSupport": [
-        {
-        "streamProtocolType": "RTSP",
-        "streamProtocolDesc": "Unicast"
-    }
-],
+cmiqr201z00i8ie8fitdg5t1b_Capabilities_out_data = {
+    "code": "",
+    "message": "",
     "transportSupport": [
         {
         "transProtocolType": "LongPolling",
-        "transProtocolDesc": ""
-    }
-]
-}
-
-# CameraProfiles
-cmiqqzrjz00i3ie8figf79cur_CameraProfiles_out_data = {
-    "code": "200",
-    "message": "성공",
-    "camList": [
-        {
-        "camID": "cam0001",
-        "camName": "카메라1",
-        "camLoc": {
-        "lon": "127.127730",
-        "lat": "38.439801",
-        "alt": "32.131",
-        "desc": "3층복도"
-    },
-        "camConfig": {
-        "camType": "PTZ"
-    }
+        "transProtocolDesc": "none"
     },
         {
-        "camID": "cam0002",
-        "camName": "카메라2",
-        "camLoc": {
-        "lon": "127.127730",
-        "lat": "37.33671",
-        "alt": "",
-        "desc": ""
+        "transProtocolType": "Webhook",
+        "transProtocolDesc": "none"
+    }
+]
+}
+
+# SensorDeviceProfiles
+cmiqr201z00i8ie8fitdg5t1b_SensorDeviceProfiles_out_data = {
+    "code": "",
+    "message": "",
+    "sensorDeviceList": [
+        {
+        "sensorDeviceID": "iot0001",
+        "sensorDeviceType": "홍채인식",
+        "sensorDeviceName": "홍채 센서",
+        "sensorDeviceLoc": {
+        "lon": "12",
+        "lat": "233",
+        "alt": "122",
+        "desc": "복도"
+    }
     },
-        "camConfig": {
-        "camType": "dome"
+        {
+        "sensorDeviceID": "iot0002",
+        "sensorDeviceType": "온도",
+        "sensorDeviceName": "온도센서",
+        "sensorDeviceLoc": {
+        "lon": "24",
+        "lat": "367",
+        "alt": "234",
+        "desc": "출입구"
+    }
+    },
+        {
+        "sensorDeviceID": "iot0003",
+        "sensorDeviceType": "지문",
+        "sensorDeviceName": "지문센서",
+        "sensorDeviceLoc": {
+        "lon": "486",
+        "lat": "54",
+        "alt": "6",
+        "desc": "후문"
+    }
+    },
+        {
+        "sensorDeviceID": "iot0004",
+        "sensorDeviceType": "온도",
+        "sensorDeviceName": "온도센서",
+        "sensorDeviceLoc": {
+        "lon": "123",
+        "lat": "42",
+        "alt": "55",
+        "desc": "복도"
     }
     }
 ]
 }
 
-# PtzStatus
-cmiqqzrjz00i3ie8figf79cur_PtzStatus_out_data = {
+# SensorDeviceControl
+cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_out_data = {
     "code": "200",
     "message": "성공",
-    "position": {
-    "pan": 10,
-    "tilt": 20,
-    "zoom": 30
-},
-    "moveStatus": {
-    "pan": "정지",
-    "tilt": "이동중",
-    "zoom": "정지"
-}
+    "sensorDeviceID": "",
+    "sensorDeviceStatus": ""
 }
 
-# PtzContinuousMove
-cmiqqzrjz00i3ie8figf79cur_PtzContinuousMove_out_data = {
+# SensorDeviceControl2
+cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl2_out_data = {
     "code": "200",
-    "message": "성공"
+    "message": "성공",
+    "sensorDeviceID": "",
+    "sensorDeviceStatus": ""
 }
 
-# PtzStop
-cmiqqzrjz00i3ie8figf79cur_PtzStop_out_data = {
-    "code": "200",
-    "message": "성공"
-}
-
-# cmiqqzrjz00i3ie8figf79cur 데이터 리스트
-cmiqqzrjz00i3ie8figf79cur_outData = [
-    cmiqqzrjz00i3ie8figf79cur_Authentication_out_data,
-    cmiqqzrjz00i3ie8figf79cur_Capabilities_out_data,
-    cmiqqzrjz00i3ie8figf79cur_CameraProfiles_out_data,
-    cmiqqzrjz00i3ie8figf79cur_PtzStatus_out_data,
-    cmiqqzrjz00i3ie8figf79cur_PtzContinuousMove_out_data,
-    cmiqqzrjz00i3ie8figf79cur_PtzStop_out_data,
+# cmiqr201z00i8ie8fitdg5t1b 데이터 리스트
+cmiqr201z00i8ie8fitdg5t1b_outData = [
+    cmiqr201z00i8ie8fitdg5t1b_Authentication_out_data,
+    cmiqr201z00i8ie8fitdg5t1b_Capabilities_out_data,
+    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceProfiles_out_data,
+    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_out_data,
+    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl2_out_data,
 ]
 
-# cmiqqzrjz00i3ie8figf79cur API endpoint
-cmiqqzrjz00i3ie8figf79cur_messages = [
+# cmiqr201z00i8ie8fitdg5t1b API endpoint
+cmiqr201z00i8ie8fitdg5t1b_messages = [
     "Authentication",
     "Capabilities",
-    "CameraProfiles",
-    "PtzStatus",
-    "PtzContinuousMove",
-    "PtzStop",
+    "SensorDeviceProfiles",
+    "SensorDeviceControl",
+    "SensorDeviceControl2",
 ]
 
