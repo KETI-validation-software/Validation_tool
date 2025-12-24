@@ -171,6 +171,13 @@ class InfoWidget(QWidget):
             if hasattr(self, 'management_url_container'):
                 self.management_url_container.setGeometry(page_width - 390, page_height - 108, 380, 60)
 
+            # ✅ 반응형: Page1 하단 버튼 영역 가로 확장
+            if hasattr(self, 'original_window_size'):
+                width_ratio = max(1.0, self.page1.width() / self.original_window_size[0])
+                self._resize_widget('page1_button_container', 'original_page1_button_container_size', width_ratio)
+                self._resize_widget('next_btn', 'original_next_btn_size', width_ratio)
+                self._resize_widget('page1_exit_btn', 'original_page1_exit_btn_size', width_ratio)
+
         # ========== Page2 크기 조정 ==========
         if hasattr(self, 'page2_content') and self.page2_content:
             content_width = self.page2_content.width()
@@ -1760,51 +1767,65 @@ class InfoWidget(QWidget):
 
         # 하단 버튼 (다음: 왼쪽, 종료: 오른쪽) - 각 378x48px, gap 20px, 전체 776x48px
         # 고정 크기 컨테이너로 감싸서 간격 유지
-        button_container = QWidget()
-        button_container.setFixedSize(776, 48)
-        button_layout = QHBoxLayout(button_container)
+        # ✅ 반응형: 인스턴스 변수로 변경
+        self.page1_button_container = QWidget()
+        self.page1_button_container.setFixedSize(776, 48)
+        self.original_page1_button_container_size = (776, 48)
+        button_layout = QHBoxLayout(self.page1_button_container)
         button_layout.setContentsMargins(0, 0, 0, 0)
         button_layout.setSpacing(20)  # 버튼 간격 20px
 
         # 다음 버튼 (왼쪽) - 378x48px
-        self.next_btn = QPushButton()
+        # ✅ 반응형: 원본 크기 저장
+        self.next_btn = QPushButton("다음")
         self.next_btn.setFixedSize(378, 48)
+        self.original_next_btn_size = (378, 48)
         btn_next_enabled = resource_path("assets/image/test_info/btn_다음_enabled.png").replace(chr(92), "/")
         btn_next_hover = resource_path("assets/image/test_info/btn_다음_Hover.png").replace(chr(92), "/")
         self.next_btn.setStyleSheet(f"""
             QPushButton {{
                 border: none;
-                background-image: url({btn_next_enabled});
-                background-repeat: no-repeat;
-                background-position: center;
+                border-image: url({btn_next_enabled}) 0 0 0 0 stretch stretch;
+                padding-left: 20px;
+                padding-right: 20px;
+                font-family: 'Noto Sans KR';
+                font-size: 20px;
+                font-weight: 500;
+                color: #FFFFFF;
             }}
             QPushButton:hover {{
-                background-image: url({btn_next_hover});
+                border-image: url({btn_next_hover}) 0 0 0 0 stretch stretch;
             }}
         """)
         self.next_btn.clicked.connect(self.go_to_next_page)
         button_layout.addWidget(self.next_btn)
 
         # 종료 버튼 (오른쪽) - 378x48px
-        exit_btn = QPushButton()
-        exit_btn.setFixedSize(378, 48)
+        # ✅ 반응형: 인스턴스 변수로 변경 및 원본 크기 저장
+        self.page1_exit_btn = QPushButton("종료")
+        self.page1_exit_btn.setFixedSize(378, 48)
+        self.original_page1_exit_btn_size = (378, 48)
         btn_exit_enabled = resource_path("assets/image/test_info/btn_종료_enabled.png").replace(chr(92), "/")
         btn_exit_hover = resource_path("assets/image/test_info/btn_종료_Hover.png").replace(chr(92), "/")
-        exit_btn.setStyleSheet(f"""
+        self.page1_exit_btn.setStyleSheet(f"""
             QPushButton {{
                 border: none;
-                background-image: url({btn_exit_enabled});
-                background-repeat: no-repeat;
-                background-position: center;
+                border-image: url({btn_exit_enabled}) 0 0 0 0 stretch stretch;
+                padding-left: 20px;
+                padding-right: 20px;
+                font-family: 'Noto Sans KR';
+                font-size: 20px;
+                font-weight: 500;
+                color: #6B6B6B;
             }}
             QPushButton:hover {{
-                background-image: url({btn_exit_hover});
+                border-image: url({btn_exit_hover}) 0 0 0 0 stretch stretch;
             }}
         """)
-        exit_btn.clicked.connect(self.exit_btn_clicked)
-        button_layout.addWidget(exit_btn)
+        self.page1_exit_btn.clicked.connect(self.exit_btn_clicked)
+        button_layout.addWidget(self.page1_exit_btn)
 
-        layout.addWidget(button_container, alignment=Qt.AlignHCenter)
+        layout.addWidget(self.page1_button_container, alignment=Qt.AlignHCenter)
 
         # 세로 확장 시 여분의 공간을 하단으로 밀어냄
         layout.addStretch()
