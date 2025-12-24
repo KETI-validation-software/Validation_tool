@@ -1,4 +1,0 @@
-{"time": "2025-12-24T05:11:53.601573Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
-{"time": "2025-12-24T05:11:53.625509Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
-{"time": "2025-12-24T05:11:53.629498Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "", "message": "", "transportSupport": [{"transProtocolType": "LongPolling", "transProtocolDesc": "none"}, {"transProtocolType": "Webhook", "transProtocolDesc": "none"}]}}
-{"time": "2025-12-24T05:11:54.595789Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "", "message": "", "transportSupport": [{"transProtocolType": "LongPolling", "transProtocolDesc": "none"}, {"transProtocolType": "Webhook", "transProtocolDesc": "none"}]}}

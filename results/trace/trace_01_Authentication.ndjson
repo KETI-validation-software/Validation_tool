@@ -1,4 +1,0 @@
-{"time": "2025-12-24T05:11:50.600514Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "kisa", "userPW": "kisa_k1!2@"}}
-{"time": "2025-12-24T05:11:50.649384Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "kisa", "userPW": "kisa_k1!2@"}}
-{"time": "2025-12-24T05:11:50.651378Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "userName": "관리자", "userAff": "오산시", "accessToken": "abcde1234"}}
-{"time": "2025-12-24T05:11:51.602105Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "userName": "관리자", "userAff": "오산시", "accessToken": "***"}}
