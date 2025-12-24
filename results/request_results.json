@@ -22,23 +22,94 @@
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 87.5,
-    "totalFields": 8,
-    "passedFields": 7,
-    "failedFields": 1
+    "score": 68.75,
+    "totalFields": 16,
+    "passedFields": 11,
+    "failedFields": 5
   },
   "testResult": [
     {
       "testGroup": "cmisfix8407te5vy7fleq8pkf",
       "testSpecId": "cmiqr201z00i8ie8fitdg5t1b",
       "testSpecName": "sensor002",
-      "score": 87.5,
-      "totalFields": 8,
-      "passedFields": 7,
-      "failedFields": 1,
+      "score": 0,
+      "totalFields": 0,
+      "passedFields": 0,
+      "failedFields": 0,
       "apis": [
         {
           "id": "cmise5c9900jr5vy7j5kdk1z6",
+          "name": "사용자 인증",
+          "method": "POST",
+          "endpoint": "/Authentication",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmisebj3b00s65vy7377edoan",
+          "name": "전송 지원 기능 정보 연동",
+          "method": "POST",
+          "endpoint": "/Capabilities",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmiseuulh03d75vy7wmr8iroc",
+          "name": "보안용 센서 단말 목록 정보 연동",
+          "method": "POST",
+          "endpoint": "/SensorDeviceProfiles",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmisfu13v07xs5vy7gthbhp0p",
+          "name": "보안용 센서 단말 제어 정보 연동-상태연동",
+          "method": "POST",
+          "endpoint": "/SensorDeviceControl",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmisge6mr08di5vy7hirl5jp1",
+          "name": "보안용 센서 단말 제어 정보 연동-제어",
+          "method": "POST",
+          "endpoint": "/SensorDeviceControl",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        }
+      ]
+    },
+    {
+      "testGroup": "cmisfix8407te5vy7fleq8pkf",
+      "testSpecId": "cmiqr1acx00i5ie8fi022t1hp",
+      "testSpecName": "ac002",
+      "score": 68.75,
+      "totalFields": 16,
+      "passedFields": 11,
+      "failedFields": 5,
+      "apis": [
+        {
+          "id": "cmisgwlsx08r25vy7s0uys91u",
           "name": "사용자 인증",
           "method": "POST",
           "endpoint": "/Authentication",
@@ -61,7 +132,7 @@
           ]
         },
         {
-          "id": "cmisebj3b00s65vy7377edoan",
+          "id": "cmisjsrxy0bd75vy78umc8kos",
           "name": "전송 지원 기능 정보 연동",
           "method": "POST",
           "endpoint": "/Capabilities",
@@ -81,10 +152,10 @@
           ]
         },
         {
-          "id": "cmiseuulh03d75vy7wmr8iroc",
-          "name": "보안용 센서 단말 목록 정보 연동",
+          "id": "cmiwq2e7z07fi844gof4cw167",
+          "name": "바이오 및 출입통제 장치 목록 정보",
           "method": "POST",
-          "endpoint": "/SensorDeviceProfiles",
+          "endpoint": "/DoorProfiles",
           "score": 100.0,
           "validationCnt": 1,
           "totalFields": 1,
@@ -101,35 +172,35 @@
           ]
         },
         {
-          "id": "cmisfu13v07xs5vy7gthbhp0p",
-          "name": "보안용 센서 단말 제어 정보 연동-상태연동",
+          "id": "cmiwqiqjn0acb844gb9f4qqd0",
+          "name": "실시간 출입통제 장치 상태 정보 연동-상태 조회",
           "method": "POST",
-          "endpoint": "/SensorDeviceControl",
-          "score": 50.0,
-          "validationCnt": 1,
-          "totalFields": 2,
-          "passFields": 1,
-          "failFields": 1,
+          "endpoint": "/RealtimeDoorStatus",
+          "score": 0.0,
+          "validationCnt": 2,
+          "totalFields": 5,
+          "passFields": 0,
+          "failFields": 5,
           "validations": [
             {
               "attempt": 1,
-              "validationData": {
-                "sensorDeviceID": "iot0003",
-                "commandType": ""
-              },
+              "validationData": {},
               "validationErrors": [
-                "[시도 1/1]",
-                "<b>[기타]</b> (1건)",
-                "- [맥락 오류] 참조 엔드포인트 없음: None"
+                "Message Missing!"
               ]
+            },
+            {
+              "attempt": 2,
+              "validationData": {},
+              "validationErrors": []
             }
           ]
         },
         {
-          "id": "cmisge6mr08di5vy7hirl5jp1",
-          "name": "보안용 센서 단말 제어 정보 연동-제어",
+          "id": "cmiwqol4l0ayv844g134sbbu7",
+          "name": "출입 통제 장치 제어 정보 연동",
           "method": "POST",
-          "endpoint": "/SensorDeviceControl",
+          "endpoint": "/DoorControl",
           "score": 100.0,
           "validationCnt": 1,
           "totalFields": 2,
@@ -139,8 +210,43 @@
             {
               "attempt": 1,
               "validationData": {
-                "sensorDeviceID": "iot0003",
-                "commandType": "AlarmOff"
+                "doorID": "door0001",
+                "commandType": "Unlock"
+              },
+              "validationErrors": [
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmiwqq5880b07844gyqot66cj",
+          "name": "실시간 출입통제 장치 상태 정보 연동-결과 조회",
+          "method": "POST",
+          "endpoint": "/RealtimeDoorStatus",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 5,
+          "passFields": 5,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "doorList": [
+                  {
+                    "doorID": "door0001"
+                  },
+                  {
+                    "doorID": "door0002"
+                  }
+                ],
+                "duration": 10000,
+                "transProtocol": {
+                  "transProtocolType": "WebHook",
+                  "transProtocolDesc": "https://10.252.219.95:2001"
+                },
+                "startTime": 20251105163010124
               },
               "validationErrors": [
                 "오류가 없습니다."
@@ -149,90 +255,7 @@
           ]
         }
       ]
-    },
-    {
-      "testGroup": "cmisfix8407te5vy7fleq8pkf",
-      "testSpecId": "cmiqr1acx00i5ie8fi022t1hp",
-      "testSpecName": "ac002",
-      "score": 0,
-      "totalFields": 0,
-      "passedFields": 0,
-      "failedFields": 0,
-      "apis": [
-        {
-          "id": "cmisgwlsx08r25vy7s0uys91u",
-          "name": "사용자 인증",
-          "method": "POST",
-          "endpoint": "/Authentication",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmisjsrxy0bd75vy78umc8kos",
-          "name": "전송 지원 기능 정보 연동",
-          "method": "POST",
-          "endpoint": "/Capabilities",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmiwq2e7z07fi844gof4cw167",
-          "name": "바이오 및 출입통제 장치 목록 정보",
-          "method": "POST",
-          "endpoint": "/DoorProfiles",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmiwqiqjn0acb844gb9f4qqd0",
-          "name": "실시간 출입통제 장치 상태 정보 연동-상태 조회",
-          "method": "POST",
-          "endpoint": "/RealtimeDoorStatus",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmiwqol4l0ayv844g134sbbu7",
-          "name": "출입 통제 장치 제어 정보 연동",
-          "method": "POST",
-          "endpoint": "/DoorControl",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmiwqq5880b07844gyqot66cj",
-          "name": "실시간 출입통제 장치 상태 정보 연동-결과 조회",
-          "method": "POST",
-          "endpoint": "/RealtimeDoorStatus",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        }
-      ]
     }
   ],
-  "completedDate": "2025-12-24T16:21:42Z"
+  "completedDate": "2025-12-24T16:45:42Z"
 }

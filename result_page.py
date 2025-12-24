@@ -848,7 +848,7 @@ class ResultPageWidget(QWidget):
 
         for idx, (spec_id, config) in enumerate(spec_items):
             desc = config.get('test_name', f'시험분야 {idx + 1}')
-            desc_with_role = f"{desc} (응답 검증)"
+            desc_with_role = f"{desc} (요청 검증)"
             item = QTableWidgetItem(desc_with_role)
             item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self.test_field_table.setItem(idx, 0, item)
