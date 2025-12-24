@@ -8,6 +8,21 @@ except ImportError:
     print("scapy 라이브러리가 설치되지 않았습니다. ARP 스캔 기능을 사용할 수 없습니다.")
 
 
+def get_local_ip():
+    """로컬 IP 주소 획득"""
+    try:
+        # DNS 서버로 연결을 시도하여 로컬 IP 획득 (실제 연결하지 않음)
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            s.connect(("8.8.8.8", 80))
+            return s.getsockname()[0]
+    except Exception:
+        try:
+            # 백업 방법: 호스트명으로 IP 획득
+            return socket.gethostbyname(socket.gethostname())
+        except Exception:
+            return None
+
+
 class NetworkScanWorker(QObject):
     """
     네트워크 스캔 작업을 수행하는 워커 클래스
@@ -32,7 +47,7 @@ class NetworkScanWorker(QObject):
     def scan_network(self):
         """네트워크 스캔 메인 메서드"""
         try:
-            local_ip = self._get_local_ip()
+            local_ip = get_local_ip()
             if not local_ip:
                 self.scan_failed.emit("내 IP 주소를 찾을 수 없습니다.")
                 return
@@ -51,20 +66,6 @@ class NetworkScanWorker(QObject):
 
         except Exception as e:
             self.scan_failed.emit(f"네트워크 탐색 중 오류 발생:\n{str(e)}")
-
-    def _get_local_ip(self):
-        """로컬 IP 주소 획득"""
-        try:
-            # DNS 서버로 연결을 시도하여 로컬 IP 획득 (실제 연결하지 않음)
-            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-                s.connect(("8.8.8.8", 80))
-                return s.getsockname()[0]
-        except Exception:
-            try:
-                # 백업 방법: 호스트명으로 IP 획득
-                return socket.gethostbyname(socket.gethostname())
-            except Exception:
-                return None
 
     def _scan_available_ports(self, ip, port_range):
         """지정된 IP에서 사용 가능한 포트 스캔"""
@@ -116,7 +117,7 @@ class ARPScanWorker(QObject):
                 return
 
             # 1. 내 IP와 네트워크 대역 감지
-            my_ip = self._get_local_ip()
+            my_ip = get_local_ip()
             if not my_ip:
                 self.scan_failed.emit("로컬 IP 주소를 가져올 수 없습니다.")
                 return
@@ -185,18 +186,6 @@ class ARPScanWorker(QObject):
             import traceback
             traceback.print_exc()
             self.scan_failed.emit(f"ARP 스캔 중 오류 발생:\n{str(e)}")
-
-    def _get_local_ip(self):
-        """로컬 IP 주소 획득"""
-        try:
-            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-                s.connect(("8.8.8.8", 80))
-                return s.getsockname()[0]
-        except Exception:
-            try:
-                return socket.gethostbyname(socket.gethostname())
-            except Exception:
-                return None
 
     def _get_network_range(self, ip):
         """IP 주소로부터 네트워크 대역 계산 (예: 192.168.1.0/24)"""
