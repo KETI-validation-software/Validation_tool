@@ -23,6 +23,7 @@ from http.server import HTTPServer
 import warnings
 from core.validation_registry import get_validation_rules
 from core.utils import remove_api_number_suffix, to_detail_text, redact, clean_trace_directory, format_schema, load_from_trace_file, load_external_constants, setup_external_spec_modules, calculate_percentage, generate_monitor_log_html, format_result_message, get_result_icon_path
+from result_page import ResultPageWidget
 
 warnings.filterwarnings('ignore')
 result_dir = os.path.join(os.getcwd(), "results")
@@ -100,7 +101,7 @@ class PlatformValidationWindow(QMainWindow):
                     try:
                         self.validation_widget.server_th.httpd.shutdown()
                         self.validation_widget.server_th.wait(2000)
-                        print(f"[WRAPPER_CLOSE] 서버 스레드 종료 완료")
+                        print(f"[WRAPPER_C1LOSE] 서버 스레드 종료 완료")
                     except Exception as e:
                         print(f"[WARN] 서버 종료 중 오류 (무시): {e}")
 
