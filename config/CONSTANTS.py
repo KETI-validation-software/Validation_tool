@@ -137,7 +137,7 @@ SPEC_CONFIG = [
     "api_endpoint": ['/Authentication', '/Capabilities', '/DoorProfiles', '/RealtimeDoorStatus', '/DoorControl', '/RealtimeDoorStatus2'],
     "trans_protocol": ['basic', 'basic', 'basic', 'LongPolling', 'basic', 'LongPolling'],
     "time_out": [6000, 6000, 6000, 6000, 6000, 6000],
-    "num_retries": [1, 1, 1, 1, 1, 1]
+    "num_retries": [1, 1, 1, 2, 1, 1]
 },
         "cmiqqzrjz00i3ie8figf79cur": {
     "test_name": "vid002",
