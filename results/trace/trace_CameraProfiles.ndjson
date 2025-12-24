@@ -1,0 +1,2 @@
+{"time": "2025-12-24T05:14:00.167137Z", "api": "CameraProfiles", "dir": "REQUEST", "data": {}}
+{"time": "2025-12-24T05:14:00.172122Z", "api": "CameraProfiles", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "camList": [{"camID": "cam0001", "camName": "카메라1", "camLoc": {"lon": "127.127730", "lat": "38.439801", "alt": "32.131", "desc": "3층복도"}, "camConfig": {"camType": "PTZ"}}, {"camID": "cam0002", "camName": "카메라2", "camLoc": {"lon": "127.127730", "lat": "37.33671", "alt": "", "desc": ""}, "camConfig": {"camType": "dome"}}]}}

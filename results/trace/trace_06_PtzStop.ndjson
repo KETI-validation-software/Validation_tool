@@ -1,0 +1,4 @@
+{"time": "2025-12-24T05:14:09.149952Z", "api": "PtzStop", "dir": "REQUEST", "data": {"camID": "cam0002", "pan": true, "tilt": true, "zoom": false}}
+{"time": "2025-12-24T05:14:09.184860Z", "api": "PtzStop", "dir": "REQUEST", "data": {"camID": "cam0002", "pan": true, "tilt": true, "zoom": false}}
+{"time": "2025-12-24T05:14:09.187851Z", "api": "PtzStop", "dir": "RESPONSE", "data": {"code": "200", "message": "성공"}}
+{"time": "2025-12-24T05:14:10.148286Z", "api": "PtzStop", "dir": "RESPONSE", "data": {"code": "200", "message": "성공"}}

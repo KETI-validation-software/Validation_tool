@@ -380,6 +380,9 @@ class ResultPageWidget(QWidget):
 
         self.setLayout(mainLayout)
 
+        # 초기 시나리오 로드 (UI 요소 생성 후 호출)
+        self.load_initial_scenarios()
+
     def resizeEvent(self, event):
         """창 크기 변경 시 배경 이미지 및 UI 반응형 조정"""
         super().resizeEvent(event)
@@ -741,9 +744,6 @@ class ResultPageWidget(QWidget):
             }
         """)
 
-        # 초기 로드: 현재 그룹의 시나리오 표시
-        self.load_initial_scenarios()
-
         layout.addWidget(self.test_field_table)
         group_box.setLayout(layout)
         return group_box
@@ -1001,7 +1001,7 @@ class ResultPageWidget(QWidget):
 
             detail_label.setCursor(Qt.PointingHandCursor)
             detail_label.setAlignment(Qt.AlignCenter)
-            detail_label.mousePressEvent = lambda event, r=row: self._show_detail(r)
+            # detail_label.mousePressEvent = lambda event, r=row: self._show_detail(r)
 
             container = QWidget()
             layout = QHBoxLayout()
@@ -1083,7 +1083,7 @@ class ResultPageWidget(QWidget):
 
             detail_label.setCursor(Qt.PointingHandCursor)
             detail_label.setAlignment(Qt.AlignCenter)
-            detail_label.mousePressEvent = lambda event, r=row: self._show_detail(r)
+            # detail_label.mousePressEvent = lambda event, r=row: self._show_detail(r)
 
             container = QWidget()
             layout = QHBoxLayout()
@@ -1464,7 +1464,7 @@ class ResultPageWidget(QWidget):
 
             detail_label.setCursor(Qt.PointingHandCursor)
             detail_label.setAlignment(Qt.AlignCenter)
-            detail_label.mousePressEvent = lambda event, r=row: self._show_detail(r)
+            # detail_label.mousePressEvent = lambda event, r=row: self._show_detail(r)
 
             container = QWidget()
             layout = QHBoxLayout()
