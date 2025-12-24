@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import (
     QScrollArea
 )
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
-from PyQt5.QtGui import QPixmap, QColor, QFont, QBrush, QPainter, QPen, QResizeEvent
+from PyQt5.QtGui import QPixmap, QColor, QFont, QPainter, QPen, QResizeEvent
 import importlib
 import re
 from core.functions import resource_path
