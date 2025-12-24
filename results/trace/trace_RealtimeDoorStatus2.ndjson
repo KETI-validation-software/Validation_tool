@@ -1,2 +1,2 @@
-{"time": "2025-12-24T02:27:32.053012Z", "api": "RealtimeDoorStatus2", "dir": "REQUEST", "data": {"doorList": [{"doorID": "door0001"}, {"doorID": "door0002"}], "duration": 10000, "transProtocol": {"transProtocolType": "WebHook", "transProtocolDesc": "https://10.252.219.95:2001"}, "startTime": 20251105163010124}}
-{"time": "2025-12-24T02:27:32.056004Z", "api": "RealtimeDoorStatus2", "dir": "RESPONSE", "data": {"code": "", "message": ""}}
+{"time": "2025-12-24T02:44:15.577440Z", "api": "RealtimeDoorStatus2", "dir": "REQUEST", "data": {"doorList": [{"doorID": "door0001"}, {"doorID": "door0002"}], "duration": 10000, "transProtocol": {"transProtocolType": "WebHook", "transProtocolDesc": "https://10.252.219.95:2001"}, "startTime": 20251105163010124}}
+{"time": "2025-12-24T02:44:15.579435Z", "api": "RealtimeDoorStatus2", "dir": "RESPONSE", "data": {"code": "", "message": ""}}

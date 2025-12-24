@@ -114,7 +114,7 @@
             {
               "attempt": 1,
               "validationData": {
-                "sensorDeviceID": "iot0004",
+                "sensorDeviceID": "iot0001",
                 "commandType": ""
               },
               "validationErrors": [
@@ -139,7 +139,7 @@
             {
               "attempt": 1,
               "validationData": {
-                "sensorDeviceID": "iot0004",
+                "sensorDeviceID": "iot0001",
                 "commandType": "AlarmOn"
               },
               "validationErrors": [
@@ -147,89 +147,6 @@
               ]
             }
           ]
-        }
-      ]
-    },
-    {
-      "testGroup": "cmisfix8407te5vy7fleq8pkf",
-      "testSpecId": "cmiqqzrjz00i3ie8figf79cur",
-      "testSpecName": "vid002",
-      "score": 0,
-      "totalFields": 0,
-      "passedFields": 0,
-      "failedFields": 0,
-      "apis": [
-        {
-          "id": "cmish2vdi08z35vy7gtz574hy",
-          "name": "사용자 인증",
-          "method": "POST",
-          "endpoint": "/Authentication",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmiwp7fqs05kc844gxsjq6rfs",
-          "name": "전송 지원 기능 정보 연동",
-          "method": "POST",
-          "endpoint": "/Capabilities",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmiwpag8n05re844gh1o3fc2u",
-          "name": "카메라 목록 연동",
-          "method": "POST",
-          "endpoint": "/CameraProfiles",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmiwpjpff077k844gx4u1vvdf",
-          "name": "PTZ 상태 정보 연동",
-          "method": "POST",
-          "endpoint": "/PtzStatus",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmiwpsaxt07b1844gx73rs8gp",
-          "name": "PTZ 연속 이동 제어 정보 연동",
-          "method": "POST",
-          "endpoint": "/PtzContinuousMove",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmiwpvh1v07dl844gap4brs86",
-          "name": "PTZ 정지 제어 정보 연동",
-          "method": "POST",
-          "endpoint": "/PtzStop",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
         }
       ]
     },
@@ -401,5 +318,5 @@
       ]
     }
   ],
-  "completedDate": "2025-12-24T11:27:32Z"
+  "completedDate": "2025-12-24T11:44:16Z"
 }

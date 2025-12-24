@@ -184,7 +184,7 @@
               "validationData": {
                 "code": "200",
                 "message": "성공",
-                "sensorDeviceID": "iot0004",
+                "sensorDeviceID": "iot0001",
                 "sensorDeviceStatus": "AlarmOff"
               },
               "validationErrors": [
@@ -210,7 +210,7 @@
               "validationData": {
                 "code": "200",
                 "message": "성공",
-                "sensorDeviceID": "iot0004",
+                "sensorDeviceID": "iot0001",
                 "sensorDeviceStatus": "AlarmOn"
               },
               "validationErrors": [
@@ -501,5 +501,5 @@
       ]
     }
   ],
-  "completedDate": "2025-12-24T11:27:33Z"
+  "completedDate": "2025-12-24T11:44:16Z"
 }
