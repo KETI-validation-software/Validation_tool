@@ -608,7 +608,7 @@ cmii7pysb004k8z1tts0npxfm_StoredVerifEventInfos_out_constraints = {
   "doorList.bioAuthTypeList": {
     "id": "cmiwk4ebl05udugxnrifqngdj",
     "valueType": "preset",
-    "required": False
+    "required": True
   },
   "doorList.otherAuthTypeList": {
     "id": "cmiwk4ecb05ufugxnskw9wjj6",

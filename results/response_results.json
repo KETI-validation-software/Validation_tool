@@ -19,20 +19,20 @@
       ]
     }
   ],
-  "status": "진행중",
+  "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 0.0,
-    "totalFields": 88,
-    "passedFields": 75,
-    "failedFields": 13
+    "score": 86.67,
+    "totalFields": 75,
+    "passedFields": 65,
+    "failedFields": 10
   },
   "testResult": [
     {
       "testGroup": "cmisfjfzt07tm5vy7qslmisks",
       "testSpecId": "cmiqr2b9j00i9ie8frw439h8i",
       "testSpecName": "sensor002",
-      "score": 0.0,
+      "score": 100.0,
       "totalFields": 29,
       "passedFields": 29,
       "failedFields": 0,
@@ -184,8 +184,8 @@
               "validationData": {
                 "code": "200",
                 "message": "성공",
-                "sensorDeviceID": "iot0003",
-                "sensorDeviceStatus": "AlarmOn"
+                "sensorDeviceID": "iot0004",
+                "sensorDeviceStatus": "AlarmOff"
               },
               "validationErrors": [
                 "[시도 1/1]",
@@ -210,8 +210,8 @@
               "validationData": {
                 "code": "200",
                 "message": "성공",
-                "sensorDeviceID": "iot0003",
-                "sensorDeviceStatus": "AlarmOff"
+                "sensorDeviceID": "iot0004",
+                "sensorDeviceStatus": "AlarmOn"
               },
               "validationErrors": [
                 "[시도 1/1]",
@@ -226,10 +226,10 @@
       "testGroup": "cmisfjfzt07tm5vy7qslmisks",
       "testSpecId": "cmiqr1jha00i6ie8fb1scb3go",
       "testSpecName": "ac002",
-      "score": 0.0,
+      "score": 78.26,
       "totalFields": 46,
-      "passedFields": 46,
-      "failedFields": 0,
+      "passedFields": 36,
+      "failedFields": 10,
       "apis": [
         {
           "id": "cmisgv0ua08o55vy7yvk4aw0a",
@@ -391,23 +391,23 @@
           "name": "실시간 출입통제 장치 상태 정보 연동-상태조회",
           "method": "POST",
           "endpoint": "/RealtimeDoorStatus",
-          "score": 100.0,
+          "score": 29.0,
           "validationCnt": 1,
           "totalFields": 7,
-          "passFields": 7,
-          "failFields": 0,
+          "passFields": 2,
+          "failFields": 5,
           "validations": [
             {
               "attempt": 1,
               "validationData": {
-                "code": "성공",
-                "message": "200"
+                "code": "",
+                "message": ""
               },
               "validationErrors": [
                 "[시도 1/1]",
                 "오류가 없습니다.",
                 "--- Webhook 검증 ---",
-                "오류가 없습니다."
+                "Webhook Message Missing!"
               ]
             }
           ]
@@ -459,23 +459,23 @@
           "name": "실시간 출입통제 장치 상태 정보 연동-결과조회",
           "method": "POST",
           "endpoint": "/RealtimeDoorStatus",
-          "score": 100.0,
+          "score": 29.0,
           "validationCnt": 1,
           "totalFields": 7,
-          "passFields": 7,
-          "failFields": 0,
+          "passFields": 2,
+          "failFields": 5,
           "validations": [
             {
               "attempt": 1,
               "validationData": {
-                "code": "200",
-                "message": "성공"
+                "code": "",
+                "message": ""
               },
               "validationErrors": [
                 "[시도 1/1]",
                 "오류가 없습니다.",
                 "--- Webhook 검증 ---",
-                "오류가 없습니다."
+                "Webhook Message Missing!"
               ]
             }
           ]
@@ -499,106 +499,7 @@
           ]
         }
       ]
-    },
-    {
-      "testGroup": "cmisfjfzt07tm5vy7qslmisks",
-      "testSpecId": "cmiqr0kdw00i4ie8fr3firjtg",
-      "testSpecName": "vid002",
-      "score": 0.0,
-      "totalFields": 13,
-      "passedFields": 0,
-      "failedFields": 13,
-      "apis": [
-        {
-          "id": "cmish1fu408we5vy7dp3ltj00",
-          "name": "사용자 인증",
-          "method": "POST",
-          "endpoint": "/Authentication",
-          "score": 0.0,
-          "validationCnt": 1,
-          "totalFields": 5,
-          "passFields": 0,
-          "failFields": 5,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {},
-              "validationErrors": [
-                "Message Missing! - 모든 시도(1회)에서 타임아웃 발생"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cmixu0dt70dyzp002xhm24l3h",
-          "name": "전송 지원 기능 정보 연동",
-          "method": "POST",
-          "endpoint": "/Capabilities",
-          "score": 0.0,
-          "validationCnt": 1,
-          "totalFields": 8,
-          "passFields": 0,
-          "failFields": 8,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {},
-              "validationErrors": [
-                "Message Missing! - 모든 시도(1회)에서 타임아웃 발생"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cmixu2m200e4up002g73csf12",
-          "name": "카메라 목록 연동",
-          "method": "POST",
-          "endpoint": "/CameraProfiles",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmixu9wn10f7rp002rgzkx3au",
-          "name": "PTZ 상태 정보 연동",
-          "method": "POST",
-          "endpoint": "/PtzStatus",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmixucv8a0fb4p002pnvfe6ay",
-          "name": "PTZ 연속 이동 제어 정보 연동",
-          "method": "POST",
-          "endpoint": "/PtzContinuousMove",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmixufkri0fdnp002fouuoqsg",
-          "name": "PTZ 정지 제어 정보 연동",
-          "method": "POST",
-          "endpoint": "/PtzStop",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        }
-      ]
     }
   ],
-  "completedDate": "2025-12-22T17:02:18Z"
+  "completedDate": "2025-12-24T11:27:33Z"
 }

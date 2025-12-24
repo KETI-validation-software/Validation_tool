@@ -2,9 +2,12 @@ import re
 import os
 import json
 from pathlib import Path
-from datetime import datetime
 import traceback
 import sys
+import importlib
+import importlib.util
+import types
+import html
 
 # ==========================================
 # 가벼운 공용 기능 함수들 (독립 모듈)
@@ -184,10 +187,9 @@ def load_from_trace_file(api_name, direction="RESPONSE"):
         traceback.print_exc() 
         return None
 
+# constants에서 설정값 읽어오는 함수
 def load_external_constants(constants_module):
-    """
-    외부 constants 모듈에서 설정값들을 로드하여 딕셔너리로 반환
-    """
+
     spec_config = getattr(constants_module, "SPEC_CONFIG", [])
 
     if getattr(sys, 'frozen', False):
@@ -225,3 +227,192 @@ def load_external_constants(constants_module):
                 print(f"[ERROR] 외부 CONSTANTS.py 로드 실패: {e}")
                 
     return spec_config
+
+# spec폴더에서 모듈 로드하는 함수
+def setup_external_spec_modules():
+    if getattr(sys, 'frozen', False):
+        exe_dir = os.path.dirname(sys.executable)
+        external_spec_parent = exe_dir
+    
+    else:
+        current_file_path = os.path.abspath(__file__)
+        current_dir = os.path.dirname(current_file_path)
+
+        exe_dir = os.path.dirname(current_dir)
+        external_spec_parent = exe_dir
+    
+    external_spec_dir = os.path.join(external_spec_parent, 'spec')
+    if os.path.exists(external_spec_dir):
+        if external_spec_parent in sys.path:
+            sys.path.remove(external_spec_parent)
+        sys.path.insert(0, external_spec_parent)
+
+        modules_to_remove = [
+            'spec.Schema_request',
+            'spec.Schema_response',
+            'spec.Constraints_response'
+        ]
+        for mod_name in modules_to_remove:
+            if mod_name in sys.modules:
+                del sys.modules[mod_name]
+        
+        if 'spec' not in sys.modules:
+            sys.modules['spec'] = types.ModuleType('spec')
+        
+        try:
+            schema_file = os.path.join(exe_dir, 'spec', 'Schema_request.py')
+            data_file = os.path.join(exe_dir, 'spec', 'Data_response.py')
+            constraints_file = os.path.join(exe_dir, 'spec', 'Constraints_response.py')
+
+            # Schema_request 모듈 로드
+            spec = importlib.util.spec_from_file_location('spec.Schema_request', schema_file)
+            schema_module = importlib.util.module_from_spec(spec)
+            sys.modules['spec.Schema_request'] = schema_module
+            spec.loader.exec_module(schema_module)
+
+            # Data_response 모듈 로드
+            spec = importlib.util.spec_from_file_location('spec.Data_response', data_file)
+            data_module = importlib.util.module_from_spec(spec)
+            sys.modules['spec.Data_response'] = data_module
+            spec.loader.exec_module(data_module)
+
+            # Constraints_response 모듈 로드
+            spec = importlib.util.spec_from_file_location('spec.Constraints_response', constraints_file)
+            constraints_module = importlib.util.module_from_spec(spec)
+            sys.modules['spec.Constraints_response'] = constraints_module
+            spec.loader.exec_module(constraints_module)
+
+            return schema_module, data_module, constraints_module
+        
+        except Exception as e:
+            print(f"[ERROR] 외부 모듈 로드 실패: {e}")
+
+    try:
+        if 'spec.Schema_request' in sys.modules:
+            import spec.Schema_request
+            importlib.reload(spec.Schema_request)
+        if 'spec.Data_response' in sys.modules:
+            import spec.Data_response
+            importlib.reload(spec.Data_response)
+        if 'spec.Constraints_response' in sys.modules:
+            import spec.Constraints_response
+            importlib.reload(spec.Constraints_response)
+        
+        import spec.Schema_request as schema
+        import spec.Data_response as data
+        import spec.Constraints_response as constraints
+        return schema, data, constraints
+    
+    except Exception as e:
+        print(f"[ERROR] 내부 모듈 로드 실패: {e}")
+        return None, None, None
+
+def calculate_percentage(part, total):
+    """
+    백분율 계산 함수 (0으로 나누기 방지)
+    """
+    if total > 0:
+        return (part / total) * 100
+    return 0
+
+def generate_monitor_log_html(step_name, timestamp, request_json="", score=None, details=""):
+    """
+    모니터링 로그를 위한 HTML 생성
+    """
+    # 점수에 따른 색상 결정
+    if score is not None:
+        if score >= 100:
+            text_color = "#10b981"  # 녹색 텍스트
+        else:
+            text_color = "#ef4444"  # 빨강 텍스트
+    else:
+        text_color = "#333"  # 기본 검정
+
+    # 1. 헤더 (Step 이름 + 시간) - Table로 블록 분리
+    html_content = f"""
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 15px;">
+        <tr>
+            <td valign="middle">
+                <span style="font-size: 20px; font-weight: bold; color: {text_color}; font-family: 'Noto Sans KR';">{step_name}</span>
+                <span style="font-size: 16px; color: #9ca3af; font-family: 'Consolas', monospace; margin-left: 8px;">{timestamp}</span>
+            </td>
+        </tr>
+    </table>
+    """
+
+    # 2. 내용 영역
+    html_content += f"""
+    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <td>
+    """
+
+    # 2-1. 상세 내용 (Details)
+    if details:
+        html_content += f"""
+            <div style="margin-bottom: 8px; font-size: 18px; color: #6b7280; font-family: 'Noto Sans KR';">
+                {details}
+            </div>
+        """
+
+    # 2-2. JSON 데이터 (회색 박스)
+    if request_json and request_json.strip():
+        escaped_json = html.escape(request_json)
+        is_json_structure = request_json.strip().startswith('{') or request_json.strip().startswith('[')
+
+        if is_json_structure:
+            html_content += f"""
+            <div style="margin-top: 5px; margin-bottom: 10px;">
+                <div style="font-size: 15px; color: #9ca3af; font-weight: bold; margin-bottom: 4px;">📦 데이터</div>
+                <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 10px;">
+                    <pre style="margin: 0; font-family: 'Consolas', monospace; font-size: 18px; color: #1f2937;">{escaped_json}</pre>
+                </div>
+            </div>
+            """
+        else:
+            # JSON이 아닌 일반 텍스트일 경우
+            html_content += f"""
+            <div style="margin-top: 5px; margin-bottom: 10px;">
+                <pre style="font-size: 18px; color: #6b7280; font-family: 'Consolas', monospace;">{escaped_json}</pre>
+            </div>
+            """
+
+    # 2-3. 점수 (Score)
+    if score is not None:
+        html_content += f"""
+            <div style="margin-top: 5px; font-size: 18px; color: #6b7280; font-weight: bold; font-family: 'Consolas', monospace;">
+                점수: {score:.1f}%
+            </div>
+        """
+
+    # Table 닫기
+    html_content += """
+            </td>
+        </tr>
+    </table>
+    <div style="margin-bottom: 10px;"></div>
+    """
+    
+    return html_content
+
+def format_result_message(auth, result, text):
+    """
+    결과 상태에 따른 툴팁 메시지 포맷팅
+    """
+    if result == "PASS":
+        return f"{auth}\n\nResult: PASS\n{text}\n"
+    elif result == "진행중":
+        return f"{auth}\n\nStatus: {text}\n"
+    else:
+        return f"{auth}\n\nResult: FAIL\nResult details:\n{text}\n"
+
+def get_result_icon_path(result, img_pass, img_fail, img_none):
+    """
+    결과 상태에 따른 아이콘 경로 반환
+    """
+    if result == "PASS":
+        return img_pass
+    elif result == "FAIL":
+        return img_fail
+    return img_none
+

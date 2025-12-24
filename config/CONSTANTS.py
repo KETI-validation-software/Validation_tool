@@ -135,8 +135,8 @@ SPEC_CONFIG = [
     "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '바이오 및 출입통제 장치 목록 정보', '실시간 출입통제 장치 상태 정보 연동-상태조회', '출입 통제 장치 제어 정보 연동', '실시간 출입통제 장치 상태 정보 연동-결과조회'],
     "api_id": ['cmisgv0ua08o55vy7yvk4aw0a', 'cmisjr2u40au05vy7kt6bb6zl', 'cmiskf6w20dcm5vy7cjao08fw', 'cmixuoetf0gr9p002gy101xid', 'cmixuttgv0hbyp002h6os6wjc', 'cmixuvzks0hd3p002rcrvqdt4'],
     "api_endpoint": ['/Authentication', '/Capabilities', '/DoorProfiles', '/RealtimeDoorStatus', '/DoorControl', '/RealtimeDoorStatus2'],
-    "trans_protocol": ['basic', 'basic', 'basic', 'WebHook', 'basic', 'WebHook'],
-    "time_out": [10000, 10000, 10000, 10000, 10000, 10000],
+    "trans_protocol": ['basic', 'basic', 'basic', 'LongPolling', 'basic', 'LongPolling'],
+    "time_out": [6000, 6000, 6000, 6000, 6000, 6000],
     "num_retries": [1, 1, 1, 1, 1, 1]
 },
         "cmiqr0kdw00i4ie8fr3firjtg": {

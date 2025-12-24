@@ -1,0 +1,4 @@
+{"time": "2025-12-24T02:27:29.005790Z", "api": "DoorControl", "dir": "REQUEST", "data": {"doorID": "door0001", "commandType": "Unlock"}}
+{"time": "2025-12-24T02:27:29.029725Z", "api": "DoorControl", "dir": "REQUEST", "data": {"doorID": "door0001", "commandType": "Unlock"}}
+{"time": "2025-12-24T02:27:29.031720Z", "api": "DoorControl", "dir": "RESPONSE", "data": {"code": "200", "message": "성공"}}
+{"time": "2025-12-24T02:27:30.007611Z", "api": "DoorControl", "dir": "RESPONSE", "data": {"code": "200", "message": "성공"}}

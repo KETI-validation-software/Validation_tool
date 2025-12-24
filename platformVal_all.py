@@ -22,7 +22,8 @@ import spec.Schema_response as schema_response_module
 from http.server import HTTPServer
 import warnings
 from core.validation_registry import get_validation_rules
-from core.utils import remove_api_number_suffix, to_detail_text, redact, clean_trace_directory, format_schema, load_from_trace_file, load_external_constants
+from core.utils import remove_api_number_suffix, to_detail_text, redact, clean_trace_directory, format_schema, load_from_trace_file, load_external_constants, setup_external_spec_modules, calculate_percentage, generate_monitor_log_html, format_result_message, get_result_icon_path
+from result_page import ResultPageWidget
 
 warnings.filterwarnings('ignore')
 result_dir = os.path.join(os.getcwd(), "results")
@@ -100,7 +101,7 @@ class PlatformValidationWindow(QMainWindow):
                     try:
                         self.validation_widget.server_th.httpd.shutdown()
                         self.validation_widget.server_th.wait(2000)
-                        print(f"[WRAPPER_CLOSE] 서버 스레드 종료 완료")
+                        print(f"[WRAPPER_C1LOSE] 서버 스레드 종료 완료")
                     except Exception as e:
                         print(f"[WARN] 서버 종료 중 오류 (무시): {e}")
 
@@ -1070,36 +1071,6 @@ class ResultPageWidget(QWidget):
             }
         """)
 
-        # SPEC_CONFIG 기반 그룹 로드
-        # ===== 외부 로드된 SPEC_CONFIG 사용 (fallback: CONSTANTS 모듈) =====
-        # import sys
-        # import os
-
-        # SPEC_CONFIG = self.CONSTANTS.SPEC_CONFIG  # 기본값
-
-        # if getattr(sys, 'frozen', False):
-        #     # PyInstaller 환경: 외부 CONSTANTS.py에서 SPEC_CONFIG 읽기
-        #     exe_dir = os.path.dirname(sys.executable)
-        #     external_constants_path = os.path.join(exe_dir, "config", "CONSTANTS.py")
-
-        #     if os.path.exists(external_constants_path):
-        #         print(f"[GROUP TABLE] 외부 CONSTANTS.py에서 SPEC_CONFIG 로드: {external_constants_path}")
-        #         try:
-        #             with open(external_constants_path, 'r', encoding='utf-8') as f:
-        #                 constants_code = f.read()
-
-        #             namespace = {'__file__': external_constants_path}
-        #             exec(constants_code, namespace)
-        #             SPEC_CONFIG = namespace.get('SPEC_CONFIG', self.CONSTANTS.SPEC_CONFIG)
-        #             print(f"[GROUP TABLE] ✅ 외부 SPEC_CONFIG 로드 완료: {len(SPEC_CONFIG)}개 그룹")
-        #             # 디버그: 그룹 이름 출력
-        #             for i, g in enumerate(SPEC_CONFIG):
-        #                 group_name = g.get('group_name', '이름없음')
-        #                 group_keys = [k for k in g.keys() if k not in ['group_name', 'group_id']]
-        #                 print(f"[GROUP TABLE DEBUG] 그룹 {i}: {group_name}, spec_id 개수: {len(group_keys)}, spec_ids: {group_keys}")
-        #         except Exception as e:
-        #             print(f"[GROUP TABLE] ⚠️ 외부 CONSTANTS 로드 실패, 기본값 사용: {e}")
-
         SPEC_CONFIG = load_external_constants(self.CONSTANTS)
 
         group_items = [
@@ -1516,7 +1487,7 @@ class ResultPageWidget(QWidget):
         total_pass = saved_data.get('total_pass_cnt', 0)
         total_error = saved_data.get('total_error_cnt', 0)
         total_fields = total_pass + total_error
-        score = (total_pass / total_fields * 100) if total_fields > 0 else 0
+        score = calculate_percentage(total_pass, total_fields)
 
         # spec_score_group 재생성
         if hasattr(self, 'spec_score_group'):
@@ -2109,7 +2080,7 @@ class ResultPageWidget(QWidget):
         opt_total = opt_pass + opt_error
         # 필수 필드 전체 수 = 전체 필드 - 선택 필드
         required_total = total_fields - opt_total
-        score = (total_pass / total_fields * 100) if total_fields > 0 else 0
+        score = calculate_percentage(total_pass, total_fields)
 
         self.total_data_area = QWidget()
         self.total_data_area.setFixedSize(1064, 76)
@@ -2329,96 +2300,11 @@ class MyApp(QWidget):
             raise ValueError(f"spec_id '{self.current_spec_id}'의 specs 설정이 올바르지 않습니다!")
         print(f"[PLATFORM] 📋 Spec 로딩 시작: {self.spec_description} (ID: {self.current_spec_id})")
 
-        # ===== PyInstaller 환경에서 외부 spec 디렉토리 우선 사용 =====
-        import sys
-        import os
-        import importlib
-
-        if getattr(sys, 'frozen', False):
-            # PyInstaller 환경: 외부 spec 디렉토리를 sys.path 맨 앞에 추가
-            exe_dir = os.path.dirname(sys.executable)
-            external_spec_parent = exe_dir  # exe_dir/spec을 찾기 위해 exe_dir을 추가
-
-            # 외부 spec 폴더 파일 존재 확인
-            external_spec_dir = os.path.join(external_spec_parent, 'spec')
-            print(f"[PLATFORM SPEC DEBUG] 외부 spec 폴더: {external_spec_dir}")
-            print(f"[PLATFORM SPEC DEBUG] 외부 spec 폴더 존재: {os.path.exists(external_spec_dir)}")
-            if os.path.exists(external_spec_dir):
-                files = [f for f in os.listdir(external_spec_dir) if f.endswith('.py')]
-                print(f"[PLATFORM SPEC DEBUG] 외부 spec 폴더 .py 파일: {files}")
-
-            # sys.path 전체 출력 (디버깅)
-            print(f"[PLATFORM SPEC DEBUG] sys.path 전체 개수: {len(sys.path)}")
-            for i, p in enumerate(sys.path):
-                print(f"[PLATFORM SPEC DEBUG]   [{i}] {p}")
-
-            # 이미 있더라도 제거 후 맨 앞에 추가 (우선순위 보장)
-            if external_spec_parent in sys.path:
-                sys.path.remove(external_spec_parent)
-            sys.path.insert(0, external_spec_parent)
-            print(f"[PLATFORM SPEC] sys.path에 외부 디렉토리 추가: {external_spec_parent}")
-
-        # sys.modules에서 기존 spec 모듈 제거 (캐시 초기화)
-        # 주의: 'spec' 패키지 자체는 유지 (parent 패키지 필요)
-        modules_to_remove = [
-            'spec.Schema_request',
-            'spec.Data_response',
-            'spec.Constraints_response'
-        ]
-        for mod_name in modules_to_remove:
-            if mod_name in sys.modules:
-                del sys.modules[mod_name]
-                print(f"[PLATFORM SPEC] 모듈 캐시 삭제: {mod_name}")
-            else:
-                print(f"[PLATFORM SPEC] 모듈 캐시 없음: {mod_name}")
-
-        # spec 패키지가 없으면 빈 모듈로 등록
-        if 'spec' not in sys.modules:
-            import types
-            sys.modules['spec'] = types.ModuleType('spec')
-            print(f"[PLATFORM SPEC] 빈 'spec' 패키지 생성")
-
-        # PyInstaller 환경에서는 importlib.util로 명시적으로 외부 파일 로드
-        if getattr(sys, 'frozen', False):
-            import importlib.util
-
-            # 외부 spec 파일 경로
-            schema_file = os.path.join(exe_dir, 'spec', 'Schema_request.py')
-            data_file = os.path.join(exe_dir, 'spec', 'Data_response.py')
-            constraints_file = os.path.join(exe_dir, 'spec', 'Constraints_response.py')
-
-            print(f"[PLATFORM SPEC] 명시적 로드 시도:")
-            print(f"  - Schema: {schema_file} (존재: {os.path.exists(schema_file)})")
-            print(f"  - Data: {data_file} (존재: {os.path.exists(data_file)})")
-            print(f"  - Constraints: {constraints_file} (존재: {os.path.exists(constraints_file)})")
-
-            # importlib.util로 명시적 로드
-            spec = importlib.util.spec_from_file_location('spec.Schema_request', schema_file)
-            schema_request_module = importlib.util.module_from_spec(spec)
-            sys.modules['spec.Schema_request'] = schema_request_module
-            spec.loader.exec_module(schema_request_module)
-
-            spec = importlib.util.spec_from_file_location('spec.Data_response', data_file)
-            data_response_module = importlib.util.module_from_spec(spec)
-            sys.modules['spec.Data_response'] = data_response_module
-            spec.loader.exec_module(data_response_module)
-
-            spec = importlib.util.spec_from_file_location('spec.Constraints_response', constraints_file)
-            constraints_response_module = importlib.util.module_from_spec(spec)
-            sys.modules['spec.Constraints_response'] = constraints_response_module
-            spec.loader.exec_module(constraints_response_module)
-
-            print(f"[PLATFORM SPEC] ✅ importlib.util로 외부 파일 로드 완료")
-        else:
-            # 일반 환경에서는 기존 방식 사용
+        schema_request_module, data_response_module, constraints_response_module = setup_external_spec_modules()
+        if schema_request_module is None:
             import spec.Schema_request as schema_request_module
             import spec.Data_response as data_response_module
             import spec.Constraints_response as constraints_response_module
-
-        # ===== spec 파일 경로 로그 추가 =====
-        print(f"[PLATFORM SPEC] Schema_request.py 로드 경로: {schema_request_module.__file__}")
-        print(f"[PLATFORM SPEC] Data_response.py 로드 경로: {data_response_module.__file__}")
-        print(f"[PLATFORM SPEC] Constraints_response.py 로드 경로: {constraints_response_module.__file__}")
 
         # 파일 수정 시간 확인
         for module, name in [(schema_request_module, 'Schema_request'),
@@ -2545,11 +2431,8 @@ class MyApp(QWidget):
         self.tableWidget.item(row, 6).setTextAlignment(Qt.AlignCenter)
 
         # 평가 점수 업데이트 - 컬럼 7
-        if total_fields > 0:
-            score = (pass_count / total_fields) * 100
-            self.tableWidget.setItem(row, 7, QTableWidgetItem(f"{score:.1f}%"))
-        else:
-            self.tableWidget.setItem(row, 7, QTableWidgetItem("0%"))
+        score = calculate_percentage(pass_count, total_fields)
+        self.tableWidget.setItem(row, 7, QTableWidgetItem(f"{score:.1f}%"))
         self.tableWidget.item(row, 7).setTextAlignment(Qt.AlignCenter)
 
         # 메시지 저장
@@ -2611,16 +2494,11 @@ class MyApp(QWidget):
 
             # 첫 틱에서는 대기만
             if self.time_pre == 0 or self.cnt != self.cnt_pre:
-                print(f"[DEBUG] 첫 틱 대기: time_pre={self.time_pre}, cnt={self.cnt}, cnt_pre={self.cnt_pre}")
                 self.time_pre = time.time()
                 self.cnt_pre = self.cnt
                 return
             else:
                 time_interval = time.time() - self.time_pre
-                print(f"[DEBUG] 시간 간격: {time_interval}초")
-
-            if self.realtime_flag is True:
-                print(f"[json_check] do_checker 호출")
 
             # SPEC_CONFIG에서 timeout
             current_timeout = (self.time_outs[self.cnt] / 1000) if self.cnt < len(self.time_outs) else 5.0
@@ -2629,8 +2507,6 @@ class MyApp(QWidget):
             if current_timeout == 0 or time_interval < current_timeout:
                 # 시스템 요청 확인
                 api_name = self.Server.message[self.cnt]
-                print(f"[DEBUG] API 처리 시작: {api_name}")
-               #  print(f"[DEBUG] cnt={self.cnt}, current_retry={self.current_retry}")
 
                 current_validation = {}
 
@@ -3098,10 +2974,7 @@ class MyApp(QWidget):
 
                     # ✅ 점수 계산은 step_pass_counts 배열의 합으로 (누적 아님!)
                     total_fields = self.total_pass_cnt + self.total_error_cnt
-                    if total_fields > 0:
-                        score_value = (self.total_pass_cnt / total_fields * 100)
-                    else:
-                        score_value = 0
+                    score_value = calculate_percentage(self.total_pass_cnt, total_fields)
 
                     # 모니터링 창에 최종 결과 표시 (HTML 카드 형식)
                     api_name = self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else "Unknown"
@@ -3118,25 +2991,6 @@ class MyApp(QWidget):
 
                     self.cnt += 1
                     self.current_retry = 0
-
-                    if CONSTANTS.enable_retry_delay:
-                        print(
-                            f"[TIMING_DEBUG] ⚠️ 수동 지연(SLEEP): API 완료 후 2초 대기 추가")
-                        self.time_pre = time.time()
-                    else:
-                        print(
-                            f"[TIMING_DEBUG] ✅ 수동 지연 비활성화: API 완료, 다음 시스템 요청 대기")
-                        self.time_pre = time.time()
-                else:
-                    # 재시도인 경우
-                    if CONSTANTS.enable_retry_delay:
-                        print(
-                            f"[TIMING_DEBUG] ⚠️ 수동 지연(SLEEP): 재시도 후 2초 대기 추가")
-                        self.time_pre = time.time()
-                    else:
-                        print(
-                            f"[TIMING_DEBUG] ✅ 수동 지연 비활성화: 재시도 완료, 다음 시스템 요청 대기")
-                        self.time_pre = time.time()
 
                 self.realtime_flag = False
 
@@ -3199,10 +3053,7 @@ class MyApp(QWidget):
                 self.update_score_display()
 
                 total_fields = self.total_pass_cnt + self.total_error_cnt
-                if total_fields > 0:
-                    score_value = (self.total_pass_cnt / total_fields * 100)
-                else:
-                    score_value = 0
+                score_value = calculate_percentage(self.total_pass_cnt, total_fields)
 
                 # 타임아웃 결과를 HTML 카드로 출력
                 api_name = self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else "Unknown"
@@ -3243,10 +3094,7 @@ class MyApp(QWidget):
                 self.cnt = 0
 
                 total_fields = self.total_pass_cnt + self.total_error_cnt
-                if total_fields > 0:
-                    final_score = (self.total_pass_cnt / total_fields * 100)
-                else:
-                    final_score = 0
+                final_score = calculate_percentage(self.total_pass_cnt, total_fields)
 
                 self.final_report += "전체 점수: " + str(final_score) + "\n"
                 self.final_report += "전체 결과: " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(
@@ -3309,8 +3157,7 @@ class MyApp(QWidget):
 
     def update_score_display(self):
         """평가 점수 디스플레이를 업데이트"""
-        if not (hasattr(self, "spec_pass_label") and hasattr(self, "spec_total_label") and hasattr(self,
-                                                                                                   "spec_score_label")):
+        if not (hasattr(self, "spec_pass_label") and hasattr(self, "spec_total_label") and hasattr(self, "spec_score_label")):
             return
 
         # ✅ 분야별 점수 제목 업데이트 (시나리오 명 변경 반영)
@@ -3347,10 +3194,7 @@ class MyApp(QWidget):
         # 필수 필드 전체 수 = 전체 필드 - 선택 필드
         spec_required_total = spec_total_fields - spec_opt_total
 
-        if spec_total_fields > 0:
-            spec_score = (self.total_pass_cnt / spec_total_fields) * 100
-        else:
-            spec_score = 0
+        spec_score = calculate_percentage(self.total_pass_cnt, spec_total_fields)
 
         # 필수/선택 형식으로 표시
         self.spec_pass_label.setText(
@@ -3373,10 +3217,7 @@ class MyApp(QWidget):
         if hasattr(self, "total_pass_label") and hasattr(self, "total_total_label") and hasattr(self,
                                                                                                 "total_score_label"):
             global_total_fields = self.global_pass_cnt + self.global_error_cnt
-            if global_total_fields > 0:
-                global_score = (self.global_pass_cnt / global_total_fields) * 100
-            else:
-                global_score = 0
+            global_score = calculate_percentage(self.global_pass_cnt, global_total_fields)
 
             # 전체 필수 필드 통과 수 = 전체 통과 - 전체 선택 통과
             global_required_pass = self.global_pass_cnt - self.global_opt_pass_cnt
@@ -3402,15 +3243,8 @@ class MyApp(QWidget):
             )
 
     def icon_update_step(self, auth_, result_, text_):
-        if result_ == "PASS":
-            msg = auth_ + "\n\n" + "Result: PASS" + "\n" + text_ + "\n"
-            img = self.img_pass
-        elif result_ == "진행중":
-            msg = auth_ + "\n\n" + "Status: " + text_ + "\n"
-            img = self.img_none
-        else:
-            msg = auth_ + "\n\n" + "Result: FAIL" + "\nResult details:\n" + text_ + "\n"
-            img = self.img_fail
+        msg = format_result_message(auth_, result_, text_)
+        img = get_result_icon_path(result_, self.img_pass, self.img_fail, self.img_none)
         return msg, img
 
     def icon_update(self, tmp_res_auth, val_result, val_text):
@@ -3446,87 +3280,11 @@ class MyApp(QWidget):
         Qt 호환성이 보장된 HTML 테이블 구조 로그 출력 함수
         """
         from datetime import datetime
-        import html
 
         # 타임스탬프
         timestamp = datetime.now().strftime("%H:%M:%S")
 
-        # 점수에 따른 색상 결정
-        if score is not None:
-            if score >= 100:
-                node_color = "#10b981"  # 녹색
-                text_color = "#10b981"  # 녹색 텍스트
-            else:
-                node_color = "#ef4444"  # 빨강
-                text_color = "#ef4444"  # 빨강 텍스트
-        else:
-            node_color = "#6b7280"  # 회색
-            text_color = "#333"  # 기본 검정
-
-        # 1. 헤더 (Step 이름 + 시간) - Table로 블록 분리
-        html_content = f"""
-        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 15px;">
-            <tr>
-                <td valign="middle">
-                    <span style="font-size: 20px; font-weight: bold; color: {text_color}; font-family: 'Noto Sans KR';">{step_name}</span>
-                    <span style="font-size: 16px; color: #9ca3af; font-family: 'Consolas', monospace; margin-left: 8px;">{timestamp}</span>
-                </td>
-            </tr>
-        </table>
-        """
-
-        # 2. 내용 영역
-        html_content += f"""
-        <table width="100%" border="0" cellspacing="0" cellpadding="0">
-            <tr>
-                <td>
-        """
-
-        # 2-1. 상세 내용 (Details)
-        if details:
-            html_content += f"""
-                <div style="margin-bottom: 8px; font-size: 18px; color: #6b7280; font-family: 'Noto Sans KR';">
-                    {details}
-                </div>
-            """
-
-        # 2-2. JSON 데이터 (회색 박스)
-        if request_json and request_json.strip():
-            escaped_json = html.escape(request_json)
-            is_json_structure = request_json.strip().startswith('{') or request_json.strip().startswith('[')
-
-            if is_json_structure:
-                html_content += f"""
-                <div style="margin-top: 5px; margin-bottom: 10px;">
-                    <div style="font-size: 15px; color: #9ca3af; font-weight: bold; margin-bottom: 4px;">📦 데이터</div>
-                    <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 10px;">
-                        <pre style="margin: 0; font-family: 'Consolas', monospace; font-size: 18px; color: #1f2937;">{escaped_json}</pre>
-                    </div>
-                </div>
-                """
-            else:
-                # JSON이 아닌 일반 텍스트일 경우
-                html_content += f"""
-                <div style="margin-top: 5px; margin-bottom: 10px;">
-                    <pre style="font-size: 18px; color: #6b7280; font-family: 'Consolas', monospace;">{escaped_json}</pre>
-                </div>
-                """
-
-        # 2-3. 점수 (Score)
-        if score is not None:
-            html_content += f"""
-                <div style="margin-top: 5px; font-size: 18px; color: #6b7280; font-weight: bold; font-family: 'Consolas', monospace;">
-                    점수: {score:.1f}%
-                </div>
-            """
-
-        # Table 닫기
-        html_content += """
-                </td>
-            </tr>
-        </table>
-        <div style="margin-bottom: 10px;"></div>
-        """
+        html_content = generate_monitor_log_html(step_name, timestamp, request_json, score, details)
 
         self.valResult.append(html_content)
 
@@ -4758,19 +4516,12 @@ class MyApp(QWidget):
             current_width = self.width()
             current_height = self.height()
 
-            # 비율 계산 (최소 1.0 - 원본 크기 이하로 줄어들지 않음)
             width_ratio = max(1.0, current_width / self.original_window_size[0])
             height_ratio = max(1.0, current_height / self.original_window_size[1])
-
-            # ✅ 왼쪽/오른쪽 패널 정렬을 위한 확장량 계산
-            # 컬럼의 추가 높이를 계산하고, 그 추가분만 확장 요소들에 분배
             original_column_height = 898  # 원본 컬럼 높이
             extra_column_height = original_column_height * (height_ratio - 1)
 
-            # 왼쪽 패널 확장 요소: group_table(204) + field_group(526) = 730px
             left_expandable_total = 204 + 526  # 730
-
-            # 오른쪽 패널 확장 요소: api_section(251) + monitor_section(157) = 408px
             right_expandable_total = 251 + 157  # 408
 
             # bg_root 크기 조정
@@ -5901,8 +5652,6 @@ class MyApp(QWidget):
         try:
             from datetime import datetime
 
-            # 마지막 완료된 API 인덱스 계산
-            # 모든 retry가 완료된 API만 완료로 간주
             last_completed = -1
             for i, buffer in enumerate(self.step_buffers):
                 # ✅ 부하테스트의 경우 모든 retry가 완료되어야 "완료"로 판단
@@ -6183,7 +5932,7 @@ class MyApp(QWidget):
     def build_result_payload(self):
         """최종 결과를 dict로 반환"""
         total_fields = self.total_pass_cnt + self.total_error_cnt
-        score = (self.total_pass_cnt / total_fields) * 100 if total_fields > 0 else 0
+        score = calculate_percentage(self.total_pass_cnt, total_fields)
         return {
             "score": score,
             "pass_count": self.total_pass_cnt,
