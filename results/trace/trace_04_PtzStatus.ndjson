@@ -1,0 +1,4 @@
+{"time": "2025-12-24T08:04:01.499334Z", "api": "PtzStatus", "dir": "REQUEST", "data": {"camID": "cam0002"}}
+{"time": "2025-12-24T08:04:01.545211Z", "api": "PtzStatus", "dir": "REQUEST", "data": {"camID": "cam0002"}}
+{"time": "2025-12-24T08:04:01.550198Z", "api": "PtzStatus", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "position": {"pan": 10, "tilt": 20, "zoom": 30}, "moveStatus": {"pan": "정지", "tilt": "이동중", "zoom": "정지"}}}
+{"time": "2025-12-24T08:04:02.485452Z", "api": "PtzStatus", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "position": {"pan": 10, "tilt": 20, "zoom": 30}, "moveStatus": {"pan": "정지", "tilt": "이동중", "zoom": "정지"}}}
