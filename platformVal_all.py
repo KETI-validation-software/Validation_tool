@@ -287,28 +287,46 @@ class CombinedDetailDialog(QDialog):
         button_layout.setContentsMargins(0, 0, 0, 0)
         
         # 확인 버튼 (434x48)
-        confirm_button = QPushButton("")
-        confirm_button.setFixedSize(434, 48)
-        confirm_button.setStyleSheet("""
-            QPushButton {
+        # ✅ 반응형: 인스턴스 변수로 변경 및 원본 크기 저장
+        self.confirm_button = QPushButton("확인")
+        self.confirm_button.setFixedSize(434, 48)
+        self.original_confirm_btn_size = (434, 48)
+        self.original_dialog_size = (1520, 921)
+        confirm_enabled = resource_path("assets/image/test_runner/btn_확인_enabled.png").replace("\\", "/")
+        confirm_hover = resource_path("assets/image/test_runner/btn_확인_Hover.png").replace("\\", "/")
+        self.confirm_button.setStyleSheet(f"""
+            QPushButton {{
                 border: none;
-                background-image: url(assets/image/test_runner/btn_확인_enabled.png);
-                background-repeat: no-repeat;
-                background-position: center;
-            }
-            QPushButton:hover {
-                background-image: url(assets/image/test_runner/btn_확인_Hover.png);
-            }
+                border-image: url('{confirm_enabled}') 0 0 0 0 stretch stretch;
+                padding-left: 20px;
+                padding-right: 20px;
+                font-family: 'Noto Sans KR';
+                font-size: 20px;
+                font-weight: 500;
+                color: #FFFFFF;
+            }}
+            QPushButton:hover {{
+                border-image: url('{confirm_hover}') 0 0 0 0 stretch stretch;
+            }}
         """)
-        confirm_button.clicked.connect(self.accept)
-        
+        self.confirm_button.clicked.connect(self.accept)
+
         button_layout.addStretch()
-        button_layout.addWidget(confirm_button)
+        button_layout.addWidget(self.confirm_button)
         button_layout.addStretch()
 
         main_layout.addWidget(button_container)
 
         self.setLayout(main_layout)
+
+    def resizeEvent(self, event):
+        """다이얼로그 크기 변경 시 확인 버튼 크기 조정"""
+        super().resizeEvent(event)
+
+        if hasattr(self, 'confirm_button') and hasattr(self, 'original_confirm_btn_size'):
+            width_ratio = max(1.0, self.width() / self.original_dialog_size[0])
+            new_btn_width = int(self.original_confirm_btn_size[0] * width_ratio)
+            self.confirm_button.setFixedSize(new_btn_width, self.original_confirm_btn_size[1])
 
 # 팝업창 설정하는 함수
 class CustomDialog(QDialog):
@@ -674,30 +692,33 @@ class ResultPageWidget(QWidget):
 
         if self.embedded:
             # Embedded 모드: 이전 화면으로 버튼
-            back_btn = QPushButton(self)
-            back_btn.setFixedSize(362, 48)
+            # ✅ 반응형: 인스턴스 변수로 변경 및 원본 크기 저장
+            self.back_btn = QPushButton("이전 화면으로", self)
+            self.back_btn.setFixedSize(362, 48)
+            self.original_back_btn_size = (362, 48)
             try:
                 back_enabled = resource_path("assets/image/test_runner/btn_이전화면으로_enabled.png").replace("\\", "/")
                 back_hover = resource_path("assets/image/test_runner/btn_이전화면으로_hover.png").replace("\\", "/")
-                back_btn.setStyleSheet(f"""
+                self.back_btn.setStyleSheet(f"""
                     QPushButton {{
                         border: none;
-                        background-image: url('{back_enabled}');
-                        background-repeat: no-repeat;
-                        background-position: center;
-                        background-color: transparent;
+                        border-image: url('{back_enabled}') 0 0 0 0 stretch stretch;
+                        padding-left: 20px;
+                        padding-right: 20px;
+                        font-family: 'Noto Sans KR';
+                        font-size: 20px;
+                        font-weight: 500;
+                        color: #FFFFFF;
                     }}
                     QPushButton:hover {{
-                        background-image: url('{back_hover}');
+                        border-image: url('{back_hover}') 0 0 0 0 stretch stretch;
                     }}
                     QPushButton:pressed {{
-                        background-image: url('{back_hover}');
-                        opacity: 0.8;
+                        border-image: url('{back_hover}') 0 0 0 0 stretch stretch;
                     }}
                 """)
             except:
-                back_btn.setText('이전 화면으로')
-                back_btn.setStyleSheet("""
+                self.back_btn.setStyleSheet("""
                     QPushButton {
                         background-color: #4A90E2;
                         border: none;
@@ -711,8 +732,8 @@ class ResultPageWidget(QWidget):
                         background-color: #357ABD;
                     }
                 """)
-            back_btn.clicked.connect(self._on_back_clicked)
-            buttonLayout.addWidget(back_btn)
+            self.back_btn.clicked.connect(self._on_back_clicked)
+            buttonLayout.addWidget(self.back_btn)
         else:
             # Standalone 모드: 닫기 버튼
             close_btn = QPushButton('닫기', self)
@@ -930,6 +951,11 @@ class ResultPageWidget(QWidget):
             if hasattr(self, 'buttonGroup') and hasattr(self, 'original_buttonGroup_size'):
                 new_btn_group_width = int(self.original_buttonGroup_size[0] * width_ratio)
                 self.buttonGroup.setFixedSize(new_btn_group_width, self.original_buttonGroup_size[1])
+
+            # ✅ 반응형: back_btn 크기 조정
+            if hasattr(self, 'back_btn') and hasattr(self, 'original_back_btn_size'):
+                new_back_btn_width = int(self.original_back_btn_size[0] * width_ratio)
+                self.back_btn.setFixedSize(new_back_btn_width, self.original_back_btn_size[1])
 
             # ✅ 결과 테이블 컬럼 너비 비례 조정
             if hasattr(self, 'tableWidget') and hasattr(self, 'original_column_widths'):
