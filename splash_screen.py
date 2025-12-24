@@ -1,22 +1,20 @@
 # splash_screen.py
 """
 실행 파일 시작 시 표시되는 스플래시 스크린 (로딩 화면)
-PyQt5로 코드만으로 디자인 (이미지 불필요)
 """
 from PyQt5.QtWidgets import QSplashScreen, QVBoxLayout, QLabel, QProgressBar, QWidget
-from PyQt5.QtCore import Qt, QTimer, QPointF
-from PyQt5.QtGui import QPixmap, QPainter, QColor, QFont, QPen
-import math
+from PyQt5.QtCore import Qt, QTimer, QRectF
+from PyQt5.QtGui import QPixmap, QPainter, QColor, QPen, QLinearGradient
 
 
 class SplashScreen(QSplashScreen):
     """
-    프로그램 시작 시 로딩 상태를 표시하는 스플래시 스크린
+    그라데이션이 적용된 스플래시
     """
-    def __init__(self, width=500, height=300):
-        # 빈 픽스맵 생성 (배경용)
+    def __init__(self, width=650, height=250):
+        # 그라데이션 배경 픽스맵 생성
         pixmap = QPixmap(width, height)
-        pixmap.fill(QColor("#f5f6f8"))
+        self._draw_background(pixmap, width, height)
 
         super().__init__(pixmap, Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
 
@@ -24,106 +22,90 @@ class SplashScreen(QSplashScreen):
         self.height = height
         self._setup_ui()
 
+    def _draw_background(self, pixmap, width, height):
+        """그라데이션 배경 그리기"""
+        painter = QPainter(pixmap)
+        painter.setRenderHint(QPainter.Antialiasing)
+
+        # 그라데이션 설정 (#275554 -> #002B69)
+        gradient = QLinearGradient(0, 0, width, height)
+        gradient.setColorAt(0, QColor("#275554"))
+        gradient.setColorAt(1, QColor("#002B69"))
+
+        # 사각형 그리기
+        painter.setBrush(gradient)
+        painter.setPen(Qt.NoPen)
+        painter.drawRect(0, 0, width, height)
+        painter.end()
+
     def _setup_ui(self):
         """UI 구성 요소 생성"""
-        # 메인 위젯 (레이아웃 사용 위해)
-        widget = QWidget()
-        widget.setObjectName("splashContainer")
-        widget.setFixedSize(self.width, self.height)
-        widget.setStyleSheet("""
-            #splashContainer {
-                background-color: #FFFFFF;
-                border: 3px solid #A3A9AD;
-            }
+        # 메인 위젯
+        self._widget = QWidget()
+        self._widget.setFixedSize(self.width, self.height)
+        self._widget.setStyleSheet("background: transparent;")
+
+        layout = QVBoxLayout(self._widget)
+        layout.setContentsMargins(50, 40, 50, 30)
+
+        # 타이틀
+        self.title_label = QLabel("물리보안 연동성 검증 도구")
+        self.title_label.setStyleSheet("""
+            color: white;
+            font-size: 22pt;
+            font-weight: bold;
+            font-family: 'Malgun Gothic', 'Noto Sans KR';
+            background: transparent;
         """)
+        layout.addWidget(self.title_label)
 
-        layout = QVBoxLayout()
-        layout.setContentsMargins(40, 40, 40, 40)
-        layout.setSpacing(15)
-
-        # ===== 상단 여백 =====
-        layout.addStretch(1)
-
-        # ===== 타이틀 =====
-        # self.title_label = QLabel("검증 소프트웨어 통합 실행기")
-        # self.title_label.setAlignment(Qt.AlignCenter)
-        # self.title_label.setStyleSheet("""
-        #     QLabel {
-        #         color: #163971;
-        #         font-size: 18pt;
-        #         font-weight: bold;
-        #         padding: 10px;
-        #     }
-        # """)
-        # layout.addWidget(self.title_label)
-
-        # ===== 서브 타이틀 =====
-        self.subtitle_label = QLabel("프로그램 시작 중...")
-        self.subtitle_label.setAlignment(Qt.AlignCenter)
+        # 서브 타이틀
+        self.subtitle_label = QLabel("시스템 리소스를 불러오는 중...")
         self.subtitle_label.setStyleSheet("""
-            QLabel {
-                font-family: 'Noto Sans KR';
-                color: #666666;
-                font-size: 18pt;
-                font-weight: 500;
-                padding: 5px;
-            }
+            color: rgba(255, 255, 255, 180);
+            font-size: 12pt;
+            background: transparent;
         """)
         layout.addWidget(self.subtitle_label)
 
-        # ===== 중간 여백 =====
-        layout.addStretch(1)
+        layout.addStretch()
 
-        # ===== 프로그레스 바 =====
+        # 슬림 프로그레스 바
         self.progress_bar = QProgressBar()
         self.progress_bar.setRange(0, 100)
         self.progress_bar.setValue(0)
-        self.progress_bar.setTextVisible(True)
-        self.progress_bar.setFixedHeight(25)
+        self.progress_bar.setTextVisible(False)
+        self.progress_bar.setFixedHeight(6)
         self.progress_bar.setStyleSheet("""
             QProgressBar {
-                font-family: 'Noto Sans KR';
-                border: 1px solid #cfd6e4;
-                border-radius: 4px;
-                background-color: #ffffff;
-                text-align: center;
-                font-size: 14pt;
-                color: #333333;
+                background-color: rgba(255, 255, 255, 50);
+                border-radius: 3px;
+                border: none;
             }
             QProgressBar::chunk {
-                background-color: #3b82f6;
+                background-color: white;
                 border-radius: 3px;
             }
         """)
         layout.addWidget(self.progress_bar)
 
-        # ===== 상태 메시지 =====
-        self.status_label = QLabel("")
-        self.status_label.setAlignment(Qt.AlignCenter)
-        self.status_label.setStyleSheet("""
-            QLabel {
-                font-family: 'Noto Sans KR';
-                color: #888888;
-                font-size: 12pt;
-                font-weight: 400;
-                padding: 5px;
-            }
+        # 진행률 텍스트
+        self.percent_label = QLabel("0%")
+        self.percent_label.setAlignment(Qt.AlignRight)
+        self.percent_label.setStyleSheet("""
+            color: white;
+            font-size: 10pt;
+            font-family: 'Consolas';
+            background: transparent;
         """)
-        layout.addWidget(self.status_label)
+        layout.addWidget(self.percent_label)
 
-        # ===== 하단 여백 =====
-        layout.addStretch(1)
-
-        widget.setLayout(layout)
-
-        # 위젯을 스플래시에 직접 설정할 수 없으므로, 렌더링을 위해 저장
-        self._widget = widget
         self._render_widget()
 
     def _render_widget(self):
-        """위젯을 픽스맵에 렌더링"""
+        """현재 UI 상태를 픽스맵으로 변환"""
         pixmap = QPixmap(self.width, self.height)
-        pixmap.fill(QColor("#f5f6f8"))
+        self._draw_background(pixmap, self.width, self.height)
 
         painter = QPainter(pixmap)
         self._widget.render(painter)
@@ -140,16 +122,13 @@ class SplashScreen(QSplashScreen):
             message (str): 상태 메시지
         """
         self.progress_bar.setValue(value)
+        self.percent_label.setText(f"{value}%")
         if message:
-            self.status_label.setText(message)
+            self.subtitle_label.setText(message)
 
-        # 위젯 다시 렌더링
         self._render_widget()
-
-        # UI 업데이트 강제 실행
         self.repaint()
 
-        # 이벤트 루프 처리 (애니메이션이 부드럽게 보이도록)
         from PyQt5.QtWidgets import QApplication
         QApplication.processEvents()
 
@@ -165,74 +144,47 @@ class SplashScreen(QSplashScreen):
 
 class SpinnerWidget(QWidget):
     """
-    회전하는 스피너 위젯
+    미니멀한 디자인의 회전 스피너
     """
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, color="#ffffff"):
         super().__init__(parent)
         self.angle = 0
-        self.setFixedSize(50, 50)
+        self.color = QColor(color)
+        self.setFixedSize(40, 40)
 
-        # 타이머 설정 (60 FPS)
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.rotate)
-        self.timer.start(50)  # 50ms = 20 FPS
+        self.timer.start(40)
 
     def rotate(self):
         """회전 각도 업데이트"""
-        self.angle = (self.angle + 60) % 360
+        self.angle = (self.angle + 30) % 360
         self.update()
 
     def paintEvent(self, event):
         """스피너 그리기"""
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
+        painter.translate(self.width() / 2, self.height() / 2)
+        painter.rotate(self.angle)
 
-        # 중심점
-        center_x = self.width() / 2
-        center_y = self.height() / 2
-        radius = 15
+        pen = QPen(self.color)
+        pen.setWidth(3)
+        pen.setCapStyle(Qt.RoundCap)
+        painter.setPen(pen)
 
-        # 8개의 선분을 원형으로 배치
-        num_lines = 8
-        for i in range(num_lines):
-            # 각 선분의 각도 계산
-            angle_deg = self.angle + (i * 360 / num_lines)
-            angle_rad = math.radians(angle_deg)
-
-            # 투명도 계산 (회전 방향으로 갈수록 진해짐)
-            alpha = int(255 * (i + 1) / num_lines)
-
-            # 선분 색상 설정
-            color = QColor(59, 130, 246, alpha)  # #3b82f6 with varying alpha
-            pen = QPen(color, 3, Qt.SolidLine, Qt.RoundCap)
-            painter.setPen(pen)
-
-            # 선분 시작점과 끝점 계산
-            inner_radius = radius * 0.5
-            outer_radius = radius
-
-            start_x = center_x + inner_radius * math.cos(angle_rad)
-            start_y = center_y + inner_radius * math.sin(angle_rad)
-            end_x = center_x + outer_radius * math.cos(angle_rad)
-            end_y = center_y + outer_radius * math.sin(angle_rad)
-
-            # 선분 그리기
-            painter.drawLine(
-                QPointF(start_x, start_y),
-                QPointF(end_x, end_y)
-            )
-
-        painter.end()
+        # 부드러운 호(Arc) 형태의 스피너 그리기
+        painter.drawArc(QRectF(-15, -15, 30, 30), 0, 270 * 16)
 
 
 class LoadingPopup(QSplashScreen):
     """
     평가 시작 시 로딩 상태를 표시하는 팝업
     """
-    def __init__(self, width=400, height=250):
-        # 빈 픽스맵 생성 (배경용)
+    def __init__(self, width=400, height=200):
+        # 그라데이션 배경 픽스맵 생성
         pixmap = QPixmap(width, height)
-        pixmap.fill(QColor("#f5f6f8"))
+        self._draw_background_static(pixmap, width, height)
 
         super().__init__(pixmap, Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
 
@@ -240,87 +192,85 @@ class LoadingPopup(QSplashScreen):
         self.height = height
         self._setup_ui()
 
-        # 스피너 애니메이션을 위한 타이머 (스피너와 동기화)
+        # 스피너 애니메이션을 위한 타이머
         self.render_timer = QTimer(self)
         self.render_timer.timeout.connect(self._render_widget)
-        self.render_timer.start(50)  # 50ms = 20 FPS
+        self.render_timer.start(40)
+
+    @staticmethod
+    def _draw_background_static(pixmap, width, height):
+        """그라데이션 배경 그리기 (정적 메서드)"""
+        painter = QPainter(pixmap)
+        painter.setRenderHint(QPainter.Antialiasing)
+
+        gradient = QLinearGradient(0, 0, width, height)
+        gradient.setColorAt(0, QColor("#275554"))
+        gradient.setColorAt(1, QColor("#002B69"))
+
+        painter.setBrush(gradient)
+        painter.setPen(Qt.NoPen)
+        painter.drawRect(0, 0, width, height)
+        painter.end()
+
+    def _draw_background(self, pixmap):
+        """인스턴스 메서드로 배경 그리기"""
+        self._draw_background_static(pixmap, self.width, self.height)
 
     def _setup_ui(self):
         """UI 구성 요소 생성"""
-        # 메인 위젯 (레이아웃 사용 위해)
-        widget = QWidget()
-        widget.setObjectName("loadingContainer")
-        widget.setFixedSize(self.width, self.height)
-        widget.setStyleSheet("""
-            #loadingContainer {
-                background-color: #FFFFFF;
-                border: 3px solid #A3A9AD;
-            }
-        """)
+        # 메인 위젯
+        self._widget = QWidget()
+        self._widget.setFixedSize(self.width, self.height)
+        self._widget.setStyleSheet("background: transparent;")
 
-        layout = QVBoxLayout()
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(10)
+        layout = QVBoxLayout(self._widget)
+        layout.setContentsMargins(30, 25, 30, 25)
+        layout.setSpacing(8)
 
-        # ===== 상단 여백 =====
-        layout.addStretch(1)
-
-        # ===== 메시지 =====
+        # 메인 메시지
         self.message_label = QLabel("평가 준비 중...")
         self.message_label.setAlignment(Qt.AlignCenter)
         self.message_label.setStyleSheet("""
-            QLabel {
-                font-family: 'Noto Sans KR';
-                color: #163971;
-                font-size: 14pt;
-                font-weight: 500;
-                padding: 10px;
-            }
+            color: white;
+            font-size: 14pt;
+            font-weight: bold;
+            font-family: 'Segoe UI', 'Malgun Gothic';
+            background: transparent;
         """)
         layout.addWidget(self.message_label)
 
-        # ===== 서브 메시지 =====
+        # 서브 메시지
         self.subtitle_label = QLabel("잠시만 기다려주세요")
         self.subtitle_label.setAlignment(Qt.AlignCenter)
         self.subtitle_label.setStyleSheet("""
-            QLabel {
-                font-family: 'Noto Sans KR';
-                color: #666666;
-                font-size: 12pt;
-                font-weight: 400;
-                padding: 5px;
-            }
+            color: rgba(255, 255, 255, 180);
+            font-size: 10pt;
+            background: transparent;
         """)
         layout.addWidget(self.subtitle_label)
 
-        # ===== 중간 여백 =====
-        layout.addStretch(1)
+        layout.addStretch()
 
-        # ===== 회전하는 스피너 =====
+        # 회전하는 스피너
         spinner_container = QWidget()
-        spinner_layout = QVBoxLayout()
+        spinner_container.setStyleSheet("background: transparent;")
+        spinner_layout = QVBoxLayout(spinner_container)
         spinner_layout.setContentsMargins(0, 0, 0, 0)
         spinner_layout.setAlignment(Qt.AlignCenter)
 
-        self.spinner = SpinnerWidget()
+        self.spinner = SpinnerWidget(color="#ffffff")
         spinner_layout.addWidget(self.spinner, alignment=Qt.AlignCenter)
 
-        spinner_container.setLayout(spinner_layout)
         layout.addWidget(spinner_container)
 
-        # ===== 하단 여백 =====
-        layout.addStretch(1)
+        layout.addStretch()
 
-        widget.setLayout(layout)
-
-        # 위젯을 스플래시에 직접 설정할 수 없으므로, 렌더링을 위해 저장
-        self._widget = widget
         self._render_widget()
 
     def _render_widget(self):
-        """위젯을 픽스맵에 렌더링"""
+        """현재 UI 상태를 픽스맵으로 변환"""
         pixmap = QPixmap(self.width, self.height)
-        pixmap.fill(QColor("#f5f6f8"))
+        self._draw_background(pixmap)
 
         painter = QPainter(pixmap)
         self._widget.render(painter)
@@ -340,13 +290,9 @@ class LoadingPopup(QSplashScreen):
         if subtitle:
             self.subtitle_label.setText(subtitle)
 
-        # 위젯 다시 렌더링
         self._render_widget()
-
-        # UI 업데이트 강제 실행
         self.repaint()
 
-        # 이벤트 루프 처리
         from PyQt5.QtWidgets import QApplication
         QApplication.processEvents()
 
@@ -383,7 +329,7 @@ if __name__ == "__main__":
 
     for value, msg in steps:
         splash.update_progress(value, msg)
-        time.sleep(0.5)  # 실제로는 작업 수행
+        time.sleep(0.5)
 
     # 메인 윈도우 생성
     main_window = QMainWindow()
