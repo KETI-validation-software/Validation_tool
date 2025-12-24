@@ -380,6 +380,9 @@ class ResultPageWidget(QWidget):
 
         self.setLayout(mainLayout)
 
+        # 초기 시나리오 로드 (UI 요소 생성 후 호출)
+        self.load_initial_scenarios()
+
     def resizeEvent(self, event):
         """창 크기 변경 시 배경 이미지 및 UI 반응형 조정"""
         super().resizeEvent(event)
@@ -611,6 +614,8 @@ class ResultPageWidget(QWidget):
         self.group_table.horizontalHeader().setFixedHeight(31)
         self.group_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.group_table.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.group_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.group_table.setFocusPolicy(Qt.NoFocus)
         self.group_table.verticalHeader().setVisible(False)
         self.group_table.verticalHeader().setDefaultSectionSize(39)
         self.group_table.setFixedHeight(204)
@@ -634,9 +639,14 @@ class ResultPageWidget(QWidget):
                 padding: 8px;
                 text-align: center;
             }
+            QTableWidget::item:focus {
+                outline: none;
+                border-bottom: 1px solid #CCCCCC;
+            }
             QTableWidget::item:selected {
                 background-color: #E3F2FF;
                 border: none;
+                outline: none;
             }
             QTableWidget::item:hover {
                 background-color: #F2F8FF;
@@ -693,6 +703,8 @@ class ResultPageWidget(QWidget):
         self.test_field_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.test_field_table.horizontalHeader().setFixedHeight(31)
         self.test_field_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.test_field_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.test_field_table.setFocusPolicy(Qt.NoFocus)
         self.test_field_table.cellClicked.connect(self.on_test_field_selected)
         self.test_field_table.verticalHeader().setVisible(False)
         self.test_field_table.verticalHeader().setDefaultSectionSize(39)
@@ -706,6 +718,7 @@ class ResultPageWidget(QWidget):
                 font-family: "Noto Sans KR";
                 font-size: 19px;
                 color: #1B1B1C;
+                outline: none;
             }
             QTableWidget::item {
                 border-bottom: 1px solid #CCCCCC;
@@ -718,8 +731,13 @@ class ResultPageWidget(QWidget):
                 letter-spacing: 0.098px;
                 text-align: center; 
             }
+            QTableWidget::item:focus {
+                outline: none;
+                border-bottom: 1px solid #CCCCCC;
+            }
             QTableWidget::item:selected {
                 background-color: #E3F2FF;
+                outline: none;
             }
             QTableWidget::item:hover {
                 background-color: #E3F2FF;
@@ -740,9 +758,6 @@ class ResultPageWidget(QWidget):
                 letter-spacing: -0.156px;
             }
         """)
-
-        # 초기 로드: 현재 그룹의 시나리오 표시
-        self.load_initial_scenarios()
 
         layout.addWidget(self.test_field_table)
         group_box.setLayout(layout)
@@ -1001,7 +1016,7 @@ class ResultPageWidget(QWidget):
 
             detail_label.setCursor(Qt.PointingHandCursor)
             detail_label.setAlignment(Qt.AlignCenter)
-            detail_label.mousePressEvent = lambda event, r=row: self._show_detail(r)
+            # detail_label.mousePressEvent = lambda event, r=row: self._show_detail(r)
 
             container = QWidget()
             layout = QHBoxLayout()
@@ -1083,7 +1098,7 @@ class ResultPageWidget(QWidget):
 
             detail_label.setCursor(Qt.PointingHandCursor)
             detail_label.setAlignment(Qt.AlignCenter)
-            detail_label.mousePressEvent = lambda event, r=row: self._show_detail(r)
+            # detail_label.mousePressEvent = lambda event, r=row: self._show_detail(r)
 
             container = QWidget()
             layout = QHBoxLayout()
@@ -1464,7 +1479,7 @@ class ResultPageWidget(QWidget):
 
             detail_label.setCursor(Qt.PointingHandCursor)
             detail_label.setAlignment(Qt.AlignCenter)
-            detail_label.mousePressEvent = lambda event, r=row: self._show_detail(r)
+            # detail_label.mousePressEvent = lambda event, r=row: self._show_detail(r)
 
             container = QWidget()
             layout = QHBoxLayout()

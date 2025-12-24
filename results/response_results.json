@@ -1,0 +1,227 @@
+{
+  "requestId": "cmisfmr3907tv5vy71y0276gp",
+  "evaluationTarget": {
+    "companyName": "엣지디엑스",
+    "contactPerson": "빙영진",
+    "productName": "AIBridge",
+    "modelName": "v1.0",
+    "version": "v1.0"
+  },
+  "testGroups": [
+    {
+      "id": "cmisfjfzt07tm5vy7qslmisks",
+      "name": "제어기능-물리보안",
+      "testRange": "ALL_FIELDS, ALL_FIELDS, ALL_FIELDS",
+      "testSpecIds": [
+        "cmiqr2b9j00i9ie8frw439h8i",
+        "cmiqr1jha00i6ie8fb1scb3go",
+        "cmiqr0kdw00i4ie8fr3firjtg"
+      ]
+    }
+  ],
+  "status": "완료",
+  "authMethod": "Digest Auth",
+  "testScore": {
+    "score": 100.0,
+    "totalFields": 29,
+    "passedFields": 29,
+    "failedFields": 0
+  },
+  "testResult": [
+    {
+      "testGroup": "cmisfjfzt07tm5vy7qslmisks",
+      "testSpecId": "cmiqr2b9j00i9ie8frw439h8i",
+      "testSpecName": "sensor002",
+      "score": 100.0,
+      "totalFields": 29,
+      "passedFields": 29,
+      "failedFields": 0,
+      "apis": [
+        {
+          "id": "cmise849o00nv5vy7mu76wa69",
+          "name": "사용자 인증",
+          "method": "POST",
+          "endpoint": "/Authentication",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 5,
+          "passFields": 5,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "userName": "관리자",
+                "userAff": "오산시",
+                "accessToken": "abcde1234"
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmise9yk200pv5vy7ktxtva7c",
+          "name": "전송 지원 기능 정보 연동",
+          "method": "POST",
+          "endpoint": "/Capabilities",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 5,
+          "passFields": 5,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "",
+                "message": "",
+                "transportSupport": [
+                  {
+                    "transProtocolType": "LongPolling",
+                    "transProtocolDesc": "none"
+                  },
+                  {
+                    "transProtocolType": "Webhook",
+                    "transProtocolDesc": "none"
+                  }
+                ]
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmisepin301uv5vy78nai1drd",
+          "name": "보안용 센서 단말 목록 정보 연동",
+          "method": "POST",
+          "endpoint": "/SensorDeviceProfiles",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 11,
+          "passFields": 11,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "",
+                "message": "",
+                "sensorDeviceList": [
+                  {
+                    "sensorDeviceID": "iot0001",
+                    "sensorDeviceType": "홍채인식",
+                    "sensorDeviceName": "홍채 센서",
+                    "sensorDeviceLoc": {
+                      "lon": "12",
+                      "lat": "233",
+                      "alt": "122",
+                      "desc": "복도"
+                    }
+                  },
+                  {
+                    "sensorDeviceID": "iot0002",
+                    "sensorDeviceType": "온도",
+                    "sensorDeviceName": "온도센서",
+                    "sensorDeviceLoc": {
+                      "lon": "24",
+                      "lat": "367",
+                      "alt": "234",
+                      "desc": "출입구"
+                    }
+                  },
+                  {
+                    "sensorDeviceID": "iot0003",
+                    "sensorDeviceType": "지문",
+                    "sensorDeviceName": "지문센서",
+                    "sensorDeviceLoc": {
+                      "lon": "486",
+                      "lat": "54",
+                      "alt": "6",
+                      "desc": "후문"
+                    }
+                  },
+                  {
+                    "sensorDeviceID": "iot0004",
+                    "sensorDeviceType": "온도",
+                    "sensorDeviceName": "온도센서",
+                    "sensorDeviceLoc": {
+                      "lon": "123",
+                      "lat": "42",
+                      "alt": "55",
+                      "desc": "복도"
+                    }
+                  }
+                ]
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmisfqfip07tz5vy7de6x5d6r",
+          "name": "보안용 센서 단말 제어 정보 연동-상태연동",
+          "method": "POST",
+          "endpoint": "/SensorDeviceControl",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 4,
+          "passFields": 4,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "sensorDeviceID": "iot0003",
+                "sensorDeviceStatus": "AlarmOn"
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmisg86id08bm5vy7ezcbr7oy",
+          "name": "보안용 센서 단말 제어 정보 연동-제어",
+          "method": "POST",
+          "endpoint": "/SensorDeviceControl",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 4,
+          "passFields": 4,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "sensorDeviceID": "iot0003",
+                "sensorDeviceStatus": "AlarmOff"
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "completedDate": "2025-12-24T16:21:42Z"
+}
