@@ -22,7 +22,7 @@ import spec.Schema_response as schema_response_module
 from http.server import HTTPServer
 import warnings
 from core.validation_registry import get_validation_rules
-from core.utils import remove_api_number_suffix, to_detail_text, redact, clean_trace_directory, format_schema, load_from_trace_file, load_external_constants, setup_external_spec_modules
+from core.utils import remove_api_number_suffix, to_detail_text, redact, clean_trace_directory, format_schema, load_from_trace_file, load_external_constants, setup_external_spec_modules, calculate_percentage, generate_monitor_log_html, format_result_message, get_result_icon_path
 
 warnings.filterwarnings('ignore')
 result_dir = os.path.join(os.getcwd(), "results")
@@ -1238,7 +1238,7 @@ class ResultPageWidget(QWidget):
         total_pass = saved_data.get('total_pass_cnt', 0)
         total_error = saved_data.get('total_error_cnt', 0)
         total_fields = total_pass + total_error
-        score = (total_pass / total_fields * 100) if total_fields > 0 else 0
+        score = calculate_percentage(total_pass, total_fields)
 
         # spec_score_group 재생성
         if hasattr(self, 'spec_score_group'):
@@ -1825,7 +1825,7 @@ class ResultPageWidget(QWidget):
         opt_total = opt_pass + opt_error
         # 필수 필드 전체 수 = 전체 필드 - 선택 필드
         required_total = total_fields - opt_total
-        score = (total_pass / total_fields * 100) if total_fields > 0 else 0
+        score = calculate_percentage(total_pass, total_fields)
 
         data_area = QWidget()
         data_area.setFixedSize(1064, 76)
@@ -2176,11 +2176,8 @@ class MyApp(QWidget):
         self.tableWidget.item(row, 6).setTextAlignment(Qt.AlignCenter)
 
         # 평가 점수 업데이트 - 컬럼 7
-        if total_fields > 0:
-            score = (pass_count / total_fields) * 100
-            self.tableWidget.setItem(row, 7, QTableWidgetItem(f"{score:.1f}%"))
-        else:
-            self.tableWidget.setItem(row, 7, QTableWidgetItem("0%"))
+        score = calculate_percentage(pass_count, total_fields)
+        self.tableWidget.setItem(row, 7, QTableWidgetItem(f"{score:.1f}%"))
         self.tableWidget.item(row, 7).setTextAlignment(Qt.AlignCenter)
 
         # 메시지 저장
@@ -2722,10 +2719,7 @@ class MyApp(QWidget):
 
                     # ✅ 점수 계산은 step_pass_counts 배열의 합으로 (누적 아님!)
                     total_fields = self.total_pass_cnt + self.total_error_cnt
-                    if total_fields > 0:
-                        score_value = (self.total_pass_cnt / total_fields * 100)
-                    else:
-                        score_value = 0
+                    score_value = calculate_percentage(self.total_pass_cnt, total_fields)
 
                     # 모니터링 창에 최종 결과 표시 (HTML 카드 형식)
                     api_name = self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else "Unknown"
@@ -2804,10 +2798,7 @@ class MyApp(QWidget):
                 self.update_score_display()
 
                 total_fields = self.total_pass_cnt + self.total_error_cnt
-                if total_fields > 0:
-                    score_value = (self.total_pass_cnt / total_fields * 100)
-                else:
-                    score_value = 0
+                score_value = calculate_percentage(self.total_pass_cnt, total_fields)
 
                 # 타임아웃 결과를 HTML 카드로 출력
                 api_name = self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else "Unknown"
@@ -2848,10 +2839,7 @@ class MyApp(QWidget):
                 self.cnt = 0
 
                 total_fields = self.total_pass_cnt + self.total_error_cnt
-                if total_fields > 0:
-                    final_score = (self.total_pass_cnt / total_fields * 100)
-                else:
-                    final_score = 0
+                final_score = calculate_percentage(self.total_pass_cnt, total_fields)
 
                 self.final_report += "전체 점수: " + str(final_score) + "\n"
                 self.final_report += "전체 결과: " + str(self.total_pass_cnt) + "(누적 통과 필드 수), " + str(
@@ -2951,10 +2939,7 @@ class MyApp(QWidget):
         # 필수 필드 전체 수 = 전체 필드 - 선택 필드
         spec_required_total = spec_total_fields - spec_opt_total
 
-        if spec_total_fields > 0:
-            spec_score = (self.total_pass_cnt / spec_total_fields) * 100
-        else:
-            spec_score = 0
+        spec_score = calculate_percentage(self.total_pass_cnt, spec_total_fields)
 
         # 필수/선택 형식으로 표시
         self.spec_pass_label.setText(
@@ -2977,10 +2962,7 @@ class MyApp(QWidget):
         if hasattr(self, "total_pass_label") and hasattr(self, "total_total_label") and hasattr(self,
                                                                                                 "total_score_label"):
             global_total_fields = self.global_pass_cnt + self.global_error_cnt
-            if global_total_fields > 0:
-                global_score = (self.global_pass_cnt / global_total_fields) * 100
-            else:
-                global_score = 0
+            global_score = calculate_percentage(self.global_pass_cnt, global_total_fields)
 
             # 전체 필수 필드 통과 수 = 전체 통과 - 전체 선택 통과
             global_required_pass = self.global_pass_cnt - self.global_opt_pass_cnt
@@ -3006,15 +2988,8 @@ class MyApp(QWidget):
             )
 
     def icon_update_step(self, auth_, result_, text_):
-        if result_ == "PASS":
-            msg = auth_ + "\n\n" + "Result: PASS" + "\n" + text_ + "\n"
-            img = self.img_pass
-        elif result_ == "진행중":
-            msg = auth_ + "\n\n" + "Status: " + text_ + "\n"
-            img = self.img_none
-        else:
-            msg = auth_ + "\n\n" + "Result: FAIL" + "\nResult details:\n" + text_ + "\n"
-            img = self.img_fail
+        msg = format_result_message(auth_, result_, text_)
+        img = get_result_icon_path(result_, self.img_pass, self.img_fail, self.img_none)
         return msg, img
 
     def icon_update(self, tmp_res_auth, val_result, val_text):
@@ -3050,87 +3025,11 @@ class MyApp(QWidget):
         Qt 호환성이 보장된 HTML 테이블 구조 로그 출력 함수
         """
         from datetime import datetime
-        import html
 
         # 타임스탬프
         timestamp = datetime.now().strftime("%H:%M:%S")
 
-        # 점수에 따른 색상 결정
-        if score is not None:
-            if score >= 100:
-                node_color = "#10b981"  # 녹색
-                text_color = "#10b981"  # 녹색 텍스트
-            else:
-                node_color = "#ef4444"  # 빨강
-                text_color = "#ef4444"  # 빨강 텍스트
-        else:
-            node_color = "#6b7280"  # 회색
-            text_color = "#333"  # 기본 검정
-
-        # 1. 헤더 (Step 이름 + 시간) - Table로 블록 분리
-        html_content = f"""
-        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 15px;">
-            <tr>
-                <td valign="middle">
-                    <span style="font-size: 20px; font-weight: bold; color: {text_color}; font-family: 'Noto Sans KR';">{step_name}</span>
-                    <span style="font-size: 16px; color: #9ca3af; font-family: 'Consolas', monospace; margin-left: 8px;">{timestamp}</span>
-                </td>
-            </tr>
-        </table>
-        """
-
-        # 2. 내용 영역
-        html_content += f"""
-        <table width="100%" border="0" cellspacing="0" cellpadding="0">
-            <tr>
-                <td>
-        """
-
-        # 2-1. 상세 내용 (Details)
-        if details:
-            html_content += f"""
-                <div style="margin-bottom: 8px; font-size: 18px; color: #6b7280; font-family: 'Noto Sans KR';">
-                    {details}
-                </div>
-            """
-
-        # 2-2. JSON 데이터 (회색 박스)
-        if request_json and request_json.strip():
-            escaped_json = html.escape(request_json)
-            is_json_structure = request_json.strip().startswith('{') or request_json.strip().startswith('[')
-
-            if is_json_structure:
-                html_content += f"""
-                <div style="margin-top: 5px; margin-bottom: 10px;">
-                    <div style="font-size: 15px; color: #9ca3af; font-weight: bold; margin-bottom: 4px;">📦 데이터</div>
-                    <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 10px;">
-                        <pre style="margin: 0; font-family: 'Consolas', monospace; font-size: 18px; color: #1f2937;">{escaped_json}</pre>
-                    </div>
-                </div>
-                """
-            else:
-                # JSON이 아닌 일반 텍스트일 경우
-                html_content += f"""
-                <div style="margin-top: 5px; margin-bottom: 10px;">
-                    <pre style="font-size: 18px; color: #6b7280; font-family: 'Consolas', monospace;">{escaped_json}</pre>
-                </div>
-                """
-
-        # 2-3. 점수 (Score)
-        if score is not None:
-            html_content += f"""
-                <div style="margin-top: 5px; font-size: 18px; color: #6b7280; font-weight: bold; font-family: 'Consolas', monospace;">
-                    점수: {score:.1f}%
-                </div>
-            """
-
-        # Table 닫기
-        html_content += """
-                </td>
-            </tr>
-        </table>
-        <div style="margin-bottom: 10px;"></div>
-        """
+        html_content = generate_monitor_log_html(step_name, timestamp, request_json, score, details)
 
         self.valResult.append(html_content)
 
@@ -5778,7 +5677,7 @@ class MyApp(QWidget):
     def build_result_payload(self):
         """최종 결과를 dict로 반환"""
         total_fields = self.total_pass_cnt + self.total_error_cnt
-        score = (self.total_pass_cnt / total_fields) * 100 if total_fields > 0 else 0
+        score = calculate_percentage(self.total_pass_cnt, total_fields)
         return {
             "score": score,
             "pass_count": self.total_pass_cnt,
