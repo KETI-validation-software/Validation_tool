@@ -361,26 +361,22 @@ cmiqr1acx00i5ie8fi022t1hp_DoorProfiles_out_constraints = {
 # RealtimeDoorStatus
 cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_out_constraints = {
   "code": {
-    "id": "cmizg2tx300fg7eoezo3qr162",
+    "id": "cmizg5khh00iq7eoexenwo9i9",
     "valueType": "preset",
     "required": True
   },
   "message": {
-    "id": "cmizg2xab00fm7eoe1bhmlgrw",
+    "id": "cmizg5lyh00iw7eoe7wbhcxaj",
     "valueType": "preset",
     "required": True
-  }
-}
-
-# RealtimeDoorStatus WebHook IN Constraints
-cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_webhook_in_constraints = {
+  },
   "doorList": {
-    "id": "cmiwqkuoh0aj7844gfnoaur3g",
+    "id": "cmjibn2jo0m6ncfb33t9lj809",
     "valueType": "preset",
     "required": True
   },
   "doorList.doorID": {
-    "id": "cmiwqkuoj0aj9844g5oec97p9",
+    "id": "cmjibn2jq0m6pcfb3gqgchw6g",
     "referenceFieldId": "cmiwqkuoj0aj9844g5oec97p9",
     "valueType": "request-based",
     "required": True,
@@ -388,29 +384,19 @@ cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_webhook_in_constraints = {
     "referenceField": "doorID"
   },
   "doorList.doorName": {
-    "id": "cmizg3epb00gy7eoeiefmp1lr",
-    "referenceFieldId": "cmizh2j7y028m7eoe561v1og0",
-    "valueType": "response-based",
-    "required": True,
-    "referenceEndpoint": "/DoorProfiles",
-    "referenceField": "doorName"
+    "id": "cmjibn2jr0m6rcfb3udx1c9nm",
+    "valueType": "preset",
+    "required": True
   },
   "doorList.doorRelaySensor": {
-    "id": "cmizg3ghq00h67eoeuthieru9",
+    "id": "cmjibn2jr0m6tcfb3pm4t00rw",
     "valueType": "preset",
     "required": True
   },
   "doorList.doorSensor": {
-    "id": "cmj13a9eu01vx12s9wja5mxt7",
-    "valueType": "random",
-    "required": True,
-    "referenceField": "(참조 필드 미선택)",
-    "referenceEndpoint": "/RealtimeDoorStatus",
-    "validValueField": "acControl",
-    "validValues": [
-      "Lock",
-      "Unlock"
-    ]
+    "id": "cmjibn2jr0m6vcfb3hihnwxi0",
+    "valueType": "preset",
+    "required": True
   }
 }
 
@@ -431,50 +417,39 @@ cmiqr1acx00i5ie8fi022t1hp_DoorControl_out_constraints = {
 # RealtimeDoorStatus2
 cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_out_constraints = {
   "code": {
-    "id": "cmiwqsqrw0b7y844gtn3rzf7y",
+    "id": "cmiwqw4by0bo6844gvwitykp8",
     "valueType": "preset",
     "required": True
   },
   "message": {
-    "id": "cmiwqsvzu0b88844gjdzch27v",
+    "id": "cmiwqw7dj0boe844gmkrvh7iu",
     "valueType": "preset",
     "required": True
-  }
-}
-
-# RealtimeDoorStatus2 WebHook IN Constraints
-cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_in_constraints = {
+  },
   "doorList": {
-    "id": "cmiwqvxns0bng844g9w4ruqq0",
+    "id": "cmjibisoz0m1xcfb3kpz2l6gk",
     "valueType": "preset",
     "required": True
   },
   "doorList.doorID": {
-    "id": "cmiwqvxnv0bni844g3f2pyz9t",
-    "valueType": "request-based",
-    "required": True,
-    "referenceField": "(참조 필드 미선택)",
-    "referenceEndpoint": "/RealtimeDoorStatus"
+    "id": "cmjibisp10m1zcfb339obwqmf",
+    "valueType": "preset",
+    "required": True
   },
   "doorList.doorName": {
-    "id": "cmiwqvxnv0bnk844gwotx0gqu",
-    "referenceFieldId": "cmizh2j7y028m7eoe561v1og0",
-    "valueType": "response-based",
-    "required": True,
-    "referenceEndpoint": "/DoorProfiles",
-    "referenceField": "doorName"
+    "id": "cmjibisp20m21cfb3y8wh8nbs",
+    "valueType": "preset",
+    "required": True
   },
   "doorList.doorRelaySensor": {
-    "id": "cmiwqvxnv0bnm844g0ndzntyu",
+    "id": "cmjibisp20m23cfb3hnjuxrez",
     "valueType": "preset",
-    "required": False
+    "required": True
   },
   "doorList.doorSensor": {
-    "id": "cmiwqvxnw0bno844gj9p4t49o",
-    "valueType": "request-based",
-    "required": False,
-    "referenceField": "(참조 필드 미선택)",
-    "referenceEndpoint": "/RealtimeDoorStatus"
+    "id": "cmjibisp20m25cfb3t4ru92yd",
+    "valueType": "preset",
+    "required": True
   }
 }
 
@@ -486,16 +461,6 @@ cmiqr1acx00i5ie8fi022t1hp_outConstraints = [
     cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_out_constraints,
     cmiqr1acx00i5ie8fi022t1hp_DoorControl_out_constraints,
     cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_out_constraints,
-]
-
-# cmiqr1acx00i5ie8fi022t1hp WebHook Constraints 리스트
-cmiqr1acx00i5ie8fi022t1hp_webhook_inConstraints = [
-    None,
-    None,
-    None,
-    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_webhook_in_constraints,
-    None,
-    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_in_constraints,
 ]
 
 # Authentication
