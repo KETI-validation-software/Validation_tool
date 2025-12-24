@@ -87,21 +87,16 @@ class InfoWidget(QWidget):
             new_height = int(original_size[1] * height_ratio) if height_ratio else original_size[1]
             widget.setFixedSize(new_width, new_height)
 
-    def _resize_table_rows(self, table, row_height_attr, height_ratio, cell_width=None):
-        """테이블 행 높이 및 셀 위젯 크기 조정"""
+    def _resize_table_rows(self, table, row_height_attr, cell_width=None):
+        """테이블 셀 위젯 너비 조정 (행 높이는 고정 유지)"""
         original_row_height = getattr(self, row_height_attr, None)
         if not original_row_height:
             return
-        new_row_height = int(original_row_height * height_ratio)
-        table.verticalHeader().setDefaultSectionSize(new_row_height)
+        # 행 높이는 원본 크기로 고정
         for row in range(table.rowCount()):
-            table.setRowHeight(row, new_row_height)
             cell_widget = table.cellWidget(row, 0) or table.cellWidget(row, 1)
-            if cell_widget:
-                if cell_width:
-                    cell_widget.setFixedSize(cell_width, new_row_height)
-                else:
-                    cell_widget.setFixedHeight(new_row_height)
+            if cell_widget and cell_width:
+                cell_widget.setFixedSize(cell_width, original_row_height)
 
     def resizeEvent(self, event):
         """창 크기 변경 시 page1, page2 요소들 위치 재조정"""
@@ -216,14 +211,14 @@ class InfoWidget(QWidget):
                     new_table_width = int(self.original_test_field_table_size[0] * width_ratio)
                     new_table_height = int(self.original_test_field_table_size[1] * height_ratio)
                     self.test_field_table.setFixedSize(new_table_width, new_table_height)
-                    self._resize_table_rows(self.test_field_table, 'original_test_field_row_height', height_ratio, new_table_width)
+                    self._resize_table_rows(self.test_field_table, 'original_test_field_row_height', new_table_width)
 
                 # 시나리오 테이블
                 if hasattr(self, 'scenario_table') and hasattr(self, 'original_scenario_table_size'):
                     new_table_width = int(self.original_scenario_table_size[0] * width_ratio)
                     new_table_height = int(self.original_scenario_table_size[1] * height_ratio)
                     self.scenario_table.setFixedSize(new_table_width, new_table_height)
-                    self._resize_table_rows(self.scenario_table, 'original_scenario_row_height', height_ratio, new_table_width)
+                    self._resize_table_rows(self.scenario_table, 'original_scenario_row_height', new_table_width)
 
                     if hasattr(self, 'scenario_column_background') and hasattr(self, 'original_scenario_column_background_geometry'):
                         orig = self.original_scenario_column_background_geometry
@@ -246,11 +241,7 @@ class InfoWidget(QWidget):
                     self.api_test_table.horizontalHeader().resizeSection(0, col_width)
                     self.api_test_table.horizontalHeader().resizeSection(1, col_width)
 
-                    if hasattr(self, 'original_api_row_height'):
-                        new_row_height = int(self.original_api_row_height * height_ratio)
-                        self.api_test_table.verticalHeader().setDefaultSectionSize(new_row_height)
-                        for row in range(self.api_test_table.rowCount()):
-                            self.api_test_table.setRowHeight(row, new_row_height)
+                    # 행 높이는 고정 유지 (원본 크기)
 
                     if hasattr(self, 'api_header_overlay') and hasattr(self, 'original_api_header_overlay_geometry'):
                         orig = self.original_api_header_overlay_geometry
@@ -297,14 +288,12 @@ class InfoWidget(QWidget):
                     url_col_width = new_url_table_width - 50
                     self.url_table.setColumnWidth(1, url_col_width)
 
+                    # 행 높이는 고정 유지, 셀 위젯 너비만 조정
                     if hasattr(self, 'original_url_row_height'):
-                        new_row_height = int(self.original_url_row_height * height_ratio)
-                        self.url_table.verticalHeader().setDefaultSectionSize(new_row_height)
                         for row in range(self.url_table.rowCount()):
-                            self.url_table.setRowHeight(row, new_row_height)
                             url_widget = self.url_table.cellWidget(row, 1)
                             if url_widget:
-                                url_widget.setFixedSize(url_col_width, new_row_height)
+                                url_widget.setFixedSize(url_col_width, self.original_url_row_height)
 
                 # 하단 버튼
                 self._resize_widget('button_container', 'original_button_container_size', width_ratio)
