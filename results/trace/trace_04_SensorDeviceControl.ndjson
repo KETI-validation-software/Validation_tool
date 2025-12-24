@@ -1,0 +1,2 @@
+{"time": "2025-12-24T05:05:21.496385Z", "api": "SensorDeviceControl", "dir": "REQUEST", "data": {"sensorDeviceID": "iot0001", "commandType": "Alarm|on"}}
+{"time": "2025-12-24T05:05:22.474540Z", "api": "SensorDeviceControl", "dir": "RESPONSE", "data": {"code": "404", "message": "API를 찾을 수 없습니다: SensorDeviceControl"}}

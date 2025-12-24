@@ -33,15 +33,13 @@ cmiqr1acx00i5ie8fi022t1hp_Authentication_request_key_ids = {
 }
 
 cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_request_key_ids = {
-    "doorList": "cmizg13y0008m7eoenzoxiz6y",
-    "doorList.doorID": "cmj6i9tmk023gxei0fwmi1vp0",
-    "duration": "cmizg1z3900b47eoep7yokzej",
-    "transProtocol": "cmizg20xz00bg7eoerj8khw25",
-    "transProtocol.transProtocolType": "cmizg295g00d67eoedi8masm6",
-    "transProtocol.transProtocolDesc": "cmizg2anl00di7eoeazzupedc",
-    "startTime": "cmizg2frh00ec7eoe48aaufo2",
-    "code": "cmizg5khh00iq7eoexenwo9i9",
-    "message": "cmizg5lyh00iw7eoe7wbhcxaj",
+    "doorList": "cmiwqj4780acp844g8i3ahbt7",
+    "doorList.doorID": "cmiwqkuoj0aj9844g5oec97p9",
+    "duration": "cmji5h6nw0laccfb33qa2rglo",
+    "transProtocol": "cmji5hfw60lbecfb3om5s6q4d",
+    "transProtocol.transProtocolType": "cmji5hsb40ldwcfb3zk6uxjpl",
+    "transProtocol.transProtocolDesc": "cmji5hsb50ldycfb3vyahtc7i",
+    "startTime": "cmji5hsba0le0cfb38tv5q4sm",
 }
 
 cmiqr1acx00i5ie8fi022t1hp_DoorControl_request_key_ids = {
@@ -50,15 +48,13 @@ cmiqr1acx00i5ie8fi022t1hp_DoorControl_request_key_ids = {
 }
 
 cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_request_key_ids = {
-    "doorList": "cmiwqr42x0b0o844gheo6h9aw",
-    "doorList.doorID": "cmiwqsji80b7m844ghp9sizpj",
-    "duration": "cmiwqrnj10b2t844g3a9ocgff",
-    "transProtocol": "cmiwqru0m0b3z844gt9wdsg7k",
-    "transProtocol.transProtocolType": "cmiwqs2m90b55844gaxykb529",
-    "transProtocol.transProtocolDesc": "cmiwqs6xa0b62844g5pmuixdw",
-    "startTime": "cmiwqsgjl0b78844gmp7x0hqg",
-    "code": "cmiwqw4by0bo6844gvwitykp8",
-    "message": "cmiwqw7dj0boe844gmkrvh7iu",
+    "doorList": "cmiwqtb8p0b8k844gt18dcxkk",
+    "doorList.doorID": "cmiwqvxnv0bni844g3f2pyz9t",
+    "duration": "cmji5ibv70lfacfb3wmix9thl",
+    "transProtocol": "cmji5ibv90lfccfb3niv6u3fd",
+    "transProtocol.transProtocolType": "cmji5mxhu0lhecfb3bne01bsl",
+    "transProtocol.transProtocolDesc": "cmji5mxhv0lhgcfb3j5xr7zpe",
+    "startTime": "cmji5ibva0lfecfb3nj49pbd0",
 }
 
 # cmiqr1acx00i5ie8fi022t1hp Request Key-ID Mapping 리스트
@@ -202,13 +198,13 @@ cmiqr1acx00i5ie8fi022t1hp_DoorProfiles_response_key_ids = {
 }
 
 cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_response_key_ids = {
-    "code": "cmizg2tx300fg7eoezo3qr162",
-    "message": "cmizg2xab00fm7eoe1bhmlgrw",
-    "doorList": "cmiwqj4780acp844g8i3ahbt7",
-    "doorList.doorID": "cmiwqkuoj0aj9844g5oec97p9",
-    "doorList.doorName": "cmizg3epb00gy7eoeiefmp1lr",
-    "doorList.doorRelaySensor": "cmizg3ghq00h67eoeuthieru9",
-    "doorList.doorSensor": "cmj13a9eu01vx12s9wja5mxt7",
+    "code": "cmizg5khh00iq7eoexenwo9i9",
+    "message": "cmizg5lyh00iw7eoe7wbhcxaj",
+    "doorList": "cmjibm02g0m2lcfb321w2hthj",
+    "doorList.doorID": "cmjibn2jq0m6pcfb3gqgchw6g",
+    "doorList.doorName": "cmjibn2jr0m6rcfb3udx1c9nm",
+    "doorList.doorRelaySensor": "cmjibn2jr0m6tcfb3pm4t00rw",
+    "doorList.doorSensor": "cmjibn2jr0m6vcfb3hihnwxi0",
 }
 
 cmiqr1acx00i5ie8fi022t1hp_DoorControl_response_key_ids = {
@@ -217,13 +213,13 @@ cmiqr1acx00i5ie8fi022t1hp_DoorControl_response_key_ids = {
 }
 
 cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_response_key_ids = {
-    "code": "cmiwqsqrw0b7y844gtn3rzf7y",
-    "message": "cmiwqsvzu0b88844gjdzch27v",
-    "doorList": "cmiwqtb8p0b8k844gt18dcxkk",
-    "doorList.doorID": "cmiwqvxnv0bni844g3f2pyz9t",
-    "doorList.doorName": "cmiwqvxnv0bnk844gwotx0gqu",
-    "doorList.doorRelaySensor": "cmiwqvxnv0bnm844g0ndzntyu",
-    "doorList.doorSensor": "cmiwqvxnw0bno844gj9p4t49o",
+    "code": "cmiwqw4by0bo6844gvwitykp8",
+    "message": "cmiwqw7dj0boe844gmkrvh7iu",
+    "doorList": "cmjibi5nd0lz1cfb3ei734ou7",
+    "doorList.doorID": "cmjibisp10m1zcfb339obwqmf",
+    "doorList.doorName": "cmjibisp20m21cfb3y8wh8nbs",
+    "doorList.doorRelaySensor": "cmjibisp20m23cfb3hnjuxrez",
+    "doorList.doorSensor": "cmjibisp20m25cfb3t4ru92yd",
 }
 
 # cmiqr1acx00i5ie8fi022t1hp Response Key-ID Mapping 리스트

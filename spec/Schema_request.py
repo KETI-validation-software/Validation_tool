@@ -51,18 +51,9 @@ cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_in_schema = {
     "doorList": [{
     "doorID": str,
 }],
-    OptionalKey("duration"): int,
-    "transProtocol": {
-    "transProtocolType": str,
-    OptionalKey("transProtocolDesc"): str,
-},
-    OptionalKey("startTime"): int,
-}
-
-# RealtimeDoorStatus WebHook OUT Schema
-cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_webhook_out_schema = {
-    "code": str,
-    "message": str,
+    "duration": int,
+    "transProtocol": {},
+    "startTime": int,
 }
 
 # DoorControl
@@ -76,18 +67,9 @@ cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_in_schema = {
     "doorList": [{
     "doorID": str,
 }],
-    OptionalKey("duration"): int,
-    "transProtocol": {
-    "transProtocolType": str,
-    OptionalKey("transProtocolDesc"): str,
-},
-    OptionalKey("startTime"): int,
-}
-
-# RealtimeDoorStatus2 WebHook OUT Schema
-cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_out_schema = {
-    "code": str,
-    "message": str,
+    "duration": int,
+    "transProtocol": {},
+    "startTime": int,
 }
 
 # cmiqr1acx00i5ie8fi022t1hp 스키마 리스트
@@ -98,16 +80,6 @@ cmiqr1acx00i5ie8fi022t1hp_inSchema = [
     cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_in_schema,
     cmiqr1acx00i5ie8fi022t1hp_DoorControl_in_schema,
     cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_in_schema,
-]
-
-# cmiqr1acx00i5ie8fi022t1hp WebHook 스키마 리스트
-cmiqr1acx00i5ie8fi022t1hp_webhook_OutSchema = [
-    None,
-    None,
-    None,
-    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_webhook_out_schema,
-    None,
-    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_out_schema,
 ]
 
 # Authentication

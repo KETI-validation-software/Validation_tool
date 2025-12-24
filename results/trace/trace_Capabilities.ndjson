@@ -1,0 +1,2 @@
+{"time": "2025-12-24T05:05:15.538603Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
+{"time": "2025-12-24T05:05:15.553631Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "transportSupport": [{"transProtocolType": "LongPolling", "transProtocolDesc": ""}, {"transProtocolType": "Webhook", "transProtocolDesc": ""}]}}

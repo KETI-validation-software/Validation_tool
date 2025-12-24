@@ -1,0 +1,2 @@
+{"time": "2025-12-24T05:05:24.475481Z", "api": "RealtimeDoorStatus", "dir": "REQUEST", "data": {"doorList": [{"doorID": "door0001"}, {"doorID": "door0002"}], "duration": 200, "transProtocol": {"transProtocolType": "WebHook", "transProtocolDesc": "https://127.0.0.1:2001"}, "startTime": 20251105163010124}}
+{"time": "2025-12-24T05:05:25.486583Z", "api": "RealtimeDoorStatus", "dir": "RESPONSE", "data": {"code": "", "message": ""}}

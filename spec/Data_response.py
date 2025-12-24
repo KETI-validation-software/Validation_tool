@@ -212,17 +212,13 @@ cmiqr1acx00i5ie8fi022t1hp_DoorProfiles_out_data = {
 
 # RealtimeDoorStatus
 cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_out_data = {
-    "code": "성공",
-    "message": "200"
-}
-
-# RealtimeDoorStatus WebHook IN Data
-cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_webhook_in_data = {
+    "code": "",
+    "message": "",
     "doorList": [
         {
         "doorID": "",
         "doorName": "",
-        "doorRelaySensor": "일반",
+        "doorRelaySensor": "",
         "doorSensor": ""
     }
 ]
@@ -236,17 +232,13 @@ cmiqr1acx00i5ie8fi022t1hp_DoorControl_out_data = {
 
 # RealtimeDoorStatus2
 cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_out_data = {
-    "code": "200",
-    "message": "성공"
-}
-
-# RealtimeDoorStatus2 WebHook IN Data
-cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_in_data = {
+    "code": "",
+    "message": "",
     "doorList": [
         {
         "doorID": "",
         "doorName": "",
-        "doorRelaySensor": "일반",
+        "doorRelaySensor": "",
         "doorSensor": ""
     }
 ]
@@ -260,16 +252,6 @@ cmiqr1acx00i5ie8fi022t1hp_outData = [
     cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_out_data,
     cmiqr1acx00i5ie8fi022t1hp_DoorControl_out_data,
     cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_out_data,
-]
-
-# cmiqr1acx00i5ie8fi022t1hp WebHook 데이터 리스트
-cmiqr1acx00i5ie8fi022t1hp_webhook_inData = [
-    None,
-    None,
-    None,
-    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus_webhook_in_data,
-    None,
-    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_in_data,
 ]
 
 # cmiqr1acx00i5ie8fi022t1hp API endpoint

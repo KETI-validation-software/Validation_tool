@@ -134,26 +134,7 @@ cmiqr1acx00i5ie8fi022t1hp_DoorControl_in_validation = {
 }
 
 # RealtimeDoorStatus2
-cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_in_validation = {
-  "doorList.doorID": {
-    "enabled": True,
-    "validationType": "request-field-match",
-    "referenceFieldId": "cmj6i9tmk023gxei0fwmi1vp0",
-    "referenceField": "doorID",
-    "referenceEndpoint": "/RealtimeDoorStatus",
-    "referenceListField": "doorID",
-    "referenceListFieldId": "cmiwqkuoj0aj9844g5oec97p9",
-    "score": 0
-  }
-}
-
-# RealtimeDoorStatus2 WebHook OUT Validation
-cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_out_validation = {}
-
-# cmiqr1acx00i5ie8fi022t1hp WebHook 검증 리스트
-cmiqr1acx00i5ie8fi022t1hp_webhook_outValidation = [
-    cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_webhook_out_validation,
-]
+cmiqr1acx00i5ie8fi022t1hp_RealtimeDoorStatus2_in_validation = {}
 
 # cmiqr1acx00i5ie8fi022t1hp 검증 리스트
 cmiqr1acx00i5ie8fi022t1hp_inValidation = [

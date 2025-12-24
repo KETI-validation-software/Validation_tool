@@ -61,12 +61,12 @@ company_name = "엣지디엑스"
 product_name = "AIBridge"
 version = "v1.0"
 test_category = "MAIN_TEST"
-test_target = "제어 기능-통합플랫폼"
+test_target = "제어 기능-통합플랫폼(sensor002)"
 test_range = "ALL_FIELDS"
-auth_type = "Digest Auth"
+auth_type = "Bearer Token"
 auth_info = "kisa,kisa_k1!2@"
 admin_code = "1"
-url = "https://10.252.219.119:2000"
+url = "https://127.0.0.1:2000"
 contact_person = "빙영진"
 model_name = "v1.0"
 request_id = "cmisflgy307tr5vy7clzgjaln"
@@ -108,7 +108,7 @@ enable_retry_delay = False  # False 권장: 불필요한 sleep 제거
 # ✅ 웹훅 서버 설정 (전역)
 WEBHOOK_HOST = "0.0.0.0"  # 서버 바인딩 주소 (모든 인터페이스에서 수신)
 WEBHOOK_PORT = 2001       # 웹훅 수신 포트
-WEBHOOK_PUBLIC_IP = "10.252.219.119"
+WEBHOOK_PUBLIC_IP = "127.0.0.1"
 # ✅ 웹훅 공개 IP 설정: info_GUI에서 선택한 시험 URL의 IP 사용
 # 초기값은 URL에서 추출, info_GUI에서 주소 선택 후 자동 업데이트됨
 
@@ -117,7 +117,7 @@ WEBHOOK_URL = f"https://{WEBHOOK_PUBLIC_IP}:{WEBHOOK_PORT}"
 
 SPEC_CONFIG = [
     {
-        "group_name": "제어 기능-통합플랫폼",
+        "group_name": "제어 기능-통합플랫폼(sensor002)",
         "group_id": "cmisfix8407te5vy7fleq8pkf",
         "cmiqr201z00i8ie8fitdg5t1b": {
     "test_name": "sensor002",
@@ -126,18 +126,18 @@ SPEC_CONFIG = [
     "api_id": ['cmise5c9900jr5vy7j5kdk1z6', 'cmisebj3b00s65vy7377edoan', 'cmiseuulh03d75vy7wmr8iroc', 'cmisfu13v07xs5vy7gthbhp0p', 'cmisge6mr08di5vy7hirl5jp1'],
     "api_endpoint": ['/Authentication', '/Capabilities', '/SensorDeviceProfiles', '/SensorDeviceControl', '/SensorDeviceControl2'],
     "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic'],
-    "time_out": [60000, 60000, 60000, 60000, 60000],
+    "time_out": [6000, 6000, 6000, 6000, 6000],
     "num_retries": [1, 1, 1, 1, 1]
 },
         "cmiqr1acx00i5ie8fi022t1hp": {
     "test_name": "ac002",
-    "specs": ['cmiqr1acx00i5ie8fi022t1hp_inSchema', 'cmiqr1acx00i5ie8fi022t1hp_outData', 'cmiqr1acx00i5ie8fi022t1hp_messages', 'cmiqr1acx00i5ie8fi022t1hp_webhook_OutSchema', 'cmiqr1acx00i5ie8fi022t1hp_webhook_inData'],
+    "specs": ['cmiqr1acx00i5ie8fi022t1hp_inSchema', 'cmiqr1acx00i5ie8fi022t1hp_outData', 'cmiqr1acx00i5ie8fi022t1hp_messages'],
     "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '바이오 및 출입통제 장치 목록 정보', '실시간 출입통제 장치 상태 정보 연동-상태 조회', '출입 통제 장치 제어 정보 연동', '실시간 출입통제 장치 상태 정보 연동-결과 조회'],
     "api_id": ['cmisgwlsx08r25vy7s0uys91u', 'cmisjsrxy0bd75vy78umc8kos', 'cmiwq2e7z07fi844gof4cw167', 'cmiwqiqjn0acb844gb9f4qqd0', 'cmiwqol4l0ayv844g134sbbu7', 'cmiwqq5880b07844gyqot66cj'],
     "api_endpoint": ['/Authentication', '/Capabilities', '/DoorProfiles', '/RealtimeDoorStatus', '/DoorControl', '/RealtimeDoorStatus2'],
-    "trans_protocol": ['basic', 'basic', 'basic', 'WebHook', 'basic', 'WebHook'],
-    "time_out": [10000, 10000, 10000, 10000, 10000, 10000],
-    "num_retries": [1, 1, 1, 1, 1, 1]
+    "trans_protocol": ['basic', 'basic', 'basic', 'LongPolling', 'basic', 'LongPolling'],
+    "time_out": [6000, 6000, 6000, 6000, 6000, 6000],
+    "num_retries": [1, 1, 1, 2, 1, 1]
 },
         "cmiqqzrjz00i3ie8figf79cur": {
     "test_name": "vid002",
@@ -146,7 +146,7 @@ SPEC_CONFIG = [
     "api_id": ['cmish2vdi08z35vy7gtz574hy', 'cmiwp7fqs05kc844gxsjq6rfs', 'cmiwpag8n05re844gh1o3fc2u', 'cmiwpjpff077k844gx4u1vvdf', 'cmiwpsaxt07b1844gx73rs8gp', 'cmiwpvh1v07dl844gap4brs86'],
     "api_endpoint": ['/Authentication', '/Capabilities', '/CameraProfiles', '/PtzStatus', '/PtzContinuousMove', '/PtzStop'],
     "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic'],
-    "time_out": [60000, 60000, 60000, 60000, 60000, 60000],
+    "time_out": [6000, 6000, 6000, 6000, 6000, 6000],
     "num_retries": [1, 1, 1, 1, 1, 1]
 }
     }
