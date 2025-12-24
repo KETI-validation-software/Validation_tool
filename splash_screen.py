@@ -5,7 +5,7 @@ PyQt5로 코드만으로 디자인 (이미지 불필요)
 """
 from PyQt5.QtWidgets import QSplashScreen, QVBoxLayout, QLabel, QProgressBar, QWidget
 from PyQt5.QtCore import Qt, QTimer, QPointF
-from PyQt5.QtGui import QPixmap, QPainter, QColor, QFont, QPen
+from PyQt5.QtGui import QPixmap, QPainter, QColor, QPen
 import math
 
 
@@ -43,19 +43,6 @@ class SplashScreen(QSplashScreen):
 
         # ===== 상단 여백 =====
         layout.addStretch(1)
-
-        # ===== 타이틀 =====
-        # self.title_label = QLabel("검증 소프트웨어 통합 실행기")
-        # self.title_label.setAlignment(Qt.AlignCenter)
-        # self.title_label.setStyleSheet("""
-        #     QLabel {
-        #         color: #163971;
-        #         font-size: 18pt;
-        #         font-weight: bold;
-        #         padding: 10px;
-        #     }
-        # """)
-        # layout.addWidget(self.title_label)
 
         # ===== 서브 타이틀 =====
         self.subtitle_label = QLabel("프로그램 시작 중...")
