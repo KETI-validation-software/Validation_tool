@@ -87,21 +87,16 @@ class InfoWidget(QWidget):
             new_height = int(original_size[1] * height_ratio) if height_ratio else original_size[1]
             widget.setFixedSize(new_width, new_height)
 
-    def _resize_table_rows(self, table, row_height_attr, height_ratio, cell_width=None):
-        """테이블 행 높이 및 셀 위젯 크기 조정"""
+    def _resize_table_rows(self, table, row_height_attr, cell_width=None):
+        """테이블 셀 위젯 너비 조정 (행 높이는 고정 유지)"""
         original_row_height = getattr(self, row_height_attr, None)
         if not original_row_height:
             return
-        new_row_height = int(original_row_height * height_ratio)
-        table.verticalHeader().setDefaultSectionSize(new_row_height)
+        # 행 높이는 원본 크기로 고정
         for row in range(table.rowCount()):
-            table.setRowHeight(row, new_row_height)
             cell_widget = table.cellWidget(row, 0) or table.cellWidget(row, 1)
-            if cell_widget:
-                if cell_width:
-                    cell_widget.setFixedSize(cell_width, new_row_height)
-                else:
-                    cell_widget.setFixedHeight(new_row_height)
+            if cell_widget and cell_width:
+                cell_widget.setFixedSize(cell_width, original_row_height)
 
     def resizeEvent(self, event):
         """창 크기 변경 시 page1, page2 요소들 위치 재조정"""
@@ -176,6 +171,13 @@ class InfoWidget(QWidget):
             if hasattr(self, 'management_url_container'):
                 self.management_url_container.setGeometry(page_width - 390, page_height - 108, 380, 60)
 
+            # ✅ 반응형: Page1 하단 버튼 영역 가로 확장
+            if hasattr(self, 'original_window_size'):
+                width_ratio = max(1.0, self.page1.width() / self.original_window_size[0])
+                self._resize_widget('page1_button_container', 'original_page1_button_container_size', width_ratio)
+                self._resize_widget('next_btn', 'original_next_btn_size', width_ratio)
+                self._resize_widget('page1_exit_btn', 'original_page1_exit_btn_size', width_ratio)
+
         # ========== Page2 크기 조정 ==========
         if hasattr(self, 'page2_content') and self.page2_content:
             content_width = self.page2_content.width()
@@ -216,14 +218,14 @@ class InfoWidget(QWidget):
                     new_table_width = int(self.original_test_field_table_size[0] * width_ratio)
                     new_table_height = int(self.original_test_field_table_size[1] * height_ratio)
                     self.test_field_table.setFixedSize(new_table_width, new_table_height)
-                    self._resize_table_rows(self.test_field_table, 'original_test_field_row_height', height_ratio, new_table_width)
+                    self._resize_table_rows(self.test_field_table, 'original_test_field_row_height', new_table_width)
 
                 # 시나리오 테이블
                 if hasattr(self, 'scenario_table') and hasattr(self, 'original_scenario_table_size'):
                     new_table_width = int(self.original_scenario_table_size[0] * width_ratio)
                     new_table_height = int(self.original_scenario_table_size[1] * height_ratio)
                     self.scenario_table.setFixedSize(new_table_width, new_table_height)
-                    self._resize_table_rows(self.scenario_table, 'original_scenario_row_height', height_ratio, new_table_width)
+                    self._resize_table_rows(self.scenario_table, 'original_scenario_row_height', new_table_width)
 
                     if hasattr(self, 'scenario_column_background') and hasattr(self, 'original_scenario_column_background_geometry'):
                         orig = self.original_scenario_column_background_geometry
@@ -246,11 +248,7 @@ class InfoWidget(QWidget):
                     self.api_test_table.horizontalHeader().resizeSection(0, col_width)
                     self.api_test_table.horizontalHeader().resizeSection(1, col_width)
 
-                    if hasattr(self, 'original_api_row_height'):
-                        new_row_height = int(self.original_api_row_height * height_ratio)
-                        self.api_test_table.verticalHeader().setDefaultSectionSize(new_row_height)
-                        for row in range(self.api_test_table.rowCount()):
-                            self.api_test_table.setRowHeight(row, new_row_height)
+                    # 행 높이는 고정 유지 (원본 크기)
 
                     if hasattr(self, 'api_header_overlay') and hasattr(self, 'original_api_header_overlay_geometry'):
                         orig = self.original_api_header_overlay_geometry
@@ -297,14 +295,12 @@ class InfoWidget(QWidget):
                     url_col_width = new_url_table_width - 50
                     self.url_table.setColumnWidth(1, url_col_width)
 
+                    # 행 높이는 고정 유지, 셀 위젯 너비만 조정
                     if hasattr(self, 'original_url_row_height'):
-                        new_row_height = int(self.original_url_row_height * height_ratio)
-                        self.url_table.verticalHeader().setDefaultSectionSize(new_row_height)
                         for row in range(self.url_table.rowCount()):
-                            self.url_table.setRowHeight(row, new_row_height)
                             url_widget = self.url_table.cellWidget(row, 1)
                             if url_widget:
-                                url_widget.setFixedSize(url_col_width, new_row_height)
+                                url_widget.setFixedSize(url_col_width, self.original_url_row_height)
 
                 # 하단 버튼
                 self._resize_widget('button_container', 'original_button_container_size', width_ratio)
@@ -1771,51 +1767,65 @@ class InfoWidget(QWidget):
 
         # 하단 버튼 (다음: 왼쪽, 종료: 오른쪽) - 각 378x48px, gap 20px, 전체 776x48px
         # 고정 크기 컨테이너로 감싸서 간격 유지
-        button_container = QWidget()
-        button_container.setFixedSize(776, 48)
-        button_layout = QHBoxLayout(button_container)
+        # ✅ 반응형: 인스턴스 변수로 변경
+        self.page1_button_container = QWidget()
+        self.page1_button_container.setFixedSize(776, 48)
+        self.original_page1_button_container_size = (776, 48)
+        button_layout = QHBoxLayout(self.page1_button_container)
         button_layout.setContentsMargins(0, 0, 0, 0)
         button_layout.setSpacing(20)  # 버튼 간격 20px
 
         # 다음 버튼 (왼쪽) - 378x48px
-        self.next_btn = QPushButton()
+        # ✅ 반응형: 원본 크기 저장
+        self.next_btn = QPushButton("다음")
         self.next_btn.setFixedSize(378, 48)
+        self.original_next_btn_size = (378, 48)
         btn_next_enabled = resource_path("assets/image/test_info/btn_다음_enabled.png").replace(chr(92), "/")
         btn_next_hover = resource_path("assets/image/test_info/btn_다음_Hover.png").replace(chr(92), "/")
         self.next_btn.setStyleSheet(f"""
             QPushButton {{
                 border: none;
-                background-image: url({btn_next_enabled});
-                background-repeat: no-repeat;
-                background-position: center;
+                border-image: url({btn_next_enabled}) 0 0 0 0 stretch stretch;
+                padding-left: 20px;
+                padding-right: 20px;
+                font-family: 'Noto Sans KR';
+                font-size: 20px;
+                font-weight: 500;
+                color: #FFFFFF;
             }}
             QPushButton:hover {{
-                background-image: url({btn_next_hover});
+                border-image: url({btn_next_hover}) 0 0 0 0 stretch stretch;
             }}
         """)
         self.next_btn.clicked.connect(self.go_to_next_page)
         button_layout.addWidget(self.next_btn)
 
         # 종료 버튼 (오른쪽) - 378x48px
-        exit_btn = QPushButton()
-        exit_btn.setFixedSize(378, 48)
+        # ✅ 반응형: 인스턴스 변수로 변경 및 원본 크기 저장
+        self.page1_exit_btn = QPushButton("종료")
+        self.page1_exit_btn.setFixedSize(378, 48)
+        self.original_page1_exit_btn_size = (378, 48)
         btn_exit_enabled = resource_path("assets/image/test_info/btn_종료_enabled.png").replace(chr(92), "/")
         btn_exit_hover = resource_path("assets/image/test_info/btn_종료_Hover.png").replace(chr(92), "/")
-        exit_btn.setStyleSheet(f"""
+        self.page1_exit_btn.setStyleSheet(f"""
             QPushButton {{
                 border: none;
-                background-image: url({btn_exit_enabled});
-                background-repeat: no-repeat;
-                background-position: center;
+                border-image: url({btn_exit_enabled}) 0 0 0 0 stretch stretch;
+                padding-left: 20px;
+                padding-right: 20px;
+                font-family: 'Noto Sans KR';
+                font-size: 20px;
+                font-weight: 500;
+                color: #6B6B6B;
             }}
             QPushButton:hover {{
-                background-image: url({btn_exit_hover});
+                border-image: url({btn_exit_hover}) 0 0 0 0 stretch stretch;
             }}
         """)
-        exit_btn.clicked.connect(self.exit_btn_clicked)
-        button_layout.addWidget(exit_btn)
+        self.page1_exit_btn.clicked.connect(self.exit_btn_clicked)
+        button_layout.addWidget(self.page1_exit_btn)
 
-        layout.addWidget(button_container, alignment=Qt.AlignHCenter)
+        layout.addWidget(self.page1_button_container, alignment=Qt.AlignHCenter)
 
         # 세로 확장 시 여분의 공간을 하단으로 밀어냄
         layout.addStretch()
