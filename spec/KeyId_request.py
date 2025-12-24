@@ -32,11 +32,6 @@ cmiqr1jha00i6ie8fb1scb3go_Authentication_request_key_ids = {
     "userPW": "cmisgvcex08oq5vy7d84t9tts",
 }
 
-cmiqr1jha00i6ie8fb1scb3go_SensorDeviceControl_request_key_ids = {
-    "sensorDeviceID": "cmjjjtgj60nlwcfb3isyyownx",
-    "commandType": "cmjjjti9a0nm2cfb3n3qa371g",
-}
-
 cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_request_key_ids = {
     "doorList": "cmixuoz8e0grnp0020xzn3bck",
     "doorList.doorID": "cmixuqxeb0h0np002mwczcz4g",
@@ -69,7 +64,6 @@ cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_request_key_ids = {
 # cmiqr1jha00i6ie8fb1scb3go Request Key-ID Mapping 리스트
 cmiqr1jha00i6ie8fb1scb3go_request_key_ids = [
     cmiqr1jha00i6ie8fb1scb3go_Authentication_request_key_ids,
-    cmiqr1jha00i6ie8fb1scb3go_SensorDeviceControl_request_key_ids,
     cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_request_key_ids,
     cmiqr1jha00i6ie8fb1scb3go_DoorControl_request_key_ids,
     cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_request_key_ids,
@@ -206,13 +200,6 @@ cmiqr1jha00i6ie8fb1scb3go_DoorProfiles_response_key_ids = {
     "doorList.otherDeviceList.otherDeviceAuthTypeList": "cmixumsx00gr1p002pa83hn6b",
 }
 
-cmiqr1jha00i6ie8fb1scb3go_SensorDeviceControl_response_key_ids = {
-    "code": "cmjjjtuys0nmkcfb3gks0gjsr",
-    "message": "cmjjju0z30nnmcfb3bmvtvons",
-    "sensorDeviceID": "cmjjju2px0nnucfb3whti4sfk",
-    "sensorDeviceStatus": "cmjjju4zh0no0cfb32pp1966k",
-}
-
 cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_response_key_ids = {
     "code": "cmixur2k30h12p0021dj2dqwu",
     "message": "cmixur54k0h18p0025u2ok46q",
@@ -243,7 +230,6 @@ cmiqr1jha00i6ie8fb1scb3go_response_key_ids = [
     cmiqr1jha00i6ie8fb1scb3go_Authentication_response_key_ids,
     cmiqr1jha00i6ie8fb1scb3go_Capabilities_response_key_ids,
     cmiqr1jha00i6ie8fb1scb3go_DoorProfiles_response_key_ids,
-    cmiqr1jha00i6ie8fb1scb3go_SensorDeviceControl_response_key_ids,
     cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_response_key_ids,
     cmiqr1jha00i6ie8fb1scb3go_DoorControl_response_key_ids,
     cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_response_key_ids,

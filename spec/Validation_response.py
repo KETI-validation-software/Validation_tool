@@ -69,9 +69,6 @@ cmiqr1jha00i6ie8fb1scb3go_Capabilities_out_validation = {}
 # DoorProfiles
 cmiqr1jha00i6ie8fb1scb3go_DoorProfiles_out_validation = {}
 
-# SensorDeviceControl
-cmiqr1jha00i6ie8fb1scb3go_SensorDeviceControl_out_validation = {}
-
 # RealtimeDoorStatus
 cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_out_validation = {}
 
@@ -136,7 +133,6 @@ cmiqr1jha00i6ie8fb1scb3go_outValidation = [
     cmiqr1jha00i6ie8fb1scb3go_Authentication_out_validation,
     cmiqr1jha00i6ie8fb1scb3go_Capabilities_out_validation,
     cmiqr1jha00i6ie8fb1scb3go_DoorProfiles_out_validation,
-    cmiqr1jha00i6ie8fb1scb3go_SensorDeviceControl_out_validation,
     cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_out_validation,
     cmiqr1jha00i6ie8fb1scb3go_DoorControl_out_validation,
     cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_out_validation,

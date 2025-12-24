@@ -90,20 +90,6 @@ cmiqr1jha00i6ie8fb1scb3go_Capabilities_in_constraints = {}
 # DoorProfiles
 cmiqr1jha00i6ie8fb1scb3go_DoorProfiles_in_constraints = {}
 
-# SensorDeviceControl
-cmiqr1jha00i6ie8fb1scb3go_SensorDeviceControl_in_constraints = {
-  "sensorDeviceID": {
-    "id": "cmjjjtgj60nlwcfb3isyyownx",
-    "valueType": "preset",
-    "required": True
-  },
-  "commandType": {
-    "id": "cmjjjti9a0nm2cfb3n3qa371g",
-    "valueType": "preset",
-    "required": True
-  }
-}
-
 # RealtimeDoorStatus
 cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_in_constraints = {
   "doorList": {
@@ -244,7 +230,6 @@ cmiqr1jha00i6ie8fb1scb3go_inConstraints = [
     cmiqr1jha00i6ie8fb1scb3go_Authentication_in_constraints,
     cmiqr1jha00i6ie8fb1scb3go_Capabilities_in_constraints,
     cmiqr1jha00i6ie8fb1scb3go_DoorProfiles_in_constraints,
-    cmiqr1jha00i6ie8fb1scb3go_SensorDeviceControl_in_constraints,
     cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_in_constraints,
     cmiqr1jha00i6ie8fb1scb3go_DoorControl_in_constraints,
     cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_in_constraints,
@@ -252,7 +237,6 @@ cmiqr1jha00i6ie8fb1scb3go_inConstraints = [
 
 # cmiqr1jha00i6ie8fb1scb3go WebHook Constraints 리스트
 cmiqr1jha00i6ie8fb1scb3go_webhook_outConstraints = [
-    None,
     None,
     None,
     None,

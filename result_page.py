@@ -614,6 +614,8 @@ class ResultPageWidget(QWidget):
         self.group_table.horizontalHeader().setFixedHeight(31)
         self.group_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.group_table.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.group_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.group_table.setFocusPolicy(Qt.NoFocus)
         self.group_table.verticalHeader().setVisible(False)
         self.group_table.verticalHeader().setDefaultSectionSize(39)
         self.group_table.setFixedHeight(204)
@@ -637,9 +639,14 @@ class ResultPageWidget(QWidget):
                 padding: 8px;
                 text-align: center;
             }
+            QTableWidget::item:focus {
+                outline: none;
+                border-bottom: 1px solid #CCCCCC;
+            }
             QTableWidget::item:selected {
                 background-color: #E3F2FF;
                 border: none;
+                outline: none;
             }
             QTableWidget::item:hover {
                 background-color: #F2F8FF;
@@ -696,6 +703,8 @@ class ResultPageWidget(QWidget):
         self.test_field_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.test_field_table.horizontalHeader().setFixedHeight(31)
         self.test_field_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.test_field_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.test_field_table.setFocusPolicy(Qt.NoFocus)
         self.test_field_table.cellClicked.connect(self.on_test_field_selected)
         self.test_field_table.verticalHeader().setVisible(False)
         self.test_field_table.verticalHeader().setDefaultSectionSize(39)
@@ -709,6 +718,7 @@ class ResultPageWidget(QWidget):
                 font-family: "Noto Sans KR";
                 font-size: 19px;
                 color: #1B1B1C;
+                outline: none;
             }
             QTableWidget::item {
                 border-bottom: 1px solid #CCCCCC;
@@ -721,8 +731,13 @@ class ResultPageWidget(QWidget):
                 letter-spacing: 0.098px;
                 text-align: center; 
             }
+            QTableWidget::item:focus {
+                outline: none;
+                border-bottom: 1px solid #CCCCCC;
+            }
             QTableWidget::item:selected {
                 background-color: #E3F2FF;
+                outline: none;
             }
             QTableWidget::item:hover {
                 background-color: #E3F2FF;
