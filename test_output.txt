@@ -1,9 +1,0 @@
-▼ [doorList.bioDeviceList] (3건)
-    ├── [X] [타입 오류] index[0] : List가 와야 하는데 Dict가 왔습니다.
-    ├── [X] [타입 오류] index[1] : List가 와야 하는데 Dict가 왔습니다.
-    └── [!] [필드 누락] bioDeviceAuthTypeList[]
-▼ [doorList.otherDeviceList] (2건)
-    ├── [X] [타입 오류] index[0] : List가 와야 하는데 Dict가 왔습니다.
-    └── [!] [필드 누락] otherDeviceAuthTypeList[]
-▼ [doorList.otherDeviceList.otherDeviceAuthTypeList] (1건)
-    └── [X] [타입 오류] index[0] : List가 와야 하는데 Str가 왔습니다.
