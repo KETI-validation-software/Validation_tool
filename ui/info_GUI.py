@@ -12,7 +12,7 @@ from core.functions import resource_path
 from network_scanner import NetworkScanWorker, ARPScanWorker
 from form_validator import FormValidator, ClickableLabel, ClickableCheckboxRowWidget
 import config.CONSTANTS as CONSTANTS
-from splash_screen import LoadingPopup
+from ui.splash_screen import LoadingPopup
 
 
 class TestFieldTableWidget(QTableWidget):

@@ -33,7 +33,7 @@ if getattr(sys, 'frozen', False):
                 print(f"[INIT] 외부 CONSTANTS.py 생성: {external_constants}")
 # ===== 외부 config 우선 사용 끝 =====
 
-from info_GUI import InfoWidget
+from ui.info_GUI import InfoWidget
 from core.functions import resource_path
 import platformVal_all as platform_app
 import systemVal_all as system_app
@@ -460,7 +460,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     # ===== 스플래시 스크린 표시 (즉시!) =====
-    from splash_screen import SplashScreen
+    from ui.splash_screen import SplashScreen
     splash = SplashScreen()
     splash.show()
     splash.update_progress(10, "프로그램 시작 중...")

@@ -7,8 +7,8 @@ from PyQt5 import QtCore
 
 from core.functions import resource_path
 from core.utils import remove_api_number_suffix, load_external_constants, calculate_percentage
-from gui_utils import CustomDialog
-from ui_components import TestSelectionPanel
+from ui.gui_utils import CustomDialog
+from ui.ui_components import TestSelectionPanel
 
 class ResultPageWidget(QWidget):
     backRequested = pyqtSignal()

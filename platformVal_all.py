@@ -17,12 +17,12 @@ import requests
 import config.CONSTANTS as CONSTANTS
 from core.json_checker_new import timeout_field_finder
 from core.functions import json_check_, resource_path, json_to_data
-from splash_screen import LoadingPopup
-from detail_dialog import CombinedDetailDialog
-from result_page import ResultPageWidget
-from gui_utils import CustomDialog
-from api_selection_dialog import APISelectionDialog
-from ui_components import TestSelectionPanel
+from ui.splash_screen import LoadingPopup
+from ui.detail_dialog import CombinedDetailDialog
+from ui.result_page import ResultPageWidget
+from ui.gui_utils import CustomDialog
+from ui.api_selection_dialog import APISelectionDialog
+from ui.ui_components import TestSelectionPanel
 import spec.Schema_response as schema_response_module
 from http.server import HTTPServer
 import warnings
