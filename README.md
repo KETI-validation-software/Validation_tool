@@ -17,7 +17,6 @@
   <img src="https://img.shields.io/badge/GUI-PyQt5-ff69b4" />
 </p>
 
-<img width="650" height="250" alt="splash_bg" src="https://github.com/user-attachments/assets/4fab21f4-f604-4669-906e-7dae5c8f8872" />
 
 ## Project 
 <p align="center">
