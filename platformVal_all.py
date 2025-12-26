@@ -3,6 +3,7 @@
 
 import os
 from api.api_server import Server
+from api.server_thread import server_th, json_data
 import time
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore
@@ -23,6 +24,7 @@ from ui.result_page import ResultPageWidget
 from ui.gui_utils import CustomDialog
 from ui.api_selection_dialog import APISelectionDialog
 from ui.ui_components import TestSelectionPanel
+from ui.platform_window import PlatformValidationWindow
 import spec.Schema_response as schema_response_module
 from http.server import HTTPServer
 import warnings
@@ -32,91 +34,6 @@ from core.utils import remove_api_number_suffix, to_detail_text, redact, clean_t
 warnings.filterwarnings('ignore')
 result_dir = os.path.join(os.getcwd(), "results")
 os.makedirs(result_dir, exist_ok=True)
-
-
-# 플랫폼 검증을 위한 래퍼 윈도우 (standalone 모드에서 스택 전환 지원)
-class PlatformValidationWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("통합플랫폼 연동 검증")
-        self.resize(1200, 720)
-
-        # 스택 위젯 생성
-        self.stack = QStackedWidget()
-        self.setCentralWidget(self.stack)
-
-        # 플랫폼 검증 위젯은 나중에 생성 (순환 참조 방지)
-        self.validation_widget = None
-        self._result_widget = None
-
-    def initialize(self):
-        """검증 위젯 초기화 (MyApp 클래스 정의 후 호출)"""
-        if self.validation_widget is None:
-            self.validation_widget = MyApp(embedded=False)
-            self.validation_widget._wrapper_window = self  # 래퍼 참조 전달
-            self.stack.addWidget(self.validation_widget)
-            self.stack.setCurrentWidget(self.validation_widget)
-
-    def _show_result_page(self):
-        """시험 결과 페이지로 전환 (스택 내부)"""
-        # 기존 결과 위젯 제거
-        if self._result_widget is not None:
-            self.stack.removeWidget(self._result_widget)
-            self._result_widget.deleteLater()
-
-        # 새로운 결과 위젯 생성
-        self._result_widget = ResultPageWidget(self.validation_widget, embedded=True)
-        self._result_widget.backRequested.connect(self._on_back_to_validation)
-
-        # 스택에 추가하고 전환
-        self.stack.addWidget(self._result_widget)
-        self.stack.setCurrentWidget(self._result_widget)
-
-    def _on_back_to_validation(self):
-        """뒤로가기: 시험 결과에서 검증 화면으로 복귀"""
-        self.stack.setCurrentWidget(self.validation_widget)
-
-    def closeEvent(self, event):
-        """래퍼 윈도우 닫기 이벤트 - validation_widget의 정리 작업 호출"""
-        print(f"[WRAPPER_CLOSE] PlatformValidationWindow closeEvent 호출됨")
-
-        # ✅ 종료 확인 대화상자
-        reply = QMessageBox.question(
-            self, '프로그램 종료',
-            '정말로 프로그램을 종료하시겠습니까?',
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No
-        )
-
-        print(f"[WRAPPER_CLOSE] 사용자 응답: {'Yes' if reply == QMessageBox.Yes else 'No'}")
-
-        if reply == QMessageBox.Yes:
-            # ✅ validation_widget의 정리 작업 호출
-            if self.validation_widget is not None:
-                print(f"[WRAPPER_CLOSE] validation_widget 정리 시작")
-                # 타이머 중지
-                if hasattr(self.validation_widget, 'tick_timer') and self.validation_widget.tick_timer.isActive():
-                    self.validation_widget.tick_timer.stop()
-                    print(f"[WRAPPER_CLOSE] 타이머 중지됨")
-
-                # 서버 스레드 종료
-                if hasattr(self.validation_widget, 'server_th') and self.validation_widget.server_th is not None and self.validation_widget.server_th.isRunning():
-                    print(f"[WRAPPER_CLOSE] 서버 스레드 종료 중...")
-                    try:
-                        self.validation_widget.server_th.httpd.shutdown()
-                        self.validation_widget.server_th.wait(2000)
-                        print(f"[WRAPPER_CLOSE] 서버 스레드 종료 완료")
-                    except Exception as e:
-                        print(f"[WARN] 서버 종료 중 오류 (무시): {e}")
-
-                # 일시정지 파일 삭제
-                print(f"[WRAPPER_CLOSE] cleanup_paused_file() 호출")
-                self.validation_widget.cleanup_paused_file()
-                print(f"[WRAPPER_CLOSE] 정리 완료")
-
-            event.accept()
-        else:
-            event.ignore()
 
 
 # 시험 결과 페이지 위젯 (result_page.py로 분리됨)
@@ -3960,54 +3877,13 @@ class MyApp(QWidget):
         }
 
 
-class server_th(QThread):
-    def __init__(self, handler_class=None, address='127.0.0.1', port=8008):
-        super().__init__()
-        self.handler_class = handler_class
-        self.address_ip = address
-        self.address_port = port
-        self.server_address = (self.address_ip, self.address_port)
-        self.httpd = HTTPServer(self.server_address, self.handler_class)
-
-        certificate_private = resource_path('config/key0627/server.crt')
-        certificate_key = resource_path('config/key0627/server.key')
-        try:
-            self.httpd.socket = ssl.wrap_socket(self.httpd.socket, certfile=certificate_private,
-                                                keyfile=certificate_key, server_side=True)
-        except Exception as e:
-            print(e)
-
-        print('Starting on ', self.server_address)
-
-    def run(self):
-        self.httpd.serve_forever()
-
-
-class json_data(QThread):
-    json_update_data = QtCore.pyqtSignal(dict)
-
-    def __init__(self):
-        super().__init__()
-
-    def run(self):
-        import time
-        while True:
-            with open(resource_path("spec/rows.json"), "r", encoding="UTF-8") as out_file:
-                data = json.load(out_file)
-            if data is not None:
-                with open(resource_path("spec/rows.json"), "w", encoding="UTF-8") as out_file:
-                    json.dump(None, out_file, ensure_ascii=False)
-                self.json_update_data.emit(data)
-            time.sleep(0.1)
-
-
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     fontDB = QFontDatabase()
     fontDB.addApplicationFont(resource_path('NanumGothic.ttf'))
     app.setFont(QFont('NanumGothic'))
 
-    ex = PlatformValidationWindow()
+    ex = PlatformValidationWindow(MyApp)
     ex.initialize()
     ex.show()
     sys.exit(app.exec())
