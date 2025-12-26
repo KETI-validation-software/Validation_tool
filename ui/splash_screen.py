@@ -13,7 +13,9 @@ def resource_path(relative_path):
     """PyInstaller 환경에서 리소스 경로 반환"""
     if hasattr(sys, '_MEIPASS'):
         return os.path.join(sys._MEIPASS, relative_path)
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), relative_path)
+    # ui/ 폴더에서 한 단계 위(프로젝트 루트)를 기준으로 경로 반환
+    base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_path, relative_path)
 
 
 class SplashScreen(QSplashScreen):
