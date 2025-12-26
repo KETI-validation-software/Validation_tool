@@ -476,10 +476,10 @@ class ConstraintDataGenerator:
                         # 최소 값 개수 추적
                         min_available_count = min(min_available_count, len(constraint["values"]))
 
-        # ✅ 랜덤한 개수 생성
+        # ✅ 랜덤한 개수 생성 -> 가능한 최대 개수로 고정 (참조 데이터 누락 방지)
         if min_available_count != float('inf'):
-            n = random.randint(1, min_available_count)
-            print(f"[INFO] {parent_key}: 랜덤하게 {n}개 생성합니다. (최대 {min_available_count}개)")
+            n = min_available_count
+            print(f"[INFO] {parent_key}: {n}개 생성합니다. (참조 데이터 개수 일치)")
 
         for i in range(n):
             item = self._generate_item(parent_key, item_template, constraint_map, n,

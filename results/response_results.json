@@ -203,6 +203,42 @@
                       "videoCodec": "H.264",
                       "audioCodec": "G.711"
                     }
+                  },
+                  {
+                    "camID": "cam0002",
+                    "accessID": "",
+                    "accessPW": "",
+                    "camURL": "rtsp://192.168.0.1:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": 30,
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  },
+                  {
+                    "camID": "cam003",
+                    "accessID": "",
+                    "accessPW": "",
+                    "camURL": "rtsp://192.168.0.1:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": 30,
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  },
+                  {
+                    "camID": "cam004",
+                    "accessID": "",
+                    "accessPW": "",
+                    "camURL": "rtsp://192.168.0.1:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": 30,
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
                   }
                 ]
               },
@@ -278,16 +314,20 @@
                     "camID": "cam0001",
                     "timeList": [
                       {
-                        "startTime": 20251105656681892,
-                        "endTime": 20251111957994187
+                        "startTime": 20251106899571564,
+                        "endTime": 20251109470454872
                       },
                       {
-                        "startTime": 20251106888911417,
-                        "endTime": 20251113895829633
+                        "startTime": 20251112486212209,
+                        "endTime": 20251114872090939
                       },
                       {
-                        "startTime": 20251112904240020,
-                        "endTime": 20251114260223090
+                        "startTime": 20251113531545293,
+                        "endTime": 20251114415744559
+                      },
+                      {
+                        "startTime": 20251113425026453,
+                        "endTime": 20251113490499354
                       }
                     ]
                   },
@@ -295,16 +335,20 @@
                     "camID": "cam0002",
                     "timeList": [
                       {
-                        "startTime": 20251109419392859,
-                        "endTime": 20251112603357731
+                        "startTime": 20251109840544287,
+                        "endTime": 20251111050327700
                       },
                       {
-                        "startTime": 20251107397890274,
-                        "endTime": 20251112570640872
+                        "startTime": 20251108884460208,
+                        "endTime": 20251111426137861
                       },
                       {
-                        "startTime": 20251113504853333,
-                        "endTime": 20251113634063641
+                        "startTime": 20251105813892307,
+                        "endTime": 20251107155751232
+                      },
+                      {
+                        "startTime": 20251109641800307,
+                        "endTime": 20251112970943892
                       }
                     ]
                   },
@@ -312,16 +356,41 @@
                     "camID": "cam003",
                     "timeList": [
                       {
-                        "startTime": 20251110007049740,
-                        "endTime": 20251110623096410
+                        "startTime": 20251112194327131,
+                        "endTime": 20251114140203516
                       },
                       {
-                        "startTime": 20251107124979884,
-                        "endTime": 20251109170869168
+                        "startTime": 20251105201678558,
+                        "endTime": 20251114864384861
                       },
                       {
-                        "startTime": 20251110758685547,
-                        "endTime": 20251112044941829
+                        "startTime": 20251112056074837,
+                        "endTime": 20251112704800900
+                      },
+                      {
+                        "startTime": 20251105875785413,
+                        "endTime": 20251106609977568
+                      }
+                    ]
+                  },
+                  {
+                    "camID": "cam004",
+                    "timeList": [
+                      {
+                        "startTime": 20251111010840134,
+                        "endTime": 20251113340098809
+                      },
+                      {
+                        "startTime": 20251112380822151,
+                        "endTime": 20251112925951375
+                      },
+                      {
+                        "startTime": 20251114079063347,
+                        "endTime": 20251114534788916
+                      },
+                      {
+                        "startTime": 20251106311480664,
+                        "endTime": 20251113976053637
                       }
                     ]
                   }
@@ -374,6 +443,30 @@
                       "videoCodec": "H.264",
                       "audioCodec": "G.711"
                     }
+                  },
+                  {
+                    "camID": "cam003",
+                    "accessID": "conn0001",
+                    "accessPW": "1234",
+                    "camURL": "rtsp://192.168.0.1:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": 30,
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  },
+                  {
+                    "camID": "cam004",
+                    "accessID": "conn0001",
+                    "accessPW": "1234",
+                    "camURL": "rtsp://192.168.0.1:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": 30,
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
                   }
                 ]
               },
@@ -407,8 +500,32 @@
                     "camID": "cam0001",
                     "eventUUID": "event01",
                     "eventName": "Intrusion",
-                    "startTime": 20251106946657806,
-                    "endTime": 20251108839689563,
+                    "startTime": 20251110359899015,
+                    "endTime": 20251111598915358,
+                    "eventDesc": "AAABVVVVCCCDDssvfdd"
+                  },
+                  {
+                    "camID": "cam0002",
+                    "eventUUID": "event01",
+                    "eventName": "Intrusion",
+                    "startTime": 20251113612692129,
+                    "endTime": 20251114926593917,
+                    "eventDesc": "AAABVVVVCCCDDssvfdd"
+                  },
+                  {
+                    "camID": "cam003",
+                    "eventUUID": "event01",
+                    "eventName": "Intrusion",
+                    "startTime": 20251114624043416,
+                    "endTime": 20251115057899232,
+                    "eventDesc": "AAABVVVVCCCDDssvfdd"
+                  },
+                  {
+                    "camID": "cam004",
+                    "eventUUID": "event01",
+                    "eventName": "Intrusion",
+                    "startTime": 20251108092352372,
+                    "endTime": 20251113957792617,
                     "eventDesc": "AAABVVVVCCCDDssvfdd"
                   }
                 ]
@@ -439,8 +556,38 @@
                 "camList": [
                   {
                     "camID": "cam0001",
-                    "analyticsTime": 20251114368840527,
+                    "analyticsTime": 20251113498247998,
                     "anlayticsResultList": [
+                      {
+                        "anayticsID": "object001",
+                        "analyticsClass": "Human",
+                        "analyticsAttribute": [
+                          "빨간색"
+                        ],
+                        "analyticsConfidence": 0.8,
+                        "analyticsBoundingBox": {
+                          "left": 0.2,
+                          "top": 0.1,
+                          "right": 0.5,
+                          "bottom": 0.6
+                        },
+                        "analyticsDesc": "13가 4567"
+                      },
+                      {
+                        "anayticsID": "object001",
+                        "analyticsClass": "Human",
+                        "analyticsAttribute": [
+                          "빨간색"
+                        ],
+                        "analyticsConfidence": 0.8,
+                        "analyticsBoundingBox": {
+                          "left": 0.2,
+                          "top": 0.1,
+                          "right": 0.5,
+                          "bottom": 0.6
+                        },
+                        "analyticsDesc": "13가 4567"
+                      },
                       {
                         "anayticsID": "object001",
                         "analyticsClass": "Human",
@@ -475,8 +622,170 @@
                   },
                   {
                     "camID": "cam0002",
-                    "analyticsTime": 20251108231683511,
+                    "analyticsTime": 20251106373224748,
                     "anlayticsResultList": [
+                      {
+                        "anayticsID": "object001",
+                        "analyticsClass": "Human",
+                        "analyticsAttribute": [
+                          "빨간색"
+                        ],
+                        "analyticsConfidence": 0.8,
+                        "analyticsBoundingBox": {
+                          "left": 0.2,
+                          "top": 0.1,
+                          "right": 0.5,
+                          "bottom": 0.6
+                        },
+                        "analyticsDesc": "13가 4567"
+                      },
+                      {
+                        "anayticsID": "object001",
+                        "analyticsClass": "Human",
+                        "analyticsAttribute": [
+                          "빨간색"
+                        ],
+                        "analyticsConfidence": 0.8,
+                        "analyticsBoundingBox": {
+                          "left": 0.2,
+                          "top": 0.1,
+                          "right": 0.5,
+                          "bottom": 0.6
+                        },
+                        "analyticsDesc": "13가 4567"
+                      },
+                      {
+                        "anayticsID": "object001",
+                        "analyticsClass": "Human",
+                        "analyticsAttribute": [
+                          "빨간색"
+                        ],
+                        "analyticsConfidence": 0.8,
+                        "analyticsBoundingBox": {
+                          "left": 0.2,
+                          "top": 0.1,
+                          "right": 0.5,
+                          "bottom": 0.6
+                        },
+                        "analyticsDesc": "13가 4567"
+                      },
+                      {
+                        "anayticsID": "object001",
+                        "analyticsClass": "Human",
+                        "analyticsAttribute": [
+                          "빨간색"
+                        ],
+                        "analyticsConfidence": 0.8,
+                        "analyticsBoundingBox": {
+                          "left": 0.2,
+                          "top": 0.1,
+                          "right": 0.5,
+                          "bottom": 0.6
+                        },
+                        "analyticsDesc": "13가 4567"
+                      }
+                    ]
+                  },
+                  {
+                    "camID": "cam003",
+                    "analyticsTime": 20251114024315381,
+                    "anlayticsResultList": [
+                      {
+                        "anayticsID": "object001",
+                        "analyticsClass": "Human",
+                        "analyticsAttribute": [
+                          "빨간색"
+                        ],
+                        "analyticsConfidence": 0.8,
+                        "analyticsBoundingBox": {
+                          "left": 0.2,
+                          "top": 0.1,
+                          "right": 0.5,
+                          "bottom": 0.6
+                        },
+                        "analyticsDesc": "13가 4567"
+                      },
+                      {
+                        "anayticsID": "object001",
+                        "analyticsClass": "Human",
+                        "analyticsAttribute": [
+                          "빨간색"
+                        ],
+                        "analyticsConfidence": 0.8,
+                        "analyticsBoundingBox": {
+                          "left": 0.2,
+                          "top": 0.1,
+                          "right": 0.5,
+                          "bottom": 0.6
+                        },
+                        "analyticsDesc": "13가 4567"
+                      },
+                      {
+                        "anayticsID": "object001",
+                        "analyticsClass": "Human",
+                        "analyticsAttribute": [
+                          "빨간색"
+                        ],
+                        "analyticsConfidence": 0.8,
+                        "analyticsBoundingBox": {
+                          "left": 0.2,
+                          "top": 0.1,
+                          "right": 0.5,
+                          "bottom": 0.6
+                        },
+                        "analyticsDesc": "13가 4567"
+                      },
+                      {
+                        "anayticsID": "object001",
+                        "analyticsClass": "Human",
+                        "analyticsAttribute": [
+                          "빨간색"
+                        ],
+                        "analyticsConfidence": 0.8,
+                        "analyticsBoundingBox": {
+                          "left": 0.2,
+                          "top": 0.1,
+                          "right": 0.5,
+                          "bottom": 0.6
+                        },
+                        "analyticsDesc": "13가 4567"
+                      }
+                    ]
+                  },
+                  {
+                    "camID": "cam004",
+                    "analyticsTime": 20251107680325251,
+                    "anlayticsResultList": [
+                      {
+                        "anayticsID": "object001",
+                        "analyticsClass": "Human",
+                        "analyticsAttribute": [
+                          "빨간색"
+                        ],
+                        "analyticsConfidence": 0.8,
+                        "analyticsBoundingBox": {
+                          "left": 0.2,
+                          "top": 0.1,
+                          "right": 0.5,
+                          "bottom": 0.6
+                        },
+                        "analyticsDesc": "13가 4567"
+                      },
+                      {
+                        "anayticsID": "object001",
+                        "analyticsClass": "Human",
+                        "analyticsAttribute": [
+                          "빨간색"
+                        ],
+                        "analyticsConfidence": 0.8,
+                        "analyticsBoundingBox": {
+                          "left": 0.2,
+                          "top": 0.1,
+                          "right": 0.5,
+                          "bottom": 0.6
+                        },
+                        "analyticsDesc": "13가 4567"
+                      },
                       {
                         "anayticsID": "object001",
                         "analyticsClass": "Human",
@@ -521,5 +830,5 @@
       ]
     }
   ],
-  "completedDate": "2025-12-26T12:15:04Z"
+  "completedDate": "2025-12-26T12:41:23Z"
 }

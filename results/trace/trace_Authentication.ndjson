@@ -1,2 +1,2 @@
-{"time": "2025-12-26T03:14:39.609864Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "kisa", "userPW": "kisa_k1!2@"}}
-{"time": "2025-12-26T03:14:39.612857Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "userName": "관리자", "userAff": "오산시청", "accessToken": "abcde1234"}}
+{"time": "2025-12-26T03:40:58.998162Z", "api": "Authentication", "dir": "REQUEST", "data": {"userID": "kisa", "userPW": "kisa_k1!2@"}}
+{"time": "2025-12-26T03:40:59.001153Z", "api": "Authentication", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "userName": "관리자", "userAff": "오산시청", "accessToken": "abcde1234"}}

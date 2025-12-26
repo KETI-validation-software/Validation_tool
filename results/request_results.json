@@ -438,6 +438,9 @@
                   },
                   {
                     "camID": "cam003"
+                  },
+                  {
+                    "camID": "cam004"
                   }
                 ],
                 "filterList": [
@@ -461,5 +464,5 @@
       ]
     }
   ],
-  "completedDate": "2025-12-26T12:15:03Z"
+  "completedDate": "2025-12-26T12:41:23Z"
 }
