@@ -464,6 +464,15 @@ if __name__ == "__main__":
     splash = SplashScreen()
     splash.show()
     splash.update_progress(10, "프로그램 시작 중...")
+    app.processEvents()  # 동적 스플래시 화면 갱신 강제
+
+    # ===== PyInstaller 정적 스플래시 닫기 (동적 스플래시가 보인 후) =====
+    if '_PYIBoot_SPLASH' in os.environ:
+        try:
+            import pyi_splash
+            pyi_splash.close()
+        except Exception:
+            pass
 
     # 폰트 로딩
     splash.update_progress(20, "폰트 로딩 중...")
