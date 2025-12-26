@@ -1319,8 +1319,8 @@ class Server(BaseHTTPRequestHandler):
                 # response_data에 없으면 latest_events의 WEBHOOK_OUT에서 확인
                 if not door_list:
                     api_key = api_name.lstrip('/')
-                    if api_key in Server.latest_events:
-                        webhook_out = Server.latest_events[api_key].get("WEBHOOK_OUT", {})
+                    if api_key in Server.latest_event:
+                        webhook_out = Server.latest_event[api_key].get("WEBHOOK_OUT", {})
                         webhook_data = webhook_out.get("data", {})
                         if "doorList" in webhook_data:
                             door_list = webhook_data.get("doorList", [])

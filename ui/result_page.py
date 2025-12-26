@@ -7,26 +7,8 @@ from PyQt5 import QtCore
 
 from core.functions import resource_path
 from core.utils import remove_api_number_suffix, load_external_constants, calculate_percentage
-
-# 팝업창 설정하는 함수
-class CustomDialog(QDialog):
-    def __init__(self, dmsg, dstep):
-        super().__init__()
-        self.setWindowTitle(dstep)
-        self.setGeometry(800, 600, 400, 600)
-        self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
-        self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
-        QBtn = QDialogButtonBox.Ok
-        self.buttonBox = QDialogButtonBox(QBtn)
-        self.buttonBox.accepted.connect(self.accept)
-        self.layout = QVBoxLayout()
-        self.tb = QTextBrowser()
-        self.tb.setAcceptRichText(True)
-        self.tb.append(dmsg)
-        self.layout.addWidget(self.tb)
-        self.layout.addWidget(self.buttonBox)
-        self.setLayout(self.layout)
-        self.exec_()
+from ui.gui_utils import CustomDialog
+from ui.ui_components import TestSelectionPanel
 
 class ResultPageWidget(QWidget):
     backRequested = pyqtSignal()
@@ -159,28 +141,28 @@ class ResultPageWidget(QWidget):
         left_layout.setContentsMargins(24, 36, 24, 80)
         left_layout.setSpacing(0)
 
-        # 시험 분야 선택 (폰트 효과 추가)
-        self.spec_panel_title = QLabel("시험 선택")
-        self.spec_panel_title.setFixedSize(424, 24)
-        self.spec_panel_title.setStyleSheet("""
-            font-size: 20px;
-            font-style: normal;
-            font-family: "Noto Sans KR";
-            font-weight: 500;
-            color: #000000;
-            letter-spacing: -0.3px;
-        """)
-        left_layout.addWidget(self.spec_panel_title)
-        left_layout.addSpacing(8)
+        # 시험 선택 패널 - TestSelectionPanel 사용
+        self.test_selection_panel = TestSelectionPanel(self.CONSTANTS)
+        self.test_selection_panel.groupSelected.connect(self.on_group_selected)
+        self.test_selection_panel.scenarioSelected.connect(self.on_test_field_selected)
 
-        # 그룹 테이블
-        self.group_table_widget = self.create_group_selection_table()
-        left_layout.addWidget(self.group_table_widget)
-        left_layout.addSpacing(20)
+        # 멤버 변수 매핑 (기존 코드와의 호환성 유지)
+        self.spec_panel_title = self.test_selection_panel.spec_panel_title
+        self.group_table_widget = self.test_selection_panel.group_table_widget
+        self.field_group = self.test_selection_panel.field_group
+        self.group_table = self.test_selection_panel.group_table
+        self.test_field_table = self.test_selection_panel.test_field_table
 
-        # 시험 시나리오 테이블
-        self.field_group = self.create_test_field_group()
-        left_layout.addWidget(self.field_group)
+        # 원본 사이즈 변수 매핑 (반응형 동작을 위해 필요)
+        self.original_spec_panel_title_size = self.test_selection_panel.original_spec_panel_title_size
+        self.original_group_table_widget_size = self.test_selection_panel.original_group_table_widget_size
+        self.original_field_group_size = self.test_selection_panel.original_field_group_size
+        
+        # 인덱스 매핑 정보도 연결 (필요 시)
+        # self.group_name_to_index = self.test_selection_panel.group_name_to_index 
+        # (이건 패널 내부에서 관리되지만, 필요하면 여기서 참조)
+
+        left_layout.addWidget(self.test_selection_panel)
 
         left_layout.addStretch()
         self.left_col.setLayout(left_layout)
@@ -380,6 +362,9 @@ class ResultPageWidget(QWidget):
 
         self.setLayout(mainLayout)
 
+        # 초기 시나리오 로드 (UI 요소 생성 후 호출)
+        self.load_initial_scenarios()
+
     def resizeEvent(self, event):
         """창 크기 변경 시 배경 이미지 및 UI 반응형 조정"""
         super().resizeEvent(event)
@@ -423,6 +408,10 @@ class ResultPageWidget(QWidget):
             if hasattr(self, 'spec_panel_title') and hasattr(self, 'original_spec_panel_title_size'):
                 new_title_width = int(self.original_spec_panel_title_size[0] * width_ratio)
                 self.spec_panel_title.setFixedSize(new_title_width, self.original_spec_panel_title_size[1])
+                
+                # TestSelectionPanel 자체 너비도 업데이트
+                if hasattr(self, 'test_selection_panel'):
+                     self.test_selection_panel.setFixedWidth(new_title_width)
 
             # 그룹 테이블 위젯 크기 조정 (extra_column_height 비례 분배)
             if hasattr(self, 'group_table_widget') and hasattr(self, 'original_group_table_widget_size'):
@@ -595,159 +584,6 @@ class ResultPageWidget(QWidget):
             if hasattr(self, 'total_score_label'):
                 self.total_score_label.setFixedSize(new_label_width, self.original_score_label_size[1])
 
-    def create_group_selection_table(self):
-        """시험 분야명 테이블"""
-        group_box = QWidget()
-        group_box.setFixedSize(424, 204)
-        group_box.setStyleSheet("background: transparent;")
-
-        layout = QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-
-        self.group_table = QTableWidget(0, 1)
-        self.group_table.setHorizontalHeaderLabels(["시험 분야"])
-        self.group_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.group_table.horizontalHeader().setFixedHeight(31)
-        self.group_table.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.group_table.setSelectionMode(QAbstractItemView.SingleSelection)
-        self.group_table.verticalHeader().setVisible(False)
-        self.group_table.verticalHeader().setDefaultSectionSize(39)
-        self.group_table.setFixedHeight(204)
-
-        self.group_table.setStyleSheet("""
-            QTableWidget {
-                background-color: #FFFFFF;
-                border: 1px solid #CECECE;
-                border-radius: 4px;
-                outline: none;
-                font-family: "Noto Sans KR";
-                font-size: 19px;
-                color: #1B1B1C;
-            }
-            QTableWidget::item {
-                border-bottom: 1px solid #CCCCCC;
-                color: #1B1B1C;
-                font-family: 'Noto Sans KR';
-                font-size: 19px;
-                font-weight: 400;
-                padding: 8px;
-                text-align: center;
-            }
-            QTableWidget::item:selected {
-                background-color: #E3F2FF;
-                border: none;
-            }
-            QTableWidget::item:hover {
-                background-color: #F2F8FF;
-            }
-            QHeaderView::section {
-                background-color: #EDF0F3;
-                border: none;
-                border-bottom: 1px solid #CECECE;
-                color: #1B1B1C;
-                text-align: center;
-                font-family: 'Noto Sans KR';
-                font-size: 18px;
-                font-weight: 600;
-                letter-spacing: -0.156px;
-            }
-        """)
-
-        SPEC_CONFIG = load_external_constants(self.CONSTANTS)
-
-        group_items = [
-            (g.get("group_name", "미지정 그룹"), g.get("group_id", ""))
-            for g in SPEC_CONFIG
-        ]
-        self.group_table.setRowCount(len(group_items))
-
-        self.group_name_to_index = {}
-        self.index_to_group_name = {}
-
-        for idx, (name, gid) in enumerate(group_items):
-            item = QTableWidgetItem(name)
-            item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-            self.group_table.setItem(idx, 0, item)
-            self.group_name_to_index[name] = idx
-            self.index_to_group_name[idx] = name
-
-        self.group_table.cellClicked.connect(self.on_group_selected)
-
-        layout.addWidget(self.group_table)
-        group_box.setLayout(layout)
-        return group_box
-
-    def create_test_field_group(self):
-        """시험 시나리오 테이블"""
-        group_box = QWidget()
-        group_box.setFixedSize(424, 526)
-        group_box.setStyleSheet("background: transparent;")
-
-        layout = QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-
-        self.test_field_table = QTableWidget(0, 1)
-        self.test_field_table.setHorizontalHeaderLabels(["시험 시나리오"])
-        self.test_field_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.test_field_table.horizontalHeader().setFixedHeight(31)
-        self.test_field_table.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.test_field_table.cellClicked.connect(self.on_test_field_selected)
-        self.test_field_table.verticalHeader().setVisible(False)
-        self.test_field_table.verticalHeader().setDefaultSectionSize(39)
-        self.test_field_table.setFixedHeight(526)
-
-        self.test_field_table.setStyleSheet("""
-            QTableWidget {
-                background-color: #FFFFFF;
-                border: 1px solid #CECECE;
-                border-radius: 4px;
-                font-family: "Noto Sans KR";
-                font-size: 19px;
-                color: #1B1B1C;
-            }
-            QTableWidget::item {
-                border-bottom: 1px solid #CCCCCC;
-                border-right: 0px solid transparent;
-                color: #1B1B1C;
-                font-family: 'Noto Sans KR';
-                font-size: 19px;
-                font-style: normal;
-                font-weight: 400;
-                letter-spacing: 0.098px;
-                text-align: center; 
-            }
-            QTableWidget::item:selected {
-                background-color: #E3F2FF;
-            }
-            QTableWidget::item:hover {
-                background-color: #E3F2FF;
-            }
-            QHeaderView::section {
-                background-color: #EDF0F3;
-                border-right: 0px solid transparent;
-                border-left: 0px solid transparent;
-                border-top: 0px solid transparent;
-                border-bottom: 1px solid #CECECE;
-                color: #1B1B1C;
-                text-align: center;
-                font-family: 'Noto Sans KR';
-                font-size: 18px;
-                font-style: normal;
-                font-weight: 600;
-                line-height: normal;
-                letter-spacing: -0.156px;
-            }
-        """)
-
-        # 초기 로드: 현재 그룹의 시나리오 표시
-        self.load_initial_scenarios()
-
-        layout.addWidget(self.test_field_table)
-        group_box.setLayout(layout)
-        return group_box
-
     def load_initial_scenarios(self):
         """초기 로드: 현재 선택된 그룹과 시나리오를 반영하여 UI 갱신"""
         SPEC_CONFIG = load_external_constants(self.CONSTANTS)
@@ -772,7 +608,7 @@ class ResultPageWidget(QWidget):
                 # 그룹 테이블 UI 선택 처리
                 self.group_table.selectRow(idx)
                 # cellClicked 시그널이 프로그래밍 방식 선택으로는 발생하지 않으므로 직접 업데이트 호출
-                self.update_test_field_table(selected_group)
+                self.test_selection_panel.update_test_field_table(selected_group)
                 break
         
         if not selected_group:
@@ -782,8 +618,8 @@ class ResultPageWidget(QWidget):
         current_spec_id = getattr(self.parent, 'current_spec_id', None)
         if current_spec_id:
             # 시나리오 테이블에서 해당 spec_id 찾기
-            if hasattr(self, 'spec_id_to_index') and current_spec_id in self.spec_id_to_index:
-                row_idx = self.spec_id_to_index[current_spec_id]
+            if hasattr(self.test_selection_panel, 'spec_id_to_index') and current_spec_id in self.test_selection_panel.spec_id_to_index:
+                row_idx = self.test_selection_panel.spec_id_to_index[current_spec_id]
                 self.test_field_table.selectRow(row_idx)
                 
                 # 결과 테이블 표시 (on_test_field_selected 로직과 유사하지만, 중복 방지 체크 우회 필요할 수도 있음)
@@ -792,7 +628,7 @@ class ResultPageWidget(QWidget):
 
     def on_group_selected(self, row, col):
         """시험 그룹 선택 시"""
-        group_name = self.index_to_group_name.get(row)
+        group_name = self.test_selection_panel.index_to_group_name.get(row)
         if not group_name:
             return
 
@@ -816,37 +652,15 @@ class ResultPageWidget(QWidget):
 
             # ✅ 그룹 ID 저장
             self.parent.current_group_id = new_group_id
-            self.update_test_field_table(selected_group)
-
-    def update_test_field_table(self, group_data):
-        """선택된 그룹의 시나리오 목록 갱신"""
-        self.test_field_table.clearContents()
-
-        spec_items = [
-            (k, v) for k, v in group_data.items()
-            if k not in ['group_name', 'group_id'] and isinstance(v, dict)
-        ]
-        self.test_field_table.setRowCount(len(spec_items))
-
-        self.spec_id_to_index = {}
-        self.index_to_spec_id = {}
-
-        for idx, (spec_id, config) in enumerate(spec_items):
-            desc = config.get('test_name', f'시험분야 {idx + 1}')
-            desc_with_role = f"{desc} (응답 검증)"
-            item = QTableWidgetItem(desc_with_role)
-            item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-            self.test_field_table.setItem(idx, 0, item)
-            self.spec_id_to_index[spec_id] = idx
-            self.index_to_spec_id[idx] = spec_id
+            self.test_selection_panel.update_test_field_table(selected_group)
 
     def on_test_field_selected(self, row, col):
         """시나리오 선택 시 해당 결과 표시 (결과 없어도 API 정보 표시)"""
 
-        if row not in self.index_to_spec_id:
+        if row not in self.test_selection_panel.index_to_spec_id:
             return
 
-        selected_spec_id = self.index_to_spec_id[row]
+        selected_spec_id = self.test_selection_panel.index_to_spec_id[row]
 
         # 선택된 시나리오가 현재와 같으면 무시
         if selected_spec_id == self.current_spec_id:
@@ -1001,7 +815,7 @@ class ResultPageWidget(QWidget):
 
             detail_label.setCursor(Qt.PointingHandCursor)
             detail_label.setAlignment(Qt.AlignCenter)
-            detail_label.mousePressEvent = lambda event, r=row: self._show_detail(r)
+            # detail_label.mousePressEvent = lambda event, r=row: self._show_detail(r)
 
             container = QWidget()
             layout = QHBoxLayout()
@@ -1083,7 +897,7 @@ class ResultPageWidget(QWidget):
 
             detail_label.setCursor(Qt.PointingHandCursor)
             detail_label.setAlignment(Qt.AlignCenter)
-            detail_label.mousePressEvent = lambda event, r=row: self._show_detail(r)
+            # detail_label.mousePressEvent = lambda event, r=row: self._show_detail(r)
 
             container = QWidget()
             layout = QHBoxLayout()
@@ -1464,7 +1278,7 @@ class ResultPageWidget(QWidget):
 
             detail_label.setCursor(Qt.PointingHandCursor)
             detail_label.setAlignment(Qt.AlignCenter)
-            detail_label.mousePressEvent = lambda event, r=row: self._show_detail(r)
+            # detail_label.mousePressEvent = lambda event, r=row: self._show_detail(r)
 
             container = QWidget()
             layout = QHBoxLayout()
