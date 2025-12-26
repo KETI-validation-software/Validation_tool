@@ -19,7 +19,9 @@
 
 
 ## Project 
-<img width="650" height="250" alt="splash_bg" src="https://github.com/user-attachments/assets/50212ce8-1fa4-4d22-8dbc-a701b5a91433" />
+<p align="center>
+  <img width="650" height="250" alt="splash_bg" src="https://github.com/user-attachments/assets/50212ce8-1fa4-4d22-8dbc-a701b5a91433" />
+</p>
 
 ## Branch
 runner: 시험 진행 GUI (정수인)
