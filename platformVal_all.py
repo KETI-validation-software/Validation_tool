@@ -17,9 +17,12 @@ import requests
 import config.CONSTANTS as CONSTANTS
 from core.json_checker_new import timeout_field_finder
 from core.functions import json_check_, resource_path, json_to_data
-from splash_screen import LoadingPopup
-from detail_dialog import CombinedDetailDialog
-from result_page import ResultPageWidget
+from ui.splash_screen import LoadingPopup
+from ui.detail_dialog import CombinedDetailDialog
+from ui.result_page import ResultPageWidget
+from ui.gui_utils import CustomDialog
+from ui.api_selection_dialog import APISelectionDialog
+from ui.ui_components import TestSelectionPanel
 import spec.Schema_response as schema_response_module
 from http.server import HTTPServer
 import warnings
@@ -114,335 +117,6 @@ class PlatformValidationWindow(QMainWindow):
             event.accept()
         else:
             event.ignore()
-
-
-# 통합된 상세 내용 확인 팝업창 클래스
-class CombinedDetailDialog(QDialog):
-    def __init__(self, api_name, step_buffer, schema_data, webhook_schema=None):
-        super().__init__()
-
-        self.setWindowTitle(f"{api_name} 상세 정보")
-        self.setMinimumSize(1520, 921)  # 반응형: 최소 크기 설정
-        self.resize(1520, 921)  # 초기 크기
-        self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
-        self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
-        self.setStyleSheet("background-color: #FFFFFF;")
-
-        # 전체 레이아웃
-        main_layout = QVBoxLayout()
-        main_layout.setContentsMargins(48, 32, 48, 40)  # 좌, 상, 우, 하
-
-        # webhook_schema 저장
-        self.webhook_schema = webhook_schema
-
-        # 상단 제목 - 반응형: 높이만 고정, 가로 확장
-        title_label = QLabel(f"{api_name} 상세 정보")
-        title_label.setMinimumHeight(38)
-        title_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        title_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 26px; font-weight: 500;")
-        title_label.setAlignment(Qt.AlignCenter)
-        main_layout.addWidget(title_label)
-        main_layout.addSpacing(16)  # 제목 아래 gap
-
-        # 서브 제목 컨테이너 - 반응형: 높이만 고정, 가로 확장
-        subtitle_container = QWidget()
-        subtitle_container.setObjectName("subtitle_container")
-        subtitle_container.setMinimumHeight(47)
-        subtitle_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        subtitle_container.setStyleSheet("""
-            #subtitle_container {
-                border-image: url(assets/image/common/message.png) 0 0 0 0 stretch stretch;
-            }
-            #subtitle_container QLabel {
-                border-image: none;
-                background: transparent;
-            }
-        """)
-        subtitle_layout = QHBoxLayout(subtitle_container)
-        subtitle_layout.setContentsMargins(14, 12, 48, 12)  # 좌14, 상12, 우48, 하12
-
-        # 체크 아이콘 (고정 크기)
-        check_icon = QLabel()
-        check_icon.setPixmap(QPixmap(resource_path("assets/image/common/icn_check.png")))
-        check_icon.setFixedSize(18, 18)
-        subtitle_layout.addWidget(check_icon)
-
-        subtitle_layout.addSpacing(13)  # 아이콘과 텍스트 사이 간격
-
-        # 텍스트
-        subtitle_label = QLabel(f"{api_name} API 정보에 대한 상세 내용을 확인합니다.")
-        subtitle_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 400;")
-        subtitle_layout.addWidget(subtitle_label)
-        subtitle_layout.addStretch()
-        
-        main_layout.addWidget(subtitle_container)
-        main_layout.addSpacing(12)  # message.png 아래 gap
-
-        # 3열 콘텐츠 영역 컨테이너 - 반응형: 전체 확장
-        content_container = QWidget()
-        content_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        content_layout = QHBoxLayout(content_container)
-        content_layout.setContentsMargins(0, 0, 0, 0)
-        content_layout.setSpacing(12)  # 열 사이 gap
-
-        # 공통 스타일
-        title_style = "font-family: 'Noto Sans KR'; font-size: 18px; font-weight: 600;"
-        box_style = "border: 1px solid #CECECE; border-radius: 4px; background-color: #FFFFFF; font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 400; padding: 12px;"
-
-        # 1열: 메시지 데이터 - 반응형: 동일 비율 확장
-        data_column = QWidget()
-        data_column.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        data_column_layout = QVBoxLayout(data_column)
-        data_column_layout.setContentsMargins(0, 0, 0, 0)
-        data_column_layout.setSpacing(0)
-
-        data_title = QLabel("메시지 데이터")
-        data_title.setMinimumHeight(24)
-        data_title.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        data_title.setStyleSheet(title_style)
-        data_column_layout.addWidget(data_title)
-        data_column_layout.addSpacing(8)
-
-        self.data_browser = QTextBrowser()
-        self.data_browser.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.data_browser.setStyleSheet(box_style)
-        self.data_browser.setAcceptRichText(True)
-        if step_buffer["data"]:
-            data_text = step_buffer["data"]
-            self.data_browser.setPlainText(data_text)
-        else:
-            self.data_browser.setHtml('<span style="color: #CECECE;">아직 수신된 데이터가 없습니다.</span>')
-        data_column_layout.addWidget(self.data_browser)
-
-        # 2열: 메시지 규격 - 반응형: 동일 비율 확장
-        schema_column = QWidget()
-        schema_column.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        schema_column_layout = QVBoxLayout(schema_column)
-        schema_column_layout.setContentsMargins(0, 0, 0, 0)
-        schema_column_layout.setSpacing(0)
-
-        schema_title = QLabel("메시지 규격")
-        schema_title.setMinimumHeight(24)
-        schema_title.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        schema_title.setStyleSheet(title_style)
-        schema_column_layout.addWidget(schema_title)
-        schema_column_layout.addSpacing(8)
-
-        self.schema_browser = QTextBrowser()
-        self.schema_browser.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.schema_browser.setStyleSheet(box_style)
-        self.schema_browser.setAcceptRichText(True)
-
-        # 기본 스키마 + 웹훅 스키마 결합
-        schema_text = format_schema(schema_data)
-        if self.webhook_schema:
-            schema_text += "\n\n=== 웹훅 응답 스키마 (시스템→플랫폼) ===\n"
-            schema_text += format_schema(self.webhook_schema)
-
-        self.schema_browser.setPlainText(schema_text)
-        schema_column_layout.addWidget(self.schema_browser)
-
-        # 3열: 검증 오류 - 반응형: 동일 비율 확장
-        error_column = QWidget()
-        error_column.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        error_column_layout = QVBoxLayout(error_column)
-        error_column_layout.setContentsMargins(0, 0, 0, 0)
-        error_column_layout.setSpacing(0)
-
-        error_title = QLabel("검증 오류")
-        error_title.setMinimumHeight(24)
-        error_title.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        error_title.setStyleSheet(title_style)
-        error_column_layout.addWidget(error_title)
-        error_column_layout.addSpacing(8)
-
-        self.error_browser = QTextBrowser()
-        self.error_browser.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.error_browser.setStyleSheet(box_style)
-        self.error_browser.setAcceptRichText(True)
-        result = step_buffer["result"]
-        error_text = step_buffer["error"] if step_buffer["error"] else ("오류가 없습니다." if result == "PASS" else "")
-        error_msg = f"검증 결과: {result}\n\n"
-        if result == "FAIL":
-            error_msg += error_text
-        else:
-            error_msg += "오류가 없습니다."
-        # HTML 렌더링을 위해 setHtml 사용 (줄바꿈을 <br>로 변환)
-        error_msg_html = error_msg.replace('\n', '<br>')
-        self.error_browser.setHtml(error_msg_html)
-        error_column_layout.addWidget(self.error_browser)
-
-        # 3개 열을 가로로 배치 - 반응형: 동일 비율(stretch=1)
-        content_layout.addWidget(data_column, stretch=1)
-        content_layout.addWidget(schema_column, stretch=1)
-        content_layout.addWidget(error_column, stretch=1)
-
-
-        main_layout.addWidget(content_container, stretch=1)  # 콘텐츠 영역 확장
-        main_layout.addSpacing(24)  # 콘텐츠 영역 아래 gap
-
-        # 확인 버튼 영역 - 반응형: 높이만 고정, 가로 확장
-        button_container = QWidget()
-        button_container.setFixedHeight(48)
-        button_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        button_layout = QHBoxLayout(button_container)
-        button_layout.setContentsMargins(0, 0, 0, 0)
-        
-        # 확인 버튼 (434x48)
-        # ✅ 반응형: 인스턴스 변수로 변경 및 원본 크기 저장
-        self.confirm_button = QPushButton("확인")
-        self.confirm_button.setFixedSize(434, 48)
-        self.original_confirm_btn_size = (434, 48)
-        self.original_dialog_size = (1520, 921)
-        confirm_enabled = resource_path("assets/image/test_runner/btn_확인_enabled.png").replace("\\", "/")
-        confirm_hover = resource_path("assets/image/test_runner/btn_확인_Hover.png").replace("\\", "/")
-        self.confirm_button.setStyleSheet(f"""
-            QPushButton {{
-                border: none;
-                border-image: url('{confirm_enabled}') 0 0 0 0 stretch stretch;
-                padding-left: 20px;
-                padding-right: 20px;
-                font-family: 'Noto Sans KR';
-                font-size: 20px;
-                font-weight: 500;
-                color: #FFFFFF;
-            }}
-            QPushButton:hover {{
-                border-image: url('{confirm_hover}') 0 0 0 0 stretch stretch;
-            }}
-        """)
-        self.confirm_button.clicked.connect(self.accept)
-
-        button_layout.addStretch()
-        button_layout.addWidget(self.confirm_button)
-        button_layout.addStretch()
-
-        main_layout.addWidget(button_container)
-
-        self.setLayout(main_layout)
-
-    def resizeEvent(self, event):
-        """다이얼로그 크기 변경 시 확인 버튼 크기 조정"""
-        super().resizeEvent(event)
-
-        if hasattr(self, 'confirm_button') and hasattr(self, 'original_confirm_btn_size'):
-            width_ratio = max(1.0, self.width() / self.original_dialog_size[0])
-            new_btn_width = int(self.original_confirm_btn_size[0] * width_ratio)
-            self.confirm_button.setFixedSize(new_btn_width, self.original_confirm_btn_size[1])
-
-# 팝업창 설정하는 함수
-class CustomDialog(QDialog):
-    def __init__(self, dmsg, dstep):
-        super().__init__()
-
-        self.setWindowTitle(dstep)
-        self.setGeometry(800, 600, 400, 600)
-        self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
-        self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
-
-        QBtn = QDialogButtonBox.Ok
-        self.buttonBox = QDialogButtonBox(QBtn)
-        self.buttonBox.accepted.connect(self.accept)
-
-        self.layout = QVBoxLayout()
-        self.tb = QTextBrowser()
-        self.tb.setAcceptRichText(True)
-        self.tb.append(dmsg)
-        self.layout.addWidget(self.tb)
-        self.layout.addWidget(self.buttonBox)
-        self.setLayout(self.layout)
-        self.exec_()
-
-
-# API 선택 다이얼로그
-class APISelectionDialog(QDialog):
-    def __init__(self, api_list, selected_indices, parent=None):
-        super().__init__(parent)
-        self.api_list = api_list
-        self.selected_indices = selected_indices.copy()
-
-        self.setWindowTitle("API 선택")
-        self.setGeometry(400, 300, 500, 600)
-        self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
-        self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
-
-        self.initUI()
-
-    def initUI(self):
-        layout = QVBoxLayout()
-
-        # 배경 이미지 설정
-        self.setObjectName("platform_main")
-        self.setAttribute(Qt.WA_StyledBackground, True)
-
-        bg_path = resource_path("assets/image/common/bg.png").replace("\\", "/")
-        print(f"배경 이미지 경로: {bg_path}")
-
-        self.setStyleSheet(f"""
-            #platform_main {{
-                background-image: url('{bg_path}');
-                background-repeat: no-repeat;
-                background-position: center;
-            }}
-            QScrollArea, QScrollArea QWidget, QScrollArea::viewport,
-            QGroupBox, QWidget#scroll_widget, QLabel {{
-                background: transparent;
-            }}
-        """)
-
-        # 상단 안내
-        info_label = QLabel("시험할 API를 선택하세요 (복수 선택 가능)")
-        info_label.setStyleSheet("font-weight: bold; font-size: 12px; padding: 10px;")
-        layout.addWidget(info_label)
-
-        # 전체 선택/해제 버튼
-        button_layout = QHBoxLayout()
-        select_all_btn = QPushButton("전체 선택")
-        select_all_btn.clicked.connect(self.select_all)
-        deselect_all_btn = QPushButton("전체 해제")
-        deselect_all_btn.clicked.connect(self.deselect_all)
-        button_layout.addWidget(select_all_btn)
-        button_layout.addWidget(deselect_all_btn)
-        button_layout.addStretch()
-        layout.addLayout(button_layout)
-
-        # API 리스트 (체크박스)
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll_widget = QWidget()
-        scroll_layout = QVBoxLayout()
-
-        self.checkboxes = []
-        for idx, api_name in enumerate(self.api_list):
-            checkbox = QCheckBox(f"{idx + 1}. {api_name}")
-            checkbox.setChecked(idx in self.selected_indices)
-            self.checkboxes.append(checkbox)
-            scroll_layout.addWidget(checkbox)
-
-        scroll_layout.addStretch()
-        scroll_widget.setLayout(scroll_layout)
-        scroll.setWidget(scroll_widget)
-        layout.addWidget(scroll)
-
-        # 하단 버튼
-        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-        button_box.accepted.connect(self.accept)
-        button_box.rejected.connect(self.reject)
-        layout.addWidget(button_box)
-
-        self.setLayout(layout)
-
-    def select_all(self):
-        for checkbox in self.checkboxes:
-            checkbox.setChecked(True)
-
-    def deselect_all(self):
-        for checkbox in self.checkboxes:
-            checkbox.setChecked(False)
-
-    def get_selected_indices(self):
-        """선택된 API 인덱스 리스트 반환"""
-        return [idx for idx, checkbox in enumerate(self.checkboxes) if checkbox.isChecked()]
 
 
 # 시험 결과 페이지 위젯 (result_page.py로 분리됨)
@@ -1201,7 +875,7 @@ class MyApp(QWidget):
                     # WebHook 프로토콜인 경우
                     if current_protocol == "WebHook":
 
-                        # 웹훅 스레드가 생성될 때까지 짧게 대기
+                        # 웹훅 스레드가 생성될 때까지 짧게 대기 
                         wait_count = 0
                         while wait_count < 10:
                             if hasattr(self.Server, 'webhook_thread') and self.Server.webhook_thread:
@@ -1811,36 +1485,32 @@ class MyApp(QWidget):
         ]
 
     def create_spec_selection_panel(self, parent_layout):
-        """시험 선택 패널 - 424px 너비"""
-        # 타이틀: 424*24, 폰트 20px Medium
-        self.spec_panel_title = QLabel("시험 선택")
-        self.spec_panel_title.setFixedSize(424, 24)
-        self.spec_panel_title.setStyleSheet("""
-            font-size: 20px;
-            font-style: normal;
-            font-family: "Noto Sans KR";
-            font-weight: 500;
-            color: #000000;
-            letter-spacing: -0.3px;
-        """)
-        parent_layout.addWidget(self.spec_panel_title)
+        """시험 선택 패널 - TestSelectionPanel 사용"""
+        self.test_selection_panel = TestSelectionPanel(self.CONSTANTS)
+        
+        # 시그널 연결
+        self.test_selection_panel.groupSelected.connect(self.on_group_selected)
+        self.test_selection_panel.scenarioSelected.connect(self.on_test_field_selected)
+        
+        # 멤버 변수 매핑 (기존 코드와의 호환성 유지)
+        self.group_table = self.test_selection_panel.group_table
+        self.test_field_table = self.test_selection_panel.test_field_table
+        self.group_name_to_index = self.test_selection_panel.group_name_to_index
+        self.index_to_group_name = self.test_selection_panel.index_to_group_name
+        self.spec_id_to_index = self.test_selection_panel.spec_id_to_index
+        self.index_to_spec_id = self.test_selection_panel.index_to_spec_id
 
-        # ✅ 반응형: 원본 크기 저장
-        self.original_spec_panel_title_size = (424, 24)
+        # ✅ 반응형 처리를 위한 UI 컴포넌트 매핑
+        self.spec_panel_title = self.test_selection_panel.spec_panel_title
+        self.group_table_widget = self.test_selection_panel.group_table_widget
+        self.field_group = self.test_selection_panel.field_group
+        
+        # ✅ 반응형 처리를 위한 원본 사이즈 매핑
+        self.original_spec_panel_title_size = self.test_selection_panel.original_spec_panel_title_size
+        self.original_group_table_widget_size = self.test_selection_panel.original_group_table_widget_size
+        self.original_field_group_size = self.test_selection_panel.original_field_group_size
 
-        # 타이틀 아래 8px gap
-        parent_layout.addSpacing(8)
-
-        # 그룹 테이블 추가 (시험 분야 테이블)
-        self.group_table_widget = self.create_group_selection_table()
-        parent_layout.addWidget(self.group_table_widget)
-
-        # 20px gap
-        parent_layout.addSpacing(20)
-
-        # 시험 시나리오 테이블
-        self.field_group = self.create_test_field_group()
-        parent_layout.addWidget(self.field_group)
+        parent_layout.addWidget(self.test_selection_panel)
 
     def on_group_selected(self, row, col):
         group_name = self.index_to_group_name.get(row)
@@ -1867,215 +1537,7 @@ class MyApp(QWidget):
 
             # ✅ 그룹 ID 저장
             self.current_group_id = new_group_id
-            self.update_test_field_table(selected_group)
-
-    def update_test_field_table(self, group_data):
-        """선택된 그룹의 spec_id 목록으로 테이블 갱신"""
-        self.test_field_table.clearContents()
-
-        spec_items = [
-            (k, v) for k, v in group_data.items()
-            if k not in ['group_name', 'group_id'] and isinstance(v, dict)
-        ]
-        self.test_field_table.setRowCount(len(spec_items))
-
-        self.spec_id_to_index.clear()
-        self.index_to_spec_id.clear()
-
-        for idx, (spec_id, config) in enumerate(spec_items):
-            desc = config.get('test_name', f'시험분야 {idx + 1}')
-            desc_with_role = f"{desc} (요청 검증)"
-            item = QTableWidgetItem(desc_with_role)
-            item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-            self.test_field_table.setItem(idx, 0, item)
-            self.spec_id_to_index[spec_id] = idx
-            self.index_to_spec_id[idx] = spec_id
-
-    def create_group_selection_table(self):
-        """시험 분야명 테이블 - 424*204, 헤더 31px, 데이터셀 39px"""
-        group_box = QWidget()
-        group_box.setFixedSize(424, 204)
-        group_box.setStyleSheet("background: transparent;")
-
-        # ✅ 반응형: 원본 크기 저장
-        self.original_group_table_widget_size = (424, 204)
-
-        layout = QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-
-        self.group_table = QTableWidget(0, 1)
-        self.group_table.setHorizontalHeaderLabels(["시험 분야"])
-        self.group_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.group_table.horizontalHeader().setFixedHeight(31)  # 헤더 높이 31px
-        self.group_table.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.group_table.setSelectionMode(QAbstractItemView.SingleSelection)
-        self.group_table.verticalHeader().setVisible(False)
-        self.group_table.setFixedHeight(204)
-        self.group_table.verticalHeader().setDefaultSectionSize(39)  # 데이터셀 높이 39px
-
-        self.group_table.setStyleSheet("""
-            QTableWidget {
-                background-color: #FFFFFF;
-                border: 1px solid #CECECE;
-                border-radius: 4px;
-                outline: none;
-                font-family: "Noto Sans KR";
-                font-size: 19px;
-                color: #1B1B1C;
-            }
-            QTableWidget::item {
-                border-bottom: 1px solid #CCCCCC;
-                color: #1B1B1C;
-                font-family: 'Noto Sans KR';
-                font-size: 19px;
-                font-weight: 400;
-                padding: 8px;
-                text-align: center;
-            }
-            QTableWidget::item:selected {
-                background-color: #E3F2FF;
-                border: none;
-            }
-            QTableWidget::item:hover {
-                background-color: #F2F8FF;
-            }
-            QHeaderView::section {
-                background-color: #EDF0F3;
-                border: none;
-                border-bottom: 1px solid #CECECE;
-                color: #1B1B1C;
-                text-align: center;
-                font-family: 'Noto Sans KR';
-                font-size: 18px;
-                font-weight: 600;
-                letter-spacing: -0.156px;
-            }
-        """)
-
-        SPEC_CONFIG = load_external_constants(self.CONSTANTS)
-
-        group_items = [
-            (g.get("group_name", "미지정 그룹"), g.get("group_id", ""))
-            for g in SPEC_CONFIG
-        ]
-        self.group_table.setRowCount(len(group_items))
-
-        self.group_name_to_index = {}
-        self.index_to_group_name = {}
-
-        for idx, (name, gid) in enumerate(group_items):
-            display_name = name
-            item = QTableWidgetItem(display_name)
-            item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-            self.group_table.setItem(idx, 0, item)
-            self.group_name_to_index[name] = idx
-            self.index_to_group_name[idx] = name
-
-        self.group_table.cellClicked.connect(self.on_group_selected)
-
-        layout.addWidget(self.group_table)
-        group_box.setLayout(layout)
-        return group_box
-
-    def create_test_field_group(self):
-        """시험 시나리오 테이블"""
-        group_box = QWidget()
-        group_box.setFixedSize(424, 526)
-        group_box.setStyleSheet("background: transparent;")
-
-        # ✅ 반응형: 원본 크기 저장
-        self.original_field_group_size = (424, 526)
-
-        layout = QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-
-        self.test_field_table = QTableWidget(0, 1)
-        self.test_field_table.setHorizontalHeaderLabels(["시험 시나리오"])
-        self.test_field_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.test_field_table.horizontalHeader().setFixedHeight(31)
-        self.test_field_table.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.test_field_table.cellClicked.connect(self.on_test_field_selected)
-        self.test_field_table.verticalHeader().setVisible(False)
-        self.test_field_table.verticalHeader().setDefaultSectionSize(39)
-        self.test_field_table.setFixedHeight(526)
-
-        self.test_field_table.setStyleSheet("""
-            QTableWidget {
-                background-color: #FFFFFF;
-                border: 1px solid #CECECE;
-                border-radius: 4px;
-                font-family: "Noto Sans KR";
-                font-size: 19px;
-                color: #1B1B1C;
-            }
-            QTableWidget::item {
-                border-bottom: 1px solid #CCCCCC;
-                border-right: 0px solid transparent;
-                color: #1B1B1C;
-                font-family: 'Noto Sans KR';
-                font-size: 19px;
-                font-style: normal;
-                font-weight: 400;
-                letter-spacing: 0.098px;
-                text-align: center; 
-            }
-            QTableWidget::item:selected {
-                background-color: #E3F2FF;
-            }
-            QTableWidget::item:hover {
-                background-color: #E3F2FF;
-            }
-            QHeaderView::section {
-                background-color: #EDF0F3;
-                border-right: 0px solid transparent;
-                border-left: 0px solid transparent;
-                border-top: 0px solid transparent;
-                border-bottom: 1px solid #CECECE;
-                color: #1B1B1C;
-                text-align: center;
-                font-family: 'Noto Sans KR';
-                font-size: 18px;
-                font-style: normal;
-                font-weight: 600;
-                line-height: normal;
-                letter-spacing: -0.156px;
-            }
-        """)
-
-        # SPEC_CONFIG에서 spec_id와 config 추출
-        spec_items = []
-        for group_data in self.CONSTANTS.SPEC_CONFIG:
-            for key, value in group_data.items():
-                if key not in ['group_name', 'group_id'] and isinstance(value, dict):
-                    spec_items.append((key, value))
-
-        if spec_items:
-            self.test_field_table.setRowCount(len(spec_items))
-
-            self.spec_id_to_index = {}
-            self.index_to_spec_id = {}
-
-            for idx, (spec_id, config) in enumerate(spec_items):
-                description = config.get('test_name', f'시험 분야 {idx + 1}')
-                description_with_role = f"{description} (요청 검증)"
-                item = QTableWidgetItem(description_with_role)
-                item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-                self.test_field_table.setItem(idx, 0, item)
-
-                self.spec_id_to_index[spec_id] = idx
-                self.index_to_spec_id[idx] = spec_id
-
-            # 현재 로드된 spec_id 선택
-            if self.current_spec_id in self.spec_id_to_index:
-                current_index = self.spec_id_to_index[self.current_spec_id]
-                self.test_field_table.selectRow(current_index)
-                self.selected_test_field_row = current_index
-
-        layout.addWidget(self.test_field_table)
-        group_box.setLayout(layout)
-        return group_box
+            self.test_selection_panel.update_test_field_table(selected_group)
 
     def save_current_spec_data(self):
         """현재 spec의 테이블 데이터와 상태를 저장"""
@@ -2314,8 +1776,24 @@ class MyApp(QWidget):
                     self.Server.outCon = self.videoOutConstraint
                     self.Server.inSchema = self.videoInSchema
                     self.Server.webhookSchema = self.videoWebhookSchema
-                    self.Server.webhookData = self.videoWebhookData
-                    self.Server.webhookCon = self.videoWebhookConstraint
+
+                    # ✅ api_server는 "Realtime"이 포함된 API만 별도 인덱싱하므로 데이터 필터링
+                    filtered_webhook_data = []
+                    filtered_webhook_con = []
+                    if self.videoMessages:
+                        for i, msg in enumerate(self.videoMessages):
+                            if "Realtime" in msg:
+                                if self.videoWebhookData and i < len(self.videoWebhookData):
+                                    filtered_webhook_data.append(self.videoWebhookData[i])
+                                else:
+                                    filtered_webhook_data.append(None)
+                                if self.videoWebhookConstraint and i < len(self.videoWebhookConstraint):
+                                    filtered_webhook_con.append(self.videoWebhookConstraint[i])
+                                else:
+                                    filtered_webhook_con.append(None)
+
+                    self.Server.webhookData = filtered_webhook_data
+                    self.Server.webhookCon = filtered_webhook_con
 
                 # 설정 다시 로드
                 self.get_setting()
@@ -3051,6 +2529,10 @@ class MyApp(QWidget):
             if hasattr(self, 'spec_panel_title') and hasattr(self, 'original_spec_panel_title_size'):
                 new_title_width = int(self.original_spec_panel_title_size[0] * width_ratio)
                 self.spec_panel_title.setFixedSize(new_title_width, self.original_spec_panel_title_size[1])
+                
+                # TestSelectionPanel 자체 너비도 업데이트
+                if hasattr(self, 'test_selection_panel'):
+                     self.test_selection_panel.setFixedWidth(new_title_width)
 
             # 그룹 테이블 위젯 크기 조정 (extra_column_height 비례 분배)
             if hasattr(self, 'group_table_widget') and hasattr(self, 'original_group_table_widget_size'):
@@ -4038,8 +3520,24 @@ class MyApp(QWidget):
             self.Server.outMessage = self.videoOutMessage
             self.Server.inSchema = self.videoInSchema
             self.Server.outCon = self.videoOutConstraint
-            self.Server.webhookData = self.videoWebhookData
-            self.Server.webhookCon = self.videoWebhookConstraint
+
+            # ✅ api_server는 "Realtime"이 포함된 API만 별도 인덱싱하므로 데이터 필터링
+            filtered_webhook_data = []
+            filtered_webhook_con = []
+            if self.videoMessages:
+                for i, msg in enumerate(self.videoMessages):
+                    if "Realtime" in msg:
+                        if self.videoWebhookData and i < len(self.videoWebhookData):
+                            filtered_webhook_data.append(self.videoWebhookData[i])
+                        else:
+                            filtered_webhook_data.append(None)
+                        if self.videoWebhookConstraint and i < len(self.videoWebhookConstraint):
+                            filtered_webhook_con.append(self.videoWebhookConstraint[i])
+                        else:
+                            filtered_webhook_con.append(None)
+
+            self.Server.webhookData = filtered_webhook_data
+            self.Server.webhookCon = filtered_webhook_con
             self.Server.system = "video"
             self.Server.timeout = timeout
             print(f"[DEBUG] Server 설정 완료")

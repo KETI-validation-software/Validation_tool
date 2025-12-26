@@ -27,7 +27,7 @@ from api.api_server import Server  # ✅ door_memory 접근을 위한 import 추
 from core.json_checker_new import timeout_field_finder
 from core.functions import json_check_, resource_path, json_to_data
 from core.data_mapper import ConstraintDataGenerator
-from splash_screen import LoadingPopup
+from ui.splash_screen import LoadingPopup
 from requests.auth import HTTPDigestAuth
 import config.CONSTANTS as CONSTANTS
 import traceback
