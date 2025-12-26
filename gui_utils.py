@@ -1,7 +1,8 @@
 from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QTextBrowser
 from PyQt5.QtCore import Qt
 
-# 팝업창 설정하는 함수
+# 팝업창과 같은 작은 것들
+
 class CustomDialog(QDialog):
     def __init__(self, dmsg, dstep):
         super().__init__()
