@@ -6381,7 +6381,12 @@ class MyApp(QWidget):
         # ✅ 로딩 팝업 표시
         self.loading_popup = LoadingPopup()
         self.loading_popup.show()
-        QApplication.processEvents()  # UI 즉시 업데이트
+        self.loading_popup.raise_()  # 최상위로 올리기
+        self.loading_popup.activateWindow()  # 활성화
+        self.loading_popup.repaint()  # 강제 다시 그리기
+        # UI가 확실히 렌더링되도록 여러 번 processEvents 호출
+        for _ in range(10):
+            QApplication.processEvents()
 
         self.pathUrl = self.url_text_box.text()
         if not resume_mode:
@@ -6617,8 +6622,11 @@ class MyApp(QWidget):
         self.tick_timer.start(1000)
         print(f"[START] ========== 검증 시작 준비 완료 ==========")
 
-        # ✅ 로딩 팝업 닫기
+        # ✅ 로딩 팝업 닫기 (최소 표시 시간 확보)
         if self.loading_popup:
+            # 팝업이 최소한 보이도록 잠시 대기
+            time.sleep(0.3)  # 300ms 대기
+            QApplication.processEvents()
             self.loading_popup.close()
             self.loading_popup = None
 

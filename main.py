@@ -401,23 +401,6 @@ class MainWindow(QMainWindow):
         # 현재 보이는 위젯 가져오기
         current_widget = self.stack.currentWidget()
 
-        # 절대 경로로 로그 파일 생성 (PyInstaller 호환)
-        try:
-            import os
-            import sys
-            if getattr(sys, 'frozen', False):
-                # PyInstaller exe 실행
-                base_dir = os.path.dirname(sys.executable)
-            else:
-                # 일반 Python 실행
-                base_dir = os.path.dirname(os.path.abspath(__file__))
-            log_path = os.path.join(base_dir, "resize_debug.log")
-            with open(log_path, "a", encoding="utf-8") as f:
-                widget_name = type(current_widget).__name__ if current_widget else "None"
-                f.write(f"[MAIN] size={self.width()}x{self.height()}, widget={widget_name}\n")
-        except Exception as e:
-            pass  # 로깅 실패 시 무시
-
         # 현재 보이는 위젯의 resizeEvent 강제 호출
         if current_widget is not None:
             # QResizeEvent를 생성하여 전달
@@ -464,6 +447,15 @@ if __name__ == "__main__":
     splash = SplashScreen()
     splash.show()
     splash.update_progress(10, "프로그램 시작 중...")
+    app.processEvents()  # 동적 스플래시 화면 갱신 강제
+
+    # ===== PyInstaller 정적 스플래시 닫기 (동적 스플래시가 보인 후) =====
+    if '_PYIBoot_SPLASH' in os.environ:
+        try:
+            import pyi_splash
+            pyi_splash.close()
+        except Exception:
+            pass
 
     # 폰트 로딩
     splash.update_progress(20, "폰트 로딩 중...")
