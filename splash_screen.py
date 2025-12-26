@@ -2,75 +2,89 @@
 """
 실행 파일 시작 시 표시되는 스플래시 스크린 (로딩 화면)
 """
+import os
+import sys
 from PyQt5.QtWidgets import QSplashScreen, QVBoxLayout, QLabel, QProgressBar, QWidget
 from PyQt5.QtCore import Qt, QTimer, QRectF
 from PyQt5.QtGui import QPixmap, QPainter, QColor, QPen, QLinearGradient
 
 
+def resource_path(relative_path):
+    """PyInstaller 환경에서 리소스 경로 반환"""
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), relative_path)
+
+
 class SplashScreen(QSplashScreen):
     """
-    그라데이션이 적용된 스플래시
+    배경 이미지 기반 스플래시 (프로그레스 바 + 로딩 메시지만 동적)
     """
     def __init__(self, width=650, height=250):
-        # 그라데이션 배경 픽스맵 생성
-        pixmap = QPixmap(width, height)
-        self._draw_background(pixmap, width, height)
+        # 배경 이미지 로드
+        self._bg_image_path = resource_path('assets/image/splash/splash_bg.png')
+        self._bg_pixmap = QPixmap(self._bg_image_path)
 
-        super().__init__(pixmap, Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
+        # 이미지 크기에 맞춤
+        if not self._bg_pixmap.isNull():
+            width = self._bg_pixmap.width()
+            height = self._bg_pixmap.height()
+
+        super().__init__(self._bg_pixmap, Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
 
         self.width = width
         self.height = height
         self._setup_ui()
 
-    def _draw_background(self, pixmap, width, height):
-        """그라데이션 배경 그리기"""
+    def _load_background(self, pixmap):
+        """배경 이미지 로드"""
+        if not self._bg_pixmap.isNull():
+            painter = QPainter(pixmap)
+            painter.drawPixmap(0, 0, self._bg_pixmap)
+            painter.end()
+        else:
+            # 이미지 로드 실패 시 그라데이션 배경 사용
+            self._draw_gradient_background(pixmap)
+
+    def _draw_gradient_background(self, pixmap):
+        """그라데이션 배경 그리기 (폴백용)"""
         painter = QPainter(pixmap)
         painter.setRenderHint(QPainter.Antialiasing)
 
-        # 그라데이션 설정 (#275554 -> #002B69)
-        gradient = QLinearGradient(0, 0, width, height)
+        gradient = QLinearGradient(0, 0, self.width, self.height)
         gradient.setColorAt(0, QColor("#275554"))
         gradient.setColorAt(1, QColor("#002B69"))
 
-        # 사각형 그리기
         painter.setBrush(gradient)
         painter.setPen(Qt.NoPen)
-        painter.drawRect(0, 0, width, height)
+        painter.drawRect(0, 0, self.width, self.height)
         painter.end()
 
     def _setup_ui(self):
-        """UI 구성 요소 생성"""
+        """UI 구성 요소 생성 (프로그레스 바 + 로딩 메시지만)"""
         # 메인 위젯
         self._widget = QWidget()
         self._widget.setFixedSize(self.width, self.height)
         self._widget.setStyleSheet("background: transparent;")
 
         layout = QVBoxLayout(self._widget)
-        layout.setContentsMargins(50, 40, 50, 30)
+        layout.setContentsMargins(50, 0, 50, 25)
 
-        # 타이틀
-        self.title_label = QLabel("물리보안 연동성 검증 도구")
-        self.title_label.setStyleSheet("""
-            color: white;
-            font-size: 22pt;
-            font-weight: bold;
+        # 상단 여백 (로고, 타이틀 영역은 이미지에 포함됨)
+        layout.addStretch()
+
+        # 로딩 메시지
+        self.message_label = QLabel("시스템 리소스를 불러오는 중...")
+        self.message_label.setAlignment(Qt.AlignCenter)
+        self.message_label.setStyleSheet("""
+            color: rgba(255, 255, 255, 200);
+            font-size: 11pt;
             font-family: 'Malgun Gothic', 'Noto Sans KR';
             background: transparent;
         """)
-        layout.addWidget(self.title_label)
+        layout.addWidget(self.message_label)
 
-        # 서브 타이틀
-        self.subtitle_label = QLabel("시스템 리소스를 불러오는 중...")
-        self.subtitle_label.setStyleSheet("""
-            color: rgba(255, 255, 255, 180);
-            font-size: 12pt;
-            background: transparent;
-        """)
-        layout.addWidget(self.subtitle_label)
-
-        layout.addStretch()
-
-        # 슬림 프로그레스 바
+        # 프로그레스 바
         self.progress_bar = QProgressBar()
         self.progress_bar.setRange(0, 100)
         self.progress_bar.setValue(0)
@@ -93,8 +107,8 @@ class SplashScreen(QSplashScreen):
         self.percent_label = QLabel("0%")
         self.percent_label.setAlignment(Qt.AlignRight)
         self.percent_label.setStyleSheet("""
-            color: white;
-            font-size: 10pt;
+            color: rgba(255, 255, 255, 180);
+            font-size: 9pt;
             font-family: 'Consolas';
             background: transparent;
         """)
@@ -105,7 +119,7 @@ class SplashScreen(QSplashScreen):
     def _render_widget(self):
         """현재 UI 상태를 픽스맵으로 변환"""
         pixmap = QPixmap(self.width, self.height)
-        self._draw_background(pixmap, self.width, self.height)
+        self._load_background(pixmap)
 
         painter = QPainter(pixmap)
         self._widget.render(painter)
@@ -124,7 +138,7 @@ class SplashScreen(QSplashScreen):
         self.progress_bar.setValue(value)
         self.percent_label.setText(f"{value}%")
         if message:
-            self.subtitle_label.setText(message)
+            self.message_label.setText(message)
 
         self._render_widget()
         self.repaint()
@@ -179,26 +193,52 @@ class SpinnerWidget(QWidget):
 
 class LoadingPopup(QSplashScreen):
     """
-    평가 시작 시 로딩 상태를 표시하는 팝업
+    평가 시작 시 로딩 상태를 표시하는 팝업 (배경 이미지 기반)
     """
     def __init__(self, width=400, height=200):
-        # 그라데이션 배경 픽스맵 생성
-        pixmap = QPixmap(width, height)
-        self._draw_background_static(pixmap, width, height)
+        try:
+            # 배경 이미지 로드
+            self._bg_image_path = resource_path('assets/image/splash/loading_bg.png')
+            print(f"[LoadingPopup] 이미지 경로: {self._bg_image_path}")
+            self._bg_pixmap = QPixmap(self._bg_image_path)
+            print(f"[LoadingPopup] 이미지 로드 결과: isNull={self._bg_pixmap.isNull()}")
 
-        super().__init__(pixmap, Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
+            # 이미지 크기에 맞춤
+            if not self._bg_pixmap.isNull():
+                width = self._bg_pixmap.width()
+                height = self._bg_pixmap.height()
+                init_pixmap = self._bg_pixmap
+                print(f"[LoadingPopup] 이미지 사용: {width}x{height}")
+            else:
+                # 이미지 로드 실패 시 그라데이션 배경으로 초기화
+                init_pixmap = QPixmap(width, height)
+                self._draw_gradient_background_static(init_pixmap, width, height)
+                print(f"[LoadingPopup] 그라데이션 배경 사용: {width}x{height}")
 
-        self.width = width
-        self.height = height
-        self._setup_ui()
+            super().__init__(init_pixmap, Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
 
-        # 스피너 애니메이션을 위한 타이머
-        self.render_timer = QTimer(self)
-        self.render_timer.timeout.connect(self._render_widget)
-        self.render_timer.start(40)
+            self.width = width
+            self.height = height
+            self._setup_ui()
+
+            # 스피너 애니메이션을 위한 타이머
+            self.render_timer = QTimer(self)
+            self.render_timer.timeout.connect(self._render_widget)
+            self.render_timer.start(40)
+            print(f"[LoadingPopup] 초기화 완료")
+        except Exception as e:
+            print(f"[LoadingPopup] 초기화 중 예외 발생: {e}")
+            import traceback
+            traceback.print_exc()
+            # 최소한의 초기화
+            init_pixmap = QPixmap(width, height)
+            init_pixmap.fill(QColor("#002B69"))
+            super().__init__(init_pixmap, Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
+            self.width = width
+            self.height = height
 
     @staticmethod
-    def _draw_background_static(pixmap, width, height):
+    def _draw_gradient_background_static(pixmap, width, height):
         """그라데이션 배경 그리기 (정적 메서드)"""
         painter = QPainter(pixmap)
         painter.setRenderHint(QPainter.Antialiasing)
@@ -212,29 +252,38 @@ class LoadingPopup(QSplashScreen):
         painter.drawRect(0, 0, width, height)
         painter.end()
 
-    def _draw_background(self, pixmap):
-        """인스턴스 메서드로 배경 그리기"""
-        self._draw_background_static(pixmap, self.width, self.height)
+    def _load_background(self, pixmap):
+        """배경 이미지 로드"""
+        if not self._bg_pixmap.isNull():
+            painter = QPainter(pixmap)
+            painter.drawPixmap(0, 0, self._bg_pixmap)
+            painter.end()
+        else:
+            # 이미지 로드 실패 시 그라데이션 배경 사용
+            self._draw_gradient_background_static(pixmap, self.width, self.height)
 
     def _setup_ui(self):
-        """UI 구성 요소 생성"""
+        """UI 구성 요소 생성 (메시지 + 서브메시지 + 스피너)"""
         # 메인 위젯
         self._widget = QWidget()
         self._widget.setFixedSize(self.width, self.height)
         self._widget.setStyleSheet("background: transparent;")
 
         layout = QVBoxLayout(self._widget)
-        layout.setContentsMargins(30, 25, 30, 25)
-        layout.setSpacing(8)
+        layout.setContentsMargins(30, 0, 30, 30)
+        layout.setSpacing(5)
 
-        # 메인 메시지
+        # 상단 여백 (로고, 타이틀 영역은 이미지에 포함됨)
+        layout.addStretch(2)
+
+        # 메인 메시지 (중앙 정렬)
         self.message_label = QLabel("평가 준비 중...")
         self.message_label.setAlignment(Qt.AlignCenter)
         self.message_label.setStyleSheet("""
-            color: white;
+            color: rgba(255, 255, 255, 230);
             font-size: 14pt;
             font-weight: bold;
-            font-family: 'Segoe UI', 'Malgun Gothic';
+            font-family: 'Malgun Gothic', 'Noto Sans KR';
             background: transparent;
         """)
         layout.addWidget(self.message_label)
@@ -245,17 +294,16 @@ class LoadingPopup(QSplashScreen):
         self.subtitle_label.setStyleSheet("""
             color: rgba(255, 255, 255, 180);
             font-size: 10pt;
+            font-family: 'Malgun Gothic', 'Noto Sans KR';
             background: transparent;
         """)
         layout.addWidget(self.subtitle_label)
-
-        layout.addStretch()
 
         # 회전하는 스피너
         spinner_container = QWidget()
         spinner_container.setStyleSheet("background: transparent;")
         spinner_layout = QVBoxLayout(spinner_container)
-        spinner_layout.setContentsMargins(0, 0, 0, 0)
+        spinner_layout.setContentsMargins(0, 5, 0, 0)
         spinner_layout.setAlignment(Qt.AlignCenter)
 
         self.spinner = SpinnerWidget(color="#ffffff")
@@ -263,14 +311,12 @@ class LoadingPopup(QSplashScreen):
 
         layout.addWidget(spinner_container)
 
-        layout.addStretch()
-
         self._render_widget()
 
     def _render_widget(self):
         """현재 UI 상태를 픽스맵으로 변환"""
         pixmap = QPixmap(self.width, self.height)
-        self._draw_background(pixmap)
+        self._load_background(pixmap)
 
         painter = QPainter(pixmap)
         self._widget.render(painter)

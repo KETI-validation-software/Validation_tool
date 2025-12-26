@@ -66,7 +66,7 @@ test_range = "ALL_FIELDS"
 auth_type = "Digest Auth"
 auth_info = "kisa,kisa_k1!2@"
 admin_code = "1234"
-url = "https://10.252.219.95:2000"
+url = "https://192.168.0.3:2000"
 contact_person = "빙영진"
 model_name = "v1.0"
 request_id = "cmisfmr3907tv5vy71y0276gp"
@@ -108,7 +108,7 @@ enable_retry_delay = False  # False 권장: 불필요한 sleep 제거
 # ✅ 웹훅 서버 설정 (전역)
 WEBHOOK_HOST = "0.0.0.0"  # 서버 바인딩 주소 (모든 인터페이스에서 수신)
 WEBHOOK_PORT = 2001       # 웹훅 수신 포트
-WEBHOOK_PUBLIC_IP = "10.252.219.95"
+WEBHOOK_PUBLIC_IP = "192.168.0.3"
 # ✅ 웹훅 공개 IP 설정: info_GUI에서 선택한 시험 URL의 IP 사용
 # 초기값은 URL에서 추출, info_GUI에서 주소 선택 후 자동 업데이트됨
 
@@ -132,12 +132,12 @@ SPEC_CONFIG = [
         "cmiqr1jha00i6ie8fb1scb3go": {
     "test_name": "ac002",
     "specs": ['cmiqr1jha00i6ie8fb1scb3go_outSchema', 'cmiqr1jha00i6ie8fb1scb3go_inData', 'cmiqr1jha00i6ie8fb1scb3go_messages', 'cmiqr1jha00i6ie8fb1scb3go_webhook_inSchema', 'cmiqr1jha00i6ie8fb1scb3go_webhook_outData'],
-    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '바이오 및 출입통제 장치 목록 정보', '보안용 센서 단말 제어 정보 연동', '실시간 출입통제 장치 상태 정보 연동-상태조회', '출입 통제 장치 제어 정보 연동', '실시간 출입통제 장치 상태 정보 연동-결과조회'],
-    "api_id": ['cmisgv0ua08o55vy7yvk4aw0a', 'cmisjr2u40au05vy7kt6bb6zl', 'cmiskf6w20dcm5vy7cjao08fw', 'cmjjjsw390nl5cfb311dawu9e', 'cmixuoetf0gr9p002gy101xid', 'cmixuttgv0hbyp002h6os6wjc', 'cmixuvzks0hd3p002rcrvqdt4'],
-    "api_endpoint": ['/Authentication', '/Capabilities', '/DoorProfiles', '/SensorDeviceControl', '/RealtimeDoorStatus', '/DoorControl', '/RealtimeDoorStatus2'],
-    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'WebHook', 'basic', 'WebHook'],
-    "time_out": [10000, 10000, 10000, 6000, 10000, 10000, 10000],
-    "num_retries": [1, 1, 1, 1, 1, 1, 1]
+    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '바이오 및 출입통제 장치 목록 정보', '실시간 출입통제 장치 상태 정보 연동-상태조회', '출입 통제 장치 제어 정보 연동', '실시간 출입통제 장치 상태 정보 연동-결과조회'],
+    "api_id": ['cmisgv0ua08o55vy7yvk4aw0a', 'cmisjr2u40au05vy7kt6bb6zl', 'cmiskf6w20dcm5vy7cjao08fw', 'cmixuoetf0gr9p002gy101xid', 'cmixuttgv0hbyp002h6os6wjc', 'cmixuvzks0hd3p002rcrvqdt4'],
+    "api_endpoint": ['/Authentication', '/Capabilities', '/DoorProfiles', '/RealtimeDoorStatus', '/DoorControl', '/RealtimeDoorStatus2'],
+    "trans_protocol": ['basic', 'basic', 'basic', 'WebHook', 'basic', 'WebHook'],
+    "time_out": [10000, 10000, 10000, 10000, 10000, 10000],
+    "num_retries": [1, 1, 1, 1, 1, 1]
 },
         "cmiqr0kdw00i4ie8fr3firjtg": {
     "test_name": "vid002",
