@@ -18,8 +18,8 @@
 </p>
 
 
-## Project Structure
-<img width="3888" height="2034" alt="image" src="https://github.com/user-attachments/assets/677cdcd2-b1bb-4418-9774-176f7aeceaa3" />
+## Project 
+<img width="650" height="250" alt="splash_bg" src="https://github.com/user-attachments/assets/50212ce8-1fa4-4d22-8dbc-a701b5a91433" />
 
 ## Branch
 runner: 시험 진행 GUI (정수인)
