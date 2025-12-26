@@ -278,8 +278,50 @@
                     "camID": "cam0001",
                     "timeList": [
                       {
-                        "startTime": 20251108550460809,
-                        "endTime": 20251113106682210
+                        "startTime": 20251105656681892,
+                        "endTime": 20251111957994187
+                      },
+                      {
+                        "startTime": 20251106888911417,
+                        "endTime": 20251113895829633
+                      },
+                      {
+                        "startTime": 20251112904240020,
+                        "endTime": 20251114260223090
+                      }
+                    ]
+                  },
+                  {
+                    "camID": "cam0002",
+                    "timeList": [
+                      {
+                        "startTime": 20251109419392859,
+                        "endTime": 20251112603357731
+                      },
+                      {
+                        "startTime": 20251107397890274,
+                        "endTime": 20251112570640872
+                      },
+                      {
+                        "startTime": 20251113504853333,
+                        "endTime": 20251113634063641
+                      }
+                    ]
+                  },
+                  {
+                    "camID": "cam003",
+                    "timeList": [
+                      {
+                        "startTime": 20251110007049740,
+                        "endTime": 20251110623096410
+                      },
+                      {
+                        "startTime": 20251107124979884,
+                        "endTime": 20251109170869168
+                      },
+                      {
+                        "startTime": 20251110758685547,
+                        "endTime": 20251112044941829
                       }
                     ]
                   }
@@ -311,6 +353,18 @@
                 "camList": [
                   {
                     "camID": "cam0001",
+                    "accessID": "conn0001",
+                    "accessPW": "1234",
+                    "camURL": "rtsp://192.168.0.1:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": 30,
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  },
+                  {
+                    "camID": "cam0002",
                     "accessID": "conn0001",
                     "accessPW": "1234",
                     "camURL": "rtsp://192.168.0.1:8000",
@@ -353,24 +407,8 @@
                     "camID": "cam0001",
                     "eventUUID": "event01",
                     "eventName": "Intrusion",
-                    "startTime": 20251113476223480,
-                    "endTime": 20251113984995627,
-                    "eventDesc": "AAABVVVVCCCDDssvfdd"
-                  },
-                  {
-                    "camID": "cam0002",
-                    "eventUUID": "event01",
-                    "eventName": "Intrusion",
-                    "startTime": 20251106457122924,
-                    "endTime": 20251108575748867,
-                    "eventDesc": "AAABVVVVCCCDDssvfdd"
-                  },
-                  {
-                    "camID": "cam003",
-                    "eventUUID": "event01",
-                    "eventName": "Intrusion",
-                    "startTime": 20251114865144428,
-                    "endTime": 20251114957561348,
+                    "startTime": 20251106946657806,
+                    "endTime": 20251108839689563,
                     "eventDesc": "AAABVVVVCCCDDssvfdd"
                   }
                 ]
@@ -401,8 +439,59 @@
                 "camList": [
                   {
                     "camID": "cam0001",
-                    "analyticsTime": 20251108689213396,
+                    "analyticsTime": 20251114368840527,
                     "anlayticsResultList": [
+                      {
+                        "anayticsID": "object001",
+                        "analyticsClass": "Human",
+                        "analyticsAttribute": [
+                          "빨간색"
+                        ],
+                        "analyticsConfidence": 0.8,
+                        "analyticsBoundingBox": {
+                          "left": 0.2,
+                          "top": 0.1,
+                          "right": 0.5,
+                          "bottom": 0.6
+                        },
+                        "analyticsDesc": "13가 4567"
+                      },
+                      {
+                        "anayticsID": "object001",
+                        "analyticsClass": "Human",
+                        "analyticsAttribute": [
+                          "빨간색"
+                        ],
+                        "analyticsConfidence": 0.8,
+                        "analyticsBoundingBox": {
+                          "left": 0.2,
+                          "top": 0.1,
+                          "right": 0.5,
+                          "bottom": 0.6
+                        },
+                        "analyticsDesc": "13가 4567"
+                      }
+                    ]
+                  },
+                  {
+                    "camID": "cam0002",
+                    "analyticsTime": 20251108231683511,
+                    "anlayticsResultList": [
+                      {
+                        "anayticsID": "object001",
+                        "analyticsClass": "Human",
+                        "analyticsAttribute": [
+                          "빨간색"
+                        ],
+                        "analyticsConfidence": 0.8,
+                        "analyticsBoundingBox": {
+                          "left": 0.2,
+                          "top": 0.1,
+                          "right": 0.5,
+                          "bottom": 0.6
+                        },
+                        "analyticsDesc": "13가 4567"
+                      },
                       {
                         "anayticsID": "object001",
                         "analyticsClass": "Human",
@@ -432,5 +521,5 @@
       ]
     }
   ],
-  "completedDate": "2025-12-26T11:50:46Z"
+  "completedDate": "2025-12-26T12:15:04Z"
 }

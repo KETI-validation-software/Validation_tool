@@ -201,6 +201,18 @@
                   {
                     "camID": "cam0001",
                     "streamProtocolType": "RTSP"
+                  },
+                  {
+                    "camID": "cam0002",
+                    "streamProtocolType": "RTSP"
+                  },
+                  {
+                    "camID": "cam003",
+                    "streamProtocolType": "RTSP"
+                  },
+                  {
+                    "camID": "cam004",
+                    "streamProtocolType": "RTSP"
                   }
                 ]
               },
@@ -233,6 +245,9 @@
                   },
                   {
                     "camID": "cam003"
+                  },
+                  {
+                    "camID": "cam004"
                   }
                 ],
                 "transProtocol": {
@@ -289,6 +304,15 @@
                 "camList": [
                   {
                     "camID": "cam0001"
+                  },
+                  {
+                    "camID": "cam0002"
+                  },
+                  {
+                    "camID": "cam003"
+                  },
+                  {
+                    "camID": "cam004"
                   }
                 ]
               },
@@ -327,6 +351,12 @@
                   },
                   {
                     "camID": "cam003",
+                    "startTime": 20251105163010124,
+                    "endTime": 20251115163010123,
+                    "streamProtocolType": "RTSP"
+                  },
+                  {
+                    "camID": "cam004",
                     "startTime": 20251105163010124,
                     "endTime": 20251115163010123,
                     "streamProtocolType": "RTSP"
@@ -405,6 +435,9 @@
                   },
                   {
                     "camID": "cam0002"
+                  },
+                  {
+                    "camID": "cam003"
                   }
                 ],
                 "filterList": [
@@ -428,5 +461,5 @@
       ]
     }
   ],
-  "completedDate": "2025-12-26T11:50:45Z"
+  "completedDate": "2025-12-26T12:15:03Z"
 }

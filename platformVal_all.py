@@ -1500,6 +1500,16 @@ class MyApp(QWidget):
         self.spec_id_to_index = self.test_selection_panel.spec_id_to_index
         self.index_to_spec_id = self.test_selection_panel.index_to_spec_id
 
+        # ✅ 반응형 처리를 위한 UI 컴포넌트 매핑
+        self.spec_panel_title = self.test_selection_panel.spec_panel_title
+        self.group_table_widget = self.test_selection_panel.group_table_widget
+        self.field_group = self.test_selection_panel.field_group
+        
+        # ✅ 반응형 처리를 위한 원본 사이즈 매핑
+        self.original_spec_panel_title_size = self.test_selection_panel.original_spec_panel_title_size
+        self.original_group_table_widget_size = self.test_selection_panel.original_group_table_widget_size
+        self.original_field_group_size = self.test_selection_panel.original_field_group_size
+
         parent_layout.addWidget(self.test_selection_panel)
 
     def on_group_selected(self, row, col):
@@ -2519,6 +2529,10 @@ class MyApp(QWidget):
             if hasattr(self, 'spec_panel_title') and hasattr(self, 'original_spec_panel_title_size'):
                 new_title_width = int(self.original_spec_panel_title_size[0] * width_ratio)
                 self.spec_panel_title.setFixedSize(new_title_width, self.original_spec_panel_title_size[1])
+                
+                # TestSelectionPanel 자체 너비도 업데이트
+                if hasattr(self, 'test_selection_panel'):
+                     self.test_selection_panel.setFixedWidth(new_title_width)
 
             # 그룹 테이블 위젯 크기 조정 (extra_column_height 비례 분배)
             if hasattr(self, 'group_table_widget') and hasattr(self, 'original_group_table_widget_size'):
