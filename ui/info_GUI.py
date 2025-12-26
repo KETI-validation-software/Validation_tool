@@ -2942,6 +2942,20 @@ class InfoWidget(QWidget):
         """)
         common_input_layout.addWidget(self.pw_input)
 
+        # ✅ 초기값 설정 (CONSTANTS.auth_info 사용)
+        print(f"[DEBUG] CONSTANTS.auth_info 확인: {getattr(CONSTANTS, 'auth_info', 'Not Found')}")
+        if hasattr(CONSTANTS, 'auth_info') and CONSTANTS.auth_info:
+            try:
+                parts = CONSTANTS.auth_info.split(',')
+                print(f"[DEBUG] 파싱된 auth_info: {parts}")
+                if len(parts) >= 2:
+                    self.id_input.setText(parts[0].strip())
+                    self.pw_input.setText(parts[1].strip())
+                elif len(parts) == 1:
+                    self.id_input.setText(parts[0].strip())
+            except Exception as e:
+                print(f"[WARN] 초기 인증 정보 설정 중 오류: {e}")
+
         self.common_input_widget.setLayout(common_input_layout)
         content_layout.addWidget(self.common_input_widget)
 
