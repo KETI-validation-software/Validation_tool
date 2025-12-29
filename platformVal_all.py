@@ -10,7 +10,6 @@ from PyQt5 import QtCore
 from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor, QPixmap
 from PyQt5.QtCore import Qt, QSettings, QTimer, QThread, pyqtSignal
 import sys
-import ssl
 from datetime import datetime
 import json
 from core.functions import build_result_json
@@ -22,11 +21,9 @@ from ui.splash_screen import LoadingPopup
 from ui.detail_dialog import CombinedDetailDialog
 from ui.result_page import ResultPageWidget
 from ui.gui_utils import CustomDialog
-from ui.api_selection_dialog import APISelectionDialog
 from ui.ui_components import TestSelectionPanel
 from ui.platform_window import PlatformValidationWindow
 import spec.Schema_response as schema_response_module
-from http.server import HTTPServer
 import warnings
 from core.validation_registry import get_validation_rules
 from core.utils import remove_api_number_suffix, to_detail_text, redact, clean_trace_directory, format_schema, load_from_trace_file, load_external_constants
