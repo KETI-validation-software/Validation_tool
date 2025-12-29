@@ -6395,7 +6395,9 @@ class MyApp(QWidget):
         print(f"[START] 시험: {self.current_spec_id} - {self.spec_description}")
         print(f"[START] 사용자 인증 방식 : ", self.CONSTANTS.auth_type)
 
+        QApplication.processEvents()  # 스피너 애니메이션 유지
         self.update_result_table_structure(self.videoMessages)
+        QApplication.processEvents()  # 스피너 애니메이션 유지
 
         # ✅ 2. 기존 타이머 정지 (중복 실행 방지)
         if self.tick_timer.isActive():
@@ -6489,6 +6491,7 @@ class MyApp(QWidget):
             # ✅ 13. 테이블 완전 초기화
             print(f"[START] 테이블 초기화: {api_count}개 API")
             for i in range(self.tableWidget.rowCount()):
+                QApplication.processEvents()  # 스피너 애니메이션 유지
                 # 아이콘 초기화
                 icon_widget = QWidget()
                 icon_layout = QHBoxLayout()
@@ -6517,6 +6520,7 @@ class MyApp(QWidget):
 
             # ✅ 15. 평가 점수 디스플레이 초기화 (전체 점수 포함)
             self.update_score_display()
+            QApplication.processEvents()  # 스피너 애니메이션 유지
 
             # ✅ 16. 결과 텍스트 초기화
             self.valResult.clear()
@@ -6575,6 +6579,7 @@ class MyApp(QWidget):
 
             # 점수 디스플레이 업데이트 (복원된 점수로)
             self.update_score_display()
+            QApplication.processEvents()  # 스피너 애니메이션 유지
 
             # 모니터링 메시지 복원
             self.valResult.clear()
@@ -6613,9 +6618,13 @@ class MyApp(QWidget):
                         print(f"[DEBUG] 테이블 복원: API {i+1} - result={result}, pass={pass_count}, error={error_count}, retries={retries}")
             print(f"[DEBUG] 테이블 데이터 복원 완료")
 
+        QApplication.processEvents()  # 스피너 애니메이션 유지
+
         # ✅ 5. 버튼 상태 변경 (신규/재개 공통)
         self.sbtn.setDisabled(True)
         self.stop_btn.setEnabled(True)
+
+        QApplication.processEvents()  # 스피너 애니메이션 유지
 
         # ✅ 19. 타이머 시작 (모든 초기화 완료 후)
         print(f"[START] 타이머 시작")
@@ -6624,9 +6633,10 @@ class MyApp(QWidget):
 
         # ✅ 로딩 팝업 닫기 (최소 표시 시간 확보)
         if self.loading_popup:
-            # 팝업이 최소한 보이도록 잠시 대기
-            time.sleep(0.3)  # 300ms 대기
-            QApplication.processEvents()
+            # 팝업이 최소한 보이도록 잠시 대기 (스피너 유지)
+            for _ in range(3):  # 3 * 100ms = 300ms
+                time.sleep(0.1)
+                QApplication.processEvents()
             self.loading_popup.close()
             self.loading_popup = None
 

@@ -3328,9 +3328,12 @@ class MyApp(QWidget):
 
             selected_spec_ids = [self.index_to_spec_id[r.row()] for r in selected_rows]
             for spec_id in selected_spec_ids:
+                QApplication.processEvents()  # 스피너 애니메이션 유지
                 self.current_spec_id = spec_id
                 self.load_specs_from_constants()
+                QApplication.processEvents()  # 스피너 애니메이션 유지
                 self.run_single_spec_test()
+                QApplication.processEvents()  # 스피너 애니메이션 유지
 
             # ✅ 일시정지 파일 존재 여부 확인
             paused_file_path = os.path.join(result_dir, "request_results_paused.json")
@@ -3362,6 +3365,8 @@ class MyApp(QWidget):
                 except Exception as e:
                     print(f"[WARN] 서버 종료 중 오류 (무시): {e}")
                 self.server_th = None
+
+            QApplication.processEvents()  # 스피너 애니메이션 유지
 
             if not resume_mode:
                 # ========== 신규 시작 모드: 완전 초기화 ==========
@@ -3424,6 +3429,7 @@ class MyApp(QWidget):
 
                 # ✅ 12. 평가 점수 디스플레이 초기화
                 self.update_score_display()
+                QApplication.processEvents()  # 스피너 애니메이션 유지
             else:
                 # ========== 재개 모드: 저장된 상태 사용, 초기화 건너뛰기 ==========
                 print(f"[DEBUG] 재개 모드: 초기화 건너뛰기, 저장된 상태 사용")
@@ -3504,6 +3510,9 @@ class MyApp(QWidget):
                             )
                             print(f"[DEBUG] 테이블 복원: API {i+1} - result={result}, pass={pass_count}, error={error_count}, retries={retries}")
                 print(f"[DEBUG] 테이블 데이터 복원 완료")
+                QApplication.processEvents()  # 스피너 애니메이션 유지
+
+            QApplication.processEvents()  # 스피너 애니메이션 유지
 
             # ✅ 12. 버튼 상태 변경
             self.sbtn.setDisabled(True)
@@ -3546,6 +3555,7 @@ class MyApp(QWidget):
             self.Server.system = "video"
             self.Server.timeout = timeout
             print(f"[DEBUG] Server 설정 완료")
+            QApplication.processEvents()  # 스피너 애니메이션 유지
 
             # ✅ 16. UI 초기화
             print(f"[DEBUG] UI 초기화 시작")
@@ -3567,6 +3577,7 @@ class MyApp(QWidget):
             if not resume_mode:
                 print(f"[DEBUG] 테이블 초기화 시작")
                 for i in range(self.tableWidget.rowCount()):
+                    QApplication.processEvents()  # 스피너 애니메이션 유지
                     # 아이콘 초기화
                     icon_widget = QWidget()
                     icon_layout = QHBoxLayout()
@@ -3625,7 +3636,10 @@ class MyApp(QWidget):
                 self.append_monitor_log(
                     step_name="플랫폼 서버 초기화 중..."
                 )
-                time.sleep(5)
+                # 5초 대기하면서 스피너 애니메이션 유지
+                for _ in range(50):  # 50 * 100ms = 5초
+                    time.sleep(0.1)
+                    QApplication.processEvents()
                 self.append_monitor_log(
                     step_name="플랫폼 서버 준비 완료"
                 )
@@ -3633,7 +3647,10 @@ class MyApp(QWidget):
             else:
                 # 두 번째 이후에도 서버 안정화를 위한 짧은 대기
                 print("[DEBUG] 서버 재시작 안정화 대기...")
-                time.sleep(2)
+                # 2초 대기하면서 스피너 애니메이션 유지
+                for _ in range(20):  # 20 * 100ms = 2초
+                    time.sleep(0.1)
+                    QApplication.processEvents()
                 self.append_monitor_log(
                     step_name="서버 준비 완료"
                 )
@@ -3645,9 +3662,10 @@ class MyApp(QWidget):
 
             # ✅ 로딩 팝업 닫기 (최소 표시 시간 확보)
             if self.loading_popup:
-                # 팝업이 최소한 보이도록 잠시 대기
-                time.sleep(0.3)  # 300ms 대기
-                QApplication.processEvents()
+                # 팝업이 최소한 보이도록 잠시 대기 (스피너 유지)
+                for _ in range(3):  # 3 * 100ms = 300ms
+                    time.sleep(0.1)
+                    QApplication.processEvents()
                 self.loading_popup.close()
                 self.loading_popup = None
 
