@@ -327,10 +327,15 @@ class LoadingPopup(QSplashScreen):
         self._load_background(pixmap)
 
         painter = QPainter(pixmap)
+        # 위젯을 픽스맵에 렌더링
         self._widget.render(painter)
         painter.end()
 
         self.setPixmap(pixmap)
+        
+        # UI 반응성 확보
+        from PyQt5.QtWidgets import QApplication
+        QApplication.processEvents()
 
     def update_message(self, message, subtitle=""):
         """
@@ -344,18 +349,14 @@ class LoadingPopup(QSplashScreen):
         if subtitle:
             self.subtitle_label.setText(subtitle)
 
+        # 메시지 변경 즉시 렌더링
         self._render_widget()
         self.repaint()
-
-        from PyQt5.QtWidgets import QApplication
-        QApplication.processEvents()
 
     def close(self):
         """팝업 닫기 시 타이머 정지"""
         if hasattr(self, 'render_timer'):
             self.render_timer.stop()
-        if hasattr(self, 'spinner') and hasattr(self.spinner, 'timer'):
-            self.spinner.timer.stop()
         super().close()
 
 

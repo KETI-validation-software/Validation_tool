@@ -2,7 +2,7 @@
 오류 메시지 트리 포매팅 테스트
 """
 
-from core.functions import format_errors_as_tree
+from .functions import format_errors_as_tree
 
 # 테스트 케이스 1: 사용자가 제공한 실제 오류 메시지
 test_errors_1 = [
