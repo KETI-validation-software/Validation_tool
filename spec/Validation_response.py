@@ -1,4 +1,157 @@
 # Authentication
+cmii7wfuf006i8z1tcds6q69g_Authentication_out_validation = {}
+
+# Capabilities
+cmii7wfuf006i8z1tcds6q69g_Capabilities_out_validation = {}
+
+# SensorDeviceProfiles
+cmii7wfuf006i8z1tcds6q69g_SensorDeviceProfiles_out_validation = {}
+
+# RealtimeSensorData
+cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_out_validation = {}
+
+# RealtimeSensorData WebHook IN Validation
+cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_webhook_in_validation = {
+  "sensorDeviceList.sensorDeviceID": {
+    "enabled": True,
+    "validationType": "request-field-list-match",
+    "referenceFieldId": "cmiwuxvls0cj1p002zte0s84o",
+    "referenceField": "sensorDeviceID",
+    "referenceEndpoint": "/RealtimeSensorData",
+    "score": 0
+  }
+}
+
+# RealtimeSensorEventInfos
+cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_out_validation = {}
+
+# RealtimeSensorEventInfos WebHook IN Validation
+cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_webhook_in_validation = {
+  "sensorDeviceList.sensorDeviceID": {
+    "enabled": True,
+    "validationType": "request-field-list-match",
+    "referenceFieldId": "cmj6feinr01aixei0iwq8v8ia",
+    "referenceField": "sensorDeviceID",
+    "referenceEndpoint": "/RealtimeSensorEventInfos",
+    "score": 0
+  },
+  "sensorDeviceList.eventName": {
+    "enabled": True,
+    "validationType": "request-field-match",
+    "referenceFieldId": "cmj6fdgsb0184xei0mr9kacqd",
+    "referenceField": "eventFilter",
+    "referenceEndpoint": "/RealtimeSensorEventInfos",
+    "score": 0
+  },
+  "sensorDeviceList.eventTime": {
+    "enabled": True,
+    "validationType": "range-match",
+    "rangeMin": 20251105163010124,
+    "rangeMax": 20251105163010124,
+    "rangeOperator": "between",
+    "score": 0
+  }
+}
+
+# StoredSensorEventInfos
+cmii7wfuf006i8z1tcds6q69g_StoredSensorEventInfos_out_validation = {
+  "sensorDeviceList.sensorDeviceID": {
+    "enabled": True,
+    "validationType": "request-field-list-match",
+    "referenceFieldId": "cmixtx2dx0dlwp002gtco28w8",
+    "referenceField": "sensorDeviceID",
+    "referenceEndpoint": "/StoredSensorEventInfos",
+    "score": 0
+  }
+}
+
+# cmii7wfuf006i8z1tcds6q69g WebHook 검증 리스트
+cmii7wfuf006i8z1tcds6q69g_webhook_inValidation = [
+    cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_webhook_in_validation,
+    cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_webhook_in_validation,
+]
+
+# cmii7wfuf006i8z1tcds6q69g 검증 리스트
+cmii7wfuf006i8z1tcds6q69g_outValidation = [
+    cmii7wfuf006i8z1tcds6q69g_Authentication_out_validation,
+    cmii7wfuf006i8z1tcds6q69g_Capabilities_out_validation,
+    cmii7wfuf006i8z1tcds6q69g_SensorDeviceProfiles_out_validation,
+    cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_out_validation,
+    cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_out_validation,
+    cmii7wfuf006i8z1tcds6q69g_StoredSensorEventInfos_out_validation,
+]
+
+# Authentication
+cmii7w683006h8z1t7usnin5g_Authentication_out_validation = {}
+
+# Capabilities
+cmii7w683006h8z1t7usnin5g_Capabilities_out_validation = {}
+
+# DoorProfiles
+cmii7w683006h8z1t7usnin5g_DoorProfiles_out_validation = {}
+
+# AccessUserInfos
+cmii7w683006h8z1t7usnin5g_AccessUserInfos_out_validation = {}
+
+# RealtimeVerifEventInfos
+cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_out_validation = {}
+
+# RealtimeVerifEventInfos WebHook IN Validation
+cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_webhook_in_validation = {
+  "doorList.doorID": {
+    "enabled": True,
+    "validationType": "request-field-list-match",
+    "referenceFieldId": "cmiwt9k7208sxp002x2a5b3x3",
+    "referenceField": "doorID",
+    "referenceEndpoint": "/RealtimeVerifEventInfos",
+    "score": 0
+  },
+  "doorList.eventName": {
+    "enabled": True,
+    "validationType": "request-field-match",
+    "referenceFieldId": "cmiwt94g908r6p00262pdfkog",
+    "referenceField": "eventFilter",
+    "referenceEndpoint": "/RealtimeVerifEventInfos",
+    "score": 0
+  }
+}
+
+# StoredVerifEventInfos
+cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_out_validation = {
+  "doorList.doorID": {
+    "enabled": True,
+    "validationType": "request-field-list-match",
+    "referenceFieldId": "cmiwthcyk09y7p002ovmv3d43",
+    "referenceField": "doorID",
+    "referenceEndpoint": "/StoredVerifEventInfos",
+    "score": 0
+  },
+  "doorList.eventName": {
+    "enabled": True,
+    "validationType": "request-field-match",
+    "referenceFieldId": "cmiwth4c209xkp002mm4lfebj",
+    "referenceField": "eventFilter",
+    "referenceEndpoint": "/StoredVerifEventInfos",
+    "score": 0
+  }
+}
+
+# cmii7w683006h8z1t7usnin5g WebHook 검증 리스트
+cmii7w683006h8z1t7usnin5g_webhook_inValidation = [
+    cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_webhook_in_validation,
+]
+
+# cmii7w683006h8z1t7usnin5g 검증 리스트
+cmii7w683006h8z1t7usnin5g_outValidation = [
+    cmii7w683006h8z1t7usnin5g_Authentication_out_validation,
+    cmii7w683006h8z1t7usnin5g_Capabilities_out_validation,
+    cmii7w683006h8z1t7usnin5g_DoorProfiles_out_validation,
+    cmii7w683006h8z1t7usnin5g_AccessUserInfos_out_validation,
+    cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_out_validation,
+    cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_out_validation,
+]
+
+# Authentication
 cmii7v8pr006g8z1tvo55a50u_Authentication_out_validation = {}
 
 # Capabilities

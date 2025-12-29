@@ -22,10 +22,10 @@
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 100.0,
-    "totalFields": 44,
-    "passedFields": 44,
-    "failedFields": 0
+    "score": 98.48,
+    "totalFields": 66,
+    "passedFields": 65,
+    "failedFields": 1
   },
   "testResult": [
     {
@@ -255,7 +255,7 @@
                   "transProtocolDesc": "https://10.252.219.95:2001"
                 },
                 "duration": 10,
-                "eventFilter": "Loitering",
+                "eventFilter": "Intrusion",
                 "classFilter": "Human",
                 "startTime": 20251105163010124
               },
@@ -462,7 +462,189 @@
           ]
         }
       ]
+    },
+    {
+      "testGroup": "cmii82nib009f8z1tvo6fz8j2",
+      "testSpecId": "cmii7pysb004k8z1tts0npxfm",
+      "testSpecName": "ac001",
+      "score": 95.45,
+      "totalFields": 22,
+      "passedFields": 21,
+      "failedFields": 1,
+      "apis": [
+        {
+          "id": "cmii7roh5004o8z1t47spn819",
+          "name": "사용자 인증",
+          "method": "POST",
+          "endpoint": "/Authentication",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 2,
+          "passFields": 2,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "userID": "kisa",
+                "userPW": "kisa_k1!2@"
+              },
+              "validationErrors": [
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmiiby4fo003chl2h8hzgu7m3",
+          "name": "전송 지원 기능 정보 연동",
+          "method": "POST",
+          "endpoint": "/Capabilities",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 1,
+          "passFields": 1,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmisjhwhq09hi5vy7n59tvsht",
+          "name": "바이오 및 출입통제 장치 목록 정보",
+          "method": "POST",
+          "endpoint": "/DoorProfiles",
+          "score": 0.0,
+          "validationCnt": 1,
+          "totalFields": 1,
+          "passFields": 0,
+          "failFields": 1,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "testest": {
+                  "f1": "1123",
+                  "f2": "11233"
+                }
+              },
+              "validationErrors": [
+                "[시도 1/1] [None Request] 데이터가 있으면 안 됩니다."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmiwhz2il00epugxnzh3d9iuc",
+          "name": "사용자 권한 정보 연동",
+          "method": "POST",
+          "endpoint": "/AccessUserInfos",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 1,
+          "passFields": 1,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmiwj1hq302myugxn8a5c6f48-registration",
+          "name": "실시간 출입인증 목록 정보 연동",
+          "method": "POST",
+          "endpoint": "/RealtimeVerifEventInfos",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 10,
+          "passFields": 10,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "doorList": [
+                  {
+                    "doorID": "door0001"
+                  }
+                ],
+                "duration": 500,
+                "transProtocol": {
+                  "transProtocolType": "WebHook",
+                  "transProtocolDesc": "https://10.252.219.95:2001"
+                },
+                "eventFilter": "AuthSuccess",
+                "startTime": 20251105163010124
+              },
+              "validationErrors": [
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmiwj1hq302myugxn8a5c6f48-webhook",
+          "name": "실시간 출입인증 목록 정보 연동 (Webhook)",
+          "method": "POST",
+          "endpoint": "/RealtimeVerifEventInfos/webhook",
+          "score": 0,
+          "validationCnt": 1,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": []
+            }
+          ]
+        },
+        {
+          "id": "cmiwjtg8i03wjugxnqkustaqj",
+          "name": "저장된 출입인증 목록 정보 연동",
+          "method": "POST",
+          "endpoint": "/StoredVerifEventInfos",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 7,
+          "passFields": 7,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "timePeriod": {
+                  "startTime": 20251105163010124,
+                  "endTime": 20251115163010124
+                },
+                "doorList": [
+                  {
+                    "doorID": "door0001"
+                  }
+                ],
+                "maxCount": 10,
+                "eventFilter": "AuthSuccess"
+              },
+              "validationErrors": [
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
-  "completedDate": "2025-12-29T09:48:35Z"
+  "completedDate": "2025-12-29T11:10:09Z"
 }

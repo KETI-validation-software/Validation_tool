@@ -1,4 +1,191 @@
 # Authentication
+cmii7wfuf006i8z1tcds6q69g_Authentication_in_data = {
+    "userID": "kisa",
+    "userPW": "kisa_k1!2@"
+}
+
+# Capabilities
+cmii7wfuf006i8z1tcds6q69g_Capabilities_in_data = {}
+
+# SensorDeviceProfiles
+cmii7wfuf006i8z1tcds6q69g_SensorDeviceProfiles_in_data = {}
+
+# RealtimeSensorData
+cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_in_data = {
+    "sensorDeviceList": [
+        {
+        "sensorDeviceID": ""
+    }
+],
+    "duration": 100,
+    "transProtocol": {
+    "transProtocolType": "Webhook",
+    "transProtocolDesc": ""
+},
+    "startTime": 20251105163010124
+}
+
+# RealtimeSensorData WebHook OUT Data
+cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_webhook_out_data = {
+    "code": "200",
+    "message": "성공"
+}
+
+# RealtimeSensorEventInfos
+cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_in_data = {
+    "sensorDeviceList": [
+        {
+        "sensorDeviceID": ""
+    }
+],
+    "duration": 1000,
+    "transProtocol": {
+    "transProtocolType": "Webhook",
+    "transProtocolDesc": ""
+},
+    "eventFilter": "",
+    "startTime": 20251105163010123
+}
+
+# RealtimeSensorEventInfos WebHook OUT Data
+cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_webhook_out_data = {
+    "code": "200",
+    "message": "성공"
+}
+
+# StoredSensorEventInfos
+cmii7wfuf006i8z1tcds6q69g_StoredSensorEventInfos_in_data = {
+    "timePeriod": {
+    "startTime": 20251105163010124,
+    "endTime": 20251115163010124
+},
+    "sensorDeviceList": [
+        {
+        "sensorDeviceID": ""
+    }
+],
+    "maxCount": 8,
+    "eventFilter": ""
+}
+
+# cmii7wfuf006i8z1tcds6q69g 데이터 리스트
+cmii7wfuf006i8z1tcds6q69g_inData = [
+    cmii7wfuf006i8z1tcds6q69g_Authentication_in_data,
+    cmii7wfuf006i8z1tcds6q69g_Capabilities_in_data,
+    cmii7wfuf006i8z1tcds6q69g_SensorDeviceProfiles_in_data,
+    cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_in_data,
+    cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_in_data,
+    cmii7wfuf006i8z1tcds6q69g_StoredSensorEventInfos_in_data,
+]
+
+# cmii7wfuf006i8z1tcds6q69g WebHook 데이터 리스트
+cmii7wfuf006i8z1tcds6q69g_webhook_outData = [
+    None,
+    None,
+    None,
+    cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_webhook_out_data,
+    cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_webhook_out_data,
+    None,
+]
+
+# cmii7wfuf006i8z1tcds6q69g API endpoint
+cmii7wfuf006i8z1tcds6q69g_messages = [
+    "Authentication",
+    "Capabilities",
+    "SensorDeviceProfiles",
+    "RealtimeSensorData",
+    "RealtimeSensorEventInfos",
+    "StoredSensorEventInfos",
+]
+
+# Authentication
+cmii7w683006h8z1t7usnin5g_Authentication_in_data = {
+    "userID": "kisa",
+    "userPW": "kisa_k1!2@"
+}
+
+# Capabilities
+cmii7w683006h8z1t7usnin5g_Capabilities_in_data = {}
+
+# DoorProfiles
+cmii7w683006h8z1t7usnin5g_DoorProfiles_in_data = {
+    "testest": {
+    "f1": "1123",
+    "f2": "11233"
+}
+}
+
+# AccessUserInfos
+cmii7w683006h8z1t7usnin5g_AccessUserInfos_in_data = {}
+
+# RealtimeVerifEventInfos
+cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_in_data = {
+    "doorList": [
+        {
+        "doorID": ""
+    }
+],
+    "duration": 500,
+    "transProtocol": {
+    "transProtocolType": "WebHook",
+    "transProtocolDesc": ""
+},
+    "eventFilter": "",
+    "startTime": 20251105163010124
+}
+
+# RealtimeVerifEventInfos WebHook OUT Data
+cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_webhook_out_data = {
+    "code": "200",
+    "message": ""
+}
+
+# StoredVerifEventInfos
+cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_in_data = {
+    "timePeriod": {
+    "startTime": 20251105163010124,
+    "endTime": 20251115163010124
+},
+    "doorList": [
+        {
+        "doorID": ""
+    }
+],
+    "maxCount": 10,
+    "eventFilter": ""
+}
+
+# cmii7w683006h8z1t7usnin5g 데이터 리스트
+cmii7w683006h8z1t7usnin5g_inData = [
+    cmii7w683006h8z1t7usnin5g_Authentication_in_data,
+    cmii7w683006h8z1t7usnin5g_Capabilities_in_data,
+    cmii7w683006h8z1t7usnin5g_DoorProfiles_in_data,
+    cmii7w683006h8z1t7usnin5g_AccessUserInfos_in_data,
+    cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_in_data,
+    cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_in_data,
+]
+
+# cmii7w683006h8z1t7usnin5g WebHook 데이터 리스트
+cmii7w683006h8z1t7usnin5g_webhook_outData = [
+    None,
+    None,
+    None,
+    None,
+    cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_webhook_out_data,
+    None,
+]
+
+# cmii7w683006h8z1t7usnin5g API endpoint
+cmii7w683006h8z1t7usnin5g_messages = [
+    "Authentication",
+    "Capabilities",
+    "DoorProfiles",
+    "AccessUserInfos",
+    "RealtimeVerifEventInfos",
+    "StoredVerifEventInfos",
+]
+
+# Authentication
 cmii7v8pr006g8z1tvo55a50u_Authentication_in_data = {
     "userID": "kisa",
     "userPW": "kisa_k1!2@"
