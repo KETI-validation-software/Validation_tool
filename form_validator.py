@@ -310,6 +310,8 @@ class FormValidator:
 
     def _generate_files_for_all_specs(self):
         """모든 testSpecIds를 하나의 파일로 합쳐서 생성 (schema + videoData)"""
+        from PyQt5.QtWidgets import QApplication
+
         try:
             # testSpecIds 추출
             print(f"\n=== 산출물 생성 시작 ===")
@@ -325,6 +327,7 @@ class FormValidator:
             all_duplicate_endpoints = []
 
             for spec_id, steps in self._steps_cache.items():
+                QApplication.processEvents()  # 스피너 애니메이션 유지
                 if not isinstance(steps, list):
                     continue
 
@@ -349,6 +352,7 @@ class FormValidator:
 
                 temp_spec_id = spec_id+"_"
                 for s in steps:
+                    QApplication.processEvents()  # 스피너 애니메이션 유지
                     step_id = s.get("id")
                     ts = self._test_step_cache.get(step_id) if hasattr(self, "_test_step_cache") else None
 
@@ -1475,6 +1479,8 @@ class FormValidator:
         산출물 파일을 분석하여 CONSTANTS.py의 SPEC_CONFIG 전체 블록을 '덮어쓰기'로 갱신한다.
         각 spec_id별로 API에서 trans_protocol, time_out, num_retries를 추출하여 반영한다.
         """
+        from PyQt5.QtWidgets import QApplication
+
         try:
             from core.functions import resource_path
             import sys
@@ -1539,6 +1545,7 @@ class FormValidator:
                 return  # 모드가 올바르지 않으면 조기 종료
 
             for spec_id in sorted(merged_result.keys()):
+                QApplication.processEvents()  # 스피너 애니메이션 유지
                 # test_name은 이미 캐시된 이름 사용(없으면 빈 문자열)
                 spec_name = self._spec_names_cache.get(spec_id, "")
 
@@ -1988,6 +1995,8 @@ class FormValidator:
 
     def load_opt_files_from_api(self, test_data):
         """API 데이터를 이용하여 OPT 파일 로드 및 스키마 생성 (모든 그룹 처리)"""
+        from PyQt5.QtWidgets import QApplication
+
         try:
             # testGroups 배열에서 모든 그룹의 testSpecs 추출
             test_groups = test_data.get("testRequest", {}).get("testGroups", [])
@@ -2015,11 +2024,17 @@ class FormValidator:
 
             # 시험 시나리오 테이블 채우기 (그룹 정보 포함)
             self._fill_test_field_table_from_api(all_test_specs_with_group)
+            QApplication.processEvents()  # 스피너 애니메이션 유지
+
             self.preload_all_spec_steps()
+            QApplication.processEvents()  # 스피너 애니메이션 유지
+
             self.preload_test_step_details_from_cache()
+            QApplication.processEvents()  # 스피너 애니메이션 유지
 
             # 산출물 파일 생성 먼저 (SPEC_CONFIG 업데이트보다 먼저 실행)
             self._generate_files_for_all_specs()
+            QApplication.processEvents()  # 스피너 애니메이션 유지
 
             # 모든 spec에 대해 개별 설정 업데이트 (trans_protocol, time_out, num_retries)
             print(f"\n=== SPEC_CONFIG 업데이트 시작 ===")
@@ -2029,11 +2044,13 @@ class FormValidator:
                     spec_config_data = self._extract_spec_config_from_api(spec_id)
                     if spec_config_data:
                         self._update_spec_config(spec_id, spec_config_data)  # 개별 spec 업데이트
+                QApplication.processEvents()  # 스피너 애니메이션 유지
             print(f"=== SPEC_CONFIG 개별 업데이트 완료 ===\n")
 
             # 산출물 파일 기반으로 SPEC_CONFIG 전체 재구성 (specs 필드 포함)
             print(f"=== SPEC_CONFIG 전체 재구성 시작 ===")
             self.overwrite_spec_config_from_mapping()  # 한 번만 호출, 모든 spec 처리
+            QApplication.processEvents()  # 스피너 애니메이션 유지
             print(f"=== SPEC_CONFIG 전체 재구성 완료 ===\n")
             # API 테이블은 첫 번째 분야를 자동 선택하여 표시 (API 기반)
             if self.parent.test_field_table.rowCount() > 0:
@@ -2202,6 +2219,7 @@ class FormValidator:
 
     def preload_all_spec_steps(self):
         """_group_specs에 있는 모든 spec_id의 steps(id, name)만 미리 캐싱"""
+        from PyQt5.QtWidgets import QApplication
 
         loaded, skipped = 0, 0
         total_specs = 0
@@ -2213,6 +2231,7 @@ class FormValidator:
 
         for group_name, specs in self._group_specs.items():
             for spec in specs:
+                QApplication.processEvents()  # 스피너 애니메이션 유지
                 total_specs += 1
                 spec_id = spec.get("id")
                 if not spec_id:
@@ -2223,6 +2242,7 @@ class FormValidator:
                     continue
 
                 spec_data = self.fetch_specification_by_id(spec_id)
+                QApplication.processEvents()  # API 호출 후 스피너 애니메이션 유지
                 if not spec_data:
                     continue
 
@@ -2528,13 +2548,17 @@ class FormValidator:
         _steps_cache에 들어있는 step.id로 test-steps API 호출 후
         _test_step_cache에 id, name, detail을 저장
         """
+        from PyQt5.QtWidgets import QApplication
+
         loaded, skipped, empty = 0, 0, 0
 
         for spec_id, steps in self._steps_cache.items():
+            QApplication.processEvents()  # 스피너 애니메이션 유지
             if not isinstance(steps, list):
                 continue
 
             for s in steps:
+                QApplication.processEvents()  # 스피너 애니메이션 유지
                 step_id = s.get("id")
                 step_name = s.get("name", "")
 
@@ -2548,6 +2572,7 @@ class FormValidator:
                     continue
 
                 detail = self.fetch_test_step_by_id(step_id)
+                QApplication.processEvents()  # API 호출 후 스피너 애니메이션 유지
                 if detail is not None:
                     step_verificationType = detail.get("step", {}).get("verificationType", "")
 

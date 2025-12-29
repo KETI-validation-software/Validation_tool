@@ -162,19 +162,21 @@ class SpinnerWidget(QWidget):
     """
     미니멀한 디자인의 회전 스피너
     """
-    def __init__(self, parent=None, color="#ffffff"):
+    def __init__(self, parent=None, color="#ffffff", auto_start=True):
         super().__init__(parent)
         self.angle = 0
         self.color = QColor(color)
         self.setFixedSize(40, 40)
 
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.rotate)
-        self.timer.start(40)
+        # auto_start=False면 외부에서 타이머를 관리
+        if auto_start:
+            self.timer = QTimer(self)
+            self.timer.timeout.connect(self.rotate)
+            self.timer.start(40)
 
     def rotate(self):
         """회전 각도 업데이트"""
-        self.angle = (self.angle + 30) % 360
+        self.angle = (self.angle + 12) % 360
         self.update()
 
     def paintEvent(self, event):
@@ -223,10 +225,10 @@ class LoadingPopup(QSplashScreen):
             self.height = height
             self._setup_ui()
 
-            # 스피너 애니메이션을 위한 타이머
+            # 스피너 애니메이션을 위한 타이머 (30ms = ~33FPS, 부드러운 애니메이션)
             self.render_timer = QTimer(self)
             self.render_timer.timeout.connect(self._render_widget)
-            self.render_timer.start(40)
+            self.render_timer.start(30)
             print(f"[LoadingPopup] 초기화 완료")
         except Exception as e:
             print(f"[LoadingPopup] 초기화 중 예외 발생: {e}")
@@ -301,14 +303,14 @@ class LoadingPopup(QSplashScreen):
         """)
         layout.addWidget(self.subtitle_label)
 
-        # 회전하는 스피너
+        # 회전하는 스피너 (auto_start=False로 외부에서 타이머 관리)
         spinner_container = QWidget()
         spinner_container.setStyleSheet("background: transparent;")
         spinner_layout = QVBoxLayout(spinner_container)
         spinner_layout.setContentsMargins(0, 5, 0, 0)
         spinner_layout.setAlignment(Qt.AlignCenter)
 
-        self.spinner = SpinnerWidget(color="#ffffff")
+        self.spinner = SpinnerWidget(color="#ffffff", auto_start=False)
         spinner_layout.addWidget(self.spinner, alignment=Qt.AlignCenter)
 
         layout.addWidget(spinner_container)
@@ -316,7 +318,11 @@ class LoadingPopup(QSplashScreen):
         self._render_widget()
 
     def _render_widget(self):
-        """현재 UI 상태를 픽스맵으로 변환"""
+        """현재 UI 상태를 픽스맵으로 변환 (스피너 각도 업데이트 포함)"""
+        # 스피너 각도 업데이트 (12도씩 = 더 부드러운 회전)
+        if hasattr(self, 'spinner'):
+            self.spinner.angle = (self.spinner.angle + 12) % 360
+
         pixmap = QPixmap(self.width, self.height)
         self._load_background(pixmap)
 
