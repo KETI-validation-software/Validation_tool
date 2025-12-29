@@ -731,7 +731,11 @@ class InfoWidget(QWidget):
 
     def _on_test_info_loaded(self, test_data):
         """시험 정보 로드 성공 시 호출되는 슬롯"""
+        from PyQt5.QtWidgets import QApplication
+
         try:
+            QApplication.processEvents()  # 스피너 애니메이션 유지
+
             if not test_data:
                 QMessageBox.warning(self, "경고",
                     "시험 정보를 불러올 수 없습니다.\n"
@@ -839,15 +843,20 @@ class InfoWidget(QWidget):
                     print(f"CONSTANTS.py 파일 수정 실패: {e}")
                     # 파일 수정 실패해도 메모리상의 값은 이미 업데이트되었으므로 계속 진행
 
+            QApplication.processEvents()  # 스피너 애니메이션 유지
+
             # verificationType 기반 모드 설정 (API 기반)
             self.current_mode = self._determine_mode_from_api(test_data)
+            QApplication.processEvents()  # 스피너 애니메이션 유지
 
             # API 데이터를 이용하여 OPT 파일 로드 및 스키마 생성
             # (UI 접근이 필요하므로 메인 스레드에서 실행)
             self.form_validator.load_opt_files_from_api(test_data)
+            QApplication.processEvents()  # 스피너 애니메이션 유지
 
             # 플랫폼 검증일 경우 Authentication 정보 자동 입력
             self.auto_fill_authentication_for_platform()
+            QApplication.processEvents()  # 스피너 애니메이션 유지
 
             # 다음 버튼 상태 업데이트
             self.check_next_button_state()

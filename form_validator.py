@@ -2072,6 +2072,7 @@ class FormValidator:
         """API testSpecs 배열로부터 시험 분야 목록 채우기 (첫 번째 컬럼만)"""
         try:
             from PyQt5.QtGui import QFont, QBrush, QColor
+            from PyQt5.QtWidgets import QApplication
 
             table = self.parent.test_field_table
             table.setRowCount(0)
@@ -2080,6 +2081,7 @@ class FormValidator:
             self._group_specs = {}
 
             for spec in test_specs:
+                QApplication.processEvents()  # 스피너 애니메이션 유지
                 spec_id = spec.get("id", "")
                 spec_name = spec.get("name", "")
                 group_name = spec.get("group_name", "")
@@ -2103,6 +2105,7 @@ class FormValidator:
 
             # 그룹별로 한 행씩 추가 (첫 번째 컬럼에만 시험 분야명)
             for i, group_name in enumerate(self._group_specs.keys()):
+                QApplication.processEvents()  # 스피너 애니메이션 유지
                 table.insertRow(i)
 
                 # 첫 번째 컬럼: 시험 분야명 (배경 이미지 + 화살표 분리, 클릭 가능)
