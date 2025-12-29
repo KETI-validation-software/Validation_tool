@@ -22,9 +22,9 @@
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 98.68,
-    "totalFields": 152,
-    "passedFields": 150,
+    "score": 98.97,
+    "totalFields": 195,
+    "passedFields": 193,
     "failedFields": 2
   },
   "testResult": [
@@ -32,9 +32,9 @@
       "testGroup": "cmjcefmh8070gcfb35wjptcsl",
       "testSpecId": "cmii7wfuf006i8z1tcds6q69g",
       "testSpecName": "sensor001",
-      "score": 0,
-      "totalFields": 0,
-      "passedFields": 0,
+      "score": 100.0,
+      "totalFields": 43,
+      "passedFields": 43,
       "failedFields": 0,
       "apis": [
         {
@@ -42,72 +42,231 @@
           "name": "사용자 인증",
           "method": "POST",
           "endpoint": "/Authentication",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 5,
+          "passFields": 5,
           "failFields": 0,
-          "validations": []
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "userName": "관리자",
+                "userAff": "오산시청",
+                "accessToken": "abcde1234"
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다."
+              ]
+            }
+          ]
         },
         {
           "id": "cmiwtm84f0an2p002pthrkfbj",
           "name": "전송 지원 기능 정보 연동",
           "method": "POST",
           "endpoint": "/Capabilities",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 5,
+          "passFields": 5,
           "failFields": 0,
-          "validations": []
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "transportSupport": [
+                  {
+                    "transProtocolType": "Webhook",
+                    "transProtocolDesc": ""
+                  }
+                ]
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다."
+              ]
+            }
+          ]
         },
         {
           "id": "cmiwtnnvx0ar8p002dcz8llaf",
           "name": "보안용 센서 단말 목록 정보 연동",
           "method": "POST",
           "endpoint": "/SensorDeviceProfiles",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 11,
+          "passFields": 11,
           "failFields": 0,
-          "validations": []
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "sensorDeviceList": [
+                  {
+                    "sensorDeviceID": "iot0001",
+                    "sensorDeviceType": "온도",
+                    "sensorDeviceName": "온도 센서",
+                    "sensorDeviceLoc": {
+                      "lon": "127.127730",
+                      "lat": "38.439801",
+                      "alt": "32.131",
+                      "desc": "3층복도"
+                    }
+                  },
+                  {
+                    "sensorDeviceID": "iot0002",
+                    "sensorDeviceType": "온도",
+                    "sensorDeviceName": "온도 센서",
+                    "sensorDeviceLoc": {
+                      "lon": "127.127730",
+                      "lat": "38.439801",
+                      "alt": "",
+                      "desc": ""
+                    }
+                  }
+                ]
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다."
+              ]
+            }
+          ]
         },
         {
-          "id": "cmiwtr5xt0boqp002melvctad",
+          "id": "cmiwtr5xt0boqp002melvctad-registration",
           "name": "실시간 보안용 센서 데이터 정보 연동",
           "method": "POST",
           "endpoint": "/RealtimeSensorData",
-          "score": 0.0,
-          "validationCnt": 0,
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 8,
+          "passFields": 8,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "200",
+                "message": "성공"
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다.",
+                "--- Webhook 검증 ---",
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmiwtr5xt0boqp002melvctad-webhook",
+          "name": "실시간 보안용 센서 데이터 정보 연동 (Webhook)",
+          "method": "POST",
+          "endpoint": "/RealtimeSensorData/webhook",
+          "score": 0,
+          "validationCnt": 1,
           "totalFields": 0,
           "passFields": 0,
           "failFields": 0,
-          "validations": []
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": []
+            }
+          ]
         },
         {
-          "id": "cmiwv1ifx0ddmp0023tuwdhoi",
+          "id": "cmiwv1ifx0ddmp0023tuwdhoi-registration",
           "name": "실시간 보안용 센서 이벤트 분석 정보 연동",
           "method": "POST",
           "endpoint": "/RealtimeSensorEventInfos",
-          "score": 0.0,
-          "validationCnt": 0,
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 7,
+          "passFields": 7,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "200",
+                "message": "성공"
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다.",
+                "--- Webhook 검증 ---",
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmiwv1ifx0ddmp0023tuwdhoi-webhook",
+          "name": "실시간 보안용 센서 이벤트 분석 정보 연동 (Webhook)",
+          "method": "POST",
+          "endpoint": "/RealtimeSensorEventInfos/webhook",
+          "score": 0,
+          "validationCnt": 1,
           "totalFields": 0,
           "passFields": 0,
           "failFields": 0,
-          "validations": []
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": []
+            }
+          ]
         },
         {
           "id": "cmixtu5uk0dg5p002kq3htt9b",
           "name": "저장된 보안용 센서 이벤트 분석 정보 연동",
           "method": "POST",
           "endpoint": "/StoredSensorEventInfos",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 7,
+          "passFields": 7,
           "failFields": 0,
-          "validations": []
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "sensorDeviceList": [
+                  {
+                    "sensorDeviceID": "iot0001",
+                    "eventName": "Leak",
+                    "eventTime": 20251113702200257,
+                    "eventDesc": "100도"
+                  },
+                  {
+                    "sensorDeviceID": "iot0002",
+                    "eventName": "Leak",
+                    "eventTime": 20251106113224303,
+                    "eventDesc": "100도"
+                  }
+                ]
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다."
+              ]
+            }
+          ]
         }
       ]
     },
@@ -1206,5 +1365,5 @@
       ]
     }
   ],
-  "completedDate": "2025-12-29T11:10:09Z"
+  "completedDate": "2025-12-29T11:12:34Z"
 }

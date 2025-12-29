@@ -6,7 +6,6 @@ from api.api_server import Server
 from api.server_thread import server_th, json_data
 import time
 from PyQt5.QtWidgets import *
-from PyQt5 import QtCore
 from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor, QPixmap
 from PyQt5.QtCore import Qt, QSettings, QTimer, QThread, pyqtSignal
 import sys
