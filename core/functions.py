@@ -1645,7 +1645,7 @@ def build_result_json(myapp_instance):
             spec_data["score"] = 0.0
 
     # 8. 완료 시간
-    completed_date = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+    completed_date = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
 
     # 최종 JSON 구성
     result_json = {
