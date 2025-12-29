@@ -168,12 +168,10 @@ class SpinnerWidget(QWidget):
         self.color = QColor(color)
         self.setFixedSize(40, 40)
 
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.rotate)
-        self.timer.start(40)
+        # 자체 타이머 제거 (부모가 제어)
 
-    def rotate(self):
-        """회전 각도 업데이트"""
+    def step(self):
+        """외부에서 호출하여 회전 (한 프레임 진행)"""
         self.angle = (self.angle + 30) % 360
         self.update()
 
@@ -316,15 +314,24 @@ class LoadingPopup(QSplashScreen):
         self._render_widget()
 
     def _render_widget(self):
-        """현재 UI 상태를 픽스맵으로 변환"""
+        """현재 UI 상태를 픽스맵으로 변환 (애니메이션 프레임)"""
+        # 스피너 회전 (한 프레임 진행)
+        if hasattr(self, 'spinner'):
+            self.spinner.step()
+
         pixmap = QPixmap(self.width, self.height)
         self._load_background(pixmap)
 
         painter = QPainter(pixmap)
+        # 위젯을 픽스맵에 렌더링
         self._widget.render(painter)
         painter.end()
 
         self.setPixmap(pixmap)
+        
+        # UI 반응성 확보
+        from PyQt5.QtWidgets import QApplication
+        QApplication.processEvents()
 
     def update_message(self, message, subtitle=""):
         """
@@ -338,18 +345,14 @@ class LoadingPopup(QSplashScreen):
         if subtitle:
             self.subtitle_label.setText(subtitle)
 
+        # 메시지 변경 즉시 렌더링
         self._render_widget()
         self.repaint()
-
-        from PyQt5.QtWidgets import QApplication
-        QApplication.processEvents()
 
     def close(self):
         """팝업 닫기 시 타이머 정지"""
         if hasattr(self, 'render_timer'):
             self.render_timer.stop()
-        if hasattr(self, 'spinner') and hasattr(self.spinner, 'timer'):
-            self.spinner.timer.stop()
         super().close()
 
 
