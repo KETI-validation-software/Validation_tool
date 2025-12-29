@@ -5,32 +5,35 @@
 """
 from PyQt5.QtWidgets import (
     QTableWidget, QGroupBox, QVBoxLayout, QHBoxLayout, QLabel,
-    QHeaderView, QAbstractItemView
+    QHeaderView, QAbstractItemView, QFrame
 )
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QFont, QPainter, QPen, QPalette
 
 
 class TestFieldTableWidget(QTableWidget):
-    """시험 분야별 시나리오 테이블 - 세로 구분선이 전체 높이까지 표시되는 커스텀 테이블"""
+    """시험 분야별 시나리오 테이블"""
 
-    def __init__(self, rows, columns):
+    def __init__(self, rows, columns, draw_right_border=False):
         super().__init__(rows, columns)
+        self._draw_right_border = draw_right_border
 
     def paintEvent(self, event):
-        """기본 paintEvent 실행 후 세로 구분선 추가"""
+        """기본 paintEvent 실행 후 세로 구분선 추가 (데이터셀 영역만)"""
         super().paintEvent(event)
 
-        painter = QPainter(self.viewport())
-        pen = QPen(QColor("#CCCCCC"))
-        pen.setWidth(1)
-        painter.setPen(pen)
+        if self._draw_right_border:
+            painter = QPainter(self.viewport())
+            pen = QPen(QColor("#CCCCCC"))
+            pen.setWidth(1)
+            painter.setPen(pen)
 
-        x_position = self.columnWidth(0)
-        viewport_height = self.viewport().height()
+            # viewport 오른쪽 끝에서 1px 안쪽에 그림
+            x_position = self.viewport().width() - 1
+            viewport_height = self.viewport().height()
 
-        painter.drawLine(x_position, 0, x_position, viewport_height)
-        painter.end()
+            painter.drawLine(x_position, 0, x_position, viewport_height)
+            painter.end()
 
 
 class TestFieldSection(QGroupBox):
@@ -70,9 +73,9 @@ class TestFieldSection(QGroupBox):
         tables_layout.setContentsMargins(0, 0, 0, 0)
         tables_layout.setSpacing(0)
 
-        # 시험 분야 테이블 (372px x 240px)
+        # 시험 분야 테이블 (371px x 240px)
         self.test_field_table = TestFieldTableWidget(0, 1)
-        self.test_field_table.setFixedSize(372, 240)
+        self.test_field_table.setFixedSize(371, 240)
         self.test_field_table.setHorizontalHeaderLabels(["시험 분야"])
 
         # 시험 시나리오 테이블 (372px x 240px)
@@ -95,8 +98,14 @@ class TestFieldSection(QGroupBox):
         # 시나리오 오버레이 설정
         self._setup_scenario_overlays()
 
+        # 두 테이블 사이 세로 구분선 (전체 높이)
+        self.divider_line = QFrame()
+        self.divider_line.setFixedSize(1, 240)
+        self.divider_line.setStyleSheet("background-color: #CCCCCC;")
+
         # 두 테이블을 수평 레이아웃에 추가
         tables_layout.addWidget(self.test_field_table)
+        tables_layout.addWidget(self.divider_line)
         tables_layout.addWidget(self.scenario_table)
 
         layout.addLayout(tables_layout)
@@ -106,7 +115,7 @@ class TestFieldSection(QGroupBox):
         if self.parent_widget:
             self.parent_widget.test_field_table = self.test_field_table
             self.parent_widget.scenario_table = self.scenario_table
-            self.parent_widget.original_test_field_table_size = (372, 240)
+            self.parent_widget.original_test_field_table_size = (371, 240)
             self.parent_widget.original_scenario_table_size = (372, 240)
             self.parent_widget.original_test_field_row_height = 39
             self.parent_widget.original_scenario_row_height = 39
@@ -184,11 +193,7 @@ class TestFieldSection(QGroupBox):
                 background-color: #EDF0F3;
                 border: none;
                 border-bottom: 1px solid #CCCCCC;
-                border-right: 1px solid #CCCCCC;
                 color: #1B1B1C;
-            }
-            QHeaderView::section:last {
-                border-right: none;
             }
             QTableWidget QTableCornerButton::section {
                 background-color: #EDF0F3;
@@ -198,9 +203,13 @@ class TestFieldSection(QGroupBox):
         # 시험 분야 테이블 스타일
         self.test_field_table.setStyleSheet(table_style + """
             QTableWidget {
+                border: none;
+                border-top: 1px solid #CECECE;
+                border-right: none;
+                border-bottom: 1px solid #CECECE;
+                border-left: 1px solid #CECECE;
                 border-top-left-radius: 4px;
                 border-bottom-left-radius: 4px;
-                border-right: 1px solid #CCCCCC;
                 border-top-right-radius: 0px;
                 border-bottom-right-radius: 0px;
             }
@@ -209,9 +218,13 @@ class TestFieldSection(QGroupBox):
         # 시험 시나리오 테이블 스타일
         self.scenario_table.setStyleSheet(table_style + """
             QTableWidget {
+                border: none;
+                border-top: 1px solid #CECECE;
+                border-right: 1px solid #CECECE;
+                border-bottom: 1px solid #CECECE;
+                border-left: none;
                 border-top-right-radius: 4px;
                 border-bottom-right-radius: 4px;
-                border-left: none;
             }
         """)
 
@@ -285,7 +298,10 @@ class TestFieldSection(QGroupBox):
                 font-weight: 400;
                 color: #6B6B6B;
                 background-color: #FFFFFF;
-                border: 1px solid #CECECE;
+                border-top: 1px solid #CCCCCC;
+                border-right: 1px solid #CECECE;
+                border-bottom: 1px solid #CECECE;
+                border-left: none;
                 border-bottom-right-radius: 4px;
                 padding-top: 40px;
             }
