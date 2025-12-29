@@ -28,6 +28,25 @@ from ui.sections import (
 from ui.pages import create_test_info_page, create_test_config_page
 
 
+class TestInfoWorker(QThread):
+    """시험 정보를 백그라운드에서 불러오는 워커 스레드"""
+    finished = pyqtSignal(object)  # 성공 시 test_data 전달
+    error = pyqtSignal(str)  # 실패 시 에러 메시지 전달
+
+    def __init__(self, form_validator, ip_address):
+        super().__init__()
+        self.form_validator = form_validator
+        self.ip_address = ip_address
+
+    def run(self):
+        try:
+            # API 호출만 백그라운드에서 실행 (UI 작업은 메인 스레드에서)
+            test_data = self.form_validator.fetch_test_info_by_ip(self.ip_address)
+            self.finished.emit(test_data)
+        except Exception as e:
+            self.error.emit(str(e))
+
+
 class InfoWidget(QWidget):
     """
     접속 후 화면 GUI.
@@ -682,7 +701,7 @@ class InfoWidget(QWidget):
             return "request"  # 기본값
 
     def on_load_test_info_clicked(self):
-        """시험정보 불러오기 버튼 클릭 이벤트 (API 기반)"""
+        """시험정보 불러오기 버튼 클릭 이벤트 (API 기반, 비동기)"""
         # IP 입력창에서 IP 주소 가져오기
         ip_address = self.ip_input_edit.text().strip()
 
@@ -700,18 +719,22 @@ class InfoWidget(QWidget):
         print(f"입력된 IP 주소: {ip_address}")
 
         # 로딩 팝업 생성 및 표시 (스피너 애니메이션 포함)
-        loading_popup = LoadingPopup(width=400, height=200)
-        loading_popup.update_message("시험 정보 불러오는 중...", "잠시만 기다려주세요")
-        loading_popup.show()
+        self.loading_popup = LoadingPopup(width=400, height=200)
+        self.loading_popup.update_message("시험 정보 불러오는 중...", "잠시만 기다려주세요")
+        self.loading_popup.show()
 
-        # UI 즉시 업데이트를 위한 이벤트 루프 처리
+        # 백그라운드 워커 스레드 시작
+        self.test_info_worker = TestInfoWorker(self.form_validator, ip_address)
+        self.test_info_worker.finished.connect(self._on_test_info_loaded)
+        self.test_info_worker.error.connect(self._on_test_info_error)
+        self.test_info_worker.start()
+
+    def _on_test_info_loaded(self, test_data):
+        """시험 정보 로드 성공 시 호출되는 슬롯"""
         from PyQt5.QtWidgets import QApplication
-        QApplication.processEvents()
 
         try:
-
-            # API 호출하여 시험 정보 가져오기
-            test_data = self.form_validator.fetch_test_info_by_ip(ip_address)
+            QApplication.processEvents()  # 스피너 애니메이션 유지
 
             if not test_data:
                 QMessageBox.warning(self, "경고",
@@ -723,10 +746,6 @@ class InfoWidget(QWidget):
             # 1페이지 필드 채우기
             eval_target = test_data.get("testRequest", {}).get("evaluationTarget", {})
             test_groups = test_data.get("testRequest", {}).get("testGroups", [])
-
-
-            test_groups = test_data.get("testRequest", {}).get("testGroups", [])
-
 
             # testGroups 배열 처리
             if not test_groups:
@@ -793,10 +812,8 @@ class InfoWidget(QWidget):
 
                 # 2. CONSTANTS.py 파일 자체도 수정
                 try:
-                    import re
                     import sys
                     import os
-                    from core.functions import resource_path
 
                     # CONSTANTS.py 파일 경로 설정
                     if getattr(sys, 'frozen', False):
@@ -826,14 +843,20 @@ class InfoWidget(QWidget):
                     print(f"CONSTANTS.py 파일 수정 실패: {e}")
                     # 파일 수정 실패해도 메모리상의 값은 이미 업데이트되었으므로 계속 진행
 
+            QApplication.processEvents()  # 스피너 애니메이션 유지
+
             # verificationType 기반 모드 설정 (API 기반)
             self.current_mode = self._determine_mode_from_api(test_data)
+            QApplication.processEvents()  # 스피너 애니메이션 유지
 
             # API 데이터를 이용하여 OPT 파일 로드 및 스키마 생성
+            # (UI 접근이 필요하므로 메인 스레드에서 실행)
             self.form_validator.load_opt_files_from_api(test_data)
+            QApplication.processEvents()  # 스피너 애니메이션 유지
 
             # 플랫폼 검증일 경우 Authentication 정보 자동 입력
             self.auto_fill_authentication_for_platform()
+            QApplication.processEvents()  # 스피너 애니메이션 유지
 
             # 다음 버튼 상태 업데이트
             self.check_next_button_state()
@@ -848,8 +871,20 @@ class InfoWidget(QWidget):
             QMessageBox.critical(self, "오류", f"시험 정보를 불러오는 중 오류가 발생했습니다:\n{str(e)}")
 
         finally:
-            # 로딩 팝업 닫기 (성공/실패 여부와 관계없이 항상 실행)
-            loading_popup.close()
+            # 로딩 팝업 닫기
+            if hasattr(self, 'loading_popup') and self.loading_popup:
+                self.loading_popup.close()
+                self.loading_popup = None
+
+    def _on_test_info_error(self, error_message):
+        """시험 정보 로드 실패 시 호출되는 슬롯"""
+        print(f"시험정보 불러오기 실패: {error_message}")
+        QMessageBox.critical(self, "오류", f"시험 정보를 불러오는 중 오류가 발생했습니다:\n{error_message}")
+
+        # 로딩 팝업 닫기
+        if hasattr(self, 'loading_popup') and self.loading_popup:
+            self.loading_popup.close()
+            self.loading_popup = None
 
     def auto_fill_authentication_for_platform(self):
         """
