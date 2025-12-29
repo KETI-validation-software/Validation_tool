@@ -9,13 +9,31 @@ import time
 import traceback
 import os
 import copy  # deepcopy를 위해 추가
-import config.CONSTANTS as CONSTANTS
 from core.functions import resource_path
 from core.data_mapper import ConstraintDataGenerator
 from requests.auth import HTTPDigestAuth
-from config.CONSTANTS import none_request_message
 from collections import defaultdict
 import random
+
+
+def load_constants():
+    import sys, os, importlib
+    import config.CONSTANTS as CONSTANTS
+
+    if getattr(sys, 'frozen', False):
+        exe_dir = os.path.dirname(sys.executable)
+        path = os.path.join(exe_dir, "config", "CONSTANTS.py")
+        if os.path.exists(path):
+            spec = importlib.util.spec_from_file_location(
+                "config.CONSTANTS", path
+            )
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+
+            sys.modules["config.CONSTANTS"] = module
+            return module
+
+    return CONSTANTS
 
 
 class Server(BaseHTTPRequestHandler):
@@ -54,7 +72,7 @@ class Server(BaseHTTPRequestHandler):
         self.webhook_flag = False
         self.generator = ConstraintDataGenerator(Server.latest_event)  # ✅ 클래스 변수 참조
         self.current_api_name = None  # ✅ 현재 처리 중인 API 이름
-
+        self.CONSTANTS = load_constants()
         # super().__init__()를 마지막에 호출 (이때 handle()이 실행되어 do_POST가 호출됨)
         super().__init__(*args, **kwargs)
 
@@ -82,13 +100,13 @@ class Server(BaseHTTPRequestHandler):
 
             # 파일 쓰기는 선택적으로 (환경 변수나 설정으로 제어 가능)
             # 성능이 중요하면 주석 처리하거나 비동기로 처리
-            if CONSTANTS.trace_path:  # trace_path가 설정되어 있을 때만 파일 쓰기
+            if self.CONSTANTS.trace_path:  # trace_path가 설정되어 있을 때만 파일 쓰기
                 try:
-                    os.makedirs(CONSTANTS.trace_path, exist_ok=True)
+                    os.makedirs(self.CONSTANTS.trace_path, exist_ok=True)
                     safe_api = "".join(c if c.isalnum() or c in ("-", "_") else "_" for c in str(api_name))
 
                     # ✅ 1. 번호 없는 파일 (기존 방식)
-                    trace_path = os.path.join(CONSTANTS.trace_path, f"trace_{safe_api}.ndjson")
+                    trace_path = os.path.join(self.CONSTANTS.trace_path, f"trace_{safe_api}.ndjson")
                     with open(trace_path, "a", encoding="utf-8") as f:
                         f.write(json.dumps(evt, ensure_ascii=False) + "\n")
 
@@ -97,7 +115,7 @@ class Server(BaseHTTPRequestHandler):
                     if hasattr(Server, 'message') and Server.message:
                         try:
                             step_idx = Server.message.index(api_name)
-                            trace_path_with_num = os.path.join(CONSTANTS.trace_path,
+                            trace_path_with_num = os.path.join(self.CONSTANTS.trace_path,
                                                                f"trace_{step_idx + 1:02d}_{safe_api}.ndjson")
                             with open(trace_path_with_num, "a", encoding="utf-8") as f:
                                 f.write(json.dumps(evt, ensure_ascii=False) + "\n")
@@ -734,7 +752,7 @@ class Server(BaseHTTPRequestHandler):
 
         #  refuse to receive non-json content
         if ctype == 'text/plain':
-            for i in none_request_message:
+            for i in self.CONSTANTS.none_request_message:
                 if self.path == "/" + i:
                     pass
                 # else
@@ -748,39 +766,15 @@ class Server(BaseHTTPRequestHandler):
         url_tmp = ""  # ✅ 스코프 확장을 위해 먼저 선언
         webhook_url = ""  # ✅ 웹훅 URL 저장용
 
-        # do_POST 함수 출신 - 지금은 realtime이라는 단어가 들어간 api에 한해서 웹훅 하는걸로 하드코딩 되어있음
-        if "Realtime".lower() in self.message[message_cnt].lower():
-            print(f"[DEBUG][SERVER] Realtime API 감지: {self.message[message_cnt]}")
+        for group in self.SPEC_CONFIG:
+            if spec_id in group:
+                self.transProtocol = group[spec_id].get("trans_protocol")
+
+        if self.transProtocol[message_cnt] == "WebHook":
+            print(f"[DEBUG][SERVER] 웹훅 API 감지: {self.message[message_cnt]}")
             trans_protocol = dict_data.get("transProtocol", {})
             print(f"[DEBUG][SERVER] transProtocol: {trans_protocol}")
 
-            # transProtocol이 데이터에 없으면 constants에서 로드 시도
-            if not trans_protocol:
-                try:
-                    for group in CONSTANTS.SPEC_CONFIG:
-                        for spec_id, config in group.items():
-                            if spec_id in ["group_name", "group_id"]:
-                                continue
-
-                        trans_protocols = config.get('trans_protocol', [])
-                        if message_cnt < len(trans_protocols):
-                            protocol_type = trans_protocols[message_cnt]
-
-                            if protocol_type == 'WebHook':
-                                # ✅ CONSTANTS에서 웹훅 URL 가져오기 (10.252.219.95:8090)
-                                webhook_url = CONSTANTS.WEBHOOK_URL
-                                trans_protocol = {
-                                    "transProtocolType": "WebHook",
-                                    "transProtocolDesc": webhook_url
-                                }
-                                print(f"[DEBUG][SERVER] 기본 WebHook 프로토콜 설정: {webhook_url}")
-                                break
-                        if trans_protocol:
-                            break
-                except Exception as e:
-                    print(f"[DEBUG][SERVER] constants에서 프로토콜 로드 실패: {e}")
-
-            # transProtocol이 데이터에 들어가있으면 -> 지금 있어서 앞에 https 붙여주어야함 + 시스템이 보낼때 제대로 다시 맵핑하도록 수정해야함
             if trans_protocol:
                 trans_protocol_type = trans_protocol.get("transProtocolType", {})
                 print(f"[DEBUG][SERVER] transProtocolType: {trans_protocol_type}")
@@ -811,7 +805,7 @@ class Server(BaseHTTPRequestHandler):
                             print(f"[SERVER ERROR] Webhook URL이 유효하지 않음: {url_tmp}")
                             message = {
                                 "code": "400",
-                                "message": "잘못된 Webhook URL"
+                                "message": "잘못된 요청: Webhook URL 유효하지 않음"
                             }
                             self._set_headers()
                             self.wfile.write(json.dumps(message).encode('utf-8'))
@@ -825,14 +819,6 @@ class Server(BaseHTTPRequestHandler):
 
                         self.webhook_flag = True
                         print(f"[DEBUG][SERVER] 웹훅 플래그 설정 완료, message={message}")
-
-                        # 웹훅인데 롱풀링으로 하려고 할 때 문제..??
-                        if "longpolling" in str(self.transProtocolInput).lower():
-                            print(f"[SERVER ERROR] transProtocolInput이 longpolling: {self.transProtocolInput}")
-                            message = {
-                                "code": "400",
-                                "message": "잘못된 요청: 프로토콜 불일치"
-                            }
 
                     except Exception as e:
                         print(f"[SERVER ERROR] WebHook 처리 중 예외 발생: {e}")
@@ -859,11 +845,12 @@ class Server(BaseHTTPRequestHandler):
                             "message": "인증 오류"
                         }
             else:
-                # webhook, LongPolloing 둘다 아닌 경우
+                # webhook 요청인데 데이터규격 다른 경우
                 message = {
                     "code": "400",
                     "message": "잘못된 요청"
                 }
+
         else:  # Realtime 메시지아니면서 Webhook 요청 없는 메시지
             if auth_pass:
                 message = data
@@ -1110,7 +1097,7 @@ class Server(BaseHTTPRequestHandler):
             Server.webhook_response = None
 
             json_data_tmp = json.dumps(webhook_payload).encode('utf-8')
-            webhook_thread = threading.Thread(target=self.webhook_req, args=(url_tmp, json_data_tmp, 5))
+            webhook_thread = threading.Thread(target=self.webhook_req, args=(url_tmp, json_data_tmp, 1))
             Server.webhook_thread = webhook_thread  # ✅ 클래스 변수에 저장
             print(f"[DEBUG][SERVER] webhook_thread 저장됨 (클래스 변수): thread={id(webhook_thread)}")
             webhook_thread.start()
@@ -1229,27 +1216,11 @@ class Server(BaseHTTPRequestHandler):
                 return spec_id_or_name
 
             # ✅ 2. CONSTANTS에서 SPEC_CONFIG 로드
-            import config.CONSTANTS as CONSTANTS
-            import sys
-            import os
 
-            SPEC_CONFIG = getattr(CONSTANTS, 'SPEC_CONFIG', [])
-
-            # PyInstaller 환경에서 외부 CONSTANTS.py 로드
-            if getattr(sys, 'frozen', False):
-                exe_dir = os.path.dirname(sys.executable)
-                external_constants_path = os.path.join(exe_dir, "config", "CONSTANTS.py")
-
-                if os.path.exists(external_constants_path):
-                    with open(external_constants_path, 'r', encoding='utf-8') as f:
-                        constants_code = f.read()
-
-                    namespace = {'__file__': external_constants_path}
-                    exec(constants_code, namespace)
-                    SPEC_CONFIG = namespace.get('SPEC_CONFIG', SPEC_CONFIG)
+            self.SPEC_CONFIG = getattr(self.CONSTANTS, 'SPEC_CONFIG', [])
 
             # ✅ 3. test_name으로 spec_id 찾기
-            for group in SPEC_CONFIG:
+            for group in self.SPEC_CONFIG:
                 for key, value in group.items():
                     if key in ['group_name', 'group_id']:
                         continue
@@ -1379,23 +1350,3 @@ class Server(BaseHTTPRequestHandler):
             import traceback
             traceback.print_exc()
 
-
-# 확인용 - 안쓰이는 코드임
-def run(server_class=HTTPServer, handler_class=Server, address='127.0.0.1', port=8008, system="video"):
-    server_address = (address, port)
-    certificate_private = resource_path('config/key0627/server.crt')
-    certificate_key = resource_path('config/key0627/server.key')
-    httpd = server_class(server_address, handler_class)
-    httpd.socket = ssl.wrap_socket(httpd.socket, certfile=certificate_private,
-                                   keyfile=certificate_key, server_side=True)
-    print('Starting https on port %d...' % port)
-    httpd.serve_forever()
-
-
-if __name__ == "__main__":
-    from sys import argv
-
-    if len(argv) == 2:
-        run(port=int(argv[1]))
-    else:
-        run()
