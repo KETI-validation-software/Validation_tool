@@ -1486,6 +1486,14 @@ class MyApp(PlatformMainUI):
             return False
 
         saved_data = self.spec_table_data[composite_key]
+        
+        # ✅ 방어 로직: 저장된 데이터의 API 개수/이름이 현재와 다르면 복원 취소
+        saved_api_list = [row['api_name'] for row in saved_data['table_data']]
+        if len(saved_api_list) != len(self.videoMessages):
+             print(f"[RESTORE] ⚠️ 데이터 불일치: 저장된 API 개수({len(saved_api_list)}) != 현재 API 개수({len(self.videoMessages)}) -> 복원 취소")
+             del self.spec_table_data[composite_key]
+             return False
+
         print(f"[DEBUG] ✅ 저장된 데이터 발견!")
         print(f"[DEBUG]   - 테이블 행 수: {len(saved_data['table_data'])}")
         print(f"[DEBUG]   - step_pass_counts: {saved_data.get('step_pass_counts', [])}")
