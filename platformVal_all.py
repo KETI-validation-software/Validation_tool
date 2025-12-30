@@ -6,7 +6,6 @@ from api.api_server import Server
 from api.server_thread import server_th, json_data
 import time
 from PyQt5.QtWidgets import *
-from PyQt5 import QtCore
 from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor, QPixmap
 from PyQt5.QtCore import Qt, QSettings, QTimer, QThread, pyqtSignal
 import sys
@@ -658,6 +657,19 @@ class MyApp(PlatformMainUI):
                         accumulated['data_parts'].append(f"{tmp_res_auth}")
                     else:
                         accumulated['data_parts'].append(f"\n{tmp_res_auth}")
+
+                    # ✅ 실시간 모니터링 출력
+                    if retry_attempt == 0:
+                        self.append_monitor_log(
+                            step_name=f"시스템 요청 수신: {self.Server.message[self.cnt]} (시도 {retry_attempt + 1}/{current_retries})",
+                            request_json=tmp_res_auth,
+                            details=f"총 {current_retries}회 검증 예정"
+                        )
+                    else:
+                        self.append_monitor_log(
+                            step_name=f"시스템 요청 수신 (시도 {retry_attempt + 1}/{current_retries})",
+                            request_json=tmp_res_auth
+                        )
 
                     accumulated['raw_data_list'].append(current_data)
 
@@ -1487,6 +1499,14 @@ class MyApp(PlatformMainUI):
             return False
 
         saved_data = self.spec_table_data[composite_key]
+        
+        # ✅ 방어 로직: 저장된 데이터의 API 개수/이름이 현재와 다르면 복원 취소
+        saved_api_list = [row['api_name'] for row in saved_data['table_data']]
+        if len(saved_api_list) != len(self.videoMessages):
+             print(f"[RESTORE] ⚠️ 데이터 불일치: 저장된 API 개수({len(saved_api_list)}) != 현재 API 개수({len(self.videoMessages)}) -> 복원 취소")
+             del self.spec_table_data[composite_key]
+             return False
+
         print(f"[DEBUG] ✅ 저장된 데이터 발견!")
         print(f"[DEBUG]   - 테이블 행 수: {len(saved_data['table_data'])}")
         print(f"[DEBUG]   - step_pass_counts: {saved_data.get('step_pass_counts', [])}")

@@ -501,24 +501,24 @@ class ResultPageWidget(QWidget):
                     self.spec_header.setFixedSize(new_header_width, self.original_score_header_size[1])
                 if hasattr(self, 'spec_data_area'):
                     self.spec_data_area.setFixedSize(new_data_width, self.original_score_data_area_size[1])
-                if hasattr(self, 'spec_pass_label'):
-                    self.spec_pass_label.setFixedSize(new_label_width, self.original_score_label_size[1])
-                if hasattr(self, 'spec_total_label'):
-                    self.spec_total_label.setFixedSize(new_label_width, self.original_score_label_size[1])
-                if hasattr(self, 'spec_score_label'):
-                    self.spec_score_label.setFixedSize(new_label_width, self.original_score_label_size[1])
+                # if hasattr(self, 'spec_pass_label'):
+                #     self.spec_pass_label.setFixedSize(new_label_width, self.original_score_label_size[1])
+                # if hasattr(self, 'spec_total_label'):
+                #     self.spec_total_label.setFixedSize(new_label_width, self.original_score_label_size[1])
+                # if hasattr(self, 'spec_score_label'):
+                #     self.spec_score_label.setFixedSize(new_label_width, self.original_score_label_size[1])
 
                 # 전체 점수 내부 위젯
                 if hasattr(self, 'total_header'):
                     self.total_header.setFixedSize(new_header_width, self.original_score_header_size[1])
                 if hasattr(self, 'total_data_area'):
                     self.total_data_area.setFixedSize(new_data_width, self.original_score_data_area_size[1])
-                if hasattr(self, 'total_pass_label'):
-                    self.total_pass_label.setFixedSize(new_label_width, self.original_score_label_size[1])
-                if hasattr(self, 'total_total_label'):
-                    self.total_total_label.setFixedSize(new_label_width, self.original_score_label_size[1])
-                if hasattr(self, 'total_score_label'):
-                    self.total_score_label.setFixedSize(new_label_width, self.original_score_label_size[1])
+                # if hasattr(self, 'total_pass_label'):
+                #     self.total_pass_label.setFixedSize(new_label_width, self.original_score_label_size[1])
+                # if hasattr(self, 'total_total_label'):
+                #     self.total_total_label.setFixedSize(new_label_width, self.original_score_label_size[1])
+                # if hasattr(self, 'total_score_label'):
+                #     self.total_score_label.setFixedSize(new_label_width, self.original_score_label_size[1])
 
             # ✅ 버튼 그룹 크기 조정 (가로만 확장, 세로 고정)
             if hasattr(self, 'buttonGroup') and hasattr(self, 'original_buttonGroup_size'):
@@ -532,10 +532,9 @@ class ResultPageWidget(QWidget):
 
             # ✅ 결과 테이블 컬럼 너비 비례 조정
             if hasattr(self, 'tableWidget') and hasattr(self, 'original_column_widths'):
-                for i, orig_width in enumerate(self.original_column_widths[:-1]):
+                for i, orig_width in enumerate(self.original_column_widths):
                     new_col_width = int(orig_width * width_ratio)
                     self.tableWidget.setColumnWidth(i, new_col_width)
-                # 마지막 컬럼은 stretchLastSection으로 자동 확장됨
 
     def _apply_score_widget_resize(self):
         """점수 위젯 재생성 후 현재 창 크기에 맞게 반응형 적용"""
@@ -565,24 +564,24 @@ class ResultPageWidget(QWidget):
                 self.spec_header.setFixedSize(new_header_width, self.original_score_header_size[1])
             if hasattr(self, 'spec_data_area'):
                 self.spec_data_area.setFixedSize(new_data_width, self.original_score_data_area_size[1])
-            if hasattr(self, 'spec_pass_label'):
-                self.spec_pass_label.setFixedSize(new_label_width, self.original_score_label_size[1])
-            if hasattr(self, 'spec_total_label'):
-                self.spec_total_label.setFixedSize(new_label_width, self.original_score_label_size[1])
-            if hasattr(self, 'spec_score_label'):
-                self.spec_score_label.setFixedSize(new_label_width, self.original_score_label_size[1])
+            # if hasattr(self, 'spec_pass_label'):
+            #     self.spec_pass_label.setFixedSize(new_label_width, self.original_score_label_size[1])
+            # if hasattr(self, 'spec_total_label'):
+            #     self.spec_total_label.setFixedSize(new_label_width, self.original_score_label_size[1])
+            # if hasattr(self, 'spec_score_label'):
+            #     self.spec_score_label.setFixedSize(new_label_width, self.original_score_label_size[1])
 
             # 전체 점수 내부 위젯
             if hasattr(self, 'total_header'):
                 self.total_header.setFixedSize(new_header_width, self.original_score_header_size[1])
             if hasattr(self, 'total_data_area'):
                 self.total_data_area.setFixedSize(new_data_width, self.original_score_data_area_size[1])
-            if hasattr(self, 'total_pass_label'):
-                self.total_pass_label.setFixedSize(new_label_width, self.original_score_label_size[1])
-            if hasattr(self, 'total_total_label'):
-                self.total_total_label.setFixedSize(new_label_width, self.original_score_label_size[1])
-            if hasattr(self, 'total_score_label'):
-                self.total_score_label.setFixedSize(new_label_width, self.original_score_label_size[1])
+            # if hasattr(self, 'total_pass_label'):
+            #     self.total_pass_label.setFixedSize(new_label_width, self.original_score_label_size[1])
+            # if hasattr(self, 'total_total_label'):
+            #     self.total_total_label.setFixedSize(new_label_width, self.original_score_label_size[1])
+            # if hasattr(self, 'total_score_label'):
+            #     self.total_score_label.setFixedSize(new_label_width, self.original_score_label_size[1])
 
     def load_initial_scenarios(self):
         """초기 로드: 현재 선택된 그룹과 시나리오를 반영하여 UI 갱신"""
@@ -772,6 +771,10 @@ class ResultPageWidget(QWidget):
         # 테이블 행 수 재설정
         self.tableWidget.setRowCount(api_count)
 
+        # ✅ 행 높이 설정 (누락 방지)
+        for i in range(api_count):
+            self.tableWidget.setRowHeight(i, 40)
+
         for row in range(api_count):
             # No. (숫자) - 컬럼 0
             no_item = QTableWidgetItem(f"{row + 1}")
@@ -839,6 +842,10 @@ class ResultPageWidget(QWidget):
 
         # 테이블 행 수 재설정
         self.tableWidget.setRowCount(len(table_data))
+
+        # ✅ 행 높이 설정 (누락 방지)
+        for i in range(len(table_data)):
+            self.tableWidget.setRowHeight(i, 40)
 
         for row, row_data in enumerate(table_data):
             # No. (숫자) - 컬럼 0
@@ -1083,12 +1090,7 @@ class ResultPageWidget(QWidget):
         self.result_header_labels = []
         for i, (width, text) in enumerate(header_columns):
             label = QLabel(text)
-            if i == len(header_columns) - 1:  # 마지막 컬럼
-                label.setMinimumWidth(width)
-                label.setFixedHeight(30)
-                label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-            else:
-                label.setFixedSize(width, 30)
+            label.setFixedSize(width, 30)  # 모든 컬럼 고정 너비
             label.setAlignment(Qt.AlignCenter)
             label.setStyleSheet("""
                 QLabel {
@@ -1148,7 +1150,7 @@ class ResultPageWidget(QWidget):
         self.tableWidget.setColumnWidth(6, 94)    # 실패 횟수
         self.tableWidget.setColumnWidth(7, 94)    # 평가 점수
         self.tableWidget.setColumnWidth(8, 133)   # 상세 내용
-        self.tableWidget.horizontalHeader().setStretchLastSection(True)  # 마지막 컬럼 자동 확장
+        self.tableWidget.horizontalHeader().setStretchLastSection(False)  # ✅ 마지막 컬럼 자동 확장 끔
 
         # 행 높이 설정
         for i in range(api_count):
