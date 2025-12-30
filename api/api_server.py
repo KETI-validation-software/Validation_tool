@@ -1097,7 +1097,7 @@ class Server(BaseHTTPRequestHandler):
             Server.webhook_response = None
 
             json_data_tmp = json.dumps(webhook_payload).encode('utf-8')
-            webhook_thread = threading.Thread(target=self.webhook_req, args=(url_tmp, json_data_tmp, 1))
+            webhook_thread = threading.Thread(target=self.webhook_req, args=(url_tmp, json_data_tmp, 1, api_name))
             Server.webhook_thread = webhook_thread  # ✅ 클래스 변수에 저장
             print(f"[DEBUG][SERVER] webhook_thread 저장됨 (클래스 변수): thread={id(webhook_thread)}")
             webhook_thread.start()
@@ -1105,7 +1105,7 @@ class Server(BaseHTTPRequestHandler):
 
         # print("통플검증sw이 보낸 메시지", a)
 
-    def webhook_req(self, url, json_data_tmp, max_retries=3):
+    def webhook_req(self, url, json_data_tmp, max_retries=3, api_name=""):
         import requests
         for attempt in range(max_retries):
 
@@ -1117,7 +1117,6 @@ class Server(BaseHTTPRequestHandler):
                 print(f"[DEBUG][SERVER] webhook_response 저장됨 (클래스 변수): {Server.webhook_response}")
 
                 # ✅ 웹훅 응답 기록 (trace)
-                spec_id, api_name = self.parse_path()
                 self._push_event(api_name, "WEBHOOK_IN", Server.webhook_response)
 
                 # JSON 파일 저장 제거 - spec/video/videoData_response.py 사용
