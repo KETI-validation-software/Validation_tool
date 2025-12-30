@@ -31,6 +31,7 @@ from ui.detail_dialog import CombinedDetailDialog
 from ui.gui_utils import CustomDialog
 from ui.api_selection_dialog import APISelectionDialog
 from ui.result_page import ResultPageWidget
+from core.system_state_manager import SystemStateManager
 from requests.auth import HTTPDigestAuth
 import config.CONSTANTS as CONSTANTS
 from core.validation_registry import get_validation_rules
@@ -223,51 +224,6 @@ class MyApp(QWidget):
             
             return request_data
 
-            # # trace 파일에서 이전 응답 데이터 로드 (필요한 경우)
-            # for path, rule in constraints.items():
-            #     ref_endpoint = rule.get("referenceEndpoint")
-            #     if ref_endpoint:
-            #         # 슬래시 제거하여 키 생성
-            #         ref_key = ref_endpoint.lstrip('/')
-
-            #         # latest_events에 없으면 trace 파일에서 로드
-            #         if ref_key not in self.latest_events or "RESPONSE" not in self.latest_events.get(ref_key, {}):
-            #             print(f"[DATA_MAPPER] trace 파일에서 {ref_endpoint} RESPONSE 로드 시도")
-            #             self._load_from_trace_file(ref_key, "RESPONSE")
-
-            # # ✅ generator의 latest_events를 명시적으로 업데이트 (참조 동기화)
-            # self.generator.latest_events = self.latest_events
-            # # print(f"[DATA_MAPPER] 🔄 generator.latest_events 동기화 완료: {list(self.generator.latest_events.keys())}")
-            
-            # # data mapper 적용
-            # # request_data를 template로, constraints 적용하여 업데이트
-            # # 빈 dict를 template로 사용하지 않고 request_data 자체를 업데이트
-            # # ✅ RealtimeDoorStatus2 대응: api_name과 door_memory 전달
-            # api_name = self.message[cnt] if cnt < len(self.message) else ""
-            # print(f"[DEBUG][SYSTEM] api_name: {api_name}")
-            # print(f"[DEBUG][SYSTEM] door_memory: {Server.door_memory}")
-            # print(f"[DEBUG][SYSTEM] request_data before: {request_data}")
-            
-            # updated_request = self.generator._applied_constraints(
-            #     request_data={},  # 이전 요청 데이터는 필요 없음
-            #     template_data=request_data.copy(),  # 현재 요청 데이터를 템플릿으로
-            #     constraints=constraints,
-            #     api_name=api_name,  # ✅ API 이름 전달
-            #     door_memory=Server.door_memory  # ✅ 문 상태 저장소 전달
-            # )
-
-            # print(f"[DEBUG][SYSTEM] request_data after: {updated_request}")
-            # # print(f"[DATA_MAPPER] 요청 데이터 업데이트 완료")
-            # # print(f"[DATA_MAPPER] 업데이트된 필드: {list(updated_request.keys())}")
-
-            # return updated_request
-
-        # except Exception as e:
-        #     print(f"[ERROR] _apply_request_constraints 실행 중 오류: {e}")
-        #     import traceback
-        #     traceback.print_exc()
-        #     return request_data
-
     def _load_from_trace_file_OLD(self, api_name, direction="RESPONSE"):
         try:
             trace_file = Path("results/trace") / f"trace_{api_name.replace('/', '_')}.ndjson"
@@ -349,6 +305,9 @@ class MyApp(QWidget):
         self.CONSTANTS = CONSTANTS
         self.current_spec_id = spec_id
         self.current_group_id = None  # ✅ 그룹 ID 저장용
+        
+        # ✅ 상태 관리자 초기화
+        self.state_manager = SystemStateManager(self)
 
         self.load_specs_from_constants()
         self.CONSTANTS = CONSTANTS
@@ -434,170 +393,21 @@ class MyApp(QWidget):
         self.webhook_schema_idx = 0  # ✅ 웹훅 스키마 인덱스 추가
 
     def save_current_spec_data(self):
-        """현재 spec의 테이블 데이터와 상태를 저장"""
-        if not hasattr(self, 'current_spec_id'):
-            print("[SAVE] current_spec_id가 없습니다.")
-            return
-
-        try:
-            # 테이블 데이터 저장 (API 이름 포함)
-            table_data = []
-            for row in range(self.tableWidget.rowCount()):
-                # ✅ videoMessages에서 실제 API 이름 가져오기
-                if row < len(self.videoMessages):
-                    api_name = self.videoMessages[row]
-                else:
-                    api_item = self.tableWidget.item(row, 1)  # API 명은 컬럼 1
-                    api_name = api_item.text() if api_item else ""
-
-                row_data = {
-                    'api_name': api_name,
-                    'icon_state': self._get_icon_state(row),
-                    'retry_count': self.tableWidget.item(row, 3).text() if self.tableWidget.item(row, 3) else "0",
-                    'pass_count': self.tableWidget.item(row, 4).text() if self.tableWidget.item(row, 4) else "0",
-                    'total_count': self.tableWidget.item(row, 5).text() if self.tableWidget.item(row, 5) else "0",
-                    'fail_count': self.tableWidget.item(row, 6).text() if self.tableWidget.item(row, 6) else "0",
-                    'score': self.tableWidget.item(row, 7).text() if self.tableWidget.item(row, 7) else "0%",
-                }
-                table_data.append(row_data)
-
-            # 전체 데이터 저장 (✅ 복합키 사용: group_id_spec_id)
-            composite_key = f"{self.current_group_id}_{self.current_spec_id}"
-
-            print(f"[DEBUG] 💾 데이터 저장: {composite_key}")
-            print(f"[DEBUG]   - 테이블 행 수: {len(table_data)}")
-            print(f"[DEBUG]   - step_pass_counts: {self.step_pass_counts[:] if hasattr(self, 'step_pass_counts') else []}")
-            print(f"[DEBUG]   - step_error_counts: {self.step_error_counts[:] if hasattr(self, 'step_error_counts') else []}")
-
-            self.spec_table_data[composite_key] = {
-                'table_data': table_data,
-                'step_buffers': [buf.copy() for buf in self.step_buffers] if self.step_buffers else [],
-                'total_pass_cnt': self.total_pass_cnt,
-                'total_error_cnt': self.total_error_cnt,
-                # ✅ step_pass_counts와 step_error_counts 배열도 저장
-                'step_pass_counts': self.step_pass_counts[:] if hasattr(self, 'step_pass_counts') else [],
-                'step_error_counts': self.step_error_counts[:] if hasattr(self, 'step_error_counts') else [],
-                # ✅ 선택 필드 통과/에러 수도 저장
-                'step_opt_pass_counts': self.step_opt_pass_counts[:] if hasattr(self, 'step_opt_pass_counts') else [],
-                'step_opt_error_counts': self.step_opt_error_counts[:] if hasattr(self, 'step_opt_error_counts') else [],
-            }
-
-            print(f"[SAVE] ✅ {composite_key} 데이터 저장 완료")
-
-        except Exception as e:
-            print(f"[ERROR] save_current_spec_data 실패: {e}")
-            import traceback
-            traceback.print_exc()
+        """현재 spec의 테이블 데이터와 상태를 저장 (state_manager 위임)"""
+        if hasattr(self, 'state_manager'):
+            self.state_manager.save_current_spec_data()
 
     def _get_icon_state(self, row):
-        """테이블 행의 아이콘 상태 반환 (PASS/FAIL/NONE)"""
-        icon_widget = self.tableWidget.cellWidget(row, 2)  # 아이콘은 컬럼 2
-        if icon_widget:
-            icon_label = icon_widget.findChild(QLabel)
-            if icon_label:
-                tooltip = icon_label.toolTip()
-                if "PASS" in tooltip:
-                    return "PASS"
-                elif "FAIL" in tooltip:
-                    return "FAIL"
+        """테이블 행의 아이콘 상태 반환 (state_manager 위임)"""
+        if hasattr(self, 'state_manager'):
+            return self.state_manager._get_icon_state(row)
         return "NONE"
 
     def restore_spec_data(self, spec_id):
-        """저장된 spec 데이터 복원 (✅ 복합키 사용)"""
-        composite_key = f"{self.current_group_id}_{spec_id}"
-        print(f"[DEBUG] 📂 데이터 복원 시도: {composite_key}")
-
-        if composite_key not in self.spec_table_data:
-            print(f"[DEBUG] ❌ {composite_key} 저장된 데이터 없음 - 초기화 필요")
-            return False
-
-        saved_data = self.spec_table_data[composite_key]
-        
-        # ✅ 방어 로직: 저장된 데이터의 API 개수/이름이 현재와 다르면 복원 취소
-        saved_api_list = [row['api_name'] for row in saved_data['table_data']]
-        if len(saved_api_list) != len(self.videoMessages):
-             print(f"[RESTORE] ⚠️ 데이터 불일치: 저장된 API 개수({len(saved_api_list)}) != 현재 API 개수({len(self.videoMessages)}) -> 복원 취소")
-             # 데이터가 맞지 않으면 해당 키 삭제하여 꼬임 방지
-             del self.spec_table_data[composite_key]
-             return False
-
-        # API 이름 비교
-        # for i, api in enumerate(self.videoMessages):
-        #     if saved_api_list[i] != api:
-        #          print(f"[RESTORE] ⚠️ 데이터 불일치: Row {i} API 이름 다름 ({saved_api_list[i]} != {api}) -> 복원 취소")
-        #          return False
-
-        print(f"[DEBUG] ✅ 저장된 데이터 발견!")
-        print(f"[DEBUG]   - 테이블 행 수: {len(saved_data['table_data'])}")
-        print(f"[DEBUG]   - step_pass_counts: {saved_data.get('step_pass_counts', [])}")
-        print(f"[DEBUG]   - step_error_counts: {saved_data.get('step_error_counts', [])}")
-        print(f"[RESTORE] {composite_key} 데이터 복원 시작")
-
-        # 테이블 복원
-        table_data = saved_data['table_data']
-        for row, row_data in enumerate(table_data):
-            if row >= self.tableWidget.rowCount():
-                print(f"[RESTORE] 경고: row={row}가 범위 초과, 건너뜀")
-                break
-
-            # No. (숫자) - 컬럼 0
-            no_item = QTableWidgetItem(f"{row + 1}")
-            no_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-            self.tableWidget.setItem(row, 0, no_item)
-
-            # API 이름 - 컬럼 1 (숫자 제거된 이름으로 표시)
-            display_name = self._remove_api_number_suffix(row_data['api_name'])
-            api_item = QTableWidgetItem(display_name)
-            api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-            self.tableWidget.setItem(row, 1, api_item)
-
-            # 아이콘 상태 복원 - 컬럼 2
-            icon_state = row_data['icon_state']
-            if icon_state == "PASS":
-                img = self.img_pass
-                icon_size = (84, 20)  # tag_성공.png
-            elif icon_state == "FAIL":
-                img = self.img_fail
-                icon_size = (84, 20)  # tag_실패.png
-            else:
-                img = self.img_none
-                icon_size = (16, 16)  # icn_basic.png
-
-            icon_widget = QWidget()
-            icon_layout = QHBoxLayout()
-            icon_layout.setContentsMargins(0, 0, 0, 0)
-            icon_label = QLabel()
-            icon_label.setPixmap(QIcon(img).pixmap(*icon_size))
-            icon_label.setAlignment(Qt.AlignCenter)
-            icon_label.setToolTip(f"Result: {icon_state}")
-            icon_layout.addWidget(icon_label)
-            icon_layout.setAlignment(Qt.AlignCenter)
-            icon_widget.setLayout(icon_layout)
-            self.tableWidget.setCellWidget(row, 2, icon_widget)
-
-            # 나머지 컬럼 복원 - 컬럼 3-7
-            for col, key in [(3, 'retry_count'), (4, 'pass_count'),
-                             (5, 'total_count'), (6, 'fail_count'), (7, 'score')]:
-                new_item = QTableWidgetItem(row_data[key])
-                new_item.setTextAlignment(Qt.AlignCenter)
-                self.tableWidget.setItem(row, col, new_item)
-
-        # step_buffers 복원
-        self.step_buffers = [buf.copy() for buf in saved_data['step_buffers']]
-
-        # 점수 복원
-        self.total_pass_cnt = saved_data['total_pass_cnt']
-        self.total_error_cnt = saved_data['total_error_cnt']
-
-        # ✅ step_pass_counts와 step_error_counts 배열 복원
-        self.step_pass_counts = saved_data.get('step_pass_counts', [0] * len(self.videoMessages))[:]
-        self.step_error_counts = saved_data.get('step_error_counts', [0] * len(self.videoMessages))[:]
-        print(f"[RESTORE] step_pass_counts 복원: {self.step_pass_counts}")
-        print(f"[RESTORE] step_error_counts 복원: {self.step_error_counts}")
-
-        # ✅ 선택 필드 통과/에러 수 배열 복원
-        self.step_opt_pass_counts = saved_data.get('step_opt_pass_counts', [0] * len(self.videoMessages))[:]
-        self.step_opt_error_counts = saved_data.get('step_opt_error_counts', [0] * len(self.videoMessages))[:]
+        """저장된 spec 데이터 복원 (state_manager 위임)"""
+        if hasattr(self, 'state_manager'):
+            return self.state_manager.restore_spec_data(spec_id)
+        return False
         print(f"[RESTORE] step_opt_pass_counts 복원: {self.step_opt_pass_counts}")
         print(f"[RESTORE] step_opt_error_counts 복원: {self.step_opt_error_counts}")
 
