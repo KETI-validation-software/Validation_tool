@@ -658,6 +658,19 @@ class MyApp(PlatformMainUI):
                     else:
                         accumulated['data_parts'].append(f"\n{tmp_res_auth}")
 
+                    # ✅ 실시간 모니터링 출력
+                    if retry_attempt == 0:
+                        self.append_monitor_log(
+                            step_name=f"시스템 요청 수신: {self.Server.message[self.cnt]} (시도 {retry_attempt + 1}/{current_retries})",
+                            request_json=tmp_res_auth,
+                            details=f"총 {current_retries}회 검증 예정"
+                        )
+                    else:
+                        self.append_monitor_log(
+                            step_name=f"시스템 요청 수신 (시도 {retry_attempt + 1}/{current_retries})",
+                            request_json=tmp_res_auth
+                        )
+
                     accumulated['raw_data_list'].append(current_data)
 
                     if "DoorControl" in api_name:

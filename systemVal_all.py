@@ -2345,21 +2345,21 @@ class MyApp(QWidget):
                     
                     # 마지막 시도에만 점수 표시, 진행중에는 표시 안함
                     if self.current_retry + 1 >= current_retries:
-                        # 마지막 시도 - 최종 결과 표시 (데이터는 이미 출력되었으므로 생략)
+                        # 마지막 시도 - 최종 결과 표시
                         total_fields = total_pass_count + total_error_count
                         score_value = (total_pass_count / total_fields * 100) if total_fields > 0 else 0
                         self.append_monitor_log(
                             step_name=step_title,
-                            request_json="",  # 데이터는 이미 출력되었으므로 빈 문자열
+                            request_json="",  # 데이터는 앞서 출력되었으므로 생략
                             result_status=final_result,
                             score=score_value,
                             details=f"통과: {total_pass_count}, 오류: {total_error_count} | 프로토콜: {current_protocol}"
                         )
                     else:
-                        # 중간 시도 - 진행중 표시 (데이터는 이미 출력되었으므로 생략)
+                        # 중간 시도 - 진행중 표시
                         self.append_monitor_log(
                             step_name=step_title,
-                            request_json="",  # 데이터는 이미 출력되었으므로 빈 문자열
+                            request_json="",  # 데이터는 앞서 출력되었으므로 생략
                             details=f"검증 진행 중... | 프로토콜: {current_protocol}"
                         )
 
@@ -3888,7 +3888,8 @@ class MyApp(QWidget):
         self.original_score_label_width = 325
 
         self.spec_pass_label = QLabel("통과 필드 수")
-        self.spec_pass_label.setFixedSize(325, 60)
+        self.spec_pass_label.setFixedHeight(60)
+        self.spec_pass_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.spec_pass_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";
@@ -3897,7 +3898,8 @@ class MyApp(QWidget):
 
         """)
         self.spec_total_label = QLabel("전체 필드 수")
-        self.spec_total_label.setFixedSize(325, 60)
+        self.spec_total_label.setFixedHeight(60)
+        self.spec_total_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.spec_total_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";
@@ -3906,7 +3908,8 @@ class MyApp(QWidget):
             
         """)
         self.spec_score_label = QLabel("종합 평가 점수")
-        self.spec_score_label.setFixedSize(325, 60)
+        self.spec_score_label.setFixedHeight(60)
+        self.spec_score_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.spec_score_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";
@@ -4017,7 +4020,8 @@ class MyApp(QWidget):
 
         # 점수 레이블들 (500 Medium 20px #000000, 325 × 60)
         self.total_pass_label = QLabel("통과 필드 수")
-        self.total_pass_label.setFixedSize(325, 60)
+        self.total_pass_label.setFixedHeight(60)
+        self.total_pass_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.total_pass_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";
@@ -4026,7 +4030,8 @@ class MyApp(QWidget):
             
         """)
         self.total_total_label = QLabel("전체 필드 수")
-        self.total_total_label.setFixedSize(325, 60)
+        self.total_total_label.setFixedHeight(60)
+        self.total_total_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.total_total_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";
@@ -4035,7 +4040,8 @@ class MyApp(QWidget):
             
         """)
         self.total_score_label = QLabel("종합 평가 점수")
-        self.total_score_label.setFixedSize(325, 60)
+        self.total_score_label.setFixedHeight(60)
+        self.total_score_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.total_score_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";
