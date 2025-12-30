@@ -288,7 +288,7 @@ class TestFieldSection(QGroupBox):
         self.scenario_column_background.hide()
 
         # 시나리오 안내 문구
-        self.scenario_placeholder_label = QLabel("시험분야를 선택하면\n시나리오가 표시됩니다.")
+        self.scenario_placeholder_label = QLabel("시험분야를 선택하면\n시험 시나리오가 표시됩니다.")
         self.scenario_placeholder_label.setParent(self.scenario_table)
         self.scenario_placeholder_label.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
         self.scenario_placeholder_label.setStyleSheet("""
@@ -303,7 +303,7 @@ class TestFieldSection(QGroupBox):
                 border-bottom: 1px solid #CECECE;
                 border-left: none;
                 border-bottom-right-radius: 4px;
-                padding-top: 40px;
+                padding-top: 60px;
             }
         """)
         self.scenario_placeholder_label.setGeometry(0, 31, 372, 209)
