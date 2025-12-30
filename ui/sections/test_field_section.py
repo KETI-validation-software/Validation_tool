@@ -115,8 +115,10 @@ class TestFieldSection(QGroupBox):
         if self.parent_widget:
             self.parent_widget.test_field_table = self.test_field_table
             self.parent_widget.scenario_table = self.scenario_table
+            self.parent_widget.divider_line = self.divider_line
             self.parent_widget.original_test_field_table_size = (371, 240)
             self.parent_widget.original_scenario_table_size = (372, 240)
+            self.parent_widget.original_divider_line_height = 240
             self.parent_widget.original_test_field_row_height = 39
             self.parent_widget.original_scenario_row_height = 39
             self.parent_widget.selected_test_field_row = None

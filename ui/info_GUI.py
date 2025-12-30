@@ -223,6 +223,11 @@ class InfoWidget(QWidget):
                     self.test_field_table.setFixedSize(new_table_width, new_table_height)
                     self._resize_table_rows(self.test_field_table, 'original_test_field_row_height', new_table_width)
 
+                # 두 테이블 사이 세로 구분선
+                if hasattr(self, 'divider_line') and hasattr(self, 'original_divider_line_height'):
+                    new_divider_height = int(self.original_divider_line_height * height_ratio)
+                    self.divider_line.setFixedSize(1, new_divider_height)
+
                 # 시나리오 테이블
                 if hasattr(self, 'scenario_table') and hasattr(self, 'original_scenario_table_size'):
                     new_table_width = int(self.original_scenario_table_size[0] * width_ratio)
