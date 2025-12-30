@@ -6,8 +6,6 @@ import threading
 import json
 import requests
 import sys
-from core.functions import build_result_json
-
 import urllib3
 import warnings
 from datetime import datetime
@@ -16,6 +14,7 @@ import importlib
 # SSL 경고 비활성화 (자체 서명 인증서 사용 시)
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 warnings.filterwarnings('ignore')
+
 import re
 from urllib.parse import urlparse
 from PyQt5.QtWidgets import *
@@ -25,7 +24,7 @@ from PyQt5 import QtCore
 from api.webhook_api import WebhookThread
 from api.api_server import Server  # ✅ door_memory 접근을 위한 import 추가
 from core.json_checker_new import timeout_field_finder
-from core.functions import json_check_, resource_path, json_to_data
+from core.functions import json_check_, resource_path, json_to_data, build_result_json
 from core.data_mapper import ConstraintDataGenerator
 from ui.splash_screen import LoadingPopup
 from ui.detail_dialog import CombinedDetailDialog
@@ -34,18 +33,15 @@ from ui.api_selection_dialog import APISelectionDialog
 from ui.result_page import ResultPageWidget
 from requests.auth import HTTPDigestAuth
 import config.CONSTANTS as CONSTANTS
-import traceback
-import importlib
 from core.validation_registry import get_validation_rules
 from pathlib import Path
 import spec.Data_request as data_request_module
 import spec.Schema_response as schema_response_module
 import spec.Constraints_request as constraints_request_module
-import importlib
+
 importlib.reload(data_request_module)
 importlib.reload(schema_response_module)
 importlib.reload(constraints_request_module)
-import os
 
 result_dir = os.path.join(os.getcwd(), "results")
 os.makedirs(result_dir, exist_ok=True)
