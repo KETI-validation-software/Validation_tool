@@ -1214,21 +1214,33 @@ class MyApp(PlatformMainUI):
         else:
             spec_score = 0
 
-        # 필수/선택 형식으로 표시
+        # 필수 통과율 계산
+        if spec_required_total > 0:
+            spec_required_score = (spec_required_pass / spec_required_total) * 100
+        else:
+            spec_required_score = 0
+
+        # 선택 통과율 계산
+        if spec_opt_total > 0:
+            spec_opt_score = (self.total_opt_pass_cnt / spec_opt_total) * 100
+        else:
+            spec_opt_score = 0
+
+        # 필수/선택/종합 점수 표시 (% (통과/전체) 형식)
         self.spec_pass_label.setText(
-            f"통과 필드 수 (필수/선택)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            f"통과 필수 필드 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
-            f"{spec_required_pass}/{self.total_opt_pass_cnt}</span>"
+            f"{spec_required_score:.1f}% ({spec_required_pass}/{spec_required_total})</span>"
         )
         self.spec_total_label.setText(
-            f"전체 필드 수 (필수/선택)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            f"통과 선택 필드 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
-            f"{spec_required_total}/{spec_opt_total}</span>"
+            f"{spec_opt_score:.1f}% ({self.total_opt_pass_cnt}/{spec_opt_total})</span>"
         )
         self.spec_score_label.setText(
             f"종합 평가 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
-            f"{spec_score:.1f}%</span>"
+            f"{spec_score:.1f}% ({self.total_pass_cnt}/{spec_total_fields})</span>"
         )
 
         # ✅ 2️⃣ 전체 점수 (모든 spec 합산)
@@ -1247,20 +1259,33 @@ class MyApp(PlatformMainUI):
             # 전체 필수 필드 수 = 전체 필드 - 전체 선택 필드
             global_required_total = global_total_fields - global_opt_total
 
+            # 필수 통과율 계산
+            if global_required_total > 0:
+                global_required_score = (global_required_pass / global_required_total) * 100
+            else:
+                global_required_score = 0
+
+            # 선택 통과율 계산
+            if global_opt_total > 0:
+                global_opt_score = (self.global_opt_pass_cnt / global_opt_total) * 100
+            else:
+                global_opt_score = 0
+
+            # 필수/선택/종합 점수 표시 (% (통과/전체) 형식)
             self.total_pass_label.setText(
-                f"통과 필드 수 (필수/선택)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+                f"통과 필수 필드 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
                 f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
-                f"{global_required_pass}/{self.global_opt_pass_cnt}</span>"
+                f"{global_required_score:.1f}% ({global_required_pass}/{global_required_total})</span>"
             )
             self.total_total_label.setText(
-                f"전체 필드 수 (필수/선택)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+                f"통과 선택 필드 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
                 f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
-                f"{global_required_total}/{global_opt_total}</span>"
+                f"{global_opt_score:.1f}% ({self.global_opt_pass_cnt}/{global_opt_total})</span>"
             )
             self.total_score_label.setText(
                 f"종합 평가 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
                 f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
-                f"{global_score:.1f}%</span>"
+                f"{global_score:.1f}% ({self.global_pass_cnt}/{global_total_fields})</span>"
             )
 
     def icon_update_step(self, auth_, result_, text_):

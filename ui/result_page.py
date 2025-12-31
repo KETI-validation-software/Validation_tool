@@ -1381,6 +1381,18 @@ class ResultPageWidget(QWidget):
         # 필수 필드 전체 수 = 전체 필드 - 선택 필드
         required_total = total_fields - opt_total
 
+        # 필수 통과율 계산
+        if required_total > 0:
+            required_score = (required_pass / required_total) * 100
+        else:
+            required_score = 0
+
+        # 선택 통과율 계산
+        if opt_total > 0:
+            opt_score = (opt_pass / opt_total) * 100
+        else:
+            opt_score = 0
+
         self.spec_data_area = QWidget()
         self.spec_data_area.setFixedSize(1064, 76)
         self.spec_data_area.setStyleSheet("background: transparent;")
@@ -1388,13 +1400,13 @@ class ResultPageWidget(QWidget):
         data_layout.setContentsMargins(56, 8, 32, 8)
         data_layout.setSpacing(0)
 
-        # 통과 필드 수 (325 × 60) - 필수/선택 형식
+        # 통과 필수 필드 점수 (325 × 60) - % (통과/전체) 형식
         self.spec_pass_label = QLabel()
         self.spec_pass_label.setFixedSize(325, 60)
         self.spec_pass_label.setText(
-            f"통과 필드 수 (필수/선택)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            f"통과 필수 필드 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
-            f"{required_pass}/{opt_pass}</span>"
+            f"{required_score:.1f}% ({required_pass}/{required_total})</span>"
         )
         self.spec_pass_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 20px; font-weight: 500; color: #000000;")
         data_layout.addWidget(self.spec_pass_label)
@@ -1410,13 +1422,13 @@ class ResultPageWidget(QWidget):
         spacer1.setFixedSize(24, 60)
         data_layout.addWidget(spacer1)
 
-        # 전체 필드 수 (325 × 60) - 필수/선택 형식
+        # 통과 선택 필드 점수 (325 × 60) - % (통과/전체) 형식
         self.spec_total_label = QLabel()
         self.spec_total_label.setFixedSize(325, 60)
         self.spec_total_label.setText(
-            f"전체 필드 수 (필수/선택)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            f"통과 선택 필드 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
-            f"{required_total}/{opt_total}</span>"
+            f"{opt_score:.1f}% ({opt_pass}/{opt_total})</span>"
         )
         self.spec_total_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 20px; font-weight: 500; color: #000000;")
         data_layout.addWidget(self.spec_total_label)
@@ -1432,13 +1444,13 @@ class ResultPageWidget(QWidget):
         spacer2.setFixedSize(24, 60)
         data_layout.addWidget(spacer2)
 
-        # 종합 평가 점수 (325 × 60)
+        # 종합 평가 점수 (325 × 60) - % (통과/전체) 형식
         self.spec_score_label = QLabel()
         self.spec_score_label.setFixedSize(325, 60)
         self.spec_score_label.setText(
             f"종합 평가 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
-            f"{score:.1f}%</span>"
+            f"{score:.1f}% ({total_pass}/{total_fields})</span>"
         )
         self.spec_score_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 20px; font-weight: 500; color: #000000;")
         data_layout.addWidget(self.spec_score_label)
@@ -1520,6 +1532,18 @@ class ResultPageWidget(QWidget):
         required_total = total_fields - opt_total
         score = (total_pass / total_fields * 100) if total_fields > 0 else 0
 
+        # 필수 통과율 계산
+        if required_total > 0:
+            required_score = (required_pass / required_total) * 100
+        else:
+            required_score = 0
+
+        # 선택 통과율 계산
+        if opt_total > 0:
+            opt_score = (opt_pass / opt_total) * 100
+        else:
+            opt_score = 0
+
         self.total_data_area = QWidget()
         self.total_data_area.setFixedSize(1064, 76)
         self.total_data_area.setStyleSheet("background: transparent; border: none;")
@@ -1527,13 +1551,13 @@ class ResultPageWidget(QWidget):
         data_layout.setContentsMargins(56, 8, 32, 8)
         data_layout.setSpacing(0)
 
-        # 통과 필드 수 (325 × 60) - 필수/선택 형식
+        # 통과 필수 필드 점수 (325 × 60) - % (통과/전체) 형식
         self.total_pass_label = QLabel()
         self.total_pass_label.setFixedSize(325, 60)
         self.total_pass_label.setText(
-            f"통과 필드 수 (필수/선택)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            f"통과 필수 필드 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
-            f"{required_pass}/{opt_pass}</span>"
+            f"{required_score:.1f}% ({required_pass}/{required_total})</span>"
         )
         self.total_pass_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 20px; font-weight: 500; color: #000000; border: none;")
         data_layout.addWidget(self.total_pass_label)
@@ -1550,13 +1574,13 @@ class ResultPageWidget(QWidget):
         spacer1.setStyleSheet("border: none;")
         data_layout.addWidget(spacer1)
 
-        # 전체 필드 수 (325 × 60) - 필수/선택 형식
+        # 통과 선택 필드 점수 (325 × 60) - % (통과/전체) 형식
         self.total_total_label = QLabel()
         self.total_total_label.setFixedSize(325, 60)
         self.total_total_label.setText(
-            f"전체 필드 수 (필수/선택)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            f"통과 선택 필드 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
-            f"{required_total}/{opt_total}</span>"
+            f"{opt_score:.1f}% ({opt_pass}/{opt_total})</span>"
         )
         self.total_total_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 20px; font-weight: 500; color: #000000; border: none;")
         data_layout.addWidget(self.total_total_label)
@@ -1573,13 +1597,13 @@ class ResultPageWidget(QWidget):
         spacer2.setStyleSheet("border: none;")
         data_layout.addWidget(spacer2)
 
-        # 종합 평가 점수 (325 × 60)
+        # 종합 평가 점수 (325 × 60) - % (통과/전체) 형식
         self.total_score_label = QLabel()
         self.total_score_label.setFixedSize(325, 60)
         self.total_score_label.setText(
             f"종합 평가 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
-            f"{score:.1f}%</span>"
+            f"{score:.1f}% ({total_pass}/{total_fields})</span>"
         )
         self.total_score_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 20px; font-weight: 500; color: #000000; border: none;")
         data_layout.addWidget(self.total_score_label)
