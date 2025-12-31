@@ -22,9 +22,9 @@
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 97.83,
-    "totalFields": 92,
-    "passedFields": 90,
+    "score": 98.52,
+    "totalFields": 135,
+    "passedFields": 133,
     "failedFields": 2
   },
   "testResult": [
@@ -32,9 +32,9 @@
       "testGroup": "cmjcefmh8070gcfb35wjptcsl",
       "testSpecId": "cmii7wfuf006i8z1tcds6q69g",
       "testSpecName": "sensor001",
-      "score": 0,
-      "totalFields": 0,
-      "passedFields": 0,
+      "score": 100.0,
+      "totalFields": 43,
+      "passedFields": 43,
       "failedFields": 0,
       "apis": [
         {
@@ -42,72 +42,231 @@
           "name": "사용자 인증",
           "method": "POST",
           "endpoint": "/Authentication",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 5,
+          "passFields": 5,
           "failFields": 0,
-          "validations": []
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "userName": "관리자",
+                "userAff": "오산시청",
+                "accessToken": "abcde1234"
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다."
+              ]
+            }
+          ]
         },
         {
           "id": "cmiwtm84f0an2p002pthrkfbj",
           "name": "전송 지원 기능 정보 연동",
           "method": "POST",
           "endpoint": "/Capabilities",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 5,
+          "passFields": 5,
           "failFields": 0,
-          "validations": []
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "transportSupport": [
+                  {
+                    "transProtocolType": "Webhook",
+                    "transProtocolDesc": ""
+                  }
+                ]
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다."
+              ]
+            }
+          ]
         },
         {
           "id": "cmiwtnnvx0ar8p002dcz8llaf",
           "name": "보안용 센서 단말 목록 정보 연동",
           "method": "POST",
           "endpoint": "/SensorDeviceProfiles",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 11,
+          "passFields": 11,
           "failFields": 0,
-          "validations": []
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "sensorDeviceList": [
+                  {
+                    "sensorDeviceID": "iot0001",
+                    "sensorDeviceType": "온도",
+                    "sensorDeviceName": "온도 센서",
+                    "sensorDeviceLoc": {
+                      "lon": "127.127730",
+                      "lat": "38.439801",
+                      "alt": "32.131",
+                      "desc": "3층복도"
+                    }
+                  },
+                  {
+                    "sensorDeviceID": "iot0002",
+                    "sensorDeviceType": "온도",
+                    "sensorDeviceName": "온도 센서",
+                    "sensorDeviceLoc": {
+                      "lon": "127.127730",
+                      "lat": "38.439801",
+                      "alt": "",
+                      "desc": ""
+                    }
+                  }
+                ]
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다."
+              ]
+            }
+          ]
         },
         {
-          "id": "cmiwtr5xt0boqp002melvctad",
+          "id": "cmiwtr5xt0boqp002melvctad-registration",
           "name": "실시간 보안용 센서 데이터 정보 연동",
           "method": "POST",
           "endpoint": "/RealtimeSensorData",
-          "score": 0.0,
-          "validationCnt": 0,
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 8,
+          "passFields": 8,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "200",
+                "message": "성공"
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다.",
+                "--- Webhook 검증 ---",
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmiwtr5xt0boqp002melvctad-webhook",
+          "name": "실시간 보안용 센서 데이터 정보 연동 (Webhook)",
+          "method": "POST",
+          "endpoint": "/RealtimeSensorData/webhook",
+          "score": 0,
+          "validationCnt": 1,
           "totalFields": 0,
           "passFields": 0,
           "failFields": 0,
-          "validations": []
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": []
+            }
+          ]
         },
         {
-          "id": "cmiwv1ifx0ddmp0023tuwdhoi",
+          "id": "cmiwv1ifx0ddmp0023tuwdhoi-registration",
           "name": "실시간 보안용 센서 이벤트 분석 정보 연동",
           "method": "POST",
           "endpoint": "/RealtimeSensorEventInfos",
-          "score": 0.0,
-          "validationCnt": 0,
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 7,
+          "passFields": 7,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "200",
+                "message": "성공"
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다.",
+                "--- Webhook 검증 ---",
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmiwv1ifx0ddmp0023tuwdhoi-webhook",
+          "name": "실시간 보안용 센서 이벤트 분석 정보 연동 (Webhook)",
+          "method": "POST",
+          "endpoint": "/RealtimeSensorEventInfos/webhook",
+          "score": 0,
+          "validationCnt": 1,
           "totalFields": 0,
           "passFields": 0,
           "failFields": 0,
-          "validations": []
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": []
+            }
+          ]
         },
         {
           "id": "cmixtu5uk0dg5p002kq3htt9b",
           "name": "저장된 보안용 센서 이벤트 분석 정보 연동",
           "method": "POST",
           "endpoint": "/StoredSensorEventInfos",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 7,
+          "passFields": 7,
           "failFields": 0,
-          "validations": []
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "sensorDeviceList": [
+                  {
+                    "sensorDeviceID": "iot0001",
+                    "eventName": "Leak",
+                    "eventTime": 20251114743476055,
+                    "eventDesc": "100도"
+                  },
+                  {
+                    "sensorDeviceID": "iot0002",
+                    "eventName": "Leak",
+                    "eventTime": 20251105794166767,
+                    "eventDesc": "100도"
+                  }
+                ]
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다."
+              ]
+            }
+          ]
         }
       ]
     },
@@ -399,20 +558,20 @@
                     "camID": "cam0001",
                     "timeList": [
                       {
-                        "startTime": 20251111715680606,
-                        "endTime": 20251114477057339
+                        "startTime": 20251113545197820,
+                        "endTime": 20251114272807655
                       },
                       {
-                        "startTime": 20251111950956291,
-                        "endTime": 20251114916449928
+                        "startTime": 20251106642139225,
+                        "endTime": 20251110346998588
                       },
                       {
-                        "startTime": 20251111918645154,
-                        "endTime": 20251115000405441
+                        "startTime": 20251109656961558,
+                        "endTime": 20251113000191858
                       },
                       {
-                        "startTime": 20251109810733837,
-                        "endTime": 20251111669049529
+                        "startTime": 20251114900861963,
+                        "endTime": 20251115011674132
                       }
                     ]
                   },
@@ -420,20 +579,20 @@
                     "camID": "cam0002",
                     "timeList": [
                       {
-                        "startTime": 20251108514872828,
-                        "endTime": 20251109532027212
+                        "startTime": 20251111954282573,
+                        "endTime": 20251114897602703
                       },
                       {
-                        "startTime": 20251109354078718,
-                        "endTime": 20251111383887567
+                        "startTime": 20251106980439183,
+                        "endTime": 20251112000713617
                       },
                       {
-                        "startTime": 20251107927788710,
-                        "endTime": 20251110167466153
+                        "startTime": 20251112962157129,
+                        "endTime": 20251113070837519
                       },
                       {
-                        "startTime": 20251113766205522,
-                        "endTime": 20251114287044088
+                        "startTime": 20251114029726025,
+                        "endTime": 20251114499841729
                       }
                     ]
                   },
@@ -441,20 +600,20 @@
                     "camID": "cam003",
                     "timeList": [
                       {
-                        "startTime": 20251108974981027,
-                        "endTime": 20251110489106064
+                        "startTime": 20251107439420522,
+                        "endTime": 20251109425425781
                       },
                       {
-                        "startTime": 20251111273645952,
-                        "endTime": 20251111800437898
+                        "startTime": 20251112252889679,
+                        "endTime": 20251113496463741
                       },
                       {
-                        "startTime": 20251111737730951,
-                        "endTime": 20251114876756503
+                        "startTime": 20251110471809784,
+                        "endTime": 20251114463403289
                       },
                       {
-                        "startTime": 20251114464267260,
-                        "endTime": 20251115139491758
+                        "startTime": 20251105507955790,
+                        "endTime": 20251109994237078
                       }
                     ]
                   },
@@ -462,20 +621,20 @@
                     "camID": "cam004",
                     "timeList": [
                       {
-                        "startTime": 20251107866326867,
-                        "endTime": 20251111318080508
+                        "startTime": 20251106890541870,
+                        "endTime": 20251113214986721
                       },
                       {
-                        "startTime": 20251111796888193,
-                        "endTime": 20251112658158267
+                        "startTime": 20251112800181128,
+                        "endTime": 20251113060708050
                       },
                       {
-                        "startTime": 20251112083144905,
-                        "endTime": 20251114687852604
+                        "startTime": 20251107881650647,
+                        "endTime": 20251112835456082
                       },
                       {
-                        "startTime": 20251112168970180,
-                        "endTime": 20251113610636564
+                        "startTime": 20251107716373680,
+                        "endTime": 20251108074956538
                       }
                     ]
                   }
@@ -585,32 +744,32 @@
                     "camID": "cam0001",
                     "eventUUID": "event01",
                     "eventName": "Intrusion",
-                    "startTime": 20251111960445263,
-                    "endTime": 20251114139975211,
+                    "startTime": 20251110142544451,
+                    "endTime": 20251110381909088,
                     "eventDesc": "AAABVVVVCCCDDssvfdd"
                   },
                   {
                     "camID": "cam0002",
                     "eventUUID": "event01",
                     "eventName": "Intrusion",
-                    "startTime": 20251105636063674,
-                    "endTime": 20251112086989666,
+                    "startTime": 20251112204514821,
+                    "endTime": 20251112760440956,
                     "eventDesc": "AAABVVVVCCCDDssvfdd"
                   },
                   {
                     "camID": "cam003",
                     "eventUUID": "event01",
                     "eventName": "Intrusion",
-                    "startTime": 20251113001250471,
-                    "endTime": 20251114878605341,
+                    "startTime": 20251108338683269,
+                    "endTime": 20251112048031362,
                     "eventDesc": "AAABVVVVCCCDDssvfdd"
                   },
                   {
                     "camID": "cam004",
                     "eventUUID": "event01",
                     "eventName": "Intrusion",
-                    "startTime": 20251110099510822,
-                    "endTime": 20251113054540677,
+                    "startTime": 20251108724023794,
+                    "endTime": 20251109558634563,
                     "eventDesc": "AAABVVVVCCCDDssvfdd"
                   }
                 ]
@@ -641,7 +800,7 @@
                 "camList": [
                   {
                     "camID": "cam0001",
-                    "analyticsTime": 20251107547741259,
+                    "analyticsTime": 20251113780826206,
                     "anlayticsResultList": [
                       {
                         "anayticsID": "object001",
@@ -707,7 +866,7 @@
                   },
                   {
                     "camID": "cam0002",
-                    "analyticsTime": 20251113096225397,
+                    "analyticsTime": 20251106658662752,
                     "anlayticsResultList": [
                       {
                         "anayticsID": "object001",
@@ -773,7 +932,7 @@
                   },
                   {
                     "camID": "cam003",
-                    "analyticsTime": 20251109099114011,
+                    "analyticsTime": 20251113576149949,
                     "anlayticsResultList": [
                       {
                         "anayticsID": "object001",
@@ -839,7 +998,7 @@
                   },
                   {
                     "camID": "cam004",
-                    "analyticsTime": 20251112253756838,
+                    "analyticsTime": 20251111640701129,
                     "anlayticsResultList": [
                       {
                         "anayticsID": "object001",
@@ -915,5 +1074,5 @@
       ]
     }
   ],
-  "completedDate": "2025-12-31T03:53:11Z"
+  "completedDate": "2025-12-31T04:43:30Z"
 }

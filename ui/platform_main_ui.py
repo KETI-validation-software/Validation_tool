@@ -6,8 +6,9 @@ from core.functions import resource_path
 from ui.ui_components import TestSelectionPanel
 from ui.detail_dialog import CombinedDetailDialog
 from ui.gui_utils import CustomDialog
+from ui.common_main_ui import CommonMainUI
 
-class PlatformMainUI(QWidget):
+class PlatformMainUI(CommonMainUI):
     """
     메인 화면의 UI 구성 및 반응형 처리를 담당하는 클래스
     """
