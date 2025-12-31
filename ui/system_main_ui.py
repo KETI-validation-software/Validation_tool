@@ -33,7 +33,7 @@ class SystemMainUI(QWidget):
         header_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         # 배경 이미지 설정 (늘어남 - border-image 사용)
-        header_bg_path = resource_path("assets/image/common/header.png").replace("\\", "/")
+        header_bg_path = resource_path("assets/image/common/header.png").replace(chr(92), "/")
         header_widget.setStyleSheet(
             f"""
             QWidget {{
@@ -80,7 +80,7 @@ class SystemMainUI(QWidget):
         self.content_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         # 배경 이미지를 QLabel로 설정 (절대 위치)
-        main_bg_path = resource_path("assets/image/common/main.png").replace("\\", "/")
+        main_bg_path = resource_path("assets/image/common/main.png").replace(chr(92), "/")
         self.content_bg_label = QLabel(self.content_widget)
         self.content_bg_label.setPixmap(QPixmap(main_bg_path))
         self.content_bg_label.setScaledContents(True)
@@ -421,13 +421,13 @@ class SystemMainUI(QWidget):
         bg_root_layout.addLayout(columns_layout)
         self.bg_root.setLayout(bg_root_layout)
 
-        # ✅ content_widget 레이아웃 설정 (좌우 48px, 하단 44px padding, 가운데 정렬) - 누락된 부분 추가
+        # content_widget 레이아웃 설정 (좌우 48px, 하단 44px padding, 가운데 정렬)
         content_layout = QVBoxLayout(self.content_widget)
         content_layout.setContentsMargins(48, 0, 48, 44)
         content_layout.setSpacing(0)
         content_layout.addWidget(self.bg_root, 0, Qt.AlignHCenter | Qt.AlignVCenter)
 
-        mainLayout.addWidget(self.content_widget)
+        mainLayout.addWidget(self.content_widget, 1)
         self.setLayout(mainLayout)
 
         if not getattr(self, "embedded", False):
@@ -438,9 +438,8 @@ class SystemMainUI(QWidget):
         btn = QPushButton()
         btn.setFixedSize(width, height)
 
-        # ✅ 문법 오류 방지: 경로를 미리 만들어서 f-string에 넣기
-        normal_path = resource_path(normal_img).replace("\\", "/")
-        hover_path = resource_path(hover_img).replace("\\", "/")
+        normal_path = resource_path(normal_img).replace(chr(92), "/")
+        hover_path = resource_path(hover_img).replace(chr(92), "/")
 
         btn.setStyleSheet(
             f"""
@@ -490,9 +489,9 @@ class SystemMainUI(QWidget):
         layout.addWidget(self.spec_panel_title)
         layout.addSpacing(8)
 
-        self.test_selection_panel = TestSelectionPanel(self)
-        self.test_selection_panel.group_selected.connect(self.on_group_selected)
-        self.test_selection_panel.test_field_selected.connect(self.on_test_field_selected)
+        self.test_selection_panel = TestSelectionPanel(self.CONSTANTS)
+        self.test_selection_panel.groupSelected.connect(self.on_group_selected)
+        self.test_selection_panel.scenarioSelected.connect(self.on_test_field_selected)
         layout.addWidget(self.test_selection_panel)
 
     def create_spec_score_display_widget(self):
@@ -782,7 +781,7 @@ class SystemMainUI(QWidget):
 
     def init_centerLayout(self):
         # 표 형태로 변경 - 동적 API 개수
-        api_count = len(self.videoMessages)
+        api_count = len(getattr(self, "videoMessages", []))
 
         self.api_header_widget = QWidget()
         self.api_header_widget.setFixedSize(1064, 30)
@@ -841,7 +840,7 @@ class SystemMainUI(QWidget):
         self.tableWidget.verticalHeader().setVisible(False)
         self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tableWidget.setSelectionMode(QAbstractItemView.NoSelection)
-        self.tableWidget.setIconSize(QtCore.QSize(16, 16))
+        self.tableWidget.setIconSize(QSize(16, 16))
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Fixed)
 
         self.tableWidget.setStyleSheet(
@@ -875,8 +874,8 @@ class SystemMainUI(QWidget):
         for i in range(api_count):
             self.tableWidget.setRowHeight(i, 40)
 
-        self.step_names = self.videoMessages
-        for i, name in enumerate(self.step_names):
+        step_names = getattr(self, "videoMessages", [])
+        for i, name in enumerate(step_names):
             no_item = QTableWidgetItem(f"{i + 1}")
             no_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self.tableWidget.setItem(i, 0, no_item)
@@ -890,7 +889,8 @@ class SystemMainUI(QWidget):
             icon_layout.setContentsMargins(0, 0, 0, 0)
 
             icon_label = QLabel()
-            icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
+            if hasattr(self, "img_none"):
+                icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
             icon_label.setAlignment(Qt.AlignCenter)
 
             icon_layout.addWidget(icon_label)
@@ -911,7 +911,7 @@ class SystemMainUI(QWidget):
             self.tableWidget.item(i, 7).setTextAlignment(Qt.AlignCenter)
 
             detail_label = QLabel()
-            img_path = resource_path("assets/image/test_runner/btn_상세내용확인.png").replace("\\", "/")
+            img_path = resource_path("assets/image/test_runner/btn_상세내용확인.png").replace(chr(92), "/")
             pixmap = QPixmap(img_path)
             detail_label.setPixmap(pixmap)
             detail_label.setScaledContents(False)
@@ -981,7 +981,6 @@ class SystemMainUI(QWidget):
     def resizeEvent(self, event):
         """창 크기 변경 시 배경 이미지 및 왼쪽 패널 크기 재조정"""
         super().resizeEvent(event)
-        # (원본 로직 그대로 - 문법 오류 없음)
 
         if hasattr(self, "content_widget") and self.content_widget:
             if hasattr(self, "content_bg_label"):
@@ -1138,28 +1137,9 @@ class SystemMainUI(QWidget):
                     label.setFixedSize(new_label_width, 30)
 
     def _update_button_positions(self, group_width=None, group_height=None):
-        """버튼 위치 직접 설정 (간격 16px 고정) - 레이아웃 사용 시 필요 없을 수도 있으나 반응형을 위해 유지"""
         pass
 
     # placeholder methods
-    def on_click_run(self): 
-        pass
-
-    def on_click_pause(self): 
-        pass
-
-    def on_click_resume(self): 
-        pass
-
-    def show_detail_dialog(self): 
-        pass
-
-    def show_result_page(self): 
-        pass
-
-    def close_application(self): 
-        pass
-
     def start_btn_clicked(self): 
         pass
 
@@ -1167,6 +1147,9 @@ class SystemMainUI(QWidget):
         pass
 
     def exit_btn_clicked(self): 
+        pass
+
+    def show_result_page(self): 
         pass
 
     def show_combined_result(self, row): 
