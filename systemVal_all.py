@@ -280,6 +280,9 @@ class MyApp(SystemMainUI):
                 # print(f"[DEBUG] [handle_authentication_response] Token updated: {self.token}")
 
     def __init__(self, embedded=False, spec_id=None):
+        super().__init__()
+        # ✅ 상태 관리자 초기화
+        self.state_manager = SystemStateManager(self)
         # ===== 수정: instantiation time에 CONSTANTS를 fresh import =====
         # PyInstaller 환경에서는 절대 경로로 직접 로드
         import sys
@@ -304,15 +307,18 @@ class MyApp(SystemMainUI):
 
         # CONSTANTS 사용
         self.CONSTANTS = CONSTANTS
-        self.current_spec_id = spec_id
+        
+        # ✅ spec_id 초기화 (info_GUI에서 전달받거나 기본값 사용)
+        if spec_id:
+            self.current_spec_id = spec_id
+            print(f"[SYSTEM] 📌 전달받은 spec_id 사용: {spec_id}")
+        else:
+            self.current_spec_id = "cmgatbdp000bqihlexmywusvq"  # 기본값: 보안용센서 시스템 (7개 API) -> 지금은 잠깐 없어짐
+            print(f"[SYSTEM] 📌 기본 spec_id 사용: {self.current_spec_id}")
+
         self.current_group_id = None  # ✅ 그룹 ID 저장용
         
-        # ✅ 상태 관리자 초기화
-        self.state_manager = SystemStateManager(self)
-
         self.load_specs_from_constants()
-        self.CONSTANTS = CONSTANTS
-        super().__init__()
         self.embedded = embedded
 
         # 전체화면 관련 변수 초기화
@@ -327,14 +333,6 @@ class MyApp(SystemMainUI):
         # 로딩 팝업 인스턴스 변수
         self.loading_popup = None
 
-        # ✅ spec_id 초기화 (info_GUI에서 전달받거나 기본값 사용)
-        if spec_id:
-            self.current_spec_id = spec_id
-            print(f"[SYSTEM] 📌 전달받은 spec_id 사용: {spec_id}")
-        else:
-            self.current_spec_id = "cmgatbdp000bqihlexmywusvq"  # 기본값: 보안용센서 시스템 (7개 API) -> 지금은 잠깐 없어짐
-            print(f"[SYSTEM] 📌 기본 spec_id 사용: {self.current_spec_id}")
-        
         # 아이콘 경로 (메인 페이지용)
         self.img_pass = resource_path("assets/image/icon/icn_success.png")
         self.img_fail = resource_path("assets/image/icon/icn_fail.png")
