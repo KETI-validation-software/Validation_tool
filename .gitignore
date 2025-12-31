@@ -14,3 +14,4 @@ summary/
 doc/
 dist/
 *.zip
+.claude/
