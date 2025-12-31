@@ -31,6 +31,7 @@ from ui.detail_dialog import CombinedDetailDialog
 from ui.gui_utils import CustomDialog
 from ui.api_selection_dialog import APISelectionDialog
 from ui.result_page import ResultPageWidget
+from ui.system_main_ui import SystemMainUI
 from core.system_state_manager import SystemStateManager
 from requests.auth import HTTPDigestAuth
 import config.CONSTANTS as CONSTANTS
@@ -46,7 +47,7 @@ importlib.reload(constraints_request_module)
 
 result_dir = os.path.join(os.getcwd(), "results")
 os.makedirs(result_dir, exist_ok=True)
-class MyApp(QWidget):
+class MyApp(SystemMainUI):
     # 시험 결과 표시 요청 시그널 (main.py와 연동)
     showResultRequested = pyqtSignal(object)  # parent widget을 인자로 전달
 
