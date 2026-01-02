@@ -487,6 +487,9 @@ class PlatformMainUI(CommonMainUI):
         if not self.embedded:
             self.setWindowTitle('물리보안 통합플랫폼 연동 검증 소프트웨어')
 
+        # 초기 점수 표시 업데이트
+        self.update_score_display()
+
         QTimer.singleShot(100, self.select_first_scenario)
 
         if not self.embedded:
@@ -1066,20 +1069,20 @@ class PlatformMainUI(CommonMainUI):
         self.original_opt_label_width = 340     # 통과 선택 필드 점수
         self.original_score_label_width = 315   # 종합 평가 점수
 
-        self.spec_pass_label = QLabel("통과 필드 수")
+        self.spec_pass_label = QLabel("통과 필수 필드 점수")
         self.spec_pass_label.setFixedSize(340, 60)
         self.spec_pass_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";
-            font-size: 20px;
+            font-size: 19px;
             font-weight: 500;
         """)
-        self.spec_total_label = QLabel("전체 필드 수")
+        self.spec_total_label = QLabel("통과 선택 필드 점수")
         self.spec_total_label.setFixedSize(340, 60)
         self.spec_total_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";
-            font-size: 20px;
+            font-size: 19px;
             font-weight: 500;
         """)
         self.spec_score_label = QLabel("종합 평가 점수")
@@ -1087,7 +1090,7 @@ class PlatformMainUI(CommonMainUI):
         self.spec_score_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";
-            font-size: 20px;
+            font-size: 19px;
             font-weight: 500;
         """)
 
@@ -1192,20 +1195,20 @@ class PlatformMainUI(CommonMainUI):
         separator.setFixedHeight(1)
 
         # 점수 레이블들 - 각 라벨별 다른 너비 (통과 필수/선택은 넓게, 종합 평가는 좁게)
-        self.total_pass_label = QLabel("통과 필드 수")
+        self.total_pass_label = QLabel("통과 필수 필드 점수")
         self.total_pass_label.setFixedSize(340, 60)
         self.total_pass_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";
-            font-size: 20px;
+            font-size: 19px;
             font-weight: 500;
         """)
-        self.total_total_label = QLabel("전체 필드 수")
+        self.total_total_label = QLabel("통과 선택 필드 점수")
         self.total_total_label.setFixedSize(340, 60)
         self.total_total_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";
-            font-size: 20px;
+            font-size: 19px;
             font-weight: 500;
         """)
         self.total_score_label = QLabel("종합 평가 점수")
@@ -1213,7 +1216,7 @@ class PlatformMainUI(CommonMainUI):
         self.total_score_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";
-            font-size: 20px;
+            font-size: 19px;
             font-weight: 500;
         """)
 
@@ -1269,3 +1272,300 @@ class PlatformMainUI(CommonMainUI):
         total_group.setLayout(total_layout)
 
         return total_group
+
+
+    def update_score_display(self):
+        """평가 점수 디스플레이를 업데이트"""
+        if not (hasattr(self, "spec_pass_label") and hasattr(self, "spec_total_label") and hasattr(self, "spec_score_label")):
+            return
+
+        # ✅ 분야별 점수 제목 업데이트 (시나리오 명 변경 반영)
+        if hasattr(self, "spec_name_label"):
+            self.spec_name_label.setText(f"{self.spec_description} ({len(self.videoMessages)}개 API)")
+
+        # ✅ 1️⃣ 분야별 점수 (현재 spec만) - step_pass_counts 배열의 합으로 계산
+        if hasattr(self, 'step_pass_counts') and hasattr(self, 'step_error_counts'):
+            self.total_pass_cnt = sum(self.step_pass_counts)
+            self.total_error_cnt = sum(self.step_error_counts)
+        
+        # ✅ 선택 필드 통과 수 계산
+        if hasattr(self, 'step_opt_pass_counts'):
+            self.total_opt_pass_cnt = sum(self.step_opt_pass_counts)
+        else:
+            self.total_opt_pass_cnt = 0
+
+        # ✅ 선택 필드 에러 수 계산
+        if hasattr(self, 'step_opt_error_counts'):
+            self.total_opt_error_cnt = sum(self.step_opt_error_counts)
+        else:
+            self.total_opt_error_cnt = 0
+
+        # 필수 필드 통과 수 = 전체 통과 - 선택 통과
+        spec_required_pass = self.total_pass_cnt - self.total_opt_pass_cnt
+
+        spec_total_fields = self.total_pass_cnt + self.total_error_cnt
+        # 선택 필드 전체 수 = 선택 통과 + 선택 에러
+        spec_opt_total = self.total_opt_pass_cnt + self.total_opt_error_cnt
+        # 필수 필드 전체 수 = 전체 필드 - 전체 선택 필드
+        spec_required_total = spec_total_fields - spec_opt_total
+
+        if spec_total_fields > 0:
+            spec_score = (self.total_pass_cnt / spec_total_fields) * 100
+        else:
+            spec_score = 0
+
+        # 필수 통과율 계산
+        if spec_required_total > 0:
+            spec_required_score = (spec_required_pass / spec_required_total) * 100
+        else:
+            spec_required_score = 0
+
+        # 선택 통과율 계산
+        if spec_opt_total > 0:
+            spec_opt_score = (self.total_opt_pass_cnt / spec_opt_total) * 100
+        else:
+            spec_opt_score = 0
+
+        # 필수/선택/종합 점수 표시 (% (통과/전체) 형식)
+        self.spec_pass_label.setText(
+            f"통과 필수 필드 점수&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
+            f"{spec_required_score:.1f}% ({spec_required_pass}/{spec_required_total})</span>"
+        )
+        self.spec_total_label.setText(
+            f"통과 선택 필드 점수&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
+            f"{spec_opt_score:.1f}% ({self.total_opt_pass_cnt}/{spec_opt_total})</span>"
+        )
+        self.spec_score_label.setText(
+            f"종합 평가 점수&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
+            f"{spec_score:.1f}% ({self.total_pass_cnt}/{spec_total_fields})</span>"
+        )
+
+        # ✅ 2️⃣ 전체 점수 (모든 spec 합산)
+        if True:
+            global_total_fields = self.global_pass_cnt + self.global_error_cnt
+            if global_total_fields > 0:
+                global_score = (self.global_pass_cnt / global_total_fields) * 100
+            else:
+                global_score = 0
+
+            # 전체 필수 필드 통과 수 = 전체 통과 - 전체 선택 통과
+            global_required_pass = self.global_pass_cnt - self.global_opt_pass_cnt
+            # 전체 선택 필드 수 = 전체 선택 통과 + 전체 선택 에러
+            global_opt_total = self.global_opt_pass_cnt + self.global_opt_error_cnt
+            # 전체 필수 필드 수 = 전체 필드 - 전체 선택 필드
+            global_required_total = global_total_fields - global_opt_total
+
+            # 필수 통과율 계산
+            if global_required_total > 0:
+                global_required_score = (global_required_pass / global_required_total) * 100
+            else:
+                global_required_score = 0
+
+            # 선택 통과율 계산
+            if global_opt_total > 0:
+                global_opt_score = (self.global_opt_pass_cnt / global_opt_total) * 100
+            else:
+                global_opt_score = 0
+
+            # 필수/선택/종합 점수 표시 (% (통과/전체) 형식)
+            self.total_pass_label.setText(
+                f"통과 필수 필드 점수&nbsp;"
+                f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
+                f"{global_required_score:.1f}% ({global_required_pass}/{global_required_total})</span>"
+            )
+            self.total_total_label.setText(
+                f"통과 선택 필드 점수&nbsp;"
+                f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
+                f"{global_opt_score:.1f}% ({self.global_opt_pass_cnt}/{global_opt_total})</span>"
+            )
+            self.total_score_label.setText(
+                f"종합 평가 점수&nbsp;"
+                f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
+                f"{global_score:.1f}% ({self.global_pass_cnt}/{global_total_fields})</span>"
+            )
+
+    def table_cell_clicked(self, row, col):
+        """테이블 셀 클릭"""
+        if col == 2:  # 아이콘 컬럼
+            msg = getattr(self, f"step{row + 1}_msg", "")
+            if msg:
+                CustomDialog(msg, self.tableWidget.item(row, 1).text())  # API 명은 컬럼 1
+
+    def update_table_row_with_retries(self, row, result, pass_count, error_count, data, error_text, retries):
+        if row >= self.tableWidget.rowCount():
+            return
+
+        # 아이콘 업데이트 - 컬럼 2
+        msg, img = self.icon_update_step(data, result, error_text)
+
+        icon_widget = QWidget()
+        icon_layout = QHBoxLayout()
+        icon_layout.setContentsMargins(0, 0, 0, 0)
+
+        icon_label = QLabel()
+        icon_label.setPixmap(QIcon(img).pixmap(84, 20))
+        icon_label.setToolTip(msg)
+        icon_label.setAlignment(Qt.AlignCenter)
+
+        icon_layout.addWidget(icon_label)
+        icon_layout.setAlignment(Qt.AlignCenter)
+        icon_widget.setLayout(icon_layout)
+
+        self.tableWidget.setCellWidget(row, 2, icon_widget)
+
+        # 실제 검증 횟수 업데이트 - 컬럼 3
+        self.tableWidget.setItem(row, 3, QTableWidgetItem(str(retries)))
+        self.tableWidget.item(row, 3).setTextAlignment(Qt.AlignCenter)
+
+        # 통과 필드 수 업데이트 - 컬럼 4
+        self.tableWidget.setItem(row, 4, QTableWidgetItem(str(pass_count)))
+        self.tableWidget.item(row, 4).setTextAlignment(Qt.AlignCenter)
+
+        # 전체 필드 수 업데이트 - 컬럼 5
+        total_fields = pass_count + error_count
+        self.tableWidget.setItem(row, 5, QTableWidgetItem(str(total_fields)))
+        self.tableWidget.item(row, 5).setTextAlignment(Qt.AlignCenter)
+
+        # 실패 필드 수 업데이트 - 컬럼 6
+        self.tableWidget.setItem(row, 6, QTableWidgetItem(str(error_count)))
+        self.tableWidget.item(row, 6).setTextAlignment(Qt.AlignCenter)
+
+        # 평가 점수 업데이트 - 컬럼 7
+        if total_fields > 0:
+            score = (pass_count / total_fields) * 100
+            self.tableWidget.setItem(row, 7, QTableWidgetItem(f"{score:.1f}%"))
+        else:
+            self.tableWidget.setItem(row, 7, QTableWidgetItem("0%"))
+        self.tableWidget.item(row, 7).setTextAlignment(Qt.AlignCenter)
+
+        # 메시지 저장
+        setattr(self, f"step{row + 1}_msg", msg)
+
+    def icon_update_step(self, auth_, result_, text_):
+        if result_ == "PASS":
+            msg = auth_ + "\n\n" + "Result: PASS" + "\n" + text_ + "\n" 
+            img = self.img_pass
+        elif result_ == "진행중":
+            msg = auth_ + "\n\n" + "Status: " + text_ + "\n" 
+            img = self.img_none
+        else:
+            msg = auth_ + "\n\n" + "Result: FAIL" + "\nResult details:\n" + text_ + "\n" 
+            img = self.img_fail
+        return msg, img
+
+    def icon_update(self, tmp_res_auth, val_result, val_text):
+        msg, img = self.icon_update_step(tmp_res_auth, val_result, val_text)
+
+        if self.cnt < self.tableWidget.rowCount():
+            # 아이콘 위젯 생성
+            icon_widget = QWidget()
+            icon_layout = QHBoxLayout()
+            icon_layout.setContentsMargins(0, 0, 0, 0)
+
+            icon_label = QLabel()
+            icon_label.setPixmap(QIcon(img).pixmap(84, 20))
+            icon_label.setAlignment(Qt.AlignCenter)
+
+            icon_layout.addWidget(icon_label)
+            icon_layout.setAlignment(Qt.AlignCenter)
+            icon_widget.setLayout(icon_layout)
+
+            self.tableWidget.setCellWidget(self.cnt, 1, icon_widget)
+            setattr(self, f"step{self.cnt + 1}_msg", msg)
+
+    def append_monitor_log(self, step_name, request_json="", result_status="진행중", score=None, details=""):
+        """
+        Qt 호환성이 보장된 HTML 테이블 구조 로그 출력 함수
+        """
+        from datetime import datetime
+        import html
+
+        # 타임스탬프
+        timestamp = datetime.now().strftime("%H:%M:%S")
+
+        # 점수에 따른 색상 결정
+        if score is not None:
+            if score >= 100:
+                node_color = "#10b981"  # 녹색
+                text_color = "#10b981"  # 녹색 텍스트
+            else:
+                node_color = "#ef4444"  # 빨강
+                text_color = "#ef4444"  # 빨강 텍스트
+        else:
+            node_color = "#6b7280"  # 회색
+            text_color = "#333"  # 기본 검정
+
+        # 1. 헤더 (Step 이름 + 시간) - Table로 블록 분리
+        html_content = f"""
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 15px;">
+            <tr>
+                <td valign="middle">
+                    <span style="font-size: 20px; font-weight: bold; color: {text_color}; font-family: 'Noto Sans KR';">{step_name}</span>
+                    <span style="font-size: 16px; color: #9ca3af; font-family: 'Consolas', monospace; margin-left: 8px;">{timestamp}</span>
+                </td>
+            </tr>
+        </table>
+        """
+
+        # 2. 내용 영역
+        html_content += f"""
+        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+                <td>
+        """
+
+        # 2-1. 상세 내용 (Details)
+        if details:
+            html_content += f"""
+                <div style="margin-bottom: 8px; font-size: 18px; color: #6b7280; font-family: 'Noto Sans KR';">
+                    {details}
+                </div>
+            """
+
+        # 2-2. JSON 데이터 (회색 박스)
+        if request_json and request_json.strip():
+            escaped_json = html.escape(request_json)
+            is_json_structure = request_json.strip().startswith('{') or request_json.strip().startswith('[')
+
+            if is_json_structure:
+                html_content += f"""
+                <div style="margin-top: 5px; margin-bottom: 10px;">
+                    <div style="font-size: 15px; color: #9ca3af; font-weight: bold; margin-bottom: 4px;">📦 데이터</div>
+                    <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 10px;">
+                        <pre style="margin: 0; font-family: 'Consolas', monospace; font-size: 18px; color: #1f2937;">{escaped_json}</pre>
+                    </div>
+                </div>
+                """
+            else:
+                # JSON이 아닌 일반 텍스트일 경우
+                html_content += f"""
+                <div style="margin-top: 5px; margin-bottom: 10px;">
+                    <pre style="font-size: 18px; color: #6b7280; font-family: 'Consolas', monospace;">{escaped_json}</pre>
+                </div>
+                """
+
+        # 2-3. 점수 (Score)
+        if score is not None:
+            html_content += f"""
+                <div style="margin-top: 5px; font-size: 18px; color: #6b7280; font-weight: bold; font-family: 'Consolas', monospace;">
+                    점수: {score:.1f}%
+                </div>
+            """
+
+        # Table 닫기
+        html_content += """
+                </td>
+            </tr>
+        </table>
+        <div style="margin-bottom: 10px;"></div>
+        """
+
+        self.valResult.append(html_content)
+
+        # 자동 스크롤
+        self.valResult.verticalScrollBar().setValue(
+            self.valResult.verticalScrollBar().maximum()
+        )
