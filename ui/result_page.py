@@ -220,7 +220,6 @@ class ResultPageWidget(QWidget):
             font-family: "Noto Sans KR";
             font-weight: 500;
             color: #000000;
-            letter-spacing: -0.3px;
         """)
         right_layout.addWidget(self.score_title)
         right_layout.addSpacing(6)
