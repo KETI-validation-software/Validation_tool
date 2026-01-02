@@ -519,6 +519,9 @@ class CommonMainUI(QWidget):
         if not self.embedded:
             self.show()
 
+    def create_spec_selection_panel(self, left_layout):
+        raise NotImplementedError("Subclass must implement create_spec_selection_panel")
+
 
 
     def _update_button_positions(self, group_width=None, group_height=None):
@@ -615,6 +618,10 @@ class CommonMainUI(QWidget):
             if hasattr(self, 'spec_panel_title') and hasattr(self, 'original_spec_panel_title_size'):
                 new_title_width = int(self.original_spec_panel_title_size[0] * width_ratio)
                 self.spec_panel_title.setFixedSize(new_title_width, self.original_spec_panel_title_size[1])
+
+                # TestSelectionPanel 자체 너비도 업데이트 (PlatformMainUI용)
+                if hasattr(self, 'test_selection_panel'):
+                     self.test_selection_panel.setFixedWidth(new_title_width)
 
             # 그룹 테이블 위젯 크기 조정 (extra_column_height 비례 분배)
             if hasattr(self, 'group_table_widget') and hasattr(self, 'original_group_table_widget_size'):
