@@ -117,7 +117,10 @@ class ResultPageWidget(QWidget):
         # ✅ 점수 테이블 내부 위젯 원본 크기
         self.original_score_header_size = (1064, 52)
         self.original_score_data_area_size = (1064, 76)
-        self.original_score_label_size = (325, 60)
+        # 각 라벨별 너비 설정 (통과 필수/선택은 넓게, 종합 평가는 좁게)
+        self.original_pass_label_size = (340, 60)    # 통과 필수 필드 점수
+        self.original_opt_label_size = (340, 60)     # 통과 선택 필드 점수
+        self.original_score_label_size = (315, 60)   # 종합 평가 점수
         self.original_column_widths = [40, 261, 100, 94, 116, 116, 94, 94, 133]
 
         # ✅ 2컬럼 레이아웃
@@ -494,7 +497,10 @@ class ResultPageWidget(QWidget):
             if hasattr(self, 'original_score_header_size'):
                 new_header_width = int(self.original_score_header_size[0] * width_ratio)
                 new_data_width = int(self.original_score_data_area_size[0] * width_ratio)
-                new_label_width = int(self.original_score_label_size[0] * width_ratio)
+                # 각 라벨별 다른 너비 적용
+                new_pass_width = int(self.original_pass_label_size[0] * width_ratio)
+                new_opt_width = int(self.original_opt_label_size[0] * width_ratio)
+                new_score_width = int(self.original_score_label_size[0] * width_ratio)
 
                 # 분야별 점수 내부 위젯
                 if hasattr(self, 'spec_header'):
@@ -502,11 +508,11 @@ class ResultPageWidget(QWidget):
                 if hasattr(self, 'spec_data_area'):
                     self.spec_data_area.setFixedSize(new_data_width, self.original_score_data_area_size[1])
                 if hasattr(self, 'spec_pass_label'):
-                    self.spec_pass_label.setFixedSize(new_label_width, self.original_score_label_size[1])
+                    self.spec_pass_label.setFixedSize(new_pass_width, self.original_pass_label_size[1])
                 if hasattr(self, 'spec_total_label'):
-                    self.spec_total_label.setFixedSize(new_label_width, self.original_score_label_size[1])
+                    self.spec_total_label.setFixedSize(new_opt_width, self.original_opt_label_size[1])
                 if hasattr(self, 'spec_score_label'):
-                    self.spec_score_label.setFixedSize(new_label_width, self.original_score_label_size[1])
+                    self.spec_score_label.setFixedSize(new_score_width, self.original_score_label_size[1])
 
                 # 전체 점수 내부 위젯
                 if hasattr(self, 'total_header'):
@@ -514,11 +520,11 @@ class ResultPageWidget(QWidget):
                 if hasattr(self, 'total_data_area'):
                     self.total_data_area.setFixedSize(new_data_width, self.original_score_data_area_size[1])
                 if hasattr(self, 'total_pass_label'):
-                    self.total_pass_label.setFixedSize(new_label_width, self.original_score_label_size[1])
+                    self.total_pass_label.setFixedSize(new_pass_width, self.original_pass_label_size[1])
                 if hasattr(self, 'total_total_label'):
-                    self.total_total_label.setFixedSize(new_label_width, self.original_score_label_size[1])
+                    self.total_total_label.setFixedSize(new_opt_width, self.original_opt_label_size[1])
                 if hasattr(self, 'total_score_label'):
-                    self.total_score_label.setFixedSize(new_label_width, self.original_score_label_size[1])
+                    self.total_score_label.setFixedSize(new_score_width, self.original_score_label_size[1])
 
             # ✅ 버튼 그룹 크기 조정 (가로만 확장, 세로 고정)
             if hasattr(self, 'buttonGroup') and hasattr(self, 'original_buttonGroup_size'):
@@ -575,7 +581,10 @@ class ResultPageWidget(QWidget):
         if hasattr(self, 'original_score_header_size'):
             new_header_width = int(self.original_score_header_size[0] * width_ratio)
             new_data_width = int(self.original_score_data_area_size[0] * width_ratio)
-            new_label_width = int(self.original_score_label_size[0] * width_ratio)
+            # 각 라벨별 다른 너비 적용
+            new_pass_width = int(self.original_pass_label_size[0] * width_ratio)
+            new_opt_width = int(self.original_opt_label_size[0] * width_ratio)
+            new_score_width = int(self.original_score_label_size[0] * width_ratio)
 
             # 분야별 점수 내부 위젯
             if hasattr(self, 'spec_header'):
@@ -583,11 +592,11 @@ class ResultPageWidget(QWidget):
             if hasattr(self, 'spec_data_area'):
                 self.spec_data_area.setFixedSize(new_data_width, self.original_score_data_area_size[1])
             if hasattr(self, 'spec_pass_label'):
-                self.spec_pass_label.setFixedSize(new_label_width, self.original_score_label_size[1])
+                self.spec_pass_label.setFixedSize(new_pass_width, self.original_pass_label_size[1])
             if hasattr(self, 'spec_total_label'):
-                self.spec_total_label.setFixedSize(new_label_width, self.original_score_label_size[1])
+                self.spec_total_label.setFixedSize(new_opt_width, self.original_opt_label_size[1])
             if hasattr(self, 'spec_score_label'):
-                self.spec_score_label.setFixedSize(new_label_width, self.original_score_label_size[1])
+                self.spec_score_label.setFixedSize(new_score_width, self.original_score_label_size[1])
 
             # 전체 점수 내부 위젯
             if hasattr(self, 'total_header'):
@@ -595,11 +604,11 @@ class ResultPageWidget(QWidget):
             if hasattr(self, 'total_data_area'):
                 self.total_data_area.setFixedSize(new_data_width, self.original_score_data_area_size[1])
             if hasattr(self, 'total_pass_label'):
-                self.total_pass_label.setFixedSize(new_label_width, self.original_score_label_size[1])
+                self.total_pass_label.setFixedSize(new_pass_width, self.original_pass_label_size[1])
             if hasattr(self, 'total_total_label'):
-                self.total_total_label.setFixedSize(new_label_width, self.original_score_label_size[1])
+                self.total_total_label.setFixedSize(new_opt_width, self.original_opt_label_size[1])
             if hasattr(self, 'total_score_label'):
-                self.total_score_label.setFixedSize(new_label_width, self.original_score_label_size[1])
+                self.total_score_label.setFixedSize(new_score_width, self.original_score_label_size[1])
 
     def load_initial_scenarios(self):
         """초기 로드: 현재 선택된 그룹과 시나리오를 반영하여 UI 갱신"""
@@ -1416,16 +1425,15 @@ class ResultPageWidget(QWidget):
         self.spec_data_area.setFixedSize(1064, 76)
         self.spec_data_area.setStyleSheet("background: transparent;")
         data_layout = QHBoxLayout(self.spec_data_area)
-        data_layout.setContentsMargins(56, 8, 32, 8)
+        data_layout.setContentsMargins(20, 8, 20, 8)
         data_layout.setSpacing(0)
 
         # 통과 필수 필드 점수 - % (통과/전체) 형식
         self.spec_pass_label = QLabel()
-        self.spec_pass_label.setFixedHeight(60)
-        self.spec_pass_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.spec_pass_label.setFixedSize(340, 60)  # 통과 필수/선택
         self.spec_pass_label.setText(
-            f"통과 필수 필드 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
+            f"통과 필수 필드 점수&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
             f"{required_score:.1f}% ({required_pass}/{required_total})</span>"
         )
         self.spec_pass_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 20px; font-weight: 500; color: #000000;")
@@ -1439,16 +1447,15 @@ class ResultPageWidget(QWidget):
 
         # Spacer 1
         spacer1 = QWidget()
-        spacer1.setFixedSize(24, 60)
+        spacer1.setFixedSize(12, 60)
         data_layout.addWidget(spacer1)
 
         # 통과 선택 필드 점수 - % (통과/전체) 형식
         self.spec_total_label = QLabel()
-        self.spec_total_label.setFixedHeight(60)
-        self.spec_total_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.spec_total_label.setFixedSize(340, 60)  # 통과 필수/선택
         self.spec_total_label.setText(
-            f"통과 선택 필드 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
+            f"통과 선택 필드 점수&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
             f"{opt_score:.1f}% ({opt_pass}/{opt_total})</span>"
         )
         self.spec_total_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 20px; font-weight: 500; color: #000000;")
@@ -1462,16 +1469,15 @@ class ResultPageWidget(QWidget):
 
         # Spacer 2
         spacer2 = QWidget()
-        spacer2.setFixedSize(24, 60)
+        spacer2.setFixedSize(12, 60)
         data_layout.addWidget(spacer2)
 
         # 종합 평가 점수 - % (통과/전체) 형식
         self.spec_score_label = QLabel()
-        self.spec_score_label.setFixedHeight(60)
-        self.spec_score_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.spec_score_label.setFixedSize(315, 60)  # 종합 평가 점수
         self.spec_score_label.setText(
-            f"종합 평가 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
+            f"종합 평가 점수&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
             f"{score:.1f}% ({total_pass}/{total_fields})</span>"
         )
         self.spec_score_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 20px; font-weight: 500; color: #000000;")
@@ -1570,16 +1576,15 @@ class ResultPageWidget(QWidget):
         self.total_data_area.setFixedSize(1064, 76)
         self.total_data_area.setStyleSheet("background: transparent; border: none;")
         data_layout = QHBoxLayout(self.total_data_area)
-        data_layout.setContentsMargins(56, 8, 32, 8)
+        data_layout.setContentsMargins(20, 8, 20, 8)
         data_layout.setSpacing(0)
 
         # 통과 필수 필드 점수 - % (통과/전체) 형식
         self.total_pass_label = QLabel()
-        self.total_pass_label.setFixedHeight(60)
-        self.total_pass_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.total_pass_label.setFixedSize(340, 60)  # 통과 필수/선택
         self.total_pass_label.setText(
-            f"통과 필수 필드 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
+            f"통과 필수 필드 점수&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
             f"{required_score:.1f}% ({required_pass}/{required_total})</span>"
         )
         self.total_pass_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 20px; font-weight: 500; color: #000000; border: none;")
@@ -1593,17 +1598,16 @@ class ResultPageWidget(QWidget):
 
         # Spacer 1
         spacer1 = QWidget()
-        spacer1.setFixedSize(24, 60)
+        spacer1.setFixedSize(12, 60)
         spacer1.setStyleSheet("border: none;")
         data_layout.addWidget(spacer1)
 
         # 통과 선택 필드 점수 - % (통과/전체) 형식
         self.total_total_label = QLabel()
-        self.total_total_label.setFixedHeight(60)
-        self.total_total_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.total_total_label.setFixedSize(340, 60)  # 통과 필수/선택
         self.total_total_label.setText(
-            f"통과 선택 필드 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
+            f"통과 선택 필드 점수&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
             f"{opt_score:.1f}% ({opt_pass}/{opt_total})</span>"
         )
         self.total_total_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 20px; font-weight: 500; color: #000000; border: none;")
@@ -1617,17 +1621,16 @@ class ResultPageWidget(QWidget):
 
         # Spacer 2
         spacer2 = QWidget()
-        spacer2.setFixedSize(24, 60)
+        spacer2.setFixedSize(12, 60)
         spacer2.setStyleSheet("border: none;")
         data_layout.addWidget(spacer2)
 
         # 종합 평가 점수 - % (통과/전체) 형식
         self.total_score_label = QLabel()
-        self.total_score_label.setFixedHeight(60)
-        self.total_score_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.total_score_label.setFixedSize(315, 60)  # 종합 평가 점수
         self.total_score_label.setText(
-            f"종합 평가 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
+            f"종합 평가 점수&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
             f"{score:.1f}% ({total_pass}/{total_fields})</span>"
         )
         self.total_score_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 20px; font-weight: 500; color: #000000; border: none;")
