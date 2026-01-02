@@ -143,6 +143,20 @@ class ResultPageWidget(QWidget):
 
         # 시험 선택 패널 - TestSelectionPanel 사용
         self.test_selection_panel = TestSelectionPanel(self.CONSTANTS)
+        
+        # ✅ 시스템 연동 검증일 경우 '응답 검증'으로 표시 (플랫폼은 기본값 '요청 검증')
+        # 상속 관계를 고려하여 MRO 확인
+        is_system = any(c.__name__ == 'SystemMainUI' for c in self.parent.__class__.__mro__)
+        
+        # Fallback: 모듈 이름으로 확인 (SystemMainUI 상속 확인이 실패할 경우 대비)
+        if not is_system:
+            parent_module = self.parent.__class__.__module__
+            if 'systemVal_all' in parent_module or 'system_app' in parent_module:
+                is_system = True
+
+        if is_system:
+            self.test_selection_panel.mode_suffix = " (응답 검증)"
+
         self.test_selection_panel.groupSelected.connect(self.on_group_selected)
         self.test_selection_panel.scenarioSelected.connect(self.on_test_field_selected)
 

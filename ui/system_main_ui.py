@@ -458,5 +458,8 @@ class SystemMainUI(CommonMainUI):
                 else:
                     self.pathUrl = self.url + "/" + self.current_spec_id
                 self.url_text_box.setText(self.pathUrl)
+                
+                # ✅ 초기 점수 표시 업데이트
+                self.update_score_display()
         except Exception as e:
             print(f"[ERROR] 초기 시나리오 선택 실패: {e}")
