@@ -1,34 +1,41 @@
 {
-  "requestId": "cmii86ssr00a48z1tqmco6ke8",
+  "requestId": "cmisflgy307tr5vy7clzgjaln",
   "evaluationTarget": {
-    "companyName": "이노뎁",
-    "contactPerson": "배성환",
-    "productName": "VURIX-TMS",
+    "companyName": "엣지디엑스",
+    "contactPerson": "빙영진",
+    "productName": "AIBridge",
     "modelName": "v1.0",
     "version": "v1.0"
   },
   "testGroups": [
     {
-      "id": "cmii82nib009f8z1tvo6fz8j2",
-      "name": "기본 기능 시험-통합시스템",
+      "id": "cmisfix8407te5vy7fleq8pkf",
+      "name": "제어 기능-통합플랫폼(sensor002)",
       "testRange": "ALL_FIELDS, ALL_FIELDS, ALL_FIELDS",
       "testSpecIds": [
-        "cmii7shen005i8z1tagevx4qh",
-        "cmii7pysb004k8z1tts0npxfm",
-        "cmii7lxbn002s8z1t1i9uudf0"
+        "cmiqr201z00i8ie8fitdg5t1b",
+        "cmiqr1acx00i5ie8fi022t1hp",
+        "cmiqqzrjz00i3ie8figf79cur"
       ]
     }
   ],
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
+<<<<<<< HEAD
     "score": 98.63,
     "totalFields": 73,
     "passedFields": 72,
+=======
+    "score": 87.5,
+    "totalFields": 8,
+    "passedFields": 7,
+>>>>>>> 328a5f09234926eb7744459ba009e52a237c1003
     "failedFields": 1
   },
   "testResult": [
     {
+<<<<<<< HEAD
       "testGroup": "cmii82nib009f8z1tvo6fz8j2",
       "testSpecId": "cmii7shen005i8z1tagevx4qh",
       "testSpecName": "sensor001",
@@ -256,6 +263,18 @@
       "apis": [
         {
           "id": "cmii7p0dp002w8z1tcikv3cji",
+=======
+      "testGroup": "cmisfix8407te5vy7fleq8pkf",
+      "testSpecId": "cmiqr201z00i8ie8fitdg5t1b",
+      "testSpecName": "sensor002",
+      "score": 87.5,
+      "totalFields": 8,
+      "passedFields": 7,
+      "failedFields": 1,
+      "apis": [
+        {
+          "id": "cmise5c9900jr5vy7j5kdk1z6",
+>>>>>>> 328a5f09234926eb7744459ba009e52a237c1003
           "name": "사용자 인증",
           "method": "POST",
           "endpoint": "/Authentication",
@@ -278,7 +297,7 @@
           ]
         },
         {
-          "id": "cmio328yj007zie8ffqfnxwnl",
+          "id": "cmisebj3b00s65vy7377edoan",
           "name": "전송 지원 기능 정보 연동",
           "method": "POST",
           "endpoint": "/Capabilities",
@@ -298,10 +317,10 @@
           ]
         },
         {
-          "id": "cmiqs6rjd00khie8frmm5c83g",
-          "name": "카메라 목록 연동",
+          "id": "cmiseuulh03d75vy7wmr8iroc",
+          "name": "보안용 센서 단말 목록 정보 연동",
           "method": "POST",
-          "endpoint": "/CameraProfiles",
+          "endpoint": "/SensorDeviceProfiles",
           "score": 100.0,
           "validationCnt": 1,
           "totalFields": 1,
@@ -318,58 +337,45 @@
           ]
         },
         {
-          "id": "cmiqsc74800leie8fsshjqpok",
-          "name": "실시간 영상(CCTV) 전송 ",
+          "id": "cmisfu13v07xs5vy7gthbhp0p",
+          "name": "보안용 센서 단말 제어 정보 연동-상태연동",
           "method": "POST",
-          "endpoint": "/StreamURLs",
-          "score": 100.0,
+          "endpoint": "/SensorDeviceControl",
+          "score": 50.0,
           "validationCnt": 1,
-          "totalFields": 3,
-          "passFields": 3,
-          "failFields": 0,
+          "totalFields": 2,
+          "passFields": 1,
+          "failFields": 1,
           "validations": [
             {
               "attempt": 1,
               "validationData": {
-                "camList": [
-                  {
-                    "camID": "cam0001",
-                    "streamProtocolType": "RTSP"
-                  },
-                  {
-                    "camID": "cam0002",
-                    "streamProtocolType": "RTSP"
-                  },
-                  {
-                    "camID": "cam003",
-                    "streamProtocolType": "RTSP"
-                  },
-                  {
-                    "camID": "cam004",
-                    "streamProtocolType": "RTSP"
-                  }
-                ]
+                "sensorDeviceID": "iot0003",
+                "commandType": ""
               },
               "validationErrors": [
-                "오류가 없습니다."
+                "[시도 1/1]",
+                "<b>[기타]</b> (1건)",
+                "- [맥락 오류] 참조 엔드포인트 없음: None"
               ]
             }
           ]
         },
         {
-          "id": "cmiqsim3j00mwie8fumvg1qnf-registration",
-          "name": "실시간 이벤트 분석 정보 연동",
+          "id": "cmisge6mr08di5vy7hirl5jp1",
+          "name": "보안용 센서 단말 제어 정보 연동-제어",
           "method": "POST",
-          "endpoint": "/RealtimeVideoEventInfos",
+          "endpoint": "/SensorDeviceControl",
           "score": 100.0,
           "validationCnt": 1,
-          "totalFields": 11,
-          "passFields": 11,
+          "totalFields": 2,
+          "passFields": 2,
           "failFields": 0,
           "validations": [
             {
               "attempt": 1,
               "validationData": {
+<<<<<<< HEAD
                 "camList": [
                   {
                     "camID": "cam0001"
@@ -588,6 +594,10 @@
                     ]
                   }
                 ]
+=======
+                "sensorDeviceID": "iot0003",
+                "commandType": "AlarmOff"
+>>>>>>> 328a5f09234926eb7744459ba009e52a237c1003
               },
               "validationErrors": [
                 "오류가 없습니다."
@@ -598,5 +608,9 @@
       ]
     }
   ],
+<<<<<<< HEAD
   "completedDate": "2025-12-31T04:43:30Z"
+=======
+  "completedDate": "2026-01-02T02:16:10Z"
+>>>>>>> 328a5f09234926eb7744459ba009e52a237c1003
 }
