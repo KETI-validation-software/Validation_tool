@@ -1430,17 +1430,17 @@ class SystemMainUI(CommonMainUI):
         # 필수/선택/종합 점수 표시 (% (통과/전체) 형식)
         self.spec_pass_label.setText(
             f"통과 필수 필드 점수&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
             f"{spec_required_score:.1f}% ({spec_required_pass}/{spec_required_total})</span>"
         )
         self.spec_total_label.setText(
             f"통과 선택 필드 점수&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
             f"{spec_opt_score:.1f}% ({self.total_opt_pass_cnt}/{spec_opt_total})</span>"
         )
         self.spec_score_label.setText(
             f"종합 평가 점수&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
             f"{spec_score:.1f}% ({self.total_pass_cnt}/{spec_total_fields})</span>"
         )
 

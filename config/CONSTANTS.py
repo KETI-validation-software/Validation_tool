@@ -47,15 +47,9 @@ def save_management_url(new_url):
 # 관리자시스템 주소
 management_url = load_management_url()
 
-<<<<<<< HEAD
-specs = [["cmii7wfuf006i8z1tcds6q69g_outSchema","cmii7wfuf006i8z1tcds6q69g_inData","cmii7wfuf006i8z1tcds6q69g_messages",""],
-         ["cmii7w683006h8z1t7usnin5g_outSchema","cmii7w683006h8z1t7usnin5g_inData","cmii7w683006h8z1t7usnin5g_messages",""],
-         ["cmii7v8pr006g8z1tvo55a50u_outSchema","cmii7v8pr006g8z1tvo55a50u_inData","cmii7v8pr006g8z1tvo55a50u_messages",""]]
-=======
-specs = [["cmiqr2b9j00i9ie8frw439h8i_outSchema","cmiqr2b9j00i9ie8frw439h8i_inData","cmiqr2b9j00i9ie8frw439h8i_messages",""],
-         ["cmiqr1jha00i6ie8fb1scb3go_outSchema","cmiqr1jha00i6ie8fb1scb3go_inData","cmiqr1jha00i6ie8fb1scb3go_messages",""],
-         ["cmiqr0kdw00i4ie8fr3firjtg_outSchema","cmiqr0kdw00i4ie8fr3firjtg_inData","cmiqr0kdw00i4ie8fr3firjtg_messages",""]]
->>>>>>> 328a5f09234926eb7744459ba009e52a237c1003
+specs = [["cmii7shen005i8z1tagevx4qh_inSchema","cmii7shen005i8z1tagevx4qh_outData","cmii7shen005i8z1tagevx4qh_messages",""],
+         ["cmii7pysb004k8z1tts0npxfm_inSchema","cmii7pysb004k8z1tts0npxfm_outData","cmii7pysb004k8z1tts0npxfm_messages",""],
+         ["cmii7lxbn002s8z1t1i9uudf0_inSchema","cmii7lxbn002s8z1t1i9uudf0_outData","cmii7lxbn002s8z1t1i9uudf0_messages",""]]
 none_request_message = ['Capabilities',
                         'CameraProfiles',
                         'DoorProfiles',
@@ -63,35 +57,19 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소
 # test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
-<<<<<<< HEAD
-company_name = "물리보안기업"
-product_name = "물리보안시스템-기본"
+company_name = "이노뎁"
+product_name = "VURIX-TMS"
 version = "v1.0"
 test_category = "MAIN_TEST"
-test_target = "기본 기능 시험-영상보안시스템"
-test_range = "ALL_FIELDS"
-auth_type = "Digest Auth"
-auth_info = "kisa,kisa_k1!2@"
-admin_code = "12343"
-url = "https://10.252.219.95:2000"
-contact_person = "김철수"
-model_name = "v1.0"
-request_id = "cmii85wjq009z8z1tv0d3d7r1"
-=======
-company_name = "엣지디엑스"
-product_name = "AIBridge"
-version = "v1.0"
-test_category = "MAIN_TEST"
-test_target = "제어기능-물리보안"
+test_target = "기본 기능 시험-통합시스템"
 test_range = "ALL_FIELDS"
 auth_type = "Digest Auth"
 auth_info = "kisa,kisa_k1!2@"
 admin_code = "1234"
-url = "https://192.168.0.3:2000"
-contact_person = "빙영진"
+url = "https://10.252.219.95:2000"
+contact_person = "배성환"
 model_name = "v1.0"
-request_id = "cmisfmr3907tv5vy71y0276gp"
->>>>>>> 328a5f09234926eb7744459ba009e52a237c1003
+request_id = "cmii86ssr00a48z1tqmco6ke8"
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황
 flag_opt = False
@@ -130,7 +108,7 @@ enable_retry_delay = False  # False 권장: 불필요한 sleep 제거
 # ✅ 웹훅 서버 설정 (전역)
 WEBHOOK_HOST = "0.0.0.0"  # 서버 바인딩 주소 (모든 인터페이스에서 수신)
 WEBHOOK_PORT = 2001       # 웹훅 수신 포트
-WEBHOOK_PUBLIC_IP = "192.168.0.3"
+WEBHOOK_PUBLIC_IP = "10.252.219.95"
 # ✅ 웹훅 공개 IP 설정: info_GUI에서 선택한 시험 URL의 IP 사용
 # 초기값은 URL에서 추출, info_GUI에서 주소 선택 후 자동 업데이트됨
 
@@ -139,71 +117,37 @@ WEBHOOK_URL = f"https://{WEBHOOK_PUBLIC_IP}:{WEBHOOK_PORT}"
 
 SPEC_CONFIG = [
     {
-<<<<<<< HEAD
-        "group_name": "기본 기능 시험-영상보안시스템",
-        "group_id": "cmjcefmh8070gcfb35wjptcsl",
-        "cmii7wfuf006i8z1tcds6q69g": {
+        "group_name": "기본 기능 시험-통합시스템",
+        "group_id": "cmii82nib009f8z1tvo6fz8j2",
+        "cmii7shen005i8z1tagevx4qh": {
     "test_name": "sensor001",
-    "specs": ['cmii7wfuf006i8z1tcds6q69g_outSchema', 'cmii7wfuf006i8z1tcds6q69g_inData', 'cmii7wfuf006i8z1tcds6q69g_messages', 'cmii7wfuf006i8z1tcds6q69g_webhook_inSchema', 'cmii7wfuf006i8z1tcds6q69g_webhook_outData'],
+    "specs": ['cmii7shen005i8z1tagevx4qh_inSchema', 'cmii7shen005i8z1tagevx4qh_outData', 'cmii7shen005i8z1tagevx4qh_messages', 'cmii7shen005i8z1tagevx4qh_webhook_OutSchema', 'cmii7shen005i8z1tagevx4qh_webhook_inData'],
     "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '보안용 센서 단말 목록 정보 연동', '실시간 보안용 센서 데이터 정보 연동', '실시간 보안용 센서 이벤트 분석 정보 연동', '저장된 보안용 센서 이벤트 분석 정보 연동'],
-    "api_id": ['cmii82age008k8z1t71s85tbz', 'cmiwtm84f0an2p002pthrkfbj', 'cmiwtnnvx0ar8p002dcz8llaf', 'cmiwtr5xt0boqp002melvctad', 'cmiwv1ifx0ddmp0023tuwdhoi', 'cmixtu5uk0dg5p002kq3htt9b'],
+    "api_id": ['cmii7ubap005m8z1tyhf1yc1r', 'cmiwkc2st000a844gm9yjeqhp', 'cmiwkf9cp003k844gk2elz2wz', 'cmiwkqkje01dz844gz2h21eva', 'cmiwl0xkh02yi844gg45hcjop', 'cmiwl9g9003nh844gv5scoe1y'],
     "api_endpoint": ['/Authentication', '/Capabilities', '/SensorDeviceProfiles', '/RealtimeSensorData', '/RealtimeSensorEventInfos', '/StoredSensorEventInfos'],
     "trans_protocol": ['basic', 'basic', 'basic', 'WebHook', 'WebHook', 'basic'],
-    "time_out": [10000, 10000, 10000, 10000, 10000, 10000],
+    "time_out": [60000, 60000, 60000, 60000, 60000, 60000],
     "num_retries": [1, 1, 1, 1, 1, 1]
 },
-        "cmii7w683006h8z1t7usnin5g": {
+        "cmii7pysb004k8z1tts0npxfm": {
     "test_name": "ac001",
-    "specs": ['cmii7w683006h8z1t7usnin5g_outSchema', 'cmii7w683006h8z1t7usnin5g_inData', 'cmii7w683006h8z1t7usnin5g_messages', 'cmii7w683006h8z1t7usnin5g_webhook_inSchema', 'cmii7w683006h8z1t7usnin5g_webhook_outData'],
+    "specs": ['cmii7pysb004k8z1tts0npxfm_inSchema', 'cmii7pysb004k8z1tts0npxfm_outData', 'cmii7pysb004k8z1tts0npxfm_messages', 'cmii7pysb004k8z1tts0npxfm_webhook_OutSchema', 'cmii7pysb004k8z1tts0npxfm_webhook_inData'],
     "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '바이오 및 출입통제 장치 목록 정보', '사용자 권한 정보 연동', '실시간 출입인증 목록 정보 연동', '저장된 출입인증 목록 정보 연동'],
-    "api_id": ['cmii80zqn007k8z1t85trpyps', 'cmiwslyqi049np002cgziiglj', 'cmiwso2p204bup002k9s8z9ph', 'cmiwstny705pnp002qw73yzs3', 'cmiwsz3sr079dp002xooui9id', 'cmiwtf61309slp002fna2xzbi'],
+    "api_id": ['cmii7roh5004o8z1t47spn819', 'cmiiby4fo003chl2h8hzgu7m3', 'cmisjhwhq09hi5vy7n59tvsht', 'cmiwhz2il00epugxnzh3d9iuc', 'cmiwj1hq302myugxn8a5c6f48', 'cmiwjtg8i03wjugxnqkustaqj'],
     "api_endpoint": ['/Authentication', '/Capabilities', '/DoorProfiles', '/AccessUserInfos', '/RealtimeVerifEventInfos', '/StoredVerifEventInfos'],
     "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'WebHook', 'basic'],
-    "time_out": [10000, 10000, 10000, 10000, 10000, 10000],
+    "time_out": [60000, 60000, 60000, 60000, 60000, 60000],
     "num_retries": [1, 1, 1, 1, 1, 1]
 },
-        "cmii7v8pr006g8z1tvo55a50u": {
+        "cmii7lxbn002s8z1t1i9uudf0": {
     "test_name": "vid001",
-    "specs": ['cmii7v8pr006g8z1tvo55a50u_outSchema', 'cmii7v8pr006g8z1tvo55a50u_inData', 'cmii7v8pr006g8z1tvo55a50u_messages', 'cmii7v8pr006g8z1tvo55a50u_webhook_inSchema', 'cmii7v8pr006g8z1tvo55a50u_webhook_outData'],
-    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '카메라 목록 연동', '실시간 영상(CCTV) 전송 ', '실시간 이벤트 분석 정보 연동', '저장된 영상 목록 연동', '저장된 영상(CCTV) 전송', '저장된 이벤트 분석 정보 연동', '저장된 객체 분석 정보 연동'],
-    "api_id": ['cmii7ylxn006m8z1tqq8dard1', 'cmiqtf9x600upie8ft45b1h1w', 'cmiqthu4900voie8f1evs0kfm', 'cmiqtkefj00whie8fd8odtc1m', 'cmiqtnwm200xoie8fxzfhodj5', 'cmiwrkvjq0005nkgl04g93wwy', 'cmiwrq4r200kqnkgluspxeyu7', 'cmiws2qij05apnkgli7hun3bl', 'cmiws9btu01ksp0028h4uc4az'],
+    "specs": ['cmii7lxbn002s8z1t1i9uudf0_inSchema', 'cmii7lxbn002s8z1t1i9uudf0_outData', 'cmii7lxbn002s8z1t1i9uudf0_messages', 'cmii7lxbn002s8z1t1i9uudf0_webhook_OutSchema', 'cmii7lxbn002s8z1t1i9uudf0_webhook_inData'],
+    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '카메라 목록 연동', '실시간 영상(CCTV) 전송 ', '실시간 이벤트 분석 정보 연동', '저장된 영상 목록 연동', '저장된 영상(CCTV) 전송 ', '저장된 이벤트 분석 정보 연동', '저장된 객체 분석 정보 연동'],
+    "api_id": ['cmii7p0dp002w8z1tcikv3cji', 'cmio328yj007zie8ffqfnxwnl', 'cmiqs6rjd00khie8frmm5c83g', 'cmiqsc74800leie8fsshjqpok', 'cmiqsim3j00mwie8fumvg1qnf', 'cmiqsrgr100p7ie8fzdzjr4hn', 'cmiqsw7ou00qgie8fjt03g03i', 'cmiqt02wa00rhie8fewnh1pn3', 'cmiqt4e5z00t6ie8fxsb3tkbc'],
     "api_endpoint": ['/Authentication', '/Capabilities', '/CameraProfiles', '/StreamURLs', '/RealtimeVideoEventInfos', '/StoredVideoInfos', '/ReplayURL', '/StoredVideoEventInfos', '/StoredObjectAnalyticsInfos'],
     "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'WebHook', 'basic', 'basic', 'basic', 'basic'],
-    "time_out": [10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000],
+    "time_out": [60000, 60000, 60000, 60000, 60000, 60000, 60000, 60000, 60000],
     "num_retries": [1, 1, 1, 1, 1, 1, 1, 1, 1]
-=======
-        "group_name": "제어기능-물리보안",
-        "group_id": "cmisfjfzt07tm5vy7qslmisks",
-        "cmiqr2b9j00i9ie8frw439h8i": {
-    "test_name": "sensor002",
-    "specs": ['cmiqr2b9j00i9ie8frw439h8i_outSchema', 'cmiqr2b9j00i9ie8frw439h8i_inData', 'cmiqr2b9j00i9ie8frw439h8i_messages'],
-    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '보안용 센서 단말 목록 정보 연동', '보안용 센서 단말 제어 정보 연동-상태연동', '보안용 센서 단말 제어 정보 연동-제어'],
-    "api_id": ['cmise849o00nv5vy7mu76wa69', 'cmise9yk200pv5vy7ktxtva7c', 'cmisepin301uv5vy78nai1drd', 'cmisfqfip07tz5vy7de6x5d6r', 'cmisg86id08bm5vy7ezcbr7oy'],
-    "api_endpoint": ['/Authentication', '/Capabilities', '/SensorDeviceProfiles', '/SensorDeviceControl', '/SensorDeviceControl2'],
-    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic'],
-    "time_out": [10000, 10000, 10000, 10000, 10000],
-    "num_retries": [1, 1, 1, 1, 1]
-},
-        "cmiqr1jha00i6ie8fb1scb3go": {
-    "test_name": "ac002",
-    "specs": ['cmiqr1jha00i6ie8fb1scb3go_outSchema', 'cmiqr1jha00i6ie8fb1scb3go_inData', 'cmiqr1jha00i6ie8fb1scb3go_messages', 'cmiqr1jha00i6ie8fb1scb3go_webhook_inSchema', 'cmiqr1jha00i6ie8fb1scb3go_webhook_outData'],
-    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '바이오 및 출입통제 장치 목록 정보', '실시간 출입통제 장치 상태 정보 연동-상태조회', '출입 통제 장치 제어 정보 연동', '실시간 출입통제 장치 상태 정보 연동-결과조회'],
-    "api_id": ['cmisgv0ua08o55vy7yvk4aw0a', 'cmisjr2u40au05vy7kt6bb6zl', 'cmiskf6w20dcm5vy7cjao08fw', 'cmixuoetf0gr9p002gy101xid', 'cmixuttgv0hbyp002h6os6wjc', 'cmixuvzks0hd3p002rcrvqdt4'],
-    "api_endpoint": ['/Authentication', '/Capabilities', '/DoorProfiles', '/RealtimeDoorStatus', '/DoorControl', '/RealtimeDoorStatus2'],
-    "trans_protocol": ['basic', 'basic', 'basic', 'WebHook', 'basic', 'WebHook'],
-    "time_out": [10000, 10000, 10000, 10000, 10000, 10000],
-    "num_retries": [1, 1, 1, 1, 1, 1]
-},
-        "cmiqr0kdw00i4ie8fr3firjtg": {
-    "test_name": "vid002",
-    "specs": ['cmiqr0kdw00i4ie8fr3firjtg_outSchema', 'cmiqr0kdw00i4ie8fr3firjtg_inData', 'cmiqr0kdw00i4ie8fr3firjtg_messages'],
-    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '카메라 목록 연동', 'PTZ 상태 정보 연동', 'PTZ 연속 이동 제어 정보 연동', 'PTZ 정지 제어 정보 연동'],
-    "api_id": ['cmish1fu408we5vy7dp3ltj00', 'cmixu0dt70dyzp002xhm24l3h', 'cmixu2m200e4up002g73csf12', 'cmixu9wn10f7rp002rgzkx3au', 'cmixucv8a0fb4p002pnvfe6ay', 'cmixufkri0fdnp002fouuoqsg'],
-    "api_endpoint": ['/Authentication', '/Capabilities', '/CameraProfiles', '/PtzStatus', '/PtzContinuousMove', '/PtzStop'],
-    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic'],
-    "time_out": [10000, 10000, 10000, 10000, 10000, 10000],
-    "num_retries": [1, 1, 1, 1, 1, 1]
->>>>>>> 328a5f09234926eb7744459ba009e52a237c1003
 }
     }
 ]
