@@ -1135,6 +1135,7 @@ class ResultPageWidget(QWidget):
         self.tableWidget.setSelectionMode(QAbstractItemView.NoSelection)
         self.tableWidget.setIconSize(QtCore.QSize(16, 16))
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Fixed)
+        self.tableWidget.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)  # 가로 스크롤바 제거
 
         # 테이블 스타일
         self.tableWidget.setStyleSheet("""
@@ -1418,9 +1419,10 @@ class ResultPageWidget(QWidget):
         data_layout.setContentsMargins(56, 8, 32, 8)
         data_layout.setSpacing(0)
 
-        # 통과 필수 필드 점수 (325 × 60) - % (통과/전체) 형식
+        # 통과 필수 필드 점수 - % (통과/전체) 형식
         self.spec_pass_label = QLabel()
-        self.spec_pass_label.setFixedSize(325, 60)
+        self.spec_pass_label.setFixedHeight(60)
+        self.spec_pass_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.spec_pass_label.setText(
             f"통과 필수 필드 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
@@ -1440,9 +1442,10 @@ class ResultPageWidget(QWidget):
         spacer1.setFixedSize(24, 60)
         data_layout.addWidget(spacer1)
 
-        # 통과 선택 필드 점수 (325 × 60) - % (통과/전체) 형식
+        # 통과 선택 필드 점수 - % (통과/전체) 형식
         self.spec_total_label = QLabel()
-        self.spec_total_label.setFixedSize(325, 60)
+        self.spec_total_label.setFixedHeight(60)
+        self.spec_total_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.spec_total_label.setText(
             f"통과 선택 필드 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
@@ -1462,9 +1465,10 @@ class ResultPageWidget(QWidget):
         spacer2.setFixedSize(24, 60)
         data_layout.addWidget(spacer2)
 
-        # 종합 평가 점수 (325 × 60) - % (통과/전체) 형식
+        # 종합 평가 점수 - % (통과/전체) 형식
         self.spec_score_label = QLabel()
-        self.spec_score_label.setFixedSize(325, 60)
+        self.spec_score_label.setFixedHeight(60)
+        self.spec_score_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.spec_score_label.setText(
             f"종합 평가 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
@@ -1569,9 +1573,10 @@ class ResultPageWidget(QWidget):
         data_layout.setContentsMargins(56, 8, 32, 8)
         data_layout.setSpacing(0)
 
-        # 통과 필수 필드 점수 (325 × 60) - % (통과/전체) 형식
+        # 통과 필수 필드 점수 - % (통과/전체) 형식
         self.total_pass_label = QLabel()
-        self.total_pass_label.setFixedSize(325, 60)
+        self.total_pass_label.setFixedHeight(60)
+        self.total_pass_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.total_pass_label.setText(
             f"통과 필수 필드 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
@@ -1592,9 +1597,10 @@ class ResultPageWidget(QWidget):
         spacer1.setStyleSheet("border: none;")
         data_layout.addWidget(spacer1)
 
-        # 통과 선택 필드 점수 (325 × 60) - % (통과/전체) 형식
+        # 통과 선택 필드 점수 - % (통과/전체) 형식
         self.total_total_label = QLabel()
-        self.total_total_label.setFixedSize(325, 60)
+        self.total_total_label.setFixedHeight(60)
+        self.total_total_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.total_total_label.setText(
             f"통과 선택 필드 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
@@ -1615,9 +1621,10 @@ class ResultPageWidget(QWidget):
         spacer2.setStyleSheet("border: none;")
         data_layout.addWidget(spacer2)
 
-        # 종합 평가 점수 (325 × 60) - % (통과/전체) 형식
+        # 종합 평가 점수 - % (통과/전체) 형식
         self.total_score_label = QLabel()
-        self.total_score_label.setFixedSize(325, 60)
+        self.total_score_label.setFixedHeight(60)
+        self.total_score_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.total_score_label.setText(
             f"종합 평가 점수&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 25px; font-weight: 500; color: #000000;'>"
