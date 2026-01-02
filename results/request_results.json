@@ -22,9 +22,9 @@
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 96.88,
-    "totalFields": 32,
-    "passedFields": 31,
+    "score": 97.87,
+    "totalFields": 47,
+    "passedFields": 46,
     "failedFields": 1
   },
   "testResult": [
@@ -114,7 +114,7 @@
             {
               "attempt": 1,
               "validationData": {
-                "sensorDeviceID": "iot0004",
+                "sensorDeviceID": "iot0002",
                 "commandType": ""
               },
               "validationErrors": [
@@ -139,8 +139,8 @@
             {
               "attempt": 1,
               "validationData": {
-                "sensorDeviceID": "iot0004",
-                "commandType": "AlarmOff"
+                "sensorDeviceID": "iot0002",
+                "commandType": "AlarmOn"
               },
               "validationErrors": [
                 "오류가 없습니다."
@@ -352,7 +352,156 @@
           ]
         }
       ]
+    },
+    {
+      "testGroup": "cmisfix8407te5vy7fleq8pkf",
+      "testSpecId": "cmiqqzrjz00i3ie8figf79cur",
+      "testSpecName": "vid002",
+      "score": 100.0,
+      "totalFields": 15,
+      "passedFields": 15,
+      "failedFields": 0,
+      "apis": [
+        {
+          "id": "cmish2vdi08z35vy7gtz574hy",
+          "name": "사용자 인증",
+          "method": "POST",
+          "endpoint": "/Authentication",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 2,
+          "passFields": 2,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "userID": "kisa",
+                "userPW": "kisa_k1!2@"
+              },
+              "validationErrors": [
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmiwp7fqs05kc844gxsjq6rfs",
+          "name": "전송 지원 기능 정보 연동",
+          "method": "POST",
+          "endpoint": "/Capabilities",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 1,
+          "passFields": 1,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmiwpag8n05re844gh1o3fc2u",
+          "name": "카메라 목록 연동",
+          "method": "POST",
+          "endpoint": "/CameraProfiles",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 1,
+          "passFields": 1,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmiwpjpff077k844gx4u1vvdf",
+          "name": "PTZ 상태 정보 연동",
+          "method": "POST",
+          "endpoint": "/PtzStatus",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 1,
+          "passFields": 1,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "camID": "cam0001"
+              },
+              "validationErrors": [
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmiwpsaxt07b1844gx73rs8gp",
+          "name": "PTZ 연속 이동 제어 정보 연동",
+          "method": "POST",
+          "endpoint": "/PtzContinuousMove",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 6,
+          "passFields": 6,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "camID": "cam0001",
+                "velocity": {
+                  "pan": 10,
+                  "tilt": -20,
+                  "zoom": 30
+                },
+                "timeOut": 5
+              },
+              "validationErrors": [
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmiwpvh1v07dl844gap4brs86",
+          "name": "PTZ 정지 제어 정보 연동",
+          "method": "POST",
+          "endpoint": "/PtzStop",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 4,
+          "passFields": 4,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "camID": "cam0001",
+                "pan": true,
+                "tilt": true,
+                "zoom": false
+              },
+              "validationErrors": [
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
-  "completedDate": "2025-12-31T04:45:24Z"
+  "completedDate": "2026-01-02T02:11:12Z"
 }
