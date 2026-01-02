@@ -530,11 +530,29 @@ class ResultPageWidget(QWidget):
                 new_back_btn_width = int(self.original_back_btn_size[0] * width_ratio)
                 self.back_btn.setFixedSize(new_back_btn_width, self.original_back_btn_size[1])
 
-            # ✅ 결과 테이블 컬럼 너비 비례 조정
+            # ✅ 결과 테이블 컬럼 너비 비례 조정 (마지막 컬럼이 남은 공간 채움)
             if hasattr(self, 'tableWidget') and hasattr(self, 'original_column_widths'):
-                for i, orig_width in enumerate(self.original_column_widths):
+                # 스크롤바 표시 여부 확인
+                row_count = self.tableWidget.rowCount()
+                total_row_height = row_count * 40  # 각 행 40px
+                scroll_area_height = self.result_scroll_area.viewport().height() if hasattr(self, 'result_scroll_area') else 189
+                scrollbar_visible = total_row_height > scroll_area_height
+                scrollbar_width = 16 if scrollbar_visible else 0
+
+                new_scroll_width = int(1064 * width_ratio)
+                # border(2) + 스크롤바 + 여유분(2) 고려
+                available_width = new_scroll_width - 4 - scrollbar_width
+
+                # 마지막 컬럼을 제외한 나머지 컬럼 너비 설정
+                used_width = 0
+                for i, orig_width in enumerate(self.original_column_widths[:-1]):
                     new_col_width = int(orig_width * width_ratio)
                     self.tableWidget.setColumnWidth(i, new_col_width)
+                    used_width += new_col_width
+
+                # 마지막 컬럼은 남은 공간을 채움
+                last_col_width = available_width - used_width
+                self.tableWidget.setColumnWidth(len(self.original_column_widths) - 1, last_col_width)
 
     def _apply_score_widget_resize(self):
         """점수 위젯 재생성 후 현재 창 크기에 맞게 반응형 적용"""
@@ -1140,16 +1158,16 @@ class ResultPageWidget(QWidget):
 
         self.tableWidget.setShowGrid(False)
 
-        # 컬럼 너비 설정 (본문용) - 9컬럼 구조
-        self.tableWidget.setColumnWidth(0, 40)    # No. (숫자)
-        self.tableWidget.setColumnWidth(1, 261)   # API 명
-        self.tableWidget.setColumnWidth(2, 100)   # 결과
-        self.tableWidget.setColumnWidth(3, 94)    # 검증 횟수
-        self.tableWidget.setColumnWidth(4, 116)   # 통과 필드 수
-        self.tableWidget.setColumnWidth(5, 116)   # 전체 필드 수
-        self.tableWidget.setColumnWidth(6, 94)    # 실패 횟수
-        self.tableWidget.setColumnWidth(7, 94)    # 평가 점수
-        self.tableWidget.setColumnWidth(8, 133)   # 상세 내용
+        # 컬럼 너비 설정 (본문용) - 9컬럼 구조 (마지막 컬럼이 남은 공간 채움)
+        base_widths = [40, 261, 100, 94, 116, 116, 94, 94]  # 0-7 컬럼
+        used_width = sum(base_widths)
+        # 스크롤 영역(1064) - border(2) - 스크롤바(16) - 여유분(2) = 1044
+        available_width = 1044
+        last_col_width = available_width - used_width  # 남은 공간: 1044 - 915 = 129
+
+        for i, width in enumerate(base_widths):
+            self.tableWidget.setColumnWidth(i, width)
+        self.tableWidget.setColumnWidth(8, last_col_width)  # 상세 내용
         self.tableWidget.horizontalHeader().setStretchLastSection(False)  # ✅ 마지막 컬럼 자동 확장 끔
 
         # 행 높이 설정

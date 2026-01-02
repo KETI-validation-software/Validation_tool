@@ -14,7 +14,6 @@ summary/
 doc/
 dist/
 *.zip
-.claude/
 
 # Trace files
 results/trace/
