@@ -3,8 +3,8 @@
 - ConnectionSection: URL 테이블 (744x376px)
 """
 from PyQt5.QtWidgets import (
-    QTableWidget, QGroupBox, QVBoxLayout,
-    QHeaderView, QAbstractItemView
+    QTableWidget, QGroupBox, QVBoxLayout, QHBoxLayout,
+    QHeaderView, QAbstractItemView, QWidget, QLabel
 )
 from PyQt5.QtCore import Qt
 
@@ -35,6 +35,7 @@ class ConnectionSection(QGroupBox):
         self.url_table.setSelectionMode(QAbstractItemView.NoSelection)
 
         self._setup_table()
+        self._setup_header_overlay()
 
         layout.addWidget(self.url_table)
         self.setLayout(layout)
@@ -47,6 +48,8 @@ class ConnectionSection(QGroupBox):
             self.parent_widget.original_url_table_size = (744, 376)
             self.parent_widget.original_url_row_height = 39
             self.parent_widget.selected_url_row = None
+            self.parent_widget.url_header_overlay = self.url_header_overlay
+            self.parent_widget.original_url_header_overlay_geometry = (0, 0, 744, 31)
 
     def _setup_table(self):
         """테이블 설정"""
@@ -104,4 +107,78 @@ class ConnectionSection(QGroupBox):
                 border: none;
                 border-bottom: 1px solid #CCCCCC;
             }
+            QScrollBar:vertical {
+                border: none;
+                background: #DFDFDF;
+                width: 14px;
+                margin-top: 31px;
+                margin-bottom: 0px;
+                margin-left: 0px;
+                margin-right: 0px;
+                border-radius: 4px;
+            }
+            QScrollBar::handle:vertical {
+                background: #A3A9AD;
+                min-height: 20px;
+                border-radius: 4px;
+                margin: 0px 3px;
+            }
+            QScrollBar::handle:vertical:hover {
+                background: #8A9094;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                border: none;
+                background: none;
+            }
         """)
+
+    def _setup_header_overlay(self):
+        """헤더 오버레이 위젯 설정 (스크롤바 상단 영역 덮기)"""
+        self.url_header_overlay = QWidget()
+        self.url_header_overlay.setParent(self.url_table)
+        self.url_header_overlay.setGeometry(0, 0, 744, 31)
+        self.url_header_overlay.setStyleSheet("""
+            QWidget {
+                background-color: #EDF0F3;
+                border: 1px solid #CECECE;
+                border-bottom: none;
+                border-top-left-radius: 4px;
+                border-top-right-radius: 4px;
+            }
+        """)
+
+        header_layout = QHBoxLayout(self.url_header_overlay)
+        header_layout.setContentsMargins(0, 0, 0, 0)
+        header_layout.setSpacing(0)
+
+        # 첫 번째 열 (빈 열)
+        self.url_header_empty_label = QLabel("")
+        self.url_header_empty_label.setFixedSize(50, 31)
+        self.url_header_empty_label.setAlignment(Qt.AlignCenter)
+        self.url_header_empty_label.setStyleSheet("""
+            QLabel {
+                background-color: transparent;
+                border: none;
+            }
+        """)
+        header_layout.addWidget(self.url_header_empty_label)
+
+        # URL 라벨
+        self.url_header_url_label = QLabel("URL")
+        self.url_header_url_label.setFixedSize(694, 31)
+        self.url_header_url_label.setAlignment(Qt.AlignCenter)
+        self.url_header_url_label.setStyleSheet("""
+            QLabel {
+                background-color: transparent;
+                border: none;
+                color: #1B1B1C;
+                font-family: 'Noto Sans KR';
+                font-size: 18px;
+                font-weight: 600;
+                letter-spacing: -0.18px;
+            }
+        """)
+        header_layout.addWidget(self.url_header_url_label)
+
+        self.url_header_overlay.show()
+        self.url_header_overlay.raise_()

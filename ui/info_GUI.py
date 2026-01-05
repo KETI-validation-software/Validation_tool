@@ -376,6 +376,11 @@ class InfoWidget(QWidget):
                     url_col_width = new_url_table_width - 50
                     self.url_table.setColumnWidth(1, url_col_width)
 
+                    # URL 헤더 오버레이 크기 조정
+                    if hasattr(self, 'url_header_overlay') and hasattr(self, 'original_url_header_overlay_geometry'):
+                        orig = self.original_url_header_overlay_geometry
+                        self.url_header_overlay.setGeometry(orig[0], orig[1], new_url_table_width, orig[3])
+
                     # 행 높이는 고정 유지, 셀 위젯 너비만 조정
                     if hasattr(self, 'original_url_row_height'):
                         for row in range(self.url_table.rowCount()):
