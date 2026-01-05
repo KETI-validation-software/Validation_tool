@@ -1329,6 +1329,10 @@ class MyApp(PlatformMainUI):
                 print(f"[PLATFORM] 🔄 시험 분야 전환: {self.current_spec_id} → {new_spec_id}")
                 print(f"[DEBUG] 현재 그룹: {self.current_group_id}")
 
+                # ✅ 0. 일시정지 파일 삭제 (시나리오 변경 시 이전 일시정지 상태 제거)
+                self.cleanup_paused_file()
+                print(f"[SELECT] 시나리오 전환: 일시정지 파일 삭제 완료")
+
                 # ✅ 1. 현재 spec의 테이블 데이터 저장 (current_spec_id가 None이 아닐 때만)
                 if self.current_spec_id is not None:
                     print(f"[DEBUG] 데이터 저장 전 - 테이블 행 수: {self.tableWidget.rowCount()}")
