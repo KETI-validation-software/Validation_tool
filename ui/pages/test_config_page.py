@@ -119,8 +119,6 @@ def _setup_bg_root(parent_widget, content_layout):
     bg_root_layout.setContentsMargins(0, 36, 0, 44)
     bg_root_layout.setSpacing(0)
 
-    bg_root_layout.addStretch()
-
     # 타이틀 컨테이너
     _setup_title_container(parent_widget, bg_root_layout)
 
@@ -129,9 +127,7 @@ def _setup_bg_root(parent_widget, content_layout):
     # 패널 컨테이너
     _setup_panels_container(parent_widget, bg_root_layout)
 
-    bg_root_layout.addStretch()
-
-    content_layout.addWidget(parent_widget.bg_root, 0, Qt.AlignHCenter | Qt.AlignVCenter)
+    content_layout.addWidget(parent_widget.bg_root, 0, Qt.AlignHCenter | Qt.AlignTop)
 
 
 def _setup_title_container(parent_widget, bg_root_layout):
@@ -281,8 +277,6 @@ def _setup_left_panel(parent_widget, panels_layout):
     parent_widget.original_api_group_size = (744, 376)
     left_layout.addWidget(parent_widget.api_group)
 
-    left_layout.addStretch()
-
     parent_widget.left_panel.setLayout(left_layout)
     panels_layout.addWidget(parent_widget.left_panel, 0, Qt.AlignTop)
 
@@ -317,6 +311,7 @@ def _setup_right_panel(parent_widget, panels_layout):
 
     # AuthSection
     parent_widget.auth_section_widget = AuthSection(parent_widget)
+    parent_widget.original_auth_section_widget_size = (744, 240)
     right_layout.addWidget(parent_widget.auth_section_widget)
 
     right_layout.addSpacing(16)
@@ -331,14 +326,13 @@ def _setup_right_panel(parent_widget, panels_layout):
 
     # ConnectionSection
     parent_widget.connection_section_widget = ConnectionSection(parent_widget)
+    parent_widget.original_connection_section_widget_size = (744, 376)
     right_layout.addWidget(parent_widget.connection_section_widget)
 
     right_layout.addSpacing(32)
 
     # 하단 버튼
     _setup_bottom_buttons(parent_widget, right_layout)
-
-    right_layout.addStretch()
 
     parent_widget.right_panel.setLayout(right_layout)
     panels_layout.addWidget(parent_widget.right_panel, 0, Qt.AlignTop)
