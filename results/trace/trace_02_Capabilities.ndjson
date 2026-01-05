@@ -1,4 +1,0 @@
-{"time": "2026-01-05T07:37:35.563176Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
-{"time": "2026-01-05T07:37:35.587111Z", "api": "Capabilities", "dir": "REQUEST", "data": {}}
-{"time": "2026-01-05T07:37:35.591101Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "transportSupport": [{"transProtocolType": "Webhook", "transProtocolDesc": ""}]}}
-{"time": "2026-01-05T07:37:36.559538Z", "api": "Capabilities", "dir": "RESPONSE", "data": {"code": "200", "message": "성공", "transportSupport": [{"transProtocolType": "Webhook", "transProtocolDesc": ""}]}}
