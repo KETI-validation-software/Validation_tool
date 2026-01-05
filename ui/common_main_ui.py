@@ -37,13 +37,16 @@ import spec.Constraints_request as constraints_request_module
 class CommonMainUI(QWidget):
     def __init__(self):
         super().__init__()
+        # 서브클래스에서 오버라이드 가능한 속성
+        self.window_title = '시스템 연동 검증'
+        self.show_initial_score = False
 
     def initUI(self):
         # ✅ 반응형: 최소 크기 설정
         self.setMinimumSize(1680, 1006)
 
         if not self.embedded:
-            self.setWindowTitle('시스템 연동 검증')
+            self.setWindowTitle(self.window_title)
 
         # ✅ 메인 레이아웃
         mainLayout = QVBoxLayout()
@@ -399,7 +402,7 @@ class CommonMainUI(QWidget):
                 color: #CECECE;
             }}
         """)
-        self.sbtn.clicked.connect(self.start_btn_clicked)
+        # 버튼 연결은 서브클래스의 connect_buttons()에서 수행
 
         # 정지 버튼
         self.stop_btn = QPushButton("일시 정지", self.buttonGroup)  # 텍스트 추가
@@ -428,8 +431,8 @@ class CommonMainUI(QWidget):
                 color: #CECECE;
             }}
         """)
-        self.stop_btn.clicked.connect(self.stop_btn_clicked)
         self.stop_btn.setDisabled(True)
+        # 버튼 연결은 서브클래스의 connect_buttons()에서 수행
 
         # 종료 버튼
         self.rbtn = QPushButton("종료", self.buttonGroup)  # 텍스트 추가
@@ -458,7 +461,7 @@ class CommonMainUI(QWidget):
                 color: #CECECE;
             }}
         """)
-        self.rbtn.clicked.connect(self.exit_btn_clicked)
+        # 버튼 연결은 서브클래스의 connect_buttons()에서 수행
 
         # 시험 결과 버튼
         self.result_btn = QPushButton("시험 결과", self.buttonGroup)  # 텍스트 추가
@@ -487,7 +490,7 @@ class CommonMainUI(QWidget):
                 color: #CECECE;
             }}
         """)
-        self.result_btn.clicked.connect(self.show_result_page)
+        # 버튼 연결은 서브클래스의 connect_buttons()에서 수행
 
         # 초기 버튼 위치 설정 (레이아웃 없이 직접 배치)
         self._update_button_positions()
@@ -514,13 +517,26 @@ class CommonMainUI(QWidget):
         if not self.embedded:
             self.setWindowTitle('물리보안 시스템 연동 검증 소프트웨어')
 
-        QTimer.singleShot(100, self.select_first_scenario)
+        # 버튼 이벤트 연결 (서브클래스에서 구현)
+        self.connect_buttons()
+
+        # 초기 점수 표시 (Platform만 해당)
+        if self.show_initial_score and hasattr(self, 'update_score_display'):
+            self.update_score_display()
+
+        # 첫 시나리오 선택 (System만 해당)
+        if hasattr(self, 'select_first_scenario'):
+            QTimer.singleShot(100, self.select_first_scenario)
 
         if not self.embedded:
             self.show()
 
     def create_spec_selection_panel(self, left_layout):
         raise NotImplementedError("Subclass must implement create_spec_selection_panel")
+
+    def connect_buttons(self):
+        """버튼 이벤트 연결 - 서브클래스에서 구현 필요"""
+        raise NotImplementedError("Subclass must implement connect_buttons")
 
 
 

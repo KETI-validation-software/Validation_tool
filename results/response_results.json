@@ -22,10 +22,10 @@
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 98.52,
-    "totalFields": 135,
-    "passedFields": 133,
-    "failedFields": 2
+    "score": 100.0,
+    "totalFields": 103,
+    "passedFields": 103,
+    "failedFields": 0
   },
   "testResult": [
     {
@@ -249,14 +249,14 @@
                 "sensorDeviceList": [
                   {
                     "sensorDeviceID": "iot0001",
-                    "eventName": "Leak",
-                    "eventTime": 20251107580248907,
+                    "eventName": "MotionDetection",
+                    "eventTime": 20251112657324909,
                     "eventDesc": "100도"
                   },
                   {
                     "sensorDeviceID": "iot0002",
-                    "eventName": "Leak",
-                    "eventTime": 20251114726545681,
+                    "eventName": "MotionDetection",
+                    "eventTime": 20251105499849836,
                     "eventDesc": "100도"
                   }
                 ]
@@ -274,96 +274,13 @@
       "testGroup": "cmjcefmh8070gcfb35wjptcsl",
       "testSpecId": "cmii7w683006h8z1t7usnin5g",
       "testSpecName": "ac001",
-      "score": 0,
-      "totalFields": 0,
-      "passedFields": 0,
+      "score": 100.0,
+      "totalFields": 60,
+      "passedFields": 60,
       "failedFields": 0,
       "apis": [
         {
           "id": "cmii80zqn007k8z1t85trpyps",
-          "name": "사용자 인증",
-          "method": "POST",
-          "endpoint": "/Authentication",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmiwslyqi049np002cgziiglj",
-          "name": "전송 지원 기능 정보 연동",
-          "method": "POST",
-          "endpoint": "/Capabilities",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmiwso2p204bup002k9s8z9ph",
-          "name": "바이오 및 출입통제 장치 목록 정보",
-          "method": "POST",
-          "endpoint": "/DoorProfiles",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmiwstny705pnp002qw73yzs3",
-          "name": "사용자 권한 정보 연동",
-          "method": "POST",
-          "endpoint": "/AccessUserInfos",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmiwsz3sr079dp002xooui9id",
-          "name": "실시간 출입인증 목록 정보 연동",
-          "method": "POST",
-          "endpoint": "/RealtimeVerifEventInfos",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmiwtf61309slp002fna2xzbi",
-          "name": "저장된 출입인증 목록 정보 연동",
-          "method": "POST",
-          "endpoint": "/StoredVerifEventInfos",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        }
-      ]
-    },
-    {
-      "testGroup": "cmjcefmh8070gcfb35wjptcsl",
-      "testSpecId": "cmii7v8pr006g8z1tvo55a50u",
-      "testSpecName": "vid001",
-      "score": 97.83,
-      "totalFields": 92,
-      "passedFields": 90,
-      "failedFields": 2,
-      "apis": [
-        {
-          "id": "cmii7ylxn006m8z1tqq8dard1",
           "name": "사용자 인증",
           "method": "POST",
           "endpoint": "/Authentication",
@@ -390,14 +307,14 @@
           ]
         },
         {
-          "id": "cmiqtf9x600upie8ft45b1h1w",
+          "id": "cmiwslyqi049np002cgziiglj",
           "name": "전송 지원 기능 정보 연동",
           "method": "POST",
           "endpoint": "/Capabilities",
           "score": 100.0,
           "validationCnt": 1,
-          "totalFields": 8,
-          "passFields": 8,
+          "totalFields": 5,
+          "passFields": 5,
           "failFields": 0,
           "validations": [
             {
@@ -405,15 +322,9 @@
               "validationData": {
                 "code": "200",
                 "message": "성공",
-                "streamingSupport": [
-                  {
-                    "streamProtocolType": "RTSP",
-                    "streamProtocolDesc": "Unicast"
-                  }
-                ],
                 "transportSupport": [
                   {
-                    "transProtocolType": "Webhook",
+                    "transProtocolType": "WebHook",
                     "transProtocolDesc": ""
                   }
                 ]
@@ -426,14 +337,14 @@
           ]
         },
         {
-          "id": "cmiqthu4900voie8f1evs0kfm",
-          "name": "카메라 목록 연동",
+          "id": "cmiwso2p204bup002k9s8z9ph",
+          "name": "바이오 및 출입통제 장치 목록 정보",
           "method": "POST",
-          "endpoint": "/CameraProfiles",
+          "endpoint": "/DoorProfiles",
           "score": 100.0,
           "validationCnt": 1,
-          "totalFields": 12,
-          "passFields": 12,
+          "totalFields": 20,
+          "passFields": 20,
           "failFields": 0,
           "validations": [
             {
@@ -441,57 +352,44 @@
               "validationData": {
                 "code": "200",
                 "message": "성공",
-                "camList": [
+                "doorList": [
                   {
-                    "camID": "cam0001",
-                    "camName": "카메라1",
-                    "camLoc": {
+                    "doorID": "door0001",
+                    "doorName": "A건물 출입문",
+                    "doorRelayStatus": "일반",
+                    "doorSensor": "0",
+                    "doorLoc": {
                       "lon": "127.127730",
                       "lat": "38.439801",
                       "alt": "32.131",
                       "desc": "3층복도"
                     },
-                    "camConfig": {
-                      "camType": "PTZ"
-                    }
-                  },
-                  {
-                    "camID": "cam0002",
-                    "camName": "카메라2",
-                    "camLoc": {
-                      "lon": "127.2887",
-                      "lat": "37.33671",
-                      "alt": ""
-                    },
-                    "camConfig": {
-                      "camType": "dome"
-                    }
-                  },
-                  {
-                    "camID": "cam003",
-                    "camName": "카메라3",
-                    "camLoc": {
-                      "lon": "75",
-                      "lat": "585",
-                      "alt": "122",
-                      "desc": "2층출입문"
-                    },
-                    "camConfig": {
-                      "camType": "PTZ"
-                    }
-                  },
-                  {
-                    "camID": "cam004",
-                    "camName": "카메라4",
-                    "camLoc": {
-                      "lon": "44",
-                      "lat": "211",
-                      "alt": "23",
-                      "desc": "1층 출입문"
-                    },
-                    "camConfig": {
-                      "camType": "dome"
-                    }
+                    "bioDeviceList": [
+                      {
+                        "bioDeviceID": "bio0001",
+                        "bioDeviceName": "출입문홍채인식기기",
+                        "bioDeviceAuthTypeList": [
+                          "홍채",
+                          "지문"
+                        ]
+                      },
+                      {
+                        "bioDeviceID": "bio0002",
+                        "bioDeviceName": "출입문지문인식기기",
+                        "bioDeviceAuthTypeList": [
+                          "지문"
+                        ]
+                      }
+                    ],
+                    "otherDeviceList": [
+                      {
+                        "otherDeviceID": "other0001",
+                        "otherDeviceName": "출입문카드인식기기",
+                        "otherDeviceAuthTypeList": [
+                          "카드"
+                        ]
+                      }
+                    ]
                   }
                 ]
               },
@@ -503,14 +401,14 @@
           ]
         },
         {
-          "id": "cmiqtkefj00whie8fd8odtc1m",
-          "name": "실시간 영상(CCTV) 전송 ",
+          "id": "cmiwstny705pnp002qw73yzs3",
+          "name": "사용자 권한 정보 연동",
           "method": "POST",
-          "endpoint": "/StreamURLs",
+          "endpoint": "/AccessUserInfos",
           "score": 100.0,
           "validationCnt": 1,
-          "totalFields": 12,
-          "passFields": 12,
+          "totalFields": 11,
+          "passFields": 11,
           "failFields": 0,
           "validations": [
             {
@@ -518,54 +416,41 @@
               "validationData": {
                 "code": "200",
                 "message": "성공",
-                "camList": [
+                "userList": [
                   {
-                    "camID": "cam0001",
-                    "accessID": "",
-                    "accessPW": "",
-                    "camURL": "rtsp://192.168.0.1:8000",
-                    "videoInfo": {
-                      "resolution": "1920x1080",
-                      "fps": 30,
-                      "videoCodec": "H.264",
-                      "audioCodec": "G.711"
-                    }
+                    "userID": "user0001",
+                    "userName": "홍길동",
+                    "userDesc": "일반사용자",
+                    "doorList": [
+                      {
+                        "doorID": "door0001",
+                        "timePeriod": {
+                          "startTime": 20251105163010124,
+                          "endTime": 20251115163010124
+                        }
+                      }
+                    ]
                   },
                   {
-                    "camID": "cam0002",
-                    "accessID": "",
-                    "accessPW": "",
-                    "camURL": "rtsp://192.168.0.1:8000",
-                    "videoInfo": {
-                      "resolution": "1920x1080",
-                      "fps": 30,
-                      "videoCodec": "H.264",
-                      "audioCodec": "G.711"
-                    }
-                  },
-                  {
-                    "camID": "cam003",
-                    "accessID": "",
-                    "accessPW": "",
-                    "camURL": "rtsp://192.168.0.1:8000",
-                    "videoInfo": {
-                      "resolution": "1920x1080",
-                      "fps": 30,
-                      "videoCodec": "H.264",
-                      "audioCodec": "G.711"
-                    }
-                  },
-                  {
-                    "camID": "cam004",
-                    "accessID": "",
-                    "accessPW": "",
-                    "camURL": "rtsp://192.168.0.1:8000",
-                    "videoInfo": {
-                      "resolution": "1920x1080",
-                      "fps": 30,
-                      "videoCodec": "H.264",
-                      "audioCodec": "G.711"
-                    }
+                    "userID": "user0002",
+                    "userName": "김철수",
+                    "userDesc": "관리자",
+                    "doorList": [
+                      {
+                        "doorID": "door0002",
+                        "timePeriod": {
+                          "startTime": 20251105163010124,
+                          "endTime": 20251115163010120
+                        }
+                      },
+                      {
+                        "doorID": "door0003",
+                        "timePeriod": {
+                          "startTime": 20251105163010124,
+                          "endTime": 20251115163010124
+                        }
+                      }
+                    ]
                   }
                 ]
               },
@@ -577,14 +462,14 @@
           ]
         },
         {
-          "id": "cmiqtnwm200xoie8fxzfhodj5-registration",
-          "name": "실시간 이벤트 분석 정보 연동",
+          "id": "cmiwsz3sr079dp002xooui9id-registration",
+          "name": "실시간 출입인증 목록 정보 연동",
           "method": "POST",
-          "endpoint": "/RealtimeVideoEventInfos",
+          "endpoint": "/RealtimeVerifEventInfos",
           "score": 100.0,
           "validationCnt": 1,
-          "totalFields": 9,
-          "passFields": 9,
+          "totalFields": 10,
+          "passFields": 10,
           "failFields": 0,
           "validations": [
             {
@@ -603,10 +488,10 @@
           ]
         },
         {
-          "id": "cmiqtnwm200xoie8fxzfhodj5-webhook",
-          "name": "실시간 이벤트 분석 정보 연동 (Webhook)",
+          "id": "cmiwsz3sr079dp002xooui9id-webhook",
+          "name": "실시간 출입인증 목록 정보 연동 (Webhook)",
           "method": "POST",
-          "endpoint": "/RealtimeVideoEventInfos/webhook",
+          "endpoint": "/RealtimeVerifEventInfos/webhook",
           "score": 0,
           "validationCnt": 1,
           "totalFields": 0,
@@ -621,196 +506,10 @@
           ]
         },
         {
-          "id": "cmiwrkvjq0005nkgl04g93wwy",
-          "name": "저장된 영상 목록 연동",
+          "id": "cmiwtf61309slp002fna2xzbi",
+          "name": "저장된 출입인증 목록 정보 연동",
           "method": "POST",
-          "endpoint": "/StoredVideoInfos",
-          "score": 100.0,
-          "validationCnt": 1,
-          "totalFields": 7,
-          "passFields": 7,
-          "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "code": "200",
-                "message": "성공",
-                "camList": [
-                  {
-                    "camID": "cam0001",
-                    "timeList": [
-                      {
-                        "startTime": 20251111993960944,
-                        "endTime": 20251114977143309
-                      },
-                      {
-                        "startTime": 20251110355507671,
-                        "endTime": 20251111664017056
-                      },
-                      {
-                        "startTime": 20251109897065866,
-                        "endTime": 20251111412308870
-                      },
-                      {
-                        "startTime": 20251114828441909,
-                        "endTime": 20251114999536129
-                      }
-                    ]
-                  },
-                  {
-                    "camID": "cam0002",
-                    "timeList": [
-                      {
-                        "startTime": 20251105594530694,
-                        "endTime": 20251107991990954
-                      },
-                      {
-                        "startTime": 20251107238803541,
-                        "endTime": 20251112834514379
-                      },
-                      {
-                        "startTime": 20251111916892862,
-                        "endTime": 20251112303720597
-                      },
-                      {
-                        "startTime": 20251108602941681,
-                        "endTime": 20251113545447089
-                      }
-                    ]
-                  },
-                  {
-                    "camID": "cam003",
-                    "timeList": [
-                      {
-                        "startTime": 20251110911142438,
-                        "endTime": 20251113670848949
-                      },
-                      {
-                        "startTime": 20251113074215294,
-                        "endTime": 20251113363541126
-                      },
-                      {
-                        "startTime": 20251107649845539,
-                        "endTime": 20251109275147761
-                      },
-                      {
-                        "startTime": 20251108107023126,
-                        "endTime": 20251110546843438
-                      }
-                    ]
-                  },
-                  {
-                    "camID": "cam004",
-                    "timeList": [
-                      {
-                        "startTime": 20251108928955259,
-                        "endTime": 20251112836183834
-                      },
-                      {
-                        "startTime": 20251112806748503,
-                        "endTime": 20251112908880838
-                      },
-                      {
-                        "startTime": 20251111968553945,
-                        "endTime": 20251113377917440
-                      },
-                      {
-                        "startTime": 20251108588554243,
-                        "endTime": 20251108735008584
-                      }
-                    ]
-                  }
-                ]
-              },
-              "validationErrors": [
-                "[시도 1/1]",
-                "오류가 없습니다."
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cmiwrq4r200kqnkgluspxeyu7",
-          "name": "저장된 영상(CCTV) 전송",
-          "method": "POST",
-          "endpoint": "/ReplayURL",
-          "score": 86.0,
-          "validationCnt": 1,
-          "totalFields": 14,
-          "passFields": 12,
-          "failFields": 2,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "code": "200",
-                "message": "성공",
-                "camList": [
-                  {
-                    "camID": "cam0001",
-                    "accessID": "conn0001",
-                    "accessPW": "1234",
-                    "camURL": "rtsp://192.168.0.1:8000",
-                    "videoInfo": {
-                      "resolution": "1920x1080",
-                      "fps": 30,
-                      "videoCodec": "H.264",
-                      "audioCodec": "G.711"
-                    }
-                  },
-                  {
-                    "camID": "cam0002",
-                    "accessID": "conn0001",
-                    "accessPW": "1234",
-                    "camURL": "rtsp://192.168.0.1:8000",
-                    "videoInfo": {
-                      "resolution": "1920x1080",
-                      "fps": 30,
-                      "videoCodec": "H.264",
-                      "audioCodec": "G.711"
-                    }
-                  },
-                  {
-                    "camID": "cam003",
-                    "accessID": "conn0001",
-                    "accessPW": "1234",
-                    "camURL": "rtsp://192.168.0.1:8000",
-                    "videoInfo": {
-                      "resolution": "1920x1080",
-                      "fps": 30,
-                      "videoCodec": "H.264",
-                      "audioCodec": "G.711"
-                    }
-                  },
-                  {
-                    "camID": "cam004",
-                    "accessID": "conn0001",
-                    "accessPW": "1234",
-                    "camURL": "rtsp://192.168.0.1:8000",
-                    "videoInfo": {
-                      "resolution": "1920x1080",
-                      "fps": 30,
-                      "videoCodec": "H.264",
-                      "audioCodec": "G.711"
-                    }
-                  }
-                ]
-              },
-              "validationErrors": [
-                "[시도 1/1]",
-                "<b>[camList]</b> (2건)",
-                "- [필드 누락] endTime",
-                "- [필드 누락] startTime"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cmiws2qij05apnkgli7hun3bl",
-          "name": "저장된 이벤트 분석 정보 연동",
-          "method": "POST",
-          "endpoint": "/StoredVideoEventInfos",
+          "endpoint": "/StoredVerifEventInfos",
           "score": 100.0,
           "validationCnt": 1,
           "totalFields": 9,
@@ -822,328 +521,34 @@
               "validationData": {
                 "code": "200",
                 "message": "성공",
-                "camList": [
+                "doorList": [
                   {
-                    "camID": "cam0001",
-                    "eventUUID": "event01",
-                    "eventName": "Loitering",
-                    "startTime": 20251108100252201,
-                    "endTime": 20251108458826766,
-                    "eventDesc": "AAABVVVVCCCDDssvfdd"
+                    "eventTime": 20220822163022124,
+                    "doorID": "door0001",
+                    "userID": "user0001",
+                    "bioAuthTypeList": [
+                      "지문",
+                      "얼굴"
+                    ],
+                    "otherAuthTypeList": [
+                      "카드"
+                    ],
+                    "eventName": "AuthSuccess",
+                    "eventDesc": "36.5"
                   },
                   {
-                    "camID": "cam0002",
-                    "eventUUID": "event01",
-                    "eventName": "Loitering",
-                    "startTime": 20251110662145064,
-                    "endTime": 20251113014749656,
-                    "eventDesc": "AAABVVVVCCCDDssvfdd"
-                  },
-                  {
-                    "camID": "cam003",
-                    "eventUUID": "event01",
-                    "eventName": "Loitering",
-                    "startTime": 20251105239595479,
-                    "endTime": 20251115139247673,
-                    "eventDesc": "AAABVVVVCCCDDssvfdd"
-                  },
-                  {
-                    "camID": "cam004",
-                    "eventUUID": "event01",
-                    "eventName": "Loitering",
-                    "startTime": 20251112214924231,
-                    "endTime": 20251115137472465,
-                    "eventDesc": "AAABVVVVCCCDDssvfdd"
-                  }
-                ]
-              },
-              "validationErrors": [
-                "[시도 1/1]",
-                "오류가 없습니다."
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cmiws9btu01ksp0028h4uc4az",
-          "name": "저장된 객체 분석 정보 연동",
-          "method": "POST",
-          "endpoint": "/StoredObjectAnalyticsInfos",
-          "score": 100.0,
-          "validationCnt": 1,
-          "totalFields": 16,
-          "passFields": 16,
-          "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "code": "200",
-                "message": "성공",
-                "camList": [
-                  {
-                    "camID": "cam0001",
-                    "analyticsTime": 20251109263659638,
-                    "anlayticsResultList": [
-                      {
-                        "anayticsID": "object001",
-                        "analyticsClass": "Human",
-                        "analyticsAttribute": [
-                          "빨간색"
-                        ],
-                        "analyticsConfidence": 0.8,
-                        "analyticsBoundingBox": {
-                          "left": 0.2,
-                          "top": 0.1,
-                          "right": 0.5,
-                          "bottom": 0.6
-                        },
-                        "analyticsDesc": "13가 4567"
-                      },
-                      {
-                        "anayticsID": "object001",
-                        "analyticsClass": "Human",
-                        "analyticsAttribute": [
-                          "빨간색"
-                        ],
-                        "analyticsConfidence": 0.8,
-                        "analyticsBoundingBox": {
-                          "left": 0.2,
-                          "top": 0.1,
-                          "right": 0.5,
-                          "bottom": 0.6
-                        },
-                        "analyticsDesc": "13가 4567"
-                      },
-                      {
-                        "anayticsID": "object001",
-                        "analyticsClass": "Human",
-                        "analyticsAttribute": [
-                          "빨간색"
-                        ],
-                        "analyticsConfidence": 0.8,
-                        "analyticsBoundingBox": {
-                          "left": 0.2,
-                          "top": 0.1,
-                          "right": 0.5,
-                          "bottom": 0.6
-                        },
-                        "analyticsDesc": "13가 4567"
-                      },
-                      {
-                        "anayticsID": "object001",
-                        "analyticsClass": "Human",
-                        "analyticsAttribute": [
-                          "빨간색"
-                        ],
-                        "analyticsConfidence": 0.8,
-                        "analyticsBoundingBox": {
-                          "left": 0.2,
-                          "top": 0.1,
-                          "right": 0.5,
-                          "bottom": 0.6
-                        },
-                        "analyticsDesc": "13가 4567"
-                      }
-                    ]
-                  },
-                  {
-                    "camID": "cam0002",
-                    "analyticsTime": 20251112652918104,
-                    "anlayticsResultList": [
-                      {
-                        "anayticsID": "object001",
-                        "analyticsClass": "Human",
-                        "analyticsAttribute": [
-                          "빨간색"
-                        ],
-                        "analyticsConfidence": 0.8,
-                        "analyticsBoundingBox": {
-                          "left": 0.2,
-                          "top": 0.1,
-                          "right": 0.5,
-                          "bottom": 0.6
-                        },
-                        "analyticsDesc": "13가 4567"
-                      },
-                      {
-                        "anayticsID": "object001",
-                        "analyticsClass": "Human",
-                        "analyticsAttribute": [
-                          "빨간색"
-                        ],
-                        "analyticsConfidence": 0.8,
-                        "analyticsBoundingBox": {
-                          "left": 0.2,
-                          "top": 0.1,
-                          "right": 0.5,
-                          "bottom": 0.6
-                        },
-                        "analyticsDesc": "13가 4567"
-                      },
-                      {
-                        "anayticsID": "object001",
-                        "analyticsClass": "Human",
-                        "analyticsAttribute": [
-                          "빨간색"
-                        ],
-                        "analyticsConfidence": 0.8,
-                        "analyticsBoundingBox": {
-                          "left": 0.2,
-                          "top": 0.1,
-                          "right": 0.5,
-                          "bottom": 0.6
-                        },
-                        "analyticsDesc": "13가 4567"
-                      },
-                      {
-                        "anayticsID": "object001",
-                        "analyticsClass": "Human",
-                        "analyticsAttribute": [
-                          "빨간색"
-                        ],
-                        "analyticsConfidence": 0.8,
-                        "analyticsBoundingBox": {
-                          "left": 0.2,
-                          "top": 0.1,
-                          "right": 0.5,
-                          "bottom": 0.6
-                        },
-                        "analyticsDesc": "13가 4567"
-                      }
-                    ]
-                  },
-                  {
-                    "camID": "cam003",
-                    "analyticsTime": 20251114998233271,
-                    "anlayticsResultList": [
-                      {
-                        "anayticsID": "object001",
-                        "analyticsClass": "Human",
-                        "analyticsAttribute": [
-                          "빨간색"
-                        ],
-                        "analyticsConfidence": 0.8,
-                        "analyticsBoundingBox": {
-                          "left": 0.2,
-                          "top": 0.1,
-                          "right": 0.5,
-                          "bottom": 0.6
-                        },
-                        "analyticsDesc": "13가 4567"
-                      },
-                      {
-                        "anayticsID": "object001",
-                        "analyticsClass": "Human",
-                        "analyticsAttribute": [
-                          "빨간색"
-                        ],
-                        "analyticsConfidence": 0.8,
-                        "analyticsBoundingBox": {
-                          "left": 0.2,
-                          "top": 0.1,
-                          "right": 0.5,
-                          "bottom": 0.6
-                        },
-                        "analyticsDesc": "13가 4567"
-                      },
-                      {
-                        "anayticsID": "object001",
-                        "analyticsClass": "Human",
-                        "analyticsAttribute": [
-                          "빨간색"
-                        ],
-                        "analyticsConfidence": 0.8,
-                        "analyticsBoundingBox": {
-                          "left": 0.2,
-                          "top": 0.1,
-                          "right": 0.5,
-                          "bottom": 0.6
-                        },
-                        "analyticsDesc": "13가 4567"
-                      },
-                      {
-                        "anayticsID": "object001",
-                        "analyticsClass": "Human",
-                        "analyticsAttribute": [
-                          "빨간색"
-                        ],
-                        "analyticsConfidence": 0.8,
-                        "analyticsBoundingBox": {
-                          "left": 0.2,
-                          "top": 0.1,
-                          "right": 0.5,
-                          "bottom": 0.6
-                        },
-                        "analyticsDesc": "13가 4567"
-                      }
-                    ]
-                  },
-                  {
-                    "camID": "cam004",
-                    "analyticsTime": 20251105712370460,
-                    "anlayticsResultList": [
-                      {
-                        "anayticsID": "object001",
-                        "analyticsClass": "Human",
-                        "analyticsAttribute": [
-                          "빨간색"
-                        ],
-                        "analyticsConfidence": 0.8,
-                        "analyticsBoundingBox": {
-                          "left": 0.2,
-                          "top": 0.1,
-                          "right": 0.5,
-                          "bottom": 0.6
-                        },
-                        "analyticsDesc": "13가 4567"
-                      },
-                      {
-                        "anayticsID": "object001",
-                        "analyticsClass": "Human",
-                        "analyticsAttribute": [
-                          "빨간색"
-                        ],
-                        "analyticsConfidence": 0.8,
-                        "analyticsBoundingBox": {
-                          "left": 0.2,
-                          "top": 0.1,
-                          "right": 0.5,
-                          "bottom": 0.6
-                        },
-                        "analyticsDesc": "13가 4567"
-                      },
-                      {
-                        "anayticsID": "object001",
-                        "analyticsClass": "Human",
-                        "analyticsAttribute": [
-                          "빨간색"
-                        ],
-                        "analyticsConfidence": 0.8,
-                        "analyticsBoundingBox": {
-                          "left": 0.2,
-                          "top": 0.1,
-                          "right": 0.5,
-                          "bottom": 0.6
-                        },
-                        "analyticsDesc": "13가 4567"
-                      },
-                      {
-                        "anayticsID": "object001",
-                        "analyticsClass": "Human",
-                        "analyticsAttribute": [
-                          "빨간색"
-                        ],
-                        "analyticsConfidence": 0.8,
-                        "analyticsBoundingBox": {
-                          "left": 0.2,
-                          "top": 0.1,
-                          "right": 0.5,
-                          "bottom": 0.6
-                        },
-                        "analyticsDesc": "13가 4567"
-                      }
-                    ]
+                    "eventTime": 20220822163022124,
+                    "doorID": "door0001",
+                    "userID": "user0001",
+                    "bioAuthTypeList": [
+                      "지문",
+                      "얼굴"
+                    ],
+                    "otherAuthTypeList": [
+                      "카드"
+                    ],
+                    "eventName": "AuthSuccess",
+                    "eventDesc": "36.5"
                   }
                 ]
               },
@@ -1157,5 +562,5 @@
       ]
     }
   ],
-  "completedDate": "2026-01-02T06:46:09Z"
+  "completedDate": "2026-01-05T01:42:47Z"
 }
