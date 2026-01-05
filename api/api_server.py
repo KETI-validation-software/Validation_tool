@@ -1,6 +1,5 @@
 import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
-import ssl
 import json
 import cgi
 from collections import defaultdict, deque  # ### NEW
@@ -13,8 +12,7 @@ from core.functions import resource_path
 from core.data_mapper import ConstraintDataGenerator
 from requests.auth import HTTPDigestAuth
 from collections import defaultdict
-import random
-
+import re
 
 def load_constants():
     import sys, os, importlib
@@ -1148,10 +1146,16 @@ class Server(BaseHTTPRequestHandler):
                 break
 
         if data is None:
+            # 🔥 api_name 뒤에 숫자가 붙어 있는지 검사
+            match = re.match(r"^(.*?)(\d+)$", api_name)
+            if match:
+                base_api_name = match.group(1)
+                print(f"[WARNING][API_RES] 호출 횟수 초과 감지: {api_name} → {base_api_name}")
+                return None, {"code": "404","message": f"API 호출 횟수를 초과했습니다: {base_api_name}"}, None
+
+            # 기존 404 처리
             print(f"[WARNING][API_RES] API를 찾을 수 없음: {api_name}")
             return None, {"code": "404", "message": f"API를 찾을 수 없습니다: {api_name}"}, None
-
-        return i, data, out_con
 
     def parse_path(self):
         """
