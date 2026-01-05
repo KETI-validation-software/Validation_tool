@@ -197,43 +197,39 @@ class InfoWidget(QWidget):
                 # ✅ 섹션 비례 분배 계산 (라벨/간격은 고정, 섹션/테이블만 확장)
                 # 좌측: field_group(240) + api_group(376) = 616px
                 # 우측: auth_section(240) + connection_section(376) = 616px
-                original_panels_height = 802
-                extra_height = original_panels_height * (height_ratio - 1)
-
-                # 각 패널의 확장 가능 영역 (독립적으로 계산)
                 panel_expandable = 240 + 376  # 616px
 
+                # bg_root: page2_content 전체를 채움
+                new_bg_root_width = int(self.original_bg_root_size[0] * width_ratio) if hasattr(self, 'original_bg_root_size') else 1680
+                new_bg_root_height = self.page2_content.height()
+
+                # panels_container: bg_root에서 고정 요소 제외
+                # 고정: 상단마진(36) + 타이틀(52) + 간격(8) + 하단마진(44) = 140px
+                new_panels_height = new_bg_root_height - 140
+                new_title_bg_width = int(self.original_page2_title_bg_size[0] * width_ratio) if hasattr(self, 'original_page2_title_bg_size') else 1584
+
+                # extra_height 계산 (실제 panels 크기 기준)
+                extra_height = max(0, new_panels_height - 802)
                 field_extra = extra_height * (240 / panel_expandable)
                 api_extra = extra_height * (376 / panel_expandable)
                 auth_extra = extra_height * (240 / panel_expandable)
                 url_extra = extra_height * (376 / panel_expandable)
 
-                # bg_root: page2_content 전체를 채움
-                total_extra = field_extra + api_extra  # = extra_height
-                if hasattr(self, 'bg_root') and hasattr(self, 'page2_content'):
-                    new_bg_root_width = int(self.original_bg_root_size[0] * width_ratio)
-                    new_bg_root_height = self.page2_content.height()  # content 전체 채움
+                # bg_root 크기 설정
+                if hasattr(self, 'bg_root'):
                     self.bg_root.setFixedSize(new_bg_root_width, new_bg_root_height)
 
-                    if hasattr(self, 'page2_title_container') and hasattr(self, 'original_page2_title_container_size'):
-                        self.page2_title_container.setFixedSize(new_bg_root_width, self.original_page2_title_container_size[1])
+                # 타이틀 컨테이너
+                if hasattr(self, 'page2_title_container') and hasattr(self, 'original_page2_title_container_size'):
+                    self.page2_title_container.setFixedSize(new_bg_root_width, self.original_page2_title_container_size[1])
 
-                    if hasattr(self, 'page2_title_bg') and hasattr(self, 'original_page2_title_bg_size'):
-                        new_title_bg_width = int(self.original_page2_title_bg_size[0] * width_ratio)
-                        self.page2_title_bg.setFixedSize(new_title_bg_width, self.original_page2_title_bg_size[1])
+                # 타이틀 배경
+                if hasattr(self, 'page2_title_bg') and hasattr(self, 'original_page2_title_bg_size'):
+                    self.page2_title_bg.setFixedSize(new_title_bg_width, self.original_page2_title_bg_size[1])
 
-                        if hasattr(self, 'panels_container') and hasattr(self, 'original_panels_container_size'):
-                            # panels_container: bg_root에서 고정 요소 제외한 나머지
-                            # 고정: 상단마진(36) + 타이틀(52) + 간격(8) + 하단마진(44) = 140px
-                            new_panels_height = new_bg_root_height - 140
-                            self.panels_container.setFixedSize(new_title_bg_width, new_panels_height)
-
-                            # extra_height 재계산 (panels 기준)
-                            extra_height = new_panels_height - 802
-                            field_extra = extra_height * (240 / panel_expandable)
-                            api_extra = extra_height * (376 / panel_expandable)
-                            auth_extra = extra_height * (240 / panel_expandable)
-                            url_extra = extra_height * (376 / panel_expandable)
+                # panels_container
+                if hasattr(self, 'panels_container') and hasattr(self, 'original_panels_container_size'):
+                    self.panels_container.setFixedSize(new_title_bg_width, new_panels_height)
 
                 # 좌측 패널 (802 + field_extra + api_extra, 간격은 고정)
                 if hasattr(self, 'left_panel') and hasattr(self, 'original_left_panel_size'):
@@ -338,9 +334,6 @@ class InfoWidget(QWidget):
                     new_divider_height = int(208 + auth_extra)
                     self.auth_divider.setFixedSize(1, new_divider_height)
                     # 이미지도 함께 확대
-                    from core.functions import resource_path
-                    from PyQt5.QtGui import QPixmap
-                    from PyQt5.QtCore import Qt
                     divider_pixmap = QPixmap(resource_path("assets/image/test_config/divider.png"))
                     self.auth_divider.setPixmap(divider_pixmap.scaled(1, new_divider_height, Qt.IgnoreAspectRatio, Qt.SmoothTransformation))
 
