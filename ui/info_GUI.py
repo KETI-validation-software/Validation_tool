@@ -194,10 +194,25 @@ class InfoWidget(QWidget):
                 width_ratio = max(1.0, self.page2.width() / 1680)
                 height_ratio = max(1.0, self.page2.height() / 1006)
 
-                # bg_root 및 타이틀 컨테이너
-                if hasattr(self, 'bg_root') and hasattr(self, 'original_bg_root_size'):
+                # ✅ 섹션 비례 분배 계산 (라벨/간격은 고정, 섹션/테이블만 확장)
+                # 좌측: field_group(240) + api_group(376) = 616px
+                # 우측: auth_section(240) + connection_section(376) = 616px
+                original_panels_height = 802
+                extra_height = original_panels_height * (height_ratio - 1)
+
+                # 각 패널의 확장 가능 영역 (독립적으로 계산)
+                panel_expandable = 240 + 376  # 616px
+
+                field_extra = extra_height * (240 / panel_expandable)
+                api_extra = extra_height * (376 / panel_expandable)
+                auth_extra = extra_height * (240 / panel_expandable)
+                url_extra = extra_height * (376 / panel_expandable)
+
+                # bg_root: page2_content 전체를 채움
+                total_extra = field_extra + api_extra  # = extra_height
+                if hasattr(self, 'bg_root') and hasattr(self, 'page2_content'):
                     new_bg_root_width = int(self.original_bg_root_size[0] * width_ratio)
-                    new_bg_root_height = int(self.original_bg_root_size[1] * height_ratio)
+                    new_bg_root_height = self.page2_content.height()  # content 전체 채움
                     self.bg_root.setFixedSize(new_bg_root_width, new_bg_root_height)
 
                     if hasattr(self, 'page2_title_container') and hasattr(self, 'original_page2_title_container_size'):
@@ -208,30 +223,47 @@ class InfoWidget(QWidget):
                         self.page2_title_bg.setFixedSize(new_title_bg_width, self.original_page2_title_bg_size[1])
 
                         if hasattr(self, 'panels_container') and hasattr(self, 'original_panels_container_size'):
-                            new_panels_height = int(self.original_panels_container_size[1] * height_ratio)
+                            # panels_container: bg_root에서 고정 요소 제외한 나머지
+                            # 고정: 상단마진(36) + 타이틀(52) + 간격(8) + 하단마진(44) = 140px
+                            new_panels_height = new_bg_root_height - 140
                             self.panels_container.setFixedSize(new_title_bg_width, new_panels_height)
 
-                # 좌측 패널
-                self._resize_widget('left_panel', 'original_left_panel_size', width_ratio, height_ratio)
-                self._resize_widget('field_scenario_title', 'original_field_scenario_title_size', width_ratio)
-                self._resize_widget('field_group', 'original_field_group_size', width_ratio, height_ratio)
+                            # extra_height 재계산 (panels 기준)
+                            extra_height = new_panels_height - 802
+                            field_extra = extra_height * (240 / panel_expandable)
+                            api_extra = extra_height * (376 / panel_expandable)
+                            auth_extra = extra_height * (240 / panel_expandable)
+                            url_extra = extra_height * (376 / panel_expandable)
 
-                # 시험 분야 테이블
+                # 좌측 패널 (802 + field_extra + api_extra, 간격은 고정)
+                if hasattr(self, 'left_panel') and hasattr(self, 'original_left_panel_size'):
+                    new_left_width = int(self.original_left_panel_size[0] * width_ratio)
+                    new_left_height = int(802 + field_extra + api_extra)
+                    self.left_panel.setFixedSize(new_left_width, new_left_height)
+                self._resize_widget('field_scenario_title', 'original_field_scenario_title_size', width_ratio)
+
+                # ✅ field_group 비례 분배 적용 (테이블 높이만 확장)
+                if hasattr(self, 'field_group') and hasattr(self, 'original_field_group_size'):
+                    new_field_group_width = int(self.original_field_group_size[0] * width_ratio)
+                    new_field_group_height = int(240 + field_extra)
+                    self.field_group.setFixedSize(new_field_group_width, new_field_group_height)
+
+                # 시험 분야 테이블 (비례 분배)
                 if hasattr(self, 'test_field_table') and hasattr(self, 'original_test_field_table_size'):
                     new_table_width = int(self.original_test_field_table_size[0] * width_ratio)
-                    new_table_height = int(self.original_test_field_table_size[1] * height_ratio)
+                    new_table_height = int(240 + field_extra)
                     self.test_field_table.setFixedSize(new_table_width, new_table_height)
                     self._resize_table_rows(self.test_field_table, 'original_test_field_row_height', new_table_width)
 
-                # 두 테이블 사이 세로 구분선
+                # 두 테이블 사이 세로 구분선 (테이블과 함께 확장)
                 if hasattr(self, 'divider_line') and hasattr(self, 'original_divider_line_height'):
-                    new_divider_height = int(self.original_divider_line_height * height_ratio)
+                    new_divider_height = int(240 + field_extra)
                     self.divider_line.setFixedSize(1, new_divider_height)
 
-                # 시나리오 테이블
+                # 시나리오 테이블 (비례 분배)
                 if hasattr(self, 'scenario_table') and hasattr(self, 'original_scenario_table_size'):
                     new_table_width = int(self.original_scenario_table_size[0] * width_ratio)
-                    new_table_height = int(self.original_scenario_table_size[1] * height_ratio)
+                    new_table_height = int(240 + field_extra)
                     self.scenario_table.setFixedSize(new_table_width, new_table_height)
                     self._resize_table_rows(self.scenario_table, 'original_scenario_row_height', new_table_width)
 
@@ -243,13 +275,16 @@ class InfoWidget(QWidget):
                         orig = self.original_scenario_placeholder_geometry
                         self.scenario_placeholder_label.setGeometry(orig[0], orig[1], int(orig[2] * width_ratio), new_table_height - 31)
 
-                # 시험 API 그룹
+                # 시험 API 그룹 (비례 분배)
                 self._resize_widget('api_title', 'original_api_title_size', width_ratio)
-                self._resize_widget('api_group', 'original_api_group_size', width_ratio, height_ratio)
+                if hasattr(self, 'api_group') and hasattr(self, 'original_api_group_size'):
+                    new_api_group_width = int(self.original_api_group_size[0] * width_ratio)
+                    new_api_group_height = int(376 + api_extra)
+                    self.api_group.setFixedSize(new_api_group_width, new_api_group_height)
 
                 if hasattr(self, 'api_test_table') and hasattr(self, 'original_api_test_table_size'):
                     new_api_table_width = int(self.original_api_test_table_size[0] * width_ratio)
-                    new_api_table_height = int(self.original_api_test_table_size[1] * height_ratio)
+                    new_api_table_height = int(376 + api_extra)
                     self.api_test_table.setFixedSize(new_api_table_width, new_api_table_height)
 
                     col_width = (new_api_table_width - 50) // 2
@@ -269,35 +304,80 @@ class InfoWidget(QWidget):
 
                     if hasattr(self, 'api_placeholder_label') and hasattr(self, 'original_api_placeholder_geometry'):
                         orig = self.original_api_placeholder_geometry
-                        self.api_placeholder_label.setGeometry(orig[0], orig[1], new_api_table_width - 50, int(orig[3] * height_ratio))
+                        new_placeholder_height = int(376 + api_extra) - 30  # 헤더 높이 제외
+                        self.api_placeholder_label.setGeometry(orig[0], orig[1], new_api_table_width - 50, new_placeholder_height)
 
-                # 우측 패널
-                self._resize_widget('right_panel', 'original_right_panel_size', width_ratio, height_ratio)
+                # 우측 패널 (802 + auth_extra + url_extra, 간격은 고정)
+                if hasattr(self, 'right_panel') and hasattr(self, 'original_right_panel_size'):
+                    new_right_width = int(self.original_right_panel_size[0] * width_ratio)
+                    new_right_height = int(802 + auth_extra + url_extra)
+                    self.right_panel.setFixedSize(new_right_width, new_right_height)
                 self._resize_widget('auth_title_widget', 'original_auth_title_size', width_ratio)
-                self._resize_widget('auth_section', 'original_auth_section_size', width_ratio, height_ratio)
-                self._resize_widget('auth_content_widget', 'original_auth_content_widget_size', width_ratio, height_ratio)
 
-                # 수직 구분선 (특수 처리)
+                # ✅ auth_section 비례 분배 적용
+                if hasattr(self, 'auth_section_widget') and hasattr(self, 'original_auth_section_widget_size'):
+                    new_auth_width = int(self.original_auth_section_widget_size[0] * width_ratio)
+                    new_auth_height = int(240 + auth_extra)
+                    self.auth_section_widget.setFixedSize(new_auth_width, new_auth_height)
+
+                # auth 내부 요소들도 auth_extra 기반으로 확장
+                # auth_content_widget: 240px → 240 + auth_extra
+                if hasattr(self, 'auth_content_widget') and hasattr(self, 'original_auth_content_widget_size'):
+                    new_content_width = int(self.original_auth_content_widget_size[0] * width_ratio)
+                    new_content_height = int(240 + auth_extra)
+                    self.auth_content_widget.setFixedSize(new_content_width, new_content_height)
+
+                # auth_type_widget, auth_divider, common_input_widget: 208px → 208 + auth_extra
+                # (auth_content 내부 패딩 32px 제외한 높이)
+                if hasattr(self, 'auth_type_widget') and hasattr(self, 'original_auth_type_widget_size'):
+                    new_type_width = int(self.original_auth_type_widget_size[0] * width_ratio)
+                    new_type_height = int(208 + auth_extra)
+                    self.auth_type_widget.setFixedSize(new_type_width, new_type_height)
+
                 if hasattr(self, 'auth_divider') and hasattr(self, 'original_auth_divider_size'):
-                    new_divider_height = int(self.original_auth_divider_size[1] * height_ratio)
+                    new_divider_height = int(208 + auth_extra)
                     self.auth_divider.setFixedSize(1, new_divider_height)
+                    # 이미지도 함께 확대
+                    from core.functions import resource_path
+                    from PyQt5.QtGui import QPixmap
+                    from PyQt5.QtCore import Qt
                     divider_pixmap = QPixmap(resource_path("assets/image/test_config/divider.png"))
                     self.auth_divider.setPixmap(divider_pixmap.scaled(1, new_divider_height, Qt.IgnoreAspectRatio, Qt.SmoothTransformation))
 
-                self._resize_widget('auth_type_widget', 'original_auth_type_widget_size', width_ratio, height_ratio)
-                self._resize_widget('digest_option', 'original_digest_option_size', width_ratio, height_ratio)
-                self._resize_widget('bearer_option', 'original_bearer_option_size', width_ratio, height_ratio)
-                self._resize_widget('common_input_widget', 'original_common_input_widget_size', width_ratio, height_ratio)
+                if hasattr(self, 'common_input_widget') and hasattr(self, 'original_common_input_widget_size'):
+                    new_input_width = int(self.original_common_input_widget_size[0] * width_ratio)
+                    new_input_height = int(208 + auth_extra)
+                    self.common_input_widget.setFixedSize(new_input_width, new_input_height)
+
+                # digest_option, bearer_option: 86px → 86 + auth_extra/2
+                # (auth_type 내부 패딩 24px + spacing 12px 제외 후 2등분)
+                option_extra = auth_extra / 2
+                if hasattr(self, 'digest_option') and hasattr(self, 'original_digest_option_size'):
+                    new_option_width = int(self.original_digest_option_size[0] * width_ratio)
+                    new_option_height = int(86 + option_extra)
+                    self.digest_option.setFixedSize(new_option_width, new_option_height)
+
+                if hasattr(self, 'bearer_option') and hasattr(self, 'original_bearer_option_size'):
+                    new_option_width = int(self.original_bearer_option_size[0] * width_ratio)
+                    new_option_height = int(86 + option_extra)
+                    self.bearer_option.setFixedSize(new_option_width, new_option_height)
+
+                # 입력 필드는 가로만 확장 (높이 고정)
                 self._resize_widget('id_input', 'original_id_input_size', width_ratio)
                 self._resize_widget('pw_input', 'original_pw_input_size', width_ratio)
 
                 # 접속주소 탐색
                 self._resize_widget('connection_title_row', 'original_connection_title_row_size', width_ratio)
-                self._resize_widget('connection_section', 'original_connection_section_size', width_ratio, height_ratio)
+
+                # ✅ connection_section 비례 분배 적용 (url_table만 확장)
+                if hasattr(self, 'connection_section_widget') and hasattr(self, 'original_connection_section_widget_size'):
+                    new_conn_width = int(self.original_connection_section_widget_size[0] * width_ratio)
+                    new_conn_height = int(376 + url_extra)
+                    self.connection_section_widget.setFixedSize(new_conn_width, new_conn_height)
 
                 if hasattr(self, 'url_table') and hasattr(self, 'original_url_table_size'):
                     new_url_table_width = int(self.original_url_table_size[0] * width_ratio)
-                    new_url_table_height = int(self.original_url_table_size[1] * height_ratio)
+                    new_url_table_height = int(376 + url_extra)
                     self.url_table.setFixedSize(new_url_table_width, new_url_table_height)
 
                     url_col_width = new_url_table_width - 50
