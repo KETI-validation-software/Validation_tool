@@ -82,6 +82,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("검증 소프트웨어 통합 실행기")
         self.setMinimumSize(1680, 1006)  # 최소 크기 설정 (반응형)
+        self._center_on_screen()  # 화면 중앙에 배치
         self.setWindowFlags(
             Qt.Window |
             Qt.WindowTitleHint |
@@ -103,6 +104,13 @@ class MainWindow(QMainWindow):
 
         #self._setup_menu()
         self.stack.setCurrentIndex(0)
+
+    def _center_on_screen(self):
+        """윈도우를 화면 중앙에 배치"""
+        screen = QApplication.primaryScreen().availableGeometry()
+        x = (screen.width() - self.minimumWidth()) // 2
+        y = (screen.height() - self.minimumHeight()) // 2
+        self.move(x, y)
 
     def _setup_menu(self):
         menubar = self.menuBar()
