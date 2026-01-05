@@ -402,7 +402,6 @@ class CommonMainUI(QWidget):
                 color: #CECECE;
             }}
         """)
-        # 버튼 연결은 서브클래스의 connect_buttons()에서 수행
 
         # 정지 버튼
         self.stop_btn = QPushButton("일시 정지", self.buttonGroup)  # 텍스트 추가
@@ -431,8 +430,8 @@ class CommonMainUI(QWidget):
                 color: #CECECE;
             }}
         """)
+        self.stop_btn.clicked.connect(self.stop_btn_clicked)
         self.stop_btn.setDisabled(True)
-        # 버튼 연결은 서브클래스의 connect_buttons()에서 수행
 
         # 종료 버튼
         self.rbtn = QPushButton("종료", self.buttonGroup)  # 텍스트 추가
@@ -461,7 +460,7 @@ class CommonMainUI(QWidget):
                 color: #CECECE;
             }}
         """)
-        # 버튼 연결은 서브클래스의 connect_buttons()에서 수행
+        self.rbtn.clicked.connect(self.exit_btn_clicked)
 
         # 시험 결과 버튼
         self.result_btn = QPushButton("시험 결과", self.buttonGroup)  # 텍스트 추가
@@ -490,7 +489,7 @@ class CommonMainUI(QWidget):
                 color: #CECECE;
             }}
         """)
-        # 버튼 연결은 서브클래스의 connect_buttons()에서 수행
+        self.result_btn.clicked.connect(self.show_result_page)
 
         # 초기 버튼 위치 설정 (레이아웃 없이 직접 배치)
         self._update_button_positions()
@@ -517,9 +516,6 @@ class CommonMainUI(QWidget):
         if not self.embedded:
             self.setWindowTitle('물리보안 시스템 연동 검증 소프트웨어')
 
-        # 버튼 이벤트 연결 (서브클래스에서 구현)
-        self.connect_buttons()
-
         # 초기 점수 표시 (Platform만 해당)
         if self.show_initial_score and hasattr(self, 'update_score_display'):
             self.update_score_display()
@@ -528,15 +524,18 @@ class CommonMainUI(QWidget):
         if hasattr(self, 'select_first_scenario'):
             QTimer.singleShot(100, self.select_first_scenario)
 
+        # 버튼 연결 (서브클래스에서 구현)
+        self.connect_buttons()
+
         if not self.embedded:
             self.show()
 
+    def connect_buttons(self):
+        """Subclass에서 버튼 연결을 구현해야 함"""
+        raise NotImplementedError("Subclass must implement connect_buttons")
+
     def create_spec_selection_panel(self, left_layout):
         raise NotImplementedError("Subclass must implement create_spec_selection_panel")
-
-    def connect_buttons(self):
-        """버튼 이벤트 연결 - 서브클래스에서 구현 필요"""
-        raise NotImplementedError("Subclass must implement connect_buttons")
 
 
 
@@ -747,23 +746,25 @@ class CommonMainUI(QWidget):
                 new_total_data_width = int(self.original_total_data_widget_size[0] * width_ratio)
                 self.total_data_widget.setFixedSize(new_total_data_width, self.original_total_data_widget_size[1])
 
-            # ✅ 시험 점수 요약 내부 라벨 너비 비례 조정
-            if hasattr(self, 'original_score_label_width'):
-                new_label_width = int(self.original_score_label_width * width_ratio)
+            # ✅ 시험 점수 요약 내부 라벨 너비 비례 조정 (각 라벨별로 다른 너비 적용)
+            if hasattr(self, 'original_pass_label_width'):
+                new_pass_width = int(self.original_pass_label_width * width_ratio)
+                new_opt_width = int(self.original_opt_label_width * width_ratio)
+                new_score_width = int(self.original_score_label_width * width_ratio)
                 # 분야별 점수 라벨
                 if hasattr(self, 'spec_pass_label'):
-                    self.spec_pass_label.setFixedSize(new_label_width, 60)
+                    self.spec_pass_label.setFixedSize(new_pass_width, 60)
                 if hasattr(self, 'spec_total_label'):
-                    self.spec_total_label.setFixedSize(new_label_width, 60)
+                    self.spec_total_label.setFixedSize(new_opt_width, 60)
                 if hasattr(self, 'spec_score_label'):
-                    self.spec_score_label.setFixedSize(new_label_width, 60)
+                    self.spec_score_label.setFixedSize(new_score_width, 60)
                 # 전체 점수 라벨
                 if hasattr(self, 'total_pass_label'):
-                    self.total_pass_label.setFixedSize(new_label_width, 60)
+                    self.total_pass_label.setFixedSize(new_pass_width, 60)
                 if hasattr(self, 'total_total_label'):
-                    self.total_total_label.setFixedSize(new_label_width, 60)
+                    self.total_total_label.setFixedSize(new_opt_width, 60)
                 if hasattr(self, 'total_score_label'):
-                    self.total_score_label.setFixedSize(new_label_width, 60)
+                    self.total_score_label.setFixedSize(new_score_width, 60)
 
             # ✅ 시험 API 테이블 헤더
             if hasattr(self, 'api_header_widget') and hasattr(self, 'original_api_header_widget_size'):
@@ -1273,40 +1274,35 @@ class CommonMainUI(QWidget):
         """)
         separator.setFixedHeight(1)
 
-        # 점수 레이블들 (500 Medium 20px #000000, 325 × 60)
-        # 원본 크기 저장 (반응형 조정용)
-        self.original_score_label_width = 325
+        # 점수 레이블들 (500 Medium 20px #000000)
+        # 원본 크기 저장 (반응형 조정용) - 각 라벨별로 다른 너비 적용
+        self.original_pass_label_width = 340
+        self.original_opt_label_width = 340
+        self.original_score_label_width = 315
 
-        self.spec_pass_label = QLabel("통과 필드 수")
-        self.spec_pass_label.setFixedHeight(60)
-        self.spec_pass_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.spec_pass_label.setStyleSheet("""
-            color: #000000;
-            font-family: "Noto Sans KR";
-            font-size: 20px;
-            font-weight: 500;
+        self.spec_pass_label = QLabel(
+            f"통과 필수 필드 점수&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
+            f"0.0% (0/0)</span>"
+        )
+        self.spec_pass_label.setFixedSize(340, 60)
+        self.spec_pass_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000;")
 
-        """)
-        self.spec_total_label = QLabel("전체 필드 수")
-        self.spec_total_label.setFixedHeight(60)
-        self.spec_total_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.spec_total_label.setStyleSheet("""
-            color: #000000;
-            font-family: "Noto Sans KR";
-            font-size: 20px;
-            font-weight: 500;
-            
-        """)
-        self.spec_score_label = QLabel("종합 평가 점수")
-        self.spec_score_label.setFixedHeight(60)
-        self.spec_score_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.spec_score_label.setStyleSheet("""
-            color: #000000;
-            font-family: "Noto Sans KR";
-            font-size: 20px;
-            font-weight: 500;
-            
-        """)
+        self.spec_total_label = QLabel(
+            f"통과 선택 필드 점수&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
+            f"0.0% (0/0)</span>"
+        )
+        self.spec_total_label.setFixedSize(340, 60)
+        self.spec_total_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000;")
+
+        self.spec_score_label = QLabel(
+            f"종합 평가 점수&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
+            f"0.0% (0/0)</span>"
+        )
+        self.spec_score_label.setFixedSize(315, 60)
+        self.spec_score_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000;")
 
         spec_layout = QVBoxLayout()
         spec_layout.setContentsMargins(0, 0, 0, 0)
@@ -1329,9 +1325,10 @@ class CommonMainUI(QWidget):
         # 데이터 영역 (1064 × 76)
         self.spec_data_widget = QWidget()
         self.spec_data_widget.setFixedSize(1064, 76)
+        self.spec_data_widget.setStyleSheet("background: transparent;")
         self.original_spec_data_widget_size = (1064, 76)
         spec_score_layout = QHBoxLayout(self.spec_data_widget)
-        spec_score_layout.setContentsMargins(56, 8, 32, 8)
+        spec_score_layout.setContentsMargins(20, 8, 20, 8)
         spec_score_layout.setSpacing(0)
 
         # 통과 필드 수 + 구분선 + spacer
@@ -1341,7 +1338,7 @@ class CommonMainUI(QWidget):
         spec_vline1.setStyleSheet("background-color: #CECECE;")
         spec_score_layout.addWidget(spec_vline1)
         spec_spacer1 = QWidget()
-        spec_spacer1.setFixedSize(24, 60)
+        spec_spacer1.setFixedSize(12, 60)
         spec_score_layout.addWidget(spec_spacer1)
 
         # 전체 필드 수 + 구분선 + spacer
@@ -1351,7 +1348,7 @@ class CommonMainUI(QWidget):
         spec_vline2.setStyleSheet("background-color: #CECECE;")
         spec_score_layout.addWidget(spec_vline2)
         spec_spacer2 = QWidget()
-        spec_spacer2.setFixedSize(24, 60)
+        spec_spacer2.setFixedSize(12, 60)
         spec_score_layout.addWidget(spec_spacer2)
 
         # 종합 평가 점수
@@ -1411,36 +1408,29 @@ class CommonMainUI(QWidget):
         separator.setFixedHeight(1)
 
         # 점수 레이블들 (500 Medium 20px #000000, 325 × 60)
-        self.total_pass_label = QLabel("통과 필드 수")
-        self.total_pass_label.setFixedHeight(60)
-        self.total_pass_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.total_pass_label.setStyleSheet("""
-            color: #000000;
-            font-family: "Noto Sans KR";
-            font-size: 20px;
-            font-weight: 500;
-            
-        """)
-        self.total_total_label = QLabel("전체 필드 수")
-        self.total_total_label.setFixedHeight(60)
-        self.total_total_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.total_total_label.setStyleSheet("""
-            color: #000000;
-            font-family: "Noto Sans KR";
-            font-size: 20px;
-            font-weight: 500;
-            
-        """)
-        self.total_score_label = QLabel("종합 평가 점수")
-        self.total_score_label.setFixedHeight(60)
-        self.total_score_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.total_score_label.setStyleSheet("""
-            color: #000000;
-            font-family: "Noto Sans KR";
-            font-size: 20px;
-            font-weight: 500;
-            
-        """)
+        self.total_pass_label = QLabel(
+            f"통과 필수 필드 점수&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
+            f"0.0% (0/0)</span>"
+        )
+        self.total_pass_label.setFixedSize(340, 60)
+        self.total_pass_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000;")
+
+        self.total_total_label = QLabel(
+            f"통과 선택 필드 점수&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
+            f"0.0% (0/0)</span>"
+        )
+        self.total_total_label.setFixedSize(340, 60)
+        self.total_total_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000;")
+
+        self.total_score_label = QLabel(
+            f"종합 평가 점수&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
+            f"0.0% (0/0)</span>"
+        )
+        self.total_score_label.setFixedSize(315, 60)
+        self.total_score_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000;")
 
         total_layout = QVBoxLayout()
         total_layout.setContentsMargins(0, 0, 0, 0)
@@ -1461,9 +1451,10 @@ class CommonMainUI(QWidget):
         # 데이터 영역 (1064 × 76)
         self.total_data_widget = QWidget()
         self.total_data_widget.setFixedSize(1064, 76)
+        self.total_data_widget.setStyleSheet("background: transparent;")
         self.original_total_data_widget_size = (1064, 76)
         score_layout = QHBoxLayout(self.total_data_widget)
-        score_layout.setContentsMargins(56, 8, 32, 8)
+        score_layout.setContentsMargins(20, 8, 20, 8)
         score_layout.setSpacing(0)
 
         # 통과 필드 수 + 구분선 + spacer
@@ -1473,17 +1464,17 @@ class CommonMainUI(QWidget):
         total_vline1.setStyleSheet("background-color: #CECECE;")
         score_layout.addWidget(total_vline1)
         total_spacer1 = QWidget()
-        total_spacer1.setFixedSize(24, 60)
+        total_spacer1.setFixedSize(12, 60)
         score_layout.addWidget(total_spacer1)
 
-        # 전체 필드 수 + 구분선 + spacer
+        # 전체 필드 수 + 구부4선 + spacer
         score_layout.addWidget(self.total_total_label)
         total_vline2 = QFrame()
         total_vline2.setFixedSize(2, 60)
         total_vline2.setStyleSheet("background-color: #CECECE;")
         score_layout.addWidget(total_vline2)
         total_spacer2 = QWidget()
-        total_spacer2.setFixedSize(24, 60)
+        total_spacer2.setFixedSize(12, 60)
         score_layout.addWidget(total_spacer2)
 
         # 종합 평가 점수

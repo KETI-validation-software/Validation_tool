@@ -66,11 +66,7 @@ test_range = "ALL_FIELDS"
 auth_type = "Digest Auth"
 auth_info = "kisa,kisa_k1!2@"
 admin_code = "1234"
-<<<<<<< HEAD
 url = "https://10.252.219.95:2000"
-=======
-url = "https://192.168.0.3:2000"
->>>>>>> 28933fe82467af0659fb6280c2d1321510a1618d
 contact_person = "배성환"
 model_name = "v1.0"
 request_id = "cmii86ssr00a48z1tqmco6ke8"

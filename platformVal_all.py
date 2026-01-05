@@ -910,10 +910,10 @@ class MyApp(PlatformMainUI):
 
                     self.update_score_display()
 
-                    # ✅ 점수 계산은 step_pass_counts 배열의 합으로 (누적 아님!)
-                    total_fields = self.total_pass_cnt + self.total_error_cnt
-                    if total_fields > 0:
-                        score_value = (self.total_pass_cnt / total_fields * 100)
+                    # ✅ 점수 계산은 현재 API만의 통과/에러 수로 계산
+                    current_api_total = accumulated['total_pass'] + accumulated['total_error']
+                    if current_api_total > 0:
+                        score_value = (accumulated['total_pass'] / current_api_total * 100)
                     else:
                         score_value = 0
 
