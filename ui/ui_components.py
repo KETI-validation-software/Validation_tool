@@ -18,6 +18,9 @@ class TestSelectionPanel(QWidget):
         self.group_name_to_index = {}
         self.index_to_group_name = {}
         
+        # ✅ 검증 모드 접미사 (기본값: 요청 검증)
+        self.mode_suffix = " (요청 검증)"
+        
         self.initUI()
 
     def initUI(self):
@@ -253,7 +256,7 @@ class TestSelectionPanel(QWidget):
 
         for idx, (spec_id, config) in enumerate(spec_items):
             desc = config.get('test_name', f'시험분야 {idx + 1}')
-            desc_with_role = f"{desc} (요청 검증)"
+            desc_with_role = f"{desc}{self.mode_suffix}"
             item = QTableWidgetItem(desc_with_role)
             item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self.test_field_table.setItem(idx, 0, item)
