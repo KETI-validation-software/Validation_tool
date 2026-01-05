@@ -29,6 +29,258 @@ class PlatformMainUI(CommonMainUI):
         self.rbtn.clicked.connect(self.exit_btn_clicked)
         self.result_btn.clicked.connect(self.show_result_page)
 
+    def _update_button_positions(self, group_width=None, group_height=None):
+        """버튼 위치 직접 설정 (간격 16px 고정)"""
+        if not hasattr(self, 'buttonGroup'):
+            return
+
+        # 크기가 전달되지 않으면 현재 크기 사용
+        if group_width is None:
+            group_width = self.buttonGroup.width()
+        if group_height is None:
+            group_height = self.buttonGroup.height()
+
+        spacing = self.button_spacing  # 16px
+
+        # 버튼 너비 = (전체 너비 - 간격 3개) / 4
+        btn_width = (group_width - spacing * 3) // 4
+        btn_height = group_height
+
+        # 각 버튼 크기 및 위치 설정
+        x = 0
+        self.sbtn.setFixedSize(btn_width, btn_height)
+        self.sbtn.move(x, 0)
+        x += btn_width + spacing
+        self.stop_btn.setFixedSize(btn_width, btn_height)
+        self.stop_btn.move(x, 0)
+        x += btn_width + spacing
+        self.result_btn.setFixedSize(btn_width, btn_height)
+        self.result_btn.move(x, 0)
+        x += btn_width + spacing
+        self.rbtn.setFixedSize(btn_width, btn_height)
+        self.rbtn.move(x, 0)
+
+    def resizeEvent(self, event):
+        """창 크기 변경 시 배경 이미지 및 왼쪽 패널 크기 재조정"""
+        super().resizeEvent(event)
+
+        # content_widget의 배경 이미지 크기 조정
+        if hasattr(self, 'content_widget') and self.content_widget:
+            if hasattr(self, 'content_bg_label'):
+                content_width = self.content_widget.width()
+                content_height = self.content_widget.height()
+                self.content_bg_label.setGeometry(0, 0, content_width, content_height)
+
+        # ✅ 반응형: 왼쪽 패널 크기 조정
+        if hasattr(self, 'original_window_size') and hasattr(self, 'left_col'):
+            current_width = self.width()
+            current_height = self.height()
+
+            # 비율 계산 (최소 1.0 - 원본 크기 이하로 줄어들지 않음)
+            width_ratio = max(1.0, current_width / self.original_window_size[0])
+            height_ratio = max(1.0, current_height / self.original_window_size[1])
+
+            # ✅ 왼쪽/오른쪽 패널 정렬을 위한 확장량 계산
+            # 컬럼의 추가 높이를 계산하고, 그 추가분만 확장 요소들에 분배
+            original_column_height = 898  # 원본 컬럼 높이
+            extra_column_height = original_column_height * (height_ratio - 1)
+
+            # 왼쪽 패널 확장 요소: group_table(204) + field_group(526) = 730px
+            left_expandable_total = 204 + 526  # 730
+
+            # 오른쪽 패널 확장 요소: api_section(251) + monitor_section(157) = 408px
+            right_expandable_total = 251 + 157  # 408
+
+            # bg_root 크기 조정
+            if hasattr(self, 'bg_root') and hasattr(self, 'original_bg_root_size'):
+                new_bg_width = int(self.original_bg_root_size[0] * width_ratio)
+                new_bg_height = int(self.original_bg_root_size[1] * height_ratio)
+                self.bg_root.setFixedSize(new_bg_width, new_bg_height)
+
+            # 왼쪽 컬럼 크기 조정
+            if hasattr(self, 'original_left_col_size'):
+                new_left_width = int(self.original_left_col_size[0] * width_ratio)
+                new_left_height = int(self.original_left_col_size[1] * height_ratio)
+                self.left_col.setFixedSize(new_left_width, new_left_height)
+
+            # 시험 선택 타이틀 크기 조정
+            if hasattr(self, 'spec_panel_title') and hasattr(self, 'original_spec_panel_title_size'):
+                new_title_width = int(self.original_spec_panel_title_size[0] * width_ratio)
+                self.spec_panel_title.setFixedSize(new_title_width, self.original_spec_panel_title_size[1])
+                
+                # TestSelectionPanel 자체 너비도 업데이트
+                if hasattr(self, 'test_selection_panel'):
+                     self.test_selection_panel.setFixedWidth(new_title_width)
+
+            # 그룹 테이블 위젯 크기 조정 (extra_column_height 비례 분배)
+            if hasattr(self, 'group_table_widget') and hasattr(self, 'original_group_table_widget_size'):
+                new_group_width = int(self.original_group_table_widget_size[0] * width_ratio)
+                group_extra = extra_column_height * (204 / left_expandable_total)
+                new_group_height = int(204 + group_extra)
+                self.group_table_widget.setFixedSize(new_group_width, new_group_height)
+                # 내부 테이블 크기도 조정
+                if hasattr(self, 'group_table'):
+                    self.group_table.setFixedHeight(new_group_height)
+
+            # 시험 시나리오 테이블 크기 조정 (extra_column_height 비례 분배)
+            if hasattr(self, 'field_group') and hasattr(self, 'original_field_group_size'):
+                new_field_width = int(self.original_field_group_size[0] * width_ratio)
+                field_extra = extra_column_height * (526 / left_expandable_total)
+                new_field_height = int(526 + field_extra)
+                self.field_group.setFixedSize(new_field_width, new_field_height)
+                # 내부 테이블 크기도 조정
+                if hasattr(self, 'test_field_table'):
+                    self.test_field_table.setFixedHeight(new_field_height)
+
+            # ✅ 오른쪽 컬럼 크기 조정
+            if hasattr(self, 'right_col') and hasattr(self, 'original_right_col_size'):
+                new_right_width = int(self.original_right_col_size[0] * width_ratio)
+                new_right_height = int(self.original_right_col_size[1] * height_ratio)
+                self.right_col.setFixedSize(new_right_width, new_right_height)
+
+            # URL 행 크기 조정
+            if hasattr(self, 'url_row') and hasattr(self, 'original_url_row_size'):
+                new_url_width = int(self.original_url_row_size[0] * width_ratio)
+                self.url_row.setFixedSize(new_url_width, self.original_url_row_size[1])
+
+            # API 섹션 크기 조정 (extra_column_height 비례 분배)
+            if hasattr(self, 'api_section') and hasattr(self, 'original_api_section_size'):
+                new_api_width = int(self.original_api_section_size[0] * width_ratio)
+                api_extra = extra_column_height * (251 / right_expandable_total)
+                new_api_height = int(251 + api_extra)
+                self.api_section.setFixedSize(new_api_width, new_api_height)
+
+            # 모니터링 섹션 크기 조정 (extra_column_height 비례 분배)
+            if hasattr(self, 'monitor_section') and hasattr(self, 'original_monitor_section_size'):
+                new_monitor_width = int(self.original_monitor_section_size[0] * width_ratio)
+                monitor_extra = extra_column_height * (157 / right_expandable_total)
+                new_monitor_height = int(157 + monitor_extra)
+                self.monitor_section.setFixedSize(new_monitor_width, new_monitor_height)
+
+            # ✅ 버튼 그룹 및 버튼 크기 조정 (간격 16px 고정, 세로 크기 고정)
+            if hasattr(self, 'original_buttonGroup_size'):
+                new_group_width = int(self.original_buttonGroup_size[0] * width_ratio)
+                btn_height = self.original_buttonGroup_size[1]  # 세로 크기 고정
+                self.buttonGroup.setFixedSize(new_group_width, btn_height)
+                self._update_button_positions(new_group_width, btn_height)
+
+            # ✅ 내부 위젯 크기 조정
+            # URL 텍스트 박스
+            if hasattr(self, 'url_text_box') and hasattr(self, 'original_url_text_box_size'):
+                new_url_tb_width = int(self.original_url_text_box_size[0] * width_ratio)
+                self.url_text_box.setFixedSize(new_url_tb_width, self.original_url_text_box_size[1])
+
+            # API 라벨
+            if hasattr(self, 'api_label') and hasattr(self, 'original_api_label_size'):
+                new_api_label_width = int(self.original_api_label_size[0] * width_ratio)
+                self.api_label.setFixedSize(new_api_label_width, self.original_api_label_size[1])
+
+            # API 콘텐츠 위젯 (api_section 내부 - 라벨 24px 제외)
+            if hasattr(self, 'api_content_widget') and hasattr(self, 'original_api_content_widget_size'):
+                new_api_cw_width = int(self.original_api_content_widget_size[0] * width_ratio)
+                new_api_cw_height = int(219 + api_extra)  # api_section에서 라벨 제외한 부분
+                self.api_content_widget.setFixedSize(new_api_cw_width, new_api_cw_height)
+
+            # 모니터링 라벨
+            if hasattr(self, 'monitor_label') and hasattr(self, 'original_monitor_label_size'):
+                new_mon_label_width = int(self.original_monitor_label_size[0] * width_ratio)
+                self.monitor_label.setFixedSize(new_mon_label_width, self.original_monitor_label_size[1])
+
+            # 텍스트 브라우저 컨테이너 (monitor_section 내부 - 라벨 24px 제외)
+            if hasattr(self, 'text_browser_container') and hasattr(self, 'original_text_browser_container_size'):
+                new_tbc_width = int(self.original_text_browser_container_size[0] * width_ratio)
+                new_tbc_height = int(125 + monitor_extra)  # monitor_section에서 라벨 제외한 부분
+                self.text_browser_container.setFixedSize(new_tbc_width, new_tbc_height)
+
+            # valResult (QTextBrowser) (monitor_section 내부)
+            if hasattr(self, 'valResult') and hasattr(self, 'original_valResult_size'):
+                new_vr_width = int(self.original_valResult_size[0] * width_ratio)
+                new_vr_height = int(125 + monitor_extra)
+                self.valResult.setFixedSize(new_vr_width, new_vr_height)
+
+            # ✅ 시험 점수 요약 섹션
+            # 시험 점수 요약 라벨
+            if hasattr(self, 'valmsg') and hasattr(self, 'original_valmsg_size'):
+                new_valmsg_width = int(self.original_valmsg_size[0] * width_ratio)
+                self.valmsg.setFixedSize(new_valmsg_width, self.original_valmsg_size[1])
+
+            # 분야별 점수 그룹
+            if hasattr(self, 'spec_score_group') and hasattr(self, 'original_spec_group_size'):
+                new_spec_width = int(self.original_spec_group_size[0] * width_ratio)
+                self.spec_score_group.setFixedSize(new_spec_width, self.original_spec_group_size[1])
+
+            # 전체 점수 그룹
+            if hasattr(self, 'total_score_group') and hasattr(self, 'original_total_group_size'):
+                new_total_width = int(self.original_total_group_size[0] * width_ratio)
+                self.total_score_group.setFixedSize(new_total_width, self.original_total_group_size[1])
+
+            # ✅ 시험 점수 요약 내부 데이터 영역 비례 조정
+            if hasattr(self, 'spec_data_widget') and hasattr(self, 'original_spec_data_widget_size'):
+                new_spec_data_width = int(self.original_spec_data_widget_size[0] * width_ratio)
+                self.spec_data_widget.setFixedSize(new_spec_data_width, self.original_spec_data_widget_size[1])
+
+            if hasattr(self, 'total_data_widget') and hasattr(self, 'original_total_data_widget_size'):
+                new_total_data_width = int(self.original_total_data_widget_size[0] * width_ratio)
+                self.total_data_widget.setFixedSize(new_total_data_width, self.original_total_data_widget_size[1])
+
+            # ✅ 시험 점수 요약 내부 라벨 너비 비례 조정
+            if hasattr(self, 'original_pass_label_width'):
+                new_pass_width = int(self.original_pass_label_width * width_ratio)
+                new_opt_width = int(self.original_opt_label_width * width_ratio)
+                new_score_width = int(self.original_score_label_width * width_ratio)
+                # 분야별 점수 라벨
+                if hasattr(self, 'spec_pass_label'):
+                    self.spec_pass_label.setFixedSize(new_pass_width, 60)
+                if hasattr(self, 'spec_total_label'):
+                    self.spec_total_label.setFixedSize(new_opt_width, 60)
+                if hasattr(self, 'spec_score_label'):
+                    self.spec_score_label.setFixedSize(new_score_width, 60)
+                # 전체 점수 라벨
+                if hasattr(self, 'total_pass_label'):
+                    self.total_pass_label.setFixedSize(new_pass_width, 60)
+                if hasattr(self, 'total_total_label'):
+                    self.total_total_label.setFixedSize(new_opt_width, 60)
+                if hasattr(self, 'total_score_label'):
+                    self.total_score_label.setFixedSize(new_score_width, 60)
+
+            # ✅ 시험 API 테이블 헤더
+            if hasattr(self, 'api_header_widget') and hasattr(self, 'original_api_header_widget_size'):
+                new_header_width = int(self.original_api_header_widget_size[0] * width_ratio)
+                self.api_header_widget.setFixedSize(new_header_width, self.original_api_header_widget_size[1])
+
+            # ✅ 시험 API 테이블 본문 (scroll_area) - 세로도 확장 (api_extra 사용)
+            if hasattr(self, 'api_scroll_area') and hasattr(self, 'original_api_scroll_area_size'):
+                new_scroll_width = int(self.original_api_scroll_area_size[0] * width_ratio)
+                new_scroll_height = int(189 + api_extra)  # api_content_widget 내부 (헤더 30px 제외)
+                self.api_scroll_area.setFixedSize(new_scroll_width, new_scroll_height)
+
+            # ✅ 시험 API 테이블 컬럼 너비 비례 조정 (마지막 컬럼이 남은 공간 채움)
+            if hasattr(self, 'tableWidget') and hasattr(self, 'original_column_widths'):
+                # 스크롤바 표시 여부 확인 (테이블 전체 높이 > 스크롤 영역 높이)
+                row_count = self.tableWidget.rowCount()
+                total_row_height = row_count * 40  # 각 행 40px
+                scrollbar_visible = total_row_height > new_scroll_height
+                scrollbar_width = 16 if scrollbar_visible else 2  # 여유분 2px
+
+                available_width = new_scroll_width - scrollbar_width
+
+                # 마지막 컬럼을 제외한 나머지 컬럼 너비 설정
+                used_width = 0
+                for i, orig_width in enumerate(self.original_column_widths[:-1]):
+                    new_col_width = int(orig_width * width_ratio)
+                    self.tableWidget.setColumnWidth(i, new_col_width)
+                    used_width += new_col_width
+
+                # 마지막 컬럼은 남은 공간을 채움
+                last_col_width = available_width - used_width
+                self.tableWidget.setColumnWidth(len(self.original_column_widths) - 1, last_col_width)
+
+            # ✅ 시험 API 테이블 헤더 라벨 너비 비례 조정
+            if hasattr(self, 'header_labels') and hasattr(self, 'original_header_widths'):
+                for i, label in enumerate(self.header_labels):
+                    new_label_width = int(self.original_header_widths[i] * width_ratio)
+                    label.setFixedSize(new_label_width, 30)
+
     def init_centerLayout(self):
         # 동적 API 개수에 따라 테이블 생성
         api_count = len(self.videoMessages)
@@ -757,3 +1009,97 @@ class PlatformMainUI(CommonMainUI):
 
             self.tableWidget.setCellWidget(self.cnt, 1, icon_widget)
             setattr(self, f"step{self.cnt + 1}_msg", msg)
+
+    def append_monitor_log(self, step_name, request_json="", result_status="진행중", score=None, details=""):
+        """
+        Qt 호환성이 보장된 HTML 테이블 구조 로그 출력 함수
+        """
+        from datetime import datetime
+        import html
+
+        # 타임스탬프
+        timestamp = datetime.now().strftime("%H:%M:%S")
+
+        # 점수에 따른 색상 결정
+        if score is not None:
+            if score >= 100:
+                node_color = "#10b981"  # 녹색
+                text_color = "#10b981"  # 녹색 텍스트
+            else:
+                node_color = "#ef4444"  # 빨강
+                text_color = "#ef4444"  # 빨강 텍스트
+        else:
+            node_color = "#6b7280"  # 회색
+            text_color = "#333"  # 기본 검정
+
+        # 1. 헤더 (Step 이름 + 시간) - Table로 블록 분리
+        html_content = f"""
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 15px;">
+            <tr>
+                <td valign="middle">
+                    <span style="font-size: 20px; font-weight: bold; color: {text_color}; font-family: 'Noto Sans KR';">{step_name}</span>
+                    <span style="font-size: 16px; color: #9ca3af; font-family: 'Consolas', monospace; margin-left: 8px;">{timestamp}</span>
+                </td>
+            </tr>
+        </table>
+        """
+
+        # 2. 내용 영역
+        html_content += f"""
+        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+                <td>
+        """
+
+        # 2-1. 상세 내용 (Details)
+        if details:
+            html_content += f"""
+                <div style="margin-bottom: 8px; font-size: 18px; color: #6b7280; font-family: 'Noto Sans KR';">
+                    {details}
+                </div>
+            """
+
+        # 2-2. JSON 데이터 (회색 박스)
+        if request_json and request_json.strip():
+            escaped_json = html.escape(request_json)
+            is_json_structure = request_json.strip().startswith('{') or request_json.strip().startswith('[')
+
+            if is_json_structure:
+                html_content += f"""
+                <div style="margin-top: 5px; margin-bottom: 10px;">
+                    <div style="font-size: 15px; color: #9ca3af; font-weight: bold; margin-bottom: 4px;">📦 데이터</div>
+                    <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 10px;">
+                        <pre style="margin: 0; font-family: 'Consolas', monospace; font-size: 18px; color: #1f2937;">{escaped_json}</pre>
+                    </div>
+                </div>
+                """
+            else:
+                # JSON이 아닌 일반 텍스트일 경우
+                html_content += f"""
+                <div style="margin-top: 5px; margin-bottom: 10px;">
+                    <pre style="font-size: 18px; color: #6b7280; font-family: 'Consolas', monospace;">{escaped_json}</pre>
+                </div>
+                """
+
+        # 2-3. 점수 (Score)
+        if score is not None:
+            html_content += f"""
+                <div style="margin-top: 5px; font-size: 18px; color: #6b7280; font-weight: bold; font-family: 'Consolas', monospace;">
+                    점수: {score:.1f}%
+                </div>
+            """
+
+        # Table 닫기
+        html_content += """
+                </td>
+            </tr>
+        </table>
+        <div style="margin-bottom: 10px;"></div>
+        """
+
+        self.valResult.append(html_content)
+
+        # 자동 스크롤
+        self.valResult.verticalScrollBar().setValue(
+            self.valResult.verticalScrollBar().maximum()
+        )
