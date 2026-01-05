@@ -16,6 +16,47 @@ class ConstraintDataGenerator:
         api_name: API 이름 (RealtimeDoorStatus2 등)
         door_memory: 문 상태 저장소
         """
+        # ✅ sensorDeviceList 구조를 가진 웹훅 데이터 동적 생성 (범용)
+        if is_webhook and "sensorDeviceList" in template_data:
+            # request_data에서 요청한 sensorDeviceID 추출
+            requested_ids = self.find_key(request_data, "sensorDeviceID")
+            
+            # sensorDeviceID가 요청에 있고, 템플릿에 sensorDeviceList가 있으면 처리
+            if requested_ids and isinstance(template_data["sensorDeviceList"], list) and len(template_data["sensorDeviceList"]) > 0:
+                print(f"[DATA_MAPPER] sensorDeviceList 웹훅 데이터 동적 생성 시작 (API: {api_name})")
+                print(f"[DATA_MAPPER] 요청한 sensorDeviceID: {requested_ids}")
+                
+                # 템플릿의 첫 번째 항목을 기준으로 허용 키 확인
+                allowed_keys = set(template_data["sensorDeviceList"][0].keys())
+                print(f"[DATA_MAPPER] 템플릿 구조 기반 허용 키: {allowed_keys}")
+                
+                # 요청한 ID만 포함하도록 필터링
+                new_sensor_list = []
+                for sensor_id in requested_ids:
+                    # 템플릿에서 해당 ID를 가진 항목 찾기
+                    matching_item = None
+                    for item in template_data["sensorDeviceList"]:
+                        if item.get("sensorDeviceID") == sensor_id:
+                            matching_item = item
+                            break
+                    
+                    # 매칭 항목이 있으면 사용, 없으면 템플릿 첫 항목 복사 후 ID만 변경
+                    if matching_item:
+                        filtered_item = {k: v for k, v in matching_item.items() if k in allowed_keys}
+                    else:
+                        # 템플릿 첫 번째 항목 복사
+                        template_item = template_data["sensorDeviceList"][0]
+                        filtered_item = {k: v for k, v in template_item.items() if k in allowed_keys}
+                        # ID만 요청한 값으로 변경
+                        filtered_item["sensorDeviceID"] = sensor_id
+                    
+                    new_sensor_list.append(filtered_item)
+                
+                template_data["sensorDeviceList"] = new_sensor_list
+                print(f"[DATA_MAPPER] 생성된 sensorDeviceList ({len(new_sensor_list)}개): {new_sensor_list}")
+            
+            return template_data
+        
         if api_name and "RealtimeDoorStatus" in api_name and "doorList" in template_data:
             
             is_response_template = "code" in template_data

@@ -59,7 +59,7 @@ cmii7shen005i8z1tagevx4qh_RealtimeSensorData_out_data = {
 cmii7shen005i8z1tagevx4qh_RealtimeSensorData_webhook_in_data = {
     "sensorDeviceList": [
         {
-        "sensorDeviceID": "",
+        "sensorDeviceID": "iot0001",
         "measureTime": 20220822163022124,
         "sensorDeviceType": "온도",
         "sensorDeviceUnit": "섭씨",
@@ -67,13 +67,6 @@ cmii7shen005i8z1tagevx4qh_RealtimeSensorData_webhook_in_data = {
     },
         {
         "sensorDeviceID": "iot0002",
-        "measureTime": 20220822163022124,
-        "sensorDeviceType": "온도",
-        "sensorDeviceUnit": "섭씨",
-        "sensorDeviceValue": "36"
-    },
-        {
-        "sensorDeviceID": "iot0003",
         "measureTime": 20220822163022124,
         "sensorDeviceType": "온도",
         "sensorDeviceUnit": "섭씨",
