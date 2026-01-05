@@ -51,7 +51,7 @@ class CombinedDetailDialog(QDialog):
 
         # 체크 아이콘 (고정 크기)
         check_icon = QLabel()
-        check_icon.setPixmap(QPixmap(resource_path("assets/image/common/icn_check.png")))
+        check_icon.setPixmap(QPixmap(resource_path("assets/image/icon/icn_check.png")))
         check_icon.setFixedSize(18, 18)
         subtitle_layout.addWidget(check_icon)
 
