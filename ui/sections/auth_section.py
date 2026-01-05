@@ -289,8 +289,8 @@ class AuthSection(QGroupBox):
         common_input_layout.addSpacing(4)
 
         # 아이디 입력칸
-        digest_enabled = resource_path("assets/image/test_config/input_DigestAuth_enabled.png").replace(chr(92), "/")
-        digest_disabled = resource_path("assets/image/test_config/input_DigestAuth_disabled.png").replace(chr(92), "/")
+        auth_enabled = resource_path("assets/image/test_config/input_auth_enabled.png").replace(chr(92), "/")
+        auth_disabled = resource_path("assets/image/test_config/input_auth_disabled.png").replace(chr(92), "/")
 
         self.id_input = QLineEdit()
         self.id_input.setFixedSize(358, 40)
@@ -300,7 +300,7 @@ class AuthSection(QGroupBox):
                 padding-left: 24px;
                 padding-right: 24px;
                 border: none;
-                border-image: url({digest_enabled}) 0 0 0 0 stretch stretch;
+                border-image: url({auth_enabled}) 0 0 0 0 stretch stretch;
                 font-family: 'Noto Sans KR';
                 font-weight: 400;
                 font-size: 18px;
@@ -313,7 +313,7 @@ class AuthSection(QGroupBox):
                 font-weight: 500;
             }}
             QLineEdit:disabled {{
-                border-image: url({digest_disabled}) 0 0 0 0 stretch stretch;
+                border-image: url({auth_disabled}) 0 0 0 0 stretch stretch;
                 color: #868686;
             }}
         """)
@@ -350,7 +350,7 @@ class AuthSection(QGroupBox):
                 padding-left: 24px;
                 padding-right: 24px;
                 border: none;
-                border-image: url({digest_enabled}) 0 0 0 0 stretch stretch;
+                border-image: url({auth_enabled}) 0 0 0 0 stretch stretch;
                 font-family: 'Noto Sans KR';
                 font-weight: 400;
                 font-size: 18px;
@@ -363,7 +363,7 @@ class AuthSection(QGroupBox):
                 font-weight: 500;
             }}
             QLineEdit:disabled {{
-                border-image: url({digest_disabled}) 0 0 0 0 stretch stretch;
+                border-image: url({auth_disabled}) 0 0 0 0 stretch stretch;
                 color: #868686;
             }}
         """)
