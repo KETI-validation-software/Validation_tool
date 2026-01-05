@@ -456,15 +456,26 @@ class InfoWidget(QWidget):
                         return
 
                     # ip:port 목록 생성
-                    urls = [f"{ip}:{self.test_port}" for ip in dict.fromkeys(ip_list)]  # 중복 제거 유지 순서
+                    new_urls = [f"{ip}:{self.test_port}" for ip in dict.fromkeys(ip_list)]  # 중복 제거 유지 순서
 
-                    print(f"통합플랫폼시스템 - API testPort 사용 (후보): {urls}")
-                    self._populate_url_table(urls)
-                    QMessageBox.information(
-                        self, "주소 설정 완료",
-                        "통합플랫폼시스템: 네트워크 IP로 주소 후보를 설정했습니다.\n"
-                        f"후보: {', '.join(urls)}"
-                    )
+                    # 기존 주소와 합치기 (기존 우선, 최대 3개)
+                    existing_urls = self._get_existing_urls()
+                    merged_urls = self._merge_urls(existing_urls, new_urls, max_count=3)
+
+                    print(f"통합플랫폼시스템 - API testPort 사용 (후보): {merged_urls}")
+                    self._populate_url_table(merged_urls)
+
+                    added_count = len(merged_urls) - len(existing_urls)
+                    if added_count > 0:
+                        QMessageBox.information(
+                            self, "주소 설정 완료",
+                            f"통합플랫폼시스템: {added_count}개의 주소를 추가했습니다."
+                        )
+                    else:
+                        QMessageBox.information(
+                            self, "주소 설정 완료",
+                            "새로 추가된 주소가 없습니다."
+                        )
                 else:
                     QMessageBox.warning(self, "경고", "testPort 정보가 없습니다.")
                 return
@@ -525,35 +536,65 @@ class InfoWidget(QWidget):
             QMessageBox.critical(self, "오류", f"네트워크 탐색 중 오류 발생:\n{str(e)}")
 
     def _on_scan_completed(self, urls):
-        self._populate_url_table(urls)
-        QMessageBox.information(self, "탐색 완료", "사용 가능한 주소를 찾았습니다.")
+        """일반 네트워크 스캔 완료 시 호출 (기존 주소 유지, 최대 3개)"""
+        existing_urls = self._get_existing_urls()
+        merged_urls = self._merge_urls(existing_urls, urls, max_count=3)
+        self._populate_url_table(merged_urls)
+
+        added_count = len(merged_urls) - len(existing_urls)
+        if added_count > 0:
+            QMessageBox.information(self, "탐색 완료", f"사용 가능한 주소 {added_count}개를 추가했습니다.")
+        else:
+            QMessageBox.information(self, "탐색 완료", "새로 추가된 주소가 없습니다.")
 
     def _on_scan_failed(self, msg):
         QMessageBox.warning(self, "주소 탐색 실패", msg)
 
     def _on_arp_scan_completed(self, urls):
-        """ARP 스캔 완료 시 호출 (최대 3개)"""
-        # 최대 3개만 표시
-        limited_urls = urls[:3]
-        self._populate_url_table(limited_urls)
+        """ARP 스캔 완료 시 호출 (기존 주소 유지, 개수 제한 없음)"""
+        existing_urls = self._get_existing_urls()
+        merged_urls = self._merge_urls(existing_urls, urls)  # 개수 제한 없음
+        self._populate_url_table(merged_urls)
+
+        added_count = len(merged_urls) - len(existing_urls)
 
         # 메시지 구성
-        if len(urls) > 3:
+        if added_count > 0:
             message = (
                 f"동일 네트워크에서 {len(urls)}개의 장비를 찾았습니다.\n"
-                f"상위 3개 주소만 표시됩니다.\n"
-                f"표시된 주소: {', '.join(limited_urls)}"
+                f"{added_count}개의 주소를 추가했습니다."
             )
         else:
             message = (
                 f"동일 네트워크에서 {len(urls)}개의 장비를 찾았습니다.\n"
-                f"발견된 주소: {', '.join(limited_urls)}"
+                f"새로 추가된 주소가 없습니다."
             )
         QMessageBox.information(self, "ARP 스캔 완료", message)
 
     def _on_arp_scan_failed(self, msg):
         """ARP 스캔 실패 시 호출"""
         QMessageBox.warning(self, "ARP 스캔 실패", msg)
+
+    def _get_existing_urls(self):
+        """현재 URL 테이블에 있는 주소 목록 반환"""
+        existing = []
+        for row in range(self.url_table.rowCount()):
+            widget = self.url_table.cellWidget(row, 1)
+            if widget:
+                url = widget.property("url")
+                if url:
+                    existing.append(url)
+        return existing
+
+    def _merge_urls(self, existing_urls, new_urls, max_count=None):
+        """기존 주소와 새 주소를 합침 (기존 우선, 중복 제거, 최대 개수 제한)"""
+        merged = list(existing_urls)  # 기존 주소 먼저
+        for url in new_urls:
+            if url not in merged:
+                merged.append(url)
+        if max_count:
+            return merged[:max_count]  # 최대 개수 제한
+        return merged
 
     def _populate_url_table(self, urls):
         """URL 테이블에 스캔 결과 채우기 (2컬럼: 행번호 + URL)"""
