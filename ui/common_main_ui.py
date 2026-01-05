@@ -406,9 +406,9 @@ class CommonMainUI(QWidget):
 
         # 정지 버튼
         self.stop_btn = QPushButton("일시 정지", self.buttonGroup)  # 텍스트 추가
-        stop_enabled = resource_path("assets/image/test_runner/btn_일시정지_enabled.png").replace("\\", "/")
-        stop_hover = resource_path("assets/image/test_runner/btn_일시정지_hover.png").replace("\\", "/")
-        stop_disabled = resource_path("assets/image/test_runner/btn_일시정지_disabled.png").replace("\\", "/")
+        stop_enabled = resource_path("assets/image/test_runner/btn_common_enabled.png").replace("\\", "/")
+        stop_hover = resource_path("assets/image/test_runner/btn_common_hover.png").replace("\\", "/")
+        stop_disabled = resource_path("assets/image/test_runner/btn_common_disabled.png").replace("\\", "/")
         self.stop_btn.setStyleSheet(f"""
             QPushButton {{
                 border: none;
@@ -436,9 +436,9 @@ class CommonMainUI(QWidget):
 
         # 종료 버튼
         self.rbtn = QPushButton("종료", self.buttonGroup)  # 텍스트 추가
-        exit_enabled = resource_path("assets/image/test_runner/btn_종료_enabled.png").replace("\\", "/")
-        exit_hover = resource_path("assets/image/test_runner/btn_종료_hover.png").replace("\\", "/")
-        exit_disabled = resource_path("assets/image/test_runner/btn_종료_disabled.png").replace("\\", "/")
+        exit_enabled = resource_path("assets/image/test_runner/btn_common_enabled.png").replace("\\", "/")
+        exit_hover = resource_path("assets/image/test_runner/btn_common_hover.png").replace("\\", "/")
+        exit_disabled = resource_path("assets/image/test_runner/btn_common_disabled.png").replace("\\", "/")
         self.rbtn.setStyleSheet(f"""
             QPushButton {{
                 border: none;
@@ -465,9 +465,9 @@ class CommonMainUI(QWidget):
 
         # 시험 결과 버튼
         self.result_btn = QPushButton("시험 결과", self.buttonGroup)  # 텍스트 추가
-        result_enabled = resource_path("assets/image/test_runner/btn_시험결과_enabled.png").replace("\\", "/")
-        result_hover = resource_path("assets/image/test_runner/btn_시험결과_hover.png").replace("\\", "/")
-        result_disabled = resource_path("assets/image/test_runner/btn_시험결과_disabled.png").replace("\\", "/")
+        result_enabled = resource_path("assets/image/test_runner/btn_common_enabled.png").replace("\\", "/")
+        result_hover = resource_path("assets/image/test_runner/btn_common_hover.png").replace("\\", "/")
+        result_disabled = resource_path("assets/image/test_runner/btn_common_disabled.png").replace("\\", "/")
         self.result_btn.setStyleSheet(f"""
             QPushButton {{
                 border: none;

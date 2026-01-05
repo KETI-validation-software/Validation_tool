@@ -321,8 +321,8 @@ class ResultPageWidget(QWidget):
             close_btn = QPushButton('닫기', self)
             close_btn.setFixedSize(362, 48)
             try:
-                exit_enabled = resource_path("assets/image/test_runner/btn_종료_enabled.png").replace("\\", "/")
-                exit_hover = resource_path("assets/image/test_runner/btn_종료_hover.png").replace("\\", "/")
+                exit_enabled = resource_path("assets/image/test_runner/btn_common_enabled.png").replace("\\", "/")
+                exit_hover = resource_path("assets/image/test_runner/btn_common_hover.png").replace("\\", "/")
                 close_btn.setStyleSheet(f"""
                     QPushButton {{
                         border: none;
