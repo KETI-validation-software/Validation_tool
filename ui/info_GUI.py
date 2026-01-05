@@ -532,13 +532,24 @@ class InfoWidget(QWidget):
         QMessageBox.warning(self, "주소 탐색 실패", msg)
 
     def _on_arp_scan_completed(self, urls):
-        """ARP 스캔 완료 시 호출"""
-        self._populate_url_table(urls)
-        QMessageBox.information(
-            self, "ARP 스캔 완료",
-            f"동일 네트워크에서 {len(urls)}개의 장비를 찾았습니다.\n"
-            f"발견된 주소: {', '.join(urls)}"
-        )
+        """ARP 스캔 완료 시 호출 (최대 3개)"""
+        # 최대 3개만 표시
+        limited_urls = urls[:3]
+        self._populate_url_table(limited_urls)
+
+        # 메시지 구성
+        if len(urls) > 3:
+            message = (
+                f"동일 네트워크에서 {len(urls)}개의 장비를 찾았습니다.\n"
+                f"상위 3개 주소만 표시됩니다.\n"
+                f"표시된 주소: {', '.join(limited_urls)}"
+            )
+        else:
+            message = (
+                f"동일 네트워크에서 {len(urls)}개의 장비를 찾았습니다.\n"
+                f"발견된 주소: {', '.join(limited_urls)}"
+            )
+        QMessageBox.information(self, "ARP 스캔 완료", message)
 
     def _on_arp_scan_failed(self, msg):
         """ARP 스캔 실패 시 호출"""
