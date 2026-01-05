@@ -74,7 +74,7 @@ def _setup_header(main_layout):
 
     # 로고 이미지 (90x32)
     logo_label = QLabel()
-    logo_pixmap = QPixmap(resource_path("assets/image/test_info/logo_KISA.png"))
+    logo_pixmap = QPixmap(resource_path("assets/image/common/logo_KISA.png"))
     logo_label.setPixmap(logo_pixmap)
     logo_label.setFixedSize(90, 32)
     header_layout.addWidget(logo_label)

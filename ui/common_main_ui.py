@@ -405,9 +405,9 @@ class CommonMainUI(QWidget):
 
         # 정지 버튼
         self.stop_btn = QPushButton("일시 정지", self.buttonGroup)  # 텍스트 추가
-        stop_enabled = resource_path("assets/image/test_runner/btn_일시정지_enabled.png").replace("\\", "/")
-        stop_hover = resource_path("assets/image/test_runner/btn_일시정지_hover.png").replace("\\", "/")
-        stop_disabled = resource_path("assets/image/test_runner/btn_일시정지_disabled.png").replace("\\", "/")
+        stop_enabled = resource_path("assets/image/test_runner/btn_common_enabled.png").replace("\\", "/")
+        stop_hover = resource_path("assets/image/test_runner/btn_common_hover.png").replace("\\", "/")
+        stop_disabled = resource_path("assets/image/test_runner/btn_common_disabled.png").replace("\\", "/")
         self.stop_btn.setStyleSheet(f"""
             QPushButton {{
                 border: none;
@@ -435,9 +435,9 @@ class CommonMainUI(QWidget):
 
         # 종료 버튼
         self.rbtn = QPushButton("종료", self.buttonGroup)  # 텍스트 추가
-        exit_enabled = resource_path("assets/image/test_runner/btn_종료_enabled.png").replace("\\", "/")
-        exit_hover = resource_path("assets/image/test_runner/btn_종료_hover.png").replace("\\", "/")
-        exit_disabled = resource_path("assets/image/test_runner/btn_종료_disabled.png").replace("\\", "/")
+        exit_enabled = resource_path("assets/image/test_runner/btn_common_enabled.png").replace("\\", "/")
+        exit_hover = resource_path("assets/image/test_runner/btn_common_hover.png").replace("\\", "/")
+        exit_disabled = resource_path("assets/image/test_runner/btn_common_disabled.png").replace("\\", "/")
         self.rbtn.setStyleSheet(f"""
             QPushButton {{
                 border: none;
@@ -464,9 +464,9 @@ class CommonMainUI(QWidget):
 
         # 시험 결과 버튼
         self.result_btn = QPushButton("시험 결과", self.buttonGroup)  # 텍스트 추가
-        result_enabled = resource_path("assets/image/test_runner/btn_시험결과_enabled.png").replace("\\", "/")
-        result_hover = resource_path("assets/image/test_runner/btn_시험결과_hover.png").replace("\\", "/")
-        result_disabled = resource_path("assets/image/test_runner/btn_시험결과_disabled.png").replace("\\", "/")
+        result_enabled = resource_path("assets/image/test_runner/btn_common_enabled.png").replace("\\", "/")
+        result_hover = resource_path("assets/image/test_runner/btn_common_hover.png").replace("\\", "/")
+        result_disabled = resource_path("assets/image/test_runner/btn_common_disabled.png").replace("\\", "/")
         self.result_btn.setStyleSheet(f"""
             QPushButton {{
                 border: none;
@@ -575,20 +575,6 @@ class CommonMainUI(QWidget):
     def resizeEvent(self, event):
         """창 크기 변경 시 배경 이미지 및 왼쪽 패널 크기 재조정"""
         super().resizeEvent(event)
-
-        # 파일 로그로 resizeEvent 호출 확인 (PyInstaller 호환)
-        try:
-            import os
-            import sys
-            if getattr(sys, 'frozen', False):
-                base_dir = os.path.dirname(sys.executable)
-            else:
-                base_dir = os.path.dirname(os.path.abspath(__file__))
-            log_path = os.path.join(base_dir, "resize_debug.log")
-            with open(log_path, "a", encoding="utf-8") as f:
-                f.write(f"[SYSTEM] width={self.width()}, height={self.height()}\n")
-        except:
-            pass
 
         # content_widget의 배경 이미지 크기 조정
         if hasattr(self, 'content_widget') and self.content_widget:
