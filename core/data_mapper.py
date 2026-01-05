@@ -16,60 +16,93 @@ class ConstraintDataGenerator:
         api_name: API 이름 (RealtimeDoorStatus2 등)
         door_memory: 문 상태 저장소
         """
-        if api_name and "RealtimeDoorStatus" in api_name and "doorList" in template_data:
+        # ✅ sensorDeviceList 구조를 가진 웹훅 데이터 동적 생성 (범용)
+        if is_webhook and "sensorDeviceList" in template_data:
+            # request_data에서 요청한 sensorDeviceID 추출
+            requested_ids = self.find_key(request_data, "sensorDeviceID")
             
+            # sensorDeviceID가 요청에 있고, 템플릿에 sensorDeviceList가 있으면 처리
+            if requested_ids and isinstance(template_data["sensorDeviceList"], list) and len(template_data["sensorDeviceList"]) > 0:
+                print(f"[DATA_MAPPER] sensorDeviceList 웹훅 데이터 동적 생성 시작 (API: {api_name})")
+                print(f"[DATA_MAPPER] 요청한 sensorDeviceID: {requested_ids}")
+                
+                # 템플릿의 첫 번째 항목을 기준으로 허용 키 확인
+                allowed_keys = set(template_data["sensorDeviceList"][0].keys())
+                print(f"[DATA_MAPPER] 템플릿 구조 기반 허용 키: {allowed_keys}")
+                
+                # 요청한 ID만 포함하도록 필터링
+                new_sensor_list = []
+                for sensor_id in requested_ids:
+                    # 템플릿에서 해당 ID를 가진 항목 찾기
+                    matching_item = None
+                    for item in template_data["sensorDeviceList"]:
+                        if item.get("sensorDeviceID") == sensor_id:
+                            matching_item = item
+                            break
+                    
+                    # 매칭 항목이 있으면 사용, 없으면 템플릿 첫 항목 복사 후 ID만 변경
+                    if matching_item:
+                        filtered_item = {k: v for k, v in matching_item.items() if k in allowed_keys}
+                    else:
+                        # 템플릿 첫 번째 항목 복사
+                        template_item = template_data["sensorDeviceList"][0]
+                        filtered_item = {k: v for k, v in template_item.items() if k in allowed_keys}
+                        # ID만 요청한 값으로 변경
+                        filtered_item["sensorDeviceID"] = sensor_id
+                    
+                    new_sensor_list.append(filtered_item)
+                
+                template_data["sensorDeviceList"] = new_sensor_list
+                print(f"[DATA_MAPPER] 생성된 sensorDeviceList ({len(new_sensor_list)}개): {new_sensor_list}")
+            
+            return template_data
+        
+        # ✅ doorList 구조를 가진 데이터 동적 생성 (범용)
+        if "doorList" in template_data:
             is_response_template = "code" in template_data
-            if not is_webhook and is_response_template:
-                if "doorList" in template_data:
-                    del template_data["doorList"]
-                return template_data
-
+            
             if is_webhook:
                 requested_ids = self.find_key(request_data, "doorID")
-                new_door_list = []
-
-                allowed_keys = set()
-                if "doorList" in template_data and isinstance(template_data["doorList"], list) and len(template_data["doorList"]) > 0:
+                
+                # doorID가 요청에 있고, 템플릿에 doorList가 있으면 처리
+                if requested_ids and isinstance(template_data["doorList"], list) and len(template_data["doorList"]) > 0:
+                    print(f"[DATA_MAPPER] doorList 웹훅 데이터 동적 생성 시작 (API: {api_name})")
+                    print(f"[DATA_MAPPER] 요청한 doorID: {requested_ids}")
+                    
+                    new_door_list = []
                     allowed_keys = set(template_data["doorList"][0].keys())
-                
-                # 안전장치
-                if not allowed_keys:
-                    allowed_keys = {"doorID", "doorName", "doorRelaySensor", "doorSensor"}
-                
-                if requested_ids:
+                    print(f"[DATA_MAPPER] 템플릿 구조 기반 허용 키: {allowed_keys}")
+                    
                     for door_id in requested_ids:
-                        if door_memory and door_id in door_memory:
-                            raw_info = door_memory[door_id]
-
-                            filtered_info = {}
-                            for key in allowed_keys:
-                                if key == "doorID":
-                                    filtered_info[key] = door_id
-                                else:
-                                    val = raw_info.get(key)
-                                    if val is None:
-                                        if key == "doorRelaySensor":
-                                            val = "일반"
-                                        elif key == "doorSensor":
-                                            val = "Lock"
-                                        else:
-                                            val = ""
-                                    filtered_info[key] = val
-                            new_door_list.append(filtered_info)
+                        # 템플릿에서 해당 ID를 가진 항목 찾기
+                        matching_item = None
+                        for item in template_data["doorList"]:
+                            if item.get("doorID") == door_id:
+                                matching_item = item
+                                break
+                        
+                        # 매칭 항목이 있으면 사용, 없으면 템플릿 첫 항목 복사 후 ID만 변경
+                        if matching_item:
+                            filtered_item = {k: v for k, v in matching_item.items() if k in allowed_keys}
                         else:
-                            default_info = {
-                                "doorID": door_id,
-                                "doorName": "",
-                                "doorRelaySensor": "일반",
-                                "doorSensor": "Lock"
-                            }
-                            # allowed_keys에 맞게 필터링
-                            filtered_default = {k: v for k, v in default_info.items() if k in allowed_keys}
-                            new_door_list.append(filtered_default)
-
-                
-                if new_door_list:
+                            # 템플릿 첫 번째 항목 복사 (door_memory 활용)
+                            template_item = template_data["doorList"][0]
+                            filtered_item = {k: v for k, v in template_item.items() if k in allowed_keys}
+                            # ID만 요청한 값으로 변경
+                            filtered_item["doorID"] = door_id
+                            
+                            # door_memory가 있으면 추가 정보 업데이트
+                            if door_memory and door_id in door_memory:
+                                raw_info = door_memory[door_id]
+                                for key in allowed_keys:
+                                    if key != "doorID" and key in raw_info:
+                                        filtered_item[key] = raw_info[key]
+                        
+                        new_door_list.append(filtered_item)
+                    
                     template_data["doorList"] = new_door_list
+                    print(f"[DATA_MAPPER] 생성된 doorList ({len(new_door_list)}개): {new_door_list}")
+                
                 return template_data
 
 
@@ -102,60 +135,54 @@ class ConstraintDataGenerator:
 
             return template_data
         
-        if api_name and "DoorControl" in api_name:
+        # ✅ commandType 구조를 가진 데이터 동적 생성 (범용 - DoorControl 등)
+        if "commandType" in template_data and "doorID" in template_data:
+            print(f"[DATA_MAPPER] commandType 데이터 동적 생성 시작 (API: {api_name})")
 
-            # 이거는 request 템플릿에만 적용 -> 응답에는 적용 x
-            needs_command_generation = False
-
-            if "commandType" in template_data:  # 응답에는 무조건 상태 변경 명령어가 포함되지 않으니까
-                needs_command_generation = True
-            
-            if not needs_command_generation:
-                return template_data
-
+            # doorID 추출
             target_door_id = None
             if request_data and "doorID" in request_data:
                 target_door_id = request_data["doorID"]
-
-            elif door_memory:
+            elif door_memory and len(door_memory) > 0:
                 target_door_id = random.choice(list(door_memory.keys()))
-
             else:
-                target_door_id = "door0001" # 얘도 일단은 기본값 하드코딩
+                # 템플릿 기본값 사용
+                target_door_id = template_data.get("doorID", "door0001")
             
             template_data["doorID"] = target_door_id
+            print(f"[DATA_MAPPER] 선택된 doorID: {target_door_id}")
 
-            current_status = "Lock" # 기본값
+            # 현재 상태 가져오기
+            current_status = template_data.get("commandType", "Lock")  # 템플릿 기본값 사용
             if door_memory and target_door_id in door_memory:
-                current_status = door_memory[target_door_id].get("doorSensor", "Lock")
+                current_status = door_memory[target_door_id].get("doorSensor", current_status)
             
-            # 동적으로
+            # constraints에서 allowedValues 추출
             allowed_values = []
-
             if constraints:
                 for key, rule in constraints.items():
                     if "commandType" in key and "allowedValues" in rule:
-                            allowed_values = rule["allowedValues"]
-                            # print(f"[DATA_MAPPER] 설정 파일에서 allowedValues 발견: {allowed_values}")
-                            break
+                        allowed_values = rule["allowedValues"]
+                        print(f"[DATA_MAPPER] constraints에서 allowedValues 발견: {allowed_values}")
+                        break
             
-            candidates = [
-                val for val in allowed_values
-                if str(val).lower() != str(current_status).lower()
-            ]
-
-            command = None
-            
-            if candidates:
-                command = random.choice(candidates)
-            
-            elif allowed_values:
-                command = random.choice(allowed_values)
-
+            # 현재 상태와 다른 명령어 선택 (토글)
+            if allowed_values:
+                candidates = [
+                    val for val in allowed_values
+                    if str(val).lower() != str(current_status).lower()
+                ]
+                
+                if candidates:
+                    command = random.choice(candidates)
+                else:
+                    command = random.choice(allowed_values)
+                
+                template_data["commandType"] = command
+                print(f"[DATA_MAPPER] 생성된 commandType: {command} (현재 상태: {current_status})")
             else:
-                command = "Unlock"  # 진짜 비상용 하드코딩값.. (추후 수정)
-            
-            template_data["commandType"] = command
+                # constraints가 없으면 템플릿 기본값 유지
+                print(f"[DATA_MAPPER] constraints 없음 - 템플릿 기본값 유지: {template_data['commandType']}")
             return template_data
 
 
