@@ -41,9 +41,6 @@ import config.CONSTANTS as CONSTANTS
 import importlib
 
 # ===== 로그 파일 설정 (windowed 모드 대응) =====
-# ✅ 로그 파일 생성 비활성화 (디버그용 로그 파일 생성하지 않음)
-# log_filename = f"validation_tool_debug_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
-# handlers = [logging.FileHandler(log_filename, encoding='utf-8')]
 handlers = []
 
 # 콘솔 모드일 때만 StreamHandler 추가
@@ -58,7 +55,6 @@ if handlers:  # handlers가 비어있지 않을 때만 설정
         handlers=handlers
     )
 logger = logging.getLogger(__name__)
-# logger.info(f"로그 파일 생성: {log_filename}")  # 주석 처리
 
 # ===== windowed 모드에서 stdout/stderr를 devnull로 리다이렉트 =====
 # Windowed 모드(console=False)에서는 sys.stdout/stderr가 None이 됨
@@ -98,11 +94,6 @@ class MainWindow(QMainWindow):
         self.info_widget = InfoWidget()
         self.stack.addWidget(self.info_widget)  # index 0
         self.info_widget.startTestRequested.connect(self._on_start_test_requested)
-
-        # info_widget의 페이지 변경 시그널 연결 (시험 정보 불러오기 완료 시)
-        #self.info_widget.stacked_widget.currentChanged.connect(self._on_page_changed)
-
-        #self._setup_menu()
         self.stack.setCurrentIndex(0)
 
     def _center_on_screen(self):
@@ -211,9 +202,6 @@ class MainWindow(QMainWindow):
         # 스택에 추가하고 전환
         self.stack.addWidget(self._result_widget)
         self.stack.setCurrentWidget(self._result_widget)
-
-        # 시험 결과 메뉴 활성화
-        #self.act_test_result.setEnabled(True)
 
     def _on_back_to_validation(self):
         """뒤로가기: 시험 결과 페이지에서 검증 화면으로 복귀"""
