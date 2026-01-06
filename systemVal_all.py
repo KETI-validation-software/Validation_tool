@@ -2598,13 +2598,13 @@ class MyApp(SystemMainUI):
             self.valResult.append(f"\n결과 저장 실패: {str(e)}")
 
     def cancel_btn_clicked(self):
-        """시험 취소 버튼 클릭 - 진행 중단, 상태 초기화, 자동 재시작"""
+        """시험 취소 버튼 클릭 - 진행 중단, 상태 초기화"""
         print(f"[CANCEL] 시험 취소 버튼 클릭")
         
         # 확인 메시지 표시
         reply = QMessageBox.question(
             self, '시험 취소',
-            '현재 진행 중인 시험을 취소하고 처음부터 다시 시작하시겠습니까?',
+            '현재 진행 중인 시험을 취소하시겠습니까?',
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No
         )
@@ -2641,21 +2641,15 @@ class MyApp(SystemMainUI):
         
         # 5. 모니터링 화면 초기화
         self.valResult.clear()
-        self.valResult.append('<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">시험을 취소c하고 재시작 중...</div>')
+        self.valResult.append('<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">시험이 취소되었습니다. 시험 시작 버튼을 눌러 다시 시작하세요.</div>')
         print(f"[CANCEL] 모니터링 화면 초기화")
         
         # 6. UI 업데이트 처리
         QApplication.processEvents()
         
-        # 7. 2초 대기 후 자동 재시작 (정리 시간 확보)
-        print(f"[CANCEL] 2초 대기 후 자동 재시작...")
-        self._auto_restart = True  # 자동 재시작 플래그 설정
-        QTimer.singleShot(2000, self.start_btn_clicked)
-        
         print(f"[CANCEL] ========== 시험 취소 완료 ==========")
 
     def init_win(self):
-        def init_win(self):
             """검증 시작 전 초기화"""
             self.cnt = 0
             self.current_retry = 0
