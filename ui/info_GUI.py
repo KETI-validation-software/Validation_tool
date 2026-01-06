@@ -467,7 +467,6 @@ class InfoWidget(QWidget):
                     existing_urls = self._get_existing_urls()
                     merged_urls = self._merge_urls(existing_urls, new_urls, max_count=3)
 
-                    print(f"통합플랫폼시스템 - API testPort 사용 (후보): {merged_urls}")
                     self._populate_url_table(merged_urls)
 
                     added_count = len(merged_urls) - len(existing_urls)
@@ -730,10 +729,7 @@ class InfoWidget(QWidget):
                 user_id = self.id_input.text().strip()
                 password = self.pw_input.text().strip()
                 if user_id and password:
-                    print(f"[INFO] 물리보안 시험 시작 - Data_request.py 업데이트 (userID={user_id})")
-                    update_success = self.form_validator.update_data_request_authentication(spec_id, user_id, password)
-                    if not update_success:
-                        print("[WARNING] Data_request.py 업데이트 실패, 기존 값으로 진행합니다.")
+                    self.form_validator.update_data_request_authentication(spec_id, user_id, password)
 
             # CONSTANTS.py 업데이트
             if self.form_validator.update_constants_py():
@@ -756,7 +752,6 @@ class InfoWidget(QWidget):
                 self.form_validator.send_heartbeat_busy(test_info)
 
                 # test_group_name, verification_type(current_mode), spec_id를 함께 전달
-                print(f"시험 시작: testTarget.name={self.target_system}, verificationType={self.current_mode}, spec_id={spec_id}")
                 self.startTestRequested.emit(self.target_system, self.current_mode, spec_id)
             else:
                 QMessageBox.warning(self, "저장 실패", "CONSTANTS.py 업데이트에 실패했습니다.")
@@ -794,39 +789,32 @@ class InfoWidget(QWidget):
             # testGroups에서 첫 번째 그룹의 testSpecs 가져오기
             test_groups = test_data.get("testRequest", {}).get("testGroups", [])
             if not test_groups:
-                print("경고: testGroups 데이터가 없습니다. 기본값 'request' 사용")
                 return "request"  # 기본값
 
             test_specs = test_groups[0].get("testSpecs", [])
             if not test_specs:
-                print("경고: testSpecs 데이터가 없습니다. 기본값 'request' 사용")
                 return "request"  # 기본값
 
             first_spec_id = test_specs[0].get("id")
             if not first_spec_id:
-                print("경고: 첫 번째 spec_id를 찾을 수 없습니다. 기본값 'request' 사용")
                 return "request"
 
             # form_validator의 캐시에서 steps 가져오기
             steps = self.form_validator._steps_cache.get(first_spec_id, [])
             if not steps:
-                print(f"경고: spec_id={first_spec_id}에 대한 steps 캐시가 없습니다. 기본값 'request' 사용")
                 return "request"
 
             first_step_id = steps[0].get("id")
             if not first_step_id:
-                print("경고: 첫 번째 step_id를 찾을 수 없습니다. 기본값 'request' 사용")
                 return "request"
 
             # test-step detail 캐시에서 verificationType 가져오기
             step_detail = self.form_validator._test_step_cache.get(first_step_id)
             if not step_detail:
-                print(f"경고: step_id={first_step_id}에 대한 캐시가 없습니다. 기본값 'request' 사용")
                 return "request"
 
             verification_type = step_detail.get("verificationType", "request")
 
-            print(f"verificationType 추출 완료: {verification_type}")
             return verification_type
 
         except Exception as e:
@@ -850,8 +838,6 @@ class InfoWidget(QWidget):
                 "올바른 IP 주소 형식이 아닙니다.\n"
                 "예: 192.168.1.1")
             return
-
-        print(f"입력된 IP 주소: {ip_address}")
 
         # 로딩 팝업 생성 및 표시 (스피너 애니메이션 포함)
         self.loading_popup = LoadingPopup(width=400, height=200)
@@ -929,7 +915,6 @@ class InfoWidget(QWidget):
             self.test_groups = test_groups  # 전체 그룹 배열 저장
             self.test_group_id = test_groups[0].get("id", "") if test_groups else ""  # 첫 번째 그룹 ID
             self.test_group_name = test_groups[0].get("name", "") if test_groups else ""  # 첫 번째 그룹 이름
-            print(f"testGroups 저장: {len(test_groups)}개 그룹, 첫 번째 id={self.test_group_id}, name={self.test_group_name}")
 
             # 모든 그룹의 testSpecs를 합침 (2페이지에서 사용)
             all_test_specs = []
@@ -969,10 +954,6 @@ class InfoWidget(QWidget):
                     # 파일 저장
                     with open(constants_path, 'w', encoding='utf-8') as f:
                         f.write(content)
-
-                    print(f"WEBHOOK_PORT 업데이트 완료: {CONSTANTS.WEBHOOK_PORT} (testPort: {self.test_port})")
-                    print(f"  - 메모리: {CONSTANTS.WEBHOOK_PORT}")
-                    print(f"  - 파일: CONSTANTS.py 수정 완료")
 
                 except Exception as e:
                     print(f"CONSTANTS.py 파일 수정 실패: {e}")
@@ -1030,22 +1011,17 @@ class InfoWidget(QWidget):
         try:
             # test_specs에서 첫 번째 spec_id 가져오기
             if not hasattr(self, 'test_specs') or not self.test_specs:
-                print("[WARNING] test_specs가 없어서 Authentication 자동 입력을 건너뜁니다.")
                 return
 
             first_spec = self.test_specs[0]
             spec_id = first_spec.get("id", "")
 
             if not spec_id:
-                print("[WARNING] spec_id를 찾을 수 없어서 Authentication 자동 입력을 건너뜁니다.")
                 return
 
             # 플랫폼 검증인지 확인
             if not hasattr(self, 'target_system') or self.target_system != "통합플랫폼시스템":
                 # 물리보안(시스템 검증): Data_request.py에서 읽어옴
-                print("[INFO] 시스템 검증(물리보안) 감지 - Data_request.py에서 Authentication 정보를 읽어옵니다.")
-                print(f"[INFO] spec_id={spec_id}로 Data_request.py에서 Authentication 정보를 추출합니다.")
-
                 user_id, password = self.form_validator.get_authentication_from_data_request(spec_id)
 
                 if user_id and password:
@@ -1056,11 +1032,7 @@ class InfoWidget(QWidget):
                     # 필드를 enabled 상태로 설정 (수정 가능)
                     self.id_input.setEnabled(True)
                     self.pw_input.setEnabled(True)
-
-                    print(f"[SUCCESS] 시스템 검증: Authentication 자동 입력 완료 (User ID={user_id})")
-                    print(f"[INFO] id_input과 pw_input 필드가 enabled 상태로 설정되었습니다. (수정 가능)")
                 else:
-                    print("[WARNING] Data_request.py에서 Authentication 정보를 찾을 수 없습니다. 필드를 비워둡니다.")
                     self.id_input.setEnabled(True)
                     self.pw_input.setEnabled(True)
                     self.id_input.clear()
@@ -1068,9 +1040,6 @@ class InfoWidget(QWidget):
                 return
 
             # 통합플랫폼: Validation_request.py에서 읽어옴
-            print("[INFO] 플랫폼 검증 감지 - Validation_request.py에서 Authentication 자동 입력을 시도합니다.")
-            print(f"[INFO] spec_id={spec_id}로 Authentication 정보를 추출합니다.")
-
             # FormValidator의 get_authentication_credentials 메서드 호출
             user_id, password = self.form_validator.get_authentication_credentials(spec_id)
 
@@ -1082,11 +1051,7 @@ class InfoWidget(QWidget):
                 # 필드를 disabled 상태로 설정
                 self.id_input.setEnabled(False)
                 self.pw_input.setEnabled(False)
-
-                print(f"[SUCCESS] 플랫폼 검증: Authentication 자동 입력 완료 (User ID={user_id})")
-                print(f"[INFO] id_input과 pw_input 필드가 disabled 상태로 설정되었습니다.")
             else:
-                print("[WARNING] Authentication 정보를 찾을 수 없습니다. 필드를 비워둡니다.")
                 # Authentication 정보가 없으면 필드를 활성화하고 비움
                 self.id_input.setEnabled(True)
                 self.pw_input.setEnabled(True)
@@ -1107,11 +1072,7 @@ class InfoWidget(QWidget):
             new_url = self.management_url_edit.text().strip()
             if new_url:
                 # CONSTANTS에 저장 (메모리 + config.txt 파일)
-                success = CONSTANTS.save_management_url(new_url)
-                if success:
-                    print(f"관리자시스템 주소가 업데이트되었습니다: {new_url}")
-                else:
-                    print("관리자시스템 주소 저장에 실패했습니다.")
+                CONSTANTS.save_management_url(new_url)
         except Exception as e:
             print(f"관리자시스템 주소 변경 처리 실패: {e}")
 
@@ -1138,8 +1099,8 @@ class InfoWidget(QWidget):
             s.close()
             if local_ip and not local_ip.startswith('127.'):
                 ip_list.append(local_ip)
-        except Exception as e:
-            print(f"socket을 사용한 IP 검색 실패: {e}")
+        except Exception:
+            pass
 
         # 위 방법 실패 시 호스트명으로 IP 가져오기
         if not ip_list:
@@ -1147,13 +1108,11 @@ class InfoWidget(QWidget):
                 hostname_ip = socket.gethostbyname(socket.gethostname())
                 if hostname_ip and not hostname_ip.startswith('127.'):
                     ip_list.append(hostname_ip)
-            except Exception as e2:
-                print(f"hostname을 사용한 IP 검색 실패: {e2}")
+            except Exception:
+                pass
 
         # 중복 제거
         ip_list = list(dict.fromkeys(ip_list))
-
-        print(f"검색된 네트워크 IP 목록: {ip_list}")
 
         # 리스트를 쉼표로 구분된 문자열로 반환
         if ip_list:

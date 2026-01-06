@@ -10,7 +10,6 @@ import re
 import os
 import sys
 import json
-import ast
 from pathlib import Path
 from typing import Dict, List
 
@@ -163,7 +162,6 @@ class FormValidator:
             # 6. 선택된 시험 분야의 인덱스 저장
             selected_spec_index = self._get_selected_spec_index()
             variables['selected_spec_index'] = selected_spec_index
-            print(f"\n[CRITICAL] CONSTANTS.py에 저장할 selected_spec_index: {selected_spec_index}")
 
             # 7. CONSTANTS.py 파일 업데이트
             self._update_constants_file(constants_path, variables)
@@ -223,24 +221,18 @@ class FormValidator:
     def _get_selected_spec_index(self):
         """선택된 시험 분야의 CONSTANTS.specs 인덱스 반환"""
         try:
-            print("\n=== _get_selected_spec_index 시작 ===")
             selected_spec_id = self._get_selected_test_field_spec_id()
-            print(f"[DEBUG] selected_spec_id: {selected_spec_id}")
 
             if not selected_spec_id:
-                print("경고: 선택된 시험 분야가 없습니다. 기본값 0 사용")
                 return 0
 
             spec_id_str = str(selected_spec_id).lower()
 
             if "spec-0011" in spec_id_str or "spec_0011" in spec_id_str:
-                print("보안용 센서 시스템 선택됨 (index 1)")
                 return 1
             elif "spec-001" in spec_id_str or "spec_001" in spec_id_str:
-                print("영상보안 시스템 선택됨 (index 0)")
                 return 0
             else:
-                print(f"경고: 알 수 없는 spec_id '{selected_spec_id}'. 기본값 0 사용")
                 return 0
 
         except Exception as e:
@@ -293,7 +285,6 @@ class FormValidator:
         for var_name, var_value in variables.items():
             if hasattr(CONSTANTS, var_name):
                 setattr(CONSTANTS, var_name, var_value)
-                print(f"[MEMORY] CONSTANTS.{var_name} 메모리 업데이트 완료")
 
     # ---------- SPEC_CONFIG 관련 ----------
 
@@ -302,7 +293,6 @@ class FormValidator:
         try:
             steps = self._steps_cache.get(spec_id, [])
             if not steps:
-                print(f"경고: spec_id={spec_id}에 대한 steps 캐시가 없습니다.")
                 return None
 
             time_out = []
@@ -320,7 +310,6 @@ class FormValidator:
 
                 cached_step = self._test_step_cache.get(step_id)
                 if not cached_step:
-                    print(f"경고: step_id={step_id}에 대한 캐시가 없습니다.")
                     time_out.append(5000)
                     num_retries.append(1)
                     trans_protocol.append(None)
@@ -362,8 +351,6 @@ class FormValidator:
                     trans_protocol_mode = None
                 trans_protocol.append(trans_protocol_mode)
 
-            print(f"  {spec_id} 프로토콜 설정 추출 완료: {len(time_out)}개 steps")
-
             return {
                 "api_name": api_name,
                 "api_id": api_id,
@@ -396,7 +383,6 @@ class FormValidator:
 
             entries = []
             mode = self.parent.target_system_edit.text().strip()
-            print(f"[DEBUG] SPEC_CONFIG 업데이트 - mode: '{mode}'")
 
             if getattr(sys, 'frozen', False):
                 exe_dir = os.path.dirname(sys.executable)
@@ -423,7 +409,6 @@ class FormValidator:
                     data_file = resource_path("spec/Data_response.py")
                 merged_result = self.file_generator.merge_list_prefix_mappings(schema_file, data_file)
             else:
-                print(f"[CONFIG SPEC]: 모드 확인해주세요. mode: '{mode}'")
                 return
 
             for spec_id in sorted(merged_result.keys()):
@@ -548,15 +533,12 @@ class FormValidator:
             with open(constants_path, "w", encoding="utf-8") as f:
                 f.write(new_content)
 
-            print("CONSTANTS.py SPEC_CONFIG 전체 덮어쓰기 완료")
-
             # 메모리의 CONSTANTS.SPEC_CONFIG도 업데이트
             try:
                 namespace = {}
                 exec(new_spec_config_block, namespace)
                 if 'SPEC_CONFIG' in namespace:
                     CONSTANTS.SPEC_CONFIG = namespace['SPEC_CONFIG']
-                    print(f"[MEMORY] CONSTANTS.SPEC_CONFIG 메모리 업데이트 완료: {len(CONSTANTS.SPEC_CONFIG)}개 그룹")
             except Exception as mem_err:
                 print(f"[WARNING] SPEC_CONFIG 메모리 업데이트 실패: {mem_err}")
 
@@ -579,7 +561,6 @@ class FormValidator:
 
             spec_config_start = content.find('SPEC_CONFIG = [')
             if spec_config_start == -1:
-                print("경고: SPEC_CONFIG 리스트를 찾을 수 없습니다.")
                 return
 
             bracket_count = 0
@@ -601,7 +582,6 @@ class FormValidator:
             spec_key_start = current_config.find(f'"{spec_id}":')
 
             spec_name = self._spec_names_cache.get(spec_id, "")
-            print(f"spec_id={spec_id}에 대한 spec_name: {spec_name}")
 
             specs_list = [
                 f"{spec_id}_inSchema",
@@ -634,21 +614,17 @@ class FormValidator:
 
                 old_spec_block = current_config[spec_key_start:brace_end]
                 new_config = current_config.replace(old_spec_block, new_spec_config)
-                print(f"SPEC_CONFIG['{spec_id}'] 업데이트")
             else:
                 closing_brace = current_config.rfind('}')
                 if '":' in current_config:
                     new_config = current_config[:closing_brace] + f',\n    {new_spec_config}\n' + current_config[closing_brace:]
                 else:
                     new_config = current_config[:closing_brace] + f'\n    {new_spec_config}\n' + current_config[closing_brace:]
-                print(f"SPEC_CONFIG['{spec_id}'] 신규 추가")
 
             content = content.replace(current_config, new_config)
 
             with open(constants_path, 'w', encoding='utf-8') as f:
                 f.write(content)
-
-            print(f"CONSTANTS.py SPEC_CONFIG 업데이트 완료")
 
         except Exception as e:
             print(f"SPEC_CONFIG 업데이트 실패: {e}")
@@ -679,10 +655,6 @@ class FormValidator:
                 QMessageBox.warning(self.parent, "데이터 없음", "testSpecs 데이터가 비어있습니다.")
                 return
 
-            print(f"\n=== API 기반 OPT 로드 시작 ===")
-            print(f"그룹 개수: {len(test_groups)}개")
-            print(f"전체 시나리오 개수: {len(all_test_specs_with_group)}개")
-
             self._fill_test_field_table_from_api(all_test_specs_with_group)
             QApplication.processEvents()
 
@@ -701,7 +673,6 @@ class FormValidator:
             QApplication.processEvents()
 
             # 모든 spec에 대해 개별 설정 업데이트
-            print(f"\n=== SPEC_CONFIG 업데이트 시작 ===")
             for spec in all_test_specs_with_group:
                 spec_id = spec.get("id", "")
                 if spec_id:
@@ -709,13 +680,10 @@ class FormValidator:
                     if spec_config_data:
                         self._update_spec_config(spec_id, spec_config_data)
                 QApplication.processEvents()
-            print(f"=== SPEC_CONFIG 개별 업데이트 완료 ===\n")
 
             # SPEC_CONFIG 전체 재구성
-            print(f"=== SPEC_CONFIG 전체 재구성 시작 ===")
             self.overwrite_spec_config_from_mapping()
             QApplication.processEvents()
-            print(f"=== SPEC_CONFIG 전체 재구성 완료 ===\n")
 
             if self.parent.test_field_table.rowCount() > 0:
                 self.parent.test_field_table.selectRow(0)
@@ -787,8 +755,6 @@ class FormValidator:
                 self.parent.scenario_placeholder_label.show()
                 self.parent.scenario_placeholder_label.raise_()
 
-            print(f"시험 분야 테이블 채우기 완료: {len(self._group_specs)}개 그룹")
-
         except Exception as e:
             print(f"시험 분야 테이블 채우기 실패: {e}")
             import traceback
@@ -814,9 +780,6 @@ class FormValidator:
             scenarios = self._group_specs.get(group_name, [])
             scenario_count = len(scenarios)
             group_count = len(self._group_specs)
-
-            print(f"\n=== 테이블 재구성 시작 ===")
-            print(f"선택된 그룹: {group_name} (시나리오 {scenario_count}개)")
 
             field_table.setRowCount(0)
             field_table.clearContents()
@@ -864,8 +827,6 @@ class FormValidator:
 
             field_table.blockSignals(False)
             scenario_table.blockSignals(False)
-
-            print(f"시나리오 채우기 완료: {group_name} - {scenario_count}개 시나리오 표시")
 
             self.parent.resizeEvent(QResizeEvent(self.parent.size(), self.parent.size()))
 
@@ -939,8 +900,6 @@ class FormValidator:
                 id_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
                 self.parent.api_test_table.setItem(r, 1, id_item)
 
-            print(f"API 테이블 채우기 완료: {len(cached_steps)}개 API")
-
         except Exception as e:
             print(f"API 테이블 채우기 실패: {e}")
             import traceback
@@ -956,7 +915,6 @@ class FormValidator:
         total_specs = 0
 
         if not hasattr(self, '_group_specs') or not self._group_specs:
-            print(f"[preload_all_spec_steps] 경고: _group_specs가 비어있습니다.")
             return
 
         for group_name, specs in self._group_specs.items():
@@ -985,8 +943,6 @@ class FormValidator:
 
                 self._steps_cache[spec_id] = trimmed
                 loaded += 1
-
-        print(f"[preload_all_spec_steps] 로드:{loaded}, 스킵:{skipped}, 총 spec 수:{total_specs}")
 
     def preload_test_step_details_from_cache(self):
         """_steps_cache를 순회하며 step 상세 응답을 _test_step_cache에 저장"""
@@ -1030,12 +986,6 @@ class FormValidator:
                     }
                     loaded += 1
 
-        print(
-            f"[preload_test_step_details_from_cache] "
-            f"로드:{loaded}, 스킵:{skipped}, id없음:{empty}, "
-            f"총 step 수(대략): {sum(len(v) for v in self._steps_cache.values())}"
-        )
-
     # ---------- UI Helper ----------
 
     def _show_initial_scenario_message(self):
@@ -1074,8 +1024,6 @@ class FormValidator:
             if hasattr(self.parent, 'scenario_placeholder_label'):
                 self.parent.scenario_placeholder_label.show()
                 self.parent.scenario_placeholder_label.raise_()
-
-            print("시험 시나리오 안내 문구 표시")
         except Exception as e:
             print(f"시험 시나리오 안내 문구 표시 실패: {e}")
 
@@ -1096,14 +1044,6 @@ class FormValidator:
     def fetch_test_info_by_ip(self, ip_address):
         """IP 주소로 시험 정보 조회 (APIClient 위임)"""
         return self.api_client.fetch_test_info_by_ip(ip_address)
-
-    def fetch_opt_by_spec_id(self, spec_id):
-        """spec_id로 OPT 파일 조회 (APIClient 위임)"""
-        return self.api_client.fetch_opt_by_spec_id(spec_id)
-
-    def load_specs_from_api_data(self, test_specs):
-        """testSpecs 배열로부터 스펙 목록 동적 로드 (APIClient 위임)"""
-        return self.api_client.load_specs_from_api_data(test_specs)
 
     def fetch_specification_by_id(self, spec_id):
         """spec_id로 specification 상세 정보 조회 (APIClient 위임)"""

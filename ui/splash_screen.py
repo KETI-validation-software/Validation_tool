@@ -203,21 +203,17 @@ class LoadingPopup(QSplashScreen):
         try:
             # 배경 이미지 로드
             self._bg_image_path = resource_path('assets/image/splash/loading_bg.png')
-            print(f"[LoadingPopup] 이미지 경로: {self._bg_image_path}")
             self._bg_pixmap = QPixmap(self._bg_image_path)
-            print(f"[LoadingPopup] 이미지 로드 결과: isNull={self._bg_pixmap.isNull()}")
 
             # 이미지 크기에 맞춤
             if not self._bg_pixmap.isNull():
                 width = self._bg_pixmap.width()
                 height = self._bg_pixmap.height()
                 init_pixmap = self._bg_pixmap
-                print(f"[LoadingPopup] 이미지 사용: {width}x{height}")
             else:
                 # 이미지 로드 실패 시 그라데이션 배경으로 초기화
                 init_pixmap = QPixmap(width, height)
                 self._draw_gradient_background_static(init_pixmap, width, height)
-                print(f"[LoadingPopup] 그라데이션 배경 사용: {width}x{height}")
 
             super().__init__(init_pixmap, Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
 
@@ -229,7 +225,6 @@ class LoadingPopup(QSplashScreen):
             self.render_timer = QTimer(self)
             self.render_timer.timeout.connect(self._render_widget)
             self.render_timer.start(30)
-            print(f"[LoadingPopup] 초기화 완료")
         except Exception as e:
             print(f"[LoadingPopup] 초기화 중 예외 발생: {e}")
             import traceback
