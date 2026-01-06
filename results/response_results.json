@@ -42,8 +42,6 @@
           "name": "사용자 인증",
           "method": "POST",
           "endpoint": "/Authentication",
-<<<<<<< HEAD
-=======
           "score": 0.0,
           "validationCnt": 0,
           "totalFields": 0,
@@ -223,7 +221,6 @@
           "name": "사용자 인증",
           "method": "POST",
           "endpoint": "/Authentication",
->>>>>>> dcd0ec9baadaef8dacdf885509eefb2f26a4b50d
           "score": 100.0,
           "validationCnt": 1,
           "totalFields": 5,
@@ -247,11 +244,7 @@
           ]
         },
         {
-<<<<<<< HEAD
-          "id": "cmiwtm84f0an2p002pthrkfbj",
-=======
           "id": "cmixu0dt70dyzp002xhm24l3h",
->>>>>>> dcd0ec9baadaef8dacdf885509eefb2f26a4b50d
           "name": "전송 지원 기능 정보 연동",
           "method": "POST",
           "endpoint": "/Capabilities",
@@ -281,13 +274,8 @@
           ]
         },
         {
-<<<<<<< HEAD
-          "id": "cmiwtnnvx0ar8p002dcz8llaf",
-          "name": "보안용 센서 단말 목록 정보 연동",
-=======
           "id": "cmixu2m200e4up002g73csf12",
           "name": "카메라 목록 연동",
->>>>>>> dcd0ec9baadaef8dacdf885509eefb2f26a4b50d
           "method": "POST",
           "endpoint": "/SensorDeviceProfiles",
           "score": 18.0,
@@ -426,12 +414,6 @@
                 "message": "성공",
                 "sensorDeviceList": [
                   {
-<<<<<<< HEAD
-                    "sensorDeviceID": "",
-                    "eventName": "MotionDetection",
-                    "eventTime": 20251106396564558,
-                    "eventDesc": "100도"
-=======
                     "camID": "cam0001",
                     "timeList": [
                       {
@@ -938,7 +920,6 @@
                         "analyticsDesc": "13가 4567"
                       }
                     ]
->>>>>>> dcd0ec9baadaef8dacdf885509eefb2f26a4b50d
                   }
                 ]
               },
