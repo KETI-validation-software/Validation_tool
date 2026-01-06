@@ -1157,6 +1157,8 @@ class Server(BaseHTTPRequestHandler):
             print(f"[WARNING][API_RES] API를 찾을 수 없음: {api_name}")
             return None, {"code": "404", "message": f"API를 찾을 수 없습니다: {api_name}"}, None
 
+        return i, data, out_con
+    
     def parse_path(self):
         """
         URL path를 파싱하여 spec_id와 api_name을 추출
