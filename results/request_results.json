@@ -1,21 +1,21 @@
 {
-  "requestId": "cmii86ssr00a48z1tqmco6ke8",
+  "requestId": "cmisflgy307tr5vy7clzgjaln",
   "evaluationTarget": {
-    "companyName": "이노뎁",
-    "contactPerson": "배성환",
-    "productName": "VURIX-TMS",
+    "companyName": "엣지디엑스",
+    "contactPerson": "빙영진",
+    "productName": "AIBridge",
     "modelName": "v1.0",
     "version": "v1.0"
   },
   "testGroups": [
     {
-      "id": "cmii82nib009f8z1tvo6fz8j2",
-      "name": "기본 기능 시험-통합시스템",
+      "id": "cmisfix8407te5vy7fleq8pkf",
+      "name": "제어 기능-통합플랫폼(sensor002)",
       "testRange": "ALL_FIELDS, ALL_FIELDS, ALL_FIELDS",
       "testSpecIds": [
-        "cmii7shen005i8z1tagevx4qh",
-        "cmii7pysb004k8z1tts0npxfm",
-        "cmii7lxbn002s8z1t1i9uudf0"
+        "cmiqr201z00i8ie8fitdg5t1b",
+        "cmiqr1acx00i5ie8fi022t1hp",
+        "cmiqqzrjz00i3ie8figf79cur"
       ]
     }
   ],
@@ -38,76 +38,319 @@
       "failedFields": 0,
       "apis": [
         {
-          "id": "cmii7ubap005m8z1tyhf1yc1r",
+          "id": "cmise5c9900jr5vy7j5kdk1z6",
           "name": "사용자 인증",
           "method": "POST",
           "endpoint": "/Authentication",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 2,
+          "passFields": 2,
           "failFields": 0,
-          "validations": []
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "userID": "kisa",
+                "userPW": "kisa_k1!2@"
+              },
+              "validationErrors": [
+                "오류가 없습니다."
+              ]
+            }
+          ]
         },
         {
-          "id": "cmiwkc2st000a844gm9yjeqhp",
+          "id": "cmisebj3b00s65vy7377edoan",
           "name": "전송 지원 기능 정보 연동",
           "method": "POST",
           "endpoint": "/Capabilities",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 1,
+          "passFields": 1,
           "failFields": 0,
-          "validations": []
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "오류가 없습니다."
+              ]
+            }
+          ]
         },
         {
-          "id": "cmiwkf9cp003k844gk2elz2wz",
+          "id": "cmiseuulh03d75vy7wmr8iroc",
           "name": "보안용 센서 단말 목록 정보 연동",
           "method": "POST",
           "endpoint": "/SensorDeviceProfiles",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 1,
+          "passFields": 1,
           "failFields": 0,
-          "validations": []
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "오류가 없습니다."
+              ]
+            }
+          ]
         },
         {
-          "id": "cmiwkqkje01dz844gz2h21eva",
-          "name": "실시간 보안용 센서 데이터 정보 연동",
+          "id": "cmisfu13v07xs5vy7gthbhp0p",
+          "name": "보안용 센서 단말 제어 정보 연동-상태연동",
           "method": "POST",
-          "endpoint": "/RealtimeSensorData",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
+          "endpoint": "/SensorDeviceControl",
+          "score": 50.0,
+          "validationCnt": 1,
+          "totalFields": 2,
+          "passFields": 1,
+          "failFields": 1,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "sensorDeviceID": "iot0002",
+                "commandType": ""
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "<b>[기타]</b> (1건)",
+                "- [맥락 오류] 참조 엔드포인트 없음: None"
+              ]
+            }
+          ]
         },
         {
-          "id": "cmiwl0xkh02yi844gg45hcjop",
-          "name": "실시간 보안용 센서 이벤트 분석 정보 연동",
+          "id": "cmisge6mr08di5vy7hirl5jp1",
+          "name": "보안용 센서 단말 제어 정보 연동-제어",
           "method": "POST",
-          "endpoint": "/RealtimeSensorEventInfos",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
+          "endpoint": "/SensorDeviceControl",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 2,
+          "passFields": 2,
           "failFields": 0,
-          "validations": []
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "sensorDeviceID": "iot0002",
+                "commandType": "AlarmOn"
+              },
+              "validationErrors": [
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "testGroup": "cmisfix8407te5vy7fleq8pkf",
+      "testSpecId": "cmiqr1acx00i5ie8fi022t1hp",
+      "testSpecName": "ac002",
+      "score": 95.83,
+      "totalFields": 24,
+      "passedFields": 23,
+      "failedFields": 1,
+      "apis": [
+        {
+          "id": "cmisgwlsx08r25vy7s0uys91u",
+          "name": "사용자 인증",
+          "method": "POST",
+          "endpoint": "/Authentication",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 2,
+          "passFields": 2,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "userID": "kisa",
+                "userPW": "kisa_k1!2@"
+              },
+              "validationErrors": [
+                "오류가 없습니다."
+              ]
+            }
+          ]
         },
         {
-          "id": "cmiwl9g9003nh844gv5scoe1y",
-          "name": "저장된 보안용 센서 이벤트 분석 정보 연동",
+          "id": "cmisjsrxy0bd75vy78umc8kos",
+          "name": "전송 지원 기능 정보 연동",
           "method": "POST",
-          "endpoint": "/StoredSensorEventInfos",
-          "score": 0.0,
-          "validationCnt": 0,
+          "endpoint": "/Capabilities",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 1,
+          "passFields": 1,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmiwq2e7z07fi844gof4cw167",
+          "name": "바이오 및 출입통제 장치 목록 정보",
+          "method": "POST",
+          "endpoint": "/DoorProfiles",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 1,
+          "passFields": 1,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmiwqiqjn0acb844gb9f4qqd0-registration",
+          "name": "실시간 출입통제 장치 상태 정보 연동-상태 조회",
+          "method": "POST",
+          "endpoint": "/RealtimeDoorStatus",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 9,
+          "passFields": 9,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "doorList": [
+                  {
+                    "doorID": "door0001"
+                  },
+                  {
+                    "doorID": "door0002"
+                  }
+                ],
+                "duration": 200,
+                "transProtocol": {
+                  "transProtocolType": "WebHook",
+                  "transProtocolDesc": "https://192.168.0.3:2001"
+                },
+                "startTime": 20251105163010124
+              },
+              "validationErrors": [
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmiwqiqjn0acb844gb9f4qqd0-webhook",
+          "name": "실시간 출입통제 장치 상태 정보 연동-상태 조회 (Webhook)",
+          "method": "POST",
+          "endpoint": "/RealtimeDoorStatus/webhook",
+          "score": 0,
+          "validationCnt": 1,
           "totalFields": 0,
           "passFields": 0,
           "failFields": 0,
-          "validations": []
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": []
+            }
+          ]
+        },
+        {
+          "id": "cmiwqol4l0ayv844g134sbbu7",
+          "name": "출입 통제 장치 제어 정보 연동",
+          "method": "POST",
+          "endpoint": "/DoorControl",
+          "score": 50.0,
+          "validationCnt": 1,
+          "totalFields": 2,
+          "passFields": 1,
+          "failFields": 1,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "doorID": "door0001",
+                "commandType": ""
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "- [맥락 오류] commandType: 값 불일치: 가 허용값 목록 ['Lock', 'Unlock']에 없음"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmiwqq5880b07844gyqot66cj-registration",
+          "name": "실시간 출입통제 장치 상태 정보 연동-결과 조회",
+          "method": "POST",
+          "endpoint": "/RealtimeDoorStatus",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 9,
+          "passFields": 9,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "doorList": [
+                  {
+                    "doorID": "door0001"
+                  },
+                  {
+                    "doorID": "door0002"
+                  }
+                ],
+                "duration": 10000,
+                "transProtocol": {
+                  "transProtocolType": "WebHook",
+                  "transProtocolDesc": "https://192.168.0.3:2001"
+                },
+                "startTime": 20251105163010124
+              },
+              "validationErrors": [
+                "오류가 없습니다."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmiwqq5880b07844gyqot66cj-webhook",
+          "name": "실시간 출입통제 장치 상태 정보 연동-결과 조회 (Webhook)",
+          "method": "POST",
+          "endpoint": "/RealtimeDoorStatus/webhook",
+          "score": 0,
+          "validationCnt": 1,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": []
+            }
+          ]
         }
       ]
     },

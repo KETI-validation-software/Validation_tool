@@ -1,21 +1,21 @@
 {
-  "requestId": "cmii85wjq009z8z1tv0d3d7r1",
+  "requestId": "cmisfmr3907tv5vy71y0276gp",
   "evaluationTarget": {
-    "companyName": "물리보안기업",
-    "contactPerson": "김철수",
-    "productName": "물리보안시스템-기본",
+    "companyName": "엣지디엑스",
+    "contactPerson": "빙영진",
+    "productName": "AIBridge",
     "modelName": "v1.0",
     "version": "v1.0"
   },
   "testGroups": [
     {
-      "id": "cmjcefmh8070gcfb35wjptcsl",
-      "name": "기본 기능 시험-영상보안시스템",
+      "id": "cmisfjfzt07tm5vy7qslmisks",
+      "name": "제어기능-물리보안",
       "testRange": "ALL_FIELDS, ALL_FIELDS, ALL_FIELDS",
       "testSpecIds": [
-        "cmii7wfuf006i8z1tcds6q69g",
-        "cmii7w683006h8z1t7usnin5g",
-        "cmii7v8pr006g8z1tvo55a50u"
+        "cmiqr2b9j00i9ie8frw439h8i",
+        "cmiqr1jha00i6ie8fb1scb3go",
+        "cmiqr0kdw00i4ie8fr3firjtg"
       ]
     }
   ],
@@ -38,7 +38,7 @@
       "failedFields": 0,
       "apis": [
         {
-          "id": "cmii82age008k8z1t71s85tbz",
+          "id": "cmise849o00nv5vy7mu76wa69",
           "name": "사용자 인증",
           "method": "POST",
           "endpoint": "/Authentication",
@@ -50,64 +50,160 @@
           "validations": []
         },
         {
-          "id": "cmiwtm84f0an2p002pthrkfbj",
+          "id": "cmise9yk200pv5vy7ktxtva7c",
           "name": "전송 지원 기능 정보 연동",
           "method": "POST",
           "endpoint": "/Capabilities",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 5,
+          "passFields": 5,
           "failFields": 0,
-          "validations": []
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "",
+                "message": "",
+                "transportSupport": [
+                  {
+                    "transProtocolType": "LongPolling",
+                    "transProtocolDesc": "none"
+                  },
+                  {
+                    "transProtocolType": "Webhook",
+                    "transProtocolDesc": "none"
+                  }
+                ]
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다."
+              ]
+            }
+          ]
         },
         {
-          "id": "cmiwtnnvx0ar8p002dcz8llaf",
+          "id": "cmisepin301uv5vy78nai1drd",
           "name": "보안용 센서 단말 목록 정보 연동",
           "method": "POST",
           "endpoint": "/SensorDeviceProfiles",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 11,
+          "passFields": 11,
           "failFields": 0,
-          "validations": []
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "",
+                "message": "",
+                "sensorDeviceList": [
+                  {
+                    "sensorDeviceID": "iot0001",
+                    "sensorDeviceType": "홍채인식",
+                    "sensorDeviceName": "홍채 센서",
+                    "sensorDeviceLoc": {
+                      "lon": "12",
+                      "lat": "233",
+                      "alt": "122",
+                      "desc": "복도"
+                    }
+                  },
+                  {
+                    "sensorDeviceID": "iot0002",
+                    "sensorDeviceType": "온도",
+                    "sensorDeviceName": "온도센서",
+                    "sensorDeviceLoc": {
+                      "lon": "24",
+                      "lat": "367",
+                      "alt": "234",
+                      "desc": "출입구"
+                    }
+                  },
+                  {
+                    "sensorDeviceID": "iot0003",
+                    "sensorDeviceType": "지문",
+                    "sensorDeviceName": "지문센서",
+                    "sensorDeviceLoc": {
+                      "lon": "486",
+                      "lat": "54",
+                      "alt": "6",
+                      "desc": "후문"
+                    }
+                  },
+                  {
+                    "sensorDeviceID": "iot0004",
+                    "sensorDeviceType": "온도",
+                    "sensorDeviceName": "온도센서",
+                    "sensorDeviceLoc": {
+                      "lon": "123",
+                      "lat": "42",
+                      "alt": "55",
+                      "desc": "복도"
+                    }
+                  }
+                ]
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다."
+              ]
+            }
+          ]
         },
         {
-          "id": "cmiwtr5xt0boqp002melvctad",
-          "name": "실시간 보안용 센서 데이터 정보 연동",
+          "id": "cmisfqfip07tz5vy7de6x5d6r",
+          "name": "보안용 센서 단말 제어 정보 연동-상태연동",
           "method": "POST",
-          "endpoint": "/RealtimeSensorData",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
+          "endpoint": "/SensorDeviceControl",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 4,
+          "passFields": 4,
           "failFields": 0,
-          "validations": []
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "sensorDeviceID": "iot0002",
+                "sensorDeviceStatus": "AlarmOff"
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다."
+              ]
+            }
+          ]
         },
         {
-          "id": "cmiwv1ifx0ddmp0023tuwdhoi",
-          "name": "실시간 보안용 센서 이벤트 분석 정보 연동",
+          "id": "cmisg86id08bm5vy7ezcbr7oy",
+          "name": "보안용 센서 단말 제어 정보 연동-제어",
           "method": "POST",
-          "endpoint": "/RealtimeSensorEventInfos",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
+          "endpoint": "/SensorDeviceControl",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 4,
+          "passFields": 4,
           "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmixtu5uk0dg5p002kq3htt9b",
-          "name": "저장된 보안용 센서 이벤트 분석 정보 연동",
-          "method": "POST",
-          "endpoint": "/StoredSensorEventInfos",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "sensorDeviceID": "iot0002",
+                "sensorDeviceStatus": "AlarmOn"
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다."
+              ]
+            }
+          ]
         }
       ]
     },
@@ -121,7 +217,7 @@
       "failedFields": 2,
       "apis": [
         {
-          "id": "cmii7ylxn006m8z1tqq8dard1",
+          "id": "cmish1fu408we5vy7dp3ltj00",
           "name": "사용자 인증",
           "method": "POST",
           "endpoint": "/Authentication",
@@ -148,7 +244,7 @@
           ]
         },
         {
-          "id": "cmiqtf9x600upie8ft45b1h1w",
+          "id": "cmixu0dt70dyzp002xhm24l3h",
           "name": "전송 지원 기능 정보 연동",
           "method": "POST",
           "endpoint": "/Capabilities",
@@ -184,7 +280,7 @@
           ]
         },
         {
-          "id": "cmiqthu4900voie8f1evs0kfm",
+          "id": "cmixu2m200e4up002g73csf12",
           "name": "카메라 목록 연동",
           "method": "POST",
           "endpoint": "/CameraProfiles",
@@ -489,8 +585,8 @@
           ]
         },
         {
-          "id": "cmiwrq4r200kqnkgluspxeyu7",
-          "name": "저장된 영상(CCTV) 전송",
+          "id": "cmixu9wn10f7rp002rgzkx3au",
+          "name": "PTZ 상태 정보 연동",
           "method": "POST",
           "endpoint": "/ReplayURL",
           "score": 86.0,
@@ -565,8 +661,8 @@
           ]
         },
         {
-          "id": "cmiws2qij05apnkgli7hun3bl",
-          "name": "저장된 이벤트 분석 정보 연동",
+          "id": "cmixucv8a0fb4p002pnvfe6ay",
+          "name": "PTZ 연속 이동 제어 정보 연동",
           "method": "POST",
           "endpoint": "/StoredVideoEventInfos",
           "score": 100.0,
@@ -623,8 +719,8 @@
           ]
         },
         {
-          "id": "cmiws9btu01ksp0028h4uc4az",
-          "name": "저장된 객체 분석 정보 연동",
+          "id": "cmixufkri0fdnp002fouuoqsg",
+          "name": "PTZ 정지 제어 정보 연동",
           "method": "POST",
           "endpoint": "/StoredObjectAnalyticsInfos",
           "score": 100.0,
