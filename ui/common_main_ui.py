@@ -409,27 +409,29 @@ class CommonMainUI(QWidget):
 
         # 시험 취소 버튼
         self.cancel_btn = QPushButton("시험 취소", self.buttonGroup)
-        cancel_enabled = resource_path("assets/image/test_runner/btn_common_enabled.png").replace("\\", "/")
-        cancel_hover = resource_path("assets/image/test_runner/btn_common_hover.png").replace("\\", "/")
         cancel_disabled = resource_path("assets/image/test_runner/btn_common_disabled.png").replace("\\", "/")
         self.cancel_btn.setStyleSheet(f"""
             QPushButton {{
-                border: none;
-                border-image: url('{cancel_enabled}') 0 0 0 0 stretch stretch;
+                border: 2px solid #FF8772;
+                border-radius: 4px;
+                background-color: #FFFFFF;
                 padding-left: 20px;
                 padding-right: 20px;
                 font-family: 'Noto Sans KR';
                 font-size: 20px;
                 font-weight: 500;
-                color: #6B6B6B;
+                color: #FF8772;
             }}
             QPushButton:hover {{
-                border-image: url('{cancel_hover}') 0 0 0 0 stretch stretch;
+                background-color: #FFF5F3;
+                border: 2px solid #FF8772;
             }}
             QPushButton:pressed {{
-                border-image: url('{cancel_hover}') 0 0 0 0 stretch stretch;
+                background-color: #FFE8E5;
+                border: 2px solid #FF8772;
             }}
             QPushButton:disabled {{
+                border: none;
                 border-image: url('{cancel_disabled}') 0 0 0 0 stretch stretch;
                 color: #CECECE;
             }}

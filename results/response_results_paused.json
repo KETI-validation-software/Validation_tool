@@ -1,0 +1,215 @@
+{
+  "timestamp": "2026-01-06 15:21:16",
+  "last_completed_api_index": 4,
+  "step_buffers": [
+    {
+      "data": "[시도 1/1]\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"userName\": \"관리자\",\n    \"userAff\": \"오산시청\",\n    \"accessToken\": \"abcde1234\"\n}",
+      "error": "[시도 1/1]\n오류가 없습니다.",
+      "result": "PASS",
+      "raw_data_list": [
+        {
+          "code": "200",
+          "message": "성공",
+          "userName": "관리자",
+          "userAff": "오산시청",
+          "accessToken": "abcde1234"
+        }
+      ],
+      "events": [
+        {
+          "time": "2026-01-06T06:21:08.482853Z",
+          "api": "Authentication",
+          "dir": "REQUEST",
+          "data": {
+            "userID": "kisa",
+            "userPW": "kisa_k1!2@"
+          }
+        },
+        {
+          "time": "2026-01-06T06:21:09.489743Z",
+          "api": "Authentication",
+          "dir": "RESPONSE",
+          "data": {
+            "code": "200",
+            "message": "성공",
+            "userName": "관리자",
+            "userAff": "오산시청",
+            "accessToken": "***"
+          }
+        }
+      ]
+    },
+    {
+      "data": "[시도 1/1]\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"transportSupport\": [\n        {\n            \"transProtocolType\": \"Webhook\",\n            \"transProtocolDesc\": \"\"\n        }\n    ]\n}",
+      "error": "[시도 1/1]\n오류가 없습니다.",
+      "result": "PASS",
+      "raw_data_list": [
+        {
+          "code": "200",
+          "message": "성공",
+          "transportSupport": [
+            {
+              "transProtocolType": "Webhook",
+              "transProtocolDesc": ""
+            }
+          ]
+        }
+      ],
+      "events": [
+        {
+          "time": "2026-01-06T06:21:11.481388Z",
+          "api": "Capabilities",
+          "dir": "REQUEST",
+          "data": {}
+        },
+        {
+          "time": "2026-01-06T06:21:12.488887Z",
+          "api": "Capabilities",
+          "dir": "RESPONSE",
+          "data": {
+            "code": "200",
+            "message": "성공",
+            "transportSupport": [
+              {
+                "transProtocolType": "Webhook",
+                "transProtocolDesc": ""
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "data": "[시도 1/1]\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"sensorDeviceList\": [\n        {\n            \"sensorDeviceID\": \"iot0001\",\n            \"sensorDeviceType\": \"온도\",\n            \"sensorDeviceName\": \"온도 센서\",\n            \"sensorDeviceLoc\": {\n                \"lon\": \"127.127730\",\n                \"lat\": \"38.439801\",\n                \"alt\": \"32.131\",\n                \"desc\": \"3층복도\"\n            }\n        },\n        {\n            \"sensorDeviceID\": \"iot0002\",\n            \"sensorDeviceType\": \"온도\",\n            \"sensorDeviceName\": \"온도 센서\",\n            \"sensorDeviceLoc\": {\n                \"lon\": \"127.127730\",\n                \"lat\": \"38.439801\",\n                \"alt\": \"\",\n                \"desc\": \"\"\n            }\n        }\n    ]\n}",
+      "error": "[시도 1/1]\n오류가 없습니다.",
+      "result": "PASS",
+      "raw_data_list": [
+        {
+          "code": "200",
+          "message": "성공",
+          "sensorDeviceList": [
+            {
+              "sensorDeviceID": "iot0001",
+              "sensorDeviceType": "온도",
+              "sensorDeviceName": "온도 센서",
+              "sensorDeviceLoc": {
+                "lon": "127.127730",
+                "lat": "38.439801",
+                "alt": "32.131",
+                "desc": "3층복도"
+              }
+            },
+            {
+              "sensorDeviceID": "iot0002",
+              "sensorDeviceType": "온도",
+              "sensorDeviceName": "온도 센서",
+              "sensorDeviceLoc": {
+                "lon": "127.127730",
+                "lat": "38.439801",
+                "alt": "",
+                "desc": ""
+              }
+            }
+          ]
+        }
+      ],
+      "events": [
+        {
+          "time": "2026-01-06T06:21:14.488882Z",
+          "api": "SensorDeviceProfiles",
+          "dir": "REQUEST",
+          "data": {}
+        },
+        {
+          "time": "2026-01-06T06:21:15.479429Z",
+          "api": "SensorDeviceProfiles",
+          "dir": "RESPONSE",
+          "data": {
+            "code": "200",
+            "message": "성공",
+            "sensorDeviceList": [
+              {
+                "sensorDeviceID": "iot0001",
+                "sensorDeviceType": "온도",
+                "sensorDeviceName": "온도 센서",
+                "sensorDeviceLoc": {
+                  "lon": "127.127730",
+                  "lat": "38.439801",
+                  "alt": "32.131",
+                  "desc": "3층복도"
+                }
+              },
+              {
+                "sensorDeviceID": "iot0002",
+                "sensorDeviceType": "온도",
+                "sensorDeviceName": "온도 센서",
+                "sensorDeviceLoc": {
+                  "lon": "127.127730",
+                  "lat": "38.439801",
+                  "alt": "",
+                  "desc": ""
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "data": "",
+      "error": "",
+      "result": "PASS",
+      "raw_data_list": []
+    },
+    {
+      "data": "\n\n--- Webhook 이벤트 데이터 ---\nnull",
+      "error": "\n\n--- Webhook 검증 ---\nWebhook Message Missing!",
+      "result": "FAIL",
+      "raw_data_list": []
+    },
+    {
+      "data": "",
+      "error": "",
+      "result": "PASS",
+      "raw_data_list": []
+    }
+  ],
+  "step_pass_counts": [
+    5,
+    5,
+    11,
+    0,
+    0,
+    0
+  ],
+  "step_error_counts": [
+    0,
+    0,
+    0,
+    0,
+    1,
+    0
+  ],
+  "step_opt_pass_counts": [
+    1,
+    1,
+    3,
+    0,
+    0,
+    0
+  ],
+  "step_opt_error_counts": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "total_pass_cnt": 21,
+  "total_error_cnt": 1,
+  "valResult_text": "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\np, li { white-space: pre-wrap; }\n</style></head><body style=\" font-family:'Noto Sans KR'; font-size:32px; font-weight:400; font-style:normal;\">\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:15px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td style=\" vertical-align:middle;\">\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:20px; font-weight:600; color:#333333;\">시스템 검증 시작: sensor001</span> <span style=\" font-family:'Consolas','monospace'; font-size:16px; color:#9ca3af;\">15:21:06</span> </p></td></tr></table>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td>\n<p style=\" margin-top:0px; margin-bottom:8px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; color:#6b7280;\">API 개수: 6개 </span></p></td></tr></table>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:15px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td style=\" vertical-align:middle;\">\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:20px; font-weight:600; color:#333333;\">Step 1: Authentication (1/1)</span> <span style=\" font-family:'Consolas','monospace'; font-size:16px; color:#9ca3af;\">15:21:09</span> </p></td></tr></table>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td>\n<p style=\" margin-top:0px; margin-bottom:8px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; color:#6b7280;\">총 1회 검증 예정 </span></p>\n<p style=\" margin-top:5px; margin-bottom:4px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:15px; font-weight:600; color:#9ca3af;\">📦 데이터</span> </p>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">{</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">    &quot;code&quot;: &quot;200&quot;,</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">    &quot;message&quot;: &quot;성공&quot;,</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">    &quot;userName&quot;: &quot;관리자&quot;,</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">    &quot;userAff&quot;: &quot;오산시청&quot;,</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">    &quot;accessToken&quot;: &quot;abcde1234&quot;</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">}</span> </pre></td></tr></table>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:15px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td style=\" vertical-align:middle;\">\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:20px; font-weight:600; color:#10b981;\">결과: Authentication (1/1)</span> <span style=\" font-family:'Consolas','monospace'; font-size:16px; color:#9ca3af;\">15:21:09</span> </p></td></tr></table>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td>\n<p style=\" margin-top:0px; margin-bottom:8px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; color:#6b7280;\">통과: 5, 오류: 0 | 프로토콜: basic </span></p>\n<p style=\" margin-top:5px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; font-weight:600; color:#6b7280;\">점수: 100.0% </span></p></td></tr></table>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<p style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:20px; font-weight:600; color:#333333;\">step 5: RealtimeSensorEventInfos</span></p>\n<p style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; font-weight:600; color:#333333;\">웹훅 이벤트 데이터</span></p>\n<p style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937; background-color:#f9fafb;\">null</span></p>\n<p style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; color:#ef4444;\">웹훅 검증 결과: FAIL</span></p>\n<p style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; color:#ef4444;\">웹훅 데이터 검증 실패</span></p>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:15px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td style=\" vertical-align:middle;\">\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:20px; font-weight:600; color:#333333;\">Step 2: Capabilities (1/1)</span> <span style=\" font-family:'Consolas','monospace'; font-size:16px; color:#9ca3af;\">15:21:12</span> </p></td></tr></table>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td>\n<p style=\" margin-top:0px; margin-bottom:8px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; color:#6b7280;\">총 1회 검증 예정 </span></p>\n<p style=\" margin-top:5px; margin-bottom:4px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:15px; font-weight:600; color:#9ca3af;\">📦 데이터</span> </p>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">{</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">    &quot;code&quot;: &quot;200&quot;,</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">    &quot;message&quot;: &quot;성공&quot;,</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">    &quot;transportSupport&quot;: [</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">        {</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">            &quot;transProtocolType&quot;: &quot;Webhook&quot;,</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">            &quot;transProtocolDesc&quot;: &quot;&quot;</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">        }</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">    ]</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">}</span> </pre></td></tr></table>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:15px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td style=\" vertical-align:middle;\">\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:20px; font-weight:600; color:#10b981;\">결과: Capabilities (1/1)</span> <span style=\" font-family:'Consolas','monospace'; font-size:16px; color:#9ca3af;\">15:21:12</span> </p></td></tr></table>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td>\n<p style=\" margin-top:0px; margin-bottom:8px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; color:#6b7280;\">통과: 5, 오류: 0 | 프로토콜: basic </span></p>\n<p style=\" margin-top:5px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; font-weight:600; color:#6b7280;\">점수: 100.0% </span></p></td></tr></table>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:15px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td style=\" vertical-align:middle;\">\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:20px; font-weight:600; color:#333333;\">Step 3: SensorDeviceProfiles (1/1)</span> <span style=\" font-family:'Consolas','monospace'; font-size:16px; color:#9ca3af;\">15:21:15</span> </p></td></tr></table>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td>\n<p style=\" margin-top:0px; margin-bottom:8px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; color:#6b7280;\">총 1회 검증 예정 </span></p>\n<p style=\" margin-top:5px; margin-bottom:4px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:15px; font-weight:600; color:#9ca3af;\">📦 데이터</span> </p>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">{</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">    &quot;code&quot;: &quot;200&quot;,</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">    &quot;message&quot;: &quot;성공&quot;,</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">    &quot;sensorDeviceList&quot;: [</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">        {</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">            &quot;sensorDeviceID&quot;: &quot;iot0001&quot;,</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">            &quot;sensorDeviceType&quot;: &quot;온도&quot;,</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">            &quot;sensorDeviceName&quot;: &quot;온도 센서&quot;,</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">            &quot;sensorDeviceLoc&quot;: {</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">                &quot;lon&quot;: &quot;127.127730&quot;,</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">                &quot;lat&quot;: &quot;38.439801&quot;,</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">                &quot;alt&quot;: &quot;32.131&quot;,</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">                &quot;desc&quot;: &quot;3층복도&quot;</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">            }</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">        },</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">        {</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">            &quot;sensorDeviceID&quot;: &quot;iot0002&quot;,</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">            &quot;sensorDeviceType&quot;: &quot;온도&quot;,</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">            &quot;sensorDeviceName&quot;: &quot;온도 센서&quot;,</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">            &quot;sensorDeviceLoc&quot;: {</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">                &quot;lon&quot;: &quot;127.127730&quot;,</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">                &quot;lat&quot;: &quot;38.439801&quot;,</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">                &quot;alt&quot;: &quot;&quot;,</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">                &quot;desc&quot;: &quot;&quot;</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">            }</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">        }</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">    ]</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">}</span> </pre></td></tr></table>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:15px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td style=\" vertical-align:middle;\">\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:20px; font-weight:600; color:#10b981;\">결과: SensorDeviceProfiles (1/1)</span> <span style=\" font-family:'Consolas','monospace'; font-size:16px; color:#9ca3af;\">15:21:15</span> </p></td></tr></table>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td>\n<p style=\" margin-top:0px; margin-bottom:8px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; color:#6b7280;\">통과: 11, 오류: 0 | 프로토콜: basic </span></p>\n<p style=\" margin-top:5px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; font-weight:600; color:#6b7280;\">점수: 100.0% </span></p></td></tr></table>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<p style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; color:#6b7280;\">검증 절차가 중지되었습니다.</span></p>\n<p style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; color:#6b7280;\">💾 재개 정보 저장 완료: C:\\validation\\Validation_tool2\\results\\response_results_paused.json</span></p>\n<p style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; color:#6b7280;\">(마지막 완료 API: 5번째, 다음 재시작 시 6번째 API부터 이어서 실행)</span></p>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:15px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td style=\" vertical-align:middle;\">\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:20px; font-weight:600; color:#333333;\">진행 상황 저장 완료</span> <span style=\" font-family:'Consolas','monospace'; font-size:16px; color:#9ca3af;\">15:21:16</span> </p></td></tr></table>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td>\n<p style=\" margin-top:0px; margin-bottom:8px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; color:#6b7280;\">C:\\validation\\Validation_tool2\\results\\response_results.json (일시정지 시점까지의 결과가 저장되었습니다) </span></p></td></tr></table>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<p style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; color:#6b7280;\">검증 절차가 중지되었습니다.</span></p></body></html>",
+  "current_spec_id": "cmii7wfuf006i8z1tcds6q69g",
+  "global_pass_cnt": 50,
+  "global_error_cnt": 0
+}
