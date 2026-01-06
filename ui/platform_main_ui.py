@@ -599,11 +599,11 @@ class PlatformMainUI(CommonMainUI):
 
         # 점수 레이블들 - 각 라벨별 다른 너비 (통과 필수/선택은 넓게, 종합 평가는 좁게)
         # 원본 크기 저장 (반응형 조정용)
-        self.original_pass_label_width = 340    # 통과 필수 필드 점수
-        self.original_opt_label_width = 340     # 통과 선택 필드 점수
+        self.original_pass_label_width = 340    # 필수 필드 점수
+        self.original_opt_label_width = 340     # 선택 필드 점수
         self.original_score_label_width = 315   # 종합 평가 점수
 
-        self.spec_pass_label = QLabel("통과 필수 필드 점수")
+        self.spec_pass_label = QLabel("필수 필드 점수")
         self.spec_pass_label.setFixedSize(340, 60)
         self.spec_pass_label.setStyleSheet("""
             color: #000000;
@@ -611,7 +611,7 @@ class PlatformMainUI(CommonMainUI):
             font-size: 19px;
             font-weight: 500;
         """)
-        self.spec_total_label = QLabel("통과 선택 필드 점수")
+        self.spec_total_label = QLabel("선택 필드 점수")
         self.spec_total_label.setFixedSize(340, 60)
         self.spec_total_label.setStyleSheet("""
             color: #000000;
@@ -729,7 +729,7 @@ class PlatformMainUI(CommonMainUI):
         separator.setFixedHeight(1)
 
         # 점수 레이블들 - 각 라벨별 다른 너비 (통과 필수/선택은 넓게, 종합 평가는 좁게)
-        self.total_pass_label = QLabel("통과 필수 필드 점수")
+        self.total_pass_label = QLabel("필수 필드 점수")
         self.total_pass_label.setFixedSize(340, 60)
         self.total_pass_label.setStyleSheet("""
             color: #000000;
@@ -737,7 +737,7 @@ class PlatformMainUI(CommonMainUI):
             font-size: 19px;
             font-weight: 500;
         """)
-        self.total_total_label = QLabel("통과 선택 필드 점수")
+        self.total_total_label = QLabel("선택 필드 점수")
         self.total_total_label.setFixedSize(340, 60)
         self.total_total_label.setStyleSheet("""
             color: #000000;
@@ -862,18 +862,18 @@ class PlatformMainUI(CommonMainUI):
 
         # 필수/선택/종합 점수 표시 (% (통과/전체) 형식)
         self.spec_pass_label.setText(
-            f"통과 필수 필드 점수&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
+            f"필수 필드 점수&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
             f"{spec_required_score:.1f}% ({spec_required_pass}/{spec_required_total})</span>"
         )
         self.spec_total_label.setText(
-            f"통과 선택 필드 점수&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
+            f"선택 필드 점수&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
             f"{spec_opt_score:.1f}% ({self.total_opt_pass_cnt}/{spec_opt_total})</span>"
         )
         self.spec_score_label.setText(
             f"종합 평가 점수&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
             f"{spec_score:.1f}% ({self.total_pass_cnt}/{spec_total_fields})</span>"
         )
 
@@ -906,18 +906,18 @@ class PlatformMainUI(CommonMainUI):
 
             # 필수/선택/종합 점수 표시 (% (통과/전체) 형식)
             self.total_pass_label.setText(
-                f"통과 필수 필드 점수&nbsp;"
-                f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
+                f"필수 필드 점수&nbsp;"
+                f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
                 f"{global_required_score:.1f}% ({global_required_pass}/{global_required_total})</span>"
             )
             self.total_total_label.setText(
-                f"통과 선택 필드 점수&nbsp;"
-                f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
+                f"선택 필드 점수&nbsp;"
+                f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
                 f"{global_opt_score:.1f}% ({self.global_opt_pass_cnt}/{global_opt_total})</span>"
             )
             self.total_score_label.setText(
                 f"종합 평가 점수&nbsp;"
-                f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
+                f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
                 f"{global_score:.1f}% ({self.global_pass_cnt}/{global_total_fields})</span>"
             )
 

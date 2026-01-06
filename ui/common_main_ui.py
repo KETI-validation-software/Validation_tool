@@ -1267,16 +1267,16 @@ class CommonMainUI(QWidget):
         self.original_score_label_width = 315
 
         self.spec_pass_label = QLabel(
-            f"통과 필수 필드 점수&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
+            f"필수 필드 점수&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
             f"0.0% (0/0)</span>"
         )
         self.spec_pass_label.setFixedSize(340, 60)
         self.spec_pass_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000;")
 
         self.spec_total_label = QLabel(
-            f"통과 선택 필드 점수&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
+            f"선택 필드 점수&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
             f"0.0% (0/0)</span>"
         )
         self.spec_total_label.setFixedSize(340, 60)
@@ -1284,7 +1284,7 @@ class CommonMainUI(QWidget):
 
         self.spec_score_label = QLabel(
             f"종합 평가 점수&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
             f"0.0% (0/0)</span>"
         )
         self.spec_score_label.setFixedSize(315, 60)
@@ -1395,16 +1395,16 @@ class CommonMainUI(QWidget):
 
         # 점수 레이블들 (500 Medium 20px #000000, 325 × 60)
         self.total_pass_label = QLabel(
-            f"통과 필수 필드 점수&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
+            f"필수 필드 점수&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
             f"0.0% (0/0)</span>"
         )
         self.total_pass_label.setFixedSize(340, 60)
         self.total_pass_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000;")
 
         self.total_total_label = QLabel(
-            f"통과 선택 필드 점수&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
+            f"선택 필드 점수&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
             f"0.0% (0/0)</span>"
         )
         self.total_total_label.setFixedSize(340, 60)
@@ -1412,7 +1412,7 @@ class CommonMainUI(QWidget):
 
         self.total_score_label = QLabel(
             f"종합 평가 점수&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
             f"0.0% (0/0)</span>"
         )
         self.total_score_label.setFixedSize(315, 60)
