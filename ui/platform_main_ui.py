@@ -349,6 +349,7 @@ class PlatformMainUI(CommonMainUI):
         self.tableWidget.verticalHeader().setVisible(False)
         self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tableWidget.setSelectionMode(QAbstractItemView.NoSelection)
+        self.tableWidget.setFocusPolicy(Qt.NoFocus)
         self.tableWidget.setIconSize(QSize(16, 16))
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Fixed)
 
@@ -582,6 +583,7 @@ class PlatformMainUI(CommonMainUI):
             QGroupBox {
                 background-color: #FFF;
                 border: 1px solid #CECECE;
+                border-bottom: none;
                 border-top-left-radius: 4px;
                 border-top-right-radius: 4px;
                 border-bottom-left-radius: 0px;
