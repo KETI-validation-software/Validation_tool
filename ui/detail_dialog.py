@@ -124,10 +124,15 @@ class CombinedDetailDialog(QDialog):
         # 기본 스키마 + 웹훅 스키마 결합
         schema_text = format_schema(schema_data)
         if self.webhook_schema:
-            schema_text += "\n\n=== 웹훅 응답 스키마 (시스템→플랫폼) ===\n"
+            schema_text += "\n\n<b>웹훅 메시지 규격</b>\n"
             schema_text += format_schema(self.webhook_schema)
 
-        self.schema_browser.setPlainText(schema_text)
+        # HTML 태그가 포함된 경우 setHtml 사용, 아니면 setPlainText
+        if '<b>' in schema_text:
+            schema_text_html = schema_text.replace('\n', '<br>')
+            self.schema_browser.setHtml(f'<pre style="font-family: \'Noto Sans KR\'; font-size: 19px; white-space: pre-wrap;">{schema_text_html}</pre>')
+        else:
+            self.schema_browser.setPlainText(schema_text)
         schema_column_layout.addWidget(self.schema_browser)
 
         # 3열: 검증 오류 - 반응형: 동일 비율 확장
