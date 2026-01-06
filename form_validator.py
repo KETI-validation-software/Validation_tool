@@ -15,7 +15,7 @@ from typing import Dict, List
 
 from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QResizeEvent
 
 # 분리된 모듈들 import
 from ui.widgets import ClickableLabel, ClickableRowWidget, ClickableCheckboxRowWidget
