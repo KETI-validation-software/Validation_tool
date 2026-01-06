@@ -2238,6 +2238,9 @@ class MyApp(SystemMainUI):
             print(f"[START] 테이블 초기화: {api_count}개 API")
             for i in range(self.tableWidget.rowCount()):
                 QApplication.processEvents()  # 스피너 애니메이션 유지
+                # ✅ 기존 위젯 제거 (겹침 방지)
+                self.tableWidget.setCellWidget(i, 2, None)
+                
                 # 아이콘 초기화
                 icon_widget = QWidget()
                 icon_layout = QHBoxLayout()
@@ -2678,6 +2681,9 @@ class MyApp(SystemMainUI):
 
             # 테이블 아이콘 및 카운트 초기화
             for i in range(self.tableWidget.rowCount()):
+                # ✅ 기존 위젯 제거 (겹침 방지)
+                self.tableWidget.setCellWidget(i, 2, None)
+                
                 icon_widget = QWidget()
                 icon_layout = QHBoxLayout()
                 icon_layout.setContentsMargins(0, 0, 0, 0)

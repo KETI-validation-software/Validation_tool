@@ -23,9 +23,9 @@
   "authMethod": "Digest Auth",
   "testScore": {
     "score": 0.0,
-    "totalFields": 33,
-    "passedFields": 31,
-    "failedFields": 2
+    "totalFields": 4,
+    "passedFields": 4,
+    "failedFields": 0
   },
   "testResult": [
     {
@@ -33,9 +33,9 @@
       "testSpecId": "cmii7shen005i8z1tagevx4qh",
       "testSpecName": "sensor001",
       "score": 0.0,
-      "totalFields": 29,
-      "passedFields": 28,
-      "failedFields": 1,
+      "totalFields": 4,
+      "passedFields": 4,
+      "failedFields": 0,
       "apis": [
         {
           "id": "cmii7ubap005m8z1tyhf1yc1r",
@@ -101,256 +101,34 @@
           ]
         },
         {
-          "id": "cmiwkqkje01dz844gz2h21eva-registration",
+          "id": "cmiwkqkje01dz844gz2h21eva",
           "name": "실시간 보안용 센서 데이터 정보 연동",
           "method": "POST",
           "endpoint": "/RealtimeSensorData",
-          "score": 89.0,
-          "validationCnt": 1,
-          "totalFields": 9,
-          "passFields": 8,
-          "failFields": 1,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "sensorDeviceList": [
-                  {
-                    "sensorDeviceID": "iot0001"
-                  },
-                  {
-                    "sensorDeviceID": "iot0002"
-                  }
-                ],
-                "duration": 100,
-                "transProtocol": {
-                  "transProtocolType": "WebHook",
-                  "transProtocolDesc": "https://10.252.219.95:2001"
-                },
-                "startTime": 20251105163010124
-              },
-              "validationErrors": [
-                "[시도 1/1]",
-                "- [맥락 오류] sensorDeviceList: 값 불일치: [{'sensorDeviceID': 'iot0001'}, {'sensorDeviceID': 'iot0002'}] != 예상값 None"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cmiwkqkje01dz844gz2h21eva-webhook",
-          "name": "실시간 보안용 센서 데이터 정보 연동 (Webhook)",
-          "method": "POST",
-          "endpoint": "/RealtimeSensorData/webhook",
-          "score": 0,
-          "validationCnt": 1,
+          "score": 0.0,
+          "validationCnt": 0,
           "totalFields": 0,
           "passFields": 0,
           "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {},
-              "validationErrors": []
-            }
-          ]
+          "validations": []
         },
         {
-          "id": "cmiwl0xkh02yi844gg45hcjop-registration",
+          "id": "cmiwl0xkh02yi844gg45hcjop",
           "name": "실시간 보안용 센서 이벤트 분석 정보 연동",
           "method": "POST",
           "endpoint": "/RealtimeSensorEventInfos",
-          "score": 100.0,
-          "validationCnt": 1,
-          "totalFields": 10,
-          "passFields": 10,
-          "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "sensorDeviceList": [
-                  {
-                    "sensorDeviceID": "iot0001"
-                  },
-                  {
-                    "sensorDeviceID": "iot0002"
-                  }
-                ],
-                "duration": 1000,
-                "transProtocol": {
-                  "transProtocolType": "WebHook",
-                  "transProtocolDesc": "https://10.252.219.95:2001"
-                },
-                "eventFilter": "MotionDetection",
-                "startTime": 20251105163010123
-              },
-              "validationErrors": [
-                "오류가 없습니다."
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cmiwl0xkh02yi844gg45hcjop-webhook",
-          "name": "실시간 보안용 센서 이벤트 분석 정보 연동 (Webhook)",
-          "method": "POST",
-          "endpoint": "/RealtimeSensorEventInfos/webhook",
-          "score": 0,
-          "validationCnt": 1,
+          "score": 0.0,
+          "validationCnt": 0,
           "totalFields": 0,
           "passFields": 0,
           "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {},
-              "validationErrors": []
-            }
-          ]
+          "validations": []
         },
         {
           "id": "cmiwl9g9003nh844gv5scoe1y",
           "name": "저장된 보안용 센서 이벤트 분석 정보 연동",
           "method": "POST",
           "endpoint": "/StoredSensorEventInfos",
-          "score": 100.0,
-          "validationCnt": 1,
-          "totalFields": 6,
-          "passFields": 6,
-          "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "timePeriod": {
-                  "startTime": 20251105163010124,
-                  "endTime": 20251115163010124
-                },
-                "sensorDeviceList": [
-                  {
-                    "sensorDeviceID": "iot0001"
-                  },
-                  {
-                    "sensorDeviceID": "iot0002"
-                  }
-                ],
-                "maxCount": 8,
-                "eventFilter": "Leak"
-              },
-              "validationErrors": [
-                "오류가 없습니다."
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "testGroup": "cmii82nib009f8z1tvo6fz8j2",
-      "testSpecId": "cmii7pysb004k8z1tts0npxfm",
-      "testSpecName": "ac001",
-      "score": 0.0,
-      "totalFields": 4,
-      "passedFields": 3,
-      "failedFields": 1,
-      "apis": [
-        {
-          "id": "cmii7roh5004o8z1t47spn819",
-          "name": "사용자 인증",
-          "method": "POST",
-          "endpoint": "/Authentication",
-          "score": 100.0,
-          "validationCnt": 1,
-          "totalFields": 2,
-          "passFields": 2,
-          "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "userID": "kisa",
-                "userPW": "kisa_k1!2@"
-              },
-              "validationErrors": [
-                "오류가 없습니다."
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cmiiby4fo003chl2h8hzgu7m3",
-          "name": "전송 지원 기능 정보 연동",
-          "method": "POST",
-          "endpoint": "/Capabilities",
-          "score": 100.0,
-          "validationCnt": 1,
-          "totalFields": 1,
-          "passFields": 1,
-          "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {},
-              "validationErrors": [
-                "오류가 없습니다."
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cmisjhwhq09hi5vy7n59tvsht",
-          "name": "바이오 및 출입통제 장치 목록 정보",
-          "method": "POST",
-          "endpoint": "/DoorProfiles",
-          "score": 0.0,
-          "validationCnt": 1,
-          "totalFields": 1,
-          "passFields": 0,
-          "failFields": 1,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "testest": {
-                  "f1": "1123",
-                  "f2": "11233"
-                }
-              },
-              "validationErrors": [
-                "[시도 1/1] [None Request] 데이터가 있으면 안 됩니다."
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cmiwhz2il00epugxnzh3d9iuc",
-          "name": "사용자 권한 정보 연동",
-          "method": "POST",
-          "endpoint": "/AccessUserInfos",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmiwj1hq302myugxn8a5c6f48",
-          "name": "실시간 출입인증 목록 정보 연동",
-          "method": "POST",
-          "endpoint": "/RealtimeVerifEventInfos",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmiwjtg8i03wjugxnqkustaqj",
-          "name": "저장된 출입인증 목록 정보 연동",
-          "method": "POST",
-          "endpoint": "/StoredVerifEventInfos",
           "score": 0.0,
           "validationCnt": 0,
           "totalFields": 0,
@@ -361,5 +139,5 @@
       ]
     }
   ],
-  "completedDate": "2026-01-06T08:12:08Z"
+  "completedDate": "2026-01-06T08:17:00Z"
 }
