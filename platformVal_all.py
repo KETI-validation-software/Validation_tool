@@ -42,6 +42,9 @@ class MyApp(PlatformMainUI):
     def __init__(self, embedded=False, mode=None, spec_id=None):
         # CONSTANTS 사용
         super().__init__()
+        
+        # ✅ 프로그램 시작 시 모든 일시정지 파일 삭제
+        self._cleanup_all_paused_files_on_startup()
 
         self.CONSTANTS = CONSTANTS
         self.current_spec_id = spec_id
@@ -2231,6 +2234,28 @@ class MyApp(PlatformMainUI):
 
         except Exception as e:
             print(f"❌ 일시정지 파일 정리 실패: {e}")
+
+    def _cleanup_all_paused_files_on_startup(self):
+        """프로그램 시작 시 모든 일시정지 파일 삭제"""
+        try:
+            import glob
+            # request_results_paused_*.json 패턴으로 모든 일시정지 파일 찾기
+            pattern = os.path.join(result_dir, "request_results_paused_*.json")
+            paused_files = glob.glob(pattern)
+            
+            if paused_files:
+                print(f"[STARTUP_CLEANUP] {len(paused_files)}개의 일시정지 파일 발견")
+                for file_path in paused_files:
+                    try:
+                        os.remove(file_path)
+                        print(f"[STARTUP_CLEANUP] 삭제 완료: {os.path.basename(file_path)}")
+                    except Exception as e:
+                        print(f"[WARN] 파일 삭제 실패 {file_path}: {e}")
+                print(f"✅ 시작 시 일시정지 파일 삭제 완료")
+            else:
+                print("[STARTUP_CLEANUP] 삭제할 일시정지 파일이 없음")
+        except Exception as e:
+            print(f"❌ 시작 시 일시정지 파일 삭제 실패: {e}")
 
     def cleanup_all_paused_files(self):
         """프로그램 종료 시 모든 일시정지 파일 삭제"""
