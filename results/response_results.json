@@ -33,9 +33,9 @@
       "testSpecId": "cmii7wfuf006i8z1tcds6q69g",
       "testSpecName": "sensor001",
       "score": 0.0,
-      "totalFields": 5,
+      "totalFields": 0,
       "passedFields": 0,
-      "failedFields": 5,
+      "failedFields": 0,
       "apis": [
         {
           "id": "cmii82age008k8z1t71s85tbz",
@@ -43,19 +43,11 @@
           "method": "POST",
           "endpoint": "/Authentication",
           "score": 0.0,
-          "validationCnt": 1,
-          "totalFields": 5,
+          "validationCnt": 0,
+          "totalFields": 0,
           "passFields": 0,
-          "failFields": 5,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {},
-              "validationErrors": [
-                "Message Missing! - 모든 시도(1회)에서 타임아웃 발생"
-              ]
-            }
-          ]
+          "failFields": 0,
+          "validations": []
         },
         {
           "id": "cmiwtm84f0an2p002pthrkfbj",
@@ -207,9 +199,9 @@
       "testSpecId": "cmii7v8pr006g8z1tvo55a50u",
       "testSpecName": "vid001",
       "score": 0.0,
-      "totalFields": 0,
+      "totalFields": 5,
       "passedFields": 0,
-      "failedFields": 0,
+      "failedFields": 5,
       "apis": [
         {
           "id": "cmii7ylxn006m8z1tqq8dard1",
@@ -217,11 +209,19 @@
           "method": "POST",
           "endpoint": "/Authentication",
           "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
+          "validationCnt": 1,
+          "totalFields": 5,
           "passFields": 0,
-          "failFields": 0,
-          "validations": []
+          "failFields": 5,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "Message Missing! - 모든 시도(1회)에서 타임아웃 발생"
+              ]
+            }
+          ]
         },
         {
           "id": "cmiqtf9x600upie8ft45b1h1w",
@@ -322,5 +322,5 @@
       ]
     }
   ],
-  "completedDate": "2026-01-06T00:50:02Z"
+  "completedDate": "2026-01-06T02:41:56Z"
 }
