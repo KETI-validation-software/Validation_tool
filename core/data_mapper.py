@@ -2,6 +2,10 @@ import random
 import copy
 
 class ConstraintDataGenerator:
+    # 상수 정의
+    MAX_TIMESTAMP = 9999999999999  # 최대 타임스탬프 범위
+    INVALID_TIMESTAMP = 0  # 오류 생성용 타임스탬프
+    
     def __init__(self, latest_events=None):
         """
         latest_events: API 이벤트 저장소 {api_name: {direction: event_data}}
@@ -125,10 +129,16 @@ class ConstraintDataGenerator:
                         if door_id:
                             new_door_list.append({"doorID": door_id})
                 
-                # 만약 DoorProfiles가 없으면(단독 실행 등), 임시 데이터라도 넣어서 빈 값 방지
+                # 만약 DoorProfiles가 없으면(단독 실행 등), 템플릿 기반으로 생성
                 if not new_door_list:
-                    # print(f"[DATA_MAPPER] DoorProfiles 데이터 없음: 기본값 생성")
-                    new_door_list = [{"doorID": "door0001"}, {"doorID": "door0002"}]
+                    # 템플릿의 doorList에서 구조 가져오기
+                    if "doorList" in template_data and isinstance(template_data["doorList"], list) and len(template_data["doorList"]) > 0:
+                        template_item = template_data["doorList"][0]
+                        # doorID만 추출하여 리스트 생성 (템플릿에 있는 doorID 사용)
+                        for item in template_data["doorList"]:
+                            door_id = item.get("doorID", "")
+                            if door_id:
+                                new_door_list.append({"doorID": door_id})
 
                 template_data["doorList"] = new_door_list
                 return template_data
@@ -146,14 +156,14 @@ class ConstraintDataGenerator:
             elif door_memory and len(door_memory) > 0:
                 target_door_id = random.choice(list(door_memory.keys()))
             else:
-                # 템플릿 기본값 사용
-                target_door_id = template_data.get("doorID", "door0001")
+                # 템플릿 기본값 사용 (템플릿에 이미 있는 값 그대로)
+                target_door_id = template_data.get("doorID", "")
             
             template_data["doorID"] = target_door_id
             print(f"[DATA_MAPPER] 선택된 doorID: {target_door_id}")
 
             # 현재 상태 가져오기
-            current_status = template_data.get("commandType", "Lock")  # 템플릿 기본값 사용
+            current_status = template_data.get("commandType", "")  # 템플릿 기본값 사용
             if door_memory and target_door_id in door_memory:
                 current_status = door_memory[target_door_id].get("doorSensor", current_status)
             
@@ -329,7 +339,7 @@ class ConstraintDataGenerator:
                     ref_key_max = (max_endpoint or ref_endpoint or "").lstrip('/')
 
                     min_val = 0
-                    max_val = 9999999999999
+                    max_val = self.MAX_TIMESTAMP
 
                     # min 값 찾기
                     if min_field:
@@ -349,7 +359,7 @@ class ConstraintDataGenerator:
                             max_vals = self.find_key(event_data, max_field)
                         else:
                             max_vals = self.find_key(request_data, max_field)
-                        max_val = max_vals[0] if max_vals else 9999999999999
+                        max_val = max_vals[0] if max_vals else self.MAX_TIMESTAMP
 
                     print(f"[DEBUG][BUILD_MAP]   request-range: min={min_val}, max={max_val}")
 
@@ -371,7 +381,7 @@ class ConstraintDataGenerator:
                     ref_key_max = (max_endpoint or ref_endpoint or "").lstrip('/')
 
                     min_val = 0
-                    max_val = 9999999999999
+                    max_val = self.MAX_TIMESTAMP
 
                     # min 값 찾기
                     if min_field:
@@ -391,7 +401,7 @@ class ConstraintDataGenerator:
                             max_vals = self.find_key(event_data, max_field)
                         else:
                             max_vals = self.find_key(request_data, max_field)
-                        max_val = max_vals[0] if max_vals else 9999999999999
+                        max_val = max_vals[0] if max_vals else self.MAX_TIMESTAMP
 
                     print(f"[DEBUG][BUILD_MAP]   request-range: min={min_val}, max={max_val}")
 
@@ -408,7 +418,7 @@ class ConstraintDataGenerator:
                         "type": "request-range",
                         "operator": "between",
                         "min": 0,
-                        "max": 9999999999999
+                        "max": self.MAX_TIMESTAMP
                     }
             elif value_type == "response-based":
                 # referenceEndpoint 없으면 현재 request_data에서 찾기
@@ -606,7 +616,7 @@ class ConstraintDataGenerator:
                 elif constraint["type"] == "request-range":
                     # 범위 내 랜덤 값 생성
                     min_val = constraint.get("min", 0)
-                    max_val = constraint.get("max", 9999999999999)
+                    max_val = constraint.get("max", self.MAX_TIMESTAMP)
 
                     # 유효성 검사: min이 max보다 큰 경우 처리
                     if min_val >= max_val:
@@ -677,7 +687,7 @@ class ConstraintDataGenerator:
             if isinstance(obj, dict):
                 for key, value in obj.items():
                     if key == "startTime":
-                        obj[key] = 00000000000000000
+                        obj[key] = self.INVALID_TIMESTAMP  # 오류 생성용 (0)
                     else:
                         traverse(value)
             elif isinstance(obj, list):
