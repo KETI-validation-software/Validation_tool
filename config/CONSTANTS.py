@@ -57,19 +57,19 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소
 # test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
-company_name = "엣지디엑스"
-product_name = "AIBridge"
+company_name = "이노뎁"
+product_name = "VURIX-TMS"
 version = "v1.0"
 test_category = "MAIN_TEST"
-test_target = "제어기능-물리보안"
+test_target = "기본 기능 시험-통합시스템"
 test_range = "ALL_FIELDS"
 auth_type = "Digest Auth"
 auth_info = "kisa,kisa_k1!2@"
 admin_code = "1234"
-url = "https://192.168.0.3:2000"
-contact_person = "빙영진"
+url = "https://10.252.219.95:2000"
+contact_person = "배성환"
 model_name = "v1.0"
-request_id = "cmisfmr3907tv5vy71y0276gp"
+request_id = "cmii86ssr00a48z1tqmco6ke8"
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황
 flag_opt = False
@@ -108,7 +108,7 @@ enable_retry_delay = False  # False 권장: 불필요한 sleep 제거
 # ✅ 웹훅 서버 설정 (전역)
 WEBHOOK_HOST = "0.0.0.0"  # 서버 바인딩 주소 (모든 인터페이스에서 수신)
 WEBHOOK_PORT = 2001       # 웹훅 수신 포트
-WEBHOOK_PUBLIC_IP = "192.168.0.3"
+WEBHOOK_PUBLIC_IP = "10.252.219.95"
 # ✅ 웹훅 공개 IP 설정: info_GUI에서 선택한 시험 URL의 IP 사용
 # 초기값은 URL에서 추출, info_GUI에서 주소 선택 후 자동 업데이트됨
 
