@@ -996,13 +996,17 @@ def _validate_valid_value_match(field_path, field_value, rule, field_errors, glo
         # 단일 값만 허용 (allowed가 리스트이면 첫 값 기준)
         expected = allowed[0] if allowed else None
         if field_value != expected:
-            error_msg = f"값 불일치: {field_value} != 예상값 {expected}"
+            # 빈 값 표시 처리
+            display_value = repr(field_value) if field_value not in [None, ""] else "'(빈 값)'" if field_value == "" else "null"
+            error_msg = f"값 불일치: {display_value} != 예상값 {expected}"
             field_errors.append(error_msg)
             global_errors.append(f"[의미] {field_path}: {error_msg}")
             return False
     else:  # equalsAny
         if field_value not in allowed:
-            error_msg = f"값 불일치: {field_value}가 허용값 목록 {allowed}에 없음"
+            # 빈 값 표시 처리
+            display_value = repr(field_value) if field_value not in [None, ""] else "'(빈 값)'" if field_value == "" else "null"
+            error_msg = f"값 불일치: {display_value}가 허용값 목록 {allowed}에 없음"
             field_errors.append(error_msg)
             global_errors.append(f"[의미] {field_path}: {error_msg}")
             return False

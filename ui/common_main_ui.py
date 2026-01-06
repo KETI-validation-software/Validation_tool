@@ -127,12 +127,12 @@ class CommonMainUI(QWidget):
         columns_layout.setContentsMargins(0, 0, 0, 0)
         columns_layout.setSpacing(0)
 
-        # ✅ 왼쪽 컬럼 (시험 분야 선택) - 472*898, padding: 좌우 24px, 상 36px, 하 80px
+        # ✅ 왼쪽 컬럼 (시험 분야 선택) - 472*898, padding: 좌우 24px, 상 36px, 하 0px
         self.left_col = QWidget()
         self.left_col.setFixedSize(472, 898)
         self.left_col.setStyleSheet("background: transparent;")
         self.left_layout = QVBoxLayout()
-        self.left_layout.setContentsMargins(24, 36, 24, 80)
+        self.left_layout.setContentsMargins(24, 36, 24, 0)
         self.left_layout.setSpacing(0)
 
         # ✅ 반응형: 왼쪽 패널 원본 크기 저장
@@ -368,40 +368,14 @@ class CommonMainUI(QWidget):
         # 30px gap
         self.right_layout.addSpacing(30)
 
+        # Stretch를 추가하여 버튼 그룹을 맨 아래로 이동
+        self.right_layout.addStretch()
+
         # ✅ 버튼 그룹 (레이아웃 없이 직접 위치 설정)
         self.buttonGroup = QWidget()
         self.buttonGroup.setFixedSize(1064, 48)
         self.original_buttonGroup_size = (1064, 48)
         self.button_spacing = 16  # 버튼 간격 고정
-
-        # 평가 시작 버튼
-        self.sbtn = QPushButton("시험 시작", self.buttonGroup)  # 텍스트 추가
-        self.original_button_size = (254, 48)  # 버튼 원본 크기 저장
-        start_enabled = resource_path("assets/image/test_runner/btn_평가시작_enabled.png").replace("\\", "/")
-        start_hover = resource_path("assets/image/test_runner/btn_평가시작_hover.png").replace("\\", "/")
-        start_disabled = resource_path("assets/image/test_runner/btn_평가시작_disabled.png").replace("\\", "/")
-        self.sbtn.setStyleSheet(f"""
-            QPushButton {{
-                border: none;
-                border-image: url('{start_enabled}') 0 0 0 0 stretch stretch;
-                padding-left: 20px;
-                padding-right: 20px;
-                font-family: 'Noto Sans KR';
-                font-size: 20px;
-                font-weight: 500;
-                color: #FFFFFF;
-            }}
-            QPushButton:hover {{
-                border-image: url('{start_hover}') 0 0 0 0 stretch stretch;
-            }}
-            QPushButton:pressed {{
-                border-image: url('{start_hover}') 0 0 0 0 stretch stretch;
-            }}
-            QPushButton:disabled {{
-                border-image: url('{start_disabled}') 0 0 0 0 stretch stretch;
-                color: #CECECE;
-            }}
-        """)
 
         # 정지 버튼
         self.stop_btn = QPushButton("일시 정지", self.buttonGroup)  # 텍스트 추가
@@ -432,6 +406,36 @@ class CommonMainUI(QWidget):
         """)
         self.stop_btn.clicked.connect(self.stop_btn_clicked)
         self.stop_btn.setDisabled(True)
+
+        # 시험 취소 버튼
+        self.cancel_btn = QPushButton("시험 취소", self.buttonGroup)
+        cancel_enabled = resource_path("assets/image/test_runner/btn_common_enabled.png").replace("\\", "/")
+        cancel_hover = resource_path("assets/image/test_runner/btn_common_hover.png").replace("\\", "/")
+        cancel_disabled = resource_path("assets/image/test_runner/btn_common_disabled.png").replace("\\", "/")
+        self.cancel_btn.setStyleSheet(f"""
+            QPushButton {{
+                border: none;
+                border-image: url('{cancel_enabled}') 0 0 0 0 stretch stretch;
+                padding-left: 20px;
+                padding-right: 20px;
+                font-family: 'Noto Sans KR';
+                font-size: 20px;
+                font-weight: 500;
+                color: #6B6B6B;
+            }}
+            QPushButton:hover {{
+                border-image: url('{cancel_hover}') 0 0 0 0 stretch stretch;
+            }}
+            QPushButton:pressed {{
+                border-image: url('{cancel_hover}') 0 0 0 0 stretch stretch;
+            }}
+            QPushButton:disabled {{
+                border-image: url('{cancel_disabled}') 0 0 0 0 stretch stretch;
+                color: #CECECE;
+            }}
+        """)
+        self.cancel_btn.clicked.connect(self.cancel_btn_clicked)
+        self.cancel_btn.setDisabled(True)
 
         # 종료 버튼
         self.rbtn = QPushButton("종료", self.buttonGroup)  # 텍스트 추가
@@ -494,7 +498,6 @@ class CommonMainUI(QWidget):
         # 초기 버튼 위치 설정 (레이아웃 없이 직접 배치)
         self._update_button_positions()
         self.right_layout.addWidget(self.buttonGroup)
-        self.right_layout.addStretch()
         self.right_col.setLayout(self.right_layout)
 
         columns_layout.addWidget(self.left_col)
@@ -540,7 +543,7 @@ class CommonMainUI(QWidget):
 
 
     def _update_button_positions(self, group_width=None, group_height=None):
-        """버튼 위치 직접 설정 (간격 16px 고정)"""
+        """버튼 위치 직접 설정 (간격 16px 고정) - stop_btn, cancel_btn, result_btn, rbtn 4개"""
         if not hasattr(self, 'buttonGroup'):
             return
 
@@ -556,13 +559,13 @@ class CommonMainUI(QWidget):
         btn_width = (group_width - spacing * 3) // 4
         btn_height = group_height
 
-        # 각 버튼 크기 및 위치 설정
+        # 각 버튼 크기 및 위치 설정 (stop_btn, cancel_btn, result_btn, rbtn)
         x = 0
-        self.sbtn.setFixedSize(btn_width, btn_height)
-        self.sbtn.move(x, 0)
-        x += btn_width + spacing
         self.stop_btn.setFixedSize(btn_width, btn_height)
         self.stop_btn.move(x, 0)
+        x += btn_width + spacing
+        self.cancel_btn.setFixedSize(btn_width, btn_height)
+        self.cancel_btn.move(x, 0)
         x += btn_width + spacing
         self.result_btn.setFixedSize(btn_width, btn_height)
         self.result_btn.move(x, 0)
@@ -643,6 +646,11 @@ class CommonMainUI(QWidget):
                 # 내부 테이블 크기도 조정
                 if hasattr(self, 'test_field_table'):
                     self.test_field_table.setFixedHeight(new_field_height)
+
+            # 시험 시작 버튼 크기 조정 (왼쪽 컬럼에 있음)
+            if hasattr(self, 'sbtn') and hasattr(self, 'original_sbtn_size'):
+                new_sbtn_width = int(self.original_sbtn_size[0] * width_ratio)
+                self.sbtn.setFixedSize(new_sbtn_width, self.original_sbtn_size[1])
 
             # ✅ 오른쪽 컬럼 크기 조정
             if hasattr(self, 'right_col') and hasattr(self, 'original_right_col_size'):
