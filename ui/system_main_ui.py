@@ -71,6 +71,41 @@ class SystemMainUI(CommonMainUI):
         self.field_group = self.create_test_field_group()
         parent_layout.addWidget(self.field_group)
 
+        # Stretch를 추가하여 시험 시작 버튼을 맨 아래로 이동
+        parent_layout.addStretch()
+
+        # 시험 시작 버튼 (시험 시나리오 박스와 같은 너비, 높이 48px)
+        self.sbtn = QPushButton("시험 시작")
+        self.sbtn.setFixedSize(424, 48)
+        self.original_sbtn_size = (424, 48)
+        self.sbtn.setStyleSheet("""
+            QPushButton {
+                border: none;
+                border-radius: 4px;
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #275554, stop:1 #002B69);
+                padding-left: 20px;
+                padding-right: 20px;
+                font-family: 'Noto Sans KR';
+                font-size: 20px;
+                font-weight: 500;
+                color: #FFFFFF;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #336665, stop:1 #003C7A);
+            }
+            QPushButton:pressed {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #1E4443, stop:1 #001A4F);
+            }
+            QPushButton:disabled {
+                background: #CECECE;
+                color: #868686;
+            }
+        """)
+        parent_layout.addWidget(self.sbtn)
+
     def create_group_selection_table(self):
         """시험 분야명 테이블 - 424*204, 헤더 31px, 데이터셀 39px"""
         group_box = QWidget()
@@ -334,12 +369,13 @@ class SystemMainUI(CommonMainUI):
         """버튼 이벤트 연결 (System 전용)"""
         self.sbtn.clicked.connect(self.start_btn_clicked)
         self.stop_btn.clicked.connect(self.stop_btn_clicked)
+        self.cancel_btn.clicked.connect(self.cancel_btn_clicked)
         self.rbtn.clicked.connect(self.exit_btn_clicked)
         self.result_btn.clicked.connect(self.show_result_page)
 
 
     def _update_button_positions(self, group_width=None, group_height=None):
-        """버튼 위치 직접 설정 (간격 16px 고정)"""
+        """버튼 위치 직접 설정 (간격 16px 고정) - stop_btn, cancel_btn, result_btn, rbtn 4개"""
         if not hasattr(self, 'buttonGroup'):
             return
 
@@ -355,13 +391,13 @@ class SystemMainUI(CommonMainUI):
         btn_width = (group_width - spacing * 3) // 4
         btn_height = group_height
 
-        # 각 버튼 크기 및 위치 설정
+        # 각 버튼 크기 및 위치 설정 (stop_btn, cancel_btn, result_btn, rbtn)
         x = 0
-        self.sbtn.setFixedSize(btn_width, btn_height)
-        self.sbtn.move(x, 0)
-        x += btn_width + spacing
         self.stop_btn.setFixedSize(btn_width, btn_height)
         self.stop_btn.move(x, 0)
+        x += btn_width + spacing
+        self.cancel_btn.setFixedSize(btn_width, btn_height)
+        self.cancel_btn.move(x, 0)
         x += btn_width + spacing
         self.result_btn.setFixedSize(btn_width, btn_height)
         self.result_btn.move(x, 0)
@@ -437,6 +473,11 @@ class SystemMainUI(CommonMainUI):
                 # 내부 테이블 크기도 조정
                 if hasattr(self, 'test_field_table'):
                     self.test_field_table.setFixedHeight(new_field_height)
+
+            # 시험 시작 버튼 크기 조정 (왼쪽 컬럼에 있음)
+            if hasattr(self, 'sbtn') and hasattr(self, 'original_sbtn_size'):
+                new_sbtn_width = int(self.original_sbtn_size[0] * width_ratio)
+                self.sbtn.setFixedSize(new_sbtn_width, self.original_sbtn_size[1])
 
             # ✅ 오른쪽 컬럼 크기 조정
             if hasattr(self, 'right_col') and hasattr(self, 'original_right_col_size'):

@@ -369,6 +369,7 @@ class MyApp(PlatformMainUI):
 
                 self.sbtn.setEnabled(True)
                 self.stop_btn.setDisabled(True)
+                self.cancel_btn.setDisabled(True)
 
                 # ✅ 완료 메시지 추가
                 self.valResult.append("\n" + "=" * 50)
@@ -1070,6 +1071,7 @@ class MyApp(PlatformMainUI):
                 self.final_report += self.valResult.toPlainText()
                 self.sbtn.setEnabled(True)
                 self.stop_btn.setDisabled(True)
+                self.cancel_btn.setDisabled(True)
 
                 # ✅ 현재 spec 데이터 저장
                 self.save_current_spec_data()
@@ -1120,6 +1122,7 @@ class MyApp(PlatformMainUI):
             self.valResult.append('<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">검증 절차가 중지되었습니다.</div>')
             self.sbtn.setEnabled(True)
             self.stop_btn.setDisabled(True)
+            self.cancel_btn.setDisabled(True)
 
     def load_test_info_from_constants(self):
         """CONSTANTS.py에서 시험정보를 로드"""
@@ -1714,10 +1717,18 @@ class MyApp(PlatformMainUI):
 
     def sbtn_push(self):
         try:
+            # ✅ 자동 재시작 플래그 확인 및 제거
+            is_auto_restart = getattr(self, '_auto_restart', False)
+            if is_auto_restart:
+                self._auto_restart = False
+                print(f"[START] 자동 재시작 모드 - 시나리오 선택 검증 건너뜀")
+            
+            # ✅ 시나리오 선택 확인 (자동 재시작이 아닐 때만 검증)
             selected_rows = self.test_field_table.selectionModel().selectedRows()
-            if not selected_rows:
+            if not is_auto_restart and not selected_rows:
                 QMessageBox.warning(self, "알림", "시험 시나리오를 선택하세요.")
                 return
+            
             self.save_current_spec_data()
 
             # ✅ 로딩 팝업 표시
@@ -1921,10 +1932,7 @@ class MyApp(PlatformMainUI):
             # ✅ 12. 버튼 상태 변경
             self.sbtn.setDisabled(True)
             self.stop_btn.setEnabled(True)
-
-            # ✅ 12. 버튼 상태 변경
-            self.sbtn.setDisabled(True)
-            self.stop_btn.setEnabled(True)
+            self.cancel_btn.setEnabled(True)
 
             # ✅ 13. JSON 데이터 준비
             json_to_data(self.radio_check_flag)
@@ -2085,6 +2093,7 @@ class MyApp(PlatformMainUI):
 
             self.sbtn.setEnabled(True)
             self.stop_btn.setDisabled(True)
+            self.cancel_btn.setDisabled(True)
 
     def save_paused_state(self):
         """일시정지 시 현재 상태를 JSON 파일로 저장"""
@@ -2233,6 +2242,7 @@ class MyApp(PlatformMainUI):
         self.valResult.append('<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">검증 절차가 중지되었습니다.</div>')
         self.sbtn.setEnabled(True)
         self.stop_btn.setDisabled(True)
+        self.cancel_btn.setDisabled(True)
         self.save_current_spec_data()
 
         # ✅ 일시정지 상태 저장
@@ -2259,6 +2269,74 @@ class MyApp(PlatformMainUI):
             import traceback
             traceback.print_exc()
             self.valResult.append(f"\n결과 저장 실패: {str(e)}")
+
+    def cancel_btn_clicked(self):
+        """시험 취소 버튼 클릭 - 진행 중단, 상태 초기화, 자동 재시작"""
+        print(f"[CANCEL] 시험 취소 버튼 클릭")
+        
+        # 확인 메시지 표시
+        reply = QMessageBox.question(
+            self, '시험 취소',
+            '현재 진행 중인 시험을 취소하고 처음부터 다시 시작하시겠습니까?',
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        
+        if reply != QMessageBox.Yes:
+            print(f"[CANCEL] 사용자가 취소를 취소함")
+            return
+        
+        print(f"[CANCEL] ========== 시험 취소 시작 ==========")
+        
+        # 1. 타이머 중지 및 초기화
+        if self.tick_timer.isActive():
+            self.tick_timer.stop()
+            print(f"[CANCEL] 타이머 중지됨")
+        
+        # 2. 서버 스레드 완전 종료
+        if self.server_th is not None and self.server_th.isRunning():
+            print(f"[CANCEL] 서버 스레드 종료 시작...")
+            try:
+                self.server_th.httpd.shutdown()
+                self.server_th.wait(3000)  # 최대 3초 대기
+                print(f"[CANCEL] 서버 스레드 종료 완료")
+            except Exception as e:
+                print(f"[WARN] 서버 종료 중 오류 (무시): {e}")
+            self.server_th = None
+        
+        # 3. 일시정지 파일 삭제
+        self.cleanup_paused_file()
+        print(f"[CANCEL] 일시정지 파일 삭제 완료")
+        
+        # 4. 상태 완전 초기화
+        self.is_paused = False
+        self.last_completed_api_index = -1
+        self.paused_valResult_text = ""
+        self.cnt = 0
+        self.current_retry = 0
+        self.post_flag = False  # 웹훅 플래그 초기화
+        self.res = None  # 응답 초기화
+        print(f"[CANCEL] 상태 초기화 완료")
+        
+        # 5. 버튼 상태 초기화
+        self.sbtn.setEnabled(True)
+        self.stop_btn.setDisabled(True)
+        self.cancel_btn.setDisabled(True)
+        
+        # 6. 모니터링 화면 초기화
+        self.valResult.clear()
+        self.valResult.append('<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">시험을 취소c하고 재시작 중...</div>')
+        print(f"[CANCEL] 모니터링 화면 초기화")
+        
+        # 7. UI 업데이트 처리
+        QApplication.processEvents()
+        
+        # 8. 2초 대기 후 자동 재시작 (정리 시간 확보)
+        print(f"[CANCEL] 2초 대기 후 자동 재시작...")
+        self._auto_restart = True  # 자동 재시작 플래그 설정
+        QTimer.singleShot(2000, self.sbtn_push)
+        
+        print(f"[CANCEL] ========== 시험 취소 완료 ==========")
 
     def init_win(self):
         """기본 초기화 (sbtn_push에서 이미 대부분 처리되므로 최소화)"""
