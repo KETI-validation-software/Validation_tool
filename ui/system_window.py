@@ -78,9 +78,9 @@ class SystemValidationWindow(QMainWindow):
                     except Exception as e:
                         print(f"[WARN] 서버 종료 중 오류 (무시): {e}")
 
-                # 일시정지 파일 삭제
-                if hasattr(self.validation_widget, 'cleanup_paused_file'):
-                    self.validation_widget.cleanup_paused_file()
+                # 모든 일시정지 파일 삭제
+                if hasattr(self.validation_widget, 'cleanup_all_paused_files'):
+                    self.validation_widget.cleanup_all_paused_files()
                 print(f"[WRAPPER_CLOSE] 정리 완료")
 
             event.accept()

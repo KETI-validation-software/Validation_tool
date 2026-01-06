@@ -1332,9 +1332,7 @@ class MyApp(PlatformMainUI):
                 print(f"[PLATFORM] 🔄 시험 분야 전환: {self.current_spec_id} → {new_spec_id}")
                 print(f"[DEBUG] 현재 그룹: {self.current_group_id}")
 
-                # ✅ 0. 일시정지 파일 삭제 (시나리오 변경 시 이전 일시정지 상태 제거)
-                self.cleanup_paused_file()
-                print(f"[SELECT] 시나리오 전환: 일시정지 파일 삭제 완료")
+                # ✅ 0. 일시정지 파일은 각 시나리오별로 유지 (삭제하지 않음)
 
                 # ✅ 1. 현재 spec의 테이블 데이터 저장 (current_spec_id가 None이 아닐 때만)
                 if self.current_spec_id is not None:
@@ -1353,6 +1351,18 @@ class MyApp(PlatformMainUI):
                 self.cnt = 0
                 self.current_retry = 0
                 self.message_error = []
+                
+                # ✅ 4-1. 서버 및 플래그 초기화
+                self.realtime_flag = False
+                self.tmp_msg_append_flag = False
+                if self.server_th is not None and self.server_th.isRunning():
+                    try:
+                        self.server_th.httpd.shutdown()
+                        self.server_th.wait(2000)
+                        print(f"[SELECT] 시나리오 전환: 기존 서버 스레드 종료 완료")
+                    except Exception as e:
+                        print(f"[WARN] 서버 종료 중 오류 (무시): {e}")
+                    self.server_th = None
 
                 # ✅ 5. 테이블 구조 업데이트 (행 수만 조정)
                 self.update_result_table_structure(self.videoMessages)
@@ -1750,8 +1760,8 @@ class MyApp(PlatformMainUI):
                 self.run_single_spec_test()
                 QApplication.processEvents()  # 스피너 애니메이션 유지
 
-            # ✅ 일시정지 파일 존재 여부 확인
-            paused_file_path = os.path.join(result_dir, "request_results_paused.json")
+            # ✅ 일시정지 파일 존재 여부 확인 (spec_id별로 관리)
+            paused_file_path = os.path.join(result_dir, f"request_results_paused_{self.current_spec_id}.json")
             resume_mode = os.path.exists(paused_file_path)
 
             if resume_mode:
@@ -2140,8 +2150,8 @@ class MyApp(PlatformMainUI):
                 "global_opt_error_cnt": getattr(self, 'global_opt_error_cnt', 0)  # 전체 선택 필드 에러 수
             }
 
-            # JSON 파일로 저장
-            paused_file_path = os.path.join(result_dir, "request_results_paused.json")
+            # JSON 파일로 저장 (spec_id 포함)
+            paused_file_path = os.path.join(result_dir, f"request_results_paused_{self.current_spec_id}.json")
             with open(paused_file_path, "w", encoding="utf-8") as f:
                 json.dump(paused_state, f, ensure_ascii=False, indent=2)
 
@@ -2161,7 +2171,7 @@ class MyApp(PlatformMainUI):
     def load_paused_state(self):
         """일시정지된 상태를 JSON 파일에서 복원"""
         try:
-            paused_file_path = os.path.join(result_dir, "request_results_paused.json")
+            paused_file_path = os.path.join(result_dir, f"request_results_paused_{self.current_spec_id}.json")
 
             if not os.path.exists(paused_file_path):
                 print("[INFO] 일시정지 파일이 존재하지 않습니다.")
@@ -2203,7 +2213,7 @@ class MyApp(PlatformMainUI):
     def cleanup_paused_file(self):
         """평가 완료 후 일시정지 파일 삭제 및 상태 초기화"""
         try:
-            paused_file_path = os.path.join(result_dir, "request_results_paused.json")
+            paused_file_path = os.path.join(result_dir, f"request_results_paused_{self.current_spec_id}.json")
             print(f"[CLEANUP] cleanup_paused_file() 호출됨")
             print(f"[CLEANUP] 파일 경로: {paused_file_path}")
             print(f"[CLEANUP] 파일 존재 여부: {os.path.exists(paused_file_path)}")
@@ -2221,6 +2231,28 @@ class MyApp(PlatformMainUI):
 
         except Exception as e:
             print(f"❌ 일시정지 파일 정리 실패: {e}")
+
+    def cleanup_all_paused_files(self):
+        """프로그램 종료 시 모든 일시정지 파일 삭제"""
+        try:
+            import glob
+            # request_results_paused_*.json 패턴으로 모든 일시정지 파일 찾기
+            pattern = os.path.join(result_dir, "request_results_paused_*.json")
+            paused_files = glob.glob(pattern)
+            
+            if paused_files:
+                print(f"[CLEANUP_ALL] {len(paused_files)}개의 일시정지 파일 발견")
+                for file_path in paused_files:
+                    try:
+                        os.remove(file_path)
+                        print(f"[CLEANUP_ALL] 삭제 완료: {os.path.basename(file_path)}")
+                    except Exception as e:
+                        print(f"[WARN] 파일 삭제 실패 {file_path}: {e}")
+                print(f"✅ 모든 일시정지 파일 삭제 완료")
+            else:
+                print("[CLEANUP_ALL] 삭제할 일시정지 파일이 없음")
+        except Exception as e:
+            print(f"❌ 일시정지 파일 일괄 삭제 실패: {e}")
 
     def stop_btn_clicked(self):
         # ✅ 타이머 중지
