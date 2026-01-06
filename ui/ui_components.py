@@ -228,6 +228,9 @@ class TestSelectionPanel(QWidget):
             }
         """)
 
+        self.test_field_table.setShowGrid(False)
+        self.test_field_table.setFocusPolicy(Qt.NoFocus)
+
         # Connect signal
         self.test_field_table.cellClicked.connect(self._on_scenario_clicked)
 
