@@ -154,7 +154,7 @@ class APIClient:
 
     def send_heartbeat_idle(self):
         """시험 정보 불러오기 시 idle 상태 전송"""
-        url = "http://ect2.iptime.org:20223/api/heartbeat"
+        url = f"{self.base_url}/api/heartbeat"
         try:
             ip_address = self.get_local_ip_address()
             payload = {
@@ -172,7 +172,7 @@ class APIClient:
 
     def send_heartbeat_busy(self, test_info):
         """시험 시작 시 busy 상태 + 시험 정보 전송"""
-        url = "http://ect2.iptime.org:20223/api/heartbeat"
+        url = f"{self.base_url}/api/heartbeat"
         try:
             ip_address = self.get_local_ip_address()
             payload = {
