@@ -156,13 +156,7 @@ class MainWindow(QMainWindow):
         self._show_result_widget(parent_widget)
 
     def _on_start_test_requested(self, target_system_edit, verification_type, spec_id):
-        """시험 시작 버튼 클릭 시 호출 - 시험 실행 메뉴 활성화 후 검증 앱 실행"""
-        # 현재 정보 저장 (메뉴에서 시험 실행 클릭 시 사용)
-        self._current_test_target_system_name = target_system_edit
-        self._current_verification_type = verification_type
-        self._current_spec_id = spec_id
-
-        # 검증 앱 실행
+        """시험 시작 버튼 클릭 시 호출 - 검증 앱 실행"""
         self._open_validation_app(target_system_edit, verification_type, spec_id)
 
     def _toggle_fullscreen(self, checked: bool):
