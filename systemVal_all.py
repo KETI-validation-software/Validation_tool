@@ -2225,10 +2225,16 @@ class MyApp(SystemMainUI):
 
                 # 카운트 초기화 (9컬럼 구조)
                 for col, value in [(3, "0"), (4, "0"), (5, "0"), (6, "0"), (7, "0%")]:
-                    item = QTableWidgetItem(value) if not self.tableWidget.item(i, col) else self.tableWidget.item(i, col)
-                    item.setText(value)
-                    item.setTextAlignment(Qt.AlignCenter)
-                    self.tableWidget.setItem(i, col, item)
+                    existing_item = self.tableWidget.item(i, col)
+                    if existing_item:
+                        # 기존 아이템이 있으면 값만 업데이트 (setItem 호출하지 않음)
+                        existing_item.setText(value)
+                        existing_item.setTextAlignment(Qt.AlignCenter)
+                    else:
+                        # 아이템이 없으면 새로 생성하고 설정
+                        new_item = QTableWidgetItem(value)
+                        new_item.setTextAlignment(Qt.AlignCenter)
+                        self.tableWidget.setItem(i, col, new_item)
             print(f"[START] 테이블 초기화 완료")
 
             # ✅ 14. 인증 정보 설정
