@@ -149,12 +149,22 @@ class CombinedDetailDialog(QDialog):
         self.error_browser.setStyleSheet(box_style)
         self.error_browser.setAcceptRichText(True)
         result = step_buffer["result"]
-        error_text = step_buffer["error"] if step_buffer["error"] else ("오류가 없습니다." if result == "PASS" else "")
-        error_msg = f"검증 결과: {result}\n\n"
-        if result == "FAIL":
-            error_msg += error_text
+        
+        # ✅ 검증 결과가 없는 경우 (데이터가 없고 에러도 없는 경우) 처리
+        has_data = step_buffer.get("data") and step_buffer["data"] != "아직 수신된 데이터가 없습니다."
+        has_error = bool(step_buffer.get("error"))
+        
+        if not has_data and not has_error:
+            # 아직 검증하지 않은 상태
+            error_msg = "검증 결과: 없음\n\n아직 검증이 수행되지 않았습니다."
         else:
-            error_msg += "오류가 없습니다."
+            error_text = step_buffer["error"] if has_error else ("오류가 없습니다." if result == "PASS" else "")
+            error_msg = f"검증 결과: {result}\n\n"
+            if result == "FAIL":
+                error_msg += error_text
+            else:
+                error_msg += "오류가 없습니다."
+        
         # HTML 렌더링을 위해 setHtml 사용 (줄바꿈을 <br>로 변환)
         error_msg_html = error_msg.replace('\n', '<br>')
         self.error_browser.setHtml(error_msg_html)
