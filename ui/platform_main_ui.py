@@ -343,6 +343,7 @@ class PlatformMainUI(CommonMainUI):
         self.tableWidget.verticalHeader().setVisible(False)
         self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tableWidget.setSelectionMode(QAbstractItemView.NoSelection)
+        self.tableWidget.setFocusPolicy(Qt.NoFocus)
         self.tableWidget.setIconSize(QSize(16, 16))
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Fixed)
 

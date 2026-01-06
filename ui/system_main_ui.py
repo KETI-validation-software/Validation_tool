@@ -257,6 +257,7 @@ class SystemMainUI(CommonMainUI):
         """)
 
         self.test_field_table.setShowGrid(False)
+        self.test_field_table.setFocusPolicy(Qt.NoFocus)
 
         # SPEC_CONFIG에서 spec_id와 config 추출
         spec_items = []
@@ -681,6 +682,7 @@ class SystemMainUI(CommonMainUI):
         self.tableWidget.verticalHeader().setVisible(False)
         self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tableWidget.setSelectionMode(QAbstractItemView.NoSelection)
+        self.tableWidget.setFocusPolicy(Qt.NoFocus)
         self.tableWidget.setIconSize(QtCore.QSize(16, 16))
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Fixed)
 
