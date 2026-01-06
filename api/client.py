@@ -6,7 +6,6 @@ API 클라이언트 모듈
 
 import requests
 import socket
-import os
 import config.CONSTANTS as CONSTANTS
 
 
@@ -40,19 +39,6 @@ class APIClient:
             print(f"API 호출 실패: {e}")
             import traceback
             traceback.print_exc()
-            return None
-
-    def fetch_opt_by_spec_id(self, spec_id):
-        """spec_id로 OPT 파일 조회 (API 기반)"""
-        # TODO: spec_id를 서버에 전송하여 OPT JSON 받아오는 API 구현 필요
-        # 현재는 임시로 로컬 파일 조회
-        opt_file_path = f"opt_files/{spec_id}.json"
-
-        if os.path.exists(opt_file_path):
-            print(f"spec_id {spec_id}에 해당하는 OPT 파일 발견: {opt_file_path}")
-            return opt_file_path
-        else:
-            print(f"spec_id {spec_id}에 해당하는 OPT 파일이 없습니다.")
             return None
 
     def fetch_specification_by_id(self, spec_id):
@@ -121,23 +107,6 @@ class APIClient:
         except Exception as e:
             print(f"ResponseCode API 호출 실패: {e}")
             return None
-
-    def load_specs_from_api_data(self, test_specs):
-        """testSpecs 배열로부터 스펙 목록 동적 로드"""
-        spec_file_paths = []
-
-        print(f"testSpecs 배열로부터 {len(test_specs)}개 스펙 로드 시작...")
-        for i, spec in enumerate(test_specs, 1):
-            spec_id = spec.get("id", "")
-            spec_name = spec.get("name", "")
-            print(f"  {i}. {spec_name} (ID: {spec_id})")
-
-            opt_path = self.fetch_opt_by_spec_id(spec_id)
-            if opt_path:
-                spec_file_paths.append(opt_path)
-
-        print(f"총 {len(spec_file_paths)}개 스펙 파일 로드 완료")
-        return spec_file_paths
 
     def get_local_ip_address(self):
         """현재 PC의 로컬 IP 주소를 가져옴"""

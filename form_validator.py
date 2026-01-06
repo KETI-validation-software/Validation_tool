@@ -1096,14 +1096,6 @@ class FormValidator:
         """IP 주소로 시험 정보 조회 (APIClient 위임)"""
         return self.api_client.fetch_test_info_by_ip(ip_address)
 
-    def fetch_opt_by_spec_id(self, spec_id):
-        """spec_id로 OPT 파일 조회 (APIClient 위임)"""
-        return self.api_client.fetch_opt_by_spec_id(spec_id)
-
-    def load_specs_from_api_data(self, test_specs):
-        """testSpecs 배열로부터 스펙 목록 동적 로드 (APIClient 위임)"""
-        return self.api_client.load_specs_from_api_data(test_specs)
-
     def fetch_specification_by_id(self, spec_id):
         """spec_id로 specification 상세 정보 조회 (APIClient 위임)"""
         return self.api_client.fetch_specification_by_id(spec_id)
