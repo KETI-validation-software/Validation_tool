@@ -474,7 +474,7 @@ class InfoWidget(QWidget):
                     if added_count > 0:
                         QMessageBox.information(
                             self, "주소 설정 완료",
-                            f"통합플랫폼시스템: {added_count}개의 주소를 추가했습니다."
+                            f"{added_count}개의 주소를 추가했습니다."
                         )
                     else:
                         QMessageBox.information(
