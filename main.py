@@ -162,7 +162,6 @@ class MainWindow(QMainWindow):
         self.info_widget.current_page = 0
         # 다음 버튼 상태 업데이트
         self.info_widget.check_next_button_state()
-        print("시험 정보 페이지로 이동")
 
     def _show_test_setup(self):
         """시험 설정 페이지로 이동 (2페이지)"""
@@ -172,7 +171,6 @@ class MainWindow(QMainWindow):
         self.info_widget.stacked_widget.setCurrentIndex(1)
         # current_page 변수도 동기화
         self.info_widget.current_page = 1
-        print("시험 설정 페이지로 이동")
 
     def _show_test_result(self):
         """시험 결과 페이지로 이동"""
@@ -238,11 +236,6 @@ class MainWindow(QMainWindow):
 
     def _on_start_test_requested(self, target_system_edit, verification_type, spec_id):
         """시험 시작 버튼 클릭 시 호출 - 시험 실행 메뉴 활성화 후 검증 앱 실행"""
-        # 시험 실행 메뉴 활성화
-        #self.act_test_run.setEnabled(True)
-        print(
-            f"시험 실행 메뉴 활성화: target_system={target_system_edit}, verificationType={verification_type}, spec_id={spec_id}")
-
         # 현재 정보 저장 (메뉴에서 시험 실행 클릭 시 사용)
         self._current_test_target_system_name = target_system_edit
         self._current_verification_type = verification_type
@@ -257,8 +250,6 @@ class MainWindow(QMainWindow):
             target_system_edit = self._current_test_target_system_name
             verification_type = getattr(self, '_current_verification_type', 'request')
             spec_id = getattr(self, '_current_spec_id', '')
-            print(
-                f"시험 실행 페이지로 이동: target_system={target_system_edit}, verificationType={verification_type}, spec_id={spec_id}")
 
             # target_system_edit에 따라 검증 화면 결정
             if "물리보안시스템" in target_system_edit:
@@ -294,7 +285,6 @@ class MainWindow(QMainWindow):
             # 제목표시줄 + 최소화 + 최대화(최대화 시 '이전크기'로 표기) + 종료
             flags = (Qt.Window | Qt.WindowTitleHint |
                      Qt.WindowMinimizeButtonHint |
-            Qt.WindowMaximizeButtonHint |
                      Qt.WindowMaximizeButtonHint |
                      Qt.WindowCloseButtonHint)
             self.setWindowFlags(flags)
@@ -316,8 +306,6 @@ class MainWindow(QMainWindow):
             # ===== 로깅 추가 끝 =====
 
             # ===== 수정: PyInstaller 환경에서 CONSTANTS reload =====
-            import sys
-            import os
             if getattr(sys, 'frozen', False):
                 # PyInstaller 환경 - sys.modules 삭제 후 재import
                 if 'config.CONSTANTS' in sys.modules:
@@ -332,13 +320,10 @@ class MainWindow(QMainWindow):
                     import config.CONSTANTS  # 모듈이 없으면 새로 import
             # ===== 수정 끝 =====
 
-            print(f"검증 화면 실행: target_system={target_system_edit}, verificationType={verification_type}, spec_id={spec_id}")
-
             # target_system_edit에 따라 어떤 검증 앱을 실행할지 결정
             if "물리보안시스템" in target_system_edit:
                 # 물리보안: 메인 창=System, 새 창=Platform
-                logger.info("→ 물리보안: 메인 창=System")  # 로깅 추가
-                print("→ 물리보안: 메인 창=System")
+                logger.info("→ 물리보안: 메인 창=System")
 
                 # ===== 수정: 기존 위젯 제거 후 새로 생성 =====
                 # Main 화면: System 검증으로 전환
@@ -361,8 +346,7 @@ class MainWindow(QMainWindow):
             # 1.2로 했을때 통합플랫폼으로 들어가야함
             elif "통합플랫폼시스템" in target_system_edit:
                 # 통합플랫폼: 메인 창=Platform, 새 창=System
-                logger.info("→ 통합플랫폼: 메인 창=Platform")  # 로깅 추가
-                print("→ 통합플랫폼: 메인 창=Platform")
+                logger.info("→ 통합플랫폼: 메인 창=Platform")
 
                 # ===== 수정: 기존 위젯 제거 후 새로 생성 =====
                 # Main 화면: Platform 검증으로 전환
@@ -386,9 +370,7 @@ class MainWindow(QMainWindow):
                 logger.info("Platform 위젯으로 전환 완료 ✅")  # 로깅 추가
 
             else:
-                logger.warning(f"알 수 없는 target_system: {target_system_edit}")  # 로깅 추가
-                print(f"알 수 없는 target_system: {target_system_edit}")
-                print(f"   ('물리보안' 또는 '통합플랫폼'이 포함되어야 합니다)")
+                logger.warning(f"알 수 없는 target_system: {target_system_edit}")
                 QMessageBox.warning(self, "경고", f"알 수 없는 시험 분야: {target_system_edit}\n'물리보안' 또는 '통합플랫폼'이 포함되어야 합니다.")
 
             # ===== 로깅 추가 시작 =====
