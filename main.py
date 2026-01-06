@@ -3,8 +3,7 @@ import os
 import urllib3
 import logging
 import traceback
-from datetime import datetime
-from PyQt5.QtWidgets import QApplication, QMainWindow, QStackedWidget, QAction, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QStackedWidget, QMessageBox
 from PyQt5.QtGui import QFontDatabase, QFont
 from PyQt5.QtCore import Qt
 
@@ -37,13 +36,9 @@ from ui.info_GUI import InfoWidget
 from core.functions import resource_path
 import platformVal_all as platform_app
 import systemVal_all as system_app
-import config.CONSTANTS as CONSTANTS
 import importlib
 
 # ===== 로그 파일 설정 (windowed 모드 대응) =====
-# ✅ 로그 파일 생성 비활성화 (디버그용 로그 파일 생성하지 않음)
-# log_filename = f"validation_tool_debug_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
-# handlers = [logging.FileHandler(log_filename, encoding='utf-8')]
 handlers = []
 
 # 콘솔 모드일 때만 StreamHandler 추가
@@ -58,7 +53,6 @@ if handlers:  # handlers가 비어있지 않을 때만 설정
         handlers=handlers
     )
 logger = logging.getLogger(__name__)
-# logger.info(f"로그 파일 생성: {log_filename}")  # 주석 처리
 
 # ===== windowed 모드에서 stdout/stderr를 devnull로 리다이렉트 =====
 # Windowed 모드(console=False)에서는 sys.stdout/stderr가 None이 됨
@@ -90,7 +84,6 @@ class MainWindow(QMainWindow):
             Qt.WindowMaximizeButtonHint |
             Qt.WindowCloseButtonHint
         )
-        self._orig_flags = self.windowFlags()
         self.stack = QStackedWidget()
         self.setCentralWidget(self.stack)
 
@@ -98,11 +91,6 @@ class MainWindow(QMainWindow):
         self.info_widget = InfoWidget()
         self.stack.addWidget(self.info_widget)  # index 0
         self.info_widget.startTestRequested.connect(self._on_start_test_requested)
-
-        # info_widget의 페이지 변경 시그널 연결 (시험 정보 불러오기 완료 시)
-        #self.info_widget.stacked_widget.currentChanged.connect(self._on_page_changed)
-
-        #self._setup_menu()
         self.stack.setCurrentIndex(0)
 
     def _center_on_screen(self):
@@ -111,85 +99,6 @@ class MainWindow(QMainWindow):
         x = (screen.width() - self.minimumWidth()) // 2
         y = (screen.height() - self.minimumHeight()) // 2
         self.move(x, y)
-
-    def _setup_menu(self):
-        menubar = self.menuBar()
-        main_menu = menubar.addMenu("메뉴")
-
-        # 1. 시험 정보 (초기 활성화)
-        self.act_test_info = QAction("시험 정보", self)
-        self.act_test_info.triggered.connect(self._show_test_info)
-        self.act_test_info.setEnabled(True)  # 초기 활성화
-        main_menu.addAction(self.act_test_info)
-
-        # 2. 시험 설정 (시험 정보 불러오기 후 활성화)
-        self.act_test_setup = QAction("시험 설정", self)
-        self.act_test_setup.triggered.connect(self._show_test_setup)
-        self.act_test_setup.setEnabled(False)
-        main_menu.addAction(self.act_test_setup)
-
-        # 3. 시험 실행 (시험 설정 완료 후 활성화)
-        self.act_test_run = QAction("시험 실행", self)
-        self.act_test_run.setEnabled(False)
-        self.act_test_run.triggered.connect(self._run_test_from_menu)
-        main_menu.addAction(self.act_test_run)
-
-        # 4. 시험 결과 (시험 실행 완료 후 활성화)
-        self.act_test_result = QAction("시험 결과", self)
-        self.act_test_result.setEnabled(False)
-        self.act_test_result.triggered.connect(self._show_test_result)
-        main_menu.addAction(self.act_test_result)
-
-        main_menu.addSeparator()
-
-        # 종료
-        act_exit = QAction("종료", self)
-        act_exit.triggered.connect(self.close)
-        main_menu.addAction(act_exit)
-
-        view_menu = menubar.addMenu("보기")
-        act_full = QAction("전체화면 전환", self, checkable=True)
-        act_full.triggered.connect(self._toggle_fullscreen)
-        view_menu.addAction(act_full)
-
-    def _show_test_info(self):
-        """시험 정보 페이지로 이동 (1페이지)"""
-        # 메인 stack을 info_widget으로 전환
-        self.stack.setCurrentWidget(self.info_widget)
-        # info_widget 내부를 1페이지로 전환
-        self.info_widget.stacked_widget.setCurrentIndex(0)
-        # current_page 변수도 동기화
-        self.info_widget.current_page = 0
-        # 다음 버튼 상태 업데이트
-        self.info_widget.check_next_button_state()
-        print("시험 정보 페이지로 이동")
-
-    def _show_test_setup(self):
-        """시험 설정 페이지로 이동 (2페이지)"""
-        # 메인 stack을 info_widget으로 전환
-        self.stack.setCurrentWidget(self.info_widget)
-        # info_widget 내부를 2페이지로 전환
-        self.info_widget.stacked_widget.setCurrentIndex(1)
-        # current_page 변수도 동기화
-        self.info_widget.current_page = 1
-        print("시험 설정 페이지로 이동")
-
-    def _show_test_result(self):
-        """시험 결과 페이지로 이동"""
-        # 현재 활성화된 검증 위젯 찾기
-        validation_widget = None
-
-        if hasattr(self, '_system_widget') and self._system_widget is not None:
-            validation_widget = self._system_widget
-        elif hasattr(self, '_platform_widget') and self._platform_widget is not None:
-            validation_widget = self._platform_widget
-
-        if validation_widget is None:
-            QMessageBox.warning(self, "경고", "시험이 실행되지 않았습니다.\n먼저 시험을 실행해주세요.")
-            return
-
-        # 시험 결과 위젯 생성 및 스택에 추가
-        self._show_result_widget(validation_widget)
 
     def _show_result_widget(self, parent_widget):
         """시험 결과 위젯을 스택에 추가하고 전환"""
@@ -214,9 +123,6 @@ class MainWindow(QMainWindow):
         self.stack.addWidget(self._result_widget)
         self.stack.setCurrentWidget(self._result_widget)
 
-        # 시험 결과 메뉴 활성화
-        #self.act_test_result.setEnabled(True)
-
     def _on_back_to_validation(self):
         """뒤로가기: 시험 결과 페이지에서 검증 화면으로 복귀"""
         # 현재 활성화된 검증 위젯으로 전환
@@ -230,82 +136,9 @@ class MainWindow(QMainWindow):
         # 스택에 시험 결과 위젯 추가하고 전환
         self._show_result_widget(parent_widget)
 
-    def _on_page_changed(self, index):
-        """info_widget의 페이지가 변경될 때 호출되는 함수"""
-        if index == 1:
-            # 2페이지(시험 설정)로 이동 → 시험 설정 메뉴 활성화
-            self.act_test_setup.setEnabled(True)
-
     def _on_start_test_requested(self, target_system_edit, verification_type, spec_id):
-        """시험 시작 버튼 클릭 시 호출 - 시험 실행 메뉴 활성화 후 검증 앱 실행"""
-        # 시험 실행 메뉴 활성화
-        #self.act_test_run.setEnabled(True)
-        print(
-            f"시험 실행 메뉴 활성화: target_system={target_system_edit}, verificationType={verification_type}, spec_id={spec_id}")
-
-        # 현재 정보 저장 (메뉴에서 시험 실행 클릭 시 사용)
-        self._current_test_target_system_name = target_system_edit
-        self._current_verification_type = verification_type
-        self._current_spec_id = spec_id
-
-        # 검증 앱 실행
+        """시험 시작 버튼 클릭 시 호출 - 검증 앱 실행"""
         self._open_validation_app(target_system_edit, verification_type, spec_id)
-
-    def _run_test_from_menu(self):
-        """메뉴에서 시험 실행 클릭 시 호출 - 메인 창을 검증 화면으로 전환"""
-        if hasattr(self, '_current_test_target_system_name') and self._current_test_target_system_name:
-            target_system_edit = self._current_test_target_system_name
-            verification_type = getattr(self, '_current_verification_type', 'request')
-            spec_id = getattr(self, '_current_spec_id', '')
-            print(
-                f"시험 실행 페이지로 이동: target_system={target_system_edit}, verificationType={verification_type}, spec_id={spec_id}")
-
-            # target_system_edit에 따라 검증 화면 결정
-            if "물리보안시스템" in target_system_edit:
-                # 물리보안 - System 검증으로 전환
-                if getattr(self, "_system_widget", None) is None:
-                    self._system_widget = system_app.MyApp(embedded=True, spec_id=spec_id)
-                    self._system_widget.showResultRequested.connect(self._on_show_result_requested)
-                    self.stack.addWidget(self._system_widget)
-                self.stack.setCurrentWidget(self._system_widget)
-            elif "통합플랫폼시스템" in target_system_edit:
-                # 통합플랫폼 - Platform 검증으로 전환
-                if getattr(self, "_platform_widget", None) is None:
-                    self._platform_widget = platform_app.MyApp(embedded=True, spec_id=spec_id)
-                    self._platform_widget.showResultRequested.connect(self._on_show_result_requested)
-                    self.stack.addWidget(self._platform_widget)
-                self.stack.setCurrentWidget(self._platform_widget)
-            else:
-                QMessageBox.warning(self, "경고", f"알 수 없는 시험 분야: {target_system_edit}\n'물리보안' 또는 '통합플랫폼'이어야 합니다.")
-        else:
-            QMessageBox.warning(self, "경고", "시험 정보가 설정되지 않았습니다.\n시험 시작 버튼을 먼저 클릭해주세요.")
-
-    def _toggle_fullscreen(self, checked: bool):
-        """
-        On: 최소화/이전크기/종료 버튼만 보이게 하고, 최대화 상태로 전환.
-            (이전크기 버튼이 활성화됨)
-        Off: 원래 플래그/지오메트리로 복원.
-        """
-        if checked:
-            # 현재 상태/지오메트리 저장(복원용)
-            self._saved_geom = self.saveGeometry()
-            self._saved_state = self.windowState()
-
-            # 제목표시줄 + 최소화 + 최대화(최대화 시 '이전크기'로 표기) + 종료
-            flags = (Qt.Window | Qt.WindowTitleHint |
-                     Qt.WindowMinimizeButtonHint |
-            Qt.WindowMaximizeButtonHint |
-                     Qt.WindowMaximizeButtonHint |
-                     Qt.WindowCloseButtonHint)
-            self.setWindowFlags(flags)
-            self.show()
-            self.showMaximized()
-        else:
-            self.setWindowFlags(self._orig_flags)
-            self.show()
-            if self._saved_geom:
-                self.restoreGeometry(self._saved_geom)
-            self.showNormal()
 
     def _open_validation_app(self, target_system_edit, verification_type, spec_id):
         """target_system_edit에 따라 다른 검증 앱 실행"""
@@ -316,8 +149,6 @@ class MainWindow(QMainWindow):
             # ===== 로깅 추가 끝 =====
 
             # ===== 수정: PyInstaller 환경에서 CONSTANTS reload =====
-            import sys
-            import os
             if getattr(sys, 'frozen', False):
                 # PyInstaller 환경 - sys.modules 삭제 후 재import
                 if 'config.CONSTANTS' in sys.modules:
@@ -332,13 +163,10 @@ class MainWindow(QMainWindow):
                     import config.CONSTANTS  # 모듈이 없으면 새로 import
             # ===== 수정 끝 =====
 
-            print(f"검증 화면 실행: target_system={target_system_edit}, verificationType={verification_type}, spec_id={spec_id}")
-
             # target_system_edit에 따라 어떤 검증 앱을 실행할지 결정
             if "물리보안시스템" in target_system_edit:
                 # 물리보안: 메인 창=System, 새 창=Platform
-                logger.info("→ 물리보안: 메인 창=System")  # 로깅 추가
-                print("→ 물리보안: 메인 창=System")
+                logger.info("→ 물리보안: 메인 창=System")
 
                 # ===== 수정: 기존 위젯 제거 후 새로 생성 =====
                 # Main 화면: System 검증으로 전환
@@ -361,8 +189,7 @@ class MainWindow(QMainWindow):
             # 1.2로 했을때 통합플랫폼으로 들어가야함
             elif "통합플랫폼시스템" in target_system_edit:
                 # 통합플랫폼: 메인 창=Platform, 새 창=System
-                logger.info("→ 통합플랫폼: 메인 창=Platform")  # 로깅 추가
-                print("→ 통합플랫폼: 메인 창=Platform")
+                logger.info("→ 통합플랫폼: 메인 창=Platform")
 
                 # ===== 수정: 기존 위젯 제거 후 새로 생성 =====
                 # Main 화면: Platform 검증으로 전환
@@ -386,9 +213,7 @@ class MainWindow(QMainWindow):
                 logger.info("Platform 위젯으로 전환 완료 ✅")  # 로깅 추가
 
             else:
-                logger.warning(f"알 수 없는 target_system: {target_system_edit}")  # 로깅 추가
-                print(f"알 수 없는 target_system: {target_system_edit}")
-                print(f"   ('물리보안' 또는 '통합플랫폼'이 포함되어야 합니다)")
+                logger.warning(f"알 수 없는 target_system: {target_system_edit}")
                 QMessageBox.warning(self, "경고", f"알 수 없는 시험 분야: {target_system_edit}\n'물리보안' 또는 '통합플랫폼'이 포함되어야 합니다.")
 
             # ===== 로깅 추가 시작 =====
