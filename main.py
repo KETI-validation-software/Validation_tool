@@ -36,7 +36,6 @@ from ui.info_GUI import InfoWidget
 from core.functions import resource_path
 import platformVal_all as platform_app
 import systemVal_all as system_app
-import config.CONSTANTS as CONSTANTS
 import importlib
 
 # ===== 로그 파일 설정 (windowed 모드 대응) =====
@@ -85,7 +84,6 @@ class MainWindow(QMainWindow):
             Qt.WindowMaximizeButtonHint |
             Qt.WindowCloseButtonHint
         )
-        self._orig_flags = self.windowFlags()
         self.stack = QStackedWidget()
         self.setCentralWidget(self.stack)
 
@@ -101,23 +99,6 @@ class MainWindow(QMainWindow):
         x = (screen.width() - self.minimumWidth()) // 2
         y = (screen.height() - self.minimumHeight()) // 2
         self.move(x, y)
-
-    def _show_test_result(self):
-        """시험 결과 페이지로 이동"""
-        # 현재 활성화된 검증 위젯 찾기
-        validation_widget = None
-
-        if hasattr(self, '_system_widget') and self._system_widget is not None:
-            validation_widget = self._system_widget
-        elif hasattr(self, '_platform_widget') and self._platform_widget is not None:
-            validation_widget = self._platform_widget
-
-        if validation_widget is None:
-            QMessageBox.warning(self, "경고", "시험이 실행되지 않았습니다.\n먼저 시험을 실행해주세요.")
-            return
-
-        # 시험 결과 위젯 생성 및 스택에 추가
-        self._show_result_widget(validation_widget)
 
     def _show_result_widget(self, parent_widget):
         """시험 결과 위젯을 스택에 추가하고 전환"""
@@ -158,32 +139,6 @@ class MainWindow(QMainWindow):
     def _on_start_test_requested(self, target_system_edit, verification_type, spec_id):
         """시험 시작 버튼 클릭 시 호출 - 검증 앱 실행"""
         self._open_validation_app(target_system_edit, verification_type, spec_id)
-
-    def _toggle_fullscreen(self, checked: bool):
-        """
-        On: 최소화/이전크기/종료 버튼만 보이게 하고, 최대화 상태로 전환.
-            (이전크기 버튼이 활성화됨)
-        Off: 원래 플래그/지오메트리로 복원.
-        """
-        if checked:
-            # 현재 상태/지오메트리 저장(복원용)
-            self._saved_geom = self.saveGeometry()
-            self._saved_state = self.windowState()
-
-            # 제목표시줄 + 최소화 + 최대화(최대화 시 '이전크기'로 표기) + 종료
-            flags = (Qt.Window | Qt.WindowTitleHint |
-                     Qt.WindowMinimizeButtonHint |
-                     Qt.WindowMaximizeButtonHint |
-                     Qt.WindowCloseButtonHint)
-            self.setWindowFlags(flags)
-            self.show()
-            self.showMaximized()
-        else:
-            self.setWindowFlags(self._orig_flags)
-            self.show()
-            if self._saved_geom:
-                self.restoreGeometry(self._saved_geom)
-            self.showNormal()
 
     def _open_validation_app(self, target_system_edit, verification_type, spec_id):
         """target_system_edit에 따라 다른 검증 앱 실행"""
