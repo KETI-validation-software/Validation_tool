@@ -10,13 +10,12 @@ import re
 import os
 import sys
 import json
-import ast
 from pathlib import Path
 from typing import Dict, List
 
 from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont, QResizeEvent
+from PyQt5.QtGui import QFont
 
 # 분리된 모듈들 import
 from ui.widgets import ClickableLabel, ClickableRowWidget, ClickableCheckboxRowWidget
