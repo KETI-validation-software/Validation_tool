@@ -3,8 +3,7 @@ import os
 import urllib3
 import logging
 import traceback
-from datetime import datetime
-from PyQt5.QtWidgets import QApplication, QMainWindow, QStackedWidget, QAction, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QStackedWidget, QMessageBox
 from PyQt5.QtGui import QFontDatabase, QFont
 from PyQt5.QtCore import Qt
 
@@ -103,66 +102,6 @@ class MainWindow(QMainWindow):
         y = (screen.height() - self.minimumHeight()) // 2
         self.move(x, y)
 
-    def _setup_menu(self):
-        menubar = self.menuBar()
-        main_menu = menubar.addMenu("메뉴")
-
-        # 1. 시험 정보 (초기 활성화)
-        self.act_test_info = QAction("시험 정보", self)
-        self.act_test_info.triggered.connect(self._show_test_info)
-        self.act_test_info.setEnabled(True)  # 초기 활성화
-        main_menu.addAction(self.act_test_info)
-
-        # 2. 시험 설정 (시험 정보 불러오기 후 활성화)
-        self.act_test_setup = QAction("시험 설정", self)
-        self.act_test_setup.triggered.connect(self._show_test_setup)
-        self.act_test_setup.setEnabled(False)
-        main_menu.addAction(self.act_test_setup)
-
-        # 3. 시험 실행 (시험 설정 완료 후 활성화)
-        self.act_test_run = QAction("시험 실행", self)
-        self.act_test_run.setEnabled(False)
-        self.act_test_run.triggered.connect(self._run_test_from_menu)
-        main_menu.addAction(self.act_test_run)
-
-        # 4. 시험 결과 (시험 실행 완료 후 활성화)
-        self.act_test_result = QAction("시험 결과", self)
-        self.act_test_result.setEnabled(False)
-        self.act_test_result.triggered.connect(self._show_test_result)
-        main_menu.addAction(self.act_test_result)
-
-        main_menu.addSeparator()
-
-        # 종료
-        act_exit = QAction("종료", self)
-        act_exit.triggered.connect(self.close)
-        main_menu.addAction(act_exit)
-
-        view_menu = menubar.addMenu("보기")
-        act_full = QAction("전체화면 전환", self, checkable=True)
-        act_full.triggered.connect(self._toggle_fullscreen)
-        view_menu.addAction(act_full)
-
-    def _show_test_info(self):
-        """시험 정보 페이지로 이동 (1페이지)"""
-        # 메인 stack을 info_widget으로 전환
-        self.stack.setCurrentWidget(self.info_widget)
-        # info_widget 내부를 1페이지로 전환
-        self.info_widget.stacked_widget.setCurrentIndex(0)
-        # current_page 변수도 동기화
-        self.info_widget.current_page = 0
-        # 다음 버튼 상태 업데이트
-        self.info_widget.check_next_button_state()
-
-    def _show_test_setup(self):
-        """시험 설정 페이지로 이동 (2페이지)"""
-        # 메인 stack을 info_widget으로 전환
-        self.stack.setCurrentWidget(self.info_widget)
-        # info_widget 내부를 2페이지로 전환
-        self.info_widget.stacked_widget.setCurrentIndex(1)
-        # current_page 변수도 동기화
-        self.info_widget.current_page = 1
-
     def _show_test_result(self):
         """시험 결과 페이지로 이동"""
         # 현재 활성화된 검증 위젯 찾기
@@ -216,12 +155,6 @@ class MainWindow(QMainWindow):
         # 스택에 시험 결과 위젯 추가하고 전환
         self._show_result_widget(parent_widget)
 
-    def _on_page_changed(self, index):
-        """info_widget의 페이지가 변경될 때 호출되는 함수"""
-        if index == 1:
-            # 2페이지(시험 설정)로 이동 → 시험 설정 메뉴 활성화
-            self.act_test_setup.setEnabled(True)
-
     def _on_start_test_requested(self, target_system_edit, verification_type, spec_id):
         """시험 시작 버튼 클릭 시 호출 - 시험 실행 메뉴 활성화 후 검증 앱 실행"""
         # 현재 정보 저장 (메뉴에서 시험 실행 클릭 시 사용)
@@ -231,33 +164,6 @@ class MainWindow(QMainWindow):
 
         # 검증 앱 실행
         self._open_validation_app(target_system_edit, verification_type, spec_id)
-
-    def _run_test_from_menu(self):
-        """메뉴에서 시험 실행 클릭 시 호출 - 메인 창을 검증 화면으로 전환"""
-        if hasattr(self, '_current_test_target_system_name') and self._current_test_target_system_name:
-            target_system_edit = self._current_test_target_system_name
-            verification_type = getattr(self, '_current_verification_type', 'request')
-            spec_id = getattr(self, '_current_spec_id', '')
-
-            # target_system_edit에 따라 검증 화면 결정
-            if "물리보안시스템" in target_system_edit:
-                # 물리보안 - System 검증으로 전환
-                if getattr(self, "_system_widget", None) is None:
-                    self._system_widget = system_app.MyApp(embedded=True, spec_id=spec_id)
-                    self._system_widget.showResultRequested.connect(self._on_show_result_requested)
-                    self.stack.addWidget(self._system_widget)
-                self.stack.setCurrentWidget(self._system_widget)
-            elif "통합플랫폼시스템" in target_system_edit:
-                # 통합플랫폼 - Platform 검증으로 전환
-                if getattr(self, "_platform_widget", None) is None:
-                    self._platform_widget = platform_app.MyApp(embedded=True, spec_id=spec_id)
-                    self._platform_widget.showResultRequested.connect(self._on_show_result_requested)
-                    self.stack.addWidget(self._platform_widget)
-                self.stack.setCurrentWidget(self._platform_widget)
-            else:
-                QMessageBox.warning(self, "경고", f"알 수 없는 시험 분야: {target_system_edit}\n'물리보안' 또는 '통합플랫폼'이어야 합니다.")
-        else:
-            QMessageBox.warning(self, "경고", "시험 정보가 설정되지 않았습니다.\n시험 시작 버튼을 먼저 클릭해주세요.")
 
     def _toggle_fullscreen(self, checked: bool):
         """
