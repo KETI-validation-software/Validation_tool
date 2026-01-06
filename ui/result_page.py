@@ -118,8 +118,8 @@ class ResultPageWidget(QWidget):
         self.original_score_header_size = (1064, 52)
         self.original_score_data_area_size = (1064, 76)
         # 각 라벨별 너비 설정 (통과 필수/선택은 넓게, 종합 평가는 좁게)
-        self.original_pass_label_size = (340, 60)    # 통과 필수 필드 점수
-        self.original_opt_label_size = (340, 60)     # 통과 선택 필드 점수
+        self.original_pass_label_size = (340, 60)    # 필수 필드 점수
+        self.original_opt_label_size = (340, 60)     # 선택 필드 점수
         self.original_score_label_size = (315, 60)   # 종합 평가 점수
         self.original_column_widths = [40, 261, 100, 94, 116, 116, 94, 94, 133]
 
@@ -1435,12 +1435,12 @@ class ResultPageWidget(QWidget):
         data_layout.setContentsMargins(20, 8, 20, 8)
         data_layout.setSpacing(0)
 
-        # 통과 필수 필드 점수 - % (통과/전체) 형식
+        # 필수 필드 점수 - % (통과/전체) 형식
         self.spec_pass_label = QLabel()
         self.spec_pass_label.setFixedSize(340, 60)  # 통과 필수/선택
         self.spec_pass_label.setText(
-            f"통과 필수 필드 점수&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
+            f"필수 필드 점수&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
             f"{required_score:.1f}% ({required_pass}/{required_total})</span>"
         )
         self.spec_pass_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000;")
@@ -1457,12 +1457,12 @@ class ResultPageWidget(QWidget):
         spacer1.setFixedSize(12, 60)
         data_layout.addWidget(spacer1)
 
-        # 통과 선택 필드 점수 - % (통과/전체) 형식
+        # 선택 필드 점수 - % (통과/전체) 형식
         self.spec_total_label = QLabel()
         self.spec_total_label.setFixedSize(340, 60)  # 통과 필수/선택
         self.spec_total_label.setText(
-            f"통과 선택 필드 점수&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
+            f"선택 필드 점수&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
             f"{opt_score:.1f}% ({opt_pass}/{opt_total})</span>"
         )
         self.spec_total_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000;")
@@ -1484,7 +1484,7 @@ class ResultPageWidget(QWidget):
         self.spec_score_label.setFixedSize(315, 60)  # 종합 평가 점수
         self.spec_score_label.setText(
             f"종합 평가 점수&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
             f"{score:.1f}% ({total_pass}/{total_fields})</span>"
         )
         self.spec_score_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000;")
@@ -1586,12 +1586,12 @@ class ResultPageWidget(QWidget):
         data_layout.setContentsMargins(20, 8, 20, 8)
         data_layout.setSpacing(0)
 
-        # 통과 필수 필드 점수 - % (통과/전체) 형식
+        # 필수 필드 점수 - % (통과/전체) 형식
         self.total_pass_label = QLabel()
         self.total_pass_label.setFixedSize(340, 60)  # 통과 필수/선택
         self.total_pass_label.setText(
-            f"통과 필수 필드 점수&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
+            f"필수 필드 점수&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
             f"{required_score:.1f}% ({required_pass}/{required_total})</span>"
         )
         self.total_pass_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000; border: none;")
@@ -1609,12 +1609,12 @@ class ResultPageWidget(QWidget):
         spacer1.setStyleSheet("border: none;")
         data_layout.addWidget(spacer1)
 
-        # 통과 선택 필드 점수 - % (통과/전체) 형식
+        # 선택 필드 점수 - % (통과/전체) 형식
         self.total_total_label = QLabel()
         self.total_total_label.setFixedSize(340, 60)  # 통과 필수/선택
         self.total_total_label.setText(
-            f"통과 선택 필드 점수&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
+            f"선택 필드 점수&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
             f"{opt_score:.1f}% ({opt_pass}/{opt_total})</span>"
         )
         self.total_total_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000; border: none;")
@@ -1637,7 +1637,7 @@ class ResultPageWidget(QWidget):
         self.total_score_label.setFixedSize(315, 60)  # 종합 평가 점수
         self.total_score_label.setText(
             f"종합 평가 점수&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 19px; font-weight: 500; color: #000000;'>"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
             f"{score:.1f}% ({total_pass}/{total_fields})</span>"
         )
         self.total_score_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000; border: none;")
