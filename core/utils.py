@@ -111,13 +111,26 @@ def format_schema(schema):
                     key_name = str(key)
 
                 if isinstance(value, dict):
-                    result += f"{spaces}{key_name}: {{\n"
-                    result += schema_to_string(value, indent + 1)
-                    result += f"{spaces}}}\n"
-                elif isinstance(value, list) and len(value) > 0 and isinstance(value[0], dict):
-                    result += f"{spaces}{key_name}: [\n"
-                    result += schema_to_string(value[0], indent + 1)
-                    result += f"{spaces}]\n"
+                    # 딕셔너리가 비어있는지 확인
+                    if not value:
+                        result += f"{spaces}{key_name}: {{}}\n"
+                    else:
+                        result += f"{spaces}{key_name}: {{\n"
+                        result += schema_to_string(value, indent + 1)
+                        result += f"{spaces}}}\n"
+                elif isinstance(value, list):
+                    if len(value) == 0:
+                        result += f"{spaces}{key_name}: []\n"
+                    elif len(value) > 0 and isinstance(value[0], dict):
+                        # 리스트 안의 딕셔너리가 비어있는지 확인
+                        if not value[0]:
+                            result += f"{spaces}{key_name}: [{{}}]\n"
+                        else:
+                            result += f"{spaces}{key_name}: [{{\n"
+                            result += schema_to_string(value[0], indent + 1)
+                            result += f"{spaces}}}]\n"
+                    else:
+                        result += f"{spaces}{key_name}: [{value[0]}]\n"
                 else:
                     val_str = value.__name__ if hasattr(value, '__name__') else str(value)
                     result += f"{spaces}{key_name}: {val_str}\n"
