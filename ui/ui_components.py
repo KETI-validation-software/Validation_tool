@@ -228,6 +228,8 @@ class TestSelectionPanel(QWidget):
             }
         """)
 
+        self.test_field_table.setShowGrid(False)
+
         # Connect signal
         self.test_field_table.cellClicked.connect(self._on_scenario_clicked)
 

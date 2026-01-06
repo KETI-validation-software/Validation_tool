@@ -97,6 +97,7 @@ class TestApiSection(QGroupBox):
 
         # 편집 비활성화
         self.api_test_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.api_test_table.setFocusPolicy(Qt.NoFocus)
 
         # 왼쪽 행 번호 헤더 설정
         vertical_header = self.api_test_table.verticalHeader()

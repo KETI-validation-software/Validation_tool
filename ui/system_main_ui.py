@@ -256,6 +256,8 @@ class SystemMainUI(CommonMainUI):
             }
         """)
 
+        self.test_field_table.setShowGrid(False)
+
         # SPEC_CONFIG에서 spec_id와 config 추출
         spec_items = []
         for group_data in self.CONSTANTS.SPEC_CONFIG:
@@ -1142,6 +1144,7 @@ class SystemMainUI(CommonMainUI):
             QGroupBox {
                 background-color: #FFF;
                 border: 1px solid #CECECE;
+                border-bottom: none;
                 border-top-left-radius: 4px;
                 border-top-right-radius: 4px;
                 border-bottom-left-radius: 0px;

@@ -1204,6 +1204,7 @@ class CommonMainUI(QWidget):
             QGroupBox {
                 background-color: #FFF;
                 border: 1px solid #CECECE;
+                border-bottom: none;
                 border-top-left-radius: 4px;
                 border-top-right-radius: 4px;
                 border-bottom-left-radius: 0px;
