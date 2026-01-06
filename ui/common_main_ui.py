@@ -436,7 +436,6 @@ class CommonMainUI(QWidget):
                 color: #CECECE;
             }}
         """)
-        self.cancel_btn.clicked.connect(self.cancel_btn_clicked)
         self.cancel_btn.setDisabled(True)
 
         # 종료 버튼

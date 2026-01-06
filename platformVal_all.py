@@ -1717,10 +1717,18 @@ class MyApp(PlatformMainUI):
 
     def sbtn_push(self):
         try:
+            # ✅ 자동 재시작 플래그 확인 및 제거
+            is_auto_restart = getattr(self, '_auto_restart', False)
+            if is_auto_restart:
+                self._auto_restart = False
+                print(f"[START] 자동 재시작 모드 - 시나리오 선택 검증 건너뜀")
+            
+            # ✅ 시나리오 선택 확인 (자동 재시작이 아닐 때만 검증)
             selected_rows = self.test_field_table.selectionModel().selectedRows()
-            if not selected_rows:
+            if not is_auto_restart and not selected_rows:
                 QMessageBox.warning(self, "알림", "시험 시나리오를 선택하세요.")
                 return
+            
             self.save_current_spec_data()
 
             # ✅ 로딩 팝업 표시
@@ -2280,17 +2288,17 @@ class MyApp(PlatformMainUI):
         
         print(f"[CANCEL] ========== 시험 취소 시작 ==========")
         
-        # 1. 타이머 중지
+        # 1. 타이머 중지 및 초기화
         if self.tick_timer.isActive():
             self.tick_timer.stop()
             print(f"[CANCEL] 타이머 중지됨")
         
-        # 2. 서버 스레드 종료
+        # 2. 서버 스레드 완전 종료
         if self.server_th is not None and self.server_th.isRunning():
             print(f"[CANCEL] 서버 스레드 종료 시작...")
             try:
                 self.server_th.httpd.shutdown()
-                self.server_th.wait(2000)  # 최대 2초 대기
+                self.server_th.wait(3000)  # 최대 3초 대기
                 print(f"[CANCEL] 서버 스레드 종료 완료")
             except Exception as e:
                 print(f"[WARN] 서버 종료 중 오류 (무시): {e}")
@@ -2300,12 +2308,14 @@ class MyApp(PlatformMainUI):
         self.cleanup_paused_file()
         print(f"[CANCEL] 일시정지 파일 삭제 완료")
         
-        # 4. 상태 초기화
+        # 4. 상태 완전 초기화
         self.is_paused = False
         self.last_completed_api_index = -1
         self.paused_valResult_text = ""
         self.cnt = 0
         self.current_retry = 0
+        self.post_flag = False  # 웹훅 플래그 초기화
+        self.res = None  # 응답 초기화
         print(f"[CANCEL] 상태 초기화 완료")
         
         # 5. 버튼 상태 초기화
@@ -2315,15 +2325,16 @@ class MyApp(PlatformMainUI):
         
         # 6. 모니터링 화면 초기화
         self.valResult.clear()
-        self.valResult.append('<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">시험이 취소되었습니다. 잠시 후 자동으로 재시작합니다...</div>')
+        self.valResult.append('<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">시험을 취소c하고 재시작 중...</div>')
         print(f"[CANCEL] 모니터링 화면 초기화")
         
         # 7. UI 업데이트 처리
         QApplication.processEvents()
         
-        # 8. 1초 대기 후 자동 재시작
-        print(f"[CANCEL] 1초 대기 후 자동 재시작...")
-        QTimer.singleShot(1000, self.sbtn_push)
+        # 8. 2초 대기 후 자동 재시작 (정리 시간 확보)
+        print(f"[CANCEL] 2초 대기 후 자동 재시작...")
+        self._auto_restart = True  # 자동 재시작 플래그 설정
+        QTimer.singleShot(2000, self.sbtn_push)
         
         print(f"[CANCEL] ========== 시험 취소 완료 ==========")
 

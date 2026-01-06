@@ -2079,10 +2079,16 @@ class MyApp(SystemMainUI):
 
     def start_btn_clicked(self):
         """평가 시작 버튼 클릭"""
-        # ✅ 1. 시나리오 선택 확인
-        if not hasattr(self, 'current_spec_id') or not self.current_spec_id:
-            QMessageBox.warning(self, "알림", "시험 시나리오를 먼저 선택하세요.")
-            return
+        # ✅ 자동 재시작 플래그 확인 및 제거
+        is_auto_restart = getattr(self, '_auto_restart', False)
+        if is_auto_restart:
+            self._auto_restart = False
+            print(f"[START] 자동 재시작 모드 - 시나리오 선택 검증 건너뜀")
+        else:
+            # ✅ 1. 시나리오 선택 확인 (수동 시작 시에만)
+            if not hasattr(self, 'current_spec_id') or not self.current_spec_id:
+                QMessageBox.warning(self, "알림", "시험 시나리오를 먼저 선택하세요.")
+                return
 
         # ✅ 일시정지 파일 존재 여부 확인
         paused_file_path = os.path.join(result_dir, "response_results_paused.json")
@@ -2541,7 +2547,7 @@ class MyApp(SystemMainUI):
         
         print(f"[CANCEL] ========== 시험 취소 시작 ==========")
         
-        # 1. 타이머 중지
+        # 1. 타이머 중지 및 초기화
         if self.tick_timer.isActive():
             self.tick_timer.stop()
             print(f"[CANCEL] 타이머 중지됨")
@@ -2550,12 +2556,14 @@ class MyApp(SystemMainUI):
         self.cleanup_paused_file()
         print(f"[CANCEL] 일시정지 파일 삭제 완료")
         
-        # 3. 상태 초기화
+        # 3. 상태 완전 초기화
         self.is_paused = False
         self.last_completed_api_index = -1
         self.paused_valResult_text = ""
         self.cnt = 0
         self.current_retry = 0
+        self.post_flag = False  # 웹훅 플래그 초기화
+        self.res = None  # 응답 초기화
         print(f"[CANCEL] 상태 초기화 완료")
         
         # 4. 버튼 상태 초기화
@@ -2565,15 +2573,16 @@ class MyApp(SystemMainUI):
         
         # 5. 모니터링 화면 초기화
         self.valResult.clear()
-        self.valResult.append('<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">시험이 취소되었습니다. 잠시 후 자동으로 재시작합니다...</div>')
+        self.valResult.append('<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">시험을 취소c하고 재시작 중...</div>')
         print(f"[CANCEL] 모니터링 화면 초기화")
         
         # 6. UI 업데이트 처리
         QApplication.processEvents()
         
-        # 7. 1초 대기 후 자동 재시작
-        print(f"[CANCEL] 1초 대기 후 자동 재시작...")
-        QTimer.singleShot(1000, self.start_btn_clicked)
+        # 7. 2초 대기 후 자동 재시작 (정리 시간 확보)
+        print(f"[CANCEL] 2초 대기 후 자동 재시작...")
+        self._auto_restart = True  # 자동 재시작 플래그 설정
+        QTimer.singleShot(2000, self.start_btn_clicked)
         
         print(f"[CANCEL] ========== 시험 취소 완료 ==========")
 
