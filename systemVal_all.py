@@ -884,9 +884,7 @@ class MyApp(SystemMainUI):
                 print(f"[SYSTEM] 🔄 시험 분야 전환: {self.current_spec_id} → {new_spec_id}")
                 print(f"[DEBUG] 현재 그룹: {self.current_group_id}")
 
-                # ✅ 0. 일시정지 파일 삭제 (시나리오 변경 시 이전 일시정지 상태 제거)
-                self.cleanup_paused_file()
-                print(f"[SELECT] 시나리오 전환: 일시정지 파일 삭제 완료")
+                # ✅ 0. 일시정지 파일은 각 시나리오별로 유지 (삭제하지 않음)
 
                 # ✅ 1. 현재 spec의 테이블 데이터 저장 (current_spec_id가 None이 아닐 때만)
                 if self.current_spec_id is not None:
@@ -908,6 +906,12 @@ class MyApp(SystemMainUI):
                 self.cnt = 0
                 self.current_retry = 0
                 self.message_error = []
+                
+                # ✅ 4-1. 웹훅 관련 변수 초기화
+                self.webhook_flag = False
+                self.post_flag = False
+                self.res = None
+                self.webhook_schema_idx = 0
 
                 # ✅ 5. 테이블 완전 재구성
                 print(f"[SELECT] 테이블 완전 재구성 시작")
@@ -1161,6 +1165,12 @@ class MyApp(SystemMainUI):
 
     # 웹훅 검증
     def get_webhook_result(self):
+        # ✅ 웹훅 스키마가 없으면 검증하지 않음
+        if self.cnt >= len(self.webhookSchema) or not self.webhookSchema[self.cnt]:
+            print(f"[WEBHOOK] API {self.cnt}는 웹훅 스키마가 없음 - 검증 건너뜀")
+            self.webhook_flag = False
+            return
+        
         # ✅ 웹훅 응답이 null인 경우에도 검증을 수행하여 실패로 카운트
         # None이거나 빈 값인 경우 빈 딕셔너리로 처리
         webhook_data = self.webhook_res if self.webhook_res else {}
@@ -1496,7 +1506,9 @@ class MyApp(SystemMainUI):
                     if hasattr(self, 'step_pass_counts') and self.cnt < len(self.step_pass_counts):
                         self.step_pass_counts[self.cnt] = 0
                         self.step_error_counts[self.cnt] = 0
-                        self.step_pass_flags[self.cnt] = 0
+                        # ✅ 배열 범위 체크 추가
+                        if self.cnt < len(self.step_pass_flags):
+                            self.step_pass_flags[self.cnt] = 0
 
                 self.message_in_cnt = 0
                 self.post_flag = False
@@ -1753,7 +1765,9 @@ class MyApp(SystemMainUI):
                     print(f"[SCORE DEBUG] step_error_counts[{self.cnt}] = {self.step_error_counts[self.cnt]}")
 
                     if final_result == "PASS":
-                        self.step_pass_flags[self.cnt] += 1
+                        # ✅ 배열 범위 체크 추가
+                        if self.cnt < len(self.step_pass_flags):
+                            self.step_pass_flags[self.cnt] += 1
 
                     total_pass_count = self.step_pass_counts[self.cnt]
                     total_error_count = self.step_error_counts[self.cnt]
@@ -1796,7 +1810,8 @@ class MyApp(SystemMainUI):
                     # 최종 결과 판정 (플랫폼과 동일한 로직)
                     if self.current_retry + 1 >= current_retries:
                         # 모든 재시도 완료 - 모든 시도가 PASS일 때만 PASS
-                        if self.step_pass_flags[self.cnt] >= current_retries:
+                        # ✅ 배열 범위 체크 추가
+                        if self.cnt < len(self.step_pass_flags) and self.step_pass_flags[self.cnt] >= current_retries:
                             self.step_buffers[self.cnt]["result"] = "PASS"
                         else:
                             self.step_buffers[self.cnt]["result"] = "FAIL"
@@ -2090,8 +2105,8 @@ class MyApp(SystemMainUI):
                 QMessageBox.warning(self, "알림", "시험 시나리오를 먼저 선택하세요.")
                 return
 
-        # ✅ 일시정지 파일 존재 여부 확인
-        paused_file_path = os.path.join(result_dir, "response_results_paused.json")
+        # ✅ 일시정지 파일 존재 여부 확인 (spec_id별로 관리)
+        paused_file_path = os.path.join(result_dir, f"response_results_paused_{self.current_spec_id}.json")
         resume_mode = os.path.exists(paused_file_path)
 
         if resume_mode:
@@ -2418,8 +2433,8 @@ class MyApp(SystemMainUI):
                 "global_error_cnt": self.global_error_cnt
             }
 
-            # JSON 파일로 저장
-            paused_file_path = os.path.join(result_dir, "response_results_paused.json")
+            # JSON 파일로 저장 (spec_id 포함)
+            paused_file_path = os.path.join(result_dir, f"response_results_paused_{self.current_spec_id}.json")
             with open(paused_file_path, "w", encoding="utf-8") as f:
                 json.dump(paused_state, f, ensure_ascii=False, indent=2)
 
@@ -2438,7 +2453,7 @@ class MyApp(SystemMainUI):
     def load_paused_state(self):
         """일시정지된 상태를 JSON 파일에서 복원"""
         try:
-            paused_file_path = os.path.join(result_dir, "response_results_paused.json")
+            paused_file_path = os.path.join(result_dir, f"response_results_paused_{self.current_spec_id}.json")
 
             if not os.path.exists(paused_file_path):
                 print("[INFO] 일시정지 파일이 존재하지 않습니다.")
@@ -2476,7 +2491,7 @@ class MyApp(SystemMainUI):
     def cleanup_paused_file(self):
         """평가 완료 후 일시정지 파일 삭제 및 상태 초기화"""
         try:
-            paused_file_path = os.path.join(result_dir, "response_results_paused.json")
+            paused_file_path = os.path.join(result_dir, f"response_results_paused_{self.current_spec_id}.json")
             print(f"[CLEANUP] cleanup_paused_file() 호출됨")
             print(f"[CLEANUP] 파일 경로: {paused_file_path}")
             print(f"[CLEANUP] 파일 존재 여부: {os.path.exists(paused_file_path)}")
@@ -2494,6 +2509,28 @@ class MyApp(SystemMainUI):
 
         except Exception as e:
             print(f"❌ 일시정지 파일 정리 실패: {e}")
+
+    def cleanup_all_paused_files(self):
+        """프로그램 종료 시 모든 일시정지 파일 삭제"""
+        try:
+            import glob
+            # response_results_paused_*.json 패턴으로 모든 일시정지 파일 찾기
+            pattern = os.path.join(result_dir, "response_results_paused_*.json")
+            paused_files = glob.glob(pattern)
+            
+            if paused_files:
+                print(f"[CLEANUP_ALL] {len(paused_files)}개의 일시정지 파일 발견")
+                for file_path in paused_files:
+                    try:
+                        os.remove(file_path)
+                        print(f"[CLEANUP_ALL] 삭제 완료: {os.path.basename(file_path)}")
+                    except Exception as e:
+                        print(f"[WARN] 파일 삭제 실패 {file_path}: {e}")
+                print(f"✅ 모든 일시정지 파일 삭제 완료")
+            else:
+                print("[CLEANUP_ALL] 삭제할 일시정지 파일이 없음")
+        except Exception as e:
+            print(f"❌ 일시정지 파일 일괄 삭제 실패: {e}")
 
     def stop_btn_clicked(self):
         """평가 중지 버튼 클릭"""
