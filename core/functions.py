@@ -1010,7 +1010,8 @@ def _validate_valid_value_match(field_path, field_value, rule, field_errors, glo
         if field_value != expected:
             # 빈 값 표시 처리
             display_value = "Empty" if field_value == "" else "null" if field_value is None else str(field_value)
-            error_msg = f"값 불일치\n- 입력값: {display_value}\n- 예상값: {expected}\n"
+            display_expected = "Empty" if expected == "" else "null" if expected is None else str(expected)
+            error_msg = f"값 불일치\n- 입력값: {display_value}\n- 예상값: {display_expected}\n"
             field_errors.append(error_msg)
             global_errors.append(f"[의미] {field_path}: {error_msg}")
             return False

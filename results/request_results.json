@@ -377,7 +377,7 @@
               "validationErrors": [
                 "[시도 1/1]",
                 "- [맥락 오류] eventFilter: 값 불일치",
-                "- 입력값: (Empty)",
+                "- 입력값: Empty",
                 "- 선택 가능 옵션: AuthSuccess | AuthFail"
               ]
             }
@@ -430,7 +430,7 @@
               "validationErrors": [
                 "[시도 1/1]",
                 "- [맥락 오류] eventFilter: 값 불일치",
-                "- 입력값: (Empty)",
+                "- 입력값: Empty",
                 "- 선택 가능 옵션: AuthSuccess | AuthFail"
               ]
             }
@@ -439,5 +439,5 @@
       ]
     }
   ],
-  "completedDate": "2026-01-07T06:01:38Z"
+  "completedDate": "2026-01-07T06:04:37Z"
 }
