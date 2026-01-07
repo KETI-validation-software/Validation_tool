@@ -16,20 +16,15 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 warnings.filterwarnings('ignore')
 
 import re
-from urllib.parse import urlparse
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor, QPixmap
 from PyQt5.QtCore import *
-from PyQt5 import QtCore
 from api.webhook_api import WebhookThread
 from api.api_server import Server  # ✅ door_memory 접근을 위한 import 추가
 from core.json_checker_new import timeout_field_finder
 from core.functions import json_check_, resource_path, json_to_data, build_result_json
 from core.data_mapper import ConstraintDataGenerator
 from ui.splash_screen import LoadingPopup
-from ui.detail_dialog import CombinedDetailDialog
-from ui.gui_utils import CustomDialog
-from ui.api_selection_dialog import APISelectionDialog
 from ui.result_page import ResultPageWidget
 from ui.system_main_ui import SystemMainUI
 from core.system_state_manager import SystemStateManager
