@@ -196,30 +196,24 @@ class BasicInfoPanel(QWidget):
         edit.setFixedSize(edit_width, 48)
         edit.setReadOnly(True)
 
-        # 이미지 경로
-        if width >= 768:
-            input_default = resource_path("assets/image/test_info/불러온정보_w_default.png").replace(chr(92), "/")
-            input_filled = resource_path("assets/image/test_info/불러온정보_w_filled.png").replace(chr(92), "/")
-        else:
-            input_default = resource_path("assets/image/test_info/불러온정보_s_default.png").replace(chr(92), "/")
-            input_filled = resource_path("assets/image/test_info/불러온정보_s_filled.png").replace(chr(92), "/")
-
         edit.setObjectName(f"{label_text}_edit")
-        edit.setStyleSheet(f"""
-            QLineEdit {{
-                font-family: 'Noto Sans KR';
-                font-size: 18px;
-                font-weight: 400;
-                letter-spacing: -0.18px;
-                color: #000000;
-                padding: 0 24px;
-                border: none;
-                border-image: url({input_default}) 0 0 0 0 stretch stretch;
-            }}
-            QLineEdit[hasText="true"] {{
-                border-image: url({input_filled}) 0 0 0 0 stretch stretch;
-            }}
-        """)
+        edit.setStyleSheet("""
+              QLineEdit {
+                  font-family: 'Noto Sans KR';
+                  font-size: 18px;
+                  font-weight: 400;
+                  letter-spacing: -0.18px;
+                  color: #000000;
+                  padding: 0 24px;
+                  background-color: #F3F3F3;
+                  border: 1px solid #CECECE;
+                  border-radius: 4px;
+              }
+              QLineEdit[hasText="true"] {
+                  background-color: #EFEFEF;
+                  border: 1px solid #6B6B6B;
+              }
+          """)       
 
         # 텍스트 변경 시 배경 이미지 변경
         def update_background():
@@ -329,44 +323,44 @@ class BasicInfoPanel(QWidget):
         self.admin_code_input.setEchoMode(QLineEdit.Password)
         self.admin_code_input.setPlaceholderText("관리자 코드를 입력해주세요")
         self.admin_code_input.setEnabled(False)
-
-        input_enabled = resource_path("assets/image/test_info/input_enabled.png").replace(chr(92), "/")
-        input_disabled = resource_path("assets/image/test_info/input_disabled.png").replace(chr(92), "/")
-        input_hover = resource_path("assets/image/test_info/input_Hover.png").replace(chr(92), "/")
-        input_filled = resource_path("assets/image/test_info/input_filled.png").replace(chr(92), "/")
-
-        self.admin_code_input.setStyleSheet(f"""
-            QLineEdit#admin_code_input {{
-                font-family: 'Noto Sans KR';
-                font-size: 18px;
-                font-weight: 400;
-                letter-spacing: -0.18px;
-                color: #000000;
-                padding: 0 24px;
-                border: none;
-                outline: none;
-                border-image: url({input_enabled}) 0 0 0 0 stretch stretch;
-            }}
-            QLineEdit#admin_code_input::placeholder {{
-                font-size: 18px;
-                font-weight: 500;
-                color: #868686;
-            }}
-            QLineEdit#admin_code_input:focus {{
-                border: none;
-                outline: none;
-                border-image: url({input_enabled}) 0 0 0 0 stretch stretch;
-            }}
-            QLineEdit#admin_code_input:hover:enabled:!focus[hasText="false"] {{
-                border-image: url({input_hover}) 0 0 0 0 stretch stretch;
-            }}
-            QLineEdit#admin_code_input:disabled {{
-                border-image: url({input_disabled}) 0 0 0 0 stretch stretch;
-            }}
-            QLineEdit#admin_code_input[hasText="true"] {{
-                border-image: url({input_filled}) 0 0 0 0 stretch stretch;
-            }}
-        """)
+        
+        self.admin_code_input.setStyleSheet("""
+              QLineEdit#admin_code_input {
+                  font-family: 'Noto Sans KR';
+                  font-size: 18px;
+                  font-weight: 400;
+                  letter-spacing: -0.18px;
+                  color: #000000;
+                  padding: 0 24px;
+                  background-color: #FFFFFF;
+                  border: 3px solid #2B96ED;
+                  border-radius: 4px;
+                  outline: none;
+              }
+              QLineEdit#admin_code_input::placeholder {
+                  font-size: 18px;
+                  font-weight: 500;
+                  color: #868686;
+              }
+              QLineEdit#admin_code_input:focus {
+                  background-color: #FFFFFF;
+                  border: 3px solid #2B96ED;
+                  outline: none;
+              }
+              QLineEdit#admin_code_input:hover:enabled:!focus[hasText="false"] {
+                  background-color: #E9F6FE;
+                  border: 1px solid #868686;
+  
+              }
+              QLineEdit#admin_code_input:disabled {
+                  background-color: #F5F5F5;
+                  border: 1px solid #CECECE;
+              }
+              QLineEdit#admin_code_input[hasText="true"] {
+                  background-color: #FFFFFF;
+                  border: 1px solid #6B6B6B;
+              }
+          """)
 
         def update_background():
             has_text = bool(self.admin_code_input.text().strip())
@@ -392,22 +386,21 @@ class BasicInfoPanel(QWidget):
         # 다음 버튼
         self.next_btn = QPushButton("다음")
         self.next_btn.setFixedSize(378, 48)
-        btn_next_enabled = resource_path("assets/image/test_info/btn_다음_enabled.png").replace(chr(92), "/")
-        btn_next_hover = resource_path("assets/image/test_info/btn_다음_Hover.png").replace(chr(92), "/")
-        self.next_btn.setStyleSheet(f"""
-            QPushButton {{
+        self.next_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #1C5DB1;
                 border: none;
-                border-image: url({btn_next_enabled}) 0 0 0 0 stretch stretch;
+                border-radius: 4px;
                 padding-left: 20px;
                 padding-right: 20px;
                 font-family: 'Noto Sans KR';
                 font-size: 20px;
                 font-weight: 500;
                 color: #FFFFFF;
-            }}
-            QPushButton:hover {{
-                border-image: url({btn_next_hover}) 0 0 0 0 stretch stretch;
-            }}
+            }
+            QPushButton:hover {
+                background-color: #3E85E2;
+            }
         """)
         if self.parent_widget:
             self.next_btn.clicked.connect(self.parent_widget.go_to_next_page)
@@ -416,22 +409,21 @@ class BasicInfoPanel(QWidget):
         # 종료 버튼
         self.page1_exit_btn = QPushButton("종료")
         self.page1_exit_btn.setFixedSize(378, 48)
-        btn_exit_enabled = resource_path("assets/image/test_info/btn_종료_enabled.png").replace(chr(92), "/")
-        btn_exit_hover = resource_path("assets/image/test_info/btn_종료_Hover.png").replace(chr(92), "/")
-        self.page1_exit_btn.setStyleSheet(f"""
-            QPushButton {{
-                border: none;
-                border-image: url({btn_exit_enabled}) 0 0 0 0 stretch stretch;
+        self.page1_exit_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #FFFFFF;
+                border: 1px solid #6B6B6B;
+                border-radius: 4px;
                 padding-left: 20px;
                 padding-right: 20px;
                 font-family: 'Noto Sans KR';
                 font-size: 20px;
                 font-weight: 500;
                 color: #6B6B6B;
-            }}
-            QPushButton:hover {{
-                border-image: url({btn_exit_hover}) 0 0 0 0 stretch stretch;
-            }}
+            }
+            QPushButton:hover {
+                background-color: #EFEFEF;
+            }
         """)
         if self.parent_widget:
             self.page1_exit_btn.clicked.connect(self.parent_widget.exit_btn_clicked)

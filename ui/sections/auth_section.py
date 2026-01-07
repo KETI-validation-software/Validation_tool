@@ -289,33 +289,32 @@ class AuthSection(QGroupBox):
         common_input_layout.addSpacing(4)
 
         # 아이디 입력칸
-        auth_enabled = resource_path("assets/image/test_config/input_auth_enabled.png").replace(chr(92), "/")
-        auth_disabled = resource_path("assets/image/test_config/input_auth_disabled.png").replace(chr(92), "/")
-
         self.id_input = QLineEdit()
         self.id_input.setFixedSize(358, 40)
         self.id_input.setPlaceholderText("사용자 ID를 입력해주세요")
-        self.id_input.setStyleSheet(f"""
-            QLineEdit {{
+        self.id_input.setStyleSheet("""
+            QLineEdit {
                 padding-left: 24px;
                 padding-right: 24px;
-                border: none;
-                border-image: url({auth_enabled}) 0 0 0 0 stretch stretch;
+                background-color: #FFFFFF;
+                border: 1px solid #868686;
+                border-radius: 4px;
                 font-family: 'Noto Sans KR';
                 font-weight: 400;
                 font-size: 18px;
                 letter-spacing: -0.18px;
                 color: #000000;
-            }}
-            QLineEdit::placeholder {{
+            }
+            QLineEdit::placeholder {
                 color: #868686;
                 font-size: 18px;
                 font-weight: 500;
-            }}
-            QLineEdit:disabled {{
-                border-image: url({auth_disabled}) 0 0 0 0 stretch stretch;
+            }
+            QLineEdit:disabled {
+                background-color: #EFEFEF;
+                border: 1px solid #6B6B6B;
                 color: #868686;
-            }}
+            }
         """)
         common_input_layout.addWidget(self.id_input)
 
@@ -345,27 +344,29 @@ class AuthSection(QGroupBox):
         self.pw_input = QLineEdit()
         self.pw_input.setFixedSize(358, 40)
         self.pw_input.setPlaceholderText("암호를 입력해 주세요")
-        self.pw_input.setStyleSheet(f"""
-            QLineEdit {{
+        self.pw_input.setStyleSheet("""
+            QLineEdit {
                 padding-left: 24px;
                 padding-right: 24px;
-                border: none;
-                border-image: url({auth_enabled}) 0 0 0 0 stretch stretch;
+                background-color: #FFFFFF;
+                border: 1px solid #868686;
+                border-radius: 4px;
                 font-family: 'Noto Sans KR';
                 font-weight: 400;
                 font-size: 18px;
                 letter-spacing: -0.18px;
                 color: #000000;
-            }}
-            QLineEdit::placeholder {{
+            }
+            QLineEdit::placeholder {
                 color: #868686;
                 font-size: 18px;
                 font-weight: 500;
-            }}
-            QLineEdit:disabled {{
-                border-image: url({auth_disabled}) 0 0 0 0 stretch stretch;
+            }
+            QLineEdit:disabled {
+                background-color: #EFEFEF;
+                border: 1px solid #6B6B6B;
                 color: #868686;
-            }}
+            }
         """)
         common_input_layout.addWidget(self.pw_input)
 
