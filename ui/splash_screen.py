@@ -217,6 +217,9 @@ class LoadingPopup(QSplashScreen):
 
             super().__init__(init_pixmap, Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
 
+            # 모달로 설정하여 뒤의 UI 상호작용 차단
+            self.setWindowModality(Qt.ApplicationModal)
+
             self.width = width
             self.height = height
             self._setup_ui()
@@ -233,6 +236,7 @@ class LoadingPopup(QSplashScreen):
             init_pixmap = QPixmap(width, height)
             init_pixmap.fill(QColor("#002B69"))
             super().__init__(init_pixmap, Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
+            self.setWindowModality(Qt.ApplicationModal)
             self.width = width
             self.height = height
 
