@@ -1619,7 +1619,9 @@ class MyApp(SystemMainUI):
                             self.trans_protocols) else "Unknown"
 
                         # 단일 응답에 대한 검증 처리
+                        from core.utils import replace_transport_desc_for_display
                         tmp_res_auth = json.dumps(res_data, indent=4, ensure_ascii=False)
+                        tmp_res_auth = replace_transport_desc_for_display(tmp_res_auth)  # UI 표시용 치환
 
                         # 실시간 모니터링 창에 응답 데이터 표시
                         # 첫 번째 응답일 때만 API 명과 검증 예정 횟수 표시
