@@ -5,7 +5,7 @@
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton
 )
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtGui import QPixmap
 from core.functions import resource_path
 
@@ -316,14 +316,16 @@ class BasicInfoPanel(QWidget):
         """)
         field_layout.addWidget(self.admin_code_label)
 
-        # 입력칸
-        self.admin_code_input = QLineEdit()
+        # 입력칸 컨테이너 (placeholder 라벨 오버레이용)
+        self.admin_code_input_container = QWidget()
+        self.admin_code_input_container.setFixedSize(768, 48)
+
+        self.admin_code_input = QLineEdit(self.admin_code_input_container)
         self.admin_code_input.setFixedSize(768, 48)
         self.admin_code_input.setObjectName("admin_code_input")
         self.admin_code_input.setEchoMode(QLineEdit.Password)
-        self.admin_code_input.setPlaceholderText("관리자 코드를 입력해주세요")
         self.admin_code_input.setEnabled(False)
-        
+
         self.admin_code_input.setStyleSheet("""
               QLineEdit#admin_code_input {
                   font-family: 'Noto Sans KR';
@@ -337,11 +339,6 @@ class BasicInfoPanel(QWidget):
                   border-radius: 4px;
                   outline: none;
               }
-              QLineEdit#admin_code_input::placeholder {
-                  font-size: 18px;
-                  font-weight: 500;
-                  color: #868686;
-              }
               QLineEdit#admin_code_input:focus {
                   background-color: #FFFFFF;
                   border: 3px solid #2B96ED;
@@ -350,7 +347,6 @@ class BasicInfoPanel(QWidget):
               QLineEdit#admin_code_input:hover:enabled:!focus[hasText="false"] {
                   background-color: #E9F6FE;
                   border: 1px solid #868686;
-  
               }
               QLineEdit#admin_code_input:disabled {
                   background-color: #F5F5F5;
@@ -362,16 +358,53 @@ class BasicInfoPanel(QWidget):
               }
           """)
 
+        # 커스텀 placeholder 라벨
+        self.admin_code_placeholder = QLabel("관리자 코드를 입력해주세요", self.admin_code_input_container)
+        self.admin_code_placeholder.setGeometry(24, 0, 720, 48)
+        self.admin_code_placeholder.setStyleSheet("""
+            QLabel {
+                font-family: 'Noto Sans KR';
+                font-size: 18px;
+                font-weight: 500;
+                color: #868686;
+                background: transparent;
+            }
+        """)
+        self.admin_code_placeholder.setAlignment(Qt.AlignVCenter)
+        self.admin_code_placeholder.setAttribute(Qt.WA_TransparentForMouseEvents)
+        self.admin_code_placeholder.show()  # 초기에는 보임 (disabled 상태)
+
+        def update_placeholder_visibility():
+            """placeholder 표시 조건: 텍스트 없음 + (disabled 또는 (hover && !focus))"""
+            has_text = bool(self.admin_code_input.text().strip())
+            is_disabled = not self.admin_code_input.isEnabled()
+            is_hovered = self.admin_code_input.underMouse()
+            has_focus = self.admin_code_input.hasFocus()
+
+            if has_text:
+                self.admin_code_placeholder.hide()
+            elif is_disabled:
+                self.admin_code_placeholder.show()
+            elif is_hovered and not has_focus:
+                self.admin_code_placeholder.show()
+            else:
+                self.admin_code_placeholder.hide()
+
         def update_background():
             has_text = bool(self.admin_code_input.text().strip())
             self.admin_code_input.setProperty("hasText", "true" if has_text else "false")
             self.admin_code_input.style().unpolish(self.admin_code_input)
             self.admin_code_input.style().polish(self.admin_code_input)
+            update_placeholder_visibility()
 
         self.admin_code_input.textChanged.connect(update_background)
         self.admin_code_input.setProperty("hasText", "false")
 
-        field_layout.addWidget(self.admin_code_input)
+        # hover 이벤트 감지를 위한 이벤트 필터 설치
+        self.admin_code_input.installEventFilter(self)
+        self._update_placeholder_visibility = update_placeholder_visibility
+
+        field_layout.addWidget(self.admin_code_input_container)
 
         layout.addWidget(self.admin_code_widget, alignment=Qt.AlignHCenter)
 
@@ -548,3 +581,12 @@ class BasicInfoPanel(QWidget):
         if hasattr(self.parent_widget, 'form_validator'):
             self.admin_code_input.textChanged.connect(self.parent_widget.form_validator.validate_admin_code)
             self.admin_code_input.textChanged.connect(self.parent_widget.check_start_button_state)
+
+    def eventFilter(self, obj, event):
+        """hover/focus 이벤트 감지하여 placeholder 표시/숨김"""
+        if obj == self.admin_code_input:
+            if event.type() in (QEvent.Enter, QEvent.Leave, QEvent.EnabledChange,
+                                QEvent.FocusIn, QEvent.FocusOut):
+                if hasattr(self, '_update_placeholder_visibility'):
+                    self._update_placeholder_visibility()
+        return super().eventFilter(obj, event)

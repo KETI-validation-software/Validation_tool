@@ -61,6 +61,7 @@ class InfoWidget(QWidget):
         self.scan_worker = None
         self.current_mode = None
         self.target_system = ""  # 시험대상 시스템 (물리보안시스템/통합플랫폼시스템)
+        self.is_loading = False  # 시험 정보 로딩 중 플래그 (로딩 중 UI 상호작용 방지)
         self.test_group_name = None  # testGroup.name 저장
         self.test_specs = []  # testSpecs 리스트 저장
         self.current_page = 0
@@ -827,6 +828,24 @@ class InfoWidget(QWidget):
             traceback.print_exc()
             return "request"  # 기본값
 
+    def _disable_ui_during_loading(self):
+        """로딩 중 UI 비활성화 (다음 버튼, 관리자 코드 입력)"""
+        if hasattr(self, 'next_btn'):
+            self.next_btn.setEnabled(False)
+        if hasattr(self, 'admin_code_edit'):
+            self.admin_code_edit.setEnabled(False)
+
+    def _enable_ui_after_loading(self):
+        """로딩 완료 후 UI 활성화 (본시험일 경우 관리자 코드 활성화)"""
+        self.is_loading = False
+        if hasattr(self, 'next_btn'):
+            self.next_btn.setEnabled(True)
+        # 관리자 코드 필드는 본시험일 경우에만 활성화
+        if hasattr(self, 'admin_code_edit'):
+            test_category = self.test_category_edit.text().strip() if hasattr(self, 'test_category_edit') else ""
+            if test_category in ["본시험", "MAIN_TEST"]:
+                self.admin_code_edit.setEnabled(True)
+
     def on_load_test_info_clicked(self):
         """시험정보 불러오기 버튼 클릭 이벤트 (API 기반, 비동기)"""
         # IP 입력창에서 IP 주소 가져오기
@@ -842,6 +861,10 @@ class InfoWidget(QWidget):
                 "올바른 IP 주소 형식이 아닙니다.\n"
                 "예: 192.168.1.1")
             return
+
+        # 로딩 상태 설정 및 UI 비활성화 (로딩 중 상호작용 방지)
+        self.is_loading = True
+        self._disable_ui_during_loading()
 
         # 로딩 팝업 생성 및 표시 (스피너 애니메이션 포함)
         self.loading_popup = LoadingPopup(width=400, height=200)
@@ -995,6 +1018,8 @@ class InfoWidget(QWidget):
             if hasattr(self, 'loading_popup') and self.loading_popup:
                 self.loading_popup.close()
                 self.loading_popup = None
+            # 로딩 완료 후 UI 활성화
+            self._enable_ui_after_loading()
 
     def _on_test_info_error(self, error_message):
         """시험 정보 로드 실패 시 호출되는 슬롯"""
@@ -1005,6 +1030,11 @@ class InfoWidget(QWidget):
         if hasattr(self, 'loading_popup') and self.loading_popup:
             self.loading_popup.close()
             self.loading_popup = None
+
+        # 로딩 실패 시 UI 복원 (다시 시도할 수 있도록)
+        self.is_loading = False
+        if hasattr(self, 'next_btn'):
+            self.next_btn.setEnabled(True)
 
     def auto_fill_authentication_for_platform(self):
         """
@@ -1149,6 +1179,10 @@ class InfoWidget(QWidget):
     def _is_page1_complete(self):
         """첫 번째 페이지 완료 조건 검사"""
         try:
+            # 0. 로딩 중이면 페이지 이동 불가
+            if self.is_loading:
+                return False
+
             # 1. 모드 선택 확인 (불러오기 버튼 중 하나를 눌렀는지)
             if not self.current_mode:
                 return False
