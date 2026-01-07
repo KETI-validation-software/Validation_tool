@@ -381,6 +381,10 @@ class InfoWidget(QWidget):
                         orig = self.original_url_header_overlay_geometry
                         self.url_header_overlay.setGeometry(orig[0], orig[1], new_url_table_width, orig[3])
 
+                        # 헤더 내부 URL 라벨 크기도 조정 (데이터 셀과 정렬 맞춤)
+                        if hasattr(self, 'connection_section') and hasattr(self.connection_section, 'url_header_url_label'):
+                            self.connection_section.url_header_url_label.setFixedSize(url_col_width, 31)
+
                     # 행 높이는 고정 유지, 셀 위젯 너비만 조정
                     if hasattr(self, 'original_url_row_height'):
                         for row in range(self.url_table.rowCount()):
