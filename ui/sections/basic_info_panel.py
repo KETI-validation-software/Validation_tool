@@ -478,7 +478,9 @@ class BasicInfoPanel(QWidget):
         self.parent_widget.original_divider_size = (776, self.divider_pixmap.height() if self.divider_pixmap.height() > 0 else 1)
         self.parent_widget.original_admin_code_widget_size = (776, 82)
         self.parent_widget.original_admin_code_label_size = (776, 28)
+        self.parent_widget.original_admin_code_input_container_size = (768, 48)
         self.parent_widget.original_admin_code_input_size = (768, 48)
+        self.parent_widget.original_admin_code_placeholder_size = (720, 48)
         self.parent_widget.original_page1_button_container_size = (776, 48)
         self.parent_widget.original_next_btn_size = (378, 48)
         self.parent_widget.original_page1_exit_btn_size = (378, 48)
@@ -550,7 +552,9 @@ class BasicInfoPanel(QWidget):
 
         self.parent_widget.admin_code_widget = self.admin_code_widget
         self.parent_widget.admin_code_label = self.admin_code_label
+        self.parent_widget.admin_code_input_container = self.admin_code_input_container
         self.parent_widget.admin_code_input = self.admin_code_input
+        self.parent_widget.admin_code_placeholder = self.admin_code_placeholder
         self.parent_widget.admin_code_edit = self.admin_code_input  # alias
 
         self.parent_widget.page1_button_container = self.page1_button_container

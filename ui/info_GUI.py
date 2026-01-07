@@ -155,7 +155,14 @@ class InfoWidget(QWidget):
                 self._resize_widget('divider', 'original_divider_size', width_ratio)
                 self._resize_widget('admin_code_widget', 'original_admin_code_widget_size', width_ratio)
                 self._resize_widget('admin_code_label', 'original_admin_code_label_size', width_ratio)
+                self._resize_widget('admin_code_input_container', 'original_admin_code_input_container_size', width_ratio)
                 self._resize_widget('admin_code_input', 'original_admin_code_input_size', width_ratio)
+
+                # admin_code_placeholder geometry 조정
+                if hasattr(self, 'admin_code_placeholder') and hasattr(self, 'original_admin_code_placeholder_size'):
+                    new_width = int(self.original_admin_code_placeholder_size[0] * width_ratio)
+                    new_height = self.original_admin_code_placeholder_size[1]
+                    self.admin_code_placeholder.setGeometry(24, 0, new_width, new_height)
 
             # 절대 위치 요소들
             page_width = self.page1.width()
