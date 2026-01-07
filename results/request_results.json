@@ -183,7 +183,7 @@
                   "transProtocolType": "WebHook",
                   "transProtocolDesc": "https://10.252.219.95:2001"
                 },
-                "eventFilter": "Leak",
+                "eventFilter": "MotionDetection",
                 "startTime": 20251105163010123
               },
               "validationErrors": [
@@ -439,5 +439,5 @@
       ]
     }
   ],
-  "completedDate": "2026-01-07T05:58:25Z"
+  "completedDate": "2026-01-07T06:01:38Z"
 }

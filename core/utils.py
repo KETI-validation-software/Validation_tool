@@ -55,7 +55,7 @@ def replace_transport_desc_for_display(json_str):
                     if key == "transProtocol" and isinstance(value, dict):
                         if "transProtocolDesc" in value:
                             # 하드코딩: UI 표시용 값으로 치환
-                            value["transProtocolDesc"] = "webhook2026.ngrok.dev"
+                            value["transProtocolDesc"] = "https://webhook2026.ngrok.dev"
                     # 모든 값에 대해 재귀 탐색
                     if isinstance(value, (dict, list)):
                         replace_in_dict(value)
