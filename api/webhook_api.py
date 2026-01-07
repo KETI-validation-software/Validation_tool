@@ -18,14 +18,12 @@ class WebhookServer(BaseHTTPRequestHandler):
     def _set_headers(self):
         self.send_response(200)
         self.send_header('Content-type', 'application/json')
-        #self.send_header('User-Agent', 'test')
         self.end_headers()
 
     def do_GET(self):
         self.send_response(200)
         self.end_headers()
         self.wfile.write(b'Hello, World!')
-        #print(f"Received GET request from {self.client_address[0]}")
 
     def do_POST(self): 
         print(f"[WEBHOOK] do_POST called: path={self.path}")  # ✅ 디버그 로그
