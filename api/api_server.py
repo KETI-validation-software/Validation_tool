@@ -809,12 +809,9 @@ class Server(BaseHTTPRequestHandler):
                             self.wfile.write(json.dumps(message).encode('utf-8'))
                             return
 
-                        # ✅ 화면 표시 주소로 변환 (실제 웹훅 전송용)
+                        # ✅ 시스템에서 받은 주소를 그대로 사용
                         url_tmp = str(url_tmp).strip()
-                        # 10.252.219.95:2001 → webhook2026.ngrok.dev로 변환
-                        if "10.252.219.95:2001" in url_tmp:
-                            url_tmp = url_tmp.replace("10.252.219.95:2001", "webhook2026.ngrok.dev")
-                            print(f"[DEBUG][SERVER] Webhook URL (실제 전송 주소): {url_tmp}")
+                        print(f"[DEBUG][SERVER] Webhook URL (시스템에서 받은 주소): {url_tmp}")
 
                         # 4단계: 올바른 인덱스 사용
                         message = self.outMessage[message_cnt]

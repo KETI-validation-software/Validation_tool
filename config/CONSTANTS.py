@@ -65,7 +65,7 @@ test_target = "기본 기능 시험-통합시스템"
 test_range = "ALL_FIELDS"
 auth_type = "Digest Auth"
 auth_info = "kisa,kisa_k1!2@"
-admin_code = "123"
+admin_code = "1234"
 url = "https://10.252.219.95:2000"
 contact_person = "배성환"
 model_name = "v1.0"
@@ -114,6 +114,11 @@ WEBHOOK_PUBLIC_IP = "10.252.219.95"
 
 WEBHOOK_URL = f"https://{WEBHOOK_PUBLIC_IP}:{WEBHOOK_PORT}"
 # 주소 선택 후 form_validator.py에서 자동으로 업데이트됨
+
+# ✅ 웹훅 외부 접근 주소 (플랫폼에 전송할 주소 - ngrok 등)
+WEBHOOK_DISPLAY_URL = "https://webhook2026.ngrok.dev"
+# 시스템이 플랫폼에 transProtocolDesc로 전송할 주소
+# 각 시스템마다 다른 ngrok 주소를 사용하려면 이 값을 변경
 
 SPEC_CONFIG = [
     {
