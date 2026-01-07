@@ -125,7 +125,7 @@
                 "duration": 100,
                 "transProtocol": {
                   "transProtocolType": "WebHook",
-                  "transProtocolDesc": "https://10.252.219.95:2001"
+                  "transProtocolDesc": "https://192.168.0.3:2001"
                 },
                 "startTime": 20251105163010124
               },
@@ -179,7 +179,7 @@
                 "duration": 1000,
                 "transProtocol": {
                   "transProtocolType": "WebHook",
-                  "transProtocolDesc": "https://10.252.219.95:2001"
+                  "transProtocolDesc": "https://192.168.0.3:2001"
                 },
                 "eventFilter": "MotionDetection",
                 "startTime": 20251105163010123
@@ -261,149 +261,9 @@
           "endpoint": "/Authentication",
           "score": 100.0,
           "validationCnt": 1,
-          "totalFields": 2,
-          "passFields": 2,
-          "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "userID": "kisa",
-                "userPW": "kisa_k1!2@"
-              },
-              "validationErrors": [
-                "오류가 없습니다."
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cmiiby4fo003chl2h8hzgu7m3",
-          "name": "전송 지원 기능 정보 연동",
-          "method": "POST",
-          "endpoint": "/Capabilities",
-          "score": 100.0,
-          "validationCnt": 1,
-          "totalFields": 1,
-          "passFields": 1,
-          "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {},
-              "validationErrors": [
-                "오류가 없습니다."
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cmisjhwhq09hi5vy7n59tvsht",
-          "name": "바이오 및 출입통제 장치 목록 정보",
-          "method": "POST",
-          "endpoint": "/DoorProfiles",
-          "score": 0.0,
-          "validationCnt": 1,
-          "totalFields": 1,
-          "passFields": 0,
-          "failFields": 1,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "testest": {
-                  "f1": "1123",
-                  "f2": "11233"
-                }
-              },
-              "validationErrors": [
-                "[시도 1/1] [None Request] 데이터가 있으면 안 됩니다."
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cmiwhz2il00epugxnzh3d9iuc",
-          "name": "사용자 권한 정보 연동",
-          "method": "POST",
-          "endpoint": "/AccessUserInfos",
-          "score": 100.0,
-          "validationCnt": 1,
-          "totalFields": 1,
-          "passFields": 1,
-          "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {},
-              "validationErrors": [
-                "오류가 없습니다."
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cmiwj1hq302myugxn8a5c6f48-registration",
-          "name": "실시간 출입인증 목록 정보 연동",
-          "method": "POST",
-          "endpoint": "/RealtimeVerifEventInfos",
-          "score": 90.0,
-          "validationCnt": 1,
-          "totalFields": 10,
-          "passFields": 9,
-          "failFields": 1,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "doorList": [
-                  {
-                    "doorID": "door0001"
-                  }
-                ],
-                "duration": 500,
-                "transProtocol": {
-                  "transProtocolType": "WebHook",
-                  "transProtocolDesc": "https://10.252.219.95:2001"
-                },
-                "eventFilter": "",
-                "startTime": 20251105163010124
-              },
-              "validationErrors": [
-                "[시도 1/1]",
-                "- [맥락 오류] eventFilter: 값 불일치: '(빈 값)'가 허용값 목록 ['AuthSuccess', 'AuthFail']에 없음"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cmiwj1hq302myugxn8a5c6f48-webhook",
-          "name": "실시간 출입인증 목록 정보 연동 (Webhook)",
-          "method": "POST",
-          "endpoint": "/RealtimeVerifEventInfos/webhook",
-          "score": 0,
-          "validationCnt": 1,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {},
-              "validationErrors": []
-            }
-          ]
-        },
-        {
-          "id": "cmiwjtg8i03wjugxnqkustaqj",
-          "name": "저장된 출입인증 목록 정보 연동",
-          "method": "POST",
-          "endpoint": "/StoredVerifEventInfos",
-          "score": 86.0,
-          "validationCnt": 1,
-          "totalFields": 7,
+          "totalFields": 6,
           "passFields": 6,
-          "failFields": 1,
+          "failFields": 0,
           "validations": [
             {
               "attempt": 1,
@@ -412,9 +272,12 @@
                   "startTime": 20251105163010124,
                   "endTime": 20251115163010124
                 },
-                "doorList": [
+                "sensorDeviceList": [
                   {
-                    "doorID": "door0001"
+                    "sensorDeviceID": "iot0001"
+                  },
+                  {
+                    "sensorDeviceID": "iot0002"
                   }
                 ],
                 "maxCount": 10,

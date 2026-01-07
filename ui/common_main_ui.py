@@ -379,121 +379,117 @@ class CommonMainUI(QWidget):
 
         # 정지 버튼
         self.stop_btn = QPushButton("일시 정지", self.buttonGroup)  # 텍스트 추가
-        stop_enabled = resource_path("assets/image/test_runner/btn_common_enabled.png").replace("\\", "/")
-        stop_hover = resource_path("assets/image/test_runner/btn_common_hover.png").replace("\\", "/")
-        stop_disabled = resource_path("assets/image/test_runner/btn_common_disabled.png").replace("\\", "/")
-        self.stop_btn.setStyleSheet(f"""
-            QPushButton {{
-                border: none;
-                border-image: url('{stop_enabled}') 0 0 0 0 stretch stretch;
-                padding-left: 20px;
-                padding-right: 20px;
-                font-family: 'Noto Sans KR';
-                font-size: 20px;
-                font-weight: 500;
-                color: #6B6B6B;
-            }}
-            QPushButton:hover {{
-                border-image: url('{stop_hover}') 0 0 0 0 stretch stretch;
-            }}
-            QPushButton:pressed {{
-                border-image: url('{stop_hover}') 0 0 0 0 stretch stretch;
-            }}
-            QPushButton:disabled {{
-                border-image: url('{stop_disabled}') 0 0 0 0 stretch stretch;
-                color: #CECECE;
-            }}
-        """)
+        self.stop_btn.setStyleSheet("""
+              QPushButton {
+                  background-color: #FFFFFF;
+                  border: 1px solid #6B6B6B;
+                  border-radius: 4px;
+                  padding-left: 20px;
+                  padding-right: 20px;
+                  font-family: 'Noto Sans KR';
+                  font-size: 20px;
+                  font-weight: 500;
+                  color: #6B6B6B;
+              }
+              QPushButton:hover {
+                  background-color: #EFEFEF;
+              }
+              QPushButton:pressed {
+                  background-color: #EFEFEF;
+              }
+              QPushButton:disabled {
+                  background-color: #F5F5F5;
+                  border: 1px solid #CECECE;
+                  color: #CECECE;
+              }
+          """)
         self.stop_btn.clicked.connect(self.stop_btn_clicked)
         self.stop_btn.setDisabled(True)
 
         # 시험 취소 버튼
         self.cancel_btn = QPushButton("시험 취소", self.buttonGroup)
-        cancel_disabled = resource_path("assets/image/test_runner/btn_common_disabled.png").replace("\\", "/")
-        self.cancel_btn.setStyleSheet(f"""
-            QPushButton {{
-                border: 2px solid #FF8772;
-                border-radius: 4px;
-                background-color: #FFFFFF;
-                padding-left: 20px;
-                padding-right: 20px;
-                font-family: 'Noto Sans KR';
-                font-size: 20px;
-                font-weight: 500;
-                color: #FF8772;
-            }}
-            QPushButton:hover {{
-                background-color: #FFF5F3;
-                border: 2px solid #FF8772;
-            }}
-            QPushButton:pressed {{
-                background-color: #FFE8E5;
-                border: 2px solid #FF8772;
-            }}
-            QPushButton:disabled {{
-                border: none;
-                border-image: url('{cancel_disabled}') 0 0 0 0 stretch stretch;
-                color: #CECECE;
-            }}
-        """)
+        self.cancel_btn.setStyleSheet("""
+              QPushButton {
+                  border: 2px solid #FF8772;
+                  border-radius: 4px;
+                  background-color: #FFFFFF;
+                  padding-left: 20px;
+                  padding-right: 20px;
+                  font-family: 'Noto Sans KR';
+                  font-size: 20px;
+                  font-weight: 500;
+                  color: #FF8772;
+              }
+              QPushButton:hover {
+                  background-color: #FFF5F3;
+                  border: 2px solid #FF8772;
+              }
+              QPushButton:pressed {
+                  background-color: #FFE8E5;
+                  border: 2px solid #FF8772;
+              }
+              QPushButton:disabled {
+                  background-color: #F5F5F5;
+                  border: 1px solid #CECECE;
+                  color: #CECECE;
+              }
+          """)
         self.cancel_btn.setDisabled(True)
 
         # 종료 버튼
         self.rbtn = QPushButton("종료", self.buttonGroup)  # 텍스트 추가
-        exit_enabled = resource_path("assets/image/test_runner/btn_common_enabled.png").replace("\\", "/")
-        exit_hover = resource_path("assets/image/test_runner/btn_common_hover.png").replace("\\", "/")
-        exit_disabled = resource_path("assets/image/test_runner/btn_common_disabled.png").replace("\\", "/")
-        self.rbtn.setStyleSheet(f"""
-            QPushButton {{
-                border: none;
-                border-image: url('{exit_enabled}') 0 0 0 0 stretch stretch;
-                padding-left: 20px;
-                padding-right: 20px;
-                font-family: 'Noto Sans KR';
-                font-size: 20px;
-                font-weight: 500;
-                color: #6B6B6B;
-            }}
-            QPushButton:hover {{
-                border-image: url('{exit_hover}') 0 0 0 0 stretch stretch;
-            }}
-            QPushButton:pressed {{
-                border-image: url('{exit_hover}') 0 0 0 0 stretch stretch;
-            }}
-            QPushButton:disabled {{
-                border-image: url('{exit_disabled}') 0 0 0 0 stretch stretch;
-                color: #CECECE;
-            }}
-        """)
+        self.rbtn.setStyleSheet("""
+              QPushButton {
+                  background-color: #FFFFFF;
+                  border: 1px solid #6B6B6B;
+                  border-radius: 4px;
+                  padding-left: 20px;
+                  padding-right: 20px;
+                  font-family: 'Noto Sans KR';
+                  font-size: 20px;
+                  font-weight: 500;
+                  color: #6B6B6B;
+              }
+              QPushButton:hover {
+                  background-color: #EFEFEF;
+              }
+              QPushButton:pressed {
+                  background-color: #EFEFEF;
+              }
+              QPushButton:disabled {
+                  background-color: #F5F5F5;
+                  border: 1px solid #CECECE;
+                  color: #CECECE;
+              }
+          """)
         self.rbtn.clicked.connect(self.exit_btn_clicked)
 
         # 시험 결과 버튼
         self.result_btn = QPushButton("시험 결과", self.buttonGroup)  # 텍스트 추가
-        result_enabled = resource_path("assets/image/test_runner/btn_common_enabled.png").replace("\\", "/")
-        result_hover = resource_path("assets/image/test_runner/btn_common_hover.png").replace("\\", "/")
-        result_disabled = resource_path("assets/image/test_runner/btn_common_disabled.png").replace("\\", "/")
-        self.result_btn.setStyleSheet(f"""
-            QPushButton {{
-                border: none;
-                border-image: url('{result_enabled}') 0 0 0 0 stretch stretch;
-                padding-left: 20px;
-                padding-right: 20px;
-                font-family: 'Noto Sans KR';
-                font-size: 20px;
-                font-weight: 500;
-                color: #6B6B6B;
-            }}
-            QPushButton:hover {{
-                border-image: url('{result_hover}') 0 0 0 0 stretch stretch;
-            }}
-            QPushButton:pressed {{
-                border-image: url('{result_hover}') 0 0 0 0 stretch stretch;
-            }}
-            QPushButton:disabled {{
-                border-image: url('{result_disabled}') 0 0 0 0 stretch stretch;
-                color: #CECECE;
-            }}
-        """)
+        self.result_btn.setStyleSheet("""
+              QPushButton {
+                  background-color: #FFFFFF;
+                  border: 1px solid #6B6B6B;
+                  border-radius: 4px;
+                  padding-left: 20px;
+                  padding-right: 20px;
+                  font-family: 'Noto Sans KR';
+                  font-size: 20px;
+                  font-weight: 500;
+                  color: #6B6B6B;
+              }
+              QPushButton:hover {
+                  background-color: #EFEFEF;
+              }
+              QPushButton:pressed {
+                  background-color: #EFEFEF;
+              }
+              QPushButton:disabled {
+                  background-color: #F5F5F5;
+                  border: 1px solid #CECECE;
+                  color: #CECECE;
+              }
+          """)        
         self.result_btn.clicked.connect(self.show_result_page)
 
         # 초기 버튼 위치 설정 (레이아웃 없이 직접 배치)

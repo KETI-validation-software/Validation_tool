@@ -197,23 +197,23 @@ class CombinedDetailDialog(QDialog):
         self.confirm_button.setFixedSize(434, 48)
         self.original_confirm_btn_size = (434, 48)
         self.original_dialog_size = (1520, 921)
-        confirm_enabled = resource_path("assets/image/test_runner/btn_확인_enabled.png").replace("\\", "/")
-        confirm_hover = resource_path("assets/image/test_runner/btn_확인_Hover.png").replace("\\", "/")
-        self.confirm_button.setStyleSheet(f"""
-            QPushButton {{
-                border: none;
-                border-image: url('{confirm_enabled}') 0 0 0 0 stretch stretch;
-                padding-left: 20px;
-                padding-right: 20px;
-                font-family: 'Noto Sans KR';
-                font-size: 20px;
-                font-weight: 500;
-                color: #FFFFFF;
-            }}
-            QPushButton:hover {{
-                border-image: url('{confirm_hover}') 0 0 0 0 stretch stretch;
-            }}
-        """)
+        self.confirm_button.setStyleSheet("""
+              QPushButton {
+                  background-color: #1C5DB1;
+                  border: none;
+                  border-radius: 4px;
+                  padding-left: 20px;
+                  padding-right: 20px;
+                  font-family: 'Noto Sans KR';
+                  font-size: 20px;
+                  font-weight: 500;
+                  color: #FFFFFF;
+              }
+              QPushButton:hover {
+                  background-color: #3E85E2;
+              }
+          """)
+        
         self.confirm_button.clicked.connect(self.accept)
 
         button_layout.addStretch()

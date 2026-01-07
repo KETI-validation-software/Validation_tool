@@ -278,42 +278,26 @@ class ResultPageWidget(QWidget):
             self.back_btn = QPushButton("이전 화면으로", self)
             self.back_btn.setFixedSize(362, 48)
             self.original_back_btn_size = (362, 48)
-            try:
-                back_enabled = resource_path("assets/image/test_runner/btn_이전화면으로_enabled.png").replace("\\", "/")
-                back_hover = resource_path("assets/image/test_runner/btn_이전화면으로_hover.png").replace("\\", "/")
-                self.back_btn.setStyleSheet(f"""
-                    QPushButton {{
-                        border: none;
-                        border-image: url('{back_enabled}') 0 0 0 0 stretch stretch;
-                        padding-left: 20px;
-                        padding-right: 20px;
-                        font-family: 'Noto Sans KR';
-                        font-size: 20px;
-                        font-weight: 500;
-                        color: #FFFFFF;
-                    }}
-                    QPushButton:hover {{
-                        border-image: url('{back_hover}') 0 0 0 0 stretch stretch;
-                    }}
-                    QPushButton:pressed {{
-                        border-image: url('{back_hover}') 0 0 0 0 stretch stretch;
-                    }}
-                """)
-            except:
-                self.back_btn.setStyleSheet("""
-                    QPushButton {
-                        background-color: #4A90E2;
-                        border: none;
-                        border-radius: 4px;
-                        color: white;
-                        font-family: "Noto Sans KR";
-                        font-size: 15px;
-                        font-weight: 600;
-                    }
-                    QPushButton:hover {
-                        background-color: #357ABD;
-                    }
-                """)
+
+            self.back_btn.setStyleSheet("""
+                  QPushButton {
+                      background-color: #1C5DB1;
+                      border: none;
+                      border-radius: 4px;
+                      padding-left: 20px;
+                      padding-right: 20px;
+                      font-family: 'Noto Sans KR';
+                      font-size: 20px;
+                      font-weight: 500;
+                      color: #FFFFFF;
+                  }
+                  QPushButton:hover {
+                      background-color: #3E85E2;
+                  }
+                  QPushButton:pressed {
+                      background-color: #3E85E2;
+                  }
+              """)
             self.back_btn.clicked.connect(self._on_back_clicked)
             buttonLayout.addWidget(self.back_btn)
         else:

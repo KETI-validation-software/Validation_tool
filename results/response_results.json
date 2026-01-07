@@ -407,8 +407,8 @@
           "endpoint": "/AccessUserInfos",
           "score": 100.0,
           "validationCnt": 1,
-          "totalFields": 11,
-          "passFields": 11,
+          "totalFields": 7,
+          "passFields": 7,
           "failFields": 0,
           "validations": [
             {
@@ -416,20 +416,12 @@
               "validationData": {
                 "code": "200",
                 "message": "성공",
-                "userList": [
+                "sensorDeviceList": [
                   {
-                    "userID": "user0001",
-                    "userName": "홍길동",
-                    "userDesc": "일반사용자",
-                    "doorList": [
-                      {
-                        "doorID": "door0001",
-                        "timePeriod": {
-                          "startTime": 20251105163010124,
-                          "endTime": 20251115163010124
-                        }
-                      }
-                    ]
+                    "sensorDeviceID": "iot0001",
+                    "eventName": "Leak",
+                    "eventTime": 20251114557541144,
+                    "eventDesc": "100도"
                   },
                   {
                     "userID": "user0002",
