@@ -581,7 +581,9 @@ class MyApp(PlatformMainUI):
 
                 if self.Server.message[self.cnt] in CONSTANTS.none_request_message:
                     # 매 시도마다 데이터 수집
+                    from core.utils import replace_transport_desc_for_display
                     tmp_res_auth = json.dumps(current_data, indent=4, ensure_ascii=False)
+                    tmp_res_auth = replace_transport_desc_for_display(tmp_res_auth)  # UI 표시용 치환
 
                     if retry_attempt == 0:
                         accumulated['data_parts'].append(f"{tmp_res_auth}")
@@ -607,7 +609,9 @@ class MyApp(PlatformMainUI):
 
                 else:
                     # 매 시도마다 입력 데이터 수집
+                    from core.utils import replace_transport_desc_for_display
                     tmp_res_auth = json.dumps(current_data, indent=4, ensure_ascii=False)
+                    tmp_res_auth = replace_transport_desc_for_display(tmp_res_auth)  # UI 표시용 치환
 
                     if retry_attempt == 0:
                         accumulated['data_parts'].append(f"{tmp_res_auth}")
@@ -776,7 +780,9 @@ class MyApp(PlatformMainUI):
                             webhook_response = self.Server.webhook_response if self.Server.webhook_response else {}
                             
                             if webhook_response:
+                                from core.utils import replace_transport_desc_for_display
                                 tmp_webhook_response = json.dumps(webhook_response, indent=4, ensure_ascii=False)
+                                tmp_webhook_response = replace_transport_desc_for_display(tmp_webhook_response)  # UI 표시용 치환
                                 accumulated['data_parts'].append(
                                     f"\n--- Webhook 응답 (시도 {retry_attempt + 1}회차) ---\n{tmp_webhook_response}")
                             else:
@@ -2003,6 +2009,9 @@ class MyApp(PlatformMainUI):
                 print(f"[DEBUG] 테이블 초기화 시작")
                 for i in range(self.tableWidget.rowCount()):
                     QApplication.processEvents()  # 스피너 애니메이션 유지
+                    # ✅ 기존 위젯 제거 (겹침 방지)
+                    self.tableWidget.setCellWidget(i, 2, None)
+                    
                     # 아이콘 초기화
                     icon_widget = QWidget()
                     icon_layout = QHBoxLayout()
@@ -2328,13 +2337,13 @@ class MyApp(PlatformMainUI):
             self.valResult.append(f"\n결과 저장 실패: {str(e)}")
 
     def cancel_btn_clicked(self):
-        """시험 취소 버튼 클릭 - 진행 중단, 상태 초기화, 자동 재시작"""
+        """시험 취소 버튼 클릭 - 진행 중단, 상태 초기화"""
         print(f"[CANCEL] 시험 취소 버튼 클릭")
         
         # 확인 메시지 표시
         reply = QMessageBox.question(
             self, '시험 취소',
-            '현재 진행 중인 시험을 취소하고 처음부터 다시 시작하시겠습니까?',
+            '현재 진행 중인 시험을 취소하시겠습니까?',
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No
         )
@@ -2382,16 +2391,11 @@ class MyApp(PlatformMainUI):
         
         # 6. 모니터링 화면 초기화
         self.valResult.clear()
-        self.valResult.append('<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">시험을 취소c하고 재시작 중...</div>')
+        self.valResult.append('<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">시험이 취소되었습니다. 시험 시작 버튼을 눌러 다시 시작하세요.</div>')
         print(f"[CANCEL] 모니터링 화면 초기화")
         
         # 7. UI 업데이트 처리
         QApplication.processEvents()
-        
-        # 8. 2초 대기 후 자동 재시작 (정리 시간 확보)
-        print(f"[CANCEL] 2초 대기 후 자동 재시작...")
-        self._auto_restart = True  # 자동 재시작 플래그 설정
-        QTimer.singleShot(2000, self.sbtn_push)
         
         print(f"[CANCEL] ========== 시험 취소 완료 ==========")
 

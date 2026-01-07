@@ -1059,6 +1059,11 @@ class PlatformMainUI(CommonMainUI):
         """
         from datetime import datetime
         import html
+        from core.utils import replace_transport_desc_for_display
+
+        # ✅ UI 표시용: transProtocolDesc 하드코딩 치환
+        if request_json:
+            request_json = replace_transport_desc_for_display(request_json)
 
         # 타임스탬프
         timestamp = datetime.now().strftime("%H:%M:%S")

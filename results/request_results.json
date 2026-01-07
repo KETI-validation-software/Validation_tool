@@ -22,10 +22,10 @@
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 96.55,
-    "totalFields": 29,
-    "passedFields": 28,
-    "failedFields": 1
+    "score": 92.45,
+    "totalFields": 53,
+    "passedFields": 49,
+    "failedFields": 4
   },
   "testResult": [
     {
@@ -235,7 +235,7 @@
                   }
                 ],
                 "maxCount": 8,
-                "eventFilter": "Leak"
+                "eventFilter": "MotionDetection"
               },
               "validationErrors": [
                 "오류가 없습니다."
@@ -244,7 +244,54 @@
           ]
         }
       ]
+    },
+    {
+      "testGroup": "cmii82nib009f8z1tvo6fz8j2",
+      "testSpecId": "cmii7pysb004k8z1tts0npxfm",
+      "testSpecName": "ac001",
+      "score": 86.36,
+      "totalFields": 22,
+      "passedFields": 19,
+      "failedFields": 3,
+      "apis": [
+        {
+          "id": "cmii7roh5004o8z1t47spn819",
+          "name": "사용자 인증",
+          "method": "POST",
+          "endpoint": "/Authentication",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 6,
+          "passFields": 6,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "timePeriod": {
+                  "startTime": 20251105163010124,
+                  "endTime": 20251115163010124
+                },
+                "sensorDeviceList": [
+                  {
+                    "sensorDeviceID": "iot0001"
+                  },
+                  {
+                    "sensorDeviceID": "iot0002"
+                  }
+                ],
+                "maxCount": 10,
+                "eventFilter": ""
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "- [맥락 오류] eventFilter: 값 불일치: '(빈 값)'가 허용값 목록 ['AuthSuccess', 'AuthFail']에 없음"
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
-  "completedDate": "2026-01-07T01:49:09Z"
+  "completedDate": "2026-01-07T01:01:49Z"
 }
