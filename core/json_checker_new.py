@@ -1072,13 +1072,11 @@ def timeout_field_finder(schema):
         elif type(fields_tmp) == list and type(fields_tmp[-1]) == dict:
             for field_tmp in fields_tmp[-1]:
                 if isinstance(field_tmp, json_checker.core.checkers.OptionalKey):
-                    # print(f"[DEBUG_CNT] ⚠️ (중첩 선택-누락됨) PASS: {field_tmp.expected_data}") 
                     # pass
                     fields_opt_cnt += 1
                     print(f"[DEBUG_CNT] (중첩 선택-누락됨) +1: {field_tmp.expected_data}")
                 else:
                     all_field_cnt += 1
-                    # print(f"[DEBUG_CNT] (중첩 필수) +1: {field_tmp}") # DEBUG
     
     print(f"[DEBUG_CNT] ---------------------------")
     print(f"[DEBUG_CNT] 필수 필드 합계: {all_field_cnt}")

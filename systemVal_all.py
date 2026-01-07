@@ -47,6 +47,8 @@ importlib.reload(constraints_request_module)
 
 result_dir = os.path.join(os.getcwd(), "results")
 os.makedirs(result_dir, exist_ok=True)
+from core.utils import to_detail_text, redact, remove_api_number_suffix
+
 class MyApp(SystemMainUI):
     # 시험 결과 표시 요청 시그널 (main.py와 연동)
     showResultRequested = pyqtSignal(object)  # parent widget을 인자로 전달
@@ -138,23 +140,12 @@ class MyApp(SystemMainUI):
             traceback.print_exc()
             return None
 
-    # 
     def _apply_request_constraints(self, request_data, cnt):
         """
         이전 응답 데이터를 기반으로 요청 데이터 업데이트
         - inCon (request constraints)을 사용하여 이전 endpoint 응답에서 값 가져오기
         """
         try:
-            # constraints 가져오기
-            # if cnt >= len(self.inCon) or not self.inCon[cnt]:
-            #     print(f"[DATA_MAPPER] constraints 없음 (cnt={cnt})")
-            #     return request_data
-
-            # constraints = self.inCon[cnt]
-
-            # if not constraints or not isinstance(constraints, dict):
-            #     print(f"[DATA_MAPPER] constraints가 비어있거나 dict가 아님")
-            #     return request_data
             # constraints 가져오기
             if cnt >= len(self.inCon) or not self.inCon[cnt]:
                 # constraints가 없더라도 강제 로드 로직은 타야 하므로 바로 리턴하지 않고 빈 dict 할당
@@ -164,9 +155,6 @@ class MyApp(SystemMainUI):
 
             if not isinstance(constraints, dict):
                 constraints = {}
-
-            # print(f"[DATA_MAPPER] 요청 데이터 업데이트 시작 (API: {self.message[cnt]})")
-            # print(f"[DATA_MAPPER] constraints: {list(constraints.keys())}")
 
             required_endpoints = set()
 
@@ -201,8 +189,6 @@ class MyApp(SystemMainUI):
                 door_memory=Server.door_memory  # ✅ 문 상태 저장소 전달
             )
 
-            # print(f"[DATA_MAPPER] 요청 데이터 업데이트 완료")
-            # print(f"[DATA_MAPPER] 업데이트된 필드: {list(updated_request.keys())}")
             self.resp_rules = get_validation_rules(
                 spec_id=self.current_spec_id,
                 api_name=self.message[self.cnt] if self.cnt < len(self.message) else "",
@@ -225,41 +211,6 @@ class MyApp(SystemMainUI):
             
             return request_data
 
-    def _load_from_trace_file_OLD(self, api_name, direction="RESPONSE"):
-        try:
-            trace_file = Path("results/trace") / f"trace_{api_name.replace('/', '_')}.ndjson"
-
-            if not trace_file.exists():
-                return None  # 파일이 없으면 None 반환
-
-            latest_data = None
-
-            with open(trace_file, "r", encoding="utf-8") as f:
-                for line in f:
-                    line = line.strip()
-                    if not line:
-                        continue
-
-                    try:
-                        entry = json.loads(line)
-
-                        if entry.get("dir") == direction and entry.get("api") == api_name:
-                            latest_data = entry.get("data", {})
-
-                    except json.JSONDecodeError:
-                        continue
-
-            if latest_data:
-                print(f"[DEBUG] trace 파일에서 {api_name} {direction} 데이터 로드 완료")
-                return latest_data
-            else:
-                print(f"[DEBUG] trace 파일에서 {api_name} {direction} 데이터 없음")
-                return None
-
-        except Exception as e:
-            print(f"[ERROR] trace 파일 로드 중 오류: {e}")
-            return None
-
     def _append_text(self, obj):
         import json
         try:
@@ -277,7 +228,6 @@ class MyApp(SystemMainUI):
             token = res_data.get("accessToken")
             if token:
                 self.token = token
-                # print(f"[DEBUG] [handle_authentication_response] Token updated: {self.token}")
 
     def __init__(self, embedded=False, spec_id=None):
         super().__init__()
@@ -416,19 +366,6 @@ class MyApp(SystemMainUI):
         print(f"[RESTORE] {spec_id} 데이터 복원 완료")
         return True
 
-    def _redact(self, payload):  # ### NEW
-        """응답/요청에서 토큰, 패스워드 등 민감값 마스킹(선택)"""
-        try:
-            if isinstance(payload, dict):
-                red = dict(payload)
-                for k in ["accessToken", "token", "Authorization", "password", "secret", "apiKey"]:
-                    if k in red and isinstance(red[k], (str, bytes)):
-                        red[k] = "***"
-                return red
-            return payload
-        except Exception:
-            return payload
-
     def _push_event(self, step_idx, direction, payload):  # ### NEW
         """REQUEST/RESPONSE/WEBHOOK 이벤트를 순서대로 기록하고 ndjson에 append"""
         try:
@@ -437,7 +374,7 @@ class MyApp(SystemMainUI):
                 "time": datetime.utcnow().isoformat() + "Z",
                 "api": api,
                 "dir": direction,  # "REQUEST" | "RESPONSE" | "WEBHOOK"
-                "data": self._redact(payload)
+                "data": redact(payload)
             }
             self.trace[step_idx].append(evt)
 
@@ -710,19 +647,6 @@ class MyApp(SystemMainUI):
         
         # ✅ UI 호환성을 위해 inSchema 변수 매핑 (시스템 검증은 응답 스키마 사용)
         self.inSchema = self.videoOutSchema
-
-    def _to_detail_text(self, val_text):
-        """검증 결과 텍스트를 항상 사람이 읽을 문자열로 표준화"""
-        if val_text is None:
-            return "오류가 없습니다."
-        if isinstance(val_text, list):
-            return "\n".join(str(x) for x in val_text) if val_text else "오류가 없습니다."
-        if isinstance(val_text, dict):
-            try:
-                return json.dumps(val_text, indent=2, ensure_ascii=False)
-            except Exception:
-                return str(val_text)
-        return str(val_text)
 
     def update_table_row_with_retries(self, row, result, pass_count, error_count, data, error_text, retries):
         """테이블 행 업데이트 (안전성 강화)"""
@@ -1283,13 +1207,13 @@ class MyApp(SystemMainUI):
                 # 누적된 필드 수로 테이블 업데이트
             self.update_table_row_with_retries(
                 self.webhook_cnt, val_result, accumulated_pass, accumulated_error,
-                tmp_webhook_res, self._to_detail_text(val_text), current_retries
+                tmp_webhook_res, to_detail_text(val_text), current_retries
             )
 
         # step_buffers 업데이트 추가 (실시간 모니터링과 상세보기 일치)
         if self.webhook_cnt < len(self.step_buffers):
             webhook_data_text = tmp_webhook_res
-            webhook_error_text = self._to_detail_text(val_text) if val_result == "FAIL" else "오류가 없습니다."
+            webhook_error_text = to_detail_text(val_text) if val_result == "FAIL" else "오류가 없습니다."
             # ✅ 웹훅 이벤트 데이터를 명확히 표시
             self.step_buffers[self.webhook_cnt]["data"] += f"\n\n--- Webhook 이벤트 데이터 ---\n{webhook_data_text}"
             self.step_buffers[self.webhook_cnt][
@@ -1649,7 +1573,6 @@ class MyApp(SystemMainUI):
                             f"[DEBUG] cnt={self.cnt}, API={self.message[self.cnt] if self.cnt < len(self.message) else 'N/A'}")
                         print(f"[DEBUG] webhook_flag={self.webhook_flag}")
                         print(f"[DEBUG] current_protocol={current_protocol}")
-                        # print(f"[DEBUG] outSchema 총 개수={len(self.outSchema)}")
 
                         # ✅ 웹훅 API의 구독 응답은 일반 스키마 사용
                         # webhook_flag는 실제 웹훅 이벤트 수신 시에만 True
@@ -1789,7 +1712,7 @@ class MyApp(SystemMainUI):
 
                     # ✅ PASS인 경우 오류 텍스트 무시 (val_text에 불필요한 정보가 있을 수 있음)
                     if val_result == "FAIL":
-                        error_text = self._to_detail_text(val_text)
+                        error_text = to_detail_text(val_text)
                     else:
                         # PASS일 때는 val_text를 그대로 사용 (400 에러 응답 메시지 포함)
                         error_text = val_text if isinstance(val_text, str) else "오류가 없습니다."
