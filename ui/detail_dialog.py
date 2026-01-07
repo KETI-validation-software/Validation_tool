@@ -164,14 +164,18 @@ class CombinedDetailDialog(QDialog):
             self.error_browser.setHtml('<span style="color: #CECECE;">아직 검증이 수행되지 않았습니다.</span>')
         else:
             error_text = step_buffer["error"] if has_error else ("오류가 없습니다." if result == "PASS" else "")
-            error_msg = f"검증 결과: {result}\n\n"
-            if result == "FAIL":
-                error_msg += error_text
-            else:
-                error_msg += "오류가 없습니다."
             
-            # HTML 렌더링을 위해 setHtml 사용 (줄바꿈을 <br>로 변환)
-            error_msg_html = error_msg.replace('\n', '<br>')
+            # ✅ 검증 결과를 볼드체로 표시
+            if result == "PASS":
+                result_html = f'<span style="font-weight: bold; color: #10b981;">검증 결과: {result}</span><br><br>'
+            else:
+                result_html = f'<span style="font-weight: bold; color: #ef4444;">검증 결과: {result}</span><br><br>'
+            
+            if result == "FAIL":
+                error_msg_html = result_html + error_text.replace('\n', '<br>')
+            else:
+                error_msg_html = result_html + "오류가 없습니다."
+            
             self.error_browser.setHtml(error_msg_html)
         error_column_layout.addWidget(self.error_browser)
 
