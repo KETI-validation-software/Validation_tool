@@ -581,7 +581,9 @@ class MyApp(PlatformMainUI):
 
                 if self.Server.message[self.cnt] in CONSTANTS.none_request_message:
                     # 매 시도마다 데이터 수집
+                    from core.utils import replace_transport_desc_for_display
                     tmp_res_auth = json.dumps(current_data, indent=4, ensure_ascii=False)
+                    tmp_res_auth = replace_transport_desc_for_display(tmp_res_auth)  # UI 표시용 치환
 
                     if retry_attempt == 0:
                         accumulated['data_parts'].append(f"{tmp_res_auth}")
@@ -607,7 +609,9 @@ class MyApp(PlatformMainUI):
 
                 else:
                     # 매 시도마다 입력 데이터 수집
+                    from core.utils import replace_transport_desc_for_display
                     tmp_res_auth = json.dumps(current_data, indent=4, ensure_ascii=False)
+                    tmp_res_auth = replace_transport_desc_for_display(tmp_res_auth)  # UI 표시용 치환
 
                     if retry_attempt == 0:
                         accumulated['data_parts'].append(f"{tmp_res_auth}")
@@ -776,7 +780,9 @@ class MyApp(PlatformMainUI):
                             webhook_response = self.Server.webhook_response if self.Server.webhook_response else {}
                             
                             if webhook_response:
+                                from core.utils import replace_transport_desc_for_display
                                 tmp_webhook_response = json.dumps(webhook_response, indent=4, ensure_ascii=False)
+                                tmp_webhook_response = replace_transport_desc_for_display(tmp_webhook_response)  # UI 표시용 치환
                                 accumulated['data_parts'].append(
                                     f"\n--- Webhook 응답 (시도 {retry_attempt + 1}회차) ---\n{tmp_webhook_response}")
                             else:
