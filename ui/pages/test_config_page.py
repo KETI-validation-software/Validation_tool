@@ -532,24 +532,22 @@ def _setup_bottom_buttons(parent_widget, right_layout):
     parent_widget.start_btn.setFixedSize(364, 48)
     parent_widget.original_start_btn_size = (364, 48)
 
-    btn_start_enabled = resource_path("assets/image/test_config/btn_시험시작_enabled.png").replace(chr(92), "/")
-    btn_start_hover = resource_path("assets/image/test_config/btn_시험시작_Hover.png").replace(chr(92), "/")
-
-    parent_widget.start_btn.setStyleSheet(f"""
-        QPushButton {{
-            border: none;
-            border-image: url({btn_start_enabled}) 0 0 0 0 stretch stretch;
-            padding-left: 20px;
-            padding-right: 20px;
-            font-family: 'Noto Sans KR';
-            font-size: 20px;
-            font-weight: 500;
-            color: #FFFFFF;
-        }}
-        QPushButton:hover {{
-            border-image: url({btn_start_hover}) 0 0 0 0 stretch stretch;
-        }}
-    """)
+    parent_widget.start_btn.setStyleSheet("""
+          QPushButton {
+              background-color: #1C5DB1;
+              border: none;
+              border-radius: 4px;
+              padding-left: 20px;
+              padding-right: 20px;
+              font-family: 'Noto Sans KR';
+              font-size: 20px;
+              font-weight: 500;
+              color: #FFFFFF;
+          }
+          QPushButton:hover {
+              background-color: #3E85E2;
+          }
+      """)
     parent_widget.start_btn.clicked.connect(parent_widget.start_test)
     parent_widget.start_btn.setEnabled(True)
     button_layout.addWidget(parent_widget.start_btn)
@@ -558,25 +556,22 @@ def _setup_bottom_buttons(parent_widget, right_layout):
     parent_widget.exit_btn = QPushButton("종료")
     parent_widget.exit_btn.setFixedSize(364, 48)
     parent_widget.original_exit_btn_size = (364, 48)
-
-    btn_exit_enabled = resource_path("assets/image/test_config/btn_종료_enabled.png").replace(chr(92), "/")
-    btn_exit_hover = resource_path("assets/image/test_config/btn_종료_Hover.png").replace(chr(92), "/")
-
-    parent_widget.exit_btn.setStyleSheet(f"""
-        QPushButton {{
-            border: none;
-            border-image: url({btn_exit_enabled}) 0 0 0 0 stretch stretch;
-            padding-left: 20px;
-            padding-right: 20px;
-            font-family: 'Noto Sans KR';
-            font-size: 20px;
-            font-weight: 500;
-            color: #6B6B6B;
-        }}
-        QPushButton:hover {{
-            border-image: url({btn_exit_hover}) 0 0 0 0 stretch stretch;
-        }}
-    """)
+    parent_widget.exit_btn.setStyleSheet("""
+          QPushButton {
+              background-color: #FFFFFF;
+              border: 1px solid #6B6B6B;
+              border-radius: 4px;
+              padding-left: 20px;
+              padding-right: 20px;
+              font-family: 'Noto Sans KR';
+              font-size: 20px;
+              font-weight: 500;
+              color: #6B6B6B;
+          }
+          QPushButton:hover {
+              background-color: #EFEFEF;
+          }
+      """)
     parent_widget.exit_btn.clicked.connect(parent_widget.exit_btn_clicked)
     button_layout.addWidget(parent_widget.exit_btn)
 
