@@ -163,7 +163,7 @@ class ConnectionSection(QGroupBox):
         """)
         header_layout.addWidget(self.url_header_empty_label)
 
-        # URL 라벨
+        # URL 라벨 (데이터 셀과 같은 좌우 패딩으로 가운데 정렬 맞춤: 좌52px, 우32px)
         self.url_header_url_label = QLabel("URL")
         self.url_header_url_label.setFixedSize(694, 31)
         self.url_header_url_label.setAlignment(Qt.AlignCenter)
@@ -176,6 +176,8 @@ class ConnectionSection(QGroupBox):
                 font-size: 18px;
                 font-weight: 600;
                 letter-spacing: -0.18px;
+                padding-left: 52px;
+                padding-right: 32px;
             }
         """)
         header_layout.addWidget(self.url_header_url_label)
