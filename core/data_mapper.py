@@ -112,15 +112,34 @@ class ConstraintDataGenerator:
 
             if not is_webhook and not is_response_template:
                 
-                # latest_events에서 DoorProfiles 응답 찾기
+                # ✅ constraints에서 doorID의 referenceEndpoint를 동적으로 찾기
+                ref_endpoint = None
+                if constraints:
+                    for field_path, rule in constraints.items():
+                        if "doorID" in field_path and isinstance(rule, dict):
+                            ref_endpoint = rule.get("referenceEndpoint")
+                            if ref_endpoint:
+                                print(f"[DATA_MAPPER] doorID의 referenceEndpoint 발견: {ref_endpoint}")
+                                break
+                
+                # referenceEndpoint가 없으면 기본값 사용
+                if not ref_endpoint:
+                    ref_endpoint = "DoorProfiles"
+                    print(f"[DATA_MAPPER] referenceEndpoint 없음 - 기본값 사용: {ref_endpoint}")
+                
+                # 슬래시 제거 및 검색 키 생성
+                ref_endpoint_clean = ref_endpoint.lstrip("/")
+                keys_to_search = [ref_endpoint_clean, f"/{ref_endpoint_clean}"]
+                
+                # latest_events에서 참조 API 응답 찾기
                 door_profiles_data = None
-                keys_to_search = ["DoorProfiles", "/DoorProfiles"]
                 for key in keys_to_search:
                     if key in self.latest_events and "RESPONSE" in self.latest_events[key]:
                         door_profiles_data = self.latest_events[key]["RESPONSE"].get("data", {})
+                        print(f"[DATA_MAPPER] latest_events에서 {key} 발견")
                         break
                 
-                # 찾은 DoorProfiles에서 doorID 추출하여 리스트 생성
+                # 찾은 응답에서 doorID 추출하여 리스트 생성
                 new_door_list = []
                 if door_profiles_data and "doorList" in door_profiles_data:
                     for profile in door_profiles_data.get("doorList", []):

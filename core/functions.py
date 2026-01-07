@@ -161,7 +161,11 @@ def format_errors_as_tree(error_messages):
 
         # 각 오류 출력 (들여쓰기 유지)
         for error in errors:
-            result_lines.append(f"- [{error['type']}] {error['detail']}")
+            # 새로운 형식 (여러 줄)인 경우 그대로 출력
+            if '\n' in error['detail']:
+                result_lines.append(f"[{error['type']}] {error['detail']}")
+            else:
+                result_lines.append(f"- [{error['type']}] {error['detail']}")
 
         # 마지막 그룹이 아니면 빈 줄 추가
         if idx < len(error_tree) - 1:
@@ -815,7 +819,8 @@ def _validate_list_match(field_path, field_value, rule, data, reference_context,
                 failed_values.append(f"{item_value} (index {idx})")
 
         if failed_values:
-            error_msg = f"값 불일치: {', '.join(failed_values)}가 {ref_list_field}({ref_list})에 없음"
+            ref_list_str = " | ".join(str(v) for v in ref_list)
+            error_msg = f"값 오류\n- 입력값: {', '.join(failed_values)}\n- 허용값({ref_list_field}): {ref_list_str}"
             field_errors.append(error_msg)
             global_errors.append(f"[의미] {field_path}: {error_msg}")
             return False
@@ -825,7 +830,8 @@ def _validate_list_match(field_path, field_value, rule, data, reference_context,
     # 단일 값 검증
     else:
         if field_value not in ref_list:
-            error_msg = f"값 불일치: {field_value}가 {ref_list_field}({ref_list})에 없음"
+            ref_list_str = " | ".join(str(v) for v in ref_list)
+            error_msg = f"값 오류\n- 입력값: {field_value}\n- 허용값({ref_list_field}): {ref_list_str}"
             field_errors.append(error_msg)
             global_errors.append(f"[의미] {field_path}: {error_msg}")
             return False
@@ -882,14 +888,14 @@ def _validate_field_match(field_path, field_value, rule, reference_context,
     if len(rhs_list) == 1:
         expected = rhs_list[0]
         if not all(item == expected for item in lhs_list):
-            error_msg = f"값 불일치: {lhs_list} != 예상값 {expected}"
+            error_msg = f"값 오류\n- 입력값: {lhs_list}\n- 예상값: {expected}"
             field_errors.append(error_msg)
             global_errors.append(f"[의미] {field_path}: {error_msg}")
             return False
         return True
     else:
         if lhs_list != rhs_list:
-            error_msg = f"값 불일치: {lhs_list} != {rhs_list}"
+            error_msg = f"값 오류\n- 입력값: {lhs_list}\n- 예상값: {rhs_list}"
             field_errors.append(error_msg)
             global_errors.append(f"[의미] {field_path}: {error_msg}")
             return False
@@ -997,16 +1003,17 @@ def _validate_valid_value_match(field_path, field_value, rule, field_errors, glo
         expected = allowed[0] if allowed else None
         if field_value != expected:
             # 빈 값 표시 처리
-            display_value = repr(field_value) if field_value not in [None, ""] else "'(빈 값)'" if field_value == "" else "null"
-            error_msg = f"값 불일치: {display_value} != 예상값 {expected}"
+            display_value = "(Empty)" if field_value == "" else "null" if field_value is None else str(field_value)
+            error_msg = f"값 오류\n- 입력값: {display_value}\n- 예상값: {expected}"
             field_errors.append(error_msg)
             global_errors.append(f"[의미] {field_path}: {error_msg}")
             return False
     else:  # equalsAny
         if field_value not in allowed:
             # 빈 값 표시 처리
-            display_value = repr(field_value) if field_value not in [None, ""] else "'(빈 값)'" if field_value == "" else "null"
-            error_msg = f"값 불일치: {display_value}가 허용값 목록 {allowed}에 없음"
+            display_value = "(Empty)" if field_value == "" else "null" if field_value is None else str(field_value)
+            allowed_str = " | ".join(str(v) for v in allowed)
+            error_msg = f"값 오류\n- 입력값: {display_value}\n- 허용값: {allowed_str}"
             field_errors.append(error_msg)
             global_errors.append(f"[의미] {field_path}: {error_msg}")
             return False
