@@ -1101,8 +1101,6 @@ class Server(BaseHTTPRequestHandler):
             webhook_thread.start()
             print(f"[DEBUG][SERVER] 웹훅 스레드 시작됨")
 
-        # print("통플검증sw이 보낸 메시지", a)
-
     def webhook_req(self, url, json_data_tmp, max_retries=3, api_name=""):
         import requests
         for attempt in range(max_retries):
@@ -1118,18 +1116,9 @@ class Server(BaseHTTPRequestHandler):
                 self._push_event(api_name, "WEBHOOK_IN", Server.webhook_response)
 
                 # JSON 파일 저장 제거 - spec/video/videoData_response.py 사용
-                # with open(resource_path("spec/" + self.system + "/" + "webhook_" + self.path[1:] + ".json"),
-                #           "w", encoding="UTF-8") as out_file2:
-                #     json.dump(json.loads(str(self.result.text)), out_file2, ensure_ascii=False)
                 break
-                #  self.res.emit(str(self.result.text))
-            # except requests.ConnectionError:
-            #    print("..")
-            #    time.sleep(1)
             except Exception as e:
                 print(e)
-                # print(traceback.format_exc())
-                #  self.res.emit(str("err from WebhookRequest"))
 
     def api_res(self, api_name=None):
         i, data, out_con = None, None, None

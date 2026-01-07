@@ -435,7 +435,6 @@ class MyApp(PlatformMainUI):
                 # 시스템 요청 확인
                 api_name = self.Server.message[self.cnt]
                 print(f"[DEBUG] API 처리 시작: {api_name}")
-               #  print(f"[DEBUG] cnt={self.cnt}, current_retry={self.current_retry}")
 
                 current_validation = {}
 
