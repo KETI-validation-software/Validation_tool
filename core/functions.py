@@ -819,8 +819,11 @@ def _validate_list_match(field_path, field_value, rule, data, reference_context,
                 failed_values.append(f"{item_value} (index {idx})")
 
         if failed_values:
-            ref_list_str = " | ".join(str(v) for v in ref_list)
-            error_msg = f"값 오류\n- 입력값: {', '.join(failed_values)}\n- 허용값({ref_list_field}): {ref_list_str}"
+            if ref_list:
+                ref_list_str = " | ".join(str(v) for v in ref_list)
+            else:
+                ref_list_str = "(없음)"
+            error_msg = f"값 불일치\n- 입력값: {', '.join(failed_values)}\n- 조회된 {ref_list_field} 목록: {ref_list_str}\n"
             field_errors.append(error_msg)
             global_errors.append(f"[의미] {field_path}: {error_msg}")
             return False
@@ -830,8 +833,11 @@ def _validate_list_match(field_path, field_value, rule, data, reference_context,
     # 단일 값 검증
     else:
         if field_value not in ref_list:
-            ref_list_str = " | ".join(str(v) for v in ref_list)
-            error_msg = f"값 오류\n- 입력값: {field_value}\n- 허용값({ref_list_field}): {ref_list_str}"
+            if ref_list:
+                ref_list_str = " | ".join(str(v) for v in ref_list)
+            else:
+                ref_list_str = "(없음)"
+            error_msg = f"값 불일치\n- 입력값: {field_value}\n- 조회된 {ref_list_field} 목록: {ref_list_str}\n"
             field_errors.append(error_msg)
             global_errors.append(f"[의미] {field_path}: {error_msg}")
             return False
@@ -1004,7 +1010,7 @@ def _validate_valid_value_match(field_path, field_value, rule, field_errors, glo
         if field_value != expected:
             # 빈 값 표시 처리
             display_value = "(Empty)" if field_value == "" else "null" if field_value is None else str(field_value)
-            error_msg = f"값 오류\n- 입력값: {display_value}\n- 예상값: {expected}"
+            error_msg = f"값 불일치\n- 입력값: {display_value}\n- 예상값: {expected}\n"
             field_errors.append(error_msg)
             global_errors.append(f"[의미] {field_path}: {error_msg}")
             return False
@@ -1013,7 +1019,7 @@ def _validate_valid_value_match(field_path, field_value, rule, field_errors, glo
             # 빈 값 표시 처리
             display_value = "(Empty)" if field_value == "" else "null" if field_value is None else str(field_value)
             allowed_str = " | ".join(str(v) for v in allowed)
-            error_msg = f"값 오류\n- 입력값: {display_value}\n- 허용값: {allowed_str}"
+            error_msg = f"값 불일치\n- 입력값: {display_value}\n- 선택 가능 옵션: {allowed_str}\n"
             field_errors.append(error_msg)
             global_errors.append(f"[의미] {field_path}: {error_msg}")
             return False
