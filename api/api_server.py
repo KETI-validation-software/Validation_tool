@@ -785,7 +785,7 @@ class Server(BaseHTTPRequestHandler):
                     print(f"[DEBUG][SERVER] WebHook 모드 감지, auth_pass={auth_pass}")
                     try:
                         url_tmp = trans_protocol.get("transProtocolDesc", {})
-                        print(f"[DEBUG][SERVER] Webhook URL: {url_tmp}")
+                        print(f"[DEBUG][SERVER] Webhook URL (받은 주소): {url_tmp}")
 
                         # ✅ 인증 확인 추가
                         if not auth_pass:
@@ -809,8 +809,9 @@ class Server(BaseHTTPRequestHandler):
                             self.wfile.write(json.dumps(message).encode('utf-8'))
                             return
 
-                        # 2단계: 잘못된 주소인 경우
+                        # ✅ 시스템에서 받은 주소를 그대로 사용
                         url_tmp = str(url_tmp).strip()
+                        print(f"[DEBUG][SERVER] Webhook URL (시스템에서 받은 주소): {url_tmp}")
 
                         # 4단계: 올바른 인덱스 사용
                         message = self.outMessage[message_cnt]
