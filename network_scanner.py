@@ -1,11 +1,13 @@
 import socket
+import traceback
+from core.logger import Logger
 from PyQt5.QtCore import QObject, pyqtSignal
 try:
     from scapy.all import ARP, Ether, srp
     SCAPY_AVAILABLE = True
 except ImportError:
     SCAPY_AVAILABLE = False
-    print("scapy 라이브러리가 설치되지 않았습니다. ARP 스캔 기능을 사용할 수 없습니다.")
+    Logger.warn("scapy 라이브러리가 설치되지 않았습니다. ARP 스캔 기능을 사용할 수 없습니다.")
 
 
 def get_local_ip():
@@ -127,7 +129,7 @@ class ARPScanWorker(QObject):
                 self.scan_failed.emit("네트워크 대역을 계산할 수 없습니다.")
                 return
 
-            print(f"ARP 스캔 시작: {network}")
+            Logger.info(f"ARP 스캔 시작: {network}")
 
             # 2. ARP 스캔 실행
             try:
@@ -178,13 +180,12 @@ class ARPScanWorker(QObject):
             else:
                 urls = found_ips  # 포트 없이 IP만
 
-            print(f"ARP 스캔 완료: {urls}")
+            Logger.info(f"ARP 스캔 완료: {urls}")
             self.scan_completed.emit(urls)
 
         except Exception as e:
-            print(f"ARP 스캔 오류: {e}")
-            import traceback
-            traceback.print_exc()
+            Logger.error(f"ARP 스캔 오류: {e}")
+            Logger.error(traceback.format_exc())
             self.scan_failed.emit(f"ARP 스캔 중 오류 발생:\n{str(e)}")
 
     def _get_network_range(self, ip):
@@ -200,5 +201,6 @@ class ARPScanWorker(QObject):
             return network
 
         except Exception as e:
-            print(f"네트워크 대역 계산 오류: {e}")
+            Logger.error(f"네트워크 대역 계산 오류: {e}")
             return None
+            

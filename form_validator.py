@@ -11,6 +11,7 @@ import os
 import sys
 import json
 from pathlib import Path
+import traceback
 from typing import Dict, List
 
 from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem
@@ -24,6 +25,7 @@ from core.auth_service import AuthService
 from core.file_generator import FileGeneratorService
 from core.opt_loader import OptLoader
 from core.functions import resource_path
+from core.logger import Logger
 
 import config.CONSTANTS as CONSTANTS
 
@@ -169,7 +171,7 @@ class FormValidator:
             return True
 
         except Exception as e:
-            print(f"CONSTANTS.py 업데이트 실패: {e}")
+            Logger.error(f"CONSTANTS.py 업데이트 실패: {e}")
             return False
 
     def _collect_basic_info(self):
@@ -215,7 +217,7 @@ class FormValidator:
                     return item.data(Qt.UserRole)
             return None
         except Exception as e:
-            print(f"선택된 시험 분야 spec_id 가져오기 실패: {e}")
+            Logger.error(f"선택된 시험 분야 spec_id 가져오기 실패: {e}")
             return None
 
     def _get_selected_spec_index(self):
@@ -236,9 +238,8 @@ class FormValidator:
                 return 0
 
         except Exception as e:
-            print(f"선택된 spec 인덱스 가져오기 실패: {e}")
-            import traceback
-            traceback.print_exc()
+            Logger.error(f"선택된 spec 인덱스 가져오기 실패: {e}")
+            Logger.error(traceback.format_exc())
             return 0
 
     def _update_constants_file(self, file_path, variables):
@@ -261,9 +262,9 @@ class FormValidator:
                     new_url_line = f'WEBHOOK_URL = f"https://{{WEBHOOK_PUBLIC_IP}}:{{WEBHOOK_PORT}}"'
                     content = re.sub(pattern_url, new_url_line, content, flags=re.MULTILINE)
 
-                    print(f"[WEBHOOK] 시험 URL에서 IP 추출: {webhook_ip}")
+                    Logger.info(f"[WEBHOOK] 시험 URL에서 IP 추출: {webhook_ip}")
             except Exception as e:
-                print(f"[WEBHOOK] URL 파싱 실패: {e}")
+                Logger.error(f"[WEBHOOK] URL 파싱 실패: {e}")
 
         for var_name, var_value in variables.items():
             if isinstance(var_value, str):
@@ -361,9 +362,8 @@ class FormValidator:
             }
 
         except Exception as e:
-            print(f"spec_id={spec_id} 프로토콜 설정 추출 실패: {e}")
-            import traceback
-            traceback.print_exc()
+            Logger.error(f"spec_id={spec_id} 프로토콜 설정 추출 실패: {e}")
+            Logger.error(traceback.format_exc())
             return None
 
     def overwrite_spec_config_from_mapping(self, constants_path: str = None) -> None:
@@ -540,12 +540,11 @@ class FormValidator:
                 if 'SPEC_CONFIG' in namespace:
                     CONSTANTS.SPEC_CONFIG = namespace['SPEC_CONFIG']
             except Exception as mem_err:
-                print(f"[WARNING] SPEC_CONFIG 메모리 업데이트 실패: {mem_err}")
+                Logger.warning(f"[WARNING] SPEC_CONFIG 메모리 업데이트 실패: {mem_err}")
 
         except Exception as e:
-            print(f"SPEC_CONFIG 덮어쓰기 실패: {e}")
-            import traceback
-            traceback.print_exc()
+            Logger.error(f"SPEC_CONFIG 덮어쓰기 실패: {e}")
+            Logger.error(traceback.format_exc())
 
     def _update_spec_config(self, spec_id, config_data):
         """CONSTANTS.py의 SPEC_CONFIG 리스트에 spec_id별 설정 업데이트"""
@@ -627,9 +626,8 @@ class FormValidator:
                 f.write(content)
 
         except Exception as e:
-            print(f"SPEC_CONFIG 업데이트 실패: {e}")
-            import traceback
-            traceback.print_exc()
+            Logger.error(f"SPEC_CONFIG 업데이트 실패: {e}")
+            Logger.error(traceback.format_exc())
 
     # ---------- API 데이터 로드 ----------
 
@@ -693,9 +691,8 @@ class FormValidator:
             self.parent.check_next_button_state()
 
         except Exception as e:
-            print(f"API 데이터 로드 실패: {e}")
-            import traceback
-            traceback.print_exc()
+            Logger.error(f"API 데이터 로드 실패: {e}")
+            Logger.error(traceback.format_exc())
             QMessageBox.critical(self.parent, "오류", f"API 데이터 로드 중 오류가 발생했습니다:\n{str(e)}")
 
     # ---------- 테이블 채우기 ----------
@@ -756,9 +753,8 @@ class FormValidator:
                 self.parent.scenario_placeholder_label.raise_()
 
         except Exception as e:
-            print(f"시험 분야 테이블 채우기 실패: {e}")
-            import traceback
-            traceback.print_exc()
+            Logger.error(f"시험 분야 테이블 채우기 실패: {e}")
+            Logger.error(traceback.format_exc())
 
     def _fill_scenarios_for_group(self, clicked_row, group_name):
         """선택된 시험 분야의 시나리오를 시나리오 테이블에 표시"""
@@ -831,9 +827,8 @@ class FormValidator:
             self.parent.resizeEvent(QResizeEvent(self.parent.size(), self.parent.size()))
 
         except Exception as e:
-            print(f"시나리오 채우기 실패: {e}")
-            import traceback
-            traceback.print_exc()
+            Logger.error(f"시나리오 채우기 실패: {e}")
+            Logger.error(traceback.format_exc())
             if 'field_table' in locals():
                 field_table.blockSignals(False)
             if 'scenario_table' in locals():
@@ -901,9 +896,8 @@ class FormValidator:
                 self.parent.api_test_table.setItem(r, 1, id_item)
 
         except Exception as e:
-            print(f"API 테이블 채우기 실패: {e}")
-            import traceback
-            traceback.print_exc()
+            Logger.error(f"API 테이블 채우기 실패: {e}")
+            Logger.error(traceback.format_exc())
 
     # ---------- Preload ----------
 
@@ -1009,7 +1003,7 @@ class FormValidator:
                 table.setSpan(0, 1, row_count, 1)
 
         except Exception as e:
-            print(f"초기 시나리오 메시지 표시 실패: {e}")
+            Logger.error(f"초기 시나리오 메시지 표시 실패: {e}")
 
     def _show_scenario_placeholder(self):
         """시험 시나리오 안내 문구 표시"""
@@ -1025,7 +1019,7 @@ class FormValidator:
                 self.parent.scenario_placeholder_label.show()
                 self.parent.scenario_placeholder_label.raise_()
         except Exception as e:
-            print(f"시험 시나리오 안내 문구 표시 실패: {e}")
+            Logger.error(f"시험 시나리오 안내 문구 표시 실패: {e}")
 
     def _show_initial_api_message(self):
         """시험 API 테이블에 초기 메시지 표시"""
@@ -1037,7 +1031,7 @@ class FormValidator:
                 self.parent.api_placeholder_label.show()
 
         except Exception as e:
-            print(f"초기 API 메시지 표시 실패: {e}")
+            Logger.error(f"초기 API 메시지 표시 실패: {e}")
 
     # ---------- API 위임 메서드 (하위 호환성) ----------
 

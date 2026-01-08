@@ -22,20 +22,20 @@
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 82.76,
+    "score": 96.55,
     "totalFields": 29,
-    "passedFields": 24,
-    "failedFields": 5
+    "passedFields": 28,
+    "failedFields": 1
   },
   "testResult": [
     {
       "testGroup": "cmii82nib009f8z1tvo6fz8j2",
       "testSpecId": "cmii7shen005i8z1tagevx4qh",
       "testSpecName": "sensor001",
-      "score": 82.76,
+      "score": 96.55,
       "totalFields": 29,
-      "passedFields": 24,
-      "failedFields": 5,
+      "passedFields": 28,
+      "failedFields": 1,
       "apis": [
         {
           "id": "cmii7ubap005m8z1tyhf1yc1r",
@@ -105,16 +105,19 @@
           "name": "실시간 보안용 센서 데이터 정보 연동",
           "method": "POST",
           "endpoint": "/RealtimeSensorData",
-          "score": 67.0,
+          "score": 89.0,
           "validationCnt": 1,
           "totalFields": 9,
-          "passFields": 6,
-          "failFields": 3,
+          "passFields": 8,
+          "failFields": 1,
           "validations": [
             {
               "attempt": 1,
               "validationData": {
                 "sensorDeviceList": [
+                  {
+                    "sensorDeviceID": "iot0001"
+                  },
                   {
                     "sensorDeviceID": "iot0002"
                   }
@@ -122,19 +125,15 @@
                 "duration": 100,
                 "transProtocol": {
                   "transProtocolType": "WebHook",
-                  "transProtocolDesc": "https://webhook2026.ngrok.dev"
+                  "transProtocolDesc": "https://10.252.219.95:2001"
                 },
                 "startTime": 20251105163010124
               },
               "validationErrors": [
                 "[시도 1/1]",
                 "- [맥락 오류] sensorDeviceList: 값 불일치",
-                "- 입력값: [{'sensorDeviceID': 'iot0002'}]",
-                "- 예상값: null",
-                "--- Webhook 검증 ---",
-                "<b>[최상위]</b> (2건)",
-                "- [필드 누락] code",
-                "- [필드 누락] message"
+                "- 입력값: [{'sensorDeviceID': 'iot0001'}, {'sensorDeviceID': 'iot0002'}]",
+                "- 예상값: null"
               ]
             }
           ]
@@ -162,11 +161,11 @@
           "name": "실시간 보안용 센서 이벤트 분석 정보 연동",
           "method": "POST",
           "endpoint": "/RealtimeSensorEventInfos",
-          "score": 80.0,
+          "score": 100.0,
           "validationCnt": 1,
           "totalFields": 10,
-          "passFields": 8,
-          "failFields": 2,
+          "passFields": 10,
+          "failFields": 0,
           "validations": [
             {
               "attempt": 1,
@@ -174,24 +173,18 @@
                 "sensorDeviceList": [
                   {
                     "sensorDeviceID": "iot0002"
-                  },
-                  {
-                    "sensorDeviceID": "iot0001"
                   }
                 ],
                 "duration": 1000,
                 "transProtocol": {
                   "transProtocolType": "WebHook",
-                  "transProtocolDesc": "https://webhook2026.ngrok.dev"
+                  "transProtocolDesc": "https://10.252.219.95:2001"
                 },
-                "eventFilter": "Leak",
+                "eventFilter": "MotionDetection",
                 "startTime": 20251105163010123
               },
               "validationErrors": [
-                "--- Webhook 검증 ---",
-                "<b>[최상위]</b> (2건)",
-                "- [필드 누락] code",
-                "- [필드 누락] message"
+                "오류가 없습니다."
               ]
             }
           ]
@@ -241,7 +234,7 @@
                   }
                 ],
                 "maxCount": 8,
-                "eventFilter": "MotionDetection"
+                "eventFilter": "Leak"
               },
               "validationErrors": [
                 "오류가 없습니다."
@@ -252,5 +245,5 @@
       ]
     }
   ],
-  "completedDate": "2026-01-08T07:43:58Z"
+  "completedDate": "2026-01-08T08:17:00Z"
 }

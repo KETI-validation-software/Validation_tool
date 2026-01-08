@@ -452,7 +452,7 @@ class InfoWidget(QWidget):
             self.start_btn.setEnabled(True)
 
         except Exception as e:
-            Logger.debug(f"버튼 상태 업데이트 실패: {e}")
+            print(f"버튼 상태 업데이트 실패: {e}")
 
     def start_scan(self):
         """실제 네트워크 스캔으로 사용 가능한 주소 탐지"""
@@ -549,7 +549,7 @@ class InfoWidget(QWidget):
             self.scan_thread.start()
 
         except Exception as e:
-            Logger.debug(f"주소 탐색 오류: {e}")
+            print(f"주소 탐색 오류: {e}")
             QMessageBox.critical(self, "오류", f"네트워크 탐색 중 오류 발생:\n{str(e)}")
 
     def _on_scan_completed(self, urls):
@@ -779,7 +779,7 @@ class InfoWidget(QWidget):
             self.start_btn.setEnabled(True)
 
         except Exception as e:
-            Logger.debug(f"버튼 상태 체크 실패: {e}")
+            print(f"버튼 상태 체크 실패: {e}")
             self.start_btn.setEnabled(True)  # 오류 발생 시에도 활성화 유지
 
     def exit_btn_clicked(self):
@@ -831,7 +831,7 @@ class InfoWidget(QWidget):
             return verification_type
 
         except Exception as e:
-            Logger.debug(f"verificationType 추출 실패: {e}")
+            print(f"verificationType 추출 실패: {e}")
             import traceback
             traceback.print_exc()
             return "request"  # 기본값
@@ -991,7 +991,7 @@ class InfoWidget(QWidget):
                         f.write(content)
 
                 except Exception as e:
-                    Logger.debug(f"CONSTANTS.py 파일 수정 실패: {e}")
+                    print(f"CONSTANTS.py 파일 수정 실패: {e}")
                     # 파일 수정 실패해도 메모리상의 값은 이미 업데이트되었으므로 계속 진행
 
             QApplication.processEvents()  # 스피너 애니메이션 유지
@@ -1016,7 +1016,7 @@ class InfoWidget(QWidget):
             self.form_validator.send_heartbeat_idle()
 
         except Exception as e:
-            Logger.debug(f"시험정보 불러오기 실패: {e}")
+            print(f"시험정보 불러오기 실패: {e}")
             import traceback
             traceback.print_exc()
             QMessageBox.critical(self, "오류", f"시험 정보를 불러오는 중 오류가 발생했습니다:\n{str(e)}")
@@ -1031,7 +1031,7 @@ class InfoWidget(QWidget):
 
     def _on_test_info_error(self, error_message):
         """시험 정보 로드 실패 시 호출되는 슬롯"""
-        Logger.debug(f"시험정보 불러오기 실패: {error_message}")
+        print(f"시험정보 불러오기 실패: {error_message}")
         QMessageBox.critical(self, "오류", f"시험 정보를 불러오는 중 오류가 발생했습니다:\n{error_message}")
 
         # 로딩 팝업 닫기
@@ -1101,7 +1101,7 @@ class InfoWidget(QWidget):
                 self.pw_input.clear()
 
         except Exception as e:
-            Logger.error(f" Authentication 자동 입력 중 오류 발생: {e}")
+            print(f"[ERROR] Authentication 자동 입력 중 오류 발생: {e}")
             import traceback
             traceback.print_exc()
             # 오류 발생 시 필드를 활성화
@@ -1116,7 +1116,7 @@ class InfoWidget(QWidget):
                 # CONSTANTS에 저장 (메모리 + config.txt 파일)
                 CONSTANTS.save_management_url(new_url)
         except Exception as e:
-            Logger.debug(f"관리자시스템 주소 변경 처리 실패: {e}")
+            print(f"관리자시스템 주소 변경 처리 실패: {e}")
 
     def _validate_ip_address(self, ip):
         """IP 주소 형식 검증"""
@@ -1182,7 +1182,7 @@ class InfoWidget(QWidget):
                 # 다음 버튼은 항상 활성화 (클릭 시 검증)
                 self.next_btn.setEnabled(True)
         except Exception as e:
-            Logger.debug(f"다음 버튼 상태 체크 실패: {e}")
+            print(f"다음 버튼 상태 체크 실패: {e}")
 
     def _is_page1_complete(self):
         """첫 번째 페이지 완료 조건 검사"""
@@ -1217,7 +1217,7 @@ class InfoWidget(QWidget):
             return basic_info_filled and admin_code_valid and test_field_filled
 
         except Exception as e:
-            Logger.debug(f"페이지 완료 조건 체크 실패: {e}")
+            print(f"페이지 완료 조건 체크 실패: {e}")
             return False
 
     def on_test_field_selected(self, row, col):
@@ -1241,7 +1241,7 @@ class InfoWidget(QWidget):
             self.form_validator._show_initial_api_message()
 
         except Exception as e:
-            Logger.debug(f"시험 분야 선택 처리 실패: {e}")
+            print(f"시험 분야 선택 처리 실패: {e}")
             QMessageBox.warning(self, "오류", f"시험 분야 데이터 로드 중 오류가 발생했습니다:\n{str(e)}")
 
     def on_scenario_selected(self, row, col):
@@ -1261,7 +1261,7 @@ class InfoWidget(QWidget):
             self.form_validator._fill_api_table_for_selected_field_from_api(row)
 
         except Exception as e:
-            Logger.debug(f"시나리오 선택 처리 실패: {e}")
+            print(f"시나리오 선택 처리 실패: {e}")
             QMessageBox.warning(self, "오류", f"시나리오 데이터 로드 중 오류가 발생했습니다:\n{str(e)}")
 
     def toggle_address_popover(self):
@@ -1375,7 +1375,7 @@ class InfoWidget(QWidget):
             QMessageBox.information(self, "추가 완료", f"주소가 추가되었습니다.\n{final_url}")
 
         except Exception as e:
-            Logger.debug(f"IP 추가 오류: {e}")
+            print(f"IP 추가 오류: {e}")
             QMessageBox.critical(self, "오류", f"주소 추가 중 오류가 발생했습니다:\n{str(e)}")
 
     def on_url_row_selected(self, row, col):
@@ -1429,4 +1429,4 @@ class InfoWidget(QWidget):
             self.check_start_button_state()
 
         except Exception as e:
-            Logger.debug(f"URL 행 선택 처리 실패: {e}")
+            print(f"URL 행 선택 처리 실패: {e}")

@@ -22,20 +22,20 @@
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 74.42,
+    "score": 100.0,
     "totalFields": 43,
-    "passedFields": 32,
-    "failedFields": 11
+    "passedFields": 43,
+    "failedFields": 0
   },
   "testResult": [
     {
       "testGroup": "cmjcefmh8070gcfb35wjptcsl",
       "testSpecId": "cmii7wfuf006i8z1tcds6q69g",
       "testSpecName": "sensor001",
-      "score": 74.42,
+      "score": 100.0,
       "totalFields": 43,
-      "passedFields": 32,
-      "failedFields": 11,
+      "passedFields": 43,
+      "failedFields": 0,
       "apis": [
         {
           "id": "cmii82age008k8z1t71s85tbz",
@@ -147,11 +147,11 @@
           "name": "실시간 보안용 센서 데이터 정보 연동",
           "method": "POST",
           "endpoint": "/RealtimeSensorData",
-          "score": 25.0,
+          "score": 100.0,
           "validationCnt": 1,
           "totalFields": 8,
-          "passFields": 2,
-          "failFields": 6,
+          "passFields": 8,
+          "failFields": 0,
           "validations": [
             {
               "attempt": 1,
@@ -163,7 +163,7 @@
                 "[시도 1/1]",
                 "오류가 없습니다.",
                 "--- Webhook 검증 ---",
-                "Webhook Message Missing!"
+                "오류가 없습니다."
               ]
             }
           ]
@@ -191,11 +191,11 @@
           "name": "실시간 보안용 센서 이벤트 분석 정보 연동",
           "method": "POST",
           "endpoint": "/RealtimeSensorEventInfos",
-          "score": 29.0,
+          "score": 100.0,
           "validationCnt": 1,
           "totalFields": 7,
-          "passFields": 2,
-          "failFields": 5,
+          "passFields": 7,
+          "failFields": 0,
           "validations": [
             {
               "attempt": 1,
@@ -207,7 +207,7 @@
                 "[시도 1/1]",
                 "오류가 없습니다.",
                 "--- Webhook 검증 ---",
-                "Webhook Message Missing!"
+                "오류가 없습니다."
               ]
             }
           ]
@@ -249,14 +249,14 @@
                 "sensorDeviceList": [
                   {
                     "sensorDeviceID": "iot0001",
-                    "eventName": "MotionDetection",
-                    "eventTime": 20251110728039488,
+                    "eventName": "Leak",
+                    "eventTime": 20251105501626197,
                     "eventDesc": "100도"
                   },
                   {
                     "sensorDeviceID": "iot0002",
-                    "eventName": "MotionDetection",
-                    "eventTime": 20251105399219300,
+                    "eventName": "Leak",
+                    "eventTime": 20251109091295881,
                     "eventDesc": "100도"
                   }
                 ]
@@ -271,5 +271,5 @@
       ]
     }
   ],
-  "completedDate": "2026-01-08T07:43:59Z"
+  "completedDate": "2026-01-08T08:17:01Z"
 }
