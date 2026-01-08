@@ -602,7 +602,7 @@ class MyApp(PlatformMainUI):
                         step_result = "FAIL"
                         add_err = 1
                         # 통일된 포맷으로 변경
-                        error_msg = f"[시도 {retry_attempt + 1}/{current_retries}]\n[맥락 오류] Request Body 값 오류\n- 입력값: {json.dumps(current_data, ensure_ascii=False)}\n- 예상값: (Empty)"
+                        error_msg = f"[시도 {retry_attempt + 1}/{current_retries}]\n[맥락 오류] Request Body 값 오류\n- 입력값: {json.dumps(current_data, ensure_ascii=False)}\n- 예상값: Empty"
                         combined_error_parts.append(error_msg)
                     elif (len(current_data) == 0) or current_data == "{}":
                         step_result = "PASS"
