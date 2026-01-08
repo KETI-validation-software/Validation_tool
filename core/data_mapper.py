@@ -19,6 +19,7 @@ class ConstraintDataGenerator:
         constraints: 제약 조건
         api_name: API 이름 (RealtimeDoorStatus2 등)
         door_memory: 문 상태 저장소
+        is_webhook: 웹훅 이벤트 생성 여부 (True이면 랜덤 선택 안함)
         """
         # ✅ sensorDeviceList 구조를 가진 웹훅 데이터 동적 생성 (범용)
         if is_webhook and "sensorDeviceList" in template_data:
@@ -214,7 +215,7 @@ class ConstraintDataGenerator:
             return template_data
 
 
-        constraint_map = self._build_constraint_map(constraints, request_data)
+        constraint_map = self._build_constraint_map(constraints, request_data, is_webhook)
         response = self._generate_from_template(template_data, constraint_map)
         template_data.update(response)
         return template_data
@@ -226,7 +227,7 @@ class ConstraintDataGenerator:
             updated_data = self.change_random_field_type(request_data)
         return updated_data
 
-    def _build_constraint_map(self, constraints, request_data):
+    def _build_constraint_map(self, constraints, request_data, is_webhook=False):
         """constraints를 분석하여 각 필드의 제약 조건과 참조 값을 매핑"""
         constraint_map = {}
 
@@ -275,6 +276,15 @@ class ConstraintDataGenerator:
                     print(f"[DEBUG][BUILD_MAP]   event_data: {event_data}")
                     values = self.find_key(event_data, ref_field)
                     print(f"[DEBUG][BUILD_MAP]   Found values from event: {values}")
+                    
+                    # response-based(시스템 요청)만 랜덤 선택, request-based(플랫폼 응답/웹훅)는 그대로 사용 (01/08)
+                    if value_type == "response-based" and not is_webhook and values and len(values) > 0:
+                        original_count = len(values)
+                        random_count = random.randint(1, len(values))
+                        values = random.sample(values, random_count)
+                        print(f"[DEBUG][BUILD_MAP]   Random selection: {random_count}/{original_count} items selected (시스템 요청)")
+                    else:
+                        print(f"[DEBUG][BUILD_MAP]   랜덤 선택 안함 (valueType={value_type}, is_webhook={is_webhook}), 전체 사용: {len(values)}개")
                 else:
                     print(f"[DEBUG][BUILD_MAP]   referenceEndpoint NOT found in latest_events")
                     print(f"[DEBUG][BUILD_MAP]   Available endpoints: {list(self.latest_events.keys())}")
