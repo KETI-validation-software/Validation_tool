@@ -20,6 +20,7 @@ from api.api_server import Server  # ✅ door_memory 접근을 위한 import 추
 from core.json_checker_new import timeout_field_finder
 from core.functions import json_check_, resource_path, json_to_data, build_result_json
 from core.data_mapper import ConstraintDataGenerator
+from core.logger import Logger
 from ui.splash_screen import LoadingPopup
 from ui.detail_dialog import CombinedDetailDialog
 from ui.gui_utils import CustomDialog
@@ -182,7 +183,7 @@ class SystemMainUI(CommonMainUI):
             external_constants_path = os.path.join(exe_dir, "config", "CONSTANTS.py")
 
             if os.path.exists(external_constants_path):
-                print(f"[GROUP TABLE] 외부 CONSTANTS.py에서 SPEC_CONFIG 로드: {external_constants_path}")
+                Logger.debug(f"[GROUP TABLE] 외부 CONSTANTS.py에서 SPEC_CONFIG 로드: {external_constants_path}")
                 try:
                     with open(external_constants_path, 'r', encoding='utf-8') as f:
                         constants_code = f.read()
@@ -190,14 +191,14 @@ class SystemMainUI(CommonMainUI):
                     namespace = {'__file__': external_constants_path}
                     exec(constants_code, namespace)
                     SPEC_CONFIG = namespace.get('SPEC_CONFIG', self.CONSTANTS.SPEC_CONFIG)
-                    print(f"[GROUP TABLE] ✅ 외부 SPEC_CONFIG 로드 완료: {len(SPEC_CONFIG)}개 그룹")
+                    Logger.debug(f"[GROUP TABLE] ✅ 외부 SPEC_CONFIG 로드 완료: {len(SPEC_CONFIG)}개 그룹")
                     # 디버그: 그룹 이름 출력
                     for i, g in enumerate(SPEC_CONFIG):
                         group_name = g.get('group_name', '이름없음')
                         group_keys = [k for k in g.keys() if k not in ['group_name', 'group_id']]
-                        print(f"[GROUP TABLE DEBUG] 그룹 {i}: {group_name}, spec_id 개수: {len(group_keys)}, spec_ids: {group_keys}")
+                        Logger.debug(f"[GROUP TABLE DEBUG] 그룹 {i}: {group_name}, spec_id 개수: {len(group_keys)}, spec_ids: {group_keys}")
                 except Exception as e:
-                    print(f"[GROUP TABLE] ⚠️ 외부 CONSTANTS 로드 실패, 기본값 사용: {e}")
+                    Logger.debug(f"[GROUP TABLE] ⚠️ 외부 CONSTANTS 로드 실패, 기본값 사용: {e}")
         # ===== 외부 CONSTANTS 로드 끝 =====
         self.webhook_schema_idx = 0
         self.webhookInSchema = []
@@ -361,7 +362,7 @@ class SystemMainUI(CommonMainUI):
             self.spec_id_to_index[spec_id] = idx
             self.index_to_spec_id[idx] = spec_id
 
-        print(f"[INFO] '{group_data.get('group_name')}' 그룹의 시험 분야 {len(spec_items)}개 로드 완료.")
+        Logger.info(f" '{group_data.get('group_name')}' 그룹의 시험 분야 {len(spec_items)}개 로드 완료.")
 
 
     def initUI(self):
@@ -632,19 +633,19 @@ class SystemMainUI(CommonMainUI):
     def select_first_scenario(self):
         """프로그램 시작 시 첫 번째 그룹의 첫 번째 시나리오 자동 선택"""
         try:
-            print(f"[DEBUG] 초기 시나리오 자동 선택 시작")
+            Logger.debug(f" 초기 시나리오 자동 선택 시작")
 
             # 1. 첫 번째 그룹이 있는지 확인
             if self.group_table.rowCount() > 0:
                 self.group_table.selectRow(0)
-                print(f"[DEBUG] 첫 번째 그룹 선택: {self.index_to_group_name.get(0)}")
+                Logger.debug(f" 첫 번째 그룹 선택: {self.index_to_group_name.get(0)}")
                 self.on_group_selected(0, 0)
 
             # 2. 시나리오 테이블에 첫 번째 항목이 있는지 확인
             if self.test_field_table.rowCount() > 0:
                 self.test_field_table.selectRow(0)
                 first_spec_id = self.index_to_spec_id.get(0)
-                print(f"[DEBUG] 첫 번째 시나리오 선택: spec_id={first_spec_id}")
+                Logger.debug(f" 첫 번째 시나리오 선택: spec_id={first_spec_id}")
                 self.on_test_field_selected(0, 0)
                 # URL 생성 (test_name 사용)
                 if hasattr(self, 'spec_config'):
@@ -653,11 +654,11 @@ class SystemMainUI(CommonMainUI):
                 else:
                     self.pathUrl = self.url + "/" + self.current_spec_id
                 self.url_text_box.setText(self.pathUrl)  # 안내 문구 변경
-            print(f"[DEBUG] 초기 시나리오 자동 선택 완료: {self.spec_description}")
+            Logger.debug(f" 초기 시나리오 자동 선택 완료: {self.spec_description}")
             QApplication.processEvents()
 
         except Exception as e:
-            print(f"[ERROR] 초기 시나리오 선택 실패: {e}")
+            Logger.error(f" 초기 시나리오 선택 실패: {e}")
             import traceback
             traceback.print_exc()
 
@@ -894,9 +895,9 @@ class SystemMainUI(CommonMainUI):
                     # ✅ row를 직접 사용 (webhookInSchema는 전체 API 리스트와 1:1 매칭)
                     if row < len(self.webhookInSchema):
                         webhook_schema = self.webhookInSchema[row]
-                        print(f"[DEBUG] 웹훅 스키마 로드: row={row}, schema={'있음' if webhook_schema else '없음'}")
+                        Logger.debug(f" 웹훅 스키마 로드: row={row}, schema={'있음' if webhook_schema else '없음'}")
                     else:
-                        print(f"[WARN] 웹훅 스키마 인덱스 초과: row={row}, 전체={len(self.webhookInSchema)}")
+                        Logger.warn(f" 웹훅 스키마 인덱스 초과: row={row}, 전체={len(self.webhookInSchema)}")
 
             # 통합 팝업창 띄우기
             dialog = CombinedDetailDialog(api_name, buf, schema_data, webhook_schema)
@@ -1050,10 +1051,10 @@ class SystemMainUI(CommonMainUI):
             )
 
             # ✅ 디버그 로그 추가
-            print(
-                f"[SCORE UPDATE] 분야별 - pass: {self.total_pass_cnt}, error: {self.total_error_cnt}, score: {spec_score:.1f}%")
-            print(
-                f"[SCORE UPDATE] 전체 - pass: {self.global_pass_cnt}, error: {self.global_error_cnt}, score: {global_score:.1f}%")
+            Logger.debug(str(
+                f"[SCORE UPDATE] 분야별 - pass: {self.total_pass_cnt}, error: {self.total_error_cnt}, score: {spec_score:.1f}%"))
+            Logger.debug(str(
+                f"[SCORE UPDATE] 전체 - pass: {self.global_pass_cnt}, error: {self.global_error_cnt}, score: {global_score:.1f}%"))
 
 
     def table_cell_clicked(self, row, col):

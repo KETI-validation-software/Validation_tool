@@ -6,6 +6,7 @@ from PyQt5.QtGui import QIcon, QPixmap, QColor
 from PyQt5 import QtCore
 
 from core.functions import resource_path
+from core.logger import Logger
 from core.utils import remove_api_number_suffix, load_external_constants, calculate_percentage
 from ui.gui_utils import CustomDialog
 from ui.ui_components import TestSelectionPanel
@@ -660,12 +661,12 @@ class ResultPageWidget(QWidget):
             new_group_id = selected_group.get('group_id')
             old_group_id = getattr(self.parent, 'current_group_id', None)
 
-            print(f"[RESULT DEBUG] 🔄 그룹 선택: {old_group_id} → {new_group_id}")
+            Logger.debug(f"[RESULT DEBUG] 🔄 그룹 선택: {old_group_id} → {new_group_id}")
 
             # ✅ 그룹이 변경되면 current_spec_id 초기화
             if old_group_id != new_group_id:
                 self.current_spec_id = None
-                print(f"[RESULT DEBUG] ✨ 그룹 변경으로 current_spec_id 초기화")
+                Logger.debug(f"[RESULT DEBUG] ✨ 그룹 변경으로 current_spec_id 초기화")
 
             # ✅ 그룹 ID 저장
             self.parent.current_group_id = new_group_id
@@ -683,8 +684,8 @@ class ResultPageWidget(QWidget):
         if selected_spec_id == self.current_spec_id:
             return
 
-        print(f"[RESULT] 시나리오 전환: {self.current_spec_id} → {selected_spec_id}")
-        print(f"[RESULT DEBUG] 현재 그룹: {self.parent.current_group_id}")
+        Logger.debug(f" 시나리오 전환: {self.current_spec_id} → {selected_spec_id}")
+        Logger.debug(f"[RESULT DEBUG] 현재 그룹: {self.parent.current_group_id}")
 
         # ✅ parent의 spec 전환 (API 목록 로드)
         old_spec_id = self.parent.current_spec_id
@@ -701,13 +702,13 @@ class ResultPageWidget(QWidget):
             # ✅ 3. 설정 다시 로드 (웹훅 스키마 포함)
             self.parent.get_setting()
 
-            print(f"[RESULT] API 개수: {len(self.parent.videoMessages)}")
-            print(f"[RESULT] inSchema 개수: {len(self.parent.inSchema)}")
-            print(f"[RESULT] webhookSchema 개수: {len(self.parent.webhookSchema)}")
+            Logger.debug(f" API 개수: {len(self.parent.videoMessages)}")
+            Logger.debug(f" inSchema 개수: {len(self.parent.inSchema)}")
+            Logger.debug(f" webhookSchema 개수: {len(self.parent.webhookSchema)}")
 
             # ✅ 4. 저장된 결과 데이터가 있으면 로드 (복합키 사용)
             composite_key = f"{self.parent.current_group_id}_{selected_spec_id}"
-            print(f"[RESULT DEBUG] 📂 데이터 복원 시도: {composite_key}")
+            Logger.debug(f"[RESULT DEBUG] 📂 데이터 복원 시도: {composite_key}")
             if composite_key in self.parent.spec_table_data:
                 saved_data = self.parent.spec_table_data[composite_key]
 
@@ -715,7 +716,7 @@ class ResultPageWidget(QWidget):
                 saved_buffers = saved_data.get('step_buffers', [])
                 if saved_buffers:
                     self.parent.step_buffers = [buf.copy() for buf in saved_buffers]
-                    print(f"[RESULT] step_buffers 복원 완료: {len(self.parent.step_buffers)}개")
+                    Logger.debug(f" step_buffers 복원 완료: {len(self.parent.step_buffers)}개")
                 else:
                     # 저장된 버퍼가 없으면 빈 버퍼 생성
                     api_count = len(self.parent.videoMessages)
@@ -731,21 +732,21 @@ class ResultPageWidget(QWidget):
                 # ✅ step_pass_counts와 step_error_counts 배열 복원
                 self.parent.step_pass_counts = saved_data.get('step_pass_counts', [0] * len(self.parent.videoMessages))[:]
                 self.parent.step_error_counts = saved_data.get('step_error_counts', [0] * len(self.parent.videoMessages))[:]
-                print(f"[RESULT] step_pass_counts 복원: {self.parent.step_pass_counts}")
-                print(f"[RESULT] step_error_counts 복원: {self.parent.step_error_counts}")
+                Logger.debug(f" step_pass_counts 복원: {self.parent.step_pass_counts}")
+                Logger.debug(f" step_error_counts 복원: {self.parent.step_error_counts}")
 
                 # 테이블 및 점수 표시 업데이트
                 self.reload_result_table(saved_data)
                 self.update_score_displays(saved_data)
 
-                print(f"[RESULT] {selected_spec_id} 저장된 결과 로드 완료")
+                Logger.debug(f" {selected_spec_id} 저장된 결과 로드 완료")
             else:
                 # 결과가 없으면 빈 테이블 표시
-                print(f"[RESULT] {selected_spec_id} 결과 없음 - 빈 테이블 표시")
+                Logger.debug(f" {selected_spec_id} 결과 없음 - 빈 테이블 표시")
                 self.show_empty_result_table()
 
         except Exception as e:
-            print(f"[ERROR] 시나리오 전환 실패: {e}")
+            Logger.error(f" 시나리오 전환 실패: {e}")
             import traceback
             traceback.print_exc()
 
@@ -768,7 +769,7 @@ class ResultPageWidget(QWidget):
         api_list = self.parent.videoMessagesDisplay  # 표시용 이름 사용
         api_count = len(api_list)
 
-        print(f"[RESULT] 빈 테이블 생성: {api_count}개 API")
+        Logger.debug(f" 빈 테이블 생성: {api_count}개 API")
 
         # ✅ step_buffers 초기화 (상세 내용 확인을 위해 필수!)
         self.parent.step_buffers = []
@@ -780,7 +781,7 @@ class ResultPageWidget(QWidget):
                 "result": "PASS"
             })
 
-        print(f"[RESULT] step_buffers 생성 완료: {len(self.parent.step_buffers)}개")
+        Logger.debug(f" step_buffers 생성 완료: {len(self.parent.step_buffers)}개")
 
         # ✅ 점수 정보 초기화
         self.parent.total_pass_cnt = 0
@@ -938,7 +939,7 @@ class ResultPageWidget(QWidget):
         try:
             self.parent.show_combined_result(row)
         except Exception as e:
-            print(f"[ERROR] 상세 내용 확인 오류: {e}")
+            Logger.error(f" 상세 내용 확인 오류: {e}")
             import traceback
             traceback.print_exc()
             QMessageBox.warning(self, "오류", f"상세 내용을 표시할 수 없습니다.\n{str(e)}")

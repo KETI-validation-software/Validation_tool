@@ -1,5 +1,6 @@
 import random
 import copy
+from core.logger import Logger
 
 class ConstraintDataGenerator:
     # 상수 정의
@@ -28,12 +29,12 @@ class ConstraintDataGenerator:
             
             # sensorDeviceID가 요청에 있고, 템플릿에 sensorDeviceList가 있으면 처리
             if requested_ids and isinstance(template_data["sensorDeviceList"], list) and len(template_data["sensorDeviceList"]) > 0:
-                print(f"[DATA_MAPPER] sensorDeviceList 웹훅 데이터 동적 생성 시작 (API: {api_name})")
-                print(f"[DATA_MAPPER] 요청한 sensorDeviceID: {requested_ids}")
+                Logger.info(f"[DATA_MAPPER] sensorDeviceList 웹훅 데이터 동적 생성 시작 (API: {api_name})")
+                Logger.debug(f"[DATA_MAPPER] 요청한 sensorDeviceID: {requested_ids}")
                 
                 # 템플릿의 첫 번째 항목을 기준으로 허용 키 확인
                 allowed_keys = set(template_data["sensorDeviceList"][0].keys())
-                print(f"[DATA_MAPPER] 템플릿 구조 기반 허용 키: {allowed_keys}")
+                Logger.debug(f" 템플릿 구조 기반 허용 키: {allowed_keys}")
                 
                 # 요청한 ID만 포함하도록 필터링
                 new_sensor_list = []
@@ -58,7 +59,8 @@ class ConstraintDataGenerator:
                     new_sensor_list.append(filtered_item)
                 
                 template_data["sensorDeviceList"] = new_sensor_list
-                print(f"[DATA_MAPPER] 생성된 sensorDeviceList ({len(new_sensor_list)}개): {new_sensor_list}")
+                Logger.info(f"[DATA_MAPPER] 생성된 sensorDeviceList: {len(new_sensor_list)}개")
+                Logger.debug(f"[DATA_MAPPER] 상세: {new_sensor_list}")
             
             return template_data
         
@@ -71,12 +73,12 @@ class ConstraintDataGenerator:
                 
                 # doorID가 요청에 있고, 템플릿에 doorList가 있으면 처리
                 if requested_ids and isinstance(template_data["doorList"], list) and len(template_data["doorList"]) > 0:
-                    print(f"[DATA_MAPPER] doorList 웹훅 데이터 동적 생성 시작 (API: {api_name})")
-                    print(f"[DATA_MAPPER] 요청한 doorID: {requested_ids}")
+                    Logger.info(f"[DATA_MAPPER] doorList 웹훅 데이터 동적 생성 시작 (API: {api_name})")
+                    Logger.debug(f"[DATA_MAPPER] 요청한 doorID: {requested_ids}")
                     
                     new_door_list = []
                     allowed_keys = set(template_data["doorList"][0].keys())
-                    print(f"[DATA_MAPPER] 템플릿 구조 기반 허용 키: {allowed_keys}")
+                    Logger.debug(f"[DATA_MAPPER] 템플릿 구조 기반 허용 키: {allowed_keys}")
                     
                     for door_id in requested_ids:
                         # 템플릿에서 해당 ID를 가진 항목 찾기
@@ -106,7 +108,7 @@ class ConstraintDataGenerator:
                         new_door_list.append(filtered_item)
                     
                     template_data["doorList"] = new_door_list
-                    print(f"[DATA_MAPPER] 생성된 doorList ({len(new_door_list)}개): {new_door_list}")
+                    Logger.debug(f" 생성된 doorList ({len(new_door_list)}개): {new_door_list}")
                 
                 return template_data
 
@@ -120,13 +122,13 @@ class ConstraintDataGenerator:
                         if "doorID" in field_path and isinstance(rule, dict):
                             ref_endpoint = rule.get("referenceEndpoint")
                             if ref_endpoint:
-                                print(f"[DATA_MAPPER] doorID의 referenceEndpoint 발견: {ref_endpoint}")
+                                Logger.debug(f" doorID의 referenceEndpoint 발견: {ref_endpoint}")
                                 break
                 
                 # referenceEndpoint가 없으면 기본값 사용
                 if not ref_endpoint:
                     ref_endpoint = "DoorProfiles"
-                    print(f"[DATA_MAPPER] referenceEndpoint 없음 - 기본값 사용: {ref_endpoint}")
+                    Logger.debug(f" referenceEndpoint 없음 - 기본값 사용: {ref_endpoint}")
                 
                 # 슬래시 제거 및 검색 키 생성
                 ref_endpoint_clean = ref_endpoint.lstrip("/")
@@ -137,7 +139,7 @@ class ConstraintDataGenerator:
                 for key in keys_to_search:
                     if key in self.latest_events and "RESPONSE" in self.latest_events[key]:
                         door_profiles_data = self.latest_events[key]["RESPONSE"].get("data", {})
-                        print(f"[DATA_MAPPER] latest_events에서 {key} 발견")
+                        Logger.debug(f" latest_events에서 {key} 발견")
                         break
                 
                 # 찾은 응답에서 doorID 추출하여 리스트 생성
@@ -166,7 +168,7 @@ class ConstraintDataGenerator:
         
         # ✅ commandType 구조를 가진 데이터 동적 생성 (범용 - DoorControl 등)
         if "commandType" in template_data and "doorID" in template_data:
-            print(f"[DATA_MAPPER] commandType 데이터 동적 생성 시작 (API: {api_name})")
+            Logger.debug(f" commandType 데이터 동적 생성 시작 (API: {api_name})")
 
             # doorID 추출
             target_door_id = None
@@ -179,7 +181,7 @@ class ConstraintDataGenerator:
                 target_door_id = template_data.get("doorID", "")
             
             template_data["doorID"] = target_door_id
-            print(f"[DATA_MAPPER] 선택된 doorID: {target_door_id}")
+            Logger.debug(f" 선택된 doorID: {target_door_id}")
 
             # 현재 상태 가져오기
             current_status = template_data.get("commandType", "")  # 템플릿 기본값 사용
@@ -192,7 +194,7 @@ class ConstraintDataGenerator:
                 for key, rule in constraints.items():
                     if "commandType" in key and "allowedValues" in rule:
                         allowed_values = rule["allowedValues"]
-                        print(f"[DATA_MAPPER] constraints에서 allowedValues 발견: {allowed_values}")
+                        Logger.debug(f" constraints에서 allowedValues 발견: {allowed_values}")
                         break
             
             # 현재 상태와 다른 명령어 선택 (토글)
@@ -208,10 +210,10 @@ class ConstraintDataGenerator:
                     command = random.choice(allowed_values)
                 
                 template_data["commandType"] = command
-                print(f"[DATA_MAPPER] 생성된 commandType: {command} (현재 상태: {current_status})")
+                Logger.debug(f" 생성된 commandType: {command} (현재 상태: {current_status})")
             else:
                 # constraints가 없으면 템플릿 기본값 유지
-                print(f"[DATA_MAPPER] constraints 없음 - 템플릿 기본값 유지: {template_data['commandType']}")
+                Logger.debug(f" constraints 없음 - 템플릿 기본값 유지: {template_data['commandType']}")
             return template_data
 
 
@@ -231,21 +233,21 @@ class ConstraintDataGenerator:
         """constraints를 분석하여 각 필드의 제약 조건과 참조 값을 매핑"""
         constraint_map = {}
 
-        print(f"[DEBUG][BUILD_MAP] constraints: {constraints}")
-        print(f"[DEBUG][BUILD_MAP] request_data: {request_data}")
-        print(f"[DEBUG][BUILD_MAP] 🔍 self.latest_events 키 목록: {list(self.latest_events.keys())}")
-        print(f"[DEBUG][BUILD_MAP] 🔍 self.latest_events 전체: {self.latest_events}")
+        Logger.debug(f"[BUILD_MAP] constraints: {constraints}")
+        Logger.debug(f"[BUILD_MAP] request_data: {request_data}")
+        Logger.debug(f"[BUILD_MAP] 🔍 self.latest_events 키 목록: {list(self.latest_events.keys())}")
+        Logger.debug(f"[BUILD_MAP] 🔍 self.latest_events 전체: {self.latest_events}")
 
         for path, rule in constraints.items():
-            print(f"[DEBUG][BUILD_MAP] Processing path: {path}, rule: {rule}")
+            Logger.debug(f"[BUILD_MAP] Processing path: {path}, rule: {rule}")
 
             value_type = rule.get("valueType")
             ref_endpoint = rule.get("referenceEndpoint")
             ref_field = rule.get("referenceField")
 
-            print(f"[DEBUG][BUILD_MAP]   valueType: {value_type}")
-            print(f"[DEBUG][BUILD_MAP]   referenceEndpoint: {ref_endpoint}")
-            print(f"[DEBUG][BUILD_MAP]   referenceField: {ref_field}")
+            Logger.debug(f"[BUILD_MAP]   valueType: {value_type}")
+            Logger.debug(f"[BUILD_MAP]   referenceEndpoint: {ref_endpoint}")
+            Logger.debug(f"[BUILD_MAP]   referenceField: {ref_field}")
 
             # valueType이 "random"이고 randomType이 있으면 아래에서 별도 처리
             random_type = rule.get("randomType")
@@ -260,34 +262,34 @@ class ConstraintDataGenerator:
                 # 예: "/StoredVideoEventInfos" → "StoredVideoEventInfos"
                 ref_key = ref_endpoint.lstrip('/')
 
-                print(f"[DEBUG][BUILD_MAP]   Searching for ref_key: {ref_key}")
+                Logger.debug(f"[BUILD_MAP]   Searching for ref_key: {ref_key}")
 
                 if ref_key in self.latest_events:
-                    print(f"[DEBUG][BUILD_MAP]   Found referenceEndpoint in latest_events")
+                    Logger.debug(f"[BUILD_MAP]   Found referenceEndpoint in latest_events")
                     # valueType에 따라 REQUEST 또는 RESPONSE에서 가져오기
                     if value_type == "request-based":
                         event = self.latest_events[ref_key].get("REQUEST", {})
-                        print(f"[DEBUG][BUILD_MAP]   Using REQUEST event")
+                        Logger.debug(f"[BUILD_MAP]   Using REQUEST event")
                     else:  # random-response 등 다른 타입
                         event = self.latest_events[ref_key].get("RESPONSE", {})
-                        print(f"[DEBUG][BUILD_MAP]   Using RESPONSE event")
+                        Logger.debug(f"[BUILD_MAP]   Using RESPONSE event")
 
                     event_data = event.get("data", {})
-                    print(f"[DEBUG][BUILD_MAP]   event_data: {event_data}")
+                    Logger.debug(f"[BUILD_MAP]   event_data: {event_data}")
                     values = self.find_key(event_data, ref_field)
-                    print(f"[DEBUG][BUILD_MAP]   Found values from event: {values}")
+                    Logger.debug(f"[BUILD_MAP]   Found values from event: {values}")
                     
                     # response-based(시스템 요청)만 랜덤 선택, request-based(플랫폼 응답/웹훅)는 그대로 사용 (01/08)
                     if value_type == "response-based" and not is_webhook and values and len(values) > 0:
                         original_count = len(values)
                         random_count = random.randint(1, len(values))
                         values = random.sample(values, random_count)
-                        print(f"[DEBUG][BUILD_MAP]   Random selection: {random_count}/{original_count} items selected (시스템 요청)")
+                        Logger.debug(f"[BUILD_MAP]   Random selection: {random_count}/{original_count} items selected (시스템 요청)")
                     else:
-                        print(f"[DEBUG][BUILD_MAP]   랜덤 선택 안함 (valueType={value_type}, is_webhook={is_webhook}), 전체 사용: {len(values)}개")
+                        Logger.debug(f"[BUILD_MAP]   랜덤 선택 안함 (valueType={value_type}, is_webhook={is_webhook}), 전체 사용: {len(values)}개")
                 else:
-                    print(f"[DEBUG][BUILD_MAP]   referenceEndpoint NOT found in latest_events")
-                    print(f"[DEBUG][BUILD_MAP]   Available endpoints: {list(self.latest_events.keys())}")
+                    Logger.debug(f"[BUILD_MAP]   referenceEndpoint NOT found in latest_events")
+                    Logger.debug(f"[BUILD_MAP]   Available endpoints: {list(self.latest_events.keys())}")
 
                 constraint_map[path] = {
                     "type": value_type,
@@ -296,9 +298,9 @@ class ConstraintDataGenerator:
 
             elif value_type == "request-based":
                 # referenceEndpoint 없으면 현재 request_data에서 찾기
-                print(f"[DEBUG][BUILD_MAP]   Searching in current request_data")
+                Logger.debug(f"[BUILD_MAP]   Searching in current request_data")
                 values = self.find_key(request_data, ref_field)
-                print(f"[DEBUG][BUILD_MAP]   Found values from request: {values}")
+                Logger.debug(f"[BUILD_MAP]   Found values from request: {values}")
                 constraint_map[path] = {
                     "type": "request-based",
                     "values": values if values else []
@@ -321,8 +323,8 @@ class ConstraintDataGenerator:
                 if random_type == "exclude-reference-valid-values":
                     ref_key = ref_endpoint.lstrip('/') if ref_endpoint else None
                     
-                    print(f"[DEBUG][BUILD_MAP]   randomType: exclude-reference-valid-values")
-                    print(f"[DEBUG][BUILD_MAP]   ref_key: {ref_key}")
+                    Logger.debug(f"[BUILD_MAP]   randomType: exclude-reference-valid-values")
+                    Logger.debug(f"[BUILD_MAP]   ref_key: {ref_key}")
                     
                     if ref_key and ref_key in self.latest_events:
                         # RESPONSE에서 참조 필드 값 가져오기
@@ -330,15 +332,15 @@ class ConstraintDataGenerator:
                         event_data = event.get("data", {})
                         reference_values = self.find_key(event_data, ref_field)
                         
-                        print(f"[DEBUG][BUILD_MAP]   reference_values from RESPONSE: {reference_values}")
-                        print(f"[DEBUG][BUILD_MAP]   validValues before exclude: {valid_values}")
+                        Logger.debug(f"[BUILD_MAP]   reference_values from RESPONSE: {reference_values}")
+                        Logger.debug(f"[BUILD_MAP]   validValues before exclude: {valid_values}")
                         
                         # 참조 값을 제외한 validValues 필터링
                         if reference_values:
                             filtered_values = [v for v in valid_values if v not in reference_values]
                             valid_values = filtered_values if filtered_values else valid_values
                         
-                        print(f"[DEBUG][BUILD_MAP]   validValues after exclude: {valid_values}")
+                        Logger.debug(f"[BUILD_MAP]   validValues after exclude: {valid_values}")
                 
                 constraint_map[path] = {
                     "type": "random",
@@ -353,7 +355,7 @@ class ConstraintDataGenerator:
                 max_field = req_range.get("maxField")
                 if min_field != None and max_field != None:
                     operator = "between"
-                print(f"[DEBUG][BUILD_MAP]   request-range operator: {operator}")
+                Logger.debug(f"[BUILD_MAP]   request-range operator: {operator}")
                 if operator == "between":
                     ref_endpoint = req_range.get("maxEndpoint")
 
@@ -389,7 +391,7 @@ class ConstraintDataGenerator:
                             max_vals = self.find_key(request_data, max_field)
                         max_val = max_vals[0] if max_vals else self.MAX_TIMESTAMP
 
-                    print(f"[DEBUG][BUILD_MAP]   request-range: min={min_val}, max={max_val}")
+                    Logger.debug(f"[BUILD_MAP]   request-range: min={min_val}, max={max_val}")
 
                     constraint_map[path] = {
                         "type": "request-range",
@@ -431,7 +433,7 @@ class ConstraintDataGenerator:
                             max_vals = self.find_key(request_data, max_field)
                         max_val = max_vals[0] if max_vals else self.MAX_TIMESTAMP
 
-                    print(f"[DEBUG][BUILD_MAP]   request-range: min={min_val}, max={max_val}")
+                    Logger.debug(f"[BUILD_MAP]   request-range: min={min_val}, max={max_val}")
 
                     constraint_map[path] = {
                         "type": "request-range",
@@ -441,7 +443,7 @@ class ConstraintDataGenerator:
                     }
                 else:
                     # 기본 범위 (operator 없거나 알 수 없는 경우)
-                    print(f"[DEBUG][BUILD_MAP]   Unknown operator: {operator}, using default range")
+                    Logger.debug(f"[BUILD_MAP]   Unknown operator: {operator}, using default range")
                     constraint_map[path] = {
                         "type": "request-range",
                         "operator": "between",
@@ -450,9 +452,9 @@ class ConstraintDataGenerator:
                     }
             elif value_type == "response-based":
                 # referenceEndpoint 없으면 현재 request_data에서 찾기
-                print(f"[DEBUG][BUILD_MAP]   Searching in current request_data")
+                Logger.debug(f"[BUILD_MAP]   Searching in current request_data")
                 values = self.find_key(request_data, ref_field)
-                print(f"[DEBUG][BUILD_MAP]   Found values from request: {values}")
+                Logger.debug(f"[BUILD_MAP]   Found values from request: {values}")
                 constraint_map[path] = {
                     "type": "request-based",
                     "values": values if values else []
@@ -544,7 +546,7 @@ class ConstraintDataGenerator:
         # ✅ 랜덤한 개수 생성 -> 가능한 최대 개수로 고정 (참조 데이터 누락 방지)
         if min_available_count != float('inf'):
             n = min_available_count
-            print(f"[INFO] {parent_key}: {n}개 생성합니다. (참조 데이터 개수 일치)")
+            Logger.info(f" {parent_key}: {n}개 생성합니다. (참조 데이터 개수 일치)")
 
         for i in range(n):
             item = self._generate_item(parent_key, item_template, constraint_map, n,
@@ -613,7 +615,7 @@ class ConstraintDataGenerator:
                             used_values[field_path].append(selected_value)
                         elif values_list:
                             # ⚠️ 모든 값을 다 사용했는데 여기 도달하면 안 됨 (n이 조정되었어야 함)
-                            print(f"[ERROR] {field_path}: 모든 값이 소진되었습니다. 생성 개수 조정 실패.")
+                            Logger.error(f" {field_path}: 모든 값이 소진되었습니다. 생성 개수 조정 실패.")
                             item[field] = values_list[0]
                         else:
                             item[field] = value
@@ -634,7 +636,7 @@ class ConstraintDataGenerator:
                             used_values[field_path].append(selected_value)
                         elif values_list:
                             # 모든 값 소진 (발생하면 안 됨)
-                            print(f"[ERROR] {field_path}: 모든 값이 소진되었습니다. (fallback)")
+                            Logger.error(f" {field_path}: 모든 값이 소진되었습니다. (fallback)")
                             item[field] = values_list[0]
                         else:
                             item[field] = value
@@ -857,7 +859,7 @@ if __name__ == "__main__":
     generator = ConstraintDataGenerator(latest_events)
 
     # 테스트 1: request-based with referenceEndpoint (latest_events의 REQUEST에서)
-    print("=== 테스트 1: request-based (latest_events REQUEST) ===")
+    Logger.debug("=== 테스트 1: request-based (latest_events REQUEST) ===")
     request_data1 = {}  # 빈 request
 
     template_data1 = {
@@ -879,12 +881,12 @@ if __name__ == "__main__":
     }
 
     result1 = generator._applied_constraints(request_data1, template_data1, constraints1, n=3)
-    print(f"camList 개수: {len(result1['camList'])}")
+    Logger.debug(f"camList 개수: {len(result1['camList'])}")
     for i, cam in enumerate(result1['camList']):
-        print(f"[{i}] camID: {cam['camID']} (latest_events의 /StreamURLs REQUEST에서 가져옴)")
+        Logger.debug(f"[{i}] camID: {cam['camID']} (latest_events의 /StreamURLs REQUEST에서 가져옴)")
 
     # 테스트 2: random-response with referenceEndpoint (latest_events의 RESPONSE에서)
-    print("\n=== 테스트 2: random-response (latest_events RESPONSE) ===")
+    Logger.debug("\n=== 테스트 2: random-response (latest_events RESPONSE) ===")
     request_data2 = {}
 
     template_data2 = {
@@ -906,12 +908,12 @@ if __name__ == "__main__":
     }
 
     result2 = generator._applied_constraints(request_data2, template_data2, constraints2, n=4)
-    print(f"selectedCamList 개수: {len(result2['selectedCamList'])}")
+    Logger.debug(f"selectedCamList 개수: {len(result2['selectedCamList'])}")
     for i, cam in enumerate(result2['selectedCamList']):
-        print(f"[{i}] camID: {cam['camID']} (latest_events의 /CameraProfiles RESPONSE에서 가져옴)")
+        Logger.debug(f"[{i}] camID: {cam['camID']} (latest_events의 /CameraProfiles RESPONSE에서 가져옴)")
 
     # 테스트 3: request-range with referenceEndpoint
-    print("\n=== 테스트 3: request-range (latest_events REQUEST) ===")
+    Logger.debug("\n=== 테스트 3: request-range (latest_events REQUEST) ===")
     request_data3 = {}
 
     template_data3 = {
@@ -947,15 +949,15 @@ if __name__ == "__main__":
     }
 
     result3 = generator._applied_constraints(request_data3, template_data3, constraints3, n=2)
-    print(f"events 개수: {len(result3['events'])}")
+    Logger.debug(f"events 개수: {len(result3['events'])}")
     for i, event in enumerate(result3['events']):
-        print(f"[{i}] timeList: {len(event['timeList'])}개")
+        Logger.debug(f"[{i}] timeList: {len(event['timeList'])}개")
         for j, time in enumerate(event['timeList'][:2]):
-            print(f"    [{j}] startTime: {time['startTime']}, endTime: {time['endTime']}")
+            Logger.debug(f"    [{j}] startTime: {time['startTime']}, endTime: {time['endTime']}")
 
-    print("\n=== latest_events 확인 ===")
-    print(f"저장된 API 목록: {list(latest_events.keys())}")
-    print(
-        f"/CameraProfiles RESPONSE의 camID들: {[c['camID'] for c in latest_events['/CameraProfiles']['RESPONSE']['data']['camList']]}")
-    print(
-        f"/StreamURLs REQUEST의 camID들: {[c['camID'] for c in latest_events['/StreamURLs']['REQUEST']['data']['camList']]}")
+    Logger.debug("\n=== latest_events 확인 ===")
+    Logger.debug(f"저장된 API 목록: {list(latest_events.keys())}")
+    Logger.debug(str(
+        f"/CameraProfiles RESPONSE의 camID들: {[c['camID'] for c in latest_events['/CameraProfiles']['RESPONSE']['data']['camList']]}"))
+    Logger.debug(str(
+        f"/StreamURLs REQUEST의 camID들: {[c['camID'] for c in latest_events['/StreamURLs']['REQUEST']['data']['camList']]}"))

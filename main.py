@@ -3,6 +3,7 @@ import os
 import urllib3
 import logging
 import traceback
+from core.logger import Logger
 from PyQt5.QtWidgets import QApplication, QMainWindow, QStackedWidget, QMessageBox
 from PyQt5.QtGui import QFontDatabase, QFont
 from PyQt5.QtCore import Qt
@@ -29,7 +30,7 @@ if getattr(sys, 'frozen', False):
             internal_constants = os.path.join(sys._MEIPASS, "config", "CONSTANTS.py")
             if os.path.exists(internal_constants):
                 shutil.copy2(internal_constants, external_constants)
-                print(f"[INIT] 외부 CONSTANTS.py 생성: {external_constants}")
+                Logger.info(f"[INIT] 외부 CONSTANTS.py 생성: {external_constants}")
 # ===== 외부 config 우선 사용 끝 =====
 
 from ui.info_GUI import InfoWidget
@@ -113,7 +114,7 @@ class MainWindow(QMainWindow):
         elif isinstance(parent_widget, system_app.MyApp):
             self._result_widget = system_app.ResultPageWidget(parent_widget, embedded=True)
         else:
-            print(f"알 수 없는 parent_widget 타입: {type(parent_widget)}")
+            Logger.error(f"알 수 없는 parent_widget 타입: {type(parent_widget)}")
             return
 
         # 뒤로가기 시그널 연결
@@ -242,27 +243,27 @@ class MainWindow(QMainWindow):
             current_widget.resizeEvent(resize_event)
 
     def closeEvent(self, event):
-        print(f"[MAIN_CLOSE] MainWindow closeEvent 호출됨")
+        Logger.debug(f"[MAIN_CLOSE] MainWindow closeEvent 호출됨")
 
         reply = QMessageBox.question(self, '종료', '프로그램을 종료하시겠습니까?',
                                      QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
 
-        print(f"[MAIN_CLOSE] 사용자 응답: {'Yes' if reply == QMessageBox.Yes else 'No'}")
+        Logger.debug(f"[MAIN_CLOSE] 사용자 응답: {'Yes' if reply == QMessageBox.Yes else 'No'}")
 
         if reply == QMessageBox.Yes:
             # ✅ 플랫폼 검증 위젯의 일시정지 파일 정리
             if hasattr(self, '_platform_widget') and self._platform_widget is not None:
-                print(f"[MAIN_CLOSE] 플랫폼 검증 위젯 정리 중...")
+                Logger.debug(f"[MAIN_CLOSE] 플랫폼 검증 위젯 정리 중...")
                 if hasattr(self._platform_widget, 'cleanup_paused_file'):
                     self._platform_widget.cleanup_paused_file()
-                    print(f"[MAIN_CLOSE] 플랫폼 일시정지 파일 삭제 완료")
+                    Logger.debug(f"[MAIN_CLOSE] 플랫폼 일시정지 파일 삭제 완료")
 
             # ✅ 시스템 검증 위젯의 일시정지 파일 정리
             if hasattr(self, '_system_widget') and self._system_widget is not None:
-                print(f"[MAIN_CLOSE] 시스템 검증 위젯 정리 중...")
+                Logger.debug(f"[MAIN_CLOSE] 시스템 검증 위젯 정리 중...")
                 if hasattr(self._system_widget, 'cleanup_paused_file'):
                     self._system_widget.cleanup_paused_file()
-                    print(f"[MAIN_CLOSE] 시스템 일시정지 파일 삭제 완료")
+                    Logger.debug(f"[MAIN_CLOSE] 시스템 일시정지 파일 삭제 완료")
 
             event.accept()
         else:
@@ -272,6 +273,11 @@ class MainWindow(QMainWindow):
 if __name__ == "__main__":
     # SSL 경고 무시 (개발환경)
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+    # ===== Logger 초기화 (CONSTANTS에서 레벨 가져오기) =====
+    import config.CONSTANTS as CONSTANTS
+    Logger.set_level(CONSTANTS.DEBUG_LEVEL)
+    Logger.info(f"[INIT] 디버그 레벨 설정: {CONSTANTS.DEBUG_LEVEL}")
 
     app = QApplication(sys.argv)
 

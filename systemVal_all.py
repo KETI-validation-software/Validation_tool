@@ -24,6 +24,7 @@ from api.api_server import Server  # ✅ door_memory 접근을 위한 import 추
 from core.json_checker_new import timeout_field_finder
 from core.functions import json_check_, resource_path, json_to_data, build_result_json
 from core.data_mapper import ConstraintDataGenerator
+from core.logger import Logger
 from ui.splash_screen import LoadingPopup
 from ui.result_page import ResultPageWidget
 from ui.system_main_ui import SystemMainUI
@@ -54,12 +55,12 @@ class MyApp(SystemMainUI):
             # API 이름에서 슬래시 제거
             api_name_clean = api_name.lstrip("/")
             
-            print(f"[DEBUG] trace 파일 찾기: api_name={api_name}, direction={direction}")
+            Logger.debug(f"trace 파일 찾기: api_name={api_name}, direction={direction}")
             
             # trace 디렉토리의 모든 파일 검색
             trace_dir = Path(CONSTANTS.trace_path)
             if not trace_dir.exists():
-                print(f"[DEBUG] trace 디렉토리 없음: {trace_dir}")
+                Logger.debug(f"trace 디렉토리 없음: {trace_dir}")
                 return None
             
             # API 이름과 매칭되는 파일 찾기
@@ -73,7 +74,7 @@ class MyApp(SystemMainUI):
             if numbered_files:
                 # 번호가 있는 파일 중 가장 최근 파일 사용
                 trace_file = max(numbered_files, key=lambda f: f.stat().st_mtime)
-                print(f"[DEBUG] 번호 있는 trace 파일 발견: {trace_file.name}")
+                Logger.debug(f"번호 있는 trace 파일 발견: {trace_file.name}")
             
             # ✅ 우선순위 2: 번호 없는 형식 찾기 (trace_API.ndjson)
             if not trace_file:
@@ -81,13 +82,13 @@ class MyApp(SystemMainUI):
                 if unnumbered_files:
                     # 번호 없는 파일 중 가장 최근 파일 사용
                     trace_file = max(unnumbered_files, key=lambda f: f.stat().st_mtime)
-                    print(f"[DEBUG] 번호 없는 trace 파일 발견: {trace_file.name}")
+                    Logger.debug(f"번호 없는 trace 파일 발견: {trace_file.name}")
             
             if not trace_file:
-                print(f"[DEBUG] trace 파일 없음 (패턴: trace_*_{safe_api}.ndjson 또는 trace_{safe_api}.ndjson)")
+                Logger.debug(f"trace 파일 없음 (패턴: trace_*_{safe_api}.ndjson 또는 trace_{safe_api}.ndjson)")
                 return None
             
-            print(f"[DEBUG] 사용할 trace 파일: {trace_file.name}")
+            Logger.debug(f"사용할 trace 파일: {trace_file.name}")
 
             # 파일에서 가장 최근의 해당 direction 이벤트 찾기
             latest_event = None
@@ -122,15 +123,15 @@ class MyApp(SystemMainUI):
                     self.latest_events[api_key_with_slash] = {}
                 self.latest_events[api_key_with_slash][direction] = latest_event
                 
-                print(f"[DEBUG] trace 파일에서 {api_name} {direction} 데이터 로드 완료")
-                print(f"[DEBUG] latest_events에 저장된 키들: {api_key}, {api_key_clean}, {api_key_with_slash}")
+                Logger.debug(f"trace 파일에서 {api_name} {direction} 데이터 로드 완료")
+                Logger.debug(f"latest_events에 저장된 키들: {api_key}, {api_key_clean}, {api_key_with_slash}")
                 return latest_event.get("data")
             else:
-                print(f"[DEBUG] trace 파일에서 {api_name} {direction} 데이터 없음")
+                Logger.debug(f"trace 파일에서 {api_name} {direction} 데이터 없음")
                 return None
 
         except Exception as e:
-            print(f"[ERROR] trace 파일 로드 중 오류: {e}")
+            Logger.error(f"trace 파일 로드 중 오류: {e}")
             import traceback
             traceback.print_exc()
             return None
@@ -161,17 +162,17 @@ class MyApp(SystemMainUI):
 
             for endpoint in required_endpoints:
                 if endpoint not in self.latest_events or "RESPONSE" not in self.latest_events.get(endpoint, {}):
-                    print(f"[DATA_MAPPER] trace 파일에서 {endpoint} RESPONSE 로드 시도")
+                    Logger.debug(f"trace 파일에서 {endpoint} RESPONSE 로드 시도")
                     self._load_from_trace_file(endpoint, "RESPONSE")
                 else:
-                    print(f"[DATA_MAPPER] latest_events에 이미 {endpoint} RESPONSE 존재")
+                    Logger.debug(f"latest_events에 이미 {endpoint} RESPONSE 존재")
             
             api_name = self.message[cnt] if cnt < len(self.message) else ""
 
             # 둘 다 무조건 맵핑 되어야 함
             if "RealtimeDoorStatus" in api_name:
                 if "DoorProfiles" not in self.latest_events or "RESPONSE" not in self.latest_events.get("DoorProfiles", {}):
-                    print(f"[DATA_MAPPER] RealtimeDoorStatus용 DoorProfiles RESPONSE 로드 시도")
+                    Logger.debug(f"RealtimeDoorStatus용 DoorProfiles RESPONSE 로드 시도")
                     self._load_from_trace_file("DoorProfiles", "RESPONSE")
             
             self.generator.latest_events = self.latest_events
@@ -201,7 +202,7 @@ class MyApp(SystemMainUI):
             except :
                 return updated_request
         except Exception as e:
-            print(f"[ERROR] _apply_request_constraints 실행 중 오류: {e}")
+            Logger.error(f"_apply_request_constraints 실행 중 오류: {e}")
             import traceback
             
             return request_data
@@ -259,10 +260,10 @@ class MyApp(SystemMainUI):
         # ✅ spec_id 초기화 (info_GUI에서 전달받거나 기본값 사용)
         if spec_id:
             self.current_spec_id = spec_id
-            print(f"[SYSTEM] 📌 전달받은 spec_id 사용: {spec_id}")
+            Logger.info(f"전달받은 spec_id 사용: {spec_id}")
         else:
             self.current_spec_id = "cmgatbdp000bqihlexmywusvq"  # 기본값: 보안용센서 시스템 (7개 API) -> 지금은 잠깐 없어짐
-            print(f"[SYSTEM] 📌 기본 spec_id 사용: {self.current_spec_id}")
+            Logger.info(f"기본 spec_id 사용: {self.current_spec_id}")
 
         self.current_group_id = None  # ✅ 그룹 ID 저장용
         
@@ -355,10 +356,10 @@ class MyApp(SystemMainUI):
         if hasattr(self, 'state_manager'):
             return self.state_manager.restore_spec_data(spec_id)
         return False
-        print(f"[RESTORE] step_opt_pass_counts 복원: {self.step_opt_pass_counts}")
-        print(f"[RESTORE] step_opt_error_counts 복원: {self.step_opt_error_counts}")
+        Logger.debug(f" step_opt_pass_counts 복원: {self.step_opt_pass_counts}")
+        Logger.debug(f" step_opt_error_counts 복원: {self.step_opt_error_counts}")
 
-        print(f"[RESTORE] {spec_id} 데이터 복원 완료")
+        Logger.debug(f" {spec_id} 데이터 복원 완료")
         return True
 
     def _push_event(self, step_idx, direction, payload):  # ### NEW
@@ -394,9 +395,9 @@ class MyApp(SystemMainUI):
                 self.latest_events[api_with_slash][direction] = evt
             
             # ✅ 디버그 로그 추가
-            print(f"[PUSH_EVENT] API={api}, Direction={direction}")
-            print(f"[PUSH_EVENT] 저장된 키들: {api}, {api_clean}, {api_with_slash}")
-            print(f"[PUSH_EVENT] latest_events 전체 키 목록: {list(self.latest_events.keys())}")
+            Logger.debug(f" API={api}, Direction={direction}")
+            Logger.debug(f" 저장된 키들: {api}, {api_clean}, {api_with_slash}")
+            Logger.debug(f" latest_events 전체 키 목록: {list(self.latest_events.keys())}")
 
             # (옵션) 즉시 파일로도 남김 - append-only ndjson
             os.makedirs(CONSTANTS.trace_path, exist_ok=True)
@@ -427,7 +428,7 @@ class MyApp(SystemMainUI):
             external_constants_path = os.path.join(exe_dir, "config", "CONSTANTS.py")
 
             if os.path.exists(external_constants_path):
-                print(f"[SYSTEM] 외부 CONSTANTS.py에서 SPEC_CONFIG 로드: {external_constants_path}")
+                Logger.info(f"외부 CONSTANTS.py에서 SPEC_CONFIG 로드: {external_constants_path}")
                 try:
                     # 외부 파일 읽어서 SPEC_CONFIG만 추출
                     with open(external_constants_path, 'r', encoding='utf-8') as f:
@@ -447,14 +448,14 @@ class MyApp(SystemMainUI):
                     self.CONSTANTS.test_target = namespace.get('test_target', self.CONSTANTS.test_target)
                     self.CONSTANTS.test_range = namespace.get('test_range', self.CONSTANTS.test_range)
 
-                    print(f"[SYSTEM] ✅ 외부 SPEC_CONFIG 로드 완료: {len(SPEC_CONFIG)}개 그룹")
+                    Logger.debug(f" ✅ 외부 SPEC_CONFIG 로드 완료: {len(SPEC_CONFIG)}개 그룹")
                     # 디버그: 그룹 이름 출력
                     for i, g in enumerate(SPEC_CONFIG):
                         group_name = g.get('group_name', '이름없음')
                         group_keys = [k for k in g.keys() if k not in ['group_name', 'group_id']]
-                        print(f"[SYSTEM DEBUG] 그룹 {i}: {group_name}, spec_id 개수: {len(group_keys)}, spec_ids: {group_keys}")
+                        Logger.debug(f"[SYSTEM DEBUG] 그룹 {i}: {group_name}, spec_id 개수: {len(group_keys)}, spec_ids: {group_keys}")
                 except Exception as e:
-                    print(f"[SYSTEM] ⚠️ 외부 CONSTANTS 로드 실패, 기본값 사용: {e}")
+                    Logger.debug(f" ⚠️ 외부 CONSTANTS 로드 실패, 기본값 사용: {e}")
         # ===== 외부 CONSTANTS 로드 끝 =====
 
         # ===== 인스턴스 변수에 저장 (다른 메서드에서 사용) =====
@@ -465,10 +466,10 @@ class MyApp(SystemMainUI):
         # ===== 저장 완료 =====
 
         # ===== 디버그 로그 추가 =====
-        print(f"[SYSTEM DEBUG] SPEC_CONFIG 개수: {len(SPEC_CONFIG)}")
-        print(f"[SYSTEM DEBUG] 찾을 spec_id: {self.current_spec_id}")
+        Logger.debug(f"[SYSTEM DEBUG] SPEC_CONFIG 개수: {len(SPEC_CONFIG)}")
+        Logger.debug(f"[SYSTEM DEBUG] 찾을 spec_id: {self.current_spec_id}")
         for i, group in enumerate(SPEC_CONFIG):
-            print(f"[SYSTEM DEBUG] Group {i} keys: {list(group.keys())}")
+            Logger.debug(f"[SYSTEM DEBUG] Group {i} keys: {list(group.keys())}")
         # ===== 디버그 로그 끝 =====
 
         config = {}
@@ -495,10 +496,10 @@ class MyApp(SystemMainUI):
         if len(spec_names) < 3:
             raise ValueError(f"spec_id '{self.current_spec_id}'의 specs 설정이 올바르지 않습니다! (최소 3개 필요)")
 
-        print(f"[SYSTEM] 📋 Spec 로딩 시작: {self.spec_description} (ID: {self.current_spec_id})")
+        Logger.info(f"Spec 로딩 시작: {self.spec_description} (ID: {self.current_spec_id})")
 
         # 시스템은 response schema / request data 사용
-        print(f"[SYSTEM] 📁 모듈: spec (센서/바이오/영상 통합)")
+        Logger.debug(f"모듈: spec (센서/바이오/영상 통합)")
 
         # ===== PyInstaller 환경에서 외부 spec 디렉토리 우선 로드 =====
         import sys
@@ -511,17 +512,17 @@ class MyApp(SystemMainUI):
 
             # 외부 spec 폴더 파일 존재 확인
             external_spec_dir = os.path.join(external_spec_parent, 'spec')
-            print(f"[SYSTEM SPEC DEBUG] 외부 spec 폴더: {external_spec_dir}")
-            print(f"[SYSTEM SPEC DEBUG] 외부 spec 폴더 존재: {os.path.exists(external_spec_dir)}")
+            Logger.debug(f"외부 spec 폴더: {external_spec_dir}")
+            Logger.debug(f"외부 spec 폴더 존재: {os.path.exists(external_spec_dir)}")
             if os.path.exists(external_spec_dir):
                 files = [f for f in os.listdir(external_spec_dir) if f.endswith('.py')]
-                print(f"[SYSTEM SPEC DEBUG] 외부 spec 폴더 .py 파일: {files}")
+                Logger.debug(f"외부 spec 폴더 .py 파일: {files}")
 
             # 이미 있더라도 제거 후 맨 앞에 추가 (우선순위 보장)
             if external_spec_parent in sys.path:
                 sys.path.remove(external_spec_parent)
             sys.path.insert(0, external_spec_parent)
-            print(f"[SYSTEM SPEC] sys.path에 외부 디렉토리 추가: {external_spec_parent}")
+            Logger.debug(f"sys.path에 외부 디렉토리 추가: {external_spec_parent}")
 
         # ===== 모듈 캐시 강제 삭제 =====
         # 주의: 'spec' 패키지 자체는 유지 (parent 패키지 필요)
@@ -534,15 +535,15 @@ class MyApp(SystemMainUI):
         for mod_name in module_names:
             if mod_name in sys.modules:
                 del sys.modules[mod_name]
-                print(f"[SYSTEM SPEC] 모듈 캐시 삭제: {mod_name}")
+                Logger.debug(f"[SYSTEM SPEC] 모듈 캐시 삭제: {mod_name}")
             else:
-                print(f"[SYSTEM SPEC] 모듈 캐시 없음: {mod_name}")
+                Logger.debug(f"[SYSTEM SPEC] 모듈 캐시 없음: {mod_name}")
 
         # spec 패키지가 없으면 빈 모듈로 등록
         if 'spec' not in sys.modules:
             import types
             sys.modules['spec'] = types.ModuleType('spec')
-            print(f"[SYSTEM SPEC] 빈 'spec' 패키지 생성")
+            Logger.debug(f"빈 'spec' 패키지 생성")
         # ===== 캐시 삭제 끝 =====
 
         # PyInstaller 환경에서는 importlib.util로 명시적으로 외부 파일 로드
@@ -555,10 +556,10 @@ class MyApp(SystemMainUI):
             schema_file = os.path.join(exe_dir, 'spec', 'Schema_response.py')
             constraints_file = os.path.join(exe_dir, 'spec', 'Constraints_request.py')
 
-            print(f"[SYSTEM SPEC] 명시적 로드 시도:")
-            print(f"  - Data: {data_file} (존재: {os.path.exists(data_file)})")
-            print(f"  - Schema: {schema_file} (존재: {os.path.exists(schema_file)})")
-            print(f"  - Constraints: {constraints_file} (존재: {os.path.exists(constraints_file)})")
+            Logger.debug(f"명시적 로드 시도:")
+            Logger.debug(f"  - Data: {data_file} (존재: {os.path.exists(data_file)})")
+            Logger.debug(f"  - Schema: {schema_file} (존재: {os.path.exists(schema_file)})")
+            Logger.debug(f"  - Constraints: {constraints_file} (존재: {os.path.exists(constraints_file)})")
 
             # importlib.util로 명시적 로드
             spec = importlib.util.spec_from_file_location('spec.Data_request', data_file)
@@ -576,7 +577,7 @@ class MyApp(SystemMainUI):
             sys.modules['spec.Constraints_request'] = constraints_request_module
             spec.loader.exec_module(constraints_request_module)
 
-            print(f"[SYSTEM SPEC] ✅ importlib.util로 외부 파일 로드 완료")
+            Logger.debug(f"importlib.util로 외부 파일 로드 완료")
         else:
             # 일반 환경에서는 기존 방식 사용
             import spec.Data_request as data_request_module
@@ -595,10 +596,10 @@ class MyApp(SystemMainUI):
             if os.path.exists(file_path):
                 mtime = os.path.getmtime(file_path)
                 mtime_str = datetime.datetime.fromtimestamp(mtime).strftime('%Y-%m-%d %H:%M:%S')
-                print(f"[SYSTEM SPEC] {name} 로드 경로: {file_path}")
-                print(f"[SYSTEM SPEC] {name} 수정 시간: {mtime_str}")
+                Logger.debug(f"{name} 로드 경로: {file_path}")
+                Logger.debug(f"{name} 수정 시간: {mtime_str}")
             else:
-                print(f"[SYSTEM SPEC] {name} 로드 경로: {file_path} (파일 없음)")
+                Logger.debug(f"{name} 로드 경로: {file_path} (파일 없음)")
         # ===== 로그 끝 =====
 
         # importlib.util로 직접 로드했으므로 reload 불필요 (이미 최신 파일 로드됨)
@@ -609,8 +610,8 @@ class MyApp(SystemMainUI):
             importlib.reload(constraints_request_module)
 
         # ✅ 시스템은 응답 검증 + 요청 전송 (outSchema/inData 사용)
-        print(f"[SYSTEM] 🔧 타입: 응답 검증 + 요청 전송")
-        print(spec_names)
+        Logger.debug(f"타입: 응답 검증 + 요청 전송")
+        Logger.debug(str(spec_names))
         # ✅ Response 검증용 스키마 로드 (시스템이 플랫폼으로부터 받을 응답 검증) - outSchema
         self.videoOutSchema = getattr(schema_response_module, spec_names[0], [])
 
@@ -623,7 +624,7 @@ class MyApp(SystemMainUI):
         try:
             self.webhookInSchema = getattr(schema_response_module, spec_names[3], [])
         except Exception as e:
-            print(f"Error loading webhook schema: {e}")
+            Logger.error(f"Error loading webhook schema: {e}")
             self.webhookInSchema = []
 
         # ✅ Webhook 관련 (현재 미사용)
@@ -632,9 +633,9 @@ class MyApp(SystemMainUI):
         # self.videoWebhookInSchema = []
         # self.videoWebhookInData = []
 
-        print(f"[SYSTEM] ✅ 로딩 완료: {len(self.videoMessages)}개 API")
-        print(f"[SYSTEM] 📋 API 목록: {self.videoMessages}")
-        print(f"[SYSTEM] 🔄 프로토콜 설정: {self.trans_protocols}")
+        Logger.info(f"로딩 완료: {len(self.videoMessages)}개 API")
+        Logger.info(f"API 목록: {self.videoMessages}")
+        Logger.debug(f"프로토콜 설정: {self.trans_protocols}")
         self.webhook_schema_idx = 0
 
         # ✅ spec_config 저장 (URL 생성에 필요)
@@ -647,10 +648,10 @@ class MyApp(SystemMainUI):
         """테이블 행 업데이트 (안전성 강화)"""
         # ✅ 1. 범위 체크
         if row >= self.tableWidget.rowCount():
-            print(f"[TABLE UPDATE] 경고: row={row}가 테이블 범위를 벗어남 (총 {self.tableWidget.rowCount()}행)")
+            Logger.debug(f"[TABLE UPDATE] 경고: row={row}가 테이블 범위를 벗어남 (총 {self.tableWidget.rowCount()}행)")
             return
 
-        print(f"[TABLE UPDATE] row={row}, result={result}, pass={pass_count}, error={error_count}, retries={retries}")
+        Logger.debug(f"[TABLE UPDATE] row={row}, result={result}, pass={pass_count}, error={error_count}, retries={retries}")
 
         # ✅ 2. 아이콘 업데이트
         msg, img = self.icon_update_step(data, result, error_text)
@@ -707,7 +708,7 @@ class MyApp(SystemMainUI):
         # ✅ 6. UI 즉시 업데이트
         QApplication.processEvents()
 
-        print(f"[TABLE UPDATE] 완료: row={row}")
+        Logger.debug(f"[TABLE UPDATE] 완료: row={row}")
 
     def load_test_info_from_constants(self):
         return [
@@ -737,12 +738,12 @@ class MyApp(SystemMainUI):
             new_group_id = selected_group.get('group_id')
             old_group_id = getattr(self, 'current_group_id', None)
 
-            print(f"[DEBUG] 🔄 그룹 선택: {old_group_id} → {new_group_id}")
+            Logger.debug(f" 🔄 그룹 선택: {old_group_id} → {new_group_id}")
 
             # ✅ 그룹이 변경되면 current_spec_id 초기화 (다음 시나리오 선택 시 무조건 다시 로드되도록)
             if old_group_id != new_group_id:
                 self.current_spec_id = None
-                print(f"[DEBUG] ✨ 그룹 변경으로 current_spec_id 초기화")
+                Logger.debug(f" ✨ 그룹 변경으로 current_spec_id 초기화")
 
             # ✅ 그룹 ID 저장
             self.current_group_id = new_group_id
@@ -771,19 +772,19 @@ class MyApp(SystemMainUI):
         # ===== 수정 끝 =====
 
         if selected_group is None:
-            print(f"[WARN] 선택된 그룹({group_name}) 데이터를 찾을 수 없습니다.")
+            Logger.warn(f" 선택된 그룹({group_name}) 데이터를 찾을 수 없습니다.")
             return
 
         # ✅ 그룹 변경 감지 및 current_spec_id 초기화
         new_group_id = selected_group.get('group_id')
         old_group_id = getattr(self, 'current_group_id', None)
 
-        print(f"[DEBUG] 🔄 그룹 선택: {old_group_id} → {new_group_id}")
+        Logger.debug(f" 🔄 그룹 선택: {old_group_id} → {new_group_id}")
 
         # ✅ 그룹이 변경되면 current_spec_id 초기화 (다음 시나리오 선택 시 무조건 다시 로드되도록)
         if old_group_id != new_group_id:
             self.current_spec_id = None
-            print(f"[DEBUG] ✨ 그룹 변경으로 current_spec_id 초기화")
+            Logger.debug(f" ✨ 그룹 변경으로 current_spec_id 초기화")
 
         # ✅ 그룹 ID 저장
         self.current_group_id = new_group_id
@@ -800,20 +801,20 @@ class MyApp(SystemMainUI):
                 new_spec_id = self.index_to_spec_id[row]
 
                 if new_spec_id == self.current_spec_id:
-                    print(f"[SELECT] 이미 선택된 시나리오: {new_spec_id}")
+                    Logger.debug(f" 이미 선택된 시나리오: {new_spec_id}")
                     return
 
-                print(f"[SYSTEM] 🔄 시험 분야 전환: {self.current_spec_id} → {new_spec_id}")
-                print(f"[DEBUG] 현재 그룹: {self.current_group_id}")
+                Logger.debug(f" 🔄 시험 분야 전환: {self.current_spec_id} → {new_spec_id}")
+                Logger.debug(f" 현재 그룹: {self.current_group_id}")
 
                 # ✅ 0. 일시정지 파일은 각 시나리오별로 유지 (삭제하지 않음)
 
                 # ✅ 1. 현재 spec의 테이블 데이터 저장 (current_spec_id가 None이 아닐 때만)
                 if self.current_spec_id is not None:
-                    print(f"[DEBUG] 데이터 저장 전 - 테이블 행 수: {self.tableWidget.rowCount()}")
+                    Logger.debug(f" 데이터 저장 전 - 테이블 행 수: {self.tableWidget.rowCount()}")
                     self.save_current_spec_data()
                 else:
-                    print(f"[DEBUG] ⚠️ current_spec_id가 None - 저장 스킵 (그룹 전환 직후)")
+                    Logger.debug(f" ⚠️ current_spec_id가 None - 저장 스킵 (그룹 전환 직후)")
 
                 # ✅ 2. spec_id 업데이트
                 self.current_spec_id = new_spec_id
@@ -821,8 +822,8 @@ class MyApp(SystemMainUI):
                 # ✅ 3. spec 데이터 다시 로드
                 self.load_specs_from_constants()
 
-                print(f"[SELECT] 로드된 API 개수: {len(self.videoMessages)}")
-                print(f"[SELECT] API 목록: {self.videoMessages}")
+                Logger.debug(f" 로드된 API 개수: {len(self.videoMessages)}")
+                Logger.debug(f" API 목록: {self.videoMessages}")
 
                 # ✅ 4. 기본 변수 초기화
                 self.cnt = 0
@@ -836,14 +837,14 @@ class MyApp(SystemMainUI):
                 self.webhook_schema_idx = 0
 
                 # ✅ 5. 테이블 완전 재구성
-                print(f"[SELECT] 테이블 완전 재구성 시작")
+                Logger.debug(f" 테이블 완전 재구성 시작")
                 self.update_result_table_structure(self.videoMessages)
 
                 # ✅ 6. 저장된 데이터 복원 시도
                 restored = self.restore_spec_data(new_spec_id)
 
                 if not restored:
-                    print(f"[SELECT] 저장된 데이터 없음 - 초기화")
+                    Logger.debug(f" 저장된 데이터 없음 - 초기화")
                     # 점수 초기화
                     self.total_pass_cnt = 0
                     self.total_error_cnt = 0
@@ -860,7 +861,7 @@ class MyApp(SystemMainUI):
                         {"data": "", "error": "", "result": "PASS", "raw_data_list": []} for _ in range(len(self.videoMessages))
                     ]
                 else:
-                    print(f"[SELECT] 저장된 데이터 복원 완료")
+                    Logger.debug(f" 저장된 데이터 복원 완료")
 
                 # ✅ 7. trace 및 latest_events 초기화
                 self.trace.clear()
@@ -887,17 +888,17 @@ class MyApp(SystemMainUI):
                     details=f"API 개수: {len(self.videoMessages)}개 | API 목록: {', '.join(self.videoMessagesDisplay)}"
                 )
 
-                print(f"[SELECT] ✅ 시스템 전환 완료")
+                Logger.debug(f" ✅ 시스템 전환 완료")
 
         except Exception as e:
-            print(f"[SELECT] 시험 분야 선택 처리 실패: {e}")
+            Logger.debug(f" 시험 분야 선택 처리 실패: {e}")
             import traceback
             traceback.print_exc()
 
     def update_result_table_structure(self, api_list):
         """테이블 구조를 완전히 재구성 (API 개수에 맞게)"""
         api_count = len(api_list)
-        print(f"[TABLE] 테이블 재구성 시작: {api_count}개 API")
+        Logger.debug(f" 테이블 재구성 시작: {api_count}개 API")
 
         # ✅ 1. 테이블 행 개수 설정
         self.tableWidget.setRowCount(api_count)
@@ -918,7 +919,7 @@ class MyApp(SystemMainUI):
             api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 1, api_item)
 
-            print(f"[TABLE] Row {row}: {display_name} 설정 완료")
+            Logger.debug(f" Row {row}: {display_name} 설정 완료")
 
             # 컬럼 2: 결과 아이콘
             icon_widget = QWidget()
@@ -974,7 +975,7 @@ class MyApp(SystemMainUI):
             # 행 높이 설정
             self.tableWidget.setRowHeight(row, 40)
 
-        print(f"[TABLE] 테이블 재구성 완료: {self.tableWidget.rowCount()}개 행")
+        Logger.debug(f" 테이블 재구성 완료: {self.tableWidget.rowCount()}개 행")
 
     def update_result_table_with_apis(self, api_list):
         """시험 결과 테이블을 새로운 API 목록으로 업데이트"""
@@ -1061,13 +1062,13 @@ class MyApp(SystemMainUI):
                     self.webhook_thread.result_signal.connect(self.handle_webhook_result)
                     self.webhook_thread.start()
         except Exception as e:
-            print(e)
+            Logger.debug(str(e))
             import traceback
             traceback.print_exc()
 
         try:
             path = re.sub(r'\d+$', '', path)
-            print(f"[DEBUG] [post] Sending request to {path} with auth_type={self.r2}, token={self.token}")
+            Logger.debug(f" [post] Sending request to {path} with auth_type={self.r2}, token={self.token}")
             self.res = requests.post(
                 path,
                 headers=headers,
@@ -1077,7 +1078,7 @@ class MyApp(SystemMainUI):
                 timeout=time_out
             )
         except Exception as e:
-            print(e)
+            Logger.debug(str(e))
 
     # 임시 수정 
     def handle_webhook_result(self, result):
@@ -1089,7 +1090,7 @@ class MyApp(SystemMainUI):
     def get_webhook_result(self):
         # ✅ 웹훅 스키마가 없으면 검증하지 않음
         if self.cnt >= len(self.webhookSchema) or not self.webhookSchema[self.cnt]:
-            print(f"[WEBHOOK] API {self.cnt}는 웹훅 스키마가 없음 - 검증 건너뜀")
+            Logger.debug(f" API {self.cnt}는 웹훅 스키마가 없음 - 검증 건너뜀")
             self.webhook_flag = False
             return
         
@@ -1106,11 +1107,11 @@ class MyApp(SystemMainUI):
         # ✅ 디버깅: 웹훅 이벤트 스키마 검증 (첫 호출에만 출력)
         if not hasattr(self, '_webhook_debug_printed'):
             self._webhook_debug_printed = True
-            print(f"\n[DEBUG] ========== 웹훅 이벤트 검증 디버깅 ==========")
-            print(
-                f"[DEBUG] webhook_cnt={self.webhook_cnt}, API={self.message[self.webhook_cnt] if self.webhook_cnt < len(self.message) else 'N/A'}")
-            print(f"[DEBUG] webhookSchema 총 개수={len(self.webhookSchema)}")
-            print(f"[DEBUG] webhook_res is None: {self.webhook_res is None}")
+            Logger.debug(f"\n========== 웹훅 이벤트 검증 디버깅 ==========")
+            webhook_api = self.message[self.webhook_cnt] if self.webhook_cnt < len(self.message) else 'N/A'
+            Logger.debug(f"webhook_cnt={self.webhook_cnt}, API={webhook_api}")
+            Logger.debug(f"webhookSchema 총 개수={len(self.webhookSchema)}")
+            Logger.debug(f"webhook_res is None: {self.webhook_res is None}")
 
         schema_to_check = self.webhookSchema[self.cnt]
 
@@ -1138,7 +1139,7 @@ class MyApp(SystemMainUI):
             )
 
         if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
-            print(f"[DEBUG] ==========================================\n")
+            Logger.debug(f" ==========================================\n")
 
         self.valResult.append(
             f'<div style="font-size: 20px; font-weight: bold; color: #333; font-family: \'Noto Sans KR\'; margin-top: 10px;">{message_name}</div>')
@@ -1188,7 +1189,7 @@ class MyApp(SystemMainUI):
                 accumulated_pass = self.step_pass_counts[self.webhook_cnt]
                 accumulated_error = self.step_error_counts[self.webhook_cnt]
 
-                print(f"[WEBHOOK] 누적 결과: pass={accumulated_pass}, error={accumulated_error}")
+                Logger.debug(f" 누적 결과: pass={accumulated_pass}, error={accumulated_error}")
             else:
                 # 누적 배열이 없으면 웹훅 결과만 사용
                 accumulated_pass = key_psss_cnt
@@ -1247,9 +1248,9 @@ class MyApp(SystemMainUI):
 
             # 웹훅 이벤트 수신 확인 - webhook_thread.wait()이 이미 동기화 처리하므로 별도 sleep 불필요
             if self.webhook_flag is True:
-                print(
-                    f"[TIMING_DEBUG] 웹훅 이벤트 수신 완료 (API: {self.message[self.cnt] if self.cnt < len(self.message) else 'N/A'})")
-                print(f"[TIMING_DEBUG] ✅ 웹훅 스레드의 wait()이 동기화 처리 완료 (수동 sleep 제거됨)")
+                api_name = self.message[self.cnt] if self.cnt < len(self.message) else 'N/A'
+                Logger.debug(f"웹훅 이벤트 수신 완료 (API: {api_name})")
+                Logger.debug(f"웹훅 스레드의 wait()이 동기화 처리 완료 (수동 sleep 제거됨)")
 
             if (self.post_flag is False and
                     self.processing_response is False and
@@ -1288,7 +1289,7 @@ class MyApp(SystemMainUI):
                 inMessage = self.inMessage[self.cnt] if self.cnt < len(self.inMessage) else {}
                 # ✅ Data Mapper 적용 - 이전 응답 데이터로 요청 업데이트
                 # generator는 이미 self.latest_events를 참조하고 있으므로 재할당 불필요
-                print(f"[DEBUG][MAPPER] latest_events 상태: {list(self.latest_events.keys())}")
+                Logger.debug(f"[MAPPER] latest_events 상태: {list(self.latest_events.keys())}")
                 inMessage = self._apply_request_constraints(inMessage, self.cnt)
 
                 trans_protocol = inMessage.get("transProtocol", {})
@@ -1297,25 +1298,25 @@ class MyApp(SystemMainUI):
                     if "WebHook".lower() in str(trans_protocol_type).lower():
 
                         # ✅ 플랫폼이 웹훅을 보낼 외부 주소 (ngrok) 사용 (01/08 - 추후 아래 주석 제거)
-                        # WEBHOOK_IP = CONSTANTS.WEBHOOK_PUBLIC_IP
-                        # WEBHOOK_PORT = CONSTANTS.WEBHOOK_PORT  # 웹훅 수신 포트
-                        # WEBHOOK_URL = f"https://{WEBHOOK_IP}:{WEBHOOK_PORT}"  # 플랫폼/시스템이 웹훅을 보낼 주소
+                        WEBHOOK_IP = CONSTANTS.WEBHOOK_PUBLIC_IP  # 웹훅 수신 IP/도메인
+                        WEBHOOK_PORT = CONSTANTS.WEBHOOK_PORT  # 웹훅 수신 포트
+                        WEBHOOK_URL = f"https://{WEBHOOK_IP}:{WEBHOOK_PORT}"  # 플랫폼/시스템이 웹훅을 보낼 주소
 
-                        # trans_protocol = {
-                        #     "transProtocolType": "WebHook",
-                        #     "transProtocolDesc": WEBHOOK_URL
-                        # }
-                        
-                        WEBHOOK_DISPLAY_URL = CONSTANTS.WEBHOOK_DISPLAY_URL
                         trans_protocol = {
                             "transProtocolType": "WebHook",
-                            "transProtocolDesc": WEBHOOK_DISPLAY_URL  # ngrok 주소 전송
+                            "transProtocolDesc": WEBHOOK_URL
                         }
+                        
+                        # WEBHOOK_DISPLAY_URL = CONSTANTS.WEBHOOK_DISPLAY_URL
+                        # trans_protocol = {
+                        #     "transProtocolType": "WebHook",
+                        #     "transProtocolDesc": WEBHOOK_DISPLAY_URL  # ngrok 주소 전송
+                        # }
                         inMessage["transProtocol"] = trans_protocol
 
                         # (01/08 - 이것도 아래를 주석 해제)
-                        # print(f"[DEBUG] [post] transProtocol 설정 추가됨: {inMessage}")
-                        print(f"[DEBUG] [post] transProtocol 설정 (ngrok 주소): {WEBHOOK_DISPLAY_URL}")
+                        Logger.debug(f" [post] transProtocol 설정 추가됨: {inMessage}")
+                        # Logger.debug(f" [post] transProtocol 설정 (ngrok 주소): {WEBHOOK_DISPLAY_URL}")
                 elif self.r2 == "B" and self.message[self.cnt] == "Authentication":
                     inMessage["userID"] = self.accessInfo[0]
                     inMessage["userPW"] = self.accessInfo[1]
@@ -1330,8 +1331,8 @@ class MyApp(SystemMainUI):
                     self.reference_context[f"/{api_name}"] = inMessage
 
                 # 순서 확인용 로그
-                print(
-                    f"[SYSTEM] 플랫폼에 요청 전송: {(self.message[self.cnt] if self.cnt < len(self.message) else 'index out of range')} (시도 {self.current_retry + 1})")
+                api_name = self.message[self.cnt] if self.cnt < len(self.message) else 'index out of range'
+                Logger.debug(f"플랫폼에 요청 전송: {api_name} (시도 {self.current_retry + 1})")
 
                 t = threading.Thread(target=self.post, args=(path, json_data, current_timeout), daemon=True)
                 t.start()
@@ -1363,7 +1364,7 @@ class MyApp(SystemMainUI):
                             webhook_rqd_cnt, webhook_opt_cnt = timeout_field_finder(webhook_schema)
                             tmp_fields_rqd_cnt += webhook_rqd_cnt
                             tmp_fields_opt_cnt += webhook_opt_cnt
-                            print(f"[TIMEOUT] 웹훅 스키마 필드 추가: rqd={webhook_rqd_cnt}, opt={webhook_opt_cnt}")
+                            Logger.debug(f" 웹훅 스키마 필드 추가: rqd={webhook_rqd_cnt}, opt={webhook_opt_cnt}")
 
                 add_err = tmp_fields_rqd_cnt if tmp_fields_rqd_cnt > 0 else 1
                 if self.flag_opt:
@@ -1458,36 +1459,36 @@ class MyApp(SystemMainUI):
                     total_fields = self.total_pass_cnt + self.total_error_cnt
 
                     # ✅ JSON 결과 자동 저장 추가
-                    print(f"[DEBUG] 평가 완료 - 자동 저장 시작")
+                    Logger.debug(f" 평가 완료 - 자동 저장 시작")
                     try:
                         self.run_status = "완료"
                         result_json = build_result_json(self)
                         url = f"{CONSTANTS.management_url}/api/integration/test-results"
                         response = requests.post(url, json=result_json)
-                        print("✅ 시험 결과 전송 상태 코드:", response.status_code)
-                        print("📥  시험 결과 전송 응답:", response.text)
+                        Logger.debug(f"시험 결과 전송 상태 코드: {response.status_code}")
+                        Logger.debug(f"시험 결과 전송 응답: {response.text}")
                         json_path = os.path.join(result_dir, "response_results.json")
                         with open(json_path, "w", encoding="utf-8") as f:
                             json.dump(result_json, f, ensure_ascii=False, indent=2)
-                        print(f"✅ 시험 결과가 '{json_path}'에 자동 저장되었습니다.")
+                        Logger.debug(f"✅ 시험 결과가 '{json_path}'에 자동 저장되었습니다.")
                         self.append_monitor_log(
                             step_name="결과 파일 저장 완료",
                             details=json_path
                         )
-                        print(f"[DEBUG] try 블록 정상 완료")
+                        Logger.debug(f" try 블록 정상 완료")
 
                     except Exception as e:
-                        print(f"❌ JSON 저장 중 오류 발생: {e}")
+                        Logger.debug(f"❌ JSON 저장 중 오류 발생: {e}")
                         import traceback
                         traceback.print_exc()
                         self.valResult.append(f"\n결과 저장 실패: {str(e)}")
-                        print(f"[DEBUG] except 블록 실행됨")
+                        Logger.debug(f" except 블록 실행됨")
 
                     finally:
                         # ✅ 평가 완료 시 일시정지 파일 정리 (에러 발생 여부와 무관하게 항상 실행)
-                        print(f"[DEBUG] ========== finally 블록 진입 ==========")
+                        Logger.debug(f" ========== finally 블록 진입 ==========")
                         self.cleanup_paused_file()
-                        print(f"[DEBUG] ========== finally 블록 종료 ==========")
+                        Logger.debug(f" ========== finally 블록 종료 ==========")
 
                     self.sbtn.setEnabled(True)
                     self.stop_btn.setDisabled(True)
@@ -1565,24 +1566,24 @@ class MyApp(SystemMainUI):
 
                     # ✅ 디버깅: 어떤 스키마로 검증하는지 확인
                     if self.current_retry == 0:  # 첫 시도에만 출력
-                        print(f"\n[DEBUG] ========== 스키마 검증 디버깅 ==========")
-                        print(
-                            f"[DEBUG] cnt={self.cnt}, API={self.message[self.cnt] if self.cnt < len(self.message) else 'N/A'}")
-                        print(f"[DEBUG] webhook_flag={self.webhook_flag}")
-                        print(f"[DEBUG] current_protocol={current_protocol}")
+                        Logger.debug(f"\n========== 스키마 검증 디버깅 ==========")
+                        api_name = self.message[self.cnt] if self.cnt < len(self.message) else 'N/A'
+                        Logger.debug(f"cnt={self.cnt}, API={api_name}")
+                        Logger.debug(f"webhook_flag={self.webhook_flag}")
+                        Logger.debug(f"current_protocol={current_protocol}")
 
                         # ✅ 웹훅 API의 구독 응답은 일반 스키마 사용
                         # webhook_flag는 실제 웹훅 이벤트 수신 시에만 True
                         # 구독 응답은 항상 outSchema[self.cnt] 사용
                         schema_index = self.cnt
-                        print(f"[DEBUG] 사용 스키마: outSchema[{schema_index}]")
+                        Logger.debug(f" 사용 스키마: outSchema[{schema_index}]")
 
                         # 스키마 필드 확인
                         if self.cnt < len(self.outSchema):
                             schema_to_use = self.outSchema[self.cnt]
                             if isinstance(schema_to_use, dict):
                                 schema_keys = list(schema_to_use.keys())[:5]
-                                print(f"[DEBUG] 스키마 필드 (first 5): {schema_keys}")
+                                Logger.debug(f" 스키마 필드 (first 5): {schema_keys}")
 
                     # val_result, val_text, key_psss_cnt, key_error_cnt = json_check_(self.outSchema[self.cnt], res_data, self.flag_opt)
                     resp_rules = {}
@@ -1590,7 +1591,7 @@ class MyApp(SystemMainUI):
                         resp_rules = self.resp_rules or {}
                     except Exception as e:
                         resp_rules = {}
-                        print(f"[ERROR] 응답 검증 규칙 로드 실패: {e}")
+                        Logger.error(f" 응답 검증 규칙 로드 실패: {e}")
 
                     # 🆕 응답 검증용 - resp_rules의 각 필드별 referenceEndpoint/Max/Min에서 trace 파일 로드
                     if resp_rules:
@@ -1604,11 +1605,11 @@ class MyApp(SystemMainUI):
                                 ref_api_name = ref_endpoint.lstrip("/")
                                 # latest_events에 없으면 trace 파일에서 로드
                                 if ref_api_name not in self.latest_events or direction not in self.latest_events.get(ref_api_name, {}):
-                                    print(f"[TRACE] {ref_endpoint} {direction}를 trace 파일에서 로드 시도")
+                                    Logger.debug(f" {ref_endpoint} {direction}를 trace 파일에서 로드 시도")
                                     response_data = self._load_from_trace_file(ref_api_name, direction)
                                     if response_data and isinstance(response_data, dict):
                                         self.reference_context[ref_endpoint] = response_data
-                                        print(f"[TRACE] {ref_endpoint} {direction}를 trace 파일에서 로드 완료")
+                                        Logger.debug(f" {ref_endpoint} {direction}를 trace 파일에서 로드 완료")
                                 else:
                                     # latest_events에 있으면 거기서 가져오기
                                     event_data = self.latest_events.get(ref_api_name, {}).get(direction, {})
@@ -1620,11 +1621,11 @@ class MyApp(SystemMainUI):
                             if ref_endpoint_max:
                                 ref_api_name_max = ref_endpoint_max.lstrip("/")
                                 if ref_api_name_max not in self.latest_events or direction not in self.latest_events.get(ref_api_name_max, {}):
-                                    print(f"[TRACE] {ref_endpoint_max} {direction}를 trace 파일에서 로드 시도 (Max)")
+                                    Logger.debug(f" {ref_endpoint_max} {direction}를 trace 파일에서 로드 시도 (Max)")
                                     response_data_max = self._load_from_trace_file(ref_api_name_max, direction)
                                     if response_data_max and isinstance(response_data_max, dict):
                                         self.reference_context[ref_endpoint_max] = response_data_max
-                                        print(f"[TRACE] {ref_endpoint_max} {direction}를 trace 파일에서 로드 완료 (Max)")
+                                        Logger.debug(f" {ref_endpoint_max} {direction}를 trace 파일에서 로드 완료 (Max)")
                                 else:
                                     event_data = self.latest_events.get(ref_api_name_max, {}).get(direction, {})
                                     if event_data and isinstance(event_data, dict):
@@ -1635,11 +1636,11 @@ class MyApp(SystemMainUI):
                             if ref_endpoint_min:
                                 ref_api_name_min = ref_endpoint_min.lstrip("/")
                                 if ref_api_name_min not in self.latest_events or direction not in self.latest_events.get(ref_api_name_min, {}):
-                                    print(f"[TRACE] {ref_endpoint_min} {direction}를 trace 파일에서 로드 시도 (Min)")
+                                    Logger.debug(f" {ref_endpoint_min} {direction}를 trace 파일에서 로드 시도 (Min)")
                                     response_data_min = self._load_from_trace_file(ref_api_name_min, direction)
                                     if response_data_min and isinstance(response_data_min, dict):
                                         self.reference_context[ref_endpoint_min] = response_data_min
-                                        print(f"[TRACE] {ref_endpoint_min} {direction}를 trace 파일에서 로드 완료 (Min)")
+                                        Logger.debug(f" {ref_endpoint_min} {direction}를 trace 파일에서 로드 완료 (Min)")
                                 else:
                                     event_data = self.latest_events.get(ref_api_name_min, {}).get(direction, {})
                                     if event_data and isinstance(event_data, dict):
@@ -1654,7 +1655,7 @@ class MyApp(SystemMainUI):
                             reference_context=self.reference_context
                         )
                     except TypeError as te:
-                        print(f"[ERROR] 응답 검증 중 TypeError 발생: {te}, 일반 검증으로 재시도")
+                        Logger.error(f" 응답 검증 중 TypeError 발생: {te}, 일반 검증으로 재시도")
                         val_result, val_text, key_psss_cnt, key_error_cnt, opt_correct, opt_error = json_check_(
                             self.outSchema[self.cnt],
                             res_data,
@@ -1664,8 +1665,8 @@ class MyApp(SystemMainUI):
                         self.handle_authentication_response(res_data)
 
                     if self.current_retry == 0:  # 첫 시도에만 출력
-                        print(f"[DEBUG] 검증 결과: {val_result}, pass={key_psss_cnt}, error={key_error_cnt}")
-                        print(f"[DEBUG] ==========================================\n")
+                        Logger.debug(f" 검증 결과: {val_result}, pass={key_psss_cnt}, error={key_error_cnt}")
+                        Logger.debug(f" ==========================================\n")
 
                     # 이번 시도의 결과
                     final_result = val_result
@@ -1685,9 +1686,9 @@ class MyApp(SystemMainUI):
                     self.step_opt_pass_counts[self.cnt] = opt_correct  # 선택 필드 통과 수
                     self.step_opt_error_counts[self.cnt] = opt_error  # 선택 필드 에러 수
                     
-                    print(f"[SCORE DEBUG] API {self.cnt} 시도 {self.current_retry + 1}: pass={key_psss_cnt}, error={key_error_cnt}")
-                    print(f"[SCORE DEBUG] step_pass_counts[{self.cnt}] = {self.step_pass_counts[self.cnt]}")
-                    print(f"[SCORE DEBUG] step_error_counts[{self.cnt}] = {self.step_error_counts[self.cnt]}")
+                    Logger.debug(f"[SCORE DEBUG] API {self.cnt} 시도 {self.current_retry + 1}: pass={key_psss_cnt}, error={key_error_cnt}")
+                    Logger.debug(f"[SCORE DEBUG] step_pass_counts[{self.cnt}] = {self.step_pass_counts[self.cnt]}")
+                    Logger.debug(f"[SCORE DEBUG] step_error_counts[{self.cnt}] = {self.step_error_counts[self.cnt]}")
 
                     if final_result == "PASS":
                         # ✅ 배열 범위 체크 추가
@@ -1809,7 +1810,7 @@ class MyApp(SystemMainUI):
 
                     # ✅ 웹훅 처리를 재시도 완료 체크 전에 실행 (step_pass_counts 업데이트를 위해)
                     if self.webhook_flag:
-                        print(f"[WEBHOOK] 웹훅 처리 시작 (API {self.cnt})")
+                        Logger.debug(f" 웹훅 처리 시작 (API {self.cnt})")
                         self.get_webhook_result()
 
                     # 재시도 카운터 증가
@@ -1823,7 +1824,7 @@ class MyApp(SystemMainUI):
                         final_pass_count = self.step_pass_counts[self.cnt]
                         final_error_count = self.step_error_counts[self.cnt]
                         
-                        print(f"[SCORE] API {self.cnt} 완료: pass={final_pass_count}, error={final_error_count}")
+                        Logger.debug(f" API {self.cnt} 완료: pass={final_pass_count}, error={final_error_count}")
 
                         # ✅ 분야별 점수 업데이트 (현재 spec만)
                         self.total_pass_cnt += final_pass_count
@@ -1839,8 +1840,8 @@ class MyApp(SystemMainUI):
                         final_opt_error_count = self.step_opt_error_counts[self.cnt]
                         self.global_opt_error_cnt += final_opt_error_count
 
-                        print(f"[SCORE] 분야별 점수: pass={self.total_pass_cnt}, error={self.total_error_cnt}")
-                        print(f"[SCORE] 전체 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}")
+                        Logger.debug(f" 분야별 점수: pass={self.total_pass_cnt}, error={self.total_error_cnt}")
+                        Logger.debug(f" 전체 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}")
 
                         # ✅ 전체 점수 포함하여 디스플레이 업데이트 (재시도 완료 후에만)
                         self.update_score_display()
@@ -1893,40 +1894,38 @@ class MyApp(SystemMainUI):
                 # ✅ 전체 점수 최종 확인 로그
                 global_total = self.global_pass_cnt + self.global_error_cnt
                 global_score = (self.global_pass_cnt / global_total * 100) if global_total > 0 else 0
-                print(
-                    f"[FINAL] 분야별 점수: pass={self.total_pass_cnt}, error={self.total_error_cnt}, score={final_score:.1f}%")
-                print(
-                    f"[FINAL] 전체 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}, score={global_score:.1f}%")
+                Logger.debug(f"분야별 점수: pass={self.total_pass_cnt}, error={self.total_error_cnt}, score={final_score:.1f}%")
+                Logger.debug(f"전체 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}, score={global_score:.1f}%")
 
                 # ✅ JSON 결과 자동 저장 추가
-                print(f"[DEBUG] 평가 완료 - 자동 저장 시작 (경로2)")
+                Logger.debug(f"평가 완료 - 자동 저장 시작 (경로2)")
                 try:
                     self.run_status = "완료"
                     result_json = build_result_json(self)
                     url = f"{CONSTANTS.management_url}/api/integration/test-results"
                     response = requests.post(url, json=result_json)
-                    print("✅ 시험 결과 전송 상태 코드:", response.status_code)
-                    print("📥  시험 결과 전송 응답:", response.text)
+                    Logger.debug(f"✅ 시험 결과 전송 상태 코드:: {response.status_code}")
+                    Logger.debug(f"📥  시험 결과 전송 응답:: {response.text}")
                     json_path = os.path.join(result_dir, "response_results.json")
                     with open(json_path, "w", encoding="utf-8") as f:
                         json.dump(result_json, f, ensure_ascii=False, indent=2)
-                    print(f"✅ 시험 결과가 '{json_path}'에 자동 저장되었습니다.")
+                    Logger.debug(f"✅ 시험 결과가 '{json_path}'에 자동 저장되었습니다.")
                     self.append_monitor_log(
                         step_name="결과 파일 저장 완료",
                         details=json_path
                     )
-                    print(f"[DEBUG] try 블록 정상 완료 (경로2)")
+                    Logger.debug(f" try 블록 정상 완료 (경로2)")
                 except Exception as e:
-                    print(f"❌ JSON 저장 중 오류 발생: {e}")
+                    Logger.debug(f"❌ JSON 저장 중 오류 발생: {e}")
                     import traceback
                     traceback.print_exc()
                     self.valResult.append(f"\n결과 저장 실패: {str(e)}")
-                    print(f"[DEBUG] except 블록 실행됨 (경로2)")
+                    Logger.debug(f" except 블록 실행됨 (경로2)")
                 finally:
                     # ✅ 평가 완료 시 일시정지 파일 정리 (에러 발생 여부와 무관하게 항상 실행)
-                    print(f"[DEBUG] ========== finally 블록 진입 (경로2) ==========")
+                    Logger.debug(f" ========== finally 블록 진입 (경로2) ==========")
                     self.cleanup_paused_file()
-                    print(f"[DEBUG] ========== finally 블록 종료 (경로2) ==========")
+                    Logger.debug(f" ========== finally 블록 종료 (경로2) ==========")
 
                 self.sbtn.setEnabled(True)
                 self.stop_btn.setDisabled(True)
@@ -1934,9 +1933,9 @@ class MyApp(SystemMainUI):
 
         except Exception as err:
             import traceback
-            print(f"[ERROR] Exception in update_view: {err}")
-            print(f"[ERROR] Current state - cnt={self.cnt}, current_retry={self.current_retry}")
-            print(f"[ERROR] Traceback:")
+            Logger.error(f" Exception in update_view: {err}")
+            Logger.error(f" Current state - cnt={self.cnt}, current_retry={self.current_retry}")
+            Logger.error(f" Traceback:")
             traceback.print_exc()
 
             msg = QMessageBox()
@@ -2004,16 +2003,16 @@ class MyApp(SystemMainUI):
 
     def _clean_trace_dir_once(self):
         """results/trace 폴더 안의 파일들을 삭제"""
-        print(f"[TRACE_CLEAN] ⚠️  _clean_trace_dir_once() 호출됨!")
+        Logger.debug(f" ⚠️  _clean_trace_dir_once() 호출됨!")
         import traceback
-        print(f"[TRACE_CLEAN] 호출 스택:\n{''.join(traceback.format_stack()[-3:-1])}")
+        Logger.debug(f" 호출 스택:\n{''.join(traceback.format_stack()[-3:-1])}")
         os.makedirs(CONSTANTS.trace_path, exist_ok=True)
         for name in os.listdir(CONSTANTS.trace_path):
             path = os.path.join(CONSTANTS.trace_path, name)
             if os.path.isfile(path):
                 try:
                     os.remove(path)
-                    print(f"[TRACE_CLEAN] 삭제: {name}")
+                    Logger.debug(f" 삭제: {name}")
                 except OSError:
                     pass
 
@@ -2023,7 +2022,7 @@ class MyApp(SystemMainUI):
         is_auto_restart = getattr(self, '_auto_restart', False)
         if is_auto_restart:
             self._auto_restart = False
-            print(f"[START] 자동 재시작 모드 - 시나리오 선택 검증 건너뜀")
+            Logger.debug(f" 자동 재시작 모드 - 시나리오 선택 검증 건너뜀")
         else:
             # ✅ 1. 시나리오 선택 확인 (수동 시작 시에만)
             if not hasattr(self, 'current_spec_id') or not self.current_spec_id:
@@ -2035,14 +2034,14 @@ class MyApp(SystemMainUI):
         resume_mode = os.path.exists(paused_file_path)
 
         if resume_mode:
-            print(f"[DEBUG] ========== 재개 모드: 일시정지 상태 복원 ==========")
+            Logger.debug(f" ========== 재개 모드: 일시정지 상태 복원 ==========")
             # 재개 모드: 저장된 상태 복원
             if self.load_paused_state():
                 self.is_paused = False  # 재개 시작이므로 paused 플래그 해제
-                print(f"[DEBUG] 재개 모드: {self.last_completed_api_index + 2}번째 API부터 시작")
+                Logger.debug(f" 재개 모드: {self.last_completed_api_index + 2}번째 API부터 시작")
             else:
                 # 복원 실패 시 신규 시작으로 전환
-                print(f"[WARN] 상태 복원 실패, 신규 시작으로 전환")
+                Logger.warn(f" 상태 복원 실패, 신규 시작으로 전환")
                 resume_mode = False
         self.webhook_schema_idx = 0
 
@@ -2058,10 +2057,10 @@ class MyApp(SystemMainUI):
 
         self.pathUrl = self.url_text_box.text()
         if not resume_mode:
-            print(f"[START] ========== 검증 시작: 완전 초기화 ==========")
-        print(f"[START] 시험 URL : ", self.pathUrl)
-        print(f"[START] 시험: {self.current_spec_id} - {self.spec_description}")
-        print(f"[START] 사용자 인증 방식 : ", self.CONSTANTS.auth_type)
+            Logger.debug(f"========== 검증 시작: 완전 초기화 ==========")
+        Logger.debug(f"시험 URL: {self.pathUrl}")
+        Logger.debug(f"시험: {self.current_spec_id} - {self.spec_description}")
+        Logger.debug(f"사용자 인증 방식: {self.CONSTANTS.auth_type}")
 
         QApplication.processEvents()  # 스피너 애니메이션 유지
         self.update_result_table_structure(self.videoMessages)
@@ -2069,22 +2068,22 @@ class MyApp(SystemMainUI):
 
         # ✅ 2. 기존 타이머 정지 (중복 실행 방지)
         if self.tick_timer.isActive():
-            print(f"[START] 기존 타이머 중지")
+            Logger.debug(f" 기존 타이머 중지")
             self.tick_timer.stop()
 
         if not resume_mode:
             # ========== 신규 시작 모드: 완전 초기화 ==========
-            print(f"[START] ========== 신규 시작: 완전 초기화 ==========")
+            Logger.debug(f" ========== 신규 시작: 완전 초기화 ==========")
 
             # ✅ 3. trace 디렉토리 초기화 (그룹이 변경될 때만)
             # 같은 그룹 내 spec 전환 시에는 trace 유지 (맥락 검증용)
             if not hasattr(self, '_last_cleaned_group') or self._last_cleaned_group != self.current_group_id:
-                print(f"[TRACE_CLEAN] 그룹 변경 감지: {getattr(self, '_last_cleaned_group', None)} → {self.current_group_id}")
-                print(f"[TRACE_CLEAN] trace 디렉토리 초기화 실행")
+                Logger.debug(f" 그룹 변경 감지: {getattr(self, '_last_cleaned_group', None)} → {self.current_group_id}")
+                Logger.debug(f" trace 디렉토리 초기화 실행")
                 self._clean_trace_dir_once()
                 self._last_cleaned_group = self.current_group_id
             else:
-                print(f"[TRACE_KEEP] 같은 그룹 내 spec 전환: trace 디렉토리 유지 (맥락 검증용)")
+                Logger.debug(f" 같은 그룹 내 spec 전환: trace 디렉토리 유지 (맥락 검증용)")
 
             # ✅ 4. JSON 데이터 준비
             json_to_data("video")
@@ -2098,8 +2097,8 @@ class MyApp(SystemMainUI):
                 # ✅ 선택 필드 통과/에러 수 계산
                 prev_opt_pass = sum(prev_data.get('step_opt_pass_counts', []))
                 prev_opt_error = sum(prev_data.get('step_opt_error_counts', []))
-                print(f"[SCORE RESET] 기존 {composite_key} 점수 제거: pass={prev_pass}, error={prev_error}")
-                print(f"[SCORE RESET] 기존 {composite_key} 선택 점수 제거: opt_pass={prev_opt_pass}, opt_error={prev_opt_error}")
+                Logger.debug(f"[SCORE RESET] 기존 {composite_key} 점수 제거: pass={prev_pass}, error={prev_error}")
+                Logger.debug(f"[SCORE RESET] 기존 {composite_key} 선택 점수 제거: opt_pass={prev_opt_pass}, opt_error={prev_opt_error}")
 
                 # ✅ global 점수에서 해당 spec 점수 제거
                 self.global_pass_cnt = max(0, self.global_pass_cnt - prev_pass)
@@ -2108,8 +2107,8 @@ class MyApp(SystemMainUI):
                 self.global_opt_pass_cnt = max(0, self.global_opt_pass_cnt - prev_opt_pass)
                 self.global_opt_error_cnt = max(0, self.global_opt_error_cnt - prev_opt_error)
 
-                print(f"[SCORE RESET] 조정 후 global 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}")
-                print(f"[SCORE RESET] 조정 후 global 선택 점수: opt_pass={self.global_opt_pass_cnt}, opt_error={self.global_opt_error_cnt}")
+                Logger.debug(f"[SCORE RESET] 조정 후 global 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}")
+                Logger.debug(f"[SCORE RESET] 조정 후 global 선택 점수: opt_pass={self.global_opt_pass_cnt}, opt_error={self.global_opt_error_cnt}")
 
             # ✅ 7. 모든 카운터 및 플래그 초기화 (첫 실행처럼)
             self.cnt = 0
@@ -2143,7 +2142,7 @@ class MyApp(SystemMainUI):
             self.step_buffers = [
                 {"data": "", "error": "", "result": "PASS", "raw_data_list": []} for _ in range(api_count)
             ]
-            print(f"[START] step_buffers 재생성 완료: {len(self.step_buffers)}개")
+            Logger.debug(f" step_buffers 재생성 완료: {len(self.step_buffers)}개")
 
             # ✅ 12. trace 초기화
             if hasattr(self, 'trace'):
@@ -2157,7 +2156,7 @@ class MyApp(SystemMainUI):
                 self.latest_events = {}
 
             # ✅ 13. 테이블 완전 초기화
-            print(f"[START] 테이블 초기화: {api_count}개 API")
+            Logger.debug(f" 테이블 초기화: {api_count}개 API")
             for i in range(self.tableWidget.rowCount()):
                 QApplication.processEvents()  # 스피너 애니메이션 유지
                 # ✅ 기존 위젯 제거 (겹침 방지)
@@ -2187,7 +2186,7 @@ class MyApp(SystemMainUI):
                         new_item = QTableWidgetItem(value)
                         new_item.setTextAlignment(Qt.AlignCenter)
                         self.tableWidget.setItem(i, col, new_item)
-            print(f"[START] 테이블 초기화 완료")
+            Logger.debug(f" 테이블 초기화 완료")
 
             # ✅ 14. 인증 정보 설정
             parts = self.auth_info.split(",")
@@ -2214,10 +2213,10 @@ class MyApp(SystemMainUI):
             )
         else:
             # ========== 재개 모드: 저장된 상태 사용, 초기화 건너뛰기 ==========
-            print(f"[DEBUG] 재개 모드: 초기화 건너뛰기, 저장된 상태 사용")
+            Logger.debug(f" 재개 모드: 초기화 건너뛰기, 저장된 상태 사용")
             # cnt는 last_completed_api_index + 1로 설정
             self.cnt = self.last_completed_api_index + 1
-            print(f"[DEBUG] 재개 모드: cnt = {self.cnt}")
+            Logger.debug(f" 재개 모드: cnt = {self.cnt}")
 
             # ✅ 재개 모드에서도 실행 상태 변수는 초기화 필요
             self.current_retry = 0  # 재시도 카운터 초기화 (중요!)
@@ -2231,12 +2230,12 @@ class MyApp(SystemMainUI):
             self.res = None
             self.webhook_res = None
             self.message_error = []
-            print(f"[DEBUG] 재개 모드: 실행 상태 변수 초기화 완료")
+            Logger.debug(f" 재개 모드: 실행 상태 변수 초기화 완료")
 
             # ✅ 미완료 API의 trace 파일 삭제 (완료된 API는 유지)
             trace_dir = os.path.join(result_dir, "trace")
             if os.path.exists(trace_dir):
-                print(f"[DEBUG] 미완료 API trace 파일 삭제 시작 (완료: 0~{self.last_completed_api_index})")
+                Logger.debug(f" 미완료 API trace 파일 삭제 시작 (완료: 0~{self.last_completed_api_index})")
                 for i in range(self.last_completed_api_index + 1, len(self.videoMessages)):
                     api_name = self.videoMessages[i]
                     # ✅ 두 가지 형식 모두 삭제 (trace_API.ndjson, trace_NN_API.ndjson)
@@ -2249,10 +2248,10 @@ class MyApp(SystemMainUI):
                         if os.path.exists(trace_file):
                             try:
                                 os.remove(trace_file)
-                                print(f"[DEBUG] 삭제: {pattern}")
+                                Logger.debug(f" 삭제: {pattern}")
                             except Exception as e:
-                                print(f"[WARN] trace 파일 삭제 실패: {e}")
-                print(f"[DEBUG] 미완료 API trace 파일 정리 완료")
+                                Logger.warn(f" trace 파일 삭제 실패: {e}")
+                Logger.debug(f" 미완료 API trace 파일 정리 완료")
 
             # 점수 디스플레이 업데이트 (복원된 점수로)
             self.update_score_display()
@@ -2265,10 +2264,10 @@ class MyApp(SystemMainUI):
                 self.valResult.append('<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-top: 10px;">========== 재개 ==========</div>')
                 self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">마지막 완료 API: {self.last_completed_api_index + 1}번째</div>')
                 self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-bottom: 10px;">{self.last_completed_api_index + 2}번째 API부터 재개합니다.</div>')
-                print(f"[DEBUG] 모니터링 메시지 복원 완료: {len(self.paused_valResult_text)} 문자")
+                Logger.debug(f" 모니터링 메시지 복원 완료: {len(self.paused_valResult_text)} 문자")
 
             # ✅ 테이블 데이터 복원 (완료된 API들만)
-            print(f"[DEBUG] 테이블 데이터 복원 시작: 0 ~ {self.last_completed_api_index}번째 API")
+            Logger.debug(f" 테이블 데이터 복원 시작: 0 ~ {self.last_completed_api_index}번째 API")
             for i in range(self.last_completed_api_index + 1):
                 if i < len(self.step_buffers):
                     buffer = self.step_buffers[i]
@@ -2292,8 +2291,8 @@ class MyApp(SystemMainUI):
                         self.update_table_row_with_retries(
                             i, result, pass_count, error_count, data, error, retries
                         )
-                        print(f"[DEBUG] 테이블 복원: API {i+1} - result={result}, pass={pass_count}, error={error_count}, retries={retries}")
-            print(f"[DEBUG] 테이블 데이터 복원 완료")
+                        Logger.debug(f" 테이블 복원: API {i+1} - result={result}, pass={pass_count}, error={error_count}, retries={retries}")
+            Logger.debug(f" 테이블 데이터 복원 완료")
 
         QApplication.processEvents()  # 스피너 애니메이션 유지
 
@@ -2305,9 +2304,9 @@ class MyApp(SystemMainUI):
         QApplication.processEvents()  # 스피너 애니메이션 유지
 
         # ✅ 19. 타이머 시작 (모든 초기화 완료 후)
-        print(f"[START] 타이머 시작")
+        Logger.debug(f" 타이머 시작")
         self.tick_timer.start(1000)
-        print(f"[START] ========== 검증 시작 준비 완료 ==========")
+        Logger.debug(f" ========== 검증 시작 준비 완료 ==========")
 
         # ✅ 로딩 팝업 닫기 (최소 표시 시간 확보)
         if self.loading_popup:
@@ -2318,7 +2317,7 @@ class MyApp(SystemMainUI):
             self.loading_popup.close()
             self.loading_popup = None
 
-        print(f"[START] 현재 global 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}")
+        Logger.debug(f" 현재 global 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}")
 
     def save_paused_state(self):
         """일시정지 시 현재 상태를 JSON 파일로 저장"""
@@ -2366,15 +2365,15 @@ class MyApp(SystemMainUI):
             with open(paused_file_path, "w", encoding="utf-8") as f:
                 json.dump(paused_state, f, ensure_ascii=False, indent=2)
 
-            print(f"✅ 일시정지 상태 저장 완료: {paused_file_path}")
-            print(f"   마지막 완료 API 인덱스: {last_completed}")
+            Logger.debug(f"✅ 일시정지 상태 저장 완료: {paused_file_path}")
+            Logger.debug(f"   마지막 완료 API 인덱스: {last_completed}")
 
             # 모니터링 창에 로그 추가
             self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-top: 10px;">💾 재개 정보 저장 완료: {paused_file_path}</div>')
             self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">   (마지막 완료 API: {last_completed + 1}번째, 다음 재시작 시 {last_completed + 2}번째 API부터 이어서 실행)</div>')
 
         except Exception as e:
-            print(f"❌ 일시정지 상태 저장 실패: {e}")
+            Logger.debug(f"❌ 일시정지 상태 저장 실패: {e}")
             import traceback
             traceback.print_exc()
 
@@ -2384,7 +2383,7 @@ class MyApp(SystemMainUI):
             paused_file_path = os.path.join(result_dir, f"response_results_paused_{self.current_spec_id}.json")
 
             if not os.path.exists(paused_file_path):
-                print("[INFO] 일시정지 파일이 존재하지 않습니다.")
+                Logger.debug("[INFO] 일시정지 파일이 존재하지 않습니다.")
                 return False
 
             with open(paused_file_path, "r", encoding="utf-8") as f:
@@ -2403,15 +2402,15 @@ class MyApp(SystemMainUI):
             self.global_pass_cnt = paused_state.get("global_pass_cnt", 0)
             self.global_error_cnt = paused_state.get("global_error_cnt", 0)
 
-            print(f"✅ 일시정지 상태 복원 완료")
-            print(f"   타임스탬프: {paused_state.get('timestamp')}")
-            print(f"   마지막 완료 API 인덱스: {self.last_completed_api_index}")
-            print(f"   복원된 점수: PASS={self.total_pass_cnt}, FAIL={self.total_error_cnt}")
+            Logger.debug(f"✅ 일시정지 상태 복원 완료")
+            Logger.debug(f"   타임스탬프: {paused_state.get('timestamp')}")
+            Logger.debug(f"   마지막 완료 API 인덱스: {self.last_completed_api_index}")
+            Logger.debug(f"   복원된 점수: PASS={self.total_pass_cnt}, FAIL={self.total_error_cnt}")
 
             return True
 
         except Exception as e:
-            print(f"❌ 일시정지 상태 복원 실패: {e}")
+            Logger.debug(f"❌ 일시정지 상태 복원 실패: {e}")
             import traceback
             traceback.print_exc()
             return False
@@ -2420,15 +2419,15 @@ class MyApp(SystemMainUI):
         """평가 완료 후 일시정지 파일 삭제 및 상태 초기화"""
         try:
             paused_file_path = os.path.join(result_dir, f"response_results_paused_{self.current_spec_id}.json")
-            print(f"[CLEANUP] cleanup_paused_file() 호출됨")
-            print(f"[CLEANUP] 파일 경로: {paused_file_path}")
-            print(f"[CLEANUP] 파일 존재 여부: {os.path.exists(paused_file_path)}")
+            Logger.debug(f" cleanup_paused_file() 호출됨")
+            Logger.debug(f" 파일 경로: {paused_file_path}")
+            Logger.debug(f" 파일 존재 여부: {os.path.exists(paused_file_path)}")
 
             if os.path.exists(paused_file_path):
                 os.remove(paused_file_path)
-                print("✅ 일시정지 중간 파일 삭제 완료")
+                Logger.debug("✅ 일시정지 중간 파일 삭제 완료")
             else:
-                print("[CLEANUP] 일시정지 파일이 존재하지 않음 (일시정지하지 않았거나 이미 삭제됨)")
+                Logger.debug("[CLEANUP] 일시정지 파일이 존재하지 않음 (일시정지하지 않았거나 이미 삭제됨)")
 
             # 일시정지 상태 초기화
             self.is_paused = False
@@ -2436,7 +2435,7 @@ class MyApp(SystemMainUI):
             self.paused_valResult_text = ""
 
         except Exception as e:
-            print(f"❌ 일시정지 파일 정리 실패: {e}")
+            Logger.debug(f"❌ 일시정지 파일 정리 실패: {e}")
 
     def _cleanup_all_paused_files_on_startup(self):
         """프로그램 시작 시 모든 일시정지 파일 삭제"""
@@ -2447,18 +2446,18 @@ class MyApp(SystemMainUI):
             paused_files = glob.glob(pattern)
             
             if paused_files:
-                print(f"[STARTUP_CLEANUP] {len(paused_files)}개의 일시정지 파일 발견")
+                Logger.debug(f" {len(paused_files)}개의 일시정지 파일 발견")
                 for file_path in paused_files:
                     try:
                         os.remove(file_path)
-                        print(f"[STARTUP_CLEANUP] 삭제 완료: {os.path.basename(file_path)}")
+                        Logger.debug(f" 삭제 완료: {os.path.basename(file_path)}")
                     except Exception as e:
-                        print(f"[WARN] 파일 삭제 실패 {file_path}: {e}")
-                print(f"✅ 시작 시 일시정지 파일 삭제 완료")
+                        Logger.warn(f" 파일 삭제 실패 {file_path}: {e}")
+                Logger.debug(f"✅ 시작 시 일시정지 파일 삭제 완료")
             else:
-                print("[STARTUP_CLEANUP] 삭제할 일시정지 파일이 없음")
+                Logger.debug("[STARTUP_CLEANUP] 삭제할 일시정지 파일이 없음")
         except Exception as e:
-            print(f"❌ 시작 시 일시정지 파일 삭제 실패: {e}")
+            Logger.debug(f"❌ 시작 시 일시정지 파일 삭제 실패: {e}")
 
     def cleanup_all_paused_files(self):
         """프로그램 종료 시 모든 일시정지 파일 삭제"""
@@ -2469,25 +2468,25 @@ class MyApp(SystemMainUI):
             paused_files = glob.glob(pattern)
             
             if paused_files:
-                print(f"[CLEANUP_ALL] {len(paused_files)}개의 일시정지 파일 발견")
+                Logger.debug(f" {len(paused_files)}개의 일시정지 파일 발견")
                 for file_path in paused_files:
                     try:
                         os.remove(file_path)
-                        print(f"[CLEANUP_ALL] 삭제 완료: {os.path.basename(file_path)}")
+                        Logger.debug(f" 삭제 완료: {os.path.basename(file_path)}")
                     except Exception as e:
-                        print(f"[WARN] 파일 삭제 실패 {file_path}: {e}")
-                print(f"✅ 모든 일시정지 파일 삭제 완료")
+                        Logger.warn(f" 파일 삭제 실패 {file_path}: {e}")
+                Logger.debug(f"✅ 모든 일시정지 파일 삭제 완료")
             else:
-                print("[CLEANUP_ALL] 삭제할 일시정지 파일이 없음")
+                Logger.debug("[CLEANUP_ALL] 삭제할 일시정지 파일이 없음")
         except Exception as e:
-            print(f"❌ 일시정지 파일 일괄 삭제 실패: {e}")
+            Logger.debug(f"❌ 일시정지 파일 일괄 삭제 실패: {e}")
 
     def stop_btn_clicked(self):
         """평가 중지 버튼 클릭"""
         # ✅ 타이머 중지
         if self.tick_timer.isActive():
             self.tick_timer.stop()
-            print(f"[STOP] 타이머 중지됨")
+            Logger.debug(f" 타이머 중지됨")
 
         self.valResult.append('<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">검증 절차가 중지되었습니다.</div>')
         self.sbtn.setEnabled(True)
@@ -2506,25 +2505,25 @@ class MyApp(SystemMainUI):
             result_json = build_result_json(self)
             url = f"{CONSTANTS.management_url}/api/integration/test-results"
             response = requests.post(url, json=result_json)
-            print("✅ 시험 결과 전송 상태 코드:", response.status_code)
-            print("📥  시험 결과 전송 응답:", response.text)
+            Logger.debug(f"✅ 시험 결과 전송 상태 코드:: {response.status_code}")
+            Logger.debug(f"📥  시험 결과 전송 응답:: {response.text}")
             json_path = os.path.join(result_dir, "response_results.json")
             with open(json_path, "w", encoding="utf-8") as f:
                 json.dump(result_json, f, ensure_ascii=False, indent=2)
-            print(f"✅ 진행 중 결과가 '{json_path}'에 저장되었습니다.")
+            Logger.debug(f"✅ 진행 중 결과가 '{json_path}'에 저장되었습니다.")
             self.append_monitor_log(
                 step_name="진행 상황 저장 완료",
                 details=f"{json_path} (일시정지 시점까지의 결과가 저장되었습니다)"
             )
         except Exception as e:
-            print(f"❌ JSON 저장 중 오류 발생: {e}")
+            Logger.debug(f"❌ JSON 저장 중 오류 발생: {e}")
             import traceback
             traceback.print_exc()
             self.valResult.append(f"\n결과 저장 실패: {str(e)}")
 
     def cancel_btn_clicked(self):
         """시험 취소 버튼 클릭 - 진행 중단, 상태 초기화"""
-        print(f"[CANCEL] 시험 취소 버튼 클릭")
+        Logger.debug(f" 시험 취소 버튼 클릭")
         
         # 확인 메시지 표시
         reply = QMessageBox.question(
@@ -2535,19 +2534,19 @@ class MyApp(SystemMainUI):
         )
         
         if reply != QMessageBox.Yes:
-            print(f"[CANCEL] 사용자가 취소를 취소함")
+            Logger.debug(f" 사용자가 취소를 취소함")
             return
         
-        print(f"[CANCEL] ========== 시험 취소 시작 ==========")
+        Logger.debug(f" ========== 시험 취소 시작 ==========")
         
         # 1. 타이머 중지 및 초기화
         if self.tick_timer.isActive():
             self.tick_timer.stop()
-            print(f"[CANCEL] 타이머 중지됨")
+            Logger.debug(f" 타이머 중지됨")
         
         # 2. 일시정지 파일 삭제
         self.cleanup_paused_file()
-        print(f"[CANCEL] 일시정지 파일 삭제 완료")
+        Logger.debug(f" 일시정지 파일 삭제 완료")
         
         # 3. 상태 완전 초기화
         self.is_paused = False
@@ -2557,7 +2556,7 @@ class MyApp(SystemMainUI):
         self.current_retry = 0
         self.post_flag = False  # 웹훅 플래그 초기화
         self.res = None  # 응답 초기화
-        print(f"[CANCEL] 상태 초기화 완료")
+        Logger.debug(f" 상태 초기화 완료")
         
         # 4. 버튼 상태 초기화
         self.sbtn.setEnabled(True)
@@ -2567,12 +2566,12 @@ class MyApp(SystemMainUI):
         # 5. 모니터링 화면 초기화
         self.valResult.clear()
         self.valResult.append('<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">시험이 취소되었습니다. 시험 시작 버튼을 눌러 다시 시작하세요.</div>')
-        print(f"[CANCEL] 모니터링 화면 초기화")
+        Logger.debug(f" 모니터링 화면 초기화")
         
         # 6. UI 업데이트 처리
         QApplication.processEvents()
         
-        print(f"[CANCEL] ========== 시험 취소 완료 ==========")
+        Logger.debug(f" ========== 시험 취소 완료 ==========")
 
     def init_win(self):
             """검증 시작 전 초기화"""
@@ -2580,7 +2579,7 @@ class MyApp(SystemMainUI):
             self.current_retry = 0
             # 현재 spec의 API 개수에 맞게 버퍼 생성
             api_count = len(self.videoMessages) if self.videoMessages else 0
-            print(f"[INIT] 초기화: {api_count}개 API")
+            Logger.debug(f" 초기화: {api_count}개 API")
 
             # 버퍼 초기화
             self.step_buffers = [
@@ -2664,7 +2663,7 @@ class MyApp(SystemMainUI):
                 if hasattr(self, 'fullscreen_btn'):
                     self.fullscreen_btn.setText("전체화면")
         except Exception as e:
-            print(f"전체화면 전환 오류: {e}")
+            Logger.debug(f"전체화면 전환 오류: {e}")
 
     def build_result_payload(self):
         """최종 결과를 dict로 반환"""
