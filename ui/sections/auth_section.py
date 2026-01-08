@@ -269,8 +269,8 @@ class AuthSection(QGroupBox):
         # gap 10px
         common_input_layout.addSpacing(10)
 
-        # "User ID" 문구
-        userid_label = QLabel("User ID")
+        # "사용자 ID" 문구
+        userid_label = QLabel("사용자 ID")
         userid_label.setFixedSize(358, 26)
         userid_label.setStyleSheet("""
             QLabel {
@@ -321,8 +321,8 @@ class AuthSection(QGroupBox):
         # gap 6px
         common_input_layout.addSpacing(6)
 
-        # "Password" 문구
-        password_label = QLabel("Password")
+        # "사용자 Password" 문구
+        password_label = QLabel("사용자 Password")
         password_label.setFixedSize(358, 26)
         password_label.setStyleSheet("""
             QLabel {
