@@ -82,7 +82,7 @@ def clean_trace_directory(trace_path):
     지정된 trace 디렉토리 내의 파일들을 삭제 (초기화)
     (경로를 인자로 받아서 처리하도록 수정됨)
     """
-    Logger.debug(f" 디렉토리 정리 시작: {trace_path}")
+    print(f"[TRACE_CLEAN] 디렉토리 정리 시작: {trace_path}")
     
     if not os.path.exists(trace_path):
         try:
@@ -96,7 +96,7 @@ def clean_trace_directory(trace_path):
         if os.path.isfile(file_path):
             try:
                 os.remove(file_path)
-                Logger.debug(f" 삭제: {name}")
+                print(f"[TRACE_CLEAN] 삭제: {name}")
             except OSError:
                 pass
 
@@ -172,11 +172,11 @@ def load_from_trace_file(api_name, direction="RESPONSE"):
                     # 매칭 확인
                     if api_part == api_name_clean or api_part_no_prefix == api_name_no_prefix:
                         trace_file = ndjson_file
-                        Logger.debug(f" ✅ 매칭 성공: {file_name} (검색어: {api_name_clean})")
+                        print(f"[DEBUG] ✅ 매칭 성공: {file_name} (검색어: {api_name_clean})")
                         break
             
             if trace_file is None or not trace_file.exists():
-                Logger.debug(f" trace 파일 없음 (검색어: {api_name_clean})")
+                print(f"[DEBUG] trace 파일 없음 (검색어: {api_name_clean})")
                 return None
 
             latest_data = None
@@ -198,14 +198,14 @@ def load_from_trace_file(api_name, direction="RESPONSE"):
                         continue
 
             if latest_data:
-                Logger.debug(f" trace 파일에서 {api_name} {direction} 로드 완료: {len(str(latest_data))} bytes")
+                print(f"[DEBUG] trace 파일에서 {api_name} {direction} 로드 완료: {len(str(latest_data))} bytes")
                 return latest_data
             else:
-                Logger.debug(f" trace 파일에 {api_name} {direction} 없음")
+                print(f"[DEBUG] trace 파일에 {api_name} {direction} 없음")
                 return None
 
     except Exception as e:
-        Logger.error(f" trace 파일 로드 실패: {e}")
+        print(f"[ERROR] trace 파일 로드 실패: {e}")
         traceback.print_exc() 
         return None
 
@@ -243,10 +243,10 @@ def load_external_constants(constants_module):
                 for i, g in enumerate(spec_config):
                     group_name = g.get('group_name', '이름없음')
                     group_keys = [k for k in g.keys() if k not in ['group_name', 'group_id']]
-                    Logger.debug(f" 그룹 {i}: {group_name} - 키: {group_keys}")
+                    print(f"[LOAD_CONSTANTS] 그룹 {i}: {group_name} - 키: {group_keys}")
             
             except Exception as e:
-                Logger.error(f" 외부 CONSTANTS.py 로드 실패: {e}")
+                print(f"[ERROR] 외부 CONSTANTS.py 로드 실패: {e}")
                 
     return spec_config
 
@@ -307,7 +307,7 @@ def setup_external_spec_modules():
             return schema_module, data_module, constraints_module
         
         except Exception as e:
-            Logger.error(f" 외부 모듈 로드 실패: {e}")
+            print(f"[ERROR] 외부 모듈 로드 실패: {e}")
 
     try:
         if 'spec.Schema_request' in sys.modules:
@@ -326,7 +326,7 @@ def setup_external_spec_modules():
         return schema, data, constraints
     
     except Exception as e:
-        Logger.error(f" 내부 모듈 로드 실패: {e}")
+        print(f"[ERROR] 내부 모듈 로드 실패: {e}")
         return None, None, None
 
 def calculate_percentage(part, total):
