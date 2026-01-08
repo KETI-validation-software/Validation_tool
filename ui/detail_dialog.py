@@ -37,15 +37,16 @@ class CombinedDetailDialog(QDialog):
         subtitle_container.setObjectName("subtitle_container")
         subtitle_container.setMinimumHeight(47)
         subtitle_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        subtitle_container.setStyleSheet("""
-            #subtitle_container {
-                border-image: url(assets/image/common/message.png) 0 0 0 0 stretch stretch;
-            }
-            #subtitle_container QLabel {
-                border-image: none;
-                background: transparent;
-            }
-        """)
+        message_bg_path = resource_path("assets/image/common/message.png").replace("\\", "/")
+        subtitle_container.setStyleSheet(f"""
+              #subtitle_container {{
+                  border-image: url({message_bg_path}) 0 0 0 0 stretch stretch;
+              }}
+              #subtitle_container QLabel {{
+                  border-image: none;
+                  background: transparent;
+              }}
+          """)
         subtitle_layout = QHBoxLayout(subtitle_container)
         subtitle_layout.setContentsMargins(14, 12, 48, 12)  # 좌14, 상12, 우48, 하12
 
