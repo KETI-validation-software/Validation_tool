@@ -172,7 +172,7 @@
               "validationData": {
                 "sensorDeviceList": [
                   {
-                    "sensorDeviceID": "iot0002"
+                    "sensorDeviceID": "iot0001"
                   }
                 ],
                 "duration": 1000,
@@ -180,7 +180,7 @@
                   "transProtocolType": "WebHook",
                   "transProtocolDesc": "https://10.252.219.95:2001"
                 },
-                "eventFilter": "MotionDetection",
+                "eventFilter": "Leak",
                 "startTime": 20251105163010123
               },
               "validationErrors": [
@@ -234,7 +234,7 @@
                   }
                 ],
                 "maxCount": 8,
-                "eventFilter": "Leak"
+                "eventFilter": "MotionDetection"
               },
               "validationErrors": [
                 "오류가 없습니다."
@@ -245,5 +245,5 @@
       ]
     }
   ],
-  "completedDate": "2026-01-08T08:17:00Z"
+  "completedDate": "2026-01-08T08:20:46Z"
 }
