@@ -115,7 +115,7 @@ WEBHOOK_PUBLIC_IP = "192.168.0.3"
 WEBHOOK_URL = f"https://{WEBHOOK_PUBLIC_IP}:{WEBHOOK_PORT}"
 # 주소 선택 후 form_validator.py에서 자동으로 업데이트됨
 
-# ✅ 웹훅 외부 접근 주소 (플랫폼에 전송할 주소 - ngrok 등)
+# ✅ 웹훅 외부 접근 주소 (플랫폼에 전송할 주소 - ngrok 등) (01/08 임시로 추가)
 WEBHOOK_DISPLAY_URL = "https://webhook2026.ngrok.dev"
 # 시스템이 플랫폼에 transProtocolDesc로 전송할 주소
 # 각 시스템마다 다른 ngrok 주소를 사용하려면 이 값을 변경

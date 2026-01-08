@@ -1295,26 +1295,30 @@ class MyApp(SystemMainUI):
                 if trans_protocol:
                     trans_protocol_type = trans_protocol.get("transProtocolType", {})
                     if "WebHook".lower() in str(trans_protocol_type).lower():
-                        # ✅ 플랫폼이 웹훅을 보낼 외부 주소 (ngrok) 사용
-                        WEBHOOK_DISPLAY_URL = CONSTANTS.WEBHOOK_DISPLAY_URL
 
+                        # ✅ 플랫폼이 웹훅을 보낼 외부 주소 (ngrok) 사용 (01/08 - 추후 아래 주석 제거)
+                        # WEBHOOK_IP = CONSTANTS.WEBHOOK_PUBLIC_IP
+                        # WEBHOOK_PORT = CONSTANTS.WEBHOOK_PORT  # 웹훅 수신 포트
+                        # WEBHOOK_URL = f"https://{WEBHOOK_IP}:{WEBHOOK_PORT}"  # 플랫폼/시스템이 웹훅을 보낼 주소
+
+                        # trans_protocol = {
+                        #     "transProtocolType": "WebHook",
+                        #     "transProtocolDesc": WEBHOOK_URL
+                        # }
+                        
+                        WEBHOOK_DISPLAY_URL = CONSTANTS.WEBHOOK_DISPLAY_URL
                         trans_protocol = {
                             "transProtocolType": "WebHook",
                             "transProtocolDesc": WEBHOOK_DISPLAY_URL  # ngrok 주소 전송
                         }
                         inMessage["transProtocol"] = trans_protocol
+
+                        # (01/08 - 이것도 아래를 주석 해제)
+                        # print(f"[DEBUG] [post] transProtocol 설정 추가됨: {inMessage}")
                         print(f"[DEBUG] [post] transProtocol 설정 (ngrok 주소): {WEBHOOK_DISPLAY_URL}")
                 elif self.r2 == "B" and self.message[self.cnt] == "Authentication":
                     inMessage["userID"] = self.accessInfo[0]
                     inMessage["userPW"] = self.accessInfo[1]
-
-                # 시스템은 요청 데이터 표시 안 함 (응답만 표시)
-                tmp_request = json.dumps(inMessage, indent=4, ensure_ascii=False)
-                # self.append_monitor_log(
-                #     step_name=f"[요청 {self.current_retry + 1}회차]",
-                #     request_json=tmp_request,
-                #     result_status="진행중"
-                # )
 
                 json_data = json.dumps(inMessage).encode('utf-8')
 
