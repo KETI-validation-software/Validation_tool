@@ -1060,11 +1060,13 @@ class Server(BaseHTTPRequestHandler):
                                     is_webhook=True
                                 )
                                 Logger.debug(f"[WEBHOOK_CONSTRAINTS] constraints 적용 완료")
-                                Logger.debug(f"[WEBHOOK_CONSTRAINTS] 업데이트된 webhook_payload: {json.dumps(webhook_payload, ensure_ascii=False)[:300]}")
+                                Logger.debug(str(
+                                    f"[DEBUG][WEBHOOK_CONSTRAINTS] 업데이트된 webhook_payload: {json.dumps(webhook_payload, ensure_ascii=False))[:300]}")
                             else:
                                 Logger.debug(f"[WEBHOOK_CONSTRAINTS] 웹훅 constraints가 비어있음 - 원본 페이로드 사용")
                         else:
-                            Logger.debug(f"[WEBHOOK_CONSTRAINTS] webhookCon 인덱스 범위 초과: {webhook_index} >= {len(self.webhookCon)}")
+                            Logger.debug(str(
+                                f"[DEBUG][WEBHOOK_CONSTRAINTS] webhookCon 인덱스 범위 초과: {webhook_index} >= {len(self.webhookCon))}")
                     else:
                         Logger.debug(f"[WEBHOOK_CONSTRAINTS] webhookCon이 없거나 리스트가 아님")
 
@@ -1324,7 +1326,8 @@ class Server(BaseHTTPRequestHandler):
                                 # 기타 commandType은 첫 글자만 대문자로
                                 Server.door_memory[door_id]["doorSensor"] = command_type.capitalize()
 
-                            Logger.debug(f"[DATA_MAPPING] 업데이트: {door_id} doorSensor -> {Server.door_memory[door_id]['doorSensor']}")
+                            Logger.debug(str(
+                                f"[DATA_MAPPING] 업데이트: {door_id} doorSensor -> {Server.door_memory[door_id]['doorSensor']}"))
                         else:
                             Logger.debug(f" 경고: {door_id}가 door_memory에 없음")
 

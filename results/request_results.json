@@ -173,10 +173,10 @@
               "validationData": {
                 "sensorDeviceList": [
                   {
-                    "sensorDeviceID": "iot0001"
+                    "sensorDeviceID": "iot0002"
                   },
                   {
-                    "sensorDeviceID": "iot0002"
+                    "sensorDeviceID": "iot0001"
                   }
                 ],
                 "duration": 1000,
@@ -252,5 +252,5 @@
       ]
     }
   ],
-  "completedDate": "2026-01-08T07:15:47Z"
+  "completedDate": "2026-01-08T07:32:38Z"
 }
