@@ -1291,21 +1291,19 @@ class MyApp(SystemMainUI):
                 print(f"[DEBUG][MAPPER] latest_events 상태: {list(self.latest_events.keys())}")
                 inMessage = self._apply_request_constraints(inMessage, self.cnt)
 
-                trans_protocol = inMessage.get("transProtocol", {})  # 이 부분 수정해야함
+                trans_protocol = inMessage.get("transProtocol", {})
                 if trans_protocol:
                     trans_protocol_type = trans_protocol.get("transProtocolType", {})
                     if "WebHook".lower() in str(trans_protocol_type).lower():
-                        WEBHOOK_IP = CONSTANTS.WEBHOOK_PUBLIC_IP
-                        WEBHOOK_PORT = CONSTANTS.WEBHOOK_PORT  # 웹훅 수신 포트
-                        WEBHOOK_URL = f"https://{WEBHOOK_IP}:{WEBHOOK_PORT}"  # 플랫폼/시스템이 웹훅을 보낼 주소
+                        # ✅ 플랫폼이 웹훅을 보낼 외부 주소 (ngrok) 사용
+                        WEBHOOK_DISPLAY_URL = CONSTANTS.WEBHOOK_DISPLAY_URL
 
                         trans_protocol = {
                             "transProtocolType": "WebHook",
-                            "transProtocolDesc": WEBHOOK_URL
+                            "transProtocolDesc": WEBHOOK_DISPLAY_URL  # ngrok 주소 전송
                         }
                         inMessage["transProtocol"] = trans_protocol
-                        # 재직렬화
-                        print(f"[DEBUG] [post] transProtocol 설정 추가됨: {inMessage}")
+                        print(f"[DEBUG] [post] transProtocol 설정 (ngrok 주소): {WEBHOOK_DISPLAY_URL}")
                 elif self.r2 == "B" and self.message[self.cnt] == "Authentication":
                     inMessage["userID"] = self.accessInfo[0]
                     inMessage["userPW"] = self.accessInfo[1]

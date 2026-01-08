@@ -71,8 +71,8 @@
           "endpoint": "/Capabilities",
           "score": 100.0,
           "validationCnt": 1,
-          "totalFields": 5,
-          "passFields": 5,
+          "totalFields": 8,
+          "passFields": 8,
           "failFields": 0,
           "validations": [
             {
@@ -80,6 +80,12 @@
               "validationData": {
                 "code": "200",
                 "message": "성공",
+                "streamingSupport": [
+                  {
+                    "streamProtocolType": "RTSP",
+                    "streamProtocolDesc": "Unicast"
+                  }
+                ],
                 "transportSupport": [
                   {
                     "transProtocolType": "Webhook",
@@ -207,7 +213,7 @@
                 "[시도 1/1]",
                 "오류가 없습니다.",
                 "--- Webhook 검증 ---",
-                "오류가 없습니다."
+                "Webhook Message Missing!"
               ]
             }
           ]

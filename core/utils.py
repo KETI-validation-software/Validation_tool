@@ -35,43 +35,13 @@ def safe_str(value):
         return ""
     return str(value)
 
-# 임시 transprotocoldesc 하드 코딩용 치환 함수 추가 (01/07)
+# transprotocoldesc UI 표시용 함수 (실제 받은 값 그대로 표시)
 def replace_transport_desc_for_display(json_str):
     """
-    UI 표시용으로 transProtocolDesc 값을 하드코딩된 값으로 치환
-    내부 로직은 변경하지 않고, 화면 표시용으로만 사용
+    UI 표시용 - 실제 받은 transProtocolDesc 값을 그대로 표시
     """
-    if not json_str or not isinstance(json_str, str):
-        return json_str
-    
-    try:
-        # JSON 파싱
-        data = json.loads(json_str)
-        
-        # transProtocol.transProtocolDesc 찾아서 치환 (모든 depth에서)
-        def replace_in_dict(obj):
-            if isinstance(obj, dict):
-                for key, value in obj.items():
-                    if key == "transProtocol" and isinstance(value, dict):
-                        if "transProtocolDesc" in value:
-                            # 하드코딩: UI 표시용 값으로 치환
-                            value["transProtocolDesc"] = "webhook2026.ngrok.dev"
-                    # 모든 값에 대해 재귀 탐색
-                    if isinstance(value, (dict, list)):
-                        replace_in_dict(value)
-            elif isinstance(obj, list):
-                for item in obj:
-                    if isinstance(item, (dict, list)):
-                        replace_in_dict(item)
-        
-        replace_in_dict(data)
-        
-        # 다시 JSON 문자열로 변환
-        return json.dumps(data, indent=4, ensure_ascii=False)
-    except Exception as e:
-        # JSON 파싱 실패 시 원본 그대로 반환
-        print(f"[DISPLAY] transProtocolDesc 치환 실패: {e}")
-        return json_str
+    # 원본 그대로 반환 (하드코딩 치환 제거)
+    return json_str
 
 def to_detail_text(val_text):
     """

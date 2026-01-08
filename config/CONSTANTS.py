@@ -108,12 +108,17 @@ enable_retry_delay = False  # False 권장: 불필요한 sleep 제거
 # ✅ 웹훅 서버 설정 (전역)
 WEBHOOK_HOST = "0.0.0.0"  # 서버 바인딩 주소 (모든 인터페이스에서 수신)
 WEBHOOK_PORT = 2001       # 웹훅 수신 포트
-WEBHOOK_PUBLIC_IP = "192.168.0.3"
+WEBHOOK_PUBLIC_IP = "10.252.219.95"
 # ✅ 웹훅 공개 IP 설정: info_GUI에서 선택한 시험 URL의 IP 사용
 # 초기값은 URL에서 추출, info_GUI에서 주소 선택 후 자동 업데이트됨
 
 WEBHOOK_URL = f"https://{WEBHOOK_PUBLIC_IP}:{WEBHOOK_PORT}"
 # 주소 선택 후 form_validator.py에서 자동으로 업데이트됨
+
+# ✅ 웹훅 외부 접근 주소 (플랫폼에 전송할 주소 - ngrok 등)
+WEBHOOK_DISPLAY_URL = "https://webhook2026.ngrok.dev"
+# 시스템이 플랫폼에 transProtocolDesc로 전송할 주소
+# 각 시스템마다 다른 ngrok 주소를 사용하려면 이 값을 변경
 
 SPEC_CONFIG = [
     {
