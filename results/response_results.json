@@ -23,8 +23,8 @@
   "authMethod": "Digest Auth",
   "testScore": {
     "score": 100.0,
-    "totalFields": 43,
-    "passedFields": 43,
+    "totalFields": 79,
+    "passedFields": 79,
     "failedFields": 0
   },
   "testResult": [
@@ -256,13 +256,13 @@
                   {
                     "sensorDeviceID": "iot0001",
                     "eventName": "MotionDetection",
-                    "eventTime": 20251105250843608,
+                    "eventTime": 20251112252979686,
                     "eventDesc": "100도"
                   },
                   {
                     "sensorDeviceID": "iot0002",
                     "eventName": "MotionDetection",
-                    "eventTime": 20251107934247091,
+                    "eventTime": 20251112645077850,
                     "eventDesc": "100도"
                   }
                 ]
@@ -277,5 +277,5 @@
       ]
     }
   ],
-  "completedDate": "2026-01-08T02:51:14Z"
+  "completedDate": "2026-01-08T03:07:55Z"
 }

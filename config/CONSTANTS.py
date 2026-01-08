@@ -47,9 +47,9 @@ def save_management_url(new_url):
 # 관리자시스템 주소
 management_url = load_management_url()
 
-specs = [["cmii7wfuf006i8z1tcds6q69g_outSchema","cmii7wfuf006i8z1tcds6q69g_inData","cmii7wfuf006i8z1tcds6q69g_messages",""],
-         ["cmii7w683006h8z1t7usnin5g_outSchema","cmii7w683006h8z1t7usnin5g_inData","cmii7w683006h8z1t7usnin5g_messages",""],
-         ["cmii7v8pr006g8z1tvo55a50u_outSchema","cmii7v8pr006g8z1tvo55a50u_inData","cmii7v8pr006g8z1tvo55a50u_messages",""]]
+specs = [["cmii7shen005i8z1tagevx4qh_inSchema","cmii7shen005i8z1tagevx4qh_outData","cmii7shen005i8z1tagevx4qh_messages",""],
+         ["cmii7pysb004k8z1tts0npxfm_inSchema","cmii7pysb004k8z1tts0npxfm_outData","cmii7pysb004k8z1tts0npxfm_messages",""],
+         ["cmii7lxbn002s8z1t1i9uudf0_inSchema","cmii7lxbn002s8z1t1i9uudf0_outData","cmii7lxbn002s8z1t1i9uudf0_messages",""]]
 none_request_message = ['Capabilities',
                         'CameraProfiles',
                         'DoorProfiles',
