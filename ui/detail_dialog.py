@@ -37,15 +37,16 @@ class CombinedDetailDialog(QDialog):
         subtitle_container.setObjectName("subtitle_container")
         subtitle_container.setMinimumHeight(47)
         subtitle_container.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        subtitle_container.setStyleSheet("""
-            #subtitle_container {
-                border-image: url(assets/image/common/message.png) 0 0 0 0 stretch stretch;
-            }
-            #subtitle_container QLabel {
-                border-image: none;
-                background: transparent;
-            }
-        """)
+        message_bg_path = resource_path("assets/image/common/message.png").replace("\\", "/")
+        subtitle_container.setStyleSheet(f"""
+              #subtitle_container {{
+                  border-image: url({message_bg_path}) 0 0 0 0 stretch stretch;
+              }}
+              #subtitle_container QLabel {{
+                  border-image: none;
+                  background: transparent;
+              }}
+          """)
         subtitle_layout = QHBoxLayout(subtitle_container)
         subtitle_layout.setContentsMargins(14, 12, 48, 12)  # 좌14, 상12, 우48, 하12
 
@@ -75,8 +76,36 @@ class CombinedDetailDialog(QDialog):
 
         # 공통 스타일
         title_style = "font-family: 'Noto Sans KR'; font-size: 18px; font-weight: 600;"
-        box_style = "border: 1px solid #CECECE; border-radius: 4px; background-color: #FFFFFF; font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 400; padding: 12px;"
-
+        box_style = """
+              QTextBrowser {
+                  border: 1px solid #CECECE;
+                  border-radius: 4px;
+                  background-color: #FFFFFF;
+                  font-family: 'Noto Sans KR';
+                  font-size: 19px;
+                  font-weight: 400;
+                  padding: 12px;
+              }
+              QScrollBar:vertical {
+                  border: none;
+                  background: #DFDFDF;
+                  width: 14px;
+                  margin: 0px;
+                  border-radius: 4px;
+              }
+              QScrollBar::handle:vertical {
+                  background: #A3A9AD;
+                  min-height: 20px;
+                  border-radius: 4px;
+                  margin: 0px 3px;
+              }
+              QScrollBar::handle:vertical:hover {
+                  background: #8A9094;
+              }
+              QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                  height: 0px;
+              }
+          """
         # 1열: 메시지 데이터 - 반응형: 동일 비율 확장
         data_column = QWidget()
         data_column.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
