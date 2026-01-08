@@ -103,6 +103,7 @@ class TestApiSection(QGroupBox):
         vertical_header = self.api_test_table.verticalHeader()
         vertical_header.setFixedWidth(50)
         vertical_header.setDefaultAlignment(Qt.AlignCenter)
+        vertical_header.setHighlightSections(False)
 
         # 행 번호 폰트 설정 (19px)
         row_number_font = QFont("Noto Sans KR")
@@ -153,6 +154,12 @@ class TestApiSection(QGroupBox):
                 font-family: 'Noto Sans KR';
                 font-weight: 400;
                 letter-spacing: 0.098px;
+                color: #1B1B1C;
+            }
+            QHeaderView::section:vertical:pressed,
+            QHeaderView::section:vertical:selected {
+                background-color: #FFFFFF;
+                font-weight: 400;
                 color: #1B1B1C;
             }
             QTableCornerButton::section {
