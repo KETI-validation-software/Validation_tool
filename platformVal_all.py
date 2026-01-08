@@ -1715,6 +1715,12 @@ class MyApp(PlatformMainUI):
             # global 점수에서 해당 spec 점수 제거
             self.global_pass_cnt = max(0, self.global_pass_cnt - prev_pass)
             self.global_error_cnt = max(0, self.global_error_cnt - prev_error)
+            # global 선택 필드 점수에서도 해당 spec 점수 제거
+            prev_opt_pass = prev_data.get('total_opt_pass_cnt', 0)
+            prev_opt_error = prev_data.get('total_opt_error_cnt', 0)
+            self.global_opt_pass_cnt = max(0, self.global_opt_pass_cnt - prev_opt_pass)
+            self.global_opt_error_cnt = max(0, self.global_opt_error_cnt - prev_opt_error)
+            print(f"[SCORE RESET] 선택 필드 점수 제거: opt_pass={prev_opt_pass}, opt_error={prev_opt_error}")
 
         # ✅ 현재 시험 시나리오(spec)의 점수만 초기화
         self.total_error_cnt = 0
@@ -1848,7 +1854,8 @@ class MyApp(PlatformMainUI):
                 self.step_pass_counts = [0] * api_count
                 self.step_error_counts = [0] * api_count
                 self.step_opt_pass_counts = [0] * api_count  # 선택 필드 통과 수
-                print(f"[DEBUG] step_pass_counts, step_error_counts, step_opt_pass_counts 초기화 완료: {api_count}개")
+                self.step_opt_error_counts = [0] * api_count  # 선택 필드 에러 수
+                print(f"[DEBUG] step_pass_counts, step_error_counts, step_opt_pass_counts, step_opt_error_counts 초기화 완료: {api_count}개")
 
                 # ✅ 11. Server 객체 상태 초기화
                 if hasattr(self.Server, 'trace'):

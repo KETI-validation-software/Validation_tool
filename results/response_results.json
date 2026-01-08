@@ -22,10 +22,17 @@
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
+<<<<<<< HEAD
     "score": 97.95,
     "totalFields": 195,
     "passedFields": 191,
     "failedFields": 4
+=======
+    "score": 100.0,
+    "totalFields": 79,
+    "passedFields": 79,
+    "failedFields": 0
+>>>>>>> 0d5fe472c57d6aa29d5acb88b4f83e292e59f29a
   },
   "testResult": [
     {
@@ -250,13 +257,21 @@
                   {
                     "sensorDeviceID": "iot0001",
                     "eventName": "MotionDetection",
+<<<<<<< HEAD
                     "eventTime": 20251107630376780,
+=======
+                    "eventTime": 20251112252979686,
+>>>>>>> 0d5fe472c57d6aa29d5acb88b4f83e292e59f29a
                     "eventDesc": "100도"
                   },
                   {
                     "sensorDeviceID": "iot0002",
                     "eventName": "MotionDetection",
+<<<<<<< HEAD
                     "eventTime": 20251105656747285,
+=======
+                    "eventTime": 20251112645077850,
+>>>>>>> 0d5fe472c57d6aa29d5acb88b4f83e292e59f29a
                     "eventDesc": "100도"
                   }
                 ]
@@ -1112,5 +1127,9 @@
       ]
     }
   ],
+<<<<<<< HEAD
   "completedDate": "2026-01-08T05:54:25Z"
+=======
+  "completedDate": "2026-01-08T03:07:55Z"
+>>>>>>> 0d5fe472c57d6aa29d5acb88b4f83e292e59f29a
 }
