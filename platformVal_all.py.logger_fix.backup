@@ -387,8 +387,8 @@ class MyApp(PlatformMainUI):
                     result_json = build_result_json(self)
                     url = f"{CONSTANTS.management_url}/api/integration/test-results"
                     response = requests.post(url, json=result_json)
-                    Logger.debug(f"✅ 시험 결과 전송 상태 코드:: {response.status_code}")
-                    Logger.debug(f"📥  시험 결과 전송 응답:: {response.text}")
+                    Logger.debug("✅ 시험 결과 전송 상태 코드:", response.status_code)
+                    Logger.debug("📥  시험 결과 전송 응답:", response.text)
 
                     json_path = os.path.join(result_dir, "request_results.json")
                     with open(json_path, "w", encoding="utf-8") as f:
@@ -1088,8 +1088,8 @@ class MyApp(PlatformMainUI):
                     result_json = build_result_json(self)
                     url = f"{CONSTANTS.management_url}/api/integration/test-results"
                     response = requests.post(url, json=result_json)
-                    Logger.debug(f"✅ 시험 결과 전송 상태 코드:: {response.status_code}")
-                    Logger.debug(f"📥  시험 결과 전송 응답:: {response.text}")
+                    Logger.debug("✅ 시험 결과 전송 상태 코드:", response.status_code)
+                    Logger.debug("📥  시험 결과 전송 응답:", response.text)
 
                     json_path = os.path.join(result_dir, "request_results.json")
                     with open(json_path, "w", encoding="utf-8") as f:
@@ -2037,8 +2037,8 @@ class MyApp(PlatformMainUI):
                 Logger.debug(f" 재개 모드: 테이블 초기화 건너뛰기 (기존 데이터 유지)")
 
             # ✅ 18. 인증 설정
-            Logger.debug(f"인증 설정 시작")
-            Logger.debug(f"사용자 인증 방식: {self.CONSTANTS.auth_type}")
+            Logger.debug(f" 인증 설정 시작")
+            Logger.debug(f" 사용자 인증 방식 : ", self.CONSTANTS.auth_type)
 
             if self.r2 == "B":
                 self.Server.auth_type = "B"
@@ -2323,8 +2323,8 @@ class MyApp(PlatformMainUI):
             result_json = build_result_json(self)
             url = f"{CONSTANTS.management_url}/api/integration/test-results"
             response = requests.post(url, json=result_json)
-            Logger.debug(f"✅ 시험 결과 전송 상태 코드:: {response.status_code}")
-            Logger.debug(f"📥  시험 결과 전송 응답:: {response.text}")
+            Logger.debug("✅ 시험 결과 전송 상태 코드:", response.status_code)
+            Logger.debug("📥  시험 결과 전송 응답:", response.text)
             json_path = os.path.join(result_dir, "request_results.json")
             with open(json_path, "w", encoding="utf-8") as f:
                 json.dump(result_json, f, ensure_ascii=False, indent=2)

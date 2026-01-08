@@ -1,5 +1,6 @@
 import random
 import copy
+from core.logger import Logger
 
 class ConstraintDataGenerator:
     # 상수 정의
@@ -28,8 +29,8 @@ class ConstraintDataGenerator:
             
             # sensorDeviceID가 요청에 있고, 템플릿에 sensorDeviceList가 있으면 처리
             if requested_ids and isinstance(template_data["sensorDeviceList"], list) and len(template_data["sensorDeviceList"]) > 0:
-                print(f"[DATA_MAPPER] sensorDeviceList 웹훅 데이터 동적 생성 시작 (API: {api_name})")
-                print(f"[DATA_MAPPER] 요청한 sensorDeviceID: {requested_ids}")
+                Logger.info(f"[DATA_MAPPER] sensorDeviceList 웹훅 데이터 동적 생성 시작 (API: {api_name})")
+                Logger.debug(f"[DATA_MAPPER] 요청한 sensorDeviceID: {requested_ids}")
                 
                 # 템플릿의 첫 번째 항목을 기준으로 허용 키 확인
                 allowed_keys = set(template_data["sensorDeviceList"][0].keys())
@@ -58,7 +59,8 @@ class ConstraintDataGenerator:
                     new_sensor_list.append(filtered_item)
                 
                 template_data["sensorDeviceList"] = new_sensor_list
-                print(f"[DATA_MAPPER] 생성된 sensorDeviceList ({len(new_sensor_list)}개): {new_sensor_list}")
+                Logger.info(f"[DATA_MAPPER] 생성된 sensorDeviceList: {len(new_sensor_list)}개")
+                Logger.debug(f"[DATA_MAPPER] 상세: {new_sensor_list}")
             
             return template_data
         
@@ -71,12 +73,12 @@ class ConstraintDataGenerator:
                 
                 # doorID가 요청에 있고, 템플릿에 doorList가 있으면 처리
                 if requested_ids and isinstance(template_data["doorList"], list) and len(template_data["doorList"]) > 0:
-                    print(f"[DATA_MAPPER] doorList 웹훅 데이터 동적 생성 시작 (API: {api_name})")
-                    print(f"[DATA_MAPPER] 요청한 doorID: {requested_ids}")
+                    Logger.info(f"[DATA_MAPPER] doorList 웹훅 데이터 동적 생성 시작 (API: {api_name})")
+                    Logger.debug(f"[DATA_MAPPER] 요청한 doorID: {requested_ids}")
                     
                     new_door_list = []
                     allowed_keys = set(template_data["doorList"][0].keys())
-                    print(f"[DATA_MAPPER] 템플릿 구조 기반 허용 키: {allowed_keys}")
+                    Logger.debug(f"[DATA_MAPPER] 템플릿 구조 기반 허용 키: {allowed_keys}")
                     
                     for door_id in requested_ids:
                         # 템플릿에서 해당 ID를 가진 항목 찾기
@@ -237,7 +239,7 @@ class ConstraintDataGenerator:
         print(f"[DEBUG][BUILD_MAP] 🔍 self.latest_events 전체: {self.latest_events}")
 
         for path, rule in constraints.items():
-            print(f"[DEBUG][BUILD_MAP] Processing path: {path}, rule: {rule}")
+            Logger.debug(f"[BUILD_MAP] Processing path: {path}, rule: {rule}")
 
             value_type = rule.get("valueType")
             ref_endpoint = rule.get("referenceEndpoint")

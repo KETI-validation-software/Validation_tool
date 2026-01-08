@@ -273,6 +273,12 @@ if __name__ == "__main__":
     # SSL 경고 무시 (개발환경)
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+    # ===== Logger 초기화 (CONSTANTS에서 레벨 가져오기) =====
+    import config.CONSTANTS as CONSTANTS
+    from core.logger import Logger
+    Logger.set_level(CONSTANTS.DEBUG_LEVEL)
+    print(f"[INIT] 디버그 레벨 설정: {CONSTANTS.DEBUG_LEVEL}")
+
     app = QApplication(sys.argv)
 
     # ===== 스플래시 스크린 표시 (즉시!) =====

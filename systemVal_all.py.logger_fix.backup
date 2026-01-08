@@ -1904,8 +1904,8 @@ class MyApp(SystemMainUI):
                     result_json = build_result_json(self)
                     url = f"{CONSTANTS.management_url}/api/integration/test-results"
                     response = requests.post(url, json=result_json)
-                    Logger.debug(f"✅ 시험 결과 전송 상태 코드:: {response.status_code}")
-                    Logger.debug(f"📥  시험 결과 전송 응답:: {response.text}")
+                    Logger.debug("✅ 시험 결과 전송 상태 코드:", response.status_code)
+                    Logger.debug("📥  시험 결과 전송 응답:", response.text)
                     json_path = os.path.join(result_dir, "response_results.json")
                     with open(json_path, "w", encoding="utf-8") as f:
                         json.dump(result_json, f, ensure_ascii=False, indent=2)
@@ -2505,8 +2505,8 @@ class MyApp(SystemMainUI):
             result_json = build_result_json(self)
             url = f"{CONSTANTS.management_url}/api/integration/test-results"
             response = requests.post(url, json=result_json)
-            Logger.debug(f"✅ 시험 결과 전송 상태 코드:: {response.status_code}")
-            Logger.debug(f"📥  시험 결과 전송 응답:: {response.text}")
+            Logger.debug("✅ 시험 결과 전송 상태 코드:", response.status_code)
+            Logger.debug("📥  시험 결과 전송 응답:", response.text)
             json_path = os.path.join(result_dir, "response_results.json")
             with open(json_path, "w", encoding="utf-8") as f:
                 json.dump(result_json, f, ensure_ascii=False, indent=2)
