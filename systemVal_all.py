@@ -1297,7 +1297,7 @@ class MyApp(SystemMainUI):
                     trans_protocol_type = trans_protocol.get("transProtocolType", {})
                     if "WebHook".lower() in str(trans_protocol_type).lower():
 
-                        # ✅ 플랫폼이 웹훅을 보낼 외부 주소 (ngrok) 사용 (01/08 - 추후 아래 주석 제거)
+                        # 플랫폼이 웹훅을 보낼 외부 주소 설정 - 동적
                         WEBHOOK_IP = CONSTANTS.WEBHOOK_PUBLIC_IP  # 웹훅 수신 IP/도메인
                         WEBHOOK_PORT = CONSTANTS.WEBHOOK_PORT  # 웹훅 수신 포트
                         WEBHOOK_URL = f"https://{WEBHOOK_IP}:{WEBHOOK_PORT}"  # 플랫폼/시스템이 웹훅을 보낼 주소
@@ -1307,16 +1307,20 @@ class MyApp(SystemMainUI):
                             "transProtocolDesc": WEBHOOK_URL
                         }
                         
+                        # ngrok 하드 코딩 부분 (01/09)
+                        # ---- 여기부터
                         # WEBHOOK_DISPLAY_URL = CONSTANTS.WEBHOOK_DISPLAY_URL
                         # trans_protocol = {
                         #     "transProtocolType": "WebHook",
                         #     "transProtocolDesc": WEBHOOK_DISPLAY_URL  # ngrok 주소 전송
                         # }
+                        #---- 여기까지
                         inMessage["transProtocol"] = trans_protocol
 
-                        # (01/08 - 이것도 아래를 주석 해제)
+                        # (01/08 - 동적: 위에 작동, 하드코딩: 아래를 작동)
                         Logger.debug(f" [post] transProtocol 설정 추가됨: {inMessage}")
                         # Logger.debug(f" [post] transProtocol 설정 (ngrok 주소): {WEBHOOK_DISPLAY_URL}")
+                        
                 elif self.r2 == "B" and self.message[self.cnt] == "Authentication":
                     inMessage["userID"] = self.accessInfo[0]
                     inMessage["userPW"] = self.accessInfo[1]
