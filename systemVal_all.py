@@ -1317,7 +1317,7 @@ class MyApp(SystemMainUI):
                         #---- 여기까지
                         inMessage["transProtocol"] = trans_protocol
 
-                        # (01/08 - 동적: 위에 작동, 하드코딩: 아래를 작동), 아래 주석 보려면 디버깅 레벨 3
+                        # (01/08 - 동적: 위에 작동, 하드코딩: 아래를 작동)
                         # Logger.debug(f" [post] transProtocol 설정 추가됨: {inMessage}")
                         Logger.debug(f" [post] transProtocol 설정 (ngrok 주소): {WEBHOOK_DISPLAY_URL}")
                         

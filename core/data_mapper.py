@@ -114,44 +114,91 @@ class ConstraintDataGenerator:
 
 
             if not is_webhook and not is_response_template:
+                Logger.info(f"[DATA_MAPPER] doorList REQUEST 데이터 동적 생성 시작 (API: {api_name})")
                 
-                # ✅ constraints에서 doorID의 referenceEndpoint를 동적으로 찾기
+                # ✅ constraints에서 doorID의 referenceEndpoint와 valueType을 동적으로 찾기
                 ref_endpoint = None
+                value_type = None
                 if constraints:
                     for field_path, rule in constraints.items():
                         if "doorID" in field_path and isinstance(rule, dict):
                             ref_endpoint = rule.get("referenceEndpoint")
+                            value_type = rule.get("valueType")
                             if ref_endpoint:
-                                Logger.debug(f" doorID의 referenceEndpoint 발견: {ref_endpoint}")
+                                Logger.debug(f"[DATA_MAPPER] doorID의 referenceEndpoint 발견: {ref_endpoint}, valueType: {value_type}")
                                 break
                 
                 # referenceEndpoint가 없으면 기본값 사용
                 if not ref_endpoint:
                     ref_endpoint = "DoorProfiles"
-                    Logger.debug(f" referenceEndpoint 없음 - 기본값 사용: {ref_endpoint}")
+                    Logger.debug(f"[DATA_MAPPER] referenceEndpoint 없음 - 기본값 사용: {ref_endpoint}")
                 
                 # 슬래시 제거 및 검색 키 생성
                 ref_endpoint_clean = ref_endpoint.lstrip("/")
                 keys_to_search = [ref_endpoint_clean, f"/{ref_endpoint_clean}"]
                 
-                # latest_events에서 참조 API 응답 찾기
+                Logger.debug(f"[DATA_MAPPER] latest_events 키 목록: {list(self.latest_events.keys())}")
+                Logger.debug(f"[DATA_MAPPER] 검색할 키: {keys_to_search}")
+                
+                # valueType에 따라 REQUEST 또는 RESPONSE에서 가져오기
+                direction = "REQUEST" if value_type == "request-based" else "RESPONSE"
+                Logger.debug(f"[DATA_MAPPER] valueType={value_type} → {direction}에서 데이터 조회")
+                
+                # latest_events에서 참조 API 데이터 찾기
                 door_profiles_data = None
                 for key in keys_to_search:
-                    if key in self.latest_events and "RESPONSE" in self.latest_events[key]:
-                        door_profiles_data = self.latest_events[key]["RESPONSE"].get("data", {})
-                        Logger.debug(f" latest_events에서 {key} 발견")
+                    if key in self.latest_events and direction in self.latest_events[key]:
+                        door_profiles_data = self.latest_events[key][direction].get("data", {})
+                        Logger.info(f"[DATA_MAPPER] latest_events에서 {key} {direction} 발견!")
+                        Logger.debug(f"[DATA_MAPPER] door_profiles_data: {door_profiles_data}")
                         break
                 
-                # 찾은 응답에서 doorID 추출하여 리스트 생성
+                if not door_profiles_data:
+                    Logger.warn(f"[DATA_MAPPER] ⚠️ latest_events에서 {ref_endpoint} {direction}를 찾을 수 없음!")
+                
+                # 찾은 데이터에서 doorID 추출하여 리스트 생성
                 new_door_list = []
-                if door_profiles_data and "doorList" in door_profiles_data:
+                
+                # DoorControl REQUEST처럼 doorList가 아닌 단일 doorID인 경우 처리
+                if door_profiles_data and "doorID" in door_profiles_data and "doorList" not in door_profiles_data:
+                    door_id = door_profiles_data.get("doorID")
+                    if door_id:
+                        new_door_list.append({"doorID": door_id})
+                        Logger.info(f"[DATA_MAPPER] ✅ {ref_endpoint}에서 단일 doorID 추출: {door_id}")
+                # doorList 배열인 경우 처리
+                elif door_profiles_data and "doorList" in door_profiles_data:
+                    Logger.debug(f"[DATA_MAPPER] door_profiles_data에 doorList 발견, 개수: {len(door_profiles_data.get('doorList', []))}")
+                    all_door_ids = []
                     for profile in door_profiles_data.get("doorList", []):
                         door_id = profile.get("doorID")
                         if door_id:
+                            all_door_ids.append(door_id)
+                    
+                    # valueType이 response-based면 랜덤 선택
+                    if value_type == "response-based" and all_door_ids:
+                        original_count = len(all_door_ids)
+                        random_count = random.randint(1, len(all_door_ids))
+                        selected_ids = random.sample(all_door_ids, random_count)
+                        Logger.info(f"[DATA_MAPPER] response-based: {original_count}개 중 {random_count}개 랜덤 선택")
+                        for door_id in selected_ids:
                             new_door_list.append({"doorID": door_id})
+                            Logger.debug(f"[DATA_MAPPER] doorID 추가: {door_id}")
+                    else:
+                        # request-based 또는 valueType 없으면 전체 사용
+                        for door_id in all_door_ids:
+                            new_door_list.append({"doorID": door_id})
+                            Logger.debug(f"[DATA_MAPPER] doorID 추가: {door_id}")
+                    
+                    Logger.info(f"[DATA_MAPPER] ✅ {ref_endpoint}에서 {len(new_door_list)}개의 doorID 추출 완료")
+                elif door_profiles_data:
+                    Logger.warning(f"[DATA_MAPPER] ⚠️ door_profiles_data에 doorList 없음!")
+                    Logger.info(f"[DATA_MAPPER] ✅ DoorProfiles에서 {len(new_door_list)}개의 doorID 추출 완료")
+                elif door_profiles_data:
+                    Logger.warning(f"[DATA_MAPPER] ⚠️ door_profiles_data에 doorList 없음!")
                 
                 # 만약 DoorProfiles가 없으면(단독 실행 등), 템플릿 기반으로 생성
                 if not new_door_list:
+                    Logger.warn(f"[DATA_MAPPER] ⚠️ DoorProfiles에서 doorID를 가져오지 못함, 템플릿 기반으로 생성 시도")
                     # 템플릿의 doorList에서 구조 가져오기
                     if "doorList" in template_data and isinstance(template_data["doorList"], list) and len(template_data["doorList"]) > 0:
                         template_item = template_data["doorList"][0]
@@ -160,7 +207,12 @@ class ConstraintDataGenerator:
                             door_id = item.get("doorID", "")
                             if door_id:
                                 new_door_list.append({"doorID": door_id})
+                                Logger.debug(f"[DATA_MAPPER] 템플릿에서 doorID 추가: {door_id}")
+                        Logger.info(f"[DATA_MAPPER] 템플릿에서 {len(new_door_list)}개의 doorID 생성")
+                    else:
+                        Logger.error(f"[DATA_MAPPER] ❌ 템플릿에도 doorList가 없거나 비어있음!")
 
+                Logger.info(f"[DATA_MAPPER] 최종 doorList 설정: {len(new_door_list)}개 항목")
                 template_data["doorList"] = new_door_list
                 return template_data
 
