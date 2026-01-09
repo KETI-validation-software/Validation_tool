@@ -19,23 +19,23 @@
       ]
     }
   ],
-  "status": "완료",
+  "status": "진행중",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 96.55,
-    "totalFields": 29,
-    "passedFields": 28,
-    "failedFields": 1
+    "score": 0.0,
+    "totalFields": 23,
+    "passedFields": 18,
+    "failedFields": 5
   },
   "testResult": [
     {
       "testGroup": "cmii82nib009f8z1tvo6fz8j2",
       "testSpecId": "cmii7shen005i8z1tagevx4qh",
       "testSpecName": "sensor001",
-      "score": 96.55,
-      "totalFields": 29,
-      "passedFields": 28,
-      "failedFields": 1,
+      "score": 0.0,
+      "totalFields": 23,
+      "passedFields": 18,
+      "failedFields": 5,
       "apis": [
         {
           "id": "cmii7ubap005m8z1tyhf1yc1r",
@@ -105,11 +105,11 @@
           "name": "실시간 보안용 센서 데이터 정보 연동",
           "method": "POST",
           "endpoint": "/RealtimeSensorData",
-          "score": 89.0,
+          "score": 67.0,
           "validationCnt": 1,
           "totalFields": 9,
-          "passFields": 8,
-          "failFields": 1,
+          "passFields": 6,
+          "failFields": 3,
           "validations": [
             {
               "attempt": 1,
@@ -125,7 +125,7 @@
                 "duration": 100,
                 "transProtocol": {
                   "transProtocolType": "WebHook",
-                  "transProtocolDesc": "https://10.252.219.95:2001"
+                  "transProtocolDesc": "https://webhook2026.ngrok.dev"
                 },
                 "startTime": 20251105163010124
               },
@@ -133,7 +133,11 @@
                 "[시도 1/1]",
                 "- [맥락 오류] sensorDeviceList: 값 불일치",
                 "- 입력값: [{'sensorDeviceID': 'iot0001'}, {'sensorDeviceID': 'iot0002'}]",
-                "- 예상값: null"
+                "- 예상값: null",
+                "--- Webhook 검증 ---",
+                "<b>[최상위]</b> (2건)",
+                "- [필드 누락] code",
+                "- [필드 누락] message"
               ]
             }
           ]
@@ -161,11 +165,11 @@
           "name": "실시간 보안용 센서 이벤트 분석 정보 연동",
           "method": "POST",
           "endpoint": "/RealtimeSensorEventInfos",
-          "score": 100.0,
+          "score": 80.0,
           "validationCnt": 1,
           "totalFields": 10,
-          "passFields": 10,
-          "failFields": 0,
+          "passFields": 8,
+          "failFields": 2,
           "validations": [
             {
               "attempt": 1,
@@ -178,13 +182,16 @@
                 "duration": 1000,
                 "transProtocol": {
                   "transProtocolType": "WebHook",
-                  "transProtocolDesc": "https://10.252.219.95:2001"
+                  "transProtocolDesc": "https://webhook2026.ngrok.dev"
                 },
-                "eventFilter": "Leak",
+                "eventFilter": "MotionDetection",
                 "startTime": 20251105163010123
               },
               "validationErrors": [
-                "오류가 없습니다."
+                "--- Webhook 검증 ---",
+                "<b>[최상위]</b> (2건)",
+                "- [필드 누락] code",
+                "- [필드 누락] message"
               ]
             }
           ]
@@ -212,38 +219,15 @@
           "name": "저장된 보안용 센서 이벤트 분석 정보 연동",
           "method": "POST",
           "endpoint": "/StoredSensorEventInfos",
-          "score": 100.0,
-          "validationCnt": 1,
-          "totalFields": 6,
-          "passFields": 6,
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
           "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "timePeriod": {
-                  "startTime": 20251105163010124,
-                  "endTime": 20251115163010124
-                },
-                "sensorDeviceList": [
-                  {
-                    "sensorDeviceID": "iot0001"
-                  },
-                  {
-                    "sensorDeviceID": "iot0002"
-                  }
-                ],
-                "maxCount": 8,
-                "eventFilter": "MotionDetection"
-              },
-              "validationErrors": [
-                "오류가 없습니다."
-              ]
-            }
-          ]
+          "validations": []
         }
       ]
     }
   ],
-  "completedDate": "2026-01-08T08:20:46Z"
+  "completedDate": "2026-01-09T00:43:48Z"
 }
