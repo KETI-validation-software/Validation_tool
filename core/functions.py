@@ -890,6 +890,9 @@ def _validate_field_match(field_path, field_value, rule, reference_context,
 
     lhs_list = to_list(field_value)
     rhs_list = to_list(ref_value)
+    
+    print(f"[DEBUG][VALIDATE] lhs_list (응답값): {lhs_list}")
+    print(f"[DEBUG][VALIDATE] rhs_list (참조값/예상값): {rhs_list}")
 
     if len(rhs_list) == 1:
         expected = rhs_list[0]
