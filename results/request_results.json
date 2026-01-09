@@ -19,20 +19,20 @@
       ]
     }
   ],
-  "status": "진행중",
+  "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 0.0,
-    "totalFields": 29,
-    "passedFields": 28,
-    "failedFields": 1
+    "score": 90.2,
+    "totalFields": 51,
+    "passedFields": 46,
+    "failedFields": 5
   },
   "testResult": [
     {
       "testGroup": "cmisfix8407te5vy7fleq8pkf",
       "testSpecId": "cmiqr201z00i8ie8fitdg5t1b",
       "testSpecName": "sensor002",
-      "score": 0.0,
+      "score": 87.5,
       "totalFields": 8,
       "passedFields": 7,
       "failedFields": 1,
@@ -154,7 +154,7 @@
       "testGroup": "cmisfix8407te5vy7fleq8pkf",
       "testSpecId": "cmiqqzrjz00i3ie8figf79cur",
       "testSpecName": "vid002",
-      "score": 0.0,
+      "score": 100.0,
       "totalFields": 15,
       "passedFields": 15,
       "failedFields": 0,
@@ -303,10 +303,10 @@
       "testGroup": "cmisfix8407te5vy7fleq8pkf",
       "testSpecId": "cmiqr1acx00i5ie8fi022t1hp",
       "testSpecName": "ac002",
-      "score": 0.0,
-      "totalFields": 2,
-      "passedFields": 2,
-      "failedFields": 0,
+      "score": 83.33,
+      "totalFields": 24,
+      "passedFields": 20,
+      "failedFields": 4,
       "apis": [
         {
           "id": "cmisgwlsx08r25vy7s0uys91u",
@@ -336,36 +336,88 @@
           "name": "전송 지원 기능 정보 연동",
           "method": "POST",
           "endpoint": "/Capabilities",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 1,
+          "passFields": 1,
           "failFields": 0,
-          "validations": []
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "오류가 없습니다."
+              ]
+            }
+          ]
         },
         {
           "id": "cmiwq2e7z07fi844gof4cw167",
           "name": "바이오 및 출입통제 장치 목록 정보",
           "method": "POST",
           "endpoint": "/DoorProfiles",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 1,
+          "passFields": 1,
           "failFields": 0,
-          "validations": []
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": [
+                "오류가 없습니다."
+              ]
+            }
+          ]
         },
         {
-          "id": "cmiwqiqjn0acb844gb9f4qqd0",
+          "id": "cmiwqiqjn0acb844gb9f4qqd0-registration",
           "name": "실시간 출입통제 장치 상태 정보 연동-상태 조회",
           "method": "POST",
           "endpoint": "/RealtimeDoorStatus",
-          "score": 0.0,
-          "validationCnt": 0,
+          "score": 89.0,
+          "validationCnt": 1,
+          "totalFields": 9,
+          "passFields": 8,
+          "failFields": 1,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "doorList": [],
+                "duration": 200,
+                "transProtocol": {
+                  "transProtocolType": "WebHook",
+                  "transProtocolDesc": "https://10.252.219.95:2001"
+                },
+                "startTime": 20251105163010124
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "<b>[doorList]</b> (1건)",
+                "- [필드 누락] doorID"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmiwqiqjn0acb844gb9f4qqd0-webhook",
+          "name": "실시간 출입통제 장치 상태 정보 연동-상태 조회 (Webhook)",
+          "method": "POST",
+          "endpoint": "/RealtimeDoorStatus/webhook",
+          "score": 0,
+          "validationCnt": 1,
           "totalFields": 0,
           "passFields": 0,
           "failFields": 0,
-          "validations": []
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": []
+            }
+          ]
         },
         {
           "id": "cmiwqol4l0ayv844g134sbbu7",
@@ -373,26 +425,85 @@
           "method": "POST",
           "endpoint": "/DoorControl",
           "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
+          "validationCnt": 1,
+          "totalFields": 2,
           "passFields": 0,
-          "failFields": 0,
-          "validations": []
+          "failFields": 2,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "doorID": "door0001",
+                "commandType": ""
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "- [맥락 오류] commandType: 값 불일치",
+                "- 입력값: Empty",
+                "- 선택 가능 옵션: Lock | Unlock",
+                "- [맥락 오류] doorID: 값 불일치",
+                "- 입력값: door0001",
+                "- 조회된 doorID 목록: (없음)"
+              ]
+            }
+          ]
         },
         {
-          "id": "cmiwqq5880b07844gyqot66cj",
+          "id": "cmiwqq5880b07844gyqot66cj-registration",
           "name": "실시간 출입통제 장치 상태 정보 연동-결과 조회",
           "method": "POST",
           "endpoint": "/RealtimeDoorStatus",
-          "score": 0.0,
-          "validationCnt": 0,
+          "score": 89.0,
+          "validationCnt": 1,
+          "totalFields": 9,
+          "passFields": 8,
+          "failFields": 1,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "doorList": [
+                  {
+                    "doorID": "door0001"
+                  }
+                ],
+                "duration": 10000,
+                "transProtocol": {
+                  "transProtocolType": "WebHook",
+                  "transProtocolDesc": "https://10.252.219.95:2001"
+                },
+                "startTime": 20251105163010124
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "<b>[기타]</b> (1건)",
+                "[맥락 오류] doorList.doorID: 값 오류",
+                "- 입력값: ['door0001']",
+                "- 예상값: None"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmiwqq5880b07844gyqot66cj-webhook",
+          "name": "실시간 출입통제 장치 상태 정보 연동-결과 조회 (Webhook)",
+          "method": "POST",
+          "endpoint": "/RealtimeDoorStatus/webhook",
+          "score": 0,
+          "validationCnt": 1,
           "totalFields": 0,
           "passFields": 0,
           "failFields": 0,
-          "validations": []
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {},
+              "validationErrors": []
+            }
+          ]
         }
       ]
     }
   ],
-  "completedDate": "2026-01-09T02:52:56Z"
+  "completedDate": "2026-01-09T02:53:27Z"
 }
