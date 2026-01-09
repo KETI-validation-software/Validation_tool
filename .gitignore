@@ -14,6 +14,7 @@ summary/
 doc/
 dist/
 *.zip
+*.spec
 
 # Trace files
 results/trace/
