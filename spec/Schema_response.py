@@ -225,12 +225,6 @@ cmiqr0kdw00i4ie8fr3firjtg_PtzStatus_out_schema = {
 },
 }
 
-# PtzContinuousMove
-cmiqr0kdw00i4ie8fr3firjtg_PtzContinuousMove_out_schema = {
-    "code": str,
-    "message": str,
-}
-
 # PtzStop
 cmiqr0kdw00i4ie8fr3firjtg_PtzStop_out_schema = {
     "code": str,
@@ -243,7 +237,6 @@ cmiqr0kdw00i4ie8fr3firjtg_outSchema = [
     cmiqr0kdw00i4ie8fr3firjtg_Capabilities_out_schema,
     cmiqr0kdw00i4ie8fr3firjtg_CameraProfiles_out_schema,
     cmiqr0kdw00i4ie8fr3firjtg_PtzStatus_out_schema,
-    cmiqr0kdw00i4ie8fr3firjtg_PtzContinuousMove_out_schema,
     cmiqr0kdw00i4ie8fr3firjtg_PtzStop_out_schema,
 ]
 

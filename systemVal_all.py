@@ -795,6 +795,15 @@ class MyApp(SystemMainUI):
     def on_test_field_selected(self, row, col):
         """시험 분야 클릭 시 해당 시스템으로 동적 전환"""
         try:
+            # ✅ 시험 진행 중이면 시나리오 변경 차단
+            if hasattr(self, 'sbtn') and not self.sbtn.isEnabled():
+                Logger.debug(f" 시험 진행 중 - 시나리오 변경 차단")
+                # 비동기로 경고창 표시 (시험 진행에 영향 없도록)
+                QTimer.singleShot(0, lambda: QMessageBox.warning(
+                    self, "알림", "시험이 진행 중입니다.\n시험 완료 후 다른 시나리오를 진행해주세요."
+                ))
+                return
+
             self.selected_test_field_row = row
 
             if row in self.index_to_spec_id:

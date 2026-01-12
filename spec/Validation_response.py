@@ -150,9 +150,6 @@ cmiqr0kdw00i4ie8fr3firjtg_CameraProfiles_out_validation = {}
 # PtzStatus
 cmiqr0kdw00i4ie8fr3firjtg_PtzStatus_out_validation = {}
 
-# PtzContinuousMove
-cmiqr0kdw00i4ie8fr3firjtg_PtzContinuousMove_out_validation = {}
-
 # PtzStop
 cmiqr0kdw00i4ie8fr3firjtg_PtzStop_out_validation = {}
 
@@ -162,7 +159,6 @@ cmiqr0kdw00i4ie8fr3firjtg_outValidation = [
     cmiqr0kdw00i4ie8fr3firjtg_Capabilities_out_validation,
     cmiqr0kdw00i4ie8fr3firjtg_CameraProfiles_out_validation,
     cmiqr0kdw00i4ie8fr3firjtg_PtzStatus_out_validation,
-    cmiqr0kdw00i4ie8fr3firjtg_PtzContinuousMove_out_validation,
     cmiqr0kdw00i4ie8fr3firjtg_PtzStop_out_validation,
 ]
 
