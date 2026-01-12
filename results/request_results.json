@@ -22,10 +22,10 @@
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 75.0,
+    "score": 78.12,
     "totalFields": 32,
-    "passedFields": 24,
-    "failedFields": 8
+    "passedFields": 25,
+    "failedFields": 7
   },
   "testResult": [
     {
@@ -114,7 +114,7 @@
             {
               "attempt": 1,
               "validationData": {
-                "sensorDeviceID": "iot0002",
+                "sensorDeviceID": "iot0004",
                 "commandType": ""
               },
               "validationErrors": [
@@ -139,8 +139,8 @@
             {
               "attempt": 1,
               "validationData": {
-                "sensorDeviceID": "iot0002",
-                "commandType": "AlarmOn"
+                "sensorDeviceID": "iot0004",
+                "commandType": "AlarmOff"
               },
               "validationErrors": [
                 "오류가 없습니다."
@@ -152,95 +152,12 @@
     },
     {
       "testGroup": "cmisfix8407te5vy7fleq8pkf",
-      "testSpecId": "cmiqqzrjz00i3ie8figf79cur",
-      "testSpecName": "vid002",
-      "score": 0,
-      "totalFields": 0,
-      "passedFields": 0,
-      "failedFields": 0,
-      "apis": [
-        {
-          "id": "cmish2vdi08z35vy7gtz574hy",
-          "name": "사용자 인증",
-          "method": "POST",
-          "endpoint": "/Authentication",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmiwp7fqs05kc844gxsjq6rfs",
-          "name": "전송 지원 기능 정보 연동",
-          "method": "POST",
-          "endpoint": "/Capabilities",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmiwpag8n05re844gh1o3fc2u",
-          "name": "카메라 목록 연동",
-          "method": "POST",
-          "endpoint": "/CameraProfiles",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmiwpjpff077k844gx4u1vvdf",
-          "name": "PTZ 상태 정보 연동",
-          "method": "POST",
-          "endpoint": "/PtzStatus",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmiwpsaxt07b1844gx73rs8gp",
-          "name": "PTZ 연속 이동 제어 정보 연동",
-          "method": "POST",
-          "endpoint": "/PtzContinuousMove",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmiwpvh1v07dl844gap4brs86",
-          "name": "PTZ 정지 제어 정보 연동",
-          "method": "POST",
-          "endpoint": "/PtzStop",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        }
-      ]
-    },
-    {
-      "testGroup": "cmisfix8407te5vy7fleq8pkf",
       "testSpecId": "cmiqr1acx00i5ie8fi022t1hp",
       "testSpecName": "ac002",
-      "score": 70.83,
+      "score": 75.0,
       "totalFields": 24,
-      "passedFields": 17,
-      "failedFields": 7,
+      "passedFields": 18,
+      "failedFields": 6,
       "apis": [
         {
           "id": "cmisgwlsx08r25vy7s0uys91u",
@@ -322,9 +239,12 @@
                 "doorList": [
                   {
                     "doorID": "door0002"
+                  },
+                  {
+                    "doorID": "door0001"
                   }
                 ],
-                "duration": 200,
+                "duration": 10000,
                 "transProtocol": {
                   "transProtocolType": "WebHook",
                   "transProtocolDesc": "https://webhook2026.ngrok.dev"
@@ -363,11 +283,11 @@
           "name": "출입 통제 장치 제어 정보 연동",
           "method": "POST",
           "endpoint": "/DoorControl",
-          "score": 0.0,
+          "score": 50.0,
           "validationCnt": 1,
           "totalFields": 2,
-          "passFields": 0,
-          "failFields": 2,
+          "passFields": 1,
+          "failFields": 1,
           "validations": [
             {
               "attempt": 1,
@@ -379,10 +299,7 @@
                 "[시도 1/1]",
                 "- [맥락 오류] commandType: 값 불일치",
                 "- 입력값: Empty",
-                "- 선택 가능 옵션: Lock | Unlock",
-                "- [맥락 오류] doorID: 값 불일치",
-                "- 입력값: door0001",
-                "- 조회된 doorID 목록: door0002 | door0002"
+                "- 선택 가능 옵션: Lock | Unlock"
               ]
             }
           ]
@@ -418,7 +335,7 @@
                 "<b>[기타]</b> (1건)",
                 "[맥락 오류] doorList.doorID: 값 오류",
                 "- 입력값: ['door0001']",
-                "- 예상값: door0002",
+                "- 예상값: ['door0002', 'door0001']",
                 "--- Webhook 검증 ---",
                 "<b>[최상위]</b> (2건)",
                 "- [필드 누락] code",
@@ -448,5 +365,5 @@
       ]
     }
   ],
-  "completedDate": "2026-01-12T05:57:03Z"
+  "completedDate": "2026-01-12T06:27:00Z"
 }

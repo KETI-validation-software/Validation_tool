@@ -277,43 +277,6 @@ cmiqr0kdw00i4ie8fr3firjtg_PtzStatus_in_constraints = {
   }
 }
 
-# PtzContinuousMove
-cmiqr0kdw00i4ie8fr3firjtg_PtzContinuousMove_in_constraints = {
-  "camID": {
-    "id": "cmixuddil0fbfp00232n3befi",
-    "referenceFieldId": "cmixu969h0f6lp00297drc0if",
-    "valueType": "response-based",
-    "required": True,
-    "referenceEndpoint": "/CameraProfiles",
-    "referenceField": "camID"
-  },
-  "velocity": {
-    "id": "cmixudm8a0fbop002igjf7hdo",
-    "valueType": "preset",
-    "required": True
-  },
-  "velocity.pan": {
-    "id": "cmixudtav0fbyp002unvnsqca",
-    "valueType": "preset",
-    "required": False
-  },
-  "velocity.tilt": {
-    "id": "cmixue23t0fc9p002q0o9u5ml",
-    "valueType": "preset",
-    "required": False
-  },
-  "velocity.zoom": {
-    "id": "cmixueccs0fclp002h9uzky0u",
-    "valueType": "preset",
-    "required": False
-  },
-  "timeOut": {
-    "id": "cmixuen0z0fcxp002zjz5mexm",
-    "valueType": "preset",
-    "required": False
-  }
-}
-
 # PtzStop
 cmiqr0kdw00i4ie8fr3firjtg_PtzStop_in_constraints = {
   "camID": {
@@ -347,7 +310,6 @@ cmiqr0kdw00i4ie8fr3firjtg_inConstraints = [
     cmiqr0kdw00i4ie8fr3firjtg_Capabilities_in_constraints,
     cmiqr0kdw00i4ie8fr3firjtg_CameraProfiles_in_constraints,
     cmiqr0kdw00i4ie8fr3firjtg_PtzStatus_in_constraints,
-    cmiqr0kdw00i4ie8fr3firjtg_PtzContinuousMove_in_constraints,
     cmiqr0kdw00i4ie8fr3firjtg_PtzStop_in_constraints,
 ]
 
