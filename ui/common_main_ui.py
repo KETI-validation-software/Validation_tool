@@ -314,6 +314,26 @@ class CommonMainUI(QWidget):
                 background: none;
                 height: 0px;
             }
+            QScrollBar:horizontal {
+                border: none;
+                background: #DFDFDF;
+                height: 14px;
+                margin: 0px;
+            }
+            QScrollBar::handle:horizontal {
+                background: #A3A9AD;
+                min-width: 20px;
+                border-radius: 4px;
+                margin: 3px 0px;
+            }
+            QScrollBar::handle:horizontal:hover {
+                background: #8A9094;
+            }
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+                border: none;
+                background: none;
+                width: 0px;
+            }
         """)
         # 텍스트 영역 여백 설정 (좌24, 우12) - 스크롤바는 맨 끝에 위치
         self.valResult.setViewportMargins(24, 0, 12, 0)
