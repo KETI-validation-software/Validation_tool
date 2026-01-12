@@ -1235,7 +1235,7 @@ class MyApp(SystemMainUI):
 
         if self.webhook_res is not None:
             self.webhook_res = None  # init
-            self.webhook_flag = Fals
+            self.webhook_flag = False
 
     def update_view(self):
 
