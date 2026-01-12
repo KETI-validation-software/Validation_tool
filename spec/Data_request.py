@@ -64,7 +64,7 @@ cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_in_data = {
     "transProtocolType": "Webhook",
     "transProtocolDesc": ""
 },
-    "startTime": 20251105163010124
+    "startTime": 20260112065600000
 }
 
 # RealtimeDoorStatus WebHook OUT Data
@@ -147,6 +147,17 @@ cmiqr0kdw00i4ie8fr3firjtg_PtzStatus_in_data = {
     "camID": ""
 }
 
+# PtzContinuousMove
+cmiqr0kdw00i4ie8fr3firjtg_PtzContinuousMove_in_data = {
+    "camID": "",
+    "velocity": {
+    "pan": 10,
+    "tilt": -20,
+    "zoom": 30
+},
+    "timeOut": 5
+}
+
 # PtzStop
 cmiqr0kdw00i4ie8fr3firjtg_PtzStop_in_data = {
     "camID": "",
@@ -161,6 +172,7 @@ cmiqr0kdw00i4ie8fr3firjtg_inData = [
     cmiqr0kdw00i4ie8fr3firjtg_Capabilities_in_data,
     cmiqr0kdw00i4ie8fr3firjtg_CameraProfiles_in_data,
     cmiqr0kdw00i4ie8fr3firjtg_PtzStatus_in_data,
+    cmiqr0kdw00i4ie8fr3firjtg_PtzContinuousMove_in_data,
     cmiqr0kdw00i4ie8fr3firjtg_PtzStop_in_data,
 ]
 
@@ -170,6 +182,7 @@ cmiqr0kdw00i4ie8fr3firjtg_messages = [
     "Capabilities",
     "CameraProfiles",
     "PtzStatus",
+    "PtzContinuousMove",
     "PtzStop",
 ]
 

@@ -79,6 +79,15 @@ cmiqr0kdw00i4ie8fr3firjtg_PtzStatus_request_key_ids = {
     "camID": "cmixuacz20f85p002l1xbtf6i",
 }
 
+cmiqr0kdw00i4ie8fr3firjtg_PtzContinuousMove_request_key_ids = {
+    "camID": "cmixuddil0fbfp00232n3befi",
+    "velocity": "cmixudm8a0fbop002igjf7hdo",
+    "velocity.pan": "cmixudtav0fbyp002unvnsqca",
+    "velocity.tilt": "cmixue23t0fc9p002q0o9u5ml",
+    "velocity.zoom": "cmixueccs0fclp002h9uzky0u",
+    "timeOut": "cmixuen0z0fcxp002zjz5mexm",
+}
+
 cmiqr0kdw00i4ie8fr3firjtg_PtzStop_request_key_ids = {
     "camID": "cmixufxre0fe1p002m1w57aeb",
     "pan": "cmixugh5u0fesp0024z3tedlc",
@@ -90,6 +99,7 @@ cmiqr0kdw00i4ie8fr3firjtg_PtzStop_request_key_ids = {
 cmiqr0kdw00i4ie8fr3firjtg_request_key_ids = [
     cmiqr0kdw00i4ie8fr3firjtg_Authentication_request_key_ids,
     cmiqr0kdw00i4ie8fr3firjtg_PtzStatus_request_key_ids,
+    cmiqr0kdw00i4ie8fr3firjtg_PtzContinuousMove_request_key_ids,
     cmiqr0kdw00i4ie8fr3firjtg_PtzStop_request_key_ids,
 ]
 
@@ -273,6 +283,11 @@ cmiqr0kdw00i4ie8fr3firjtg_PtzStatus_response_key_ids = {
     "moveStatus.zoom": "cmixuc6ug0fayp002fgl2kqn7",
 }
 
+cmiqr0kdw00i4ie8fr3firjtg_PtzContinuousMove_response_key_ids = {
+    "code": "cmixuf25f0fdbp002dvwqr8ha",
+    "message": "cmixuf4qu0fdhp002dfxm567d",
+}
+
 cmiqr0kdw00i4ie8fr3firjtg_PtzStop_response_key_ids = {
     "code": "cmixuh19s0ffgp002trz88up8",
     "message": "cmixuh3sa0ffop002cdckdjbx",
@@ -284,6 +299,7 @@ cmiqr0kdw00i4ie8fr3firjtg_response_key_ids = [
     cmiqr0kdw00i4ie8fr3firjtg_Capabilities_response_key_ids,
     cmiqr0kdw00i4ie8fr3firjtg_CameraProfiles_response_key_ids,
     cmiqr0kdw00i4ie8fr3firjtg_PtzStatus_response_key_ids,
+    cmiqr0kdw00i4ie8fr3firjtg_PtzContinuousMove_response_key_ids,
     cmiqr0kdw00i4ie8fr3firjtg_PtzStop_response_key_ids,
 ]
 
