@@ -1824,7 +1824,17 @@ class MyApp(SystemMainUI):
                     # ✅ 웹훅 처리를 재시도 완료 체크 전에 실행 (step_pass_counts 업데이트를 위해)
                     if self.webhook_flag:
                         Logger.debug(f" 웹훅 처리 시작 (API {self.cnt})")
-                        self.get_webhook_result()
+                        if self.webhook_res != None:
+                            # 웹훅 도착 - 검증
+                            self.get_webhook_result()
+                        elif time_interval > self.time_outs[self.cnt] / 1000:
+                            # 타임아웃 - 포기
+                            Logger.warn(f" 메시지 타임아웃! 웹훅 대기 종료")
+                            self.get_webhook_result()
+                        else:
+                            # 아직 대기 중
+                            Logger.debug(f" 웹훅 대기 중... (API {self.cnt})")
+                            return
 
                     # 재시도 카운터 증가
                     self.current_retry += 1
