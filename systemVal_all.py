@@ -1233,8 +1233,9 @@ class MyApp(SystemMainUI):
         elif self.webhook_cnt == 3:
             self.step4_msg += msg
 
-        self.webhook_res = None  # init
-        self.webhook_flag = False
+        if self.webhook_res is not None:
+            self.webhook_res = None  # init
+            self.webhook_flag = Fals
 
     def update_view(self):
 
@@ -1825,6 +1826,15 @@ class MyApp(SystemMainUI):
                     if self.webhook_flag:
                         Logger.debug(f" 웹훅 처리 시작 (API {self.cnt})")
                         self.get_webhook_result()
+                        if self.webhook_flag:
+                            # API 응답 타임아웃 체크 (전체 메시지 타임아웃)
+                            if time_interval > self.time_outs[self.cnt] / 1000:
+                                # 타임아웃 - 웹훅 대기 종료
+                                Logger.warn(f" 메시지 타임아웃! 웹훅 대기 종료")
+                                self.webhook_flag = False
+                            else:
+                                Logger.debug(f" 웹훅 대기 중... (API {self.cnt})")
+                                return  # 아직 타임아웃 전이면 대기 계속
 
                     # 재시도 카운터 증가
                     self.current_retry += 1
