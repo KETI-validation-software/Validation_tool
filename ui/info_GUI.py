@@ -1298,23 +1298,37 @@ class InfoWidget(QWidget):
                 QMessageBox.warning(self, "입력 오류", "IP 주소를 입력해주세요.\n예: 192.168.1.1")
                 return
 
-            # Port 포함 여부 확인 - Port는 입력하지 않아야 함
+            # Port 포함 여부 확인
             if ':' in ip_port:
-                QMessageBox.warning(self, "입력 오류", "IP 주소만 입력해주세요.\nPort는 시험정보의 testPort로 자동 설정됩니다.\n예: 192.168.1.1")
-                return
+                # IP:Port 형태로 입력된 경우 - 입력한 Port 그대로 사용
+                parts = ip_port.split(':')
+                if len(parts) != 2:
+                    QMessageBox.warning(self, "입력 오류", "올바른 형식으로 입력해주세요.\n예: 192.168.1.1 또는 192.168.1.1:8080")
+                    return
+                ip_address, port = parts
+                # IP 검증
+                if not self._validate_ip_address(ip_address):
+                    QMessageBox.warning(self, "IP 오류", "올바른 IP 주소를 입력해주세요.\n예: 192.168.1.100")
+                    return
+                # Port 검증
+                if not port.isdigit() or not (1 <= int(port) <= 65535):
+                    QMessageBox.warning(self, "Port 오류", "올바른 Port를 입력해주세요.\n(1-65535)")
+                    return
+                final_url = ip_port
+            else:
+                # IP만 입력된 경우 - testPort 자동 추가
+                # IP 검증
+                if not self._validate_ip_address(ip_port):
+                    QMessageBox.warning(self, "IP 오류", "올바른 IP 주소를 입력해주세요.\n예: 192.168.1.100")
+                    return
 
-            # IP 검증
-            if not self._validate_ip_address(ip_port):
-                QMessageBox.warning(self, "IP 오류", "올바른 IP 주소를 입력해주세요.\n예: 192.168.1.100")
-                return
+                # testPort 확인 및 자동 추가
+                if not hasattr(self, 'test_port') or not self.test_port:
+                    QMessageBox.warning(self, "testPort 없음", "시험정보를 먼저 불러와주세요.\ntestPort 정보가 필요합니다.")
+                    return
 
-            # testPort 확인 및 자동 추가
-            if not hasattr(self, 'test_port') or not self.test_port:
-                QMessageBox.warning(self, "testPort 없음", "시험정보를 먼저 불러와주세요.\ntestPort 정보가 필요합니다.")
-                return
-
-            # IP와 testPort 결합
-            final_url = f"{ip_port}:{self.test_port}"
+                # IP와 testPort 결합
+                final_url = f"{ip_port}:{self.test_port}"
 
             # 중복 확인 (컬럼 1의 ClickableLabel에서 url property 가져오기)
             for row in range(self.url_table.rowCount()):
