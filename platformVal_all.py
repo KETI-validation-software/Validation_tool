@@ -395,8 +395,8 @@ class MyApp(PlatformMainUI):
                         json.dump(result_json, f, ensure_ascii=False, indent=2)
                     Logger.debug(f"✅ 시험 결과가 '{json_path}'에 자동 저장되었습니다.")
                     self.append_monitor_log(
-                        step_name="결과 파일 저장 완료",
-                        details=json_path
+                        step_name="관리시스템 결과 전송 완료",
+                        details=""
                     )
                     Logger.debug(f" try 블록 정상 완료")
 
@@ -937,7 +937,7 @@ class MyApp(PlatformMainUI):
                         request_json="",  # 데이터는 이미 출력되었으므로 빈 문자열
                         result_status=final_result,
                         score=score_value,
-                        details=f"통과: {self.total_pass_cnt}, 오류: {self.total_error_cnt} | 프로토콜: {current_protocol}"
+                        details=f"통과: {self.total_pass_cnt}, 오류: {self.total_error_cnt} | {'일반 메시지' if current_protocol.lower() == 'basic' else f'실시간 메시지: {current_protocol}'}"
                     )
 
                     self.cnt += 1
@@ -1096,8 +1096,8 @@ class MyApp(PlatformMainUI):
                         json.dump(result_json, f, ensure_ascii=False, indent=2)
                     Logger.debug(f"✅ 시험 결과가 '{json_path}'에 자동 저장되었습니다.")
                     self.append_monitor_log(
-                        step_name="결과 파일 저장 완료",
-                        details=json_path
+                        step_name="관리시스템 결과 전송 완료",
+                        details=""
                     )
                     Logger.debug(f" try 블록 정상 완료 (경로2)")
                 except Exception as e:

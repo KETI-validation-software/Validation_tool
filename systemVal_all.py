@@ -1476,8 +1476,8 @@ class MyApp(SystemMainUI):
                             json.dump(result_json, f, ensure_ascii=False, indent=2)
                         Logger.debug(f"✅ 시험 결과가 '{json_path}'에 자동 저장되었습니다.")
                         self.append_monitor_log(
-                            step_name="결과 파일 저장 완료",
-                            details=json_path
+                            step_name="관리시스템 결과 전송 완료",
+                            details=""
                         )
                         Logger.debug(f" try 블록 정상 완료")
 
@@ -1802,14 +1802,14 @@ class MyApp(SystemMainUI):
                             request_json="",  # 데이터는 앞서 출력되었으므로 생략
                             result_status=final_result,
                             score=score_value,
-                            details=f"통과: {total_pass_count}, 오류: {total_error_count} | 프로토콜: {current_protocol}"
+                            details=f"통과: {total_pass_count}, 오류: {total_error_count} | {'일반 메시지' if current_protocol.lower() == 'basic' else f'실시간 메시지: {current_protocol}'}"
                         )
                     else:
                         # 중간 시도 - 진행중 표시
                         self.append_monitor_log(
                             step_name=step_title,
                             request_json="",  # 데이터는 앞서 출력되었으므로 생략
-                            details=f"검증 진행 중... | 프로토콜: {current_protocol}"
+                            details=f"검증 진행 중... | {'일반 메시지' if current_protocol.lower() == 'basic' else f'실시간 메시지: {current_protocol}'}"
                         )
 
                     # ✅ 웹훅 처리를 재시도 완료 체크 전에 실행 (step_pass_counts 업데이트를 위해)
@@ -1915,8 +1915,8 @@ class MyApp(SystemMainUI):
                         json.dump(result_json, f, ensure_ascii=False, indent=2)
                     Logger.debug(f"✅ 시험 결과가 '{json_path}'에 자동 저장되었습니다.")
                     self.append_monitor_log(
-                        step_name="결과 파일 저장 완료",
-                        details=json_path
+                        step_name="관리시스템 결과 전송 완료",
+                        details=""
                     )
                     Logger.debug(f" try 블록 정상 완료 (경로2)")
                 except Exception as e:
