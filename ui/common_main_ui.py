@@ -399,6 +399,7 @@ class CommonMainUI(QWidget):
 
         # 정지 버튼
         self.stop_btn = QPushButton("일시 정지", self.buttonGroup)  # 텍스트 추가
+        self.stop_btn.setFocusPolicy(Qt.NoFocus)
         self.stop_btn.setStyleSheet("""
               QPushButton {
                   background-color: #FFFFFF;
@@ -428,6 +429,7 @@ class CommonMainUI(QWidget):
 
         # 시험 취소 버튼
         self.cancel_btn = QPushButton("시험 취소", self.buttonGroup)
+        self.cancel_btn.setFocusPolicy(Qt.NoFocus)
         self.cancel_btn.setStyleSheet("""
               QPushButton {
                   border: 2px solid #FF8772;
@@ -458,6 +460,7 @@ class CommonMainUI(QWidget):
 
         # 종료 버튼
         self.rbtn = QPushButton("종료", self.buttonGroup)  # 텍스트 추가
+        self.rbtn.setFocusPolicy(Qt.NoFocus)
         self.rbtn.setStyleSheet("""
               QPushButton {
                   background-color: #FFFFFF;
@@ -486,6 +489,7 @@ class CommonMainUI(QWidget):
 
         # 시험 결과 버튼
         self.result_btn = QPushButton("시험 결과", self.buttonGroup)  # 텍스트 추가
+        self.result_btn.setFocusPolicy(Qt.NoFocus)
         self.result_btn.setStyleSheet("""
               QPushButton {
                   background-color: #FFFFFF;
