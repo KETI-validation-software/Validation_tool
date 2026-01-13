@@ -1044,6 +1044,7 @@ class MyApp(SystemMainUI):
     def post(self, path, json_data, time_out):
         self.res = None
         headers = CONSTANTS.headers.copy()
+        self.webhook_flag = False
         auth = None
         if self.r2 == "B":  # Bearer
             if self.token:
