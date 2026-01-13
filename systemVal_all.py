@@ -1,5 +1,6 @@
 # 시스템 검증 소프트웨어
 # physical security integrated system validation software
+import math
 import os
 import time
 import threading
@@ -1082,6 +1083,8 @@ class MyApp(SystemMainUI):
         try:
             path = re.sub(r'\d+$', '', path)
             Logger.debug(f" [post] Sending request to {path} with auth_type={self.r2}, token={self.token}")
+            Logger.debug(f" [post] request message {json_data}")
+
             self.res = requests.post(
                 path,
                 headers=headers,
@@ -1089,6 +1092,10 @@ class MyApp(SystemMainUI):
                 auth=auth,
                 verify=False,
                 timeout=time_out
+            )
+            Logger.debug(f" [post] response message {self.res.status_code}")
+            Logger.debug(
+                f"{self.res.json() if self.res.headers.get('Content-Type', '').startswith('application/json') else self.res.text}"
             )
         except Exception as e:
             Logger.debug(str(e))
@@ -1265,10 +1272,9 @@ class MyApp(SystemMainUI):
                 Logger.debug(f"웹훅 이벤트 수신 완료 (API: {api_name})")
                 if self.webhook_res != None:
                     Logger.warn(f" 웹훅 메시지 수신")
-                elif time_interval > self.time_outs[self.cnt] / 1000 - 1:
+                elif round(time_interval) >= self.time_outs[self.cnt] / 1000:
                     Logger.warn(f" 메시지 타임아웃! 웹훅 대기 종료")
-                    print(self.webhook_flag, self.res)
-                else :
+                else:
                     Logger.debug(f" 웹훅 대기 중... (API {self.cnt}) 타임아웃 {round(time_interval)} /{round(self.time_outs[self.cnt] / 1000)}")
                     return
             if (self.post_flag is False and
@@ -1449,6 +1455,7 @@ class MyApp(SystemMainUI):
                     # 다음 API로 이동
                     self.cnt += 1
                     self.current_retry = 0  # 재시도 카운터 리셋
+                    self.webhook_flag = False
 
                     # 다음 API를 위한 누적 카운트 초기 설정 확인
                     if hasattr(self, 'step_pass_counts') and self.cnt < len(self.step_pass_counts):
