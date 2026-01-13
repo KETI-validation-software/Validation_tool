@@ -1043,8 +1043,8 @@ class MyApp(SystemMainUI):
 
     def post(self, path, json_data, time_out):
         self.res = None
-        self.webhook_flag = False  # 매 요청마다 초기화 (WebHook API일 때만 True로 설정됨)
         headers = CONSTANTS.headers.copy()
+        self.webhook_flag = False
         auth = None
         if self.r2 == "B":  # Bearer
             if self.token:
@@ -1263,7 +1263,13 @@ class MyApp(SystemMainUI):
             if self.webhook_flag is True:
                 api_name = self.message[self.cnt] if self.cnt < len(self.message) else 'N/A'
                 Logger.debug(f"웹훅 이벤트 수신 완료 (API: {api_name})")
-                Logger.debug(f"웹훅 스레드의 wait()이 동기화 처리 완료 (수동 sleep 제거됨)")
+                if self.webhook_res != None:
+                    Logger.warn(f" 웹훅 메시지 수신")
+                elif time_interval > self.time_outs[self.cnt] / 1000 - 1:
+                    Logger.warn(f" 메시지 타임아웃! 웹훅 대기 종료")
+                else :
+                    Logger.debug(f" 웹훅 대기 중... (API {self.cnt}) 타임아웃 {round(time_interval)} /{round(self.time_outs[self.cnt] / 1000)}")
+                    return
 
             if (self.post_flag is False and
                     self.processing_response is False and
@@ -1828,18 +1834,7 @@ class MyApp(SystemMainUI):
                     # ✅ 웹훅 처리를 재시도 완료 체크 전에 실행 (step_pass_counts 업데이트를 위해)
                     if self.webhook_flag:
                         Logger.debug(f" 웹훅 처리 시작 (API {self.cnt})")
-                        if self.webhook_res != None:
-                            # 웹훅 도착 - 검증
-                            self.get_webhook_result()
-                        elif time_interval > self.time_outs[self.cnt] / 1000:
-                            # 타임아웃 - 포기
-                            Logger.warn(f" 메시지 타임아웃! 웹훅 대기 종료")
-                            self.get_webhook_result()
-                        else:
-                            # 아직 대기 중
-                            Logger.debug(f" 웹훅 대기 중... (API {self.cnt})")
-                            self.res = None  # 응답 재처리 방지
-                            return
+                        self.get_webhook_result()
 
                     # 재시도 카운터 증가
                     self.current_retry += 1
