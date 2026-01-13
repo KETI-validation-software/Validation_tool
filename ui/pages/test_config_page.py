@@ -373,6 +373,7 @@ def _setup_connection_title_row(parent_widget, right_layout):
     # 주소탐색 버튼
     scan_btn = QPushButton("")
     scan_btn.setFixedSize(120, 38)
+    scan_btn.setFocusPolicy(Qt.NoFocus)
 
     btn_scan_enabled = resource_path("assets/image/test_config/btn_주소탐색_enabled.png").replace(chr(92), "/")
     btn_scan_hover = resource_path("assets/image/test_config/btn_주소탐색_Hover.png").replace(chr(92), "/")
@@ -531,6 +532,7 @@ def _setup_bottom_buttons(parent_widget, right_layout):
     parent_widget.start_btn = QPushButton("시험 시작")
     parent_widget.start_btn.setFixedSize(364, 48)
     parent_widget.original_start_btn_size = (364, 48)
+    parent_widget.start_btn.setFocusPolicy(Qt.NoFocus)
 
     parent_widget.start_btn.setStyleSheet("""
           QPushButton {
@@ -556,6 +558,7 @@ def _setup_bottom_buttons(parent_widget, right_layout):
     parent_widget.exit_btn = QPushButton("종료")
     parent_widget.exit_btn.setFixedSize(364, 48)
     parent_widget.original_exit_btn_size = (364, 48)
+    parent_widget.exit_btn.setFocusPolicy(Qt.NoFocus)
     parent_widget.exit_btn.setStyleSheet("""
           QPushButton {
               background-color: #FFFFFF;

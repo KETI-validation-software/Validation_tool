@@ -284,6 +284,7 @@ class ResultPageWidget(QWidget):
             self.back_btn = QPushButton("이전 화면으로", self)
             self.back_btn.setFixedSize(362, 48)
             self.original_back_btn_size = (362, 48)
+            self.back_btn.setFocusPolicy(Qt.NoFocus)
 
             self.back_btn.setStyleSheet("""
                   QPushButton {

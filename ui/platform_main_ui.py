@@ -537,6 +537,7 @@ class PlatformMainUI(CommonMainUI):
         self.sbtn = QPushButton("시험 시작")
         self.sbtn.setFixedSize(424, 48)
         self.original_sbtn_size = (424, 48)
+        self.sbtn.setFocusPolicy(Qt.NoFocus)
         self.sbtn.setStyleSheet("""
             QPushButton {
                 border: none;
