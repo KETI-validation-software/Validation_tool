@@ -191,6 +191,14 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
     """
     try:
         # ✅ 데이터가 문자열이면 JSON으로 파싱
+
+        print("============ 필드별 순차 검증 시작 ============")
+
+        # 1) 필드 목록 및 데이터 추출 (json_checker_new 함수 사용)
+        flat_fields, opt_fields = get_flat_fields_from_schema(schema)
+        required_fields = [f for f in flat_fields.keys() if f not in opt_fields]
+        optional_fields = list(opt_fields)
+
         if isinstance(data, str):
             # 빈 문자열은 빈 딕셔너리로 처리
             if not data.strip():
@@ -202,17 +210,12 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
                     # 파싱 실패 시, 상세 오류와 함께 즉시 FAIL 반환
                     error_msg = f"응답 데이터가 유효한 JSON 형식이 아닙니다. (오류: {e})"
                     # flat_fields를 얻을 수 없으므로 전체 필드 수는 0으로 처리
-                    return "FAIL", error_msg, 0, 0, 0, 0
+                    return "FAIL", error_msg, 0, len(required_fields)+len(optional_fields), \
+                           0, len(optional_fields)
 
-        print("============ 필드별 순차 검증 시작 ============")
-
-        # 1) 필드 목록 및 데이터 추출 (json_checker_new 함수 사용)
-        flat_fields, opt_fields = get_flat_fields_from_schema(schema)
         flat_data = get_flat_data_from_response(data)
-        print(f"[json_check_] 필드 수: {len(flat_fields)}, 선택 필드: {len(opt_fields)}, 데이터 필드: {len(flat_data)}")
-        required_fields = [f for f in flat_fields.keys() if f not in opt_fields]
-        optional_fields = list(opt_fields)
 
+        print(f"[json_check_] 필드 수: {len(flat_fields)}, 선택 필드: {len(opt_fields)}, 데이터 필드: {len(flat_data)}")
         print(f"\n📊 필드 분류:")
         print(f"  - 필수 필드 ({len(required_fields)}개): {required_fields}")
         print(f"  - 선택 필드 ({len(optional_fields)}개): {optional_fields}")

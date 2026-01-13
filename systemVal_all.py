@@ -1675,6 +1675,7 @@ class MyApp(SystemMainUI):
                                     if event_data and isinstance(event_data, dict):
                                         self.reference_context[ref_endpoint_min] = event_data.get("data", {})
 
+
                     try:
                         val_result, val_text, key_psss_cnt, key_error_cnt, opt_correct, opt_error = json_check_(
                             self.outSchema[self.cnt],
