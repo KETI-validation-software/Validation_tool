@@ -1267,10 +1267,10 @@ class MyApp(SystemMainUI):
                     Logger.warn(f" 웹훅 메시지 수신")
                 elif time_interval > self.time_outs[self.cnt] / 1000 - 1:
                     Logger.warn(f" 메시지 타임아웃! 웹훅 대기 종료")
+                    print(self.webhook_flag, self.res)
                 else :
                     Logger.debug(f" 웹훅 대기 중... (API {self.cnt}) 타임아웃 {round(time_interval)} /{round(self.time_outs[self.cnt] / 1000)}")
                     return
-
             if (self.post_flag is False and
                     self.processing_response is False and
                     self.cnt < len(self.message) and
@@ -1549,10 +1549,11 @@ class MyApp(SystemMainUI):
                         except Exception as e:
                             self._append_text(f"응답 JSON 파싱 오류: {e}")
                             self._append_text({"raw_response": self.res.text})
-                            self.post_flag = False
-                            self.processing_response = False
-                            self.current_retry += 1
-                            return
+                            #self.post_flag = False
+                            #self.processing_response = False
+                            #self.current_retry += 1
+                            self.res.txt = {}
+                            #return
 
                         # ✅ RESPONSE 기록 제거 - 서버(api_server.py)에서만 기록하도록 변경
                         self._push_event(self.cnt, "RESPONSE", res_data)
@@ -2579,6 +2580,7 @@ class MyApp(SystemMainUI):
         self.current_retry = 0
         self.post_flag = False  # 웹훅 플래그 초기화
         self.res = None  # 응답 초기화
+        self.webhook_flag = False
         Logger.debug(f" 상태 초기화 완료")
         
         # 4. 버튼 상태 초기화
