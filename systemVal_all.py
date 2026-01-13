@@ -1270,7 +1270,7 @@ class MyApp(SystemMainUI):
                 Logger.debug(f"웹훅 이벤트 수신 완료 (API: {api_name})")
                 if self.webhook_res != None:
                     Logger.warn(f" 웹훅 메시지 수신")
-                elif round(time_interval) >= self.time_outs[self.cnt] / 1000:
+                elif math.ceil(time_interval) >= self.time_outs[self.cnt] / 1000 - 1:
                     Logger.warn(f" 메시지 타임아웃! 웹훅 대기 종료")
                 else :
                     Logger.debug(f" 웹훅 대기 중... (API {self.cnt}) 타임아웃 {round(time_interval)} /{round(self.time_outs[self.cnt] / 1000)}")
