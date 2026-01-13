@@ -15,6 +15,7 @@ doc/
 dist/
 *.zip
 *.spec
+*.iss
 
 # Trace files
 results/trace/
