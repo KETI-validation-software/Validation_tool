@@ -1043,6 +1043,7 @@ class MyApp(SystemMainUI):
 
     def post(self, path, json_data, time_out):
         self.res = None
+        self.webhook_flag = False  # 매 요청마다 초기화 (WebHook API일 때만 True로 설정됨)
         headers = CONSTANTS.headers.copy()
         auth = None
         if self.r2 == "B":  # Bearer
@@ -1070,6 +1071,9 @@ class MyApp(SystemMainUI):
                     self.webhook_thread = WebhookThread(url, port, msg)
                     self.webhook_thread.result_signal.connect(self.handle_webhook_result)
                     self.webhook_thread.start()
+                else:
+                    # WebHook이 아닌 경우 플래그 초기화
+                    self.webhook_flag = False
         except Exception as e:
             Logger.debug(str(e))
             import traceback
@@ -1834,6 +1838,7 @@ class MyApp(SystemMainUI):
                         else:
                             # 아직 대기 중
                             Logger.debug(f" 웹훅 대기 중... (API {self.cnt})")
+                            self.res = None  # 응답 재처리 방지
                             return
 
                     # 재시도 카운터 증가
