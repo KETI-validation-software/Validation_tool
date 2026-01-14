@@ -210,17 +210,25 @@ class MyApp(SystemMainUI):
 
     def _append_text(self, obj):
         import json
+        from html import escape
         try:
             if isinstance(obj, (dict, list)):
-                self.valResult.append(json.dumps(obj, ensure_ascii=False, indent=2))
+                json_str = json.dumps(obj, ensure_ascii=False, indent=2)
+                # HTML 태그를 escape 처리하여 렌더링 방지
+                escaped_json = escape(json_str)
+                # 개행을 <br> 태그로 변환하고 공백을 &nbsp;로 변환
+                formatted = escaped_json.replace('\n', '<br>').replace(' ', '&nbsp;')
+                self.valResult.append(formatted)
             else:
-                self.valResult.append(str(obj))
+                # 문자열도 HTML escape 처리
+                escaped_str = escape(str(obj))
+                formatted = escaped_str.replace('\n', '<br>').replace(' ', '&nbsp;')
+                self.valResult.append(formatted)
         except Exception as e:
-            self.valResult.append(f"[append_error] {e}")
+            self.valResult.append(f"[append_error] {escape(str(e))}")
 
     def handle_authentication_response(self, res_data):
-        """Handles the response for the Authentication step, updates token if present."""
-        # Fix: Use 'accessToken' key, not 'token'
+        
         if isinstance(res_data, dict):
             token = res_data.get("accessToken")
             if token:
