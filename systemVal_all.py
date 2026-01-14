@@ -169,11 +169,21 @@ class MyApp(SystemMainUI):
             
             api_name = self.message[cnt] if cnt < len(self.message) else ""
 
-            # 둘 다 무조건 맵핑 되어야 함
+            # ✅ Realtime 계열 API들의 Profiles RESPONSE 강제 로드
             if "RealtimeDoorStatus" in api_name:
                 if "DoorProfiles" not in self.latest_events or "RESPONSE" not in self.latest_events.get("DoorProfiles", {}):
                     Logger.debug(f"RealtimeDoorStatus용 DoorProfiles RESPONSE 로드 시도")
                     self._load_from_trace_file("DoorProfiles", "RESPONSE")
+            
+            if "RealtimeSensorData" in api_name or "RealtimeSensorEventInfos" in api_name or "StoredSensorEventInfos" in api_name:
+                if "SensorDeviceProfiles" not in self.latest_events or "RESPONSE" not in self.latest_events.get("SensorDeviceProfiles", {}):
+                    Logger.debug(f"{api_name}용 SensorDeviceProfiles RESPONSE 로드 시도")
+                    self._load_from_trace_file("SensorDeviceProfiles", "RESPONSE")
+            
+            if "StreamURLs" in api_name or "RealtimeVideoEventInfos" in api_name or "StoredVideo" in api_name or "ReplayURL" in api_name or "StoredObjectAnalyticsInfos" in api_name:
+                if "CameraProfiles" not in self.latest_events or "RESPONSE" not in self.latest_events.get("CameraProfiles", {}):
+                    Logger.debug(f"{api_name}용 CameraProfiles RESPONSE 로드 시도")
+                    self._load_from_trace_file("CameraProfiles", "RESPONSE")
             
             self.generator.latest_events = self.latest_events
 
@@ -1298,28 +1308,28 @@ class MyApp(SystemMainUI):
                     if "WebHook".lower() in str(trans_protocol_type).lower():
 
                         # 플랫폼이 웹훅을 보낼 외부 주소 설정 - 동적
-                        # WEBHOOK_IP = CONSTANTS.WEBHOOK_PUBLIC_IP  # 웹훅 수신 IP/도메인
-                        # WEBHOOK_PORT = CONSTANTS.WEBHOOK_PORT  # 웹훅 수신 포트
-                        # WEBHOOK_URL = f"https://{WEBHOOK_IP}:{WEBHOOK_PORT}"  # 플랫폼/시스템이 웹훅을 보낼 주소
+                        WEBHOOK_IP = CONSTANTS.WEBHOOK_PUBLIC_IP  # 웹훅 수신 IP/도메인
+                        WEBHOOK_PORT = CONSTANTS.WEBHOOK_PORT  # 웹훅 수신 포트
+                        WEBHOOK_URL = f"https://{WEBHOOK_IP}:{WEBHOOK_PORT}"  # 플랫폼/시스템이 웹훅을 보낼 주소
 
-                        # trans_protocol = {
-                        #     "transProtocolType": "WebHook",
-                        #     "transProtocolDesc": WEBHOOK_URL
-                        # }
+                        trans_protocol = {
+                            "transProtocolType": "WebHook",
+                            "transProtocolDesc": WEBHOOK_URL
+                        }
                         
                         # ngrok 하드 코딩 부분 (01/09)
                         # ---- 여기부터
-                        WEBHOOK_DISPLAY_URL = CONSTANTS.WEBHOOK_DISPLAY_URL
-                        trans_protocol = {
-                            "transProtocolType": "WebHook",
-                            "transProtocolDesc": WEBHOOK_DISPLAY_URL  # ngrok 주소 전송
-                        }
+                        # WEBHOOK_DISPLAY_URL = CONSTANTS.WEBHOOK_DISPLAY_URL
+                        # trans_protocol = {
+                        #     "transProtocolType": "WebHook",
+                        #     "transProtocolDesc": WEBHOOK_DISPLAY_URL  # ngrok 주소 전송
+                        # }
                         #---- 여기까지
                         inMessage["transProtocol"] = trans_protocol
 
                         # (01/08 - 동적: 위에 작동, 하드코딩: 아래를 작동)
-                        # Logger.debug(f" [post] transProtocol 설정 추가됨: {inMessage}")
-                        Logger.debug(f" [post] transProtocol 설정 (ngrok 주소): {WEBHOOK_DISPLAY_URL}")
+                        Logger.debug(f" [post] transProtocol 설정 추가됨: {inMessage}")
+                        # Logger.debug(f" [post] transProtocol 설정 (ngrok 주소): {WEBHOOK_DISPLAY_URL}")
                         
                 elif self.r2 == "B" and self.message[self.cnt] == "Authentication":
                     inMessage["userID"] = self.accessInfo[0]
@@ -1607,18 +1617,30 @@ class MyApp(SystemMainUI):
                             ref_endpoint = validation_rule.get("referenceEndpoint", "")
                             if ref_endpoint:
                                 ref_api_name = ref_endpoint.lstrip("/")
+                                Logger.debug(f"🔍 [{field_path}] referenceEndpoint: {ref_endpoint}, direction: {direction}")
+                                
                                 # latest_events에 없으면 trace 파일에서 로드
                                 if ref_api_name not in self.latest_events or direction not in self.latest_events.get(ref_api_name, {}):
-                                    Logger.debug(f" {ref_endpoint} {direction}를 trace 파일에서 로드 시도")
+                                    Logger.debug(f"  → latest_events에 없음, trace 파일 로드 시도")
                                     response_data = self._load_from_trace_file(ref_api_name, direction)
+                                    Logger.debug(f"  → trace 로드 결과: {type(response_data).__name__}, 키: {list(response_data.keys()) if isinstance(response_data, dict) else 'N/A'}")
                                     if response_data and isinstance(response_data, dict):
                                         self.reference_context[ref_endpoint] = response_data
-                                        Logger.debug(f" {ref_endpoint} {direction}를 trace 파일에서 로드 완료")
+                                        Logger.debug(f"  ✅ reference_context 저장 완료")
+                                    else:
+                                        Logger.warning(f"  ❌ trace 로드 실패 또는 빈 데이터")
                                 else:
                                     # latest_events에 있으면 거기서 가져오기
+                                    Logger.debug(f"  → latest_events에 존재")
                                     event_data = self.latest_events.get(ref_api_name, {}).get(direction, {})
+                                    Logger.debug(f"  → event_data 타입: {type(event_data).__name__}, 키: {list(event_data.keys()) if isinstance(event_data, dict) else 'N/A'}")
                                     if event_data and isinstance(event_data, dict):
-                                        self.reference_context[ref_endpoint] = event_data.get("data", {})
+                                        extracted = event_data.get("data", {})
+                                        Logger.debug(f"  → 추출된 'data' 타입: {type(extracted).__name__}, 키: {list(extracted.keys()) if isinstance(extracted, dict) else 'N/A'}")
+                                        self.reference_context[ref_endpoint] = extracted
+                                        Logger.debug(f"  ✅ reference_context 저장 완료")
+                                    else:
+                                        Logger.warning(f"  ❌ event_data가 비어있거나 dict가 아님")
                             
                             # referenceEndpointMax 처리
                             ref_endpoint_max = validation_rule.get("referenceEndpointMax", "")
@@ -1649,6 +1671,21 @@ class MyApp(SystemMainUI):
                                     event_data = self.latest_events.get(ref_api_name_min, {}).get(direction, {})
                                     if event_data and isinstance(event_data, dict):
                                         self.reference_context[ref_endpoint_min] = event_data.get("data", {})
+
+                    # ✅ 맥락 검증 디버깅 로그
+                    Logger.debug(f"========== 맥락 검증 준비 ==========")
+                    Logger.debug(f"API: {self.message[self.cnt]}")
+                    Logger.debug(f"reference_context 키 목록: {list(self.reference_context.keys())}")
+                    for key, value in self.reference_context.items():
+                        if isinstance(value, dict):
+                            Logger.debug(f"  [{key}]: {type(value).__name__} - 키: {list(value.keys())}")
+                            # sensorDeviceList 또는 doorList가 있으면 상세 출력
+                            for data_key in ['sensorDeviceList', 'doorList', 'cameraList']:
+                                if data_key in value:
+                                    Logger.debug(f"    └─ {data_key}: {value[data_key]}")
+                        else:
+                            Logger.debug(f"  [{key}]: {type(value).__name__} - {value}")
+                    Logger.debug(f"====================================")
 
                     try:
                         val_result, val_text, key_psss_cnt, key_error_cnt, opt_correct, opt_error = json_check_(
