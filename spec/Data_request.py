@@ -125,13 +125,13 @@ cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_in_data = {
         "doorID": ""
     }
 ],
-    "duration": 500,
+    "duration": 10000,
     "transProtocol": {
     "transProtocolType": "WebHook",
     "transProtocolDesc": ""
 },
     "eventFilter": "",
-    "startTime": 20251105163010124
+    "startTime": 20260112065600000
 }
 
 # RealtimeVerifEventInfos WebHook OUT Data

@@ -314,6 +314,26 @@ class CommonMainUI(QWidget):
                 background: none;
                 height: 0px;
             }
+            QScrollBar:horizontal {
+                border: none;
+                background: #DFDFDF;
+                height: 14px;
+                margin: 0px;
+            }
+            QScrollBar::handle:horizontal {
+                background: #A3A9AD;
+                min-width: 20px;
+                border-radius: 4px;
+                margin: 3px 0px;
+            }
+            QScrollBar::handle:horizontal:hover {
+                background: #8A9094;
+            }
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+                border: none;
+                background: none;
+                width: 0px;
+            }
         """)
         # 텍스트 영역 여백 설정 (좌24, 우12) - 스크롤바는 맨 끝에 위치
         self.valResult.setViewportMargins(24, 0, 12, 0)
@@ -379,6 +399,7 @@ class CommonMainUI(QWidget):
 
         # 정지 버튼
         self.stop_btn = QPushButton("일시 정지", self.buttonGroup)  # 텍스트 추가
+        self.stop_btn.setFocusPolicy(Qt.NoFocus)
         self.stop_btn.setStyleSheet("""
               QPushButton {
                   background-color: #FFFFFF;
@@ -408,6 +429,7 @@ class CommonMainUI(QWidget):
 
         # 시험 취소 버튼
         self.cancel_btn = QPushButton("시험 취소", self.buttonGroup)
+        self.cancel_btn.setFocusPolicy(Qt.NoFocus)
         self.cancel_btn.setStyleSheet("""
               QPushButton {
                   border: 2px solid #FF8772;
@@ -438,6 +460,7 @@ class CommonMainUI(QWidget):
 
         # 종료 버튼
         self.rbtn = QPushButton("종료", self.buttonGroup)  # 텍스트 추가
+        self.rbtn.setFocusPolicy(Qt.NoFocus)
         self.rbtn.setStyleSheet("""
               QPushButton {
                   background-color: #FFFFFF;
@@ -466,6 +489,7 @@ class CommonMainUI(QWidget):
 
         # 시험 결과 버튼
         self.result_btn = QPushButton("시험 결과", self.buttonGroup)  # 텍스트 추가
+        self.result_btn.setFocusPolicy(Qt.NoFocus)
         self.result_btn.setStyleSheet("""
               QPushButton {
                   background-color: #FFFFFF;
@@ -826,7 +850,7 @@ class CommonMainUI(QWidget):
             (94, "검증 횟수"),
             (116, "통과 필드 수"),
             (116, "전체 필드 수"),
-            (94, "실패 횟수"),
+            (94, "실패 필드 수"),
             (94, "평가 점수"),
             (133, "상세 내용")
         ]

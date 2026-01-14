@@ -14,7 +14,7 @@ import importlib
 # SSL 경고 비활성화 (자체 서명 인증서 사용 시)
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 warnings.filterwarnings('ignore')
-
+import math
 import re
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor, QPixmap
@@ -169,21 +169,11 @@ class MyApp(SystemMainUI):
             
             api_name = self.message[cnt] if cnt < len(self.message) else ""
 
-            # ✅ Realtime 계열 API들의 Profiles RESPONSE 강제 로드
+            # 둘 다 무조건 맵핑 되어야 함
             if "RealtimeDoorStatus" in api_name:
                 if "DoorProfiles" not in self.latest_events or "RESPONSE" not in self.latest_events.get("DoorProfiles", {}):
                     Logger.debug(f"RealtimeDoorStatus용 DoorProfiles RESPONSE 로드 시도")
                     self._load_from_trace_file("DoorProfiles", "RESPONSE")
-            
-            if "RealtimeSensorData" in api_name or "RealtimeSensorEventInfos" in api_name or "StoredSensorEventInfos" in api_name:
-                if "SensorDeviceProfiles" not in self.latest_events or "RESPONSE" not in self.latest_events.get("SensorDeviceProfiles", {}):
-                    Logger.debug(f"{api_name}용 SensorDeviceProfiles RESPONSE 로드 시도")
-                    self._load_from_trace_file("SensorDeviceProfiles", "RESPONSE")
-            
-            if "StreamURLs" in api_name or "RealtimeVideoEventInfos" in api_name or "StoredVideo" in api_name or "ReplayURL" in api_name or "StoredObjectAnalyticsInfos" in api_name:
-                if "CameraProfiles" not in self.latest_events or "RESPONSE" not in self.latest_events.get("CameraProfiles", {}):
-                    Logger.debug(f"{api_name}용 CameraProfiles RESPONSE 로드 시도")
-                    self._load_from_trace_file("CameraProfiles", "RESPONSE")
             
             self.generator.latest_events = self.latest_events
 
@@ -805,6 +795,15 @@ class MyApp(SystemMainUI):
     def on_test_field_selected(self, row, col):
         """시험 분야 클릭 시 해당 시스템으로 동적 전환"""
         try:
+            # ✅ 시험 진행 중이면 시나리오 변경 차단
+            if hasattr(self, 'sbtn') and not self.sbtn.isEnabled():
+                Logger.debug(f" 시험 진행 중 - 시나리오 변경 차단")
+                # 비동기로 경고창 표시 (시험 진행에 영향 없도록)
+                QTimer.singleShot(0, lambda: QMessageBox.warning(
+                    self, "알림", "시험이 진행 중입니다.\n시험 완료 후 다른 시나리오를 진행해주세요."
+                ))
+                return
+
             self.selected_test_field_row = row
 
             if row in self.index_to_spec_id:
@@ -1045,6 +1044,7 @@ class MyApp(SystemMainUI):
     def post(self, path, json_data, time_out):
         self.res = None
         headers = CONSTANTS.headers.copy()
+        self.webhook_flag = False
         auth = None
         if self.r2 == "B":  # Bearer
             if self.token:
@@ -1071,6 +1071,9 @@ class MyApp(SystemMainUI):
                     self.webhook_thread = WebhookThread(url, port, msg)
                     self.webhook_thread.result_signal.connect(self.handle_webhook_result)
                     self.webhook_thread.start()
+                else:
+                    # WebHook이 아닌 경우 플래그 초기화
+                    self.webhook_flag = False
         except Exception as e:
             Logger.debug(str(e))
             import traceback
@@ -1079,6 +1082,7 @@ class MyApp(SystemMainUI):
         try:
             path = re.sub(r'\d+$', '', path)
             Logger.debug(f" [post] Sending request to {path} with auth_type={self.r2}, token={self.token}")
+            Logger.debug(f" [post] request message {json_data}")
             self.res = requests.post(
                 path,
                 headers=headers,
@@ -1086,6 +1090,10 @@ class MyApp(SystemMainUI):
                 auth=auth,
                 verify=False,
                 timeout=time_out
+            )
+            Logger.debug(f" [post] response message {self.res.status_code}")
+            Logger.debug(
+                f"{self.res.json() if self.res.headers.get('Content-Type', '').startswith('application/json') else self.res.text}"
             )
         except Exception as e:
             Logger.debug(str(e))
@@ -1260,8 +1268,13 @@ class MyApp(SystemMainUI):
             if self.webhook_flag is True:
                 api_name = self.message[self.cnt] if self.cnt < len(self.message) else 'N/A'
                 Logger.debug(f"웹훅 이벤트 수신 완료 (API: {api_name})")
-                Logger.debug(f"웹훅 스레드의 wait()이 동기화 처리 완료 (수동 sleep 제거됨)")
-
+                if self.webhook_res != None:
+                    Logger.warn(f" 웹훅 메시지 수신")
+                elif math.ceil(time_interval) >= self.time_outs[self.cnt] / 1000 - 1:
+                    Logger.warn(f" 메시지 타임아웃! 웹훅 대기 종료")
+                else :
+                    Logger.debug(f" 웹훅 대기 중... (API {self.cnt}) 타임아웃 {round(time_interval)} /{round(self.time_outs[self.cnt] / 1000)}")
+                    return
             if (self.post_flag is False and
                     self.processing_response is False and
                     self.cnt < len(self.message) and
@@ -1308,28 +1321,28 @@ class MyApp(SystemMainUI):
                     if "WebHook".lower() in str(trans_protocol_type).lower():
 
                         # 플랫폼이 웹훅을 보낼 외부 주소 설정 - 동적
-                        WEBHOOK_IP = CONSTANTS.WEBHOOK_PUBLIC_IP  # 웹훅 수신 IP/도메인
-                        WEBHOOK_PORT = CONSTANTS.WEBHOOK_PORT  # 웹훅 수신 포트
-                        WEBHOOK_URL = f"https://{WEBHOOK_IP}:{WEBHOOK_PORT}"  # 플랫폼/시스템이 웹훅을 보낼 주소
+                        # WEBHOOK_IP = CONSTANTS.WEBHOOK_PUBLIC_IP  # 웹훅 수신 IP/도메인
+                        # WEBHOOK_PORT = CONSTANTS.WEBHOOK_PORT  # 웹훅 수신 포트
+                        # WEBHOOK_URL = f"https://{WEBHOOK_IP}:{WEBHOOK_PORT}"  # 플랫폼/시스템이 웹훅을 보낼 주소
 
-                        trans_protocol = {
-                            "transProtocolType": "WebHook",
-                            "transProtocolDesc": WEBHOOK_URL
-                        }
+                        # trans_protocol = {
+                        #     "transProtocolType": "WebHook",
+                        #     "transProtocolDesc": WEBHOOK_URL
+                        # }
                         
                         # ngrok 하드 코딩 부분 (01/09)
                         # ---- 여기부터
-                        # WEBHOOK_DISPLAY_URL = CONSTANTS.WEBHOOK_DISPLAY_URL
-                        # trans_protocol = {
-                        #     "transProtocolType": "WebHook",
-                        #     "transProtocolDesc": WEBHOOK_DISPLAY_URL  # ngrok 주소 전송
-                        # }
+                        WEBHOOK_DISPLAY_URL = CONSTANTS.WEBHOOK_DISPLAY_URL
+                        trans_protocol = {
+                            "transProtocolType": "WebHook",
+                            "transProtocolDesc": WEBHOOK_DISPLAY_URL  # ngrok 주소 전송
+                        }
                         #---- 여기까지
                         inMessage["transProtocol"] = trans_protocol
 
                         # (01/08 - 동적: 위에 작동, 하드코딩: 아래를 작동)
-                        Logger.debug(f" [post] transProtocol 설정 추가됨: {inMessage}")
-                        # Logger.debug(f" [post] transProtocol 설정 (ngrok 주소): {WEBHOOK_DISPLAY_URL}")
+                        # Logger.debug(f" [post] transProtocol 설정 추가됨: {inMessage}")
+                        Logger.debug(f" [post] transProtocol 설정 (ngrok 주소): {WEBHOOK_DISPLAY_URL}")
                         
                 elif self.r2 == "B" and self.message[self.cnt] == "Authentication":
                     inMessage["userID"] = self.accessInfo[0]
@@ -1440,6 +1453,7 @@ class MyApp(SystemMainUI):
                     # 다음 API로 이동
                     self.cnt += 1
                     self.current_retry = 0  # 재시도 카운터 리셋
+                    self.webhook_flag = False
 
                     # 다음 API를 위한 누적 카운트 초기 설정 확인
                     if hasattr(self, 'step_pass_counts') and self.cnt < len(self.step_pass_counts):
@@ -1486,8 +1500,8 @@ class MyApp(SystemMainUI):
                             json.dump(result_json, f, ensure_ascii=False, indent=2)
                         Logger.debug(f"✅ 시험 결과가 '{json_path}'에 자동 저장되었습니다.")
                         self.append_monitor_log(
-                            step_name="결과 파일 저장 완료",
-                            details=json_path
+                            step_name="관리시스템 결과 전송 완료",
+                            details=""
                         )
                         Logger.debug(f" try 블록 정상 완료")
 
@@ -1540,10 +1554,11 @@ class MyApp(SystemMainUI):
                         except Exception as e:
                             self._append_text(f"응답 JSON 파싱 오류: {e}")
                             self._append_text({"raw_response": self.res.text})
-                            self.post_flag = False
-                            self.processing_response = False
-                            self.current_retry += 1
-                            return
+                            #self.post_flag = False
+                            #self.processing_response = False
+                            #self.current_retry += 1
+                            self.res.txt = {}
+                            #return
 
                         # ✅ RESPONSE 기록 제거 - 서버(api_server.py)에서만 기록하도록 변경
                         self._push_event(self.cnt, "RESPONSE", res_data)
@@ -1617,30 +1632,18 @@ class MyApp(SystemMainUI):
                             ref_endpoint = validation_rule.get("referenceEndpoint", "")
                             if ref_endpoint:
                                 ref_api_name = ref_endpoint.lstrip("/")
-                                Logger.debug(f"🔍 [{field_path}] referenceEndpoint: {ref_endpoint}, direction: {direction}")
-                                
                                 # latest_events에 없으면 trace 파일에서 로드
                                 if ref_api_name not in self.latest_events or direction not in self.latest_events.get(ref_api_name, {}):
-                                    Logger.debug(f"  → latest_events에 없음, trace 파일 로드 시도")
+                                    Logger.debug(f" {ref_endpoint} {direction}를 trace 파일에서 로드 시도")
                                     response_data = self._load_from_trace_file(ref_api_name, direction)
-                                    Logger.debug(f"  → trace 로드 결과: {type(response_data).__name__}, 키: {list(response_data.keys()) if isinstance(response_data, dict) else 'N/A'}")
                                     if response_data and isinstance(response_data, dict):
                                         self.reference_context[ref_endpoint] = response_data
-                                        Logger.debug(f"  ✅ reference_context 저장 완료")
-                                    else:
-                                        Logger.warning(f"  ❌ trace 로드 실패 또는 빈 데이터")
+                                        Logger.debug(f" {ref_endpoint} {direction}를 trace 파일에서 로드 완료")
                                 else:
                                     # latest_events에 있으면 거기서 가져오기
-                                    Logger.debug(f"  → latest_events에 존재")
                                     event_data = self.latest_events.get(ref_api_name, {}).get(direction, {})
-                                    Logger.debug(f"  → event_data 타입: {type(event_data).__name__}, 키: {list(event_data.keys()) if isinstance(event_data, dict) else 'N/A'}")
                                     if event_data and isinstance(event_data, dict):
-                                        extracted = event_data.get("data", {})
-                                        Logger.debug(f"  → 추출된 'data' 타입: {type(extracted).__name__}, 키: {list(extracted.keys()) if isinstance(extracted, dict) else 'N/A'}")
-                                        self.reference_context[ref_endpoint] = extracted
-                                        Logger.debug(f"  ✅ reference_context 저장 완료")
-                                    else:
-                                        Logger.warning(f"  ❌ event_data가 비어있거나 dict가 아님")
+                                        self.reference_context[ref_endpoint] = event_data.get("data", {})
                             
                             # referenceEndpointMax 처리
                             ref_endpoint_max = validation_rule.get("referenceEndpointMax", "")
@@ -1672,20 +1675,6 @@ class MyApp(SystemMainUI):
                                     if event_data and isinstance(event_data, dict):
                                         self.reference_context[ref_endpoint_min] = event_data.get("data", {})
 
-                    # ✅ 맥락 검증 디버깅 로그
-                    Logger.debug(f"========== 맥락 검증 준비 ==========")
-                    Logger.debug(f"API: {self.message[self.cnt]}")
-                    Logger.debug(f"reference_context 키 목록: {list(self.reference_context.keys())}")
-                    for key, value in self.reference_context.items():
-                        if isinstance(value, dict):
-                            Logger.debug(f"  [{key}]: {type(value).__name__} - 키: {list(value.keys())}")
-                            # sensorDeviceList 또는 doorList가 있으면 상세 출력
-                            for data_key in ['sensorDeviceList', 'doorList', 'cameraList']:
-                                if data_key in value:
-                                    Logger.debug(f"    └─ {data_key}: {value[data_key]}")
-                        else:
-                            Logger.debug(f"  [{key}]: {type(value).__name__} - {value}")
-                    Logger.debug(f"====================================")
 
                     try:
                         val_result, val_text, key_psss_cnt, key_error_cnt, opt_correct, opt_error = json_check_(
@@ -1839,14 +1828,14 @@ class MyApp(SystemMainUI):
                             request_json="",  # 데이터는 앞서 출력되었으므로 생략
                             result_status=final_result,
                             score=score_value,
-                            details=f"통과: {total_pass_count}, 오류: {total_error_count} | 프로토콜: {current_protocol}"
+                            details=f"통과: {total_pass_count}, 오류: {total_error_count} | {'일반 메시지' if current_protocol.lower() == 'basic' else f'실시간 메시지: {current_protocol}'}"
                         )
                     else:
                         # 중간 시도 - 진행중 표시
                         self.append_monitor_log(
                             step_name=step_title,
                             request_json="",  # 데이터는 앞서 출력되었으므로 생략
-                            details=f"검증 진행 중... | 프로토콜: {current_protocol}"
+                            details=f"검증 진행 중... | {'일반 메시지' if current_protocol.lower() == 'basic' else f'실시간 메시지: {current_protocol}'}"
                         )
 
                     # ✅ 웹훅 처리를 재시도 완료 체크 전에 실행 (step_pass_counts 업데이트를 위해)
@@ -1952,8 +1941,8 @@ class MyApp(SystemMainUI):
                         json.dump(result_json, f, ensure_ascii=False, indent=2)
                     Logger.debug(f"✅ 시험 결과가 '{json_path}'에 자동 저장되었습니다.")
                     self.append_monitor_log(
-                        step_name="결과 파일 저장 완료",
-                        details=json_path
+                        step_name="관리시스템 결과 전송 완료",
+                        details=""
                     )
                     Logger.debug(f" try 블록 정상 완료 (경로2)")
                 except Exception as e:
@@ -2597,6 +2586,7 @@ class MyApp(SystemMainUI):
         self.current_retry = 0
         self.post_flag = False  # 웹훅 플래그 초기화
         self.res = None  # 응답 초기화
+        self.webhook_flag = False
         Logger.debug(f" 상태 초기화 완료")
         
         # 4. 버튼 상태 초기화

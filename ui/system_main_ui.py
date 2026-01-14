@@ -79,6 +79,7 @@ class SystemMainUI(CommonMainUI):
         self.sbtn = QPushButton("시험 시작")
         self.sbtn.setFixedSize(424, 48)
         self.original_sbtn_size = (424, 48)
+        self.sbtn.setFocusPolicy(Qt.NoFocus)
         self.sbtn.setStyleSheet("""
             QPushButton {
                 border: none;
@@ -691,7 +692,7 @@ class SystemMainUI(CommonMainUI):
             (94, "검증 횟수"),
             (116, "통과 필드 수"),
             (116, "전체 필드 수"),
-            (94, "실패 횟수"),
+            (94, "실패 필드 수"),
             (94, "평가 점수"),
             (133, "상세 내용")
         ]
