@@ -1446,7 +1446,8 @@ def get_test_groups_info():
                 test_spec_ids.append(key)
 
         # testRange는 testSpecIds 개수에 맞춰 생성
-        test_range = ", ".join(["ALL_FIELDS"] * len(test_spec_ids))
+        # CONSTANTS.py의 test_range 값과 통일 ("전체 필드")
+        test_range = ", ".join(["전체 필드"] * len(test_spec_ids))
 
         test_groups.append({
             "id": group_id,

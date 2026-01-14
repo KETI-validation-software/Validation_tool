@@ -851,7 +851,7 @@ class InfoWidget(QWidget):
         # 관리자 코드 필드는 본시험일 경우에만 활성화
         if hasattr(self, 'admin_code_edit'):
             test_category = self.test_category_edit.text().strip() if hasattr(self, 'test_category_edit') else ""
-            if test_category in ["본시험", "MAIN_TEST"]:
+            if test_category == "본시험":
                 self.admin_code_edit.setEnabled(True)
 
     def on_load_test_info_clicked(self):
@@ -936,7 +936,7 @@ class InfoWidget(QWidget):
 
             # 시험범위를 UI용 텍스트로 변환하여 표시
             display_test_range = combined_group_ranges
-            if combined_group_ranges == "ALL_FIELDS":
+            if combined_group_ranges == "ALL_FIELDS" or combined_group_ranges == "전체 필드":
                 display_test_range = "전체필드"
             elif combined_group_ranges:
                 display_test_range = "필수필드"

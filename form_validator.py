@@ -72,7 +72,7 @@ class FormValidator:
     def is_admin_code_required(self):
         """관리자 코드 입력이 필요한지 확인"""
         test_category = self.parent.test_category_edit.text().strip()
-        return test_category == "MAIN_TEST" or test_category == "본시험"
+        return test_category == "본시험"
 
     def is_admin_code_valid(self):
         """관리자 코드 유효성 검사"""
@@ -103,15 +103,19 @@ class FormValidator:
 
         self.parent.original_test_category = test_category
 
+        # API에서 받아온 영문 값이 있는 경우를 위한 처리
         if test_category == "MAIN_TEST":
             self.parent.test_category_edit.setText("본시험")
             self.parent.admin_code_edit.setEnabled(True)
             self.parent.admin_code_edit.setPlaceholderText("")
-        else:
+        elif test_category == "PRE_TEST":
             self.parent.test_category_edit.setText("사전시험")
             self.parent.admin_code_edit.setEnabled(False)
             self.parent.admin_code_edit.clear()
             self.parent.admin_code_edit.setPlaceholderText("")
+        else:
+            # 이미 한글인 경우는 그대로 유지
+            pass
 
     def handle_test_range_change(self):
         """시험범위 변경 시 UI 표시 텍스트 변환"""
@@ -125,10 +129,14 @@ class FormValidator:
 
         self.parent.original_test_range = test_range
 
-        if test_range == "ALL_FIELDS":
+        # API에서 받아온 영문 값이 있는 경우를 위한 처리
+        if test_range == "ALL_FIELDS" or test_range == "전체 필드":
             self.parent.test_range_edit.setText("전체필드")
-        else:
+        elif test_range == "REQUIRED_FIELDS" or test_range == "필수 필드":
             self.parent.test_range_edit.setText("필수필드")
+        else:
+            # 이미 한글인 경우는 그대로 유지
+            pass
 
     # ---------- CONSTANTS.py 업데이트 ----------
 
@@ -179,15 +187,18 @@ class FormValidator:
         test_category = self.parent.test_category_edit.text().strip()
         test_range = self.parent.test_range_edit.text().strip()
 
+        # test_category는 이미 한글로 변환되어 있어야 함 ("본시험" 또는 "사전시험")
+        # API에서 받아온 original 값이 있다면 사용
         if test_category == "본시험":
-            test_category = "MAIN_TEST"
+            test_category = "본시험"
         elif test_category == "사전시험":
             test_category = self.parent.original_test_category if self.parent.original_test_category else "사전시험"
 
+        # test_range 변환: UI 표시용("전체필드") -> CONSTANTS.py용("전체 필드")
         if test_range == "전체필드":
-            test_range = "ALL_FIELDS"
+            test_range = "전체 필드"
         elif test_range == "필수필드":
-            test_range = self.parent.original_test_range if self.parent.original_test_range else "필수필드"
+            test_range = self.parent.original_test_range if self.parent.original_test_range else "필수 필드"
 
         return {
             'company_name': self.parent.company_edit.text().strip(),

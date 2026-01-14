@@ -1337,7 +1337,7 @@ class ResultPageWidget(QWidget):
                         if row >= self.parent.tableWidget.rowCount():
                             break
 
-                        # 아이콘 상태 복원 (컬럼 2)
+                        # 아이콘 상태 복원 (컬럼 2) - ✅ 84x20 크기로 복원
                         icon_state = row_data.get('icon_state', '')
                         if icon_state in ["PASS", "FAIL"]:
                             img = self.parent.img_pass if icon_state == "PASS" else self.parent.img_fail
@@ -1345,7 +1345,7 @@ class ResultPageWidget(QWidget):
                             icon_layout = QHBoxLayout()
                             icon_layout.setContentsMargins(0, 0, 0, 0)
                             icon_label = QLabel()
-                            icon_label.setPixmap(QIcon(img).pixmap(16, 16))
+                            icon_label.setPixmap(QIcon(img).pixmap(84, 20))  # ✅ 원래 크기로 복원
                             icon_label.setAlignment(Qt.AlignCenter)
                             icon_label.setToolTip(f"Result: {icon_state}")
                             icon_layout.addWidget(icon_label)
