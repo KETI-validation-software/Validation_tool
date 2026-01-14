@@ -63,6 +63,9 @@ class SystemStateManager:
                 # ✅ 선택 필드 통과/에러 수도 저장
                 'step_opt_pass_counts': self.main.step_opt_pass_counts[:] if hasattr(self.main, 'step_opt_pass_counts') else [],
                 'step_opt_error_counts': self.main.step_opt_error_counts[:] if hasattr(self.main, 'step_opt_error_counts') else [],
+                # ✅ 현재 진행 상태 저장 (cnt, current_retry)
+                'cnt': self.main.cnt if hasattr(self.main, 'cnt') else 0,
+                'current_retry': self.main.current_retry if hasattr(self.main, 'current_retry') else 0,
             }
 
             print(f"[SAVE] ✅ {composite_key} 데이터 저장 완료")
@@ -171,5 +174,9 @@ class SystemStateManager:
         self.main.step_opt_pass_counts = saved_data.get('step_opt_pass_counts', [0] * len(self.main.videoMessages))[:]
         self.main.step_opt_error_counts = saved_data.get('step_opt_error_counts', [0] * len(self.main.videoMessages))[:]
 
-        print(f"[RESTORE] {spec_id} 데이터 복원 완료")
+        # ✅ 현재 진행 상태 복원 (cnt, current_retry)
+        self.main.cnt = saved_data.get('cnt', 0)
+        self.main.current_retry = saved_data.get('current_retry', 0)
+
+        print(f"[RESTORE] {spec_id} 데이터 복원 완료 (cnt={self.main.cnt}, current_retry={self.main.current_retry})")
         return True

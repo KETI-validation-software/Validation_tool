@@ -199,7 +199,8 @@ class MyApp(SystemMainUI):
                     allowed_value=allowed_value
                 )
                 return updated_request
-            except :
+            except Exception as e:
+                Logger.warning(f"constraint 적용 중 일부 실패: {e}")
                 return updated_request
         except Exception as e:
             Logger.error(f"_apply_request_constraints 실행 중 오류: {e}")
@@ -232,10 +233,7 @@ class MyApp(SystemMainUI):
         
         # ✅ 상태 관리자 초기화
         self.state_manager = SystemStateManager(self)
-        # ===== 수정: instantiation time에 CONSTANTS를 fresh import =====
-        # PyInstaller 환경에서는 절대 경로로 직접 로드
-        import sys
-        import os
+        
         self.run_status = "진행전"
 
         # ✅ 분야별 점수 (현재 spec만)
@@ -291,13 +289,10 @@ class MyApp(SystemMainUI):
         self.tick_timer = QTimer()
         self.tick_timer.timeout.connect(self.update_view)
         self.cnt = 0
-        self.current_retry = 0  # 현재 API의 반복 횟수 카운터
         self.auth_flag = True
 
         self.time_pre = 0
         self.post_flag = False
-        self.total_error_cnt = 0
-        self.total_pass_cnt = 0
         self.message_in_cnt = 0
         self.message_error = []
         self.message_name = ""
@@ -356,11 +351,6 @@ class MyApp(SystemMainUI):
         if hasattr(self, 'state_manager'):
             return self.state_manager.restore_spec_data(spec_id)
         return False
-        Logger.debug(f" step_opt_pass_counts 복원: {self.step_opt_pass_counts}")
-        Logger.debug(f" step_opt_error_counts 복원: {self.step_opt_error_counts}")
-
-        Logger.debug(f" {spec_id} 데이터 복원 완료")
-        return True
 
     def _push_event(self, step_idx, direction, payload):  # ### NEW
         """REQUEST/RESPONSE/WEBHOOK 이벤트를 순서대로 기록하고 ndjson에 append"""

@@ -1,21 +1,21 @@
 {
-  "requestId": "cmisfmr3907tv5vy71y0276gp",
+  "requestId": "cmii85wjq009z8z1tv0d3d7r1",
   "evaluationTarget": {
-    "companyName": "엣지디엑스",
-    "contactPerson": "빙영진",
-    "productName": "AIBridge",
+    "companyName": "물리보안기업",
+    "contactPerson": "김철수",
+    "productName": "물리보안시스템-기본",
     "modelName": "v1.0",
     "version": "v1.0"
   },
   "testGroups": [
     {
-      "id": "cmisfjfzt07tm5vy7qslmisks",
-      "name": "제어 기능-물리보안",
+      "id": "cmjcefmh8070gcfb35wjptcsl",
+      "name": "기본 기능 시험-영상보안시스템",
       "testRange": "전체 필드, 전체 필드, 전체 필드",
       "testSpecIds": [
-        "cmiqr2b9j00i9ie8frw439h8i",
-        "cmiqr1jha00i6ie8fb1scb3go",
-        "cmiqr0kdw00i4ie8fr3firjtg"
+        "cmii7wfuf006i8z1tcds6q69g",
+        "cmii7w683006h8z1t7usnin5g",
+        "cmii7v8pr006g8z1tvo55a50u"
       ]
     }
   ],
@@ -23,84 +23,46 @@
   "authMethod": "Digest Auth",
   "testScore": {
     "score": 0.0,
-    "totalFields": 76,
-    "passedFields": 72,
-    "failedFields": 4
+    "totalFields": 21,
+    "passedFields": 21,
+    "failedFields": 0
   },
   "testResult": [
     {
-      "testGroup": "cmisfjfzt07tm5vy7qslmisks",
-      "testSpecId": "cmiqr2b9j00i9ie8frw439h8i",
-      "testSpecName": "sensor002",
+      "testGroup": "cmjcefmh8070gcfb35wjptcsl",
+      "testSpecId": "cmii7wfuf006i8z1tcds6q69g",
+      "testSpecName": "sensor001",
       "score": 0.0,
-      "totalFields": 29,
-      "passedFields": 25,
-      "failedFields": 4,
+      "totalFields": 11,
+      "passedFields": 11,
+      "failedFields": 0,
       "apis": [
         {
-          "id": "cmise849o00nv5vy7mu76wa69",
+          "id": "cmii82age008k8z1t71s85tbz",
           "name": "사용자 인증",
           "method": "POST",
           "endpoint": "/Authentication",
-          "score": 100.0,
-          "validationCnt": 1,
-          "totalFields": 5,
-          "passFields": 5,
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
           "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "accessToken": "eyJhbGciOiJIUzUxMiIsImlhdCI6MTc2Nzk5MzYyNiwiZXhwIjoxNzY4MDgwMDI2fQ.eyJ1c2VybmFtZSI6ImFkbWluIn0.fONqVvQS9dFHDm_CBqMSZa3pZ8y_DlH6VQiFxLVH9kbopqVDCC56f9YVUcPLIaMMPaJSwhtAGXo5lDsbxY-bdA",
-                "code": "200",
-                "message": "성공",
-                "userAff": "KISA-IOT",
-                "userLevel": 1,
-                "userName": "관리자"
-              },
-              "validationErrors": [
-                "[시도 1/1]",
-                "오류가 없습니다."
-              ]
-            }
-          ]
+          "validations": []
         },
         {
-          "id": "cmise9yk200pv5vy7ktxtva7c",
+          "id": "cmiwtm84f0an2p002pthrkfbj",
           "name": "전송 지원 기능 정보 연동",
           "method": "POST",
           "endpoint": "/Capabilities",
-          "score": 100.0,
-          "validationCnt": 1,
-          "totalFields": 5,
-          "passFields": 5,
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
           "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "code": "200",
-                "message": "성공",
-                "transportSupport": [
-                  {
-                    "transProtocolDesc": "Max 20 seconds duration",
-                    "transProtocolType": "LongPolling"
-                  },
-                  {
-                    "transProtocolDesc": "UltraFast hook",
-                    "transProtocolType": "WebHook"
-                  }
-                ]
-              },
-              "validationErrors": [
-                "[시도 1/1]",
-                "오류가 없습니다."
-              ]
-            }
-          ]
+          "validations": []
         },
         {
-          "id": "cmisepin301uv5vy78nai1drd",
+          "id": "cmiwtnnvx0ar8p002dcz8llaf",
           "name": "보안용 센서 단말 목록 정보 연동",
           "method": "POST",
           "endpoint": "/SensorDeviceProfiles",
@@ -234,73 +196,10 @@
           ]
         },
         {
-          "id": "cmisfqfip07tz5vy7de6x5d6r",
-          "name": "보안용 센서 단말 제어 정보 연동-상태연동",
+          "id": "cmiwtr5xt0boqp002melvctad",
+          "name": "실시간 보안용 센서 데이터 정보 연동",
           "method": "POST",
-          "endpoint": "/SensorDeviceControl",
-          "score": 50.0,
-          "validationCnt": 1,
-          "totalFields": 4,
-          "passFields": 2,
-          "failFields": 2,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "code": "404",
-                "message": "Field \"sensorDeviceID : AIN001\" does not match any valid prefix and range."
-              },
-              "validationErrors": [
-                "[시도 1/1]",
-                "<b>[최상위]</b> (2건)",
-                "- [필드 누락] sensorDeviceID",
-                "- [필드 누락] sensorDeviceStatus"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cmisg86id08bm5vy7ezcbr7oy",
-          "name": "보안용 센서 단말 제어 정보 연동-제어",
-          "method": "POST",
-          "endpoint": "/SensorDeviceControl",
-          "score": 50.0,
-          "validationCnt": 1,
-          "totalFields": 4,
-          "passFields": 2,
-          "failFields": 2,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "code": "404",
-                "message": "Field \"sensorDeviceID : AIN001\" does not match any valid prefix and range."
-              },
-              "validationErrors": [
-                "[시도 1/1]",
-                "<b>[최상위]</b> (2건)",
-                "- [필드 누락] sensorDeviceID",
-                "- [필드 누락] sensorDeviceStatus"
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "testGroup": "cmisfjfzt07tm5vy7qslmisks",
-      "testSpecId": "cmiqr1jha00i6ie8fb1scb3go",
-      "testSpecName": "ac002",
-      "score": 0.0,
-      "totalFields": 0,
-      "passedFields": 0,
-      "failedFields": 0,
-      "apis": [
-        {
-          "id": "cmisgv0ua08o55vy7yvk4aw0a",
-          "name": "사용자 인증",
-          "method": "POST",
-          "endpoint": "/Authentication",
+          "endpoint": "/RealtimeSensorData",
           "score": 0.0,
           "validationCnt": 0,
           "totalFields": 0,
@@ -309,10 +208,10 @@
           "validations": []
         },
         {
-          "id": "cmisjr2u40au05vy7kt6bb6zl",
-          "name": "전송 지원 기능 정보 연동",
+          "id": "cmiwv1ifx0ddmp0023tuwdhoi",
+          "name": "실시간 보안용 센서 이벤트 분석 정보 연동",
           "method": "POST",
-          "endpoint": "/Capabilities",
+          "endpoint": "/RealtimeSensorEventInfos",
           "score": 0.0,
           "validationCnt": 0,
           "totalFields": 0,
@@ -321,265 +220,10 @@
           "validations": []
         },
         {
-          "id": "cmiskf6w20dcm5vy7cjao08fw",
-          "name": "바이오 및 출입통제 장치 목록 정보",
+          "id": "cmixtu5uk0dg5p002kq3htt9b",
+          "name": "저장된 보안용 센서 이벤트 분석 정보 연동",
           "method": "POST",
-          "endpoint": "/DoorProfiles",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmixuoetf0gr9p002gy101xid",
-          "name": "실시간 출입통제 장치 상태 정보 연동-상태조회",
-          "method": "POST",
-          "endpoint": "/RealtimeDoorStatus",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmixuttgv0hbyp002h6os6wjc",
-          "name": "출입 통제 장치 제어 정보 연동",
-          "method": "POST",
-          "endpoint": "/DoorControl",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmixuvzks0hd3p002rcrvqdt4",
-          "name": "실시간 출입통제 장치 상태 정보 연동-결과조회",
-          "method": "POST",
-          "endpoint": "/RealtimeDoorStatus",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        }
-      ]
-    },
-    {
-      "testGroup": "cmisfjfzt07tm5vy7qslmisks",
-      "testSpecId": "cmiqr0kdw00i4ie8fr3firjtg",
-      "testSpecName": "vid002",
-      "score": 0.0,
-      "totalFields": 35,
-      "passedFields": 35,
-      "failedFields": 0,
-      "apis": [
-        {
-          "id": "cmish1fu408we5vy7dp3ltj00",
-          "name": "사용자 인증",
-          "method": "POST",
-          "endpoint": "/Authentication",
-          "score": 100.0,
-          "validationCnt": 1,
-          "totalFields": 5,
-          "passFields": 5,
-          "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "accessToken": "eyJhbGciOiJIUzUxMiIsImlhdCI6MTc2Nzk5MzczMSwiZXhwIjoxNzY4MDgwMTMxfQ.eyJ1c2VybmFtZSI6ImFkbWluIn0.HGLAi7pTKc3snipa8X5PPBmBhJG-Wdszn2fqJ77jLbTSEtGApjxdUQABc2-5T18Akt3-4xPF4IyS3fl6Hy66Tw",
-                "code": "200",
-                "message": "성공",
-                "userAff": "KISA-CCTV",
-                "userLevel": 1,
-                "userName": "관리자"
-              },
-              "validationErrors": [
-                "[시도 1/1]",
-                "오류가 없습니다."
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cmixu0dt70dyzp002xhm24l3h",
-          "name": "전송 지원 기능 정보 연동",
-          "method": "POST",
-          "endpoint": "/Capabilities",
-          "score": 100.0,
-          "validationCnt": 1,
-          "totalFields": 8,
-          "passFields": 8,
-          "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "code": "200",
-                "message": "성공",
-                "streamingSupport": [
-                  {
-                    "streamProtocolDesc": "Unicast, H264, 720p",
-                    "streamProtocolType": "RTSP"
-                  },
-                  {
-                    "streamProtocolDesc": "H264, 720p",
-                    "streamProtocolType": "HLS"
-                  }
-                ],
-                "transportSupport": [
-                  {
-                    "transProtocolDesc": "Max 20 seconds duration",
-                    "transProtocolType": "LongPolling"
-                  },
-                  {
-                    "transProtocolDesc": "UltraFast hook",
-                    "transProtocolType": "WebHook"
-                  }
-                ]
-              },
-              "validationErrors": [
-                "[시도 1/1]",
-                "오류가 없습니다."
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cmixu2m200e4up002g73csf12",
-          "name": "카메라 목록 연동",
-          "method": "POST",
-          "endpoint": "/CameraProfiles",
-          "score": 100.0,
-          "validationCnt": 1,
-          "totalFields": 12,
-          "passFields": 12,
-          "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "camList": [
-                  {
-                    "camConfig": {
-                      "camType": "dome"
-                    },
-                    "camID": "CAM001",
-                    "camLoc": {
-                      "alt": "0.0",
-                      "desc": "",
-                      "lat": "0.0",
-                      "lon": "0.0"
-                    },
-                    "camName": "CAM001"
-                  },
-                  {
-                    "camConfig": {
-                      "camType": "PTZ"
-                    },
-                    "camID": "CAM002",
-                    "camLoc": {
-                      "alt": "0.0",
-                      "desc": "",
-                      "lat": "0.0",
-                      "lon": "0.0"
-                    },
-                    "camName": "CAM002"
-                  },
-                  {
-                    "camConfig": {
-                      "camType": "dome"
-                    },
-                    "camID": "CAM003",
-                    "camLoc": {
-                      "alt": "0.0",
-                      "desc": "",
-                      "lat": "0.0",
-                      "lon": "0.0"
-                    },
-                    "camName": "CAM003"
-                  },
-                  {
-                    "camConfig": {
-                      "camType": "PTZ"
-                    },
-                    "camID": "CAM004",
-                    "camLoc": {
-                      "alt": "0.0",
-                      "desc": "",
-                      "lat": "0.0",
-                      "lon": "0.0"
-                    },
-                    "camName": "CAM004"
-                  }
-                ],
-                "code": "200",
-                "message": "성공"
-              },
-              "validationErrors": [
-                "[시도 1/1]",
-                "오류가 없습니다."
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cmixu9wn10f7rp002rgzkx3au",
-          "name": "PTZ 상태 정보 연동",
-          "method": "POST",
-          "endpoint": "/PtzStatus",
-          "score": 100.0,
-          "validationCnt": 1,
-          "totalFields": 10,
-          "passFields": 10,
-          "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "code": "200",
-                "message": "성공",
-                "moveStatus": {
-                  "pan": "정지",
-                  "tilt": "정지",
-                  "zoom": "정지"
-                },
-                "position": {
-                  "pan": 0,
-                  "tilt": 0,
-                  "zoom": 0
-                }
-              },
-              "validationErrors": [
-                "[시도 1/1]",
-                "오류가 없습니다."
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cmixucv8a0fb4p002pnvfe6ay",
-          "name": "PTZ 연속 이동 제어 정보 연동",
-          "method": "POST",
-          "endpoint": "/PtzContinuousMove",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
-        },
-        {
-          "id": "cmixufkri0fdnp002fouuoqsg",
-          "name": "PTZ 정지 제어 정보 연동",
-          "method": "POST",
-          "endpoint": "/PtzStop",
+          "endpoint": "/StoredSensorEventInfos",
           "score": 0.0,
           "validationCnt": 0,
           "totalFields": 0,
@@ -590,5 +234,5 @@
       ]
     }
   ],
-  "completedDate": "2026-01-14T02:12:48Z"
+  "completedDate": "2026-01-14T07:40:00Z"
 }

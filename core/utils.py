@@ -209,11 +209,12 @@ def load_from_trace_file(api_name, direction="RESPONSE"):
         traceback.print_exc() 
         return None
 
-# constants에서 설정값 읽어오는 함수
+# pyinstaller로 빌드된 실행 파일 환경에서 외부에 있는 constants에서 설정값 읽어오는 함수
 def load_external_constants(constants_module):
 
     spec_config = getattr(constants_module, "SPEC_CONFIG", [])
 
+    # 현재 exe 실행환경 파일인지 확인
     if getattr(sys, 'frozen', False):
         exe_dir = os.path.dirname(sys.executable)
         external_constants_path = os.path.join(exe_dir, "config", "CONSTANTS.py")
@@ -236,11 +237,12 @@ def load_external_constants(constants_module):
                     'version', 'test_category', 'test_target', 'test_range'
                 ]
 
+                # 덮어씌우기
                 for key in keys_to_update:
                     if key in namespace and hasattr(constants_module, key):
                         setattr(constants_module, key, namespace[key])
                 
-                for i, g in enumerate(spec_config):
+                for i, g in enumerate(spec_config): 
                     group_name = g.get('group_name', '이름없음')
                     group_keys = [k for k in g.keys() if k not in ['group_name', 'group_id']]
                     Logger.debug(f" 그룹 {i}: {group_name} - 키: {group_keys}")
