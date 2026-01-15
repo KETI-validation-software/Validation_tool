@@ -19,6 +19,7 @@ from core.validation_generator import ValidationGenerator
 from core.constraint_generator import constraintGeneractor
 from core.key_generator import KeyIdGenerator
 import config.CONSTANTS as CONSTANTS
+from core.logger import Logger
 
 
 class FileGeneratorService:
@@ -88,14 +89,14 @@ class FileGeneratorService:
             with open(output_path, 'w', encoding='utf-8') as f:
                 f.write(content)
 
-            print(f"ResponseCode.py 생성 완료: {len(error_message)}개 응답 코드")
-            print(f"[SPEC FILES] ResponseCode.py 저장 경로: {output_path}")
+            Logger.info(f"ResponseCode.py 생성 완료: {len(error_message)}개 응답 코드")
+            Logger.info(f"[SPEC FILES] ResponseCode.py 저장 경로: {output_path}")
             return True
 
         except Exception as e:
-            print(f"ResponseCode 파일 생성 실패: {e}")
+            Logger.error(f"ResponseCode 파일 생성 실패: {e}")
             import traceback
-            traceback.print_exc()
+            Logger.error(traceback.format_exc())
             return False
 
     def generate_files_for_all_specs(self, steps_cache, test_step_cache, spec_names_cache):
@@ -103,8 +104,8 @@ class FileGeneratorService:
         from PyQt5.QtWidgets import QApplication
 
         try:
-            print(f"\n=== 산출물 생성 시작 ===")
-            print(f"specIds: {steps_cache.items()}")
+            Logger.info(f"\n=== 산출물 생성 시작 ===")
+            Logger.debug(f"specIds: {steps_cache.items()}")
 
             schema_content = ""
             data_content = ""
@@ -198,10 +199,10 @@ class FileGeneratorService:
                 spec_duplicate_endpoints = [ep for ep, count in endpoint_count.items() if count >= 2]
                 if spec_duplicate_endpoints:
                     all_duplicate_endpoints.extend(spec_duplicate_endpoints)
-                    print(f"  [spec_id={spec_id}] 중복 API 감지: {spec_duplicate_endpoints}")
+                    Logger.info(f"  [spec_id={spec_id}] 중복 API 감지: {spec_duplicate_endpoints}")
 
                 if schema_type is None:
-                    print(f"[WARNING] spec_id={spec_id}: schema_type이 설정되지 않음, 건너뜁니다.")
+                    Logger.warning(f"[WARNING] spec_id={spec_id}: schema_type이 설정되지 않음, 건너뜁니다.")
                     continue
 
                 # 스키마 리스트 생성
@@ -500,11 +501,11 @@ class FileGeneratorService:
 
         if total_duplicate_endpoints > 0:
             fail_count = len(fail_no_field_id) + len(fail_not_in_keyid)
-            print(f"\n  [{file_label}] 중복 API referenceEndpoint 매핑 통계:")
-            print(f"    - 중복 API명 목록: {duplicate_endpoints}")
-            print(f"    - 중복 API referenceEndpoint 개수: {total_duplicate_endpoints}")
-            print(f"    - 매핑 성공: {len(success_list)}")
-            print(f"    - 매핑 실패: {fail_count}")
+            Logger.info(f"\n  [{file_label}] 중복 API referenceEndpoint 매핑 통계:")
+            Logger.info(f"    - 중복 API명 목록: {duplicate_endpoints}")
+            Logger.info(f"    - 중복 API referenceEndpoint 개수: {total_duplicate_endpoints}")
+            Logger.info(f"    - 매핑 성공: {len(success_list)}")
+            Logger.info(f"    - 매핑 실패: {fail_count}")
 
         return '\n'.join(result_lines)
 

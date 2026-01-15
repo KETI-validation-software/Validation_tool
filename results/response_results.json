@@ -1,44 +1,44 @@
 {
-  "requestId": "cmisfmr3907tv5vy71y0276gp",
+  "requestId": "cmii85wjq009z8z1tv0d3d7r1",
   "evaluationTarget": {
-    "companyName": "엣지디엑스",
-    "contactPerson": "빙영진",
-    "productName": "AIBridge",
+    "companyName": "물리보안기업",
+    "contactPerson": "김철수",
+    "productName": "물리보안시스템-기본",
     "modelName": "v1.0",
     "version": "v1.0"
   },
   "testGroups": [
     {
-      "id": "cmisfjfzt07tm5vy7qslmisks",
-      "name": "제어 기능-물리보안",
+      "id": "cmjcefmh8070gcfb35wjptcsl",
+      "name": "기본 기능 시험-영상보안시스템",
       "testRange": "전체 필드, 전체 필드, 전체 필드",
       "testSpecIds": [
-        "cmiqr2b9j00i9ie8frw439h8i",
-        "cmiqr1jha00i6ie8fb1scb3go",
-        "cmiqr0kdw00i4ie8fr3firjtg"
+        "cmii7wfuf006i8z1tcds6q69g",
+        "cmii7w683006h8z1t7usnin5g",
+        "cmii7v8pr006g8z1tvo55a50u"
       ]
     }
   ],
-  "status": "완료",
+  "status": "진행중",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 86.21,
+    "score": 0.0,
     "totalFields": 29,
-    "passedFields": 25,
-    "failedFields": 4
+    "passedFields": 23,
+    "failedFields": 6
   },
   "testResult": [
     {
-      "testGroup": "cmisfjfzt07tm5vy7qslmisks",
-      "testSpecId": "cmiqr2b9j00i9ie8frw439h8i",
-      "testSpecName": "sensor002",
-      "score": 86.21,
+      "testGroup": "cmjcefmh8070gcfb35wjptcsl",
+      "testSpecId": "cmii7wfuf006i8z1tcds6q69g",
+      "testSpecName": "sensor001",
+      "score": 0.0,
       "totalFields": 29,
-      "passedFields": 25,
-      "failedFields": 4,
+      "passedFields": 23,
+      "failedFields": 6,
       "apis": [
         {
-          "id": "cmise849o00nv5vy7mu76wa69",
+          "id": "cmii82age008k8z1t71s85tbz",
           "name": "사용자 인증",
           "method": "POST",
           "endpoint": "/Authentication",
@@ -51,7 +51,7 @@
             {
               "attempt": 1,
               "validationData": {
-                "accessToken": "eyJhbGciOiJIUzUxMiIsImlhdCI6MTc2ODA3OTg1OSwiZXhwIjoxNzY4MTY2MjU5fQ.eyJ1c2VybmFtZSI6ImFkbWluIn0.O-CJEqM5YmLMS0D7ZI6GZ0cybRHBdyun4YX_GAFMoMDjAzJ_eASauVgA5Q_1td7o81TYeRJQCsMQZY9RTQobeQ",
+                "accessToken": "eyJhbGciOiJIUzUxMiIsImlhdCI6MTc2ODA4MDYxMywiZXhwIjoxNzY4MTY3MDEzfQ.eyJ1c2VybmFtZSI6ImFkbWluIn0.OGtPfiJKbo1GpJ5qYUpa9Ji-1zbHzoV77XbAY466RFCXWWkDbXPCGlGJ-BYwlYLtlBTMNIwOU2WQU2tFnVA2lw",
                 "code": "200",
                 "message": "성공",
                 "userAff": "KISA-IOT",
@@ -66,7 +66,7 @@
           ]
         },
         {
-          "id": "cmise9yk200pv5vy7ktxtva7c",
+          "id": "cmiwtm84f0an2p002pthrkfbj",
           "name": "전송 지원 기능 정보 연동",
           "method": "POST",
           "endpoint": "/Capabilities",
@@ -100,7 +100,7 @@
           ]
         },
         {
-          "id": "cmisepin301uv5vy78nai1drd",
+          "id": "cmiwtnnvx0ar8p002dcz8llaf",
           "name": "보안용 센서 단말 목록 정보 연동",
           "method": "POST",
           "endpoint": "/SensorDeviceProfiles",
@@ -234,15 +234,15 @@
           ]
         },
         {
-          "id": "cmisfqfip07tz5vy7de6x5d6r",
-          "name": "보안용 센서 단말 제어 정보 연동-상태연동",
+          "id": "cmiwtr5xt0boqp002melvctad-registration",
+          "name": "실시간 보안용 센서 데이터 정보 연동",
           "method": "POST",
-          "endpoint": "/SensorDeviceControl",
-          "score": 50.0,
+          "endpoint": "/RealtimeSensorData",
+          "score": 25.0,
           "validationCnt": 1,
-          "totalFields": 4,
+          "totalFields": 8,
           "passFields": 2,
-          "failFields": 2,
+          "failFields": 6,
           "validations": [
             {
               "attempt": 1,
@@ -252,41 +252,69 @@
               },
               "validationErrors": [
                 "[시도 1/1]",
-                "<b>[최상위]</b> (2건)",
-                "- [필드 누락] sensorDeviceID",
-                "- [필드 누락] sensorDeviceStatus"
+                "오류가 없습니다.",
+                "--- Webhook 검증 ---",
+                "Webhook Message Missing!"
               ]
             }
           ]
         },
         {
-          "id": "cmisg86id08bm5vy7ezcbr7oy",
-          "name": "보안용 센서 단말 제어 정보 연동-제어",
+          "id": "cmiwtr5xt0boqp002melvctad-webhook",
+          "name": "실시간 보안용 센서 데이터 정보 연동 (Webhook)",
           "method": "POST",
-          "endpoint": "/SensorDeviceControl",
-          "score": 50.0,
+          "endpoint": "/RealtimeSensorData/webhook",
+          "score": 0,
           "validationCnt": 1,
-          "totalFields": 4,
-          "passFields": 2,
-          "failFields": 2,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
           "validations": [
             {
               "attempt": 1,
-              "validationData": {
-                "code": "404",
-                "message": "Field \"sensorDeviceID : \" does not match any valid prefix and range."
-              },
-              "validationErrors": [
-                "[시도 1/1]",
-                "<b>[최상위]</b> (2건)",
-                "- [필드 누락] sensorDeviceID",
-                "- [필드 누락] sensorDeviceStatus"
-              ]
+              "validationData": {},
+              "validationErrors": []
             }
           ]
+        },
+        {
+          "id": "cmiwv1ifx0ddmp0023tuwdhoi-registration",
+          "name": "실시간 보안용 센서 이벤트 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/RealtimeSensorEventInfos",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmiwv1ifx0ddmp0023tuwdhoi-webhook",
+          "name": "실시간 보안용 센서 이벤트 분석 정보 연동 (Webhook)",
+          "method": "POST",
+          "endpoint": "/RealtimeSensorEventInfos/webhook",
+          "score": 0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmixtu5uk0dg5p002kq3htt9b",
+          "name": "저장된 보안용 센서 이벤트 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/StoredSensorEventInfos",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
         }
       ]
     }
   ],
-  "completedDate": "2026-01-15T02:07:53Z"
+  "completedDate": "2026-01-15T02:21:26Z"
 }
