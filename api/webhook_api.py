@@ -5,6 +5,7 @@ import traceback
 from core.functions import resource_path
 import ssl
 from urllib.parse import urlparse
+from core.logger import Logger
 
 class WebhookServer(BaseHTTPRequestHandler):
     result_signal = pyqtSignal(dict)
@@ -26,10 +27,10 @@ class WebhookServer(BaseHTTPRequestHandler):
         self.wfile.write(b'Hello, World!')
 
     def do_POST(self): 
-        print(f"[WEBHOOK] do_POST called: path={self.path}")  # ✅ 디버그 로그
+        Logger.debug(f"[WEBHOOK] do_POST called: path={self.path}")  # ✅ 디버그 로그
         try:
             content_length = int(self.headers.get('Content-Length', '0'))
-            print(f"[WEBHOOK] Content-Length: {content_length}")  # ✅ 디버그 로그
+            Logger.debug(f"[WEBHOOK] Content-Length: {content_length}")  # ✅ 디버그 로그
             raw = self.rfile.read(content_length) if content_length > 0 else b'{}'
             try:
                 payload = json.loads(raw.decode('utf-8'))
@@ -37,7 +38,7 @@ class WebhookServer(BaseHTTPRequestHandler):
                 # JSON 파싱 실패 대비 (원문 그대로 보존)
                 payload = {"_raw": raw.decode('utf-8', errors='ignore')}
 
-            print(f"[WEBHOOK] Payload received: {json.dumps(payload, ensure_ascii=False)[:200]}")  # ✅ 디버그 로그
+            Logger.debug(f"[WEBHOOK] Payload received: {json.dumps(payload, ensure_ascii=False)[:200]}")  # ✅ 디버그 로그
 
             # ✅ 1) 수신한 웹훅 요청 바디를 그대로 상위로 전달 (검증용)
             if self.result_signal:
@@ -51,10 +52,10 @@ class WebhookServer(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(resp, ensure_ascii=False).encode('utf-8'))
             self.wfile.flush()
             
-            print(f"[WEBHOOK] Response sent: {resp}")  # ✅ 디버그 로그
+            Logger.debug(f"[WEBHOOK] Response sent: {resp}")  # ✅ 디버그 로그
 
         except Exception as e:
-            print(f"[WEBHOOK ERROR] {e}")  # ✅ 디버그 로그
+            Logger.error(f"[WEBHOOK ERROR] {e}")  # ✅ 디버그 로그
             # 실패 응답 (옵션)
             try:
                 self.send_response(500)
@@ -65,7 +66,7 @@ class WebhookServer(BaseHTTPRequestHandler):
                 self.wfile.flush()
             finally:
                 import traceback
-                print(traceback.format_exc())
+                Logger.error(traceback.format_exc())
 
 
 
@@ -84,7 +85,7 @@ class WebhookThread(QThread):
         # ✅ 웹훅 서버는 항상 0.0.0.0에 바인딩 (모든 인터페이스에서 수신)
         # safe_url은 로깅/디버깅용으로만 사용
         server_address = ("0.0.0.0", self.port)
-        print(f"[Webhook] 서버 바인딩: 0.0.0.0:{self.port}")
+        Logger.info(f"[Webhook] 서버 바인딩: 0.0.0.0:{self.port}")
         
         # SSL 인증서 설정
         certificate_private = resource_path('config/key0627/server.crt')
@@ -98,12 +99,12 @@ class WebhookThread(QThread):
         # SSL 설정
         self.httpd.socket = ssl_context.wrap_socket(self.httpd.socket, server_side=True)
 
-        print(f'[Webhook] 웹훅 서버 시작됨: 0.0.0.0:{self.port}')
+        Logger.info(f'[Webhook] 웹훅 서버 시작됨: 0.0.0.0:{self.port}')
 
         try:
             self.httpd.serve_forever()
         except Exception as e:
-            print(e)
+            Logger.error(f"[Webhook Server Error] {e}")
         finally:
             if self.httpd:
                 self.httpd.server_close()

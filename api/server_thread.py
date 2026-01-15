@@ -5,6 +5,7 @@ from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5 import QtCore
 from http.server import HTTPServer
 from core.functions import resource_path
+from core.logger import Logger
 
 class server_th(QThread):
     def __init__(self, handler_class=None, address='127.0.0.1', port=8008):
@@ -21,9 +22,9 @@ class server_th(QThread):
             self.httpd.socket = ssl.wrap_socket(self.httpd.socket, certfile=certificate_private,
                                                 keyfile=certificate_key, server_side=True)
         except Exception as e:
-            print(f"[SERVER_THREAD] SSL 인증서 로드 오류: {e}")
+            Logger.error(f"[SERVER_THREAD] SSL 인증서 로드 오류: {e}")
 
-        print('Starting on ', self.server_address)
+        Logger.info(f'Starting on {self.server_address}')
 
     def run(self):
         self.httpd.serve_forever()
