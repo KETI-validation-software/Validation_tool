@@ -22,10 +22,10 @@
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 40.22,
+    "score": 54.35,
     "totalFields": 92,
-    "passedFields": 37,
-    "failedFields": 55
+    "passedFields": 50,
+    "failedFields": 42
   },
   "testResult": [
     {
@@ -115,10 +115,10 @@
       "testGroup": "cmjcefmh8070gcfb35wjptcsl",
       "testSpecId": "cmii7v8pr006g8z1tvo55a50u",
       "testSpecName": "vid001",
-      "score": 40.22,
+      "score": 54.35,
       "totalFields": 92,
-      "passedFields": 37,
-      "failedFields": 55,
+      "passedFields": 50,
+      "failedFields": 42,
       "apis": [
         {
           "id": "cmii7ylxn006m8z1tqq8dard1",
@@ -134,7 +134,7 @@
             {
               "attempt": 1,
               "validationData": {
-                "accessToken": "eyJhbGciOiJIUzUxMiIsImlhdCI6MTc2ODAxMzkzOSwiZXhwIjoxNzY4MTAwMzM5fQ.eyJ1c2VybmFtZSI6ImFkbWluIn0.sCbz2ixghkTjUPFFj6RSkRJu8ZBIh9kIl68o9AGLPvzK5eoFUbpvXCEZOqjldlL6vwKp8Kcy03SuVIy7qjehUQ",
+                "accessToken": "eyJhbGciOiJIUzUxMiIsImlhdCI6MTc2ODA5MDE4MiwiZXhwIjoxNzY4MTc2NTgyfQ.eyJ1c2VybmFtZSI6ImFkbWluIn0.6MCaYtgUS3JaBsjMzYqmEf2ORCsAHJ6YGjVYPtjmRvplwcTpXe1Jl8XlEHW_woOHqRbuSnJLsH__9spce1ixLw",
                 "code": "200",
                 "message": "성공",
                 "userAff": "KISA-CCTV",
@@ -275,33 +275,59 @@
           "name": "실시간 영상(CCTV) 전송 ",
           "method": "POST",
           "endpoint": "/StreamURLs",
-          "score": 17.0,
+          "score": 100.0,
           "validationCnt": 1,
           "totalFields": 12,
-          "passFields": 2,
-          "failFields": 10,
+          "passFields": 12,
+          "failFields": 0,
           "validations": [
             {
               "attempt": 1,
               "validationData": {
-                "code": "404",
-                "message": "Field \"camID\" must start with \"CAM\". "
+                "camList": [
+                  {
+                    "accessID": "admin",
+                    "accessPW": "admin1234",
+                    "camID": "CAM001",
+                    "camURL": "rtsp://192.168.77.130:5554/live/ch1",
+                    "videoInfo": {
+                      "audioCodec": "G.711",
+                      "fps": 3,
+                      "resolution": "1280x720",
+                      "videoCodec": "H.264"
+                    }
+                  },
+                  {
+                    "accessID": "admin",
+                    "accessPW": "admin1234",
+                    "camID": "CAM002",
+                    "camURL": "rtsp://192.168.77.130:5554/live/ch2",
+                    "videoInfo": {
+                      "audioCodec": "G.711",
+                      "fps": 3,
+                      "resolution": "1280x720",
+                      "videoCodec": "H.264"
+                    }
+                  },
+                  {
+                    "accessID": "admin",
+                    "accessPW": "admin1234",
+                    "camID": "CAM003",
+                    "camURL": "rtsp://192.168.77.130:5554/live/ch3",
+                    "videoInfo": {
+                      "audioCodec": "G.711",
+                      "fps": 3,
+                      "resolution": "1280x720",
+                      "videoCodec": "H.264"
+                    }
+                  }
+                ],
+                "code": "200",
+                "message": "성공"
               },
               "validationErrors": [
                 "[시도 1/1]",
-                "<b>[camList]</b> (5건)",
-                "- [필드 누락] accessID",
-                "- [필드 누락] accessPW",
-                "- [필드 누락] camID",
-                "- [필드 누락] camURL",
-                "- [필드 누락] videoInfo",
-                "<b>[camList.videoInfo]</b> (4건)",
-                "- [필드 누락] audioCodec",
-                "- [필드 누락] fps",
-                "- [필드 누락] resolution",
-                "- [필드 누락] videoCodec",
-                "<b>[최상위]</b> (1건)",
-                "- [필드 누락] camList"
+                "오류가 없습니다."
               ]
             }
           ]
@@ -320,8 +346,9 @@
             {
               "attempt": 1,
               "validationData": {
-                "code": "404",
-                "message": "Field \"camID\" must start with \"CAM\". "
+                "code": "200",
+                "message": "성공",
+                "webhookId": "f764b741-fc97-4e54-bb00-4b041fa73e91"
               },
               "validationErrors": [
                 "[시도 1/1]",
@@ -355,28 +382,38 @@
           "name": "저장된 영상 목록 연동",
           "method": "POST",
           "endpoint": "/StoredVideoInfos",
-          "score": 29.0,
+          "score": 71.0,
           "validationCnt": 1,
           "totalFields": 7,
-          "passFields": 2,
-          "failFields": 5,
+          "passFields": 5,
+          "failFields": 2,
           "validations": [
             {
               "attempt": 1,
               "validationData": {
-                "code": "404",
-                "message": "Field \"camID\" must start with \"CAM\". "
+                "camList": [
+                  {
+                    "camID": "CAM001",
+                    "timeList": []
+                  },
+                  {
+                    "camID": "CAM002",
+                    "timeList": []
+                  },
+                  {
+                    "camID": "CAM004",
+                    "timeList": []
+                  }
+                ],
+                "code": "200",
+                "message": "성공",
+                "nextKey": ""
               },
               "validationErrors": [
                 "[시도 1/1]",
-                "<b>[camList]</b> (2건)",
-                "- [필드 누락] camID",
-                "- [필드 누락] timeList",
                 "<b>[camList.timeList]</b> (2건)",
                 "- [필드 누락] endTime",
-                "- [필드 누락] startTime",
-                "<b>[최상위]</b> (1건)",
-                "- [필드 누락] camList"
+                "- [필드 누락] startTime"
               ]
             }
           ]
@@ -395,8 +432,8 @@
             {
               "attempt": 1,
               "validationData": {
-                "code": "404",
-                "message": "Field \"camID\" must start with \"CAM\". "
+                "code": "201",
+                "message": "정보 없음"
               },
               "validationErrors": [
                 "[시도 1/1]",
@@ -433,8 +470,8 @@
             {
               "attempt": 1,
               "validationData": {
-                "code": "404",
-                "message": "Field \"camID\" must start with \"CAM\". "
+                "code": "201",
+                "message": "정보 없음"
               },
               "validationErrors": [
                 "[시도 1/1]",
@@ -465,8 +502,8 @@
             {
               "attempt": 1,
               "validationData": {
-                "code": "404",
-                "message": "Field \"camID\" must start with \"CAM\". "
+                "code": "201",
+                "message": "정보 없음"
               },
               "validationErrors": [
                 "[시도 1/1]",
@@ -495,5 +532,5 @@
       ]
     }
   ],
-  "completedDate": "2026-01-14T07:50:22Z"
+  "completedDate": "2026-01-15T05:01:09Z"
 }

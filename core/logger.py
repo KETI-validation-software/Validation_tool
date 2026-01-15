@@ -29,6 +29,11 @@ class Logger:
         """중요 정보 (레벨 1 이상)"""
         if cls.current_level >= cls.LEVEL_WARN:
             print(f"[WARN] {msg}")
+
+    @classmethod
+    def warning(cls, msg):
+        """warn의 별칭 (표준 logging 모듈 호환성)"""
+        cls.warn(msg)
     
     @classmethod
     def info(cls, msg):
