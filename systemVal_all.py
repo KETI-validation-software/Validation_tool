@@ -133,7 +133,7 @@ class MyApp(SystemMainUI):
         except Exception as e:
             Logger.error(f"trace 파일 로드 중 오류: {e}")
             import traceback
-            traceback.print_exc()
+            Logger.error(traceback.format_exc())
             return None
 
     def _apply_request_constraints(self, request_data, cnt):
@@ -900,7 +900,7 @@ class MyApp(SystemMainUI):
         except Exception as e:
             Logger.debug(f" 시험 분야 선택 처리 실패: {e}")
             import traceback
-            traceback.print_exc()
+            Logger.error(traceback.format_exc())
 
     def update_result_table_structure(self, api_list):
         """테이블 구조를 완전히 재구성 (API 개수에 맞게)"""
@@ -1075,7 +1075,7 @@ class MyApp(SystemMainUI):
         except Exception as e:
             Logger.debug(str(e))
             import traceback
-            traceback.print_exc()
+            Logger.error(traceback.format_exc())
 
         try:
             path = re.sub(r'\d+$', '', path)
@@ -1506,7 +1506,7 @@ class MyApp(SystemMainUI):
                     except Exception as e:
                         Logger.debug(f"❌ JSON 저장 중 오류 발생: {e}")
                         import traceback
-                        traceback.print_exc()
+                        Logger.error(traceback.format_exc())
                         self.valResult.append(f"\n결과 저장 실패: {str(e)}")
                         Logger.debug(f" except 블록 실행됨")
 
@@ -1946,7 +1946,7 @@ class MyApp(SystemMainUI):
                 except Exception as e:
                     Logger.debug(f"❌ JSON 저장 중 오류 발생: {e}")
                     import traceback
-                    traceback.print_exc()
+                    Logger.error(traceback.format_exc())
                     self.valResult.append(f"\n결과 저장 실패: {str(e)}")
                     Logger.debug(f" except 블록 실행됨 (경로2)")
                 finally:
@@ -1964,7 +1964,7 @@ class MyApp(SystemMainUI):
             Logger.error(f" Exception in update_view: {err}")
             Logger.error(f" Current state - cnt={self.cnt}, current_retry={self.current_retry}")
             Logger.error(f" Traceback:")
-            traceback.print_exc()
+            Logger.error(traceback.format_exc())
 
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Critical)
@@ -2403,7 +2403,7 @@ class MyApp(SystemMainUI):
         except Exception as e:
             Logger.debug(f"❌ 일시정지 상태 저장 실패: {e}")
             import traceback
-            traceback.print_exc()
+            Logger.error(traceback.format_exc())
 
     def load_paused_state(self):
         """일시정지된 상태를 JSON 파일에서 복원"""
@@ -2440,7 +2440,7 @@ class MyApp(SystemMainUI):
         except Exception as e:
             Logger.debug(f"❌ 일시정지 상태 복원 실패: {e}")
             import traceback
-            traceback.print_exc()
+            Logger.error(traceback.format_exc())
             return False
 
     def cleanup_paused_file(self):
@@ -2546,7 +2546,7 @@ class MyApp(SystemMainUI):
         except Exception as e:
             Logger.debug(f"❌ JSON 저장 중 오류 발생: {e}")
             import traceback
-            traceback.print_exc()
+            Logger.error(traceback.format_exc())
             self.valResult.append(f"\n결과 저장 실패: {str(e)}")
 
     def cancel_btn_clicked(self):

@@ -327,7 +327,7 @@ class MyApp(PlatformMainUI):
         except Exception as e:
             Logger.debug(f" ⚠️ 웹훅 스키마 및 데이터 로드 중 오류 발생: {e}")
             import traceback
-            traceback.print_exc()
+            Logger.error(traceback.format_exc())
             self.videoWebhookSchema = []
             self.videoWebhookData = []
             self.videoWebhookConstraint = []
@@ -403,7 +403,7 @@ class MyApp(PlatformMainUI):
                 except Exception as e:
                     Logger.debug(f"❌ JSON 저장 중 오류 발생: {e}")
                     import traceback
-                    traceback.print_exc()
+                    Logger.error(traceback.format_exc())
                     self.valResult.append(f"\n결과 저장 실패: {str(e)}")
                     Logger.debug(f" except 블록 실행됨")
 
@@ -704,7 +704,7 @@ class MyApp(PlatformMainUI):
                     except Exception as e:
                         Logger.debug(f" json_check_ 기타 에러: {e}")
                         import traceback
-                        traceback.print_exc()
+                        Logger.error(traceback.format_exc())
                         raise
 
                     # ✅ 의미 검증: code_value 확인
@@ -1103,7 +1103,7 @@ class MyApp(PlatformMainUI):
                 except Exception as e:
                     Logger.debug(f"❌ JSON 저장 중 오류 발생: {e}")
                     import traceback
-                    traceback.print_exc()
+                    Logger.error(traceback.format_exc())
                     self.valResult.append(f"\n결과 저장 실패: {str(e)}")
                     Logger.debug(f" except 블록 실행됨 (경로2)")
                 finally:
@@ -1115,7 +1115,7 @@ class MyApp(PlatformMainUI):
         except Exception as err:
             Logger.error(f" update_view에서 예외 발생: {err}")
             import traceback
-            traceback.print_exc()
+            Logger.error(traceback.format_exc())
 
             msg = QMessageBox()
             msg.setIcon(QMessageBox.Critical)
@@ -1486,7 +1486,7 @@ class MyApp(PlatformMainUI):
         except Exception as e:
             Logger.debug(f"시험 분야 선택 처리 실패: {e}")
             import traceback
-            traceback.print_exc()
+            Logger.error(traceback.format_exc())
 
     def update_result_table_structure(self, api_list):
         """테이블 구조만 업데이트 (API 이름 및 행 수만 조정, 결과는 유지)"""
@@ -1661,7 +1661,7 @@ class MyApp(PlatformMainUI):
         except Exception as e:
             Logger.error(f" 초기 시나리오 선택 실패: {e}")
             import traceback
-            traceback.print_exc()
+            Logger.error(traceback.format_exc())
     def show_combined_result(self, row):
         """통합 상세 내용 확인"""
         try:
@@ -2118,7 +2118,7 @@ class MyApp(PlatformMainUI):
         except Exception as e:
             Logger.error(f" sbtn_push에서 예외 발생: {e}")
             import traceback
-            traceback.print_exc()
+            Logger.error(traceback.format_exc())
 
             # ✅ 에러 발생 시 로딩 팝업 닫기
             if self.loading_popup:
@@ -2189,7 +2189,7 @@ class MyApp(PlatformMainUI):
         except Exception as e:
             Logger.debug(f"❌ 일시정지 상태 저장 실패: {e}")
             import traceback
-            traceback.print_exc()
+            Logger.error(traceback.format_exc())
             self.valResult.append(f'<div style="font-size: 18px; color: #ef4444; font-family: \'Noto Sans KR\'; margin-top: 10px;">재개 정보 저장 실패: {str(e)}</div>')
 
     def load_paused_state(self):
@@ -2231,7 +2231,7 @@ class MyApp(PlatformMainUI):
         except Exception as e:
             Logger.debug(f"❌ 일시정지 상태 복원 실패: {e}")
             import traceback
-            traceback.print_exc()
+            Logger.error(traceback.format_exc())
             return False
 
     def cleanup_paused_file(self):
@@ -2345,7 +2345,7 @@ class MyApp(PlatformMainUI):
         except Exception as e:
             Logger.debug(f"❌ JSON 저장 중 오류 발생: {e}")
             import traceback
-            traceback.print_exc()
+            Logger.error(traceback.format_exc())
             self.valResult.append(f"\n결과 저장 실패: {str(e)}")
 
     def cancel_btn_clicked(self):

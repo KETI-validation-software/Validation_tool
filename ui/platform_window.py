@@ -2,6 +2,7 @@
 from PyQt5.QtWidgets import QMainWindow, QStackedWidget, QMessageBox
 from PyQt5.QtCore import Qt
 from ui.result_page import ResultPageWidget
+from core.logger import Logger
 
 class PlatformValidationWindow(QMainWindow):
     """
@@ -52,7 +53,7 @@ class PlatformValidationWindow(QMainWindow):
 
     def closeEvent(self, event):
         """래퍼 윈도우 닫기 이벤트 - validation_widget의 정리 작업 호출"""
-        print(f"[WRAPPER_CLOSE] PlatformValidationWindow closeEvent 호출됨")
+        Logger.debug(f"[WRAPPER_CLOSE] PlatformValidationWindow closeEvent 호출됨")
 
         # ✅ 종료 확인 대화상자
         reply = QMessageBox.question(
@@ -65,7 +66,7 @@ class PlatformValidationWindow(QMainWindow):
         if reply == QMessageBox.Yes:
             # ✅ validation_widget의 정리 작업 호출
             if self.validation_widget is not None:
-                print(f"[WRAPPER_CLOSE] validation_widget 정리 시작")
+                Logger.debug(f"[WRAPPER_CLOSE] validation_widget 정리 시작")
                 # 타이머 중지
                 if hasattr(self.validation_widget, 'tick_timer') and self.validation_widget.tick_timer.isActive():
                     self.validation_widget.tick_timer.stop()
@@ -76,12 +77,12 @@ class PlatformValidationWindow(QMainWindow):
                         self.validation_widget.server_th.httpd.shutdown()
                         self.validation_widget.server_th.wait(2000)
                     except Exception as e:
-                        print(f"[WARN] 서버 종료 중 오류 (무시): {e}")
+                        Logger.warning(f"[WARN] 서버 종료 중 오류 (무시): {e}")
 
                 # 모든 일시정지 파일 삭제
                 if hasattr(self.validation_widget, 'cleanup_all_paused_files'):
                     self.validation_widget.cleanup_all_paused_files()
-                print(f"[WRAPPER_CLOSE] 정리 완료")
+                Logger.debug(f"[WRAPPER_CLOSE] 정리 완료")
 
             event.accept()
         else:
