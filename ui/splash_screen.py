@@ -7,6 +7,7 @@ import sys
 from PyQt5.QtWidgets import QSplashScreen, QVBoxLayout, QLabel, QProgressBar, QWidget
 from PyQt5.QtCore import Qt, QTimer, QRectF
 from PyQt5.QtGui import QPixmap, QPainter, QColor, QPen, QLinearGradient
+from core.logger import Logger
 
 
 def resource_path(relative_path):
@@ -229,9 +230,9 @@ class LoadingPopup(QSplashScreen):
             self.render_timer.timeout.connect(self._render_widget)
             self.render_timer.start(30)
         except Exception as e:
-            print(f"[LoadingPopup] 초기화 중 예외 발생: {e}")
+            Logger.error(f"[LoadingPopup] 초기화 중 예외 발생: {e}")
             import traceback
-            traceback.print_exc()
+            Logger.error(traceback.format_exc())
             # 최소한의 초기화
             init_pixmap = QPixmap(width, height)
             init_pixmap.fill(QColor("#002B69"))

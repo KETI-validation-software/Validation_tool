@@ -33,6 +33,8 @@ from pathlib import Path
 import spec.Data_request as data_request_module
 import spec.Schema_response as schema_response_module
 import spec.Constraints_request as constraints_request_module
+from core.logger import Logger
+
 
 class CommonMainUI(QWidget):
     def __init__(self):
@@ -1055,9 +1057,9 @@ class CommonMainUI(QWidget):
                     # ✅ row를 직접 사용 (webhookInSchema는 전체 API 리스트와 1:1 매칭)
                     if row < len(self.webhookInSchema):
                         webhook_schema = self.webhookInSchema[row]
-                        print(f"[DEBUG] 웹훅 스키마 로드: row={row}, schema={'있음' if webhook_schema else '없음'}")
+                        Logger.debug(f"[DEBUG] 웹훅 스키마 로드: row={row}, schema={'있음' if webhook_schema else '없음'}")
                     else:
-                        print(f"[WARN] 웹훅 스키마 인덱스 초과: row={row}, 전체={len(self.webhookInSchema)}")
+                        Logger.warning(f"[WARN] 웹훅 스키마 인덱스 초과: row={row}, 전체={len(self.webhookInSchema)}")
 
             # 통합 팝업창 띄우기
             dialog = CombinedDetailDialog(api_name, buf, schema_data, webhook_schema)

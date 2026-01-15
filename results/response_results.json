@@ -1,44 +1,44 @@
 {
-  "requestId": "cmii85wjq009z8z1tv0d3d7r1",
+  "requestId": "cmisfmr3907tv5vy71y0276gp",
   "evaluationTarget": {
-    "companyName": "물리보안기업",
-    "contactPerson": "김철수",
-    "productName": "물리보안시스템-기본",
+    "companyName": "엣지디엑스",
+    "contactPerson": "빙영진",
+    "productName": "AIBridge",
     "modelName": "v1.0",
     "version": "v1.0"
   },
   "testGroups": [
     {
-      "id": "cmjcefmh8070gcfb35wjptcsl",
-      "name": "기본 기능 시험-영상보안시스템",
+      "id": "cmisfjfzt07tm5vy7qslmisks",
+      "name": "제어 기능-물리보안",
       "testRange": "전체 필드, 전체 필드, 전체 필드",
       "testSpecIds": [
-        "cmii7wfuf006i8z1tcds6q69g",
-        "cmii7w683006h8z1t7usnin5g",
-        "cmii7v8pr006g8z1tvo55a50u"
+        "cmiqr2b9j00i9ie8frw439h8i",
+        "cmiqr1jha00i6ie8fb1scb3go",
+        "cmiqr0kdw00i4ie8fr3firjtg"
       ]
     }
   ],
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 58.14,
-    "totalFields": 43,
+    "score": 86.21,
+    "totalFields": 29,
     "passedFields": 25,
-    "failedFields": 18
+    "failedFields": 4
   },
   "testResult": [
     {
-      "testGroup": "cmjcefmh8070gcfb35wjptcsl",
-      "testSpecId": "cmii7wfuf006i8z1tcds6q69g",
-      "testSpecName": "sensor001",
-      "score": 58.14,
-      "totalFields": 43,
+      "testGroup": "cmisfjfzt07tm5vy7qslmisks",
+      "testSpecId": "cmiqr2b9j00i9ie8frw439h8i",
+      "testSpecName": "sensor002",
+      "score": 86.21,
+      "totalFields": 29,
       "passedFields": 25,
-      "failedFields": 18,
+      "failedFields": 4,
       "apis": [
         {
-          "id": "cmii82age008k8z1t71s85tbz",
+          "id": "cmise849o00nv5vy7mu76wa69",
           "name": "사용자 인증",
           "method": "POST",
           "endpoint": "/Authentication",
@@ -51,7 +51,7 @@
             {
               "attempt": 1,
               "validationData": {
-                "accessToken": "eyJhbGciOiJIUzUxMiIsImlhdCI6MTc2ODA5Mzk5NSwiZXhwIjoxNzY4MTgwMzk1fQ.eyJ1c2VybmFtZSI6ImFkbWluIn0.K_ToogDaxCamXPfOiKtme2W8Q9RH_NpUS_Vl9zrO0hGJCRa4SZI5BzNr7RA2MOyRQWjGxoA42YAyR-Hg8vu4Ng",
+                "accessToken": "eyJhbGciOiJIUzUxMiIsImlhdCI6MTc2ODA5NTExNiwiZXhwIjoxNzY4MTgxNTE2fQ.eyJ1c2VybmFtZSI6ImFkbWluIn0.pWIaGvTE6NWzzVftulHfDHjMJt0reA6CbFX8EquGZN0k2dSJAuT3XIX-2ZRihBJ-n0EjagxZc4MSys5JPOEeig",
                 "code": "200",
                 "message": "성공",
                 "userAff": "KISA-IOT",
@@ -66,7 +66,7 @@
           ]
         },
         {
-          "id": "cmiwtm84f0an2p002pthrkfbj",
+          "id": "cmise9yk200pv5vy7ktxtva7c",
           "name": "전송 지원 기능 정보 연동",
           "method": "POST",
           "endpoint": "/Capabilities",
@@ -100,7 +100,7 @@
           ]
         },
         {
-          "id": "cmiwtnnvx0ar8p002dcz8llaf",
+          "id": "cmisepin301uv5vy78nai1drd",
           "name": "보안용 센서 단말 목록 정보 연동",
           "method": "POST",
           "endpoint": "/SensorDeviceProfiles",
@@ -234,119 +234,53 @@
           ]
         },
         {
-          "id": "cmiwtr5xt0boqp002melvctad-registration",
-          "name": "실시간 보안용 센서 데이터 정보 연동",
+          "id": "cmisfqfip07tz5vy7de6x5d6r",
+          "name": "보안용 센서 단말 제어 정보 연동-상태연동",
           "method": "POST",
-          "endpoint": "/RealtimeSensorData",
-          "score": 0.0,
+          "endpoint": "/SensorDeviceControl",
+          "score": 50.0,
           "validationCnt": 1,
-          "totalFields": 8,
-          "passFields": 0,
-          "failFields": 8,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "raw_response": "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\">\n<title>500 Internal Server Error</title>\n<h1>Internal Server Error</h1>\n<p>The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.</p>\n"
-              },
-              "validationErrors": [
-                "[시도 1/1]",
-                "응답 데이터가 유효한 JSON 형식이 아닙니다. (오류: Expecting value: line 1 column 1 (char 0))",
-                "--- Webhook 검증 ---",
-                "Webhook Message Missing!"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cmiwtr5xt0boqp002melvctad-webhook",
-          "name": "실시간 보안용 센서 데이터 정보 연동 (Webhook)",
-          "method": "POST",
-          "endpoint": "/RealtimeSensorData/webhook",
-          "score": 0,
-          "validationCnt": 1,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {},
-              "validationErrors": []
-            }
-          ]
-        },
-        {
-          "id": "cmiwv1ifx0ddmp0023tuwdhoi-registration",
-          "name": "실시간 보안용 센서 이벤트 분석 정보 연동",
-          "method": "POST",
-          "endpoint": "/RealtimeSensorEventInfos",
-          "score": 29.0,
-          "validationCnt": 1,
-          "totalFields": 7,
+          "totalFields": 4,
           "passFields": 2,
-          "failFields": 5,
+          "failFields": 2,
           "validations": [
             {
               "attempt": 1,
               "validationData": {
-                "code": "200",
-                "message": "성공",
-                "webhookId": "3c3801b9-dd85-4260-b8c3-e6493e0a27a1"
+                "code": "404",
+                "message": "Field \"sensorDeviceID : AIN003\" does not match any valid prefix and range."
               },
               "validationErrors": [
                 "[시도 1/1]",
-                "오류가 없습니다.",
-                "--- Webhook 검증 ---",
-                "Webhook Message Missing!"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cmiwv1ifx0ddmp0023tuwdhoi-webhook",
-          "name": "실시간 보안용 센서 이벤트 분석 정보 연동 (Webhook)",
-          "method": "POST",
-          "endpoint": "/RealtimeSensorEventInfos/webhook",
-          "score": 0,
-          "validationCnt": 1,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {},
-              "validationErrors": []
-            }
-          ]
-        },
-        {
-          "id": "cmixtu5uk0dg5p002kq3htt9b",
-          "name": "저장된 보안용 센서 이벤트 분석 정보 연동",
-          "method": "POST",
-          "endpoint": "/StoredSensorEventInfos",
-          "score": 29.0,
-          "validationCnt": 1,
-          "totalFields": 7,
-          "passFields": 2,
-          "failFields": 5,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "code": "201",
-                "message": "정보 없음"
-              },
-              "validationErrors": [
-                "[시도 1/1]",
-                "<b>[sensorDeviceList]</b> (4건)",
-                "- [필드 누락] eventDesc",
-                "- [필드 누락] eventName",
-                "- [필드 누락] eventTime",
+                "<b>[최상위]</b> (2건)",
                 "- [필드 누락] sensorDeviceID",
-                "<b>[최상위]</b> (1건)",
-                "- [필드 누락] sensorDeviceList"
+                "- [필드 누락] sensorDeviceStatus"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cmisg86id08bm5vy7ezcbr7oy",
+          "name": "보안용 센서 단말 제어 정보 연동-제어",
+          "method": "POST",
+          "endpoint": "/SensorDeviceControl",
+          "score": 50.0,
+          "validationCnt": 1,
+          "totalFields": 4,
+          "passFields": 2,
+          "failFields": 2,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "404",
+                "message": "Field \"sensorDeviceID : AIN003\" does not match any valid prefix and range."
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "<b>[최상위]</b> (2건)",
+                "- [필드 누락] sensorDeviceID",
+                "- [필드 누락] sensorDeviceStatus"
               ]
             }
           ]
@@ -354,5 +288,5 @@
       ]
     }
   ],
-  "completedDate": "2026-01-15T06:05:26Z"
+  "completedDate": "2026-01-15T06:22:10Z"
 }
