@@ -3,6 +3,7 @@ import json
 import pandas as pd
 import json_checker
 from json_checker import OptionalKey
+from core.logger import Logger
 
 
 # ================================================================
@@ -39,18 +40,18 @@ def safe_compare(a, b):
             try:
                 return json.dumps(a, sort_keys=True, default=str) == json.dumps(b, sort_keys=True, default=str)
             except (TypeError, ValueError) as e:
-                print(f"[DEBUG] safe_compare JSON error: {e}")
+                Logger.debug(f"[DEBUG] safe_compare JSON error: {e}")
                 # JSON 직렬화가 실패하면 문자열로 비교
                 return str(a) == str(b)
 
         # 기본 타입은 직접 비교
         return a == b
     except Exception as e:
-        print(f"[DEBUG] safe_compare error: {e}")
-        print(f"[DEBUG] a type: {type(a)}, a: {repr(a)}")
-        print(f"[DEBUG] b type: {type(b)}, b: {repr(b)}")
+        Logger.debug(f"[DEBUG] safe_compare error: {e}")
+        Logger.debug(f"[DEBUG] a type: {type(a)}, a: {repr(a)}")
+        Logger.debug(f"[DEBUG] b type: {type(b)}, b: {repr(b)}")
         import traceback
-        traceback.print_exc()
+        Logger.error(traceback.format_exc())
         return False
 
 
@@ -192,9 +193,9 @@ def extract_validation_rules(validation_dict):
     Returns:
         dict: {필드명: 검증규칙 dict, ...} 형태
     """
-    print(f"\n🔍 [EXTRACT VALIDATION RULES] 시작")
-    print(f"📋 입력 데이터 타입: {type(validation_dict)}")
-    print(f"📊 입력 데이터 크기: {len(validation_dict) if isinstance(validation_dict, dict) else 'N/A'}")
+    Logger.debug(f"\n🔍 [EXTRACT VALIDATION RULES] 시작")
+    Logger.debug(f"📋 입력 데이터 타입: {type(validation_dict)}")
+    Logger.debug(f"📊 입력 데이터 크기: {len(validation_dict) if isinstance(validation_dict, dict) else 'N/A'}")
 
     rules = {}
 
@@ -203,15 +204,15 @@ def extract_validation_rules(validation_dict):
             field_name = f"{prefix}.{k}" if prefix else k
             if isinstance(v, dict) and ("validationType" in v or "enabled" in v):
                 rules[field_name] = v
-                print(f"   ✅ 규칙 발견: '{field_name}' -> {v.get('validationType', 'N/A')}")
+                Logger.debug(f"   ✅ 규칙 발견: '{field_name}' -> {v.get('validationType', 'N/A')}")
             elif isinstance(v, dict):
-                print(f"   🔍 중첩 구조 탐색: '{field_name}'")
+                Logger.debug(f"   🔍 중첩 구조 탐색: '{field_name}'")
                 _flatten(field_name, v)
 
     _flatten("", validation_dict)
 
-    print(f"📊 추출된 규칙 개수: {len(rules)}")
-    print(f"📝 규칙 목록: {list(rules.keys())}")
+    Logger.debug(f"📊 추출된 규칙 개수: {len(rules)}")
+    Logger.debug(f"📝 규칙 목록: {list(rules.keys())}")
 
     return rules
 
@@ -255,7 +256,7 @@ def data_finder(schema_):
                 else:
                     fields.append([step, key_name, value[0], value[0]])
             except Exception as e:
-                print(f"[DEBUG] data_finder error: {e}, key={key}, value={value}")
+                Logger.debug(f"[DEBUG] data_finder error: {e}, key={key}, value={value}")
                 try:
                     fields.append([step, str(key), "OPT", str(value)])
                 except:
@@ -521,7 +522,7 @@ def get_flat_data_from_response(data):
                         if not isinstance(first_elem, (dict, list)):
                             flat_data[f"{child_path}[]"] = values[0]
                             is_primitive_array = True
-                            print(f"[DEBUG][FLATTEN_DATA] Primitive 배열 감지: {child_path}[] = {values[0]}")
+                            Logger.debug(f"[DEBUG][FLATTEN_DATA] Primitive 배열 감지: {child_path}[] = {values[0]}")
 
                     # primitive 배열이 아닐 때만 재귀 호출
                     if not is_primitive_array and len(values) > 0 and isinstance(values[0], dict):
@@ -656,12 +657,12 @@ def do_checker(all_field, datas, opt_field, flag_opt):
                                         try:
                                             cnt_list.append(raw_data[1])
                                         except Exception as e:
-                                            print(f"[DEBUG] cnt_list append error: {e}")
+                                            Logger.debug(f"[DEBUG] cnt_list append error: {e}")
                                 else:
                                     try:
                                         cnt_list.append(raw_data[1])
                                     except Exception as e:
-                                        print(f"[DEBUG] cnt_list append error: {e}")
+                                        Logger.debug(f"[DEBUG] cnt_list append error: {e}")
 
                                 if safe_len(cnt_elements) != 0:
                                     flag = False
@@ -670,17 +671,17 @@ def do_checker(all_field, datas, opt_field, flag_opt):
                                             if safe_compare(raw_data[1], cnt_element):
                                                 flag = True
                                         except Exception as e:
-                                            print(f"[DEBUG] cnt_elements 비교 에러: {e}")
+                                            Logger.debug(f"[DEBUG] cnt_elements 비교 에러: {e}")
                                     if flag == False:
                                         try:
                                             cnt_elements.append(raw_data[1])
                                         except Exception as e:
-                                            print(f"[DEBUG] cnt_elements append error: {e}")
+                                            Logger.debug(f"[DEBUG] cnt_elements append error: {e}")
                                 else:
                                     try:
                                         cnt_elements.append(raw_data[1])
                                     except Exception as e:
-                                        print(f"[DEBUG] cnt_elements append error: {e}")
+                                        Logger.debug(f"[DEBUG] cnt_elements append error: {e}")
 
                             if type(raw_data[-2]) == field[-2]:
                                 raw_data[-1] = True
@@ -735,9 +736,9 @@ def do_checker(all_field, datas, opt_field, flag_opt):
             cnt = sum(1 for x in cnt_list if safe_compare(i, x))
             all_cnt.append([i, cnt])
         except Exception as e:
-            print(f"[DEBUG] all_cnt calculation error: {e}")
+            Logger.debug(f"[DEBUG] all_cnt calculation error: {e}")
             import traceback
-            traceback.print_exc()
+            Logger.error(traceback.format_exc())
             all_cnt.append([i, 0])
 
     check_error = []
@@ -1074,14 +1075,14 @@ def timeout_field_finder(schema):
                 if isinstance(field_tmp, json_checker.core.checkers.OptionalKey):
                     # pass
                     fields_opt_cnt += 1
-                    print(f"[DEBUG_CNT] (중첩 선택-누락됨) +1: {field_tmp.expected_data}")
+                    Logger.debug(f"[DEBUG_CNT] (중첩 선택-누락됨) +1: {field_tmp.expected_data}")
                 else:
                     all_field_cnt += 1
     
-    print(f"[DEBUG_CNT] ---------------------------")
-    print(f"[DEBUG_CNT] 필수 필드 합계: {all_field_cnt}")
-    print(f"[DEBUG_CNT] 선택 필드 합계: {fields_opt_cnt}")
-    print(f"[DEBUG_CNT] 총 합계: {all_field_cnt + fields_opt_cnt}")
-    print(f"[DEBUG_CNT] ---------------------------\n")
+    Logger.debug(f"[DEBUG_CNT] ---------------------------")
+    Logger.debug(f"[DEBUG_CNT] 필수 필드 합계: {all_field_cnt}")
+    Logger.debug(f"[DEBUG_CNT] 선택 필드 합계: {fields_opt_cnt}")
+    Logger.debug(f"[DEBUG_CNT] 총 합계: {all_field_cnt + fields_opt_cnt}")
+    Logger.debug(f"[DEBUG_CNT] ---------------------------\n")
 
     return all_field_cnt, fields_opt_cnt
