@@ -21,7 +21,11 @@ def load_management_url():
                             if key.strip() == 'management_url':
                                 return value.strip()
     except Exception as e:
-        print(f"config.txt 읽기 실패: {e}")
+        try:
+            from core.logger import Logger
+            Logger.error(f"config.txt 읽기 실패: {e}")
+        except ImportError:
+            print(f"config.txt 읽기 실패: {e}")
 
     return default_url
 
@@ -41,7 +45,11 @@ def save_management_url(new_url):
 
         return True
     except Exception as e:
-        print(f"config.txt 저장 실패: {e}")
+        try:
+            from core.logger import Logger
+            Logger.error(f"config.txt 저장 실패: {e}")
+        except ImportError:
+            print(f"config.txt 저장 실패: {e}")
         return False
 
 # 관리자시스템 주소
@@ -65,7 +73,7 @@ test_target = "제어 기능-물리보안"
 test_range = "전체 필드"
 auth_type = "Digest Auth"
 auth_info = "admin,admin1234"
-admin_code = "123"
+admin_code = "1234"
 url = "https://10.252.219.95:2000"
 contact_person = "빙영진"
 model_name = "v1.0"

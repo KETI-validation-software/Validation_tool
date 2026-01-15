@@ -19,23 +19,23 @@
       ]
     }
   ],
-  "status": "진행중",
+  "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 0.0,
-    "totalFields": 5,
-    "passedFields": 5,
-    "failedFields": 0
+    "score": 86.21,
+    "totalFields": 29,
+    "passedFields": 25,
+    "failedFields": 4
   },
   "testResult": [
     {
       "testGroup": "cmisfjfzt07tm5vy7qslmisks",
       "testSpecId": "cmiqr2b9j00i9ie8frw439h8i",
       "testSpecName": "sensor002",
-      "score": 0.0,
-      "totalFields": 5,
-      "passedFields": 5,
-      "failedFields": 0,
+      "score": 86.21,
+      "totalFields": 29,
+      "passedFields": 25,
+      "failedFields": 4,
       "apis": [
         {
           "id": "cmise849o00nv5vy7mu76wa69",
@@ -51,7 +51,7 @@
             {
               "attempt": 1,
               "validationData": {
-                "accessToken": "eyJhbGciOiJIUzUxMiIsImlhdCI6MTc2ODA4MDk1MywiZXhwIjoxNzY4MTY3MzUzfQ.eyJ1c2VybmFtZSI6ImFkbWluIn0.4oh_CC6-d47-vrc4SPXEcOiPZ5QyKmLGzbUUvtgpOWRIkyeyxWG3O1NOeOPulPzwFnKhvTp66DXe0T6y69yrvw",
+                "accessToken": "eyJhbGciOiJIUzUxMiIsImlhdCI6MTc2ODA4Mjg2MywiZXhwIjoxNzY4MTY5MjYzfQ.eyJ1c2VybmFtZSI6ImFkbWluIn0.WYC7r9Ycm2yzvajdFetxDZGw7bcblbAnHS4Iydx2mgsrTGBQfsNIirInSyruLw0r7_uAP9rftLNb5XyB3ZaPNA",
                 "code": "200",
                 "message": "성공",
                 "userAff": "KISA-IOT",
@@ -70,51 +70,223 @@
           "name": "전송 지원 기능 정보 연동",
           "method": "POST",
           "endpoint": "/Capabilities",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 5,
+          "passFields": 5,
           "failFields": 0,
-          "validations": []
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "transportSupport": [
+                  {
+                    "transProtocolDesc": "Max 20 seconds duration",
+                    "transProtocolType": "LongPolling"
+                  },
+                  {
+                    "transProtocolDesc": "UltraFast hook",
+                    "transProtocolType": "WebHook"
+                  }
+                ]
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다."
+              ]
+            }
+          ]
         },
         {
           "id": "cmisepin301uv5vy78nai1drd",
           "name": "보안용 센서 단말 목록 정보 연동",
           "method": "POST",
           "endpoint": "/SensorDeviceProfiles",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 11,
+          "passFields": 11,
           "failFields": 0,
-          "validations": []
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "sensorDeviceList": [
+                  {
+                    "sensorDeviceCommandList": [],
+                    "sensorDeviceID": "AIN001",
+                    "sensorDeviceLoc": {
+                      "alt": "0.0",
+                      "desc": "",
+                      "lat": "0.0",
+                      "lon": "0.0"
+                    },
+                    "sensorDeviceName": "움직임감지",
+                    "sensorDeviceType": "AlarmIn"
+                  },
+                  {
+                    "sensorDeviceCommandList": [],
+                    "sensorDeviceID": "AIN002",
+                    "sensorDeviceLoc": {
+                      "alt": "0.0",
+                      "desc": "",
+                      "lat": "0.0",
+                      "lon": "0.0"
+                    },
+                    "sensorDeviceName": "누수감지",
+                    "sensorDeviceType": "AlarmIn"
+                  },
+                  {
+                    "sensorDeviceCommandList": [],
+                    "sensorDeviceID": "AIN003",
+                    "sensorDeviceLoc": {
+                      "alt": "0.0",
+                      "desc": "",
+                      "lat": "0.0",
+                      "lon": "0.0"
+                    },
+                    "sensorDeviceName": "Alarm IN 3",
+                    "sensorDeviceType": "AlarmIn"
+                  },
+                  {
+                    "sensorDeviceCommandList": [],
+                    "sensorDeviceID": "AIN004",
+                    "sensorDeviceLoc": {
+                      "alt": "0.0",
+                      "desc": "",
+                      "lat": "0.0",
+                      "lon": "0.0"
+                    },
+                    "sensorDeviceName": "Alarm IN 4",
+                    "sensorDeviceType": "AlarmIn"
+                  },
+                  {
+                    "sensorDeviceCommandList": [
+                      "Relay|On",
+                      "Relay|Off"
+                    ],
+                    "sensorDeviceID": "RELAY001",
+                    "sensorDeviceLoc": {
+                      "alt": "0.0",
+                      "desc": "",
+                      "lat": "0.0",
+                      "lon": "0.0"
+                    },
+                    "sensorDeviceName": "RELAY001",
+                    "sensorDeviceType": "Relay"
+                  },
+                  {
+                    "sensorDeviceCommandList": [
+                      "Relay|On",
+                      "Relay|Off"
+                    ],
+                    "sensorDeviceID": "RELAY002",
+                    "sensorDeviceLoc": {
+                      "alt": "0.0",
+                      "desc": "",
+                      "lat": "0.0",
+                      "lon": "0.0"
+                    },
+                    "sensorDeviceName": "RELAY002",
+                    "sensorDeviceType": "Relay"
+                  },
+                  {
+                    "sensorDeviceCommandList": [
+                      "Relay|On",
+                      "Relay|Off"
+                    ],
+                    "sensorDeviceID": "RELAY003",
+                    "sensorDeviceLoc": {
+                      "alt": "0.0",
+                      "desc": "",
+                      "lat": "0.0",
+                      "lon": "0.0"
+                    },
+                    "sensorDeviceName": "RELAY003",
+                    "sensorDeviceType": "Relay"
+                  },
+                  {
+                    "sensorDeviceCommandList": [
+                      "Relay|On",
+                      "Relay|Off"
+                    ],
+                    "sensorDeviceID": "RELAY004",
+                    "sensorDeviceLoc": {
+                      "alt": "0.0",
+                      "desc": "",
+                      "lat": "0.0",
+                      "lon": "0.0"
+                    },
+                    "sensorDeviceName": "RELAY004",
+                    "sensorDeviceType": "Relay"
+                  }
+                ]
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다."
+              ]
+            }
+          ]
         },
         {
           "id": "cmisfqfip07tz5vy7de6x5d6r",
           "name": "보안용 센서 단말 제어 정보 연동-상태연동",
           "method": "POST",
           "endpoint": "/SensorDeviceControl",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
+          "score": 50.0,
+          "validationCnt": 1,
+          "totalFields": 4,
+          "passFields": 2,
+          "failFields": 2,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "404",
+                "message": "Field \"sensorDeviceID : \" does not match any valid prefix and range."
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "<b>[최상위]</b> (2건)",
+                "- [필드 누락] sensorDeviceID",
+                "- [필드 누락] sensorDeviceStatus"
+              ]
+            }
+          ]
         },
         {
           "id": "cmisg86id08bm5vy7ezcbr7oy",
           "name": "보안용 센서 단말 제어 정보 연동-제어",
           "method": "POST",
           "endpoint": "/SensorDeviceControl",
-          "score": 0.0,
-          "validationCnt": 0,
-          "totalFields": 0,
-          "passFields": 0,
-          "failFields": 0,
-          "validations": []
+          "score": 50.0,
+          "validationCnt": 1,
+          "totalFields": 4,
+          "passFields": 2,
+          "failFields": 2,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "404",
+                "message": "Field \"sensorDeviceID : \" does not match any valid prefix and range."
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "<b>[최상위]</b> (2건)",
+                "- [필드 누락] sensorDeviceID",
+                "- [필드 누락] sensorDeviceStatus"
+              ]
+            }
+          ]
         }
       ]
     }
   ],
-  "completedDate": "2026-01-15T02:25:58Z"
+  "completedDate": "2026-01-15T02:57:57Z"
 }

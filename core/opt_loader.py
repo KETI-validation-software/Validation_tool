@@ -6,6 +6,7 @@ import json
 import os
 from typing import Dict, List, Optional, Tuple
 from .functions import resource_path
+from core.logger import Logger
 
 
 class OptLoader:
@@ -39,68 +40,23 @@ class OptLoader:
             # JSON 파일 타입 자동 감지
             if "testRequest" in data:
                 self.test_requests_data = data
-                print(f"시험 요청 데이터 로드 완료")
+                Logger.info(f"시험 요청 데이터 로드 완료")
             elif "specification" in data:
                 self.specification_data = data
-                print(f"명세서 데이터 로드 완료")
+                Logger.info(f"명세서 데이터 로드 완료")
                 
             return data
             
         except FileNotFoundError as e:
-            print(f"파일 오류: {e}")
+            Logger.error(f"파일 오류: {e}")
             raise
         except json.JSONDecodeError as e:
-            print(f"JSON 파싱 오류: {e}")
+            Logger.error(f"JSON 파싱 오류: {e}")
             raise
         except Exception as e:
-            print(f"예상치 못한 오류: {e}")
+            Logger.error(f"예상치 못한 오류: {e}")
             raise
-    
-    def parse_test_info(self, test_request_data: Dict) -> Dict:
-        """
-        시험 요청 데이터에서 GUI 매핑용 시험 정보를 추출합니다.
-        
-        Args:
-            test_request_data: testRequest JSON 데이터
-            
-        Returns:
-            GUI 매핑용 시험 정보 딕셔너리
-        """
-        if not test_request_data or "testRequest" not in test_request_data:
-            return {}
-
-        # 시험 요청 데이터 사용
-        first_request = test_request_data["testRequest"]
-        evaluation_target = first_request.get("evaluationTarget", {})
-        test_group = first_request.get("testGroup", {})
-        
-        test_info = {
-            # 시험 기본 정보
-            "company_name": evaluation_target.get("companyName", ""),
-            "product_name": evaluation_target.get("productName", ""),
-            "version": evaluation_target.get("version", ""),    
-            "model_name": evaluation_target.get("modelName", ""),
-            
-            "test_category": test_group.get("testCategory", ""),
-            "target_system": test_group.get("targetSystem", []),
-            "test_name": test_group.get("name", ""),
-            "test_range": test_group.get("testRange", ""),
-            
-        }
-        
-        return test_info
-    
-    
-    def get_gui_mapping_data(self, file_path: str) -> Tuple[Dict, Dict]:
-        """
-        OPT JSON 파일을 로드하고 GUI 매핑용 데이터를 반환합니다.
-        
-        Args:
-            file_path: OPT JSON 파일 경로
-            
-        Returns:
-            (test_info, auth_info) 튜플
-        """
+# ... (중략)
         try:
             data = self.load_opt_json(file_path)
             
@@ -116,7 +72,7 @@ class OptLoader:
             return test_info, auth_info
             
         except Exception as e:
-            print(f"GUI 매핑 데이터 생성 실패: {e}")
+            Logger.error(f"GUI 매핑 데이터 생성 실패: {e}")
             return {}, {}
     
     def validate_opt_json(self, data: Dict) -> bool:
