@@ -12,6 +12,7 @@ from datetime import datetime
 import config.CONSTANTS as CONSTANTS
 import re
 import cv2
+from core.logger import Logger
 
 
 def resource_path(relative_path):
@@ -192,7 +193,7 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
     try:
         # ✅ 데이터가 문자열이면 JSON으로 파싱
 
-        print("============ 필드별 순차 검증 시작 ============")
+        Logger.info("============ 필드별 순차 검증 시작 ============")
 
         # 1) 필드 목록 및 데이터 추출 (json_checker_new 함수 사용)
         flat_fields, opt_fields = get_flat_fields_from_schema(schema)
@@ -215,20 +216,20 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
 
         flat_data = get_flat_data_from_response(data)
 
-        print(f"[json_check_] 필드 수: {len(flat_fields)}, 선택 필드: {len(opt_fields)}, 데이터 필드: {len(flat_data)}")
-        print(f"\n📊 필드 분류:")
-        print(f"  - 필수 필드 ({len(required_fields)}개): {required_fields}")
-        print(f"  - 선택 필드 ({len(optional_fields)}개): {optional_fields}")
-        print(f"  - 데이터에 존재하는 필드 ({len(flat_data)}개): {list(flat_data.keys())}")
+        Logger.debug(f"[json_check_] 필드 수: {len(flat_fields)}, 선택 필드: {len(opt_fields)}, 데이터 필드: {len(flat_data)}")
+        Logger.debug(f"\n📊 필드 분류:")
+        Logger.debug(f"  - 필수 필드 ({len(required_fields)}개): {required_fields}")
+        Logger.debug(f"  - 선택 필드 ({len(optional_fields)}개): {optional_fields}")
+        Logger.debug(f"  - 데이터에 존재하는 필드 ({len(flat_data)}개): {list(flat_data.keys())}")
 
         # ✅ 디버그: primitive 배열 필드 확인
         for field_path in flat_fields.keys():
             if field_path.endswith("[]"):
-                print(f"[DEBUG] 스키마에 primitive 배열 필드 발견: {field_path} -> {flat_fields[field_path]}")
+                Logger.debug(f"[DEBUG] 스키마에 primitive 배열 필드 발견: {field_path} -> {flat_fields[field_path]}")
 
         for field_path in flat_data.keys():
             if field_path.endswith("[]"):
-                print(f"[DEBUG] 데이터에 primitive 배열 필드 발견: {field_path} -> {flat_data[field_path]}")
+                Logger.debug(f"[DEBUG] 데이터에 primitive 배열 필드 발견: {field_path} -> {flat_data[field_path]}")
 
         # 2) 의미 검증 규칙 평탄화
         rules_dict = {}
@@ -237,7 +238,7 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
                 rules_dict = validation_rules
             else:
                 rules_dict = extract_validation_rules(validation_rules)
-            print(f"[json_check_] 의미 검증 규칙 키: {list(rules_dict.keys())}")
+            Logger.debug(f"[json_check_] 의미 검증 규칙 키: {list(rules_dict.keys())}")
 
         # 3) 필드별 결과 저장
         field_results = {}
@@ -257,18 +258,18 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
             if field_name in flat_data and field_name in rules_dict:
                 rule = rules_dict[field_name]
 
-                print(f"\n[맥락검증] {field_name} 필드 검증 시작")
-                print(f"[맥락검증] rule: {rule}")
+                Logger.debug(f"\n[맥락검증] {field_name} 필드 검증 시작")
+                Logger.debug(f"[맥락검증] rule: {rule}")
 
                 if not rule.get("enabled", False):
-                    print(f"[맥락검증] {field_name} 규칙이 비활성화됨 - 건너뜀")
+                    Logger.debug(f"[맥락검증] {field_name} 규칙이 비활성화됨 - 건너뜀")
                     continue
 
                 validation_type = rule.get("validationType")
-                print(f"[맥락검증] validationType: {validation_type}")
+                Logger.debug(f"[맥락검증] validationType: {validation_type}")
 
                 if validation_type != "specified-value-match":
-                    print(f"[맥락검증] {field_name}은 specified-value-match가 아님 - 건너뜀")
+                    Logger.debug(f"[맥락검증] {field_name}은 specified-value-match가 아님 - 건너뜀")
                     continue
 
                 actual_value = flat_data[field_name]
@@ -277,20 +278,20 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
                 # allowedValues에서 예상값 추출
                 # ===================================================================
                 allowed_values = rule.get("allowedValues", [])
-                print(f"[맥락검증] allowedValues: {allowed_values}")
+                Logger.debug(f"[맥락검증] allowedValues: {allowed_values}")
 
                 if not allowed_values or len(allowed_values) == 0:
-                    print(f"[경고] {field_name}의 allowedValues가 비어있음 - 맥락 검증 건너뜀")
+                    Logger.warning(f"[경고] {field_name}의 allowedValues가 비어있음 - 맥락 검증 건너뜀")
                     continue
 
                 # 단일 값만 허용하는 경우에만 맥락 검증 수행
                 if len(allowed_values) > 1:
-                    print(f"[맥락검증] {field_name}이 여러 값을 허용 ({allowed_values}) - 맥락 검증 건너뜀")
+                    Logger.debug(f"[맥락검증] {field_name}이 여러 값을 허용 ({allowed_values}) - 맥락 검증 건너뜀")
                     continue
 
                 expected_value = allowed_values[0]
-                print(f"[맥락검증] expected_value: {expected_value} (type: {type(expected_value).__name__})")
-                print(f"[맥락검증] actual_value: {actual_value} (type: {type(actual_value).__name__})")
+                Logger.debug(f"[맥락검증] expected_value: {expected_value} (type: {type(expected_value).__name__})")
+                Logger.debug(f"[맥락검증] actual_value: {actual_value} (type: {type(actual_value).__name__})")
 
                 # ===================================================================
                 # 맥락 검증 수행 (타입 안전한 비교)
@@ -314,7 +315,7 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
                     else:
                         actual_num = None
 
-                    print(f"[맥락검증] 변환 후 - expected_num: {expected_num}, actual_num: {actual_num}")
+                    Logger.debug(f"[맥락검증] 변환 후 - expected_num: {expected_num}, actual_num: {actual_num}")
 
                     # 숫자 비교가 가능한 경우
                     if expected_num is not None and actual_num is not None:
@@ -323,11 +324,11 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
                             context_validation_failed = True
                             code_message_error = f"{field_name} 맥락 검증 실패: 예상값 {expected_num}, 실제값 {actual_num}"
                             error_messages.append(f"[의미] {code_message_error}")
-                            print(f"  ❌ 맥락 검증 실패: {code_message_error}")
-                            print(f"  ⚠️ 모든 필드를 실패로 처리합니다.")
+                            Logger.error(f"  ❌ 맥락 검증 실패: {code_message_error}")
+                            Logger.error(f"  ⚠️ 모든 필드를 실패로 처리합니다.")
                             break
                         else:
-                            print(f"[맥락검증] ✅ {field_name} 숫자 검증 통과")
+                            Logger.debug(f"[맥락검증] ✅ {field_name} 숫자 검증 통과")
 
                     # 문자열 비교 (message 필드 등)
                     else:
@@ -339,16 +340,16 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
                             context_validation_failed = True
                             code_message_error = f"{field_name} 맥락 검증 실패: 예상값 '{expected_str}', 실제값 '{actual_str}'"
                             error_messages.append(f"[의미] {code_message_error}")
-                            print(f"  ❌ 맥락 검증 실패: {code_message_error}")
-                            print(f"  ⚠️ 모든 필드를 실패로 처리합니다.")
+                            Logger.error(f"  ❌ 맥락 검증 실패: {code_message_error}")
+                            Logger.error(f"  ⚠️ 모든 필드를 실패로 처리합니다.")
                             break
                         else:
-                            print(f"[맥락검증] ✅ {field_name} 문자열 검증 통과")
+                            Logger.debug(f"[맥락검증] ✅ {field_name} 문자열 검증 통과")
 
                 except Exception as e:
-                    print(f"[경고] {field_name} 맥락 검증 중 예외 발생: {e}")
+                    Logger.warning(f"[경고] {field_name} 맥락 검증 중 예외 발생: {e}")
                     import traceback
-                    traceback.print_exc()
+                    Logger.error(traceback.format_exc())
                     continue
 
         # ===================================================================
@@ -380,28 +381,28 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
             final_result = "FAIL"
             error_msg = format_errors_as_tree(error_messages)
 
-            print(f"\n============ 맥락 검증 실패로 조기 종료 ============")
-            print(f"📊 최종 카운트 요약:")
-            print(f"  전체 필드: {len(flat_fields)}개")
-            print(f"    ├─ 필수 필드: {len(required_fields)}개")
-            print(f"    └─ 선택 필드: {len(optional_fields)}개")
-            print(f"\n  검증 결과:")
-            print(f"    ├─ 전체 통과: {total_correct}개")
-            print(f"    ├─ 전체 실패: {total_error}개")
-            print(f"    ├─ 필수 통과: {required_correct}개")
-            print(f"    ├─ 필수 실패: {required_error}개")
-            print(f"    ├─ 선택 통과: {opt_correct}개")
-            print(f"    └─ 선택 실패: {opt_error}개")
-            print(f"\n  검증 상태: {final_result}")
+            Logger.info(f"\n============ 맥락 검증 실패로 조기 종료 ============")
+            Logger.info(f"📊 최종 카운트 요약:")
+            Logger.info(f"  전체 필드: {len(flat_fields)}개")
+            Logger.info(f"    ├─ 필수 필드: {len(required_fields)}개")
+            Logger.info(f"    └─ 선택 필드: {len(optional_fields)}개")
+            Logger.info(f"\n  검증 결과:")
+            Logger.info(f"    ├─ 전체 통과: {total_correct}개")
+            Logger.info(f"    ├─ 전체 실패: {total_error}개")
+            Logger.info(f"    ├─ 필수 통과: {required_correct}개")
+            Logger.info(f"    ├─ 필수 실패: {required_error}개")
+            Logger.info(f"    ├─ 선택 통과: {opt_correct}개")
+            Logger.info(f"    └─ 선택 실패: {opt_error}개")
+            Logger.info(f"\n  검증 상태: {final_result}")
 
             return final_result, error_msg, total_correct, total_error, opt_correct, opt_error
         # 4) 각 필드에 대해 순차 검증
         for field_path in sorted(flat_fields.keys()):
-            print(f"\n--- 필드 검증: {field_path} ---")
+            Logger.debug(f"\n--- 필드 검증: {field_path} ---")
 
             # 선택 필드 여부 확인
             is_optional = field_path in opt_fields
-            print(f"  📌 필드 타입: {'선택 필드' if is_optional else '필수 필드'}")
+            Logger.debug(f"  📌 필드 타입: {'선택 필드' if is_optional else '필수 필드'}")
 
             field_results[field_path] = {
                 "struct_pass": False,
@@ -422,7 +423,7 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
                         error_messages.append(f"[구조] {error_msg}")
                         total_error += 1
                         required_error += 1
-                        print(f"  ❌ 구조: 필수 필드 누락 (required_error +1)")
+                        Logger.error(f"  ❌ 구조: 필수 필드 누락 (required_error +1)")
                         continue
                     else:
                         # 선택 필드 누락
@@ -431,7 +432,7 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
                         error_messages.append(f"[구조] {error_msg}")
                         total_error += 1
                         opt_error += 1
-                        print(f"  ❌ 구조: 선택 필드 누락 (opt_error +1)")
+                        Logger.error(f"  ❌ 구조: 선택 필드 누락 (opt_error +1)")
                         continue
                 else:
                     if not is_optional:
@@ -441,11 +442,11 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
                         error_messages.append(f"[구조] {error_msg}")
                         total_error += 1
                         required_error += 1
-                        print(f"  ❌ 구조: 필수 필드 누락 (required_error +1)")
+                        Logger.error(f"  ❌ 구조: 필수 필드 누락 (required_error +1)")
                         continue
                     else:
                         # Optional 필드는 누락 가능 → PASS
-                        print(f"  ✅ 구조: Optional 필드 누락 허용 (opt_correct +1)")
+                        Logger.debug(f"  ✅ 구조: Optional 필드 누락 허용 (opt_correct +1)")
                         field_results[field_path]["struct_pass"] = True
                         field_results[field_path]["semantic_pass"] = True
                         total_correct += 1
@@ -463,15 +464,15 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
                 total_error += 1
                 if is_optional:
                     opt_error += 1
-                    print(f"  ❌ 구조: {type_error_msg} (opt_error +1)")
+                    Logger.error(f"  ❌ 구조: {type_error_msg} (opt_error +1)")
                 else:
                     required_error += 1
-                    print(f"  ❌ 구조: {type_error_msg} (required_error +1)")
+                    Logger.error(f"  ❌ 구조: {type_error_msg} (required_error +1)")
                 continue
 
             # 구조 검증 통과
             field_results[field_path]["struct_pass"] = True
-            print(f"  ✅ 구조: 타입 검증 통과")
+            Logger.debug(f"  ✅ 구조: 타입 검증 통과")
 
             # 4-3) 의미 검증
             if field_path not in rules_dict:
@@ -480,10 +481,10 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
                 total_correct += 1
                 if is_optional:
                     opt_correct += 1
-                    print(f"  ⊙ 의미: 검증 규칙 없음 (자동 PASS) (opt_correct +1)")
+                    Logger.debug(f"  ⊙ 의미: 검증 규칙 없음 (자동 PASS) (opt_correct +1)")
                 else:
                     required_correct += 1
-                    print(f"  ⊙ 의미: 검증 규칙 없음 (자동 PASS) (required_correct +1)")
+                    Logger.debug(f"  ⊙ 의미: 검증 규칙 없음 (자동 PASS) (required_correct +1)")
                 continue
 
             rule = rules_dict[field_path]
@@ -494,13 +495,13 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
                 total_correct += 1
                 if is_optional:
                     opt_correct += 1
-                    print(f"  ⊙ 의미: 규칙 비활성화 (자동 PASS) (opt_correct +1)")
+                    Logger.debug(f"  ⊙ 의미: 규칙 비활성화 (자동 PASS) (opt_correct +1)")
                 else:
                     required_correct += 1
-                    print(f"  ⊙ 의미: 규칙 비활성화 (자동 PASS) (required_correct +1)")
+                    Logger.debug(f"  ⊙ 의미: 규칙 비활성화 (자동 PASS) (required_correct +1)")
                 continue
 
-            print(f"  → 의미 검증 시작: {rule.get('validationType', 'UNKNOWN')}")
+            Logger.debug(f"  → 의미 검증 시작: {rule.get('validationType', 'UNKNOWN')}")
 
             # 의미 검증 수행
             semantic_pass = _validate_field_semantic(
@@ -514,18 +515,18 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
                 total_correct += 1
                 if is_optional:
                     opt_correct += 1
-                    print(f"  ✅ 의미: 검증 통과 (opt_correct +1)")
+                    Logger.debug(f"  ✅ 의미: 검증 통과 (opt_correct +1)")
                 else:
                     required_correct += 1
-                    print(f"  ✅ 의미: 검증 통과 (required_correct +1)")
+                    Logger.debug(f"  ✅ 의미: 검증 통과 (required_correct +1)")
             else:
                 total_error += 1
                 if is_optional:
                     opt_error += 1
-                    print(f"  ❌ 의미: 검증 실패 (opt_error +1)")
+                    Logger.error(f"  ❌ 의미: 검증 실패 (opt_error +1)")
                 else:
                     required_error += 1
-                    print(f"  ❌ 의미: 검증 실패 (required_error +1)")
+                    Logger.error(f"  ❌ 의미: 검증 실패 (required_error +1)")
 
             # 5) 최종 결과 결정
         final_result = "FAIL" if total_error > 0 else "PASS"
@@ -535,45 +536,45 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
         else:
             error_msg = "오류가 없습니다."
 
-        print(f"\n============ 검증 완료 ============")
-        print(f"📊 최종 카운트 요약:")
-        print(f"  전체 필드: {len(flat_fields)}개")
-        print(f"    ├─ 필수 필드: {len(required_fields)}개")
-        print(f"    └─ 선택 필드: {len(optional_fields)}개")
-        print(f"\n  검증 결과:")
-        print(f"    ├─ 전체 통과: {total_correct}개")
-        print(f"    ├─ 전체 실패: {total_error}개")
-        print(f"    ├─ 필수 통과: {required_correct}개")
-        print(f"    ├─ 필수 실패: {required_error}개")
-        print(f"    ├─ 선택 통과: {opt_correct}개")
-        print(f"    └─ 선택 실패: {opt_error}개")
-        print(f"\n  검증 상태: {final_result}")
+        Logger.info(f"\n============ 검증 완료 ============")
+        Logger.info(f"📊 최종 카운트 요약:")
+        Logger.info(f"  전체 필드: {len(flat_fields)}개")
+        Logger.info(f"    ├─ 필수 필드: {len(required_fields)}개")
+        Logger.info(f"    └─ 선택 필드: {len(optional_fields)}개")
+        Logger.info(f"\n  검증 결과:")
+        Logger.info(f"    ├─ 전체 통과: {total_correct}개")
+        Logger.info(f"    ├─ 전체 실패: {total_error}개")
+        Logger.info(f"    ├─ 필수 통과: {required_correct}개")
+        Logger.info(f"    ├─ 필수 실패: {required_error}개")
+        Logger.info(f"    ├─ 선택 통과: {opt_correct}개")
+        Logger.info(f"    └─ 선택 실패: {opt_error}개")
+        Logger.info(f"\n  검증 상태: {final_result}")
 
         # ✅ 검증: 카운트가 맞는지 확인
         total_check = total_correct + total_error
         required_check = required_correct + required_error
         opt_check = opt_correct + opt_error
 
-        print(f"\n🔍 카운트 검증:")
-        print(
+        Logger.debug(f"\n🔍 카운트 검증:")
+        Logger.debug(
             f"  total_correct({total_correct}) + total_error({total_error}) = {total_check} (should be {len(flat_fields)})")
-        print(
+        Logger.debug(
             f"  required_correct({required_correct}) + required_error({required_error}) = {required_check} (should be {len(required_fields)})")
-        print(f"  opt_correct({opt_correct}) + opt_error({opt_error}) = {opt_check} (should be {len(optional_fields)})")
+        Logger.debug(f"  opt_correct({opt_correct}) + opt_error({opt_error}) = {opt_check} (should be {len(optional_fields)})")
 
         if total_check != len(flat_fields):
-            print(f"  ⚠️ 경고: 전체 카운트 불일치! ({total_check} != {len(flat_fields)})")
+            Logger.warning(f"  ⚠️ 경고: 전체 카운트 불일치! ({total_check} != {len(flat_fields)})")
         if required_check != len(required_fields):
-            print(f"  ⚠️ 경고: 필수 필드 카운트 불일치! ({required_check} != {len(required_fields)})")
+            Logger.warning(f"  ⚠️ 경고: 필수 필드 카운트 불일치! ({required_check} != {len(required_fields)})")
         if opt_check != len(optional_fields):
-            print(f"  ⚠️ 경고: 선택 필드 카운트 불일치! ({opt_check} != {len(optional_fields)})")
+            Logger.warning(f"  ⚠️ 경고: 선택 필드 카운트 불일치! ({opt_check} != {len(optional_fields)})")
 
         return final_result, error_msg, total_correct, total_error, opt_correct, opt_error
 
     except Exception as e:
-        print(f"[json_check_] 에러: {e}")
+        Logger.error(f"[json_check_] 에러: {e}")
         import traceback
-        traceback.print_exc()
+        Logger.error(traceback.format_exc())
         raise
 
 
@@ -766,7 +767,7 @@ def _validate_field_semantic(field_path, field_value, rule, data, reference_cont
                                 field_errors, global_errors)
 
     else:
-        print(f"  ⚠ 미지원 validationType: {validation_type}")
+        Logger.warning(f"  ⚠ 미지원 validationType: {validation_type}")
         return True
 
 
@@ -789,7 +790,7 @@ def _validate_list_match(field_path, field_value, rule, data, reference_context,
     # collect_all_values_by_key 사용하여 모든 camID 값 수집
     ref_list = collect_all_values_by_key(ref_data, ref_list_field)
 
-    print(f"    참조 리스트 ({ref_list_field}): {ref_list}")
+    Logger.debug(f"    참조 리스트 ({ref_list_field}): {ref_list}")
 
     # 리스트 필드인 경우 (예: camList.camID)
     if "." in field_path:
@@ -856,10 +857,10 @@ def _validate_field_match(field_path, field_value, rule, reference_context,
     ref_endpoint = rule.get("referenceEndpoint")
     ref_field = rule.get("referenceField")
 
-    print(f"[DEBUG][VALIDATE] field_path: {field_path}, field_value: {field_value}")
-    print(f"[DEBUG][VALIDATE] ref_endpoint: {ref_endpoint}, ref_field: {ref_field}")
-    print(f"[DEBUG][VALIDATE] reference_context keys: {list(reference_context.keys()) if reference_context else None}")
-    print(f"[DEBUG][VALIDATE] reference_context: {reference_context}")
+    Logger.debug(f"[DEBUG][VALIDATE] field_path: {field_path}, field_value: {field_value}")
+    Logger.debug(f"[DEBUG][VALIDATE] ref_endpoint: {ref_endpoint}, ref_field: {ref_field}")
+    Logger.debug(f"[DEBUG][VALIDATE] reference_context keys: {list(reference_context.keys()) if reference_context else None}")
+    Logger.debug(f"[DEBUG][VALIDATE] reference_context: {reference_context}")
 
     if not reference_context or ref_endpoint not in reference_context:
         error_msg = f"참조 엔드포인트 없음: {ref_endpoint}"
@@ -868,22 +869,22 @@ def _validate_field_match(field_path, field_value, rule, reference_context,
         return False
 
     ref_data = reference_context[ref_endpoint]
-    print(f"[DEBUG][VALIDATE] ref_data: {ref_data}")
+    Logger.debug(f"[DEBUG][VALIDATE] ref_data: {ref_data}")
     ref_value = get_by_path(ref_data, ref_field)
 
     # ref_value가 None이면 배열 필드 안을 자동 탐색
     if ref_value is None:
-        print(f"[DEBUG][VALIDATE] ref_field '{ref_field}' not found, searching in arrays...")
+        Logger.debug(f"[DEBUG][VALIDATE] ref_field '{ref_field}' not found, searching in arrays...")
         for key, value in ref_data.items():
             if isinstance(value, list) and value:
                 # 배열 안의 객체에서 ref_field 찾기
                 array_path = f"{key}.{ref_field}"
                 ref_value = get_by_path(ref_data, array_path)
-                print(f"[DEBUG][VALIDATE] Tried array_path: {array_path}, result: {ref_value}")
+                Logger.debug(f"[DEBUG][VALIDATE] Tried array_path: {array_path}, result: {ref_value}")
                 if ref_value is not None:
                     break
 
-    print(f"[DEBUG][VALIDATE] Final ref_value: {ref_value}")
+    Logger.debug(f"[DEBUG][VALIDATE] Final ref_value: {ref_value}")
 
     # 보완
     def to_list(v):
@@ -894,8 +895,8 @@ def _validate_field_match(field_path, field_value, rule, reference_context,
     lhs_list = to_list(field_value)
     rhs_list = to_list(ref_value)
     
-    print(f"[DEBUG][VALIDATE] lhs_list (응답값): {lhs_list}")
-    print(f"[DEBUG][VALIDATE] rhs_list (참조값/예상값): {rhs_list}")
+    Logger.debug(f"[DEBUG][VALIDATE] lhs_list (응답값): {lhs_list}")
+    Logger.debug(f"[DEBUG][VALIDATE] rhs_list (참조값/예상값): {rhs_list}")
 
     if len(rhs_list) == 1:
         expected = rhs_list[0]
@@ -927,7 +928,7 @@ def _validate_range_match(field_path, field_value, rule, reference_context,
 
     # ✅ field_value가 리스트인 경우 각 요소를 검증
     if isinstance(field_value, list):
-        print(f"  [DEBUG] field_value가 리스트입니다: {field_value}")
+        Logger.debug(f"  [DEBUG] field_value가 리스트입니다: {field_value}")
 
         if not field_value:
             error_msg = f"빈 리스트: 범위 검증 불가"
@@ -946,7 +947,7 @@ def _validate_range_match(field_path, field_value, rule, reference_context,
                 ):
                     all_valid = False
             else:
-                print(f"  [DEBUG] 리스트 요소[{idx}]가 검증 불가능한 타입: {type(val)}")
+                Logger.debug(f"  [DEBUG] 리스트 요소[{idx}]가 검증 불가능한 타입: {type(val)}")
 
         return all_valid
 
@@ -977,7 +978,7 @@ def _validate_single_value_in_range(field_path, field_value, ref_endpoint_max, r
             max_values = collect_all_values_by_key(max_data, ref_field_max)
             if max_values and isinstance(max_values, list) and len(max_values) > 0:
                 max_value = max(max_values)
-                print(f"  [DEBUG] Max value from {ref_endpoint_max}.{ref_field_max}: {max_value}")
+                Logger.debug(f"  [DEBUG] Max value from {ref_endpoint_max}.{ref_field_max}: {max_value}")
 
     # 2) referenceEndpointMin에서 min 값 추출
     if ref_endpoint_min and ref_endpoint_min in reference_context:
@@ -986,7 +987,7 @@ def _validate_single_value_in_range(field_path, field_value, ref_endpoint_max, r
             min_values = collect_all_values_by_key(min_data, ref_field_min)
             if min_values and isinstance(min_values, list) and len(min_values) > 0:
                 min_value = min(min_values)
-                print(f"  [DEBUG] Min value from {ref_endpoint_min}.{ref_field_min}: {min_value}")
+                Logger.debug(f"  [DEBUG] Min value from {ref_endpoint_min}.{ref_field_min}: {min_value}")
 
     # 3) range 검증 수행
     if ref_operator == 'between' and min_value is not None and max_value is not None:
@@ -996,7 +997,7 @@ def _validate_single_value_in_range(field_path, field_value, ref_endpoint_max, r
             global_errors.append(f"[의미] {display_path}: {error_msg}")
             return False
         else:
-            print(f"  [DEBUG] ✅ Value {field_value} is between {min_value} and {max_value}")
+            Logger.debug(f"  [DEBUG] ✅ Value {field_value} is between {min_value} and {max_value}")
             return True
     else:
         error_msg = f"범위 검증 실패: min={min_value}, max={max_value}, operator={ref_operator}"
@@ -1394,7 +1395,7 @@ def save_result(str_in, path):
         pdf.multi_cell(w=0, h=10, txt=str_in)
         pdf.output(path, 'F')
     except Exception as err:
-        print(err)
+        Logger.error(err)
 
 
 def set_message(path_):
@@ -1412,7 +1413,7 @@ def set_message(path_):
         box.exec_()
         return {}
     except Exception as e:
-        print(e)
+        Logger.error(e)
         return {}
 
 
@@ -1890,7 +1891,7 @@ def save_result_json(myapp_instance, output_path="results/validation_result.json
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(result_json, f, ensure_ascii=False, indent=2)
 
-    print(f"검증 결과가 '{output_path}'에 저장되었습니다.")
+    Logger.info(f"검증 결과가 '{output_path}'에 저장되었습니다.")
     return output_path
 
 
@@ -1912,13 +1913,13 @@ def _validate_url_video(field_path, field_value, rule, reference_context, field_
         global_errors.append(f"[의미] {field_path}: {error_msg}")
         return False
 
-    print(f"    [url-video] 검증할 URL 개수: {len(url_list)}")
+    Logger.debug(f"    [url-video] 검증할 URL 개수: {len(url_list)}")
 
     # ✅ 2. 각 URL 검증
     all_success = True
     for idx, target_url in enumerate(url_list):
         url_index = f"[{idx}]" if isinstance(field_value, list) else ""
-        print(f"    [url-video] {url_index} 검증 시작: {target_url}")
+        Logger.debug(f"    [url-video] {url_index} 검증 시작: {target_url}")
 
         access_id = None
         access_pw = None
@@ -1989,19 +1990,19 @@ def _validate_url_video(field_path, field_value, rule, reference_context, field_
 
             url_without_protocol = actual_test_url.replace("rtsp://", "")
             actual_test_url = f"rtsp://{access_id}:{access_pw}@{url_without_protocol}"
-            print(f"    [url-video] {url_index} 인증 정보 포함된 URL로 변경됨", actual_test_url)
+            Logger.debug(f"    [url-video] {url_index} 인증 정보 포함된 URL로 변경됨 {actual_test_url}")
 
         # ✅ 6. OpenCV로 스트림 검증
         cap = None
         try:
-            print(f"    [url-video] {url_index} 연결 시도 중...")
+            Logger.debug(f"    [url-video] {url_index} 연결 시도 중...")
             cap = cv2.VideoCapture(actual_test_url)
 
             try:
                 cap.set(cv2.CAP_PROP_OPEN_TIMEOUT_MSEC, 5000)
                 cap.set(cv2.CAP_PROP_READ_TIMEOUT_MSEC, 3000)
             except:
-                print(f"    [url-video] {url_index} ⚠️ 타임아웃 설정 실패")
+                Logger.warning(f"    [url-video] {url_index} ⚠️ 타임아웃 설정 실패")
 
             if not cap.isOpened():
                 error_msg = f"{url_index} 스트림 연결 실패: {actual_test_url}"
@@ -2017,7 +2018,7 @@ def _validate_url_video(field_path, field_value, rule, reference_context, field_
                 if ret and frame is not None:
                     success_count += 1
                     if i == 0:
-                        print(f"    [url-video] {url_index} 프레임 크기: {frame.shape}")
+                        Logger.debug(f"    [url-video] {url_index} 프레임 크기: {frame.shape}")
                 time.sleep(0.3)
 
             if success_count < 2:
@@ -2027,7 +2028,7 @@ def _validate_url_video(field_path, field_value, rule, reference_context, field_
                 all_success = False
                 continue
 
-            print(f"    [url-video] {url_index} ✅ 스트림 검증 성공: {actual_test_url} ({success_count}/3 프레임)")
+            Logger.info(f"    [url-video] {url_index} ✅ 스트림 검증 성공: {actual_test_url} ({success_count}/3 프레임)")
 
         except Exception as e:
             if hasattr(cv2, 'error') and isinstance(e, cv2.error):
@@ -2044,6 +2045,6 @@ def _validate_url_video(field_path, field_value, rule, reference_context, field_
         finally:
             if cap is not None:
                 cap.release()
-                print(f"    [url-video] {url_index} 연결 해제 완료")
+                Logger.debug(f"    [url-video] {url_index} 연결 해제 완료")
 
     return all_success

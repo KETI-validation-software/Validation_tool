@@ -7,6 +7,7 @@
 import sys
 import os
 import re
+from core.logger import Logger
 
 
 class AuthService:
@@ -36,7 +37,7 @@ class AuthService:
             rules = get_validation_rules(spec_id, 'Authentication', 'in')
 
             if not rules:
-                print(f"[WARNING] spec_id={spec_id}에 대한 Authentication 검증 규칙을 찾을 수 없습니다.")
+                Logger.warning(f"[WARNING] spec_id={spec_id}에 대한 Authentication 검증 규칙을 찾을 수 없습니다.")
                 return None, None
 
             # userID 추출
@@ -56,16 +57,16 @@ class AuthService:
                     password = allowed_values[0]
 
             if user_id and password:
-                print(f"[INFO] Authentication 인증 정보 추출 완료: user_id={user_id}")
+                Logger.info(f"[INFO] Authentication 인증 정보 추출 완료: user_id={user_id}")
                 return user_id, password
             else:
-                print(f"[WARNING] Authentication 규칙에서 userID 또는 userPW를 찾을 수 없습니다.")
+                Logger.warning(f"[WARNING] Authentication 규칙에서 userID 또는 userPW를 찾을 수 없습니다.")
                 return None, None
 
         except Exception as e:
-            print(f"[ERROR] Authentication 인증 정보 추출 실패: {e}")
+            Logger.error(f"[ERROR] Authentication 인증 정보 추출 실패: {e}")
             import traceback
-            traceback.print_exc()
+            Logger.error(traceback.format_exc())
             return None, None
 
     def get_authentication_from_data_request(self, spec_id):
@@ -90,11 +91,11 @@ class AuthService:
                 base_dir = os.path.dirname(os.path.abspath(__file__))
                 file_path = os.path.join(os.path.dirname(base_dir), 'spec', 'Data_request.py')
 
-            print(f"[DATA_REQUEST] 파일 경로: {file_path}")
-            print(f"[DATA_REQUEST] spec_id: {spec_id}")
+            Logger.debug(f"[DATA_REQUEST] 파일 경로: {file_path}")
+            Logger.debug(f"[DATA_REQUEST] spec_id: {spec_id}")
 
             if not os.path.exists(file_path):
-                print(f"[WARNING] Data_request.py 파일이 존재하지 않음: {file_path}")
+                Logger.warning(f"[WARNING] Data_request.py 파일이 존재하지 않음: {file_path}")
                 return None, None
 
             # 파일 읽기
@@ -112,7 +113,7 @@ class AuthService:
             if match:
                 user_id = match.group(1)
                 password = match.group(2)
-                print(f"[INFO] Data_request.py에서 인증 정보 추출 완료: {var_name} -> user_id={user_id}")
+                Logger.info(f"[INFO] Data_request.py에서 인증 정보 추출 완료: {var_name} -> user_id={user_id}")
                 return user_id, password
             else:
                 # userPW가 userID 앞에 있는 경우도 체크
@@ -122,16 +123,16 @@ class AuthService:
                 if match_reverse:
                     password = match_reverse.group(1)
                     user_id = match_reverse.group(2)
-                    print(f"[INFO] Data_request.py에서 인증 정보 추출 완료: {var_name} -> user_id={user_id}")
+                    Logger.info(f"[INFO] Data_request.py에서 인증 정보 추출 완료: {var_name} -> user_id={user_id}")
                     return user_id, password
 
-                print(f"[WARNING] {var_name}에서 userID/userPW를 찾을 수 없음")
+                Logger.warning(f"[WARNING] {var_name}에서 userID/userPW를 찾을 수 없음")
                 return None, None
 
         except Exception as e:
-            print(f"[ERROR] Data_request.py 인증 정보 추출 실패: {e}")
+            Logger.error(f"[ERROR] Data_request.py 인증 정보 추출 실패: {e}")
             import traceback
-            traceback.print_exc()
+            Logger.error(traceback.format_exc())
             return None, None
 
     def update_data_request_authentication(self, spec_id, user_id, password):
@@ -155,11 +156,11 @@ class AuthService:
                 base_dir = os.path.dirname(os.path.abspath(__file__))
                 file_path = os.path.join(os.path.dirname(base_dir), 'spec', 'Data_request.py')
 
-            print(f"[UPDATE_DATA_REQUEST] 파일 경로: {file_path}")
-            print(f"[UPDATE_DATA_REQUEST] 새 userID: {user_id}")
+            Logger.debug(f"[UPDATE_DATA_REQUEST] 파일 경로: {file_path}")
+            Logger.debug(f"[UPDATE_DATA_REQUEST] 새 userID: {user_id}")
 
             if not os.path.exists(file_path):
-                print(f"[ERROR] Data_request.py 파일이 존재하지 않음: {file_path}")
+                Logger.error(f"[ERROR] Data_request.py 파일이 존재하지 않음: {file_path}")
                 return False
 
             # 파일 읽기
@@ -173,10 +174,10 @@ class AuthService:
 
             # 매칭되는 모든 패턴 찾기
             matches = re.findall(r'([a-zA-Z0-9]+)_Authentication_in_data\s*=', content)
-            print(f"[UPDATE_DATA_REQUEST] 발견된 Authentication 변수: {len(matches)}개")
+            Logger.info(f"[UPDATE_DATA_REQUEST] 발견된 Authentication 변수: {len(matches)}개")
 
             if not matches:
-                print(f"[ERROR] Authentication_in_data 패턴을 찾을 수 없음")
+                Logger.error(f"[ERROR] Authentication_in_data 패턴을 찾을 수 없음")
                 return False
 
             # 각 매칭에 대해 교체 함수
@@ -191,11 +192,11 @@ class AuthService:
             with open(file_path, 'w', encoding='utf-8') as f:
                 f.write(new_content)
 
-            print(f"[INFO] Data_request.py 업데이트 완료 - {len(matches)}개의 Authentication 업데이트됨")
+            Logger.info(f"[INFO] Data_request.py 업데이트 완료 - {len(matches)}개의 Authentication 업데이트됨")
             return True
 
         except Exception as e:
-            print(f"[ERROR] Data_request.py 업데이트 실패: {e}")
+            Logger.error(f"[ERROR] Data_request.py 업데이트 실패: {e}")
             import traceback
-            traceback.print_exc()
+            Logger.error(traceback.format_exc())
             return False

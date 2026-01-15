@@ -40,20 +40,20 @@ import systemVal_all as system_app
 import importlib
 
 # ===== 로그 파일 설정 (windowed 모드 대응) =====
-handlers = []
+# handlers = []
 
 # 콘솔 모드일 때만 StreamHandler 추가
-if sys.stdout is not None:
-    handlers.append(logging.StreamHandler(sys.stdout))
+# if sys.stdout is not None:
+#     handlers.append(logging.StreamHandler(sys.stdout))
 
 # 최소한의 로깅 설정 (파일 없이 콘솔만)
-if handlers:  # handlers가 비어있지 않을 때만 설정
-    logging.basicConfig(
-        level=logging.WARNING,  # WARNING 이상만 출력 (INFO, DEBUG 제외)
-        format='%(asctime)s - %(levelname)s - %(message)s',
-        handlers=handlers
-    )
-logger = logging.getLogger(__name__)
+# if handlers:  # handlers가 비어있지 않을 때만 설정
+#     logging.basicConfig(
+#         level=logging.WARNING,  # WARNING 이상만 출력 (INFO, DEBUG 제외)
+#         format='%(asctime)s - %(levelname)s - %(message)s',
+#         handlers=handlers
+#     )
+# logger = logging.getLogger(__name__)
 
 # ===== windowed 모드에서 stdout/stderr를 devnull로 리다이렉트 =====
 # Windowed 모드(console=False)에서는 sys.stdout/stderr가 None이 됨
@@ -65,8 +65,8 @@ if sys.stderr is None:
 
 # ===== 처리되지 않은 예외를 로그에 기록 =====
 def exception_hook(exctype, value, tb):
-    logger.error("처리되지 않은 예외 발생!")
-    logger.error(''.join(traceback.format_exception(exctype, value, tb)))
+    Logger.error("처리되지 않은 예외 발생!")
+    Logger.error(''.join(traceback.format_exception(exctype, value, tb)))
     sys.__excepthook__(exctype, value, tb)
 
 sys.excepthook = exception_hook
@@ -145,8 +145,8 @@ class MainWindow(QMainWindow):
         """target_system_edit에 따라 다른 검증 앱 실행"""
         try:
             # ===== 로깅 추가 시작 =====
-            logger.info(f"=== _open_validation_app 시작 ===")
-            logger.info(f"target_system={target_system_edit}, verificationType={verification_type}, spec_id={spec_id}")
+            Logger.info(f"=== _open_validation_app 시작 ===")
+            Logger.info(f"target_system={target_system_edit}, verificationType={verification_type}, spec_id={spec_id}")
             # ===== 로깅 추가 끝 =====
 
             # ===== 수정: PyInstaller 환경에서 CONSTANTS reload =====
@@ -167,64 +167,64 @@ class MainWindow(QMainWindow):
             # target_system_edit에 따라 어떤 검증 앱을 실행할지 결정
             if "물리보안시스템" in target_system_edit:
                 # 물리보안: 메인 창=System, 새 창=Platform
-                logger.info("→ 물리보안: 메인 창=System")
+                Logger.info("→ 물리보안: 메인 창=System")
 
                 # ===== 수정: 기존 위젯 제거 후 새로 생성 =====
                 # Main 화면: System 검증으로 전환
                 if getattr(self, "_system_widget", None) is not None:
                     # 기존 위젯이 있으면 제거
-                    logger.info("기존 System 위젯 제거...")
+                    Logger.info("기존 System 위젯 제거...")
                     self.stack.removeWidget(self._system_widget)
                     self._system_widget.deleteLater()
                     self._system_widget = None
 
-                logger.info("System 위젯 생성 시작...")  # 로깅 추가
+                Logger.info("System 위젯 생성 시작...")  # 로깅 추가
                 self._system_widget = system_app.MyApp(embedded=True, spec_id=spec_id)
-                logger.info("System 위젯 생성 완료")  # 로깅 추가
+                Logger.info("System 위젯 생성 완료")  # 로깅 추가
                 self._system_widget.showResultRequested.connect(self._on_show_result_requested)
                 self.stack.addWidget(self._system_widget)
                 # ===== 수정 끝 =====
                 self.stack.setCurrentWidget(self._system_widget)
-                logger.info("System 위젯으로 전환 완료")  # 로깅 추가
+                Logger.info("System 위젯으로 전환 완료")  # 로깅 추가
 
             # 1.2로 했을때 통합플랫폼으로 들어가야함
             elif "통합플랫폼시스템" in target_system_edit:
                 # 통합플랫폼: 메인 창=Platform, 새 창=System
-                logger.info("→ 통합플랫폼: 메인 창=Platform")
+                Logger.info("→ 통합플랫폼: 메인 창=Platform")
 
                 # ===== 수정: 기존 위젯 제거 후 새로 생성 =====
                 # Main 화면: Platform 검증으로 전환
                 if getattr(self, "_platform_widget", None) is not None:
                     # 기존 위젯이 있으면 제거
-                    logger.info("기존 Platform 위젯 제거...")
+                    Logger.info("기존 Platform 위젯 제거...")
                     self.stack.removeWidget(self._platform_widget)
                     self._platform_widget.deleteLater()
                     self._platform_widget = None
 
-                logger.info("Platform 위젯 생성 시작...")  # 로깅 추가
+                Logger.info("Platform 위젯 생성 시작...")  # 로깅 추가
                 self._platform_widget = platform_app.MyApp(embedded=True, spec_id=spec_id)
-                logger.info("Platform 위젯 생성 완료")  # 로깅 추가
+                Logger.info("Platform 위젯 생성 완료")  # 로깅 추가
                 self._platform_widget.showResultRequested.connect(self._on_show_result_requested)
-                logger.info("Signal 연결 완료")  # 로깅 추가
+                Logger.info("Signal 연결 완료")  # 로깅 추가
                 self.stack.addWidget(self._platform_widget)
-                logger.info("Stack에 위젯 추가 완료")  # 로깅 추가
+                Logger.info("Stack에 위젯 추가 완료")  # 로깅 추가
                 # ===== 수정 끝 =====
-                logger.info("Platform 위젯으로 전환 시작...")  # 로깅 추가
+                Logger.info("Platform 위젯으로 전환 시작...")  # 로깅 추가
                 self.stack.setCurrentWidget(self._platform_widget)
-                logger.info("Platform 위젯으로 전환 완료 ✅")  # 로깅 추가
+                Logger.info("Platform 위젯으로 전환 완료 ✅")  # 로깅 추가
 
             else:
-                logger.warning(f"알 수 없는 target_system: {target_system_edit}")
+                Logger.warning(f"알 수 없는 target_system: {target_system_edit}")
                 QMessageBox.warning(self, "경고", f"알 수 없는 시험 분야: {target_system_edit}\n'물리보안' 또는 '통합플랫폼'이 포함되어야 합니다.")
 
             # ===== 로깅 추가 시작 =====
-            logger.info("=== _open_validation_app 완료 ===")
+            Logger.info("=== _open_validation_app 완료 ===")
             # ===== 로깅 추가 끝 =====
 
         except Exception as e:
             # ===== 예외 처리 로깅 추가 시작 =====
-            logger.error(f"❌ _open_validation_app에서 예외 발생: {e}")
-            logger.error(traceback.format_exc())
+            Logger.error(f"❌ _open_validation_app에서 예외 발생: {e}")
+            Logger.error(traceback.format_exc())
             raise
             # ===== 예외 처리 로깅 추가 끝 =====
 

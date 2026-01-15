@@ -6,6 +6,7 @@ import json
 import os
 from typing import Dict, List, Optional, Tuple
 from .functions import resource_path
+from core.logger import Logger
 
 
 class OptLoader:
@@ -39,21 +40,21 @@ class OptLoader:
             # JSON 파일 타입 자동 감지
             if "testRequest" in data:
                 self.test_requests_data = data
-                print(f"시험 요청 데이터 로드 완료")
+                Logger.info(f"시험 요청 데이터 로드 완료")
             elif "specification" in data:
                 self.specification_data = data
-                print(f"명세서 데이터 로드 완료")
+                Logger.info(f"명세서 데이터 로드 완료")
                 
             return data
             
         except FileNotFoundError as e:
-            print(f"파일 오류: {e}")
+            Logger.error(f"파일 오류: {e}")
             raise
         except json.JSONDecodeError as e:
-            print(f"JSON 파싱 오류: {e}")
+            Logger.error(f"JSON 파싱 오류: {e}")
             raise
         except Exception as e:
-            print(f"예상치 못한 오류: {e}")
+            Logger.error(f"예상치 못한 오류: {e}")
             raise
     
     def parse_test_info(self, test_request_data: Dict) -> Dict:
@@ -116,7 +117,7 @@ class OptLoader:
             return test_info, auth_info
             
         except Exception as e:
-            print(f"GUI 매핑 데이터 생성 실패: {e}")
+            Logger.error(f"GUI 매핑 데이터 생성 실패: {e}")
             return {}, {}
     
     def validate_opt_json(self, data: Dict) -> bool:

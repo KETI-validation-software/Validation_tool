@@ -7,6 +7,7 @@ API 클라이언트 모듈
 import requests
 import socket
 import config.CONSTANTS as CONSTANTS
+from core.logger import Logger
 
 
 class APIClient:
@@ -25,47 +26,47 @@ class APIClient:
             json_data = response.json()
 
             if json_data.get("success") and json_data.get("data"):
-                print(f"API 호출 성공: {len(json_data['data'])}개 시험 정보 조회됨")
+                Logger.info(f"API 호출 성공: {len(json_data['data'])}개 시험 정보 조회됨")
                 return json_data["data"][0]
             else:
                 raise ValueError("API 응답에 데이터가 없습니다.")
         except requests.exceptions.Timeout:
-            print(f"API 호출 타임아웃: 서버 응답 시간 초과")
+            Logger.error(f"API 호출 타임아웃: 서버 응답 시간 초과")
             return None
         except requests.exceptions.ConnectionError:
-            print(f"API 호출 실패: 서버 연결 불가")
+            Logger.error(f"API 호출 실패: 서버 연결 불가")
             return None
         except Exception as e:
-            print(f"API 호출 실패: {e}")
+            Logger.error(f"API 호출 실패: {e}")
             import traceback
-            traceback.print_exc()
+            Logger.error(traceback.format_exc())
             return None
 
     def fetch_specification_by_id(self, spec_id):
         """spec_id로 specification 상세 정보 조회 (API 기반)"""
         url = f"{self.base_url}/api/integration/specifications/{spec_id}"
         try:
-            print(f"Specification API 호출 중: {spec_id}")
+            Logger.debug(f"Specification API 호출 중: {spec_id}")
             response = requests.get(url, timeout=self.timeout)
             response.raise_for_status()
             json_data = response.json()
-            print(f"Specification 조회 성공: {json_data.get('specification', {}).get('name', '')}")
+            Logger.info(f"Specification 조회 성공: {json_data.get('specification', {}).get('name', '')}")
             return json_data
         except requests.exceptions.Timeout:
-            print(f"Specification API 타임아웃: {spec_id}")
+            Logger.error(f"Specification API 타임아웃: {spec_id}")
             return None
         except requests.exceptions.ConnectionError:
-            print(f"Specification API 연결 실패: {spec_id}")
+            Logger.error(f"Specification API 연결 실패: {spec_id}")
             return None
         except Exception as e:
-            print(f"Specification 조회 실패 ({spec_id}): {e}")
+            Logger.error(f"Specification 조회 실패 ({spec_id}): {e}")
             return None
 
     def fetch_test_step_by_id(self, step_id):
         """step_id로 test-step 상세 정보 조회 (API 기반)"""
         url = f"{self.base_url}/api/integration/test-steps/{step_id}"
         try:
-            print(f"Test-Step API 호출 중: {step_id}")
+            Logger.debug(f"Test-Step API 호출 중: {step_id}")
             resp = requests.get(url, timeout=self.timeout)
             resp.raise_for_status()
             data = resp.json()
@@ -75,23 +76,23 @@ class APIClient:
                     or data.get("name")
                     or ""
             )
-            print(f"Test-Step 조회 성공: id={step_id}, name={name}")
+            Logger.info(f"Test-Step 조회 성공: id={step_id}, name={name}")
             return data
         except requests.exceptions.Timeout:
-            print(f"Test-Step API 타임아웃: {step_id}")
+            Logger.error(f"Test-Step API 타임아웃: {step_id}")
             return None
         except requests.exceptions.ConnectionError:
-            print(f"Test-Step API 연결 실패: {step_id}")
+            Logger.error(f"Test-Step API 연결 실패: {step_id}")
             return None
         except Exception as e:
-            print(f"Test-Step 조회 실패 ({step_id}): {e}")
+            Logger.error(f"Test-Step 조회 실패 ({step_id}): {e}")
             return None
 
     def fetch_response_codes(self):
         """API에서 response-codes 가져오기"""
         url = f"{self.base_url}/api/integration/response-codes"
         try:
-            print(f"ResponseCode API 호출 중: {url}")
+            Logger.debug(f"ResponseCode API 호출 중: {url}")
             response = requests.get(url, timeout=self.timeout)
             response.raise_for_status()
             json_data = response.json()
@@ -99,13 +100,13 @@ class APIClient:
             if json_data.get("success") and json_data.get("data"):
                 return json_data["data"]
             else:
-                print("ResponseCode API 응답에 데이터가 없습니다.")
+                Logger.warning("ResponseCode API 응답에 데이터가 없습니다.")
                 return None
         except requests.exceptions.Timeout:
-            print("ResponseCode API 타임아웃")
+            Logger.error("ResponseCode API 타임아웃")
             return None
         except Exception as e:
-            print(f"ResponseCode API 호출 실패: {e}")
+            Logger.error(f"ResponseCode API 호출 실패: {e}")
             return None
 
     def get_local_ip_address(self):
@@ -118,7 +119,7 @@ class APIClient:
             s.close()
             return ip
         except Exception as e:
-            print(f"[WARNING] IP 주소 가져오기 실패: {e}")
+            Logger.warning(f"[WARNING] IP 주소 가져오기 실패: {e}")
             return "127.0.0.1"
 
     def send_heartbeat_idle(self):
@@ -131,12 +132,12 @@ class APIClient:
                 "status": "idle"
             }
             response = requests.post(url, json=payload, timeout=self.timeout)
-            print(f"[INFO] Heartbeat (idle) 응답 코드: {response.status_code}")
+            Logger.info(f"[INFO] Heartbeat (idle) 응답 코드: {response.status_code}")
             response.raise_for_status()
-            print(f"[INFO] Heartbeat (idle) 전송 성공: {payload}")
+            Logger.info(f"[INFO] Heartbeat (idle) 전송 성공: {payload}")
             return True
         except Exception as e:
-            print(f"[WARNING] Heartbeat (idle) 전송 실패: {e}")
+            Logger.warning(f"[WARNING] Heartbeat (idle) 전송 실패: {e}")
             return False
 
     def send_heartbeat_busy(self, test_info):
@@ -150,10 +151,10 @@ class APIClient:
                 "testInfo": test_info
             }
             response = requests.post(url, json=payload, timeout=self.timeout)
-            print(f"[INFO] Heartbeat (busy) 응답 코드: {response.status_code}")
+            Logger.info(f"[INFO] Heartbeat (busy) 응답 코드: {response.status_code}")
             response.raise_for_status()
-            print(f"[INFO] Heartbeat (busy) 전송 성공: ipAddress={ip_address}")
+            Logger.info(f"[INFO] Heartbeat (busy) 전송 성공: ipAddress={ip_address}")
             return True
         except Exception as e:
-            print(f"[WARNING] Heartbeat (busy) 전송 실패: {e}")
+            Logger.warning(f"[WARNING] Heartbeat (busy) 전송 실패: {e}")
             return False

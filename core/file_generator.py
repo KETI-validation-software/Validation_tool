@@ -19,6 +19,7 @@ from core.validation_generator import ValidationGenerator
 from core.constraint_generator import constraintGeneractor
 from core.key_generator import KeyIdGenerator
 import config.CONSTANTS as CONSTANTS
+from core.logger import Logger
 
 
 class FileGeneratorService:
@@ -88,14 +89,14 @@ class FileGeneratorService:
             with open(output_path, 'w', encoding='utf-8') as f:
                 f.write(content)
 
-            print(f"ResponseCode.py 생성 완료: {len(error_message)}개 응답 코드")
-            print(f"[SPEC FILES] ResponseCode.py 저장 경로: {output_path}")
+            Logger.info(f"ResponseCode.py 생성 완료: {len(error_message)}개 응답 코드")
+            Logger.info(f"[SPEC FILES] ResponseCode.py 저장 경로: {output_path}")
             return True
 
         except Exception as e:
-            print(f"ResponseCode 파일 생성 실패: {e}")
+            Logger.error(f"ResponseCode 파일 생성 실패: {e}")
             import traceback
-            traceback.print_exc()
+            Logger.error(traceback.format_exc())
             return False
 
     def generate_files_for_all_specs(self, steps_cache, test_step_cache, spec_names_cache):
@@ -103,8 +104,8 @@ class FileGeneratorService:
         from PyQt5.QtWidgets import QApplication
 
         try:
-            print(f"\n=== 산출물 생성 시작 ===")
-            print(f"specIds: {steps_cache.items()}")
+            Logger.info(f"\n=== 산출물 생성 시작 ===")
+            Logger.debug(f"specIds: {steps_cache.items()}")
 
             schema_content = ""
             data_content = ""
@@ -198,10 +199,10 @@ class FileGeneratorService:
                 spec_duplicate_endpoints = [ep for ep, count in endpoint_count.items() if count >= 2]
                 if spec_duplicate_endpoints:
                     all_duplicate_endpoints.extend(spec_duplicate_endpoints)
-                    print(f"  [spec_id={spec_id}] 중복 API 감지: {spec_duplicate_endpoints}")
+                    Logger.info(f"  [spec_id={spec_id}] 중복 API 감지: {spec_duplicate_endpoints}")
 
                 if schema_type is None:
-                    print(f"[WARNING] spec_id={spec_id}: schema_type이 설정되지 않음, 건너뜁니다.")
+                    Logger.warning(f"[WARNING] spec_id={spec_id}: schema_type이 설정되지 않음, 건너뜁니다.")
                     continue
 
                 # 스키마 리스트 생성
@@ -343,7 +344,7 @@ class FileGeneratorService:
 
             # 역매핑 생성 및 referenceEndpoint 업데이트
             if file_type and all_duplicate_endpoints:
-                print(f"\n  [전체 중복 API 목록] {all_duplicate_endpoints}")
+                Logger.info(f"\n  [전체 중복 API 목록] {all_duplicate_endpoints}")
 
                 response_reverse_map = self.key_id_gen.build_field_id_to_endpoint_map(
                     steps_cache, test_step_cache, "response"
@@ -365,7 +366,7 @@ class FileGeneratorService:
                 exe_dir = os.path.dirname(sys.executable)
                 spec_dir = os.path.join(exe_dir, "spec")
                 os.makedirs(spec_dir, exist_ok=True)
-                print(f"[SPEC FILES] 외부 spec 디렉토리 사용: {spec_dir}")
+                Logger.info(f"[SPEC FILES] 외부 spec 디렉토리 사용: {spec_dir}")
 
                 schema_output = os.path.join(spec_dir, f"Schema_{schema_type}.py")
                 data_output = os.path.join(spec_dir, f"Data_{file_type}.py")
@@ -389,7 +390,7 @@ class FileGeneratorService:
                 try:
                     if os.path.exists(path):
                         os.remove(path)
-                        print(f"[삭제 완료] 기존 {label} 파일 제거: {path}")
+                        Logger.info(f"[삭제 완료] 기존 {label} 파일 제거: {path}")
 
                     if "Schema_" in os.path.basename(path):
                         header = "from json_checker import OptionalKey\n\n\n"
@@ -399,11 +400,11 @@ class FileGeneratorService:
                         f.write(content)
 
                     abs_path = os.path.abspath(path)
-                    print(f"[생성 완료] {label} 파일 생성: {path} ({len(content.splitlines())} lines)")
-                    print(f"[생성 완료] 절대 경로: {abs_path}")
+                    Logger.info(f"[생성 완료] {label} 파일 생성: {path} ({len(content.splitlines())} lines)")
+                    Logger.info(f"[생성 완료] 절대 경로: {abs_path}")
 
                 except Exception as e:
-                    print(f"[경고] {label} 파일 생성 실패: {path}, 사유: {e}")
+                    Logger.warning(f"[경고] {label} 파일 생성 실패: {path}, 사유: {e}")
 
             # CONSTANTS.py 업데이트
             if all_spec_list_names:
@@ -416,13 +417,13 @@ class FileGeneratorService:
             from core.validation_registry import clear_validation_cache
             clear_validation_cache()
 
-            print(f"\n=== 산출물 생성 완료 ===\n")
+            Logger.info(f"\n=== 산출물 생성 완료 ===\n")
             return all_spec_list_names
 
         except Exception as e:
-            print(f"스키마 파일 생성 실패: {e}")
+            Logger.error(f"스키마 파일 생성 실패: {e}")
             import traceback
-            traceback.print_exc()
+            Logger.error(traceback.format_exc())
             return []
 
     def _update_reference_endpoints(self, content: str, reverse_map: dict, file_label: str = "", duplicate_endpoints: list = None) -> str:
@@ -500,11 +501,11 @@ class FileGeneratorService:
 
         if total_duplicate_endpoints > 0:
             fail_count = len(fail_no_field_id) + len(fail_not_in_keyid)
-            print(f"\n  [{file_label}] 중복 API referenceEndpoint 매핑 통계:")
-            print(f"    - 중복 API명 목록: {duplicate_endpoints}")
-            print(f"    - 중복 API referenceEndpoint 개수: {total_duplicate_endpoints}")
-            print(f"    - 매핑 성공: {len(success_list)}")
-            print(f"    - 매핑 실패: {fail_count}")
+            Logger.info(f"\n  [{file_label}] 중복 API referenceEndpoint 매핑 통계:")
+            Logger.info(f"    - 중복 API명 목록: {duplicate_endpoints}")
+            Logger.info(f"    - 중복 API referenceEndpoint 개수: {total_duplicate_endpoints}")
+            Logger.info(f"    - 매핑 성공: {len(success_list)}")
+            Logger.info(f"    - 매핑 실패: {fail_count}")
 
         return '\n'.join(result_lines)
 
@@ -546,7 +547,7 @@ class FileGeneratorService:
             formatted_webhook = self.schema_gen.format_schema_content(webhook_schema_obj)
             schema_content += f"{spec_id}{webhook_schema_name} = {formatted_webhook}\n\n"
             webhook_schema_names.append(webhook_schema_name)
-            print(f"  ✓ WebHook OUT Schema 생성: {webhook_schema_name}" + (" (빈 딕셔너리)" if not webhook_spec else ""))
+            Logger.info(f"  ✓ WebHook OUT Schema 생성: {webhook_schema_name}" + (" (빈 딕셔너리)" if not webhook_spec else ""))
 
         if protocol_type == "webhook" and schema_type == "response":
             webhook_spec = settings.get("webhook", {}).get("requestSpec") or {}
@@ -556,7 +557,7 @@ class FileGeneratorService:
             formatted_webhook = self.schema_gen.format_schema_content(webhook_schema_obj)
             schema_content += f"{spec_id}{webhook_schema_name} = {formatted_webhook}\n\n"
             webhook_schema_names.append(webhook_schema_name)
-            print(f"  ✓ WebHook IN Schema 생성: {webhook_schema_name}" + (" (빈 딕셔너리)" if not webhook_spec else ""))
+            Logger.info(f"  ✓ WebHook IN Schema 생성: {webhook_schema_name}" + (" (빈 딕셔너리)" if not webhook_spec else ""))
 
         # Data 생성
         data_info = self.data_gen.extract_endpoint_data(ts, file_type)
@@ -586,7 +587,7 @@ class FileGeneratorService:
             formatted_webhook_data = self.data_gen.format_data_content(webhook_data_obj)
             data_content += f"{spec_id}{webhook_data_name} = {formatted_webhook_data}\n\n"
             webhook_data_names.append(webhook_data_name)
-            print(f"  ✓ WebHook OUT Data 생성: {webhook_data_name}" + (" (빈 딕셔너리)" if not webhook_request_spec else ""))
+            Logger.info(f"  ✓ WebHook OUT Data 생성: {webhook_data_name}" + (" (빈 딕셔너리)" if not webhook_request_spec else ""))
 
         if protocol_type == "webhook" and file_type == "response":
             webhook_request_spec = settings.get("webhook", {}).get("requestSpec") or {}
@@ -601,7 +602,7 @@ class FileGeneratorService:
             formatted_webhook_data = self.data_gen.format_data_content(webhook_data_obj)
             data_content += f"{spec_id}{webhook_data_name} = {formatted_webhook_data}\n\n"
             webhook_data_names.append(webhook_data_name)
-            print(f"  ✓ WebHook IN Data 생성: {webhook_data_name}" + (" (빈 딕셔너리)" if not webhook_request_spec else ""))
+            Logger.info(f"  ✓ WebHook IN Data 생성: {webhook_data_name}" + (" (빈 딕셔너리)" if not webhook_request_spec else ""))
 
         endpoint_names.append(numbered_endpoint)
 
@@ -665,7 +666,7 @@ class FileGeneratorService:
                 webhook_c_py_style_json = re.sub(r'\bfalse\b', 'False', webhook_c_py_style_json)
                 constraints_content += f"{spec_id}{webhook_c_name} = {webhook_c_py_style_json}\n\n"
             webhook_constraints_names.append(webhook_c_name)
-            print(f"  ✓ WebHook IN Constraints 생성: {webhook_c_name}" + (" (빈 딕셔너리)" if not webhook_c_map else ""))
+            Logger.info(f"  ✓ WebHook IN Constraints 생성: {webhook_c_name}" + (" (빈 딕셔너리)" if not webhook_c_map else ""))
 
         if protocol_type == "webhook" and file_type == "request":
             webhook_request_spec = settings.get("webhook", {}).get("integrationSpec") or {}
@@ -690,7 +691,7 @@ class FileGeneratorService:
                 webhook_c_py_style_json = re.sub(r'\bfalse\b', 'False', webhook_c_py_style_json)
                 constraints_content += f"{spec_id}{webhook_c_name} = {webhook_c_py_style_json}\n\n"
             webhook_constraints_names.append(webhook_c_name)
-            print(f"  ✓ WebHook OUT Constraints 생성: {webhook_c_name}" + (" (빈 딕셔너리)" if not webhook_c_map else ""))
+            Logger.info(f"  ✓ WebHook OUT Constraints 생성: {webhook_c_name}" + (" (빈 딕셔너리)" if not webhook_c_map else ""))
 
         # WebHook Validation 처리
         if protocol_type == "webhook" and schema_type == "request":
@@ -708,7 +709,7 @@ class FileGeneratorService:
                 validation_content += f"{spec_id}{webhook_v_name} = {py_style_json}\n\n"
 
             webhook_validation_names.append(webhook_v_name)
-            print(f"  ✓ WebHook OUT Validation 생성: {webhook_v_name}" + (" (빈 딕셔너리)" if not webhook_v_map else ""))
+            Logger.info(f"  ✓ WebHook OUT Validation 생성: {webhook_v_name}" + (" (빈 딕셔너리)" if not webhook_v_map else ""))
 
         if protocol_type == "webhook" and schema_type == "response":
             webhook_spec = settings.get("webhook", {}).get("requestSpec") or []
@@ -725,7 +726,7 @@ class FileGeneratorService:
                 validation_content += f"{spec_id}{webhook_v_name} = {py_style_json}\n\n"
 
             webhook_validation_names.append(webhook_v_name)
-            print(f"  ✓ WebHook IN Validation 생성: {webhook_v_name}" + (" (빈 딕셔너리)" if not webhook_v_map else ""))
+            Logger.info(f"  ✓ WebHook IN Validation 생성: {webhook_v_name}" + (" (빈 딕셔너리)" if not webhook_v_map else ""))
 
         return schema_content, data_content, validation_content, constraints_content
 
@@ -776,12 +777,12 @@ class FileGeneratorService:
             with open(constants_path, 'w', encoding='utf-8') as f:
                 f.write(new_content)
 
-            print(f"CONSTANTS.py specs 리스트 업데이트 완료")
+            Logger.info(f"CONSTANTS.py specs 리스트 업데이트 완료")
 
         except Exception as e:
-            print(f"  경고: CONSTANTS.py specs 업데이트 실패: {e}")
+            Logger.error(f"  경고: CONSTANTS.py specs 업데이트 실패: {e}")
             import traceback
-            traceback.print_exc()
+            Logger.error(traceback.format_exc())
 
     def merge_list_prefix_mappings(self, file_a: str, file_b: str) -> Dict[str, Dict[str, List[str]]]:
         """두 파일에서 리스트 변수를 추출하여 prefix별로 병합"""
@@ -789,7 +790,7 @@ class FileGeneratorService:
 
         for file_path in (file_a, file_b):
             if not os.path.exists(file_path):
-                print(f"[WARNING] 파일이 존재하지 않음: {file_path}")
+                Logger.warning(f"[WARNING] 파일이 존재하지 않음: {file_path}")
                 continue
 
             file_name = os.path.basename(file_path)
@@ -823,6 +824,6 @@ class FileGeneratorService:
                 result[var_name] = []
 
         except Exception as e:
-            print(f"[ERROR] 파일 읽기 실패 ({file_path}): {e}")
+            Logger.error(f"[ERROR] 파일 읽기 실패 ({file_path}): {e}")
 
         return result
