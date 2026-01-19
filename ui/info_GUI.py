@@ -1264,17 +1264,10 @@ class InfoWidget(QWidget):
             return None
 
     def _get_local_ip_list(self):
-        """get_local_ip() 결과를 안전하게 리스트로 변환 (최대 3개)"""
-        raw = self.get_local_ip()
-        ip_list = []
-
-        if isinstance(raw, str):
-            ip_list = [ip.strip() for ip in raw.split(',') if ip.strip()]
-        elif isinstance(raw, (list, tuple, set)):
-            ip_list = [str(ip).strip() for ip in raw if str(ip).strip()]
-
-        # 최대 3개만 반환
-        return ip_list[:3]
+        """모든 로컬 IP를 리스트로 반환 (이더넷, 와이파이 등)"""
+        # CONSTANTS의 get_all_local_ips() 사용
+        ip_list = CONSTANTS.get_all_local_ips()
+        return ip_list
 
     def check_next_button_state(self):
         """첫 번째 페이지의 다음 버튼 활성화 조건 체크"""
