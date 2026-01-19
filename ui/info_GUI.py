@@ -82,6 +82,46 @@ class InfoWidget(QWidget):
         main_layout.addWidget(self.stacked_widget)
         self.setLayout(main_layout)
 
+        # 버전4: 자동 로드 플래그 (showEvent에서 한 번만 실행)
+        self._auto_load_done = False
+
+    def showEvent(self, event):
+        """창이 표시될 때 호출 (버전4: 자동 로드)"""
+        super().showEvent(event)
+
+        # 버전4: 창이 완전히 표시된 후 자동으로 시험 정보 불러오기 (한 번만 실행)
+        if not self._auto_load_done:
+            self._auto_load_done = True
+            from PyQt5.QtCore import QTimer
+            QTimer.singleShot(500, self._auto_load_test_info)
+
+    def _auto_load_test_info(self):
+        """버전4: 로컬 PC IP로 자동으로 시험 정보 불러오기"""
+        try:
+            # 로컬 PC IP 자동 감지
+            ip_address = CONSTANTS.get_local_ip()
+            Logger.debug(f"버전4: 로컬 PC IP 감지됨 - {ip_address}")
+
+            if not ip_address or ip_address == '127.0.0.1':
+                Logger.debug("자동 로드 실패: 로컬 IP를 감지할 수 없음")
+                return
+            if not self._validate_ip_address(ip_address):
+                Logger.debug(f"자동 로드 실패: 잘못된 IP 형식 - {ip_address}")
+                return
+
+            self.is_loading = True
+            self._disable_ui_during_loading()
+            self.loading_popup = LoadingPopup(width=400, height=200)
+            self.loading_popup.update_message("시험 정보 불러오는 중...", f"로컬 IP: {ip_address}")
+            self.loading_popup.show()
+
+            self.test_info_worker = TestInfoWorker(self.form_validator, ip_address)
+            self.test_info_worker.finished.connect(self._on_test_info_loaded)
+            self.test_info_worker.error.connect(self._on_test_info_error)
+            self.test_info_worker.start()
+        except Exception as e:
+            Logger.debug(f"자동 로드 실패: {e}")
+
     # ---------- 반응형 크기 조정 헬퍼 함수들 ----------
     def _resize_widget(self, widget_attr, size_attr, width_ratio, height_ratio=None):
         """위젯 크기 조정 헬퍼 (가로만 또는 가로+세로)"""
@@ -175,13 +215,15 @@ class InfoWidget(QWidget):
 
                 if hasattr(self, 'page1_bg_label'):
                     self.page1_bg_label.setGeometry(0, 0, content_width, content_height)
-                if hasattr(self, 'ip_input_edit'):
-                    self.ip_input_edit.setGeometry(content_width - 411, 24, 200, 40)
-                if hasattr(self, 'load_test_info_btn'):
-                    self.load_test_info_btn.setGeometry(content_width - 203, 13, 198, 62)
+                # 버전4: 시험 IP 입력 UI 제거 (로컬 IP 자동 감지)
+                # if hasattr(self, 'ip_input_edit'):
+                #     self.ip_input_edit.setGeometry(content_width - 411, 24, 200, 40)
+                # if hasattr(self, 'load_test_info_btn'):
+                #     self.load_test_info_btn.setGeometry(content_width - 203, 13, 198, 62)
 
-            if hasattr(self, 'management_url_container'):
-                self.management_url_container.setGeometry(page_width - 390, page_height - 108, 380, 60)
+            # 버전4: 관리자시스템 주소 UI 제거
+            # if hasattr(self, 'management_url_container'):
+            #     self.management_url_container.setGeometry(page_width - 390, page_height - 108, 380, 60)
 
             # ✅ 반응형: Page1 하단 버튼 영역 가로 확장
             if hasattr(self, 'original_window_size'):

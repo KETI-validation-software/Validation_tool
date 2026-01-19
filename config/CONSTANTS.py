@@ -1,8 +1,33 @@
 # API-info
 import os
 import sys
+import socket
 
 headers = {"Content-type": "application/json", "User-Agent": 'test'}
+
+# 버전4: 로컬 PC IP 자동 감지
+def get_local_ip():
+    """로컬 PC의 IP 주소를 자동으로 감지하여 반환"""
+    try:
+        # 외부 서버에 연결하여 로컬 IP 확인 (실제 연결은 하지 않음)
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.settimeout(0)
+        try:
+            # Google DNS 서버 주소 (실제 연결 안 함, 라우팅 테이블만 확인)
+            s.connect(('8.8.8.8', 80))
+            local_ip = s.getsockname()[0]
+        except Exception:
+            local_ip = '127.0.0.1'
+        finally:
+            s.close()
+        return local_ip
+    except Exception as e:
+        try:
+            from core.logger import Logger
+            Logger.error(f"로컬 IP 감지 실패: {e}")
+        except ImportError:
+            print(f"로컬 IP 감지 실패: {e}")
+        return '127.0.0.1'
 
 # config.txt 경로 헬퍼 함수
 def get_config_path():
