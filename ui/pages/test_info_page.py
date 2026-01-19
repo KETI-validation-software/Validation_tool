@@ -40,14 +40,14 @@ def create_test_info_page(parent_widget):
     # 본문 영역
     _setup_content(parent_widget, main_layout)
 
-    # 관리자시스템 주소 입력 필드
-    _setup_management_url(parent_widget)
+    # 관리자시스템 주소 입력 필드 (버전3: UI 제거 - config.txt에서만 설정)
+    # _setup_management_url(parent_widget)
 
     parent_widget.page1.setLayout(main_layout)
 
-    # 레이아웃 적용 후 management_url_container를 최상위로 올림
-    if hasattr(parent_widget, 'management_url_container'):
-        parent_widget.management_url_container.raise_()
+    # 레이아웃 적용 후 management_url_container를 최상위로 올림 (버전3: UI 제거)
+    # if hasattr(parent_widget, 'management_url_container'):
+    #     parent_widget.management_url_container.raise_()
 
     return parent_widget.page1
 
@@ -123,11 +123,11 @@ def _setup_content(parent_widget, main_layout):
     parent_widget.info_panel.connect_signals()
     content_layout.addWidget(parent_widget.info_panel, alignment=Qt.AlignHCenter)
 
-    # IP 입력창
-    _setup_ip_input(parent_widget)
+    # IP 입력창 (버전3: UI 제거 - config.txt에서 설정, 자동 로드)
+    # _setup_ip_input(parent_widget)
 
-    # 불러오기 버튼
-    _setup_load_button(parent_widget)
+    # 불러오기 버튼 (버전3: UI 제거 - 자동 로드)
+    # _setup_load_button(parent_widget)
 
     main_layout.addWidget(parent_widget.page1_content, 1)
 

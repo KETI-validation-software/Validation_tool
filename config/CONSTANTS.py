@@ -45,10 +45,17 @@ def save_management_url(new_url):
     config_path = get_config_path()
 
     try:
+        # 기존 test_ip 값 유지
+        current_test_ip = load_test_ip()
+
         with open(config_path, 'w', encoding='utf-8') as f:
             f.write("# 관리자시스템 주소 설정\n")
             f.write("# 주소 변경이 필요한 경우 아래 URL만 수정하세요\n")
             f.write(f"management_url={new_url}\n")
+            f.write("\n")
+            f.write("# 시험 대상 IP 설정\n")
+            f.write("# 프로그램 시작 시 자동으로 시험 정보를 불러옵니다\n")
+            f.write(f"test_ip={current_test_ip}\n")
 
         # 메모리상의 값도 업데이트
         global management_url
@@ -63,8 +70,66 @@ def save_management_url(new_url):
             print(f"config.txt 저장 실패: {e}")
         return False
 
+# 버전3: 시험 대상 IP 설정 로딩
+def load_test_ip():
+    """config.txt에서 시험 대상 IP를 읽어옴"""
+    config_path = get_config_path()
+    default_ip = "192.168.1.1"
+
+    try:
+        if os.path.exists(config_path):
+            with open(config_path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith('#'):
+                        if '=' in line:
+                            key, value = line.split('=', 1)
+                            if key.strip() == 'test_ip':
+                                return value.strip()
+    except Exception as e:
+        try:
+            from core.logger import Logger
+            Logger.error(f"config.txt 읽기 실패: {e}")
+        except ImportError:
+            print(f"config.txt 읽기 실패: {e}")
+
+    return default_ip
+
+def save_test_ip(new_ip):
+    """시험 대상 IP를 config.txt에 저장"""
+    config_path = get_config_path()
+
+    try:
+        # 기존 management_url 값 유지
+        current_management_url = management_url
+
+        with open(config_path, 'w', encoding='utf-8') as f:
+            f.write("# 관리자시스템 주소 설정\n")
+            f.write("# 주소 변경이 필요한 경우 아래 URL만 수정하세요\n")
+            f.write(f"management_url={current_management_url}\n")
+            f.write("\n")
+            f.write("# 시험 대상 IP 설정\n")
+            f.write("# 프로그램 시작 시 자동으로 시험 정보를 불러옵니다\n")
+            f.write(f"test_ip={new_ip}\n")
+
+        # 메모리상의 값도 업데이트
+        global test_ip
+        test_ip = new_ip
+
+        return True
+    except Exception as e:
+        try:
+            from core.logger import Logger
+            Logger.error(f"config.txt 저장 실패: {e}")
+        except ImportError:
+            print(f"config.txt 저장 실패: {e}")
+        return False
+
 # 관리자시스템 주소
 management_url = load_management_url()
+
+# 시험 대상 IP (버전3: 외부 파일에서 로드)
+test_ip = load_test_ip()
 
 specs = [["cmii7shen005i8z1tagevx4qh_inSchema","cmii7shen005i8z1tagevx4qh_outData","cmii7shen005i8z1tagevx4qh_messages",""],
          ["cmii7pysb004k8z1tts0npxfm_inSchema","cmii7pysb004k8z1tts0npxfm_outData","cmii7pysb004k8z1tts0npxfm_messages",""],
