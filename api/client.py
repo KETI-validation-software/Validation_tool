@@ -14,8 +14,12 @@ class APIClient:
     """API 통신을 담당하는 클라이언트 클래스"""
 
     def __init__(self):
-        self.base_url = CONSTANTS.management_url
         self.timeout = 10
+
+    @property
+    def base_url(self):
+        """관리자시스템 주소 (실시간 반영)"""
+        return CONSTANTS.management_url
 
     def fetch_test_info_by_ip(self, ip_address):
         """IP 주소로 시험 정보 조회"""
