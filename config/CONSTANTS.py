@@ -5,29 +5,42 @@ import socket
 
 headers = {"Content-type": "application/json", "User-Agent": 'test'}
 
-# 버전4: 로컬 PC IP 자동 감지
-def get_local_ip():
-    """로컬 PC의 IP 주소를 자동으로 감지하여 반환"""
+# 버전4: 모든 로컬 IP 주소 감지 (이더넷, 와이파이 등 모든 네트워크 어댑터)
+def get_all_local_ips():
+    """로컬 PC의 모든 IP 주소를 리스트로 반환 (이더넷, 와이파이 등)"""
+    ip_list = []
+
     try:
-        # 외부 서버에 연결하여 로컬 IP 확인 (실제 연결은 하지 않음)
+        # 방법 1: 모든 네트워크 인터페이스의 IP 가져오기
+        hostname = socket.gethostname()
+        # getaddrinfo로 모든 IP 조회
+        addrs = socket.getaddrinfo(hostname, None, socket.AF_INET)
+        for addr in addrs:
+            ip = addr[4][0]
+            if ip and not ip.startswith('127.') and ip not in ip_list:
+                ip_list.append(ip)
+    except Exception:
+        pass
+
+    try:
+        # 방법 2: 기본 라우팅 IP 추가 (이미 있으면 스킵)
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.settimeout(0)
-        try:
-            # Google DNS 서버 주소 (실제 연결 안 함, 라우팅 테이블만 확인)
-            s.connect(('8.8.8.8', 80))
-            local_ip = s.getsockname()[0]
-        except Exception:
-            local_ip = '127.0.0.1'
-        finally:
-            s.close()
-        return local_ip
-    except Exception as e:
-        try:
-            from core.logger import Logger
-            Logger.error(f"로컬 IP 감지 실패: {e}")
-        except ImportError:
-            print(f"로컬 IP 감지 실패: {e}")
-        return '127.0.0.1'
+        s.connect(('8.8.8.8', 80))
+        default_ip = s.getsockname()[0]
+        s.close()
+        if default_ip and not default_ip.startswith('127.') and default_ip not in ip_list:
+            ip_list.append(default_ip)
+    except Exception:
+        pass
+
+    try:
+        from core.logger import Logger
+        Logger.debug(f"버전4: 감지된 모든 로컬 IP - {ip_list}")
+    except ImportError:
+        pass
+
+    return ip_list if ip_list else []
 
 # config.txt 경로 헬퍼 함수
 def get_config_path():

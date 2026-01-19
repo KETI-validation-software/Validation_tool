@@ -96,31 +96,88 @@ class InfoWidget(QWidget):
             QTimer.singleShot(500, self._auto_load_test_info)
 
     def _auto_load_test_info(self):
-        """버전4: 로컬 PC IP로 자동으로 시험 정보 불러오기"""
+        """버전4: 모든 로컬 IP를 조회하여 시험 정보가 등록된 IP 자동 감지"""
         try:
-            # 로컬 PC IP 자동 감지
-            ip_address = CONSTANTS.get_local_ip()
-            Logger.debug(f"버전4: 로컬 PC IP 감지됨 - {ip_address}")
+            # 모든 로컬 IP 가져오기
+            ip_list = CONSTANTS.get_all_local_ips()
+            Logger.debug(f"버전4: 감지된 로컬 IP 목록 - {ip_list}")
 
-            if not ip_address or ip_address == '127.0.0.1':
+            if not ip_list:
                 Logger.debug("자동 로드 실패: 로컬 IP를 감지할 수 없음")
                 return
-            if not self._validate_ip_address(ip_address):
-                Logger.debug(f"자동 로드 실패: 잘못된 IP 형식 - {ip_address}")
+
+            # 유효한 IP만 필터링 (127.0.0.1 제외)
+            valid_ips = [ip for ip in ip_list if self._validate_ip_address(ip) and ip != '127.0.0.1']
+            if not valid_ips:
+                Logger.debug("자동 로드 실패: 유효한 IP가 없음")
                 return
 
             self.is_loading = True
             self._disable_ui_during_loading()
             self.loading_popup = LoadingPopup(width=400, height=200)
-            self.loading_popup.update_message("시험 정보 불러오는 중...", f"로컬 IP: {ip_address}")
+            self.loading_popup.update_message("시험 정보 검색 중...", f"검색할 IP: {len(valid_ips)}개")
             self.loading_popup.show()
 
-            self.test_info_worker = TestInfoWorker(self.form_validator, ip_address)
-            self.test_info_worker.finished.connect(self._on_test_info_loaded)
-            self.test_info_worker.error.connect(self._on_test_info_error)
-            self.test_info_worker.start()
+            # 각 IP에 대해 순차적으로 시험 정보 조회 시도
+            self._auto_load_ip_list = valid_ips
+            self._auto_load_current_index = 0
+            self._try_next_ip()
+
         except Exception as e:
             Logger.debug(f"자동 로드 실패: {e}")
+
+    def _try_next_ip(self):
+        """다음 IP로 시험 정보 조회 시도"""
+        from PyQt5.QtWidgets import QMessageBox
+
+        if self._auto_load_current_index >= len(self._auto_load_ip_list):
+            # 모든 IP 시도 완료 - 실패
+            self._close_loading_popup()
+            self._enable_ui_after_loading()
+            Logger.debug("자동 로드 실패: 모든 IP에서 시험 정보를 찾을 수 없음")
+            QMessageBox.warning(self, "자동 로드 실패",
+                f"등록된 시험 정보를 찾을 수 없습니다.\n\n"
+                f"검색한 IP: {', '.join(self._auto_load_ip_list)}\n\n"
+                f"관리 시스템에 해당 PC의 IP가 등록되어 있는지 확인해주세요.")
+            return
+
+        ip_address = self._auto_load_ip_list[self._auto_load_current_index]
+        Logger.debug(f"버전4: IP {ip_address} 조회 시도 ({self._auto_load_current_index + 1}/{len(self._auto_load_ip_list)})")
+
+        self.loading_popup.update_message(
+            "시험 정보 검색 중...",
+            f"IP: {ip_address} ({self._auto_load_current_index + 1}/{len(self._auto_load_ip_list)})"
+        )
+
+        # 워커 스레드로 조회
+        self.test_info_worker = TestInfoWorker(self.form_validator, ip_address)
+        self.test_info_worker.finished.connect(self._on_auto_load_ip_result)
+        self.test_info_worker.error.connect(self._on_auto_load_ip_error)
+        self.test_info_worker.start()
+
+    def _on_auto_load_ip_result(self, test_data):
+        """IP 조회 결과 처리"""
+        if test_data:
+            # 시험 정보 찾음 - 성공
+            found_ip = self._auto_load_ip_list[self._auto_load_current_index]
+            Logger.debug(f"버전4: IP {found_ip}에서 시험 정보 발견")
+            # 시그널 연결 해제 (중복 호출 방지)
+            try:
+                self.test_info_worker.finished.disconnect(self._on_auto_load_ip_result)
+                self.test_info_worker.error.disconnect(self._on_auto_load_ip_error)
+            except Exception:
+                pass
+            self._on_test_info_loaded(test_data)
+        else:
+            # 이 IP에는 없음 - 다음 IP 시도
+            self._auto_load_current_index += 1
+            self._try_next_ip()
+
+    def _on_auto_load_ip_error(self, error_message):
+        """IP 조회 에러 처리 (다음 IP 시도)"""
+        Logger.debug(f"버전4: IP 조회 실패 - {error_message}")
+        self._auto_load_current_index += 1
+        self._try_next_ip()
 
     # ---------- 반응형 크기 조정 헬퍼 함수들 ----------
     def _resize_widget(self, widget_attr, size_attr, width_ratio, height_ratio=None):
