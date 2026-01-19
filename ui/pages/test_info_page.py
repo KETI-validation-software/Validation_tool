@@ -40,14 +40,14 @@ def create_test_info_page(parent_widget):
     # 본문 영역
     _setup_content(parent_widget, main_layout)
 
-    # 관리자시스템 주소 입력 필드
-    _setup_management_url(parent_widget)
+    # 관리자시스템 주소 입력 필드 (버전2: UI 제거 - config.txt에서만 설정)
+    # _setup_management_url(parent_widget)
 
     parent_widget.page1.setLayout(main_layout)
 
-    # 레이아웃 적용 후 management_url_container를 최상위로 올림
-    if hasattr(parent_widget, 'management_url_container'):
-        parent_widget.management_url_container.raise_()
+    # 레이아웃 적용 후 management_url_container를 최상위로 올림 (버전2: UI 제거)
+    # if hasattr(parent_widget, 'management_url_container'):
+    #     parent_widget.management_url_container.raise_()
 
     return parent_widget.page1
 

@@ -180,8 +180,9 @@ class InfoWidget(QWidget):
                 if hasattr(self, 'load_test_info_btn'):
                     self.load_test_info_btn.setGeometry(content_width - 203, 13, 198, 62)
 
-            if hasattr(self, 'management_url_container'):
-                self.management_url_container.setGeometry(page_width - 390, page_height - 108, 380, 60)
+            # 버전2: 관리자시스템 주소 UI 제거
+            # if hasattr(self, 'management_url_container'):
+            #     self.management_url_container.setGeometry(page_width - 390, page_height - 108, 380, 60)
 
             # ✅ 반응형: Page1 하단 버튼 영역 가로 확장
             if hasattr(self, 'original_window_size'):
