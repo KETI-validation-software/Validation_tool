@@ -885,6 +885,12 @@ class InfoWidget(QWidget):
         self.test_info_worker.error.connect(self._on_test_info_error)
         self.test_info_worker.start()
 
+    def _close_loading_popup(self):
+        """로딩 팝업 닫기 헬퍼 메서드"""
+        if hasattr(self, 'loading_popup') and self.loading_popup:
+            self.loading_popup.close()
+            self.loading_popup = None
+
     def _on_test_info_loaded(self, test_data):
         """시험 정보 로드 성공 시 호출되는 슬롯"""
         from PyQt5.QtWidgets import QApplication
@@ -893,6 +899,7 @@ class InfoWidget(QWidget):
             QApplication.processEvents()  # 스피너 애니메이션 유지
 
             if not test_data:
+                self._close_loading_popup()  # 경고창 표시 전에 로딩 팝업 닫기
                 QMessageBox.warning(self, "경고",
                     "시험 정보를 불러올 수 없습니다.\n"
                     "- 서버 연결을 확인해주세요.\n"
@@ -905,6 +912,7 @@ class InfoWidget(QWidget):
 
             # testGroups 배열 처리
             if not test_groups:
+                self._close_loading_popup()  # 경고창 표시 전에 로딩 팝업 닫기
                 QMessageBox.warning(self, "경고", "testGroups 데이터가 비어있습니다.")
                 return
 
@@ -1019,25 +1027,19 @@ class InfoWidget(QWidget):
             Logger.debug(f"시험정보 불러오기 실패: {e}")
             import traceback
             traceback.print_exc()
+            self._close_loading_popup()  # 경고창 표시 전에 로딩 팝업 먼저 닫기
             QMessageBox.critical(self, "오류", f"시험 정보를 불러오는 중 오류가 발생했습니다:\n{str(e)}")
 
         finally:
-            # 로딩 팝업 닫기
-            if hasattr(self, 'loading_popup') and self.loading_popup:
-                self.loading_popup.close()
-                self.loading_popup = None
+            self._close_loading_popup()  # 로딩 팝업 닫기
             # 로딩 완료 후 UI 활성화
             self._enable_ui_after_loading()
 
     def _on_test_info_error(self, error_message):
         """시험 정보 로드 실패 시 호출되는 슬롯"""
         Logger.debug(f"시험정보 불러오기 실패: {error_message}")
+        self._close_loading_popup()  # 경고창 표시 전에 로딩 팝업 먼저 닫기
         QMessageBox.critical(self, "오류", f"시험 정보를 불러오는 중 오류가 발생했습니다:\n{error_message}")
-
-        # 로딩 팝업 닫기
-        if hasattr(self, 'loading_popup') and self.loading_popup:
-            self.loading_popup.close()
-            self.loading_popup = None
 
         # 로딩 실패 시 UI 복원 (다시 시도할 수 있도록)
         self.is_loading = False
