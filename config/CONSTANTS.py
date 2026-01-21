@@ -4,10 +4,21 @@ import sys
 
 headers = {"Content-type": "application/json", "User-Agent": 'test'}
 
+# config.txt 경로 헬퍼 함수
+def get_config_path():
+    """실행파일 또는 소스코드 기준으로 config.txt 경로 반환"""
+    if getattr(sys, 'frozen', False):
+        # PyInstaller 실행파일 → exe 파일 위치 기준
+        base_dir = os.path.dirname(sys.executable)
+    else:
+        # 일반 Python 실행 → 소스코드 위치 기준
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_dir, "config.txt")
+
 # 관리자시스템 주소 설정 로딩
 def load_management_url():
     """config.txt에서 관리자시스템 주소를 읽어옴"""
-    config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config.txt")
+    config_path = get_config_path()
     default_url = "http://ect2.iptime.org:20223"
 
     try:
@@ -31,7 +42,7 @@ def load_management_url():
 
 def save_management_url(new_url):
     """관리자시스템 주소를 config.txt에 저장"""
-    config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config.txt")
+    config_path = get_config_path()
 
     try:
         with open(config_path, 'w', encoding='utf-8') as f:
