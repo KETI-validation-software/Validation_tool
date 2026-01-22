@@ -300,6 +300,9 @@ if __name__ == "__main__":
     splash.update_progress(20, "폰트 로딩 중...")
     fontDB = QFontDatabase()
     fontDB.addApplicationFont(resource_path('NanumGothic.ttf'))
+    fontDB.addApplicationFont(resource_path('assets/fonts/NotoSansKR-Regular.ttf'))
+    fontDB.addApplicationFont(resource_path('assets/fonts/NotoSansKR-Medium.ttf'))
+    fontDB.addApplicationFont(resource_path('assets/fonts/NotoSansKR-Bold.ttf'))
     app.setFont(QFont('NanumGothic'))
 
     # 메인 윈도우 생성 (무거운 모듈들 자동 로딩)
