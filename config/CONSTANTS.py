@@ -114,8 +114,8 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소
 # test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
-company_name = "이노뎁"
-product_name = "VURIX-TMS"
+company_name = "통합플랫폼 기업"
+product_name = "통합플랫폼 제품"
 version = "v1.0"
 test_category = "본시험"
 test_target = "기본 기능 시험-통합시스템"
@@ -123,10 +123,10 @@ test_range = "전체 필드"
 auth_type = "Digest Auth"
 auth_info = "kisa,kisa_k1!2@"
 admin_code = "1234"
-url = "https://10.252.219.95:2000"
-contact_person = "배성환"
+url = "https://192.168.0.10:2000"
+contact_person = "김철수"
 model_name = "v1.0"
-request_id = "cmii86ssr00a48z1tqmco6ke8"
+request_id = "cmkki6rd400bxh0zt62pd0a8k"
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황
 flag_opt = False
@@ -175,7 +175,7 @@ DEBUG_LEVEL = 1  # 기본값: WARN (권장)
 # ✅ 웹훅 서버 설정 (전역)
 WEBHOOK_HOST = "0.0.0.0"  # 서버 바인딩 주소 (모든 인터페이스에서 수신)
 WEBHOOK_PORT = 2001       # 웹훅 수신 포트
-WEBHOOK_PUBLIC_IP = "10.252.219.95"
+WEBHOOK_PUBLIC_IP = "192.168.0.10"
 # ✅ 웹훅 공개 IP 설정: info_GUI에서 선택한 시험 URL의 IP 사용
 # 초기값은 URL에서 추출, info_GUI에서 주소 선택 후 자동 업데이트됨
 

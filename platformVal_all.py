@@ -3,6 +3,7 @@
 
 import os
 from api.api_server import Server
+from api.client import APIClient
 from api.server_thread import server_th, json_data
 import time
 from PyQt5.QtWidgets import *
@@ -412,6 +413,14 @@ class MyApp(PlatformMainUI):
                     Logger.debug(f" ========== finally 블록 진입 ==========")
                     self.cleanup_paused_file()
                     Logger.debug(f" ========== finally 블록 종료 ==========")
+                    
+                    # ✅ 시험 완료 - idle 상태 heartbeat 전송
+                    try:
+                        api_client = APIClient(CONSTANTS.management_url)
+                        api_client.send_heartbeat_idle()
+                        Logger.debug(f"✅ 시험 완료 - idle 상태 전송 완료")
+                    except Exception as e:
+                        Logger.warning(f"⚠️ 시험 완료 - idle 상태 전송 실패: {e}")
 
                 return
 
@@ -1111,6 +1120,14 @@ class MyApp(PlatformMainUI):
                     Logger.debug(f" ========== finally 블록 진입 (경로2) ==========")
                     self.cleanup_paused_file()
                     Logger.debug(f" ========== finally 블록 종료 (경로2) ==========")
+                    
+                    # ✅ 시험 완료 - idle 상태 heartbeat 전송 (경로2)
+                    try:
+                        api_client = APIClient(CONSTANTS.management_url)
+                        api_client.send_heartbeat_idle()
+                        Logger.debug(f"✅ 시험 완료 (경로2) - idle 상태 전송 완료")
+                    except Exception as e:
+                        Logger.warning(f"⚠️ 시험 완료 (경로2) - idle 상태 전송 실패: {e}")
 
         except Exception as err:
             Logger.error(f" update_view에서 예외 발생: {err}")
@@ -2321,6 +2338,15 @@ class MyApp(PlatformMainUI):
         self.sbtn.setEnabled(True)
         self.stop_btn.setDisabled(True)
         self.cancel_btn.setDisabled(True)
+        
+        # ✅ 시험 중지 - idle 상태 heartbeat 전송
+        try:
+            api_client = APIClient(CONSTANTS.management_url)
+            api_client.send_heartbeat_idle()
+            Logger.debug(f"✅ 시험 중지 - idle 상태 전송 완료")
+        except Exception as e:
+            Logger.warning(f"⚠️ 시험 중지 - idle 상태 전송 실패: {e}")
+        
         self.save_current_spec_data()
 
         # ✅ 일시정지 상태 저장
@@ -2400,6 +2426,14 @@ class MyApp(PlatformMainUI):
         self.sbtn.setEnabled(True)
         self.stop_btn.setDisabled(True)
         self.cancel_btn.setDisabled(True)
+        
+        # ✅ 시험 취소 - idle 상태 heartbeat 전송
+        try:
+            api_client = APIClient(CONSTANTS.management_url)
+            api_client.send_heartbeat_idle()
+            Logger.debug(f"✅ 시험 취소 - idle 상태 전송 완료")
+        except Exception as e:
+            Logger.warning(f"⚠️ 시험 취소 - idle 상태 전송 실패: {e}")
         
         # 6. 모니터링 화면 초기화
         self.valResult.clear()
