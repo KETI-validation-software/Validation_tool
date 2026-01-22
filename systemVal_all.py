@@ -21,6 +21,7 @@ from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor, QPixmap
 from PyQt5.QtCore import *
 from api.webhook_api import WebhookThread
 from api.api_server import Server  # ✅ door_memory 접근을 위한 import 추가
+from api.client import APIClient
 from core.json_checker_new import timeout_field_finder
 from core.functions import json_check_, resource_path, json_to_data, build_result_json
 from core.data_mapper import ConstraintDataGenerator
@@ -1514,6 +1515,15 @@ class MyApp(SystemMainUI):
                         # ✅ 평가 완료 시 일시정지 파일 정리 (에러 발생 여부와 무관하게 항상 실행)
                         Logger.debug(f" ========== finally 블록 진입 ==========")
                         self.cleanup_paused_file()
+                        
+                        # ✅ 시험 완료 후 idle 상태 전송
+                        try:
+                            api_client = APIClient()
+                            api_client.send_heartbeat_idle()
+                            Logger.info(f"✅ 시험 완료 - idle 상태 전송 완료")
+                        except Exception as e:
+                            Logger.warning(f"⚠️ 시험 완료 - idle 상태 전송 실패: {e}")
+                        
                         Logger.debug(f" ========== finally 블록 종료 ==========")
 
                     self.sbtn.setEnabled(True)
@@ -1953,6 +1963,15 @@ class MyApp(SystemMainUI):
                     # ✅ 평가 완료 시 일시정지 파일 정리 (에러 발생 여부와 무관하게 항상 실행)
                     Logger.debug(f" ========== finally 블록 진입 (경로2) ==========")
                     self.cleanup_paused_file()
+                    
+                    # ✅ 시험 완료 후 idle 상태 전송
+                    try:
+                        api_client = APIClient()
+                        api_client.send_heartbeat_idle()
+                        Logger.info(f"✅ 시험 완료 - idle 상태 전송 완료 (경로2)")
+                    except Exception as e:
+                        Logger.warning(f"⚠️ 시험 완료 - idle 상태 전송 실패 (경로2): {e}")
+                    
                     Logger.debug(f" ========== finally 블록 종료 (경로2) ==========")
 
                 self.sbtn.setEnabled(True)
@@ -2523,6 +2542,14 @@ class MyApp(SystemMainUI):
 
         self.save_current_spec_data()
 
+        # ✅ 시험 중지 후 idle 상태 전송
+        try:
+            api_client = APIClient()
+            api_client.send_heartbeat_idle()
+            Logger.info(f"✅ 시험 중지 - idle 상태 전송 완료")
+        except Exception as e:
+            Logger.warning(f"⚠️ 시험 중지 - idle 상태 전송 실패: {e}")
+
         # ✅ 일시정지 상태 저장
         self.is_paused = True
         self.save_paused_state()
@@ -2592,7 +2619,15 @@ class MyApp(SystemMainUI):
         self.stop_btn.setDisabled(True)
         self.cancel_btn.setDisabled(True)
         
-        # 5. 모니터링 화면 초기화
+        # 5. 시험 취소 후 idle 상태 전송
+        try:
+            api_client = APIClient()
+            api_client.send_heartbeat_idle()
+            Logger.info(f"✅ 시험 취소 - idle 상태 전송 완료")
+        except Exception as e:
+            Logger.warning(f"⚠️ 시험 취소 - idle 상태 전송 실패: {e}")
+        
+        # 6. 모니터링 화면 초기화
         self.valResult.clear()
         self.valResult.append('<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">시험이 취소되었습니다. 시험 시작 버튼을 눌러 다시 시작하세요.</div>')
         Logger.debug(f" 모니터링 화면 초기화")

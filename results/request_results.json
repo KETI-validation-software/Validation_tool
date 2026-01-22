@@ -125,7 +125,7 @@
                 "duration": 100,
                 "transProtocol": {
                   "transProtocolType": "WebHook",
-                  "transProtocolDesc": "https://10.252.219.95:2001"
+                  "transProtocolDesc": "https://127.0.0.1:2001"
                 },
                 "startTime": 20251105163010124
               },
@@ -178,9 +178,9 @@
                 "duration": 1000,
                 "transProtocol": {
                   "transProtocolType": "WebHook",
-                  "transProtocolDesc": "https://10.252.219.95:2001"
+                  "transProtocolDesc": "https://127.0.0.1:2001"
                 },
-                "eventFilter": "MotionDetection",
+                "eventFilter": "Leak",
                 "startTime": 20251105163010123
               },
               "validationErrors": [
@@ -234,7 +234,7 @@
                   }
                 ],
                 "maxCount": 8,
-                "eventFilter": "MotionDetection"
+                "eventFilter": "Leak"
               },
               "validationErrors": [
                 "오류가 없습니다."
@@ -245,5 +245,5 @@
       ]
     }
   ],
-  "completedDate": "2026-01-21T03:55:31Z"
+  "completedDate": "2026-01-22T06:03:44Z"
 }
