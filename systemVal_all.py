@@ -1518,9 +1518,9 @@ class MyApp(SystemMainUI):
                         
                         # ✅ 시험 완료 후 idle 상태 전송
                         try:
-                            api_client = APIClient(CONSTANTS.management_url)
+                            api_client = APIClient()
                             api_client.send_heartbeat_idle()
-                            Logger.debug(f"✅ 시험 완료 - idle 상태 전송 완료")
+                            Logger.info(f"✅ 시험 완료 - idle 상태 전송 완료")
                         except Exception as e:
                             Logger.warning(f"⚠️ 시험 완료 - idle 상태 전송 실패: {e}")
                         
@@ -1966,9 +1966,9 @@ class MyApp(SystemMainUI):
                     
                     # ✅ 시험 완료 후 idle 상태 전송
                     try:
-                        api_client = APIClient(CONSTANTS.management_url)
+                        api_client = APIClient()
                         api_client.send_heartbeat_idle()
-                        Logger.debug(f"✅ 시험 완료 - idle 상태 전송 완료 (경로2)")
+                        Logger.info(f"✅ 시험 완료 - idle 상태 전송 완료 (경로2)")
                     except Exception as e:
                         Logger.warning(f"⚠️ 시험 완료 - idle 상태 전송 실패 (경로2): {e}")
                     
@@ -2544,9 +2544,9 @@ class MyApp(SystemMainUI):
 
         # ✅ 시험 중지 후 idle 상태 전송
         try:
-            api_client = APIClient(CONSTANTS.management_url)
+            api_client = APIClient()
             api_client.send_heartbeat_idle()
-            Logger.debug(f"✅ 시험 중지 - idle 상태 전송 완료")
+            Logger.info(f"✅ 시험 중지 - idle 상태 전송 완료")
         except Exception as e:
             Logger.warning(f"⚠️ 시험 중지 - idle 상태 전송 실패: {e}")
 
@@ -2621,9 +2621,9 @@ class MyApp(SystemMainUI):
         
         # 5. 시험 취소 후 idle 상태 전송
         try:
-            api_client = APIClient(CONSTANTS.management_url)
+            api_client = APIClient()
             api_client.send_heartbeat_idle()
-            Logger.debug(f"✅ 시험 취소 - idle 상태 전송 완료")
+            Logger.info(f"✅ 시험 취소 - idle 상태 전송 완료")
         except Exception as e:
             Logger.warning(f"⚠️ 시험 취소 - idle 상태 전송 실패: {e}")
         
