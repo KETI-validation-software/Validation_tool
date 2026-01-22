@@ -21,6 +21,7 @@ from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor, QPixmap
 from PyQt5.QtCore import *
 from api.webhook_api import WebhookThread
 from api.api_server import Server  # ✅ door_memory 접근을 위한 import 추가
+from api.client import APIClient
 from core.json_checker_new import timeout_field_finder
 from core.functions import json_check_, resource_path, json_to_data, build_result_json
 from core.data_mapper import ConstraintDataGenerator
@@ -1515,6 +1516,14 @@ class MyApp(SystemMainUI):
                         Logger.debug(f" ========== finally 블록 진입 ==========")
                         self.cleanup_paused_file()
                         Logger.debug(f" ========== finally 블록 종료 ==========")
+                        
+                        # ✅ 시험 완료 - idle 상태 heartbeat 전송
+                        try:
+                            api_client = APIClient(CONSTANTS.management_url)
+                            api_client.send_heartbeat_idle()
+                            Logger.debug(f"✅ 시험 완료 - idle 상태 전송 완료")
+                        except Exception as e:
+                            Logger.warning(f"⚠️ 시험 완료 - idle 상태 전송 실패: {e}")
 
                     self.sbtn.setEnabled(True)
                     self.stop_btn.setDisabled(True)
@@ -1954,6 +1963,14 @@ class MyApp(SystemMainUI):
                     Logger.debug(f" ========== finally 블록 진입 (경로2) ==========")
                     self.cleanup_paused_file()
                     Logger.debug(f" ========== finally 블록 종료 (경로2) ==========")
+                    
+                    # ✅ 시험 완료 - idle 상태 heartbeat 전송 (경로2)
+                    try:
+                        api_client = APIClient(CONSTANTS.management_url)
+                        api_client.send_heartbeat_idle()
+                        Logger.debug(f"✅ 시험 완료 (경로2) - idle 상태 전송 완료")
+                    except Exception as e:
+                        Logger.warning(f"⚠️ 시험 완료 (경로2) - idle 상태 전송 실패: {e}")
 
                 self.sbtn.setEnabled(True)
                 self.stop_btn.setDisabled(True)
@@ -2520,6 +2537,14 @@ class MyApp(SystemMainUI):
         self.sbtn.setEnabled(True)
         self.stop_btn.setDisabled(True)
         self.cancel_btn.setDisabled(True)
+        
+        # ✅ 시험 중지 - idle 상태 heartbeat 전송
+        try:
+            api_client = APIClient(CONSTANTS.management_url)
+            api_client.send_heartbeat_idle()
+            Logger.debug(f"✅ 시험 중지 - idle 상태 전송 완료")
+        except Exception as e:
+            Logger.warning(f"⚠️ 시험 중지 - idle 상태 전송 실패: {e}")
 
         self.save_current_spec_data()
 
@@ -2591,6 +2616,14 @@ class MyApp(SystemMainUI):
         self.sbtn.setEnabled(True)
         self.stop_btn.setDisabled(True)
         self.cancel_btn.setDisabled(True)
+        
+        # ✅ 시험 취소 - idle 상태 heartbeat 전송
+        try:
+            api_client = APIClient(CONSTANTS.management_url)
+            api_client.send_heartbeat_idle()
+            Logger.debug(f"✅ 시험 취소 - idle 상태 전송 완료")
+        except Exception as e:
+            Logger.warning(f"⚠️ 시험 취소 - idle 상태 전송 실패: {e}")
         
         # 5. 모니터링 화면 초기화
         self.valResult.clear()
