@@ -249,7 +249,7 @@ def load_external_constants(constants_module):
             
             except Exception as e:
                 Logger.error(f" 외부 CONSTANTS.py 로드 실패: {e}")
-                
+            
     return spec_config
 
 # spec폴더에서 모듈 로드하는 함수

@@ -26,13 +26,6 @@ cmii7shen005i8z1tagevx4qh_SensorDeviceProfiles_in_validation = {}
 
 # RealtimeSensorData
 cmii7shen005i8z1tagevx4qh_RealtimeSensorData_in_validation = {
-  "sensorDeviceList": {
-    "enabled": True,
-    "validationType": "valid-value-match",
-    "validValueMatchType": "validation-field",
-    "validValueOperator": "equals",
-    "score": 0
-  },
   "sensorDeviceList.sensorDeviceID": {
     "enabled": True,
     "validationType": "response-field-list-match",

@@ -55,6 +55,22 @@ cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_webhook_in_validation = {
 
 # StoredSensorEventInfos
 cmii7wfuf006i8z1tcds6q69g_StoredSensorEventInfos_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "201"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "정보 없음"
+    ],
+    "score": 0
+  },
   "sensorDeviceList.sensorDeviceID": {
     "enabled": True,
     "validationType": "request-field-list-match",
@@ -118,6 +134,22 @@ cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_webhook_in_validation = {
 
 # StoredVerifEventInfos
 cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "201"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "정보 없음"
+    ],
+    "score": 0
+  },
   "doorList.doorID": {
     "enabled": True,
     "validationType": "request-field-list-match",
@@ -161,7 +193,24 @@ cmii7v8pr006g8z1tvo55a50u_Capabilities_out_validation = {}
 cmii7v8pr006g8z1tvo55a50u_CameraProfiles_out_validation = {}
 
 # StreamURLs
-cmii7v8pr006g8z1tvo55a50u_StreamURLs_out_validation = {}
+cmii7v8pr006g8z1tvo55a50u_StreamURLs_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "400"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "잘못된 요청"
+    ],
+    "score": 0
+  }
+}
 
 # RealtimeVideoEventInfos
 cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_out_validation = {}
@@ -180,6 +229,22 @@ cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_webhook_in_validation = {
 
 # StoredVideoInfos
 cmii7v8pr006g8z1tvo55a50u_StoredVideoInfos_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "201"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "정보 없음"
+    ],
+    "score": 0
+  },
   "camList.camID": {
     "enabled": True,
     "validationType": "request-field-list-match",
