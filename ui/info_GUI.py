@@ -69,6 +69,7 @@ class InfoWidget(QWidget):
         self.stacked_widget = QStackedWidget()
         self.original_test_category = None  # API에서 받아온 원래 test_category 값 보관
         self.original_test_range = None  # API에서 받아온 원래 test_range 값 보관
+        self.real_admin_code = None  # [추가] API로부터 받아온 실제 관리자 코드
         self.initUI()
 
     def initUI(self):
@@ -516,10 +517,24 @@ class InfoWidget(QWidget):
     # ---------- 페이지 전환 메서드 ----------
     def go_to_next_page(self):
         """다음 페이지로 이동 (조건 검증 후)"""
-        is_complete = self._is_page1_complete()
+        # 0. 로딩 중이면 이동 불가
+        if self.is_loading:
+            return
 
-        if not is_complete:
-            QMessageBox.warning(self,"입력 필요", "시험 정보 페이지의 모든 필수 항목을 입력해주세요.")
+        # 1. 필수 입력 항목 및 관리자 코드 검증
+        if not self.company_edit.text().strip() or not self.product_edit.text().strip():
+            QMessageBox.warning(self, "입력 필요", "시험 정보 페이지의 모든 필수 항목을 입력해주세요.")
+            return
+
+        if not self.form_validator.is_admin_code_valid():
+            if self.form_validator.is_admin_code_required():
+                QMessageBox.warning(self, "인증 실패", "관리자 코드가 올바르지 않습니다.\n다시 확인해주세요.")
+            else:
+                QMessageBox.warning(self, "입력 필요", "관리자 코드를 입력해주세요.")
+            return
+
+        if not self.test_field_table.rowCount() > 0:
+            QMessageBox.warning(self, "입력 필요", "시험 분야 데이터가 없습니다.")
             return
 
         if self.current_page < 1:
@@ -1111,6 +1126,16 @@ class InfoWidget(QWidget):
             # (UI 접근이 필요하므로 메인 스레드에서 실행)
             self.form_validator.load_opt_files_from_api(test_data)
             QApplication.processEvents()  # 스피너 애니메이션 유지
+
+            # [추가] 관리자 코드 조회
+            try:
+                self.real_admin_code = self.form_validator.api_client.fetch_admin_code()
+                if self.real_admin_code:
+                    Logger.info(f"관리자 코드 조회 성공: {self.real_admin_code}")
+                else:
+                    Logger.warning("관리자 코드를 조회할 수 없습니다.")
+            except Exception as e:
+                Logger.error(f"관리자 코드 조회 중 오류: {e}")
 
             # 플랫폼 검증일 경우 Authentication 정보 자동 입력
             self.auto_fill_authentication_for_platform()
