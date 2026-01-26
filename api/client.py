@@ -113,6 +113,48 @@ class APIClient:
             Logger.error(f"ResponseCode API 호출 실패: {e}")
             return None
 
+    def fetch_admin_code(self, base_url=None):
+        """
+        API에서 관리자 코드 가져오기
+        Args:
+            base_url (str, optional): 요청할 기본 URL. None이면 self.base_url 사용.
+        """
+        target_url = base_url if base_url else self.base_url
+        # URL 끝에 슬래시가 있다면 제거
+        target_url = target_url.rstrip('/')
+        
+        url = f"{target_url}/api/integration/admin-code"
+        try:
+            Logger.debug(f"Admin Code API 호출 중: {url}")
+            # 검증 단계이므로 짧은 타임아웃 설정
+            response = requests.get(url, timeout=5, verify=False)
+            response.raise_for_status()
+            json_data = response.json()
+            Logger.info(f"Admin Code API 전체 응답: {json_data}")
+
+            # 응답 구조 대응: "adminCode" 또는 "data" 안의 "adminCode" 또는 "data" 안의 "code"
+            if "adminCode" in json_data:
+                return json_data["adminCode"]
+            elif json_data.get("data"):
+                data_obj = json_data["data"]
+                if isinstance(data_obj, dict):
+                    if "adminCode" in data_obj:
+                        return data_obj["adminCode"]
+                    elif "code" in data_obj:
+                        return data_obj["code"]
+                
+                Logger.warning("Admin Code API 응답의 data 객체 안에 adminCode나 code가 없습니다.")
+                return None
+            else:
+                Logger.warning("Admin Code API 응답에 adminCode나 data 필드가 없습니다.")
+                return None
+        except requests.exceptions.Timeout:
+            Logger.error("Admin Code API 타임아웃")
+            return None
+        except Exception as e:
+            Logger.error(f"Admin Code API 호출 실패: {e}")
+            return None
+
     def get_local_ip_address(self):
         """현재 PC의 로컬 IP 주소를 가져옴"""
         try:
