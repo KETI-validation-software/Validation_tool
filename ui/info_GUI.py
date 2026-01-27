@@ -985,8 +985,12 @@ class InfoWidget(QWidget):
             # testPort 기반 WEBHOOK_PORT 업데이트
             if self.test_port:
                 # 1. 메모리상의 값 업데이트
+                local_ip = self.form_validator.get_local_ip_address()
+                CONSTANTS.WEBHOOK_PUBLIC_IP = local_ip
                 CONSTANTS.WEBHOOK_PORT = self.test_port + 1
-                CONSTANTS.WEBHOOK_URL = f"https://{CONSTANTS.url}:{CONSTANTS.WEBHOOK_PORT}"
+                CONSTANTS.WEBHOOK_URL = f"https://{local_ip}:{CONSTANTS.WEBHOOK_PORT}"
+                
+                Logger.info(f"[WEBHOOK] 로컬 IP 설정: {local_ip}, 포트: {CONSTANTS.WEBHOOK_PORT}")
 
                 # 2. CONSTANTS.py 파일 자체도 수정
                 try:
@@ -1003,6 +1007,11 @@ class InfoWidget(QWidget):
                     # 파일 읽기
                     with open(constants_path, 'r', encoding='utf-8') as f:
                         content = f.read()
+
+                    # WEBHOOK_PUBLIC_IP 업데이트
+                    pattern_ip = r'^WEBHOOK_PUBLIC_IP\s*=.*$'
+                    new_ip_line = f'WEBHOOK_PUBLIC_IP = "{local_ip}"'
+                    content = re.sub(pattern_ip, new_ip_line, content, flags=re.MULTILINE)
 
                     # WEBHOOK_PORT = 숫자 패턴 찾아서 치환
                     pattern_port = r'^WEBHOOK_PORT\s*=\s*\d+.*$'

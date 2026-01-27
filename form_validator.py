@@ -272,9 +272,9 @@ class FormValidator:
         # URL이 업데이트되면 WEBHOOK_PUBLIC_IP도 함께 업데이트
         if 'url' in variables:
             try:
-                from urllib.parse import urlparse
-                parsed_url = urlparse(variables['url'])
-                webhook_ip = parsed_url.hostname
+                # [수정] 접속 주소(URL) 대신 내 로컬 IP를 사용
+                webhook_ip = self.api_client.get_local_ip_address()
+                
                 if webhook_ip:
                     pattern_ip = r'^WEBHOOK_PUBLIC_IP\s*=.*$'
                     new_ip_line = f'WEBHOOK_PUBLIC_IP = "{webhook_ip}"'
@@ -284,9 +284,9 @@ class FormValidator:
                     new_url_line = f'WEBHOOK_URL = f"https://{{WEBHOOK_PUBLIC_IP}}:{{WEBHOOK_PORT}}"'
                     content = re.sub(pattern_url, new_url_line, content, flags=re.MULTILINE)
 
-                    Logger.info(f"[WEBHOOK] 시험 URL에서 IP 추출: {webhook_ip}")
+                    Logger.info(f"[WEBHOOK] 로컬 IP로 웹훅 설정: {webhook_ip}")
             except Exception as e:
-                Logger.error(f"[WEBHOOK] URL 파싱 실패: {e}")
+                Logger.error(f"[WEBHOOK] IP 설정 실패: {e}")
 
         for var_name, var_value in variables.items():
             if isinstance(var_value, str):

@@ -158,9 +158,24 @@ class APIClient:
     def get_local_ip_address(self):
         """현재 PC의 로컬 IP 주소를 가져옴"""
         try:
-            # 외부에 연결을 시도하여 로컬 IP 확인 (실제 연결하지 않음)
+            target_host = "8.8.8.8"
+            target_port = 80
+
+            # CONSTANTS.url에서 타겟 호스트 추출 시도
+            try:
+                import config.CONSTANTS as CONSTANTS
+                if hasattr(CONSTANTS, 'url') and CONSTANTS.url:
+                    from urllib.parse import urlparse
+                    parsed = urlparse(CONSTANTS.url)
+                    if parsed.hostname:
+                        target_host = parsed.hostname
+                        target_port = parsed.port if parsed.port else (443 if parsed.scheme == 'https' else 80)
+            except Exception:
+                pass
+
+            # 타겟 서버와 통신을 시도하여 로컬 IP 확인 (실제 연결하지 않음)
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            s.connect(("8.8.8.8", 80))
+            s.connect((target_host, target_port))
             ip = s.getsockname()[0]
             s.close()
             return ip
