@@ -123,7 +123,7 @@ enable_retry_delay = False  # False 권장: 불필요한 sleep 제거
 - 2 (INFO): 1 + 검증 과정, 매핑 정보
 - 3 (DEBUG): 모든 디버그 정보 출력 (상세)
 '''
-DEBUG_LEVEL = 3  # 기본값: WARN (권장)
+DEBUG_LEVEL = 1  # 기본값: WARN (권장)
 
 # test-opt
 '''
