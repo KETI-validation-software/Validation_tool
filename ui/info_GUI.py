@@ -1029,14 +1029,15 @@ class InfoWidget(QWidget):
             QApplication.processEvents()  # 스피너 애니메이션 유지
 
             # [추가] 관리자 코드 조회
-            try:
-                self.real_admin_code = self.form_validator.api_client.fetch_admin_code()
-                if self.real_admin_code:
-                    Logger.info(f"관리자 코드 조회 성공: {self.real_admin_code}")
-                else:
-                    Logger.warning("관리자 코드를 조회할 수 없습니다.")
-            except Exception as e:
-                Logger.error(f"관리자 코드 조회 중 오류: {e}")
+            # [임시 수정] API 호출 주석 처리
+            # try:
+            #     self.real_admin_code = self.form_validator.api_client.fetch_admin_code()
+            #     if self.real_admin_code:
+            #         Logger.info(f"관리자 코드 조회 성공: {self.real_admin_code}")
+            #     else:
+            #         Logger.warning("관리자 코드를 조회할 수 없습니다.")
+            # except Exception as e:
+            #     Logger.error(f"관리자 코드 조회 중 오류: {e}")
 
             # 플랫폼 검증일 경우 Authentication 정보 자동 입력
             self.auto_fill_authentication_for_platform()

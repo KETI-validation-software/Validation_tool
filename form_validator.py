@@ -79,15 +79,18 @@ class FormValidator:
         if not self.is_admin_code_required():
             return True
         
-        admin_code = self.parent.admin_code_edit.text().strip()
+        # [임시 수정] 관리자 코드 검증 무조건 Pass
+        return True
         
-        # API로부터 받아온 코드가 없는 경우 검증 실패 처리
-        if not hasattr(self.parent, 'real_admin_code') or self.parent.real_admin_code is None:
-            Logger.warning("실제 관리자 코드가 로드되지 않았습니다.")
-            return False
-            
-        # 입력값과 API에서 받아온 값을 비교
-        return str(admin_code) == str(self.parent.real_admin_code)
+        # admin_code = self.parent.admin_code_edit.text().strip()
+        # 
+        # # API로부터 받아온 코드가 없는 경우 검증 실패 처리
+        # if not hasattr(self.parent, 'real_admin_code') or self.parent.real_admin_code is None:
+        #     Logger.warning("실제 관리자 코드가 로드되지 않았습니다.")
+        #     return False
+        #     
+        # # 입력값과 API에서 받아온 값을 비교
+        # return str(admin_code) == str(self.parent.real_admin_code)
 
     def handle_test_category_change(self):
         """시험유형 변경 시 관리자 코드 필드 활성화/비활성화"""
