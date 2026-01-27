@@ -20,10 +20,10 @@
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 68.42,
-    "totalFields": 76,
-    "passedFields": 52,
-    "failedFields": 24
+    "score": 100.0,
+    "totalFields": 46,
+    "passedFields": 46,
+    "failedFields": 0
   },
   "testResult": [
     {
@@ -305,5 +305,5 @@
       ]
     }
   ],
-  "completedDate": "2026-01-27T06:29:32Z"
+  "completedDate": "2026-01-27T07:29:00Z"
 }
