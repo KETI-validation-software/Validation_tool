@@ -1224,12 +1224,48 @@ class CommonMainUI(QWidget):
 
         self.valResult.append(html_content)
 
-        # 자동 스크롤
         self.valResult.verticalScrollBar().setValue(
             self.valResult.verticalScrollBar().maximum()
         )
 
+    def update_last_line_timer(self, message, remove=False):
+        """
+        valResult의 마지막 줄을 확인하여 타이머 메시지이면 업데이트하고,
+        아니면 새로 추가하는 메서드. remove=True이면 해당 줄을 삭제함.
+        """
+        cursor = self.valResult.textCursor()
+        cursor.movePosition(cursor.End)
+        cursor.select(cursor.BlockUnderCursor)
+        last_line_text = cursor.selectedText()
+        
+        # HTML 태그 제거 및 텍스트 추출 (간단한 방식)
+        import re
+        clean_text = re.sub('<[^<]+?>', '', last_line_text).strip()
 
+        timer_prefix = "남은 대기 시간:"
+        
+        if timer_prefix in clean_text:
+            # 마지막 줄이 타이머이면 교체 또는 삭제
+            cursor.removeSelectedText()
+            if not remove:
+                # 줄바꿈 없이 바로 텍스트 삽입 (이전 줄이 지워졌으므로)
+                # HTML 스타일 적용
+                html_msg = f"<div style='font-size: 18px; font-weight: bold; color: #FF5722; font-family: \"Noto Sans KR\";'>{message}</div>"
+                cursor.insertHtml(html_msg)
+            else:
+                # 삭제 시 줄바꿈이 남을 수 있으므로 이전 줄바꿈도 제거 시도
+                cursor.deletePreviousChar()
+        else:
+            # 마지막 줄이 타이머가 아니면 새로 추가 (remove=True일 때는 무시)
+            if not remove:
+                # append 대신 HTML 직접 삽입으로 제어
+                html_msg = f"<div style='font-size: 18px; font-weight: bold; color: #FF5722; font-family: \"Noto Sans KR\"; margin-top: 10px;'>{message}</div>"
+                self.valResult.append(html_msg)
+
+        # 스크롤 최하단으로 이동
+        self.valResult.verticalScrollBar().setValue(
+            self.valResult.verticalScrollBar().maximum()
+        )
 
     def create_spec_score_display_widget(self):
         """메인 화면에 표시할 시험 분야별 평가 점수 위젯"""

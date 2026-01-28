@@ -9,34 +9,36 @@
   },
   "testGroups": [
     {
-      "id": "cmk4tgs2c1enwcfb3sbsbdgrd",
-      "name": "제어 기능 시험-바이오인식 기반 출입통제 시스템",
-      "testRange": "전체 필드",
+      "id": "cmjcefmh8070gcfb35wjptcsl",
+      "name": "기본 기능 시험-영상보안시스템",
+      "testRange": "전체 필드, 전체 필드, 전체 필드",
       "testSpecIds": [
-        "cmiqr1jha00i6ie8fb1scb3go"
+        "cmii7wfuf006i8z1tcds6q69g",
+        "cmii7w683006h8z1t7usnin5g",
+        "cmii7v8pr006g8z1tvo55a50u"
       ]
     }
   ],
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 100.0,
-    "totalFields": 46,
-    "passedFields": 46,
-    "failedFields": 0
+    "score": 83.72,
+    "totalFields": 43,
+    "passedFields": 36,
+    "failedFields": 7
   },
   "testResult": [
     {
-      "testGroup": "cmk4tgs2c1enwcfb3sbsbdgrd",
-      "testSpecId": "cmiqr1jha00i6ie8fb1scb3go",
-      "testSpecName": "ac002",
-      "score": 100.0,
-      "totalFields": 46,
-      "passedFields": 46,
-      "failedFields": 0,
+      "testGroup": "cmjcefmh8070gcfb35wjptcsl",
+      "testSpecId": "cmii7wfuf006i8z1tcds6q69g",
+      "testSpecName": "sensor001",
+      "score": 83.72,
+      "totalFields": 43,
+      "passedFields": 36,
+      "failedFields": 7,
       "apis": [
         {
-          "id": "cmisgv0ua08o55vy7yvk4aw0a",
+          "id": "cmii82age008k8z1t71s85tbz",
           "name": "사용자 인증",
           "method": "POST",
           "endpoint": "/Authentication",
@@ -53,7 +55,7 @@
                 "message": "성공",
                 "userName": "관리자",
                 "userAff": "오산시청",
-                "accessToken": ""
+                "accessToken": "abcde1234"
               },
               "validationErrors": [
                 "[시도 1/1]",
@@ -63,7 +65,7 @@
           ]
         },
         {
-          "id": "cmisjr2u40au05vy7kt6bb6zl",
+          "id": "cmiwtm84f0an2p002pthrkfbj",
           "name": "전송 지원 기능 정보 연동",
           "method": "POST",
           "endpoint": "/Capabilities",
@@ -80,10 +82,6 @@
                 "message": "성공",
                 "transportSupport": [
                   {
-                    "transProtocolType": "LongPolling",
-                    "transProtocolDesc": ""
-                  },
-                  {
                     "transProtocolType": "Webhook",
                     "transProtocolDesc": ""
                   }
@@ -97,14 +95,14 @@
           ]
         },
         {
-          "id": "cmiskf6w20dcm5vy7cjao08fw",
-          "name": "바이오 및 출입통제 장치 목록 정보",
+          "id": "cmiwtnnvx0ar8p002dcz8llaf",
+          "name": "보안용 센서 단말 목록 정보 연동",
           "method": "POST",
-          "endpoint": "/DoorProfiles",
+          "endpoint": "/SensorDeviceProfiles",
           "score": 100.0,
           "validationCnt": 1,
-          "totalFields": 20,
-          "passFields": 20,
+          "totalFields": 11,
+          "passFields": 11,
           "failFields": 0,
           "validations": [
             {
@@ -112,74 +110,28 @@
               "validationData": {
                 "code": "200",
                 "message": "성공",
-                "doorList": [
+                "sensorDeviceList": [
                   {
-                    "doorID": "door0001",
-                    "doorName": "A건물 출입문",
-                    "doorRelayStatus": "일반",
-                    "doorSensor": "0",
-                    "doorLoc": {
+                    "sensorDeviceID": "iot0001",
+                    "sensorDeviceType": "온도",
+                    "sensorDeviceName": "온도 센서",
+                    "sensorDeviceLoc": {
                       "lon": "127.127730",
                       "lat": "38.439801",
                       "alt": "32.131",
                       "desc": "3층복도"
-                    },
-                    "bioDeviceList": [
-                      {
-                        "bioDeviceID": "bio0001",
-                        "otherDeviceName": "출입문홍채인식기기",
-                        "bioDeviceAuthTypeList": [
-                          "홍채",
-                          "지문"
-                        ]
-                      },
-                      {
-                        "bioDeviceID": "bio0002",
-                        "bioDeviceName": "출입문지문인식기기",
-                        "bioDeviceAuthTypeList": [
-                          "지문"
-                        ]
-                      }
-                    ],
-                    "otherDeviceList": [
-                      {
-                        "otherDeviceID": "other0001",
-                        "otherDeviceName": "출입문카드인식기기",
-                        "otherDeviceAuthTypeList": [
-                          "카드"
-                        ]
-                      }
-                    ]
+                    }
                   },
                   {
-                    "doorID": "door0002",
-                    "doorName": "B건물 출입문",
-                    "doorRelayStatus": "수동 개방",
-                    "doorSensor": "0",
-                    "doorLoc": {
-                      "lon": "233",
-                      "lat": "123",
-                      "alt": "23",
-                      "desc": "333"
-                    },
-                    "bioDeviceList": [
-                      {
-                        "bioDeviceID": "bio0002",
-                        "bioDeviceName": "정맥인식기기",
-                        "bioDeviceAuthTypeList": [
-                          "정맥"
-                        ]
-                      }
-                    ],
-                    "otherDeviceList": [
-                      {
-                        "otherDeviceID": "other0002",
-                        "otherDeviceName": "카드인식기기",
-                        "otherDeviceAuthTypeList": [
-                          "카드"
-                        ]
-                      }
-                    ]
+                    "sensorDeviceID": "iot0002",
+                    "sensorDeviceType": "온도",
+                    "sensorDeviceName": "온도 센서",
+                    "sensorDeviceLoc": {
+                      "lon": "127.127730",
+                      "lat": "38.439801",
+                      "alt": "",
+                      "desc": ""
+                    }
                   }
                 ]
               },
@@ -191,21 +143,21 @@
           ]
         },
         {
-          "id": "cmixuoetf0gr9p002gy101xid-registration",
-          "name": "실시간 출입통제 장치 상태 정보 연동-상태조회",
+          "id": "cmiwtr5xt0boqp002melvctad-registration",
+          "name": "실시간 보안용 센서 데이터 정보 연동",
           "method": "POST",
-          "endpoint": "/RealtimeDoorStatus",
+          "endpoint": "/RealtimeSensorData",
           "score": 100.0,
           "validationCnt": 1,
-          "totalFields": 7,
-          "passFields": 7,
+          "totalFields": 8,
+          "passFields": 8,
           "failFields": 0,
           "validations": [
             {
               "attempt": 1,
               "validationData": {
-                "code": "성공",
-                "message": "200"
+                "code": "200",
+                "message": "성공"
               },
               "validationErrors": [
                 "[시도 1/1]",
@@ -217,10 +169,10 @@
           ]
         },
         {
-          "id": "cmixuoetf0gr9p002gy101xid-webhook",
-          "name": "실시간 출입통제 장치 상태 정보 연동-상태조회 (Webhook)",
+          "id": "cmiwtr5xt0boqp002melvctad-webhook",
+          "name": "실시간 보안용 센서 데이터 정보 연동 (Webhook)",
           "method": "POST",
-          "endpoint": "/RealtimeDoorStatus/webhook",
+          "endpoint": "/RealtimeSensorData/webhook",
           "score": 0,
           "validationCnt": 1,
           "totalFields": 0,
@@ -235,34 +187,10 @@
           ]
         },
         {
-          "id": "cmixuttgv0hbyp002h6os6wjc",
-          "name": "출입 통제 장치 제어 정보 연동",
+          "id": "cmiwv1ifx0ddmp0023tuwdhoi-registration",
+          "name": "실시간 보안용 센서 이벤트 분석 정보 연동",
           "method": "POST",
-          "endpoint": "/DoorControl",
-          "score": 100.0,
-          "validationCnt": 1,
-          "totalFields": 2,
-          "passFields": 2,
-          "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "validationData": {
-                "code": "200",
-                "message": "성공"
-              },
-              "validationErrors": [
-                "[시도 1/1]",
-                "오류가 없습니다."
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cmixuvzks0hd3p002rcrvqdt4-registration",
-          "name": "실시간 출입통제 장치 상태 정보 연동-결과조회",
-          "method": "POST",
-          "endpoint": "/RealtimeDoorStatus",
+          "endpoint": "/RealtimeSensorEventInfos",
           "score": 100.0,
           "validationCnt": 1,
           "totalFields": 7,
@@ -285,10 +213,10 @@
           ]
         },
         {
-          "id": "cmixuvzks0hd3p002rcrvqdt4-webhook",
-          "name": "실시간 출입통제 장치 상태 정보 연동-결과조회 (Webhook)",
+          "id": "cmiwv1ifx0ddmp0023tuwdhoi-webhook",
+          "name": "실시간 보안용 센서 이벤트 분석 정보 연동 (Webhook)",
           "method": "POST",
-          "endpoint": "/RealtimeDoorStatus/webhook",
+          "endpoint": "/RealtimeSensorEventInfos/webhook",
           "score": 0,
           "validationCnt": 1,
           "totalFields": 0,
@@ -299,11 +227,50 @@
               "attempt": 1,
               "validationData": {},
               "validationErrors": []
+            }
+          ]
+        },
+        {
+          "id": "cmixtu5uk0dg5p002kq3htt9b",
+          "name": "저장된 보안용 센서 이벤트 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/StoredSensorEventInfos",
+          "score": 0.0,
+          "validationCnt": 1,
+          "totalFields": 7,
+          "passFields": 0,
+          "failFields": 7,
+          "validations": [
+            {
+              "attempt": 1,
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "sensorDeviceList": [
+                  {
+                    "sensorDeviceID": "iot0001",
+                    "eventName": "Leak",
+                    "eventTime": 19814066948735977,
+                    "eventDesc": "100도"
+                  },
+                  {
+                    "sensorDeviceID": "iot0002",
+                    "eventName": "Leak",
+                    "eventTime": 307451228683871,
+                    "eventDesc": "100도"
+                  }
+                ]
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "<b>[기타]</b> (1건)",
+                "- [맥락 오류] code 맥락 검증 실패: 예상값 201, 실제값 200"
+              ]
             }
           ]
         }
       ]
     }
   ],
-  "completedDate": "2026-01-27T07:35:43Z"
+  "completedDate": "2026-01-28T05:27:56Z"
 }

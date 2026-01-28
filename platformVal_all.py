@@ -429,6 +429,7 @@ class MyApp(PlatformMainUI):
                 Logger.debug(f" 첫 틱 대기: time_pre={self.time_pre}, cnt={self.cnt}, cnt_pre={self.cnt_pre}")
                 self.time_pre = time.time()
                 self.cnt_pre = self.cnt
+                self.step_start_log_printed = False # ✅ 단계 변경 시 플래그 리셋
                 return
             else:
                 time_interval = time.time() - self.time_pre
@@ -444,6 +445,17 @@ class MyApp(PlatformMainUI):
             if current_timeout == 0 or time_interval < current_timeout:
                 # 시스템 요청 확인
                 api_name = self.Server.message[self.cnt]
+                
+                # ✅ 대기 시작 시 로그 먼저 출력 (최초 1회)
+                if not self.step_start_log_printed:
+                    current_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
+                    display_name = self.Server.message_display[self.cnt] if self.cnt < len(self.Server.message_display) else "Unknown"
+                    self.append_monitor_log(
+                        step_name=f"시험 API: {display_name} (시도 {self.current_retry + 1}/{current_retries})",
+                        details="시스템 요청 대기 중..."
+                    )
+                    self.step_start_log_printed = True
+
                 Logger.debug(f" API 처리 시작: {api_name}")
 
                 current_validation = {}
@@ -477,16 +489,23 @@ class MyApp(PlatformMainUI):
 
                 # 요청이 도착하지 않았으면 대기
                 if not request_received:
+                    # ✅ 대기 시간 타이머 표시 (마지막 줄 갱신)
+                    remaining = max(0, int(current_timeout - time_interval))
+                    self.update_last_line_timer(f"남은 대기 시간: {remaining}초")
+
                     if self.current_retry == 0:
                         Logger.debug(f"능동 대기(WAIT): 시스템 요청 대기 중 (API: {api_name}, 예상: {expected_count}회, 실제: {actual_count}회)")
                     return
+                
+                # ✅ 요청 수신 완료 - 타이머 라인 제거
+                self.update_last_line_timer("", remove=True)
 
                 request_arrival_time = time.time()
                 expected_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
                 Logger.debug(f" ✅ 요청 도착 감지! API: {api_name}, 시도: {self.current_retry + 1}/{expected_retries}")
 
                 display_name = self.Server.message_display[self.cnt] if self.cnt < len(self.Server.message_display) else "Unknown"
-                message_name = "step " + str(self.cnt + 1) + ": " + display_name
+                message_name = "시험 API: " + display_name
 
                 # SPEC_CONFIG에서 검증 설정 가져오기
                 current_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
@@ -631,13 +650,13 @@ class MyApp(PlatformMainUI):
                     # ✅ 실시간 모니터링 출력
                     if retry_attempt == 0:
                         self.append_monitor_log(
-                            step_name=f"시스템 요청 수신: {self.Server.message[self.cnt]} (시도 {retry_attempt + 1}/{current_retries})",
+                            step_name=f"시험 API: {self.Server.message[self.cnt]} (시도 {retry_attempt + 1}/{current_retries})",
                             request_json=tmp_res_auth,
                             details=f"총 {current_retries}회 검증 예정"
                         )
                     else:
                         self.append_monitor_log(
-                            step_name=f"시스템 요청 수신 (시도 {retry_attempt + 1}/{current_retries})",
+                            step_name=f"시험 API (시도 {retry_attempt + 1}/{current_retries})",
                             request_json=tmp_res_auth
                         )
 
@@ -942,7 +961,7 @@ class MyApp(PlatformMainUI):
                     
                     # 최종 결과는 데이터 없이 점수와 상태만 표시 (데이터는 이미 실시간으로 출력됨)
                     self.append_monitor_log(
-                        step_name=f"결과: {display_name} ({current_retries}회 검증 완료)",
+                        step_name=f"시험 API 결과: {display_name} ({current_retries}회 검증 완료)",
                         request_json="",  # 데이터는 이미 출력되었으므로 빈 문자열
                         result_status=final_result,
                         score=score_value,
@@ -1036,7 +1055,7 @@ class MyApp(PlatformMainUI):
                 # 타임아웃 결과를 HTML 카드로 출력
                 api_name = self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else "Unknown"
                 self.append_monitor_log(
-                    step_name=f"Step {self.cnt + 1}: {api_name}",
+                    step_name=f"시험 API: {api_name}",
                     request_json="",
                     score=score_value,
                     details=f"⏱️ Timeout ({current_timeout}초) - Message Missing! | 통과: {self.total_pass_cnt}, 오류: {self.total_error_cnt}"
@@ -1067,7 +1086,7 @@ class MyApp(PlatformMainUI):
                 self.append_monitor_log(
                     step_name="시험 완료",
                     request_json="",
-                    details="검증 절차가 완료되었습니다."
+                    details="시험이 완료되었습니다."
                 )
                 self.cnt = 0
 
@@ -1844,6 +1863,7 @@ class MyApp(PlatformMainUI):
                 self.current_retry = 0
                 self.realtime_flag = False
                 self.tmp_msg_append_flag = False
+                self.step_start_log_printed = False # ✅ 플래그 초기화
 
                 # ✅ 5. 현재 spec의 점수만 초기화
                 self.total_error_cnt = 0
@@ -2079,7 +2099,7 @@ class MyApp(PlatformMainUI):
             
             # ✅ 19. 시작 메시지 출력
             self.append_monitor_log(
-                step_name="플랫폼 검증 시작",
+                step_name="시험 시작",
                 details=f"API 개수: {len(self.videoMessages)}개"
             )
 
@@ -2117,7 +2137,7 @@ class MyApp(PlatformMainUI):
                 self.append_monitor_log(
                     step_name="서버 준비 완료"
                 )
-
+ 
             # ✅ 21. 타이머 시작 (모든 초기화 완료 후)
             Logger.debug(f" 타이머 시작")
             self.tick_timer.start(1000)

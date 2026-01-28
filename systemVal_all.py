@@ -343,6 +343,7 @@ class MyApp(SystemMainUI):
         self.webhook_cnt = 99
         self.reference_context = {}  # 맥락검증 참조 컨텍스트
         self.webhook_schema_idx = 0  # ✅ 웹훅 스키마 인덱스 추가
+        self.step_start_log_printed = False # ✅ 단계 시작 로그 출력 여부 플래그
 
     def save_current_spec_data(self):
         """현재 spec의 테이블 데이터와 상태를 저장 (state_manager 위임)"""
@@ -1252,13 +1253,14 @@ class MyApp(SystemMainUI):
             # cnt가 리스트 길이 이상이면 종료 처리 (무한 반복 방지)
             if self.cnt >= len(self.message) or self.cnt >= len(self.time_outs):
                 self.tick_timer.stop()
-                self.valResult.append("검증 절차가 완료되었습니다.")
+                self.valResult.append("시험이 완료되었습니다.")
                 self.cnt = 0
                 return
             # 플랫폼과 동일하게 time_pre/cnt_pre 조건 적용
             if self.time_pre == 0 or self.cnt != self.cnt_pre:
                 self.time_pre = time.time()
                 self.cnt_pre = self.cnt
+                self.step_start_log_printed = False # ✅ 플래그 리셋
                 return  # 첫 틱에서는 대기만 하고 리턴
             else:
                 time_interval = time.time() - self.time_pre
@@ -1269,9 +1271,17 @@ class MyApp(SystemMainUI):
                 Logger.debug(f"웹훅 이벤트 수신 완료 (API: {api_name})")
                 if self.webhook_res != None:
                     Logger.warn(f" 웹훅 메시지 수신")
+                    # ✅ 타이머 라인 제거
+                    self.update_last_line_timer("", remove=True)
                 elif math.ceil(time_interval) >= self.time_outs[self.cnt] / 1000 - 1:
                     Logger.warn(f" 메시지 타임아웃! 웹훅 대기 종료")
+                    # ✅ 타이머 라인 제거
+                    self.update_last_line_timer("", remove=True)
                 else :
+                    # ✅ 대기 시간 타이머 표시 (마지막 줄 갱신)
+                    remaining = max(0, int((self.time_outs[self.cnt] / 1000) - time_interval))
+                    self.update_last_line_timer(f"남은 대기 시간: {remaining}초")
+                    
                     Logger.debug(f" 웹훅 대기 중... (API {self.cnt}) 타임아웃 {round(time_interval)} /{round(self.time_outs[self.cnt] / 1000)}")
                     return
             if (self.post_flag is False and
@@ -1289,6 +1299,14 @@ class MyApp(SystemMainUI):
                     self.message_name = "step " + str(self.cnt + 1) + ": " + display_name + retry_info
                 else:
                     self.message_name = f"step {self.cnt + 1}: (index out of range)" + retry_info
+
+                # ✅ 요청 전송 전 로그 출력 (최초 1회)
+                if not self.step_start_log_printed:
+                    self.append_monitor_log(
+                        step_name=f"시험 API: {display_name} (시도 {self.current_retry + 1}/{self.num_retries_list[self.cnt]})",
+                        details="요청 전송 중..."
+                    )
+                    self.step_start_log_printed = True
 
                 # 첫 번째 시도일 때만 메시지 표시 - 제거 (응답 처리 시 표시)
                 # if self.current_retry == 0:
@@ -1406,7 +1424,7 @@ class MyApp(SystemMainUI):
                 api_name = self.message[self.cnt] if self.cnt < len(self.message) else "Unknown"
                 timeout_sec = self.time_outs[self.cnt] / 1000 if self.cnt < len(self.time_outs) else 0
                 self.append_monitor_log(
-                    step_name=f"Step {self.cnt + 1}: {api_name}",
+                    step_name=f"시험 API: {api_name}",
                     request_json="",
                     score=score_value,
                     details=f"⏱️ Timeout ({timeout_sec}초) - Message Missing! (시도 {self.current_retry + 1}/{current_retries}) | 통과: {self.total_pass_cnt}, 오류: {self.total_error_cnt}"
@@ -1471,7 +1489,7 @@ class MyApp(SystemMainUI):
 
                 if self.cnt >= len(self.message):
                     self.tick_timer.stop()
-                    self.valResult.append("검증 절차가 완료되었습니다.")
+                    self.valResult.append("시험이 완료되었습니다.")
 
                     # ✅ 현재 spec 데이터 저장
                     self.save_current_spec_data()
@@ -1532,7 +1550,17 @@ class MyApp(SystemMainUI):
 
             # 응답이 도착한 경우 처리
             elif self.post_flag == True:
+                if self.res is None:
+                    # ✅ 대기 시간 타이머 표시 (마지막 줄 갱신)
+                    current_timeout = self.time_outs[self.cnt] / 1000 if self.cnt < len(self.time_outs) else 5.0
+                    remaining = max(0, int(current_timeout - time_interval))
+                    self.update_last_line_timer(f"남은 대기 시간: {remaining}초")
+
                 if self.res != None:
+                    # ✅ 응답 수신 완료 - 타이머 라인 제거 (웹훅 대기가 아닐 때만)
+                    if not self.webhook_flag:
+                        self.update_last_line_timer("", remove=True)
+                    
                     # 응답 처리 시작
                     if self.res != None:
                         # 응답 처리 시작
@@ -1587,7 +1615,7 @@ class MyApp(SystemMainUI):
                             api_name = self.message[self.cnt] if self.cnt < len(self.message) else "Unknown"
                             display_name = self.message_display[self.cnt] if self.cnt < len(self.message_display) else api_name
                             self.append_monitor_log(
-                                step_name=f"Step {self.cnt + 1}: {display_name} ({self.current_retry + 1}/{current_retries})",
+                                step_name=f"시험 API: {display_name} ({self.current_retry + 1}/{current_retries})",
                                 details=f"총 {current_retries}회 검증 예정",
                                 request_json=tmp_res_auth
                             )
@@ -1596,7 +1624,7 @@ class MyApp(SystemMainUI):
                             api_name = self.message[self.cnt] if self.cnt < len(self.message) else "Unknown"
                             display_name = self.message_display[self.cnt] if self.cnt < len(self.message_display) else api_name
                             self.append_monitor_log(
-                                step_name=f"Step {self.cnt + 1}: {display_name} ({self.current_retry + 1}/{current_retries})",
+                                step_name=f"시험 API: {display_name} ({self.current_retry + 1}/{current_retries})",
                                 request_json=tmp_res_auth
                             )
 
@@ -1821,9 +1849,9 @@ class MyApp(SystemMainUI):
                     api_name = self.message[self.cnt] if self.cnt < len(self.message) else "Unknown"
                     display_name = self.message_display[self.cnt] if self.cnt < len(self.message_display) else api_name
                     if current_protocol == "WebHook":
-                        step_title = f"결과: {display_name} - 웹훅 구독 ({self.current_retry + 1}/{current_retries})"
+                        step_title = f"시험 API 결과: {display_name} - 웹훅 구독 ({self.current_retry + 1}/{current_retries})"
                     else:
-                        step_title = f"결과: {display_name} ({self.current_retry + 1}/{current_retries})"
+                        step_title = f"시험 API 결과: {display_name} ({self.current_retry + 1}/{current_retries})"
                     
                     # 마지막 시도에만 점수 표시, 진행중에는 표시 안함
                     if self.current_retry + 1 >= current_retries:
@@ -1835,7 +1863,7 @@ class MyApp(SystemMainUI):
                             request_json="",  # 데이터는 앞서 출력되었으므로 생략
                             result_status=final_result,
                             score=score_value,
-                            details=f"통과: {total_pass_count}, 오류: {total_error_count} | {'일반 메시지' if current_protocol.lower() == 'basic' else f'실시간 메시지: {current_protocol}'}"
+                            details=f"통과 필드 수: {total_pass_count}, 실패 필드 수: {total_error_count} | {'일반 메시지' if current_protocol.lower() == 'basic' else f'실시간 메시지: {current_protocol}'}"
                         )
                     else:
                         # 중간 시도 - 진행중 표시
@@ -1909,7 +1937,7 @@ class MyApp(SystemMainUI):
                 self.tick_timer.stop()
                 self.append_monitor_log(
                     step_name="시험 완료",
-                    details="검증 절차가 완료되었습니다."
+                    details="시험이 완료되었습니다."
                 )
 
                 # ✅ 현재 spec 데이터 저장
