@@ -1143,7 +1143,7 @@ class MyApp(SystemMainUI):
                 key_error_cnt += tmp_fields_opt_cnt
 
             val_result = "FAIL"
-            val_text = "Webhook Message Missing!"
+            val_text = "웹훅 메시지 미수신"
             key_psss_cnt = 0
             opt_correct = 0
             opt_error = tmp_fields_opt_cnt if self.flag_opt else 0
@@ -1159,23 +1159,29 @@ class MyApp(SystemMainUI):
         if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
             Logger.debug(f" ==========================================\n")
 
-        self.valResult.append(
-            f'<div style="font-size: 20px; font-weight: bold; color: #333; font-family: \'Noto Sans KR\'; margin-top: 10px;">{message_name}</div>')
-        self.valResult.append(
-            '<div style="font-size: 18px; font-weight: bold; color: #333; font-family: \'Noto Sans KR\'; margin-top: 5px;">웹훅 이벤트 데이터</div>')
-        self.valResult.append(
-            f'<pre style="font-size: 18px; color: #1f2937; font-family: \'Consolas\', monospace; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 10px; margin: 5px 0;">{tmp_webhook_res}</pre>')
+        # ✅ 타이머 라인 제거 (안전장치)
+        self.update_last_line_timer("", remove=True)
 
-        if val_result == "PASS":
-            self.valResult.append(
-                f'<div style="font-size: 18px; color: #10b981; font-family: \'Noto Sans KR\'; margin-top: 5px;">웹훅 검증 결과: {val_result}</div>')
-            self.valResult.append(
-                '<div style="font-size: 18px; color: #10b981; font-family: \'Noto Sans KR\';">웹훅 데이터 검증 성공</div>')
+        if self.webhook_cnt < len(self.num_retries_list):
+            current_retries = self.num_retries_list[self.webhook_cnt]
         else:
-            self.valResult.append(
-                f'<div style="font-size: 18px; color: #ef4444; font-family: \'Noto Sans KR\'; margin-top: 5px;">웹훅 검증 결과: {val_result}</div>')
-            self.valResult.append(
-                '<div style="font-size: 18px; color: #ef4444; font-family: \'Noto Sans KR\';">웹훅 데이터 검증 실패</div>')
+            current_retries = 1
+
+        display_name = self.message_display[self.webhook_cnt] if self.webhook_cnt < len(self.message_display) else "Unknown"
+        
+        # 상세 결과 텍스트 구성
+        if val_result == "PASS":
+            detail_msg = f"웹훅 검증 결과: PASS | 통과 필드 수: {key_psss_cnt}, 실패 필드 수: {key_error_cnt}"
+        else:
+            detail_msg = f"웹훅 검증 결과: FAIL | 통과 필드 수: {key_psss_cnt}, 실패 필드 수: {key_error_cnt}\n{to_detail_text(val_text)}"
+
+        # ✅ append_monitor_log 사용하여 디자인 통일
+        self.append_monitor_log(
+            step_name=f"웹훅 이벤트 수신: {display_name}",
+            request_json=tmp_webhook_res,
+            result_status=val_result,
+            details=detail_msg
+        )
 
         # ✅ step_pass_counts 배열에 웹훅 결과 추가 (배열이 없으면 생성하지 않음)
         # 점수 업데이트는 모든 재시도 완료 후에 일괄 처리됨 (플랫폼과 동일)
@@ -1304,7 +1310,8 @@ class MyApp(SystemMainUI):
                 if not self.step_start_log_printed:
                     self.append_monitor_log(
                         step_name=f"시험 API: {display_name} (시도 {self.current_retry + 1}/{self.num_retries_list[self.cnt]})",
-                        details="요청 전송 중..."
+                        details="요청 전송 중...",
+                        is_temp=True
                     )
                     self.step_start_log_printed = True
 
@@ -1427,7 +1434,7 @@ class MyApp(SystemMainUI):
                     step_name=f"시험 API: {api_name}",
                     request_json="",
                     score=score_value,
-                    details=f"⏱️ Timeout ({timeout_sec}초) - Message Missing! (시도 {self.current_retry + 1}/{current_retries}) | 통과 필드 수: {self.total_pass_cnt}, 실패 필드 수: {self.total_error_cnt}"
+                    details=f"⏱️ 메시지 수신 타임아웃({timeout_sec}초) -> 메시지 미수신 (시도 {self.current_retry + 1}/{current_retries}) | 통과 필드 수: {self.total_pass_cnt}, 실패 필드 수: {self.total_error_cnt}"
                 )
 
                 # 재시도 카운터 증가
@@ -1448,7 +1455,7 @@ class MyApp(SystemMainUI):
                     # 모든 재시도 완료 - 버퍼에 최종 결과 저장
                     self.step_buffers[self.cnt]["data"] = "타임아웃으로 인해 수신된 데이터가 없습니다."
                     current_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
-                    self.step_buffers[self.cnt]["error"] = f"Message Missing! - 모든 시도({current_retries}회)에서 타임아웃 발생"
+                    self.step_buffers[self.cnt]["error"] = f"메시지 미수신 - 모든 시도({current_retries}회)에서 타임아웃 발생"
                     self.step_buffers[self.cnt]["result"] = "FAIL"
                     self.step_buffers[self.cnt]["events"] = list(self.trace.get(self.cnt, []))
 
@@ -1464,7 +1471,7 @@ class MyApp(SystemMainUI):
                     # 평가 점수 디스플레이 업데이트
                     self.update_score_display()
                     # 테이블 업데이트 (Message Missing)
-                    self.update_table_row_with_retries(self.cnt, "FAIL", 0, add_err, "", "Message Missing!",
+                    self.update_table_row_with_retries(self.cnt, "FAIL", 0, add_err, "", "메시지 미수신",
                                                        current_retries)
 
                     # 다음 API로 이동

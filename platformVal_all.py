@@ -452,7 +452,8 @@ class MyApp(PlatformMainUI):
                     display_name = self.Server.message_display[self.cnt] if self.cnt < len(self.Server.message_display) else "Unknown"
                     self.append_monitor_log(
                         step_name=f"시험 API: {display_name} (시도 {self.current_retry + 1}/{current_retries})",
-                        details="시스템 요청 대기 중..."
+                        details="시스템 요청 대기 중...",
+                        is_temp=True
                     )
                     self.step_start_log_printed = True
 
@@ -994,7 +995,7 @@ class MyApp(PlatformMainUI):
 
                 # message missing인 경우 버퍼 업데이트
                 self.step_buffers[self.cnt]["data"] = "아직 수신된 데이터가 없습니다."
-                self.step_buffers[self.cnt]["error"] = "Message Missing!"
+                self.step_buffers[self.cnt]["error"] = "메시지 미수신"
                 self.step_buffers[self.cnt]["result"] = "FAIL"
 
                 tmp_fields_rqd_cnt, tmp_fields_opt_cnt = timeout_field_finder(self.Server.inSchema[self.cnt])
@@ -1058,7 +1059,7 @@ class MyApp(PlatformMainUI):
                     step_name=f"시험 API: {api_name}",
                     request_json="",
                     score=score_value,
-                    details=f"⏱️ Timeout ({current_timeout}초) - Message Missing! | 통과 필드 수: {self.total_pass_cnt}, 실패 필드 수: {self.total_error_cnt}"
+                    details=f"⏱️ 메시지 수신 타임아웃({current_timeout}초) -> 메시지 미수신 | 통과 필드 수: {self.total_pass_cnt}, 실패 필드 수: {self.total_error_cnt}"
                 )
 
                 # 테이블 업데이트 (Message Missing)
@@ -1067,7 +1068,7 @@ class MyApp(PlatformMainUI):
                     add_err += tmp_fields_opt_cnt
 
                 current_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
-                self.update_table_row_with_retries(self.cnt, "FAIL", 0, add_err, "", "Message Missing!",
+                self.update_table_row_with_retries(self.cnt, "FAIL", 0, add_err, "", "메시지 미수신",
                                                    current_retries)
 
                 self.cnt += 1

@@ -1130,10 +1130,63 @@ class CommonMainUI(QWidget):
 
 
 
-    def append_monitor_log(self, step_name, request_json="", result_status="진행중", score=None, details=""):
+    def update_last_line_timer(self, message, remove=False):
+        """
+        마지막 줄(타이머)을 업데이트하거나 삭제함.
+        """
+        cursor = self.valResult.textCursor()
+        cursor.movePosition(cursor.End)
+        cursor.select(cursor.BlockUnderCursor)
+        last_line_text = cursor.selectedText()
+        
+        # HTML 태그 제거
+        import re
+        clean_text = re.sub('<[^<]+?>', '', last_line_text).strip()
+        timer_prefix = "남은 대기 시간:"
+
+        if timer_prefix in clean_text:
+            cursor.removeSelectedText()
+            if remove:
+                cursor.deletePreviousChar() # 줄바꿈 삭제
+            else:
+                html_msg = f"<div style='font-size: 18px; font-weight: bold; color: #FF5722; font-family: \"Noto Sans KR\";'>{message}</div>"
+                cursor.insertHtml(html_msg)
+        else:
+            # 타이머 줄이 없으면 새로 추가 (remove=True일 때는 무시)
+            if not remove:
+                html_msg = f"<div style='font-size: 18px; font-weight: bold; color: #FF5722; font-family: \"Noto Sans KR\"; margin-top: 5px;'>{message}</div>"
+                self.valResult.append(html_msg)
+
+        self.valResult.verticalScrollBar().setValue(
+            self.valResult.verticalScrollBar().maximum()
+        )
+
+    def append_monitor_log(self, step_name, request_json="", result_status="진행중", score=None, details="", is_temp=False):
         """
         Qt 호환성이 보장된 HTML 테이블 구조 로그 출력 함수
+        is_temp=True 이면 이 로그는 나중에 새로운 로그가 추가될 때 삭제됨 (헤더 유지 효과)
         """
+        # ✅ 이전에 임시 로그(헤더+내용)가 있었다면, 그 블록과 타이머 줄을 모두 삭제
+        if getattr(self, 'has_temp_log', False):
+            cursor = self.valResult.textCursor()
+            cursor.movePosition(cursor.End)
+            
+            # 1. 타이머 줄이 있을 수 있으므로 확인 후 삭제
+            cursor.select(cursor.BlockUnderCursor)
+            if "남은 대기 시간:" in cursor.selectedText() or cursor.selectedText().strip() == "":
+                cursor.removeSelectedText()
+                cursor.deletePreviousChar() # 타이머 줄바꿈 삭제
+            
+            # 2. 임시 로그 테이블(Block) 삭제
+            # 테이블은 하나의 블록으로 취급될 수 있음. 
+            # 커서를 위로 이동하며 이전 블록 선택
+            cursor.movePosition(cursor.PreviousBlock, cursor.KeepAnchor)
+            cursor.movePosition(cursor.PreviousBlock, cursor.KeepAnchor) # 안전하게 두 번 정도 위로
+            cursor.removeSelectedText()
+            
+            # 플래그 리셋
+            self.has_temp_log = False
+
         from datetime import datetime
         import html
         from core.utils import replace_transport_desc_for_display
@@ -1224,48 +1277,16 @@ class CommonMainUI(QWidget):
 
         self.valResult.append(html_content)
 
+        # 자동 스크롤
         self.valResult.verticalScrollBar().setValue(
             self.valResult.verticalScrollBar().maximum()
         )
-
-    def update_last_line_timer(self, message, remove=False):
-        """
-        valResult의 마지막 줄을 확인하여 타이머 메시지이면 업데이트하고,
-        아니면 새로 추가하는 메서드. remove=True이면 해당 줄을 삭제함.
-        """
-        cursor = self.valResult.textCursor()
-        cursor.movePosition(cursor.End)
-        cursor.select(cursor.BlockUnderCursor)
-        last_line_text = cursor.selectedText()
         
-        # HTML 태그 제거 및 텍스트 추출 (간단한 방식)
-        import re
-        clean_text = re.sub('<[^<]+?>', '', last_line_text).strip()
+        # ✅ 임시 로그 플래그 설정
+        if is_temp:
+            self.has_temp_log = True
 
-        timer_prefix = "남은 대기 시간:"
-        
-        if timer_prefix in clean_text:
-            # 마지막 줄이 타이머이면 교체 또는 삭제
-            cursor.removeSelectedText()
-            if not remove:
-                # 줄바꿈 없이 바로 텍스트 삽입 (이전 줄이 지워졌으므로)
-                # HTML 스타일 적용
-                html_msg = f"<div style='font-size: 18px; font-weight: bold; color: #FF5722; font-family: \"Noto Sans KR\";'>{message}</div>"
-                cursor.insertHtml(html_msg)
-            else:
-                # 삭제 시 줄바꿈이 남을 수 있으므로 이전 줄바꿈도 제거 시도
-                cursor.deletePreviousChar()
-        else:
-            # 마지막 줄이 타이머가 아니면 새로 추가 (remove=True일 때는 무시)
-            if not remove:
-                # append 대신 HTML 직접 삽입으로 제어
-                html_msg = f"<div style='font-size: 18px; font-weight: bold; color: #FF5722; font-family: \"Noto Sans KR\"; margin-top: 10px;'>{message}</div>"
-                self.valResult.append(html_msg)
 
-        # 스크롤 최하단으로 이동
-        self.valResult.verticalScrollBar().setValue(
-            self.valResult.verticalScrollBar().maximum()
-        )
 
     def create_spec_score_display_widget(self):
         """메인 화면에 표시할 시험 분야별 평가 점수 위젯"""
