@@ -2116,16 +2116,10 @@ class MyApp(PlatformMainUI):
 
             # 서버 준비 완료까지 대기 (첫 실행 시만)
             if self.first_run:
-                self.append_monitor_log(
-                    step_name="플랫폼 서버 초기화 중..."
-                )
                 # 5초 대기하면서 스피너 애니메이션 유지
                 for _ in range(50):  # 50 * 100ms = 5초
                     time.sleep(0.1)
                     QApplication.processEvents()
-                self.append_monitor_log(
-                    step_name="플랫폼 서버 준비 완료"
-                )
                 self.first_run = False
             else:
                 # 두 번째 이후에도 서버 안정화를 위한 짧은 대기
@@ -2134,9 +2128,6 @@ class MyApp(PlatformMainUI):
                 for _ in range(20):  # 20 * 100ms = 2초
                     time.sleep(0.1)
                     QApplication.processEvents()
-                self.append_monitor_log(
-                    step_name="서버 준비 완료"
-                )
  
             # ✅ 21. 타이머 시작 (모든 초기화 완료 후)
             Logger.debug(f" 타이머 시작")
