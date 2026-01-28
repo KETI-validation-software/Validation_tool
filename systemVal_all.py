@@ -893,11 +893,11 @@ class MyApp(SystemMainUI):
                 # ✅ 10. 결과 텍스트 초기화
                 self.valResult.clear()
                 self.append_monitor_log(
-                    step_name=f"시스템 전환 완료: {self.spec_description}",
+                    step_name=f"전환 완료: {self.spec_description}",
                     details=f"API 개수: {len(self.videoMessages)}개 | API 목록: {', '.join(self.videoMessagesDisplay)}"
                 )
 
-                Logger.debug(f" ✅ 시스템 전환 완료")
+                Logger.debug(f" ✅ 전환 완료")
 
         except Exception as e:
             Logger.debug(f" 시험 분야 선택 처리 실패: {e}")
@@ -2288,7 +2288,7 @@ class MyApp(SystemMainUI):
 
             # ✅ 18. 시작 메시지
             self.append_monitor_log(
-                step_name=f"시스템 검증 시작: {self.spec_description}",
+                step_name=f"시험 시작: {self.spec_description}",
                 details=f"API 개수: {len(self.videoMessages)}개"
             )
         else:

@@ -1054,10 +1054,31 @@ class PlatformMainUI(CommonMainUI):
             self.tableWidget.setCellWidget(self.cnt, 1, icon_widget)
             setattr(self, f"step{self.cnt + 1}_msg", msg)
 
-    def append_monitor_log(self, step_name, request_json="", result_status="진행중", score=None, details=""):
+    def append_monitor_log(self, step_name, request_json="", result_status="진행중", score=None, details="", is_temp=False):
         """
         Qt 호환성이 보장된 HTML 테이블 구조 로그 출력 함수
         """
+        # ✅ 이전에 임시 로그(헤더+내용)가 있었다면, 그 블록과 타이머 줄을 모두 삭제
+        if getattr(self, 'has_temp_log', False):
+            cursor = self.valResult.textCursor()
+            cursor.movePosition(cursor.End)
+            
+            # 1. 타이머 줄이 있을 수 있으므로 확인 후 삭제
+            cursor.select(cursor.BlockUnderCursor)
+            if "남은 대기 시간:" in cursor.selectedText() or cursor.selectedText().strip() == "":
+                cursor.removeSelectedText()
+                cursor.deletePreviousChar() # 타이머 줄바꿈 삭제
+            
+            # 2. 임시 로그 테이블(Block) 삭제
+            # 테이블은 하나의 블록으로 취급될 수 있음. 
+            # 커서를 위로 이동하며 이전 블록 선택
+            cursor.movePosition(cursor.PreviousBlock, cursor.KeepAnchor)
+            cursor.movePosition(cursor.PreviousBlock, cursor.KeepAnchor) # 안전하게 두 번 정도 위로
+            cursor.removeSelectedText()
+            
+            # 플래그 리셋
+            self.has_temp_log = False
+
         from datetime import datetime
         import html
         from core.utils import replace_transport_desc_for_display
@@ -1152,3 +1173,7 @@ class PlatformMainUI(CommonMainUI):
         self.valResult.verticalScrollBar().setValue(
             self.valResult.verticalScrollBar().maximum()
         )
+        
+        # ✅ 임시 로그 플래그 설정
+        if is_temp:
+            self.has_temp_log = True

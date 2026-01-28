@@ -104,9 +104,7 @@ def save_management_url(new_url):
 # 관리자시스템 주소
 management_url = load_management_url()
 
-specs = [["cmii7wfuf006i8z1tcds6q69g_outSchema","cmii7wfuf006i8z1tcds6q69g_inData","cmii7wfuf006i8z1tcds6q69g_messages",""],
-         ["cmii7w683006h8z1t7usnin5g_outSchema","cmii7w683006h8z1t7usnin5g_inData","cmii7w683006h8z1t7usnin5g_messages",""],
-         ["cmii7v8pr006g8z1tvo55a50u_outSchema","cmii7v8pr006g8z1tvo55a50u_inData","cmii7v8pr006g8z1tvo55a50u_messages",""]]
+specs = [["cmii7wfuf006i8z1tcds6q69g_outSchema","cmii7wfuf006i8z1tcds6q69g_inData","cmii7wfuf006i8z1tcds6q69g_messages",""]]
 none_request_message = ['Capabilities',
                         'CameraProfiles',
                         'DoorProfiles',
@@ -118,7 +116,7 @@ company_name = "물리보안 시스템 기업"
 product_name = "물리보안 제품"
 version = "v1.0"
 test_category = "본시험"
-test_target = "기본 기능 시험-영상보안시스템"
+test_target = "기본 기능 시험-보안용 센서 시스템"
 test_range = "전체 필드"
 auth_type = "Digest Auth"
 auth_info = "kisa,kisa_k1!2@"
@@ -161,7 +159,7 @@ enable_retry_delay = False  # False 권장: 불필요한 sleep 제거
 - 2 (INFO): 1 + 검증 과정, 매핑 정보
 - 3 (DEBUG): 모든 디버그 정보 출력 (상세)
 '''
-DEBUG_LEVEL = 3 # 기본값: WARN (권장)
+DEBUG_LEVEL = 1 # 기본값: WARN (권장)
 
 # test-opt
 '''
@@ -189,8 +187,8 @@ WEBHOOK_DISPLAY_URL = "https://webhook2026.ngrok.dev"
 
 SPEC_CONFIG = [
     {
-        "group_name": "기본 기능 시험-영상보안시스템",
-        "group_id": "cmjcefmh8070gcfb35wjptcsl",
+        "group_name": "기본 기능 시험-보안용 센서 시스템",
+        "group_id": "cmjcegnpz070mcfb3wbzift18",
         "cmii7wfuf006i8z1tcds6q69g": {
     "test_name": "sensor001",
     "specs": ['cmii7wfuf006i8z1tcds6q69g_outSchema', 'cmii7wfuf006i8z1tcds6q69g_inData', 'cmii7wfuf006i8z1tcds6q69g_messages', 'cmii7wfuf006i8z1tcds6q69g_webhook_inSchema', 'cmii7wfuf006i8z1tcds6q69g_webhook_outData'],
@@ -200,26 +198,6 @@ SPEC_CONFIG = [
     "trans_protocol": ['basic', 'basic', 'basic', 'WebHook', 'WebHook', 'basic'],
     "time_out": [60000, 60000, 60000, 60000, 60000, 60000],
     "num_retries": [1, 1, 1, 1, 1, 1]
-},
-        "cmii7w683006h8z1t7usnin5g": {
-    "test_name": "ac001",
-    "specs": ['cmii7w683006h8z1t7usnin5g_outSchema', 'cmii7w683006h8z1t7usnin5g_inData', 'cmii7w683006h8z1t7usnin5g_messages', 'cmii7w683006h8z1t7usnin5g_webhook_inSchema', 'cmii7w683006h8z1t7usnin5g_webhook_outData'],
-    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '바이오 및 출입통제 장치 목록 정보', '사용자 권한 정보 연동', '실시간 출입인증 목록 정보 연동', '저장된 출입인증 목록 정보 연동'],
-    "api_id": ['cmii80zqn007k8z1t85trpyps', 'cmiwslyqi049np002cgziiglj', 'cmiwso2p204bup002k9s8z9ph', 'cmiwstny705pnp002qw73yzs3', 'cmiwsz3sr079dp002xooui9id', 'cmiwtf61309slp002fna2xzbi'],
-    "api_endpoint": ['/Authentication', '/Capabilities', '/DoorProfiles', '/AccessUserInfos', '/RealtimeVerifEventInfos', '/StoredVerifEventInfos'],
-    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'WebHook', 'basic'],
-    "time_out": [60000, 60000, 60000, 60000, 60000, 60000],
-    "num_retries": [1, 1, 1, 1, 1, 1]
-},
-        "cmii7v8pr006g8z1tvo55a50u": {
-    "test_name": "vid001",
-    "specs": ['cmii7v8pr006g8z1tvo55a50u_outSchema', 'cmii7v8pr006g8z1tvo55a50u_inData', 'cmii7v8pr006g8z1tvo55a50u_messages', 'cmii7v8pr006g8z1tvo55a50u_webhook_inSchema', 'cmii7v8pr006g8z1tvo55a50u_webhook_outData'],
-    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '카메라 목록 연동', '실시간 영상(CCTV) 전송 ', '실시간 이벤트 분석 정보 연동', '저장된 영상 목록 연동', '저장된 영상(CCTV) 전송', '저장된 이벤트 분석 정보 연동', '저장된 객체 분석 정보 연동'],
-    "api_id": ['cmii7ylxn006m8z1tqq8dard1', 'cmiqtf9x600upie8ft45b1h1w', 'cmiqthu4900voie8f1evs0kfm', 'cmiqtkefj00whie8fd8odtc1m', 'cmiqtnwm200xoie8fxzfhodj5', 'cmiwrkvjq0005nkgl04g93wwy', 'cmiwrq4r200kqnkgluspxeyu7', 'cmiws2qij05apnkgli7hun3bl', 'cmiws9btu01ksp0028h4uc4az'],
-    "api_endpoint": ['/Authentication', '/Capabilities', '/CameraProfiles', '/StreamURLs', '/RealtimeVideoEventInfos', '/StoredVideoInfos', '/ReplayURL', '/StoredVideoEventInfos', '/StoredObjectAnalyticsInfos'],
-    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'WebHook', 'basic', 'basic', 'basic', 'basic'],
-    "time_out": [60000, 60000, 60000, 60000, 60000, 10000, 60000, 60000, 60000],
-    "num_retries": [1, 1, 1, 1, 1, 1, 1, 1, 1]
 }
     }
 ]
