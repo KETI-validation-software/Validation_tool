@@ -1427,7 +1427,7 @@ class MyApp(SystemMainUI):
                     step_name=f"시험 API: {api_name}",
                     request_json="",
                     score=score_value,
-                    details=f"⏱️ Timeout ({timeout_sec}초) - Message Missing! (시도 {self.current_retry + 1}/{current_retries}) | 통과: {self.total_pass_cnt}, 오류: {self.total_error_cnt}"
+                    details=f"⏱️ Timeout ({timeout_sec}초) - Message Missing! (시도 {self.current_retry + 1}/{current_retries}) | 통과 필드 수: {self.total_pass_cnt}, 실패 필드 수: {self.total_error_cnt}"
                 )
 
                 # 재시도 카운터 증가

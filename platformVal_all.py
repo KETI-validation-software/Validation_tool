@@ -965,7 +965,7 @@ class MyApp(PlatformMainUI):
                         request_json="",  # 데이터는 이미 출력되었으므로 빈 문자열
                         result_status=final_result,
                         score=score_value,
-                        details=f"통과: {self.total_pass_cnt}, 오류: {self.total_error_cnt} | {'일반 메시지' if current_protocol.lower() == 'basic' else f'실시간 메시지: {current_protocol}'}"
+                        details=f"통과 필드 수: {self.total_pass_cnt}, 실패 필드 수: {self.total_error_cnt} | {'일반 메시지' if current_protocol.lower() == 'basic' else f'실시간 메시지: {current_protocol}'}"
                     )
 
                     self.cnt += 1
@@ -1058,7 +1058,7 @@ class MyApp(PlatformMainUI):
                     step_name=f"시험 API: {api_name}",
                     request_json="",
                     score=score_value,
-                    details=f"⏱️ Timeout ({current_timeout}초) - Message Missing! | 통과: {self.total_pass_cnt}, 오류: {self.total_error_cnt}"
+                    details=f"⏱️ Timeout ({current_timeout}초) - Message Missing! | 통과 필드 수: {self.total_pass_cnt}, 실패 필드 수: {self.total_error_cnt}"
                 )
 
                 # 테이블 업데이트 (Message Missing)
