@@ -836,7 +836,7 @@ class FormValidator:
             for i, scenario in enumerate(scenarios):
                 label = ClickableCheckboxRowWidget(
                     scenario["name"], i, 0,
-                    'assets/image/test_config/row_selected.png',
+                    'assets/image/test_config/row.png',
                     'assets/image/test_config/row_selected.png',
                     'assets/image/test_config/checkbox_unchecked.png',
                     'assets/image/test_config/checkbox_checked.png'

@@ -250,8 +250,8 @@ class AuthSection(QGroupBox):
         common_input_layout.setContentsMargins(0, 12, 0, 12)
         common_input_layout.setSpacing(0)
 
-        # "사용자 ID입력" 문구
-        auth_input_title = QLabel("사용자 ID입력")
+        # "사용자 정보 입력" 문구
+        auth_input_title = QLabel("사용자 정보 입력")
         auth_input_title.setFixedSize(358, 29)
         auth_input_title.setStyleSheet("""
             QLabel {
