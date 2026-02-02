@@ -14,6 +14,7 @@ from network_scanner import NetworkScanWorker, ARPScanWorker
 from form_validator import FormValidator, ClickableLabel, ClickableCheckboxRowWidget
 import config.CONSTANTS as CONSTANTS
 from ui.splash_screen import LoadingPopup
+from ui.widgets import SystemPopup
 
 # 분리된 섹션 임포트
 from ui.sections import (
@@ -136,10 +137,17 @@ class InfoWidget(QWidget):
             self._close_loading_popup()
             self._enable_ui_after_loading()
             Logger.debug("자동 로드 실패: 모든 IP에서 시험 정보를 찾을 수 없음")
-            QMessageBox.warning(self, "자동 로드 실패",
-                f"등록된 시험 정보를 찾을 수 없습니다.\n\n"
-                f"검색한 IP: {', '.join(self._auto_load_ip_list)}\n\n"
-                f"관리 시스템에 해당 PC의 IP가 등록되어 있는지 확인해주세요.")
+            
+            popup = SystemPopup(
+                title="시험 데이터 확인 실패",
+                message=f"현재 PC의 IP({', '.join(self._auto_load_ip_list)})로 할당된 시험이 없습니다.\n\n"
+                        "관리 시스템에 해당 PC의 IP가 등록되어 있는지 확인 후 다시 실행해주세요.\n\n"
+                        "프로그램을 종료합니다.",
+                parent=self
+            )
+            popup.exec_()
+            
+            QApplication.instance().quit()
             return
 
         ip_address = self._auto_load_ip_list[self._auto_load_current_index]
@@ -1014,10 +1022,18 @@ class InfoWidget(QWidget):
 
             if not test_data:
                 self._close_loading_popup()  # 경고창 표시 전에 로딩 팝업 닫기
-                QMessageBox.warning(self, "경고",
-                    "시험 정보를 불러올 수 없습니다.\n"
-                    "- 서버 연결을 확인해주세요.\n"
-                    "- IP 주소에 해당하는 시험 요청이 있는지 확인해주세요.")
+                
+                popup = SystemPopup(
+                    title="시험 데이터 확인 실패",
+                    message="시험 정보를 불러올 수 없습니다.\n\n"
+                            "- 서버 연결 상태를 확인해주세요.\n"
+                            "- 관리 시스템에 현재 PC의 IP로 할당된 시험이 있는지 확인해주세요.\n\n"
+                            "프로그램을 종료합니다.",
+                    parent=self
+                )
+                popup.exec_()
+                
+                QApplication.instance().quit()
                 return
 
             # 1페이지 필드 채우기

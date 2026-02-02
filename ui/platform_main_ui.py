@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import *
 from PyQt5 import QtCore
-from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtGui import QIcon, QPixmap, QTextDocument, QTextCursor
 from PyQt5.QtCore import Qt, QTimer, QSize
 from core.functions import resource_path
 from ui.ui_components import TestSelectionPanel
@@ -1058,25 +1058,38 @@ class PlatformMainUI(CommonMainUI):
         """
         Qt 호환성이 보장된 HTML 테이블 구조 로그 출력 함수
         """
-        # ✅ 이전에 임시 로그(헤더+내용)가 있었다면, 그 블록과 타이머 줄을 모두 삭제
+        # ✅ 이전에 임시 로그(헤더+내용)가 있었다면 삭제
         if getattr(self, 'has_temp_log', False):
-            cursor = self.valResult.textCursor()
-            cursor.movePosition(cursor.End)
+            doc = self.valResult.document()
+            block = doc.lastBlock()
             
-            # 1. 타이머 줄이 있을 수 있으므로 확인 후 삭제
-            cursor.select(cursor.BlockUnderCursor)
-            if "남은 대기 시간:" in cursor.selectedText() or cursor.selectedText().strip() == "":
-                cursor.removeSelectedText()
-                cursor.deletePreviousChar() # 타이머 줄바꿈 삭제
+            for _ in range(5):
+                if not block.isValid():
+                    break
+                    
+                text = block.text().strip()
+                should_delete = False
+                
+                if "남은 대기 시간:" in text:
+                    should_delete = True
+                elif "시험 API:" in text and ("요청 전송 중" in text or "요청 대기 중" in text):
+                    should_delete = True
+                elif not text:
+                    should_delete = True
+                
+                prev_block = block.previous()
+                
+                if should_delete:
+                    cursor = QTextCursor(block)
+                    cursor.select(QTextCursor.BlockUnderCursor)
+                    cursor.removeSelectedText()
+                    cursor.deletePreviousChar()
+                
+                if "시험 API:" in text and should_delete:
+                    break
+                    
+                block = prev_block
             
-            # 2. 임시 로그 테이블(Block) 삭제
-            # 테이블은 하나의 블록으로 취급될 수 있음. 
-            # 커서를 위로 이동하며 이전 블록 선택
-            cursor.movePosition(cursor.PreviousBlock, cursor.KeepAnchor)
-            cursor.movePosition(cursor.PreviousBlock, cursor.KeepAnchor) # 안전하게 두 번 정도 위로
-            cursor.removeSelectedText()
-            
-            # 플래그 리셋
             self.has_temp_log = False
 
         from datetime import datetime

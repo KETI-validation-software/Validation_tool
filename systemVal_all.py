@@ -1159,8 +1159,8 @@ class MyApp(SystemMainUI):
         if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
             Logger.debug(f" ==========================================\n")
 
-        # ✅ 타이머 라인 제거 (안전장치)
-        self.update_last_line_timer("", remove=True)
+        # ✅ 타이머 라인 제거 (기능 비활성화됨)
+        # self.update_last_line_timer("", remove=True)
 
         if self.webhook_cnt < len(self.num_retries_list):
             current_retries = self.num_retries_list[self.webhook_cnt]
@@ -1277,16 +1277,16 @@ class MyApp(SystemMainUI):
                 Logger.debug(f"웹훅 이벤트 수신 완료 (API: {api_name})")
                 if self.webhook_res != None:
                     Logger.warn(f" 웹훅 메시지 수신")
-                    # ✅ 타이머 라인 제거
-                    self.update_last_line_timer("", remove=True)
+                    # ✅ 타이머 라인 제거 (기능 비활성화됨)
+                    # self.update_last_line_timer("", remove=True)
                 elif math.ceil(time_interval) >= self.time_outs[self.cnt] / 1000 - 1:
                     Logger.warn(f" 메시지 타임아웃! 웹훅 대기 종료")
-                    # ✅ 타이머 라인 제거
-                    self.update_last_line_timer("", remove=True)
+                    # ✅ 타이머 라인 제거 (기능 비활성화됨)
+                    # self.update_last_line_timer("", remove=True)
                 else :
-                    # ✅ 대기 시간 타이머 표시 (마지막 줄 갱신)
+                    # ✅ 대기 시간 타이머 표시 (기능 비활성화됨)
                     remaining = max(0, int((self.time_outs[self.cnt] / 1000) - time_interval))
-                    self.update_last_line_timer(f"남은 대기 시간: {remaining}초")
+                    # self.update_last_line_timer(f"남은 대기 시간: {remaining}초")
                     
                     Logger.debug(f" 웹훅 대기 중... (API {self.cnt}) 타임아웃 {round(time_interval)} /{round(self.time_outs[self.cnt] / 1000)}")
                     return
@@ -1310,8 +1310,8 @@ class MyApp(SystemMainUI):
                 if not self.step_start_log_printed:
                     self.append_monitor_log(
                         step_name=f"시험 API: {display_name} (시도 {self.current_retry + 1}/{self.num_retries_list[self.cnt]})",
-                        details="요청 전송 중...",
-                        is_temp=True
+                        details="요청 전송 중..."
+                        # is_temp=True # 기능 비활성화
                     )
                     self.step_start_log_printed = True
 
@@ -1554,20 +1554,19 @@ class MyApp(SystemMainUI):
                     self.stop_btn.setDisabled(True)
                     self.cancel_btn.setDisabled(True)
 
-
             # 응답이 도착한 경우 처리
             elif self.post_flag == True:
                 if self.res is None:
-                    # ✅ 대기 시간 타이머 표시 (마지막 줄 갱신)
+                    # ✅ 대기 시간 타이머 표시 (기능 비활성화됨)
                     current_timeout = self.time_outs[self.cnt] / 1000 if self.cnt < len(self.time_outs) else 5.0
                     remaining = max(0, int(current_timeout - time_interval))
-                    self.update_last_line_timer(f"남은 대기 시간: {remaining}초")
+                    # self.update_last_line_timer(f"남은 대기 시간: {remaining}초")
 
                 if self.res != None:
-                    # ✅ 응답 수신 완료 - 타이머 라인 제거 (웹훅 대기가 아닐 때만)
-                    if not self.webhook_flag:
-                        self.update_last_line_timer("", remove=True)
-                    
+                    # ✅ 응답 수신 완료 - 타이머 라인 제거 (기능 비활성화됨)
+                    # if not self.webhook_flag:
+                    #     self.update_last_line_timer("", remove=True)
+
                     # 응답 처리 시작
                     if self.res != None:
                         # 응답 처리 시작
@@ -2449,7 +2448,7 @@ class MyApp(SystemMainUI):
             Logger.debug(f"   마지막 완료 API 인덱스: {last_completed}")
 
             # 모니터링 창에 로그 추가
-            self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-top: 10px;">💾 재개 정보 저장 완료: {paused_file_path}</div>')
+            # self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-top: 10px;">💾 재개 정보 저장 완료: {paused_file_path}</div>')
             self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">   (마지막 완료 API: {last_completed + 1}번째, 다음 재시작 시 {last_completed + 2}번째 API부터 이어서 실행)</div>')
 
         except Exception as e:

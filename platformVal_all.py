@@ -452,8 +452,8 @@ class MyApp(PlatformMainUI):
                     display_name = self.Server.message_display[self.cnt] if self.cnt < len(self.Server.message_display) else "Unknown"
                     self.append_monitor_log(
                         step_name=f"시험 API: {display_name} (시도 {self.current_retry + 1}/{current_retries})",
-                        details="시스템 요청 대기 중...",
-                        is_temp=True
+                        details="시스템 요청 대기 중..."
+                        # is_temp=True # 기능 비활성화
                     )
                     self.step_start_log_printed = True
 
@@ -490,16 +490,16 @@ class MyApp(PlatformMainUI):
 
                 # 요청이 도착하지 않았으면 대기
                 if not request_received:
-                    # ✅ 대기 시간 타이머 표시 (마지막 줄 갱신)
+                    # ✅ 대기 시간 타이머 표시 (기능 비활성화됨)
                     remaining = max(0, int(current_timeout - time_interval))
-                    self.update_last_line_timer(f"남은 대기 시간: {remaining}초")
+                    # self.update_last_line_timer(f"남은 대기 시간: {remaining}초")
 
                     if self.current_retry == 0:
                         Logger.debug(f"능동 대기(WAIT): 시스템 요청 대기 중 (API: {api_name}, 예상: {expected_count}회, 실제: {actual_count}회)")
                     return
                 
-                # ✅ 요청 수신 완료 - 타이머 라인 제거
-                self.update_last_line_timer("", remove=True)
+                # ✅ 요청 수신 완료 - 타이머 라인 제거 (기능 비활성화됨)
+                # self.update_last_line_timer("", remove=True)
 
                 request_arrival_time = time.time()
                 expected_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
@@ -2212,7 +2212,7 @@ class MyApp(PlatformMainUI):
             Logger.debug(f"   마지막 완료 API 인덱스: {last_completed}")
 
             # 모니터링 창에 로그 추가
-            self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-top: 10px;">💾 재개 정보 저장 완료: {paused_file_path}</div>')
+            # self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-top: 10px;">💾 재개 정보 저장 완료: {paused_file_path}</div>')
             self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">   (마지막 완료 API: {last_completed + 1}번째, 다음 재시작 시 {last_completed + 2}번째 API부터 이어서 실행)</div>')
 
         except Exception as e:
