@@ -726,7 +726,12 @@ class InfoWidget(QWidget):
                 f"동일 네트워크에서 {len(urls)}개의 장비를 찾았습니다.\n"
                 f"새로 추가된 주소가 없습니다."
             )
-        QMessageBox.information(self, "ARP 스캔 완료", message)
+        popup = SystemPopup(
+            title="ARP 스캔 완료",
+            message=message,
+            parent=self
+        )
+        popup.exec_()
 
     def _on_arp_scan_failed(self, msg):
         """ARP 스캔 실패 시 호출"""
