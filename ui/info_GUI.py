@@ -731,7 +731,13 @@ class InfoWidget(QWidget):
     def _on_arp_scan_failed(self, msg):
         """ARP 스캔 실패 시 호출"""
         self._close_loading_popup()
-        QMessageBox.warning(self, "ARP 스캔 실패", msg)
+        
+        popup = SystemPopup(
+            title="주소 탐색 오류",
+            message=msg,
+            parent=self
+        )
+        popup.exec_()
 
     def _get_existing_urls(self):
         """현재 URL 테이블에 있는 주소 목록 반환"""

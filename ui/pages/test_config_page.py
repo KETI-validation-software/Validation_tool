@@ -530,16 +530,17 @@ def _setup_bottom_buttons(parent_widget, right_layout):
     button_layout.setSpacing(16)
 
     # 시험 시작 버튼
-    parent_widget.start_btn = QPushButton("시험 시작")
+    parent_widget.start_btn = QPushButton("시험 준비 완료")
     parent_widget.start_btn.setFixedSize(364, 48)
     parent_widget.original_start_btn_size = (364, 48)
     parent_widget.start_btn.setFocusPolicy(Qt.NoFocus)
 
     parent_widget.start_btn.setStyleSheet("""
           QPushButton {
-              background-color: #1C5DB1;
               border: none;
               border-radius: 4px;
+              background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                  stop:0 #275554, stop:1 #002B69);
               padding-left: 20px;
               padding-right: 20px;
               font-family: 'Noto Sans KR';
@@ -548,7 +549,16 @@ def _setup_bottom_buttons(parent_widget, right_layout):
               color: #FFFFFF;
           }
           QPushButton:hover {
-              background-color: #3E85E2;
+              background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                  stop:0 #336665, stop:1 #003C7A);
+          }
+          QPushButton:pressed {
+              background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                  stop:0 #1E4443, stop:1 #001A4F);
+          }
+          QPushButton:disabled {
+              background: #CECECE;
+              color: #868686;
           }
       """)
     parent_widget.start_btn.clicked.connect(parent_widget.start_test)
