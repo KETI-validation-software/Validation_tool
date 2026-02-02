@@ -1,14 +1,11 @@
-import os
-import sys
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import Qt, pyqtSignal, QSize
-from PyQt5.QtGui import QIcon, QPixmap, QColor
+from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5 import QtCore
 
 from core.functions import resource_path
 from core.logger import Logger
-from core.utils import remove_api_number_suffix, load_external_constants, calculate_percentage
-from ui.gui_utils import CustomDialog
+from core.utils import remove_api_number_suffix, load_external_constants
 from ui.ui_components import TestSelectionPanel
 from ui.detail_dialog import CombinedDetailDialog
 
