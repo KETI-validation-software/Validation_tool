@@ -12,7 +12,7 @@ import importlib
 import re
 from urllib.parse import urlparse
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor, QPixmap
+from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor, QPixmap, QTextDocument, QTextCursor
 from PyQt5.QtCore import *
 from PyQt5 import QtCore
 from api.webhook_api import WebhookThread
@@ -1084,10 +1084,44 @@ class SystemMainUI(CommonMainUI):
         return re.sub(r'\d+$', '', api_name)
 
 
-    def append_monitor_log(self, step_name, request_json="", result_status="진행중", score=None, details=""):
+    def append_monitor_log(self, step_name, request_json="", result_status="진행중", score=None, details="", is_temp=False):
         """
         Qt 호환성이 보장된 HTML 테이블 구조 로그 출력 함수
         """
+        # ✅ 이전에 임시 로그(헤더+내용)가 있었다면 삭제
+        if getattr(self, 'has_temp_log', False):
+            doc = self.valResult.document()
+            block = doc.lastBlock()
+            
+            for _ in range(5):
+                if not block.isValid():
+                    break
+                    
+                text = block.text().strip()
+                should_delete = False
+                
+                if "남은 대기 시간:" in text:
+                    should_delete = True
+                elif "시험 API:" in text and ("요청 전송 중" in text or "요청 대기 중" in text):
+                    should_delete = True
+                elif not text:
+                    should_delete = True
+                
+                prev_block = block.previous()
+                
+                if should_delete:
+                    cursor = QTextCursor(block)
+                    cursor.select(QTextCursor.BlockUnderCursor)
+                    cursor.removeSelectedText()
+                    cursor.deletePreviousChar()
+                
+                if "시험 API:" in text and should_delete:
+                    break
+                    
+                block = prev_block
+            
+            self.has_temp_log = False
+
         from datetime import datetime
         import html
         from core.utils import replace_transport_desc_for_display
@@ -1182,6 +1216,10 @@ class SystemMainUI(CommonMainUI):
         self.valResult.verticalScrollBar().setValue(
             self.valResult.verticalScrollBar().maximum()
         )
+        
+        # ✅ 임시 로그 플래그 설정
+        if is_temp:
+            self.has_temp_log = True
 
 
     def create_spec_score_display_widget(self):

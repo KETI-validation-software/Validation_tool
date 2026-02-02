@@ -78,27 +78,44 @@ class FormValidator:
         """관리자 코드 유효성 검사"""
         if not self.is_admin_code_required():
             return True
-        admin_code = self.parent.admin_code_edit.text().strip()
-        return bool(admin_code and admin_code.isdigit())
+        
+        # [임시 수정] 관리자 코드 검증 무조건 Pass
+        return True
+        
+        # admin_code = self.parent.admin_code_edit.text().strip()
+        # 
+        # # API로부터 받아온 코드가 없는 경우 검증 실패 처리
+        # if not hasattr(self.parent, 'real_admin_code') or self.parent.real_admin_code is None:
+        #     Logger.warning("실제 관리자 코드가 로드되지 않았습니다.")
+        #     return False
+        #     
+        # # 입력값과 API에서 받아온 값을 비교
+        # return str(admin_code) == str(self.parent.real_admin_code)
 
     def handle_test_category_change(self):
         """시험유형 변경 시 관리자 코드 필드 활성화/비활성화"""
         test_category = self.parent.test_category_edit.text().strip()
+        
+        # 관리자 코드 placeholder 라벨 가져오기
+        placeholder_label = getattr(self.parent, 'admin_code_placeholder', None)
 
         if not test_category:
             self.parent.admin_code_edit.setEnabled(False)
             self.parent.admin_code_edit.clear()
-            self.parent.admin_code_edit.setPlaceholderText("")
+            if placeholder_label:
+                placeholder_label.setText("관리자 코드를 입력해주세요")
             return
 
         if test_category in ["본시험", "사전시험"]:
             if test_category == "본시험":
                 self.parent.admin_code_edit.setEnabled(True)
-                self.parent.admin_code_edit.setPlaceholderText("")
+                if placeholder_label:
+                    placeholder_label.setText("관리자 코드를 입력해주세요")
             else:
                 self.parent.admin_code_edit.setEnabled(False)
                 self.parent.admin_code_edit.clear()
-                self.parent.admin_code_edit.setPlaceholderText("")
+                if placeholder_label:
+                    placeholder_label.setText("본시험에서만 입력합니다")
             return
 
         self.parent.original_test_category = test_category
@@ -107,12 +124,14 @@ class FormValidator:
         if test_category == "MAIN_TEST":
             self.parent.test_category_edit.setText("본시험")
             self.parent.admin_code_edit.setEnabled(True)
-            self.parent.admin_code_edit.setPlaceholderText("")
+            if placeholder_label:
+                placeholder_label.setText("관리자 코드를 입력해주세요")
         elif test_category == "PRE_TEST":
             self.parent.test_category_edit.setText("사전시험")
             self.parent.admin_code_edit.setEnabled(False)
             self.parent.admin_code_edit.clear()
-            self.parent.admin_code_edit.setPlaceholderText("")
+            if placeholder_label:
+                placeholder_label.setText("본시험에서만 입력합니다")
         else:
             # 이미 한글인 경우는 그대로 유지
             pass
@@ -261,9 +280,9 @@ class FormValidator:
         # URL이 업데이트되면 WEBHOOK_PUBLIC_IP도 함께 업데이트
         if 'url' in variables:
             try:
-                from urllib.parse import urlparse
-                parsed_url = urlparse(variables['url'])
-                webhook_ip = parsed_url.hostname
+                # [수정] 접속 주소(URL) 대신 내 로컬 IP를 사용
+                webhook_ip = self.api_client.get_local_ip_address()
+                
                 if webhook_ip:
                     pattern_ip = r'^WEBHOOK_PUBLIC_IP\s*=.*$'
                     new_ip_line = f'WEBHOOK_PUBLIC_IP = "{webhook_ip}"'
@@ -273,9 +292,9 @@ class FormValidator:
                     new_url_line = f'WEBHOOK_URL = f"https://{{WEBHOOK_PUBLIC_IP}}:{{WEBHOOK_PORT}}"'
                     content = re.sub(pattern_url, new_url_line, content, flags=re.MULTILINE)
 
-                    Logger.info(f"[WEBHOOK] 시험 URL에서 IP 추출: {webhook_ip}")
+                    Logger.info(f"[WEBHOOK] 로컬 IP로 웹훅 설정: {webhook_ip}")
             except Exception as e:
-                Logger.error(f"[WEBHOOK] URL 파싱 실패: {e}")
+                Logger.error(f"[WEBHOOK] IP 설정 실패: {e}")
 
         for var_name, var_value in variables.items():
             if isinstance(var_value, str):

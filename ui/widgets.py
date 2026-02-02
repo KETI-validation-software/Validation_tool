@@ -5,9 +5,9 @@
 - ClickableCheckboxRowWidget: 시나리오 셀용 (체크박스 + 텍스트 분리)
 """
 
-from PyQt5.QtWidgets import QLabel, QWidget, QHBoxLayout
+from PyQt5.QtWidgets import QLabel, QWidget, QHBoxLayout, QDialog, QPushButton, QVBoxLayout, QGraphicsDropShadowEffect
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtGui import QPixmap, QPainter
+from PyQt5.QtGui import QPixmap, QPainter, QColor, QFont, QLinearGradient
 from core.functions import resource_path
 
 
@@ -190,3 +190,105 @@ class ClickableCheckboxRowWidget(QWidget):
         """배경 이미지 변경"""
         self.bg_pixmap = QPixmap(resource_path(bg_image_path))
         self.update()
+
+
+class SystemPopup(QDialog):
+    """
+    스플래시 화면 스타일의 시스템 알림 팝업
+    - 배경: 이미지 없이 깔끔한 그라데이션 적용 (#275554 -> #002B69)
+    - 스타일: 테두리 없음, 어두운 배경, 흰색 텍스트
+    """
+    def __init__(self, title="알림", message="", parent=None):
+        super().__init__(parent)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Dialog)
+        self.setAttribute(Qt.WA_TranslucentBackground)  # 배경 투명 (라운드 처리 등을 위해)
+        self.setFixedSize(400, 240)  # 크기 고정
+
+        self.title_text = title
+        self.message_text = message
+
+        # UI 설정
+        self._setup_ui()
+
+    def _setup_ui(self):
+        # 메인 레이아웃
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(30, 30, 30, 30)
+        layout.setSpacing(15)
+
+        # 제목 (상단)
+        self.title_label = QLabel(self.title_text)
+        self.title_label.setAlignment(Qt.AlignCenter)
+        self.title_label.setStyleSheet("""
+            color: #FFFFFF;
+            font-size: 16pt;
+            font-weight: bold;
+            font-family: 'Malgun Gothic', 'Noto Sans KR';
+            background: transparent;
+        """)
+        layout.addWidget(self.title_label)
+
+        # 내용 (중앙)
+        self.msg_label = QLabel(self.message_text)
+        self.msg_label.setAlignment(Qt.AlignCenter)
+        self.msg_label.setWordWrap(True)  # 줄바꿈 허용
+        self.msg_label.setStyleSheet("""
+            color: rgba(255, 255, 255, 220);
+            font-size: 11pt;
+            font-family: 'Malgun Gothic', 'Noto Sans KR';
+            background: transparent;
+            line-height: 140%;
+        """)
+        layout.addWidget(self.msg_label)
+
+        layout.addStretch()
+
+        # 확인 버튼 (하단)
+        self.ok_btn = QPushButton("확인")
+        self.ok_btn.setCursor(Qt.PointingHandCursor)
+        self.ok_btn.setFixedSize(120, 36)
+        
+        # 버튼 스타일 (깔끔한 반투명/유리 느낌)
+        self.ok_btn.setStyleSheet("""
+            QPushButton {
+                background-color: rgba(255, 255, 255, 0.15);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                border-radius: 18px;
+                color: #FFFFFF;
+                font-family: 'Malgun Gothic', 'Noto Sans KR';
+                font-size: 10pt;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: rgba(255, 255, 255, 0.25);
+                border: 1px solid rgba(255, 255, 255, 0.5);
+            }
+            QPushButton:pressed {
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+        """)
+        self.ok_btn.clicked.connect(self.accept)  # 클릭 시 창 닫기 (QDialog.accept)
+
+        # 버튼 컨테이너 (중앙 정렬)
+        btn_container = QWidget()
+        btn_layout = QHBoxLayout(btn_container)
+        btn_layout.setContentsMargins(0, 0, 0, 0)
+        btn_layout.addWidget(self.ok_btn)
+        btn_layout.setAlignment(Qt.AlignCenter)
+        
+        layout.addWidget(btn_container)
+
+    def paintEvent(self, event):
+        """배경 그리기 (이미지 없이 그라데이션만)"""
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+
+        # 스플래시 테마와 동일한 그라데이션 적용
+        gradient = QLinearGradient(0, 0, self.width(), self.height())
+        gradient.setColorAt(0, QColor("#275554")) # 짙은 청록
+        gradient.setColorAt(1, QColor("#002B69")) # 짙은 남색
+        
+        painter.setBrush(gradient)
+        painter.setPen(Qt.NoPen)
+        # 둥근 모서리 적용 (선택 사항, 여기서는 직각으로 하되 깔끔하게)
+        painter.drawRect(self.rect())

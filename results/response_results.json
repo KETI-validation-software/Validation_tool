@@ -1,41 +1,39 @@
 {
-  "requestId": "cmii85wjq009z8z1tv0d3d7r1",
+  "requestId": "cmkkpi00m00c2h0ztemrruzgs",
   "evaluationTarget": {
-    "companyName": "물리보안기업",
+    "companyName": "물리보안 시스템 기업",
     "contactPerson": "김철수",
-    "productName": "물리보안시스템-기본",
+    "productName": "물리보안 제품",
     "modelName": "v1.0",
     "version": "v1.0"
   },
   "testGroups": [
     {
-      "id": "cmjcefmh8070gcfb35wjptcsl",
-      "name": "기본 기능 시험-영상보안시스템",
-      "testRange": "전체 필드, 전체 필드, 전체 필드",
+      "id": "cmjcegnpz070mcfb3wbzift18",
+      "name": "기본 기능 시험-보안용 센서 시스템",
+      "testRange": "전체 필드",
       "testSpecIds": [
-        "cmii7wfuf006i8z1tcds6q69g",
-        "cmii7w683006h8z1t7usnin5g",
-        "cmii7v8pr006g8z1tvo55a50u"
+        "cmii7wfuf006i8z1tcds6q69g"
       ]
     }
   ],
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 100.0,
+    "score": 83.72,
     "totalFields": 43,
-    "passedFields": 43,
-    "failedFields": 0
+    "passedFields": 36,
+    "failedFields": 7
   },
   "testResult": [
     {
-      "testGroup": "cmjcefmh8070gcfb35wjptcsl",
+      "testGroup": "cmjcegnpz070mcfb3wbzift18",
       "testSpecId": "cmii7wfuf006i8z1tcds6q69g",
       "testSpecName": "sensor001",
-      "score": 100.0,
+      "score": 83.72,
       "totalFields": 43,
-      "passedFields": 43,
-      "failedFields": 0,
+      "passedFields": 36,
+      "failedFields": 7,
       "apis": [
         {
           "id": "cmii82age008k8z1t71s85tbz",
@@ -235,11 +233,11 @@
           "name": "저장된 보안용 센서 이벤트 분석 정보 연동",
           "method": "POST",
           "endpoint": "/StoredSensorEventInfos",
-          "score": 100.0,
+          "score": 0.0,
           "validationCnt": 1,
           "totalFields": 7,
-          "passFields": 7,
-          "failFields": 0,
+          "passFields": 0,
+          "failFields": 7,
           "validations": [
             {
               "attempt": 1,
@@ -250,20 +248,21 @@
                   {
                     "sensorDeviceID": "iot0001",
                     "eventName": "Leak",
-                    "eventTime": 20251108160634484,
+                    "eventTime": 8992697300304259,
                     "eventDesc": "100도"
                   },
                   {
                     "sensorDeviceID": "iot0002",
                     "eventName": "Leak",
-                    "eventTime": 20251111148227318,
+                    "eventTime": 5239174278186052,
                     "eventDesc": "100도"
                   }
                 ]
               },
               "validationErrors": [
                 "[시도 1/1]",
-                "오류가 없습니다."
+                "<b>[기타]</b> (1건)",
+                "- [맥락 오류] code 맥락 검증 실패: 예상값 201, 실제값 200"
               ]
             }
           ]
@@ -271,5 +270,5 @@
       ]
     }
   ],
-  "completedDate": "2026-01-19T00:48:10Z"
+  "completedDate": "2026-01-28T08:19:47Z"
 }

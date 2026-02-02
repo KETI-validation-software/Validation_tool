@@ -5,6 +5,7 @@ venv/
 .env
 dist/
 build/
+builds/
 *.log
 .idea/
 .vscode/

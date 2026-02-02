@@ -3,6 +3,7 @@
 
 import os
 from api.api_server import Server
+from api.client import APIClient
 from api.server_thread import server_th, json_data
 import time
 from PyQt5.QtWidgets import *
@@ -412,6 +413,14 @@ class MyApp(PlatformMainUI):
                     Logger.debug(f" ========== finally 블록 진입 ==========")
                     self.cleanup_paused_file()
                     Logger.debug(f" ========== finally 블록 종료 ==========")
+                    
+                    # ✅ 시험 완료 - idle 상태 heartbeat 전송
+                    try:
+                        api_client = APIClient()
+                        api_client.send_heartbeat_idle()
+                        Logger.info(f"✅ 시험 완료 - idle 상태 전송 완료")
+                    except Exception as e:
+                        Logger.warning(f"⚠️ 시험 완료 - idle 상태 전송 실패: {e}")
 
                 return
 
@@ -420,6 +429,7 @@ class MyApp(PlatformMainUI):
                 Logger.debug(f" 첫 틱 대기: time_pre={self.time_pre}, cnt={self.cnt}, cnt_pre={self.cnt_pre}")
                 self.time_pre = time.time()
                 self.cnt_pre = self.cnt
+                self.step_start_log_printed = False # ✅ 단계 변경 시 플래그 리셋
                 return
             else:
                 time_interval = time.time() - self.time_pre
@@ -435,6 +445,18 @@ class MyApp(PlatformMainUI):
             if current_timeout == 0 or time_interval < current_timeout:
                 # 시스템 요청 확인
                 api_name = self.Server.message[self.cnt]
+                
+                # ✅ 대기 시작 시 로그 먼저 출력 (최초 1회)
+                if not self.step_start_log_printed:
+                    current_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
+                    display_name = self.Server.message_display[self.cnt] if self.cnt < len(self.Server.message_display) else "Unknown"
+                    self.append_monitor_log(
+                        step_name=f"시험 API: {display_name} (시도 {self.current_retry + 1}/{current_retries})",
+                        details="시스템 요청 대기 중..."
+                        # is_temp=True # 기능 비활성화
+                    )
+                    self.step_start_log_printed = True
+
                 Logger.debug(f" API 처리 시작: {api_name}")
 
                 current_validation = {}
@@ -468,16 +490,23 @@ class MyApp(PlatformMainUI):
 
                 # 요청이 도착하지 않았으면 대기
                 if not request_received:
+                    # ✅ 대기 시간 타이머 표시 (기능 비활성화됨)
+                    remaining = max(0, int(current_timeout - time_interval))
+                    # self.update_last_line_timer(f"남은 대기 시간: {remaining}초")
+
                     if self.current_retry == 0:
                         Logger.debug(f"능동 대기(WAIT): 시스템 요청 대기 중 (API: {api_name}, 예상: {expected_count}회, 실제: {actual_count}회)")
                     return
+                
+                # ✅ 요청 수신 완료 - 타이머 라인 제거 (기능 비활성화됨)
+                # self.update_last_line_timer("", remove=True)
 
                 request_arrival_time = time.time()
                 expected_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
                 Logger.debug(f" ✅ 요청 도착 감지! API: {api_name}, 시도: {self.current_retry + 1}/{expected_retries}")
 
                 display_name = self.Server.message_display[self.cnt] if self.cnt < len(self.Server.message_display) else "Unknown"
-                message_name = "step " + str(self.cnt + 1) + ": " + display_name
+                message_name = "시험 API: " + display_name
 
                 # SPEC_CONFIG에서 검증 설정 가져오기
                 current_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
@@ -622,13 +651,13 @@ class MyApp(PlatformMainUI):
                     # ✅ 실시간 모니터링 출력
                     if retry_attempt == 0:
                         self.append_monitor_log(
-                            step_name=f"시스템 요청 수신: {self.Server.message[self.cnt]} (시도 {retry_attempt + 1}/{current_retries})",
+                            step_name=f"시험 API: {self.Server.message[self.cnt]} (시도 {retry_attempt + 1}/{current_retries})",
                             request_json=tmp_res_auth,
                             details=f"총 {current_retries}회 검증 예정"
                         )
                     else:
                         self.append_monitor_log(
-                            step_name=f"시스템 요청 수신 (시도 {retry_attempt + 1}/{current_retries})",
+                            step_name=f"시험 API (시도 {retry_attempt + 1}/{current_retries})",
                             request_json=tmp_res_auth
                         )
 
@@ -933,11 +962,11 @@ class MyApp(PlatformMainUI):
                     
                     # 최종 결과는 데이터 없이 점수와 상태만 표시 (데이터는 이미 실시간으로 출력됨)
                     self.append_monitor_log(
-                        step_name=f"결과: {display_name} ({current_retries}회 검증 완료)",
+                        step_name=f"시험 API 결과: {display_name} ({current_retries}회 검증 완료)",
                         request_json="",  # 데이터는 이미 출력되었으므로 빈 문자열
                         result_status=final_result,
                         score=score_value,
-                        details=f"통과: {self.total_pass_cnt}, 오류: {self.total_error_cnt} | {'일반 메시지' if current_protocol.lower() == 'basic' else f'실시간 메시지: {current_protocol}'}"
+                        details=f"통과 필드 수: {self.total_pass_cnt}, 실패 필드 수: {self.total_error_cnt} | {'일반 메시지' if current_protocol.lower() == 'basic' else f'실시간 메시지: {current_protocol}'}"
                     )
 
                     self.cnt += 1
@@ -966,7 +995,7 @@ class MyApp(PlatformMainUI):
 
                 # message missing인 경우 버퍼 업데이트
                 self.step_buffers[self.cnt]["data"] = "아직 수신된 데이터가 없습니다."
-                self.step_buffers[self.cnt]["error"] = "Message Missing!"
+                self.step_buffers[self.cnt]["error"] = "메시지 미수신"
                 self.step_buffers[self.cnt]["result"] = "FAIL"
 
                 tmp_fields_rqd_cnt, tmp_fields_opt_cnt = timeout_field_finder(self.Server.inSchema[self.cnt])
@@ -1027,10 +1056,10 @@ class MyApp(PlatformMainUI):
                 # 타임아웃 결과를 HTML 카드로 출력
                 api_name = self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else "Unknown"
                 self.append_monitor_log(
-                    step_name=f"Step {self.cnt + 1}: {api_name}",
+                    step_name=f"시험 API: {api_name}",
                     request_json="",
                     score=score_value,
-                    details=f"⏱️ Timeout ({current_timeout}초) - Message Missing! | 통과: {self.total_pass_cnt}, 오류: {self.total_error_cnt}"
+                    details=f"⏱️ 메시지 수신 타임아웃({current_timeout}초) -> 메시지 미수신 | 통과 필드 수: {self.total_pass_cnt}, 실패 필드 수: {self.total_error_cnt}"
                 )
 
                 # 테이블 업데이트 (Message Missing)
@@ -1039,7 +1068,7 @@ class MyApp(PlatformMainUI):
                     add_err += tmp_fields_opt_cnt
 
                 current_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
-                self.update_table_row_with_retries(self.cnt, "FAIL", 0, add_err, "", "Message Missing!",
+                self.update_table_row_with_retries(self.cnt, "FAIL", 0, add_err, "", "메시지 미수신",
                                                    current_retries)
 
                 self.cnt += 1
@@ -1058,7 +1087,7 @@ class MyApp(PlatformMainUI):
                 self.append_monitor_log(
                     step_name="시험 완료",
                     request_json="",
-                    details="검증 절차가 완료되었습니다."
+                    details="시험이 완료되었습니다."
                 )
                 self.cnt = 0
 
@@ -1111,6 +1140,14 @@ class MyApp(PlatformMainUI):
                     Logger.debug(f" ========== finally 블록 진입 (경로2) ==========")
                     self.cleanup_paused_file()
                     Logger.debug(f" ========== finally 블록 종료 (경로2) ==========")
+                    
+                    # ✅ 시험 완료 - idle 상태 heartbeat 전송 (경로2)
+                    try:
+                        api_client = APIClient()
+                        api_client.send_heartbeat_idle()
+                        Logger.info(f"✅ 시험 완료 (경로2) - idle 상태 전송 완료")
+                    except Exception as e:
+                        Logger.warning(f"⚠️ 시험 완료 (경로2) - idle 상태 전송 실패: {e}")
 
         except Exception as err:
             Logger.error(f" update_view에서 예외 발생: {err}")
@@ -1478,11 +1515,11 @@ class MyApp(PlatformMainUI):
                 # 결과 텍스트 초기화
                 self.valResult.clear()
                 self.append_monitor_log(
-                    step_name=f"플랫폼 전환 완료: {self.spec_description}",
+                    step_name=f"전환 완료: {self.spec_description}",
                     details=f"API 목록 ({len(self.videoMessages)}개): {', '.join(self.videoMessagesDisplay)}"
                 )
 
-                Logger.debug(f" ✅ 플랫폼 전환 완료: {self.spec_description}, API 수: {len(self.videoMessages)}")
+                Logger.debug(f" ✅ 전환 완료: {self.spec_description}, API 수: {len(self.videoMessages)}")
         except Exception as e:
             Logger.debug(f"시험 분야 선택 처리 실패: {e}")
             import traceback
@@ -1827,6 +1864,7 @@ class MyApp(PlatformMainUI):
                 self.current_retry = 0
                 self.realtime_flag = False
                 self.tmp_msg_append_flag = False
+                self.step_start_log_printed = False # ✅ 플래그 초기화
 
                 # ✅ 5. 현재 spec의 점수만 초기화
                 self.total_error_cnt = 0
@@ -2062,7 +2100,7 @@ class MyApp(PlatformMainUI):
             
             # ✅ 19. 시작 메시지 출력
             self.append_monitor_log(
-                step_name="플랫폼 검증 시작",
+                step_name="시험 시작",
                 details=f"API 개수: {len(self.videoMessages)}개"
             )
 
@@ -2079,16 +2117,10 @@ class MyApp(PlatformMainUI):
 
             # 서버 준비 완료까지 대기 (첫 실행 시만)
             if self.first_run:
-                self.append_monitor_log(
-                    step_name="플랫폼 서버 초기화 중..."
-                )
                 # 5초 대기하면서 스피너 애니메이션 유지
                 for _ in range(50):  # 50 * 100ms = 5초
                     time.sleep(0.1)
                     QApplication.processEvents()
-                self.append_monitor_log(
-                    step_name="플랫폼 서버 준비 완료"
-                )
                 self.first_run = False
             else:
                 # 두 번째 이후에도 서버 안정화를 위한 짧은 대기
@@ -2097,10 +2129,7 @@ class MyApp(PlatformMainUI):
                 for _ in range(20):  # 20 * 100ms = 2초
                     time.sleep(0.1)
                     QApplication.processEvents()
-                self.append_monitor_log(
-                    step_name="서버 준비 완료"
-                )
-
+ 
             # ✅ 21. 타이머 시작 (모든 초기화 완료 후)
             Logger.debug(f" 타이머 시작")
             self.tick_timer.start(1000)
@@ -2183,7 +2212,7 @@ class MyApp(PlatformMainUI):
             Logger.debug(f"   마지막 완료 API 인덱스: {last_completed}")
 
             # 모니터링 창에 로그 추가
-            self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-top: 10px;">💾 재개 정보 저장 완료: {paused_file_path}</div>')
+            # self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-top: 10px;">💾 재개 정보 저장 완료: {paused_file_path}</div>')
             self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">   (마지막 완료 API: {last_completed + 1}번째, 다음 재시작 시 {last_completed + 2}번째 API부터 이어서 실행)</div>')
 
         except Exception as e:
@@ -2321,6 +2350,15 @@ class MyApp(PlatformMainUI):
         self.sbtn.setEnabled(True)
         self.stop_btn.setDisabled(True)
         self.cancel_btn.setDisabled(True)
+        
+        # ✅ 시험 중지 - idle 상태 heartbeat 전송
+        try:
+            api_client = APIClient()
+            api_client.send_heartbeat_idle()
+            Logger.info(f"✅ 시험 중지 - idle 상태 전송 완료")
+        except Exception as e:
+            Logger.warning(f"⚠️ 시험 중지 - idle 상태 전송 실패: {e}")
+        
         self.save_current_spec_data()
 
         # ✅ 일시정지 상태 저장
@@ -2400,6 +2438,14 @@ class MyApp(PlatformMainUI):
         self.sbtn.setEnabled(True)
         self.stop_btn.setDisabled(True)
         self.cancel_btn.setDisabled(True)
+        
+        # ✅ 시험 취소 - idle 상태 heartbeat 전송
+        try:
+            api_client = APIClient()
+            api_client.send_heartbeat_idle()
+            Logger.info(f"✅ 시험 취소 - idle 상태 전송 완료")
+        except Exception as e:
+            Logger.warning(f"⚠️ 시험 취소 - idle 상태 전송 실패: {e}")
         
         # 6. 모니터링 화면 초기화
         self.valResult.clear()
@@ -2537,6 +2583,9 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     fontDB = QFontDatabase()
     fontDB.addApplicationFont(resource_path('NanumGothic.ttf'))
+    fontDB.addApplicationFont(resource_path('assets/fonts/NotoSansKR-Regular.ttf'))
+    fontDB.addApplicationFont(resource_path('assets/fonts/NotoSansKR-Medium.ttf'))
+    fontDB.addApplicationFont(resource_path('assets/fonts/NotoSansKR-Bold.ttf'))
     app.setFont(QFont('NanumGothic'))
 
     ex = PlatformValidationWindow(MyApp)

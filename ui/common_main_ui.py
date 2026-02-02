@@ -12,7 +12,7 @@ import importlib
 import re
 from urllib.parse import urlparse
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor, QPixmap
+from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor, QPixmap, QTextDocument, QTextCursor
 from PyQt5.QtCore import *
 from PyQt5 import QtCore
 from api.webhook_api import WebhookThread
@@ -1130,10 +1130,100 @@ class CommonMainUI(QWidget):
 
 
 
-    def append_monitor_log(self, step_name, request_json="", result_status="진행중", score=None, details=""):
+    def update_last_line_timer(self, message, remove=False):
+        """
+        마지막 줄(타이머)을 업데이트하거나 삭제함.
+        블록 단위로 확인하여 확실하게 처리.
+        """
+        pass
+        # cursor = self.valResult.textCursor()
+        # cursor.movePosition(cursor.End)
+        # 
+        # # 마지막 블록 확인
+        # cursor.select(QTextCursor.BlockUnderCursor)
+        # text = cursor.selectedText()
+        # 
+        # # 빈 줄이면 윗 줄 확인 (최대 2번 위로)
+        # found = False
+        # for _ in range(2):
+        #     if "남은 대기 시간:" in text:
+        #         found = True
+        #         break
+        #     
+        #     # 못 찾았으면 위로 이동
+        #     if not cursor.block().previous().isValid():
+        #         break
+        #     cursor.movePosition(cursor.PreviousBlock, cursor.MoveAnchor)
+        #     cursor.select(QTextCursor.BlockUnderCursor)
+        #     text = cursor.selectedText()
+        #
+        # if found:
+        #     # 찾았으면 삭제
+        #     cursor.removeSelectedText()
+        #     # 줄바꿈이 남아서 빈 줄이 생기는 것을 방지하기 위해 확인 후 삭제
+        #     # 현재 블록이 지워졌지만 줄바꿈 문자가 남아있을 수 있음
+        #     cursor.deleteChar() 
+        #     
+        #     if not remove:
+        #         # 덮어쓰기 (줄바꿈 없이 삽입)
+        #         html_msg = f"<div style='font-size: 18px; font-weight: bold; color: #FF5722; font-family: \"Noto Sans KR\";'>{message}</div>"
+        #         cursor.insertHtml(html_msg)
+        #         # 커서를 다시 맨 끝으로 보내지 않음 (현재 위치 유지)
+        # else:
+        #     # 못 찾았으면 (맨 처음) 새로 추가
+        #     if not remove:
+        #         # 맨 끝으로 이동 후 추가
+        #         self.valResult.moveCursor(QTextCursor.End)
+        #         html_msg = f"<div style='font-size: 18px; font-weight: bold; color: #FF5722; font-family: \"Noto Sans KR\"; margin-top: 5px;'>{message}</div>"
+        #         self.valResult.append(html_msg)
+        #
+        # self.valResult.verticalScrollBar().setValue(
+        #     self.valResult.verticalScrollBar().maximum()
+        # )
+
+    def append_monitor_log(self, step_name, request_json="", result_status="진행중", score=None, details="", is_temp=False):
         """
         Qt 호환성이 보장된 HTML 테이블 구조 로그 출력 함수
         """
+        # ✅ 이전에 임시 로그(헤더+내용)가 있었다면 삭제 (주석 처리됨)
+        # if getattr(self, 'has_temp_log', False):
+        #     doc = self.valResult.document()
+        #     block = doc.lastBlock()
+        #     
+        #     # 최대 5개의 블록을 거슬러 올라가며 확인 (안전장치)
+        #     for _ in range(5):
+        #         if not block.isValid():
+        #             break
+        #             
+        #         text = block.text().strip()
+        #         should_delete = False
+        #         
+        #         # 1. 타이머 줄인지 확인
+        #         if "남은 대기 시간:" in text:
+        #             should_delete = True
+        #         # 2. 임시 헤더("시험 API:" + "요청")인지 확인
+        #         elif "시험 API:" in text and ("요청 전송 중" in text or "요청 대기 중" in text):
+        #             should_delete = True
+        #         # 3. 빈 줄인지 확인 (헤더와 타이머 사이 등)
+        #         elif not text:
+        #             should_delete = True
+        #         
+        #         prev_block = block.previous() # 삭제 전에 이전 블록 저장
+        #         
+        #         if should_delete:
+        #             cursor = QTextCursor(block)
+        #             cursor.select(QTextCursor.BlockUnderCursor)
+        #             cursor.removeSelectedText()
+        #             cursor.deletePreviousChar() # 줄바꿈 삭제
+        #         
+        #         # 헤더("시험 API:")를 지웠다면 더 이상 지울 필요 없음 (루프 종료)
+        #         if "시험 API:" in text and should_delete:
+        #             break
+        #             
+        #         block = prev_block # 위로 이동
+        #
+        #     self.has_temp_log = False
+
         from datetime import datetime
         import html
         from core.utils import replace_transport_desc_for_display
@@ -1228,6 +1318,10 @@ class CommonMainUI(QWidget):
         self.valResult.verticalScrollBar().setValue(
             self.valResult.verticalScrollBar().maximum()
         )
+        
+        # ✅ 임시 로그 플래그 설정
+        if is_temp:
+            self.has_temp_log = True
 
 
 

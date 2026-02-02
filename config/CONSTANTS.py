@@ -1,13 +1,62 @@
 # API-info
 import os
 import sys
+import socket
 
 headers = {"Content-type": "application/json", "User-Agent": 'test'}
+
+# 버전4: 모든 로컬 IP 주소 감지 (이더넷, 와이파이 등 모든 네트워크 어댑터)
+def get_all_local_ips():
+    """로컬 PC의 모든 IP 주소를 리스트로 반환 (이더넷, 와이파이 등)"""
+    ip_list = []
+
+    try:
+        # 방법 1: 모든 네트워크 인터페이스의 IP 가져오기
+        hostname = socket.gethostname()
+        # getaddrinfo로 모든 IP 조회
+        addrs = socket.getaddrinfo(hostname, None, socket.AF_INET)
+        for addr in addrs:
+            ip = addr[4][0]
+            if ip and not ip.startswith('127.') and ip not in ip_list:
+                ip_list.append(ip)
+    except Exception:
+        pass
+
+    try:
+        # 방법 2: 기본 라우팅 IP 추가 (이미 있으면 스킵)
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.settimeout(0)
+        s.connect(('8.8.8.8', 80))
+        default_ip = s.getsockname()[0]
+        s.close()
+        if default_ip and not default_ip.startswith('127.') and default_ip not in ip_list:
+            ip_list.append(default_ip)
+    except Exception:
+        pass
+
+    try:
+        from core.logger import Logger
+        Logger.debug(f"버전4: 감지된 모든 로컬 IP - {ip_list}")
+    except ImportError:
+        pass
+
+    return ip_list if ip_list else []
+
+# config.txt 경로 헬퍼 함수
+def get_config_path():
+    """실행파일 또는 소스코드 기준으로 config.txt 경로 반환"""
+    if getattr(sys, 'frozen', False):
+        # PyInstaller 실행파일 → exe 파일 위치 기준
+        base_dir = os.path.dirname(sys.executable)
+    else:
+        # 일반 Python 실행 → 소스코드 위치 기준
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_dir, "config.txt")
 
 # 관리자시스템 주소 설정 로딩
 def load_management_url():
     """config.txt에서 관리자시스템 주소를 읽어옴"""
-    config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config.txt")
+    config_path = get_config_path()
     default_url = "http://ect2.iptime.org:20223"
 
     try:
@@ -31,7 +80,7 @@ def load_management_url():
 
 def save_management_url(new_url):
     """관리자시스템 주소를 config.txt에 저장"""
-    config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config.txt")
+    config_path = get_config_path()
 
     try:
         with open(config_path, 'w', encoding='utf-8') as f:
@@ -65,19 +114,19 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소
 # test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
-company_name = "이노뎁"
-product_name = "VURIX-TMS"
+company_name = "물리보안 시스템 기업"
+product_name = "물리보안 제품"
 version = "v1.0"
 test_category = "본시험"
-test_target = "기본 기능 시험-통합시스템"
+test_target = "기본 기능 시험-보안용 센서 시스템"
 test_range = "전체 필드"
 auth_type = "Digest Auth"
 auth_info = "kisa,kisa_k1!2@"
-admin_code = "123"
-url = "https://10.252.219.95:2000"
-contact_person = "배성환"
+admin_code = "1"
+url = "https://192.168.0.10:2000"
+contact_person = "김철수"
 model_name = "v1.0"
-request_id = "cmii86ssr00a48z1tqmco6ke8"
+request_id = "cmkkpi00m00c2h0ztemrruzgs"
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황
 flag_opt = False
@@ -112,7 +161,7 @@ enable_retry_delay = False  # False 권장: 불필요한 sleep 제거
 - 2 (INFO): 1 + 검증 과정, 매핑 정보
 - 3 (DEBUG): 모든 디버그 정보 출력 (상세)
 '''
-DEBUG_LEVEL = 1  # 기본값: WARN (권장)
+DEBUG_LEVEL = 3 # 기본값: WARN (권장)
 
 # test-opt
 '''
@@ -126,7 +175,7 @@ DEBUG_LEVEL = 1  # 기본값: WARN (권장)
 # ✅ 웹훅 서버 설정 (전역)
 WEBHOOK_HOST = "0.0.0.0"  # 서버 바인딩 주소 (모든 인터페이스에서 수신)
 WEBHOOK_PORT = 2001       # 웹훅 수신 포트
-WEBHOOK_PUBLIC_IP = "10.252.219.95"
+WEBHOOK_PUBLIC_IP = "192.168.0.6"
 # ✅ 웹훅 공개 IP 설정: info_GUI에서 선택한 시험 URL의 IP 사용
 # 초기값은 URL에서 추출, info_GUI에서 주소 선택 후 자동 업데이트됨
 
@@ -182,4 +231,4 @@ digest_security_res = [
     '5196b2513bbc86a08386720240053b2a29a628aac0e1fdaf372e7f220e984538',
     '99f13e073da1f5e4e6db0d37d9f99285e4439ef57820518067ce56847613239f',
     'a723679b7b81137cb0b560428ea120fc3468ca3f2c3d2bc120a2f9a84b3a5a49'
-]
+] 

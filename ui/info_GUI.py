@@ -8,12 +8,14 @@ from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QPixmap, QColor, QFont, QPainter, QPen, QResizeEvent
 import importlib
 import re
+from datetime import datetime
 from core.functions import resource_path
 from core.logger import Logger
 from network_scanner import NetworkScanWorker, ARPScanWorker
 from form_validator import FormValidator, ClickableLabel, ClickableCheckboxRowWidget
 import config.CONSTANTS as CONSTANTS
 from ui.splash_screen import LoadingPopup
+from ui.widgets import SystemPopup
 
 # 분리된 섹션 임포트
 from ui.sections import (
@@ -69,6 +71,7 @@ class InfoWidget(QWidget):
         self.stacked_widget = QStackedWidget()
         self.original_test_category = None  # API에서 받아온 원래 test_category 값 보관
         self.original_test_range = None  # API에서 받아온 원래 test_range 값 보관
+        self.real_admin_code = None  # [추가] API로부터 받아온 실제 관리자 코드
         self.initUI()
 
     def initUI(self):
@@ -81,6 +84,110 @@ class InfoWidget(QWidget):
 
         main_layout.addWidget(self.stacked_widget)
         self.setLayout(main_layout)
+
+        # 버전4: 자동 로드 플래그 (showEvent에서 한 번만 실행)
+        self._auto_load_done = False
+
+    def showEvent(self, event):
+        """창이 표시될 때 호출 (버전4: 자동 로드)"""
+        super().showEvent(event)
+
+        # 버전4: 창이 완전히 표시된 후 자동으로 시험 정보 불러오기 (한 번만 실행)
+        if not self._auto_load_done:
+            self._auto_load_done = True
+            from PyQt5.QtCore import QTimer
+            QTimer.singleShot(500, self._auto_load_test_info)
+
+    def _auto_load_test_info(self):
+        """버전4: 모든 로컬 IP를 조회하여 시험 정보가 등록된 IP 자동 감지"""
+        try:
+            # 모든 로컬 IP 가져오기
+            ip_list = CONSTANTS.get_all_local_ips()
+            Logger.debug(f"버전4: 감지된 로컬 IP 목록 - {ip_list}")
+
+            if not ip_list:
+                Logger.debug("자동 로드 실패: 로컬 IP를 감지할 수 없음")
+                return
+
+            # 유효한 IP만 필터링 (127.0.0.1 제외)
+            valid_ips = [ip for ip in ip_list if self._validate_ip_address(ip) and ip != '127.0.0.1']
+            if not valid_ips:
+                Logger.debug("자동 로드 실패: 유효한 IP가 없음")
+                return
+
+            self.is_loading = True
+            self._disable_ui_during_loading()
+            self.loading_popup = LoadingPopup(width=400, height=200)
+            self.loading_popup.update_message("시험 정보 검색 중...", f"검색할 IP: {len(valid_ips)}개")
+            self.loading_popup.show()
+
+            # 각 IP에 대해 순차적으로 시험 정보 조회 시도
+            self._auto_load_ip_list = valid_ips
+            self._auto_load_current_index = 0
+            self._try_next_ip()
+
+        except Exception as e:
+            Logger.debug(f"자동 로드 실패: {e}")
+
+    def _try_next_ip(self):
+        """다음 IP로 시험 정보 조회 시도"""
+        from PyQt5.QtWidgets import QMessageBox
+
+        if self._auto_load_current_index >= len(self._auto_load_ip_list):
+            # 모든 IP 시도 완료 - 실패
+            self._close_loading_popup()
+            self._enable_ui_after_loading()
+            Logger.debug("자동 로드 실패: 모든 IP에서 시험 정보를 찾을 수 없음")
+            
+            popup = SystemPopup(
+                title="시험 데이터 확인 실패",
+                message=f"현재 PC의 IP로 할당된 시험이 없습니다.\n\n"
+                        "관리 시스템에 해당 PC의 IP로 시험이 등록되어 있는지 확인 후 다시 실행해주세요.\n\n"
+                        "프로그램을 종료합니다.",
+                parent=self
+            )
+            popup.exec_()
+            
+            QApplication.instance().quit()
+            return
+
+        ip_address = self._auto_load_ip_list[self._auto_load_current_index]
+        Logger.debug(f"버전4: IP {ip_address} 조회 시도 ({self._auto_load_current_index + 1}/{len(self._auto_load_ip_list)})")
+
+        self.loading_popup.update_message(
+            "시험 정보 검색 중...",
+            f"IP: {ip_address} ({self._auto_load_current_index + 1}/{len(self._auto_load_ip_list)})"
+        )
+
+        # 워커 스레드로 조회
+        self.test_info_worker = TestInfoWorker(self.form_validator, ip_address)
+        self.test_info_worker.finished.connect(self._on_auto_load_ip_result)
+        self.test_info_worker.error.connect(self._on_auto_load_ip_error)
+        self.test_info_worker.start()
+
+    def _on_auto_load_ip_result(self, test_data):
+        """IP 조회 결과 처리"""
+        if test_data:
+            # 시험 정보 찾음 - 성공
+            found_ip = self._auto_load_ip_list[self._auto_load_current_index]
+            Logger.debug(f"버전4: IP {found_ip}에서 시험 정보 발견")
+            # 시그널 연결 해제 (중복 호출 방지)
+            try:
+                self.test_info_worker.finished.disconnect(self._on_auto_load_ip_result)
+                self.test_info_worker.error.disconnect(self._on_auto_load_ip_error)
+            except Exception:
+                pass
+            self._on_test_info_loaded(test_data)
+        else:
+            # 이 IP에는 없음 - 다음 IP 시도
+            self._auto_load_current_index += 1
+            self._try_next_ip()
+
+    def _on_auto_load_ip_error(self, error_message):
+        """IP 조회 에러 처리 (다음 IP 시도)"""
+        Logger.debug(f"버전4: IP 조회 실패 - {error_message}")
+        self._auto_load_current_index += 1
+        self._try_next_ip()
 
     # ---------- 반응형 크기 조정 헬퍼 함수들 ----------
     def _resize_widget(self, widget_attr, size_attr, width_ratio, height_ratio=None):
@@ -175,13 +282,15 @@ class InfoWidget(QWidget):
 
                 if hasattr(self, 'page1_bg_label'):
                     self.page1_bg_label.setGeometry(0, 0, content_width, content_height)
-                if hasattr(self, 'ip_input_edit'):
-                    self.ip_input_edit.setGeometry(content_width - 411, 24, 200, 40)
-                if hasattr(self, 'load_test_info_btn'):
-                    self.load_test_info_btn.setGeometry(content_width - 203, 13, 198, 62)
+                # 버전4: 시험 IP 입력 UI 제거 (로컬 IP 자동 감지)
+                # if hasattr(self, 'ip_input_edit'):
+                #     self.ip_input_edit.setGeometry(content_width - 411, 24, 200, 40)
+                # if hasattr(self, 'load_test_info_btn'):
+                #     self.load_test_info_btn.setGeometry(content_width - 203, 13, 198, 62)
 
-            if hasattr(self, 'management_url_container'):
-                self.management_url_container.setGeometry(page_width - 390, page_height - 108, 380, 60)
+            # 버전4: 관리자시스템 주소 UI 제거
+            # if hasattr(self, 'management_url_container'):
+            #     self.management_url_container.setGeometry(page_width - 390, page_height - 108, 380, 60)
 
             # ✅ 반응형: Page1 하단 버튼 영역 가로 확장
             if hasattr(self, 'original_window_size'):
@@ -417,10 +526,24 @@ class InfoWidget(QWidget):
     # ---------- 페이지 전환 메서드 ----------
     def go_to_next_page(self):
         """다음 페이지로 이동 (조건 검증 후)"""
-        is_complete = self._is_page1_complete()
+        # 0. 로딩 중이면 이동 불가
+        if self.is_loading:
+            return
 
-        if not is_complete:
-            QMessageBox.warning(self,"입력 필요", "시험 정보 페이지의 모든 필수 항목을 입력해주세요.")
+        # 1. 필수 입력 항목 및 관리자 코드 검증
+        if not self.company_edit.text().strip() or not self.product_edit.text().strip():
+            QMessageBox.warning(self, "입력 필요", "시험 정보 페이지의 모든 필수 항목을 입력해주세요.")
+            return
+
+        if not self.form_validator.is_admin_code_valid():
+            if self.form_validator.is_admin_code_required():
+                QMessageBox.warning(self, "인증 실패", "관리자 코드가 올바르지 않습니다.\n다시 확인해주세요.")
+            else:
+                QMessageBox.warning(self, "입력 필요", "관리자 코드를 입력해주세요.")
+            return
+
+        if not self.test_field_table.rowCount() > 0:
+            QMessageBox.warning(self, "입력 필요", "시험 분야 데이터가 없습니다.")
             return
 
         if self.current_page < 1:
@@ -885,6 +1008,95 @@ class InfoWidget(QWidget):
         self.test_info_worker.error.connect(self._on_test_info_error)
         self.test_info_worker.start()
 
+    def _close_loading_popup(self):
+        """로딩 팝업 닫기 헬퍼 메서드"""
+        if hasattr(self, 'loading_popup') and self.loading_popup:
+            self.loading_popup.close()
+            self.loading_popup = None
+
+    def _validate_test_schedule(self, schedule_data):
+        """시험 스케줄(날짜/시간) 검증"""
+        try:
+            # [디버깅] 스케줄 데이터 전체 로그 출력
+            Logger.debug(f"API 스케줄 데이터 확인: {schedule_data}")
+
+            start_time_str = schedule_data.get("startTime")
+            end_time_str = schedule_data.get("endTime")
+            schedule_date_str = schedule_data.get("scheduledDate")  # scheduleDate -> scheduledDate 수정
+
+            # 시간 정보가 없으면 검증 패스 (필수 정보가 아닐 수 있음)
+            if not start_time_str or not end_time_str:
+                return True
+
+            # 날짜/시간 파싱 헬퍼 함수
+            def parse_dt(dt_str, date_str=None):
+                # 1. Full DateTime (ISO like)
+                for fmt in ["%Y-%m-%dT%H:%M:%S", "%Y-%m-%d %H:%M:%S"]:
+                    try:
+                        return datetime.strptime(dt_str, fmt)
+                    except ValueError:
+                        continue
+                
+                # 2. Time only + Schedule Date
+                if date_str:
+                    try:
+                        # date_str 파싱 (ISO 8601 대응: 2026-01-19T00:00:00.000Z)
+                        if 'T' in date_str:
+                            # T 이후를 자르고 날짜만 추출하거나 fromisoformat 사용
+                            d = datetime.fromisoformat(date_str.replace('Z', '+00:00')).date()
+                        else:
+                            d = datetime.strptime(date_str, "%Y-%m-%d").date()
+                            
+                        # 24:00 예외 처리
+                        if dt_str == "24:00":
+                            from datetime import time
+                            return datetime.combine(d, time(23, 59, 59))
+                            
+                        for fmt in ["%H:%M:%S", "%H:%M"]:
+                            try:
+                                t = datetime.strptime(dt_str, fmt).time()
+                                return datetime.combine(d, t)
+                            except ValueError:
+                                continue
+                    except Exception as e:
+                        Logger.debug(f"날짜 결합 파싱 실패: {e}")
+                return None
+
+            start_dt = parse_dt(start_time_str, schedule_date_str)
+            end_dt = parse_dt(end_time_str, schedule_date_str)
+
+            if not start_dt or not end_dt:
+                Logger.warning(f"스케줄 파싱 실패: start={start_time_str}, end={end_time_str}, date={schedule_date_str}")
+                return True # 파싱 실패 시 일단 통과
+
+            now = datetime.now()
+            
+            # 로그 출력: 시험 시간 정보
+            Logger.info(f"[스케줄 확인] 시험 허용 기간: {start_dt.strftime('%Y-%m-%d %H:%M')} ~ {end_dt.strftime('%Y-%m-%d %H:%M')} (현재 시간: {now.strftime('%Y-%m-%d %H:%M')})")
+
+            # 현재 시간이 허용 범위 밖인 경우
+            if not (start_dt <= now <= end_dt):
+                msg = (
+                    f"현재 시간은 시험 허용 기간이 아닙니다.\n\n"
+                    f"현재 시간: {now.strftime('%Y-%m-%d %H:%M')}\n"
+                    f"허용 기간: {start_dt.strftime('%Y-%m-%d %H:%M')} ~ {end_dt.strftime('%Y-%m-%d %H:%M')}\n\n"
+                    "프로그램을 종료합니다."
+                )
+                
+                popup = SystemPopup(
+                    title="시험 기간 만료",
+                    message=msg,
+                    parent=self
+                )
+                popup.exec_()
+                return False
+
+            return True
+
+        except Exception as e:
+            Logger.error(f"스케줄 검증 중 오류 발생: {e}")
+            return True
+
     def _on_test_info_loaded(self, test_data):
         """시험 정보 로드 성공 시 호출되는 슬롯"""
         from PyQt5.QtWidgets import QApplication
@@ -893,10 +1105,25 @@ class InfoWidget(QWidget):
             QApplication.processEvents()  # 스피너 애니메이션 유지
 
             if not test_data:
-                QMessageBox.warning(self, "경고",
-                    "시험 정보를 불러올 수 없습니다.\n"
-                    "- 서버 연결을 확인해주세요.\n"
-                    "- IP 주소에 해당하는 시험 요청이 있는지 확인해주세요.")
+                self._close_loading_popup()  # 경고창 표시 전에 로딩 팝업 닫기
+                
+                popup = SystemPopup(
+                    title="시험 데이터 확인 실패",
+                    message="시험 정보를 불러올 수 없습니다.\n\n"
+                            "- 서버 연결 상태를 확인해주세요.\n"
+                            "- 관리 시스템에 현재 PC의 IP로 할당된 시험이 있는지 확인해주세요.\n\n"
+                            "프로그램을 종료합니다.",
+                    parent=self
+                )
+                popup.exec_()
+                
+                QApplication.instance().quit()
+                return
+
+            # [추가] 시험 스케줄 검증
+            if not self._validate_test_schedule(test_data.get("schedule") or {}):
+                self._close_loading_popup()
+                QApplication.instance().quit()
                 return
 
             # 1페이지 필드 채우기
@@ -905,6 +1132,7 @@ class InfoWidget(QWidget):
 
             # testGroups 배열 처리
             if not test_groups:
+                self._close_loading_popup()  # 경고창 표시 전에 로딩 팝업 닫기
                 QMessageBox.warning(self, "경고", "testGroups 데이터가 비어있습니다.")
                 return
 
@@ -962,8 +1190,12 @@ class InfoWidget(QWidget):
             # testPort 기반 WEBHOOK_PORT 업데이트
             if self.test_port:
                 # 1. 메모리상의 값 업데이트
+                local_ip = self.form_validator.get_local_ip_address()
+                CONSTANTS.WEBHOOK_PUBLIC_IP = local_ip
                 CONSTANTS.WEBHOOK_PORT = self.test_port + 1
-                CONSTANTS.WEBHOOK_URL = f"https://{CONSTANTS.url}:{CONSTANTS.WEBHOOK_PORT}"
+                CONSTANTS.WEBHOOK_URL = f"https://{local_ip}:{CONSTANTS.WEBHOOK_PORT}"
+                
+                Logger.info(f"[WEBHOOK] 로컬 IP 설정: {local_ip}, 포트: {CONSTANTS.WEBHOOK_PORT}")
 
                 # 2. CONSTANTS.py 파일 자체도 수정
                 try:
@@ -980,6 +1212,11 @@ class InfoWidget(QWidget):
                     # 파일 읽기
                     with open(constants_path, 'r', encoding='utf-8') as f:
                         content = f.read()
+
+                    # WEBHOOK_PUBLIC_IP 업데이트
+                    pattern_ip = r'^WEBHOOK_PUBLIC_IP\s*=.*$'
+                    new_ip_line = f'WEBHOOK_PUBLIC_IP = "{local_ip}"'
+                    content = re.sub(pattern_ip, new_ip_line, content, flags=re.MULTILINE)
 
                     # WEBHOOK_PORT = 숫자 패턴 찾아서 치환
                     pattern_port = r'^WEBHOOK_PORT\s*=\s*\d+.*$'
@@ -1005,6 +1242,17 @@ class InfoWidget(QWidget):
             self.form_validator.load_opt_files_from_api(test_data)
             QApplication.processEvents()  # 스피너 애니메이션 유지
 
+            # [추가] 관리자 코드 조회
+            # [임시 수정] API 호출 주석 처리
+            # try:
+            #     self.real_admin_code = self.form_validator.api_client.fetch_admin_code()
+            #     if self.real_admin_code:
+            #         Logger.info(f"관리자 코드 조회 성공: {self.real_admin_code}")
+            #     else:
+            #         Logger.warning("관리자 코드를 조회할 수 없습니다.")
+            # except Exception as e:
+            #     Logger.error(f"관리자 코드 조회 중 오류: {e}")
+
             # 플랫폼 검증일 경우 Authentication 정보 자동 입력
             self.auto_fill_authentication_for_platform()
             QApplication.processEvents()  # 스피너 애니메이션 유지
@@ -1019,25 +1267,19 @@ class InfoWidget(QWidget):
             Logger.debug(f"시험정보 불러오기 실패: {e}")
             import traceback
             traceback.print_exc()
+            self._close_loading_popup()  # 경고창 표시 전에 로딩 팝업 먼저 닫기
             QMessageBox.critical(self, "오류", f"시험 정보를 불러오는 중 오류가 발생했습니다:\n{str(e)}")
 
         finally:
-            # 로딩 팝업 닫기
-            if hasattr(self, 'loading_popup') and self.loading_popup:
-                self.loading_popup.close()
-                self.loading_popup = None
+            self._close_loading_popup()  # 로딩 팝업 닫기
             # 로딩 완료 후 UI 활성화
             self._enable_ui_after_loading()
 
     def _on_test_info_error(self, error_message):
         """시험 정보 로드 실패 시 호출되는 슬롯"""
         Logger.debug(f"시험정보 불러오기 실패: {error_message}")
+        self._close_loading_popup()  # 경고창 표시 전에 로딩 팝업 먼저 닫기
         QMessageBox.critical(self, "오류", f"시험 정보를 불러오는 중 오류가 발생했습니다:\n{error_message}")
-
-        # 로딩 팝업 닫기
-        if hasattr(self, 'loading_popup') and self.loading_popup:
-            self.loading_popup.close()
-            self.loading_popup = None
 
         # 로딩 실패 시 UI 복원 (다시 시도할 수 있도록)
         self.is_loading = False
@@ -1163,17 +1405,10 @@ class InfoWidget(QWidget):
             return None
 
     def _get_local_ip_list(self):
-        """get_local_ip() 결과를 안전하게 리스트로 변환 (최대 3개)"""
-        raw = self.get_local_ip()
-        ip_list = []
-
-        if isinstance(raw, str):
-            ip_list = [ip.strip() for ip in raw.split(',') if ip.strip()]
-        elif isinstance(raw, (list, tuple, set)):
-            ip_list = [str(ip).strip() for ip in raw if str(ip).strip()]
-
-        # 최대 3개만 반환
-        return ip_list[:3]
+        """모든 로컬 IP를 리스트로 반환 (이더넷, 와이파이 등)"""
+        # CONSTANTS의 get_all_local_ips() 사용
+        ip_list = CONSTANTS.get_all_local_ips()
+        return ip_list
 
     def check_next_button_state(self):
         """첫 번째 페이지의 다음 버튼 활성화 조건 체크"""
