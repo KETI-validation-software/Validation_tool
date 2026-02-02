@@ -282,7 +282,7 @@ class TestFieldSection(QGroupBox):
         self.scenario_column_background.setParent(self.scenario_table.viewport())
         self.scenario_column_background.setStyleSheet("""
             QLabel {
-                background-color: #E3F2FF;
+                background-color: #FFFFFF;
             }
         """)
         self.scenario_column_background.setGeometry(0, 0, 372, 240)
