@@ -121,20 +121,12 @@ class ClickableCheckboxRowWidget(QWidget):
         self.checkbox_unchecked_path = checkbox_unchecked_path
         self.checkbox_checked_path = checkbox_checked_path
 
-        # 레이아웃 설정: padding 좌24, 상8, 우32, 하8
+        # 레이아웃 설정: padding 상하8, 좌우 32 (체크박스 삭제로 좌우 균형 맞춤)
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(24, 8, 32, 8)
+        layout.setContentsMargins(32, 8, 32, 8)
         layout.setSpacing(8)
 
-        # 체크박스 이미지 (왼쪽)
-        self.checkbox_label = QLabel()
-        self.checkbox_label.setStyleSheet("background: transparent;")
-        checkbox_pixmap = QPixmap(resource_path(checkbox_unchecked_path))
-        self.checkbox_label.setPixmap(checkbox_pixmap)
-        self.checkbox_label.setFixedSize(checkbox_pixmap.width(), checkbox_pixmap.height())
-        layout.addWidget(self.checkbox_label)
-
-        # 텍스트 라벨
+        # 텍스트 라벨 (체크박스 삭제)
         self.text_label = QLabel(text)
         self.text_label.setAlignment(Qt.AlignCenter)
         self.text_label.setStyleSheet("""
@@ -174,16 +166,12 @@ class ClickableCheckboxRowWidget(QWidget):
         return self._is_checked
 
     def setChecked(self, checked):
-        """체크 상태 변경 (체크박스 + 배경 이미지 모두 변경)"""
+        """체크 상태 변경 (배경 이미지 변경)"""
         self._is_checked = checked
         if checked:
-            checkbox_pixmap = QPixmap(resource_path(self.checkbox_checked_path))
             self.bg_pixmap = QPixmap(resource_path(self.bg_selected_image_path))
         else:
-            checkbox_pixmap = QPixmap(resource_path(self.checkbox_unchecked_path))
             self.bg_pixmap = QPixmap(resource_path(self.bg_image_path))
-        self.checkbox_label.setPixmap(checkbox_pixmap)
-        self.checkbox_label.setFixedSize(checkbox_pixmap.width(), checkbox_pixmap.height())
         self.update()  # 배경 다시 그리기
 
     def setBackgroundImage(self, bg_image_path):
