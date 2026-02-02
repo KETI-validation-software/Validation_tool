@@ -118,12 +118,12 @@ company_name = "물리보안 시스템 기업"
 product_name = "물리보안 제품"
 version = "v1.0"
 test_category = "본시험"
-test_target = "기본 기능 시험-통합시스템"
+test_target = "기본 기능 시험-보안용 센서 시스템"
 test_range = "전체 필드"
 auth_type = "Digest Auth"
 auth_info = "kisa,kisa_k1!2@"
 admin_code = "1"
-url = "https://127.0.0.1:2000"
+url = "https://192.168.0.10:2000"
 contact_person = "김철수"
 model_name = "v1.0"
 request_id = "cmkkpi00m00c2h0ztemrruzgs"
@@ -161,7 +161,7 @@ enable_retry_delay = False  # False 권장: 불필요한 sleep 제거
 - 2 (INFO): 1 + 검증 과정, 매핑 정보
 - 3 (DEBUG): 모든 디버그 정보 출력 (상세)
 '''
-DEBUG_LEVEL = 1 # 기본값: WARN (권장)
+DEBUG_LEVEL = 3 # 기본값: WARN (권장)
 
 # test-opt
 '''
@@ -175,7 +175,7 @@ DEBUG_LEVEL = 1 # 기본값: WARN (권장)
 # ✅ 웹훅 서버 설정 (전역)
 WEBHOOK_HOST = "0.0.0.0"  # 서버 바인딩 주소 (모든 인터페이스에서 수신)
 WEBHOOK_PORT = 2001       # 웹훅 수신 포트
-WEBHOOK_PUBLIC_IP = "127.0.0.1"
+WEBHOOK_PUBLIC_IP = "192.168.0.6"
 # ✅ 웹훅 공개 IP 설정: info_GUI에서 선택한 시험 URL의 IP 사용
 # 초기값은 URL에서 추출, info_GUI에서 주소 선택 후 자동 업데이트됨
 
@@ -231,4 +231,4 @@ digest_security_res = [
     '5196b2513bbc86a08386720240053b2a29a628aac0e1fdaf372e7f220e984538',
     '99f13e073da1f5e4e6db0d37d9f99285e4439ef57820518067ce56847613239f',
     'a723679b7b81137cb0b560428ea120fc3468ca3f2c3d2bc120a2f9a84b3a5a49'
-]
+] 

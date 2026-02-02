@@ -8,6 +8,7 @@ from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QPixmap, QColor, QFont, QPainter, QPen, QResizeEvent
 import importlib
 import re
+from datetime import datetime
 from core.functions import resource_path
 from core.logger import Logger
 from network_scanner import NetworkScanWorker, ARPScanWorker
@@ -140,8 +141,8 @@ class InfoWidget(QWidget):
             
             popup = SystemPopup(
                 title="시험 데이터 확인 실패",
-                message=f"현재 PC의 IP({', '.join(self._auto_load_ip_list)})로 할당된 시험이 없습니다.\n\n"
-                        "관리 시스템에 해당 PC의 IP가 등록되어 있는지 확인 후 다시 실행해주세요.\n\n"
+                message=f"현재 PC의 IP로 할당된 시험이 없습니다.\n\n"
+                        "관리 시스템에 해당 PC의 IP로 시험이 등록되어 있는지 확인 후 다시 실행해주세요.\n\n"
                         "프로그램을 종료합니다.",
                 parent=self
             )
@@ -1013,6 +1014,89 @@ class InfoWidget(QWidget):
             self.loading_popup.close()
             self.loading_popup = None
 
+    def _validate_test_schedule(self, schedule_data):
+        """시험 스케줄(날짜/시간) 검증"""
+        try:
+            # [디버깅] 스케줄 데이터 전체 로그 출력
+            Logger.debug(f"API 스케줄 데이터 확인: {schedule_data}")
+
+            start_time_str = schedule_data.get("startTime")
+            end_time_str = schedule_data.get("endTime")
+            schedule_date_str = schedule_data.get("scheduledDate")  # scheduleDate -> scheduledDate 수정
+
+            # 시간 정보가 없으면 검증 패스 (필수 정보가 아닐 수 있음)
+            if not start_time_str or not end_time_str:
+                return True
+
+            # 날짜/시간 파싱 헬퍼 함수
+            def parse_dt(dt_str, date_str=None):
+                # 1. Full DateTime (ISO like)
+                for fmt in ["%Y-%m-%dT%H:%M:%S", "%Y-%m-%d %H:%M:%S"]:
+                    try:
+                        return datetime.strptime(dt_str, fmt)
+                    except ValueError:
+                        continue
+                
+                # 2. Time only + Schedule Date
+                if date_str:
+                    try:
+                        # date_str 파싱 (ISO 8601 대응: 2026-01-19T00:00:00.000Z)
+                        if 'T' in date_str:
+                            # T 이후를 자르고 날짜만 추출하거나 fromisoformat 사용
+                            d = datetime.fromisoformat(date_str.replace('Z', '+00:00')).date()
+                        else:
+                            d = datetime.strptime(date_str, "%Y-%m-%d").date()
+                            
+                        # 24:00 예외 처리
+                        if dt_str == "24:00":
+                            from datetime import time
+                            return datetime.combine(d, time(23, 59, 59))
+                            
+                        for fmt in ["%H:%M:%S", "%H:%M"]:
+                            try:
+                                t = datetime.strptime(dt_str, fmt).time()
+                                return datetime.combine(d, t)
+                            except ValueError:
+                                continue
+                    except Exception as e:
+                        Logger.debug(f"날짜 결합 파싱 실패: {e}")
+                return None
+
+            start_dt = parse_dt(start_time_str, schedule_date_str)
+            end_dt = parse_dt(end_time_str, schedule_date_str)
+
+            if not start_dt or not end_dt:
+                Logger.warning(f"스케줄 파싱 실패: start={start_time_str}, end={end_time_str}, date={schedule_date_str}")
+                return True # 파싱 실패 시 일단 통과
+
+            now = datetime.now()
+            
+            # 로그 출력: 시험 시간 정보
+            Logger.info(f"[스케줄 확인] 시험 허용 기간: {start_dt.strftime('%Y-%m-%d %H:%M')} ~ {end_dt.strftime('%Y-%m-%d %H:%M')} (현재 시간: {now.strftime('%Y-%m-%d %H:%M')})")
+
+            # 현재 시간이 허용 범위 밖인 경우
+            if not (start_dt <= now <= end_dt):
+                msg = (
+                    f"현재 시간은 시험 허용 기간이 아닙니다.\n\n"
+                    f"현재 시간: {now.strftime('%Y-%m-%d %H:%M')}\n"
+                    f"허용 기간: {start_dt.strftime('%Y-%m-%d %H:%M')} ~ {end_dt.strftime('%Y-%m-%d %H:%M')}\n\n"
+                    "프로그램을 종료합니다."
+                )
+                
+                popup = SystemPopup(
+                    title="시험 기간 만료",
+                    message=msg,
+                    parent=self
+                )
+                popup.exec_()
+                return False
+
+            return True
+
+        except Exception as e:
+            Logger.error(f"스케줄 검증 중 오류 발생: {e}")
+            return True
+
     def _on_test_info_loaded(self, test_data):
         """시험 정보 로드 성공 시 호출되는 슬롯"""
         from PyQt5.QtWidgets import QApplication
@@ -1033,6 +1117,12 @@ class InfoWidget(QWidget):
                 )
                 popup.exec_()
                 
+                QApplication.instance().quit()
+                return
+
+            # [추가] 시험 스케줄 검증
+            if not self._validate_test_schedule(test_data.get("schedule") or {}):
+                self._close_loading_popup()
                 QApplication.instance().quit()
                 return
 
