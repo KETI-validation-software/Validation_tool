@@ -1097,6 +1097,25 @@ class InfoWidget(QWidget):
             Logger.error(f"스케줄 검증 중 오류 발생: {e}")
             return True
 
+    def _setup_for_integrated_system(self):
+        """통합플랫폼시스템 전용 설정 (IP 자동 추가, UI 비활성화)"""
+        try:
+            # 1. IP 자동 추가
+            if hasattr(self, 'test_port') and self.test_port:
+                ip_list = self._get_local_ip_list()
+                if ip_list:
+                    new_urls = [f"{ip}:{self.test_port}" for ip in dict.fromkeys(ip_list)]
+                    self._populate_url_table(new_urls)
+            
+            # 2. 추가 버튼 및 주소탐색 버튼 비활성화/숨김
+            if hasattr(self, 'add_btn'):
+                self.add_btn.hide()
+            if hasattr(self, 'scan_btn'):
+                self.scan_btn.hide()
+                
+        except Exception as e:
+            Logger.debug(f"통합플랫폼 UI 설정 실패: {e}")
+
     def _on_test_info_loaded(self, test_data):
         """시험 정보 로드 성공 시 호출되는 슬롯"""
         from PyQt5.QtWidgets import QApplication
@@ -1186,6 +1205,10 @@ class InfoWidget(QWidget):
 
             self.test_specs = all_test_specs
             self.test_port = test_data.get("schedule", {}).get("testPort", None)
+
+            # [추가] 통합플랫폼시스템인 경우 자동 설정
+            if self.target_system == "통합플랫폼시스템":
+                self._setup_for_integrated_system()
 
             # testPort 기반 WEBHOOK_PORT 업데이트
             if self.test_port:

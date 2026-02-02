@@ -371,7 +371,8 @@ def _setup_connection_title_row(parent_widget, right_layout):
     buttons_layout.setSpacing(16)
 
     # 주소탐색 버튼
-    scan_btn = QPushButton("")
+    parent_widget.scan_btn = QPushButton("")
+    scan_btn = parent_widget.scan_btn
     scan_btn.setFixedSize(120, 38)
     scan_btn.setFocusPolicy(Qt.NoFocus)
 
