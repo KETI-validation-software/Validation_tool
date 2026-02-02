@@ -95,21 +95,27 @@ class FormValidator:
     def handle_test_category_change(self):
         """시험유형 변경 시 관리자 코드 필드 활성화/비활성화"""
         test_category = self.parent.test_category_edit.text().strip()
+        
+        # 관리자 코드 placeholder 라벨 가져오기
+        placeholder_label = getattr(self.parent, 'admin_code_placeholder', None)
 
         if not test_category:
             self.parent.admin_code_edit.setEnabled(False)
             self.parent.admin_code_edit.clear()
-            self.parent.admin_code_edit.setPlaceholderText("")
+            if placeholder_label:
+                placeholder_label.setText("관리자 코드를 입력해주세요")
             return
 
         if test_category in ["본시험", "사전시험"]:
             if test_category == "본시험":
                 self.parent.admin_code_edit.setEnabled(True)
-                self.parent.admin_code_edit.setPlaceholderText("")
+                if placeholder_label:
+                    placeholder_label.setText("관리자 코드를 입력해주세요")
             else:
                 self.parent.admin_code_edit.setEnabled(False)
                 self.parent.admin_code_edit.clear()
-                self.parent.admin_code_edit.setPlaceholderText("")
+                if placeholder_label:
+                    placeholder_label.setText("본시험에서만 입력합니다")
             return
 
         self.parent.original_test_category = test_category
@@ -118,12 +124,14 @@ class FormValidator:
         if test_category == "MAIN_TEST":
             self.parent.test_category_edit.setText("본시험")
             self.parent.admin_code_edit.setEnabled(True)
-            self.parent.admin_code_edit.setPlaceholderText("")
+            if placeholder_label:
+                placeholder_label.setText("관리자 코드를 입력해주세요")
         elif test_category == "PRE_TEST":
             self.parent.test_category_edit.setText("사전시험")
             self.parent.admin_code_edit.setEnabled(False)
             self.parent.admin_code_edit.clear()
-            self.parent.admin_code_edit.setPlaceholderText("")
+            if placeholder_label:
+                placeholder_label.setText("본시험에서만 입력합니다")
         else:
             # 이미 한글인 경우는 그대로 유지
             pass
