@@ -348,9 +348,9 @@ def _setup_connection_title_row(parent_widget, right_layout):
     connection_title_layout.setContentsMargins(0, 0, 0, 0)
     connection_title_layout.setSpacing(0)
 
-    connection_title_widget = QLabel("접속 주소 탐색")
-    connection_title_widget.setFixedHeight(38)
-    connection_title_widget.setStyleSheet("""
+    parent_widget.connection_title_label = QLabel("접속 주소 탐색")
+    parent_widget.connection_title_label.setFixedHeight(38)
+    parent_widget.connection_title_label.setStyleSheet("""
         QLabel {
             font-family: 'Noto Sans KR';
             font-size: 20px;
@@ -359,7 +359,7 @@ def _setup_connection_title_row(parent_widget, right_layout):
             background: transparent;
         }
     """)
-    connection_title_layout.addWidget(connection_title_widget)
+    connection_title_layout.addWidget(parent_widget.connection_title_label)
 
     connection_title_layout.addStretch()
 

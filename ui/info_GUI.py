@@ -72,6 +72,7 @@ class InfoWidget(QWidget):
         self.original_test_category = None  # API에서 받아온 원래 test_category 값 보관
         self.original_test_range = None  # API에서 받아온 원래 test_range 값 보관
         self.real_admin_code = None  # [추가] API로부터 받아온 실제 관리자 코드
+        self.pending_auto_scan = False  # 2페이지 진입 시 자동 스캔 수행 플래그
         self.initUI()
 
     def initUI(self):
@@ -552,6 +553,13 @@ class InfoWidget(QWidget):
             # 페이지 전환 후 반응형 레이아웃 적용을 위해 resize 이벤트 강제 트리거
             self.resizeEvent(QResizeEvent(self.size(), self.size()))
 
+            # [추가] 2페이지 진입 시 예약된 자동 스캔 실행
+            if self.pending_auto_scan:
+                self.pending_auto_scan = False
+                from PyQt5.QtCore import QTimer
+                # UI가 완전히 렌더링된 후 시작하도록 약간의 지연(100ms) 추가
+                QTimer.singleShot(100, lambda: self.start_scan(is_auto=True))
+
     def go_to_previous_page(self):
         """이전 페이지로 이동"""
         if self.current_page > 0:
@@ -577,7 +585,7 @@ class InfoWidget(QWidget):
         except Exception as e:
             Logger.debug(f"버튼 상태 업데이트 실패: {e}")
 
-    def start_scan(self):
+    def start_scan(self, is_auto=False):
         """실제 네트워크 스캔으로 사용 가능한 주소 탐지"""
         try:
             # target_system에 따라 분기 처리
@@ -606,16 +614,17 @@ class InfoWidget(QWidget):
                     self._populate_url_table(merged_urls)
 
                     added_count = len(merged_urls) - len(existing_urls)
-                    if added_count > 0:
-                        QMessageBox.information(
-                            self, "주소 설정 완료",
-                            f"{added_count}개의 주소를 추가했습니다."
-                        )
-                    else:
-                        QMessageBox.information(
-                            self, "주소 설정 완료",
-                            "새로 추가된 주소가 없습니다."
-                        )
+                    if not is_auto:
+                        if added_count > 0:
+                            QMessageBox.information(
+                                self, "주소 설정 완료",
+                                f"{added_count}개의 주소를 추가했습니다."
+                            )
+                        else:
+                            QMessageBox.information(
+                                self, "주소 설정 완료",
+                                "새로 추가된 주소가 없습니다."
+                            )
                 else:
                     QMessageBox.warning(self, "경고", "testPort 정보가 없습니다.")
                 return
@@ -624,7 +633,8 @@ class InfoWidget(QWidget):
                 # 물리보안시스템: ARP 스캔으로 동일 네트워크 IP 검색
                 # 이미 스캔 중이면 중복 실행 방지
                 if hasattr(self, 'arp_scan_thread') and self.arp_scan_thread and self.arp_scan_thread.isRunning():
-                    QMessageBox.information(self, "알림", "이미 주소 탐색이 진행 중입니다.")
+                    if not is_auto:
+                        QMessageBox.information(self, "알림", "이미 주소 탐색이 진행 중입니다.")
                     return
 
                 # ARP Worker와 Thread 설정
@@ -644,7 +654,13 @@ class InfoWidget(QWidget):
 
                 # 스레드 시작
                 self.arp_scan_thread.start()
-                QMessageBox.information(self, "ARP 스캔 시작", "동일 네트워크의 장비를 검색합니다.\n잠시만 기다려주세요...")
+                if is_auto:
+                    # 자동 스캔 시 로딩 팝업 표시
+                    self.loading_popup = LoadingPopup(width=400, height=200)
+                    self.loading_popup.update_message("시험 대상 검색 중...", "네트워크 상의 시험 대상을 검색하고 있습니다.\n잠시만 기다려주세요.")
+                    self.loading_popup.show()
+                else:
+                    QMessageBox.information(self, "ARP 스캔 시작", "동일 네트워크의 장비를 검색합니다.\n잠시만 기다려주세요...")
                 return
 
             # 기타 시스템 또는 testPort가 없는 경우: 기존 네트워크 스캔 수행
@@ -692,6 +708,7 @@ class InfoWidget(QWidget):
 
     def _on_arp_scan_completed(self, urls):
         """ARP 스캔 완료 시 호출 (기존 주소 유지, 개수 제한 없음)"""
+        self._close_loading_popup()
         existing_urls = self._get_existing_urls()
         merged_urls = self._merge_urls(existing_urls, urls)  # 개수 제한 없음
         self._populate_url_table(merged_urls)
@@ -713,6 +730,7 @@ class InfoWidget(QWidget):
 
     def _on_arp_scan_failed(self, msg):
         """ARP 스캔 실패 시 호출"""
+        self._close_loading_popup()
         QMessageBox.warning(self, "ARP 스캔 실패", msg)
 
     def _get_existing_urls(self):
@@ -1116,6 +1134,19 @@ class InfoWidget(QWidget):
         except Exception as e:
             Logger.debug(f"통합플랫폼 UI 설정 실패: {e}")
 
+    def _setup_for_physical_security_system(self):
+        """물리보안시스템 전용 설정 (ARP 스캔 예약, 버튼 숨김)"""
+        try:
+            # 1. 주소 탐색 버튼 숨김
+            if hasattr(self, 'scan_btn'):
+                self.scan_btn.hide()
+            
+            # 2. 2페이지 진입 시 스캔하도록 예약
+            self.pending_auto_scan = True
+                
+        except Exception as e:
+            Logger.debug(f"물리보안 UI 설정 실패: {e}")
+
     def _on_test_info_loaded(self, test_data):
         """시험 정보 로드 성공 시 호출되는 슬롯"""
         from PyQt5.QtWidgets import QApplication
@@ -1209,6 +1240,12 @@ class InfoWidget(QWidget):
             # [추가] 통합플랫폼시스템인 경우 자동 설정
             if self.target_system == "통합플랫폼시스템":
                 self._setup_for_integrated_system()
+            
+            # [추가] 물리보안시스템인 경우 UI 문구 변경
+            elif self.target_system == "물리보안시스템":
+                if hasattr(self, 'connection_title_label'):
+                    self.connection_title_label.setText("시험 대상 선택")
+                self._setup_for_physical_security_system()
 
             # testPort 기반 WEBHOOK_PORT 업데이트
             if self.test_port:
