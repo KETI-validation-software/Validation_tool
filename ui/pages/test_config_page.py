@@ -170,7 +170,7 @@ def _setup_title_container(parent_widget, bg_root_layout):
     title_inner_layout.addSpacing(13)
 
     # 텍스트
-    parent_widget.page2_title_text = QLabel("시험 분야별 시나리오 확인 및 시험 환경을 설정하세요.")
+    parent_widget.page2_title_text = QLabel("시험 분야별로 시나리오를 확인하고 시험 환경을 설정하세요.")
     parent_widget.page2_title_text.setStyleSheet("""
         QLabel {
             font-family: 'Noto Sans KR';
