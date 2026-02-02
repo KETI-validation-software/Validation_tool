@@ -190,7 +190,7 @@ class SystemPopup(QDialog):
         super().__init__(parent)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Dialog)
         self.setAttribute(Qt.WA_TranslucentBackground)  # 배경 투명 (라운드 처리 등을 위해)
-        self.setFixedSize(400, 240)  # 크기 고정
+        self.setFixedSize(380, 200)  # 크기 축소 (기존 400x240)
 
         self.title_text = title
         self.message_text = message
@@ -201,20 +201,22 @@ class SystemPopup(QDialog):
     def _setup_ui(self):
         # 메인 레이아웃
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(30, 30, 30, 30)
-        layout.setSpacing(15)
+        layout.setContentsMargins(25, 25, 25, 20)
+        layout.setSpacing(10)
 
         # 제목 (상단)
         self.title_label = QLabel(self.title_text)
         self.title_label.setAlignment(Qt.AlignCenter)
         self.title_label.setStyleSheet("""
             color: #FFFFFF;
-            font-size: 16pt;
+            font-size: 14pt;
             font-weight: bold;
             font-family: 'Malgun Gothic', 'Noto Sans KR';
             background: transparent;
         """)
         layout.addWidget(self.title_label)
+
+        layout.addStretch(1) # 상단 여백 추가하여 가운데 정렬 유도
 
         # 내용 (중앙)
         self.msg_label = QLabel(self.message_text)
@@ -222,14 +224,14 @@ class SystemPopup(QDialog):
         self.msg_label.setWordWrap(True)  # 줄바꿈 허용
         self.msg_label.setStyleSheet("""
             color: rgba(255, 255, 255, 220);
-            font-size: 11pt;
+            font-size: 10pt;
             font-family: 'Malgun Gothic', 'Noto Sans KR';
             background: transparent;
-            line-height: 140%;
+            line-height: 130%;
         """)
         layout.addWidget(self.msg_label)
 
-        layout.addStretch()
+        layout.addStretch(1) # 하단 여백 추가하여 가운데 정렬 유도
 
         # 확인 버튼 (하단)
         self.ok_btn = QPushButton("확인")
