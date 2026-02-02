@@ -144,11 +144,10 @@ class ARPScanWorker(QObject):
                 error_msg = str(arp_error).lower()
                 if "winpcap" in error_msg or "npcap" in error_msg or "layer2" in error_msg:
                     self.scan_failed.emit(
-                        "❌ Npcap이 설치되지 않았습니다.\n\n"
-                        "ARP 스캔 기능을 사용하려면 Npcap 설치가 필요합니다.\n\n"
-                        "📥 다운로드: https://npcap.com/\n\n"
-                        "설치 후 프로그램을 재시작해주세요.\n"
-                        "또는 '직접 입력' 기능을 사용해주세요."
+                        "네트워크 주소 탐색을 위한 필수 구성 요소(Npcap)가\n"
+                        "설치되어 있지 않거나 정상적으로 작동하지 않습니다.\n\n"
+                        "제공된 '대응 매뉴얼'을 참고하여\n"
+                        "Npcap을 설치하거나 설정을 확인해주세요."
                     )
                     return
                 else:
