@@ -1739,3 +1739,15 @@ class InfoWidget(QWidget):
 
         except Exception as e:
             Logger.debug(f"URL 행 선택 처리 실패: {e}")
+
+    def mousePressEvent(self, event):
+        """팝오버 바깥 영역 클릭 시 닫기 처리"""
+        if hasattr(self, 'address_popover') and self.address_popover.isVisible():
+            # 클릭된 위치가 팝오버 영역 내부인지 확인
+            if not self.address_popover.geometry().contains(event.pos()):
+                # 추가 버튼 자체를 클릭한 경우는 버튼 자체의 토글 로직이 처리하도록 제외 (중복 방지)
+                if hasattr(self, 'add_btn') and not self.add_btn.geometry().contains(self.add_btn.parent().mapFromParent(event.pos())):
+                    self.address_popover.hide()
+                    self.add_btn.setChecked(False)
+        
+        super().mousePressEvent(event)
