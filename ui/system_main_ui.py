@@ -439,8 +439,8 @@ class SystemMainUI(CommonMainUI):
             # 왼쪽 패널 확장 요소: group_table(204) + field_group(526) = 730px
             left_expandable_total = 204 + 526  # 730
 
-            # 오른쪽 패널 확장 요소: api_section(251) + monitor_section(157) = 408px
-            right_expandable_total = 251 + 157  # 408
+            # 오른쪽 패널 확장 요소: api_section(251) + monitor_section(267) = 518px
+            right_expandable_total = 251 + 267  # 518
 
             # bg_root 크기 조정
             if hasattr(self, 'bg_root') and hasattr(self, 'original_bg_root_size'):
@@ -505,8 +505,8 @@ class SystemMainUI(CommonMainUI):
             # 모니터링 섹션 크기 조정 (extra_column_height 비례 분배)
             if hasattr(self, 'monitor_section') and hasattr(self, 'original_monitor_section_size'):
                 new_monitor_width = int(self.original_monitor_section_size[0] * width_ratio)
-                monitor_extra = extra_column_height * (157 / right_expandable_total)
-                new_monitor_height = int(157 + monitor_extra)
+                monitor_extra = extra_column_height * (267 / right_expandable_total)
+                new_monitor_height = int(267 + monitor_extra)
                 self.monitor_section.setFixedSize(new_monitor_width, new_monitor_height)
 
             # ✅ 버튼 그룹 및 버튼 크기 조정 (간격 16px 고정, 세로 크기 고정)
@@ -541,13 +541,13 @@ class SystemMainUI(CommonMainUI):
             # 텍스트 브라우저 컨테이너 (monitor_section 내부 - 라벨 24px 제외)
             if hasattr(self, 'text_browser_container') and hasattr(self, 'original_text_browser_container_size'):
                 new_tbc_width = int(self.original_text_browser_container_size[0] * width_ratio)
-                new_tbc_height = int(125 + monitor_extra)  # monitor_section에서 라벨 제외한 부분
+                new_tbc_height = int(235 + monitor_extra)  # monitor_section에서 라벨 제외한 부분
                 self.text_browser_container.setFixedSize(new_tbc_width, new_tbc_height)
 
             # valResult (QTextBrowser) (monitor_section 내부)
             if hasattr(self, 'valResult') and hasattr(self, 'original_valResult_size'):
                 new_vr_width = int(self.original_valResult_size[0] * width_ratio)
-                new_vr_height = int(125 + monitor_extra)
+                new_vr_height = int(235 + monitor_extra)
                 self.valResult.setFixedSize(new_vr_width, new_vr_height)
 
             # ✅ 시험 점수 요약 섹션
