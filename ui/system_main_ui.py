@@ -572,6 +572,16 @@ class SystemMainUI(CommonMainUI):
                 new_total_data_width = int(self.original_total_data_widget_size[0] * width_ratio)
                 self.total_data_widget.setFixedSize(new_total_data_width, self.original_total_data_widget_size[1])
 
+            # ✅ 시험 점수 요약 헤더 영역 비례 조정 (추가)
+            if hasattr(self, 'spec_header_widget') and hasattr(self, 'spec_score_group'):
+                # 부모 박스 크기에서 2px 빼기 (border 고려)
+                new_spec_header_width = self.spec_score_group.width() - 2
+                self.spec_header_widget.setFixedSize(new_spec_header_width, 52)
+
+            if hasattr(self, 'total_header_widget') and hasattr(self, 'original_total_header_widget_size'):
+                new_total_header_width = int(self.original_total_header_widget_size[0] * width_ratio)
+                self.total_header_widget.setFixedSize(new_total_header_width, self.original_total_header_widget_size[1])
+
             # ✅ 시험 점수 요약 내부 라벨 너비 비례 조정 (각 라벨별 다른 너비)
             if hasattr(self, 'original_pass_label_width'):
                 new_pass_width = int(self.original_pass_label_width * width_ratio)
@@ -1277,10 +1287,12 @@ class SystemMainUI(CommonMainUI):
         spec_layout.setContentsMargins(0, 0, 0, 0)
         spec_layout.setSpacing(0)
 
-        # 아이콘 + 분야명 (헤더 영역 1064 × 52)
-        header_widget = QWidget()
-        header_widget.setFixedSize(1064, 52)
-        header_layout = QHBoxLayout(header_widget)
+        # 아이콘 + 분야명 (헤더 영역 1062 × 52, 부모 border 1px 고려)
+        self.spec_header_widget = QWidget()
+        self.spec_header_widget.setFixedSize(1062, 52)
+        self.spec_header_widget.setStyleSheet("background: #F5F5F5;")  # 옅은 회색 배경
+        self.original_spec_header_widget_size = (1062, 52)
+        header_layout = QHBoxLayout(self.spec_header_widget)
         header_layout.setContentsMargins(0, 5, 0, 5)
         header_layout.setSpacing(12)
         header_layout.addWidget(icon_label, alignment=Qt.AlignVCenter)
@@ -1288,7 +1300,7 @@ class SystemMainUI(CommonMainUI):
         header_layout.addWidget(header_vline, alignment=Qt.AlignVCenter)
         header_layout.addWidget(self.spec_name_label, alignment=Qt.AlignVCenter)
         header_layout.addStretch()
-        spec_layout.addWidget(header_widget)
+        spec_layout.addWidget(self.spec_header_widget)
         spec_layout.addWidget(separator)
 
         # 데이터 영역 (1064 × 76)

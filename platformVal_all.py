@@ -1514,10 +1514,10 @@ class MyApp(PlatformMainUI):
 
                 # 결과 텍스트 초기화
                 self.valResult.clear()
-                self.append_monitor_log(
-                    step_name=f"전환 완료: {self.spec_description}",
-                    details=f"API 목록 ({len(self.videoMessages)}개): {', '.join(self.videoMessagesDisplay)}"
-                )
+                # self.append_monitor_log(
+                #     step_name=f"전환 완료: {self.spec_description}",
+                #     details=f"API 목록 ({len(self.videoMessages)}개): {', '.join(self.videoMessagesDisplay)}"
+                # )
 
                 Logger.debug(f" ✅ 전환 완료: {self.spec_description}, API 수: {len(self.videoMessages)}")
         except Exception as e:

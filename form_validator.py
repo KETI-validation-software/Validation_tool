@@ -93,30 +93,31 @@ class FormValidator:
         # return str(admin_code) == str(self.parent.real_admin_code)
 
     def handle_test_category_change(self):
-        """시험유형 변경 시 관리자 코드 필드 활성화/비활성화"""
+        """시험유형 변경 시 관리자 코드 필드 활성화/비활성화 (현재 비활성화된 기능)"""
         test_category = self.parent.test_category_edit.text().strip()
         
         # 관리자 코드 placeholder 라벨 가져오기
         placeholder_label = getattr(self.parent, 'admin_code_placeholder', None)
 
-        if not test_category:
-            self.parent.admin_code_edit.setEnabled(False)
-            self.parent.admin_code_edit.clear()
-            if placeholder_label:
-                placeholder_label.setText("관리자 코드를 입력해주세요")
-            return
+        # ===== 아래 로직은 향후 구현 예정 (현재 주석 처리) =====
+        # if not test_category:
+        #     self.parent.admin_code_edit.setEnabled(False)
+        #     self.parent.admin_code_edit.clear()
+        #     if placeholder_label:
+        #         placeholder_label.setText("관리자 코드를 입력해주세요")
+        #     return
 
-        if test_category in ["본시험", "사전시험"]:
-            if test_category == "본시험":
-                self.parent.admin_code_edit.setEnabled(True)
-                if placeholder_label:
-                    placeholder_label.setText("관리자 코드를 입력해주세요")
-            else:
-                self.parent.admin_code_edit.setEnabled(False)
-                self.parent.admin_code_edit.clear()
-                if placeholder_label:
-                    placeholder_label.setText("본시험에서만 입력합니다")
-            return
+        # if test_category in ["본시험", "사전시험"]:
+        #     if test_category == "본시험":
+        #         self.parent.admin_code_edit.setEnabled(True)
+        #         if placeholder_label:
+        #             placeholder_label.setText("관리자 코드를 입력해주세요")
+        #     else:
+        #         self.parent.admin_code_edit.setEnabled(False)
+        #         self.parent.admin_code_edit.clear()
+        #         if placeholder_label:
+        #             placeholder_label.setText("본시험에서만 입력합니다")
+        #     return
 
         self.parent.original_test_category = test_category
 

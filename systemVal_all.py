@@ -343,7 +343,6 @@ class MyApp(SystemMainUI):
         self.webhook_cnt = 99
         self.reference_context = {}  # 맥락검증 참조 컨텍스트
         self.webhook_schema_idx = 0  # ✅ 웹훅 스키마 인덱스 추가
-        self.step_start_log_printed = False # ✅ 단계 시작 로그 출력 여부 플래그
 
     def save_current_spec_data(self):
         """현재 spec의 테이블 데이터와 상태를 저장 (state_manager 위임)"""
@@ -622,7 +621,10 @@ class MyApp(SystemMainUI):
         self.videoMessagesDisplay = [self._remove_api_number_suffix(msg) for msg in self.videoMessages]
         self.videoInConstraint = getattr(constraints_request_module, self.current_spec_id + "_inConstraints", [])
         try:
-            self.webhookInSchema = getattr(schema_response_module, spec_names[3], [])
+            if len(spec_names) > 3:
+                self.webhookInSchema = getattr(schema_response_module, spec_names[3], [])
+            else:
+                self.webhookInSchema = []
         except Exception as e:
             Logger.error(f"Error loading webhook schema: {e}")
             self.webhookInSchema = []
@@ -892,12 +894,12 @@ class MyApp(SystemMainUI):
 
                 # ✅ 10. 결과 텍스트 초기화
                 self.valResult.clear()
-                self.append_monitor_log(
-                    step_name=f"전환 완료: {self.spec_description}",
-                    details=f"API 개수: {len(self.videoMessages)}개 | API 목록: {', '.join(self.videoMessagesDisplay)}"
-                )
+                # self.append_monitor_log(
+                #     step_name=f"시스템 전환 완료: {self.spec_description}",
+                #     details=f"API 개수: {len(self.videoMessages)}개 | API 목록: {', '.join(self.videoMessagesDisplay)}"
+                # )
 
-                Logger.debug(f" ✅ 전환 완료")
+                Logger.debug(f" ✅ 시스템 전환 완료")
 
         except Exception as e:
             Logger.debug(f" 시험 분야 선택 처리 실패: {e}")
@@ -1143,7 +1145,7 @@ class MyApp(SystemMainUI):
                 key_error_cnt += tmp_fields_opt_cnt
 
             val_result = "FAIL"
-            val_text = "웹훅 메시지 미수신"
+            val_text = "Webhook Message Missing!"
             key_psss_cnt = 0
             opt_correct = 0
             opt_error = tmp_fields_opt_cnt if self.flag_opt else 0
@@ -1159,29 +1161,23 @@ class MyApp(SystemMainUI):
         if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
             Logger.debug(f" ==========================================\n")
 
-        # ✅ 타이머 라인 제거 (기능 비활성화됨)
-        # self.update_last_line_timer("", remove=True)
+        self.valResult.append(
+            f'<div style="font-size: 20px; font-weight: bold; color: #333; font-family: \'Noto Sans KR\'; margin-top: 10px;">{message_name}</div>')
+        self.valResult.append(
+            '<div style="font-size: 18px; font-weight: bold; color: #333; font-family: \'Noto Sans KR\'; margin-top: 5px;">웹훅 이벤트 데이터</div>')
+        self.valResult.append(
+            f'<pre style="font-size: 18px; color: #1f2937; font-family: \'Consolas\', monospace; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 10px; margin: 5px 0;">{tmp_webhook_res}</pre>')
 
-        if self.webhook_cnt < len(self.num_retries_list):
-            current_retries = self.num_retries_list[self.webhook_cnt]
-        else:
-            current_retries = 1
-
-        display_name = self.message_display[self.webhook_cnt] if self.webhook_cnt < len(self.message_display) else "Unknown"
-        
-        # 상세 결과 텍스트 구성
         if val_result == "PASS":
-            detail_msg = f"웹훅 검증 결과: PASS | 통과 필드 수: {key_psss_cnt}, 실패 필드 수: {key_error_cnt}"
+            self.valResult.append(
+                f'<div style="font-size: 18px; color: #10b981; font-family: \'Noto Sans KR\'; margin-top: 5px;">웹훅 검증 결과: {val_result}</div>')
+            self.valResult.append(
+                '<div style="font-size: 18px; color: #10b981; font-family: \'Noto Sans KR\';">웹훅 데이터 검증 성공</div>')
         else:
-            detail_msg = f"웹훅 검증 결과: FAIL | 통과 필드 수: {key_psss_cnt}, 실패 필드 수: {key_error_cnt}\n{to_detail_text(val_text)}"
-
-        # ✅ append_monitor_log 사용하여 디자인 통일
-        self.append_monitor_log(
-            step_name=f"웹훅 이벤트 수신: {display_name}",
-            request_json=tmp_webhook_res,
-            result_status=val_result,
-            details=detail_msg
-        )
+            self.valResult.append(
+                f'<div style="font-size: 18px; color: #ef4444; font-family: \'Noto Sans KR\'; margin-top: 5px;">웹훅 검증 결과: {val_result}</div>')
+            self.valResult.append(
+                '<div style="font-size: 18px; color: #ef4444; font-family: \'Noto Sans KR\';">웹훅 데이터 검증 실패</div>')
 
         # ✅ step_pass_counts 배열에 웹훅 결과 추가 (배열이 없으면 생성하지 않음)
         # 점수 업데이트는 모든 재시도 완료 후에 일괄 처리됨 (플랫폼과 동일)
@@ -1266,7 +1262,6 @@ class MyApp(SystemMainUI):
             if self.time_pre == 0 or self.cnt != self.cnt_pre:
                 self.time_pre = time.time()
                 self.cnt_pre = self.cnt
-                self.step_start_log_printed = False # ✅ 플래그 리셋
                 return  # 첫 틱에서는 대기만 하고 리턴
             else:
                 time_interval = time.time() - self.time_pre
@@ -1277,16 +1272,16 @@ class MyApp(SystemMainUI):
                 Logger.debug(f"웹훅 이벤트 수신 완료 (API: {api_name})")
                 if self.webhook_res != None:
                     Logger.warn(f" 웹훅 메시지 수신")
-                    # ✅ 타이머 라인 제거 (기능 비활성화됨)
-                    # self.update_last_line_timer("", remove=True)
+                    # ✅ 타이머 라인 제거
+                    self.update_last_line_timer("", remove=True)
                 elif math.ceil(time_interval) >= self.time_outs[self.cnt] / 1000 - 1:
                     Logger.warn(f" 메시지 타임아웃! 웹훅 대기 종료")
-                    # ✅ 타이머 라인 제거 (기능 비활성화됨)
-                    # self.update_last_line_timer("", remove=True)
+                    # ✅ 타이머 라인 제거
+                    self.update_last_line_timer("", remove=True)
                 else :
-                    # ✅ 대기 시간 타이머 표시 (기능 비활성화됨)
+                    # ✅ 대기 시간 타이머 표시 (마지막 줄 갱신)
                     remaining = max(0, int((self.time_outs[self.cnt] / 1000) - time_interval))
-                    # self.update_last_line_timer(f"남은 대기 시간: {remaining}초")
+                    self.update_last_line_timer(f"남은 대기 시간: {remaining}초")
                     
                     Logger.debug(f" 웹훅 대기 중... (API {self.cnt}) 타임아웃 {round(time_interval)} /{round(self.time_outs[self.cnt] / 1000)}")
                     return
@@ -1305,15 +1300,6 @@ class MyApp(SystemMainUI):
                     self.message_name = "step " + str(self.cnt + 1) + ": " + display_name + retry_info
                 else:
                     self.message_name = f"step {self.cnt + 1}: (index out of range)" + retry_info
-
-                # ✅ 요청 전송 전 로그 출력 (최초 1회)
-                if not self.step_start_log_printed:
-                    self.append_monitor_log(
-                        step_name=f"시험 API: {display_name} (시도 {self.current_retry + 1}/{self.num_retries_list[self.cnt]})",
-                        details="요청 전송 중..."
-                        # is_temp=True # 기능 비활성화
-                    )
-                    self.step_start_log_printed = True
 
                 # 첫 번째 시도일 때만 메시지 표시 - 제거 (응답 처리 시 표시)
                 # if self.current_retry == 0:
@@ -1434,7 +1420,7 @@ class MyApp(SystemMainUI):
                     step_name=f"시험 API: {api_name}",
                     request_json="",
                     score=score_value,
-                    details=f"⏱️ 메시지 수신 타임아웃({timeout_sec}초) -> 메시지 미수신 (시도 {self.current_retry + 1}/{current_retries}) | 통과 필드 수: {self.total_pass_cnt}, 실패 필드 수: {self.total_error_cnt}"
+                    details=f"⏱️ Timeout ({timeout_sec}초) - Message Missing! (시도 {self.current_retry + 1}/{current_retries}) | 통과 필드 수: {self.total_pass_cnt}, 실패 필드 수: {self.total_error_cnt}"
                 )
 
                 # 재시도 카운터 증가
@@ -1455,7 +1441,7 @@ class MyApp(SystemMainUI):
                     # 모든 재시도 완료 - 버퍼에 최종 결과 저장
                     self.step_buffers[self.cnt]["data"] = "타임아웃으로 인해 수신된 데이터가 없습니다."
                     current_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
-                    self.step_buffers[self.cnt]["error"] = f"메시지 미수신 - 모든 시도({current_retries}회)에서 타임아웃 발생"
+                    self.step_buffers[self.cnt]["error"] = f"Message Missing! - 모든 시도({current_retries}회)에서 타임아웃 발생"
                     self.step_buffers[self.cnt]["result"] = "FAIL"
                     self.step_buffers[self.cnt]["events"] = list(self.trace.get(self.cnt, []))
 
@@ -1471,7 +1457,7 @@ class MyApp(SystemMainUI):
                     # 평가 점수 디스플레이 업데이트
                     self.update_score_display()
                     # 테이블 업데이트 (Message Missing)
-                    self.update_table_row_with_retries(self.cnt, "FAIL", 0, add_err, "", "메시지 미수신",
+                    self.update_table_row_with_retries(self.cnt, "FAIL", 0, add_err, "", "Message Missing!",
                                                        current_retries)
 
                     # 다음 API로 이동
@@ -1554,19 +1540,20 @@ class MyApp(SystemMainUI):
                     self.stop_btn.setDisabled(True)
                     self.cancel_btn.setDisabled(True)
 
+
             # 응답이 도착한 경우 처리
             elif self.post_flag == True:
                 if self.res is None:
-                    # ✅ 대기 시간 타이머 표시 (기능 비활성화됨)
+                    # ✅ 대기 시간 타이머 표시 (마지막 줄 갱신)
                     current_timeout = self.time_outs[self.cnt] / 1000 if self.cnt < len(self.time_outs) else 5.0
                     remaining = max(0, int(current_timeout - time_interval))
-                    # self.update_last_line_timer(f"남은 대기 시간: {remaining}초")
+                    self.update_last_line_timer(f"남은 대기 시간: {remaining}초")
 
                 if self.res != None:
-                    # ✅ 응답 수신 완료 - 타이머 라인 제거 (기능 비활성화됨)
-                    # if not self.webhook_flag:
-                    #     self.update_last_line_timer("", remove=True)
-
+                    # ✅ 응답 수신 완료 - 타이머 라인 제거 (웹훅 대기가 아닐 때만)
+                    if not self.webhook_flag:
+                        self.update_last_line_timer("", remove=True)
+                    
                     # 응답 처리 시작
                     if self.res != None:
                         # 응답 처리 시작
@@ -1855,9 +1842,9 @@ class MyApp(SystemMainUI):
                     api_name = self.message[self.cnt] if self.cnt < len(self.message) else "Unknown"
                     display_name = self.message_display[self.cnt] if self.cnt < len(self.message_display) else api_name
                     if current_protocol == "WebHook":
-                        step_title = f"시험 API 결과: {display_name} - 웹훅 구독 ({self.current_retry + 1}/{current_retries})"
+                        step_title = f"결과: {display_name} - 웹훅 구독 ({self.current_retry + 1}/{current_retries})"
                     else:
-                        step_title = f"시험 API 결과: {display_name} ({self.current_retry + 1}/{current_retries})"
+                        step_title = f"결과: {display_name} ({self.current_retry + 1}/{current_retries})"
                     
                     # 마지막 시도에만 점수 표시, 진행중에는 표시 안함
                     if self.current_retry + 1 >= current_retries:
@@ -2448,7 +2435,7 @@ class MyApp(SystemMainUI):
             Logger.debug(f"   마지막 완료 API 인덱스: {last_completed}")
 
             # 모니터링 창에 로그 추가
-            # self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-top: 10px;">💾 재개 정보 저장 완료: {paused_file_path}</div>')
+            self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-top: 10px;">💾 재개 정보 저장 완료: {paused_file_path}</div>')
             self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">   (마지막 완료 API: {last_completed + 1}번째, 다음 재시작 시 {last_completed + 2}번째 API부터 이어서 실행)</div>')
 
         except Exception as e:

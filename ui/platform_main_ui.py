@@ -21,6 +21,10 @@ class PlatformMainUI(CommonMainUI):
     def initUI(self):
         # CommonMainUI의 initUI 호출
         super().initUI()
+        
+        # Platform에서는 시험 URL 수정 불가
+        if hasattr(self, 'url_text_box'):
+            self.url_text_box.setReadOnly(True)
 
     def connect_buttons(self):
         """버튼 이벤트 연결 (Platform 전용)"""
@@ -228,6 +232,16 @@ class PlatformMainUI(CommonMainUI):
             if hasattr(self, 'total_data_widget') and hasattr(self, 'original_total_data_widget_size'):
                 new_total_data_width = int(self.original_total_data_widget_size[0] * width_ratio)
                 self.total_data_widget.setFixedSize(new_total_data_width, self.original_total_data_widget_size[1])
+
+            # ✅ 시험 점수 요약 헤더 영역 비례 조정 (추가)
+            if hasattr(self, 'spec_header_widget') and hasattr(self, 'spec_score_group'):
+                # 부모 박스 크기에서 2px 빼기 (border 고려)
+                new_spec_header_width = self.spec_score_group.width() - 2
+                self.spec_header_widget.setFixedSize(new_spec_header_width, 52)
+
+            if hasattr(self, 'total_header_widget') and hasattr(self, 'original_total_header_widget_size'):
+                new_total_header_width = int(self.original_total_header_widget_size[0] * width_ratio)
+                self.total_header_widget.setFixedSize(new_total_header_width, self.original_total_header_widget_size[1])
 
             # ✅ 시험 점수 요약 내부 라벨 너비 비례 조정
             if hasattr(self, 'original_pass_label_width'):
@@ -577,10 +591,10 @@ class PlatformMainUI(CommonMainUI):
     def create_spec_score_display_widget(self):
         """메인 화면에 표시할 시험 분야별 평가 점수 위젯"""
 
-        spec_group = QGroupBox()
-        spec_group.setFixedSize(1064, 128)
+        self.spec_score_group = QGroupBox()
+        self.spec_score_group.setFixedSize(1064, 128)
         self.original_spec_group_size = (1064, 128)
-        spec_group.setStyleSheet("""
+        self.spec_score_group.setStyleSheet("""
             QGroupBox {
                 background-color: #FFF;
                 border: 1px solid #CECECE;
@@ -672,10 +686,12 @@ class PlatformMainUI(CommonMainUI):
         spec_layout.setContentsMargins(0, 0, 0, 0)
         spec_layout.setSpacing(0)
 
-        # 아이콘 + 분야명 (헤더 영역 1064 × 52)
-        header_widget = QWidget()
-        header_widget.setFixedSize(1064, 52)
-        header_layout = QHBoxLayout(header_widget)
+        # 아이콘 + 분야명 (헤더 영역 1062 × 52, 부모 border 1px 고려)
+        self.spec_header_widget = QWidget()
+        self.spec_header_widget.setFixedSize(1062, 52)
+        self.spec_header_widget.setStyleSheet("background: #F5F5F5;")  # 옅은 회색 배경
+        self.original_spec_header_widget_size = (1062, 52)
+        header_layout = QHBoxLayout(self.spec_header_widget)
         header_layout.setContentsMargins(0, 5, 0, 5)
         header_layout.setSpacing(12)
         header_layout.addWidget(icon_label, alignment=Qt.AlignVCenter)
@@ -683,7 +699,7 @@ class PlatformMainUI(CommonMainUI):
         header_layout.addWidget(header_vline, alignment=Qt.AlignVCenter)
         header_layout.addWidget(self.spec_name_label, alignment=Qt.AlignVCenter)
         header_layout.addStretch()
-        spec_layout.addWidget(header_widget)
+        spec_layout.addWidget(self.spec_header_widget)
         spec_layout.addWidget(separator)
 
         # 데이터 영역 (1064 × 76)
@@ -719,9 +735,9 @@ class PlatformMainUI(CommonMainUI):
         spec_score_layout.addStretch()
 
         spec_layout.addWidget(self.spec_data_widget)
-        spec_group.setLayout(spec_layout)
+        self.spec_score_group.setLayout(spec_layout)
 
-        return spec_group
+        return self.spec_score_group
 
     def create_total_score_display_widget(self):
         """메인 화면에 표시할 전체 평가 점수 위젯"""

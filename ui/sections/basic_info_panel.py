@@ -323,8 +323,7 @@ class BasicInfoPanel(QWidget):
         self.admin_code_input = QLineEdit(self.admin_code_input_container)
         self.admin_code_input.setFixedSize(768, 48)
         self.admin_code_input.setObjectName("admin_code_input")
-        self.admin_code_input.setEchoMode(QLineEdit.Password)
-        self.admin_code_input.setEnabled(False)
+        self.admin_code_input.setEnabled(True)  # 기본값 활성화
 
         self.admin_code_input.setStyleSheet("""
               QLineEdit#admin_code_input {
@@ -372,20 +371,18 @@ class BasicInfoPanel(QWidget):
         """)
         self.admin_code_placeholder.setAlignment(Qt.AlignVCenter)
         self.admin_code_placeholder.setAttribute(Qt.WA_TransparentForMouseEvents)
-        self.admin_code_placeholder.show()  # 초기에는 보임 (disabled 상태)
+        self.admin_code_placeholder.hide()  # 기본값으로 숨김 (활성화 상태이므로)
 
         def update_placeholder_visibility():
-            """placeholder 표시 조건: 텍스트 없음 + (disabled 또는 (hover && !focus))"""
+            """placeholder 표시 조건: 텍스트 없음 + disabled 상태"""
             has_text = bool(self.admin_code_input.text().strip())
             is_disabled = not self.admin_code_input.isEnabled()
-            is_hovered = self.admin_code_input.underMouse()
             has_focus = self.admin_code_input.hasFocus()
 
-            if has_text:
+            # 텍스트가 있거나 focus를 받았으면 무조건 숨김
+            if has_text or has_focus:
                 self.admin_code_placeholder.hide()
             elif is_disabled:
-                self.admin_code_placeholder.show()
-            elif is_hovered and not has_focus:
                 self.admin_code_placeholder.show()
             else:
                 self.admin_code_placeholder.hide()
@@ -405,6 +402,10 @@ class BasicInfoPanel(QWidget):
         self._update_placeholder_visibility = update_placeholder_visibility
 
         field_layout.addWidget(self.admin_code_input_container)
+
+        # form_validator와 info_GUI 호환성을 위한 alias
+        if self.parent_widget:
+            self.parent_widget.admin_code_edit = self.admin_code_input
 
         layout.addWidget(self.admin_code_widget, alignment=Qt.AlignHCenter)
 
