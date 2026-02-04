@@ -1186,11 +1186,7 @@ class SystemMainUI(CommonMainUI):
             QGroupBox {
                 background-color: #FFF;
                 border: 1px solid #CECECE;
-                border-bottom: none;
-                border-top-left-radius: 4px;
-                border-top-right-radius: 4px;
-                border-bottom-left-radius: 0px;
-                border-bottom-right-radius: 0px;
+                border-radius: 4px;
                 padding: 0px;
                 margin: 0px;
             }
