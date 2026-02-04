@@ -584,11 +584,7 @@ class PlatformMainUI(CommonMainUI):
             QGroupBox {
                 background-color: #FFF;
                 border: 1px solid #CECECE;
-                border-bottom: none;
-                border-top-left-radius: 4px;
-                border-top-right-radius: 4px;
-                border-bottom-left-radius: 0px;
-                border-bottom-right-radius: 0px;
+                border-radius: 4px;
                 padding: 0px;
                 margin: 0px;
             }
@@ -947,23 +943,6 @@ class PlatformMainUI(CommonMainUI):
                 global_opt_score = (self.global_opt_pass_cnt / global_opt_total) * 100
             else:
                 global_opt_score = 0
-
-            # 필수/선택/종합 점수 표시 (% (통과/전체) 형식)
-            self.total_pass_label.setText(
-                f"필수 필드 점수&nbsp;"
-                f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
-                f"{global_required_score:.1f}% ({global_required_pass}/{global_required_total})</span>"
-            )
-            self.total_total_label.setText(
-                f"선택 필드 점수&nbsp;"
-                f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
-                f"{global_opt_score:.1f}% ({self.global_opt_pass_cnt}/{global_opt_total})</span>"
-            )
-            self.total_score_label.setText(
-                f"종합 평가 점수&nbsp;"
-                f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
-                f"{global_score:.1f}% ({self.global_pass_cnt}/{global_total_fields})</span>"
-            )
 
     def table_cell_clicked(self, row, col):
         """테이블 셀 클릭"""

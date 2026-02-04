@@ -1007,55 +1007,9 @@ class SystemMainUI(CommonMainUI):
             f"{spec_score:.1f}% ({self.total_pass_cnt}/{spec_total_fields})</span>"
         )
 
-        # ✅ 2️⃣ 전체 점수 (모든 spec 합산)
-        if hasattr(self, "total_pass_label") and hasattr(self, "total_total_label") and hasattr(self, "total_score_label"):
-            global_total_fields = self.global_pass_cnt + self.global_error_cnt
-            if global_total_fields > 0:
-                global_score = (self.global_pass_cnt / global_total_fields) * 100
-            else:
-                global_score = 0
-
-            # 전체 필수 필드 통과 수 = 전체 통과 - 전체 선택 통과
-            global_required_pass = self.global_pass_cnt - self.global_opt_pass_cnt
-            # 전체 선택 필드 수 = 전체 선택 통과 + 전체 선택 에러
-            global_opt_total = self.global_opt_pass_cnt + self.global_opt_error_cnt
-            # 전체 필수 필드 수 = 전체 필드 - 전체 선택 필드
-            global_required_total = global_total_fields - global_opt_total
-
-            # 필수 통과율 계산
-            if global_required_total > 0:
-                global_required_score = (global_required_pass / global_required_total) * 100
-            else:
-                global_required_score = 0
-
-            # 선택 통과율 계산
-            if global_opt_total > 0:
-                global_opt_score = (self.global_opt_pass_cnt / global_opt_total) * 100
-            else:
-                global_opt_score = 0
-
-            # 필수/선택/종합 점수 표시 (% (통과/전체) 형식)
-            self.total_pass_label.setText(
-                f"필수 필드 점수&nbsp;"
-                f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
-                f"{global_required_score:.1f}% ({global_required_pass}/{global_required_total})</span>"
-            )
-            self.total_total_label.setText(
-                f"선택 필드 점수&nbsp;"
-                f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
-                f"{global_opt_score:.1f}% ({self.global_opt_pass_cnt}/{global_opt_total})</span>"
-            )
-            self.total_score_label.setText(
-                f"종합 평가 점수&nbsp;"
-                f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
-                f"{global_score:.1f}% ({self.global_pass_cnt}/{global_total_fields})</span>"
-            )
-
-            # ✅ 디버그 로그 추가
-            Logger.debug(str(
-                f"[SCORE UPDATE] 분야별 - pass: {self.total_pass_cnt}, error: {self.total_error_cnt}, score: {spec_score:.1f}%"))
-            Logger.debug(str(
-                f"[SCORE UPDATE] 전체 - pass: {self.global_pass_cnt}, error: {self.global_error_cnt}, score: {global_score:.1f}%"))
+        # ✅ 디버그 로그 추가
+        Logger.debug(str(
+            f"[SCORE UPDATE] 분야별 - pass: {self.total_pass_cnt}, error: {self.total_error_cnt}, score: {spec_score:.1f}%"))
 
 
     def table_cell_clicked(self, row, col):
