@@ -22,9 +22,25 @@ class PlatformMainUI(CommonMainUI):
         # CommonMainUI의 initUI 호출
         super().initUI()
         
+        print(f"[Platform initUI] hasattr url_text_box: {hasattr(self, 'url_text_box')}")
+        
         # Platform에서는 시험 URL 수정 불가
         if hasattr(self, 'url_text_box'):
+            print(f"[Platform] URL 텍스트 박스 발견, ReadOnly 설정 전: {self.url_text_box.isReadOnly()}")
             self.url_text_box.setReadOnly(True)
+            print(f"[Platform] URL 텍스트 박스 ReadOnly 설정 후: {self.url_text_box.isReadOnly()}")
+            self.url_text_box.setStyleSheet("""
+                QLineEdit {
+                    background-color: #F5F5F5;
+                    border: 1px solid #CECECE;
+                    border-radius: 4px;
+                    padding: 0 24px;
+                    font-family: "Noto Sans KR";
+                    font-size: 18px;
+                    font-weight: 400;
+                    color: #6B6B6B;
+                }
+            """)
 
     def connect_buttons(self):
         """버튼 이벤트 연결 (Platform 전용)"""

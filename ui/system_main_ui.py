@@ -40,6 +40,30 @@ class SystemMainUI(CommonMainUI):
     def __init__(self):
         super().__init__()
 
+    def initUI(self):
+        # CommonMainUI의 initUI 호출
+        super().initUI()
+        
+        print(f"[System initUI] hasattr url_text_box: {hasattr(self, 'url_text_box')}")
+        
+        # System에서는 시험 URL 수정 불가
+        if hasattr(self, 'url_text_box'):
+            print(f"[System] URL 텍스트 박스 발견, ReadOnly 설정 전: {self.url_text_box.isReadOnly()}")
+            self.url_text_box.setReadOnly(True)
+            print(f"[System] URL 텍스트 박스 ReadOnly 설정 후: {self.url_text_box.isReadOnly()}")
+            self.url_text_box.setStyleSheet("""
+                QLineEdit {
+                    background-color: #F5F5F5;
+                    border: 1px solid #CECECE;
+                    border-radius: 4px;
+                    padding: 0 24px;
+                    font-family: "Noto Sans KR";
+                    font-size: 18px;
+                    font-weight: 400;
+                    color: #6B6B6B;
+                }
+            """)
+
     def create_spec_selection_panel(self, parent_layout):
         """시험 선택 패널 - 424px 너비"""
         # 타이틀: 424*24, 폰트 20px Medium
