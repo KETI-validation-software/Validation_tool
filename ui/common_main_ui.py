@@ -12,7 +12,7 @@ import importlib
 import re
 from urllib.parse import urlparse
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor, QPixmap, QTextDocument, QTextCursor
+from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor, QPixmap
 from PyQt5.QtCore import *
 from PyQt5 import QtCore
 from api.webhook_api import WebhookThread
@@ -250,21 +250,21 @@ class CommonMainUI(QWidget):
 
         self.right_layout.addWidget(self.api_section)
 
-        # 20px gap
-        self.right_layout.addSpacing(20)
+        # 30px gap
+        self.right_layout.addSpacing(30)
 
-        # ========== 수신 메시지 실시간 모니터링 영역 (1064 × 157) ==========
+        # ========== 송수신 메시지 실시간 모니터링 영역 (1064 × 267) ==========
         self.monitor_section = QWidget()
-        self.monitor_section.setFixedSize(1064, 157)
+        self.monitor_section.setFixedSize(1064, 267)
         self.monitor_section.setStyleSheet("background: transparent;")
-        self.original_monitor_section_size = (1064, 157)
+        self.original_monitor_section_size = (1064, 267)
 
         monitor_section_layout = QVBoxLayout(self.monitor_section)
         monitor_section_layout.setContentsMargins(0, 0, 0, 0)
         monitor_section_layout.setSpacing(0)
 
-        # 수신 메시지 실시간 모니터링 라벨 (1064 × 24, 20px Medium)
-        self.monitor_label = QLabel("수신 메시지 실시간 모니터링")
+        # 송수신 메시지 실시간 모니터링 라벨 (1064 × 24, 20px Medium)
+        self.monitor_label = QLabel("송수신 메시지 실시간 모니터링")
         self.monitor_label.setFixedSize(1064, 24)
         self.original_monitor_label_size = (1064, 24)
         self.monitor_label.setStyleSheet("""
@@ -278,14 +278,15 @@ class CommonMainUI(QWidget):
         # 8px gap
         monitor_section_layout.addSpacing(8)
 
-        # ✅ QTextBrowser를 담을 컨테이너 생성 (1064 × 125)
+        # ✅ QTextBrowser를 담을 컨테이너 생성 (1064 × 235)
         self.text_browser_container = QWidget()
-        self.text_browser_container.setFixedSize(1064, 125)
-        self.original_text_browser_container_size = (1064, 125)
+        self.text_browser_container.setFixedSize(1064, 235)
+        self.original_text_browser_container_size = (1064, 235)
 
         self.valResult = QTextBrowser(self.text_browser_container)
-        self.valResult.setFixedSize(1064, 125)
-        self.original_valResult_size = (1064, 125)
+        self.valResult.setFixedSize(1064, 235)
+        self.original_valResult_size = (1064, 235)
+        print(f"[DEBUG] valResult 초기 크기 설정: {self.valResult.size()}")  # 디버그 출력
         self.valResult.setStyleSheet("""
             QTextBrowser {
                 background: #FFF;
@@ -363,8 +364,8 @@ class CommonMainUI(QWidget):
         # 초기 상태 설정
         self._toggle_placeholder()
 
-        # 20px gap
-        self.right_layout.addSpacing(20)
+        # 30px gap (고정)
+        self.right_layout.addSpacing(25)
 
         self.valmsg = QLabel('시험 점수 요약', self)
         self.valmsg.setFixedSize(1064, 24)
@@ -384,13 +385,7 @@ class CommonMainUI(QWidget):
         self.spec_score_group = self.create_spec_score_display_widget()
         self.right_layout.addWidget(self.spec_score_group)
 
-        self.total_score_group = self.create_total_score_display_widget()
-        self.right_layout.addWidget(self.total_score_group)
-
-        # 30px gap
-        self.right_layout.addSpacing(30)
-
-        # Stretch를 추가하여 버튼 그룹을 맨 아래로 이동
+        # Stretch 2: 버튼 그룹을 맨 아래로 이동
         self.right_layout.addStretch()
 
         # ✅ 버튼 그룹 (레이아웃 없이 직접 위치 설정)
@@ -626,8 +621,8 @@ class CommonMainUI(QWidget):
             # 왼쪽 패널 확장 요소: group_table(204) + field_group(526) = 730px
             left_expandable_total = 204 + 526  # 730
 
-            # 오른쪽 패널 확장 요소: api_section(251) + monitor_section(157) = 408px
-            right_expandable_total = 251 + 157  # 408
+            # 오른쪽 패널 확장 요소: api_section(251) + monitor_section(267) = 518px
+            right_expandable_total = 251 + 267  # 518
 
             # bg_root 크기 조정
             if hasattr(self, 'bg_root') and hasattr(self, 'original_bg_root_size'):
@@ -696,8 +691,8 @@ class CommonMainUI(QWidget):
             # 모니터링 섹션 크기 조정 (extra_column_height 비례 분배)
             if hasattr(self, 'monitor_section') and hasattr(self, 'original_monitor_section_size'):
                 new_monitor_width = int(self.original_monitor_section_size[0] * width_ratio)
-                monitor_extra = extra_column_height * (157 / right_expandable_total)
-                new_monitor_height = int(157 + monitor_extra)
+                monitor_extra = extra_column_height * (267 / right_expandable_total)
+                new_monitor_height = int(267 + monitor_extra)
                 self.monitor_section.setFixedSize(new_monitor_width, new_monitor_height)
 
             # ✅ 버튼 그룹 및 버튼 크기 조정 (간격 16px 고정, 세로 크기 고정)
@@ -732,14 +727,15 @@ class CommonMainUI(QWidget):
             # 텍스트 브라우저 컨테이너 (monitor_section 내부 - 라벨 24px 제외)
             if hasattr(self, 'text_browser_container') and hasattr(self, 'original_text_browser_container_size'):
                 new_tbc_width = int(self.original_text_browser_container_size[0] * width_ratio)
-                new_tbc_height = int(125 + monitor_extra)  # monitor_section에서 라벨 제외한 부분
+                new_tbc_height = int(235 + monitor_extra)  # monitor_section에서 라벨 제외한 부분
                 self.text_browser_container.setFixedSize(new_tbc_width, new_tbc_height)
 
             # valResult (QTextBrowser) (monitor_section 내부)
             if hasattr(self, 'valResult') and hasattr(self, 'original_valResult_size'):
                 new_vr_width = int(self.original_valResult_size[0] * width_ratio)
-                new_vr_height = int(125 + monitor_extra)
+                new_vr_height = int(235 + monitor_extra)
                 self.valResult.setFixedSize(new_vr_width, new_vr_height)
+                print(f"[DEBUG resizeEvent] valResult 크기 재설정: width={new_vr_width}, height={new_vr_height}, monitor_extra={monitor_extra}")  # 디버그
 
             # ✅ 시험 점수 요약 섹션
             if hasattr(self, 'valmsg') and hasattr(self, 'original_valmsg_size'):
@@ -1130,100 +1126,10 @@ class CommonMainUI(QWidget):
 
 
 
-    def update_last_line_timer(self, message, remove=False):
-        """
-        마지막 줄(타이머)을 업데이트하거나 삭제함.
-        블록 단위로 확인하여 확실하게 처리.
-        """
-        pass
-        # cursor = self.valResult.textCursor()
-        # cursor.movePosition(cursor.End)
-        # 
-        # # 마지막 블록 확인
-        # cursor.select(QTextCursor.BlockUnderCursor)
-        # text = cursor.selectedText()
-        # 
-        # # 빈 줄이면 윗 줄 확인 (최대 2번 위로)
-        # found = False
-        # for _ in range(2):
-        #     if "남은 대기 시간:" in text:
-        #         found = True
-        #         break
-        #     
-        #     # 못 찾았으면 위로 이동
-        #     if not cursor.block().previous().isValid():
-        #         break
-        #     cursor.movePosition(cursor.PreviousBlock, cursor.MoveAnchor)
-        #     cursor.select(QTextCursor.BlockUnderCursor)
-        #     text = cursor.selectedText()
-        #
-        # if found:
-        #     # 찾았으면 삭제
-        #     cursor.removeSelectedText()
-        #     # 줄바꿈이 남아서 빈 줄이 생기는 것을 방지하기 위해 확인 후 삭제
-        #     # 현재 블록이 지워졌지만 줄바꿈 문자가 남아있을 수 있음
-        #     cursor.deleteChar() 
-        #     
-        #     if not remove:
-        #         # 덮어쓰기 (줄바꿈 없이 삽입)
-        #         html_msg = f"<div style='font-size: 18px; font-weight: bold; color: #FF5722; font-family: \"Noto Sans KR\";'>{message}</div>"
-        #         cursor.insertHtml(html_msg)
-        #         # 커서를 다시 맨 끝으로 보내지 않음 (현재 위치 유지)
-        # else:
-        #     # 못 찾았으면 (맨 처음) 새로 추가
-        #     if not remove:
-        #         # 맨 끝으로 이동 후 추가
-        #         self.valResult.moveCursor(QTextCursor.End)
-        #         html_msg = f"<div style='font-size: 18px; font-weight: bold; color: #FF5722; font-family: \"Noto Sans KR\"; margin-top: 5px;'>{message}</div>"
-        #         self.valResult.append(html_msg)
-        #
-        # self.valResult.verticalScrollBar().setValue(
-        #     self.valResult.verticalScrollBar().maximum()
-        # )
-
-    def append_monitor_log(self, step_name, request_json="", result_status="진행중", score=None, details="", is_temp=False):
+    def append_monitor_log(self, step_name, request_json="", result_status="진행중", score=None, details=""):
         """
         Qt 호환성이 보장된 HTML 테이블 구조 로그 출력 함수
         """
-        # ✅ 이전에 임시 로그(헤더+내용)가 있었다면 삭제 (주석 처리됨)
-        # if getattr(self, 'has_temp_log', False):
-        #     doc = self.valResult.document()
-        #     block = doc.lastBlock()
-        #     
-        #     # 최대 5개의 블록을 거슬러 올라가며 확인 (안전장치)
-        #     for _ in range(5):
-        #         if not block.isValid():
-        #             break
-        #             
-        #         text = block.text().strip()
-        #         should_delete = False
-        #         
-        #         # 1. 타이머 줄인지 확인
-        #         if "남은 대기 시간:" in text:
-        #             should_delete = True
-        #         # 2. 임시 헤더("시험 API:" + "요청")인지 확인
-        #         elif "시험 API:" in text and ("요청 전송 중" in text or "요청 대기 중" in text):
-        #             should_delete = True
-        #         # 3. 빈 줄인지 확인 (헤더와 타이머 사이 등)
-        #         elif not text:
-        #             should_delete = True
-        #         
-        #         prev_block = block.previous() # 삭제 전에 이전 블록 저장
-        #         
-        #         if should_delete:
-        #             cursor = QTextCursor(block)
-        #             cursor.select(QTextCursor.BlockUnderCursor)
-        #             cursor.removeSelectedText()
-        #             cursor.deletePreviousChar() # 줄바꿈 삭제
-        #         
-        #         # 헤더("시험 API:")를 지웠다면 더 이상 지울 필요 없음 (루프 종료)
-        #         if "시험 API:" in text and should_delete:
-        #             break
-        #             
-        #         block = prev_block # 위로 이동
-        #
-        #     self.has_temp_log = False
-
         from datetime import datetime
         import html
         from core.utils import replace_transport_desc_for_display
@@ -1318,10 +1224,6 @@ class CommonMainUI(QWidget):
         self.valResult.verticalScrollBar().setValue(
             self.valResult.verticalScrollBar().maximum()
         )
-        
-        # ✅ 임시 로그 플래그 설정
-        if is_temp:
-            self.has_temp_log = True
 
 
 
@@ -1335,11 +1237,7 @@ class CommonMainUI(QWidget):
             QGroupBox {
                 background-color: #FFF;
                 border: 1px solid #CECECE;
-                border-bottom: none;
-                border-top-left-radius: 4px;
-                border-top-right-radius: 4px;
-                border-bottom-left-radius: 0px;
-                border-bottom-right-radius: 0px;
+                border-radius: 4px;
                 padding: 0px;
                 margin: 0px;
             }
@@ -1429,6 +1327,7 @@ class CommonMainUI(QWidget):
         # 아이콘 + 분야명 (헤더 영역 1064 × 52)
         header_widget = QWidget()
         header_widget.setFixedSize(1064, 52)
+        header_widget.setStyleSheet("background: transparent;")
         header_layout = QHBoxLayout(header_widget)
         header_layout.setContentsMargins(0, 5, 0, 5)
         header_layout.setSpacing(12)

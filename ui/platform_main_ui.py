@@ -89,8 +89,8 @@ class PlatformMainUI(CommonMainUI):
             # 왼쪽 패널 확장 요소: group_table(204) + field_group(526) = 730px
             left_expandable_total = 204 + 526  # 730
 
-            # 오른쪽 패널 확장 요소: api_section(251) + monitor_section(157) = 408px
-            right_expandable_total = 251 + 157  # 408
+            # 오른쪽 패널 확장 요소: api_section(251) + monitor_section(267) = 518px
+            right_expandable_total = 251 + 267  # 518
 
             # bg_root 크기 조정
             if hasattr(self, 'bg_root') and hasattr(self, 'original_bg_root_size'):
@@ -159,8 +159,8 @@ class PlatformMainUI(CommonMainUI):
             # 모니터링 섹션 크기 조정 (extra_column_height 비례 분배)
             if hasattr(self, 'monitor_section') and hasattr(self, 'original_monitor_section_size'):
                 new_monitor_width = int(self.original_monitor_section_size[0] * width_ratio)
-                monitor_extra = extra_column_height * (157 / right_expandable_total)
-                new_monitor_height = int(157 + monitor_extra)
+                monitor_extra = extra_column_height * (267 / right_expandable_total)
+                new_monitor_height = int(267 + monitor_extra)
                 self.monitor_section.setFixedSize(new_monitor_width, new_monitor_height)
 
             # ✅ 버튼 그룹 및 버튼 크기 조정 (간격 16px 고정, 세로 크기 고정)
@@ -195,13 +195,13 @@ class PlatformMainUI(CommonMainUI):
             # 텍스트 브라우저 컨테이너 (monitor_section 내부 - 라벨 24px 제외)
             if hasattr(self, 'text_browser_container') and hasattr(self, 'original_text_browser_container_size'):
                 new_tbc_width = int(self.original_text_browser_container_size[0] * width_ratio)
-                new_tbc_height = int(125 + monitor_extra)  # monitor_section에서 라벨 제외한 부분
+                new_tbc_height = int(235 + monitor_extra)  # monitor_section에서 라벨 제외한 부분
                 self.text_browser_container.setFixedSize(new_tbc_width, new_tbc_height)
 
             # valResult (QTextBrowser) (monitor_section 내부)
             if hasattr(self, 'valResult') and hasattr(self, 'original_valResult_size'):
                 new_vr_width = int(self.original_valResult_size[0] * width_ratio)
-                new_vr_height = int(125 + monitor_extra)
+                new_vr_height = int(235 + monitor_extra)
                 self.valResult.setFixedSize(new_vr_width, new_vr_height)
 
             # ✅ 시험 점수 요약 섹션
@@ -313,10 +313,10 @@ class PlatformMainUI(CommonMainUI):
             (40, ""),            # No.
             (261, "API 명"),
             (100, "결과"),
-            (94, "검증 횟수"),
-            (116, "통과 필드 수"),
             (116, "전체 필드 수"),
+            (116, "통과 필드 수"),
             (94, "실패 필드 수"),
+            (94, "검증 횟수"),
             (94, "평가 점수"),
             (133, "상세 내용")
         ]
@@ -375,7 +375,7 @@ class PlatformMainUI(CommonMainUI):
         self.tableWidget.setShowGrid(False)
 
         # 컬럼 너비 설정 - 9컬럼 구조 (원본 너비 저장)
-        self.original_column_widths = [40, 261, 100, 94, 116, 116, 94, 94, 133]
+        self.original_column_widths = [40, 261, 100, 116, 116, 94, 94, 94, 133]
         for i, width in enumerate(self.original_column_widths):
             self.tableWidget.setColumnWidth(i, width)
         self.tableWidget.horizontalHeader().setStretchLastSection(False)  # 비례 조정을 위해 비활성화
@@ -412,23 +412,23 @@ class PlatformMainUI(CommonMainUI):
 
             self.tableWidget.setCellWidget(i, 2, icon_widget)
 
-            # 검증 횟수 - 컬럼 3
+            # 전체 필드 수 (새 위치: 3)
             self.tableWidget.setItem(i, 3, QTableWidgetItem("0"))
             self.tableWidget.item(i, 3).setTextAlignment(Qt.AlignCenter)
 
-            # 통과 필드 수 - 컬럼 4
+            # 통과 필드 수 (위치 유지: 4)
             self.tableWidget.setItem(i, 4, QTableWidgetItem("0"))
             self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
 
-            # 전체 필드 수 - 컬럼 5
+            # 실패 필드 수 (새 위치: 5)
             self.tableWidget.setItem(i, 5, QTableWidgetItem("0"))
             self.tableWidget.item(i, 5).setTextAlignment(Qt.AlignCenter)
 
-            # 실패 횟수 - 컬럼 6
+            # 검증 횟수 (새 위치: 6)
             self.tableWidget.setItem(i, 6, QTableWidgetItem("0"))
             self.tableWidget.item(i, 6).setTextAlignment(Qt.AlignCenter)
 
-            # 평가 점수 - 컬럼 7
+            # 평가 점수
             self.tableWidget.setItem(i, 7, QTableWidgetItem("0%"))
             self.tableWidget.item(i, 7).setTextAlignment(Qt.AlignCenter)
 
@@ -584,11 +584,7 @@ class PlatformMainUI(CommonMainUI):
             QGroupBox {
                 background-color: #FFF;
                 border: 1px solid #CECECE;
-                border-bottom: none;
-                border-top-left-radius: 4px;
-                border-top-right-radius: 4px;
-                border-bottom-left-radius: 0px;
-                border-bottom-right-radius: 0px;
+                border-radius: 4px;
                 padding: 0px;
                 margin: 0px;
             }
@@ -948,23 +944,6 @@ class PlatformMainUI(CommonMainUI):
             else:
                 global_opt_score = 0
 
-            # 필수/선택/종합 점수 표시 (% (통과/전체) 형식)
-            self.total_pass_label.setText(
-                f"필수 필드 점수&nbsp;"
-                f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
-                f"{global_required_score:.1f}% ({global_required_pass}/{global_required_total})</span>"
-            )
-            self.total_total_label.setText(
-                f"선택 필드 점수&nbsp;"
-                f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
-                f"{global_opt_score:.1f}% ({self.global_opt_pass_cnt}/{global_opt_total})</span>"
-            )
-            self.total_score_label.setText(
-                f"종합 평가 점수&nbsp;"
-                f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
-                f"{global_score:.1f}% ({self.global_pass_cnt}/{global_total_fields})</span>"
-            )
-
     def table_cell_clicked(self, row, col):
         """테이블 셀 클릭"""
         if col == 2:  # 아이콘 컬럼
@@ -994,21 +973,21 @@ class PlatformMainUI(CommonMainUI):
 
         self.tableWidget.setCellWidget(row, 2, icon_widget)
 
-        # 실제 검증 횟수 업데이트 - 컬럼 3
-        self.tableWidget.setItem(row, 3, QTableWidgetItem(str(retries)))
+        # 전체 필드 수 업데이트 - 컬럼 3
+        total_fields = pass_count + error_count
+        self.tableWidget.setItem(row, 3, QTableWidgetItem(str(total_fields)))
         self.tableWidget.item(row, 3).setTextAlignment(Qt.AlignCenter)
 
         # 통과 필드 수 업데이트 - 컬럼 4
         self.tableWidget.setItem(row, 4, QTableWidgetItem(str(pass_count)))
         self.tableWidget.item(row, 4).setTextAlignment(Qt.AlignCenter)
 
-        # 전체 필드 수 업데이트 - 컬럼 5
-        total_fields = pass_count + error_count
-        self.tableWidget.setItem(row, 5, QTableWidgetItem(str(total_fields)))
+        # 실패 필드 수 업데이트 - 컬럼 5
+        self.tableWidget.setItem(row, 5, QTableWidgetItem(str(error_count)))
         self.tableWidget.item(row, 5).setTextAlignment(Qt.AlignCenter)
 
-        # 실패 필드 수 업데이트 - 컬럼 6
-        self.tableWidget.setItem(row, 6, QTableWidgetItem(str(error_count)))
+        # 검증 횟수 업데이트 - 컬럼 6
+        self.tableWidget.setItem(row, 6, QTableWidgetItem(str(retries)))
         self.tableWidget.item(row, 6).setTextAlignment(Qt.AlignCenter)
 
         # 평가 점수 업데이트 - 컬럼 7
