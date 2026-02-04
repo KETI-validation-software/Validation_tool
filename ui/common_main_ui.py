@@ -363,8 +363,11 @@ class CommonMainUI(QWidget):
         # 초기 상태 설정
         self._toggle_placeholder()
 
-        # 20px gap
-        self.right_layout.addSpacing(20)
+        # 60px gap (분야별 점수 박스를 더 아래로)
+        self.right_layout.addSpacing(110)
+
+        # Stretch 1: 시험 점수 요약 섹션을 아래로 이동
+        self.right_layout.addStretch()
 
         self.valmsg = QLabel('시험 점수 요약', self)
         self.valmsg.setFixedSize(1064, 24)
@@ -384,10 +387,7 @@ class CommonMainUI(QWidget):
         self.spec_score_group = self.create_spec_score_display_widget()
         self.right_layout.addWidget(self.spec_score_group)
 
-        # 30px gap
-        self.right_layout.addSpacing(30)
-
-        # Stretch를 추가하여 버튼 그룹을 맨 아래로 이동
+        # Stretch 2: 버튼 그룹을 맨 아래로 이동
         self.right_layout.addStretch()
 
         # ✅ 버튼 그룹 (레이아웃 없이 직접 위치 설정)
