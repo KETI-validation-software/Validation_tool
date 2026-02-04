@@ -1324,11 +1324,12 @@ class CommonMainUI(QWidget):
         spec_layout.setContentsMargins(0, 0, 0, 0)
         spec_layout.setSpacing(0)
 
-        # 아이콘 + 분야명 (헤더 영역 1064 × 52)
-        header_widget = QWidget()
-        header_widget.setFixedSize(1064, 52)
-        header_widget.setStyleSheet("background: transparent;")
-        header_layout = QHBoxLayout(header_widget)
+        # 아이콘 + 분야명 (헤더 영역 1062 × 52, 부모 border 1px 고려)
+        self.spec_header_widget = QWidget()
+        self.spec_header_widget.setFixedSize(1062, 52)
+        self.spec_header_widget.setStyleSheet("background: #F5F5F5;")  # 옅은 회색 배경
+        self.original_spec_header_widget_size = (1062, 52)
+        header_layout = QHBoxLayout(self.spec_header_widget)
         header_layout.setContentsMargins(0, 5, 0, 5)
         header_layout.setSpacing(12)
         header_layout.addWidget(icon_label, alignment=Qt.AlignVCenter)
@@ -1336,7 +1337,7 @@ class CommonMainUI(QWidget):
         header_layout.addWidget(header_vline, alignment=Qt.AlignVCenter)
         header_layout.addWidget(self.spec_name_label, alignment=Qt.AlignVCenter)
         header_layout.addStretch()
-        spec_layout.addWidget(header_widget)
+        spec_layout.addWidget(self.spec_header_widget)
         spec_layout.addWidget(separator)
 
         # 데이터 영역 (1064 × 76)
