@@ -313,10 +313,10 @@ class PlatformMainUI(CommonMainUI):
             (40, ""),            # No.
             (261, "API 명"),
             (100, "결과"),
-            (94, "검증 횟수"),
-            (116, "통과 필드 수"),
             (116, "전체 필드 수"),
+            (116, "통과 필드 수"),
             (94, "실패 필드 수"),
+            (94, "검증 횟수"),
             (94, "평가 점수"),
             (133, "상세 내용")
         ]
@@ -375,7 +375,7 @@ class PlatformMainUI(CommonMainUI):
         self.tableWidget.setShowGrid(False)
 
         # 컬럼 너비 설정 - 9컬럼 구조 (원본 너비 저장)
-        self.original_column_widths = [40, 261, 100, 94, 116, 116, 94, 94, 133]
+        self.original_column_widths = [40, 261, 100, 116, 116, 94, 94, 94, 133]
         for i, width in enumerate(self.original_column_widths):
             self.tableWidget.setColumnWidth(i, width)
         self.tableWidget.horizontalHeader().setStretchLastSection(False)  # 비례 조정을 위해 비활성화
@@ -412,23 +412,23 @@ class PlatformMainUI(CommonMainUI):
 
             self.tableWidget.setCellWidget(i, 2, icon_widget)
 
-            # 검증 횟수 - 컬럼 3
+            # 전체 필드 수 (새 위치: 3)
             self.tableWidget.setItem(i, 3, QTableWidgetItem("0"))
             self.tableWidget.item(i, 3).setTextAlignment(Qt.AlignCenter)
 
-            # 통과 필드 수 - 컬럼 4
+            # 통과 필드 수 (위치 유지: 4)
             self.tableWidget.setItem(i, 4, QTableWidgetItem("0"))
             self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
 
-            # 전체 필드 수 - 컬럼 5
+            # 실패 필드 수 (새 위치: 5)
             self.tableWidget.setItem(i, 5, QTableWidgetItem("0"))
             self.tableWidget.item(i, 5).setTextAlignment(Qt.AlignCenter)
 
-            # 실패 횟수 - 컬럼 6
+            # 검증 횟수 (새 위치: 6)
             self.tableWidget.setItem(i, 6, QTableWidgetItem("0"))
             self.tableWidget.item(i, 6).setTextAlignment(Qt.AlignCenter)
 
-            # 평가 점수 - 컬럼 7
+            # 평가 점수
             self.tableWidget.setItem(i, 7, QTableWidgetItem("0%"))
             self.tableWidget.item(i, 7).setTextAlignment(Qt.AlignCenter)
 
@@ -994,21 +994,21 @@ class PlatformMainUI(CommonMainUI):
 
         self.tableWidget.setCellWidget(row, 2, icon_widget)
 
-        # 실제 검증 횟수 업데이트 - 컬럼 3
-        self.tableWidget.setItem(row, 3, QTableWidgetItem(str(retries)))
+        # 전체 필드 수 업데이트 - 컬럼 3
+        total_fields = pass_count + error_count
+        self.tableWidget.setItem(row, 3, QTableWidgetItem(str(total_fields)))
         self.tableWidget.item(row, 3).setTextAlignment(Qt.AlignCenter)
 
         # 통과 필드 수 업데이트 - 컬럼 4
         self.tableWidget.setItem(row, 4, QTableWidgetItem(str(pass_count)))
         self.tableWidget.item(row, 4).setTextAlignment(Qt.AlignCenter)
 
-        # 전체 필드 수 업데이트 - 컬럼 5
-        total_fields = pass_count + error_count
-        self.tableWidget.setItem(row, 5, QTableWidgetItem(str(total_fields)))
+        # 실패 필드 수 업데이트 - 컬럼 5
+        self.tableWidget.setItem(row, 5, QTableWidgetItem(str(error_count)))
         self.tableWidget.item(row, 5).setTextAlignment(Qt.AlignCenter)
 
-        # 실패 필드 수 업데이트 - 컬럼 6
-        self.tableWidget.setItem(row, 6, QTableWidgetItem(str(error_count)))
+        # 검증 횟수 업데이트 - 컬럼 6
+        self.tableWidget.setItem(row, 6, QTableWidgetItem(str(retries)))
         self.tableWidget.item(row, 6).setTextAlignment(Qt.AlignCenter)
 
         # 평가 점수 업데이트 - 컬럼 7

@@ -181,7 +181,7 @@ class CommonMainUI(QWidget):
         self.url_text_box = QLineEdit()
         self.url_text_box.setFixedSize(960, 36)
         self.original_url_text_box_size = (960, 36)
-        self.url_text_box.setReadOnly(False)
+        self.url_text_box.setReadOnly(True)
         self.url_text_box.setPlaceholderText("접속 주소를 입력하세요.")
 
         # URL 생성 (초기에는 spec_id 사용, get_setting() 후 test_name으로 업데이트됨)
@@ -190,23 +190,19 @@ class CommonMainUI(QWidget):
 
         self.url_text_box.setStyleSheet("""
             QLineEdit {
-                background-color: #FFFFFF;
+                background-color: #F5F5F5;
                 border: 1px solid #868686;
                 border-radius: 4px;
                 padding: 0 24px;
                 font-family: "Noto Sans KR";
                 font-size: 18px;
                 font-weight: 400;
-                color: #000000;
+                color: #555555;
                 selection-background-color: #4A90E2;
                 selection-color: white;
             }
             QLineEdit::placeholder {
                 color: #6B6B6B;
-            }
-            QLineEdit:focus {
-                border: 1px solid #4A90E2;
-                background-color: #FFFFFF;
             }
         """)
         url_row_layout.addWidget(self.url_text_box)
@@ -849,10 +845,10 @@ class CommonMainUI(QWidget):
             (40, ""),            # No.
             (261, "API 명"),
             (100, "결과"),
-            (94, "검증 횟수"),
-            (116, "통과 필드 수"),
             (116, "전체 필드 수"),
+            (116, "통과 필드 수"),
             (94, "실패 필드 수"),
+            (94, "검증 횟수"),
             (94, "평가 점수"),
             (133, "상세 내용")
         ]
@@ -911,7 +907,7 @@ class CommonMainUI(QWidget):
         self.tableWidget.setShowGrid(False)
 
         # 컬럼 너비 설정 - 9컬럼 구조 (원본 너비 저장)
-        self.original_column_widths = [40, 261, 100, 94, 116, 116, 94, 94, 133]
+        self.original_column_widths = [40, 261, 100, 116, 116, 94, 94, 94, 133]
         for i, width in enumerate(self.original_column_widths):
             self.tableWidget.setColumnWidth(i, width)
         self.tableWidget.horizontalHeader().setStretchLastSection(False)  # 비례 조정을 위해 비활성화
@@ -948,16 +944,16 @@ class CommonMainUI(QWidget):
 
             self.tableWidget.setCellWidget(i, 2, icon_widget)
 
-            # 검증 횟수
+            # 전체 필드 수 (새 위치: 3)
             self.tableWidget.setItem(i, 3, QTableWidgetItem("0"))
             self.tableWidget.item(i, 3).setTextAlignment(Qt.AlignCenter)
-            # 통과 필드 수
+            # 통과 필드 수 (위치 유지: 4)
             self.tableWidget.setItem(i, 4, QTableWidgetItem("0"))
             self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
-            # 전체 필드 수
+            # 실패 필드 수 (새 위치: 5)
             self.tableWidget.setItem(i, 5, QTableWidgetItem("0"))
             self.tableWidget.item(i, 5).setTextAlignment(Qt.AlignCenter)
-            # 실패 횟수
+            # 검증 횟수 (새 위치: 6)
             self.tableWidget.setItem(i, 6, QTableWidgetItem("0"))
             self.tableWidget.item(i, 6).setTextAlignment(Qt.AlignCenter)
             # 평가 점수

@@ -1157,10 +1157,10 @@ class ResultPageWidget(QWidget):
             (40, ""),            # No.
             (261, "API 명"),
             (100, "결과"),
-            (94, "검증 횟수"),
-            (116, "통과 필드 수"),
             (116, "전체 필드 수"),
+            (116, "통과 필드 수"),
             (94, "실패 필드 수"),
+            (94, "검증 횟수"),
             (94, "평가 점수"),
             (133, "상세 내용")
         ]
@@ -1222,7 +1222,7 @@ class ResultPageWidget(QWidget):
         self.tableWidget.setShowGrid(False)
 
         # 컬럼 너비 설정 (본문용) - 9컬럼 구조 (마지막 컬럼이 남은 공간 채움)
-        base_widths = [40, 261, 100, 94, 116, 116, 94, 94]  # 0-7 컬럼
+        base_widths = [40, 261, 100, 116, 116, 94, 94, 94]  # 0-7 컬럼
         used_width = sum(base_widths)
         # 스크롤 영역(1064) - border(2) - 스크롤바(16) - 여유분(2) = 1044
         available_width = 1044
@@ -1350,8 +1350,8 @@ class ResultPageWidget(QWidget):
                         self.parent.tableWidget.setCellWidget(row, 2, icon_widget)
 
                     # 컬럼 3-7 복원
-                    for col, key in [(3, 'retry_count'), (4, 'pass_count'),
-                                     (5, 'total_count'), (6, 'fail_count'), (7, 'score')]:
+                    for col, key in [(3, 'total_count'), (4, 'pass_count'),
+                                     (5, 'fail_count'), (6, 'retry_count'), (7, 'score')]:
                         value = row_data.get(key, '0')
                         item = self.parent.tableWidget.item(row, col)
                         if item:
