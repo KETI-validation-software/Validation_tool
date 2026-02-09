@@ -95,7 +95,7 @@ class NetworkScanWorker(QObject):
 class ARPScanWorker(QObject):
     """
     ARP 스캔으로 동일 네트워크의 활성 IP를 검색하는 워커 클래스
-    - 물리보안시스템용
+    - 단일시스템용
     - 백그라운드 스레드에서 실행되어 GUI 스레드 안전성 보장
     """
     scan_completed = pyqtSignal(list)  # 스캔 완료 시 IP 리스트 전달

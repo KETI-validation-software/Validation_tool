@@ -1173,7 +1173,7 @@ class MyApp(PlatformMainUI):
             ("제품명", self.CONSTANTS.product_name),
             ("버전", self.CONSTANTS.version),
             ("시험유형", self.CONSTANTS.test_category),
-            ("시험대상", self.CONSTANTS.test_target),
+            ("시험분야", self.CONSTANTS.test_target),
             ("시험범위", self.CONSTANTS.test_range),
             ("사용자 인증 방식", self.auth_type),
             ("시험 접속 정보", self.url)

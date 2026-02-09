@@ -218,7 +218,12 @@ class FormValidator:
         if test_range == "전체필드":
             test_range = "전체 필드"
         elif test_range == "필수필드":
-            test_range = self.parent.original_test_range if self.parent.original_test_range else "필수 필드"
+            original_range = self.parent.original_test_range if hasattr(self.parent, 'original_test_range') else "필수 필드"
+            # "ALL_FIELDS"가 포함된 경우 한글로 변환
+            if "ALL_FIELDS" in original_range:
+                test_range = "전체 필드"
+            else:
+                test_range = original_range
 
         return {
             'company_name': self.parent.company_edit.text().strip(),
@@ -421,7 +426,7 @@ class FormValidator:
             else:
                 spec_dir = None
 
-            if mode == "물리보안시스템":
+            if mode == "단일시스템":
                 priority_order = ["outSchema", "inData", "messages", "webhook"]
                 if spec_dir:
                     schema_file = os.path.join(spec_dir, "Schema_response.py")
@@ -430,7 +435,7 @@ class FormValidator:
                     schema_file = resource_path("spec/Schema_response.py")
                     data_file = resource_path("spec/Data_request.py")
                 merged_result = self.file_generator.merge_list_prefix_mappings(schema_file, data_file)
-            elif mode == "통합플랫폼시스템":
+            elif mode == "통합시스템":
                 priority_order = ["inSchema", "outData", "messages", "webhook"]
                 if spec_dir:
                     schema_file = os.path.join(spec_dir, "Schema_request.py")

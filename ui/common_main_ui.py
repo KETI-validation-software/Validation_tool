@@ -735,7 +735,7 @@ class CommonMainUI(QWidget):
                 new_vr_width = int(self.original_valResult_size[0] * width_ratio)
                 new_vr_height = int(235 + monitor_extra)
                 self.valResult.setFixedSize(new_vr_width, new_vr_height)
-                print(f"[DEBUG resizeEvent] valResult 크기 재설정: width={new_vr_width}, height={new_vr_height}, monitor_extra={monitor_extra}")  # 디버그
+                # print(f"[DEBUG resizeEvent] valResult 크기 재설정: width={new_vr_width}, height={new_vr_height}, monitor_extra={monitor_extra}")  # 디버그
 
             # ✅ 시험 점수 요약 섹션
             if hasattr(self, 'valmsg') and hasattr(self, 'original_valmsg_size'):
