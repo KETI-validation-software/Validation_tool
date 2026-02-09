@@ -165,9 +165,9 @@ class MainWindow(QMainWindow):
             # ===== 수정 끝 =====
 
             # target_system_edit에 따라 어떤 검증 앱을 실행할지 결정
-            if "물리보안시스템" in target_system_edit:
-                # 물리보안: 메인 창=System, 새 창=Platform
-                Logger.info("→ 물리보안: 메인 창=System")
+            if "단일시스템" in target_system_edit:
+                # 단일시스템: 메인 창=System, 새 창=Platform
+                Logger.info("→ 단일시스템: 메인 창=System")
 
                 # ===== 수정: 기존 위젯 제거 후 새로 생성 =====
                 # Main 화면: System 검증으로 전환
@@ -187,10 +187,10 @@ class MainWindow(QMainWindow):
                 self.stack.setCurrentWidget(self._system_widget)
                 Logger.info("System 위젯으로 전환 완료")  # 로깅 추가
 
-            # 1.2로 했을때 통합플랫폼으로 들어가야함
-            elif "통합플랫폼시스템" in target_system_edit:
-                # 통합플랫폼: 메인 창=Platform, 새 창=System
-                Logger.info("→ 통합플랫폼: 메인 창=Platform")
+            # 1.2로 했을때 통합시스템으로 들어가야함
+            elif "통합시스템" in target_system_edit:
+                # 통합시스템: 메인 창=Platform, 새 창=System
+                Logger.info("→ 통합시스템: 메인 창=Platform")
 
                 # ===== 수정: 기존 위젯 제거 후 새로 생성 =====
                 # Main 화면: Platform 검증으로 전환

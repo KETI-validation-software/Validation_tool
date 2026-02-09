@@ -12,7 +12,7 @@ class SystemValidationWindow(QMainWindow):
     def __init__(self, my_app_class):
         super().__init__()
         self.my_app_class = my_app_class
-        self.setWindowTitle("물리보안시스템 연동 검증")
+        self.setWindowTitle("단일시스템 연동 검증")
         self.resize(1200, 720)
 
         # 스택 위젯 생성

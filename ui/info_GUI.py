@@ -63,7 +63,7 @@ class InfoWidget(QWidget):
         self.scan_thread = None
         self.scan_worker = None
         self.current_mode = None
-        self.target_system = ""  # 시험대상 시스템 (물리보안시스템/통합플랫폼시스템)
+        self.target_system = ""  # 시험대상 시스템 (단일시스템/통합시스템)
         self.is_loading = False  # 시험 정보 로딩 중 플래그 (로딩 중 UI 상호작용 방지)
         self.test_group_name = None  # testGroup.name 저장
         self.test_specs = []  # testSpecs 리스트 저장
@@ -589,8 +589,8 @@ class InfoWidget(QWidget):
         """실제 네트워크 스캔으로 사용 가능한 주소 탐지"""
         try:
             # target_system에 따라 분기 처리
-            if hasattr(self, 'target_system') and self.target_system == "통합플랫폼시스템":
-                # 통합플랫폼시스템: 네트워크 IP 검색
+            if hasattr(self, 'target_system') and self.target_system == "통합시스템":
+                # 통합시스템: 네트워크 IP 검색
                 if hasattr(self, 'test_port') and self.test_port:
                     ip_list = self._get_local_ip_list()
 
@@ -629,8 +629,8 @@ class InfoWidget(QWidget):
                     QMessageBox.warning(self, "경고", "testPort 정보가 없습니다.")
                 return
 
-            elif hasattr(self, 'target_system') and self.target_system == "물리보안시스템":
-                # 물리보안시스템: ARP 스캔으로 동일 네트워크 IP 검색
+            elif hasattr(self, 'target_system') and self.target_system == "단일시스템":
+                # 단일시스템: ARP 스캔으로 동일 네트워크 IP 검색
                 # 이미 스캔 중이면 중복 실행 방지
                 if hasattr(self, 'arp_scan_thread') and self.arp_scan_thread and self.arp_scan_thread.isRunning():
                     if not is_auto:
@@ -890,7 +890,7 @@ class InfoWidget(QWidget):
                 return
 
             # 물리보안(시스템 검증)일 경우: UI에서 수정한 ID/PW로 Data_request.py 업데이트
-            if not hasattr(self, 'target_system') or self.target_system != "통합플랫폼시스템":
+            if not hasattr(self, 'target_system') or self.target_system != "통합시스템":
                 user_id = self.id_input.text().strip()
                 password = self.pw_input.text().strip()
                 if user_id and password:
@@ -1127,7 +1127,7 @@ class InfoWidget(QWidget):
             return True
 
     def _setup_for_integrated_system(self):
-        """통합플랫폼시스템 전용 설정 (IP 자동 추가, UI 비활성화)"""
+        """통합시스템 전용 설정 (IP 자동 추가, UI 비활성화)"""
         try:
             # 1. IP 자동 추가
             if hasattr(self, 'test_port') and self.test_port:
@@ -1146,7 +1146,7 @@ class InfoWidget(QWidget):
             Logger.debug(f"통합플랫폼 UI 설정 실패: {e}")
 
     def _setup_for_physical_security_system(self):
-        """물리보안시스템 전용 설정 (ARP 스캔 예약, 버튼 숨김)"""
+        """단일시스템 전용 설정 (ARP 스캔 예약, 버튼 숨김)"""
         try:
             # 1. 주소 탐색 버튼 숨김
             if hasattr(self, 'scan_btn'):
@@ -1205,8 +1205,15 @@ class InfoWidget(QWidget):
             group_ranges = [g.get("testRange", "") for g in test_groups]
             combined_group_ranges = ", ".join(group_ranges)
 
-            # 원본 시험범위 값 저장
-            self.original_test_range = combined_group_ranges
+            # 원본 시험범위 값 저장 (한글로 변환하여 저장)
+            if combined_group_ranges and "ALL_FIELDS" in combined_group_ranges:
+                # "ALL_FIELDS, ALL_FIELDS" -> "전체 필드"
+                self.original_test_range = "전체 필드"
+            elif combined_group_ranges:
+                # 그 외의 경우 "필수 필드"
+                self.original_test_range = "필수 필드"
+            else:
+                self.original_test_range = combined_group_ranges
 
             self.company_edit.setText(eval_target.get("companyName", ""))
             self.product_edit.setText(eval_target.get("productName", ""))
@@ -1216,16 +1223,16 @@ class InfoWidget(QWidget):
 
             self.target_system = eval_target.get("targetSystem", "")
             if self.target_system == "PHYSICAL_SECURITY":
-                self.target_system = "물리보안시스템"
+                self.target_system = "단일시스템"
             elif self.target_system == "INTEGRATED_SYSTEM":
-                self.target_system = "통합플랫폼시스템"
+                self.target_system = "통합시스템"
             self.target_system_edit.setText(self.target_system)
 
             self.test_group_edit.setText(combined_group_names)  # 콤마로 연결된 그룹 이름들
 
             # 시험범위를 UI용 텍스트로 변환하여 표시
             display_test_range = combined_group_ranges
-            if combined_group_ranges == "ALL_FIELDS" or combined_group_ranges == "전체 필드":
+            if "ALL_FIELDS" in combined_group_ranges or combined_group_ranges == "전체 필드":
                 display_test_range = "전체필드"
             elif combined_group_ranges:
                 display_test_range = "필수필드"
@@ -1248,12 +1255,12 @@ class InfoWidget(QWidget):
             self.test_specs = all_test_specs
             self.test_port = test_data.get("schedule", {}).get("testPort", None)
 
-            # [추가] 통합플랫폼시스템인 경우 자동 설정
-            if self.target_system == "통합플랫폼시스템":
+            # [추가] 통합시스템인 경우 자동 설정
+            if self.target_system == "통합시스템":
                 self._setup_for_integrated_system()
             
-            # [추가] 물리보안시스템인 경우 UI 문구 변경
-            elif self.target_system == "물리보안시스템":
+            # [추가] 단일시스템인 경우 UI 문구 변경
+            elif self.target_system == "단일시스템":
                 if hasattr(self, 'connection_title_label'):
                     self.connection_title_label.setText("시험 대상 선택")
                 self._setup_for_physical_security_system()
@@ -1375,7 +1382,7 @@ class InfoWidget(QWidget):
                 return
 
             # 플랫폼 검증인지 확인
-            if not hasattr(self, 'target_system') or self.target_system != "통합플랫폼시스템":
+            if not hasattr(self, 'target_system') or self.target_system != "통합시스템":
                 # 물리보안(시스템 검증): Data_request.py에서 읽어옴
                 user_id, password = self.form_validator.get_authentication_from_data_request(spec_id)
 
