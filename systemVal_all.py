@@ -729,12 +729,15 @@ class MyApp(SystemMainUI):
         Logger.debug(f"[TABLE UPDATE] 완료: row={row}")
 
     def load_test_info_from_constants(self):
+        # ✅ 그룹명이 저장되어 있으면 사용, 없으면 spec_description 사용
+        test_field = getattr(self, 'current_group_name', self.spec_description)
+
         return [
             ("기업명", self.CONSTANTS.company_name),
             ("제품명", self.CONSTANTS.product_name),
             ("버전", self.CONSTANTS.version),
             ("시험유형", self.CONSTANTS.test_category),
-            ("시험분야", self.CONSTANTS.test_target),
+            ("시험분야", test_field),  # ✅ 그룹명 사용
             ("시험범위", self.CONSTANTS.test_range),
             ("사용자 인증 방식", self.auth_type),
             ("시험 접속 정보", self.url)
