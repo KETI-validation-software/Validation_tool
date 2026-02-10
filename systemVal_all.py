@@ -1413,6 +1413,14 @@ class MyApp(SystemMainUI):
                 api_name = self.message[self.cnt] if self.cnt < len(self.message) else 'index out of range'
                 Logger.debug(f"플랫폼에 요청 전송: {api_name} (시도 {self.current_retry + 1})")
 
+                # ✅ 송신 메시지 실시간 모니터링 로그 추가 (SEND)
+                display_name = self.message_display[self.cnt] if self.cnt < len(self.message_display) else api_name
+                self.append_monitor_log(
+                    step_name=display_name,
+                    request_json=json.dumps(inMessage, indent=4, ensure_ascii=False),
+                    direction="SEND"
+                )
+
                 t = threading.Thread(target=self.post, args=(path, json_data, current_timeout), daemon=True)
                 t.start()
                 self.post_flag = True
@@ -1652,7 +1660,8 @@ class MyApp(SystemMainUI):
                             self.append_monitor_log(
                                 step_name=f"시험 API: {display_name} ({self.current_retry + 1}/{current_retries})",
                                 details=f"총 {current_retries}회 검증 예정",
-                                request_json=tmp_res_auth
+                                request_json=tmp_res_auth,
+                                direction="RECV"
                             )
                         else:
                             # 2회차 이상: API 명과 회차만 표시
@@ -1660,7 +1669,8 @@ class MyApp(SystemMainUI):
                             display_name = self.message_display[self.cnt] if self.cnt < len(self.message_display) else api_name
                             self.append_monitor_log(
                                 step_name=f"시험 API: {display_name} ({self.current_retry + 1}/{current_retries})",
-                                request_json=tmp_res_auth
+                                request_json=tmp_res_auth,
+                                direction="RECV"
                             )
 
                     # ✅ 디버깅: 어떤 스키마로 검증하는지 확인

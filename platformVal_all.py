@@ -476,16 +476,19 @@ class MyApp(PlatformMainUI):
                     path = f"{base_with_scenario}/{api_path}"
                     self.url_text_box.setText(path)
 
-                # ✅ 대기 시작 시 로그 먼저 출력 (최초 1회)
-                if not self.step_start_log_printed:
-                    current_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
-                    display_name = self.Server.message_display[self.cnt] if self.cnt < len(self.Server.message_display) else "Unknown"
-                    self.append_monitor_log(
-                        step_name=f"시험 API: {display_name} (시도 {self.current_retry + 1}/{current_retries})",
-                        details="시스템 요청 대기 중..."
-                        # is_temp=True # 기능 비활성화
-                    )
-                    self.step_start_log_printed = True
+                # ✅ 대기 시작 시 로그 먼저 출력 (최초 1회) - 타이머 라벨로 대체되어 주석 처리
+                # if not self.step_start_log_printed:
+                #     current_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
+                #     display_name = self.Server.message_display[self.cnt] if self.cnt < len(self.Server.message_display) else "Unknown"
+                #     self.append_monitor_log(
+                #         step_name=f"시험 API: {display_name} (시도 {self.current_retry + 1}/{current_retries})",
+                #         details="시스템 요청 대기 중..."
+                #         # is_temp=True # 기능 비활성화
+                #     )
+                #     self.step_start_log_printed = True
+                
+                # 대신 플래그만 세팅하여 중복 실행 방지
+                self.step_start_log_printed = True
 
                 Logger.debug(f" API 처리 시작: {api_name}")
 
@@ -678,17 +681,19 @@ class MyApp(PlatformMainUI):
                     else:
                         accumulated['data_parts'].append(f"\n{tmp_res_auth}")
 
-                    # ✅ 실시간 모니터링 출력
+                    # ✅ 실시간 모니터링 출력 (RECV)
                     if retry_attempt == 0:
                         self.append_monitor_log(
                             step_name=f"시험 API: {self.Server.message[self.cnt]} (시도 {retry_attempt + 1}/{current_retries})",
                             request_json=tmp_res_auth,
-                            details=f"총 {current_retries}회 검증 예정"
+                            details=f"총 {current_retries}회 검증 예정",
+                            direction="RECV"
                         )
                     else:
                         self.append_monitor_log(
                             step_name=f"시험 API (시도 {retry_attempt + 1}/{current_retries})",
-                            request_json=tmp_res_auth
+                            request_json=tmp_res_auth,
+                            direction="RECV"
                         )
 
                     accumulated['raw_data_list'].append(current_data)
@@ -917,10 +922,18 @@ class MyApp(PlatformMainUI):
                 )
                 QApplication.processEvents()
 
-                # 플랫폼은 응답 메시지 표시 안 함 (요청만 표시)
-                # self.valResult.append(f"\n📤 응답 메시지 송신 [{retry_attempt + 1}/{current_retries}]")
-                # if 'tmp_response' in locals():
-                #     self.valResult.append(tmp_response)
+                # ✅ 송신 메시지 실시간 모니터링 로그 추가 (SEND)
+                api_name = self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else "Unknown"
+                display_name = self.Server.message_display[self.cnt] if self.cnt < len(self.Server.message_display) else api_name
+                
+                # 응답 데이터 가져오기 (trace 파일에서 로드된 response_data 사용)
+                tmp_response_json = json.dumps(response_data, indent=4, ensure_ascii=False) if 'response_data' in locals() else "{}"
+                
+                self.append_monitor_log(
+                    step_name=f"{display_name} (응답)",
+                    request_json=tmp_response_json,
+                    direction="SEND"
+                )
 
                 # current_retry 증가
                 self.current_retry += 1
