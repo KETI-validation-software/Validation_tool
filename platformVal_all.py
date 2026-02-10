@@ -52,6 +52,16 @@ class MyApp(PlatformMainUI):
         self.current_spec_id = spec_id
         self.current_group_id = None  # ✅ 그룹 ID 저장용
 
+        # ✅ base URL을 프로그램 시작 시 한 번만 저장 (절대 변경 금지)
+        _temp_url = str(getattr(CONSTANTS, 'url', ''))
+        # ✅ 혹시 모를 API 경로 포함 여부 확인 및 제거
+        if '/' in _temp_url.split('//')[1] if '//' in _temp_url else _temp_url:
+            # 프로토콜://호스트:포트/경로 형태에서 경로 제거
+            parts = _temp_url.split('/')
+            _temp_url = '/'.join(parts[:3])  # http://host:port만 유지
+        self._original_base_url = _temp_url
+        Logger.debug(f"[INIT] 원본 base URL 저장: {self._original_base_url}")
+
         # ✅ 웹훅 관련 변수 미리 초기화 (load_specs_from_constants 호출 전)
         self.videoWebhookSchema = []
         self.videoWebhookData = []
@@ -150,7 +160,14 @@ class MyApp(PlatformMainUI):
 
         SPEC_CONFIG = load_external_constants(self.CONSTANTS)
 
-        self.url = getattr(self.CONSTANTS, 'url', None)
+        # ✅ 하위 호환성을 위한 변수 (읽기 전용)
+        self.base_url = self._original_base_url
+        self.url = self._original_base_url
+        
+        if hasattr(self, 'url_text_box'):
+            self.url_text_box.setText(self._original_base_url)
+            Logger.debug(f" [LOAD_SPECS] base_url 설정: {self._original_base_url}")
+            
         self.auth_type = getattr(self.CONSTANTS, 'auth_type', None)
         self.auth_info = getattr(self.CONSTANTS, 'auth_info', None)
 
@@ -446,16 +463,32 @@ class MyApp(PlatformMainUI):
                 # 시스템 요청 확인
                 api_name = self.Server.message[self.cnt]
                 
-                # ✅ 대기 시작 시 로그 먼저 출력 (최초 1회)
-                if not self.step_start_log_printed:
-                    current_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
-                    display_name = self.Server.message_display[self.cnt] if self.cnt < len(self.Server.message_display) else "Unknown"
-                    self.append_monitor_log(
-                        step_name=f"시험 API: {display_name} (시도 {self.current_retry + 1}/{current_retries})",
-                        details="시스템 요청 대기 중..."
-                        # is_temp=True # 기능 비활성화
-                    )
-                    self.step_start_log_printed = True
+                # ✅ 실시간 URL 업데이트 (누적 버그 방지: 매번 fresh_base_url에서 재구성)
+                if hasattr(self, 'url_text_box'):
+                    fresh_base_url = self._original_base_url # 플랫폼은 초기화 시 저장된 원본 사용
+                    if hasattr(self, 'spec_config'):
+                        test_name = self.spec_config.get('test_name', self.current_spec_id).replace("/", "")
+                        base_with_scenario = fresh_base_url.rstrip('/') + "/" + test_name
+                    else:
+                        base_with_scenario = fresh_base_url.rstrip('/')
+                    
+                    api_path = api_name.lstrip('/')
+                    path = f"{base_with_scenario}/{api_path}"
+                    self.url_text_box.setText(path)
+
+                # ✅ 대기 시작 시 로그 먼저 출력 (최초 1회) - 타이머 라벨로 대체되어 주석 처리
+                # if not self.step_start_log_printed:
+                #     current_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
+                #     display_name = self.Server.message_display[self.cnt] if self.cnt < len(self.Server.message_display) else "Unknown"
+                #     self.append_monitor_log(
+                #         step_name=f"시험 API: {display_name} (시도 {self.current_retry + 1}/{current_retries})",
+                #         details="시스템 요청 대기 중..."
+                #         # is_temp=True # 기능 비활성화
+                #     )
+                #     self.step_start_log_printed = True
+                
+                # 대신 플래그만 세팅하여 중복 실행 방지
+                self.step_start_log_printed = True
 
                 Logger.debug(f" API 처리 시작: {api_name}")
 
@@ -648,17 +681,19 @@ class MyApp(PlatformMainUI):
                     else:
                         accumulated['data_parts'].append(f"\n{tmp_res_auth}")
 
-                    # ✅ 실시간 모니터링 출력
+                    # ✅ 실시간 모니터링 출력 (RECV)
                     if retry_attempt == 0:
                         self.append_monitor_log(
                             step_name=f"시험 API: {self.Server.message[self.cnt]} (시도 {retry_attempt + 1}/{current_retries})",
                             request_json=tmp_res_auth,
-                            details=f"총 {current_retries}회 검증 예정"
+                            details=f"총 {current_retries}회 검증 예정",
+                            direction="RECV"
                         )
                     else:
                         self.append_monitor_log(
                             step_name=f"시험 API (시도 {retry_attempt + 1}/{current_retries})",
-                            request_json=tmp_res_auth
+                            request_json=tmp_res_auth,
+                            direction="RECV"
                         )
 
                     accumulated['raw_data_list'].append(current_data)
@@ -887,10 +922,18 @@ class MyApp(PlatformMainUI):
                 )
                 QApplication.processEvents()
 
-                # 플랫폼은 응답 메시지 표시 안 함 (요청만 표시)
-                # self.valResult.append(f"\n📤 응답 메시지 송신 [{retry_attempt + 1}/{current_retries}]")
-                # if 'tmp_response' in locals():
-                #     self.valResult.append(tmp_response)
+                # ✅ 송신 메시지 실시간 모니터링 로그 추가 (SEND)
+                api_name = self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else "Unknown"
+                display_name = self.Server.message_display[self.cnt] if self.cnt < len(self.Server.message_display) else api_name
+                
+                # 응답 데이터 가져오기 (trace 파일에서 로드된 response_data 사용)
+                tmp_response_json = json.dumps(response_data, indent=4, ensure_ascii=False) if 'response_data' in locals() else "{}"
+                
+                self.append_monitor_log(
+                    step_name=f"{display_name} (응답)",
+                    request_json=tmp_response_json,
+                    direction="SEND"
+                )
 
                 # current_retry 증가
                 self.current_retry += 1
@@ -1168,15 +1211,18 @@ class MyApp(PlatformMainUI):
 
     def load_test_info_from_constants(self):
         """CONSTANTS.py에서 시험정보를 로드"""
+        # ✅ 그룹명이 저장되어 있으면 사용, 없으면 spec_description 사용
+        test_field = getattr(self, 'current_group_name', self.spec_description)
+
         return [
             ("기업명", self.CONSTANTS.company_name),
             ("제품명", self.CONSTANTS.product_name),
             ("버전", self.CONSTANTS.version),
             ("시험유형", self.CONSTANTS.test_category),
-            ("시험분야", self.CONSTANTS.test_target),
+            ("시험분야", test_field),  # ✅ 그룹명 사용
             ("시험범위", self.CONSTANTS.test_range),
             ("사용자 인증 방식", self.auth_type),
-            ("시험 접속 정보", self.url)
+            ("시험 접속 정보", self._original_base_url)  # ✅ 원본 base URL 사용
         ]
 
 
@@ -1501,13 +1547,19 @@ class MyApp(PlatformMainUI):
                 # 평가 점수 디스플레이 업데이트
                 self.update_score_display()
 
-                # URL 업데이트 (test_name 사용)
-                if hasattr(self, 'spec_config'):
-                    test_name = self.spec_config.get('test_name', self.current_spec_id)
-                    self.pathUrl = self.url + "/" + test_name
-                else:
-                    self.pathUrl = self.url + "/" + self.current_spec_id
+                # URL 업데이트 (base_url + 시나리오명)
+                test_name = self.spec_config.get('test_name', self.current_spec_id).replace("/", "")
+                # ✅ CONSTANTS에서 직접 읽어서 강제 초기화
+                fresh_base_url = str(getattr(self.CONSTANTS, 'url', 'https://192.168.0.10:2000'))
+                if fresh_base_url.count('/') > 2:
+                    fresh_base_url = '/'.join(fresh_base_url.split('/')[:3])
+                print(f"\n=== [시나리오 전환] URL 생성 ===")
+                print(f"CONSTANTS.url: {fresh_base_url}")
+                print(f"test_name: {test_name}")
+                self.pathUrl = fresh_base_url.rstrip('/') + "/" + test_name
+                print(f"최종 URL: {self.pathUrl}\n")
                 self.url_text_box.setText(self.pathUrl)
+                
                 self.Server.current_spec_id = self.current_spec_id
                 self.Server.num_retries = self.spec_config.get('num_retries', self.current_spec_id)
                 self.Server.trans_protocol = self.spec_config.get('trans_protocol', self.current_spec_id)
@@ -1677,12 +1729,10 @@ class MyApp(PlatformMainUI):
                 self.test_field_table.selectRow(0)
                 first_spec_id = self.index_to_spec_id.get(0)
                 Logger.debug(f" 첫 번째 시나리오 선택: spec_id={first_spec_id}")
-                # URL 생성 (test_name 사용)
-                if hasattr(self, 'spec_config'):
-                    test_name = self.spec_config.get('test_name', first_spec_id)
-                    self.pathUrl = self.url + "/" + test_name
-                else:
-                    self.pathUrl = self.url + "/" + first_spec_id
+                # URL 업데이트 (base_url + 시나리오명)
+                test_name = self.spec_config.get('test_name', first_spec_id).replace("/", "")
+                # ✅ 원본 base URL만 사용 (절대 오염되지 않음)
+                self.pathUrl = self._original_base_url.rstrip('/') + "/" + test_name
 
                 self.Server.current_spec_id = first_spec_id
                 self.Server.num_retries = self.spec_config.get('num_retries', first_spec_id)
@@ -1813,6 +1863,22 @@ class MyApp(PlatformMainUI):
                 QApplication.processEvents()  # 스피너 애니메이션 유지
                 self.current_spec_id = spec_id
                 self.load_specs_from_constants()
+                
+                # ✅ URL 초기화 (base_url + 시나리오명) - API 경로 누적 방지
+                if hasattr(self, 'url_text_box') and hasattr(self, 'spec_config'):
+                    test_name = self.spec_config.get('test_name', self.current_spec_id).replace("/", "")
+                    # ✅ CONSTANTS에서 직접 읽어서 강제 초기화 (절대적으로 안전)
+                    fresh_base_url = str(getattr(self.CONSTANTS, 'url', 'https://192.168.0.10:2000'))
+                    # 혹시 모를 경로 포함 제거
+                    if fresh_base_url.count('/') > 2:
+                        fresh_base_url = '/'.join(fresh_base_url.split('/')[:3])
+                    print(f"\n=== [시험 시작] URL 생성 ===")
+                    print(f"CONSTANTS.url: {fresh_base_url}")
+                    print(f"test_name: {test_name}")
+                    self.pathUrl = fresh_base_url.rstrip('/') + "/" + test_name
+                    print(f"최종 URL: {self.pathUrl}\n")
+                    self.url_text_box.setText(self.pathUrl)
+                
                 QApplication.processEvents()  # 스피너 애니메이션 유지
                 self.run_single_spec_test()
                 QApplication.processEvents()  # 스피너 애니메이션 유지
@@ -2106,12 +2172,13 @@ class MyApp(PlatformMainUI):
 
             # ✅ 20. 서버 시작
             Logger.debug(f" 서버 시작 준비")
-            url = self.url.split(":")
-            address_port = int(url[-1])
+            # ✅ 원본 base URL에서 포트 추출
+            url_parts = self._original_base_url.split(":")
+            address_port = int(url_parts[-1])
             # ✅ 0.0.0.0으로 바인딩 (모든 네트워크 인터페이스에서 수신)
             address_ip = "0.0.0.0"
 
-            Logger.debug(f" 플랫폼 서버 시작: {address_ip}:{address_port} (외부 접근: {self.url})")
+            Logger.debug(f" 플랫폼 서버 시작: {address_ip}:{address_port} (외부 접근: {self._original_base_url})")
             self.server_th = server_th(handler_class=self.Server, address=address_ip, port=address_port)
             self.server_th.start()
 
@@ -2544,12 +2611,19 @@ class MyApp(PlatformMainUI):
         else:
             self.r2 = "None"
 
-        # ✅ URL 업데이트 (test_name 사용) - spec_config가 로드된 후 실행
-        if hasattr(self, 'spec_config') and hasattr(self, 'url_text_box'):
-            test_name = self.spec_config.get('test_name', self.current_spec_id)
-            self.pathUrl = self.url + "/" + test_name
+        # ✅ URL 업데이트 (base_url + 시나리오명) - spec_config가 로드된 후 실행
+        if hasattr(self, 'url_text_box'):
+            test_name = self.spec_config.get('test_name', self.current_spec_id).replace("/", "")
+            # ✅ CONSTANTS에서 직접 읽어서 강제 초기화
+            fresh_base_url = str(getattr(self.CONSTANTS, 'url', 'https://192.168.0.10:2000'))
+            if fresh_base_url.count('/') > 2:
+                fresh_base_url = '/'.join(fresh_base_url.split('/')[:3])
+            print(f"\n=== [get_setting] URL 생성 ===")
+            print(f"CONSTANTS.url: {fresh_base_url}")
+            print(f"test_name: {test_name}")
+            self.pathUrl = fresh_base_url.rstrip('/') + "/" + test_name
+            print(f"최종 URL: {self.pathUrl}\n")
             self.url_text_box.setText(self.pathUrl)
-            Logger.debug(f" 시험 URL 업데이트: {self.pathUrl}")
 
     def closeEvent(self, event):
         """창 닫기 이벤트 - 서버 스레드 정리"""

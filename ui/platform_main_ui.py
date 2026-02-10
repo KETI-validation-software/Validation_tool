@@ -1065,10 +1065,14 @@ class PlatformMainUI(CommonMainUI):
             self.tableWidget.setCellWidget(self.cnt, 1, icon_widget)
             setattr(self, f"step{self.cnt + 1}_msg", msg)
 
-    def append_monitor_log(self, step_name, request_json="", result_status="진행중", score=None, details="", is_temp=False):
+    def append_monitor_log(self, step_name, request_json="", result_status="진행중", score=None, details="", is_temp=False, direction="RECV"):
         """
         Qt 호환성이 보장된 HTML 테이블 구조 로그 출력 함수
         """
+        # placeholder 숨기기
+        if hasattr(self, 'placeholder_label') and self.placeholder_label.isVisible():
+            self.placeholder_label.hide()
+
         # ✅ 이전에 임시 로그(헤더+내용)가 있었다면 삭제
         if getattr(self, 'has_temp_log', False):
             doc = self.valResult.document()
@@ -1110,6 +1114,74 @@ class PlatformMainUI(CommonMainUI):
         # ✅ UI 표시용: transProtocolDesc 하드코딩 치환
         if request_json:
             request_json = replace_transport_desc_for_display(request_json)
+
+        # 타임스탬프
+        timestamp = datetime.now().strftime("%H:%M:%S")
+
+        # 방향에 따른 스타일 및 아이콘 설정
+        if direction == "SEND":
+            header_color = "#1D4ED8"  # Blue-700
+            bg_color = "#F0F9FF"      # Blue-50
+            icon = "📤"
+            type_label = "SEND"
+        else:
+            header_color = "#1B1B1C"  # 기본 검정
+            bg_color = "#F9FAFB"      # Gray-50
+            icon = "📥"
+            type_label = "RECV"
+
+        # 점수에 따른 색상 보정 (RECV인 경우만 적용)
+        if direction == "RECV" and score is not None:
+            if score >= 100:
+                header_color = "#10b981"  # 녹색
+            else:
+                header_color = "#ef4444"  # 빨강
+
+        # 1. 헤더 영역 구성
+        html_content = f"""
+        <table width="100%" border="0" cellspacing="0" cellpadding="8" style="margin-top: 10px; background-color: {bg_color}; border-top: 2px solid {header_color};">
+            <tr>
+                <td valign="middle">
+                    <span style="font-size: 19px; font-weight: bold; color: {header_color}; font-family: 'Noto Sans KR';">{icon} [{type_label}] {step_name}</span>
+                    <span style="font-size: 15px; color: #9ca3af; font-family: 'Consolas', monospace; margin-left: 10px;">{timestamp}</span>
+                </td>
+            </tr>
+        </table>
+        """
+
+        # 2. 내용 영역
+        if request_json or details:
+            html_content += f"""
+            <table width="100%" border="0" cellspacing="0" cellpadding="10" style="background-color: #FFFFFF; border: 1px solid #E5E7EB; border-top: none; margin-bottom: 10px;">
+                <tr>
+                    <td>
+            """
+            
+            if details:
+                html_content += f'<div style="font-size: 17px; color: #4B5563; margin-bottom: 8px; font-family: \'Noto Sans KR\';">{details}</div>'
+            
+            if request_json:
+                html_content += f'<pre style="font-size: 16px; color: #1F2937; background-color: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 4px; padding: 10px; font-family: \'Consolas\', monospace;">{request_json}</pre>'
+            
+            if direction == "RECV" and score is not None:
+                score_text_color = "#10b981" if score >= 100 else "#ef4444"
+                html_content += f'<div style="font-size: 17px; font-weight: bold; color: {score_text_color}; margin-top: 8px; font-family: \'Noto Sans KR\';">평가 점수: {score}%</div>'
+
+            html_content += """
+                    </td>
+                </tr>
+            </table>
+            """
+
+        self.valResult.append(html_content)
+        
+        # 자동 스크롤
+        self.valResult.verticalScrollBar().setValue(
+            self.valResult.verticalScrollBar().maximum()
+        )
+
+        if is_temp:
+            self.has_temp_log = True
 
         # 타임스탬프
         timestamp = datetime.now().strftime("%H:%M:%S")

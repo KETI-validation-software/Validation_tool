@@ -671,9 +671,14 @@ class ResultPageWidget(QWidget):
                 self.current_spec_id = None
                 Logger.debug(f"[RESULT DEBUG] ✨ 그룹 변경으로 current_spec_id 초기화")
 
-            # ✅ 그룹 ID 저장
+            # ✅ 그룹 ID 및 그룹명 저장
             self.parent.current_group_id = new_group_id
+            self.parent.current_group_name = group_name  # ✅ 그룹명 저장
+
             self.test_selection_panel.update_test_field_table(selected_group)
+
+            # ✅ 시험 정보 업데이트
+            self.update_test_info()
 
     def on_test_field_selected(self, row, col):
         """시나리오 선택 시 해당 결과 표시 (결과 없어도 API 정보 표시)"""
@@ -767,11 +772,17 @@ class ResultPageWidget(QWidget):
                 self.reload_result_table(saved_data)
                 self.update_score_displays(saved_data)
 
+                # ✅ 시험 정보 업데이트
+                self.update_test_info()
+
                 Logger.debug(f" {selected_spec_id} 저장된 결과 로드 완료")
             else:
                 # 결과가 없으면 빈 테이블 표시
                 Logger.debug(f" {selected_spec_id} 결과 없음 - 빈 테이블 표시")
                 self.show_empty_result_table()
+
+                # ✅ 시험 정보 업데이트
+                self.update_test_info()
 
         except Exception as e:
             Logger.error(f" 시나리오 전환 실패: {e}")
@@ -1072,9 +1083,9 @@ class ResultPageWidget(QWidget):
         info_text = "\n".join([f"{label}: {value}" for label, value in test_info])
 
         # ✅ 한 개의 라벨로 출력
-        info_label = QLabel(info_text)
-        info_label.setWordWrap(True)  # 줄바꿈 자동 처리
-        info_label.setStyleSheet("""
+        self.info_label = QLabel(info_text)  # ✅ 멤버 변수로 저장
+        self.info_label.setWordWrap(True)  # 줄바꿈 자동 처리
+        self.info_label.setStyleSheet("""
             font-family: "Noto Sans KR";
             font-size: 16px;
             font-weight: 400;
@@ -1083,7 +1094,7 @@ class ResultPageWidget(QWidget):
             border: none;
         """)
 
-        layout.addWidget(info_label)
+        layout.addWidget(self.info_label)
         layout.addStretch()
         info_widget.setLayout(layout)
 
@@ -1455,6 +1466,23 @@ class ResultPageWidget(QWidget):
             container.setLayout(layout)
 
             self.tableWidget.setCellWidget(row, 8, container)
+
+    def update_test_info(self):
+        """시험 정보 업데이트 (시나리오 선택 시 호출)"""
+        if not hasattr(self, 'info_label'):
+            Logger.warning("info_label이 없습니다. 시험 정보를 업데이트할 수 없습니다.")
+            return
+
+        # ✅ 시험 정보 다시 불러오기
+        test_info = self.parent.load_test_info_from_constants()
+
+        # ✅ 시험 정보를 한 개의 문자열로 합치기
+        info_text = "\n".join([f"{label}: {value}" for label, value in test_info])
+
+        # ✅ 라벨 텍스트 업데이트
+        self.info_label.setText(info_text)
+
+        Logger.debug(f"[RESULT DEBUG] 시험 정보 업데이트 완료")
 
     def _create_spec_score_display(self):
         """시험 분야별 점수 표시"""

@@ -9,11 +9,13 @@
   },
   "testGroups": [
     {
-      "id": "cmjcegnpz070mcfb3wbzift18",
-      "name": "기본 기능 시험-보안용 센서 시스템",
-      "testRange": "전체 필드",
+      "id": "cmjcefmh8070gcfb35wjptcsl",
+      "name": "기본 기능 시험-영상보안시스템",
+      "testRange": "전체 필드, 전체 필드, 전체 필드",
       "testSpecIds": [
-        "cmii7wfuf006i8z1tcds6q69g"
+        "cmii7wfuf006i8z1tcds6q69g",
+        "cmii7w683006h8z1t7usnin5g",
+        "cmii7v8pr006g8z1tvo55a50u"
       ]
     }
   ],
@@ -27,7 +29,7 @@
   },
   "testResult": [
     {
-      "testGroup": "cmjcegnpz070mcfb3wbzift18",
+      "testGroup": "cmjcefmh8070gcfb35wjptcsl",
       "testSpecId": "cmii7wfuf006i8z1tcds6q69g",
       "testSpecName": "sensor001",
       "score": 83.72,
@@ -247,14 +249,14 @@
                 "sensorDeviceList": [
                   {
                     "sensorDeviceID": "iot0001",
-                    "eventName": "Leak",
-                    "eventTime": 8992697300304259,
+                    "eventName": "MotionDetection",
+                    "eventTime": 3129996244857647,
                     "eventDesc": "100도"
                   },
                   {
                     "sensorDeviceID": "iot0002",
-                    "eventName": "Leak",
-                    "eventTime": 5239174278186052,
+                    "eventName": "MotionDetection",
+                    "eventTime": 7374512551295885,
                     "eventDesc": "100도"
                   }
                 ]
@@ -270,5 +272,5 @@
       ]
     }
   ],
-  "completedDate": "2026-01-28T08:19:47Z"
+  "completedDate": "2026-02-10T04:03:05Z"
 }

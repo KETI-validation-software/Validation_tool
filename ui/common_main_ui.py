@@ -264,16 +264,33 @@ class CommonMainUI(QWidget):
         monitor_section_layout.setSpacing(0)
 
         # 송수신 메시지 실시간 모니터링 라벨 (1064 × 24, 20px Medium)
+        monitor_header_container = QWidget()
+        monitor_header_container.setFixedSize(1064, 24)
+        monitor_header_layout = QHBoxLayout(monitor_header_container)
+        monitor_header_layout.setContentsMargins(0, 0, 0, 0)
+        monitor_header_layout.setSpacing(0)
+
         self.monitor_label = QLabel("송수신 메시지 실시간 모니터링")
-        self.monitor_label.setFixedSize(1064, 24)
-        self.original_monitor_label_size = (1064, 24)
         self.monitor_label.setStyleSheet("""
             font-size: 20px;
             font-family: "Noto Sans KR";
             font-weight: 500;
             color: #000000;
         """)
-        monitor_section_layout.addWidget(self.monitor_label)
+        monitor_header_layout.addWidget(self.monitor_label)
+
+        # ✅ 전용 타이머 라벨 추가 (우측 상단 고정, 인플레이스 업데이트용)
+        self.countdown_timer_label = QLabel("")
+        self.countdown_timer_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self.countdown_timer_label.setStyleSheet("""
+            font-size: 18px;
+            font-family: "Noto Sans KR";
+            font-weight: 500;
+            color: #EF4444;  /* Red-500 */
+        """)
+        monitor_header_layout.addWidget(self.countdown_timer_label)
+        
+        monitor_section_layout.addWidget(monitor_header_container)
 
         # 8px gap
         monitor_section_layout.addSpacing(8)
@@ -1126,13 +1143,19 @@ class CommonMainUI(QWidget):
 
 
 
-    def append_monitor_log(self, step_name, request_json="", result_status="진행중", score=None, details=""):
+    def append_monitor_log(self, step_name, request_json="", result_status="진행중", score=None, details="", direction="RECV"):
         """
-        Qt 호환성이 보장된 HTML 테이블 구조 로그 출력 함수
+        송수신 메시지를 실시간 모니터링 영역에 추가 (통합 타임라인 뷰)
+        Args:
+            direction: "SEND" (보내는 메시지) 또는 "RECV" (받는 메시지)
         """
         from datetime import datetime
         import html
         from core.utils import replace_transport_desc_for_display
+
+        # placeholder 숨기기
+        if hasattr(self, 'placeholder_label') and self.placeholder_label.isVisible():
+            self.placeholder_label.hide()
 
         # ✅ UI 표시용: transProtocolDesc 하드코딩 치환
         if request_json:
@@ -1141,36 +1164,68 @@ class CommonMainUI(QWidget):
         # 타임스탬프
         timestamp = datetime.now().strftime("%H:%M:%S")
 
-        # 점수에 따른 색상 결정
-        if score is not None:
-            if score >= 100:
-                node_color = "#10b981"  # 녹색
-                text_color = "#10b981"  # 녹색 텍스트
-            else:
-                node_color = "#ef4444"  # 빨강
-                text_color = "#ef4444"  # 빨강 텍스트
+        # 방향에 따른 스타일 및 아이콘 설정
+        if direction == "SEND":
+            header_color = "#1D4ED8"  # Blue-700
+            bg_color = "#F0F9FF"      # Blue-50
+            icon = "📤"
+            type_label = "SEND"
         else:
-            node_color = "#6b7280"  # 회색
-            text_color = "#333"  # 기본 검정
+            header_color = "#1B1B1C"  # 기본 검정
+            bg_color = "#F9FAFB"      # Gray-50
+            icon = "📥"
+            type_label = "RECV"
 
-        # 1. 헤더 (Step 이름 + 시간) - Table로 블록 분리
+        # 점수에 따른 색상 보정 (RECV인 경우만 적용)
+        if direction == "RECV" and score is not None:
+            if score >= 100:
+                header_color = "#10b981"  # 녹색
+            else:
+                header_color = "#ef4444"  # 빨강
+
+        # 1. 헤더 영역 구성
         html_content = f"""
-        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 15px;">
+        <table width="100%" border="0" cellspacing="0" cellpadding="8" style="margin-top: 10px; background-color: {bg_color}; border-top: 2px solid {header_color};">
             <tr>
                 <td valign="middle">
-                    <span style="font-size: 20px; font-weight: bold; color: {text_color}; font-family: 'Noto Sans KR';">{step_name}</span>
-                    <span style="font-size: 16px; color: #9ca3af; font-family: 'Consolas', monospace; margin-left: 8px;">{timestamp}</span>
+                    <span style="font-size: 19px; font-weight: bold; color: {header_color}; font-family: 'Noto Sans KR';">{icon} [{type_label}] {step_name}</span>
+                    <span style="font-size: 15px; color: #9ca3af; font-family: 'Consolas', monospace; margin-left: 10px;">{timestamp}</span>
                 </td>
             </tr>
         </table>
         """
 
-        # 2. 내용 영역
-        html_content += f"""
-        <table width="100%" border="0" cellspacing="0" cellpadding="0">
-            <tr>
-                <td>
-        """
+        # 2. 내용 영역 (JSON 데이터 등)
+        if request_json or details:
+            html_content += f"""
+            <table width="100%" border="0" cellspacing="0" cellpadding="10" style="background-color: #FFFFFF; border: 1px solid #E5E7EB; border-top: none; margin-bottom: 10px;">
+                <tr>
+                    <td>
+            """
+            
+            if details:
+                html_content += f'<div style="font-size: 17px; color: #4B5563; margin-bottom: 8px; font-family: \'Noto Sans KR\';">{details}</div>'
+            
+            if request_json:
+                html_content += f'<pre style="font-size: 16px; color: #1F2937; background-color: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 4px; padding: 10px; font-family: \'Consolas\', monospace;">{request_json}</pre>'
+            
+            if direction == "RECV" and score is not None:
+                score_text_color = "#10b981" if score >= 100 else "#ef4444"
+                html_content += f'<div style="font-size: 17px; font-weight: bold; color: {score_text_color}; margin-top: 8px; font-family: \'Noto Sans KR\';">평가 점수: {score}%</div>'
+
+            html_content += """
+                    </td>
+                </tr>
+            </table>
+            """
+
+        # valResult에 추가
+        self.valResult.append(html_content)
+        
+        # 스크롤을 맨 아래로 이동
+        self.valResult.verticalScrollBar().setValue(
+            self.valResult.verticalScrollBar().maximum()
+        )
 
         # 2-1. 상세 내용 (Details)
         if details:
@@ -1503,6 +1558,27 @@ class CommonMainUI(QWidget):
         total_group.setLayout(total_layout)
 
         return total_group
+    
+    def update_last_line_timer(self, text, remove=False):
+        """
+        전용 타이머 라벨을 업데이트하거나 초기화 (In-place update)
+        Args:
+            text: 표시할 타이머 텍스트 (예: "남은 대기 시간: 5초")
+            remove: True이면 타이머 텍스트 제거
+        """
+        from PyQt5.QtWidgets import QApplication
+        
+        if not hasattr(self, 'countdown_timer_label'):
+            return
+
+        if remove or not text:
+            self.countdown_timer_label.setText("")
+        else:
+            # 우측 상단 라벨에 텍스트 업데이트 (로그 창 외부)
+            self.countdown_timer_label.setText(f"⏳ {text}")
+        
+        # UI 즉시 갱신 반영
+        QApplication.processEvents()
 
 
 

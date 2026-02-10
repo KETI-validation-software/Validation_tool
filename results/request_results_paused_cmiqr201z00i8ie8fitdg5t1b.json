@@ -1,0 +1,196 @@
+{
+  "timestamp": "2026-02-10 11:49:04",
+  "last_completed_api_index": 2,
+  "step_buffers": [
+    {
+      "data": "{\n    \"userID\": \"kisa\",\n    \"userPW\": \"kisa_k1!2@\"\n}",
+      "error": "오류가 없습니다.",
+      "result": "PASS",
+      "raw_data_list": [
+        {
+          "userID": "kisa",
+          "userPW": "kisa_k1!2@"
+        }
+      ],
+      "events": [
+        {
+          "time": "2026-02-10T02:48:53.978814Z",
+          "api": "Authentication",
+          "dir": "REQUEST",
+          "data": {
+            "userID": "kisa",
+            "userPW": "kisa_k1!2@"
+          }
+        },
+        {
+          "time": "2026-02-10T02:48:53.982813Z",
+          "api": "Authentication",
+          "dir": "RESPONSE",
+          "data": {
+            "code": "200",
+            "message": "성공",
+            "userName": "관리자",
+            "userAff": "오산시",
+            "accessToken": "abcde1234"
+          }
+        }
+      ]
+    },
+    {
+      "data": "{}",
+      "error": "오류가 없습니다.",
+      "result": "PASS",
+      "raw_data_list": [
+        {}
+      ],
+      "events": [
+        {
+          "time": "2026-02-10T02:48:57.462078Z",
+          "api": "Capabilities",
+          "dir": "REQUEST",
+          "data": {}
+        },
+        {
+          "time": "2026-02-10T02:48:57.467080Z",
+          "api": "Capabilities",
+          "dir": "RESPONSE",
+          "data": {
+            "code": "",
+            "message": "",
+            "transportSupport": [
+              {
+                "transProtocolType": "LongPolling",
+                "transProtocolDesc": "none"
+              },
+              {
+                "transProtocolType": "Webhook",
+                "transProtocolDesc": "none"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "data": "{}",
+      "error": "오류가 없습니다.",
+      "result": "PASS",
+      "raw_data_list": [
+        {}
+      ],
+      "events": [
+        {
+          "time": "2026-02-10T02:49:00.389766Z",
+          "api": "SensorDeviceProfiles",
+          "dir": "REQUEST",
+          "data": {}
+        },
+        {
+          "time": "2026-02-10T02:49:00.395765Z",
+          "api": "SensorDeviceProfiles",
+          "dir": "RESPONSE",
+          "data": {
+            "code": "",
+            "message": "",
+            "sensorDeviceList": [
+              {
+                "sensorDeviceID": "iot0001",
+                "sensorDeviceType": "홍채인식",
+                "sensorDeviceName": "홍채 센서",
+                "sensorDeviceLoc": {
+                  "lon": "12",
+                  "lat": "233",
+                  "alt": "122",
+                  "desc": "복도"
+                }
+              },
+              {
+                "sensorDeviceID": "iot0002",
+                "sensorDeviceType": "온도",
+                "sensorDeviceName": "온도센서",
+                "sensorDeviceLoc": {
+                  "lon": "24",
+                  "lat": "367",
+                  "alt": "234",
+                  "desc": "출입구"
+                }
+              },
+              {
+                "sensorDeviceID": "iot0003",
+                "sensorDeviceType": "지문",
+                "sensorDeviceName": "지문센서",
+                "sensorDeviceLoc": {
+                  "lon": "486",
+                  "lat": "54",
+                  "alt": "6",
+                  "desc": "후문"
+                }
+              },
+              {
+                "sensorDeviceID": "iot0004",
+                "sensorDeviceType": "온도",
+                "sensorDeviceName": "온도센서",
+                "sensorDeviceLoc": {
+                  "lon": "123",
+                  "lat": "42",
+                  "alt": "55",
+                  "desc": "복도"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "data": "",
+      "error": "",
+      "result": "PASS",
+      "raw_data_list": []
+    },
+    {
+      "data": "",
+      "error": "",
+      "result": "PASS",
+      "raw_data_list": []
+    }
+  ],
+  "step_pass_counts": [
+    2,
+    1,
+    1,
+    0,
+    0
+  ],
+  "step_error_counts": [
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "step_opt_pass_counts": [
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "step_opt_error_counts": [
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "total_pass_cnt": 4,
+  "total_error_cnt": 0,
+  "total_opt_pass_cnt": 0,
+  "total_opt_error_cnt": 0,
+  "valResult_text": "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\np, li { white-space: pre-wrap; }\n</style></head><body style=\" font-family:'Noto Sans KR'; font-size:32px; font-weight:400; font-style:normal;\">\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:15px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td style=\" vertical-align:middle;\">\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:20px; font-weight:600; color:#333333;\">시험 시작</span> <span style=\" font-family:'Consolas','monospace'; font-size:16px; color:#9ca3af;\">11:48:35</span> </p></td></tr></table>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td>\n<p style=\" margin-top:0px; margin-bottom:8px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; color:#6b7280;\">API 개수: 5개 </span></p></td></tr></table>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:15px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td style=\" vertical-align:middle;\">\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:20px; font-weight:600; color:#333333;\">시험 API: Authentication (시도 1/1)</span> <span style=\" font-family:'Consolas','monospace'; font-size:16px; color:#9ca3af;\">11:48:39</span> </p></td></tr></table>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td>\n<p style=\" margin-top:0px; margin-bottom:8px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; color:#6b7280;\">시스템 요청 대기 중... </span></p></td></tr></table>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:15px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td style=\" vertical-align:middle;\">\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:20px; font-weight:600; color:#333333;\">시험 API: Authentication</span> <span style=\" font-family:'Consolas','monospace'; font-size:16px; color:#9ca3af;\">11:48:54</span> </p></td></tr></table>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td>\n<p style=\" margin-top:0px; margin-bottom:8px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; color:#6b7280;\">총 1회 검증 예정 </span></p></td></tr></table>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:15px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td style=\" vertical-align:middle;\">\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:20px; font-weight:600; color:#333333;\">시험 API: Authentication (시도 1/1)</span> <span style=\" font-family:'Consolas','monospace'; font-size:16px; color:#9ca3af;\">11:48:54</span> </p></td></tr></table>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td>\n<p style=\" margin-top:0px; margin-bottom:8px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; color:#6b7280;\">총 1회 검증 예정 </span></p>\n<p style=\" margin-top:5px; margin-bottom:4px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:15px; font-weight:600; color:#9ca3af;\">📦 데이터</span> </p>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">{</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">    &quot;userID&quot;: &quot;kisa&quot;,</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">    &quot;userPW&quot;: &quot;kisa_k1!2@&quot;</span></pre>\n<pre style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; background-color:#f9fafb;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; color:#1f2937;\">}</span> </pre></td></tr></table>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:15px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td style=\" vertical-align:middle;\">\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:20px; font-weight:600; color:#10b981;\">시험 API 결과: Authentication (1회 검증 완료)</span> <span style=\" font-family:'Consolas','monospace'; font-size:16px; color:#9ca3af;\">11:48:54</span> </p></td></tr></table>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td>\n<p style=\" margin-top:0px; margin-bottom:8px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; color:#6b7280;\">통과 필드 수: 2, 실패 필드 수: 0 | 일반 메시지 </span></p>\n<p style=\" margin-top:5px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; font-weight:600; color:#6b7280;\">점수: 100.0% </span></p></td></tr></table>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:15px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td style=\" vertical-align:middle;\">\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:20px; font-weight:600; color:#333333;\">시험 API: Capabilities (시도 1/1)</span> <span style=\" font-family:'Consolas','monospace'; font-size:16px; color:#9ca3af;\">11:48:56</span> </p></td></tr></table>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td>\n<p style=\" margin-top:0px; margin-bottom:8px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; color:#6b7280;\">시스템 요청 대기 중... </span></p></td></tr></table>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:15px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td style=\" vertical-align:middle;\">\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:20px; font-weight:600; color:#333333;\">시험 API: Capabilities</span> <span style=\" font-family:'Consolas','monospace'; font-size:16px; color:#9ca3af;\">11:48:57</span> </p></td></tr></table>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td>\n<p style=\" margin-top:0px; margin-bottom:8px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; color:#6b7280;\">총 1회 검증 예정 </span></p></td></tr></table>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:15px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td style=\" vertical-align:middle;\">\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:20px; font-weight:600; color:#10b981;\">시험 API 결과: Capabilities (1회 검증 완료)</span> <span style=\" font-family:'Consolas','monospace'; font-size:16px; color:#9ca3af;\">11:48:57</span> </p></td></tr></table>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td>\n<p style=\" margin-top:0px; margin-bottom:8px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; color:#6b7280;\">통과 필드 수: 3, 실패 필드 수: 0 | 일반 메시지 </span></p>\n<p style=\" margin-top:5px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; font-weight:600; color:#6b7280;\">점수: 100.0% </span></p></td></tr></table>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:15px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td style=\" vertical-align:middle;\">\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:20px; font-weight:600; color:#333333;\">시험 API: SensorDeviceProfiles (시도 1/1)</span> <span style=\" font-family:'Consolas','monospace'; font-size:16px; color:#9ca3af;\">11:48:59</span> </p></td></tr></table>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td>\n<p style=\" margin-top:0px; margin-bottom:8px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; color:#6b7280;\">시스템 요청 대기 중... </span></p></td></tr></table>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:15px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td style=\" vertical-align:middle;\">\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:20px; font-weight:600; color:#333333;\">시험 API: SensorDeviceProfiles</span> <span style=\" font-family:'Consolas','monospace'; font-size:16px; color:#9ca3af;\">11:49:00</span> </p></td></tr></table>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td>\n<p style=\" margin-top:0px; margin-bottom:8px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; color:#6b7280;\">총 1회 검증 예정 </span></p></td></tr></table>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:15px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td style=\" vertical-align:middle;\">\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:20px; font-weight:600; color:#10b981;\">시험 API 결과: SensorDeviceProfiles (1회 검증 완료)</span> <span style=\" font-family:'Consolas','monospace'; font-size:16px; color:#9ca3af;\">11:49:00</span> </p></td></tr></table>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td>\n<p style=\" margin-top:0px; margin-bottom:8px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; color:#6b7280;\">통과 필드 수: 4, 실패 필드 수: 0 | 일반 메시지 </span></p>\n<p style=\" margin-top:5px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:'Consolas','monospace'; font-size:18px; font-weight:600; color:#6b7280;\">점수: 100.0% </span></p></td></tr></table>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:15px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td style=\" vertical-align:middle;\">\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:20px; font-weight:600; color:#333333;\">시험 API: SensorDeviceControl (시도 1/1)</span> <span style=\" font-family:'Consolas','monospace'; font-size:16px; color:#9ca3af;\">11:49:02</span> </p></td></tr></table>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td>\n<p style=\" margin-top:0px; margin-bottom:8px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; color:#6b7280;\">시스템 요청 대기 중... </span></p></td></tr></table>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<p style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; color:#6b7280;\">검증 절차가 중지되었습니다.</span></p>\n<p style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; color:#6b7280;\">(마지막 완료 API: 3번째, 다음 재시작 시 4번째 API부터 이어서 실행)</span></p>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:15px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td style=\" vertical-align:middle;\">\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:20px; font-weight:600; color:#333333;\">진행 상황 저장 완료</span> <span style=\" font-family:'Consolas','monospace'; font-size:16px; color:#9ca3af;\">11:49:04</span> </p></td></tr></table>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n<td>\n<p style=\" margin-top:0px; margin-bottom:8px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; color:#6b7280;\">C:\\validation\\Validation_tool2\\results\\request_results.json (일시정지 시점까지의 결과가 저장되었습니다) </span></p></td></tr></table>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<p style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; color:#6b7280;\">검증 절차가 중지되었습니다.</span></p></body></html>",
+  "current_spec_id": "cmiqr201z00i8ie8fitdg5t1b",
+  "global_pass_cnt": 4,
+  "global_error_cnt": 0,
+  "global_opt_pass_cnt": 0,
+  "global_opt_error_cnt": 0
+}
