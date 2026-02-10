@@ -1,62 +1,99 @@
 # Authentication
-cmiqr2b9j00i9ie8frw439h8i_Authentication_out_validation = {}
+cmii7wfuf006i8z1tcds6q69g_Authentication_out_validation = {}
 
 # Capabilities
-cmiqr2b9j00i9ie8frw439h8i_Capabilities_out_validation = {}
+cmii7wfuf006i8z1tcds6q69g_Capabilities_out_validation = {}
 
 # SensorDeviceProfiles
-cmiqr2b9j00i9ie8frw439h8i_SensorDeviceProfiles_out_validation = {}
+cmii7wfuf006i8z1tcds6q69g_SensorDeviceProfiles_out_validation = {}
 
-# SensorDeviceControl
-cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl_out_validation = {
-  "sensorDeviceID": {
+# RealtimeSensorData
+cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_out_validation = {}
+
+# RealtimeSensorData WebHook IN Validation
+cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_webhook_in_validation = {
+  "sensorDeviceList.sensorDeviceID": {
     "enabled": True,
-    "validationType": "request-field-match",
-    "referenceFieldId": "cmisfqqxc07ub5vy7ao1d67bu",
+    "validationType": "request-field-list-match",
+    "referenceFieldId": "cmiwuxvls0cj1p002zte0s84o",
     "referenceField": "sensorDeviceID",
-    "referenceEndpoint": "/SensorDeviceControl",
+    "referenceEndpoint": "/RealtimeSensorData",
+    "score": 0
+  }
+}
+
+# RealtimeSensorEventInfos
+cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_out_validation = {}
+
+# RealtimeSensorEventInfos WebHook IN Validation
+cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_webhook_in_validation = {
+  "sensorDeviceList.sensorDeviceID": {
+    "enabled": True,
+    "validationType": "request-field-list-match",
+    "referenceFieldId": "cmj6feinr01aixei0iwq8v8ia",
+    "referenceField": "sensorDeviceID",
+    "referenceEndpoint": "/RealtimeSensorEventInfos",
     "score": 0
   },
-  "sensorDeviceStatus": {
+  "sensorDeviceList.eventName": {
     "enabled": True,
-    "validationType": "valid-value-match",
-    "validValueMatchType": "validation-field",
-    "validValueFieldName": "sensorControl",
-    "validValueOperator": "equalsAny",
+    "validationType": "request-field-match",
+    "referenceFieldId": "cmj6fdgsb0184xei0mr9kacqd",
+    "referenceField": "eventFilter",
+    "referenceEndpoint": "/RealtimeSensorEventInfos",
+    "score": 0
+  },
+  "sensorDeviceList.eventTime": {
+    "enabled": True,
+    "validationType": "range-match",
+    "rangeMin": 20251105163010124,
+    "rangeMax": 20251105163010124,
+    "rangeOperator": "between",
+    "score": 0
+  }
+}
+
+# StoredSensorEventInfos
+cmii7wfuf006i8z1tcds6q69g_StoredSensorEventInfos_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
     "allowedValues": [
-      "AlarmOn",
-      "AlarmOff"
+      "201"
     ],
     "score": 0
-  }
-}
-
-# SensorDeviceControl2
-cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl2_out_validation = {
-  "sensorDeviceID": {
+  },
+  "message": {
     "enabled": True,
-    "validationType": "request-field-match",
-    "referenceFieldId": "cmisg8fmw08c55vy7eby9fson",
-    "referenceField": "sensorDeviceID",
-    "referenceEndpoint": "/SensorDeviceControl2",
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "정보 없음"
+    ],
     "score": 0
   },
-  "sensorDeviceStatus": {
+  "sensorDeviceList.sensorDeviceID": {
     "enabled": True,
-    "validationType": "request-field-match",
-    "referenceFieldId": "cmisg8hg208ca5vy7ijzfeelo",
-    "referenceField": "commandType",
-    "referenceEndpoint": "/SensorDeviceControl2",
+    "validationType": "request-field-list-match",
+    "referenceFieldId": "cmixtx2dx0dlwp002gtco28w8",
+    "referenceField": "sensorDeviceID",
+    "referenceEndpoint": "/StoredSensorEventInfos",
     "score": 0
   }
 }
 
-# cmiqr2b9j00i9ie8frw439h8i 검증 리스트
-cmiqr2b9j00i9ie8frw439h8i_outValidation = [
-    cmiqr2b9j00i9ie8frw439h8i_Authentication_out_validation,
-    cmiqr2b9j00i9ie8frw439h8i_Capabilities_out_validation,
-    cmiqr2b9j00i9ie8frw439h8i_SensorDeviceProfiles_out_validation,
-    cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl_out_validation,
-    cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl2_out_validation,
+# cmii7wfuf006i8z1tcds6q69g WebHook 검증 리스트
+cmii7wfuf006i8z1tcds6q69g_webhook_inValidation = [
+    cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_webhook_in_validation,
+    cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_webhook_in_validation,
+]
+
+# cmii7wfuf006i8z1tcds6q69g 검증 리스트
+cmii7wfuf006i8z1tcds6q69g_outValidation = [
+    cmii7wfuf006i8z1tcds6q69g_Authentication_out_validation,
+    cmii7wfuf006i8z1tcds6q69g_Capabilities_out_validation,
+    cmii7wfuf006i8z1tcds6q69g_SensorDeviceProfiles_out_validation,
+    cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_out_validation,
+    cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_out_validation,
+    cmii7wfuf006i8z1tcds6q69g_StoredSensorEventInfos_out_validation,
 ]
 

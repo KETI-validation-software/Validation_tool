@@ -2,7 +2,7 @@ from json_checker import OptionalKey
 
 
 # Authentication
-cmiqr2b9j00i9ie8frw439h8i_Authentication_out_schema = {
+cmii7wfuf006i8z1tcds6q69g_Authentication_out_schema = {
     "code": str,
     "message": str,
     "userName": str,
@@ -11,7 +11,7 @@ cmiqr2b9j00i9ie8frw439h8i_Authentication_out_schema = {
 }
 
 # Capabilities
-cmiqr2b9j00i9ie8frw439h8i_Capabilities_out_schema = {
+cmii7wfuf006i8z1tcds6q69g_Capabilities_out_schema = {
     "code": str,
     "message": str,
     "transportSupport": [{
@@ -21,7 +21,7 @@ cmiqr2b9j00i9ie8frw439h8i_Capabilities_out_schema = {
 }
 
 # SensorDeviceProfiles
-cmiqr2b9j00i9ie8frw439h8i_SensorDeviceProfiles_out_schema = {
+cmii7wfuf006i8z1tcds6q69g_SensorDeviceProfiles_out_schema = {
     "code": str,
     "message": str,
     "sensorDeviceList": [{
@@ -37,28 +37,68 @@ cmiqr2b9j00i9ie8frw439h8i_SensorDeviceProfiles_out_schema = {
 }],
 }
 
-# SensorDeviceControl
-cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl_out_schema = {
+# RealtimeSensorData
+cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_out_schema = {
     "code": str,
     "message": str,
-    "sensorDeviceID": str,
-    "sensorDeviceStatus": str,
 }
 
-# SensorDeviceControl2
-cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl2_out_schema = {
+# RealtimeSensorData WebHook IN Schema
+cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_webhook_in_schema = {
+    "sensorDeviceList": [{
+    "sensorDeviceID": str,
+    "measureTime": int,
+    "sensorDeviceType": str,
+    "sensorDeviceUnit": str,
+    "sensorDeviceValue": str,
+}],
+}
+
+# RealtimeSensorEventInfos
+cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_out_schema = {
     "code": str,
     "message": str,
-    "sensorDeviceID": str,
-    "sensorDeviceStatus": str,
 }
 
-# cmiqr2b9j00i9ie8frw439h8i 스키마 리스트
-cmiqr2b9j00i9ie8frw439h8i_outSchema = [
-    cmiqr2b9j00i9ie8frw439h8i_Authentication_out_schema,
-    cmiqr2b9j00i9ie8frw439h8i_Capabilities_out_schema,
-    cmiqr2b9j00i9ie8frw439h8i_SensorDeviceProfiles_out_schema,
-    cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl_out_schema,
-    cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl2_out_schema,
+# RealtimeSensorEventInfos WebHook IN Schema
+cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_webhook_in_schema = {
+    "sensorDeviceList": [{
+    "sensorDeviceID": str,
+    "eventName": str,
+    "eventTime": int,
+    OptionalKey("eventDesc"): str,
+}],
+}
+
+# StoredSensorEventInfos
+cmii7wfuf006i8z1tcds6q69g_StoredSensorEventInfos_out_schema = {
+    "code": str,
+    "message": str,
+    "sensorDeviceList": [{
+    "sensorDeviceID": str,
+    "eventName": str,
+    "eventTime": int,
+    OptionalKey("eventDesc"): str,
+}],
+}
+
+# cmii7wfuf006i8z1tcds6q69g 스키마 리스트
+cmii7wfuf006i8z1tcds6q69g_outSchema = [
+    cmii7wfuf006i8z1tcds6q69g_Authentication_out_schema,
+    cmii7wfuf006i8z1tcds6q69g_Capabilities_out_schema,
+    cmii7wfuf006i8z1tcds6q69g_SensorDeviceProfiles_out_schema,
+    cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_out_schema,
+    cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_out_schema,
+    cmii7wfuf006i8z1tcds6q69g_StoredSensorEventInfos_out_schema,
+]
+
+# cmii7wfuf006i8z1tcds6q69g WebHook 스키마 리스트
+cmii7wfuf006i8z1tcds6q69g_webhook_inSchema = [
+    None,
+    None,
+    None,
+    cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_webhook_in_schema,
+    cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_webhook_in_schema,
+    None,
 ]
 

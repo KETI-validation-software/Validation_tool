@@ -821,17 +821,16 @@ class InfoWidget(QWidget):
         QMessageBox.warning(self, "주소 탐색 실패", message)
 
     def get_selected_url(self):
-        """URL 테이블에서 선택된 URL 반환 (2컬럼 방식 - 컬럼 1에서 URL 가져오기)"""
-        # 선택된 행 번호 확인
+        """URL 테이블에서 선택된 기본 URL 반환 (https://IP:Port)"""
         if self.selected_url_row is not None:
-            widget = self.url_table.cellWidget(self.selected_url_row, 1)  # 컬럼 1: URL
+            widget = self.url_table.cellWidget(self.selected_url_row, 1)
             if widget:
-                selected_url = widget.property("url")
-                if selected_url:
+                base_url = widget.property("url")
+                if base_url:
                     # http://가 없으면 추가
-                    if not selected_url.startswith(('http://', 'https://')):
-                        selected_url = f"https://{selected_url}"
-                    return selected_url
+                    if not base_url.startswith(('http://', 'https://')):
+                        base_url = f"https://{base_url}"
+                    return base_url
         return None
 
     def _check_required_fields(self):
@@ -1158,6 +1157,54 @@ class InfoWidget(QWidget):
         except Exception as e:
             Logger.debug(f"물리보안 UI 설정 실패: {e}")
 
+    def apply_port_to_all(self):
+        """UI에 입력된 포트 번호를 현재 모든 주소와 시스템 설정에 일괄 적용"""
+        try:
+            new_port = self.port_input.text().strip()
+            if not new_port or not new_port.isdigit():
+                QMessageBox.warning(self, "입력 오류", "올바른 포트 번호를 입력해주세요.")
+                return
+
+            # 1. 내부 test_port 업데이트
+            self.test_port = int(new_port)
+            
+            # 2. 테이블의 모든 주소 업데이트
+            updated_count = 0
+            for row in range(self.url_table.rowCount()):
+                widget = self.url_table.cellWidget(row, 1)
+                if widget:
+                    current_url = widget.property("url") # "https://1.1.1.1:80" 형태
+                    if current_url:
+                        # 프로토콜 유지하면서 IP:Port 부분 수정
+                        if "://" in current_url:
+                            protocol, rest = current_url.split("://", 1)
+                            if ":" in rest:
+                                ip_part = rest.rsplit(":", 1)[0]
+                                new_url = f"{protocol}://{ip_part}:{new_port}"
+                            else:
+                                new_url = f"{protocol}://{rest}:{new_port}"
+                        else:
+                            if ":" in current_url:
+                                ip_part = current_url.rsplit(":", 1)[0]
+                                new_url = f"{ip_part}:{new_port}"
+                            else:
+                                new_url = f"{current_url}:{new_port}"
+                            # 프로토콜 없으면 추가
+                            if not new_url.startswith(('http://', 'https://')):
+                                new_url = f"https://{new_url}"
+                            
+                        # 위젯 속성 및 텍스트 업데이트
+                        widget.setProperty("url", new_url)
+                        if hasattr(widget, 'text_label'):
+                            widget.text_label.setText(new_url)
+                        widget.update()
+                        updated_count += 1
+            
+            QMessageBox.information(self, "적용 완료", f"모든 주소의 포트가 {new_port}번으로 변경되었습니다.")
+            
+        except Exception as e:
+            Logger.error(f"포트 일괄 적용 중 오류: {e}")
+
     def _on_test_info_loaded(self, test_data):
         """시험 정보 로드 성공 시 호출되는 슬롯"""
         from PyQt5.QtWidgets import QApplication
@@ -1253,7 +1300,24 @@ class InfoWidget(QWidget):
                 all_test_specs.extend(group.get("testSpecs", []))
 
             self.test_specs = all_test_specs
-            self.test_port = test_data.get("schedule", {}).get("testPort", None)
+            
+            # [수정] UI에 입력된 포트가 있으면 그것을 우선 사용, 없으면 API의 testPort 사용 (기본 8080)
+            ui_port = ""
+            if hasattr(self, 'port_input'):
+                ui_port = self.port_input.text().strip()
+            
+            api_port = test_data.get("schedule", {}).get("testPort", None)
+            
+            if ui_port:
+                self.test_port = int(ui_port)
+            elif api_port:
+                self.test_port = int(api_port)
+            else:
+                self.test_port = 8080
+            
+            # UI 포트 입력창 동기화
+            if hasattr(self, 'port_input'):
+                self.port_input.setText(str(self.test_port))
 
             # [추가] 통합시스템인 경우 자동 설정
             if self.target_system == "통합시스템":
@@ -1270,7 +1334,7 @@ class InfoWidget(QWidget):
                 # 1. 메모리상의 값 업데이트
                 local_ip = self.form_validator.get_local_ip_address()
                 CONSTANTS.WEBHOOK_PUBLIC_IP = local_ip
-                CONSTANTS.WEBHOOK_PORT = self.test_port + 1
+                CONSTANTS.WEBHOOK_PORT = int(self.test_port) + 1
                 CONSTANTS.WEBHOOK_URL = f"https://{local_ip}:{CONSTANTS.WEBHOOK_PORT}"
                 
                 Logger.info(f"[WEBHOOK] 로컬 IP 설정: {local_ip}, 포트: {CONSTANTS.WEBHOOK_PORT}")
@@ -1298,7 +1362,7 @@ class InfoWidget(QWidget):
 
                     # WEBHOOK_PORT = 숫자 패턴 찾아서 치환
                     pattern_port = r'^WEBHOOK_PORT\s*=\s*\d+.*$'
-                    new_port_line = f'WEBHOOK_PORT = {self.test_port + 1}       # 웹훅 수신 포트'
+                    new_port_line = f'WEBHOOK_PORT = {int(self.test_port) + 1}       # 웹훅 수신 포트'
                     content = re.sub(pattern_port, new_port_line, content, flags=re.MULTILINE)
 
                     # 파일 저장
@@ -1561,14 +1625,28 @@ class InfoWidget(QWidget):
         """시나리오 테이블 클릭 시 체크박스 상태 변경 및 API 테이블 업데이트"""
         try:
             # 모든 시나리오 행의 체크박스 상태 업데이트
+            selected_scenario_name = ""
             for i in range(self.scenario_table.rowCount()):
                 widget = self.scenario_table.cellWidget(i, 0)
                 if widget and hasattr(widget, 'setChecked'):
                     # 클릭된 행은 체크, 나머지는 체크 해제
-                    widget.setChecked(i == row)
+                    is_selected = (i == row)
+                    widget.setChecked(is_selected)
+                    if is_selected:
+                        # ClickableCheckboxRowWidget에서 텍스트 가져오기 (레이블 텍스트)
+                        selected_scenario_name = widget.text()
+
+            # 선택된 시나리오명 저장 (URL 생성용)
+            self.selected_scenario_name = selected_scenario_name
+            Logger.debug(f" [URL] 선택된 시나리오명: {selected_scenario_name}")
 
             # UI 업데이트 강제 (체크박스 이미지가 먼저 보이도록)
             QApplication.processEvents()
+
+            # 선택된 URL이 있다면 로그로 전체 URL 확인
+            full_url = self.get_selected_url()
+            if full_url:
+                Logger.info(f" [URL] 현재 설정된 전체 시험 URL: {full_url}")
 
             # specifications API 호출하여 API 테이블 채우기
             self.form_validator._fill_api_table_for_selected_field_from_api(row)
@@ -1629,19 +1707,23 @@ class InfoWidget(QWidget):
                     return
                 final_url = ip_port
             else:
-                # IP만 입력된 경우 - testPort 자동 추가
+                # IP만 입력된 경우 - 설정된 port_input 자동 추가
                 # IP 검증
                 if not self._validate_ip_address(ip_port):
                     QMessageBox.warning(self, "IP 오류", "올바른 IP 주소를 입력해주세요.\n예: 192.168.1.100")
                     return
 
-                # testPort 확인 및 자동 추가
-                if not hasattr(self, 'test_port') or not self.test_port:
-                    QMessageBox.warning(self, "testPort 없음", "시험정보를 먼저 불러와주세요.\ntestPort 정보가 필요합니다.")
-                    return
+                # port_input에서 포트 가져오기 (기본값 8080)
+                port = "8080"
+                if hasattr(self, 'port_input'):
+                    port = self.port_input.text().strip() or "8080"
 
-                # IP와 testPort 결합
-                final_url = f"{ip_port}:{self.test_port}"
+                # IP와 Port 결합
+                final_url = f"{ip_port}:{port}"
+
+            # 프로토콜이 없으면 https:// 추가
+            if not final_url.startswith(('http://', 'https://')):
+                final_url = f"https://{final_url}"
 
             # 중복 확인 (컬럼 1의 ClickableLabel에서 url property 가져오기)
             for row in range(self.url_table.rowCount()):

@@ -361,6 +361,65 @@ def _setup_connection_title_row(parent_widget, right_layout):
     """)
     connection_title_layout.addWidget(parent_widget.connection_title_label)
 
+    connection_title_layout.addSpacing(20)
+
+    # 포트 입력 레이블
+    port_label = QLabel("Port")
+    port_label.setStyleSheet("""
+        QLabel {
+            font-family: 'Noto Sans KR';
+            font-size: 16px;
+            font-weight: 500;
+            color: #444444;
+            background: transparent;
+        }
+    """)
+    connection_title_layout.addWidget(port_label)
+
+    connection_title_layout.addSpacing(8)
+
+    # 포트 입력창
+    parent_widget.port_input = QLineEdit("8080")
+    parent_widget.port_input.setFixedSize(60, 30)
+    parent_widget.port_input.setAlignment(Qt.AlignCenter)
+    parent_widget.port_input.setStyleSheet("""
+        QLineEdit {
+            border: 1px solid #CECECE;
+            border-radius: 4px;
+            background-color: #FFFFFF;
+            font-family: 'Noto Sans KR';
+            font-size: 16px;
+            font-weight: 500;
+            color: #000000;
+        }
+    """)
+    connection_title_layout.addWidget(parent_widget.port_input)
+
+    connection_title_layout.addSpacing(8)
+
+    # 포트 적용 버튼
+    parent_widget.port_apply_btn = QPushButton("적용")
+    parent_widget.port_apply_btn.setFixedSize(50, 30)
+    parent_widget.port_apply_btn.setStyleSheet("""
+        QPushButton {
+            background-color: #6B6B6B;
+            border: none;
+            border-radius: 4px;
+            font-family: 'Noto Sans KR';
+            font-size: 14px;
+            font-weight: 500;
+            color: #FFFFFF;
+        }
+        QPushButton:hover {
+            background-color: #868686;
+        }
+        QPushButton:pressed {
+            background-color: #4A4A4A;
+        }
+    """)
+    parent_widget.port_apply_btn.clicked.connect(parent_widget.apply_port_to_all)
+    connection_title_layout.addWidget(parent_widget.port_apply_btn)
+
     connection_title_layout.addStretch()
 
     # 버튼 그룹

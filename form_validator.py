@@ -172,8 +172,9 @@ class FormValidator:
             # 1. 시험 기본 정보 수집
             variables = self._collect_basic_info()
 
-            # 2. 접속 정보
-            variables['url'] = self.parent.get_selected_url()
+            # 2. 접속 정보 (시나리오명이 포함된 전체 URL 가져오기)
+            full_url = self.parent.get_selected_url()
+            variables['url'] = full_url
 
             # 3. 인증 정보
             auth_type, auth_info = self._collect_auth_info()

@@ -476,6 +476,10 @@ class MyApp(SystemMainUI):
         # ===== 인스턴스 변수에 저장 (다른 메서드에서 사용) =====
         self.LOADED_SPEC_CONFIG = SPEC_CONFIG
         self.url = url_value  # ✅ 외부 CONSTANTS.py에 정의된 url도 반영
+        self._original_base_url = str(url_value)  # ✅ 오염 방지용 불변 복사본
+        if hasattr(self, 'url_text_box') and self.url:
+            self.url_text_box.setText(self.url)
+            
         self.auth_type = auth_type
         self.auth_info = auth_info
         # ===== 저장 완료 =====
@@ -903,13 +907,13 @@ class MyApp(SystemMainUI):
                 # ✅ 9. 평가 점수 디스플레이 업데이트
                 self.update_score_display()
 
-                # URL 업데이트 (test_name 사용)
-                if hasattr(self, 'spec_config'):
-                    test_name = self.spec_config.get('test_name', self.current_spec_id)
-                    self.pathUrl = self.url + "/" + test_name
-                else:
-                    self.pathUrl = self.url + "/" + self.current_spec_id
+                # URL 업데이트 (base_url + 시나리오명) - 오염 방지: CONSTANTS에서 직접 읽기
+                test_name = self.spec_config.get('test_name', self.current_spec_id).replace("/", "")
+                fresh_base_url = str(getattr(self.CONSTANTS, 'url', self._original_base_url))
+                self.pathUrl = fresh_base_url.rstrip('/') + "/" + test_name
                 self.url_text_box.setText(self.pathUrl)  # 안내 문구 변경
+                Logger.debug(f" 시험 URL 업데이트: {self.pathUrl}")
+                print(f"[SYSTEM DEBUG] on_test_field_selected에서 pathUrl 설정: {self.pathUrl}")
 
                 # ✅ 10. 결과 텍스트 초기화
                 self.valResult.clear()
@@ -1337,7 +1341,26 @@ class MyApp(SystemMainUI):
 
                 # 시스템이 플랫폼에 요청 전송
                 current_timeout = self.time_outs[self.cnt] / 1000 if self.cnt < len(self.time_outs) else 5.0
-                path = self.pathUrl + "/" + (self.message[self.cnt] if self.cnt < len(self.message) else "")
+                api_endpoint = self.message[self.cnt] if self.cnt < len(self.message) else ""
+                
+                # ✅ URL 오염 방지: pathUrl을 매번 깨끗한 base로 재구성
+                fresh_base_url = str(getattr(self.CONSTANTS, 'url', self._original_base_url))
+                if hasattr(self, 'spec_config'):
+                    test_name = self.spec_config.get('test_name', self.current_spec_id).replace("/", "")
+                    base_with_scenario = fresh_base_url.rstrip('/') + "/" + test_name
+                else:
+                    base_with_scenario = fresh_base_url.rstrip('/')
+                
+                # API 엔드포인트 추가
+                api_path = api_endpoint.lstrip('/')
+                path = f"{base_with_scenario}/{api_path}"
+                print(f"[SYSTEM DEBUG] update_view에서 API 호출 경로: {path}")
+                print(f"[SYSTEM DEBUG] fresh_base_url: {fresh_base_url}, base_with_scenario: {base_with_scenario}, api_path: {api_path}")
+
+                # ✅ 실시간 API 경로 표시 (매번 새로 생성된 path를 사용하므로 누적되지 않음)
+                if hasattr(self, 'url_text_box'):
+                    self.url_text_box.setText(path) 
+                
                 inMessage = self.inMessage[self.cnt] if self.cnt < len(self.inMessage) else {}
                 # ✅ Data Mapper 적용 - 이전 응답 데이터로 요청 업데이트
                 # generator는 이미 self.latest_events를 참조하고 있으므로 재할당 불필요
@@ -2140,7 +2163,14 @@ class MyApp(SystemMainUI):
         for _ in range(10):
             QApplication.processEvents()
 
-        self.pathUrl = self.url_text_box.text()
+        # ✅ URL 오염 방지: 텍스트 박스가 아닌 CONSTANTS에서 직접 읽기
+        fresh_base_url = str(getattr(self.CONSTANTS, 'url', self._original_base_url))
+        if hasattr(self, 'spec_config'):
+            test_name = self.spec_config.get('test_name', self.current_spec_id).replace("/", "")
+            self.pathUrl = fresh_base_url.rstrip('/') + "/" + test_name
+        else:
+            self.pathUrl = fresh_base_url
+        print(f"[SYSTEM DEBUG] sbtn_push에서 pathUrl 설정: {self.pathUrl}")
         if not resume_mode:
             Logger.debug(f"========== 검증 시작: 완전 초기화 ==========")
         Logger.debug(f"시험 URL: {self.pathUrl}")
@@ -2286,10 +2316,15 @@ class MyApp(SystemMainUI):
             # ✅ 16. 결과 텍스트 초기화
             self.valResult.clear()
 
-            # ✅ 17. URL 설정
-            #self.pathUrl = self.url + "/" + self.current_spec_id
-            self.pathUrl = self.url_text_box.text()
+            # ✅ 17. URL 설정 (오염 방지: CONSTANTS에서 읽기)
+            fresh_base_url = str(getattr(self.CONSTANTS, 'url', self._original_base_url))
+            if hasattr(self, 'spec_config'):
+                test_name = self.spec_config.get('test_name', self.current_spec_id).replace("/", "")
+                self.pathUrl = fresh_base_url.rstrip('/') + "/" + test_name
+            else:
+                self.pathUrl = fresh_base_url
             self.url_text_box.setText(self.pathUrl)  # 안내 문구 변경
+            print(f"[SYSTEM DEBUG] start_test_execution에서 pathUrl 설정: {self.pathUrl}")
 
             # ✅ 18. 시작 메시지
             self.append_monitor_log(
@@ -2812,11 +2847,13 @@ class MyApp(SystemMainUI):
         elif self.r2 == "Bearer Token":
             self.r2 = "B"
 
-        # ✅ URL 업데이트 (test_name 사용) - spec_config가 로드된 후 실행
+        # ✅ URL 업데이트 (base_url + 시나리오명) - 오염 방지: CONSTANTS에서 직접 읽기
         if hasattr(self, 'spec_config') and hasattr(self, 'url_text_box'):
-            test_name = self.spec_config.get('test_name', self.current_spec_id)
-            self.pathUrl = self.url + "/" + test_name
+            test_name = self.spec_config.get('test_name', self.current_spec_id).replace("/", "")
+            fresh_base_url = str(getattr(self.CONSTANTS, 'url', self._original_base_url))
+            self.pathUrl = fresh_base_url.rstrip('/') + "/" + test_name
             self.url_text_box.setText(self.pathUrl)
+            print(f"[SYSTEM DEBUG] get_setting에서 pathUrl 설정: {self.pathUrl}")
 
     def closeEvent(self, event):
         """창 닫기 이벤트 - 타이머 정리"""

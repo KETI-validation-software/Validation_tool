@@ -1503,6 +1503,47 @@ class CommonMainUI(QWidget):
         total_group.setLayout(total_layout)
 
         return total_group
+    
+    def update_last_line_timer(self, text, remove=False):
+        """
+        valResult의 마지막 줄을 타이머 텍스트로 업데이트하거나 제거
+        Args:
+            text: 표시할 타이머 텍스트 (예: "남은 대기 시간: 5초")
+            remove: True이면 타이머 줄을 제거
+        """
+        import re
+        
+        # 타이머 라인을 식별하기 위한 고유 ID
+        timer_id = "timer_countdown_line"
+        
+        # 현재 HTML 컨텐츠 가져오기
+        current_html = self.valResult.toHtml()
+        
+        # 기존 타이머 라인이 있는지 확인 및 제거
+        # id 속성을 가진 div 전체를 찾아서 제거 (더 정확한 패턴)
+        pattern = f'<div[^>]*id="{timer_id}"[^>]*>.*?</div>'
+        if re.search(pattern, current_html, re.DOTALL):
+            current_html = re.sub(pattern, '', current_html, flags=re.DOTALL)
+        
+        if remove:
+            # 타이머 라인만 제거하고 나머지 유지
+            self.valResult.setHtml(current_html)
+        elif text:
+            # 새로운 타이머 라인 추가 (</body> 태그 바로 앞에 삽입)
+            timer_html = f'<div id="{timer_id}" style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-top: 5px;">⏳ {text}</div>'
+            
+            # </body> 태그 앞에 삽입
+            if '</body>' in current_html:
+                current_html = current_html.replace('</body>', timer_html + '</body>')
+            else:
+                current_html += timer_html
+            
+            self.valResult.setHtml(current_html)
+        
+        # 스크롤을 맨 아래로 이동
+        self.valResult.verticalScrollBar().setValue(
+            self.valResult.verticalScrollBar().maximum()
+        )
 
 
 
