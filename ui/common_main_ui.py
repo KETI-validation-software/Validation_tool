@@ -264,16 +264,33 @@ class CommonMainUI(QWidget):
         monitor_section_layout.setSpacing(0)
 
         # 송수신 메시지 실시간 모니터링 라벨 (1064 × 24, 20px Medium)
+        monitor_header_container = QWidget()
+        monitor_header_container.setFixedSize(1064, 24)
+        monitor_header_layout = QHBoxLayout(monitor_header_container)
+        monitor_header_layout.setContentsMargins(0, 0, 0, 0)
+        monitor_header_layout.setSpacing(0)
+
         self.monitor_label = QLabel("송수신 메시지 실시간 모니터링")
-        self.monitor_label.setFixedSize(1064, 24)
-        self.original_monitor_label_size = (1064, 24)
         self.monitor_label.setStyleSheet("""
             font-size: 20px;
             font-family: "Noto Sans KR";
             font-weight: 500;
             color: #000000;
         """)
-        monitor_section_layout.addWidget(self.monitor_label)
+        monitor_header_layout.addWidget(self.monitor_label)
+
+        # ✅ 전용 타이머 라벨 추가 (우측 상단 고정, 인플레이스 업데이트용)
+        self.countdown_timer_label = QLabel("")
+        self.countdown_timer_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self.countdown_timer_label.setStyleSheet("""
+            font-size: 18px;
+            font-family: "Noto Sans KR";
+            font-weight: 500;
+            color: #EF4444;  /* Red-500 */
+        """)
+        monitor_header_layout.addWidget(self.countdown_timer_label)
+        
+        monitor_section_layout.addWidget(monitor_header_container)
 
         # 8px gap
         monitor_section_layout.addSpacing(8)
@@ -1506,44 +1523,24 @@ class CommonMainUI(QWidget):
     
     def update_last_line_timer(self, text, remove=False):
         """
-        valResult의 마지막 줄을 타이머 텍스트로 업데이트하거나 제거
+        전용 타이머 라벨을 업데이트하거나 초기화 (In-place update)
         Args:
             text: 표시할 타이머 텍스트 (예: "남은 대기 시간: 5초")
-            remove: True이면 타이머 줄을 제거
+            remove: True이면 타이머 텍스트 제거
         """
-        import re
+        from PyQt5.QtWidgets import QApplication
         
-        # 타이머 라인을 식별하기 위한 고유 ID
-        timer_id = "timer_countdown_line"
+        if not hasattr(self, 'countdown_timer_label'):
+            return
+
+        if remove or not text:
+            self.countdown_timer_label.setText("")
+        else:
+            # 우측 상단 라벨에 텍스트 업데이트 (로그 창 외부)
+            self.countdown_timer_label.setText(f"⏳ {text}")
         
-        # 현재 HTML 컨텐츠 가져오기
-        current_html = self.valResult.toHtml()
-        
-        # 기존 타이머 라인이 있는지 확인 및 제거
-        # id 속성을 가진 div 전체를 찾아서 제거 (더 정확한 패턴)
-        pattern = f'<div[^>]*id="{timer_id}"[^>]*>.*?</div>'
-        if re.search(pattern, current_html, re.DOTALL):
-            current_html = re.sub(pattern, '', current_html, flags=re.DOTALL)
-        
-        if remove:
-            # 타이머 라인만 제거하고 나머지 유지
-            self.valResult.setHtml(current_html)
-        elif text:
-            # 새로운 타이머 라인 추가 (</body> 태그 바로 앞에 삽입)
-            timer_html = f'<div id="{timer_id}" style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-top: 5px;">⏳ {text}</div>'
-            
-            # </body> 태그 앞에 삽입
-            if '</body>' in current_html:
-                current_html = current_html.replace('</body>', timer_html + '</body>')
-            else:
-                current_html += timer_html
-            
-            self.valResult.setHtml(current_html)
-        
-        # 스크롤을 맨 아래로 이동
-        self.valResult.verticalScrollBar().setValue(
-            self.valResult.verticalScrollBar().maximum()
-        )
+        # UI 즉시 갱신 반영
+        QApplication.processEvents()
 
 
 
