@@ -45,10 +45,7 @@ class PlatformMainUI(CommonMainUI):
     def connect_buttons(self):
         """버튼 이벤트 연결 (Platform 전용)"""
         self.sbtn.clicked.connect(self.sbtn_push)
-        self.stop_btn.clicked.connect(self.stop_btn_clicked)
         self.cancel_btn.clicked.connect(self.cancel_btn_clicked)
-        self.rbtn.clicked.connect(self.exit_btn_clicked)
-        self.result_btn.clicked.connect(self.show_result_page)
 
     def _update_button_positions(self, group_width=None, group_height=None):
         """버튼 위치 직접 설정 (간격 16px 고정) - stop_btn, cancel_btn, result_btn, rbtn 4개"""

@@ -2578,6 +2578,7 @@ class MyApp(PlatformMainUI):
                                      QMessageBox.No)
 
         if reply == QMessageBox.Yes:
+            QApplication.instance().setProperty("skip_exit_confirm", True)
             result_payload = self.build_result_payload()
 
             # ✅ 종료 시 일시정지 파일 삭제

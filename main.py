@@ -244,6 +244,12 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event):
         Logger.debug(f"[MAIN_CLOSE] MainWindow closeEvent 호출됨")
+        app = QApplication.instance()
+        if app is not None and app.property("skip_exit_confirm"):
+            app.setProperty("skip_exit_confirm", False)
+            Logger.debug(f"[MAIN_CLOSE] skip_exit_confirm=True, ?? ?? ??")
+            event.accept()
+            return
 
         reply = QMessageBox.question(self, '종료', '프로그램을 종료하시겠습니까?',
                                      QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
