@@ -752,7 +752,7 @@ class InfoWidget(QWidget):
             if widget:
                 url = widget.property("url")
                 if url:
-                    existing.append(url)
+                    existing.append(self._normalize_display_url(url))
         return existing
 
     def _merge_urls(self, existing_urls, new_urls, max_count=None):
@@ -764,6 +764,16 @@ class InfoWidget(QWidget):
         if max_count:
             return merged[:max_count]  # 최대 개수 제한
         return merged
+
+    def _normalize_display_url(self, url):
+        """URL ?? ??? ip:port ? ???"""
+        if not url:
+            return ""
+        normalized = str(url).strip()
+        if "://" in normalized:
+            normalized = normalized.split("://", 1)[1]
+        normalized = normalized.rstrip("/")
+        return normalized
 
     def _populate_url_table(self, urls):
         """URL 테이블에 스캔 결과 채우기 (2컬럼: 행번호 + URL)"""
@@ -778,6 +788,7 @@ class InfoWidget(QWidget):
             checkbox_checked = "assets/image/test_config/checkbox_checked.png"
 
             for i, url in enumerate(urls):
+                normalized_url = self._normalize_display_url(url)
                 row = self.url_table.rowCount()
                 self.url_table.insertRow(row)
 
@@ -800,11 +811,11 @@ class InfoWidget(QWidget):
 
                 # 컬럼 1: URL (ClickableCheckboxRowWidget - 체크박스 분리, paintEvent 배경)
                 url_widget = ClickableCheckboxRowWidget(
-                    url, row, 1,
+                    normalized_url, row, 1,
                     bg_image, bg_selected_image,
                     checkbox_unchecked, checkbox_checked
                 )
-                url_widget.setProperty("url", url)
+                url_widget.setProperty("url", normalized_url)
                 url_widget.clicked.connect(self.on_url_row_selected)
                 self.url_table.setCellWidget(row, 1, url_widget)
 
@@ -1166,43 +1177,29 @@ class InfoWidget(QWidget):
                 QMessageBox.warning(self, "입력 오류", "올바른 포트 번호를 입력해주세요.")
                 return
 
-            # 1. 내부 test_port 업데이트
             self.test_port = int(new_port)
-            
-            # 2. 테이블의 모든 주소 업데이트
+
             updated_count = 0
             for row in range(self.url_table.rowCount()):
                 widget = self.url_table.cellWidget(row, 1)
                 if widget:
-                    current_url = widget.property("url") # "https://1.1.1.1:80" 형태
+                    current_url = widget.property("url")
                     if current_url:
-                        # 프로토콜 유지하면서 IP:Port 부분 수정
-                        if "://" in current_url:
-                            protocol, rest = current_url.split("://", 1)
-                            if ":" in rest:
-                                ip_part = rest.rsplit(":", 1)[0]
-                                new_url = f"{protocol}://{ip_part}:{new_port}"
-                            else:
-                                new_url = f"{protocol}://{rest}:{new_port}"
+                        normalized_url = self._normalize_display_url(current_url)
+                        if ":" in normalized_url:
+                            ip_part = normalized_url.rsplit(":", 1)[0]
+                            new_url = f"{ip_part}:{new_port}"
                         else:
-                            if ":" in current_url:
-                                ip_part = current_url.rsplit(":", 1)[0]
-                                new_url = f"{ip_part}:{new_port}"
-                            else:
-                                new_url = f"{current_url}:{new_port}"
-                            # 프로토콜 없으면 추가
-                            if not new_url.startswith(('http://', 'https://')):
-                                new_url = f"https://{new_url}"
-                            
-                        # 위젯 속성 및 텍스트 업데이트
+                            new_url = f"{normalized_url}:{new_port}"
+
                         widget.setProperty("url", new_url)
-                        if hasattr(widget, 'text_label'):
+                        if hasattr(widget, "text_label"):
                             widget.text_label.setText(new_url)
                         widget.update()
                         updated_count += 1
-            
+
             QMessageBox.information(self, "적용 완료", f"모든 주소의 포트가 {new_port}번으로 변경되었습니다.")
-            
+
         except Exception as e:
             Logger.error(f"포트 일괄 적용 중 오류: {e}")
 
@@ -1722,14 +1719,12 @@ class InfoWidget(QWidget):
                 # IP와 Port 결합
                 final_url = f"{ip_port}:{port}"
 
-            # 프로토콜이 없으면 https:// 추가
-            if not final_url.startswith(('http://', 'https://')):
-                final_url = f"https://{final_url}"
+            final_url = self._normalize_display_url(final_url)
 
             # 중복 확인 (컬럼 1의 ClickableLabel에서 url property 가져오기)
             for row in range(self.url_table.rowCount()):
                 widget = self.url_table.cellWidget(row, 1)
-                if widget and widget.property("url") == final_url:
+                if widget and self._normalize_display_url(widget.property("url")) == final_url:
                     QMessageBox.information(self, "알림", "이미 추가된 주소입니다.")
                     return
 
