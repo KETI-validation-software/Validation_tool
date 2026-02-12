@@ -1,5 +1,5 @@
 # ui/system_window.py
-from PyQt5.QtWidgets import QMainWindow, QStackedWidget, QMessageBox
+from PyQt5.QtWidgets import QMainWindow, QStackedWidget, QMessageBox, QApplication
 from PyQt5.QtCore import Qt
 from ui.result_page import ResultPageWidget
 from core.logger import Logger
@@ -55,6 +55,12 @@ class SystemValidationWindow(QMainWindow):
     def closeEvent(self, event):
         """래퍼 윈도우 닫기 이벤트 - validation_widget의 정리 작업 호출"""
         Logger.debug(f"[WRAPPER_CLOSE] SystemValidationWindow closeEvent 호출됨")
+        app = QApplication.instance()
+        if app is not None and app.property("skip_exit_confirm"):
+            app.setProperty("skip_exit_confirm", False)
+            Logger.debug(f"[WRAPPER_CLOSE] skip_exit_confirm=True (SystemValidationWindow), ?? ?? ??")
+            event.accept()
+            return
 
         # ✅ 종료 확인 대화상자
         reply = QMessageBox.question(

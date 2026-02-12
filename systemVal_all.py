@@ -28,6 +28,7 @@ from core.data_mapper import ConstraintDataGenerator
 from core.logger import Logger
 from ui.splash_screen import LoadingPopup
 from ui.result_page import ResultPageWidget
+from ui.widgets import install_gradient_messagebox
 from ui.system_main_ui import SystemMainUI
 from core.system_state_manager import SystemStateManager
 from requests.auth import HTTPDigestAuth
@@ -2055,13 +2056,7 @@ class MyApp(SystemMainUI):
             Logger.error(f" Current state - cnt={self.cnt}, current_retry={self.current_retry}")
             Logger.error(f" Traceback:")
             traceback.print_exc()
-
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Critical)
-            msg.setText("Error Message: 오류 확인 후 검증 절차를 다시 시작해주세요")
-            msg.setInformativeText(f"Error at step {self.cnt + 1}: {str(err)}")
-            msg.setWindowTitle("Error")
-            msg.exec_()
+            QMessageBox.critical(self, "Error", "Error Message: 오류 확인 후 검증 절차를 다시 시작해주세요" + '\n' + f"Error at step {self.cnt + 1}: {str(err)}")
             self.tick_timer.stop()
             self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">검증 절차가 중지되었습니다. (오류 위치: Step {self.cnt + 1})</div>')
             self.sbtn.setEnabled(True)
@@ -2830,6 +2825,7 @@ class MyApp(SystemMainUI):
                                      QMessageBox.No)
 
         if reply == QMessageBox.Yes:
+            QApplication.instance().setProperty("skip_exit_confirm", True)
             result_payload = self.build_result_payload()
 
             # ✅ 종료 시 일시정지 파일 삭제
@@ -2876,6 +2872,7 @@ class MyApp(SystemMainUI):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+    install_gradient_messagebox()
     fontDB = QFontDatabase()
     fontDB.addApplicationFont(resource_path('NanumGothic.ttf'))
     fontDB.addApplicationFont(resource_path('assets/fonts/NotoSansKR-Regular.ttf'))

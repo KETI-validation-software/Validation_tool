@@ -397,10 +397,7 @@ class SystemMainUI(CommonMainUI):
     def connect_buttons(self):
         """버튼 이벤트 연결 (System 전용)"""
         self.sbtn.clicked.connect(self.start_btn_clicked)
-        self.stop_btn.clicked.connect(self.stop_btn_clicked)
         self.cancel_btn.clicked.connect(self.cancel_btn_clicked)
-        self.rbtn.clicked.connect(self.exit_btn_clicked)
-        self.result_btn.clicked.connect(self.show_result_page)
 
 
     def _update_button_positions(self, group_width=None, group_height=None):

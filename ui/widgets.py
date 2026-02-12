@@ -5,7 +5,7 @@
 - ClickableCheckboxRowWidget: 시나리오 셀용 (체크박스 + 텍스트 분리)
 """
 
-from PyQt5.QtWidgets import QLabel, QWidget, QHBoxLayout, QDialog, QPushButton, QVBoxLayout, QGraphicsDropShadowEffect
+from PyQt5.QtWidgets import QLabel, QWidget, QHBoxLayout, QDialog, QPushButton, QVBoxLayout, QGraphicsDropShadowEffect, QMessageBox
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QPixmap, QPainter, QColor, QFont, QLinearGradient
 from core.functions import resource_path
@@ -282,3 +282,186 @@ class SystemPopup(QDialog):
         painter.setPen(Qt.NoPen)
         # 둥근 모서리 적용 (선택 사항, 여기서는 직각으로 하되 깔끔하게)
         painter.drawRect(self.rect())
+
+
+
+class GradientMessageBox(QDialog):
+    """QMessageBox ??? ????? ?????"""
+    def __init__(self, title, message, detail="", buttons=None, default_button=None, parent=None):
+        super().__init__(parent)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Dialog)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setFixedSize(420, 230)
+        self._result = QMessageBox.NoButton
+
+        self.title_text = title or "??"
+        self.message_text = message or ""
+        self.detail_text = detail or ""
+        self.buttons = buttons if buttons is not None else QMessageBox.Ok
+        self.default_button = default_button if default_button is not None else QMessageBox.NoButton
+        self._setup_ui()
+
+    def _setup_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(25, 24, 25, 24)
+        layout.setSpacing(8)
+
+        title_label = QLabel(self.title_text)
+        title_label.setAlignment(Qt.AlignCenter)
+        title_label.setStyleSheet("""
+            color: #FFFFFF;
+            font-size: 14pt;
+            font-weight: 700;
+            font-family: 'Malgun Gothic', 'Noto Sans KR';
+            background: transparent;
+        """)
+        layout.addWidget(title_label)
+        layout.addStretch(1)
+
+        message_label = QLabel(self.message_text)
+        message_label.setAlignment(Qt.AlignCenter)
+        message_label.setWordWrap(True)
+        message_label.setStyleSheet("""
+            color: rgba(255, 255, 255, 235);
+            font-size: 10.5pt;
+            font-family: 'Malgun Gothic', 'Noto Sans KR';
+            background: transparent;
+            line-height: 130%;
+        """)
+        layout.addWidget(message_label)
+
+        if self.detail_text:
+            detail_label = QLabel(self.detail_text)
+            detail_label.setAlignment(Qt.AlignCenter)
+            detail_label.setWordWrap(True)
+            detail_label.setStyleSheet("""
+                color: rgba(255, 255, 255, 200);
+                font-size: 9pt;
+                font-family: 'Malgun Gothic', 'Noto Sans KR';
+                background: transparent;
+            """)
+            layout.addWidget(detail_label)
+
+        layout.addStretch(1)
+        layout.addWidget(self._build_buttons(), 0, Qt.AlignHCenter)
+
+    def _create_button(self, text, standard_value):
+        btn = QPushButton(text)
+        btn.setCursor(Qt.PointingHandCursor)
+        btn.setFixedSize(120, 36)
+        btn.setStyleSheet("""
+            QPushButton {
+                background-color: rgba(255, 255, 255, 0.15);
+                border: 1px solid rgba(255, 255, 255, 0.35);
+                border-radius: 18px;
+                color: #FFFFFF;
+                font-family: 'Malgun Gothic', 'Noto Sans KR';
+                font-size: 10pt;
+                font-weight: 700;
+            }
+            QPushButton:hover {
+                background-color: rgba(255, 255, 255, 0.28);
+                border: 1px solid rgba(255, 255, 255, 0.55);
+            }
+            QPushButton:pressed {
+                background-color: rgba(255, 255, 255, 0.10);
+            }
+        """)
+        btn.clicked.connect(lambda: self._set_result_and_close(standard_value))
+        return btn
+
+    def _build_buttons(self):
+        container = QWidget()
+        container.setStyleSheet("background: transparent;")
+        button_layout = QHBoxLayout(container)
+        button_layout.setContentsMargins(0, 4, 0, 0)
+        button_layout.setSpacing(12)
+        button_layout.setAlignment(Qt.AlignCenter)
+
+        button_defs = []
+        if self.buttons & QMessageBox.Yes:
+            button_defs.append(("\uC608", QMessageBox.Yes))
+        if self.buttons & QMessageBox.No:
+            button_defs.append(("\uC544\uB2C8\uC624", QMessageBox.No))
+        if self.buttons & QMessageBox.Ok:
+            button_defs.append(("\uD655\uC778", QMessageBox.Ok))
+        if self.buttons & QMessageBox.Cancel:
+            button_defs.append(("\uCDE8\uC18C", QMessageBox.Cancel))
+
+        if not button_defs:
+            button_defs = [("\uD655\uC778", QMessageBox.Ok)]
+
+        for text, value in button_defs:
+            button_layout.addWidget(self._create_button(text, value))
+        return container
+
+    def _set_result_and_close(self, value):
+        self._result = value
+        self.accept()
+
+    def exec_with_result(self):
+        self.exec_()
+        if self._result == QMessageBox.NoButton:
+            if self.default_button != QMessageBox.NoButton:
+                return self.default_button
+            if self.buttons & QMessageBox.No:
+                return QMessageBox.No
+            if self.buttons & QMessageBox.Cancel:
+                return QMessageBox.Cancel
+            return QMessageBox.Ok
+        return self._result
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        gradient = QLinearGradient(0, 0, self.width(), self.height())
+        gradient.setColorAt(0, QColor("#275554"))
+        gradient.setColorAt(1, QColor("#002B69"))
+        painter.setBrush(gradient)
+        painter.setPen(Qt.NoPen)
+        painter.drawRect(self.rect())
+
+
+def install_gradient_messagebox():
+    """QMessageBox ?? ???? ????? ???? ??"""
+    if getattr(QMessageBox, "_gradient_patch_installed", False):
+        return
+
+    def _resolve_buttons(args, fallback_buttons, fallback_default):
+        buttons = fallback_buttons
+        default_button = fallback_default
+        if len(args) >= 1 and isinstance(args[0], int):
+            buttons = args[0]
+        if len(args) >= 2 and isinstance(args[1], int):
+            default_button = args[1]
+        return buttons, default_button
+
+    def _show(parent, title, text, detail, fallback_buttons, fallback_default, args):
+        buttons, default_button = _resolve_buttons(args, fallback_buttons, fallback_default)
+        dialog = GradientMessageBox(
+            title=title,
+            message=text,
+            detail=detail,
+            buttons=buttons,
+            default_button=default_button,
+            parent=parent
+        )
+        return dialog.exec_with_result()
+
+    def warning(parent, title, text, *args):
+        return _show(parent, title, text, "", QMessageBox.Ok, QMessageBox.NoButton, args)
+
+    def information(parent, title, text, *args):
+        return _show(parent, title, text, "", QMessageBox.Ok, QMessageBox.NoButton, args)
+
+    def critical(parent, title, text, *args):
+        return _show(parent, title, text, "", QMessageBox.Ok, QMessageBox.NoButton, args)
+
+    def question(parent, title, text, *args):
+        return _show(parent, title, text, "", QMessageBox.Yes | QMessageBox.No, QMessageBox.No, args)
+
+    QMessageBox.warning = staticmethod(warning)
+    QMessageBox.information = staticmethod(information)
+    QMessageBox.critical = staticmethod(critical)
+    QMessageBox.question = staticmethod(question)
+    QMessageBox._gradient_patch_installed = True

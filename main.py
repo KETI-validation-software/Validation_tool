@@ -34,6 +34,7 @@ if getattr(sys, 'frozen', False):
 # ===== 외부 config 우선 사용 끝 =====
 
 from ui.info_GUI import InfoWidget
+from ui.widgets import install_gradient_messagebox
 from core.functions import resource_path
 import platformVal_all as platform_app
 import systemVal_all as system_app
@@ -244,6 +245,12 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event):
         Logger.debug(f"[MAIN_CLOSE] MainWindow closeEvent 호출됨")
+        app = QApplication.instance()
+        if app is not None and app.property("skip_exit_confirm"):
+            app.setProperty("skip_exit_confirm", False)
+            Logger.debug(f"[MAIN_CLOSE] skip_exit_confirm=True, ?? ?? ??")
+            event.accept()
+            return
 
         reply = QMessageBox.question(self, '종료', '프로그램을 종료하시겠습니까?',
                                      QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
@@ -280,6 +287,7 @@ if __name__ == "__main__":
     Logger.info(f"[INIT] 디버그 레벨 설정: {CONSTANTS.DEBUG_LEVEL}")
 
     app = QApplication(sys.argv)
+    install_gradient_messagebox()
 
     # ===== 스플래시 스크린 표시 (즉시!) =====
     from ui.splash_screen import SplashScreen

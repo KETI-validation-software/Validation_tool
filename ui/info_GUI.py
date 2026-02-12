@@ -940,6 +940,7 @@ class InfoWidget(QWidget):
                                      QMessageBox.Yes | QMessageBox.No,
                                      QMessageBox.No)
         if reply == QMessageBox.Yes:
+            QApplication.instance().setProperty("skip_exit_confirm", True)
             QApplication.quit()
 
     def _determine_mode_from_api(self, test_data):
