@@ -34,6 +34,7 @@ if getattr(sys, 'frozen', False):
 # ===== 외부 config 우선 사용 끝 =====
 
 from ui.info_GUI import InfoWidget
+from ui.widgets import install_gradient_messagebox
 from core.functions import resource_path
 import platformVal_all as platform_app
 import systemVal_all as system_app
@@ -286,6 +287,7 @@ if __name__ == "__main__":
     Logger.info(f"[INIT] 디버그 레벨 설정: {CONSTANTS.DEBUG_LEVEL}")
 
     app = QApplication(sys.argv)
+    install_gradient_messagebox()
 
     # ===== 스플래시 스크린 표시 (즉시!) =====
     from ui.splash_screen import SplashScreen

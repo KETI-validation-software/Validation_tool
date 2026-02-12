@@ -1405,12 +1405,7 @@ def set_message(path_):
             message = json_data
         return message
     except json.JSONDecodeError as verr:
-        box = QMessageBox()
-        box.setIcon(QMessageBox.Critical)
-        box.setText("Error Message: " + path_ + " 을 확인하세요")
-        box.setInformativeText(str(verr))
-        box.setWindowTitle("Error")
-        box.exec_()
+        QMessageBox.critical(None, "Error", "Error Message: " + path_ + " 을 확인하세요" + '\n' + str(str(verr)))
         return {}
     except Exception as e:
         Logger.error(e)

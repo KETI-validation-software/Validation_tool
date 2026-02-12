@@ -20,6 +20,7 @@ from core.functions import json_check_, resource_path, json_to_data
 from ui.splash_screen import LoadingPopup
 from ui.detail_dialog import CombinedDetailDialog
 from ui.result_page import ResultPageWidget
+from ui.widgets import install_gradient_messagebox
 from ui.gui_utils import CustomDialog
 from ui.platform_window import PlatformValidationWindow
 from ui.platform_main_ui import PlatformMainUI
@@ -1196,13 +1197,7 @@ class MyApp(PlatformMainUI):
             Logger.error(f" update_view에서 예외 발생: {err}")
             import traceback
             traceback.print_exc()
-
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Critical)
-            msg.setText("Error Message: 오류 확인 후 검증 절차를 다시 시작해주세요")
-            msg.setInformativeText(str(err))
-            msg.setWindowTitle("Error")
-            msg.exec_()
+            QMessageBox.critical(self, "Error", "Error Message: 오류 확인 후 검증 절차를 다시 시작해주세요" + '\n' + str(str(err)))
             self.tick_timer.stop()
             self.valResult.append('<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">검증 절차가 중지되었습니다.</div>')
             self.sbtn.setEnabled(True)
@@ -2656,6 +2651,7 @@ class MyApp(PlatformMainUI):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+    install_gradient_messagebox()
     fontDB = QFontDatabase()
     fontDB.addApplicationFont(resource_path('NanumGothic.ttf'))
     fontDB.addApplicationFont(resource_path('assets/fonts/NotoSansKR-Regular.ttf'))
