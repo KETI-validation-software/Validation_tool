@@ -183,7 +183,7 @@ class BasicInfoPanel(QWidget):
             QLabel {
                 font-family: 'Noto Sans KR';
                 font-size: 18px;
-                font-weight: 400;
+                font-weight: 700;
                 color: #000000;
                 background: transparent;
             }
@@ -309,7 +309,7 @@ class BasicInfoPanel(QWidget):
             QLabel {
                 font-family: 'Noto Sans KR';
                 font-size: 18px;
-                font-weight: 400;
+                font-weight: 700;
                 color: #000000;
                 background: transparent;
             }
