@@ -118,7 +118,7 @@ class ResultPageWidget(QWidget):
         self.original_total_group_size = (1064, 128)
         self.original_buttonGroup_size = (1064, 48)
         # ✅ 점수 테이블 내부 위젯 원본 크기
-        self.original_score_header_size = (1064, 52)
+        self.original_score_header_size = (1062, 52)
         self.original_score_data_area_size = (1064, 76)
         # 각 라벨별 너비 설정 (통과 필수/선택은 넓게, 종합 평가는 좁게)
         self.original_pass_label_size = (340, 60)    # 필수 필드 점수
@@ -247,8 +247,7 @@ class ResultPageWidget(QWidget):
         self.score_table.setStyleSheet("""
             QWidget {
                 background-color: #FFFFFF;
-                border: 1px solid #CECECE;
-                border-radius: 4px;
+                border: none;
             }
         """)
         score_table_layout = QVBoxLayout()
@@ -1499,9 +1498,20 @@ class ResultPageWidget(QWidget):
 
     def _create_spec_score_display_with_data(self, total_pass, total_error, score, opt_pass=0, opt_error=0):
         """데이터를 받아서 분야별 점수 표시 위젯 생성 (1064 × 128)"""
-        spec_group = QWidget()
+        spec_group = QGroupBox()
         spec_group.setFixedSize(1064, 128)
-        spec_group.setStyleSheet("background: transparent; border: none;")
+        spec_group.setStyleSheet("""
+            QGroupBox {
+                background-color: #FFFFFF;
+                border: 1px solid #CECECE;
+                border-top-left-radius: 4px;
+                border-top-right-radius: 4px;
+                border-bottom-left-radius: 0px;
+                border-bottom-right-radius: 0px;
+                padding: 0px;
+                margin: 0px;
+            }
+        """)
 
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(0, 0, 0, 0)
@@ -1509,8 +1519,8 @@ class ResultPageWidget(QWidget):
 
         # 헤더 영역 (1064 × 52)
         self.spec_header = QWidget()
-        self.spec_header.setFixedSize(1064, 52)
-        self.spec_header.setStyleSheet("background: transparent;")
+        self.spec_header.setFixedSize(1062, 52)
+        self.spec_header.setStyleSheet("background: #F5F5F5;")
         header_layout = QHBoxLayout(self.spec_header)
         header_layout.setContentsMargins(0, 5, 0, 5)
         header_layout.setSpacing(12)
@@ -1557,7 +1567,7 @@ class ResultPageWidget(QWidget):
         header_layout.addWidget(spec_info_label, alignment=Qt.AlignVCenter)
         header_layout.addStretch()
 
-        main_layout.addWidget(self.spec_header)
+        main_layout.addWidget(self.spec_header, alignment=Qt.AlignHCenter)
 
         # 가로선 (헤더 아래 테두리)
         separator = QFrame()
@@ -1676,8 +1686,8 @@ class ResultPageWidget(QWidget):
 
         # 헤더 영역 (1064 × 52)
         self.total_header = QWidget()
-        self.total_header.setFixedSize(1064, 52)
-        self.total_header.setStyleSheet("background: transparent; border: none;")
+        self.total_header.setFixedSize(1062, 52)
+        self.total_header.setStyleSheet("background: #F5F5F5; border: none;")
         header_layout = QHBoxLayout(self.total_header)
         header_layout.setContentsMargins(0, 5, 0, 5)
         header_layout.setSpacing(6)
@@ -1703,7 +1713,7 @@ class ResultPageWidget(QWidget):
         header_layout.addWidget(total_name_label, alignment=Qt.AlignVCenter)
         header_layout.addStretch()
 
-        main_layout.addWidget(self.total_header)
+        main_layout.addWidget(self.total_header, alignment=Qt.AlignHCenter)
 
         # 가로선 (헤더 아래 테두리)
         separator = QFrame()
