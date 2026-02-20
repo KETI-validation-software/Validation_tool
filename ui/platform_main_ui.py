@@ -17,6 +17,7 @@ class PlatformMainUI(CommonMainUI):
         # Platform 전용 설정
         self.window_title = '통합플랫폼 연동 검증'
         self.show_initial_score = True  # 초기 점수 표시 활성화
+        self.validation_mode = "platform"
 
     def initUI(self):
         # CommonMainUI의 initUI 호출
