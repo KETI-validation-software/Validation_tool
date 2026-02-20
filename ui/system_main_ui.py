@@ -39,6 +39,7 @@ from ui.common_main_ui import CommonMainUI
 class SystemMainUI(CommonMainUI):
     def __init__(self):
         super().__init__()
+        self.validation_mode = "system"
 
     def initUI(self):
         # CommonMainUI의 initUI 호출

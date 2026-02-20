@@ -42,6 +42,21 @@ class CommonMainUI(QWidget):
         # 서브클래스에서 오버라이드 가능한 속성
         self.window_title = '시스템 연동 검증'
         self.show_initial_score = False
+        self.validation_mode = "platform"
+
+    def get_header_title_path(self, page_type):
+        title_map = {
+            "platform": {
+                "runner": "assets/image/test_runner/platform_runner_title.png",
+                "result": "assets/image/test_runner/platform_result_title.png",
+            },
+            "system": {
+                "runner": "assets/image/test_runner/system_runner_title.png",
+                "result": "assets/image/test_runner/system_result_title.png",
+            },
+        }
+        mode = self.validation_mode if self.validation_mode in title_map else "platform"
+        return title_map[mode].get(page_type, title_map["platform"]["runner"])
 
     def initUI(self):
         # ✅ 반응형: 최소 크기 설정
@@ -89,7 +104,7 @@ class CommonMainUI(QWidget):
 
         # 타이틀 이미지 (408x36)
         header_title_label = QLabel()
-        header_title_pixmap = QPixmap(resource_path("assets/image/test_runner/runner_title.png"))
+        header_title_pixmap = QPixmap(resource_path(self.get_header_title_path("runner")))
         header_title_label.setPixmap(header_title_pixmap.scaled(407, 36, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         header_title_label.setFixedSize(407, 36)
         header_layout.addWidget(header_title_label)

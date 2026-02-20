@@ -36,6 +36,14 @@ class ResultPageWidget(QWidget):
 
         self.initUI()
 
+    def _get_result_header_title_path(self):
+        mode = getattr(self.parent, "validation_mode", "platform")
+        title_map = {
+            "platform": "assets/image/test_runner/platform_result_title.png",
+            "system": "assets/image/test_runner/system_result_title.png",
+        }
+        return title_map.get(mode, title_map["platform"])
+
     def initUI(self):
         # ✅ 반응형: 최소 크기 설정
         self.setMinimumSize(1680, 1006)
@@ -79,7 +87,7 @@ class ResultPageWidget(QWidget):
 
         # 타이틀 이미지 (408x36) - result_title.png 사용
         header_title_label = QLabel()
-        header_title_pixmap = QPixmap(resource_path("assets/image/test_runner/result_title.png"))
+        header_title_pixmap = QPixmap(resource_path(self._get_result_header_title_path()))
         header_title_label.setPixmap(header_title_pixmap.scaled(407, 36, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         header_title_label.setFixedSize(407, 36)
         header_layout.addWidget(header_title_label)
