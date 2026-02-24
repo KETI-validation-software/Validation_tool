@@ -17,6 +17,8 @@ dist/
 *.zip
 *.spec
 *.iss
+docs/
+*.spec
 
 # Trace files
 results/trace/
