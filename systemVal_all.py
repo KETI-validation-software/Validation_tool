@@ -2847,7 +2847,7 @@ class MyApp(SystemMainUI):
         if reply == QMessageBox.Yes:
 
             try:
-                APIClient().send_heartbeat_pending()
+                APIClient().send_heartbeat_pending(getattr(self.CONSTANTS, "request_id", ""))
             except Exception as e:
                 Logger.warning(f"⚠️ 종료 시 stopped 상태 전송 실패: {e}")
             QApplication.instance().setProperty("skip_exit_confirm", True)
@@ -2890,7 +2890,7 @@ class MyApp(SystemMainUI):
         """창 닫기 이벤트 - 타이머 정리"""
         # ✅ 타이머 중지
         if hasattr(self, 'tick_timer') and self.tick_timer.isActive():
-            APIClient().send_heartbeat_pending()
+            APIClient().send_heartbeat_pending(getattr(self.CONSTANTS, "request_id", ""))
             self.tick_timer.stop()
 
         event.accept()

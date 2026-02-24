@@ -116,7 +116,7 @@ class InfoWidget(QWidget):
                 Logger.debug("자동 로드 실패: 유효한 IP가 없음")
                 return
 
-            self.form_validator.api_client.send_heartbeat_pending()
+            self.form_validator.api_client.send_heartbeat_pending(getattr(self, "request_id", ""))
             self.is_loading = True
             self._disable_ui_during_loading()
             self.loading_popup = LoadingPopup(width=400, height=200)
@@ -936,14 +936,14 @@ class InfoWidget(QWidget):
         if reply == QMessageBox.Yes:
             ok = False
             try:
-                ok = self.form_validator.api_client.send_heartbeat_pending()
+                ok = self.form_validator.api_client.send_heartbeat_pending(getattr(self, "request_id", ""))
             except Exception as e:
                 Logger.warning(f"⚠️ 종료 시 stopped 상태 전송 실패(1차): {e}")
 
             if not ok:
                 try:
                     from api.client import APIClient
-                    ok = APIClient().send_heartbeat_pending()
+                    ok = APIClient().send_heartbeat_pending(getattr(self, "request_id", ""))
                 except Exception as e:
                     Logger.warning(f"⚠️ 종료 시 stopped 상태 전송 실패(2차): {e}")
 
@@ -1038,7 +1038,7 @@ class InfoWidget(QWidget):
             return
 
         # 로딩 상태 설정 및 UI 비활성화 (로딩 중 상호작용 방지)
-        self.form_validator.api_client.send_heartbeat_pending()
+        self.form_validator.api_client.send_heartbeat_pending(getattr(self, "request_id", ""))
         self.is_loading = True
         self._disable_ui_during_loading()
 
