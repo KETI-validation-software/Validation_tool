@@ -2640,7 +2640,7 @@ class MyApp(SystemMainUI):
         # ✅ 시험 중지 - stopped 상태 heartbeat 전송
         try:
             api_client = APIClient()
-            api_client.send_heartbeat_in_progress(getattr(self.CONSTANTS, "request_id", ""))
+            api_client.send_heartbeat_stopped(getattr(self.CONSTANTS, "request_id", ""))
             Logger.info(f"✅ 시험 중지 - in_progress 상태 전송 완료")
         except Exception as e:
             Logger.warning(f"⚠️ 시험 중지 - in_progress 상태 전송 실패: {e}")
@@ -2720,7 +2720,7 @@ class MyApp(SystemMainUI):
         # ✅ 시험 취소 - stopped 상태 heartbeat 전송
         try:
             api_client = APIClient()
-            api_client.send_heartbeat_in_progress(getattr(self.CONSTANTS, "request_id", ""))
+            api_client.send_heartbeat_stopped(getattr(self.CONSTANTS, "request_id", ""))
             Logger.info(f"✅ 시험 취소 - in_progress 상태 전송 완료")
         except Exception as e:
             Logger.warning(f"⚠️ 시험 취소 - in_progress 상태 전송 실패: {e}")
@@ -2847,7 +2847,7 @@ class MyApp(SystemMainUI):
         if reply == QMessageBox.Yes:
 
             try:
-                APIClient().send_heartbeat_stopped(getattr(self.CONSTANTS, "request_id", ""))
+                APIClient().send_heartbeat_pending()
             except Exception as e:
                 Logger.warning(f"⚠️ 종료 시 stopped 상태 전송 실패: {e}")
             QApplication.instance().setProperty("skip_exit_confirm", True)
@@ -2890,7 +2890,7 @@ class MyApp(SystemMainUI):
         """창 닫기 이벤트 - 타이머 정리"""
         # ✅ 타이머 중지
         if hasattr(self, 'tick_timer') and self.tick_timer.isActive():
-            APIClient().send_heartbeat_stopped(getattr(self.CONSTANTS, "request_id", ""))
+            APIClient().send_heartbeat_pending()
             self.tick_timer.stop()
 
         event.accept()

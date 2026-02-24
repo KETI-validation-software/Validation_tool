@@ -936,14 +936,14 @@ class InfoWidget(QWidget):
         if reply == QMessageBox.Yes:
             ok = False
             try:
-                ok = self.form_validator.api_client.send_heartbeat_stopped(getattr(self, "request_id", ""))
+                ok = self.form_validator.api_client.send_heartbeat_pending()
             except Exception as e:
                 Logger.warning(f"⚠️ 종료 시 stopped 상태 전송 실패(1차): {e}")
 
             if not ok:
                 try:
                     from api.client import APIClient
-                    ok = APIClient().send_heartbeat_stopped(getattr(self, "request_id", ""))
+                    ok = APIClient().send_heartbeat_pending()
                 except Exception as e:
                     Logger.warning(f"⚠️ 종료 시 stopped 상태 전송 실패(2차): {e}")
 
@@ -1058,45 +1058,85 @@ class InfoWidget(QWidget):
         if hasattr(self, 'loading_popup') and self.loading_popup:
             self.loading_popup.close()
             self.loading_popup = None
+    def _extract_schedule_candidates(self, test_data):
+        """Return normalized schedule list from API response (new/legacy)."""
+        if not isinstance(test_data, dict):
+            return []
 
-    def _validate_test_schedule(self, schedule_data):
-        """시험 스케줄(날짜/시간) 검증"""
+        schedules = test_data.get("schedules")
+        if isinstance(schedules, list) and schedules:
+            return [s for s in schedules if isinstance(s, dict)]
+
+        schedule = test_data.get("schedule")
+        if isinstance(schedule, dict):
+            return [schedule]
+
+        return []
+
+    def _validate_test_schedule(self, test_data):
+        """Validate schedule and select today's schedule when multiple exist."""
         try:
-            # [디버깅] 스케줄 데이터 전체 로그 출력
-            Logger.debug(f"API 스케줄 데이터 확인: {schedule_data}")
+            schedules = self._extract_schedule_candidates(test_data)
+            Logger.debug(f"API schedule candidates count: {len(schedules)}")
+
+            if not schedules:
+                popup = SystemPopup(
+                    title="시험 일정 없음",
+                    message="오늘 시작 가능한 시험 일정이 없습니다.\n\n프로그램을 종료합니다.",
+                    parent=self
+                )
+                popup.exec_()
+                return False
+
+            today = datetime.now().date()
+            today_schedules = []
+            for sch in schedules:
+                date_str = sch.get("scheduledDate") or sch.get("scheduleDate")
+                if not date_str:
+                    continue
+                try:
+                    date_only = date_str.split('T')[0] if 'T' in date_str else date_str
+                    d = datetime.strptime(date_only, "%Y-%m-%d").date()
+                    if d == today:
+                        today_schedules.append(sch)
+                except Exception:
+                    continue
+
+            if not today_schedules:
+                popup = SystemPopup(
+                    title="시험 일정 불일치",
+                    message="오늘 날짜에 해당하는 시험 일정이 없습니다.\n\n프로그램을 종료합니다.",
+                    parent=self
+                )
+                popup.exec_()
+                return False
+
+            schedule_data = today_schedules[0]
+            self.current_schedule = schedule_data
 
             start_time_str = schedule_data.get("startTime")
             end_time_str = schedule_data.get("endTime")
-            schedule_date_str = schedule_data.get("scheduledDate")  # scheduleDate -> scheduledDate 수정
+            schedule_date_str = schedule_data.get("scheduledDate") or schedule_data.get("scheduleDate")
 
-            # 시간 정보가 없으면 검증 패스 (필수 정보가 아닐 수 있음)
             if not start_time_str or not end_time_str:
                 return True
 
-            # 날짜/시간 파싱 헬퍼 함수
             def parse_dt(dt_str, date_str=None):
-                # 1. Full DateTime (ISO like)
                 for fmt in ["%Y-%m-%dT%H:%M:%S", "%Y-%m-%d %H:%M:%S"]:
                     try:
                         return datetime.strptime(dt_str, fmt)
                     except ValueError:
                         continue
-                
-                # 2. Time only + Schedule Date
+
                 if date_str:
                     try:
-                        # date_str 파싱 (ISO 8601 대응: 2026-01-19T00:00:00.000Z)
-                        if 'T' in date_str:
-                            # T 이후를 자르고 날짜만 추출하거나 fromisoformat 사용
-                            d = datetime.fromisoformat(date_str.replace('Z', '+00:00')).date()
-                        else:
-                            d = datetime.strptime(date_str, "%Y-%m-%d").date()
-                            
-                        # 24:00 예외 처리
+                        date_only = date_str.split('T')[0] if 'T' in date_str else date_str
+                        d = datetime.strptime(date_only, "%Y-%m-%d").date()
+
                         if dt_str == "24:00":
                             from datetime import time
                             return datetime.combine(d, time(23, 59, 59))
-                            
+
                         for fmt in ["%H:%M:%S", "%H:%M"]:
                             try:
                                 t = datetime.strptime(dt_str, fmt).time()
@@ -1104,7 +1144,7 @@ class InfoWidget(QWidget):
                             except ValueError:
                                 continue
                     except Exception as e:
-                        Logger.debug(f"날짜 결합 파싱 실패: {e}")
+                        Logger.debug(f"날짜/시간 파싱 실패: {e}")
                 return None
 
             start_dt = parse_dt(start_time_str, schedule_date_str)
@@ -1112,24 +1152,25 @@ class InfoWidget(QWidget):
 
             if not start_dt or not end_dt:
                 Logger.warning(f"스케줄 파싱 실패: start={start_time_str}, end={end_time_str}, date={schedule_date_str}")
-                return True # 파싱 실패 시 일단 통과
+                return True
 
             now = datetime.now()
-            
-            # 로그 출력: 시험 시간 정보
-            Logger.info(f"[스케줄 확인] 시험 허용 기간: {start_dt.strftime('%Y-%m-%d %H:%M')} ~ {end_dt.strftime('%Y-%m-%d %H:%M')} (현재 시간: {now.strftime('%Y-%m-%d %H:%M')})")
 
-            # 현재 시간이 허용 범위 밖인 경우
+            Logger.info(
+                f"[스케줄 확인] 시험 가능 시간: {start_dt.strftime('%Y-%m-%d %H:%M')} ~ {end_dt.strftime('%Y-%m-%d %H:%M')} "
+                f"(현재 시간: {now.strftime('%Y-%m-%d %H:%M')})"
+            )
+
             if not (start_dt <= now <= end_dt):
                 msg = (
-                    f"현재 시간은 시험 허용 기간이 아닙니다.\n\n"
+                    f"현재 시간은 시험 가능 시간 범위가 아닙니다.\n\n"
                     f"현재 시간: {now.strftime('%Y-%m-%d %H:%M')}\n"
-                    f"허용 기간: {start_dt.strftime('%Y-%m-%d %H:%M')} ~ {end_dt.strftime('%Y-%m-%d %H:%M')}\n\n"
+                    f"시험 가능 시간: {start_dt.strftime('%Y-%m-%d %H:%M')} ~ {end_dt.strftime('%Y-%m-%d %H:%M')}\n\n"
                     "프로그램을 종료합니다."
                 )
-                
+
                 popup = SystemPopup(
-                    title="시험 기간 만료",
+                    title="시험 일정 범위 벗어남",
                     message=msg,
                     parent=self
                 )
@@ -1139,7 +1180,7 @@ class InfoWidget(QWidget):
             return True
 
         except Exception as e:
-            Logger.error(f"스케줄 검증 중 오류 발생: {e}")
+            Logger.error(f"스케줄 검증 중 예외 발생: {e}")
             return True
 
     def _setup_for_integrated_system(self):
@@ -1232,8 +1273,13 @@ class InfoWidget(QWidget):
                 return
 
             # [추가] 시험 스케줄 검증
-            if not self._validate_test_schedule(test_data.get("schedule") or {}):
+            self.request_id = test_data.get("testRequest", {}).get("id", "")
+            if not self._validate_test_schedule(test_data):
                 self._close_loading_popup()
+                try:
+                    self.form_validator.api_client.send_heartbeat("pending", test_info={"testRequestId": self.request_id} if self.request_id else None)
+                except Exception as e:
+                    Logger.warning(f"일정 불일치 종료 시 pending heartbeat 전송 실패: {e}")
                 QApplication.instance().quit()
                 return
 
@@ -1309,7 +1355,10 @@ class InfoWidget(QWidget):
             if hasattr(self, 'port_input'):
                 ui_port = self.port_input.text().strip()
             
-            api_port = test_data.get("schedule", {}).get("testPort", None)
+            selected_schedule = getattr(self, "current_schedule", {}) if isinstance(getattr(self, "current_schedule", {}), dict) else {}
+            api_port = selected_schedule.get("testPort", None)
+            if api_port is None:
+                api_port = test_data.get("schedule", {}).get("testPort", None)
             
             if ui_port:
                 self.test_port = int(ui_port)
@@ -1422,7 +1471,8 @@ class InfoWidget(QWidget):
             self._enable_ui_after_loading()
 
     def _build_ready_test_info(self, test_data):
-        schedule = test_data.get("schedule", {}) if isinstance(test_data, dict) else {}
+        selected_schedule = getattr(self, "current_schedule", {}) if isinstance(getattr(self, "current_schedule", {}), dict) else {}
+        schedule = selected_schedule or (test_data.get("schedule", {}) if isinstance(test_data, dict) else {})
         return {
             "testRequestId": getattr(self, 'request_id', ''),
             "companyName": self.company_edit.text().strip(),

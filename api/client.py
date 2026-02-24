@@ -135,8 +135,21 @@ class APIClient:
     def send_heartbeat(self, status, test_info=None, error_message=None):
         url = f"{self.base_url}/api/heartbeat"
         try:
-            if status != "stopped" and getattr(CONSTANTS, "HEARTBEAT_STOPPED_LOCK", False):
-                Logger.info(f"[INFO] Heartbeat ({status}) suppressed by stopped-lock")
+            last_status = getattr(CONSTANTS, "HEARTBEAT_LAST_STATUS", "")
+
+            # stopped is valid only after in_progress.
+            if status == "stopped" and last_status != "in_progress":
+                Logger.info(f"[INFO] Heartbeat (stopped) suppressed: last_status={last_status}")
+                return True
+
+            # keep completed after completion, even if exit is clicked.
+            if status == "pending" and last_status == "completed":
+                Logger.info("[INFO] Heartbeat (pending) suppressed: keep completed state")
+                return True
+
+            # after stopped, suppress stray in_progress race events.
+            if status == "in_progress" and getattr(CONSTANTS, "HEARTBEAT_STOPPED_LOCK", False):
+                Logger.info("[INFO] Heartbeat (in_progress) suppressed by stopped-lock")
                 return True
             payload = {
                 "ipAddress": self.get_local_ip_address(),
@@ -154,7 +167,18 @@ class APIClient:
 
             response = requests.post(url, json=payload, timeout=self.timeout)
             Logger.info(f"[INFO] Heartbeat ({status}) code: {response.status_code}")
+            try:
+                Logger.info(f"[INFO] Heartbeat ({status}) response: {response.text}")
+            except Exception:
+                pass
             response.raise_for_status()
+            setattr(CONSTANTS, "HEARTBEAT_LAST_STATUS", status)
+            if status == "stopped":
+                setattr(CONSTANTS, "HEARTBEAT_STOPPED_LOCK", True)
+            elif status == "in_progress":
+                setattr(CONSTANTS, "HEARTBEAT_STOPPED_LOCK", False)
+            elif status == "pending":
+                setattr(CONSTANTS, "HEARTBEAT_STOPPED_LOCK", False)
             return True
         except Exception as e:
             Logger.warning(f"[WARNING] Heartbeat ({status}) failed: {e}")
@@ -177,7 +201,6 @@ class APIClient:
         return self.send_heartbeat("completed")
 
     def send_heartbeat_stopped(self, test_request_id=None):
-        setattr(CONSTANTS, "HEARTBEAT_STOPPED_LOCK", True)
         test_info = {"testRequestId": test_request_id} if test_request_id else None
         return self.send_heartbeat("stopped", test_info=test_info)
 
