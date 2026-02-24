@@ -435,8 +435,11 @@ class MyApp(PlatformMainUI):
                     # ✅ 시험 완료 - idle 상태 heartbeat 전송
                     try:
                         api_client = APIClient()
-                        api_client.send_heartbeat_completed()
-                        Logger.info(f"✅ 시험 완료 - idle 상태 전송 완료")
+                        if not getattr(self, "is_paused", False) and not getattr(CONSTANTS, "SUPPRESS_COMPLETED_HEARTBEAT", False):
+                            api_client.send_heartbeat_completed()
+                            Logger.info("completed heartbeat sent")
+                        else:
+                            Logger.info("completed heartbeat suppressed by pause/stop guard")
                     except Exception as e:
                         Logger.warning(f"⚠️ 시험 완료 - idle 상태 전송 실패: {e}")
 
@@ -1188,8 +1191,11 @@ class MyApp(PlatformMainUI):
                     # ✅ 시험 완료 - idle 상태 heartbeat 전송 (경로2)
                     try:
                         api_client = APIClient()
-                        api_client.send_heartbeat_completed()
-                        Logger.info(f"✅ 시험 완료 (경로2) - idle 상태 전송 완료")
+                        if not getattr(self, "is_paused", False) and not getattr(CONSTANTS, "SUPPRESS_COMPLETED_HEARTBEAT", False):
+                            api_client.send_heartbeat_completed()
+                            Logger.info("completed heartbeat sent")
+                        else:
+                            Logger.info("completed heartbeat suppressed by pause/stop guard")
                     except Exception as e:
                         Logger.warning(f"⚠️ 시험 완료 (경로2) - idle 상태 전송 실패: {e}")
 
@@ -1830,6 +1836,7 @@ class MyApp(PlatformMainUI):
     def sbtn_push(self):
         try:
             setattr(CONSTANTS, "SUPPRESS_COMPLETED_HEARTBEAT", False)
+            setattr(CONSTANTS, "HEARTBEAT_STOPPED_LOCK", False)
             try:
                 APIClient().send_heartbeat_in_progress(getattr(self.CONSTANTS, "request_id", ""))
             except Exception as e:
@@ -2398,6 +2405,7 @@ class MyApp(PlatformMainUI):
 
     def stop_btn_clicked(self):
         setattr(CONSTANTS, "SUPPRESS_COMPLETED_HEARTBEAT", True)
+        self.is_paused = True
         # ✅ 타이머 중지
         if self.tick_timer.isActive():
             self.tick_timer.stop()
@@ -2432,6 +2440,7 @@ class MyApp(PlatformMainUI):
         # ✅ 일시정지 상태 저장
         self.is_paused = True
         self.save_paused_state()
+        return
 
         try:
             self.run_status = "진행중"
@@ -2456,6 +2465,7 @@ class MyApp(PlatformMainUI):
 
     def cancel_btn_clicked(self):
         setattr(CONSTANTS, "SUPPRESS_COMPLETED_HEARTBEAT", True)
+        self.is_paused = True
         """시험 취소 버튼 클릭 - 진행 중단, 상태 초기화"""
         Logger.debug(f" 시험 취소 버튼 클릭")
         
@@ -2580,12 +2590,12 @@ class MyApp(PlatformMainUI):
                                      QMessageBox.No)
 
         if reply == QMessageBox.Yes:
-            QApplication.instance().setProperty("skip_exit_confirm", True)
-            result_payload = self.build_result_payload()
             try:
-                APIClient().send_heartbeat_stopped()
+                APIClient().send_heartbeat_stopped(getattr(self.CONSTANTS, "request_id", ""))
             except Exception as e:
                 Logger.warning(f"stopped heartbeat send failed on exit: {e}")
+            QApplication.instance().setProperty("skip_exit_confirm", True)
+            result_payload = self.build_result_payload()
 
             # ✅ 종료 시 일시정지 파일 삭제
             self.cleanup_paused_file()
@@ -2635,7 +2645,7 @@ class MyApp(PlatformMainUI):
     def closeEvent(self, event):
         """창 닫기 이벤트 - 서버 스레드 정리"""
         try:
-            APIClient().send_heartbeat_stopped()
+            APIClient().send_heartbeat_stopped(getattr(self.CONSTANTS, "request_id", ""))
         except Exception as e:
             Logger.warning(f"stopped heartbeat send failed on closeEvent: {e}")
         # ✅ 타이머 중지

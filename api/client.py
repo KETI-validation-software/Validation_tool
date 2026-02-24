@@ -135,6 +135,9 @@ class APIClient:
     def send_heartbeat(self, status, test_info=None, error_message=None):
         url = f"{self.base_url}/api/heartbeat"
         try:
+            if status != "stopped" and getattr(CONSTANTS, "HEARTBEAT_STOPPED_LOCK", False):
+                Logger.info(f"[INFO] Heartbeat ({status}) suppressed by stopped-lock")
+                return True
             payload = {
                 "ipAddress": self.get_local_ip_address(),
                 "status": status,
@@ -143,6 +146,11 @@ class APIClient:
                 payload["testInfo"] = test_info
             if error_message:
                 payload["errorMessage"] = error_message
+            if status in ("in_progress", "stopped"):
+                rid = ""
+                if isinstance(payload.get("testInfo"), dict):
+                    rid = payload["testInfo"].get("testRequestId", "")
+                Logger.info(f"[INFO] Heartbeat ({status}) requestId={rid}")
 
             response = requests.post(url, json=payload, timeout=self.timeout)
             Logger.info(f"[INFO] Heartbeat ({status}) code: {response.status_code}")
@@ -168,8 +176,10 @@ class APIClient:
             return True
         return self.send_heartbeat("completed")
 
-    def send_heartbeat_stopped(self):
-        return self.send_heartbeat("stopped")
+    def send_heartbeat_stopped(self, test_request_id=None):
+        setattr(CONSTANTS, "HEARTBEAT_STOPPED_LOCK", True)
+        test_info = {"testRequestId": test_request_id} if test_request_id else None
+        return self.send_heartbeat("stopped", test_info=test_info)
 
     def send_heartbeat_error(self, error_message):
         return self.send_heartbeat("error", error_message=error_message)

@@ -936,14 +936,14 @@ class InfoWidget(QWidget):
         if reply == QMessageBox.Yes:
             ok = False
             try:
-                ok = self.form_validator.api_client.send_heartbeat_stopped()
+                ok = self.form_validator.api_client.send_heartbeat_stopped(getattr(self, "request_id", ""))
             except Exception as e:
                 Logger.warning(f"⚠️ 종료 시 stopped 상태 전송 실패(1차): {e}")
 
             if not ok:
                 try:
                     from api.client import APIClient
-                    ok = APIClient().send_heartbeat_stopped()
+                    ok = APIClient().send_heartbeat_stopped(getattr(self, "request_id", ""))
                 except Exception as e:
                     Logger.warning(f"⚠️ 종료 시 stopped 상태 전송 실패(2차): {e}")
 

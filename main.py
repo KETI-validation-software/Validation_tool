@@ -37,6 +37,7 @@ from ui.info_GUI import InfoWidget
 from ui.widgets import install_gradient_messagebox
 from core.functions import resource_path
 from api.client import APIClient
+import config.CONSTANTS as CONSTANTS
 import platformVal_all as platform_app
 import systemVal_all as system_app
 import importlib
@@ -250,7 +251,7 @@ class MainWindow(QMainWindow):
         if app is not None and app.property("skip_exit_confirm"):
             app.setProperty("skip_exit_confirm", False)
             try:
-                APIClient().send_heartbeat_stopped()
+                APIClient().send_heartbeat_stopped(getattr(CONSTANTS, "request_id", ""))
             except Exception as e:
                 Logger.warning(f"[MAIN_CLOSE] failed to send stopped heartbeat (skip flag): {e}")
             Logger.debug(f"[MAIN_CLOSE] skip_exit_confirm=True, ?? ?? ??")
@@ -264,7 +265,7 @@ class MainWindow(QMainWindow):
 
         if reply == QMessageBox.Yes:
             try:
-                APIClient().send_heartbeat_stopped()
+                APIClient().send_heartbeat_stopped(getattr(CONSTANTS, "request_id", ""))
             except Exception as e:
                 Logger.warning(f"[MAIN_CLOSE] failed to send stopped heartbeat: {e}")
             # ✅ 플랫폼 검증 위젯의 일시정지 파일 정리
