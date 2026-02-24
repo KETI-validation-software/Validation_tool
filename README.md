@@ -23,7 +23,7 @@
   <img src="https://github.com/user-attachments/assets/4fab21f4-f604-4669-906e-7dae5c8f8872" alt="splash_logo" />
 </p>
 
-A unified validation tool for API integration testing of **integrated systems** and **standalone systems**.  
+A unified validation tool for API integration testing of integrated systems and standalone systems.
 It retrieves test configurations from the management system and performs scenario-based API send/receive validation.
 ---
 
@@ -112,4 +112,3 @@ pyinstaller --onedir --windowed --splash=assets/image/splash/splash.png \
 ## 📋 Releases
 
 See the [Releases](../../releases) page for the latest builds and changelogs.
-브랜치 설명은 한국어로 되어 있는 이름(정수인, 장예진)이 있어서 뺐어요. 필요하면 다시 넣어드
