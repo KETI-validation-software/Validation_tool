@@ -23,29 +23,9 @@
   <img src="https://github.com/user-attachments/assets/4fab21f4-f604-4669-906e-7dae5c8f8872" alt="splash_logo" />
 </p>
 
-## Architecture
-
-```mermaid
-flowchart TD
-    A[main.py\nApp entry / window routing] --> B[ui/info_GUI.py\nTest setup page]
-    B --> C[platformVal_all.py\nPlatform validation page]
-    B --> D[systemVal_all.py\nSystem validation page]
-
-    B --> E[api/client.py\nManagement API client]
-    C --> E
-    D --> E
-
-    C --> F[core/functions.py\nValidation utils / result JSON builder]
-    D --> F
-
-    C --> G[api/api_server.py\nLocal receiver server]
-    D --> G
-
-    C --> H[results/\nIntermediate/final outputs]
-    D --> H
-
-    E --> I[(Management Server)]
-```
+A unified validation tool for API integration testing of **integrated systems** and **standalone systems**.  
+It retrieves test configurations from the management system and performs scenario-based API send/receive validation.
+---
 
 ## Runtime Flow
 
@@ -71,3 +51,65 @@ sequenceDiagram
     U->>V: Exit
     V->>A: pending heartbeat
 ```
+---
+
+## ⚙️ Configuration — config.txt
+```ini
+[Management]
+url=http://ect2.iptime.org:20223
+
+[Test]
+test_ip=192.168.1.100
+```
+
+| Key | Description |
+|-----|-------------|
+| `url` | Management system address |
+| `test_ip` | Target device IP (used for standalone system tests only) |
+
+---
+
+## 🚀 How to Run
+
+### Onefile
+1. Download `ValidationTool_onefile.exe` and `config.txt` into the **same folder**
+2. Set the management system URL in `config.txt`
+3. Double-click the exe to launch
+
+### Onedir
+1. Download and extract the zip file
+2. Run the exe inside the extracted folder (`config.txt` is already included)
+
+---
+
+## 🔨 Build
+
+**Environment**
+- Python 3.9.13
+- PyInstaller 5.13.2
+- Windows 10
+
+### Onefile (config.txt distributed separately)
+```bash
+pyinstaller --onefile --windowed --splash=assets/image/splash/splash.png \
+  --name ValidationTool_onefile_Level1 \
+  --add-data "assets;assets" --add-data "config;config" \
+  --add-data "core;core" --add-data "spec;spec" --add-data "ui;ui" main.py
+```
+
+### Onedir (config.txt included)
+```bash
+pyinstaller --onedir --windowed --splash=assets/image/splash/splash.png \
+  --name ValidationTool_onedir_Level1 \
+  --add-data "config.txt;." --add-data "assets;assets" --add-data "config;config" \
+  --add-data "core;core" --add-data "spec;spec" --add-data "ui;ui" main.py
+```
+
+> For Level 3 build: remove `--windowed`, add `--console`, and set `DEBUG_LEVEL = 3` in `config/CONSTANTS.py`
+
+---
+
+## 📋 Releases
+
+See the [Releases](../../releases) page for the latest builds and changelogs.
+브랜치 설명은 한국어로 되어 있는 이름(정수인, 장예진)이 있어서 뺐어요. 필요하면 다시 넣어드
