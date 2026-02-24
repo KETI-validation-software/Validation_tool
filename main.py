@@ -36,6 +36,8 @@ if getattr(sys, 'frozen', False):
 from ui.info_GUI import InfoWidget
 from ui.widgets import install_gradient_messagebox
 from core.functions import resource_path
+from api.client import APIClient
+import config.CONSTANTS as CONSTANTS
 import platformVal_all as platform_app
 import systemVal_all as system_app
 import importlib
@@ -248,6 +250,10 @@ class MainWindow(QMainWindow):
         app = QApplication.instance()
         if app is not None and app.property("skip_exit_confirm"):
             app.setProperty("skip_exit_confirm", False)
+            try:
+                APIClient().send_heartbeat_stopped(getattr(CONSTANTS, "request_id", ""))
+            except Exception as e:
+                Logger.warning(f"[MAIN_CLOSE] failed to send stopped heartbeat (skip flag): {e}")
             Logger.debug(f"[MAIN_CLOSE] skip_exit_confirm=True, ?? ?? ??")
             event.accept()
             return
@@ -258,6 +264,10 @@ class MainWindow(QMainWindow):
         Logger.debug(f"[MAIN_CLOSE] 사용자 응답: {'Yes' if reply == QMessageBox.Yes else 'No'}")
 
         if reply == QMessageBox.Yes:
+            try:
+                APIClient().send_heartbeat_stopped(getattr(CONSTANTS, "request_id", ""))
+            except Exception as e:
+                Logger.warning(f"[MAIN_CLOSE] failed to send stopped heartbeat: {e}")
             # ✅ 플랫폼 검증 위젯의 일시정지 파일 정리
             if hasattr(self, '_platform_widget') and self._platform_widget is not None:
                 Logger.debug(f"[MAIN_CLOSE] 플랫폼 검증 위젯 정리 중...")

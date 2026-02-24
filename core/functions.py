@@ -12,6 +12,7 @@ from datetime import datetime
 import config.CONSTANTS as CONSTANTS
 import re
 import cv2
+import copy
 from core.logger import Logger
 
 
@@ -1474,6 +1475,21 @@ def map_auth_method(auth_type_str):
     return auth_map.get(auth_type_str, auth_type_str)
 
 
+def _extract_validation_field_name(validation_data, validation_errors):
+    """validation 항목에서 field명을 추출합니다."""
+    if isinstance(validation_errors, list) and validation_errors:
+        first_error = str(validation_errors[0]).strip()
+        if first_error:
+            m = re.match(r'^([A-Za-z0-9_.\[\]-]+)', first_error)
+            if m:
+                return m.group(1).split('.')[-1]
+
+    if isinstance(validation_data, dict) and validation_data:
+        return next(iter(validation_data.keys()))
+
+    return ""
+
+
 def generate_validation_data_from_step_buffer(step_buffer, attempt_num):
     """
     스텝 버퍼에서 검증 데이터 추출 (raw_data_list 우선 사용)
@@ -1559,10 +1575,14 @@ def generate_validation_data_from_step_buffer(step_buffer, attempt_num):
                 validation_errors = [line.strip() for line in error_text.split('\n') if line.strip()]
 
     # 4. 결과 반환 - attempt는 전달받은 값 그대로 사용
+    field_name = _extract_validation_field_name(validation_data, validation_errors)
+    transmitted_data = copy.deepcopy(validation_data)
     return {
         "attempt": attempt_num,
+        "field": field_name,
         "validationData": validation_data,
-        "validationErrors": validation_errors
+        "validationErrors": validation_errors,
+        "transmittedData": transmitted_data
     }
 
 
@@ -1589,8 +1609,20 @@ def build_result_json(myapp_instance):
         "version": CONSTANTS.version
     }
 
-    # 3. 테스트 그룹 정보
+    # 3. 테스트 그룹 정보 (신규 규격: 단일 testGroup)
     test_groups = get_test_groups_info()
+    current_group_id = getattr(myapp_instance, 'current_group_id', None)
+    test_group = test_groups[0] if test_groups else {
+        "id": "",
+        "name": "",
+        "testRange": "",
+        "testSpecIds": []
+    }
+    if current_group_id:
+        for group in test_groups:
+            if group.get("id") == current_group_id:
+                test_group = group
+                break
 
     # 4. 인증 방식
     auth_method = map_auth_method(CONSTANTS.auth_type)
@@ -1655,6 +1687,8 @@ def build_result_json(myapp_instance):
                 all_spec_results[composite_key] = spec_result
 
     test_result = list(all_spec_results.values())
+    if test_result:
+        test_group["testSpecIds"] = [item.get("testSpecId", "") for item in test_result if item.get("testSpecId")]
 
     # 7. 실행 상태
     status = getattr(myapp_instance, 'run_status', '진행중')
@@ -1672,7 +1706,7 @@ def build_result_json(myapp_instance):
     result_json = {
         "requestId": request_id,
         "evaluationTarget": evaluation_target,
-        "testGroups": test_groups,
+        "testGroup": test_group,
         "status": status,
         "authMethod": auth_method,
         "testScore": test_score,
@@ -1810,9 +1844,14 @@ def _build_spec_result(myapp_instance, spec_id, step_buffers, table_data=None, g
             for attempt in range(1, retries + 1):
                 webhook_validation = {
                     "attempt": attempt,
+                    "field": _extract_validation_field_name(
+                        step_buffer.get("webhook_data") or {},
+                        step_buffer.get("webhook_error", "").split('\n') if step_buffer.get("webhook_error") else []
+                    ),
                     "validationData": step_buffer.get("webhook_data") or {},
                     "validationErrors": step_buffer.get("webhook_error", "").split('\n') if step_buffer.get(
-                        "webhook_error") else []
+                        "webhook_error") else [],
+                    "transmittedData": copy.deepcopy(step_buffer.get("webhook_data") or {})
                 }
                 webhook_validations.append(webhook_validation)
 
@@ -1843,20 +1882,13 @@ def _build_spec_result(myapp_instance, spec_id, step_buffers, table_data=None, g
     spec_score = (total_pass / total_fields * 100) if total_fields > 0 else 0
 
     # 5. spec 이름 가져오기
-    spec_name = get_spec_test_name(spec_id)
-
-    # 6. group_id 기본값 처리
     final_group_id = group_id if group_id is not None else ""
 
-    # 7. 최종 결과 반환
+    # 신규 test-result 규격
     return {
-        "testGroup": final_group_id,
         "testSpecId": spec_id,
-        "testSpecName": spec_name,
+        "testGroupId": final_group_id,
         "score": round(spec_score, 2),
-        "totalFields": total_fields,
-        "passedFields": total_pass,
-        "failedFields": total_fields - total_pass,
         "apis": apis
     }
 
