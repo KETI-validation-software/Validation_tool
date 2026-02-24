@@ -47,35 +47,6 @@ flowchart TD
     E --> I[(Management Server)]
 ```
 
-## Directory Tree (Core)
-
-```text
-Validation_tool2/
-|- main.py
-|- platformVal_all.py
-|- systemVal_all.py
-|- form_validator.py
-|- api/
-|  |- client.py
-|  |- api_server.py
-|  `- webhook_api.py
-|- core/
-|  |- functions.py
-|  `- logger.py
-|- ui/
-|  |- info_GUI.py
-|  |- platform_main_ui.py
-|  |- system_main_ui.py
-|  |- result_page.py
-|  `- widgets.py
-|- config/
-|  `- CONSTANTS.py
-|- assets/
-|- results/
-|- tests/
-`- docs/
-```
-
 ## Runtime Flow
 
 ```mermaid
@@ -100,8 +71,3 @@ sequenceDiagram
     U->>V: Exit
     V->>A: pending heartbeat
 ```
-
-## Branch
-runner: 시험 진행 GUI (정수인)
-
-info: 시험 정보 GUI (장예진)
