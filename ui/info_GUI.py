@@ -116,6 +116,7 @@ class InfoWidget(QWidget):
                 Logger.debug("자동 로드 실패: 유효한 IP가 없음")
                 return
 
+            self.form_validator.api_client.send_heartbeat_pending()
             self.is_loading = True
             self._disable_ui_during_loading()
             self.loading_popup = LoadingPopup(width=400, height=200)
@@ -908,24 +909,6 @@ class InfoWidget(QWidget):
 
             # CONSTANTS.py 업데이트
             if self.form_validator.update_constants_py():
-                # Heartbeat (busy) 전송 - 시험 시작 시
-                test_info = {
-                    "testRequestId": getattr(self, 'request_id', ''),
-                    "companyName": self.company_edit.text().strip(),
-                    "contactPerson": getattr(self, 'contact_person', ''),
-                    "productName": self.product_edit.text().strip(),
-                    "modelName": self.model_edit.text().strip(),
-                    "version": self.version_edit.text().strip(),
-                    "testGroups": [
-                        {
-                            "id": g.get("id", ""),
-                            "name": g.get("name", ""),
-                            "testRange": g.get("testRange", "")
-                        } for g in getattr(self, 'test_groups', [])
-                    ]
-                }
-                self.form_validator.send_heartbeat_busy(test_info)
-
                 # test_group_name, verification_type(current_mode), spec_id를 함께 전달
                 self.startTestRequested.emit(self.target_system, self.current_mode, spec_id)
             else:
@@ -951,6 +934,27 @@ class InfoWidget(QWidget):
                                      QMessageBox.Yes | QMessageBox.No,
                                      QMessageBox.No)
         if reply == QMessageBox.Yes:
+            ok = False
+            try:
+                ok = self.form_validator.api_client.send_heartbeat_stopped()
+            except Exception as e:
+                Logger.warning(f"⚠️ 종료 시 stopped 상태 전송 실패(1차): {e}")
+
+            if not ok:
+                try:
+                    from api.client import APIClient
+                    ok = APIClient().send_heartbeat_stopped()
+                except Exception as e:
+                    Logger.warning(f"⚠️ 종료 시 stopped 상태 전송 실패(2차): {e}")
+
+            if not ok:
+                QMessageBox.warning(
+                    self,
+                    "종료 중단",
+                    "시험 상태를 '중단'으로 전송하지 못했습니다.\n네트워크/관리시스템 연결을 확인한 후 다시 시도해주세요."
+                )
+                return
+
             QApplication.instance().setProperty("skip_exit_confirm", True)
             QApplication.quit()
 
@@ -1034,6 +1038,7 @@ class InfoWidget(QWidget):
             return
 
         # 로딩 상태 설정 및 UI 비활성화 (로딩 중 상호작용 방지)
+        self.form_validator.api_client.send_heartbeat_pending()
         self.is_loading = True
         self._disable_ui_during_loading()
 
@@ -1400,11 +1405,12 @@ class InfoWidget(QWidget):
             # 다음 버튼 상태 업데이트
             self.check_next_button_state()
 
-            # Heartbeat (idle) 전송 - 시험 정보 불러오기 성공 시
-            self.form_validator.send_heartbeat_idle()
+            ready_test_info = self._build_ready_test_info(test_data)
+            self.form_validator.api_client.send_heartbeat_ready(ready_test_info)
 
         except Exception as e:
             Logger.debug(f"시험정보 불러오기 실패: {e}")
+            self.form_validator.api_client.send_heartbeat_error(str(e))
             import traceback
             traceback.print_exc()
             self._close_loading_popup()  # 경고창 표시 전에 로딩 팝업 먼저 닫기
@@ -1415,9 +1421,31 @@ class InfoWidget(QWidget):
             # 로딩 완료 후 UI 활성화
             self._enable_ui_after_loading()
 
+    def _build_ready_test_info(self, test_data):
+        schedule = test_data.get("schedule", {}) if isinstance(test_data, dict) else {}
+        return {
+            "testRequestId": getattr(self, 'request_id', ''),
+            "companyName": self.company_edit.text().strip(),
+            "contactPerson": getattr(self, 'contact_person', ''),
+            "productName": self.product_edit.text().strip(),
+            "modelName": self.model_edit.text().strip(),
+            "version": self.version_edit.text().strip(),
+            "testGroups": [
+                {
+                    "id": g.get("id", ""),
+                    "name": g.get("name", ""),
+                    "testRange": g.get("testRange", "")
+                } for g in getattr(self, 'test_groups', [])
+            ],
+            "scheduledDate": schedule.get("scheduledDate", ""),
+            "startTime": schedule.get("startTime", ""),
+            "endTime": schedule.get("endTime", "")
+        }
+
     def _on_test_info_error(self, error_message):
         """시험 정보 로드 실패 시 호출되는 슬롯"""
         Logger.debug(f"시험정보 불러오기 실패: {error_message}")
+        self.form_validator.api_client.send_heartbeat_error(error_message)
         self._close_loading_popup()  # 경고창 표시 전에 로딩 팝업 먼저 닫기
         QMessageBox.critical(self, "오류", f"시험 정보를 불러오는 중 오류가 발생했습니다:\n{error_message}")
 
