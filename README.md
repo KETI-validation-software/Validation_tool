@@ -23,6 +23,84 @@
   <img src="https://github.com/user-attachments/assets/4fab21f4-f604-4669-906e-7dae5c8f8872" alt="splash_logo" />
 </p>
 
+## Architecture
+
+```mermaid
+flowchart TD
+    A[main.py\nApp entry / window routing] --> B[ui/info_GUI.py\nTest setup page]
+    B --> C[platformVal_all.py\nPlatform validation page]
+    B --> D[systemVal_all.py\nSystem validation page]
+
+    B --> E[api/client.py\nManagement API client]
+    C --> E
+    D --> E
+
+    C --> F[core/functions.py\nValidation utils / result JSON builder]
+    D --> F
+
+    C --> G[api/api_server.py\nLocal receiver server]
+    D --> G
+
+    C --> H[results/\nIntermediate/final outputs]
+    D --> H
+
+    E --> I[(Management Server)]
+```
+
+## Directory Tree (Core)
+
+```text
+Validation_tool2/
+|- main.py
+|- platformVal_all.py
+|- systemVal_all.py
+|- form_validator.py
+|- api/
+|  |- client.py
+|  |- api_server.py
+|  `- webhook_api.py
+|- core/
+|  |- functions.py
+|  `- logger.py
+|- ui/
+|  |- info_GUI.py
+|  |- platform_main_ui.py
+|  |- system_main_ui.py
+|  |- result_page.py
+|  `- widgets.py
+|- config/
+|  `- CONSTANTS.py
+|- assets/
+|- results/
+|- tests/
+`- docs/
+```
+
+## Runtime Flow
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant I as info_GUI
+    participant A as APIClient
+    participant V as Validation Page
+    participant S as Management Server
+
+    U->>I: Load test info
+    I->>A: pending heartbeat
+    I->>S: GET /api/integration/test-requests/by-ip
+    I->>A: ready heartbeat (+testInfo)
+
+    U->>V: Start test
+    V->>A: in_progress heartbeat
+    V->>V: Execute validation / score
+    V->>A: completed or stopped heartbeat
+    V->>S: POST /api/integration/test-results
+
+    U->>V: Exit
+    V->>A: pending heartbeat
+```
+
 ## Branch
 runner: 시험 진행 GUI (정수인)
 
