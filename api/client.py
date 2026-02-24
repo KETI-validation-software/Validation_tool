@@ -142,11 +142,6 @@ class APIClient:
                 Logger.info(f"[INFO] Heartbeat (stopped) suppressed: last_status={last_status}")
                 return True
 
-            # keep completed after completion, even if exit is clicked.
-            if status == "pending" and last_status == "completed":
-                Logger.info("[INFO] Heartbeat (pending) suppressed: keep completed state")
-                return True
-
             # after stopped, suppress stray in_progress race events.
             if status == "in_progress" and getattr(CONSTANTS, "HEARTBEAT_STOPPED_LOCK", False):
                 Logger.info("[INFO] Heartbeat (in_progress) suppressed by stopped-lock")
@@ -184,8 +179,9 @@ class APIClient:
             Logger.warning(f"[WARNING] Heartbeat ({status}) failed: {e}")
             return False
 
-    def send_heartbeat_pending(self):
-        return self.send_heartbeat("pending")
+    def send_heartbeat_pending(self, test_request_id=None):
+        test_info = {"testRequestId": test_request_id} if test_request_id else None
+        return self.send_heartbeat("pending", test_info=test_info)
 
     def send_heartbeat_ready(self, test_info):
         return self.send_heartbeat("ready", test_info=test_info)

@@ -2591,7 +2591,7 @@ class MyApp(PlatformMainUI):
 
         if reply == QMessageBox.Yes:
             try:
-                APIClient().send_heartbeat_pending()
+                APIClient().send_heartbeat_pending(getattr(self.CONSTANTS, "request_id", ""))
             except Exception as e:
                 Logger.warning(f"stopped heartbeat send failed on exit: {e}")
             QApplication.instance().setProperty("skip_exit_confirm", True)
@@ -2645,7 +2645,7 @@ class MyApp(PlatformMainUI):
     def closeEvent(self, event):
         """창 닫기 이벤트 - 서버 스레드 정리"""
         try:
-            APIClient().send_heartbeat_pending()
+            APIClient().send_heartbeat_pending(getattr(self.CONSTANTS, "request_id", ""))
         except Exception as e:
             Logger.warning(f"stopped heartbeat send failed on closeEvent: {e}")
         # ✅ 타이머 중지
