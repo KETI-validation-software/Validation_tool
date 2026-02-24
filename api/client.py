@@ -142,6 +142,11 @@ class APIClient:
                 Logger.info(f"[INFO] Heartbeat (stopped) suppressed: last_status={last_status}")
                 return True
 
+            # keep completed after completion, even if exit is clicked.
+            if status == "pending" and last_status == "completed":
+                Logger.info("[INFO] Heartbeat (pending) suppressed: keep completed state")
+                return True
+
             # after stopped, suppress stray in_progress race events.
             if status == "in_progress" and getattr(CONSTANTS, "HEARTBEAT_STOPPED_LOCK", False):
                 Logger.info("[INFO] Heartbeat (in_progress) suppressed by stopped-lock")
@@ -162,11 +167,17 @@ class APIClient:
 
             response = requests.post(url, json=payload, timeout=self.timeout)
             Logger.info(f"[INFO] Heartbeat ({status}) code: {response.status_code}")
+            try:
+                Logger.info(f"[INFO] Heartbeat ({status}) response: {response.text}")
+            except Exception:
+                pass
             response.raise_for_status()
             setattr(CONSTANTS, "HEARTBEAT_LAST_STATUS", status)
             if status == "stopped":
                 setattr(CONSTANTS, "HEARTBEAT_STOPPED_LOCK", True)
             elif status == "in_progress":
+                setattr(CONSTANTS, "HEARTBEAT_STOPPED_LOCK", False)
+            elif status == "pending":
                 setattr(CONSTANTS, "HEARTBEAT_STOPPED_LOCK", False)
             return True
         except Exception as e:
