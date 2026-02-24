@@ -1,4 +1,4 @@
-# Validation_tool
+## Validation_tool
 <p align="center">
   <img src="https://github.com/user-attachments/assets/d15b5f1f-2052-4b2e-b914-270107ee7431" alt="<프로젝트명> Banner" width="70%" />
 </p>
@@ -18,7 +18,7 @@
 </p>
 
 
-## Project 소개
+### Project
 <p align="center">
   <img src="https://github.com/user-attachments/assets/4fab21f4-f604-4669-906e-7dae5c8f8872" alt="splash_logo" />
 </p>
@@ -45,7 +45,7 @@
 
 ---
 
-## 실행 흐름
+### 실행 흐름
 
 ```mermaid
 sequenceDiagram
@@ -71,7 +71,7 @@ sequenceDiagram
 ```
 ---
 
-## 환경설정 — config.txt
+### 환경설정 — config.txt
 ```ini
 [Management]
 url=http://ect2.iptime.org:20223
@@ -87,27 +87,27 @@ test_ip=192.168.1.100
 
 ---
 
-## 실행 방법
+### 실행 방법
 
-### Onefile
+#### Onefile
 1. `ValidationTool_onefile.exe` 와 `config.txt` 를 **같은 폴더**에 다운로드
 2. `config.txt` 에서 관리시스템 URL 설정
 3. exe 더블클릭 실행
 
-### Onedir
+#### Onedir
 1. zip 파일 다운로드 후 압축 해제
 2. 폴더 내 exe 실행 (`config.txt` 포함되어 있음)
 
 ---
 
-## 빌드 방법
+### 빌드 방법
 
 **환경**
 - Python 3.9.13
 - PyInstaller 5.13.2
 - Windows 10
 
-### Onefile (config.txt 별도 배포)
+#### Onefile (config.txt 별도 배포)
 ```bash
 pyinstaller --onefile --windowed --splash=assets/image/splash/splash.png \
   --name ValidationTool_onefile_Level1 \
@@ -115,7 +115,7 @@ pyinstaller --onefile --windowed --splash=assets/image/splash/splash.png \
   --add-data "core;core" --add-data "spec;spec" --add-data "ui;ui" main.py
 ```
 
-### Onedir (config.txt 포함)
+#### Onedir (config.txt 포함)
 ```bash
 pyinstaller --onedir --windowed --splash=assets/image/splash/splash.png \
   --name ValidationTool_onedir_Level1 \
@@ -127,6 +127,6 @@ pyinstaller --onedir --windowed --splash=assets/image/splash/splash.png \
 
 ---
 
-## 📋 릴리즈
+### 📋 릴리즈
 
 최신 빌드 및 변경 사항은 [Releases](../../releases) 페이지를 참고하세요.
