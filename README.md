@@ -13,7 +13,7 @@
   
   <!-- Custom 기능 배지 -->
   <img src="https://img.shields.io/badge/Webhook-supported-brightgreen" />
-  <img src="https://img.shields.io/badge/PyIn-ready-orange" />
+  <img src="https://img.shields.io/badge/PyIn-5.13.2-orange" />
   <img src="https://img.shields.io/badge/GUI-PyQt5-ff69b4" />
 </p>
 
