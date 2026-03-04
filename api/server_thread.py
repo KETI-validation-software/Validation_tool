@@ -7,6 +7,20 @@ from http.server import HTTPServer
 from core.functions import resource_path
 from core.logger import Logger
 
+
+class ReusableHTTPServer(HTTPServer):
+    allow_reuse_address = True
+
+    def shutdown(self):
+        try:
+            super().shutdown()
+        finally:
+            try:
+                self.server_close()
+            except Exception:
+                pass
+
+
 class server_th(QThread):
     def __init__(self, handler_class=None, address='127.0.0.1', port=8008):
         super().__init__()
@@ -14,7 +28,7 @@ class server_th(QThread):
         self.address_ip = address
         self.address_port = port
         self.server_address = (self.address_ip, self.address_port)
-        self.httpd = HTTPServer(self.server_address, self.handler_class)
+        self.httpd = ReusableHTTPServer(self.server_address, self.handler_class)
 
         certificate_private = resource_path('config/key0627/server.crt')
         certificate_key = resource_path('config/key0627/server.key')
@@ -27,7 +41,22 @@ class server_th(QThread):
         Logger.info(f'Starting on {self.server_address}')
 
     def run(self):
-        self.httpd.serve_forever()
+        try:
+            self.httpd.serve_forever()
+        finally:
+            try:
+                self.httpd.server_close()
+            except Exception:
+                pass
+
+    def stop_server(self, wait_ms=0):
+        try:
+            if self.httpd:
+                self.httpd.shutdown()
+                self.httpd.server_close()
+        finally:
+            if wait_ms is not None and wait_ms >= 0:
+                self.wait(wait_ms)
 
 
 class json_data(QThread):

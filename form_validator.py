@@ -10,6 +10,7 @@ import re
 import os
 import sys
 import json
+from urllib.parse import urlparse
 from pathlib import Path
 import traceback
 from typing import Dict, List
@@ -28,6 +29,27 @@ from core.functions import resource_path
 from core.logger import Logger
 
 import config.CONSTANTS as CONSTANTS
+
+
+def derive_webhook_port(test_port, full_url):
+    """Return webhook port as (test port + 1)."""
+    try:
+        if test_port is not None and str(test_port).strip() != "":
+            return int(test_port) + 1
+    except (TypeError, ValueError):
+        pass
+
+    if not full_url:
+        return None
+
+    try:
+        port = urlparse(full_url).port
+    except ValueError:
+        return None
+
+    if port is None:
+        return None
+    return int(port) + 1
 
 
 class FormValidator:
@@ -175,6 +197,9 @@ class FormValidator:
             # 2. 접속 정보 (시나리오명이 포함된 전체 URL 가져오기)
             full_url = self.parent.get_selected_url()
             variables['url'] = full_url
+            webhook_port = derive_webhook_port(getattr(self.parent, 'test_port', None), full_url)
+            if webhook_port is not None:
+                variables['WEBHOOK_PORT'] = webhook_port
 
             # 3. 인증 정보
             auth_type, auth_info = self._collect_auth_info()

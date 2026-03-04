@@ -4,8 +4,27 @@ import json
 import traceback
 from core.functions import resource_path
 import ssl
+import threading
 from urllib.parse import urlparse
 from core.logger import Logger
+
+
+class ReusableHTTPServer(HTTPServer):
+    allow_reuse_address = True
+
+    def shutdown(self):
+        try:
+            super().shutdown()
+        finally:
+            try:
+                self.server_close()
+            except Exception:
+                pass
+
+    def handle_error(self, _request, client_address):
+        import traceback
+        Logger.error(f"[WEBHOOK] 연결 오류 from {client_address}:\n{traceback.format_exc()}")
+
 
 class WebhookServer(BaseHTTPRequestHandler):
     result_signal = pyqtSignal(dict)
@@ -80,31 +99,33 @@ class WebhookThread(QThread):
         self.port = port
         self.message = message
         self.httpd = None
+        self.server_ready = threading.Event()
 
     def run(self):
         # ✅ 웹훅 서버는 항상 0.0.0.0에 바인딩 (모든 인터페이스에서 수신)
-        # safe_url은 로깅/디버깅용으로만 사용
         server_address = ("0.0.0.0", self.port)
         Logger.info(f"[Webhook] 서버 바인딩: 0.0.0.0:{self.port}")
-        
-        # SSL 인증서 설정
-        certificate_private = resource_path('config/key0627/server.crt')
-        certificate_key = resource_path('config/key0627/server.key')
-        ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-        ssl_context.load_cert_chain(certfile=certificate_private, keyfile=certificate_key)
-
-        self.httpd = HTTPServer(server_address, lambda *args, **kwargs: WebhookServer(*args, msg=self.message,
-                                                                                      result_signal=self.result_signal,
-                                                                                      **kwargs))
-        # SSL 설정
-        self.httpd.socket = ssl_context.wrap_socket(self.httpd.socket, server_side=True)
-
-        Logger.info(f'[Webhook] 웹훅 서버 시작됨: 0.0.0.0:{self.port}')
 
         try:
+            # SSL 인증서 설정
+            certificate_private = resource_path('config/key0627/server.crt')
+            certificate_key = resource_path('config/key0627/server.key')
+            ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+            ssl_context.load_cert_chain(certfile=certificate_private, keyfile=certificate_key)
+
+            self.httpd = ReusableHTTPServer(server_address, lambda *args, **kwargs: WebhookServer(*args, msg=self.message,
+                                                                                                   result_signal=self.result_signal,
+                                                                                                   **kwargs))
+            # SSL 설정
+            self.httpd.socket = ssl_context.wrap_socket(self.httpd.socket, server_side=True)
+
+            Logger.info(f'[Webhook] 웹훅 서버 시작됨: 0.0.0.0:{self.port}')
+            self.server_ready.set()  # 서버 준비 완료 신호
+
             self.httpd.serve_forever()
         except Exception as e:
             Logger.error(f"[Webhook Server Error] {e}")
+            self.server_ready.set()  # 실패해도 대기 해제 (무한 블로킹 방지)
         finally:
             if self.httpd:
                 self.httpd.server_close()
@@ -112,5 +133,7 @@ class WebhookThread(QThread):
     def stop(self):
         if self.httpd:
             self.httpd.shutdown()
+            self.httpd.server_close()
             return True
+        return False
 
