@@ -1607,7 +1607,7 @@ class CommonMainUI(QWidget):
             self.countdown_timer_label.setText("")
         else:
             # 우측 상단 라벨에 텍스트 업데이트 (로그 창 외부)
-            self.countdown_timer_label.setText(f"⏳ {text}")
+            self.countdown_timer_label.setText(f"{text}")
         
         # UI 즉시 갱신 반영
         QApplication.processEvents()
