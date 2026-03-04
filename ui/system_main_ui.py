@@ -1128,12 +1128,12 @@ class SystemMainUI(CommonMainUI):
             header_color = "#1D4ED8"  # Blue-700
             bg_color = "#F0F9FF"      # Blue-50
             icon = "📤"
-            type_label = "SEND"
+            type_label = "송신"
         else:
             header_color = "#1B1B1C"  # 기본 검정
             bg_color = "#F9FAFB"      # Gray-50
             icon = "📥"
-            type_label = "RECV"
+            type_label = "수신"
 
         # 점수에 따른 색상 보정 (RECV인 경우만 적용)
         if direction == "RECV" and score is not None:
