@@ -1284,6 +1284,7 @@ class MyApp(PlatformMainUI):
         self.spec_table_data[composite_key] = {
             'table_data': table_data,
             'step_buffers': [buf.copy() for buf in self.step_buffers],  # 깊은 복사
+            'monitor_html': self.valResult.toHtml() if hasattr(self, 'valResult') else "",
             'total_pass_cnt': self.total_pass_cnt,
             'total_error_cnt': self.total_error_cnt,
             'total_opt_pass_cnt': getattr(self, 'total_opt_pass_cnt', 0),  # 선택 필드 통과 수
@@ -1400,6 +1401,13 @@ class MyApp(PlatformMainUI):
         Logger.debug(f" step_opt_pass_counts 복원: {self.step_opt_pass_counts}")
         Logger.debug(f" step_opt_error_counts 복원: {self.step_opt_error_counts}")
 
+        # 실시간 모니터링 로그(HTML) 복원
+        monitor_html = saved_data.get('monitor_html', "")
+        if monitor_html:
+            self.valResult.setHtml(monitor_html)
+        else:
+            self.valResult.clear()
+
         # api_accumulated_data 복원
         if 'api_accumulated_data' in saved_data:
             self.api_accumulated_data = saved_data['api_accumulated_data'].copy()
@@ -1468,6 +1476,7 @@ class MyApp(PlatformMainUI):
                 # ✅ 6. 저장된 데이터가 있으면 복원, 없으면 초기화
                 if not self.restore_spec_data(new_spec_id):
                     # 저장된 데이터가 없으면 초기화
+                    self.valResult.clear()
                     self.total_pass_cnt = 0
                     self.total_error_cnt = 0
                     self.total_opt_pass_cnt = 0  # 선택 필드 통과 수

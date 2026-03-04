@@ -1187,11 +1187,11 @@ class CommonMainUI(QWidget):
         # 방향에 따른 스타일 및 아이콘 설정
         if direction == "SEND":
             header_color = "#1D4ED8"  # Blue-700
-            icon = "📤"
+            # icon = "📤"
             type_label = "송신"
         else:
             header_color = "#1B1B1C"  # 기본 검정
-            icon = "📥"
+            # icon = "📥"
             type_label = "수신"
 
         # 점수에 따른 색상 보정 (RECV인 경우만 적용)
@@ -1607,7 +1607,7 @@ class CommonMainUI(QWidget):
             self.countdown_timer_label.setText("")
         else:
             # 우측 상단 라벨에 텍스트 업데이트 (로그 창 외부)
-            self.countdown_timer_label.setText(f"⏳ {text}")
+            self.countdown_timer_label.setText(f"{text}")
         
         # UI 즉시 갱신 반영
         QApplication.processEvents()
