@@ -1126,14 +1126,12 @@ class SystemMainUI(CommonMainUI):
         # 방향에 따른 스타일 및 아이콘 설정
         if direction == "SEND":
             header_color = "#1D4ED8"  # Blue-700
-            bg_color = "#F0F9FF"      # Blue-50
             icon = "📤"
-            type_label = "SEND"
+            type_label = "송신"
         else:
             header_color = "#1B1B1C"  # 기본 검정
-            bg_color = "#F9FAFB"      # Gray-50
             icon = "📥"
-            type_label = "RECV"
+            type_label = "수신"
 
         # 점수에 따른 색상 보정 (RECV인 경우만 적용)
         if direction == "RECV" and score is not None:
@@ -1143,11 +1141,21 @@ class SystemMainUI(CommonMainUI):
                 header_color = "#ef4444"  # 빨강
 
         # 1. 헤더 영역 구성
+        header_text = f"{icon} [{type_label}] {step_name}"
+        if isinstance(step_name, str):
+            is_result_title = step_name.startswith("\uacb0\uacfc:")
+            is_mgmt_send_done = (
+                step_name == "\uad00\ub9ac\uc2dc\uc2a4\ud15c \uacb0\uacfc \uc804\uc1a1 \uc644\ub8cc"
+            )
+            is_test_done = step_name.startswith("\uc2dc\ud5d8 \uc644\ub8cc")
+            if is_result_title or is_mgmt_send_done or is_test_done:
+                header_text = step_name
+
         html_content = f"""
-        <table width="100%" border="0" cellspacing="0" cellpadding="8" style="margin-top: 10px; background-color: {bg_color}; border-top: 2px solid {header_color};">
+        <table width="100%" border="0" cellspacing="0" cellpadding="8" style="margin-top: 10px; border-top: 2px solid {header_color};">
             <tr>
                 <td valign="middle">
-                    <span style="font-size: 19px; font-weight: bold; color: {header_color}; font-family: 'Noto Sans KR';">{icon} [{type_label}] {step_name}</span>
+                    <span style="font-size: 19px; font-weight: bold; color: {header_color}; font-family: 'Noto Sans KR';">{header_text}</span>
                     <span style="font-size: 15px; color: #9ca3af; font-family: 'Consolas', monospace; margin-left: 10px;">{timestamp}</span>
                 </td>
             </tr>
@@ -1157,7 +1165,7 @@ class SystemMainUI(CommonMainUI):
         # 2. 내용 영역
         if request_json or details:
             html_content += f"""
-            <table width="100%" border="0" cellspacing="0" cellpadding="10" style="background-color: #FFFFFF; border: 1px solid #E5E7EB; border-top: none; margin-bottom: 10px;">
+            <table width="100%" border="0" cellspacing="0" cellpadding="10" style="margin-bottom: 10px;">
                 <tr>
                     <td>
             """
@@ -1166,11 +1174,15 @@ class SystemMainUI(CommonMainUI):
                 html_content += f'<div style="font-size: 17px; color: #4B5563; margin-bottom: 8px; font-family: \'Noto Sans KR\';">{details}</div>'
             
             if request_json:
-                html_content += f'<pre style="font-size: 16px; color: #1F2937; background-color: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 4px; padding: 10px; font-family: \'Consolas\', monospace;">{request_json}</pre>'
+                html_content += f'<pre style="font-size: 16px; color: #1F2937; background-color: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 4px; padding: 10px; font-family: \'Consolas\', monospace;">\n{request_json}</pre>'
             
             if direction == "RECV" and score is not None:
                 score_text_color = "#10b981" if score >= 100 else "#ef4444"
-                html_content += f'<div style="font-size: 17px; font-weight: bold; color: {score_text_color}; margin-top: 8px; font-family: \'Noto Sans KR\';">평가 점수: {score}%</div>'
+                try:
+                    score_display = f"{float(score):.1f}"
+                except (TypeError, ValueError):
+                    score_display = str(score)
+                html_content += f'<div style="font-size: 17px; font-weight: bold; color: {score_text_color}; margin-top: 8px; font-family: \'Noto Sans KR\';">평가 점수: {score_display}%</div>'
 
             html_content += """
                     </td>
@@ -1185,97 +1197,6 @@ class SystemMainUI(CommonMainUI):
             self.valResult.verticalScrollBar().maximum()
         )
 
-        if is_temp:
-            self.has_temp_log = True
-
-        # 타임스탬프
-        timestamp = datetime.now().strftime("%H:%M:%S")
-
-        # 점수에 따른 색상 결정
-        if score is not None:
-            if score >= 100:
-                node_color = "#10b981"  # 녹색
-                text_color = "#10b981"  # 녹색 텍스트
-            else:
-                node_color = "#ef4444"  # 빨강
-                text_color = "#ef4444"  # 빨강 텍스트
-        else:
-            node_color = "#6b7280"  # 회색
-            text_color = "#333"  # 기본 검정
-
-        # 1. 헤더 (Step 이름 + 시간) - Table로 블록 분리
-        html_content = f"""
-        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-bottom: 15px;">
-            <tr>
-                <td valign="middle">
-                    <span style="font-size: 20px; font-weight: bold; color: {text_color}; font-family: 'Noto Sans KR';">{step_name}</span>
-                    <span style="font-size: 16px; color: #9ca3af; font-family: 'Consolas', monospace; margin-left: 8px;">{timestamp}</span>
-                </td>
-            </tr>
-        </table>
-        """
-
-        # 2. 내용 영역
-        html_content += f"""
-        <table width="100%" border="0" cellspacing="0" cellpadding="0">
-            <tr>
-                <td>
-        """
-
-        # 2-1. 상세 내용 (Details)
-        if details:
-            html_content += f"""
-                <div style="margin-bottom: 8px; font-size: 18px; color: #6b7280; font-family: 'Noto Sans KR';">
-                    {details}
-                </div>
-            """
-
-        # 2-2. JSON 데이터 (회색 박스)
-        if request_json and request_json.strip():
-            escaped_json = html.escape(request_json)
-            is_json_structure = request_json.strip().startswith('{') or request_json.strip().startswith('[')
-
-            if is_json_structure:
-                html_content += f"""
-                <div style="margin-top: 5px; margin-bottom: 10px;">
-                    <div style="font-size: 15px; color: #9ca3af; font-weight: bold; margin-bottom: 4px;">📦 데이터</div>
-                    <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 10px;">
-                        <pre style="margin: 0; font-family: 'Consolas', monospace; font-size: 18px; color: #1f2937;">{escaped_json}</pre>
-                    </div>
-                </div>
-                """
-            else:
-                # JSON이 아닌 일반 텍스트일 경우
-                html_content += f"""
-                <div style="margin-top: 5px; margin-bottom: 10px;">
-                    <pre style="font-size: 18px; color: #6b7280; font-family: 'Consolas', monospace;">{escaped_json}</pre>
-                </div>
-                """
-
-        # 2-3. 점수 (Score)
-        if score is not None:
-            html_content += f"""
-                <div style="margin-top: 5px; font-size: 18px; color: #6b7280; font-weight: bold; font-family: 'Consolas', monospace;">
-                    점수: {score:.1f}%
-                </div>
-            """
-
-        # Table 닫기
-        html_content += """
-                </td>
-            </tr>
-        </table>
-        <div style="margin-bottom: 10px;"></div>
-        """
-
-        self.valResult.append(html_content)
-
-        # 자동 스크롤
-        self.valResult.verticalScrollBar().setValue(
-            self.valResult.verticalScrollBar().maximum()
-        )
-        
-        # ✅ 임시 로그 플래그 설정
         if is_temp:
             self.has_temp_log = True
 

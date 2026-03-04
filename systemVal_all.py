@@ -917,7 +917,6 @@ class MyApp(SystemMainUI):
                 print(f"[SYSTEM DEBUG] on_test_field_selected에서 pathUrl 설정: {self.pathUrl}")
 
                 # ✅ 10. 결과 텍스트 초기화
-                self.valResult.clear()
                 # self.append_monitor_log(
                 #     step_name=f"시스템 전환 완료: {self.spec_description}",
                 #     details=f"API 개수: {len(self.videoMessages)}개 | API 목록: {', '.join(self.videoMessagesDisplay)}"
@@ -1189,23 +1188,25 @@ class MyApp(SystemMainUI):
         if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
             Logger.debug(f" ==========================================\n")
 
-        self.valResult.append(
-            f'<div style="font-size: 20px; font-weight: bold; color: #333; font-family: \'Noto Sans KR\'; margin-top: 10px;">{message_name}</div>')
-        self.valResult.append(
-            '<div style="font-size: 18px; font-weight: bold; color: #333; font-family: \'Noto Sans KR\'; margin-top: 5px;">웹훅 이벤트 데이터</div>')
-        self.valResult.append(
-            f'<pre style="font-size: 18px; color: #1f2937; font-family: \'Consolas\', monospace; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 10px; margin: 5px 0;">{tmp_webhook_res}</pre>')
+        display_name = self.message_display[self.webhook_cnt] if self.webhook_cnt < len(self.message_display) else (
+            self.message[self.webhook_cnt] if self.webhook_cnt < len(self.message) else "Unknown"
+        )
 
-        if val_result == "PASS":
-            self.valResult.append(
-                f'<div style="font-size: 18px; color: #10b981; font-family: \'Noto Sans KR\'; margin-top: 5px;">웹훅 검증 결과: {val_result}</div>')
-            self.valResult.append(
-                '<div style="font-size: 18px; color: #10b981; font-family: \'Noto Sans KR\';">웹훅 데이터 검증 성공</div>')
-        else:
-            self.valResult.append(
-                f'<div style="font-size: 18px; color: #ef4444; font-family: \'Noto Sans KR\'; margin-top: 5px;">웹훅 검증 결과: {val_result}</div>')
-            self.valResult.append(
-                '<div style="font-size: 18px; color: #ef4444; font-family: \'Noto Sans KR\';">웹훅 데이터 검증 실패</div>')
+        # 웹훅 수신 payload를 실시간 모니터링에 [수신]으로 표시
+        self.append_monitor_log(
+            step_name=f"웹훅 이벤트: {display_name}",
+            request_json=tmp_webhook_res,
+            direction="RECV"
+        )
+
+        # 웹훅 ACK 응답 payload를 실시간 모니터링에 [송신]으로 표시
+        if self.webhook_res is not None:
+            webhook_ack_payload = {"code": "200", "message": "성공"}
+            self.append_monitor_log(
+                step_name=f"웹훅 응답: {display_name}",
+                request_json=json.dumps(webhook_ack_payload, indent=4, ensure_ascii=False),
+                direction="SEND"
+            )
 
         # ✅ step_pass_counts 배열에 웹훅 결과 추가 (배열이 없으면 생성하지 않음)
         # 점수 업데이트는 모든 재시도 완료 후에 일괄 처리됨 (플랫폼과 동일)
@@ -1247,6 +1248,24 @@ class MyApp(SystemMainUI):
                 current_retries = self.num_retries_list[self.webhook_cnt]
             else:
                 current_retries = 1
+
+            result_step_title = f"결과: {display_name} - 웹훅 이벤트 데이터 ({self.current_retry + 1}/{current_retries})"
+            total_fields = accumulated_pass + accumulated_error
+            score_value = (accumulated_pass / total_fields * 100) if total_fields > 0 else 0
+            result_details = (
+                f"통과 필드 수: {accumulated_pass}, 실패 필드 수: {accumulated_error} | 실시간 메시지: WebHook"
+            )
+            if val_result == "FAIL":
+                result_details += f" | 상세: {to_detail_text(val_text)}"
+
+            self.append_monitor_log(
+                step_name=result_step_title,
+                request_json="",
+                result_status=val_result,
+                score=score_value,
+                details=result_details,
+                direction="RECV"
+            )
 
                 # 누적된 필드 수로 테이블 업데이트
             self.update_table_row_with_retries(

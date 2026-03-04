@@ -279,9 +279,9 @@ class CommonMainUI(QWidget):
         monitor_section_layout.setSpacing(0)
 
         # 송수신 메시지 실시간 모니터링 라벨 (1064 × 24, 20px Medium)
-        monitor_header_container = QWidget()
-        monitor_header_container.setFixedSize(1064, 24)
-        monitor_header_layout = QHBoxLayout(monitor_header_container)
+        self.monitor_header_container = QWidget()
+        self.monitor_header_container.setFixedSize(1064, 24)
+        monitor_header_layout = QHBoxLayout(self.monitor_header_container)
         monitor_header_layout.setContentsMargins(0, 0, 0, 0)
         monitor_header_layout.setSpacing(0)
 
@@ -304,8 +304,8 @@ class CommonMainUI(QWidget):
             color: #EF4444;  /* Red-500 */
         """)
         monitor_header_layout.addWidget(self.countdown_timer_label)
-        
-        monitor_section_layout.addWidget(monitor_header_container)
+
+        monitor_section_layout.addWidget(self.monitor_header_container)
 
         # 8px gap
         monitor_section_layout.addSpacing(8)
@@ -751,6 +751,11 @@ class CommonMainUI(QWidget):
                 new_api_cw_height = int(219 + api_extra)  # api_section에서 라벨 제외한 부분
                 self.api_content_widget.setFixedSize(new_api_cw_width, new_api_cw_height)
 
+            # 모니터링 헤더 컨테이너 (타이머 라벨 포함)
+            if hasattr(self, 'monitor_header_container'):
+                new_header_width = int(1064 * width_ratio)
+                self.monitor_header_container.setFixedSize(new_header_width, 24)
+
             # 모니터링 라벨
             if hasattr(self, 'monitor_label') and hasattr(self, 'original_monitor_label_size'):
                 new_mon_label_width = int(self.original_monitor_label_size[0] * width_ratio)
@@ -1182,14 +1187,12 @@ class CommonMainUI(QWidget):
         # 방향에 따른 스타일 및 아이콘 설정
         if direction == "SEND":
             header_color = "#1D4ED8"  # Blue-700
-            bg_color = "#F0F9FF"      # Blue-50
             icon = "📤"
-            type_label = "SEND"
+            type_label = "송신"
         else:
             header_color = "#1B1B1C"  # 기본 검정
-            bg_color = "#F9FAFB"      # Gray-50
             icon = "📥"
-            type_label = "RECV"
+            type_label = "수신"
 
         # 점수에 따른 색상 보정 (RECV인 경우만 적용)
         if direction == "RECV" and score is not None:
@@ -1199,11 +1202,21 @@ class CommonMainUI(QWidget):
                 header_color = "#ef4444"  # 빨강
 
         # 1. 헤더 영역 구성
+        header_text = f"{icon} [{type_label}] {step_name}"
+        if isinstance(step_name, str):
+            is_result_title = step_name.startswith("\uacb0\uacfc:")
+            is_mgmt_send_done = (
+                step_name == "\uad00\ub9ac\uc2dc\uc2a4\ud15c \uacb0\uacfc \uc804\uc1a1 \uc644\ub8cc"
+            )
+            is_test_done = step_name.startswith("\uc2dc\ud5d8 \uc644\ub8cc")
+            if is_result_title or is_mgmt_send_done or is_test_done:
+                header_text = step_name
+
         html_content = f"""
-        <table width="100%" border="0" cellspacing="0" cellpadding="8" style="margin-top: 10px; background-color: {bg_color}; border-top: 2px solid {header_color};">
+        <table width="100%" border="0" cellspacing="0" cellpadding="8" style="margin-top: 10px; border-top: 2px solid {header_color};">
             <tr>
                 <td valign="middle">
-                    <span style="font-size: 19px; font-weight: bold; color: {header_color}; font-family: 'Noto Sans KR';">{icon} [{type_label}] {step_name}</span>
+                    <span style="font-size: 19px; font-weight: bold; color: {header_color}; font-family: 'Noto Sans KR';">{header_text}</span>
                     <span style="font-size: 15px; color: #9ca3af; font-family: 'Consolas', monospace; margin-left: 10px;">{timestamp}</span>
                 </td>
             </tr>
@@ -1213,7 +1226,7 @@ class CommonMainUI(QWidget):
         # 2. 내용 영역 (JSON 데이터 등)
         if request_json or details:
             html_content += f"""
-            <table width="100%" border="0" cellspacing="0" cellpadding="10" style="background-color: #FFFFFF; border: 1px solid #E5E7EB; border-top: none; margin-bottom: 10px;">
+            <table width="100%" border="0" cellspacing="0" cellpadding="10" style="margin-bottom: 10px;">
                 <tr>
                     <td>
             """
@@ -1222,11 +1235,15 @@ class CommonMainUI(QWidget):
                 html_content += f'<div style="font-size: 17px; color: #4B5563; margin-bottom: 8px; font-family: \'Noto Sans KR\';">{details}</div>'
             
             if request_json:
-                html_content += f'<pre style="font-size: 16px; color: #1F2937; background-color: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 4px; padding: 10px; font-family: \'Consolas\', monospace;">{request_json}</pre>'
+                html_content += f'<pre style="font-size: 16px; color: #1F2937; background-color: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 4px; padding: 10px; font-family: \'Consolas\', monospace;">\n{request_json}</pre>'
             
             if direction == "RECV" and score is not None:
                 score_text_color = "#10b981" if score >= 100 else "#ef4444"
-                html_content += f'<div style="font-size: 17px; font-weight: bold; color: {score_text_color}; margin-top: 8px; font-family: \'Noto Sans KR\';">평가 점수: {score}%</div>'
+                try:
+                    score_display = f"{float(score):.1f}"
+                except (TypeError, ValueError):
+                    score_display = str(score)
+                html_content += f'<div style="font-size: 17px; font-weight: bold; color: {score_text_color}; margin-top: 8px; font-family: \'Noto Sans KR\';">평가 점수: {score_display}%</div>'
 
             html_content += """
                     </td>
