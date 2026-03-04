@@ -1196,7 +1196,6 @@ class MyApp(SystemMainUI):
             f'<div style="font-size: 20px; font-weight: bold; color: #333; font-family: \'Noto Sans KR\'; margin-top: 10px;">{message_name}</div>'
             f'<div style="font-size: 18px; font-weight: bold; color: #333; font-family: \'Noto Sans KR\'; margin-top: 5px;">웹훅 이벤트 데이터</div>'
             f'<pre style="font-size: 18px; color: #1f2937; font-family: \'Consolas\', monospace; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 10px; margin: 5px 0;">\n{tmp_webhook_res}</pre>'
-            f'<div style="font-size: 18px; color: {result_color}; font-family: \'Noto Sans KR\'; margin-top: 5px;">웹훅 검증 결과: {val_result}</div>'
             f'<div style="font-size: 18px; color: {result_color}; font-family: \'Noto Sans KR\';">{result_text}</div>'
             f'</div>'
         )

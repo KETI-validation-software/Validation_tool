@@ -1147,7 +1147,8 @@ class SystemMainUI(CommonMainUI):
             is_mgmt_send_done = (
                 step_name == "\uad00\ub9ac\uc2dc\uc2a4\ud15c \uacb0\uacfc \uc804\uc1a1 \uc644\ub8cc"
             )
-            if is_result_title or is_mgmt_send_done:
+            is_test_done = step_name.startswith("\uc2dc\ud5d8 \uc644\ub8cc")
+            if is_result_title or is_mgmt_send_done or is_test_done:
                 header_text = step_name
 
         html_content = f"""
@@ -1177,7 +1178,11 @@ class SystemMainUI(CommonMainUI):
             
             if direction == "RECV" and score is not None:
                 score_text_color = "#10b981" if score >= 100 else "#ef4444"
-                html_content += f'<div style="font-size: 17px; font-weight: bold; color: {score_text_color}; margin-top: 8px; font-family: \'Noto Sans KR\';">평가 점수: {score}%</div>'
+                try:
+                    score_display = f"{float(score):.1f}"
+                except (TypeError, ValueError):
+                    score_display = str(score)
+                html_content += f'<div style="font-size: 17px; font-weight: bold; color: {score_text_color}; margin-top: 8px; font-family: \'Noto Sans KR\';">평가 점수: {score_display}%</div>'
 
             html_content += """
                     </td>

@@ -279,9 +279,9 @@ class CommonMainUI(QWidget):
         monitor_section_layout.setSpacing(0)
 
         # 송수신 메시지 실시간 모니터링 라벨 (1064 × 24, 20px Medium)
-        monitor_header_container = QWidget()
-        monitor_header_container.setFixedSize(1064, 24)
-        monitor_header_layout = QHBoxLayout(monitor_header_container)
+        self.monitor_header_container = QWidget()
+        self.monitor_header_container.setFixedSize(1064, 24)
+        monitor_header_layout = QHBoxLayout(self.monitor_header_container)
         monitor_header_layout.setContentsMargins(0, 0, 0, 0)
         monitor_header_layout.setSpacing(0)
 
@@ -304,8 +304,8 @@ class CommonMainUI(QWidget):
             color: #EF4444;  /* Red-500 */
         """)
         monitor_header_layout.addWidget(self.countdown_timer_label)
-        
-        monitor_section_layout.addWidget(monitor_header_container)
+
+        monitor_section_layout.addWidget(self.monitor_header_container)
 
         # 8px gap
         monitor_section_layout.addSpacing(8)
@@ -750,6 +750,11 @@ class CommonMainUI(QWidget):
                 new_api_cw_width = int(self.original_api_content_widget_size[0] * width_ratio)
                 new_api_cw_height = int(219 + api_extra)  # api_section에서 라벨 제외한 부분
                 self.api_content_widget.setFixedSize(new_api_cw_width, new_api_cw_height)
+
+            # 모니터링 헤더 컨테이너 (타이머 라벨 포함)
+            if hasattr(self, 'monitor_header_container'):
+                new_header_width = int(1064 * width_ratio)
+                self.monitor_header_container.setFixedSize(new_header_width, 24)
 
             # 모니터링 라벨
             if hasattr(self, 'monitor_label') and hasattr(self, 'original_monitor_label_size'):
@@ -1203,7 +1208,8 @@ class CommonMainUI(QWidget):
             is_mgmt_send_done = (
                 step_name == "\uad00\ub9ac\uc2dc\uc2a4\ud15c \uacb0\uacfc \uc804\uc1a1 \uc644\ub8cc"
             )
-            if is_result_title or is_mgmt_send_done:
+            is_test_done = step_name.startswith("\uc2dc\ud5d8 \uc644\ub8cc")
+            if is_result_title or is_mgmt_send_done or is_test_done:
                 header_text = step_name
 
         html_content = f"""
@@ -1233,7 +1239,11 @@ class CommonMainUI(QWidget):
             
             if direction == "RECV" and score is not None:
                 score_text_color = "#10b981" if score >= 100 else "#ef4444"
-                html_content += f'<div style="font-size: 17px; font-weight: bold; color: {score_text_color}; margin-top: 8px; font-family: \'Noto Sans KR\';">평가 점수: {score}%</div>'
+                try:
+                    score_display = f"{float(score):.1f}"
+                except (TypeError, ValueError):
+                    score_display = str(score)
+                html_content += f'<div style="font-size: 17px; font-weight: bold; color: {score_text_color}; margin-top: 8px; font-family: \'Noto Sans KR\';">평가 점수: {score_display}%</div>'
 
             html_content += """
                     </td>
