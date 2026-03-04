@@ -1189,23 +1189,17 @@ class MyApp(SystemMainUI):
         if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
             Logger.debug(f" ==========================================\n")
 
+        result_color = "#10b981" if val_result == "PASS" else "#ef4444"
+        result_text = "웹훅 데이터 검증 성공" if val_result == "PASS" else "웹훅 데이터 검증 실패"
         self.valResult.append(
-            f'<div style="font-size: 20px; font-weight: bold; color: #333; font-family: \'Noto Sans KR\'; margin-top: 10px;">{message_name}</div>')
-        self.valResult.append(
-            '<div style="font-size: 18px; font-weight: bold; color: #333; font-family: \'Noto Sans KR\'; margin-top: 5px;">웹훅 이벤트 데이터</div>')
-        self.valResult.append(
-            f'<pre style="font-size: 18px; color: #1f2937; font-family: \'Consolas\', monospace; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 10px; margin: 5px 0;">{tmp_webhook_res}</pre>')
-
-        if val_result == "PASS":
-            self.valResult.append(
-                f'<div style="font-size: 18px; color: #10b981; font-family: \'Noto Sans KR\'; margin-top: 5px;">웹훅 검증 결과: {val_result}</div>')
-            self.valResult.append(
-                '<div style="font-size: 18px; color: #10b981; font-family: \'Noto Sans KR\';">웹훅 데이터 검증 성공</div>')
-        else:
-            self.valResult.append(
-                f'<div style="font-size: 18px; color: #ef4444; font-family: \'Noto Sans KR\'; margin-top: 5px;">웹훅 검증 결과: {val_result}</div>')
-            self.valResult.append(
-                '<div style="font-size: 18px; color: #ef4444; font-family: \'Noto Sans KR\';">웹훅 데이터 검증 실패</div>')
+            f'<div style="background-color: transparent;">'
+            f'<div style="font-size: 20px; font-weight: bold; color: #333; font-family: \'Noto Sans KR\'; margin-top: 10px;">{message_name}</div>'
+            f'<div style="font-size: 18px; font-weight: bold; color: #333; font-family: \'Noto Sans KR\'; margin-top: 5px;">웹훅 이벤트 데이터</div>'
+            f'<pre style="font-size: 18px; color: #1f2937; font-family: \'Consolas\', monospace; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 10px; margin: 5px 0;">\n{tmp_webhook_res}</pre>'
+            f'<div style="font-size: 18px; color: {result_color}; font-family: \'Noto Sans KR\'; margin-top: 5px;">웹훅 검증 결과: {val_result}</div>'
+            f'<div style="font-size: 18px; color: {result_color}; font-family: \'Noto Sans KR\';">{result_text}</div>'
+            f'</div>'
+        )
 
         # ✅ step_pass_counts 배열에 웹훅 결과 추가 (배열이 없으면 생성하지 않음)
         # 점수 업데이트는 모든 재시도 완료 후에 일괄 처리됨 (플랫폼과 동일)

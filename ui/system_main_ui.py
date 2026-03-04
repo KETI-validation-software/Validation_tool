@@ -1126,12 +1126,10 @@ class SystemMainUI(CommonMainUI):
         # 방향에 따른 스타일 및 아이콘 설정
         if direction == "SEND":
             header_color = "#1D4ED8"  # Blue-700
-            bg_color = "#F0F9FF"      # Blue-50
             icon = "📤"
             type_label = "송신"
         else:
             header_color = "#1B1B1C"  # 기본 검정
-            bg_color = "#F9FAFB"      # Gray-50
             icon = "📥"
             type_label = "수신"
 
@@ -1143,11 +1141,20 @@ class SystemMainUI(CommonMainUI):
                 header_color = "#ef4444"  # 빨강
 
         # 1. 헤더 영역 구성
+        header_text = f"{icon} [{type_label}] {step_name}"
+        if isinstance(step_name, str):
+            is_result_title = step_name.startswith("\uacb0\uacfc:")
+            is_mgmt_send_done = (
+                step_name == "\uad00\ub9ac\uc2dc\uc2a4\ud15c \uacb0\uacfc \uc804\uc1a1 \uc644\ub8cc"
+            )
+            if is_result_title or is_mgmt_send_done:
+                header_text = step_name
+
         html_content = f"""
-        <table width="100%" border="0" cellspacing="0" cellpadding="8" style="margin-top: 10px; background-color: {bg_color}; border-top: 2px solid {header_color};">
+        <table width="100%" border="0" cellspacing="0" cellpadding="8" style="margin-top: 10px; border-top: 2px solid {header_color};">
             <tr>
                 <td valign="middle">
-                    <span style="font-size: 19px; font-weight: bold; color: {header_color}; font-family: 'Noto Sans KR';">{icon} [{type_label}] {step_name}</span>
+                    <span style="font-size: 19px; font-weight: bold; color: {header_color}; font-family: 'Noto Sans KR';">{header_text}</span>
                     <span style="font-size: 15px; color: #9ca3af; font-family: 'Consolas', monospace; margin-left: 10px;">{timestamp}</span>
                 </td>
             </tr>
@@ -1166,7 +1173,7 @@ class SystemMainUI(CommonMainUI):
                 html_content += f'<div style="font-size: 17px; color: #4B5563; margin-bottom: 8px; font-family: \'Noto Sans KR\';">{details}</div>'
             
             if request_json:
-                html_content += f'<pre style="font-size: 16px; color: #1F2937; background-color: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 4px; padding: 10px; font-family: \'Consolas\', monospace;">{request_json}</pre>'
+                html_content += f'<pre style="font-size: 16px; color: #1F2937; background-color: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 4px; padding: 10px; font-family: \'Consolas\', monospace;">\n{request_json}</pre>'
             
             if direction == "RECV" and score is not None:
                 score_text_color = "#10b981" if score >= 100 else "#ef4444"

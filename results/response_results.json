@@ -12,25 +12,105 @@
     "name": "기본 기능 시험-영상보안시스템",
     "testRange": "전체 필드, 전체 필드, 전체 필드",
     "testSpecIds": [
-      "cmii7wfuf006i8z1tcds6q69g"
+      "cmii7wfuf006i8z1tcds6q69g",
+      "cmii7v8pr006g8z1tvo55a50u"
     ]
   },
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 83.72,
-    "totalFields": 43,
-    "passedFields": 36,
-    "failedFields": 7
+    "score": 77.17,
+    "totalFields": 92,
+    "passedFields": 71,
+    "failedFields": 21
   },
   "testResult": [
     {
       "testSpecId": "cmii7wfuf006i8z1tcds6q69g",
       "testGroupId": "cmjcefmh8070gcfb35wjptcsl",
-      "score": 83.72,
+      "score": 0,
       "apis": [
         {
           "id": "cmii82age008k8z1t71s85tbz",
+          "name": "사용자 인증",
+          "method": "POST",
+          "endpoint": "/Authentication",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmiwtm84f0an2p002pthrkfbj",
+          "name": "전송 지원 기능 정보 연동",
+          "method": "POST",
+          "endpoint": "/Capabilities",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmiwtnnvx0ar8p002dcz8llaf",
+          "name": "보안용 센서 단말 목록 정보 연동",
+          "method": "POST",
+          "endpoint": "/SensorDeviceProfiles",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmiwtr5xt0boqp002melvctad",
+          "name": "실시간 보안용 센서 데이터 정보 연동",
+          "method": "POST",
+          "endpoint": "/RealtimeSensorData",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmiwv1ifx0ddmp0023tuwdhoi",
+          "name": "실시간 보안용 센서 이벤트 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/RealtimeSensorEventInfos",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        },
+        {
+          "id": "cmixtu5uk0dg5p002kq3htt9b",
+          "name": "저장된 보안용 센서 이벤트 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/StoredSensorEventInfos",
+          "score": 0.0,
+          "validationCnt": 0,
+          "totalFields": 0,
+          "passFields": 0,
+          "failFields": 0,
+          "validations": []
+        }
+      ]
+    },
+    {
+      "testSpecId": "cmii7v8pr006g8z1tvo55a50u",
+      "testGroupId": "cmjcefmh8070gcfb35wjptcsl",
+      "score": 77.17,
+      "apis": [
+        {
+          "id": "cmii7ylxn006m8z1tqq8dard1",
           "name": "사용자 인증",
           "method": "POST",
           "endpoint": "/Authentication",
@@ -65,128 +145,10 @@
           ]
         },
         {
-          "id": "cmiwtm84f0an2p002pthrkfbj",
+          "id": "cmiqtf9x600upie8ft45b1h1w",
           "name": "전송 지원 기능 정보 연동",
           "method": "POST",
           "endpoint": "/Capabilities",
-          "score": 100.0,
-          "validationCnt": 1,
-          "totalFields": 5,
-          "passFields": 5,
-          "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "field": "[",
-              "validationData": {
-                "code": "200",
-                "message": "성공",
-                "transportSupport": [
-                  {
-                    "transProtocolType": "Webhook",
-                    "transProtocolDesc": ""
-                  }
-                ]
-              },
-              "validationErrors": [
-                "[시도 1/1]",
-                "오류가 없습니다."
-              ],
-              "transmittedData": {
-                "code": "200",
-                "message": "성공",
-                "transportSupport": [
-                  {
-                    "transProtocolType": "Webhook",
-                    "transProtocolDesc": ""
-                  }
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "id": "cmiwtnnvx0ar8p002dcz8llaf",
-          "name": "보안용 센서 단말 목록 정보 연동",
-          "method": "POST",
-          "endpoint": "/SensorDeviceProfiles",
-          "score": 100.0,
-          "validationCnt": 1,
-          "totalFields": 11,
-          "passFields": 11,
-          "failFields": 0,
-          "validations": [
-            {
-              "attempt": 1,
-              "field": "[",
-              "validationData": {
-                "code": "200",
-                "message": "성공",
-                "sensorDeviceList": [
-                  {
-                    "sensorDeviceID": "iot0001",
-                    "sensorDeviceType": "온도",
-                    "sensorDeviceName": "온도 센서",
-                    "sensorDeviceLoc": {
-                      "lon": "127.127730",
-                      "lat": "38.439801",
-                      "alt": "32.131",
-                      "desc": "3층복도"
-                    }
-                  },
-                  {
-                    "sensorDeviceID": "iot0002",
-                    "sensorDeviceType": "온도",
-                    "sensorDeviceName": "온도 센서",
-                    "sensorDeviceLoc": {
-                      "lon": "127.127730",
-                      "lat": "38.439801",
-                      "alt": "",
-                      "desc": ""
-                    }
-                  }
-                ]
-              },
-              "validationErrors": [
-                "[시도 1/1]",
-                "오류가 없습니다."
-              ],
-              "transmittedData": {
-                "code": "200",
-                "message": "성공",
-                "sensorDeviceList": [
-                  {
-                    "sensorDeviceID": "iot0001",
-                    "sensorDeviceType": "온도",
-                    "sensorDeviceName": "온도 센서",
-                    "sensorDeviceLoc": {
-                      "lon": "127.127730",
-                      "lat": "38.439801",
-                      "alt": "32.131",
-                      "desc": "3층복도"
-                    }
-                  },
-                  {
-                    "sensorDeviceID": "iot0002",
-                    "sensorDeviceType": "온도",
-                    "sensorDeviceName": "온도 센서",
-                    "sensorDeviceLoc": {
-                      "lon": "127.127730",
-                      "lat": "38.439801",
-                      "alt": "",
-                      "desc": ""
-                    }
-                  }
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "id": "cmiwtr5xt0boqp002melvctad-registration",
-          "name": "실시간 보안용 센서 데이터 정보 연동",
-          "method": "POST",
-          "endpoint": "/RealtimeSensorData",
           "score": 100.0,
           "validationCnt": 1,
           "totalFields": 8,
@@ -198,50 +160,269 @@
               "field": "[",
               "validationData": {
                 "code": "200",
-                "message": "성공"
+                "message": "성공",
+                "streamingSupport": [
+                  {
+                    "streamProtocolType": "RTSP",
+                    "streamProtocolDesc": "Unicast"
+                  }
+                ],
+                "transportSupport": [
+                  {
+                    "transProtocolType": "Webhook",
+                    "transProtocolDesc": ""
+                  }
+                ]
               },
               "validationErrors": [
                 "[시도 1/1]",
-                "오류가 없습니다.",
-                "--- Webhook 검증 ---",
                 "오류가 없습니다."
               ],
               "transmittedData": {
                 "code": "200",
-                "message": "성공"
+                "message": "성공",
+                "streamingSupport": [
+                  {
+                    "streamProtocolType": "RTSP",
+                    "streamProtocolDesc": "Unicast"
+                  }
+                ],
+                "transportSupport": [
+                  {
+                    "transProtocolType": "Webhook",
+                    "transProtocolDesc": ""
+                  }
+                ]
               }
             }
           ]
         },
         {
-          "id": "cmiwtr5xt0boqp002melvctad-webhook",
-          "name": "실시간 보안용 센서 데이터 정보 연동 (Webhook)",
+          "id": "cmiqthu4900voie8f1evs0kfm",
+          "name": "카메라 목록 연동",
           "method": "POST",
-          "endpoint": "/RealtimeSensorData/webhook",
-          "score": 0,
+          "endpoint": "/CameraProfiles",
+          "score": 100.0,
           "validationCnt": 1,
-          "totalFields": 0,
-          "passFields": 0,
+          "totalFields": 12,
+          "passFields": 12,
           "failFields": 0,
           "validations": [
             {
               "attempt": 1,
-              "field": "",
-              "validationData": {},
-              "validationErrors": [],
-              "transmittedData": {}
+              "field": "[",
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "camName": "카메라1",
+                    "camLoc": {
+                      "lon": "127.127730",
+                      "lat": "38.439801",
+                      "alt": "32.131",
+                      "desc": "3층복도"
+                    },
+                    "camConfig": {
+                      "camType": "PTZ"
+                    }
+                  },
+                  {
+                    "camID": "cam0002",
+                    "camName": "카메라2",
+                    "camLoc": {
+                      "lon": "127.2887",
+                      "lat": "37.33671",
+                      "alt": ""
+                    },
+                    "camConfig": {
+                      "camType": "dome"
+                    }
+                  },
+                  {
+                    "camID": "cam003",
+                    "camName": "카메라3",
+                    "camLoc": {
+                      "lon": "75",
+                      "lat": "585",
+                      "alt": "122",
+                      "desc": "2층출입문"
+                    },
+                    "camConfig": {
+                      "camType": "PTZ"
+                    }
+                  },
+                  {
+                    "camID": "cam004",
+                    "camName": "카메라4",
+                    "camLoc": {
+                      "lon": "44",
+                      "lat": "211",
+                      "alt": "23",
+                      "desc": "1층 출입문"
+                    },
+                    "camConfig": {
+                      "camType": "dome"
+                    }
+                  }
+                ]
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다."
+              ],
+              "transmittedData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "camName": "카메라1",
+                    "camLoc": {
+                      "lon": "127.127730",
+                      "lat": "38.439801",
+                      "alt": "32.131",
+                      "desc": "3층복도"
+                    },
+                    "camConfig": {
+                      "camType": "PTZ"
+                    }
+                  },
+                  {
+                    "camID": "cam0002",
+                    "camName": "카메라2",
+                    "camLoc": {
+                      "lon": "127.2887",
+                      "lat": "37.33671",
+                      "alt": ""
+                    },
+                    "camConfig": {
+                      "camType": "dome"
+                    }
+                  },
+                  {
+                    "camID": "cam003",
+                    "camName": "카메라3",
+                    "camLoc": {
+                      "lon": "75",
+                      "lat": "585",
+                      "alt": "122",
+                      "desc": "2층출입문"
+                    },
+                    "camConfig": {
+                      "camType": "PTZ"
+                    }
+                  },
+                  {
+                    "camID": "cam004",
+                    "camName": "카메라4",
+                    "camLoc": {
+                      "lon": "44",
+                      "lat": "211",
+                      "alt": "23",
+                      "desc": "1층 출입문"
+                    },
+                    "camConfig": {
+                      "camType": "dome"
+                    }
+                  }
+                ]
+              }
             }
           ]
         },
         {
-          "id": "cmiwv1ifx0ddmp0023tuwdhoi-registration",
-          "name": "실시간 보안용 센서 이벤트 분석 정보 연동",
+          "id": "cmiqtkefj00whie8fd8odtc1m",
+          "name": "실시간 영상(CCTV) 전송 ",
           "method": "POST",
-          "endpoint": "/RealtimeSensorEventInfos",
+          "endpoint": "/StreamURLs",
+          "score": 0.0,
+          "validationCnt": 1,
+          "totalFields": 12,
+          "passFields": 0,
+          "failFields": 12,
+          "validations": [
+            {
+              "attempt": 1,
+              "field": "[",
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam003",
+                    "accessID": "",
+                    "accessPW": "",
+                    "camURL": "rtsp://192.168.0.1:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": 30,
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  },
+                  {
+                    "camID": "cam0001",
+                    "accessID": "",
+                    "accessPW": "",
+                    "camURL": "rtsp://192.168.0.1:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": 30,
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  }
+                ]
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "<b>[기타]</b> (1건)",
+                "- [맥락 오류] code 맥락 검증 실패: 예상값 400, 실제값 200"
+              ],
+              "transmittedData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam003",
+                    "accessID": "",
+                    "accessPW": "",
+                    "camURL": "rtsp://192.168.0.1:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": 30,
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  },
+                  {
+                    "camID": "cam0001",
+                    "accessID": "",
+                    "accessPW": "",
+                    "camURL": "rtsp://192.168.0.1:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": 30,
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "cmiqtnwm200xoie8fxzfhodj5-registration",
+          "name": "실시간 이벤트 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/RealtimeVideoEventInfos",
           "score": 100.0,
           "validationCnt": 1,
-          "totalFields": 7,
-          "passFields": 7,
+          "totalFields": 9,
+          "passFields": 9,
           "failFields": 0,
           "validations": [
             {
@@ -265,10 +446,10 @@
           ]
         },
         {
-          "id": "cmiwv1ifx0ddmp0023tuwdhoi-webhook",
-          "name": "실시간 보안용 센서 이벤트 분석 정보 연동 (Webhook)",
+          "id": "cmiqtnwm200xoie8fxzfhodj5-webhook",
+          "name": "실시간 이벤트 분석 정보 연동 (Webhook)",
           "method": "POST",
-          "endpoint": "/RealtimeSensorEventInfos/webhook",
+          "endpoint": "/RealtimeVideoEventInfos/webhook",
           "score": 0,
           "validationCnt": 1,
           "totalFields": 0,
@@ -285,10 +466,10 @@
           ]
         },
         {
-          "id": "cmixtu5uk0dg5p002kq3htt9b",
-          "name": "저장된 보안용 센서 이벤트 분석 정보 연동",
+          "id": "cmiwrkvjq0005nkgl04g93wwy",
+          "name": "저장된 영상 목록 연동",
           "method": "POST",
-          "endpoint": "/StoredSensorEventInfos",
+          "endpoint": "/StoredVideoInfos",
           "score": 0.0,
           "validationCnt": 1,
           "totalFields": 7,
@@ -301,18 +482,90 @@
               "validationData": {
                 "code": "200",
                 "message": "성공",
-                "sensorDeviceList": [
+                "camList": [
                   {
-                    "sensorDeviceID": "iot0001",
-                    "eventName": "MotionDetection",
-                    "eventTime": 19757544339582746,
-                    "eventDesc": "100도"
+                    "camID": "cam003",
+                    "timeList": [
+                      {
+                        "startTime": 13409211785657672,
+                        "endTime": 16707105918686162
+                      },
+                      {
+                        "startTime": 15536556480566629,
+                        "endTime": 16959622514372017
+                      },
+                      {
+                        "startTime": 11146448688839189,
+                        "endTime": 11356980625055409
+                      },
+                      {
+                        "startTime": 18488090183793913,
+                        "endTime": 18928658847179325
+                      }
+                    ]
                   },
                   {
-                    "sensorDeviceID": "iot0002",
-                    "eventName": "MotionDetection",
-                    "eventTime": 15604407854968,
-                    "eventDesc": "100도"
+                    "camID": "cam004",
+                    "timeList": [
+                      {
+                        "startTime": 19525283436192407,
+                        "endTime": 19955975157457596
+                      },
+                      {
+                        "startTime": 17702237822022169,
+                        "endTime": 19717686512609703
+                      },
+                      {
+                        "startTime": 11632342361193136,
+                        "endTime": 15199511846947308
+                      },
+                      {
+                        "startTime": 2889534269341525,
+                        "endTime": 13833985781160780
+                      }
+                    ]
+                  },
+                  {
+                    "camID": "cam0002",
+                    "timeList": [
+                      {
+                        "startTime": 18554056199819542,
+                        "endTime": 19958130412011136
+                      },
+                      {
+                        "startTime": 5985540877575383,
+                        "endTime": 8389079126215039
+                      },
+                      {
+                        "startTime": 8735448157587108,
+                        "endTime": 12499613205111170
+                      },
+                      {
+                        "startTime": 18256145837377723,
+                        "endTime": 18533547773834622
+                      }
+                    ]
+                  },
+                  {
+                    "camID": "cam0001",
+                    "timeList": [
+                      {
+                        "startTime": 1083163044688278,
+                        "endTime": 13049312242484267
+                      },
+                      {
+                        "startTime": 20027191358302047,
+                        "endTime": 20200339220225817
+                      },
+                      {
+                        "startTime": 19795048849490463,
+                        "endTime": 20046834762054613
+                      },
+                      {
+                        "startTime": 10317663894468572,
+                        "endTime": 12619838953937771
+                      }
+                    ]
                   }
                 ]
               },
@@ -324,18 +577,393 @@
               "transmittedData": {
                 "code": "200",
                 "message": "성공",
-                "sensorDeviceList": [
+                "camList": [
                   {
-                    "sensorDeviceID": "iot0001",
-                    "eventName": "MotionDetection",
-                    "eventTime": 19757544339582746,
-                    "eventDesc": "100도"
+                    "camID": "cam003",
+                    "timeList": [
+                      {
+                        "startTime": 13409211785657672,
+                        "endTime": 16707105918686162
+                      },
+                      {
+                        "startTime": 15536556480566629,
+                        "endTime": 16959622514372017
+                      },
+                      {
+                        "startTime": 11146448688839189,
+                        "endTime": 11356980625055409
+                      },
+                      {
+                        "startTime": 18488090183793913,
+                        "endTime": 18928658847179325
+                      }
+                    ]
                   },
                   {
-                    "sensorDeviceID": "iot0002",
-                    "eventName": "MotionDetection",
-                    "eventTime": 15604407854968,
-                    "eventDesc": "100도"
+                    "camID": "cam004",
+                    "timeList": [
+                      {
+                        "startTime": 19525283436192407,
+                        "endTime": 19955975157457596
+                      },
+                      {
+                        "startTime": 17702237822022169,
+                        "endTime": 19717686512609703
+                      },
+                      {
+                        "startTime": 11632342361193136,
+                        "endTime": 15199511846947308
+                      },
+                      {
+                        "startTime": 2889534269341525,
+                        "endTime": 13833985781160780
+                      }
+                    ]
+                  },
+                  {
+                    "camID": "cam0002",
+                    "timeList": [
+                      {
+                        "startTime": 18554056199819542,
+                        "endTime": 19958130412011136
+                      },
+                      {
+                        "startTime": 5985540877575383,
+                        "endTime": 8389079126215039
+                      },
+                      {
+                        "startTime": 8735448157587108,
+                        "endTime": 12499613205111170
+                      },
+                      {
+                        "startTime": 18256145837377723,
+                        "endTime": 18533547773834622
+                      }
+                    ]
+                  },
+                  {
+                    "camID": "cam0001",
+                    "timeList": [
+                      {
+                        "startTime": 1083163044688278,
+                        "endTime": 13049312242484267
+                      },
+                      {
+                        "startTime": 20027191358302047,
+                        "endTime": 20200339220225817
+                      },
+                      {
+                        "startTime": 19795048849490463,
+                        "endTime": 20046834762054613
+                      },
+                      {
+                        "startTime": 10317663894468572,
+                        "endTime": 12619838953937771
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "cmiwrq4r200kqnkgluspxeyu7",
+          "name": "저장된 영상(CCTV) 전송",
+          "method": "POST",
+          "endpoint": "/ReplayURL",
+          "score": 86.0,
+          "validationCnt": 1,
+          "totalFields": 14,
+          "passFields": 12,
+          "failFields": 2,
+          "validations": [
+            {
+              "attempt": 1,
+              "field": "[",
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam004",
+                    "accessID": "conn0001",
+                    "accessPW": "1234",
+                    "camURL": "rtsp://192.168.0.1:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": 30,
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  },
+                  {
+                    "camID": "cam003",
+                    "accessID": "conn0001",
+                    "accessPW": "1234",
+                    "camURL": "rtsp://192.168.0.1:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": 30,
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  },
+                  {
+                    "camID": "cam0002",
+                    "accessID": "conn0001",
+                    "accessPW": "1234",
+                    "camURL": "rtsp://192.168.0.1:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": 30,
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  },
+                  {
+                    "camID": "cam0001",
+                    "accessID": "conn0001",
+                    "accessPW": "1234",
+                    "camURL": "rtsp://192.168.0.1:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": 30,
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  }
+                ]
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "<b>[camList]</b> (2건)",
+                "- [필드 누락] endTime",
+                "- [필드 누락] startTime"
+              ],
+              "transmittedData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam004",
+                    "accessID": "conn0001",
+                    "accessPW": "1234",
+                    "camURL": "rtsp://192.168.0.1:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": 30,
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  },
+                  {
+                    "camID": "cam003",
+                    "accessID": "conn0001",
+                    "accessPW": "1234",
+                    "camURL": "rtsp://192.168.0.1:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": 30,
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  },
+                  {
+                    "camID": "cam0002",
+                    "accessID": "conn0001",
+                    "accessPW": "1234",
+                    "camURL": "rtsp://192.168.0.1:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": 30,
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  },
+                  {
+                    "camID": "cam0001",
+                    "accessID": "conn0001",
+                    "accessPW": "1234",
+                    "camURL": "rtsp://192.168.0.1:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": 30,
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "cmiws2qij05apnkgli7hun3bl",
+          "name": "저장된 이벤트 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/StoredVideoEventInfos",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 9,
+          "passFields": 9,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "field": "[",
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam004",
+                    "eventUUID": "event01",
+                    "eventName": "Intrusion",
+                    "startTime": 20251105362786686,
+                    "endTime": 20251114557940808,
+                    "eventDesc": "AAABVVVVCCCDDssvfdd"
+                  },
+                  {
+                    "camID": "cam003",
+                    "eventUUID": "event01",
+                    "eventName": "Intrusion",
+                    "startTime": 20251113425269599,
+                    "endTime": 20251113957737557,
+                    "eventDesc": "AAABVVVVCCCDDssvfdd"
+                  },
+                  {
+                    "camID": "cam0001",
+                    "eventUUID": "event01",
+                    "eventName": "Intrusion",
+                    "startTime": 20251114964035369,
+                    "endTime": 20251115036831714,
+                    "eventDesc": "AAABVVVVCCCDDssvfdd"
+                  },
+                  {
+                    "camID": "cam0002",
+                    "eventUUID": "event01",
+                    "eventName": "Intrusion",
+                    "startTime": 20251114702147197,
+                    "endTime": 20251114844794967,
+                    "eventDesc": "AAABVVVVCCCDDssvfdd"
+                  }
+                ]
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다."
+              ],
+              "transmittedData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam004",
+                    "eventUUID": "event01",
+                    "eventName": "Intrusion",
+                    "startTime": 20251105362786686,
+                    "endTime": 20251114557940808,
+                    "eventDesc": "AAABVVVVCCCDDssvfdd"
+                  },
+                  {
+                    "camID": "cam003",
+                    "eventUUID": "event01",
+                    "eventName": "Intrusion",
+                    "startTime": 20251113425269599,
+                    "endTime": 20251113957737557,
+                    "eventDesc": "AAABVVVVCCCDDssvfdd"
+                  },
+                  {
+                    "camID": "cam0001",
+                    "eventUUID": "event01",
+                    "eventName": "Intrusion",
+                    "startTime": 20251114964035369,
+                    "endTime": 20251115036831714,
+                    "eventDesc": "AAABVVVVCCCDDssvfdd"
+                  },
+                  {
+                    "camID": "cam0002",
+                    "eventUUID": "event01",
+                    "eventName": "Intrusion",
+                    "startTime": 20251114702147197,
+                    "endTime": 20251114844794967,
+                    "eventDesc": "AAABVVVVCCCDDssvfdd"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "cmiws9btu01ksp0028h4uc4az",
+          "name": "저장된 객체 분석 정보 연동",
+          "method": "POST",
+          "endpoint": "/StoredObjectAnalyticsInfos",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 16,
+          "passFields": 16,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "field": "[",
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam004",
+                    "analyticsTime": 20251111446230321,
+                    "anlayticsResultList": [
+                      {
+                        "anayticsID": "object001",
+                        "analyticsClass": "Human",
+                        "analyticsAttribute": [
+                          "빨간색"
+                        ],
+                        "analyticsConfidence": 0.8,
+                        "analyticsBoundingBox": {
+                          "left": 0.2,
+                          "top": 0.1,
+                          "right": 0.5,
+                          "bottom": 0.6
+                        },
+                        "analyticsDesc": "13가 4567"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "validationErrors": [
+                "[시도 1/1]",
+                "오류가 없습니다."
+              ],
+              "transmittedData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam004",
+                    "analyticsTime": 20251111446230321,
+                    "anlayticsResultList": [
+                      {
+                        "anayticsID": "object001",
+                        "analyticsClass": "Human",
+                        "analyticsAttribute": [
+                          "빨간색"
+                        ],
+                        "analyticsConfidence": 0.8,
+                        "analyticsBoundingBox": {
+                          "left": 0.2,
+                          "top": 0.1,
+                          "right": 0.5,
+                          "bottom": 0.6
+                        },
+                        "analyticsDesc": "13가 4567"
+                      }
+                    ]
                   }
                 ]
               }
@@ -345,5 +973,5 @@
       ]
     }
   ],
-  "completedDate": "2026-03-04T05:48:48Z"
+  "completedDate": "2026-03-04T06:01:35Z"
 }
