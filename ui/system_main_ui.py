@@ -1157,7 +1157,7 @@ class SystemMainUI(CommonMainUI):
         # 2. 내용 영역
         if request_json or details:
             html_content += f"""
-            <table width="100%" border="0" cellspacing="0" cellpadding="10" style="background-color: #FFFFFF; border: 1px solid #E5E7EB; border-top: none; margin-bottom: 10px;">
+            <table width="100%" border="0" cellspacing="0" cellpadding="10" style="margin-bottom: 10px;">
                 <tr>
                     <td>
             """
