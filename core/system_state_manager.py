@@ -56,6 +56,7 @@ class SystemStateManager:
             self.main.spec_table_data[composite_key] = {
                 'table_data': table_data,
                 'step_buffers': [buf.copy() for buf in self.main.step_buffers] if self.main.step_buffers else [],
+                'monitor_html': self.main.valResult.toHtml() if hasattr(self.main, 'valResult') else "",
                 'total_pass_cnt': self.main.total_pass_cnt,
                 'total_error_cnt': self.main.total_error_cnt,
                 # ✅ step_pass_counts와 step_error_counts 배열도 저장
@@ -178,6 +179,14 @@ class SystemStateManager:
         # ✅ 현재 진행 상태 복원 (cnt, current_retry)
         self.main.cnt = saved_data.get('cnt', 0)
         self.main.current_retry = saved_data.get('current_retry', 0)
+
+        # 실시간 모니터링 로그(HTML) 복원
+        if hasattr(self.main, 'valResult'):
+            monitor_html = saved_data.get('monitor_html', "")
+            if monitor_html:
+                self.main.valResult.setHtml(monitor_html)
+            else:
+                self.main.valResult.clear()
 
         Logger.info(f"[RESTORE] {spec_id} 데이터 복원 완료 (cnt={self.main.cnt}, current_retry={self.main.current_retry})")
         return True

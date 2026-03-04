@@ -1187,11 +1187,11 @@ class CommonMainUI(QWidget):
         # 방향에 따른 스타일 및 아이콘 설정
         if direction == "SEND":
             header_color = "#1D4ED8"  # Blue-700
-            icon = "📤"
+            # icon = "📤"
             type_label = "송신"
         else:
             header_color = "#1B1B1C"  # 기본 검정
-            icon = "📥"
+            # icon = "📥"
             type_label = "수신"
 
         # 점수에 따른 색상 보정 (RECV인 경우만 적용)

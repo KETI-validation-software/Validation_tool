@@ -880,6 +880,9 @@ class MyApp(SystemMainUI):
 
                 if not restored:
                     Logger.debug(f" 저장된 데이터 없음 - 초기화")
+                    # 시나리오별 모니터링 로그 복원 정책:
+                    # 저장된 로그가 없으면 이전 시나리오 로그를 남기지 않고 비운다.
+                    self.valResult.clear()
                     # 점수 초기화
                     self.total_pass_cnt = 0
                     self.total_error_cnt = 0
