@@ -1,4 +1,4 @@
-# Validation_tool
+## Validation_tool
 <p align="center">
   <img src="https://github.com/user-attachments/assets/d15b5f1f-2052-4b2e-b914-270107ee7431" alt="<프로젝트명> Banner" width="70%" />
 </p>
@@ -13,72 +13,40 @@
   
   <!-- Custom 기능 배지 -->
   <img src="https://img.shields.io/badge/Webhook-supported-brightgreen" />
-  <img src="https://img.shields.io/badge/PyIn-ready-orange" />
+  <img src="https://img.shields.io/badge/PyIn-5.13.2-orange" />
   <img src="https://img.shields.io/badge/GUI-PyQt5-ff69b4" />
 </p>
 
 
-## Project 
+### Project
+
 <p align="center">
   <img src="https://github.com/user-attachments/assets/4fab21f4-f604-4669-906e-7dae5c8f8872" alt="splash_logo" />
 </p>
 
+- **GUI 기반 통합 검증 도구**  
+  시험 담당자가 복잡한 명령어 없이 화면에서 바로 검증을 수행할 수 있도록 설계된 통합 도구입니다.  
+  시험 설정, 실행, 모니터링, 결과 확인까지 하나의 UI 흐름으로 제공합니다.
 
+- **관리 시스템 연동 자동화**  
+  시험 관리 시스템과 API로 연동되어 시험 정보 조회, 상태 동기화, 결과 리포팅을 자동 처리합니다.
 
-## Architecture
+- **통합시스템 및 단일시스템 시험 지원**  
+  하나의 프로젝트에서 통합시스템 시험과 단일시스템 시험을 모두 지원합니다.
 
-```mermaid
-flowchart TD
-    A[main.py\nApp entry / window routing] --> B[ui/info_GUI.py\nTest setup page]
-    B --> C[platformVal_all.py\nPlatform validation page]
-    B --> D[systemVal_all.py\nSystem validation page]
+- **실시간 검증 및 WebHook 시나리오 지원**  
+  일반 API 응답 검증뿐 아니라 WebHook 기반 시나리오까지 지원합니다.  
+  검증 결과는 단계별로 시각화되어 즉시 확인할 수 있습니다.
 
-    B --> E[api/client.py\nManagement API client]
-    C --> E
-    D --> E
+- **표준화된 상태 관리 (Heartbeat)**  
+  시험 생명주기 상태를 표준화하여 서버와 동기화합니다.
 
-    C --> F[core/functions.py\nValidation utils / result JSON builder]
-    D --> F
+- **결과 데이터 구조화 및 자동 저장**  
+  시험 결과를 JSON 기반 구조로 생성하여 서버 전송 및 로컬 저장을 동시에 수행합니다.
 
-    C --> G[api/api_server.py\nLocal receiver server]
-    D --> G
+---
 
-    C --> H[results/\nIntermediate/final outputs]
-    D --> H
-
-    E --> I[(Management Server)]
-```
-
-## Directory Tree (Core)
-
-```text
-Validation_tool2/
-|- main.py
-|- platformVal_all.py
-|- systemVal_all.py
-|- form_validator.py
-|- api/
-|  |- client.py
-|  |- api_server.py
-|  `- webhook_api.py
-|- core/
-|  |- functions.py
-|  `- logger.py
-|- ui/
-|  |- info_GUI.py
-|  |- platform_main_ui.py
-|  |- system_main_ui.py
-|  |- result_page.py
-|  `- widgets.py
-|- config/
-|  `- CONSTANTS.py
-|- assets/
-|- results/
-|- tests/
-`- docs/
-```
-
-## Runtime Flow
+### 실행 흐름
 
 ```mermaid
 sequenceDiagram
@@ -102,8 +70,64 @@ sequenceDiagram
     U->>V: Exit
     V->>A: pending heartbeat
 ```
+---
 
-## Branch
-runner: 시험 진행 GUI (정수인)
+### 환경설정 — config.txt
+```ini
+[Management]
+url=http://ect2.iptime.org:20223
 
-info: 시험 정보 GUI (장예진)
+[Test]
+test_ip=192.168.1.100
+```
+
+| 항목 | 설명 |
+|------|------|
+| `url` | 관리시스템 주소 |
+| `test_ip` | 시험 대상 IP (단일시스템 시험 시에만 사용) |
+
+---
+
+### 실행 방법
+
+#### Onefile
+1. `ValidationTool_onefile.exe` 와 `config.txt` 를 **같은 폴더**에 다운로드
+2. `config.txt` 에서 관리시스템 URL 설정
+3. exe 더블클릭 실행
+
+#### Onedir
+1. zip 파일 다운로드 후 압축 해제
+2. 폴더 내 exe 실행 (`config.txt` 포함되어 있음)
+
+---
+
+### 빌드 방법
+
+**환경**
+- Python 3.9.13
+- PyInstaller 5.13.2
+- Windows 10
+
+#### Onefile (config.txt 별도 배포)
+```bash
+pyinstaller --onefile --windowed --splash=assets/image/splash/splash.png \
+  --name ValidationTool_onefile_Level1 \
+  --add-data "assets;assets" --add-data "config;config" \
+  --add-data "core;core" --add-data "spec;spec" --add-data "ui;ui" main.py
+```
+
+#### Onedir (config.txt 포함)
+```bash
+pyinstaller --onedir --windowed --splash=assets/image/splash/splash.png \
+  --name ValidationTool_onedir_Level1 \
+  --add-data "config.txt;." --add-data "assets;assets" --add-data "config;config" \
+  --add-data "core;core" --add-data "spec;spec" --add-data "ui;ui" main.py
+```
+
+> Level 3 빌드 시: `--windowed` 제거 후 `--console` 추가, `config/CONSTANTS.py` 의 `DEBUG_LEVEL` 을 `3` 으로 변경
+
+---
+
+### 📋 릴리즈
+
+최신 빌드 및 변경 사항은 [Releases](../../releases) 페이지를 참고하세요.
