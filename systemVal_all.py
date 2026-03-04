@@ -1188,7 +1188,6 @@ class MyApp(SystemMainUI):
         if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
             Logger.debug(f" ==========================================\n")
 
-        result_text = "웹훅 데이터 검증 성공" if val_result == "PASS" else "웹훅 데이터 검증 실패"
         display_name = self.message_display[self.webhook_cnt] if self.webhook_cnt < len(self.message_display) else (
             self.message[self.webhook_cnt] if self.webhook_cnt < len(self.message) else "Unknown"
         )
@@ -1197,7 +1196,6 @@ class MyApp(SystemMainUI):
         self.append_monitor_log(
             step_name=f"웹훅 이벤트: {display_name}",
             request_json=tmp_webhook_res,
-            details=result_text,
             direction="RECV"
         )
 
@@ -1250,6 +1248,24 @@ class MyApp(SystemMainUI):
                 current_retries = self.num_retries_list[self.webhook_cnt]
             else:
                 current_retries = 1
+
+            result_step_title = f"결과: {display_name} - 웹훅 이벤트 데이터 ({self.current_retry + 1}/{current_retries})"
+            total_fields = accumulated_pass + accumulated_error
+            score_value = (accumulated_pass / total_fields * 100) if total_fields > 0 else 0
+            result_details = (
+                f"통과 필드 수: {accumulated_pass}, 실패 필드 수: {accumulated_error} | 실시간 메시지: WebHook"
+            )
+            if val_result == "FAIL":
+                result_details += f" | 상세: {to_detail_text(val_text)}"
+
+            self.append_monitor_log(
+                step_name=result_step_title,
+                request_json="",
+                result_status=val_result,
+                score=score_value,
+                details=result_details,
+                direction="RECV"
+            )
 
                 # 누적된 필드 수로 테이블 업데이트
             self.update_table_row_with_retries(
