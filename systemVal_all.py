@@ -1097,6 +1097,10 @@ class MyApp(SystemMainUI):
                     self.webhook_thread = WebhookThread(url, port, msg)
                     self.webhook_thread.result_signal.connect(self.handle_webhook_result)
                     self.webhook_thread.start()
+                    # 서버가 완전히 준비될 때까지 대기 (최대 15초)
+                    ready = self.webhook_thread.server_ready.wait(timeout=15)
+                    if not ready:
+                        Logger.error("[Webhook] 서버 준비 타임아웃 - POST 전송 취소")
                 else:
                     # WebHook이 아닌 경우 플래그 초기화
                     self.webhook_flag = False
