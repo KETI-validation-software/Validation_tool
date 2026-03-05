@@ -1202,7 +1202,7 @@ class CommonMainUI(QWidget):
                 header_color = "#ef4444"  # 빨강
 
         # 1. 헤더 영역 구성
-        header_text = f"{icon} [{type_label}] {step_name}"
+        header_text = f"[{type_label}] {step_name}"
         if isinstance(step_name, str):
             is_result_title = step_name.startswith("\uacb0\uacfc:")
             is_mgmt_send_done = (
