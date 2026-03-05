@@ -1586,6 +1586,25 @@ def generate_validation_data_from_step_buffer(step_buffer, attempt_num):
     }
 
 
+def update_webhook_step_buffer_fields(
+        step_buffer,
+        webhook_data,
+        webhook_error_text,
+        webhook_pass_cnt,
+        webhook_total_cnt):
+    """
+    Populate webhook-specific fields in a step buffer so result JSON can
+    include webhook transmittedData/validation metadata.
+    """
+    if not isinstance(step_buffer, dict):
+        return
+
+    step_buffer["webhook_data"] = copy.deepcopy(webhook_data or {})
+    step_buffer["webhook_error"] = webhook_error_text or ""
+    step_buffer["webhook_pass_cnt"] = int(webhook_pass_cnt or 0)
+    step_buffer["webhook_total_cnt"] = int(webhook_total_cnt or 0)
+
+
 def build_result_json(myapp_instance):
     """
     MyApp 인스턴스에서 데이터를 추출하여 JSON 형식으로 변환 (모든 시험 시나리오 포함)
