@@ -35,7 +35,7 @@ def create_test_info_page(parent_widget):
     main_layout.setSpacing(0)
 
     # 상단 헤더 영역
-    _setup_header(main_layout)
+    _setup_header(parent_widget, main_layout)
 
     # 본문 영역
     _setup_content(parent_widget, main_layout)
@@ -52,7 +52,26 @@ def create_test_info_page(parent_widget):
     return parent_widget.page1
 
 
-def _setup_header(main_layout):
+def _resolve_header_title_path(parent_widget):
+    target_system = getattr(parent_widget, "target_system", "")
+    if target_system == "통합시스템":
+        return "assets/image/test_info/platform_info_title.png"
+    if target_system == "단일시스템":
+        return "assets/image/test_info/system_info_title.png"
+    return "assets/image/test_info/header_title.png"
+
+
+def update_test_info_header_title(parent_widget):
+    if not hasattr(parent_widget, "page1_header_title_label"):
+        return
+
+    header_title_pixmap = QPixmap(resource_path(_resolve_header_title_path(parent_widget)))
+    parent_widget.page1_header_title_label.setPixmap(
+        header_title_pixmap.scaled(407, 36, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+    )
+
+
+def _setup_header(parent_widget, main_layout):
     """상단 헤더 영역 설정"""
     header_widget = QWidget()
     header_widget.setFixedHeight(64)
@@ -88,9 +107,10 @@ def _setup_header(main_layout):
 
     # 타이틀 이미지 (269x30)
     header_title_label = QLabel()
-    header_title_pixmap = QPixmap(resource_path("assets/image/test_info/header_title.png"))
-    header_title_label.setPixmap(header_title_pixmap)
-    header_title_label.setFixedSize(269, 30)
+    parent_widget.page1_header_title_label = header_title_label
+    header_title_pixmap = QPixmap(resource_path(_resolve_header_title_path(parent_widget)))
+    header_title_label.setPixmap(header_title_pixmap.scaled(407, 36, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+    header_title_label.setFixedSize(407, 36)
     header_layout.addWidget(header_title_label)
 
     header_layout.addStretch()

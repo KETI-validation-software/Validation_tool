@@ -34,7 +34,7 @@ def create_test_config_page(parent_widget):
     main_layout.setSpacing(0)
 
     # 상단 헤더 영역
-    _setup_header(main_layout)
+    _setup_header(parent_widget, main_layout)
 
     # 본문 영역
     _setup_content(parent_widget, main_layout)
@@ -43,7 +43,26 @@ def create_test_config_page(parent_widget):
     return parent_widget.page2
 
 
-def _setup_header(main_layout):
+def _resolve_header_title_path(parent_widget):
+    target_system = getattr(parent_widget, "target_system", "")
+    if target_system == "통합시스템":
+        return "assets/image/test_info/platform_info_title.png"
+    if target_system == "단일시스템":
+        return "assets/image/test_info/system_info_title.png"
+    return "assets/image/test_config/config_title.png"
+
+
+def update_test_config_header_title(parent_widget):
+    if not hasattr(parent_widget, "page2_header_title_label"):
+        return
+
+    header_title_pixmap = QPixmap(resource_path(_resolve_header_title_path(parent_widget)))
+    parent_widget.page2_header_title_label.setPixmap(
+        header_title_pixmap.scaled(407, 36, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+    )
+
+
+def _setup_header(parent_widget, main_layout):
     """상단 헤더 영역 설정"""
     header_widget = QWidget()
     header_widget.setFixedHeight(64)
@@ -75,9 +94,10 @@ def _setup_header(main_layout):
 
     # 타이틀 이미지
     header_title_label = QLabel()
-    header_title_pixmap = QPixmap(resource_path("assets/image/test_config/config_title.png"))
-    header_title_label.setPixmap(header_title_pixmap.scaled(458, 36, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-    header_title_label.setFixedSize(458, 36)
+    parent_widget.page2_header_title_label = header_title_label
+    header_title_pixmap = QPixmap(resource_path(_resolve_header_title_path(parent_widget)))
+    header_title_label.setPixmap(header_title_pixmap.scaled(407, 36, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+    header_title_label.setFixedSize(407, 36)
     header_layout.addWidget(header_title_label)
 
     header_layout.addStretch()
@@ -348,7 +368,7 @@ def _setup_connection_title_row(parent_widget, right_layout):
     connection_title_layout.setContentsMargins(0, 0, 0, 0)
     connection_title_layout.setSpacing(0)
 
-    parent_widget.connection_title_label = QLabel("접속 주소 탐색")
+    parent_widget.connection_title_label = QLabel("접속 주소 확인")
     parent_widget.connection_title_label.setFixedHeight(38)
     parent_widget.connection_title_label.setStyleSheet("""
         QLabel {
@@ -364,7 +384,7 @@ def _setup_connection_title_row(parent_widget, right_layout):
     connection_title_layout.addSpacing(20)
 
     # 포트 입력 레이블
-    port_label = QLabel("Port")
+    port_label = QLabel("포트 번호")
     port_label.setStyleSheet("""
         QLabel {
             font-family: 'Noto Sans KR';
@@ -589,7 +609,7 @@ def _setup_bottom_buttons(parent_widget, right_layout):
     button_layout.setSpacing(16)
 
     # 시험 시작 버튼
-    parent_widget.start_btn = QPushButton("시험 준비 완료")
+    parent_widget.start_btn = QPushButton("설정 완료")
     parent_widget.start_btn.setFixedSize(364, 48)
     parent_widget.original_start_btn_size = (364, 48)
     parent_widget.start_btn.setFocusPolicy(Qt.NoFocus)
