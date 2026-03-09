@@ -24,3 +24,4 @@ docs/
 results/trace/
 *.ndjson
 memory/
+AGENTS.md

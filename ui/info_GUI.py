@@ -28,7 +28,12 @@ from ui.sections import (
 )
 
 # 분리된 페이지 임포트
-from ui.pages import create_test_info_page, create_test_config_page
+from ui.pages import (
+    create_test_info_page,
+    create_test_config_page,
+    update_test_info_header_title,
+    update_test_config_header_title,
+)
 
 
 class TestInfoWorker(QThread):
@@ -493,7 +498,8 @@ class InfoWidget(QWidget):
                     new_url_table_height = int(376 + url_extra)
                     self.url_table.setFixedSize(new_url_table_width, new_url_table_height)
 
-                    url_col_width = new_url_table_width - 50
+                    number_col_width = getattr(self.connection_section, 'NUMBER_COLUMN_WIDTH', 0) if hasattr(self, 'connection_section') else 0
+                    url_col_width = new_url_table_width - number_col_width
                     self.url_table.setColumnWidth(1, url_col_width)
 
                     # URL 헤더 오버레이 크기 조정
@@ -524,6 +530,11 @@ class InfoWidget(QWidget):
     def create_page2(self):
         """두 번째 페이지: 시험 설정"""
         return create_test_config_page(self)
+
+    def _refresh_page_header_titles(self):
+        """시험 대상에 맞춰 1-2페이지 헤더 타이틀 이미지를 갱신."""
+        update_test_info_header_title(self)
+        update_test_config_header_title(self)
 
     # ---------- 페이지 전환 메서드 ----------
     def go_to_next_page(self):
@@ -1323,6 +1334,7 @@ class InfoWidget(QWidget):
             elif self.target_system == "INTEGRATED_SYSTEM":
                 self.target_system = "통합시스템"
             self.target_system_edit.setText(self.target_system)
+            self._refresh_page_header_titles()
 
             self.test_group_edit.setText(combined_group_names)  # 콤마로 연결된 그룹 이름들
 

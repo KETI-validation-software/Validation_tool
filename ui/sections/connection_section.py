@@ -10,6 +10,8 @@ from PyQt5.QtCore import Qt
 
 
 class ConnectionSection(QGroupBox):
+    NUMBER_COLUMN_WIDTH = 0
+    URL_COLUMN_WIDTH = 744
     """접속 정보 섹션 (744x376px)"""
 
     def __init__(self, parent_widget=None):
@@ -59,7 +61,8 @@ class ConnectionSection(QGroupBox):
         header.setDefaultAlignment(Qt.AlignCenter)
         header.setSectionResizeMode(0, QHeaderView.Fixed)
         header.setSectionResizeMode(1, QHeaderView.Stretch)
-        self.url_table.setColumnWidth(0, 50)
+        self.url_table.setColumnWidth(0, self.NUMBER_COLUMN_WIDTH)
+        self.url_table.setColumnHidden(0, True)
 
         # 왼쪽 행 번호 헤더 숨김
         vertical_header = self.url_table.verticalHeader()
@@ -153,7 +156,7 @@ class ConnectionSection(QGroupBox):
 
         # 첫 번째 열 (빈 열)
         self.url_header_empty_label = QLabel("")
-        self.url_header_empty_label.setFixedSize(50, 31)
+        self.url_header_empty_label.setFixedSize(self.NUMBER_COLUMN_WIDTH, 31)
         self.url_header_empty_label.setAlignment(Qt.AlignCenter)
         self.url_header_empty_label.setStyleSheet("""
             QLabel {
@@ -165,7 +168,7 @@ class ConnectionSection(QGroupBox):
 
         # URL 라벨 (데이터 셀과 같은 좌우 패딩으로 가운데 정렬 맞춤: 좌52px, 우32px)
         self.url_header_url_label = QLabel("URL")
-        self.url_header_url_label.setFixedSize(694, 31)
+        self.url_header_url_label.setFixedSize(self.URL_COLUMN_WIDTH, 31)
         self.url_header_url_label.setAlignment(Qt.AlignCenter)
         self.url_header_url_label.setStyleSheet("""
             QLabel {
