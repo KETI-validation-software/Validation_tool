@@ -9,6 +9,11 @@ from core.utils import remove_api_number_suffix, load_external_constants
 from ui.ui_components import TestSelectionPanel
 from ui.detail_dialog import CombinedDetailDialog
 
+
+def get_result_header_title_display_size(widget):
+    return QPixmap(resource_path(widget._get_result_header_title_path())).size()
+
+
 class ResultPageWidget(QWidget):
     backRequested = pyqtSignal()
 
@@ -88,8 +93,9 @@ class ResultPageWidget(QWidget):
         # 타이틀 이미지 (408x36) - result_title.png 사용
         header_title_label = QLabel()
         header_title_pixmap = QPixmap(resource_path(self._get_result_header_title_path()))
-        header_title_label.setPixmap(header_title_pixmap.scaled(407, 36, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        header_title_label.setFixedSize(407, 36)
+        title_size = get_result_header_title_display_size(self)
+        header_title_label.setPixmap(header_title_pixmap.scaled(title_size, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        header_title_label.setFixedSize(title_size)
         header_layout.addWidget(header_title_label)
 
         # 오른쪽 stretch (나머지 공간 채우기)
