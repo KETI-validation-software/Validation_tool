@@ -53,12 +53,11 @@ def create_test_info_page(parent_widget):
 
 
 def _resolve_header_title_path(parent_widget):
-    target_system = getattr(parent_widget, "target_system", "")
-    if target_system == "통합시스템":
-        return "assets/image/test_info/platform_info_title.png"
-    if target_system == "단일시스템":
-        return "assets/image/test_info/system_info_title.png"
     return "assets/image/test_info/header_title.png"
+
+
+def _get_header_title_display_size(parent_widget):
+    return QPixmap(resource_path(_resolve_header_title_path(parent_widget))).size()
 
 
 def update_test_info_header_title(parent_widget):
@@ -66,9 +65,11 @@ def update_test_info_header_title(parent_widget):
         return
 
     header_title_pixmap = QPixmap(resource_path(_resolve_header_title_path(parent_widget)))
+    title_size = _get_header_title_display_size(parent_widget)
     parent_widget.page1_header_title_label.setPixmap(
-        header_title_pixmap.scaled(407, 36, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        header_title_pixmap.scaled(title_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
     )
+    parent_widget.page1_header_title_label.setFixedSize(title_size)
 
 
 def _setup_header(parent_widget, main_layout):
@@ -109,8 +110,9 @@ def _setup_header(parent_widget, main_layout):
     header_title_label = QLabel()
     parent_widget.page1_header_title_label = header_title_label
     header_title_pixmap = QPixmap(resource_path(_resolve_header_title_path(parent_widget)))
-    header_title_label.setPixmap(header_title_pixmap.scaled(407, 36, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-    header_title_label.setFixedSize(407, 36)
+    title_size = _get_header_title_display_size(parent_widget)
+    header_title_label.setPixmap(header_title_pixmap.scaled(title_size, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+    header_title_label.setFixedSize(title_size)
     header_layout.addWidget(header_title_label)
 
     header_layout.addStretch()
