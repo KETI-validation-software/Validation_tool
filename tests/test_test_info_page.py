@@ -1,8 +1,13 @@
 import unittest
 
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QVBoxLayout
 
-from ui.pages.test_info_page import _get_header_title_display_size, _resolve_header_title_path
+from ui.pages.test_info_page import (
+    _get_header_title_display_size,
+    _get_header_title_top_offset,
+    _resolve_header_title_path,
+    _setup_header,
+)
 
 
 class DummyParent:
@@ -37,6 +42,15 @@ class TestTestInfoPage(unittest.TestCase):
         self.assertEqual(_get_header_title_display_size(parent).width(), 267)
         self.assertEqual(_get_header_title_display_size(parent).height(), 23)
 
+    def test_page1_header_title_has_three_pixel_top_offset_without_wrapper(self):
+        parent = DummyParent("통합시스템")
+        layout = QVBoxLayout()
+
+        _setup_header(parent, layout)
+
+        margins = parent.page1_header_title_label.contentsMargins()
+        self.assertEqual(margins.top(), 3)
+        self.assertEqual(parent.page1_header_title_label.height(), 23 + _get_header_title_top_offset())
 
 if __name__ == "__main__":
     unittest.main()

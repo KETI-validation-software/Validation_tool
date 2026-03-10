@@ -60,16 +60,23 @@ def _get_header_title_display_size(parent_widget):
     return QPixmap(resource_path(_resolve_header_title_path(parent_widget))).size()
 
 
+def _get_header_title_top_offset():
+    return 3
+
+
 def update_test_info_header_title(parent_widget):
     if not hasattr(parent_widget, "page1_header_title_label"):
         return
 
     header_title_pixmap = QPixmap(resource_path(_resolve_header_title_path(parent_widget)))
     title_size = _get_header_title_display_size(parent_widget)
+    top_offset = _get_header_title_top_offset()
     parent_widget.page1_header_title_label.setPixmap(
         header_title_pixmap.scaled(title_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
     )
-    parent_widget.page1_header_title_label.setFixedSize(title_size)
+    parent_widget.page1_header_title_label.setContentsMargins(0, top_offset, 0, 0)
+    parent_widget.page1_header_title_label.setAlignment(Qt.AlignLeft | Qt.AlignTop)
+    parent_widget.page1_header_title_label.setFixedSize(title_size.width(), title_size.height() + top_offset)
 
 
 def _setup_header(parent_widget, main_layout):
@@ -111,8 +118,11 @@ def _setup_header(parent_widget, main_layout):
     parent_widget.page1_header_title_label = header_title_label
     header_title_pixmap = QPixmap(resource_path(_resolve_header_title_path(parent_widget)))
     title_size = _get_header_title_display_size(parent_widget)
+    top_offset = _get_header_title_top_offset()
     header_title_label.setPixmap(header_title_pixmap.scaled(title_size, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-    header_title_label.setFixedSize(title_size)
+    header_title_label.setContentsMargins(0, top_offset, 0, 0)
+    header_title_label.setAlignment(Qt.AlignLeft | Qt.AlignTop)
+    header_title_label.setFixedSize(title_size.width(), title_size.height() + top_offset)
     header_layout.addWidget(header_title_label)
 
     header_layout.addStretch()
