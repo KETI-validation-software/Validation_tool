@@ -44,6 +44,41 @@ def replace_transport_desc_for_display(json_str):
     # 원본 그대로 반환 (하드코딩 치환 제거)
     return json_str
 
+
+def build_monitor_header_text(type_label, step_name):
+    """
+    실시간 모니터링 헤더 텍스트를 구성한다.
+    송수신 payload 헤더에만 [송신]/[수신] 접두어를 붙이고,
+    시작/결과/완료성 제목은 원문 그대로 유지한다.
+    """
+    if not isinstance(step_name, str):
+        return f"[{type_label}] {step_name}"
+
+    plain_title_prefixes = (
+        "결과:",
+        "시험 API 결과:",
+        "시험 완료",
+        "시험 시작",
+    )
+    plain_titles = {
+        "관리시스템 결과 전송 완료",
+    }
+
+    if step_name.startswith(plain_title_prefixes) or step_name in plain_titles:
+        return step_name
+
+    return f"[{type_label}] {step_name}"
+
+
+def normalize_monitor_step_name(step_name):
+    """
+    실시간 모니터링 제목에서 중복되거나 불필요한 보조 태그를 제거한다.
+    """
+    if not isinstance(step_name, str):
+        return step_name
+
+    return step_name.replace(" (응답)", "")
+
 def to_detail_text(val_text):
     """
     검증 결과 텍스트를 항상 사람이 읽을 문자열로 표준화

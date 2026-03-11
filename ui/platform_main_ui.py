@@ -1107,7 +1107,7 @@ class PlatformMainUI(CommonMainUI):
 
         from datetime import datetime
         import html
-        from core.utils import replace_transport_desc_for_display
+        from core.utils import build_monitor_header_text, replace_transport_desc_for_display
 
         # ✅ UI 표시용: transProtocolDesc 하드코딩 치환
         if request_json:
@@ -1134,15 +1134,7 @@ class PlatformMainUI(CommonMainUI):
                 header_color = "#ef4444"  # 빨강
 
         # 1. 헤더 영역 구성
-        header_text = f"[{type_label}] {step_name}"
-        if isinstance(step_name, str):
-            is_result_title = step_name.startswith("\uacb0\uacfc:")
-            is_mgmt_send_done = (
-                step_name == "\uad00\ub9ac\uc2dc\uc2a4\ud15c \uacb0\uacfc \uc804\uc1a1 \uc644\ub8cc"
-            )
-            is_test_done = step_name.startswith("\uc2dc\ud5d8 \uc644\ub8cc")
-            if is_result_title or is_mgmt_send_done or is_test_done:
-                header_text = step_name
+        header_text = build_monitor_header_text(type_label, step_name)
 
         html_content = f"""
         <table width="100%" border="0" cellspacing="0" cellpadding="8" style="margin-top: 10px; border-top: 2px solid {header_color};">
