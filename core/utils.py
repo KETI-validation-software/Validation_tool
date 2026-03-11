@@ -79,6 +79,24 @@ def normalize_monitor_step_name(step_name):
 
     return step_name.replace(" (응답)", "")
 
+
+def normalize_monitor_request_json(type_label, step_name, request_json, details=""):
+    """
+    payload 로그에서 본문이 비어 있으면 사용자용 안내 문구를 채운다.
+    시작/결과/완료성 제목은 빈 본문을 그대로 둔다.
+    """
+    if request_json:
+        return request_json
+
+    if details:
+        return request_json
+
+    header_text = build_monitor_header_text(type_label, step_name)
+    if isinstance(header_text, str) and header_text.startswith("["):
+        return "메시지 없음"
+
+    return request_json
+
 def to_detail_text(val_text):
     """
     검증 결과 텍스트를 항상 사람이 읽을 문자열로 표준화

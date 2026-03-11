@@ -1114,7 +1114,11 @@ class SystemMainUI(CommonMainUI):
 
         from datetime import datetime
         import html
-        from core.utils import build_monitor_header_text, replace_transport_desc_for_display
+        from core.utils import (
+            build_monitor_header_text,
+            normalize_monitor_request_json,
+            replace_transport_desc_for_display,
+        )
 
         # ✅ UI 표시용: transProtocolDesc 하드코딩 치환
         if request_json:
@@ -1142,6 +1146,7 @@ class SystemMainUI(CommonMainUI):
 
         # 1. 헤더 영역 구성
         header_text = build_monitor_header_text(type_label, step_name)
+        request_json = normalize_monitor_request_json(type_label, step_name, request_json, details)
 
         html_content = f"""
         <table width="100%" border="0" cellspacing="0" cellpadding="8" style="margin-top: 10px; border-top: 2px solid {header_color};">
