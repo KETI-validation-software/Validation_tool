@@ -27,7 +27,7 @@ from ui.platform_main_ui import PlatformMainUI
 import spec.Schema_response as schema_response_module
 import warnings
 from core.validation_registry import get_validation_rules
-from core.utils import remove_api_number_suffix, to_detail_text, redact, clean_trace_directory, format_schema, load_from_trace_file, load_external_constants
+from core.utils import remove_api_number_suffix, to_detail_text, redact, clean_trace_directory, format_schema, load_from_trace_file, load_external_constants, normalize_monitor_step_name
 from core.logger import Logger
 
 warnings.filterwarnings('ignore')
@@ -543,7 +543,6 @@ class MyApp(PlatformMainUI):
                 Logger.debug(f" ✅ 요청 도착 감지! API: {api_name}, 시도: {self.current_retry + 1}/{expected_retries}")
 
                 display_name = self.Server.message_display[self.cnt] if self.cnt < len(self.Server.message_display) else "Unknown"
-                message_name = "시험 API: " + display_name
 
                 # SPEC_CONFIG에서 검증 설정 가져오기
                 current_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
@@ -576,13 +575,6 @@ class MyApp(PlatformMainUI):
                 add_err = 0
                 add_opt_pass = 0  # 선택 필드 통과 수
                 add_opt_error = 0  # 선택 필드 에러 수
-
-                # 실시간 진행률 표시
-                if retry_attempt == 0:
-                    self.append_monitor_log(
-                        step_name=message_name,
-                        details=f"총 {current_retries}회 검증 예정"
-                    )
 
                 api_name = self.Server.message[self.cnt]
                 Logger.debug(f"시스템 요청 수신: {api_name} (시도 {retry_attempt + 1}/{current_retries})")
@@ -690,7 +682,6 @@ class MyApp(PlatformMainUI):
                         self.append_monitor_log(
                             step_name=f"시험 API: {self.Server.message[self.cnt]} (시도 {retry_attempt + 1}/{current_retries})",
                             request_json=tmp_res_auth,
-                            details=f"총 {current_retries}회 검증 예정",
                             direction="RECV"
                         )
                     else:
@@ -934,7 +925,7 @@ class MyApp(PlatformMainUI):
                 tmp_response_json = json.dumps(response_data, indent=4, ensure_ascii=False) if 'response_data' in locals() else "{}"
                 
                 self.append_monitor_log(
-                    step_name=f"{display_name} (응답)",
+                    step_name=normalize_monitor_step_name(f"{display_name} (응답)"),
                     request_json=tmp_response_json,
                     direction="SEND"
                 )

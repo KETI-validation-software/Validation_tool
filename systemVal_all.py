@@ -1702,7 +1702,6 @@ class MyApp(SystemMainUI):
                             display_name = self.message_display[self.cnt] if self.cnt < len(self.message_display) else api_name
                             self.append_monitor_log(
                                 step_name=f"시험 API: {display_name} ({self.current_retry + 1}/{current_retries})",
-                                details=f"총 {current_retries}회 검증 예정",
                                 request_json=tmp_res_auth,
                                 direction="RECV"
                             )
