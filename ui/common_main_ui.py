@@ -44,6 +44,7 @@ def create_embedded_back_navigation(parent, click_handler, width=424):
     container = QWidget(parent)
     container.setFixedSize(width, 46)
     container.setStyleSheet("background: transparent;")
+    container.base_width = width
 
     container_layout = QVBoxLayout(container)
     container_layout.setContentsMargins(0, 0, 0, 0)
@@ -101,6 +102,7 @@ def create_embedded_back_navigation(parent, click_handler, width=424):
         }
     """)
     container_layout.addWidget(divider, 0, Qt.AlignLeft)
+    container.divider = divider
 
     return container
 
@@ -261,30 +263,34 @@ class CommonMainUI(QWidget):
 
         # ✅ 시험 URL 라벨 + 텍스트 박스 (가로 배치)
         self.url_row = QWidget()
-        self.url_row.setFixedSize(418, 36)
+        self.url_row.setFixedSize(444, 36)
         self.url_row.setStyleSheet("background: transparent;")
-        self.original_url_row_size = (418, 36)
+        self.original_url_row_size = (444, 36)
         url_row_layout = QHBoxLayout()
         url_row_layout.setContentsMargins(0, 0, 0, 0)
+        url_row_layout.setSpacing(10)
         url_row_layout.setSpacing(8)  # 라벨과 텍스트 박스 사이 8px gap
         url_row_layout.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)  # 왼쪽 정렬
 
         # 시험 URL 라벨 (96 × 24, 20px Medium)
         result_label = QLabel('시험 URL')
-        result_label.setFixedSize(96, 24)
+        result_label.setFixedSize(74, 24)
+        result_label.setText('?ì’—ë¿• url:')
         result_label.setStyleSheet("""
-            font-size: 20px;
+            font-size: 16px;
             font-family: "Noto Sans KR";
             font-weight: 500;
             color: #000000;
         """)
         result_label.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
+        result_label.setText("\uc2dc\ud5d8 URL:")
+        url_row_layout.setSpacing(10)
         url_row_layout.addWidget(result_label)
 
         # ✅ URL 텍스트 박스 (960 × 36, 내부 좌우 24px padding, 18px Medium)
         self.url_text_box = QLineEdit()
-        self.url_text_box.setFixedSize(314, 36)
-        self.original_url_text_box_size = (314, 36)
+        self.url_text_box.setFixedSize(360, 36)
+        self.original_url_text_box_size = (360, 36)
         self.url_text_box.setReadOnly(False)
         self.url_text_box.setPlaceholderText("접속 주소를 입력하세요.")
 
@@ -793,6 +799,14 @@ class CommonMainUI(QWidget):
                 self.left_col.setFixedSize(new_left_width, new_left_height)
                 if hasattr(self, 'column_divider'):
                     self.column_divider.setFixedSize(1, new_left_height)
+                if hasattr(self, 'top_back_navigation'):
+                    if hasattr(self, 'original_spec_panel_title_size'):
+                        new_back_width = int(self.original_spec_panel_title_size[0] * width_ratio)
+                    else:
+                        new_back_width = int(getattr(self.top_back_navigation, 'base_width', 424) * width_ratio)
+                    self.top_back_navigation.setFixedWidth(new_back_width)
+                    if hasattr(self.top_back_navigation, 'divider'):
+                        self.top_back_navigation.divider.setFixedWidth(new_back_width)
 
             # 시험 선택 타이틀 크기 조정
             if hasattr(self, 'spec_panel_title') and hasattr(self, 'original_spec_panel_title_size'):
