@@ -14,6 +14,75 @@ def get_result_header_title_display_size(widget):
     return QPixmap(resource_path(widget._get_result_header_title_path())).size()
 
 
+def create_embedded_back_navigation(parent, click_handler):
+    container = QWidget(parent)
+    container.setObjectName("top_back_navigation")
+    container.setFixedSize(444, 46)
+    container.setStyleSheet("background: transparent;")
+
+    container_layout = QVBoxLayout(container)
+    container_layout.setContentsMargins(0, 0, 0, 0)
+    container_layout.setSpacing(12)
+
+    row = QWidget(container)
+    row.setFixedSize(150, 29)
+    row.setStyleSheet("background: transparent;")
+    row_layout = QHBoxLayout(row)
+    row_layout.setContentsMargins(0, 0, 0, 0)
+    row_layout.setSpacing(14)
+
+    icon_button = QPushButton(row)
+    icon_button.setObjectName("top_back_icon_button")
+    icon_button.setFixedSize(22, 29)
+    icon_button.setFocusPolicy(Qt.NoFocus)
+    arrow_path = resource_path("assets/image/test_config/btn_back.svg").replace("\\", "/")
+    icon_button.setStyleSheet(f"""
+        QPushButton {{
+            border: none;
+            background-color: transparent;
+            background-image: url('{arrow_path}');
+            background-repeat: no-repeat;
+            background-position: center;
+        }}
+    """)
+    icon_button.clicked.connect(click_handler)
+    row_layout.addWidget(icon_button)
+
+    text_button = QPushButton("이전 화면으로", row)
+    text_button.setObjectName("top_back_text_button")
+    text_button.setFixedSize(114, 29)
+    text_button.setFocusPolicy(Qt.NoFocus)
+    text_button.setStyleSheet("""
+        QPushButton {
+            border: none;
+            background-color: transparent;
+            color: #1B1B1C;
+            font-family: 'Noto Sans KR';
+            font-size: 20px;
+            font-weight: 500;
+            text-align: left;
+            padding: 0;
+        }
+    """)
+    text_button.clicked.connect(click_handler)
+    row_layout.addWidget(text_button)
+
+    container_layout.addWidget(row, 0, Qt.AlignRight)
+
+    divider = QFrame(container)
+    divider.setObjectName("top_back_divider")
+    divider.setFixedSize(444, 1)
+    divider.setStyleSheet("""
+        QFrame {
+            background-color: #CECECE;
+            border: none;
+        }
+    """)
+    container_layout.addWidget(divider, 0, Qt.AlignRight)
+
+    return container
+
+
 class ResultPageWidget(QWidget):
     backRequested = pyqtSignal()
 

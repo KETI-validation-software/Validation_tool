@@ -114,9 +114,9 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소
 # test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
-company_name = "스마트홈 테크놀로지"
-product_name = "스마트 도어락 시스템"
-version = "v2.1.0"
+company_name = "keti"
+product_name = "keti"
+version = "keti"
 test_category = "본시험"
 test_target = "기본 기능 시험-통합시스템"
 test_range = "전체 필드"
@@ -124,9 +124,9 @@ auth_type = "Digest Auth"
 auth_info = "kisa,kisa_k1!2@"
 admin_code = "1"
 url = "https://192.168.0.6:8080"
-contact_person = "정수인"
-model_name = "SDL-2026"
-request_id = "cmmii12kr000bggo9y5npzj5a"
+contact_person = "keti"
+model_name = "keti"
+request_id = "cmmvfa357001aggo9hfs07ve3"
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황
 flag_opt = False
@@ -174,7 +174,7 @@ DEBUG_LEVEL = 3 # 기본값: WARN (권장)
 
 # ✅ 웹훅 서버 설정 (전역)
 WEBHOOK_HOST = "0.0.0.0"  # 서버 바인딩 주소 (모든 인터페이스에서 수신)
-WEBHOOK_PORT = 8081       # 웹훅 수신 포트
+WEBHOOK_PORT = 8081
 WEBHOOK_PUBLIC_IP = "192.168.0.6"
 # ✅ 웹훅 공개 IP 설정: info_GUI에서 선택한 시험 URL의 IP 사용
 # 초기값은 URL에서 추출, info_GUI에서 주소 선택 후 자동 업데이트됨

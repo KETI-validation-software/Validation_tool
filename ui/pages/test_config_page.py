@@ -415,7 +415,7 @@ def _setup_connection_title_row(parent_widget, right_layout):
     connection_title_layout.addSpacing(16)
 
     # 포트 입력 레이블
-    port_label = QLabel("포트 번호")
+    port_label = QLabel("포트 번호:")
     port_label.setStyleSheet("""
         QLabel {
             font-family: 'Noto Sans KR';

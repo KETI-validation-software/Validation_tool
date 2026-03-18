@@ -40,6 +40,71 @@ def get_header_title_display_size(widget, page_type):
     return QPixmap(resource_path(widget.get_header_title_path(page_type))).size()
 
 
+def create_embedded_back_navigation(parent, click_handler, width=424):
+    container = QWidget(parent)
+    container.setFixedSize(width, 46)
+    container.setStyleSheet("background: transparent;")
+
+    container_layout = QVBoxLayout(container)
+    container_layout.setContentsMargins(0, 0, 0, 0)
+    container_layout.setSpacing(16)
+
+    row = QWidget(container)
+    row.setFixedSize(154, 29)
+    row.setStyleSheet("background: transparent;")
+    row_layout = QHBoxLayout(row)
+    row_layout.setContentsMargins(0, 0, 0, 0)
+    row_layout.setSpacing(8)
+
+    icon_button = QPushButton(row)
+    icon_button.setFixedSize(22, 29)
+    icon_button.setFocusPolicy(Qt.NoFocus)
+    arrow_path = resource_path("assets/image/test_config/btn_back.svg").replace("\\", "/")
+    icon_button.setStyleSheet(f"""
+        QPushButton {{
+            border: none;
+            background-color: transparent;
+            background-image: url('{arrow_path}');
+            background-repeat: no-repeat;
+            background-position: center;
+        }}
+    """)
+    icon_button.clicked.connect(click_handler)
+    row_layout.addWidget(icon_button)
+
+    text_button = QPushButton("\uc774\uc804 \ud654\uba74\uc73c\ub85c", row)
+    text_button.setFixedSize(114, 29)
+    text_button.setFocusPolicy(Qt.NoFocus)
+    text_button.setStyleSheet("""
+        QPushButton {
+            border: none;
+            background-color: transparent;
+            color: #262626;
+            font-family: 'Noto Sans KR';
+            font-size: 20px;
+            font-weight: 500;
+            text-align: left;
+            padding: 0;
+        }
+    """)
+    text_button.clicked.connect(click_handler)
+    row_layout.addWidget(text_button)
+
+    container_layout.addWidget(row, 0, Qt.AlignLeft)
+
+    divider = QFrame(container)
+    divider.setFixedSize(width, 1)
+    divider.setStyleSheet("""
+        QFrame {
+            background-color: #E5E5E5;
+            border: none;
+        }
+    """)
+    container_layout.addWidget(divider, 0, Qt.AlignLeft)
+
+    return container
+
+
 class CommonMainUI(QWidget):
     def __init__(self):
         super().__init__()
@@ -154,11 +219,21 @@ class CommonMainUI(QWidget):
         self.left_col.setFixedSize(472, 898)
         self.left_col.setStyleSheet("background: transparent;")
         self.left_layout = QVBoxLayout()
-        self.left_layout.setContentsMargins(24, 36, 24, 0)
+        left_top_margin = 20 if self.embedded else 36
+        self.left_layout.setContentsMargins(24, left_top_margin, 24, 0)
         self.left_layout.setSpacing(0)
 
         # ✅ 반응형: 왼쪽 패널 원본 크기 저장
         self.original_left_col_size = (472, 898)
+
+        if self.embedded:
+            self.top_back_navigation = create_embedded_back_navigation(
+                self.left_col,
+                self._on_previous_page_clicked,
+                width=424,
+            )
+            self.left_layout.addWidget(self.top_back_navigation, 0, Qt.AlignLeft | Qt.AlignTop)
+            self.left_layout.addSpacing(16)
 
         self.create_spec_selection_panel(self.left_layout)
         self.left_col.setLayout(self.left_layout)
@@ -595,6 +670,10 @@ class CommonMainUI(QWidget):
     def create_spec_selection_panel(self, left_layout):
         raise NotImplementedError("Subclass must implement create_spec_selection_panel")
 
+    def _on_previous_page_clicked(self):
+        if self.embedded and hasattr(self, "previousPageRequested"):
+            self.previousPageRequested.emit(self)
+
 
 
     def _update_button_positions(self, group_width=None, group_height=None):
@@ -656,7 +735,9 @@ class CommonMainUI(QWidget):
             extra_column_height = original_column_height * (height_ratio - 1)
 
             # 왼쪽 패널 확장 요소: group_table(204) + field_group(526) = 730px
-            left_expandable_total = 204 + 526  # 730
+            group_base_height = self.original_group_table_widget_size[1]
+            field_base_height = self.original_field_group_size[1]
+            left_expandable_total = group_base_height + field_base_height
 
             # 오른쪽 패널 확장 요소: api_section(251) + monitor_section(267) = 518px
             right_expandable_total = 251 + 267  # 518
@@ -685,8 +766,8 @@ class CommonMainUI(QWidget):
             # 그룹 테이블 위젯 크기 조정 (extra_column_height 비례 분배)
             if hasattr(self, 'group_table_widget') and hasattr(self, 'original_group_table_widget_size'):
                 new_group_width = int(self.original_group_table_widget_size[0] * width_ratio)
-                group_extra = extra_column_height * (204 / left_expandable_total)
-                new_group_height = int(204 + group_extra)
+                group_extra = extra_column_height * (group_base_height / left_expandable_total)
+                new_group_height = int(group_base_height + group_extra)
                 self.group_table_widget.setFixedSize(new_group_width, new_group_height)
                 # 내부 테이블 크기도 조정
                 if hasattr(self, 'group_table'):
@@ -695,8 +776,8 @@ class CommonMainUI(QWidget):
             # 시험 시나리오 테이블 크기 조정 (extra_column_height 비례 분배)
             if hasattr(self, 'field_group') and hasattr(self, 'original_field_group_size'):
                 new_field_width = int(self.original_field_group_size[0] * width_ratio)
-                field_extra = extra_column_height * (526 / left_expandable_total)
-                new_field_height = int(526 + field_extra)
+                field_extra = extra_column_height * (field_base_height / left_expandable_total)
+                new_field_height = int(field_base_height + field_extra)
                 self.field_group.setFixedSize(new_field_width, new_field_height)
                 # 내부 테이블 크기도 조정
                 if hasattr(self, 'test_field_table'):

@@ -41,6 +41,7 @@ os.makedirs(result_dir, exist_ok=True)
 class MyApp(PlatformMainUI):
     # 시험 결과 표시 요청 시그널
     showResultRequested = pyqtSignal(object)
+    previousPageRequested = pyqtSignal(object)
 
     def __init__(self, embedded=False, mode=None, spec_id=None):
         # CONSTANTS 사용
