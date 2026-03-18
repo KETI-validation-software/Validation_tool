@@ -851,7 +851,10 @@ class CommonMainUI(QWidget):
             # URL 행 크기 조정
             if hasattr(self, 'url_row') and hasattr(self, 'original_url_row_size'):
                 new_url_width = int(self.original_url_row_size[0] * width_ratio)
-                self.url_row.setFixedSize(new_url_width, self.original_url_row_size[1])
+                extra_url_width = 0
+                if hasattr(self, 'api_header_row') and hasattr(self, 'original_api_header_row_size'):
+                    extra_url_width = max(0, int(self.original_api_header_row_size[0] * width_ratio) - self.original_api_header_row_size[0])
+                self.url_row.setFixedSize(new_url_width + extra_url_width, self.original_url_row_size[1])
 
             if hasattr(self, 'api_header_row') and hasattr(self, 'original_api_header_row_size'):
                 new_api_header_width = int(self.original_api_header_row_size[0] * width_ratio)
@@ -882,7 +885,10 @@ class CommonMainUI(QWidget):
             # URL 텍스트 박스
             if hasattr(self, 'url_text_box') and hasattr(self, 'original_url_text_box_size'):
                 new_url_tb_width = int(self.original_url_text_box_size[0] * width_ratio)
-                self.url_text_box.setFixedSize(new_url_tb_width, self.original_url_text_box_size[1])
+                extra_url_tb_width = 0
+                if hasattr(self, 'api_header_row') and hasattr(self, 'original_api_header_row_size'):
+                    extra_url_tb_width = max(0, int(self.original_api_header_row_size[0] * width_ratio) - self.original_api_header_row_size[0])
+                self.url_text_box.setFixedSize(new_url_tb_width + extra_url_tb_width, self.original_url_text_box_size[1])
 
             # API 라벨
             if hasattr(self, 'api_label') and hasattr(self, 'original_api_label_size'):
