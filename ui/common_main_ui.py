@@ -365,9 +365,9 @@ class CommonMainUI(QWidget):
 
         # ========== 송수신 메시지 실시간 모니터링 영역 (1064 × 267) ==========
         self.monitor_section = QWidget()
-        self.monitor_section.setFixedSize(1064, 308)
+        self.monitor_section.setFixedSize(1064, 306)
         self.monitor_section.setStyleSheet("background: transparent;")
-        self.original_monitor_section_size = (1064, 308)
+        self.original_monitor_section_size = (1064, 306)
 
         monitor_section_layout = QVBoxLayout(self.monitor_section)
         monitor_section_layout.setContentsMargins(0, 0, 0, 0)
@@ -407,12 +407,12 @@ class CommonMainUI(QWidget):
 
         # ✅ QTextBrowser를 담을 컨테이너 생성 (1064 × 235)
         self.text_browser_container = QWidget()
-        self.text_browser_container.setFixedSize(1064, 276)
-        self.original_text_browser_container_size = (1064, 276)
+        self.text_browser_container.setFixedSize(1064, 274)
+        self.original_text_browser_container_size = (1064, 274)
 
         self.valResult = QTextBrowser(self.text_browser_container)
-        self.valResult.setFixedSize(1064, 276)
-        self.original_valResult_size = (1064, 276)
+        self.valResult.setFixedSize(1064, 274)
+        self.original_valResult_size = (1064, 274)
         print(f"[DEBUG] valResult 초기 크기 설정: {self.valResult.size()}")  # 디버그 출력
         self.valResult.setStyleSheet("""
             QTextBrowser {
@@ -506,7 +506,7 @@ class CommonMainUI(QWidget):
         self.right_layout.addWidget(self.valmsg)
 
         # 6px gap
-        self.right_layout.addSpacing(6)
+        self.right_layout.addSpacing(8)
 
         # 평가 점수 표시
         self.spec_score_group = self.create_spec_score_display_widget()
@@ -778,7 +778,7 @@ class CommonMainUI(QWidget):
             left_expandable_total = group_base_height + field_base_height
 
             # 오른쪽 패널 확장 요소: api_section(251) + monitor_section(267) = 518px
-            right_expandable_total = 265 + 308  # 573
+            right_expandable_total = 265 + 306  # 571
 
             # bg_root 크기 조정
             if hasattr(self, 'bg_root') and hasattr(self, 'original_bg_root_size'):
@@ -853,8 +853,8 @@ class CommonMainUI(QWidget):
             # 모니터링 섹션 크기 조정 (extra_column_height 비례 분배)
             if hasattr(self, 'monitor_section') and hasattr(self, 'original_monitor_section_size'):
                 new_monitor_width = int(self.original_monitor_section_size[0] * width_ratio)
-                monitor_extra = extra_column_height * (308 / right_expandable_total)
-                new_monitor_height = int(308 + monitor_extra)
+                monitor_extra = extra_column_height * (306 / right_expandable_total)
+                new_monitor_height = int(306 + monitor_extra)
                 self.monitor_section.setFixedSize(new_monitor_width, new_monitor_height)
 
             # ✅ 버튼 그룹 및 버튼 크기 조정 (간격 16px 고정, 세로 크기 고정)
@@ -897,7 +897,7 @@ class CommonMainUI(QWidget):
                 new_tbc_width = int(self.original_text_browser_container_size[0] * width_ratio)
                 new_tbc_height = int(235 + monitor_extra)  # monitor_section에서 라벨 제외한 부분
                 self.text_browser_container.setFixedSize(new_tbc_width, new_tbc_height)
-                self.text_browser_container.setFixedSize(new_tbc_width, int(276 + monitor_extra))
+                self.text_browser_container.setFixedSize(new_tbc_width, int(274 + monitor_extra))
                 self.text_browser_container.setFixedSize(new_tbc_width, int(321 + monitor_extra))
 
             # valResult (QTextBrowser) (monitor_section 내부)
@@ -905,7 +905,7 @@ class CommonMainUI(QWidget):
                 new_vr_width = int(self.original_valResult_size[0] * width_ratio)
                 new_vr_height = int(235 + monitor_extra)
                 self.valResult.setFixedSize(new_vr_width, new_vr_height)
-                self.valResult.setFixedSize(new_vr_width, int(276 + monitor_extra))
+                self.valResult.setFixedSize(new_vr_width, int(274 + monitor_extra))
                 self.valResult.setFixedSize(new_vr_width, int(321 + monitor_extra))
                 # print(f"[DEBUG resizeEvent] valResult 크기 재설정: width={new_vr_width}, height={new_vr_height}, monitor_extra={monitor_extra}")  # 디버그
 
