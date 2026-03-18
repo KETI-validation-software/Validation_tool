@@ -261,9 +261,9 @@ class CommonMainUI(QWidget):
 
         # ✅ 시험 URL 라벨 + 텍스트 박스 (가로 배치)
         self.url_row = QWidget()
-        self.url_row.setFixedSize(1064, 36)
+        self.url_row.setFixedSize(418, 36)
         self.url_row.setStyleSheet("background: transparent;")
-        self.original_url_row_size = (1064, 36)
+        self.original_url_row_size = (418, 36)
         url_row_layout = QHBoxLayout()
         url_row_layout.setContentsMargins(0, 0, 0, 0)
         url_row_layout.setSpacing(8)  # 라벨과 텍스트 박스 사이 8px gap
@@ -283,8 +283,8 @@ class CommonMainUI(QWidget):
 
         # ✅ URL 텍스트 박스 (960 × 36, 내부 좌우 24px padding, 18px Medium)
         self.url_text_box = QLineEdit()
-        self.url_text_box.setFixedSize(960, 36)
-        self.original_url_text_box_size = (960, 36)
+        self.url_text_box.setFixedSize(314, 36)
+        self.original_url_text_box_size = (314, 36)
         self.url_text_box.setReadOnly(False)
         self.url_text_box.setPlaceholderText("접속 주소를 입력하세요.")
 
@@ -316,32 +316,38 @@ class CommonMainUI(QWidget):
         url_row_layout.addWidget(self.url_text_box)
 
         self.url_row.setLayout(url_row_layout)
-        self.right_layout.addWidget(self.url_row)
-
-        # 20px gap
-        self.right_layout.addSpacing(20)
 
         # ========== 시험 API 영역 (1064 × 251) ==========
         self.api_section = QWidget()
-        self.api_section.setFixedSize(1064, 251)
+        self.api_section.setFixedSize(1064, 263)
         self.api_section.setStyleSheet("background: transparent;")
-        self.original_api_section_size = (1064, 251)
+        self.original_api_section_size = (1064, 263)
 
         api_section_layout = QVBoxLayout(self.api_section)
         api_section_layout.setContentsMargins(0, 0, 0, 0)
         api_section_layout.setSpacing(8)
+        self.api_header_row = QWidget()
+        self.api_header_row.setFixedSize(1064, 36)
+        self.original_api_header_row_size = (1064, 36)
+        self.api_header_row.setStyleSheet("background: transparent;")
+        api_header_row_layout = QHBoxLayout(self.api_header_row)
+        api_header_row_layout.setContentsMargins(0, 0, 0, 0)
+        api_header_row_layout.setSpacing(0)
 
         # 시험 API 라벨 (1064 × 24, 20px Medium)
         self.api_label = QLabel('시험 API')
-        self.api_label.setFixedSize(1064, 24)
-        self.original_api_label_size = (1064, 24)
+        self.api_label.setFixedSize(96, 24)
+        self.original_api_label_size = (96, 24)
         self.api_label.setStyleSheet("""
             font-size: 20px;
             font-family: "Noto Sans KR";
             font-weight: 500;
             color: #000000;
         """)
-        api_section_layout.addWidget(self.api_label)
+        api_header_row_layout.addWidget(self.api_label, 0, Qt.AlignLeft | Qt.AlignVCenter)
+        api_header_row_layout.addStretch()
+        api_header_row_layout.addWidget(self.url_row, 0, Qt.AlignRight | Qt.AlignVCenter)
+        api_section_layout.addWidget(self.api_header_row)
 
         # 시험 API 테이블 (1064 × 219)
         self.init_centerLayout()
@@ -354,8 +360,8 @@ class CommonMainUI(QWidget):
 
         self.right_layout.addWidget(self.api_section)
 
-        # 30px gap
-        self.right_layout.addSpacing(30)
+        # 82px gap
+        self.right_layout.addSpacing(82)
 
         # ========== 송수신 메시지 실시간 모니터링 영역 (1064 × 267) ==========
         self.monitor_section = QWidget()
@@ -486,7 +492,7 @@ class CommonMainUI(QWidget):
         self._toggle_placeholder()
 
         # 30px gap (고정)
-        self.right_layout.addSpacing(25)
+        self.right_layout.addSpacing(27)
 
         self.valmsg = QLabel('시험 점수 요약', self)
         self.valmsg.setFixedSize(1064, 24)
@@ -772,7 +778,7 @@ class CommonMainUI(QWidget):
             left_expandable_total = group_base_height + field_base_height
 
             # 오른쪽 패널 확장 요소: api_section(251) + monitor_section(267) = 518px
-            right_expandable_total = 251 + 267  # 518
+            right_expandable_total = 263 + 267  # 530
 
             # bg_root 크기 조정
             if hasattr(self, 'bg_root') and hasattr(self, 'original_bg_root_size'):
@@ -833,11 +839,15 @@ class CommonMainUI(QWidget):
                 new_url_width = int(self.original_url_row_size[0] * width_ratio)
                 self.url_row.setFixedSize(new_url_width, self.original_url_row_size[1])
 
+            if hasattr(self, 'api_header_row') and hasattr(self, 'original_api_header_row_size'):
+                new_api_header_width = int(self.original_api_header_row_size[0] * width_ratio)
+                self.api_header_row.setFixedSize(new_api_header_width, self.original_api_header_row_size[1])
+
             # API 섹션 크기 조정 (extra_column_height 비례 분배)
             if hasattr(self, 'api_section') and hasattr(self, 'original_api_section_size'):
                 new_api_width = int(self.original_api_section_size[0] * width_ratio)
-                api_extra = extra_column_height * (251 / right_expandable_total)
-                new_api_height = int(251 + api_extra)
+                api_extra = extra_column_height * (263 / right_expandable_total)
+                new_api_height = int(263 + api_extra)
                 self.api_section.setFixedSize(new_api_width, new_api_height)
 
             # 모니터링 섹션 크기 조정 (extra_column_height 비례 분배)
