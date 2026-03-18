@@ -175,6 +175,7 @@ class PlatformMainUI(CommonMainUI):
                 api_extra = extra_column_height * (251 / right_expandable_total)
                 new_api_height = int(251 + api_extra)
                 self.api_section.setFixedSize(new_api_width, new_api_height)
+                self.api_section.setFixedSize(new_api_width, int(self.original_api_section_size[1] + api_extra))
 
             # 모니터링 섹션 크기 조정 (extra_column_height 비례 분배)
             if hasattr(self, 'monitor_section') and hasattr(self, 'original_monitor_section_size'):
@@ -182,6 +183,7 @@ class PlatformMainUI(CommonMainUI):
                 monitor_extra = extra_column_height * (267 / right_expandable_total)
                 new_monitor_height = int(267 + monitor_extra)
                 self.monitor_section.setFixedSize(new_monitor_width, new_monitor_height)
+                self.monitor_section.setFixedSize(new_monitor_width, int(self.original_monitor_section_size[1] + monitor_extra))
 
             # ✅ 버튼 그룹 및 버튼 크기 조정 (간격 16px 고정, 세로 크기 고정)
             if hasattr(self, 'original_buttonGroup_size'):
@@ -206,6 +208,7 @@ class PlatformMainUI(CommonMainUI):
                 new_api_cw_width = int(self.original_api_content_widget_size[0] * width_ratio)
                 new_api_cw_height = int(219 + api_extra)  # api_section에서 라벨 제외한 부분
                 self.api_content_widget.setFixedSize(new_api_cw_width, new_api_cw_height)
+                self.api_content_widget.setFixedSize(new_api_cw_width, int(self.original_api_content_widget_size[1] + api_extra))
 
             # 모니터링 라벨
             if hasattr(self, 'monitor_label') and hasattr(self, 'original_monitor_label_size'):
@@ -217,12 +220,14 @@ class PlatformMainUI(CommonMainUI):
                 new_tbc_width = int(self.original_text_browser_container_size[0] * width_ratio)
                 new_tbc_height = int(235 + monitor_extra)  # monitor_section에서 라벨 제외한 부분
                 self.text_browser_container.setFixedSize(new_tbc_width, new_tbc_height)
+                self.text_browser_container.setFixedSize(new_tbc_width, int(self.original_text_browser_container_size[1] + monitor_extra))
 
             # valResult (QTextBrowser) (monitor_section 내부)
             if hasattr(self, 'valResult') and hasattr(self, 'original_valResult_size'):
                 new_vr_width = int(self.original_valResult_size[0] * width_ratio)
                 new_vr_height = int(235 + monitor_extra)
                 self.valResult.setFixedSize(new_vr_width, new_vr_height)
+                self.valResult.setFixedSize(new_vr_width, int(self.original_valResult_size[1] + monitor_extra))
 
             # ✅ 시험 점수 요약 섹션
             # 시험 점수 요약 라벨
@@ -289,6 +294,7 @@ class PlatformMainUI(CommonMainUI):
                 new_scroll_width = int(self.original_api_scroll_area_size[0] * width_ratio)
                 new_scroll_height = int(189 + api_extra)  # api_content_widget 내부 (헤더 30px 제외)
                 self.api_scroll_area.setFixedSize(new_scroll_width, new_scroll_height)
+                self.api_scroll_area.setFixedSize(new_scroll_width, int(self.original_api_scroll_area_size[1] + api_extra))
 
             # ✅ 시험 API 테이블 컬럼 너비 비례 조정 (마지막 컬럼이 남은 공간 채움)
             if hasattr(self, 'tableWidget') and hasattr(self, 'original_column_widths'):
