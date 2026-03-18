@@ -40,6 +40,71 @@ def get_header_title_display_size(widget, page_type):
     return QPixmap(resource_path(widget.get_header_title_path(page_type))).size()
 
 
+def create_embedded_back_navigation(parent, click_handler, width=424):
+    container = QWidget(parent)
+    container.setFixedSize(width, 46)
+    container.setStyleSheet("background: transparent;")
+
+    container_layout = QVBoxLayout(container)
+    container_layout.setContentsMargins(0, 0, 0, 0)
+    container_layout.setSpacing(16)
+
+    row = QWidget(container)
+    row.setFixedSize(154, 29)
+    row.setStyleSheet("background: transparent;")
+    row_layout = QHBoxLayout(row)
+    row_layout.setContentsMargins(0, 0, 0, 0)
+    row_layout.setSpacing(8)
+
+    icon_button = QPushButton(row)
+    icon_button.setFixedSize(22, 29)
+    icon_button.setFocusPolicy(Qt.NoFocus)
+    arrow_path = resource_path("assets/image/test_config/btn_back.svg").replace("\\", "/")
+    icon_button.setStyleSheet(f"""
+        QPushButton {{
+            border: none;
+            background-color: transparent;
+            background-image: url('{arrow_path}');
+            background-repeat: no-repeat;
+            background-position: center;
+        }}
+    """)
+    icon_button.clicked.connect(click_handler)
+    row_layout.addWidget(icon_button)
+
+    text_button = QPushButton("\uc774\uc804 \ud654\uba74\uc73c\ub85c", row)
+    text_button.setFixedSize(114, 29)
+    text_button.setFocusPolicy(Qt.NoFocus)
+    text_button.setStyleSheet("""
+        QPushButton {
+            border: none;
+            background-color: transparent;
+            color: #262626;
+            font-family: 'Noto Sans KR';
+            font-size: 20px;
+            font-weight: 500;
+            text-align: left;
+            padding: 0;
+        }
+    """)
+    text_button.clicked.connect(click_handler)
+    row_layout.addWidget(text_button)
+
+    container_layout.addWidget(row, 0, Qt.AlignLeft)
+
+    divider = QFrame(container)
+    divider.setFixedSize(width, 1)
+    divider.setStyleSheet("""
+        QFrame {
+            background-color: #E5E5E5;
+            border: none;
+        }
+    """)
+    container_layout.addWidget(divider, 0, Qt.AlignLeft)
+
+    return container
+
+
 class CommonMainUI(QWidget):
     def __init__(self):
         super().__init__()
@@ -122,24 +187,29 @@ class CommonMainUI(QWidget):
         # ✅ 본문 영역 컨테이너 (반응형 - main.png 배경)
         self.content_widget = QWidget()
         self.content_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.content_widget.setStyleSheet("background-color: #FFFFFF;")
 
         # 배경 이미지를 QLabel로 설정 (절대 위치)
-        main_bg_path = resource_path("assets/image/common/main.png").replace(chr(92), "/")
         self.content_bg_label = QLabel(self.content_widget)
-        self.content_bg_label.setPixmap(QPixmap(main_bg_path))
-        self.content_bg_label.setScaledContents(True)
+        self.content_bg_label.setStyleSheet("background-color: #FFFFFF;")
+        self.left_background_panel = QFrame(self.content_bg_label)
+        self.left_background_panel.setStyleSheet("background-color: #F7F7F7; border: none;")
+        self.content_background_divider = QFrame(self.content_bg_label)
+        self.content_background_divider.setStyleSheet("background-color: #D9D9D9; border: none;")
+        self.right_background_panel = QFrame(self.content_bg_label)
+        self.right_background_panel.setStyleSheet("background-color: #FFFFFF; border: none;")
         self.content_bg_label.lower()  # 맨 뒤로 보내기
 
         # ✅ 2컬럼 레이아웃 적용
         self.bg_root = QWidget(self.content_widget)
         self.bg_root.setObjectName("bg_root")
-        self.bg_root.setFixedSize(1584, 898)  # left_col(472) + right_col(1112) = 1584
+        self.bg_root.setFixedSize(1585, 898)  # left_col(472) + divider(1) + right_col(1112) = 1585
         self.bg_root.setAttribute(Qt.WA_StyledBackground, True)
         self.bg_root.setStyleSheet("QWidget#bg_root { background: transparent; }")
 
         # ✅ 반응형: 원본 크기 저장
         self.original_window_size = (1680, 1006)
-        self.original_bg_root_size = (1584, 898)
+        self.original_bg_root_size = (1585, 898)
 
         bg_root_layout = QVBoxLayout()
         bg_root_layout.setContentsMargins(0, 0, 0, 0)
@@ -154,14 +224,28 @@ class CommonMainUI(QWidget):
         self.left_col.setFixedSize(472, 898)
         self.left_col.setStyleSheet("background: transparent;")
         self.left_layout = QVBoxLayout()
-        self.left_layout.setContentsMargins(24, 36, 24, 0)
+        left_top_margin = 20 if self.embedded else 36
+        self.left_layout.setContentsMargins(24, left_top_margin, 24, 0)
         self.left_layout.setSpacing(0)
 
         # ✅ 반응형: 왼쪽 패널 원본 크기 저장
         self.original_left_col_size = (472, 898)
 
+        if self.embedded:
+            self.top_back_navigation = create_embedded_back_navigation(
+                self.left_col,
+                self._on_previous_page_clicked,
+                width=424,
+            )
+            self.left_layout.addWidget(self.top_back_navigation, 0, Qt.AlignLeft | Qt.AlignTop)
+            self.left_layout.addSpacing(16)
+
         self.create_spec_selection_panel(self.left_layout)
         self.left_col.setLayout(self.left_layout)
+
+        self.column_divider = QFrame()
+        self.column_divider.setFixedSize(1, 898)
+        self.column_divider.setStyleSheet("background: transparent; border: none;")
 
         # ✅ 오른쪽 컬럼 (나머지 UI)
         self.right_col = QWidget()
@@ -556,6 +640,7 @@ class CommonMainUI(QWidget):
         self.right_col.setLayout(self.right_layout)
 
         columns_layout.addWidget(self.left_col)
+        columns_layout.addWidget(self.column_divider)
         columns_layout.addWidget(self.right_col)
 
         bg_root_layout.addLayout(columns_layout)
@@ -563,13 +648,14 @@ class CommonMainUI(QWidget):
 
         # content_widget 레이아웃 설정 (좌우 48px, 하단 44px padding, 가운데 정렬)
         content_layout = QVBoxLayout(self.content_widget)
-        content_layout.setContentsMargins(48, 0, 48, 44)
+        content_layout.setContentsMargins(47, 0, 47, 44)
         content_layout.setSpacing(0)
-        content_layout.addWidget(self.bg_root, 0, Qt.AlignHCenter | Qt.AlignVCenter)
+        content_layout.addWidget(self.bg_root, 0, Qt.AlignLeft | Qt.AlignVCenter)
 
         mainLayout.addWidget(self.content_widget, 1)  # 반응형: stretch=1로 남은 공간 채움
 
         self.setLayout(mainLayout)
+        QTimer.singleShot(0, self._update_content_background_geometry)
 
         if not self.embedded:
             self.setWindowTitle('물리보안 시스템 연동 검증 소프트웨어')
@@ -594,6 +680,35 @@ class CommonMainUI(QWidget):
 
     def create_spec_selection_panel(self, left_layout):
         raise NotImplementedError("Subclass must implement create_spec_selection_panel")
+
+    def _on_previous_page_clicked(self):
+        if self.embedded and hasattr(self, "previousPageRequested"):
+            self.previousPageRequested.emit(self)
+
+    def _update_content_background_geometry(self):
+        if not hasattr(self, 'content_widget') or not self.content_widget:
+            return
+        if not hasattr(self, 'content_bg_label'):
+            return
+
+        content_width = self.content_widget.width()
+        content_height = self.content_widget.height()
+        self.content_bg_label.setGeometry(0, 0, content_width, content_height)
+
+        if hasattr(self, 'bg_root') and hasattr(self, 'left_background_panel'):
+            width_ratio = 1.0
+            if hasattr(self, 'original_window_size') and self.original_window_size[0]:
+                width_ratio = max(1.0, self.width() / self.original_window_size[0])
+            divider_offset = int(round((width_ratio - 1.0) * 28))
+            divider_x = self.bg_root.geometry().x() + self.left_col.width() - divider_offset
+            self.left_background_panel.setGeometry(0, 0, divider_x, content_height)
+            self.content_background_divider.setGeometry(divider_x, 0, 1, content_height)
+            self.right_background_panel.setGeometry(
+                divider_x + 1,
+                0,
+                max(0, content_width - divider_x - 1),
+                content_height,
+            )
 
 
 
@@ -635,11 +750,7 @@ class CommonMainUI(QWidget):
         super().resizeEvent(event)
 
         # content_widget의 배경 이미지 크기 조정
-        if hasattr(self, 'content_widget') and self.content_widget:
-            if hasattr(self, 'content_bg_label'):
-                content_width = self.content_widget.width()
-                content_height = self.content_widget.height()
-                self.content_bg_label.setGeometry(0, 0, content_width, content_height)
+        
 
         # ✅ 반응형: 왼쪽 패널 크기 조정
         if hasattr(self, 'original_window_size') and hasattr(self, 'left_col'):
@@ -656,7 +767,9 @@ class CommonMainUI(QWidget):
             extra_column_height = original_column_height * (height_ratio - 1)
 
             # 왼쪽 패널 확장 요소: group_table(204) + field_group(526) = 730px
-            left_expandable_total = 204 + 526  # 730
+            group_base_height = self.original_group_table_widget_size[1]
+            field_base_height = self.original_field_group_size[1]
+            left_expandable_total = group_base_height + field_base_height
 
             # 오른쪽 패널 확장 요소: api_section(251) + monitor_section(267) = 518px
             right_expandable_total = 251 + 267  # 518
@@ -672,6 +785,8 @@ class CommonMainUI(QWidget):
                 new_left_width = int(self.original_left_col_size[0] * width_ratio)
                 new_left_height = int(self.original_left_col_size[1] * height_ratio)
                 self.left_col.setFixedSize(new_left_width, new_left_height)
+                if hasattr(self, 'column_divider'):
+                    self.column_divider.setFixedSize(1, new_left_height)
 
             # 시험 선택 타이틀 크기 조정
             if hasattr(self, 'spec_panel_title') and hasattr(self, 'original_spec_panel_title_size'):
@@ -685,8 +800,8 @@ class CommonMainUI(QWidget):
             # 그룹 테이블 위젯 크기 조정 (extra_column_height 비례 분배)
             if hasattr(self, 'group_table_widget') and hasattr(self, 'original_group_table_widget_size'):
                 new_group_width = int(self.original_group_table_widget_size[0] * width_ratio)
-                group_extra = extra_column_height * (204 / left_expandable_total)
-                new_group_height = int(204 + group_extra)
+                group_extra = extra_column_height * (group_base_height / left_expandable_total)
+                new_group_height = int(group_base_height + group_extra)
                 self.group_table_widget.setFixedSize(new_group_width, new_group_height)
                 # 내부 테이블 크기도 조정
                 if hasattr(self, 'group_table'):
@@ -695,8 +810,8 @@ class CommonMainUI(QWidget):
             # 시험 시나리오 테이블 크기 조정 (extra_column_height 비례 분배)
             if hasattr(self, 'field_group') and hasattr(self, 'original_field_group_size'):
                 new_field_width = int(self.original_field_group_size[0] * width_ratio)
-                field_extra = extra_column_height * (526 / left_expandable_total)
-                new_field_height = int(526 + field_extra)
+                field_extra = extra_column_height * (field_base_height / left_expandable_total)
+                new_field_height = int(field_base_height + field_extra)
                 self.field_group.setFixedSize(new_field_width, new_field_height)
                 # 내부 테이블 크기도 조정
                 if hasattr(self, 'test_field_table'):
@@ -858,6 +973,8 @@ class CommonMainUI(QWidget):
                 for i, label in enumerate(self.header_labels):
                     new_label_width = int(self.original_header_widths[i] * width_ratio)
                     label.setFixedSize(new_label_width, 30)
+
+        self._update_content_background_geometry()
 
 
 

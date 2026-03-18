@@ -4,7 +4,7 @@
 """
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
-    QPushButton, QGroupBox, QSizePolicy, QGraphicsDropShadowEffect
+    QPushButton, QGroupBox, QSizePolicy, QGraphicsDropShadowEffect, QFrame
 )
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QColor
@@ -400,10 +400,22 @@ def _setup_connection_title_row(parent_widget, right_layout):
     """)
     connection_title_layout.addWidget(parent_widget.connection_title_label)
 
-    connection_title_layout.addSpacing(20)
+    connection_title_layout.addSpacing(16)
+
+    parent_widget.connection_title_divider = QFrame()
+    parent_widget.connection_title_divider.setFixedSize(1, 28)
+    parent_widget.connection_title_divider.setStyleSheet("""
+        QFrame {
+            background-color: #CECECE;
+            border: none;
+        }
+    """)
+    connection_title_layout.addWidget(parent_widget.connection_title_divider, 0, Qt.AlignVCenter)
+
+    connection_title_layout.addSpacing(16)
 
     # 포트 입력 레이블
-    port_label = QLabel("포트 번호")
+    port_label = QLabel("포트 번호:")
     port_label.setStyleSheet("""
         QLabel {
             font-family: 'Noto Sans KR';

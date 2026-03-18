@@ -135,6 +135,9 @@ class MainWindow(QMainWindow):
         elif hasattr(self, '_platform_widget') and self._platform_widget is not None:
             self.stack.setCurrentWidget(self._platform_widget)
 
+    def _on_back_to_info(self, _parent_widget):
+        self.stack.setCurrentWidget(self.info_widget)
+
     def _on_show_result_requested(self, parent_widget):
         """검증 화면에서 시험 결과 표시 요청 시 호출 (embedded 모드에서)"""
         # 스택에 시험 결과 위젯 추가하고 전환
@@ -185,6 +188,7 @@ class MainWindow(QMainWindow):
                 self._system_widget = system_app.MyApp(embedded=True, spec_id=spec_id)
                 Logger.info("System 위젯 생성 완료")  # 로깅 추가
                 self._system_widget.showResultRequested.connect(self._on_show_result_requested)
+                self._system_widget.previousPageRequested.connect(self._on_back_to_info)
                 self.stack.addWidget(self._system_widget)
                 # ===== 수정 끝 =====
                 self.stack.setCurrentWidget(self._system_widget)
@@ -208,6 +212,7 @@ class MainWindow(QMainWindow):
                 self._platform_widget = platform_app.MyApp(embedded=True, spec_id=spec_id)
                 Logger.info("Platform 위젯 생성 완료")  # 로깅 추가
                 self._platform_widget.showResultRequested.connect(self._on_show_result_requested)
+                self._platform_widget.previousPageRequested.connect(self._on_back_to_info)
                 Logger.info("Signal 연결 완료")  # 로깅 추가
                 self.stack.addWidget(self._platform_widget)
                 Logger.info("Stack에 위젯 추가 완료")  # 로깅 추가

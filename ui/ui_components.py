@@ -158,11 +158,11 @@ class TestSelectionPanel(QWidget):
     def create_test_field_group(self):
         """시험 시나리오 테이블"""
         group_box = QWidget()
-        group_box.setFixedSize(424, 526)
+        group_box.setFixedSize(424, 479)
         group_box.setStyleSheet("background: transparent;")
         
         # Original size
-        self.original_field_group_size = (424, 526)
+        self.original_field_group_size = (424, 479)
 
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
@@ -177,7 +177,7 @@ class TestSelectionPanel(QWidget):
         self.test_field_table.setFocusPolicy(Qt.NoFocus)
         self.test_field_table.verticalHeader().setVisible(False)
         self.test_field_table.verticalHeader().setDefaultSectionSize(39)
-        self.test_field_table.setFixedHeight(526)
+        self.test_field_table.setFixedHeight(479)
 
         self.test_field_table.setStyleSheet("""
             QTableWidget {

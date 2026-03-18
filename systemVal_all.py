@@ -54,6 +54,7 @@ os.makedirs(result_dir, exist_ok=True)
 from core.utils import to_detail_text, redact, remove_api_number_suffix
 
 class MyApp(SystemMainUI):
+    previousPageRequested = pyqtSignal(object)
     # 시험 결과 표시 요청 시그널 (main.py와 연동)
     showResultRequested = pyqtSignal(object)  # parent widget을 인자로 전달
 

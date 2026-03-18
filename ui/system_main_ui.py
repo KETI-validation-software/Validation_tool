@@ -254,11 +254,11 @@ class SystemMainUI(CommonMainUI):
     def create_test_field_group(self):
         """시험 시나리오 테이블 - 424*526, 헤더 31px, 데이터셀 39px"""
         group_box = QWidget()
-        group_box.setFixedSize(424, 526)
+        group_box.setFixedSize(424, 479)
         group_box.setStyleSheet("background: transparent;")
 
         # ✅ 반응형: 원본 크기 저장
-        self.original_field_group_size = (424, 526)
+        self.original_field_group_size = (424, 479)
 
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
@@ -271,7 +271,7 @@ class SystemMainUI(CommonMainUI):
         self.test_field_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.test_field_table.cellClicked.connect(self.on_test_field_selected)
         self.test_field_table.verticalHeader().setVisible(False)
-        self.test_field_table.setFixedHeight(526)
+        self.test_field_table.setFixedHeight(479)
         self.test_field_table.verticalHeader().setDefaultSectionSize(39)  # 데이터셀 높이 39px
 
         # ✅ 플랫폼과 완전히 동일한 스타일
@@ -459,7 +459,9 @@ class SystemMainUI(CommonMainUI):
             extra_column_height = original_column_height * (height_ratio - 1)
 
             # 왼쪽 패널 확장 요소: group_table(204) + field_group(526) = 730px
-            left_expandable_total = 204 + 526  # 730
+            group_base_height = self.original_group_table_widget_size[1]
+            field_base_height = self.original_field_group_size[1]
+            left_expandable_total = group_base_height + field_base_height
 
             # 오른쪽 패널 확장 요소: api_section(251) + monitor_section(267) = 518px
             right_expandable_total = 251 + 267  # 518
@@ -484,8 +486,8 @@ class SystemMainUI(CommonMainUI):
             # 그룹 테이블 위젯 크기 조정 (extra_column_height 비례 분배)
             if hasattr(self, 'group_table_widget') and hasattr(self, 'original_group_table_widget_size'):
                 new_group_width = int(self.original_group_table_widget_size[0] * width_ratio)
-                group_extra = extra_column_height * (204 / left_expandable_total)
-                new_group_height = int(204 + group_extra)
+                group_extra = extra_column_height * (group_base_height / left_expandable_total)
+                new_group_height = int(group_base_height + group_extra)
                 self.group_table_widget.setFixedSize(new_group_width, new_group_height)
                 # 내부 테이블 크기도 조정
                 if hasattr(self, 'group_table'):
@@ -494,8 +496,8 @@ class SystemMainUI(CommonMainUI):
             # 시험 시나리오 테이블 크기 조정 (extra_column_height 비례 분배)
             if hasattr(self, 'field_group') and hasattr(self, 'original_field_group_size'):
                 new_field_width = int(self.original_field_group_size[0] * width_ratio)
-                field_extra = extra_column_height * (526 / left_expandable_total)
-                new_field_height = int(526 + field_extra)
+                field_extra = extra_column_height * (field_base_height / left_expandable_total)
+                new_field_height = int(field_base_height + field_extra)
                 self.field_group.setFixedSize(new_field_width, new_field_height)
                 # 내부 테이블 크기도 조정
                 if hasattr(self, 'test_field_table'):
