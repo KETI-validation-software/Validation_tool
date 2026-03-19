@@ -29,6 +29,7 @@ from core.functions import (
     json_to_data,
     build_result_json,
     update_webhook_step_buffer_fields,
+    upsert_attempt_log,
 )
 from core.data_mapper import ConstraintDataGenerator
 from core.logger import Logger
@@ -326,7 +327,7 @@ class MyApp(SystemMainUI):
         # step_buffers 동적 생성 (API 개수에 따라)
         api_count = len(self.videoMessages)
         self.step_buffers = [
-            {"data": "", "error": "", "result": "PASS", "raw_data_list": []} for _ in range(api_count)
+            {"data": "", "error": "", "result": "PASS", "raw_data_list": [], "attempt_logs": [], "api_info": {}} for _ in range(api_count)
         ]
 
         # ✅ 누적 카운트 초기화
@@ -903,7 +904,7 @@ class MyApp(SystemMainUI):
 
                     # step_buffers 초기화
                     self.step_buffers = [
-                        {"data": "", "error": "", "result": "PASS", "raw_data_list": []} for _ in range(len(self.videoMessages))
+                        {"data": "", "error": "", "result": "PASS", "raw_data_list": [], "attempt_logs": [], "api_info": {}} for _ in range(len(self.videoMessages))
                     ]
                 else:
                     Logger.debug(f" 저장된 데이터 복원 완료")
@@ -1293,6 +1294,8 @@ class MyApp(SystemMainUI):
                 webhook_error_text=webhook_error_text,
                 webhook_pass_cnt=key_psss_cnt,
                 webhook_total_cnt=(key_psss_cnt + key_error_cnt),
+                attempt_num=self.current_retry + 1,
+                webhook_ack_payload=webhook_ack_payload if self.webhook_res is not None else None,
             )
             # ✅ 웹훅 이벤트 데이터를 명확히 표시
             self.step_buffers[self.webhook_cnt]["data"] += f"\n\n--- Webhook 이벤트 데이터 ---\n{webhook_data_text}"
@@ -1461,6 +1464,13 @@ class MyApp(SystemMainUI):
                     request_json=json.dumps(inMessage, indent=4, ensure_ascii=False),
                     direction="SEND"
                 )
+                if self.cnt < len(self.step_buffers):
+                    self.step_buffers[self.cnt].setdefault("api_info", {})["method"] = "POST"
+                    upsert_attempt_log(
+                        self.step_buffers[self.cnt],
+                        self.current_retry + 1,
+                        send_payload=inMessage,
+                    )
 
                 t = threading.Thread(target=self.post, args=(path, json_data, current_timeout), daemon=True)
                 t.start()
@@ -1870,6 +1880,12 @@ class MyApp(SystemMainUI):
 
                     # ✅ raw_data_list에 현재 응답 데이터 추가 (재개 시 retry count 복원용)
                     self.step_buffers[self.cnt]["raw_data_list"].append(platform_data)
+                    upsert_attempt_log(
+                        self.step_buffers[self.cnt],
+                        self.current_retry + 1,
+                        recv_payload=platform_data,
+                        validation_errors=[line.strip() for line in error_text.split("\n") if line.strip()] if val_result == "FAIL" else [],
+                    )
 
                     # 기존 버퍼에 누적 (재시도 정보와 함께)
                     if self.current_retry == 0:
@@ -2313,7 +2329,7 @@ class MyApp(SystemMainUI):
 
             # ✅ 11. step_buffers 완전 재생성
             self.step_buffers = [
-                {"data": "", "error": "", "result": "PASS", "raw_data_list": []} for _ in range(api_count)
+                {"data": "", "error": "", "result": "PASS", "raw_data_list": [], "attempt_logs": [], "api_info": {}} for _ in range(api_count)
             ]
             Logger.debug(f" step_buffers 재생성 완료: {len(self.step_buffers)}개")
 
@@ -2784,7 +2800,7 @@ class MyApp(SystemMainUI):
 
             # 버퍼 초기화
             self.step_buffers = [
-                {"data": "", "result": "", "error": "", "raw_data_list": []} for _ in range(api_count)
+                {"data": "", "result": "", "error": "", "raw_data_list": [], "attempt_logs": [], "api_info": {}} for _ in range(api_count)
             ]
 
             # 누적 카운트 초기화
