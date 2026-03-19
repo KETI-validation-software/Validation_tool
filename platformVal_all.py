@@ -12,7 +12,7 @@ from PyQt5.QtCore import Qt, QSettings, QTimer, QThread, pyqtSignal
 import sys
 from datetime import datetime
 import json
-from core.functions import build_result_json
+from core.functions import build_result_json, upsert_attempt_log
 import requests
 import config.CONSTANTS as CONSTANTS
 from core.json_checker_new import timeout_field_finder
@@ -139,7 +139,7 @@ class MyApp(PlatformMainUI):
 
         # step_buffers 동적 생성
         self.step_buffers = [
-            {"data": "", "error": "", "result": "PASS", "raw_data_list": []} for _ in range(len(self.videoMessages))
+            {"data": "", "error": "", "result": "PASS", "raw_data_list": [], "attempt_logs": [], "api_info": {}} for _ in range(len(self.videoMessages))
         ]
 
         # ✅ 현재 spec에 맞게 누적 카운트 초기화
@@ -656,6 +656,13 @@ class MyApp(PlatformMainUI):
                     #     )
 
                     accumulated['raw_data_list'].append(current_data)
+                    if self.cnt < len(self.step_buffers):
+                        self.step_buffers[self.cnt].setdefault("api_info", {})["method"] = "POST"
+                        upsert_attempt_log(
+                            self.step_buffers[self.cnt],
+                            retry_attempt + 1,
+                            recv_payload=current_data,
+                        )
 
                     if (len(current_data) != 0) and current_data != "{}":
                         step_result = "FAIL"
@@ -814,6 +821,12 @@ class MyApp(PlatformMainUI):
                     add_opt_error += opt_error  # 선택 필드 에러 수 누적
 
                     inbound_err_txt = to_detail_text(val_text)
+                    if self.cnt < len(self.step_buffers):
+                        upsert_attempt_log(
+                            self.step_buffers[self.cnt],
+                            retry_attempt + 1,
+                            validation_errors=[line.strip() for line in inbound_err_txt.split("\n") if line.strip()] if val_result == "FAIL" else [],
+                        )
                     if val_result == "FAIL":
                         step_result = "FAIL"
                         combined_error_parts.append(f"[시도 {retry_attempt + 1}/{current_retries}]\n" + inbound_err_txt)
@@ -850,6 +863,7 @@ class MyApp(PlatformMainUI):
                             
                             if self.cnt < len(self.step_buffers):
                                 self.step_buffers[self.cnt]["is_webhook_api"] = True
+                                self.step_buffers[self.cnt]["webhook_data"] = webhook_response
                             
                             # 웹훅 응답 검증 (null인 경우에도 검증 수행)
                             webhook_resp_val_result, webhook_resp_val_text, webhook_resp_key_psss_cnt, webhook_resp_key_error_cnt, opt_correct, opt_error = json_check_(
@@ -862,6 +876,16 @@ class MyApp(PlatformMainUI):
                             add_opt_error += opt_error  # 웹훅 선택 필드 에러 수 누적
 
                             webhook_resp_err_txt = to_detail_text(webhook_resp_val_text)
+                            if self.cnt < len(self.step_buffers):
+                                self.step_buffers[self.cnt]["webhook_error"] = webhook_resp_err_txt if webhook_resp_val_result == "FAIL" else ""
+                                self.step_buffers[self.cnt]["webhook_pass_cnt"] = webhook_resp_key_psss_cnt
+                                self.step_buffers[self.cnt]["webhook_total_cnt"] = webhook_resp_key_psss_cnt + webhook_resp_key_error_cnt
+                                upsert_attempt_log(
+                                    self.step_buffers[self.cnt],
+                                    retry_attempt + 1,
+                                    webhook_recv_payload=webhook_response,
+                                    webhook_recv_errors=[line.strip() for line in webhook_resp_err_txt.split("\n") if line.strip()] if webhook_resp_val_result == "FAIL" else [],
+                                )
                             if webhook_resp_val_result == "FAIL":
                                 step_result = "FAIL"
                                 combined_error_parts.append(f"\n--- Webhook 검증 ---\n" + webhook_resp_err_txt)
@@ -931,6 +955,13 @@ class MyApp(PlatformMainUI):
                     direction="SEND"
                 )
 
+                if self.cnt < len(self.step_buffers):
+                    self.step_buffers[self.cnt].setdefault("api_info", {})["method"] = "POST"
+                    upsert_attempt_log(
+                        self.step_buffers[self.cnt],
+                        retry_attempt + 1,
+                        send_payload=response_data if 'response_data' in locals() else {},
+                    )
                 # current_retry 증가
                 self.current_retry += 1
 
@@ -1960,7 +1991,7 @@ class MyApp(PlatformMainUI):
                 # ✅ 9. step_buffers 완전 재생성
                 api_count = len(self.videoMessages) if self.videoMessages else 9
                 self.step_buffers = [
-                    {"data": "", "error": "", "result": "PASS", "raw_data_list": []}
+                    {"data": "", "error": "", "result": "PASS", "raw_data_list": [], "attempt_logs": [], "api_info": {}}
                     for _ in range(api_count)
                 ]
                 Logger.debug(f" step_buffers 재생성 완료: {len(self.step_buffers)}개")

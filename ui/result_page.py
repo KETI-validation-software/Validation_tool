@@ -14,22 +14,23 @@ def get_result_header_title_display_size(widget):
     return QPixmap(resource_path(widget._get_result_header_title_path())).size()
 
 
-def create_embedded_back_navigation(parent, click_handler):
+def create_embedded_back_navigation(parent, click_handler, width=424, height=46):
     container = QWidget(parent)
     container.setObjectName("top_back_navigation")
-    container.setFixedSize(444, 46)
+    container.setFixedSize(width, height)
     container.setStyleSheet("background: transparent;")
+    container.base_width = width
 
     container_layout = QVBoxLayout(container)
     container_layout.setContentsMargins(0, 0, 0, 0)
-    container_layout.setSpacing(12)
+    container_layout.setSpacing(16)
 
     row = QWidget(container)
-    row.setFixedSize(150, 29)
+    row.setFixedSize(154, 29)
     row.setStyleSheet("background: transparent;")
     row_layout = QHBoxLayout(row)
     row_layout.setContentsMargins(0, 0, 0, 0)
-    row_layout.setSpacing(14)
+    row_layout.setSpacing(8)
 
     icon_button = QPushButton(row)
     icon_button.setObjectName("top_back_icon_button")
@@ -56,7 +57,7 @@ def create_embedded_back_navigation(parent, click_handler):
         QPushButton {
             border: none;
             background-color: transparent;
-            color: #1B1B1C;
+            color: #262626;
             font-family: 'Noto Sans KR';
             font-size: 20px;
             font-weight: 500;
@@ -67,18 +68,19 @@ def create_embedded_back_navigation(parent, click_handler):
     text_button.clicked.connect(click_handler)
     row_layout.addWidget(text_button)
 
-    container_layout.addWidget(row, 0, Qt.AlignRight)
+    container_layout.addWidget(row, 0, Qt.AlignLeft)
 
     divider = QFrame(container)
     divider.setObjectName("top_back_divider")
-    divider.setFixedSize(444, 1)
+    divider.setFixedSize(width, 1)
     divider.setStyleSheet("""
         QFrame {
-            background-color: #CECECE;
+            background-color: #E5E5E5;
             border: none;
         }
     """)
-    container_layout.addWidget(divider, 0, Qt.AlignRight)
+    container_layout.addWidget(divider, 0, Qt.AlignLeft)
+    container.divider = divider
 
     return container
 
@@ -175,17 +177,25 @@ class ResultPageWidget(QWidget):
         # ✅ 본문 영역 컨테이너 (반응형 - main.png 배경)
         self.content_widget = QWidget()
         self.content_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.content_widget.setStyleSheet("background-color: #FFFFFF;")
 
         # 배경 이미지를 QLabel로 설정 (절대 위치)
-        main_bg_path = resource_path("assets/image/common/main.png").replace("\\", "/")
         self.content_bg_label = QLabel(self.content_widget)
-        self.content_bg_label.setPixmap(QPixmap(main_bg_path))
-        self.content_bg_label.setScaledContents(True)
+        self.content_bg_label.setStyleSheet("background-color: #FFFFFF;")
+        
+        # ✅ 배경 구분선 및 패널 추가 (3페이지와 동일하게)
+        self.left_background_panel = QFrame(self.content_bg_label)
+        self.left_background_panel.setStyleSheet("background-color: #F7F7F7; border: none;")
+        self.content_background_divider = QFrame(self.content_bg_label)
+        self.content_background_divider.setStyleSheet("background-color: #D9D9D9; border: none;")
+        self.right_background_panel = QFrame(self.content_bg_label)
+        self.right_background_panel.setStyleSheet("background-color: #FFFFFF; border: none;")
+        
         self.content_bg_label.lower()  # 맨 뒤로 보내기
 
         # ✅ 반응형: 원본 크기 저장
         self.original_window_size = (1680, 1006)
-        self.original_bg_root_size = (1584, 898)
+        self.original_bg_root_size = (1585, 898)
         self.original_left_col_size = (472, 898)
         self.original_right_col_size = (1112, 898)
         self.original_spec_panel_title_size = (424, 24)
@@ -212,6 +222,7 @@ class ResultPageWidget(QWidget):
         # ✅ 2컬럼 레이아웃
         self.bg_root = QWidget(self.content_widget)
         self.bg_root.setObjectName("bg_root")
+        self.bg_root.setFixedSize(1585, 898)
         self.bg_root.setAttribute(Qt.WA_StyledBackground, True)
         self.bg_root.setStyleSheet("QWidget#bg_root { background: transparent; }")
         bg_root_layout = QVBoxLayout()
@@ -227,8 +238,20 @@ class ResultPageWidget(QWidget):
         self.left_col.setFixedSize(472, 898)
         self.left_col.setStyleSheet("background: transparent;")
         left_layout = QVBoxLayout()
-        left_layout.setContentsMargins(24, 36, 24, 80)
+        # ✅ 반응형: 상단 여백 조정 (임베디드 시 20px)
+        left_top_margin = 20 if self.embedded else 36
+        left_layout.setContentsMargins(24, left_top_margin, 24, 0)
         left_layout.setSpacing(0)
+
+        # ✅ 상단 내비게이션 바 추가 (임베디드 모드일 때만)
+        if self.embedded:
+            self.top_back_navigation = create_embedded_back_navigation(
+                self.left_col,
+                self._on_back_clicked,
+                width=424,
+            )
+            left_layout.addWidget(self.top_back_navigation, 0, Qt.AlignLeft | Qt.AlignTop)
+            left_layout.addSpacing(16)
 
         # 시험 선택 패널 - TestSelectionPanel 사용
         self.test_selection_panel = TestSelectionPanel(self.CONSTANTS)
@@ -269,6 +292,10 @@ class ResultPageWidget(QWidget):
 
         left_layout.addStretch()
         self.left_col.setLayout(left_layout)
+
+        self.column_divider = QFrame()
+        self.column_divider.setFixedSize(1, 898)
+        self.column_divider.setStyleSheet("background: transparent; border: none;")
 
         # ✅ 오른쪽 컬럼 (결과 테이블 및 점수)
         self.right_col = QWidget()
@@ -357,36 +384,7 @@ class ResultPageWidget(QWidget):
         buttonLayout.setAlignment(Qt.AlignRight)  # 오른쪽 정렬
         buttonLayout.setContentsMargins(0, 0, 0, 0)
 
-        if self.embedded:
-            # Embedded 모드: 이전 화면으로 버튼
-            # ✅ 반응형: 인스턴스 변수로 변경 및 원본 크기 저장
-            self.back_btn = QPushButton("이전 화면으로", self)
-            self.back_btn.setFixedSize(362, 48)
-            self.original_back_btn_size = (362, 48)
-            self.back_btn.setFocusPolicy(Qt.NoFocus)
-
-            self.back_btn.setStyleSheet("""
-                  QPushButton {
-                      background-color: #1C5DB1;
-                      border: none;
-                      border-radius: 4px;
-                      padding-left: 20px;
-                      padding-right: 20px;
-                      font-family: 'Noto Sans KR';
-                      font-size: 20px;
-                      font-weight: 500;
-                      color: #FFFFFF;
-                  }
-                  QPushButton:hover {
-                      background-color: #3E85E2;
-                  }
-                  QPushButton:pressed {
-                      background-color: #3E85E2;
-                  }
-              """)
-            self.back_btn.clicked.connect(self._on_back_clicked)
-            buttonLayout.addWidget(self.back_btn)
-        else:
+        if not self.embedded:
             # Standalone 모드: 닫기 버튼
             close_btn = QPushButton('닫기', self)
             close_btn.setFixedSize(362, 48)
@@ -433,16 +431,17 @@ class ResultPageWidget(QWidget):
         self.right_col.setLayout(right_layout)
 
         columns_layout.addWidget(self.left_col)
+        columns_layout.addWidget(self.column_divider)
         columns_layout.addWidget(self.right_col)
 
         bg_root_layout.addLayout(columns_layout)
         self.bg_root.setLayout(bg_root_layout)
 
-        # content_widget 레이아웃 설정 (좌우 48px, 하단 44px padding, 가운데 정렬)
+        # content_widget 레이아웃 설정 (좌우 47px, 하단 44px padding, 왼쪽 정렬)
         content_layout = QVBoxLayout(self.content_widget)
-        content_layout.setContentsMargins(48, 0, 48, 44)
+        content_layout.setContentsMargins(47, 0, 47, 44)
         content_layout.setSpacing(0)
-        content_layout.addWidget(self.bg_root, 0, Qt.AlignHCenter | Qt.AlignVCenter)
+        content_layout.addWidget(self.bg_root, 0, Qt.AlignLeft | Qt.AlignVCenter)
 
         mainLayout.addWidget(self.content_widget, 1)  # 반응형: stretch=1로 남은 공간 채움
 
@@ -450,17 +449,45 @@ class ResultPageWidget(QWidget):
 
         # 초기 시나리오 로드 (UI 요소 생성 후 호출)
         self.load_initial_scenarios()
+        
+        # ✅ 초기 배경 지오메트리 설정
+        QtCore.QTimer.singleShot(0, self._update_content_background_geometry)
+
+    def _update_content_background_geometry(self):
+        """배경 패널 및 구분선 위치/크기 업데이트 (3페이지와 동일)"""
+        if not hasattr(self, 'content_widget') or not self.content_widget:
+            return
+        if not hasattr(self, 'content_bg_label'):
+            return
+
+        content_width = self.content_widget.width()
+        content_height = self.content_widget.height()
+        self.content_bg_label.setGeometry(0, 0, content_width, content_height)
+
+        if hasattr(self, 'bg_root') and hasattr(self, 'left_background_panel'):
+            width_ratio = 1.0
+            if hasattr(self, 'original_window_size') and self.original_window_size[0]:
+                width_ratio = max(1.0, self.width() / self.original_window_size[0])
+            
+            # 3페이지(common_main_ui.py)와 동일한 오프셋 계산 적용
+            divider_offset = int(round((width_ratio - 1.0) * 28))
+            divider_x = self.bg_root.geometry().x() + self.left_col.width() - divider_offset
+            
+            self.left_background_panel.setGeometry(0, 0, divider_x, content_height)
+            self.content_background_divider.setGeometry(divider_x, 0, 1, content_height)
+            self.right_background_panel.setGeometry(
+                divider_x + 1,
+                0,
+                max(0, content_width - divider_x - 1),
+                content_height,
+            )
 
     def resizeEvent(self, event):
         """창 크기 변경 시 배경 이미지 및 UI 반응형 조정"""
         super().resizeEvent(event)
 
-        # content_widget의 배경 이미지 크기 조정
-        if hasattr(self, 'content_widget') and self.content_widget:
-            if hasattr(self, 'content_bg_label'):
-                content_width = self.content_widget.width()
-                content_height = self.content_widget.height()
-                self.content_bg_label.setGeometry(0, 0, content_width, content_height)
+        # ✅ 배경 지오메트리 실시간 업데이트
+        self._update_content_background_geometry()
 
         # ✅ 반응형: UI 요소 크기 조정
         if hasattr(self, 'original_window_size') and hasattr(self, 'left_col'):
@@ -489,6 +516,18 @@ class ResultPageWidget(QWidget):
                 new_left_width = int(self.original_left_col_size[0] * width_ratio)
                 new_left_height = int(self.original_left_col_size[1] * height_ratio)
                 self.left_col.setFixedSize(new_left_width, new_left_height)
+                if hasattr(self, 'column_divider'):
+                    self.column_divider.setFixedSize(1, new_left_height)
+                
+                # ✅ 상단 내비게이션 바 크기 조정 (3페이지와 동일)
+                if hasattr(self, 'top_back_navigation'):
+                    if hasattr(self, 'original_spec_panel_title_size'):
+                        new_back_width = int(self.original_spec_panel_title_size[0] * width_ratio)
+                    else:
+                        new_back_width = int(getattr(self.top_back_navigation, 'base_width', 424) * width_ratio)
+                    self.top_back_navigation.setFixedWidth(new_back_width)
+                    if hasattr(self.top_back_navigation, 'divider'):
+                        self.top_back_navigation.divider.setFixedWidth(new_back_width)
 
             # 시험 선택 타이틀 크기 조정 (가로만 확장)
             if hasattr(self, 'spec_panel_title') and hasattr(self, 'original_spec_panel_title_size'):
@@ -636,6 +675,9 @@ class ResultPageWidget(QWidget):
                 # 마지막 컬럼은 남은 공간을 채움
                 last_col_width = available_width - used_width
                 self.tableWidget.setColumnWidth(len(self.original_column_widths) - 1, last_col_width)
+
+        # ✅ 배경 지오메트리 실시간 업데이트 (리사이징 완료 후 최하단에서 호출 - 3페이지와 동일)
+        self._update_content_background_geometry()
 
     def _apply_score_widget_resize(self):
         """점수 위젯 재생성 후 현재 창 크기에 맞게 반응형 적용"""

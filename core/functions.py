@@ -1490,44 +1490,80 @@ def _extract_validation_field_name(validation_data, validation_errors):
     return ""
 
 
+def _get_attempt_log(step_buffer, attempt_num):
+    """Return the stored attempt log for a 1-based attempt index."""
+    if not isinstance(step_buffer, dict):
+        return None
+
+    attempt_logs = step_buffer.get("attempt_logs") or []
+    if not isinstance(attempt_logs, list):
+        return None
+
+    for attempt_log in attempt_logs:
+        if isinstance(attempt_log, dict) and int(attempt_log.get("attempt", 0) or 0) == int(attempt_num):
+            return attempt_log
+
+    if 0 <= attempt_num - 1 < len(attempt_logs):
+        attempt_log = attempt_logs[attempt_num - 1]
+        if isinstance(attempt_log, dict):
+            return attempt_log
+
+    return None
+
+
+def upsert_attempt_log(step_buffer, attempt_num, **fields):
+    """Create or update per-attempt payload data used for result JSON generation."""
+    if not isinstance(step_buffer, dict):
+        return None
+
+    attempt_logs = step_buffer.setdefault("attempt_logs", [])
+    if not isinstance(attempt_logs, list):
+        step_buffer["attempt_logs"] = []
+        attempt_logs = step_buffer["attempt_logs"]
+
+    attempt_log = _get_attempt_log(step_buffer, attempt_num)
+    if attempt_log is None:
+        attempt_log = {"attempt": int(attempt_num)}
+        attempt_logs.append(attempt_log)
+
+    for key, value in fields.items():
+        if value is not None:
+            attempt_log[key] = copy.deepcopy(value)
+
+    return attempt_log
+
+
 def generate_validation_data_from_step_buffer(step_buffer, attempt_num):
     """
-    스텝 버퍼에서 검증 데이터 추출 (raw_data_list 우선 사용)
-
-    Args:
-        step_buffer: 스텝 버퍼 딕셔너리
-        attempt_num: 시도 번호 (1부터 시작)
-
-    Returns:
-        dict: {
-            "attempt": attempt_num,
-            "validationData": {...},
-            "validationErrors": [...]
-        }
+    ?? ???? ?? ???? ????. attempt_logs? ??? ?? ????.
     """
     import re
 
     validation_data = {}
     validation_errors = []
+    transmitted_data = {}
 
-    # 1. raw_data_list에서 데이터 추출 (우선순위 1)
-    if "raw_data_list" in step_buffer and step_buffer["raw_data_list"]:
+    attempt_log = _get_attempt_log(step_buffer, attempt_num)
+    if attempt_log:
+        validation_data = copy.deepcopy(
+            attempt_log.get("recv_payload")
+            if attempt_log.get("recv_payload") is not None
+            else attempt_log.get("validation_data") or {}
+        )
+        validation_errors = copy.deepcopy(attempt_log.get("validation_errors") or [])
+        transmitted_data = copy.deepcopy(attempt_log.get("send_payload") or {})
+
+    if not validation_data and "raw_data_list" in step_buffer and step_buffer["raw_data_list"]:
         raw_data_list = step_buffer["raw_data_list"]
-        # attempt_num은 1부터 시작하므로 인덱스는 attempt_num - 1
         if 0 <= attempt_num - 1 < len(raw_data_list):
             validation_data = raw_data_list[attempt_num - 1]
         else:
             validation_data = {}
-
-    # 2. data 텍스트에서 파싱 (raw_data_list가 없는 경우)
-    elif step_buffer.get("data"):
+    elif not validation_data and step_buffer.get("data"):
         data_text = step_buffer["data"]
-
-        # "[시도 n회차]" 패턴으로 분리
-        pattern = r'\[시도 (\d+)회차\]'
+        pattern = r'\[?? (\d+)??\]'
         parts = re.split(pattern, data_text)
 
-        # parts는 [앞부분, '1', 데이터1, '2', 데이터2, ...] 형식
         attempt_data_map = {}
         for i in range(1, len(parts), 2):
             if i + 1 < len(parts):
@@ -1535,25 +1571,20 @@ def generate_validation_data_from_step_buffer(step_buffer, attempt_num):
                 data_content = parts[i + 1].strip()
                 attempt_data_map[attempt_idx] = data_content
 
-        # 현재 attempt_num에 해당하는 데이터 가져오기
         if attempt_num in attempt_data_map:
             raw_data = attempt_data_map[attempt_num]
             try:
                 validation_data = json.loads(raw_data)
-            except:
+            except Exception:
                 validation_data = {"raw_data": raw_data}
         else:
             validation_data = {}
 
-    # 3. 에러 메시지 추출 - attempt별로 분리
-    if step_buffer.get("error"):
+    if not validation_errors and step_buffer.get("error"):
         error_text = step_buffer["error"]
-
-        # "[검증 n회차]" 또는 "[시도 n회차]" 패턴으로 분리
-        error_pattern = r'\[(?:검증|시도) (\d+)회차\]'
+        error_pattern = r'\[(?:??|??) (\d+)??\]'
         error_parts = re.split(error_pattern, error_text)
 
-        # 에러 메시지 매핑
         attempt_error_map = {}
         for i in range(1, len(error_parts), 2):
             if i + 1 < len(error_parts):
@@ -1562,27 +1593,24 @@ def generate_validation_data_from_step_buffer(step_buffer, attempt_num):
                 if attempt_idx not in attempt_error_map:
                     attempt_error_map[attempt_idx] = []
                 if error_content:
-                    # 에러 내용을 줄 단위로 분리
                     error_lines = [line.strip() for line in error_content.split('\n') if line.strip()]
                     attempt_error_map[attempt_idx].extend(error_lines)
 
-        # 현재 attempt_num에 해당하는 에러만 가져오기
         if attempt_num in attempt_error_map:
             validation_errors = attempt_error_map[attempt_num]
-        else:
-            # 패턴이 없는 경우 첫 번째 시도에만 전체 에러 할당
-            if attempt_num == 1 and not attempt_error_map:
-                validation_errors = [line.strip() for line in error_text.split('\n') if line.strip()]
+        elif attempt_num == 1 and not attempt_error_map:
+            validation_errors = [line.strip() for line in error_text.split('\n') if line.strip()]
 
-    # 4. 결과 반환 - attempt는 전달받은 값 그대로 사용
     field_name = _extract_validation_field_name(validation_data, validation_errors)
-    transmitted_data = copy.deepcopy(validation_data)
+    if not transmitted_data:
+        transmitted_data = copy.deepcopy(validation_data)
+
     return {
         "attempt": attempt_num,
         "field": field_name,
         "validationData": validation_data,
         "validationErrors": validation_errors,
-        "transmittedData": transmitted_data
+        "transmittedData": transmitted_data,
     }
 
 
@@ -1591,7 +1619,9 @@ def update_webhook_step_buffer_fields(
         webhook_data,
         webhook_error_text,
         webhook_pass_cnt,
-        webhook_total_cnt):
+        webhook_total_cnt,
+        attempt_num=None,
+        webhook_ack_payload=None):
     """
     Populate webhook-specific fields in a step buffer so result JSON can
     include webhook transmittedData/validation metadata.
@@ -1603,6 +1633,16 @@ def update_webhook_step_buffer_fields(
     step_buffer["webhook_error"] = webhook_error_text or ""
     step_buffer["webhook_pass_cnt"] = int(webhook_pass_cnt or 0)
     step_buffer["webhook_total_cnt"] = int(webhook_total_cnt or 0)
+
+    if attempt_num is not None:
+        error_lines = [line.strip() for line in (webhook_error_text or "").split("\n") if line.strip()]
+        upsert_attempt_log(
+            step_buffer,
+            attempt_num,
+            webhook_recv_payload=webhook_data or {},
+            webhook_recv_errors=error_lines,
+            webhook_ack_payload=webhook_ack_payload,
+        )
 
 
 def build_result_json(myapp_instance):
@@ -1861,20 +1901,30 @@ def _build_spec_result(myapp_instance, spec_id, step_buffers, table_data=None, g
             # webhook 검증 데이터 생성
             webhook_validations = []
             for attempt in range(1, retries + 1):
+                attempt_log = _get_attempt_log(step_buffer, attempt)
+                if attempt_log:
+                    webhook_data = copy.deepcopy(
+                        attempt_log.get("webhook_recv_payload")
+                        if attempt_log.get("webhook_recv_payload") is not None
+                        else step_buffer.get("webhook_data") or {}
+                    )
+                    webhook_errors = copy.deepcopy(
+                        attempt_log.get("webhook_recv_errors")
+                        or (step_buffer.get("webhook_error", "").split('\n') if step_buffer.get("webhook_error") else [])
+                    )
+                else:
+                    webhook_data = copy.deepcopy(step_buffer.get("webhook_data") or {})
+                    webhook_errors = step_buffer.get("webhook_error", "").split('\n') if step_buffer.get("webhook_error") else []
+
                 webhook_validation = {
                     "attempt": attempt,
-                    "field": _extract_validation_field_name(
-                        step_buffer.get("webhook_data") or {},
-                        step_buffer.get("webhook_error", "").split('\n') if step_buffer.get("webhook_error") else []
-                    ),
-                    "validationData": step_buffer.get("webhook_data") or {},
-                    "validationErrors": step_buffer.get("webhook_error", "").split('\n') if step_buffer.get(
-                        "webhook_error") else [],
-                    "transmittedData": copy.deepcopy(step_buffer.get("webhook_data") or {})
+                    "field": _extract_validation_field_name(webhook_data, webhook_errors),
+                    "validationData": webhook_data,
+                    "validationErrors": webhook_errors,
+                    "transmittedData": copy.deepcopy(webhook_data)
                 }
                 webhook_validations.append(webhook_validation)
 
-            # webhook 점수 계산
             webhook_pass = step_buffer.get("webhook_pass_cnt", 0)
             webhook_total = step_buffer.get("webhook_total_cnt", 0)
             webhook_fail = webhook_total - webhook_pass
