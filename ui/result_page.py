@@ -8,6 +8,7 @@ from core.logger import Logger
 from core.utils import remove_api_number_suffix, load_external_constants
 from ui.ui_components import TestSelectionPanel
 from ui.detail_dialog import CombinedDetailDialog
+from ui.gui_utils import WebhookBadgeLabel
 
 
 def get_result_header_title_display_size(widget):
@@ -219,7 +220,7 @@ class ResultPageWidget(QWidget):
         self.original_pass_label_size = (340, 60)    # 필수 필드 점수
         self.original_opt_label_size = (340, 60)     # 선택 필드 점수
         self.original_score_label_size = (315, 60)   # 종합 평가 점수
-        self.original_column_widths = [40, 304, 100, 94, 116, 116, 94, 94, 90]
+        self.original_column_widths = [40, 324, 80, 116, 116, 94, 94, 94, 90]
 
         # ✅ 2컬럼 레이아웃
         self.bg_root = QWidget(self.content_widget)
@@ -993,39 +994,42 @@ class ResultPageWidget(QWidget):
         return False
 
     def _set_api_name_cell(self, row, api_name):
+        """4페이지용 API 명 셀 설정 (3페이지와 동일하게 웹훅 뱃지 포함 및 좌측 정렬, 17px)"""
         api_item = QTableWidgetItem(api_name)
         api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
         api_item.setData(Qt.UserRole, api_name)
-        api_item.setText("")
+        api_item.setText("")  # 텍스트는 QLabel로 표시하므로 비움
         self.tableWidget.setItem(row, 1, api_item)
 
         api_container = QWidget()
         api_layout = QHBoxLayout()
-        api_layout.setContentsMargins(6, 0, 6, 0)
-        api_layout.setSpacing(4)
-        api_layout.addStretch()
+        api_layout.setContentsMargins(12, 0, 4, 0)
+        api_layout.setSpacing(8)
+        api_layout.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
 
         api_name_label = QLabel(api_name)
         api_name_label.setStyleSheet("""
             QLabel {
                 color: #1B1B1C;
                 font-family: 'Noto Sans KR';
-                font-size: 19px;
+                font-size: 17px;
                 font-weight: 400;
             }
         """)
-        api_name_label.setAlignment(Qt.AlignVCenter)
-        api_layout.addWidget(api_name_label)
+        api_name_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        api_name_label.setWordWrap(False)
+        api_name_label.setToolTip(api_name)
+        api_layout.addWidget(api_name_label, 0, Qt.AlignVCenter)
 
+        # 웹훅 뱃지 추가 (3페이지와 동일한 로직)
         if self._is_webhook_api(row) and not self.webhook_badge_pixmap.isNull():
-            webhook_badge_label = QLabel()
+            webhook_badge_label = WebhookBadgeLabel()
             webhook_badge_label.setPixmap(self.webhook_badge_pixmap)
             webhook_badge_label.setScaledContents(False)
             webhook_badge_label.setFixedSize(self.webhook_badge_pixmap.size())
             webhook_badge_label.setAlignment(Qt.AlignCenter)
             api_layout.addWidget(webhook_badge_label, 0, Qt.AlignVCenter)
 
-        api_layout.addStretch()
         api_container.setLayout(api_layout)
         self.tableWidget.setCellWidget(row, 1, api_container)
 
@@ -1065,10 +1069,22 @@ class ResultPageWidget(QWidget):
             no_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 0, no_item)
 
-            # API 명 - 컬럼 1 (이미 숫자가 제거된 리스트 사용)
+            # API 명 - 컬럼 1 (웹훅 뱃지 포함)
             self._set_api_name_cell(row, api_list[row])
 
-            # ✅ 기본 아이콘 (결과 페이지 전용 아이콘 사용) - 컬럼 2
+            # ✅ 타이머/뱃지 컬럼(2) - 빈 대기 아이콘
+            timer_widget = QWidget()
+            timer_layout = QHBoxLayout()
+            timer_layout.setContentsMargins(0, 0, 0, 0)
+            timer_label = QLabel()
+            timer_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
+            timer_label.setAlignment(Qt.AlignCenter)
+            timer_layout.addWidget(timer_label)
+            timer_layout.setAlignment(Qt.AlignCenter)
+            timer_widget.setLayout(timer_layout)
+            self.tableWidget.setCellWidget(row, 2, timer_widget)
+
+            # ✅ 기본 아이콘 (결과 페이지 전용 아이콘 사용) - 컬럼 3
             icon_widget = QWidget()
             icon_layout = QHBoxLayout()
             icon_layout.setContentsMargins(0, 0, 0, 0)
@@ -1078,15 +1094,15 @@ class ResultPageWidget(QWidget):
             icon_layout.addWidget(icon_label)
             icon_layout.setAlignment(Qt.AlignCenter)
             icon_widget.setLayout(icon_layout)
-            self.tableWidget.setCellWidget(row, 2, icon_widget)
+            self.tableWidget.setCellWidget(row, 3, icon_widget)
 
-            # 모든 값 0으로 초기화 (9컬럼 구조) - 컬럼 3-7
-            for col, value in [(3, "0"), (4, "0"), (5, "0"), (6, "0"), (7, "0%")]:
+            # 모든 값 0으로 초기화 (10컬럼 구조 대응) - 컬럼 4-8
+            for col, value in [(4, "0"), (5, "0"), (6, "0"), (7, "0"), (8, "0%")]:
                 item = QTableWidgetItem(value)
                 item.setTextAlignment(Qt.AlignCenter)
                 self.tableWidget.setItem(row, col, item)
 
-            # 상세 내용 버튼 - 컬럼 8
+            # 상세 내용 버튼 - 컬럼 9
             detail_label = QLabel()
             try:
                 img_path = resource_path("assets/image/test_runner/btn_상세내용확인.png").replace("\\", "/")
@@ -1109,7 +1125,7 @@ class ResultPageWidget(QWidget):
             layout.setContentsMargins(0, 0, 0, 0)
             container.setLayout(layout)
 
-            self.tableWidget.setCellWidget(row, 8, container)
+            self.tableWidget.setCellWidget(row, 9, container)
 
         # 점수 표시도 0으로 업데이트
         empty_data = {
@@ -1119,7 +1135,7 @@ class ResultPageWidget(QWidget):
         self.update_score_displays(empty_data)
 
     def reload_result_table(self, saved_data):
-        """저장된 데이터로 결과 테이블 재구성"""
+        """저장된 데이터로 결과 테이블 재구성 (10컬럼 구조)"""
         table_data = saved_data.get('table_data', [])
 
         # 테이블 행 수 재설정
@@ -1135,21 +1151,38 @@ class ResultPageWidget(QWidget):
             no_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
             self.tableWidget.setItem(row, 0, no_item)
 
-            # API 명 - 컬럼 1 (숫자 제거된 이름 표시)
+            # API 명 - 컬럼 1 (웹훅 뱃지 포함)
             display_name = remove_api_number_suffix(row_data['api_name'])
             self._set_api_name_cell(row, display_name)
 
-            # ✅ 아이콘 상태 복원 (결과 페이지 전용 아이콘 사용) - 컬럼 2
+            # ✅ 타이머/뱃지 컬럼 복원 - 컬럼 2
+            if self._is_webhook_api(row):
+                timer_widget = self.parent.tableWidget.cellWidget(row, 2)
+                if timer_widget:
+                    old_label = timer_widget.findChild(QLabel)
+                    if old_label and not old_label.pixmap().isNull():
+                        new_timer_widget = QWidget()
+                        new_timer_layout = QHBoxLayout()
+                        new_timer_layout.setContentsMargins(0, 0, 0, 0)
+                        new_timer_label = QLabel()
+                        new_timer_label.setPixmap(old_label.pixmap())
+                        new_timer_label.setAlignment(Qt.AlignCenter)
+                        new_timer_layout.addWidget(new_timer_label)
+                        new_timer_layout.setAlignment(Qt.AlignCenter)
+                        new_timer_widget.setLayout(new_timer_layout)
+                        self.tableWidget.setCellWidget(row, 2, new_timer_widget)
+
+            # ✅ 아이콘 상태 복원 (결과 페이지 전용 아이콘 사용) - 컬럼 3
             icon_state = row_data['icon_state']
             if icon_state == "PASS":
                 img = self.img_pass  # tag_성공.png
-                icon_size = (84, 20)  # tag_성공.png
+                icon_size = (84, 20)
             elif icon_state == "FAIL":
                 img = self.img_fail  # tag_실패.png
-                icon_size = (84, 20)  # tag_실패.png
+                icon_size = (84, 20)
             else:
                 img = self.img_none  # icn_basic.png
-                icon_size = (16, 16)  # icn_basic.png
+                icon_size = (16, 16)
 
             icon_widget = QWidget()
             icon_layout = QHBoxLayout()
@@ -1161,16 +1194,16 @@ class ResultPageWidget(QWidget):
             icon_layout.addWidget(icon_label)
             icon_layout.setAlignment(Qt.AlignCenter)
             icon_widget.setLayout(icon_layout)
-            self.tableWidget.setCellWidget(row, 2, icon_widget)
+            self.tableWidget.setCellWidget(row, 3, icon_widget)
 
-            # 나머지 컬럼 복원 - 컬럼 3-7
-            for col, key in [(3, 'retry_count'), (4, 'pass_count'),
-                             (5, 'total_count'), (6, 'fail_count'), (7, 'score')]:
-                item = QTableWidgetItem(row_data[key])
+            # 나머지 컬럼 복원 - 컬럼 4-8 (헤더 순서: 4:전체, 5:통과, 6:실패, 7:검증, 8:점수)
+            for col, key in [(4, 'total_count'), (5, 'pass_count'),
+                             (6, 'fail_count'), (7, 'retry_count'), (8, 'score')]:
+                item = QTableWidgetItem(str(row_data.get(key, "0")))
                 item.setTextAlignment(Qt.AlignCenter)
                 self.tableWidget.setItem(row, col, item)
 
-            # 상세 내용 버튼 - 컬럼 8
+            # 상세 내용 버튼 - 컬럼 9
             detail_label = QLabel()
             try:
                 img_path = resource_path("assets/image/test_runner/btn_상세내용확인.png").replace("\\", "/")
@@ -1193,7 +1226,7 @@ class ResultPageWidget(QWidget):
             layout.setContentsMargins(0, 0, 0, 0)
             container.setLayout(layout)
 
-            self.tableWidget.setCellWidget(row, 8, container)
+            self.tableWidget.setCellWidget(row, 9, container)
 
     def _show_detail(self, row):
         """상세 내용 확인 - 자체 tableWidget 데이터 사용"""
@@ -1359,7 +1392,7 @@ class ResultPageWidget(QWidget):
         return scroll_area
 
     def create_result_table(self, parent_layout):
-        """결과 테이블 생성 - 3페이지(common_main_ui) 구조와 동일하게 복구"""
+        """결과 테이블 생성 - 3페이지(system_main_ui) 구조와 동일하게 복구"""
         api_count = self.parent.tableWidget.rowCount()
 
         # 별도 헤더 위젯 (1064px 전체 너비)
@@ -1368,9 +1401,9 @@ class ResultPageWidget(QWidget):
         self.result_header_widget.setFixedSize(1064, 30)
         self.result_header_widget.setStyleSheet("""
             QWidget#result_header_widget {
-                background-color: #EDF0F3;
+                background-color: #F8F9FA;
                 border: 1px solid #CECECE;
-                border-bottom: none;
+                border-bottom: 1px solid #CCCCCC;
                 border-top-left-radius: 4px;
                 border-top-right-radius: 4px;
             }
@@ -1379,11 +1412,12 @@ class ResultPageWidget(QWidget):
         header_layout.setContentsMargins(0, 0, 14, 0)  # 오른쪽 14px (스크롤바 영역)
         header_layout.setSpacing(0)
 
-        # 헤더 컬럼 정의 (너비, 텍스트) - 9컬럼 구조
+        # 헤더 컬럼 정의 (너비, 텍스트) - 10컬럼 구조 (3페이지와 동일)
         header_columns = [
             (40, ""),            # No.
-            (304, "API 명"),
-            (100, "결과"),
+            (268, "API 명"),
+            (60, ""),            # 타이머/뱃지용
+            (76, "결과"),
             (116, "전체 필드 수"),
             (116, "통과 필드 수"),
             (94, "실패 필드 수"),
@@ -1411,8 +1445,8 @@ class ResultPageWidget(QWidget):
             header_layout.addWidget(label)
             self.result_header_labels.append(label)
 
-        # 테이블 본문 (헤더 숨김)
-        self.tableWidget = QTableWidget(api_count, 9)
+        # 테이블 본문 (헤더 숨김) - 10개 컬럼
+        self.tableWidget = QTableWidget(api_count, 10)
         self.tableWidget.horizontalHeader().setVisible(False)
         self.tableWidget.verticalHeader().setVisible(False)
         self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -1444,8 +1478,8 @@ class ResultPageWidget(QWidget):
 
         self.tableWidget.setShowGrid(False)
 
-        # 컬럼 너비 설정 - 3페이지와 동일한 베이스 너비 사용
-        self.original_column_widths = [40, 304, 100, 116, 116, 94, 94, 94, 90]
+        # 컬럼 너비 설정 - 3페이지와 동일한 10컬럼 구조
+        self.original_column_widths = [40, 268, 60, 76, 116, 116, 94, 94, 94, 90]
         for i, width in enumerate(self.original_column_widths):
             self.tableWidget.setColumnWidth(i, width)
         self.tableWidget.horizontalHeader().setStretchLastSection(False)
@@ -1588,7 +1622,7 @@ class ResultPageWidget(QWidget):
         self.backRequested.emit()
 
     def _copy_table_data(self):
-        """parent의 테이블 데이터를 복사 (결과 페이지 전용 아이콘 사용)"""
+        """parent의 테이블 데이터를 복사 (10컬럼 구조 매핑 수정)"""
         api_count = self.parent.tableWidget.rowCount()
         for row in range(api_count):
             # No. (숫자) - 컬럼 0
@@ -1598,21 +1632,37 @@ class ResultPageWidget(QWidget):
                 new_no_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
                 self.tableWidget.setItem(row, 0, new_no_item)
 
-            # API 명 - 컬럼 1
+            # API 명 + 웹훅 뱃지 - 컬럼 1 (3페이지와 동일한 구조)
             api_item = self.parent.tableWidget.item(row, 1)
             if api_item:
                 api_name = api_item.data(Qt.UserRole) or api_item.text()
                 self._set_api_name_cell(row, api_name)
 
-            # ✅ 결과 아이콘 (결과 페이지 전용 아이콘으로 교체) - 컬럼 2
-            icon_widget = self.parent.tableWidget.cellWidget(row, 2)
+            # ✅ 타이머/뱃지 컬럼 - 컬럼 2 (부모의 컬럼 2에서 복사)
+            timer_widget = self.parent.tableWidget.cellWidget(row, 2)
+            if timer_widget:
+                old_timer_label = timer_widget.findChild(QLabel)
+                if old_timer_label and not old_timer_label.pixmap().isNull():
+                    new_timer_widget = QWidget()
+                    new_timer_layout = QHBoxLayout()
+                    new_timer_layout.setContentsMargins(0, 0, 0, 0)
+                    new_timer_label = QLabel()
+                    new_timer_label.setPixmap(old_timer_label.pixmap())
+                    new_timer_label.setAlignment(Qt.AlignCenter)
+                    new_timer_layout.addWidget(new_timer_label)
+                    new_timer_layout.setAlignment(Qt.AlignCenter)
+                    new_timer_widget.setLayout(new_timer_layout)
+                    self.tableWidget.setCellWidget(row, 2, new_timer_widget)
+
+            # ✅ 결과 아이콘 (부모의 컬럼 3에서 가져옴) - 컬럼 3
+            icon_widget = self.parent.tableWidget.cellWidget(row, 3)
             if icon_widget:
                 old_label = icon_widget.findChild(QLabel)
                 if old_label:
                     # ✅ tooltip에서 결과 상태 추출
                     tooltip = old_label.toolTip()
 
-                    # ✅ 결과에 따라 결과 페이지 전용 아이콘 선택
+                    # ✅ 결과에 따라 결과 페이지 전용 아이콘 선택 (tag_성공/실패.png)
                     if "Result: PASS" in tooltip:
                         img = self.img_pass  # tag_성공.png
                         icon_size = (84, 20)
@@ -1636,17 +1686,17 @@ class ResultPageWidget(QWidget):
                     new_icon_layout.setAlignment(Qt.AlignCenter)
                     new_icon_widget.setLayout(new_icon_layout)
 
-                    self.tableWidget.setCellWidget(row, 2, new_icon_widget)
+                    self.tableWidget.setCellWidget(row, 3, new_icon_widget)
 
-            # 나머지 컬럼들 - 컬럼 3-7
-            for col in range(3, 8):
+            # 나머지 수치 데이터들 - 컬럼 4-8 (부모의 4-8에서 1:1 대응)
+            for col in range(4, 9):
                 item = self.parent.tableWidget.item(row, col)
                 if item:
                     new_item = QTableWidgetItem(item.text())
                     new_item.setTextAlignment(Qt.AlignCenter)
                     self.tableWidget.setItem(row, col, new_item)
 
-            # 상세 내용 버튼 - 컬럼 8
+            # 상세 내용 버튼 - 컬럼 9
             detail_label = QLabel()
             try:
                 img_path = resource_path("assets/image/test_runner/btn_상세내용확인.png").replace("\\", "/")
@@ -1669,7 +1719,7 @@ class ResultPageWidget(QWidget):
             layout.setContentsMargins(0, 0, 0, 0)
             container.setLayout(layout)
 
-            self.tableWidget.setCellWidget(row, 8, container)
+            self.tableWidget.setCellWidget(row, 9, container)
 
     def update_test_info(self):
         """시험 정보 업데이트 (시나리오 선택 시 호출)"""

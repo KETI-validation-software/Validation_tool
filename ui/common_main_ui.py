@@ -40,6 +40,45 @@ def get_header_title_display_size(widget, page_type):
     return QPixmap(resource_path(widget.get_header_title_path(page_type))).size()
 
 
+class WebhookBadgeLabel(QLabel):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.tooltip_window = None
+        self.hover_image_path = resource_path("assets/image/icon/webhook_mousehover.png").replace("\\", "/")
+        self.setMouseTracking(True)
+        self.setAttribute(Qt.WA_Hover)
+
+    def enterEvent(self, event):
+        # 툴팁 창 생성 및 설정 (Lazy Initialization)
+        if not self.tooltip_window:
+            self.tooltip_window = QLabel(None, Qt.ToolTip | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+            self.tooltip_window.setAttribute(Qt.WA_TranslucentBackground)
+            self.tooltip_window.setAttribute(Qt.WA_ShowWithoutActivating)
+            
+            pixmap = QPixmap(self.hover_image_path)
+            if not pixmap.isNull():
+                self.tooltip_window.setPixmap(pixmap)
+                self.tooltip_window.setFixedSize(pixmap.size())
+            else:
+                self.tooltip_window.setText("WebHook")
+                self.tooltip_window.setStyleSheet("background-color: #333; color: white; padding: 5px; border-radius: 4px;")
+                self.tooltip_window.adjustSize()
+
+        # 팝업 위치: 뱃지 아이콘의 중앙 위쪽
+        global_pos = self.mapToGlobal(QPoint(0, 0))
+        x = global_pos.x() - (self.tooltip_window.width() - self.width()) // 2
+        y = global_pos.y() - self.tooltip_window.height() - 5  # 5px 위로 띄움
+        
+        self.tooltip_window.move(x, y)
+        self.tooltip_window.show()
+        super().enterEvent(event)
+
+    def leaveEvent(self, event):
+        if self.tooltip_window:
+            self.tooltip_window.hide()
+        super().leaveEvent(event)
+
+
 def create_embedded_back_navigation(parent, click_handler, width=424):
     container = QWidget(parent)
     container.setFixedSize(width, 46)
@@ -1136,8 +1175,8 @@ class CommonMainUI(QWidget):
             api_container = QWidget()
             api_layout = QHBoxLayout()
             api_layout.setContentsMargins(6, 0, 6, 0)
-            api_layout.setSpacing(4)
-            api_layout.addStretch()
+            api_layout.setSpacing(12)  # 간격을 12px로 늘려 "살짝 떨어진 느낌" 고정
+            api_layout.setAlignment(Qt.AlignCenter)
 
             api_name_label = QLabel(name)
             api_name_label.setStyleSheet("""
@@ -1152,14 +1191,13 @@ class CommonMainUI(QWidget):
             api_layout.addWidget(api_name_label)
 
             if is_webhook_api and not webhook_badge_pixmap.isNull():
-                webhook_badge_label = QLabel()
+                webhook_badge_label = WebhookBadgeLabel()
                 webhook_badge_label.setPixmap(webhook_badge_pixmap)
                 webhook_badge_label.setScaledContents(False)
                 webhook_badge_label.setFixedSize(webhook_badge_pixmap.size())
                 webhook_badge_label.setAlignment(Qt.AlignCenter)
-                api_layout.addWidget(webhook_badge_label, 0, Qt.AlignVCenter)
+                api_layout.addWidget(webhook_badge_label)
 
-            api_layout.addStretch()
             api_container.setLayout(api_layout)
             self.tableWidget.setCellWidget(i, 1, api_container)
 
@@ -1363,6 +1401,91 @@ class CommonMainUI(QWidget):
         import re
         # 마지막에 숫자만 있으면 제거
         return re.sub(r'\d+$', '', api_name)
+
+    def _get_timer_icon_pixmap(self, state):
+        if not hasattr(self, '_api_timer_pixmaps'):
+            icon_map = {
+                "waiting": "assets/image/icon/waiting_timer.png",
+                "running": "assets/image/icon/running_timer.png",
+                "success": "assets/image/icon/success_timer.png",
+                "timeover": "assets/image/icon/timeover_timer.png",
+            }
+            self._api_timer_pixmaps = {}
+            for key, rel_path in icon_map.items():
+                self._api_timer_pixmaps[key] = QPixmap(resource_path(rel_path))
+
+        state_key = str(state or "waiting").strip().lower()
+        if state_key not in self._api_timer_pixmaps:
+            state_key = "waiting"
+        return self._api_timer_pixmaps[state_key]
+
+    def set_api_timer_state(self, row, state, elapsed_seconds=0):
+        if not hasattr(self, 'tableWidget'):
+            return
+        if row < 0 or row >= self.tableWidget.rowCount():
+            return
+
+        timer_col = getattr(self, 'COL_TIMER', 2)
+        state_key = str(state or "waiting").strip().lower()
+        if state_key not in {"waiting", "running", "success", "timeover"}:
+            state_key = "waiting"
+
+        elapsed = max(0, int(elapsed_seconds))
+        show_elapsed_text = not (state_key == "waiting" and elapsed == 0)
+        color_map = {
+            "waiting": "#8A9094",
+            "running": "#1D4ED8",
+            "success": "#059669",
+            "timeover": "#DC2626",
+        }
+
+        timer_widget = QWidget()
+        timer_layout = QHBoxLayout()
+        timer_layout.setContentsMargins(4, 0, 4, 0)
+        timer_layout.setSpacing(4 if show_elapsed_text else 0)
+        timer_layout.setAlignment(Qt.AlignCenter)
+
+        icon_label = QLabel()
+        timer_pixmap = self._get_timer_icon_pixmap(state_key)
+        if not timer_pixmap.isNull():
+            icon_label.setPixmap(timer_pixmap)
+            icon_label.setFixedSize(timer_pixmap.size())
+        icon_label.setAlignment(Qt.AlignCenter)
+
+        timer_layout.addWidget(icon_label)
+        if show_elapsed_text:
+            text_label = QLabel(f"{elapsed}s")
+            text_label.setAlignment(Qt.AlignCenter)
+            text_label.setStyleSheet(
+                f"""
+                QLabel {{
+                    color: {color_map[state_key]};
+                    font-family: 'Noto Sans KR';
+                    font-size: 16px;
+                    font-weight: 600;
+                    border: none;
+                    background: transparent;
+                }}
+                """
+            )
+            timer_layout.addWidget(text_label)
+        timer_widget.setLayout(timer_layout)
+
+        self.tableWidget.setCellWidget(row, timer_col, timer_widget)
+        setattr(self, f"_api_timer_state_{row}", state_key)
+        setattr(self, f"_api_timer_elapsed_{row}", elapsed)
+
+    def get_api_timer_state(self, row):
+        return getattr(self, f"_api_timer_state_{row}", "waiting")
+
+    def get_api_timer_elapsed(self, row):
+        return int(getattr(self, f"_api_timer_elapsed_{row}", 0))
+
+    def reset_all_api_timers(self):
+        if not hasattr(self, 'tableWidget'):
+            return
+        for row in range(self.tableWidget.rowCount()):
+            self.set_api_timer_state(row, "waiting", 0)
 
 
 

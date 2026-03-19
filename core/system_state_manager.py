@@ -32,11 +32,13 @@ class SystemStateManager:
                 row_data = {
                     'api_name': api_name,
                     'icon_state': self._get_icon_state(row),
-                    'retry_count': self.main.tableWidget.item(row, 3).text() if self.main.tableWidget.item(row, 3) else "0",
-                    'pass_count': self.main.tableWidget.item(row, 4).text() if self.main.tableWidget.item(row, 4) else "0",
-                    'total_count': self.main.tableWidget.item(row, 5).text() if self.main.tableWidget.item(row, 5) else "0",
-                    'fail_count': self.main.tableWidget.item(row, 6).text() if self.main.tableWidget.item(row, 6) else "0",
-                    'score': self.main.tableWidget.item(row, 7).text() if self.main.tableWidget.item(row, 7) else "0%",
+                    'timer_state': self.main.get_api_timer_state(row),
+                    'timer_elapsed': self.main.get_api_timer_elapsed(row),
+                    'retry_count': self.main.tableWidget.item(row, 4).text() if self.main.tableWidget.item(row, 4) else "0",
+                    'pass_count': self.main.tableWidget.item(row, 5).text() if self.main.tableWidget.item(row, 5) else "0",
+                    'total_count': self.main.tableWidget.item(row, 6).text() if self.main.tableWidget.item(row, 6) else "0",
+                    'fail_count': self.main.tableWidget.item(row, 7).text() if self.main.tableWidget.item(row, 7) else "0",
+                    'score': self.main.tableWidget.item(row, 8).text() if self.main.tableWidget.item(row, 8) else "0%",
                 }
                 table_data.append(row_data)
 
@@ -78,7 +80,7 @@ class SystemStateManager:
 
     def _get_icon_state(self, row):
         """테이블 행의 아이콘 상태 반환 (PASS/FAIL/NONE)"""
-        icon_widget = self.main.tableWidget.cellWidget(row, 2)  # 아이콘은 컬럼 2
+        icon_widget = self.main.tableWidget.cellWidget(row, 3)  # 아이콘은 컬럼 3
         if icon_widget:
             icon_label = icon_widget.findChild(QLabel)
             if icon_label:
@@ -126,11 +128,11 @@ class SystemStateManager:
             # API 이름 - 컬럼 1 (숫자 제거된 이름으로 표시)
             # MyApp의 _remove_api_number_suffix 메서드 사용
             display_name = self.main._remove_api_number_suffix(row_data['api_name'])
-            api_item = QTableWidgetItem(display_name)
-            api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-            self.main.tableWidget.setItem(row, 1, api_item)
+            self.main._set_api_name_cell(row, display_name)
 
-            # 아이콘 상태 복원 - 컬럼 2
+            self.main.set_api_timer_state(row, row_data.get('timer_state', 'waiting'), row_data.get('timer_elapsed', 0))
+
+            # 아이콘 상태 복원 - 컬럼 3
             icon_state = row_data['icon_state']
             if icon_state == "PASS":
                 img = self.main.img_pass
@@ -152,11 +154,11 @@ class SystemStateManager:
             icon_layout.addWidget(icon_label)
             icon_layout.setAlignment(Qt.AlignCenter)
             icon_widget.setLayout(icon_layout)
-            self.main.tableWidget.setCellWidget(row, 2, icon_widget)
+            self.main.tableWidget.setCellWidget(row, 3, icon_widget)
 
-            # 나머지 컬럼 복원 - 컬럼 3-7
-            for col, key in [(3, 'retry_count'), (4, 'pass_count'),
-                             (5, 'total_count'), (6, 'fail_count'), (7, 'score')]:
+            # 나머지 컬럼 복원 - 컬럼 4-8
+            for col, key in [(4, 'retry_count'), (5, 'pass_count'),
+                             (6, 'total_count'), (7, 'fail_count'), (8, 'score')]:
                 new_item = QTableWidgetItem(row_data[key])
                 new_item.setTextAlignment(Qt.AlignCenter)
                 self.main.tableWidget.setItem(row, col, new_item)
