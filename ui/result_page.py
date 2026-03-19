@@ -195,16 +195,17 @@ class ResultPageWidget(QWidget):
 
         # ✅ 반응형: 원본 크기 저장
         self.original_window_size = (1680, 1006)
-        self.original_bg_root_size = (1585, 898)
-        self.original_left_col_size = (472, 898)
-        self.original_right_col_size = (1112, 898)
+        self.original_bg_root_size = (1585, 970)
+        self.original_left_col_size = (472, 970)
+        self.original_right_col_size = (1112, 970)
         self.original_spec_panel_title_size = (424, 24)
         self.original_group_table_widget_size = (424, 204)
-        self.original_field_group_size = (424, 526)
+        self.original_field_group_size = (424, 561)
         self.original_info_title_size = (1064, 24)
-        self.original_info_widget_size = (1064, 134)
+        self.original_info_widget_size = (1064, 169)
         self.original_result_label_size = (1064, 24)
-        self.original_result_header_widget_size = (1064, 30)
+        self.original_result_header_widget_size = (1064, 38)
+        self.original_result_table_height = 335  # ✅ 시험 결과 테이블 기본 높이 소폭 조정 (하단 밸런스)
         self.original_score_title_size = (1064, 24)
         self.original_score_table_size = (1064, 256)
         self.original_spec_group_size = (1064, 128)
@@ -222,7 +223,7 @@ class ResultPageWidget(QWidget):
         # ✅ 2컬럼 레이아웃
         self.bg_root = QWidget(self.content_widget)
         self.bg_root.setObjectName("bg_root")
-        self.bg_root.setFixedSize(1585, 898)
+        self.bg_root.setFixedSize(1585, 970)
         self.bg_root.setAttribute(Qt.WA_StyledBackground, True)
         self.bg_root.setStyleSheet("QWidget#bg_root { background: transparent; }")
         bg_root_layout = QVBoxLayout()
@@ -235,7 +236,7 @@ class ResultPageWidget(QWidget):
 
         # ✅ 왼쪽 컬럼 (시험 분야 + 시나리오 )
         self.left_col = QWidget()
-        self.left_col.setFixedSize(472, 898)
+        self.left_col.setFixedSize(472, 970)
         self.left_col.setStyleSheet("background: transparent;")
         left_layout = QVBoxLayout()
         # ✅ 반응형: 상단 여백 조정 (임베디드 시 20px)
@@ -294,15 +295,39 @@ class ResultPageWidget(QWidget):
         self.left_col.setLayout(left_layout)
 
         self.column_divider = QFrame()
-        self.column_divider.setFixedSize(1, 898)
+        self.column_divider.setFixedSize(1, 970)
         self.column_divider.setStyleSheet("background: transparent; border: none;")
 
-        # ✅ 오른쪽 컬럼 (결과 테이블 및 점수)
+        # ✅ 오른쪽 컬럼 (스크롤 영역으로 감싸기)
+        self.right_scroll_container = QScrollArea()
+        self.right_scroll_container.setFixedSize(1112, 970)
+        self.right_scroll_container.setWidgetResizable(True)
+        self.right_scroll_container.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.right_scroll_container.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.right_scroll_container.setStyleSheet("""
+            QScrollArea {
+                border: none;
+                background: transparent;
+            }
+            QScrollBar:vertical {
+                border: none;
+                background: #DFDFDF;
+                width: 12px;
+                margin: 0px;
+                border-radius: 6px;
+            }
+            QScrollBar::handle:vertical {
+                background: #A3A9AD;
+                min-height: 20px;
+                border-radius: 6px;
+                margin: 0px 2px;
+            }
+        """)
+
         self.right_col = QWidget()
-        self.right_col.setFixedSize(1112, 898)
         self.right_col.setStyleSheet("background: transparent;")
-        right_layout = QVBoxLayout()
-        right_layout.setContentsMargins(24, 36, 24, 0)
+        right_layout = QVBoxLayout(self.right_col)
+        right_layout.setContentsMargins(24, 36, 24, 40)  # 하단 여백 추가
         right_layout.setSpacing(0)
 
         # 시험 정보 (크기 키움: 360px)
@@ -329,7 +354,7 @@ class ResultPageWidget(QWidget):
             font-family: "Noto Sans KR";
             font-weight: 500;
             color: #222;
-            margin-top: 20px;
+            margin-top: 36px;
             margin-bottom: 8px;
             letter-spacing: -0.3px;
         """)
@@ -337,7 +362,7 @@ class ResultPageWidget(QWidget):
 
         # 결과 테이블 (크기 키움: 350px)
         self.create_result_table(right_layout)
-        right_layout.addSpacing(20)
+        right_layout.addSpacing(18)
 
         # 시험 점수 요약 타이틀 (1064 × 24)
         self.score_title = QLabel('시험 점수 요약')
@@ -349,7 +374,7 @@ class ResultPageWidget(QWidget):
             color: #000000;
         """)
         right_layout.addWidget(self.score_title)
-        right_layout.addSpacing(6)
+        right_layout.addSpacing(8)
 
         # 시험 점수 테이블 (1064 × 256) - 분야별 점수 + 전체 점수
         self.score_table = QWidget()
@@ -375,16 +400,15 @@ class ResultPageWidget(QWidget):
         self.score_table.setLayout(score_table_layout)
         right_layout.addWidget(self.score_table)
 
-        right_layout.addSpacing(32)
-
-        # ✅ 버튼 그룹 (오른쪽 정렬)
-        self.buttonGroup = QWidget()
-        self.buttonGroup.setFixedSize(1064, 48)
-        buttonLayout = QHBoxLayout()
-        buttonLayout.setAlignment(Qt.AlignRight)  # 오른쪽 정렬
-        buttonLayout.setContentsMargins(0, 0, 0, 0)
-
+        # ✅ 버튼 그룹 (임베디드 모드가 아닐 때만 하단 간격 및 버튼 추가)
         if not self.embedded:
+            right_layout.addSpacing(32)
+            self.buttonGroup = QWidget()
+            self.buttonGroup.setFixedSize(1064, 48)
+            buttonLayout = QHBoxLayout()
+            buttonLayout.setAlignment(Qt.AlignRight)  # 오른쪽 정렬
+            buttonLayout.setContentsMargins(0, 0, 0, 0)
+
             # Standalone 모드: 닫기 버튼
             close_btn = QPushButton('닫기', self)
             close_btn.setFixedSize(362, 48)
@@ -424,9 +448,11 @@ class ResultPageWidget(QWidget):
                 """)
             close_btn.clicked.connect(self.close)
             buttonLayout.addWidget(close_btn)
-
-        self.buttonGroup.setLayout(buttonLayout)
-        right_layout.addWidget(self.buttonGroup)
+            self.buttonGroup.setLayout(buttonLayout)
+            right_layout.addWidget(self.buttonGroup)
+        else:
+            # 임베디드 모드일 때는 하단 여백을 주어 점수 요약을 살짝 올림 (5px 추가 상향)
+            right_layout.addSpacing(30)
 
         self.right_col.setLayout(right_layout)
 
@@ -502,8 +528,8 @@ class ResultPageWidget(QWidget):
             original_column_height = 898  # 원본 컬럼 높이
             extra_column_height = original_column_height * (height_ratio - 1)
 
-            # 왼쪽 패널 확장 요소: group_table(204) + field_group(526) = 730px
-            left_expandable_total = 204 + 526  # 730
+            # 왼쪽 패널 확장 요소: group_table(204) + field_group(561) = 765px
+            left_expandable_total = 204 + 561  # 765
 
             # bg_root 크기 조정
             if hasattr(self, 'bg_root') and hasattr(self, 'original_bg_root_size'):
@@ -551,18 +577,18 @@ class ResultPageWidget(QWidget):
             # 시험 시나리오 테이블 크기 조정 (extra_column_height 비례 분배)
             if hasattr(self, 'field_group') and hasattr(self, 'original_field_group_size'):
                 new_field_width = int(self.original_field_group_size[0] * width_ratio)
-                field_extra = extra_column_height * (526 / left_expandable_total)
-                new_field_height = int(526 + field_extra)
+                field_extra = extra_column_height * (561 / left_expandable_total)
+                new_field_height = int(561 + field_extra)
                 self.field_group.setFixedSize(new_field_width, new_field_height)
                 # 내부 테이블 크기도 조정
                 if hasattr(self, 'test_field_table'):
                     self.test_field_table.setFixedHeight(new_field_height)
 
-            # ✅ 오른쪽 컬럼 크기 조정
-            if hasattr(self, 'right_col') and hasattr(self, 'original_right_col_size'):
+            # ✅ 오른쪽 컬럼 크기 조정 (스크롤 컨테이너 크기 조정)
+            if hasattr(self, 'right_scroll_container') and hasattr(self, 'original_right_col_size'):
                 new_right_width = int(self.original_right_col_size[0] * width_ratio)
                 new_right_height = int(self.original_right_col_size[1] * height_ratio)
-                self.right_col.setFixedSize(new_right_width, new_right_height)
+                self.right_scroll_container.setFixedSize(new_right_width, new_right_height)
 
             # 시험 정보 위젯 크기 조정 (가로만 확장)
             if hasattr(self, 'info_widget') and hasattr(self, 'original_info_widget_size'):
@@ -579,10 +605,32 @@ class ResultPageWidget(QWidget):
                     for i, label in enumerate(self.result_header_labels):
                         new_label_width = int(self.original_column_widths[i] * width_ratio)
                         label.setFixedSize(new_label_width, 30)
-            # ✅ 결과 테이블 스크롤 영역 크기 조정 (가로만 확장, 세로 고정)
+            # ✅ 결과 테이블 스크롤 영역 크기 조정 (3페이지 방식: 남은 공간 모두 차지)
             if hasattr(self, 'result_scroll_area'):
                 new_scroll_width = int(1064 * width_ratio)
-                self.result_scroll_area.setFixedWidth(new_scroll_width)
+                
+                # 고정된 위젯들의 높이 합산 (마진 및 여유 공간 정밀 반영)
+                # 1. 레이아웃 상단 마진: 36
+                # 2. 시험 정보 타이틀 영역: 약 40
+                # 3. 시험 정보 위젯: 169
+                # 4. 시험 결과 라벨 영역 (마진 포함): 약 80
+                # 5. 결과 테이블 헤더: 30
+                # 6. 중간 간격 (Spacing): 36
+                # 7. 시험 점수 요약 타이틀 영역: 약 40
+                # 8. 시험 점수 테이블: 256
+                # 9. 레이아웃 하단 마진: 40
+                # 10. 기타 미세 보정값: 13
+                
+                fixed_heights = 36 + 40 + 169 + 80 + 30 + 36 + 40 + 256 + 40 + 13
+                bottom_gap = 30 if self.embedded else 80
+                
+                # 전체 컬럼 높이에서 고정 높이들을 뺀 나머지를 할당
+                new_scroll_height = new_right_height - fixed_heights - bottom_gap
+                
+                # 최소 높이 보장
+                new_scroll_height = max(150, new_scroll_height)
+                
+                self.result_scroll_area.setFixedSize(new_scroll_width, new_scroll_height)
 
             # 테이블 컨테이너 크기 조정
             if hasattr(self, 'table_container'):
@@ -1226,7 +1274,7 @@ class ResultPageWidget(QWidget):
         scroll_area = QScrollArea()
         scroll_area.setWidget(info_widget)
         scroll_area.setWidgetResizable(True)
-        scroll_area.setFixedSize(1064, 134)
+        scroll_area.setFixedSize(1064, 169)
         scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
@@ -1261,21 +1309,15 @@ class ResultPageWidget(QWidget):
         return scroll_area
 
     def create_result_table(self, parent_layout):
-        """결과 테이블 생성 - 헤더 분리 구조"""
+        """결과 테이블 생성 - 3페이지(common_main_ui) 구조와 동일하게 복구"""
         api_count = self.parent.tableWidget.rowCount()
-
-        # 컨테이너 위젯 (헤더 + 본문)
-        self.table_container = QWidget()
-        self.table_container.setFixedWidth(1064)
-        container_layout = QVBoxLayout(self.table_container)
-        container_layout.setContentsMargins(0, 0, 0, 0)
-        container_layout.setSpacing(0)
 
         # 별도 헤더 위젯 (1064px 전체 너비)
         self.result_header_widget = QWidget()
+        self.result_header_widget.setObjectName("result_header_widget")
         self.result_header_widget.setFixedSize(1064, 30)
         self.result_header_widget.setStyleSheet("""
-            QWidget {
+            QWidget#result_header_widget {
                 background-color: #EDF0F3;
                 border: 1px solid #CECECE;
                 border-bottom: none;
@@ -1284,7 +1326,7 @@ class ResultPageWidget(QWidget):
             }
         """)
         header_layout = QHBoxLayout(self.result_header_widget)
-        header_layout.setContentsMargins(0, 0, 14, 0)
+        header_layout.setContentsMargins(0, 0, 14, 0)  # 오른쪽 14px (스크롤바 영역)
         header_layout.setSpacing(0)
 
         # 헤더 컬럼 정의 (너비, 텍스트) - 9컬럼 구조
@@ -1300,11 +1342,11 @@ class ResultPageWidget(QWidget):
             (133, "상세 내용")
         ]
 
-        # ✅ 헤더 라벨들을 저장하여 resizeEvent에서 사용
+        # ✅ 헤더 라벨 저장
         self.result_header_labels = []
         for i, (width, text) in enumerate(header_columns):
             label = QLabel(text)
-            label.setFixedSize(width, 30)  # 모든 컬럼 고정 너비
+            label.setFixedSize(width, 30)
             label.setAlignment(Qt.AlignCenter)
             label.setStyleSheet("""
                 QLabel {
@@ -1314,17 +1356,13 @@ class ResultPageWidget(QWidget):
                     font-family: 'Noto Sans KR';
                     font-size: 18px;
                     font-weight: 600;
-                    letter-spacing: -0.156px;
                 }
             """)
             header_layout.addWidget(label)
             self.result_header_labels.append(label)
 
-        container_layout.addWidget(self.result_header_widget)
-
         # 테이블 본문 (헤더 숨김)
-        self.tableWidget = QTableWidget(api_count, 9)  # 9개 컬럼
-        # self.tableWidget.setFixedWidth(1050)  # setWidgetResizable(True) 사용으로 주석 처리
+        self.tableWidget = QTableWidget(api_count, 9)
         self.tableWidget.horizontalHeader().setVisible(False)
         self.tableWidget.verticalHeader().setVisible(False)
         self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -1332,7 +1370,7 @@ class ResultPageWidget(QWidget):
         self.tableWidget.setFocusPolicy(Qt.NoFocus)
         self.tableWidget.setIconSize(QtCore.QSize(16, 16))
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Fixed)
-        self.tableWidget.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)  # 가로 스크롤바 제거
+        self.tableWidget.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         # 테이블 스타일
         self.tableWidget.setStyleSheet("""
@@ -1356,35 +1394,27 @@ class ResultPageWidget(QWidget):
 
         self.tableWidget.setShowGrid(False)
 
-        # 컬럼 너비 설정 (본문용) - 9컬럼 구조 (마지막 컬럼이 남은 공간 채움)
-        base_widths = [40, 261, 100, 116, 116, 94, 94, 94]  # 0-7 컬럼
-        used_width = sum(base_widths)
-        # 스크롤 영역(1064) - border(2) - 스크롤바(16) - 여유분(2) = 1044
-        available_width = 1044
-        last_col_width = available_width - used_width  # 남은 공간: 1044 - 915 = 129
-
-        for i, width in enumerate(base_widths):
+        # 컬럼 너비 설정 - 3페이지와 동일한 베이스 너비 사용
+        self.original_column_widths = [40, 261, 100, 116, 116, 94, 94, 94, 133]
+        for i, width in enumerate(self.original_column_widths):
             self.tableWidget.setColumnWidth(i, width)
-        self.tableWidget.setColumnWidth(8, last_col_width)  # 상세 내용
-        self.tableWidget.horizontalHeader().setStretchLastSection(False)  # ✅ 마지막 컬럼 자동 확장 끔
+        self.tableWidget.horizontalHeader().setStretchLastSection(False)
 
         # 행 높이 설정
         for i in range(api_count):
             self.tableWidget.setRowHeight(i, 40)
 
-        # parent 테이블 데이터 복사
+        # 데이터 복사 및 상세 버튼 클릭 연결
         self._copy_table_data()
-
-        # 상세 내용 버튼 클릭 이벤트
         self.tableWidget.cellClicked.connect(self.table_cell_clicked)
 
-        # QScrollArea로 본문만 감싸기
+        # QScrollArea로 본문 감싸기 (3페이지와 동일 스타일)
         self.result_scroll_area = QScrollArea()
         self.result_scroll_area.setWidget(self.tableWidget)
         self.result_scroll_area.setWidgetResizable(True)
         self.result_scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.result_scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        self.result_scroll_area.setFixedWidth(1064)
+        self.result_scroll_area.setViewportMargins(0, 0, 0, 2)
         self.result_scroll_area.setStyleSheet("""
             QScrollArea {
                 border: 1px solid #CECECE;
@@ -1415,8 +1445,9 @@ class ResultPageWidget(QWidget):
             }
         """)
 
-        container_layout.addWidget(self.result_scroll_area)
-        parent_layout.addWidget(self.table_container)
+        # 레이아웃에 직접 추가 (3페이지 방식)
+        parent_layout.addWidget(self.result_header_widget)
+        parent_layout.addWidget(self.result_scroll_area)
 
     def _on_back_clicked(self):
         """뒤로가기 버튼 클릭 시 - 원래 시나리오로 복원 후 시그널 발생"""
