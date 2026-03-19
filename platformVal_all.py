@@ -21,7 +21,7 @@ from ui.splash_screen import LoadingPopup
 from ui.detail_dialog import CombinedDetailDialog
 from ui.result_page import ResultPageWidget
 from ui.widgets import install_gradient_messagebox
-from ui.gui_utils import CustomDialog
+from ui.gui_utils import CustomDialog, WebhookBadgeLabel
 from ui.platform_window import PlatformValidationWindow
 from ui.platform_main_ui import PlatformMainUI
 import spec.Schema_response as schema_response_module
@@ -378,6 +378,25 @@ class MyApp(PlatformMainUI):
         except Exception:
             pass
 
+    def _timer_elapsed_seconds(self, time_interval=None):
+        if time_interval is not None:
+            return max(0, int(time_interval))
+        if getattr(self, 'time_pre', 0):
+            return max(0, int(time.time() - self.time_pre))
+        return 0
+
+    def _set_timer_running(self, row, time_interval=None):
+        self.set_api_timer_state(row, "running", self._timer_elapsed_seconds(time_interval))
+
+    def _set_timer_success(self, row, time_interval=None):
+        self.set_api_timer_state(row, "success", self._timer_elapsed_seconds(time_interval))
+
+    def _set_timer_timeover(self, row, time_interval=None):
+        self.set_api_timer_state(row, "timeover", self._timer_elapsed_seconds(time_interval))
+
+    def _reset_all_row_timers(self):
+        self.reset_all_api_timers()
+
 
 
     def update_view(self):
@@ -451,6 +470,8 @@ class MyApp(PlatformMainUI):
                 Logger.debug(f" 첫 틱 대기: time_pre={self.time_pre}, cnt={self.cnt}, cnt_pre={self.cnt_pre}")
                 self.time_pre = time.time()
                 self.cnt_pre = self.cnt
+                if self.cnt < len(self.videoMessages):
+                    self._set_timer_running(self.cnt, 0)
                 self.step_start_log_printed = False # ✅ 단계 변경 시 플래그 리셋
                 return
             else:
@@ -531,6 +552,7 @@ class MyApp(PlatformMainUI):
                     # ✅ 대기 시간 타이머 표시 (기능 비활성화됨)
                     remaining = max(0, int(current_timeout - time_interval))
                     # self.update_last_line_timer(f"남은 대기 시간: {remaining}초")
+                    self._set_timer_running(self.cnt, time_interval)
 
                     if self.current_retry == 0:
                         Logger.debug(f"능동 대기(WAIT): 시스템 요청 대기 중 (API: {api_name}, 예상: {expected_count}회, 실제: {actual_count}회)")
@@ -542,6 +564,7 @@ class MyApp(PlatformMainUI):
                 request_arrival_time = time.time()
                 expected_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
                 Logger.debug(f" ✅ 요청 도착 감지! API: {api_name}, 시도: {self.current_retry + 1}/{expected_retries}")
+                self._set_timer_success(self.cnt, time_interval)
 
                 display_name = self.Server.message_display[self.cnt] if self.cnt < len(self.Server.message_display) else "Unknown"
 
@@ -1056,12 +1079,14 @@ class MyApp(PlatformMainUI):
                     else:
                         Logger.debug(f"수동 지연 비활성화: 재시도 완료, 다음 시스템 요청 대기")
                         self.time_pre = time.time()
+                    self._set_timer_running(self.cnt, 0)
 
                 self.realtime_flag = False
 
             elif time_interval > current_timeout and self.cnt == self.cnt_pre:
                 display_name = self.Server.message_display[self.cnt] if self.cnt < len(self.Server.message_display) else "Unknown"
                 message_name = "step " + str(self.cnt + 1) + ": " + display_name
+                self._set_timer_timeover(self.cnt, time_interval)
 
                 # message missing인 경우 버퍼 업데이트
                 self.step_buffers[self.cnt]["data"] = "아직 수신된 데이터가 없습니다."
@@ -1286,14 +1311,21 @@ class MyApp(PlatformMainUI):
         # 테이블 데이터 저장
         table_data = []
         for row in range(self.tableWidget.rowCount()):
+            api_item = self.tableWidget.item(row, 1)
+            api_name = ""
+            if api_item is not None:
+                api_name = api_item.data(Qt.UserRole) or api_item.text()
+
             row_data = {
-                'api_name': self.tableWidget.item(row, 1).text() if self.tableWidget.item(row, 1) else "",  # API 명은 컬럼 1
+                'api_name': api_name,  # API 명은 컬럼 1
                 'icon_state': self._get_icon_state(row),  # PASS/FAIL/NONE 상태
-                'retry_count': self.tableWidget.item(row, 3).text() if self.tableWidget.item(row, 3) else "0",
-                'pass_count': self.tableWidget.item(row, 4).text() if self.tableWidget.item(row, 4) else "0",
-                'total_count': self.tableWidget.item(row, 5).text() if self.tableWidget.item(row, 5) else "0",
-                'fail_count': self.tableWidget.item(row, 6).text() if self.tableWidget.item(row, 6) else "0",
-                'score': self.tableWidget.item(row, 7).text() if self.tableWidget.item(row, 7) else "0%",
+                'timer_state': self.get_api_timer_state(row),
+                'timer_elapsed': self.get_api_timer_elapsed(row),
+                'retry_count': self.tableWidget.item(row, 4).text() if self.tableWidget.item(row, 4) else "0",
+                'pass_count': self.tableWidget.item(row, 5).text() if self.tableWidget.item(row, 5) else "0",
+                'total_count': self.tableWidget.item(row, 6).text() if self.tableWidget.item(row, 6) else "0",
+                'fail_count': self.tableWidget.item(row, 7).text() if self.tableWidget.item(row, 7) else "0",
+                'score': self.tableWidget.item(row, 8).text() if self.tableWidget.item(row, 8) else "0%",
             }
             table_data.append(row_data)
 
@@ -1324,7 +1356,7 @@ class MyApp(PlatformMainUI):
 
     def _get_icon_state(self, row):
         """테이블 행의 아이콘 상태 반환 (PASS/FAIL/NONE)"""
-        icon_widget = self.tableWidget.cellWidget(row, 2)  # 아이콘은 컬럼 2
+        icon_widget = self.tableWidget.cellWidget(row, 3)  # 아이콘은 컬럼 3
         if icon_widget:
             icon_label = icon_widget.findChild(QLabel)
             if icon_label:
@@ -1334,6 +1366,56 @@ class MyApp(PlatformMainUI):
                 elif "FAIL" in tooltip:
                     return "FAIL"
         return "NONE"
+
+    def _is_webhook_api_row(self, row):
+        if hasattr(self, 'trans_protocols') and row < len(self.trans_protocols):
+            protocol = str(self.trans_protocols[row] or "").strip().lower()
+            return protocol == "webhook"
+        return False
+
+    def _set_api_name_cell(self, row, api_name):
+        api_item = QTableWidgetItem(api_name)
+        api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+        api_item.setData(Qt.UserRole, api_name)
+        api_item.setText("")
+        self.tableWidget.setItem(row, 1, api_item)
+
+        if not hasattr(self, '_webhook_badge_pixmap'):
+            badge_path = resource_path("assets/image/icon/badge-webhook.png").replace("\\", "/")
+            self._webhook_badge_pixmap = QPixmap(badge_path)
+
+        api_container = QWidget()
+        api_layout = QHBoxLayout()
+        api_layout.setContentsMargins(2, 0, 2, 0)
+        api_layout.setSpacing(4)
+        api_layout.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+
+        api_name_label = QLabel(api_name)
+        api_name_label.setStyleSheet("""
+            QLabel {
+                color: #1B1B1C;
+                font-family: 'Noto Sans KR';
+                font-size: 17px;
+                font-weight: 400;
+            }
+        """)
+        api_name_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        api_name_label.setWordWrap(False)
+        api_name_label.setToolTip(api_name)
+        api_name_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        api_name_label.setMinimumWidth(0)
+        api_layout.addWidget(api_name_label, 0, Qt.AlignVCenter)
+
+        if self._is_webhook_api_row(row) and not self._webhook_badge_pixmap.isNull():
+            webhook_badge_label = WebhookBadgeLabel()
+            webhook_badge_label.setPixmap(self._webhook_badge_pixmap)
+            webhook_badge_label.setScaledContents(False)
+            webhook_badge_label.setFixedSize(self._webhook_badge_pixmap.size())
+            webhook_badge_label.setAlignment(Qt.AlignCenter)
+            api_layout.addWidget(webhook_badge_label, 0, Qt.AlignVCenter)
+        api_layout.addStretch()
+        api_container.setLayout(api_layout)
+        self.tableWidget.setCellWidget(row, 1, api_container)
 
     def restore_spec_data(self, spec_id):
         """저장된 spec 데이터 복원 (✅ 복합키 사용)"""
@@ -1370,9 +1452,7 @@ class MyApp(PlatformMainUI):
 
             # API 이름 - 컬럼 1 (숫자 제거된 이름으로 표시)
             display_name = remove_api_number_suffix(row_data['api_name'])
-            api_item = QTableWidgetItem(display_name)
-            api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-            self.tableWidget.setItem(row, 1, api_item)
+            self._set_api_name_cell(row, display_name)
 
             # 아이콘 상태 복원 - 컬럼 2
             icon_state = row_data['icon_state']
@@ -1396,11 +1476,13 @@ class MyApp(PlatformMainUI):
             icon_layout.addWidget(icon_label)
             icon_layout.setAlignment(Qt.AlignCenter)
             icon_widget.setLayout(icon_layout)
-            self.tableWidget.setCellWidget(row, 2, icon_widget)
+            self.tableWidget.setCellWidget(row, 3, icon_widget)
 
-            # 나머지 컬럼 복원 - 컬럼 3-7
-            for col, key in [(3, 'retry_count'), (4, 'pass_count'),
-                             (5, 'total_count'), (6, 'fail_count'), (7, 'score')]:
+            self.set_api_timer_state(row, row_data.get('timer_state', 'waiting'), row_data.get('timer_elapsed', 0))
+
+            # 나머지 컬럼 복원 - 컬럼 4-8
+            for col, key in [(4, 'retry_count'), (5, 'pass_count'),
+                             (6, 'total_count'), (7, 'fail_count'), (8, 'score')]:
                 new_item = QTableWidgetItem(row_data[key])
                 new_item.setTextAlignment(Qt.AlignCenter)
                 self.tableWidget.setItem(row, col, new_item)
@@ -1518,6 +1600,8 @@ class MyApp(PlatformMainUI):
                     # 테이블 초기화
                     Logger.debug(f" 💥 저장된 데이터 없음 - 테이블 초기화 시작 ({self.tableWidget.rowCount()}개 행)")
                     for i in range(self.tableWidget.rowCount()):
+                        self.set_api_timer_state(i, "waiting", 0)
+
                         # 아이콘 초기화
                         icon_widget = QWidget()
                         icon_layout = QHBoxLayout()
@@ -1528,10 +1612,10 @@ class MyApp(PlatformMainUI):
                         icon_layout.addWidget(icon_label)
                         icon_layout.setAlignment(Qt.AlignCenter)
                         icon_widget.setLayout(icon_layout)
-                        self.tableWidget.setCellWidget(i, 2, icon_widget)
+                        self.tableWidget.setCellWidget(i, 3, icon_widget)
 
-                        # 카운트 초기화 - ✅ 아이템이 없으면 새로 생성 (9컬럼 구조)
-                        for col, value in [(3, "0"), (4, "0"), (5, "0"), (6, "0"), (7, "0%")]:
+                        # 카운트 초기화 - ✅ 아이템이 없으면 새로 생성 (10컬럼 구조)
+                        for col, value in [(4, "0"), (5, "0"), (6, "0"), (7, "0"), (8, "0%")]:
                             item = self.tableWidget.item(i, col)
                             if item:
                                 item.setText(value)
@@ -1632,15 +1716,13 @@ class MyApp(PlatformMainUI):
                 self.tableWidget.setItem(row, 0, no_item)
 
             # API 명 - 컬럼 1 (숫자 제거)
-            if self.tableWidget.item(row, 1):
-                self.tableWidget.item(row, 1).setText(display_name)
-            else:
-                api_item = QTableWidgetItem(display_name)
-                api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-                self.tableWidget.setItem(row, 1, api_item)
+            self._set_api_name_cell(row, display_name)
 
-            # 결과 아이콘이 없으면 추가 - 컬럼 2
             if not self.tableWidget.cellWidget(row, 2):
+                self.set_api_timer_state(row, "waiting", 0)
+
+            # 결과 아이콘이 없으면 추가 - 컬럼 3
+            if not self.tableWidget.cellWidget(row, 3):
                 icon_widget = QWidget()
                 icon_layout = QHBoxLayout()
                 icon_layout.setContentsMargins(0, 0, 0, 0)
@@ -1650,15 +1732,15 @@ class MyApp(PlatformMainUI):
                 icon_layout.addWidget(icon_label)
                 icon_layout.setAlignment(Qt.AlignCenter)
                 icon_widget.setLayout(icon_layout)
-                self.tableWidget.setCellWidget(row, 2, icon_widget)
+                self.tableWidget.setCellWidget(row, 3, icon_widget)
 
-            # 컬럼 3-7 초기화 (검증 횟수, 통과/전체/실패 필드 수, 평가 점수)
+            # 컬럼 4-8 초기화 (검증 횟수, 통과/전체/실패 필드 수, 평가 점수)
             col_values = [
-                (3, "0"),  # 검증 횟수
-                (4, "0"),  # 통과 필드 수
-                (5, "0"),  # 전체 필드 수
-                (6, "0"),  # 실패 필드 수
-                (7, "0%")  # 평가 점수
+                (4, "0"),  # 검증 횟수
+                (5, "0"),  # 통과 필드 수
+                (6, "0"),  # 전체 필드 수
+                (7, "0"),  # 실패 필드 수
+                (8, "0%")  # 평가 점수
             ]
             for col, value in col_values:
                 if not self.tableWidget.item(row, col):
@@ -1666,8 +1748,8 @@ class MyApp(PlatformMainUI):
                     item.setTextAlignment(Qt.AlignCenter)
                     self.tableWidget.setItem(row, col, item)
 
-            # 상세 내용 버튼이 없으면 추가 - 컬럼 8
-            if not self.tableWidget.cellWidget(row, 8):
+            # 상세 내용 버튼이 없으면 추가 - 컬럼 9
+            if not self.tableWidget.cellWidget(row, 9):
                 detail_label = QLabel()
                 img_path = resource_path("assets/image/test_runner/btn_상세내용확인.png").replace("\\", "/")
                 pixmap = QPixmap(img_path)
@@ -1685,7 +1767,7 @@ class MyApp(PlatformMainUI):
                 layout.setContentsMargins(0, 0, 0, 0)
                 container.setLayout(layout)
 
-                self.tableWidget.setCellWidget(row, 8, container)
+                self.tableWidget.setCellWidget(row, 9, container)
 
             # 행 높이 설정
             self.tableWidget.setRowHeight(row, 40)
@@ -1703,11 +1785,11 @@ class MyApp(PlatformMainUI):
 
             # API 명 - 컬럼 1
             display_name = remove_api_number_suffix(api_name)
-            api_item = QTableWidgetItem(display_name)
-            api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-            self.tableWidget.setItem(row, 1, api_item)
+            self._set_api_name_cell(row, display_name)
 
-            # 결과 아이콘 초기화 - 컬럼 2
+            self.set_api_timer_state(row, "waiting", 0)
+
+            # 결과 아이콘 초기화 - 컬럼 3
             icon_widget = QWidget()
             icon_layout = QHBoxLayout()
             icon_layout.setContentsMargins(0, 0, 0, 0)
@@ -1717,15 +1799,15 @@ class MyApp(PlatformMainUI):
             icon_layout.addWidget(icon_label)
             icon_layout.setAlignment(Qt.AlignCenter)
             icon_widget.setLayout(icon_layout)
-            self.tableWidget.setCellWidget(row, 2, icon_widget)
+            self.tableWidget.setCellWidget(row, 3, icon_widget)
 
-            # 검증 횟수, 통과 필드 수, 전체 필드 수, 실패 필드 수, 평가 점수 - 컬럼 3-7
-            for col in range(3, 8):
-                item = QTableWidgetItem("0" if col != 7 else "0%")
+            # 검증 횟수, 통과 필드 수, 전체 필드 수, 실패 필드 수, 평가 점수 - 컬럼 4-8
+            for col in range(4, 9):
+                item = QTableWidgetItem("0" if col != 8 else "0%")
                 item.setTextAlignment(Qt.AlignCenter)
                 self.tableWidget.setItem(row, col, item)
 
-            # 상세 내용 버튼 - 컬럼 8
+            # 상세 내용 버튼 - 컬럼 9
             detail_btn = QPushButton("상세 내용 확인")
             detail_btn.setMaximumHeight(30)
             detail_btn.setMaximumWidth(130)
@@ -1738,7 +1820,7 @@ class MyApp(PlatformMainUI):
             layout.setContentsMargins(0, 0, 0, 0)
             container.setLayout(layout)
 
-            self.tableWidget.setCellWidget(row, 8, container)
+            self.tableWidget.setCellWidget(row, 9, container)
             self.tableWidget.setRowHeight(row, 40)
 
     def select_first_scenario(self):
@@ -1785,7 +1867,10 @@ class MyApp(PlatformMainUI):
         """통합 상세 내용 확인"""
         try:
             buf = self.step_buffers[row]
-            api_name = self.tableWidget.item(row, 1).text()  # API 명은 컬럼 1
+            api_item = self.tableWidget.item(row, 1)
+            api_name = ""
+            if api_item is not None:
+                api_name = api_item.data(Qt.UserRole) or api_item.text()
 
             # 스키마 데이터 가져오기
             try:
@@ -1817,10 +1902,14 @@ class MyApp(PlatformMainUI):
 
     def table_cell_clicked(self, row, col):
         """테이블 셀 클릭"""
-        if col == 2:  # 아이콘 컬럼
+        if col == 3:  # 아이콘 컬럼
             msg = getattr(self, f"step{row + 1}_msg", "")
             if msg:
-                CustomDialog(msg, self.tableWidget.item(row, 1).text())  # API 명은 컬럼 1
+                api_item = self.tableWidget.item(row, 1)
+                api_name = ""
+                if api_item is not None:
+                    api_name = api_item.data(Qt.UserRole) or api_item.text()
+                CustomDialog(msg, api_name)  # API 명은 컬럼 1
 
     def run_single_spec_test(self):
         """단일 spec_id에 대한 시험 실행"""
@@ -2163,8 +2252,10 @@ class MyApp(PlatformMainUI):
                 Logger.debug(f" 테이블 초기화 시작")
                 for i in range(self.tableWidget.rowCount()):
                     QApplication.processEvents()  # 스피너 애니메이션 유지
+                    self.set_api_timer_state(i, "waiting", 0)
+
                     # ✅ 기존 위젯 제거 (겹침 방지)
-                    self.tableWidget.setCellWidget(i, 2, None)
+                    self.tableWidget.setCellWidget(i, 3, None)
                     
                     # 아이콘 초기화
                     icon_widget = QWidget()
@@ -2176,10 +2267,10 @@ class MyApp(PlatformMainUI):
                     icon_layout.addWidget(icon_label)
                     icon_layout.setAlignment(Qt.AlignCenter)
                     icon_widget.setLayout(icon_layout)
-                    self.tableWidget.setCellWidget(i, 2, icon_widget)
+                    self.tableWidget.setCellWidget(i, 3, icon_widget)
 
-                    # 모든 카운트 0으로 초기화 (9컬럼 구조)
-                    for col, value in ((3, "0"), (4, "0"), (5, "0"), (6, "0"), (7, "0%")):
+                    # 모든 카운트 0으로 초기화 (10컬럼 구조)
+                    for col, value in ((4, "0"), (5, "0"), (6, "0"), (7, "0"), (8, "0%")):
                         item = QTableWidgetItem(value)
                         item.setTextAlignment(Qt.AlignCenter)
                         self.tableWidget.setItem(i, col, item)
@@ -2542,6 +2633,7 @@ class MyApp(PlatformMainUI):
         self.current_retry = 0
         self.post_flag = False  # 웹훅 플래그 초기화
         self.res = None  # 응답 초기화
+        self._reset_all_row_timers()
         Logger.debug(f" 상태 초기화 완료")
         
         # 5. 버튼 상태 초기화

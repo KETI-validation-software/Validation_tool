@@ -15,12 +15,13 @@ from pathlib import Path
 import traceback
 from typing import Dict, List
 
-from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem
+from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem, QWidget, QHBoxLayout, QLabel, QSizePolicy
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont, QResizeEvent
+from PyQt5.QtGui import QFont, QResizeEvent, QPixmap
 
 # 분리된 모듈들 import
 from ui.widgets import ClickableLabel, ClickableRowWidget, ClickableCheckboxRowWidget
+from ui.gui_utils import WebhookBadgeLabel
 from api.client import APIClient
 from core.auth_service import AuthService
 from core.file_generator import FileGeneratorService
@@ -924,22 +925,42 @@ class FormValidator:
             if hasattr(self.parent, 'api_placeholder_label'):
                 self.parent.api_placeholder_label.hide()
 
+            webhook_badge_pixmap = QPixmap(resource_path("assets/image/icon/badge-webhook.png"))
+
             for step in cached_steps:
                 step_id = step.get("id")
                 ts = self._test_step_cache.get(step_id) if hasattr(self, "_test_step_cache") else None
                 name_to_show = ""
                 id_to_show = ""
+                is_webhook = False
 
                 if ts:
                     name_to_show = ts.get("name", "")
                     endpoint = ts.get("endpoint")
                     id_to_show = "" if endpoint is None else str(endpoint)
+                    
+                    # 프로토콜 확인
+                    detail = ts.get("detail", {})
+                    settings = detail.get("step", {}).get("api", {}).get("settings", {})
+                    trans_protocol_obj = settings.get("transProtocol")
+                    if isinstance(trans_protocol_obj, str):
+                        is_webhook = (trans_protocol_obj.lower() == "webhook")
+                    elif isinstance(trans_protocol_obj, dict):
+                        is_webhook = (trans_protocol_obj.get("mode", "").lower() == "webhook")
                 else:
                     step_detail = self.api_client.fetch_test_step_by_id(step_id)
                     if step_detail:
-                        endpoint = step_detail.get("step", {}).get("api", {}).get("endpoint", "")
+                        detail_api = step_detail.get("step", {}).get("api", {})
+                        endpoint = detail_api.get("endpoint", "")
                         name_to_show = step_detail.get("step", {}).get("name", step.get("name", ""))
                         id_to_show = str(endpoint) if endpoint else ""
+                        
+                        settings = detail_api.get("settings", {})
+                        trans_protocol_obj = settings.get("transProtocol")
+                        if isinstance(trans_protocol_obj, str):
+                            is_webhook = (trans_protocol_obj.lower() == "webhook")
+                        elif isinstance(trans_protocol_obj, dict):
+                            is_webhook = (trans_protocol_obj.get("mode", "").lower() == "webhook")
                     else:
                         name_to_show = step.get("name", "")
                         id_to_show = ""
@@ -947,10 +968,24 @@ class FormValidator:
                 r = self.parent.api_test_table.rowCount()
                 self.parent.api_test_table.insertRow(r)
 
-                name_item = QTableWidgetItem(name_to_show)
-                name_item.setTextAlignment(Qt.AlignCenter)
-                name_item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-                self.parent.api_test_table.setItem(r, 0, name_item)
+                # API명 셀 (웹훅 뱃지 포함)
+                name_container = QWidget()
+                name_layout = QHBoxLayout(name_container)
+                name_layout.setContentsMargins(5, 0, 5, 0)
+                name_layout.setSpacing(5)
+                name_layout.setAlignment(Qt.AlignCenter)
+
+                name_label = QLabel(name_to_show)
+                name_label.setStyleSheet("color: #1B1B1C; font-family: 'Noto Sans KR'; font-size: 14px;")
+                name_layout.addWidget(name_label)
+
+                if is_webhook and not webhook_badge_pixmap.isNull():
+                    badge = WebhookBadgeLabel()
+                    badge.setPixmap(webhook_badge_pixmap)
+                    badge.setFixedSize(webhook_badge_pixmap.size())
+                    name_layout.addWidget(badge)
+
+                self.parent.api_test_table.setCellWidget(r, 0, name_container)
 
                 id_item = QTableWidgetItem(id_to_show)
                 id_item.setTextAlignment(Qt.AlignCenter)

@@ -23,7 +23,7 @@ from core.data_mapper import ConstraintDataGenerator
 from core.logger import Logger
 from ui.splash_screen import LoadingPopup
 from ui.detail_dialog import CombinedDetailDialog
-from ui.gui_utils import CustomDialog
+from ui.gui_utils import CustomDialog, WebhookBadgeLabel
 from ui.api_selection_dialog import APISelectionDialog
 from ui.result_page import ResultPageWidget
 from core.system_state_manager import SystemStateManager
@@ -463,8 +463,8 @@ class SystemMainUI(CommonMainUI):
             field_base_height = self.original_field_group_size[1]
             left_expandable_total = group_base_height + field_base_height
 
-            # 오른쪽 패널 확장 요소: api_section(251) + monitor_section(267) = 518px
-            right_expandable_total = 251 + 267  # 518
+            # 오른쪽 패널 확장 요소: api_section(265) + monitor_section(306) = 571px
+            right_expandable_total = 265 + 306  # 571
 
             # bg_root 크기 조정
             if hasattr(self, 'bg_root') and hasattr(self, 'original_bg_root_size'):
@@ -522,18 +522,16 @@ class SystemMainUI(CommonMainUI):
             # API 섹션 크기 조정 (extra_column_height 비례 분배)
             if hasattr(self, 'api_section') and hasattr(self, 'original_api_section_size'):
                 new_api_width = int(self.original_api_section_size[0] * width_ratio)
-                api_extra = extra_column_height * (251 / right_expandable_total)
-                new_api_height = int(251 + api_extra)
+                api_extra = extra_column_height * (265 / right_expandable_total)
+                new_api_height = int(265 + api_extra)
                 self.api_section.setFixedSize(new_api_width, new_api_height)
-                self.api_section.setFixedSize(new_api_width, int(self.original_api_section_size[1] + api_extra))
 
             # 모니터링 섹션 크기 조정 (extra_column_height 비례 분배)
             if hasattr(self, 'monitor_section') and hasattr(self, 'original_monitor_section_size'):
                 new_monitor_width = int(self.original_monitor_section_size[0] * width_ratio)
-                monitor_extra = extra_column_height * (267 / right_expandable_total)
-                new_monitor_height = int(267 + monitor_extra)
+                monitor_extra = extra_column_height * (306 / right_expandable_total)
+                new_monitor_height = int(306 + monitor_extra)
                 self.monitor_section.setFixedSize(new_monitor_width, new_monitor_height)
-                self.monitor_section.setFixedSize(new_monitor_width, int(self.original_monitor_section_size[1] + monitor_extra))
 
             # ✅ 버튼 그룹 및 버튼 크기 조정 (간격 16px 고정, 세로 크기 고정)
             if hasattr(self, 'original_buttonGroup_size'):
@@ -704,6 +702,17 @@ class SystemMainUI(CommonMainUI):
             traceback.print_exc()
 
     def init_centerLayout(self):
+        self.COL_NO = 0
+        self.COL_API_NAME = 1
+        self.COL_TIMER = 2
+        self.COL_RESULT = 3
+        self.COL_TOTAL_FIELDS = 4
+        self.COL_PASS_FIELDS = 5
+        self.COL_FAIL_FIELDS = 6
+        self.COL_RETRY_COUNT = 7
+        self.COL_SCORE = 8
+        self.COL_DETAIL = 9
+
         # 표 형태로 변경 - 동적 API 개수
         api_count = len(self.videoMessages)
 
@@ -724,17 +733,18 @@ class SystemMainUI(CommonMainUI):
         header_layout.setContentsMargins(0, 0, 14, 0)  # 오른쪽 14px (스크롤바 영역)
         header_layout.setSpacing(0)
 
-        # 헤더 컬럼 정의 (너비, 텍스트) - 9컬럼 구조
+        # 헤더 컬럼 정의 (너비, 텍스트) - 10컬럼 구조
         header_columns = [
             (40, ""),            # No.
-            (261, "API 명"),
-            (100, "결과"),
+            (268, "API 명"),
+            (60, ""),
+            (76, "결과"),
             (116, "전체 필드 수"),
             (116, "통과 필드 수"),
             (94, "실패 필드 수"),
             (94, "검증 횟수"),
             (94, "평가 점수"),
-            (133, "상세 내용")
+            (90, "상세 내용")
         ]
 
         # 헤더 라벨 저장 (반응형 조정용)
@@ -759,7 +769,7 @@ class SystemMainUI(CommonMainUI):
             header_layout.addWidget(label)
 
         # 테이블 본문 (헤더 숨김)
-        self.tableWidget = QTableWidget(api_count, 9)  # 9개 컬럼
+        self.tableWidget = QTableWidget(api_count, 10)  # 10개 컬럼
         # self.tableWidget.setFixedWidth(1050)  # setWidgetResizable(True) 사용으로 주석 처리
         self.tableWidget.horizontalHeader().setVisible(False)
         self.tableWidget.verticalHeader().setVisible(False)
@@ -790,8 +800,9 @@ class SystemMainUI(CommonMainUI):
 
         self.tableWidget.setShowGrid(False)
 
-        # 컬럼 너비 설정 - 9컬럼 구조 (원본 너비 저장)
-        self.original_column_widths = [40, 261, 100, 116, 116, 94, 94, 94, 133]
+        # 컬럼 너비 설정 - 10컬럼 구조 (원본 너비 저장)
+        self.original_column_widths = [40, 268, 60, 76, 116, 116, 94, 94, 94, 90]
+
         for i, width in enumerate(self.original_column_widths):
             self.tableWidget.setColumnWidth(i, width)
         self.tableWidget.horizontalHeader().setStretchLastSection(False)  # 비례 조정을 위해 비활성화
@@ -802,6 +813,8 @@ class SystemMainUI(CommonMainUI):
 
         # 단계명 리스트 (동적으로 로드된 API 이름 사용)
         self.step_names = self.videoMessages
+        webhook_badge_path = resource_path("assets/image/icon/badge-webhook.png").replace("\\", "/")
+        webhook_badge_pixmap = QPixmap(webhook_badge_path)
         for i, name in enumerate(self.step_names):
             # No. (숫자)
             no_item = QTableWidgetItem(f"{i + 1}")
@@ -811,9 +824,54 @@ class SystemMainUI(CommonMainUI):
             # API 명
             api_item = QTableWidgetItem(name)
             api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-            self.tableWidget.setItem(i, 1, api_item)
+            api_item.setData(Qt.UserRole, name)
+            api_item.setText("")
+            self.tableWidget.setItem(i, self.COL_API_NAME, api_item)
 
-            # 결과 아이콘
+            protocol = ""
+            if hasattr(self, 'trans_protocols') and i < len(self.trans_protocols):
+                protocol = str(self.trans_protocols[i] or "").strip().lower()
+            is_webhook_api = protocol == "webhook"
+
+            api_container = QWidget()
+            api_layout = QHBoxLayout()
+            api_layout.setContentsMargins(2, 0, 2, 0)
+            api_layout.setSpacing(4)
+            api_layout.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+
+            api_name_label = QLabel(name)
+            api_name_label.setStyleSheet("""
+                QLabel {
+                    color: #1B1B1C;
+                    font-family: 'Noto Sans KR';
+                    font-size: 17px;
+                    font-weight: 400;
+                }
+            """)
+            api_name_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            api_name_label.setWordWrap(False)
+            api_name_label.setToolTip(name)
+            api_name_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+            api_name_label.setMinimumWidth(0)
+            api_layout.addWidget(api_name_label, 0, Qt.AlignVCenter)
+
+            if is_webhook_api and not webhook_badge_pixmap.isNull():
+                webhook_badge_label = WebhookBadgeLabel()
+                webhook_badge_label.setPixmap(webhook_badge_pixmap)
+                webhook_badge_label.setScaledContents(False)
+                webhook_badge_label.setFixedSize(webhook_badge_pixmap.size())
+                webhook_badge_label.setAlignment(Qt.AlignCenter)
+                api_layout.addWidget(webhook_badge_label, 0, Qt.AlignVCenter)
+
+            api_layout.addStretch()
+
+            api_container.setLayout(api_layout)
+            self.tableWidget.setCellWidget(i, self.COL_API_NAME, api_container)
+
+            # 타이머 - 컬럼 2
+            self.set_api_timer_state(i, "waiting", 0)
+
+            # 결과 아이콘 - 컬럼 3
             icon_widget = QWidget()
             icon_layout = QHBoxLayout()
             icon_layout.setContentsMargins(0, 0, 0, 0)
@@ -826,23 +884,23 @@ class SystemMainUI(CommonMainUI):
             icon_layout.setAlignment(Qt.AlignCenter)
             icon_widget.setLayout(icon_layout)
 
-            self.tableWidget.setCellWidget(i, 2, icon_widget)
+            self.tableWidget.setCellWidget(i, self.COL_RESULT, icon_widget)
 
-            # 전체 필드 수 (새 위치: 3)
-            self.tableWidget.setItem(i, 3, QTableWidgetItem("0"))
-            self.tableWidget.item(i, 3).setTextAlignment(Qt.AlignCenter)
-            # 통과 필드 수 (위치 유지: 4)
-            self.tableWidget.setItem(i, 4, QTableWidgetItem("0"))
-            self.tableWidget.item(i, 4).setTextAlignment(Qt.AlignCenter)
-            # 실패 필드 수 (새 위치: 5)
-            self.tableWidget.setItem(i, 5, QTableWidgetItem("0"))
-            self.tableWidget.item(i, 5).setTextAlignment(Qt.AlignCenter)
-            # 검증 횟수 (새 위치: 6)
-            self.tableWidget.setItem(i, 6, QTableWidgetItem("0"))
-            self.tableWidget.item(i, 6).setTextAlignment(Qt.AlignCenter)
-            # 평가 점수
-            self.tableWidget.setItem(i, 7, QTableWidgetItem("0%"))
-            self.tableWidget.item(i, 7).setTextAlignment(Qt.AlignCenter)
+            # 전체 필드 수 (컬럼 4)
+            self.tableWidget.setItem(i, self.COL_TOTAL_FIELDS, QTableWidgetItem("0"))
+            self.tableWidget.item(i, self.COL_TOTAL_FIELDS).setTextAlignment(Qt.AlignCenter)
+            # 통과 필드 수 (컬럼 5)
+            self.tableWidget.setItem(i, self.COL_PASS_FIELDS, QTableWidgetItem("0"))
+            self.tableWidget.item(i, self.COL_PASS_FIELDS).setTextAlignment(Qt.AlignCenter)
+            # 실패 필드 수 (컬럼 6)
+            self.tableWidget.setItem(i, self.COL_FAIL_FIELDS, QTableWidgetItem("0"))
+            self.tableWidget.item(i, self.COL_FAIL_FIELDS).setTextAlignment(Qt.AlignCenter)
+            # 검증 횟수 (컬럼 7)
+            self.tableWidget.setItem(i, self.COL_RETRY_COUNT, QTableWidgetItem("0"))
+            self.tableWidget.item(i, self.COL_RETRY_COUNT).setTextAlignment(Qt.AlignCenter)
+            # 평가 점수 (컬럼 8)
+            self.tableWidget.setItem(i, self.COL_SCORE, QTableWidgetItem("0%"))
+            self.tableWidget.item(i, self.COL_SCORE).setTextAlignment(Qt.AlignCenter)
 
             # 상세 내용 버튼
             detail_label = QLabel()
@@ -864,7 +922,7 @@ class SystemMainUI(CommonMainUI):
             layout.setContentsMargins(0, 0, 0, 0)
             container.setLayout(layout)
 
-            self.tableWidget.setCellWidget(i, 8, container)
+            self.tableWidget.setCellWidget(i, self.COL_DETAIL, container)
 
         # 결과 컬럼만 클릭 가능하도록 설정 (기존 기능 유지)
         self.tableWidget.cellClicked.connect(self.table_cell_clicked)
@@ -920,7 +978,10 @@ class SystemMainUI(CommonMainUI):
         """통합 상세 내용 확인 - 데이터, 규격, 오류를 모두 보여주는 3열 팝업"""
         try:
             buf = self.step_buffers[row]
-            api_name = self.tableWidget.item(row, 1).text()  # API 명은 컬럼 1
+            api_item = self.tableWidget.item(row, 1)
+            api_name = ""
+            if api_item is not None:
+                api_name = api_item.data(Qt.UserRole) or api_item.text()
 
             # 스키마 데이터 가져오기 -> 09/24 시스템쪽은 OutSchema
             try:
@@ -1054,10 +1115,15 @@ class SystemMainUI(CommonMainUI):
 
     def table_cell_clicked(self, row, col):
         """테이블 셀 클릭 시 호출되는 함수"""
-        if col == 2:  # 결과 컬럼 클릭 시에만 동작 (컬럼 2)
+        if col == self.COL_RESULT:  # 결과 컬럼 클릭 시에만 동작
             msg = getattr(self, f"step{row + 1}_msg", "")
             if msg:
-                api_name = self.step_names[row] if row < len(self.step_names) else f"Step {row + 1}"
+                api_item = self.tableWidget.item(row, self.COL_API_NAME)
+                api_name = ""
+                if api_item is not None:
+                    api_name = api_item.data(Qt.UserRole) or api_item.text()
+                if not api_name:
+                    api_name = self.step_names[row] if row < len(self.step_names) else f"Step {row + 1}"
                 CustomDialog(msg, api_name)
     
 
