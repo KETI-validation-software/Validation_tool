@@ -1038,14 +1038,14 @@ class CommonMainUI(QWidget):
         # 헤더 컬럼 정의 (너비, 텍스트) - 9컬럼 구조
         header_columns = [
             (40, ""),            # No.
-            (261, "API 명"),
+            (304, "API 명"),
             (100, "결과"),
             (94, "검증 횟수"),
             (116, "통과 필드 수"),
             (116, "전체 필드 수"),
             (94, "실패 필드 수"),
             (94, "평가 점수"),
-            (133, "상세 내용")
+            (90, "상세 내용")
         ]
 
         # 헤더 라벨 저장 (반응형 조정용)
@@ -1102,7 +1102,7 @@ class CommonMainUI(QWidget):
         self.tableWidget.setShowGrid(False)
 
         # 컬럼 너비 설정 - 9컬럼 구조 (원본 너비 저장)
-        self.original_column_widths = [40, 261, 100, 94, 116, 116, 94, 94, 133]
+        self.original_column_widths = [40, 304, 100, 94, 116, 116, 94, 94, 90]
         for i, width in enumerate(self.original_column_widths):
             self.tableWidget.setColumnWidth(i, width)
         self.tableWidget.horizontalHeader().setStretchLastSection(False)  # 비례 조정을 위해 비활성화
@@ -1113,6 +1113,8 @@ class CommonMainUI(QWidget):
 
         # 단계명 리스트 (동적으로 로드된 API 이름 사용)
         self.step_names = self.videoMessages
+        webhook_badge_path = resource_path("assets/image/icon/badge-webhook.png").replace("\\", "/")
+        webhook_badge_pixmap = QPixmap(webhook_badge_path)
         for i, name in enumerate(self.step_names):
             # No. (숫자)
             no_item = QTableWidgetItem(f"{i + 1}")
@@ -1122,7 +1124,44 @@ class CommonMainUI(QWidget):
             # API 명
             api_item = QTableWidgetItem(name)
             api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+            api_item.setData(Qt.UserRole, name)
+            api_item.setText("")
             self.tableWidget.setItem(i, 1, api_item)
+
+            protocol = ""
+            if hasattr(self, 'trans_protocols') and i < len(self.trans_protocols):
+                protocol = str(self.trans_protocols[i] or "").strip().lower()
+            is_webhook_api = protocol == "webhook"
+
+            api_container = QWidget()
+            api_layout = QHBoxLayout()
+            api_layout.setContentsMargins(6, 0, 6, 0)
+            api_layout.setSpacing(4)
+            api_layout.addStretch()
+
+            api_name_label = QLabel(name)
+            api_name_label.setStyleSheet("""
+                QLabel {
+                    color: #1B1B1C;
+                    font-family: 'Noto Sans KR';
+                    font-size: 19px;
+                    font-weight: 400;
+                }
+            """)
+            api_name_label.setAlignment(Qt.AlignVCenter)
+            api_layout.addWidget(api_name_label)
+
+            if is_webhook_api and not webhook_badge_pixmap.isNull():
+                webhook_badge_label = QLabel()
+                webhook_badge_label.setPixmap(webhook_badge_pixmap)
+                webhook_badge_label.setScaledContents(False)
+                webhook_badge_label.setFixedSize(webhook_badge_pixmap.size())
+                webhook_badge_label.setAlignment(Qt.AlignCenter)
+                api_layout.addWidget(webhook_badge_label, 0, Qt.AlignVCenter)
+
+            api_layout.addStretch()
+            api_container.setLayout(api_layout)
+            self.tableWidget.setCellWidget(i, 1, api_container)
 
             # 결과 아이콘
             icon_widget = QWidget()
@@ -1235,7 +1274,10 @@ class CommonMainUI(QWidget):
         """통합 상세 내용 확인 - 데이터, 규격, 오류를 모두 보여주는 3열 팝업"""
         try:
             buf = self.step_buffers[row]
-            api_name = self.tableWidget.item(row, 1).text()  # API 명은 컬럼 1
+            api_item = self.tableWidget.item(row, 1)
+            api_name = ""
+            if api_item is not None:
+                api_name = api_item.data(Qt.UserRole) or api_item.text()
 
             # 스키마 데이터 가져오기 -> 09/24 시스템쪽은 OutSchema
             try:

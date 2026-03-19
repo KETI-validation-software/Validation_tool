@@ -1286,8 +1286,13 @@ class MyApp(PlatformMainUI):
         # 테이블 데이터 저장
         table_data = []
         for row in range(self.tableWidget.rowCount()):
+            api_item = self.tableWidget.item(row, 1)
+            api_name = ""
+            if api_item is not None:
+                api_name = api_item.data(Qt.UserRole) or api_item.text()
+
             row_data = {
-                'api_name': self.tableWidget.item(row, 1).text() if self.tableWidget.item(row, 1) else "",  # API 명은 컬럼 1
+                'api_name': api_name,  # API 명은 컬럼 1
                 'icon_state': self._get_icon_state(row),  # PASS/FAIL/NONE 상태
                 'retry_count': self.tableWidget.item(row, 3).text() if self.tableWidget.item(row, 3) else "0",
                 'pass_count': self.tableWidget.item(row, 4).text() if self.tableWidget.item(row, 4) else "0",
@@ -1335,6 +1340,53 @@ class MyApp(PlatformMainUI):
                     return "FAIL"
         return "NONE"
 
+    def _is_webhook_api_row(self, row):
+        if hasattr(self, 'trans_protocols') and row < len(self.trans_protocols):
+            protocol = str(self.trans_protocols[row] or "").strip().lower()
+            return protocol == "webhook"
+        return False
+
+    def _set_api_name_cell(self, row, api_name):
+        api_item = QTableWidgetItem(api_name)
+        api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+        api_item.setData(Qt.UserRole, api_name)
+        api_item.setText("")
+        self.tableWidget.setItem(row, 1, api_item)
+
+        if not hasattr(self, '_webhook_badge_pixmap'):
+            badge_path = resource_path("assets/image/icon/badge-webhook.png").replace("\\", "/")
+            self._webhook_badge_pixmap = QPixmap(badge_path)
+
+        api_container = QWidget()
+        api_layout = QHBoxLayout()
+        api_layout.setContentsMargins(6, 0, 6, 0)
+        api_layout.setSpacing(4)
+        api_layout.addStretch()
+
+        api_name_label = QLabel(api_name)
+        api_name_label.setStyleSheet("""
+            QLabel {
+                color: #1B1B1C;
+                font-family: 'Noto Sans KR';
+                font-size: 19px;
+                font-weight: 400;
+            }
+        """)
+        api_name_label.setAlignment(Qt.AlignVCenter)
+        api_layout.addWidget(api_name_label)
+
+        if self._is_webhook_api_row(row) and not self._webhook_badge_pixmap.isNull():
+            webhook_badge_label = QLabel()
+            webhook_badge_label.setPixmap(self._webhook_badge_pixmap)
+            webhook_badge_label.setScaledContents(False)
+            webhook_badge_label.setFixedSize(self._webhook_badge_pixmap.size())
+            webhook_badge_label.setAlignment(Qt.AlignCenter)
+            api_layout.addWidget(webhook_badge_label, 0, Qt.AlignVCenter)
+
+        api_layout.addStretch()
+        api_container.setLayout(api_layout)
+        self.tableWidget.setCellWidget(row, 1, api_container)
+
     def restore_spec_data(self, spec_id):
         """저장된 spec 데이터 복원 (✅ 복합키 사용)"""
         composite_key = f"{self.current_group_id}_{spec_id}"
@@ -1370,9 +1422,7 @@ class MyApp(PlatformMainUI):
 
             # API 이름 - 컬럼 1 (숫자 제거된 이름으로 표시)
             display_name = remove_api_number_suffix(row_data['api_name'])
-            api_item = QTableWidgetItem(display_name)
-            api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-            self.tableWidget.setItem(row, 1, api_item)
+            self._set_api_name_cell(row, display_name)
 
             # 아이콘 상태 복원 - 컬럼 2
             icon_state = row_data['icon_state']
@@ -1632,12 +1682,7 @@ class MyApp(PlatformMainUI):
                 self.tableWidget.setItem(row, 0, no_item)
 
             # API 명 - 컬럼 1 (숫자 제거)
-            if self.tableWidget.item(row, 1):
-                self.tableWidget.item(row, 1).setText(display_name)
-            else:
-                api_item = QTableWidgetItem(display_name)
-                api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-                self.tableWidget.setItem(row, 1, api_item)
+            self._set_api_name_cell(row, display_name)
 
             # 결과 아이콘이 없으면 추가 - 컬럼 2
             if not self.tableWidget.cellWidget(row, 2):
@@ -1703,9 +1748,7 @@ class MyApp(PlatformMainUI):
 
             # API 명 - 컬럼 1
             display_name = remove_api_number_suffix(api_name)
-            api_item = QTableWidgetItem(display_name)
-            api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-            self.tableWidget.setItem(row, 1, api_item)
+            self._set_api_name_cell(row, display_name)
 
             # 결과 아이콘 초기화 - 컬럼 2
             icon_widget = QWidget()
@@ -1785,7 +1828,10 @@ class MyApp(PlatformMainUI):
         """통합 상세 내용 확인"""
         try:
             buf = self.step_buffers[row]
-            api_name = self.tableWidget.item(row, 1).text()  # API 명은 컬럼 1
+            api_item = self.tableWidget.item(row, 1)
+            api_name = ""
+            if api_item is not None:
+                api_name = api_item.data(Qt.UserRole) or api_item.text()
 
             # 스키마 데이터 가져오기
             try:
@@ -1820,7 +1866,11 @@ class MyApp(PlatformMainUI):
         if col == 2:  # 아이콘 컬럼
             msg = getattr(self, f"step{row + 1}_msg", "")
             if msg:
-                CustomDialog(msg, self.tableWidget.item(row, 1).text())  # API 명은 컬럼 1
+                api_item = self.tableWidget.item(row, 1)
+                api_name = ""
+                if api_item is not None:
+                    api_name = api_item.data(Qt.UserRole) or api_item.text()
+                CustomDialog(msg, api_name)  # API 명은 컬럼 1
 
     def run_single_spec_test(self):
         """단일 spec_id에 대한 시험 실행"""

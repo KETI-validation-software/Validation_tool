@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtGui import QIcon, QPixmap, QColor
 from PyQt5 import QtCore
 
 from core.functions import resource_path
@@ -109,6 +109,7 @@ class ResultPageWidget(QWidget):
         self.img_pass = resource_path("assets/image/test_runner/tag_성공.png")
         self.img_fail = resource_path("assets/image/test_runner/tag_실패.png")
         self.img_none = resource_path("assets/image/icon/icn_basic.png")
+        self.webhook_badge_pixmap = QPixmap(resource_path("assets/image/icon/badge-webhook.png"))
 
         self.initUI()
 
@@ -218,7 +219,7 @@ class ResultPageWidget(QWidget):
         self.original_pass_label_size = (340, 60)    # 필수 필드 점수
         self.original_opt_label_size = (340, 60)     # 선택 필드 점수
         self.original_score_label_size = (315, 60)   # 종합 평가 점수
-        self.original_column_widths = [40, 261, 100, 94, 116, 116, 94, 94, 133]
+        self.original_column_widths = [40, 304, 100, 94, 116, 116, 94, 94, 90]
 
         # ✅ 2컬럼 레이아웃
         self.bg_root = QWidget(self.content_widget)
@@ -280,10 +281,14 @@ class ResultPageWidget(QWidget):
         self.group_table = self.test_selection_panel.group_table
         self.test_field_table = self.test_selection_panel.test_field_table
 
+        # ✅ 4페이지 전용 높이 강제 설정 (561px)
+        self.field_group.setFixedSize(424, 561)
+        self.test_field_table.setFixedHeight(561)
+
         # 원본 사이즈 변수 매핑 (반응형 동작을 위해 필요)
         self.original_spec_panel_title_size = self.test_selection_panel.original_spec_panel_title_size
         self.original_group_table_widget_size = self.test_selection_panel.original_group_table_widget_size
-        self.original_field_group_size = self.test_selection_panel.original_field_group_size
+        # self.original_field_group_size = self.test_selection_panel.original_field_group_size # 제거: 4페이지 고유값 사용
         
         # 인덱스 매핑 정보도 연결 (필요 시)
         # self.group_name_to_index = self.test_selection_panel.group_name_to_index 
@@ -354,7 +359,7 @@ class ResultPageWidget(QWidget):
             font-family: "Noto Sans KR";
             font-weight: 500;
             color: #222;
-            margin-top: 36px;
+            margin-top: 30px;
             margin-bottom: 8px;
             letter-spacing: -0.3px;
         """)
@@ -362,7 +367,7 @@ class ResultPageWidget(QWidget):
 
         # 결과 테이블 (크기 키움: 350px)
         self.create_result_table(right_layout)
-        right_layout.addSpacing(18)
+        right_layout.addSpacing(30)
 
         # 시험 점수 요약 타이틀 (1064 × 24)
         self.score_title = QLabel('시험 점수 요약')
@@ -525,11 +530,15 @@ class ResultPageWidget(QWidget):
             height_ratio = max(1.0, current_height / self.original_window_size[1])
 
             # ✅ 좌우 패널 정렬을 위한 확장량 계산
-            original_column_height = 898  # 원본 컬럼 높이
+            # 기본 화면(height_ratio=1.0)에서는 561px을 유지하며, 
+            # 창이 커질 때는 다른 페이지(3페이지 등)와 동일한 비례 배분 방식을 사용합니다.
+            # 컬럼의 전체 높이(970)를 기준으로 확장량을 계산해야 우측과 정렬이 맞음
+            original_column_height = 970  # (970)
             extra_column_height = original_column_height * (height_ratio - 1)
 
-            # 왼쪽 패널 확장 요소: group_table(204) + field_group(561) = 765px
-            left_expandable_total = 204 + 561  # 765
+            # 왼쪽 패널 확장 요소 (비례 배분 기준)
+            # group_table(204) + field_group(561) = 765px
+            left_expandable_total = 765
 
             # bg_root 크기 조정
             if hasattr(self, 'bg_root') and hasattr(self, 'original_bg_root_size'):
@@ -564,7 +573,7 @@ class ResultPageWidget(QWidget):
                 if hasattr(self, 'test_selection_panel'):
                      self.test_selection_panel.setFixedWidth(new_title_width)
 
-            # 그룹 테이블 위젯 크기 조정 (extra_column_height 비례 분배)
+            # 그룹 테이블 위젯 크기 조정 (비례 배분)
             if hasattr(self, 'group_table_widget') and hasattr(self, 'original_group_table_widget_size'):
                 new_group_width = int(self.original_group_table_widget_size[0] * width_ratio)
                 group_extra = extra_column_height * (204 / left_expandable_total)
@@ -574,11 +583,13 @@ class ResultPageWidget(QWidget):
                 if hasattr(self, 'group_table'):
                     self.group_table.setFixedHeight(new_group_height)
 
-            # 시험 시나리오 테이블 크기 조정 (extra_column_height 비례 분배)
+            # 시험 시나리오 테이블 크기 조정 (비례 배분)
             if hasattr(self, 'field_group') and hasattr(self, 'original_field_group_size'):
                 new_field_width = int(self.original_field_group_size[0] * width_ratio)
+                # 추가 높이를 561/765 비율로 배분하여 너무 극단적이지 않게 확장
                 field_extra = extra_column_height * (561 / left_expandable_total)
                 new_field_height = int(561 + field_extra)
+                
                 self.field_group.setFixedSize(new_field_width, new_field_height)
                 # 내부 테이블 크기도 조정
                 if hasattr(self, 'test_field_table'):
@@ -613,15 +624,15 @@ class ResultPageWidget(QWidget):
                 # 1. 레이아웃 상단 마진: 36
                 # 2. 시험 정보 타이틀 영역: 약 40
                 # 3. 시험 정보 위젯: 169
-                # 4. 시험 결과 라벨 영역 (마진 포함): 약 80
+                # 4. 시험 결과 라벨 영역 (마진 포함): 약 74 (30 + 24 + 20)
                 # 5. 결과 테이블 헤더: 30
-                # 6. 중간 간격 (Spacing): 36
+                # 6. 중간 간격 (Spacing): 30
                 # 7. 시험 점수 요약 타이틀 영역: 약 40
                 # 8. 시험 점수 테이블: 256
                 # 9. 레이아웃 하단 마진: 40
                 # 10. 기타 미세 보정값: 13
                 
-                fixed_heights = 36 + 40 + 169 + 80 + 30 + 36 + 40 + 256 + 40 + 13
+                fixed_heights = 36 + 40 + 169 + 74 + 30 + 30 + 40 + 256 + 40 + 13
                 bottom_gap = 30 if self.embedded else 80
                 
                 # 전체 컬럼 높이에서 고정 높이들을 뺀 나머지를 할당
@@ -975,6 +986,49 @@ class ResultPageWidget(QWidget):
 
             QMessageBox.warning(self, "오류", f"시나리오 전환 중 오류가 발생했습니다.\n{str(e)}")
 
+    def _is_webhook_api(self, row):
+        if hasattr(self.parent, 'trans_protocols') and row < len(self.parent.trans_protocols):
+            protocol = str(self.parent.trans_protocols[row] or "").strip().lower()
+            return protocol == "webhook"
+        return False
+
+    def _set_api_name_cell(self, row, api_name):
+        api_item = QTableWidgetItem(api_name)
+        api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+        api_item.setData(Qt.UserRole, api_name)
+        api_item.setText("")
+        self.tableWidget.setItem(row, 1, api_item)
+
+        api_container = QWidget()
+        api_layout = QHBoxLayout()
+        api_layout.setContentsMargins(6, 0, 6, 0)
+        api_layout.setSpacing(4)
+        api_layout.addStretch()
+
+        api_name_label = QLabel(api_name)
+        api_name_label.setStyleSheet("""
+            QLabel {
+                color: #1B1B1C;
+                font-family: 'Noto Sans KR';
+                font-size: 19px;
+                font-weight: 400;
+            }
+        """)
+        api_name_label.setAlignment(Qt.AlignVCenter)
+        api_layout.addWidget(api_name_label)
+
+        if self._is_webhook_api(row) and not self.webhook_badge_pixmap.isNull():
+            webhook_badge_label = QLabel()
+            webhook_badge_label.setPixmap(self.webhook_badge_pixmap)
+            webhook_badge_label.setScaledContents(False)
+            webhook_badge_label.setFixedSize(self.webhook_badge_pixmap.size())
+            webhook_badge_label.setAlignment(Qt.AlignCenter)
+            api_layout.addWidget(webhook_badge_label, 0, Qt.AlignVCenter)
+
+        api_layout.addStretch()
+        api_container.setLayout(api_layout)
+        self.tableWidget.setCellWidget(row, 1, api_container)
+
     def show_empty_result_table(self):
         """결과가 없을 때 빈 테이블 표시 (API 목록만)"""
         api_list = self.parent.videoMessagesDisplay  # 표시용 이름 사용
@@ -1012,9 +1066,7 @@ class ResultPageWidget(QWidget):
             self.tableWidget.setItem(row, 0, no_item)
 
             # API 명 - 컬럼 1 (이미 숫자가 제거된 리스트 사용)
-            api_item = QTableWidgetItem(api_list[row])
-            api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-            self.tableWidget.setItem(row, 1, api_item)
+            self._set_api_name_cell(row, api_list[row])
 
             # ✅ 기본 아이콘 (결과 페이지 전용 아이콘 사용) - 컬럼 2
             icon_widget = QWidget()
@@ -1085,9 +1137,7 @@ class ResultPageWidget(QWidget):
 
             # API 명 - 컬럼 1 (숫자 제거된 이름 표시)
             display_name = remove_api_number_suffix(row_data['api_name'])
-            api_item = QTableWidgetItem(display_name)
-            api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-            self.tableWidget.setItem(row, 1, api_item)
+            self._set_api_name_cell(row, display_name)
 
             # ✅ 아이콘 상태 복원 (결과 페이지 전용 아이콘 사용) - 컬럼 2
             icon_state = row_data['icon_state']
@@ -1153,7 +1203,7 @@ class ResultPageWidget(QWidget):
             if api_item is None:
                 QMessageBox.warning(self, "오류", "해당 행의 API 정보를 찾을 수 없습니다.")
                 return
-            api_name = api_item.text()
+            api_name = api_item.data(Qt.UserRole) or api_item.text()
 
             # parent의 데이터 가져오기
             buf = self.parent.step_buffers[row] if row < len(self.parent.step_buffers) else {"data": "", "error": "", "result": ""}
@@ -1332,14 +1382,14 @@ class ResultPageWidget(QWidget):
         # 헤더 컬럼 정의 (너비, 텍스트) - 9컬럼 구조
         header_columns = [
             (40, ""),            # No.
-            (261, "API 명"),
+            (304, "API 명"),
             (100, "결과"),
             (116, "전체 필드 수"),
             (116, "통과 필드 수"),
             (94, "실패 필드 수"),
             (94, "검증 횟수"),
             (94, "평가 점수"),
-            (133, "상세 내용")
+            (90, "상세 내용")
         ]
 
         # ✅ 헤더 라벨 저장
@@ -1395,7 +1445,7 @@ class ResultPageWidget(QWidget):
         self.tableWidget.setShowGrid(False)
 
         # 컬럼 너비 설정 - 3페이지와 동일한 베이스 너비 사용
-        self.original_column_widths = [40, 261, 100, 116, 116, 94, 94, 94, 133]
+        self.original_column_widths = [40, 304, 100, 116, 116, 94, 94, 94, 90]
         for i, width in enumerate(self.original_column_widths):
             self.tableWidget.setColumnWidth(i, width)
         self.tableWidget.horizontalHeader().setStretchLastSection(False)
@@ -1551,9 +1601,8 @@ class ResultPageWidget(QWidget):
             # API 명 - 컬럼 1
             api_item = self.parent.tableWidget.item(row, 1)
             if api_item:
-                new_item = QTableWidgetItem(api_item.text())
-                new_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-                self.tableWidget.setItem(row, 1, new_item)
+                api_name = api_item.data(Qt.UserRole) or api_item.text()
+                self._set_api_name_cell(row, api_name)
 
             # ✅ 결과 아이콘 (결과 페이지 전용 아이콘으로 교체) - 컬럼 2
             icon_widget = self.parent.tableWidget.cellWidget(row, 2)

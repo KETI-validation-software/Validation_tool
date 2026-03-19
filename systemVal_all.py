@@ -940,6 +940,53 @@ class MyApp(SystemMainUI):
             import traceback
             traceback.print_exc()
 
+    def _is_webhook_api_row(self, row):
+        if hasattr(self, 'trans_protocols') and row < len(self.trans_protocols):
+            protocol = str(self.trans_protocols[row] or "").strip().lower()
+            return protocol == "webhook"
+        return False
+
+    def _set_api_name_cell(self, row, api_name):
+        api_item = QTableWidgetItem(api_name)
+        api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+        api_item.setData(Qt.UserRole, api_name)
+        api_item.setText("")
+        self.tableWidget.setItem(row, 1, api_item)
+
+        if not hasattr(self, '_webhook_badge_pixmap'):
+            badge_path = resource_path("assets/image/icon/badge-webhook.png").replace("\\", "/")
+            self._webhook_badge_pixmap = QPixmap(badge_path)
+
+        api_container = QWidget()
+        api_layout = QHBoxLayout()
+        api_layout.setContentsMargins(6, 0, 6, 0)
+        api_layout.setSpacing(4)
+        api_layout.addStretch()
+
+        api_name_label = QLabel(api_name)
+        api_name_label.setStyleSheet("""
+            QLabel {
+                color: #1B1B1C;
+                font-family: 'Noto Sans KR';
+                font-size: 19px;
+                font-weight: 400;
+            }
+        """)
+        api_name_label.setAlignment(Qt.AlignVCenter)
+        api_layout.addWidget(api_name_label)
+
+        if self._is_webhook_api_row(row) and not self._webhook_badge_pixmap.isNull():
+            webhook_badge_label = QLabel()
+            webhook_badge_label.setPixmap(self._webhook_badge_pixmap)
+            webhook_badge_label.setScaledContents(False)
+            webhook_badge_label.setFixedSize(self._webhook_badge_pixmap.size())
+            webhook_badge_label.setAlignment(Qt.AlignCenter)
+            api_layout.addWidget(webhook_badge_label, 0, Qt.AlignVCenter)
+
+        api_layout.addStretch()
+        api_container.setLayout(api_layout)
+        self.tableWidget.setCellWidget(row, 1, api_container)
+
     def update_result_table_structure(self, api_list):
         """테이블 구조를 완전히 재구성 (API 개수에 맞게)"""
         api_count = len(api_list)
@@ -960,9 +1007,7 @@ class MyApp(SystemMainUI):
             self.tableWidget.setItem(row, 0, no_item)
 
             # 컬럼 1: API 명 (숫자 제거)
-            api_item = QTableWidgetItem(display_name)
-            api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-            self.tableWidget.setItem(row, 1, api_item)
+            self._set_api_name_cell(row, display_name)
 
             Logger.debug(f" Row {row}: {display_name} 설정 완료")
 
@@ -1036,9 +1081,7 @@ class MyApp(SystemMainUI):
 
             # API 명 - 컬럼 1 (숫자 제거)
             display_name = self.parent._remove_api_number_suffix(api_list[row])
-            api_item = QTableWidgetItem(display_name)
-            api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-            self.tableWidget.setItem(row, 1, api_item)
+            self._set_api_name_cell(row, display_name)
 
             # 결과 아이콘 - 컬럼 2
             icon_widget = QWidget()
@@ -2155,7 +2198,7 @@ class MyApp(SystemMainUI):
             icon_layout.setAlignment(Qt.AlignCenter)
             icon_widget.setLayout(icon_layout)
 
-            self.tableWidget.setCellWidget(self.cnt, 1, icon_widget)
+            self.tableWidget.setCellWidget(self.cnt, 2, icon_widget)
 
             if self.cnt == 0:
                 self.step1_msg += msg
