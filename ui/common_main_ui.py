@@ -1077,8 +1077,8 @@ class CommonMainUI(QWidget):
         # 헤더 컬럼 정의 (너비, 텍스트) - 9컬럼 구조
         header_columns = [
             (40, ""),            # No.
-            (304, "API 명"),
-            (100, "결과"),
+            (284, "API 명"),      # 304 -> 284로 축소
+            (120, "결과"),        # 100 -> 120으로 확대 (타이머 공간 확보)
             (94, "검증 횟수"),
             (116, "통과 필드 수"),
             (116, "전체 필드 수"),
@@ -1141,7 +1141,7 @@ class CommonMainUI(QWidget):
         self.tableWidget.setShowGrid(False)
 
         # 컬럼 너비 설정 - 9컬럼 구조 (원본 너비 저장)
-        self.original_column_widths = [40, 304, 100, 94, 116, 116, 94, 94, 90]
+        self.original_column_widths = [40, 284, 120, 94, 116, 116, 94, 94, 90]
         for i, width in enumerate(self.original_column_widths):
             self.tableWidget.setColumnWidth(i, width)
         self.tableWidget.horizontalHeader().setStretchLastSection(False)  # 비례 조정을 위해 비활성화
@@ -1441,9 +1441,9 @@ class CommonMainUI(QWidget):
 
         timer_widget = QWidget()
         timer_layout = QHBoxLayout()
-        timer_layout.setContentsMargins(4, 0, 4, 0)
-        timer_layout.setSpacing(4 if show_elapsed_text else 0)
-        timer_layout.setAlignment(Qt.AlignCenter)
+        timer_layout.setContentsMargins(10, 0, 0, 0)  # 좌측 여백을 최소화하여 공간 확보
+        timer_layout.setSpacing(6)  # 아이콘과 텍스트 사이 간격 약간 확대
+        timer_layout.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
 
         icon_label = QLabel()
         timer_pixmap = self._get_timer_icon_pixmap(state_key)
@@ -1455,7 +1455,7 @@ class CommonMainUI(QWidget):
         timer_layout.addWidget(icon_label)
         if show_elapsed_text:
             text_label = QLabel(f"{elapsed}초")
-            text_label.setAlignment(Qt.AlignCenter)
+            text_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
             text_label.setStyleSheet(
                 f"""
                 QLabel {{
@@ -1469,6 +1469,8 @@ class CommonMainUI(QWidget):
                 """
             )
             timer_layout.addWidget(text_label)
+        
+        timer_layout.addStretch()  # 나머지 빈 공간을 오른쪽으로 밀어내어 텍스트 잘림 방지
         timer_widget.setLayout(timer_layout)
 
         self.tableWidget.setCellWidget(row, timer_col, timer_widget)
