@@ -1321,10 +1321,10 @@ class MyApp(PlatformMainUI):
                 'icon_state': self._get_icon_state(row),  # PASS/FAIL/NONE 상태
                 'timer_state': self.get_api_timer_state(row),
                 'timer_elapsed': self.get_api_timer_elapsed(row),
-                'retry_count': self.tableWidget.item(row, 4).text() if self.tableWidget.item(row, 4) else "0",
+                'retry_count': self.tableWidget.item(row, 7).text() if self.tableWidget.item(row, 7) else "0",
                 'pass_count': self.tableWidget.item(row, 5).text() if self.tableWidget.item(row, 5) else "0",
-                'total_count': self.tableWidget.item(row, 6).text() if self.tableWidget.item(row, 6) else "0",
-                'fail_count': self.tableWidget.item(row, 7).text() if self.tableWidget.item(row, 7) else "0",
+                'total_count': self.tableWidget.item(row, 4).text() if self.tableWidget.item(row, 4) else "0",
+                'fail_count': self.tableWidget.item(row, 6).text() if self.tableWidget.item(row, 6) else "0",
                 'score': self.tableWidget.item(row, 8).text() if self.tableWidget.item(row, 8) else "0%",
             }
             table_data.append(row_data)
@@ -1350,6 +1350,8 @@ class MyApp(PlatformMainUI):
             'step_error_counts': self.step_error_counts[:] if hasattr(self, 'step_error_counts') else [],
             'step_opt_pass_counts': self.step_opt_pass_counts[:] if hasattr(self, 'step_opt_pass_counts') else [],  # 선택 필드 통과 수 배열
             'step_opt_error_counts': self.step_opt_error_counts[:] if hasattr(self, 'step_opt_error_counts') else [],  # 선택 필드 에러 수 배열
+            'cnt': self.cnt if hasattr(self, 'cnt') else 0,
+            'current_retry': self.current_retry if hasattr(self, 'current_retry') else 0,
         }
 
         Logger.debug(f" ✅ 데이터 저장 완료")
@@ -1480,9 +1482,9 @@ class MyApp(PlatformMainUI):
 
             self.set_api_timer_state(row, row_data.get('timer_state', 'waiting'), row_data.get('timer_elapsed', 0))
 
-            # 나머지 컬럼 복원 - 컬럼 4-8
-            for col, key in [(4, 'retry_count'), (5, 'pass_count'),
-                             (6, 'total_count'), (7, 'fail_count'), (8, 'score')]:
+            # 나머지 컬럼 복원 - 컬럼 4-8 (전체, 통과, 실패, 검증, 점수)
+            for col, key in [(4, 'total_count'), (5, 'pass_count'),
+                             (6, 'fail_count'), (7, 'retry_count'), (8, 'score')]:
                 new_item = QTableWidgetItem(row_data[key])
                 new_item.setTextAlignment(Qt.AlignCenter)
                 self.tableWidget.setItem(row, col, new_item)
@@ -1501,6 +1503,8 @@ class MyApp(PlatformMainUI):
         self.step_error_counts = saved_data.get('step_error_counts', [0] * len(self.videoMessages))[:]
         self.step_opt_pass_counts = saved_data.get('step_opt_pass_counts', [0] * len(self.videoMessages))[:]  # 선택 필드 통과
         self.step_opt_error_counts = saved_data.get('step_opt_error_counts', [0] * len(self.videoMessages))[:]  # 선택 필드 에러
+        self.cnt = saved_data.get('cnt', 0)
+        self.current_retry = saved_data.get('current_retry', 0)
         Logger.debug(f" step_pass_counts 복원: {self.step_pass_counts}")
         Logger.debug(f" step_error_counts 복원: {self.step_error_counts}")
         Logger.debug(f" step_opt_pass_counts 복원: {self.step_opt_pass_counts}")

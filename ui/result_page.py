@@ -1549,70 +1549,14 @@ class ResultPageWidget(QWidget):
                 self.parent.load_specs_from_constants()
                 self.parent.get_setting()
 
-            # ✅ 저장된 결과 데이터 복원 (update_result_table_structure 호출 제거 - 테이블 초기화 방지)
-            composite_key = f"{self.parent.current_group_id}_{self.parent.current_spec_id}"
-            if hasattr(self.parent, 'spec_table_data') and composite_key in self.parent.spec_table_data:
-                saved_data = self.parent.spec_table_data[composite_key]
+            restored = False
+            if hasattr(self.parent, 'restore_spec_data'):
+                restored = self.parent.restore_spec_data(self.parent.current_spec_id)
+                Logger.debug(f" parent 표준 복원 결과: {restored}")
 
-                # step_buffers 복원
-                saved_buffers = saved_data.get('step_buffers', [])
-                if saved_buffers:
-                    self.parent.step_buffers = [buf.copy() for buf in saved_buffers]
-
-                # 점수 정보 복원
-                self.parent.total_pass_cnt = saved_data.get('total_pass_cnt', 0)
-                self.parent.total_error_cnt = saved_data.get('total_error_cnt', 0)
-
-                # ✅ 선택 필드 점수 정보 복원
-                self.parent.total_opt_pass_cnt = saved_data.get('total_opt_pass_cnt', 0)
-                self.parent.total_opt_error_cnt = saved_data.get('total_opt_error_cnt', 0)
-
-                # ✅ step 배열 복원
-                self.parent.step_pass_counts = saved_data.get('step_pass_counts', [0] * len(self.parent.videoMessages))[:]
-                self.parent.step_error_counts = saved_data.get('step_error_counts', [0] * len(self.parent.videoMessages))[:]
-                self.parent.step_opt_pass_counts = saved_data.get('step_opt_pass_counts', [0] * len(self.parent.videoMessages))[:]
-                self.parent.step_opt_error_counts = saved_data.get('step_opt_error_counts', [0] * len(self.parent.videoMessages))[:]
-
-                # ✅ 현재 진행 상태 복원 (cnt, current_retry)
-                self.parent.cnt = saved_data.get('cnt', 0)
-                self.parent.current_retry = saved_data.get('current_retry', 0)
-
-                # 테이블 데이터 복원
-                table_data = saved_data.get('table_data', [])
-                for row, row_data in enumerate(table_data):
-                    if row >= self.parent.tableWidget.rowCount():
-                        break
-
-                    # 아이콘 상태 복원 (컬럼 2) - ✅ 84x20 크기로 복원
-                    icon_state = row_data.get('icon_state', '')
-                    if icon_state in ["PASS", "FAIL"]:
-                        img = self.parent.img_pass if icon_state == "PASS" else self.parent.img_fail
-                        icon_widget = QWidget()
-                        icon_layout = QHBoxLayout()
-                        icon_layout.setContentsMargins(0, 0, 0, 0)
-                        icon_label = QLabel()
-                        icon_label.setPixmap(QIcon(img).pixmap(84, 20))  # ✅ 원래 크기로 복원
-                        icon_label.setAlignment(Qt.AlignCenter)
-                        icon_label.setToolTip(f"Result: {icon_state}")
-                        icon_layout.addWidget(icon_label)
-                        icon_layout.setAlignment(Qt.AlignCenter)
-                        icon_widget.setLayout(icon_layout)
-                        self.parent.tableWidget.setCellWidget(row, 2, icon_widget)
-
-                    # 컬럼 3-7 복원
-                    for col, key in [(3, 'total_count'), (4, 'pass_count'),
-                                     (5, 'fail_count'), (6, 'retry_count'), (7, 'score')]:
-                        value = row_data.get(key, '0')
-                        item = self.parent.tableWidget.item(row, col)
-                        if item:
-                            item.setText(str(value))
-
-                Logger.debug(f" parent 테이블 결과 데이터 복원 완료")
-
-                # ✅ parent의 점수 표시 갱신
-                if hasattr(self.parent, 'update_score_display'):
-                    self.parent.update_score_display()
-                    Logger.debug(f" parent 점수 표시 갱신 완료")
+            if hasattr(self.parent, 'update_score_display'):
+                self.parent.update_score_display()
+                Logger.debug(f" parent 점수 표시 갱신 완료")
 
         except Exception as e:
             Logger.error(f" parent 테이블 복원 실패: {e}")
@@ -2073,5 +2017,5 @@ class ResultPageWidget(QWidget):
 
     def table_cell_clicked(self, row, col):
         """상세 내용 버튼 클릭 시"""
-        if col == 8:  # 'Score' column is 7, 'Detail' column is 8. Corrected to 8
+        if col == 9:  # 'Detail' column is 9 in the 10-column structure
             self._show_detail(row)

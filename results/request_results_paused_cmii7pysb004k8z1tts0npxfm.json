@@ -1,0 +1,96 @@
+{
+  "timestamp": "2026-03-20 10:50:28",
+  "last_completed_api_index": -1,
+  "step_buffers": [
+    {
+      "data": "아직 수신된 데이터가 없습니다.",
+      "error": "메시지 미수신",
+      "result": "FAIL",
+      "raw_data_list": [],
+      "attempt_logs": [],
+      "api_info": {}
+    },
+    {
+      "data": "",
+      "error": "",
+      "result": "PASS",
+      "raw_data_list": [],
+      "attempt_logs": [],
+      "api_info": {}
+    },
+    {
+      "data": "",
+      "error": "",
+      "result": "PASS",
+      "raw_data_list": [],
+      "attempt_logs": [],
+      "api_info": {}
+    },
+    {
+      "data": "",
+      "error": "",
+      "result": "PASS",
+      "raw_data_list": [],
+      "attempt_logs": [],
+      "api_info": {}
+    },
+    {
+      "data": "",
+      "error": "",
+      "result": "PASS",
+      "raw_data_list": [],
+      "attempt_logs": [],
+      "api_info": {}
+    },
+    {
+      "data": "",
+      "error": "",
+      "result": "PASS",
+      "raw_data_list": [],
+      "attempt_logs": [],
+      "api_info": {}
+    }
+  ],
+  "step_pass_counts": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "step_error_counts": [
+    2,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "step_opt_pass_counts": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "step_opt_error_counts": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "total_pass_cnt": 0,
+  "total_error_cnt": 2,
+  "total_opt_pass_cnt": 0,
+  "total_opt_error_cnt": 0,
+  "valResult_text": "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\np, li { white-space: pre-wrap; }\n</style></head><body style=\" font-family:'Noto Sans KR'; font-size:32px; font-weight:400; font-style:normal;\">\n<table border=\"0\" style=\" margin-top:10px; margin-bottom:0px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"8\">\n<tr>\n<td style=\" vertical-align:middle;\">\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:19px; font-weight:600; color:#1b1b1c;\">시험 시작</span> <span style=\" font-family:'Consolas','monospace'; font-size:15px; color:#9ca3af;\">10:49:21</span> </p></td></tr></table>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"10\">\n<tr>\n<td>\n<p style=\" margin-top:0px; margin-bottom:8px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:17px; color:#4b5563;\">API 개수: 6개</span> </p></td></tr></table>\n<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n<table border=\"0\" style=\" margin-top:10px; margin-bottom:0px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"8\">\n<tr>\n<td style=\" vertical-align:middle;\">\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:19px; font-weight:600; color:#ef4444;\">[수신] 시험 API: Authentication</span> <span style=\" font-family:'Consolas','monospace'; font-size:15px; color:#9ca3af;\">10:50:24</span> </p></td></tr></table>\n<table border=\"0\" style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"0\" cellpadding=\"10\">\n<tr>\n<td>\n<p style=\" margin-top:0px; margin-bottom:8px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:17px; color:#4b5563;\">⏱️ 메시지 수신 타임아웃(60.0초) -&gt; 메시지 미수신 | 통과 필드 수: 0, 실패 필드 수: 2</span></p>\n<p style=\" margin-top:8px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:17px; font-weight:600; color:#ef4444;\">평가 점수: 0.0%</span> </p></td></tr></table>\n<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:18px; color:#6b7280;\">검증 절차가 중지되었습니다.</span></p></body></html>",
+  "current_spec_id": "cmii7pysb004k8z1tts0npxfm",
+  "global_pass_cnt": 0,
+  "global_error_cnt": 2,
+  "global_opt_pass_cnt": 0,
+  "global_opt_error_cnt": 0
+}

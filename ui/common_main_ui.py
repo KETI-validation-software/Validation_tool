@@ -1433,10 +1433,10 @@ class CommonMainUI(QWidget):
         elapsed = max(0, int(elapsed_seconds))
         show_elapsed_text = not (state_key == "waiting" and elapsed == 0)
         color_map = {
-            "waiting": "#8A9094",
-            "running": "#1D4ED8",
-            "success": "#059669",
-            "timeover": "#DC2626",
+            "waiting": "#8A9094",  # 회색
+            "running": "#8A9094",  # 회색 (카운트 중)
+            "success": "#1D4ED8",  # 파란색 (제시간 종료)
+            "timeover": "#DC2626", # 빨간색
         }
 
         timer_widget = QWidget()
@@ -1454,7 +1454,7 @@ class CommonMainUI(QWidget):
 
         timer_layout.addWidget(icon_label)
         if show_elapsed_text:
-            text_label = QLabel(f"{elapsed}s")
+            text_label = QLabel(f"{elapsed}초")
             text_label.setAlignment(Qt.AlignCenter)
             text_label.setStyleSheet(
                 f"""
