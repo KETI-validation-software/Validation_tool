@@ -370,7 +370,7 @@ class CommonMainUI(QWidget):
 
         api_section_layout = QVBoxLayout(self.api_section)
         api_section_layout.setContentsMargins(0, 0, 0, 0)
-        api_section_layout.setSpacing(8)
+        api_section_layout.setSpacing(2)
         self.api_header_row = QWidget()
         self.api_header_row.setFixedSize(1064, 36)
         self.original_api_header_row_size = (1064, 36)

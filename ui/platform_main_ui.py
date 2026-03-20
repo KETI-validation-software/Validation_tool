@@ -342,9 +342,9 @@ class PlatformMainUI(CommonMainUI):
         self.original_api_header_widget_size = (1064, 30)
         self.api_header_widget.setStyleSheet("""
             QWidget {
-                background-color: #EDF0F3;
+                background-color: #F8F9FA;
                 border: 1px solid #CECECE;
-                border-bottom: none;
+                border-bottom: 1px solid #CCCCCC;
                 border-top-left-radius: 4px;
                 border-top-right-radius: 4px;
             }
@@ -767,7 +767,7 @@ class PlatformMainUI(CommonMainUI):
         # 아이콘 + 분야명 (헤더 영역 1062 × 52, 부모 border 1px 고려)
         self.spec_header_widget = QWidget()
         self.spec_header_widget.setFixedSize(1062, 52)
-        self.spec_header_widget.setStyleSheet("background: #F5F5F5;")  # 옅은 회색 배경
+        self.spec_header_widget.setStyleSheet("background: #F8F9FA;")
         self.original_spec_header_widget_size = (1062, 52)
         header_layout = QHBoxLayout(self.spec_header_widget)
         header_layout.setContentsMargins(0, 5, 0, 5)
