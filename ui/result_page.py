@@ -37,6 +37,7 @@ def create_embedded_back_navigation(parent, click_handler, width=424, height=46)
     icon_button.setObjectName("top_back_icon_button")
     icon_button.setFixedSize(22, 29)
     icon_button.setFocusPolicy(Qt.NoFocus)
+    icon_button.setCursor(Qt.PointingHandCursor)  # 마우스 커서 변경
     arrow_path = resource_path("assets/image/test_config/btn_back.svg").replace("\\", "/")
     icon_button.setStyleSheet(f"""
         QPushButton {{
@@ -54,6 +55,7 @@ def create_embedded_back_navigation(parent, click_handler, width=424, height=46)
     text_button.setObjectName("top_back_text_button")
     text_button.setFixedSize(114, 29)
     text_button.setFocusPolicy(Qt.NoFocus)
+    text_button.setCursor(Qt.PointingHandCursor)  # 마우스 커서 변경
     text_button.setStyleSheet("""
         QPushButton {
             border: none;
@@ -111,6 +113,14 @@ class ResultPageWidget(QWidget):
         self.img_fail = resource_path("assets/image/test_runner/tag_실패.png")
         self.img_none = resource_path("assets/image/icon/icn_basic.png")
         self.webhook_badge_pixmap = QPixmap(resource_path("assets/image/icon/badge-webhook.png"))
+
+        # 4페이지 타이머 실시간 동기화용 캐시/타이머
+        self._result_timer_cache = {}
+        self._score_summary_cache = None
+        self._timer_sync_interval_ms = 250
+        self._live_timer_sync = QtCore.QTimer(self)
+        self._live_timer_sync.setInterval(self._timer_sync_interval_ms)
+        self._live_timer_sync.timeout.connect(self._sync_result_timer_cells)
 
         self.initUI()
 
@@ -204,9 +214,9 @@ class ResultPageWidget(QWidget):
         self.original_group_table_widget_size = (424, 204)
         self.original_field_group_size = (424, 561)
         self.original_info_title_size = (1064, 24)
-        self.original_info_widget_size = (1064, 169)
+        self.original_info_widget_size = (1064, 194)
         self.original_result_label_size = (1064, 24)
-        self.original_result_header_widget_size = (1064, 38)
+        self.original_result_header_widget_size = (1064, 30)
         self.original_result_table_height = 335  # ✅ 시험 결과 테이블 기본 높이 소폭 조정 (하단 밸런스)
         self.original_score_title_size = (1064, 24)
         self.original_score_table_size = (1064, 256)
@@ -333,38 +343,47 @@ class ResultPageWidget(QWidget):
         self.right_col = QWidget()
         self.right_col.setStyleSheet("background: transparent;")
         right_layout = QVBoxLayout(self.right_col)
-        right_layout.setContentsMargins(24, 36, 24, 40)  # 하단 여백 추가
+        self.right_layout = right_layout
+        right_layout.setContentsMargins(24, 38, 24, 40)  # 상단 여백 2px 미세 조정
         right_layout.setSpacing(0)
 
         # 시험 정보 (크기 키움: 360px)
         self.info_title = QLabel("시험 정보")
+        self.info_title.setFixedSize(1064, 24)
         self.info_title.setStyleSheet("""
             font-size: 20px;
             font-style: normal;
             font-family: "Noto Sans KR";
             font-weight: 500;
             color: #000000;
-            margin-bottom: 8px;
+            margin-bottom: 0px;
             letter-spacing: -0.3px;
         """)
+        self.info_title.setContentsMargins(0, 0, 0, 0)
+        self.info_title.setAlignment(Qt.AlignLeft | Qt.AlignBottom)
         right_layout.addWidget(self.info_title)
+        right_layout.addSpacing(8)
 
         self.info_widget = self._create_simple_info_display()
         right_layout.addWidget(self.info_widget)
+        right_layout.addSpacing(30)
 
         # 시험 결과 라벨
         self.result_label = QLabel('시험 결과')
+        self.result_label.setFixedSize(1064, 24)
         self.result_label.setStyleSheet("""
             font-size: 20px;
             font-style: normal;
             font-family: "Noto Sans KR";
             font-weight: 500;
             color: #222;
-            margin-top: 30px;
-            margin-bottom: 8px;
+            margin-bottom: 0px;
             letter-spacing: -0.3px;
         """)
+        self.result_label.setContentsMargins(0, 0, 0, 0)
+        self.result_label.setAlignment(Qt.AlignLeft | Qt.AlignBottom)
         right_layout.addWidget(self.result_label)
+        right_layout.addSpacing(8)
 
         # 결과 테이블 (크기 키움: 350px)
         self.create_result_table(right_layout)
@@ -379,6 +398,8 @@ class ResultPageWidget(QWidget):
             font-weight: 500;
             color: #000000;
         """)
+        self.score_title.setContentsMargins(0, 0, 0, 0)
+        self.score_title.setAlignment(Qt.AlignLeft | Qt.AlignBottom)
         right_layout.addWidget(self.score_title)
         right_layout.addSpacing(8)
 
@@ -461,10 +482,11 @@ class ResultPageWidget(QWidget):
             right_layout.addSpacing(30)
 
         self.right_col.setLayout(right_layout)
+        self.right_scroll_container.setWidget(self.right_col)
 
         columns_layout.addWidget(self.left_col)
         columns_layout.addWidget(self.column_divider)
-        columns_layout.addWidget(self.right_col)
+        columns_layout.addWidget(self.right_scroll_container)
 
         bg_root_layout.addLayout(columns_layout)
         self.bg_root.setLayout(bg_root_layout)
@@ -484,6 +506,211 @@ class ResultPageWidget(QWidget):
         
         # ✅ 초기 배경 지오메트리 설정
         QtCore.QTimer.singleShot(0, self._update_content_background_geometry)
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        self._start_live_timer_sync()
+
+    def hideEvent(self, event):
+        self._stop_live_timer_sync()
+        super().hideEvent(event)
+
+    def closeEvent(self, event):
+        self._stop_live_timer_sync()
+        super().closeEvent(event)
+
+    def _start_live_timer_sync(self):
+        if hasattr(self, '_live_timer_sync') and not self._live_timer_sync.isActive():
+            self._live_timer_sync.start()
+
+    def _stop_live_timer_sync(self):
+        if hasattr(self, '_live_timer_sync') and self._live_timer_sync.isActive():
+            self._live_timer_sync.stop()
+
+    def _sync_result_timer_cells(self):
+        """page4 표시 중 부모 타이머 상태를 주기적으로 동기화한다."""
+        if not hasattr(self, 'tableWidget') or self.tableWidget is None:
+            return
+
+        # 실행 중이 아닐 때는 부모 테이블 값을 강제 동기화하지 않는다.
+        # (시나리오 전환 시 다른 시나리오 결과가 덮어써지는 문제 방지)
+        if not self._is_parent_live_running():
+            return
+
+        # 점수 요약 카드(분야별/전체)도 실시간 동기화
+        self._sync_score_summary_from_parent()
+
+        row_count = self.tableWidget.rowCount()
+        if row_count <= 0:
+            return
+
+        for row in range(row_count):
+            # 타이머/아이콘 외 수치 컬럼(전체/통과/실패/검증/점수)도 실시간 동기화
+            self._sync_result_metrics_from_parent(row)
+
+            # 타이머와 별개로 결과 아이콘(PASS/FAIL)도 실시간 동기화
+            self._sync_result_icon_from_parent(row)
+
+            state, elapsed = self._get_parent_timer_state_elapsed(row)
+            state_key = str(state or "waiting").strip().lower()
+            if state_key not in {"waiting", "running", "success", "timeover"}:
+                state_key = "waiting"
+
+            current_state, current_elapsed = self._result_timer_cache.get(row, (None, None))
+
+            # 부모 쪽 타이머 정보가 비어있는 경우(기본 waiting/0)에는
+            # 이미 표시 중인 의미 있는 스냅샷 값을 덮어쓰지 않는다.
+            if (
+                state_key == "waiting"
+                and int(elapsed) == 0
+                and current_state is not None
+                and (current_state != "waiting" or int(current_elapsed or 0) > 0)
+            ):
+                continue
+
+            if current_state == state_key and int(current_elapsed or 0) == int(elapsed):
+                continue
+
+            self._set_timer_cell(row, state_key, elapsed)
+
+    def _is_parent_live_running(self):
+        tick_timer = getattr(self.parent, 'tick_timer', None)
+        if tick_timer is None:
+            return False
+        try:
+            return bool(tick_timer.isActive())
+        except Exception:
+            return False
+
+    def _get_score_summary_snapshot(self):
+        return (
+            int(getattr(self.parent, 'total_pass_cnt', 0)),
+            int(getattr(self.parent, 'total_error_cnt', 0)),
+            int(getattr(self.parent, 'total_opt_pass_cnt', 0)),
+            int(getattr(self.parent, 'total_opt_error_cnt', 0)),
+            int(getattr(self.parent, 'global_pass_cnt', 0)),
+            int(getattr(self.parent, 'global_error_cnt', 0)),
+            int(getattr(self.parent, 'global_opt_pass_cnt', 0)),
+            int(getattr(self.parent, 'global_opt_error_cnt', 0)),
+        )
+
+    def _sync_score_summary_from_parent(self):
+        """부모(3페이지) 점수 요약을 4페이지 카드에 실시간 반영"""
+        if not hasattr(self, 'score_table'):
+            return
+
+        snapshot = self._get_score_summary_snapshot()
+        if snapshot == self._score_summary_cache:
+            return
+
+        self.update_score_displays({})
+        self._score_summary_cache = snapshot
+
+    def _get_table_item_text(self, table_widget, row, col):
+        if table_widget is None:
+            return None
+        if row < 0 or row >= table_widget.rowCount():
+            return None
+        if col < 0 or col >= table_widget.columnCount():
+            return None
+
+        item = table_widget.item(row, col)
+        if item is None:
+            return None
+        return item.text()
+
+    def _set_center_text_item(self, row, col, text):
+        if not hasattr(self, 'tableWidget'):
+            return
+        if row < 0 or row >= self.tableWidget.rowCount():
+            return
+        if col < 0 or col >= self.tableWidget.columnCount():
+            return
+
+        item = self.tableWidget.item(row, col)
+        if item is None:
+            item = QTableWidgetItem(str(text))
+            item.setTextAlignment(Qt.AlignCenter)
+            self.tableWidget.setItem(row, col, item)
+        else:
+            item.setText(str(text))
+            item.setTextAlignment(Qt.AlignCenter)
+
+    def _sync_result_metrics_from_parent(self, row):
+        """부모(3페이지) 테이블의 수치 컬럼을 4페이지에 실시간 반영"""
+        if not hasattr(self.parent, 'tableWidget'):
+            return
+
+        # 4: 전체 필드 수, 5: 통과 필드 수, 6: 실패 필드 수, 7: 검증 횟수, 8: 평가 점수
+        metric_cols = (4, 5, 6, 7, 8)
+        for col in metric_cols:
+            parent_text = self._get_table_item_text(self.parent.tableWidget, row, col)
+            if parent_text is None:
+                continue
+
+            current_text = self._get_table_item_text(self.tableWidget, row, col)
+            if current_text != parent_text:
+                self._set_center_text_item(row, col, parent_text)
+
+    def _get_cell_icon_state(self, table_widget, row):
+        if table_widget is None or row < 0 or row >= table_widget.rowCount():
+            return None
+
+        icon_widget = table_widget.cellWidget(row, 3)
+        if icon_widget is None:
+            return None
+
+        icon_label = icon_widget.findChild(QLabel)
+        if icon_label is None:
+            return None
+
+        tooltip = icon_label.toolTip() or ""
+        if "Result: PASS" in tooltip:
+            return "PASS"
+        if "Result: FAIL" in tooltip:
+            return "FAIL"
+        if "Result: NONE" in tooltip:
+            return "NONE"
+        return None
+
+    def _set_result_icon_cell(self, row, icon_state):
+        state = str(icon_state or "NONE").upper()
+        if state == "PASS":
+            img = self.img_pass
+            icon_size = (84, 20)
+        elif state == "FAIL":
+            img = self.img_fail
+            icon_size = (84, 20)
+        else:
+            state = "NONE"
+            img = self.img_none
+            icon_size = (16, 16)
+
+        icon_widget = QWidget()
+        icon_layout = QHBoxLayout()
+        icon_layout.setContentsMargins(0, 0, 0, 0)
+        icon_label = QLabel()
+        icon_label.setPixmap(QIcon(img).pixmap(*icon_size))
+        icon_label.setAlignment(Qt.AlignCenter)
+        icon_label.setToolTip(f"Result: {state}")
+        icon_layout.addWidget(icon_label)
+        icon_layout.setAlignment(Qt.AlignCenter)
+        icon_widget.setLayout(icon_layout)
+        self.tableWidget.setCellWidget(row, 3, icon_widget)
+
+    def _sync_result_icon_from_parent(self, row):
+        if not hasattr(self.parent, 'tableWidget'):
+            return
+
+        parent_state = self._get_cell_icon_state(self.parent.tableWidget, row)
+        current_state = self._get_cell_icon_state(self.tableWidget, row)
+
+        # 부모의 기본 NONE 값으로 기존 PASS/FAIL 표시를 덮어쓰지 않는다.
+        if parent_state == "NONE" and current_state in {"PASS", "FAIL"}:
+            return
+
+        if parent_state in {"PASS", "FAIL", "NONE"} and parent_state != current_state:
+            self._set_result_icon_cell(row, parent_state)
 
     def _update_content_background_geometry(self):
         """배경 패널 및 구분선 위치/크기 업데이트 (3페이지와 동일)"""
@@ -601,6 +828,8 @@ class ResultPageWidget(QWidget):
                 new_right_width = int(self.original_right_col_size[0] * width_ratio)
                 new_right_height = int(self.original_right_col_size[1] * height_ratio)
                 self.right_scroll_container.setFixedSize(new_right_width, new_right_height)
+                if hasattr(self, 'right_col'):
+                    self.right_col.setFixedWidth(new_right_width)
 
             # 시험 정보 위젯 크기 조정 (가로만 확장)
             if hasattr(self, 'info_widget') and hasattr(self, 'original_info_widget_size'):
@@ -611,33 +840,32 @@ class ResultPageWidget(QWidget):
             if hasattr(self, 'result_header_widget') and hasattr(self, 'original_result_header_widget_size'):
                 new_header_width = int(self.original_result_header_widget_size[0] * width_ratio)
                 self.result_header_widget.setFixedSize(new_header_width, self.original_result_header_widget_size[1])
-
-                # ✅ 헤더 라벨들도 비례 조정
-                if hasattr(self, 'result_header_labels') and hasattr(self, 'original_column_widths'):
-                    for i, label in enumerate(self.result_header_labels):
-                        new_label_width = int(self.original_column_widths[i] * width_ratio)
-                        label.setFixedSize(new_label_width, 30)
             # ✅ 결과 테이블 스크롤 영역 크기 조정 (3페이지 방식: 남은 공간 모두 차지)
             if hasattr(self, 'result_scroll_area'):
                 new_scroll_width = int(1064 * width_ratio)
-                
-                # 고정된 위젯들의 높이 합산 (마진 및 여유 공간 정밀 반영)
-                # 1. 레이아웃 상단 마진: 36
-                # 2. 시험 정보 타이틀 영역: 약 40
-                # 3. 시험 정보 위젯: 169
-                # 4. 시험 결과 라벨 영역 (마진 포함): 약 74 (30 + 24 + 20)
-                # 5. 결과 테이블 헤더: 30
-                # 6. 중간 간격 (Spacing): 30
-                # 7. 시험 점수 요약 타이틀 영역: 약 40
-                # 8. 시험 점수 테이블: 256
-                # 9. 레이아웃 하단 마진: 40
-                # 10. 기타 미세 보정값: 13
-                
-                fixed_heights = 36 + 40 + 169 + 74 + 30 + 30 + 40 + 256 + 40 + 13
-                bottom_gap = 30 if self.embedded else 80
-                
-                # 전체 컬럼 높이에서 고정 높이들을 뺀 나머지를 할당
-                new_scroll_height = new_right_height - fixed_heights - bottom_gap
+
+                # 실제 표시되는 오른쪽 컬럼 레이아웃 기준으로 본문 높이 계산
+                if hasattr(self, 'right_layout'):
+                    _, top_margin, _, bottom_margin = self.right_layout.getContentsMargins()
+                    top_bottom_margins = top_margin + bottom_margin
+                else:
+                    top_bottom_margins = 38 + 40
+
+                static_height = (
+                    self.info_title.height() + 8 +
+                    self.info_widget.height() + 30 +
+                    self.result_label.height() + 8 +
+                    self.result_header_widget.height() + 30 +
+                    self.score_title.height() + 8 +
+                    self.score_table.height()
+                )
+                if self.embedded:
+                    static_height += 30
+                elif hasattr(self, 'buttonGroup'):
+                    static_height += 32 + self.buttonGroup.height()
+
+                viewport_height = self.right_scroll_container.viewport().height() if hasattr(self, 'right_scroll_container') else new_right_height
+                new_scroll_height = viewport_height - top_bottom_margins - static_height
                 
                 # 최소 높이 보장
                 new_scroll_height = max(150, new_scroll_height)
@@ -719,11 +947,10 @@ class ResultPageWidget(QWidget):
                 total_row_height = row_count * 40  # 각 행 40px
                 scroll_area_height = self.result_scroll_area.viewport().height() if hasattr(self, 'result_scroll_area') else 189
                 scrollbar_visible = total_row_height > scroll_area_height
-                scrollbar_width = 16 if scrollbar_visible else 0
+                scrollbar_width = 16 if scrollbar_visible else 2
 
                 new_scroll_width = int(1064 * width_ratio)
-                # border(2) + 스크롤바 + 여유분(2) 고려
-                available_width = new_scroll_width - 4 - scrollbar_width
+                available_width = new_scroll_width - scrollbar_width
 
                 # 마지막 컬럼을 제외한 나머지 컬럼 너비 설정
                 used_width = 0
@@ -735,6 +962,18 @@ class ResultPageWidget(QWidget):
                 # 마지막 컬럼은 남은 공간을 채움
                 last_col_width = available_width - used_width
                 self.tableWidget.setColumnWidth(len(self.original_column_widths) - 1, last_col_width)
+
+                # ✅ 헤더 레이아웃 여백 동기화 (오른쪽 밀림 현상 방지 핵심)
+                if hasattr(self, 'result_header_layout'):
+                    self.result_header_layout.setContentsMargins(0, 0, scrollbar_width, 0)
+
+                # 헤더 라벨 너비도 테이블 컬럼 너비와 완벽히 동기화
+                if hasattr(self, 'result_header_labels'):
+                    for i in range(len(self.original_column_widths)):
+                        if i < len(self.result_header_labels):
+                            # 실제 테이블의 컬럼 너비를 그대로 주입
+                            label_width = self.tableWidget.columnWidth(i)
+                            self.result_header_labels[i].setFixedSize(label_width, 30)
 
         # ✅ 배경 지오메트리 실시간 업데이트 (리사이징 완료 후 최하단에서 호출 - 3페이지와 동일)
         self._update_content_background_geometry()
@@ -831,6 +1070,55 @@ class ResultPageWidget(QWidget):
                 # 여기서는 직접 호출하여 강제로 갱신
                 self.on_test_field_selected(row_idx, 0)
 
+    def _is_parent_test_running(self):
+        """3페이지와 동일하게 시험 진행 중 상태를 판단한다."""
+        if hasattr(self.parent, 'sbtn'):
+            try:
+                if not self.parent.sbtn.isEnabled():
+                    return True
+            except Exception:
+                pass
+
+        tick_timer = getattr(self.parent, 'tick_timer', None)
+        if tick_timer is not None:
+            try:
+                return bool(tick_timer.isActive())
+            except Exception:
+                return False
+
+        return False
+
+    def _warn_running_scenario_change_blocked(self):
+        QtCore.QTimer.singleShot(
+            0,
+            lambda: QMessageBox.warning(
+                self,
+                "알림",
+                "시험이 진행 중입니다.\n시험 완료 후 다른 시나리오를 진행해주세요.",
+            ),
+        )
+
+    def _restore_current_group_selection(self):
+        current_group_id = getattr(self.parent, 'current_group_id', None)
+        if not current_group_id:
+            return
+
+        SPEC_CONFIG = getattr(self.parent, 'LOADED_SPEC_CONFIG', self.parent.CONSTANTS.SPEC_CONFIG)
+        for idx, group in enumerate(SPEC_CONFIG):
+            if group.get('group_id') == current_group_id:
+                self.group_table.selectRow(idx)
+                return
+
+    def _restore_current_scenario_selection(self):
+        current_spec_id = getattr(self.parent, 'current_spec_id', None)
+        if not current_spec_id:
+            return
+
+        if hasattr(self.test_selection_panel, 'spec_id_to_index'):
+            row_idx = self.test_selection_panel.spec_id_to_index.get(current_spec_id)
+            if row_idx is not None:
+                self.test_field_table.selectRow(row_idx)
+
     def on_group_selected(self, row, col):
         """시험 그룹 선택 시"""
         group_name = self.test_selection_panel.index_to_group_name.get(row)
@@ -847,6 +1135,14 @@ class ResultPageWidget(QWidget):
         if selected_group:
             new_group_id = selected_group.get('group_id')
             old_group_id = getattr(self.parent, 'current_group_id', None)
+
+            # ✅ 시험 진행 중에는 다른 그룹/시나리오 선택 차단 (3페이지와 동일 정책)
+            if self._is_parent_test_running() and new_group_id != old_group_id:
+                Logger.debug("[RESULT DEBUG] 시험 진행 중 - 그룹 변경 차단")
+                self._warn_running_scenario_change_blocked()
+                self._restore_current_group_selection()
+                self._restore_current_scenario_selection()
+                return
 
             Logger.debug(f"[RESULT DEBUG] 🔄 그룹 선택: {old_group_id} → {new_group_id}")
 
@@ -874,6 +1170,13 @@ class ResultPageWidget(QWidget):
 
         # 선택된 시나리오가 현재와 같으면 무시
         if selected_spec_id == self.current_spec_id:
+            return
+
+        # ✅ 시험 진행 중에는 시나리오 변경 차단 (3페이지와 동일 정책)
+        if self._is_parent_test_running():
+            Logger.debug("[RESULT DEBUG] 시험 진행 중 - 시나리오 변경 차단")
+            self._warn_running_scenario_change_blocked()
+            self._restore_current_scenario_selection()
             return
 
         Logger.debug(f" 시나리오 전환: {self.current_spec_id} → {selected_spec_id}")
@@ -993,18 +1296,115 @@ class ResultPageWidget(QWidget):
             return protocol == "webhook"
         return False
 
+    def _get_timer_icon_pixmap(self, state):
+        if not hasattr(self, '_api_timer_pixmaps'):
+            icon_map = {
+                "waiting": "assets/image/icon/waiting_timer.png",
+                "running": "assets/image/icon/running_timer.png",
+                "success": "assets/image/icon/success_timer.png",
+                "timeover": "assets/image/icon/timeover_timer.png",
+            }
+            self._api_timer_pixmaps = {}
+            for key, rel_path in icon_map.items():
+                self._api_timer_pixmaps[key] = QPixmap(resource_path(rel_path))
+
+        state_key = str(state or "waiting").strip().lower()
+        if state_key not in self._api_timer_pixmaps:
+            state_key = "waiting"
+        return self._api_timer_pixmaps[state_key]
+
+    def _set_timer_cell(self, row, state, elapsed_seconds=0):
+        """4페이지 타이머 셀 렌더링 (3페이지와 동일한 아이콘/텍스트 스타일)"""
+        if not hasattr(self, 'tableWidget'):
+            return
+        if row < 0 or row >= self.tableWidget.rowCount():
+            return
+
+        state_key = str(state or "waiting").strip().lower()
+        if state_key not in {"waiting", "running", "success", "timeover"}:
+            state_key = "waiting"
+
+        try:
+            elapsed = max(0, int(elapsed_seconds))
+        except (TypeError, ValueError):
+            elapsed = 0
+        show_elapsed_text = not (state_key == "waiting" and elapsed == 0)
+        color_map = {
+            "waiting": "#8A9094",
+            "running": "#8A9094",
+            "success": "#1D4ED8",
+            "timeover": "#DC2626",
+        }
+
+        timer_widget = QWidget()
+        timer_layout = QHBoxLayout()
+        # 3페이지와 동일하게 좌측 기준으로 배치
+        timer_layout.setContentsMargins(10, 0, 0, 0)
+        timer_layout.setSpacing(6)
+        timer_layout.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+
+        icon_label = QLabel()
+        timer_pixmap = self._get_timer_icon_pixmap(state_key)
+        if not timer_pixmap.isNull():
+            icon_label.setPixmap(timer_pixmap)
+            icon_label.setFixedSize(timer_pixmap.size())
+        icon_label.setAlignment(Qt.AlignCenter)
+        timer_layout.addWidget(icon_label)
+
+        if show_elapsed_text:
+            text_label = QLabel(f"{elapsed}초")
+            text_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            text_label.setStyleSheet(
+                f"""
+                QLabel {{
+                    color: {color_map[state_key]};
+                    font-family: 'Noto Sans KR';
+                    font-size: 16px;
+                    font-weight: 600;
+                    border: none;
+                    background: transparent;
+                }}
+                """
+            )
+            timer_layout.addWidget(text_label)
+
+        timer_layout.addStretch()
+
+        timer_widget.setLayout(timer_layout)
+        self.tableWidget.setCellWidget(row, 2, timer_widget)
+        self._result_timer_cache[row] = (state_key, elapsed)
+
+    def _get_parent_timer_state_elapsed(self, row):
+        state = "waiting"
+        elapsed = 0
+        if hasattr(self.parent, 'get_api_timer_state'):
+            state = self.parent.get_api_timer_state(row)
+        else:
+            state = getattr(self.parent, f"_api_timer_state_{row}", "waiting")
+
+        if hasattr(self.parent, 'get_api_timer_elapsed'):
+            elapsed = self.parent.get_api_timer_elapsed(row)
+        else:
+            elapsed = getattr(self.parent, f"_api_timer_elapsed_{row}", 0)
+        try:
+            elapsed = int(elapsed)
+        except (TypeError, ValueError):
+            elapsed = 0
+        return state, elapsed
+
     def _set_api_name_cell(self, row, api_name):
-        """4페이지용 API 명 셀 설정 (3페이지와 동일하게 웹훅 뱃지 포함 및 좌측 정렬, 17px)"""
+        """4페이지용 API 명 셀 설정 (3페이지와 유사한 좌측 밀착 여백)"""
         api_item = QTableWidgetItem(api_name)
-        api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+        api_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         api_item.setData(Qt.UserRole, api_name)
         api_item.setText("")  # 텍스트는 QLabel로 표시하므로 비움
         self.tableWidget.setItem(row, 1, api_item)
 
         api_container = QWidget()
         api_layout = QHBoxLayout()
-        api_layout.setContentsMargins(12, 0, 4, 0)
-        api_layout.setSpacing(8)
+        # 3페이지와 동일하게 좌측 여백을 줄여 긴 API명이 덜 잘리게 한다.
+        api_layout.setContentsMargins(2, 0, 2, 0)
+        api_layout.setSpacing(4)
         api_layout.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
 
         api_name_label = QLabel(api_name)
@@ -1019,9 +1419,11 @@ class ResultPageWidget(QWidget):
         api_name_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         api_name_label.setWordWrap(False)
         api_name_label.setToolTip(api_name)
+        api_name_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        api_name_label.setMinimumWidth(0)
         api_layout.addWidget(api_name_label, 0, Qt.AlignVCenter)
 
-        # 웹훅 뱃지 추가 (3페이지와 동일한 로직)
+        # 웹훅 뱃지 추가
         if self._is_webhook_api(row) and not self.webhook_badge_pixmap.isNull():
             webhook_badge_label = WebhookBadgeLabel()
             webhook_badge_label.setPixmap(self.webhook_badge_pixmap)
@@ -1029,6 +1431,8 @@ class ResultPageWidget(QWidget):
             webhook_badge_label.setFixedSize(self.webhook_badge_pixmap.size())
             webhook_badge_label.setAlignment(Qt.AlignCenter)
             api_layout.addWidget(webhook_badge_label, 0, Qt.AlignVCenter)
+
+        api_layout.addStretch()
 
         api_container.setLayout(api_layout)
         self.tableWidget.setCellWidget(row, 1, api_container)
@@ -1072,17 +1476,8 @@ class ResultPageWidget(QWidget):
             # API 명 - 컬럼 1 (웹훅 뱃지 포함)
             self._set_api_name_cell(row, api_list[row])
 
-            # ✅ 타이머/뱃지 컬럼(2) - 빈 대기 아이콘
-            timer_widget = QWidget()
-            timer_layout = QHBoxLayout()
-            timer_layout.setContentsMargins(0, 0, 0, 0)
-            timer_label = QLabel()
-            timer_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
-            timer_label.setAlignment(Qt.AlignCenter)
-            timer_layout.addWidget(timer_label)
-            timer_layout.setAlignment(Qt.AlignCenter)
-            timer_widget.setLayout(timer_layout)
-            self.tableWidget.setCellWidget(row, 2, timer_widget)
+            # ✅ 타이머 컬럼(2) - 3페이지와 동일한 waiting 상태 렌더
+            self._set_timer_cell(row, "waiting", 0)
 
             # ✅ 기본 아이콘 (결과 페이지 전용 아이콘 사용) - 컬럼 3
             icon_widget = QWidget()
@@ -1155,22 +1550,12 @@ class ResultPageWidget(QWidget):
             display_name = remove_api_number_suffix(row_data['api_name'])
             self._set_api_name_cell(row, display_name)
 
-            # ✅ 타이머/뱃지 컬럼 복원 - 컬럼 2
-            if self._is_webhook_api(row):
-                timer_widget = self.parent.tableWidget.cellWidget(row, 2)
-                if timer_widget:
-                    old_label = timer_widget.findChild(QLabel)
-                    if old_label and not old_label.pixmap().isNull():
-                        new_timer_widget = QWidget()
-                        new_timer_layout = QHBoxLayout()
-                        new_timer_layout.setContentsMargins(0, 0, 0, 0)
-                        new_timer_label = QLabel()
-                        new_timer_label.setPixmap(old_label.pixmap())
-                        new_timer_label.setAlignment(Qt.AlignCenter)
-                        new_timer_layout.addWidget(new_timer_label)
-                        new_timer_layout.setAlignment(Qt.AlignCenter)
-                        new_timer_widget.setLayout(new_timer_layout)
-                        self.tableWidget.setCellWidget(row, 2, new_timer_widget)
+            # ✅ 타이머 컬럼 복원 - 상태/경과시간 기반 렌더 (웹훅 여부와 무관)
+            timer_state = row_data.get('timer_state', None)
+            timer_elapsed = row_data.get('timer_elapsed', None)
+            if timer_state is None or timer_elapsed is None:
+                timer_state, timer_elapsed = self._get_parent_timer_state_elapsed(row)
+            self._set_timer_cell(row, timer_state, timer_elapsed)
 
             # ✅ 아이콘 상태 복원 (결과 페이지 전용 아이콘 사용) - 컬럼 3
             icon_state = row_data['icon_state']
@@ -1328,7 +1713,7 @@ class ResultPageWidget(QWidget):
         """)
 
         layout = QVBoxLayout()
-        layout.setContentsMargins(24, 10, 10, 10)
+        layout.setContentsMargins(24, 0, 10, 10)
         layout.setSpacing(5)
 
         # ✅ 시험 정보 불러오기
@@ -1357,7 +1742,7 @@ class ResultPageWidget(QWidget):
         scroll_area = QScrollArea()
         scroll_area.setWidget(info_widget)
         scroll_area.setWidgetResizable(True)
-        scroll_area.setFixedSize(1064, 169)
+        scroll_area.setFixedSize(1064, 194)
         scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
@@ -1408,51 +1793,73 @@ class ResultPageWidget(QWidget):
                 border-top-right-radius: 4px;
             }
         """)
-        header_layout = QHBoxLayout(self.result_header_widget)
-        header_layout.setContentsMargins(0, 0, 14, 0)  # 오른쪽 14px (스크롤바 영역)
-        header_layout.setSpacing(0)
+        self.result_header_layout = QHBoxLayout(self.result_header_widget)
+        self.result_header_layout.setContentsMargins(0, 0, 14, 0)  # 오른쪽 14px (기본값, resizeEvent에서 동기화됨)
+        self.result_header_layout.setSpacing(0)
 
         # 헤더 컬럼 정의 (너비, 텍스트) - 10컬럼 구조 (3페이지와 동일)
         header_columns = [
             (40, ""),            # No.
-            (268, "API 명"),
-            (60, ""),            # 타이머/뱃지용
-            (76, "결과"),
-            (116, "전체 필드 수"),
-            (116, "통과 필드 수"),
-            (94, "실패 필드 수"),
-            (94, "검증 횟수"),
-            (94, "평가 점수"),
+            (243, "API 명"),
+            (90, ""),            # 타이머/뱃지용
+            (100, "결과"),
+            (107, "전체 필드 수"),
+            (107, "통과 필드 수"),
+            (107, "실패 필드 수"),
+            (90, "검증 횟수"),
+            (90, "평가 점수"),
             (90, "상세 내용")
         ]
+        self.original_header_widths = [col[0] for col in header_columns]
 
         # ✅ 헤더 라벨 저장
         self.result_header_labels = []
         for i, (width, text) in enumerate(header_columns):
             label = QLabel(text)
             label.setFixedSize(width, 30)
-            label.setAlignment(Qt.AlignCenter)
-            label.setStyleSheet("""
-                QLabel {
-                    background-color: transparent;
-                    border: none;
-                    color: #1B1B1C;
-                    font-family: 'Noto Sans KR';
-                    font-size: 18px;
-                    font-weight: 600;
-                }
-            """)
-            header_layout.addWidget(label)
+            
+            # API 명(index 1) 헤더만 가운데 정렬 (본문 셀 정렬은 유지)
+            if i == 1:
+                label.setAlignment(Qt.AlignCenter)
+                label.setStyleSheet("""
+                    QLabel {
+                        background-color: transparent;
+                        border: none;
+                        color: #1B1B1C;
+                        font-family: 'Noto Sans KR';
+                        font-size: 18px;
+                        font-weight: 600;
+                    }
+                """)
+            else:
+                label.setAlignment(Qt.AlignCenter)
+                label.setStyleSheet("""
+                    QLabel {
+                        background-color: transparent;
+                        border: none;
+                        color: #1B1B1C;
+                        font-family: 'Noto Sans KR';
+                        font-size: 18px;
+                        font-weight: 600;
+                    }
+                """)
+            
+            self.result_header_layout.addWidget(label)
             self.result_header_labels.append(label)
 
         # 테이블 본문 (헤더 숨김) - 10개 컬럼
         self.tableWidget = QTableWidget(api_count, 10)
         self.tableWidget.horizontalHeader().setVisible(False)
+        self.tableWidget.horizontalHeader().setFixedHeight(0)
+        self.tableWidget.horizontalHeader().setMinimumHeight(0)
+        self.tableWidget.horizontalHeader().setMaximumHeight(0)
         self.tableWidget.verticalHeader().setVisible(False)
         self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tableWidget.setSelectionMode(QAbstractItemView.NoSelection)
         self.tableWidget.setFocusPolicy(Qt.NoFocus)
         self.tableWidget.setIconSize(QtCore.QSize(16, 16))
+        self.tableWidget.setContentsMargins(0, 0, 0, 0)
+        self.tableWidget.setVerticalScrollMode(QAbstractItemView.ScrollPerItem)
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Fixed)
         self.tableWidget.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
@@ -1479,7 +1886,7 @@ class ResultPageWidget(QWidget):
         self.tableWidget.setShowGrid(False)
 
         # 컬럼 너비 설정 - 3페이지와 동일한 10컬럼 구조
-        self.original_column_widths = [40, 268, 60, 76, 116, 116, 94, 94, 94, 90]
+        self.original_column_widths = [40, 243, 90, 100, 107, 107, 107, 90, 90, 90]
         for i, width in enumerate(self.original_column_widths):
             self.tableWidget.setColumnWidth(i, width)
         self.tableWidget.horizontalHeader().setStretchLastSection(False)
@@ -1496,6 +1903,7 @@ class ResultPageWidget(QWidget):
         self.result_scroll_area = QScrollArea()
         self.result_scroll_area.setWidget(self.tableWidget)
         self.result_scroll_area.setWidgetResizable(True)
+        self.result_scroll_area.setAlignment(Qt.AlignTop | Qt.AlignLeft)
         self.result_scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.result_scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.result_scroll_area.setViewportMargins(0, 0, 0, 2)
@@ -1512,7 +1920,6 @@ class ResultPageWidget(QWidget):
                 background: #DFDFDF;
                 width: 14px;
                 margin: 0px;
-                border-radius: 4px;
             }
             QScrollBar::handle:vertical {
                 background: #A3A9AD;
@@ -1526,6 +1933,7 @@ class ResultPageWidget(QWidget):
             QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
                 border: none;
                 background: none;
+                height: 0px;
             }
         """)
 
@@ -1536,8 +1944,13 @@ class ResultPageWidget(QWidget):
     def _on_back_clicked(self):
         """뒤로가기 버튼 클릭 시 - 원래 시나리오로 복원 후 시그널 발생"""
         try:
+            spec_or_group_changed = (
+                (self.original_spec_id and self.original_spec_id != self.parent.current_spec_id)
+                or (self.original_group_id and self.original_group_id != getattr(self.parent, 'current_group_id', None))
+            )
+
             # ✅ 원래 시나리오로 복원 (결과 페이지 진입 시 저장해둔 값)
-            if self.original_spec_id and self.original_spec_id != self.parent.current_spec_id:
+            if spec_or_group_changed:
                 Logger.debug(f" 원래 시나리오로 복원: {self.parent.current_spec_id} → {self.original_spec_id}")
 
                 # 1. spec_id 복원
@@ -1549,70 +1962,16 @@ class ResultPageWidget(QWidget):
                 self.parent.load_specs_from_constants()
                 self.parent.get_setting()
 
-            # ✅ 저장된 결과 데이터 복원 (update_result_table_structure 호출 제거 - 테이블 초기화 방지)
-            composite_key = f"{self.parent.current_group_id}_{self.parent.current_spec_id}"
-            if hasattr(self.parent, 'spec_table_data') and composite_key in self.parent.spec_table_data:
-                saved_data = self.parent.spec_table_data[composite_key]
+                restored = False
+                if hasattr(self.parent, 'restore_spec_data'):
+                    restored = self.parent.restore_spec_data(self.parent.current_spec_id)
+                    Logger.debug(f" parent 표준 복원 결과: {restored}")
 
-                # step_buffers 복원
-                saved_buffers = saved_data.get('step_buffers', [])
-                if saved_buffers:
-                    self.parent.step_buffers = [buf.copy() for buf in saved_buffers]
-
-                # 점수 정보 복원
-                self.parent.total_pass_cnt = saved_data.get('total_pass_cnt', 0)
-                self.parent.total_error_cnt = saved_data.get('total_error_cnt', 0)
-
-                # ✅ 선택 필드 점수 정보 복원
-                self.parent.total_opt_pass_cnt = saved_data.get('total_opt_pass_cnt', 0)
-                self.parent.total_opt_error_cnt = saved_data.get('total_opt_error_cnt', 0)
-
-                # ✅ step 배열 복원
-                self.parent.step_pass_counts = saved_data.get('step_pass_counts', [0] * len(self.parent.videoMessages))[:]
-                self.parent.step_error_counts = saved_data.get('step_error_counts', [0] * len(self.parent.videoMessages))[:]
-                self.parent.step_opt_pass_counts = saved_data.get('step_opt_pass_counts', [0] * len(self.parent.videoMessages))[:]
-                self.parent.step_opt_error_counts = saved_data.get('step_opt_error_counts', [0] * len(self.parent.videoMessages))[:]
-
-                # ✅ 현재 진행 상태 복원 (cnt, current_retry)
-                self.parent.cnt = saved_data.get('cnt', 0)
-                self.parent.current_retry = saved_data.get('current_retry', 0)
-
-                # 테이블 데이터 복원
-                table_data = saved_data.get('table_data', [])
-                for row, row_data in enumerate(table_data):
-                    if row >= self.parent.tableWidget.rowCount():
-                        break
-
-                    # 아이콘 상태 복원 (컬럼 2) - ✅ 84x20 크기로 복원
-                    icon_state = row_data.get('icon_state', '')
-                    if icon_state in ["PASS", "FAIL"]:
-                        img = self.parent.img_pass if icon_state == "PASS" else self.parent.img_fail
-                        icon_widget = QWidget()
-                        icon_layout = QHBoxLayout()
-                        icon_layout.setContentsMargins(0, 0, 0, 0)
-                        icon_label = QLabel()
-                        icon_label.setPixmap(QIcon(img).pixmap(84, 20))  # ✅ 원래 크기로 복원
-                        icon_label.setAlignment(Qt.AlignCenter)
-                        icon_label.setToolTip(f"Result: {icon_state}")
-                        icon_layout.addWidget(icon_label)
-                        icon_layout.setAlignment(Qt.AlignCenter)
-                        icon_widget.setLayout(icon_layout)
-                        self.parent.tableWidget.setCellWidget(row, 2, icon_widget)
-
-                    # 컬럼 3-7 복원
-                    for col, key in [(3, 'total_count'), (4, 'pass_count'),
-                                     (5, 'fail_count'), (6, 'retry_count'), (7, 'score')]:
-                        value = row_data.get(key, '0')
-                        item = self.parent.tableWidget.item(row, col)
-                        if item:
-                            item.setText(str(value))
-
-                Logger.debug(f" parent 테이블 결과 데이터 복원 완료")
-
-                # ✅ parent의 점수 표시 갱신
                 if hasattr(self.parent, 'update_score_display'):
                     self.parent.update_score_display()
                     Logger.debug(f" parent 점수 표시 갱신 완료")
+            else:
+                Logger.debug(" 결과 페이지에서 시나리오 변경 없음 - parent 라이브 상태 유지")
 
         except Exception as e:
             Logger.error(f" parent 테이블 복원 실패: {e}")
@@ -1638,21 +1997,9 @@ class ResultPageWidget(QWidget):
                 api_name = api_item.data(Qt.UserRole) or api_item.text()
                 self._set_api_name_cell(row, api_name)
 
-            # ✅ 타이머/뱃지 컬럼 - 컬럼 2 (부모의 컬럼 2에서 복사)
-            timer_widget = self.parent.tableWidget.cellWidget(row, 2)
-            if timer_widget:
-                old_timer_label = timer_widget.findChild(QLabel)
-                if old_timer_label and not old_timer_label.pixmap().isNull():
-                    new_timer_widget = QWidget()
-                    new_timer_layout = QHBoxLayout()
-                    new_timer_layout.setContentsMargins(0, 0, 0, 0)
-                    new_timer_label = QLabel()
-                    new_timer_label.setPixmap(old_timer_label.pixmap())
-                    new_timer_label.setAlignment(Qt.AlignCenter)
-                    new_timer_layout.addWidget(new_timer_label)
-                    new_timer_layout.setAlignment(Qt.AlignCenter)
-                    new_timer_widget.setLayout(new_timer_layout)
-                    self.tableWidget.setCellWidget(row, 2, new_timer_widget)
+            # ✅ 타이머 컬럼 - 상태/경과시간 기반 렌더
+            timer_state, timer_elapsed = self._get_parent_timer_state_elapsed(row)
+            self._set_timer_cell(row, timer_state, timer_elapsed)
 
             # ✅ 결과 아이콘 (부모의 컬럼 3에서 가져옴) - 컬럼 3
             icon_widget = self.parent.tableWidget.cellWidget(row, 3)
@@ -1721,6 +2068,8 @@ class ResultPageWidget(QWidget):
 
             self.tableWidget.setCellWidget(row, 9, container)
 
+
+
     def update_test_info(self):
         """시험 정보 업데이트 (시나리오 선택 시 호출)"""
         if not hasattr(self, 'info_label'):
@@ -1775,7 +2124,7 @@ class ResultPageWidget(QWidget):
         # 헤더 영역 (1064 × 52)
         self.spec_header = QWidget()
         self.spec_header.setFixedSize(1062, 52)
-        self.spec_header.setStyleSheet("background: #F5F5F5;")
+        self.spec_header.setStyleSheet("background: #F8F9FA;")
         header_layout = QHBoxLayout(self.spec_header)
         header_layout.setContentsMargins(0, 5, 0, 5)
         header_layout.setSpacing(12)
@@ -1924,8 +2273,9 @@ class ResultPageWidget(QWidget):
         total_group.setFixedSize(1064, 128)
         total_group.setStyleSheet("""
             QGroupBox {
-                background-color: #F0F6FB;
+                background-color: #FFFFFF;
                 border: 1px solid #CECECE;
+                border-top: none;
                 border-top-left-radius: 0px;
                 border-top-right-radius: 0px;
                 border-bottom-left-radius: 4px;
@@ -1942,7 +2292,7 @@ class ResultPageWidget(QWidget):
         # 헤더 영역 (1064 × 52)
         self.total_header = QWidget()
         self.total_header.setFixedSize(1062, 52)
-        self.total_header.setStyleSheet("background: #F5F5F5; border: none;")
+        self.total_header.setStyleSheet("background: #F8F9FA; border: none;")
         header_layout = QHBoxLayout(self.total_header)
         header_layout.setContentsMargins(0, 5, 0, 5)
         header_layout.setSpacing(6)
@@ -2073,5 +2423,5 @@ class ResultPageWidget(QWidget):
 
     def table_cell_clicked(self, row, col):
         """상세 내용 버튼 클릭 시"""
-        if col == 8:  # 'Score' column is 7, 'Detail' column is 8. Corrected to 8
+        if col == 9:  # 'Detail' column is 9 in the 10-column structure
             self._show_detail(row)

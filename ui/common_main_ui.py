@@ -99,6 +99,7 @@ def create_embedded_back_navigation(parent, click_handler, width=424):
     icon_button = QPushButton(row)
     icon_button.setFixedSize(22, 29)
     icon_button.setFocusPolicy(Qt.NoFocus)
+    icon_button.setCursor(Qt.PointingHandCursor)
     arrow_path = resource_path("assets/image/test_config/btn_back.svg").replace("\\", "/")
     icon_button.setStyleSheet(f"""
         QPushButton {{
@@ -115,6 +116,7 @@ def create_embedded_back_navigation(parent, click_handler, width=424):
     text_button = QPushButton("\uc774\uc804 \ud654\uba74\uc73c\ub85c", row)
     text_button.setFixedSize(114, 29)
     text_button.setFocusPolicy(Qt.NoFocus)
+    text_button.setCursor(Qt.PointingHandCursor)
     text_button.setStyleSheet("""
         QPushButton {
             border: none;
@@ -302,9 +304,9 @@ class CommonMainUI(QWidget):
 
         # ✅ 시험 URL 라벨 + 텍스트 박스 (가로 배치)
         self.url_row = QWidget()
-        self.url_row.setFixedSize(444, 36)
+        self.url_row.setFixedSize(544, 36)
         self.url_row.setStyleSheet("background: transparent;")
-        self.original_url_row_size = (444, 36)
+        self.original_url_row_size = (544, 36)
         url_row_layout = QHBoxLayout()
         url_row_layout.setContentsMargins(0, 0, 0, 0)
         url_row_layout.setSpacing(10)
@@ -328,8 +330,8 @@ class CommonMainUI(QWidget):
 
         # ✅ URL 텍스트 박스 (960 × 36, 내부 좌우 24px padding, 18px Medium)
         self.url_text_box = QLineEdit()
-        self.url_text_box.setFixedSize(360, 36)
-        self.original_url_text_box_size = (360, 36)
+        self.url_text_box.setFixedSize(460, 36)
+        self.original_url_text_box_size = (460, 36)
         self.url_text_box.setReadOnly(False)
         self.url_text_box.setPlaceholderText("접속 주소를 입력하세요.")
 
@@ -370,7 +372,7 @@ class CommonMainUI(QWidget):
 
         api_section_layout = QVBoxLayout(self.api_section)
         api_section_layout.setContentsMargins(0, 0, 0, 0)
-        api_section_layout.setSpacing(8)
+        api_section_layout.setSpacing(2)
         self.api_header_row = QWidget()
         self.api_header_row.setFixedSize(1064, 36)
         self.original_api_header_row_size = (1064, 36)
@@ -1077,8 +1079,8 @@ class CommonMainUI(QWidget):
         # 헤더 컬럼 정의 (너비, 텍스트) - 9컬럼 구조
         header_columns = [
             (40, ""),            # No.
-            (304, "API 명"),
-            (100, "결과"),
+            (284, "API 명"),      # 304 -> 284로 축소
+            (120, "결과"),        # 100 -> 120으로 확대 (타이머 공간 확보)
             (94, "검증 횟수"),
             (116, "통과 필드 수"),
             (116, "전체 필드 수"),
@@ -1141,7 +1143,7 @@ class CommonMainUI(QWidget):
         self.tableWidget.setShowGrid(False)
 
         # 컬럼 너비 설정 - 9컬럼 구조 (원본 너비 저장)
-        self.original_column_widths = [40, 304, 100, 94, 116, 116, 94, 94, 90]
+        self.original_column_widths = [40, 284, 120, 94, 116, 116, 94, 94, 90]
         for i, width in enumerate(self.original_column_widths):
             self.tableWidget.setColumnWidth(i, width)
         self.tableWidget.horizontalHeader().setStretchLastSection(False)  # 비례 조정을 위해 비활성화
@@ -1433,17 +1435,17 @@ class CommonMainUI(QWidget):
         elapsed = max(0, int(elapsed_seconds))
         show_elapsed_text = not (state_key == "waiting" and elapsed == 0)
         color_map = {
-            "waiting": "#8A9094",
-            "running": "#1D4ED8",
-            "success": "#059669",
-            "timeover": "#DC2626",
+            "waiting": "#8A9094",  # 회색
+            "running": "#8A9094",  # 회색 (카운트 중)
+            "success": "#1D4ED8",  # 파란색 (제시간 종료)
+            "timeover": "#DC2626", # 빨간색
         }
 
         timer_widget = QWidget()
         timer_layout = QHBoxLayout()
-        timer_layout.setContentsMargins(4, 0, 4, 0)
-        timer_layout.setSpacing(4 if show_elapsed_text else 0)
-        timer_layout.setAlignment(Qt.AlignCenter)
+        timer_layout.setContentsMargins(10, 0, 0, 0)  # 좌측 여백을 최소화하여 공간 확보
+        timer_layout.setSpacing(6)  # 아이콘과 텍스트 사이 간격 약간 확대
+        timer_layout.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
 
         icon_label = QLabel()
         timer_pixmap = self._get_timer_icon_pixmap(state_key)
@@ -1454,8 +1456,8 @@ class CommonMainUI(QWidget):
 
         timer_layout.addWidget(icon_label)
         if show_elapsed_text:
-            text_label = QLabel(f"{elapsed}s")
-            text_label.setAlignment(Qt.AlignCenter)
+            text_label = QLabel(f"{elapsed}초")
+            text_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
             text_label.setStyleSheet(
                 f"""
                 QLabel {{
@@ -1469,6 +1471,8 @@ class CommonMainUI(QWidget):
                 """
             )
             timer_layout.addWidget(text_label)
+        
+        timer_layout.addStretch()  # 나머지 빈 공간을 오른쪽으로 밀어내어 텍스트 잘림 방지
         timer_widget.setLayout(timer_layout)
 
         self.tableWidget.setCellWidget(row, timer_col, timer_widget)

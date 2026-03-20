@@ -342,9 +342,9 @@ class PlatformMainUI(CommonMainUI):
         self.original_api_header_widget_size = (1064, 30)
         self.api_header_widget.setStyleSheet("""
             QWidget {
-                background-color: #EDF0F3;
+                background-color: #F8F9FA;
                 border: 1px solid #CECECE;
-                border-bottom: none;
+                border-bottom: 1px solid #CCCCCC;
                 border-top-left-radius: 4px;
                 border-top-right-radius: 4px;
             }
@@ -356,14 +356,14 @@ class PlatformMainUI(CommonMainUI):
         # 헤더 컬럼 정의 (너비, 텍스트) - 10컬럼 구조
         header_columns = [
             (40, ""),            # No.
-            (268, "API 명"),
-            (60, ""),
-            (76, "결과"),
-            (116, "전체 필드 수"),
-            (116, "통과 필드 수"),
-            (94, "실패 필드 수"),
+            (258, "API 명"),
+            (74, ""),
+            (72, "결과"),
+            (110, "전체 필드 수"),
+            (110, "통과 필드 수"),
+            (110, "실패 필드 수"),
             (94, "검증 횟수"),
-            (94, "평가 점수"),
+            (90, "평가 점수"),
             (90, "상세 내용")
         ]
 
@@ -421,7 +421,7 @@ class PlatformMainUI(CommonMainUI):
         self.tableWidget.setShowGrid(False)
 
         # 컬럼 너비 설정 - 10컬럼 구조 (원본 너비 저장)
-        self.original_column_widths = [40, 268, 60, 76, 116, 116, 94, 94, 94, 90]
+        self.original_column_widths = [40, 258, 74, 72, 110, 110, 110, 94, 90, 90]
 
         for i, width in enumerate(self.original_column_widths):
             self.tableWidget.setColumnWidth(i, width)
@@ -767,7 +767,7 @@ class PlatformMainUI(CommonMainUI):
         # 아이콘 + 분야명 (헤더 영역 1062 × 52, 부모 border 1px 고려)
         self.spec_header_widget = QWidget()
         self.spec_header_widget.setFixedSize(1062, 52)
-        self.spec_header_widget.setStyleSheet("background: #F5F5F5;")  # 옅은 회색 배경
+        self.spec_header_widget.setStyleSheet("background: #F8F9FA;")
         self.original_spec_header_widget_size = (1062, 52)
         header_layout = QHBoxLayout(self.spec_header_widget)
         header_layout.setContentsMargins(0, 5, 0, 5)

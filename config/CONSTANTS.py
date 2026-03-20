@@ -126,7 +126,7 @@ admin_code = "1"
 url = "https://192.168.0.6:8080"
 contact_person = "keti"
 model_name = "keti"
-request_id = "cmmvfa357001aggo9hfs07ve3"
+request_id = "cmmy6cq4y002wggo9oyy1eooj"
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황
 flag_opt = False

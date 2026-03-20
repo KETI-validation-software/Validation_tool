@@ -320,6 +320,10 @@ class MyApp(SystemMainUI):
         self.is_paused = False
         self.last_completed_api_index = -1
         self.paused_valResult_text = ""
+        self.paused_current_api_index = -1
+        self.paused_current_retry = 0
+        self.paused_current_elapsed = 0
+        self.paused_current_timer_state = "waiting"
 
         parts = self.auth_info.split(",")
         auth = [parts[0], parts[1] if len(parts) > 1 else ""]
@@ -2497,23 +2501,40 @@ class MyApp(SystemMainUI):
         else:
             # ========== 재개 모드: 저장된 상태 사용, 초기화 건너뛰기 ==========
             Logger.debug(f" 재개 모드: 초기화 건너뛰기, 저장된 상태 사용")
-            # cnt는 last_completed_api_index + 1로 설정
-            self.cnt = self.last_completed_api_index + 1
+            # 기존 방식(last_completed + 1) 대신, 일시정지 당시 진행 API/시간을 복원
+            api_count = len(self.videoMessages)
+            fallback_index = self.last_completed_api_index + 1
+            paused_index = getattr(self, 'paused_current_api_index', -1)
+            if 0 <= paused_index < api_count:
+                self.cnt = paused_index
+            else:
+                self.cnt = min(max(0, fallback_index), max(0, api_count - 1))
             Logger.debug(f" 재개 모드: cnt = {self.cnt}")
 
             # ✅ 재개 모드에서도 실행 상태 변수는 초기화 필요
-            self.current_retry = 0  # 재시도 카운터 초기화 (중요!)
+            self.current_retry = max(0, int(getattr(self, 'paused_current_retry', 0)))
             self.post_flag = False
             self.processing_response = False
             self.message_in_cnt = 0
             self.realtime_flag = False
             self.tmp_msg_append_flag = False
-            self.cnt_pre = 0
-            self.time_pre = 0
+            self.cnt_pre = self.cnt
+            resume_elapsed = max(0, int(getattr(self, 'paused_current_elapsed', 0)))
+            if resume_elapsed > 0:
+                self.time_pre = time.time() - resume_elapsed
+            else:
+                self.time_pre = 0
             self.res = None
             self.webhook_res = None
             self.message_error = []
             Logger.debug(f" 재개 모드: 실행 상태 변수 초기화 완료")
+
+            # 진행 중이던 API 타이머 표시 즉시 복원
+            if 0 <= self.cnt < api_count:
+                restored_state = str(getattr(self, 'paused_current_timer_state', 'running') or 'running').lower()
+                if restored_state not in {"waiting", "running", "success", "timeover"}:
+                    restored_state = "running"
+                self.set_api_timer_state(self.cnt, restored_state, resume_elapsed)
 
             # ✅ 미완료 API의 trace 파일 삭제 (완료된 API는 유지)
             trace_dir = os.path.join(result_dir, "trace")
@@ -2545,8 +2566,11 @@ class MyApp(SystemMainUI):
             if self.paused_valResult_text:
                 self.valResult.setHtml(self.paused_valResult_text)
                 self.valResult.append('<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-top: 10px;">========== 재개 ==========</div>')
-                self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">마지막 완료 API: {self.last_completed_api_index + 1}번째</div>')
-                self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-bottom: 10px;">{self.last_completed_api_index + 2}번째 API부터 재개합니다.</div>')
+                if self.paused_current_api_index >= 0:
+                    self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">재개 API: {self.paused_current_api_index + 1}번째</div>')
+                    self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-bottom: 10px;">{self.paused_current_elapsed}초부터 재개합니다.</div>')
+                else:
+                    self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-bottom: 10px;">재개 가능한 진행 API가 없습니다.</div>')
                 Logger.debug(f" 모니터링 메시지 복원 완료: {len(self.paused_valResult_text)} 문자")
 
             # ✅ 테이블 데이터 복원 (완료된 API들만)
@@ -2626,10 +2650,35 @@ class MyApp(SystemMainUI):
 
             self.last_completed_api_index = last_completed
 
+            # 일시정지 시점의 현재 진행 API/재시도/경과시간 저장
+            paused_current_api_index = self.cnt if 0 <= self.cnt < len(self.videoMessages) else -1
+            paused_current_retry = max(0, int(getattr(self, 'current_retry', 0)))
+            paused_current_elapsed = 0
+            paused_current_timer_state = "waiting"
+            if paused_current_api_index >= 0:
+                paused_current_elapsed = max(
+                    int(self.get_api_timer_elapsed(paused_current_api_index)),
+                    int(self._timer_elapsed_seconds()) if self.cnt_pre == paused_current_api_index else 0,
+                )
+                paused_current_timer_state = str(
+                    self.get_api_timer_state(paused_current_api_index) or "waiting"
+                ).lower()
+                if paused_current_timer_state not in {"waiting", "running", "success", "timeover"}:
+                    paused_current_timer_state = "waiting"
+
+            self.paused_current_api_index = paused_current_api_index
+            self.paused_current_retry = paused_current_retry
+            self.paused_current_elapsed = paused_current_elapsed
+            self.paused_current_timer_state = paused_current_timer_state
+
             # 저장할 상태 데이터 구성
             paused_state = {
                 "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 "last_completed_api_index": self.last_completed_api_index,
+                "paused_current_api_index": self.paused_current_api_index,
+                "paused_current_retry": self.paused_current_retry,
+                "paused_current_elapsed": self.paused_current_elapsed,
+                "paused_current_timer_state": self.paused_current_timer_state,
                 "step_buffers": self.step_buffers,
                 "step_pass_counts": getattr(self, 'step_pass_counts', [0] * len(self.videoMessages)),
                 "step_error_counts": getattr(self, 'step_error_counts', [0] * len(self.videoMessages)),
@@ -2653,7 +2702,14 @@ class MyApp(SystemMainUI):
 
             # 모니터링 창에 로그 추가
             self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\'; margin-top: 10px;">💾 재개 정보 저장 완료: {paused_file_path}</div>')
-            self.valResult.append(f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">   (마지막 완료 API: {last_completed + 1}번째, 다음 재시작 시 {last_completed + 2}번째 API부터 이어서 실행)</div>')
+            if self.paused_current_api_index >= 0:
+                self.valResult.append(
+                    f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">   (현재 진행 API: {self.paused_current_api_index + 1}번째, 재시작 시 {self.paused_current_elapsed}초부터 이어서 실행)</div>'
+                )
+            else:
+                self.valResult.append(
+                    f'<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">   (마지막 완료 API: {last_completed + 1}번째)</div>'
+                )
 
         except Exception as e:
             Logger.debug(f"❌ 일시정지 상태 저장 실패: {e}")
@@ -2674,6 +2730,10 @@ class MyApp(SystemMainUI):
 
             # 상태 복원
             self.last_completed_api_index = paused_state.get("last_completed_api_index", -1)
+            self.paused_current_api_index = paused_state.get("paused_current_api_index", -1)
+            self.paused_current_retry = paused_state.get("paused_current_retry", 0)
+            self.paused_current_elapsed = paused_state.get("paused_current_elapsed", 0)
+            self.paused_current_timer_state = paused_state.get("paused_current_timer_state", "waiting")
             self.step_buffers = paused_state.get("step_buffers", [])
             self.step_pass_counts = paused_state.get("step_pass_counts", [0] * len(self.videoMessages))
             self.step_error_counts = paused_state.get("step_error_counts", [0] * len(self.videoMessages))
@@ -2688,6 +2748,7 @@ class MyApp(SystemMainUI):
             Logger.debug(f"✅ 일시정지 상태 복원 완료")
             Logger.debug(f"   타임스탬프: {paused_state.get('timestamp')}")
             Logger.debug(f"   마지막 완료 API 인덱스: {self.last_completed_api_index}")
+            Logger.debug(f"   재개 대상 API 인덱스: {self.paused_current_api_index}, retry={self.paused_current_retry}, elapsed={self.paused_current_elapsed}s")
             Logger.debug(f"   복원된 점수: PASS={self.total_pass_cnt}, FAIL={self.total_error_cnt}")
 
             return True
@@ -2818,7 +2879,7 @@ class MyApp(SystemMainUI):
             self.valResult.append(f"\n결과 저장 실패: {str(e)}")
 
     def cancel_btn_clicked(self):
-        """시험 취소 버튼 클릭 - 진행 중단, 상태 초기화"""
+        """시험 취소 버튼 클릭 - 진행 중단, 현재 상태 유지"""
         Logger.debug(f" 시험 취소 버튼 클릭")
         setattr(CONSTANTS, "SUPPRESS_COMPLETED_HEARTBEAT", True)
         
@@ -2845,17 +2906,12 @@ class MyApp(SystemMainUI):
         self.cleanup_paused_file()
         Logger.debug(f" 일시정지 파일 삭제 완료")
         
-        # 3. 상태 완전 초기화
-        self.is_paused = False
-        self.last_completed_api_index = -1
-        self.paused_valResult_text = ""
-        self.cnt = 0
-        self.current_retry = 0
-        self.post_flag = False  # 웹훅 플래그 초기화
-        self.res = None  # 응답 초기화
+        # 3. 즉시 초기화는 하지 않고 현재 화면 상태를 유지한다.
+        # 실제 초기화는 다음 '시험 시작' 클릭 시 신규 시작 경로에서 수행된다.
+        self.post_flag = False
+        self.res = None
         self.webhook_flag = False
-        self._reset_all_row_timers()
-        Logger.debug(f" 상태 초기화 완료")
+        Logger.debug(f" 취소 시점 상태 유지 (다음 시작 시 초기화)")
         
         # 4. 버튼 상태 초기화
         self.sbtn.setEnabled(True)
@@ -2870,10 +2926,9 @@ class MyApp(SystemMainUI):
         except Exception as e:
             Logger.warning(f"⚠️ 시험 취소 - in_progress 상태 전송 실패: {e}")
         
-        # 5. 모니터링 화면 초기화
-        self.valResult.clear()
-        self.valResult.append('<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">시험이 취소되었습니다. 시험 시작 버튼을 눌러 다시 시작하세요.</div>')
-        Logger.debug(f" 모니터링 화면 초기화")
+        # 5. 모니터링 화면은 유지하고 취소 안내만 추가
+        self.valResult.append('<div style="font-size: 18px; color: #6b7280; font-family: \'Noto Sans KR\';">시험이 취소되었습니다. 현재 상태로 멈췄으며, 시험 시작 버튼을 누르면 초기화 후 다시 시작합니다.</div>')
+        Logger.debug(f" 모니터링 화면 상태 유지")
         
         # 6. UI 업데이트 처리
         QApplication.processEvents()

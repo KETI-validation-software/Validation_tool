@@ -118,7 +118,7 @@ class TestSelectionPanel(QWidget):
                 background-color: #F2F8FF;
             }
             QHeaderView::section {
-                background-color: #EDF0F3;
+                background-color: #F8F9FA;
                 border: none;
                 border-bottom: 1px solid #CECECE;
                 color: #1B1B1C;
@@ -212,7 +212,7 @@ class TestSelectionPanel(QWidget):
                 background-color: #E3F2FF;
             }
             QHeaderView::section {
-                background-color: #EDF0F3;
+                background-color: #F8F9FA;
                 border-right: 0px solid transparent;
                 border-left: 0px solid transparent;
                 border-top: 0px solid transparent;
