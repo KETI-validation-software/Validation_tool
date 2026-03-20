@@ -1561,7 +1561,8 @@ def generate_validation_data_from_step_buffer(step_buffer, attempt_num):
             validation_data = {}
     elif not validation_data and step_buffer.get("data"):
         data_text = step_buffer["data"]
-        pattern = r'\[?? (\d+)??\]'
+        # [시도 1/3], [검증 2/3], [attempt 1/3] 형태의 헤더를 지원
+        pattern = r'\[(?:시도|검증|attempt|Attempt)\s+(\d+)(?:\s*/\s*\d+)?\]'
         parts = re.split(pattern, data_text)
 
         attempt_data_map = {}
@@ -1582,7 +1583,8 @@ def generate_validation_data_from_step_buffer(step_buffer, attempt_num):
 
     if not validation_errors and step_buffer.get("error"):
         error_text = step_buffer["error"]
-        error_pattern = r'\[(?:??|??) (\d+)??\]'
+        # 오류 로그도 동일한 시도/검증 헤더 패턴으로 분리
+        error_pattern = r'\[(?:시도|검증|attempt|Attempt)\s+(\d+)(?:\s*/\s*\d+)?\]'
         error_parts = re.split(error_pattern, error_text)
 
         attempt_error_map = {}
