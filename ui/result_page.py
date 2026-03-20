@@ -532,6 +532,11 @@ class ResultPageWidget(QWidget):
         if not hasattr(self, 'tableWidget') or self.tableWidget is None:
             return
 
+        # 실행 중이 아닐 때는 부모 테이블 값을 강제 동기화하지 않는다.
+        # (시나리오 전환 시 다른 시나리오 결과가 덮어써지는 문제 방지)
+        if not self._is_parent_live_running():
+            return
+
         # 점수 요약 카드(분야별/전체)도 실시간 동기화
         self._sync_score_summary_from_parent()
 
@@ -567,6 +572,15 @@ class ResultPageWidget(QWidget):
                 continue
 
             self._set_timer_cell(row, state_key, elapsed)
+
+    def _is_parent_live_running(self):
+        tick_timer = getattr(self.parent, 'tick_timer', None)
+        if tick_timer is None:
+            return False
+        try:
+            return bool(tick_timer.isActive())
+        except Exception:
+            return False
 
     def _get_score_summary_snapshot(self):
         return (
@@ -1056,6 +1070,55 @@ class ResultPageWidget(QWidget):
                 # 여기서는 직접 호출하여 강제로 갱신
                 self.on_test_field_selected(row_idx, 0)
 
+    def _is_parent_test_running(self):
+        """3페이지와 동일하게 시험 진행 중 상태를 판단한다."""
+        if hasattr(self.parent, 'sbtn'):
+            try:
+                if not self.parent.sbtn.isEnabled():
+                    return True
+            except Exception:
+                pass
+
+        tick_timer = getattr(self.parent, 'tick_timer', None)
+        if tick_timer is not None:
+            try:
+                return bool(tick_timer.isActive())
+            except Exception:
+                return False
+
+        return False
+
+    def _warn_running_scenario_change_blocked(self):
+        QtCore.QTimer.singleShot(
+            0,
+            lambda: QMessageBox.warning(
+                self,
+                "알림",
+                "시험이 진행 중입니다.\n시험 완료 후 다른 시나리오를 진행해주세요.",
+            ),
+        )
+
+    def _restore_current_group_selection(self):
+        current_group_id = getattr(self.parent, 'current_group_id', None)
+        if not current_group_id:
+            return
+
+        SPEC_CONFIG = getattr(self.parent, 'LOADED_SPEC_CONFIG', self.parent.CONSTANTS.SPEC_CONFIG)
+        for idx, group in enumerate(SPEC_CONFIG):
+            if group.get('group_id') == current_group_id:
+                self.group_table.selectRow(idx)
+                return
+
+    def _restore_current_scenario_selection(self):
+        current_spec_id = getattr(self.parent, 'current_spec_id', None)
+        if not current_spec_id:
+            return
+
+        if hasattr(self.test_selection_panel, 'spec_id_to_index'):
+            row_idx = self.test_selection_panel.spec_id_to_index.get(current_spec_id)
+            if row_idx is not None:
+                self.test_field_table.selectRow(row_idx)
+
     def on_group_selected(self, row, col):
         """시험 그룹 선택 시"""
         group_name = self.test_selection_panel.index_to_group_name.get(row)
@@ -1072,6 +1135,14 @@ class ResultPageWidget(QWidget):
         if selected_group:
             new_group_id = selected_group.get('group_id')
             old_group_id = getattr(self.parent, 'current_group_id', None)
+
+            # ✅ 시험 진행 중에는 다른 그룹/시나리오 선택 차단 (3페이지와 동일 정책)
+            if self._is_parent_test_running() and new_group_id != old_group_id:
+                Logger.debug("[RESULT DEBUG] 시험 진행 중 - 그룹 변경 차단")
+                self._warn_running_scenario_change_blocked()
+                self._restore_current_group_selection()
+                self._restore_current_scenario_selection()
+                return
 
             Logger.debug(f"[RESULT DEBUG] 🔄 그룹 선택: {old_group_id} → {new_group_id}")
 
@@ -1099,6 +1170,13 @@ class ResultPageWidget(QWidget):
 
         # 선택된 시나리오가 현재와 같으면 무시
         if selected_spec_id == self.current_spec_id:
+            return
+
+        # ✅ 시험 진행 중에는 시나리오 변경 차단 (3페이지와 동일 정책)
+        if self._is_parent_test_running():
+            Logger.debug("[RESULT DEBUG] 시험 진행 중 - 시나리오 변경 차단")
+            self._warn_running_scenario_change_blocked()
+            self._restore_current_scenario_selection()
             return
 
         Logger.debug(f" 시나리오 전환: {self.current_spec_id} → {selected_spec_id}")
