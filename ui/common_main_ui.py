@@ -1464,7 +1464,7 @@ class CommonMainUI(QWidget):
                     color: {color_map[state_key]};
                     font-family: 'Noto Sans KR';
                     font-size: 16px;
-                    font-weight: 600;
+                    font-weight: 500;
                     border: none;
                     background: transparent;
                 }}
