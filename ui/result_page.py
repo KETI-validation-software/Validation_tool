@@ -112,6 +112,13 @@ class ResultPageWidget(QWidget):
         self.img_none = resource_path("assets/image/icon/icn_basic.png")
         self.webhook_badge_pixmap = QPixmap(resource_path("assets/image/icon/badge-webhook.png"))
 
+        # 4페이지 타이머 실시간 동기화용 캐시/타이머
+        self._result_timer_cache = {}
+        self._timer_sync_interval_ms = 250
+        self._live_timer_sync = QtCore.QTimer(self)
+        self._live_timer_sync.setInterval(self._timer_sync_interval_ms)
+        self._live_timer_sync.timeout.connect(self._sync_result_timer_cells)
+
         self.initUI()
 
     def _get_result_header_title_path(self):
@@ -496,6 +503,121 @@ class ResultPageWidget(QWidget):
         
         # ✅ 초기 배경 지오메트리 설정
         QtCore.QTimer.singleShot(0, self._update_content_background_geometry)
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        self._start_live_timer_sync()
+
+    def hideEvent(self, event):
+        self._stop_live_timer_sync()
+        super().hideEvent(event)
+
+    def closeEvent(self, event):
+        self._stop_live_timer_sync()
+        super().closeEvent(event)
+
+    def _start_live_timer_sync(self):
+        if hasattr(self, '_live_timer_sync') and not self._live_timer_sync.isActive():
+            self._live_timer_sync.start()
+
+    def _stop_live_timer_sync(self):
+        if hasattr(self, '_live_timer_sync') and self._live_timer_sync.isActive():
+            self._live_timer_sync.stop()
+
+    def _sync_result_timer_cells(self):
+        """page4 표시 중 부모 타이머 상태를 주기적으로 동기화한다."""
+        if not hasattr(self, 'tableWidget') or self.tableWidget is None:
+            return
+
+        row_count = self.tableWidget.rowCount()
+        if row_count <= 0:
+            return
+
+        for row in range(row_count):
+            # 타이머와 별개로 결과 아이콘(PASS/FAIL)도 실시간 동기화
+            self._sync_result_icon_from_parent(row)
+
+            state, elapsed = self._get_parent_timer_state_elapsed(row)
+            state_key = str(state or "waiting").strip().lower()
+            if state_key not in {"waiting", "running", "success", "timeover"}:
+                state_key = "waiting"
+
+            current_state, current_elapsed = self._result_timer_cache.get(row, (None, None))
+
+            # 부모 쪽 타이머 정보가 비어있는 경우(기본 waiting/0)에는
+            # 이미 표시 중인 의미 있는 스냅샷 값을 덮어쓰지 않는다.
+            if (
+                state_key == "waiting"
+                and int(elapsed) == 0
+                and current_state is not None
+                and (current_state != "waiting" or int(current_elapsed or 0) > 0)
+            ):
+                continue
+
+            if current_state == state_key and int(current_elapsed or 0) == int(elapsed):
+                continue
+
+            self._set_timer_cell(row, state_key, elapsed)
+
+    def _get_cell_icon_state(self, table_widget, row):
+        if table_widget is None or row < 0 or row >= table_widget.rowCount():
+            return None
+
+        icon_widget = table_widget.cellWidget(row, 3)
+        if icon_widget is None:
+            return None
+
+        icon_label = icon_widget.findChild(QLabel)
+        if icon_label is None:
+            return None
+
+        tooltip = icon_label.toolTip() or ""
+        if "Result: PASS" in tooltip:
+            return "PASS"
+        if "Result: FAIL" in tooltip:
+            return "FAIL"
+        if "Result: NONE" in tooltip:
+            return "NONE"
+        return None
+
+    def _set_result_icon_cell(self, row, icon_state):
+        state = str(icon_state or "NONE").upper()
+        if state == "PASS":
+            img = self.img_pass
+            icon_size = (84, 20)
+        elif state == "FAIL":
+            img = self.img_fail
+            icon_size = (84, 20)
+        else:
+            state = "NONE"
+            img = self.img_none
+            icon_size = (16, 16)
+
+        icon_widget = QWidget()
+        icon_layout = QHBoxLayout()
+        icon_layout.setContentsMargins(0, 0, 0, 0)
+        icon_label = QLabel()
+        icon_label.setPixmap(QIcon(img).pixmap(*icon_size))
+        icon_label.setAlignment(Qt.AlignCenter)
+        icon_label.setToolTip(f"Result: {state}")
+        icon_layout.addWidget(icon_label)
+        icon_layout.setAlignment(Qt.AlignCenter)
+        icon_widget.setLayout(icon_layout)
+        self.tableWidget.setCellWidget(row, 3, icon_widget)
+
+    def _sync_result_icon_from_parent(self, row):
+        if not hasattr(self.parent, 'tableWidget'):
+            return
+
+        parent_state = self._get_cell_icon_state(self.parent.tableWidget, row)
+        current_state = self._get_cell_icon_state(self.tableWidget, row)
+
+        # 부모의 기본 NONE 값으로 기존 PASS/FAIL 표시를 덮어쓰지 않는다.
+        if parent_state == "NONE" and current_state in {"PASS", "FAIL"}:
+            return
+
+        if parent_state in {"PASS", "FAIL", "NONE"} and parent_state != current_state:
+            self._set_result_icon_cell(row, parent_state)
 
     def _update_content_background_geometry(self):
         """배경 패널 및 구분선 위치/크기 업데이트 (3페이지와 동일)"""
@@ -1059,6 +1181,7 @@ class ResultPageWidget(QWidget):
 
         timer_widget = QWidget()
         timer_layout = QHBoxLayout()
+        # 3페이지와 동일하게 좌측 기준으로 배치
         timer_layout.setContentsMargins(10, 0, 0, 0)
         timer_layout.setSpacing(6)
         timer_layout.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
@@ -1089,8 +1212,10 @@ class ResultPageWidget(QWidget):
             timer_layout.addWidget(text_label)
 
         timer_layout.addStretch()
+
         timer_widget.setLayout(timer_layout)
         self.tableWidget.setCellWidget(row, 2, timer_widget)
+        self._result_timer_cache[row] = (state_key, elapsed)
 
     def _get_parent_timer_state_elapsed(self, row):
         state = "waiting"
@@ -1111,7 +1236,7 @@ class ResultPageWidget(QWidget):
         return state, elapsed
 
     def _set_api_name_cell(self, row, api_name):
-        """4페이지용 API 명 셀 설정 (왼쪽 정렬 + 12px 여백으로 헤더와 수직선 맞춤)"""
+        """4페이지용 API 명 셀 설정 (3페이지와 유사한 좌측 밀착 여백)"""
         api_item = QTableWidgetItem(api_name)
         api_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         api_item.setData(Qt.UserRole, api_name)
@@ -1120,8 +1245,9 @@ class ResultPageWidget(QWidget):
 
         api_container = QWidget()
         api_layout = QHBoxLayout()
-        api_layout.setContentsMargins(12, 0, 4, 0)  # 12px 들여쓰기
-        api_layout.setSpacing(8)
+        # 3페이지와 동일하게 좌측 여백을 줄여 긴 API명이 덜 잘리게 한다.
+        api_layout.setContentsMargins(2, 0, 2, 0)
+        api_layout.setSpacing(4)
         api_layout.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
 
         api_name_label = QLabel(api_name)
@@ -1136,6 +1262,8 @@ class ResultPageWidget(QWidget):
         api_name_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         api_name_label.setWordWrap(False)
         api_name_label.setToolTip(api_name)
+        api_name_label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        api_name_label.setMinimumWidth(0)
         api_layout.addWidget(api_name_label, 0, Qt.AlignVCenter)
 
         # 웹훅 뱃지 추가
@@ -1146,6 +1274,8 @@ class ResultPageWidget(QWidget):
             webhook_badge_label.setFixedSize(self.webhook_badge_pixmap.size())
             webhook_badge_label.setAlignment(Qt.AlignCenter)
             api_layout.addWidget(webhook_badge_label, 0, Qt.AlignVCenter)
+
+        api_layout.addStretch()
 
         api_container.setLayout(api_layout)
         self.tableWidget.setCellWidget(row, 1, api_container)
@@ -1514,8 +1644,8 @@ class ResultPageWidget(QWidget):
         header_columns = [
             (40, ""),            # No.
             (243, "API 명"),
-            (85, ""),            # 타이머/뱃지용
-            (105, "결과"),
+            (90, ""),            # 타이머/뱃지용
+            (100, "결과"),
             (107, "전체 필드 수"),
             (107, "통과 필드 수"),
             (107, "실패 필드 수"),
@@ -1531,9 +1661,9 @@ class ResultPageWidget(QWidget):
             label = QLabel(text)
             label.setFixedSize(width, 30)
             
-            # API 명(index 1)만 왼쪽 정렬 + 12px 여백 (본문 셀과 동일하게)
+            # API 명(index 1) 헤더만 가운데 정렬 (본문 셀 정렬은 유지)
             if i == 1:
-                label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+                label.setAlignment(Qt.AlignCenter)
                 label.setStyleSheet("""
                     QLabel {
                         background-color: transparent;
@@ -1542,7 +1672,6 @@ class ResultPageWidget(QWidget):
                         font-family: 'Noto Sans KR';
                         font-size: 18px;
                         font-weight: 600;
-                        padding-left: 12px;
                     }
                 """)
             else:
@@ -1600,7 +1729,7 @@ class ResultPageWidget(QWidget):
         self.tableWidget.setShowGrid(False)
 
         # 컬럼 너비 설정 - 3페이지와 동일한 10컬럼 구조
-        self.original_column_widths = [40, 243, 85, 105, 107, 107, 107, 90, 90, 90]
+        self.original_column_widths = [40, 243, 90, 100, 107, 107, 107, 90, 90, 90]
         for i, width in enumerate(self.original_column_widths):
             self.tableWidget.setColumnWidth(i, width)
         self.tableWidget.horizontalHeader().setStretchLastSection(False)
@@ -1658,8 +1787,13 @@ class ResultPageWidget(QWidget):
     def _on_back_clicked(self):
         """뒤로가기 버튼 클릭 시 - 원래 시나리오로 복원 후 시그널 발생"""
         try:
+            spec_or_group_changed = (
+                (self.original_spec_id and self.original_spec_id != self.parent.current_spec_id)
+                or (self.original_group_id and self.original_group_id != getattr(self.parent, 'current_group_id', None))
+            )
+
             # ✅ 원래 시나리오로 복원 (결과 페이지 진입 시 저장해둔 값)
-            if self.original_spec_id and self.original_spec_id != self.parent.current_spec_id:
+            if spec_or_group_changed:
                 Logger.debug(f" 원래 시나리오로 복원: {self.parent.current_spec_id} → {self.original_spec_id}")
 
                 # 1. spec_id 복원
@@ -1671,14 +1805,16 @@ class ResultPageWidget(QWidget):
                 self.parent.load_specs_from_constants()
                 self.parent.get_setting()
 
-            restored = False
-            if hasattr(self.parent, 'restore_spec_data'):
-                restored = self.parent.restore_spec_data(self.parent.current_spec_id)
-                Logger.debug(f" parent 표준 복원 결과: {restored}")
+                restored = False
+                if hasattr(self.parent, 'restore_spec_data'):
+                    restored = self.parent.restore_spec_data(self.parent.current_spec_id)
+                    Logger.debug(f" parent 표준 복원 결과: {restored}")
 
-            if hasattr(self.parent, 'update_score_display'):
-                self.parent.update_score_display()
-                Logger.debug(f" parent 점수 표시 갱신 완료")
+                if hasattr(self.parent, 'update_score_display'):
+                    self.parent.update_score_display()
+                    Logger.debug(f" parent 점수 표시 갱신 완료")
+            else:
+                Logger.debug(" 결과 페이지에서 시나리오 변경 없음 - parent 라이브 상태 유지")
 
         except Exception as e:
             Logger.error(f" parent 테이블 복원 실패: {e}")
