@@ -736,14 +736,14 @@ class SystemMainUI(CommonMainUI):
         # 헤더 컬럼 정의 (너비, 텍스트) - 10컬럼 구조
         header_columns = [
             (40, ""),            # No.
-            (256, "API 명"),
-            (72, ""),
-            (76, "결과"),
-            (116, "전체 필드 수"),
-            (116, "통과 필드 수"),
-            (94, "실패 필드 수"),
+            (258, "API 명"),
+            (74, ""),
+            (72, "결과"),
+            (110, "전체 필드 수"),
+            (110, "통과 필드 수"),
+            (110, "실패 필드 수"),
             (94, "검증 횟수"),
-            (94, "평가 점수"),
+            (90, "평가 점수"),
             (90, "상세 내용")
         ]
 
@@ -801,7 +801,7 @@ class SystemMainUI(CommonMainUI):
         self.tableWidget.setShowGrid(False)
 
         # 컬럼 너비 설정 - 10컬럼 구조 (원본 너비 저장)
-        self.original_column_widths = [40, 256, 72, 76, 116, 116, 94, 94, 94, 90]
+        self.original_column_widths = [40, 258, 74, 72, 110, 110, 110, 94, 90, 90]
 
         for i, width in enumerate(self.original_column_widths):
             self.tableWidget.setColumnWidth(i, width)
