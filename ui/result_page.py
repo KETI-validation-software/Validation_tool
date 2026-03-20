@@ -37,6 +37,7 @@ def create_embedded_back_navigation(parent, click_handler, width=424, height=46)
     icon_button.setObjectName("top_back_icon_button")
     icon_button.setFixedSize(22, 29)
     icon_button.setFocusPolicy(Qt.NoFocus)
+    icon_button.setCursor(Qt.PointingHandCursor)  # 마우스 커서 변경
     arrow_path = resource_path("assets/image/test_config/btn_back.svg").replace("\\", "/")
     icon_button.setStyleSheet(f"""
         QPushButton {{
@@ -54,6 +55,7 @@ def create_embedded_back_navigation(parent, click_handler, width=424, height=46)
     text_button.setObjectName("top_back_text_button")
     text_button.setFixedSize(114, 29)
     text_button.setFocusPolicy(Qt.NoFocus)
+    text_button.setCursor(Qt.PointingHandCursor)  # 마우스 커서 변경
     text_button.setStyleSheet("""
         QPushButton {
             border: none;
@@ -114,6 +116,7 @@ class ResultPageWidget(QWidget):
 
         # 4페이지 타이머 실시간 동기화용 캐시/타이머
         self._result_timer_cache = {}
+        self._score_summary_cache = None
         self._timer_sync_interval_ms = 250
         self._live_timer_sync = QtCore.QTimer(self)
         self._live_timer_sync.setInterval(self._timer_sync_interval_ms)
@@ -529,11 +532,17 @@ class ResultPageWidget(QWidget):
         if not hasattr(self, 'tableWidget') or self.tableWidget is None:
             return
 
+        # 점수 요약 카드(분야별/전체)도 실시간 동기화
+        self._sync_score_summary_from_parent()
+
         row_count = self.tableWidget.rowCount()
         if row_count <= 0:
             return
 
         for row in range(row_count):
+            # 타이머/아이콘 외 수치 컬럼(전체/통과/실패/검증/점수)도 실시간 동기화
+            self._sync_result_metrics_from_parent(row)
+
             # 타이머와 별개로 결과 아이콘(PASS/FAIL)도 실시간 동기화
             self._sync_result_icon_from_parent(row)
 
@@ -558,6 +567,76 @@ class ResultPageWidget(QWidget):
                 continue
 
             self._set_timer_cell(row, state_key, elapsed)
+
+    def _get_score_summary_snapshot(self):
+        return (
+            int(getattr(self.parent, 'total_pass_cnt', 0)),
+            int(getattr(self.parent, 'total_error_cnt', 0)),
+            int(getattr(self.parent, 'total_opt_pass_cnt', 0)),
+            int(getattr(self.parent, 'total_opt_error_cnt', 0)),
+            int(getattr(self.parent, 'global_pass_cnt', 0)),
+            int(getattr(self.parent, 'global_error_cnt', 0)),
+            int(getattr(self.parent, 'global_opt_pass_cnt', 0)),
+            int(getattr(self.parent, 'global_opt_error_cnt', 0)),
+        )
+
+    def _sync_score_summary_from_parent(self):
+        """부모(3페이지) 점수 요약을 4페이지 카드에 실시간 반영"""
+        if not hasattr(self, 'score_table'):
+            return
+
+        snapshot = self._get_score_summary_snapshot()
+        if snapshot == self._score_summary_cache:
+            return
+
+        self.update_score_displays({})
+        self._score_summary_cache = snapshot
+
+    def _get_table_item_text(self, table_widget, row, col):
+        if table_widget is None:
+            return None
+        if row < 0 or row >= table_widget.rowCount():
+            return None
+        if col < 0 or col >= table_widget.columnCount():
+            return None
+
+        item = table_widget.item(row, col)
+        if item is None:
+            return None
+        return item.text()
+
+    def _set_center_text_item(self, row, col, text):
+        if not hasattr(self, 'tableWidget'):
+            return
+        if row < 0 or row >= self.tableWidget.rowCount():
+            return
+        if col < 0 or col >= self.tableWidget.columnCount():
+            return
+
+        item = self.tableWidget.item(row, col)
+        if item is None:
+            item = QTableWidgetItem(str(text))
+            item.setTextAlignment(Qt.AlignCenter)
+            self.tableWidget.setItem(row, col, item)
+        else:
+            item.setText(str(text))
+            item.setTextAlignment(Qt.AlignCenter)
+
+    def _sync_result_metrics_from_parent(self, row):
+        """부모(3페이지) 테이블의 수치 컬럼을 4페이지에 실시간 반영"""
+        if not hasattr(self.parent, 'tableWidget'):
+            return
+
+        # 4: 전체 필드 수, 5: 통과 필드 수, 6: 실패 필드 수, 7: 검증 횟수, 8: 평가 점수
+        metric_cols = (4, 5, 6, 7, 8)
+        for col in metric_cols:
+            parent_text = self._get_table_item_text(self.parent.tableWidget, row, col)
+            if parent_text is None:
+                continue
+
+            current_text = self._get_table_item_text(self.tableWidget, row, col)
+            if current_text != parent_text:
+                self._set_center_text_item(row, col, parent_text)
 
     def _get_cell_icon_state(self, table_widget, row):
         if table_widget is None or row < 0 or row >= table_widget.rowCount():

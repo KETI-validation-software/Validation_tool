@@ -99,6 +99,7 @@ def create_embedded_back_navigation(parent, click_handler, width=424):
     icon_button = QPushButton(row)
     icon_button.setFixedSize(22, 29)
     icon_button.setFocusPolicy(Qt.NoFocus)
+    icon_button.setCursor(Qt.PointingHandCursor)
     arrow_path = resource_path("assets/image/test_config/btn_back.svg").replace("\\", "/")
     icon_button.setStyleSheet(f"""
         QPushButton {{
@@ -115,6 +116,7 @@ def create_embedded_back_navigation(parent, click_handler, width=424):
     text_button = QPushButton("\uc774\uc804 \ud654\uba74\uc73c\ub85c", row)
     text_button.setFixedSize(114, 29)
     text_button.setFocusPolicy(Qt.NoFocus)
+    text_button.setCursor(Qt.PointingHandCursor)
     text_button.setStyleSheet("""
         QPushButton {
             border: none;
