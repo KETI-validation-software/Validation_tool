@@ -204,7 +204,7 @@ class ResultPageWidget(QWidget):
         self.original_group_table_widget_size = (424, 204)
         self.original_field_group_size = (424, 561)
         self.original_info_title_size = (1064, 24)
-        self.original_info_widget_size = (1064, 169)
+        self.original_info_widget_size = (1064, 194)
         self.original_result_label_size = (1064, 24)
         self.original_result_header_widget_size = (1064, 38)
         self.original_result_table_height = 335  # ✅ 시험 결과 테이블 기본 높이 소폭 조정 (하단 밸런스)
@@ -333,21 +333,23 @@ class ResultPageWidget(QWidget):
         self.right_col = QWidget()
         self.right_col.setStyleSheet("background: transparent;")
         right_layout = QVBoxLayout(self.right_col)
-        right_layout.setContentsMargins(24, 36, 24, 40)  # 하단 여백 추가
+        right_layout.setContentsMargins(24, 38, 24, 40)  # 상단 여백 2px 미세 조정
         right_layout.setSpacing(0)
 
         # 시험 정보 (크기 키움: 360px)
         self.info_title = QLabel("시험 정보")
+        self.info_title.setFixedSize(1064, 24)
         self.info_title.setStyleSheet("""
             font-size: 20px;
             font-style: normal;
             font-family: "Noto Sans KR";
             font-weight: 500;
             color: #000000;
-            margin-bottom: 8px;
+            margin-bottom: 0px;
             letter-spacing: -0.3px;
         """)
         right_layout.addWidget(self.info_title)
+        right_layout.addSpacing(8)
 
         self.info_widget = self._create_simple_info_display()
         right_layout.addWidget(self.info_widget)
@@ -360,7 +362,7 @@ class ResultPageWidget(QWidget):
             font-family: "Noto Sans KR";
             font-weight: 500;
             color: #222;
-            margin-top: 30px;
+            margin-top: 40px;
             margin-bottom: 8px;
             letter-spacing: -0.3px;
         """)
@@ -624,7 +626,7 @@ class ResultPageWidget(QWidget):
                 # 고정된 위젯들의 높이 합산 (마진 및 여유 공간 정밀 반영)
                 # 1. 레이아웃 상단 마진: 36
                 # 2. 시험 정보 타이틀 영역: 약 40
-                # 3. 시험 정보 위젯: 169
+                # 3. 시험 정보 위젯: 194
                 # 4. 시험 결과 라벨 영역 (마진 포함): 약 74 (30 + 24 + 20)
                 # 5. 결과 테이블 헤더: 30
                 # 6. 중간 간격 (Spacing): 30
@@ -633,7 +635,7 @@ class ResultPageWidget(QWidget):
                 # 9. 레이아웃 하단 마진: 40
                 # 10. 기타 미세 보정값: 13
                 
-                fixed_heights = 36 + 40 + 169 + 74 + 30 + 30 + 40 + 256 + 40 + 13
+                fixed_heights = 36 + 40 + 194 + 74 + 30 + 30 + 40 + 256 + 40 + 13
                 bottom_gap = 30 if self.embedded else 80
                 
                 # 전체 컬럼 높이에서 고정 높이들을 뺀 나머지를 할당
@@ -1328,7 +1330,7 @@ class ResultPageWidget(QWidget):
         """)
 
         layout = QVBoxLayout()
-        layout.setContentsMargins(24, 10, 10, 10)
+        layout.setContentsMargins(24, 0, 10, 10)
         layout.setSpacing(5)
 
         # ✅ 시험 정보 불러오기
@@ -1357,7 +1359,7 @@ class ResultPageWidget(QWidget):
         scroll_area = QScrollArea()
         scroll_area.setWidget(info_widget)
         scroll_area.setWidgetResizable(True)
-        scroll_area.setFixedSize(1064, 169)
+        scroll_area.setFixedSize(1064, 194)
         scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
@@ -1868,8 +1870,9 @@ class ResultPageWidget(QWidget):
         total_group.setFixedSize(1064, 128)
         total_group.setStyleSheet("""
             QGroupBox {
-                background-color: #F0F6FB;
+                background-color: #FFFFFF;
                 border: 1px solid #CECECE;
+                border-top: none;
                 border-top-left-radius: 0px;
                 border-top-right-radius: 0px;
                 border-bottom-left-radius: 4px;
