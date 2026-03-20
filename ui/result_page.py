@@ -748,11 +748,17 @@ class ResultPageWidget(QWidget):
                 last_col_width = available_width - used_width
                 self.tableWidget.setColumnWidth(len(self.original_column_widths) - 1, last_col_width)
 
-                # 헤더 라벨 너비도 3페이지와 동일하게 비례 조정
-                if hasattr(self, 'result_header_labels') and hasattr(self, 'original_header_widths'):
-                    for i, label in enumerate(self.result_header_labels):
-                        new_label_width = int(self.original_header_widths[i] * width_ratio)
-                        label.setFixedSize(new_label_width, 30)
+                # ✅ 헤더 레이아웃 여백 동기화 (오른쪽 밀림 현상 방지 핵심)
+                if hasattr(self, 'result_header_layout'):
+                    self.result_header_layout.setContentsMargins(0, 0, scrollbar_width, 0)
+
+                # 헤더 라벨 너비도 테이블 컬럼 너비와 완벽히 동기화
+                if hasattr(self, 'result_header_labels'):
+                    for i in range(len(self.original_column_widths)):
+                        if i < len(self.result_header_labels):
+                            # 실제 테이블의 컬럼 너비를 그대로 주입
+                            label_width = self.tableWidget.columnWidth(i)
+                            self.result_header_labels[i].setFixedSize(label_width, 30)
 
         # ✅ 배경 지오메트리 실시간 업데이트 (리사이징 완료 후 최하단에서 호출 - 3페이지와 동일)
         self._update_content_background_geometry()
@@ -1011,17 +1017,110 @@ class ResultPageWidget(QWidget):
             return protocol == "webhook"
         return False
 
+    def _get_timer_icon_pixmap(self, state):
+        if not hasattr(self, '_api_timer_pixmaps'):
+            icon_map = {
+                "waiting": "assets/image/icon/waiting_timer.png",
+                "running": "assets/image/icon/running_timer.png",
+                "success": "assets/image/icon/success_timer.png",
+                "timeover": "assets/image/icon/timeover_timer.png",
+            }
+            self._api_timer_pixmaps = {}
+            for key, rel_path in icon_map.items():
+                self._api_timer_pixmaps[key] = QPixmap(resource_path(rel_path))
+
+        state_key = str(state or "waiting").strip().lower()
+        if state_key not in self._api_timer_pixmaps:
+            state_key = "waiting"
+        return self._api_timer_pixmaps[state_key]
+
+    def _set_timer_cell(self, row, state, elapsed_seconds=0):
+        """4페이지 타이머 셀 렌더링 (3페이지와 동일한 아이콘/텍스트 스타일)"""
+        if not hasattr(self, 'tableWidget'):
+            return
+        if row < 0 or row >= self.tableWidget.rowCount():
+            return
+
+        state_key = str(state or "waiting").strip().lower()
+        if state_key not in {"waiting", "running", "success", "timeover"}:
+            state_key = "waiting"
+
+        try:
+            elapsed = max(0, int(elapsed_seconds))
+        except (TypeError, ValueError):
+            elapsed = 0
+        show_elapsed_text = not (state_key == "waiting" and elapsed == 0)
+        color_map = {
+            "waiting": "#8A9094",
+            "running": "#8A9094",
+            "success": "#1D4ED8",
+            "timeover": "#DC2626",
+        }
+
+        timer_widget = QWidget()
+        timer_layout = QHBoxLayout()
+        timer_layout.setContentsMargins(10, 0, 0, 0)
+        timer_layout.setSpacing(6)
+        timer_layout.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+
+        icon_label = QLabel()
+        timer_pixmap = self._get_timer_icon_pixmap(state_key)
+        if not timer_pixmap.isNull():
+            icon_label.setPixmap(timer_pixmap)
+            icon_label.setFixedSize(timer_pixmap.size())
+        icon_label.setAlignment(Qt.AlignCenter)
+        timer_layout.addWidget(icon_label)
+
+        if show_elapsed_text:
+            text_label = QLabel(f"{elapsed}초")
+            text_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            text_label.setStyleSheet(
+                f"""
+                QLabel {{
+                    color: {color_map[state_key]};
+                    font-family: 'Noto Sans KR';
+                    font-size: 16px;
+                    font-weight: 600;
+                    border: none;
+                    background: transparent;
+                }}
+                """
+            )
+            timer_layout.addWidget(text_label)
+
+        timer_layout.addStretch()
+        timer_widget.setLayout(timer_layout)
+        self.tableWidget.setCellWidget(row, 2, timer_widget)
+
+    def _get_parent_timer_state_elapsed(self, row):
+        state = "waiting"
+        elapsed = 0
+        if hasattr(self.parent, 'get_api_timer_state'):
+            state = self.parent.get_api_timer_state(row)
+        else:
+            state = getattr(self.parent, f"_api_timer_state_{row}", "waiting")
+
+        if hasattr(self.parent, 'get_api_timer_elapsed'):
+            elapsed = self.parent.get_api_timer_elapsed(row)
+        else:
+            elapsed = getattr(self.parent, f"_api_timer_elapsed_{row}", 0)
+        try:
+            elapsed = int(elapsed)
+        except (TypeError, ValueError):
+            elapsed = 0
+        return state, elapsed
+
     def _set_api_name_cell(self, row, api_name):
-        """4페이지용 API 명 셀 설정 (3페이지와 동일하게 웹훅 뱃지 포함 및 좌측 정렬, 17px)"""
+        """4페이지용 API 명 셀 설정 (왼쪽 정렬 + 12px 여백으로 헤더와 수직선 맞춤)"""
         api_item = QTableWidgetItem(api_name)
-        api_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
+        api_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         api_item.setData(Qt.UserRole, api_name)
         api_item.setText("")  # 텍스트는 QLabel로 표시하므로 비움
         self.tableWidget.setItem(row, 1, api_item)
 
         api_container = QWidget()
         api_layout = QHBoxLayout()
-        api_layout.setContentsMargins(12, 0, 4, 0)
+        api_layout.setContentsMargins(12, 0, 4, 0)  # 12px 들여쓰기
         api_layout.setSpacing(8)
         api_layout.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
 
@@ -1039,7 +1138,7 @@ class ResultPageWidget(QWidget):
         api_name_label.setToolTip(api_name)
         api_layout.addWidget(api_name_label, 0, Qt.AlignVCenter)
 
-        # 웹훅 뱃지 추가 (3페이지와 동일한 로직)
+        # 웹훅 뱃지 추가
         if self._is_webhook_api(row) and not self.webhook_badge_pixmap.isNull():
             webhook_badge_label = WebhookBadgeLabel()
             webhook_badge_label.setPixmap(self.webhook_badge_pixmap)
@@ -1090,17 +1189,8 @@ class ResultPageWidget(QWidget):
             # API 명 - 컬럼 1 (웹훅 뱃지 포함)
             self._set_api_name_cell(row, api_list[row])
 
-            # ✅ 타이머/뱃지 컬럼(2) - 빈 대기 아이콘
-            timer_widget = QWidget()
-            timer_layout = QHBoxLayout()
-            timer_layout.setContentsMargins(0, 0, 0, 0)
-            timer_label = QLabel()
-            timer_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))
-            timer_label.setAlignment(Qt.AlignCenter)
-            timer_layout.addWidget(timer_label)
-            timer_layout.setAlignment(Qt.AlignCenter)
-            timer_widget.setLayout(timer_layout)
-            self.tableWidget.setCellWidget(row, 2, timer_widget)
+            # ✅ 타이머 컬럼(2) - 3페이지와 동일한 waiting 상태 렌더
+            self._set_timer_cell(row, "waiting", 0)
 
             # ✅ 기본 아이콘 (결과 페이지 전용 아이콘 사용) - 컬럼 3
             icon_widget = QWidget()
@@ -1173,22 +1263,12 @@ class ResultPageWidget(QWidget):
             display_name = remove_api_number_suffix(row_data['api_name'])
             self._set_api_name_cell(row, display_name)
 
-            # ✅ 타이머/뱃지 컬럼 복원 - 컬럼 2
-            if self._is_webhook_api(row):
-                timer_widget = self.parent.tableWidget.cellWidget(row, 2)
-                if timer_widget:
-                    old_label = timer_widget.findChild(QLabel)
-                    if old_label and not old_label.pixmap().isNull():
-                        new_timer_widget = QWidget()
-                        new_timer_layout = QHBoxLayout()
-                        new_timer_layout.setContentsMargins(0, 0, 0, 0)
-                        new_timer_label = QLabel()
-                        new_timer_label.setPixmap(old_label.pixmap())
-                        new_timer_label.setAlignment(Qt.AlignCenter)
-                        new_timer_layout.addWidget(new_timer_label)
-                        new_timer_layout.setAlignment(Qt.AlignCenter)
-                        new_timer_widget.setLayout(new_timer_layout)
-                        self.tableWidget.setCellWidget(row, 2, new_timer_widget)
+            # ✅ 타이머 컬럼 복원 - 상태/경과시간 기반 렌더 (웹훅 여부와 무관)
+            timer_state = row_data.get('timer_state', None)
+            timer_elapsed = row_data.get('timer_elapsed', None)
+            if timer_state is None or timer_elapsed is None:
+                timer_state, timer_elapsed = self._get_parent_timer_state_elapsed(row)
+            self._set_timer_cell(row, timer_state, timer_elapsed)
 
             # ✅ 아이콘 상태 복원 (결과 페이지 전용 아이콘 사용) - 컬럼 3
             icon_state = row_data['icon_state']
@@ -1426,9 +1506,9 @@ class ResultPageWidget(QWidget):
                 border-top-right-radius: 4px;
             }
         """)
-        header_layout = QHBoxLayout(self.result_header_widget)
-        header_layout.setContentsMargins(0, 0, 14, 0)  # 오른쪽 14px (스크롤바 영역)
-        header_layout.setSpacing(0)
+        self.result_header_layout = QHBoxLayout(self.result_header_widget)
+        self.result_header_layout.setContentsMargins(0, 0, 14, 0)  # 오른쪽 14px (기본값, resizeEvent에서 동기화됨)
+        self.result_header_layout.setSpacing(0)
 
         # 헤더 컬럼 정의 (너비, 텍스트) - 10컬럼 구조 (3페이지와 동일)
         header_columns = [
@@ -1450,18 +1530,35 @@ class ResultPageWidget(QWidget):
         for i, (width, text) in enumerate(header_columns):
             label = QLabel(text)
             label.setFixedSize(width, 30)
-            label.setAlignment(Qt.AlignCenter)
-            label.setStyleSheet("""
-                QLabel {
-                    background-color: transparent;
-                    border: none;
-                    color: #1B1B1C;
-                    font-family: 'Noto Sans KR';
-                    font-size: 18px;
-                    font-weight: 600;
-                }
-            """)
-            header_layout.addWidget(label)
+            
+            # API 명(index 1)만 왼쪽 정렬 + 12px 여백 (본문 셀과 동일하게)
+            if i == 1:
+                label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+                label.setStyleSheet("""
+                    QLabel {
+                        background-color: transparent;
+                        border: none;
+                        color: #1B1B1C;
+                        font-family: 'Noto Sans KR';
+                        font-size: 18px;
+                        font-weight: 600;
+                        padding-left: 12px;
+                    }
+                """)
+            else:
+                label.setAlignment(Qt.AlignCenter)
+                label.setStyleSheet("""
+                    QLabel {
+                        background-color: transparent;
+                        border: none;
+                        color: #1B1B1C;
+                        font-family: 'Noto Sans KR';
+                        font-size: 18px;
+                        font-weight: 600;
+                    }
+                """)
+            
+            self.result_header_layout.addWidget(label)
             self.result_header_labels.append(label)
 
         # 테이블 본문 (헤더 숨김) - 10개 컬럼
@@ -1607,21 +1704,9 @@ class ResultPageWidget(QWidget):
                 api_name = api_item.data(Qt.UserRole) or api_item.text()
                 self._set_api_name_cell(row, api_name)
 
-            # ✅ 타이머/뱃지 컬럼 - 컬럼 2 (부모의 컬럼 2에서 복사)
-            timer_widget = self.parent.tableWidget.cellWidget(row, 2)
-            if timer_widget:
-                old_timer_label = timer_widget.findChild(QLabel)
-                if old_timer_label and not old_timer_label.pixmap().isNull():
-                    new_timer_widget = QWidget()
-                    new_timer_layout = QHBoxLayout()
-                    new_timer_layout.setContentsMargins(0, 0, 0, 0)
-                    new_timer_label = QLabel()
-                    new_timer_label.setPixmap(old_timer_label.pixmap())
-                    new_timer_label.setAlignment(Qt.AlignCenter)
-                    new_timer_layout.addWidget(new_timer_label)
-                    new_timer_layout.setAlignment(Qt.AlignCenter)
-                    new_timer_widget.setLayout(new_timer_layout)
-                    self.tableWidget.setCellWidget(row, 2, new_timer_widget)
+            # ✅ 타이머 컬럼 - 상태/경과시간 기반 렌더
+            timer_state, timer_elapsed = self._get_parent_timer_state_elapsed(row)
+            self._set_timer_cell(row, timer_state, timer_elapsed)
 
             # ✅ 결과 아이콘 (부모의 컬럼 3에서 가져옴) - 컬럼 3
             icon_widget = self.parent.tableWidget.cellWidget(row, 3)
