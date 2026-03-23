@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import (
+﻿from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QGroupBox, QLineEdit,
     QPushButton, QMessageBox, QTableWidget, QHeaderView, QAbstractItemView, QTableWidgetItem,
     QStackedWidget, QRadioButton, QFrame, QApplication, QSizePolicy, QGraphicsDropShadowEffect,
@@ -1174,14 +1174,14 @@ class InfoWidget(QWidget):
 
             if not (start_dt <= now <= end_dt):
                 msg = (
-                    f"현재 시간은 시험 가능 시간 범위가 아닙니다.\n\n"
+                    f"현재 시간은 시험 가능 시간이 아닙니다.\n\n"
                     f"현재 시간: {now.strftime('%Y-%m-%d %H:%M')}\n"
                     f"시험 가능 시간: {start_dt.strftime('%Y-%m-%d %H:%M')} ~ {end_dt.strftime('%Y-%m-%d %H:%M')}\n\n"
                     "프로그램을 종료합니다."
                 )
 
                 popup = SystemPopup(
-                    title="시험 일정 범위 벗어남",
+                    title="시험 가능 시간대 아님",
                     message=msg,
                     parent=self
                 )
