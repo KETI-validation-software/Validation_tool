@@ -135,6 +135,16 @@ def build_monitor_start_details(api_count):
     return f"API {_k(0xAC1C, 0xC218)} {int(api_count)}{_k(0xAC1C)}"
 
 
+def generate_monitor_notice_html(message, accent_color="#275554", background_color="#F8FAFC", text_color="#1F2937"):
+    escaped_message = html.escape(str(message))
+    return (
+        f"<div style=\"margin-top: 10px; margin-bottom: 10px; padding: 12px 14px; "
+        f"border-left: 4px solid {accent_color}; background-color: {background_color}; "
+        f"border-radius: 4px; font-size: 17px; font-weight: 500; color: {text_color}; "
+        f"font-family: 'Noto Sans KR';\">{escaped_message}</div>"
+    )
+
+
 def build_monitor_progress_details(protocol):
     protocol_lower = str(protocol).lower()
     if protocol_lower == "basic":

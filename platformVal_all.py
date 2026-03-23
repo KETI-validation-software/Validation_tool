@@ -27,7 +27,7 @@ from ui.platform_main_ui import PlatformMainUI
 import spec.Schema_response as schema_response_module
 import warnings
 from core.validation_registry import get_validation_rules
-from core.utils import remove_api_number_suffix, to_detail_text, redact, clean_trace_directory, format_schema, load_from_trace_file, load_external_constants, build_monitor_step_name, build_webhook_monitor_step_name, build_monitor_result_title, build_monitor_start_title, build_monitor_start_details, build_monitor_progress_details, build_monitor_result_details
+from core.utils import remove_api_number_suffix, to_detail_text, redact, clean_trace_directory, format_schema, load_from_trace_file, load_external_constants, build_monitor_step_name, build_webhook_monitor_step_name, build_monitor_result_title, build_monitor_start_title, build_monitor_start_details, build_monitor_progress_details, build_monitor_result_details, generate_monitor_notice_html
 from core.logger import Logger
 
 warnings.filterwarnings('ignore')
@@ -421,9 +421,7 @@ class MyApp(PlatformMainUI):
                 self.cancel_btn.setDisabled(True)
 
                 # ✅ 완료 메시지 추가
-                self.valResult.append("\n" + "=" * 50)
-                self.valResult.append("모든 API 검증이 완료되었습니다!")
-                self.valResult.append("=" * 50)
+                self.valResult.append(generate_monitor_notice_html("모든 API 검증이 완료되었습니다!"))
 
                 # ✅ 자동 저장
                 Logger.debug(f" 평가 완료 - 자동 저장 시작")
@@ -2353,6 +2351,8 @@ class MyApp(PlatformMainUI):
                             self.update_table_row_with_retries(
                                 i, result, pass_count, error_count, data, error, retries
                             )
+                            restored_timer_state = "timeover" if "Message Missing" in str(error) else "success"
+                            self.set_api_timer_state(i, restored_timer_state, self.get_api_timer_elapsed(i))
                             Logger.debug(f" 테이블 복원: API {i+1} - result={result}, pass={pass_count}, error={error_count}, retries={retries}")
                 Logger.debug(f" 테이블 데이터 복원 완료")
                 QApplication.processEvents()  # 스피너 애니메이션 유지
@@ -2571,6 +2571,13 @@ class MyApp(PlatformMainUI):
             self.paused_current_retry = paused_current_retry
             self.paused_current_elapsed = paused_current_elapsed
             self.paused_current_timer_state = paused_current_timer_state
+            paused_table_timer_rows = [
+                {
+                    "state": self.get_api_timer_state(i),
+                    "elapsed": self.get_api_timer_elapsed(i),
+                }
+                for i in range(self.tableWidget.rowCount())
+            ]
 
             # 저장할 상태 데이터 구성
             paused_state = {
@@ -2580,6 +2587,7 @@ class MyApp(PlatformMainUI):
                 "paused_current_retry": self.paused_current_retry,
                 "paused_current_elapsed": self.paused_current_elapsed,
                 "paused_current_timer_state": self.paused_current_timer_state,
+                "paused_table_timer_rows": paused_table_timer_rows,
                 "step_buffers": self.step_buffers,
                 "step_pass_counts": getattr(self, 'step_pass_counts', [0] * len(self.videoMessages)),
                 "step_error_counts": getattr(self, 'step_error_counts', [0] * len(self.videoMessages)),
@@ -2640,6 +2648,7 @@ class MyApp(PlatformMainUI):
             self.paused_current_retry = paused_state.get("paused_current_retry", 0)
             self.paused_current_elapsed = paused_state.get("paused_current_elapsed", 0)
             self.paused_current_timer_state = paused_state.get("paused_current_timer_state", "waiting")
+            self.paused_table_timer_rows = paused_state.get("paused_table_timer_rows", [])
             self.step_buffers = paused_state.get("step_buffers", [])
             self.step_pass_counts = paused_state.get("step_pass_counts", [0] * len(self.videoMessages))
             self.step_error_counts = paused_state.get("step_error_counts", [0] * len(self.videoMessages))

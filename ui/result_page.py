@@ -734,24 +734,27 @@ class ResultPageWidget(QWidget):
             return "NONE"
         return None
 
+    def _get_result_icon_pixmap(self, image_path):
+        pixmap = QPixmap(image_path)
+        if pixmap.isNull():
+            return QIcon(image_path).pixmap(16, 16)
+        return pixmap
+
     def _set_result_icon_cell(self, row, icon_state):
         state = str(icon_state or "NONE").upper()
         if state == "PASS":
             img = self.img_pass
-            icon_size = (84, 20)
         elif state == "FAIL":
             img = self.img_fail
-            icon_size = (84, 20)
         else:
             state = "NONE"
             img = self.img_none
-            icon_size = (16, 16)
 
         icon_widget = QWidget()
         icon_layout = QHBoxLayout()
         icon_layout.setContentsMargins(0, 0, 0, 0)
         icon_label = QLabel()
-        icon_label.setPixmap(QIcon(img).pixmap(*icon_size))
+        icon_label.setPixmap(self._get_result_icon_pixmap(img))
         icon_label.setAlignment(Qt.AlignCenter)
         icon_label.setToolTip(f"Result: {state}")
         icon_layout.addWidget(icon_label)
@@ -1560,7 +1563,7 @@ class ResultPageWidget(QWidget):
             icon_layout = QHBoxLayout()
             icon_layout.setContentsMargins(0, 0, 0, 0)
             icon_label = QLabel()
-            icon_label.setPixmap(QIcon(self.img_none).pixmap(16, 16))  # icn_basic.png는 16x16
+            icon_label.setPixmap(self._get_result_icon_pixmap(self.img_none))  # icn_basic.png는 16x16
             icon_label.setAlignment(Qt.AlignCenter)
             icon_layout.addWidget(icon_label)
             icon_layout.setAlignment(Qt.AlignCenter)
@@ -1649,7 +1652,7 @@ class ResultPageWidget(QWidget):
             icon_layout = QHBoxLayout()
             icon_layout.setContentsMargins(0, 0, 0, 0)
             icon_label = QLabel()
-            icon_label.setPixmap(QIcon(img).pixmap(*icon_size))
+            icon_label.setPixmap(self._get_result_icon_pixmap(img))
             icon_label.setAlignment(Qt.AlignCenter)
             icon_label.setToolTip(f"Result: {icon_state}")
             icon_layout.addWidget(icon_label)
@@ -2101,7 +2104,7 @@ class ResultPageWidget(QWidget):
                     new_icon_layout.setContentsMargins(0, 0, 0, 0)
 
                     new_icon_label = QLabel()
-                    new_icon_label.setPixmap(QIcon(img).pixmap(*icon_size))
+                    new_icon_label.setPixmap(self._get_result_icon_pixmap(img))
                     new_icon_label.setToolTip(tooltip)
                     new_icon_label.setAlignment(Qt.AlignCenter)
 

@@ -26,6 +26,7 @@ from ui.gui_utils import CustomDialog
 from ui.api_selection_dialog import APISelectionDialog
 from ui.result_page import ResultPageWidget
 from core.system_state_manager import SystemStateManager
+from core.logger import Logger
 from requests.auth import HTTPDigestAuth
 import config.CONSTANTS as CONSTANTS
 from core.validation_registry import get_validation_rules
@@ -1479,11 +1480,19 @@ class CommonMainUI(QWidget):
             return
 
         timer_col = getattr(self, 'COL_TIMER', 2)
+        previous_state = getattr(self, f"_api_timer_state_{row}", "waiting")
+        previous_elapsed = int(getattr(self, f"_api_timer_elapsed_{row}", 0))
         state_key = str(state or "waiting").strip().lower()
         if state_key not in {"waiting", "running", "success", "timeover"}:
             state_key = "waiting"
 
         elapsed = max(0, int(elapsed_seconds))
+        if self.__class__.__name__ == "MyApp" and (
+            previous_state != state_key or previous_elapsed != elapsed
+        ):
+            Logger.debug(
+                f"[TIMER_STATE_CHANGE] row={row + 1} {previous_state}/{previous_elapsed} -> {state_key}/{elapsed}"
+            )
         show_elapsed_text = not (state_key == "waiting" and elapsed == 0)
         color_map = {
             "waiting": "#8A9094",  # 회색

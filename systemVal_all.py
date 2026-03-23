@@ -54,7 +54,7 @@ importlib.reload(constraints_request_module)
 
 result_dir = os.path.join(os.getcwd(), "results")
 os.makedirs(result_dir, exist_ok=True)
-from core.utils import to_detail_text, redact, remove_api_number_suffix, build_monitor_step_name, build_webhook_monitor_step_name, build_monitor_result_title, build_monitor_start_title, build_monitor_start_details, build_monitor_progress_details, build_monitor_result_details
+from core.utils import to_detail_text, redact, remove_api_number_suffix, build_monitor_step_name, build_webhook_monitor_step_name, build_monitor_result_title, build_monitor_start_title, build_monitor_start_details, build_monitor_progress_details, build_monitor_result_details, generate_monitor_notice_html
 
 class MyApp(SystemMainUI):
     previousPageRequested = pyqtSignal(object)
@@ -363,7 +363,7 @@ class MyApp(SystemMainUI):
                     border-radius: 4px;
                     padding: 0 24px;
                     font-family: "Noto Sans KR";
-                    font-size: 18px;
+                    font-size: 16px;
                     font-weight: 400;
                     color: #6B6B6B;
                 }
@@ -458,6 +458,17 @@ class MyApp(SystemMainUI):
 
     def _reset_all_row_timers(self):
         self.reset_all_api_timers()
+
+    def _log_timer_snapshot(self, tag):
+        snapshots = []
+        try:
+            for row in range(self.tableWidget.rowCount()):
+                snapshots.append(
+                    f"{row + 1}:{self.get_api_timer_state(row)}/{self.get_api_timer_elapsed(row)}"
+                )
+            Logger.debug(f"[TIMER_SNAPSHOT] {tag} -> {' | '.join(snapshots)}")
+        except Exception as e:
+            Logger.debug(f"[TIMER_SNAPSHOT] {tag} logging failed: {e}")
 
     def load_specs_from_constants(self):
         """
@@ -1400,7 +1411,7 @@ class MyApp(SystemMainUI):
             # cnt가 리스트 길이 이상이면 종료 처리 (무한 반복 방지)
             if self.cnt >= len(self.message) or self.cnt >= len(self.time_outs):
                 self.tick_timer.stop()
-                self.valResult.append("시험이 완료되었습니다.")
+                self.valResult.append(generate_monitor_notice_html("시험이 완료되었습니다."))
                 self.cnt = 0
                 return
             # 플랫폼과 동일하게 time_pre/cnt_pre 조건 적용
@@ -1420,6 +1431,11 @@ class MyApp(SystemMainUI):
                 if self.webhook_res != None:
                     Logger.warn(f" 웹훅 메시지 수신")
                     # ✅ 타이머 라인 제거
+                    Logger.debug(
+                        f"[TIMER_SUCCESS_PATH] webhook cnt={self.cnt} retry={self.current_retry} "
+                        f"webhook_flag={self.webhook_flag} webhook_res={self.webhook_res is not None} "
+                        f"time_interval={time_interval:.3f}"
+                    )
                     self._set_timer_success(self.cnt, time_interval)
                 elif math.ceil(time_interval) >= self.time_outs[self.cnt] / 1000 - 1:
                     Logger.warn(f" 메시지 타임아웃! 웹훅 대기 종료")
@@ -1673,7 +1689,7 @@ class MyApp(SystemMainUI):
 
                 if self.cnt >= len(self.message):
                     self.tick_timer.stop()
-                    self.valResult.append("시험이 완료되었습니다.")
+                    self.valResult.append(generate_monitor_notice_html("시험이 완료되었습니다."))
 
                     # ✅ 현재 spec 데이터 저장
                     self.save_current_spec_data()
@@ -1756,6 +1772,11 @@ class MyApp(SystemMainUI):
 
                 if self.res != None:
                     # ✅ 응답 수신 완료 - 타이머 라인 제거 (웹훅 대기가 아닐 때만)
+                    Logger.debug(
+                        f"[TIMER_SUCCESS_PATH] response cnt={self.cnt} retry={self.current_retry} "
+                        f"webhook_flag={self.webhook_flag} res={self.res is not None} "
+                        f"time_interval={time_interval:.3f}"
+                    )
                     self._set_timer_success(self.cnt, time_interval)
                     
                     # 응답 처리 시작
@@ -2614,6 +2635,14 @@ class MyApp(SystemMainUI):
                         self.update_table_row_with_retries(
                             i, result, pass_count, error_count, data, error, retries
                         )
+                        timer_rows = getattr(self, "paused_table_timer_rows", [])
+                        saved_timer = timer_rows[i] if i < len(timer_rows) else {}
+                        restored_timer_state = saved_timer.get(
+                            "state",
+                            "timeover" if "Message Missing" in str(error) else "success",
+                        )
+                        restored_timer_elapsed = int(saved_timer.get("elapsed", 0) or 0)
+                        self.set_api_timer_state(i, restored_timer_state, restored_timer_elapsed)
                         Logger.debug(f" 테이블 복원: API {i+1} - result={result}, pass={pass_count}, error={error_count}, retries={retries}")
             Logger.debug(f" 테이블 데이터 복원 완료")
 
@@ -2686,6 +2715,13 @@ class MyApp(SystemMainUI):
             self.paused_current_retry = paused_current_retry
             self.paused_current_elapsed = paused_current_elapsed
             self.paused_current_timer_state = paused_current_timer_state
+            paused_table_timer_rows = [
+                {
+                    "state": self.get_api_timer_state(i),
+                    "elapsed": self.get_api_timer_elapsed(i),
+                }
+                for i in range(self.tableWidget.rowCount())
+            ]
 
             # 저장할 상태 데이터 구성
             paused_state = {
@@ -2695,6 +2731,7 @@ class MyApp(SystemMainUI):
                 "paused_current_retry": self.paused_current_retry,
                 "paused_current_elapsed": self.paused_current_elapsed,
                 "paused_current_timer_state": self.paused_current_timer_state,
+                "paused_table_timer_rows": paused_table_timer_rows,
                 "step_buffers": self.step_buffers,
                 "step_pass_counts": getattr(self, 'step_pass_counts', [0] * len(self.videoMessages)),
                 "step_error_counts": getattr(self, 'step_error_counts', [0] * len(self.videoMessages)),
@@ -2750,6 +2787,7 @@ class MyApp(SystemMainUI):
             self.paused_current_retry = paused_state.get("paused_current_retry", 0)
             self.paused_current_elapsed = paused_state.get("paused_current_elapsed", 0)
             self.paused_current_timer_state = paused_state.get("paused_current_timer_state", "waiting")
+            self.paused_table_timer_rows = paused_state.get("paused_table_timer_rows", [])
             self.step_buffers = paused_state.get("step_buffers", [])
             self.step_pass_counts = paused_state.get("step_pass_counts", [0] * len(self.videoMessages))
             self.step_error_counts = paused_state.get("step_error_counts", [0] * len(self.videoMessages))
@@ -2866,10 +2904,13 @@ class MyApp(SystemMainUI):
         except Exception as e:
             Logger.warning(f"⚠️ 시험 중지 - in_progress 상태 전송 실패: {e}")
 
+        self._log_timer_snapshot("pause_before_save_current_spec_data")
         self.save_current_spec_data()
+        self._log_timer_snapshot("pause_after_save_current_spec_data")
 
         # ✅ 일시정지 상태 저장
         self.save_paused_state()
+        self._log_timer_snapshot("pause_after_save_paused_state")
         return
 
         # ✅ JSON 결과 저장 추가
