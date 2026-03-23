@@ -30,6 +30,7 @@ from core.functions import (
     build_result_json,
     update_webhook_step_buffer_fields,
     upsert_attempt_log,
+    append_attempt_log_text,
 )
 from core.data_mapper import ConstraintDataGenerator
 from core.logger import Logger
@@ -1286,7 +1287,7 @@ class MyApp(SystemMainUI):
         # 웹훅 수신 payload를 실시간 모니터링에 [수신]으로 표시
         self.monitor_request_started_at[self.webhook_cnt] = time.perf_counter()
         self.monitor_response_elapsed_ms.pop(self.webhook_cnt, None)
-        self.append_monitor_log(
+        webhook_event_log_text = self.append_monitor_log(
             step_name=build_webhook_monitor_step_name(display_name, "event"),
             request_json=tmp_webhook_res,
             direction="RECV"
@@ -1298,7 +1299,7 @@ class MyApp(SystemMainUI):
             started_at = self.monitor_request_started_at.get(self.webhook_cnt)
             if started_at is not None:
                 self.monitor_response_elapsed_ms[self.webhook_cnt] = int(round((time.perf_counter() - started_at) * 1000))
-            self.append_monitor_log(
+            webhook_ack_log_text = self.append_monitor_log(
                 step_name=build_webhook_monitor_step_name(display_name, "ack"),
                 request_json=json.dumps(webhook_ack_payload, indent=4, ensure_ascii=False),
                 direction="SEND"
@@ -1344,7 +1345,7 @@ class MyApp(SystemMainUI):
             score_value = (accumulated_pass / total_fields * 100) if total_fields > 0 else 0
             extra_detail = to_detail_text(val_text) if val_result == "FAIL" else ""
 
-            self.append_monitor_log(
+            webhook_result_log_text = self.append_monitor_log(
                 step_name=result_step_title,
                 request_json="",
                 result_status=val_result,
@@ -1543,7 +1544,7 @@ class MyApp(SystemMainUI):
                 display_name = self.message_display[self.cnt] if self.cnt < len(self.message_display) else api_name
                 self.monitor_request_started_at[self.cnt] = time.perf_counter()
                 self.monitor_response_elapsed_ms.pop(self.cnt, None)
-                self.append_monitor_log(
+                request_log_text = self.append_monitor_log(
                     step_name=build_monitor_step_name(display_name, "request"),
                     request_json=json.dumps(inMessage, indent=4, ensure_ascii=False),
                     direction="SEND"
@@ -1554,6 +1555,12 @@ class MyApp(SystemMainUI):
                         self.step_buffers[self.cnt],
                         self.current_retry + 1,
                         send_payload=inMessage,
+                    )
+                    append_attempt_log_text(
+                        self.step_buffers[self.cnt],
+                        self.current_retry + 1,
+                        "monitor_log_text",
+                        request_log_text,
                     )
 
                 t = threading.Thread(target=self.post, args=(path, json_data, current_timeout), daemon=True)
@@ -1687,6 +1694,15 @@ class MyApp(SystemMainUI):
                     try:
                         self.run_status = "완료"
                         result_json = build_result_json(self)
+                        for spec_item in result_json.get("testResult", []):
+                            for api_item in spec_item.get("apis", []):
+                                validations = api_item.get("validations", [])
+                                if not validations:
+                                    continue
+                                transmitted_data = validations[0].get("transmittedData")
+                                Logger.debug(
+                                    f"[RESULT_JSON] api={api_item.get('name')} type={type(transmitted_data).__name__} value={repr(transmitted_data)[:300]}"
+                                )
                         url = f"{CONSTANTS.management_url}/api/integration/test-results"
                         response = requests.post(url, json=result_json)
                         Logger.debug(f"시험 결과 전송 상태 코드: {response.status_code}")
@@ -1802,7 +1818,7 @@ class MyApp(SystemMainUI):
                         started_at = self.monitor_request_started_at.get(self.cnt)
                         if started_at is not None:
                             self.monitor_response_elapsed_ms[self.cnt] = int(round((time.perf_counter() - started_at) * 1000))
-                        self.append_monitor_log(
+                        response_log_text = self.append_monitor_log(
                             step_name=build_monitor_step_name(display_name, "response"),
                             request_json=tmp_res_auth,
                             direction="RECV"
@@ -1968,6 +1984,12 @@ class MyApp(SystemMainUI):
                         recv_payload=platform_data,
                         validation_errors=[line.strip() for line in error_text.split("\n") if line.strip()] if val_result == "FAIL" else [],
                     )
+                    append_attempt_log_text(
+                        self.step_buffers[self.cnt],
+                        self.current_retry + 1,
+                        "monitor_log_text",
+                        response_log_text,
+                    )
 
                     # 기존 버퍼에 누적 (재시도 정보와 함께)
                     if self.current_retry == 0:
@@ -2041,13 +2063,19 @@ class MyApp(SystemMainUI):
                         # ??? ?? - ?? ?? ??
                         total_fields = total_pass_count + total_error_count
                         score_value = (total_pass_count / total_fields * 100) if total_fields > 0 else 0
-                        self.append_monitor_log(
+                        result_log_text = self.append_monitor_log(
                             step_name=build_monitor_result_title(display_name, self.current_retry + 1),
                             request_json="",  # ???? ?? ??????? ??
                             result_status=final_result,
                             score=score_value,
                             details=build_monitor_result_details(total_pass_count, total_error_count, current_protocol),
                             response_time_ms=self.monitor_response_elapsed_ms.get(self.cnt),
+                        )
+                        append_attempt_log_text(
+                            self.step_buffers[self.cnt],
+                            self.current_retry + 1,
+                            "monitor_log_text",
+                            result_log_text,
                         )
                     else:
                         # ?? ?? - ??? ??

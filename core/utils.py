@@ -147,6 +147,41 @@ def build_monitor_result_details(pass_count, error_count, protocol, response_tim
     return " | ".join(parts)
 
 
+def build_monitor_log_text(step_name, request_json="", score=None, details="", direction="RECV", response_time_ms=None, timestamp=None):
+    from datetime import datetime
+
+    type_label = _k(0xC1A1, 0xC2E0) if direction == "SEND" else _k(0xC218, 0xC2E0)
+    header_text = build_monitor_header_text(type_label, step_name)
+
+    if request_json:
+        request_json = replace_transport_desc_for_display(request_json)
+    request_json = normalize_monitor_request_json(type_label, step_name, request_json, details)
+
+    if timestamp is None:
+        timestamp = datetime.now().strftime("%H:%M:%S")
+
+    header_line = f"{header_text} {timestamp}"
+    if response_time_ms is not None:
+        header_line += f" | {_k(0xC751, 0xB2F5, 0x20, 0xC18C, 0xC694, 0x20, 0xC2DC, 0xAC04)}: {float(response_time_ms) / 1000:.2f}{_k(0xCD08)}"
+
+    parts = [header_line]
+
+    if details:
+        parts.extend(["", str(details)])
+
+    if request_json:
+        parts.extend(["", request_json])
+
+    if direction == "RECV" and score is not None:
+        try:
+            score_display = f"{float(score):.1f}"
+        except (TypeError, ValueError):
+            score_display = str(score)
+        parts.extend(["", f"{_k(0xD3C9, 0xAC00, 0x20, 0xC810, 0xC218)}: {score_display}%"])
+
+    return "\n".join(parts).strip()
+
+
 def to_detail_text(val_text):
     """
     검증 결과 텍스트를 항상 사람이 읽을 문자열로 표준화

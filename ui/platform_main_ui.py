@@ -1177,6 +1177,7 @@ class PlatformMainUI(CommonMainUI):
         import html
         from core.utils import (
             build_monitor_header_text,
+            build_monitor_log_text,
             normalize_monitor_request_json,
             replace_transport_desc_for_display,
         )
@@ -1187,6 +1188,15 @@ class PlatformMainUI(CommonMainUI):
 
         # 타임스탬프
         timestamp = datetime.now().strftime("%H:%M:%S")
+        plain_text_log = build_monitor_log_text(
+            step_name=step_name,
+            request_json=request_json,
+            score=score,
+            details=details,
+            direction=direction,
+            response_time_ms=response_time_ms,
+            timestamp=timestamp,
+        )
 
         # 방향에 따른 스타일 및 아이콘 설정
         if direction == "SEND":
@@ -1262,3 +1272,5 @@ class PlatformMainUI(CommonMainUI):
 
         if is_temp:
             self.has_temp_log = True
+
+        return plain_text_log
