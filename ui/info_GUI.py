@@ -575,6 +575,17 @@ class InfoWidget(QWidget):
     def go_to_previous_page(self):
         """이전 페이지로 이동"""
         if self.current_page > 0:
+            if self.current_page == 1:
+                reply = QMessageBox.question(
+                    self,
+                    "이전 화면으로 이동",
+                    "뒤로 가면 시험 시작 화면의 현재 정보가 초기화될 수 있습니다.\n이전 화면으로 이동하시겠습니까?",
+                    QMessageBox.Yes | QMessageBox.No,
+                    QMessageBox.No,
+                )
+                if reply != QMessageBox.Yes:
+                    return
+
             self.current_page -= 1
             self.stacked_widget.setCurrentIndex(self.current_page)
             # 페이지 전환 후 반응형 레이아웃 적용을 위해 resize 이벤트 강제 트리거

@@ -774,8 +774,20 @@ class CommonMainUI(QWidget):
         raise NotImplementedError("Subclass must implement create_spec_selection_panel")
 
     def _on_previous_page_clicked(self):
-        if self.embedded and hasattr(self, "previousPageRequested"):
-            self.previousPageRequested.emit(self)
+        if not self.embedded or not hasattr(self, "previousPageRequested"):
+            return
+
+        reply = QMessageBox.question(
+            self,
+            "이전 화면으로 이동",
+            "이전 화면으로 이동 시 현재 시험 정보가 초기화됩니다.\n계속하시겠습니까?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
+        if reply != QMessageBox.Yes:
+            return
+
+        self.previousPageRequested.emit(self)
 
     def _update_content_background_geometry(self):
         if not hasattr(self, 'content_widget') or not self.content_widget:
