@@ -325,6 +325,7 @@ class MyApp(SystemMainUI):
         self.paused_current_retry = 0
         self.paused_current_elapsed = 0
         self.paused_current_timer_state = "waiting"
+        self.paused_post_flag = False
         self.monitor_request_started_at = {}
         self.monitor_response_elapsed_ms = {}
 
@@ -2550,13 +2551,27 @@ class MyApp(SystemMainUI):
 
             # ✅ 재개 모드에서도 실행 상태 변수는 초기화 필요
             self.current_retry = max(0, int(getattr(self, 'paused_current_retry', 0)))
-            self.post_flag = False
+            self.post_flag = bool(getattr(self, 'paused_post_flag', False))
             self.processing_response = False
             self.message_in_cnt = 0
             self.realtime_flag = False
             self.tmp_msg_append_flag = False
             self.cnt_pre = self.cnt
-            resume_elapsed = max(0, int(getattr(self, 'paused_current_elapsed', 0)))
+            timer_rows = getattr(self, 'paused_table_timer_rows', [])
+            current_timer_row = (
+                timer_rows[self.cnt]
+                if 0 <= self.cnt < len(timer_rows)
+                else {}
+            )
+            resume_elapsed = max(
+                0,
+                int(
+                    current_timer_row.get(
+                        "elapsed",
+                        getattr(self, 'paused_current_elapsed', 0),
+                    ) or 0
+                ),
+            )
             if resume_elapsed > 0:
                 self.time_pre = time.time() - resume_elapsed
             else:
@@ -2568,7 +2583,12 @@ class MyApp(SystemMainUI):
 
             # 진행 중이던 API 타이머 표시 즉시 복원
             if 0 <= self.cnt < api_count:
-                restored_state = str(getattr(self, 'paused_current_timer_state', 'running') or 'running').lower()
+                restored_state = str(
+                    current_timer_row.get(
+                        "state",
+                        getattr(self, 'paused_current_timer_state', 'running'),
+                    ) or 'running'
+                ).lower()
                 if restored_state not in {"waiting", "running", "success", "timeover"}:
                     restored_state = "running"
                 self.set_api_timer_state(self.cnt, restored_state, resume_elapsed)
@@ -2696,7 +2716,13 @@ class MyApp(SystemMainUI):
             self.last_completed_api_index = last_completed
 
             # 일시정지 시점의 현재 진행 API/재시도/경과시간 저장
-            paused_current_api_index = self.cnt if 0 <= self.cnt < len(self.videoMessages) else -1
+            paused_current_api_index = next(
+                (
+                    i for i in range(self.tableWidget.rowCount())
+                    if self.get_api_timer_state(i) == "running"
+                ),
+                self.cnt if 0 <= self.cnt < len(self.videoMessages) else -1
+            )
             paused_current_retry = max(0, int(getattr(self, 'current_retry', 0)))
             paused_current_elapsed = 0
             paused_current_timer_state = "waiting"
@@ -2711,10 +2737,6 @@ class MyApp(SystemMainUI):
                 if paused_current_timer_state not in {"waiting", "running", "success", "timeover"}:
                     paused_current_timer_state = "waiting"
 
-            self.paused_current_api_index = paused_current_api_index
-            self.paused_current_retry = paused_current_retry
-            self.paused_current_elapsed = paused_current_elapsed
-            self.paused_current_timer_state = paused_current_timer_state
             paused_table_timer_rows = [
                 {
                     "state": self.get_api_timer_state(i),
@@ -2722,6 +2744,20 @@ class MyApp(SystemMainUI):
                 }
                 for i in range(self.tableWidget.rowCount())
             ]
+            if 0 <= paused_current_api_index < len(paused_table_timer_rows):
+                current_timer_row = paused_table_timer_rows[paused_current_api_index]
+                paused_current_elapsed = int(current_timer_row.get("elapsed", paused_current_elapsed) or 0)
+                paused_current_timer_state = str(
+                    current_timer_row.get("state", paused_current_timer_state) or paused_current_timer_state
+                ).lower()
+                if paused_current_timer_state not in {"waiting", "running", "success", "timeover"}:
+                    paused_current_timer_state = "waiting"
+
+            self.paused_current_api_index = paused_current_api_index
+            self.paused_current_retry = paused_current_retry
+            self.paused_current_elapsed = paused_current_elapsed
+            self.paused_current_timer_state = paused_current_timer_state
+            self.paused_post_flag = bool(getattr(self, 'post_flag', False))
 
             # 저장할 상태 데이터 구성
             paused_state = {
@@ -2731,6 +2767,7 @@ class MyApp(SystemMainUI):
                 "paused_current_retry": self.paused_current_retry,
                 "paused_current_elapsed": self.paused_current_elapsed,
                 "paused_current_timer_state": self.paused_current_timer_state,
+                "paused_post_flag": self.paused_post_flag,
                 "paused_table_timer_rows": paused_table_timer_rows,
                 "step_buffers": self.step_buffers,
                 "step_pass_counts": getattr(self, 'step_pass_counts', [0] * len(self.videoMessages)),
@@ -2787,6 +2824,7 @@ class MyApp(SystemMainUI):
             self.paused_current_retry = paused_state.get("paused_current_retry", 0)
             self.paused_current_elapsed = paused_state.get("paused_current_elapsed", 0)
             self.paused_current_timer_state = paused_state.get("paused_current_timer_state", "waiting")
+            self.paused_post_flag = bool(paused_state.get("paused_post_flag", False))
             self.paused_table_timer_rows = paused_state.get("paused_table_timer_rows", [])
             self.step_buffers = paused_state.get("step_buffers", [])
             self.step_pass_counts = paused_state.get("step_pass_counts", [0] * len(self.videoMessages))

@@ -123,7 +123,7 @@ test_range = "전체 필드"
 auth_type = "Digest Auth"
 auth_info = "kisa,kisa_k1!2@"
 admin_code = "1"
-url = "https://192.168.0.10:8080"
+url = "https://10.252.219.53:8080"
 contact_person = "6"
 model_name = "6"
 request_id = "cmn2vnezz00j3r776v36r0ca9"
@@ -175,7 +175,7 @@ DEBUG_LEVEL = 3 # 기본값: WARN (권장)
 # ✅ 웹훅 서버 설정 (전역)
 WEBHOOK_HOST = "0.0.0.0"  # 서버 바인딩 주소 (모든 인터페이스에서 수신)
 WEBHOOK_PORT = 8081
-WEBHOOK_PUBLIC_IP = "192.168.0.6"
+WEBHOOK_PUBLIC_IP = "10.252.219.95"
 # ✅ 웹훅 공개 IP 설정: info_GUI에서 선택한 시험 URL의 IP 사용
 # 초기값은 URL에서 추출, info_GUI에서 주소 선택 후 자동 업데이트됨
 
