@@ -57,6 +57,7 @@ class TestSelectionPanel(QWidget):
             color: #000000;
             letter-spacing: -0.3px;
         """)
+        self.spec_panel_title.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         layout.addWidget(self.spec_panel_title)
         self.spec_panel_title_header = QWidget()
         self.spec_panel_title_header.setFixedSize(424, 24)

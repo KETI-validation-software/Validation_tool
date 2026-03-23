@@ -404,6 +404,7 @@ class CommonMainUI(QWidget):
             font-weight: 500;
             color: #000000;
         """)
+        self.api_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         self.api_title_icon = self._create_title_icon_label("assets/image/icon/icn_테이블.png")
         api_header_row_layout.addWidget(self.api_title_icon, 0, Qt.AlignLeft | Qt.AlignVCenter)
         api_header_row_layout.addSpacing(12)
@@ -450,6 +451,7 @@ class CommonMainUI(QWidget):
             font-weight: 500;
             color: #000000;
         """)
+        self.monitor_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         self.monitor_title_icon = self._create_title_icon_label("assets/image/icon/icn_모니터링.png")
         monitor_header_layout.addWidget(self.monitor_title_icon, 0, Qt.AlignLeft | Qt.AlignVCenter)
         monitor_header_layout.addSpacing(12)
@@ -570,6 +572,7 @@ class CommonMainUI(QWidget):
             font-weight: 500;
             color: #000000;
         """)
+        self.valmsg.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         self.right_layout.addWidget(self.valmsg)
         self.valmsg_header = QWidget()
         self.valmsg_header.setFixedSize(1064, 24)
