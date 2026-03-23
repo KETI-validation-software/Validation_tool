@@ -1288,7 +1288,7 @@ class MyApp(SystemMainUI):
         self.monitor_request_started_at[self.webhook_cnt] = time.perf_counter()
         self.monitor_response_elapsed_ms.pop(self.webhook_cnt, None)
         webhook_event_log_text = self.append_monitor_log(
-            step_name=build_webhook_monitor_step_name(display_name, "event"),
+            step_name=build_webhook_monitor_step_name(display_name, "event", role="system"),
             request_json=tmp_webhook_res,
             direction="RECV"
         )
@@ -1300,7 +1300,7 @@ class MyApp(SystemMainUI):
             if started_at is not None:
                 self.monitor_response_elapsed_ms[self.webhook_cnt] = int(round((time.perf_counter() - started_at) * 1000))
             webhook_ack_log_text = self.append_monitor_log(
-                step_name=build_webhook_monitor_step_name(display_name, "ack"),
+                step_name=build_webhook_monitor_step_name(display_name, "ack", role="system"),
                 request_json=json.dumps(webhook_ack_payload, indent=4, ensure_ascii=False),
                 direction="SEND"
             )
@@ -1341,6 +1341,7 @@ class MyApp(SystemMainUI):
                 accumulated_pass = key_psss_cnt
                 accumulated_error = key_error_cnt
             result_step_title = build_monitor_result_title(display_name, self.current_retry + 1)
+            current_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
             total_fields = accumulated_pass + accumulated_error
             score_value = (accumulated_pass / total_fields * 100) if total_fields > 0 else 0
             extra_detail = to_detail_text(val_text) if val_result == "FAIL" else ""
@@ -1419,17 +1420,14 @@ class MyApp(SystemMainUI):
                 if self.webhook_res != None:
                     Logger.warn(f" 웹훅 메시지 수신")
                     # ✅ 타이머 라인 제거
-                    self.update_last_line_timer("", remove=True)
                     self._set_timer_success(self.cnt, time_interval)
                 elif math.ceil(time_interval) >= self.time_outs[self.cnt] / 1000 - 1:
                     Logger.warn(f" 메시지 타임아웃! 웹훅 대기 종료")
                     # ✅ 타이머 라인 제거
-                    self.update_last_line_timer("", remove=True)
                     self._set_timer_timeover(self.cnt, time_interval)
                 else :
                     # ✅ 대기 시간 타이머 표시 (마지막 줄 갱신)
                     remaining = max(0, int((self.time_outs[self.cnt] / 1000) - time_interval))
-                    self.update_last_line_timer(f"남은 대기 시간: {remaining}초")
                     self._set_timer_running(self.cnt, time_interval)
                     
                     Logger.debug(f" 웹훅 대기 중... (API {self.cnt}) 타임아웃 {round(time_interval)} /{round(self.time_outs[self.cnt] / 1000)}")
@@ -1754,13 +1752,10 @@ class MyApp(SystemMainUI):
                     # ✅ 대기 시간 타이머 표시 (마지막 줄 갱신)
                     current_timeout = self.time_outs[self.cnt] / 1000 if self.cnt < len(self.time_outs) else 5.0
                     remaining = max(0, int(current_timeout - time_interval))
-                    self.update_last_line_timer(f"남은 대기 시간: {remaining}초")
                     self._set_timer_running(self.cnt, time_interval)
 
                 if self.res != None:
                     # ✅ 응답 수신 완료 - 타이머 라인 제거 (웹훅 대기가 아닐 때만)
-                    if not self.webhook_flag:
-                        self.update_last_line_timer("", remove=True)
                     self._set_timer_success(self.cnt, time_interval)
                     
                     # 응답 처리 시작
