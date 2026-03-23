@@ -41,6 +41,19 @@ class SystemMainUI(CommonMainUI):
         super().__init__()
         self.validation_mode = "system"
 
+    def _create_title_icon_label(self, icon_path, max_height=24):
+        icon_label = QLabel()
+        pixmap = QPixmap(resource_path(icon_path))
+        if not pixmap.isNull():
+            if pixmap.height() > max_height:
+                pixmap = pixmap.scaledToHeight(max_height, Qt.SmoothTransformation)
+            icon_label.setPixmap(pixmap)
+            icon_label.setFixedSize(pixmap.size())
+        else:
+            icon_label.setFixedSize(0, max_height)
+        icon_label.setStyleSheet("background: transparent;")
+        return icon_label
+
     def initUI(self):
         # CommonMainUI의 initUI 호출
         super().initUI()
@@ -78,7 +91,21 @@ class SystemMainUI(CommonMainUI):
             color: #000000;
             letter-spacing: -0.3px;
         """)
-        parent_layout.addWidget(self.spec_panel_title)
+        self.spec_panel_title.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+
+        self.spec_panel_title_header = QWidget()
+        self.spec_panel_title_header.setFixedSize(424, 24)
+        title_header_layout = QHBoxLayout(self.spec_panel_title_header)
+        title_header_layout.setContentsMargins(0, 0, 0, 0)
+        title_header_layout.setSpacing(0)
+
+        self.spec_panel_title_icon = self._create_title_icon_label("assets/image/icon/icn_시험 선택.png")
+        title_header_layout.addWidget(self.spec_panel_title_icon, 0, Qt.AlignLeft | Qt.AlignVCenter)
+        title_header_layout.addSpacing(12)
+        title_header_layout.addWidget(self.spec_panel_title, 0, Qt.AlignLeft | Qt.AlignVCenter)
+        title_header_layout.addStretch()
+
+        parent_layout.addWidget(self.spec_panel_title_header)
 
         # ✅ 반응형: 원본 크기 저장
         self.original_spec_panel_title_size = (424, 24)
@@ -482,6 +509,8 @@ class SystemMainUI(CommonMainUI):
             if hasattr(self, 'spec_panel_title') and hasattr(self, 'original_spec_panel_title_size'):
                 new_title_width = int(self.original_spec_panel_title_size[0] * width_ratio)
                 self.spec_panel_title.setFixedSize(new_title_width, self.original_spec_panel_title_size[1])
+                if hasattr(self, 'spec_panel_title_header'):
+                    self.spec_panel_title_header.setFixedSize(new_title_width, self.original_spec_panel_title_size[1])
 
             # 그룹 테이블 위젯 크기 조정 (extra_column_height 비례 분배)
             if hasattr(self, 'group_table_widget') and hasattr(self, 'original_group_table_widget_size'):
