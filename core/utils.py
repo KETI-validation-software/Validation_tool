@@ -45,23 +45,23 @@ def replace_transport_desc_for_display(json_str):
     return json_str
 
 
+def _k(*codepoints):
+    return "".join(chr(code) for code in codepoints)
+
+
 def build_monitor_header_text(type_label, step_name):
-    """
-    실시간 모니터링 헤더 텍스트를 구성한다.
-    송수신 payload 헤더에만 [송신]/[수신] 접두어를 붙이고,
-    시작/결과/완료성 제목은 원문 그대로 유지한다.
-    """
     if not isinstance(step_name, str):
         return f"[{type_label}] {step_name}"
 
     plain_title_prefixes = (
-        "결과:",
-        "시험 API 결과:",
-        "시험 완료",
-        "시험 시작",
+        f"{_k(0xACB0, 0xACFC)}:",
+        f"{_k(0xAC80, 0xC99D, 0x20, 0xACB0, 0xACFC)}:",
+        f"{_k(0xC2DC, 0xD5D8, 0x20, 0x41, 0x50, 0x49, 0x20, 0xACB0, 0xACFC)}:",
+        _k(0xC2DC, 0xD5D8, 0x20, 0xC644, 0xB8CC),
+        _k(0xC2DC, 0xD5D8, 0x20, 0xC2DC, 0xC791),
     )
     plain_titles = {
-        "관리시스템 결과 전송 완료",
+        _k(0xAD00, 0xB9AC, 0xC2DC, 0xC2A4, 0xD15C, 0x20, 0xACB0, 0xACFC, 0x20, 0xC804, 0xC1A1, 0x20, 0xC644, 0xB8CC),
     }
 
     if step_name.startswith(plain_title_prefixes) or step_name in plain_titles:
@@ -71,20 +71,13 @@ def build_monitor_header_text(type_label, step_name):
 
 
 def normalize_monitor_step_name(step_name):
-    """
-    실시간 모니터링 제목에서 중복되거나 불필요한 보조 태그를 제거한다.
-    """
     if not isinstance(step_name, str):
         return step_name
 
-    return step_name.replace(" (응답)", "")
+    return step_name.replace(f" ({_k(0xC751, 0xB2F5)})", "")
 
 
 def normalize_monitor_request_json(type_label, step_name, request_json, details=""):
-    """
-    payload 로그에서 본문이 비어 있으면 사용자용 안내 문구를 채운다.
-    시작/결과/완료성 제목은 빈 본문을 그대로 둔다.
-    """
     if request_json:
         return request_json
 
@@ -93,9 +86,55 @@ def normalize_monitor_request_json(type_label, step_name, request_json, details=
 
     header_text = build_monitor_header_text(type_label, step_name)
     if isinstance(header_text, str) and header_text.startswith("["):
-        return "메시지 없음"
+        return _k(0xBA54, 0xC2DC, 0xC9C0, 0x20, 0xC5C6, 0xC74C)
 
     return request_json
+
+
+def build_monitor_step_name(api_name, kind):
+    label_map = {
+        "request": _k(0xC694, 0xCCAD),
+        "response": _k(0xC751, 0xB2F5),
+    }
+    suffix = label_map.get(kind, kind)
+    return f"{api_name} ({suffix})" if suffix else str(api_name)
+
+
+def build_monitor_result_title(api_name, completed_attempts, suffix=""):
+    title = f"{_k(0xAC80, 0xC99D, 0x20, 0xACB0, 0xACFC)}: {api_name}"
+    if suffix:
+        title += f" - {suffix}"
+    return f"{title} ({completed_attempts}{_k(0xD68C, 0x20, 0xAC80, 0xC99D, 0x20, 0xC644, 0xB8CC)})"
+
+
+def build_monitor_start_title():
+    return _k(0xC2DC, 0xD5D8, 0x20, 0xC2DC, 0xC791)
+
+
+def build_monitor_start_details(api_count):
+    return f"API {_k(0xAC1C, 0xC218)} {int(api_count)}{_k(0xAC1C)}"
+
+
+def build_monitor_progress_details(protocol):
+    protocol_text = _k(0xC77C, 0xBC18, 0x20, 0xBA54, 0xC2DC, 0xC9C0) if str(protocol).lower() == "basic" else f"{_k(0xC2E4, 0xC2DC, 0xAC04, 0x20, 0xBA54, 0xC2DC, 0xC9C0)}: {protocol}"
+    return f"{_k(0xAC80, 0xC99D, 0x20, 0xC9C4, 0xD589, 0x20, 0xC911)}... | {protocol_text}"
+
+
+def build_monitor_result_details(pass_count, error_count, protocol, response_time_ms=None, extra_detail=""):
+    protocol_text = _k(0xC77C, 0xBC18, 0x20, 0xBA54, 0xC2DC, 0xC9C0) if str(protocol).lower() == "basic" else f"{_k(0xC2E4, 0xC2DC, 0xAC04, 0x20, 0xBA54, 0xC2DC, 0xC9C0)}: {protocol}"
+    parts = [
+        f"{_k(0xD1B5, 0xACFC, 0x20, 0xD544, 0xB4DC, 0x20, 0xC218)}: {pass_count}, {_k(0xC2E4, 0xD328, 0x20, 0xD544, 0xB4DC, 0x20, 0xC218)}: {error_count}",
+        protocol_text,
+    ]
+    if response_time_ms is not None:
+        parts.append(f"{_k(0xC751, 0xB2F5, 0x20, 0xC18C, 0xC694, 0x20, 0xC2DC, 0xAC04)}: {int(response_time_ms)}ms")
+    if extra_detail:
+        parts.append(f"{_k(0xC0C1, 0xC138)}: {extra_detail}")
+    return " | ".join(parts)
+
+
+    return " | ".join(parts)
+
 
 def to_detail_text(val_text):
     """

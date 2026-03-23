@@ -90,9 +90,9 @@ class TestApiSection(QGroupBox):
         # 셀 높이 설정 (39px)
         self.api_test_table.verticalHeader().setDefaultSectionSize(39)
 
-        # 셀 폰트 설정 (19px)
+        # 셀 폰트 설정 (17px)
         cell_font = QFont("Noto Sans KR")
-        cell_font.setPixelSize(19)
+        cell_font.setPixelSize(17)
         self.api_test_table.setFont(cell_font)
 
         # 편집 비활성화

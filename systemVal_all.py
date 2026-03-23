@@ -53,7 +53,7 @@ importlib.reload(constraints_request_module)
 
 result_dir = os.path.join(os.getcwd(), "results")
 os.makedirs(result_dir, exist_ok=True)
-from core.utils import to_detail_text, redact, remove_api_number_suffix
+from core.utils import to_detail_text, redact, remove_api_number_suffix, build_monitor_step_name, build_monitor_result_title, build_monitor_start_title, build_monitor_start_details, build_monitor_progress_details, build_monitor_result_details
 
 class MyApp(SystemMainUI):
     previousPageRequested = pyqtSignal(object)
@@ -324,6 +324,8 @@ class MyApp(SystemMainUI):
         self.paused_current_retry = 0
         self.paused_current_elapsed = 0
         self.paused_current_timer_state = "waiting"
+        self.monitor_request_started_at = {}
+        self.monitor_response_elapsed_ms = {}
 
         parts = self.auth_info.split(",")
         auth = [parts[0], parts[1] if len(parts) > 1 else ""]
@@ -1282,17 +1284,22 @@ class MyApp(SystemMainUI):
         )
 
         # 웹훅 수신 payload를 실시간 모니터링에 [수신]으로 표시
+        self.monitor_request_started_at[self.webhook_cnt] = time.perf_counter()
+        self.monitor_response_elapsed_ms.pop(self.webhook_cnt, None)
         self.append_monitor_log(
-            step_name=f"웹훅 이벤트: {display_name}",
+            step_name=build_monitor_step_name(display_name, "request"),
             request_json=tmp_webhook_res,
             direction="RECV"
         )
 
-        # 웹훅 ACK 응답 payload를 실시간 모니터링에 [송신]으로 표시
+        # ?? ACK ?? payload? ??? ????? [??]?? ??
         if self.webhook_res is not None:
             webhook_ack_payload = {"code": "200", "message": "성공"}
+            started_at = self.monitor_request_started_at.get(self.webhook_cnt)
+            if started_at is not None:
+                self.monitor_response_elapsed_ms[self.webhook_cnt] = int(round((time.perf_counter() - started_at) * 1000))
             self.append_monitor_log(
-                step_name=f"웹훅 응답: {display_name}",
+                step_name=build_monitor_step_name(display_name, "response"),
                 request_json=json.dumps(webhook_ack_payload, indent=4, ensure_ascii=False),
                 direction="SEND"
             )
@@ -1332,27 +1339,18 @@ class MyApp(SystemMainUI):
                 # 누적 배열이 없으면 웹훅 결과만 사용
                 accumulated_pass = key_psss_cnt
                 accumulated_error = key_error_cnt
-
-            if self.webhook_cnt < len(self.num_retries_list):
-                current_retries = self.num_retries_list[self.webhook_cnt]
-            else:
-                current_retries = 1
-
-            result_step_title = f"결과: {display_name} - 웹훅 이벤트 데이터 ({self.current_retry + 1}/{current_retries})"
+            result_step_title = build_monitor_result_title(display_name, self.current_retry + 1)
             total_fields = accumulated_pass + accumulated_error
             score_value = (accumulated_pass / total_fields * 100) if total_fields > 0 else 0
-            result_details = (
-                f"통과 필드 수: {accumulated_pass}, 실패 필드 수: {accumulated_error} | 실시간 메시지: WebHook"
-            )
-            if val_result == "FAIL":
-                result_details += f" | 상세: {to_detail_text(val_text)}"
+            extra_detail = to_detail_text(val_text) if val_result == "FAIL" else ""
 
             self.append_monitor_log(
                 step_name=result_step_title,
                 request_json="",
                 result_status=val_result,
                 score=score_value,
-                details=result_details,
+                details=build_monitor_result_details(accumulated_pass, accumulated_error, "WebHook", extra_detail=extra_detail),
+                response_time_ms=self.monitor_response_elapsed_ms.get(self.webhook_cnt),
                 direction="RECV"
             )
 
@@ -1543,8 +1541,10 @@ class MyApp(SystemMainUI):
 
                 # ✅ 송신 메시지 실시간 모니터링 로그 추가 (SEND)
                 display_name = self.message_display[self.cnt] if self.cnt < len(self.message_display) else api_name
+                self.monitor_request_started_at[self.cnt] = time.perf_counter()
+                self.monitor_response_elapsed_ms.pop(self.cnt, None)
                 self.append_monitor_log(
-                    step_name=display_name,
+                    step_name=build_monitor_step_name(display_name, "request"),
                     request_json=json.dumps(inMessage, indent=4, ensure_ascii=False),
                     direction="SEND"
                 )
@@ -1797,23 +1797,16 @@ class MyApp(SystemMainUI):
 
                         # 실시간 모니터링 창에 응답 데이터 표시
                         # 첫 번째 응답일 때만 API 명과 검증 예정 횟수 표시
-                        if self.current_retry == 0:
-                            api_name = self.message[self.cnt] if self.cnt < len(self.message) else "Unknown"
-                            display_name = self.message_display[self.cnt] if self.cnt < len(self.message_display) else api_name
-                            self.append_monitor_log(
-                                step_name=f"시험 API: {display_name} ({self.current_retry + 1}/{current_retries})",
-                                request_json=tmp_res_auth,
-                                direction="RECV"
-                            )
-                        else:
-                            # 2회차 이상: API 명과 회차만 표시
-                            api_name = self.message[self.cnt] if self.cnt < len(self.message) else "Unknown"
-                            display_name = self.message_display[self.cnt] if self.cnt < len(self.message_display) else api_name
-                            self.append_monitor_log(
-                                step_name=f"시험 API: {display_name} ({self.current_retry + 1}/{current_retries})",
-                                request_json=tmp_res_auth,
-                                direction="RECV"
-                            )
+                        api_name = self.message[self.cnt] if self.cnt < len(self.message) else "Unknown"
+                        display_name = self.message_display[self.cnt] if self.cnt < len(self.message_display) else api_name
+                        started_at = self.monitor_request_started_at.get(self.cnt)
+                        if started_at is not None:
+                            self.monitor_response_elapsed_ms[self.cnt] = int(round((time.perf_counter() - started_at) * 1000))
+                        self.append_monitor_log(
+                            step_name=build_monitor_step_name(display_name, "response"),
+                            request_json=tmp_res_auth,
+                            direction="RECV"
+                        )
 
                     # ✅ 디버깅: 어떤 스키마로 검증하는지 확인
                     if self.current_retry == 0:  # 첫 시도에만 출력
@@ -2041,29 +2034,27 @@ class MyApp(SystemMainUI):
                     # 웹훅 여부에 따라 다른 표시
                     api_name = self.message[self.cnt] if self.cnt < len(self.message) else "Unknown"
                     display_name = self.message_display[self.cnt] if self.cnt < len(self.message_display) else api_name
-                    if current_protocol == "WebHook":
-                        step_title = f"결과: {display_name} - 웹훅 구독 ({self.current_retry + 1}/{current_retries})"
-                    else:
-                        step_title = f"결과: {display_name} ({self.current_retry + 1}/{current_retries})"
+                    protocol_text = "일반 메시지" if current_protocol.lower() == "basic" else f"실시간 메시지: {current_protocol}"
                     
-                    # 마지막 시도에만 점수 표시, 진행중에는 표시 안함
+                    # ??? ???? ?? ??, ????? ?? ??
                     if self.current_retry + 1 >= current_retries:
-                        # 마지막 시도 - 최종 결과 표시
+                        # ??? ?? - ?? ?? ??
                         total_fields = total_pass_count + total_error_count
                         score_value = (total_pass_count / total_fields * 100) if total_fields > 0 else 0
                         self.append_monitor_log(
-                            step_name=step_title,
-                            request_json="",  # 데이터는 앞서 출력되었으므로 생략
+                            step_name=build_monitor_result_title(display_name, self.current_retry + 1),
+                            request_json="",  # ???? ?? ??????? ??
                             result_status=final_result,
                             score=score_value,
-                            details=f"통과 필드 수: {total_pass_count}, 실패 필드 수: {total_error_count} | {'일반 메시지' if current_protocol.lower() == 'basic' else f'실시간 메시지: {current_protocol}'}"
+                            details=build_monitor_result_details(total_pass_count, total_error_count, current_protocol),
+                            response_time_ms=self.monitor_response_elapsed_ms.get(self.cnt),
                         )
                     else:
-                        # 중간 시도 - 진행중 표시
+                        # ?? ?? - ??? ??
                         self.append_monitor_log(
-                            step_name=step_title,
-                            request_json="",  # 데이터는 앞서 출력되었으므로 생략
-                            details=f"검증 진행 중... | {'일반 메시지' if current_protocol.lower() == 'basic' else f'실시간 메시지: {current_protocol}'}"
+                            step_name=build_monitor_result_title(display_name, self.current_retry + 1),
+                            request_json="",  # ???? ?? ??????? ??
+                            details=f"검증 진행 중... | {protocol_text}"
                         )
 
                     # ✅ 웹훅 처리를 재시도 완료 체크 전에 실행 (step_pass_counts 업데이트를 위해)
@@ -2493,10 +2484,12 @@ class MyApp(SystemMainUI):
             self.url_text_box.setText(self.pathUrl)  # 안내 문구 변경
             print(f"[SYSTEM DEBUG] start_test_execution에서 pathUrl 설정: {self.pathUrl}")
 
-            # ✅ 18. 시작 메시지
+            # ? 18. ?? ???
+            self.monitor_request_started_at = {}
+            self.monitor_response_elapsed_ms = {}
             self.append_monitor_log(
-                step_name=f"시험 시작: {self.spec_description}",
-                details=f"API 개수: {len(self.videoMessages)}개"
+                step_name="시험 시작",
+                details=build_monitor_start_details(len(self.videoMessages))
             )
         else:
             # ========== 재개 모드: 저장된 상태 사용, 초기화 건너뛰기 ==========

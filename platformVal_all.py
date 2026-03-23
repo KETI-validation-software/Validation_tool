@@ -27,7 +27,7 @@ from ui.platform_main_ui import PlatformMainUI
 import spec.Schema_response as schema_response_module
 import warnings
 from core.validation_registry import get_validation_rules
-from core.utils import remove_api_number_suffix, to_detail_text, redact, clean_trace_directory, format_schema, load_from_trace_file, load_external_constants, normalize_monitor_step_name
+from core.utils import remove_api_number_suffix, to_detail_text, redact, clean_trace_directory, format_schema, load_from_trace_file, load_external_constants, build_monitor_step_name, build_monitor_result_title, build_monitor_start_title, build_monitor_start_details, build_monitor_progress_details, build_monitor_result_details
 from core.logger import Logger
 
 warnings.filterwarnings('ignore')
@@ -140,6 +140,8 @@ class MyApp(PlatformMainUI):
         self.paused_current_retry = 0
         self.paused_current_elapsed = 0
         self.paused_current_timer_state = "waiting"
+        self.monitor_request_started_at = {}
+        self.monitor_response_elapsed_ms = {}
 
         # step_buffers 동적 생성
         self.step_buffers = [
@@ -676,19 +678,21 @@ class MyApp(PlatformMainUI):
                         accumulated['data_parts'].append(f"\n{tmp_res_auth}")
 
                     # 실시간 모니터링 창에 요청 데이터 표시 (API 이름 중복 없이 데이터만)
-                    # if retry_attempt == 0:
-                    #     self.append_monitor_log(
-                    #         step_name="",
-                    #         request_json=tmp_res_auth
-                    #     )
-
-                    accumulated['raw_data_list'].append(current_data)
-                    if self.cnt < len(self.step_buffers):
-                        self.step_buffers[self.cnt].setdefault("api_info", {})["method"] = "POST"
-                        upsert_attempt_log(
-                            self.step_buffers[self.cnt],
-                            retry_attempt + 1,
-                            recv_payload=current_data,
+                    if retry_attempt == 0:
+                        self.monitor_request_started_at[self.cnt] = time.perf_counter()
+                        self.monitor_response_elapsed_ms.pop(self.cnt, None)
+                        self.append_monitor_log(
+                            step_name=build_monitor_step_name(self.Server.message[self.cnt], "request"),
+                            request_json=tmp_res_auth,
+                            direction="RECV"
+                        )
+                    else:
+                        self.monitor_request_started_at[self.cnt] = time.perf_counter()
+                        self.monitor_response_elapsed_ms.pop(self.cnt, None)
+                        self.append_monitor_log(
+                            step_name=build_monitor_step_name(self.Server.message[self.cnt], "request"),
+                            request_json=tmp_res_auth,
+                            direction="RECV"
                         )
 
                     if (len(current_data) != 0) and current_data != "{}":
@@ -712,16 +716,20 @@ class MyApp(PlatformMainUI):
                     else:
                         accumulated['data_parts'].append(f"\n{tmp_res_auth}")
 
-                    # ✅ 실시간 모니터링 출력 (RECV)
+                    # ? ??? ???? ?? (RECV)
                     if retry_attempt == 0:
+                        self.monitor_request_started_at[self.cnt] = time.perf_counter()
+                        self.monitor_response_elapsed_ms.pop(self.cnt, None)
                         self.append_monitor_log(
-                            step_name=f"시험 API: {self.Server.message[self.cnt]} (시도 {retry_attempt + 1}/{current_retries})",
+                            step_name=build_monitor_step_name(self.Server.message[self.cnt], "request"),
                             request_json=tmp_res_auth,
                             direction="RECV"
                         )
                     else:
+                        self.monitor_request_started_at[self.cnt] = time.perf_counter()
+                        self.monitor_response_elapsed_ms.pop(self.cnt, None)
                         self.append_monitor_log(
-                            step_name=f"시험 API (시도 {retry_attempt + 1}/{current_retries})",
+                            step_name=build_monitor_step_name(self.Server.message[self.cnt], "request"),
                             request_json=tmp_res_auth,
                             direction="RECV"
                         )
@@ -976,8 +984,11 @@ class MyApp(PlatformMainUI):
                 # 응답 데이터 가져오기 (trace 파일에서 로드된 response_data 사용)
                 tmp_response_json = json.dumps(response_data, indent=4, ensure_ascii=False) if 'response_data' in locals() else "{}"
                 
+                started_at = self.monitor_request_started_at.get(self.cnt)
+                if started_at is not None:
+                    self.monitor_response_elapsed_ms[self.cnt] = int(round((time.perf_counter() - started_at) * 1000))
                 self.append_monitor_log(
-                    step_name=normalize_monitor_step_name(f"{display_name} (응답)"),
+                    step_name=build_monitor_step_name(display_name, "response"),
                     request_json=tmp_response_json,
                     direction="SEND"
                 )
@@ -1053,17 +1064,17 @@ class MyApp(PlatformMainUI):
                     else:
                         score_value = 0
 
-                    # 모니터링 창에 최종 결과 표시 (HTML 카드 형식)
+                    # ???? ?? ?? ?? ?? (HTML ?? ??)
                     api_name = self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else "Unknown"
                     display_name = self.Server.message_display[self.cnt] if self.cnt < len(self.Server.message_display) else "Unknown"
-                    
-                    # 최종 결과는 데이터 없이 점수와 상태만 표시 (데이터는 이미 실시간으로 출력됨)
+
                     self.append_monitor_log(
-                        step_name=f"시험 API 결과: {display_name} ({current_retries}회 검증 완료)",
-                        request_json="",  # 데이터는 이미 출력되었으므로 빈 문자열
+                        step_name=build_monitor_result_title(display_name, current_retries),
+                        request_json="",  # ???? ?? ??????? ? ???
                         result_status=final_result,
                         score=score_value,
-                        details=f"통과 필드 수: {self.total_pass_cnt}, 실패 필드 수: {self.total_error_cnt} | {'일반 메시지' if current_protocol.lower() == 'basic' else f'실시간 메시지: {current_protocol}'}"
+                        details=build_monitor_result_details(self.total_pass_cnt, self.total_error_cnt, current_protocol),
+                        response_time_ms=self.monitor_response_elapsed_ms.get(self.cnt),
                     )
 
                     self.cnt += 1
@@ -1158,7 +1169,7 @@ class MyApp(PlatformMainUI):
                     step_name=f"시험 API: {api_name}",
                     request_json="",
                     score=score_value,
-                    details=f"⏱️ 메시지 수신 타임아웃({current_timeout}초) -> 메시지 미수신 | 통과 필드 수: {self.total_pass_cnt}, 실패 필드 수: {self.total_error_cnt}"
+                    details=f"메시지 수신 타임아웃({current_timeout}초) -> 메시지 미수신 | 통과 필드 수: {self.total_pass_cnt}, 실패 필드 수: {self.total_error_cnt}"
                 )
 
                 # 테이블 업데이트 (Message Missing)
@@ -2324,10 +2335,12 @@ class MyApp(PlatformMainUI):
 
             self.Server.transProtocolInput = "LongPolling"
             
-            # ✅ 19. 시작 메시지 출력
+            # ? 19. ?? ??? ??
+            self.monitor_request_started_at = {}
+            self.monitor_response_elapsed_ms = {}
             self.append_monitor_log(
                 step_name="시험 시작",
-                details=f"API 개수: {len(self.videoMessages)}개"
+                details=build_monitor_start_details(len(self.videoMessages))
             )
 
             # ✅ 20. 서버 시작
