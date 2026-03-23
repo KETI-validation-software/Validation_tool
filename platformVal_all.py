@@ -12,7 +12,7 @@ from PyQt5.QtCore import Qt, QSettings, QTimer, QThread, pyqtSignal
 import sys
 from datetime import datetime
 import json
-from core.functions import build_result_json, upsert_attempt_log
+from core.functions import build_result_json, upsert_attempt_log, append_attempt_log_text
 import requests
 import config.CONSTANTS as CONSTANTS
 from core.json_checker_new import timeout_field_finder
@@ -430,6 +430,15 @@ class MyApp(PlatformMainUI):
                 try:
                     self.run_status = "완료"
                     result_json = build_result_json(self)
+                    for spec_item in result_json.get("testResult", []):
+                        for api_item in spec_item.get("apis", []):
+                            validations = api_item.get("validations", [])
+                            if not validations:
+                                continue
+                            transmitted_data = validations[0].get("transmittedData")
+                            Logger.debug(
+                                f"[RESULT_JSON] api={api_item.get('name')} type={type(transmitted_data).__name__} value={repr(transmitted_data)[:300]}"
+                            )
                     url = f"{CONSTANTS.management_url}/api/integration/test-results"
                     response = requests.post(url, json=result_json)
                     Logger.debug(f"✅ 시험 결과 전송 상태 코드:: {response.status_code}")
@@ -681,19 +690,43 @@ class MyApp(PlatformMainUI):
                     if retry_attempt == 0:
                         self.monitor_request_started_at[self.cnt] = time.perf_counter()
                         self.monitor_response_elapsed_ms.pop(self.cnt, None)
-                        self.append_monitor_log(
+                        request_log_text = self.append_monitor_log(
                             step_name=build_monitor_step_name(self.Server.message[self.cnt], "request"),
                             request_json=tmp_res_auth,
                             direction="RECV"
                         )
+                        if self.cnt < len(self.step_buffers):
+                            upsert_attempt_log(
+                                self.step_buffers[self.cnt],
+                                retry_attempt + 1,
+                                send_payload=current_data,
+                            )
+                            append_attempt_log_text(
+                                self.step_buffers[self.cnt],
+                                retry_attempt + 1,
+                                "monitor_log_text",
+                                request_log_text,
+                            )
                     else:
                         self.monitor_request_started_at[self.cnt] = time.perf_counter()
                         self.monitor_response_elapsed_ms.pop(self.cnt, None)
-                        self.append_monitor_log(
+                        request_log_text = self.append_monitor_log(
                             step_name=build_monitor_step_name(self.Server.message[self.cnt], "request"),
                             request_json=tmp_res_auth,
                             direction="RECV"
                         )
+                        if self.cnt < len(self.step_buffers):
+                            upsert_attempt_log(
+                                self.step_buffers[self.cnt],
+                                retry_attempt + 1,
+                                send_payload=current_data,
+                            )
+                            append_attempt_log_text(
+                                self.step_buffers[self.cnt],
+                                retry_attempt + 1,
+                                "monitor_log_text",
+                                request_log_text,
+                            )
 
                     if (len(current_data) != 0) and current_data != "{}":
                         step_result = "FAIL"
@@ -720,19 +753,43 @@ class MyApp(PlatformMainUI):
                     if retry_attempt == 0:
                         self.monitor_request_started_at[self.cnt] = time.perf_counter()
                         self.monitor_response_elapsed_ms.pop(self.cnt, None)
-                        self.append_monitor_log(
+                        request_log_text = self.append_monitor_log(
                             step_name=build_monitor_step_name(self.Server.message[self.cnt], "request"),
                             request_json=tmp_res_auth,
                             direction="RECV"
                         )
+                        if self.cnt < len(self.step_buffers):
+                            upsert_attempt_log(
+                                self.step_buffers[self.cnt],
+                                retry_attempt + 1,
+                                send_payload=current_data,
+                            )
+                            append_attempt_log_text(
+                                self.step_buffers[self.cnt],
+                                retry_attempt + 1,
+                                "monitor_log_text",
+                                request_log_text,
+                            )
                     else:
                         self.monitor_request_started_at[self.cnt] = time.perf_counter()
                         self.monitor_response_elapsed_ms.pop(self.cnt, None)
-                        self.append_monitor_log(
+                        request_log_text = self.append_monitor_log(
                             step_name=build_monitor_step_name(self.Server.message[self.cnt], "request"),
                             request_json=tmp_res_auth,
                             direction="RECV"
                         )
+                        if self.cnt < len(self.step_buffers):
+                            upsert_attempt_log(
+                                self.step_buffers[self.cnt],
+                                retry_attempt + 1,
+                                send_payload=current_data,
+                            )
+                            append_attempt_log_text(
+                                self.step_buffers[self.cnt],
+                                retry_attempt + 1,
+                                "monitor_log_text",
+                                request_log_text,
+                            )
 
                     accumulated['raw_data_list'].append(current_data)
 
@@ -858,6 +915,8 @@ class MyApp(PlatformMainUI):
                     inbound_err_txt = to_detail_text(val_text)
                     webhook_monitor_event_json = None
                     webhook_monitor_ack_json = None
+                    webhook_event_log_text = None
+                    webhook_ack_log_text = None
                     if self.cnt < len(self.step_buffers):
                         upsert_attempt_log(
                             self.step_buffers[self.cnt],
@@ -935,6 +994,20 @@ class MyApp(PlatformMainUI):
                                     webhook_recv_payload=webhook_response,
                                     webhook_recv_errors=[line.strip() for line in webhook_resp_err_txt.split("\n") if line.strip()] if webhook_resp_val_result == "FAIL" else [],
                                 )
+                                if webhook_event_log_text is not None:
+                                    append_attempt_log_text(
+                                        self.step_buffers[self.cnt],
+                                        retry_attempt + 1,
+                                        "webhook_monitor_log_text",
+                                        webhook_event_log_text,
+                                    )
+                                if webhook_ack_log_text is not None:
+                                    append_attempt_log_text(
+                                        self.step_buffers[self.cnt],
+                                        retry_attempt + 1,
+                                        "webhook_monitor_log_text",
+                                        webhook_ack_log_text,
+                                    )
                             if webhook_resp_val_result == "FAIL":
                                 step_result = "FAIL"
                                 combined_error_parts.append(f"\n--- Webhook 검증 ---\n" + webhook_resp_err_txt)
@@ -1001,21 +1074,21 @@ class MyApp(PlatformMainUI):
                 started_at = self.monitor_request_started_at.get(self.cnt)
                 if started_at is not None:
                     self.monitor_response_elapsed_ms[self.cnt] = int(round((time.perf_counter() - started_at) * 1000))
-                self.append_monitor_log(
+                response_log_text = self.append_monitor_log(
                     step_name=build_monitor_step_name(display_name, "response"),
                     request_json=tmp_response_json,
                     direction="SEND"
                 )
 
                 if current_protocol == "WebHook" and webhook_monitor_event_json is not None:
-                    self.append_monitor_log(
+                    webhook_event_log_text = self.append_monitor_log(
                         step_name=build_webhook_monitor_step_name(display_name, "event"),
                         request_json=webhook_monitor_event_json,
                         direction="SEND"
                     )
 
                 if current_protocol == "WebHook" and webhook_monitor_ack_json is not None:
-                    self.append_monitor_log(
+                    webhook_ack_log_text = self.append_monitor_log(
                         step_name=build_webhook_monitor_step_name(display_name, "ack"),
                         request_json=webhook_monitor_ack_json,
                         direction="RECV"
@@ -1027,6 +1100,12 @@ class MyApp(PlatformMainUI):
                         self.step_buffers[self.cnt],
                         retry_attempt + 1,
                         send_payload=response_data if 'response_data' in locals() else {},
+                    )
+                    append_attempt_log_text(
+                        self.step_buffers[self.cnt],
+                        retry_attempt + 1,
+                        "monitor_log_text",
+                        response_log_text,
                     )
                 # current_retry 증가
                 self.current_retry += 1
@@ -1096,7 +1175,7 @@ class MyApp(PlatformMainUI):
                     api_name = self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else "Unknown"
                     display_name = self.Server.message_display[self.cnt] if self.cnt < len(self.Server.message_display) else "Unknown"
 
-                    self.append_monitor_log(
+                    result_log_text = self.append_monitor_log(
                         step_name=build_monitor_result_title(display_name, current_retries),
                         request_json="",  # ???? ?? ??????? ? ???
                         result_status=final_result,
@@ -1104,6 +1183,19 @@ class MyApp(PlatformMainUI):
                         details=build_monitor_result_details(self.total_pass_cnt, self.total_error_cnt, current_protocol),
                         response_time_ms=self.monitor_response_elapsed_ms.get(self.cnt),
                     )
+                    append_attempt_log_text(
+                        self.step_buffers[self.cnt],
+                        current_retries,
+                        "monitor_log_text",
+                        result_log_text,
+                    )
+                    if current_protocol == "WebHook":
+                        append_attempt_log_text(
+                            self.step_buffers[self.cnt],
+                            current_retries,
+                            "webhook_monitor_log_text",
+                            result_log_text,
+                        )
 
                     self.cnt += 1
                     self.current_retry = 0
@@ -1253,6 +1345,15 @@ class MyApp(PlatformMainUI):
                 try:
                     self.run_status = "완료"
                     result_json = build_result_json(self)
+                    for spec_item in result_json.get("testResult", []):
+                        for api_item in spec_item.get("apis", []):
+                            validations = api_item.get("validations", [])
+                            if not validations:
+                                continue
+                            transmitted_data = validations[0].get("transmittedData")
+                            Logger.debug(
+                                f"[RESULT_JSON] api={api_item.get('name')} type={type(transmitted_data).__name__} value={repr(transmitted_data)[:300]}"
+                            )
                     url = f"{CONSTANTS.management_url}/api/integration/test-results"
                     response = requests.post(url, json=result_json)
                     Logger.debug(f"✅ 시험 결과 전송 상태 코드:: {response.status_code}")

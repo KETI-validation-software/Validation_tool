@@ -317,9 +317,9 @@ class CommonMainUI(QWidget):
 
         # ✅ 시험 URL 라벨 + 텍스트 박스 (가로 배치)
         self.url_row = QWidget()
-        self.url_row.setFixedSize(544, 36)
+        self.url_row.setFixedSize(624, 36)
         self.url_row.setStyleSheet("background: transparent;")
-        self.original_url_row_size = (544, 36)
+        self.original_url_row_size = (624, 36)
         url_row_layout = QHBoxLayout()
         url_row_layout.setContentsMargins(0, 0, 0, 0)
         url_row_layout.setSpacing(10)
@@ -343,8 +343,8 @@ class CommonMainUI(QWidget):
 
         # ✅ URL 텍스트 박스 (960 × 36, 내부 좌우 24px padding, 18px Medium)
         self.url_text_box = QLineEdit()
-        self.url_text_box.setFixedSize(460, 36)
-        self.original_url_text_box_size = (460, 36)
+        self.url_text_box.setFixedSize(540, 36)
+        self.original_url_text_box_size = (540, 36)
         self.url_text_box.setReadOnly(False)
         self.url_text_box.setPlaceholderText("접속 주소를 입력하세요.")
 
@@ -774,8 +774,20 @@ class CommonMainUI(QWidget):
         raise NotImplementedError("Subclass must implement create_spec_selection_panel")
 
     def _on_previous_page_clicked(self):
-        if self.embedded and hasattr(self, "previousPageRequested"):
-            self.previousPageRequested.emit(self)
+        if not self.embedded or not hasattr(self, "previousPageRequested"):
+            return
+
+        reply = QMessageBox.question(
+            self,
+            "이전 화면으로 이동",
+            "이전 화면으로 이동 시 현재 시험 정보가 초기화됩니다.\n계속하시겠습니까?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
+        if reply != QMessageBox.Yes:
+            return
+
+        self.previousPageRequested.emit(self)
 
     def _update_content_background_geometry(self):
         if not hasattr(self, 'content_widget') or not self.content_widget:
@@ -1502,7 +1514,7 @@ class CommonMainUI(QWidget):
                 QLabel {{
                     color: {color_map[state_key]};
                     font-family: 'Noto Sans KR';
-                    font-size: 16px;
+                    font-size: 15px;
                     font-weight: 500;
                     border: none;
                     background: transparent;

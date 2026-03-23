@@ -1533,6 +1533,24 @@ def upsert_attempt_log(step_buffer, attempt_num, **fields):
     return attempt_log
 
 
+def append_attempt_log_text(step_buffer, attempt_num, field_name, block_text):
+    """Append a monitor log text block to a per-attempt string field."""
+    if not block_text:
+        return None
+
+    attempt_log = upsert_attempt_log(step_buffer, attempt_num)
+    if attempt_log is None:
+        return None
+
+    existing_text = attempt_log.get(field_name)
+    if existing_text:
+        attempt_log[field_name] = f"{existing_text}\n\n{block_text}"
+    else:
+        attempt_log[field_name] = str(block_text)
+
+    return attempt_log[field_name]
+
+
 def generate_validation_data_from_step_buffer(step_buffer, attempt_num):
     """
     ?? ???? ?? ???? ????. attempt_logs? ??? ?? ????.
@@ -1551,7 +1569,11 @@ def generate_validation_data_from_step_buffer(step_buffer, attempt_num):
             else attempt_log.get("validation_data") or {}
         )
         validation_errors = copy.deepcopy(attempt_log.get("validation_errors") or [])
-        transmitted_data = copy.deepcopy(attempt_log.get("send_payload") or {})
+        transmitted_data = copy.deepcopy(
+            attempt_log.get("monitor_log_text")
+            if attempt_log.get("monitor_log_text") is not None
+            else attempt_log.get("send_payload") or {}
+        )
 
     if not validation_data and "raw_data_list" in step_buffer and step_buffer["raw_data_list"]:
         raw_data_list = step_buffer["raw_data_list"]
@@ -1923,7 +1945,11 @@ def _build_spec_result(myapp_instance, spec_id, step_buffers, table_data=None, g
                     "field": _extract_validation_field_name(webhook_data, webhook_errors),
                     "validationData": webhook_data,
                     "validationErrors": webhook_errors,
-                    "transmittedData": copy.deepcopy(webhook_data)
+                    "transmittedData": copy.deepcopy(
+                        attempt_log.get("webhook_monitor_log_text")
+                        if attempt_log and attempt_log.get("webhook_monitor_log_text") is not None
+                        else webhook_data
+                    )
                 }
                 webhook_validations.append(webhook_validation)
 
