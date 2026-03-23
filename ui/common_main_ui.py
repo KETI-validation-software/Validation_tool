@@ -317,9 +317,9 @@ class CommonMainUI(QWidget):
 
         # ✅ 시험 URL 라벨 + 텍스트 박스 (가로 배치)
         self.url_row = QWidget()
-        self.url_row.setFixedSize(544, 36)
+        self.url_row.setFixedSize(624, 36)
         self.url_row.setStyleSheet("background: transparent;")
-        self.original_url_row_size = (544, 36)
+        self.original_url_row_size = (624, 36)
         url_row_layout = QHBoxLayout()
         url_row_layout.setContentsMargins(0, 0, 0, 0)
         url_row_layout.setSpacing(10)
@@ -343,8 +343,8 @@ class CommonMainUI(QWidget):
 
         # ✅ URL 텍스트 박스 (960 × 36, 내부 좌우 24px padding, 18px Medium)
         self.url_text_box = QLineEdit()
-        self.url_text_box.setFixedSize(460, 36)
-        self.original_url_text_box_size = (460, 36)
+        self.url_text_box.setFixedSize(540, 36)
+        self.original_url_text_box_size = (540, 36)
         self.url_text_box.setReadOnly(False)
         self.url_text_box.setPlaceholderText("접속 주소를 입력하세요.")
 
@@ -1514,7 +1514,7 @@ class CommonMainUI(QWidget):
                 QLabel {{
                     color: {color_map[state_key]};
                     font-family: 'Noto Sans KR';
-                    font-size: 16px;
+                    font-size: 15px;
                     font-weight: 500;
                     border: none;
                     background: transparent;

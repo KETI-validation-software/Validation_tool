@@ -105,8 +105,8 @@ def build_monitor_step_name(api_name, kind):
 
 def build_webhook_monitor_step_name(api_name, kind):
     label_map = {
-        "event": f"[{_k(0xC6F9, 0xD6C5, 0x20, 0xC218, 0xC2E0)}] {api_name} ({_k(0xC694, 0xCCAD)})",
-        "ack": f"[{_k(0xC6F9, 0xD6C5, 0x20, 0xC1A1, 0xC2E0)}] {api_name} ({_k(0xC751, 0xB2F5)})",
+        "event": f"[{_k(0xC6F9, 0xD6C5, 0x20, 0xC1A1, 0xC2E0)}] {api_name} ({_k(0xC694, 0xCCAD)})",
+        "ack": f"[{_k(0xC6F9, 0xD6C5, 0x20, 0xC218, 0xC2E0)}] {api_name} ({_k(0xC751, 0xB2F5)})",
     }
     return label_map.get(kind, str(api_name))
 
@@ -127,7 +127,13 @@ def build_monitor_start_details(api_count):
 
 
 def build_monitor_progress_details(protocol):
-    protocol_text = _k(0xC77C, 0xBC18, 0x20, 0xBA54, 0xC2DC, 0xC9C0) if str(protocol).lower() == "basic" else f"{_k(0xC2E4, 0xC2DC, 0xAC04, 0x20, 0xBA54, 0xC2DC, 0xC9C0)}: {protocol}"
+    protocol_lower = str(protocol).lower()
+    if protocol_lower == "basic":
+        protocol_text = _k(0xC77C, 0xBC18, 0x20, 0xBA54, 0xC2DC, 0xC9C0)
+    elif protocol_lower == "webhook":
+        protocol_text = _k(0xC6F9, 0xD6C5, 0xBA54, 0xC2DC, 0xC9C0)
+    else:
+        protocol_text = f"{_k(0xC2E4, 0xC2DC, 0xAC04, 0x20, 0xBA54, 0xC2DC, 0xC9C0)}: {protocol}"
     return f"{_k(0xAC80, 0xC99D, 0x20, 0xC9C4, 0xD589, 0x20, 0xC911)}... | {protocol_text}"
 
 
