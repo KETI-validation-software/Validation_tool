@@ -221,6 +221,9 @@
                 "sensorDeviceList": [
                   {
                     "sensorDeviceID": "iot0001"
+                  },
+                  {
+                    "sensorDeviceID": "iot0002"
                   }
                 ],
                 "duration": 1000,
@@ -295,7 +298,7 @@
                   }
                 ],
                 "maxCount": 8,
-                "eventFilter": "MotionDetection"
+                "eventFilter": "Leak"
               },
               "validationErrors": [
                 "오류가 없습니다."
@@ -306,14 +309,14 @@
                 "sensorDeviceList": [
                   {
                     "sensorDeviceID": "iot0001",
-                    "eventName": "MotionDetection",
-                    "eventTime": 6376519877763050,
+                    "eventName": "Leak",
+                    "eventTime": 858302429498265,
                     "eventDesc": "100도"
                   },
                   {
                     "sensorDeviceID": "iot0002",
-                    "eventName": "MotionDetection",
-                    "eventTime": 10639587722476425,
+                    "eventName": "Leak",
+                    "eventTime": 2789377711824493,
                     "eventDesc": "100도"
                   }
                 ]
@@ -324,5 +327,5 @@
       ]
     }
   ],
-  "completedDate": "2026-03-20T06:53:59Z"
+  "completedDate": "2026-03-23T03:17:12Z"
 }

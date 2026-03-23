@@ -27,7 +27,7 @@ from ui.platform_main_ui import PlatformMainUI
 import spec.Schema_response as schema_response_module
 import warnings
 from core.validation_registry import get_validation_rules
-from core.utils import remove_api_number_suffix, to_detail_text, redact, clean_trace_directory, format_schema, load_from_trace_file, load_external_constants, build_monitor_step_name, build_monitor_result_title, build_monitor_start_title, build_monitor_start_details, build_monitor_progress_details, build_monitor_result_details
+from core.utils import remove_api_number_suffix, to_detail_text, redact, clean_trace_directory, format_schema, load_from_trace_file, load_external_constants, build_monitor_step_name, build_webhook_monitor_step_name, build_monitor_result_title, build_monitor_start_title, build_monitor_start_details, build_monitor_progress_details, build_monitor_result_details
 from core.logger import Logger
 
 warnings.filterwarnings('ignore')
@@ -856,6 +856,8 @@ class MyApp(PlatformMainUI):
                     add_opt_error += opt_error  # 선택 필드 에러 수 누적
 
                     inbound_err_txt = to_detail_text(val_text)
+                    webhook_monitor_event_json = None
+                    webhook_monitor_ack_json = None
                     if self.cnt < len(self.step_buffers):
                         upsert_attempt_log(
                             self.step_buffers[self.cnt],
@@ -884,6 +886,14 @@ class MyApp(PlatformMainUI):
                         # 실제 웹훅 응답 사용
                         # ✅ 웹훅 응답이 null인 경우에도 검증을 수행하여 실패로 카운트
                         if hasattr(self.Server, 'webhook_response'):
+                            webhook_event_payload = load_from_trace_file(api_name, "WEBHOOK_OUT") or {}
+                            if webhook_event_payload:
+                                from core.utils import replace_transport_desc_for_display
+                                tmp_webhook_event = json.dumps(webhook_event_payload, indent=4, ensure_ascii=False)
+                                tmp_webhook_event = replace_transport_desc_for_display(tmp_webhook_event)
+                            else:
+                                tmp_webhook_event = "null"
+
                             # webhook_response가 None이거나 빈 값인 경우 빈 딕셔너리로 처리
                             webhook_response = self.Server.webhook_response if self.Server.webhook_response else {}
                             
@@ -894,7 +904,11 @@ class MyApp(PlatformMainUI):
                                 accumulated['data_parts'].append(
                                     f"\n--- Webhook 응답 (시도 {retry_attempt + 1}회차) ---\n{tmp_webhook_response}")
                             else:
+                                tmp_webhook_response = "null"
                                 accumulated['data_parts'].append(f"\n--- Webhook 응답 (시도 {retry_attempt + 1}회차) ---\nnull")
+
+                            webhook_monitor_event_json = tmp_webhook_event
+                            webhook_monitor_ack_json = tmp_webhook_response
                             
                             if self.cnt < len(self.step_buffers):
                                 self.step_buffers[self.cnt]["is_webhook_api"] = True
@@ -992,6 +1006,20 @@ class MyApp(PlatformMainUI):
                     request_json=tmp_response_json,
                     direction="SEND"
                 )
+
+                if current_protocol == "WebHook" and webhook_monitor_event_json is not None:
+                    self.append_monitor_log(
+                        step_name=build_webhook_monitor_step_name(display_name, "event"),
+                        request_json=webhook_monitor_event_json,
+                        direction="SEND"
+                    )
+
+                if current_protocol == "WebHook" and webhook_monitor_ack_json is not None:
+                    self.append_monitor_log(
+                        step_name=build_webhook_monitor_step_name(display_name, "ack"),
+                        request_json=webhook_monitor_ack_json,
+                        direction="RECV"
+                    )
 
                 if self.cnt < len(self.step_buffers):
                     self.step_buffers[self.cnt].setdefault("api_info", {})["method"] = "POST"
