@@ -53,7 +53,7 @@ importlib.reload(constraints_request_module)
 
 result_dir = os.path.join(os.getcwd(), "results")
 os.makedirs(result_dir, exist_ok=True)
-from core.utils import to_detail_text, redact, remove_api_number_suffix, build_monitor_step_name, build_monitor_result_title, build_monitor_start_title, build_monitor_start_details, build_monitor_progress_details, build_monitor_result_details
+from core.utils import to_detail_text, redact, remove_api_number_suffix, build_monitor_step_name, build_webhook_monitor_step_name, build_monitor_result_title, build_monitor_start_title, build_monitor_start_details, build_monitor_progress_details, build_monitor_result_details
 
 class MyApp(SystemMainUI):
     previousPageRequested = pyqtSignal(object)
@@ -1287,7 +1287,7 @@ class MyApp(SystemMainUI):
         self.monitor_request_started_at[self.webhook_cnt] = time.perf_counter()
         self.monitor_response_elapsed_ms.pop(self.webhook_cnt, None)
         self.append_monitor_log(
-            step_name=build_monitor_step_name(display_name, "request"),
+            step_name=build_webhook_monitor_step_name(display_name, "event"),
             request_json=tmp_webhook_res,
             direction="RECV"
         )
@@ -1299,7 +1299,7 @@ class MyApp(SystemMainUI):
             if started_at is not None:
                 self.monitor_response_elapsed_ms[self.webhook_cnt] = int(round((time.perf_counter() - started_at) * 1000))
             self.append_monitor_log(
-                step_name=build_monitor_step_name(display_name, "response"),
+                step_name=build_webhook_monitor_step_name(display_name, "ack"),
                 request_json=json.dumps(webhook_ack_payload, indent=4, ensure_ascii=False),
                 direction="SEND"
             )

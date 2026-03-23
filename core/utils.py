@@ -53,6 +53,9 @@ def build_monitor_header_text(type_label, step_name):
     if not isinstance(step_name, str):
         return f"[{type_label}] {step_name}"
 
+    if step_name.startswith("["):
+        return step_name
+
     plain_title_prefixes = (
         f"{_k(0xACB0, 0xACFC)}:",
         f"{_k(0xAC80, 0xC99D, 0x20, 0xACB0, 0xACFC)}:",
@@ -100,6 +103,14 @@ def build_monitor_step_name(api_name, kind):
     return f"{api_name} ({suffix})" if suffix else str(api_name)
 
 
+def build_webhook_monitor_step_name(api_name, kind):
+    label_map = {
+        "event": f"[{_k(0xC6F9, 0xD6C5, 0x20, 0xC218, 0xC2E0)}] {api_name} ({_k(0xC694, 0xCCAD)})",
+        "ack": f"[{_k(0xC6F9, 0xD6C5, 0x20, 0xC1A1, 0xC2E0)}] {api_name} ({_k(0xC751, 0xB2F5)})",
+    }
+    return label_map.get(kind, str(api_name))
+
+
 def build_monitor_result_title(api_name, completed_attempts, suffix=""):
     title = f"{_k(0xAC80, 0xC99D, 0x20, 0xACB0, 0xACFC)}: {api_name}"
     if suffix:
@@ -127,7 +138,7 @@ def build_monitor_result_details(pass_count, error_count, protocol, response_tim
         protocol_text,
     ]
     if response_time_ms is not None:
-        parts.append(f"{_k(0xC751, 0xB2F5, 0x20, 0xC18C, 0xC694, 0x20, 0xC2DC, 0xAC04)}: {int(response_time_ms)}ms")
+        parts.append(f"{_k(0xC751, 0xB2F5, 0x20, 0xC18C, 0xC694, 0x20, 0xC2DC, 0xAC04)}: {float(response_time_ms) / 1000:.2f}{_k(0xCD08)}")
     if extra_detail:
         parts.append(f"{_k(0xC0C1, 0xC138)}: {extra_detail}")
     return " | ".join(parts)

@@ -1224,7 +1224,8 @@ class SystemMainUI(CommonMainUI):
 
         response_time_text = ""
         if response_time_ms is not None:
-            response_time_text = f' <span style="font-size: 15px; color: #9ca3af; font-family: \'Noto Sans KR\'; margin-left: 6px;">| 응답 소요 시간: {int(response_time_ms)}ms</span>'
+            response_time_seconds = float(response_time_ms) / 1000
+            response_time_text = f' <span style="font-size: 15px; color: #9ca3af; font-family: \'Noto Sans KR\'; margin-left: 6px;">| 응답 소요 시간: {response_time_seconds:.2f}초</span>'
 
         html_content = f"""
         <table width="100%" border="0" cellspacing="0" cellpadding="8" style="margin-top: 10px; border-top: 2px solid {header_color};">
