@@ -224,11 +224,11 @@ class CombinedDetailDialog(QDialog):
         button_layout = QHBoxLayout(button_container)
         button_layout.setContentsMargins(0, 0, 0, 0)
         
-        # 확인 버튼 (434x48)
+        # 확인 버튼 (240x48)
         # ✅ 반응형: 인스턴스 변수로 변경 및 원본 크기 저장
         self.confirm_button = QPushButton("확인")
-        self.confirm_button.setFixedSize(434, 48)
-        self.original_confirm_btn_size = (434, 48)
+        self.confirm_button.setFixedSize(240, 48)
+        self.original_confirm_btn_size = (240, 48)
         self.original_dialog_size = (1520, 921)
         self.confirm_button.setStyleSheet("""
               QPushButton {

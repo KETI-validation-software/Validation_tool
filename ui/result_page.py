@@ -124,6 +124,19 @@ class ResultPageWidget(QWidget):
 
         self.initUI()
 
+    def _create_title_icon_label(self, icon_path, max_height=24):
+        icon_label = QLabel()
+        pixmap = QPixmap(resource_path(icon_path))
+        if not pixmap.isNull():
+            if pixmap.height() > max_height:
+                pixmap = pixmap.scaledToHeight(max_height, Qt.SmoothTransformation)
+            icon_label.setPixmap(pixmap)
+            icon_label.setFixedSize(pixmap.size())
+        else:
+            icon_label.setFixedSize(0, max_height)
+        icon_label.setStyleSheet("background: transparent;")
+        return icon_label
+
     def _get_result_header_title_path(self):
         mode = getattr(self.parent, "validation_mode", "platform")
         title_map = {
@@ -360,8 +373,24 @@ class ResultPageWidget(QWidget):
             letter-spacing: -0.3px;
         """)
         self.info_title.setContentsMargins(0, 0, 0, 0)
-        self.info_title.setAlignment(Qt.AlignLeft | Qt.AlignBottom)
+        self.info_title.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         right_layout.addWidget(self.info_title)
+        self.info_title_header = QWidget()
+        self.info_title_header.setFixedSize(1064, 24)
+        self.original_info_title_header_size = (1064, 24)
+        info_title_header_layout = QHBoxLayout(self.info_title_header)
+        info_title_header_layout.setContentsMargins(0, 0, 0, 0)
+        info_title_header_layout.setSpacing(0)
+
+        self.info_title_icon = self._create_title_icon_label("assets/image/icon/icn_정보.png")
+        info_title_header_layout.addWidget(self.info_title_icon, 0, Qt.AlignLeft | Qt.AlignVCenter)
+        info_title_header_layout.addSpacing(12)
+
+        right_layout.removeWidget(self.info_title)
+        self.info_title.setParent(self.info_title_header)
+        info_title_header_layout.addWidget(self.info_title, 0, Qt.AlignLeft | Qt.AlignVCenter)
+        info_title_header_layout.addStretch()
+        right_layout.addWidget(self.info_title_header)
         right_layout.addSpacing(8)
 
         self.info_widget = self._create_simple_info_display()
@@ -381,8 +410,24 @@ class ResultPageWidget(QWidget):
             letter-spacing: -0.3px;
         """)
         self.result_label.setContentsMargins(0, 0, 0, 0)
-        self.result_label.setAlignment(Qt.AlignLeft | Qt.AlignBottom)
+        self.result_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         right_layout.addWidget(self.result_label)
+        self.result_label_header = QWidget()
+        self.result_label_header.setFixedSize(1064, 24)
+        self.original_result_label_header_size = (1064, 24)
+        result_label_header_layout = QHBoxLayout(self.result_label_header)
+        result_label_header_layout.setContentsMargins(0, 0, 0, 0)
+        result_label_header_layout.setSpacing(0)
+
+        self.result_label_icon = self._create_title_icon_label("assets/image/icon/icn_테이블.png")
+        result_label_header_layout.addWidget(self.result_label_icon, 0, Qt.AlignLeft | Qt.AlignVCenter)
+        result_label_header_layout.addSpacing(12)
+
+        right_layout.removeWidget(self.result_label)
+        self.result_label.setParent(self.result_label_header)
+        result_label_header_layout.addWidget(self.result_label, 0, Qt.AlignLeft | Qt.AlignVCenter)
+        result_label_header_layout.addStretch()
+        right_layout.addWidget(self.result_label_header)
         right_layout.addSpacing(8)
 
         # 결과 테이블 (크기 키움: 350px)
@@ -399,8 +444,24 @@ class ResultPageWidget(QWidget):
             color: #000000;
         """)
         self.score_title.setContentsMargins(0, 0, 0, 0)
-        self.score_title.setAlignment(Qt.AlignLeft | Qt.AlignBottom)
+        self.score_title.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         right_layout.addWidget(self.score_title)
+        self.score_title_header = QWidget()
+        self.score_title_header.setFixedSize(1064, 24)
+        self.original_score_title_header_size = (1064, 24)
+        score_title_header_layout = QHBoxLayout(self.score_title_header)
+        score_title_header_layout.setContentsMargins(0, 0, 0, 0)
+        score_title_header_layout.setSpacing(0)
+
+        self.score_title_icon = self._create_title_icon_label("assets/image/icon/icn_점수.png")
+        score_title_header_layout.addWidget(self.score_title_icon, 0, Qt.AlignLeft | Qt.AlignVCenter)
+        score_title_header_layout.addSpacing(12)
+
+        right_layout.removeWidget(self.score_title)
+        self.score_title.setParent(self.score_title_header)
+        score_title_header_layout.addWidget(self.score_title, 0, Qt.AlignLeft | Qt.AlignVCenter)
+        score_title_header_layout.addStretch()
+        right_layout.addWidget(self.score_title_header)
         right_layout.addSpacing(8)
 
         # 시험 점수 테이블 (1064 × 256) - 분야별 점수 + 전체 점수
@@ -832,6 +893,12 @@ class ResultPageWidget(QWidget):
                     self.right_col.setFixedWidth(new_right_width)
 
             # 시험 정보 위젯 크기 조정 (가로만 확장)
+            if hasattr(self, 'info_title_header') and hasattr(self, 'original_info_title_header_size'):
+                new_info_title_header_width = int(self.original_info_title_header_size[0] * width_ratio)
+                self.info_title_header.setFixedSize(new_info_title_header_width, self.original_info_title_header_size[1])
+            if hasattr(self, 'info_title') and hasattr(self, 'original_info_title_size'):
+                new_info_title_width = int(self.original_info_title_size[0] * width_ratio)
+                self.info_title.setFixedSize(new_info_title_width, self.original_info_title_size[1])
             if hasattr(self, 'info_widget') and hasattr(self, 'original_info_widget_size'):
                 new_info_width = int(self.original_info_widget_size[0] * width_ratio)
                 self.info_widget.setFixedSize(new_info_width, self.original_info_widget_size[1])
@@ -841,6 +908,12 @@ class ResultPageWidget(QWidget):
                 new_header_width = int(self.original_result_header_widget_size[0] * width_ratio)
                 self.result_header_widget.setFixedSize(new_header_width, self.original_result_header_widget_size[1])
             # ✅ 결과 테이블 스크롤 영역 크기 조정 (3페이지 방식: 남은 공간 모두 차지)
+            if hasattr(self, 'result_label_header') and hasattr(self, 'original_result_label_header_size'):
+                new_result_label_header_width = int(self.original_result_label_header_size[0] * width_ratio)
+                self.result_label_header.setFixedSize(new_result_label_header_width, self.original_result_label_header_size[1])
+            if hasattr(self, 'result_label') and hasattr(self, 'original_result_label_size'):
+                new_result_label_width = int(self.original_result_label_size[0] * width_ratio)
+                self.result_label.setFixedSize(new_result_label_width, self.original_result_label_size[1])
             if hasattr(self, 'result_scroll_area'):
                 new_scroll_width = int(1064 * width_ratio)
 
@@ -878,6 +951,9 @@ class ResultPageWidget(QWidget):
                 self.table_container.setFixedWidth(new_container_width)
 
             # 시험 점수 요약 타이틀 크기 조정 (가로만 확장)
+            if hasattr(self, 'score_title_header') and hasattr(self, 'original_score_title_header_size'):
+                new_score_title_header_width = int(self.original_score_title_header_size[0] * width_ratio)
+                self.score_title_header.setFixedSize(new_score_title_header_width, self.original_score_title_header_size[1])
             if hasattr(self, 'score_title') and hasattr(self, 'original_score_title_size'):
                 new_score_title_width = int(self.original_score_title_size[0] * width_ratio)
                 self.score_title.setFixedSize(new_score_title_width, self.original_score_title_size[1])

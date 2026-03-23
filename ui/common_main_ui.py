@@ -149,6 +149,19 @@ def create_embedded_back_navigation(parent, click_handler, width=424):
 
 
 class CommonMainUI(QWidget):
+    def _create_title_icon_label(self, icon_path, max_height=24):
+        icon_label = QLabel()
+        pixmap = QPixmap(resource_path(icon_path))
+        if not pixmap.isNull():
+            if pixmap.height() > max_height:
+                pixmap = pixmap.scaledToHeight(max_height, Qt.SmoothTransformation)
+            icon_label.setPixmap(pixmap)
+            icon_label.setFixedSize(pixmap.size())
+        else:
+            icon_label.setFixedSize(0, max_height)
+        icon_label.setStyleSheet("background: transparent;")
+        return icon_label
+
     def __init__(self):
         super().__init__()
         # 서브클래스에서 오버라이드 가능한 속성
@@ -391,6 +404,10 @@ class CommonMainUI(QWidget):
             font-weight: 500;
             color: #000000;
         """)
+        self.api_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        self.api_title_icon = self._create_title_icon_label("assets/image/icon/icn_테이블.png")
+        api_header_row_layout.addWidget(self.api_title_icon, 0, Qt.AlignLeft | Qt.AlignVCenter)
+        api_header_row_layout.addSpacing(12)
         api_header_row_layout.addWidget(self.api_label, 0, Qt.AlignLeft | Qt.AlignVCenter)
         api_header_row_layout.addStretch()
         api_header_row_layout.addWidget(self.url_row, 0, Qt.AlignRight | Qt.AlignVCenter)
@@ -434,7 +451,12 @@ class CommonMainUI(QWidget):
             font-weight: 500;
             color: #000000;
         """)
-        monitor_header_layout.addWidget(self.monitor_label)
+        self.monitor_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        self.monitor_title_icon = self._create_title_icon_label("assets/image/icon/icn_모니터링.png")
+        monitor_header_layout.addWidget(self.monitor_title_icon, 0, Qt.AlignLeft | Qt.AlignVCenter)
+        monitor_header_layout.addSpacing(12)
+        monitor_header_layout.addWidget(self.monitor_label, 0, Qt.AlignLeft | Qt.AlignVCenter)
+        monitor_header_layout.addStretch()
 
         # ✅ 전용 타이머 라벨 추가 (우측 상단 고정, 인플레이스 업데이트용)
         self.countdown_timer_label = QLabel("")
@@ -550,7 +572,24 @@ class CommonMainUI(QWidget):
             font-weight: 500;
             color: #000000;
         """)
+        self.valmsg.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         self.right_layout.addWidget(self.valmsg)
+        self.valmsg_header = QWidget()
+        self.valmsg_header.setFixedSize(1064, 24)
+        self.original_valmsg_header_size = (1064, 24)
+        valmsg_header_layout = QHBoxLayout(self.valmsg_header)
+        valmsg_header_layout.setContentsMargins(0, 0, 0, 0)
+        valmsg_header_layout.setSpacing(0)
+
+        self.valmsg_title_icon = self._create_title_icon_label("assets/image/icon/icn_점수.png")
+        valmsg_header_layout.addWidget(self.valmsg_title_icon, 0, Qt.AlignLeft | Qt.AlignVCenter)
+        valmsg_header_layout.addSpacing(12)
+
+        self.right_layout.removeWidget(self.valmsg)
+        self.valmsg.setParent(self.valmsg_header)
+        valmsg_header_layout.addWidget(self.valmsg, 0, Qt.AlignLeft | Qt.AlignVCenter)
+        valmsg_header_layout.addStretch()
+        self.right_layout.addWidget(self.valmsg_header)
 
         # 6px gap
         self.right_layout.addSpacing(8)

@@ -37,7 +37,7 @@ class PlatformMainUI(CommonMainUI):
                     border-radius: 4px;
                     padding: 0 24px;
                     font-family: "Noto Sans KR";
-                    font-size: 18px;
+                    font-size: 16px;
                     font-weight: 400;
                     color: #6B6B6B;
                 }
@@ -1131,7 +1131,7 @@ class PlatformMainUI(CommonMainUI):
             self.tableWidget.setCellWidget(self.cnt, self.COL_RESULT, icon_widget)
             setattr(self, f"step{self.cnt + 1}_msg", msg)
 
-    def append_monitor_log(self, step_name, request_json="", result_status="진행중", score=None, details="", is_temp=False, direction="RECV"):
+    def append_monitor_log(self, step_name, request_json="", result_status="진행중", score=None, details="", is_temp=False, direction="RECV", response_time_ms=None):
         """
         Qt 호환성이 보장된 HTML 테이블 구조 로그 출력 함수
         """
@@ -1209,12 +1209,16 @@ class PlatformMainUI(CommonMainUI):
         header_text = build_monitor_header_text(type_label, step_name)
         request_json = normalize_monitor_request_json(type_label, step_name, request_json, details)
 
+        response_time_text = ""
+        if response_time_ms is not None:
+            response_time_text = f' <span style="font-size: 15px; color: #9ca3af; font-family: \'Noto Sans KR\'; margin-left: 6px;">| 응답 소요 시간: {int(response_time_ms)}ms</span>'
+
         html_content = f"""
         <table width="100%" border="0" cellspacing="0" cellpadding="8" style="margin-top: 10px; border-top: 2px solid {header_color};">
             <tr>
                 <td valign="middle">
                     <span style="font-size: 19px; font-weight: bold; color: {header_color}; font-family: 'Noto Sans KR';">{header_text}</span>
-                    <span style="font-size: 15px; color: #9ca3af; font-family: 'Consolas', monospace; margin-left: 10px;">{timestamp}</span>
+                    <span style="font-size: 15px; color: #9ca3af; font-family: 'Consolas', monospace; margin-left: 10px;">{timestamp}</span>{response_time_text}
                 </td>
             </tr>
         </table>

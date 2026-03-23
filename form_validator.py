@@ -900,6 +900,11 @@ class FormValidator:
     def _fill_api_table_for_selected_field_from_api(self, row):
         """선택된 시험 시나리오의 API 테이블 채우기"""
         try:
+            def _format_api_endpoint_for_display(endpoint_value):
+                if endpoint_value is None:
+                    return ""
+                return str(endpoint_value).lstrip('/')
+
             widget = self.parent.scenario_table.cellWidget(row, 0)
             if not widget:
                 return
@@ -937,7 +942,7 @@ class FormValidator:
                 if ts:
                     name_to_show = ts.get("name", "")
                     endpoint = ts.get("endpoint")
-                    id_to_show = "" if endpoint is None else str(endpoint)
+                    id_to_show = _format_api_endpoint_for_display(endpoint)
                     
                     # 프로토콜 확인
                     detail = ts.get("detail", {})
@@ -953,7 +958,7 @@ class FormValidator:
                         detail_api = step_detail.get("step", {}).get("api", {})
                         endpoint = detail_api.get("endpoint", "")
                         name_to_show = step_detail.get("step", {}).get("name", step.get("name", ""))
-                        id_to_show = str(endpoint) if endpoint else ""
+                        id_to_show = _format_api_endpoint_for_display(endpoint)
                         
                         settings = detail_api.get("settings", {})
                         trans_protocol_obj = settings.get("transProtocol")
@@ -976,7 +981,7 @@ class FormValidator:
                 name_layout.setAlignment(Qt.AlignCenter)
 
                 name_label = QLabel(name_to_show)
-                name_label.setStyleSheet("color: #1B1B1C; font-family: 'Noto Sans KR'; font-size: 14px;")
+                name_label.setStyleSheet("color: #1B1B1C; font-family: 'Noto Sans KR'; font-size: 15px;")
                 name_layout.addWidget(name_label)
 
                 if is_webhook and not webhook_badge_pixmap.isNull():
