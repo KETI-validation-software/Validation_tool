@@ -53,6 +53,31 @@ def derive_webhook_port(test_port, full_url):
     return int(port) + 1
 
 
+def derive_webhook_host(full_url):
+    """Return webhook host for callback URL (prefer local machine IP)."""
+    try:
+        local_ips = CONSTANTS.get_all_local_ips()
+        if local_ips:
+            # 기본 라우팅 IP가 마지막에 추가되므로 우선 사용
+            return local_ips[-1]
+    except Exception:
+        pass
+
+    if not full_url:
+        return None
+
+    normalized_url = full_url
+    if not normalized_url.startswith(("http://", "https://")):
+        normalized_url = f"https://{normalized_url}"
+
+    try:
+        parsed = urlparse(normalized_url)
+    except ValueError:
+        return None
+
+    return parsed.hostname
+
+
 class FormValidator:
     """
     폼 검증 및 데이터 처리를 담당하는 클래스
@@ -198,9 +223,15 @@ class FormValidator:
             # 2. 접속 정보 (시나리오명이 포함된 전체 URL 가져오기)
             full_url = self.parent.get_selected_url()
             variables['url'] = full_url
+            webhook_host = derive_webhook_host(full_url)
             webhook_port = derive_webhook_port(getattr(self.parent, 'test_port', None), full_url)
+
+            if webhook_host:
+                variables['WEBHOOK_PUBLIC_IP'] = webhook_host
             if webhook_port is not None:
                 variables['WEBHOOK_PORT'] = webhook_port
+            if webhook_host and webhook_port is not None:
+                variables['WEBHOOK_URL'] = f"https://{webhook_host}:{webhook_port}"
 
             # 3. 인증 정보
             auth_type, auth_info = self._collect_auth_info()
@@ -309,25 +340,6 @@ class FormValidator:
         """CONSTANTS.py 파일의 특정 변수들을 업데이트"""
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
-
-        # URL이 업데이트되면 WEBHOOK_PUBLIC_IP도 함께 업데이트
-        if 'url' in variables:
-            try:
-                # [수정] 접속 주소(URL) 대신 내 로컬 IP를 사용
-                webhook_ip = self.api_client.get_local_ip_address()
-                
-                if webhook_ip:
-                    pattern_ip = r'^WEBHOOK_PUBLIC_IP\s*=.*$'
-                    new_ip_line = f'WEBHOOK_PUBLIC_IP = "{webhook_ip}"'
-                    content = re.sub(pattern_ip, new_ip_line, content, flags=re.MULTILINE)
-
-                    pattern_url = r'^WEBHOOK_URL\s*=.*$'
-                    new_url_line = f'WEBHOOK_URL = f"https://{{WEBHOOK_PUBLIC_IP}}:{{WEBHOOK_PORT}}"'
-                    content = re.sub(pattern_url, new_url_line, content, flags=re.MULTILINE)
-
-                    Logger.info(f"[WEBHOOK] 로컬 IP로 웹훅 설정: {webhook_ip}")
-            except Exception as e:
-                Logger.error(f"[WEBHOOK] IP 설정 실패: {e}")
 
         for var_name, var_value in variables.items():
             if isinstance(var_value, str):

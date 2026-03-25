@@ -1570,6 +1570,8 @@ class CommonMainUI(QWidget):
         # ✅ UI 표시용: transProtocolDesc 하드코딩 치환
         if request_json:
             request_json = replace_transport_desc_for_display(request_json)
+            if isinstance(request_json, str) and request_json.strip() == "{}":
+                request_json = "{\n\n}"
 
         # 타임스탬프
         timestamp = datetime.now().strftime("%H:%M:%S")
