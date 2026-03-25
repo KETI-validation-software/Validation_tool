@@ -122,7 +122,26 @@ class FormValidator:
         test_category = self.parent.test_category_edit.text().strip()
         return test_category == "본시험"
 
+    def get_admin_code_validation_status(self):
+        """Return the admin code validation status for page 1 flow."""
+        if not self.is_admin_code_required():
+            return "not_required"
+
+        admin_code = self.parent.admin_code_edit.text().strip()
+        if not admin_code:
+            return "missing_input"
+
+        if not hasattr(self.parent, 'real_admin_code') or self.parent.real_admin_code is None:
+            Logger.warning("Actual admin code was not loaded from server.")
+            return "missing_server_code"
+
+        if str(admin_code) == str(self.parent.real_admin_code):
+            return "valid"
+
+        return "mismatch"
+
     def is_admin_code_valid(self):
+        return self.get_admin_code_validation_status() in ("not_required", "valid")
         """관리자 코드 유효성 검사"""
         if not self.is_admin_code_required():
             return True

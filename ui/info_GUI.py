@@ -31,6 +31,7 @@ from ui.sections import (
 from ui.pages import (
     create_test_info_page,
     create_test_config_page,
+    format_test_group_summary,
     update_test_info_header_title,
     update_test_config_header_title,
 )
@@ -548,8 +549,16 @@ class InfoWidget(QWidget):
             QMessageBox.warning(self, "입력 필요", "시험 정보 페이지의 모든 필수 항목을 입력해주세요.")
             return
 
-        if not self.form_validator.is_admin_code_valid():
-            if self.form_validator.is_admin_code_required():
+        admin_code_status = self.form_validator.get_admin_code_validation_status()
+        if admin_code_status not in ("not_required", "valid"):
+            if admin_code_status == "missing_input":
+                QMessageBox.warning(self, "입력 필요", "관리자 코드를 입력해주십시오.")
+            elif admin_code_status == "missing_server_code":
+                QMessageBox.warning(self, "인증 실패", "관리자 코드를 확인할 수 없습니다.\n중앙 서버 연결 상태를 확인해 주세요.")
+            else:
+                QMessageBox.warning(self, "인증 실패", "관리자 코드가 올바르지 않습니다.\n다시 확인해주십시오.")
+            return
+            if admin_code_status == "missing_input":
                 QMessageBox.warning(self, "인증 실패", "관리자 코드가 올바르지 않습니다.\n다시 확인해주세요.")
             else:
                 QMessageBox.warning(self, "입력 필요", "관리자 코드를 입력해주세요.")
@@ -1330,7 +1339,7 @@ class InfoWidget(QWidget):
 
             # 여러 그룹의 이름을 콤마로 연결
             group_names = [g.get("name", "") for g in test_groups]
-            combined_group_names = ", ".join(group_names)
+            combined_group_names = format_test_group_summary(group_names)
 
             # 여러 그룹의 testRange를 콤마로 연결
             group_ranges = [g.get("testRange", "") for g in test_groups]
@@ -1480,6 +1489,15 @@ class InfoWidget(QWidget):
             # API 데이터를 이용하여 OPT 파일 로드 및 스키마 생성
             # (UI 접근이 필요하므로 메인 스레드에서 실행)
             self.form_validator.load_opt_files_from_api(test_data)
+            try:
+                self.real_admin_code = self.form_validator.api_client.fetch_admin_code()
+                if self.real_admin_code:
+                    Logger.info(f"Admin code fetched successfully: {self.real_admin_code}")
+                else:
+                    Logger.warning("Admin code could not be fetched from server.")
+            except Exception as e:
+                self.real_admin_code = None
+                Logger.error(f"Admin code fetch failed: {e}")
             QApplication.processEvents()  # 스피너 애니메이션 유지
 
             # [추가] 관리자 코드 조회

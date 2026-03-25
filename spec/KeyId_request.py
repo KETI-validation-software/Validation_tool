@@ -199,12 +199,6 @@ cmii7v8pr006g8z1tvo55a50u_Authentication_request_key_ids = {
     "userPW": "cmii7ym0400718z1tyoxfj6ft",
 }
 
-cmii7v8pr006g8z1tvo55a50u_StreamURLs_request_key_ids = {
-    "camList": "cmiqtkzfm00wsie8f9qmwp4l1",
-    "camList.camID": "cmj17qhrz026o12s9jozkqym7",
-    "camList.streamProtocolType": "cmjb5nmy1070zdmvoi5u22oxx",
-}
-
 cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_request_key_ids = {
     "camList": "cmiqtoihq00y2ie8f3urrjlbh",
     "camList.camID": "cmiwrf69i0bu6844g22ccsjtr",
@@ -217,33 +211,6 @@ cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_request_key_ids = {
     "startTime": "cmiqtqxt400ywie8f4ir49gl1",
     "code": "cmiwrhxdj0ci0844gogcg394u",
     "message": "cmj1820zz02m012s9cxe2wcfn",
-}
-
-cmii7v8pr006g8z1tvo55a50u_StoredVideoInfos_request_key_ids = {
-    "timePeriod": "cmiwrl7dr000knkglwk60tug6",
-    "timePeriod.startTime": "cmiwrltxz000vnkgl3m4u2f2s",
-    "timePeriod.endTime": "cmiwrlxaj0013nkgl40nosy7z",
-    "camList": "cmiwrmm95001fnkglx47nenkk",
-    "camList.camID": "cmiwrn6ab003pnkgl7f78y9t6",
-}
-
-cmii7v8pr006g8z1tvo55a50u_ReplayURL_request_key_ids = {
-    "camList": "cmiwrqopk00l1nkgl3szz44s6",
-    "camList.camID": "cmiwrtok201dmnkgl6gzxhft5",
-    "camList.startTime": "cmiwrtok201donkglhwulnxos",
-    "camList.endTime": "cmiwrtok301dqnkgl0k66p4py",
-    "camList.streamProtocolType": "cmiwrtok301dsnkgl3t29d3op",
-}
-
-cmii7v8pr006g8z1tvo55a50u_StoredVideoEventInfos_request_key_ids = {
-    "timePeriod": "cmiws35o105b3nkglj38lr0hx",
-    "timePeriod.startTime": "cmiws3ab605bknkglsndw6cp5",
-    "timePeriod.endTime": "cmiws41yv0005p002amxfzrhq",
-    "camList": "cmiws41z00007p002zof3yx8d",
-    "camList.camID": "cmiws5hes00anp002ng50q3fc",
-    "maxCount": "cmiws4rcl005up002n2yhi3pu",
-    "eventFilter": "cmiws56xa008jp002vhqm6yfn",
-    "classFilter": "cmiws5ggr00aip0022iuh6at3",
 }
 
 cmii7v8pr006g8z1tvo55a50u_StoredObjectAnalyticsInfos_request_key_ids = {
@@ -260,11 +227,7 @@ cmii7v8pr006g8z1tvo55a50u_StoredObjectAnalyticsInfos_request_key_ids = {
 # cmii7v8pr006g8z1tvo55a50u Request Key-ID Mapping 리스트
 cmii7v8pr006g8z1tvo55a50u_request_key_ids = [
     cmii7v8pr006g8z1tvo55a50u_Authentication_request_key_ids,
-    cmii7v8pr006g8z1tvo55a50u_StreamURLs_request_key_ids,
     cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_request_key_ids,
-    cmii7v8pr006g8z1tvo55a50u_StoredVideoInfos_request_key_ids,
-    cmii7v8pr006g8z1tvo55a50u_ReplayURL_request_key_ids,
-    cmii7v8pr006g8z1tvo55a50u_StoredVideoEventInfos_request_key_ids,
     cmii7v8pr006g8z1tvo55a50u_StoredObjectAnalyticsInfos_request_key_ids,
 ]
 
@@ -649,36 +612,6 @@ cmii7v8pr006g8z1tvo55a50u_Capabilities_response_key_ids = {
     "transportSupport.transProtocolDesc": "cmizrbt0b0040117lfsatd26c",
 }
 
-cmii7v8pr006g8z1tvo55a50u_CameraProfiles_response_key_ids = {
-    "code": "cmiqtj27q00vzie8ftb569ut8",
-    "message": "cmiqtj7zi00w5ie8fhbse8h4u",
-    "camList": "cmiqtjhkm00wbie8fxwprjc5l",
-    "camList.camID": "cmizre5yl00gq117lhvg7sqp7",
-    "camList.camName": "cmizre5yl00gs117lp2nxsuo7",
-    "camList.camLoc": "cmizre5ym00gu117l1fjgzdxr",
-    "camList.camLoc.lon": "cmizre5yq00gy117lqyw0ufvg",
-    "camList.camLoc.lat": "cmizre5yq00h0117llhm50tky",
-    "camList.camLoc.alt": "cmizre5yr00h2117lluxub8fw",
-    "camList.camLoc.desc": "cmizre5yr00h4117lsmvfm7gx",
-    "camList.camConfig": "cmizre5ym00gw117lm9mvctn8",
-    "camList.camConfig.camType": "cmizre5yr00h6117l9zj33pr2",
-}
-
-cmii7v8pr006g8z1tvo55a50u_StreamURLs_response_key_ids = {
-    "code": "cmiqtlss200x6ie8f7pu1f23c",
-    "message": "cmiqtlyto00xcie8fn3fbocfh",
-    "camList": "cmiqtma5m00xiie8fuly6thwh",
-    "camList.camID": "cmj17rvsh02ki12s9h05zrodz",
-    "camList.accessID": "cmj17rvsh02kk12s9vpei1lm3",
-    "camList.accessPW": "cmj17rvsh02km12s9zhsg7ogj",
-    "camList.camURL": "cmj17rvsi02ko12s9b6ucezhj",
-    "camList.videoInfo": "cmj17rvsi02kq12s9u06k8ix6",
-    "camList.videoInfo.resolution": "cmj17rvsn02ks12s9lrc90chn",
-    "camList.videoInfo.fps": "cmj17rvsn02ku12s9mz0gwgcx",
-    "camList.videoInfo.videoCodec": "cmj17rvsn02kw12s9jgf73dat",
-    "camList.videoInfo.audioCodec": "cmj17rvsn02ky12s9sgltoz5h",
-}
-
 cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_response_key_ids = {
     "code": "cmiqtr21700z1ie8f2gb2pxw4",
     "message": "cmiwrfgls0buk844gegf6h5nd",
@@ -689,45 +622,6 @@ cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_response_key_ids = {
     "camList.startTime": "cmiwrhv3m0cha844gwp8thxsx",
     "camList.endTime": "cmiwrhv3n0chc844geaa6w099",
     "camList.eventDesc": "cmiwrhv3n0che844gqfrgim1r",
-}
-
-cmii7v8pr006g8z1tvo55a50u_StoredVideoInfos_response_key_ids = {
-    "code": "cmiwrncyp0041nkglw6ylrgkd",
-    "message": "cmiwrnfl60049nkgld7j8vz90",
-    "camList": "cmiwrniqz004hnkglkap6vspc",
-    "camList.camID": "cmiwrp98m00k0nkglgjjm6lpy",
-    "camList.timeList": "cmiwrp98m00k2nkgl0dorq4k8",
-    "camList.timeList.startTime": "cmiwrp98q00k6nkgl2fopmr38",
-    "camList.timeList.endTime": "cmiwrp98q00k8nkgl38r8o9je",
-}
-
-cmii7v8pr006g8z1tvo55a50u_ReplayURL_response_key_ids = {
-    "code": "cmiwru2lz01ennkglgut1l9g7",
-    "message": "cmiwru5fx01evnkgl7kr2ap5k",
-    "camList": "cmiwruc5m01fjnkglfb5808qt",
-    "camList.camID": "cmiws0cvy058fnkglfht15n64",
-    "camList.accessID": "cmiws0cvy058hnkgl6jlrc6bu",
-    "camList.accessPW": "cmiws0cvy058jnkglor0futar",
-    "camList.startTime": "cmiws0cvy058lnkglfs3qy75c",
-    "camList.endTime": "cmiws0cvz058nnkgl3b4g59v6",
-    "camList.camURL": "cmiws0cvz058pnkgllee02xjt",
-    "camList.videoInfo": "cmiws0cvz058rnkgla4dbi4ep",
-    "camList.videoInfo.resolution": "cmiws0cw5058tnkglgh6liq5j",
-    "camList.videoInfo.fps": "cmiws0cw5058vnkglhps56lsg",
-    "camList.videoInfo.videoCodec": "cmiws0cw6058xnkgldn18k152",
-    "camList.videoInfo.audioCodec": "cmiws0cw6058znkglop8r5368",
-}
-
-cmii7v8pr006g8z1tvo55a50u_StoredVideoEventInfos_response_key_ids = {
-    "code": "cmiws5la500b6p002ehfpwl91",
-    "message": "cmiws5o2500bep002ksv0kruy",
-    "camList": "cmiws5sie00bnp002mhjjpdm9",
-    "camList.camID": "cmiws8l4y01jkp002veo9vtsv",
-    "camList.eventUUID": "cmiws8l4y01jmp0025i9yxipb",
-    "camList.eventName": "cmiws8l4y01jop002nczpx3or",
-    "camList.startTime": "cmiws8l4z01jqp0020oxveqiq",
-    "camList.endTime": "cmiws8l4z01jsp00212xgr4qb",
-    "camList.eventDesc": "cmiws8l4z01jup0022zlb61is",
 }
 
 cmii7v8pr006g8z1tvo55a50u_StoredObjectAnalyticsInfos_response_key_ids = {
@@ -753,12 +647,7 @@ cmii7v8pr006g8z1tvo55a50u_StoredObjectAnalyticsInfos_response_key_ids = {
 cmii7v8pr006g8z1tvo55a50u_response_key_ids = [
     cmii7v8pr006g8z1tvo55a50u_Authentication_response_key_ids,
     cmii7v8pr006g8z1tvo55a50u_Capabilities_response_key_ids,
-    cmii7v8pr006g8z1tvo55a50u_CameraProfiles_response_key_ids,
-    cmii7v8pr006g8z1tvo55a50u_StreamURLs_response_key_ids,
     cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_response_key_ids,
-    cmii7v8pr006g8z1tvo55a50u_StoredVideoInfos_response_key_ids,
-    cmii7v8pr006g8z1tvo55a50u_ReplayURL_response_key_ids,
-    cmii7v8pr006g8z1tvo55a50u_StoredVideoEventInfos_response_key_ids,
     cmii7v8pr006g8z1tvo55a50u_StoredObjectAnalyticsInfos_response_key_ids,
 ]
 

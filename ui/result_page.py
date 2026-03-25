@@ -2217,7 +2217,7 @@ class ResultPageWidget(QWidget):
         header_layout.addWidget(icon_label, alignment=Qt.AlignVCenter)
 
         # 분야별 점수 레이블 (500 Medium 20px)
-        score_type_label = QLabel("분야별 점수")
+        score_type_label = QLabel("시나리오별 점수")
         score_type_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";

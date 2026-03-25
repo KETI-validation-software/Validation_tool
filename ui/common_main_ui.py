@@ -1730,7 +1730,7 @@ class CommonMainUI(QWidget):
         icon_label.setAlignment(Qt.AlignCenter)
 
         # 분야별 점수 레이블 (500 Medium 20px)
-        score_type_label = QLabel("분야별 점수")
+        score_type_label = QLabel("시나리오별 점수")
         score_type_label.setStyleSheet("""
             color: #000;
             font-family: "Noto Sans KR";
