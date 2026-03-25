@@ -1445,6 +1445,15 @@ class MyApp(PlatformMainUI):
             # ✅ 그룹 ID 저장
             self.current_group_id = new_group_id
             self.test_selection_panel.update_test_field_table(selected_group)
+            self._auto_select_first_scenario()
+
+    def _auto_select_first_scenario(self):
+        """현재 분야의 첫 번째 시나리오를 선택하고 상세 화면을 동기화한다."""
+        if self.test_field_table.rowCount() <= 0:
+            return
+
+        self.test_field_table.selectRow(0)
+        self.on_test_field_selected(0, 0)
 
     def save_current_spec_data(self):
         """현재 spec의 테이블 데이터와 상태를 저장"""
