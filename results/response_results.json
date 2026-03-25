@@ -1,11 +1,11 @@
 {
-  "requestId": "cmn2vnezz00j3r776v36r0ca9",
+  "requestId": "cmn5f02ej001a1e8aexr7pgzr",
   "evaluationTarget": {
-    "companyName": "6",
-    "contactPerson": "6",
-    "productName": "6",
-    "modelName": "6",
-    "version": "6"
+    "companyName": "keti2",
+    "contactPerson": "keti2",
+    "productName": "keti2",
+    "modelName": "keti2",
+    "version": "keti2"
   },
   "testGroup": {
     "id": "cmjcefmh8070gcfb35wjptcsl",
@@ -53,7 +53,7 @@
               "validationErrors": [
                 "오류가 없습니다."
               ],
-              "transmittedData": "[송신] Authentication (요청) 17:26:34\n\n{\n    \"userID\": \"kisa\",\n    \"userPW\": \"kisa_k1!2@\"\n}\n\n[수신] Authentication (응답) 17:26:37\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"userName\": \"관리자\",\n    \"userAff\": \"오산시청\",\n    \"accessToken\": \"abcde1234\"\n}\n\n검증 결과: Authentication (1회 검증 완료) 17:26:37 | 응답 소요 시간: 2.99초\n\n통과 필드 수: 5, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
+              "transmittedData": "[송신] Authentication (요청) 12:58:22\n\n{\n    \"userID\": \"kisa\",\n    \"userPW\": \"kisa_k1!2@\"\n}\n\n[수신] Authentication (응답) 12:58:23\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"userName\": \"관리자\",\n    \"userAff\": \"오산시청\",\n    \"accessToken\": \"abcde1234\"\n}\n\n검증 결과: Authentication (1회 검증 완료) 12:58:23 | 응답 소요 시간: 0.99초\n\n통과 필드 수: 5, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
             }
           ]
         },
@@ -84,7 +84,7 @@
               "validationErrors": [
                 "오류가 없습니다."
               ],
-              "transmittedData": "[송신] Capabilities (요청) 17:26:39\n\n{}\n\n[수신] Capabilities (응답) 17:26:40\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"transportSupport\": [\n        {\n            \"transProtocolType\": \"Webhook\",\n            \"transProtocolDesc\": \"\"\n        }\n    ]\n}\n\n검증 결과: Capabilities (1회 검증 완료) 17:26:40 | 응답 소요 시간: 1.00초\n\n통과 필드 수: 5, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
+              "transmittedData": "[송신] Capabilities (요청) 12:58:25\n\n{}\n\n[수신] Capabilities (응답) 12:58:27\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"transportSupport\": [\n        {\n            \"transProtocolType\": \"Webhook\",\n            \"transProtocolDesc\": \"\"\n        }\n    ]\n}\n\n검증 결과: Capabilities (1회 검증 완료) 12:58:27 | 응답 소요 시간: 2.00초\n\n통과 필드 수: 5, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
             }
           ]
         },
@@ -133,7 +133,7 @@
               "validationErrors": [
                 "오류가 없습니다."
               ],
-              "transmittedData": "[송신] SensorDeviceProfiles (요청) 17:26:42\n\n{}\n\n[수신] SensorDeviceProfiles (응답) 17:26:43\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"sensorDeviceList\": [\n        {\n            \"sensorDeviceID\": \"iot0001\",\n            \"sensorDeviceType\": \"온도\",\n            \"sensorDeviceName\": \"온도 센서\",\n            \"sensorDeviceLoc\": {\n                \"lon\": \"127.127730\",\n                \"lat\": \"38.439801\",\n                \"alt\": \"32.131\",\n                \"desc\": \"3층복도\"\n            }\n        },\n        {\n            \"sensorDeviceID\": \"iot0002\",\n            \"sensorDeviceType\": \"온도\",\n            \"sensorDeviceName\": \"온도 센서\",\n            \"sensorDeviceLoc\": {\n                \"lon\": \"127.127730\",\n                \"lat\": \"38.439801\",\n                \"alt\": \"\",\n                \"desc\": \"\"\n            }\n        }\n    ]\n}\n\n검증 결과: SensorDeviceProfiles (1회 검증 완료) 17:26:43 | 응답 소요 시간: 1.01초\n\n통과 필드 수: 11, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
+              "transmittedData": "[송신] SensorDeviceProfiles (요청) 12:58:29\n\n{}\n\n[수신] SensorDeviceProfiles (응답) 12:58:30\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"sensorDeviceList\": [\n        {\n            \"sensorDeviceID\": \"iot0001\",\n            \"sensorDeviceType\": \"온도\",\n            \"sensorDeviceName\": \"온도 센서\",\n            \"sensorDeviceLoc\": {\n                \"lon\": \"127.127730\",\n                \"lat\": \"38.439801\",\n                \"alt\": \"32.131\",\n                \"desc\": \"3층복도\"\n            }\n        },\n        {\n            \"sensorDeviceID\": \"iot0002\",\n            \"sensorDeviceType\": \"온도\",\n            \"sensorDeviceName\": \"온도 센서\",\n            \"sensorDeviceLoc\": {\n                \"lon\": \"127.127730\",\n                \"lat\": \"38.439801\",\n                \"alt\": \"\",\n                \"desc\": \"\"\n            }\n        }\n    ]\n}\n\n검증 결과: SensorDeviceProfiles (1회 검증 완료) 12:58:30 | 응답 소요 시간: 1.00초\n\n통과 필드 수: 11, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
             }
           ]
         },
@@ -160,7 +160,7 @@
                 "--- Webhook 검증 ---",
                 "오류가 없습니다."
               ],
-              "transmittedData": "[송신] RealtimeSensorData (요청) 17:26:45\n\n{\n    \"sensorDeviceList\": [\n        {\n            \"sensorDeviceID\": \"iot0002\"\n        }\n    ],\n    \"duration\": 100,\n    \"transProtocol\": {\n        \"transProtocolType\": \"WebHook\",\n        \"transProtocolDesc\": \"https://192.168.0.6:8081\"\n    },\n    \"startTime\": 20251105163010124\n}\n\n[수신] RealtimeSensorData (응답) 17:26:46\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\"\n}\n\n검증 결과: RealtimeSensorData (1회 검증 완료) 17:26:46 | 응답 소요 시간: 0.99초\n\n통과 필드 수: 2, 실패 필드 수: 0 | 웹훅메시지\n\n평가 점수: 100.0%"
+              "transmittedData": "[송신] RealtimeSensorData (요청) 12:58:32\n\n{\n    \"sensorDeviceList\": [\n        {\n            \"sensorDeviceID\": \"iot0001\"\n        }\n    ],\n    \"duration\": 100,\n    \"transProtocol\": {\n        \"transProtocolType\": \"WebHook\",\n        \"transProtocolDesc\": \"https://192.168.0.6:8081\"\n    },\n    \"startTime\": 20251105163010124\n}\n\n[수신] RealtimeSensorData (응답) 12:58:34\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\"\n}\n\n검증 결과: RealtimeSensorData (1회 검증 완료) 12:58:34 | 응답 소요 시간: 2.00초\n\n통과 필드 수: 2, 실패 필드 수: 0 | 웹훅메시지\n\n평가 점수: 100.0%"
             }
           ]
         },
@@ -181,11 +181,11 @@
               "validationData": {
                 "sensorDeviceList": [
                   {
-                    "sensorDeviceID": "iot0002",
+                    "sensorDeviceID": "iot0001",
                     "measureTime": 20220822163022124,
                     "sensorDeviceType": "온도",
                     "sensorDeviceUnit": "섭씨",
-                    "sensorDeviceValue": "36"
+                    "sensorDeviceValue": "90"
                   }
                 ]
               },
@@ -195,11 +195,11 @@
               "transmittedData": {
                 "sensorDeviceList": [
                   {
-                    "sensorDeviceID": "iot0002",
+                    "sensorDeviceID": "iot0001",
                     "measureTime": 20220822163022124,
                     "sensorDeviceType": "온도",
                     "sensorDeviceUnit": "섭씨",
-                    "sensorDeviceValue": "36"
+                    "sensorDeviceValue": "90"
                   }
                 ]
               }
@@ -229,7 +229,7 @@
                 "--- Webhook 검증 ---",
                 "오류가 없습니다."
               ],
-              "transmittedData": "[송신] RealtimeSensorEventInfos (요청) 17:26:48\n\n{\n    \"sensorDeviceList\": [\n        {\n            \"sensorDeviceID\": \"iot0002\"\n        },\n        {\n            \"sensorDeviceID\": \"iot0001\"\n        }\n    ],\n    \"duration\": 1000,\n    \"transProtocol\": {\n        \"transProtocolType\": \"WebHook\",\n        \"transProtocolDesc\": \"https://192.168.0.6:8081\"\n    },\n    \"eventFilter\": \"MotionDetection\",\n    \"startTime\": 20251105163010123\n}\n\n[수신] RealtimeSensorEventInfos (응답) 17:26:49\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\"\n}\n\n검증 결과: RealtimeSensorEventInfos (1회 검증 완료) 17:26:49 | 응답 소요 시간: 1.00초\n\n통과 필드 수: 2, 실패 필드 수: 0 | 웹훅메시지\n\n평가 점수: 100.0%"
+              "transmittedData": "[송신] RealtimeSensorEventInfos (요청) 12:58:36\n\n{\n    \"sensorDeviceList\": [\n        {\n            \"sensorDeviceID\": \"iot0001\"\n        },\n        {\n            \"sensorDeviceID\": \"iot0002\"\n        }\n    ],\n    \"duration\": 1000,\n    \"transProtocol\": {\n        \"transProtocolType\": \"WebHook\",\n        \"transProtocolDesc\": \"https://192.168.0.6:8081\"\n    },\n    \"eventFilter\": \"Leak\",\n    \"startTime\": 20251105163010123\n}\n\n[수신] RealtimeSensorEventInfos (응답) 12:58:37\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\"\n}\n\n검증 결과: RealtimeSensorEventInfos (1회 검증 완료) 12:58:37 | 응답 소요 시간: 0.99초\n\n통과 필드 수: 2, 실패 필드 수: 0 | 웹훅메시지\n\n평가 점수: 100.0%"
             }
           ]
         },
@@ -250,13 +250,13 @@
               "validationData": {
                 "sensorDeviceList": [
                   {
-                    "sensorDeviceID": "iot0002",
+                    "sensorDeviceID": "iot0001",
                     "eventName": "",
                     "eventTime": 0,
                     "eventDesc": "100도"
                   },
                   {
-                    "sensorDeviceID": "iot0001",
+                    "sensorDeviceID": "iot0002",
                     "eventName": "",
                     "eventTime": 0,
                     "eventDesc": "100도"
@@ -269,13 +269,13 @@
               "transmittedData": {
                 "sensorDeviceList": [
                   {
-                    "sensorDeviceID": "iot0002",
+                    "sensorDeviceID": "iot0001",
                     "eventName": "",
                     "eventTime": 0,
                     "eventDesc": "100도"
                   },
                   {
-                    "sensorDeviceID": "iot0001",
+                    "sensorDeviceID": "iot0002",
                     "eventName": "",
                     "eventTime": 0,
                     "eventDesc": "100도"
@@ -306,13 +306,13 @@
                   {
                     "sensorDeviceID": "iot0001",
                     "eventName": "Leak",
-                    "eventTime": 13393565760036669,
+                    "eventTime": 5059612546317580,
                     "eventDesc": "100도"
                   },
                   {
                     "sensorDeviceID": "iot0002",
                     "eventName": "Leak",
-                    "eventTime": 7982375150798171,
+                    "eventTime": 11002874637123986,
                     "eventDesc": "100도"
                   }
                 ]
@@ -321,12 +321,12 @@
                 "<b>[기타]</b> (1건)",
                 "- [맥락 오류] code 맥락 검증 실패: 예상값 201, 실제값 200"
               ],
-              "transmittedData": "[송신] StoredSensorEventInfos (요청) 17:26:51\n\n{\n    \"timePeriod\": {\n        \"startTime\": 0,\n        \"endTime\": 20251115163010124\n    },\n    \"sensorDeviceList\": [\n        {\n            \"sensorDeviceID\": \"iot0001\"\n        },\n        {\n            \"sensorDeviceID\": \"iot0002\"\n        }\n    ],\n    \"maxCount\": 8,\n    \"eventFilter\": \"Leak\"\n}\n\n[수신] StoredSensorEventInfos (응답) 17:26:52\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"sensorDeviceList\": [\n        {\n            \"sensorDeviceID\": \"iot0001\",\n            \"eventName\": \"Leak\",\n            \"eventTime\": 13393565760036669,\n            \"eventDesc\": \"100도\"\n        },\n        {\n            \"sensorDeviceID\": \"iot0002\",\n            \"eventName\": \"Leak\",\n            \"eventTime\": 7982375150798171,\n            \"eventDesc\": \"100도\"\n        }\n    ]\n}\n\n검증 결과: StoredSensorEventInfos (1회 검증 완료) 17:26:52 | 응답 소요 시간: 1.00초\n\n통과 필드 수: 0, 실패 필드 수: 7 | 일반 메시지\n\n평가 점수: 0.0%"
+              "transmittedData": "[송신] StoredSensorEventInfos (요청) 12:58:39\n\n{\n    \"timePeriod\": {\n        \"startTime\": 0,\n        \"endTime\": 20251115163010124\n    },\n    \"sensorDeviceList\": [\n        {\n            \"sensorDeviceID\": \"iot0001\"\n        },\n        {\n            \"sensorDeviceID\": \"iot0002\"\n        }\n    ],\n    \"maxCount\": 8,\n    \"eventFilter\": \"Leak\"\n}\n\n[수신] StoredSensorEventInfos (응답) 12:58:40\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"sensorDeviceList\": [\n        {\n            \"sensorDeviceID\": \"iot0001\",\n            \"eventName\": \"Leak\",\n            \"eventTime\": 5059612546317580,\n            \"eventDesc\": \"100도\"\n        },\n        {\n            \"sensorDeviceID\": \"iot0002\",\n            \"eventName\": \"Leak\",\n            \"eventTime\": 11002874637123986,\n            \"eventDesc\": \"100도\"\n        }\n    ]\n}\n\n검증 결과: StoredSensorEventInfos (1회 검증 완료) 12:58:40 | 응답 소요 시간: 0.99초\n\n통과 필드 수: 0, 실패 필드 수: 7 | 일반 메시지\n\n평가 점수: 0.0%"
             }
           ]
         }
       ]
     }
   ],
-  "completedDate": "2026-03-23T08:26:52Z"
+  "completedDate": "2026-03-25T03:58:40Z"
 }

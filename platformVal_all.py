@@ -42,6 +42,7 @@ class MyApp(PlatformMainUI):
     # 시험 결과 표시 요청 시그널
     showResultRequested = pyqtSignal(object)
     previousPageRequested = pyqtSignal(object)
+    WEBHOOK_FAILFAST_TIMEOUT_SEC = 10.0
 
     def __init__(self, embedded=False, mode=None, spec_id=None):
         # CONSTANTS 사용
@@ -936,9 +937,9 @@ class MyApp(PlatformMainUI):
                             time.sleep(0.1)
                             wait_count += 1
 
-                        # 웹훅 스레드 완료 대기
+                        # 웹훅 스레드는 fail-fast timeout만큼만 대기
                         if hasattr(self.Server, 'webhook_thread') and self.Server.webhook_thread:
-                            self.Server.webhook_thread.join(timeout=5)
+                            self.Server.webhook_thread.join(timeout=self.WEBHOOK_FAILFAST_TIMEOUT_SEC)
 
                         # 실제 웹훅 응답 사용
                         # ✅ 웹훅 응답이 null인 경우에도 검증을 수행하여 실패로 카운트

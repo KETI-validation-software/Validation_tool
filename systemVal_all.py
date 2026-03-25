@@ -60,6 +60,19 @@ class MyApp(SystemMainUI):
     previousPageRequested = pyqtSignal(object)
     # 시험 결과 표시 요청 시그널 (main.py와 연동)
     showResultRequested = pyqtSignal(object)  # parent widget을 인자로 전달
+    WEBHOOK_FAILFAST_TIMEOUT_SEC = 10.0
+
+    def _get_effective_timeout_seconds(self, idx):
+        """Webhook API는 긴 시나리오 timeout 대신 fail-fast timeout을 적용한다."""
+        base_timeout = self.time_outs[idx] / 1000 if idx < len(self.time_outs) else 5.0
+        try:
+            if idx < len(self.trans_protocols):
+                protocol = str(self.trans_protocols[idx]).strip().lower()
+                if protocol == "webhook":
+                    return min(base_timeout, self.WEBHOOK_FAILFAST_TIMEOUT_SEC)
+        except Exception:
+            pass
+        return base_timeout
 
     def _load_from_trace_file(self, api_name, direction="RESPONSE"):
         """Trace 파일에서 최신 이벤트 데이터 로드"""
@@ -510,6 +523,14 @@ class MyApp(SystemMainUI):
                     self.CONSTANTS.test_category = namespace.get('test_category', self.CONSTANTS.test_category)
                     self.CONSTANTS.test_target = namespace.get('test_target', self.CONSTANTS.test_target)
                     self.CONSTANTS.test_range = namespace.get('test_range', self.CONSTANTS.test_range)
+                    webhook_public_ip = namespace.get('WEBHOOK_PUBLIC_IP', None)
+                    if webhook_public_ip:
+                        self.CONSTANTS.WEBHOOK_PUBLIC_IP = webhook_public_ip
+                        Logger.debug(f" ✅ WEBHOOK_PUBLIC_IP 업데이트: {webhook_public_ip}")
+                    webhook_port = namespace.get('WEBHOOK_PORT', None)
+                    if webhook_port is not None:
+                        self.CONSTANTS.WEBHOOK_PORT = int(webhook_port)
+                        Logger.debug(f" ✅ WEBHOOK_PORT 업데이트: {webhook_port}")
 
                     Logger.debug(f" ✅ 외부 SPEC_CONFIG 로드 완료: {len(SPEC_CONFIG)}개 그룹")
                     # 디버그: 그룹 이름 출력
@@ -1190,13 +1211,18 @@ class MyApp(SystemMainUI):
                 if "WebHook" == self.spec_config.get('trans_protocol', self.current_spec_id)[self.cnt]:
                     self.webhook_flag = True
                     time.sleep(0.001)
-                    url = CONSTANTS.WEBHOOK_HOST  # ✅ 기본값 수정
-                    port = CONSTANTS.WEBHOOK_PORT  # ✅ 포트도 2001로
+                    url = self.CONSTANTS.WEBHOOK_HOST  # self.CONSTANTS 사용 (PyInstaller stale 방지)
+                    port = self.CONSTANTS.WEBHOOK_PORT  # self.CONSTANTS 사용 (transProtocolDesc와 포트 일치)
 
                     msg = {}
                     self.step_buffers[self.cnt]["is_webhook_api"] = True
 
                     self.webhook_cnt = self.cnt
+                    # 이전 웹훅 스레드가 남아있으면 정리 (포트 충돌 방지)
+                    if hasattr(self, 'webhook_thread') and self.webhook_thread is not None:
+                        self.webhook_thread.stop()
+                        self.webhook_thread = None
+
                     self.webhook_thread = WebhookThread(url, port, msg)
                     self.webhook_thread.result_signal.connect(self.handle_webhook_result)
                     self.webhook_thread.start()
@@ -1204,6 +1230,9 @@ class MyApp(SystemMainUI):
                     ready = self.webhook_thread.server_ready.wait(timeout=15)
                     if not ready:
                         Logger.error("[Webhook] 서버 준비 타임아웃 - POST 전송 취소")
+                    elif self.webhook_thread.httpd is None:
+                        Logger.error(f"[Webhook] 서버 시작 실패 (SSL/포트 바인딩 오류) - 포트 {port} 점검 필요")
+                        self.webhook_flag = False
                 else:
                     # WebHook이 아닌 경우 플래그 초기화
                     self.webhook_flag = False
@@ -1428,6 +1457,7 @@ class MyApp(SystemMainUI):
             # 웹훅 이벤트 수신 확인 - webhook_thread.wait()이 이미 동기화 처리하므로 별도 sleep 불필요
             if self.webhook_flag is True:
                 api_name = self.message[self.cnt] if self.cnt < len(self.message) else 'N/A'
+                current_timeout = self._get_effective_timeout_seconds(self.cnt)
                 Logger.debug(f"웹훅 이벤트 수신 완료 (API: {api_name})")
                 if self.webhook_res != None:
                     Logger.warn(f" 웹훅 메시지 수신")
@@ -1438,16 +1468,16 @@ class MyApp(SystemMainUI):
                         f"time_interval={time_interval:.3f}"
                     )
                     self._set_timer_success(self.cnt, time_interval)
-                elif math.ceil(time_interval) >= self.time_outs[self.cnt] / 1000 - 1:
+                elif math.ceil(time_interval) >= current_timeout - 1:
                     Logger.warn(f" 메시지 타임아웃! 웹훅 대기 종료")
                     # ✅ 타이머 라인 제거
                     self._set_timer_timeover(self.cnt, time_interval)
                 else :
                     # ✅ 대기 시간 타이머 표시 (마지막 줄 갱신)
-                    remaining = max(0, int((self.time_outs[self.cnt] / 1000) - time_interval))
+                    remaining = max(0, int(current_timeout - time_interval))
                     self._set_timer_running(self.cnt, time_interval)
                     
-                    Logger.debug(f" 웹훅 대기 중... (API {self.cnt}) 타임아웃 {round(time_interval)} /{round(self.time_outs[self.cnt] / 1000)}")
+                    Logger.debug(f" 웹훅 대기 중... (API {self.cnt}) 타임아웃 {round(time_interval)} /{round(current_timeout)}")
                     return
             if (self.post_flag is False and
                     self.processing_response is False and
@@ -1482,7 +1512,7 @@ class MyApp(SystemMainUI):
                     self.tmp_msg_append_flag = True
 
                 # 시스템이 플랫폼에 요청 전송
-                current_timeout = self.time_outs[self.cnt] / 1000 if self.cnt < len(self.time_outs) else 5.0
+                current_timeout = self._get_effective_timeout_seconds(self.cnt)
                 api_endpoint = self.message[self.cnt] if self.cnt < len(self.message) else ""
                 
                 # ✅ URL 오염 방지: pathUrl을 매번 깨끗한 base로 재구성
@@ -1515,8 +1545,8 @@ class MyApp(SystemMainUI):
                     if "WebHook".lower() in str(trans_protocol_type).lower():
 
                         # 플랫폼이 웹훅을 보낼 외부 주소 설정 - 동적
-                        WEBHOOK_IP = CONSTANTS.WEBHOOK_PUBLIC_IP  # 웹훅 수신 IP/도메인
-                        WEBHOOK_PORT = CONSTANTS.WEBHOOK_PORT  # 웹훅 수신 포트
+                        WEBHOOK_IP = self.CONSTANTS.WEBHOOK_PUBLIC_IP  # 웹훅 수신 IP/도메인 (self.CONSTANTS 사용: PyInstaller에서 올바른 값)
+                        WEBHOOK_PORT = self.CONSTANTS.WEBHOOK_PORT  # 웹훅 수신 포트
                         WEBHOOK_URL = f"https://{WEBHOOK_IP}:{WEBHOOK_PORT}"  # 플랫폼/시스템이 웹훅을 보낼 주소
 
                         trans_protocol = {
@@ -1583,8 +1613,8 @@ class MyApp(SystemMainUI):
                 self.post_flag = True
 
             # timeout 조건은 응답 대기/재시도 판단에만 사용
-            elif self.cnt < len(self.time_outs) and time_interval >= self.time_outs[
-                self.cnt] / 1000 and self.post_flag is True:
+            elif self.cnt < len(self.time_outs) and time_interval >= self._get_effective_timeout_seconds(
+                self.cnt) and self.post_flag is True:
                 self._set_timer_timeover(self.cnt, time_interval)
 
                 if self.cnt < len(self.message):
@@ -1623,7 +1653,7 @@ class MyApp(SystemMainUI):
                 
                 # 타임아웃 로그를 HTML 카드로 출력
                 api_name = self.message[self.cnt] if self.cnt < len(self.message) else "Unknown"
-                timeout_sec = self.time_outs[self.cnt] / 1000 if self.cnt < len(self.time_outs) else 0
+                timeout_sec = self._get_effective_timeout_seconds(self.cnt)
                 self.append_monitor_log(
                     step_name=f"시험 API: {api_name}",
                     request_json="",
@@ -1668,7 +1698,10 @@ class MyApp(SystemMainUI):
                     self.update_table_row_with_retries(self.cnt, "FAIL", 0, add_err, "", "Message Missing!",
                                                        current_retries)
 
-                    # 다음 API로 이동
+                    # 다음 API로 이동 (웹훅 스레드 정리 후 이동)
+                    if hasattr(self, 'webhook_thread') and self.webhook_thread is not None:
+                        self.webhook_thread.stop()
+                        self.webhook_thread = None
                     self.cnt += 1
                     self.current_retry = 0  # 재시도 카운터 리셋
                     self.webhook_flag = False
@@ -1767,7 +1800,7 @@ class MyApp(SystemMainUI):
             elif self.post_flag == True:
                 if self.res is None:
                     # ✅ 대기 시간 타이머 표시 (마지막 줄 갱신)
-                    current_timeout = self.time_outs[self.cnt] / 1000 if self.cnt < len(self.time_outs) else 5.0
+                    current_timeout = self._get_effective_timeout_seconds(self.cnt)
                     remaining = max(0, int(current_timeout - time_interval))
                     self._set_timer_running(self.cnt, time_interval)
 
@@ -3005,6 +3038,10 @@ class MyApp(SystemMainUI):
         # 실제 초기화는 다음 '시험 시작' 클릭 시 신규 시작 경로에서 수행된다.
         self.post_flag = False
         self.res = None
+        # 웹훅 스레드가 실행 중이면 정지 (포트 해제)
+        if hasattr(self, 'webhook_thread') and self.webhook_thread is not None:
+            self.webhook_thread.stop()
+            self.webhook_thread = None
         self.webhook_flag = False
         Logger.debug(f" 취소 시점 상태 유지 (다음 시작 시 초기화)")
         

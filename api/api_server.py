@@ -1099,7 +1099,7 @@ class Server(BaseHTTPRequestHandler):
         for attempt in range(max_retries):
 
             try:
-                result = requests.post(url, data=json_data_tmp, verify=False)
+                result = requests.post(url, data=json_data_tmp, verify=False, timeout=10)
                 Logger.debug(f"[SERVER] 웹훅 응답 수신: {result.text}")
                 self.result = result
                 Server.webhook_response = json.loads(result.text)  # ✅ 클래스 변수에 저장

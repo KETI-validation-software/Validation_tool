@@ -104,7 +104,10 @@ def save_management_url(new_url):
 # 관리자시스템 주소
 management_url = load_management_url()
 
-specs = [["cmii7wfuf006i8z1tcds6q69g_outSchema","cmii7wfuf006i8z1tcds6q69g_inData","cmii7wfuf006i8z1tcds6q69g_messages",""],
+specs = [["cmiqr1jha00i6ie8fb1scb3go_outSchema","cmiqr1jha00i6ie8fb1scb3go_inData","cmiqr1jha00i6ie8fb1scb3go_messages",""],
+         ["cmiqr2b9j00i9ie8frw439h8i_outSchema","cmiqr2b9j00i9ie8frw439h8i_inData","cmiqr2b9j00i9ie8frw439h8i_messages",""],
+         ["cmiqr0kdw00i4ie8fr3firjtg_outSchema","cmiqr0kdw00i4ie8fr3firjtg_inData","cmiqr0kdw00i4ie8fr3firjtg_messages",""],
+         ["cmii7wfuf006i8z1tcds6q69g_outSchema","cmii7wfuf006i8z1tcds6q69g_inData","cmii7wfuf006i8z1tcds6q69g_messages",""],
          ["cmii7w683006h8z1t7usnin5g_outSchema","cmii7w683006h8z1t7usnin5g_inData","cmii7w683006h8z1t7usnin5g_messages",""],
          ["cmii7v8pr006g8z1tvo55a50u_outSchema","cmii7v8pr006g8z1tvo55a50u_inData","cmii7v8pr006g8z1tvo55a50u_messages",""]]
 none_request_message = ['Capabilities',
@@ -114,19 +117,19 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소
 # test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
-company_name = "6"
-product_name = "6"
-version = "6"
+company_name = "keti2"
+product_name = "keti2"
+version = "keti2"
 test_category = "본시험"
-test_target = "기본 기능 시험-영상보안시스템"
+test_target = "제어 기능 시험-바이오인식 기반 출입통제 시스템, 제어기능시험-보안용 센서 시스템, 제어 기능 시험-영상보안시스템, 기본 기능 시험-영상보안시스템"
 test_range = "전체 필드"
 auth_type = "Digest Auth"
 auth_info = "kisa,kisa_k1!2@"
 admin_code = "1"
-url = "https://10.252.219.53:8080"
-contact_person = "6"
-model_name = "6"
-request_id = "cmn2vnezz00j3r776v36r0ca9"
+url = "https://192.168.0.10:8080"
+contact_person = "keti2"
+model_name = "keti2"
+request_id = "cmn5f02ej001a1e8aexr7pgzr"
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황
 flag_opt = False
@@ -175,11 +178,11 @@ DEBUG_LEVEL = 3 # 기본값: WARN (권장)
 # ✅ 웹훅 서버 설정 (전역)
 WEBHOOK_HOST = "0.0.0.0"  # 서버 바인딩 주소 (모든 인터페이스에서 수신)
 WEBHOOK_PORT = 8081
-WEBHOOK_PUBLIC_IP = "10.252.219.95"
+WEBHOOK_PUBLIC_IP = "192.168.0.6"
 # ✅ 웹훅 공개 IP 설정: info_GUI에서 선택한 시험 URL의 IP 사용
 # 초기값은 URL에서 추출, info_GUI에서 주소 선택 후 자동 업데이트됨
 
-WEBHOOK_URL = f"https://{WEBHOOK_PUBLIC_IP}:{WEBHOOK_PORT}"
+WEBHOOK_URL = "https://192.168.0.6:8081"
 # 주소 선택 후 form_validator.py에서 자동으로 업데이트됨
 
 # ✅ 웹훅 외부 접근 주소 (플랫폼에 전송할 주소 - ngrok 등) (01/08 임시로 추가)
@@ -188,6 +191,48 @@ WEBHOOK_DISPLAY_URL = "https://webhook2026.ngrok.dev"
 # 각 시스템마다 다른 ngrok 주소를 사용하려면 이 값을 변경
 
 SPEC_CONFIG = [
+    {
+        "group_name": "제어 기능 시험-바이오인식 기반 출입통제 시스템",
+        "group_id": "cmk4tgs2c1enwcfb3sbsbdgrd",
+        "cmiqr1jha00i6ie8fb1scb3go": {
+    "test_name": "ac002",
+    "specs": ['cmiqr1jha00i6ie8fb1scb3go_outSchema', 'cmiqr1jha00i6ie8fb1scb3go_inData', 'cmiqr1jha00i6ie8fb1scb3go_messages', 'cmiqr1jha00i6ie8fb1scb3go_webhook_inSchema', 'cmiqr1jha00i6ie8fb1scb3go_webhook_outData'],
+    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '바이오 및 출입통제 장치 목록 정보', '실시간 출입통제 장치 상태 정보 연동-상태조회', '출입 통제 장치 제어 정보 연동', '실시간 출입통제 장치 상태 정보 연동-결과조회'],
+    "api_id": ['cmisgv0ua08o55vy7yvk4aw0a', 'cmisjr2u40au05vy7kt6bb6zl', 'cmiskf6w20dcm5vy7cjao08fw', 'cmixuoetf0gr9p002gy101xid', 'cmixuttgv0hbyp002h6os6wjc', 'cmixuvzks0hd3p002rcrvqdt4'],
+    "api_endpoint": ['/Authentication', '/Capabilities', '/DoorProfiles', '/RealtimeDoorStatus', '/DoorControl', '/RealtimeDoorStatus2'],
+    "trans_protocol": ['basic', 'basic', 'basic', 'WebHook', 'basic', 'WebHook'],
+    "time_out": [60000, 60000, 60000, 60000, 60000, 60000],
+    "num_retries": [1, 1, 1, 1, 1, 1]
+}
+    },
+    {
+        "group_name": "제어기능시험-보안용 센서 시스템",
+        "group_id": "cmk4tggl01entcfb38q47jw4w",
+        "cmiqr2b9j00i9ie8frw439h8i": {
+    "test_name": "sensor002",
+    "specs": ['cmiqr2b9j00i9ie8frw439h8i_outSchema', 'cmiqr2b9j00i9ie8frw439h8i_inData', 'cmiqr2b9j00i9ie8frw439h8i_messages'],
+    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '보안용 센서 단말 목록 정보 연동', '보안용 센서 단말 제어 정보 연동-상태연동', '보안용 센서 단말 제어 정보 연동-제어'],
+    "api_id": ['cmise849o00nv5vy7mu76wa69', 'cmise9yk200pv5vy7ktxtva7c', 'cmisepin301uv5vy78nai1drd', 'cmisfqfip07tz5vy7de6x5d6r', 'cmisg86id08bm5vy7ezcbr7oy'],
+    "api_endpoint": ['/Authentication', '/Capabilities', '/SensorDeviceProfiles', '/SensorDeviceControl', '/SensorDeviceControl2'],
+    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic'],
+    "time_out": [60000, 60000, 60000, 60000, 60000],
+    "num_retries": [1, 1, 1, 1, 1]
+}
+    },
+    {
+        "group_name": "제어 기능 시험-영상보안시스템",
+        "group_id": "cmk4tfso61enncfb3l63wp1m3",
+        "cmiqr0kdw00i4ie8fr3firjtg": {
+    "test_name": "vid002",
+    "specs": ['cmiqr0kdw00i4ie8fr3firjtg_outSchema', 'cmiqr0kdw00i4ie8fr3firjtg_inData', 'cmiqr0kdw00i4ie8fr3firjtg_messages'],
+    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '카메라 목록 연동', 'PTZ 상태 정보 연동', 'PTZ 연속 이동 제어 정보 연동', 'PTZ 정지 제어 정보 연동'],
+    "api_id": ['cmish1fu408we5vy7dp3ltj00', 'cmixu0dt70dyzp002xhm24l3h', 'cmixu2m200e4up002g73csf12', 'cmixu9wn10f7rp002rgzkx3au', 'cmixucv8a0fb4p002pnvfe6ay', 'cmixufkri0fdnp002fouuoqsg'],
+    "api_endpoint": ['/Authentication', '/Capabilities', '/CameraProfiles', '/PtzStatus', '/PtzContinuousMove', '/PtzStop'],
+    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic'],
+    "time_out": [60000, 60000, 60000, 60000, 60000, 60000],
+    "num_retries": [1, 1, 1, 1, 1, 1]
+}
+    },
     {
         "group_name": "기본 기능 시험-영상보안시스템",
         "group_id": "cmjcefmh8070gcfb35wjptcsl",

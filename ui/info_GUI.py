@@ -12,7 +12,7 @@ from datetime import datetime
 from core.functions import resource_path
 from core.logger import Logger
 from network_scanner import NetworkScanWorker, ARPScanWorker
-from form_validator import FormValidator, ClickableLabel, ClickableCheckboxRowWidget
+from form_validator import FormValidator, ClickableLabel, ClickableCheckboxRowWidget, derive_webhook_host
 import config.CONSTANTS as CONSTANTS
 from ui.splash_screen import LoadingPopup
 from ui.widgets import SystemPopup
@@ -679,9 +679,13 @@ class InfoWidget(QWidget):
                 self.arp_scan_thread.start()
                 if is_auto:
                     # 자동 스캔 시 로딩 팝업 표시
+                    # LoadingPopup 내부의 QApplication.processEvents()로 인해 스캔 완료 시그널이
+                    # 팝업 초기화 도중 처리될 수 있어 _close_loading_popup()이 먼저 호출될 수 있음.
+                    # 이 경우 self.loading_popup이 None으로 설정되므로 show() 전에 null 체크 필요.
                     self.loading_popup = LoadingPopup(width=400, height=200)
                     self.loading_popup.update_message("시험 대상 검색 중...", "네트워크 상의 시험 대상을 검색하고 있습니다.\n잠시만 기다려주세요.")
-                    self.loading_popup.show()
+                    if self.loading_popup is not None:
+                        self.loading_popup.show()
                 else:
                     QMessageBox.information(self, "ARP 스캔 시작", "동일 네트워크의 장비를 검색합니다.\n잠시만 기다려주세요...")
                 return
@@ -759,6 +763,15 @@ class InfoWidget(QWidget):
     def _on_arp_scan_failed(self, msg):
         """ARP 스캔 실패 시 호출"""
         self._close_loading_popup()
+
+        err_text = str(msg or "")
+        lower_msg = err_text.lower()
+        if "npcap" in lower_msg or "winpcap" in lower_msg:
+            msg = (
+                f"{err_text}\n\n"
+                "Npcap 미설치/오류 환경에서는 자동 주소 탐색을 사용할 수 없습니다.\n"
+                "상대방 장비 IP를 '직접 입력'으로 추가해 주세요."
+            )
         
         popup = SystemPopup(
             title="주소 탐색 오류",
@@ -1406,13 +1419,17 @@ class InfoWidget(QWidget):
 
             # testPort 기반 WEBHOOK_PORT 업데이트
             if self.test_port:
+                selected_url = self.get_selected_url()
+                webhook_host = derive_webhook_host(selected_url)
+
                 # 1. 메모리상의 값 업데이트
-                local_ip = self.form_validator.get_local_ip_address()
-                CONSTANTS.WEBHOOK_PUBLIC_IP = local_ip
                 CONSTANTS.WEBHOOK_PORT = int(self.test_port) + 1
-                CONSTANTS.WEBHOOK_URL = f"https://{local_ip}:{CONSTANTS.WEBHOOK_PORT}"
-                
-                Logger.info(f"[WEBHOOK] 로컬 IP 설정: {local_ip}, 포트: {CONSTANTS.WEBHOOK_PORT}")
+                if webhook_host:
+                    CONSTANTS.WEBHOOK_PUBLIC_IP = webhook_host
+                    CONSTANTS.WEBHOOK_URL = f"https://{webhook_host}:{CONSTANTS.WEBHOOK_PORT}"
+                    Logger.info(f"[WEBHOOK] 선택 URL 기반 설정: {webhook_host}, 포트: {CONSTANTS.WEBHOOK_PORT}")
+                else:
+                    Logger.warning("[WEBHOOK] 선택 URL host를 찾지 못해 WEBHOOK_PUBLIC_IP는 유지하고 포트만 갱신합니다.")
 
                 # 2. CONSTANTS.py 파일 자체도 수정
                 try:
@@ -1430,15 +1447,21 @@ class InfoWidget(QWidget):
                     with open(constants_path, 'r', encoding='utf-8') as f:
                         content = f.read()
 
-                    # WEBHOOK_PUBLIC_IP 업데이트
-                    pattern_ip = r'^WEBHOOK_PUBLIC_IP\s*=.*$'
-                    new_ip_line = f'WEBHOOK_PUBLIC_IP = "{local_ip}"'
-                    content = re.sub(pattern_ip, new_ip_line, content, flags=re.MULTILINE)
+                    if webhook_host:
+                        # WEBHOOK_PUBLIC_IP 업데이트
+                        pattern_ip = r'^WEBHOOK_PUBLIC_IP\s*=.*$'
+                        new_ip_line = f'WEBHOOK_PUBLIC_IP = "{webhook_host}"'
+                        content = re.sub(pattern_ip, new_ip_line, content, flags=re.MULTILINE)
 
                     # WEBHOOK_PORT = 숫자 패턴 찾아서 치환
                     pattern_port = r'^WEBHOOK_PORT\s*=\s*\d+.*$'
                     new_port_line = f'WEBHOOK_PORT = {int(self.test_port) + 1}       # 웹훅 수신 포트'
                     content = re.sub(pattern_port, new_port_line, content, flags=re.MULTILINE)
+
+                    if webhook_host:
+                        pattern_url = r'^WEBHOOK_URL\s*=.*$'
+                        new_url_line = f'WEBHOOK_URL = "https://{webhook_host}:{int(self.test_port) + 1}"'
+                        content = re.sub(pattern_url, new_url_line, content, flags=re.MULTILINE)
 
                     # 파일 저장
                     with open(constants_path, 'w', encoding='utf-8') as f:
