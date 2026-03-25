@@ -123,6 +123,9 @@ class MyApp(PlatformMainUI):
 
         # ✅ 각 spec_id별 테이블 데이터 저장 (시나리오 전환 시 결과 유지)
         self.spec_table_data = {}  # {spec_id: {table_data, step_buffers, scores}}
+        self.selected_spec_ids_for_run = []
+        self.completed_spec_ids_for_run = set()
+        self.final_result_sent = False
 
         self.initUI()
         self.realtime_flag = False
@@ -416,7 +419,12 @@ class MyApp(PlatformMainUI):
 
                 # ✅ 현재 spec 데이터 저장
                 self.save_current_spec_data()
-
+                if not self._should_send_final_result_now():
+                    Logger.info(
+                        f"final result send deferred: {len(self.completed_spec_ids_for_run)}/{len(self.selected_spec_ids_for_run or [self.current_spec_id])} specs completed"
+                    )
+                    self.cleanup_paused_file()
+                    return
                 self.sbtn.setEnabled(True)
                 self.stop_btn.setDisabled(True)
                 self.cancel_btn.setDisabled(True)
@@ -440,6 +448,7 @@ class MyApp(PlatformMainUI):
                             )
                     url = f"{CONSTANTS.management_url}/api/integration/test-results"
                     response = requests.post(url, json=result_json)
+                    self.final_result_sent = True
                     Logger.debug(f"✅ 시험 결과 전송 상태 코드:: {response.status_code}")
                     Logger.debug(f"📥  시험 결과 전송 응답:: {response.text}")
 
@@ -1335,6 +1344,13 @@ class MyApp(PlatformMainUI):
                 self.sbtn.setEnabled(True)
                 self.stop_btn.setDisabled(True)
                 self.cancel_btn.setDisabled(True)
+                self.save_current_spec_data()
+                if not self._should_send_final_result_now():
+                    Logger.info(
+                        f"final result send deferred: {len(self.completed_spec_ids_for_run)}/{len(self.selected_spec_ids_for_run or [self.current_spec_id])} specs completed"
+                    )
+                    self.cleanup_paused_file()
+                    return
 
                 # ✅ 현재 spec 데이터 저장
                 self.save_current_spec_data()
@@ -2067,6 +2083,39 @@ class MyApp(PlatformMainUI):
                     api_name = api_item.data(Qt.UserRole) or api_item.text()
                 CustomDialog(msg, api_name)  # API 명은 컬럼 1
 
+    def _prepare_final_result_tracking(self, selected_spec_ids):
+        unique_spec_ids = []
+        for spec_id in selected_spec_ids:
+            if spec_id and spec_id not in unique_spec_ids:
+                unique_spec_ids.append(spec_id)
+
+        if not unique_spec_ids and self.current_spec_id:
+            unique_spec_ids = [self.current_spec_id]
+
+        self.selected_spec_ids_for_run = unique_spec_ids
+        self.completed_spec_ids_for_run = set()
+        self.final_result_sent = False
+
+    def _should_send_final_result_now(self):
+        if getattr(self, "final_result_sent", False):
+            return False
+
+        current_spec_id = getattr(self, "current_spec_id", None)
+        if current_spec_id:
+            self.completed_spec_ids_for_run.add(current_spec_id)
+
+        expected_spec_ids = list(getattr(self, "selected_spec_ids_for_run", []) or [])
+        if not expected_spec_ids and current_spec_id:
+            expected_spec_ids = [current_spec_id]
+
+        if not expected_spec_ids:
+            return False
+
+        should_send = set(expected_spec_ids).issubset(self.completed_spec_ids_for_run)
+        if should_send:
+            self.final_result_sent = True
+        return should_send
+
     def run_single_spec_test(self):
         """단일 spec_id에 대한 시험 실행"""
         # ✅ trace 초기화는 sbtn_push()의 신규 시작 모드에서만 수행
@@ -2142,6 +2191,7 @@ class MyApp(PlatformMainUI):
                 QApplication.processEvents()
 
             selected_spec_ids = [self.index_to_spec_id[r.row()] for r in selected_rows]
+            self._prepare_final_result_tracking(selected_spec_ids)
             for spec_id in selected_spec_ids:
                 QApplication.processEvents()  # 스피너 애니메이션 유지
                 self.current_spec_id = spec_id

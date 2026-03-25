@@ -121,7 +121,7 @@ company_name = "keti3"
 product_name = "keti3"
 version = "keti3"
 test_category = "본시험"
-test_target = "제어 기능-통합플랫폼, 기본 기능 시험-통합시스템"
+test_target = "제어 기능-통합플랫폼 외 1개"
 test_range = "전체 필드"
 auth_type = "Digest Auth"
 auth_info = "kisa,kisa_k1!2@"
@@ -177,7 +177,7 @@ DEBUG_LEVEL = 3 # 기본값: WARN (권장)
 
 # ✅ 웹훅 서버 설정 (전역)
 WEBHOOK_HOST = "0.0.0.0"  # 서버 바인딩 주소 (모든 인터페이스에서 수신)
-WEBHOOK_PORT = 8081
+WEBHOOK_PORT = 8081       # 웹훅 수신 포트
 WEBHOOK_PUBLIC_IP = "192.168.1.70"
 # ✅ 웹훅 공개 IP 설정: info_GUI에서 선택한 시험 URL의 IP 사용
 # 초기값은 URL에서 추출, info_GUI에서 주소 선택 후 자동 업데이트됨

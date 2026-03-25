@@ -13,6 +13,16 @@ from ui.sections import BasicInfoPanel
 import config.CONSTANTS as CONSTANTS
 
 
+def format_test_group_summary(group_names):
+    if not group_names:
+        return ""
+
+    if len(group_names) == 1:
+        return str(group_names[0])
+
+    return f"{group_names[0]} 외 {len(group_names) - 1}개"
+
+
 def create_test_info_page(parent_widget):
     """
     시험 정보 확인 페이지 생성
