@@ -1190,6 +1190,7 @@ class MyApp(PlatformMainUI):
                         score=score_value,
                         details=build_monitor_result_details(self.total_pass_cnt, self.total_error_cnt, current_protocol),
                         response_time_ms=self.monitor_response_elapsed_ms.get(self.cnt),
+                        total_timeout_ms=self.time_outs[self.cnt] if self.cnt < len(self.time_outs) else None,
                     )
                     append_attempt_log_text(
                         self.step_buffers[self.cnt],

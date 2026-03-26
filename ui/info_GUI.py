@@ -56,6 +56,118 @@ class TestInfoWorker(QThread):
             self.error.emit(str(e))
 
 
+def _summarize_schedule_debug_fields(schedules):
+    """Return compact schedule diagnostics for debug logging."""
+    if not isinstance(schedules, list):
+        return []
+
+    date_keys = [
+        "scheduledDate",
+        "scheduleDate",
+        "startDate",
+        "endDate",
+        "fromDate",
+        "toDate",
+        "validFrom",
+        "validTo",
+        "periodStart",
+        "periodEnd",
+        "startTime",
+        "endTime",
+    ]
+
+    summaries = []
+    for idx, schedule in enumerate(schedules):
+        if not isinstance(schedule, dict):
+            summaries.append(f"schedule[{idx}] <non-dict>")
+            continue
+
+        pairs = []
+        for key in date_keys:
+            value = schedule.get(key)
+            if value not in (None, ""):
+                pairs.append(f"{key}={value}")
+
+        if not pairs:
+            for key, value in schedule.items():
+                if "date" in str(key).lower() or "time" in str(key).lower():
+                    if value not in (None, ""):
+                        pairs.append(f"{key}={value}")
+
+        if not pairs:
+            pairs.append("<no date/time fields>")
+
+        summaries.append(f"schedule[{idx}] " + ", ".join(pairs))
+
+    return summaries
+
+
+def _parse_schedule_date_value(value):
+    if not value:
+        return None
+    try:
+        date_only = value.split('T')[0] if 'T' in value else value
+        return datetime.strptime(date_only, "%Y-%m-%d").date()
+    except Exception:
+        return None
+
+
+def _schedule_matches_date(schedule, target_date):
+    if not isinstance(schedule, dict):
+        return False
+
+    start_value = (
+        schedule.get("scheduledDate")
+        or schedule.get("scheduleDate")
+        or schedule.get("startDate")
+        or schedule.get("fromDate")
+        or schedule.get("validFrom")
+        or schedule.get("periodStart")
+    )
+    end_value = (
+        schedule.get("endDate")
+        or schedule.get("toDate")
+        or schedule.get("validTo")
+        or schedule.get("periodEnd")
+        or start_value
+    )
+
+    start_date = _parse_schedule_date_value(start_value)
+    end_date = _parse_schedule_date_value(end_value)
+    if not start_date or not end_date:
+        return False
+
+    if end_date < start_date:
+        end_date = start_date
+
+    return start_date <= target_date <= end_date
+
+
+def _schedule_reference_date_for_time_window(schedule, target_date):
+    if not isinstance(schedule, dict):
+        return ""
+
+    end_value = (
+        schedule.get("endDate")
+        or schedule.get("toDate")
+        or schedule.get("validTo")
+        or schedule.get("periodEnd")
+    )
+    if end_value:
+        return target_date.strftime("%Y-%m-%d")
+
+    start_value = (
+        schedule.get("scheduledDate")
+        or schedule.get("scheduleDate")
+        or schedule.get("startDate")
+        or schedule.get("fromDate")
+        or schedule.get("validFrom")
+        or schedule.get("periodStart")
+        or ""
+    )
+    return start_value.split('T')[0] if 'T' in start_value else start_value
+
+
 class InfoWidget(QWidget):
     """
     접속 후 화면 GUI.
@@ -1122,6 +1234,8 @@ class InfoWidget(QWidget):
         try:
             schedules = self._extract_schedule_candidates(test_data)
             Logger.debug(f"API schedule candidates count: {len(schedules)}")
+            for summary in _summarize_schedule_debug_fields(schedules):
+                Logger.debug(f"API schedule candidate detail: {summary}")
 
             if not schedules:
                 popup = SystemPopup(
@@ -1133,18 +1247,7 @@ class InfoWidget(QWidget):
                 return False
 
             today = datetime.now().date()
-            today_schedules = []
-            for sch in schedules:
-                date_str = sch.get("scheduledDate") or sch.get("scheduleDate")
-                if not date_str:
-                    continue
-                try:
-                    date_only = date_str.split('T')[0] if 'T' in date_str else date_str
-                    d = datetime.strptime(date_only, "%Y-%m-%d").date()
-                    if d == today:
-                        today_schedules.append(sch)
-                except Exception:
-                    continue
+            today_schedules = [sch for sch in schedules if _schedule_matches_date(sch, today)]
 
             if not today_schedules:
                 popup = SystemPopup(
@@ -1160,7 +1263,7 @@ class InfoWidget(QWidget):
 
             start_time_str = schedule_data.get("startTime")
             end_time_str = schedule_data.get("endTime")
-            schedule_date_str = schedule_data.get("scheduledDate") or schedule_data.get("scheduleDate")
+            schedule_date_str = _schedule_reference_date_for_time_window(schedule_data, today)
 
             if not start_time_str or not end_time_str:
                 return True

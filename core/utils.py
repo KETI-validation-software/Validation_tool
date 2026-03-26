@@ -145,6 +145,27 @@ def generate_monitor_notice_html(message, accent_color="#275554", background_col
     )
 
 
+def _format_seconds_for_monitor_display(milliseconds):
+    if milliseconds is None:
+        return ""
+
+    seconds = float(milliseconds) / 1000
+    if seconds.is_integer():
+        return f"{int(seconds)}{_k(0xCD08)}"
+    return f"{seconds:.2f}".rstrip("0").rstrip(".") + _k(0xCD08)
+
+
+def build_monitor_response_time_text(response_time_ms=None, total_timeout_ms=None):
+    if response_time_ms is None:
+        return ""
+
+    response_time_text = f"{_k(0xC751, 0xB2F5, 0x20, 0xC18C, 0xC694, 0x20, 0xC2DC, 0xAC04)}: {float(response_time_ms) / 1000:.2f}{_k(0xCD08)}"
+    timeout_text = _format_seconds_for_monitor_display(total_timeout_ms)
+    if timeout_text:
+        response_time_text += f" ({timeout_text})"
+    return response_time_text
+
+
 def build_monitor_progress_details(protocol):
     protocol_lower = str(protocol).lower()
     if protocol_lower == "basic":
@@ -178,7 +199,7 @@ def build_monitor_result_details(pass_count, error_count, protocol, response_tim
     return " | ".join(parts)
 
 
-def build_monitor_log_text(step_name, request_json="", score=None, details="", direction="RECV", response_time_ms=None, timestamp=None):
+def build_monitor_log_text(step_name, request_json="", score=None, details="", direction="RECV", response_time_ms=None, total_timeout_ms=None, timestamp=None):
     from datetime import datetime
 
     type_label = _k(0xC1A1, 0xC2E0) if direction == "SEND" else _k(0xC218, 0xC2E0)
@@ -192,8 +213,9 @@ def build_monitor_log_text(step_name, request_json="", score=None, details="", d
         timestamp = datetime.now().strftime("%H:%M:%S")
 
     header_line = f"{header_text} {timestamp}"
-    if response_time_ms is not None:
-        header_line += f" | {_k(0xC751, 0xB2F5, 0x20, 0xC18C, 0xC694, 0x20, 0xC2DC, 0xAC04)}: {float(response_time_ms) / 1000:.2f}{_k(0xCD08)}"
+    response_time_text = build_monitor_response_time_text(response_time_ms, total_timeout_ms)
+    if response_time_text:
+        header_line += f" | {response_time_text}"
 
     parts = [header_line]
 
