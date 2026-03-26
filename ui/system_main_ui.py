@@ -1173,7 +1173,7 @@ class SystemMainUI(CommonMainUI):
         return re.sub(r'\d+$', '', api_name)
 
 
-    def append_monitor_log(self, step_name, request_json="", result_status="진행중", score=None, details="", is_temp=False, direction="RECV", response_time_ms=None):
+    def append_monitor_log(self, step_name, request_json="", result_status="진행중", score=None, details="", is_temp=False, direction="RECV", response_time_ms=None, total_timeout_ms=None):
         """
         Qt 호환성이 보장된 HTML 테이블 구조 로그 출력 함수
         """
@@ -1222,6 +1222,7 @@ class SystemMainUI(CommonMainUI):
             build_monitor_log_text,
             normalize_monitor_request_json,
             replace_transport_desc_for_display,
+            build_monitor_response_time_text,
         )
 
         # ✅ UI 표시용: transProtocolDesc 하드코딩 치환
@@ -1237,6 +1238,7 @@ class SystemMainUI(CommonMainUI):
             details=details,
             direction=direction,
             response_time_ms=response_time_ms,
+            total_timeout_ms=total_timeout_ms,
             timestamp=timestamp,
         )
 
