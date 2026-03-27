@@ -137,6 +137,10 @@ class APIClient:
         try:
             last_status = getattr(CONSTANTS, "HEARTBEAT_LAST_STATUS", "")
 
+            if last_status == "completed" and status != "completed":
+                Logger.info(f"[INFO] Heartbeat ({status}) suppressed after completed")
+                return True
+
             # stopped is valid only after in_progress.
             if status == "stopped" and last_status != "in_progress":
                 Logger.info(f"[INFO] Heartbeat (stopped) suppressed: last_status={last_status}")

@@ -168,6 +168,35 @@ def _schedule_reference_date_for_time_window(schedule, target_date):
     return start_value.split('T')[0] if 'T' in start_value else start_value
 
 
+def _should_show_url_checkbox(target_system):
+    normalized = str(target_system or "").strip()
+    integrated_aliases = {"INTEGRATED_SYSTEM", "통합시스템"}
+    return normalized not in integrated_aliases
+
+
+def _find_matching_platform_url_row(urls, resolved_test_ip):
+    if not resolved_test_ip:
+        return None
+
+    for index, url in enumerate(urls or []):
+        normalized = str(url or "")
+        if "://" in normalized:
+            normalized = normalized.split("://", 1)[1]
+        host = normalized.split(":", 1)[0].strip()
+        if host == resolved_test_ip:
+            return index
+    return None
+
+
+def _build_integrated_system_urls(local_ips, test_port, resolved_test_ip=None):
+    deduped_ips = [ip for ip in dict.fromkeys(local_ips or []) if ip]
+    matched_index = _find_matching_platform_url_row(deduped_ips, resolved_test_ip)
+    if matched_index is not None:
+        deduped_ips = [deduped_ips[matched_index]]
+
+    return [f"{ip}:{test_port}" for ip in deduped_ips]
+
+
 class InfoWidget(QWidget):
     """
     접속 후 화면 GUI.
@@ -191,6 +220,8 @@ class InfoWidget(QWidget):
         self.original_test_range = None  # API에서 받아온 원래 test_range 값 보관
         self.real_admin_code = None  # [추가] API로부터 받아온 실제 관리자 코드
         self.pending_auto_scan = False  # 2페이지 진입 시 자동 스캔 수행 플래그
+        self.resolved_test_ip = None
+        self._pending_test_info_ip = None
         self.initUI()
 
     def initUI(self):
@@ -272,6 +303,7 @@ class InfoWidget(QWidget):
             return
 
         ip_address = self._auto_load_ip_list[self._auto_load_current_index]
+        self._pending_test_info_ip = ip_address
         Logger.debug(f"버전4: IP {ip_address} 조회 시도 ({self._auto_load_current_index + 1}/{len(self._auto_load_ip_list)})")
 
         self.loading_popup.update_message(
@@ -970,7 +1002,9 @@ class InfoWidget(QWidget):
                 url_widget = ClickableCheckboxRowWidget(
                     normalized_url, row, 1,
                     bg_image, bg_selected_image,
-                    checkbox_unchecked, checkbox_checked
+                    checkbox_unchecked, checkbox_checked,
+                    show_checkbox=_should_show_url_checkbox(getattr(self, 'target_system', '')),
+                    checkbox_alignment="left"
                 )
                 url_widget.setProperty("url", normalized_url)
                 url_widget.clicked.connect(self.on_url_row_selected)
@@ -1204,6 +1238,8 @@ class InfoWidget(QWidget):
         self.loading_popup.show()
 
         # 백그라운드 워커 스레드 시작
+        self._pending_test_info_ip = ip_address
+
         self.test_info_worker = TestInfoWorker(self.form_validator, ip_address)
         self.test_info_worker.finished.connect(self._on_test_info_loaded)
         self.test_info_worker.error.connect(self._on_test_info_error)
@@ -1331,23 +1367,34 @@ class InfoWidget(QWidget):
             return True
 
     def _setup_for_integrated_system(self):
-        """통합시스템 전용 설정 (IP 자동 추가, UI 비활성화)"""
+        """Integrated-system setup (auto URL population, UI lock-down)."""
         try:
-            # 1. IP 자동 추가
+            # Keep only the page-1 resolved test IP as the platform URL candidate when available
             if hasattr(self, 'test_port') and self.test_port:
                 ip_list = self._get_local_ip_list()
                 if ip_list:
-                    new_urls = [f"{ip}:{self.test_port}" for ip in dict.fromkeys(ip_list)]
+                    new_urls = _build_integrated_system_urls(
+                        ip_list,
+                        self.test_port,
+                        getattr(self, 'resolved_test_ip', None),
+                    )
                     self._populate_url_table(new_urls)
+
+                    matched_row = _find_matching_platform_url_row(
+                        new_urls,
+                        getattr(self, 'resolved_test_ip', None),
+                    )
+                    if matched_row is not None:
+                        self.on_url_row_selected(matched_row, 1)
             
-            # 2. 추가 버튼 및 주소탐색 버튼 비활성화/숨김
+            # Hide controls that would imply manual URL selection in integrated mode
             if hasattr(self, 'add_btn'):
                 self.add_btn.hide()
             if hasattr(self, 'scan_btn'):
                 self.scan_btn.hide()
                 
         except Exception as e:
-            Logger.debug(f"통합플랫폼 UI 설정 실패: {e}")
+            Logger.debug(f"Integrated-system UI setup failed: {e}")
 
     def _setup_for_physical_security_system(self):
         """단일시스템 전용 설정 (ARP 스캔 예약, 버튼 숨김)"""
@@ -1402,6 +1449,11 @@ class InfoWidget(QWidget):
 
         try:
             QApplication.processEvents()  # 스피너 애니메이션 유지
+
+            resolved_test_ip = getattr(self, "_pending_test_info_ip", None)
+            if resolved_test_ip:
+                self.resolved_test_ip = resolved_test_ip
+            self._pending_test_info_ip = None
 
             if not test_data:
                 self._close_loading_popup()  # 경고창 표시 전에 로딩 팝업 닫기
@@ -2004,7 +2056,9 @@ class InfoWidget(QWidget):
             url_widget = ClickableCheckboxRowWidget(
                 final_url, row, 1,
                 bg_image, bg_selected_image,
-                checkbox_unchecked, checkbox_checked
+                checkbox_unchecked, checkbox_checked,
+                show_checkbox=_should_show_url_checkbox(getattr(self, 'target_system', '')),
+                checkbox_alignment="left"
             )
             url_widget.setProperty("url", final_url)
             url_widget.clicked.connect(self.on_url_row_selected)

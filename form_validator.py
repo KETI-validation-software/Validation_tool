@@ -903,7 +903,8 @@ class FormValidator:
                     'assets/image/test_config/row.png',
                     'assets/image/test_config/row_selected.png',
                     'assets/image/test_config/checkbox_unchecked.png',
-                    'assets/image/test_config/checkbox_checked.png'
+                    'assets/image/test_config/checkbox_checked.png',
+                    show_checkbox=False
                 )
                 label.setProperty("spec_id", scenario["id"])
                 label.clicked.connect(self.parent.on_scenario_selected)

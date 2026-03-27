@@ -357,17 +357,74 @@ cmii7v8pr006g8z1tvo55a50u_Authentication_out_validation = {}
 # Capabilities
 cmii7v8pr006g8z1tvo55a50u_Capabilities_out_validation = {}
 
-# RealtimeVideoEventInfos
-cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_out_validation = {}
+# StreamURLs
+cmii7v8pr006g8z1tvo55a50u_StreamURLs_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "400"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "잘못된 요청"
+    ],
+    "score": 0
+  }
+}
 
-# RealtimeVideoEventInfos WebHook IN Validation
-cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_webhook_in_validation = {
+# StoredVideoInfos
+cmii7v8pr006g8z1tvo55a50u_StoredVideoInfos_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "201"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "정보 없음"
+    ],
+    "score": 0
+  },
   "camList.camID": {
     "enabled": True,
     "validationType": "request-field-list-match",
-    "referenceFieldId": "cmiwrf69i0bu6844g22ccsjtr",
+    "referenceFieldId": "cmiwrn6ab003pnkgl7f78y9t6",
     "referenceField": "camID",
-    "referenceEndpoint": "/RealtimeVideoEventInfos",
+    "referenceEndpoint": "/StoredVideoInfos",
+    "score": 0
+  },
+  "camList.timeList.startTime": {
+    "enabled": True,
+    "validationType": "request-field-range-match",
+    "rangeOperator": "between",
+    "referenceFieldMin": "startTime",
+    "referenceFieldMinId": "cmiwrltxz000vnkgl3m4u2f2s",
+    "referenceFieldMax": "endTime",
+    "referenceFieldMaxId": "cmiwrlxaj0013nkgl40nosy7z",
+    "referenceEndpointMin": "/StoredVideoInfos",
+    "referenceEndpointMax": "/StoredVideoInfos",
+    "score": 0
+  },
+  "camList.timeList.endTime": {
+    "enabled": True,
+    "validationType": "request-field-range-match",
+    "rangeOperator": "between",
+    "referenceFieldMin": "startTime",
+    "referenceFieldMinId": "cmiwrltxz000vnkgl3m4u2f2s",
+    "referenceFieldMax": "endTime",
+    "referenceFieldMaxId": "cmiwrlxaj0013nkgl40nosy7z",
+    "referenceEndpointMin": "/StoredVideoInfos",
+    "referenceEndpointMax": "/StoredVideoInfos",
     "score": 0
   }
 }
@@ -412,16 +469,12 @@ cmii7v8pr006g8z1tvo55a50u_StoredObjectAnalyticsInfos_out_validation = {
   }
 }
 
-# cmii7v8pr006g8z1tvo55a50u WebHook 검증 리스트
-cmii7v8pr006g8z1tvo55a50u_webhook_inValidation = [
-    cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_webhook_in_validation,
-]
-
 # cmii7v8pr006g8z1tvo55a50u 검증 리스트
 cmii7v8pr006g8z1tvo55a50u_outValidation = [
     cmii7v8pr006g8z1tvo55a50u_Authentication_out_validation,
     cmii7v8pr006g8z1tvo55a50u_Capabilities_out_validation,
-    cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_out_validation,
+    cmii7v8pr006g8z1tvo55a50u_StreamURLs_out_validation,
+    cmii7v8pr006g8z1tvo55a50u_StoredVideoInfos_out_validation,
     cmii7v8pr006g8z1tvo55a50u_StoredObjectAnalyticsInfos_out_validation,
 ]
 

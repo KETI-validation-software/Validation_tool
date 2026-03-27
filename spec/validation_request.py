@@ -528,18 +528,6 @@ cmii7lxbn002s8z1t1i9uudf0_StoredVideoInfos_in_validation = {
   }
 }
 
-# ReplayURL
-cmii7lxbn002s8z1t1i9uudf0_ReplayURL_in_validation = {
-  "camList.camID": {
-    "enabled": True,
-    "validationType": "response-field-list-match",
-    "referenceFieldId": "cmir0b7u9005f4m396k05nfzt",
-    "referenceField": "camID",
-    "referenceEndpoint": "/CameraProfiles",
-    "score": 0
-  }
-}
-
 # StoredVideoEventInfos
 cmii7lxbn002s8z1t1i9uudf0_StoredVideoEventInfos_in_validation = {
   "camList.camID": {
@@ -575,41 +563,6 @@ cmii7lxbn002s8z1t1i9uudf0_StoredVideoEventInfos_in_validation = {
   }
 }
 
-# StoredObjectAnalyticsInfos
-cmii7lxbn002s8z1t1i9uudf0_StoredObjectAnalyticsInfos_in_validation = {
-  "camList.camID": {
-    "enabled": True,
-    "validationType": "response-field-list-match",
-    "referenceFieldId": "cmir0b7u9005f4m396k05nfzt",
-    "referenceField": "camID",
-    "referenceEndpoint": "/CameraProfiles",
-    "score": 0
-  },
-  "filterList.classFilter": {
-    "enabled": True,
-    "validationType": "valid-value-match",
-    "validValueMatchType": "validation-field",
-    "validValueFieldName": "videoObject",
-    "validValueOperator": "equalsAny",
-    "allowedValues": [
-      "Human"
-    ],
-    "score": 0
-  },
-  "filterList.attributeFilter": {
-    "enabled": True,
-    "validationType": "valid-value-match",
-    "validValueMatchType": "validation-field",
-    "validValueFieldName": "videoAttribute",
-    "validValueOperator": "equalsAny",
-    "allowedValues": [
-      "Male",
-      "Female"
-    ],
-    "score": 0
-  }
-}
-
 # cmii7lxbn002s8z1t1i9uudf0 WebHook 검증 리스트
 cmii7lxbn002s8z1t1i9uudf0_webhook_outValidation = [
     cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_webhook_out_validation,
@@ -623,8 +576,6 @@ cmii7lxbn002s8z1t1i9uudf0_inValidation = [
     cmii7lxbn002s8z1t1i9uudf0_StreamURLs_in_validation,
     cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_in_validation,
     cmii7lxbn002s8z1t1i9uudf0_StoredVideoInfos_in_validation,
-    cmii7lxbn002s8z1t1i9uudf0_ReplayURL_in_validation,
     cmii7lxbn002s8z1t1i9uudf0_StoredVideoEventInfos_in_validation,
-    cmii7lxbn002s8z1t1i9uudf0_StoredObjectAnalyticsInfos_in_validation,
 ]
 
