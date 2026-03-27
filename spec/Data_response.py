@@ -894,26 +894,6 @@ cmii7lxbn002s8z1t1i9uudf0_StoredVideoInfos_out_data = {
 ]
 }
 
-# ReplayURL
-cmii7lxbn002s8z1t1i9uudf0_ReplayURL_out_data = {
-    "code": "200",
-    "message": "성공",
-    "camList": [
-        {
-        "camID": "",
-        "accessID": "conn0001",
-        "accessPW": "1234",
-        "camURL": "rtsp://192.168.0.1:8000",
-        "videoInfo": {
-        "resolution": "1920x1080",
-        "fps": 30,
-        "videoCodec": "H.264",
-        "audioCodec": "G.711"
-    }
-    }
-]
-}
-
 # StoredVideoEventInfos
 cmii7lxbn002s8z1t1i9uudf0_StoredVideoEventInfos_out_data = {
     "code": "200",
@@ -930,35 +910,6 @@ cmii7lxbn002s8z1t1i9uudf0_StoredVideoEventInfos_out_data = {
 ]
 }
 
-# StoredObjectAnalyticsInfos
-cmii7lxbn002s8z1t1i9uudf0_StoredObjectAnalyticsInfos_out_data = {
-    "code": "200",
-    "message": "성공",
-    "camList": [
-        {
-        "camID": "",
-        "analyticsTime": 0,
-        "anlayticsResultList": [
-            {
-            "anayticsID": "object001",
-            "analyticsClass": "Human",
-            "analyticsAttribute": [
-            "빨간색"
-        ],
-            "analyticsConfidence": 0.8,
-            "analyticsBoundingBox": {
-            "left": 0.2,
-            "top": 0.1,
-            "right": 0.5,
-            "bottom": 0.6
-        },
-            "analyticsDesc": "13가 4567"
-        }
-    ]
-    }
-]
-}
-
 # cmii7lxbn002s8z1t1i9uudf0 데이터 리스트
 cmii7lxbn002s8z1t1i9uudf0_outData = [
     cmii7lxbn002s8z1t1i9uudf0_Authentication_out_data,
@@ -967,9 +918,7 @@ cmii7lxbn002s8z1t1i9uudf0_outData = [
     cmii7lxbn002s8z1t1i9uudf0_StreamURLs_out_data,
     cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_out_data,
     cmii7lxbn002s8z1t1i9uudf0_StoredVideoInfos_out_data,
-    cmii7lxbn002s8z1t1i9uudf0_ReplayURL_out_data,
     cmii7lxbn002s8z1t1i9uudf0_StoredVideoEventInfos_out_data,
-    cmii7lxbn002s8z1t1i9uudf0_StoredObjectAnalyticsInfos_out_data,
 ]
 
 # cmii7lxbn002s8z1t1i9uudf0 WebHook 데이터 리스트
@@ -979,8 +928,6 @@ cmii7lxbn002s8z1t1i9uudf0_webhook_inData = [
     None,
     None,
     cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_webhook_in_data,
-    None,
-    None,
     None,
     None,
 ]
@@ -993,8 +940,6 @@ cmii7lxbn002s8z1t1i9uudf0_messages = [
     "StreamURLs",
     "RealtimeVideoEventInfos",
     "StoredVideoInfos",
-    "ReplayURL",
     "StoredVideoEventInfos",
-    "StoredObjectAnalyticsInfos",
 ]
 

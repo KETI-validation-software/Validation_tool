@@ -1730,73 +1730,6 @@ cmii7lxbn002s8z1t1i9uudf0_StoredVideoInfos_out_constraints = {
   }
 }
 
-# ReplayURL
-cmii7lxbn002s8z1t1i9uudf0_ReplayURL_out_constraints = {
-  "code": {
-    "id": "cmiqsxbw000qzie8fqg6ai3cf",
-    "valueType": "preset",
-    "required": True
-  },
-  "message": {
-    "id": "cmiqsxsv000r5ie8fb8dk0hz4",
-    "valueType": "preset",
-    "required": True
-  },
-  "camList": {
-    "id": "cmir3npez057n4m39iap76r75",
-    "valueType": "preset",
-    "required": True
-  },
-  "camList.camID": {
-    "id": "cmir3npf2057p4m39bp2ukn6j",
-    "referenceFieldId": "cmir35uma03my4m39s5d6jggk",
-    "valueType": "request-based",
-    "required": True,
-    "referenceEndpoint": "/ReplayURL",
-    "referenceField": "camID"
-  },
-  "camList.accessID": {
-    "id": "cmir3npf3057r4m398ypagqxu",
-    "valueType": "preset",
-    "required": False
-  },
-  "camList.accessPW": {
-    "id": "cmir3npf4057t4m39chpyyb44",
-    "valueType": "preset",
-    "required": False
-  },
-  "camList.camURL": {
-    "id": "cmir3npf4057v4m39a32yuml9",
-    "valueType": "preset",
-    "required": True
-  },
-  "camList.videoInfo": {
-    "id": "cmir3npf5057x4m39xnl7sph4",
-    "valueType": "preset",
-    "required": False
-  },
-  "camList.videoInfo.resolution": {
-    "id": "cmir3npfc057z4m39gv6h8ci4",
-    "valueType": "preset",
-    "required": False
-  },
-  "camList.videoInfo.fps": {
-    "id": "cmir3npfd05814m39t5syait5",
-    "valueType": "preset",
-    "required": False
-  },
-  "camList.videoInfo.videoCodec": {
-    "id": "cmir3npfd05834m39t9m4rdmu",
-    "valueType": "preset",
-    "required": False
-  },
-  "camList.videoInfo.audioCodec": {
-    "id": "cmir3npfe05854m398cp4ur96",
-    "valueType": "preset",
-    "required": False
-  }
-}
-
 # StoredVideoEventInfos
 cmii7lxbn002s8z1t1i9uudf0_StoredVideoEventInfos_out_constraints = {
   "code": {
@@ -1868,101 +1801,6 @@ cmii7lxbn002s8z1t1i9uudf0_StoredVideoEventInfos_out_constraints = {
   }
 }
 
-# StoredObjectAnalyticsInfos
-cmii7lxbn002s8z1t1i9uudf0_StoredObjectAnalyticsInfos_out_constraints = {
-  "code": {
-    "id": "cmiqt66q400u1ie8f5tuowt4m",
-    "valueType": "preset",
-    "required": True
-  },
-  "message": {
-    "id": "cmiqt6i6500u7ie8f2897rtwv",
-    "valueType": "preset",
-    "required": True
-  },
-  "camList": {
-    "id": "cmis5m2y500edt4pq4v0e8411",
-    "valueType": "preset",
-    "required": True
-  },
-  "camList.camID": {
-    "id": "cmis5m2y800eft4pqy70zoak1",
-    "referenceFieldId": "cmis5gwfi00b8t4pqmp438c9j",
-    "valueType": "request-based",
-    "required": True,
-    "referenceEndpoint": "/StoredObjectAnalyticsInfos",
-    "referenceField": "camID"
-  },
-  "camList.analyticsTime": {
-    "id": "cmis5m2y800eht4pqhzi2mq5d",
-    "valueType": "request-range",
-    "required": True,
-    "requestRange": {
-      "maxFieldId": "cmis5e5kx003lt4pqtfogwd0g",
-      "minFieldId": "cmis5dxva003ft4pqhigxna18",
-      "maxEndpoint": "/StoredObjectAnalyticsInfos",
-      "minEndpoint": "/StoredObjectAnalyticsInfos",
-      "minField": "startTime",
-      "maxField": "endTime"
-    }
-  },
-  "camList.anlayticsResultList": {
-    "id": "cmiseswra03bs5vy7c7h99m2t",
-    "valueType": "preset",
-    "required": True
-  },
-  "camList.anlayticsResultList.anayticsID": {
-    "id": "cmiseswre03bu5vy7f9bv6570",
-    "valueType": "preset",
-    "required": True
-  },
-  "camList.anlayticsResultList.analyticsClass": {
-    "id": "cmjblmzce02oecfb316he7e51",
-    "valueType": "preset",
-    "required": True
-  },
-  "camList.anlayticsResultList.analyticsAttribute": {
-    "id": "cmiseswrq03c65vy7q1gxhmjb",
-    "valueType": "preset",
-    "required": False
-  },
-  "camList.anlayticsResultList.analyticsConfidence": {
-    "id": "cmiseswrg03c05vy7b19khldt",
-    "valueType": "preset",
-    "required": False
-  },
-  "camList.anlayticsResultList.analyticsBoundingBox": {
-    "id": "cmiseswrg03c25vy7x292ueus",
-    "valueType": "preset",
-    "required": False
-  },
-  "camList.anlayticsResultList.analyticsBoundingBox.left": {
-    "id": "cmiseswrq03c85vy7ex3827kd",
-    "valueType": "preset",
-    "required": True
-  },
-  "camList.anlayticsResultList.analyticsBoundingBox.top": {
-    "id": "cmiseswrr03ca5vy7wihjatly",
-    "valueType": "preset",
-    "required": True
-  },
-  "camList.anlayticsResultList.analyticsBoundingBox.right": {
-    "id": "cmiseswrr03cc5vy71g9v8uh1",
-    "valueType": "preset",
-    "required": True
-  },
-  "camList.anlayticsResultList.analyticsBoundingBox.bottom": {
-    "id": "cmiseswrs03ce5vy7aktc2lgd",
-    "valueType": "preset",
-    "required": True
-  },
-  "camList.anlayticsResultList.analyticsDesc": {
-    "id": "cmiseswrh03c45vy7y3iyzsd7",
-    "valueType": "preset",
-    "required": False
-  }
-}
-
 # cmii7lxbn002s8z1t1i9uudf0 검증 리스트
 cmii7lxbn002s8z1t1i9uudf0_outConstraints = [
     cmii7lxbn002s8z1t1i9uudf0_Authentication_out_constraints,
@@ -1971,9 +1809,7 @@ cmii7lxbn002s8z1t1i9uudf0_outConstraints = [
     cmii7lxbn002s8z1t1i9uudf0_StreamURLs_out_constraints,
     cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_out_constraints,
     cmii7lxbn002s8z1t1i9uudf0_StoredVideoInfos_out_constraints,
-    cmii7lxbn002s8z1t1i9uudf0_ReplayURL_out_constraints,
     cmii7lxbn002s8z1t1i9uudf0_StoredVideoEventInfos_out_constraints,
-    cmii7lxbn002s8z1t1i9uudf0_StoredObjectAnalyticsInfos_out_constraints,
 ]
 
 # cmii7lxbn002s8z1t1i9uudf0 WebHook Constraints 리스트
@@ -1983,8 +1819,6 @@ cmii7lxbn002s8z1t1i9uudf0_webhook_inConstraints = [
     None,
     None,
     cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_webhook_in_constraints,
-    None,
-    None,
     None,
     None,
 ]

@@ -358,16 +358,6 @@ cmii7lxbn002s8z1t1i9uudf0_StoredVideoInfos_in_schema = {
 }],
 }
 
-# ReplayURL
-cmii7lxbn002s8z1t1i9uudf0_ReplayURL_in_schema = {
-    "camList": [{
-    "camID": str,
-    "startTime": int,
-    "endTime": int,
-    "streamProtocolType": str,
-}],
-}
-
 # StoredVideoEventInfos
 cmii7lxbn002s8z1t1i9uudf0_StoredVideoEventInfos_in_schema = {
     "timePeriod": {
@@ -382,21 +372,6 @@ cmii7lxbn002s8z1t1i9uudf0_StoredVideoEventInfos_in_schema = {
     OptionalKey("classFilter"): str,
 }
 
-# StoredObjectAnalyticsInfos
-cmii7lxbn002s8z1t1i9uudf0_StoredObjectAnalyticsInfos_in_schema = {
-    "timePeriod": {
-    "startTime": int,
-    "endTime": int,
-},
-    OptionalKey("camList"): [{
-    "camID": str,
-}],
-    OptionalKey("filterList"): [{
-    OptionalKey("classFilter"): [str],
-    OptionalKey("attributeFilter"): [str],
-}],
-}
-
 # cmii7lxbn002s8z1t1i9uudf0 스키마 리스트
 cmii7lxbn002s8z1t1i9uudf0_inSchema = [
     cmii7lxbn002s8z1t1i9uudf0_Authentication_in_schema,
@@ -405,9 +380,7 @@ cmii7lxbn002s8z1t1i9uudf0_inSchema = [
     cmii7lxbn002s8z1t1i9uudf0_StreamURLs_in_schema,
     cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_in_schema,
     cmii7lxbn002s8z1t1i9uudf0_StoredVideoInfos_in_schema,
-    cmii7lxbn002s8z1t1i9uudf0_ReplayURL_in_schema,
     cmii7lxbn002s8z1t1i9uudf0_StoredVideoEventInfos_in_schema,
-    cmii7lxbn002s8z1t1i9uudf0_StoredObjectAnalyticsInfos_in_schema,
 ]
 
 # cmii7lxbn002s8z1t1i9uudf0 WebHook 스키마 리스트
@@ -417,8 +390,6 @@ cmii7lxbn002s8z1t1i9uudf0_webhook_OutSchema = [
     None,
     None,
     cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_webhook_out_schema,
-    None,
-    None,
     None,
     None,
 ]

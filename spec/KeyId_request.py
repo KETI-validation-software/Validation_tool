@@ -199,18 +199,18 @@ cmii7v8pr006g8z1tvo55a50u_Authentication_request_key_ids = {
     "userPW": "cmii7ym0400718z1tyoxfj6ft",
 }
 
-cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_request_key_ids = {
-    "camList": "cmiqtoihq00y2ie8f3urrjlbh",
-    "camList.camID": "cmiwrf69i0bu6844g22ccsjtr",
-    "transProtocol": "cmiqtpoov00yeie8fv3h8pllf",
-    "transProtocol.transProtocolType": "cmiwrdzrw0bs4844gzg8kzcsq",
-    "transProtocol.transProtocolDesc": "cmiwre3fr0bt1844gwguauq4q",
-    "duration": "cmiqtov1n00y8ie8frsppu8ev",
-    "eventFilter": "cmiqtq1xn00ykie8fqjmg6au9",
-    "classFilter": "cmiqtqegc00yqie8foi0sc1u9",
-    "startTime": "cmiqtqxt400ywie8f4ir49gl1",
-    "code": "cmiwrhxdj0ci0844gogcg394u",
-    "message": "cmj1820zz02m012s9cxe2wcfn",
+cmii7v8pr006g8z1tvo55a50u_StreamURLs_request_key_ids = {
+    "camList": "cmiqtkzfm00wsie8f9qmwp4l1",
+    "camList.camID": "cmj17qhrz026o12s9jozkqym7",
+    "camList.streamProtocolType": "cmjb5nmy1070zdmvoi5u22oxx",
+}
+
+cmii7v8pr006g8z1tvo55a50u_StoredVideoInfos_request_key_ids = {
+    "timePeriod": "cmiwrl7dr000knkglwk60tug6",
+    "timePeriod.startTime": "cmiwrltxz000vnkgl3m4u2f2s",
+    "timePeriod.endTime": "cmiwrlxaj0013nkgl40nosy7z",
+    "camList": "cmiwrmm95001fnkglx47nenkk",
+    "camList.camID": "cmiwrn6ab003pnkgl7f78y9t6",
 }
 
 cmii7v8pr006g8z1tvo55a50u_StoredObjectAnalyticsInfos_request_key_ids = {
@@ -227,7 +227,8 @@ cmii7v8pr006g8z1tvo55a50u_StoredObjectAnalyticsInfos_request_key_ids = {
 # cmii7v8pr006g8z1tvo55a50u Request Key-ID Mapping 리스트
 cmii7v8pr006g8z1tvo55a50u_request_key_ids = [
     cmii7v8pr006g8z1tvo55a50u_Authentication_request_key_ids,
-    cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_request_key_ids,
+    cmii7v8pr006g8z1tvo55a50u_StreamURLs_request_key_ids,
+    cmii7v8pr006g8z1tvo55a50u_StoredVideoInfos_request_key_ids,
     cmii7v8pr006g8z1tvo55a50u_StoredObjectAnalyticsInfos_request_key_ids,
 ]
 
@@ -612,16 +613,29 @@ cmii7v8pr006g8z1tvo55a50u_Capabilities_response_key_ids = {
     "transportSupport.transProtocolDesc": "cmizrbt0b0040117lfsatd26c",
 }
 
-cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_response_key_ids = {
-    "code": "cmiqtr21700z1ie8f2gb2pxw4",
-    "message": "cmiwrfgls0buk844gegf6h5nd",
-    "camList": "cmiwrfquy0buv844gfufg2j30",
-    "camList.camID": "cmiwrhv3l0ch4844g7qzbakmx",
-    "camList.eventUUID": "cmiwrhv3m0ch6844g1lux0upw",
-    "camList.eventName": "cmiwrhv3m0ch8844gqnoxrtsi",
-    "camList.startTime": "cmiwrhv3m0cha844gwp8thxsx",
-    "camList.endTime": "cmiwrhv3n0chc844geaa6w099",
-    "camList.eventDesc": "cmiwrhv3n0che844gqfrgim1r",
+cmii7v8pr006g8z1tvo55a50u_StreamURLs_response_key_ids = {
+    "code": "cmiqtlss200x6ie8f7pu1f23c",
+    "message": "cmiqtlyto00xcie8fn3fbocfh",
+    "camList": "cmiqtma5m00xiie8fuly6thwh",
+    "camList.camID": "cmj17rvsh02ki12s9h05zrodz",
+    "camList.accessID": "cmj17rvsh02kk12s9vpei1lm3",
+    "camList.accessPW": "cmj17rvsh02km12s9zhsg7ogj",
+    "camList.camURL": "cmj17rvsi02ko12s9b6ucezhj",
+    "camList.videoInfo": "cmj17rvsi02kq12s9u06k8ix6",
+    "camList.videoInfo.resolution": "cmj17rvsn02ks12s9lrc90chn",
+    "camList.videoInfo.fps": "cmj17rvsn02ku12s9mz0gwgcx",
+    "camList.videoInfo.videoCodec": "cmj17rvsn02kw12s9jgf73dat",
+    "camList.videoInfo.audioCodec": "cmj17rvsn02ky12s9sgltoz5h",
+}
+
+cmii7v8pr006g8z1tvo55a50u_StoredVideoInfos_response_key_ids = {
+    "code": "cmiwrncyp0041nkglw6ylrgkd",
+    "message": "cmiwrnfl60049nkgld7j8vz90",
+    "camList": "cmiwrniqz004hnkglkap6vspc",
+    "camList.camID": "cmiwrp98m00k0nkglgjjm6lpy",
+    "camList.timeList": "cmiwrp98m00k2nkgl0dorq4k8",
+    "camList.timeList.startTime": "cmiwrp98q00k6nkgl2fopmr38",
+    "camList.timeList.endTime": "cmiwrp98q00k8nkgl38r8o9je",
 }
 
 cmii7v8pr006g8z1tvo55a50u_StoredObjectAnalyticsInfos_response_key_ids = {
@@ -647,7 +661,8 @@ cmii7v8pr006g8z1tvo55a50u_StoredObjectAnalyticsInfos_response_key_ids = {
 cmii7v8pr006g8z1tvo55a50u_response_key_ids = [
     cmii7v8pr006g8z1tvo55a50u_Authentication_response_key_ids,
     cmii7v8pr006g8z1tvo55a50u_Capabilities_response_key_ids,
-    cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_response_key_ids,
+    cmii7v8pr006g8z1tvo55a50u_StreamURLs_response_key_ids,
+    cmii7v8pr006g8z1tvo55a50u_StoredVideoInfos_response_key_ids,
     cmii7v8pr006g8z1tvo55a50u_StoredObjectAnalyticsInfos_response_key_ids,
 ]
 

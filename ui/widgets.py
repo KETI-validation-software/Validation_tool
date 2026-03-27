@@ -98,35 +98,43 @@ class ClickableRowWidget(QWidget):
 
 
 class ClickableCheckboxRowWidget(QWidget):
-    """클릭 가능한 QWidget - 시나리오 셀용 (체크박스 + 텍스트 분리)"""
-    clicked = pyqtSignal(int, int)  # row, column 전달
+    """Clickable row widget with optional checkbox affordance."""
+    clicked = pyqtSignal(int, int)
 
-    def __init__(self, text, row, col, bg_image_path, bg_selected_image_path, checkbox_unchecked_path, checkbox_checked_path, parent=None):
+    def __init__(
+        self,
+        text,
+        row,
+        col,
+        bg_image_path,
+        bg_selected_image_path,
+        checkbox_unchecked_path,
+        checkbox_checked_path,
+        parent=None,
+        show_checkbox=True,
+        checkbox_alignment="right",
+    ):
         super().__init__(parent)
         self.row = row
         self.col = col
         self._text = text
         self._is_checked = False
+        self.show_checkbox = show_checkbox
+        self.checkbox_alignment = checkbox_alignment
         self.setCursor(Qt.PointingHandCursor)
-        self.setFixedHeight(39)  # 행 높이 고정
+        self.setFixedHeight(39)
 
-        # 배경 이미지 경로 저장
         self.bg_image_path = bg_image_path
         self.bg_selected_image_path = bg_selected_image_path
-
-        # 배경 이미지 설정 (paintEvent에서 그림)
         self.bg_pixmap = QPixmap(resource_path(bg_image_path))
 
-        # 체크박스 이미지 경로 저장
         self.checkbox_unchecked_path = checkbox_unchecked_path
         self.checkbox_checked_path = checkbox_checked_path
 
-        # 레이아웃 설정: padding 상하8, 좌우 32 (체크박스 삭제로 좌우 균형 맞춤)
         layout = QHBoxLayout(self)
         layout.setContentsMargins(32, 8, 32, 8)
         layout.setSpacing(8)
 
-        # 텍스트 라벨 (체크박스 삭제)
         self.text_label = QLabel(text)
         self.text_label.setAlignment(Qt.AlignCenter)
         self.text_label.setStyleSheet("""
@@ -138,10 +146,30 @@ class ClickableCheckboxRowWidget(QWidget):
                 color: #000000;
             }
         """)
-        layout.addWidget(self.text_label, 1)  # stretch=1로 남은 공간 채우기
+
+        if self.show_checkbox:
+            self.checkbox_label = QLabel()
+            self.checkbox_label.setStyleSheet('background: transparent;')
+            self._update_checkbox_pixmap()
+
+        if self.show_checkbox and self.checkbox_alignment == "left":
+            layout.addWidget(self.checkbox_label, 0, Qt.AlignLeft | Qt.AlignVCenter)
+
+        layout.addWidget(self.text_label, 1)
+
+        if self.show_checkbox and self.checkbox_alignment != "left":
+            layout.addWidget(self.checkbox_label, 0, Qt.AlignRight | Qt.AlignVCenter)
+
+    def _update_checkbox_pixmap(self):
+        if not self.show_checkbox or not hasattr(self, 'checkbox_label'):
+            return
+
+        checkbox_path = self.checkbox_checked_path if self._is_checked else self.checkbox_unchecked_path
+        checkbox_pixmap = QPixmap(resource_path(checkbox_path))
+        self.checkbox_label.setPixmap(checkbox_pixmap)
+        self.checkbox_label.setFixedSize(checkbox_pixmap.size())
 
     def paintEvent(self, event):
-        """배경 이미지를 위젯 크기에 맞게 그리기"""
         painter = QPainter(self)
         if not self.bg_pixmap.isNull():
             scaled_pixmap = self.bg_pixmap.scaled(
@@ -158,24 +186,21 @@ class ClickableCheckboxRowWidget(QWidget):
         super().mousePressEvent(event)
 
     def text(self):
-        """기존 ClickableLabel과 호환을 위한 text() 메서드"""
         return self._text
 
     def isChecked(self):
-        """체크 상태 반환"""
         return self._is_checked
 
     def setChecked(self, checked):
-        """체크 상태 변경 (배경 이미지 변경)"""
         self._is_checked = checked
         if checked:
             self.bg_pixmap = QPixmap(resource_path(self.bg_selected_image_path))
         else:
             self.bg_pixmap = QPixmap(resource_path(self.bg_image_path))
-        self.update()  # 배경 다시 그리기
+        self._update_checkbox_pixmap()
+        self.update()
 
     def setBackgroundImage(self, bg_image_path):
-        """배경 이미지 변경"""
         self.bg_pixmap = QPixmap(resource_path(bg_image_path))
         self.update()
 
