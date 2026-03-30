@@ -137,6 +137,14 @@ class ResultPageWidget(QWidget):
         icon_label.setStyleSheet("background: transparent;")
         return icon_label
 
+    def _get_result_icon_pixmap(self, img_path):
+        pixmap = QPixmap(img_path)
+        if pixmap.isNull():
+            return pixmap
+        if img_path == self.img_none:
+            return pixmap.scaled(16, 16, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        return pixmap.scaled(84, 20, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+
     def _get_result_header_title_path(self):
         mode = getattr(self.parent, "validation_mode", "platform")
         title_map = {
@@ -599,8 +607,6 @@ class ResultPageWidget(QWidget):
             return
 
         # 점수 요약 카드(분야별/전체)도 실시간 동기화
-        self._sync_score_summary_from_parent()
-
         row_count = self.tableWidget.rowCount()
         if row_count <= 0:
             return
@@ -643,29 +649,299 @@ class ResultPageWidget(QWidget):
         except Exception:
             return False
 
+    def _safe_score_int(self, value):
+        try:
+            return int(value or 0)
+        except (TypeError, ValueError):
+            return 0
+
+    def _safe_score_float(self, value):
+        try:
+            return float(value or 0)
+        except (TypeError, ValueError):
+            return 0.0
+
+    def _normalize_score_block(self, block):
+        block = block or {}
+        return {
+            "score": self._safe_score_float(block.get("score")),
+            "totalFields": self._safe_score_int(block.get("totalFields")),
+            "passedFields": self._safe_score_int(block.get("passedFields")),
+            "failedFields": self._safe_score_int(block.get("failedFields")),
+        }
+
+    def _extract_score_summary_data(self):
+        zero = self._normalize_score_block(None)
+        summary = {
+            "overall": dict(zero),
+            "group": dict(zero),
+            "scenario": dict(zero),
+            "group_name": "-",
+            "scenario_name": "-",
+            "scenario_api_count": 0,
+        }
+
+        latest = getattr(self.parent, 'latest_result_response', None)
+        if not isinstance(latest, dict):
+            return summary
+
+        summary["overall"] = self._normalize_score_block(latest.get("finalScore"))
+
+        group_results = latest.get("groupResults") or []
+        current_group_id = getattr(self.parent, 'current_group_id', None)
+        group_entry = next(
+            (
+                item for item in group_results
+                if str(item.get("testGroupId") or item.get("id") or "") == str(current_group_id or "")
+            ),
+            group_results[0] if group_results else None,
+        )
+        if isinstance(group_entry, dict):
+            summary["group"] = self._normalize_score_block(group_entry.get("groupScore"))
+            summary["group_name"] = str(group_entry.get("groupName") or "-")
+            scenario_results = group_entry.get("scenarioResults") or []
+        else:
+            scenario_results = []
+
+        current_spec_id = getattr(self.parent, 'current_spec_id', None)
+        scenario_entry = next(
+            (
+                item for item in scenario_results
+                if str(item.get("testSpecId") or item.get("specId") or "") == str(current_spec_id or "")
+            ),
+            scenario_results[0] if scenario_results else None,
+        )
+        if isinstance(scenario_entry, dict):
+            summary["scenario"] = self._normalize_score_block(scenario_entry.get("scenarioScore"))
+            summary["scenario_name"] = str(scenario_entry.get("specName") or "-")
+            summary["scenario_api_count"] = len(scenario_entry.get("apis") or [])
+
+        return summary
+
     def _get_score_summary_snapshot(self):
+        summary = self._extract_score_summary_data()
+        def pack(block):
+            return (
+                int(block.get("score", 0)),
+                int(block.get("totalFields", 0)),
+                int(block.get("passedFields", 0)),
+                int(block.get("failedFields", 0)),
+            )
         return (
-            int(getattr(self.parent, 'total_pass_cnt', 0)),
-            int(getattr(self.parent, 'total_error_cnt', 0)),
-            int(getattr(self.parent, 'total_opt_pass_cnt', 0)),
-            int(getattr(self.parent, 'total_opt_error_cnt', 0)),
-            int(getattr(self.parent, 'global_pass_cnt', 0)),
-            int(getattr(self.parent, 'global_error_cnt', 0)),
-            int(getattr(self.parent, 'global_opt_pass_cnt', 0)),
-            int(getattr(self.parent, 'global_opt_error_cnt', 0)),
+            str(getattr(self.parent, 'current_group_id', '') or ''),
+            str(getattr(self.parent, 'current_spec_id', '') or ''),
+            pack(summary["overall"]),
+            pack(summary["group"]),
+            pack(summary["scenario"]),
         )
 
     def _sync_score_summary_from_parent(self):
-        """부모(3페이지) 점수 요약을 4페이지 카드에 실시간 반영"""
         if not hasattr(self, 'score_table'):
             return
-
         snapshot = self._get_score_summary_snapshot()
         if snapshot == self._score_summary_cache:
             return
-
         self.update_score_displays({})
         self._score_summary_cache = snapshot
+
+    def _create_score_display_group(self, prefix, title_text, info_text, score_data):
+        group_box = QGroupBox()
+        group_box.setFixedSize(1064, 128)
+        group_box.setStyleSheet("""
+            QGroupBox {
+                background-color: #FFFFFF;
+                border: 1px solid #CECECE;
+                border-radius: 4px;
+                padding: 0px;
+                margin: 0px;
+            }
+        """)
+
+        main_layout = QVBoxLayout()
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
+
+        header = QWidget()
+        header.setFixedSize(1062, 52)
+        header.setStyleSheet("background: #F8F9FA; border: none;")
+        header_layout = QHBoxLayout(header)
+        header_layout.setContentsMargins(20, 5, 20, 5)
+        header_layout.setSpacing(8)
+
+        title_label = QLabel(title_text)
+        title_label.setStyleSheet("""
+            color: #000000;
+            font-family: 'Noto Sans KR';
+            font-size: 20px;
+            font-weight: 500;
+        """)
+        header_layout.addWidget(title_label, alignment=Qt.AlignVCenter)
+
+        if info_text:
+            vline = QFrame()
+            vline.setFrameShape(QFrame.VLine)
+            vline.setFixedSize(1, 27)
+            vline.setStyleSheet("background-color: #000000;")
+            header_layout.addWidget(vline, alignment=Qt.AlignVCenter)
+
+            info_label = QLabel(info_text)
+            info_label.setStyleSheet("""
+                color: #000000;
+                font-family: 'Noto Sans KR';
+                font-size: 18px;
+                font-weight: 500;
+            """)
+            header_layout.addWidget(info_label, alignment=Qt.AlignVCenter)
+        header_layout.addStretch()
+        main_layout.addWidget(header, alignment=Qt.AlignHCenter)
+
+        separator = QFrame()
+        separator.setFrameShape(QFrame.HLine)
+        separator.setFixedHeight(1)
+        separator.setStyleSheet("background-color: #CECECE; border: none;")
+        main_layout.addWidget(separator)
+
+        data_area = QWidget()
+        data_area.setFixedSize(1064, 76)
+        data_layout = QHBoxLayout(data_area)
+        data_layout.setContentsMargins(20, 8, 20, 8)
+        data_layout.setSpacing(0)
+
+        total_fields = int(score_data.get("totalFields", 0))
+        passed_fields = int(score_data.get("passedFields", 0))
+        failed_fields = int(score_data.get("failedFields", 0))
+        score_value = float(score_data.get("score", 0.0))
+
+        pass_label = QLabel(
+            f'?? ?? ?&nbsp;<span style="font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;">{passed_fields}/{total_fields}</span>'
+        )
+        pass_label.setTextFormat(Qt.RichText)
+        pass_label.setFixedSize(340, 60)
+        pass_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000; border: none;")
+        data_layout.addWidget(pass_label)
+
+        vline1 = QFrame()
+        vline1.setFixedSize(2, 60)
+        vline1.setStyleSheet("background-color: #CECECE; border: none;")
+        data_layout.addWidget(vline1)
+
+        spacer1 = QWidget()
+        spacer1.setFixedSize(12, 60)
+        spacer1.setStyleSheet("border: none;")
+        data_layout.addWidget(spacer1)
+
+        fail_label = QLabel(
+            f'?? ?? ?&nbsp;<span style="font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;">{failed_fields}/{total_fields}</span>'
+        )
+        fail_label.setTextFormat(Qt.RichText)
+        fail_label.setFixedSize(340, 60)
+        fail_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000; border: none;")
+        data_layout.addWidget(fail_label)
+
+        vline2 = QFrame()
+        vline2.setFixedSize(2, 60)
+        vline2.setStyleSheet("background-color: #CECECE; border: none;")
+        data_layout.addWidget(vline2)
+
+        spacer2 = QWidget()
+        spacer2.setFixedSize(12, 60)
+        spacer2.setStyleSheet("border: none;")
+        data_layout.addWidget(spacer2)
+
+        score_label = QLabel(
+            f'??&nbsp;<span style="font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;">{score_value:.1f}%</span>'
+        )
+        score_label.setTextFormat(Qt.RichText)
+        score_label.setFixedSize(315, 60)
+        score_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000; border: none;")
+        data_layout.addWidget(score_label)
+        data_layout.addStretch()
+        main_layout.addWidget(data_area)
+        group_box.setLayout(main_layout)
+
+        setattr(self, f"{prefix}_header", header)
+        setattr(self, f"{prefix}_data_area", data_area)
+        setattr(self, f"{prefix}_pass_label", pass_label)
+        setattr(self, f"{prefix}_total_label", fail_label)
+        setattr(self, f"{prefix}_score_label", score_label)
+        return group_box
+
+    def _create_total_score_display(self):
+        summary = self._extract_score_summary_data()
+        return self._create_score_display_group(
+            "total",
+            "?? ??",
+            "?? ?? ??",
+            summary["overall"],
+        )
+
+    def _create_group_score_display(self):
+        summary = self._extract_score_summary_data()
+        return self._create_score_display_group(
+            "group",
+            "??? ??",
+            summary.get("group_name") or "-",
+            summary["group"],
+        )
+
+    def _create_spec_score_display(self):
+        summary = self._extract_score_summary_data()
+        scenario_name = summary.get("scenario_name") or "-"
+        scenario_api_count = int(summary.get("scenario_api_count", 0) or 0)
+        info_text = f"{scenario_name} ({scenario_api_count}? API)" if scenario_api_count else scenario_name
+        return self._create_score_display_group(
+            "spec",
+            "????? ??",
+            info_text,
+            summary["scenario"],
+        )
+
+    def update_score_displays(self, saved_data):
+        if not hasattr(self, 'score_table'):
+            return
+        layout = self.score_table.layout()
+        if layout is None:
+            return
+
+        definitions = [
+            ("total_score_group", self._create_total_score_display),
+            ("group_score_group", self._create_group_score_display),
+            ("spec_score_group", self._create_spec_score_display),
+        ]
+        for index, (attr_name, factory) in enumerate(definitions):
+            old_widget = getattr(self, attr_name, None)
+            new_widget = factory()
+            if old_widget is not None:
+                layout.replaceWidget(old_widget, new_widget)
+                old_widget.deleteLater()
+            else:
+                layout.insertWidget(index, new_widget)
+            setattr(self, attr_name, new_widget)
+        self._apply_score_widget_resize()
+
+    def _show_detail(self, row):
+        if hasattr(self.parent, 'show_combined_result'):
+            self.parent.show_combined_result(row)
+            return
+
+        try:
+            api_item = self.tableWidget.item(row, 1)
+            if api_item is None:
+                QMessageBox.warning(self, "??", "?? ?? API ??? ?? ? ????.")
+                return
+            api_name = api_item.data(Qt.UserRole) or api_item.text()
+            buf = self.parent.step_buffers[row] if row < len(self.parent.step_buffers) else {"data": "", "error": "", "result": ""}
+            schema_data = self.parent.videoOutSchema[row] if row < len(self.parent.videoOutSchema) else None
+            webhook_schema = None
+            if hasattr(self.parent, 'trans_protocols') and row < len(self.parent.trans_protocols):
+                current_protocol = self.parent.trans_protocols[row]
+                if current_protocol == "WebHook" and hasattr(self.parent, 'webhookInSchema') and row < len(self.parent.webhookInSchema):
+                    webhook_schema = self.parent.webhookInSchema[row]
+            dialog = CombinedDetailDialog(api_name, buf, schema_data, webhook_schema)
+            dialog.exec_()
+        except Exception as e:
+            Logger.error(f"?? ?? ?? ??: {e}")
+            QMessageBox.warning(self, "??", f"?? ??? ??? ? ????.\n{str(e)}")
 
     def _get_table_item_text(self, table_widget, row, col):
         if table_widget is None:
@@ -698,17 +974,13 @@ class ResultPageWidget(QWidget):
             item.setTextAlignment(Qt.AlignCenter)
 
     def _sync_result_metrics_from_parent(self, row):
-        """부모(3페이지) 테이블의 수치 컬럼을 4페이지에 실시간 반영"""
         if not hasattr(self.parent, 'tableWidget'):
             return
 
-        # 4: 전체 필드 수, 5: 통과 필드 수, 6: 실패 필드 수, 7: 검증 횟수, 8: 평가 점수
-        metric_cols = (4, 5, 6, 7, 8)
-        for col in metric_cols:
+        for col in (4, 5, 6, 7, 8):
             parent_text = self._get_table_item_text(self.parent.tableWidget, row, col)
             if parent_text is None:
                 continue
-
             current_text = self._get_table_item_text(self.tableWidget, row, col)
             if current_text != parent_text:
                 self._set_center_text_item(row, col, parent_text)
@@ -733,12 +1005,6 @@ class ResultPageWidget(QWidget):
         if "Result: NONE" in tooltip:
             return "NONE"
         return None
-
-    def _get_result_icon_pixmap(self, image_path):
-        pixmap = QPixmap(image_path)
-        if pixmap.isNull():
-            return QIcon(image_path).pixmap(16, 16)
-        return pixmap
 
     def _set_result_icon_cell(self, row, icon_state):
         state = str(icon_state or "NONE").upper()
@@ -769,7 +1035,6 @@ class ResultPageWidget(QWidget):
         parent_state = self._get_cell_icon_state(self.parent.tableWidget, row)
         current_state = self._get_cell_icon_state(self.tableWidget, row)
 
-        # 부모의 기본 NONE 값으로 기존 PASS/FAIL 표시를 덮어쓰지 않는다.
         if parent_state == "NONE" and current_state in {"PASS", "FAIL"}:
             return
 
@@ -777,10 +1042,7 @@ class ResultPageWidget(QWidget):
             self._set_result_icon_cell(row, parent_state)
 
     def _update_content_background_geometry(self):
-        """배경 패널 및 구분선 위치/크기 업데이트 (3페이지와 동일)"""
-        if not hasattr(self, 'content_widget') or not self.content_widget:
-            return
-        if not hasattr(self, 'content_bg_label'):
+        if not hasattr(self, 'content_widget') or not hasattr(self, 'content_bg_label'):
             return
 
         content_width = self.content_widget.width()
@@ -791,11 +1053,10 @@ class ResultPageWidget(QWidget):
             width_ratio = 1.0
             if hasattr(self, 'original_window_size') and self.original_window_size[0]:
                 width_ratio = max(1.0, self.width() / self.original_window_size[0])
-            
-            # 3페이지(common_main_ui.py)와 동일한 오프셋 계산 적용
+
             divider_offset = int(round((width_ratio - 1.0) * 28))
             divider_x = self.bg_root.geometry().x() + self.left_col.width() - divider_offset
-            
+
             self.left_background_panel.setGeometry(0, 0, divider_x, content_height)
             self.content_background_divider.setGeometry(divider_x, 0, 1, content_height)
             self.right_background_panel.setGeometry(
@@ -805,89 +1066,94 @@ class ResultPageWidget(QWidget):
                 content_height,
             )
 
-    def resizeEvent(self, event):
-        """창 크기 변경 시 배경 이미지 및 UI 반응형 조정"""
-        super().resizeEvent(event)
+    def _apply_score_widget_resize(self):
+        if not hasattr(self, 'original_window_size'):
+            return
 
-        # ✅ 배경 지오메트리 실시간 업데이트
+        current_width = self.width()
+        width_ratio = max(1.0, current_width / self.original_window_size[0])
+
+        if hasattr(self, 'spec_score_group') and hasattr(self, 'original_spec_group_size'):
+            new_spec_width = int(self.original_spec_group_size[0] * width_ratio)
+            self.spec_score_group.setFixedSize(new_spec_width, self.original_spec_group_size[1])
+
+        if hasattr(self, 'total_score_group') and hasattr(self, 'original_total_group_size'):
+            new_total_width = int(self.original_total_group_size[0] * width_ratio)
+            self.total_score_group.setFixedSize(new_total_width, self.original_total_group_size[1])
+
+        if hasattr(self, 'original_score_header_size'):
+            new_header_width = int(self.original_score_header_size[0] * width_ratio)
+            new_data_width = int(self.original_score_data_area_size[0] * width_ratio)
+            new_pass_width = int(self.original_pass_label_size[0] * width_ratio)
+            new_opt_width = int(self.original_opt_label_size[0] * width_ratio)
+            new_score_width = int(self.original_score_label_size[0] * width_ratio)
+
+            for prefix in ("spec", "total"):
+                header = getattr(self, f"{prefix}_header", None)
+                data_area = getattr(self, f"{prefix}_data_area", None)
+                pass_label = getattr(self, f"{prefix}_pass_label", None)
+                total_label = getattr(self, f"{prefix}_total_label", None)
+                score_label = getattr(self, f"{prefix}_score_label", None)
+                if header is not None:
+                    header.setFixedSize(new_header_width, self.original_score_header_size[1])
+                if data_area is not None:
+                    data_area.setFixedSize(new_data_width, self.original_score_data_area_size[1])
+                if pass_label is not None:
+                    pass_label.setFixedSize(new_pass_width, self.original_pass_label_size[1])
+                if total_label is not None:
+                    total_label.setFixedSize(new_opt_width, self.original_opt_label_size[1])
+                if score_label is not None:
+                    score_label.setFixedSize(new_score_width, self.original_score_label_size[1])
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
         self._update_content_background_geometry()
 
-        # ✅ 반응형: UI 요소 크기 조정
         if hasattr(self, 'original_window_size') and hasattr(self, 'left_col'):
             current_width = self.width()
             current_height = self.height()
-
-            # 비율 계산 (최소 1.0 - 원본 크기 이하로 줄어들지 않음)
             width_ratio = max(1.0, current_width / self.original_window_size[0])
             height_ratio = max(1.0, current_height / self.original_window_size[1])
 
-            # ✅ 좌우 패널 정렬을 위한 확장량 계산
-            # 기본 화면(height_ratio=1.0)에서는 561px을 유지하며, 
-            # 창이 커질 때는 다른 페이지(3페이지 등)와 동일한 비례 배분 방식을 사용합니다.
-            # 컬럼의 전체 높이(970)를 기준으로 확장량을 계산해야 우측과 정렬이 맞음
-            original_column_height = 970  # (970)
+            original_column_height = 970
             extra_column_height = original_column_height * (height_ratio - 1)
-
-            # 왼쪽 패널 확장 요소 (비례 배분 기준)
-            # group_table(204) + field_group(561) = 765px
             left_expandable_total = 765
 
-            # bg_root 크기 조정
             if hasattr(self, 'bg_root') and hasattr(self, 'original_bg_root_size'):
-                new_bg_width = int(self.original_bg_root_size[0] * width_ratio)
-                new_bg_height = int(self.original_bg_root_size[1] * height_ratio)
-                self.bg_root.setFixedSize(new_bg_width, new_bg_height)
+                self.bg_root.setFixedSize(
+                    int(self.original_bg_root_size[0] * width_ratio),
+                    int(self.original_bg_root_size[1] * height_ratio),
+                )
 
-            # ✅ 왼쪽 컬럼 크기 조정
             if hasattr(self, 'original_left_col_size'):
                 new_left_width = int(self.original_left_col_size[0] * width_ratio)
                 new_left_height = int(self.original_left_col_size[1] * height_ratio)
                 self.left_col.setFixedSize(new_left_width, new_left_height)
                 if hasattr(self, 'column_divider'):
                     self.column_divider.setFixedSize(1, new_left_height)
-                
-                # ✅ 상단 내비게이션 바 크기 조정 (3페이지와 동일)
-                if hasattr(self, 'top_back_navigation'):
-                    if hasattr(self, 'original_spec_panel_title_size'):
-                        new_back_width = int(self.original_spec_panel_title_size[0] * width_ratio)
-                    else:
-                        new_back_width = int(getattr(self.top_back_navigation, 'base_width', 424) * width_ratio)
-                    self.top_back_navigation.setFixedWidth(new_back_width)
-                    if hasattr(self.top_back_navigation, 'divider'):
-                        self.top_back_navigation.divider.setFixedWidth(new_back_width)
 
-            # 시험 선택 타이틀 크기 조정 (가로만 확장)
             if hasattr(self, 'spec_panel_title') and hasattr(self, 'original_spec_panel_title_size'):
                 new_title_width = int(self.original_spec_panel_title_size[0] * width_ratio)
                 self.spec_panel_title.setFixedSize(new_title_width, self.original_spec_panel_title_size[1])
-                
-                # TestSelectionPanel 자체 너비도 업데이트
                 if hasattr(self, 'test_selection_panel'):
-                     self.test_selection_panel.setFixedWidth(new_title_width)
+                    self.test_selection_panel.setFixedWidth(new_title_width)
 
-            # 그룹 테이블 위젯 크기 조정 (비례 배분)
             if hasattr(self, 'group_table_widget') and hasattr(self, 'original_group_table_widget_size'):
                 new_group_width = int(self.original_group_table_widget_size[0] * width_ratio)
                 group_extra = extra_column_height * (204 / left_expandable_total)
                 new_group_height = int(204 + group_extra)
                 self.group_table_widget.setFixedSize(new_group_width, new_group_height)
-                # 내부 테이블 크기도 조정
                 if hasattr(self, 'group_table'):
                     self.group_table.setFixedHeight(new_group_height)
 
-            # 시험 시나리오 테이블 크기 조정 (비례 배분)
             if hasattr(self, 'field_group') and hasattr(self, 'original_field_group_size'):
                 new_field_width = int(self.original_field_group_size[0] * width_ratio)
-                # 추가 높이를 561/765 비율로 배분하여 너무 극단적이지 않게 확장
                 field_extra = extra_column_height * (561 / left_expandable_total)
                 new_field_height = int(561 + field_extra)
-                
                 self.field_group.setFixedSize(new_field_width, new_field_height)
-                # 내부 테이블 크기도 조정
                 if hasattr(self, 'test_field_table'):
                     self.test_field_table.setFixedHeight(new_field_height)
 
-            # ✅ 오른쪽 컬럼 크기 조정 (스크롤 컨테이너 크기 조정)
             if hasattr(self, 'right_scroll_container') and hasattr(self, 'original_right_col_size'):
                 new_right_width = int(self.original_right_col_size[0] * width_ratio)
                 new_right_height = int(self.original_right_col_size[1] * height_ratio)
@@ -895,32 +1161,40 @@ class ResultPageWidget(QWidget):
                 if hasattr(self, 'right_col'):
                     self.right_col.setFixedWidth(new_right_width)
 
-            # 시험 정보 위젯 크기 조정 (가로만 확장)
             if hasattr(self, 'info_title_header') and hasattr(self, 'original_info_title_header_size'):
-                new_info_title_header_width = int(self.original_info_title_header_size[0] * width_ratio)
-                self.info_title_header.setFixedSize(new_info_title_header_width, self.original_info_title_header_size[1])
+                self.info_title_header.setFixedSize(
+                    int(self.original_info_title_header_size[0] * width_ratio),
+                    self.original_info_title_header_size[1],
+                )
             if hasattr(self, 'info_title') and hasattr(self, 'original_info_title_size'):
-                new_info_title_width = int(self.original_info_title_size[0] * width_ratio)
-                self.info_title.setFixedSize(new_info_title_width, self.original_info_title_size[1])
+                self.info_title.setFixedSize(
+                    int(self.original_info_title_size[0] * width_ratio),
+                    self.original_info_title_size[1],
+                )
             if hasattr(self, 'info_widget') and hasattr(self, 'original_info_widget_size'):
-                new_info_width = int(self.original_info_widget_size[0] * width_ratio)
-                self.info_widget.setFixedSize(new_info_width, self.original_info_widget_size[1])
+                self.info_widget.setFixedSize(
+                    int(self.original_info_widget_size[0] * width_ratio),
+                    self.original_info_widget_size[1],
+                )
 
-            # ✅ 결과 테이블 헤더 크기 조정 (가로만 확장)
             if hasattr(self, 'result_header_widget') and hasattr(self, 'original_result_header_widget_size'):
-                new_header_width = int(self.original_result_header_widget_size[0] * width_ratio)
-                self.result_header_widget.setFixedSize(new_header_width, self.original_result_header_widget_size[1])
-            # ✅ 결과 테이블 스크롤 영역 크기 조정 (3페이지 방식: 남은 공간 모두 차지)
+                self.result_header_widget.setFixedSize(
+                    int(self.original_result_header_widget_size[0] * width_ratio),
+                    self.original_result_header_widget_size[1],
+                )
             if hasattr(self, 'result_label_header') and hasattr(self, 'original_result_label_header_size'):
-                new_result_label_header_width = int(self.original_result_label_header_size[0] * width_ratio)
-                self.result_label_header.setFixedSize(new_result_label_header_width, self.original_result_label_header_size[1])
+                self.result_label_header.setFixedSize(
+                    int(self.original_result_label_header_size[0] * width_ratio),
+                    self.original_result_label_header_size[1],
+                )
             if hasattr(self, 'result_label') and hasattr(self, 'original_result_label_size'):
-                new_result_label_width = int(self.original_result_label_size[0] * width_ratio)
-                self.result_label.setFixedSize(new_result_label_width, self.original_result_label_size[1])
+                self.result_label.setFixedSize(
+                    int(self.original_result_label_size[0] * width_ratio),
+                    self.original_result_label_size[1],
+                )
+
             if hasattr(self, 'result_scroll_area'):
                 new_scroll_width = int(1064 * width_ratio)
-
-                # 실제 표시되는 오른쪽 컬럼 레이아웃 기준으로 본문 높이 계산
                 if hasattr(self, 'right_layout'):
                     _, top_margin, _, bottom_margin = self.right_layout.getContentsMargins()
                     top_bottom_margins = top_margin + bottom_margin
@@ -940,90 +1214,40 @@ class ResultPageWidget(QWidget):
                 elif hasattr(self, 'buttonGroup'):
                     static_height += 32 + self.buttonGroup.height()
 
-                viewport_height = self.right_scroll_container.viewport().height() if hasattr(self, 'right_scroll_container') else new_right_height
-                new_scroll_height = viewport_height - top_bottom_margins - static_height
-                
-                # 최소 높이 보장
-                new_scroll_height = max(150, new_scroll_height)
-                
+                viewport_height = self.right_scroll_container.viewport().height() if hasattr(self, 'right_scroll_container') else int(self.original_right_col_size[1] * height_ratio)
+                new_scroll_height = max(150, viewport_height - top_bottom_margins - static_height)
                 self.result_scroll_area.setFixedSize(new_scroll_width, new_scroll_height)
 
-            # 테이블 컨테이너 크기 조정
             if hasattr(self, 'table_container'):
-                new_container_width = int(1064 * width_ratio)
-                self.table_container.setFixedWidth(new_container_width)
+                self.table_container.setFixedWidth(int(1064 * width_ratio))
 
-            # 시험 점수 요약 타이틀 크기 조정 (가로만 확장)
             if hasattr(self, 'score_title_header') and hasattr(self, 'original_score_title_header_size'):
-                new_score_title_header_width = int(self.original_score_title_header_size[0] * width_ratio)
-                self.score_title_header.setFixedSize(new_score_title_header_width, self.original_score_title_header_size[1])
+                self.score_title_header.setFixedSize(
+                    int(self.original_score_title_header_size[0] * width_ratio),
+                    self.original_score_title_header_size[1],
+                )
             if hasattr(self, 'score_title') and hasattr(self, 'original_score_title_size'):
-                new_score_title_width = int(self.original_score_title_size[0] * width_ratio)
-                self.score_title.setFixedSize(new_score_title_width, self.original_score_title_size[1])
-
-            # 점수 테이블 크기 조정 (가로만 확장)
+                self.score_title.setFixedSize(
+                    int(self.original_score_title_size[0] * width_ratio),
+                    self.original_score_title_size[1],
+                )
             if hasattr(self, 'score_table') and hasattr(self, 'original_score_table_size'):
-                new_score_width = int(self.original_score_table_size[0] * width_ratio)
-                self.score_table.setFixedSize(new_score_width, self.original_score_table_size[1])
+                self.score_table.setFixedSize(
+                    int(self.original_score_table_size[0] * width_ratio),
+                    self.original_score_table_size[1],
+                )
 
-            # 분야별 점수 그룹 크기 조정 (가로만 확장)
-            if hasattr(self, 'spec_score_group') and hasattr(self, 'original_spec_group_size'):
-                new_spec_width = int(self.original_spec_group_size[0] * width_ratio)
-                self.spec_score_group.setFixedSize(new_spec_width, self.original_spec_group_size[1])
+            self._apply_score_widget_resize()
 
-            # 전체 점수 그룹 크기 조정 (가로만 확장)
-            if hasattr(self, 'total_score_group') and hasattr(self, 'original_total_group_size'):
-                new_total_width = int(self.original_total_group_size[0] * width_ratio)
-                self.total_score_group.setFixedSize(new_total_width, self.original_total_group_size[1])
-
-            # ✅ 점수 테이블 내부 위젯 크기 조정
-            if hasattr(self, 'original_score_header_size'):
-                new_header_width = int(self.original_score_header_size[0] * width_ratio)
-                new_data_width = int(self.original_score_data_area_size[0] * width_ratio)
-                # 각 라벨별 다른 너비 적용
-                new_pass_width = int(self.original_pass_label_size[0] * width_ratio)
-                new_opt_width = int(self.original_opt_label_size[0] * width_ratio)
-                new_score_width = int(self.original_score_label_size[0] * width_ratio)
-
-                # 분야별 점수 내부 위젯
-                if hasattr(self, 'spec_header'):
-                    self.spec_header.setFixedSize(new_header_width, self.original_score_header_size[1])
-                if hasattr(self, 'spec_data_area'):
-                    self.spec_data_area.setFixedSize(new_data_width, self.original_score_data_area_size[1])
-                if hasattr(self, 'spec_pass_label'):
-                    self.spec_pass_label.setFixedSize(new_pass_width, self.original_pass_label_size[1])
-                if hasattr(self, 'spec_total_label'):
-                    self.spec_total_label.setFixedSize(new_opt_width, self.original_opt_label_size[1])
-                if hasattr(self, 'spec_score_label'):
-                    self.spec_score_label.setFixedSize(new_score_width, self.original_score_label_size[1])
-
-                # 전체 점수 내부 위젯
-                if hasattr(self, 'total_header'):
-                    self.total_header.setFixedSize(new_header_width, self.original_score_header_size[1])
-                if hasattr(self, 'total_data_area'):
-                    self.total_data_area.setFixedSize(new_data_width, self.original_score_data_area_size[1])
-                if hasattr(self, 'total_pass_label'):
-                    self.total_pass_label.setFixedSize(new_pass_width, self.original_pass_label_size[1])
-                if hasattr(self, 'total_total_label'):
-                    self.total_total_label.setFixedSize(new_opt_width, self.original_opt_label_size[1])
-                if hasattr(self, 'total_score_label'):
-                    self.total_score_label.setFixedSize(new_score_width, self.original_score_label_size[1])
-
-            # ✅ 버튼 그룹 크기 조정 (가로만 확장, 세로 고정)
             if hasattr(self, 'buttonGroup') and hasattr(self, 'original_buttonGroup_size'):
-                new_btn_group_width = int(self.original_buttonGroup_size[0] * width_ratio)
-                self.buttonGroup.setFixedSize(new_btn_group_width, self.original_buttonGroup_size[1])
+                self.buttonGroup.setFixedSize(
+                    int(self.original_buttonGroup_size[0] * width_ratio),
+                    self.original_buttonGroup_size[1],
+                )
 
-            # ✅ 반응형: back_btn 크기 조정
-            if hasattr(self, 'back_btn') and hasattr(self, 'original_back_btn_size'):
-                new_back_btn_width = int(self.original_back_btn_size[0] * width_ratio)
-                self.back_btn.setFixedSize(new_back_btn_width, self.original_back_btn_size[1])
-
-            # ✅ 결과 테이블 컬럼 너비 비례 조정 (마지막 컬럼이 남은 공간 채움)
             if hasattr(self, 'tableWidget') and hasattr(self, 'original_column_widths'):
-                # 스크롤바 표시 여부 확인
                 row_count = self.tableWidget.rowCount()
-                total_row_height = row_count * 40  # 각 행 40px
+                total_row_height = row_count * 40
                 scroll_area_height = self.result_scroll_area.viewport().height() if hasattr(self, 'result_scroll_area') else 189
                 scrollbar_visible = total_row_height > scroll_area_height
                 scrollbar_width = 16 if scrollbar_visible else 2
@@ -1031,81 +1255,23 @@ class ResultPageWidget(QWidget):
                 new_scroll_width = int(1064 * width_ratio)
                 available_width = new_scroll_width - scrollbar_width
 
-                # 마지막 컬럼을 제외한 나머지 컬럼 너비 설정
                 used_width = 0
                 for i, orig_width in enumerate(self.original_column_widths[:-1]):
                     new_col_width = int(orig_width * width_ratio)
                     self.tableWidget.setColumnWidth(i, new_col_width)
                     used_width += new_col_width
 
-                # 마지막 컬럼은 남은 공간을 채움
                 last_col_width = available_width - used_width
                 self.tableWidget.setColumnWidth(len(self.original_column_widths) - 1, last_col_width)
 
-                # ✅ 헤더 레이아웃 여백 동기화 (오른쪽 밀림 현상 방지 핵심)
                 if hasattr(self, 'result_header_layout'):
                     self.result_header_layout.setContentsMargins(0, 0, scrollbar_width, 0)
-
-                # 헤더 라벨 너비도 테이블 컬럼 너비와 완벽히 동기화
                 if hasattr(self, 'result_header_labels'):
                     for i in range(len(self.original_column_widths)):
                         if i < len(self.result_header_labels):
-                            # 실제 테이블의 컬럼 너비를 그대로 주입
-                            label_width = self.tableWidget.columnWidth(i)
-                            self.result_header_labels[i].setFixedSize(label_width, 30)
+                            self.result_header_labels[i].setFixedSize(self.tableWidget.columnWidth(i), 30)
 
-        # ✅ 배경 지오메트리 실시간 업데이트 (리사이징 완료 후 최하단에서 호출 - 3페이지와 동일)
         self._update_content_background_geometry()
-
-    def _apply_score_widget_resize(self):
-        """점수 위젯 재생성 후 현재 창 크기에 맞게 반응형 적용"""
-        if not hasattr(self, 'original_window_size'):
-            return
-
-        current_width = self.width()
-        width_ratio = max(1.0, current_width / self.original_window_size[0])
-
-        # 외부 컨테이너 크기 조정
-        if hasattr(self, 'spec_score_group') and hasattr(self, 'original_spec_group_size'):
-            new_spec_width = int(self.original_spec_group_size[0] * width_ratio)
-            self.spec_score_group.setFixedSize(new_spec_width, self.original_spec_group_size[1])
-
-        if hasattr(self, 'total_score_group') and hasattr(self, 'original_total_group_size'):
-            new_total_width = int(self.original_total_group_size[0] * width_ratio)
-            self.total_score_group.setFixedSize(new_total_width, self.original_total_group_size[1])
-
-        # 내부 위젯 크기 조정
-        if hasattr(self, 'original_score_header_size'):
-            new_header_width = int(self.original_score_header_size[0] * width_ratio)
-            new_data_width = int(self.original_score_data_area_size[0] * width_ratio)
-            # 각 라벨별 다른 너비 적용
-            new_pass_width = int(self.original_pass_label_size[0] * width_ratio)
-            new_opt_width = int(self.original_opt_label_size[0] * width_ratio)
-            new_score_width = int(self.original_score_label_size[0] * width_ratio)
-
-            # 분야별 점수 내부 위젯
-            if hasattr(self, 'spec_header'):
-                self.spec_header.setFixedSize(new_header_width, self.original_score_header_size[1])
-            if hasattr(self, 'spec_data_area'):
-                self.spec_data_area.setFixedSize(new_data_width, self.original_score_data_area_size[1])
-            if hasattr(self, 'spec_pass_label'):
-                self.spec_pass_label.setFixedSize(new_pass_width, self.original_pass_label_size[1])
-            if hasattr(self, 'spec_total_label'):
-                self.spec_total_label.setFixedSize(new_opt_width, self.original_opt_label_size[1])
-            if hasattr(self, 'spec_score_label'):
-                self.spec_score_label.setFixedSize(new_score_width, self.original_score_label_size[1])
-
-            # 전체 점수 내부 위젯
-            if hasattr(self, 'total_header'):
-                self.total_header.setFixedSize(new_header_width, self.original_score_header_size[1])
-            if hasattr(self, 'total_data_area'):
-                self.total_data_area.setFixedSize(new_data_width, self.original_score_data_area_size[1])
-            if hasattr(self, 'total_pass_label'):
-                self.total_pass_label.setFixedSize(new_pass_width, self.original_pass_label_size[1])
-            if hasattr(self, 'total_total_label'):
-                self.total_total_label.setFixedSize(new_opt_width, self.original_opt_label_size[1])
-            if hasattr(self, 'total_score_label'):
-                self.total_score_label.setFixedSize(new_score_width, self.original_score_label_size[1])
 
     def load_initial_scenarios(self):
         """초기 로드: 현재 선택된 그룹과 시나리오를 반영하여 UI 갱신"""
@@ -1235,6 +1401,11 @@ class ResultPageWidget(QWidget):
             self.parent.current_group_name = group_name  # ✅ 그룹명 저장
 
             self.test_selection_panel.update_test_field_table(selected_group)
+            if self.test_field_table.rowCount() > 0:
+                self.test_field_table.selectRow(0)
+                self.on_test_field_selected(0, 0)
+            else:
+                self.show_empty_result_table()
 
             # ✅ 시험 정보 업데이트
             self.update_test_info()
@@ -1693,41 +1864,28 @@ class ResultPageWidget(QWidget):
             self.tableWidget.setCellWidget(row, 9, container)
 
     def _show_detail(self, row):
-        """상세 내용 확인 - 자체 tableWidget 데이터 사용"""
+        if hasattr(self.parent, 'show_combined_result'):
+            self.parent.show_combined_result(row)
+            return
+
         try:
-            # 자체 tableWidget에서 API 이름 가져오기 (부모 테이블 참조 문제 해결)
             api_item = self.tableWidget.item(row, 1)
             if api_item is None:
-                QMessageBox.warning(self, "오류", "해당 행의 API 정보를 찾을 수 없습니다.")
+                QMessageBox.warning(self, "??", "?? ?? API ??? ?? ? ????.")
                 return
             api_name = api_item.data(Qt.UserRole) or api_item.text()
-
-            # parent의 데이터 가져오기
             buf = self.parent.step_buffers[row] if row < len(self.parent.step_buffers) else {"data": "", "error": "", "result": ""}
-
-            # 스키마 데이터 가져오기
-            try:
-                schema_data = self.parent.videoOutSchema[row] if row < len(self.parent.videoOutSchema) else None
-            except:
-                schema_data = None
-
-            # 웹훅 스키마 데이터 가져오기
+            schema_data = self.parent.videoOutSchema[row] if row < len(self.parent.videoOutSchema) else None
             webhook_schema = None
             if hasattr(self.parent, 'trans_protocols') and row < len(self.parent.trans_protocols):
                 current_protocol = self.parent.trans_protocols[row]
-                if current_protocol == "WebHook":
-                    if hasattr(self.parent, 'webhookInSchema') and row < len(self.parent.webhookInSchema):
-                        webhook_schema = self.parent.webhookInSchema[row]
-
-            # 통합 팝업창 띄우기
+                if current_protocol == "WebHook" and hasattr(self.parent, 'webhookInSchema') and row < len(self.parent.webhookInSchema):
+                    webhook_schema = self.parent.webhookInSchema[row]
             dialog = CombinedDetailDialog(api_name, buf, schema_data, webhook_schema)
             dialog.exec_()
-
         except Exception as e:
-            Logger.error(f" 상세 내용 확인 오류: {e}")
-            import traceback
-            traceback.print_exc()
-            QMessageBox.warning(self, "오류", f"상세 내용을 표시할 수 없습니다.\n{str(e)}")
+            Logger.error(f"?? ?? ?? ??: {e}")
+            QMessageBox.warning(self, "??", f"?? ??? ??? ? ????.\n{str(e)}")
 
     def update_score_displays(self, saved_data):
         """점수 표시 업데이트"""

@@ -36,6 +36,7 @@ if getattr(sys, 'frozen', False):
 from ui.info_GUI import InfoWidget
 from ui.widgets import install_gradient_messagebox
 from core.functions import resource_path
+from core.utils import should_send_error_heartbeat_on_close
 from api.client import APIClient
 import config.CONSTANTS as CONSTANTS
 import platformVal_all as platform_app
@@ -68,6 +69,10 @@ if sys.stderr is None:
 
 # ===== 처리되지 않은 예외를 로그에 기록 =====
 def exception_hook(exctype, value, tb):
+    try:
+        APIClient().send_heartbeat_error(str(value))
+    except Exception as heartbeat_error:
+        Logger.warning(f"[EXCEPTION_HOOK] failed to send error heartbeat: {heartbeat_error}")
     Logger.error("처리되지 않은 예외 발생!")
     Logger.error(''.join(traceback.format_exception(exctype, value, tb)))
     sys.__excepthook__(exctype, value, tb)
@@ -256,9 +261,12 @@ class MainWindow(QMainWindow):
         if app is not None and app.property("skip_exit_confirm"):
             app.setProperty("skip_exit_confirm", False)
             try:
-                APIClient().send_heartbeat_pending(getattr(CONSTANTS, "request_id", ""))
+                if should_send_error_heartbeat_on_close(getattr(CONSTANTS, "HEARTBEAT_LAST_STATUS", ""), False):
+                    APIClient().send_heartbeat_error("Application closed while test was still active")
+                else:
+                    APIClient().send_heartbeat_pending(getattr(CONSTANTS, "request_id", ""))
             except Exception as e:
-                Logger.warning(f"[MAIN_CLOSE] failed to send stopped heartbeat (skip flag): {e}")
+                Logger.warning(f"[MAIN_CLOSE] failed to send close heartbeat (skip flag): {e}")
             Logger.debug(f"[MAIN_CLOSE] skip_exit_confirm=True, ?? ?? ??")
             event.accept()
             return
@@ -270,9 +278,12 @@ class MainWindow(QMainWindow):
 
         if reply == QMessageBox.Yes:
             try:
-                APIClient().send_heartbeat_pending(getattr(CONSTANTS, "request_id", ""))
+                if should_send_error_heartbeat_on_close(getattr(CONSTANTS, "HEARTBEAT_LAST_STATUS", ""), False):
+                    APIClient().send_heartbeat_error("Application closed while test was still active")
+                else:
+                    APIClient().send_heartbeat_pending(getattr(CONSTANTS, "request_id", ""))
             except Exception as e:
-                Logger.warning(f"[MAIN_CLOSE] failed to send stopped heartbeat: {e}")
+                Logger.warning(f"[MAIN_CLOSE] failed to send close heartbeat: {e}")
             # ✅ 플랫폼 검증 위젯의 일시정지 파일 정리
             if hasattr(self, '_platform_widget') and self._platform_widget is not None:
                 Logger.debug(f"[MAIN_CLOSE] 플랫폼 검증 위젯 정리 중...")

@@ -27,7 +27,7 @@ from ui.platform_main_ui import PlatformMainUI
 import spec.Schema_response as schema_response_module
 import warnings
 from core.validation_registry import get_validation_rules
-from core.utils import remove_api_number_suffix, to_detail_text, redact, clean_trace_directory, format_schema, load_from_trace_file, load_external_constants, build_monitor_step_name, build_webhook_monitor_step_name, build_monitor_result_title, build_monitor_start_title, build_monitor_start_details, build_monitor_progress_details, build_monitor_result_details, generate_monitor_notice_html
+from core.utils import remove_api_number_suffix, to_detail_text, redact, clean_trace_directory, format_schema, load_from_trace_file, load_external_constants, build_monitor_step_name, build_webhook_monitor_step_name, build_monitor_result_title, build_monitor_start_title, build_monitor_start_details, build_monitor_progress_details, build_monitor_result_details, generate_monitor_notice_html, response_time_ms_to_table_seconds, should_send_error_heartbeat_on_close
 from core.logger import Logger
 
 warnings.filterwarnings('ignore')
@@ -395,14 +395,21 @@ class MyApp(PlatformMainUI):
             return max(0, int(time.time() - self.time_pre))
         return 0
 
+
+    def _table_timer_seconds(self, row, time_interval=None):
+        response_time_ms = getattr(self, 'monitor_response_elapsed_ms', {}).get(row)
+        if response_time_ms is not None:
+            return response_time_ms_to_table_seconds(response_time_ms)
+        return self._timer_elapsed_seconds(time_interval)
+
     def _set_timer_running(self, row, time_interval=None):
         self.set_api_timer_state(row, "running", self._timer_elapsed_seconds(time_interval))
 
     def _set_timer_success(self, row, time_interval=None):
-        self.set_api_timer_state(row, "success", self._timer_elapsed_seconds(time_interval))
+        self.set_api_timer_state(row, "success", self._table_timer_seconds(row, time_interval))
 
     def _set_timer_timeover(self, row, time_interval=None):
-        self.set_api_timer_state(row, "timeover", self._timer_elapsed_seconds(time_interval))
+        self.set_api_timer_state(row, "timeover", self._table_timer_seconds(row, time_interval))
 
     def _reset_all_row_timers(self):
         self.reset_all_api_timers()
@@ -448,6 +455,10 @@ class MyApp(PlatformMainUI):
                             )
                     url = f"{CONSTANTS.management_url}/api/integration/test-results"
                     response = requests.post(url, json=result_json)
+                    try:
+                        self.latest_result_response = response.json()
+                    except Exception:
+                        self.latest_result_response = None
                     self.final_result_sent = True
                     Logger.debug(f"✅ 시험 결과 전송 상태 코드:: {response.status_code}")
                     Logger.debug(f"📥  시험 결과 전송 응답:: {response.text}")
@@ -3075,10 +3086,14 @@ class MyApp(PlatformMainUI):
 
     def closeEvent(self, event):
         """창 닫기 이벤트 - 서버 스레드 정리"""
+        timer_active = hasattr(self, 'tick_timer') and self.tick_timer.isActive()
         try:
-            APIClient().send_heartbeat_pending(getattr(self.CONSTANTS, "request_id", ""))
+            if should_send_error_heartbeat_on_close(getattr(self, "run_status", ""), timer_active):
+                APIClient().send_heartbeat_error("Window closed while test was still active")
+            else:
+                APIClient().send_heartbeat_pending(getattr(self.CONSTANTS, "request_id", ""))
         except Exception as e:
-            Logger.warning(f"stopped heartbeat send failed on closeEvent: {e}")
+            Logger.warning(f"close heartbeat send failed on closeEvent: {e}")
         # ✅ 타이머 중지
         if hasattr(self, 'tick_timer') and self.tick_timer.isActive():
             self.tick_timer.stop()

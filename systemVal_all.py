@@ -54,7 +54,7 @@ importlib.reload(constraints_request_module)
 
 result_dir = os.path.join(os.getcwd(), "results")
 os.makedirs(result_dir, exist_ok=True)
-from core.utils import to_detail_text, redact, remove_api_number_suffix, build_monitor_step_name, build_webhook_monitor_step_name, build_monitor_result_title, build_monitor_start_title, build_monitor_start_details, build_monitor_progress_details, build_monitor_result_details, generate_monitor_notice_html
+from core.utils import to_detail_text, redact, remove_api_number_suffix, build_monitor_step_name, build_webhook_monitor_step_name, build_monitor_result_title, build_monitor_start_title, build_monitor_start_details, build_monitor_progress_details, build_monitor_result_details, generate_monitor_notice_html, response_time_ms_to_table_seconds, should_send_error_heartbeat_on_close
 
 class MyApp(SystemMainUI):
     previousPageRequested = pyqtSignal(object)
@@ -461,14 +461,21 @@ class MyApp(SystemMainUI):
             return max(0, int(time.time() - self.time_pre))
         return 0
 
+
+    def _table_timer_seconds(self, row, time_interval=None):
+        response_time_ms = getattr(self, 'monitor_response_elapsed_ms', {}).get(row)
+        if response_time_ms is not None:
+            return response_time_ms_to_table_seconds(response_time_ms)
+        return self._timer_elapsed_seconds(time_interval)
+
     def _set_timer_running(self, row, time_interval=None):
         self.set_api_timer_state(row, "running", self._timer_elapsed_seconds(time_interval))
 
     def _set_timer_success(self, row, time_interval=None):
-        self.set_api_timer_state(row, "success", self._timer_elapsed_seconds(time_interval))
+        self.set_api_timer_state(row, "success", self._table_timer_seconds(row, time_interval))
 
     def _set_timer_timeover(self, row, time_interval=None):
-        self.set_api_timer_state(row, "timeover", self._timer_elapsed_seconds(time_interval))
+        self.set_api_timer_state(row, "timeover", self._table_timer_seconds(row, time_interval))
 
     def _reset_all_row_timers(self):
         self.reset_all_api_timers()
@@ -1753,6 +1760,10 @@ class MyApp(SystemMainUI):
                                 )
                         url = f"{CONSTANTS.management_url}/api/integration/test-results"
                         response = requests.post(url, json=result_json)
+                        try:
+                            self.latest_result_response = response.json()
+                        except Exception:
+                            self.latest_result_response = None
                         Logger.debug(f"시험 결과 전송 상태 코드: {response.status_code}")
                         Logger.debug(f"시험 결과 전송 응답: {response.text}")
                         json_path = os.path.join(result_dir, "response_results.json")
