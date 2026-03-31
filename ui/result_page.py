@@ -1395,18 +1395,14 @@ class ResultPageWidget(QWidget):
 
             # ✅ 시험 진행 중에는 다른 그룹/시나리오 선택 차단 (3페이지와 동일 정책)
             if self._is_parent_test_running() and new_group_id != old_group_id:
-                Logger.debug("[RESULT DEBUG] 시험 진행 중 - 그룹 변경 차단")
                 self._warn_running_scenario_change_blocked()
                 self._restore_current_group_selection()
                 self._restore_current_scenario_selection()
                 return
 
-            Logger.debug(f"[RESULT DEBUG] 🔄 그룹 선택: {old_group_id} → {new_group_id}")
-
             # ✅ 그룹이 변경되면 current_spec_id 초기화
             if old_group_id != new_group_id:
                 self.current_spec_id = None
-                Logger.debug(f"[RESULT DEBUG] ✨ 그룹 변경으로 current_spec_id 초기화")
 
             # ✅ 그룹 ID 및 그룹명 저장
             self.parent.current_group_id = new_group_id
@@ -1436,13 +1432,11 @@ class ResultPageWidget(QWidget):
 
         # ✅ 시험 진행 중에는 시나리오 변경 차단 (3페이지와 동일 정책)
         if self._is_parent_test_running():
-            Logger.debug("[RESULT DEBUG] 시험 진행 중 - 시나리오 변경 차단")
             self._warn_running_scenario_change_blocked()
             self._restore_current_scenario_selection()
             return
 
         Logger.debug(f" 시나리오 전환: {self.current_spec_id} → {selected_spec_id}")
-        Logger.debug(f"[RESULT DEBUG] 현재 그룹: {self.parent.current_group_id}")
 
         # ✅ parent의 spec 전환 (API 목록 로드)
         old_spec_id = self.parent.current_spec_id
@@ -1465,7 +1459,7 @@ class ResultPageWidget(QWidget):
 
             # ✅ 4. 저장된 결과 데이터가 있으면 로드 (복합키 사용)
             composite_key = f"{self.parent.current_group_id}_{selected_spec_id}"
-            Logger.debug(f"[RESULT DEBUG] 📂 데이터 복원 시도: {composite_key}")
+            Logger.debug(f" 📂 데이터 복원 시도: {composite_key}")
             if composite_key in self.parent.spec_table_data:
                 saved_data = self.parent.spec_table_data[composite_key]
 
@@ -2301,7 +2295,6 @@ class ResultPageWidget(QWidget):
             else:
                 value_label.setText("")
 
-        Logger.debug("[RESULT DEBUG] 시험 정보 업데이트 완료")
 
     def _create_spec_score_display(self):
         """시험 분야별 점수 표시"""

@@ -188,9 +188,6 @@ class MyApp(PlatformMainUI):
         if not SPEC_CONFIG:
             raise ValueError("CONSTANTS.SPEC_CONFIG가 정의되지 않았습니다!")
 
-        Logger.debug(f"[PLATFORM DEBUG] SPEC_CONFIG 개수: {len(SPEC_CONFIG)}")
-        Logger.debug(f"[PLATFORM DEBUG] 찾을 spec_id: {self.current_spec_id}")
-
         config = {}
         for group in SPEC_CONFIG:
             if self.current_spec_id in group:
@@ -229,11 +226,6 @@ class MyApp(PlatformMainUI):
             if os.path.exists(external_spec_dir):
                 files = [f for f in os.listdir(external_spec_dir) if f.endswith('.py')]
                 Logger.debug(f"외부 spec 폴더 .py 파일: {files}")
-
-            # sys.path 전체 출력 (디버깅)
-            Logger.debug(f"[PLATFORM SPEC DEBUG] sys.path 전체 개수: {len(sys.path)}")
-            for i, p in enumerate(sys.path):
-                Logger.debug(f"[PLATFORM SPEC DEBUG]   [{i}] {p}")
 
             # 이미 있더라도 제거 후 맨 앞에 추가 (우선순위 보장)
             if external_spec_parent in sys.path:
@@ -554,8 +546,6 @@ class MyApp(PlatformMainUI):
 
                 current_validation = {}
 
-                Logger.debug("++++++++++ 규칙 가져오기 ++++++++++")
-
                 try:
                     current_validation = get_validation_rules(
                         spec_id=self.current_spec_id,
@@ -567,8 +557,6 @@ class MyApp(PlatformMainUI):
                 except Exception as e:
                     current_validation = {}
                     Logger.debug(f" 현재 API의 검증 규칙 로드 실패: {e}")
-
-                Logger.debug("++++++++++ 규칙 로드 끝 ++++++++++")
 
                 request_received = False
                 expected_count = self.current_retry + 1

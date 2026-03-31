@@ -45,11 +45,9 @@ class WebhookServer(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(b'Hello, World!')
 
-    def do_POST(self): 
-        Logger.debug(f"[WEBHOOK] do_POST called: path={self.path}")  # ✅ 디버그 로그
+    def do_POST(self):
         try:
             content_length = int(self.headers.get('Content-Length', '0'))
-            Logger.debug(f"[WEBHOOK] Content-Length: {content_length}")  # ✅ 디버그 로그
             raw = self.rfile.read(content_length) if content_length > 0 else b'{}'
             try:
                 payload = json.loads(raw.decode('utf-8'))
@@ -57,7 +55,7 @@ class WebhookServer(BaseHTTPRequestHandler):
                 # JSON 파싱 실패 대비 (원문 그대로 보존)
                 payload = {"_raw": raw.decode('utf-8', errors='ignore')}
 
-            Logger.debug(f"[WEBHOOK] Payload received: {json.dumps(payload, ensure_ascii=False)[:200]}")  # ✅ 디버그 로그
+            Logger.debug(f"[WEBHOOK] 수신: {self.path} ({content_length}bytes)")
 
             # ✅ 1) 수신한 웹훅 요청 바디를 그대로 상위로 전달 (검증용)
             if self.result_signal:
@@ -70,11 +68,9 @@ class WebhookServer(BaseHTTPRequestHandler):
             resp = {"code": "200", "message": "성공"}
             self.wfile.write(json.dumps(resp, ensure_ascii=False).encode('utf-8'))
             self.wfile.flush()
-            
-            Logger.debug(f"[WEBHOOK] Response sent: {resp}")  # ✅ 디버그 로그
 
         except Exception as e:
-            Logger.error(f"[WEBHOOK ERROR] {e}")  # ✅ 디버그 로그
+            Logger.error(f"[WEBHOOK ERROR] {e}")
             # 실패 응답 (옵션)
             try:
                 self.send_response(500)

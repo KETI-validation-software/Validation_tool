@@ -1749,15 +1749,6 @@ class MyApp(SystemMainUI):
                     try:
                         self.run_status = "완료"
                         result_json = build_result_json(self)
-                        for spec_item in result_json.get("testResult", []):
-                            for api_item in spec_item.get("apis", []):
-                                validations = api_item.get("validations", [])
-                                if not validations:
-                                    continue
-                                transmitted_data = validations[0].get("transmittedData")
-                                Logger.debug(
-                                    f"[RESULT_JSON] api={api_item.get('name')} type={type(transmitted_data).__name__} value={repr(transmitted_data)[:300]}"
-                                )
                         url = f"{CONSTANTS.management_url}/api/integration/test-results"
                         response = requests.post(url, json=result_json)
                         try:
@@ -1774,7 +1765,6 @@ class MyApp(SystemMainUI):
                             step_name="관리시스템 결과 전송 완료",
                             details=""
                         )
-                        Logger.debug(f" try 블록 정상 완료")
 
                     except Exception as e:
                         Logger.debug(f"❌ JSON 저장 중 오류 발생: {e}")
@@ -2008,9 +1998,6 @@ class MyApp(SystemMainUI):
                     self.step_opt_pass_counts[self.cnt] = opt_correct  # 선택 필드 통과 수
                     self.step_opt_error_counts[self.cnt] = opt_error  # 선택 필드 에러 수
                     
-                    Logger.debug(f"[SCORE DEBUG] API {self.cnt} 시도 {self.current_retry + 1}: pass={key_psss_cnt}, error={key_error_cnt}")
-                    Logger.debug(f"[SCORE DEBUG] step_pass_counts[{self.cnt}] = {self.step_pass_counts[self.cnt]}")
-                    Logger.debug(f"[SCORE DEBUG] step_error_counts[{self.cnt}] = {self.step_error_counts[self.cnt]}")
 
                     if final_result == "PASS":
                         # ✅ 배열 범위 체크 추가
@@ -2255,18 +2242,14 @@ class MyApp(SystemMainUI):
                         step_name="관리시스템 결과 전송 완료",
                         details=""
                     )
-                    Logger.debug(f" try 블록 정상 완료 (경로2)")
                 except Exception as e:
                     Logger.debug(f"❌ JSON 저장 중 오류 발생: {e}")
                     import traceback
                     traceback.print_exc()
                     self.valResult.append(f"\n결과 저장 실패: {str(e)}")
-                    Logger.debug(f" except 블록 실행됨 (경로2)")
                 finally:
                     # ✅ 평가 완료 시 일시정지 파일 정리 (에러 발생 여부와 무관하게 항상 실행)
-                    Logger.debug(f" ========== finally 블록 진입 (경로2) ==========")
                     self.cleanup_paused_file()
-                    Logger.debug(f" ========== finally 블록 종료 (경로2) ==========")
                     
                     # stop/pause 의도가 있으면 completed 전송 금지 (경로2)
                     if not getattr(self, "is_paused", False):
