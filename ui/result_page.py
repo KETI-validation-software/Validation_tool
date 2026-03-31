@@ -2635,8 +2635,8 @@ class ResultPageWidget(QWidget):
         opt_pass = int(opt_pass or 0)
         opt_error = int(opt_error or 0)
         opt_total = opt_pass + opt_error
-        required_pass = passed_fields - opt_pass
-        required_total = total_fields - opt_total
+        required_pass = max(0, passed_fields - opt_pass)
+        required_total = max(0, total_fields - opt_total)
         required_score = (required_pass / required_total * 100) if required_total > 0 else 0.0
         opt_score = (opt_pass / opt_total * 100) if opt_total > 0 else 0.0
 

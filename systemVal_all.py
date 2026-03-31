@@ -2155,15 +2155,18 @@ class MyApp(SystemMainUI):
                         # ✅ 분야별 점수 업데이트 (현재 spec만)
                         self.total_pass_cnt += final_pass_count
                         self.total_error_cnt += final_error_count
+                        # ✅ 선택 필드 분야별 점수 누적
+                        final_opt_pass_count = self.step_opt_pass_counts[self.cnt]
+                        final_opt_error_count = self.step_opt_error_counts[self.cnt]
+                        self.total_opt_pass_cnt += final_opt_pass_count
+                        self.total_opt_error_cnt += final_opt_error_count
 
                         # ✅ 전체 점수 업데이트 (모든 spec 합산) - API당 1회만 추가
                         self.global_error_cnt += final_error_count
                         self.global_pass_cnt += final_pass_count
                         # ✅ 선택 필드 통과 수도 전체 점수에 누적
-                        final_opt_pass_count = self.step_opt_pass_counts[self.cnt]
                         self.global_opt_pass_cnt += final_opt_pass_count
                         # ✅ 선택 필드 에러 수도 전체 점수에 누적
-                        final_opt_error_count = self.step_opt_error_counts[self.cnt]
                         self.global_opt_error_cnt += final_opt_error_count
 
                         Logger.debug(f" 분야별 점수: pass={self.total_pass_cnt}, error={self.total_error_cnt}")
