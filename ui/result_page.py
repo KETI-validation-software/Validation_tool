@@ -692,25 +692,9 @@ class ResultPageWidget(QWidget):
         # 분야별 점수 - 현재 그룹의 spec들 합산
         current_group_id = getattr(self.parent, 'current_group_id', None)
         current_spec_id = getattr(self.parent, 'current_spec_id', None)
-        spec_table_data = getattr(self.parent, 'spec_table_data', {}) or {}
 
-        group_pass = 0
-        group_error = 0
-        counted_keys = set()
-
-        if current_group_id:
-            prefix = f"{current_group_id}_"
-            for key, data in spec_table_data.items():
-                if key.startswith(prefix):
-                    group_pass += int(data.get('total_pass_cnt', 0) or 0)
-                    group_error += int(data.get('total_error_cnt', 0) or 0)
-                    counted_keys.add(key)
-
-        # 현재 spec이 아직 spec_table_data에 저장 안 됐으면 직접 추가
-        current_key = f"{current_group_id}_{current_spec_id}" if current_group_id and current_spec_id else None
-        if current_key and current_key not in counted_keys:
-            group_pass += int(getattr(self.parent, 'total_pass_cnt', 0) or 0)
-            group_error += int(getattr(self.parent, 'total_error_cnt', 0) or 0)
+        group_pass = self._collect_group_counts(current_group_id, current_spec_id, 'total_pass_cnt', 'total_pass_cnt')
+        group_error = self._collect_group_counts(current_group_id, current_spec_id, 'total_error_cnt', 'total_error_cnt')
 
         # 시나리오별 점수 - 로컬 카운터
         spec_pass = int(getattr(self.parent, 'total_pass_cnt', 0) or 0)
@@ -725,11 +709,30 @@ class ResultPageWidget(QWidget):
             "scenario_api_count": len(getattr(self.parent, 'videoMessages', []) or []),
         }
 
+    def _collect_group_counts(self, group_id, spec_id, saved_key, fallback_attr, is_array=False):
+        """spec_table_data에서 현재 그룹의 카운터를 합산.
+        is_array=True면 저장된 값이 리스트(step 단위 배열)이므로 sum() 적용.
+        현재 spec이 아직 저장 안 됐으면 parent 속성으로 폴백."""
+        spec_table_data = getattr(self.parent, 'spec_table_data', {}) or {}
+        total = 0
+        counted_keys = set()
+        if group_id:
+            prefix = f"{group_id}_"
+            for key, data in spec_table_data.items():
+                if key.startswith(prefix):
+                    val = data.get(saved_key, [] if is_array else 0)
+                    total += sum(val) if is_array else int(val or 0)
+                    counted_keys.add(key)
+        current_key = f"{group_id}_{spec_id}" if group_id and spec_id else None
+        if current_key and current_key not in counted_keys:
+            total += int(getattr(self.parent, fallback_attr, 0) or 0)
+        return total
+
     def _get_score_summary_snapshot(self):
         summary = self._extract_score_summary_data()
         def pack(block):
             return (
-                int(block.get("score", 0)),
+                float(block.get("score", 0)),
                 int(block.get("totalFields", 0)),
                 int(block.get("passedFields", 0)),
                 int(block.get("failedFields", 0)),
@@ -2483,22 +2486,8 @@ class ResultPageWidget(QWidget):
         # 현재 그룹의 선택 필드 카운터 합산
         current_group_id = getattr(self.parent, 'current_group_id', None)
         current_spec_id = getattr(self.parent, 'current_spec_id', None)
-        opt_pass = 0
-        opt_error = 0
-        spec_table_data = getattr(self.parent, 'spec_table_data', {})
-        counted_keys = set()
-        if current_group_id:
-            prefix = f"{current_group_id}_"
-            for key, data in spec_table_data.items():
-                if key.startswith(prefix):
-                    opt_pass += sum(data.get('step_opt_pass_counts', []))
-                    opt_error += sum(data.get('step_opt_error_counts', []))
-                    counted_keys.add(key)
-        # 현재 spec이 아직 spec_table_data에 저장 안 된 경우 직접 추가
-        current_key = f"{current_group_id}_{current_spec_id}" if current_group_id and current_spec_id else None
-        if current_key and current_key not in counted_keys:
-            opt_pass += getattr(self.parent, 'total_opt_pass_cnt', 0)
-            opt_error += getattr(self.parent, 'total_opt_error_cnt', 0)
+        opt_pass = self._collect_group_counts(current_group_id, current_spec_id, 'step_opt_pass_counts', 'total_opt_pass_cnt', is_array=True)
+        opt_error = self._collect_group_counts(current_group_id, current_spec_id, 'step_opt_error_counts', 'total_opt_error_cnt', is_array=True)
 
         return self._create_summary_score_card(
             prefix="total",
