@@ -675,52 +675,55 @@ class ResultPageWidget(QWidget):
         }
 
     def _extract_score_summary_data(self):
-        zero = self._normalize_score_block(None)
-        summary = {
-            "overall": dict(zero),
-            "group": dict(zero),
-            "scenario": dict(zero),
-            "group_name": "-",
-            "scenario_name": "-",
-            "scenario_api_count": 0,
-        }
+        def make_block(passed, failed):
+            total = passed + failed
+            score = round(passed / total * 100, 2) if total > 0 else 0.0
+            return {
+                "score": score,
+                "totalFields": total,
+                "passedFields": passed,
+                "failedFields": failed,
+            }
 
-        latest = getattr(self.parent, 'latest_result_response', None)
-        if not isinstance(latest, dict):
-            return summary
+        # 전체 점수 - global 카운터 로컬 계산
+        global_pass = int(getattr(self.parent, 'global_pass_cnt', 0) or 0)
+        global_error = int(getattr(self.parent, 'global_error_cnt', 0) or 0)
 
-        summary["overall"] = self._normalize_score_block(latest.get("finalScore"))
-
-        group_results = latest.get("groupResults") or []
+        # 분야별 점수 - 현재 그룹의 spec들 합산
         current_group_id = getattr(self.parent, 'current_group_id', None)
-        group_entry = next(
-            (
-                item for item in group_results
-                if str(item.get("testGroupId") or item.get("id") or "") == str(current_group_id or "")
-            ),
-            group_results[0] if group_results else None,
-        )
-        if isinstance(group_entry, dict):
-            summary["group"] = self._normalize_score_block(group_entry.get("groupScore"))
-            summary["group_name"] = str(group_entry.get("groupName") or "-")
-            scenario_results = group_entry.get("scenarioResults") or []
-        else:
-            scenario_results = []
-
         current_spec_id = getattr(self.parent, 'current_spec_id', None)
-        scenario_entry = next(
-            (
-                item for item in scenario_results
-                if str(item.get("testSpecId") or item.get("specId") or "") == str(current_spec_id or "")
-            ),
-            scenario_results[0] if scenario_results else None,
-        )
-        if isinstance(scenario_entry, dict):
-            summary["scenario"] = self._normalize_score_block(scenario_entry.get("scenarioScore"))
-            summary["scenario_name"] = str(scenario_entry.get("specName") or "-")
-            summary["scenario_api_count"] = len(scenario_entry.get("apis") or [])
+        spec_table_data = getattr(self.parent, 'spec_table_data', {}) or {}
 
-        return summary
+        group_pass = 0
+        group_error = 0
+        counted_keys = set()
+
+        if current_group_id:
+            prefix = f"{current_group_id}_"
+            for key, data in spec_table_data.items():
+                if key.startswith(prefix):
+                    group_pass += int(data.get('total_pass_cnt', 0) or 0)
+                    group_error += int(data.get('total_error_cnt', 0) or 0)
+                    counted_keys.add(key)
+
+        # 현재 spec이 아직 spec_table_data에 저장 안 됐으면 직접 추가
+        current_key = f"{current_group_id}_{current_spec_id}" if current_group_id and current_spec_id else None
+        if current_key and current_key not in counted_keys:
+            group_pass += int(getattr(self.parent, 'total_pass_cnt', 0) or 0)
+            group_error += int(getattr(self.parent, 'total_error_cnt', 0) or 0)
+
+        # 시나리오별 점수 - 로컬 카운터
+        spec_pass = int(getattr(self.parent, 'total_pass_cnt', 0) or 0)
+        spec_error = int(getattr(self.parent, 'total_error_cnt', 0) or 0)
+
+        return {
+            "overall": make_block(global_pass, global_error),
+            "group": make_block(group_pass, group_error),
+            "scenario": make_block(spec_pass, spec_error),
+            "group_name": str(getattr(self.parent, 'current_group_name', '') or '-'),
+            "scenario_name": str(getattr(self.parent, 'spec_description', '') or '-'),
+            "scenario_api_count": len(getattr(self.parent, 'videoMessages', []) or []),
+        }
 
     def _get_score_summary_snapshot(self):
         summary = self._extract_score_summary_data()
@@ -1928,21 +1931,22 @@ class ResultPageWidget(QWidget):
 
     def _create_simple_info_display(self):
         """시험 정보 4열 2행 표시"""
-        info_widget = QWidget()
-        info_widget.setFixedWidth(1050)
-        info_widget.setStyleSheet("""
+        info_card = QWidget()
+        info_card.setFixedSize(1064, 128)
+        info_card.setStyleSheet("""
             QWidget {
-                background-color: #FFFFFF;
-                border: none;
+                background-color: #FCFDFE;
+                border: 1px solid #CECECE;
+                border-radius: 4px;
             }
         """)
 
-        layout = QGridLayout()
-        layout.setContentsMargins(24, 10, 24, 10)
+        layout = QGridLayout(info_card)
+        layout.setContentsMargins(16, 6, 16, 6)
         layout.setHorizontalSpacing(0)
         layout.setVerticalSpacing(0)
 
-        test_info = list(self.parent.load_test_info_from_constants())
+        test_info = list(self.parent.load_test_info_from_constants())[:8]
         self.info_value_labels = []
 
         for index, (label, value) in enumerate(test_info):
@@ -1951,23 +1955,23 @@ class ResultPageWidget(QWidget):
             grid_col = col * 2
 
             cell_widget = QWidget()
-            cell_layout = QVBoxLayout()
-            cell_layout.setContentsMargins(12, 8, 12, 8)
-            cell_layout.setSpacing(4)
+            cell_widget.setStyleSheet("background: transparent; border: none;")
+            cell_layout = QVBoxLayout(cell_widget)
+            cell_layout.setContentsMargins(10, 6, 10, 6)
+            cell_layout.setSpacing(3)
 
             label_widget = QLabel(str(label))
             label_widget.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-            label_widget.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 14px; font-weight: 500; color: #555555; border: none;")
+            label_widget.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 12px; font-weight: 500; color: #6B7280; border: none;")
 
             value_widget = QLabel(str(value))
-            value_widget.setWordWrap(True)
+            value_widget.setWordWrap(False)
+            value_widget.setToolTip(str(value))
             value_widget.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-            value_widget.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 15px; font-weight: 400; color: #1B1B1C; border: none;")
+            value_widget.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 14px; font-weight: 500; color: #1B1B1C; border: none;")
 
             cell_layout.addWidget(label_widget)
             cell_layout.addWidget(value_widget)
-            cell_layout.addStretch()
-            cell_widget.setLayout(cell_layout)
             layout.addWidget(cell_widget, row * 2, grid_col)
             self.info_value_labels.append(value_widget)
 
@@ -1975,38 +1979,19 @@ class ResultPageWidget(QWidget):
                 v_divider = QFrame()
                 v_divider.setFrameShape(QFrame.VLine)
                 v_divider.setFixedWidth(1)
-                v_divider.setStyleSheet("background-color: #D9D9D9; border: none;")
+                v_divider.setStyleSheet("background-color: #E4E7EB; border: none;")
                 layout.addWidget(v_divider, row * 2, grid_col + 1)
 
         h_divider = QFrame()
         h_divider.setFrameShape(QFrame.HLine)
         h_divider.setFixedHeight(1)
-        h_divider.setStyleSheet("background-color: #D9D9D9; border: none;")
+        h_divider.setStyleSheet("background-color: #E4E7EB; border: none;")
         layout.addWidget(h_divider, 1, 0, 1, 7)
 
         for col in range(0, 7, 2):
             layout.setColumnStretch(col, 1)
 
-        info_widget.setLayout(layout)
-
-        scroll_area = QScrollArea()
-        scroll_area.setWidget(info_widget)
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setFixedSize(1064, 132)
-        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        scroll_area.verticalScrollBar().setEnabled(False)
-        scroll_area.horizontalScrollBar().setEnabled(False)
-        scroll_area.wheelEvent = self._disable_scroll_event
-        scroll_area.viewport().wheelEvent = self._disable_scroll_event
-        scroll_area.setStyleSheet("""
-            QScrollArea {
-                border: 1px solid #CECECE;
-                border-radius: 4px;
-                background-color: #FFFFFF;
-            }
-        """)
-        return scroll_area
+        return info_card
 
     def create_result_table(self, parent_layout):
         """결과 테이블 생성 - 3페이지(system_main_ui) 구조와 동일하게 복구"""
@@ -2501,23 +2486,51 @@ class ResultPageWidget(QWidget):
     def _create_total_score_display(self):
         """분야별 점수 표시 위젯 생성 (1064 × 128)"""
         summary = self._extract_score_summary_data()
+
+        # 현재 그룹의 선택 필드 카운터 합산
+        current_group_id = getattr(self.parent, 'current_group_id', None)
+        current_spec_id = getattr(self.parent, 'current_spec_id', None)
+        opt_pass = 0
+        opt_error = 0
+        spec_table_data = getattr(self.parent, 'spec_table_data', {})
+        counted_keys = set()
+        if current_group_id:
+            prefix = f"{current_group_id}_"
+            for key, data in spec_table_data.items():
+                if key.startswith(prefix):
+                    opt_pass += sum(data.get('step_opt_pass_counts', []))
+                    opt_error += sum(data.get('step_opt_error_counts', []))
+                    counted_keys.add(key)
+        # 현재 spec이 아직 spec_table_data에 저장 안 된 경우 직접 추가
+        current_key = f"{current_group_id}_{current_spec_id}" if current_group_id and current_spec_id else None
+        if current_key and current_key not in counted_keys:
+            opt_pass += getattr(self.parent, 'total_opt_pass_cnt', 0)
+            opt_error += getattr(self.parent, 'total_opt_error_cnt', 0)
+
         return self._create_summary_score_card(
             prefix="total",
             title="분야별 점수",
             score_block=summary["group"],
             info_text=self._build_dynamic_group_mode_text(summary),
             rounded_bottom=False,
+            opt_pass=opt_pass,
+            opt_error=opt_error,
         )
 
     def _create_overall_score_display(self):
         """전체 점수 표시 위젯 생성 (1064 × 128)"""
         summary = self._extract_score_summary_data()
+        # 전체 선택 필드 카운터 (모든 spec 누적값)
+        opt_pass = getattr(self.parent, 'global_opt_pass_cnt', 0)
+        opt_error = getattr(self.parent, 'global_opt_error_cnt', 0)
         return self._create_summary_score_card(
             prefix="overall",
             title="전체 점수",
             score_block=summary["overall"],
             info_text=None,
             rounded_bottom=True,
+            opt_pass=opt_pass,
+            opt_error=opt_error,
         )
 
     def _build_dynamic_group_mode_text(self, summary):
@@ -2546,7 +2559,7 @@ class ResultPageWidget(QWidget):
             return f"{group_name}-{mode_label}"
         return mode_label
 
-    def _create_summary_score_card(self, prefix, title, score_block, rounded_bottom, info_text=None):
+    def _create_summary_score_card(self, prefix, title, score_block, rounded_bottom, info_text=None, opt_pass=0, opt_error=0):
         card = QGroupBox()
         card.setFixedSize(1064, 128)
         bottom_radius = "4px" if rounded_bottom else "0px"
@@ -2623,10 +2636,16 @@ class ResultPageWidget(QWidget):
 
         total_fields = int(score_block.get("totalFields", 0) or 0)
         passed_fields = int(score_block.get("passedFields", 0) or 0)
-        failed_fields = int(score_block.get("failedFields", 0) or 0)
         score = float(score_block.get("score", 0.0) or 0.0)
-        passed_score = (passed_fields / total_fields * 100) if total_fields > 0 else 0.0
-        failed_score = (failed_fields / total_fields * 100) if total_fields > 0 else 0.0
+
+        # 필수/선택 필드 계산 (시나리오별 카드와 동일 방식)
+        opt_pass = int(opt_pass or 0)
+        opt_error = int(opt_error or 0)
+        opt_total = opt_pass + opt_error
+        required_pass = passed_fields - opt_pass
+        required_total = total_fields - opt_total
+        required_score = (required_pass / required_total * 100) if required_total > 0 else 0.0
+        opt_score = (opt_pass / opt_total * 100) if opt_total > 0 else 0.0
 
         data_area = QWidget()
         data_area.setFixedSize(1064, 76)
@@ -2640,7 +2659,7 @@ class ResultPageWidget(QWidget):
         pass_label.setText(
             f"필수 필드 점수&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
-            f"{passed_score:.1f}% ({passed_fields}/{total_fields})</span>"
+            f"{required_score:.1f}% ({required_pass}/{required_total})</span>"
         )
         pass_label.setTextFormat(Qt.RichText)
         pass_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000;")
@@ -2661,7 +2680,7 @@ class ResultPageWidget(QWidget):
         fail_label.setText(
             f"선택 필드 점수&nbsp;"
             f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
-            f"{failed_score:.1f}% ({failed_fields}/{total_fields})</span>"
+            f"{opt_score:.1f}% ({opt_pass}/{opt_total})</span>"
         )
         fail_label.setTextFormat(Qt.RichText)
         fail_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000;")
