@@ -188,6 +188,14 @@ def _find_matching_platform_url_row(urls, resolved_test_ip):
     return None
 
 
+def _prefer_resolved_test_ip_urls(urls, resolved_test_ip=None):
+    normalized_urls = [str(url or '').strip() for url in (urls or []) if str(url or '').strip()]
+    matched_index = _find_matching_platform_url_row(normalized_urls, resolved_test_ip)
+    if matched_index is not None:
+        return [normalized_urls[matched_index]]
+    return normalized_urls
+
+
 def _build_integrated_system_urls(local_ips, test_port, resolved_test_ip=None):
     deduped_ips = [ip for ip in dict.fromkeys(local_ips or []) if ip]
     matched_index = _find_matching_platform_url_row(deduped_ips, resolved_test_ip)
@@ -887,27 +895,28 @@ class InfoWidget(QWidget):
         QMessageBox.warning(self, "주소 탐색 실패", msg)
 
     def _on_arp_scan_completed(self, urls):
-        """ARP 스캔 완료 시 호출 (기존 주소 유지, 개수 제한 없음)"""
+        """ARP 스캔 완료 시 호출 (중복 제거 및 개수 제한)"""
         self._close_loading_popup()
         existing_urls = self._get_existing_urls()
-        merged_urls = self._merge_urls(existing_urls, urls)  # 개수 제한 없음
-        self._populate_url_table(merged_urls)
+        merged_urls = self._merge_urls(existing_urls, urls)  # 중복 제거 후
+        preferred_urls = _prefer_resolved_test_ip_urls(merged_urls, getattr(self, "resolved_test_ip", None))
+        self._populate_url_table(preferred_urls)
 
-        added_count = len(merged_urls) - len(existing_urls)
+        added_count = len(preferred_urls) - len(existing_urls)
 
-        # 메시지 구성
+        # 결과 메시지
         if added_count > 0:
             message = (
-                f"동일 네트워크에서 {len(urls)}개의 장비를 찾았습니다.\n"
-                f"{added_count}개의 주소를 추가했습니다."
+                f"ARP 탐색으로 {len(urls)}개의 주소를 찾았습니다.\n"
+                f"{added_count}개의 새 주소를 추가했습니다."
             )
         else:
             message = (
-                f"동일 네트워크에서 {len(urls)}개의 장비를 찾았습니다.\n"
-                f"새로 추가된 주소가 없습니다."
+                f"ARP 탐색으로 {len(urls)}개의 주소를 찾았습니다.\n"
+                f"새로 추가된 주소는 없습니다."
             )
         popup = SystemPopup(
-            title="ARP 스캔 완료",
+            title="ARP 탐색 결과",
             message=message,
             parent=self
         )
@@ -955,7 +964,7 @@ class InfoWidget(QWidget):
         return merged
 
     def _normalize_display_url(self, url):
-        """URL ?? ??? ip:port ? ???"""
+        """URL 표시용으로 ip:port 형태로 정규화"""
         if not url:
             return ""
         normalized = str(url).strip()

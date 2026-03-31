@@ -155,6 +155,27 @@ def _format_seconds_for_monitor_display(milliseconds):
     return f"{seconds:.2f}".rstrip("0").rstrip(".") + _k(0xCD08)
 
 
+def response_time_ms_to_table_seconds(response_time_ms):
+    if response_time_ms is None:
+        return 0
+
+    try:
+        milliseconds = float(response_time_ms)
+    except (TypeError, ValueError):
+        return 0
+
+    if milliseconds <= 0:
+        return 0
+    return max(0, int(milliseconds / 1000.0))
+
+
+def should_send_error_heartbeat_on_close(run_status, timer_active=False):
+    normalized_status = str(run_status or '').strip().lower()
+    if normalized_status in {'completed', 'pending', 'ready', 'stopped'}:
+        return False
+    return bool(timer_active or normalized_status in {'in_progress', 'error'})
+
+
 def build_monitor_response_time_text(response_time_ms=None, total_timeout_ms=None):
     if response_time_ms is None:
         return ""

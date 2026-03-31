@@ -311,7 +311,7 @@ class SystemPopup(QDialog):
 
 
 class GradientMessageBox(QDialog):
-    """QMessageBox ??? ????? ?????"""
+    """QMessageBox 대신 사용하는 그라디언트 다이얼로그"""
     def __init__(self, title, message, detail="", buttons=None, default_button=None, parent=None):
         super().__init__(parent)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.Dialog)
@@ -319,7 +319,7 @@ class GradientMessageBox(QDialog):
         self.setFixedSize(420, 230)
         self._result = QMessageBox.NoButton
 
-        self.title_text = title or "??"
+        self.title_text = title or "알림"
         self.message_text = message or ""
         self.detail_text = detail or ""
         self.buttons = buttons if buttons is not None else QMessageBox.Ok
@@ -448,7 +448,7 @@ class GradientMessageBox(QDialog):
 
 
 def install_gradient_messagebox():
-    """QMessageBox ?? ???? ????? ???? ??"""
+    """QMessageBox 기본 팝업을 그라디언트 팝업으로 치환"""
     if getattr(QMessageBox, "_gradient_patch_installed", False):
         return
 

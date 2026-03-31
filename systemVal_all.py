@@ -54,7 +54,7 @@ importlib.reload(constraints_request_module)
 
 result_dir = os.path.join(os.getcwd(), "results")
 os.makedirs(result_dir, exist_ok=True)
-from core.utils import to_detail_text, redact, remove_api_number_suffix, build_monitor_step_name, build_webhook_monitor_step_name, build_monitor_result_title, build_monitor_start_title, build_monitor_start_details, build_monitor_progress_details, build_monitor_result_details, generate_monitor_notice_html
+from core.utils import to_detail_text, redact, remove_api_number_suffix, build_monitor_step_name, build_webhook_monitor_step_name, build_monitor_result_title, build_monitor_start_title, build_monitor_start_details, build_monitor_progress_details, build_monitor_result_details, generate_monitor_notice_html, response_time_ms_to_table_seconds, should_send_error_heartbeat_on_close
 
 class MyApp(SystemMainUI):
     previousPageRequested = pyqtSignal(object)
@@ -461,14 +461,21 @@ class MyApp(SystemMainUI):
             return max(0, int(time.time() - self.time_pre))
         return 0
 
+
+    def _table_timer_seconds(self, row, time_interval=None):
+        response_time_ms = getattr(self, 'monitor_response_elapsed_ms', {}).get(row)
+        if response_time_ms is not None:
+            return response_time_ms_to_table_seconds(response_time_ms)
+        return self._timer_elapsed_seconds(time_interval)
+
     def _set_timer_running(self, row, time_interval=None):
         self.set_api_timer_state(row, "running", self._timer_elapsed_seconds(time_interval))
 
     def _set_timer_success(self, row, time_interval=None):
-        self.set_api_timer_state(row, "success", self._timer_elapsed_seconds(time_interval))
+        self.set_api_timer_state(row, "success", self._table_timer_seconds(row, time_interval))
 
     def _set_timer_timeover(self, row, time_interval=None):
-        self.set_api_timer_state(row, "timeover", self._timer_elapsed_seconds(time_interval))
+        self.set_api_timer_state(row, "timeover", self._table_timer_seconds(row, time_interval))
 
     def _reset_all_row_timers(self):
         self.reset_all_api_timers()
@@ -1742,17 +1749,12 @@ class MyApp(SystemMainUI):
                     try:
                         self.run_status = "완료"
                         result_json = build_result_json(self)
-                        for spec_item in result_json.get("testResult", []):
-                            for api_item in spec_item.get("apis", []):
-                                validations = api_item.get("validations", [])
-                                if not validations:
-                                    continue
-                                transmitted_data = validations[0].get("transmittedData")
-                                Logger.debug(
-                                    f"[RESULT_JSON] api={api_item.get('name')} type={type(transmitted_data).__name__} value={repr(transmitted_data)[:300]}"
-                                )
                         url = f"{CONSTANTS.management_url}/api/integration/test-results"
                         response = requests.post(url, json=result_json)
+                        try:
+                            self.latest_result_response = response.json()
+                        except Exception:
+                            self.latest_result_response = None
                         Logger.debug(f"시험 결과 전송 상태 코드: {response.status_code}")
                         Logger.debug(f"시험 결과 전송 응답: {response.text}")
                         json_path = os.path.join(result_dir, "response_results.json")
@@ -1763,7 +1765,6 @@ class MyApp(SystemMainUI):
                             step_name="관리시스템 결과 전송 완료",
                             details=""
                         )
-                        Logger.debug(f" try 블록 정상 완료")
 
                     except Exception as e:
                         Logger.debug(f"❌ JSON 저장 중 오류 발생: {e}")
@@ -1997,9 +1998,6 @@ class MyApp(SystemMainUI):
                     self.step_opt_pass_counts[self.cnt] = opt_correct  # 선택 필드 통과 수
                     self.step_opt_error_counts[self.cnt] = opt_error  # 선택 필드 에러 수
                     
-                    Logger.debug(f"[SCORE DEBUG] API {self.cnt} 시도 {self.current_retry + 1}: pass={key_psss_cnt}, error={key_error_cnt}")
-                    Logger.debug(f"[SCORE DEBUG] step_pass_counts[{self.cnt}] = {self.step_pass_counts[self.cnt]}")
-                    Logger.debug(f"[SCORE DEBUG] step_error_counts[{self.cnt}] = {self.step_error_counts[self.cnt]}")
 
                     if final_result == "PASS":
                         # ✅ 배열 범위 체크 추가
@@ -2157,15 +2155,18 @@ class MyApp(SystemMainUI):
                         # ✅ 분야별 점수 업데이트 (현재 spec만)
                         self.total_pass_cnt += final_pass_count
                         self.total_error_cnt += final_error_count
+                        # ✅ 선택 필드 분야별 점수 누적
+                        final_opt_pass_count = self.step_opt_pass_counts[self.cnt]
+                        final_opt_error_count = self.step_opt_error_counts[self.cnt]
+                        self.total_opt_pass_cnt += final_opt_pass_count
+                        self.total_opt_error_cnt += final_opt_error_count
 
                         # ✅ 전체 점수 업데이트 (모든 spec 합산) - API당 1회만 추가
                         self.global_error_cnt += final_error_count
                         self.global_pass_cnt += final_pass_count
                         # ✅ 선택 필드 통과 수도 전체 점수에 누적
-                        final_opt_pass_count = self.step_opt_pass_counts[self.cnt]
                         self.global_opt_pass_cnt += final_opt_pass_count
                         # ✅ 선택 필드 에러 수도 전체 점수에 누적
-                        final_opt_error_count = self.step_opt_error_counts[self.cnt]
                         self.global_opt_error_cnt += final_opt_error_count
 
                         Logger.debug(f" 분야별 점수: pass={self.total_pass_cnt}, error={self.total_error_cnt}")
@@ -2244,18 +2245,14 @@ class MyApp(SystemMainUI):
                         step_name="관리시스템 결과 전송 완료",
                         details=""
                     )
-                    Logger.debug(f" try 블록 정상 완료 (경로2)")
                 except Exception as e:
                     Logger.debug(f"❌ JSON 저장 중 오류 발생: {e}")
                     import traceback
                     traceback.print_exc()
                     self.valResult.append(f"\n결과 저장 실패: {str(e)}")
-                    Logger.debug(f" except 블록 실행됨 (경로2)")
                 finally:
                     # ✅ 평가 완료 시 일시정지 파일 정리 (에러 발생 여부와 무관하게 항상 실행)
-                    Logger.debug(f" ========== finally 블록 진입 (경로2) ==========")
                     self.cleanup_paused_file()
-                    Logger.debug(f" ========== finally 블록 종료 (경로2) ==========")
                     
                     # stop/pause 의도가 있으면 completed 전송 금지 (경로2)
                     if not getattr(self, "is_paused", False):

@@ -58,7 +58,7 @@ class SystemValidationWindow(QMainWindow):
         app = QApplication.instance()
         if app is not None and app.property("skip_exit_confirm"):
             app.setProperty("skip_exit_confirm", False)
-            Logger.debug(f"[WRAPPER_CLOSE] skip_exit_confirm=True (SystemValidationWindow), ?? ?? ??")
+            Logger.debug(f"[WRAPPER_CLOSE] skip_exit_confirm=True (SystemValidationWindow), 종료 확인 없이 종료")
             event.accept()
             return
 
