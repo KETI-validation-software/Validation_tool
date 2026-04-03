@@ -892,6 +892,15 @@ class MyApp(SystemMainUI):
 
         # 시험 분야 테이블 갱신
         self.update_test_field_table(selected_group)
+        self._auto_select_first_scenario()
+
+    def _auto_select_first_scenario(self):
+        """현재 분야의 첫 번째 시나리오를 선택하고 상세 화면을 동기화한다."""
+        if self.test_field_table.rowCount() <= 0:
+            return
+
+        self.test_field_table.selectRow(0)
+        self.on_test_field_selected(0, 0)
 
     def on_test_field_selected(self, row, col):
         """시험 분야 클릭 시 해당 시스템으로 동적 전환"""
