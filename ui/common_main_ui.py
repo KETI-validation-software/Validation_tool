@@ -774,6 +774,58 @@ class CommonMainUI(QWidget):
     def create_spec_selection_panel(self, left_layout):
         raise NotImplementedError("Subclass must implement create_spec_selection_panel")
 
+    def restore_result_page_selection(self, group_id, spec_id):
+        """결과 페이지에서 돌아올 때 선택한 그룹/시나리오를 검증 화면에 다시 반영한다."""
+        if not group_id or not spec_id:
+            return False
+
+        spec_config = getattr(self, 'LOADED_SPEC_CONFIG', getattr(self.CONSTANTS, 'SPEC_CONFIG', []))
+        group_name = None
+        for group in spec_config or []:
+            if group.get('group_id') == group_id:
+                group_name = group.get('group_name')
+                break
+
+        if not group_name:
+            return False
+
+        panel = getattr(self, 'test_selection_panel', None)
+
+        group_mapping = getattr(panel, 'group_name_to_index', None)
+        if not isinstance(group_mapping, dict):
+            group_mapping = getattr(self, 'group_name_to_index', None)
+        if not isinstance(group_mapping, dict) or group_name not in group_mapping:
+            return False
+
+        group_row = group_mapping[group_name]
+        group_table = getattr(panel, 'group_table', None)
+        if group_table is None:
+            group_table = getattr(self, 'group_table', None)
+        if group_table is not None:
+            group_table.selectRow(group_row)
+
+        self.current_group_name = group_name
+        self.current_group_id = group_id
+        if not hasattr(self, 'on_group_selected'):
+            return False
+        self.on_group_selected(group_row, 0)
+
+        spec_mapping = getattr(panel, 'spec_id_to_index', None)
+        if not isinstance(spec_mapping, dict):
+            spec_mapping = getattr(self, 'spec_id_to_index', None)
+        if not isinstance(spec_mapping, dict) or spec_id not in spec_mapping:
+            return False
+
+        spec_row = spec_mapping[spec_id]
+        if hasattr(self, 'test_field_table'):
+            self.test_field_table.selectRow(spec_row)
+
+        if not hasattr(self, 'on_test_field_selected'):
+            return False
+        self.on_test_field_selected(spec_row, 0)
+
+        return True
+
     def _on_previous_page_clicked(self):
         if not self.embedded or not hasattr(self, "previousPageRequested"):
             return
