@@ -284,6 +284,9 @@ class MyApp(SystemMainUI):
 
         # ✅ 각 spec_id별 테이블 데이터 저장 (시나리오 전환 시 결과 유지) - 추가
         self.spec_table_data = {}  # {spec_id: {table_data, step_buffers, scores}}
+        self.selected_spec_ids_for_run = []
+        self.completed_spec_ids_for_run = set()
+        self.final_result_sent = False
 
         # CONSTANTS 사용
         self.CONSTANTS = CONSTANTS
@@ -390,6 +393,88 @@ class MyApp(SystemMainUI):
         self.webhook_cnt = 99
         self.reference_context = {}  # 맥락검증 참조 컨텍스트
         self.webhook_schema_idx = 0  # ✅ 웹훅 스키마 인덱스 추가
+
+    def _get_request_spec_ids_for_tracking(self):
+        spec_config = getattr(self, 'LOADED_SPEC_CONFIG', getattr(self.CONSTANTS, 'SPEC_CONFIG', []))
+        request_spec_ids = []
+        for group in spec_config:
+            spec_ids = [
+                key for key, value in group.items()
+                if key not in ["group_name", "group_id"] and isinstance(value, dict)
+            ]
+            for spec_id in spec_ids:
+                if spec_id and spec_id not in request_spec_ids:
+                    request_spec_ids.append(spec_id)
+
+        if request_spec_ids:
+            return request_spec_ids
+
+        current_spec_id = getattr(self, "current_spec_id", None)
+        return [current_spec_id] if current_spec_id else []
+
+    def _saved_completed_spec_ids_for_request(self, expected_spec_ids):
+        completed_spec_ids = set()
+        expected_spec_id_set = set(expected_spec_ids or [])
+
+        for composite_key, saved_data in (getattr(self, "spec_table_data", {}) or {}).items():
+            if "_" in composite_key:
+                group_id, spec_id = composite_key.split("_", 1)
+            else:
+                group_id, spec_id = None, composite_key
+
+            if spec_id not in expected_spec_id_set:
+                continue
+
+            table_data = saved_data.get("table_data") or []
+            saved_cnt = int(saved_data.get("cnt", 0) or 0)
+            if table_data and saved_cnt >= len(table_data):
+                completed_spec_ids.add(spec_id)
+
+        return completed_spec_ids
+
+    def _prepare_final_result_tracking(self, selected_spec_ids=None):
+        if selected_spec_ids is None:
+            selected_spec_ids = MyApp._get_request_spec_ids_for_tracking(self)
+        else:
+            request_spec_ids = MyApp._get_request_spec_ids_for_tracking(self)
+            if request_spec_ids:
+                selected_spec_ids = request_spec_ids
+
+        unique_spec_ids = []
+        for spec_id in selected_spec_ids:
+            if spec_id and spec_id not in unique_spec_ids:
+                unique_spec_ids.append(spec_id)
+
+        if not unique_spec_ids and self.current_spec_id:
+            unique_spec_ids = [self.current_spec_id]
+
+        self.selected_spec_ids_for_run = unique_spec_ids
+        self.completed_spec_ids_for_run = MyApp._saved_completed_spec_ids_for_request(self, unique_spec_ids)
+        self.final_result_sent = False
+        Logger.info(
+            f"[FINAL_RESULT_GATE] prepared group={getattr(self, 'current_group_id', None)} "
+            f"selected={self.selected_spec_ids_for_run} restored_completed={sorted(self.completed_spec_ids_for_run)}"
+        )
+
+    def _should_send_final_result_now(self):
+        if getattr(self, "final_result_sent", False):
+            return False
+
+        current_spec_id = getattr(self, "current_spec_id", None)
+        if current_spec_id:
+            self.completed_spec_ids_for_run.add(current_spec_id)
+
+        expected_spec_ids = list(getattr(self, "selected_spec_ids_for_run", []) or [])
+        if not expected_spec_ids and current_spec_id:
+            expected_spec_ids = [current_spec_id]
+
+        if not expected_spec_ids:
+            return False
+
+        should_send = set(expected_spec_ids).issubset(self.completed_spec_ids_for_run)
+        if should_send:
+            self.final_result_sent = True
+        return should_send
 
     def save_current_spec_data(self):
         """현재 spec의 테이블 데이터와 상태를 저장 (state_manager 위임)"""
@@ -1321,7 +1406,7 @@ class MyApp(SystemMainUI):
                 key_error_cnt += tmp_fields_opt_cnt
 
             val_result = "FAIL"
-            val_text = "Webhook Message Missing!"
+            val_text = "웹훅 메시지 미수신"
             key_psss_cnt = 0
             opt_correct = 0
             opt_error = tmp_fields_opt_cnt if self.flag_opt else 0
@@ -1657,78 +1742,87 @@ class MyApp(SystemMainUI):
                             tmp_fields_opt_cnt += webhook_opt_cnt
                             Logger.debug(f" 웹훅 스키마 필드 추가: rqd={webhook_rqd_cnt}, opt={webhook_opt_cnt}")
 
-                add_err = tmp_fields_rqd_cnt if tmp_fields_rqd_cnt > 0 else 1
+                # message missing인 경우 버퍼 업데이트 (플랫폼과 동일 문구)
+                self.step_buffers[self.cnt]["data"] = "아직 수신된 데이터가 없습니다."
+                self.step_buffers[self.cnt]["error"] = "메시지 미수신"
+                self.step_buffers[self.cnt]["result"] = "FAIL"
+                self.step_buffers[self.cnt]["events"] = list(self.trace.get(self.cnt, []))
+
+                self.total_error_cnt += tmp_fields_rqd_cnt
+                if tmp_fields_rqd_cnt == 0:
+                    self.total_error_cnt += 1
                 if self.flag_opt:
-                    add_err += tmp_fields_opt_cnt
+                    self.total_error_cnt += tmp_fields_opt_cnt
+
+                self.total_pass_cnt += 0
+
+                # ✅ 전체 점수에도 반영
+                self.global_error_cnt += tmp_fields_rqd_cnt
+                if tmp_fields_rqd_cnt == 0:
+                    self.global_error_cnt += 1
+                if self.flag_opt:
+                    self.global_error_cnt += tmp_fields_opt_cnt
+
+                # ✅ step_error_counts 배열에도 저장 (타임아웃 경우)
+                api_count = len(self.videoMessages)
+                if not hasattr(self, 'step_error_counts') or len(self.step_error_counts) != api_count:
+                    self.step_error_counts = [0] * api_count
+                    self.step_pass_counts = [0] * api_count
+                    self.step_opt_pass_counts = [0] * api_count
+                    self.step_opt_error_counts = [0] * api_count
+
+                # 이미 계산된 값을 배열에 저장
+                step_err = tmp_fields_rqd_cnt if tmp_fields_rqd_cnt > 0 else 1
+                opt_err = tmp_fields_opt_cnt if self.flag_opt else 0
+                if self.flag_opt:
+                    step_err += tmp_fields_opt_cnt
+
+                self.step_error_counts[self.cnt] = step_err
+                self.step_pass_counts[self.cnt] = 0
+                self.step_opt_pass_counts[self.cnt] = 0
+                self.step_opt_error_counts[self.cnt] = opt_err
+
+                # 평가 점수 디스플레이 업데이트
+                self.update_score_display()
 
                 total_fields = self.total_pass_cnt + self.total_error_cnt
                 if total_fields > 0:
                     score_value = (self.total_pass_cnt / total_fields) * 100
                 else:
                     score_value = 0
-                
-                # 타임아웃 로그를 HTML 카드로 출력
+
+                # 타임아웃 로그를 HTML 카드로 출력 (플랫폼과 동일 문구)
                 api_name = self.message[self.cnt] if self.cnt < len(self.message) else "Unknown"
                 timeout_sec = self._get_effective_timeout_seconds(self.cnt)
                 self.append_monitor_log(
                     step_name=f"시험 API: {api_name}",
                     request_json="",
                     score=score_value,
-                    details=f"⏱️ Timeout ({timeout_sec}초) - Message Missing! (시도 {self.current_retry + 1}/{current_retries}) | 통과 필드 수: {self.total_pass_cnt}, 실패 필드 수: {self.total_error_cnt}"
+                    details=f"메시지 수신 타임아웃({timeout_sec}초) -> 메시지 미수신 | 통과 필드 수: {self.total_pass_cnt}, 실패 필드 수: {self.total_error_cnt}"
                 )
 
-                # 재시도 카운터 증가
-                self.current_retry += 1
+                # 테이블 업데이트 (플랫폼과 동일 문구)
+                add_err = tmp_fields_rqd_cnt if tmp_fields_rqd_cnt > 0 else 1
+                if self.flag_opt:
+                    add_err += tmp_fields_opt_cnt
+
                 self.update_table_row_with_retries(
                     self.cnt,
-                    "진행중",  # ← 검정색 아이콘
-                    0, 0,  # ← 아직 결과 없음
-                    "검증 진행중...",
-                    f"시도 {self.current_retry }/{current_retries}",
-                    self.current_retry   # ← 검증 횟수: 1, 2, 3...
+                    "FAIL",
+                    0,
+                    add_err,
+                    "",
+                    "메시지 미수신",
+                    current_retries,
                 )
-                QApplication.processEvents()  # UI 즉시 반영
 
-                # 재시도 완료 여부 확인
-                if (self.cnt < len(self.num_retries_list) and
-                        self.current_retry >= self.num_retries_list[self.cnt]):
-                    # 모든 재시도 완료 - 버퍼에 최종 결과 저장
-                    self.step_buffers[self.cnt]["data"] = "타임아웃으로 인해 수신된 데이터가 없습니다."
-                    current_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
-                    self.step_buffers[self.cnt]["error"] = f"Message Missing! - 모든 시도({current_retries}회)에서 타임아웃 발생"
-                    self.step_buffers[self.cnt]["result"] = "FAIL"
-                    self.step_buffers[self.cnt]["events"] = list(self.trace.get(self.cnt, []))
-
-                    # ✅ step_pass_counts 배열에 저장 (배열이 있는 경우에만)
-                    if hasattr(self, 'step_pass_counts') and self.cnt < len(self.step_pass_counts):
-                        self.step_pass_counts[self.cnt] = 0
-                        self.step_error_counts[self.cnt] = add_err
-                    
-                    # ✅ 전체 점수 업데이트 (모든 spec 합산)
-                    self.global_error_cnt += add_err
-                    self.global_pass_cnt += 0
-
-                    # 평가 점수 디스플레이 업데이트
-                    self.update_score_display()
-                    # 테이블 업데이트 (Message Missing)
-                    self.update_table_row_with_retries(self.cnt, "FAIL", 0, add_err, "", "Message Missing!",
-                                                       current_retries)
-
-                    # 다음 API로 이동 (웹훅 스레드 정리 후 이동)
-                    if hasattr(self, 'webhook_thread') and self.webhook_thread is not None:
-                        self.webhook_thread.stop()
-                        self.webhook_thread = None
-                    self.cnt += 1
-                    self.current_retry = 0  # 재시도 카운터 리셋
-                    self.webhook_flag = False
-
-                    # 다음 API를 위한 누적 카운트 초기 설정 확인
-                    if hasattr(self, 'step_pass_counts') and self.cnt < len(self.step_pass_counts):
-                        self.step_pass_counts[self.cnt] = 0
-                        self.step_error_counts[self.cnt] = 0
-                        # ✅ 배열 범위 체크 추가
-                        if self.cnt < len(self.step_pass_flags):
-                            self.step_pass_flags[self.cnt] = 0
+                # 다음 API로 이동 (웹훅 스레드 정리 후 이동)
+                if hasattr(self, 'webhook_thread') and self.webhook_thread is not None:
+                    self.webhook_thread.stop()
+                    self.webhook_thread = None
+                self.cnt += 1
+                self.current_retry = 0
+                self.webhook_flag = False
 
                 self.message_in_cnt = 0
                 self.post_flag = False
@@ -1753,17 +1847,36 @@ class MyApp(SystemMainUI):
                     # 최종 리포트 생성
                     total_fields = self.total_pass_cnt + self.total_error_cnt
 
+                    if not self._should_send_final_result_now():
+                        Logger.info(
+                            f"[FINAL_RESULT_GATE] deferred current={self.current_spec_id} "
+                            f"completed={sorted(self.completed_spec_ids_for_run)} "
+                            f"expected={self.selected_spec_ids_for_run or [self.current_spec_id]}"
+                        )
+                        self.run_status = "진행중"
+                        self.cleanup_paused_file()
+                        self.sbtn.setEnabled(True)
+                        self.stop_btn.setDisabled(True)
+                        self.cancel_btn.setDisabled(True)
+                        return
+
                     # ✅ JSON 결과 자동 저장 추가
                     Logger.debug(f" 평가 완료 - 자동 저장 시작")
                     try:
                         self.run_status = "완료"
                         result_json = build_result_json(self)
+                        Logger.info(
+                            f"[FINAL_RESULT_GATE] sending final result current={self.current_spec_id} "
+                            f"completed={sorted(self.completed_spec_ids_for_run)} "
+                            f"expected={self.selected_spec_ids_for_run or [self.current_spec_id]}"
+                        )
                         url = f"{CONSTANTS.management_url}/api/integration/test-results"
                         response = requests.post(url, json=result_json)
                         try:
                             self.latest_result_response = response.json()
                         except Exception:
                             self.latest_result_response = None
+                        self.final_result_sent = True
                         Logger.debug(f"시험 결과 전송 상태 코드: {response.status_code}")
                         Logger.debug(f"시험 결과 전송 응답: {response.text}")
                         json_path = os.path.join(result_dir, "response_results.json")
@@ -1878,6 +1991,8 @@ class MyApp(SystemMainUI):
                         started_at = self.monitor_request_started_at.get(self.cnt)
                         if started_at is not None:
                             self.monitor_response_elapsed_ms[self.cnt] = int(round((time.perf_counter() - started_at) * 1000))
+                            # Keep table timer aligned to response elapsed time in integer seconds.
+                            self._set_timer_success(self.cnt)
                         response_log_text = self.append_monitor_log(
                             step_name=build_monitor_step_name(display_name, "response"),
                             request_json=tmp_res_auth,
@@ -2237,13 +2352,32 @@ class MyApp(SystemMainUI):
                 Logger.debug(f"분야별 점수: pass={self.total_pass_cnt}, error={self.total_error_cnt}, score={final_score:.1f}%")
                 Logger.debug(f"전체 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}, score={global_score:.1f}%")
 
+                if not self._should_send_final_result_now():
+                    Logger.info(
+                        f"[FINAL_RESULT_GATE] deferred current={self.current_spec_id} "
+                        f"completed={sorted(self.completed_spec_ids_for_run)} "
+                        f"expected={self.selected_spec_ids_for_run or [self.current_spec_id]}"
+                    )
+                    self.run_status = "진행중"
+                    self.cleanup_paused_file()
+                    self.sbtn.setEnabled(True)
+                    self.stop_btn.setDisabled(True)
+                    self.cancel_btn.setDisabled(True)
+                    return
+
                 # ✅ JSON 결과 자동 저장 추가
                 Logger.debug(f"평가 완료 - 자동 저장 시작 (경로2)")
                 try:
                     self.run_status = "완료"
                     result_json = build_result_json(self)
+                    Logger.info(
+                        f"[FINAL_RESULT_GATE] sending final result current={self.current_spec_id} "
+                        f"completed={sorted(self.completed_spec_ids_for_run)} "
+                        f"expected={self.selected_spec_ids_for_run or [self.current_spec_id]}"
+                    )
                     url = f"{CONSTANTS.management_url}/api/integration/test-results"
                     response = requests.post(url, json=result_json)
+                    self.final_result_sent = True
                     Logger.debug(f"✅ 시험 결과 전송 상태 코드:: {response.status_code}")
                     Logger.debug(f"📥  시험 결과 전송 응답:: {response.text}")
                     json_path = os.path.join(result_dir, "response_results.json")
@@ -2377,6 +2511,8 @@ class MyApp(SystemMainUI):
             if not hasattr(self, 'current_spec_id') or not self.current_spec_id:
                 QMessageBox.warning(self, "알림", "시험 시나리오를 먼저 선택하세요.")
                 return
+
+        self._prepare_final_result_tracking()
 
         # ✅ 일시정지 파일 존재 여부 확인 (spec_id별로 관리)
         paused_file_path = os.path.join(result_dir, f"response_results_paused_{self.current_spec_id}.json")
@@ -2699,7 +2835,7 @@ class MyApp(SystemMainUI):
                         saved_timer = timer_rows[i] if i < len(timer_rows) else {}
                         restored_timer_state = saved_timer.get(
                             "state",
-                            "timeover" if "Message Missing" in str(error) else "success",
+                            "timeover" if ("Message Missing" in str(error) or "메시지 미수신" in str(error)) else "success",
                         )
                         restored_timer_elapsed = int(saved_timer.get("elapsed", 0) or 0)
                         self.set_api_timer_state(i, restored_timer_state, restored_timer_elapsed)
@@ -2749,7 +2885,8 @@ class MyApp(SystemMainUI):
                     last_completed = i
                 # timeout 등으로 데이터 없이 FAIL 처리된 경우도 완료로 간주
                 elif buffer.get('result') == 'FAIL' and (buffer.get('data') or buffer.get('error')):
-                    has_timeout_error = 'Message Missing' in str(buffer.get('error', ''))
+                    error_text = str(buffer.get('error', ''))
+                    has_timeout_error = ('Message Missing' in error_text) or ('메시지 미수신' in error_text)
                     if has_timeout_error:
                         last_completed = i
 
@@ -2990,28 +3127,6 @@ class MyApp(SystemMainUI):
         self.save_paused_state()
         self._log_timer_snapshot("pause_after_save_paused_state")
         return
-
-        # ✅ JSON 결과 저장 추가
-        try:
-            self.run_status = "진행중"
-            result_json = build_result_json(self)
-            url = f"{CONSTANTS.management_url}/api/integration/test-results"
-            response = requests.post(url, json=result_json)
-            Logger.debug(f"✅ 시험 결과 전송 상태 코드:: {response.status_code}")
-            Logger.debug(f"📥  시험 결과 전송 응답:: {response.text}")
-            json_path = os.path.join(result_dir, "response_results.json")
-            with open(json_path, "w", encoding="utf-8") as f:
-                json.dump(result_json, f, ensure_ascii=False, indent=2)
-            Logger.debug(f"✅ 진행 중 결과가 '{json_path}'에 저장되었습니다.")
-            self.append_monitor_log(
-                step_name="진행 상황 저장 완료",
-                details=f"{json_path} (일시정지 시점까지의 결과가 저장되었습니다)"
-            )
-        except Exception as e:
-            Logger.debug(f"❌ JSON 저장 중 오류 발생: {e}")
-            import traceback
-            traceback.print_exc()
-            self.valResult.append(f"\n결과 저장 실패: {str(e)}")
 
     def cancel_btn_clicked(self):
         """시험 취소 버튼 클릭 - 진행 중단, 현재 상태 유지"""

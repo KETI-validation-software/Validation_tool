@@ -170,10 +170,7 @@ def response_time_ms_to_table_seconds(response_time_ms):
 
 
 def should_send_error_heartbeat_on_close(run_status, timer_active=False):
-    normalized_status = str(run_status or '').strip().lower()
-    if normalized_status in {'completed', 'pending', 'ready', 'stopped'}:
-        return False
-    return bool(timer_active or normalized_status in {'in_progress', 'error'})
+    return False
 
 
 def build_monitor_response_time_text(response_time_ms=None, total_timeout_ms=None):

@@ -1081,6 +1081,8 @@ class MyApp(PlatformMainUI):
                 started_at = self.monitor_request_started_at.get(self.cnt)
                 if started_at is not None:
                     self.monitor_response_elapsed_ms[self.cnt] = int(round((time.perf_counter() - started_at) * 1000))
+                    # Final table timer should reflect response elapsed time (integer seconds).
+                    self._set_timer_success(self.cnt)
                 response_log_text = self.append_monitor_log(
                     step_name=build_monitor_step_name(display_name, "response"),
                     request_json=tmp_response_json,
@@ -2084,6 +2086,10 @@ class MyApp(PlatformMainUI):
                 CustomDialog(msg, api_name)  # API 명은 컬럼 1
 
     def _prepare_final_result_tracking(self, selected_spec_ids):
+        request_spec_ids = MyApp._get_request_spec_ids_for_tracking(self)
+        if request_spec_ids:
+            selected_spec_ids = request_spec_ids
+
         unique_spec_ids = []
         for spec_id in selected_spec_ids:
             if spec_id and spec_id not in unique_spec_ids:
@@ -2093,8 +2099,47 @@ class MyApp(PlatformMainUI):
             unique_spec_ids = [self.current_spec_id]
 
         self.selected_spec_ids_for_run = unique_spec_ids
-        self.completed_spec_ids_for_run = set()
+        self.completed_spec_ids_for_run = MyApp._saved_completed_spec_ids_for_request(self, unique_spec_ids)
         self.final_result_sent = False
+
+    def _get_request_spec_ids_for_tracking(self):
+        spec_config = getattr(self, 'LOADED_SPEC_CONFIG', getattr(self.CONSTANTS, 'SPEC_CONFIG', []))
+        request_spec_ids = []
+
+        for group in spec_config:
+            spec_ids = [
+                key for key, value in group.items()
+                if key not in ["group_name", "group_id"] and isinstance(value, dict)
+            ]
+            for spec_id in spec_ids:
+                if spec_id and spec_id not in request_spec_ids:
+                    request_spec_ids.append(spec_id)
+
+        if request_spec_ids:
+            return request_spec_ids
+
+        current_spec_id = getattr(self, "current_spec_id", None)
+        return [current_spec_id] if current_spec_id else []
+
+    def _saved_completed_spec_ids_for_request(self, expected_spec_ids):
+        completed_spec_ids = set()
+        expected_spec_id_set = set(expected_spec_ids or [])
+
+        for composite_key, saved_data in (getattr(self, "spec_table_data", {}) or {}).items():
+            if "_" in composite_key:
+                _group_id, spec_id = composite_key.split("_", 1)
+            else:
+                spec_id = composite_key
+
+            if spec_id not in expected_spec_id_set:
+                continue
+
+            table_data = saved_data.get("table_data") or []
+            saved_cnt = int(saved_data.get("cnt", 0) or 0)
+            if table_data and saved_cnt >= len(table_data):
+                completed_spec_ids.add(spec_id)
+
+        return completed_spec_ids
 
     def _should_send_final_result_now(self):
         if getattr(self, "final_result_sent", False):

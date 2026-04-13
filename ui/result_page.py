@@ -1721,6 +1721,12 @@ class ResultPageWidget(QWidget):
         # ✅ 점수 정보 초기화
         self.parent.total_pass_cnt = 0
         self.parent.total_error_cnt = 0
+        self.parent.total_opt_pass_cnt = 0
+        self.parent.total_opt_error_cnt = 0
+        self.parent.step_pass_counts = [0] * api_count
+        self.parent.step_error_counts = [0] * api_count
+        self.parent.step_opt_pass_counts = [0] * api_count
+        self.parent.step_opt_error_counts = [0] * api_count
 
         # 테이블 행 수 재설정
         self.tableWidget.setRowCount(api_count)
