@@ -1335,6 +1335,10 @@ class ResultPageWidget(QWidget):
                 # 여기서는 직접 호출하여 강제로 갱신
                 self.on_test_field_selected(row_idx, 0)
 
+            # 초기 진입 시 on_test_field_selected가 중복 선택으로 early return 될 수 있으므로
+            # 시험 정보 카드를 한 번 강제 동기화해 시험분야가 시나리오명으로 남지 않게 보정한다.
+            self.update_test_info()
+
     def _is_parent_test_running(self):
         """3페이지와 동일하게 시험 진행 중 상태를 판단한다."""
         if hasattr(self.parent, 'sbtn'):
@@ -2659,10 +2663,19 @@ class ResultPageWidget(QWidget):
         header_layout.setContentsMargins(0, 5, 0, 5)
         header_layout.setSpacing(12)
 
+        if prefix == "overall":
+            header_layout.addSpacing(10.8)
+
         icon_label = QLabel()
-        icon_pixmap = QPixmap(resource_path("assets/image/test_runner/icn_전체점수.png"))
-        icon_label.setPixmap(icon_pixmap.scaled(52, 42, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        icon_label.setFixedSize(52, 42)
+        icon_path = "assets/image/icon/icn_최종전체점수.png" if prefix == "overall" else "assets/image/test_runner/icn_전체점수.png"
+        icon_pixmap = QPixmap(resource_path(icon_path))
+        if prefix == "overall":
+            # 전체 점수는 원본 이미지 크기 그대로 표시
+            icon_label.setPixmap(icon_pixmap)
+            icon_label.setFixedSize(icon_pixmap.size())
+        else:
+            icon_label.setPixmap(icon_pixmap.scaled(52, 42, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            icon_label.setFixedSize(52, 42)
         icon_label.setAlignment(Qt.AlignCenter)
         header_layout.addWidget(icon_label, alignment=Qt.AlignVCenter)
 
