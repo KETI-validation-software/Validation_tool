@@ -978,7 +978,11 @@ class CommonMainUI(QWidget):
                 self.group_table_widget.setFixedSize(new_group_width, new_group_height)
                 # 내부 테이블 크기도 조정
                 if hasattr(self, 'group_table'):
-                    self.group_table.setFixedHeight(new_group_height)
+                    if hasattr(self, 'group_table_header_widget'):
+                        header_height = self.group_table_header_widget.height()
+                        self.group_table.setFixedHeight(max(0, new_group_height - header_height))
+                    else:
+                        self.group_table.setFixedHeight(new_group_height)
 
             # 시험 시나리오 테이블 크기 조정 (extra_column_height 비례 분배)
             if hasattr(self, 'field_group') and hasattr(self, 'original_field_group_size'):

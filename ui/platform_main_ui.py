@@ -141,7 +141,11 @@ class PlatformMainUI(CommonMainUI):
                 self.group_table_widget.setFixedSize(new_group_width, new_group_height)
                 # 내부 테이블 크기도 조정
                 if hasattr(self, 'group_table'):
-                    self.group_table.setFixedHeight(new_group_height)
+                    if hasattr(self, 'group_table_header_widget'):
+                        header_height = self.group_table_header_widget.height()
+                        self.group_table.setFixedHeight(max(0, new_group_height - header_height))
+                    else:
+                        self.group_table.setFixedHeight(new_group_height)
 
             # 시험 시나리오 테이블 크기 조정 (extra_column_height 비례 분배)
             if hasattr(self, 'field_group') and hasattr(self, 'original_field_group_size'):
@@ -1222,9 +1226,13 @@ class PlatformMainUI(CommonMainUI):
         request_json = normalize_monitor_request_json(type_label, step_name, request_json, details)
 
         response_time_text = ""
-        if response_time_ms is not None:
-            response_time_seconds = float(response_time_ms) / 1000
-            response_time_text = f' <span style="font-size: 15px; color: #9ca3af; font-family: \'Noto Sans KR\'; margin-left: 6px;">| 응답 소요 시간: {response_time_seconds:.2f}초</span>'
+        formatted_response_time_text = build_monitor_response_time_text(response_time_ms, total_timeout_ms)
+        if formatted_response_time_text:
+            response_time_text = (
+                f' <span style="font-size: 15px; color: #9ca3af; font-family: \'Noto Sans KR\'; margin-left: 6px;">'
+                f'| {html.escape(formatted_response_time_text)}'
+                f'</span>'
+            )
 
         html_content = f"""
         <table width="100%" border="0" cellspacing="0" cellpadding="8" style="margin-top: 10px; border-top: 2px solid {header_color};">
