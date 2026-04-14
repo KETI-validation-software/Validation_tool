@@ -2659,10 +2659,19 @@ class ResultPageWidget(QWidget):
         header_layout.setContentsMargins(0, 5, 0, 5)
         header_layout.setSpacing(12)
 
+        if prefix == "overall":
+            header_layout.addSpacing(10.8)
+
         icon_label = QLabel()
-        icon_pixmap = QPixmap(resource_path("assets/image/test_runner/icn_전체점수.png"))
-        icon_label.setPixmap(icon_pixmap.scaled(52, 42, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        icon_label.setFixedSize(52, 42)
+        icon_path = "assets/image/icon/icn_최종전체점수.png" if prefix == "overall" else "assets/image/test_runner/icn_전체점수.png"
+        icon_pixmap = QPixmap(resource_path(icon_path))
+        if prefix == "overall":
+            # 전체 점수는 원본 이미지 크기 그대로 표시
+            icon_label.setPixmap(icon_pixmap)
+            icon_label.setFixedSize(icon_pixmap.size())
+        else:
+            icon_label.setPixmap(icon_pixmap.scaled(52, 42, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            icon_label.setFixedSize(52, 42)
         icon_label.setAlignment(Qt.AlignCenter)
         header_layout.addWidget(icon_label, alignment=Qt.AlignVCenter)
 
