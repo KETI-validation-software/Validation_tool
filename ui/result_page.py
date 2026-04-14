@@ -1335,6 +1335,10 @@ class ResultPageWidget(QWidget):
                 # 여기서는 직접 호출하여 강제로 갱신
                 self.on_test_field_selected(row_idx, 0)
 
+            # 초기 진입 시 on_test_field_selected가 중복 선택으로 early return 될 수 있으므로
+            # 시험 정보 카드를 한 번 강제 동기화해 시험분야가 시나리오명으로 남지 않게 보정한다.
+            self.update_test_info()
+
     def _is_parent_test_running(self):
         """3페이지와 동일하게 시험 진행 중 상태를 판단한다."""
         if hasattr(self.parent, 'sbtn'):
