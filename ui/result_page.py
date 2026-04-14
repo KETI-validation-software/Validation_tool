@@ -312,6 +312,7 @@ class ResultPageWidget(QWidget):
         self.group_table_widget = self.test_selection_panel.group_table_widget
         self.field_group = self.test_selection_panel.field_group
         self.group_table = self.test_selection_panel.group_table
+        self.group_table_header_widget = self.test_selection_panel.group_table_header_widget
         self.test_field_table = self.test_selection_panel.test_field_table
 
         # ✅ 4페이지 전용 높이 강제 설정 (561px)
@@ -1158,7 +1159,11 @@ class ResultPageWidget(QWidget):
                 new_group_height = int(204 + group_extra)
                 self.group_table_widget.setFixedSize(new_group_width, new_group_height)
                 if hasattr(self, 'group_table'):
-                    self.group_table.setFixedHeight(new_group_height)
+                    if hasattr(self, 'group_table_header_widget'):
+                        header_height = self.group_table_header_widget.height()
+                        self.group_table.setFixedHeight(max(0, new_group_height - header_height))
+                    else:
+                        self.group_table.setFixedHeight(new_group_height)
 
             if hasattr(self, 'field_group') and hasattr(self, 'original_field_group_size'):
                 new_field_width = int(self.original_field_group_size[0] * width_ratio)
@@ -1721,6 +1726,12 @@ class ResultPageWidget(QWidget):
         # ✅ 점수 정보 초기화
         self.parent.total_pass_cnt = 0
         self.parent.total_error_cnt = 0
+        self.parent.total_opt_pass_cnt = 0
+        self.parent.total_opt_error_cnt = 0
+        self.parent.step_pass_counts = [0] * api_count
+        self.parent.step_error_counts = [0] * api_count
+        self.parent.step_opt_pass_counts = [0] * api_count
+        self.parent.step_opt_error_counts = [0] * api_count
 
         # 테이블 행 수 재설정
         self.tableWidget.setRowCount(api_count)
@@ -2156,34 +2167,19 @@ class ResultPageWidget(QWidget):
         parent_layout.addWidget(self.result_scroll_area)
 
     def _on_back_clicked(self):
-        """뒤로가기 버튼 클릭 시 - 원래 시나리오로 복원 후 시그널 발생"""
+        """뒤로가기 버튼 클릭 시 현재 선택을 부모 검증 화면에 동기화한다."""
         try:
             spec_or_group_changed = (
                 (self.original_spec_id and self.original_spec_id != self.parent.current_spec_id)
                 or (self.original_group_id and self.original_group_id != getattr(self.parent, 'current_group_id', None))
             )
 
-            # ✅ 원래 시나리오로 복원 (결과 페이지 진입 시 저장해둔 값)
             if spec_or_group_changed:
-                Logger.debug(f" 원래 시나리오로 복원: {self.parent.current_spec_id} → {self.original_spec_id}")
-
-                # 1. spec_id 복원
-                self.parent.current_spec_id = self.original_spec_id
-                if self.original_group_id:
-                    self.parent.current_group_id = self.original_group_id
-
-                # 2. 원래 시나리오의 데이터 다시 로드
-                self.parent.load_specs_from_constants()
-                self.parent.get_setting()
-
-                restored = False
-                if hasattr(self.parent, 'restore_spec_data'):
-                    restored = self.parent.restore_spec_data(self.parent.current_spec_id)
-                    Logger.debug(f" parent 표준 복원 결과: {restored}")
-
-                if hasattr(self.parent, 'update_score_display'):
-                    self.parent.update_score_display()
-                    Logger.debug(f" parent 점수 표시 갱신 완료")
+                Logger.debug(
+                    f" 결과 페이지 선택 유지: group={getattr(self.parent, 'current_group_id', None)}, "
+                    f"spec={self.parent.current_spec_id}"
+                )
+                self._sync_parent_selection_on_back()
             else:
                 Logger.debug(" 결과 페이지에서 시나리오 변경 없음 - parent 라이브 상태 유지")
 
@@ -2193,6 +2189,99 @@ class ResultPageWidget(QWidget):
             traceback.print_exc()
 
         self.backRequested.emit()
+
+    def _sync_parent_selection_on_back(self):
+        """결과 페이지의 현재 그룹/시나리오 선택을 부모 검증 화면 UI에 반영한다."""
+        current_group_id = getattr(self.parent, 'current_group_id', None)
+        current_spec_id = getattr(self.parent, 'current_spec_id', None)
+
+        if hasattr(self.parent, 'restore_result_page_selection'):
+            restored = self.parent.restore_result_page_selection(current_group_id, current_spec_id)
+            Logger.debug(f" parent 복귀 전용 복원 결과: {restored}")
+            if restored:
+                return
+
+        group_row = self._find_parent_group_row(current_group_id)
+        if group_row is not None and hasattr(self.parent, 'on_group_selected'):
+            self.parent.on_group_selected(group_row, 0)
+
+        spec_row = self._find_parent_spec_row(current_spec_id)
+        if spec_row is not None and hasattr(self.parent, 'on_test_field_selected'):
+            self.parent.on_test_field_selected(spec_row, 0)
+        elif current_spec_id and hasattr(self.parent, 'restore_spec_data'):
+            restored = self.parent.restore_spec_data(current_spec_id)
+            Logger.debug(f" parent 표준 복원 결과: {restored}")
+
+        if hasattr(self.parent, 'update_score_display'):
+            self.parent.update_score_display()
+            Logger.debug(" parent 점수 표시 갱신 완료")
+
+    def _find_parent_group_row(self, group_id):
+        if not group_id:
+            return None
+
+        spec_config = getattr(self.parent, 'LOADED_SPEC_CONFIG', None)
+        if spec_config is None:
+            spec_config = getattr(getattr(self.parent, 'CONSTANTS', None), 'SPEC_CONFIG', [])
+
+        group_name = None
+        for group in spec_config or []:
+            if group.get('group_id') == group_id:
+                group_name = group.get('group_name')
+                break
+
+        if not group_name:
+            return None
+
+        mapping = getattr(self.parent, 'group_name_to_index', None)
+        if isinstance(mapping, dict) and group_name in mapping:
+            return mapping[group_name]
+
+        panel = getattr(self.parent, 'test_selection_panel', None)
+        panel_mapping = getattr(panel, 'group_name_to_index', None)
+        if isinstance(panel_mapping, dict) and group_name in panel_mapping:
+            return panel_mapping[group_name]
+
+        reverse_mapping = getattr(self.parent, 'index_to_group_name', None)
+        if isinstance(reverse_mapping, dict):
+            for row, name in reverse_mapping.items():
+                if name == group_name:
+                    return row
+
+        panel_reverse = getattr(panel, 'index_to_group_name', None)
+        if isinstance(panel_reverse, dict):
+            for row, name in panel_reverse.items():
+                if name == group_name:
+                    return row
+
+        return None
+
+    def _find_parent_spec_row(self, spec_id):
+        if not spec_id:
+            return None
+
+        mapping = getattr(self.parent, 'spec_id_to_index', None)
+        if isinstance(mapping, dict) and spec_id in mapping:
+            return mapping[spec_id]
+
+        panel = getattr(self.parent, 'test_selection_panel', None)
+        panel_mapping = getattr(panel, 'spec_id_to_index', None)
+        if isinstance(panel_mapping, dict) and spec_id in panel_mapping:
+            return panel_mapping[spec_id]
+
+        reverse_mapping = getattr(self.parent, 'index_to_spec_id', None)
+        if isinstance(reverse_mapping, dict):
+            for row, current_spec_id in reverse_mapping.items():
+                if current_spec_id == spec_id:
+                    return row
+
+        panel_reverse = getattr(panel, 'index_to_spec_id', None)
+        if isinstance(panel_reverse, dict):
+            for row, current_spec_id in panel_reverse.items():
+                if current_spec_id == spec_id:
+                    return row
+
+        return None
 
     def _copy_table_data(self):
         """parent의 테이블 데이터를 복사 (10컬럼 구조 매핑 수정)"""

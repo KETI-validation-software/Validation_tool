@@ -105,23 +105,59 @@ class TestSelectionPanel(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
+        self.group_table_header_widget = QWidget()
+        self.group_table_header_widget.setFixedHeight(31)
+        self.group_table_header_widget.setStyleSheet("""
+            QWidget {
+                background-color: #F8F9FA;
+                border: 1px solid #CECECE;
+                border-bottom: 1px solid #CCCCCC;
+                border-top-left-radius: 4px;
+                border-top-right-radius: 4px;
+            }
+        """)
+        group_header_layout = QHBoxLayout(self.group_table_header_widget)
+        group_header_layout.setContentsMargins(0, 0, 14, 0)
+        group_header_layout.setSpacing(0)
+
+        group_header_label = QLabel("시험 분야")
+        group_header_label.setAlignment(Qt.AlignCenter)
+        group_header_label.setStyleSheet("""
+            QLabel {
+                background-color: transparent;
+                border: none;
+                color: #1B1B1C;
+                font-family: 'Noto Sans KR';
+                font-size: 18px;
+                font-weight: 600;
+                letter-spacing: -0.156px;
+            }
+        """)
+        group_header_layout.addWidget(group_header_label)
+
+        layout.addWidget(self.group_table_header_widget)
+
         self.group_table = QTableWidget(0, 1)
         self.group_table.setHorizontalHeaderLabels(["시험 분야"])
         self.group_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.group_table.horizontalHeader().setFixedHeight(31)
+        self.group_table.horizontalHeader().setVisible(False)
         self.group_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.group_table.setSelectionMode(QAbstractItemView.SingleSelection)
         self.group_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.group_table.setFocusPolicy(Qt.NoFocus)
         self.group_table.verticalHeader().setVisible(False)
         self.group_table.verticalHeader().setDefaultSectionSize(39)
-        self.group_table.setFixedHeight(204)
+        self.group_table.setFixedHeight(173)
+        self.group_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.group_table.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
 
         self.group_table.setStyleSheet("""
             QTableWidget {
                 background-color: #FFFFFF;
                 border: 1px solid #CECECE;
-                border-radius: 4px;
+                border-top: none;
+                border-bottom-left-radius: 4px;
+                border-bottom-right-radius: 4px;
                 outline: none;
                 font-family: "Noto Sans KR";
                 font-size: 19px;
@@ -148,16 +184,25 @@ class TestSelectionPanel(QWidget):
             QTableWidget::item:hover {
                 background-color: #F2F8FF;
             }
-            QHeaderView::section {
-                background-color: #F8F9FA;
+            QScrollBar:vertical {
                 border: none;
-                border-bottom: 1px solid #CECECE;
-                color: #1B1B1C;
-                text-align: center;
-                font-family: 'Noto Sans KR';
-                font-size: 18px;
-                font-weight: 600;
-                letter-spacing: -0.156px;
+                background: #DFDFDF;
+                width: 14px;
+                margin: 0px;
+            }
+            QScrollBar::handle:vertical {
+                background: #A3A9AD;
+                min-height: 20px;
+                border-radius: 4px;
+                margin: 0px 3px;
+            }
+            QScrollBar::handle:vertical:hover {
+                background: #8A9094;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                border: none;
+                background: none;
+                height: 0px;
             }
         """)
 

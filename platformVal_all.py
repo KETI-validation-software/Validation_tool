@@ -406,6 +406,18 @@ class MyApp(PlatformMainUI):
     def _reset_all_row_timers(self):
         self.reset_all_api_timers()
 
+    def _record_webhook_payload_elapsed(self, row, event_received_at=None):
+        started_at = self.monitor_request_started_at.get(row)
+        if started_at is None:
+            return None
+
+        if event_received_at is None:
+            event_received_at = time.perf_counter()
+
+        elapsed_ms = int(round((event_received_at - started_at) * 1000))
+        self.monitor_response_elapsed_ms[row] = elapsed_ms
+        return elapsed_ms
+
 
 
     def update_view(self):
@@ -975,6 +987,8 @@ class MyApp(PlatformMainUI):
 
                             webhook_monitor_event_json = tmp_webhook_event
                             webhook_monitor_ack_json = tmp_webhook_response
+                            if webhook_event_payload:
+                                self._record_webhook_payload_elapsed(self.cnt)
                             
                             if self.cnt < len(self.step_buffers):
                                 self.step_buffers[self.cnt]["is_webhook_api"] = True
@@ -1079,8 +1093,10 @@ class MyApp(PlatformMainUI):
                 tmp_response_json = json.dumps(response_data, indent=4, ensure_ascii=False) if 'response_data' in locals() else "{}"
                 
                 started_at = self.monitor_request_started_at.get(self.cnt)
-                if started_at is not None:
+                if started_at is not None and current_protocol != "WebHook":
                     self.monitor_response_elapsed_ms[self.cnt] = int(round((time.perf_counter() - started_at) * 1000))
+                    # Final table timer should reflect response elapsed time (integer seconds).
+                    self._set_timer_success(self.cnt)
                 response_log_text = self.append_monitor_log(
                     step_name=build_monitor_step_name(display_name, "response"),
                     request_json=tmp_response_json,
@@ -1091,7 +1107,8 @@ class MyApp(PlatformMainUI):
                     webhook_event_log_text = self.append_monitor_log(
                         step_name=build_webhook_monitor_step_name(display_name, "event"),
                         request_json=webhook_monitor_event_json,
-                        direction="SEND"
+                        direction="SEND",
+                        response_time_ms=self.monitor_response_elapsed_ms.get(self.cnt),
                     )
 
                 if current_protocol == "WebHook" and webhook_monitor_ack_json is not None:
@@ -1187,7 +1204,12 @@ class MyApp(PlatformMainUI):
                         request_json="",  # ???? ?? ??????? ? ???
                         result_status=final_result,
                         score=score_value,
-                        details=build_monitor_result_details(self.total_pass_cnt, self.total_error_cnt, current_protocol),
+                        details=build_monitor_result_details(
+                            self.total_pass_cnt,
+                            self.total_error_cnt,
+                            current_protocol,
+                            response_time_ms=self.monitor_response_elapsed_ms.get(self.cnt),
+                        ),
                         response_time_ms=self.monitor_response_elapsed_ms.get(self.cnt),
                         total_timeout_ms=self.time_outs[self.cnt] if self.cnt < len(self.time_outs) else None,
                     )
@@ -1461,7 +1483,8 @@ class MyApp(PlatformMainUI):
             # ✅ 그룹 ID 저장
             self.current_group_id = new_group_id
             self.test_selection_panel.update_test_field_table(selected_group)
-            self._auto_select_first_scenario()
+            if not getattr(self, '_suppress_group_auto_select', False):
+                self._auto_select_first_scenario()
 
     def _auto_select_first_scenario(self):
         """현재 분야의 첫 번째 시나리오를 선택하고 상세 화면을 동기화한다."""
@@ -1708,21 +1731,25 @@ class MyApp(PlatformMainUI):
 
             if row in self.index_to_spec_id:
                 new_spec_id = self.index_to_spec_id[row]
+                force_result_page_restore = bool(getattr(self, '_force_result_page_restore', False))
+                same_spec_refresh = force_result_page_restore and new_spec_id == self.current_spec_id
 
-                if new_spec_id == self.current_spec_id:
+                if new_spec_id == self.current_spec_id and not force_result_page_restore:
                     return
 
                 Logger.debug(f" 🔄 시험 분야 전환: {self.current_spec_id} → {new_spec_id}")
                 Logger.debug(f" 현재 그룹: {self.current_group_id}")
+                if same_spec_refresh:
+                    Logger.debug(" 결과 페이지 복귀 동기화로 동일 시나리오를 강제 새로고침합니다.")
 
                 # ✅ 0. 일시정지 파일은 각 시나리오별로 유지 (삭제하지 않음)
 
                 # ✅ 1. 현재 spec의 테이블 데이터 저장 (current_spec_id가 None이 아닐 때만)
-                if self.current_spec_id is not None:
+                if self.current_spec_id is not None and not same_spec_refresh:
                     Logger.debug(f" 데이터 저장 전 - 테이블 행 수: {self.tableWidget.rowCount()}")
                     self.save_current_spec_data()
                 else:
-                    Logger.debug(f" ⚠️ current_spec_id가 None - 저장 스킵 (그룹 전환 직후)")
+                    Logger.debug(f" ⚠️ 현재 화면 저장 스킵 (그룹 전환 직후 또는 결과 페이지 복귀 강제 새로고침)")
 
                 # ✅ 2. spec_id 업데이트
                 self.current_spec_id = new_spec_id
@@ -2084,6 +2111,10 @@ class MyApp(PlatformMainUI):
                 CustomDialog(msg, api_name)  # API 명은 컬럼 1
 
     def _prepare_final_result_tracking(self, selected_spec_ids):
+        request_spec_ids = MyApp._get_request_spec_ids_for_tracking(self)
+        if request_spec_ids:
+            selected_spec_ids = request_spec_ids
+
         unique_spec_ids = []
         for spec_id in selected_spec_ids:
             if spec_id and spec_id not in unique_spec_ids:
@@ -2093,8 +2124,47 @@ class MyApp(PlatformMainUI):
             unique_spec_ids = [self.current_spec_id]
 
         self.selected_spec_ids_for_run = unique_spec_ids
-        self.completed_spec_ids_for_run = set()
+        self.completed_spec_ids_for_run = MyApp._saved_completed_spec_ids_for_request(self, unique_spec_ids)
         self.final_result_sent = False
+
+    def _get_request_spec_ids_for_tracking(self):
+        spec_config = getattr(self, 'LOADED_SPEC_CONFIG', getattr(self.CONSTANTS, 'SPEC_CONFIG', []))
+        request_spec_ids = []
+
+        for group in spec_config:
+            spec_ids = [
+                key for key, value in group.items()
+                if key not in ["group_name", "group_id"] and isinstance(value, dict)
+            ]
+            for spec_id in spec_ids:
+                if spec_id and spec_id not in request_spec_ids:
+                    request_spec_ids.append(spec_id)
+
+        if request_spec_ids:
+            return request_spec_ids
+
+        current_spec_id = getattr(self, "current_spec_id", None)
+        return [current_spec_id] if current_spec_id else []
+
+    def _saved_completed_spec_ids_for_request(self, expected_spec_ids):
+        completed_spec_ids = set()
+        expected_spec_id_set = set(expected_spec_ids or [])
+
+        for composite_key, saved_data in (getattr(self, "spec_table_data", {}) or {}).items():
+            if "_" in composite_key:
+                _group_id, spec_id = composite_key.split("_", 1)
+            else:
+                spec_id = composite_key
+
+            if spec_id not in expected_spec_id_set:
+                continue
+
+            table_data = saved_data.get("table_data") or []
+            saved_cnt = int(saved_data.get("cnt", 0) or 0)
+            if table_data and saved_cnt >= len(table_data):
+                completed_spec_ids.add(spec_id)
+
+        return completed_spec_ids
 
     def _should_send_final_result_now(self):
         if getattr(self, "final_result_sent", False):
