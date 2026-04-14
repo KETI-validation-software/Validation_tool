@@ -312,6 +312,7 @@ class ResultPageWidget(QWidget):
         self.group_table_widget = self.test_selection_panel.group_table_widget
         self.field_group = self.test_selection_panel.field_group
         self.group_table = self.test_selection_panel.group_table
+        self.group_table_header_widget = self.test_selection_panel.group_table_header_widget
         self.test_field_table = self.test_selection_panel.test_field_table
 
         # ✅ 4페이지 전용 높이 강제 설정 (561px)
@@ -1158,7 +1159,11 @@ class ResultPageWidget(QWidget):
                 new_group_height = int(204 + group_extra)
                 self.group_table_widget.setFixedSize(new_group_width, new_group_height)
                 if hasattr(self, 'group_table'):
-                    self.group_table.setFixedHeight(new_group_height)
+                    if hasattr(self, 'group_table_header_widget'):
+                        header_height = self.group_table_header_widget.height()
+                        self.group_table.setFixedHeight(max(0, new_group_height - header_height))
+                    else:
+                        self.group_table.setFixedHeight(new_group_height)
 
             if hasattr(self, 'field_group') and hasattr(self, 'original_field_group_size'):
                 new_field_width = int(self.original_field_group_size[0] * width_ratio)
