@@ -166,7 +166,7 @@ def response_time_ms_to_table_seconds(response_time_ms):
 
     if milliseconds <= 0:
         return 0
-    return max(0, int(milliseconds / 1000.0))
+    return max(0, int((milliseconds / 1000.0) + 0.5))
 
 
 def should_send_error_heartbeat_on_close(run_status, timer_active=False):

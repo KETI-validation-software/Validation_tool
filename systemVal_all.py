@@ -1431,21 +1431,26 @@ class MyApp(SystemMainUI):
             self.message[self.webhook_cnt] if self.webhook_cnt < len(self.message) else "Unknown"
         )
 
-        # 웹훅 수신 payload를 실시간 모니터링에 [수신]으로 표시
-        self.monitor_request_started_at[self.webhook_cnt] = time.perf_counter()
-        self.monitor_response_elapsed_ms.pop(self.webhook_cnt, None)
+        # 웹훅 응답 시간은 최초 요청 송신 시점부터 payload 수신 시점까지로 측정한다.
+        started_at = self.monitor_request_started_at.get(self.webhook_cnt)
+        event_received_at = time.perf_counter()
+        if started_at is not None:
+            self.monitor_response_elapsed_ms[self.webhook_cnt] = int(round((event_received_at - started_at) * 1000))
+        else:
+            self.monitor_request_started_at[self.webhook_cnt] = event_received_at
+            self.monitor_response_elapsed_ms.pop(self.webhook_cnt, None)
         webhook_event_log_text = self.append_monitor_log(
             step_name=build_webhook_monitor_step_name(display_name, "event", role="system"),
             request_json=tmp_webhook_res,
-            direction="RECV"
+            direction="RECV",
+            response_time_ms=self.monitor_response_elapsed_ms.get(self.webhook_cnt),
         )
 
         # ?? ACK ?? payload? ??? ????? [??]?? ??
+        webhook_ack_payload = None
+        webhook_ack_log_text = None
         if self.webhook_res is not None:
             webhook_ack_payload = {"code": "200", "message": "성공"}
-            started_at = self.monitor_request_started_at.get(self.webhook_cnt)
-            if started_at is not None:
-                self.monitor_response_elapsed_ms[self.webhook_cnt] = int(round((time.perf_counter() - started_at) * 1000))
             webhook_ack_log_text = self.append_monitor_log(
                 step_name=build_webhook_monitor_step_name(display_name, "ack", role="system"),
                 request_json=json.dumps(webhook_ack_payload, indent=4, ensure_ascii=False),
@@ -1498,7 +1503,13 @@ class MyApp(SystemMainUI):
                 request_json="",
                 result_status=val_result,
                 score=score_value,
-                details=build_monitor_result_details(accumulated_pass, accumulated_error, "WebHook", extra_detail=extra_detail),
+                details=build_monitor_result_details(
+                    accumulated_pass,
+                    accumulated_error,
+                    "WebHook",
+                    response_time_ms=self.monitor_response_elapsed_ms.get(self.webhook_cnt),
+                    extra_detail=extra_detail,
+                ),
                 response_time_ms=self.monitor_response_elapsed_ms.get(self.webhook_cnt),
                 direction="RECV"
             )

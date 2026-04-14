@@ -406,6 +406,18 @@ class MyApp(PlatformMainUI):
     def _reset_all_row_timers(self):
         self.reset_all_api_timers()
 
+    def _record_webhook_payload_elapsed(self, row, event_received_at=None):
+        started_at = self.monitor_request_started_at.get(row)
+        if started_at is None:
+            return None
+
+        if event_received_at is None:
+            event_received_at = time.perf_counter()
+
+        elapsed_ms = int(round((event_received_at - started_at) * 1000))
+        self.monitor_response_elapsed_ms[row] = elapsed_ms
+        return elapsed_ms
+
 
 
     def update_view(self):
@@ -975,6 +987,8 @@ class MyApp(PlatformMainUI):
 
                             webhook_monitor_event_json = tmp_webhook_event
                             webhook_monitor_ack_json = tmp_webhook_response
+                            if webhook_event_payload:
+                                self._record_webhook_payload_elapsed(self.cnt)
                             
                             if self.cnt < len(self.step_buffers):
                                 self.step_buffers[self.cnt]["is_webhook_api"] = True
@@ -1079,7 +1093,7 @@ class MyApp(PlatformMainUI):
                 tmp_response_json = json.dumps(response_data, indent=4, ensure_ascii=False) if 'response_data' in locals() else "{}"
                 
                 started_at = self.monitor_request_started_at.get(self.cnt)
-                if started_at is not None:
+                if started_at is not None and current_protocol != "WebHook":
                     self.monitor_response_elapsed_ms[self.cnt] = int(round((time.perf_counter() - started_at) * 1000))
                     # Final table timer should reflect response elapsed time (integer seconds).
                     self._set_timer_success(self.cnt)
@@ -1093,7 +1107,8 @@ class MyApp(PlatformMainUI):
                     webhook_event_log_text = self.append_monitor_log(
                         step_name=build_webhook_monitor_step_name(display_name, "event"),
                         request_json=webhook_monitor_event_json,
-                        direction="SEND"
+                        direction="SEND",
+                        response_time_ms=self.monitor_response_elapsed_ms.get(self.cnt),
                     )
 
                 if current_protocol == "WebHook" and webhook_monitor_ack_json is not None:
@@ -1189,7 +1204,12 @@ class MyApp(PlatformMainUI):
                         request_json="",  # ???? ?? ??????? ? ???
                         result_status=final_result,
                         score=score_value,
-                        details=build_monitor_result_details(self.total_pass_cnt, self.total_error_cnt, current_protocol),
+                        details=build_monitor_result_details(
+                            self.total_pass_cnt,
+                            self.total_error_cnt,
+                            current_protocol,
+                            response_time_ms=self.monitor_response_elapsed_ms.get(self.cnt),
+                        ),
                         response_time_ms=self.monitor_response_elapsed_ms.get(self.cnt),
                         total_timeout_ms=self.time_outs[self.cnt] if self.cnt < len(self.time_outs) else None,
                     )
