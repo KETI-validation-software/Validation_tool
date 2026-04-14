@@ -808,7 +808,11 @@ class CommonMainUI(QWidget):
         self.current_group_id = group_id
         if not hasattr(self, 'on_group_selected'):
             return False
-        self.on_group_selected(group_row, 0)
+        self._suppress_group_auto_select = True
+        try:
+            self.on_group_selected(group_row, 0)
+        finally:
+            self._suppress_group_auto_select = False
 
         spec_mapping = getattr(panel, 'spec_id_to_index', None)
         if not isinstance(spec_mapping, dict):
@@ -822,7 +826,11 @@ class CommonMainUI(QWidget):
 
         if not hasattr(self, 'on_test_field_selected'):
             return False
-        self.on_test_field_selected(spec_row, 0)
+        self._force_result_page_restore = True
+        try:
+            self.on_test_field_selected(spec_row, 0)
+        finally:
+            self._force_result_page_restore = False
 
         return True
 

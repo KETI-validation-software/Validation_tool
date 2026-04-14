@@ -977,7 +977,8 @@ class MyApp(SystemMainUI):
 
         # 시험 분야 테이블 갱신
         self.update_test_field_table(selected_group)
-        self._auto_select_first_scenario()
+        if not getattr(self, '_suppress_group_auto_select', False):
+            self._auto_select_first_scenario()
 
     def _auto_select_first_scenario(self):
         """현재 분야의 첫 번째 시나리오를 선택하고 상세 화면을 동기화한다."""
@@ -1003,22 +1004,26 @@ class MyApp(SystemMainUI):
 
             if row in self.index_to_spec_id:
                 new_spec_id = self.index_to_spec_id[row]
+                force_result_page_restore = bool(getattr(self, '_force_result_page_restore', False))
+                same_spec_refresh = force_result_page_restore and new_spec_id == self.current_spec_id
 
-                if new_spec_id == self.current_spec_id:
+                if new_spec_id == self.current_spec_id and not force_result_page_restore:
                     Logger.debug(f" 이미 선택된 시나리오: {new_spec_id}")
                     return
 
                 Logger.debug(f" 🔄 시험 분야 전환: {self.current_spec_id} → {new_spec_id}")
                 Logger.debug(f" 현재 그룹: {self.current_group_id}")
+                if same_spec_refresh:
+                    Logger.debug(" 결과 페이지 복귀 동기화로 동일 시나리오를 강제 새로고침합니다.")
 
                 # ✅ 0. 일시정지 파일은 각 시나리오별로 유지 (삭제하지 않음)
 
                 # ✅ 1. 현재 spec의 테이블 데이터 저장 (current_spec_id가 None이 아닐 때만)
-                if self.current_spec_id is not None:
+                if self.current_spec_id is not None and not same_spec_refresh:
                     Logger.debug(f" 데이터 저장 전 - 테이블 행 수: {self.tableWidget.rowCount()}")
                     self.save_current_spec_data()
                 else:
-                    Logger.debug(f" ⚠️ current_spec_id가 None - 저장 스킵 (그룹 전환 직후)")
+                    Logger.debug(f" ⚠️ 현재 화면 저장 스킵 (그룹 전환 직후 또는 결과 페이지 복귀 강제 새로고침)")
 
                 # ✅ 2. spec_id 업데이트
                 self.current_spec_id = new_spec_id
