@@ -1,7 +1,6 @@
 import sys
 import os
 import urllib3
-import logging
 import traceback
 from core.logger import Logger
 from PyQt5.QtWidgets import QApplication, QMainWindow, QStackedWidget, QMessageBox
@@ -267,7 +266,7 @@ class MainWindow(QMainWindow):
                     APIClient().send_heartbeat_pending(getattr(CONSTANTS, "request_id", ""))
             except Exception as e:
                 Logger.warning(f"[MAIN_CLOSE] failed to send close heartbeat (skip flag): {e}")
-            Logger.debug(f"[MAIN_CLOSE] skip_exit_confirm=True, ?? ?? ??")
+            Logger.debug(f"[MAIN_CLOSE] skip_exit_confirm=True, 즉시 종료")
             event.accept()
             return
 

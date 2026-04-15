@@ -1,7 +1,6 @@
 import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
-import cgi
 from collections import defaultdict, deque  # ### NEW
 import datetime
 import time
@@ -445,7 +444,7 @@ class Server(BaseHTTPRequestHandler):
             self.wfile.write(error_msg.encode('utf-8'))
             return
         Logger.debug(f"[SERVER] do_POST called, path={self.path}, auth_type={self.auth_type}, headers={dict(self.headers)}")
-        ctype, pdict = cgi.parse_header(self.headers.get_content_type())
+        ctype = self.headers.get_content_type()
 
         # ✅ 1단계: 요청 본문 먼저 읽기 (self.request_data 생성)
         # ✅ 1단계: 요청 본문 먼저 읽기
