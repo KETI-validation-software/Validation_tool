@@ -22,7 +22,7 @@ from core.functions import json_check_, resource_path, json_to_data, build_resul
 from core.data_mapper import ConstraintDataGenerator
 from ui.splash_screen import LoadingPopup
 from ui.detail_dialog import CombinedDetailDialog
-from ui.gui_utils import CustomDialog
+from ui.gui_utils import CustomDialog, WebhookBadgeLabel
 from ui.api_selection_dialog import APISelectionDialog
 from ui.result_page import ResultPageWidget
 from core.system_state_manager import SystemStateManager
@@ -34,50 +34,11 @@ from pathlib import Path
 import spec.Data_request as data_request_module
 import spec.Schema_response as schema_response_module
 import spec.Constraints_request as constraints_request_module
-from core.logger import Logger
 
 
 def get_header_title_display_size(widget, page_type):
     return QPixmap(resource_path(widget.get_header_title_path(page_type))).size()
 
-
-class WebhookBadgeLabel(QLabel):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.tooltip_window = None
-        self.hover_image_path = resource_path("assets/image/icon/webhook_mousehover.png").replace("\\", "/")
-        self.setMouseTracking(True)
-        self.setAttribute(Qt.WA_Hover)
-
-    def enterEvent(self, event):
-        # 툴팁 창 생성 및 설정 (Lazy Initialization)
-        if not self.tooltip_window:
-            self.tooltip_window = QLabel(None, Qt.ToolTip | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
-            self.tooltip_window.setAttribute(Qt.WA_TranslucentBackground)
-            self.tooltip_window.setAttribute(Qt.WA_ShowWithoutActivating)
-            
-            pixmap = QPixmap(self.hover_image_path)
-            if not pixmap.isNull():
-                self.tooltip_window.setPixmap(pixmap)
-                self.tooltip_window.setFixedSize(pixmap.size())
-            else:
-                self.tooltip_window.setText("WebHook")
-                self.tooltip_window.setStyleSheet("background-color: #333; color: white; padding: 5px; border-radius: 4px;")
-                self.tooltip_window.adjustSize()
-
-        # 팝업 위치: 뱃지 아이콘의 중앙 위쪽
-        global_pos = self.mapToGlobal(QPoint(0, 0))
-        x = global_pos.x() - (self.tooltip_window.width() - self.width()) // 2
-        y = global_pos.y() - self.tooltip_window.height() - 5  # 5px 위로 띄움
-        
-        self.tooltip_window.move(x, y)
-        self.tooltip_window.show()
-        super().enterEvent(event)
-
-    def leaveEvent(self, event):
-        if self.tooltip_window:
-            self.tooltip_window.hide()
-        super().leaveEvent(event)
 
 
 def create_embedded_back_navigation(parent, click_handler, width=424):

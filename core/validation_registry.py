@@ -6,8 +6,8 @@ import importlib
 import re
 from functools import lru_cache
 from types import ModuleType
-import importlib
 from typing import Dict, Any, Optional
+from core.logger import Logger
 
 
 # 변수명 규칙: {specId}_{apiName}_{in|out}_validation
@@ -87,11 +87,11 @@ def build_validation_registry(
                 module_name = path.split('.')[-1]
                 file_path = os.path.join(exe_dir, 'spec', f'{module_name}.py')
 
-                print(f"[VALIDATION REGISTRY] 외부 파일 로드 시도: {file_path}")
-                print(f"[VALIDATION REGISTRY] 파일 존재 여부: {os.path.exists(file_path)}")
+                Logger.debug(f"[VALIDATION REGISTRY] 외부 파일 로드 시도: {file_path}")
+                Logger.debug(f"[VALIDATION REGISTRY] 파일 존재 여부: {os.path.exists(file_path)}")
 
                 if not os.path.exists(file_path):
-                    print(f"[WARNING] 파일이 존재하지 않음: {file_path}")
+                    Logger.warning(f"[VALIDATION REGISTRY] 파일이 존재하지 않음: {file_path}")
                     continue
 
                 # importlib.util로 명시적 로드
@@ -100,8 +100,8 @@ def build_validation_registry(
                 sys.modules[path] = mod
                 spec.loader.exec_module(mod)
 
-                print(f"[VALIDATION REGISTRY] ✅ 외부 파일 로드 완료: {file_path}")
-                print(f"[VALIDATION REGISTRY] 모듈 __file__: {mod.__file__}")
+                Logger.debug(f"[VALIDATION REGISTRY] ✅ 외부 파일 로드 완료: {file_path}")
+                Logger.debug(f"[VALIDATION REGISTRY] 모듈 __file__: {mod.__file__}")
             else:
                 # 일반 환경에서는 기존 import 방식 사용
                 import importlib
@@ -117,14 +117,14 @@ def build_validation_registry(
                     reg[spec][direction].update(amap)
 
         except ImportError as e:
-            print(f"[WARNING] 모듈 로드 실패: {path} - {e}")
+            Logger.warning(f"[VALIDATION REGISTRY] 모듈 로드 실패: {path} - {e}")
             import traceback
-            traceback.print_exc()
+            Logger.debug(traceback.format_exc())
             continue
         except Exception as e:
-            print(f"[ERROR] 예상치 못한 오류: {path} - {e}")
+            Logger.error(f"[VALIDATION REGISTRY] 예상치 못한 오류: {path} - {e}")
             import traceback
-            traceback.print_exc()
+            Logger.debug(traceback.format_exc())
             continue
 
     return reg
@@ -138,7 +138,7 @@ def clear_validation_cache():
     다음 조회 시 새로운 데이터로 레지스트리를 다시 빌드하도록 함
     """
     build_validation_registry.cache_clear()
-    print("[INFO] validation_registry 캐시가 클리어되었습니다.")
+    Logger.info("[VALIDATION REGISTRY] 캐시가 클리어되었습니다.")
 
 
 def get_validation_rules(
@@ -188,29 +188,23 @@ def get_validation_rules(
     # 레지스트리 빌드
     reg = build_validation_registry(request_module_path, response_module_path)
     
-    # 디버그 로그 (개선된 형태)
-    print(f"\n[DEBUG] 검증 규칙 조회:")
-    print(f"  - Spec ID: {spec_id}")
-    print(f"  - API Name: {api_name}")
-    print(f"  - Direction: {direction} ({'플랫폼→시스템' if direction == 'in' else '시스템→플랫폼'})")
-    
+    # 디버그 로그
+    Logger.debug(f"[VALIDATION REGISTRY] 검증 규칙 조회: spec={spec_id}, api={api_name}, direction={direction}")
+
     if spec_id not in reg:
-        print(f"  [경고] Spec ID '{spec_id}'를 레지스트리에서 찾을 수 없음")
-        print(f"  사용 가능한 Spec ID: {list(reg.keys())}")
+        Logger.warning(f"[VALIDATION REGISTRY] Spec ID '{spec_id}'를 레지스트리에서 찾을 수 없음. 사용 가능: {list(reg.keys())}")
         return {}
-    
+
     if direction not in reg[spec_id]:
-        print(f"  [경고] Direction '{direction}'을 찾을 수 없음")
-        print(f"  '{spec_id}'의 사용 가능한 방향: {list(reg[spec_id].keys())}")
+        Logger.warning(f"[VALIDATION REGISTRY] Direction '{direction}'을 찾을 수 없음. '{spec_id}'의 사용 가능한 방향: {list(reg[spec_id].keys())}")
         return {}
-    
+
     if api_name not in reg[spec_id][direction]:
-        print(f"  [경고] API '{api_name}'을 찾을 수 없음")
-        print(f"  '{spec_id}/{direction}'의 사용 가능한 API: {list(reg[spec_id][direction].keys())}")
+        Logger.warning(f"[VALIDATION REGISTRY] API '{api_name}'을 찾을 수 없음. '{spec_id}/{direction}'의 사용 가능한 API: {list(reg[spec_id][direction].keys())}")
         return {}
-    
+
     rules = reg[spec_id][direction][api_name]
-    print(f"  ✓ 검증 규칙 발견: {len(rules)}개 필드")
+    Logger.debug(f"[VALIDATION REGISTRY] ✅ 검증 규칙 발견: {len(rules)}개 필드")
     return rules
 
 
@@ -254,31 +248,31 @@ def validate_registry_structure(
         reg = build_validation_registry(request_module_path, response_module_path)
         
         if not reg:
-            print("[ERROR] 레지스트리가 비어있음")
+            Logger.error("[VALIDATION REGISTRY] 레지스트리가 비어있음")
             return False
-        
+
         for spec_id, directions in reg.items():
             if not isinstance(directions, dict):
-                print(f"[ERROR] {spec_id}의 directions가 dict가 아님")
+                Logger.error(f"[VALIDATION REGISTRY] {spec_id}의 directions가 dict가 아님")
                 return False
-            
+
             for direction, apis in directions.items():
                 if direction not in ("in", "out"):
-                    print(f"[ERROR] 잘못된 direction: {direction}")
+                    Logger.error(f"[VALIDATION REGISTRY] 잘못된 direction: {direction}")
                     return False
-                
+
                 if not isinstance(apis, dict):
-                    print(f"[ERROR] {spec_id}/{direction}의 apis가 dict가 아님")
+                    Logger.error(f"[VALIDATION REGISTRY] {spec_id}/{direction}의 apis가 dict가 아님")
                     return False
-                
+
                 for api_name, rules in apis.items():
                     if not isinstance(rules, dict):
-                        print(f"[ERROR] {spec_id}/{direction}/{api_name}의 rules가 dict가 아님")
+                        Logger.error(f"[VALIDATION REGISTRY] {spec_id}/{direction}/{api_name}의 rules가 dict가 아님")
                         return False
-        
-        print("[OK] 레지스트리 구조 검증 성공")
+
+        Logger.info("[VALIDATION REGISTRY] 레지스트리 구조 검증 성공")
         return True
-        
+
     except Exception as e:
-        print(f"[ERROR] 검증 중 예외 발생: {e}")
+        Logger.error(f"[VALIDATION REGISTRY] 검증 중 예외 발생: {e}")
         return False

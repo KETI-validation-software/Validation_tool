@@ -1,11 +1,15 @@
 import ssl
 import json
 import time
+import threading
 from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5 import QtCore
 from http.server import HTTPServer
 from core.functions import resource_path
 from core.logger import Logger
+
+# rows.json 파일 동시 접근 방지용 Lock
+rows_json_lock = threading.Lock()
 
 
 class ReusableHTTPServer(HTTPServer):
@@ -33,8 +37,9 @@ class server_th(QThread):
         certificate_private = resource_path('config/key0627/server.crt')
         certificate_key = resource_path('config/key0627/server.key')
         try:
-            self.httpd.socket = ssl.wrap_socket(self.httpd.socket, certfile=certificate_private,
-                                                keyfile=certificate_key, server_side=True)
+            ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+            ssl_context.load_cert_chain(certfile=certificate_private, keyfile=certificate_key)
+            self.httpd.socket = ssl_context.wrap_socket(self.httpd.socket, server_side=True)
         except Exception as e:
             Logger.error(f"[SERVER_THREAD] SSL 인증서 로드 오류: {e}")
 
@@ -68,11 +73,13 @@ class json_data(QThread):
     def run(self):
         while True:
             try:
-                with open(resource_path("spec/rows.json"), "r", encoding="UTF-8") as out_file:
-                    data = json.load(out_file)
+                with rows_json_lock:
+                    with open(resource_path("spec/rows.json"), "r", encoding="UTF-8") as out_file:
+                        data = json.load(out_file)
+                    if data is not None:
+                        with open(resource_path("spec/rows.json"), "w", encoding="UTF-8") as out_file:
+                            json.dump(None, out_file, ensure_ascii=False)
                 if data is not None:
-                    with open(resource_path("spec/rows.json"), "w", encoding="UTF-8") as out_file:
-                        json.dump(None, out_file, ensure_ascii=False)
                     self.json_update_data.emit(data)
             except Exception:
                 pass

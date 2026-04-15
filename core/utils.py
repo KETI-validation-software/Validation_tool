@@ -214,9 +214,6 @@ def build_monitor_result_details(pass_count, error_count, protocol, response_tim
     return " | ".join(parts)
 
 
-    return " | ".join(parts)
-
-
 def build_monitor_log_text(step_name, request_json="", score=None, details="", direction="RECV", response_time_ms=None, total_timeout_ms=None, timestamp=None):
     from datetime import datetime
 

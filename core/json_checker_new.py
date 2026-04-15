@@ -704,7 +704,7 @@ def do_checker(all_field, datas, opt_field, flag_opt):
                             else:
                                 if field[-1] == int:
                                     if type(raw_data[-1]) == numpy.int64 or type(raw_data[-1]) == numpy.int32 or type(
-                                            raw_data[-1]) == numpy.float:
+                                            raw_data[-1]) == float:
                                         raw_data[-1] = True
                                     else:
                                         raw_data[-1] = "Value Type Error: " + str(field[1]) + " " + str(

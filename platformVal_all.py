@@ -4,7 +4,7 @@
 import os
 from api.api_server import Server
 from api.client import APIClient
-from api.server_thread import server_th, json_data
+from api.server_thread import server_th, json_data, rows_json_lock
 import time
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor, QPixmap
@@ -31,7 +31,7 @@ from core.utils import remove_api_number_suffix, to_detail_text, redact, clean_t
 from core.logger import Logger
 
 warnings.filterwarnings('ignore')
-result_dir = os.path.join(os.getcwd(), "results")
+result_dir = CONSTANTS.result_dir
 os.makedirs(result_dir, exist_ok=True)
 
 
@@ -163,8 +163,9 @@ class MyApp(PlatformMainUI):
         self.get_setting()
         self.first_run = True
 
-        with open(resource_path("spec/rows.json"), "w") as out_file:
-            json.dump(None, out_file, ensure_ascii=False)
+        with rows_json_lock:
+            with open(resource_path("spec/rows.json"), "w") as out_file:
+                json.dump(None, out_file, ensure_ascii=False)
 
         self.reference_context = {}
 

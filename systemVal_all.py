@@ -52,7 +52,7 @@ importlib.reload(data_request_module)
 importlib.reload(schema_response_module)
 importlib.reload(constraints_request_module)
 
-result_dir = os.path.join(os.getcwd(), "results")
+result_dir = CONSTANTS.result_dir
 os.makedirs(result_dir, exist_ok=True)
 from core.utils import to_detail_text, redact, remove_api_number_suffix, build_monitor_step_name, build_webhook_monitor_step_name, build_monitor_result_title, build_monitor_start_title, build_monitor_start_details, build_monitor_progress_details, build_monitor_result_details, generate_monitor_notice_html, response_time_ms_to_table_seconds, should_send_error_heartbeat_on_close
 
