@@ -236,7 +236,7 @@ class TestSelectionPanel(QWidget):
         group_box = QWidget()
         group_box.setFixedSize(424, 483)
         group_box.setStyleSheet("background: transparent;")
-        
+
         # Original size
         self.original_field_group_size = (424, 483)
 

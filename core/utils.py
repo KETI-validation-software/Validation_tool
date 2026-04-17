@@ -41,6 +41,9 @@ def replace_transport_desc_for_display(json_str):
     """
     UI 표시용 - 실제 받은 transProtocolDesc 값을 그대로 표시
     """
+    # 빈 객체 {} → 멀티라인 형태로 표시
+    if isinstance(json_str, str) and json_str.strip() == "{}":
+        return "{\n\n}"
     # 원본 그대로 반환 (하드코딩 치환 제거)
     return json_str
 
