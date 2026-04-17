@@ -4,6 +4,7 @@ from unittest.mock import patch
 from PyQt5.QtWidgets import QApplication
 
 from platformVal_all import MyApp
+from systemVal_all import MyApp as SystemMyApp
 from ui.ui_components import TestSelectionPanel
 
 
@@ -32,6 +33,13 @@ class TestTestSelectionPanelLayout(unittest.TestCase):
         )
 
         self.assertEqual(widget.group_table.height(), expected_table_height)
+
+    def test_system_start_page_keeps_compact_scenario_panel_height(self):
+        widget = SystemMyApp(embedded=False, spec_id="cmii7shen005i8z1tagevx4qh")
+
+        self.assertEqual(widget.original_field_group_size, (424, 483))
+        self.assertEqual(widget.field_group.height(), 483)
+        self.assertEqual(widget.test_field_table.height(), 483)
 
 
 if __name__ == "__main__":
