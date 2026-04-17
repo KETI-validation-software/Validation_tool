@@ -618,6 +618,7 @@ class PlatformMainUI(CommonMainUI):
         self.spec_panel_title = self.test_selection_panel.spec_panel_title
         self.group_table_widget = self.test_selection_panel.group_table_widget
         self.field_group = self.test_selection_panel.field_group
+        self.group_table_header_widget = self.test_selection_panel.group_table_header_widget
         
         # ✅ 반응형 처리를 위한 원본 사이즈 매핑
         self.original_spec_panel_title_size = self.test_selection_panel.original_spec_panel_title_size
