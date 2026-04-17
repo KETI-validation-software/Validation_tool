@@ -1436,6 +1436,7 @@ class MyApp(SystemMainUI):
         event_received_at = time.perf_counter()
         if started_at is not None:
             self.monitor_response_elapsed_ms[self.webhook_cnt] = int(round((event_received_at - started_at) * 1000))
+            self._set_timer_success(self.webhook_cnt)
         else:
             self.monitor_request_started_at[self.webhook_cnt] = event_received_at
             self.monitor_response_elapsed_ms.pop(self.webhook_cnt, None)
@@ -1549,6 +1550,12 @@ class MyApp(SystemMainUI):
 
         self.webhook_res = None  # init
         self.webhook_flag = False
+
+    @staticmethod
+    def _should_emit_primary_result_log(current_protocol, current_retry, current_retries):
+        protocol = str(current_protocol or "").strip().lower()
+        is_final_attempt = (current_retry + 1) >= current_retries
+        return not (protocol == "webhook" and is_final_attempt)
 
     def update_view(self):
 
@@ -2247,7 +2254,11 @@ class MyApp(SystemMainUI):
                     protocol_text = "일반 메시지" if current_protocol.lower() == "basic" else f"실시간 메시지: {current_protocol}"
                     
                     # ??? ???? ?? ??, ????? ?? ??
-                    if self.current_retry + 1 >= current_retries:
+                    if self.current_retry + 1 >= current_retries and self._should_emit_primary_result_log(
+                        current_protocol,
+                        self.current_retry,
+                        current_retries,
+                    ):
                         # ??? ?? - ?? ?? ??
                         total_fields = total_pass_count + total_error_count
                         score_value = (total_pass_count / total_fields * 100) if total_fields > 0 else 0
@@ -2266,7 +2277,7 @@ class MyApp(SystemMainUI):
                             "monitor_log_text",
                             result_log_text,
                         )
-                    else:
+                    elif self.current_retry + 1 < current_retries:
                         # ?? ?? - ??? ??
                         self.append_monitor_log(
                             step_name=build_monitor_result_title(display_name, self.current_retry + 1),
