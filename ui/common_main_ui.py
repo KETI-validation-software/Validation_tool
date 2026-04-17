@@ -1596,7 +1596,7 @@ class CommonMainUI(QWidget):
         if request_json:
             request_json = replace_transport_desc_for_display(request_json)
             if isinstance(request_json, str) and request_json.strip() == "{}":
-                request_json = "{\n\n}"
+                request_json = "{\n}"
 
         # 타임스탬프
         timestamp = datetime.now().strftime("%H:%M:%S")
@@ -1652,7 +1652,9 @@ class CommonMainUI(QWidget):
                 html_content += f'<div style="font-size: 17px; color: #4B5563; margin-bottom: 8px; font-family: \'Noto Sans KR\';">{details}</div>'
             
             if request_json:
-                html_content += f'<pre style="font-size: 16px; color: #1F2937; background-color: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 4px; padding: 10px; font-family: \'Consolas\', monospace;">\n{request_json}</pre>'
+                import html as _html
+                _escaped = _html.escape(request_json).replace('\n', '<br>')
+                html_content += f'<div style="font-size: 16px; color: #1F2937; background-color: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 4px; padding: 10px; font-family: \'Consolas\', monospace;">{_escaped}</div>'
             
             if direction == "RECV" and score is not None:
                 score_text_color = "#10b981" if score >= 100 else "#ef4444"
@@ -1670,61 +1672,8 @@ class CommonMainUI(QWidget):
 
         # valResult에 추가
         self.valResult.append(html_content)
-        
+
         # 스크롤을 맨 아래로 이동
-        self.valResult.verticalScrollBar().setValue(
-            self.valResult.verticalScrollBar().maximum()
-        )
-
-        # 2-1. 상세 내용 (Details)
-        if details:
-            html_content += f"""
-                <div style="margin-bottom: 8px; font-size: 18px; color: #6b7280; font-family: 'Noto Sans KR';">
-                    {details}
-                </div>
-            """
-
-        # 2-2. JSON 데이터 (회색 박스)
-        if request_json and request_json.strip():
-            escaped_json = html.escape(request_json)
-            is_json_structure = request_json.strip().startswith('{') or request_json.strip().startswith('[')
-
-            if is_json_structure:
-                html_content += f"""
-                <div style="margin-top: 5px; margin-bottom: 10px;">
-                    <div style="font-size: 15px; color: #9ca3af; font-weight: bold; margin-bottom: 4px;">📦 데이터</div>
-                    <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 10px;">
-                        <pre style="margin: 0; font-family: 'Consolas', monospace; font-size: 18px; color: #1f2937;">{escaped_json}</pre>
-                    </div>
-                </div>
-                """
-            else:
-                # JSON이 아닌 일반 텍스트일 경우
-                html_content += f"""
-                <div style="margin-top: 5px; margin-bottom: 10px;">
-                    <pre style="font-size: 18px; color: #6b7280; font-family: 'Consolas', monospace;">{escaped_json}</pre>
-                </div>
-                """
-
-        # 2-3. 점수 (Score)
-        if score is not None:
-            html_content += f"""
-                <div style="margin-top: 5px; font-size: 18px; color: #6b7280; font-weight: bold; font-family: 'Consolas', monospace;">
-                    점수: {score:.1f}%
-                </div>
-            """
-
-        # Table 닫기
-        html_content += """
-                </td>
-            </tr>
-        </table>
-        <div style="margin-bottom: 10px;"></div>
-        """
-
-        self.valResult.append(html_content)
-
-        # 자동 스크롤
         self.valResult.verticalScrollBar().setValue(
             self.valResult.verticalScrollBar().maximum()
         )

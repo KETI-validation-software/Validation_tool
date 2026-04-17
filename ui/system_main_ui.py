@@ -1277,6 +1277,11 @@ class SystemMainUI(CommonMainUI):
         # ✅ UI 표시용: transProtocolDesc 하드코딩 치환
         if request_json:
             request_json = replace_transport_desc_for_display(request_json)
+            if isinstance(request_json, str):
+                import re
+                request_json = request_json.replace("\r\n", "\n").rstrip()
+                # 문자열 끝의 닫는 괄호 직전 공백-only 줄을 1줄로 정규화
+                request_json = re.sub(r"(?:\n[ \t]*){2,}([ \t]*[\}\]])$", r"\n\1", request_json)
 
         # 타임스탬프
         timestamp = datetime.now().strftime("%H:%M:%S")
@@ -1344,7 +1349,20 @@ class SystemMainUI(CommonMainUI):
                 html_content += f'<div style="font-size: 17px; color: #4B5563; margin-bottom: 8px; font-family: \'Noto Sans KR\';">{details}</div>'
             
             if request_json:
-                html_content += f'<pre style="font-size: 16px; color: #1F2937; background-color: #F8FAFC; border: 1px solid #CBD5E1; border-radius: 4px; padding: 10px; font-family: \'Consolas\', monospace;">\n{request_json}</pre>'
+                _lines = html.escape(str(request_json)).split('\n')
+                _rows = ''.join(
+                    f'<tr><td style="padding: 0; margin: 0;">{l.replace(" ", "&nbsp;") or "&nbsp;"}</td></tr>'
+                    for l in _lines
+                )
+                html_content += (
+                    f'<table cellspacing="0" cellpadding="0" width="100%" bgcolor="#F8FAFC"'
+                    f' style="border: 1px solid #CBD5E1; border-radius: 4px;">'
+                    f'<tr><td style="padding: 10px;">'
+                    f'<table cellspacing="0" cellpadding="0" width="100%"'
+                    f' style="font-size: 16px; color: #1F2937; font-family: \'Consolas\', monospace;">'
+                    f'{_rows}</table>'
+                    f'</td></tr></table>'
+                )
             
             if direction == "RECV" and score is not None:
                 score_text_color = "#10b981" if score >= 100 else "#ef4444"

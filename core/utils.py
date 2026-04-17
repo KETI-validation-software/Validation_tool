@@ -41,9 +41,9 @@ def replace_transport_desc_for_display(json_str):
     """
     UI 표시용 - 실제 받은 transProtocolDesc 값을 그대로 표시
     """
-    # 빈 객체 {} → 멀티라인 형태로 표시
+    # 빈 객체 {} → 과도한 빈 줄 없이 한 줄 내려 표시
     if isinstance(json_str, str) and json_str.strip() == "{}":
-        return "{\n\n}"
+        return "{\n}"
     # 원본 그대로 반환 (하드코딩 치환 제거)
     return json_str
 
@@ -210,8 +210,6 @@ def build_monitor_result_details(pass_count, error_count, protocol, response_tim
         f"{_k(0xD1B5, 0xACFC, 0x20, 0xD544, 0xB4DC, 0x20, 0xC218)}: {pass_count}, {_k(0xC2E4, 0xD328, 0x20, 0xD544, 0xB4DC, 0x20, 0xC218)}: {error_count}",
         protocol_text,
     ]
-    if response_time_ms is not None:
-        parts.append(f"{_k(0xC751, 0xB2F5, 0x20, 0xC18C, 0xC694, 0x20, 0xC2DC, 0xAC04)}: {float(response_time_ms) / 1000:.2f}{_k(0xCD08)}")
     if extra_detail:
         parts.append(f"{_k(0xC0C1, 0xC138)}: {extra_detail}")
     return " | ".join(parts)

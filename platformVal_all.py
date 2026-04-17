@@ -417,6 +417,8 @@ class MyApp(PlatformMainUI):
 
         elapsed_ms = int(round((event_received_at - started_at) * 1000))
         self.monitor_response_elapsed_ms[row] = elapsed_ms
+        if hasattr(self, "_set_timer_success"):
+            self._set_timer_success(row)
         return elapsed_ms
 
 
@@ -510,6 +512,9 @@ class MyApp(PlatformMainUI):
                 self.time_pre = time.time()
                 self.cnt_pre = self.cnt
                 if self.cnt < len(self.videoMessages):
+                    # 시도 시작 시점 기준으로 응답 소요 시간을 측정한다.
+                    self.monitor_request_started_at[self.cnt] = time.perf_counter()
+                    self.monitor_response_elapsed_ms.pop(self.cnt, None)
                     self._set_timer_running(self.cnt, 0)
                 self.step_start_log_printed = False # ✅ 단계 변경 시 플래그 리셋
                 return
@@ -708,8 +713,6 @@ class MyApp(PlatformMainUI):
 
                     # 실시간 모니터링 창에 요청 데이터 표시 (API 이름 중복 없이 데이터만)
                     if retry_attempt == 0:
-                        self.monitor_request_started_at[self.cnt] = time.perf_counter()
-                        self.monitor_response_elapsed_ms.pop(self.cnt, None)
                         request_log_text = self.append_monitor_log(
                             step_name=build_monitor_step_name(self.Server.message[self.cnt], "request"),
                             request_json=tmp_res_auth,
@@ -728,8 +731,6 @@ class MyApp(PlatformMainUI):
                                 request_log_text,
                             )
                     else:
-                        self.monitor_request_started_at[self.cnt] = time.perf_counter()
-                        self.monitor_response_elapsed_ms.pop(self.cnt, None)
                         request_log_text = self.append_monitor_log(
                             step_name=build_monitor_step_name(self.Server.message[self.cnt], "request"),
                             request_json=tmp_res_auth,
@@ -771,8 +772,6 @@ class MyApp(PlatformMainUI):
 
                     # ? ??? ???? ?? (RECV)
                     if retry_attempt == 0:
-                        self.monitor_request_started_at[self.cnt] = time.perf_counter()
-                        self.monitor_response_elapsed_ms.pop(self.cnt, None)
                         request_log_text = self.append_monitor_log(
                             step_name=build_monitor_step_name(self.Server.message[self.cnt], "request"),
                             request_json=tmp_res_auth,
@@ -791,8 +790,6 @@ class MyApp(PlatformMainUI):
                                 request_log_text,
                             )
                     else:
-                        self.monitor_request_started_at[self.cnt] = time.perf_counter()
-                        self.monitor_response_elapsed_ms.pop(self.cnt, None)
                         request_log_text = self.append_monitor_log(
                             step_name=build_monitor_step_name(self.Server.message[self.cnt], "request"),
                             request_json=tmp_res_auth,
@@ -1245,6 +1242,9 @@ class MyApp(PlatformMainUI):
                     else:
                         Logger.debug(f"수동 지연 비활성화: 재시도 완료, 다음 시스템 요청 대기")
                         self.time_pre = time.time()
+                    # 다음 시도 시작 시각으로 타이머 기준점을 갱신한다.
+                    self.monitor_request_started_at[self.cnt] = time.perf_counter()
+                    self.monitor_response_elapsed_ms.pop(self.cnt, None)
                     self._set_timer_running(self.cnt, 0)
 
                 self.realtime_flag = False
