@@ -416,6 +416,17 @@ class MyApp(SystemMainUI):
         completed_spec_ids = set()
         expected_spec_id_set = set(expected_spec_ids or [])
 
+        def _is_saved_spec_completed(saved_data):
+            table_data = saved_data.get("table_data") or []
+            if not table_data:
+                return False
+
+            for row_data in table_data:
+                icon_state = str(row_data.get("icon_state", "")).upper()
+                if icon_state not in {"PASS", "FAIL"}:
+                    return False
+            return True
+
         for composite_key, saved_data in (getattr(self, "spec_table_data", {}) or {}).items():
             if "_" in composite_key:
                 group_id, spec_id = composite_key.split("_", 1)
@@ -425,20 +436,17 @@ class MyApp(SystemMainUI):
             if spec_id not in expected_spec_id_set:
                 continue
 
-            table_data = saved_data.get("table_data") or []
-            saved_cnt = int(saved_data.get("cnt", 0) or 0)
-            if table_data and saved_cnt >= len(table_data):
+            if _is_saved_spec_completed(saved_data):
                 completed_spec_ids.add(spec_id)
 
         return completed_spec_ids
 
     def _prepare_final_result_tracking(self, selected_spec_ids=None):
-        if selected_spec_ids is None:
-            selected_spec_ids = MyApp._get_request_spec_ids_for_tracking(self)
-        else:
-            request_spec_ids = MyApp._get_request_spec_ids_for_tracking(self)
-            if request_spec_ids:
-                selected_spec_ids = request_spec_ids
+        request_spec_ids = MyApp._get_request_spec_ids_for_tracking(self)
+        if request_spec_ids:
+            selected_spec_ids = request_spec_ids
+        elif selected_spec_ids is None:
+            selected_spec_ids = []
 
         unique_spec_ids = []
         for spec_id in selected_spec_ids:
@@ -471,10 +479,7 @@ class MyApp(SystemMainUI):
         if not expected_spec_ids:
             return False
 
-        should_send = set(expected_spec_ids).issubset(self.completed_spec_ids_for_run)
-        if should_send:
-            self.final_result_sent = True
-        return should_send
+        return set(expected_spec_ids).issubset(self.completed_spec_ids_for_run)
 
     def save_current_spec_data(self):
         """현재 spec의 테이블 데이터와 상태를 저장 (state_manager 위임)"""
@@ -1894,7 +1899,8 @@ class MyApp(SystemMainUI):
                             f"expected={self.selected_spec_ids_for_run or [self.current_spec_id]}"
                         )
                         url = f"{CONSTANTS.management_url}/api/integration/test-results"
-                        response = requests.post(url, json=result_json)
+                        response = requests.post(url, json=result_json, timeout=15)
+                        response.raise_for_status()
                         try:
                             self.latest_result_response = response.json()
                         except Exception:
@@ -2403,7 +2409,8 @@ class MyApp(SystemMainUI):
                         f"expected={self.selected_spec_ids_for_run or [self.current_spec_id]}"
                     )
                     url = f"{CONSTANTS.management_url}/api/integration/test-results"
-                    response = requests.post(url, json=result_json)
+                    response = requests.post(url, json=result_json, timeout=15)
+                    response.raise_for_status()
                     self.final_result_sent = True
                     Logger.debug(f"✅ 시험 결과 전송 상태 코드:: {response.status_code}")
                     Logger.debug(f"📥  시험 결과 전송 응답:: {response.text}")
@@ -3321,6 +3328,42 @@ class MyApp(SystemMainUI):
             "details": self.final_report if hasattr(self, "final_report") else ""
         }
 
+    def _is_completed_exit(self):
+        if getattr(self, "run_status", "") == "완료":
+            return True
+        try:
+            return bool(self._should_send_final_result_now())
+        except Exception as e:
+            Logger.warning(f"⚠️ 종료 시 완료 상태 판정 실패: {e}")
+            return False
+
+    def _send_final_result_on_exit_if_needed(self):
+        if getattr(self, "final_result_sent", False):
+            return True
+
+        result_json = build_result_json(self)
+        url = f"{CONSTANTS.management_url}/api/integration/test-results"
+        response = requests.post(url, json=result_json, timeout=15)
+        response.raise_for_status()
+        try:
+            self.latest_result_response = response.json()
+        except Exception:
+            self.latest_result_response = None
+        self.final_result_sent = True
+        Logger.info("✅ 종료 시 최종 시험 결과 전송 완료")
+        return True
+
+    def _send_exit_heartbeat(self):
+        api_client = APIClient()
+        completed_exit = self._is_completed_exit() and not getattr(self, "is_paused", False)
+        if completed_exit:
+            self._send_final_result_on_exit_if_needed()
+            api_client.send_heartbeat_completed()
+            return "completed"
+
+        api_client.send_heartbeat_pending(getattr(self.CONSTANTS, "request_id", ""))
+        return "pending"
+
     def exit_btn_clicked(self):
         reply = QMessageBox.question(self, '프로그램 종료',
                                      '정말로 프로그램을 종료하시겠습니까?',
@@ -3328,13 +3371,11 @@ class MyApp(SystemMainUI):
                                      QMessageBox.No)
 
         if reply == QMessageBox.Yes:
-
             try:
-                APIClient().send_heartbeat_pending(getattr(self.CONSTANTS, "request_id", ""))
+                self._send_exit_heartbeat()
             except Exception as e:
                 Logger.warning(f"⚠️ 종료 시 stopped 상태 전송 실패: {e}")
             QApplication.instance().setProperty("skip_exit_confirm", True)
-            result_payload = self.build_result_payload()
 
             # ✅ 종료 시 일시정지 파일 삭제
             self.cleanup_paused_file()
@@ -3371,9 +3412,12 @@ class MyApp(SystemMainUI):
 
     def closeEvent(self, event):
         """창 닫기 이벤트 - 타이머 정리"""
-        # ✅ 타이머 중지
+        try:
+            self._send_exit_heartbeat()
+        except Exception as e:
+            Logger.warning(f"⚠️ 창 닫기 heartbeat 전송 실패: {e}")
+
         if hasattr(self, 'tick_timer') and self.tick_timer.isActive():
-            APIClient().send_heartbeat_pending(getattr(self.CONSTANTS, "request_id", ""))
             self.tick_timer.stop()
 
         event.accept()

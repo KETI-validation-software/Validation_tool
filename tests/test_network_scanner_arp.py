@@ -10,6 +10,30 @@ class _AnsweredPacket:
 
 
 class TestArpScanWorker(unittest.TestCase):
+    @patch("network_scanner.ARP")
+    @patch("network_scanner.srp")
+    @patch("network_scanner.get_local_ip", return_value="192.168.1.25")
+    def test_scan_arp_uses_source_ip_when_provided(self, _mock_local_ip, mock_srp, mock_arp):
+        worker = ARPScanWorker(test_port=8080, source_ip="192.168.0.10")
+        captured = []
+        failures = []
+
+        mock_srp.return_value = (
+            [
+                (None, _AnsweredPacket("192.168.0.20")),
+            ],
+            [],
+        )
+
+        worker.scan_completed.connect(captured.append)
+        worker.scan_failed.connect(failures.append)
+
+        worker.scan_arp()
+
+        self.assertEqual(failures, [])
+        self.assertEqual(captured, [["192.168.0.20:8080"]])
+        mock_arp.assert_called_once_with(pdst="192.168.0.0/24")
+
     @patch("network_scanner.srp")
     @patch("network_scanner.get_local_ip", return_value="192.168.0.10")
     def test_scan_arp_excludes_local_ip_from_results(self, _mock_local_ip, mock_srp):

@@ -101,13 +101,15 @@ class ARPScanWorker(QObject):
     scan_completed = pyqtSignal(list)  # 스캔 완료 시 IP 리스트 전달
     scan_failed = pyqtSignal(str)      # 스캔 실패 시 오류 메시지 전달
 
-    def __init__(self, test_port=None):
+    def __init__(self, test_port=None, source_ip=None):
         """
         Args:
             test_port: URL에 사용할 포트 번호 (예: 8080)
+            source_ip: 스캔 대역 계산에 사용할 기준 로컬 IP (없으면 자동 감지)
         """
         super().__init__()
         self.test_port = test_port
+        self.source_ip = source_ip
 
     def scan_arp(self):
         """ARP 스캔 메인 메서드"""
@@ -119,7 +121,7 @@ class ARPScanWorker(QObject):
                 return
 
             # 1. 내 IP와 네트워크 대역 감지
-            my_ip = get_local_ip()
+            my_ip = self.source_ip or get_local_ip()
             if not my_ip:
                 self.scan_failed.emit("로컬 IP 주소를 가져올 수 없습니다.")
                 return
@@ -129,7 +131,7 @@ class ARPScanWorker(QObject):
                 self.scan_failed.emit("네트워크 대역을 계산할 수 없습니다.")
                 return
 
-            Logger.info(f"ARP 스캔 시작: {network}")
+            Logger.info(f"ARP 스캔 시작: source_ip={my_ip}, network={network}")
 
             # 2. ARP 스캔 실행
             try:

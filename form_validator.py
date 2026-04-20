@@ -54,28 +54,36 @@ def derive_webhook_port(test_port, full_url):
 
 
 def derive_webhook_host(full_url):
-    """Return webhook host for callback URL (prefer local machine IP)."""
+    """Return webhook host for callback URL.
+
+    Priority:
+    1) Host from selected URL in UI (stable, user-visible choice)
+    2) Fallback to local machine routing IP (legacy behavior)
+    """
+    parsed_host = None
+    if full_url:
+        normalized_url = full_url
+        if not normalized_url.startswith(("http://", "https://")):
+            normalized_url = f"https://{normalized_url}"
+
+        try:
+            parsed = urlparse(normalized_url)
+            parsed_host = parsed.hostname
+        except ValueError:
+            parsed_host = None
+
+    if parsed_host:
+        return parsed_host
+
     try:
         local_ips = CONSTANTS.get_all_local_ips()
         if local_ips:
-            # 기본 라우팅 IP가 마지막에 추가되므로 우선 사용
+            # 기존 동작 호환: 기본 라우팅 IP가 마지막에 추가되므로 마지막 값 사용
             return local_ips[-1]
     except Exception:
         pass
 
-    if not full_url:
-        return None
-
-    normalized_url = full_url
-    if not normalized_url.startswith(("http://", "https://")):
-        normalized_url = f"https://{normalized_url}"
-
-    try:
-        parsed = urlparse(normalized_url)
-    except ValueError:
-        return None
-
-    return parsed.hostname
+    return None
 
 
 class FormValidator:
@@ -242,7 +250,8 @@ class FormValidator:
             # 2. 접속 정보 (시나리오명이 포함된 전체 URL 가져오기)
             full_url = self.parent.get_selected_url()
             variables['url'] = full_url
-            webhook_host = derive_webhook_host(full_url)
+            resolved_test_ip = getattr(self.parent, 'resolved_test_ip', None)
+            webhook_host = resolved_test_ip or derive_webhook_host(full_url)
             webhook_port = derive_webhook_port(getattr(self.parent, 'test_port', None), full_url)
 
             if webhook_host:
@@ -476,6 +485,62 @@ class FormValidator:
                 content = f.read()
 
             entries = []
+
+            # 기존 메모리 SPEC_CONFIG를 기준으로 급격한 API 개수 축소(또는 비어짐)를 방지
+            existing_spec_configs = {}
+            for group in getattr(CONSTANTS, "SPEC_CONFIG", []):
+                if not isinstance(group, dict):
+                    continue
+                for key, value in group.items():
+                    if key in ("group_name", "group_id"):
+                        continue
+                    if isinstance(value, dict):
+                        existing_spec_configs[key] = value
+
+            def _normalize_spec_config_lists(config_data):
+                """SPEC_CONFIG 내부 리스트 길이를 endpoint 길이에 맞춰 정합화."""
+                api_name = list(config_data.get("api_name", []) or [])
+                api_id = list(config_data.get("api_id", []) or [])
+                api_endpoint = list(config_data.get("api_endpoint", []) or [])
+                trans_protocol = list(config_data.get("trans_protocol", []) or [])
+                time_out = list(config_data.get("time_out", []) or [])
+                num_retries = list(config_data.get("num_retries", []) or [])
+
+                target_len = len(api_endpoint)
+                if target_len == 0:
+                    target_len = max(
+                        len(api_name),
+                        len(api_id),
+                        len(trans_protocol),
+                        len(time_out),
+                        len(num_retries),
+                    )
+
+                if target_len == 0:
+                    return {
+                        "api_name": [],
+                        "api_id": [],
+                        "api_endpoint": [],
+                        "trans_protocol": [],
+                        "time_out": [],
+                        "num_retries": [],
+                    }
+
+                def _fit(values, default_value):
+                    values = list(values)
+                    if len(values) >= target_len:
+                        return values[:target_len]
+                    return values + [default_value] * (target_len - len(values))
+
+                return {
+                    "api_name": _fit(api_name, ""),
+                    "api_id": _fit(api_id, ""),
+                    "api_endpoint": _fit(api_endpoint, ""),
+                    "trans_protocol": _fit(trans_protocol, None),
+                    "time_out": _fit(time_out, 60000),
+                    "num_retries": _fit(num_retries, 1),
+                }
+
             mode = self.parent.target_system_edit.text().strip()
 
             if getattr(sys, 'frozen', False):
@@ -540,6 +605,26 @@ class FormValidator:
                         "time_out": [],
                         "num_retries": []
                     }
+
+                # API step 데이터가 줄어들거나 비는 경우, 기존 설정을 보존해 로딩 깨짐 방지
+                existing_config = existing_spec_configs.get(spec_id, {})
+                new_count = len(spec_config_data.get("api_endpoint", []) or [])
+                old_count = len(existing_config.get("api_endpoint", []) or [])
+                if old_count > 0 and new_count == 0:
+                    Logger.warning(
+                        f"[SPEC_CONFIG] spec_id={spec_id} API 개수 축소 감지 "
+                        f"(new={new_count}, old={old_count}) -> 기존 설정 유지"
+                    )
+                    spec_config_data = {
+                        "api_name": list(existing_config.get("api_name", []) or []),
+                        "api_id": list(existing_config.get("api_id", []) or []),
+                        "api_endpoint": list(existing_config.get("api_endpoint", []) or []),
+                        "trans_protocol": list(existing_config.get("trans_protocol", []) or []),
+                        "time_out": list(existing_config.get("time_out", []) or []),
+                        "num_retries": list(existing_config.get("num_retries", []) or []),
+                    }
+
+                spec_config_data = _normalize_spec_config_lists(spec_config_data)
 
                 entry = (
                     f'"{spec_id}": {{\n'
@@ -641,87 +726,11 @@ class FormValidator:
             Logger.error(traceback.format_exc())
 
     def _update_spec_config(self, spec_id, config_data):
-        """CONSTANTS.py의 SPEC_CONFIG 리스트에 spec_id별 설정 업데이트"""
-        try:
-            if getattr(sys, 'frozen', False):
-                exe_dir = os.path.dirname(sys.executable)
-                constants_path = os.path.join(exe_dir, "config", "CONSTANTS.py")
-            else:
-                constants_path = resource_path("config/CONSTANTS.py")
-
-            with open(constants_path, 'r', encoding='utf-8') as f:
-                content = f.read()
-
-            spec_config_start = content.find('SPEC_CONFIG = [')
-            if spec_config_start == -1:
-                return
-
-            bracket_count = 0
-            start_pos = content.find('[', spec_config_start)
-            current_pos = start_pos
-            end_pos = len(content)
-
-            while current_pos < len(content):
-                if content[current_pos] == '[':
-                    bracket_count += 1
-                elif content[current_pos] == ']':
-                    bracket_count -= 1
-                    if bracket_count == 0:
-                        end_pos = current_pos + 1
-                        break
-                current_pos += 1
-
-            current_config = content[spec_config_start:end_pos]
-            spec_key_start = current_config.find(f'"{spec_id}":')
-
-            spec_name = self._spec_names_cache.get(spec_id, "")
-
-            specs_list = [
-                f"{spec_id}_inSchema",
-                f"{spec_id}_outData",
-                f"{spec_id}_messages"
-            ]
-
-            new_spec_config = f'''"{spec_id}": {{
-        "test_name": "{spec_name}",
-        "specs": {specs_list},
-        "trans_protocol": {config_data.get("trans_protocol", [])},
-        "time_out": {config_data.get("time_out", [])},
-        "num_retries": {config_data.get("num_retries", [])}
-    }}'''
-
-            if spec_key_start != -1:
-                brace_start = current_config.find('{', spec_key_start)
-                brace_count = 0
-                pos = brace_start
-
-                while pos < len(current_config):
-                    if current_config[pos] == '{':
-                        brace_count += 1
-                    elif current_config[pos] == '}':
-                        brace_count -= 1
-                        if brace_count == 0:
-                            brace_end = pos + 1
-                            break
-                    pos += 1
-
-                old_spec_block = current_config[spec_key_start:brace_end]
-                new_config = current_config.replace(old_spec_block, new_spec_config)
-            else:
-                closing_brace = current_config.rfind('}')
-                if '":' in current_config:
-                    new_config = current_config[:closing_brace] + f',\n    {new_spec_config}\n' + current_config[closing_brace:]
-                else:
-                    new_config = current_config[:closing_brace] + f'\n    {new_spec_config}\n' + current_config[closing_brace:]
-
-            content = content.replace(current_config, new_config)
-
-            with open(constants_path, 'w', encoding='utf-8') as f:
-                f.write(content)
-
-        except Exception as e:
-            Logger.error(f"SPEC_CONFIG 업데이트 실패: {e}")
-            Logger.error(traceback.format_exc())
+        """중간 SPEC_CONFIG 파일 갱신은 비활성화 (최종 overwrite 단계에서만 반영)."""
+        Logger.debug(
+            f"[SPEC_CONFIG] 중간 갱신 비활성화: spec_id={spec_id} "
+            "(overwrite_spec_config_from_mapping에서 일괄 반영)"
+        )
 
     # ---------- API 데이터 로드 ----------
 
@@ -756,6 +765,21 @@ class FormValidator:
             self.preload_test_step_details_from_cache()
             QApplication.processEvents()
 
+            # step 상세 일부 누락 시 부분 산출물로 API 개수가 줄어드는 문제를 방지
+            missing_step_ids = self._retry_missing_step_details(max_attempts=3)
+            if missing_step_ids:
+                Logger.error(
+                    f"step 상세 누락으로 산출물 생성을 중단합니다. 누락 step 수={len(missing_step_ids)}"
+                )
+                Logger.error(f"누락 step_ids: {missing_step_ids}")
+                QMessageBox.warning(
+                    self.parent,
+                    "데이터 로드 불완전",
+                    "일부 API step 상세를 불러오지 못해 산출물 생성을 중단했습니다.\n"
+                    "네트워크 상태를 확인한 뒤 다시 시도해 주세요."
+                )
+                return
+
             # 산출물 파일 생성 (FileGeneratorService 사용)
             self.file_generator.generate_files_for_all_specs(
                 self._steps_cache,
@@ -763,15 +787,6 @@ class FormValidator:
                 self._spec_names_cache
             )
             QApplication.processEvents()
-
-            # 모든 spec에 대해 개별 설정 업데이트
-            for spec in all_test_specs_with_group:
-                spec_id = spec.get("id", "")
-                if spec_id:
-                    spec_config_data = self._extract_spec_config_from_api(spec_id)
-                    if spec_config_data:
-                        self._update_spec_config(spec_id, spec_config_data)
-                QApplication.processEvents()
 
             # SPEC_CONFIG 전체 재구성
             self.overwrite_spec_config_from_mapping()
@@ -1096,7 +1111,7 @@ class FormValidator:
                     skipped += 1
                     continue
 
-                detail = self.api_client.fetch_test_step_by_id(step_id)
+                detail = self._fetch_test_step_with_retry(step_id)
                 QApplication.processEvents()
                 if detail is not None:
                     step_verificationType = detail.get("step", {}).get("verificationType", "")
@@ -1113,6 +1128,55 @@ class FormValidator:
                         "detail": detail
                     }
                     loaded += 1
+
+    def _fetch_test_step_with_retry(self, step_id, max_attempts=3):
+        """test-step 상세를 재시도 포함해 조회"""
+        for attempt in range(1, max_attempts + 1):
+            detail = self.api_client.fetch_test_step_by_id(step_id)
+            if detail is not None:
+                return detail
+            Logger.warning(
+                f"test-step 상세 조회 실패: step_id={step_id}, attempt={attempt}/{max_attempts}"
+            )
+        return None
+
+    def _collect_missing_step_detail_ids(self):
+        """_steps_cache 대비 _test_step_cache 누락 step_id 목록"""
+        missing_ids = []
+        for _spec_id, steps in self._steps_cache.items():
+            if not isinstance(steps, list):
+                continue
+            for s in steps:
+                step_id = s.get("id")
+                if step_id and step_id not in self._test_step_cache:
+                    missing_ids.append(step_id)
+        return missing_ids
+
+    def _retry_missing_step_details(self, max_attempts=3):
+        """누락 step 상세를 다시 조회해 캐시 보강"""
+        missing_ids = self._collect_missing_step_detail_ids()
+        if not missing_ids:
+            return []
+
+        for step_id in missing_ids:
+            if step_id in self._test_step_cache:
+                continue
+
+            detail = self._fetch_test_step_with_retry(step_id, max_attempts=max_attempts)
+            if detail is None:
+                continue
+
+            step = detail.get("step", {})
+            api = step.get("api", {}) if isinstance(step, dict) else {}
+            self._test_step_cache[step_id] = {
+                "id": step_id,
+                "name": step.get("name", ""),
+                "endpoint": api.get("endpoint", ""),
+                "verificationType": step.get("verificationType", ""),
+                "detail": detail,
+            }
+
+        return self._collect_missing_step_detail_ids()
 
     # ---------- UI Helper ----------
 

@@ -702,6 +702,14 @@ class InfoWidget(QWidget):
             return
 
         admin_code_status = self.form_validator.get_admin_code_validation_status()
+        if admin_code_status == "missing_server_code":
+            try:
+                self.real_admin_code = self.form_validator.api_client.fetch_admin_code()
+            except Exception as e:
+                Logger.warning(f"관리자 코드 재조회 실패: {e}")
+                self.real_admin_code = None
+            admin_code_status = self.form_validator.get_admin_code_validation_status()
+
         if admin_code_status not in ("not_required", "valid"):
             if admin_code_status == "missing_input":
                 QMessageBox.warning(self, "입력 필요", "관리자 코드를 입력해주십시오.")
@@ -824,7 +832,11 @@ class InfoWidget(QWidget):
                 # ARP Worker와 Thread 설정
                 from PyQt5.QtCore import QThread
 
-                self.arp_scan_worker = ARPScanWorker(test_port=self.test_port if hasattr(self, 'test_port') else None)
+                preferred_source_ip = getattr(self, 'resolved_test_ip', None)
+                self.arp_scan_worker = ARPScanWorker(
+                    test_port=self.test_port if hasattr(self, 'test_port') else None,
+                    source_ip=preferred_source_ip,
+                )
                 self.arp_scan_thread = QThread()
 
                 # Worker를 Thread로 이동
