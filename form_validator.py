@@ -54,28 +54,36 @@ def derive_webhook_port(test_port, full_url):
 
 
 def derive_webhook_host(full_url):
-    """Return webhook host for callback URL (prefer local machine IP)."""
+    """Return webhook host for callback URL.
+
+    Priority:
+    1) Host from selected URL in UI (stable, user-visible choice)
+    2) Fallback to local machine routing IP (legacy behavior)
+    """
+    parsed_host = None
+    if full_url:
+        normalized_url = full_url
+        if not normalized_url.startswith(("http://", "https://")):
+            normalized_url = f"https://{normalized_url}"
+
+        try:
+            parsed = urlparse(normalized_url)
+            parsed_host = parsed.hostname
+        except ValueError:
+            parsed_host = None
+
+    if parsed_host:
+        return parsed_host
+
     try:
         local_ips = CONSTANTS.get_all_local_ips()
         if local_ips:
-            # 기본 라우팅 IP가 마지막에 추가되므로 우선 사용
+            # 기존 동작 호환: 기본 라우팅 IP가 마지막에 추가되므로 마지막 값 사용
             return local_ips[-1]
     except Exception:
         pass
 
-    if not full_url:
-        return None
-
-    normalized_url = full_url
-    if not normalized_url.startswith(("http://", "https://")):
-        normalized_url = f"https://{normalized_url}"
-
-    try:
-        parsed = urlparse(normalized_url)
-    except ValueError:
-        return None
-
-    return parsed.hostname
+    return None
 
 
 class FormValidator:
@@ -242,7 +250,8 @@ class FormValidator:
             # 2. 접속 정보 (시나리오명이 포함된 전체 URL 가져오기)
             full_url = self.parent.get_selected_url()
             variables['url'] = full_url
-            webhook_host = derive_webhook_host(full_url)
+            resolved_test_ip = getattr(self.parent, 'resolved_test_ip', None)
+            webhook_host = resolved_test_ip or derive_webhook_host(full_url)
             webhook_port = derive_webhook_port(getattr(self.parent, 'test_port', None), full_url)
 
             if webhook_host:

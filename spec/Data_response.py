@@ -686,41 +686,6 @@ cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_webhook_in_data = {
 ]
 }
 
-# StoredVerifEventInfos
-cmii7pysb004k8z1tts0npxfm_StoredVerifEventInfos_out_data = {
-    "code": "200",
-    "message": "성공",
-    "doorList": [
-        {
-        "eventTime": 20220822163022124,
-        "doorID": "door0001",
-        "userID": "user0001",
-        "bioAuthTypeList": [
-        "지문",
-        "얼굴"
-    ],
-        "otherAuthTypeList": [
-        "카드"
-    ],
-        "eventName": "성공",
-        "eventDesc": "36.5"
-    },
-        {
-        "eventTime": 20220822163022124,
-        "doorID": "door0002",
-        "userID": "user0002",
-        "bioAuthTypeList": [
-        "홍채"
-    ],
-        "otherAuthTypeList": [
-        "카드"
-    ],
-        "eventName": "",
-        "eventDesc": ""
-    }
-]
-}
-
 # cmii7pysb004k8z1tts0npxfm 데이터 리스트
 cmii7pysb004k8z1tts0npxfm_outData = [
     cmii7pysb004k8z1tts0npxfm_Authentication_out_data,
@@ -728,7 +693,6 @@ cmii7pysb004k8z1tts0npxfm_outData = [
     cmii7pysb004k8z1tts0npxfm_DoorProfiles_out_data,
     cmii7pysb004k8z1tts0npxfm_AccessUserInfos_out_data,
     cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_out_data,
-    cmii7pysb004k8z1tts0npxfm_StoredVerifEventInfos_out_data,
 ]
 
 # cmii7pysb004k8z1tts0npxfm WebHook 데이터 리스트
@@ -738,7 +702,6 @@ cmii7pysb004k8z1tts0npxfm_webhook_inData = [
     None,
     None,
     cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_webhook_in_data,
-    None,
 ]
 
 # cmii7pysb004k8z1tts0npxfm API endpoint
@@ -748,7 +711,6 @@ cmii7pysb004k8z1tts0npxfm_messages = [
     "DoorProfiles",
     "AccessUserInfos",
     "RealtimeVerifEventInfos",
-    "StoredVerifEventInfos",
 ]
 
 # Authentication
@@ -758,83 +720,6 @@ cmii7lxbn002s8z1t1i9uudf0_Authentication_out_data = {
     "userName": "관리자",
     "userAff": "오산시청",
     "accessToken": "abcde1234"
-}
-
-# Capabilities
-cmii7lxbn002s8z1t1i9uudf0_Capabilities_out_data = {
-    "code": "200",
-    "message": "성공",
-    "streamingSupport": [
-        {
-        "streamProtocolType": "RTSP",
-        "streamProtocolDesc": "Unicast"
-    }
-],
-    "transportSupport": [
-        {
-        "transProtocolType": "Webhook",
-        "transProtocolDesc": ""
-    }
-]
-}
-
-# CameraProfiles
-cmii7lxbn002s8z1t1i9uudf0_CameraProfiles_out_data = {
-    "code": "200",
-    "message": "성공",
-    "camList": [
-        {
-        "camID": "cam0001",
-        "camName": "카메라1",
-        "camLoc": {
-        "lon": "127.127730",
-        "lat": "38.439801",
-        "alt": "32.131",
-        "desc": "3층복도"
-    },
-        "camConfig": {
-        "camType": "PTZ"
-    }
-    },
-        {
-        "camID": "cam0002",
-        "camName": "카메라2",
-        "camLoc": {
-        "lon": "127.2887",
-        "lat": "37.33671",
-        "alt": ""
-    },
-        "camConfig": {
-        "camType": "dome"
-    }
-    },
-        {
-        "camID": "cam003",
-        "camName": "카메라3",
-        "camLoc": {
-        "lon": "75",
-        "lat": "585",
-        "alt": "122",
-        "desc": "2층출입문"
-    },
-        "camConfig": {
-        "camType": "PTZ"
-    }
-    },
-        {
-        "camID": "cam004",
-        "camName": "카메라4",
-        "camLoc": {
-        "lon": "44",
-        "lat": "211",
-        "alt": "23",
-        "desc": "1층 출입문"
-    },
-        "camConfig": {
-        "camType": "dome"
-    }
-    }
-]
 }
 
 # StreamURLs
@@ -853,43 +738,6 @@ cmii7lxbn002s8z1t1i9uudf0_StreamURLs_out_data = {
         "videoCodec": "H.264",
         "audioCodec": "G.711"
     }
-    }
-]
-}
-
-# RealtimeVideoEventInfos
-cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_out_data = {
-    "code": "200",
-    "message": "성공"
-}
-
-# RealtimeVideoEventInfos WebHook IN Data
-cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_webhook_in_data = {
-    "camList": [
-        {
-        "camID": "",
-        "eventUUID": "event01",
-        "eventName": "",
-        "startTime": 0,
-        "endTime": 0,
-        "eventDesc": "sfdfEFASDDDLKJFjdkdlfjde"
-    }
-]
-}
-
-# StoredVideoInfos
-cmii7lxbn002s8z1t1i9uudf0_StoredVideoInfos_out_data = {
-    "code": "200",
-    "message": "성공",
-    "camList": [
-        {
-        "camID": "",
-        "timeList": [
-            {
-            "startTime": 0,
-            "endTime": 0
-        }
-    ]
     }
 ]
 }
@@ -914,87 +762,17 @@ cmii7lxbn002s8z1t1i9uudf0_ReplayURL_out_data = {
 ]
 }
 
-# StoredVideoEventInfos
-cmii7lxbn002s8z1t1i9uudf0_StoredVideoEventInfos_out_data = {
-    "code": "200",
-    "message": "성공",
-    "camList": [
-        {
-        "camID": "",
-        "eventUUID": "event01",
-        "eventName": "",
-        "startTime": 0,
-        "endTime": 0,
-        "eventDesc": "AAABVVVVCCCDDssvfdd"
-    }
-]
-}
-
-# StoredObjectAnalyticsInfos
-cmii7lxbn002s8z1t1i9uudf0_StoredObjectAnalyticsInfos_out_data = {
-    "code": "200",
-    "message": "성공",
-    "camList": [
-        {
-        "camID": "",
-        "analyticsTime": 0,
-        "anlayticsResultList": [
-            {
-            "anayticsID": "object001",
-            "analyticsClass": "Human",
-            "analyticsAttribute": [
-            "빨간색"
-        ],
-            "analyticsConfidence": 0.8,
-            "analyticsBoundingBox": {
-            "left": 0.2,
-            "top": 0.1,
-            "right": 0.5,
-            "bottom": 0.6
-        },
-            "analyticsDesc": "13가 4567"
-        }
-    ]
-    }
-]
-}
-
 # cmii7lxbn002s8z1t1i9uudf0 데이터 리스트
 cmii7lxbn002s8z1t1i9uudf0_outData = [
     cmii7lxbn002s8z1t1i9uudf0_Authentication_out_data,
-    cmii7lxbn002s8z1t1i9uudf0_Capabilities_out_data,
-    cmii7lxbn002s8z1t1i9uudf0_CameraProfiles_out_data,
     cmii7lxbn002s8z1t1i9uudf0_StreamURLs_out_data,
-    cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_out_data,
-    cmii7lxbn002s8z1t1i9uudf0_StoredVideoInfos_out_data,
     cmii7lxbn002s8z1t1i9uudf0_ReplayURL_out_data,
-    cmii7lxbn002s8z1t1i9uudf0_StoredVideoEventInfos_out_data,
-    cmii7lxbn002s8z1t1i9uudf0_StoredObjectAnalyticsInfos_out_data,
-]
-
-# cmii7lxbn002s8z1t1i9uudf0 WebHook 데이터 리스트
-cmii7lxbn002s8z1t1i9uudf0_webhook_inData = [
-    None,
-    None,
-    None,
-    None,
-    cmii7lxbn002s8z1t1i9uudf0_RealtimeVideoEventInfos_webhook_in_data,
-    None,
-    None,
-    None,
-    None,
 ]
 
 # cmii7lxbn002s8z1t1i9uudf0 API endpoint
 cmii7lxbn002s8z1t1i9uudf0_messages = [
     "Authentication",
-    "Capabilities",
-    "CameraProfiles",
     "StreamURLs",
-    "RealtimeVideoEventInfos",
-    "StoredVideoInfos",
     "ReplayURL",
-    "StoredVideoEventInfos",
-    "StoredObjectAnalyticsInfos",
 ]
 

@@ -117,19 +117,19 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소
 # test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
-company_name = "keti"
-product_name = "keti"
-version = "keti"
+company_name = "keti6"
+product_name = "keti6"
+version = "keti6"
 test_category = "본시험"
 test_target = "제어 기능-통합플랫폼 외 1개"
 test_range = "전체 필드"
 auth_type = "Digest Auth"
 auth_info = "kisa,kisa_k1!2@"
 admin_code = "123456"
-url = "https://192.168.1.70:8080"
-contact_person = "keti"
-model_name = "keti"
-request_id = "cmncibwlw000j1303mb4prh3r"
+url = "https://192.168.0.6:8080"
+contact_person = "keti6"
+model_name = "keti6"
+request_id = "cmo6iekcw016s1303w4ftpthx"
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황
 flag_opt = False
@@ -178,11 +178,11 @@ DEBUG_LEVEL = 3 # 기본값: WARN (권장)
 # ✅ 웹훅 서버 설정 (전역)
 WEBHOOK_HOST = "0.0.0.0"  # 서버 바인딩 주소 (모든 인터페이스에서 수신)
 WEBHOOK_PORT = 8081
-WEBHOOK_PUBLIC_IP = "192.168.1.70"
+WEBHOOK_PUBLIC_IP = "192.168.0.6"
 # ✅ 웹훅 공개 IP 설정: info_GUI에서 선택한 시험 URL의 IP 사용
 # 초기값은 URL에서 추출, info_GUI에서 주소 선택 후 자동 업데이트됨
 
-WEBHOOK_URL = "https://192.168.1.70:8081"
+WEBHOOK_URL = "https://192.168.0.6:8081"
 # 주소 선택 후 form_validator.py에서 자동으로 업데이트됨
 
 # ✅ 웹훅 외부 접근 주소 (플랫폼에 전송할 주소 - ngrok 등) (01/08 임시로 추가)
@@ -241,21 +241,21 @@ SPEC_CONFIG = [
         "cmii7pysb004k8z1tts0npxfm": {
     "test_name": "ac001",
     "specs": ['cmii7pysb004k8z1tts0npxfm_inSchema', 'cmii7pysb004k8z1tts0npxfm_outData', 'cmii7pysb004k8z1tts0npxfm_messages', 'cmii7pysb004k8z1tts0npxfm_webhook_OutSchema', 'cmii7pysb004k8z1tts0npxfm_webhook_inData'],
-    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '바이오 및 출입통제 장치 목록 정보', '사용자 권한 정보 연동', '실시간 출입인증 목록 정보 연동', '저장된 출입인증 목록 정보 연동'],
-    "api_id": ['cmii7roh5004o8z1t47spn819', 'cmiiby4fo003chl2h8hzgu7m3', 'cmisjhwhq09hi5vy7n59tvsht', 'cmiwhz2il00epugxnzh3d9iuc', 'cmiwj1hq302myugxn8a5c6f48', 'cmiwjtg8i03wjugxnqkustaqj'],
-    "api_endpoint": ['/Authentication', '/Capabilities', '/DoorProfiles', '/AccessUserInfos', '/RealtimeVerifEventInfos', '/StoredVerifEventInfos'],
-    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'WebHook', 'basic'],
-    "time_out": [60000, 60000, 60000, 60000, 60000, 60000],
+    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '바이오 및 출입통제 장치 목록 정보', '사용자 권한 정보 연동', '실시간 출입인증 목록 정보 연동'],
+    "api_id": ['cmii7roh5004o8z1t47spn819', 'cmiiby4fo003chl2h8hzgu7m3', 'cmisjhwhq09hi5vy7n59tvsht', 'cmiwhz2il00epugxnzh3d9iuc', 'cmiwj1hq302myugxn8a5c6f48'],
+    "api_endpoint": ['/Authentication', '/Capabilities', '/DoorProfiles', '/AccessUserInfos', '/RealtimeVerifEventInfos'],
+    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'WebHook', None],
+    "time_out": [60000, 60000, 60000, 60000, 60000, 5000],
     "num_retries": [1, 1, 1, 1, 1, 1]
 },
         "cmii7lxbn002s8z1t1i9uudf0": {
     "test_name": "vid001",
-    "specs": ['cmii7lxbn002s8z1t1i9uudf0_inSchema', 'cmii7lxbn002s8z1t1i9uudf0_outData', 'cmii7lxbn002s8z1t1i9uudf0_messages', 'cmii7lxbn002s8z1t1i9uudf0_webhook_OutSchema', 'cmii7lxbn002s8z1t1i9uudf0_webhook_inData'],
-    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '카메라 목록 연동', '실시간 영상(CCTV) 전송 ', '실시간 이벤트 분석 정보 연동', '저장된 영상 목록 연동', '저장된 영상(CCTV) 전송 ', '저장된 이벤트 분석 정보 연동', '저장된 객체 분석 정보 연동'],
-    "api_id": ['cmii7p0dp002w8z1tcikv3cji', 'cmio328yj007zie8ffqfnxwnl', 'cmiqs6rjd00khie8frmm5c83g', 'cmiqsc74800leie8fsshjqpok', 'cmiqsim3j00mwie8fumvg1qnf', 'cmiqsrgr100p7ie8fzdzjr4hn', 'cmiqsw7ou00qgie8fjt03g03i', 'cmiqt02wa00rhie8fewnh1pn3', 'cmiqt4e5z00t6ie8fxsb3tkbc'],
-    "api_endpoint": ['/Authentication', '/Capabilities', '/CameraProfiles', '/StreamURLs', '/RealtimeVideoEventInfos', '/StoredVideoInfos', '/ReplayURL', '/StoredVideoEventInfos', '/StoredObjectAnalyticsInfos'],
-    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'WebHook', 'basic', 'basic', 'basic', 'basic'],
-    "time_out": [60000, 60000, 60000, 60000, 60000, 60000, 60000, 60000, 60000],
+    "specs": ['cmii7lxbn002s8z1t1i9uudf0_inSchema', 'cmii7lxbn002s8z1t1i9uudf0_outData', 'cmii7lxbn002s8z1t1i9uudf0_messages'],
+    "api_name": ['사용자 인증', '실시간 영상(CCTV) 전송 ', '저장된 영상(CCTV) 전송 '],
+    "api_id": ['cmii7p0dp002w8z1tcikv3cji', 'cmiqsc74800leie8fsshjqpok', 'cmiqsw7ou00qgie8fjt03g03i'],
+    "api_endpoint": ['/Authentication', '/StreamURLs', '/ReplayURL'],
+    "trans_protocol": ['basic', None, None, 'basic', None, None, 'basic', None, None],
+    "time_out": [60000, 5000, 5000, 60000, 5000, 5000, 60000, 5000, 5000],
     "num_retries": [1, 1, 1, 1, 1, 1, 1, 1, 1]
 }
     }
