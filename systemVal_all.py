@@ -396,11 +396,8 @@ class MyApp(SystemMainUI):
 
     def _get_request_spec_ids_for_tracking(self):
         spec_config = getattr(self, 'LOADED_SPEC_CONFIG', getattr(self.CONSTANTS, 'SPEC_CONFIG', []))
-        current_group_id = getattr(self, "current_group_id", None)
         request_spec_ids = []
         for group in spec_config:
-            if current_group_id and group.get("group_id") != current_group_id:
-                continue
             spec_ids = [
                 key for key, value in group.items()
                 if key not in ["group_name", "group_id"] and isinstance(value, dict)
