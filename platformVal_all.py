@@ -461,7 +461,8 @@ class MyApp(PlatformMainUI):
                                 f"[RESULT_JSON] api={api_item.get('name')} type={type(transmitted_data).__name__} value={repr(transmitted_data)[:300]}"
                             )
                     url = f"{CONSTANTS.management_url}/api/integration/test-results"
-                    response = requests.post(url, json=result_json)
+                    response = requests.post(url, json=result_json, timeout=15)
+                    response.raise_for_status()
                     try:
                         self.latest_result_response = response.json()
                     except Exception:
@@ -1393,7 +1394,8 @@ class MyApp(PlatformMainUI):
                                 f"[RESULT_JSON] api={api_item.get('name')} type={type(transmitted_data).__name__} value={repr(transmitted_data)[:300]}"
                             )
                     url = f"{CONSTANTS.management_url}/api/integration/test-results"
-                    response = requests.post(url, json=result_json)
+                    response = requests.post(url, json=result_json, timeout=15)
+                    response.raise_for_status()
                     Logger.debug(f"✅ 시험 결과 전송 상태 코드:: {response.status_code}")
                     Logger.debug(f"📥  시험 결과 전송 응답:: {response.text}")
 
@@ -2115,6 +2117,8 @@ class MyApp(PlatformMainUI):
         request_spec_ids = MyApp._get_request_spec_ids_for_tracking(self)
         if request_spec_ids:
             selected_spec_ids = request_spec_ids
+        elif not selected_spec_ids:
+            selected_spec_ids = []
 
         unique_spec_ids = []
         for spec_id in selected_spec_ids:
@@ -2130,9 +2134,12 @@ class MyApp(PlatformMainUI):
 
     def _get_request_spec_ids_for_tracking(self):
         spec_config = getattr(self, 'LOADED_SPEC_CONFIG', getattr(self.CONSTANTS, 'SPEC_CONFIG', []))
+        current_group_id = getattr(self, "current_group_id", None)
         request_spec_ids = []
 
         for group in spec_config:
+            if current_group_id and group.get("group_id") != current_group_id:
+                continue
             spec_ids = [
                 key for key, value in group.items()
                 if key not in ["group_name", "group_id"] and isinstance(value, dict)
@@ -2151,6 +2158,17 @@ class MyApp(PlatformMainUI):
         completed_spec_ids = set()
         expected_spec_id_set = set(expected_spec_ids or [])
 
+        def _is_saved_spec_completed(saved_data):
+            table_data = saved_data.get("table_data") or []
+            if not table_data:
+                return False
+
+            for row_data in table_data:
+                icon_state = str(row_data.get("icon_state", "")).upper()
+                if icon_state not in {"PASS", "FAIL"}:
+                    return False
+            return True
+
         for composite_key, saved_data in (getattr(self, "spec_table_data", {}) or {}).items():
             if "_" in composite_key:
                 _group_id, spec_id = composite_key.split("_", 1)
@@ -2160,9 +2178,7 @@ class MyApp(PlatformMainUI):
             if spec_id not in expected_spec_id_set:
                 continue
 
-            table_data = saved_data.get("table_data") or []
-            saved_cnt = int(saved_data.get("cnt", 0) or 0)
-            if table_data and saved_cnt >= len(table_data):
+            if _is_saved_spec_completed(saved_data):
                 completed_spec_ids.add(spec_id)
 
         return completed_spec_ids
@@ -2182,10 +2198,7 @@ class MyApp(PlatformMainUI):
         if not expected_spec_ids:
             return False
 
-        should_send = set(expected_spec_ids).issubset(self.completed_spec_ids_for_run)
-        if should_send:
-            self.final_result_sent = True
-        return should_send
+        return set(expected_spec_ids).issubset(self.completed_spec_ids_for_run)
 
     def run_single_spec_test(self):
         """단일 spec_id에 대한 시험 실행"""
@@ -2952,7 +2965,8 @@ class MyApp(PlatformMainUI):
             self.run_status = "진행중"
             result_json = build_result_json(self)
             url = f"{CONSTANTS.management_url}/api/integration/test-results"
-            response = requests.post(url, json=result_json)
+            response = requests.post(url, json=result_json, timeout=15)
+            response.raise_for_status()
             Logger.debug(f"✅ 시험 결과 전송 상태 코드:: {response.status_code}")
             Logger.debug(f"📥  시험 결과 전송 응답:: {response.text}")
             json_path = os.path.join(result_dir, "request_results.json")

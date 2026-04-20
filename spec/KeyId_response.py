@@ -88,37 +88,17 @@ cmiqqzrjz00i3ie8figf79cur_PtzContinuousMove_request_key_ids = {
     "timeOut": "cmiwptzu407ct844gn5e3aiox",
 }
 
-cmiqqzrjz00i3ie8figf79cur_PtzStop_request_key_ids = {
-    "camID": "cmiwpwil007dz844guxyn1lhc",
-    "pan": "cmiwpwm0f07e7844g44j47a6t",
-    "tilt": "cmiwpwtpf07eh844giz0vy842",
-    "zoom": "cmiwpwz1v07er844gzzx8hm0j",
-}
-
 # cmiqqzrjz00i3ie8figf79cur Request Key-ID Mapping 리스트
 cmiqqzrjz00i3ie8figf79cur_request_key_ids = [
     cmiqqzrjz00i3ie8figf79cur_Authentication_request_key_ids,
     cmiqqzrjz00i3ie8figf79cur_PtzStatus_request_key_ids,
     cmiqqzrjz00i3ie8figf79cur_PtzContinuousMove_request_key_ids,
-    cmiqqzrjz00i3ie8figf79cur_PtzStop_request_key_ids,
 ]
 
 # cmii7shen005i8z1tagevx4qh
 cmii7shen005i8z1tagevx4qh_Authentication_request_key_ids = {
     "userID": "cmii7ubbm005z8z1tehq9fr86",
     "userPW": "cmii7ubbn00618z1t8tq43wxl",
-}
-
-cmii7shen005i8z1tagevx4qh_RealtimeSensorData_request_key_ids = {
-    "sensorDeviceList": "cmiwks7mu01ed844gsf300h90",
-    "sensorDeviceList.sensorDeviceID": "cmiwku6pd01py844gs8pdfqk7",
-    "duration": "cmiwktcwm01iz844go8txcmqw",
-    "transProtocol": "cmiwktiqh01kl844gjwbaiw73",
-    "transProtocol.transProtocolType": "cmiwktrzi01n5844gxocqtjht",
-    "transProtocol.transProtocolDesc": "cmiwktx0r01ok844gn28t482z",
-    "startTime": "cmiwku3u101pg844gejhlznpv",
-    "code": "cmiwkzzwa02y3844gljxs30eu",
-    "message": "cmiwl037902yc844gagayjzkj",
 }
 
 cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_request_key_ids = {
@@ -134,22 +114,10 @@ cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_request_key_ids = {
     "message": "cmiwl81k103nb844gd7iiue6b",
 }
 
-cmii7shen005i8z1tagevx4qh_StoredSensorEventInfos_request_key_ids = {
-    "timePeriod": "cmiwljyk703pj844gnqjb4im6",
-    "timePeriod.startTime": "cmiwlk5bz03q0844g7oomi66i",
-    "timePeriod.endTime": "cmiwlk8e003q8844gd2f442h5",
-    "sensorDeviceList": "cmiwlkeb803qh844gnr7ujlru",
-    "sensorDeviceList.sensorDeviceID": "cmiwlli7703u9844graoc4jdn",
-    "maxCount": "cmiwlkv3q03rp844gzzp5dbqi",
-    "eventFilter": "cmiwllfp703tr844g17037vsi",
-}
-
 # cmii7shen005i8z1tagevx4qh Request Key-ID Mapping 리스트
 cmii7shen005i8z1tagevx4qh_request_key_ids = [
     cmii7shen005i8z1tagevx4qh_Authentication_request_key_ids,
-    cmii7shen005i8z1tagevx4qh_RealtimeSensorData_request_key_ids,
     cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_request_key_ids,
-    cmii7shen005i8z1tagevx4qh_StoredSensorEventInfos_request_key_ids,
 ]
 
 # cmii7pysb004k8z1tts0npxfm
@@ -175,33 +143,6 @@ cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_request_key_ids = {
 cmii7pysb004k8z1tts0npxfm_request_key_ids = [
     cmii7pysb004k8z1tts0npxfm_Authentication_request_key_ids,
     cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_request_key_ids,
-]
-
-# cmii7lxbn002s8z1t1i9uudf0
-cmii7lxbn002s8z1t1i9uudf0_Authentication_request_key_ids = {
-    "userID": "cmii7p9by00438z1tcsv6char",
-    "userPW": "cmii7p9by00458z1tk9ujm7bg",
-}
-
-cmii7lxbn002s8z1t1i9uudf0_StreamURLs_request_key_ids = {
-    "camList": "cmiqse7sz00lrie8fyyzktd2q",
-    "camList.camID": "cmir13qc500ha4m39kvqh9lau",
-    "camList.streamProtocolType": "cmir13qc600hc4m39p2sfeh85",
-}
-
-cmii7lxbn002s8z1t1i9uudf0_ReplayURL_request_key_ids = {
-    "camList": "cmiqswyv200qrie8fmjncw65d",
-    "camList.camID": "cmir35uma03my4m39s5d6jggk",
-    "camList.startTime": "cmir35umb03n04m39nanmwopv",
-    "camList.endTime": "cmir35umc03n24m39yyacy0x5",
-    "camList.streamProtocolType": "cmir35umc03n44m39x80d04ox",
-}
-
-# cmii7lxbn002s8z1t1i9uudf0 Request Key-ID Mapping 리스트
-cmii7lxbn002s8z1t1i9uudf0_request_key_ids = [
-    cmii7lxbn002s8z1t1i9uudf0_Authentication_request_key_ids,
-    cmii7lxbn002s8z1t1i9uudf0_StreamURLs_request_key_ids,
-    cmii7lxbn002s8z1t1i9uudf0_ReplayURL_request_key_ids,
 ]
 
 
@@ -390,11 +331,6 @@ cmiqqzrjz00i3ie8figf79cur_PtzContinuousMove_response_key_ids = {
     "message": "cmiwpupho07de844ghl7x9u0q",
 }
 
-cmiqqzrjz00i3ie8figf79cur_PtzStop_response_key_ids = {
-    "code": "cmiwpx90h07f1844glcuw528e",
-    "message": "cmiwpxflk07fb844ge0ye0ib7",
-}
-
 # cmiqqzrjz00i3ie8figf79cur Response Key-ID Mapping 리스트
 cmiqqzrjz00i3ie8figf79cur_response_key_ids = [
     cmiqqzrjz00i3ie8figf79cur_Authentication_response_key_ids,
@@ -402,7 +338,6 @@ cmiqqzrjz00i3ie8figf79cur_response_key_ids = [
     cmiqqzrjz00i3ie8figf79cur_CameraProfiles_response_key_ids,
     cmiqqzrjz00i3ie8figf79cur_PtzStatus_response_key_ids,
     cmiqqzrjz00i3ie8figf79cur_PtzContinuousMove_response_key_ids,
-    cmiqqzrjz00i3ie8figf79cur_PtzStop_response_key_ids,
 ]
 
 # cmii7shen005i8z1tagevx4qh
@@ -412,39 +347,6 @@ cmii7shen005i8z1tagevx4qh_Authentication_response_key_ids = {
     "userName": "cmii7ubcc006a8z1tiysoivn3",
     "userAff": "cmii7ubcd006c8z1t5znhxevt",
     "accessToken": "cmii7ubcd006e8z1tdsy8yzmg",
-}
-
-cmii7shen005i8z1tagevx4qh_Capabilities_response_key_ids = {
-    "code": "cmiwkddjg000t844g314b5617",
-    "message": "cmiwkdp0c0019844gm7dcd6x7",
-    "transportSupport": "cmiwke1ip001l844ga022dkuo",
-    "transportSupport.transProtocolType": "cmiwkenyq003c844g8076pb6b",
-    "transportSupport.transProtocolDesc": "cmiwkenyq003e844gceq8juz9",
-}
-
-cmii7shen005i8z1tagevx4qh_SensorDeviceProfiles_response_key_ids = {
-    "code": "cmiwkjjd5003y844g1zy7wxlg",
-    "message": "cmiwkjq080048844gqxgoo5kt",
-    "sensorDeviceList": "cmiwkjxse004i844g6dzk9xuk",
-    "sensorDeviceList.sensorDeviceID": "cmiwkpl7z01df844gtz32y9f5",
-    "sensorDeviceList.sensorDeviceType": "cmiwkpl8001dh844g75gn8pnr",
-    "sensorDeviceList.sensorDeviceName": "cmiwkpl8001dj844gft5bvtk3",
-    "sensorDeviceList.sensorDeviceLoc": "cmiwkpl8101dl844gkgmxvh73",
-    "sensorDeviceList.sensorDeviceLoc.lon": "cmiwkpl9001dn844gcfhlhmuf",
-    "sensorDeviceList.sensorDeviceLoc.lat": "cmiwkpl9101dp844g7ipf3rd7",
-    "sensorDeviceList.sensorDeviceLoc.alt": "cmiwkpl9101dr844gmhas0h0i",
-    "sensorDeviceList.sensorDeviceLoc.desc": "cmiwkpl9201dt844gpk2spohg",
-}
-
-cmii7shen005i8z1tagevx4qh_RealtimeSensorData_response_key_ids = {
-    "code": "cmiwkumay01qo844gast85yvr",
-    "message": "cmiwkuog901qt844gswj7kaas",
-    "sensorDeviceList": "cmiwkvlgi01r6844g0inyggzl",
-    "sensorDeviceList.sensorDeviceID": "cmiwkzuqx02xk844gd9lr6k8p",
-    "sensorDeviceList.measureTime": "cmiwkzuqx02xm844ghyx3o5j7",
-    "sensorDeviceList.sensorDeviceType": "cmiwkzuqy02xo844glk3msr3k",
-    "sensorDeviceList.sensorDeviceUnit": "cmiwkzuqy02xq844gh7csg9af",
-    "sensorDeviceList.sensorDeviceValue": "cmiwkzuqz02xs844gqt2i349j",
 }
 
 cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_response_key_ids = {
@@ -457,24 +359,10 @@ cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_response_key_ids = {
     "sensorDeviceList.eventDesc": "cmiwl7u0l03mh844g8mtp6h14",
 }
 
-cmii7shen005i8z1tagevx4qh_StoredSensorEventInfos_response_key_ids = {
-    "code": "cmiwllxwf03uk844gapewtuco",
-    "message": "cmiwlm39u03uu844g8drw39o8",
-    "sensorDeviceList": "cmiwlmdjq03v4844gn0z12qco",
-    "sensorDeviceList.sensorDeviceID": "cmiwlopxp04a3844gu8p7c9ce",
-    "sensorDeviceList.eventName": "cmiwlopxq04a5844gu90f3obk",
-    "sensorDeviceList.eventTime": "cmiwlopxq04a7844g3dl2n5f1",
-    "sensorDeviceList.eventDesc": "cmiwlopxq04a9844gg1gbzxy3",
-}
-
 # cmii7shen005i8z1tagevx4qh Response Key-ID Mapping 리스트
 cmii7shen005i8z1tagevx4qh_response_key_ids = [
     cmii7shen005i8z1tagevx4qh_Authentication_response_key_ids,
-    cmii7shen005i8z1tagevx4qh_Capabilities_response_key_ids,
-    cmii7shen005i8z1tagevx4qh_SensorDeviceProfiles_response_key_ids,
-    cmii7shen005i8z1tagevx4qh_RealtimeSensorData_response_key_ids,
     cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_response_key_ids,
-    cmii7shen005i8z1tagevx4qh_StoredSensorEventInfos_response_key_ids,
 ]
 
 # cmii7pysb004k8z1tts0npxfm
@@ -484,51 +372,6 @@ cmii7pysb004k8z1tts0npxfm_Authentication_response_key_ids = {
     "userName": "cmii7rok4005c8z1tgr5tzegk",
     "userAff": "cmii7rok4005e8z1tcbqpnnxe",
     "accessToken": "cmii7rok5005g8z1tpldy9e57",
-}
-
-cmii7pysb004k8z1tts0npxfm_Capabilities_response_key_ids = {
-    "code": "cmiiby4h9003ihl2hmn3ghbvl",
-    "message": "cmiiby4ha003khl2hx6u7i1ps",
-    "transportSupport": "cmiiby4hb003ohl2hema5s6r2",
-    "transportSupport.transProtocolType": "cmiiby4hy003yhl2hh2puktr0",
-    "transportSupport.transProtocolDesc": "cmiiby4hz0040hl2hev5ljfq9",
-}
-
-cmii7pysb004k8z1tts0npxfm_DoorProfiles_response_key_ids = {
-    "code": "cmisjisee09hw5vy7ajj18xo1",
-    "message": "cmisjj68n09i65vy7bhj2lnxi",
-    "doorList": "cmisjjjw309ij5vy7klz54kvh",
-    "doorList.doorID": "cmisk9y5l0db35vy74nn3utak",
-    "doorList.doorName": "cmisk9y5m0db55vy7m42cq0u0",
-    "doorList.doorRelayStatus": "cmisk9y5m0db75vy7nrgitysd",
-    "doorList.doorSensor": "cmisk9y5n0db95vy7cpkpvnlh",
-    "doorList.doorLoc": "cmisk9y5n0dbb5vy78079wnwa",
-    "doorList.doorLoc.lon": "cmisk9y600dbh5vy7585nx241",
-    "doorList.doorLoc.lat": "cmisk9y610dbj5vy757umjzmd",
-    "doorList.doorLoc.alt": "cmisk9y620dbl5vy7729uz0ee",
-    "doorList.doorLoc.desc": "cmisk9y620dbn5vy707sb9da3",
-    "doorList.bioDeviceList": "cmisk9y5o0dbd5vy75p2klvsn",
-    "doorList.bioDeviceList.bioDeviceID": "cmisk9y6t0dc15vy7y7tv0ftk",
-    "doorList.bioDeviceList.bioDeviceName": "cmisk9y6t0dc35vy7mkqcjckn",
-    "doorList.bioDeviceList.bioDeviceAuthTypeList": "cmisk9y6u0dc55vy7j4xovvyy",
-    "doorList.otherDeviceList": "cmisk9y5o0dbf5vy765j03uof",
-    "doorList.otherDeviceList.otherDeviceID": "cmisk9y6u0dc75vy7s3znthpa",
-    "doorList.otherDeviceList.otherDeviceName": "cmisk9y6v0dc95vy7fj06dgu6",
-    "doorList.otherDeviceList.otherDeviceAuthTypeList": "cmisk9y6v0dcb5vy77eqohj9u",
-}
-
-cmii7pysb004k8z1tts0npxfm_AccessUserInfos_response_key_ids = {
-    "code": "cmiwiplu600gpugxnl33vzh64",
-    "message": "cmiwipydg00gzugxny5b0z1h8",
-    "userList": "cmiwiqao200h9ugxn0brcef9o",
-    "userList.userID": "cmiwj0n6b02m2ugxnw1xpebou",
-    "userList.userName": "cmiwj0n6b02m4ugxnbuikeax0",
-    "userList.userDesc": "cmiwj0n6b02m6ugxnsaqjrk5l",
-    "userList.doorList": "cmiwj0n6c02m8ugxnifph5nei",
-    "userList.doorList.doorID": "cmiwj0n6i02miugxn26i0v7ni",
-    "userList.doorList.timePeriod": "cmiwj0n6j02mkugxneilxzvra",
-    "userList.doorList.timePeriod.startTime": "cmiwj0n6n02mqugxn455p44hm",
-    "userList.doorList.timePeriod.endTime": "cmiwj0n6n02msugxnnqmanlio",
 }
 
 cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_response_key_ids = {
@@ -547,55 +390,6 @@ cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_response_key_ids = {
 # cmii7pysb004k8z1tts0npxfm Response Key-ID Mapping 리스트
 cmii7pysb004k8z1tts0npxfm_response_key_ids = [
     cmii7pysb004k8z1tts0npxfm_Authentication_response_key_ids,
-    cmii7pysb004k8z1tts0npxfm_Capabilities_response_key_ids,
-    cmii7pysb004k8z1tts0npxfm_DoorProfiles_response_key_ids,
-    cmii7pysb004k8z1tts0npxfm_AccessUserInfos_response_key_ids,
     cmii7pysb004k8z1tts0npxfm_RealtimeVerifEventInfos_response_key_ids,
-]
-
-# cmii7lxbn002s8z1t1i9uudf0
-cmii7lxbn002s8z1t1i9uudf0_Authentication_response_key_ids = {
-    "code": "cmii7p9cw004a8z1td2ihlpuf",
-    "message": "cmii7p9cw004c8z1tom7291lc",
-    "userName": "cmii7p9cx004e8z1t4lb6n36d",
-    "userAff": "cmii7p9cx004g8z1t5qbkhnr8",
-    "accessToken": "cmii7p9cy004i8z1tlescd7jn",
-}
-
-cmii7lxbn002s8z1t1i9uudf0_StreamURLs_response_key_ids = {
-    "code": "cmiqsg09500maie8f451y1im1",
-    "message": "cmiqsgaxz00mgie8fnbfjb40u",
-    "camList": "cmiqsgvq800mmie8fduvknrff",
-    "camList.camID": "cmir1ncuo02am4m39q458o2fl",
-    "camList.accessID": "cmir1ncuo02ao4m39czhtxulh",
-    "camList.accessPW": "cmir1ncup02aq4m39pg83m7px",
-    "camList.camURL": "cmir1ncup02as4m39y4q1dws1",
-    "camList.videoInfo": "cmir1ncuq02au4m39ual0s1y7",
-    "camList.videoInfo.resolution": "cmir1ncuw02aw4m390i0kuve1",
-    "camList.videoInfo.fps": "cmir1ncux02ay4m39i0p68gno",
-    "camList.videoInfo.videoCodec": "cmir1ncux02b04m39smp9iiqp",
-    "camList.videoInfo.audioCodec": "cmir1ncuy02b24m39m47zic3f",
-}
-
-cmii7lxbn002s8z1t1i9uudf0_ReplayURL_response_key_ids = {
-    "code": "cmiqsxbw000qzie8fqg6ai3cf",
-    "message": "cmiqsxsv000r5ie8fb8dk0hz4",
-    "camList": "cmiqsy9jb00rbie8f50ruweoz",
-    "camList.camID": "cmir3npf2057p4m39bp2ukn6j",
-    "camList.accessID": "cmir3npf3057r4m398ypagqxu",
-    "camList.accessPW": "cmir3npf4057t4m39chpyyb44",
-    "camList.camURL": "cmir3npf4057v4m39a32yuml9",
-    "camList.videoInfo": "cmir3npf5057x4m39xnl7sph4",
-    "camList.videoInfo.resolution": "cmir3npfc057z4m39gv6h8ci4",
-    "camList.videoInfo.fps": "cmir3npfd05814m39t5syait5",
-    "camList.videoInfo.videoCodec": "cmir3npfd05834m39t9m4rdmu",
-    "camList.videoInfo.audioCodec": "cmir3npfe05854m398cp4ur96",
-}
-
-# cmii7lxbn002s8z1t1i9uudf0 Response Key-ID Mapping 리스트
-cmii7lxbn002s8z1t1i9uudf0_response_key_ids = [
-    cmii7lxbn002s8z1t1i9uudf0_Authentication_response_key_ids,
-    cmii7lxbn002s8z1t1i9uudf0_StreamURLs_response_key_ids,
-    cmii7lxbn002s8z1t1i9uudf0_ReplayURL_response_key_ids,
 ]
 

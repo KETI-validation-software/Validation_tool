@@ -832,7 +832,11 @@ class InfoWidget(QWidget):
                 # ARP Worker와 Thread 설정
                 from PyQt5.QtCore import QThread
 
-                self.arp_scan_worker = ARPScanWorker(test_port=self.test_port if hasattr(self, 'test_port') else None)
+                preferred_source_ip = getattr(self, 'resolved_test_ip', None)
+                self.arp_scan_worker = ARPScanWorker(
+                    test_port=self.test_port if hasattr(self, 'test_port') else None,
+                    source_ip=preferred_source_ip,
+                )
                 self.arp_scan_thread = QThread()
 
                 # Worker를 Thread로 이동
