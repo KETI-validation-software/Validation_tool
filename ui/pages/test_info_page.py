@@ -255,7 +255,7 @@ def _setup_management_url(parent_widget):
     # 입력 필드
     parent_widget.management_url_edit = QLineEdit()
     parent_widget.management_url_edit.setText(CONSTANTS.management_url)
-    parent_widget.management_url_edit.setPlaceholderText("http://ect2.iptime.org:20223")
+    parent_widget.management_url_edit.setPlaceholderText("http://localhost")
     parent_widget.management_url_edit.setStyleSheet("""
         QLineEdit {
             font-family: 'Noto Sans KR';

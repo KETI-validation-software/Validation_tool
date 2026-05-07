@@ -1974,13 +1974,13 @@ class ResultPageWidget(QWidget):
 
             label_widget = QLabel(str(label))
             label_widget.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-            label_widget.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 12px; font-weight: 500; color: #6B7280; border: none;")
+            label_widget.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 14px; font-weight: 500; color: #6B7280; border: none;")
 
             value_widget = QLabel(str(value))
             value_widget.setWordWrap(False)
             value_widget.setToolTip(str(value))
             value_widget.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-            value_widget.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 14px; font-weight: 500; color: #1B1B1C; border: none;")
+            value_widget.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 16px; font-weight: 500; color: #1B1B1C; border: none;")
 
             cell_layout.addWidget(label_widget)
             cell_layout.addWidget(value_widget)

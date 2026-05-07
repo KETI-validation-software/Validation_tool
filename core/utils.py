@@ -85,6 +85,8 @@ def normalize_monitor_step_name(step_name):
 
 def normalize_monitor_request_json(type_label, step_name, request_json, details=""):
     if request_json:
+        if isinstance(request_json, str) and request_json.strip() == '{}':
+            return '{\n}'
         return request_json
 
     if details:

@@ -392,7 +392,14 @@ class InfoWidget(QWidget):
                 # 인풋 컨테이너 (가로만)
                 self._resize_widget('input_container', 'original_input_container_size', width_ratio)
 
-                # 기업명/제품명 필드 (가로만)
+                # 시험유형/시험분야 필드 (가로만)
+                for prefix in ['test_category', 'test_group']:
+                    self._resize_widget(f'{prefix}_field_widget', f'original_{prefix}_field_size', width_ratio)
+                    self._resize_widget(f'{prefix}_label', f'original_{prefix}_label_size', width_ratio)
+                    self._resize_widget(f'{prefix}_edit', f'original_{prefix}_edit_size', width_ratio)
+
+                # 기업명/제품명 행 (가로만)
+                self._resize_widget('company_product_row', 'original_company_product_row_size', width_ratio)
                 for prefix in ['company', 'product']:
                     self._resize_widget(f'{prefix}_field_widget', f'original_{prefix}_field_size', width_ratio)
                     self._resize_widget(f'{prefix}_label', f'original_{prefix}_label_size', width_ratio)
@@ -405,16 +412,9 @@ class InfoWidget(QWidget):
                     self._resize_widget(f'{prefix}_label', f'original_{prefix}_label_size', width_ratio)
                     self._resize_widget(f'{prefix}_edit', f'original_{prefix}_edit_size', width_ratio)
 
-                # 시험유형/시험대상 행 (가로만)
-                self._resize_widget('category_target_row', 'original_category_target_row_size', width_ratio)
-                for prefix, attr in [('test_category', 'test_category'), ('target_system', 'target_system')]:
-                    self._resize_widget(f'{prefix}_widget', f'original_{attr}_field_size', width_ratio)
-                    self._resize_widget(f'{prefix}_label', f'original_{attr}_label_size', width_ratio)
-                    self._resize_widget(f'{prefix}_edit', f'original_{attr}_edit_size', width_ratio)
-
-                # 시험분야/시험범위 행 (가로만)
-                self._resize_widget('group_range_row', 'original_group_range_row_size', width_ratio)
-                for prefix, attr in [('test_group', 'test_group'), ('test_range', 'test_range')]:
+                # 시험대상/시험범위 행 (가로만)
+                self._resize_widget('target_range_row', 'original_target_range_row_size', width_ratio)
+                for prefix, attr in [('target_system', 'target_system'), ('test_range', 'test_range')]:
                     self._resize_widget(f'{prefix}_widget', f'original_{attr}_field_size', width_ratio)
                     self._resize_widget(f'{prefix}_label', f'original_{attr}_label_size', width_ratio)
                     self._resize_widget(f'{prefix}_edit', f'original_{attr}_edit_size', width_ratio)
@@ -1794,9 +1794,9 @@ class InfoWidget(QWidget):
                 self.id_input.setEnabled(False)
                 self.pw_input.setEnabled(False)
             else:
-                # Authentication 정보가 없으면 필드를 활성화하고 비움
-                self.id_input.setEnabled(True)
-                self.pw_input.setEnabled(True)
+                # 통합플랫폼은 인증정보 로드 실패해도 잠금 유지 (수동 입력 불가)
+                self.id_input.setEnabled(False)
+                self.pw_input.setEnabled(False)
                 self.id_input.clear()
                 self.pw_input.clear()
 
@@ -1804,9 +1804,13 @@ class InfoWidget(QWidget):
             Logger.error(f" Authentication 자동 입력 중 오류 발생: {e}")
             import traceback
             traceback.print_exc()
-            # 오류 발생 시 필드를 활성화
-            self.id_input.setEnabled(True)
-            self.pw_input.setEnabled(True)
+            # 통합시스템은 예외 발생 시에도 잠금 유지
+            if hasattr(self, 'target_system') and self.target_system == "통합시스템":
+                self.id_input.setEnabled(False)
+                self.pw_input.setEnabled(False)
+            else:
+                self.id_input.setEnabled(True)
+                self.pw_input.setEnabled(True)
 
     def on_management_url_changed(self):
         """관리자시스템 주소 변경 시 처리"""

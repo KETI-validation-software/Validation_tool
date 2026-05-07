@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtGui import QPixmap
 from core.functions import resource_path
+from ui.gui_utils import TruncatedLineEdit
 
 
 class BasicInfoPanel(QWidget):
@@ -150,7 +151,7 @@ class BasicInfoPanel(QWidget):
         input_layout.addWidget(self.test_category_widget, alignment=Qt.AlignHCenter)
 
         # 시험분야 필드
-        self.test_group_widget, self.test_group_label, self.test_group_edit = self._create_readonly_field("시험분야", 776)
+        self.test_group_widget, self.test_group_label, self.test_group_edit = self._create_readonly_field("시험분야", 776, truncation_popup=True)
         input_layout.addWidget(self.test_group_widget, alignment=Qt.AlignHCenter)
 
         # 시험대상/시험범위 행
@@ -166,7 +167,7 @@ class BasicInfoPanel(QWidget):
 
         layout.addWidget(self.input_container, alignment=Qt.AlignHCenter)
 
-    def _create_readonly_field(self, label_text, width):
+    def _create_readonly_field(self, label_text, width, truncation_popup=False):
         """읽기 전용 필드 생성"""
         field_widget = QWidget()
         field_widget.setFixedSize(width, 82)
@@ -191,7 +192,7 @@ class BasicInfoPanel(QWidget):
         field_layout.addWidget(label)
 
         # 입력칸
-        edit = QLineEdit()
+        edit = TruncatedLineEdit() if truncation_popup else QLineEdit()
         edit_width = 768 if width == 776 else width
         edit.setFixedSize(edit_width, 48)
         edit.setReadOnly(True)

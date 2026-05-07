@@ -1212,11 +1212,11 @@ class PlatformMainUI(CommonMainUI):
 
         # 방향에 따른 스타일 및 아이콘 설정
         if direction == "SEND":
-            header_color = "#1D4ED8"  # Blue-700
+            header_color = "#1B1B1C"  # 기본 검정 (응답)
             # icon = "📤"
             type_label = "송신"
         else:
-            header_color = "#1B1B1C"  # 기본 검정
+            header_color = "#1D4ED8"  # Blue-700 (요청)
             # icon = "📥"
             type_label = "수신"
 

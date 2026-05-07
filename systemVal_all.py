@@ -3322,7 +3322,7 @@ class MyApp(SystemMainUI):
         total_fields = self.total_pass_cnt + self.total_error_cnt
         score = (self.total_pass_cnt / total_fields) * 100 if total_fields > 0 else 0
         return {
-            "score": score,
+            "score": round(score, 1),
             "pass_count": self.total_pass_cnt,
             "error_count": self.total_error_cnt,
             "details": self.final_report if hasattr(self, "final_report") else ""
