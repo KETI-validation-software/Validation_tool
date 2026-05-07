@@ -27,6 +27,17 @@ class ClickableLabel(QLabel):
         super().mousePressEvent(event)
 
 
+class ElidedLabel(QLabel):
+    """텍스트가 넘칠 때 오른쪽을 ...으로 잘라 표시하는 QLabel"""
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setFont(self.font())
+        painter.setPen(QColor("#000000"))
+        elided = painter.fontMetrics().elidedText(self.text(), Qt.ElideRight, self.width())
+        painter.drawText(self.rect(), self.alignment(), elided)
+
+
 class ClickableRowWidget(QWidget):
     """클릭 가능한 QWidget - 시험 분야 셀용 (텍스트 + 화살표 분리)"""
     clicked = pyqtSignal(int, int)  # row, column 전달
@@ -48,8 +59,8 @@ class ClickableRowWidget(QWidget):
         layout.setSpacing(8)
 
         # 텍스트 라벨
-        self.text_label = QLabel(text)
-        self.text_label.setAlignment(Qt.AlignCenter)
+        self.text_label = ElidedLabel(text)
+        self.text_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         self.text_label.setStyleSheet("""
             QLabel {
                 background: transparent;
