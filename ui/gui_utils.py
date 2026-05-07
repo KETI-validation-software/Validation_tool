@@ -44,7 +44,7 @@ class WebhookBadgeLabel(QLabel):
 
 _TRUNCATION_POPUP_STYLE = """
     QLabel {
-        background-color: #F0F0F0;
+        background-color: #F8F8F8;
         color: #1B1B1C;
         font-family: 'Noto Sans KR';
         font-size: 15px;
@@ -73,7 +73,8 @@ class TruncatedLineEdit(QLineEdit):
         if not self._popup:
             self._popup = QLabel(None, Qt.ToolTip | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
             self._popup.setAttribute(Qt.WA_ShowWithoutActivating)
-            self._popup.setStyleSheet(_TRUNCATION_POPUP_STYLE)
+            self._popup.setAttribute(Qt.WA_StyledBackground, True)
+        self._popup.setStyleSheet(_TRUNCATION_POPUP_STYLE)
 
     def enterEvent(self, event):
         if self._is_truncated():
@@ -120,7 +121,8 @@ class TableTruncationFilter(QObject):
         if not self._popup:
             self._popup = QLabel(None, Qt.ToolTip | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
             self._popup.setAttribute(Qt.WA_ShowWithoutActivating)
-            self._popup.setStyleSheet(_TRUNCATION_POPUP_STYLE)
+            self._popup.setAttribute(Qt.WA_StyledBackground, True)
+        self._popup.setStyleSheet(_TRUNCATION_POPUP_STYLE)
 
     def _get_cell_text(self, row, col):
         item = self.table.item(row, col)
