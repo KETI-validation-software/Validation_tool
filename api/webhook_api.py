@@ -89,13 +89,15 @@ class WebhookServer(BaseHTTPRequestHandler):
 class WebhookThread(QThread):
     result_signal = pyqtSignal(dict)
 
-    def __init__(self, url, port, message):
+    def __init__(self, url, port, message, timeout_sec=None):
         super().__init__()
         self.url = url
         self.port = port
         self.message = message
+        self.timeout_sec = timeout_sec
         self.httpd = None
         self.server_ready = threading.Event()
+        self._shutdown_timer = None
 
     def run(self):
         # ✅ 웹훅 서버는 항상 0.0.0.0에 바인딩 (모든 인터페이스에서 수신)
@@ -118,11 +120,19 @@ class WebhookThread(QThread):
             Logger.info(f'[Webhook] 웹훅 서버 시작됨: 0.0.0.0:{self.port}')
             self.server_ready.set()  # 서버 준비 완료 신호
 
+            # 자동 종료 타이머: timeout_sec 경과 후 서버 닫기
+            if self.timeout_sec:
+                self._shutdown_timer = threading.Timer(self.timeout_sec, self.stop)
+                self._shutdown_timer.start()
+                Logger.info(f"[Webhook] 자동 종료 타이머 설정: {self.timeout_sec}초")
+
             self.httpd.serve_forever()
         except Exception as e:
             Logger.error(f"[Webhook Server Error] {e}")
             self.server_ready.set()  # 실패해도 대기 해제 (무한 블로킹 방지)
         finally:
+            if self._shutdown_timer:
+                self._shutdown_timer.cancel()
             if self.httpd:
                 self.httpd.server_close()
 
