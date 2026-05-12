@@ -1424,8 +1424,9 @@ class MyApp(SystemMainUI):
             else (self.message[self.webhook_cnt] if self.webhook_cnt < len(self.message) else "Unknown")
         )
 
+        event_recv_name = f"{build_webhook_monitor_step_name(display_name, 'event', role='system')} #{event_index}"
         self.append_monitor_log(
-            step_name=build_webhook_monitor_step_name(display_name, f"event-{event_index}", role="system"),
+            step_name=event_recv_name,
             request_json=tmp_webhook_res,
             direction="RECV",
             response_time_ms=self.monitor_response_elapsed_ms.get(self.webhook_cnt),
@@ -1433,8 +1434,9 @@ class MyApp(SystemMainUI):
 
         if webhook_data:
             webhook_ack_payload = {"code": "200", "message": "성공"}
+            ack_name = f"{build_webhook_monitor_step_name(display_name, 'ack', role='system')} #{event_index}"
             self.append_monitor_log(
-                step_name=build_webhook_monitor_step_name(display_name, "ack", role="system"),
+                step_name=ack_name,
                 request_json=json.dumps(webhook_ack_payload, indent=4, ensure_ascii=False),
                 direction="SEND",
             )
