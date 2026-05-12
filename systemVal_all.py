@@ -1436,15 +1436,6 @@ class MyApp(SystemMainUI):
             self.message[self.webhook_cnt] if self.webhook_cnt < len(self.message) else "Unknown"
         )
 
-        # 웹훅 응답 시간은 최초 요청 송신 시점부터 payload 수신 시점까지로 측정한다.
-        started_at = self.monitor_request_started_at.get(self.webhook_cnt)
-        event_received_at = time.perf_counter()
-        if started_at is not None:
-            self.monitor_response_elapsed_ms[self.webhook_cnt] = int(round((event_received_at - started_at) * 1000))
-            self._set_timer_success(self.webhook_cnt)
-        else:
-            self.monitor_request_started_at[self.webhook_cnt] = event_received_at
-            self.monitor_response_elapsed_ms.pop(self.webhook_cnt, None)
         webhook_event_log_text = self.append_monitor_log(
             step_name=build_webhook_monitor_step_name(display_name, "event", role="system"),
             request_json=tmp_webhook_res,
