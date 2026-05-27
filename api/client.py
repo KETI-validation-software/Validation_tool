@@ -16,6 +16,7 @@ class APIClient:
 
     def __init__(self):
         self.timeout = 10
+        self._session = requests.Session()
 
     @property
     def base_url(self):
@@ -24,7 +25,7 @@ class APIClient:
     def fetch_test_info_by_ip(self, ip_address):
         url = f"{self.base_url}/api/integration/test-requests/by-ip?ipAddress={ip_address}"
         try:
-            response = requests.get(url, timeout=self.timeout)
+            response = self._session.get(url, timeout=self.timeout)
             response.raise_for_status()
             json_data = response.json()
             if json_data.get("success") and json_data.get("data"):
@@ -44,7 +45,7 @@ class APIClient:
     def fetch_specification_by_id(self, spec_id):
         url = f"{self.base_url}/api/integration/specifications/{spec_id}"
         try:
-            response = requests.get(url, timeout=self.timeout)
+            response = self._session.get(url, timeout=self.timeout)
             response.raise_for_status()
             return response.json()
         except requests.exceptions.Timeout:
@@ -60,7 +61,7 @@ class APIClient:
     def fetch_test_step_by_id(self, step_id):
         url = f"{self.base_url}/api/integration/test-steps/{step_id}"
         try:
-            response = requests.get(url, timeout=self.timeout)
+            response = self._session.get(url, timeout=self.timeout)
             response.raise_for_status()
             return response.json()
         except requests.exceptions.Timeout:
@@ -76,7 +77,7 @@ class APIClient:
     def fetch_response_codes(self):
         url = f"{self.base_url}/api/integration/response-codes"
         try:
-            response = requests.get(url, timeout=self.timeout)
+            response = self._session.get(url, timeout=self.timeout)
             response.raise_for_status()
             json_data = response.json()
             if json_data.get("success") and json_data.get("data"):

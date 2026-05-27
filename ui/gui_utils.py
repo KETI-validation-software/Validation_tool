@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QVBoxLayout, QTextBrowser, QLabel, QLineEdit
 from PyQt5.QtCore import Qt, QPoint, QObject, QEvent, QTimer
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QPainter, QColor
 from core.functions import resource_path
 
 # 팝업창과 같은 작은 것들
@@ -42,17 +42,24 @@ class WebhookBadgeLabel(QLabel):
         super().leaveEvent(event)
 
 
-_TRUNCATION_POPUP_STYLE = """
-    QLabel {
-        background-color: #F8F8F8;
-        color: #1B1B1C;
-        font-family: 'Noto Sans KR';
-        font-size: 15px;
-        padding: 6px 12px;
-        border: 1px solid #D0D0D0;
-        border-radius: 4px;
-    }
-"""
+class TruncationPopup(QLabel):
+    """텍스트 잘림 팝업 - 은은한 스타일"""
+
+    def __init__(self):
+        super().__init__(None, Qt.ToolTip | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+        self.setAttribute(Qt.WA_ShowWithoutActivating)
+        self.setAttribute(Qt.WA_StyledBackground, True)
+        self.setStyleSheet("""
+            QLabel {
+                background-color: #FAFAFA;
+                color: #707070;
+                font-family: 'Noto Sans KR';
+                font-size: 14px;
+                padding: 5px 11px;
+                border: 1px solid #E0E0E0;
+                border-radius: 2px;
+            }
+        """)
 
 
 class TruncatedLineEdit(QLineEdit):
@@ -71,10 +78,7 @@ class TruncatedLineEdit(QLineEdit):
 
     def _ensure_popup(self):
         if not self._popup:
-            self._popup = QLabel(None, Qt.ToolTip | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
-            self._popup.setAttribute(Qt.WA_ShowWithoutActivating)
-            self._popup.setAttribute(Qt.WA_StyledBackground, True)
-        self._popup.setStyleSheet(_TRUNCATION_POPUP_STYLE)
+            self._popup = TruncationPopup()
 
     def enterEvent(self, event):
         if self._is_truncated():
@@ -82,7 +86,7 @@ class TruncatedLineEdit(QLineEdit):
             self._popup.setText(self.text())
             self._popup.adjustSize()
             gp = self.mapToGlobal(QPoint(0, 0))
-            self._popup.move(gp.x(), gp.y() - self._popup.height() - 5)
+            self._popup.move(gp.x() + 70, gp.y() - self._popup.height() - 5)
             self._popup.show()
         super().enterEvent(event)
 
@@ -119,10 +123,7 @@ class TableTruncationFilter(QObject):
 
     def _ensure_popup(self):
         if not self._popup:
-            self._popup = QLabel(None, Qt.ToolTip | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
-            self._popup.setAttribute(Qt.WA_ShowWithoutActivating)
-            self._popup.setAttribute(Qt.WA_StyledBackground, True)
-        self._popup.setStyleSheet(_TRUNCATION_POPUP_STYLE)
+            self._popup = TruncationPopup()
 
     def _get_cell_text(self, row, col):
         item = self.table.item(row, col)
@@ -161,10 +162,19 @@ class TableTruncationFilter(QObject):
             index = self.table.model().index(row, col)
             cell_rect = self.table.visualRect(index)
             gp = self.table.viewport().mapToGlobal(cell_rect.topLeft())
-            self._popup.move(gp.x(), gp.y() - self._popup.height() - 5)
+            self._popup.move(gp.x() + 70, gp.y() - self._popup.height() - 5)
             self._popup.show()
 
     def eventFilter(self, obj, event):
+        try:
+            return self._eventFilter_impl(obj, event)
+        except RuntimeError:
+            # Qt C++ 객체가 이미 삭제된 경우 (페이지 전환 등)
+            if self._popup:
+                self._popup.hide()
+            return False
+
+    def _eventFilter_impl(self, obj, event):
         # 셀 위젯(ClickableRowWidget 등) Enter/Leave로 팝업 제어
         if obj is not self.table.viewport():
             row = self._find_row_for_widget(obj)
@@ -195,7 +205,7 @@ class TableTruncationFilter(QObject):
                     index = self.table.model().index(row, col)
                     cell_rect = self.table.visualRect(index)
                     gp = self.table.viewport().mapToGlobal(cell_rect.topLeft())
-                    self._popup.move(gp.x(), gp.y() - self._popup.height() - 5)
+                    self._popup.move(gp.x() + 70, gp.y() - self._popup.height() - 5)
                     self._popup.show()
 
         elif event.type() == QEvent.Leave:
