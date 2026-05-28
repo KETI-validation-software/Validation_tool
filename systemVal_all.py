@@ -1555,7 +1555,7 @@ class MyApp(SystemMainUI):
                 webhook_ack_payload={"code": "200", "message": "성공"} if results_list else None,
             )
             self.step_buffers[self.webhook_cnt]["data"] += (
-                f"\n\n--- Webhook 이벤트 ({len(results_list)}건) ---\n{tmp_webhook_res}"
+                f"\n\n--- Webhook 응답 (시도 {self.current_retry + 1}회차) ---\n{tmp_webhook_res}"
             )
             self.step_buffers[self.webhook_cnt]["error"] += f"\n\n--- Webhook 검증 ---\n{webhook_error_text}"
             self.step_buffers[self.webhook_cnt]["result"] = val_result
@@ -2213,33 +2213,48 @@ class MyApp(SystemMainUI):
                     )
 
                     # 기존 버퍼에 누적 (재시도 정보와 함께)
-                    if self.current_retry == 0:
-                        # 첫 번째 시도인 경우 초기화
-                        self.step_buffers[self.cnt][
-                            "data"] = f"[시도 {self.current_retry + 1}/{current_retries}]\n{data_text}"
-                        self.step_buffers[self.cnt][
-                            "error"] = f"[시도 {self.current_retry + 1}/{current_retries}]\n{error_text}"
-                        self.step_buffers[self.cnt]["result"] = val_result  # 첫 시도 결과로 초기화
-                    else:
-                        # 재시도인 경우 누적
-                        self.step_buffers[self.cnt][
-                            "data"] += f"\n\n[시도 {self.current_retry + 1}/{current_retries}]\n{data_text}"
-                        self.step_buffers[self.cnt][
-                            "error"] += f"\n\n[시도 {self.current_retry + 1}/{current_retries}]\n{error_text}"
-                        self.step_buffers[self.cnt]["result"] = val_result  # 마지막 시도 결과로 항상 갱신
-                    # 최종 결과 판정 (플랫폼과 동일한 로직)
-                    if self.current_retry + 1 >= current_retries:
-                        # 모든 재시도 완료 - 모든 시도가 PASS일 때만 PASS
-                        # ✅ 배열 범위 체크 추가
-                        if self.cnt < len(self.step_pass_flags) and self.step_pass_flags[self.cnt] >= current_retries:
-                            self.step_buffers[self.cnt]["result"] = "PASS"
+                    is_webhook_step = self.step_buffers[self.cnt].get("is_webhook_api", False)
+                    if is_webhook_step:
+                        # 웹훅 API: get_webhook_result()가 이미 웹훅 이벤트를 data에 추가한 상태
+                        # HTTP 응답을 앞에 붙여 두 데이터를 함께 표시
+                        existing_data = self.step_buffers[self.cnt]["data"]
+                        if self.current_retry == 0:
+                            self.step_buffers[self.cnt]["data"] = data_text + existing_data
                         else:
+                            self.step_buffers[self.cnt]["data"] = existing_data + "\n" + data_text
+                        # HTTP 응답 검증 실패 시 최종 결과 FAIL, 오류도 추가
+                        if val_result == "FAIL":
                             self.step_buffers[self.cnt]["result"] = "FAIL"
-                        # 마지막 시도 결과의 오류 텍스트로 덮어쓰기 (실패 시)
-                        if self.step_buffers[self.cnt]["result"] == "FAIL":
+                            existing_error = self.step_buffers[self.cnt]["error"]
+                            http_err = "[시도 " + str(self.current_retry + 1) + "/" + str(current_retries) + "]\n" + error_text
+                            self.step_buffers[self.cnt]["error"] = (existing_error + "\n\n" + http_err if existing_error.strip() else http_err)
+                    else:
+                        if self.current_retry == 0:
+                            # 첫 번째 시도인 경우 초기화
+                            self.step_buffers[self.cnt][
+                                "data"] = f"[시도 {self.current_retry + 1}/{current_retries}]\n{data_text}"
                             self.step_buffers[self.cnt][
                                 "error"] = f"[시도 {self.current_retry + 1}/{current_retries}]\n{error_text}"
-
+                            self.step_buffers[self.cnt]["result"] = val_result  # 첫 시도 결과로 초기화
+                        else:
+                            # 재시도인 경우 누적
+                            self.step_buffers[self.cnt][
+                                "data"] += f"\n\n[시도 {self.current_retry + 1}/{current_retries}]\n{data_text}"
+                            self.step_buffers[self.cnt][
+                                "error"] += f"\n\n[시도 {self.current_retry + 1}/{current_retries}]\n{error_text}"
+                            self.step_buffers[self.cnt]["result"] = val_result  # 마지막 시도 결과로 항상 갱신
+                        # 최종 결과 판정 (플랫폼과 동일한 로직)
+                        if self.current_retry + 1 >= current_retries:
+                            # 모든 재시도 완료 - 모든 시도가 PASS일 때만 PASS
+                            # ✅ 배열 범위 체크 추가
+                            if self.cnt < len(self.step_pass_flags) and self.step_pass_flags[self.cnt] >= current_retries:
+                                self.step_buffers[self.cnt]["result"] = "PASS"
+                            else:
+                                self.step_buffers[self.cnt]["result"] = "FAIL"
+                            # 마지막 시도 결과의 오류 텍스트로 덮어쓰기 (실패 시)
+                            if self.step_buffers[self.cnt]["result"] == "FAIL":
+                                self.step_buffers[self.cnt][
+                                    "error"] = f"[시도 {self.current_retry + 1}/{current_retries}]\n{error_text}"
                     # 진행 중 표시 (플랫폼과 동일하게)
                     display_name = self.message_display[self.cnt] if self.cnt < len(self.message_display) else self.message[self.cnt]
                     message_name = "step " + str(self.cnt + 1) + ": " + display_name
