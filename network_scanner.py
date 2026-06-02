@@ -4,6 +4,7 @@ from core.logger import Logger
 from PyQt5.QtCore import QObject, pyqtSignal
 try:
     from scapy.all import ARP, Ether, srp
+    from scapy.arch.windows import get_windows_if_list
     SCAPY_AVAILABLE = True
 except ImportError:
     SCAPY_AVAILABLE = False
@@ -131,7 +132,9 @@ class ARPScanWorker(QObject):
                 self.scan_failed.emit("네트워크 대역을 계산할 수 없습니다.")
                 return
 
-            Logger.info(f"ARP 스캔 시작: source_ip={my_ip}, network={network}")
+            # my_ip에 해당하는 인터페이스 명시 (기본값 사용 시 잘못된 NIC로 전송될 수 있음)
+            iface = self._get_iface_for_ip(my_ip)
+            Logger.info(f"ARP 스캔 시작: source_ip={my_ip}, network={network}, iface={iface}")
 
             # 2. ARP 스캔 실행
             try:
@@ -139,8 +142,7 @@ class ARPScanWorker(QObject):
                 broadcast = Ether(dst="ff:ff:ff:ff:ff:ff")
                 arp_request_broadcast = broadcast / arp_request
 
-                # timeout 3초, verbose=0 (출력 억제)
-                answered_list = srp(arp_request_broadcast, timeout=3, verbose=0)[0]
+                answered_list = srp(arp_request_broadcast, timeout=5, verbose=0, iface=iface)[0]
             except Exception as arp_error:
                 # Npcap 미설치 오류 감지
                 error_msg = str(arp_error).lower()
@@ -185,6 +187,16 @@ class ARPScanWorker(QObject):
             Logger.error(f"ARP 스캔 오류: {e}")
             Logger.error(traceback.format_exc())
             self.scan_failed.emit(f"ARP 스캔 중 오류 발생:\n{str(e)}")
+
+    def _get_iface_for_ip(self, ip):
+        """IP 주소에 해당하는 scapy 인터페이스 이름 반환"""
+        try:
+            for iface in get_windows_if_list():
+                if ip in iface.get('ips', []):
+                    return iface.get('name')
+        except Exception as e:
+            Logger.warn(f"인터페이스 탐색 실패, 기본값 사용: {e}")
+        return None
 
     def _get_network_range(self, ip):
         """IP 주소로부터 네트워크 대역 계산 (예: 192.168.1.0/24)"""
