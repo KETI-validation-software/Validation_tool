@@ -1001,18 +1001,18 @@ class PlatformMainUI(CommonMainUI):
 
         # 필수/선택/종합 점수 표시 (% (통과/전체) 형식)
         self.spec_pass_label.setText(
-            f"필수 필드 점수&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
+            f"필수 필드 점수&nbsp;&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 23px; font-weight: 500; color: #000000;'>"
             f"{spec_required_score:.1f}% ({spec_required_pass}/{spec_required_total})</span>"
         )
         self.spec_total_label.setText(
-            f"선택 필드 점수&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
+            f"선택 필드 점수&nbsp;&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 23px; font-weight: 500; color: #000000;'>"
             f"{spec_opt_score:.1f}% ({self.total_opt_pass_cnt}/{spec_opt_total})</span>"
         )
         self.spec_score_label.setText(
-            f"종합 평가 점수&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
+            f"종합 평가 점수&nbsp;&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 23px; font-weight: 500; color: #000000;'>"
             f"{spec_score:.1f}% ({self.total_pass_cnt}/{spec_total_fields})</span>"
         )
 
@@ -1196,6 +1196,9 @@ class PlatformMainUI(CommonMainUI):
                 request_json = request_json.replace("\r\n", "\n").rstrip()
                 # 문자열 끝의 닫는 괄호 직전 공백-only 줄을 1줄로 정규화
                 request_json = re.sub(r"(?:\n[ \t]*){2,}([ \t]*[\}\]])$", r"\n\1", request_json)
+                # ✅ payload가 비어있으면({}) "{ 엔터 }" 형태로 표시
+                if request_json.strip() == "{}":
+                    request_json = "{\n}"
 
         # 타임스탬프
         timestamp = datetime.now().strftime("%H:%M:%S")

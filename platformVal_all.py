@@ -52,6 +52,8 @@ class MyApp(PlatformMainUI):
         self._cleanup_all_paused_files_on_startup()
 
         self.CONSTANTS = CONSTANTS
+        # ✅ 웹훅 창/대기시간을 CONSTANTS 단일 소스에서 읽음 (시스템·플랫폼 공통 → 함께 변경됨)
+        self.WEBHOOK_FAILFAST_TIMEOUT_SEC = float(getattr(self.CONSTANTS, 'WEBHOOK_WINDOW_SEC', 10.0))
         self.current_spec_id = spec_id
         self.current_group_id = None  # ✅ 그룹 ID 저장용
 
@@ -603,6 +605,10 @@ class MyApp(PlatformMainUI):
                 # self.update_last_line_timer("", remove=True)
 
                 request_arrival_time = time.time()
+                # ✅ 응답 소요 시간은 "요청 도착 → 응답"만 측정 (대기 시간 제외, 모든 프로토콜 공통)
+                # 측정 시작점을 요청 도착 시점으로 재설정 → 시스템 요청 대기 시간이 포함되지 않음
+                self.monitor_request_started_at[self.cnt] = time.perf_counter()
+                self.monitor_response_elapsed_ms.pop(self.cnt, None)
                 expected_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
                 Logger.debug(f" ✅ 요청 도착 감지! API: {api_name}, 시도: {self.current_retry + 1}/{expected_retries}")
                 self._set_timer_success(self.cnt, time_interval)
@@ -935,6 +941,7 @@ class MyApp(PlatformMainUI):
                     webhook_monitor_ack_json = None
                     webhook_event_log_text = None
                     webhook_ack_log_text = None
+                    webhook_monitor_pairs = []  # ✅ 이벤트별 (event_json, ack_json, index) — 시스템처럼 #N 표시
                     if self.cnt < len(self.step_buffers):
                         upsert_attempt_log(
                             self.step_buffers[self.cnt],
@@ -944,6 +951,14 @@ class MyApp(PlatformMainUI):
                     if val_result == "FAIL":
                         step_result = "FAIL"
                         combined_error_parts.append(f"[시도 {retry_attempt + 1}/{current_retries}]\n" + inbound_err_txt)
+
+                    # ✅ 응답 소요 시간 = 일반 요청-응답 왕복까지만 측정.
+                    # 웹훅/롱폴링의 프로토콜 비동기 구간(join 등)이 포함되지 않도록,
+                    # 프로토콜 처리 직전(일반 응답 시점)에 소요 시간을 고정한다.
+                    if current_protocol in ("WebHook", "LongPolling"):
+                        _resp_started_at = self.monitor_request_started_at.get(self.cnt)
+                        if _resp_started_at is not None:
+                            self.monitor_response_elapsed_ms[self.cnt] = int(round((time.perf_counter() - _resp_started_at) * 1000))
 
                     # WebHook 프로토콜인 경우
                     if current_protocol == "WebHook":
@@ -963,73 +978,89 @@ class MyApp(PlatformMainUI):
                         # 실제 웹훅 응답 사용
                         # ✅ 웹훅 응답이 null인 경우에도 검증을 수행하여 실패로 카운트
                         if hasattr(self.Server, 'webhook_response'):
+                            from core.utils import replace_transport_desc_for_display
+                            # ── 웹훅 송신 페이로드(event) — trace에서 로드, 모든 이벤트 공통 ──
                             webhook_event_payload = load_from_trace_file(api_name, "WEBHOOK_OUT") or {}
                             if webhook_event_payload:
-                                from core.utils import replace_transport_desc_for_display
                                 tmp_webhook_event = json.dumps(webhook_event_payload, indent=4, ensure_ascii=False)
                                 tmp_webhook_event = replace_transport_desc_for_display(tmp_webhook_event)
                             else:
                                 tmp_webhook_event = "null"
 
-                            # webhook_response가 None이거나 빈 값인 경우 빈 딕셔너리로 처리
-                            webhook_response = self.Server.webhook_response if self.Server.webhook_response else {}
-                            
-                            if webhook_response:
-                                from core.utils import replace_transport_desc_for_display
-                                tmp_webhook_response = json.dumps(webhook_response, indent=4, ensure_ascii=False)
-                                tmp_webhook_response = replace_transport_desc_for_display(tmp_webhook_response)  # UI 표시용 치환
-                                accumulated['data_parts'].append(
-                                    f"\n--- Webhook 응답 (시도 {retry_attempt + 1}회차) ---\n{tmp_webhook_response}")
-                            else:
-                                tmp_webhook_response = "null"
-                                accumulated['data_parts'].append(f"\n--- Webhook 응답 (시도 {retry_attempt + 1}회차) ---\nnull")
+                            # ── 이벤트별 응답 목록 수집 (시스템 webhook_results_list와 동일 역할) ──
+                            webhook_responses = list(getattr(self.Server, 'webhook_response_list', None) or [])
+                            if not webhook_responses:
+                                _single = self.Server.webhook_response
+                                webhook_responses = [_single] if _single else []
 
-                            webhook_monitor_event_json = tmp_webhook_event
-                            webhook_monitor_ack_json = tmp_webhook_response
+                            # 웹훅 검증 누적 변수
+                            wh_pass_sum = 0
+                            wh_err_sum = 0
+                            wh_fail_texts = []
+                            webhook_response = {}  # 대표 응답 (마지막 이벤트)
+
+                            if webhook_responses:
+                                # 복수 이벤트 — 각 이벤트를 개별 검증 + 모니터에 #N으로 기록
+                                for _i, _wh in enumerate(webhook_responses, start=1):
+                                    _wh = _wh if _wh else {}
+                                    if _wh:
+                                        _ack = json.dumps(_wh, indent=4, ensure_ascii=False)
+                                        _ack = replace_transport_desc_for_display(_ack)
+                                    else:
+                                        _ack = "null"
+                                    webhook_monitor_pairs.append((tmp_webhook_event, _ack, _i))
+                                    accumulated['data_parts'].append(
+                                        f"\n--- Webhook 응답 [이벤트 {_i}] (시도 {retry_attempt + 1}회차) ---\n{_ack}")
+
+                                    _vr, _vt, _vp, _ve, _vop, _voe = json_check_(
+                                        self.videoWebhookSchema[self.cnt], _wh, self.flag_opt
+                                    )
+                                    add_pass += _vp
+                                    add_err += _ve
+                                    add_opt_pass += _vop
+                                    add_opt_error += _voe
+                                    wh_pass_sum += _vp
+                                    wh_err_sum += _ve
+                                    if _vr == "FAIL":
+                                        step_result = "FAIL"
+                                        _vt_txt = to_detail_text(_vt)
+                                        wh_fail_texts.append(f"[이벤트 {_i}] {_vt_txt}")
+                                        combined_error_parts.append(f"\n--- Webhook 검증 [이벤트 {_i}] ---\n" + _vt_txt)
+                                webhook_response = webhook_responses[-1] if webhook_responses[-1] else {}
+                            else:
+                                # 미수신 — 빈 응답 1건으로 검증 (FAIL)
+                                webhook_monitor_pairs.append((tmp_webhook_event, "null", 1))
+                                accumulated['data_parts'].append(f"\n--- Webhook 응답 (시도 {retry_attempt + 1}회차) ---\nnull")
+                                _vr, _vt, _vp, _ve, _vop, _voe = json_check_(
+                                    self.videoWebhookSchema[self.cnt], {}, self.flag_opt
+                                )
+                                add_pass += _vp
+                                add_err += _ve
+                                add_opt_pass += _vop
+                                add_opt_error += _voe
+                                wh_pass_sum += _vp
+                                wh_err_sum += _ve
+                                if _vr == "FAIL":
+                                    step_result = "FAIL"
+                                    _vt_txt = to_detail_text(_vt)
+                                    wh_fail_texts.append(_vt_txt)
+                                    combined_error_parts.append(f"\n--- Webhook 검증 ---\n" + _vt_txt)
+
+                            # step_buffers 갱신 (전체 이벤트 집계 기준)
                             if self.cnt < len(self.step_buffers):
                                 self.step_buffers[self.cnt]["is_webhook_api"] = True
                                 self.step_buffers[self.cnt]["webhook_data"] = webhook_response
-                            
-                            # 웹훅 응답 검증 (null인 경우에도 검증 수행)
-                            webhook_resp_val_result, webhook_resp_val_text, webhook_resp_key_psss_cnt, webhook_resp_key_error_cnt, opt_correct, opt_error = json_check_(
-                                self.videoWebhookSchema[self.cnt], webhook_response, self.flag_opt
-                            )
-
-                            add_pass += webhook_resp_key_psss_cnt
-                            add_err += webhook_resp_key_error_cnt
-                            add_opt_pass += opt_correct  # 웹훅 선택 필드 통과 수 누적
-                            add_opt_error += opt_error  # 웹훅 선택 필드 에러 수 누적
-
-                            webhook_resp_err_txt = to_detail_text(webhook_resp_val_text)
-                            if self.cnt < len(self.step_buffers):
-                                self.step_buffers[self.cnt]["webhook_error"] = webhook_resp_err_txt if webhook_resp_val_result == "FAIL" else ""
-                                self.step_buffers[self.cnt]["webhook_pass_cnt"] = webhook_resp_key_psss_cnt
-                                self.step_buffers[self.cnt]["webhook_total_cnt"] = webhook_resp_key_psss_cnt + webhook_resp_key_error_cnt
+                                self.step_buffers[self.cnt]["webhook_error"] = "\n".join(wh_fail_texts) if wh_fail_texts else ""
+                                self.step_buffers[self.cnt]["webhook_pass_cnt"] = wh_pass_sum
+                                self.step_buffers[self.cnt]["webhook_total_cnt"] = wh_pass_sum + wh_err_sum
                                 upsert_attempt_log(
                                     self.step_buffers[self.cnt],
                                     retry_attempt + 1,
                                     webhook_recv_payload=webhook_response,
-                                    webhook_recv_errors=[line.strip() for line in webhook_resp_err_txt.split("\n") if line.strip()] if webhook_resp_val_result == "FAIL" else [],
+                                    webhook_recv_errors=[line.strip() for t in wh_fail_texts for line in t.split("\n") if line.strip()],
                                 )
-                                if webhook_event_log_text is not None:
-                                    append_attempt_log_text(
-                                        self.step_buffers[self.cnt],
-                                        retry_attempt + 1,
-                                        "webhook_monitor_log_text",
-                                        webhook_event_log_text,
-                                    )
-                                if webhook_ack_log_text is not None:
-                                    append_attempt_log_text(
-                                        self.step_buffers[self.cnt],
-                                        retry_attempt + 1,
-                                        "webhook_monitor_log_text",
-                                        webhook_ack_log_text,
-                                    )
-                            if webhook_resp_val_result == "FAIL":
-                                step_result = "FAIL"
-                                combined_error_parts.append(f"\n--- Webhook 검증 ---\n" + webhook_resp_err_txt)
 
-                            # webhook_response가 None이 아닌 경우에만 reference_context에 저장
+                            # 대표 응답을 reference_context에 저장
                             if webhook_response:
                                 webhook_context_key = f"/{api_name}"
                                 self.reference_context[webhook_context_key] = webhook_response
@@ -1090,7 +1121,9 @@ class MyApp(PlatformMainUI):
                 
                 started_at = self.monitor_request_started_at.get(self.cnt)
                 if started_at is not None:
-                    self.monitor_response_elapsed_ms[self.cnt] = int(round((time.perf_counter() - started_at) * 1000))
+                    # 웹훅/롱폴링은 프로토콜 블록 직전에 이미 고정됨 → 덮어쓰지 않음 (일반 요청-응답만 측정)
+                    if self.cnt not in self.monitor_response_elapsed_ms:
+                        self.monitor_response_elapsed_ms[self.cnt] = int(round((time.perf_counter() - started_at) * 1000))
                     # Final table timer should reflect response elapsed time (integer seconds).
                     self._set_timer_success(self.cnt)
                 response_log_text = self.append_monitor_log(
@@ -1099,20 +1132,20 @@ class MyApp(PlatformMainUI):
                     direction="SEND"
                 )
 
-                if current_protocol == "WebHook" and webhook_monitor_event_json is not None:
-                    webhook_event_log_text = self.append_monitor_log(
-                        step_name=build_webhook_monitor_step_name(display_name, "event"),
-                        request_json=webhook_monitor_event_json,
-                        direction="SEND",
-                        response_time_ms=self.monitor_response_elapsed_ms.get(self.cnt),
-                    )
-
-                if current_protocol == "WebHook" and webhook_monitor_ack_json is not None:
-                    webhook_ack_log_text = self.append_monitor_log(
-                        step_name=build_webhook_monitor_step_name(display_name, "ack"),
-                        request_json=webhook_monitor_ack_json,
-                        direction="RECV"
-                    )
+                # ✅ 이벤트별로 송신(event)/수신(ack) 모니터 로그를 #N suffix로 기록 (시스템과 동일)
+                if current_protocol == "WebHook" and webhook_monitor_pairs:
+                    for _ev_json, _ack_json, _idx in webhook_monitor_pairs:
+                        self.append_monitor_log(
+                            step_name=f"{build_webhook_monitor_step_name(display_name, 'event')} #{_idx}",
+                            request_json=_ev_json,
+                            direction="SEND",
+                            response_time_ms=self.monitor_response_elapsed_ms.get(self.cnt),
+                        )
+                        self.append_monitor_log(
+                            step_name=f"{build_webhook_monitor_step_name(display_name, 'ack')} #{_idx}",
+                            request_json=_ack_json,
+                            direction="RECV",
+                        )
 
                 if self.cnt < len(self.step_buffers):
                     self.step_buffers[self.cnt].setdefault("api_info", {})["method"] = "POST"

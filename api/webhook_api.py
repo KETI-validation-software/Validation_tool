@@ -1,16 +1,25 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
+import socketserver
+import socket
 from PyQt5.QtCore import *
 import json
 import traceback
 from core.functions import resource_path
 import ssl
 import threading
+import time
 from urllib.parse import urlparse
 from core.logger import Logger
 
 
 class ReusableHTTPServer(HTTPServer):
     allow_reuse_address = True
+
+    def server_bind(self):
+        # socket.getfqdn("0.0.0.0") 역방향 DNS 조회 생략 (Windows에서 11초+ 지연 원인)
+        socketserver.TCPServer.server_bind(self)
+        self.server_name = socket.gethostname()
+        self.server_port = self.server_address[1]
 
     def shutdown(self):
         try:
@@ -86,6 +95,24 @@ class WebhookServer(BaseHTTPRequestHandler):
 
 
 
+_ssl_context_cache = None
+_ssl_context_lock = threading.Lock()
+
+def _get_cached_ssl_context():
+    global _ssl_context_cache
+    if _ssl_context_cache is None:
+        with _ssl_context_lock:
+            if _ssl_context_cache is None:
+                certificate_private = resource_path('config/key0627/server.crt')
+                certificate_key = resource_path('config/key0627/server.key')
+                t0 = time.time()
+                ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+                ctx.load_cert_chain(certfile=certificate_private, keyfile=certificate_key)
+                _ssl_context_cache = ctx
+                Logger.info(f"[Webhook] SSL context 초기화 완료 ({time.time() - t0:.2f}초, 이후 재사용)")
+    return _ssl_context_cache
+
+
 class WebhookThread(QThread):
     result_signal = pyqtSignal(dict)
 
@@ -105,19 +132,21 @@ class WebhookThread(QThread):
         Logger.info(f"[Webhook] 서버 바인딩: 0.0.0.0:{self.port}")
 
         try:
-            # SSL 인증서 설정
-            certificate_private = resource_path('config/key0627/server.crt')
-            certificate_key = resource_path('config/key0627/server.key')
-            ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-            ssl_context.load_cert_chain(certfile=certificate_private, keyfile=certificate_key)
+            t_start = time.time()
+            ssl_context = _get_cached_ssl_context()
+            Logger.info(f"[Webhook] SSL context 획득: {time.time() - t_start:.2f}초")
 
+            t_httpd = time.time()
             self.httpd = ReusableHTTPServer(server_address, lambda *args, **kwargs: WebhookServer(*args, msg=self.message,
                                                                                                    result_signal=self.result_signal,
                                                                                                    **kwargs))
+            Logger.info(f"[Webhook] HTTPServer 생성: {time.time() - t_httpd:.2f}초")
             # SSL 설정
+            t_wrap = time.time()
             self.httpd.socket = ssl_context.wrap_socket(self.httpd.socket, server_side=True)
+            Logger.info(f"[Webhook] wrap_socket 완료: {time.time() - t_wrap:.2f}초")
 
-            Logger.info(f'[Webhook] 웹훅 서버 시작됨: 0.0.0.0:{self.port}')
+            Logger.info(f'[Webhook] 웹훅 서버 시작됨: 0.0.0.0:{self.port} (run() 진입 후 총 {time.time() - t_start:.2f}초)')
             self.server_ready.set()  # 서버 준비 완료 신호
 
             # 자동 종료 타이머: timeout_sec 경과 후 서버 닫기

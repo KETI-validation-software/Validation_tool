@@ -43,7 +43,13 @@ class Server(BaseHTTPRequestHandler):
     outSchema = None
     webhookData = None  # ✅ 웹훅 데이터 추가
     webhook_thread = None  # ✅ 웹훅 스레드 (클래스 변수)
-    webhook_response = None  # ✅ 웹훅 응답 (클래스 변수)
+    webhook_response = None  # ✅ 웹훅 응답 (클래스 변수, 마지막 응답)
+    webhook_response_list = None  # ✅ 이벤트별 응답 누적 목록 (시스템 webhook_results_list와 동일 역할)
+    # 임시 테스트: 웹훅을 연속 N회 전송 (1=단건, N>1=다중 전송 테스트) (0602)
+    WEBHOOK_MULTI_SEND_COUNT = 3            # 보낼 이벤트 수 (실검증=1, 테스트=N) — 상한
+    WEBHOOK_SEND_INTERVAL_MIN = 0.1         # 이벤트 간 불규칙 간격 최소(초) — N>1일 때만 의미
+    WEBHOOK_SEND_INTERVAL_MAX = 3.0         # 이벤트 간 불규칙 간격 최대(초)
+    WEBHOOK_SEND_SEED = 42                  # 간격 랜덤 재현용 고정 시드
     webhookCon = None
     num_retries = None
     system = ""
@@ -1085,6 +1091,7 @@ class Server(BaseHTTPRequestHandler):
 
             # ✅ 웹훅 응답 초기화 (클래스 변수)
             Server.webhook_response = None
+            Server.webhook_response_list = None
 
             json_data_tmp = json.dumps(webhook_payload).encode('utf-8')
             webhook_thread = threading.Thread(target=self.webhook_req, args=(url_tmp, json_data_tmp, 1, api_name))
@@ -1093,24 +1100,54 @@ class Server(BaseHTTPRequestHandler):
             webhook_thread.start()
             Logger.debug(f"[SERVER] 웹훅 스레드 시작됨")
 
+    # 0602 - 웹훅 복수 전송 로직 추가
     def webhook_req(self, url, json_data_tmp, max_retries=3, api_name=""):
-        import requests
-        for attempt in range(max_retries):
-
+        import requests, random
+        me = threading.current_thread()  # ✅ 이 송신의 소유권 토큰 (옛 스레드 오염 차단용)
+        total = Server.WEBHOOK_MULTI_SEND_COUNT
+        Server.webhook_response_list = []  # ✅ 이벤트별 응답 누적 (시스템 webhook_results_list와 동일)
+        # ✅ 창(WEBHOOK_WINDOW_SEC)도 상한, 개수(total)도 상한 → 둘 중 먼저 닿으면 멈춤
+        #    실검증: total=1 → 1건 보내고 즉시 종료 / 테스트: total=N → 불규칙 간격으로 창 안에서 N건
+        window_sec = float(getattr(self.CONSTANTS, 'WEBHOOK_WINDOW_SEC', 10.0))
+        rng = random.Random(Server.WEBHOOK_SEND_SEED)  # 고정 시드 → 매 실행 동일한 불규칙 패턴(재현 가능)
+        _start = time.perf_counter()
+        send_num = 0
+        while send_num < total and (time.perf_counter() - _start) < window_sec:
+            send_num += 1
+            # ✅ 새 송신이 시작돼 주인이 바뀌었으면 더 보내지 않고 중단 (다음 API 창 오염 차단)
+            if Server.webhook_thread is not me:
+                Logger.warn(f"[SERVER] 새 웹훅 스레드 시작됨 — 이전 송신 중단 (send#{send_num} 미발송)")
+                return
+            Logger.info(f"[SERVER] 웹훅 전송 {send_num}/{total}회차 시작 → {url}")
             try:
                 result = requests.post(url, data=json_data_tmp, verify=False, timeout=10)
+                Logger.info(f"[SERVER] 웹훅 전송 {send_num}/{total}회차 응답 수신: HTTP {result.status_code}")
                 Logger.debug(f"[SERVER] 웹훅 응답 수신: {result.text}")
+                # ✅ post 도중 창이 닫히고 새 송신이 주인이 됐을 수 있음 → 쓰기 직전 재확인
+                if Server.webhook_thread is not me:
+                    Logger.warn(f"[SERVER] 창 종료 후 늦게 도착한 응답 (send#{send_num}) — 슬롯 오염 방지 위해 폐기")
+                    return
                 self.result = result
-                Server.webhook_response = json.loads(result.text)  # ✅ 클래스 변수에 저장
+                Server.webhook_response = json.loads(result.text)  # ✅ 마지막 응답 (하위 호환)
+                Server.webhook_response_list.append(Server.webhook_response)  # ✅ 이벤트별 누적
                 Logger.debug(f"[SERVER] webhook_response 저장됨 (클래스 변수): {Server.webhook_response}")
 
                 # ✅ 웹훅 응답 기록 (trace)
                 self._push_event(api_name, "WEBHOOK_IN", Server.webhook_response)
 
-                # JSON 파일 저장 제거 - spec/video/videoData_response.py 사용
-                break
             except Exception as e:
+                # ✅ 옛 스레드의 늦은 전송 실패가 새 창 슬롯을 오염시키지 않도록 주인일 때만 기록
+                if Server.webhook_thread is not me:
+                    Logger.warn(f"[SERVER] 창 종료 후 늦은 전송 실패 (send#{send_num}) — 폐기")
+                    return
+                Server.webhook_response_list.append(None)  # ✅ 전송 실패도 1건으로 기록 (미수신 검증)
+                Logger.info(f"[SERVER] 웹훅 전송 {send_num}/{total}회차 실패: {e}")
                 Logger.debug(str(e))
+
+            if send_num < total:
+                # 다음 이벤트까지 불규칙 대기 (시드 고정 → 재현 가능). 창을 넘기면 다음 while 조건에서 종료
+                time.sleep(rng.uniform(Server.WEBHOOK_SEND_INTERVAL_MIN,
+                                       Server.WEBHOOK_SEND_INTERVAL_MAX))
 
     def api_res(self, api_name=None):
         i, data, out_con = None, None, None
