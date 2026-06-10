@@ -922,33 +922,6 @@ class MyApp(SystemMainUI):
         ]
 
     def on_group_selected(self, row, col):
-        group_name = self.index_to_group_name.get(row)
-        if not group_name:
-            return
-
-        # ===== 외부 로드된 SPEC_CONFIG 사용 (fallback: CONSTANTS 모듈) =====
-        SPEC_CONFIG = getattr(self, 'LOADED_SPEC_CONFIG', self.CONSTANTS.SPEC_CONFIG)
-        selected_group = next(
-            (g for g in SPEC_CONFIG if g.get("group_name") == group_name), None
-        )
-        # ===== 수정 끝 =====
-
-        if selected_group:
-            new_group_id = selected_group.get('group_id')
-            old_group_id = getattr(self, 'current_group_id', None)
-
-            Logger.debug(f" 🔄 그룹 선택: {old_group_id} → {new_group_id}")
-
-            # ✅ 그룹이 변경되면 current_spec_id 초기화 (다음 시나리오 선택 시 무조건 다시 로드되도록)
-            if old_group_id != new_group_id:
-                self.current_spec_id = None
-                Logger.debug(f" ✨ 그룹 변경으로 current_spec_id 초기화")
-
-            # ✅ 그룹 ID 저장
-            self.current_group_id = new_group_id
-            self.update_test_field_table(selected_group)
-
-    def on_group_selected(self, row, col):
         """
         ✅ 시험 그룹 선택 시 해당 그룹의 시험 분야 목록을 자동 갱신
         """
