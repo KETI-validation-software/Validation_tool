@@ -185,7 +185,8 @@ def build_monitor_response_time_text(response_time_ms=None, total_timeout_ms=Non
     response_time_text = f"{_k(0xC751, 0xB2F5, 0x20, 0xC18C, 0xC694, 0x20, 0xC2DC, 0xAC04)}: {float(response_time_ms) / 1000:.2f}{_k(0xCD08)}"
     timeout_text = _format_seconds_for_monitor_display(total_timeout_ms)
     if timeout_text:
-        response_time_text += f" ({timeout_text})"
+        # 측정값/타임아웃 형식으로 표기 (예: "0.99초/60초") — 괄호 표기는 오해 소지
+        response_time_text += f"/{timeout_text}"
     return response_time_text
 
 

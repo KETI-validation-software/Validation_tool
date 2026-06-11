@@ -613,7 +613,10 @@ class MyApp(PlatformMainUI):
                     # ✅ 대기 시간 타이머 표시 (기능 비활성화됨)
                     remaining = max(0, int(current_timeout - time_interval))
                     # self.update_last_line_timer(f"남은 대기 시간: {remaining}초")
-                    self._set_timer_running(self.cnt, time_interval)
+                    # ✅ 대기 중에는 0으로 고정(카운트업 안 함). 응답시간은 요청 도착 후 0부터 측정하므로,
+                    #    대기 경과를 표시하면 도착 순간 0으로 리셋되어 "1초→0초" 깜빡임이 생김. 시스템과 달리
+                    #    플랫폼은 대기 시간을 응답시간에서 제외하므로 대기 표시를 0으로 둔다.
+                    self._set_timer_running(self.cnt, 0)
 
                     if self.current_retry == 0:
                         Logger.debug(f"능동 대기(WAIT): 시스템 요청 대기 중 (API: {api_name}, 예상: {expected_count}회, 실제: {actual_count}회)")
@@ -1173,7 +1176,7 @@ class MyApp(PlatformMainUI):
                             step_name=f"{build_webhook_monitor_step_name(display_name, 'event')} #{_idx}",
                             request_json=_ev_json,
                             direction="SEND",
-                            response_time_ms=self.monitor_response_elapsed_ms.get(self.cnt),
+                            # 응답 소요 시간은 매 웹훅 이벤트 태그가 아니라 '검증 결과' 태그에만 표시 (롱폴링과 동일)
                         )
                         self.append_monitor_log(
                             step_name=f"{build_webhook_monitor_step_name(display_name, 'ack')} #{_idx}",

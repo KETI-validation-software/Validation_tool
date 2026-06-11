@@ -1400,7 +1400,7 @@ class MyApp(SystemMainUI):
             step_name=build_monitor_step_name(display_name, "response"),
             request_json=ack_text,
             direction="RECV",
-            response_time_ms=self.monitor_response_elapsed_ms.get(cnt),
+            # 응답 소요 시간은 '검증 결과' 태그에만 표시 (basic/롱폴링과 동일) — 구독 ACK엔 표시 안 함
         )
 
     def handle_webhook_result(self, result):
@@ -1460,7 +1460,7 @@ class MyApp(SystemMainUI):
             step_name=event_recv_name,
             request_json=tmp_webhook_res,
             direction="RECV",
-            response_time_ms=self.monitor_response_elapsed_ms.get(self.webhook_cnt),
+            # 응답 소요 시간은 매 웹훅 이벤트 태그가 아니라 '검증 결과' 태그에만 표시 (롱폴링과 동일)
         )
 
         if webhook_data:
