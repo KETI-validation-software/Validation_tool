@@ -787,7 +787,7 @@ class ResultPageWidget(QWidget):
         title_label.setStyleSheet("""
             color: #000000;
             font-family: 'Noto Sans KR';
-            font-size: 20px;
+            font-size: 16px;
             font-weight: 500;
         """)
         header_layout.addWidget(title_label, alignment=Qt.AlignVCenter)
@@ -795,7 +795,7 @@ class ResultPageWidget(QWidget):
         if info_text:
             vline = QFrame()
             vline.setFrameShape(QFrame.VLine)
-            vline.setFixedSize(1, 27)
+            vline.setFixedSize(1, 20)
             vline.setStyleSheet("background-color: #000000;")
             header_layout.addWidget(vline, alignment=Qt.AlignVCenter)
 
@@ -803,7 +803,7 @@ class ResultPageWidget(QWidget):
             info_label.setStyleSheet("""
                 color: #000000;
                 font-family: 'Noto Sans KR';
-                font-size: 18px;
+                font-size: 14px;
                 font-weight: 500;
             """)
             header_layout.addWidget(info_label, alignment=Qt.AlignVCenter)
@@ -828,11 +828,11 @@ class ResultPageWidget(QWidget):
         score_value = float(score_data.get("score", 0.0))
 
         pass_label = QLabel(
-            f'필수 필드 점수&nbsp;&nbsp;<span style="font-family: \"Noto Sans KR\"; font-size: 23px; font-weight: 500; color: #000000;">{passed_fields}/{total_fields}</span>'
+            f'필수 필드 점수&nbsp;&nbsp;<span style="font-family: \"Noto Sans KR\"; font-size: 20px; font-weight: 500; color: #000000;">{passed_fields}/{total_fields}</span>'
         )
         pass_label.setTextFormat(Qt.RichText)
         pass_label.setFixedSize(340, 60)
-        pass_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000; border: none;")
+        pass_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 17px; font-weight: 500; color: #000000; border: none;")
         data_layout.addWidget(pass_label)
 
         vline1 = QFrame()
@@ -846,11 +846,11 @@ class ResultPageWidget(QWidget):
         data_layout.addWidget(spacer1)
 
         fail_label = QLabel(
-            f'선택 필드 점수&nbsp;&nbsp;<span style="font-family: \"Noto Sans KR\"; font-size: 23px; font-weight: 500; color: #000000;">{failed_fields}/{total_fields}</span>'
+            f'선택 필드 점수&nbsp;&nbsp;<span style="font-family: \"Noto Sans KR\"; font-size: 20px; font-weight: 500; color: #000000;">{failed_fields}/{total_fields}</span>'
         )
         fail_label.setTextFormat(Qt.RichText)
         fail_label.setFixedSize(340, 60)
-        fail_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000; border: none;")
+        fail_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 17px; font-weight: 500; color: #000000; border: none;")
         data_layout.addWidget(fail_label)
 
         vline2 = QFrame()
@@ -864,11 +864,11 @@ class ResultPageWidget(QWidget):
         data_layout.addWidget(spacer2)
 
         score_label = QLabel(
-            f'종합 평가 점수&nbsp;&nbsp;<span style="font-family: \"Noto Sans KR\"; font-size: 23px; font-weight: 500; color: #000000;">{score_value:.1f}%</span>'
+            f'종합 평가 점수&nbsp;&nbsp;<span style="font-family: \"Noto Sans KR\"; font-size: 20px; font-weight: 500; color: #000000;">{score_value:.1f}%</span>'
         )
         score_label.setTextFormat(Qt.RichText)
         score_label.setFixedSize(315, 60)
-        score_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000; border: none;")
+        score_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 17px; font-weight: 500; color: #000000; border: none;")
         data_layout.addWidget(score_label)
         data_layout.addStretch()
         main_layout.addWidget(data_area)
@@ -2441,8 +2441,9 @@ class ResultPageWidget(QWidget):
         # 분야별 점수 아이콘 (52 × 42)
         icon_label = QLabel()
         icon_pixmap = QPixmap(resource_path("assets/image/test_runner/icn_분야별점수.png"))
-        icon_label.setPixmap(icon_pixmap.scaled(52, 42, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        icon_label.setFixedSize(52, 42)
+        icon_label.setPixmap(icon_pixmap.scaled(44, 35, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        icon_label.setFixedSize(44, 35)
+        icon_label.setContentsMargins(0, 0, 0, 4)  # 아이콘만 살짝 위로 (텍스트와 수평 정렬)
         icon_label.setAlignment(Qt.AlignCenter)
         header_layout.addWidget(icon_label, alignment=Qt.AlignVCenter)
 
@@ -2451,7 +2452,7 @@ class ResultPageWidget(QWidget):
         score_type_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";
-            font-size: 20px;
+            font-size: 17px;
             font-style: normal;
             font-weight: 500;
             line-height: normal;
@@ -2461,7 +2462,7 @@ class ResultPageWidget(QWidget):
         # 세로선 (27px)
         vline = QFrame()
         vline.setFrameShape(QFrame.VLine)
-        vline.setFixedSize(1, 27)
+        vline.setFixedSize(1, 20)
         vline.setStyleSheet("background-color: #000000;")
         header_layout.addWidget(vline, alignment=Qt.AlignVCenter)
 
@@ -2472,7 +2473,7 @@ class ResultPageWidget(QWidget):
         spec_info_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";
-            font-size: 20px;
+            font-size: 17px;
             font-style: normal;
             font-weight: 500;
             line-height: normal;
@@ -2521,10 +2522,10 @@ class ResultPageWidget(QWidget):
         self.spec_pass_label.setFixedSize(340, 60)  # 통과 필수/선택
         self.spec_pass_label.setText(
             f"필수 필드 점수&nbsp;&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 23px; font-weight: 500; color: #000000;'>"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-weight: 500; color: #000000;'>"
             f"{required_score:.1f}% ({required_pass}/{required_total})</span>"
         )
-        self.spec_pass_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000;")
+        self.spec_pass_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 17px; font-weight: 500; color: #000000;")
         data_layout.addWidget(self.spec_pass_label)
 
         # 구분선 1
@@ -2543,10 +2544,10 @@ class ResultPageWidget(QWidget):
         self.spec_total_label.setFixedSize(340, 60)  # 통과 필수/선택
         self.spec_total_label.setText(
             f"선택 필드 점수&nbsp;&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 23px; font-weight: 500; color: #000000;'>"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-weight: 500; color: #000000;'>"
             f"{opt_score:.1f}% ({opt_pass}/{opt_total})</span>"
         )
-        self.spec_total_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000;")
+        self.spec_total_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 17px; font-weight: 500; color: #000000;")
         data_layout.addWidget(self.spec_total_label)
 
         # 구분선 2
@@ -2565,10 +2566,10 @@ class ResultPageWidget(QWidget):
         self.spec_score_label.setFixedSize(315, 60)  # 종합 평가 점수
         self.spec_score_label.setText(
             f"종합 평가 점수&nbsp;&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 23px; font-weight: 500; color: #000000;'>"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-weight: 500; color: #000000;'>"
             f"{score:.1f}% ({total_pass}/{total_fields})</span>"
         )
-        self.spec_score_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000;")
+        self.spec_score_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 17px; font-weight: 500; color: #000000;")
         data_layout.addWidget(self.spec_score_label)
         data_layout.addStretch()
         main_layout.addWidget(self.spec_data_area)
@@ -2661,27 +2662,28 @@ class ResultPageWidget(QWidget):
         header_layout.setContentsMargins(0, 5, 0, 5)
         header_layout.setSpacing(12)
 
-        if prefix == "overall":
-            header_layout.addSpacing(10.8)
-
         icon_label = QLabel()
         icon_path = "assets/image/icon/icn_최종전체점수.png" if prefix == "overall" else "assets/image/test_runner/icn_전체점수.png"
         icon_pixmap = QPixmap(resource_path(icon_path))
         if prefix == "overall":
             # 전체 점수는 원본 이미지 크기 그대로 표시
-            icon_label.setPixmap(icon_pixmap)
-            icon_label.setFixedSize(icon_pixmap.size())
+            icon_label.setPixmap(icon_pixmap.scaled(44, 35, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            icon_label.setFixedSize(44, 35)
         else:
-            icon_label.setPixmap(icon_pixmap.scaled(52, 42, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-            icon_label.setFixedSize(52, 42)
+            icon_label.setPixmap(icon_pixmap.scaled(44, 35, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            icon_label.setFixedSize(44, 35)
         icon_label.setAlignment(Qt.AlignCenter)
+        if prefix == "overall":
+            icon_label.setContentsMargins(8, 0, 0, 4)  # 전체 점수 아이콘(40x40 정사각·여백큼): 우측 ~4px + 위로
+        else:
+            icon_label.setContentsMargins(0, 0, 0, 4)  # 아이콘만 살짝 위로
         header_layout.addWidget(icon_label, alignment=Qt.AlignVCenter)
 
         title_label = QLabel(title)
         title_label.setStyleSheet("""
             color: #000;
             font-family: "Noto Sans KR";
-            font-size: 20px;
+            font-size: 17px;
             font-style: normal;
             font-weight: 500;
             line-height: normal;
@@ -2691,7 +2693,7 @@ class ResultPageWidget(QWidget):
         if info_text:
             vline = QFrame()
             vline.setFrameShape(QFrame.VLine)
-            vline.setFixedSize(1, 27)
+            vline.setFixedSize(1, 20)
             vline.setStyleSheet("background-color: #000000;")
             header_layout.addWidget(vline, alignment=Qt.AlignVCenter)
 
@@ -2699,7 +2701,7 @@ class ResultPageWidget(QWidget):
             info_label.setStyleSheet("""
                 color: #000000;
                 font-family: "Noto Sans KR";
-                font-size: 20px;
+                font-size: 17px;
                 font-style: normal;
                 font-weight: 500;
                 line-height: normal;
@@ -2740,11 +2742,11 @@ class ResultPageWidget(QWidget):
         pass_label.setFixedSize(340, 60)
         pass_label.setText(
             f"필수 필드 점수&nbsp;&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 23px; font-weight: 500; color: #000000;'>"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-weight: 500; color: #000000;'>"
             f"{required_score:.1f}% ({required_pass}/{required_total})</span>"
         )
         pass_label.setTextFormat(Qt.RichText)
-        pass_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000;")
+        pass_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 17px; font-weight: 500; color: #000000;")
         data_layout.addWidget(pass_label)
 
         vline1 = QFrame()
@@ -2761,11 +2763,11 @@ class ResultPageWidget(QWidget):
         fail_label.setFixedSize(340, 60)
         fail_label.setText(
             f"선택 필드 점수&nbsp;&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 23px; font-weight: 500; color: #000000;'>"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-weight: 500; color: #000000;'>"
             f"{opt_score:.1f}% ({opt_pass}/{opt_total})</span>"
         )
         fail_label.setTextFormat(Qt.RichText)
-        fail_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000;")
+        fail_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 17px; font-weight: 500; color: #000000;")
         data_layout.addWidget(fail_label)
 
         vline2 = QFrame()
@@ -2782,11 +2784,11 @@ class ResultPageWidget(QWidget):
         score_label.setFixedSize(315, 60)
         score_label.setText(
             f"종합 평가 점수&nbsp;&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 23px; font-weight: 500; color: #000000;'>"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-weight: 500; color: #000000;'>"
             f"{score:.1f}% ({passed_fields}/{total_fields})</span>"
         )
         score_label.setTextFormat(Qt.RichText)
-        score_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000;")
+        score_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 17px; font-weight: 500; color: #000000;")
         data_layout.addWidget(score_label)
         data_layout.addStretch()
         main_layout.addWidget(data_area)

@@ -184,7 +184,7 @@ class PlatformMainUI(CommonMainUI):
             if hasattr(self, 'monitor_section') and hasattr(self, 'original_monitor_section_size'):
                 new_monitor_width = int(self.original_monitor_section_size[0] * width_ratio)
                 monitor_extra = extra_column_height * (306 / right_expandable_total)
-                new_monitor_height = int(306 + monitor_extra)
+                new_monitor_height = int(330 + monitor_extra)
                 self.monitor_section.setFixedSize(new_monitor_width, new_monitor_height)
 
             # ✅ 버튼 그룹 및 버튼 크기 조정 (간격 16px 고정, 세로 크기 고정)
@@ -691,8 +691,9 @@ class PlatformMainUI(CommonMainUI):
         # 분야별 점수 아이콘 (52 × 42)
         icon_label = QLabel()
         icon_pixmap = QPixmap(resource_path("assets/image/test_runner/icn_분야별점수.png"))
-        icon_label.setPixmap(icon_pixmap.scaled(52, 42, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        icon_label.setFixedSize(52, 42)
+        icon_label.setPixmap(icon_pixmap.scaled(44, 35, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        icon_label.setFixedSize(44, 35)
+        icon_label.setContentsMargins(0, 0, 0, 4)  # 아이콘만 살짝 위로 (텍스트와 수평 정렬)
         icon_label.setAlignment(Qt.AlignCenter)
 
         # 분야별 점수 레이블 (500 Medium 20px)
@@ -700,7 +701,7 @@ class PlatformMainUI(CommonMainUI):
         score_type_label.setStyleSheet("""
             color: #000;
             font-family: "Noto Sans KR";
-            font-size: 20px;
+            font-size: 17px;
             font-style: normal;
             font-weight: 500;
             line-height: normal;
@@ -709,7 +710,7 @@ class PlatformMainUI(CommonMainUI):
         # 세로선 (27px)
         header_vline = QFrame()
         header_vline.setFrameShape(QFrame.VLine)
-        header_vline.setFixedSize(1, 27)
+        header_vline.setFixedSize(1, 20)
         header_vline.setStyleSheet("background-color: #000000;")
 
         # spec 정보 레이블 (500 Medium 20px)
@@ -717,7 +718,7 @@ class PlatformMainUI(CommonMainUI):
         self.spec_name_label.setStyleSheet("""
             color: #000;
             font-family: "Noto Sans KR";
-            font-size: 20px;
+            font-size: 17px;
             font-style: normal;
             font-weight: 500;
             line-height: normal;
@@ -746,7 +747,7 @@ class PlatformMainUI(CommonMainUI):
         self.spec_pass_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";
-            font-size: 19px;
+            font-size: 17px;
             font-weight: 500;
         """)
         self.spec_total_label = QLabel("선택 필드 점수")
@@ -754,7 +755,7 @@ class PlatformMainUI(CommonMainUI):
         self.spec_total_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";
-            font-size: 19px;
+            font-size: 17px;
             font-weight: 500;
         """)
         self.spec_score_label = QLabel("종합 평가 점수")
@@ -762,7 +763,7 @@ class PlatformMainUI(CommonMainUI):
         self.spec_score_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";
-            font-size: 19px;
+            font-size: 17px;
             font-weight: 500;
         """)
 
@@ -843,16 +844,17 @@ class PlatformMainUI(CommonMainUI):
 
         # 전체 점수 아이콘 (52 × 42)
         icon_label = QLabel()
-        icon_label.setFixedSize(52, 42)
+        icon_label.setFixedSize(44, 35)
+        icon_label.setContentsMargins(0, 0, 0, 4)  # 아이콘만 살짝 위로 (텍스트와 수평 정렬)
         icon_pixmap = QPixmap(resource_path("assets/image/test_runner/icn_전체점수.png"))
-        icon_label.setPixmap(icon_pixmap.scaled(52, 42, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        icon_label.setPixmap(icon_pixmap.scaled(44, 35, Qt.KeepAspectRatio, Qt.SmoothTransformation))
 
         # 전체 점수 레이블 (500 Medium 20px)
         total_name_label = QLabel("전체 점수")
         total_name_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";
-            font-size: 20px;
+            font-size: 17px;
             font-weight: 500;
         """)
 
@@ -874,7 +876,7 @@ class PlatformMainUI(CommonMainUI):
         self.total_pass_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";
-            font-size: 19px;
+            font-size: 17px;
             font-weight: 500;
         """)
         self.total_total_label = QLabel("선택 필드 점수")
@@ -882,7 +884,7 @@ class PlatformMainUI(CommonMainUI):
         self.total_total_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";
-            font-size: 19px;
+            font-size: 17px;
             font-weight: 500;
         """)
         self.total_score_label = QLabel("종합 평가 점수")
@@ -890,7 +892,7 @@ class PlatformMainUI(CommonMainUI):
         self.total_score_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";
-            font-size: 19px;
+            font-size: 17px;
             font-weight: 500;
         """)
 
@@ -1003,17 +1005,17 @@ class PlatformMainUI(CommonMainUI):
         # 필수/선택/종합 점수 표시 (% (통과/전체) 형식)
         self.spec_pass_label.setText(
             f"필수 필드 점수&nbsp;&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 23px; font-weight: 500; color: #000000;'>"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-weight: 500; color: #000000;'>"
             f"{spec_required_score:.1f}% ({spec_required_pass}/{spec_required_total})</span>"
         )
         self.spec_total_label.setText(
             f"선택 필드 점수&nbsp;&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 23px; font-weight: 500; color: #000000;'>"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-weight: 500; color: #000000;'>"
             f"{spec_opt_score:.1f}% ({self.total_opt_pass_cnt}/{spec_opt_total})</span>"
         )
         self.spec_score_label.setText(
             f"종합 평가 점수&nbsp;&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 23px; font-weight: 500; color: #000000;'>"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-weight: 500; color: #000000;'>"
             f"{spec_score:.1f}% ({self.total_pass_cnt}/{spec_total_fields})</span>"
         )
 

@@ -391,9 +391,9 @@ class CommonMainUI(QWidget):
 
         # ========== 송수신 메시지 실시간 모니터링 영역 (1064 × 267) ==========
         self.monitor_section = QWidget()
-        self.monitor_section.setFixedSize(1064, 306)
+        self.monitor_section.setFixedSize(1064, 330)
         self.monitor_section.setStyleSheet("background: transparent;")
-        self.original_monitor_section_size = (1064, 306)
+        self.original_monitor_section_size = (1064, 330)
 
         monitor_section_layout = QVBoxLayout(self.monitor_section)
         monitor_section_layout.setContentsMargins(0, 0, 0, 0)
@@ -438,12 +438,12 @@ class CommonMainUI(QWidget):
 
         # ✅ QTextBrowser를 담을 컨테이너 생성 (1064 × 235)
         self.text_browser_container = QWidget()
-        self.text_browser_container.setFixedSize(1064, 274)
-        self.original_text_browser_container_size = (1064, 274)
+        self.text_browser_container.setFixedSize(1064, 298)
+        self.original_text_browser_container_size = (1064, 298)
 
         self.valResult = QTextBrowser(self.text_browser_container)
-        self.valResult.setFixedSize(1064, 274)
-        self.original_valResult_size = (1064, 274)
+        self.valResult.setFixedSize(1064, 298)
+        self.original_valResult_size = (1064, 298)
         print(f"[DEBUG] valResult 초기 크기 설정: {self.valResult.size()}")  # 디버그 출력
         self.valResult.setStyleSheet("""
             QTextBrowser {
@@ -989,7 +989,7 @@ class CommonMainUI(QWidget):
             if hasattr(self, 'monitor_section') and hasattr(self, 'original_monitor_section_size'):
                 new_monitor_width = int(self.original_monitor_section_size[0] * width_ratio)
                 monitor_extra = extra_column_height * (306 / right_expandable_total)
-                new_monitor_height = int(306 + monitor_extra)
+                new_monitor_height = int(330 + monitor_extra)
                 self.monitor_section.setFixedSize(new_monitor_width, new_monitor_height)
 
             # ✅ 버튼 그룹 및 버튼 크기 조정 (간격 16px 고정, 세로 크기 고정)
