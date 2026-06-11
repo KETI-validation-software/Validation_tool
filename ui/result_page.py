@@ -1124,6 +1124,41 @@ class ResultPageWidget(QWidget):
                 if score_label is not None:
                     score_label.setFixedSize(new_score_width, self.original_score_label_size[1])
 
+    def _adjust_result_columns(self):
+        """결과 테이블 컬럼폭·헤더를 현재 스크롤바 유무에 맞춰 재계산.
+        스크롤바가 없을 땐 마지막 컬럼을 끝까지 늘려 행 구분선이 테이블 우측 끝까지 그려지게 함."""
+        if not (hasattr(self, 'tableWidget') and hasattr(self, 'original_column_widths')):
+            return
+        if hasattr(self, 'original_window_size'):
+            width_ratio = max(1.0, self.width() / self.original_window_size[0])
+        else:
+            width_ratio = 1.0
+
+        row_count = self.tableWidget.rowCount()
+        total_row_height = row_count * 40
+        scroll_area_height = self.result_scroll_area.viewport().height() if hasattr(self, 'result_scroll_area') else 189
+        scrollbar_visible = total_row_height > scroll_area_height
+        scrollbar_width = 16 if scrollbar_visible else 2  # 스크롤바 없으면 그 자리까지 컬럼 확장
+
+        new_scroll_width = int(1064 * width_ratio)
+        available_width = new_scroll_width - scrollbar_width
+
+        used_width = 0
+        for i, orig_width in enumerate(self.original_column_widths[:-1]):
+            new_col_width = int(orig_width * width_ratio)
+            self.tableWidget.setColumnWidth(i, new_col_width)
+            used_width += new_col_width
+
+        last_col_width = available_width - used_width
+        self.tableWidget.setColumnWidth(len(self.original_column_widths) - 1, last_col_width)
+
+        if hasattr(self, 'result_header_layout'):
+            self.result_header_layout.setContentsMargins(0, 0, scrollbar_width, 0)
+        if hasattr(self, 'result_header_labels'):
+            for i in range(len(self.original_column_widths)):
+                if i < len(self.result_header_labels):
+                    self.result_header_labels[i].setFixedSize(self.tableWidget.columnWidth(i), 30)
+
     def resizeEvent(self, event):
         super().resizeEvent(event)
         self._update_content_background_geometry()
@@ -1268,31 +1303,7 @@ class ResultPageWidget(QWidget):
                     self.original_buttonGroup_size[1],
                 )
 
-            if hasattr(self, 'tableWidget') and hasattr(self, 'original_column_widths'):
-                row_count = self.tableWidget.rowCount()
-                total_row_height = row_count * 40
-                scroll_area_height = self.result_scroll_area.viewport().height() if hasattr(self, 'result_scroll_area') else 189
-                scrollbar_visible = total_row_height > scroll_area_height
-                scrollbar_width = 16 if scrollbar_visible else 2
-
-                new_scroll_width = int(1064 * width_ratio)
-                available_width = new_scroll_width - scrollbar_width
-
-                used_width = 0
-                for i, orig_width in enumerate(self.original_column_widths[:-1]):
-                    new_col_width = int(orig_width * width_ratio)
-                    self.tableWidget.setColumnWidth(i, new_col_width)
-                    used_width += new_col_width
-
-                last_col_width = available_width - used_width
-                self.tableWidget.setColumnWidth(len(self.original_column_widths) - 1, last_col_width)
-
-                if hasattr(self, 'result_header_layout'):
-                    self.result_header_layout.setContentsMargins(0, 0, scrollbar_width, 0)
-                if hasattr(self, 'result_header_labels'):
-                    for i in range(len(self.original_column_widths)):
-                        if i < len(self.result_header_labels):
-                            self.result_header_labels[i].setFixedSize(self.tableWidget.columnWidth(i), 30)
+            self._adjust_result_columns()
 
         self._update_content_background_geometry()
 
@@ -1743,6 +1754,8 @@ class ResultPageWidget(QWidget):
 
         # 테이블 행 수 재설정
         self.tableWidget.setRowCount(api_count)
+        # 행 수가 정해지면 스크롤바 유무에 맞춰 컬럼폭 재조정(구분선 끝까지)
+        QtCore.QTimer.singleShot(0, self._adjust_result_columns)
 
         # ✅ 행 높이 설정 (누락 방지)
         for i in range(api_count):
@@ -1816,6 +1829,8 @@ class ResultPageWidget(QWidget):
 
         # 테이블 행 수 재설정
         self.tableWidget.setRowCount(len(table_data))
+        # 행 수가 정해지면 스크롤바 유무에 맞춰 컬럼폭 재조정(구분선 끝까지)
+        QtCore.QTimer.singleShot(0, self._adjust_result_columns)
 
         # ✅ 행 높이 설정 (누락 방지)
         for i in range(len(table_data)):
