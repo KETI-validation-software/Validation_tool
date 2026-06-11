@@ -43,6 +43,7 @@ class Server(BaseHTTPRequestHandler):
     outSchema = None
     webhookData = None  # ✅ 웹훅 데이터 추가
     webhook_thread = None  # ✅ 웹훅 스레드 (클래스 변수)
+    webhook_window_started_at = None  # ✅ 송신 창 시작 시각 (perf_counter) — 플랫폼 창 채우기 기준점
     webhook_response = None  # ✅ 웹훅 응답 (클래스 변수, 마지막 응답)
     webhook_response_list = None  # ✅ 이벤트별 응답 누적 목록 (시스템 webhook_results_list와 동일 역할)
     # 임시 테스트: 웹훅을 연속 N회 전송 (1=단건, N>1=다중 전송 테스트) (0602)
@@ -1096,6 +1097,7 @@ class Server(BaseHTTPRequestHandler):
             json_data_tmp = json.dumps(webhook_payload).encode('utf-8')
             webhook_thread = threading.Thread(target=self.webhook_req, args=(url_tmp, json_data_tmp, 1, api_name))
             Server.webhook_thread = webhook_thread  # ✅ 클래스 변수에 저장
+            Server.webhook_window_started_at = time.perf_counter()  # ✅ 송신 창 시작 — 플랫폼 창 채우기 기준점
             Logger.debug(f"[SERVER] webhook_thread 저장됨 (클래스 변수): thread={id(webhook_thread)}")
             webhook_thread.start()
             Logger.debug(f"[SERVER] 웹훅 스레드 시작됨")

@@ -240,14 +240,15 @@ class ResultPageWidget(QWidget):
         self.original_result_header_widget_size = (1064, 30)
         self.original_result_table_height = 335  # ✅ 시험 결과 테이블 기본 높이 소폭 조정 (하단 밸런스)
         self.original_score_title_size = (1064, 24)
-        self.original_score_table_size = (1064, 384)
-        self.original_spec_group_size = (1064, 128)
-        self.original_total_group_size = (1064, 128)
-        self.original_overall_group_size = (1064, 128)
+        # ✅ 점수 카드 슬림화: 카드 128→104 (헤더 52→40, 데이터 76→64) — 결과 테이블 영역 확보
+        self.original_score_table_size = (1064, 312)
+        self.original_spec_group_size = (1064, 104)
+        self.original_total_group_size = (1064, 104)
+        self.original_overall_group_size = (1064, 104)
         self.original_buttonGroup_size = (1064, 48)
         # ✅ 점수 테이블 내부 위젯 원본 크기
-        self.original_score_header_size = (1062, 52)
-        self.original_score_data_area_size = (1064, 76)
+        self.original_score_header_size = (1062, 40)
+        self.original_score_data_area_size = (1064, 64)
         # 각 라벨별 너비 설정 (통과 필수/선택은 넓게, 종합 평가는 좁게)
         self.original_pass_label_size = (340, 60)    # 필수 필드 점수
         self.original_opt_label_size = (340, 60)     # 선택 필드 점수
@@ -476,7 +477,7 @@ class ResultPageWidget(QWidget):
 
         # 시험 점수 테이블 (1064 × 256) - 분야별 점수 + 전체 점수
         self.score_table = QWidget()
-        self.score_table.setFixedSize(1064, 384)
+        self.score_table.setFixedSize(1064, 312)
         self.score_table.setStyleSheet("""
             QWidget {
                 background-color: #FFFFFF;
@@ -611,7 +612,10 @@ class ResultPageWidget(QWidget):
         if not self._is_parent_live_running():
             return
 
-        # 점수 요약 카드(분야별/전체)도 실시간 동기화
+        # ✅ 점수 요약 카드(분야별/전체)도 실시간 동기화
+        #    (주석만 있고 호출이 누락되어 있었음 — 페이지 전환 없이는 점수 요약이 안 바뀌던 원인)
+        self._sync_score_summary_from_parent()
+
         row_count = self.tableWidget.rowCount()
         if row_count <= 0:
             return
@@ -757,7 +761,7 @@ class ResultPageWidget(QWidget):
 
     def _create_score_display_group(self, prefix, title_text, info_text, score_data):
         group_box = QGroupBox()
-        group_box.setFixedSize(1064, 128)
+        group_box.setFixedSize(1064, 104)
         group_box.setStyleSheet("""
             QGroupBox {
                 background-color: #FFFFFF;
@@ -773,7 +777,7 @@ class ResultPageWidget(QWidget):
         main_layout.setSpacing(0)
 
         header = QWidget()
-        header.setFixedSize(1062, 52)
+        header.setFixedSize(1062, 40)
         header.setStyleSheet("background: #F8F9FA; border: none;")
         header_layout = QHBoxLayout(header)
         header_layout.setContentsMargins(20, 5, 20, 5)
@@ -813,9 +817,9 @@ class ResultPageWidget(QWidget):
         main_layout.addWidget(separator)
 
         data_area = QWidget()
-        data_area.setFixedSize(1064, 76)
+        data_area.setFixedSize(1064, 64)
         data_layout = QHBoxLayout(data_area)
-        data_layout.setContentsMargins(20, 8, 20, 8)
+        data_layout.setContentsMargins(20, 2, 20, 2)
         data_layout.setSpacing(0)
 
         total_fields = int(score_data.get("totalFields", 0))
@@ -2408,7 +2412,7 @@ class ResultPageWidget(QWidget):
     def _create_spec_score_display_with_data(self, total_pass, total_error, score, opt_pass=0, opt_error=0):
         """데이터를 받아서 분야별 점수 표시 위젯 생성 (1064 × 128)"""
         spec_group = QGroupBox()
-        spec_group.setFixedSize(1064, 128)
+        spec_group.setFixedSize(1064, 104)
         spec_group.setStyleSheet("""
             QGroupBox {
                 background-color: #FFFFFF;
@@ -2428,7 +2432,7 @@ class ResultPageWidget(QWidget):
 
         # 헤더 영역 (1064 × 52)
         self.spec_header = QWidget()
-        self.spec_header.setFixedSize(1062, 52)
+        self.spec_header.setFixedSize(1062, 40)
         self.spec_header.setStyleSheet("background: #F8F9FA;")
         header_layout = QHBoxLayout(self.spec_header)
         header_layout.setContentsMargins(0, 5, 0, 5)
@@ -2506,10 +2510,10 @@ class ResultPageWidget(QWidget):
             opt_score = 0
 
         self.spec_data_area = QWidget()
-        self.spec_data_area.setFixedSize(1064, 76)
+        self.spec_data_area.setFixedSize(1064, 64)
         self.spec_data_area.setStyleSheet("background: transparent;")
         data_layout = QHBoxLayout(self.spec_data_area)
-        data_layout.setContentsMargins(20, 8, 20, 8)
+        data_layout.setContentsMargins(20, 2, 20, 2)
         data_layout.setSpacing(0)
 
         # 필수 필드 점수 - % (통과/전체) 형식
@@ -2624,19 +2628,13 @@ class ResultPageWidget(QWidget):
                         self.parent.current_group_name = group_name
                     break
 
-        mode = str(getattr(self.parent, "validation_mode", "platform") or "platform").strip().lower()
-        mode_label = "통합시스템" if mode == "system" else "통합플랫폼"
-
-        if group_name:
-            # 그룹명에 모드 접미사가 이미 포함된 경우 중복으로 덧붙이지 않는다.
-            if group_name.endswith("-통합플랫폼") or group_name.endswith("-통합시스템"):
-                return group_name
-            return f"{group_name}-{mode_label}"
-        return mode_label
+        # ✅ 모드 접미사(-통합시스템/-통합플랫폼)를 붙이지 않고 시험 분야명 그대로 표시
+        #    (단일시스템 모드에서도 '통합시스템'이 붙는 등 라벨 로직 자체가 부정확했음)
+        return group_name
 
     def _create_summary_score_card(self, prefix, title, score_block, rounded_bottom, info_text=None, opt_pass=0, opt_error=0):
         card = QGroupBox()
-        card.setFixedSize(1064, 128)
+        card.setFixedSize(1064, 104)
         bottom_radius = "4px" if rounded_bottom else "0px"
         card.setStyleSheet(f"""
             QGroupBox {{
@@ -2657,7 +2655,7 @@ class ResultPageWidget(QWidget):
         main_layout.setSpacing(0)
 
         header = QWidget()
-        header.setFixedSize(1062, 52)
+        header.setFixedSize(1062, 40)
         header.setStyleSheet("background: #F8F9FA; border: none;")
         header_layout = QHBoxLayout(header)
         header_layout.setContentsMargins(0, 5, 0, 5)
@@ -2732,10 +2730,10 @@ class ResultPageWidget(QWidget):
         opt_score = (opt_pass / opt_total * 100) if opt_total > 0 else 0.0
 
         data_area = QWidget()
-        data_area.setFixedSize(1064, 76)
+        data_area.setFixedSize(1064, 64)
         data_area.setStyleSheet("background: transparent; border: none;")
         data_layout = QHBoxLayout(data_area)
-        data_layout.setContentsMargins(20, 8, 20, 8)
+        data_layout.setContentsMargins(20, 2, 20, 2)
         data_layout.setSpacing(0)
 
         pass_label = QLabel()

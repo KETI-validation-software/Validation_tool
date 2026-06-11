@@ -681,7 +681,7 @@ class SystemMainUI(CommonMainUI):
             if hasattr(self, 'spec_header_widget') and hasattr(self, 'spec_score_group'):
                 # 부모 박스 크기에서 2px 빼기 (border 고려)
                 new_spec_header_width = self.spec_score_group.width() - 2
-                self.spec_header_widget.setFixedSize(new_spec_header_width, 52)
+                self.spec_header_widget.setFixedSize(new_spec_header_width, 40)
 
             if hasattr(self, 'total_header_widget') and hasattr(self, 'original_total_header_widget_size'):
                 new_total_header_width = int(self.original_total_header_widget_size[0] * width_ratio)
@@ -1398,8 +1398,9 @@ class SystemMainUI(CommonMainUI):
         """메인 화면에 표시할 시험 분야별 평가 점수 위젯"""
 
         spec_group = QGroupBox()
-        spec_group.setFixedSize(1064, 128)
-        self.original_spec_group_size = (1064, 128)
+        # ✅ 점수 카드 슬림화: 카드 128→104 (헤더 52→40, 데이터 76→64)
+        spec_group.setFixedSize(1064, 104)
+        self.original_spec_group_size = (1064, 104)
         spec_group.setStyleSheet("""
             QGroupBox {
                 background-color: #FFF;
@@ -1497,9 +1498,9 @@ class SystemMainUI(CommonMainUI):
 
         # 아이콘 + 분야명 (헤더 영역 1062 × 52, 부모 border 1px 고려)
         self.spec_header_widget = QWidget()
-        self.spec_header_widget.setFixedSize(1062, 52)
+        self.spec_header_widget.setFixedSize(1062, 40)
         self.spec_header_widget.setStyleSheet("background: #F8F9FA;")
-        self.original_spec_header_widget_size = (1062, 52)
+        self.original_spec_header_widget_size = (1062, 40)
         header_layout = QHBoxLayout(self.spec_header_widget)
         header_layout.setContentsMargins(0, 5, 0, 5)
         header_layout.setSpacing(12)
@@ -1513,10 +1514,10 @@ class SystemMainUI(CommonMainUI):
 
         # 데이터 영역 (1064 × 76)
         self.spec_data_widget = QWidget()
-        self.spec_data_widget.setFixedSize(1064, 76)
-        self.original_spec_data_widget_size = (1064, 76)
+        self.spec_data_widget.setFixedSize(1064, 64)
+        self.original_spec_data_widget_size = (1064, 64)
         spec_score_layout = QHBoxLayout(self.spec_data_widget)
-        spec_score_layout.setContentsMargins(20, 8, 20, 8)
+        spec_score_layout.setContentsMargins(20, 2, 20, 2)
         spec_score_layout.setSpacing(0)
 
         # 통과 필드 수 + 구분선 + spacer

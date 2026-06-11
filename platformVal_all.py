@@ -174,6 +174,8 @@ class MyApp(PlatformMainUI):
     def load_specs_from_constants(self):
 
         SPEC_CONFIG = load_external_constants(self.CONSTANTS)
+        # ✅ 외부 CONSTANTS 재로드 직후 웹훅 창 시간 갱신 (__init__에서 빌드시점 값으로 먼저 읽힌 것 교정)
+        self.WEBHOOK_FAILFAST_TIMEOUT_SEC = float(getattr(self.CONSTANTS, 'WEBHOOK_WINDOW_SEC', 10.0))
 
         # ✅ 하위 호환성을 위한 변수 (읽기 전용)
         self.base_url = self._original_base_url
@@ -394,8 +396,13 @@ class MyApp(PlatformMainUI):
     def _table_timer_seconds(self, row, time_interval=None):
         response_time_ms = getattr(self, 'monitor_response_elapsed_ms', {}).get(row)
         if response_time_ms is not None:
+            # ✅ 확정 측정값(요청 도착→응답)이 있으면 항상 그대로 표시
+            #    — 웹훅 창/요청 대기 중 카운트업된 표시값이 확정값을 덮으면 안 됨 (11초/9초 고착 버그)
             return response_time_ms_to_table_seconds(response_time_ms)
-        return self._timer_elapsed_seconds(time_interval)
+        # 확정값이 없는 카운트업 중에만 표시 역행 방지 적용
+        elapsed = self._timer_elapsed_seconds(time_interval)
+        previous_elapsed = int(getattr(self, f"_api_timer_elapsed_{row}", 0))
+        return max(previous_elapsed, elapsed)
 
     def _set_timer_running(self, row, time_interval=None):
         self.set_api_timer_state(row, "running", self._timer_elapsed_seconds(time_interval))
@@ -426,6 +433,17 @@ class MyApp(PlatformMainUI):
 
 
     def update_view(self):
+        # ✅ 재진입 가드: 처리 중 processEvents가 틱 이벤트를 소화하면서
+        #    update_view가 중첩 실행되는 것을 차단 (웹훅 창 채우기 대기 중 필수)
+        if getattr(self, '_update_view_busy', False):
+            return
+        self._update_view_busy = True
+        try:
+            return self._update_view_impl()
+        finally:
+            self._update_view_busy = False
+
+    def _update_view_impl(self):
         try:
             time_interval = 0
 
@@ -611,7 +629,9 @@ class MyApp(PlatformMainUI):
                 self.monitor_response_elapsed_ms.pop(self.cnt, None)
                 expected_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
                 Logger.debug(f" ✅ 요청 도착 감지! API: {api_name}, 시도: {self.current_retry + 1}/{expected_retries}")
-                self._set_timer_success(self.cnt, time_interval)
+                # ✅ 도착 시점엔 측정이 막 시작된 상태 — 대기 시간(time_interval)을 success로 표시하지 않고
+                #    0초부터 다시 카운트 (최종 success는 응답 송신 후 확정값으로 기록됨)
+                self._set_timer_running(self.cnt, 0)
 
                 display_name = self.Server.message_display[self.cnt] if self.cnt < len(self.Server.message_display) else "Unknown"
 
@@ -963,7 +983,7 @@ class MyApp(PlatformMainUI):
                     # WebHook 프로토콜인 경우
                     if current_protocol == "WebHook":
 
-                        # 웹훅 스레드가 생성될 때까지 짧게 대기 
+                        # 웹훅 스레드가 생성될 때까지 짧게 대기
                         wait_count = 0
                         while wait_count < 10:
                             if hasattr(self.Server, 'webhook_thread') and self.Server.webhook_thread:
@@ -971,9 +991,23 @@ class MyApp(PlatformMainUI):
                             time.sleep(0.1)
                             wait_count += 1
 
-                        # 웹훅 스레드는 fail-fast timeout만큼만 대기
-                        if hasattr(self.Server, 'webhook_thread') and self.Server.webhook_thread:
-                            self.Server.webhook_thread.join(timeout=self.WEBHOOK_FAILFAST_TIMEOUT_SEC)
+                        # ✅ 웹훅 창 채우기: 송신이 일찍 끝나도(실검증=1건) 창(WEBHOOK_WINDOW_SEC)이
+                        #    닫힐 때까지 머무름 → 시스템 수신창과 페이싱 정렬.
+                        #    (일찍 넘어가면 다음 API의 "요청 대기" 시간이 ~9초로 길어져 보이는 문제 방지)
+                        #    join 한 방에 블로킹하지 않고 짧게 쪼개 대기 + processEvents로 UI 유지
+                        _window_started_at = getattr(self.Server, 'webhook_window_started_at', None)
+                        if _window_started_at is None:
+                            _window_started_at = time.perf_counter()
+                        _window_deadline = _window_started_at + self.WEBHOOK_FAILFAST_TIMEOUT_SEC
+                        while time.perf_counter() < _window_deadline:
+                            _wh_th = getattr(self.Server, 'webhook_thread', None)
+                            if _wh_th is not None and _wh_th.is_alive():
+                                _wh_th.join(timeout=0.1)
+                            else:
+                                time.sleep(0.1)
+                            # 창 진행 중 타이머 카운트업 표시 (창 종료 후 확정 측정값으로 정착)
+                            self._set_timer_running(self.cnt, time.perf_counter() - _window_started_at)
+                            QApplication.processEvents()
 
                         # 실제 웹훅 응답 사용
                         # ✅ 웹훅 응답이 null인 경우에도 검증을 수행하여 실패로 카운트

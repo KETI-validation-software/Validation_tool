@@ -443,7 +443,8 @@ def load_external_constants(constants_module):
                 
                 keys_to_update = [
                     'url', 'auth_type', 'auth_info', 'company_name', 'product_name',
-                    'version', 'test_category', 'test_target', 'test_range'
+                    'version', 'test_category', 'test_target', 'test_range',
+                    'WEBHOOK_WINDOW_SEC',  # ✅ 웹훅 창 시간 — 플랫폼 대기창/송신창도 외부 설정 따라가도록
                 ]
 
                 # 덮어씌우기
