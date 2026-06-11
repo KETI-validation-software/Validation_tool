@@ -503,7 +503,9 @@ class Server(BaseHTTPRequestHandler):
 
                 # 토큰 생성 및 저장
                 import uuid
-                import time
+                # ⚠️ 로컬 'import time' 제거: do_POST 전체에서 time이 지역변수로 묶여
+                #    웹훅 경로(webhook_window_started_at = time.perf_counter())에서
+                #    UnboundLocalError 발생하던 문제 해결 (모듈 최상단 import time 사용)
                 new_token = f"{uuid.uuid4().hex}_{int(time.time())}"
                 if not isinstance(Server.auth_Info, list):
                     Server.auth_Info = []
