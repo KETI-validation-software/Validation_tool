@@ -1526,18 +1526,15 @@ class MyApp(SystemMainUI):
                 opt_error += v['opt_error']
                 if v['val_result'] != 'PASS':
                     val_result = 'FAIL'
-                    val_text_parts.append(f"[이벤트 {i + 1}] {v['val_text']}")
+                    val_text_parts.append(f"[웹훅 메시지 #{i + 1}] {v['val_text']}")
             val_text = "\n".join(val_text_parts) if val_text_parts else ""
             last_event = results_list[-1]
-            # ✅ 받은 이벤트 전부 기록 (플랫폼처럼 #1,#2,#3 모두 상세에 표시)
-            if len(results_list) == 1:
-                tmp_webhook_res = json.dumps(last_event, indent=4, ensure_ascii=False) if last_event else "null"
-            else:
-                _ev_parts = []
-                for _i, _ev in enumerate(results_list, start=1):
-                    _ev_txt = json.dumps(_ev, indent=4, ensure_ascii=False) if _ev else "null"
-                    _ev_parts.append(f"[이벤트 {_i}]\n{_ev_txt}")
-                tmp_webhook_res = "\n\n".join(_ev_parts)
+            # ✅ 단일/복수 모두 [웹훅 메시지 #N] 라벨 부여 (받은 이벤트 전부 상세에 표시)
+            _ev_parts = []
+            for _i, _ev in enumerate(results_list, start=1):
+                _ev_txt = json.dumps(_ev, indent=4, ensure_ascii=False) if _ev else "null"
+                _ev_parts.append(f"[웹훅 메시지 #{_i}]\n{_ev_txt}")
+            tmp_webhook_res = "\n\n".join(_ev_parts)
 
         if val_result == "PASS":
             msg = "\n" + tmp_webhook_res + "\n\n" + "Result: PASS\n"
@@ -1598,9 +1595,9 @@ class MyApp(SystemMainUI):
                 webhook_ack_payload={"code": "200", "message": "성공"} if results_list else None,
             )
             self.step_buffers[self.webhook_cnt]["data"] += (
-                f"\n\n--- Webhook 응답 (시도 {self.current_retry + 1}회차) ---\n{tmp_webhook_res}"
+                f"\n\n{tmp_webhook_res}"
             )
-            self.step_buffers[self.webhook_cnt]["error"] += f"\n\n--- Webhook 검증 ---\n{webhook_error_text}"
+            self.step_buffers[self.webhook_cnt]["error"] += f"\n\n--- 웹훅 검증 ---\n{webhook_error_text}"
             self.step_buffers[self.webhook_cnt]["result"] = val_result
 
         if self.webhook_cnt == 6:
@@ -2277,22 +2274,22 @@ class MyApp(SystemMainUI):
                         if val_result == "FAIL":
                             self.step_buffers[self.cnt]["result"] = "FAIL"
                             existing_error = self.step_buffers[self.cnt]["error"]
-                            http_err = "[시도 " + str(self.current_retry + 1) + "/" + str(current_retries) + "]\n" + error_text
+                            http_err = "[검증 회차 " + str(self.current_retry + 1) + "/" + str(current_retries) + "]\n" + error_text
                             self.step_buffers[self.cnt]["error"] = (existing_error + "\n\n" + http_err if existing_error.strip() else http_err)
                     else:
                         if self.current_retry == 0:
                             # 첫 번째 시도인 경우 초기화
                             self.step_buffers[self.cnt][
-                                "data"] = f"[시도 {self.current_retry + 1}/{current_retries}]\n{data_text}"
+                                "data"] = data_text
                             self.step_buffers[self.cnt][
-                                "error"] = f"[시도 {self.current_retry + 1}/{current_retries}]\n{error_text}"
+                                "error"] = f"[검증 회차 {self.current_retry + 1}/{current_retries}]\n{error_text}"
                             self.step_buffers[self.cnt]["result"] = val_result  # 첫 시도 결과로 초기화
                         else:
                             # 재시도인 경우 누적
                             self.step_buffers[self.cnt][
-                                "data"] += f"\n\n[시도 {self.current_retry + 1}/{current_retries}]\n{data_text}"
+                                "data"] += f"\n\n{data_text}"
                             self.step_buffers[self.cnt][
-                                "error"] += f"\n\n[시도 {self.current_retry + 1}/{current_retries}]\n{error_text}"
+                                "error"] += f"\n\n[검증 회차 {self.current_retry + 1}/{current_retries}]\n{error_text}"
                             self.step_buffers[self.cnt]["result"] = val_result  # 마지막 시도 결과로 항상 갱신
                         # 최종 결과 판정 (플랫폼과 동일한 로직)
                         if self.current_retry + 1 >= current_retries:
@@ -2305,7 +2302,7 @@ class MyApp(SystemMainUI):
                             # 마지막 시도 결과의 오류 텍스트로 덮어쓰기 (실패 시)
                             if self.step_buffers[self.cnt]["result"] == "FAIL":
                                 self.step_buffers[self.cnt][
-                                    "error"] = f"[시도 {self.current_retry + 1}/{current_retries}]\n{error_text}"
+                                    "error"] = f"[검증 회차 {self.current_retry + 1}/{current_retries}]\n{error_text}"
                     # 진행 중 표시 (플랫폼과 동일하게)
                     display_name = self.message_display[self.cnt] if self.cnt < len(self.message_display) else self.message[self.cnt]
                     message_name = "step " + str(self.cnt + 1) + ": " + display_name

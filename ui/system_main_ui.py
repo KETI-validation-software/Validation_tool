@@ -1285,7 +1285,7 @@ class SystemMainUI(CommonMainUI):
                 request_json = re.sub(r"(?:\n[ \t]*){2,}([ \t]*[\}\]])$", r"\n\1", request_json)
                 # ✅ payload가 비어있으면({}) "{ 엔터 }" 형태로 표시
                 if request_json.strip() == "{}":
-                    request_json = "{\n}"
+                    request_json = "{\n\n}"
 
         # 타임스탬프
         timestamp = datetime.now().strftime("%H:%M:%S")
@@ -1525,7 +1525,7 @@ class SystemMainUI(CommonMainUI):
         # 통과 필드 수 + 구분선 + spacer
         spec_score_layout.addWidget(self.spec_pass_label)
         spec_vline1 = QFrame()
-        spec_vline1.setFixedSize(2, 60)
+        spec_vline1.setFixedSize(1, 40)
         spec_vline1.setStyleSheet("background-color: #CECECE;")
         spec_score_layout.addWidget(spec_vline1)
         spec_spacer1 = QWidget()
@@ -1535,7 +1535,7 @@ class SystemMainUI(CommonMainUI):
         # 전체 필드 수 + 구분선 + spacer
         spec_score_layout.addWidget(self.spec_total_label)
         spec_vline2 = QFrame()
-        spec_vline2.setFixedSize(2, 60)
+        spec_vline2.setFixedSize(1, 40)
         spec_vline2.setStyleSheet("background-color: #CECECE;")
         spec_score_layout.addWidget(spec_vline2)
         spec_spacer2 = QWidget()
@@ -1654,7 +1654,7 @@ class SystemMainUI(CommonMainUI):
         # 통과 필드 수 + 구분선 + spacer
         score_layout.addWidget(self.total_pass_label)
         total_vline1 = QFrame()
-        total_vline1.setFixedSize(2, 60)
+        total_vline1.setFixedSize(1, 40)
         total_vline1.setStyleSheet("background-color: #CECECE;")
         score_layout.addWidget(total_vline1)
         total_spacer1 = QWidget()
@@ -1664,7 +1664,7 @@ class SystemMainUI(CommonMainUI):
         # 전체 필드 수 + 구분선 + spacer
         score_layout.addWidget(self.total_total_label)
         total_vline2 = QFrame()
-        total_vline2.setFixedSize(2, 60)
+        total_vline2.setFixedSize(1, 40)
         total_vline2.setStyleSheet("background-color: #CECECE;")
         score_layout.addWidget(total_vline2)
         total_spacer2 = QWidget()

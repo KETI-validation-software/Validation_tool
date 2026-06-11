@@ -783,7 +783,7 @@ class MyApp(PlatformMainUI):
                         step_result = "FAIL"
                         add_err = 1
                         # 통일된 포맷으로 변경
-                        error_msg = f"[시도 {retry_attempt + 1}/{current_retries}]\n[맥락 오류] Request Body 값 오류\n- 입력값: {json.dumps(current_data, ensure_ascii=False)}\n- 예상값: Empty"
+                        error_msg = f"[검증 회차 {retry_attempt + 1}/{current_retries}]\n[맥락 오류] Request Body 값 오류\n- 입력값: {json.dumps(current_data, ensure_ascii=False)}\n- 예상값: Empty"
                         combined_error_parts.append(error_msg)
                     elif (len(current_data) == 0) or current_data == "{}":
                         step_result = "PASS"
@@ -973,7 +973,7 @@ class MyApp(PlatformMainUI):
                         )
                     if val_result == "FAIL":
                         step_result = "FAIL"
-                        combined_error_parts.append(f"[시도 {retry_attempt + 1}/{current_retries}]\n" + inbound_err_txt)
+                        combined_error_parts.append(f"[검증 회차 {retry_attempt + 1}/{current_retries}]\n" + inbound_err_txt)
 
                     # ✅ 응답 소요 시간 = 일반 요청-응답 왕복까지만 측정.
                     # 웹훅/롱폴링의 프로토콜 비동기 구간(join 등)이 포함되지 않도록,
@@ -1038,6 +1038,7 @@ class MyApp(PlatformMainUI):
 
                             if webhook_responses:
                                 # 복수 이벤트 — 각 이벤트를 개별 검증 + 모니터에 #N으로 기록
+                                _wh_acks = []
                                 for _i, _wh in enumerate(webhook_responses, start=1):
                                     _wh = _wh if _wh else {}
                                     if _wh:
@@ -1046,8 +1047,7 @@ class MyApp(PlatformMainUI):
                                     else:
                                         _ack = "null"
                                     webhook_monitor_pairs.append((tmp_webhook_event, _ack, _i))
-                                    accumulated['data_parts'].append(
-                                        f"\n--- Webhook 응답 [이벤트 {_i}] (시도 {retry_attempt + 1}회차) ---\n{_ack}")
+                                    _wh_acks.append(_ack)
 
                                     _vr, _vt, _vp, _ve, _vop, _voe = json_check_(
                                         self.videoWebhookSchema[self.cnt], _wh, self.flag_opt
@@ -1061,13 +1061,19 @@ class MyApp(PlatformMainUI):
                                     if _vr == "FAIL":
                                         step_result = "FAIL"
                                         _vt_txt = to_detail_text(_vt)
-                                        wh_fail_texts.append(f"[이벤트 {_i}] {_vt_txt}")
-                                        combined_error_parts.append(f"\n--- Webhook 검증 [이벤트 {_i}] ---\n" + _vt_txt)
+                                        wh_fail_texts.append(f"[웹훅 메시지 #{_i}] {_vt_txt}")
+                                        combined_error_parts.append(f"\n--- 웹훅 검증 [웹훅 메시지 #{_i}] ---\n" + _vt_txt)
+                                # ✅ 단일/복수 모두 [웹훅 메시지 #N] 라벨 부여 (시스템과 동일)
+                                _wh_body = "\n\n".join(
+                                    f"[웹훅 메시지 #{_n}]\n{_a}" for _n, _a in enumerate(_wh_acks, start=1)
+                                )
+                                accumulated['data_parts'].append(
+                                    f"\n{_wh_body}")
                                 webhook_response = webhook_responses[-1] if webhook_responses[-1] else {}
                             else:
                                 # 미수신 — 빈 응답 1건으로 검증 (FAIL)
                                 webhook_monitor_pairs.append((tmp_webhook_event, "null", 1))
-                                accumulated['data_parts'].append(f"\n--- Webhook 응답 (시도 {retry_attempt + 1}회차) ---\nnull")
+                                accumulated['data_parts'].append(f"\nnull")
                                 _vr, _vt, _vp, _ve, _vop, _voe = json_check_(
                                     self.videoWebhookSchema[self.cnt], {}, self.flag_opt
                                 )
@@ -1081,7 +1087,7 @@ class MyApp(PlatformMainUI):
                                     step_result = "FAIL"
                                     _vt_txt = to_detail_text(_vt)
                                     wh_fail_texts.append(_vt_txt)
-                                    combined_error_parts.append(f"\n--- Webhook 검증 ---\n" + _vt_txt)
+                                    combined_error_parts.append(f"\n--- 웹훅 검증 ---\n" + _vt_txt)
 
                             # step_buffers 갱신 (전체 이벤트 집계 기준)
                             if self.cnt < len(self.step_buffers):
@@ -1104,7 +1110,7 @@ class MyApp(PlatformMainUI):
                                 Logger.debug(f" webhook 응답을 reference_context에 저장: {webhook_context_key}")
                         else:
                             # webhook_response 속성이 없는 경우 (초기화되지 않은 경우)
-                            accumulated['data_parts'].append(f"\n--- Webhook 응답 ---\nnull")
+                            accumulated['data_parts'].append(f"\n--- 웹훅 응답 ---\nnull")
                             # 웹훅 스키마가 있는 경우 빈 딕셔너리로 검증 수행
                             webhook_response = {}
                             webhook_resp_val_result, webhook_resp_val_text, webhook_resp_key_psss_cnt, webhook_resp_key_error_cnt, opt_correct, opt_error = json_check_(
@@ -1119,7 +1125,7 @@ class MyApp(PlatformMainUI):
                             webhook_resp_err_txt = to_detail_text(webhook_resp_val_text)
                             if webhook_resp_val_result == "FAIL":
                                 step_result = "FAIL"
-                                combined_error_parts.append(f"\n--- Webhook 검증 ---\n" + webhook_resp_err_txt)
+                                combined_error_parts.append(f"\n--- 웹훅 검증 ---\n" + webhook_resp_err_txt)
 
 
                     # LongPolling 프로토콜인 경우

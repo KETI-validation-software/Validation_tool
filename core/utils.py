@@ -43,7 +43,7 @@ def replace_transport_desc_for_display(json_str):
     """
     # 빈 객체 {} → 과도한 빈 줄 없이 한 줄 내려 표시
     if isinstance(json_str, str) and json_str.strip() == "{}":
-        return "{\n}"
+        return "{\n\n}"
     # 원본 그대로 반환 (하드코딩 치환 제거)
     return json_str
 
@@ -86,7 +86,7 @@ def normalize_monitor_step_name(step_name):
 def normalize_monitor_request_json(type_label, step_name, request_json, details=""):
     if request_json:
         if isinstance(request_json, str) and request_json.strip() == '{}':
-            return '{\n}'
+            return '{\n\n}'
         return request_json
 
     if details:
@@ -182,7 +182,7 @@ def build_monitor_response_time_text(response_time_ms=None, total_timeout_ms=Non
     if response_time_ms is None:
         return ""
 
-    response_time_text = f"{_k(0xC751, 0xB2F5, 0x20, 0xC18C, 0xC694, 0x20, 0xC2DC, 0xAC04)}: {float(response_time_ms) / 1000:.2f}{_k(0xCD08)}"
+    response_time_text = f"{_k(0xC751, 0xB2F5, 0x20, 0xC18C, 0xC694, 0x20, 0xC2DC, 0xAC04)}: {float(response_time_ms) / 1000:.1f}{_k(0xCD08)}"
     timeout_text = _format_seconds_for_monitor_display(total_timeout_ms)
     if timeout_text:
         # 측정값/타임아웃 형식으로 표기 (예: "0.99초/60초") — 괄호 표기는 오해 소지

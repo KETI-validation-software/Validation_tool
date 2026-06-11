@@ -836,7 +836,7 @@ class ResultPageWidget(QWidget):
         data_layout.addWidget(pass_label)
 
         vline1 = QFrame()
-        vline1.setFixedSize(2, 60)
+        vline1.setFixedSize(1, 40)
         vline1.setStyleSheet("background-color: #CECECE; border: none;")
         data_layout.addWidget(vline1)
 
@@ -854,7 +854,7 @@ class ResultPageWidget(QWidget):
         data_layout.addWidget(fail_label)
 
         vline2 = QFrame()
-        vline2.setFixedSize(2, 60)
+        vline2.setFixedSize(1, 40)
         vline2.setStyleSheet("background-color: #CECECE; border: none;")
         data_layout.addWidget(vline2)
 
@@ -2545,7 +2545,7 @@ class ResultPageWidget(QWidget):
 
         # 구분선 1
         vline1 = QFrame()
-        vline1.setFixedSize(2, 60)
+        vline1.setFixedSize(1, 40)
         vline1.setStyleSheet("background-color: #CECECE;")
         data_layout.addWidget(vline1)
 
@@ -2567,7 +2567,7 @@ class ResultPageWidget(QWidget):
 
         # 구분선 2
         vline2 = QFrame()
-        vline2.setFixedSize(2, 60)
+        vline2.setFixedSize(1, 40)
         vline2.setStyleSheet("background-color: #CECECE;")
         data_layout.addWidget(vline2)
 
@@ -2765,7 +2765,7 @@ class ResultPageWidget(QWidget):
         data_layout.addWidget(pass_label)
 
         vline1 = QFrame()
-        vline1.setFixedSize(2, 60)
+        vline1.setFixedSize(1, 40)
         vline1.setStyleSheet("background-color: #CECECE; border: none;")
         data_layout.addWidget(vline1)
 
@@ -2786,7 +2786,7 @@ class ResultPageWidget(QWidget):
         data_layout.addWidget(fail_label)
 
         vline2 = QFrame()
-        vline2.setFixedSize(2, 60)
+        vline2.setFixedSize(1, 40)
         vline2.setStyleSheet("background-color: #CECECE; border: none;")
         data_layout.addWidget(vline2)
 
