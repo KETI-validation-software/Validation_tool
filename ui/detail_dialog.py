@@ -214,7 +214,13 @@ class CombinedDetailDialog(QDialog):
             if result == "FAIL":
                 error_msg_html = result_html + error_text.replace('\n', '<br>')
             else:
-                error_msg_html = result_html + "오류가 없습니다."
+                # ✅ PASS도 [검증 회차 N/M] 헤더를 FAIL과 동일하게 표시 (회차별 '오류가 없습니다.')
+                import re as _re_attempt
+                _headers = _re_attempt.findall(r'\[검증\s*회차\s*\d+(?:\s*/\s*\d+)?\]', error_text or "")
+                if _headers:
+                    error_msg_html = result_html + "<br><br>".join(f"{_h}<br>오류가 없습니다." for _h in _headers)
+                else:
+                    error_msg_html = result_html + "오류가 없습니다."
             
             self.error_browser.setHtml(error_msg_html)
         error_column_layout.addWidget(self.error_browser)
