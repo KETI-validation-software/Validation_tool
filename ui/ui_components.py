@@ -150,6 +150,7 @@ class TestSelectionPanel(QWidget):
         self.group_table.setFixedHeight(173)
         self.group_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.group_table.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.group_table.setShowGrid(False)  # 기본 격자선 제거 — item border-bottom과 겹쳐 줄이 굵어 보이는 문제 해결
 
         self.group_table.setStyleSheet("""
             QTableWidget {
@@ -178,7 +179,7 @@ class TestSelectionPanel(QWidget):
             }
             QTableWidget::item:selected {
                 background-color: #E3F2FF;
-                border: none;
+                border-bottom: 1px solid #CCCCCC;
                 outline: none;
             }
             QTableWidget::item:hover {

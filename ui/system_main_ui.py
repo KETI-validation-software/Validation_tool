@@ -216,6 +216,7 @@ class SystemMainUI(CommonMainUI):
         self.group_table.verticalHeader().setDefaultSectionSize(39)  # 데이터셀 높이 39px
         self.group_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.group_table.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.group_table.setShowGrid(False)  # 기본 격자선 제거 — item border-bottom과 겹쳐 줄이 굵어 보이는 문제 해결
 
         # ✅ 플랫폼과 동일한 스타일 적용
         self.group_table.setStyleSheet("""
@@ -241,7 +242,7 @@ class SystemMainUI(CommonMainUI):
             }
             QTableWidget::item:selected {
                 background-color: #E3F2FF;
-                border: none;
+                border-bottom: 1px solid #CCCCCC;
             }
             QTableWidget::item:hover {
                 background-color: #F2F8FF;
