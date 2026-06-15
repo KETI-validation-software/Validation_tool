@@ -982,17 +982,25 @@ class MyApp(PlatformMainUI):
                         _resp_started_at = self.monitor_request_started_at.get(self.cnt)
                         if _resp_started_at is not None:
                             self.monitor_response_elapsed_ms[self.cnt] = int(round((time.perf_counter() - _resp_started_at) * 1000))
+                            # ✅ 응답 소요시간이 확정되는 즉시 타이머에 반영한다.
+                            #    웹훅 창(아래) 동안에는 카운트업하지 않고 이 실제 응답시간을 고정 표시 →
+                            #    0→창시간 카운트업 후 확정값으로 떨어지는 점프(예: 0→15→0)가 사라진다.
+                            self._set_timer_success(self.cnt)
 
                     # WebHook 프로토콜인 경우
                     if current_protocol == "WebHook":
 
                         # 웹훅 스레드가 생성될 때까지 짧게 대기
+                        #    ✅ processEvents 없이 sleep만 돌면 이 최대 1초 동안 UI가 얼어붙어
+                        #       타이머 셀이 "회색(waiting)→파랑(running)"으로 바뀌는 순간 렉처럼 멈춰 보임.
+                        #       아래 "창 채우기" 루프와 동일하게 매 틱 UI를 갱신해 전환을 매끄럽게 유지.
                         wait_count = 0
                         while wait_count < 10:
                             if hasattr(self.Server, 'webhook_thread') and self.Server.webhook_thread:
                                 break
                             time.sleep(0.1)
                             wait_count += 1
+                            QApplication.processEvents()
 
                         # ✅ 웹훅 창 채우기: 송신이 일찍 끝나도(실검증=1건) 창(WEBHOOK_WINDOW_SEC)이
                         #    닫힐 때까지 머무름 → 시스템 수신창과 페이싱 정렬.
@@ -1008,8 +1016,8 @@ class MyApp(PlatformMainUI):
                                 _wh_th.join(timeout=0.1)
                             else:
                                 time.sleep(0.1)
-                            # 창 진행 중 타이머 카운트업 표시 (창 종료 후 확정 측정값으로 정착)
-                            self._set_timer_running(self.cnt, time.perf_counter() - _window_started_at)
+                            # 창 동안에는 타이머를 건드리지 않는다 — 응답 소요시간은 일반 요청-응답까지만이며
+                            # 위에서 이미 확정·표시했다. 창은 페이싱(시스템 수신창 정렬) 목적으로만 대기한다.
                             QApplication.processEvents()
 
                         # 실제 웹훅 응답 사용
@@ -1061,11 +1069,11 @@ class MyApp(PlatformMainUI):
                                     if _vr == "FAIL":
                                         step_result = "FAIL"
                                         _vt_txt = to_detail_text(_vt)
-                                        wh_fail_texts.append(f"[웹훅 메시지 #{_i}] {_vt_txt}")
-                                        combined_error_parts.append(f"\n--- 웹훅 검증 [웹훅 메시지 #{_i}] ---\n" + _vt_txt)
-                                # ✅ 단일/복수 모두 [웹훅 메시지 #N] 라벨 부여 (시스템과 동일)
+                                        wh_fail_texts.append(f"[웹훅 메시지 {_i}] {_vt_txt}")
+                                        combined_error_parts.append(f"\n--- 웹훅 검증 [웹훅 메시지 {_i}] ---\n" + _vt_txt)
+                                # ✅ 단일/복수 모두 [웹훅 메시지 N] 라벨 부여 (시스템과 동일)
                                 _wh_body = "\n\n".join(
-                                    f"[웹훅 메시지 #{_n}]\n{_a}" for _n, _a in enumerate(_wh_acks, start=1)
+                                    f"[웹훅 메시지 {_n}]\n{_a}" for _n, _a in enumerate(_wh_acks, start=1)
                                 )
                                 accumulated['data_parts'].append(
                                     f"\n{_wh_body}")
