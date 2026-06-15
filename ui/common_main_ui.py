@@ -1498,6 +1498,8 @@ class CommonMainUI(QWidget):
             state_key = "waiting"
         return self._api_timer_pixmaps[state_key]
 
+    # 테이블에 타이머 표시하는 함수
+    # elapsed_seconds = 셀에 표시할 정수 초
     def set_api_timer_state(self, row, state, elapsed_seconds=0):
         if not hasattr(self, 'tableWidget'):
             return
@@ -1519,17 +1521,6 @@ class CommonMainUI(QWidget):
                 f"[TIMER_STATE_CHANGE] row={row + 1} {previous_state}/{previous_elapsed} -> {state_key}/{elapsed}"
             )
 
-        # 🔧 상태·경과초가 직전과 동일하고 셀 위젯이 이미 있으면 재생성을 생략.
-        #    웹훅 "창 채우기" 루프가 0.1초마다 _set_timer_running을 호출하는데, 표시값(정수 초)은
-        #    1초에 한 번만 바뀌므로 위젯을 매번 setCellWidget으로 갈아끼우면 초당 10번 재생성 →
-        #    깜빡임/반쪽 렌더가 생겨 타이머가 회색·빨강이 섞인 채 깨져 보인다. 변화가 있을 때만 갱신.
-        if (
-            previous_state == state_key
-            and previous_elapsed == elapsed
-            and self.tableWidget.cellWidget(row, timer_col) is not None
-        ):
-            return
-
         show_elapsed_text = not (state_key == "waiting" and elapsed == 0)
         color_map = {
             "waiting": "#8A9094",  # 회색
@@ -1537,7 +1528,39 @@ class CommonMainUI(QWidget):
             "success": "#1D4ED8",  # 파란색 (제시간 종료)
             "timeover": "#DC2626", # 빨간색
         }
+        text_style = (
+            f"QLabel {{ color: {color_map[state_key]}; font-family: 'Noto Sans KR';"
+            f" font-size: 15px; font-weight: 500; border: none; background: transparent; }}"
+        )
 
+        # 🔧 셀 위젯을 매번 새로 만들지 않고 최초 1회만 생성, 이후에는 내부 라벨만 제자리에서 갱신.
+        #    setCellWidget으로 위젯을 통째 교체하면 이전 위젯이 deleteLater로 지연 삭제되며,
+        #    웹훅 "창 채우기" 루프가 0.1초마다 호출하는 탓에 잦은 교체로 옛/새 위젯이 겹쳐 그려져
+        #    타이머가 회색·빨강이 섞인 채 깨져 보였다. 라벨 in-place 갱신으로 잔상·깜빡임을 제거한다.
+        cache = getattr(self, "_timer_cell_widgets", None)
+        if cache is None:
+            cache = self._timer_cell_widgets = {}
+        cached = cache.get(row)
+        existing = self.tableWidget.cellWidget(row, timer_col)
+        if cached is not None and existing is cached["widget"]:
+            # 상태·경과초 변화가 없으면 손대지 않아 불필요한 repaint를 막는다.
+            if previous_state == state_key and previous_elapsed == elapsed:
+                return
+            timer_pixmap = self._get_timer_icon_pixmap(state_key)
+            if not timer_pixmap.isNull():
+                cached["icon"].setPixmap(timer_pixmap)
+                cached["icon"].setFixedSize(timer_pixmap.size())
+            if show_elapsed_text:
+                cached["text"].setText(f"{elapsed}초")
+                cached["text"].setStyleSheet(text_style)
+                cached["text"].setVisible(True)
+            else:
+                cached["text"].setVisible(False)
+            setattr(self, f"_api_timer_state_{row}", state_key)
+            setattr(self, f"_api_timer_elapsed_{row}", elapsed)
+            return
+
+        # 최초 생성(또는 테이블 재구성으로 셀이 교체된 경우): 위젯을 만들고 캐시에 참조를 보관한다.
         timer_widget = QWidget()
         timer_layout = QHBoxLayout()
         timer_layout.setContentsMargins(10, 0, 0, 0)  # 좌측 여백을 최소화하여 공간 확보
@@ -1550,29 +1573,20 @@ class CommonMainUI(QWidget):
             icon_label.setPixmap(timer_pixmap)
             icon_label.setFixedSize(timer_pixmap.size())
         icon_label.setAlignment(Qt.AlignCenter)
-
         timer_layout.addWidget(icon_label)
-        if show_elapsed_text:
-            text_label = QLabel(f"{elapsed}초")
-            text_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-            text_label.setStyleSheet(
-                f"""
-                QLabel {{
-                    color: {color_map[state_key]};
-                    font-family: 'Noto Sans KR';
-                    font-size: 15px;
-                    font-weight: 500;
-                    border: none;
-                    background: transparent;
-                }}
-                """
-            )
-            timer_layout.addWidget(text_label)
-        
+
+        # 텍스트 라벨은 항상 생성하고 필요할 때만 표시 — 이후 호출에서 in-place 갱신하려면 참조가 살아 있어야 함.
+        text_label = QLabel(f"{elapsed}초")
+        text_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        text_label.setStyleSheet(text_style)
+        text_label.setVisible(show_elapsed_text)
+        timer_layout.addWidget(text_label)
+
         timer_layout.addStretch()  # 나머지 빈 공간을 오른쪽으로 밀어내어 텍스트 잘림 방지
         timer_widget.setLayout(timer_layout)
 
         self.tableWidget.setCellWidget(row, timer_col, timer_widget)
+        cache[row] = {"widget": timer_widget, "icon": icon_label, "text": text_label}
         setattr(self, f"_api_timer_state_{row}", state_key)
         setattr(self, f"_api_timer_elapsed_{row}", elapsed)
 
