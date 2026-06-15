@@ -1200,7 +1200,8 @@ class PlatformMainUI(CommonMainUI):
                 # 문자열 끝의 닫는 괄호 직전 공백-only 줄을 1줄로 정규화
                 request_json = re.sub(r"(?:\n[ \t]*){2,}([ \t]*[\}\]])$", r"\n\1", request_json)
                 # ✅ payload가 비어있으면({}) "{ 엔터 }" 형태로 표시
-                if request_json.strip() == "{}":
+                #    위 정규식이 "{\n\n}" → "{\n}"로 줄여버리므로, 공백을 모두 제거해 빈 객체 여부를 판정해야 함
+                if re.sub(r"\s", "", request_json) == "{}":
                     request_json = "{\n\n}"
 
         # 타임스탬프

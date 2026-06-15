@@ -987,12 +987,16 @@ class MyApp(PlatformMainUI):
                     if current_protocol == "WebHook":
 
                         # 웹훅 스레드가 생성될 때까지 짧게 대기
+                        #    ✅ processEvents 없이 sleep만 돌면 이 최대 1초 동안 UI가 얼어붙어
+                        #       타이머 셀이 "회색(waiting)→파랑(running)"으로 바뀌는 순간 렉처럼 멈춰 보임.
+                        #       아래 "창 채우기" 루프와 동일하게 매 틱 UI를 갱신해 전환을 매끄럽게 유지.
                         wait_count = 0
                         while wait_count < 10:
                             if hasattr(self.Server, 'webhook_thread') and self.Server.webhook_thread:
                                 break
                             time.sleep(0.1)
                             wait_count += 1
+                            QApplication.processEvents()
 
                         # ✅ 웹훅 창 채우기: 송신이 일찍 끝나도(실검증=1건) 창(WEBHOOK_WINDOW_SEC)이
                         #    닫힐 때까지 머무름 → 시스템 수신창과 페이싱 정렬.

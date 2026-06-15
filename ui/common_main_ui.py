@@ -1518,6 +1518,18 @@ class CommonMainUI(QWidget):
             Logger.debug(
                 f"[TIMER_STATE_CHANGE] row={row + 1} {previous_state}/{previous_elapsed} -> {state_key}/{elapsed}"
             )
+
+        # 🔧 상태·경과초가 직전과 동일하고 셀 위젯이 이미 있으면 재생성을 생략.
+        #    웹훅 "창 채우기" 루프가 0.1초마다 _set_timer_running을 호출하는데, 표시값(정수 초)은
+        #    1초에 한 번만 바뀌므로 위젯을 매번 setCellWidget으로 갈아끼우면 초당 10번 재생성 →
+        #    깜빡임/반쪽 렌더가 생겨 타이머가 회색·빨강이 섞인 채 깨져 보인다. 변화가 있을 때만 갱신.
+        if (
+            previous_state == state_key
+            and previous_elapsed == elapsed
+            and self.tableWidget.cellWidget(row, timer_col) is not None
+        ):
+            return
+
         show_elapsed_text = not (state_key == "waiting" and elapsed == 0)
         color_map = {
             "waiting": "#8A9094",  # 회색
