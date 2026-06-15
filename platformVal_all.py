@@ -982,6 +982,10 @@ class MyApp(PlatformMainUI):
                         _resp_started_at = self.monitor_request_started_at.get(self.cnt)
                         if _resp_started_at is not None:
                             self.monitor_response_elapsed_ms[self.cnt] = int(round((time.perf_counter() - _resp_started_at) * 1000))
+                            # ✅ 응답 소요시간이 확정되는 즉시 타이머에 반영한다.
+                            #    웹훅 창(아래) 동안에는 카운트업하지 않고 이 실제 응답시간을 고정 표시 →
+                            #    0→창시간 카운트업 후 확정값으로 떨어지는 점프(예: 0→15→0)가 사라진다.
+                            self._set_timer_success(self.cnt)
 
                     # WebHook 프로토콜인 경우
                     if current_protocol == "WebHook":
@@ -1012,8 +1016,8 @@ class MyApp(PlatformMainUI):
                                 _wh_th.join(timeout=0.1)
                             else:
                                 time.sleep(0.1)
-                            # 창 진행 중 타이머 카운트업 표시 (창 종료 후 확정 측정값으로 정착)
-                            self._set_timer_running(self.cnt, time.perf_counter() - _window_started_at)
+                            # 창 동안에는 타이머를 건드리지 않는다 — 응답 소요시간은 일반 요청-응답까지만이며
+                            # 위에서 이미 확정·표시했다. 창은 페이싱(시스템 수신창 정렬) 목적으로만 대기한다.
                             QApplication.processEvents()
 
                         # 실제 웹훅 응답 사용
