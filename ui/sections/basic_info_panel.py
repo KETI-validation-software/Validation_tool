@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QEvent
 from PyQt5.QtGui import QPixmap
 from core.functions import resource_path
+from ui.gui_utils import TruncatedLineEdit
 
 
 class BasicInfoPanel(QWidget):
@@ -145,28 +146,28 @@ class BasicInfoPanel(QWidget):
         input_layout.setContentsMargins(0, 0, 0, 0)
         input_layout.setSpacing(12)
 
-        # 기업명 필드
-        self.company_field_widget, self.company_label, self.company_edit = self._create_readonly_field("기업명", 776)
-        input_layout.addWidget(self.company_field_widget, alignment=Qt.AlignHCenter)
+        # 시험유형 필드
+        self.test_category_widget, self.test_category_label, self.test_category_edit = self._create_readonly_field("시험유형", 776)
+        input_layout.addWidget(self.test_category_widget, alignment=Qt.AlignHCenter)
 
-        # 제품명 필드
-        self.product_field_widget, self.product_label, self.product_edit = self._create_readonly_field("제품명", 776)
-        input_layout.addWidget(self.product_field_widget, alignment=Qt.AlignHCenter)
+        # 시험분야 필드
+        self.test_group_widget, self.test_group_label, self.test_group_edit = self._create_readonly_field("시험분야", 776, truncation_popup=True)
+        input_layout.addWidget(self.test_group_widget, alignment=Qt.AlignHCenter)
+
+        # 시험대상/시험범위 행
+        self._setup_target_range_row(input_layout)
+
+        # 기업명/제품명 행
+        self._setup_company_product_row(input_layout)
 
         # 버전/모델명 행
         self._setup_version_model_row(input_layout)
-
-        # 시험유형/시험대상 행
-        self._setup_category_target_row(input_layout)
-
-        # 시험분야/시험범위 행
-        self._setup_group_range_row(input_layout)
 
         input_layout.addSpacing(20)
 
         layout.addWidget(self.input_container, alignment=Qt.AlignHCenter)
 
-    def _create_readonly_field(self, label_text, width):
+    def _create_readonly_field(self, label_text, width, truncation_popup=False):
         """읽기 전용 필드 생성"""
         field_widget = QWidget()
         field_widget.setFixedSize(width, 82)
@@ -191,7 +192,7 @@ class BasicInfoPanel(QWidget):
         field_layout.addWidget(label)
 
         # 입력칸
-        edit = QLineEdit()
+        edit = TruncatedLineEdit() if truncation_popup else QLineEdit()
         edit_width = 768 if width == 776 else width
         edit.setFixedSize(edit_width, 48)
         edit.setReadOnly(True)
@@ -232,6 +233,23 @@ class BasicInfoPanel(QWidget):
 
         return field_widget, label, edit
 
+    def _setup_company_product_row(self, parent_layout):
+        """기업명/제품명 행 설정"""
+        self.company_product_row = QWidget()
+        self.company_product_row.setFixedSize(776, 82)
+        self.company_product_row.setStyleSheet("QWidget { background: transparent; }")
+        row_layout = QHBoxLayout(self.company_product_row)
+        row_layout.setContentsMargins(0, 0, 0, 0)
+        row_layout.setSpacing(20)
+
+        self.company_field_widget, self.company_label, self.company_edit = self._create_readonly_field("기업명", 378)
+        row_layout.addWidget(self.company_field_widget)
+
+        self.product_field_widget, self.product_label, self.product_edit = self._create_readonly_field("제품명", 378)
+        row_layout.addWidget(self.product_field_widget)
+
+        parent_layout.addWidget(self.company_product_row, alignment=Qt.AlignHCenter)
+
     def _setup_version_model_row(self, parent_layout):
         """버전/모델명 행 설정"""
         self.version_model_row = QWidget()
@@ -249,39 +267,22 @@ class BasicInfoPanel(QWidget):
 
         parent_layout.addWidget(self.version_model_row, alignment=Qt.AlignHCenter)
 
-    def _setup_category_target_row(self, parent_layout):
-        """시험유형/시험대상 행 설정"""
-        self.category_target_row = QWidget()
-        self.category_target_row.setFixedSize(776, 82)
-        self.category_target_row.setStyleSheet("QWidget { background: transparent; }")
-        row_layout = QHBoxLayout(self.category_target_row)
+    def _setup_target_range_row(self, parent_layout):
+        """시험대상/시험범위 행 설정"""
+        self.target_range_row = QWidget()
+        self.target_range_row.setFixedSize(776, 82)
+        self.target_range_row.setStyleSheet("QWidget { background: transparent; }")
+        row_layout = QHBoxLayout(self.target_range_row)
         row_layout.setContentsMargins(0, 0, 0, 0)
         row_layout.setSpacing(20)
-
-        self.test_category_widget, self.test_category_label, self.test_category_edit = self._create_readonly_field("시험유형", 378)
-        row_layout.addWidget(self.test_category_widget)
 
         self.target_system_widget, self.target_system_label, self.target_system_edit = self._create_readonly_field("시험대상", 378)
         row_layout.addWidget(self.target_system_widget)
 
-        parent_layout.addWidget(self.category_target_row, alignment=Qt.AlignHCenter)
-
-    def _setup_group_range_row(self, parent_layout):
-        """시험분야/시험범위 행 설정"""
-        self.group_range_row = QWidget()
-        self.group_range_row.setFixedSize(776, 82)
-        self.group_range_row.setStyleSheet("QWidget { background: transparent; }")
-        row_layout = QHBoxLayout(self.group_range_row)
-        row_layout.setContentsMargins(0, 0, 0, 0)
-        row_layout.setSpacing(20)
-
-        self.test_group_widget, self.test_group_label, self.test_group_edit = self._create_readonly_field("시험분야", 378)
-        row_layout.addWidget(self.test_group_widget)
-
         self.test_range_widget, self.test_range_label, self.test_range_edit = self._create_readonly_field("시험범위", 378)
         row_layout.addWidget(self.test_range_widget)
 
-        parent_layout.addWidget(self.group_range_row, alignment=Qt.AlignHCenter)
+        parent_layout.addWidget(self.target_range_row, alignment=Qt.AlignHCenter)
 
     def _setup_divider(self, layout):
         """Divider 설정"""
@@ -487,10 +488,16 @@ class BasicInfoPanel(QWidget):
         self.parent_widget.original_page1_exit_btn_size = (378, 48)
 
         # 필드별 원본 크기
-        for prefix in ['company', 'product']:
+        for prefix in ['test_category', 'test_group']:
             setattr(self.parent_widget, f'original_{prefix}_field_size', (776, 82))
             setattr(self.parent_widget, f'original_{prefix}_label_size', (776, 28))
             setattr(self.parent_widget, f'original_{prefix}_edit_size', (768, 48))
+
+        self.parent_widget.original_company_product_row_size = (776, 82)
+        for prefix in ['company', 'product']:
+            setattr(self.parent_widget, f'original_{prefix}_field_size', (378, 82))
+            setattr(self.parent_widget, f'original_{prefix}_label_size', (378, 28))
+            setattr(self.parent_widget, f'original_{prefix}_edit_size', (378, 48))
 
         self.parent_widget.original_version_model_row_size = (776, 82)
         for prefix in ['version', 'model']:
@@ -498,14 +505,8 @@ class BasicInfoPanel(QWidget):
             setattr(self.parent_widget, f'original_{prefix}_label_size', (378, 28))
             setattr(self.parent_widget, f'original_{prefix}_edit_size', (378, 48))
 
-        self.parent_widget.original_category_target_row_size = (776, 82)
-        for prefix in ['test_category', 'target_system']:
-            setattr(self.parent_widget, f'original_{prefix}_field_size', (378, 82))
-            setattr(self.parent_widget, f'original_{prefix}_label_size', (378, 28))
-            setattr(self.parent_widget, f'original_{prefix}_edit_size', (378, 48))
-
-        self.parent_widget.original_group_range_row_size = (776, 82)
-        for prefix in ['test_group', 'test_range']:
+        self.parent_widget.original_target_range_row_size = (776, 82)
+        for prefix in ['target_system', 'test_range']:
             setattr(self.parent_widget, f'original_{prefix}_field_size', (378, 82))
             setattr(self.parent_widget, f'original_{prefix}_label_size', (378, 28))
             setattr(self.parent_widget, f'original_{prefix}_edit_size', (378, 48))
@@ -519,6 +520,15 @@ class BasicInfoPanel(QWidget):
         self.parent_widget.divider = self.divider
 
         # 필드 참조
+        self.parent_widget.test_category_widget = self.test_category_widget
+        self.parent_widget.test_category_label = self.test_category_label
+        self.parent_widget.test_category_edit = self.test_category_edit
+
+        self.parent_widget.test_group_widget = self.test_group_widget
+        self.parent_widget.test_group_label = self.test_group_label
+        self.parent_widget.test_group_edit = self.test_group_edit
+
+        self.parent_widget.company_product_row = self.company_product_row
         self.parent_widget.company_field_widget = self.company_field_widget
         self.parent_widget.company_label = self.company_label
         self.parent_widget.company_edit = self.company_edit
@@ -535,18 +545,10 @@ class BasicInfoPanel(QWidget):
         self.parent_widget.model_label = self.model_label
         self.parent_widget.model_edit = self.model_edit
 
-        self.parent_widget.category_target_row = self.category_target_row
-        self.parent_widget.test_category_widget = self.test_category_widget
-        self.parent_widget.test_category_label = self.test_category_label
-        self.parent_widget.test_category_edit = self.test_category_edit
+        self.parent_widget.target_range_row = self.target_range_row
         self.parent_widget.target_system_widget = self.target_system_widget
         self.parent_widget.target_system_label = self.target_system_label
         self.parent_widget.target_system_edit = self.target_system_edit
-
-        self.parent_widget.group_range_row = self.group_range_row
-        self.parent_widget.test_group_widget = self.test_group_widget
-        self.parent_widget.test_group_label = self.test_group_label
-        self.parent_widget.test_group_edit = self.test_group_edit
         self.parent_widget.test_range_widget = self.test_range_widget
         self.parent_widget.test_range_label = self.test_range_label
         self.parent_widget.test_range_edit = self.test_range_edit

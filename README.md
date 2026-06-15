@@ -75,7 +75,7 @@ sequenceDiagram
 ### 환경설정 — config.txt
 ```ini
 [Management]
-url=http://ect2.iptime.org:20223
+url=http://localhost
 
 [Test]
 test_ip=192.168.1.100

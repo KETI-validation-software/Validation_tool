@@ -216,6 +216,7 @@ class SystemMainUI(CommonMainUI):
         self.group_table.verticalHeader().setDefaultSectionSize(39)  # 데이터셀 높이 39px
         self.group_table.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.group_table.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.group_table.setShowGrid(False)  # 기본 격자선 제거 — item border-bottom과 겹쳐 줄이 굵어 보이는 문제 해결
 
         # ✅ 플랫폼과 동일한 스타일 적용
         self.group_table.setStyleSheet("""
@@ -241,7 +242,7 @@ class SystemMainUI(CommonMainUI):
             }
             QTableWidget::item:selected {
                 background-color: #E3F2FF;
-                border: none;
+                border-bottom: 1px solid #CCCCCC;
             }
             QTableWidget::item:hover {
                 background-color: #F2F8FF;
@@ -608,7 +609,7 @@ class SystemMainUI(CommonMainUI):
             if hasattr(self, 'monitor_section') and hasattr(self, 'original_monitor_section_size'):
                 new_monitor_width = int(self.original_monitor_section_size[0] * width_ratio)
                 monitor_extra = extra_column_height * (306 / right_expandable_total)
-                new_monitor_height = int(306 + monitor_extra)
+                new_monitor_height = int(330 + monitor_extra)
                 self.monitor_section.setFixedSize(new_monitor_width, new_monitor_height)
 
             # ✅ 버튼 그룹 및 버튼 크기 조정 (간격 16px 고정, 세로 크기 고정)
@@ -681,7 +682,7 @@ class SystemMainUI(CommonMainUI):
             if hasattr(self, 'spec_header_widget') and hasattr(self, 'spec_score_group'):
                 # 부모 박스 크기에서 2px 빼기 (border 고려)
                 new_spec_header_width = self.spec_score_group.width() - 2
-                self.spec_header_widget.setFixedSize(new_spec_header_width, 52)
+                self.spec_header_widget.setFixedSize(new_spec_header_width, 40)
 
             if hasattr(self, 'total_header_widget') and hasattr(self, 'original_total_header_widget_size'):
                 new_total_header_width = int(self.original_total_header_widget_size[0] * width_ratio)
@@ -1171,18 +1172,18 @@ class SystemMainUI(CommonMainUI):
 
         # 필수/선택/종합 점수 표시 (% (통과/전체) 형식)
         self.spec_pass_label.setText(
-            f"필수 필드 점수&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
+            f"필수 필드 점수&nbsp;&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-weight: 500; color: #000000;'>"
             f"{spec_required_score:.1f}% ({spec_required_pass}/{spec_required_total})</span>"
         )
         self.spec_total_label.setText(
-            f"선택 필드 점수&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
+            f"선택 필드 점수&nbsp;&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-weight: 500; color: #000000;'>"
             f"{spec_opt_score:.1f}% ({self.total_opt_pass_cnt}/{spec_opt_total})</span>"
         )
         self.spec_score_label.setText(
-            f"종합 평가 점수&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
+            f"종합 평가 점수&nbsp;&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-weight: 500; color: #000000;'>"
             f"{spec_score:.1f}% ({self.total_pass_cnt}/{spec_total_fields})</span>"
         )
 
@@ -1282,6 +1283,9 @@ class SystemMainUI(CommonMainUI):
                 request_json = request_json.replace("\r\n", "\n").rstrip()
                 # 문자열 끝의 닫는 괄호 직전 공백-only 줄을 1줄로 정규화
                 request_json = re.sub(r"(?:\n[ \t]*){2,}([ \t]*[\}\]])$", r"\n\1", request_json)
+                # ✅ payload가 비어있으면({}) "{ 엔터 }" 형태로 표시
+                if request_json.strip() == "{}":
+                    request_json = "{\n\n}"
 
         # 타임스탬프
         timestamp = datetime.now().strftime("%H:%M:%S")
@@ -1395,8 +1399,9 @@ class SystemMainUI(CommonMainUI):
         """메인 화면에 표시할 시험 분야별 평가 점수 위젯"""
 
         spec_group = QGroupBox()
-        spec_group.setFixedSize(1064, 128)
-        self.original_spec_group_size = (1064, 128)
+        # ✅ 점수 카드 슬림화: 카드 128→104 (헤더 52→40, 데이터 76→64)
+        spec_group.setFixedSize(1064, 104)
+        self.original_spec_group_size = (1064, 104)
         spec_group.setStyleSheet("""
             QGroupBox {
                 background-color: #FFF;
@@ -1410,8 +1415,9 @@ class SystemMainUI(CommonMainUI):
         # 분야별 점수 아이콘 (52 × 42)
         icon_label = QLabel()
         icon_pixmap = QPixmap(resource_path("assets/image/test_runner/icn_분야별점수.png"))
-        icon_label.setPixmap(icon_pixmap.scaled(52, 42, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        icon_label.setFixedSize(52, 42)
+        icon_label.setPixmap(icon_pixmap.scaled(44, 35, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        icon_label.setFixedSize(44, 35)
+        icon_label.setContentsMargins(0, 0, 0, 4)  # 아이콘만 살짝 위로 (텍스트와 수평 정렬)
         icon_label.setAlignment(Qt.AlignCenter)
 
         # 분야별 점수 레이블 (500 Medium 20px)
@@ -1419,7 +1425,7 @@ class SystemMainUI(CommonMainUI):
         score_type_label.setStyleSheet("""
             color: #000;
             font-family: "Noto Sans KR";
-            font-size: 20px;
+            font-size: 17px;
             font-style: normal;
             font-weight: 500;
             line-height: normal;
@@ -1428,7 +1434,7 @@ class SystemMainUI(CommonMainUI):
         # 세로선 (27px)
         header_vline = QFrame()
         header_vline.setFrameShape(QFrame.VLine)
-        header_vline.setFixedSize(1, 27)
+        header_vline.setFixedSize(1, 20)
         header_vline.setStyleSheet("background-color: #000000;")
 
         # spec 정보 레이블 (500 Medium 20px)
@@ -1436,7 +1442,7 @@ class SystemMainUI(CommonMainUI):
         self.spec_name_label.setStyleSheet("""
             color: #000;
             font-family: "Noto Sans KR";
-            font-size: 20px;
+            font-size: 17px;
             font-style: normal;
             font-weight: 500;
             line-height: normal;
@@ -1465,7 +1471,7 @@ class SystemMainUI(CommonMainUI):
         self.spec_pass_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";
-            font-size: 19px;
+            font-size: 17px;
             font-weight: 500;
 
         """)
@@ -1474,7 +1480,7 @@ class SystemMainUI(CommonMainUI):
         self.spec_total_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";
-            font-size: 19px;
+            font-size: 17px;
             font-weight: 500;
 
         """)
@@ -1483,7 +1489,7 @@ class SystemMainUI(CommonMainUI):
         self.spec_score_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";
-            font-size: 19px;
+            font-size: 17px;
             font-weight: 500;
 
         """)
@@ -1494,9 +1500,9 @@ class SystemMainUI(CommonMainUI):
 
         # 아이콘 + 분야명 (헤더 영역 1062 × 52, 부모 border 1px 고려)
         self.spec_header_widget = QWidget()
-        self.spec_header_widget.setFixedSize(1062, 52)
+        self.spec_header_widget.setFixedSize(1062, 40)
         self.spec_header_widget.setStyleSheet("background: #F8F9FA;")
-        self.original_spec_header_widget_size = (1062, 52)
+        self.original_spec_header_widget_size = (1062, 40)
         header_layout = QHBoxLayout(self.spec_header_widget)
         header_layout.setContentsMargins(0, 5, 0, 5)
         header_layout.setSpacing(12)
@@ -1510,16 +1516,16 @@ class SystemMainUI(CommonMainUI):
 
         # 데이터 영역 (1064 × 76)
         self.spec_data_widget = QWidget()
-        self.spec_data_widget.setFixedSize(1064, 76)
-        self.original_spec_data_widget_size = (1064, 76)
+        self.spec_data_widget.setFixedSize(1064, 64)
+        self.original_spec_data_widget_size = (1064, 64)
         spec_score_layout = QHBoxLayout(self.spec_data_widget)
-        spec_score_layout.setContentsMargins(20, 8, 20, 8)
+        spec_score_layout.setContentsMargins(20, 2, 20, 2)
         spec_score_layout.setSpacing(0)
 
         # 통과 필드 수 + 구분선 + spacer
         spec_score_layout.addWidget(self.spec_pass_label)
         spec_vline1 = QFrame()
-        spec_vline1.setFixedSize(2, 60)
+        spec_vline1.setFixedSize(1, 40)
         spec_vline1.setStyleSheet("background-color: #CECECE;")
         spec_score_layout.addWidget(spec_vline1)
         spec_spacer1 = QWidget()
@@ -1529,7 +1535,7 @@ class SystemMainUI(CommonMainUI):
         # 전체 필드 수 + 구분선 + spacer
         spec_score_layout.addWidget(self.spec_total_label)
         spec_vline2 = QFrame()
-        spec_vline2.setFixedSize(2, 60)
+        spec_vline2.setFixedSize(1, 40)
         spec_vline2.setStyleSheet("background-color: #CECECE;")
         spec_score_layout.addWidget(spec_vline2)
         spec_spacer2 = QWidget()
@@ -1566,16 +1572,17 @@ class SystemMainUI(CommonMainUI):
 
         # 전체 점수 아이콘 (52 × 42)
         icon_label = QLabel()
-        icon_label.setFixedSize(52, 42)
+        icon_label.setFixedSize(44, 35)
+        icon_label.setContentsMargins(0, 0, 0, 4)  # 아이콘만 살짝 위로 (텍스트와 수평 정렬)
         icon_pixmap = QPixmap(resource_path("assets/image/test_runner/icn_전체점수.png"))
-        icon_label.setPixmap(icon_pixmap.scaled(52, 42, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        icon_label.setPixmap(icon_pixmap.scaled(44, 35, Qt.KeepAspectRatio, Qt.SmoothTransformation))
 
         # 전체 점수 레이블 (500 Medium 20px)
         total_name_label = QLabel("전체 점수")
         total_name_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";
-            font-size: 20px;
+            font-size: 17px;
             font-weight: 500;
         """)
 
@@ -1597,7 +1604,7 @@ class SystemMainUI(CommonMainUI):
         self.total_pass_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";
-            font-size: 19px;
+            font-size: 17px;
             font-weight: 500;
 
         """)
@@ -1606,7 +1613,7 @@ class SystemMainUI(CommonMainUI):
         self.total_total_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";
-            font-size: 19px;
+            font-size: 17px;
             font-weight: 500;
 
         """)
@@ -1615,7 +1622,7 @@ class SystemMainUI(CommonMainUI):
         self.total_score_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";
-            font-size: 19px;
+            font-size: 17px;
             font-weight: 500;
 
         """)
@@ -1647,7 +1654,7 @@ class SystemMainUI(CommonMainUI):
         # 통과 필드 수 + 구분선 + spacer
         score_layout.addWidget(self.total_pass_label)
         total_vline1 = QFrame()
-        total_vline1.setFixedSize(2, 60)
+        total_vline1.setFixedSize(1, 40)
         total_vline1.setStyleSheet("background-color: #CECECE;")
         score_layout.addWidget(total_vline1)
         total_spacer1 = QWidget()
@@ -1657,7 +1664,7 @@ class SystemMainUI(CommonMainUI):
         # 전체 필드 수 + 구분선 + spacer
         score_layout.addWidget(self.total_total_label)
         total_vline2 = QFrame()
-        total_vline2.setFixedSize(2, 60)
+        total_vline2.setFixedSize(1, 40)
         total_vline2.setStyleSheet("background-color: #CECECE;")
         score_layout.addWidget(total_vline2)
         total_spacer2 = QWidget()

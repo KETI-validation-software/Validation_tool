@@ -125,8 +125,19 @@ class CombinedDetailDialog(QDialog):
         self.data_browser.setStyleSheet(box_style)
         self.data_browser.setAcceptRichText(True)
         if step_buffer["data"]:
+            import html as _html, re as _re
             data_text = step_buffer["data"]
-            self.data_browser.setPlainText(data_text)
+            _escaped = _html.escape(data_text, quote=False)
+            # 웹훅 이벤트 라벨 [웹훅 이벤트 #N] 을 볼드 + 파란색(#4B72E0)으로 강조
+            _escaped = _re.sub(
+                r'(\[웹훅 메시지 #\d+\])',
+                r'<span style="color:#1C5DB1; font-weight:700;">\1</span>',
+                _escaped,
+            )
+            # JSON 들여쓰기·줄바꿈 보존(pre) + 본문 폰트 적용(monospace 기본값 덮어쓰기)
+            self.data_browser.setHtml(
+                f"<pre style=\"font-family:'Noto Sans KR'; font-size:19px; white-space:pre-wrap; margin:0;\">{_escaped}</pre>"
+            )
         else:
             self.data_browser.setHtml('<span style="color: #CECECE;">아직 수신된 데이터가 없습니다.</span>')
         data_column_layout.addWidget(self.data_browser)
@@ -203,7 +214,13 @@ class CombinedDetailDialog(QDialog):
             if result == "FAIL":
                 error_msg_html = result_html + error_text.replace('\n', '<br>')
             else:
-                error_msg_html = result_html + "오류가 없습니다."
+                # ✅ PASS도 [검증 회차 N/M] 헤더를 FAIL과 동일하게 표시 (회차별 '오류가 없습니다.')
+                import re as _re_attempt
+                _headers = _re_attempt.findall(r'\[검증\s*회차\s*\d+(?:\s*/\s*\d+)?\]', error_text or "")
+                if _headers:
+                    error_msg_html = result_html + "<br><br>".join(f"{_h}<br>오류가 없습니다." for _h in _headers)
+                else:
+                    error_msg_html = result_html + "오류가 없습니다."
             
             self.error_browser.setHtml(error_msg_html)
         error_column_layout.addWidget(self.error_browser)

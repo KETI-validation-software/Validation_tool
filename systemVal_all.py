@@ -290,6 +290,8 @@ class MyApp(SystemMainUI):
 
         # CONSTANTS 사용
         self.CONSTANTS = CONSTANTS
+        # ✅ 웹훅 창/대기시간을 CONSTANTS 단일 소스에서 읽음 (시스템·플랫폼 공통 → 함께 변경됨)
+        self.WEBHOOK_FAILFAST_TIMEOUT_SEC = float(getattr(self.CONSTANTS, 'WEBHOOK_WINDOW_SEC', 10.0))
         
         # ✅ spec_id 초기화 (info_GUI에서 전달받거나 기본값 사용)
         if spec_id:
@@ -628,6 +630,11 @@ class MyApp(SystemMainUI):
                     if webhook_port is not None:
                         self.CONSTANTS.WEBHOOK_PORT = int(webhook_port)
                         Logger.debug(f" ✅ WEBHOOK_PORT 업데이트: {webhook_port}")
+                    webhook_window = namespace.get('WEBHOOK_WINDOW_SEC', None)
+                    if webhook_window is not None:
+                        self.CONSTANTS.WEBHOOK_WINDOW_SEC = float(webhook_window)
+                        self.WEBHOOK_FAILFAST_TIMEOUT_SEC = float(webhook_window)
+                        Logger.debug(f" ✅ WEBHOOK_WINDOW_SEC 업데이트: {webhook_window}")
 
                     Logger.debug(f" ✅ 외부 SPEC_CONFIG 로드 완료: {len(SPEC_CONFIG)}개 그룹")
                     # 디버그: 그룹 이름 출력
@@ -858,11 +865,12 @@ class MyApp(SystemMainUI):
         self.tableWidget.setCellWidget(row, 3, icon_widget)
 
         # ✅ 3. 각 컬럼 업데이트 (아이템이 없으면 생성)
+        # ✅ 헤더 순서(system_main_ui.py)에 맞춤: 4:전체, 5:통과, 6:실패, 7:검증
         updates = [
-            (4, str(retries)),  # 검증 횟수
+            (4, str(pass_count + error_count)),  # 전체 필드 수
             (5, str(pass_count)),  # 통과 필드 수
-            (6, str(pass_count + error_count)),  # 전체 필드 수
-            (7, str(error_count)),  # 실패 필드 수
+            (6, str(error_count)),  # 실패 필드 수
+            (7, str(retries)),  # 검증 횟수
         ]
 
         for col, value in updates:
@@ -912,33 +920,6 @@ class MyApp(SystemMainUI):
             ("사용자 인증 방식", self.auth_type),
             ("시험 접속 정보", self.url)
         ]
-
-    def on_group_selected(self, row, col):
-        group_name = self.index_to_group_name.get(row)
-        if not group_name:
-            return
-
-        # ===== 외부 로드된 SPEC_CONFIG 사용 (fallback: CONSTANTS 모듈) =====
-        SPEC_CONFIG = getattr(self, 'LOADED_SPEC_CONFIG', self.CONSTANTS.SPEC_CONFIG)
-        selected_group = next(
-            (g for g in SPEC_CONFIG if g.get("group_name") == group_name), None
-        )
-        # ===== 수정 끝 =====
-
-        if selected_group:
-            new_group_id = selected_group.get('group_id')
-            old_group_id = getattr(self, 'current_group_id', None)
-
-            Logger.debug(f" 🔄 그룹 선택: {old_group_id} → {new_group_id}")
-
-            # ✅ 그룹이 변경되면 current_spec_id 초기화 (다음 시나리오 선택 시 무조건 다시 로드되도록)
-            if old_group_id != new_group_id:
-                self.current_spec_id = None
-                Logger.debug(f" ✨ 그룹 변경으로 current_spec_id 초기화")
-
-            # ✅ 그룹 ID 저장
-            self.current_group_id = new_group_id
-            self.update_test_field_table(selected_group)
 
     def on_group_selected(self, row, col):
         """
@@ -1334,7 +1315,15 @@ class MyApp(SystemMainUI):
                         self.webhook_thread.stop()
                         self.webhook_thread = None
 
-                    self.webhook_thread = WebhookThread(url, port, msg)
+                    self.webhook_results_list = []
+                    self.webhook_validation_results = []
+                    # ✅ 구독 응답(ACK) 선처리 상태 초기화 (송신요청 → 수신응답 → 웹훅 순서)
+                    self._webhook_ack_logged = False
+                    self._webhook_base_pass = 0
+                    self._webhook_base_error = 0
+                    self._webhook_base_opt_pass = 0
+                    self._webhook_base_opt_error = 0
+                    self.webhook_thread = WebhookThread(url, port, msg, timeout_sec=self.WEBHOOK_FAILFAST_TIMEOUT_SEC)
                     self.webhook_thread.result_signal.connect(self.handle_webhook_result)
                     self.webhook_thread.start()
                     # 서버가 완전히 준비될 때까지 대기 (최대 15초)
@@ -1364,6 +1353,11 @@ class MyApp(SystemMainUI):
                 verify=False,
                 timeout=time_out
             )
+            # ✅ 웹훅: 일반 요청→일반 응답(구독 ACK) 소요 시간을 이 시점에 고정 (윈도우 제외, 롱폴링/basic과 동일)
+            if self.webhook_flag and self.cnt not in self.monitor_response_elapsed_ms:
+                _started = self.monitor_request_started_at.get(self.cnt)
+                if _started is not None:
+                    self.monitor_response_elapsed_ms[self.cnt] = int(round((time.perf_counter() - _started) * 1000))
             Logger.debug(f" [post] response message {self.res.status_code}")
             Logger.debug(
                 f"{self.res.json() if self.res.headers.get('Content-Type', '').startswith('application/json') else self.res.text}"
@@ -1371,164 +1365,225 @@ class MyApp(SystemMainUI):
         except Exception as e:
             Logger.debug(str(e))
 
-    # 임시 수정 
-    def handle_webhook_result(self, result):
-        self.webhook_res = result
-        self.webhook_thread.stop()
-        self._push_event(self.webhook_cnt, "WEBHOOK", result)
+    def _log_webhook_subscribe_ack(self):
+        """구독 응답(ACK)을 웹훅 이벤트보다 먼저 1회 검증·기록 (송신요청 → 수신응답 → 웹훅 순서).
+        카운트는 get_webhook_result에서 웹훅 이벤트와 합산한다 (기본 필드 + 웹훅 필드 × N)."""
+        if getattr(self, '_webhook_ack_logged', False):
+            return
+        self._webhook_ack_logged = True
+        cnt = self.webhook_cnt
+        ack_data = {}
+        if self.res is not None:
+            try:
+                ack_data = self.res.json()
+            except Exception:
+                ack_data = {}
+        # 기본 필드(code,message) 검증 — 카운트만 저장 (합산은 get_webhook_result)
+        self._webhook_base_pass = 0
+        self._webhook_base_error = 0
+        self._webhook_base_opt_pass = 0
+        self._webhook_base_opt_error = 0
+        if cnt < len(self.outSchema) and ack_data:
+            try:
+                _bvr, _bvt, bp, be, bop, boe = json_check_(self.outSchema[cnt], ack_data, self.flag_opt)
+                self._webhook_base_pass, self._webhook_base_error = bp, be
+                self._webhook_base_opt_pass, self._webhook_base_opt_error = bop, boe
+            except Exception as _e:
+                Logger.debug(f"[Webhook] 구독 ACK 검증 실패: {_e}")
+        # 수신(응답) 로그 — 웹훅 이벤트보다 먼저 찍음
+        display_name = (
+            self.message_display[cnt] if cnt < len(self.message_display)
+            else (self.message[cnt] if cnt < len(self.message) else "Unknown")
+        )
+        ack_text = json.dumps(ack_data, indent=4, ensure_ascii=False) if ack_data else "null"
+        self.append_monitor_log(
+            step_name=build_monitor_step_name(display_name, "response"),
+            request_json=ack_text,
+            direction="RECV",
+            # 응답 소요 시간은 '검증 결과' 태그에만 표시 (basic/롱폴링과 동일) — 구독 ACK엔 표시 안 함
+        )
 
-    # 웹훅 검증
+    def handle_webhook_result(self, result):
+        if not hasattr(self, 'webhook_results_list'):
+            self.webhook_results_list = []
+        self._log_webhook_subscribe_ack()  # ✅ 첫 이벤트 직전에 구독 응답 먼저 기록
+        self.webhook_results_list.append(result)
+        self._push_event(self.webhook_cnt, "WEBHOOK", result)
+        self._process_single_webhook_event(result, len(self.webhook_results_list))
+
+    def _process_single_webhook_event(self, event_data, event_index):
+        """이벤트 수신 즉시 스키마 검증 및 모니터 로그 기록"""
+        if not hasattr(self, 'webhook_validation_results'):
+            self.webhook_validation_results = []
+
+        if self.webhook_cnt >= len(self.webhookSchema) or not self.webhookSchema[self.webhook_cnt]:
+            Logger.debug(f"[Webhook] 스키마 없음 — 검증 건너뜀 (cnt={self.webhook_cnt})")
+            self.webhook_validation_results.append({
+                'val_result': 'PASS', 'val_text': '',
+                'key_psss_cnt': 0, 'key_error_cnt': 0,
+                'opt_correct': 0, 'opt_error': 0,
+            })
+            return
+
+        schema_to_check = self.webhookSchema[self.webhook_cnt]
+        webhook_data = event_data if event_data else {}
+        tmp_webhook_res = json.dumps(webhook_data, indent=4, ensure_ascii=False) if webhook_data else "null"
+
+        if webhook_data:
+            val_result, val_text, key_psss_cnt, key_error_cnt, opt_correct, opt_error = json_check_(
+                schema=schema_to_check,
+                data=webhook_data,
+                flag=self.flag_opt,
+                reference_context=self.reference_context,
+            )
+        else:
+            from core.json_checker_new import timeout_field_finder
+            rqd, opt = timeout_field_finder(schema_to_check)
+            val_result, val_text = "FAIL", "빈 웹훅 이벤트"
+            key_psss_cnt, key_error_cnt = 0, rqd if rqd > 0 else 1
+            opt_correct, opt_error = 0, opt if self.flag_opt else 0
+
+        self.webhook_validation_results.append({
+            'val_result': val_result, 'val_text': val_text,
+            'key_psss_cnt': key_psss_cnt, 'key_error_cnt': key_error_cnt,
+            'opt_correct': opt_correct, 'opt_error': opt_error,
+        })
+
+        display_name = (
+            self.message_display[self.webhook_cnt]
+            if self.webhook_cnt < len(self.message_display)
+            else (self.message[self.webhook_cnt] if self.webhook_cnt < len(self.message) else "Unknown")
+        )
+
+        event_recv_name = f"{build_webhook_monitor_step_name(display_name, 'event', role='system')} #{event_index}"
+        self.append_monitor_log(
+            step_name=event_recv_name,
+            request_json=tmp_webhook_res,
+            direction="RECV",
+            # 응답 소요 시간은 매 웹훅 이벤트 태그가 아니라 '검증 결과' 태그에만 표시 (롱폴링과 동일)
+        )
+
+        if webhook_data:
+            webhook_ack_payload = {"code": "200", "message": "성공"}
+            ack_name = f"{build_webhook_monitor_step_name(display_name, 'ack', role='system')} #{event_index}"
+            self.append_monitor_log(
+                step_name=ack_name,
+                request_json=json.dumps(webhook_ack_payload, indent=4, ensure_ascii=False),
+                direction="SEND",
+            )
+
+        Logger.info(
+            f"[Webhook] 이벤트 {event_index}건 처리 완료 — "
+            f"result={val_result}, pass={key_psss_cnt}, error={key_error_cnt}"
+        )
+
+    # 웹훅 검증 — 10초 윈도우 종료 후 복수 이벤트 집계
     def get_webhook_result(self):
         # ✅ 웹훅 스키마가 없으면 검증하지 않음
         if self.cnt >= len(self.webhookSchema) or not self.webhookSchema[self.cnt]:
-            Logger.debug(f" API {self.cnt}는 웹훅 스키마가 없음 - 검증 건너뜀")
+            Logger.debug(f"API {self.cnt}는 웹훅 스키마가 없음 - 검증 건너뜀")
             self.webhook_flag = False
             return
-        
-        # ✅ 웹훅 응답이 null인 경우에도 검증을 수행하여 실패로 카운트
-        # None이거나 빈 값인 경우 빈 딕셔너리로 처리
-        webhook_data = self.webhook_res if self.webhook_res else {}
-        tmp_webhook_res = json.dumps(webhook_data, indent=4, ensure_ascii=False) if webhook_data else "null"
-        
-        if self.webhook_cnt < len(self.message):
-            message_name = "step " + str(self.webhook_cnt + 1) + ": " + self.message[self.webhook_cnt]
-        else:
-            message_name = f"step {self.webhook_cnt + 1}: (index out of range)"
 
-        # ✅ 디버깅: 웹훅 이벤트 스키마 검증 (첫 호출에만 출력)
-        if not hasattr(self, '_webhook_debug_printed'):
-            self._webhook_debug_printed = True
-            Logger.debug(f"\n========== 웹훅 이벤트 검증 디버깅 ==========")
-            webhook_api = self.message[self.webhook_cnt] if self.webhook_cnt < len(self.message) else 'N/A'
-            Logger.debug(f"webhook_cnt={self.webhook_cnt}, API={webhook_api}")
-            Logger.debug(f"webhookSchema 총 개수={len(self.webhookSchema)}")
-            Logger.debug(f"webhook_res is None: {self.webhook_res is None}")
+        # ✅ 이벤트가 하나도 없던 경우에도 구독 응답(ACK)을 먼저 기록 (이벤트 있으면 이미 처리됨 → no-op)
+        self._log_webhook_subscribe_ack()
 
         schema_to_check = self.webhookSchema[self.cnt]
+        results_list = getattr(self, 'webhook_results_list', [])
+        validation_list = getattr(self, 'webhook_validation_results', [])
 
-        # ⭐ 추가: webhook_res가 None이면 timeout 처리
-        if self.webhook_res is None:
-            # timeout_field_finder로 스키마의 필드 개수 계산
+        display_name = (
+            self.message_display[self.webhook_cnt]
+            if self.webhook_cnt < len(self.message_display)
+            else (self.message[self.webhook_cnt] if self.webhook_cnt < len(self.message) else "Unknown")
+        )
+
+        if not results_list:
+            # 이벤트 미수신 — 타임아웃 처리
             from core.json_checker_new import timeout_field_finder
             tmp_fields_rqd_cnt, tmp_fields_opt_cnt = timeout_field_finder(schema_to_check)
             key_error_cnt = tmp_fields_rqd_cnt if tmp_fields_rqd_cnt > 0 else 1
             if self.flag_opt:
                 key_error_cnt += tmp_fields_opt_cnt
-
             val_result = "FAIL"
             val_text = "웹훅 메시지 미수신"
             key_psss_cnt = 0
             opt_correct = 0
             opt_error = tmp_fields_opt_cnt if self.flag_opt else 0
+            tmp_webhook_res = "null"
         else:
-            # ✅ 정상적으로 webhook 데이터가 있는 경우 검증
-            val_result, val_text, key_psss_cnt, key_error_cnt, opt_correct, opt_error = json_check_(
-                schema=schema_to_check,
-                data=webhook_data,
-                flag=self.flag_opt,
-                reference_context=self.reference_context
-            )
-
-        if not hasattr(self, '_webhook_debug_printed') or not self._webhook_debug_printed:
-            Logger.debug(f" ==========================================\n")
-
-        display_name = self.message_display[self.webhook_cnt] if self.webhook_cnt < len(self.message_display) else (
-            self.message[self.webhook_cnt] if self.webhook_cnt < len(self.message) else "Unknown"
-        )
-
-        # 웹훅 응답 시간은 최초 요청 송신 시점부터 payload 수신 시점까지로 측정한다.
-        started_at = self.monitor_request_started_at.get(self.webhook_cnt)
-        event_received_at = time.perf_counter()
-        if started_at is not None:
-            self.monitor_response_elapsed_ms[self.webhook_cnt] = int(round((event_received_at - started_at) * 1000))
-            self._set_timer_success(self.webhook_cnt)
-        else:
-            self.monitor_request_started_at[self.webhook_cnt] = event_received_at
-            self.monitor_response_elapsed_ms.pop(self.webhook_cnt, None)
-        webhook_event_log_text = self.append_monitor_log(
-            step_name=build_webhook_monitor_step_name(display_name, "event", role="system"),
-            request_json=tmp_webhook_res,
-            direction="RECV",
-            response_time_ms=self.monitor_response_elapsed_ms.get(self.webhook_cnt),
-        )
-
-        # ?? ACK ?? payload? ??? ????? [??]?? ??
-        webhook_ack_payload = None
-        webhook_ack_log_text = None
-        if self.webhook_res is not None:
-            webhook_ack_payload = {"code": "200", "message": "성공"}
-            webhook_ack_log_text = self.append_monitor_log(
-                step_name=build_webhook_monitor_step_name(display_name, "ack", role="system"),
-                request_json=json.dumps(webhook_ack_payload, indent=4, ensure_ascii=False),
-                direction="SEND"
-            )
-
-        # ✅ step_pass_counts 배열에 웹훅 결과 추가 (배열이 없으면 생성하지 않음)
-        # 점수 업데이트는 모든 재시도 완료 후에 일괄 처리됨 (플랫폼과 동일)
-
-        # ✅ 점수는 표시하지 않음 (재시도 완료 후에만 표시)
-        # 평가 점수 디스플레이 업데이트는 재시도 완료 시에만 호출
+            # 복수 이벤트 집계 — 모두 PASS여야 최종 PASS
+            val_result = "PASS"
+            val_text_parts = []
+            key_psss_cnt = 0
+            key_error_cnt = 0
+            opt_correct = 0
+            opt_error = 0
+            for i, v in enumerate(validation_list):
+                key_psss_cnt += v['key_psss_cnt']
+                key_error_cnt += v['key_error_cnt']
+                opt_correct += v['opt_correct']
+                opt_error += v['opt_error']
+                if v['val_result'] != 'PASS':
+                    val_result = 'FAIL'
+                    val_text_parts.append(f"[웹훅 메시지 #{i + 1}] {v['val_text']}")
+            val_text = "\n".join(val_text_parts) if val_text_parts else ""
+            last_event = results_list[-1]
+            # ✅ 단일/복수 모두 [웹훅 메시지 #N] 라벨 부여 (받은 이벤트 전부 상세에 표시)
+            _ev_parts = []
+            for _i, _ev in enumerate(results_list, start=1):
+                _ev_txt = json.dumps(_ev, indent=4, ensure_ascii=False) if _ev else "null"
+                _ev_parts.append(f"[웹훅 메시지 #{_i}]\n{_ev_txt}")
+            tmp_webhook_res = "\n\n".join(_ev_parts)
 
         if val_result == "PASS":
-            msg = "\n" + tmp_webhook_res + "\n\n" + "Result: " + val_text + "\n"
-            img = self.img_pass
+            msg = "\n" + tmp_webhook_res + "\n\n" + "Result: PASS\n"
         else:
-            msg = "\n" + tmp_webhook_res + "\n\n" + "Result: " + val_result + "\nResult details:\n" + val_text + "\n"
-            img = self.img_fail
+            msg = "\n" + tmp_webhook_res + "\n\n" + "Result: FAIL\nResult details:\n" + val_text + "\n"
 
-        # ✅ 웹훅 검증 결과를 기존 누적 필드 수에 추가
         if self.webhook_cnt < self.tableWidget.rowCount():
-            # 기존 누적 필드 수 가져오기
             if hasattr(self, 'step_pass_counts') and hasattr(self, 'step_error_counts'):
-                # ✅ 웹훅 결과를 기존 step_pass_counts에 추가 (inbound + webhook)
-                self.step_pass_counts[self.webhook_cnt] += key_psss_cnt
-                self.step_error_counts[self.webhook_cnt] += key_error_cnt
-
-                # ⭐ 선택 필드 합산
+                # ✅ 웹훅 이벤트 카운트 + 구독 응답(기본 필드 code,message) 카운트 합산 (플랫폼과 동일: 기본 + 웹훅×N)
+                self.step_pass_counts[self.webhook_cnt] += key_psss_cnt + getattr(self, '_webhook_base_pass', 0)
+                self.step_error_counts[self.webhook_cnt] += key_error_cnt + getattr(self, '_webhook_base_error', 0)
                 if hasattr(self, 'step_opt_pass_counts') and hasattr(self, 'step_opt_error_counts'):
-                    self.step_opt_pass_counts[self.webhook_cnt] += opt_correct
-                    self.step_opt_error_counts[self.webhook_cnt] += opt_error
-
-                # 누적된 총 필드 수로 테이블 업데이트
+                    self.step_opt_pass_counts[self.webhook_cnt] += opt_correct + getattr(self, '_webhook_base_opt_pass', 0)
+                    self.step_opt_error_counts[self.webhook_cnt] += opt_error + getattr(self, '_webhook_base_opt_error', 0)
                 accumulated_pass = self.step_pass_counts[self.webhook_cnt]
                 accumulated_error = self.step_error_counts[self.webhook_cnt]
-
-                Logger.debug(f" 누적 결과: pass={accumulated_pass}, error={accumulated_error}")
+                Logger.debug(f"웹훅 누적 결과: pass={accumulated_pass}, error={accumulated_error}")
             else:
-                # 누적 배열이 없으면 웹훅 결과만 사용
                 accumulated_pass = key_psss_cnt
                 accumulated_error = key_error_cnt
-            result_step_title = build_monitor_result_title(display_name, self.current_retry + 1)
+
             current_retries = self.num_retries_list[self.cnt] if self.cnt < len(self.num_retries_list) else 1
             total_fields = accumulated_pass + accumulated_error
             score_value = (accumulated_pass / total_fields * 100) if total_fields > 0 else 0
             extra_detail = to_detail_text(val_text) if val_result == "FAIL" else ""
+            event_summary = f"{len(results_list)}건 수신" if results_list else "미수신"
 
-            webhook_result_log_text = self.append_monitor_log(
-                step_name=result_step_title,
+            result_step_title = build_monitor_result_title(display_name, self.current_retry + 1)
+            self.append_monitor_log(
+                step_name=f"{result_step_title} ({event_summary})",
                 request_json="",
                 result_status=val_result,
                 score=score_value,
                 details=build_monitor_result_details(
-                    accumulated_pass,
-                    accumulated_error,
-                    "WebHook",
+                    accumulated_pass, accumulated_error, "WebHook",
                     response_time_ms=self.monitor_response_elapsed_ms.get(self.webhook_cnt),
                     extra_detail=extra_detail,
                 ),
                 response_time_ms=self.monitor_response_elapsed_ms.get(self.webhook_cnt),
-                direction="RECV"
+                direction="RECV",
             )
 
-                # 누적된 필드 수로 테이블 업데이트
             self.update_table_row_with_retries(
                 self.webhook_cnt, val_result, accumulated_pass, accumulated_error,
-                tmp_webhook_res, to_detail_text(val_text), current_retries
+                tmp_webhook_res, to_detail_text(val_text), current_retries,
             )
 
-        # step_buffers 업데이트 추가 (실시간 모니터링과 상세보기 일치)
         if self.webhook_cnt < len(self.step_buffers):
-            webhook_data_text = tmp_webhook_res
+            webhook_data = results_list[-1] if results_list else {}
             webhook_error_text = to_detail_text(val_text) if val_result == "FAIL" else "오류가 없습니다."
             update_webhook_step_buffer_fields(
                 step_buffer=self.step_buffers[self.webhook_cnt],
@@ -1537,15 +1592,14 @@ class MyApp(SystemMainUI):
                 webhook_pass_cnt=key_psss_cnt,
                 webhook_total_cnt=(key_psss_cnt + key_error_cnt),
                 attempt_num=self.current_retry + 1,
-                webhook_ack_payload=webhook_ack_payload if self.webhook_res is not None else None,
+                webhook_ack_payload={"code": "200", "message": "성공"} if results_list else None,
             )
-            # ✅ 웹훅 이벤트 데이터를 명확히 표시
-            self.step_buffers[self.webhook_cnt]["data"] += f"\n\n--- Webhook 이벤트 데이터 ---\n{webhook_data_text}"
-            self.step_buffers[self.webhook_cnt][
-                "error"] += f"\n\n--- Webhook 검증 ---\n{webhook_error_text}"  # 얘가 문제임 화딱지가 난다
+            self.step_buffers[self.webhook_cnt]["data"] += (
+                f"\n\n{tmp_webhook_res}"
+            )
+            self.step_buffers[self.webhook_cnt]["error"] += f"\n\n--- 웹훅 검증 ---\n{webhook_error_text}"
             self.step_buffers[self.webhook_cnt]["result"] = val_result
 
-            # 메시지 저장
         if self.webhook_cnt == 6:
             self.step7_msg += msg
         elif self.webhook_cnt == 4:
@@ -1553,7 +1607,10 @@ class MyApp(SystemMainUI):
         elif self.webhook_cnt == 3:
             self.step4_msg += msg
 
-        self.webhook_res = None  # init
+        # 상태 초기화
+        self.webhook_results_list = []
+        self.webhook_validation_results = []
+        self.webhook_res = None
         self.webhook_flag = False
 
     @staticmethod
@@ -1587,27 +1644,31 @@ class MyApp(SystemMainUI):
             if self.webhook_flag is True:
                 api_name = self.message[self.cnt] if self.cnt < len(self.message) else 'N/A'
                 current_timeout = self._get_effective_timeout_seconds(self.cnt)
-                Logger.debug(f"웹훅 이벤트 수신 완료 (API: {api_name})")
-                if self.webhook_res != None:
-                    Logger.warn(f" 웹훅 메시지 수신")
-                    # ✅ 타이머 라인 제거
+                event_count = len(getattr(self, 'webhook_results_list', []))
+
+                webhook_thread_alive = (
+                    hasattr(self, 'webhook_thread') and
+                    self.webhook_thread is not None and
+                    self.webhook_thread.isRunning()
+                )
+
+                if webhook_thread_alive:
+                    # ✅ 일반 요청→응답(구독 ACK) 소요 시간을 그대로 표시 (윈도우는 카운트업하지 않음) — 롱폴링/basic과 동일
+                    self.set_api_timer_state(self.cnt, "running", self._table_timer_seconds(self.cnt, time_interval))
                     Logger.debug(
-                        f"[TIMER_SUCCESS_PATH] webhook cnt={self.cnt} retry={self.current_retry} "
-                        f"webhook_flag={self.webhook_flag} webhook_res={self.webhook_res is not None} "
-                        f"time_interval={time_interval:.3f}"
+                        f"웹훅 윈도우 오픈 중 (API: {api_name}, 수신: {event_count}건, "
+                        f"경과: {round(time_interval)}/{round(current_timeout)}초)"
                     )
-                    self._set_timer_success(self.cnt, time_interval)
-                elif math.ceil(time_interval) >= current_timeout - 1:
-                    Logger.warn(f" 메시지 타임아웃! 웹훅 대기 종료")
-                    # ✅ 타이머 라인 제거
-                    self._set_timer_timeover(self.cnt, time_interval)
-                else :
-                    # ✅ 대기 시간 타이머 표시 (마지막 줄 갱신)
-                    remaining = max(0, int(current_timeout - time_interval))
-                    self._set_timer_running(self.cnt, time_interval)
-                    
-                    Logger.debug(f" 웹훅 대기 중... (API {self.cnt}) 타임아웃 {round(time_interval)} /{round(current_timeout)}")
                     return
+
+                # 스레드 종료 — 집계 단계로 진입
+                if event_count > 0:
+                    self._set_timer_success(self.cnt, time_interval)
+                else:
+                    Logger.warn(f"웹훅 이벤트 미수신 — 타임아웃")
+                    self._set_timer_timeover(self.cnt, time_interval)
+                # 이벤트 집계 및 검증 결과 기록 (webhook_flag를 여기서 해제)
+                self.get_webhook_result()
             if (self.post_flag is False and
                     self.processing_response is False and
                     self.cnt < len(self.message) and
@@ -1743,7 +1804,7 @@ class MyApp(SystemMainUI):
 
             # timeout 조건은 응답 대기/재시도 판단에만 사용
             elif self.cnt < len(self.time_outs) and time_interval >= self._get_effective_timeout_seconds(
-                self.cnt) and self.post_flag is True:
+                self.cnt) and self.post_flag is True and self.res is None:
                 self._set_timer_timeover(self.cnt, time_interval)
 
                 if self.cnt < len(self.message):
@@ -2018,15 +2079,19 @@ class MyApp(SystemMainUI):
                         api_name = self.message[self.cnt] if self.cnt < len(self.message) else "Unknown"
                         display_name = self.message_display[self.cnt] if self.cnt < len(self.message_display) else api_name
                         started_at = self.monitor_request_started_at.get(self.cnt)
-                        if started_at is not None:
+                        if started_at is not None and self.cnt not in self.monitor_response_elapsed_ms:
+                            # 웹훅은 ACK 도착 시점(post)에 이미 고정됨 → 윈도우 시간 포함 방지
                             self.monitor_response_elapsed_ms[self.cnt] = int(round((time.perf_counter() - started_at) * 1000))
                             # Keep table timer aligned to response elapsed time in integer seconds.
                             self._set_timer_success(self.cnt)
-                        response_log_text = self.append_monitor_log(
-                            step_name=build_monitor_step_name(display_name, "response"),
-                            request_json=tmp_res_auth,
-                            direction="RECV"
-                        )
+                        # ✅ 웹훅은 구독 응답을 _log_webhook_subscribe_ack()에서 이미 기록함 → 여기선 중복 방지
+                        response_log_text = ""
+                        if current_protocol != "WebHook":
+                            response_log_text = self.append_monitor_log(
+                                step_name=build_monitor_step_name(display_name, "response"),
+                                request_json=tmp_res_auth,
+                                direction="RECV"
+                            )
 
                     # ✅ 디버깅: 어떤 스키마로 검증하는지 확인
                     if self.current_retry == 0:  # 첫 시도에만 출력
@@ -2146,10 +2211,13 @@ class MyApp(SystemMainUI):
                         self.step_pass_flags = [0] * api_count
 
                     # ✅ 이번 시도 결과로 덮어쓰기 (누적하지 않음!)
-                    self.step_pass_counts[self.cnt] = key_psss_cnt
-                    self.step_error_counts[self.cnt] = key_error_cnt
-                    self.step_opt_pass_counts[self.cnt] = opt_correct  # 선택 필드 통과 수
-                    self.step_opt_error_counts[self.cnt] = opt_error  # 선택 필드 에러 수
+                    # 단, 웹훅 API는 get_webhook_result()가 이미 이벤트 기반으로 카운트했으므로
+                    # 구독 ACK 응답({code,message})으로 덮어쓰지 않는다 (웹훅 이벤트 카운트 보존)
+                    if current_protocol != "WebHook":
+                        self.step_pass_counts[self.cnt] = key_psss_cnt
+                        self.step_error_counts[self.cnt] = key_error_cnt
+                        self.step_opt_pass_counts[self.cnt] = opt_correct  # 선택 필드 통과 수
+                        self.step_opt_error_counts[self.cnt] = opt_error  # 선택 필드 에러 수
                     
 
                     if final_result == "PASS":
@@ -2193,33 +2261,48 @@ class MyApp(SystemMainUI):
                     )
 
                     # 기존 버퍼에 누적 (재시도 정보와 함께)
-                    if self.current_retry == 0:
-                        # 첫 번째 시도인 경우 초기화
-                        self.step_buffers[self.cnt][
-                            "data"] = f"[시도 {self.current_retry + 1}/{current_retries}]\n{data_text}"
-                        self.step_buffers[self.cnt][
-                            "error"] = f"[시도 {self.current_retry + 1}/{current_retries}]\n{error_text}"
-                        self.step_buffers[self.cnt]["result"] = val_result  # 첫 시도 결과로 초기화
-                    else:
-                        # 재시도인 경우 누적
-                        self.step_buffers[self.cnt][
-                            "data"] += f"\n\n[시도 {self.current_retry + 1}/{current_retries}]\n{data_text}"
-                        self.step_buffers[self.cnt][
-                            "error"] += f"\n\n[시도 {self.current_retry + 1}/{current_retries}]\n{error_text}"
-                        self.step_buffers[self.cnt]["result"] = val_result  # 마지막 시도 결과로 항상 갱신
-                    # 최종 결과 판정 (플랫폼과 동일한 로직)
-                    if self.current_retry + 1 >= current_retries:
-                        # 모든 재시도 완료 - 모든 시도가 PASS일 때만 PASS
-                        # ✅ 배열 범위 체크 추가
-                        if self.cnt < len(self.step_pass_flags) and self.step_pass_flags[self.cnt] >= current_retries:
-                            self.step_buffers[self.cnt]["result"] = "PASS"
+                    is_webhook_step = self.step_buffers[self.cnt].get("is_webhook_api", False)
+                    if is_webhook_step:
+                        # 웹훅 API: get_webhook_result()가 이미 웹훅 이벤트를 data에 추가한 상태
+                        # HTTP 응답을 앞에 붙여 두 데이터를 함께 표시
+                        existing_data = self.step_buffers[self.cnt]["data"]
+                        if self.current_retry == 0:
+                            self.step_buffers[self.cnt]["data"] = data_text + existing_data
                         else:
+                            self.step_buffers[self.cnt]["data"] = existing_data + "\n" + data_text
+                        # HTTP 응답 검증 실패 시 최종 결과 FAIL, 오류도 추가
+                        if val_result == "FAIL":
                             self.step_buffers[self.cnt]["result"] = "FAIL"
-                        # 마지막 시도 결과의 오류 텍스트로 덮어쓰기 (실패 시)
-                        if self.step_buffers[self.cnt]["result"] == "FAIL":
+                            existing_error = self.step_buffers[self.cnt]["error"]
+                            http_err = "[검증 회차 " + str(self.current_retry + 1) + "/" + str(current_retries) + "]\n" + error_text
+                            self.step_buffers[self.cnt]["error"] = (existing_error + "\n\n" + http_err if existing_error.strip() else http_err)
+                    else:
+                        if self.current_retry == 0:
+                            # 첫 번째 시도인 경우 초기화
                             self.step_buffers[self.cnt][
-                                "error"] = f"[시도 {self.current_retry + 1}/{current_retries}]\n{error_text}"
-
+                                "data"] = data_text
+                            self.step_buffers[self.cnt][
+                                "error"] = f"[검증 회차 {self.current_retry + 1}/{current_retries}]\n{error_text}"
+                            self.step_buffers[self.cnt]["result"] = val_result  # 첫 시도 결과로 초기화
+                        else:
+                            # 재시도인 경우 누적
+                            self.step_buffers[self.cnt][
+                                "data"] += f"\n\n{data_text}"
+                            self.step_buffers[self.cnt][
+                                "error"] += f"\n\n[검증 회차 {self.current_retry + 1}/{current_retries}]\n{error_text}"
+                            self.step_buffers[self.cnt]["result"] = val_result  # 마지막 시도 결과로 항상 갱신
+                        # 최종 결과 판정 (플랫폼과 동일한 로직)
+                        if self.current_retry + 1 >= current_retries:
+                            # 모든 재시도 완료 - 모든 시도가 PASS일 때만 PASS
+                            # ✅ 배열 범위 체크 추가
+                            if self.cnt < len(self.step_pass_flags) and self.step_pass_flags[self.cnt] >= current_retries:
+                                self.step_buffers[self.cnt]["result"] = "PASS"
+                            else:
+                                self.step_buffers[self.cnt]["result"] = "FAIL"
+                            # 마지막 시도 결과의 오류 텍스트로 덮어쓰기 (실패 시)
+                            if self.step_buffers[self.cnt]["result"] == "FAIL":
+                                self.step_buffers[self.cnt][
+                                    "error"] = f"[검증 회차 {self.current_retry + 1}/{current_retries}]\n{error_text}"
                     # 진행 중 표시 (플랫폼과 동일하게)
                     display_name = self.message_display[self.cnt] if self.cnt < len(self.message_display) else self.message[self.cnt]
                     message_name = "step " + str(self.cnt + 1) + ": " + display_name
@@ -3322,7 +3405,7 @@ class MyApp(SystemMainUI):
         total_fields = self.total_pass_cnt + self.total_error_cnt
         score = (self.total_pass_cnt / total_fields) * 100 if total_fields > 0 else 0
         return {
-            "score": score,
+            "score": round(score, 1),
             "pass_count": self.total_pass_cnt,
             "error_count": self.total_error_cnt,
             "details": self.final_report if hasattr(self, "final_report") else ""

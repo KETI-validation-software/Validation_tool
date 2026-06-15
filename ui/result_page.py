@@ -240,14 +240,15 @@ class ResultPageWidget(QWidget):
         self.original_result_header_widget_size = (1064, 30)
         self.original_result_table_height = 335  # ✅ 시험 결과 테이블 기본 높이 소폭 조정 (하단 밸런스)
         self.original_score_title_size = (1064, 24)
-        self.original_score_table_size = (1064, 384)
-        self.original_spec_group_size = (1064, 128)
-        self.original_total_group_size = (1064, 128)
-        self.original_overall_group_size = (1064, 128)
+        # ✅ 점수 카드 슬림화: 카드 128→104 (헤더 52→40, 데이터 76→64) — 결과 테이블 영역 확보
+        self.original_score_table_size = (1064, 312)
+        self.original_spec_group_size = (1064, 104)
+        self.original_total_group_size = (1064, 104)
+        self.original_overall_group_size = (1064, 104)
         self.original_buttonGroup_size = (1064, 48)
         # ✅ 점수 테이블 내부 위젯 원본 크기
-        self.original_score_header_size = (1062, 52)
-        self.original_score_data_area_size = (1064, 76)
+        self.original_score_header_size = (1062, 40)
+        self.original_score_data_area_size = (1064, 64)
         # 각 라벨별 너비 설정 (통과 필수/선택은 넓게, 종합 평가는 좁게)
         self.original_pass_label_size = (340, 60)    # 필수 필드 점수
         self.original_opt_label_size = (340, 60)     # 선택 필드 점수
@@ -476,7 +477,7 @@ class ResultPageWidget(QWidget):
 
         # 시험 점수 테이블 (1064 × 256) - 분야별 점수 + 전체 점수
         self.score_table = QWidget()
-        self.score_table.setFixedSize(1064, 384)
+        self.score_table.setFixedSize(1064, 312)
         self.score_table.setStyleSheet("""
             QWidget {
                 background-color: #FFFFFF;
@@ -611,7 +612,10 @@ class ResultPageWidget(QWidget):
         if not self._is_parent_live_running():
             return
 
-        # 점수 요약 카드(분야별/전체)도 실시간 동기화
+        # ✅ 점수 요약 카드(분야별/전체)도 실시간 동기화
+        #    (주석만 있고 호출이 누락되어 있었음 — 페이지 전환 없이는 점수 요약이 안 바뀌던 원인)
+        self._sync_score_summary_from_parent()
+
         row_count = self.tableWidget.rowCount()
         if row_count <= 0:
             return
@@ -757,7 +761,7 @@ class ResultPageWidget(QWidget):
 
     def _create_score_display_group(self, prefix, title_text, info_text, score_data):
         group_box = QGroupBox()
-        group_box.setFixedSize(1064, 128)
+        group_box.setFixedSize(1064, 104)
         group_box.setStyleSheet("""
             QGroupBox {
                 background-color: #FFFFFF;
@@ -773,7 +777,7 @@ class ResultPageWidget(QWidget):
         main_layout.setSpacing(0)
 
         header = QWidget()
-        header.setFixedSize(1062, 52)
+        header.setFixedSize(1062, 40)
         header.setStyleSheet("background: #F8F9FA; border: none;")
         header_layout = QHBoxLayout(header)
         header_layout.setContentsMargins(20, 5, 20, 5)
@@ -783,7 +787,7 @@ class ResultPageWidget(QWidget):
         title_label.setStyleSheet("""
             color: #000000;
             font-family: 'Noto Sans KR';
-            font-size: 20px;
+            font-size: 16px;
             font-weight: 500;
         """)
         header_layout.addWidget(title_label, alignment=Qt.AlignVCenter)
@@ -791,7 +795,7 @@ class ResultPageWidget(QWidget):
         if info_text:
             vline = QFrame()
             vline.setFrameShape(QFrame.VLine)
-            vline.setFixedSize(1, 27)
+            vline.setFixedSize(1, 20)
             vline.setStyleSheet("background-color: #000000;")
             header_layout.addWidget(vline, alignment=Qt.AlignVCenter)
 
@@ -799,7 +803,7 @@ class ResultPageWidget(QWidget):
             info_label.setStyleSheet("""
                 color: #000000;
                 font-family: 'Noto Sans KR';
-                font-size: 18px;
+                font-size: 14px;
                 font-weight: 500;
             """)
             header_layout.addWidget(info_label, alignment=Qt.AlignVCenter)
@@ -813,9 +817,9 @@ class ResultPageWidget(QWidget):
         main_layout.addWidget(separator)
 
         data_area = QWidget()
-        data_area.setFixedSize(1064, 76)
+        data_area.setFixedSize(1064, 64)
         data_layout = QHBoxLayout(data_area)
-        data_layout.setContentsMargins(20, 8, 20, 8)
+        data_layout.setContentsMargins(20, 2, 20, 2)
         data_layout.setSpacing(0)
 
         total_fields = int(score_data.get("totalFields", 0))
@@ -824,15 +828,15 @@ class ResultPageWidget(QWidget):
         score_value = float(score_data.get("score", 0.0))
 
         pass_label = QLabel(
-            f'필수 필드 점수&nbsp;<span style="font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;">{passed_fields}/{total_fields}</span>'
+            f'필수 필드 점수&nbsp;&nbsp;<span style="font-family: \"Noto Sans KR\"; font-size: 20px; font-weight: 500; color: #000000;">{passed_fields}/{total_fields}</span>'
         )
         pass_label.setTextFormat(Qt.RichText)
         pass_label.setFixedSize(340, 60)
-        pass_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000; border: none;")
+        pass_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 17px; font-weight: 500; color: #000000; border: none;")
         data_layout.addWidget(pass_label)
 
         vline1 = QFrame()
-        vline1.setFixedSize(2, 60)
+        vline1.setFixedSize(1, 40)
         vline1.setStyleSheet("background-color: #CECECE; border: none;")
         data_layout.addWidget(vline1)
 
@@ -842,15 +846,15 @@ class ResultPageWidget(QWidget):
         data_layout.addWidget(spacer1)
 
         fail_label = QLabel(
-            f'선택 필드 점수&nbsp;<span style="font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;">{failed_fields}/{total_fields}</span>'
+            f'선택 필드 점수&nbsp;&nbsp;<span style="font-family: \"Noto Sans KR\"; font-size: 20px; font-weight: 500; color: #000000;">{failed_fields}/{total_fields}</span>'
         )
         fail_label.setTextFormat(Qt.RichText)
         fail_label.setFixedSize(340, 60)
-        fail_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000; border: none;")
+        fail_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 17px; font-weight: 500; color: #000000; border: none;")
         data_layout.addWidget(fail_label)
 
         vline2 = QFrame()
-        vline2.setFixedSize(2, 60)
+        vline2.setFixedSize(1, 40)
         vline2.setStyleSheet("background-color: #CECECE; border: none;")
         data_layout.addWidget(vline2)
 
@@ -860,11 +864,11 @@ class ResultPageWidget(QWidget):
         data_layout.addWidget(spacer2)
 
         score_label = QLabel(
-            f'종합 평가 점수&nbsp;<span style="font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;">{score_value:.1f}%</span>'
+            f'종합 평가 점수&nbsp;&nbsp;<span style="font-family: \"Noto Sans KR\"; font-size: 20px; font-weight: 500; color: #000000;">{score_value:.1f}%</span>'
         )
         score_label.setTextFormat(Qt.RichText)
         score_label.setFixedSize(315, 60)
-        score_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000; border: none;")
+        score_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 17px; font-weight: 500; color: #000000; border: none;")
         data_layout.addWidget(score_label)
         data_layout.addStretch()
         main_layout.addWidget(data_area)
@@ -1120,6 +1124,41 @@ class ResultPageWidget(QWidget):
                 if score_label is not None:
                     score_label.setFixedSize(new_score_width, self.original_score_label_size[1])
 
+    def _adjust_result_columns(self):
+        """결과 테이블 컬럼폭·헤더를 현재 스크롤바 유무에 맞춰 재계산.
+        스크롤바가 없을 땐 마지막 컬럼을 끝까지 늘려 행 구분선이 테이블 우측 끝까지 그려지게 함."""
+        if not (hasattr(self, 'tableWidget') and hasattr(self, 'original_column_widths')):
+            return
+        if hasattr(self, 'original_window_size'):
+            width_ratio = max(1.0, self.width() / self.original_window_size[0])
+        else:
+            width_ratio = 1.0
+
+        row_count = self.tableWidget.rowCount()
+        total_row_height = row_count * 40
+        scroll_area_height = self.result_scroll_area.viewport().height() if hasattr(self, 'result_scroll_area') else 189
+        scrollbar_visible = total_row_height > scroll_area_height
+        scrollbar_width = 16 if scrollbar_visible else 2  # 스크롤바 없으면 그 자리까지 컬럼 확장
+
+        new_scroll_width = int(1064 * width_ratio)
+        available_width = new_scroll_width - scrollbar_width
+
+        used_width = 0
+        for i, orig_width in enumerate(self.original_column_widths[:-1]):
+            new_col_width = int(orig_width * width_ratio)
+            self.tableWidget.setColumnWidth(i, new_col_width)
+            used_width += new_col_width
+
+        last_col_width = available_width - used_width
+        self.tableWidget.setColumnWidth(len(self.original_column_widths) - 1, last_col_width)
+
+        if hasattr(self, 'result_header_layout'):
+            self.result_header_layout.setContentsMargins(0, 0, scrollbar_width, 0)
+        if hasattr(self, 'result_header_labels'):
+            for i in range(len(self.original_column_widths)):
+                if i < len(self.result_header_labels):
+                    self.result_header_labels[i].setFixedSize(self.tableWidget.columnWidth(i), 30)
+
     def resizeEvent(self, event):
         super().resizeEvent(event)
         self._update_content_background_geometry()
@@ -1264,31 +1303,7 @@ class ResultPageWidget(QWidget):
                     self.original_buttonGroup_size[1],
                 )
 
-            if hasattr(self, 'tableWidget') and hasattr(self, 'original_column_widths'):
-                row_count = self.tableWidget.rowCount()
-                total_row_height = row_count * 40
-                scroll_area_height = self.result_scroll_area.viewport().height() if hasattr(self, 'result_scroll_area') else 189
-                scrollbar_visible = total_row_height > scroll_area_height
-                scrollbar_width = 16 if scrollbar_visible else 2
-
-                new_scroll_width = int(1064 * width_ratio)
-                available_width = new_scroll_width - scrollbar_width
-
-                used_width = 0
-                for i, orig_width in enumerate(self.original_column_widths[:-1]):
-                    new_col_width = int(orig_width * width_ratio)
-                    self.tableWidget.setColumnWidth(i, new_col_width)
-                    used_width += new_col_width
-
-                last_col_width = available_width - used_width
-                self.tableWidget.setColumnWidth(len(self.original_column_widths) - 1, last_col_width)
-
-                if hasattr(self, 'result_header_layout'):
-                    self.result_header_layout.setContentsMargins(0, 0, scrollbar_width, 0)
-                if hasattr(self, 'result_header_labels'):
-                    for i in range(len(self.original_column_widths)):
-                        if i < len(self.result_header_labels):
-                            self.result_header_labels[i].setFixedSize(self.tableWidget.columnWidth(i), 30)
+            self._adjust_result_columns()
 
         self._update_content_background_geometry()
 
@@ -1739,6 +1754,8 @@ class ResultPageWidget(QWidget):
 
         # 테이블 행 수 재설정
         self.tableWidget.setRowCount(api_count)
+        # 행 수가 정해지면 스크롤바 유무에 맞춰 컬럼폭 재조정(구분선 끝까지)
+        QtCore.QTimer.singleShot(0, self._adjust_result_columns)
 
         # ✅ 행 높이 설정 (누락 방지)
         for i in range(api_count):
@@ -1812,6 +1829,8 @@ class ResultPageWidget(QWidget):
 
         # 테이블 행 수 재설정
         self.tableWidget.setRowCount(len(table_data))
+        # 행 수가 정해지면 스크롤바 유무에 맞춰 컬럼폭 재조정(구분선 끝까지)
+        QtCore.QTimer.singleShot(0, self._adjust_result_columns)
 
         # ✅ 행 높이 설정 (누락 방지)
         for i in range(len(table_data)):
@@ -1974,13 +1993,13 @@ class ResultPageWidget(QWidget):
 
             label_widget = QLabel(str(label))
             label_widget.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-            label_widget.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 12px; font-weight: 500; color: #6B7280; border: none;")
+            label_widget.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 14px; font-weight: 500; color: #6B7280; border: none;")
 
             value_widget = QLabel(str(value))
             value_widget.setWordWrap(False)
             value_widget.setToolTip(str(value))
             value_widget.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-            value_widget.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 14px; font-weight: 500; color: #1B1B1C; border: none;")
+            value_widget.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 16px; font-weight: 500; color: #1B1B1C; border: none;")
 
             cell_layout.addWidget(label_widget)
             cell_layout.addWidget(value_widget)
@@ -2408,7 +2427,7 @@ class ResultPageWidget(QWidget):
     def _create_spec_score_display_with_data(self, total_pass, total_error, score, opt_pass=0, opt_error=0):
         """데이터를 받아서 분야별 점수 표시 위젯 생성 (1064 × 128)"""
         spec_group = QGroupBox()
-        spec_group.setFixedSize(1064, 128)
+        spec_group.setFixedSize(1064, 104)
         spec_group.setStyleSheet("""
             QGroupBox {
                 background-color: #FFFFFF;
@@ -2428,7 +2447,7 @@ class ResultPageWidget(QWidget):
 
         # 헤더 영역 (1064 × 52)
         self.spec_header = QWidget()
-        self.spec_header.setFixedSize(1062, 52)
+        self.spec_header.setFixedSize(1062, 40)
         self.spec_header.setStyleSheet("background: #F8F9FA;")
         header_layout = QHBoxLayout(self.spec_header)
         header_layout.setContentsMargins(0, 5, 0, 5)
@@ -2437,8 +2456,9 @@ class ResultPageWidget(QWidget):
         # 분야별 점수 아이콘 (52 × 42)
         icon_label = QLabel()
         icon_pixmap = QPixmap(resource_path("assets/image/test_runner/icn_분야별점수.png"))
-        icon_label.setPixmap(icon_pixmap.scaled(52, 42, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-        icon_label.setFixedSize(52, 42)
+        icon_label.setPixmap(icon_pixmap.scaled(44, 35, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        icon_label.setFixedSize(44, 35)
+        icon_label.setContentsMargins(0, 0, 0, 4)  # 아이콘만 살짝 위로 (텍스트와 수평 정렬)
         icon_label.setAlignment(Qt.AlignCenter)
         header_layout.addWidget(icon_label, alignment=Qt.AlignVCenter)
 
@@ -2447,7 +2467,7 @@ class ResultPageWidget(QWidget):
         score_type_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";
-            font-size: 20px;
+            font-size: 17px;
             font-style: normal;
             font-weight: 500;
             line-height: normal;
@@ -2457,7 +2477,7 @@ class ResultPageWidget(QWidget):
         # 세로선 (27px)
         vline = QFrame()
         vline.setFrameShape(QFrame.VLine)
-        vline.setFixedSize(1, 27)
+        vline.setFixedSize(1, 20)
         vline.setStyleSheet("background-color: #000000;")
         header_layout.addWidget(vline, alignment=Qt.AlignVCenter)
 
@@ -2468,7 +2488,7 @@ class ResultPageWidget(QWidget):
         spec_info_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";
-            font-size: 20px;
+            font-size: 17px;
             font-style: normal;
             font-weight: 500;
             line-height: normal;
@@ -2506,26 +2526,26 @@ class ResultPageWidget(QWidget):
             opt_score = 0
 
         self.spec_data_area = QWidget()
-        self.spec_data_area.setFixedSize(1064, 76)
+        self.spec_data_area.setFixedSize(1064, 64)
         self.spec_data_area.setStyleSheet("background: transparent;")
         data_layout = QHBoxLayout(self.spec_data_area)
-        data_layout.setContentsMargins(20, 8, 20, 8)
+        data_layout.setContentsMargins(20, 2, 20, 2)
         data_layout.setSpacing(0)
 
         # 필수 필드 점수 - % (통과/전체) 형식
         self.spec_pass_label = QLabel()
         self.spec_pass_label.setFixedSize(340, 60)  # 통과 필수/선택
         self.spec_pass_label.setText(
-            f"필수 필드 점수&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
+            f"필수 필드 점수&nbsp;&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-weight: 500; color: #000000;'>"
             f"{required_score:.1f}% ({required_pass}/{required_total})</span>"
         )
-        self.spec_pass_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000;")
+        self.spec_pass_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 17px; font-weight: 500; color: #000000;")
         data_layout.addWidget(self.spec_pass_label)
 
         # 구분선 1
         vline1 = QFrame()
-        vline1.setFixedSize(2, 60)
+        vline1.setFixedSize(1, 40)
         vline1.setStyleSheet("background-color: #CECECE;")
         data_layout.addWidget(vline1)
 
@@ -2538,16 +2558,16 @@ class ResultPageWidget(QWidget):
         self.spec_total_label = QLabel()
         self.spec_total_label.setFixedSize(340, 60)  # 통과 필수/선택
         self.spec_total_label.setText(
-            f"선택 필드 점수&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
+            f"선택 필드 점수&nbsp;&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-weight: 500; color: #000000;'>"
             f"{opt_score:.1f}% ({opt_pass}/{opt_total})</span>"
         )
-        self.spec_total_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000;")
+        self.spec_total_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 17px; font-weight: 500; color: #000000;")
         data_layout.addWidget(self.spec_total_label)
 
         # 구분선 2
         vline2 = QFrame()
-        vline2.setFixedSize(2, 60)
+        vline2.setFixedSize(1, 40)
         vline2.setStyleSheet("background-color: #CECECE;")
         data_layout.addWidget(vline2)
 
@@ -2560,11 +2580,11 @@ class ResultPageWidget(QWidget):
         self.spec_score_label = QLabel()
         self.spec_score_label.setFixedSize(315, 60)  # 종합 평가 점수
         self.spec_score_label.setText(
-            f"종합 평가 점수&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
+            f"종합 평가 점수&nbsp;&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-weight: 500; color: #000000;'>"
             f"{score:.1f}% ({total_pass}/{total_fields})</span>"
         )
-        self.spec_score_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000;")
+        self.spec_score_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 17px; font-weight: 500; color: #000000;")
         data_layout.addWidget(self.spec_score_label)
         data_layout.addStretch()
         main_layout.addWidget(self.spec_data_area)
@@ -2624,19 +2644,13 @@ class ResultPageWidget(QWidget):
                         self.parent.current_group_name = group_name
                     break
 
-        mode = str(getattr(self.parent, "validation_mode", "platform") or "platform").strip().lower()
-        mode_label = "통합시스템" if mode == "system" else "통합플랫폼"
-
-        if group_name:
-            # 그룹명에 모드 접미사가 이미 포함된 경우 중복으로 덧붙이지 않는다.
-            if group_name.endswith("-통합플랫폼") or group_name.endswith("-통합시스템"):
-                return group_name
-            return f"{group_name}-{mode_label}"
-        return mode_label
+        # ✅ 모드 접미사(-통합시스템/-통합플랫폼)를 붙이지 않고 시험 분야명 그대로 표시
+        #    (단일시스템 모드에서도 '통합시스템'이 붙는 등 라벨 로직 자체가 부정확했음)
+        return group_name
 
     def _create_summary_score_card(self, prefix, title, score_block, rounded_bottom, info_text=None, opt_pass=0, opt_error=0):
         card = QGroupBox()
-        card.setFixedSize(1064, 128)
+        card.setFixedSize(1064, 104)
         bottom_radius = "4px" if rounded_bottom else "0px"
         card.setStyleSheet(f"""
             QGroupBox {{
@@ -2657,33 +2671,34 @@ class ResultPageWidget(QWidget):
         main_layout.setSpacing(0)
 
         header = QWidget()
-        header.setFixedSize(1062, 52)
+        header.setFixedSize(1062, 40)
         header.setStyleSheet("background: #F8F9FA; border: none;")
         header_layout = QHBoxLayout(header)
         header_layout.setContentsMargins(0, 5, 0, 5)
         header_layout.setSpacing(12)
-
-        if prefix == "overall":
-            header_layout.addSpacing(10.8)
 
         icon_label = QLabel()
         icon_path = "assets/image/icon/icn_최종전체점수.png" if prefix == "overall" else "assets/image/test_runner/icn_전체점수.png"
         icon_pixmap = QPixmap(resource_path(icon_path))
         if prefix == "overall":
             # 전체 점수는 원본 이미지 크기 그대로 표시
-            icon_label.setPixmap(icon_pixmap)
-            icon_label.setFixedSize(icon_pixmap.size())
+            icon_label.setPixmap(icon_pixmap.scaled(44, 35, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            icon_label.setFixedSize(44, 35)
         else:
-            icon_label.setPixmap(icon_pixmap.scaled(52, 42, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-            icon_label.setFixedSize(52, 42)
+            icon_label.setPixmap(icon_pixmap.scaled(44, 35, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            icon_label.setFixedSize(44, 35)
         icon_label.setAlignment(Qt.AlignCenter)
+        if prefix == "overall":
+            icon_label.setContentsMargins(8, 0, 0, 4)  # 전체 점수 아이콘(40x40 정사각·여백큼): 우측 ~4px + 위로
+        else:
+            icon_label.setContentsMargins(0, 0, 0, 4)  # 아이콘만 살짝 위로
         header_layout.addWidget(icon_label, alignment=Qt.AlignVCenter)
 
         title_label = QLabel(title)
         title_label.setStyleSheet("""
             color: #000;
             font-family: "Noto Sans KR";
-            font-size: 20px;
+            font-size: 17px;
             font-style: normal;
             font-weight: 500;
             line-height: normal;
@@ -2693,7 +2708,7 @@ class ResultPageWidget(QWidget):
         if info_text:
             vline = QFrame()
             vline.setFrameShape(QFrame.VLine)
-            vline.setFixedSize(1, 27)
+            vline.setFixedSize(1, 20)
             vline.setStyleSheet("background-color: #000000;")
             header_layout.addWidget(vline, alignment=Qt.AlignVCenter)
 
@@ -2701,7 +2716,7 @@ class ResultPageWidget(QWidget):
             info_label.setStyleSheet("""
                 color: #000000;
                 font-family: "Noto Sans KR";
-                font-size: 20px;
+                font-size: 17px;
                 font-style: normal;
                 font-weight: 500;
                 line-height: normal;
@@ -2732,25 +2747,25 @@ class ResultPageWidget(QWidget):
         opt_score = (opt_pass / opt_total * 100) if opt_total > 0 else 0.0
 
         data_area = QWidget()
-        data_area.setFixedSize(1064, 76)
+        data_area.setFixedSize(1064, 64)
         data_area.setStyleSheet("background: transparent; border: none;")
         data_layout = QHBoxLayout(data_area)
-        data_layout.setContentsMargins(20, 8, 20, 8)
+        data_layout.setContentsMargins(20, 2, 20, 2)
         data_layout.setSpacing(0)
 
         pass_label = QLabel()
         pass_label.setFixedSize(340, 60)
         pass_label.setText(
-            f"필수 필드 점수&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
+            f"필수 필드 점수&nbsp;&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-weight: 500; color: #000000;'>"
             f"{required_score:.1f}% ({required_pass}/{required_total})</span>"
         )
         pass_label.setTextFormat(Qt.RichText)
-        pass_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000;")
+        pass_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 17px; font-weight: 500; color: #000000;")
         data_layout.addWidget(pass_label)
 
         vline1 = QFrame()
-        vline1.setFixedSize(2, 60)
+        vline1.setFixedSize(1, 40)
         vline1.setStyleSheet("background-color: #CECECE; border: none;")
         data_layout.addWidget(vline1)
 
@@ -2762,16 +2777,16 @@ class ResultPageWidget(QWidget):
         fail_label = QLabel()
         fail_label.setFixedSize(340, 60)
         fail_label.setText(
-            f"선택 필드 점수&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
+            f"선택 필드 점수&nbsp;&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-weight: 500; color: #000000;'>"
             f"{opt_score:.1f}% ({opt_pass}/{opt_total})</span>"
         )
         fail_label.setTextFormat(Qt.RichText)
-        fail_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000;")
+        fail_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 17px; font-weight: 500; color: #000000;")
         data_layout.addWidget(fail_label)
 
         vline2 = QFrame()
-        vline2.setFixedSize(2, 60)
+        vline2.setFixedSize(1, 40)
         vline2.setStyleSheet("background-color: #CECECE; border: none;")
         data_layout.addWidget(vline2)
 
@@ -2783,12 +2798,12 @@ class ResultPageWidget(QWidget):
         score_label = QLabel()
         score_label.setFixedSize(315, 60)
         score_label.setText(
-            f"종합 평가 점수&nbsp;"
-            f"<span style='font-family: \"Noto Sans KR\"; font-size: 21px; font-weight: 500; color: #000000;'>"
+            f"종합 평가 점수&nbsp;&nbsp;"
+            f"<span style='font-family: \"Noto Sans KR\"; font-size: 20px; font-weight: 500; color: #000000;'>"
             f"{score:.1f}% ({passed_fields}/{total_fields})</span>"
         )
         score_label.setTextFormat(Qt.RichText)
-        score_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 19px; font-weight: 500; color: #000000;")
+        score_label.setStyleSheet("font-family: 'Noto Sans KR'; font-size: 17px; font-weight: 500; color: #000000;")
         data_layout.addWidget(score_label)
         data_layout.addStretch()
         main_layout.addWidget(data_area)

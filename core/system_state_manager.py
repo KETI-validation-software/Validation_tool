@@ -34,10 +34,12 @@ class SystemStateManager:
                     'icon_state': self._get_icon_state(row),
                     'timer_state': self.main.get_api_timer_state(row),
                     'timer_elapsed': self.main.get_api_timer_elapsed(row),
-                    'retry_count': self.main.tableWidget.item(row, 4).text() if self.main.tableWidget.item(row, 4) else "0",
+                    # ✅ 현행 헤더 순서(4:전체, 5:통과, 6:실패, 7:검증)에 맞춰 저장
+                    #    (옛 순서로 읽으면 4페이지 결과표가 키-컬럼 어긋나 밀려 보임)
+                    'total_count': self.main.tableWidget.item(row, 4).text() if self.main.tableWidget.item(row, 4) else "0",
                     'pass_count': self.main.tableWidget.item(row, 5).text() if self.main.tableWidget.item(row, 5) else "0",
-                    'total_count': self.main.tableWidget.item(row, 6).text() if self.main.tableWidget.item(row, 6) else "0",
-                    'fail_count': self.main.tableWidget.item(row, 7).text() if self.main.tableWidget.item(row, 7) else "0",
+                    'fail_count': self.main.tableWidget.item(row, 6).text() if self.main.tableWidget.item(row, 6) else "0",
+                    'retry_count': self.main.tableWidget.item(row, 7).text() if self.main.tableWidget.item(row, 7) else "0",
                     'score': self.main.tableWidget.item(row, 8).text() if self.main.tableWidget.item(row, 8) else "0%",
                 }
                 table_data.append(row_data)
@@ -156,9 +158,9 @@ class SystemStateManager:
             icon_widget.setLayout(icon_layout)
             self.main.tableWidget.setCellWidget(row, 3, icon_widget)
 
-            # 나머지 컬럼 복원 - 컬럼 4-8
-            for col, key in [(4, 'retry_count'), (5, 'pass_count'),
-                             (6, 'total_count'), (7, 'fail_count'), (8, 'score')]:
+            # 나머지 컬럼 복원 - 컬럼 4-8 (✅ 현행 헤더 순서: 4:전체, 5:통과, 6:실패, 7:검증, 8:점수)
+            for col, key in [(4, 'total_count'), (5, 'pass_count'),
+                             (6, 'fail_count'), (7, 'retry_count'), (8, 'score')]:
                 new_item = QTableWidgetItem(row_data[key])
                 new_item.setTextAlignment(Qt.AlignCenter)
                 self.main.tableWidget.setItem(row, col, new_item)

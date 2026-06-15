@@ -10,6 +10,7 @@ import re
 import os
 import sys
 import json
+import time
 from urllib.parse import urlparse
 from pathlib import Path
 import traceback
@@ -1072,9 +1073,18 @@ class FormValidator:
                     skipped += 1
                     continue
 
-                spec_data = self.api_client.fetch_specification_by_id(spec_id)
-                QApplication.processEvents()
+                spec_data = None
+                for attempt in range(1, 4):
+                    spec_data = self.api_client.fetch_specification_by_id(spec_id)
+                    QApplication.processEvents()
+                    if spec_data is not None:
+                        break
+                    Logger.warning(f"spec 로드 실패: spec_id={spec_id}, attempt={attempt}/3")
+                    if attempt < 3:
+                        time.sleep(1)
+
                 if not spec_data:
+                    Logger.error(f"spec 로드 최종 실패 (3회 시도): spec_id={spec_id}")
                     continue
 
                 steps = spec_data.get("specification", {}).get("steps", [])
@@ -1138,6 +1148,8 @@ class FormValidator:
             Logger.warning(
                 f"test-step 상세 조회 실패: step_id={step_id}, attempt={attempt}/{max_attempts}"
             )
+            if attempt < max_attempts:
+                time.sleep(1)
         return None
 
     def _collect_missing_step_detail_ids(self):

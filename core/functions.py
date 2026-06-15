@@ -1717,7 +1717,7 @@ def build_result_json(myapp_instance):
     global_score = (global_pass / global_total * 100) if global_total > 0 else 0
 
     test_score = {
-        "score": round(global_score, 2),
+        "score": round(global_score, 1),
         "totalFields": global_total,
         "passedFields": global_pass,
         "failedFields": global_error
@@ -1985,7 +1985,7 @@ def _build_spec_result(myapp_instance, spec_id, step_buffers, table_data=None, g
     return {
         "testSpecId": spec_id,
         "testGroupId": final_group_id,
-        "score": round(spec_score, 2),
+        "score": round(spec_score, 1),
         "apis": apis
     }
 

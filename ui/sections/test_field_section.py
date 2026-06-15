@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QFont, QPainter, QPen, QPalette
+from ui.gui_utils import TableTruncationFilter
 
 
 class TestFieldTableWidget(QTableWidget):
@@ -85,6 +86,7 @@ class TestFieldSection(QGroupBox):
 
         # 시험 분야 테이블 설정
         self._setup_field_table()
+        self._field_truncation_filter = TableTruncationFilter(self.test_field_table, col=0)
 
         # 시험 시나리오 테이블 설정
         self._setup_scenario_table()

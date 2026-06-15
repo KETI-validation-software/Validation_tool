@@ -1,5 +1,5 @@
 {
-  "requestId": "cmo6iekcw016s1303w4ftpthx",
+  "requestId": "cmo6u2r3h01xm13034b4h9gmd",
   "evaluationTarget": {
     "companyName": "keti6",
     "contactPerson": "keti6",
@@ -8,21 +8,24 @@
     "version": "keti6"
   },
   "testGroup": {
-    "id": "cmjcefmh8070gcfb35wjptcsl",
-    "name": "기본 기능 시험-영상보안시스템",
-    "testRange": "전체 필드, 전체 필드, 전체 필드",
+    "id": "cmk4tgs2c1enwcfb3sbsbdgrd",
+    "name": "제어 기능 시험-바이오인식 기반 출입통제 시스템",
+    "testRange": "전체 필드",
     "testSpecIds": [
       "cmii7wfuf006i8z1tcds6q69g",
       "cmii7w683006h8z1t7usnin5g",
-      "cmii7v8pr006g8z1tvo55a50u"
+      "cmii7v8pr006g8z1tvo55a50u",
+      "cmiqr0kdw00i4ie8fr3firjtg",
+      "cmiqr2b9j00i9ie8frw439h8i",
+      "cmiqr1jha00i6ie8fb1scb3go"
     ]
   },
   "status": "완료",
   "authMethod": "Digest Auth",
   "testScore": {
-    "score": 81.03,
-    "totalFields": 195,
-    "passedFields": 158,
+    "score": 88.03,
+    "totalFields": 309,
+    "passedFields": 272,
     "failedFields": 37
   },
   "testResult": [
@@ -55,7 +58,7 @@
               "validationErrors": [
                 "오류가 없습니다."
               ],
-              "transmittedData": "[송신] Authentication (요청) 15:08:31\n\n{\n    \"userID\": \"kisa\",\n    \"userPW\": \"kisa_k1!2@\"\n}\n\n[수신] Authentication (응답) 15:08:32\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"userName\": \"관리자\",\n    \"userAff\": \"오산시청\",\n    \"accessToken\": \"abcde1234\"\n}\n\n검증 결과: Authentication (1회 검증 완료) 15:08:32 | 응답 소요 시간: 1.00초 (60초)\n\n통과 필드 수: 5, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
+              "transmittedData": "[송신] Authentication (요청) 15:50:08\n\n{\n    \"userID\": \"kisa\",\n    \"userPW\": \"kisa_k1!2@\"\n}\n\n[수신] Authentication (응답) 15:50:09\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"userName\": \"관리자\",\n    \"userAff\": \"오산시청\",\n    \"accessToken\": \"abcde1234\"\n}\n\n검증 결과: Authentication (1회 검증 완료) 15:50:09 | 응답 소요 시간: 1.00초 (60초)\n\n통과 필드 수: 5, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
             }
           ]
         },
@@ -86,7 +89,7 @@
               "validationErrors": [
                 "오류가 없습니다."
               ],
-              "transmittedData": "[송신] Capabilities (요청) 15:08:34\n\n{\n}\n\n[수신] Capabilities (응답) 15:08:35\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"transportSupport\": [\n        {\n            \"transProtocolType\": \"Webhook\",\n            \"transProtocolDesc\": \"\"\n        }\n    ]\n}\n\n검증 결과: Capabilities (1회 검증 완료) 15:08:35 | 응답 소요 시간: 1.00초 (60초)\n\n통과 필드 수: 5, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
+              "transmittedData": "[송신] Capabilities (요청) 15:50:11\n\n{\n}\n\n[수신] Capabilities (응답) 15:50:12\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"transportSupport\": [\n        {\n            \"transProtocolType\": \"Webhook\",\n            \"transProtocolDesc\": \"\"\n        }\n    ]\n}\n\n검증 결과: Capabilities (1회 검증 완료) 15:50:12 | 응답 소요 시간: 1.01초 (60초)\n\n통과 필드 수: 5, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
             }
           ]
         },
@@ -135,7 +138,7 @@
               "validationErrors": [
                 "오류가 없습니다."
               ],
-              "transmittedData": "[송신] SensorDeviceProfiles (요청) 15:08:37\n\n{\n}\n\n[수신] SensorDeviceProfiles (응답) 15:08:38\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"sensorDeviceList\": [\n        {\n            \"sensorDeviceID\": \"iot0001\",\n            \"sensorDeviceType\": \"온도\",\n            \"sensorDeviceName\": \"온도 센서\",\n            \"sensorDeviceLoc\": {\n                \"lon\": \"127.127730\",\n                \"lat\": \"38.439801\",\n                \"alt\": \"32.131\",\n                \"desc\": \"3층복도\"\n            }\n        },\n        {\n            \"sensorDeviceID\": \"iot0002\",\n            \"sensorDeviceType\": \"온도\",\n            \"sensorDeviceName\": \"온도 센서\",\n            \"sensorDeviceLoc\": {\n                \"lon\": \"127.127730\",\n                \"lat\": \"38.439801\",\n                \"alt\": \"\",\n                \"desc\": \"\"\n            }\n        }\n    ]\n}\n\n검증 결과: SensorDeviceProfiles (1회 검증 완료) 15:08:38 | 응답 소요 시간: 1.00초 (60초)\n\n통과 필드 수: 11, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
+              "transmittedData": "[송신] SensorDeviceProfiles (요청) 15:50:14\n\n{\n}\n\n[수신] SensorDeviceProfiles (응답) 15:50:15\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"sensorDeviceList\": [\n        {\n            \"sensorDeviceID\": \"iot0001\",\n            \"sensorDeviceType\": \"온도\",\n            \"sensorDeviceName\": \"온도 센서\",\n            \"sensorDeviceLoc\": {\n                \"lon\": \"127.127730\",\n                \"lat\": \"38.439801\",\n                \"alt\": \"32.131\",\n                \"desc\": \"3층복도\"\n            }\n        },\n        {\n            \"sensorDeviceID\": \"iot0002\",\n            \"sensorDeviceType\": \"온도\",\n            \"sensorDeviceName\": \"온도 센서\",\n            \"sensorDeviceLoc\": {\n                \"lon\": \"127.127730\",\n                \"lat\": \"38.439801\",\n                \"alt\": \"\",\n                \"desc\": \"\"\n            }\n        }\n    ]\n}\n\n검증 결과: SensorDeviceProfiles (1회 검증 완료) 15:50:15 | 응답 소요 시간: 0.99초 (60초)\n\n통과 필드 수: 11, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
             }
           ]
         },
@@ -162,7 +165,7 @@
                 "--- Webhook 검증 ---",
                 "오류가 없습니다."
               ],
-              "transmittedData": "[송신] RealtimeSensorData (요청) 15:08:40\n\n{\n    \"sensorDeviceList\": [\n        {\n            \"sensorDeviceID\": \"iot0001\"\n        },\n        {\n            \"sensorDeviceID\": \"iot0002\"\n        }\n    ],\n    \"duration\": 100,\n    \"transProtocol\": {\n        \"transProtocolType\": \"WebHook\",\n        \"transProtocolDesc\": \"https://192.168.0.6:8081\"\n    },\n    \"startTime\": 20251105163010124\n}\n\n[수신] RealtimeSensorData (응답) 15:08:41\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\"\n}"
+              "transmittedData": "[송신] RealtimeSensorData (요청) 15:50:17\n\n{\n    \"sensorDeviceList\": [\n        {\n            \"sensorDeviceID\": \"iot0001\"\n        },\n        {\n            \"sensorDeviceID\": \"iot0002\"\n        }\n    ],\n    \"duration\": 100,\n    \"transProtocol\": {\n        \"transProtocolType\": \"WebHook\",\n        \"transProtocolDesc\": \"https://192.168.0.6:8081\"\n    },\n    \"startTime\": 20251105163010124\n}\n\n[수신] RealtimeSensorData (응답) 15:50:19\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\"\n}"
             }
           ]
         },
@@ -245,7 +248,7 @@
                 "--- Webhook 검증 ---",
                 "오류가 없습니다."
               ],
-              "transmittedData": "[송신] RealtimeSensorEventInfos (요청) 15:08:43\n\n{\n    \"sensorDeviceList\": [\n        {\n            \"sensorDeviceID\": \"iot0001\"\n        },\n        {\n            \"sensorDeviceID\": \"iot0002\"\n        }\n    ],\n    \"duration\": 1000,\n    \"transProtocol\": {\n        \"transProtocolType\": \"WebHook\",\n        \"transProtocolDesc\": \"https://192.168.0.6:8081\"\n    },\n    \"eventFilter\": \"MotionDetection\",\n    \"startTime\": 20251105163010123\n}\n\n[수신] RealtimeSensorEventInfos (응답) 15:08:45\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\"\n}"
+              "transmittedData": "[송신] RealtimeSensorEventInfos (요청) 15:50:21\n\n{\n    \"sensorDeviceList\": [\n        {\n            \"sensorDeviceID\": \"iot0002\"\n        }\n    ],\n    \"duration\": 1000,\n    \"transProtocol\": {\n        \"transProtocolType\": \"WebHook\",\n        \"transProtocolDesc\": \"https://192.168.0.6:8081\"\n    },\n    \"eventFilter\": \"Leak\",\n    \"startTime\": 20251105163010123\n}\n\n[수신] RealtimeSensorEventInfos (응답) 15:50:23\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\"\n}"
             }
           ]
         },
@@ -266,12 +269,6 @@
               "validationData": {
                 "sensorDeviceList": [
                   {
-                    "sensorDeviceID": "iot0001",
-                    "eventName": "",
-                    "eventTime": 0,
-                    "eventDesc": "100도"
-                  },
-                  {
                     "sensorDeviceID": "iot0002",
                     "eventName": "",
                     "eventTime": 0,
@@ -284,12 +281,6 @@
               ],
               "transmittedData": {
                 "sensorDeviceList": [
-                  {
-                    "sensorDeviceID": "iot0001",
-                    "eventName": "",
-                    "eventTime": 0,
-                    "eventDesc": "100도"
-                  },
                   {
                     "sensorDeviceID": "iot0002",
                     "eventName": "",
@@ -321,14 +312,14 @@
                 "sensorDeviceList": [
                   {
                     "sensorDeviceID": "iot0001",
-                    "eventName": "Leak",
-                    "eventTime": 6952034033767209,
+                    "eventName": "MotionDetection",
+                    "eventTime": 9102391695859897,
                     "eventDesc": "100도"
                   },
                   {
                     "sensorDeviceID": "iot0002",
-                    "eventName": "Leak",
-                    "eventTime": 7224164791686751,
+                    "eventName": "MotionDetection",
+                    "eventTime": 7247717613891647,
                     "eventDesc": "100도"
                   }
                 ]
@@ -337,7 +328,7 @@
                 "<b>[기타]</b> (1건)",
                 "- [맥락 오류] code 맥락 검증 실패: 예상값 201, 실제값 200"
               ],
-              "transmittedData": "[송신] StoredSensorEventInfos (요청) 15:08:47\n\n{\n    \"timePeriod\": {\n        \"startTime\": 0,\n        \"endTime\": 20251115163010124\n    },\n    \"sensorDeviceList\": [\n        {\n            \"sensorDeviceID\": \"iot0001\"\n        },\n        {\n            \"sensorDeviceID\": \"iot0002\"\n        }\n    ],\n    \"maxCount\": 8,\n    \"eventFilter\": \"Leak\"\n}\n\n[수신] StoredSensorEventInfos (응답) 15:08:49\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"sensorDeviceList\": [\n        {\n            \"sensorDeviceID\": \"iot0001\",\n            \"eventName\": \"Leak\",\n            \"eventTime\": 6952034033767209,\n            \"eventDesc\": \"100도\"\n        },\n        {\n            \"sensorDeviceID\": \"iot0002\",\n            \"eventName\": \"Leak\",\n            \"eventTime\": 7224164791686751,\n            \"eventDesc\": \"100도\"\n        }\n    ]\n}\n\n검증 결과: StoredSensorEventInfos (1회 검증 완료) 15:08:49 | 응답 소요 시간: 1.99초 (60초)\n\n통과 필드 수: 0, 실패 필드 수: 7 | 일반 메시지\n\n평가 점수: 0.0%"
+              "transmittedData": "[송신] StoredSensorEventInfos (요청) 15:50:25\n\n{\n    \"timePeriod\": {\n        \"startTime\": 0,\n        \"endTime\": 20251115163010124\n    },\n    \"sensorDeviceList\": [\n        {\n            \"sensorDeviceID\": \"iot0001\"\n        },\n        {\n            \"sensorDeviceID\": \"iot0002\"\n        }\n    ],\n    \"maxCount\": 8,\n    \"eventFilter\": \"MotionDetection\"\n}\n\n[수신] StoredSensorEventInfos (응답) 15:50:26\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"sensorDeviceList\": [\n        {\n            \"sensorDeviceID\": \"iot0001\",\n            \"eventName\": \"MotionDetection\",\n            \"eventTime\": 9102391695859897,\n            \"eventDesc\": \"100도\"\n        },\n        {\n            \"sensorDeviceID\": \"iot0002\",\n            \"eventName\": \"MotionDetection\",\n            \"eventTime\": 7247717613891647,\n            \"eventDesc\": \"100도\"\n        }\n    ]\n}\n\n검증 결과: StoredSensorEventInfos (1회 검증 완료) 15:50:26 | 응답 소요 시간: 1.00초 (60초)\n\n통과 필드 수: 0, 실패 필드 수: 7 | 일반 메시지\n\n평가 점수: 0.0%"
             }
           ]
         }
@@ -372,7 +363,7 @@
               "validationErrors": [
                 "오류가 없습니다."
               ],
-              "transmittedData": "[송신] Authentication (요청) 15:08:57\n\n{\n    \"userID\": \"kisa\",\n    \"userPW\": \"kisa_k1!2@\"\n}\n\n[수신] Authentication (응답) 15:08:58\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"userName\": \"관리자\",\n    \"userAff\": \"오산시청\",\n    \"accessToken\": \"abcde1234\"\n}\n\n검증 결과: Authentication (1회 검증 완료) 15:08:58 | 응답 소요 시간: 1.01초 (60초)\n\n통과 필드 수: 5, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
+              "transmittedData": "[송신] Authentication (요청) 15:50:46\n\n{\n    \"userID\": \"kisa\",\n    \"userPW\": \"kisa_k1!2@\"\n}\n\n[수신] Authentication (응답) 15:50:47\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"userName\": \"관리자\",\n    \"userAff\": \"오산시청\",\n    \"accessToken\": \"abcde1234\"\n}\n\n검증 결과: Authentication (1회 검증 완료) 15:50:47 | 응답 소요 시간: 1.00초 (60초)\n\n통과 필드 수: 5, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
             }
           ]
         },
@@ -403,7 +394,7 @@
               "validationErrors": [
                 "오류가 없습니다."
               ],
-              "transmittedData": "[송신] Capabilities (요청) 15:09:00\n\n{\n}\n\n[수신] Capabilities (응답) 15:09:01\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"transportSupport\": [\n        {\n            \"transProtocolType\": \"WebHook\",\n            \"transProtocolDesc\": \"\"\n        }\n    ]\n}\n\n검증 결과: Capabilities (1회 검증 완료) 15:09:01 | 응답 소요 시간: 1.00초 (60초)\n\n통과 필드 수: 5, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
+              "transmittedData": "[송신] Capabilities (요청) 15:50:49\n\n{\n}\n\n[수신] Capabilities (응답) 15:50:50\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"transportSupport\": [\n        {\n            \"transProtocolType\": \"WebHook\",\n            \"transProtocolDesc\": \"\"\n        }\n    ]\n}\n\n검증 결과: Capabilities (1회 검증 완료) 15:50:50 | 응답 소요 시간: 0.99초 (60초)\n\n통과 필드 수: 5, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
             }
           ]
         },
@@ -468,7 +459,7 @@
               "validationErrors": [
                 "오류가 없습니다."
               ],
-              "transmittedData": "[송신] DoorProfiles (요청) 15:09:03\n\n{\n    \"testest\": {\n        \"f1\": \"1123\",\n        \"f2\": \"11233\"\n    }\n}\n\n[수신] DoorProfiles (응답) 15:09:04\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"doorList\": [\n        {\n            \"doorID\": \"door0001\",\n            \"doorName\": \"A건물 출입문\",\n            \"doorRelayStatus\": \"일반\",\n            \"doorSensor\": \"0\",\n            \"doorLoc\": {\n                \"lon\": \"127.127730\",\n                \"lat\": \"38.439801\",\n                \"alt\": \"32.131\",\n                \"desc\": \"3층복도\"\n            },\n            \"bioDeviceList\": [\n                {\n                    \"bioDeviceID\": \"bio0001\",\n                    \"bioDeviceName\": \"출입문홍채인식기기\",\n                    \"bioDeviceAuthTypeList\": [\n                        \"홍채\",\n                        \"지문\"\n                    ]\n                },\n                {\n                    \"bioDeviceID\": \"bio0002\",\n                    \"bioDeviceName\": \"출입문지문인식기기\",\n                    \"bioDeviceAuthTypeList\": [\n                        \"지문\"\n                    ]\n                }\n            ],\n            \"otherDeviceList\": [\n                {\n                    \"otherDeviceID\": \"other0001\",\n                    \"otherDeviceName\": \"출입문카드인식기기\",\n                    \"otherDeviceAuthTypeList\": [\n                        \"카드\"\n                    ]\n                }\n            ]\n        }\n    ]\n}\n\n검증 결과: DoorProfiles (1회 검증 완료) 15:09:04 | 응답 소요 시간: 1.00초 (60초)\n\n통과 필드 수: 20, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
+              "transmittedData": "[송신] DoorProfiles (요청) 15:50:52\n\n{\n    \"testest\": {\n        \"f1\": \"1123\",\n        \"f2\": \"11233\"\n    }\n}\n\n[수신] DoorProfiles (응답) 15:50:53\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"doorList\": [\n        {\n            \"doorID\": \"door0001\",\n            \"doorName\": \"A건물 출입문\",\n            \"doorRelayStatus\": \"일반\",\n            \"doorSensor\": \"0\",\n            \"doorLoc\": {\n                \"lon\": \"127.127730\",\n                \"lat\": \"38.439801\",\n                \"alt\": \"32.131\",\n                \"desc\": \"3층복도\"\n            },\n            \"bioDeviceList\": [\n                {\n                    \"bioDeviceID\": \"bio0001\",\n                    \"bioDeviceName\": \"출입문홍채인식기기\",\n                    \"bioDeviceAuthTypeList\": [\n                        \"홍채\",\n                        \"지문\"\n                    ]\n                },\n                {\n                    \"bioDeviceID\": \"bio0002\",\n                    \"bioDeviceName\": \"출입문지문인식기기\",\n                    \"bioDeviceAuthTypeList\": [\n                        \"지문\"\n                    ]\n                }\n            ],\n            \"otherDeviceList\": [\n                {\n                    \"otherDeviceID\": \"other0001\",\n                    \"otherDeviceName\": \"출입문카드인식기기\",\n                    \"otherDeviceAuthTypeList\": [\n                        \"카드\"\n                    ]\n                }\n            ]\n        }\n    ]\n}\n\n검증 결과: DoorProfiles (1회 검증 완료) 15:50:53 | 응답 소요 시간: 0.99초 (60초)\n\n통과 필드 수: 20, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
             }
           ]
         },
@@ -530,7 +521,7 @@
               "validationErrors": [
                 "오류가 없습니다."
               ],
-              "transmittedData": "[송신] AccessUserInfos (요청) 15:09:06\n\n{\n}\n\n[수신] AccessUserInfos (응답) 15:09:08\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"userList\": [\n        {\n            \"userID\": \"user0001\",\n            \"userName\": \"홍길동\",\n            \"userDesc\": \"일반사용자\",\n            \"doorList\": [\n                {\n                    \"doorID\": \"door0001\",\n                    \"timePeriod\": {\n                        \"startTime\": 20251105163010124,\n                        \"endTime\": 20251115163010124\n                    }\n                }\n            ]\n        },\n        {\n            \"userID\": \"user0002\",\n            \"userName\": \"김철수\",\n            \"userDesc\": \"관리자\",\n            \"doorList\": [\n                {\n                    \"doorID\": \"door0002\",\n                    \"timePeriod\": {\n                        \"startTime\": 20251105163010124,\n                        \"endTime\": 20251115163010120\n                    }\n                },\n                {\n                    \"doorID\": \"door0003\",\n                    \"timePeriod\": {\n                        \"startTime\": 20251105163010124,\n                        \"endTime\": 20251115163010124\n                    }\n                }\n            ]\n        }\n    ]\n}\n\n검증 결과: AccessUserInfos (1회 검증 완료) 15:09:08 | 응답 소요 시간: 2.00초 (60초)\n\n통과 필드 수: 11, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
+              "transmittedData": "[송신] AccessUserInfos (요청) 15:50:55\n\n{\n}\n\n[수신] AccessUserInfos (응답) 15:50:57\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"userList\": [\n        {\n            \"userID\": \"user0001\",\n            \"userName\": \"홍길동\",\n            \"userDesc\": \"일반사용자\",\n            \"doorList\": [\n                {\n                    \"doorID\": \"door0001\",\n                    \"timePeriod\": {\n                        \"startTime\": 20251105163010124,\n                        \"endTime\": 20251115163010124\n                    }\n                }\n            ]\n        },\n        {\n            \"userID\": \"user0002\",\n            \"userName\": \"김철수\",\n            \"userDesc\": \"관리자\",\n            \"doorList\": [\n                {\n                    \"doorID\": \"door0002\",\n                    \"timePeriod\": {\n                        \"startTime\": 20251105163010124,\n                        \"endTime\": 20251115163010120\n                    }\n                },\n                {\n                    \"doorID\": \"door0003\",\n                    \"timePeriod\": {\n                        \"startTime\": 20251105163010124,\n                        \"endTime\": 20251115163010124\n                    }\n                }\n            ]\n        }\n    ]\n}\n\n검증 결과: AccessUserInfos (1회 검증 완료) 15:50:57 | 응답 소요 시간: 2.00초 (60초)\n\n통과 필드 수: 11, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
             }
           ]
         },
@@ -557,7 +548,7 @@
                 "--- Webhook 검증 ---",
                 "오류가 없습니다."
               ],
-              "transmittedData": "[송신] RealtimeVerifEventInfos (요청) 15:09:10\n\n{\n    \"doorList\": [\n        {\n            \"doorID\": \"door0001\"\n        }\n    ],\n    \"duration\": 10000,\n    \"transProtocol\": {\n        \"transProtocolType\": \"WebHook\",\n        \"transProtocolDesc\": \"https://192.168.0.6:8081\"\n    },\n    \"eventFilter\": \"\",\n    \"startTime\": 20260112065600000\n}\n\n[수신] RealtimeVerifEventInfos (응답) 15:09:11\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\"\n}"
+              "transmittedData": "[송신] RealtimeVerifEventInfos (요청) 15:50:59\n\n{\n    \"doorList\": [\n        {\n            \"doorID\": \"door0001\"\n        }\n    ],\n    \"duration\": 10000,\n    \"transProtocol\": {\n        \"transProtocolType\": \"WebHook\",\n        \"transProtocolDesc\": \"https://192.168.0.6:8081\"\n    },\n    \"eventFilter\": \"\",\n    \"startTime\": 20260112065600000\n}\n\n[수신] RealtimeVerifEventInfos (응답) 15:51:00\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\"\n}"
             }
           ]
         },
@@ -668,7 +659,7 @@
                 "<b>[기타]</b> (1건)",
                 "- [맥락 오류] code 맥락 검증 실패: 예상값 201, 실제값 200"
               ],
-              "transmittedData": "[송신] StoredVerifEventInfos (요청) 15:09:13\n\n{\n    \"timePeriod\": {\n        \"startTime\": 0,\n        \"endTime\": 20251115163010124\n    },\n    \"doorList\": [\n        {\n            \"doorID\": \"door0001\"\n        }\n    ],\n    \"maxCount\": 10,\n    \"eventFilter\": \"\"\n}\n\n[수신] StoredVerifEventInfos (응답) 15:09:15\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"doorList\": [\n        {\n            \"eventTime\": 20220822163022124,\n            \"doorID\": \"door0001\",\n            \"userID\": \"user0001\",\n            \"bioAuthTypeList\": [\n                \"지문\",\n                \"얼굴\"\n            ],\n            \"otherAuthTypeList\": [\n                \"카드\"\n            ],\n            \"eventName\": \"성공\",\n            \"eventDesc\": \"36.5\"\n        },\n        {\n            \"eventTime\": 20220822163022124,\n            \"doorID\": \"door0002\",\n            \"userID\": \"user0002\",\n            \"bioAuthTypeList\": [\n                \"홍채\"\n            ],\n            \"otherAuthTypeList\": [\n                \"카드\"\n            ],\n            \"eventName\": \"\",\n            \"eventDesc\": \"\"\n        }\n    ]\n}\n\n검증 결과: StoredVerifEventInfos (1회 검증 완료) 15:09:15 | 응답 소요 시간: 2.02초 (60초)\n\n통과 필드 수: 0, 실패 필드 수: 9 | 일반 메시지\n\n평가 점수: 0.0%"
+              "transmittedData": "[송신] StoredVerifEventInfos (요청) 15:51:02\n\n{\n    \"timePeriod\": {\n        \"startTime\": 0,\n        \"endTime\": 20251115163010124\n    },\n    \"doorList\": [\n        {\n            \"doorID\": \"door0001\"\n        }\n    ],\n    \"maxCount\": 10,\n    \"eventFilter\": \"\"\n}\n\n[수신] StoredVerifEventInfos (응답) 15:51:03\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"doorList\": [\n        {\n            \"eventTime\": 20220822163022124,\n            \"doorID\": \"door0001\",\n            \"userID\": \"user0001\",\n            \"bioAuthTypeList\": [\n                \"지문\",\n                \"얼굴\"\n            ],\n            \"otherAuthTypeList\": [\n                \"카드\"\n            ],\n            \"eventName\": \"성공\",\n            \"eventDesc\": \"36.5\"\n        },\n        {\n            \"eventTime\": 20220822163022124,\n            \"doorID\": \"door0002\",\n            \"userID\": \"user0002\",\n            \"bioAuthTypeList\": [\n                \"홍채\"\n            ],\n            \"otherAuthTypeList\": [\n                \"카드\"\n            ],\n            \"eventName\": \"\",\n            \"eventDesc\": \"\"\n        }\n    ]\n}\n\n검증 결과: StoredVerifEventInfos (1회 검증 완료) 15:51:03 | 응답 소요 시간: 1.00초 (60초)\n\n통과 필드 수: 0, 실패 필드 수: 9 | 일반 메시지\n\n평가 점수: 0.0%"
             }
           ]
         }
@@ -703,7 +694,7 @@
               "validationErrors": [
                 "오류가 없습니다."
               ],
-              "transmittedData": "[송신] Authentication (요청) 15:09:22\n\n{\n    \"userID\": \"kisa\",\n    \"userPW\": \"kisa_k1!2@\"\n}\n\n[수신] Authentication (응답) 15:09:23\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"userName\": \"관리자\",\n    \"userAff\": \"오산시청\",\n    \"accessToken\": \"abcde1234\"\n}\n\n검증 결과: Authentication (1회 검증 완료) 15:09:23 | 응답 소요 시간: 0.99초 (60초)\n\n통과 필드 수: 5, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
+              "transmittedData": "[송신] Authentication (요청) 15:51:16\n\n{\n    \"userID\": \"kisa\",\n    \"userPW\": \"kisa_k1!2@\"\n}\n\n[수신] Authentication (응답) 15:51:17\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"userName\": \"관리자\",\n    \"userAff\": \"오산시청\",\n    \"accessToken\": \"abcde1234\"\n}\n\n검증 결과: Authentication (1회 검증 완료) 15:51:17 | 응답 소요 시간: 1.01초 (60초)\n\n통과 필드 수: 5, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
             }
           ]
         },
@@ -740,7 +731,7 @@
               "validationErrors": [
                 "오류가 없습니다."
               ],
-              "transmittedData": "[송신] Capabilities (요청) 15:09:25\n\n{\n}\n\n[수신] Capabilities (응답) 15:09:26\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"streamingSupport\": [\n        {\n            \"streamProtocolType\": \"RTSP\",\n            \"streamProtocolDesc\": \"Unicast\"\n        }\n    ],\n    \"transportSupport\": [\n        {\n            \"transProtocolType\": \"Webhook\",\n            \"transProtocolDesc\": \"\"\n        }\n    ]\n}\n\n검증 결과: Capabilities (1회 검증 완료) 15:09:26 | 응답 소요 시간: 1.00초 (60초)\n\n통과 필드 수: 8, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
+              "transmittedData": "[송신] Capabilities (요청) 15:51:19\n\n{\n}\n\n[수신] Capabilities (응답) 15:51:20\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"streamingSupport\": [\n        {\n            \"streamProtocolType\": \"RTSP\",\n            \"streamProtocolDesc\": \"Unicast\"\n        }\n    ],\n    \"transportSupport\": [\n        {\n            \"transProtocolType\": \"Webhook\",\n            \"transProtocolDesc\": \"\"\n        }\n    ]\n}\n\n검증 결과: Capabilities (1회 검증 완료) 15:51:20 | 응답 소요 시간: 1.00초 (60초)\n\n통과 필드 수: 8, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
             }
           ]
         },
@@ -818,7 +809,7 @@
               "validationErrors": [
                 "오류가 없습니다."
               ],
-              "transmittedData": "[송신] CameraProfiles (요청) 15:09:28\n\n{\n}\n\n[수신] CameraProfiles (응답) 15:09:29\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"camList\": [\n        {\n            \"camID\": \"cam0001\",\n            \"camName\": \"카메라1\",\n            \"camLoc\": {\n                \"lon\": \"127.127730\",\n                \"lat\": \"38.439801\",\n                \"alt\": \"32.131\",\n                \"desc\": \"3층복도\"\n            },\n            \"camConfig\": {\n                \"camType\": \"PTZ\"\n            }\n        },\n        {\n            \"camID\": \"cam0002\",\n            \"camName\": \"카메라2\",\n            \"camLoc\": {\n                \"lon\": \"127.2887\",\n                \"lat\": \"37.33671\",\n                \"alt\": \"\"\n            },\n            \"camConfig\": {\n                \"camType\": \"dome\"\n            }\n        },\n        {\n            \"camID\": \"cam003\",\n            \"camName\": \"카메라3\",\n            \"camLoc\": {\n                \"lon\": \"75\",\n                \"lat\": \"585\",\n                \"alt\": \"122\",\n                \"desc\": \"2층출입문\"\n            },\n            \"camConfig\": {\n                \"camType\": \"PTZ\"\n            }\n        },\n        {\n            \"camID\": \"cam004\",\n            \"camName\": \"카메라4\",\n            \"camLoc\": {\n                \"lon\": \"44\",\n                \"lat\": \"211\",\n                \"alt\": \"23\",\n                \"desc\": \"1층 출입문\"\n            },\n            \"camConfig\": {\n                \"camType\": \"dome\"\n            }\n        }\n    ]\n}\n\n검증 결과: CameraProfiles (1회 검증 완료) 15:09:29 | 응답 소요 시간: 1.02초 (60초)\n\n통과 필드 수: 12, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
+              "transmittedData": "[송신] CameraProfiles (요청) 15:51:22\n\n{\n}\n\n[수신] CameraProfiles (응답) 15:51:23\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"camList\": [\n        {\n            \"camID\": \"cam0001\",\n            \"camName\": \"카메라1\",\n            \"camLoc\": {\n                \"lon\": \"127.127730\",\n                \"lat\": \"38.439801\",\n                \"alt\": \"32.131\",\n                \"desc\": \"3층복도\"\n            },\n            \"camConfig\": {\n                \"camType\": \"PTZ\"\n            }\n        },\n        {\n            \"camID\": \"cam0002\",\n            \"camName\": \"카메라2\",\n            \"camLoc\": {\n                \"lon\": \"127.2887\",\n                \"lat\": \"37.33671\",\n                \"alt\": \"\"\n            },\n            \"camConfig\": {\n                \"camType\": \"dome\"\n            }\n        },\n        {\n            \"camID\": \"cam003\",\n            \"camName\": \"카메라3\",\n            \"camLoc\": {\n                \"lon\": \"75\",\n                \"lat\": \"585\",\n                \"alt\": \"122\",\n                \"desc\": \"2층출입문\"\n            },\n            \"camConfig\": {\n                \"camType\": \"PTZ\"\n            }\n        },\n        {\n            \"camID\": \"cam004\",\n            \"camName\": \"카메라4\",\n            \"camLoc\": {\n                \"lon\": \"44\",\n                \"lat\": \"211\",\n                \"alt\": \"23\",\n                \"desc\": \"1층 출입문\"\n            },\n            \"camConfig\": {\n                \"camType\": \"dome\"\n            }\n        }\n    ]\n}\n\n검증 결과: CameraProfiles (1회 검증 완료) 15:51:23 | 응답 소요 시간: 1.00초 (60초)\n\n통과 필드 수: 12, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
             }
           ]
         },
@@ -851,42 +842,6 @@
                       "videoCodec": "H.264",
                       "audioCodec": "G.711"
                     }
-                  },
-                  {
-                    "camID": "cam0002",
-                    "accessID": "",
-                    "accessPW": "",
-                    "camURL": "rtsp://192.168.0.1:8000",
-                    "videoInfo": {
-                      "resolution": "1920x1080",
-                      "fps": 30,
-                      "videoCodec": "H.264",
-                      "audioCodec": "G.711"
-                    }
-                  },
-                  {
-                    "camID": "cam0001",
-                    "accessID": "",
-                    "accessPW": "",
-                    "camURL": "rtsp://192.168.0.1:8000",
-                    "videoInfo": {
-                      "resolution": "1920x1080",
-                      "fps": 30,
-                      "videoCodec": "H.264",
-                      "audioCodec": "G.711"
-                    }
-                  },
-                  {
-                    "camID": "cam003",
-                    "accessID": "",
-                    "accessPW": "",
-                    "camURL": "rtsp://192.168.0.1:8000",
-                    "videoInfo": {
-                      "resolution": "1920x1080",
-                      "fps": 30,
-                      "videoCodec": "H.264",
-                      "audioCodec": "G.711"
-                    }
                   }
                 ]
               },
@@ -894,7 +849,7 @@
                 "<b>[기타]</b> (1건)",
                 "- [맥락 오류] code 맥락 검증 실패: 예상값 400, 실제값 200"
               ],
-              "transmittedData": "[송신] StreamURLs (요청) 15:09:31\n\n{\n    \"camList\": [\n        {\n            \"camID\": \"cam004\",\n            \"streamProtocolType\": \"RTSP\"\n        },\n        {\n            \"camID\": \"cam0002\",\n            \"streamProtocolType\": 1\n        },\n        {\n            \"camID\": \"cam0001\",\n            \"streamProtocolType\": \"RTSP\"\n        },\n        {\n            \"camID\": \"cam003\",\n            \"streamProtocolType\": \"RTSP\"\n        }\n    ]\n}\n\n[수신] StreamURLs (응답) 15:09:33\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"camList\": [\n        {\n            \"camID\": \"cam004\",\n            \"accessID\": \"\",\n            \"accessPW\": \"\",\n            \"camURL\": \"rtsp://192.168.0.1:8000\",\n            \"videoInfo\": {\n                \"resolution\": \"1920x1080\",\n                \"fps\": 30,\n                \"videoCodec\": \"H.264\",\n                \"audioCodec\": \"G.711\"\n            }\n        },\n        {\n            \"camID\": \"cam0002\",\n            \"accessID\": \"\",\n            \"accessPW\": \"\",\n            \"camURL\": \"rtsp://192.168.0.1:8000\",\n            \"videoInfo\": {\n                \"resolution\": \"1920x1080\",\n                \"fps\": 30,\n                \"videoCodec\": \"H.264\",\n                \"audioCodec\": \"G.711\"\n            }\n        },\n        {\n            \"camID\": \"cam0001\",\n            \"accessID\": \"\",\n            \"accessPW\": \"\",\n            \"camURL\": \"rtsp://192.168.0.1:8000\",\n            \"videoInfo\": {\n                \"resolution\": \"1920x1080\",\n                \"fps\": 30,\n                \"videoCodec\": \"H.264\",\n                \"audioCodec\": \"G.711\"\n            }\n        },\n        {\n            \"camID\": \"cam003\",\n            \"accessID\": \"\",\n            \"accessPW\": \"\",\n            \"camURL\": \"rtsp://192.168.0.1:8000\",\n            \"videoInfo\": {\n                \"resolution\": \"1920x1080\",\n                \"fps\": 30,\n                \"videoCodec\": \"H.264\",\n                \"audioCodec\": \"G.711\"\n            }\n        }\n    ]\n}\n\n검증 결과: StreamURLs (1회 검증 완료) 15:09:33 | 응답 소요 시간: 1.99초 (60초)\n\n통과 필드 수: 0, 실패 필드 수: 12 | 일반 메시지\n\n평가 점수: 0.0%"
+              "transmittedData": "[송신] StreamURLs (요청) 15:51:25\n\n{\n    \"camList\": [\n        {\n            \"camID\": \"cam004\",\n            \"streamProtocolType\": 1\n        }\n    ]\n}\n\n[수신] StreamURLs (응답) 15:51:26\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"camList\": [\n        {\n            \"camID\": \"cam004\",\n            \"accessID\": \"\",\n            \"accessPW\": \"\",\n            \"camURL\": \"rtsp://192.168.0.1:8000\",\n            \"videoInfo\": {\n                \"resolution\": \"1920x1080\",\n                \"fps\": 30,\n                \"videoCodec\": \"H.264\",\n                \"audioCodec\": \"G.711\"\n            }\n        }\n    ]\n}\n\n검증 결과: StreamURLs (1회 검증 완료) 15:51:26 | 응답 소요 시간: 1.01초 (60초)\n\n통과 필드 수: 0, 실패 필드 수: 12 | 일반 메시지\n\n평가 점수: 0.0%"
             }
           ]
         },
@@ -921,7 +876,7 @@
                 "--- Webhook 검증 ---",
                 "오류가 없습니다."
               ],
-              "transmittedData": "[송신] RealtimeVideoEventInfos (요청) 15:09:35\n\n{\n    \"camList\": [\n        {\n            \"camID\": \"cam004\"\n        }\n    ],\n    \"transProtocol\": {\n        \"transProtocolType\": \"WebHook\",\n        \"transProtocolDesc\": \"https://192.168.0.6:8081\"\n    },\n    \"duration\": 10,\n    \"eventFilter\": \"Loitering\",\n    \"classFilter\": \"Human\",\n    \"startTime\": 20251105163010124\n}\n\n[수신] RealtimeVideoEventInfos (응답) 15:09:37\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\"\n}"
+              "transmittedData": "[송신] RealtimeVideoEventInfos (요청) 15:51:28\n\n{\n    \"camList\": [\n        {\n            \"camID\": \"cam0001\"\n        },\n        {\n            \"camID\": \"cam004\"\n        },\n        {\n            \"camID\": \"cam0002\"\n        },\n        {\n            \"camID\": \"cam003\"\n        }\n    ],\n    \"transProtocol\": {\n        \"transProtocolType\": \"WebHook\",\n        \"transProtocolDesc\": \"https://192.168.0.6:8081\"\n    },\n    \"duration\": 10,\n    \"eventFilter\": \"Intrusion\",\n    \"classFilter\": \"Human\",\n    \"startTime\": 20251105163010124\n}\n\n[수신] RealtimeVideoEventInfos (응답) 15:51:31\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\"\n}"
             }
           ]
         },
@@ -942,11 +897,35 @@
               "validationData": {
                 "camList": [
                   {
+                    "camID": "cam0001",
+                    "eventUUID": "event01",
+                    "eventName": "Intrusion",
+                    "startTime": 20251105163010155,
+                    "endTime": 20251105163010502,
+                    "eventDesc": "sfdfEFASDDDLKJFjdkdlfjde"
+                  },
+                  {
                     "camID": "cam004",
                     "eventUUID": "event01",
-                    "eventName": "Loitering",
-                    "startTime": 20251105163010453,
-                    "endTime": 20251105163010781,
+                    "eventName": "Intrusion",
+                    "startTime": 20251105163011037,
+                    "endTime": 20251105163011074,
+                    "eventDesc": "sfdfEFASDDDLKJFjdkdlfjde"
+                  },
+                  {
+                    "camID": "cam0002",
+                    "eventUUID": "event01",
+                    "eventName": "Intrusion",
+                    "startTime": 20251105163010314,
+                    "endTime": 20251105163010965,
+                    "eventDesc": "sfdfEFASDDDLKJFjdkdlfjde"
+                  },
+                  {
+                    "camID": "cam003",
+                    "eventUUID": "event01",
+                    "eventName": "Intrusion",
+                    "startTime": 20251105163010670,
+                    "endTime": 20251105163011045,
                     "eventDesc": "sfdfEFASDDDLKJFjdkdlfjde"
                   }
                 ]
@@ -957,11 +936,35 @@
               "transmittedData": {
                 "camList": [
                   {
+                    "camID": "cam0001",
+                    "eventUUID": "event01",
+                    "eventName": "Intrusion",
+                    "startTime": 20251105163010155,
+                    "endTime": 20251105163010502,
+                    "eventDesc": "sfdfEFASDDDLKJFjdkdlfjde"
+                  },
+                  {
                     "camID": "cam004",
                     "eventUUID": "event01",
-                    "eventName": "Loitering",
-                    "startTime": 20251105163010453,
-                    "endTime": 20251105163010781,
+                    "eventName": "Intrusion",
+                    "startTime": 20251105163011037,
+                    "endTime": 20251105163011074,
+                    "eventDesc": "sfdfEFASDDDLKJFjdkdlfjde"
+                  },
+                  {
+                    "camID": "cam0002",
+                    "eventUUID": "event01",
+                    "eventName": "Intrusion",
+                    "startTime": 20251105163010314,
+                    "endTime": 20251105163010965,
+                    "eventDesc": "sfdfEFASDDDLKJFjdkdlfjde"
+                  },
+                  {
+                    "camID": "cam003",
+                    "eventUUID": "event01",
+                    "eventName": "Intrusion",
+                    "startTime": 20251105163010670,
+                    "endTime": 20251105163011045,
                     "eventDesc": "sfdfEFASDDDLKJFjdkdlfjde"
                   }
                 ]
@@ -988,28 +991,11 @@
                 "message": "성공",
                 "camList": [
                   {
-                    "camID": "cam003",
+                    "camID": "cam004",
                     "timeList": [
                       {
-                        "startTime": 17121931370305450,
-                        "endTime": 18634181240696576
-                      },
-                      {
-                        "startTime": 16373040018662034,
-                        "endTime": 19598380518484397
-                      }
-                    ]
-                  },
-                  {
-                    "camID": "cam0002",
-                    "timeList": [
-                      {
-                        "startTime": 16062403708975557,
-                        "endTime": 19920192165654092
-                      },
-                      {
-                        "startTime": 14478966951210725,
-                        "endTime": 18477107412351646
+                        "startTime": 16385917784586772,
+                        "endTime": 17278372912288795
                       }
                     ]
                   }
@@ -1019,7 +1005,7 @@
                 "<b>[기타]</b> (1건)",
                 "- [맥락 오류] code 맥락 검증 실패: 예상값 201, 실제값 200"
               ],
-              "transmittedData": "[송신] StoredVideoInfos (요청) 15:09:39\n\n{\n    \"timePeriod\": {\n        \"startTime\": 0,\n        \"endTime\": 20251115163010124\n    },\n    \"camList\": [\n        {\n            \"camID\": \"cam003\"\n        },\n        {\n            \"camID\": \"cam0002\"\n        }\n    ]\n}\n\n[수신] StoredVideoInfos (응답) 15:09:40\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"camList\": [\n        {\n            \"camID\": \"cam003\",\n            \"timeList\": [\n                {\n                    \"startTime\": 17121931370305450,\n                    \"endTime\": 18634181240696576\n                },\n                {\n                    \"startTime\": 16373040018662034,\n                    \"endTime\": 19598380518484397\n                }\n            ]\n        },\n        {\n            \"camID\": \"cam0002\",\n            \"timeList\": [\n                {\n                    \"startTime\": 16062403708975557,\n                    \"endTime\": 19920192165654092\n                },\n                {\n                    \"startTime\": 14478966951210725,\n                    \"endTime\": 18477107412351646\n                }\n            ]\n        }\n    ]\n}\n\n검증 결과: StoredVideoInfos (1회 검증 완료) 15:09:40 | 응답 소요 시간: 1.01초 (10초)\n\n통과 필드 수: 0, 실패 필드 수: 7 | 일반 메시지\n\n평가 점수: 0.0%"
+              "transmittedData": "[송신] StoredVideoInfos (요청) 15:51:33\n\n{\n    \"timePeriod\": {\n        \"startTime\": 0,\n        \"endTime\": 20251115163010124\n    },\n    \"camList\": [\n        {\n            \"camID\": \"cam004\"\n        }\n    ]\n}\n\n[수신] StoredVideoInfos (응답) 15:51:34\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"camList\": [\n        {\n            \"camID\": \"cam004\",\n            \"timeList\": [\n                {\n                    \"startTime\": 16385917784586772,\n                    \"endTime\": 17278372912288795\n                }\n            ]\n        }\n    ]\n}\n\n검증 결과: StoredVideoInfos (1회 검증 완료) 15:51:34 | 응답 소요 시간: 0.99초 (10초)\n\n통과 필드 수: 0, 실패 필드 수: 7 | 일반 메시지\n\n평가 점수: 0.0%"
             }
           ]
         },
@@ -1042,7 +1028,7 @@
                 "message": "성공",
                 "camList": [
                   {
-                    "camID": "cam004",
+                    "camID": "cam003",
                     "accessID": "conn0001",
                     "accessPW": "1234",
                     "camURL": "rtsp://192.168.0.1:8000",
@@ -1054,7 +1040,19 @@
                     }
                   },
                   {
-                    "camID": "cam003",
+                    "camID": "cam0002",
+                    "accessID": "conn0001",
+                    "accessPW": "1234",
+                    "camURL": "rtsp://192.168.0.1:8000",
+                    "videoInfo": {
+                      "resolution": "1920x1080",
+                      "fps": 30,
+                      "videoCodec": "H.264",
+                      "audioCodec": "G.711"
+                    }
+                  },
+                  {
+                    "camID": "cam004",
                     "accessID": "conn0001",
                     "accessPW": "1234",
                     "camURL": "rtsp://192.168.0.1:8000",
@@ -1084,7 +1082,7 @@
                 "- [필드 누락] endTime",
                 "- [필드 누락] startTime"
               ],
-              "transmittedData": "[송신] ReplayURL (요청) 15:09:42\n\n{\n    \"camList\": [\n        {\n            \"camID\": \"cam004\",\n            \"startTime\": 20251105163010124,\n            \"endTime\": 20251115163010123,\n            \"streamProtocolType\": \"RTSP\"\n        },\n        {\n            \"camID\": \"cam003\",\n            \"startTime\": 20251105163010124,\n            \"endTime\": 20251115163010123,\n            \"streamProtocolType\": \"RTSP\"\n        },\n        {\n            \"camID\": \"cam0001\",\n            \"startTime\": 20251105163010124,\n            \"endTime\": 20251115163010123,\n            \"streamProtocolType\": \"RTSP\"\n        }\n    ]\n}\n\n[수신] ReplayURL (응답) 15:09:44\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"camList\": [\n        {\n            \"camID\": \"cam004\",\n            \"accessID\": \"conn0001\",\n            \"accessPW\": \"1234\",\n            \"camURL\": \"rtsp://192.168.0.1:8000\",\n            \"videoInfo\": {\n                \"resolution\": \"1920x1080\",\n                \"fps\": 30,\n                \"videoCodec\": \"H.264\",\n                \"audioCodec\": \"G.711\"\n            }\n        },\n        {\n            \"camID\": \"cam003\",\n            \"accessID\": \"conn0001\",\n            \"accessPW\": \"1234\",\n            \"camURL\": \"rtsp://192.168.0.1:8000\",\n            \"videoInfo\": {\n                \"resolution\": \"1920x1080\",\n                \"fps\": 30,\n                \"videoCodec\": \"H.264\",\n                \"audioCodec\": \"G.711\"\n            }\n        },\n        {\n            \"camID\": \"cam0001\",\n            \"accessID\": \"conn0001\",\n            \"accessPW\": \"1234\",\n            \"camURL\": \"rtsp://192.168.0.1:8000\",\n            \"videoInfo\": {\n                \"resolution\": \"1920x1080\",\n                \"fps\": 30,\n                \"videoCodec\": \"H.264\",\n                \"audioCodec\": \"G.711\"\n            }\n        }\n    ]\n}\n\n검증 결과: ReplayURL (1회 검증 완료) 15:09:44 | 응답 소요 시간: 1.99초 (60초)\n\n통과 필드 수: 12, 실패 필드 수: 2 | 일반 메시지\n\n평가 점수: 85.7%"
+              "transmittedData": "[송신] ReplayURL (요청) 15:51:36\n\n{\n    \"camList\": [\n        {\n            \"camID\": \"cam003\",\n            \"startTime\": 20251105163010124,\n            \"endTime\": 20251115163010123,\n            \"streamProtocolType\": \"RTSP\"\n        },\n        {\n            \"camID\": \"cam0002\",\n            \"startTime\": 20251105163010124,\n            \"endTime\": 20251115163010123,\n            \"streamProtocolType\": \"RTSP\"\n        },\n        {\n            \"camID\": \"cam004\",\n            \"startTime\": 20251105163010124,\n            \"endTime\": 20251115163010123,\n            \"streamProtocolType\": \"RTSP\"\n        },\n        {\n            \"camID\": \"cam0001\",\n            \"startTime\": 20251105163010124,\n            \"endTime\": 20251115163010123,\n            \"streamProtocolType\": \"RTSP\"\n        }\n    ]\n}\n\n[수신] ReplayURL (응답) 15:51:37\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"camList\": [\n        {\n            \"camID\": \"cam003\",\n            \"accessID\": \"conn0001\",\n            \"accessPW\": \"1234\",\n            \"camURL\": \"rtsp://192.168.0.1:8000\",\n            \"videoInfo\": {\n                \"resolution\": \"1920x1080\",\n                \"fps\": 30,\n                \"videoCodec\": \"H.264\",\n                \"audioCodec\": \"G.711\"\n            }\n        },\n        {\n            \"camID\": \"cam0002\",\n            \"accessID\": \"conn0001\",\n            \"accessPW\": \"1234\",\n            \"camURL\": \"rtsp://192.168.0.1:8000\",\n            \"videoInfo\": {\n                \"resolution\": \"1920x1080\",\n                \"fps\": 30,\n                \"videoCodec\": \"H.264\",\n                \"audioCodec\": \"G.711\"\n            }\n        },\n        {\n            \"camID\": \"cam004\",\n            \"accessID\": \"conn0001\",\n            \"accessPW\": \"1234\",\n            \"camURL\": \"rtsp://192.168.0.1:8000\",\n            \"videoInfo\": {\n                \"resolution\": \"1920x1080\",\n                \"fps\": 30,\n                \"videoCodec\": \"H.264\",\n                \"audioCodec\": \"G.711\"\n            }\n        },\n        {\n            \"camID\": \"cam0001\",\n            \"accessID\": \"conn0001\",\n            \"accessPW\": \"1234\",\n            \"camURL\": \"rtsp://192.168.0.1:8000\",\n            \"videoInfo\": {\n                \"resolution\": \"1920x1080\",\n                \"fps\": 30,\n                \"videoCodec\": \"H.264\",\n                \"audioCodec\": \"G.711\"\n            }\n        }\n    ]\n}\n\n검증 결과: ReplayURL (1회 검증 완료) 15:51:37 | 응답 소요 시간: 1.01초 (60초)\n\n통과 필드 수: 12, 실패 필드 수: 2 | 일반 메시지\n\n평가 점수: 85.7%"
             }
           ]
         },
@@ -1109,25 +1107,17 @@
                   {
                     "camID": "cam004",
                     "eventUUID": "event01",
-                    "eventName": "Loitering",
-                    "startTime": 20251112431144184,
-                    "endTime": 20251115081695826,
+                    "eventName": "Intrusion",
+                    "startTime": 20251110737694084,
+                    "endTime": 20251114033488922,
                     "eventDesc": "AAABVVVVCCCDDssvfdd"
                   },
                   {
-                    "camID": "cam0001",
+                    "camID": "cam0002",
                     "eventUUID": "event01",
-                    "eventName": "Loitering",
-                    "startTime": 20251106410070702,
-                    "endTime": 20251111537407555,
-                    "eventDesc": "AAABVVVVCCCDDssvfdd"
-                  },
-                  {
-                    "camID": "cam003",
-                    "eventUUID": "event01",
-                    "eventName": "Loitering",
-                    "startTime": 20251107987793954,
-                    "endTime": 20251114075266508,
+                    "eventName": "Intrusion",
+                    "startTime": 20251114978271866,
+                    "endTime": 20251115092777474,
                     "eventDesc": "AAABVVVVCCCDDssvfdd"
                   }
                 ]
@@ -1135,7 +1125,7 @@
               "validationErrors": [
                 "오류가 없습니다."
               ],
-              "transmittedData": "[송신] StoredVideoEventInfos (요청) 15:09:46\n\n{\n    \"timePeriod\": {\n        \"startTime\": 20251105163010124,\n        \"endTime\": 20251115163010124\n    },\n    \"camList\": [\n        {\n            \"camID\": \"cam004\"\n        },\n        {\n            \"camID\": \"cam0001\"\n        },\n        {\n            \"camID\": \"cam003\"\n        }\n    ],\n    \"maxCount\": 3,\n    \"eventFilter\": \"Loitering\",\n    \"classFilter\": \"Human\"\n}\n\n[수신] StoredVideoEventInfos (응답) 15:09:48\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"camList\": [\n        {\n            \"camID\": \"cam004\",\n            \"eventUUID\": \"event01\",\n            \"eventName\": \"Loitering\",\n            \"startTime\": 20251112431144184,\n            \"endTime\": 20251115081695826,\n            \"eventDesc\": \"AAABVVVVCCCDDssvfdd\"\n        },\n        {\n            \"camID\": \"cam0001\",\n            \"eventUUID\": \"event01\",\n            \"eventName\": \"Loitering\",\n            \"startTime\": 20251106410070702,\n            \"endTime\": 20251111537407555,\n            \"eventDesc\": \"AAABVVVVCCCDDssvfdd\"\n        },\n        {\n            \"camID\": \"cam003\",\n            \"eventUUID\": \"event01\",\n            \"eventName\": \"Loitering\",\n            \"startTime\": 20251107987793954,\n            \"endTime\": 20251114075266508,\n            \"eventDesc\": \"AAABVVVVCCCDDssvfdd\"\n        }\n    ]\n}\n\n검증 결과: StoredVideoEventInfos (1회 검증 완료) 15:09:48 | 응답 소요 시간: 2.00초 (60초)\n\n통과 필드 수: 9, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
+              "transmittedData": "[송신] StoredVideoEventInfos (요청) 15:51:39\n\n{\n    \"timePeriod\": {\n        \"startTime\": 20251105163010124,\n        \"endTime\": 20251115163010124\n    },\n    \"camList\": [\n        {\n            \"camID\": \"cam004\"\n        },\n        {\n            \"camID\": \"cam0002\"\n        }\n    ],\n    \"maxCount\": 3,\n    \"eventFilter\": \"Intrusion\",\n    \"classFilter\": \"Human\"\n}\n\n[수신] StoredVideoEventInfos (응답) 15:51:40\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"camList\": [\n        {\n            \"camID\": \"cam004\",\n            \"eventUUID\": \"event01\",\n            \"eventName\": \"Intrusion\",\n            \"startTime\": 20251110737694084,\n            \"endTime\": 20251114033488922,\n            \"eventDesc\": \"AAABVVVVCCCDDssvfdd\"\n        },\n        {\n            \"camID\": \"cam0002\",\n            \"eventUUID\": \"event01\",\n            \"eventName\": \"Intrusion\",\n            \"startTime\": 20251114978271866,\n            \"endTime\": 20251115092777474,\n            \"eventDesc\": \"AAABVVVVCCCDDssvfdd\"\n        }\n    ]\n}\n\n검증 결과: StoredVideoEventInfos (1회 검증 완료) 15:51:40 | 응답 소요 시간: 0.99초 (60초)\n\n통과 필드 수: 9, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
             }
           ]
         },
@@ -1158,206 +1148,8 @@
                 "message": "성공",
                 "camList": [
                   {
-                    "camID": "cam0001",
-                    "analyticsTime": 20251113580708674,
-                    "anlayticsResultList": [
-                      {
-                        "anayticsID": "object001",
-                        "analyticsClass": "Human",
-                        "analyticsAttribute": [
-                          "빨간색"
-                        ],
-                        "analyticsConfidence": 0.8,
-                        "analyticsBoundingBox": {
-                          "left": 0.2,
-                          "top": 0.1,
-                          "right": 0.5,
-                          "bottom": 0.6
-                        },
-                        "analyticsDesc": "13가 4567"
-                      },
-                      {
-                        "anayticsID": "object001",
-                        "analyticsClass": "Human",
-                        "analyticsAttribute": [
-                          "빨간색"
-                        ],
-                        "analyticsConfidence": 0.8,
-                        "analyticsBoundingBox": {
-                          "left": 0.2,
-                          "top": 0.1,
-                          "right": 0.5,
-                          "bottom": 0.6
-                        },
-                        "analyticsDesc": "13가 4567"
-                      },
-                      {
-                        "anayticsID": "object001",
-                        "analyticsClass": "Human",
-                        "analyticsAttribute": [
-                          "빨간색"
-                        ],
-                        "analyticsConfidence": 0.8,
-                        "analyticsBoundingBox": {
-                          "left": 0.2,
-                          "top": 0.1,
-                          "right": 0.5,
-                          "bottom": 0.6
-                        },
-                        "analyticsDesc": "13가 4567"
-                      },
-                      {
-                        "anayticsID": "object001",
-                        "analyticsClass": "Human",
-                        "analyticsAttribute": [
-                          "빨간색"
-                        ],
-                        "analyticsConfidence": 0.8,
-                        "analyticsBoundingBox": {
-                          "left": 0.2,
-                          "top": 0.1,
-                          "right": 0.5,
-                          "bottom": 0.6
-                        },
-                        "analyticsDesc": "13가 4567"
-                      }
-                    ]
-                  },
-                  {
-                    "camID": "cam0002",
-                    "analyticsTime": 20251105519236864,
-                    "anlayticsResultList": [
-                      {
-                        "anayticsID": "object001",
-                        "analyticsClass": "Human",
-                        "analyticsAttribute": [
-                          "빨간색"
-                        ],
-                        "analyticsConfidence": 0.8,
-                        "analyticsBoundingBox": {
-                          "left": 0.2,
-                          "top": 0.1,
-                          "right": 0.5,
-                          "bottom": 0.6
-                        },
-                        "analyticsDesc": "13가 4567"
-                      },
-                      {
-                        "anayticsID": "object001",
-                        "analyticsClass": "Human",
-                        "analyticsAttribute": [
-                          "빨간색"
-                        ],
-                        "analyticsConfidence": 0.8,
-                        "analyticsBoundingBox": {
-                          "left": 0.2,
-                          "top": 0.1,
-                          "right": 0.5,
-                          "bottom": 0.6
-                        },
-                        "analyticsDesc": "13가 4567"
-                      },
-                      {
-                        "anayticsID": "object001",
-                        "analyticsClass": "Human",
-                        "analyticsAttribute": [
-                          "빨간색"
-                        ],
-                        "analyticsConfidence": 0.8,
-                        "analyticsBoundingBox": {
-                          "left": 0.2,
-                          "top": 0.1,
-                          "right": 0.5,
-                          "bottom": 0.6
-                        },
-                        "analyticsDesc": "13가 4567"
-                      },
-                      {
-                        "anayticsID": "object001",
-                        "analyticsClass": "Human",
-                        "analyticsAttribute": [
-                          "빨간색"
-                        ],
-                        "analyticsConfidence": 0.8,
-                        "analyticsBoundingBox": {
-                          "left": 0.2,
-                          "top": 0.1,
-                          "right": 0.5,
-                          "bottom": 0.6
-                        },
-                        "analyticsDesc": "13가 4567"
-                      }
-                    ]
-                  },
-                  {
-                    "camID": "cam003",
-                    "analyticsTime": 20251113539042733,
-                    "anlayticsResultList": [
-                      {
-                        "anayticsID": "object001",
-                        "analyticsClass": "Human",
-                        "analyticsAttribute": [
-                          "빨간색"
-                        ],
-                        "analyticsConfidence": 0.8,
-                        "analyticsBoundingBox": {
-                          "left": 0.2,
-                          "top": 0.1,
-                          "right": 0.5,
-                          "bottom": 0.6
-                        },
-                        "analyticsDesc": "13가 4567"
-                      },
-                      {
-                        "anayticsID": "object001",
-                        "analyticsClass": "Human",
-                        "analyticsAttribute": [
-                          "빨간색"
-                        ],
-                        "analyticsConfidence": 0.8,
-                        "analyticsBoundingBox": {
-                          "left": 0.2,
-                          "top": 0.1,
-                          "right": 0.5,
-                          "bottom": 0.6
-                        },
-                        "analyticsDesc": "13가 4567"
-                      },
-                      {
-                        "anayticsID": "object001",
-                        "analyticsClass": "Human",
-                        "analyticsAttribute": [
-                          "빨간색"
-                        ],
-                        "analyticsConfidence": 0.8,
-                        "analyticsBoundingBox": {
-                          "left": 0.2,
-                          "top": 0.1,
-                          "right": 0.5,
-                          "bottom": 0.6
-                        },
-                        "analyticsDesc": "13가 4567"
-                      },
-                      {
-                        "anayticsID": "object001",
-                        "analyticsClass": "Human",
-                        "analyticsAttribute": [
-                          "빨간색"
-                        ],
-                        "analyticsConfidence": 0.8,
-                        "analyticsBoundingBox": {
-                          "left": 0.2,
-                          "top": 0.1,
-                          "right": 0.5,
-                          "bottom": 0.6
-                        },
-                        "analyticsDesc": "13가 4567"
-                      }
-                    ]
-                  },
-                  {
                     "camID": "cam004",
-                    "analyticsTime": 20251105752107410,
+                    "analyticsTime": 20251114370843504,
                     "anlayticsResultList": [
                       {
                         "anayticsID": "object001",
@@ -1388,7 +1180,13 @@
                           "bottom": 0.6
                         },
                         "analyticsDesc": "13가 4567"
-                      },
+                      }
+                    ]
+                  },
+                  {
+                    "camID": "cam0001",
+                    "analyticsTime": 20251111113540434,
+                    "anlayticsResultList": [
                       {
                         "anayticsID": "object001",
                         "analyticsClass": "Human",
@@ -1426,12 +1224,741 @@
               "validationErrors": [
                 "오류가 없습니다."
               ],
-              "transmittedData": "[송신] StoredObjectAnalyticsInfos (요청) 15:09:50\n\n{\n    \"timePeriod\": {\n        \"startTime\": 20251105163010124,\n        \"endTime\": 20251115163010124\n    },\n    \"camList\": [\n        {\n            \"camID\": \"cam0001\"\n        },\n        {\n            \"camID\": \"cam0002\"\n        },\n        {\n            \"camID\": \"cam003\"\n        },\n        {\n            \"camID\": \"cam004\"\n        }\n    ],\n    \"filterList\": [\n        {\n            \"classFilter\": [\n                \"Human\"\n            ],\n            \"attributeFilter\": [\n                \"Male\",\n                \"Female\"\n            ]\n        }\n    ]\n}\n\n[수신] StoredObjectAnalyticsInfos (응답) 15:09:52\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"camList\": [\n        {\n            \"camID\": \"cam0001\",\n            \"analyticsTime\": 20251113580708674,\n            \"anlayticsResultList\": [\n                {\n                    \"anayticsID\": \"object001\",\n                    \"analyticsClass\": \"Human\",\n                    \"analyticsAttribute\": [\n                        \"빨간색\"\n                    ],\n                    \"analyticsConfidence\": 0.8,\n                    \"analyticsBoundingBox\": {\n                        \"left\": 0.2,\n                        \"top\": 0.1,\n                        \"right\": 0.5,\n                        \"bottom\": 0.6\n                    },\n                    \"analyticsDesc\": \"13가 4567\"\n                },\n                {\n                    \"anayticsID\": \"object001\",\n                    \"analyticsClass\": \"Human\",\n                    \"analyticsAttribute\": [\n                        \"빨간색\"\n                    ],\n                    \"analyticsConfidence\": 0.8,\n                    \"analyticsBoundingBox\": {\n                        \"left\": 0.2,\n                        \"top\": 0.1,\n                        \"right\": 0.5,\n                        \"bottom\": 0.6\n                    },\n                    \"analyticsDesc\": \"13가 4567\"\n                },\n                {\n                    \"anayticsID\": \"object001\",\n                    \"analyticsClass\": \"Human\",\n                    \"analyticsAttribute\": [\n                        \"빨간색\"\n                    ],\n                    \"analyticsConfidence\": 0.8,\n                    \"analyticsBoundingBox\": {\n                        \"left\": 0.2,\n                        \"top\": 0.1,\n                        \"right\": 0.5,\n                        \"bottom\": 0.6\n                    },\n                    \"analyticsDesc\": \"13가 4567\"\n                },\n                {\n                    \"anayticsID\": \"object001\",\n                    \"analyticsClass\": \"Human\",\n                    \"analyticsAttribute\": [\n                        \"빨간색\"\n                    ],\n                    \"analyticsConfidence\": 0.8,\n                    \"analyticsBoundingBox\": {\n                        \"left\": 0.2,\n                        \"top\": 0.1,\n                        \"right\": 0.5,\n                        \"bottom\": 0.6\n                    },\n                    \"analyticsDesc\": \"13가 4567\"\n                }\n            ]\n        },\n        {\n            \"camID\": \"cam0002\",\n            \"analyticsTime\": 20251105519236864,\n            \"anlayticsResultList\": [\n                {\n                    \"anayticsID\": \"object001\",\n                    \"analyticsClass\": \"Human\",\n                    \"analyticsAttribute\": [\n                        \"빨간색\"\n                    ],\n                    \"analyticsConfidence\": 0.8,\n                    \"analyticsBoundingBox\": {\n                        \"left\": 0.2,\n                        \"top\": 0.1,\n                        \"right\": 0.5,\n                        \"bottom\": 0.6\n                    },\n                    \"analyticsDesc\": \"13가 4567\"\n                },\n                {\n                    \"anayticsID\": \"object001\",\n                    \"analyticsClass\": \"Human\",\n                    \"analyticsAttribute\": [\n                        \"빨간색\"\n                    ],\n                    \"analyticsConfidence\": 0.8,\n                    \"analyticsBoundingBox\": {\n                        \"left\": 0.2,\n                        \"top\": 0.1,\n                        \"right\": 0.5,\n                        \"bottom\": 0.6\n                    },\n                    \"analyticsDesc\": \"13가 4567\"\n                },\n                {\n                    \"anayticsID\": \"object001\",\n                    \"analyticsClass\": \"Human\",\n                    \"analyticsAttribute\": [\n                        \"빨간색\"\n                    ],\n                    \"analyticsConfidence\": 0.8,\n                    \"analyticsBoundingBox\": {\n                        \"left\": 0.2,\n                        \"top\": 0.1,\n                        \"right\": 0.5,\n                        \"bottom\": 0.6\n                    },\n                    \"analyticsDesc\": \"13가 4567\"\n                },\n                {\n                    \"anayticsID\": \"object001\",\n                    \"analyticsClass\": \"Human\",\n                    \"analyticsAttribute\": [\n                        \"빨간색\"\n                    ],\n                    \"analyticsConfidence\": 0.8,\n                    \"analyticsBoundingBox\": {\n                        \"left\": 0.2,\n                        \"top\": 0.1,\n                        \"right\": 0.5,\n                        \"bottom\": 0.6\n                    },\n                    \"analyticsDesc\": \"13가 4567\"\n                }\n            ]\n        },\n        {\n            \"camID\": \"cam003\",\n            \"analyticsTime\": 20251113539042733,\n            \"anlayticsResultList\": [\n                {\n                    \"anayticsID\": \"object001\",\n                    \"analyticsClass\": \"Human\",\n                    \"analyticsAttribute\": [\n                        \"빨간색\"\n                    ],\n                    \"analyticsConfidence\": 0.8,\n                    \"analyticsBoundingBox\": {\n                        \"left\": 0.2,\n                        \"top\": 0.1,\n                        \"right\": 0.5,\n                        \"bottom\": 0.6\n                    },\n                    \"analyticsDesc\": \"13가 4567\"\n                },\n                {\n                    \"anayticsID\": \"object001\",\n                    \"analyticsClass\": \"Human\",\n                    \"analyticsAttribute\": [\n                        \"빨간색\"\n                    ],\n                    \"analyticsConfidence\": 0.8,\n                    \"analyticsBoundingBox\": {\n                        \"left\": 0.2,\n                        \"top\": 0.1,\n                        \"right\": 0.5,\n                        \"bottom\": 0.6\n                    },\n                    \"analyticsDesc\": \"13가 4567\"\n                },\n                {\n                    \"anayticsID\": \"object001\",\n                    \"analyticsClass\": \"Human\",\n                    \"analyticsAttribute\": [\n                        \"빨간색\"\n                    ],\n                    \"analyticsConfidence\": 0.8,\n                    \"analyticsBoundingBox\": {\n                        \"left\": 0.2,\n                        \"top\": 0.1,\n                        \"right\": 0.5,\n                        \"bottom\": 0.6\n                    },\n                    \"analyticsDesc\": \"13가 4567\"\n                },\n                {\n                    \"anayticsID\": \"object001\",\n                    \"analyticsClass\": \"Human\",\n                    \"analyticsAttribute\": [\n                        \"빨간색\"\n                    ],\n                    \"analyticsConfidence\": 0.8,\n                    \"analyticsBoundingBox\": {\n                        \"left\": 0.2,\n                        \"top\": 0.1,\n                        \"right\": 0.5,\n                        \"bottom\": 0.6\n                    },\n                    \"analyticsDesc\": \"13가 4567\"\n                }\n            ]\n        },\n        {\n            \"camID\": \"cam004\",\n            \"analyticsTime\": 20251105752107410,\n            \"anlayticsResultList\": [\n                {\n                    \"anayticsID\": \"object001\",\n                    \"analyticsClass\": \"Human\",\n                    \"analyticsAttribute\": [\n                        \"빨간색\"\n                    ],\n                    \"analyticsConfidence\": 0.8,\n                    \"analyticsBoundingBox\": {\n                        \"left\": 0.2,\n                        \"top\": 0.1,\n                        \"right\": 0.5,\n                        \"bottom\": 0.6\n                    },\n                    \"analyticsDesc\": \"13가 4567\"\n                },\n                {\n                    \"anayticsID\": \"object001\",\n                    \"analyticsClass\": \"Human\",\n                    \"analyticsAttribute\": [\n                        \"빨간색\"\n                    ],\n                    \"analyticsConfidence\": 0.8,\n                    \"analyticsBoundingBox\": {\n                        \"left\": 0.2,\n                        \"top\": 0.1,\n                        \"right\": 0.5,\n                        \"bottom\": 0.6\n                    },\n                    \"analyticsDesc\": \"13가 4567\"\n                },\n                {\n                    \"anayticsID\": \"object001\",\n                    \"analyticsClass\": \"Human\",\n                    \"analyticsAttribute\": [\n                        \"빨간색\"\n                    ],\n                    \"analyticsConfidence\": 0.8,\n                    \"analyticsBoundingBox\": {\n                        \"left\": 0.2,\n                        \"top\": 0.1,\n                        \"right\": 0.5,\n                        \"bottom\": 0.6\n                    },\n                    \"analyticsDesc\": \"13가 4567\"\n                },\n                {\n                    \"anayticsID\": \"object001\",\n                    \"analyticsClass\": \"Human\",\n                    \"analyticsAttribute\": [\n                        \"빨간색\"\n                    ],\n                    \"analyticsConfidence\": 0.8,\n                    \"analyticsBoundingBox\": {\n                        \"left\": 0.2,\n                        \"top\": 0.1,\n                        \"right\": 0.5,\n                        \"bottom\": 0.6\n                    },\n                    \"analyticsDesc\": \"13가 4567\"\n                }\n            ]\n        }\n    ]\n}\n\n검증 결과: StoredObjectAnalyticsInfos (1회 검증 완료) 15:09:52 | 응답 소요 시간: 2.00초 (60초)\n\n통과 필드 수: 16, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
+              "transmittedData": "[송신] StoredObjectAnalyticsInfos (요청) 15:51:42\n\n{\n    \"timePeriod\": {\n        \"startTime\": 20251105163010124,\n        \"endTime\": 20251115163010124\n    },\n    \"camList\": [\n        {\n            \"camID\": \"cam004\"\n        },\n        {\n            \"camID\": \"cam0001\"\n        }\n    ],\n    \"filterList\": [\n        {\n            \"classFilter\": [\n                \"Human\"\n            ],\n            \"attributeFilter\": [\n                \"Male\",\n                \"Female\"\n            ]\n        }\n    ]\n}\n\n[수신] StoredObjectAnalyticsInfos (응답) 15:51:43\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"camList\": [\n        {\n            \"camID\": \"cam004\",\n            \"analyticsTime\": 20251114370843504,\n            \"anlayticsResultList\": [\n                {\n                    \"anayticsID\": \"object001\",\n                    \"analyticsClass\": \"Human\",\n                    \"analyticsAttribute\": [\n                        \"빨간색\"\n                    ],\n                    \"analyticsConfidence\": 0.8,\n                    \"analyticsBoundingBox\": {\n                        \"left\": 0.2,\n                        \"top\": 0.1,\n                        \"right\": 0.5,\n                        \"bottom\": 0.6\n                    },\n                    \"analyticsDesc\": \"13가 4567\"\n                },\n                {\n                    \"anayticsID\": \"object001\",\n                    \"analyticsClass\": \"Human\",\n                    \"analyticsAttribute\": [\n                        \"빨간색\"\n                    ],\n                    \"analyticsConfidence\": 0.8,\n                    \"analyticsBoundingBox\": {\n                        \"left\": 0.2,\n                        \"top\": 0.1,\n                        \"right\": 0.5,\n                        \"bottom\": 0.6\n                    },\n                    \"analyticsDesc\": \"13가 4567\"\n                }\n            ]\n        },\n        {\n            \"camID\": \"cam0001\",\n            \"analyticsTime\": 20251111113540434,\n            \"anlayticsResultList\": [\n                {\n                    \"anayticsID\": \"object001\",\n                    \"analyticsClass\": \"Human\",\n                    \"analyticsAttribute\": [\n                        \"빨간색\"\n                    ],\n                    \"analyticsConfidence\": 0.8,\n                    \"analyticsBoundingBox\": {\n                        \"left\": 0.2,\n                        \"top\": 0.1,\n                        \"right\": 0.5,\n                        \"bottom\": 0.6\n                    },\n                    \"analyticsDesc\": \"13가 4567\"\n                },\n                {\n                    \"anayticsID\": \"object001\",\n                    \"analyticsClass\": \"Human\",\n                    \"analyticsAttribute\": [\n                        \"빨간색\"\n                    ],\n                    \"analyticsConfidence\": 0.8,\n                    \"analyticsBoundingBox\": {\n                        \"left\": 0.2,\n                        \"top\": 0.1,\n                        \"right\": 0.5,\n                        \"bottom\": 0.6\n                    },\n                    \"analyticsDesc\": \"13가 4567\"\n                }\n            ]\n        }\n    ]\n}\n\n검증 결과: StoredObjectAnalyticsInfos (1회 검증 완료) 15:51:43 | 응답 소요 시간: 0.99초 (60초)\n\n통과 필드 수: 16, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "testSpecId": "cmiqr0kdw00i4ie8fr3firjtg",
+      "testGroupId": "cmk4tfso61enncfb3l63wp1m3",
+      "score": 100.0,
+      "apis": [
+        {
+          "id": "cmish1fu408we5vy7dp3ltj00",
+          "name": "사용자 인증",
+          "method": "POST",
+          "endpoint": "/Authentication",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 5,
+          "passFields": 5,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "field": "code",
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "userName": "관리자",
+                "userAff": "오산시청",
+                "accessToken": ""
+              },
+              "validationErrors": [
+                "오류가 없습니다."
+              ],
+              "transmittedData": "[송신] Authentication (요청) 15:51:56\n\n{\n    \"userID\": \"kisa\",\n    \"userPW\": \"kisa_k1!2@\"\n}\n\n[수신] Authentication (응답) 15:51:57\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"userName\": \"관리자\",\n    \"userAff\": \"오산시청\",\n    \"accessToken\": \"\"\n}\n\n검증 결과: Authentication (1회 검증 완료) 15:51:57 | 응답 소요 시간: 0.99초 (60초)\n\n통과 필드 수: 5, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
+            }
+          ]
+        },
+        {
+          "id": "cmixu0dt70dyzp002xhm24l3h",
+          "name": "전송 지원 기능 정보 연동",
+          "method": "POST",
+          "endpoint": "/Capabilities",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 8,
+          "passFields": 8,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "field": "code",
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "streamingSupport": [
+                  {
+                    "streamProtocolType": "RTSP",
+                    "streamProtocolDesc": "Unicast"
+                  }
+                ],
+                "transportSupport": [
+                  {
+                    "transProtocolType": "LongPolling",
+                    "transProtocolDesc": ""
+                  }
+                ]
+              },
+              "validationErrors": [
+                "오류가 없습니다."
+              ],
+              "transmittedData": "[송신] Capabilities (요청) 15:51:59\n\n{\n}\n\n[수신] Capabilities (응답) 15:52:00\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"streamingSupport\": [\n        {\n            \"streamProtocolType\": \"RTSP\",\n            \"streamProtocolDesc\": \"Unicast\"\n        }\n    ],\n    \"transportSupport\": [\n        {\n            \"transProtocolType\": \"LongPolling\",\n            \"transProtocolDesc\": \"\"\n        }\n    ]\n}\n\n검증 결과: Capabilities (1회 검증 완료) 15:52:00 | 응답 소요 시간: 1.00초 (60초)\n\n통과 필드 수: 8, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
+            }
+          ]
+        },
+        {
+          "id": "cmixu2m200e4up002g73csf12",
+          "name": "카메라 목록 연동",
+          "method": "POST",
+          "endpoint": "/CameraProfiles",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 12,
+          "passFields": 12,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "field": "code",
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "camList": [
+                  {
+                    "camID": "cam0001",
+                    "camName": "카메라1",
+                    "camLoc": {
+                      "lon": "127.127730",
+                      "lat": "38.439801",
+                      "alt": "32.131",
+                      "desc": "3층복도"
+                    },
+                    "camConfig": {
+                      "camType": "PTZ"
+                    }
+                  },
+                  {
+                    "camID": "cam0002",
+                    "camName": "카메라2",
+                    "camLoc": {
+                      "lon": "127.127730",
+                      "lat": "37.33671",
+                      "alt": "",
+                      "desc": ""
+                    },
+                    "camConfig": {
+                      "camType": "dome"
+                    }
+                  }
+                ]
+              },
+              "validationErrors": [
+                "오류가 없습니다."
+              ],
+              "transmittedData": "[송신] CameraProfiles (요청) 15:52:02\n\n{\n}\n\n[수신] CameraProfiles (응답) 15:52:04\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"camList\": [\n        {\n            \"camID\": \"cam0001\",\n            \"camName\": \"카메라1\",\n            \"camLoc\": {\n                \"lon\": \"127.127730\",\n                \"lat\": \"38.439801\",\n                \"alt\": \"32.131\",\n                \"desc\": \"3층복도\"\n            },\n            \"camConfig\": {\n                \"camType\": \"PTZ\"\n            }\n        },\n        {\n            \"camID\": \"cam0002\",\n            \"camName\": \"카메라2\",\n            \"camLoc\": {\n                \"lon\": \"127.127730\",\n                \"lat\": \"37.33671\",\n                \"alt\": \"\",\n                \"desc\": \"\"\n            },\n            \"camConfig\": {\n                \"camType\": \"dome\"\n            }\n        }\n    ]\n}\n\n검증 결과: CameraProfiles (1회 검증 완료) 15:52:04 | 응답 소요 시간: 2.01초 (60초)\n\n통과 필드 수: 12, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
+            }
+          ]
+        },
+        {
+          "id": "cmixu9wn10f7rp002rgzkx3au",
+          "name": "PTZ 상태 정보 연동",
+          "method": "POST",
+          "endpoint": "/PtzStatus",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 10,
+          "passFields": 10,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "field": "code",
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "position": {
+                  "pan": 10,
+                  "tilt": 20,
+                  "zoom": 30
+                },
+                "moveStatus": {
+                  "pan": "정지",
+                  "tilt": "이동중",
+                  "zoom": "정지"
+                }
+              },
+              "validationErrors": [
+                "오류가 없습니다."
+              ],
+              "transmittedData": "[송신] PtzStatus (요청) 15:52:06\n\n{\n    \"camID\": \"cam0002\"\n}\n\n[수신] PtzStatus (응답) 15:52:07\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"position\": {\n        \"pan\": 10,\n        \"tilt\": 20,\n        \"zoom\": 30\n    },\n    \"moveStatus\": {\n        \"pan\": \"정지\",\n        \"tilt\": \"이동중\",\n        \"zoom\": \"정지\"\n    }\n}\n\n검증 결과: PtzStatus (1회 검증 완료) 15:52:07 | 응답 소요 시간: 0.99초 (60초)\n\n통과 필드 수: 10, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
+            }
+          ]
+        },
+        {
+          "id": "cmixucv8a0fb4p002pnvfe6ay",
+          "name": "PTZ 연속 이동 제어 정보 연동",
+          "method": "POST",
+          "endpoint": "/PtzContinuousMove",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 2,
+          "passFields": 2,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "field": "code",
+              "validationData": {
+                "code": "200",
+                "message": "성공"
+              },
+              "validationErrors": [
+                "오류가 없습니다."
+              ],
+              "transmittedData": "[송신] PtzContinuousMove (요청) 15:52:09\n\n{\n    \"camID\": \"cam0002\",\n    \"velocity\": {\n        \"pan\": 10,\n        \"tilt\": -20,\n        \"zoom\": 30\n    },\n    \"timeOut\": 5\n}\n\n[수신] PtzContinuousMove (응답) 15:52:10\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\"\n}\n\n검증 결과: PtzContinuousMove (1회 검증 완료) 15:52:10 | 응답 소요 시간: 1.00초 (60초)\n\n통과 필드 수: 2, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
+            }
+          ]
+        },
+        {
+          "id": "cmixufkri0fdnp002fouuoqsg",
+          "name": "PTZ 정지 제어 정보 연동",
+          "method": "POST",
+          "endpoint": "/PtzStop",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 2,
+          "passFields": 2,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "field": "code",
+              "validationData": {
+                "code": "200",
+                "message": "성공"
+              },
+              "validationErrors": [
+                "오류가 없습니다."
+              ],
+              "transmittedData": "[송신] PtzStop (요청) 15:52:12\n\n{\n    \"camID\": \"cam0001\",\n    \"pan\": true,\n    \"tilt\": true,\n    \"zoom\": false\n}\n\n[수신] PtzStop (응답) 15:52:13\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\"\n}\n\n검증 결과: PtzStop (1회 검증 완료) 15:52:13 | 응답 소요 시간: 0.99초 (60초)\n\n통과 필드 수: 2, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "testSpecId": "cmiqr2b9j00i9ie8frw439h8i",
+      "testGroupId": "cmk4tggl01entcfb38q47jw4w",
+      "score": 100.0,
+      "apis": [
+        {
+          "id": "cmise849o00nv5vy7mu76wa69",
+          "name": "사용자 인증",
+          "method": "POST",
+          "endpoint": "/Authentication",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 5,
+          "passFields": 5,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "field": "code",
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "userName": "관리자",
+                "userAff": "오산시",
+                "accessToken": "abcde1234"
+              },
+              "validationErrors": [
+                "오류가 없습니다."
+              ],
+              "transmittedData": "[송신] Authentication (요청) 15:52:25\n\n{\n    \"userID\": \"kisa\",\n    \"userPW\": \"kisa_k1!2@\"\n}\n\n[수신] Authentication (응답) 15:52:26\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"userName\": \"관리자\",\n    \"userAff\": \"오산시\",\n    \"accessToken\": \"abcde1234\"\n}\n\n검증 결과: Authentication (1회 검증 완료) 15:52:26 | 응답 소요 시간: 0.99초 (60초)\n\n통과 필드 수: 5, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
+            }
+          ]
+        },
+        {
+          "id": "cmise9yk200pv5vy7ktxtva7c",
+          "name": "전송 지원 기능 정보 연동",
+          "method": "POST",
+          "endpoint": "/Capabilities",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 5,
+          "passFields": 5,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "field": "code",
+              "validationData": {
+                "code": "",
+                "message": "",
+                "transportSupport": [
+                  {
+                    "transProtocolType": "LongPolling",
+                    "transProtocolDesc": "none"
+                  },
+                  {
+                    "transProtocolType": "Webhook",
+                    "transProtocolDesc": "none"
+                  }
+                ]
+              },
+              "validationErrors": [
+                "오류가 없습니다."
+              ],
+              "transmittedData": "[송신] Capabilities (요청) 15:52:28\n\n{\n}\n\n[수신] Capabilities (응답) 15:52:29\n\n{\n    \"code\": \"\",\n    \"message\": \"\",\n    \"transportSupport\": [\n        {\n            \"transProtocolType\": \"LongPolling\",\n            \"transProtocolDesc\": \"none\"\n        },\n        {\n            \"transProtocolType\": \"Webhook\",\n            \"transProtocolDesc\": \"none\"\n        }\n    ]\n}\n\n검증 결과: Capabilities (1회 검증 완료) 15:52:29 | 응답 소요 시간: 1.00초 (60초)\n\n통과 필드 수: 5, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
+            }
+          ]
+        },
+        {
+          "id": "cmisepin301uv5vy78nai1drd",
+          "name": "보안용 센서 단말 목록 정보 연동",
+          "method": "POST",
+          "endpoint": "/SensorDeviceProfiles",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 11,
+          "passFields": 11,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "field": "code",
+              "validationData": {
+                "code": "",
+                "message": "",
+                "sensorDeviceList": [
+                  {
+                    "sensorDeviceID": "iot0001",
+                    "sensorDeviceType": "홍채인식",
+                    "sensorDeviceName": "홍채 센서",
+                    "sensorDeviceLoc": {
+                      "lon": "12",
+                      "lat": "233",
+                      "alt": "122",
+                      "desc": "복도"
+                    }
+                  },
+                  {
+                    "sensorDeviceID": "iot0002",
+                    "sensorDeviceType": "온도",
+                    "sensorDeviceName": "온도센서",
+                    "sensorDeviceLoc": {
+                      "lon": "24",
+                      "lat": "367",
+                      "alt": "234",
+                      "desc": "출입구"
+                    }
+                  },
+                  {
+                    "sensorDeviceID": "iot0003",
+                    "sensorDeviceType": "지문",
+                    "sensorDeviceName": "지문센서",
+                    "sensorDeviceLoc": {
+                      "lon": "486",
+                      "lat": "54",
+                      "alt": "6",
+                      "desc": "후문"
+                    }
+                  },
+                  {
+                    "sensorDeviceID": "iot0004",
+                    "sensorDeviceType": "온도",
+                    "sensorDeviceName": "온도센서",
+                    "sensorDeviceLoc": {
+                      "lon": "123",
+                      "lat": "42",
+                      "alt": "55",
+                      "desc": "복도"
+                    }
+                  }
+                ]
+              },
+              "validationErrors": [
+                "오류가 없습니다."
+              ],
+              "transmittedData": "[송신] SensorDeviceProfiles (요청) 15:52:31\n\n{\n}\n\n[수신] SensorDeviceProfiles (응답) 15:52:33\n\n{\n    \"code\": \"\",\n    \"message\": \"\",\n    \"sensorDeviceList\": [\n        {\n            \"sensorDeviceID\": \"iot0001\",\n            \"sensorDeviceType\": \"홍채인식\",\n            \"sensorDeviceName\": \"홍채 센서\",\n            \"sensorDeviceLoc\": {\n                \"lon\": \"12\",\n                \"lat\": \"233\",\n                \"alt\": \"122\",\n                \"desc\": \"복도\"\n            }\n        },\n        {\n            \"sensorDeviceID\": \"iot0002\",\n            \"sensorDeviceType\": \"온도\",\n            \"sensorDeviceName\": \"온도센서\",\n            \"sensorDeviceLoc\": {\n                \"lon\": \"24\",\n                \"lat\": \"367\",\n                \"alt\": \"234\",\n                \"desc\": \"출입구\"\n            }\n        },\n        {\n            \"sensorDeviceID\": \"iot0003\",\n            \"sensorDeviceType\": \"지문\",\n            \"sensorDeviceName\": \"지문센서\",\n            \"sensorDeviceLoc\": {\n                \"lon\": \"486\",\n                \"lat\": \"54\",\n                \"alt\": \"6\",\n                \"desc\": \"후문\"\n            }\n        },\n        {\n            \"sensorDeviceID\": \"iot0004\",\n            \"sensorDeviceType\": \"온도\",\n            \"sensorDeviceName\": \"온도센서\",\n            \"sensorDeviceLoc\": {\n                \"lon\": \"123\",\n                \"lat\": \"42\",\n                \"alt\": \"55\",\n                \"desc\": \"복도\"\n            }\n        }\n    ]\n}\n\n검증 결과: SensorDeviceProfiles (1회 검증 완료) 15:52:33 | 응답 소요 시간: 1.99초 (60초)\n\n통과 필드 수: 11, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
+            }
+          ]
+        },
+        {
+          "id": "cmisfqfip07tz5vy7de6x5d6r",
+          "name": "보안용 센서 단말 제어 정보 연동-상태연동",
+          "method": "POST",
+          "endpoint": "/SensorDeviceControl",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 4,
+          "passFields": 4,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "field": "code",
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "sensorDeviceID": "iot0002",
+                "sensorDeviceStatus": "AlarmOff"
+              },
+              "validationErrors": [
+                "오류가 없습니다."
+              ],
+              "transmittedData": "[송신] SensorDeviceControl (요청) 15:52:35\n\n{\n    \"sensorDeviceID\": \"iot0002\",\n    \"commandType\": \"\"\n}\n\n[수신] SensorDeviceControl (응답) 15:52:36\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"sensorDeviceID\": \"iot0002\",\n    \"sensorDeviceStatus\": \"AlarmOff\"\n}\n\n검증 결과: SensorDeviceControl (1회 검증 완료) 15:52:36 | 응답 소요 시간: 1.00초 (60초)\n\n통과 필드 수: 4, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
+            }
+          ]
+        },
+        {
+          "id": "cmisg86id08bm5vy7ezcbr7oy",
+          "name": "보안용 센서 단말 제어 정보 연동-제어",
+          "method": "POST",
+          "endpoint": "/SensorDeviceControl",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 4,
+          "passFields": 4,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "field": "code",
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "sensorDeviceID": "iot0002",
+                "sensorDeviceStatus": "AlarmOn"
+              },
+              "validationErrors": [
+                "오류가 없습니다."
+              ],
+              "transmittedData": "[송신] SensorDeviceControl (요청) 15:52:38\n\n{\n    \"sensorDeviceID\": \"iot0002\",\n    \"commandType\": \"AlarmOn\"\n}\n\n[수신] SensorDeviceControl (응답) 15:52:40\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"sensorDeviceID\": \"iot0002\",\n    \"sensorDeviceStatus\": \"AlarmOn\"\n}\n\n검증 결과: SensorDeviceControl (1회 검증 완료) 15:52:40 | 응답 소요 시간: 2.01초 (60초)\n\n통과 필드 수: 4, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "testSpecId": "cmiqr1jha00i6ie8fb1scb3go",
+      "testGroupId": "cmk4tgs2c1enwcfb3sbsbdgrd",
+      "score": 100.0,
+      "apis": [
+        {
+          "id": "cmisgv0ua08o55vy7yvk4aw0a",
+          "name": "사용자 인증",
+          "method": "POST",
+          "endpoint": "/Authentication",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 5,
+          "passFields": 5,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "field": "code",
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "userName": "관리자",
+                "userAff": "오산시청",
+                "accessToken": ""
+              },
+              "validationErrors": [
+                "오류가 없습니다."
+              ],
+              "transmittedData": "[송신] Authentication (요청) 15:52:54\n\n{\n    \"userID\": \"kisa\",\n    \"userPW\": \"kisa_k1!2@\"\n}\n\n[수신] Authentication (응답) 15:52:55\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"userName\": \"관리자\",\n    \"userAff\": \"오산시청\",\n    \"accessToken\": \"\"\n}\n\n검증 결과: Authentication (1회 검증 완료) 15:52:55 | 응답 소요 시간: 1.01초 (60초)\n\n통과 필드 수: 5, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
+            }
+          ]
+        },
+        {
+          "id": "cmisjr2u40au05vy7kt6bb6zl",
+          "name": "전송 지원 기능 정보 연동",
+          "method": "POST",
+          "endpoint": "/Capabilities",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 5,
+          "passFields": 5,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "field": "code",
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "transportSupport": [
+                  {
+                    "transProtocolType": "LongPolling",
+                    "transProtocolDesc": ""
+                  },
+                  {
+                    "transProtocolType": "Webhook",
+                    "transProtocolDesc": ""
+                  }
+                ]
+              },
+              "validationErrors": [
+                "오류가 없습니다."
+              ],
+              "transmittedData": "[송신] Capabilities (요청) 15:52:57\n\n{\n}\n\n[수신] Capabilities (응답) 15:52:59\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"transportSupport\": [\n        {\n            \"transProtocolType\": \"LongPolling\",\n            \"transProtocolDesc\": \"\"\n        },\n        {\n            \"transProtocolType\": \"Webhook\",\n            \"transProtocolDesc\": \"\"\n        }\n    ]\n}\n\n검증 결과: Capabilities (1회 검증 완료) 15:52:59 | 응답 소요 시간: 1.99초 (60초)\n\n통과 필드 수: 5, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
+            }
+          ]
+        },
+        {
+          "id": "cmiskf6w20dcm5vy7cjao08fw",
+          "name": "바이오 및 출입통제 장치 목록 정보",
+          "method": "POST",
+          "endpoint": "/DoorProfiles",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 20,
+          "passFields": 20,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "field": "code",
+              "validationData": {
+                "code": "200",
+                "message": "성공",
+                "doorList": [
+                  {
+                    "doorID": "door0001",
+                    "doorName": "A건물 출입문",
+                    "doorRelayStatus": "일반",
+                    "doorSensor": "0",
+                    "doorLoc": {
+                      "lon": "127.127730",
+                      "lat": "38.439801",
+                      "alt": "32.131",
+                      "desc": "3층복도"
+                    },
+                    "bioDeviceList": [
+                      {
+                        "bioDeviceID": "bio0001",
+                        "otherDeviceName": "출입문홍채인식기기",
+                        "bioDeviceAuthTypeList": [
+                          "홍채",
+                          "지문"
+                        ]
+                      },
+                      {
+                        "bioDeviceID": "bio0002",
+                        "bioDeviceName": "출입문지문인식기기",
+                        "bioDeviceAuthTypeList": [
+                          "지문"
+                        ]
+                      }
+                    ],
+                    "otherDeviceList": [
+                      {
+                        "otherDeviceID": "other0001",
+                        "otherDeviceName": "출입문카드인식기기",
+                        "otherDeviceAuthTypeList": [
+                          "카드"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "doorID": "door0002",
+                    "doorName": "B건물 출입문",
+                    "doorRelayStatus": "수동 개방",
+                    "doorSensor": "0",
+                    "doorLoc": {
+                      "lon": "233",
+                      "lat": "123",
+                      "alt": "23",
+                      "desc": "333"
+                    },
+                    "bioDeviceList": [
+                      {
+                        "bioDeviceID": "bio0002",
+                        "bioDeviceName": "정맥인식기기",
+                        "bioDeviceAuthTypeList": [
+                          "정맥"
+                        ]
+                      }
+                    ],
+                    "otherDeviceList": [
+                      {
+                        "otherDeviceID": "other0002",
+                        "otherDeviceName": "카드인식기기",
+                        "otherDeviceAuthTypeList": [
+                          "카드"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "validationErrors": [
+                "오류가 없습니다."
+              ],
+              "transmittedData": "[송신] DoorProfiles (요청) 15:53:01\n\n{\n}\n\n[수신] DoorProfiles (응답) 15:53:03\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\",\n    \"doorList\": [\n        {\n            \"doorID\": \"door0001\",\n            \"doorName\": \"A건물 출입문\",\n            \"doorRelayStatus\": \"일반\",\n            \"doorSensor\": \"0\",\n            \"doorLoc\": {\n                \"lon\": \"127.127730\",\n                \"lat\": \"38.439801\",\n                \"alt\": \"32.131\",\n                \"desc\": \"3층복도\"\n            },\n            \"bioDeviceList\": [\n                {\n                    \"bioDeviceID\": \"bio0001\",\n                    \"otherDeviceName\": \"출입문홍채인식기기\",\n                    \"bioDeviceAuthTypeList\": [\n                        \"홍채\",\n                        \"지문\"\n                    ]\n                },\n                {\n                    \"bioDeviceID\": \"bio0002\",\n                    \"bioDeviceName\": \"출입문지문인식기기\",\n                    \"bioDeviceAuthTypeList\": [\n                        \"지문\"\n                    ]\n                }\n            ],\n            \"otherDeviceList\": [\n                {\n                    \"otherDeviceID\": \"other0001\",\n                    \"otherDeviceName\": \"출입문카드인식기기\",\n                    \"otherDeviceAuthTypeList\": [\n                        \"카드\"\n                    ]\n                }\n            ]\n        },\n        {\n            \"doorID\": \"door0002\",\n            \"doorName\": \"B건물 출입문\",\n            \"doorRelayStatus\": \"수동 개방\",\n            \"doorSensor\": \"0\",\n            \"doorLoc\": {\n                \"lon\": \"233\",\n                \"lat\": \"123\",\n                \"alt\": \"23\",\n                \"desc\": \"333\"\n            },\n            \"bioDeviceList\": [\n                {\n                    \"bioDeviceID\": \"bio0002\",\n                    \"bioDeviceName\": \"정맥인식기기\",\n                    \"bioDeviceAuthTypeList\": [\n                        \"정맥\"\n                    ]\n                }\n            ],\n            \"otherDeviceList\": [\n                {\n                    \"otherDeviceID\": \"other0002\",\n                    \"otherDeviceName\": \"카드인식기기\",\n                    \"otherDeviceAuthTypeList\": [\n                        \"카드\"\n                    ]\n                }\n            ]\n        }\n    ]\n}\n\n검증 결과: DoorProfiles (1회 검증 완료) 15:53:03 | 응답 소요 시간: 2.01초 (60초)\n\n통과 필드 수: 20, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
+            }
+          ]
+        },
+        {
+          "id": "cmixuoetf0gr9p002gy101xid-registration",
+          "name": "실시간 출입통제 장치 상태 정보 연동-상태조회",
+          "method": "POST",
+          "endpoint": "/RealtimeDoorStatus",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 7,
+          "passFields": 7,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "field": "code",
+              "validationData": {
+                "code": "성공",
+                "message": "200"
+              },
+              "validationErrors": [
+                "오류가 없습니다.",
+                "--- Webhook 검증 ---",
+                "오류가 없습니다."
+              ],
+              "transmittedData": "[송신] RealtimeDoorStatus (요청) 15:53:05\n\n{\n    \"doorList\": [\n        {\n            \"doorID\": \"door0002\"\n        }\n    ],\n    \"duration\": 10000,\n    \"transProtocol\": {\n        \"transProtocolType\": \"WebHook\",\n        \"transProtocolDesc\": \"https://192.168.0.6:8081\"\n    },\n    \"startTime\": 20260112065600000\n}\n\n[수신] RealtimeDoorStatus (응답) 15:53:06\n\n{\n    \"code\": \"성공\",\n    \"message\": \"200\"\n}"
+            }
+          ]
+        },
+        {
+          "id": "cmixuoetf0gr9p002gy101xid-webhook",
+          "name": "실시간 출입통제 장치 상태 정보 연동-상태조회 (Webhook)",
+          "method": "POST",
+          "endpoint": "/RealtimeDoorStatus/webhook",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 5,
+          "passFields": 5,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "field": "doorList",
+              "validationData": {
+                "doorList": [
+                  {
+                    "doorID": "door0002",
+                    "doorName": "B건물 출입문",
+                    "doorRelaySensor": "수동 개방",
+                    "doorSensor": "Lock"
+                  }
+                ]
+              },
+              "validationErrors": [
+                "오류가 없습니다."
+              ],
+              "transmittedData": {
+                "doorList": [
+                  {
+                    "doorID": "door0002",
+                    "doorName": "B건물 출입문",
+                    "doorRelaySensor": "수동 개방",
+                    "doorSensor": "Lock"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "cmixuttgv0hbyp002h6os6wjc",
+          "name": "출입 통제 장치 제어 정보 연동",
+          "method": "POST",
+          "endpoint": "/DoorControl",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 2,
+          "passFields": 2,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "field": "code",
+              "validationData": {
+                "code": "200",
+                "message": "성공"
+              },
+              "validationErrors": [
+                "오류가 없습니다."
+              ],
+              "transmittedData": "[송신] DoorControl (요청) 15:53:08\n\n{\n    \"doorID\": \"door0001\",\n    \"commandType\": \"\"\n}\n\n[수신] DoorControl (응답) 15:53:10\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\"\n}\n\n검증 결과: DoorControl (1회 검증 완료) 15:53:10 | 응답 소요 시간: 2.00초 (60초)\n\n통과 필드 수: 2, 실패 필드 수: 0 | 일반 메시지\n\n평가 점수: 100.0%"
+            }
+          ]
+        },
+        {
+          "id": "cmixuvzks0hd3p002rcrvqdt4-registration",
+          "name": "실시간 출입통제 장치 상태 정보 연동-결과조회",
+          "method": "POST",
+          "endpoint": "/RealtimeDoorStatus",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 7,
+          "passFields": 7,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "field": "code",
+              "validationData": {
+                "code": "200",
+                "message": "성공"
+              },
+              "validationErrors": [
+                "오류가 없습니다.",
+                "--- Webhook 검증 ---",
+                "오류가 없습니다."
+              ],
+              "transmittedData": "[송신] RealtimeDoorStatus (요청) 15:53:12\n\n{\n    \"doorList\": [\n        {\n            \"doorID\": \"door0001\"\n        }\n    ],\n    \"duration\": 10000,\n    \"transProtocol\": {\n        \"transProtocolType\": \"WebHook\",\n        \"transProtocolDesc\": \"https://192.168.0.6:8081\"\n    },\n    \"startTime\": 20251105163010124\n}\n\n[수신] RealtimeDoorStatus (응답) 15:53:14\n\n{\n    \"code\": \"200\",\n    \"message\": \"성공\"\n}"
+            }
+          ]
+        },
+        {
+          "id": "cmixuvzks0hd3p002rcrvqdt4-webhook",
+          "name": "실시간 출입통제 장치 상태 정보 연동-결과조회 (Webhook)",
+          "method": "POST",
+          "endpoint": "/RealtimeDoorStatus/webhook",
+          "score": 100.0,
+          "validationCnt": 1,
+          "totalFields": 5,
+          "passFields": 5,
+          "failFields": 0,
+          "validations": [
+            {
+              "attempt": 1,
+              "field": "doorList",
+              "validationData": {
+                "doorList": [
+                  {
+                    "doorID": "door0001",
+                    "doorName": "A건물 출입문",
+                    "doorRelaySensor": "일반",
+                    "doorSensor": "Lock"
+                  }
+                ]
+              },
+              "validationErrors": [
+                "오류가 없습니다."
+              ],
+              "transmittedData": {
+                "doorList": [
+                  {
+                    "doorID": "door0001",
+                    "doorName": "A건물 출입문",
+                    "doorRelaySensor": "일반",
+                    "doorSensor": "Lock"
+                  }
+                ]
+              }
             }
           ]
         }
       ]
     }
   ],
-  "completedDate": "2026-04-20T06:09:52Z"
+  "completedDate": "2026-04-20T06:53:14Z"
 }
