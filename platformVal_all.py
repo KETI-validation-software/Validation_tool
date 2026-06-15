@@ -1069,11 +1069,11 @@ class MyApp(PlatformMainUI):
                                     if _vr == "FAIL":
                                         step_result = "FAIL"
                                         _vt_txt = to_detail_text(_vt)
-                                        wh_fail_texts.append(f"[웹훅 메시지 #{_i}] {_vt_txt}")
-                                        combined_error_parts.append(f"\n--- 웹훅 검증 [웹훅 메시지 #{_i}] ---\n" + _vt_txt)
-                                # ✅ 단일/복수 모두 [웹훅 메시지 #N] 라벨 부여 (시스템과 동일)
+                                        wh_fail_texts.append(f"[웹훅 메시지 {_i}] {_vt_txt}")
+                                        combined_error_parts.append(f"\n--- 웹훅 검증 [웹훅 메시지 {_i}] ---\n" + _vt_txt)
+                                # ✅ 단일/복수 모두 [웹훅 메시지 N] 라벨 부여 (시스템과 동일)
                                 _wh_body = "\n\n".join(
-                                    f"[웹훅 메시지 #{_n}]\n{_a}" for _n, _a in enumerate(_wh_acks, start=1)
+                                    f"[웹훅 메시지 {_n}]\n{_a}" for _n, _a in enumerate(_wh_acks, start=1)
                                 )
                                 accumulated['data_parts'].append(
                                     f"\n{_wh_body}")

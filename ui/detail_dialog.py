@@ -128,9 +128,9 @@ class CombinedDetailDialog(QDialog):
             import html as _html, re as _re
             data_text = step_buffer["data"]
             _escaped = _html.escape(data_text, quote=False)
-            # 웹훅 이벤트 라벨 [웹훅 이벤트 #N] 을 볼드 + 파란색(#4B72E0)으로 강조
+            # 웹훅 메시지 라벨 [웹훅 메시지 N] 을 볼드 + 파란색(#4B72E0)으로 강조
             _escaped = _re.sub(
-                r'(\[웹훅 메시지 #\d+\])',
+                r'(\[웹훅 메시지 \d+\])',
                 r'<span style="color:#1C5DB1; font-weight:700;">\1</span>',
                 _escaped,
             )

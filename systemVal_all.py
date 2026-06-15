@@ -1526,14 +1526,14 @@ class MyApp(SystemMainUI):
                 opt_error += v['opt_error']
                 if v['val_result'] != 'PASS':
                     val_result = 'FAIL'
-                    val_text_parts.append(f"[웹훅 메시지 #{i + 1}] {v['val_text']}")
+                    val_text_parts.append(f"[웹훅 메시지 {i + 1}] {v['val_text']}")
             val_text = "\n".join(val_text_parts) if val_text_parts else ""
             last_event = results_list[-1]
-            # ✅ 단일/복수 모두 [웹훅 메시지 #N] 라벨 부여 (받은 이벤트 전부 상세에 표시)
+            # ✅ 단일/복수 모두 [웹훅 메시지 N] 라벨 부여 (받은 이벤트 전부 상세에 표시)
             _ev_parts = []
             for _i, _ev in enumerate(results_list, start=1):
                 _ev_txt = json.dumps(_ev, indent=4, ensure_ascii=False) if _ev else "null"
-                _ev_parts.append(f"[웹훅 메시지 #{_i}]\n{_ev_txt}")
+                _ev_parts.append(f"[웹훅 메시지 {_i}]\n{_ev_txt}")
             tmp_webhook_res = "\n\n".join(_ev_parts)
 
         if val_result == "PASS":
