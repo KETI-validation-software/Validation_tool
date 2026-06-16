@@ -965,6 +965,7 @@ class MyApp(PlatformMainUI):
                     webhook_event_log_text = None
                     webhook_ack_log_text = None
                     webhook_monitor_pairs = []  # ✅ 이벤트별 (event_json, ack_json, index) — 시스템처럼 #N 표시
+                    _rendered_wh = 0  # ✅ 창 안에서 실시간 렌더한 웹훅 이벤트 개수 (없으면 0)
                     if self.cnt < len(self.step_buffers):
                         upsert_attempt_log(
                             self.step_buffers[self.cnt],
@@ -1010,6 +1011,22 @@ class MyApp(PlatformMainUI):
                         if _window_started_at is None:
                             _window_started_at = time.perf_counter()
                         _window_deadline = _window_started_at + self.WEBHOOK_FAILFAST_TIMEOUT_SEC
+
+                        # ✅ 실시간 표시(1/2): 응답(구독 ACK) 로그를 창 진입 전에 먼저 그린다.
+                        #    (기존엔 창 닫힌 뒤 일괄 렌더 → 우르르 떴음. 이제 일반 메시지처럼 즉시 표시)
+                        from core.utils import replace_transport_desc_for_display as _rtd
+                        _wh_display_name = self.Server.message_display[self.cnt] if self.cnt < len(self.Server.message_display) else api_name
+                        _wh_response_json = json.dumps(response_data, indent=4, ensure_ascii=False) if 'response_data' in locals() else "{}"
+                        response_log_text = self.append_monitor_log(
+                            step_name=build_monitor_step_name(_wh_display_name, "response"),
+                            request_json=_wh_response_json,
+                            direction="SEND"
+                        )
+                        # 송신 페이로드(event)는 모든 이벤트 공통 — 한 번만 로드
+                        _wh_event_payload = load_from_trace_file(api_name, "WEBHOOK_OUT") or {}
+                        _wh_event_json = _rtd(json.dumps(_wh_event_payload, indent=4, ensure_ascii=False)) if _wh_event_payload else "null"
+                        _rendered_wh = 0  # 창 안에서 실시간으로 이미 그린 이벤트 개수
+
                         while time.perf_counter() < _window_deadline:
                             _wh_th = getattr(self.Server, 'webhook_thread', None)
                             if _wh_th is not None and _wh_th.is_alive():
@@ -1019,6 +1036,25 @@ class MyApp(PlatformMainUI):
                             # 창 동안에는 타이머를 건드리지 않는다 — 응답 소요시간은 일반 요청-응답까지만이며
                             # 위에서 이미 확정·표시했다. 창은 페이싱(시스템 수신창 정렬) 목적으로만 대기한다.
                             QApplication.processEvents()
+
+                            # ✅ 실시간 표시(2/2): 새로 도착한 웹훅 응답을 그때그때 event#N/ack#N 으로 렌더
+                            #    (백그라운드 송신 스레드가 webhook_response_list에 append → 여기선 읽기만)
+                            _wh_resp_now = list(getattr(self.Server, 'webhook_response_list', None) or [])
+                            while _rendered_wh < len(_wh_resp_now):
+                                _i = _rendered_wh + 1
+                                _wh_one = _wh_resp_now[_rendered_wh]
+                                _ack_json = _rtd(json.dumps(_wh_one, indent=4, ensure_ascii=False)) if _wh_one else "null"
+                                self.append_monitor_log(
+                                    step_name=f"{build_webhook_monitor_step_name(_wh_display_name, 'event')} #{_i}",
+                                    request_json=_wh_event_json,
+                                    direction="SEND",
+                                )
+                                self.append_monitor_log(
+                                    step_name=f"{build_webhook_monitor_step_name(_wh_display_name, 'ack')} #{_i}",
+                                    request_json=_ack_json,
+                                    direction="RECV",
+                                )
+                                _rendered_wh += 1
 
                         # 실제 웹훅 응답 사용
                         # ✅ 웹훅 응답이 null인 경우에도 검증을 수행하여 실패로 카운트
@@ -1177,15 +1213,18 @@ class MyApp(PlatformMainUI):
                         self.monitor_response_elapsed_ms[self.cnt] = int(round((time.perf_counter() - started_at) * 1000))
                     # Final table timer should reflect response elapsed time (integer seconds).
                     self._set_timer_success(self.cnt)
-                response_log_text = self.append_monitor_log(
-                    step_name=build_monitor_step_name(display_name, "response"),
-                    request_json=tmp_response_json,
-                    direction="SEND"
-                )
+                # ✅ WebHook은 위(창 진입 전)에서 이미 응답 로그를 그렸다 → 중복 렌더 방지
+                if current_protocol != "WebHook":
+                    response_log_text = self.append_monitor_log(
+                        step_name=build_monitor_step_name(display_name, "response"),
+                        request_json=tmp_response_json,
+                        direction="SEND"
+                    )
 
                 # ✅ 이벤트별로 송신(event)/수신(ack) 모니터 로그를 #N suffix로 기록 (시스템과 동일)
+                # 창 안에서 실시간으로 이미 그린 이벤트는 건너뛴다 (보통 전부 그려져 잔여 0개)
                 if current_protocol == "WebHook" and webhook_monitor_pairs:
-                    for _ev_json, _ack_json, _idx in webhook_monitor_pairs:
+                    for _ev_json, _ack_json, _idx in webhook_monitor_pairs[_rendered_wh:]:
                         self.append_monitor_log(
                             step_name=f"{build_webhook_monitor_step_name(display_name, 'event')} #{_idx}",
                             request_json=_ev_json,
