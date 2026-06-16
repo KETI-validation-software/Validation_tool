@@ -887,11 +887,13 @@ class MyApp(PlatformMainUI):
                             Logger.debug(f" 경고: doorList는 있지만 내부에 doorID가 없습니다.")                       
                         
                                 
+                    # ✅ 스키마 리스트가 메시지보다 짧을 때 IndexError로 시험이 중단되지 않도록 가드
+                    in_schema = self.videoInSchema[self.cnt] if self.cnt < len(self.videoInSchema) else {}
                     try:
                         Logger.debug(f" json_check_ 호출 시작")
 
                         val_result, val_text, key_psss_cnt, key_error_cnt, opt_correct, opt_error = json_check_(
-                            self.videoInSchema[self.cnt],
+                            in_schema,
                             current_data,
                             self.flag_opt,
                             validation_rules=current_validation,
@@ -902,7 +904,7 @@ class MyApp(PlatformMainUI):
                     except TypeError as e:
                         Logger.debug(f" TypeError 발생, 맥락 검증 제외 하고 다시 시도: {e}")
                         val_result, val_text, key_psss_cnt, key_error_cnt, opt_correct, opt_error = json_check_(
-                            self.videoInSchema[self.cnt],
+                            in_schema,
                             current_data,
                             self.flag_opt
                         )
@@ -1094,7 +1096,7 @@ class MyApp(PlatformMainUI):
                                     _wh_acks.append(_ack)
 
                                     _vr, _vt, _vp, _ve, _vop, _voe = json_check_(
-                                        self.videoWebhookSchema[self.cnt], _wh, self.flag_opt
+                                        (self.videoWebhookSchema[self.cnt] if self.cnt < len(self.videoWebhookSchema) else {}), _wh, self.flag_opt
                                     )
                                     add_pass += _vp
                                     add_err += _ve
@@ -1119,7 +1121,7 @@ class MyApp(PlatformMainUI):
                                 webhook_monitor_pairs.append((tmp_webhook_event, "null", 1))
                                 accumulated['data_parts'].append(f"\nnull")
                                 _vr, _vt, _vp, _ve, _vop, _voe = json_check_(
-                                    self.videoWebhookSchema[self.cnt], {}, self.flag_opt
+                                    (self.videoWebhookSchema[self.cnt] if self.cnt < len(self.videoWebhookSchema) else {}), {}, self.flag_opt
                                 )
                                 add_pass += _vp
                                 add_err += _ve
@@ -1158,7 +1160,7 @@ class MyApp(PlatformMainUI):
                             # 웹훅 스키마가 있는 경우 빈 딕셔너리로 검증 수행
                             webhook_response = {}
                             webhook_resp_val_result, webhook_resp_val_text, webhook_resp_key_psss_cnt, webhook_resp_key_error_cnt, opt_correct, opt_error = json_check_(
-                                self.videoWebhookSchema[self.cnt], webhook_response, self.flag_opt
+                                (self.videoWebhookSchema[self.cnt] if self.cnt < len(self.videoWebhookSchema) else {}), webhook_response, self.flag_opt
                             )
 
                             add_pass += webhook_resp_key_psss_cnt
@@ -1277,6 +1279,9 @@ class MyApp(PlatformMainUI):
                         'data_parts'] else "아직 수신된 데이터가 없습니다."
                     error_text = "\n".join(accumulated['error_messages']) if accumulated[
                         'error_messages'] else "오류가 없습니다."
+                    # ✅ step_buffers가 메시지보다 짧을 때(재개 등) IndexError 방지 패딩
+                    while len(self.step_buffers) <= self.cnt:
+                        self.step_buffers.append({})
                     self.step_buffers[self.cnt]["data"] = data_text
                     self.step_buffers[self.cnt]["error"] = error_text
                     self.step_buffers[self.cnt]["result"] = final_result
@@ -1376,16 +1381,19 @@ class MyApp(PlatformMainUI):
                 self._set_timer_timeover(self.cnt, time_interval)
 
                 # message missing인 경우 버퍼 업데이트
+                # ✅ step_buffers가 메시지보다 짧을 때(재개 등) IndexError 방지 패딩
+                while len(self.step_buffers) <= self.cnt:
+                    self.step_buffers.append({})
                 self.step_buffers[self.cnt]["data"] = "아직 수신된 데이터가 없습니다."
                 self.step_buffers[self.cnt]["error"] = "메시지 미수신"
                 self.step_buffers[self.cnt]["result"] = "FAIL"
 
-                tmp_fields_rqd_cnt, tmp_fields_opt_cnt = timeout_field_finder(self.Server.inSchema[self.cnt])
+                tmp_fields_rqd_cnt, tmp_fields_opt_cnt = timeout_field_finder(self.Server.inSchema[self.cnt] if self.cnt < len(self.Server.inSchema) else {})
 
                 # ✅ 웹훅 API인 경우 웹훅 스키마 필드 수도 추가
                 current_protocol = self.trans_protocols[self.cnt] if self.cnt < len(self.trans_protocols) else "basic"
                 if current_protocol == "WebHook" :
-                    webhook_rqd_cnt, webhook_opt_cnt = timeout_field_finder(self.videoWebhookSchema[self.cnt])
+                    webhook_rqd_cnt, webhook_opt_cnt = timeout_field_finder((self.videoWebhookSchema[self.cnt] if self.cnt < len(self.videoWebhookSchema) else {}))
                     tmp_fields_rqd_cnt += webhook_rqd_cnt
                     tmp_fields_opt_cnt += webhook_opt_cnt
                     Logger.debug(f" 웹훅 필드 수 추가: 필수={webhook_rqd_cnt}, 선택={webhook_opt_cnt}")
