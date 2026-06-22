@@ -17,7 +17,7 @@ cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_in_data = {
         "doorID": ""
     }
 ],
-    "duration": 10000,
+    "duration": 100,
     "transProtocol": {
     "transProtocolType": "Webhook",
     "transProtocolDesc": ""
@@ -44,7 +44,7 @@ cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_in_data = {
         "doorID": ""
     }
 ],
-    "duration": 10000,
+    "duration": 100,
     "transProtocol": {
     "transProtocolType": "Webhook",
     "transProtocolDesc": ""
@@ -226,7 +226,7 @@ cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_in_data = {
         "sensorDeviceID": ""
     }
 ],
-    "duration": 1000,
+    "duration": 100,
     "transProtocol": {
     "transProtocolType": "Webhook",
     "transProtocolDesc": ""
@@ -313,7 +313,7 @@ cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_in_data = {
         "doorID": ""
     }
 ],
-    "duration": 10000,
+    "duration": 100,
     "transProtocol": {
     "transProtocolType": "WebHook",
     "transProtocolDesc": ""

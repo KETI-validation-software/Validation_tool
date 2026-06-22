@@ -74,6 +74,17 @@ class MyApp(SystemMainUI):
             pass
         return base_timeout
 
+    def _webhook_window_seconds(self, idx, duration):
+        """웹훅 이벤트 창(초). duration(초) 기준, 상한 2×time_out, 없으면 폴백 10초."""
+        base = self.time_outs[idx] / 1000 if idx < len(self.time_outs) else 60.0
+        cap = 2 * base
+        try:
+            if duration is not None and float(duration) > 0:
+                return min(float(duration), cap)
+        except (TypeError, ValueError):
+            pass
+        return float(getattr(self.CONSTANTS, 'WEBHOOK_WINDOW_SEC', 10.0))
+
     def _load_from_trace_file(self, api_name, direction="RESPONSE"):
         """Trace 파일에서 최신 이벤트 데이터 로드"""
         try:
@@ -1323,7 +1334,11 @@ class MyApp(SystemMainUI):
                     self._webhook_base_error = 0
                     self._webhook_base_opt_pass = 0
                     self._webhook_base_opt_error = 0
-                    self.webhook_thread = WebhookThread(url, port, msg, timeout_sec=self.WEBHOOK_FAILFAST_TIMEOUT_SEC)
+                    # ✅ 웹훅 이벤트 창 = 보낼 구독요청의 duration(초) 기준 (없으면 폴백 10초)
+                    _wh_duration = json_data_dict.get("duration") if isinstance(json_data_dict, dict) else None
+                    self._webhook_window_sec = self._webhook_window_seconds(self.cnt, _wh_duration)
+                    Logger.debug(f"[webhook] 이벤트 창={self._webhook_window_sec}초 (duration={_wh_duration}, cap=2×time_out)")
+                    self.webhook_thread = WebhookThread(url, port, msg, timeout_sec=self._webhook_window_sec)
                     self.webhook_thread.result_signal.connect(self.handle_webhook_result)
                     self.webhook_thread.start()
                     # 서버가 완전히 준비될 때까지 대기 (최대 15초)
@@ -1643,7 +1658,8 @@ class MyApp(SystemMainUI):
             # 웹훅 이벤트 수신 확인 - webhook_thread.wait()이 이미 동기화 처리하므로 별도 sleep 불필요
             if self.webhook_flag is True:
                 api_name = self.message[self.cnt] if self.cnt < len(self.message) else 'N/A'
-                current_timeout = self._get_effective_timeout_seconds(self.cnt)
+                # 웹훅 이벤트 창 표시는 duration 기반 값(:1326에서 계산·저장) 사용, 폴백은 기존 함수
+                current_timeout = getattr(self, '_webhook_window_sec', None) or self._get_effective_timeout_seconds(self.cnt)
                 event_count = len(getattr(self, 'webhook_results_list', []))
 
                 webhook_thread_alive = (
