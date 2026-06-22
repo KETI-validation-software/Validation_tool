@@ -416,6 +416,17 @@ class MyApp(PlatformMainUI):
     def _reset_all_row_timers(self):
         self.reset_all_api_timers()
 
+    def _webhook_window_seconds(self, idx, duration):
+        """웹훅 이벤트 창(초). duration(초) 기준, 상한 2×time_out, 없으면 폴백 10초."""
+        base = self.time_outs[idx] / 1000 if idx < len(self.time_outs) else 60.0
+        cap = 2 * base
+        try:
+            if duration is not None and float(duration) > 0:
+                return min(float(duration), cap)
+        except (TypeError, ValueError):
+            pass
+        return float(getattr(self.CONSTANTS, 'WEBHOOK_WINDOW_SEC', 10.0))
+
     def _record_webhook_payload_elapsed(self, row, event_received_at=None):
         started_at = self.monitor_request_started_at.get(row)
         if started_at is None:
@@ -1012,7 +1023,11 @@ class MyApp(PlatformMainUI):
                         _window_started_at = getattr(self.Server, 'webhook_window_started_at', None)
                         if _window_started_at is None:
                             _window_started_at = time.perf_counter()
-                        _window_deadline = _window_started_at + self.WEBHOOK_FAILFAST_TIMEOUT_SEC
+                        # ✅ 웹훅 이벤트 창 = 수신한 구독요청(current_data)의 duration(초) 기준 (없으면 폴백 10초)
+                        _wh_duration = current_data.get("duration") if isinstance(current_data, dict) else None
+                        _wh_window = self._webhook_window_seconds(self.cnt, _wh_duration)
+                        Logger.debug(f"[webhook] 플랫폼 이벤트 창={_wh_window}초 (duration={_wh_duration})")
+                        _window_deadline = _window_started_at + _wh_window
 
                         # ✅ 실시간 표시(1/2): 응답(구독 ACK) 로그를 창 진입 전에 먼저 그린다.
                         #    (기존엔 창 닫힌 뒤 일괄 렌더 → 우르르 떴음. 이제 일반 메시지처럼 즉시 표시)

@@ -47,7 +47,7 @@ class Server(BaseHTTPRequestHandler):
     webhook_response = None  # ✅ 웹훅 응답 (클래스 변수, 마지막 응답)
     webhook_response_list = None  # ✅ 이벤트별 응답 누적 목록 (시스템 webhook_results_list와 동일 역할)
     # 임시 테스트: 웹훅을 연속 N회 전송 (1=단건, N>1=다중 전송 테스트) (0602)
-    WEBHOOK_MULTI_SEND_COUNT = 3            # 보낼 이벤트 수 (실검증=1, 테스트=N) — 상한
+    WEBHOOK_MULTI_SEND_COUNT = 1            # 보낼 이벤트 수 (실검증=1, 테스트=N) — 상한
     WEBHOOK_SEND_INTERVAL_MIN = 0.1         # 이벤트 간 불규칙 간격 최소(초) — N>1일 때만 의미
     WEBHOOK_SEND_INTERVAL_MAX = 3.0         # 이벤트 간 불규칙 간격 최대(초)
     WEBHOOK_SEND_SEED = 42                  # 간격 랜덤 재현용 고정 시드
@@ -139,8 +139,8 @@ class Server(BaseHTTPRequestHandler):
         메시지별 가장 최근 이벤트를 반환
         """
         direction = direction.upper()
-        if api_name in Server.latest_event:  # ✅ 클래스 변수 사용
-            return Server.latest_event[api_name].get(direction)  # ✅ 클래스 변수 사용
+        if api_name in Server.latest_event:  # 클래스 변수 사용
+            return Server.latest_event[api_name].get(direction)  # 클래스 변수 사용
         return None
 
     def get_api_name_with_retry_suffix(self, base_api_name):
@@ -1112,7 +1112,18 @@ class Server(BaseHTTPRequestHandler):
         Server.webhook_response_list = []  # ✅ 이벤트별 응답 누적 (시스템 webhook_results_list와 동일)
         # ✅ 창(WEBHOOK_WINDOW_SEC)도 상한, 개수(total)도 상한 → 둘 중 먼저 닿으면 멈춤
         #    실검증: total=1 → 1건 보내고 즉시 종료 / 테스트: total=N → 불규칙 간격으로 창 안에서 N건
-        window_sec = float(getattr(self.CONSTANTS, 'WEBHOOK_WINDOW_SEC', 10.0))
+        # ✅ 웹훅 이벤트 창 = 수신 요청의 duration(초) 기준. Server엔 per-API time_out이 없어
+        #    2×time_out cap은 생략(데이터는 서버에서 보정됨, 실제 대기 상한은 platformVal 창이 강제).
+        _wh_dur = None
+        try:
+            _req_evt = Server.latest_event.get(api_name, {}).get("REQUEST", {})
+            _wh_dur = (_req_evt.get("data", {}) or {}).get("duration")
+        except Exception:
+            _wh_dur = None
+        try:
+            window_sec = float(_wh_dur) if (_wh_dur is not None and float(_wh_dur) > 0) else float(getattr(self.CONSTANTS, 'WEBHOOK_WINDOW_SEC', 10.0))
+        except (TypeError, ValueError):
+            window_sec = float(getattr(self.CONSTANTS, 'WEBHOOK_WINDOW_SEC', 10.0))
         rng = random.Random(Server.WEBHOOK_SEND_SEED)  # 고정 시드 → 매 실행 동일한 불규칙 패턴(재현 가능)
         _start = time.perf_counter()
         send_num = 0
