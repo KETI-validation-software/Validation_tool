@@ -176,6 +176,8 @@ class MyApp(PlatformMainUI):
         SPEC_CONFIG = load_external_constants(self.CONSTANTS)
         # ✅ 외부 CONSTANTS 재로드 직후 웹훅 창 시간 갱신 (__init__에서 빌드시점 값으로 먼저 읽힌 것 교정)
         self.WEBHOOK_FAILFAST_TIMEOUT_SEC = float(getattr(self.CONSTANTS, 'WEBHOOK_WINDOW_SEC', 10.0))
+        # ✅ 시험범위(선택 필드 검증 여부)도 같이 교정 — __init__(:95)에서 옛 값으로 먼저 읽힘
+        self.flag_opt = self.CONSTANTS.flag_opt
 
         # ✅ 하위 호환성을 위한 변수 (읽기 전용)
         self.base_url = self._original_base_url

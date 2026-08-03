@@ -633,6 +633,10 @@ class MyApp(SystemMainUI):
                     self.CONSTANTS.test_category = namespace.get('test_category', self.CONSTANTS.test_category)
                     self.CONSTANTS.test_target = namespace.get('test_target', self.CONSTANTS.test_target)
                     self.CONSTANTS.test_range = namespace.get('test_range', self.CONSTANTS.test_range)
+                    # ✅ 시험범위에 따른 선택 필드 검증 여부도 함께 갱신
+                    #    (test_range만 갱신되고 flag_opt는 빌드시점 값에 고착되던 문제)
+                    self.CONSTANTS.flag_opt = namespace.get('flag_opt', self.CONSTANTS.flag_opt)
+                    self.flag_opt = self.CONSTANTS.flag_opt
                     webhook_public_ip = namespace.get('WEBHOOK_PUBLIC_IP', None)
                     if webhook_public_ip:
                         self.CONSTANTS.WEBHOOK_PUBLIC_IP = webhook_public_ip

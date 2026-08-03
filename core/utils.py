@@ -446,6 +446,7 @@ def load_external_constants(constants_module):
                     'url', 'auth_type', 'auth_info', 'company_name', 'product_name',
                     'version', 'test_category', 'test_target', 'test_range',
                     'WEBHOOK_WINDOW_SEC',  # ✅ 웹훅 창 시간 — 플랫폼 대기창/송신창도 외부 설정 따라가도록
+                    'flag_opt',  # ✅ 선택 필드 검증 여부 — test_range만 갱신되고 flag_opt는 빌드시점 값에 고착되던 문제
                 ]
 
                 # 덮어씌우기
