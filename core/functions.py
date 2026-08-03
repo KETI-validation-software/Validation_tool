@@ -198,6 +198,13 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
 
         # 1) 필드 목록 및 데이터 추출 (json_checker_new 함수 사용)
         flat_fields, opt_fields = get_flat_fields_from_schema(schema)
+        # ✅ 필수 필드 모드(flag_opt=False)면 선택 필드를 여기서 아예 떨궈서 검증 대상에서 제외
+        #    (누락이든 값이 틀렸든 검증하지 않고 분모에도 넣지 않음)
+        # ponytail: 진입점 한 곳에서 걸러 이후 전 경로(맥락검증 실패 분기·필드 루프·요약 로그·
+        #           카운트 정합성 체크)가 자동으로 따라오게 함
+        if not CONSTANTS.flag_opt:
+            flat_fields = {k: v for k, v in flat_fields.items() if k not in opt_fields}
+            opt_fields = set()
         required_fields = [f for f in flat_fields.keys() if f not in opt_fields]
         optional_fields = list(opt_fields)
 
