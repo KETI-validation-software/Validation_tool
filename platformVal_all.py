@@ -2210,14 +2210,15 @@ class MyApp(PlatformMainUI):
             Logger.error(f" 초기 시나리오 선택 실패: {e}")
             import traceback
             traceback.print_exc()
-    def show_combined_result(self, row):
-        """통합 상세 내용 확인"""
+    def show_combined_result(self, row, api_name_override=None):
+        """통합 상세 내용 확인 (api_name_override: 4페이지가 자기 테이블 이름을 넘겨줄 때 사용)"""
         try:
             buf = self.step_buffers[row]
-            api_item = self.tableWidget.item(row, 1)
-            api_name = ""
-            if api_item is not None:
-                api_name = api_item.data(Qt.UserRole) or api_item.text()
+            api_name = api_name_override or ""
+            if not api_name:
+                api_item = self.tableWidget.item(row, 1)
+                if api_item is not None:
+                    api_name = api_item.data(Qt.UserRole) or api_item.text()
 
             # 스키마 데이터 가져오기
             try:
