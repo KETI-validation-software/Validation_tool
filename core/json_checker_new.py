@@ -365,14 +365,21 @@ def get_flat_fields_from_schema(schema):
 
                 for k, v in first.items():
                     keyname = _norm_key(k)
-                    is_opt = isinstance(k, OptionalKey)
+                    # ✅ 부모가 선택이면 하위도 선택으로 물려받음 (조건부 필수)
+                    #    예: OptionalKey("camList"): [{"camID": str}]
+                    #    → camList를 보냈다면 camID가 필수라는 뜻이므로,
+                    #      camList 자체를 생략할 수 있는 이상 camID도 무조건 필수는 아님
+                    is_opt = isinstance(k, OptionalKey) or is_current_optional
                     child_path = f"{path}.{keyname}" if path else keyname
                     walk(v, child_path, is_opt)
             else:
                 # Primitive array ([str], [int] 등):
                 # 현재 path는 저장하지 않고, path[]만 생성
+                # ✅ 부모의 선택 여부를 그대로 물려줌
+                #    (OptionalKey("classFilter"): [str] 처럼 선택 필드가 원시 배열이면
+                #     여기서 플래그를 잃고 필수로 등록되던 문제)
                 child_path = f"{path}[]"
-                walk(first, child_path, False)
+                walk(first, child_path, is_current_optional)
 
         elif isinstance(node, dict):
             if path:
@@ -382,7 +389,8 @@ def get_flat_fields_from_schema(schema):
 
             for k, v in node.items():
                 keyname = _norm_key(k)
-                is_opt = isinstance(k, OptionalKey)
+                # ✅ 부모가 선택이면 하위도 선택 (위 list 분기와 동일 규칙)
+                is_opt = isinstance(k, OptionalKey) or is_current_optional
                 child_path = f"{path}.{keyname}" if path else keyname
                 walk(v, child_path, is_opt)
 

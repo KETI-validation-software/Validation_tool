@@ -934,29 +934,7 @@ class ResultPageWidget(QWidget):
             setattr(self, attr_name, new_widget)
         self._apply_score_widget_resize()
 
-    def _show_detail(self, row):
-        if hasattr(self.parent, 'show_combined_result'):
-            self.parent.show_combined_result(row)
-            return
-
-        try:
-            api_item = self.tableWidget.item(row, 1)
-            if api_item is None:
-                QMessageBox.warning(self, "오류", "상세 정보 API 항목을 찾을 수 없습니다.")
-                return
-            api_name = api_item.data(Qt.UserRole) or api_item.text()
-            buf = self.parent.step_buffers[row] if row < len(self.parent.step_buffers) else {"data": "", "error": "", "result": ""}
-            schema_data = self.parent.videoOutSchema[row] if row < len(self.parent.videoOutSchema) else None
-            webhook_schema = None
-            if hasattr(self.parent, 'trans_protocols') and row < len(self.parent.trans_protocols):
-                current_protocol = self.parent.trans_protocols[row]
-                if current_protocol == "WebHook" and hasattr(self.parent, 'webhookInSchema') and row < len(self.parent.webhookInSchema):
-                    webhook_schema = self.parent.webhookInSchema[row]
-            dialog = CombinedDetailDialog(api_name, buf, schema_data, webhook_schema)
-            dialog.exec_()
-        except Exception as e:
-            Logger.error(f"상세 정보 표시 오류: {e}")
-            QMessageBox.warning(self, "오류", f"상세 정보를 표시할 수 없습니다.\n{str(e)}")
+    # ✅ _show_detail 중복 정의 제거 (동일 내용이 아래쪽에 한 번 더 있었고, 뒤쪽 정의만 동작했음)
 
     def _get_table_item_text(self, table_widget, row, col):
         if table_widget is None:
@@ -1911,7 +1889,12 @@ class ResultPageWidget(QWidget):
 
     def _show_detail(self, row):
         if hasattr(self.parent, 'show_combined_result'):
-            self.parent.show_combined_result(row)
+            # ✅ API 이름은 4페이지(자기) 테이블에서 읽어 넘긴다.
+            #    3페이지 테이블은 4페이지에서 시나리오만 바꿀 때 갱신되지 않아
+            #    이전 시나리오의 같은 행 이름이 제목에 뜨던 문제가 있었음.
+            api_item = self.tableWidget.item(row, 1)
+            api_name = (api_item.data(Qt.UserRole) or api_item.text()) if api_item is not None else None
+            self.parent.show_combined_result(row, api_name)
             return
 
         try:

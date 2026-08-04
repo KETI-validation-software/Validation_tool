@@ -13,11 +13,26 @@ from json_checker import OptionalKey
 
 import config.CONSTANTS as CONSTANTS
 from core.functions import json_check_
+from core.json_checker_new import get_flat_fields_from_schema
 
 # 필수 1 + 선택 1 짜리 최소 스키마
 SCHEMA = {
     "code": str,
     OptionalKey("desc"): str,
+}
+
+# 선택 필드가 원시 타입 배열인 경우 + 선택 컨테이너 하위의 조건부 필수
+# (StoredObjectAnalyticsInfos 요청 형태)
+ARRAY_SCHEMA = {
+    "timePeriod": {
+        "startTime": int,
+    },
+    OptionalKey("camList"): [{
+        "camID": str,          # camList를 보냈다면 필수 = 조건부 필수
+    }],
+    OptionalKey("filterList"): [{
+        OptionalKey("classFilter"): [str],
+    }],
 }
 
 
@@ -48,6 +63,20 @@ def demo():
         assert result == "FAIL", result
     finally:
         CONSTANTS.flag_opt = saved
+
+    # 4) 선택 필드가 원시 배열이어도 선택으로 잡혀야 함
+    #    (OptionalKey("classFilter"): [str] 가 "classFilter[]" 경로가 되면서
+    #     선택 플래그를 잃고 필수로 등록되던 회귀 방지)
+    flat, opt = get_flat_fields_from_schema(ARRAY_SCHEMA)
+    assert "filterList.classFilter[]" in flat, sorted(flat)
+    assert "filterList.classFilter[]" in opt, f"원시 배열 선택 필드가 필수로 잡힘: {sorted(opt)}"
+
+    # 5) 선택 컨테이너 하위의 조건부 필수도 선택으로 잡혀야 함
+    #    camList를 생략할 수 있는 이상 camID는 무조건 필수가 아님
+    assert "camList.camID" in opt, f"선택 컨테이너 하위가 필수로 남음: {sorted(opt)}"
+
+    required = [f for f in flat if f not in opt]
+    assert sorted(required) == ["timePeriod", "timePeriod.startTime"], sorted(required)
 
     print("OK: 필수 필드 모드에서 선택 필드 완전 제외 확인")
 
