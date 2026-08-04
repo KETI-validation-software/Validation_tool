@@ -757,7 +757,10 @@ class MyApp(PlatformMainUI):
                     # 실시간 모니터링 창에 요청 데이터 표시 (API 이름 중복 없이 데이터만)
                     if retry_attempt == 0:
                         request_log_text = self.append_monitor_log(
-                            step_name=build_monitor_step_name(self.Server.message[self.cnt], "request"),
+                            step_name=build_monitor_step_name(
+                                self.Server.message_display[self.cnt]
+                                if self.cnt < len(self.Server.message_display)
+                                else self.Server.message[self.cnt], "request"),
                             request_json=tmp_res_auth,
                             direction="RECV"
                         )
@@ -775,7 +778,10 @@ class MyApp(PlatformMainUI):
                             )
                     else:
                         request_log_text = self.append_monitor_log(
-                            step_name=build_monitor_step_name(self.Server.message[self.cnt], "request"),
+                            step_name=build_monitor_step_name(
+                                self.Server.message_display[self.cnt]
+                                if self.cnt < len(self.Server.message_display)
+                                else self.Server.message[self.cnt], "request"),
                             request_json=tmp_res_auth,
                             direction="RECV"
                         )
@@ -816,7 +822,10 @@ class MyApp(PlatformMainUI):
                     # ? ??? ???? ?? (RECV)
                     if retry_attempt == 0:
                         request_log_text = self.append_monitor_log(
-                            step_name=build_monitor_step_name(self.Server.message[self.cnt], "request"),
+                            step_name=build_monitor_step_name(
+                                self.Server.message_display[self.cnt]
+                                if self.cnt < len(self.Server.message_display)
+                                else self.Server.message[self.cnt], "request"),
                             request_json=tmp_res_auth,
                             direction="RECV"
                         )
@@ -834,7 +843,10 @@ class MyApp(PlatformMainUI):
                             )
                     else:
                         request_log_text = self.append_monitor_log(
-                            step_name=build_monitor_step_name(self.Server.message[self.cnt], "request"),
+                            step_name=build_monitor_step_name(
+                                self.Server.message_display[self.cnt]
+                                if self.cnt < len(self.Server.message_display)
+                                else self.Server.message[self.cnt], "request"),
                             request_json=tmp_res_auth,
                             direction="RECV"
                         )
@@ -1346,8 +1358,10 @@ class MyApp(PlatformMainUI):
                         result_status=final_result,
                         score=score_value,
                         details=build_monitor_result_details(
-                            self.total_pass_cnt,
-                            self.total_error_cnt,
+                            # ✅ 시나리오 누적(total_*_cnt)이 아니라 현재 API 값 사용
+                            #    — 테이블 행(update_table_row_with_retries)·점수와 같은 출처
+                            accumulated['total_pass'],
+                            accumulated['total_error'],
                             current_protocol,
                             response_time_ms=self.monitor_response_elapsed_ms.get(self.cnt),
                         ),
@@ -1454,19 +1468,19 @@ class MyApp(PlatformMainUI):
                 # 평가 점수 디스플레이 업데이트
                 self.update_score_display()
 
-                total_fields = self.total_pass_cnt + self.total_error_cnt
-                if total_fields > 0:
-                    score_value = (self.total_pass_cnt / total_fields * 100)
-                else:
-                    score_value = 0
+                # ✅ 모니터 카드는 시나리오 누적이 아니라 현재 API 값으로 표시 (테이블 행과 동일 출처)
+                #    타임아웃이므로 통과 0 / 실패 step_err → 점수도 0
+                score_value = 0
 
                 # 타임아웃 결과를 HTML 카드로 출력
-                api_name = self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else "Unknown"
+                api_name = (self.Server.message_display[self.cnt]
+                            if self.cnt < len(self.Server.message_display)
+                            else (self.Server.message[self.cnt] if self.cnt < len(self.Server.message) else "Unknown"))
                 self.append_monitor_log(
                     step_name=f"시험 API: {api_name}",
                     request_json="",
                     score=score_value,
-                    details=f"메시지 수신 타임아웃({current_timeout}초) -> 메시지 미수신 | 통과 필드 수: {self.total_pass_cnt}, 실패 필드 수: {self.total_error_cnt}"
+                    details=f"메시지 수신 타임아웃({current_timeout}초) -> 메시지 미수신 | 통과 필드 수: 0, 실패 필드 수: {step_err}"
                 )
 
                 # 테이블 업데이트 (Message Missing)

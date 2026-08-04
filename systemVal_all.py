@@ -1894,20 +1894,19 @@ class MyApp(SystemMainUI):
                 # 평가 점수 디스플레이 업데이트
                 self.update_score_display()
 
-                total_fields = self.total_pass_cnt + self.total_error_cnt
-                if total_fields > 0:
-                    score_value = (self.total_pass_cnt / total_fields) * 100
-                else:
-                    score_value = 0
+                # ✅ 모니터 카드는 시나리오 누적이 아니라 현재 API 값으로 표시 (테이블 행과 동일 출처)
+                #    타임아웃이므로 통과 0 / 실패 step_err → 점수도 0
+                score_value = 0
 
                 # 타임아웃 로그를 HTML 카드로 출력 (플랫폼과 동일 문구)
                 api_name = self.message[self.cnt] if self.cnt < len(self.message) else "Unknown"
+                api_name = self._remove_api_number_suffix(api_name)
                 timeout_sec = self._get_effective_timeout_seconds(self.cnt)
                 self.append_monitor_log(
                     step_name=f"시험 API: {api_name}",
                     request_json="",
                     score=score_value,
-                    details=f"메시지 수신 타임아웃({timeout_sec}초) -> 메시지 미수신 | 통과 필드 수: {self.total_pass_cnt}, 실패 필드 수: {self.total_error_cnt}"
+                    details=f"메시지 수신 타임아웃({timeout_sec}초) -> 메시지 미수신 | 통과 필드 수: 0, 실패 필드 수: {step_err}"
                 )
 
                 # 테이블 업데이트 (플랫폼과 동일 문구)
