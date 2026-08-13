@@ -251,11 +251,8 @@ class ConstraintDataGenerator:
                 template_data["doorList"] = new_door_list
                 return template_data
 
-            # 응답 템플릿(code 포함)은 여기서 끝내지 않고 아래 공통 경로로 내려보낸다.
-            # 예전엔 그대로 반환해서 doorList가 있는 응답의 생성 제약이 전부 무시됐다
-            # (예: ac002 StoredVerifEventInfos의 eventName request-based가 실행된 적 없음).
-            # 제약이 없는 응답(DoorProfiles 등)은 공통 경로에서도 템플릿 그대로 나간다.
-
+            return template_data
+        
         # ✅ commandType 구조를 가진 데이터 동적 생성 (범용 - DoorControl 등)
         if "commandType" in template_data and "doorID" in template_data:
             Logger.debug(f" commandType 데이터 동적 생성 시작 (API: {api_name})")
