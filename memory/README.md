@@ -26,15 +26,16 @@ This folder is intentionally gitignored for local project management notes.
 - 10_2026-03-30_encoding_recovery_summary.md
 - troubleshooting_webhook_firewall_2026-03-04.md
 - AGENTS.md
-- worklog.md
 
 ## Archive policy
 - Older or superseded notes should move to `memory/archive/`.
 - Keep raw history only when it adds context not preserved by a canonical file.
 - Prefer consolidating related dated notes into one durable summary document.
+- `memory/archive/worklog_legacy.md` preserves the old worklog.
+- `memory/archive/log2_2026-03-04_webhook_firewall_raw.txt` preserves the raw webhook firewall log.
 
 ## Rules
 - Keep entries short and practical.
 - Prefer factual updates over long narrative.
 - Add date for each meaningful update.
-- Treat `worklog.md` as legacy until it is intentionally normalized or rebuilt.
+- Keep current notes in the canonical files above; move one-off logs and superseded plans to archive.

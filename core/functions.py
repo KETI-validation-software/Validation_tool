@@ -700,6 +700,31 @@ def _validate_field_type(field_path, field_value, expected_type):
             return True, None
 
 
+def ref_direction(rule):
+    """규칙 종류로 참조할 방향을 결정 — 참조 데이터를 적재하는 쪽과 동일한 규칙"""
+    return "REQUEST" if "request-field" in (rule.get("validationType") or "") else "RESPONSE"
+
+
+def ref_context_key(endpoint, direction):
+    """참조 저장 키 — 같은 엔드포인트라도 요청/응답을 다른 칸에 보관한다.
+
+    한 단계에 참조 엔드포인트가 같고 방향만 다른 규칙이 둘 이상 있으면,
+    엔드포인트 이름만으로 칸을 잡을 경우 나중 규칙이 앞 규칙의 참조를 덮어쓴다.
+    (예: DoorControl의 doorID=요청 / commandType=응답)
+    """
+    return f"{endpoint}#{direction}"
+
+
+def get_reference_data(reference_context, endpoint, rule):
+    """규칙이 필요로 하는 방향의 참조 데이터를 꺼낸다 (없으면 방향 없는 옛 키로 폴백)"""
+    if not reference_context or not endpoint:
+        return None
+    data = reference_context.get(ref_context_key(endpoint, ref_direction(rule)))
+    if data is None:
+        data = reference_context.get(endpoint)
+    return data
+
+
 def _validate_field_semantic(field_path, field_value, rule, data, reference_context,
                              field_errors, global_errors):
     """단일 필드의 의미 검증 수행"""
@@ -787,13 +812,12 @@ def _validate_list_match(field_path, field_value, rule, data, reference_context,
     ref_endpoint = rule.get("referenceEndpoint")
     ref_list_field = rule.get("referenceListField") or rule.get("referenceField")
 
-    if not reference_context or ref_endpoint not in reference_context:
+    ref_data = get_reference_data(reference_context, ref_endpoint, rule)
+    if ref_data is None:
         error_msg = f"참조 엔드포인트 없음: {ref_endpoint}"
         field_errors.append(error_msg)
         global_errors.append(f"[의미] {error_msg}")
         return False
-
-    ref_data = reference_context[ref_endpoint]
 
     # collect_all_values_by_key 사용하여 모든 camID 값 수집
     ref_list = collect_all_values_by_key(ref_data, ref_list_field)
@@ -870,13 +894,13 @@ def _validate_field_match(field_path, field_value, rule, reference_context,
     Logger.debug(f"[DEBUG][VALIDATE] reference_context keys: {list(reference_context.keys()) if reference_context else None}")
     Logger.debug(f"[DEBUG][VALIDATE] reference_context: {reference_context}")
 
-    if not reference_context or ref_endpoint not in reference_context:
+    ref_data = get_reference_data(reference_context, ref_endpoint, rule)
+    if ref_data is None:
         error_msg = f"참조 엔드포인트 없음: {ref_endpoint}"
         field_errors.append(error_msg)
         global_errors.append(f"[의미] {error_msg}")
         return False
 
-    ref_data = reference_context[ref_endpoint]
     Logger.debug(f"[DEBUG][VALIDATE] ref_data: {ref_data}")
     ref_value = get_by_path(ref_data, ref_field)
 
@@ -1449,9 +1473,8 @@ def get_test_groups_info():
             if key not in ["group_name", "group_id"] and isinstance(value, dict):
                 test_spec_ids.append(key)
 
-        # testRange는 testSpecIds 개수에 맞춰 생성
-        # CONSTANTS.py의 test_range 값과 통일 ("전체 필드")
-        test_range = ", ".join(["전체 필드"] * len(test_spec_ids))
+        # 결과 API는 그룹당 단일 enum 값을 요구한다.
+        test_range = normalize_result_test_range(CONSTANTS.test_range)
 
         test_groups.append({
             "id": group_id,
@@ -1461,6 +1484,16 @@ def get_test_groups_info():
         })
 
     return test_groups
+
+
+def normalize_result_test_range(test_range):
+    """GUI 표시용 시험범위를 결과 API의 단일 enum 값으로 변환한다."""
+    normalized = str(test_range or "").strip()
+    if normalized in {"ALL_FIELDS", "전체필드", "전체 필드"}:
+        return "ALL_FIELDS"
+    if normalized in {"REQUIRED_FIELDS", "필수필드", "필수 필드"}:
+        return "REQUIRED_FIELDS"
+    return normalized
 
 
 def get_spec_test_name(spec_id):

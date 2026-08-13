@@ -31,6 +31,7 @@ from core.functions import (
     update_webhook_step_buffer_fields,
     upsert_attempt_log,
     append_attempt_log_text,
+    ref_context_key,
 )
 from core.data_mapper import ConstraintDataGenerator
 from core.logger import Logger
@@ -1789,6 +1790,8 @@ class MyApp(SystemMainUI):
 
                 api_name = self.message[self.cnt] if self.cnt < len(self.message) else ""
                 if api_name and isinstance(inMessage, dict):
+                    # 방금 보낸 요청 = 그 엔드포인트의 REQUEST 참조
+                    self.reference_context[ref_context_key(f"/{api_name}", "REQUEST")] = inMessage
                     self.reference_context[f"/{api_name}"] = inMessage
 
                 # 순서 확인용 로그
@@ -2156,12 +2159,14 @@ class MyApp(SystemMainUI):
                                     Logger.debug(f" {ref_endpoint} {direction}를 trace 파일에서 로드 시도")
                                     response_data = self._load_from_trace_file(ref_api_name, direction)
                                     if response_data and isinstance(response_data, dict):
+                                        self.reference_context[ref_context_key(ref_endpoint, direction)] = response_data
                                         self.reference_context[ref_endpoint] = response_data
                                         Logger.debug(f" {ref_endpoint} {direction}를 trace 파일에서 로드 완료")
                                 else:
                                     # latest_events에 있으면 거기서 가져오기
                                     event_data = self.latest_events.get(ref_api_name, {}).get(direction, {})
                                     if event_data and isinstance(event_data, dict):
+                                        self.reference_context[ref_context_key(ref_endpoint, direction)] = event_data.get("data", {})
                                         self.reference_context[ref_endpoint] = event_data.get("data", {})
                             
                             # referenceEndpointMax 처리
@@ -2172,11 +2177,13 @@ class MyApp(SystemMainUI):
                                     Logger.debug(f" {ref_endpoint_max} {direction}를 trace 파일에서 로드 시도 (Max)")
                                     response_data_max = self._load_from_trace_file(ref_api_name_max, direction)
                                     if response_data_max and isinstance(response_data_max, dict):
+                                        self.reference_context[ref_context_key(ref_endpoint_max, direction)] = response_data_max
                                         self.reference_context[ref_endpoint_max] = response_data_max
                                         Logger.debug(f" {ref_endpoint_max} {direction}를 trace 파일에서 로드 완료 (Max)")
                                 else:
                                     event_data = self.latest_events.get(ref_api_name_max, {}).get(direction, {})
                                     if event_data and isinstance(event_data, dict):
+                                        self.reference_context[ref_context_key(ref_endpoint_max, direction)] = event_data.get("data", {})
                                         self.reference_context[ref_endpoint_max] = event_data.get("data", {})
                             
                             # referenceEndpointMin 처리
@@ -2187,11 +2194,13 @@ class MyApp(SystemMainUI):
                                     Logger.debug(f" {ref_endpoint_min} {direction}를 trace 파일에서 로드 시도 (Min)")
                                     response_data_min = self._load_from_trace_file(ref_api_name_min, direction)
                                     if response_data_min and isinstance(response_data_min, dict):
+                                        self.reference_context[ref_context_key(ref_endpoint_min, direction)] = response_data_min
                                         self.reference_context[ref_endpoint_min] = response_data_min
                                         Logger.debug(f" {ref_endpoint_min} {direction}를 trace 파일에서 로드 완료 (Min)")
                                 else:
                                     event_data = self.latest_events.get(ref_api_name_min, {}).get(direction, {})
                                     if event_data and isinstance(event_data, dict):
+                                        self.reference_context[ref_context_key(ref_endpoint_min, direction)] = event_data.get("data", {})
                                         self.reference_context[ref_endpoint_min] = event_data.get("data", {})
 
 

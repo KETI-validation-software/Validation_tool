@@ -1,5 +1,6 @@
 import random
 import copy
+import config.CONSTANTS as CONSTANTS
 from core.logger import Logger
 
 class ConstraintDataGenerator:
@@ -12,6 +13,40 @@ class ConstraintDataGenerator:
         latest_events: API 이벤트 저장소 {api_name: {direction: event_data}}
         """
         self.latest_events = latest_events if latest_events is not None else {}
+
+    def _find_reference_state(self, constraints, field, item_id, id_field):
+        """수신한 이벤트에서 특정 항목의 현재 상태를 찾는다.
+
+        제약에 적힌 referenceEndpoint / referenceField를 그대로 따라간다.
+        (예: DoorControl.commandType → /RealtimeDoorStatus 의 doorSensor)
+        """
+        rule = next(
+            (r for k, r in (constraints or {}).items()
+             if field in k and isinstance(r, dict) and r.get("referenceEndpoint")),
+            None,
+        )
+        if not rule or not item_id:
+            return None
+
+        ref_key = rule["referenceEndpoint"].lstrip("/")
+        ref_field = rule.get("referenceField")
+        if not ref_field or ref_field == "(참조 필드 미선택)":
+            return None
+
+        # 상태는 응답이 아니라 웹훅 이벤트로 오므로 이벤트를 먼저 본다
+        for key in (ref_key, f"/{ref_key}"):
+            for direction in ("WEBHOOK", "WEBHOOK_OUT", "RESPONSE", "REQUEST"):
+                event = self.latest_events.get(key, {}).get(direction) or {}
+                data = event.get("data") or {}
+                for values in data.values():
+                    if not isinstance(values, list):
+                        continue
+                    for item in values:
+                        if not isinstance(item, dict):
+                            continue
+                        if item.get(id_field) == item_id and item.get(ref_field):
+                            return item[ref_field]
+        return None
 
     def _applied_constraints(self, request_data, template_data, constraints, api_name=None, door_memory=None, is_webhook=False):
         """
@@ -239,14 +274,24 @@ class ConstraintDataGenerator:
             current_status = template_data.get("commandType", "")  # 템플릿 기본값 사용
             if door_memory and target_door_id in door_memory:
                 current_status = door_memory[target_door_id].get("doorSensor", current_status)
+            else:
+                # door_memory는 우리가 장치 역할일 때만 채워진다.
+                # 플랫폼 역할(단일시스템 시험)에서는 비어 있으므로 수신한 상태 이벤트에서 찾는다.
+                found = self._find_reference_state(constraints, "commandType", target_door_id, "doorID")
+                if found:
+                    current_status = found
+                    Logger.debug(f" 수신 이벤트에서 {target_door_id} 현재 상태 확인: {found}")
             
-            # constraints에서 allowedValues 추출
+            # constraints에서 후보값 추출
+            # 제약은 validValues, 검증 규칙은 allowedValues로 이름이 다르므로 둘 다 인정한다
             allowed_values = []
             if constraints:
                 for key, rule in constraints.items():
-                    if "commandType" in key and "allowedValues" in rule:
-                        allowed_values = rule["allowedValues"]
-                        Logger.debug(f" constraints에서 allowedValues 발견: {allowed_values}")
+                    if "commandType" not in key or not isinstance(rule, dict):
+                        continue
+                    allowed_values = rule.get("validValues") or rule.get("allowedValues") or []
+                    if allowed_values:
+                        Logger.debug(f" constraints에서 후보값 발견: {allowed_values}")
                         break
             
             # 현재 상태와 다른 명령어 선택 (토글)
@@ -275,6 +320,9 @@ class ConstraintDataGenerator:
         return template_data
 
     def _applied_codevalue(self, request_data, allowed_value):
+        if not getattr(CONSTANTS, "ENABLE_ERROR_REQUEST_MUTATION", False):
+            return request_data
+
         if allowed_value == "201":
             updated_data = self.replace_start_time(request_data)
         elif allowed_value == "400":

@@ -7,6 +7,7 @@ import re
 from functools import lru_cache
 from types import ModuleType
 from typing import Dict, Any, Optional
+import config.CONSTANTS as CONSTANTS
 from core.logger import Logger
 
 
@@ -141,6 +142,30 @@ def clear_validation_cache():
     Logger.info("[VALIDATION REGISTRY] 캐시가 클리어되었습니다.")
 
 
+def _without_disabled_error_response_expectations(rules: Dict[str, Any]) -> Dict[str, Any]:
+    """정상 시험 모드에서는 201/400 전용 code/message 기대값만 제외한다."""
+    if getattr(CONSTANTS, "ENABLE_ERROR_REQUEST_MUTATION", False):
+        return rules
+
+    code_rule = rules.get("code") if isinstance(rules, dict) else None
+    if not isinstance(code_rule, dict):
+        return rules
+
+    allowed_values = code_rule.get("allowedValues", [])
+    if code_rule.get("validationType") != "specified-value-match" or len(allowed_values) != 1:
+        return rules
+
+    expected_code = str(allowed_values[0]).strip()
+    if expected_code in {"", "200"}:
+        return rules
+
+    return {
+        field_name: rule
+        for field_name, rule in rules.items()
+        if field_name not in {"code", "message"}
+    }
+
+
 def get_validation_rules(
     spec_id: str,
     api_name: str,
@@ -203,7 +228,7 @@ def get_validation_rules(
         Logger.warning(f"[VALIDATION REGISTRY] API '{api_name}'을 찾을 수 없음. '{spec_id}/{direction}'의 사용 가능한 API: {list(reg[spec_id][direction].keys())}")
         return {}
 
-    rules = reg[spec_id][direction][api_name]
+    rules = _without_disabled_error_response_expectations(reg[spec_id][direction][api_name])
     Logger.debug(f"[VALIDATION REGISTRY] ✅ 검증 규칙 발견: {len(rules)}개 필드")
     return rules
 

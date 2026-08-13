@@ -406,10 +406,6 @@ class FileGeneratorService:
                 except Exception as e:
                     Logger.warning(f"[경고] {label} 파일 생성 실패: {path}, 사유: {e}")
 
-            # CONSTANTS.py 업데이트
-            if all_spec_list_names:
-                self.update_constants_specs(all_spec_list_names)
-
             # ResponseCode 파일 생성
             self.generate_response_code_file()
 
@@ -729,60 +725,6 @@ class FileGeneratorService:
             Logger.info(f"  ✓ WebHook IN Validation 생성: {webhook_v_name}" + (" (빈 딕셔너리)" if not webhook_v_map else ""))
 
         return schema_content, data_content, validation_content, constraints_content
-
-    def update_constants_specs(self, spec_list_names):
-        """CONSTANTS.py의 specs 리스트를 업데이트"""
-        try:
-            from core.functions import resource_path
-
-            if getattr(sys, 'frozen', False):
-                exe_dir = os.path.dirname(sys.executable)
-                constants_path = os.path.join(exe_dir, "config", "CONSTANTS.py")
-            else:
-                constants_path = resource_path("config/CONSTANTS.py")
-
-            with open(constants_path, 'r', encoding='utf-8') as f:
-                content = f.read()
-
-            specs_lines = []
-            for spec_info in spec_list_names:
-                in_schema = spec_info.get("inSchema", "")
-                out_data = spec_info.get("outData", "")
-                messages = spec_info.get("messages", "")
-                webhook_schema = spec_info.get("webhookSchema", "")
-                webhook_data = spec_info.get("webhookData", "")
-                name = spec_info.get("name", "")
-
-                if webhook_schema and webhook_data:
-                    spec_line = f'["{in_schema}","{out_data}","{messages}","{webhook_schema}","{webhook_data}","{name}"]'
-                else:
-                    spec_line = f'["{in_schema}","{out_data}","{messages}","{name}"]'
-
-                specs_lines.append(spec_line)
-
-            specs_str = "specs = [" + ",\n         ".join(specs_lines) + "]"
-
-            pattern = r'specs\s*=\s*\[\[.*?\]\]'
-
-            if re.search(pattern, content, re.DOTALL):
-                new_content = re.sub(pattern, specs_str, content, flags=re.DOTALL)
-            else:
-                url_pattern = r'(# 관리자시스템 주소\nmanagement_url\s*=\s*load_management_url\(\)\n)'
-                if re.search(url_pattern, content):
-                    new_content = re.sub(url_pattern, r'\1' + specs_str + '\n', content)
-                else:
-                    none_msg_pattern = r'(none_request_message\s*=)'
-                    new_content = re.sub(none_msg_pattern, specs_str + '\n' + r'\1', content)
-
-            with open(constants_path, 'w', encoding='utf-8') as f:
-                f.write(new_content)
-
-            Logger.info(f"CONSTANTS.py specs 리스트 업데이트 완료")
-
-        except Exception as e:
-            Logger.error(f"  경고: CONSTANTS.py specs 업데이트 실패: {e}")
-            import traceback
-            Logger.error(traceback.format_exc())
 
     def merge_list_prefix_mappings(self, file_a: str, file_b: str) -> Dict[str, Dict[str, List[str]]]:
         """두 파일에서 리스트 변수를 추출하여 prefix별로 병합"""

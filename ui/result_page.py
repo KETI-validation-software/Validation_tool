@@ -1709,14 +1709,11 @@ class ResultPageWidget(QWidget):
         Logger.debug(f" 빈 테이블 생성: {api_count}개 API")
 
         # ✅ step_buffers 초기화 (상세 내용 확인을 위해 필수!)
-        self.parent.step_buffers = []
-        for i in range(api_count):
-            api_name = api_list[i] if i < len(api_list) else f"API {i + 1}"
-            self.parent.step_buffers.append({
-                "data": f"아직 시험이 진행되지 않았습니다.\n\nAPI: {api_name}",
-                "error": "시험 데이터가 없습니다.",
-                "result": "PASS"
-            })
+        # 3페이지 초기 버퍼와 동일하게 빈 값으로 두면 상세 창이 회색 안내문을 표시함
+        self.parent.step_buffers = [
+            {"data": "", "error": "", "result": "PASS", "raw_data_list": [], "attempt_logs": [], "api_info": {}}
+            for _ in range(api_count)
+        ]
 
         Logger.debug(f" step_buffers 생성 완료: {len(self.parent.step_buffers)}개")
 

@@ -16,7 +16,7 @@ from core.functions import build_result_json, upsert_attempt_log, append_attempt
 import requests
 import config.CONSTANTS as CONSTANTS
 from core.json_checker_new import timeout_field_finder
-from core.functions import json_check_, resource_path, json_to_data
+from core.functions import json_check_, resource_path, json_to_data, ref_context_key
 from ui.splash_screen import LoadingPopup
 from ui.detail_dialog import CombinedDetailDialog
 from ui.result_page import ResultPageWidget
@@ -724,6 +724,7 @@ class MyApp(PlatformMainUI):
                             ref_api_name = ref_endpoint.lstrip("/")
                             ref_data = load_from_trace_file(ref_api_name, direction)
                             if ref_data and isinstance(ref_data, dict):
+                                self.reference_context[ref_context_key(ref_endpoint, direction)] = ref_data
                                 self.reference_context[ref_endpoint] = ref_data
                                 Logger.debug(f" {ref_endpoint} {direction}를 trace 파일에서 로드 (from validation rule)")
 
@@ -732,6 +733,7 @@ class MyApp(PlatformMainUI):
                             ref_api_name_max = ref_endpoint_max.lstrip("/")
                             ref_data_max = load_from_trace_file(ref_api_name_max, direction)
                             if ref_data_max and isinstance(ref_data_max, dict):
+                                self.reference_context[ref_context_key(ref_endpoint_max, direction)] = ref_data_max
                                 self.reference_context[ref_endpoint_max] = ref_data_max
                                 Logger.debug(f" {ref_endpoint_max} {direction}를 trace 파일에서 로드 (from validation rule)")
 
@@ -740,6 +742,7 @@ class MyApp(PlatformMainUI):
                             ref_api_name_min = ref_endpoint_min.lstrip("/")
                             ref_data_min = load_from_trace_file(ref_api_name_min, direction)
                             if ref_data_min and isinstance(ref_data_min, dict):
+                                self.reference_context[ref_context_key(ref_endpoint_min, direction)] = ref_data_min
                                 self.reference_context[ref_endpoint_min] = ref_data_min
                                 Logger.debug(f" {ref_endpoint_min} {direction}를 trace 파일에서 로드 (from validation rule)")
 
@@ -865,53 +868,6 @@ class MyApp(PlatformMainUI):
 
                     accumulated['raw_data_list'].append(current_data)
 
-                    if "DoorControl" in api_name:
-                        # 1. 검증 규칙 강제 수정 (혹시 doorList.doorID로 되어있다면 다시 doorID로 원복)
-                        if "doorID" in current_validation:
-                            current_validation["doorID"]["referenceField"] = "doorID"
-                            Logger.debug(f" 규칙 강제 설정: referenceField = 'doorID'")
-
-                        # 2. 데이터 강제 평탄화 (Flattening)
-                        target_key = "/RealtimeDoorStatus"
-
-                        ref_data = self.reference_context.get(target_key, {})
-                        
-                        # 데이터가 없으면 Trace 파일에서 비상 로드
-                        if "doorList" not in ref_data or not ref_data.get("doorList"):
-                            try:
-                                webhook_data = load_from_trace_file("RealtimeDoorStatus", "WEBHOOK_OUT")
-                                if webhook_data and "doorList" in webhook_data:
-                                    ref_data = webhook_data
-                                    Logger.debug(f" reference_context에 RealtimeDoorStatus 데이터가 없어 WEBHOOK에서 로드함")
-                            except:
-                                pass
-                        
-                        if "doorList" not in ref_data or not ref_data.get("doorList"):
-                            try:
-                                response_data = load_from_trace_file("RealtimeDoorStatus", "REQUEST")
-                                if response_data and "doorList" in response_data:
-                                    ref_data = response_data
-                                    Logger.debug(f" reference_context에 RealtimeDoorStatus 데이터가 없어 REQUEST에서 로드함")
-                            except:
-                                pass
-                        
-                        extracted_ids = []
-                        if "doorList" in ref_data and isinstance(ref_data["doorList"], list):
-                            for item in ref_data["doorList"]:
-                                if isinstance(item, dict):
-                                    val = item.get("doorID") or item.get("doorId")
-                                    if val: extracted_ids.append(val)
-
-                        if extracted_ids:
-                            ref_data["doorID"] = extracted_ids
-
-                            self.reference_context[target_key] = ref_data
-                            Logger.debug(f" 데이터 평탄화 성공: {extracted_ids}")
-
-                        else:
-                            Logger.debug(f" 경고: doorList는 있지만 내부에 doorID가 없습니다.")                       
-                        
-                                
                     # ✅ 스키마 리스트가 메시지보다 짧을 때 IndexError로 시험이 중단되지 않도록 가드
                     in_schema = self.videoInSchema[self.cnt] if self.cnt < len(self.videoInSchema) else {}
                     try:
@@ -3284,13 +3240,8 @@ class MyApp(PlatformMainUI):
         self.inSchema = self.videoInSchema
         self.outCon = self.videoOutConstraint
 
-        # 이 부분 수정해야함
-        try:
-            webhook_schema_name = f"{self.current_spec_id}_webhook_inSchema"
-            self.webhookSchema = getattr(schema_response_module, webhook_schema_name, [])
-        except Exception as e:
-            Logger.debug(f"Error loading webhook schema: {e}")
-            self.webhookSchema = []
+        # 웹훅 스키마는 load_specs_from_constants()에서 이미 올바르게 로드됨 (spec_names[3] → schema_request_module)
+        self.webhookSchema = self.videoWebhookSchema
 
         self.r2 = self.auth_type
         if self.r2 == "Digest Auth":
