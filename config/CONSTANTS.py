@@ -7,7 +7,7 @@ headers = {"Content-type": "application/json", "User-Agent": 'test'}
 
 # 오류 응답(201/400) 유도 시험: 요청값을 변조해 상대의 오류 처리를 검사한다.
 # 정상 연동만 확인할 때는 False로 변경한다.
-ENABLE_ERROR_REQUEST_MUTATION = False
+ENABLE_ERROR_REQUEST_MUTATION = True
 
 # 버전4: 모든 로컬 IP 주소 감지 (이더넷, 와이파이 등 모든 네트워크 어댑터)
 def get_all_local_ips():
