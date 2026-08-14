@@ -48,6 +48,35 @@ class ConstraintDataGenerator:
                             return item[ref_field]
         return None
 
+    @staticmethod
+    def _to_number(value, default):
+        """문자열 시각값("20251105163010124")을 숫자로. 변환 불가 시 default."""
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return default
+
+    def _filter_rows_by_request(self, rows, request_data, id_field):
+        """조회 응답에서 요청 조건에 해당하는 줄만 남긴다.
+
+        저장된 기록(템플릿 줄)을 그대로 두고 걸러내기만 한다. 값을 바꾸거나 줄을 늘리지 않는다.
+        템플릿 줄의 ID가 비어 있으면 요청 개수만큼 채워 쓰는 구조이므로 걸러내지 않는다.
+        """
+        if not isinstance(rows, list) or not rows:
+            return rows
+
+        requested = [v for v in (self.find_key(request_data, id_field) or []) if v]
+        if not requested:
+            # 조회 조건이 없는 API(DoorProfiles 등)는 전체를 그대로 응답한다
+            return rows
+
+        if not all(isinstance(r, dict) and r.get(id_field) for r in rows):
+            return rows
+
+        filtered = [r for r in rows if r.get(id_field) in requested]
+        Logger.info(f"[DATA_MAPPER] 조회 조건 적용: {len(rows)}건 중 {len(filtered)}건 응답 (요청 {id_field}: {requested})")
+        return filtered
+
     def _applied_constraints(self, request_data, template_data, constraints, api_name=None, door_memory=None, is_webhook=False):
         """
         request_data: 요청 데이터 (camID 후보 등)
@@ -251,7 +280,11 @@ class ConstraintDataGenerator:
                 template_data["doorList"] = new_door_list
                 return template_data
 
-            return template_data
+            # 조회 응답: 저장된 기록 중 요청 조건에 해당하는 줄만 남긴다.
+            # 걸러낸 뒤에는 아래 공통 경로로 내려가 값 채우기 설정(eventName 등)이 적용된다.
+            template_data["doorList"] = self._filter_rows_by_request(
+                template_data["doorList"], request_data, "doorID"
+            )
         
         # ✅ commandType 구조를 가진 데이터 동적 생성 (범용 - DoorControl 등)
         if "commandType" in template_data and "doorID" in template_data:
@@ -592,14 +625,22 @@ class ConstraintDataGenerator:
                 # ✅ constraints가 없으면 원본 리스트를 그대로 사용
                 has_constraints = any(f"{key}.{field}" in constraint_map for field in value[0].keys())
                 
-                if has_constraints:
-                    # constraints가 있으면 동적 생성 (템플릿 길이만큼)
+                if not has_constraints:
+                    # constraints가 없으면 원본 리스트 그대로 사용 (preset)
+                    result[key] = value
+                elif n > 1:
+                    # 등록된 줄이 여럿이면 줄별로 채운다.
+                    # 첫 줄만 본으로 삼아 n개를 찍어내면 2번째 이후 줄(카메라2, door0002 등)이
+                    # 사라지고 첫 줄이 복제된다.
+                    result[key] = [
+                        self._generate_list_items(key, row, constraint_map, 1)[0]
+                        for row in value
+                    ]
+                else:
+                    # 줄이 하나면 요청 개수만큼 늘리는 기존 방식 (영상 계열 등)
                     result[key] = self._generate_list_items(
                         key, value[0], constraint_map, n
                     )
-                else:
-                    # constraints가 없으면 원본 리스트 그대로 사용 (preset)
-                    result[key] = value
             elif isinstance(value, dict):
                 # 중첩된 딕셔너리 구조는 그대로 유지 (최상위 레벨)
                 result[key] = value
@@ -745,8 +786,13 @@ class ConstraintDataGenerator:
 
                 elif constraint["type"] == "request-range":
                     # 범위 내 랜덤 값 생성
-                    min_val = constraint.get("min", 0)
-                    max_val = constraint.get("max", self.MAX_TIMESTAMP)
+                    # ✅ 17자리 시각 필드가 String으로 전환되어 min/max가 문자열로 올 수 있다.
+                    #    내부에서는 숫자로 변환해 비교·생성하고, 원본이 문자열이면 문자열로 내보낸다.
+                    raw_min = constraint.get("min", 0)
+                    raw_max = constraint.get("max", self.MAX_TIMESTAMP)
+                    as_string = isinstance(raw_min, str) or isinstance(raw_max, str)
+                    min_val = self._to_number(raw_min, 0)
+                    max_val = self._to_number(raw_max, self.MAX_TIMESTAMP)
 
                     # 유효성 검사: min이 max보다 큰 경우 처리
                     if min_val >= max_val:
@@ -754,9 +800,12 @@ class ConstraintDataGenerator:
 
                     # startTime/endTime 처리 (endTime은 startTime보다 커야 함)
                     if "endTime" in field and "startTime" in item:
-                        item[field] = random.randint(item["startTime"] + 1, max_val)
+                        start_num = self._to_number(item["startTime"], min_val)
+                        generated = random.randint(start_num + 1, max(max_val, start_num + 2))
                     else:
-                        item[field] = random.randint(min_val, max_val)
+                        generated = random.randint(min_val, max_val)
+
+                    item[field] = str(generated) if as_string else generated
 
             else:
                 # constraint 없는 필드는 기본값 유지
