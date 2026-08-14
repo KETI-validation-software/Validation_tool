@@ -5,8 +5,8 @@ import socket
 
 headers = {"Content-type": "application/json", "User-Agent": 'test'}
 
-# 다음 주 정상 연동 시험 동안 오류 응답(201/400)을 유도하려고 요청값을 변조하지 않는다.
-# 오류 유도 시험을 재개할 때만 True로 변경한다.
+# 오류 응답(201/400) 유도 시험: 요청값을 변조해 상대의 오류 처리를 검사한다.
+# 정상 연동만 확인할 때는 False로 변경한다.
 ENABLE_ERROR_REQUEST_MUTATION = False
 
 # 버전4: 모든 로컬 IP 주소 감지 (이더넷, 와이파이 등 모든 네트워크 어댑터)
