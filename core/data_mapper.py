@@ -866,7 +866,13 @@ class ConstraintDataGenerator:
             if isinstance(obj, dict):
                 for key, value in obj.items():
                     if key == "startTime":
-                        obj[key] = self.INVALID_TIMESTAMP  # 오류 생성용 (0)
+                        # 오류 생성용(0). 시각 필드 String 전환에 맞춰 원본 타입을 유지한다.
+                        # 숫자 0을 넣으면 201 유도가 아니라 규격(타입) 검증에서 먼저 탈락해
+                        # "형식은 유효하되 내용만 이상한 요청"이라는 유도 의도가 깨진다.
+                        if isinstance(value, str):
+                            obj[key] = str(self.INVALID_TIMESTAMP)
+                        else:
+                            obj[key] = self.INVALID_TIMESTAMP
                     else:
                         traverse(value)
             elif isinstance(obj, list):
