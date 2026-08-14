@@ -1457,7 +1457,7 @@ def get_test_groups_info():
         return [{
             "id": "group-001",
             "name": CONSTANTS.test_target,
-            "testRange": CONSTANTS.test_range,
+            "testRange": normalize_result_test_range(CONSTANTS.test_range),
             "testSpecIds": []
         }]
 
@@ -1487,13 +1487,20 @@ def get_test_groups_info():
 
 
 def normalize_result_test_range(test_range):
-    """GUI 표시용 시험범위를 결과 API의 단일 enum 값으로 변환한다."""
+    """GUI 표시용 시험범위를 결과 API의 단일 enum 값으로 변환한다.
+
+    "필수 필드, 필수 필드" 같은 그룹별 연결 문자열이 설정에 남아 흘러들어도
+    반드시 enum 하나로 정리한다. enum이 아닌 값이 서버로 가면 관리시스템이
+    해석하지 못해 기본값(전체 필드)으로 표시되던 문제가 있었다.
+    """
     normalized = str(test_range or "").strip()
-    if normalized in {"ALL_FIELDS", "전체필드", "전체 필드"}:
+    if "ALL_FIELDS" in normalized or "전체" in normalized:
         return "ALL_FIELDS"
-    if normalized in {"REQUIRED_FIELDS", "필수필드", "필수 필드"}:
+    if "REQUIRED_FIELDS" in normalized or "필수" in normalized:
         return "REQUIRED_FIELDS"
-    return normalized
+    # 판별 불가 시 안전한 쪽(필수)이 아니라 값 없음이 아닌 기존 동작 유지가 맞지만,
+    # 결과 API는 enum만 받으므로 기본값을 명시한다
+    return "REQUIRED_FIELDS" if not normalized else normalized
 
 
 def get_spec_test_name(spec_id):
