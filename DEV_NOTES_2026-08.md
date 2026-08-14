@@ -1,211 +1,240 @@
-# 개발 노트 — 2026-08-13 ~ 08-14 집중 디버깅 기록
+# 개발 노트 — 2026-08-13 ~ 08-14 디버깅 기록
 
-다음 주 시험을 앞두고 두 PC(단일시스템 도구 ↔ 통합시스템 도구)를 서로 붙여 리허설하며
-발견·수정한 내용의 전체 기록이다. 처음 보는 개발자가 "왜 이렇게 고쳤는지"와
-"무엇이 아직 남았는지"를 이 문서만으로 파악할 수 있게 쓴다.
+다음 주 시험을 앞두고 두 PC(단일시스템 도구 ↔ 통합시스템 도구)를 서로 붙여
+리허설하며 발견한 문제들의 기록. "고친 것"과 "아직 남은 것"을 나눠서 적는다.
 
----
-
-## 0. 전제 지식 (이 문서를 읽는 데 필요한 배경)
-
-### 시험 구성
-- **단일시스템 도구** (`systemVal_all.py`) = **플랫폼 역할**. 요청을 만들어 보내고,
-  받은 응답/웹훅을 검증한다.
-- **통합시스템 도구** (`platformVal_all.py`) = **장치 역할**. 요청을 받아 응답을
-  만들어 보내고, 받은 요청을 검증한다.
-- 리허설에서는 두 역할을 모두 우리 도구가 수행하므로, **요청 생성·응답 생성·검증
-  세 곳의 설정이 서로 아귀가 맞아야** 통과한다. 한 곳만 어긋나도 FAIL이 난다.
-
-### 관리도구(관리시스템)와 spec/ 폴더
-- 시험 시작 시 관리시스템에서 시나리오 설정을 내려받아 `spec/*.py`로 저장한다.
-  - `Data_request/response.py` — 메시지 템플릿(예시 값)
-  - `Constraints_request/response.py` — **값 생성 규칙** (preset/참조/랜덤/범위)
-  - `validation_request/response.py` — **검증 규칙** (list-match/field-match/허용값…)
-  - `Schema_*.py` — 필드 유무·타입
-- **오류 원인 구분법**: `spec/` 파일을 열어 본다.
-  - 설정이 제대로 있는데 이상 동작 → **도구 코드 문제**
-  - 설정이 비었거나 엉뚱함 → **관리도구 등록 문제**
-  - 참조가 있는데 값이 빈 채 나감 → 참조할 기록을 못 찾은 것 (코드 or 단계 순서)
-
-### 오류 화면 읽는 법
-- `조회된 doorID 목록` = 규칙의 referenceEndpoint에서 가져온 **기준값**
-  (대부분 자기 자신의 **요청**에 적힌 목록이다. "조회된"이라는 문구에 속지 말 것)
-- `입력값` = 검사 대상 중 **걸린 항목만** 표시된다. 통과한 항목은 안 보인다.
-
-### 디버깅 팁
-- `results/trace/*.ndjson`은 **매 실행 시 초기화**된다. 증상이 보이면 즉시 폴더째 복사.
-- `results/request_results.json` = 장치 역할(요청 수신) 결과,
-  `results/response_results.json` = 플랫폼 역할(요청 송신) 결과. 송수신 전문이 남는다.
-- 콘솔 로그가 최고의 증거다. (§2-6의 String 시각 버그도 로그의 Traceback으로 확정함)
+한 줄 요약: 시각 필드를 Number→String으로 전환(내부 회의 결정)한 여파가 코드
+곳곳에 남아 있던 것 + 요청을 만드는 쪽/응답을 만드는 쪽/채점하는 쪽의 설정이
+서로 어긋나 있던 것이 이틀간 버그의 대부분이었다.
 
 ---
 
-## 1. 시각 필드 String 전환 배경
+## 1. 고친 것
 
-내부 회의로 17자리 시각 필드(startTime/endTime/eventTime 등)를 **Number → String으로
-통일**하기로 결정했다(JS의 2^53 정밀도 문제). 관리시스템 스펙은 순차 전환 중이며,
-**도구 코드 곳곳에 "시각=숫자" 가정이 남아 있던 것**이 8/13~14 버그 다수의 뿌리다.
-새 코드를 쓸 때 시각 필드는 반드시 String/Number 양쪽을 처리할 것.
+### ① ac003 제어(DoorControl) 판정이 돌릴 때마다 달라지던 문제 — 커밋 800866f
+
+**무슨 일이 있었나**
+같은 시험인데 어떤 회차는 통과, 어떤 회차는 "doorID 값 불일치"로 실패했다.
+실패할 때 오류 화면의 비교 목록에는 구독한 문이 아니라 엉뚱한 값이 떠 있었다.
+
+**왜 그랬나**
+DoorControl 단계에는 검사 항목이 두 개 있는데(doorID, commandType) 둘 다
+`/RealtimeDoorStatus`를 참조한다. 다만 doorID는 그 API의 "요청"을, commandType은
+"응답"을 참조한다. 그런데 참조 자료를 담아두는 자리가 API 이름 하나로만 구분돼
+있어서, 나중에 자료를 담는 commandType이 **doorID가 쓸 자료를 덮어써 버렸다.**
+자료를 잃은 doorID 검사는 예비 경로로 빠져 마지막 웹훅 이벤트를 대신 참조했고,
+웹훅 내용은 회차마다 다르니 판정도 회차마다 달라졌다.
+
+**어떻게 고쳤나**
+자료 담는 자리를 "API 이름 + 요청/응답"으로 나눠서 서로 덮어쓰지 못하게 했다.
+(core/functions.py의 ref_context_key / get_reference_data, 적재부는
+platformVal·systemVal 양쪽)
+
+### ② 오류 메시지에 같은 문이 두 번 표시되던 문제 (`door0002 | door0002`) — 800866f
+
+①을 임시로 우회하려고 예전에 넣어둔 DoorControl 전용 코드가, 문 목록을 한 벌
+복사해 최상위에 얹고 있었다. 목록을 세는 함수는 중첩 구조를 전부 훑기 때문에
+같은 값이 두 번 세어졌다. ①로 근본 원인이 사라졌으므로 이 우회 코드 47줄을
+통째로 삭제했다. (platformVal_all.py)
+
+### ③ DoorControl의 commandType이 빈 칸으로 나가던 문제 — 800866f
+
+**무슨 일이 있었나**
+제어 요청이 `"commandType": ""`로 전송됐다. 관리도구에는 후보값(Lock/Unlock)이
+분명히 등록돼 있었다.
+
+**왜 그랬나**
+관리도구는 후보값을 `validValues`라는 이름으로 내려주는데, 값을 만드는 코드는
+`allowedValues`라는 **다른 이름만 찾고 있었다.** 이름이 안 맞아 후보를 못 찾았고,
+템플릿의 빈 문자열이 그대로 나갔다.
+
+**어떻게 고쳤나**
+두 이름 모두 인정하게 했다. 추가로, "현재 잠긴 문이면 Unlock을 보낸다"는 반대
+명령 선택이 플랫폼 역할에서는 문 상태를 알 수 없어(상태 저장소가 장치 역할일
+때만 채워짐) 동작하지 않던 것도, 수신한 웹훅 이벤트에서 현재 상태를 찾도록
+보완했다. (core/data_mapper.py)
+
+### ④ ac002 조회 응답에 안 물어본 문이 섞여 나가던 문제 — 8bb468c
+
+**무슨 일이 있었나**
+StoredVerifEventInfos(저장된 출입인증 조회)에서 door0001만 조회했는데 응답에
+door0002 기록까지 왔고, "요청하지 않은 문"이라고 FAIL이 났다. 참고: 이 오류는
+예전부터 있었지만 code 오류(아래 ⑦ 참고)가 검증을 먼저 중단시켜서 화면에
+안 보였을 뿐이다.
+
+**왜 그랬나**
+장치 역할이 조회 응답을 만들 때, 관리도구에 등록된 예시 2줄(door0001, door0002)을
+조회 조건과 무관하게 **통째로** 내보내고 있었다. 요청받은 문만 골라내는 기능이
+없었다.
+
+**어떻게 고쳤나**
+저장된 예시 줄 중에서 **요청한 문의 줄만 남기는 필터**를 넣었다. door0001만
+물으면 door0001 줄만, 둘 다 물으면 두 줄 다 나간다. 조회 조건이 없는
+API(DoorProfiles 등)와 예시가 한 줄뿐인 영상 계열은 기존 동작 그대로다.
+(core/data_mapper.py의 _filter_rows_by_request)
+
+※ 중간에 한 번 잘못 고쳐서(40da25a) door0001이 두 번 복제되는 부작용이 났고
+되돌렸다(9e7d549). 원인은 "예시 첫 줄만 본으로 삼아 줄 수만큼 찍어내는" 기존
+채우기 구조였고, 최종 수정에서는 예시가 여러 줄이면 **줄별로** 채우게 바꿔서
+해결했다.
+
+### ⑤ vid001 웹훅이 전부 빈 값으로 나가던 문제 — 8bb468c
+
+**무슨 일이 있었나**
+실시간 이벤트 웹훅에서 camID, eventName, startTime이 몽땅 `""`로 나갔다.
+cam0001·cam004 두 대를 요청했는데 웹훅에 반영되지 않았다.
+
+**왜 그랬나**
+시각 필드가 String으로 전환된 뒤, 시각 범위로 값을 만드는 코드가 문자열과
+숫자를 비교하다가(`"2025..." >= 9999999999999`) **파이썬 오류(TypeError)로
+죽었다.** 이 오류 하나로 웹훅 값 채우기 전체가 중단돼, 시각뿐 아니라 camID·
+eventName까지 전부 빈 템플릿 그대로 나간 것이다. 콘솔 로그의 Traceback으로
+확정했다. vid002/sensor002의 저장 조회 응답이 비던 증상도 같은 원인이다.
+
+**어떻게 고쳤나**
+비교·생성은 내부에서 숫자로 변환해서 하고, 원본이 문자열이었으면 결과도
+문자열로 되돌려 내보내게 했다. 숫자 스펙(미전환)은 기존대로 숫자로 나간다.
+(core/data_mapper.py의 _to_number)
+
+### ⑥ 필수 필드로 검증했는데 관리시스템에 "전체 필드"로 표시되던 문제 — bf96540
+
+**무슨 일이 있었나**
+검증 자체는 필수 필드 모드로 제대로 돌았는데, 결과를 올리면 관리시스템 화면에
+전체 필드로 표시됐다.
+
+**왜 그랬나**
+결과 전송 시 시험범위 칸에 `"필수 필드, 필수 필드, 필수 필드"`라는 쉼표로 이어진
+문자열이 실려 나갔다(외부 설정 파일에 남아 있던 예전 값). 결과 API는
+`REQUIRED_FIELDS`/`ALL_FIELDS` 두 값만 알아듣기 때문에, 해석 못 하는 값을 받으면
+기본값(전체 필드)으로 표시한 것이다. ※ 관리시스템이 내려주는 값은 정상임을
+실측으로 확인 — 예전에 있었던 by-ip 서버 버그의 재발이 아니다.
+
+**어떻게 고쳤나**
+전송 직전 정규화를 강화해서, 어떤 오염된 문자열이 들어와도 반드시 두 enum 중
+하나로 정리해 보내게 했다. "필수"가 포함되면 REQUIRED_FIELDS, 하나라도 "전체"가
+있으면 ALL_FIELDS. (core/functions.py의 normalize_result_test_range)
+
+### ⑦ 오류 유도용 기대 규칙이 정상 시험까지 잡던 문제 — 800866f (사용자 직접 작업)
+
+**무슨 일이 있었나**
+정상 조회에 상대가 정상적으로 200을 답했는데 "예상값 201, 실제값 200"으로
+FAIL이 났다.
+
+**왜 그랬나**
+오류 유도 시험(아래 §2)은 "일부러 이상한 요청을 보내고 → 201 응답을 기대"가
+한 쌍인데, 요청 변조만 꺼두고 201 기대 규칙은 남아 있었다. 정상 문제를 내고
+채점표만 오답 기준이었던 셈이다. 게다가 code가 틀리면 나머지 필드 검사를 전부
+건너뛰는 구조라, 이 오류가 다른 진짜 오류들(④ 등)을 가리고 있었다.
+
+**어떻게 고쳤나**
+변조가 꺼진 상태에서는 201 등 오류 응답 전용 code/message 기대 규칙을 검증에서
+제외하게 했다. (core/validation_registry.py) — 이 수정 이후 가려져 있던 필드
+오류들이 드러나기 시작했다. 8/13~14에 "갑자기 문제가 늘어난" 것처럼 보인 이유.
+
+### ⑧ 오류 유도 변조가 타입까지 망가뜨리던 문제 — aad4601
+
+**무슨 일이 있었나**
+sensor002에서 startTime이 숫자 0으로 수신되어 "Str가 와야 하는데 Number가
+왔습니다"라는 타입 오류가 났다. 관리도구에는 값이 제대로 입력돼 있었다.
+
+**왜 그랬나**
+오류 유도 기능이 요청의 startTime을 일부러 0으로 바꿔치기하는데(201 유도),
+이 코드가 String 전환 이전 구현이라 **숫자 0**을 넣었다. 유도의 의도는 "형식은
+유효하되 내용만 무의미한 요청"인데, 숫자 0은 형식(타입) 검사에서 먼저 걸려
+유도 시험이 성립하지 않았다.
+
+**어떻게 고쳤나**
+원본이 문자열이면 `"0"`, 숫자면 `0` — 타입을 유지한 채 값만 무효화하게 했다.
+(core/data_mapper.py의 replace_start_time)
+
+### ⑨ 빌드가 콘솔 없는(windowed) 버전으로 나가고 있던 문제
+
+build.ps1 주석은 "console 버전"인데 spec 파일은 `console=False`였다.
+`ValidationTool_onefile_Level1.spec`의 `console=True`로 고정.
+**주의: *.spec은 .gitignore 대상이라 이 설정은 로컬에만 있다.** 새 PC에서 클론해
+빌드하면 다시 확인할 것. (빌드 로그의 부트로더가 run.exe면 console, runw.exe면
+windowed) 빌드 산출물은 `dist\<MMdd>\`, **exe 옆에 config.txt 필수**, 새 exe는
+**두 PC 모두 교체**해야 한다.
 
 ---
 
-## 2. 고친 것 (커밋 순)
+## 2. 오류 유도 시험 기능(201/400) — 절반만 살아 있음 ★미해결
 
-### 2-1. 맥락 검증 참조가 서로 덮어쓰던 문제 — `800866f`
-- **증상**: ac003 DoorControl 판정이 회차마다 달라짐. `조회된 doorID 목록`에
-  구독 요청이 아닌 웹훅 이벤트 값이 뜸.
-- **원인**: 한 단계에 참조 엔드포인트가 같고 방향만 다른 규칙이 둘 있으면
-  (DoorControl: doorID=REQUEST 참조 / commandType=RESPONSE 참조) 참조 저장소
-  `reference_context`의 키가 엔드포인트뿐이라 나중 규칙이 앞 규칙의 자료를 덮어씀.
-- **수정**: 키를 `엔드포인트#방향`으로 분리. `core/functions.py`의
-  `ref_context_key()` / `get_reference_data()`, 적재부는 platformVal·systemVal 양쪽.
-  방향 없는 옛 키도 폴백으로 유지(하위 호환).
+관리도구에 값을 제대로 등록해 두고, 도구가 전송 직전에 **일부러 요청을 망가뜨려**
+상대가 오류 코드(201 정보 없음 / 400 잘못된 요청)로 제대로 거절하는지 보는 기능.
+세 단계가 한 사슬이어야 한다:
 
-### 2-2. DoorControl 전용 "평탄화" 블록 삭제 — `800866f`
-- **증상**: 오류 메시지에 `door0002 | door0002`처럼 같은 값이 두 번 표시.
-- **원인**: 2-1을 우회하려고 넣었던 47줄짜리 특례가 doorList의 doorID를 최상위에
-  복사해 얹어, 재귀 수집(`collect_all_values_by_key`)이 같은 값을 두 번 셈.
-- **수정**: 2-1로 원인이 사라졌으므로 블록 전체 삭제(platformVal_all.py).
+```
+[출제] 요청 변조        → 켜짐 (ENABLE_ERROR_REQUEST_MUTATION = True)
+[답변] 이상한 요청에 201/400로 응답 → ★죽어 있음 (주석 처리)
+[채점] 응답 code가 201인지 확인     → 켜짐
+```
 
-### 2-3. commandType 빈 값 + 반대 명령 미선택 — `800866f`
-- **증상**: DoorControl 요청의 commandType이 `""`로 전송. 이후엔 Lock 상태 문에
-  또 Lock을 보냄.
-- **원인 1**: 관리도구 제약은 후보값을 `validValues`로 주는데 생성 코드는
-  `allowedValues`만 조회(이름 불일치) → 후보 없음 → 템플릿 빈 문자열 전송.
-- **원인 2**: 문 상태 저장소 `door_memory`는 장치 역할일 때만 채워짐. 플랫폼
-  역할에선 비어 있어 현재 상태를 모른 채 아무 값이나 선택.
-- **수정**: `core/data_mapper.py` — 두 이름 모두 인정 + `_find_reference_state()`로
-  플랫폼 역할에선 수신한 웹훅 이벤트에서 현재 상태를 찾아 반대 명령 선택.
+**"답변" 단계가 죽어 있는 것이 문제다.** 장치 역할이 이상한 요청을 받으면
+400/201/404로 응답하는 로직이 `api/api_server.py`의 `_check_request_errors()`
+(±237행)에 구현되어 있으나, **함수 정의와 호출부 2곳(±530행, ±741행)이 전부
+`'''` 삼중따옴표 주석으로 비활성화**되어 있다. 그래서 도구끼리 리허설하면 변조
+요청에도 항상 200+정상 데이터가 응답되고, 201 채점은 **반드시 FAIL**한다.
+(실전에서 상대가 진짜 업체 장비면 그쪽이 201을 주면 되므로 실전엔 영향 없음)
 
-### 2-4. (같은 커밋에 동승한 별도 작업)
-- `core/validation_registry.py` — `_without_disabled_error_response_expectations()`:
-  오류 유도가 꺼진 상태(§3)에서는 code=201 등 오류 응답 전용 code/message 기대
-  규칙을 검증에서 제외. **이 변경으로 그동안 code 오류가 검증을 중단시켜 가려져
-  있던 후속 필드 오류들이 일제히 드러났다.** 8/13~14에 "갑자기 문제가 늘어난"
-  것처럼 보인 주된 이유.
-- `core/utils.py` — 외부 CONSTANTS 재로드 목록에 request_id 등 식별자 추가
-  (결과가 이전 평가 건으로 전송되던 문제).
+- 스위치: `config/CONSTANTS.py`의 `ENABLE_ERROR_REQUEST_MUTATION`. exe 옆 외부
+  CONSTANTS.py가 있으면 그 값이 우선 → 재빌드 없이 현장에서 켜고 끌 수 있다.
+- 유도 대상 API(스펙에 code≠200 기대가 등록된 곳, 전부 단일시스템 스펙):
+  StoredVideoInfos(201), StreamURLs(400), StoredVerifEventInfos(201),
+  StoredSensorEventInfos(201)
+- 403/404 등 나머지 코드는 정의만 있고 유도 기능 미구현 (현재 스펙은 201/400만 요구)
 
-### 2-5. 조회 응답 필터 + 줄별 채우기 — `8bb468c` (중간에 `40da25a`→`9e7d549` 시행착오 있음)
-- **증상 1**: ac002 StoredVerifEventInfos에서 door0001만 조회했는데 응답에
-  door0002 기록이 섞여 나옴 → "요청하지 않은 문" FAIL.
-- **증상 2**: (1차 수정 후) door0001 기록이 두 번 복제되어 나옴.
-- **원인**: 장치 역할의 조회 응답이 관리도구 예시(2줄)를 조회 조건과 무관하게
-  통째로 반환. 1차 수정(40da25a)으로 값 채우기를 열자, 채우기가 "첫 줄만 본으로
-  삼아 줄 수만큼 복제"하는 구조라 door0002 줄이 사라지고 door0001이 복제됨 → revert.
-- **최종 수정**: `core/data_mapper.py`
-  - `_filter_rows_by_request()` — 저장된 줄 중 **요청한 ID의 줄만** 남김.
-    조회 조건 없는 요청(DoorProfiles 등)은 전체 유지. 템플릿 ID가 빈
-    영상 계열(요청 개수만큼 늘리는 구조)은 자동 제외.
-  - `_generate_from_template()` — 템플릿 줄이 **여럿이면 줄별로** 채우고,
-    한 줄이면 기존처럼 요청 개수만큼 늘림(영상 계열 유지).
-  - 실질 영향 범위는 StoredVerifEventInfos 1곳(다른 다줄 템플릿은 전부 preset이라
-    원본 그대로 나감 — 수정 전후 바이트 동일함을 대조로 확인).
-
-### 2-6. String 시각 request-range TypeError — `8bb468c`
-- **증상**: vid001 RealtimeVideoEventInfos 웹훅에서 camID·eventName·startTime이
-  전부 빈 값. (vid002/sensor002 Stored* 계열도 동일 증상 보고됨)
-- **원인**: 시각 String 전환 후 범위 생성(`request-range`)의 `min_val >= max_val`
-  비교가 str-int TypeError로 사망 → **예외로 채우기 전체가 중단**되어 웹훅
-  페이로드가 템플릿 빈 값 그대로 나감. (로그의 Traceback으로 확정:
-  `_generate_item` 내 비교 지점)
-- **수정**: `core/data_mapper.py` `_to_number()` — 내부는 숫자로 변환해 비교·생성,
-  **원본이 문자열이면 문자열로 출력**. Number 스펙(미전환)은 기존대로 숫자 출력.
-
-### 2-7. 결과 전송 testRange가 관리시스템에서 "전체 필드"로 표시 — `bf96540`
-- **증상**: 필수 필드로 검증했는데 관리시스템 결과 화면에는 전체 필드로 표시.
-- **원인**: 외부 설정에 남아 있던 `"필수 필드, 필수 필드, 필수 필드"`(그룹별 연결
-  문자열)가 그대로 전송됨. 결과 API는 `ALL_FIELDS`/`REQUIRED_FIELDS` enum만
-  해석하므로 미해석 값 → 기본 표시(전체 필드). ※ by-ip가 내려주는 값은 두 PC
-  모두 REQUIRED_FIELDS 정상임을 실측 — 서버 버그 재발 아님.
-- **수정**: `core/functions.py` `normalize_result_test_range()` — 완전일치 판별을
-  **포함 판별**로 강화. 연결 문자열·빈 값도 반드시 enum 하나로 정리
-  (하나라도 "전체"가 있으면 ALL_FIELDS).
-
-### 2-8. 오류 유도 변조의 타입 유지 — (이 문서와 같은 커밋)
-- **증상**: sensor002 StoredSensorEventInfos에서 startTime이 숫자 0으로 수신되어
-  "Str가 와야 하는데 Number가 왔습니다" 타입 오류.
-- **원인**: 오류 유도(§3)의 `replace_start_time()`이 String 전환 이전 구현이라
-  숫자 0을 주입. 201 유도의 의도는 "형식은 유효하되 내용만 무의미한 요청"인데,
-  숫자 0은 **규격(타입) 검증에서 먼저 탈락**해 유도가 성립하지 않음.
-- **수정**: `core/data_mapper.py` `replace_start_time()` — 원본이 문자열이면
-  `"0"`, 숫자면 `0`으로 **타입을 유지한 채** 값만 무효화.
-
-### 2-9. 빌드 설정
-- `ValidationTool_onefile_Level1.spec`의 `console=False`(windowed)로 되어 있어
-  그동안 콘솔 없는 빌드가 나가고 있었음 → `console=True`로 고정.
-  **주의: `*.spec`은 .gitignore 대상이라 이 설정은 로컬에만 있다.** 새 PC에서
-  클론 후 빌드하면 다시 확인할 것. (빌드 로그의 부트로더가 `run.exe`면 console,
-  `runw.exe`면 windowed)
-- 빌드 절차: `.\build.ps1` → `dist\<MMdd>\` 산출. **exe 옆에 `config.txt` 필수**
-  (없으면 관리시스템 주소가 localhost로 떨어짐). 마지막의
-  "[경고] 예상 산출물을 찾지 못했습니다"는 스크립트가 찾는 이름과 spec `name=`이
-  달라서 뜨는 것으로 무시. **새 exe는 반드시 두 PC 모두 교체.**
-
----
-
-## 3. 오류 유도 시험 기능 (201/400) — 현재 상태
-
-관리도구에 값을 제대로 등록해 두고, **도구가 전송 직전에 일부러 요청을 망가뜨려**
-상대의 오류 처리(201 정보 없음 / 400 잘못된 요청)를 검사하는 기능.
-
-- 스위치: `config/CONSTANTS.py`의 `ENABLE_ERROR_REQUEST_MUTATION` (현재 **True**).
-  exe 옆 외부 `config/CONSTANTS.py`가 있으면 **그 값이 우선** — 재빌드 없이 현장에서
-  켜고 끌 수 있다.
-- 변조 방법: `core/data_mapper.py::_applied_codevalue()` —
-  응답 검증 규칙의 code 기대값이 "201"이면 `replace_start_time()`(startTime→0/"0"),
-  "400"이면 `change_random_field_type()`(임의 필드 타입 변조).
-- 대상 API(스펙에 code≠200 기대가 등록된 곳, 전부 단일시스템 스펙): 4곳
-  | 스펙 | API | 기대 code |
-  |---|---|---|
-  | 단일 영상 | StoredVideoInfos | 201 |
-  | 단일 영상 | StreamURLs | 400 |
-  | 단일 출입 | StoredVerifEventInfos | 201 |
-  | 단일 센서 | StoredSensorEventInfos | 201 |
-- 403/404 등 나머지 오류 코드: 정의(`spec/ResponseCode.py`)만 있고 **유도 기능 미구현**.
-  현재 스펙은 201/400만 요구하므로 문제 없으나, 스펙에 추가되면 구현 필요.
-
-### ⚠️ 리허설에서 201 채점이 절대 통과할 수 없는 이유 (미해결)
-장치 역할이 이상한 요청에 201/400/404로 응답하는 로직이
-`api/api_server.py::_check_request_errors()`(±237행)에 **구현되어 있으나, 함수
-정의와 호출부 2곳(±530행, ±741행)이 전부 `'''` 주석으로 비활성화**되어 있다.
-따라서 우리 도구끼리 붙이면 변조 요청에도 항상 200+정상 데이터가 응답되어
-201 기대 채점은 반드시 FAIL이다. (실제 업체 장비가 상대라면 그쪽이 201을 주면
-되므로 실전에는 영향 없음)
-
-**되살릴 때 함께 손볼 것** (기록만 해둠 — 박사님이 의도적으로 꺼두셨는지 먼저 확인):
+**살릴 때 함께 손볼 것** (박사님이 의도적으로 꺼두셨는지 먼저 확인):
 1. 주석 해제 (함수 1곳 + 호출부 2곳)
-2. `_check_time_range()`가 Unix 초·int 가정 → 17자리 String 시각 대응 필요.
-   기준도 "endTime이 2년 전보다 과거"라는 자의적 규칙 대신, 변조 방식과 짝이 맞는
-   "startTime이 0/'0'이면 201"로 정리 권장 (유도-응답-채점 삼자가 같은 기준을 봐야 함)
-3. `_check_device_exists()`의 valid_device_ids 채움 경로 검증
+2. 시간 검사 `_check_time_range()`가 Unix 초·숫자 가정 → 17자리 String 시각 대응.
+   판별 기준도 변조 방식과 짝이 맞게 "startTime이 0/'0'이면 201"로 정리 권장
+3. `_check_device_exists()`의 유효 장치 목록이 실제로 채워지는지 확인
+
+---
+
+## 3. 웹훅에는 맥락 검증이 아예 안 돌고 있음 ★미해결 (가장 큰 구멍)
+
+웹훅으로 들어오는 이벤트는 **형식(필드 유무·타입) 검사만** 받는다. 관리도구에
+등록된 웹훅 맥락 검증 규칙 — 예: "결과조회 웹훅의 doorSensor는 DoorControl의
+commandType과 같아야 한다"(= 제어가 실제 반영됐는지) — 은 다운로드만 되고
+**한 번도 실행된 적이 없다.**
+
+배관이 세 군데 끊겨 있다:
+1. 규칙 창고(`core/validation_registry.py`)가 방향을 in/out 둘만 알아서 웹훅
+   규칙이 등록될 칸이 없음
+2. 웹훅 검사 직전에 규칙을 꺼내오는 코드가 없음
+3. 웹훅 검사 호출부(`platformVal_all.py` ±1083, `systemVal_all.py` ±1453)가
+   `validation_rules` 인자 자체를 안 넘김
+
+연결하면 지금까지 무조건 통과하던 웹훅들이 규칙 검사를 받기 시작하므로
+**기존 100% 단계가 FAIL로 바뀔 수 있다.** 시험 후 적용 권장. 또한 "웹훅 데이터를
+참조하라"는 규칙을 표현할 방향(WEBHOOK)이 없어서(현재 REQUEST/RESPONSE 둘뿐)
+연결 작업 시 함께 설계해야 한다.
 
 ---
 
 ## 4. 남은 과제 — 도구 코드
 
-| # | 내용 | 위치 | 비고 |
+| # | 내용 | 위치 |
+|---|---|---|
+| 1 | 웹훅 맥락 검증 미연결 (§3) | registry + 웹훅 검사 호출부 |
+| 2 | 오류 응답(400/201/404) 로직 주석 처리 (§2) | api/api_server.py |
+| 3 | DoorControl doorID 생성이 관리도구 설정을 무시하고 템플릿 고정값(door0001) 사용. 1차 구독은 무작위 부분집합이라 **약 25% 확률로 ac003 FAIL** (실측 재현) → 구독한 문에서 고르도록 수정 필요 | core/data_mapper.py commandType 블록 |
+| 4 | 검증 쪽 excludeReference 연산자 미구현 — "현재 상태와 반대 명령인가"를 검사 못 하고 단순 목록 검사로 동작. 규격서에 근거 없음 → 박사님 확인 후 결정 | core/functions.py _validate_valid_value_match |
+| 5 | 미지원 validationType은 경고만 남기고 통과 처리 — 관리시스템에 새 유형이 생기면 검사 없이 전부 합격됨 | core/functions.py 디스패처 |
+| 6 | code≠기대값이면 나머지 필드 검사를 전부 건너뛰는 구조(오류 이유가 한 줄로 뭉개짐). ⑦로 정상 모드에선 우회되나 구조는 남음 | core/functions.py ±329 |
+
+## 5. 남은 과제 — 관리도구 설정 (코드 무관)
+
+| # | 위치 | 필드 | 조치 |
 |---|---|---|---|
-| 1 | **웹훅 이벤트에 맥락 검증 규칙이 아예 전달되지 않음** | registry가 in/out만 지원 + 웹훅 검사 호출부(`platformVal_all.py:±1083`, `systemVal_all.py:±1453`)가 `validation_rules` 미전달 | 관리도구의 `*_webhook_*_validation` 규칙 전체가 다운로드만 되고 한 번도 실행된 적 없음. "제어 후 상태 반영 확인"(결과조회 웹훅 doorSensor=commandType) 같은 핵심 검사가 무효. 연결 시 기존 100% 단계들이 FAIL로 바뀔 수 있어 시험 후 적용 권장 |
-| 2 | **DoorControl doorID 생성이 관리도구 설정을 무시하고 템플릿 고정값 사용** | `core/data_mapper.py` commandType 블록 (①받은요청→②door_memory→③템플릿 순서, 플랫폼 역할은 ①②가 항상 빈 상태) | 1차 구독은 무작위 부분집합인데 제어는 고정 door0001 → **약 25% 확률로 ac003 FAIL** (문 2개 기준, 실측 재현됨). 구독한 문(latest_events의 /RealtimeDoorStatus REQUEST)에서 고르도록 수정 필요 |
-| 3 | 검증 쪽 `excludeReference` 연산자 미구현 | `core/functions.py::_validate_valid_value_match` — 참조를 인자로 받지도 않고 equalsAny로 동작 | "현재 상태와 반대 명령인가" 검사 불가. **규격서(기술보고서 v2.0)에 근거 없음** — 박사님 확인 후 결정 |
-| 4 | 참조 방향이 REQUEST/RESPONSE 둘뿐 (WEBHOOK 표현 불가) | 규칙 적재부의 `direction = "REQUEST" if "request-field" in validationType else "RESPONSE"` | doorSensor처럼 웹훅에만 있는 값을 참조하는 규칙이 엉뚱한 응답({"code":"성공"})을 집음. #1과 함께 설계 필요 |
-| 5 | 미지원 validationType은 경고만 남기고 통과 처리 | `core/functions.py` 디스패처 else | 관리시스템에 새 유형이 추가되면 검사 없이 전부 합격됨 |
-| 6 | code≠기대값이면 검증 전체 break | `core/functions.py:±329` | 오류 이유가 한 줄로 뭉개짐. §2-4로 정상 모드에선 우회되나 구조는 남음 |
-| 7 | §3의 오류 응답 로직(400/201/404) 주석 처리 | `api/api_server.py` | 위 참조 |
+| 1 | 통합 sensor003 > SensorDeviceControl > 검증(요청) | sensorDeviceID | 영상 이벤트 목록(Loitering/Intrusion)과 비교하도록 잘못 등록됨 → 목록대조 + `/SensorDeviceProfiles`의 sensorDeviceID 참조로 |
+| 2 | 단일 sensor003 > SensorDeviceControl > 전송(요청) | commandType | preset인데 값이 비어 있음 → `AlarmOn` 지정 |
+| 3 | 단일 ac002 > StoredVerifEventInfos > 전송(요청) | eventFilter | 자기 자신 참조 + 필드 미선택이라 빈 값 전송 → 참조 제거, 후보값(AuthSuccess/AuthFail)만 |
+| 4 | 통합 ac003 > RealtimeDoorStatus2 > 검증 | doorList.doorID | 완전일치(request-field-match)라 "1차에 두 문 구독 → 제어한 문만 재구독"하는 정상 흐름이 불합격 → 목록대조(request-field-list-match)로 |
+| 5 | 단일 신규 스펙 vid002(cmsmhhyl5…)·sensor002(cmsmj2a0g…) > 전송(요청) | camList.camID 등 | 전 필드가 참조 없는 preset이라 예시값(cam0001, 2022년 날짜, "배회")이 그대로 전송됨 → ac002 신규 스펙(cmsmiz4rk…, 참조 정상)을 본떠 참조 걸기 |
 
-## 5. 남은 과제 — 관리도구 설정 (코드 무관, 관리시스템에서 수정)
-
-| # | 위치 | 필드 | 문제 → 조치 |
-|---|---|---|---|
-| 1 | 통합 sensor003 > SensorDeviceControl > 검증(요청) | sensorDeviceID | 유효값일치+videoEvent(Loitering/Intrusion)로 잘못 등록 → **목록대조** + 참조 `/SensorDeviceProfiles`의 sensorDeviceID |
-| 2 | 단일 sensor003 > SensorDeviceControl > 전송(요청) | commandType | preset인데 값 없음 → `AlarmOn` 지정 (4단계엔 제외할 이전 상태가 없음 — SensorDeviceProfiles 응답에 상태 필드 없음) |
-| 3 | 단일 ac002 > StoredVerifEventInfos > 전송(요청) | eventFilter | 자기참조+필드미선택 → 참조 제거, 후보값(AuthSuccess/AuthFail)만 (빈 값 전송의 원인) |
-| 4 | 통합 ac003 > RealtimeDoorStatus2 > 검증 | doorList.doorID | `request-field-match`(완전일치) → `request-field-list-match` (1차에 두 문 구독 후 제어한 문만 재구독하는 정상 흐름이 불합격됨) |
-| 5 | 단일 **신규 스펙** vid002(cmsmhhyl5…)·sensor002(cmsmj2a0g…) > 전송(요청) | camList.camID 등 전 필드 | 전부 preset·참조 없음 → 예시값(cam0001, 2022년 날짜, "배회")이 그대로 전송됨. ac002 신규 스펙(cmsmiz4rk…, 참조 정상)을 본떠 `/CameraProfiles`·`/SensorDeviceProfiles` 참조 걸기 |
-
-- 관리시스템 서버가 간헐적으로 503을 반환(test-steps 조회 실패 — StoredObjectAnalyticsInfos
-  단계 설정 미수신 사례 있음). 재현 시 재시도.
+- 관리시스템 서버가 간헐적으로 503 반환(test-steps 조회 실패 사례 있음). 재현 시 재시도.
 
 ## 6. 표기 불일치 — 규격서 vs 관리도구 (박사님 확인 대상)
 
@@ -214,23 +243,33 @@
 | DoorControl commandType | `"unlock"` (소문자) | `Lock` / `Unlock` |
 | SensorDeviceControl commandType | `"Alarm\|On"` | `AlarmOn` / `AlarmOff` |
 | doorSensor 값 체계 | `"0"`=open / `"1"`=closed | `Lock` / `Unlock` 문자열 |
-| ac002 eventName | (응답 예시 `"성공"`) | 규칙 기대는 `AuthSuccess`/`AuthFail` |
+| ac002 eventName | 응답 예시 `"성공"` | 규칙 기대는 `AuthSuccess`/`AuthFail` |
 
-또한 규격서에는 excludeReference(현재 상태와 반대 명령) 규정이 없다
-("반대/현재 상태/상태 변경" 표현 0회).
+규격서에는 excludeReference(현재 상태와 반대 명령이어야 함) 규정 자체가 없다.
 
-## 7. 회귀 시험
+## 7. 진단 요령 (문제가 또 생기면)
+
+- **코드 문제 vs 관리도구 문제 구분**: `spec/` 폴더를 연다. 관리도구가 내려준
+  설정의 사본이다. 설정이 제대로 있는데 이상 동작이면 코드, 설정이 비었거나
+  엉뚱하면 관리도구.
+- 오류 화면의 "조회된 ~ 목록" = 규칙이 참조한 **기준값**(대부분 자기 요청에 적은
+  목록), "입력값" = 검사에 **걸린 항목만** (통과한 것은 표시 안 됨).
+- `results/trace/`는 매 실행 시 초기화 → 증상이 보이면 **즉시 폴더째 복사**.
+- `results/request_results.json` = 장치 역할 결과, `response_results.json` =
+  플랫폼 역할 결과. 송수신 전문이 남아 있어 증거로 쓸 수 있다.
+
+## 8. 회귀 시험
 
 `temp/` 아래, git 추적됨. 실행: `.venv\Scripts\python.exe temp\test_*.py`
 
-| 파일 | 검증 내용 |
+| 파일 | 확인 내용 (관련 항목) |
 |---|---|
-| test_reference_context_direction.py | 참조가 요청/응답끼리 덮어쓰지 않음 (§2-1) |
-| test_commandtype_generation.py | commandType이 문 상태의 반대값 (§2-3) |
-| test_response_row_filter.py | 조회 응답이 요청 조건의 기록만 반환 (§2-5) |
-| test_webhook_string_time.py | String/Number 시각 모두 웹훅 값 정상 생성 (§2-6) |
-| test_result_test_range.py | 결과 testRange가 항상 enum (§2-7) |
-| test_error_mutation.py | 변조가 원본 타입 유지 (§2-8) |
+| test_reference_context_direction.py | 참조가 요청/응답끼리 덮어쓰지 않음 (①) |
+| test_commandtype_generation.py | commandType이 문 상태의 반대값 (③) |
+| test_response_row_filter.py | 조회 응답이 요청한 기록만 반환 (④) |
+| test_webhook_string_time.py | String/Number 시각 모두 값 정상 생성 (⑤) |
+| test_result_test_range.py | 결과 testRange가 항상 enum (⑥) |
+| test_error_mutation.py | 변조가 원본 타입 유지 (⑧) |
 
-별도: `tests/test_error_response_rule_suppression.py` (§2-4, 실행 시
+별도: `tests/test_error_response_rule_suppression.py` (⑦, 실행 시
 `PYTHONPATH=프로젝트루트` 필요)
