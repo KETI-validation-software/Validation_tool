@@ -401,12 +401,28 @@ class MyApp(SystemMainUI):
             """)
 
         self.webhookInSchema = []
+        self.webhookInValidation = []  # 웹훅 맥락 검증 규칙 (단계별 정렬)
         self.get_setting()  # 실행되는 시점
         self.webhook_flag = False
         self.webhook_msg = "."
         self.webhook_cnt = 99
         self.reference_context = {}  # 맥락검증 참조 컨텍스트
         self.webhook_schema_idx = 0  # ✅ 웹훅 스키마 인덱스 추가
+
+    def _load_spec_module(self, module_name, file_name):
+        """spec 모듈 로드 — PyInstaller 환경이면 exe 옆 외부 spec 파일을 명시적으로 로드
+        (Data_request/Schema_response 로딩과 동일한 방식)"""
+        if getattr(sys, 'frozen', False):
+            exe_dir = os.path.dirname(sys.executable)
+            file_path = os.path.join(exe_dir, 'spec', file_name)
+            module_spec = importlib.util.spec_from_file_location(module_name, file_path)
+            module = importlib.util.module_from_spec(module_spec)
+            sys.modules[module_name] = module
+            module_spec.loader.exec_module(module)
+            return module
+        module = importlib.import_module(module_name)
+        importlib.reload(module)
+        return module
 
     def _get_request_spec_ids_for_tracking(self):
         spec_config = getattr(self, 'LOADED_SPEC_CONFIG', getattr(self.CONSTANTS, 'SPEC_CONFIG', []))
@@ -837,6 +853,22 @@ class MyApp(SystemMainUI):
         except Exception as e:
             Logger.error(f"Error loading webhook schema: {e}")
             self.webhookInSchema = []
+
+        # ✅ 웹훅 맥락 검증 규칙 로드 — 스키마와 같은 방식으로 validation_response에서 가져온다.
+        #    스키마 목록은 단계별 자리맞춤(웹훅 없는 단계는 None), 규칙 목록은 웹훅 API만
+        #    압축돼 있으므로 스키마의 None 위치에 맞춰 정렬해 둔다.
+        self.webhookInValidation = []
+        try:
+            validation_response_module = self._load_spec_module('spec.validation_response', 'validation_response.py')
+            compact_rules = getattr(validation_response_module, f"{self.current_spec_id}_webhook_inValidation", []) or []
+            rule_iter = iter(compact_rules)
+            for sch in (self.webhookInSchema or []):
+                self.webhookInValidation.append((next(rule_iter, {}) or {}) if sch else {})
+            n_rules = sum(1 for r in self.webhookInValidation if r)
+            Logger.info(f"[Webhook] 맥락 검증 규칙 로드: {n_rules}개 단계 (spec={self.current_spec_id})")
+        except Exception as e:
+            Logger.error(f"웹훅 검증 규칙 로드 실패(규격 검증만 수행됨): {e}")
+            self.webhookInValidation = []
 
         # ✅ Webhook 관련 (현재 미사용)
         # self.videoWebhookSchema = []
@@ -1449,11 +1481,20 @@ class MyApp(SystemMainUI):
         webhook_data = event_data if event_data else {}
         tmp_webhook_res = json.dumps(webhook_data, indent=4, ensure_ascii=False) if webhook_data else "null"
 
+        # ✅ 웹훅 맥락 검증 규칙 — 그동안 규칙이 전달되지 않아 규격(형식) 검사만 수행됐다.
+        #    문제가 생기면 CONSTANTS.ENABLE_WEBHOOK_CONTEXT_VALIDATION=False로 즉시 이전 동작 복귀.
+        webhook_rules = None
+        if getattr(self.CONSTANTS, "ENABLE_WEBHOOK_CONTEXT_VALIDATION", True):
+            rules_list = getattr(self, "webhookInValidation", []) or []
+            if self.webhook_cnt < len(rules_list) and rules_list[self.webhook_cnt]:
+                webhook_rules = rules_list[self.webhook_cnt]
+
         if webhook_data:
             val_result, val_text, key_psss_cnt, key_error_cnt, opt_correct, opt_error = json_check_(
                 schema=schema_to_check,
                 data=webhook_data,
                 flag=self.flag_opt,
+                validation_rules=webhook_rules,
                 reference_context=self.reference_context,
             )
         else:

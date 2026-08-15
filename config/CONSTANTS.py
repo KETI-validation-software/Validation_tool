@@ -9,6 +9,12 @@ headers = {"Content-type": "application/json", "User-Agent": 'test'}
 # 정상 연동만 확인할 때는 False로 변경한다.
 ENABLE_ERROR_REQUEST_MUTATION = True
 
+# 웹훅 이벤트 맥락 검증: 관리도구의 웹훅 검증 규칙(doorID가 구독한 문인지,
+# doorSensor가 제어 명령대로 바뀌었는지 등)을 실제로 적용한다.
+# 문제가 생기면 False로 바꿔 즉시 이전 동작(규격 검증만)으로 되돌릴 수 있다.
+# exe 옆 외부 config/CONSTANTS.py에서 바꾸면 재빌드 없이 적용된다.
+ENABLE_WEBHOOK_CONTEXT_VALIDATION = True
+
 # 버전4: 모든 로컬 IP 주소 감지 (이더넷, 와이파이 등 모든 네트워크 어댑터)
 def get_all_local_ips():
     """로컬 PC의 모든 IP 주소를 리스트로 반환 (이더넷, 와이파이 등)"""

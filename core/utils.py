@@ -448,6 +448,8 @@ def load_external_constants(constants_module):
                     'WEBHOOK_WINDOW_SEC',  # ✅ 웹훅 창 시간 — 플랫폼 대기창/송신창도 외부 설정 따라가도록
                     'flag_opt',  # ✅ 선택 필드 검증 여부 — test_range만 갱신되고 flag_opt는 빌드시점 값에 고착되던 문제
                     'request_id', 'admin_code', 'contact_person', 'model_name',  # ✅ 빌드시점 값 고착 방지 — 결과가 이전 평가 건으로 전송되던 문제
+                    'ENABLE_ERROR_REQUEST_MUTATION',      # ✅ 오류 유도 시험 — 외부 파일로 재빌드 없이 켜고 끄기
+                    'ENABLE_WEBHOOK_CONTEXT_VALIDATION',  # ✅ 웹훅 맥락 검증 — 문제 시 외부 파일에서 False로 즉시 롤백
                 ]
 
                 # 덮어씌우기
