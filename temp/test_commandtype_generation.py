@@ -73,6 +73,23 @@ def main():
     result = generate(CONSTRAINTS, {}, webhook_event("Unlock"))
     assert result["commandType"] == "Lock", result
 
+    # 플랫폼 역할에서 제어 대상 문은 "구독한 문" 중에서 골라야 한다.
+    # (구독은 무작위 부분집합인데 템플릿 고정값 door0001을 쓰면
+    #  구독하지 않은 문을 제어하게 되어 맥락 검증에서 확률적으로 실패)
+    events = {
+        "RealtimeDoorStatus": {
+            "REQUEST": {"data": {"doorList": [{"doorID": "door0002"}]}},
+            "WEBHOOK": {"data": {"doorList": [{"doorID": "door0002", "doorSensor": "Lock"}]}},
+        }
+    }
+    result = generate(CONSTRAINTS, {}, events)
+    assert result["doorID"] == "door0002", result       # 템플릿의 door0001이 아니라 구독한 문
+    assert result["commandType"] == "Unlock", result    # 그 문의 현재 상태(Lock)의 반대
+
+    # 구독 기록이 없으면 기존처럼 템플릿 기본값 유지 (하위 호환)
+    result = generate(CONSTRAINTS, {}, {})
+    assert result["doorID"] == "door0001", result
+
     print("OK — commandType이 문 상태의 반대값으로 채워짐")
 
 

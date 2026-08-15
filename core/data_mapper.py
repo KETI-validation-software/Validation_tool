@@ -14,6 +14,25 @@ class ConstraintDataGenerator:
         """
         self.latest_events = latest_events if latest_events is not None else {}
 
+    def _find_requested_ids(self, constraints, field, default_endpoint):
+        """앞서 보낸 요청(구독/조회)에서 해당 필드의 ID 후보를 찾는다.
+
+        제약에 referenceEndpoint가 있으면 그 API를, 없으면 default_endpoint의
+        REQUEST 기록(latest_events)을 본다. 기록이 없으면 빈 목록(폴백은 호출부).
+        """
+        rule = next(
+            (r for k, r in (constraints or {}).items()
+             if field in k and isinstance(r, dict) and r.get("referenceEndpoint")),
+            None,
+        )
+        ref_key = rule["referenceEndpoint"].lstrip("/") if rule else default_endpoint
+        for key in (ref_key, f"/{ref_key}"):
+            event = self.latest_events.get(key, {}).get("REQUEST") or {}
+            ids = [v for v in self.find_key(event.get("data") or {}, field) if v]
+            if ids:
+                return ids
+        return []
+
     def _find_reference_state(self, constraints, field, item_id, id_field):
         """수신한 이벤트에서 특정 항목의 현재 상태를 찾는다.
 
@@ -297,8 +316,16 @@ class ConstraintDataGenerator:
             elif door_memory and len(door_memory) > 0:
                 target_door_id = random.choice(list(door_memory.keys()))
             else:
-                # 템플릿 기본값 사용 (템플릿에 이미 있는 값 그대로)
-                target_door_id = template_data.get("doorID", "")
+                # 플랫폼 역할: 앞서 보낸 상태조회(구독) 요청에서 구독한 문 중 하나를 고른다.
+                # 구독은 무작위 부분집합인데 제어가 템플릿 고정값(door0001)이면
+                # "구독하지 않은 문을 제어"하게 되어 맥락 검증에서 확률적으로 실패한다.
+                subscribed = self._find_requested_ids(constraints, "doorID", "RealtimeDoorStatus")
+                if subscribed:
+                    target_door_id = random.choice(subscribed)
+                    Logger.debug(f" 구독한 문 중에서 선택: {target_door_id} (후보: {subscribed})")
+                else:
+                    # 템플릿 기본값 사용 (템플릿에 이미 있는 값 그대로)
+                    target_door_id = template_data.get("doorID", "")
             
             template_data["doorID"] = target_door_id
             Logger.debug(f" 선택된 doorID: {target_door_id}")
