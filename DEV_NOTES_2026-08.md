@@ -213,13 +213,29 @@ commandType과 같아야 한다"(= 제어가 실제 반영됐는지) — 은 다
 
 ---
 
+### 8/15 추가 수정
+
+- **⑩ DoorControl doorID를 구독한 문에서 선택** — 커밋 9f0fb84.
+  플랫폼 역할에서 제어 대상이 템플릿 고정값(door0001)이라 무작위 구독과
+  약 25% 확률로 어긋나던 문제. 앞서 보낸 구독 요청(latest_events)에서 구독한
+  문 중 하나를 고르도록 함(`_find_requested_ids`). 구독 기록 없으면 기존 폴백.
+- **⑪ 웹훅 이벤트에 맥락 검증 연결 (§3 해소)** — 커밋 0772498.
+  validation_response에서 웹훅 규칙을 로드해 단계별로 정렬 후
+  `_process_single_webhook_event`에 전달. **롤백 스위치**:
+  `ENABLE_WEBHOOK_CONTEXT_VALIDATION = False` (외부 config/CONSTANTS.py에서
+  바꾸면 재빌드 없이 즉시 이전 동작 복귀). 같은 커밋에서
+  `ENABLE_ERROR_REQUEST_MUTATION`도 외부 반영 목록에 추가됨 — 그 전에는
+  외부 파일로 이 플래그를 바꿔도 반영되지 않았음에 주의.
+  ⚠️ 연결 이후 웹훅이 맥락 채점을 받으므로 기존 100% 단계가 FAIL로 바뀔 수
+  있다. 새로 걸리는 항목은 설정·표기 문제가 드러난 것일 가능성이 크다.
+
 ## 4. 남은 과제 — 도구 코드
 
 | # | 내용 | 위치 |
 |---|---|---|
-| 1 | 웹훅 맥락 검증 미연결 (§3) | registry + 웹훅 검사 호출부 |
+| 1 | ~~웹훅 맥락 검증 미연결~~ → **8/15 연결 완료(⑪)**, 리허설로 신규 FAIL 수집·분류 남음 | — |
 | 2 | 오류 응답(400/201/404) 로직 주석 처리 (§2) | api/api_server.py |
-| 3 | DoorControl doorID 생성이 관리도구 설정을 무시하고 템플릿 고정값(door0001) 사용. 1차 구독은 무작위 부분집합이라 **약 25% 확률로 ac003 FAIL** (실측 재현) → 구독한 문에서 고르도록 수정 필요 | core/data_mapper.py commandType 블록 |
+| 3 | ~~DoorControl doorID 고정값~~ → **8/15 해결(⑩)** | — |
 | 4 | 검증 쪽 excludeReference 연산자 미구현 — "현재 상태와 반대 명령인가"를 검사 못 하고 단순 목록 검사로 동작. 규격서에 근거 없음 → 박사님 확인 후 결정 | core/functions.py _validate_valid_value_match |
 | 5 | 미지원 validationType은 경고만 남기고 통과 처리 — 관리시스템에 새 유형이 생기면 검사 없이 전부 합격됨 | core/functions.py 디스패처 |
 | 6 | code≠기대값이면 나머지 필드 검사를 전부 건너뛰는 구조(오류 이유가 한 줄로 뭉개짐). ⑦로 정상 모드에선 우회되나 구조는 남음 | core/functions.py ±329 |
