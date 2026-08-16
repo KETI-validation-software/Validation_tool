@@ -15,6 +15,12 @@ ENABLE_ERROR_REQUEST_MUTATION = True
 # exe 옆 외부 config/CONSTANTS.py에서 바꾸면 재빌드 없이 적용된다.
 ENABLE_WEBHOOK_CONTEXT_VALIDATION = True
 
+# 장치 역할일 때 받은 요청의 오류를 판정해 오류 코드로 응답한다(400/201/404).
+# 상대의 유도(ENABLE_ERROR_REQUEST_MUTATION)와 짝이 되는 기능으로, 실제 시험에서는
+# 피시험 업체 시스템이 이 역할을 하므로 주로 도구 대 도구 리허설에서 쓴다.
+# 오탐이 나면 False로 바꿔 즉시 이전 동작(항상 200 응답)으로 되돌릴 수 있다.
+ENABLE_ERROR_RESPONSE_CHECK = True
+
 # 버전4: 모든 로컬 IP 주소 감지 (이더넷, 와이파이 등 모든 네트워크 어댑터)
 def get_all_local_ips():
     """로컬 PC의 모든 IP 주소를 리스트로 반환 (이더넷, 와이파이 등)"""

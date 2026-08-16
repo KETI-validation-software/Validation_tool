@@ -450,6 +450,7 @@ def load_external_constants(constants_module):
                     'request_id', 'admin_code', 'contact_person', 'model_name',  # ✅ 빌드시점 값 고착 방지 — 결과가 이전 평가 건으로 전송되던 문제
                     'ENABLE_ERROR_REQUEST_MUTATION',      # ✅ 오류 유도 시험 — 외부 파일로 재빌드 없이 켜고 끄기
                     'ENABLE_WEBHOOK_CONTEXT_VALIDATION',  # ✅ 웹훅 맥락 검증 — 문제 시 외부 파일에서 False로 즉시 롤백
+                    'ENABLE_ERROR_RESPONSE_CHECK',        # ✅ 장치 역할의 오류 코드 응답 — 리허설용, 오탐 시 즉시 롤백
                 ]
 
                 # 덮어씌우기

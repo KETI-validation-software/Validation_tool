@@ -235,7 +235,11 @@ class Server(BaseHTTPRequestHandler):
             return base_api_name
 
     # ========== 오류 검사 함수들 (400/201/404) ==========
-    '''
+    # 상대(플랫폼 역할)가 ENABLE_ERROR_REQUEST_MUTATION으로 망가뜨려 보낸 요청을
+    # 여기서 판정해 오류 코드로 돌려준다. 유도 방식과 판정 기준이 짝이 맞아야 한다.
+    #   startTime을 0/"0"으로 변조  → 201 정보 없음
+    #   임의 leaf의 타입을 변조     → 400 잘못된 요청
+    #   없는 장치 ID               → 404 자원 없음
     def _check_request_errors(self, api_name, request_data):
         """
         요청 데이터 오류 검사
@@ -243,46 +247,43 @@ class Server(BaseHTTPRequestHandler):
         Returns:
             dict: 오류 응답 (오류 있을 때) 또는 None (정상)
         """
-        # 해당 API의 스키마 가져오기
+        if not getattr(self.CONSTANTS, "ENABLE_ERROR_RESPONSE_CHECK", False):
+            return None
+
+        # 1. 시간 구간 검사 → 201
+        #    스키마 없이도 판정할 수 있으므로 스키마 유무와 무관하게 먼저 본다.
+        time_error = self._check_time_range(request_data)
+        if time_error:
+            Logger.debug(f" 시간 범위 오류 감지: {time_error}")
+            Server.request_has_error[api_name] = True
+            return {"code": "201", "message": "정보 없음"}
+
+        # 2. 장치 존재 검사 → 404 : 아직 켜지 않는다.
+        #    상대에 404 유도 코드가 없어 이 검사가 잡는 건 전부 오탐이 된다.
+        #    (_check_device_exists의 기준 목록 Server.valid_device_ids는 CameraProfiles
+        #     응답으로 갱신되는데, 그 갱신 경로가 살아 있는지부터 확인해야 한다.)
+        #    404 유도를 붙일 때 아래 주석을 풀고 짝을 맞출 것.
+        # device_error = self._check_device_exists(request_data)
+        # if device_error:
+        #     Server.request_has_error[api_name] = True
+        #     return {"code": "404", "message": "자원 없음"}
+
+        # 3. 타입 불일치 검사 → 400 (요청 스키마가 있는 API만 판정 가능)
         schema = self._get_request_schema(api_name)
         if not schema:
-            Logger.debug(f" 스키마를 찾을 수 없음: {api_name}")
-            return None  # 스키마 없으면 검사 안 함
+            Logger.debug(f" 요청 스키마 없음 → 타입 검사 생략: {api_name}")
+            Server.request_has_error[api_name] = False
+            return None
 
-        # 1. 타입 불일치 검사 → 400
         type_error = self._check_type_mismatch(request_data, schema)
         if type_error:
             Logger.debug(f" 타입 불일치 감지: {type_error}")
-            # ✅ 내부 flag 설정 (요청에 오류가 있음을 표시)
             Server.request_has_error[api_name] = True
-
-            # 테스트 스위치: True = 정상 동작 (400 응답), False = 200으로 잘못 응답
-            SEND_ERROR_RESPONSE = True  # ← 이걸 False로 바꾸면 200 응답 테스트
-            if SEND_ERROR_RESPONSE:
-                return {"code": "400", "message": "잘못된 요청"}
-            else:
-                # 에러 감지했지만 응답은 보내지 않음 (flag는 유지)
-                return None
-
-        # 2. 시간 구간 검사 → 201 (startTime, endTime 있는 API만)
-        if "startTime" in request_data or "endTime" in request_data:
-            time_error = self._check_time_range(request_data)
-            if time_error:
-                Logger.debug(f" 시간 범위 오류 감지: {time_error}")
-                Server.request_has_error[api_name] = True
-                return {"code": "201", "message": "정보 없음"}
-
-        # 3. 장치 존재 검사 → 404 (camID, camList 있는 API만)
-        if "camID" in request_data or "camList" in request_data:
-            device_error = self._check_device_exists(request_data)
-            if device_error:
-                Logger.debug(f" 장치 없음 감지: {device_error}")
-                Server.request_has_error[api_name] = True
-                return {"code": "404", "message": "장치 없음"}
+            return {"code": "400", "message": "잘못된 요청"}
 
         # ✅ 오류 없으면 flag 초기화
         Server.request_has_error[api_name] = False
-        return None  # 오류 없음'''
+        return None  # 오류 없음
 
     def _get_request_schema(self, api_name):
         """API의 요청 스키마 가져오기"""
@@ -303,60 +304,87 @@ class Server(BaseHTTPRequestHandler):
             str: 오류 필드명 (오류 있을 때) 또는 None (정상)
         """
         try:
-            for field, expected_type in schema.items():
-                # OptionalKey 처리
-                field_name = field.key if hasattr(field, 'key') else field
-
-                if field_name in request_data:
-                    value = request_data[field_name]
-
-                    # None 값은 검사 스킵
-                    if value is None:
-                        continue
-
-                    # 타입 검사
-                    if expected_type == str:
-                        if not isinstance(value, str):
-                            Logger.debug(f" {field_name}: expected str, got {type(value).__name__}")
-                            return field_name
-                    elif expected_type == int:
-                        if not isinstance(value, int) or isinstance(value, bool):
-                            Logger.debug(f" {field_name}: expected int, got {type(value).__name__}")
-                            return field_name
-                    elif expected_type == list:
-                        if not isinstance(value, list):
-                            Logger.debug(f" {field_name}: expected list, got {type(value).__name__}")
-                            return field_name
-                    elif expected_type == dict:
-                        if not isinstance(value, dict):
-                            Logger.debug(f" {field_name}: expected dict, got {type(value).__name__}")
-                            return field_name
+            # 스키마가 timePeriod.startTime, doorList[].doorID처럼 중첩돼 있어
+            # 최상위만 훑으면 변조된 필드를 놓친다. 구조를 따라 재귀로 내려간다.
+            return self._walk_type_check(request_data, schema, "")
         except Exception as e:
             Logger.error(f" 타입 검사 중 오류: {e}")
 
         return None
 
+    @staticmethod
+    def _schema_key_name(field):
+        """스키마 키에서 실제 필드명을 뽑는다. OptionalKey는 버전에 따라 .key가 없어
+        "OptionalKey(maxCount)" 문자열로만 확인되는 경우가 있다."""
+        if isinstance(field, str):
+            return field
+        if hasattr(field, 'key'):
+            return str(field.key)
+        name = str(field)
+        if name.startswith('OptionalKey(') and name.endswith(')'):
+            return name[12:-1]
+        return name
+
+    def _walk_type_check(self, data, schema, path):
+        """스키마 구조를 따라 내려가며 첫 번째 타입 불일치 경로를 돌려준다."""
+        # 스키마가 dict → 데이터도 dict여야 하고, 키별로 내려간다
+        if isinstance(schema, dict):
+            if not isinstance(data, dict):
+                return path or "root"
+            for field, expected in schema.items():
+                field_name = self._schema_key_name(field)  # OptionalKey 처리
+                if field_name not in data or data[field_name] is None:
+                    continue  # 없거나 None이면 타입 검사 대상 아님
+                sub_path = f"{path}.{field_name}" if path else field_name
+                bad = self._walk_type_check(data[field_name], expected, sub_path)
+                if bad:
+                    return bad
+            return None
+
+        # 스키마가 [{...}] → 데이터도 list여야 하고, 원소마다 같은 스키마를 적용
+        if isinstance(schema, list):
+            if not isinstance(data, list):
+                return path
+            if not schema:
+                return None
+            for idx, item in enumerate(data):
+                bad = self._walk_type_check(item, schema[0], f"{path}[{idx}]")
+                if bad:
+                    return bad
+            return None
+
+        # 스키마가 타입(str/int/...) → 잎 노드 검사
+        if isinstance(schema, type):
+            if schema is int and isinstance(data, bool):
+                return path  # bool은 int의 하위형이지만 별개로 본다
+            if not isinstance(data, schema):
+                Logger.debug(f" {path}: expected {schema.__name__}, got {type(data).__name__}")
+                return path
+
+        return None
+
+    # 17자리 시각(YYYYMMDDhhmmssSSS)의 하한. 이보다 과거면 조회할 기록이 없다고 본다.
+    MIN_VALID_TIME = 19000101000000000
+
     def _check_time_range(self, request_data):
         """
-        시간 구간 검사 - 현재 시간 기준으로 과거 데이터 요청인지 확인
+        시간 구간 검사 — 조회 구간이 유효 범위를 벗어난 과거인지 확인
+
+        상대의 201 유도는 startTime을 0(또는 "0")으로 바꿔 보내는 방식이다.
+        - 시각 필드가 Number→String으로 전환됐으므로 문자열도 받아 숫자로 변환해 비교한다
+          (isinstance(int)로만 보면 "0"이 걸리지 않아 201이 영영 안 잡힌다)
+        - startTime은 timePeriod.startTime처럼 중첩돼 있어 최상위 조회로는 못 찾는다
 
         Returns:
             str: 오류 메시지 (오류 있을 때) 또는 None (정상)
         """
-        current_time = int(time.time())
-
-        start_time = request_data.get("startTime")
-        end_time = request_data.get("endTime")
-
         try:
-            if start_time is not None and end_time is not None:
-                # Unix timestamp로 가정 (정수형)
-                # 2년 전보다 과거 데이터면 "정보 없음"
-                two_years_ago = current_time - (2 * 365 * 24 * 60 * 60)
-
-                if isinstance(start_time, int) and isinstance(end_time, int):
-                    if end_time < two_years_ago:
-                        return "시간 구간이 너무 과거입니다"
+            for value in self.generator.find_key(request_data, "startTime"):
+                try:
+                    if int(value) < self.MIN_VALID_TIME:
+                        return f"조회 구간이 유효 범위를 벗어남: startTime={value!r}"
+                except (TypeError, ValueError):
+                    continue  # 숫자로 볼 수 없는 값은 타입 검사(400)가 잡는다
         except Exception as e:
             Logger.error(f" 시간 검사 실패: {e}")
 
@@ -525,20 +553,16 @@ class Server(BaseHTTPRequestHandler):
 
                 # ✅ Authentication API REQUEST 이벤트 기록 (한 번만)
                 self._push_event(api_name, "REQUEST", self.request_data)
-                '''
                 # ========== Authentication API도 오류 검사 (400/201/404) ==========
                 error_response = self._check_request_errors(api_name, self.request_data)
                 if error_response:
                     Logger.debug(f"[SERVER] Authentication 오류 감지: {error_response}")
                     # ✅ trace 저장 (_push_event 내부에서 deepcopy 수행)
                     self._push_event(api_name, "RESPONSE", error_response)
-                    # ✅ JSON에 code_value 추가
-                    error_response["code_value"] = 400
-                    Logger.debug(f"[SERVER] Authentication 에러 응답에 code_value=400 추가")
                     self._set_headers()
                     self.wfile.write(json.dumps(error_response).encode('utf-8'))
                     return
-                # ================================================================'''
+                # ================================================================
 
                 # 응답에 토큰 포함
                 if isinstance(data, dict):
@@ -735,21 +759,19 @@ class Server(BaseHTTPRequestHandler):
         except Exception as e:
             Logger.debug(f" request_counter 에러: {e}")
         # ================================================================
-        '''
         # ========== 오류 검사 로직 (400/201/404) ==========
         # ✅ api_res() 호출 후에 검사 (self.message, self.inSchema가 설정된 후)
+        # code_value는 읽는 쪽이 없는 잔재라 붙이지 않는다(응답 스키마에 없는 필드가
+        # 섞이면 상대의 응답 필드 검증에서 군더더기로 잡힌다).
         error_response = self._check_request_errors(api_name, self.request_data)
         if error_response:
             Logger.debug(f"[SERVER] 오류 감지: {error_response}")
             # ✅ trace 저장 (_push_event 내부에서 deepcopy 수행)
             self._push_event(api_name, "RESPONSE", error_response)
-            # ✅ JSON에 code_value 추가
-            error_response["code_value"] = 400
-            Logger.debug(f"[SERVER] 에러 응답에 code_value=400 추가")
             self._set_headers()
             self.wfile.write(json.dumps(error_response).encode('utf-8'))
             return
-        # ================================================'''
+        # ================================================
 
         # ✅ 요청 본문은 이미 do_POST 시작 부분에서 self.request_data에 저장됨
         # 중복 읽기 방지를 위해 이미 저장된 데이터 사용
