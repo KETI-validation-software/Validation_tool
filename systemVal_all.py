@@ -238,9 +238,21 @@ class MyApp(SystemMainUI):
             try:
                 code_value = self.resp_rules.get("code")
                 allowed_value = code_value.get("allowedValues", [])[0]
+
+                # ⑤ 토큰 미포함(403)은 요청 본문이 아니라 헤더를 건드린다.
+                # post()가 이 플래그를 보고 Authorization 헤더를 한 번만 빼고 보낸다.
+                if str(allowed_value) == "403" and getattr(
+                        self.CONSTANTS, "ENABLE_ERROR_REQUEST_MUTATION", False):
+                    self.omit_token_once = True
+                    Logger.debug("[오류주입] ⑤ 토큰 미포함 — 다음 요청에서 인증 헤더 제외")
+                    return updated_request
+
                 updated_request = self.generator._applied_codevalue(
                     request_data=updated_request,
-                    allowed_value=allowed_value
+                    allowed_value=allowed_value,
+                    constraints=constraints,
+                    # 시험범위: flag_opt=False가 필수 범위 — 선택 필드는 주입 대상이 아니다
+                    include_optional=getattr(self, "flag_opt", True),
                 )
                 return updated_request
             except Exception as e:
@@ -1343,9 +1355,16 @@ class MyApp(SystemMainUI):
         headers = CONSTANTS.headers.copy()
         self.webhook_flag = False
         auth = None
+        # ⑤ 토큰 미포함(403) 주입 — 이번 요청 한 번만 인증 헤더를 뺀다.
+        # 다음 요청부터는 다시 정상 인증으로 돌아가야 하므로 즉시 소비한다.
+        omit_token = getattr(self, 'omit_token_once', False)
+        self.omit_token_once = False
+
         if self.r2 == "B":  # Bearer
-            if self.token:
+            if self.token and not omit_token:
                 headers['Authorization'] = f"Bearer {self.token}"
+            elif omit_token:
+                Logger.debug("[오류주입] ⑤ 인증 헤더 제외하고 전송")
         elif self.r2 == "D":  # Digest
             auth = HTTPDigestAuth(self.accessInfo[0], self.accessInfo[1])
         # self.r2 == "None"이면 그대로 None

@@ -379,15 +379,46 @@ class ConstraintDataGenerator:
         template_data.update(response)
         return template_data
 
-    def _applied_codevalue(self, request_data, allowed_value):
+    # 기대 코드별 기본 주입 방법.
+    # 400은 유도 방법이 셋(②누락·③자료형·④유효값)이라 기대 코드만으로는 정할 수 없다.
+    # 관리도구가 주입 방법을 내려주게 되면 _applied_codevalue(method=...)로 연결하면 되고,
+    # 그 전까지는 기존 동작(자료형 불일치)을 기본으로 둔다.
+    DEFAULT_INJECTION = {
+        "201": "start-time",       # ① 저장 조회 구간 밖
+        "400": "type-mismatch",    # ③ 자료형 불일치
+        "404": "unknown-device",   # ⑦ 미등록 장치 ID
+        # "403"은 요청 본문이 아니라 헤더/경로를 건드리므로 여기서 처리하지 않는다
+    }
+
+    def _applied_codevalue(self, request_data, allowed_value, constraints=None,
+                           include_optional=True, method=None):
+        """오류 유도 — 기대 코드(또는 명시된 method)에 맞춰 요청을 변조한다.
+
+        Args:
+            allowed_value: 관리도구가 내려준 응답 code 기대값("201"/"400"/"404" 등)
+            constraints: 해당 API의 요청 제약. 필수/선택 판정과 허용 값 목록이 들어 있다
+            include_optional: 시험범위. False면 필수 범위 — 선택 필드는 주입하지 않는다
+            method: 주입 방법을 직접 지정할 때 사용. 없으면 DEFAULT_INJECTION을 따른다
+        """
         if not getattr(CONSTANTS, "ENABLE_ERROR_REQUEST_MUTATION", False):
             return request_data
 
-        if allowed_value == "201":
-            updated_data = self.replace_start_time(request_data)
-        elif allowed_value == "400":
-            updated_data = self.change_random_field_type(request_data)
-        return updated_data
+        method = method or self.DEFAULT_INJECTION.get(str(allowed_value))
+
+        if method == "start-time":
+            return self.replace_start_time(request_data)
+        if method == "missing-required":
+            return self.remove_required_field(request_data, constraints)[0]
+        if method == "type-mismatch":
+            return self.change_random_field_type(request_data, constraints, include_optional)
+        if method == "invalid-value":
+            return self.violate_valid_value(request_data, constraints, include_optional)[0]
+        if method == "unknown-device":
+            return self.use_unknown_device_id(request_data)[0]
+
+        # 기대 코드가 200이거나 본문 변조 대상이 아닌 경우(403 등)는 그대로 보낸다.
+        # (예전에는 여기서 지역변수 미할당으로 예외가 나고 바깥 except가 삼켰다)
+        return request_data
 
     def _build_constraint_map(self, constraints, request_data, is_webhook=False):
         """constraints를 분석하여 각 필드의 제약 조건과 참조 값을 매핑"""
@@ -840,7 +871,124 @@ class ConstraintDataGenerator:
 
         return item
 
-    def change_random_field_type(self, data):
+    # ========== 오류 주입(유도) ==========
+    # 시험 기준(2026-08-16 "오류 처리 케이스 정리")의 주입 방법과 1:1로 맞춘다.
+    #   ① 저장 조회 구간 밖  → 201 : replace_start_time
+    #   ② 필수 필드 누락     → 400 : remove_required_field
+    #   ③ 자료형 불일치      → 400 : change_random_field_type
+    #   ④ 유효 값 위반       → 400 : violate_valid_value
+    #   ⑤ 토큰 미포함        → 403 : 전송 계층(systemVal_all.post)에서 헤더 제거
+    #   ⑥ 접근 불가 URL      → 403 : 미구현 — 절차서에 경로 기준이 확정돼야 함
+    #   ⑦ 미등록 장치 ID     → 404 : use_unknown_device_id
+    #
+    # 필수/선택 판정과 허용 값 목록은 전부 관리도구가 내려주는 제약(constraints)에
+    # 이미 들어 있다("required": True/False, "validValues": [...]). 별도 스키마 해석 불필요.
+
+    # 미등록 장치로 바꿀 때 쓰는 ID (시험 기준 예시와 동일)
+    UNKNOWN_DEVICE_IDS = {
+        "camID": "cam9999",
+        "doorID": "door9999",
+        "sensorDeviceID": "iot9999",
+    }
+
+    @staticmethod
+    def _leaf_constraints(constraints, include_optional=True):
+        """제약에서 잎 경로만 (경로, 규칙)으로 돌려준다.
+
+        제약에는 "doorList"(컨테이너)와 "doorList.doorID"(잎)가 함께 들어 있다.
+        컨테이너를 지우면 하위가 통째로 날아가 주입 의도가 흐려지므로 잎만 쓴다.
+        include_optional=False는 필수 범위 시험 — 선택 필드는 주입 대상이 아니다.
+        """
+        items = [(p, r) for p, r in (constraints or {}).items() if isinstance(r, dict)]
+        all_paths = [p for p, _ in items]
+        result = []
+        for path, rule in items:
+            if any(other.startswith(path + ".") for other in all_paths):
+                continue  # 하위를 가진 컨테이너는 건너뛴다
+            if not include_optional and not rule.get("required"):
+                continue
+            result.append((path, rule))
+        return result
+
+    @staticmethod
+    def _resolve_targets(data, dotted_path):
+        """점 표기 경로가 실제로 가리키는 (부모 dict, 키) 목록.
+
+        중간에 리스트가 있으면 원소마다 펼친다 (doorList.doorID → 모든 줄의 doorID).
+        """
+        nodes = [data]
+        parts = dotted_path.split(".")
+        for part in parts[:-1]:
+            next_nodes = []
+            for node in nodes:
+                if isinstance(node, dict) and part in node:
+                    value = node[part]
+                    next_nodes.extend(value if isinstance(value, list) else [value])
+            nodes = next_nodes
+        last = parts[-1]
+        return [(n, last) for n in nodes if isinstance(n, dict) and last in n]
+
+    def remove_required_field(self, data, constraints):
+        """② 필수 필드 누락 → 400. 첫 번째 필수 잎 필드를 요청에서 지운다."""
+        new_data = copy.deepcopy(data)
+        for path, _rule in self._leaf_constraints(constraints, include_optional=False):
+            targets = self._resolve_targets(new_data, path)
+            if not targets:
+                continue
+            for container, key in targets:
+                container.pop(key, None)
+            Logger.debug(f"[오류주입] ② 필수 필드 누락: {path}")
+            return new_data, path
+        Logger.debug("[오류주입] ② 제거할 필수 필드를 찾지 못함 — 원본 유지")
+        return new_data, None
+
+    def violate_valid_value(self, data, constraints, include_optional=True):
+        """④ 유효 값 위반 → 400. 허용 값 목록이 있는 필드에 목록 밖 값을 넣는다."""
+        new_data = copy.deepcopy(data)
+        for path, rule in self._leaf_constraints(constraints, include_optional):
+            allowed = rule.get("validValues") or rule.get("allowedValues")
+            if not allowed:
+                continue
+            targets = self._resolve_targets(new_data, path)
+            if not targets:
+                continue
+            bad_value = "INVALID_VALUE"
+            while bad_value in allowed:
+                bad_value += "_X"  # 허용 목록과 겹치지 않을 때까지
+            for container, key in targets:
+                container[key] = bad_value
+            Logger.debug(f"[오류주입] ④ 유효 값 위반: {path} → {bad_value} (허용: {allowed})")
+            return new_data, path
+        Logger.debug("[오류주입] ④ 허용 값 목록이 있는 필드를 찾지 못함 — 원본 유지")
+        return new_data, None
+
+    def use_unknown_device_id(self, data):
+        """⑦ 미등록 장치 ID → 404. 장치 ID를 목록에 없는 값으로 바꾼다."""
+        new_data = copy.deepcopy(data)
+        changed = []
+
+        def traverse(obj):
+            if isinstance(obj, dict):
+                for key, value in obj.items():
+                    if key in self.UNKNOWN_DEVICE_IDS and isinstance(value, str):
+                        obj[key] = self.UNKNOWN_DEVICE_IDS[key]
+                        changed.append(key)
+                    else:
+                        traverse(value)
+            elif isinstance(obj, list):
+                for item in obj:
+                    traverse(item)
+
+        traverse(new_data)
+        Logger.debug(f"[오류주입] ⑦ 미등록 장치 ID: {changed or '대상 없음 — 원본 유지'}")
+        return new_data, (changed[0] if changed else None)
+
+    def change_random_field_type(self, data, constraints=None, include_optional=True):
+        """③ 자료형 불일치 → 400. 잎 하나를 골라 타입만 바꾼다.
+
+        필수 범위 시험(include_optional=False)에서는 선택 필드를 건드리면 안 되므로
+        제약의 required=True인 경로만 후보로 남긴다.
+        """
         new_data = copy.deepcopy(data)
         leaf_paths = []
 
@@ -857,8 +1005,22 @@ class ConstraintDataGenerator:
 
         collect(new_data, [])
 
+        # 1️⃣-2 범위 제한 — 필수 범위면 필수 필드만 후보로 남긴다
+        if constraints and not include_optional:
+            required_paths = {p for p, _ in self._leaf_constraints(constraints, False)}
+            # 리스트 인덱스는 빼고 점 표기로 맞춰 비교 (doorList[0].doorID → doorList.doorID)
+            filtered = [
+                p for p in leaf_paths
+                if ".".join(str(k) for k in p if not isinstance(k, int)) in required_paths
+            ]
+            if filtered:
+                leaf_paths = filtered
+            else:
+                Logger.debug("[오류주입] ③ 필수 범위에 해당하는 잎이 없어 전체에서 고름")
+
         if not leaf_paths:
-            return new_data, None, None, None
+            Logger.debug("[오류주입] ③ 변조할 잎이 없음 — 원본 유지")
+            return new_data
 
         # 2️⃣ 랜덤 경로 선택
         path = random.choice(leaf_paths)
