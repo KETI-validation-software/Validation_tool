@@ -44,21 +44,25 @@ NORMAL_REQUEST = {
 }
 
 
-def make_server(enabled=True, schema=SCHEMA):
+def make_server(enabled=True, schema=SCHEMA, in_con=None):
     """소켓을 열지 않고 판정 메서드만 쓰기 위한 최소 인스턴스"""
     srv = object.__new__(Server)
     srv.CONSTANTS = type("C", (), {"ENABLE_ERROR_RESPONSE_CHECK": enabled})
     srv.generator = ConstraintDataGenerator({})
     srv.message = ["StoredVerifEventInfos"]
     srv.inSchema = [schema]
+    Server.inCon = [in_con] if in_con is not None else None
     Server.request_has_error = {}
+    # 장치 목록은 시험마다 초기화 (비어 있으면 404 판정 안 함)
+    Server.valid_ids_by_field = {"camID": set(), "doorID": set(), "sensorDeviceID": set()}
     return srv
 
 
-def check(request_data, enabled=True, schema=SCHEMA):
-    return make_server(enabled, schema)._check_request_errors(
-        "StoredVerifEventInfos", request_data
-    )
+def check(request_data, enabled=True, schema=SCHEMA, in_con=None, known_doors=None):
+    srv = make_server(enabled, schema, in_con)
+    if known_doors:
+        Server.valid_ids_by_field["doorID"].update(known_doors)
+    return srv._check_request_errors("StoredVerifEventInfos", request_data)
 
 
 def test_normal_request_passes():
@@ -130,6 +134,81 @@ def test_empty_schema_api_does_not_false_400():
     """요청 스키마가 빈 API(DoorProfiles 등)는 타입 검사를 건너뛴다"""
     assert check({"anything": 1}, schema={}) is None
     print("✅ 요청 스키마 없는 API → 오류 없음")
+
+
+def test_missing_required_field_is_400():
+    """② 필수 필드(endTime) 누락 → 400. 선택 필드(maxCount) 누락은 정상."""
+    gen = ConstraintDataGenerator({})
+    missing_required = {
+        "timePeriod": {"startTime": "20251105163010124"},  # endTime 제거됨
+        "doorList": [{"doorID": "door0001"}],
+    }
+    result = check(missing_required)
+    assert result is not None and result["code"] == "400", f"400이 아님: {result}"
+
+    missing_optional = {k: v for k, v in NORMAL_REQUEST.items() if k != "maxCount"}
+    assert check(missing_optional) is None, "선택 필드 누락을 오류로 판정함"
+    print("✅ ② 필수 필드 누락 → 400, 선택 필드 누락은 정상")
+
+
+def test_invalid_value_is_400():
+    """④ validValues 목록 밖 값 → 400 (요청 제약 기반, 중첩 경로 포함)"""
+    in_con = {
+        "eventFilter": {"required": False, "validValues": ["AuthSuccess", "AuthFail"]},
+    }
+    bad = dict(NORMAL_REQUEST, eventFilter="무단침입")
+    result = check(bad, in_con=in_con)
+    assert result is not None and result["code"] == "400", f"400이 아님: {result}"
+
+    good = dict(NORMAL_REQUEST, eventFilter="AuthSuccess")
+    assert check(good, in_con=in_con) is None, "허용 값인데 오류로 판정함"
+
+    # 제약이 아예 없는 API(inCon=None)는 판정하지 않는다
+    assert check(bad) is None, "제약이 없는데 유효 값 판정을 함"
+    print("✅ ④ 유효 값 위반 → 400, 허용 값·제약 없음은 정상")
+
+
+def test_unknown_device_is_404():
+    """⑦ 프로필 목록에 없는 doorID → 404 (중첩 doorList.doorID까지)"""
+    bad = {
+        "timePeriod": dict(NORMAL_REQUEST["timePeriod"]),
+        "doorList": [{"doorID": "door9999"}],
+    }
+    result = check(bad, known_doors={"door0001", "door0002"})
+    assert result is not None and result["code"] == "404", f"404가 아님: {result}"
+    assert result["message"] == "장치 없음"
+
+    good = check(NORMAL_REQUEST, known_doors={"door0001", "door0002"})
+    assert good is None, "등록된 장치인데 404로 판정함"
+    print("✅ ⑦ 미등록 doorID → 404 장치 없음, 등록 장치는 정상")
+
+
+def test_unknown_device_no_list_no_judgment():
+    """⑦ 프로필 목록이 비어 있으면(조회 전) 판정하지 않는다 — 오탐 방지"""
+    bad = {
+        "timePeriod": dict(NORMAL_REQUEST["timePeriod"]),
+        "doorList": [{"doorID": "door9999"}],
+    }
+    assert check(bad) is None, "목록이 없는데 404로 판정함(오탐)"
+    print("✅ ⑦ 프로필 조회 전에는 404 판정 안 함 (오탐 방지)")
+
+
+def test_profiles_response_fills_device_list():
+    """프로필 응답이 나가면 장치 목록이 자동으로 채워진다"""
+    srv = make_server()
+    srv._update_valid_devices("DoorProfiles", {
+        "code": "200",
+        "doorList": [{"doorID": "door0001"}, {"doorID": "door0002"}],
+    })
+    srv._update_valid_devices("SensorDeviceProfiles", {
+        "sensorDeviceList": [{"sensorDeviceID": "iot0001"}],
+    })
+    srv._update_valid_devices("StoredVerifEventInfos", {  # 프로필이 아니면 무시
+        "doorList": [{"doorID": "doorXXXX"}],
+    })
+    assert Server.valid_ids_by_field["doorID"] == {"door0001", "door0002"}
+    assert Server.valid_ids_by_field["sensorDeviceID"] == {"iot0001"}
+    print("✅ 프로필 응답 → 장치 목록 자동 수집 (프로필 아닌 응답은 무시)")
 
 
 def test_switch_off_disables_everything():

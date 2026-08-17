@@ -67,7 +67,10 @@ class Server(BaseHTTPRequestHandler):
     request_counter = {}  # ✅ API별 시스템 요청 카운터 (클래스 변수)
     latest_event = defaultdict(dict)  # ✅ API별 최신 이벤트 저장 (클래스 변수)
     request_has_error = {}  # ✅ API별 요청 오류 flag (내부용, 응답 JSON에 포함 안 됨)
-    valid_device_ids = set(["cam0001", "cam0002", "cam003", "cam004"])  # ✅ 유효한 장치 ID 목록 (동적 업데이트)
+    # ✅ 404(미등록 장치) 판정 기준 — 프로필 응답(CameraProfiles/DoorProfiles/
+    #    SensorDeviceProfiles)이 나갈 때 자동으로 채워진다. 목록이 비어 있는 동안은
+    #    판정하지 않으므로(오탐 방지) 하드코딩 초기값이 필요 없다.
+    valid_ids_by_field = {"camID": set(), "doorID": set(), "sensorDeviceID": set()}
 
     # ✅ 데이터 맵핑 저장소 (ac002 시나리오용)
     door_memory = {}  # doorID를 키로 하는 문 정보 저장소
@@ -258,26 +261,29 @@ class Server(BaseHTTPRequestHandler):
             Server.request_has_error[api_name] = True
             return {"code": "201", "message": "정보 없음"}
 
-        # 2. 장치 존재 검사 → 404 : 아직 켜지 않는다.
-        #    상대에 404 유도 코드가 없어 이 검사가 잡는 건 전부 오탐이 된다.
-        #    (_check_device_exists의 기준 목록 Server.valid_device_ids는 CameraProfiles
-        #     응답으로 갱신되는데, 그 갱신 경로가 살아 있는지부터 확인해야 한다.)
-        #    404 유도를 붙일 때 아래 주석을 풀고 짝을 맞출 것.
-        # device_error = self._check_device_exists(request_data)
-        # if device_error:
-        #     Server.request_has_error[api_name] = True
-        #     return {"code": "404", "message": "자원 없음"}
+        # 2. 미등록 장치 검사 → 404 (⑦ 유도와 짝. 프로필 목록이 비어 있으면 판정 안 함)
+        device_error = self._check_device_exists(request_data)
+        if device_error:
+            Logger.debug(f" 장치 없음 감지: {device_error}")
+            Server.request_has_error[api_name] = True
+            return {"code": "404", "message": "장치 없음"}
 
-        # 3. 타입 불일치 검사 → 400 (요청 스키마가 있는 API만 판정 가능)
+        # 3. 필수 필드 누락 + 타입 불일치 검사 → 400 (②·③ 유도와 짝,
+        #    요청 스키마가 있는 API만 판정 가능)
         schema = self._get_request_schema(api_name)
-        if not schema:
-            Logger.debug(f" 요청 스키마 없음 → 타입 검사 생략: {api_name}")
-            Server.request_has_error[api_name] = False
-            return None
+        if schema:
+            type_error = self._check_type_mismatch(request_data, schema)
+            if type_error:
+                Logger.debug(f" 필드 누락/타입 불일치 감지: {type_error}")
+                Server.request_has_error[api_name] = True
+                return {"code": "400", "message": "잘못된 요청"}
+        else:
+            Logger.debug(f" 요청 스키마 없음 → 필드 검사 생략: {api_name}")
 
-        type_error = self._check_type_mismatch(request_data, schema)
-        if type_error:
-            Logger.debug(f" 타입 불일치 감지: {type_error}")
+        # 4. 유효 값 위반 검사 → 400 (④ 유도와 짝, 요청 제약의 validValues와 대조)
+        value_error = self._check_valid_values(api_name, request_data)
+        if value_error:
+            Logger.debug(f" 유효 값 위반 감지: {value_error}")
             Server.request_has_error[api_name] = True
             return {"code": "400", "message": "잘못된 요청"}
 
@@ -294,6 +300,46 @@ class Server(BaseHTTPRequestHandler):
                         return self.inSchema[i]
         except Exception as e:
             Logger.error(f" 스키마 가져오기 실패: {e}")
+        return None
+
+    def _get_request_constraints(self, api_name):
+        """API의 요청 제약 가져오기 (inSchema와 같은 인덱스 배열)"""
+        try:
+            in_con = getattr(Server, 'inCon', None)
+            if in_con and self.message:
+                for i, msg in enumerate(self.message):
+                    if msg == api_name and i < len(in_con):
+                        return in_con[i]
+        except Exception as e:
+            Logger.error(f" 요청 제약 가져오기 실패: {e}")
+        return None
+
+    def _check_valid_values(self, api_name, request_data):
+        """
+        ④ 유효 값 위반 검사 → 400
+
+        요청 제약(Constraints_request)의 validValues 목록과 요청 값을 대조한다.
+        경로 키("transProtocol.transProtocolType")의 마지막 이름으로 중첩까지 찾는다.
+
+        Returns:
+            str: 오류 메시지 (오류 있을 때) 또는 None (정상)
+        """
+        constraints = self._get_request_constraints(api_name)
+        if not isinstance(constraints, dict):
+            return None
+        try:
+            for path, rule in constraints.items():
+                if not isinstance(rule, dict):
+                    continue
+                allowed = rule.get("validValues") or rule.get("allowedValues")
+                if not allowed:
+                    continue
+                leaf = str(path).split(".")[-1]
+                for value in self.generator.find_key(request_data, leaf):
+                    if value is not None and value not in allowed:
+                        return f"{path}: 허용 외 값 {value!r} (허용: {allowed})"
+        except Exception as e:
+            Logger.error(f" 유효 값 검사 실패: {e}")
         return None
 
     def _check_type_mismatch(self, request_data, schema):
@@ -333,9 +379,14 @@ class Server(BaseHTTPRequestHandler):
                 return path or "root"
             for field, expected in schema.items():
                 field_name = self._schema_key_name(field)  # OptionalKey 처리
-                if field_name not in data or data[field_name] is None:
-                    continue  # 없거나 None이면 타입 검사 대상 아님
                 sub_path = f"{path}.{field_name}" if path else field_name
+                if field_name not in data or data[field_name] is None:
+                    # 스키마 키가 맨 문자열이면 필수 — 없으면 ② 필수 필드 누락 → 400.
+                    # OptionalKey로 감싼 키(선택)는 없어도 정상이다.
+                    if isinstance(field, str):
+                        Logger.debug(f" {sub_path}: 필수 필드 누락")
+                        return sub_path
+                    continue
                 bad = self._walk_type_check(data[field_name], expected, sub_path)
                 if bad:
                     return bad
@@ -390,30 +441,39 @@ class Server(BaseHTTPRequestHandler):
 
         return None
 
+    def _update_valid_devices(self, api_name, payload):
+        """프로필 응답에서 장치 ID를 수집해 404 판정 기준 목록을 채운다.
+
+        CameraProfiles/DoorProfiles/SensorDeviceProfiles 응답이 이 서버를 거쳐
+        나가므로, 그때 실린 ID가 곧 "등록된 장치"다. 리셋 없이 누적한다
+        (리셋하면 다른 분야 프로필이 서로의 목록을 지운다).
+        """
+        if "Profiles" not in str(api_name) or not isinstance(payload, dict):
+            return
+        for field in Server.valid_ids_by_field:
+            ids = [v for v in self.generator.find_key(payload, field)
+                   if isinstance(v, str) and v]
+            if ids:
+                Server.valid_ids_by_field[field].update(ids)
+                Logger.debug(f" {api_name} 응답에서 {field} {len(ids)}개 수집 "
+                             f"→ 현재 목록: {sorted(Server.valid_ids_by_field[field])}")
+
     def _check_device_exists(self, request_data):
         """
-        장치 존재 검사 - 유효한 camID인지 확인
+        ⑦ 미등록 장치 ID 검사 → 404
+
+        camID/doorID/sensorDeviceID를 중첩 구조까지 찾아 프로필 목록과 대조한다.
+        해당 분야 목록이 아직 비어 있으면(프로필 조회 전) 판정하지 않는다 — 오탐 방지.
 
         Returns:
             str: 오류 메시지 (오류 있을 때) 또는 None (정상)
         """
-        # ✅ 유효한 카메라 ID 목록 (클래스 변수 사용 - 동적으로 업데이트됨)
-        valid_cam_ids = Server.valid_device_ids
-
-        # camID 검사
-        cam_id = request_data.get("camID")
-        if cam_id is not None:
-            if cam_id not in valid_cam_ids:
-                return f"존재하지 않는 장치: {cam_id}"
-
-        # camList 검사
-        cam_list = request_data.get("camList")
-        if cam_list is not None and isinstance(cam_list, list):
-            for cam in cam_list:
-                cam_id_in_list = cam.get("camID") if isinstance(cam, dict) else cam
-                if cam_id_in_list and cam_id_in_list not in valid_cam_ids:
-                    return f"존재하지 않는 장치: {cam_id_in_list}"
-
+        for field, known_ids in Server.valid_ids_by_field.items():
+            if not known_ids:
+                continue
+            for value in self.generator.find_key(request_data, field):
+                if isinstance(value, str) and value and value not in known_ids:
+                    return f"존재하지 않는 장치: {field}={value}"
         return None
 
     # ========== 오류 검사 함수들 끝 ==========
@@ -694,24 +754,24 @@ class Server(BaseHTTPRequestHandler):
 
                 # 1단계: Authorization 헤더 존재 확인
                 if not auth:
-                    Logger.debug(f"[SERVER][AUTH] ❌ Authorization 헤더 없음!")
-                    self.send_response(401)
+                    # ⑤ 토큰 미포함 → 403 권한 없음 (시험 코드 체계는 201/400/403/404 —
+                    # 401은 이번 시험에서 쓰지 않으므로 교체함)
+                    Logger.debug(f"[SERVER][AUTH] ❌ Authorization 헤더 없음 → 403")
+                    self.send_response(403)
                     self.send_header('Content-type', 'application/json')
-                    self.send_header('WWW-Authenticate', 'Bearer realm="API"')
                     self.end_headers()
-                    error_msg = json.dumps({"code": "401", "message": "인증 헤더 누락"})
+                    error_msg = json.dumps({"code": "403", "message": "권한 없음"})
                     self.wfile.write(error_msg.encode('utf-8'))
                     return
 
                 # 2단계: Bearer 스킴 확인
                 auth_parts = auth.split(" ", 1)
                 if len(auth_parts) != 2 or auth_parts[0] != 'Bearer':
-                    Logger.debug(f"[SERVER][AUTH] ❌ 잘못된 인증 스킴: {auth_parts[0] if auth_parts else 'None'}")
-                    self.send_response(401)
+                    Logger.debug(f"[SERVER][AUTH] ❌ 잘못된 인증 스킴: {auth_parts[0] if auth_parts else 'None'} → 403")
+                    self.send_response(403)
                     self.send_header('Content-type', 'application/json')
-                    self.send_header('WWW-Authenticate', 'Bearer realm="API"')
                     self.end_headers()
-                    error_msg = json.dumps({"code": "401", "message": "잘못된 인증 스킴"})
+                    error_msg = json.dumps({"code": "403", "message": "권한 없음"})
                     self.wfile.write(error_msg.encode('utf-8'))
                     return
 
@@ -729,12 +789,11 @@ class Server(BaseHTTPRequestHandler):
                     Logger.debug(f"[SERVER][AUTH] ✅ Bearer 토큰 인증 성공!")
                     auth_pass = True
                 else:
-                    Logger.debug(f"[SERVER][AUTH] ❌ Bearer 토큰 불일치!")
-                    self.send_response(401)
+                    Logger.debug(f"[SERVER][AUTH] ❌ Bearer 토큰 불일치 → 403")
+                    self.send_response(403)
                     self.send_header('Content-type', 'application/json')
-                    self.send_header('WWW-Authenticate', 'Bearer realm="API", error="invalid_token"')
                     self.end_headers()
-                    error_msg = json.dumps({"code": "401", "message": "유효하지 않은 토큰"})
+                    error_msg = json.dumps({"code": "403", "message": "권한 없음"})
                     self.wfile.write(error_msg.encode('utf-8'))
                     return
 
@@ -922,20 +981,8 @@ class Server(BaseHTTPRequestHandler):
                 # ✅ trace 저장 (_push_event 내부에서 deepcopy 수행)
                 self._push_event(api_name, "RESPONSE", updated_message)
 
-                # ✅ CameraProfiles 응답인 경우 camID들을 valid_device_ids에 업데이트 (리셋 후 추가)
-                if "CameraProfiles" in api_name and isinstance(updated_message, dict):
-                    cam_list = updated_message.get("camList", [])
-                    if cam_list:
-                        # 기본 ID들 유지하고 CameraProfiles ID들만 리셋
-                        base_ids = {"cam001", "cam002", "keti", "camera1", "camera2"}
-                        Server.valid_device_ids = base_ids.copy()
-
-                        # CameraProfiles에서 받은 ID 추가
-                        for cam in cam_list:
-                            if isinstance(cam, dict) and "camID" in cam:
-                                Server.valid_device_ids.add(cam["camID"])
-                        Logger.debug(f" CameraProfiles에서 {len(cam_list)}개 camID로 리셋+추가")
-                        Logger.debug(f" 현재 유효한 장치 목록: {Server.valid_device_ids}")
+                # ✅ 프로필 응답이면 장치 ID들을 404 판정 기준 목록에 반영
+                self._update_valid_devices(api_name, updated_message)
                 '''
                 # ✅ JSON에 code_value 추가
                 if isinstance(updated_message, dict):
@@ -955,20 +1002,8 @@ class Server(BaseHTTPRequestHandler):
                 # ✅ trace 저장 (_push_event 내부에서 deepcopy 수행)
                 self._push_event(api_name, "RESPONSE", message)
 
-                # ✅ CameraProfiles 응답인 경우 camID들을 valid_device_ids에 업데이트 (리셋 후 추가)
-                if "CameraProfiles" in api_name and isinstance(message, dict):
-                    cam_list = message.get("camList", [])
-                    if cam_list:
-                        # 기본 ID들 유지하고 CameraProfiles ID들만 리셋
-                        base_ids = {"cam001", "cam002", "keti", "camera1", "camera2"}
-                        Server.valid_device_ids = base_ids.copy()
-
-                        # CameraProfiles에서 받은 ID 추가
-                        for cam in cam_list:
-                            if isinstance(cam, dict) and "camID" in cam:
-                                Server.valid_device_ids.add(cam["camID"])
-                        Logger.debug(f" CameraProfiles에서 {len(cam_list)}개 camID로 리셋+추가")
-                        Logger.debug(f" 현재 유효한 장치 목록: {Server.valid_device_ids}")
+                # ✅ 프로필 응답이면 장치 ID들을 404 판정 기준 목록에 반영
+                self._update_valid_devices(api_name, message)
                 '''
                 # ✅ JSON에 code_value 추가
                 if isinstance(message, dict):
