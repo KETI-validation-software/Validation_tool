@@ -228,6 +228,13 @@ class MyApp(SystemMainUI):
                 direction="out"  # 응답 검증
 
             )
+            # 인증 메시지에는 오류를 주입하지 않는다.
+            # 시험 기준(2026-08-16 오류 처리 케이스 정리): 오류 주입 대상은 "사용자 인증
+            # 이후의 메시지"이며 인증 메시지(1-1·1-2)는 제외한다.
+            # 재시도로 붙는 숫자 접미사(Authentication2 등)까지 걸러야 해 startswith로 본다.
+            if str(api_name).startswith("Authentication"):
+                return updated_request
+
             try:
                 code_value = self.resp_rules.get("code")
                 allowed_value = code_value.get("allowedValues", [])[0]

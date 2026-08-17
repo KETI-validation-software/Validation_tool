@@ -553,15 +553,11 @@ class Server(BaseHTTPRequestHandler):
 
                 # ✅ Authentication API REQUEST 이벤트 기록 (한 번만)
                 self._push_event(api_name, "REQUEST", self.request_data)
-                # ========== Authentication API도 오류 검사 (400/201/404) ==========
-                error_response = self._check_request_errors(api_name, self.request_data)
-                if error_response:
-                    Logger.debug(f"[SERVER] Authentication 오류 감지: {error_response}")
-                    # ✅ trace 저장 (_push_event 내부에서 deepcopy 수행)
-                    self._push_event(api_name, "RESPONSE", error_response)
-                    self._set_headers()
-                    self.wfile.write(json.dumps(error_response).encode('utf-8'))
-                    return
+                # ========== 인증 메시지는 오류 검사 대상이 아니다 ==========
+                # 시험 기준(2026-08-16 오류 처리 케이스 정리): 오류 주입은 "사용자 인증
+                # 이후의 메시지" 중에서 고르며 인증 메시지(1-1·1-2)에는 주입하지 않는다.
+                # 주입이 없으므로 여기서 판정할 것도 없다.
+                # (인증 실패는 아래 자격 증명 불일치 분기가 별도로 처리한다.)
                 # ================================================================
 
                 # 응답에 토큰 포함
