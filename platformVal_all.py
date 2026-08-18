@@ -268,7 +268,6 @@ class MyApp(PlatformMainUI):
             schema_file = os.path.join(exe_dir, 'spec', 'Schema_request.py')
             data_file = os.path.join(exe_dir, 'spec', 'Data_response.py')
             constraints_file = os.path.join(exe_dir, 'spec', 'Constraints_response.py')
-            constraints_request_file = os.path.join(exe_dir, 'spec', 'Constraints_request.py')  # 유효 값 위반(400) 판정 기준
 
             Logger.debug(f"명시적 로드 시도:")
             Logger.debug(f"  - Schema: {schema_file} (존재: {os.path.exists(schema_file)})")
@@ -291,19 +290,12 @@ class MyApp(PlatformMainUI):
             sys.modules['spec.Constraints_response'] = constraints_response_module
             spec.loader.exec_module(constraints_response_module)
 
-            # 요청 제약 — 상대역이 유효 값 위반(400)을 판정할 때 validValues를 참조한다
-            spec = importlib.util.spec_from_file_location('spec.Constraints_request', constraints_request_file)
-            constraints_request_module = importlib.util.module_from_spec(spec)
-            sys.modules['spec.Constraints_request'] = constraints_request_module
-            spec.loader.exec_module(constraints_request_module)
-
             Logger.debug(f"importlib.util로 외부 파일 로드 완료")
         else:
             # 일반 환경에서는 기존 방식 사용
             import spec.Schema_request as schema_request_module
             import spec.Data_response as data_response_module
             import spec.Constraints_response as constraints_response_module
-            import spec.Constraints_request as constraints_request_module  # 유효 값 위반(400) 판정 기준
 
         # ===== spec 파일 경로 로그 추가 =====
         Logger.debug(f"[PLATFORM SPEC] Schema_request.py 로드 경로: {schema_request_module.__file__}")
@@ -334,8 +326,6 @@ class MyApp(PlatformMainUI):
         # 표시용 API 이름 (숫자 제거)
         self.videoMessagesDisplay = [remove_api_number_suffix(msg) for msg in self.videoMessages]
         self.videoOutConstraint = getattr(constraints_response_module, self.current_spec_id + "_outConstraints", [])
-        # 요청 제약 — 상대역의 유효 값 위반(400) 판정 기준 (validValues 목록)
-        self.videoInConstraint = getattr(constraints_request_module, self.current_spec_id + "_inConstraints", [])
 
         # Webhook 관련
         try:
@@ -1965,7 +1955,6 @@ class MyApp(PlatformMainUI):
                     self.Server.outMessage = self.videoOutMessage
                     self.Server.outCon = self.videoOutConstraint
                     self.Server.inSchema = self.videoInSchema
-                    self.Server.inCon = getattr(self, 'videoInConstraint', [])  # 유효 값 위반(400) 판정용
                     self.Server.webhookSchema = self.videoWebhookSchema
 
                     # ✅ api_server는 "Realtime"이 포함된 API만 별도 인덱싱하므로 데이터 필터링
@@ -2663,7 +2652,6 @@ class MyApp(PlatformMainUI):
             self.Server.outMessage = self.videoOutMessage
             self.Server.inSchema = self.videoInSchema
             self.Server.outCon = self.videoOutConstraint
-            self.Server.inCon = getattr(self, 'videoInConstraint', [])  # 유효 값 위반(400) 판정용
 
             # ✅ api_server는 "Realtime"이 포함된 API만 별도 인덱싱하므로 데이터 필터링
             filtered_webhook_data = []

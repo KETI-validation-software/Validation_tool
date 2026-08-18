@@ -52,6 +52,7 @@ def make_server(enabled=True, schema=SCHEMA, in_con=None):
     srv.message = ["StoredVerifEventInfos"]
     srv.inSchema = [schema]
     Server.inCon = [in_con] if in_con is not None else None
+    Server.current_spec_id = None  # registry 경로 차단 — 시험은 inCon 오버라이드 사용
     Server.request_has_error = {}
     # 장치 목록은 시험마다 초기화 (비어 있으면 404 판정 안 함)
     Server.valid_ids_by_field = {"camID": set(), "doorID": set(), "sensorDeviceID": set()}
@@ -152,9 +153,13 @@ def test_missing_required_field_is_400():
 
 
 def test_invalid_value_is_400():
-    """④ validValues 목록 밖 값 → 400 (요청 제약 기반, 중첩 경로 포함)"""
+    """④ 허용 목록 밖 값 → 400. 실제 내려오는 validation_request 규칙 형식으로 확인."""
     in_con = {
-        "eventFilter": {"required": False, "validValues": ["AuthSuccess", "AuthFail"]},
+        "eventFilter": {  # 실제 ac002 다운로드 규칙과 같은 형태
+            "enabled": True,
+            "validationType": "valid-value-match",
+            "allowedValues": ["AuthSuccess", "AuthFail"],
+        },
     }
     bad = dict(NORMAL_REQUEST, eventFilter="무단침입")
     result = check(bad, in_con=in_con)
@@ -163,9 +168,15 @@ def test_invalid_value_is_400():
     good = dict(NORMAL_REQUEST, eventFilter="AuthSuccess")
     assert check(good, in_con=in_con) is None, "허용 값인데 오류로 판정함"
 
-    # 제약이 아예 없는 API(inCon=None)는 판정하지 않는다
-    assert check(bad) is None, "제약이 없는데 유효 값 판정을 함"
-    print("✅ ④ 유효 값 위반 → 400, 허용 값·제약 없음은 정상")
+    # 규칙이 아예 없는 API는 판정하지 않는다
+    assert check(bad) is None, "규칙이 없는데 유효 값 판정을 함"
+
+    # valid-value-match가 아닌 규칙의 allowedValues는 유효 값 목록이 아니다
+    other_rule = {"code": {"validationType": "specified-value-match",
+                           "allowedValues": ["200"]}}
+    assert check(dict(NORMAL_REQUEST), in_con=other_rule) is None, \
+        "specified-value-match의 allowedValues로 오판정함"
+    print("✅ ④ 유효 값 위반 → 400 (validation_request 규칙 형식), 오판정 없음")
 
 
 def test_unknown_device_is_404():

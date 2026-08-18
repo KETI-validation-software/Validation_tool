@@ -302,36 +302,55 @@ class Server(BaseHTTPRequestHandler):
             Logger.error(f" 스키마 가져오기 실패: {e}")
         return None
 
-    def _get_request_constraints(self, api_name):
-        """API의 요청 제약 가져오기 (inSchema와 같은 인덱스 배열)"""
+    def _get_request_valid_rules(self, api_name):
+        """④ 유효 값 판정에 쓸 요청 규칙을 가져온다.
+
+        통합 도구가 관리시스템에서 내려받는 산출물에는 Constraints_request.py가
+        없다(6종: KeyId/ResponseCode/Schema_request/Data_response/validation_request/
+        Constraints_response). 허용 값 목록은 validation_request.py의 요청 검증 규칙
+        (valid-value-match의 allowedValues)에 들어 있으므로 registry에서 읽는다.
+        """
+        # 시험 주입용 오버라이드 (temp/test_error_response_check.py)
+        in_con = getattr(Server, 'inCon', None)
+        if in_con and self.message:
+            for i, msg in enumerate(self.message):
+                if msg == api_name and i < len(in_con):
+                    return in_con[i]
         try:
-            in_con = getattr(Server, 'inCon', None)
-            if in_con and self.message:
-                for i, msg in enumerate(self.message):
-                    if msg == api_name and i < len(in_con):
-                        return in_con[i]
+            if Server.current_spec_id:
+                from core.validation_registry import get_validation_rules
+                return get_validation_rules(
+                    spec_id=Server.current_spec_id,
+                    api_name=api_name,
+                    direction="in",
+                )
         except Exception as e:
-            Logger.error(f" 요청 제약 가져오기 실패: {e}")
+            Logger.error(f" 요청 검증 규칙 가져오기 실패: {e}")
         return None
 
     def _check_valid_values(self, api_name, request_data):
         """
         ④ 유효 값 위반 검사 → 400
 
-        요청 제약(Constraints_request)의 validValues 목록과 요청 값을 대조한다.
+        요청 규칙의 허용 값 목록과 요청 값을 대조한다.
         경로 키("transProtocol.transProtocolType")의 마지막 이름으로 중첩까지 찾는다.
 
         Returns:
             str: 오류 메시지 (오류 있을 때) 또는 None (정상)
         """
-        constraints = self._get_request_constraints(api_name)
-        if not isinstance(constraints, dict):
+        rules = self._get_request_valid_rules(api_name)
+        if not isinstance(rules, dict):
             return None
         try:
-            for path, rule in constraints.items():
+            for path, rule in rules.items():
                 if not isinstance(rule, dict):
                     continue
-                allowed = rule.get("validValues") or rule.get("allowedValues")
+                # 제약 형식은 validValues, 검증 규칙 형식은 valid-value-match의
+                # allowedValues. 다른 규칙 종류의 allowedValues(예: specified-value-
+                # match)는 유효 값 목록이 아니므로 쓰지 않는다.
+                allowed = rule.get("validValues")
+                if allowed is None and rule.get("validationType") == "valid-value-match":
+                    allowed = rule.get("allowedValues")
                 if not allowed:
                     continue
                 leaf = str(path).split(".")[-1]
