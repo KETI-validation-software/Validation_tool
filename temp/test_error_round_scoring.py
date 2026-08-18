@@ -50,6 +50,31 @@ def test_error_round_correct_201_passes():
     print("✅ 201 응답 → code·message만 채점, PASS (doorList 누락 오탐 없음)")
 
 
+def test_all_error_codes_shrink_scoring():
+    """축소 로직은 201 전용이 아니라 400/403/404에도 동일하게 동작해야 한다"""
+    cases = [("400", "잘못된 요청"), ("403", "권한 없음"), ("404", "장치 없음")]
+    for code, msg in cases:
+        rules = {
+            "code": {"enabled": True, "validationType": "specified-value-match",
+                     "allowedValues": [code], "score": 0},
+            "message": {"enabled": True, "validationType": "specified-value-match",
+                        "allowedValues": [msg], "score": 0},
+        }
+        response = {"code": code, "message": msg}
+        result, text, ok, err, _, _ = json_check_(
+            SCHEMA, response, False, validation_rules=rules)
+        assert result == "PASS", f"{code}: PASS여야 하는데 {result}\n{text}"
+        assert err == 0, f"{code}: 실패 필드 {err}개\n{text}"
+
+        # 틀린 코드(200)가 오면 전체 0점도 코드 무관하게 동일
+        wrong = {"code": "200", "message": "성공",
+                 "doorList": [{"doorID": "d", "eventName": "e", "eventTime": "t"}]}
+        result2, _, ok2, _, _, _ = json_check_(
+            SCHEMA, wrong, False, validation_rules=rules)
+        assert result2 == "FAIL" and ok2 == 0, f"{code}: 불일치인데 전체 0점이 아님"
+    print("✅ 400·403·404도 201과 동일 — 일치 시 code·message만, 불일치 시 전체 0점")
+
+
 def test_error_round_wrong_200_fails_all():
     """오류 회차 실패: 200으로 오면 기존대로 전체 필드 0점 조기 종료"""
     response = {"code": "200", "message": "성공",
