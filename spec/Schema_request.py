@@ -157,7 +157,7 @@ cmiqr201z00i8ie8fitdg5t1b_SensorDeviceProfiles_in_schema = {}
 # SensorDeviceControl
 cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_in_schema = {
     "sensorDeviceID": str,
-    "commandType": str,
+    OptionalKey("commandType"): str,
 }
 
 # SensorDeviceControl2

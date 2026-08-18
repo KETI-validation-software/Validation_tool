@@ -1,4 +1,196 @@
 # Authentication
+cmii7v8pr006g8z1tvo55a50u_Authentication_out_validation = {}
+
+# Capabilities
+cmii7v8pr006g8z1tvo55a50u_Capabilities_out_validation = {}
+
+# CameraProfiles
+cmii7v8pr006g8z1tvo55a50u_CameraProfiles_out_validation = {}
+
+# StreamURLs
+cmii7v8pr006g8z1tvo55a50u_StreamURLs_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "400"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "잘못된 요청"
+    ],
+    "score": 0
+  }
+}
+
+# RealtimeVideoEventInfos
+cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_out_validation = {}
+
+# RealtimeVideoEventInfos WebHook IN Validation
+cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_webhook_in_validation = {
+  "camList.camID": {
+    "enabled": True,
+    "validationType": "request-field-list-match",
+    "referenceFieldId": "cmiwrf69i0bu6844g22ccsjtr",
+    "referenceField": "camID",
+    "referenceEndpoint": "/RealtimeVideoEventInfos",
+    "score": 0
+  }
+}
+
+# cmii7v8pr006g8z1tvo55a50u WebHook 검증 리스트
+cmii7v8pr006g8z1tvo55a50u_webhook_inValidation = [
+    cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_webhook_in_validation,
+]
+
+# cmii7v8pr006g8z1tvo55a50u 검증 리스트
+cmii7v8pr006g8z1tvo55a50u_outValidation = [
+    cmii7v8pr006g8z1tvo55a50u_Authentication_out_validation,
+    cmii7v8pr006g8z1tvo55a50u_Capabilities_out_validation,
+    cmii7v8pr006g8z1tvo55a50u_CameraProfiles_out_validation,
+    cmii7v8pr006g8z1tvo55a50u_StreamURLs_out_validation,
+    cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_out_validation,
+]
+
+# Authentication
+cmsmj2a0g037grc0qddx8wie2_Authentication_out_validation = {}
+
+# Capabilities
+cmsmj2a0g037grc0qddx8wie2_Capabilities_out_validation = {}
+
+# SensorDeviceProfiles
+cmsmj2a0g037grc0qddx8wie2_SensorDeviceProfiles_out_validation = {}
+
+# StoredSensorEventInfos
+cmsmj2a0g037grc0qddx8wie2_StoredSensorEventInfos_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "201"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "정보 없음"
+    ],
+    "score": 0
+  },
+  "sensorDeviceList.sensorDeviceID": {
+    "enabled": True,
+    "validationType": "request-field-list-match",
+    "referenceFieldId": "cmsmj2acm03d6rc0qln8u5ijy",
+    "referenceField": "sensorDeviceID",
+    "referenceEndpoint": "/StoredSensorEventInfos",
+    "score": 0
+  }
+}
+
+# cmsmj2a0g037grc0qddx8wie2 검증 리스트
+cmsmj2a0g037grc0qddx8wie2_outValidation = [
+    cmsmj2a0g037grc0qddx8wie2_Authentication_out_validation,
+    cmsmj2a0g037grc0qddx8wie2_Capabilities_out_validation,
+    cmsmj2a0g037grc0qddx8wie2_SensorDeviceProfiles_out_validation,
+    cmsmj2a0g037grc0qddx8wie2_StoredSensorEventInfos_out_validation,
+]
+
+# Authentication
+cmsmiz4rk030drc0qgs8hvb18_Authentication_out_validation = {}
+
+# Capabilities
+cmsmiz4rk030drc0qgs8hvb18_Capabilities_out_validation = {}
+
+# DoorProfiles
+cmsmiz4rk030drc0qgs8hvb18_DoorProfiles_out_validation = {}
+
+# AccessUserInfos
+cmsmiz4rk030drc0qgs8hvb18_AccessUserInfos_out_validation = {}
+
+# StoredVerifEventInfos
+cmsmiz4rk030drc0qgs8hvb18_StoredVerifEventInfos_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "201"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "정보 없음"
+    ],
+    "score": 0
+  },
+  "doorList.doorID": {
+    "enabled": True,
+    "validationType": "request-field-list-match",
+    "referenceFieldId": "cmsmiz55t036nrc0qstfwj7er",
+    "referenceField": "doorID",
+    "referenceEndpoint": "/StoredVerifEventInfos",
+    "score": 0
+  },
+  "doorList.eventName": {
+    "enabled": True,
+    "validationType": "request-field-match",
+    "referenceFieldId": "cmsmiz55y036rrc0qvnkripmq",
+    "referenceField": "eventFilter",
+    "referenceEndpoint": "/StoredVerifEventInfos",
+    "score": 0
+  }
+}
+
+# cmsmiz4rk030drc0qgs8hvb18 검증 리스트
+cmsmiz4rk030drc0qgs8hvb18_outValidation = [
+    cmsmiz4rk030drc0qgs8hvb18_Authentication_out_validation,
+    cmsmiz4rk030drc0qgs8hvb18_Capabilities_out_validation,
+    cmsmiz4rk030drc0qgs8hvb18_DoorProfiles_out_validation,
+    cmsmiz4rk030drc0qgs8hvb18_AccessUserInfos_out_validation,
+    cmsmiz4rk030drc0qgs8hvb18_StoredVerifEventInfos_out_validation,
+]
+
+# Authentication
+cmsmhhyl502ncrc0qnjtvbt43_Authentication_out_validation = {}
+
+# Capabilities
+cmsmhhyl502ncrc0qnjtvbt43_Capabilities_out_validation = {}
+
+# CameraProfiles
+cmsmhhyl502ncrc0qnjtvbt43_CameraProfiles_out_validation = {}
+
+# StoredVideoInfos
+cmsmhhyl502ncrc0qnjtvbt43_StoredVideoInfos_out_validation = {}
+
+# ReplayURL
+cmsmhhyl502ncrc0qnjtvbt43_ReplayURL_out_validation = {}
+
+# StoredVideoEventInfos
+cmsmhhyl502ncrc0qnjtvbt43_StoredVideoEventInfos_out_validation = {}
+
+# StoredObjectAnalyticsInfos
+cmsmhhyl502ncrc0qnjtvbt43_StoredObjectAnalyticsInfos_out_validation = {}
+
+# cmsmhhyl502ncrc0qnjtvbt43 검증 리스트
+cmsmhhyl502ncrc0qnjtvbt43_outValidation = [
+    cmsmhhyl502ncrc0qnjtvbt43_Authentication_out_validation,
+    cmsmhhyl502ncrc0qnjtvbt43_Capabilities_out_validation,
+    cmsmhhyl502ncrc0qnjtvbt43_CameraProfiles_out_validation,
+    cmsmhhyl502ncrc0qnjtvbt43_StoredVideoInfos_out_validation,
+    cmsmhhyl502ncrc0qnjtvbt43_ReplayURL_out_validation,
+    cmsmhhyl502ncrc0qnjtvbt43_StoredVideoEventInfos_out_validation,
+    cmsmhhyl502ncrc0qnjtvbt43_StoredObjectAnalyticsInfos_out_validation,
+]
+
+# Authentication
 cmiqr1jha00i6ie8fb1scb3go_Authentication_out_validation = {}
 
 # Capabilities
@@ -221,34 +413,6 @@ cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_webhook_in_validation = {
   }
 }
 
-# StoredSensorEventInfos
-cmii7wfuf006i8z1tcds6q69g_StoredSensorEventInfos_out_validation = {
-  "code": {
-    "enabled": True,
-    "validationType": "specified-value-match",
-    "allowedValues": [
-      "201"
-    ],
-    "score": 0
-  },
-  "message": {
-    "enabled": True,
-    "validationType": "specified-value-match",
-    "allowedValues": [
-      "정보 없음"
-    ],
-    "score": 0
-  },
-  "sensorDeviceList.sensorDeviceID": {
-    "enabled": True,
-    "validationType": "request-field-list-match",
-    "referenceFieldId": "cmixtx2dx0dlwp002gtco28w8",
-    "referenceField": "sensorDeviceID",
-    "referenceEndpoint": "/StoredSensorEventInfos",
-    "score": 0
-  }
-}
-
 # cmii7wfuf006i8z1tcds6q69g WebHook 검증 리스트
 cmii7wfuf006i8z1tcds6q69g_webhook_inValidation = [
     cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_webhook_in_validation,
@@ -262,7 +426,6 @@ cmii7wfuf006i8z1tcds6q69g_outValidation = [
     cmii7wfuf006i8z1tcds6q69g_SensorDeviceProfiles_out_validation,
     cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_out_validation,
     cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_out_validation,
-    cmii7wfuf006i8z1tcds6q69g_StoredSensorEventInfos_out_validation,
 ]
 
 # Authentication
@@ -300,42 +463,6 @@ cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_webhook_in_validation = {
   }
 }
 
-# StoredVerifEventInfos
-cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_out_validation = {
-  "code": {
-    "enabled": True,
-    "validationType": "specified-value-match",
-    "allowedValues": [
-      "201"
-    ],
-    "score": 0
-  },
-  "message": {
-    "enabled": True,
-    "validationType": "specified-value-match",
-    "allowedValues": [
-      "정보 없음"
-    ],
-    "score": 0
-  },
-  "doorList.doorID": {
-    "enabled": True,
-    "validationType": "request-field-list-match",
-    "referenceFieldId": "cmiwthcyk09y7p002ovmv3d43",
-    "referenceField": "doorID",
-    "referenceEndpoint": "/StoredVerifEventInfos",
-    "score": 0
-  },
-  "doorList.eventName": {
-    "enabled": True,
-    "validationType": "request-field-match",
-    "referenceFieldId": "cmiwth4c209xkp002mm4lfebj",
-    "referenceField": "eventFilter",
-    "referenceEndpoint": "/StoredVerifEventInfos",
-    "score": 0
-  }
-}
-
 # cmii7w683006h8z1t7usnin5g WebHook 검증 리스트
 cmii7w683006h8z1t7usnin5g_webhook_inValidation = [
     cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_webhook_in_validation,
@@ -348,240 +475,5 @@ cmii7w683006h8z1t7usnin5g_outValidation = [
     cmii7w683006h8z1t7usnin5g_DoorProfiles_out_validation,
     cmii7w683006h8z1t7usnin5g_AccessUserInfos_out_validation,
     cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_out_validation,
-    cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_out_validation,
-]
-
-# Authentication
-cmii7v8pr006g8z1tvo55a50u_Authentication_out_validation = {}
-
-# Capabilities
-cmii7v8pr006g8z1tvo55a50u_Capabilities_out_validation = {}
-
-# CameraProfiles
-cmii7v8pr006g8z1tvo55a50u_CameraProfiles_out_validation = {}
-
-# StreamURLs
-cmii7v8pr006g8z1tvo55a50u_StreamURLs_out_validation = {
-  "code": {
-    "enabled": True,
-    "validationType": "specified-value-match",
-    "allowedValues": [
-      "400"
-    ],
-    "score": 0
-  },
-  "message": {
-    "enabled": True,
-    "validationType": "specified-value-match",
-    "allowedValues": [
-      "잘못된 요청"
-    ],
-    "score": 0
-  }
-}
-
-# RealtimeVideoEventInfos
-cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_out_validation = {}
-
-# RealtimeVideoEventInfos WebHook IN Validation
-cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_webhook_in_validation = {
-  "camList.camID": {
-    "enabled": True,
-    "validationType": "request-field-list-match",
-    "referenceFieldId": "cmiwrf69i0bu6844g22ccsjtr",
-    "referenceField": "camID",
-    "referenceEndpoint": "/RealtimeVideoEventInfos",
-    "score": 0
-  }
-}
-
-# StoredVideoInfos
-cmii7v8pr006g8z1tvo55a50u_StoredVideoInfos_out_validation = {
-  "code": {
-    "enabled": True,
-    "validationType": "specified-value-match",
-    "allowedValues": [
-      "201"
-    ],
-    "score": 0
-  },
-  "message": {
-    "enabled": True,
-    "validationType": "specified-value-match",
-    "allowedValues": [
-      "정보 없음"
-    ],
-    "score": 0
-  },
-  "camList.camID": {
-    "enabled": True,
-    "validationType": "request-field-list-match",
-    "referenceFieldId": "cmiwrn6ab003pnkgl7f78y9t6",
-    "referenceField": "camID",
-    "referenceEndpoint": "/StoredVideoInfos",
-    "score": 0
-  },
-  "camList.timeList.startTime": {
-    "enabled": True,
-    "validationType": "request-field-range-match",
-    "rangeOperator": "between",
-    "referenceFieldMin": "startTime",
-    "referenceFieldMinId": "cmiwrltxz000vnkgl3m4u2f2s",
-    "referenceFieldMax": "endTime",
-    "referenceFieldMaxId": "cmiwrlxaj0013nkgl40nosy7z",
-    "referenceEndpointMin": "/StoredVideoInfos",
-    "referenceEndpointMax": "/StoredVideoInfos",
-    "score": 0
-  },
-  "camList.timeList.endTime": {
-    "enabled": True,
-    "validationType": "request-field-range-match",
-    "rangeOperator": "between",
-    "referenceFieldMin": "startTime",
-    "referenceFieldMinId": "cmiwrltxz000vnkgl3m4u2f2s",
-    "referenceFieldMax": "endTime",
-    "referenceFieldMaxId": "cmiwrlxaj0013nkgl40nosy7z",
-    "referenceEndpointMin": "/StoredVideoInfos",
-    "referenceEndpointMax": "/StoredVideoInfos",
-    "score": 0
-  }
-}
-
-# ReplayURL
-cmii7v8pr006g8z1tvo55a50u_ReplayURL_out_validation = {
-  "camList.camID": {
-    "enabled": True,
-    "validationType": "request-field-list-match",
-    "referenceFieldId": "cmiwrtok201dmnkgl6gzxhft5",
-    "referenceField": "camID",
-    "referenceEndpoint": "/ReplayURL",
-    "score": 0
-  },
-  "camList.startTime": {
-    "enabled": True,
-    "validationType": "request-field-range-match",
-    "rangeOperator": "between",
-    "referenceFieldMin": "startTime",
-    "referenceFieldMinId": "cmiwrtok201donkglhwulnxos",
-    "referenceFieldMax": "endTime",
-    "referenceFieldMaxId": "cmiwrtok301dqnkgl0k66p4py",
-    "referenceEndpointMin": "/ReplayURL",
-    "referenceEndpointMax": "/ReplayURL",
-    "score": 0
-  },
-  "camList.endTime": {
-    "enabled": True,
-    "validationType": "request-field-range-match",
-    "rangeOperator": "between",
-    "referenceFieldMin": "startTime",
-    "referenceFieldMinId": "cmiwrtok201donkglhwulnxos",
-    "referenceFieldMax": "endTime",
-    "referenceFieldMaxId": "cmiwrtok301dqnkgl0k66p4py",
-    "referenceEndpointMin": "/ReplayURL",
-    "referenceEndpointMax": "/ReplayURL",
-    "score": 0
-  }
-}
-
-# StoredVideoEventInfos
-cmii7v8pr006g8z1tvo55a50u_StoredVideoEventInfos_out_validation = {
-  "camList.camID": {
-    "enabled": True,
-    "validationType": "request-field-list-match",
-    "referenceFieldId": "cmiws5hes00anp002ng50q3fc",
-    "referenceField": "camID",
-    "referenceEndpoint": "/StoredVideoEventInfos",
-    "score": 0
-  },
-  "camList.eventName": {
-    "enabled": True,
-    "validationType": "request-field-match",
-    "referenceFieldId": "cmiws56xa008jp002vhqm6yfn",
-    "referenceField": "eventFilter",
-    "referenceEndpoint": "/StoredVideoEventInfos",
-    "score": 0
-  },
-  "camList.startTime": {
-    "enabled": True,
-    "validationType": "request-field-range-match",
-    "rangeOperator": "between",
-    "referenceFieldMin": "startTime",
-    "referenceFieldMinId": "cmiws3ab605bknkglsndw6cp5",
-    "referenceFieldMax": "endTime",
-    "referenceFieldMaxId": "cmiws41yv0005p002amxfzrhq",
-    "referenceEndpointMin": "/StoredVideoEventInfos",
-    "referenceEndpointMax": "/StoredVideoEventInfos",
-    "score": 0
-  },
-  "camList.endTime": {
-    "enabled": True,
-    "validationType": "request-field-range-match",
-    "rangeOperator": "between",
-    "referenceFieldMin": "startTime",
-    "referenceFieldMinId": "cmiws3ab605bknkglsndw6cp5",
-    "referenceFieldMax": "endTime",
-    "referenceFieldMaxId": "cmiws41yv0005p002amxfzrhq",
-    "referenceEndpointMin": "/StoredVideoEventInfos",
-    "referenceEndpointMax": "/StoredVideoEventInfos",
-    "score": 0
-  }
-}
-
-# StoredObjectAnalyticsInfos
-cmii7v8pr006g8z1tvo55a50u_StoredObjectAnalyticsInfos_out_validation = {
-  "camList.camID": {
-    "enabled": True,
-    "validationType": "request-field-list-match",
-    "referenceFieldId": "cmiwsgzrw02x0p002fnxf1f08",
-    "referenceField": "camID",
-    "referenceEndpoint": "/StoredObjectAnalyticsInfos",
-    "score": 0
-  },
-  "camList.analyticsTime": {
-    "enabled": True,
-    "validationType": "request-field-range-match",
-    "rangeOperator": "between",
-    "referenceFieldMin": "startTime",
-    "referenceFieldMinId": "cmiwsa3je01lnp002owjbqng1",
-    "referenceFieldMax": "endTime",
-    "referenceFieldMaxId": "cmiwsa57401lsp0021esg4kr1",
-    "referenceEndpointMin": "/StoredObjectAnalyticsInfos",
-    "referenceEndpointMax": "/StoredObjectAnalyticsInfos",
-    "score": 0
-  },
-  "camList.anlayticsResultList.analyticsClass": {
-    "enabled": True,
-    "validationType": "request-field-list-match",
-    "referenceFieldId": "cmiwsgzse02xcp002b6pfp72a",
-    "referenceField": "classFilter",
-    "referenceEndpoint": "/StoredObjectAnalyticsInfos",
-    "score": 0
-  },
-  "camList.anlayticsResultList.analyticsAttribute": {
-    "enabled": True,
-    "validationType": "request-field-list-match",
-    "referenceFieldId": "cmiwsgzse02xep0024ycdnvrw",
-    "referenceField": "attributeFilter",
-    "referenceEndpoint": "/StoredObjectAnalyticsInfos",
-    "score": 0
-  }
-}
-
-# cmii7v8pr006g8z1tvo55a50u WebHook 검증 리스트
-cmii7v8pr006g8z1tvo55a50u_webhook_inValidation = [
-    cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_webhook_in_validation,
-]
-
-# cmii7v8pr006g8z1tvo55a50u 검증 리스트
-cmii7v8pr006g8z1tvo55a50u_outValidation = [
-    cmii7v8pr006g8z1tvo55a50u_Authentication_out_validation,
-    cmii7v8pr006g8z1tvo55a50u_Capabilities_out_validation,
-    cmii7v8pr006g8z1tvo55a50u_CameraProfiles_out_validation,
-    cmii7v8pr006g8z1tvo55a50u_StreamURLs_out_validation,
-    cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_out_validation,
-    cmii7v8pr006g8z1tvo55a50u_StoredVideoInfos_out_validation,
-    cmii7v8pr006g8z1tvo55a50u_ReplayURL_out_validation,
-    cmii7v8pr006g8z1tvo55a50u_StoredVideoEventInfos_out_validation,
-    cmii7v8pr006g8z1tvo55a50u_StoredObjectAnalyticsInfos_out_validation,
 ]
 

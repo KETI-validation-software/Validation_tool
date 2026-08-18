@@ -259,14 +259,7 @@ cmiqr201z00i8ie8fitdg5t1b_SensorDeviceProfiles_in_validation = {}
 cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_in_validation = {
   "sensorDeviceID": {
     "enabled": True,
-    "validationType": "valid-value-match",
-    "validValueMatchType": "validation-field",
-    "validValueFieldName": "videoEvent",
-    "validValueOperator": "excludeReference",
-    "allowedValues": [
-      "Loitering",
-      "Intrusion"
-    ],
+    "validationType": "response-field-list-match",
     "referenceFieldId": "cmisfgtuu07ry5vy7docqsqe5",
     "referenceField": "sensorDeviceID",
     "referenceEndpoint": "/SensorDeviceProfiles",
@@ -274,7 +267,14 @@ cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_in_validation = {
   },
   "commandType": {
     "enabled": True,
-    "validationType": "response-field-list-match",
+    "validationType": "valid-value-match",
+    "validValueMatchType": "validation-field",
+    "validValueFieldName": "sensorControl",
+    "validValueOperator": "equalsAny",
+    "allowedValues": [
+      "AlarmOn",
+      "AlarmOff"
+    ],
     "score": 0
   }
 }

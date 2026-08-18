@@ -1047,15 +1047,11 @@ cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_out_constraints = {
   },
   "sensorDeviceStatus": {
     "id": "cmj6hdjek01qsxei0ydzyxlg3",
-    "valueType": "random",
+    "referenceFieldId": "cmiwkyi4402a0844gkokgga8t",
+    "valueType": "request-based",
     "required": True,
-    "referenceField": "(참조 필드 미선택)",
     "referenceEndpoint": "/SensorDeviceControl",
-    "validValueField": "sensorControl",
-    "validValues": [
-      "AlarmOn",
-      "AlarmOff"
-    ]
+    "referenceField": "commandType"
   }
 }
 

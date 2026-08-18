@@ -3,6 +3,136 @@
 
 # ========== REQUEST MAPPINGS ==========
 
+# cmii7v8pr006g8z1tvo55a50u
+cmii7v8pr006g8z1tvo55a50u_Authentication_request_key_ids = {
+    "userID": "cmii7ym04006z8z1tr9r06hrb",
+    "userPW": "cmii7ym0400718z1tyoxfj6ft",
+}
+
+cmii7v8pr006g8z1tvo55a50u_StreamURLs_request_key_ids = {
+    "camList": "cmiqtkzfm00wsie8f9qmwp4l1",
+    "camList.camID": "cmj17qhrz026o12s9jozkqym7",
+    "camList.streamProtocolType": "cmjb5nmy1070zdmvoi5u22oxx",
+}
+
+cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_request_key_ids = {
+    "camList": "cmiqtoihq00y2ie8f3urrjlbh",
+    "camList.camID": "cmiwrf69i0bu6844g22ccsjtr",
+    "transProtocol": "cmiqtpoov00yeie8fv3h8pllf",
+    "transProtocol.transProtocolType": "cmiwrdzrw0bs4844gzg8kzcsq",
+    "transProtocol.transProtocolDesc": "cmiwre3fr0bt1844gwguauq4q",
+    "duration": "cmiqtov1n00y8ie8frsppu8ev",
+    "eventFilter": "cmiqtq1xn00ykie8fqjmg6au9",
+    "classFilter": "cmiqtqegc00yqie8foi0sc1u9",
+    "startTime": "cmiqtqxt400ywie8f4ir49gl1",
+    "code": "cmiwrhxdj0ci0844gogcg394u",
+    "message": "cmj1820zz02m012s9cxe2wcfn",
+}
+
+# cmii7v8pr006g8z1tvo55a50u Request Key-ID Mapping 리스트
+cmii7v8pr006g8z1tvo55a50u_request_key_ids = [
+    cmii7v8pr006g8z1tvo55a50u_Authentication_request_key_ids,
+    cmii7v8pr006g8z1tvo55a50u_StreamURLs_request_key_ids,
+    cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_request_key_ids,
+]
+
+# cmsmj2a0g037grc0qddx8wie2
+cmsmj2a0g037grc0qddx8wie2_Authentication_request_key_ids = {
+    "userID": "cmsmj2a0u037orc0qpeokownu",
+    "userPW": "cmsmj2a13037qrc0qrce78i41",
+}
+
+cmsmj2a0g037grc0qddx8wie2_StoredSensorEventInfos_request_key_ids = {
+    "timePeriod": "cmsmj2ac903cwrc0qd0bb40ia",
+    "timePeriod.startTime": "cmsmj2acc03cyrc0qb5nucw6h",
+    "timePeriod.endTime": "cmsmj2ace03d0rc0qpu8aha27",
+    "sensorDeviceList": "cmsmj2ach03d2rc0qsvpjak0r",
+    "sensorDeviceList.sensorDeviceID": "cmsmj2acm03d6rc0qln8u5ijy",
+    "maxCount": "cmsmj2acp03d8rc0qxlvt6r48",
+    "eventFilter": "cmsmj2acr03darc0q13di1rio",
+}
+
+# cmsmj2a0g037grc0qddx8wie2 Request Key-ID Mapping 리스트
+cmsmj2a0g037grc0qddx8wie2_request_key_ids = [
+    cmsmj2a0g037grc0qddx8wie2_Authentication_request_key_ids,
+    cmsmj2a0g037grc0qddx8wie2_StoredSensorEventInfos_request_key_ids,
+]
+
+# cmsmiz4rk030drc0qgs8hvb18
+cmsmiz4rk030drc0qgs8hvb18_Authentication_request_key_ids = {
+    "userID": "cmsmiz4rz030lrc0q7sh573cu",
+    "userPW": "cmsmiz4s8030nrc0qpbbtl2vk",
+}
+
+cmsmiz4rk030drc0qgs8hvb18_StoredVerifEventInfos_request_key_ids = {
+    "timePeriod": "cmsmiz55f036drc0qhz5p9bj6",
+    "timePeriod.startTime": "cmsmiz55i036frc0qg5p4g2n0",
+    "timePeriod.endTime": "cmsmiz55k036hrc0q74kv7qfm",
+    "doorList": "cmsmiz55n036jrc0qowv36yzl",
+    "doorList.doorID": "cmsmiz55t036nrc0qstfwj7er",
+    "maxCount": "cmsmiz55v036prc0q8bz9yixk",
+    "eventFilter": "cmsmiz55y036rrc0qvnkripmq",
+}
+
+# cmsmiz4rk030drc0qgs8hvb18 Request Key-ID Mapping 리스트
+cmsmiz4rk030drc0qgs8hvb18_request_key_ids = [
+    cmsmiz4rk030drc0qgs8hvb18_Authentication_request_key_ids,
+    cmsmiz4rk030drc0qgs8hvb18_StoredVerifEventInfos_request_key_ids,
+]
+
+# cmsmhhyl502ncrc0qnjtvbt43
+cmsmhhyl502ncrc0qnjtvbt43_Authentication_request_key_ids = {
+    "userID": "cmsmhhylk02nkrc0qlwdz620j",
+    "userPW": "cmsmhhylt02nmrc0q8tqoctzm",
+}
+
+cmsmhhyl502ncrc0qnjtvbt43_StoredVideoInfos_request_key_ids = {
+    "timePeriod": "cmsmhrolt02tarc0qla2qvhlo",
+    "timePeriod.startTime": "cmsmhrom602terc0qp4jpxf2w",
+    "timePeriod.endTime": "cmsmhrom702tgrc0qlnxyg4wq",
+    "camList": "cmsmhrolu02tcrc0qjydbkijj",
+    "camList.camID": "cmsmhrome02tkrc0qgcwrmibj",
+}
+
+cmsmhhyl502ncrc0qnjtvbt43_ReplayURL_request_key_ids = {
+    "camList": "cmsmi3we602utrc0qf0qiizvg",
+    "camList.camID": "cmsmi3wel02uxrc0q9ehe83j4",
+    "camList.startTime": "cmsmi3wel02uzrc0qq61flskq",
+    "camList.endTime": "cmsmi3wem02v1rc0qb44zzrbm",
+    "camList.streamProtocolType": "cmsmi3wen02v3rc0qgeoa3lqb",
+}
+
+cmsmhhyl502ncrc0qnjtvbt43_StoredVideoEventInfos_request_key_ids = {
+    "timePeriod": "cmsmifweq02wirc0qaw2b1z0x",
+    "timePeriod.startTime": "cmsmifwf802wsrc0qu34b405n",
+    "timePeriod.endTime": "cmsmifwf902wurc0qlufi8yfu",
+    "camList": "cmsmifweq02wkrc0q1qgtkvde",
+    "camList.camID": "cmsmihcn402x5rc0q8dces4ng",
+    "maxCount": "cmsmifwer02wmrc0qyivx5i97",
+    "eventFilter": "cmsmifwer02worc0q5byh0n8n",
+    "classFilter": "cmsmifwes02wqrc0qip3eoy8v",
+}
+
+cmsmhhyl502ncrc0qnjtvbt43_StoredObjectAnalyticsInfos_request_key_ids = {
+    "timePeriod": "cmsmipu6v02yfrc0qwn3tlp9s",
+    "timePeriod.startTime": "cmsmipu7a02ylrc0q3metw1zc",
+    "timePeriod.endTime": "cmsmipu7a02ynrc0qf5kejqwr",
+    "camList": "cmsmipu6v02yhrc0qpg4bxfk7",
+    "camList.camID": "cmsmipu7j02ytrc0qc0hu96hx",
+    "filterList": "cmsmipu6w02yjrc0qy7vbimtp",
+    "filterList.classFilter": "cmsmipu7k02yvrc0qfovzyvbz",
+    "filterList.attributeFilter": "cmsmipu7l02yxrc0qgrgjb17k",
+}
+
+# cmsmhhyl502ncrc0qnjtvbt43 Request Key-ID Mapping 리스트
+cmsmhhyl502ncrc0qnjtvbt43_request_key_ids = [
+    cmsmhhyl502ncrc0qnjtvbt43_Authentication_request_key_ids,
+    cmsmhhyl502ncrc0qnjtvbt43_StoredVideoInfos_request_key_ids,
+    cmsmhhyl502ncrc0qnjtvbt43_ReplayURL_request_key_ids,
+    cmsmhhyl502ncrc0qnjtvbt43_StoredVideoEventInfos_request_key_ids,
+    cmsmhhyl502ncrc0qnjtvbt43_StoredObjectAnalyticsInfos_request_key_ids,
+]
+
 # cmiqr1jha00i6ie8fb1scb3go
 cmiqr1jha00i6ie8fb1scb3go_Authentication_request_key_ids = {
     "userID": "cmisgv95008oh5vy7mjspm3wh",
@@ -134,32 +264,17 @@ cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_request_key_ids = {
     "message": "cmj6fgodk01jgxei0cxvcsc7x",
 }
 
-cmii7wfuf006i8z1tcds6q69g_StoredSensorEventInfos_request_key_ids = {
-    "timePeriod": "cmixtuwas0dgjp002hv5tx59h",
-    "timePeriod.startTime": "cmixtv47x0dgtp002g9gr1j6f",
-    "timePeriod.endTime": "cmixtvivy0dh4p0026kaoqaop",
-    "sensorDeviceList": "cmixtvwg40dhfp002gndgmeq5",
-    "sensorDeviceList.sensorDeviceID": "cmixtx2dx0dlwp002gtco28w8",
-    "maxCount": "cmixtwo5i0dkcp00280zysdrq",
-    "eventFilter": "cmixtwwqg0dlip002jrqkcbsv",
-}
-
 # cmii7wfuf006i8z1tcds6q69g Request Key-ID Mapping 리스트
 cmii7wfuf006i8z1tcds6q69g_request_key_ids = [
     cmii7wfuf006i8z1tcds6q69g_Authentication_request_key_ids,
     cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_request_key_ids,
     cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_request_key_ids,
-    cmii7wfuf006i8z1tcds6q69g_StoredSensorEventInfos_request_key_ids,
 ]
 
 # cmii7w683006h8z1t7usnin5g
 cmii7w683006h8z1t7usnin5g_Authentication_request_key_ids = {
     "userID": "cmii80zrr007x8z1tf6e6uj3z",
     "userPW": "cmii80zrr007z8z1tt0cfjh2a",
-}
-
-cmii7w683006h8z1t7usnin5g_DoorProfiles_request_key_ids = {
-    "testest": "cmjcjx8qp09hucfb3d86qqcqj",
 }
 
 cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_request_key_ids = {
@@ -175,101 +290,311 @@ cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_request_key_ids = {
     "message": "cmiwtb79608ujp002utlpf4wa",
 }
 
-cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_request_key_ids = {
-    "timePeriod": "cmiwtfk8h09swp0029euwvaw2",
-    "timePeriod.startTime": "cmiwtfqcf09t6p002gr25maii",
-    "timePeriod.endTime": "cmiwtfu0609tfp002j5q0gkl4",
-    "doorList": "cmiwtg78e09trp002p97eizcv",
-    "doorList.doorID": "cmiwthcyk09y7p002ovmv3d43",
-    "maxCount": "cmiwtgzxs09wnp002naveumda",
-    "eventFilter": "cmiwth4c209xkp002mm4lfebj",
-}
-
 # cmii7w683006h8z1t7usnin5g Request Key-ID Mapping 리스트
 cmii7w683006h8z1t7usnin5g_request_key_ids = [
     cmii7w683006h8z1t7usnin5g_Authentication_request_key_ids,
-    cmii7w683006h8z1t7usnin5g_DoorProfiles_request_key_ids,
     cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_request_key_ids,
-    cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_request_key_ids,
-]
-
-# cmii7v8pr006g8z1tvo55a50u
-cmii7v8pr006g8z1tvo55a50u_Authentication_request_key_ids = {
-    "userID": "cmii7ym04006z8z1tr9r06hrb",
-    "userPW": "cmii7ym0400718z1tyoxfj6ft",
-}
-
-cmii7v8pr006g8z1tvo55a50u_StreamURLs_request_key_ids = {
-    "camList": "cmiqtkzfm00wsie8f9qmwp4l1",
-    "camList.camID": "cmj17qhrz026o12s9jozkqym7",
-    "camList.streamProtocolType": "cmjb5nmy1070zdmvoi5u22oxx",
-}
-
-cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_request_key_ids = {
-    "camList": "cmiqtoihq00y2ie8f3urrjlbh",
-    "camList.camID": "cmiwrf69i0bu6844g22ccsjtr",
-    "transProtocol": "cmiqtpoov00yeie8fv3h8pllf",
-    "transProtocol.transProtocolType": "cmiwrdzrw0bs4844gzg8kzcsq",
-    "transProtocol.transProtocolDesc": "cmiwre3fr0bt1844gwguauq4q",
-    "duration": "cmiqtov1n00y8ie8frsppu8ev",
-    "eventFilter": "cmiqtq1xn00ykie8fqjmg6au9",
-    "classFilter": "cmiqtqegc00yqie8foi0sc1u9",
-    "startTime": "cmiqtqxt400ywie8f4ir49gl1",
-    "code": "cmiwrhxdj0ci0844gogcg394u",
-    "message": "cmj1820zz02m012s9cxe2wcfn",
-}
-
-cmii7v8pr006g8z1tvo55a50u_StoredVideoInfos_request_key_ids = {
-    "timePeriod": "cmiwrl7dr000knkglwk60tug6",
-    "timePeriod.startTime": "cmiwrltxz000vnkgl3m4u2f2s",
-    "timePeriod.endTime": "cmiwrlxaj0013nkgl40nosy7z",
-    "camList": "cmiwrmm95001fnkglx47nenkk",
-    "camList.camID": "cmiwrn6ab003pnkgl7f78y9t6",
-}
-
-cmii7v8pr006g8z1tvo55a50u_ReplayURL_request_key_ids = {
-    "camList": "cmiwrqopk00l1nkgl3szz44s6",
-    "camList.camID": "cmiwrtok201dmnkgl6gzxhft5",
-    "camList.startTime": "cmiwrtok201donkglhwulnxos",
-    "camList.endTime": "cmiwrtok301dqnkgl0k66p4py",
-    "camList.streamProtocolType": "cmiwrtok301dsnkgl3t29d3op",
-}
-
-cmii7v8pr006g8z1tvo55a50u_StoredVideoEventInfos_request_key_ids = {
-    "timePeriod": "cmiws35o105b3nkglj38lr0hx",
-    "timePeriod.startTime": "cmiws3ab605bknkglsndw6cp5",
-    "timePeriod.endTime": "cmiws41yv0005p002amxfzrhq",
-    "camList": "cmiws41z00007p002zof3yx8d",
-    "camList.camID": "cmiws5hes00anp002ng50q3fc",
-    "maxCount": "cmiws4rcl005up002n2yhi3pu",
-    "eventFilter": "cmiws56xa008jp002vhqm6yfn",
-    "classFilter": "cmiws5ggr00aip0022iuh6at3",
-}
-
-cmii7v8pr006g8z1tvo55a50u_StoredObjectAnalyticsInfos_request_key_ids = {
-    "timePeriod": "cmiws9wg801l3p002ju1o2yfi",
-    "timePeriod.startTime": "cmiwsa3je01lnp002owjbqng1",
-    "timePeriod.endTime": "cmiwsa57401lsp0021esg4kr1",
-    "camList": "cmiwsaj3401m4p002rukj2l01",
-    "camList.camID": "cmiwsgzrw02x0p002fnxf1f08",
-    "filterList": "cmiwscsb501vhp002i6nu3tli",
-    "filterList.classFilter": "cmjbkqdq30214cfb3vc5gfha7",
-    "filterList.attributeFilter": "cmjbkrglh022scfb3w3vusllt",
-}
-
-# cmii7v8pr006g8z1tvo55a50u Request Key-ID Mapping 리스트
-cmii7v8pr006g8z1tvo55a50u_request_key_ids = [
-    cmii7v8pr006g8z1tvo55a50u_Authentication_request_key_ids,
-    cmii7v8pr006g8z1tvo55a50u_StreamURLs_request_key_ids,
-    cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_request_key_ids,
-    cmii7v8pr006g8z1tvo55a50u_StoredVideoInfos_request_key_ids,
-    cmii7v8pr006g8z1tvo55a50u_ReplayURL_request_key_ids,
-    cmii7v8pr006g8z1tvo55a50u_StoredVideoEventInfos_request_key_ids,
-    cmii7v8pr006g8z1tvo55a50u_StoredObjectAnalyticsInfos_request_key_ids,
 ]
 
 
 # ========== RESPONSE MAPPINGS ==========
+
+# cmii7v8pr006g8z1tvo55a50u
+cmii7v8pr006g8z1tvo55a50u_Authentication_response_key_ids = {
+    "code": "cmii7ym1100768z1tpqpc0la4",
+    "message": "cmii7ym1200788z1tsq0xhtf7",
+    "userName": "cmii7ym12007a8z1t633dt6my",
+    "userAff": "cmii7ym13007c8z1t9x8vuwxs",
+    "accessToken": "cmii7ym14007e8z1t5rg7z8sf",
+}
+
+cmii7v8pr006g8z1tvo55a50u_Capabilities_response_key_ids = {
+    "code": "cmiqtft4l00v0ie8frqocttvo",
+    "message": "cmiqtg05800v6ie8f64llg3s9",
+    "streamingSupport": "cmiqtgh5e00vcie8frhd9t8dt",
+    "streamingSupport.streamProtocolType": "cmizrbt02003s117lg1x01x5x",
+    "streamingSupport.streamProtocolDesc": "cmizrbt02003u117ltjjy7p0x",
+    "transportSupport": "cmiqth24i00viie8fwgt3t39v",
+    "transportSupport.transProtocolType": "cmizrbt0b003y117lfp9bnmd9",
+    "transportSupport.transProtocolDesc": "cmizrbt0b0040117lfsatd26c",
+}
+
+cmii7v8pr006g8z1tvo55a50u_CameraProfiles_response_key_ids = {
+    "code": "cmiqtj27q00vzie8ftb569ut8",
+    "message": "cmiqtj7zi00w5ie8fhbse8h4u",
+    "camList": "cmiqtjhkm00wbie8fxwprjc5l",
+    "camList.camID": "cmizre5yl00gq117lhvg7sqp7",
+    "camList.camName": "cmizre5yl00gs117lp2nxsuo7",
+    "camList.camLoc": "cmizre5ym00gu117l1fjgzdxr",
+    "camList.camLoc.lon": "cmizre5yq00gy117lqyw0ufvg",
+    "camList.camLoc.lat": "cmizre5yq00h0117llhm50tky",
+    "camList.camLoc.alt": "cmizre5yr00h2117lluxub8fw",
+    "camList.camLoc.desc": "cmizre5yr00h4117lsmvfm7gx",
+    "camList.camConfig": "cmizre5ym00gw117lm9mvctn8",
+    "camList.camConfig.camType": "cmizre5yr00h6117l9zj33pr2",
+}
+
+cmii7v8pr006g8z1tvo55a50u_StreamURLs_response_key_ids = {
+    "code": "cmiqtlss200x6ie8f7pu1f23c",
+    "message": "cmiqtlyto00xcie8fn3fbocfh",
+    "camList": "cmiqtma5m00xiie8fuly6thwh",
+    "camList.camID": "cmj17rvsh02ki12s9h05zrodz",
+    "camList.accessID": "cmj17rvsh02kk12s9vpei1lm3",
+    "camList.accessPW": "cmj17rvsh02km12s9zhsg7ogj",
+    "camList.camURL": "cmj17rvsi02ko12s9b6ucezhj",
+    "camList.videoInfo": "cmj17rvsi02kq12s9u06k8ix6",
+    "camList.videoInfo.resolution": "cmj17rvsn02ks12s9lrc90chn",
+    "camList.videoInfo.fps": "cmj17rvsn02ku12s9mz0gwgcx",
+    "camList.videoInfo.videoCodec": "cmj17rvsn02kw12s9jgf73dat",
+    "camList.videoInfo.audioCodec": "cmj17rvsn02ky12s9sgltoz5h",
+}
+
+cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_response_key_ids = {
+    "code": "cmiqtr21700z1ie8f2gb2pxw4",
+    "message": "cmiwrfgls0buk844gegf6h5nd",
+    "camList": "cmiwrfquy0buv844gfufg2j30",
+    "camList.camID": "cmiwrhv3l0ch4844g7qzbakmx",
+    "camList.eventUUID": "cmiwrhv3m0ch6844g1lux0upw",
+    "camList.eventName": "cmiwrhv3m0ch8844gqnoxrtsi",
+    "camList.startTime": "cmiwrhv3m0cha844gwp8thxsx",
+    "camList.endTime": "cmiwrhv3n0chc844geaa6w099",
+    "camList.eventDesc": "cmiwrhv3n0che844gqfrgim1r",
+}
+
+# cmii7v8pr006g8z1tvo55a50u Response Key-ID Mapping 리스트
+cmii7v8pr006g8z1tvo55a50u_response_key_ids = [
+    cmii7v8pr006g8z1tvo55a50u_Authentication_response_key_ids,
+    cmii7v8pr006g8z1tvo55a50u_Capabilities_response_key_ids,
+    cmii7v8pr006g8z1tvo55a50u_CameraProfiles_response_key_ids,
+    cmii7v8pr006g8z1tvo55a50u_StreamURLs_response_key_ids,
+    cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_response_key_ids,
+]
+
+# cmsmj2a0g037grc0qddx8wie2
+cmsmj2a0g037grc0qddx8wie2_Authentication_response_key_ids = {
+    "code": "cmsmj2a18037urc0qjs4gqykw",
+    "message": "cmsmj2a1b037wrc0qwi6225ny",
+    "userName": "cmsmj2a1e037yrc0qzqelsdlp",
+    "userAff": "cmsmj2a1h0380rc0qi5twyd9j",
+    "accessToken": "cmsmj2a1k0382rc0qlzuc9334",
+}
+
+cmsmj2a0g037grc0qddx8wie2_Capabilities_response_key_ids = {
+    "code": "cmsmj2a1v038arc0qy6sr03ls",
+    "message": "cmsmj2a1y038crc0qta8bl660",
+    "transportSupport": "cmsmj2a20038erc0qmro17267",
+    "transportSupport.transProtocolType": "cmsmj2a27038irc0qfmhps6xf",
+    "transportSupport.transProtocolDesc": "cmsmj2a29038krc0q71g9s9ue",
+}
+
+cmsmj2a0g037grc0qddx8wie2_SensorDeviceProfiles_response_key_ids = {
+    "code": "cmsmj2a3i038src0q7z9yb38g",
+    "message": "cmsmj2a3l038urc0q7nx5cl8k",
+    "sensorDeviceList": "cmsmj2a3n038wrc0qs6zt8x54",
+    "sensorDeviceList.sensorDeviceID": "cmsmj2a3t0390rc0q8ifdifj1",
+    "sensorDeviceList.sensorDeviceType": "cmsmj2a3w0392rc0qp4f7eovv",
+    "sensorDeviceList.sensorDeviceName": "cmsmj2a3y0394rc0qnowodl18",
+    "sensorDeviceList.sensorDeviceLoc": "cmsmj2a410396rc0qelnzyz0o",
+    "sensorDeviceList.sensorDeviceLoc.lon": "cmsmj2a440398rc0qrgfr3iee",
+    "sensorDeviceList.sensorDeviceLoc.lat": "cmsmj2a46039arc0q8fpz0i7w",
+    "sensorDeviceList.sensorDeviceLoc.alt": "cmsmj2a49039crc0qvyu7s3xk",
+    "sensorDeviceList.sensorDeviceLoc.desc": "cmsmj2a4b039erc0qp1n92ykx",
+}
+
+cmsmj2a0g037grc0qddx8wie2_StoredSensorEventInfos_response_key_ids = {
+    "code": "cmsmj2aah03cerc0q506183ra",
+    "message": "cmsmj2aak03cgrc0qgy7mfmb6",
+    "sensorDeviceList": "cmsmj2abr03circ0qr1fgnh0f",
+    "sensorDeviceList.sensorDeviceID": "cmsmj2ac203cqrc0qz2w9aqc0",
+    "sensorDeviceList.eventName": "cmsmj2ac403csrc0q4hojnlsg",
+    "sensorDeviceList.eventTime": "cmsmj2abx03cmrc0q73b7dken",
+    "sensorDeviceList.eventDesc": "cmsmj2abz03corc0q8s8shofh",
+}
+
+# cmsmj2a0g037grc0qddx8wie2 Response Key-ID Mapping 리스트
+cmsmj2a0g037grc0qddx8wie2_response_key_ids = [
+    cmsmj2a0g037grc0qddx8wie2_Authentication_response_key_ids,
+    cmsmj2a0g037grc0qddx8wie2_Capabilities_response_key_ids,
+    cmsmj2a0g037grc0qddx8wie2_SensorDeviceProfiles_response_key_ids,
+    cmsmj2a0g037grc0qddx8wie2_StoredSensorEventInfos_response_key_ids,
+]
+
+# cmsmiz4rk030drc0qgs8hvb18
+cmsmiz4rk030drc0qgs8hvb18_Authentication_response_key_ids = {
+    "code": "cmsmiz4sd030rrc0q507j3y20",
+    "message": "cmsmiz4sg030trc0q6h7y17u8",
+    "userName": "cmsmiz4sj030vrc0qbhno0scv",
+    "userAff": "cmsmiz4sm030xrc0q93xgv0xf",
+    "accessToken": "cmsmiz4sp030zrc0q24rv2rov",
+}
+
+cmsmiz4rk030drc0qgs8hvb18_Capabilities_response_key_ids = {
+    "code": "cmsmiz4tr0317rc0qmtp11qjb",
+    "message": "cmsmiz4tt0319rc0qx5ggqm2v",
+    "transportSupport": "cmsmiz4tw031brc0qe5rgo0us",
+    "transportSupport.transProtocolType": "cmsmiz4u2031frc0q5i056m1m",
+    "transportSupport.transProtocolDesc": "cmsmiz4u5031hrc0q3kbobq0g",
+}
+
+cmsmiz4rk030drc0qgs8hvb18_DoorProfiles_response_key_ids = {
+    "code": "cmsmiz4us031vrc0qcaj876z1",
+    "message": "cmsmiz4uv031xrc0qp1eszjxa",
+    "doorList": "cmsmiz4uy031zrc0qtsdudc58",
+    "doorList.doorID": "cmsmiz4v40323rc0q2bdq3h17",
+    "doorList.doorName": "cmsmiz4v70325rc0qu8x09d5w",
+    "doorList.doorRelayStatus": "cmsmiz4v90327rc0qa42fjmlm",
+    "doorList.doorSensor": "cmsmiz4wh0329rc0qf4ru52ex",
+    "doorList.doorLoc": "cmsmiz4wj032brc0qg35vy41u",
+    "doorList.doorLoc.lon": "cmsmiz4wm032drc0q1f9po47o",
+    "doorList.doorLoc.lat": "cmsmiz4wp032frc0qqhy1texd",
+    "doorList.doorLoc.alt": "cmsmiz4ws032hrc0q4zgb37sz",
+    "doorList.doorLoc.desc": "cmsmiz4wu032jrc0qzldxhzuj",
+    "doorList.bioDeviceList": "cmsmiz4wx032lrc0qq6r7m6c5",
+    "doorList.bioDeviceList.bioDeviceID": "cmsmiz4x5032rrc0qgwrrxs9g",
+    "doorList.bioDeviceList.bioDeviceName": "cmsmiz4x8032trc0qq6eo9pm4",
+    "doorList.bioDeviceList.bioDeviceAuthTypeList": "cmsmiz4x3032prc0q7f4ynyld",
+    "doorList.otherDeviceList": "cmsmiz4xc032vrc0qmurxe1ok",
+    "doorList.otherDeviceList.otherDeviceID": "cmsmiz4xh032zrc0qg5xeelmz",
+    "doorList.otherDeviceList.otherDeviceName": "cmsmiz4xk0331rc0qwu8p58q8",
+    "doorList.otherDeviceList.otherDeviceAuthTypeList": "cmsmiz4xn0333rc0qealf2i2t",
+}
+
+cmsmiz4rk030drc0qgs8hvb18_AccessUserInfos_response_key_ids = {
+    "code": "cmsmiz4xy033brc0qrhhnzjg5",
+    "message": "cmsmiz4y0033drc0qh7vjrpko",
+    "userList": "cmsmiz4z7033frc0q3o2h37t7",
+    "userList.userID": "cmsmiz4zy033zrc0qo07u6nii",
+    "userList.userName": "cmsmiz4zd033jrc0q7on6oxtc",
+    "userList.userDesc": "cmsmiz4zf033lrc0qa7uueg2h",
+    "userList.doorList": "cmsmiz4zi033nrc0qxk0lkptr",
+    "userList.doorList.doorID": "cmsmiz4zo033rrc0qdjwovjja",
+    "userList.doorList.timePeriod": "cmsmiz4zr033trc0qeeluofnn",
+    "userList.doorList.timePeriod.startTime": "cmsmiz4zt033vrc0qz28hnv1c",
+    "userList.doorList.timePeriod.endTime": "cmsmiz4zw033xrc0qklbsus57",
+}
+
+cmsmiz4rk030drc0qgs8hvb18_StoredVerifEventInfos_response_key_ids = {
+    "code": "cmsmiz53i035rrc0qut8qztoq",
+    "message": "cmsmiz53l035trc0qq4vvo0xn",
+    "doorList": "cmsmiz54r035vrc0qpnkl3v1y",
+    "doorList.eventTime": "cmsmiz54x035zrc0qe72cwrya",
+    "doorList.doorID": "cmsmiz54z0361rc0q5sf3bm7f",
+    "doorList.userID": "cmsmiz5520363rc0qs24yj5vy",
+    "doorList.bioAuthTypeList": "cmsmiz5550365rc0q3mw82owe",
+    "doorList.otherAuthTypeList": "cmsmiz5580367rc0qi5ld2q0u",
+    "doorList.eventName": "cmsmiz55a0369rc0qgs6mlel2",
+}
+
+# cmsmiz4rk030drc0qgs8hvb18 Response Key-ID Mapping 리스트
+cmsmiz4rk030drc0qgs8hvb18_response_key_ids = [
+    cmsmiz4rk030drc0qgs8hvb18_Authentication_response_key_ids,
+    cmsmiz4rk030drc0qgs8hvb18_Capabilities_response_key_ids,
+    cmsmiz4rk030drc0qgs8hvb18_DoorProfiles_response_key_ids,
+    cmsmiz4rk030drc0qgs8hvb18_AccessUserInfos_response_key_ids,
+    cmsmiz4rk030drc0qgs8hvb18_StoredVerifEventInfos_response_key_ids,
+]
+
+# cmsmhhyl502ncrc0qnjtvbt43
+cmsmhhyl502ncrc0qnjtvbt43_Authentication_response_key_ids = {
+    "code": "cmsmhhylz02nqrc0qxruzivmz",
+    "message": "cmsmhhym202nsrc0qba4st1l6",
+    "userName": "cmsmhhymi02nurc0qhpbw9o2i",
+    "userAff": "cmsmhhyml02nwrc0qhn6jqxwk",
+    "accessToken": "cmsmhhymo02nyrc0qlcraw3up",
+}
+
+cmsmhhyl502ncrc0qnjtvbt43_Capabilities_response_key_ids = {
+    "code": "cmsmhhymy02o6rc0qty1qfzhy",
+    "message": "cmsmhhyn002o8rc0qv5tubhp9",
+    "streamingSupport": "cmsmhhyn302oarc0q73av0zwx",
+    "streamingSupport.streamProtocolType": "cmsmhhyn902oerc0q2ysheoou",
+    "streamingSupport.streamProtocolDesc": "cmsmhhync02ogrc0q69iivul4",
+    "transportSupport": "cmsmhhynf02oirc0qrwzojo1w",
+    "transportSupport.transProtocolType": "cmsmhhynl02omrc0q6ua86bjx",
+    "transportSupport.transProtocolDesc": "cmsmhhyno02oorc0qakp1t304",
+}
+
+cmsmhhyl502ncrc0qnjtvbt43_CameraProfiles_response_key_ids = {
+    "code": "cmsmhhyny02owrc0qyy6dun4x",
+    "message": "cmsmhhyo002oyrc0qz3bns30k",
+    "camList": "cmsmhhyo302p0rc0qqivxkegl",
+    "camList.camID": "cmsmhhype02p4rc0q335amjsm",
+    "camList.camName": "cmsmhhyph02p6rc0qzniifjos",
+    "camList.camLoc": "cmsmhhypk02p8rc0qddvepvpj",
+    "camList.camLoc.lon": "cmsmhhypm02parc0qf1dhaxdx",
+    "camList.camLoc.lat": "cmsmhhypp02pcrc0qz3sh3ju7",
+    "camList.camLoc.alt": "cmsmhhyps02perc0q29i91ya3",
+    "camList.camLoc.desc": "cmsmhhypu02pgrc0q0knzfavo",
+    "camList.camConfig": "cmsmhhypx02pirc0qcyqb03kb",
+    "camList.camConfig.camType": "cmsmhhypz02pkrc0q80ysi8bc",
+}
+
+cmsmhhyl502ncrc0qnjtvbt43_StoredVideoInfos_response_key_ids = {
+    "code": "cmsmhwr1o02trrc0qn6kofwgx",
+    "message": "cmsmhwr1p02ttrc0qz2kkuvjq",
+    "camList": "cmsmhwr1q02tvrc0qd6qaxvyu",
+    "camList.camID": "cmsmhwr2702tzrc0qtjtzxsz2",
+    "camList.timeList": "cmsmhwr2802u1rc0q6cgnwgxu",
+    "camList.timeList.startTime": "cmsmhwr2h02u5rc0qepx4yhul",
+    "camList.timeList.endTime": "cmsmhwr2i02u7rc0qpbrvh0o2",
+}
+
+cmsmhhyl502ncrc0qnjtvbt43_ReplayURL_response_key_ids = {
+    "code": "cmsmi83y702varc0ql39lr66t",
+    "message": "cmsmi83y802vcrc0qmaonrc0a",
+    "camList": "cmsmi83y802verc0q7hrmxdbo",
+    "camList.camID": "cmsmi83yi02virc0q11vil0ov",
+    "camList.accessID": "cmsmi83yj02vkrc0qjps8r4mo",
+    "camList.accessPW": "cmsmi83yk02vmrc0q8i8wb0qw",
+    "camList.camURL": "cmsmi83yk02vorc0q1bm6bg1r",
+    "camList.videoInfo": "cmsmi83yl02vqrc0qpfk2wb3g",
+    "camList.videoInfo.resolution": "cmsmi83yt02vsrc0qn1v93x5y",
+    "camList.videoInfo.fps": "cmsmi83yu02vurc0q34dahqku",
+    "camList.videoInfo.videoCodec": "cmsmi83yv02vwrc0qh02wbax5",
+    "camList.videoInfo.audioCodec": "cmsmi83yv02vyrc0qi1leghcu",
+}
+
+cmsmhhyl502ncrc0qnjtvbt43_StoredVideoEventInfos_response_key_ids = {
+    "code": "cmsmijvsb02xcrc0qaqsbchzv",
+    "message": "cmsmijvsc02xerc0qr68vwml4",
+    "camList": "cmsmijvsc02xgrc0qjh5nzm17",
+    "camList.camID": "cmsmijvsm02xkrc0qhc6c8e5a",
+    "camList.eventUUID": "cmsmijvsn02xmrc0qrlhgsbra",
+    "camList.eventName": "cmsmijvso02xorc0qyaonj7nv",
+    "camList.startTime": "cmsmijvso02xqrc0qp0wrikot",
+    "camList.endTime": "cmsmijvsp02xsrc0qku228fpi",
+    "camList.eventDesc": "cmsmijvsp02xurc0qli6trneb",
+}
+
+cmsmhhyl502ncrc0qnjtvbt43_StoredObjectAnalyticsInfos_response_key_ids = {
+    "code": "cmsmiv0j102z4rc0q8o5zzx2n",
+    "message": "cmsmiv0j202z6rc0qhcib6oob",
+    "camList": "cmsmiv0j302z8rc0ql70eiypr",
+    "camList.camID": "cmsmiv0jk02zcrc0qhzj4kofh",
+    "camList.analyticsTime": "cmsmiv0jl02zerc0qdq0wxmjr",
+    "camList.anlayticsResultList": "cmsmiv0jm02zgrc0q9lk8szs2",
+    "camList.anlayticsResultList.anayticsID": "cmsmiv0jx02zkrc0q3jh0snkd",
+    "camList.anlayticsResultList.analyticsClass": "cmsmiv0jy02zmrc0qq7ta778d",
+    "camList.anlayticsResultList.analyticsAttribute": "cmsmiv0jy02zorc0qbefd8gbt",
+    "camList.anlayticsResultList.analyticsConfidence": "cmsmiv0jz02zqrc0qbnpvfw2d",
+    "camList.anlayticsResultList.analyticsBoundingBox": "cmsmiv0k002zsrc0qs81vas9e",
+    "camList.anlayticsResultList.analyticsBoundingBox.left": "cmsmiv0ka02zyrc0qnvepsm3q",
+    "camList.anlayticsResultList.analyticsBoundingBox.top": "cmsmiv0kb0300rc0qx4oynnjy",
+    "camList.anlayticsResultList.analyticsBoundingBox.right": "cmsmiv0kb0302rc0qy7jkd8l8",
+    "camList.anlayticsResultList.analyticsBoundingBox.bottom": "cmsmiv0kc0304rc0qupc50omx",
+    "camList.anlayticsResultList.analyticsDesc": "cmsmiv0k002zurc0qtkp6h0ua",
+}
+
+# cmsmhhyl502ncrc0qnjtvbt43 Response Key-ID Mapping 리스트
+cmsmhhyl502ncrc0qnjtvbt43_response_key_ids = [
+    cmsmhhyl502ncrc0qnjtvbt43_Authentication_response_key_ids,
+    cmsmhhyl502ncrc0qnjtvbt43_Capabilities_response_key_ids,
+    cmsmhhyl502ncrc0qnjtvbt43_CameraProfiles_response_key_ids,
+    cmsmhhyl502ncrc0qnjtvbt43_StoredVideoInfos_response_key_ids,
+    cmsmhhyl502ncrc0qnjtvbt43_ReplayURL_response_key_ids,
+    cmsmhhyl502ncrc0qnjtvbt43_StoredVideoEventInfos_response_key_ids,
+    cmsmhhyl502ncrc0qnjtvbt43_StoredObjectAnalyticsInfos_response_key_ids,
+]
 
 # cmiqr1jha00i6ie8fb1scb3go
 cmiqr1jha00i6ie8fb1scb3go_Authentication_response_key_ids = {
@@ -520,16 +845,6 @@ cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_response_key_ids = {
     "sensorDeviceList.eventDesc": "cmj6fgd0p01iixei0fassafmt",
 }
 
-cmii7wfuf006i8z1tcds6q69g_StoredSensorEventInfos_response_key_ids = {
-    "code": "cmixtx93k0dmbp002giiv2mn8",
-    "message": "cmixtxbsw0dmkp002zadzlb2s",
-    "sensorDeviceList": "cmixtxedg0dmtp0021yh790om",
-    "sensorDeviceList.sensorDeviceID": "cmixtz2t50dydp002h8ijvxtb",
-    "sensorDeviceList.eventName": "cmixtz2t60dyfp002gzvkjuc0",
-    "sensorDeviceList.eventTime": "cmixtz2t60dyhp002jyhrxar4",
-    "sensorDeviceList.eventDesc": "cmixtz2t60dyjp002tmkxp1kg",
-}
-
 # cmii7wfuf006i8z1tcds6q69g Response Key-ID Mapping 리스트
 cmii7wfuf006i8z1tcds6q69g_response_key_ids = [
     cmii7wfuf006i8z1tcds6q69g_Authentication_response_key_ids,
@@ -537,7 +852,6 @@ cmii7wfuf006i8z1tcds6q69g_response_key_ids = [
     cmii7wfuf006i8z1tcds6q69g_SensorDeviceProfiles_response_key_ids,
     cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_response_key_ids,
     cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_response_key_ids,
-    cmii7wfuf006i8z1tcds6q69g_StoredSensorEventInfos_response_key_ids,
 ]
 
 # cmii7w683006h8z1t7usnin5g
@@ -607,18 +921,6 @@ cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_response_key_ids = {
     "doorList.eventDesc": "cmiwtei2909pjp002pkj4b4ts",
 }
 
-cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_response_key_ids = {
-    "code": "cmiwthi4809yjp002avhbunqy",
-    "message": "cmiwthksr09yrp0025hej2mjs",
-    "doorList": "cmiwthu9q09yxp00274g8nrid",
-    "doorList.eventTime": "cmiwtk63q0am3p002ttbf0qpt",
-    "doorList.doorID": "cmiwtk63r0am5p0021ye95ki5",
-    "doorList.userID": "cmiwtk63r0am7p002pv6ksmkm",
-    "doorList.bioAuthTypeList": "cmiwtk63r0am9p002zvsnmyo6",
-    "doorList.otherAuthTypeList": "cmiwtk63r0ambp002foft6aka",
-    "doorList.eventName": "cmiwtk63s0amdp002a958928n",
-}
-
 # cmii7w683006h8z1t7usnin5g Response Key-ID Mapping 리스트
 cmii7w683006h8z1t7usnin5g_response_key_ids = [
     cmii7w683006h8z1t7usnin5g_Authentication_response_key_ids,
@@ -626,139 +928,5 @@ cmii7w683006h8z1t7usnin5g_response_key_ids = [
     cmii7w683006h8z1t7usnin5g_DoorProfiles_response_key_ids,
     cmii7w683006h8z1t7usnin5g_AccessUserInfos_response_key_ids,
     cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_response_key_ids,
-    cmii7w683006h8z1t7usnin5g_StoredVerifEventInfos_response_key_ids,
-]
-
-# cmii7v8pr006g8z1tvo55a50u
-cmii7v8pr006g8z1tvo55a50u_Authentication_response_key_ids = {
-    "code": "cmii7ym1100768z1tpqpc0la4",
-    "message": "cmii7ym1200788z1tsq0xhtf7",
-    "userName": "cmii7ym12007a8z1t633dt6my",
-    "userAff": "cmii7ym13007c8z1t9x8vuwxs",
-    "accessToken": "cmii7ym14007e8z1t5rg7z8sf",
-}
-
-cmii7v8pr006g8z1tvo55a50u_Capabilities_response_key_ids = {
-    "code": "cmiqtft4l00v0ie8frqocttvo",
-    "message": "cmiqtg05800v6ie8f64llg3s9",
-    "streamingSupport": "cmiqtgh5e00vcie8frhd9t8dt",
-    "streamingSupport.streamProtocolType": "cmizrbt02003s117lg1x01x5x",
-    "streamingSupport.streamProtocolDesc": "cmizrbt02003u117ltjjy7p0x",
-    "transportSupport": "cmiqth24i00viie8fwgt3t39v",
-    "transportSupport.transProtocolType": "cmizrbt0b003y117lfp9bnmd9",
-    "transportSupport.transProtocolDesc": "cmizrbt0b0040117lfsatd26c",
-}
-
-cmii7v8pr006g8z1tvo55a50u_CameraProfiles_response_key_ids = {
-    "code": "cmiqtj27q00vzie8ftb569ut8",
-    "message": "cmiqtj7zi00w5ie8fhbse8h4u",
-    "camList": "cmiqtjhkm00wbie8fxwprjc5l",
-    "camList.camID": "cmizre5yl00gq117lhvg7sqp7",
-    "camList.camName": "cmizre5yl00gs117lp2nxsuo7",
-    "camList.camLoc": "cmizre5ym00gu117l1fjgzdxr",
-    "camList.camLoc.lon": "cmizre5yq00gy117lqyw0ufvg",
-    "camList.camLoc.lat": "cmizre5yq00h0117llhm50tky",
-    "camList.camLoc.alt": "cmizre5yr00h2117lluxub8fw",
-    "camList.camLoc.desc": "cmizre5yr00h4117lsmvfm7gx",
-    "camList.camConfig": "cmizre5ym00gw117lm9mvctn8",
-    "camList.camConfig.camType": "cmizre5yr00h6117l9zj33pr2",
-}
-
-cmii7v8pr006g8z1tvo55a50u_StreamURLs_response_key_ids = {
-    "code": "cmiqtlss200x6ie8f7pu1f23c",
-    "message": "cmiqtlyto00xcie8fn3fbocfh",
-    "camList": "cmiqtma5m00xiie8fuly6thwh",
-    "camList.camID": "cmj17rvsh02ki12s9h05zrodz",
-    "camList.accessID": "cmj17rvsh02kk12s9vpei1lm3",
-    "camList.accessPW": "cmj17rvsh02km12s9zhsg7ogj",
-    "camList.camURL": "cmj17rvsi02ko12s9b6ucezhj",
-    "camList.videoInfo": "cmj17rvsi02kq12s9u06k8ix6",
-    "camList.videoInfo.resolution": "cmj17rvsn02ks12s9lrc90chn",
-    "camList.videoInfo.fps": "cmj17rvsn02ku12s9mz0gwgcx",
-    "camList.videoInfo.videoCodec": "cmj17rvsn02kw12s9jgf73dat",
-    "camList.videoInfo.audioCodec": "cmj17rvsn02ky12s9sgltoz5h",
-}
-
-cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_response_key_ids = {
-    "code": "cmiqtr21700z1ie8f2gb2pxw4",
-    "message": "cmiwrfgls0buk844gegf6h5nd",
-    "camList": "cmiwrfquy0buv844gfufg2j30",
-    "camList.camID": "cmiwrhv3l0ch4844g7qzbakmx",
-    "camList.eventUUID": "cmiwrhv3m0ch6844g1lux0upw",
-    "camList.eventName": "cmiwrhv3m0ch8844gqnoxrtsi",
-    "camList.startTime": "cmiwrhv3m0cha844gwp8thxsx",
-    "camList.endTime": "cmiwrhv3n0chc844geaa6w099",
-    "camList.eventDesc": "cmiwrhv3n0che844gqfrgim1r",
-}
-
-cmii7v8pr006g8z1tvo55a50u_StoredVideoInfos_response_key_ids = {
-    "code": "cmiwrncyp0041nkglw6ylrgkd",
-    "message": "cmiwrnfl60049nkgld7j8vz90",
-    "camList": "cmiwrniqz004hnkglkap6vspc",
-    "camList.camID": "cmiwrp98m00k0nkglgjjm6lpy",
-    "camList.timeList": "cmiwrp98m00k2nkgl0dorq4k8",
-    "camList.timeList.startTime": "cmiwrp98q00k6nkgl2fopmr38",
-    "camList.timeList.endTime": "cmiwrp98q00k8nkgl38r8o9je",
-}
-
-cmii7v8pr006g8z1tvo55a50u_ReplayURL_response_key_ids = {
-    "code": "cmiwru2lz01ennkglgut1l9g7",
-    "message": "cmiwru5fx01evnkgl7kr2ap5k",
-    "camList": "cmiwruc5m01fjnkglfb5808qt",
-    "camList.camID": "cmiws0cvy058fnkglfht15n64",
-    "camList.accessID": "cmiws0cvy058hnkgl6jlrc6bu",
-    "camList.accessPW": "cmiws0cvy058jnkglor0futar",
-    "camList.startTime": "cmiws0cvy058lnkglfs3qy75c",
-    "camList.endTime": "cmiws0cvz058nnkgl3b4g59v6",
-    "camList.camURL": "cmiws0cvz058pnkgllee02xjt",
-    "camList.videoInfo": "cmiws0cvz058rnkgla4dbi4ep",
-    "camList.videoInfo.resolution": "cmiws0cw5058tnkglgh6liq5j",
-    "camList.videoInfo.fps": "cmiws0cw5058vnkglhps56lsg",
-    "camList.videoInfo.videoCodec": "cmiws0cw6058xnkgldn18k152",
-    "camList.videoInfo.audioCodec": "cmiws0cw6058znkglop8r5368",
-}
-
-cmii7v8pr006g8z1tvo55a50u_StoredVideoEventInfos_response_key_ids = {
-    "code": "cmiws5la500b6p002ehfpwl91",
-    "message": "cmiws5o2500bep002ksv0kruy",
-    "camList": "cmiws5sie00bnp002mhjjpdm9",
-    "camList.camID": "cmiws8l4y01jkp002veo9vtsv",
-    "camList.eventUUID": "cmiws8l4y01jmp0025i9yxipb",
-    "camList.eventName": "cmiws8l4y01jop002nczpx3or",
-    "camList.startTime": "cmiws8l4z01jqp0020oxveqiq",
-    "camList.endTime": "cmiws8l4z01jsp00212xgr4qb",
-    "camList.eventDesc": "cmiws8l4z01jup0022zlb61is",
-}
-
-cmii7v8pr006g8z1tvo55a50u_StoredObjectAnalyticsInfos_response_key_ids = {
-    "code": "cmiwsh9m502y7p0022i73n1po",
-    "message": "cmiwshcj002yfp002dkiz4vt7",
-    "camList": "cmiwshfet02ynp002zkcg7gej",
-    "camList.camID": "cmiwsk9l4048cp002u3itb9wc",
-    "camList.analyticsTime": "cmiwsk9l4048ep002oozd2o0r",
-    "camList.anlayticsResultList": "cmiwsk9l4048gp0020kib5lae",
-    "camList.anlayticsResultList.anayticsID": "cmj18hgdz03zk12s9hubxe0fk",
-    "camList.anlayticsResultList.analyticsClass": "cmj18hgdz03zm12s907dfl848",
-    "camList.anlayticsResultList.analyticsAttribute": "cmj18hge003zo12s9tb8883af",
-    "camList.anlayticsResultList.analyticsConfidence": "cmj18hge003zq12s9auut749x",
-    "camList.anlayticsResultList.analyticsBoundingBox": "cmj18hge003zs12s9b8iw2mzc",
-    "camList.anlayticsResultList.analyticsBoundingBox.left": "cmj18hge8040012s96yafbp4g",
-    "camList.anlayticsResultList.analyticsBoundingBox.top": "cmj18hge8040212s98m872xsr",
-    "camList.anlayticsResultList.analyticsBoundingBox.right": "cmj18hge8040412s9tzx8g4ca",
-    "camList.anlayticsResultList.analyticsBoundingBox.bottom": "cmj18hge9040612s9mg22oxxt",
-    "camList.anlayticsResultList.analyticsDesc": "cmj18hge103zu12s94p8o91au",
-}
-
-# cmii7v8pr006g8z1tvo55a50u Response Key-ID Mapping 리스트
-cmii7v8pr006g8z1tvo55a50u_response_key_ids = [
-    cmii7v8pr006g8z1tvo55a50u_Authentication_response_key_ids,
-    cmii7v8pr006g8z1tvo55a50u_Capabilities_response_key_ids,
-    cmii7v8pr006g8z1tvo55a50u_CameraProfiles_response_key_ids,
-    cmii7v8pr006g8z1tvo55a50u_StreamURLs_response_key_ids,
-    cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_response_key_ids,
-    cmii7v8pr006g8z1tvo55a50u_StoredVideoInfos_response_key_ids,
-    cmii7v8pr006g8z1tvo55a50u_ReplayURL_response_key_ids,
-    cmii7v8pr006g8z1tvo55a50u_StoredVideoEventInfos_response_key_ids,
-    cmii7v8pr006g8z1tvo55a50u_StoredObjectAnalyticsInfos_response_key_ids,
 ]
 
