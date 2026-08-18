@@ -174,7 +174,24 @@ cmsmhhyl502ncrc0qnjtvbt43_StoredVideoInfos_out_validation = {}
 cmsmhhyl502ncrc0qnjtvbt43_ReplayURL_out_validation = {}
 
 # StoredVideoEventInfos
-cmsmhhyl502ncrc0qnjtvbt43_StoredVideoEventInfos_out_validation = {}
+cmsmhhyl502ncrc0qnjtvbt43_StoredVideoEventInfos_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "404"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "장치 없음"
+    ],
+    "score": 0
+  }
+}
 
 # StoredObjectAnalyticsInfos
 cmsmhhyl502ncrc0qnjtvbt43_StoredObjectAnalyticsInfos_out_validation = {}
