@@ -254,6 +254,9 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
         total_error = 0
         error_messages = []
         context_validation_failed = False
+        # 오류 회차 표식 — code 규칙이 200이 아닌 값을 기대했고 실제로 그 값이 온 경우.
+        # 이때의 응답 본문은 code·message뿐인 것이 정상이므로 데이터 필드는 채점하지 않는다.
+        error_code_expected_matched = False
         code_message_error = None
         # 필수 필드 카운트
         required_correct = 0
@@ -337,6 +340,10 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
                             break
                         else:
                             Logger.debug(f"[맥락검증] ✅ {field_name} 숫자 검증 통과")
+                            # code가 기대한 오류 코드(201/400 등)로 정확히 왔다 → 오류 회차 성공
+                            # (message는 "성공" 같은 정상 문구도 있어 code로만 판단한다)
+                            if field_name == 'code' and expected_num != 200:
+                                error_code_expected_matched = True
 
                     # 문자열 비교 (message 필드 등)
                     else:
@@ -404,6 +411,21 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
             Logger.info(f"\n  검증 상태: {final_result}")
 
             return final_result, error_msg, total_correct, total_error, opt_correct, opt_error
+
+        # ===================================================================
+        # 오류 회차 성공: 상대가 기대한 오류 코드로 정확히 거절했다.
+        # 오류 응답의 본문은 {code, message}뿐인 것이 정상이므로, 정상 응답용
+        # 스키마(doorList 등)로 채점하면 "필드 누락" 오탐이 쏟아진다.
+        # → 채점 대상을 code·message로 축소한다.
+        # ===================================================================
+        if error_code_expected_matched:
+            flat_fields = {k: v for k, v in flat_fields.items() if k in ("code", "message")}
+            opt_fields = {f for f in opt_fields if f in flat_fields}
+            # 요약·카운트 검증에 쓰는 목록도 축소된 대상 기준으로 다시 계산
+            required_fields = [f for f in flat_fields.keys() if f not in opt_fields]
+            optional_fields = list(opt_fields)
+            Logger.info(f"[오류회차] 기대 오류 코드 일치 — code·message만 채점 (대상 {len(flat_fields)}개)")
+
         # 4) 각 필드에 대해 순차 검증
         for field_path in sorted(flat_fields.keys()):
             Logger.debug(f"\n--- 필드 검증: {field_path} ---")
