@@ -44,10 +44,11 @@ NORMAL_REQUEST = {
 }
 
 
-def make_server(enabled=True, schema=SCHEMA, in_con=None):
+def make_server(enabled=True, schema=SCHEMA, in_con=None, flag_opt=True):
     """소켓을 열지 않고 판정 메서드만 쓰기 위한 최소 인스턴스"""
     srv = object.__new__(Server)
-    srv.CONSTANTS = type("C", (), {"ENABLE_ERROR_RESPONSE_CHECK": enabled})
+    srv.CONSTANTS = type("C", (), {"ENABLE_ERROR_RESPONSE_CHECK": enabled,
+                                   "flag_opt": flag_opt})
     srv.generator = ConstraintDataGenerator({})
     srv.message = ["StoredVerifEventInfos"]
     srv.inSchema = [schema]
@@ -59,8 +60,9 @@ def make_server(enabled=True, schema=SCHEMA, in_con=None):
     return srv
 
 
-def check(request_data, enabled=True, schema=SCHEMA, in_con=None, known_doors=None):
-    srv = make_server(enabled, schema, in_con)
+def check(request_data, enabled=True, schema=SCHEMA, in_con=None, known_doors=None,
+          flag_opt=True):
+    srv = make_server(enabled, schema, in_con, flag_opt)
     if known_doors:
         Server.valid_ids_by_field["doorID"].update(known_doors)
     return srv._check_request_errors("StoredVerifEventInfos", request_data)
@@ -242,6 +244,34 @@ def test_profiles_response_fills_device_list():
     assert Server.valid_ids_by_field["doorID"] == {"door0001", "door0002"}
     assert Server.valid_ids_by_field["sensorDeviceID"] == {"iot0001"}
     print("✅ 프로필 응답 → 장치 목록 자동 수집 (프로필 아닌 응답은 무시)")
+
+
+def test_required_scope_ignores_optional_fields():
+    """필수 범위(flag_opt=False)에서 선택 필드는 "없는 취급" — 값이 틀려도 판정 안 함.
+    (2026-08-19 결정: 채점·주입과 동일 정책. 선택 필드 오탐 400이 응답 데이터를
+    비워 필수 필드 채점까지 무너뜨리는 뒷문 효과 차단)"""
+    # 선택 필드(maxCount) 타입 오류 — 전체 범위에선 400, 필수 범위에선 무시
+    bad_optional = dict(NORMAL_REQUEST, maxCount="10")
+    assert check(bad_optional, flag_opt=True) is not None, "전체 범위인데 선택 필드를 안 봄"
+    assert check(bad_optional, flag_opt=False) is None, "필수 범위인데 선택 필드를 판정함"
+
+    # 선택 필드 유효 값 위반도 동일
+    in_con = {"eventFilter": {"validationType": "valid-value-match",
+                              "allowedValues": ["AuthSuccess", "AuthFail"]}}
+    schema_with_opt = dict(SCHEMA)
+    schema_with_opt[OptionalKey("eventFilter")] = str
+    bad_value = dict(NORMAL_REQUEST, eventFilter="무단침입")
+    assert check(bad_value, schema=schema_with_opt, in_con=in_con,
+                 flag_opt=False) is None, "필수 범위인데 선택 필드 유효 값을 판정함"
+
+    # 필수 필드 오류는 필수 범위에서도 그대로 잡아야 한다
+    bad_required = {
+        "timePeriod": {"startTime": "20251105163010124"},  # endTime(필수) 누락
+        "doorList": [{"doorID": "door0001"}],
+    }
+    result = check(bad_required, flag_opt=False)
+    assert result is not None and result["code"] == "400", "필수 필드 오류를 놓침"
+    print("✅ 필수 범위 — 선택 필드는 없는 취급, 필수 필드 판정은 유지")
 
 
 def test_switch_off_disables_everything():

@@ -253,6 +253,15 @@ class Server(BaseHTTPRequestHandler):
         if not getattr(self.CONSTANTS, "ENABLE_ERROR_RESPONSE_CHECK", False):
             return None
 
+        # 필수 범위 시험(flag_opt=False)이면 선택 필드는 "없는 취급" — 판정 전에
+        # 사본에서 제거한다. 채점·주입과 동일 정책(2026-08-19 결정): 필수 범위에서
+        # 주입은 필수 필드만 표적이므로 선택 필드 판정은 잡을 진짜 오류가 없고,
+        # 오탐 시 400 응답이 데이터를 비워 필수 필드 채점까지 무너뜨린다(뒷문 효과).
+        if not getattr(self.CONSTANTS, "flag_opt", True):
+            schema_for_strip = self._get_request_schema(api_name)
+            if schema_for_strip:
+                request_data = self._strip_optional_fields(request_data, schema_for_strip)
+
         # 1. 시간 구간 검사 → 201
         #    스키마 없이도 판정할 수 있으므로 스키마 유무와 무관하게 먼저 본다.
         time_error = self._check_time_range(request_data)
@@ -290,6 +299,29 @@ class Server(BaseHTTPRequestHandler):
         # ✅ 오류 없으면 flag 초기화
         Server.request_has_error[api_name] = False
         return None  # 오류 없음
+
+    def _strip_optional_fields(self, data, schema):
+        """스키마의 OptionalKey 필드를 요청 사본에서 제거한다 — 필수 범위의 "없는 취급".
+
+        선택 컨테이너(OptionalKey("camList") 등)는 하위까지 통째로 빠지고,
+        필수 컨테이너 안의 선택 필드는 재귀로 내려가며 걸러낸다.
+        스키마에 정의되지 않은 잉여 키는 판정 대상이 아니므로 그대로 둔다.
+        """
+        if not isinstance(data, dict) or not isinstance(schema, dict):
+            return data
+        out = dict(data)
+        for field, expected in schema.items():
+            name = self._schema_key_name(field)
+            if name not in out:
+                continue
+            if not isinstance(field, str):
+                out.pop(name, None)  # OptionalKey → 없는 취급
+                continue
+            if isinstance(expected, dict):
+                out[name] = self._strip_optional_fields(out[name], expected)
+            elif isinstance(expected, list) and expected and isinstance(out[name], list):
+                out[name] = [self._strip_optional_fields(v, expected[0]) for v in out[name]]
+        return out
 
     def _get_request_schema(self, api_name):
         """API의 요청 스키마 가져오기"""
