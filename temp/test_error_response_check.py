@@ -179,6 +179,28 @@ def test_invalid_value_is_400():
     print("✅ ④ 유효 값 위반 → 400 (validation_request 규칙 형식), 오판정 없음")
 
 
+def test_valid_values_array_field():
+    """④ 배열 필드는 원소별 대조 — 빈 배열/허용 원소는 정상, 허용 외 원소만 400.
+    (2026-08-19 실측: classFilter []가 통째 비교로 400 오판되던 문제)"""
+    in_con = {
+        "filterList.classFilter": {"validationType": "valid-value-match",
+                                   "allowedValues": ["Human"]},
+    }
+    base = {"timePeriod": dict(NORMAL_REQUEST["timePeriod"]),
+            "doorList": [{"doorID": "door0001"}]}
+
+    empty = dict(base, filterList=[{"classFilter": []}])
+    assert check(empty, in_con=in_con) is None, "빈 배열(필터 없음)을 400으로 오판"
+
+    ok = dict(base, filterList=[{"classFilter": ["Human"]}])
+    assert check(ok, in_con=in_con) is None, "허용 원소인데 400으로 오판"
+
+    bad = dict(base, filterList=[{"classFilter": ["비행기"]}])
+    result = check(bad, in_con=in_con)
+    assert result is not None and result["code"] == "400", f"허용 외 원소를 놓침: {result}"
+    print("✅ ④ 배열 필드 원소별 대조 — 빈 배열·허용 원소 정상, 허용 외 원소만 400")
+
+
 def test_unknown_device_is_404():
     """⑦ 프로필 목록에 없는 doorID → 404 (중첩 doorList.doorID까지)"""
     bad = {

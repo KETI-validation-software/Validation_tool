@@ -355,8 +355,15 @@ class Server(BaseHTTPRequestHandler):
                     continue
                 leaf = str(path).split(".")[-1]
                 for value in self.generator.find_key(request_data, leaf):
-                    if value is not None and value not in allowed:
-                        return f"{path}: 허용 외 값 {value!r} (허용: {allowed})"
+                    if value is None:
+                        continue
+                    # 배열 필드(classFilter 등)는 원소별로 대조한다(equalsAny 의미).
+                    # 빈 배열은 "필터 없음"이므로 정상 — 통째 비교하면 []가
+                    # 허용 목록에 없다는 이유로 400 오판이 난다 (2026-08-19 실측).
+                    elements = value if isinstance(value, list) else [value]
+                    for element in elements:
+                        if element is not None and element not in allowed:
+                            return f"{path}: 허용 외 값 {element!r} (허용: {allowed})"
         except Exception as e:
             Logger.error(f" 유효 값 검사 실패: {e}")
         return None
