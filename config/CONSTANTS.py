@@ -127,19 +127,19 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소
 # test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
-company_name = "test-단일시스템!"
-product_name = "test-단일시스템"
-version = "test-단일시스템"
+company_name = "필테 - 통합"
+product_name = "필테 - 통합"
+version = "필테 - 통합"
 test_category = "본시험"
-test_target = "기본 기능 시험-영상보안시스템 외 8개"
+test_target = "[필수] 통합 테스트"
 test_range = "필수 필드"
 auth_type = "Digest Auth"
 auth_info = "kisa,kisa_k1!2@"
 admin_code = "123456"
-url = "https://192.168.1.25:8080"
-contact_person = "정수인"
-model_name = "test-단일시스템"
-request_id = "cmsxwvy4904z9rc0q0gavc4vs"
+url = "https://192.168.1.30:8080"
+contact_person = "필테 - 통합"
+model_name = "필테 - 통합"
+request_id = "cmszckit9011xilyrbf55edkr"
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황
 flag_opt = False
@@ -203,126 +203,14 @@ WEBHOOK_DISPLAY_URL = "https://webhook2026.ngrok.dev"
 
 SPEC_CONFIG = [
     {
-        "group_name": "기본 기능 시험-영상보안시스템",
-        "group_id": "cmsoeb4qx03t9rc0q8a15ccys",
-        "cmii7v8pr006g8z1tvo55a50u": {
-    "test_name": "vid001",
-    "specs": ['cmii7v8pr006g8z1tvo55a50u_outSchema', 'cmii7v8pr006g8z1tvo55a50u_inData', 'cmii7v8pr006g8z1tvo55a50u_messages', 'cmii7v8pr006g8z1tvo55a50u_webhook_inSchema', 'cmii7v8pr006g8z1tvo55a50u_webhook_outData'],
+        "group_name": "[필수] 통합 테스트",
+        "group_id": "cmszcjoz4011oilyre63lt0vw",
+        "cmsy90xd705aarc0quh4je1k0": {
+    "test_name": "req_vid001",
+    "specs": ['cmsy90xd705aarc0quh4je1k0_inSchema', 'cmsy90xd705aarc0quh4je1k0_outData', 'cmsy90xd705aarc0quh4je1k0_messages', 'cmsy90xd705aarc0quh4je1k0_webhook_OutSchema', 'cmsy90xd705aarc0quh4je1k0_webhook_inData'],
     "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '카메라 목록 연동', '실시간 영상(CCTV) 전송 ', '실시간 이벤트 분석 정보 연동'],
-    "api_id": ['cmii7ylxn006m8z1tqq8dard1', 'cmiqtf9x600upie8ft45b1h1w', 'cmiqthu4900voie8f1evs0kfm', 'cmiqtkefj00whie8fd8odtc1m', 'cmiqtnwm200xoie8fxzfhodj5'],
+    "api_id": ['cmsy91ipk05agrc0qm4x2cf08', 'cmsy93mqm05birc0q5k2fpbqu', 'cmsy99ujz05chrc0qw4kx4kn5', 'cmsyafs4605dprc0qqh72ak77', 'cmsyau2qn05f3rc0qjkcsrloa'],
     "api_endpoint": ['/Authentication', '/Capabilities', '/CameraProfiles', '/StreamURLs', '/RealtimeVideoEventInfos'],
-    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'WebHook'],
-    "time_out": [60000, 60000, 60000, 60000, 60000],
-    "num_retries": [1, 1, 1, 1, 1]
-}
-    },
-    {
-        "group_name": "저장기능-보안용센서시스템",
-        "group_id": "cmsmj2x2m03dvrc0qa9kn3b3m",
-        "cmsmj2a0g037grc0qddx8wie2": {
-    "test_name": "sensor002",
-    "specs": ['cmsmj2a0g037grc0qddx8wie2_outSchema', 'cmsmj2a0g037grc0qddx8wie2_inData', 'cmsmj2a0g037grc0qddx8wie2_messages'],
-    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '보안용 센서 단말 목록 정보 연동', '저장된 보안용 센서 이벤트 분석 정보 연동'],
-    "api_id": ['cmsmj2a0i037irc0qbqsvx68l', 'cmsmj2a1m0384rc0qayz81lyo', 'cmsmj2a2c038mrc0quf5010oq', 'cmsmj2aaa03c8rc0qjoedevfa'],
-    "api_endpoint": ['/Authentication', '/Capabilities', '/SensorDeviceProfiles', '/StoredSensorEventInfos'],
-    "trans_protocol": ['basic', 'basic', 'basic', 'basic'],
-    "time_out": [60000, 60000, 60000, 60000],
-    "num_retries": [1, 1, 1, 1]
-}
-    },
-    {
-        "group_name": "저장기능시험-출입통제시스템",
-        "group_id": "cmsmizx48037arc0qvfartq9n",
-        "cmsmiz4rk030drc0qgs8hvb18": {
-    "test_name": "ac002",
-    "specs": ['cmsmiz4rk030drc0qgs8hvb18_outSchema', 'cmsmiz4rk030drc0qgs8hvb18_inData', 'cmsmiz4rk030drc0qgs8hvb18_messages'],
-    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '바이오 및 출입통제 장치 목록 정보', '사용자 권한 정보 연동', '저장된 출입인증 목록 정보 연동'],
-    "api_id": ['cmsmiz4rm030frc0qr3meof4p', 'cmsmiz4sr0311rc0qtbbvxb08', 'cmsmiz4u8031jrc0q4uzczyhx', 'cmsmiz4xq0335rc0q9nyjn539', 'cmsmiz53b035lrc0qy0dz1d9a'],
-    "api_endpoint": ['/Authentication', '/Capabilities', '/DoorProfiles', '/AccessUserInfos', '/StoredVerifEventInfos'],
-    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic'],
-    "time_out": [60000, 60000, 60000, 60000, 60000],
-    "num_retries": [1, 1, 1, 1, 1]
-}
-    },
-    {
-        "group_name": "저장기능시험-영상보안시스템",
-        "group_id": "cmsmiwkw80308rc0qtrk0jg8s",
-        "cmsmhhyl502ncrc0qnjtvbt43": {
-    "test_name": "vid002",
-    "specs": ['cmsmhhyl502ncrc0qnjtvbt43_outSchema', 'cmsmhhyl502ncrc0qnjtvbt43_inData', 'cmsmhhyl502ncrc0qnjtvbt43_messages'],
-    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '카메라 목록 연동', '저장된 영상 목록 연동', '저장된 영상(CCTV) 전송 ', '저장된 이벤트 분석 정보 연동', '저장된 객체 분석 정보 연동'],
-    "api_id": ['cmsmhhyl802nerc0qz6mcofry', 'cmsmhhymr02o0rc0qed268apx', 'cmsmhhynq02oqrc0qtcst54wu', 'cmsmhkah802surc0qkk9tvtwm', 'cmsmhzpps02ukrc0qa9bxxuvn', 'cmsmi97r102w7rc0qe1gvnm66', 'cmsmilg8902y6rc0qxdpsg5yz'],
-    "api_endpoint": ['/Authentication', '/Capabilities', '/CameraProfiles', '/StoredVideoInfos', '/ReplayURL', '/StoredVideoEventInfos', '/StoredObjectAnalyticsInfos'],
-    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic', 'basic'],
-    "time_out": [60000, 60000, 60000, 60000, 60000, 60000, 60000],
-    "num_retries": [1, 1, 1, 1, 1, 1, 1]
-}
-    },
-    {
-        "group_name": "제어 기능 시험-바이오인식 기반 출입통제 시스템",
-        "group_id": "cmk4tgs2c1enwcfb3sbsbdgrd",
-        "cmiqr1jha00i6ie8fb1scb3go": {
-    "test_name": "ac003",
-    "specs": ['cmiqr1jha00i6ie8fb1scb3go_outSchema', 'cmiqr1jha00i6ie8fb1scb3go_inData', 'cmiqr1jha00i6ie8fb1scb3go_messages', 'cmiqr1jha00i6ie8fb1scb3go_webhook_inSchema', 'cmiqr1jha00i6ie8fb1scb3go_webhook_outData'],
-    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '바이오 및 출입통제 장치 목록 정보', '실시간 출입통제 장치 상태 정보 연동-상태조회', '출입 통제 장치 제어 정보 연동', '실시간 출입통제 장치 상태 정보 연동-결과조회'],
-    "api_id": ['cmisgv0ua08o55vy7yvk4aw0a', 'cmisjr2u40au05vy7kt6bb6zl', 'cmiskf6w20dcm5vy7cjao08fw', 'cmixuoetf0gr9p002gy101xid', 'cmixuttgv0hbyp002h6os6wjc', 'cmixuvzks0hd3p002rcrvqdt4'],
-    "api_endpoint": ['/Authentication', '/Capabilities', '/DoorProfiles', '/RealtimeDoorStatus', '/DoorControl', '/RealtimeDoorStatus2'],
-    "trans_protocol": ['basic', 'basic', 'basic', 'WebHook', 'basic', 'WebHook'],
-    "time_out": [60000, 60000, 60000, 60000, 60000, 60000],
-    "num_retries": [1, 1, 1, 1, 1, 1]
-}
-    },
-    {
-        "group_name": "제어기능시험-보안용 센서 시스템",
-        "group_id": "cmk4tggl01entcfb38q47jw4w",
-        "cmiqr2b9j00i9ie8frw439h8i": {
-    "test_name": "sensor003",
-    "specs": ['cmiqr2b9j00i9ie8frw439h8i_outSchema', 'cmiqr2b9j00i9ie8frw439h8i_inData', 'cmiqr2b9j00i9ie8frw439h8i_messages'],
-    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '보안용 센서 단말 목록 정보 연동', '보안용 센서 단말 제어 정보 연동-상태연동', '보안용 센서 단말 제어 정보 연동-제어'],
-    "api_id": ['cmise849o00nv5vy7mu76wa69', 'cmise9yk200pv5vy7ktxtva7c', 'cmisepin301uv5vy78nai1drd', 'cmisfqfip07tz5vy7de6x5d6r', 'cmisg86id08bm5vy7ezcbr7oy'],
-    "api_endpoint": ['/Authentication', '/Capabilities', '/SensorDeviceProfiles', '/SensorDeviceControl', '/SensorDeviceControl2'],
-    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic'],
-    "time_out": [60000, 60000, 60000, 60000, 60000],
-    "num_retries": [1, 1, 1, 1, 1]
-}
-    },
-    {
-        "group_name": "제어 기능 시험-영상보안시스템",
-        "group_id": "cmk4tfso61enncfb3l63wp1m3",
-        "cmiqr0kdw00i4ie8fr3firjtg": {
-    "test_name": "vid003",
-    "specs": ['cmiqr0kdw00i4ie8fr3firjtg_outSchema', 'cmiqr0kdw00i4ie8fr3firjtg_inData', 'cmiqr0kdw00i4ie8fr3firjtg_messages'],
-    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '카메라 목록 연동', 'PTZ 상태 정보 연동', 'PTZ 연속 이동 제어 정보 연동', 'PTZ 정지 제어 정보 연동'],
-    "api_id": ['cmish1fu408we5vy7dp3ltj00', 'cmixu0dt70dyzp002xhm24l3h', 'cmixu2m200e4up002g73csf12', 'cmixu9wn10f7rp002rgzkx3au', 'cmixucv8a0fb4p002pnvfe6ay', 'cmixufkri0fdnp002fouuoqsg'],
-    "api_endpoint": ['/Authentication', '/Capabilities', '/CameraProfiles', '/PtzStatus', '/PtzContinuousMove', '/PtzStop'],
-    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic', 'basic'],
-    "time_out": [60000, 60000, 60000, 60000, 60000, 60000],
-    "num_retries": [1, 1, 1, 1, 1, 1]
-}
-    },
-    {
-        "group_name": "기본 기능 시험-보안용 센서 시스템",
-        "group_id": "cmjcegnpz070mcfb3wbzift18",
-        "cmii7wfuf006i8z1tcds6q69g": {
-    "test_name": "sensor001",
-    "specs": ['cmii7wfuf006i8z1tcds6q69g_outSchema', 'cmii7wfuf006i8z1tcds6q69g_inData', 'cmii7wfuf006i8z1tcds6q69g_messages', 'cmii7wfuf006i8z1tcds6q69g_webhook_inSchema', 'cmii7wfuf006i8z1tcds6q69g_webhook_outData'],
-    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '보안용 센서 단말 목록 정보 연동', '실시간 보안용 센서 데이터 정보 연동', '실시간 보안용 센서 이벤트 분석 정보 연동'],
-    "api_id": ['cmii82age008k8z1t71s85tbz', 'cmiwtm84f0an2p002pthrkfbj', 'cmiwtnnvx0ar8p002dcz8llaf', 'cmiwtr5xt0boqp002melvctad', 'cmiwv1ifx0ddmp0023tuwdhoi'],
-    "api_endpoint": ['/Authentication', '/Capabilities', '/SensorDeviceProfiles', '/RealtimeSensorData', '/RealtimeSensorEventInfos'],
-    "trans_protocol": ['basic', 'basic', 'basic', 'WebHook', 'WebHook'],
-    "time_out": [60000, 60000, 60000, 60000, 60000],
-    "num_retries": [1, 1, 1, 1, 1]
-}
-    },
-    {
-        "group_name": "기본 기능 시험-바이오인식 기반 출입통제 시스템",
-        "group_id": "cmjceg896070jcfb3e5yg5s6o",
-        "cmii7w683006h8z1t7usnin5g": {
-    "test_name": "ac001",
-    "specs": ['cmii7w683006h8z1t7usnin5g_outSchema', 'cmii7w683006h8z1t7usnin5g_inData', 'cmii7w683006h8z1t7usnin5g_messages', 'cmii7w683006h8z1t7usnin5g_webhook_inSchema', 'cmii7w683006h8z1t7usnin5g_webhook_outData'],
-    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '바이오 및 출입통제 장치 목록 정보', '사용자 권한 정보 연동', '실시간 출입인증 목록 정보 연동'],
-    "api_id": ['cmii80zqn007k8z1t85trpyps', 'cmiwslyqi049np002cgziiglj', 'cmiwso2p204bup002k9s8z9ph', 'cmiwstny705pnp002qw73yzs3', 'cmiwsz3sr079dp002xooui9id'],
-    "api_endpoint": ['/Authentication', '/Capabilities', '/DoorProfiles', '/AccessUserInfos', '/RealtimeVerifEventInfos'],
     "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'WebHook'],
     "time_out": [60000, 60000, 60000, 60000, 60000],
     "num_retries": [1, 1, 1, 1, 1]
