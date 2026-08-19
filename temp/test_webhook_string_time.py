@@ -66,7 +66,27 @@ def main():
         assert isinstance(c["startTime"], int) and c["startTime"] >= 20251105163010124, c
         assert isinstance(c["endTime"], int) and c["endTime"] > c["startTime"], c
 
-    print("OK — 시각 String/Number 모두 웹훅 값이 정상 생성됨")
+    # ✅ 요청에 startTime이 아예 없는 경우(선택 필드 생략) — 참조가 비어도
+    #    템플릿이 String("17자리 예시")이면 String으로, 템플릿 시각 근방 값으로 나가야 한다.
+    #    (2026-08-19 실측: 참조 부재 시 min=0 폴백으로 13자리 Number가 나가던 문제)
+    template_with_time = copy.deepcopy(TEMPLATE)
+    template_with_time["camList"][0]["startTime"] = "20251105163010124"
+    template_with_time["camList"][0]["endTime"] = "20251105163020124"
+    request = {"camList": [{"camID": "cam0001"}], "duration": 10,
+               "eventFilter": "Loitering"}  # startTime 없음
+    events = {"RealtimeVideoEventInfos": {"REQUEST": {"data": request}}}
+    out = ConstraintDataGenerator(events)._applied_constraints(
+        request_data=request,
+        template_data=template_with_time,
+        constraints=CONSTRAINTS,
+        api_name="RealtimeVideoEventInfos",
+        is_webhook=False,
+    )
+    for c in out["camList"]:
+        assert isinstance(c["startTime"], str), f"참조 부재 시 String이어야 함: {c}"
+        assert int(c["startTime"]) >= 20251105163010124, f"템플릿 시각 근방이어야 함: {c}"
+
+    print("OK — 시각 String/Number 모두 웹훅 값이 정상 생성됨 (참조 부재 폴백 포함)")
 
 
 if __name__ == "__main__":

@@ -848,9 +848,25 @@ class ConstraintDataGenerator:
                     #    내부에서는 숫자로 변환해 비교·생성하고, 원본이 문자열이면 문자열로 내보낸다.
                     raw_min = constraint.get("min", 0)
                     raw_max = constraint.get("max", self.MAX_TIMESTAMP)
-                    as_string = isinstance(raw_min, str) or isinstance(raw_max, str)
                     min_val = self._to_number(raw_min, 0)
                     max_val = self._to_number(raw_max, self.MAX_TIMESTAMP)
+
+                    # 참조 부재 판단: 요청에 기준 필드가 없으면 min이 기본값 0으로
+                    # 떨어진다(실제 시각은 0일 수 없음). 이때만 템플릿을 대타로 쓴다.
+                    reference_missing = min_val == 0 and not isinstance(raw_min, str)
+
+                    # 출력 타입: 참조값이 있으면 참조의 타입을 따르고(기존 동작),
+                    # 참조가 없으면 템플릿 값(관리도구의 예시 데이터) 타입을 따른다.
+                    # — 요청이 선택 필드 startTime을 생략해도 String 설정이 유지되도록.
+                    as_string = (isinstance(raw_min, str) or isinstance(raw_max, str)
+                                 or (reference_missing and isinstance(value, str)))
+
+                    # 참조가 없으면 범위가 0~13자리 난수가 돼 시각으로서 무의미하다.
+                    # 템플릿에 시각 값이 있으면 그 근방을 기준으로 삼는다.
+                    if reference_missing:
+                        template_num = self._to_number(value, 0)
+                        if template_num > 0:
+                            min_val = template_num
 
                     # 유효성 검사: min이 max보다 큰 경우 처리
                     if min_val >= max_val:
