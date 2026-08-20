@@ -141,10 +141,29 @@ class ConstraintDataGenerator:
                     
                     new_sensor_list.append(filtered_item)
                 
+                # ✅ 줄 생성(ID 채움) 후 값 채우기 설정까지 마저 적용한다.
+                # 예전에는 여기서 바로 반환해 eventName(←eventFilter)·eventTime(←startTime)
+                # 같은 참조 설정이 한 번도 실행되지 않았다 — 웹훅이 템플릿 빈 값 그대로
+                # 나가던 원인 (2026-08-20 sensor001 리허설 실측).
+                constraint_map = self._build_constraint_map(constraints or {}, request_data,
+                                                            is_webhook=True)
+                if constraint_map:
+                    filled_list = []
+                    for row in new_sensor_list:
+                        filled = self._generate_list_items("sensorDeviceList", row,
+                                                           constraint_map, 1)[0]
+                        # ID는 위에서 요청 순서대로 정해둔 값을 유지한다
+                        # (줄별 생성은 매번 첫 후보를 집어 전 줄이 같은 ID가 된다)
+                        filled["sensorDeviceID"] = row.get("sensorDeviceID",
+                                                           filled.get("sensorDeviceID"))
+                        filled_list.append(filled)
+                    new_sensor_list = filled_list
+                    Logger.debug(f"[DATA_MAPPER] 값 채우기 적용 후: {new_sensor_list}")
+
                 template_data["sensorDeviceList"] = new_sensor_list
                 Logger.info(f"[DATA_MAPPER] 생성된 sensorDeviceList: {len(new_sensor_list)}개")
                 Logger.debug(f"[DATA_MAPPER] 상세: {new_sensor_list}")
-            
+
             return template_data
         
         # ✅ doorList 구조를 가진 데이터 동적 생성 (범용)
