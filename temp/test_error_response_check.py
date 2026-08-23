@@ -73,27 +73,29 @@ def test_normal_request_passes():
     print("✅ 정상 요청 → 오류 없음")
 
 
-def test_string_zero_start_time_is_201():
-    """시각 필드 String 전환 후에도 201이 잡혀야 한다 (이게 안 되면 오류 회차 전패)"""
+def test_future_range_is_201():
+    """201 유도(미래 구간, 형식 유효)가 201로 판정돼야 한다 (2026-08-23 개편)"""
     gen = ConstraintDataGenerator({})
     mutated = gen.replace_start_time(NORMAL_REQUEST)
-    assert mutated["timePeriod"]["startTime"] == "0", "변조가 문자열 타입을 유지하지 않음"
+    assert mutated["timePeriod"]["startTime"] == gen.FUTURE_START_TIME, \
+        "변조가 미래 구간 String이 아님"
 
     result = check(mutated)
-    assert result is not None, "변조된 startTime을 판정하지 못함"
+    assert result is not None, "미래 구간을 판정하지 못함"
     assert result["code"] == "201", f"201이어야 하는데 {result['code']}"
-    print("✅ startTime=\"0\"(String) → 201 정보 없음")
+    print("✅ 미래 구간(형식 유효 String) → 201 정보 없음")
 
 
-def test_number_zero_start_time_is_201():
-    """Number 시각을 쓰는 옛 규격도 그대로 잡혀야 한다"""
+def test_number_future_range_is_201():
+    """Number 시각을 쓰는 옛 규격도 동일하게 201"""
     number_request = {
         "timePeriod": {"startTime": 20251105163010124, "endTime": 20251115163010124},
         "doorList": [{"doorID": "door0001"}],
     }
     gen = ConstraintDataGenerator({})
     mutated = gen.replace_start_time(number_request)
-    assert mutated["timePeriod"]["startTime"] == 0, "변조가 숫자 타입을 유지하지 않음"
+    assert mutated["timePeriod"]["startTime"] == int(gen.FUTURE_START_TIME), \
+        "변조가 숫자 타입을 유지하지 않음"
 
     number_schema = {
         "timePeriod": {"startTime": int, "endTime": int},
@@ -101,7 +103,28 @@ def test_number_zero_start_time_is_201():
     }
     result = check(mutated, schema=number_schema)
     assert result is not None and result["code"] == "201", f"201이 아님: {result}"
-    print("✅ startTime=0(Number) → 201 정보 없음")
+    print("✅ 미래 구간(Number) → 201 정보 없음")
+
+
+def test_zero_filled_time_is_400():
+    """400 유도(0 채움 17자리·"0"·숫자 0)는 형식 위반으로 400 판정"""
+    gen = ConstraintDataGenerator({})
+    for bad in [gen.INVALID_TIME_FORMAT, "0", 0]:
+        req = {"timePeriod": {"startTime": bad, "endTime": "20251115163010124"},
+               "doorList": [{"doorID": "door0001"}]}
+        schema = {"timePeriod": {"startTime": (str if isinstance(bad, str) else int),
+                                 "endTime": str},
+                  "doorList": [{"doorID": str}]}
+        result = check(req, schema=schema)
+        assert result is not None and result["code"] == "400", \
+            f"startTime={bad!r} → 400이어야 하는데 {result}"
+    print("✅ 0 값·0 채움 시각 → 400 잘못된 요청 (형식 위반)")
+
+
+def test_normal_past_time_not_flagged():
+    """시나리오의 정상 과거 시각(2022년 등)은 판정하지 않는다 — 오탐 방지"""
+    assert check(NORMAL_REQUEST) is None, "정상 과거 시각을 오판함"
+    print("✅ 정상 과거 시각(2025년) → 판정 안 함")
 
 
 def test_nested_type_mutation_is_400():

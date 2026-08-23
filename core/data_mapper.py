@@ -6,7 +6,13 @@ from core.logger import Logger
 class ConstraintDataGenerator:
     # 상수 정의
     MAX_TIMESTAMP = 9999999999999  # 최대 타임스탬프 범위
-    INVALID_TIMESTAMP = 0  # 오류 생성용 타임스탬프
+    INVALID_TIMESTAMP = 0  # 오류 생성용 타임스탬프 (Number 스펙의 형식 위반용)
+    # 201 유도용 — 형식은 완벽한 "미래 구간" (시험 기준 문서 표 4·6·8 예시와 동일).
+    # "0"류 값은 형식 검사 여부에 따라 업체마다 201/400 판정이 갈려 폐기.
+    FUTURE_START_TIME = "20270101000000000"
+    FUTURE_END_TIME = "20270131000000000"
+    # 400 유도용 — 자리수(17)만 맞고 날짜로는 무효 (월 00·일 00)
+    INVALID_TIME_FORMAT = "0" * 17
     
     def __init__(self, latest_events=None):
         """
@@ -426,6 +432,8 @@ class ConstraintDataGenerator:
 
         if method == "start-time":
             return self.replace_start_time(request_data)
+        if method == "time-format":
+            return self.corrupt_time_format(request_data)
         if method == "missing-required":
             return self.remove_required_field(request_data, constraints)[0]
         if method == "type-mismatch":
@@ -1107,19 +1115,52 @@ class ConstraintDataGenerator:
         return new_data
 
     def replace_start_time(self, data):
+        """① 201 유도 — 조회 구간을 "형식은 완벽한 미래 구간"으로 옮긴다.
+
+        예전 방식("0")은 형식(17자리 시각) 검사를 하는 시스템에서 400으로 판정될
+        수 있어 업체마다 201/400이 갈렸다(시험장 논쟁). 시험 기준 문서 표 4·6·8
+        예시(2027-01 구간)와 동일하게 실존 가능한 미래 날짜로 통일 — 타입도 형식도
+        유효하고 데이터만 없는 구간이라 201 외의 해석 여지가 없다.
+        start·end를 함께 옮겨 구간 역전(start>end) 같은 또 다른 애매함도 막는다.
+        시각 필드 String 전환에 맞춰 원본 타입(String/Number)은 유지한다.
+        """
+        new_data = copy.deepcopy(data)
+
+        def shifted(key, value):
+            future = self.FUTURE_START_TIME if key == "startTime" else self.FUTURE_END_TIME
+            return future if isinstance(value, str) else int(future)
+
+        def traverse(obj):
+            if isinstance(obj, dict):
+                for key, value in obj.items():
+                    if key in ("startTime", "endTime"):
+                        obj[key] = shifted(key, value)
+                    else:
+                        traverse(value)
+            elif isinstance(obj, list):
+                for item in obj:
+                    traverse(item)
+
+        traverse(new_data)
+        return new_data
+
+    def corrupt_time_format(self, data):
+        """시각 0 채움 변조 — method="time-format" 명시 지정 시에만 사용.
+
+        ⚠️ 시험용 비권장: 0 채움 17자리는 패턴(숫자 17자리)으로는 유효하고
+        날짜(월 00·일 00)로는 무효라, 업체 구현에 따라 201/400 판정이 갈린다 —
+        "0" 단독 방식과 같은 회색지대다. 시험 유도는 201=미래 구간(replace_
+        start_time), 400=자료형 변조(change_random_field_type)를 쓸 것.
+        (타입은 유지: String이면 0 채움 17자리, Number 스펙이면 숫자 0)
+        """
         new_data = copy.deepcopy(data)
 
         def traverse(obj):
             if isinstance(obj, dict):
                 for key, value in obj.items():
                     if key == "startTime":
-                        # 오류 생성용(0). 시각 필드 String 전환에 맞춰 원본 타입을 유지한다.
-                        # 숫자 0을 넣으면 201 유도가 아니라 규격(타입) 검증에서 먼저 탈락해
-                        # "형식은 유효하되 내용만 이상한 요청"이라는 유도 의도가 깨진다.
-                        if isinstance(value, str):
-                            obj[key] = str(self.INVALID_TIMESTAMP)
-                        else:
-                            obj[key] = self.INVALID_TIMESTAMP
+                        obj[key] = (self.INVALID_TIME_FORMAT if isinstance(value, str)
+                                    else self.INVALID_TIMESTAMP)
                     else:
                         traverse(value)
             elif isinstance(obj, list):

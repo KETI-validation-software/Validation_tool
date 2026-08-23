@@ -262,13 +262,16 @@ class Server(BaseHTTPRequestHandler):
             if schema_for_strip:
                 request_data = self._strip_optional_fields(request_data, schema_for_strip)
 
-        # 1. 시간 구간 검사 → 201
+        # 1. 시각 필드 판정 → 201 또는 400 (유도 방식과 짝)
         #    스키마 없이도 판정할 수 있으므로 스키마 유무와 무관하게 먼저 본다.
-        time_error = self._check_time_range(request_data)
-        if time_error:
-            Logger.debug(f" 시간 범위 오류 감지: {time_error}")
+        time_verdict = self._judge_time_fields(request_data)
+        if time_verdict:
+            code, reason = time_verdict
+            Logger.debug(f" 시각 판정: {code} — {reason}")
             Server.request_has_error[api_name] = True
-            return {"code": "201", "message": "정보 없음"}
+            if code == "201":
+                return {"code": "201", "message": "정보 없음"}
+            return {"code": "400", "message": "잘못된 요청"}
 
         # 2. 미등록 장치 검사 → 404 (⑦ 유도와 짝. 프로필 목록이 비어 있으면 판정 안 함)
         device_error = self._check_device_exists(request_data)
@@ -472,30 +475,44 @@ class Server(BaseHTTPRequestHandler):
 
         return None
 
-    # 17자리 시각(YYYYMMDDhhmmssSSS)의 하한. 이보다 과거면 조회할 기록이 없다고 본다.
-    MIN_VALID_TIME = 19000101000000000
+    def _judge_time_fields(self, request_data):
+        """시각 필드 판정 — 유도 방식 개편(2026-08-23)과 짝을 맞춘다.
 
-    def _check_time_range(self, request_data):
-        """
-        시간 구간 검사 — 조회 구간이 유효 범위를 벗어난 과거인지 확인
+        유도 값이 두 종류로 분리됐다:
+          201 유도: 형식이 완벽한 미래 구간 (2027-01-01 ~) → "미래 데이터는 없음"
+          400 유도: 0 값·0 채움 17자리 등 시각으로 무효   → "형식 위반"
+        예전 "0" 단독 방식은 업체마다 201/400 판정이 갈려 폐기됐다(시험장 논쟁).
 
-        상대의 201 유도는 startTime을 0(또는 "0")으로 바꿔 보내는 방식이다.
-        - 시각 필드가 Number→String으로 전환됐으므로 문자열도 받아 숫자로 변환해 비교한다
-          (isinstance(int)로만 보면 "0"이 걸리지 않아 201이 영영 안 잡힌다)
-        - startTime은 timePeriod.startTime처럼 중첩돼 있어 최상위 조회로는 못 찾는다
+        - 시각 필드가 String 전환됐으므로 문자열도 숫자로 변환해 본다
+        - startTime은 timePeriod.startTime처럼 중첩돼 있어 재귀로 찾는다
+        - 정상 과거 시각(시나리오 데이터의 2022년 등)은 판정하지 않는다
 
         Returns:
-            str: 오류 메시지 (오류 있을 때) 또는 None (정상)
+            (code, reason) 튜플 — "201"/"400" — 또는 None (정상)
         """
         try:
+            now17 = int(datetime.datetime.now().strftime("%Y%m%d%H%M%S") + "999")
             for value in self.generator.find_key(request_data, "startTime"):
                 try:
-                    if int(value) < self.MIN_VALID_TIME:
-                        return f"조회 구간이 유효 범위를 벗어남: startTime={value!r}"
+                    num = int(value)
                 except (TypeError, ValueError):
                     continue  # 숫자로 볼 수 없는 값은 타입 검사(400)가 잡는다
+
+                # 0 값·0 채움("0"*17 등) → 시각으로 무효 → 형식 위반
+                if num == 0:
+                    return ("400", f"시각 형식 무효: startTime={value!r}")
+
+                # 17자리이면 실제 날짜로 성립하는지 확인
+                s = str(value)
+                if len(s) == 17:
+                    try:
+                        datetime.datetime.strptime(s[:14], "%Y%m%d%H%M%S")
+                    except ValueError:
+                        return ("400", f"시각 형식 무효(날짜 불성립): startTime={value!r}")
+                    if num > now17:
+                        return ("201", f"조회 구간이 미래: startTime={value!r}")
         except Exception as e:
-            Logger.error(f" 시간 검사 실패: {e}")
+            Logger.error(f" 시각 판정 실패: {e}")
 
         return None
 

@@ -127,7 +127,12 @@ def test_dispatcher_defaults():
             "doorList": [{"doorID": "door0001"}]}
 
     out = gen._applied_codevalue(copy.deepcopy(base), "201")
-    assert out["timePeriod"]["startTime"] == "0", "201 → startTime 변조 안 됨"
+    assert out["timePeriod"]["startTime"] == gen.FUTURE_START_TIME, "201 → 미래 구간 변조 안 됨"
+    assert out["timePeriod"]["endTime"] == gen.FUTURE_END_TIME, "201 → endTime도 함께 이동해야 함"
+
+    # method 지정으로 시각 형식 위반(400)도 선택 가능
+    out = gen._applied_codevalue(copy.deepcopy(base), "400", method="time-format")
+    assert out["timePeriod"]["startTime"] == gen.INVALID_TIME_FORMAT, "time-format 미동작"
 
     out = gen._applied_codevalue(copy.deepcopy(base), "404")
     assert out["doorList"][0]["doorID"] == "door9999", "404 → 미등록 ID 변조 안 됨"
