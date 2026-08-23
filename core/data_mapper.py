@@ -501,6 +501,13 @@ class ConstraintDataGenerator:
                     Logger.debug(f"[BUILD_MAP]   referenceEndpoint NOT found in latest_events")
                     Logger.debug(f"[BUILD_MAP]   Available endpoints: {list(self.latest_events.keys())}")
 
+                # ✅ 무작위 계열은 참조에서 값을 못 찾으면 관리도구 설정값으로 폴백.
+                # 요청 생성 시점에는 참조 응답이 아직 없는 게 보통이라, 폴백이 없으면
+                # "무작위 + 참조 필드 선택" 조합이 항상 빈 값으로 나간다 (2026-08-20 실측).
+                if not values and value_type in ("random", "random-response"):
+                    values = self._get_static_random_values(rule)
+                    Logger.debug(f"[BUILD_MAP]   참조 값 없음 → 설정값 폴백: {values}")
+
                 constraint_map[path] = {
                     "type": value_type,
                     "values": values if values else []
@@ -518,15 +525,18 @@ class ConstraintDataGenerator:
 
             elif value_type == "random-response":
                 # referenceEndpoint 없으면 현재 request_data에서 찾기
-                values = self.find_key(request_data, ref_field)
+                values = (self.find_key(request_data, ref_field)
+                          if ref_field and ref_field != "(참조 필드 미선택)" else [])
+                if not values:
+                    values = self._get_static_random_values(rule)
                 constraint_map[path] = {
                     "type": "random-response",
                     "values": values if values else []
                 }
 
             elif value_type == "random":
-                # validValues에서 랜덤 선택
-                valid_values = rule.get("validValues", [])
+                # validValues/specifiedValues에서 랜덤 선택
+                valid_values = self._get_static_random_values(rule)
                 random_type = rule.get("randomType")  # exclude-reference-valid-values 등
                 
                 # exclude-reference-valid-values: 참조 필드 값 제외
@@ -680,6 +690,14 @@ class ConstraintDataGenerator:
 
         return constraint_map
 
+    @staticmethod
+    def _get_static_random_values(rule):
+        """관리도구 '무작위' 설정값 추출 — validValues 우선, 없으면 specifiedValues."""
+        values = rule.get("validValues") or []
+        if not values:
+            values = rule.get("specifiedValues") or []
+        return list(values)
+
     def _generate_from_template(self, template, constraint_map):
         """템플릿을 재귀적으로 순회하며 데이터 생성 (템플릿 구조 유지)"""
         result = {}
@@ -719,8 +737,13 @@ class ConstraintDataGenerator:
                         key, value[0], constraint_map, n
                     )
             elif isinstance(value, dict):
-                # 중첩된 딕셔너리 구조는 그대로 유지 (최상위 레벨)
-                result[key] = value
+                # ✅ 중첩 딕셔너리: 하위 경로(key.field)에 제약이 있으면 재귀 적용.
+                # 예전에는 무조건 그대로 둬서 filter.eventFilter 같은 중첩 필드의
+                # 무작위/참조 설정이 조용히 무시됐다 (2026-08-23 이식).
+                if any(p == key or p.startswith(f"{key}.") for p in constraint_map):
+                    result[key] = self._generate_item(key, value, constraint_map, 1)
+                else:
+                    result[key] = value
             else:
                 # 일반 필드는 그대로 유지
                 result[key] = value
