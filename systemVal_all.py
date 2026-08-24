@@ -441,19 +441,26 @@ class MyApp(SystemMainUI):
 
         self.initUI()
         
-        # System에서는 시험 URL 수정 불가
+        # ⚠️ 임시(테스트용): 시험 URL 직접 편집 허용 — 원복 시 setReadOnly(True)와
+        #    회색 스타일(#F5F5F5/#6B6B6B)로 되돌릴 것. 여기가 실제로 칸을 잠그던 곳이다
+        #    (ui/system_main_ui.py의 같은 코드는 initUI 중복 정의로 실행되지 않음).
         if hasattr(self, 'url_text_box'):
-            self.url_text_box.setReadOnly(True)
+            self.url_text_box.setReadOnly(False)
             self.url_text_box.setStyleSheet("""
                 QLineEdit {
-                    background-color: #F5F5F5;
-                    border: 1px solid #CECECE;
+                    background-color: #FFFFFF;
+                    border: 1px solid #868686;
                     border-radius: 4px;
                     padding: 0 24px;
                     font-family: "Noto Sans KR";
                     font-size: 16px;
                     font-weight: 400;
-                    color: #6B6B6B;
+                    color: #000000;
+                    selection-background-color: #4A90E2;
+                    selection-color: white;
+                }
+                QLineEdit:focus {
+                    border: 1px solid #4A90E2;
                 }
             """)
 
