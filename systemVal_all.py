@@ -1180,7 +1180,8 @@ class MyApp(SystemMainUI):
                 test_name = self.spec_config.get('test_name', self.current_spec_id).replace("/", "")
                 fresh_base_url = str(getattr(self.CONSTANTS, 'url', self._original_base_url))
                 self.pathUrl = fresh_base_url.rstrip('/') + "/" + test_name
-                self._set_url_box(self.pathUrl)  # 안내 문구 변경 (시나리오 전환 → 편집 초기화)
+                self._url_prefix_override = None  # 시나리오 전환 → URL 편집 초기화
+                self._set_url_box(self.pathUrl)  # 안내 문구 변경
                 Logger.debug(f" 시험 URL 업데이트: {self.pathUrl}")
                 print(f"[SYSTEM DEBUG] on_test_field_selected에서 pathUrl 설정: {self.pathUrl}")
 
@@ -1841,11 +1842,21 @@ class MyApp(SystemMainUI):
                 
                 # API 엔드포인트 추가
                 api_path = api_endpoint.lstrip('/')
-                # ⚠️ 임시(테스트용): URL 칸을 손으로 고쳤으면 그 전체 URL을 그대로 전송
-                #    (다음 자동 갱신 전까지 적용 — 접근불가 URL 유도 등 수동 시험용)
+                # ⚠️ 임시(테스트용): URL 칸을 손으로 고치면 API명 앞부분(접두부)을 고정하고
+                #    이후 모든 API를 "고친접두부/API명"으로 전송한다 (업체별 상이 URL 대응).
+                #    시나리오를 바꾸면 초기화. 다시 고치면 새 접두부로 갱신.
                 if self._url_box_edited():
-                    path = self.url_text_box.text().strip()
-                    Logger.debug(f"[URL 편집] 칸의 전체 URL 그대로 전송: {path}")
+                    typed = self.url_text_box.text().strip().rstrip('/')
+                    last = typed.rsplit('/', 1)[-1]
+                    names = set(getattr(self, 'message', []) or [])
+                    names |= {re.sub(r'\d+$', '', n) for n in names}
+                    # 마지막 조각이 API명이면 떼어낸다 — 어느 API 차례에 고쳤든 접두부는 동일
+                    self._url_prefix_override = typed.rsplit('/', 1)[0] if last in names else typed
+                    Logger.debug(f"[URL 편집] 접두부 고정: {self._url_prefix_override} (이후 모든 API에 적용)")
+
+                prefix_override = getattr(self, '_url_prefix_override', None)
+                if prefix_override:
+                    path = f"{prefix_override}/{api_path}"
                 else:
                     path = f"{base_with_scenario}/{api_path}"
                 print(f"[SYSTEM DEBUG] update_view에서 API 호출 경로: {path}")
@@ -3628,7 +3639,8 @@ class MyApp(SystemMainUI):
             test_name = self.spec_config.get('test_name', self.current_spec_id).replace("/", "")
             fresh_base_url = self._fresh_base_url()
             self.pathUrl = fresh_base_url.rstrip('/') + "/" + test_name
-            self._set_url_box(self.pathUrl)  # 시나리오 전환 → 편집 초기화
+            self._url_prefix_override = None  # 시나리오 전환 → URL 편집 초기화
+            self._set_url_box(self.pathUrl)
             print(f"[SYSTEM DEBUG] get_setting에서 pathUrl 설정: {self.pathUrl}")
 
     def closeEvent(self, event):
