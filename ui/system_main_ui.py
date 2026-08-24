@@ -63,7 +63,8 @@ class SystemMainUI(CommonMainUI):
         # System에서는 시험 URL 수정 불가
         if hasattr(self, 'url_text_box'):
             print(f"[System] URL 텍스트 박스 발견, ReadOnly 설정 전: {self.url_text_box.isReadOnly()}")
-            self.url_text_box.setReadOnly(True)
+            # ⚠️ 임시(테스트용): URL 칸 직접 편집 허용 — 원복 시 True로 되돌릴 것
+            self.url_text_box.setReadOnly(False)
             print(f"[System] URL 텍스트 박스 ReadOnly 설정 후: {self.url_text_box.isReadOnly()}")
             self.url_text_box.setStyleSheet("""
                 QLineEdit {

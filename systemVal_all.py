@@ -283,8 +283,27 @@ class MyApp(SystemMainUI):
         except Exception as e:
             self.valResult.append(f"[append_error] {escape(str(e))}")
 
+    def _fresh_base_url(self):
+        """시험 대상 base URL 결정.
+
+        ⚠️ 임시(테스트용): URL 칸에 손으로 고친 주소가 있으면 그 호스트를 우선한다.
+        칸에서 `https://호스트:포트` 부분만 뽑아 쓰므로 뒤에 뭐가 붙어 있든 안전하고,
+        시나리오 이름은 기존처럼 자동으로 붙는다. 원복 시 이 메서드 본문을
+        `return str(getattr(self.CONSTANTS, 'url', self._original_base_url))` 한 줄로.
+        """
+        auto = str(getattr(self.CONSTANTS, 'url', self._original_base_url))
+        try:
+            typed = self.url_text_box.text().strip() if hasattr(self, 'url_text_box') else ""
+            m = re.match(r'https?://[^/\s]+', typed)
+            if m and m.group(0) != auto.rstrip('/'):
+                Logger.debug(f"[URL 편집] 칸의 주소 우선 사용: {m.group(0)} (기본: {auto})")
+                return m.group(0)
+        except Exception as e:
+            Logger.debug(f"[URL 편집] 칸 읽기 실패, 기본 URL 사용: {e}")
+        return auto
+
     def handle_authentication_response(self, res_data):
-        
+
         if isinstance(res_data, dict):
             token = res_data.get("accessToken")
             if token:
@@ -1793,8 +1812,8 @@ class MyApp(SystemMainUI):
                 current_timeout = self._get_effective_timeout_seconds(self.cnt)
                 api_endpoint = self.message[self.cnt] if self.cnt < len(self.message) else ""
                 
-                # ✅ URL 오염 방지: pathUrl을 매번 깨끗한 base로 재구성
-                fresh_base_url = str(getattr(self.CONSTANTS, 'url', self._original_base_url))
+                # ✅ URL 오염 방지: pathUrl을 매번 깨끗한 base로 재구성 (칸 편집 시 그 주소 우선)
+                fresh_base_url = self._fresh_base_url()
                 if hasattr(self, 'spec_config'):
                     test_name = self.spec_config.get('test_name', self.current_spec_id).replace("/", "")
                     base_with_scenario = fresh_base_url.rstrip('/') + "/" + test_name
@@ -2752,8 +2771,8 @@ class MyApp(SystemMainUI):
         for _ in range(10):
             QApplication.processEvents()
 
-        # ✅ URL 오염 방지: 텍스트 박스가 아닌 CONSTANTS에서 직접 읽기
-        fresh_base_url = str(getattr(self.CONSTANTS, 'url', self._original_base_url))
+        # ✅ URL 오염 방지: 깨끗한 base에서 재구성 (칸 편집 시 그 주소 우선)
+        fresh_base_url = self._fresh_base_url()
         if hasattr(self, 'spec_config'):
             test_name = self.spec_config.get('test_name', self.current_spec_id).replace("/", "")
             self.pathUrl = fresh_base_url.rstrip('/') + "/" + test_name
@@ -2907,8 +2926,8 @@ class MyApp(SystemMainUI):
             # ✅ 16. 결과 텍스트 초기화
             self.valResult.clear()
 
-            # ✅ 17. URL 설정 (오염 방지: CONSTANTS에서 읽기)
-            fresh_base_url = str(getattr(self.CONSTANTS, 'url', self._original_base_url))
+            # ✅ 17. URL 설정 (오염 방지: 깨끗한 base에서 재구성, 칸 편집 시 그 주소 우선)
+            fresh_base_url = self._fresh_base_url()
             if hasattr(self, 'spec_config'):
                 test_name = self.spec_config.get('test_name', self.current_spec_id).replace("/", "")
                 self.pathUrl = fresh_base_url.rstrip('/') + "/" + test_name
@@ -3580,10 +3599,10 @@ class MyApp(SystemMainUI):
         elif self.r2 == "Bearer Token":
             self.r2 = "B"
 
-        # ✅ URL 업데이트 (base_url + 시나리오명) - 오염 방지: CONSTANTS에서 직접 읽기
+        # ✅ URL 업데이트 (base_url + 시나리오명) - 오염 방지: 깨끗한 base에서 재구성 (칸 편집 시 그 주소 우선)
         if hasattr(self, 'spec_config') and hasattr(self, 'url_text_box'):
             test_name = self.spec_config.get('test_name', self.current_spec_id).replace("/", "")
-            fresh_base_url = str(getattr(self.CONSTANTS, 'url', self._original_base_url))
+            fresh_base_url = self._fresh_base_url()
             self.pathUrl = fresh_base_url.rstrip('/') + "/" + test_name
             self.url_text_box.setText(self.pathUrl)
             print(f"[SYSTEM DEBUG] get_setting에서 pathUrl 설정: {self.pathUrl}")
