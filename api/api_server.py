@@ -832,22 +832,14 @@ class Server(BaseHTTPRequestHandler):
                     # ⑤ 토큰 미포함 → 403 권한 없음 (시험 코드 체계는 201/400/403/404 —
                     # 401은 이번 시험에서 쓰지 않으므로 교체함)
                     Logger.debug(f"[SERVER][AUTH] ❌ Authorization 헤더 없음 → 403")
-                    self.send_response(403)
-                    self.send_header('Content-type', 'application/json')
-                    self.end_headers()
-                    error_msg = json.dumps({"code": "403", "message": "권한 없음"})
-                    self.wfile.write(error_msg.encode('utf-8'))
+                    self._reject_403(api_name)
                     return
 
                 # 2단계: Bearer 스킴 확인
                 auth_parts = auth.split(" ", 1)
                 if len(auth_parts) != 2 or auth_parts[0] != 'Bearer':
                     Logger.debug(f"[SERVER][AUTH] ❌ 잘못된 인증 스킴: {auth_parts[0] if auth_parts else 'None'} → 403")
-                    self.send_response(403)
-                    self.send_header('Content-type', 'application/json')
-                    self.end_headers()
-                    error_msg = json.dumps({"code": "403", "message": "권한 없음"})
-                    self.wfile.write(error_msg.encode('utf-8'))
+                    self._reject_403(api_name)
                     return
 
                 # 3단계: 토큰 추출
@@ -865,11 +857,7 @@ class Server(BaseHTTPRequestHandler):
                     auth_pass = True
                 else:
                     Logger.debug(f"[SERVER][AUTH] ❌ Bearer 토큰 불일치 → 403")
-                    self.send_response(403)
-                    self.send_header('Content-type', 'application/json')
-                    self.end_headers()
-                    error_msg = json.dumps({"code": "403", "message": "권한 없음"})
-                    self.wfile.write(error_msg.encode('utf-8'))
+                    self._reject_403(api_name)
                     return
 
             # 특정 path 우회
@@ -1291,6 +1279,27 @@ class Server(BaseHTTPRequestHandler):
                 # 다음 이벤트까지 불규칙 대기 (시드 고정 → 재현 가능). 창을 넘기면 다음 while 조건에서 종료
                 time.sleep(rng.uniform(Server.WEBHOOK_SEND_INTERVAL_MIN,
                                        Server.WEBHOOK_SEND_INTERVAL_MAX))
+
+    def _reject_403(self, api_name):
+        """⑤ 토큰 오류 403 거절 — 거절하되 요청/응답은 기록한다.
+
+        기록 없이 return하면 단계 카운터가 안 올라가 통합 UI가 그 단계에서
+        멈춘다(401 실패 경로 722행과 동일한 이유로 기록 후 반환).
+        """
+        try:
+            if api_name not in Server.request_counter:
+                Server.request_counter[api_name] = 0
+            Server.request_counter[api_name] += 1
+            Logger.debug(f" 요청 수신(403 거절): {api_name} (카운트: {Server.request_counter[api_name]})")
+        except Exception as e:
+            Logger.debug(f" request_counter 에러: {e}")
+        self._push_event(api_name, "REQUEST", self.request_data)
+        error_response = {"code": "403", "message": "권한 없음"}
+        self._push_event(api_name, "RESPONSE", error_response)
+        self.send_response(403)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+        self.wfile.write(json.dumps(error_response).encode('utf-8'))
 
     def api_res(self, api_name=None):
         i, data, out_con = None, None, None
