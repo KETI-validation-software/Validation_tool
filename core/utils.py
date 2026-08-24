@@ -451,6 +451,8 @@ def load_external_constants(constants_module):
                     'ENABLE_ERROR_REQUEST_MUTATION',      # ✅ 오류 유도 시험 — 외부 파일로 재빌드 없이 켜고 끄기
                     'ENABLE_WEBHOOK_CONTEXT_VALIDATION',  # ✅ 웹훅 맥락 검증 — 문제 시 외부 파일에서 False로 즉시 롤백
                     'ENABLE_ERROR_RESPONSE_CHECK',        # ✅ 장치 역할의 오류 코드 응답 — 리허설용, 오탐 시 즉시 롤백
+                    'FORCE_START_TIME_NOW',               # ✅ startTime을 전송 시점 기준으로 강제 — 외부 파일로 켜고 끄기
+                    'FORCE_START_TIME_OFFSET_SEC',        # ✅ 위 기능의 오프셋(초)
                 ]
 
                 # 덮어씌우기

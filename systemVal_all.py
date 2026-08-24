@@ -222,6 +222,14 @@ class MyApp(SystemMainUI):
                 door_memory=Server.door_memory  # ✅ 문 상태 저장소 전달
             )
 
+            # startTime을 "전송 시점 + N초"로 강제 (관리도구 값 무시).
+            # 실시간 구독에서 과거 시각이 나가 상대가 즉시/과다 이벤트를 쏘거나
+            # 거절하던 문제 대응. 끄려면 외부 CONSTANTS에서 False.
+            if getattr(self.CONSTANTS, "FORCE_START_TIME_NOW", False):
+                offset = getattr(self.CONSTANTS, "FORCE_START_TIME_OFFSET_SEC", 3)
+                updated_request = self.generator.force_start_time_now(updated_request, offset)
+                Logger.debug(f"[startTime 강제] 전송 시점 +{offset}초로 설정: {updated_request}")
+
             self.resp_rules = get_validation_rules(
                 spec_id=self.current_spec_id,
                 api_name=self.message[self.cnt] if self.cnt < len(self.message) else "",

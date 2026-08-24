@@ -1114,6 +1114,36 @@ class ConstraintDataGenerator:
 
         return new_data
 
+    def force_start_time_now(self, data, offset_sec=3):
+        """startTime을 "보내는 시점 + offset_sec"로 덮어쓴다 (관리도구 값 무시).
+
+        실시간 구독에서 과거 시각을 보내면 상대가 즉시/과다 이벤트를 쏘거나
+        거절하는 경우가 있어, 전송 직전에 가까운 미래로 맞춘다.
+        - 17자리(YYYYMMDDHHMMSSmmm) 형식, 원본 타입(String/Number) 유지
+        - 이미 있는 startTime만 덮어쓴다(없는 곳에 새로 만들지 않음)
+        - endTime은 건드리지 않는다(조회 구간의 상한은 시나리오 값 그대로)
+        """
+        import datetime
+
+        stamp = datetime.datetime.now() + datetime.timedelta(seconds=offset_sec)
+        text = stamp.strftime("%Y%m%d%H%M%S") + f"{stamp.microsecond // 1000:03d}"
+
+        new_data = copy.deepcopy(data)
+
+        def traverse(obj):
+            if isinstance(obj, dict):
+                for key, value in obj.items():
+                    if key == "startTime":
+                        obj[key] = text if isinstance(value, str) else int(text)
+                    else:
+                        traverse(value)
+            elif isinstance(obj, list):
+                for item in obj:
+                    traverse(item)
+
+        traverse(new_data)
+        return new_data
+
     def replace_start_time(self, data):
         """① 201 유도 — 조회 구간을 "형식은 완벽한 미래 구간"으로 옮긴다.
 
