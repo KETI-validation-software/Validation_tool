@@ -1983,10 +1983,8 @@ class MyApp(PlatformMainUI):
 
                 # URL 업데이트 (base_url + 시나리오명)
                 test_name = self.spec_config.get('test_name', self.current_spec_id).replace("/", "")
-                # ✅ CONSTANTS에서 직접 읽어서 강제 초기화
-                fresh_base_url = str(getattr(self.CONSTANTS, 'url', 'https://192.168.0.10:2000'))
-                if fresh_base_url.count('/') > 2:
-                    fresh_base_url = '/'.join(fresh_base_url.split('/')[:3])
+                # ✅ 깨끗한 base에서 재구성 (칸 편집 시 그 주소 우선)
+                fresh_base_url = self._fresh_base_url()
                 print(f"\n=== [시나리오 전환] URL 생성 ===")
                 print(f"CONSTANTS.url: {fresh_base_url}")
                 print(f"test_name: {test_name}")
@@ -2162,8 +2160,8 @@ class MyApp(PlatformMainUI):
                 Logger.debug(f" 첫 번째 시나리오 선택: spec_id={first_spec_id}")
                 # URL 업데이트 (base_url + 시나리오명)
                 test_name = self.spec_config.get('test_name', first_spec_id).replace("/", "")
-                # ✅ 원본 base URL만 사용 (절대 오염되지 않음)
-                self.pathUrl = self._original_base_url.rstrip('/') + "/" + test_name
+                # ✅ 깨끗한 base에서 재구성 (칸 편집 시 그 주소 우선)
+                self.pathUrl = self._fresh_base_url().rstrip('/') + "/" + test_name
 
                 self.Server.current_spec_id = first_spec_id
                 self.Server.num_retries = self.spec_config.get('num_retries', first_spec_id)
@@ -2397,11 +2395,8 @@ class MyApp(PlatformMainUI):
                 # ✅ URL 초기화 (base_url + 시나리오명) - API 경로 누적 방지
                 if hasattr(self, 'url_text_box') and hasattr(self, 'spec_config'):
                     test_name = self.spec_config.get('test_name', self.current_spec_id).replace("/", "")
-                    # ✅ CONSTANTS에서 직접 읽어서 강제 초기화 (절대적으로 안전)
-                    fresh_base_url = str(getattr(self.CONSTANTS, 'url', 'https://192.168.0.10:2000'))
-                    # 혹시 모를 경로 포함 제거
-                    if fresh_base_url.count('/') > 2:
-                        fresh_base_url = '/'.join(fresh_base_url.split('/')[:3])
+                    # ✅ 깨끗한 base에서 재구성 (칸 편집 시 그 주소 우선)
+                    fresh_base_url = self._fresh_base_url()
                     print(f"\n=== [시험 시작] URL 생성 ===")
                     print(f"CONSTANTS.url: {fresh_base_url}")
                     print(f"test_name: {test_name}")
@@ -3254,16 +3249,35 @@ class MyApp(PlatformMainUI):
         # ✅ URL 업데이트 (base_url + 시나리오명) - spec_config가 로드된 후 실행
         if hasattr(self, 'url_text_box'):
             test_name = self.spec_config.get('test_name', self.current_spec_id).replace("/", "")
-            # ✅ CONSTANTS에서 직접 읽어서 강제 초기화
-            fresh_base_url = str(getattr(self.CONSTANTS, 'url', 'https://192.168.0.10:2000'))
-            if fresh_base_url.count('/') > 2:
-                fresh_base_url = '/'.join(fresh_base_url.split('/')[:3])
+            # ✅ 깨끗한 base에서 재구성 (칸 편집 시 그 주소 우선)
+            fresh_base_url = self._fresh_base_url()
             print(f"\n=== [get_setting] URL 생성 ===")
             print(f"CONSTANTS.url: {fresh_base_url}")
             print(f"test_name: {test_name}")
             self.pathUrl = fresh_base_url.rstrip('/') + "/" + test_name
             print(f"최종 URL: {self.pathUrl}\n")
             self.url_text_box.setText(self.pathUrl)
+
+    def _fresh_base_url(self):
+        """시험 대상 base URL 결정.
+
+        ⚠️ 임시(테스트용): URL 칸에 손으로 고친 주소가 있으면 그 호스트
+        (https://호스트:포트)를 우선한다. 시나리오 이름은 기존처럼 자동으로 붙는다.
+        원복 시 이 메서드를 지우고 호출부를 기존 CONSTANTS 읽기로 되돌릴 것.
+        """
+        auto = str(getattr(self.CONSTANTS, 'url', 'https://192.168.0.10:2000'))
+        if auto.count('/') > 2:
+            auto = '/'.join(auto.split('/')[:3])
+        try:
+            typed = self.url_text_box.text().strip() if hasattr(self, 'url_text_box') else ""
+            if typed.startswith(('http://', 'https://')) and typed.split('/')[2]:
+                typed_base = '/'.join(typed.split('/')[:3])
+                if typed_base != auto.rstrip('/'):
+                    Logger.debug(f"[URL 편집] 칸의 주소 우선 사용: {typed_base} (기본: {auto})")
+                    return typed_base
+        except Exception as e:
+            Logger.debug(f"[URL 편집] 칸 읽기 실패, 기본 URL 사용: {e}")
+        return auto
 
     def closeEvent(self, event):
         """창 닫기 이벤트 - 서버 스레드 정리"""
