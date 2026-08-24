@@ -21,14 +21,6 @@ ENABLE_WEBHOOK_CONTEXT_VALIDATION = True
 # 오탐이 나면 False로 바꿔 즉시 이전 동작(항상 200 응답)으로 되돌릴 수 있다.
 ENABLE_ERROR_RESPONSE_CHECK = True
 
-# 단일(플랫폼 역할)이 보내는 요청의 startTime을 관리도구 값 대신
-# "전송 시점 + FORCE_START_TIME_OFFSET_SEC초"로 덮어쓴다.
-# 실시간 구독에 과거 시각이 나가면 상대가 즉시/과다 이벤트를 보내거나 거절하는
-# 경우가 있어 가까운 미래로 맞춘다. endTime은 건드리지 않는다.
-# 201 유도(미래 구간 변조)는 이 뒤에 적용되므로 오류 시험과 충돌하지 않는다.
-FORCE_START_TIME_NOW = True
-FORCE_START_TIME_OFFSET_SEC = 3
-
 # 버전4: 모든 로컬 IP 주소 감지 (이더넷, 와이파이 등 모든 네트워크 어댑터)
 def get_all_local_ips():
     """로컬 PC의 모든 IP 주소를 리스트로 반환 (이더넷, 와이파이 등)"""
@@ -135,19 +127,19 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소
 # test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
-company_name = "ㅇㅇ"
-product_name = "ㅇㅇ"
-version = "ㅇㅇ"
+company_name = "필테 - 통합"
+product_name = "필테 - 통합"
+version = "필테 - 통합"
 test_category = "본시험"
-test_target = "저장기능시험-출입통제시스템"
+test_target = "[필수] 통합 테스트"
 test_range = "필수 필드"
 auth_type = "Digest Auth"
 auth_info = "kisa,kisa_k1!2@"
 admin_code = "123456"
-url = "https://10.252.219.67:8080"
-contact_person = "ㅇㅇ"
-model_name = "ㅇㅇ"
-request_id = "cmt6nqjg4000b3d8hmepwalwy"
+url = "https://192.168.1.30:8080"
+contact_person = "필테 - 통합"
+model_name = "필테 - 통합"
+request_id = "cmszckit9011xilyrbf55edkr"
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황
 flag_opt = False
@@ -197,11 +189,11 @@ DEBUG_LEVEL = 3 # 기본값: WARN (권장)
 WEBHOOK_HOST = "0.0.0.0"  # 서버 바인딩 주소 (모든 인터페이스에서 수신)
 WEBHOOK_PORT = 8081
 WEBHOOK_WINDOW_SEC = 10.0  # ✅ 웹훅 창/대기시간(초) — 시스템 수신·플랫폼 송신·플랫폼 join 공통 (단일 소스, 함께 변경됨)
-WEBHOOK_PUBLIC_IP = "10.252.219.95"
+WEBHOOK_PUBLIC_IP = "192.168.1.30"
 # ✅ 웹훅 공개 IP 설정: info_GUI에서 선택한 시험 URL의 IP 사용
 # 초기값은 URL에서 추출, info_GUI에서 주소 선택 후 자동 업데이트됨
 
-WEBHOOK_URL = "https://10.252.219.95:8081"
+WEBHOOK_URL = "https://192.168.1.30:8081"
 # 주소 선택 후 form_validator.py에서 자동으로 업데이트됨
 
 # ✅ 웹훅 외부 접근 주소 (플랫폼에 전송할 주소 - ngrok 등) (01/08 임시로 추가)
@@ -211,15 +203,15 @@ WEBHOOK_DISPLAY_URL = "https://webhook2026.ngrok.dev"
 
 SPEC_CONFIG = [
     {
-        "group_name": "저장기능시험-출입통제시스템",
-        "group_id": "cmsmizx48037arc0qvfartq9n",
-        "cmsmiz4rk030drc0qgs8hvb18": {
-    "test_name": "ac002",
-    "specs": ['cmsmiz4rk030drc0qgs8hvb18_outSchema', 'cmsmiz4rk030drc0qgs8hvb18_inData', 'cmsmiz4rk030drc0qgs8hvb18_messages'],
-    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '바이오 및 출입통제 장치 목록 정보', '사용자 권한 정보 연동', '저장된 출입인증 목록 정보 연동'],
-    "api_id": ['cmsmiz4rm030frc0qr3meof4p', 'cmsmiz4sr0311rc0qtbbvxb08', 'cmsmiz4u8031jrc0q4uzczyhx', 'cmsmiz4xq0335rc0q9nyjn539', 'cmsmiz53b035lrc0qy0dz1d9a'],
-    "api_endpoint": ['/Authentication', '/Capabilities', '/DoorProfiles', '/AccessUserInfos', '/StoredVerifEventInfos'],
-    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic'],
+        "group_name": "[필수] 통합 테스트",
+        "group_id": "cmszcjoz4011oilyre63lt0vw",
+        "cmsy90xd705aarc0quh4je1k0": {
+    "test_name": "req_vid001",
+    "specs": ['cmsy90xd705aarc0quh4je1k0_inSchema', 'cmsy90xd705aarc0quh4je1k0_outData', 'cmsy90xd705aarc0quh4je1k0_messages', 'cmsy90xd705aarc0quh4je1k0_webhook_OutSchema', 'cmsy90xd705aarc0quh4je1k0_webhook_inData'],
+    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '카메라 목록 연동', '실시간 영상(CCTV) 전송 ', '실시간 이벤트 분석 정보 연동'],
+    "api_id": ['cmsy91ipk05agrc0qm4x2cf08', 'cmsy93mqm05birc0q5k2fpbqu', 'cmsy99ujz05chrc0qw4kx4kn5', 'cmsyafs4605dprc0qqh72ak77', 'cmsyau2qn05f3rc0qjkcsrloa'],
+    "api_endpoint": ['/Authentication', '/Capabilities', '/CameraProfiles', '/StreamURLs', '/RealtimeVideoEventInfos'],
+    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'WebHook'],
     "time_out": [60000, 60000, 60000, 60000, 60000],
     "num_retries": [1, 1, 1, 1, 1]
 }
