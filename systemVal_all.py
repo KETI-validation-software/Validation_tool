@@ -283,6 +283,25 @@ class MyApp(SystemMainUI):
         except Exception as e:
             self.valResult.append(f"[append_error] {escape(str(e))}")
 
+    def _set_url_box(self, text, preserve_edit=False):
+        """URL 칸 갱신 — 코드가 쓴 마지막 값을 기억해 사용자 편집과 구분한다.
+
+        ⚠️ 임시(테스트용) URL 편집 지원의 일부. preserve_edit=True면 사용자가
+        손으로 고친 값을 덮어쓰지 않는다 (시험 시작 직전 편집 유지용).
+        """
+        if not hasattr(self, 'url_text_box'):
+            return
+        if preserve_edit and self._url_box_edited():
+            Logger.debug(f"[URL 편집] 사용자 편집 유지 — 자동값 덮어쓰기 생략: {text}")
+            return
+        self.url_text_box.setText(text)
+        self._last_auto_url = text
+
+    def _url_box_edited(self):
+        """URL 칸이 코드가 쓴 값과 다르면(=사용자가 고쳤으면) True."""
+        typed = self.url_text_box.text().strip() if hasattr(self, 'url_text_box') else ""
+        return typed.startswith(('http://', 'https://')) and typed != getattr(self, '_last_auto_url', None)
+
     def _fresh_base_url(self):
         """시험 대상 base URL 결정.
 
@@ -1161,7 +1180,7 @@ class MyApp(SystemMainUI):
                 test_name = self.spec_config.get('test_name', self.current_spec_id).replace("/", "")
                 fresh_base_url = str(getattr(self.CONSTANTS, 'url', self._original_base_url))
                 self.pathUrl = fresh_base_url.rstrip('/') + "/" + test_name
-                self.url_text_box.setText(self.pathUrl)  # 안내 문구 변경
+                self._set_url_box(self.pathUrl)  # 안내 문구 변경 (시나리오 전환 → 편집 초기화)
                 Logger.debug(f" 시험 URL 업데이트: {self.pathUrl}")
                 print(f"[SYSTEM DEBUG] on_test_field_selected에서 pathUrl 설정: {self.pathUrl}")
 
@@ -1822,13 +1841,18 @@ class MyApp(SystemMainUI):
                 
                 # API 엔드포인트 추가
                 api_path = api_endpoint.lstrip('/')
-                path = f"{base_with_scenario}/{api_path}"
+                # ⚠️ 임시(테스트용): URL 칸을 손으로 고쳤으면 그 전체 URL을 그대로 전송
+                #    (다음 자동 갱신 전까지 적용 — 접근불가 URL 유도 등 수동 시험용)
+                if self._url_box_edited():
+                    path = self.url_text_box.text().strip()
+                    Logger.debug(f"[URL 편집] 칸의 전체 URL 그대로 전송: {path}")
+                else:
+                    path = f"{base_with_scenario}/{api_path}"
                 print(f"[SYSTEM DEBUG] update_view에서 API 호출 경로: {path}")
                 print(f"[SYSTEM DEBUG] fresh_base_url: {fresh_base_url}, base_with_scenario: {base_with_scenario}, api_path: {api_path}")
 
                 # ✅ 실시간 API 경로 표시 (매번 새로 생성된 path를 사용하므로 누적되지 않음)
-                if hasattr(self, 'url_text_box'):
-                    self.url_text_box.setText(path) 
+                self._set_url_box(path)
                 
                 inMessage = self.inMessage[self.cnt] if self.cnt < len(self.inMessage) else {}
                 # ✅ Data Mapper 적용 - 이전 응답 데이터로 요청 업데이트
@@ -2933,7 +2957,7 @@ class MyApp(SystemMainUI):
                 self.pathUrl = fresh_base_url.rstrip('/') + "/" + test_name
             else:
                 self.pathUrl = fresh_base_url
-            self.url_text_box.setText(self.pathUrl)  # 안내 문구 변경
+            self._set_url_box(self.pathUrl, preserve_edit=True)  # 시작 직전 사용자 편집은 유지
             print(f"[SYSTEM DEBUG] start_test_execution에서 pathUrl 설정: {self.pathUrl}")
 
             # ? 18. ?? ???
@@ -3604,7 +3628,7 @@ class MyApp(SystemMainUI):
             test_name = self.spec_config.get('test_name', self.current_spec_id).replace("/", "")
             fresh_base_url = self._fresh_base_url()
             self.pathUrl = fresh_base_url.rstrip('/') + "/" + test_name
-            self.url_text_box.setText(self.pathUrl)
+            self._set_url_box(self.pathUrl)  # 시나리오 전환 → 편집 초기화
             print(f"[SYSTEM DEBUG] get_setting에서 pathUrl 설정: {self.pathUrl}")
 
     def closeEvent(self, event):
