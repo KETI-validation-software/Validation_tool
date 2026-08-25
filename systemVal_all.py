@@ -161,7 +161,6 @@ class MyApp(SystemMainUI):
                 self.latest_events[api_key_with_slash][direction] = latest_event
                 
                 Logger.debug(f"trace 파일에서 {api_name} {direction} 데이터 로드 완료")
-                Logger.debug(f"latest_events에 저장된 키들: {api_key}, {api_key_clean}, {api_key_with_slash}")
                 return latest_event.get("data")
             else:
                 Logger.debug(f"trace 파일에서 {api_name} {direction} 데이터 없음")
@@ -624,10 +623,8 @@ class MyApp(SystemMainUI):
                     self.latest_events[api_with_slash] = {}
                 self.latest_events[api_with_slash][direction] = evt
             
-            # ✅ 디버그 로그 추가
-            Logger.debug(f" API={api}, Direction={direction}")
-            Logger.debug(f" 저장된 키들: {api}, {api_clean}, {api_with_slash}")
-            Logger.debug(f" latest_events 전체 키 목록: {list(self.latest_events.keys())}")
+            # 같은 정보를 3줄로 반복하던 것을 한 줄로 (키 목록은 BUILD_MAP에서 다시 찍힌다)
+            Logger.debug(f" [기록] {api} {direction} 저장 (누적 {len(self.latest_events)}건)")
 
             # (옵션) 즉시 파일로도 남김 - append-only ndjson
             os.makedirs(CONSTANTS.trace_path, exist_ok=True)
@@ -1875,7 +1872,7 @@ class MyApp(SystemMainUI):
                 inMessage = self.inMessage[self.cnt] if self.cnt < len(self.inMessage) else {}
                 # ✅ Data Mapper 적용 - 이전 응답 데이터로 요청 업데이트
                 # generator는 이미 self.latest_events를 참조하고 있으므로 재할당 불필요
-                Logger.debug(f"[MAPPER] latest_events 상태: {list(self.latest_events.keys())}")
+                # (참조 가능 이벤트 목록은 바로 뒤 [BUILD_MAP]에서 찍히므로 여기선 생략)
                 inMessage = self._apply_request_constraints(inMessage, self.cnt)
 
                 trans_protocol = inMessage.get("transProtocol", {})

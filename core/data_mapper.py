@@ -451,21 +451,21 @@ class ConstraintDataGenerator:
         """constraints를 분석하여 각 필드의 제약 조건과 참조 값을 매핑"""
         constraint_map = {}
 
+        # latest_events는 단계가 진행될수록 누적돼, 통째로 찍으면 한 줄이 수천 자가
+        # 된다(로그 가독성 저하의 주범). 어떤 API가 쌓여 있는지 키만 남긴다.
         Logger.debug(f"[BUILD_MAP] constraints: {constraints}")
         Logger.debug(f"[BUILD_MAP] request_data: {request_data}")
-        Logger.debug(f"[BUILD_MAP] 🔍 self.latest_events 키 목록: {list(self.latest_events.keys())}")
-        Logger.debug(f"[BUILD_MAP] 🔍 self.latest_events 전체: {self.latest_events}")
+        Logger.debug(f"[BUILD_MAP] 참조 가능 이벤트 {len(self.latest_events)}건: "
+                     f"{sorted(k for k in self.latest_events if not k.startswith('/'))}")
 
         for path, rule in constraints.items():
-            Logger.debug(f"[BUILD_MAP] Processing path: {path}, rule: {rule}")
-
             value_type = rule.get("valueType")
             ref_endpoint = rule.get("referenceEndpoint")
             ref_field = rule.get("referenceField")
 
-            Logger.debug(f"[BUILD_MAP]   valueType: {value_type}")
-            Logger.debug(f"[BUILD_MAP]   referenceEndpoint: {ref_endpoint}")
-            Logger.debug(f"[BUILD_MAP]   referenceField: {ref_field}")
+            # 필드 1개당 4줄씩 찍던 것을 한 줄로 (valueType·참조 대상 한눈에)
+            ref_text = f", 참조={ref_endpoint}.{ref_field}" if ref_endpoint else ""
+            Logger.debug(f"[BUILD_MAP] {path}: valueType={value_type}{ref_text}")
 
             # valueType이 "random"이고 randomType이 있으면 아래에서 별도 처리
             random_type = rule.get("randomType")

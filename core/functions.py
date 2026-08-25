@@ -453,7 +453,7 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
                         error_messages.append(f"[구조] {error_msg}")
                         total_error += 1
                         required_error += 1
-                        Logger.error(f"  ❌ 구조: 필수 필드 누락 (required_error +1)")
+                        Logger.error(f"  ❌ [실패] {field_path} — 필수 필드 누락")
                         continue
                     else:
                         # 선택 필드 누락
@@ -462,7 +462,7 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
                         error_messages.append(f"[구조] {error_msg}")
                         total_error += 1
                         opt_error += 1
-                        Logger.error(f"  ❌ 구조: 선택 필드 누락 (opt_error +1)")
+                        Logger.error(f"  ❌ [실패] {field_path} — 선택 필드 누락")
                         continue
                 else:
                     if not is_optional:
@@ -472,7 +472,7 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
                         error_messages.append(f"[구조] {error_msg}")
                         total_error += 1
                         required_error += 1
-                        Logger.error(f"  ❌ 구조: 필수 필드 누락 (required_error +1)")
+                        Logger.error(f"  ❌ [실패] {field_path} — 필수 필드 누락")
                         continue
                     else:
                         # Optional 필드는 누락 가능 → PASS
@@ -551,12 +551,19 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
                     Logger.debug(f"  ✅ 의미: 검증 통과 (required_correct +1)")
             else:
                 total_error += 1
+                # 실패 이유를 로그에 함께 남긴다 — 그동안 "검증 실패"만 찍혀
+                # 어느 필드가 왜 틀렸는지 결과창을 따로 봐야 알 수 있었다.
+                reason = " / ".join(
+                    str(e).replace("\n", " ").strip()
+                    for e in field_results[field_path]["errors"]
+                ) or "사유 미기록"
+                kind = rule.get('validationType', 'UNKNOWN')
                 if is_optional:
                     opt_error += 1
-                    Logger.error(f"  ❌ 의미: 검증 실패 (opt_error +1)")
+                    Logger.error(f"  ❌ [실패] {field_path} ({kind}) — {reason}")
                 else:
                     required_error += 1
-                    Logger.error(f"  ❌ 의미: 검증 실패 (required_error +1)")
+                    Logger.error(f"  ❌ [실패] {field_path} ({kind}) — {reason}")
 
             # 5) 최종 결과 결정
         final_result = "FAIL" if total_error > 0 else "PASS"
@@ -579,6 +586,19 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
         Logger.info(f"    ├─ 선택 통과: {opt_correct}개")
         Logger.info(f"    └─ 선택 실패: {opt_error}개")
         Logger.info(f"\n  검증 상태: {final_result}")
+
+        # 실패한 필드만 한 번 더 모아서 보여준다 — 수백 줄을 거슬러 올라가지
+        # 않고도 "무엇이 왜 틀렸는지"를 이 자리에서 바로 확인할 수 있게.
+        if total_error > 0:
+            Logger.error(f"  ❌ 실패 필드 {total_error}개:")
+            for path, res in field_results.items():
+                if not res.get("errors"):
+                    continue
+                mark = "선택" if res.get("is_optional") else "필수"
+                detail = " / ".join(
+                    str(e).replace("\n", " ").strip() for e in res["errors"]
+                )
+                Logger.error(f"     - [{mark}] {path} — {detail}")
 
         # ✅ 검증: 카운트가 맞는지 확인
         total_check = total_correct + total_error
@@ -911,10 +931,9 @@ def _validate_field_match(field_path, field_value, rule, reference_context,
     ref_endpoint = rule.get("referenceEndpoint")
     ref_field = rule.get("referenceField")
 
-    Logger.debug(f"[DEBUG][VALIDATE] field_path: {field_path}, field_value: {field_value}")
-    Logger.debug(f"[DEBUG][VALIDATE] ref_endpoint: {ref_endpoint}, ref_field: {ref_field}")
-    Logger.debug(f"[DEBUG][VALIDATE] reference_context keys: {list(reference_context.keys()) if reference_context else None}")
-    Logger.debug(f"[DEBUG][VALIDATE] reference_context: {reference_context}")
+    # 참조 자료 전체 덤프는 누적돼 한 줄이 수천 자가 되므로 보관 키만 남긴다.
+    Logger.debug(f"[VALIDATE] {field_path}={field_value} ← 참조 {ref_endpoint}.{ref_field}")
+    Logger.debug(f"[VALIDATE] 참조 보관함: {list(reference_context.keys()) if reference_context else None}")
 
     ref_data = get_reference_data(reference_context, ref_endpoint, rule)
     if ref_data is None:
@@ -923,22 +942,20 @@ def _validate_field_match(field_path, field_value, rule, reference_context,
         global_errors.append(f"[의미] {error_msg}")
         return False
 
-    Logger.debug(f"[DEBUG][VALIDATE] ref_data: {ref_data}")
+    # 참조 자료 본문 전체는 찍지 않는다(누적되면 한 줄이 수천 자) — 최상위 키만
+    Logger.debug(f"[VALIDATE] 참조 자료 키: {list(ref_data.keys()) if isinstance(ref_data, dict) else type(ref_data).__name__}")
     ref_value = get_by_path(ref_data, ref_field)
 
     # ref_value가 None이면 배열 필드 안을 자동 탐색
     if ref_value is None:
-        Logger.debug(f"[DEBUG][VALIDATE] ref_field '{ref_field}' not found, searching in arrays...")
         for key, value in ref_data.items():
             if isinstance(value, list) and value:
                 # 배열 안의 객체에서 ref_field 찾기
                 array_path = f"{key}.{ref_field}"
                 ref_value = get_by_path(ref_data, array_path)
-                Logger.debug(f"[DEBUG][VALIDATE] Tried array_path: {array_path}, result: {ref_value}")
                 if ref_value is not None:
+                    Logger.debug(f"[VALIDATE] 배열 안에서 찾음: {array_path}")
                     break
-
-    Logger.debug(f"[DEBUG][VALIDATE] Final ref_value: {ref_value}")
 
     # 보완
     def to_list(v):
@@ -949,8 +966,7 @@ def _validate_field_match(field_path, field_value, rule, reference_context,
     lhs_list = to_list(field_value)
     rhs_list = to_list(ref_value)
     
-    Logger.debug(f"[DEBUG][VALIDATE] lhs_list (응답값): {lhs_list}")
-    Logger.debug(f"[DEBUG][VALIDATE] rhs_list (참조값/예상값): {rhs_list}")
+    Logger.debug(f"[VALIDATE] 대조: 응답값={lhs_list} vs 예상값={rhs_list}")
 
     if len(rhs_list) == 1:
         expected = rhs_list[0]
