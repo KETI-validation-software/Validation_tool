@@ -1228,18 +1228,8 @@ class Server(BaseHTTPRequestHandler):
         Server.webhook_response_list = []  # ✅ 이벤트별 응답 누적 (시스템 webhook_results_list와 동일)
         # ✅ 창(WEBHOOK_WINDOW_SEC)도 상한, 개수(total)도 상한 → 둘 중 먼저 닿으면 멈춤
         #    실검증: total=1 → 1건 보내고 즉시 종료 / 테스트: total=N → 불규칙 간격으로 창 안에서 N건
-        # ✅ 웹훅 이벤트 창 = 수신 요청의 duration(초) 기준. Server엔 per-API time_out이 없어
-        #    2×time_out cap은 생략(데이터는 서버에서 보정됨, 실제 대기 상한은 platformVal 창이 강제).
-        _wh_dur = None
-        try:
-            _req_evt = Server.latest_event.get(api_name, {}).get("REQUEST", {})
-            _wh_dur = (_req_evt.get("data", {}) or {}).get("duration")
-        except Exception:
-            _wh_dur = None
-        try:
-            window_sec = float(_wh_dur) if (_wh_dur is not None and float(_wh_dur) > 0) else float(getattr(self.CONSTANTS, 'WEBHOOK_WINDOW_SEC', 10.0))
-        except (TypeError, ValueError):
-            window_sec = float(getattr(self.CONSTANTS, 'WEBHOOK_WINDOW_SEC', 10.0))
+        # ✅ 웹훅 이벤트 창 — 무조건 60초 고정 (수신 duration 값과 무관, 양쪽 도구 동일 규칙)
+        window_sec = 60.0
         rng = random.Random(Server.WEBHOOK_SEND_SEED)  # 고정 시드 → 매 실행 동일한 불규칙 패턴(재현 가능)
         _start = time.perf_counter()
         send_num = 0

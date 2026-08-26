@@ -76,15 +76,13 @@ class MyApp(SystemMainUI):
         return base_timeout
 
     def _webhook_window_seconds(self, idx, duration):
-        """웹훅 이벤트 창(초). duration(초) 기준, 상한 2×time_out, 없으면 폴백 10초."""
-        base = self.time_outs[idx] / 1000 if idx < len(self.time_outs) else 60.0
-        cap = 2 * base
-        try:
-            if duration is not None and float(duration) > 0:
-                return min(float(duration), cap)
-        except (TypeError, ValueError):
-            pass
-        return float(getattr(self.CONSTANTS, 'WEBHOOK_WINDOW_SEC', 10.0))
+        """웹훅 이벤트 창(초) — 무조건 60초 고정.
+
+        duration이 있든 없든, 어떤 값이 오든 60초. (2026-08-26 결정:
+        업체별 duration 값 차이로 창이 들쭉날쭉해지는 것을 막는다.
+        duration 기반 동적 창으로 되돌리려면 git 이력의 이전 본문 참조.)
+        """
+        return 60.0
 
     def _load_from_trace_file(self, api_name, direction="RESPONSE"):
         """Trace 파일에서 최신 이벤트 데이터 로드"""
