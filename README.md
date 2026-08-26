@@ -90,14 +90,9 @@ test_ip=192.168.1.100
 
 ### 실행 방법
 
-#### Onefile
 1. `ValidationTool_onefile.exe` 와 `config.txt` 를 **같은 폴더**에 다운로드
 2. `config.txt` 에서 관리시스템 URL 설정
 3. exe 더블클릭 실행
-
-#### Onedir
-1. zip 파일 다운로드 후 압축 해제
-2. 폴더 내 exe 실행 (`config.txt` 포함되어 있음)
 
 ---
 
@@ -108,19 +103,10 @@ test_ip=192.168.1.100
 - PyInstaller 5.13.2
 - Windows 10
 
-#### Onefile (config.txt 별도 배포)
 ```bash
 pyinstaller --onefile --windowed --splash=assets/image/splash/splash.png \
   --name ValidationTool_onefile_Level1 \
   --add-data "assets;assets" --add-data "config;config" \
-  --add-data "core;core" --add-data "spec;spec" --add-data "ui;ui" main.py
-```
-
-#### Onedir (config.txt 포함)
-```bash
-pyinstaller --onedir --windowed --splash=assets/image/splash/splash.png \
-  --name ValidationTool_onedir_Level1 \
-  --add-data "config.txt;." --add-data "assets;assets" --add-data "config;config" \
   --add-data "core;core" --add-data "spec;spec" --add-data "ui;ui" main.py
 ```
 
