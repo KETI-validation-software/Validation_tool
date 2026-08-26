@@ -737,6 +737,41 @@ class ConstraintDataGenerator:
             values = rule.get("specifiedValues") or []
         return list(values)
 
+    def _pick_range_value(self, constraint, template_value, sibling_start=None):
+        """request-range 값 생성 (최상위·리스트 줄 공용).
+
+        ✅ 17자리 시각 필드가 String으로 전환되어 min/max가 문자열로 올 수 있다.
+           내부에서는 숫자로 변환해 비교·생성하고, 원본이 문자열이면 문자열로 내보낸다.
+        - 참조 부재(min이 기본값 0): 템플릿 시각 값을 기준으로 삼고 타입도 템플릿을 따른다.
+        - sibling_start가 주어지면(endTime 생성) 그보다 큰 값을 만든다.
+        """
+        raw_min = constraint.get("min", 0)
+        raw_max = constraint.get("max", self.MAX_TIMESTAMP)
+        min_val = self._to_number(raw_min, 0)
+        max_val = self._to_number(raw_max, self.MAX_TIMESTAMP)
+
+        reference_missing = min_val == 0 and not isinstance(raw_min, str)
+        as_string = (isinstance(raw_min, str) or isinstance(raw_max, str)
+                     or (reference_missing and isinstance(template_value, str)))
+
+        # 참조가 없으면 범위가 0~13자리 난수가 돼 시각으로서 무의미하다.
+        # 템플릿에 시각 값이 있으면 그 근방을 기준으로 삼는다.
+        if reference_missing:
+            template_num = self._to_number(template_value, 0)
+            if template_num > 0:
+                min_val = template_num
+
+        if min_val >= max_val:
+            max_val = min_val + 1000
+
+        if sibling_start is not None:
+            start_num = self._to_number(sibling_start, min_val)
+            generated = random.randint(start_num + 1, max(max_val, start_num + 2))
+        else:
+            generated = random.randint(min_val, max_val)
+
+        return str(generated) if as_string else generated
+
     def _generate_from_template(self, template, constraint_map):
         """템플릿을 재귀적으로 순회하며 데이터 생성 (템플릿 구조 유지)"""
         result = {}
@@ -746,18 +781,27 @@ class ConstraintDataGenerator:
             if key in constraint_map:
                 constraint = constraint_map[key]
                 if constraint["type"] in ["random-response", "random", "request-based", "response-based", ]:
-                    # 랜덤 값 선택
+                    # 랜덤 값 선택 — 템플릿이 배열이면 배열 타입 유지 (classFilter 등
+                    # 문자열 배열 필드가 낱값으로 변형돼 나가던 문제 방지)
                     if constraint["values"]:
-                        result[key] = random.choice(constraint["values"])
+                        picked = random.choice(constraint["values"])
+                        result[key] = [picked] if isinstance(value, list) else picked
                     else:
                         result[key] = value
+                elif constraint["type"] == "request-range":
+                    # ✅ 최상위 시각 필드의 범위 설정 — 예전에는 미처리로 템플릿 값이
+                    # 그대로 나갔다 (2026-08-26 전수 검사에서 확인)
+                    result[key] = self._pick_range_value(constraint, value)
             elif isinstance(value, list) and len(value) > 0 and isinstance(value[0], dict):
                 # 리스트 형태의 구조 처리
                 # ✅ 템플릿의 리스트 길이 자동 감지
                 n = len(value)
                 
                 # ✅ constraints가 없으면 원본 리스트를 그대로 사용
-                has_constraints = any(f"{key}.{field}" in constraint_map for field in value[0].keys())
+                # 깊이 무관 접두부 검사 — 예전에는 한 단계(key.field)만 봐서
+                # rows[].box.f / rows[].sub[].f 같은 더 깊은 필드의 설정이
+                # 통째로 무시됐다 (2026-08-26 전수 검사에서 확인).
+                has_constraints = any(p.startswith(f"{key}.") for p in constraint_map)
                 
                 if not has_constraints:
                     # constraints가 없으면 원본 리스트 그대로 사용 (preset)
@@ -864,6 +908,12 @@ class ConstraintDataGenerator:
                     item[field] = self._generate_list_items(
                         field_path, value[0], constraint_map, n
                     )
+                elif field_path in constraint_map and constraint_map[field_path].get("values"):
+                    # ✅ 문자열 배열 필드(filterList.classFilter 등)도 값 설정을 적용한다.
+                    # 예전에는 리스트라는 이유로 규칙 확인 없이 원본([])을 그대로 둬서
+                    # 무작위 설정이 조용히 무시됐다 (2026-08-26 리허설 실측).
+                    # 배열 타입을 유지하기 위해 뽑은 값을 배열로 감싼다.
+                    item[field] = [random.choice(constraint_map[field_path]["values"])]
                 else:
                     item[field] = value
 
@@ -924,43 +974,9 @@ class ConstraintDataGenerator:
                         item[field] = value
 
                 elif constraint["type"] == "request-range":
-                    # 범위 내 랜덤 값 생성
-                    # ✅ 17자리 시각 필드가 String으로 전환되어 min/max가 문자열로 올 수 있다.
-                    #    내부에서는 숫자로 변환해 비교·생성하고, 원본이 문자열이면 문자열로 내보낸다.
-                    raw_min = constraint.get("min", 0)
-                    raw_max = constraint.get("max", self.MAX_TIMESTAMP)
-                    min_val = self._to_number(raw_min, 0)
-                    max_val = self._to_number(raw_max, self.MAX_TIMESTAMP)
-
-                    # 참조 부재 판단: 요청에 기준 필드가 없으면 min이 기본값 0으로
-                    # 떨어진다(실제 시각은 0일 수 없음). 이때만 템플릿을 대타로 쓴다.
-                    reference_missing = min_val == 0 and not isinstance(raw_min, str)
-
-                    # 출력 타입: 참조값이 있으면 참조의 타입을 따르고(기존 동작),
-                    # 참조가 없으면 템플릿 값(관리도구의 예시 데이터) 타입을 따른다.
-                    # — 요청이 선택 필드 startTime을 생략해도 String 설정이 유지되도록.
-                    as_string = (isinstance(raw_min, str) or isinstance(raw_max, str)
-                                 or (reference_missing and isinstance(value, str)))
-
-                    # 참조가 없으면 범위가 0~13자리 난수가 돼 시각으로서 무의미하다.
-                    # 템플릿에 시각 값이 있으면 그 근방을 기준으로 삼는다.
-                    if reference_missing:
-                        template_num = self._to_number(value, 0)
-                        if template_num > 0:
-                            min_val = template_num
-
-                    # 유효성 검사: min이 max보다 큰 경우 처리
-                    if min_val >= max_val:
-                        max_val = min_val + 1000
-
-                    # startTime/endTime 처리 (endTime은 startTime보다 커야 함)
-                    if "endTime" in field and "startTime" in item:
-                        start_num = self._to_number(item["startTime"], min_val)
-                        generated = random.randint(start_num + 1, max(max_val, start_num + 2))
-                    else:
-                        generated = random.randint(min_val, max_val)
-
-                    item[field] = str(generated) if as_string else generated
+                    sibling_start = (item.get("startTime")
+                                     if "endTime" in field and "startTime" in item else None)
+                    item[field] = self._pick_range_value(constraint, value, sibling_start)
 
             else:
                 # constraint 없는 필드는 기본값 유지
