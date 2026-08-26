@@ -1394,6 +1394,18 @@ class Server(BaseHTTPRequestHandler):
 
             self.SPEC_CONFIG = getattr(self.CONSTANTS, 'SPEC_CONFIG', [])
 
+            # ✅ 2.5 같은 test_name이 여러 시나리오에 있으면(예: 셋 다 "sensor")
+            #     항상 첫 번째로 매칭돼 두 번째 시험부터 do_POST의 spec_id 대조에서
+            #     전부 400으로 거절되던 문제 — 지금 화면에서 진행 중인 시나리오의
+            #     이름과 일치하면 그것을 우선한다. 이름이 서로 다르면 결과는 기존과 동일.
+            current = Server.current_spec_id
+            if current:
+                for group in self.SPEC_CONFIG:
+                    value = group.get(current)
+                    if isinstance(value, dict) and value.get('test_name', '') == spec_id_or_name:
+                        Logger.debug(f" test_name '{spec_id_or_name}' → 진행 중인 spec_id '{current}' 우선")
+                        return current
+
             # ✅ 3. test_name으로 spec_id 찾기
             for group in self.SPEC_CONFIG:
                 for key, value in group.items():
