@@ -322,6 +322,19 @@ class ConstraintDataGenerator:
 
                 Logger.info(f"[DATA_MAPPER] 최종 doorList 설정: {len(new_door_list)}개 항목")
                 template_data["doorList"] = new_door_list
+
+                # ✅ doorList만 채우고 바로 반환하던 조기 반환 제거 — eventFilter 같은
+                #    나머지 최상위 필드의 값 설정(무작위 등)이 한 번도 적용되지 않아
+                #    빈 값으로 나가던 원인 (sensor 웹훅 3cea01b와 동일 유형).
+                #    doorList는 위에서 확정했으므로 doorList 계열 제약은 빼고
+                #    나머지 필드만 공통 경로로 마저 채운다.
+                other_constraints = {k: v for k, v in (constraints or {}).items()
+                                     if not str(k).startswith("doorList")}
+                if other_constraints:
+                    constraint_map = self._build_constraint_map(other_constraints, request_data)
+                    filled = self._generate_from_template(template_data, constraint_map)
+                    filled["doorList"] = new_door_list  # 확정한 doorList 보존
+                    template_data.update(filled)
                 return template_data
 
             # 조회 응답: 저장된 기록 중 요청 조건에 해당하는 줄만 남긴다.
