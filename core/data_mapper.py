@@ -214,10 +214,28 @@ class ConstraintDataGenerator:
                                         filtered_item[key] = raw_info[key]
                         
                         new_door_list.append(filtered_item)
-                    
+
+                    # ✅ 줄 생성(ID 채움) 후 값 채우기 설정까지 마저 적용한다.
+                    # 예전에는 여기서 바로 반환해 eventName(←eventFilter)·eventTime
+                    # 같은 참조 설정이 한 번도 실행되지 않았다 — 웹훅이 템플릿 빈 값
+                    # 그대로 나가던 원인 (sensor 웹훅 3cea01b와 동일 유형,
+                    # 2026-08-26 RealtimeVerifEventInfos 리허설 실측).
+                    constraint_map = self._build_constraint_map(constraints or {}, request_data,
+                                                                is_webhook=True)
+                    if constraint_map:
+                        filled_list = []
+                        for row in new_door_list:
+                            filled = self._generate_list_items("doorList", row,
+                                                               constraint_map, 1)[0]
+                            # ID는 위에서 요청 순서대로 정해둔 값을 유지한다
+                            filled["doorID"] = row.get("doorID", filled.get("doorID"))
+                            filled_list.append(filled)
+                        new_door_list = filled_list
+                        Logger.debug(f"[DATA_MAPPER] 값 채우기 적용 후: {new_door_list}")
+
                     template_data["doorList"] = new_door_list
                     Logger.debug(f" 생성된 doorList ({len(new_door_list)}개): {new_door_list}")
-                
+
                 return template_data
 
 
