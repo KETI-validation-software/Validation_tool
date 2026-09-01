@@ -55,7 +55,7 @@ importlib.reload(constraints_request_module)
 
 result_dir = CONSTANTS.result_dir
 os.makedirs(result_dir, exist_ok=True)
-from core.utils import to_detail_text, redact, remove_api_number_suffix, build_monitor_step_name, build_webhook_monitor_step_name, build_monitor_result_title, build_monitor_start_title, build_monitor_start_details, build_monitor_progress_details, build_monitor_result_details, generate_monitor_notice_html, response_time_ms_to_table_seconds, should_send_error_heartbeat_on_close
+from core.utils import summarize_payload, to_detail_text, redact, remove_api_number_suffix, build_monitor_step_name, build_webhook_monitor_step_name, build_monitor_result_title, build_monitor_start_title, build_monitor_start_details, build_monitor_progress_details, build_monitor_result_details, generate_monitor_notice_html, response_time_ms_to_table_seconds, should_send_error_heartbeat_on_close
 
 class MyApp(SystemMainUI):
     previousPageRequested = pyqtSignal(object)
@@ -1466,6 +1466,12 @@ class MyApp(SystemMainUI):
             path = re.sub(r'\d+$', '', path)
             Logger.debug(f" [post] Sending request to {path} with auth_type={self.r2}, token={self.token}")
             Logger.debug(f" [post] request message {json_data}")
+            # 실제 오간 값 한눈에 보기 — 개수가 아니라 내용(cam0001…)을 남긴다
+            _api = self.message[self.cnt] if self.cnt < len(self.message) else path.rsplit('/', 1)[-1]
+            try:
+                Logger.info(f"[데이터] → 송신 {_api}: {summarize_payload(json.loads(json_data))}")
+            except Exception:
+                pass
             self.res = requests.post(
                 path,
                 headers=headers,
@@ -1483,6 +1489,11 @@ class MyApp(SystemMainUI):
             Logger.debug(
                 f"{self.res.json() if self.res.headers.get('Content-Type', '').startswith('application/json') else self.res.text}"
             )
+            try:
+                Logger.info(f"[데이터] ← 수신 {_api} ({self.res.status_code}): "
+                            f"{summarize_payload(self.res.json())}")
+            except Exception:
+                pass
         except Exception as e:
             Logger.debug(str(e))
 

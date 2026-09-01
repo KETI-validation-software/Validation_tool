@@ -27,6 +27,60 @@ def remove_api_number_suffix(api_name):
         
     return re.sub(r'\d+$', '', api_name)
 
+def summarize_payload(data, max_items=12, max_text=40):
+    """메시지 내용을 한 줄로 요약 — 실제 오간 값을 눈으로 확인하기 위한 것.
+
+    개수만으로는 "무엇이 오갔는지" 알 수 없어(cam0001인지 cam9999인지),
+    목록은 대표 값들을, 낱값은 값 자체를 보여준다.
+
+    예) camList 5건 [cam0001, cam0002, cam0003, cam0004, cam0005] | code=200
+        timePeriod{startTime=20260817163010123, endTime=20260822163010123}
+    """
+    def brief(v):
+        text = str(v)
+        return text if len(text) <= max_text else text[:max_text] + "…"
+
+    def rep_key(rows):
+        """목록에서 보여줄 대표 필드 — ID류 우선, 없으면 첫 필드"""
+        keys = [k for r in rows if isinstance(r, dict) for k in r.keys()]
+        for kw in ("ID", "Id", "Name", "Time"):
+            for k in keys:
+                if k.endswith(kw):
+                    return k
+        return keys[0] if keys else None
+
+    if not isinstance(data, dict):
+        return brief(data)
+
+    # 비밀번호·토큰은 값 대신 ***  (요약 줄은 캡처·공유가 잦다)
+    secret_keys = {"userPW", "accessToken", "token", "password", "secret", "apiKey",
+                   "accessPW", "Authorization"}
+
+    parts = []
+    for key, value in data.items():
+        if key in secret_keys:
+            parts.append(f"{key}=***")
+            continue
+        if isinstance(value, list):
+            if value and isinstance(value[0], dict):
+                rk = rep_key(value)
+                shown = [brief(r.get(rk)) for r in value[:max_items] if isinstance(r, dict)]
+                more = f" 외 {len(value) - max_items}건" if len(value) > max_items else ""
+                label = f"{key} {len(value)}건"
+                parts.append(f"{label} [{', '.join(shown)}{more}]" if rk else f"{label}")
+            else:
+                shown = [brief(v) for v in value[:max_items]]
+                more = f" 외 {len(value) - max_items}" if len(value) > max_items else ""
+                parts.append(f"{key} {len(value)}건 [{', '.join(shown)}{more}]")
+        elif isinstance(value, dict):
+            inner = ", ".join(f"{k}={brief(v)}" for k, v in list(value.items())[:4]
+                              if not isinstance(v, (dict, list)))
+            parts.append(f"{key}{{{inner}}}" if inner else f"{key}{{...}}")
+        else:
+            parts.append(f"{key}={brief(value)}")
+    return " | ".join(parts) if parts else "(빈 메시지)"
+
+
 def safe_str(value):
     """
     UI 표시를 위해 데이터를 안전하게 문자열로 변환하는 함수

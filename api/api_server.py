@@ -8,6 +8,7 @@ import traceback
 import os
 import copy  # deepcopy를 위해 추가
 from core.functions import resource_path
+from core.utils import summarize_payload
 from core.data_mapper import ConstraintDataGenerator
 from core.logger import Logger
 from requests.auth import HTTPDigestAuth
@@ -626,6 +627,8 @@ class Server(BaseHTTPRequestHandler):
             try:
                 self.request_data = json.loads(request_body.decode('utf-8'))
                 Logger.debug(f"[SERVER] 파싱된 요청 데이터: {self.request_data}")
+                # 실제 오간 값 한눈에 보기 — 개수가 아니라 내용(cam0001…)을 남긴다
+                Logger.info(f"[데이터] ← 수신 {api_name}: {summarize_payload(self.request_data)}")
 
                 # ✅ API 이름으로 로깅 (spec_id 제외)
                 Logger.debug(f"[TRACE WRITE] API 이름: {api_name}")
@@ -1040,6 +1043,7 @@ class Server(BaseHTTPRequestHandler):
                     is_webhook=False
                 )
                 Logger.debug(f"[CONSTRAINTS] 업데이트된 message 내용: {json.dumps(updated_message, ensure_ascii=False)[:200]}")
+                Logger.info(f"[데이터] → 송신 {api_name}: {summarize_payload(updated_message)}")
 
                 # ✅ trace 저장 (_push_event 내부에서 deepcopy 수행)
                 self._push_event(api_name, "RESPONSE", updated_message)
