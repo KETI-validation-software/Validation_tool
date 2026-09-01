@@ -794,19 +794,31 @@ class ConstraintDataGenerator:
         """
         raw_min = constraint.get("min", 0)
         raw_max = constraint.get("max", self.MAX_TIMESTAMP)
-        min_val = self._to_number(raw_min, 0)
-        max_val = self._to_number(raw_max, self.MAX_TIMESTAMP)
+        # 참조 대상이 비어 있으면 min/max가 빈 문자열("")로 들어온다.
+        # 문자열이라는 이유만으로 "참조 있음"으로 보면 아래 참조 없음 판정을
+        # 빠져나가 0~13자리 난수가 시각 자리에 나갔다.
+        norm_min = 0 if isinstance(raw_min, str) and not raw_min.strip() else raw_min
+        norm_max = (self.MAX_TIMESTAMP
+                    if isinstance(raw_max, str) and not raw_max.strip() else raw_max)
+        min_val = self._to_number(norm_min, 0)
+        max_val = self._to_number(norm_max, self.MAX_TIMESTAMP)
 
-        reference_missing = min_val == 0 and not isinstance(raw_min, str)
+        reference_missing = min_val == 0 and not isinstance(norm_min, str)
         as_string = (isinstance(raw_min, str) or isinstance(raw_max, str)
                      or (reference_missing and isinstance(template_value, str)))
 
         # 참조가 없으면 범위가 0~13자리 난수가 돼 시각으로서 무의미하다.
-        # 템플릿에 시각 값이 있으면 그 근방을 기준으로 삼는다.
+        # 템플릿에 시각 값이 있으면 그 근방을, 그것도 비어 있으면 현재 시각을 쓴다.
         if reference_missing:
             template_num = self._to_number(template_value, 0)
             if template_num > 0:
                 min_val = template_num
+            else:
+                import datetime
+                now17 = self._format_time17(datetime.datetime.now())
+                Logger.warning(f"  ⚠ request-range 참조·템플릿 모두 비어 있음 "
+                               f"→ 현재 시각 {now17} 사용")
+                return now17 if as_string else int(now17)
 
         if min_val >= max_val:
             max_val = min_val + 1000
