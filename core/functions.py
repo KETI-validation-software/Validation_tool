@@ -1173,8 +1173,14 @@ def _validate_specified_value_match(field_path, field_value, rule, field_errors,
     """지정된 값과 일치하는지 검증"""
     specified = rule.get('allowedValues', [])
 
-    if field_value not in specified:
-        error_msg = f"값 불일치: {field_value}가 지정값 {specified}에 없음"
+    # 리스트 필드(camList[].streamProtocolType 등)는 요소별로 대조한다.
+    # 예전에는 배열을 통째로 비교해 ['RTSP','RTSP']가 ['RTSP']에 없다고
+    # 오판했다 (valid-value-match 2ed16e4와 같은 유형, 2026-09-01 실측).
+    elements = field_value if isinstance(field_value, list) else [field_value]
+
+    invalid = [v for v in elements if v not in specified]
+    if invalid:
+        error_msg = f"값 불일치: {invalid}가 지정값 {specified}에 없음"
         field_errors.append(error_msg)
         global_errors.append(f"[의미] {field_path}: {error_msg}")
         return False
@@ -1193,7 +1199,9 @@ def _validate_range_match_direct(field_path, field_value, rule, field_errors, gl
 
     for v in values:
         try:
-            v_num = float(v)
+            # 17자리 시각은 float로 바꾸면 정밀도가 깨지고(2.02e+16) 오류 문구도
+            # 읽을 수 없게 된다 — 정수로 먼저 시도한다.
+            v_num = int(str(v).strip()) if str(v).strip().lstrip('-').isdigit() else float(v)
         except (ValueError, TypeError):
             error_msg = f"숫자 변환 실패: {v}"
             field_errors.append(error_msg)
