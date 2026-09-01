@@ -27,6 +27,11 @@ ENABLE_ERROR_RESPONSE_CHECK = True
 # 기준"에 명시된 4종뿐이며, 이벤트 목록(RealtimeVideoEventInfos의 camList 등)에는
 # 적용하지 않는다(이벤트는 1건 이상이면 정상).
 # 오탐이 나면 False로 즉시 이전 동작으로 되돌릴 수 있다.
+# 메시지 전송 제한 시간 상한(초) — 안내서 표 3-2 "메시지당 제한 시간은 60초"
+# 관리도구가 더 큰 값을 내려줘도 이 값으로 잘라 시험 기준을 지킨다.
+# (관리도구 값이 더 작으면 그 값을 그대로 쓴다 — 더 엄격한 쪽 우선)
+MESSAGE_TIMEOUT_CAP_SEC = 60
+
 ENABLE_LIST_COUNT_CHECK = True
 LIST_COUNT_MIN = 5
 LIST_COUNT_MAX = 100

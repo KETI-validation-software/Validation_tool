@@ -737,6 +737,53 @@ class ConstraintDataGenerator:
             values = rule.get("specifiedValues") or []
         return list(values)
 
+    # 17자리 시각 표기 yyyyMMddHHmmssSSS (안내서 표 2-1)
+    TIME_FORMAT_LEN = 17
+
+    @staticmethod
+    def _parse_time17(value):
+        """17자리 시각 문자열/숫자를 datetime으로. 시각이 아니면 None."""
+        import datetime
+        text = str(value).strip()
+        if len(text) != ConstraintDataGenerator.TIME_FORMAT_LEN or not text.isdigit():
+            return None
+        try:
+            base = datetime.datetime.strptime(text[:14], "%Y%m%d%H%M%S")
+            return base + datetime.timedelta(milliseconds=int(text[14:]))
+        except ValueError:
+            return None  # 13월 40일 같은 달력에 없는 날짜
+
+    @staticmethod
+    def _format_time17(dt):
+        """datetime → 17자리 시각 문자열"""
+        return dt.strftime("%Y%m%d%H%M%S") + f"{dt.microsecond // 1000:03d}"
+
+    def _pick_time_in_range(self, min_val, max_val, exclusive_min=False):
+        """구간 안의 '실제로 존재하는 시각'을 뽑는다.
+
+        예전에는 17자리 숫자 구간에서 random.randint로 정수를 뽑아 문자열로만
+        바꿨다 — 숫자로는 구간 안이어도 달력에 없는 날짜(월 13·일 40 등)가
+        나올 수 있었다("날짜가 난수로 나가던" 문제). 구간을 날짜로 해석해
+        밀리초 단위로 뽑고 다시 17자리로 포맷한다.
+
+        Returns:
+            str | None — 양 끝을 시각으로 해석하지 못하면 None(호출부가 폴백)
+        """
+        import datetime
+        start = self._parse_time17(min_val)
+        end = self._parse_time17(max_val)
+        if start is None or end is None:
+            return None
+        if end < start:
+            start, end = end, start
+        span_ms = int((end - start).total_seconds() * 1000)
+        if exclusive_min:
+            # endTime 등 "start보다 뒤" 조건 — 최소 1ms 뒤
+            offset = random.randint(1, span_ms) if span_ms >= 1 else 1
+        else:
+            offset = random.randint(0, span_ms) if span_ms > 0 else 0
+        return self._format_time17(start + datetime.timedelta(milliseconds=offset))
+
     def _pick_range_value(self, constraint, template_value, sibling_start=None):
         """request-range 값 생성 (최상위·리스트 줄 공용).
 
@@ -763,6 +810,14 @@ class ConstraintDataGenerator:
 
         if min_val >= max_val:
             max_val = min_val + 1000
+
+        # ✅ 시각 구간이면 '실제로 존재하는 시각'을 뽑는다 (달력에 없는 날짜 방지).
+        #    양 끝이 17자리 시각으로 해석되지 않으면(일반 숫자 범위) 기존 방식으로 폴백.
+        lo_for_time = sibling_start if sibling_start is not None else min_val
+        picked_time = self._pick_time_in_range(lo_for_time, max_val,
+                                               exclusive_min=sibling_start is not None)
+        if picked_time is not None:
+            return picked_time if as_string else int(picked_time)
 
         if sibling_start is not None:
             start_num = self._to_number(sibling_start, min_val)

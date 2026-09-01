@@ -66,6 +66,11 @@ class MyApp(SystemMainUI):
     def _get_effective_timeout_seconds(self, idx):
         """Webhook API는 긴 시나리오 timeout 대신 fail-fast timeout을 적용한다."""
         base_timeout = self.time_outs[idx] / 1000 if idx < len(self.time_outs) else 5.0
+        # 안내서 표 3-2: 메시지당 제한 시간 60초 — 관리도구가 더 큰 값을 내려줘도 잘라낸다
+        cap = getattr(self.CONSTANTS, 'MESSAGE_TIMEOUT_CAP_SEC', 60)
+        if cap and base_timeout > cap:
+            Logger.debug(f"[제한 시간] 설정 {base_timeout:.0f}초 → 상한 {cap}초 적용")
+            base_timeout = cap
         try:
             if idx < len(self.trans_protocols):
                 protocol = str(self.trans_protocols[idx]).strip().lower()
