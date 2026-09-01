@@ -92,15 +92,34 @@ def test_parse_rejects_invalid_dates():
     print("✅ 17자리 판별/포맷 왕복 정확")
 
 
-def test_timeout_cap_constant_exists():
-    """② 제한 시간 상한 상수 (안내서 60초)"""
-    cap = getattr(CONSTANTS, "MESSAGE_TIMEOUT_CAP_SEC", None)
-    assert cap == 60, f"상한 상수가 60이 아님: {cap}"
-    # 상한 적용 로직 자체 검증 (도구 인스턴스 없이 동일 식으로)
-    for setting, expected in [(120, 60), (60, 60), (30, 30)]:
-        applied = cap if (cap and setting > cap) else setting
-        assert applied == expected, f"{setting}초 → {applied}초 (기대 {expected})"
-    print("✅ 제한 시간 상한 60초 (더 작은 설정은 그대로)")
+def test_message_timeout_is_fixed_60():
+    """② 제한 시간은 관리도구 설정과 무관하게 60초 고정 (안내서 표 3-2)"""
+    assert getattr(CONSTANTS, "MESSAGE_TIMEOUT_SEC", None) == 60, "상수가 60이 아님"
+
+    from systemVal_all import MyApp
+    from types import SimpleNamespace
+    # QWidget이라 인스턴스화 없이 메서드만 스텁에 바인딩해 확인
+    calc = MyApp._get_effective_timeout_seconds
+    tool = SimpleNamespace(CONSTANTS=CONSTANTS, trans_protocols=["basic", "basic", "basic"],
+                           WEBHOOK_FAILFAST_TIMEOUT_SEC=MyApp.WEBHOOK_FAILFAST_TIMEOUT_SEC)
+
+    # 관리도구가 뭘 내려주든(작든 크든) 60초
+    for time_outs in ([5000, 5000, 5000], [120000, 120000, 120000], []):
+        tool.time_outs = time_outs
+        got = calc(tool, 0)
+        assert got == 60, f"time_out={time_outs} -> {got}초 (기대 60)"
+    print("✅ 제한 시간 60초 고정 (설정값 5초·120초·미설정 모두 60)")
+
+
+def test_webhook_failfast_still_applies():
+    """웹훅 구독 ACK용 fail-fast(10초)는 별개 기능이라 그대로 유지"""
+    from systemVal_all import MyApp
+    from types import SimpleNamespace
+    tool = SimpleNamespace(CONSTANTS=CONSTANTS, time_outs=[60000], trans_protocols=["WebHook"],
+                           WEBHOOK_FAILFAST_TIMEOUT_SEC=MyApp.WEBHOOK_FAILFAST_TIMEOUT_SEC)
+    got = MyApp._get_effective_timeout_seconds(tool, 0)
+    assert got == 10.0, f"웹훅 fail-fast가 깨짐: {got}"
+    print("✅ 웹훅 구독 ACK fail-fast 10초 유지")
 
 
 if __name__ == "__main__":
