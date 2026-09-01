@@ -179,7 +179,42 @@ def format_errors_as_tree(error_messages):
 # ================================================================
 # 필드별 순차 검증 (구조 → 의미)
 # ================================================================
-def json_check_(schema, data, flag, validation_rules=None, reference_context=None):
+def check_list_counts(api_name, data):
+    """목록 구성 개수(5~100) 판정 — 안내서 표 2-1 "목록 정보", 부록 표 Ⅰ-12.
+
+    프로필 조회 응답의 목록은 5개 이상 100개 이하여야 한다("송신 조건 불충족").
+    대상은 CONSTANTS.LIST_COUNT_TARGETS에 등록된 (API, 필드)뿐이다 — 이벤트 목록은
+    1건 이상이면 정상이라 대상이 아니다.
+
+    Returns:
+        list[(field, count, ok)] — 판정한 목록들. 대상이 없으면 빈 목록.
+    """
+    if not getattr(CONSTANTS, "ENABLE_LIST_COUNT_CHECK", False):
+        return []
+    if not isinstance(data, dict) or not api_name:
+        return []
+
+    # 재시도로 붙는 숫자 접미사(CameraProfiles2 등)를 떼고 대조한다
+    base_api = re.sub(r'\d+$', '', str(api_name))
+    targets = (getattr(CONSTANTS, "LIST_COUNT_TARGETS", {}) or {}).get(base_api, [])
+    if not targets:
+        return []
+
+    lo = getattr(CONSTANTS, "LIST_COUNT_MIN", 5)
+    hi = getattr(CONSTANTS, "LIST_COUNT_MAX", 100)
+
+    results = []
+    for field in targets:
+        value = data.get(field)
+        if not isinstance(value, list):
+            continue  # 필드 자체가 없거나 목록이 아니면 구조 검증이 잡는다
+        count = len(value)
+        results.append((field, count, lo <= count <= hi))
+    return results
+
+
+def json_check_(schema, data, flag, validation_rules=None, reference_context=None,
+                api_name=None):
     """
     각 필드마다 '구조 검증 → 의미 검증'을 순차적으로 수행
 
@@ -188,6 +223,7 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
     flag:   옵션(기존 그대로)
     validation_rules: (선택) 의미 검증 규칙 dict
     reference_context: (선택) 다른 엔드포인트 응답 사전
+    api_name: (선택) 목록 구성 개수 판정 대상 식별용 API 이름
 
     반환: (result, error_msg, correct_cnt, error_cnt)
     """
@@ -247,6 +283,14 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
             else:
                 rules_dict = extract_validation_rules(validation_rules)
             Logger.debug(f"[json_check_] 의미 검증 규칙 키: {list(rules_dict.keys())}")
+
+        # 2-1) 목록 구성 개수 판정 (5~100) — 대상 목록만, 개수는 항상 로그에 남긴다
+        #      (안내서: "실제 시험한 개수는 시험결과서에 표기됩니다")
+        list_count_map = {}
+        for _field, _count, _ok in check_list_counts(api_name, data):
+            list_count_map[_field] = (_count, _ok)
+            Logger.info(f"[목록 개수] {api_name}.{_field}: {_count}개 "
+                        f"({'적합' if _ok else '기준 미달/초과'})")
 
         # 3) 필드별 결과 저장
         field_results = {}
@@ -503,6 +547,26 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
             # 구조 검증 통과
             field_results[field_path]["struct_pass"] = True
             Logger.debug(f"  ✅ 구조: 타입 검증 통과")
+
+            # 4-2-1) 목록 구성 개수(송신 조건) — 기준 미달·초과면 데이터 유효성 실패
+            if field_path in list_count_map:
+                _count, _ok = list_count_map[field_path]
+                if not _ok:
+                    _lo = getattr(CONSTANTS, "LIST_COUNT_MIN", 5)
+                    _hi = getattr(CONSTANTS, "LIST_COUNT_MAX", 100)
+                    error_msg = (f"목록 구성 개수 기준 미충족\n- 실제: {_count}개"
+                                 f"\n- 기준: {_lo}개 이상 {_hi}개 이하\n")
+                    field_results[field_path]["errors"].append(error_msg)
+                    error_messages.append(f"[의미] {field_path}: {error_msg}")
+                    field_results[field_path]["semantic_pass"] = False
+                    total_error += 1
+                    if is_optional:
+                        opt_error += 1
+                    else:
+                        required_error += 1
+                    Logger.error(f"  ❌ [실패] {field_path} (목록 구성 개수) — "
+                                 f"{_count}개 (기준: {_lo}~{_hi}개)")
+                    continue
 
             # 4-3) 의미 검증
             if field_path not in rules_dict:

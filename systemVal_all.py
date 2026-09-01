@@ -2333,7 +2333,9 @@ class MyApp(SystemMainUI):
                             res_data,
                             self.flag_opt,
                             validation_rules=resp_rules,
-                            reference_context=self.reference_context
+                            reference_context=self.reference_context,
+                            # 목록 구성 개수(5~100) 판정 대상 식별용 — 프로필 조회 응답에만 적용
+                            api_name=self.message[self.cnt] if self.cnt < len(self.message) else None
                         )
                     except TypeError as te:
                         Logger.error(f" 응답 검증 중 TypeError 발생: {te}, 일반 검증으로 재시도")

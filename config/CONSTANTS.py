@@ -21,6 +21,22 @@ ENABLE_WEBHOOK_CONTEXT_VALIDATION = True
 # 오탐이 나면 False로 바꿔 즉시 이전 동작(항상 200 응답)으로 되돌릴 수 있다.
 ENABLE_ERROR_RESPONSE_CHECK = True
 
+# 목록 구성 개수 검증 (안내서 표 2-1 "목록 정보", 부록 표 Ⅰ-12)
+# 프로필 조회 응답의 목록은 5개 이상 100개 이하여야 한다 — "송신 조건 불충족"으로
+# 판정하며 단일시스템 시험에 적용된다. 대상은 각 시나리오 "유효성 검증 세부 충족
+# 기준"에 명시된 4종뿐이며, 이벤트 목록(RealtimeVideoEventInfos의 camList 등)에는
+# 적용하지 않는다(이벤트는 1건 이상이면 정상).
+# 오탐이 나면 False로 즉시 이전 동작으로 되돌릴 수 있다.
+ENABLE_LIST_COUNT_CHECK = True
+LIST_COUNT_MIN = 5
+LIST_COUNT_MAX = 100
+LIST_COUNT_TARGETS = {
+    "CameraProfiles": ["camList"],
+    "DoorProfiles": ["doorList"],
+    "AccessUserInfos": ["userList"],
+    "SensorDeviceProfiles": ["sensorDeviceList"],
+}
+
 # 버전4: 모든 로컬 IP 주소 감지 (이더넷, 와이파이 등 모든 네트워크 어댑터)
 def get_all_local_ips():
     """로컬 PC의 모든 IP 주소를 리스트로 반환 (이더넷, 와이파이 등)"""
