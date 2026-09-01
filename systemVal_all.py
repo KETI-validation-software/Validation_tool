@@ -1896,11 +1896,14 @@ class MyApp(SystemMainUI):
                         WEBHOOK_PORT = self.CONSTANTS.WEBHOOK_PORT  # 웹훅 수신 포트
                         WEBHOOK_URL = f"https://{WEBHOOK_IP}:{WEBHOOK_PORT}"  # 플랫폼/시스템이 웹훅을 보낼 주소
 
-                        trans_protocol = {
-                            "transProtocolType": "WebHook",
-                            "transProtocolDesc": WEBHOOK_URL
-                        }
-                        
+                        # ✅ transProtocolType은 관리도구 설정값을 그대로 둔다.
+                        #    예전에는 객체를 통째로 새로 만들며 내부 프로토콜 이름
+                        #    "WebHook"(대문자 H)을 같이 써버려, 관리도구에 "Webhook"으로
+                        #    설정해도 전송 시점에 값이 바뀌어 지정값 대조에서 실패했다.
+                        #    실제로 갈아끼워야 하는 건 수신 주소(Desc)뿐이다.
+                        trans_protocol = dict(trans_protocol)
+                        trans_protocol["transProtocolDesc"] = WEBHOOK_URL
+
                         # ngrok 하드 코딩 부분 (01/09)
                         # ---- 여기부터
                         # WEBHOOK_DISPLAY_URL = CONSTANTS.WEBHOOK_DISPLAY_URL
