@@ -343,8 +343,10 @@ class FileGeneratorService:
                 all_spec_list_names.extend(spec_list_names)
 
             # 역매핑 생성 및 referenceEndpoint 업데이트
-            if file_type and all_duplicate_endpoints:
-                Logger.info(f"\n  [전체 중복 API 목록] {all_duplicate_endpoints}")
+            # ✅ 중복 API가 없어도 항상 수행 — fieldId 기준 참조 보정이 전 규칙 대상이 됨
+            if file_type:
+                if all_duplicate_endpoints:
+                    Logger.info(f"\n  [전체 중복 API 목록] {all_duplicate_endpoints}")
 
                 response_reverse_map = self.key_id_gen.build_field_id_to_endpoint_map(
                     steps_cache, test_step_cache, "response"
@@ -465,29 +467,36 @@ class FileGeneratorService:
                 if endpoint_name in duplicate_endpoints:
                     total_duplicate_endpoints += 1
 
-                    if current_field_id:
-                        if current_field_id in reverse_map:
-                            new_endpoint_name = reverse_map[current_field_id]
-                            new_endpoint = f"/{new_endpoint_name}"
-                            if old_endpoint != new_endpoint:
-                                line = line.replace(f'"referenceEndpoint": "{old_endpoint}"', f'"referenceEndpoint": "{new_endpoint}"')
-                            success_list.append({
-                                "key": current_block_key,
-                                "referenceEndpoint": old_endpoint,
-                                "referenceFieldId": current_field_id,
-                                "newReferenceEndpoint": new_endpoint
-                            })
-                        else:
-                            fail_not_in_keyid.append({
-                                "key": current_block_key,
-                                "referenceEndpoint": old_endpoint,
-                                "referenceFieldId": current_field_id
-                            })
-                    else:
-                        fail_no_field_id.append({
+                # ✅ fieldId가 있으면 항상 재계산 — 예전에는 중복 이름 API에만 적용했다.
+                # 관리 서버가 referenceEndpoint를 자기 단계 값으로 잘못 저장해 내려보내는
+                # 사례가 확인됨(2026-09-01: VerifEventInfos 규칙의 fieldId는 DoorProfiles
+                # 응답 doorID인데 endpoint는 /RealtimeVerifEventInfos). 진짜 선택은
+                # referenceFieldId에 있으므로 그것을 기준으로 엔드포인트를 바로잡는다.
+                if current_field_id:
+                    if current_field_id in reverse_map:
+                        new_endpoint_name = reverse_map[current_field_id]
+                        new_endpoint = f"/{new_endpoint_name}"
+                        if old_endpoint != new_endpoint:
+                            Logger.info(f"  [{file_label}] 참조 보정: {current_block_key} "
+                                        f"{old_endpoint} → {new_endpoint} (fieldId 기준)")
+                            line = line.replace(f'"referenceEndpoint": "{old_endpoint}"', f'"referenceEndpoint": "{new_endpoint}"')
+                        success_list.append({
                             "key": current_block_key,
-                            "referenceEndpoint": old_endpoint
+                            "referenceEndpoint": old_endpoint,
+                            "referenceFieldId": current_field_id,
+                            "newReferenceEndpoint": new_endpoint
                         })
+                    else:
+                        fail_not_in_keyid.append({
+                            "key": current_block_key,
+                            "referenceEndpoint": old_endpoint,
+                            "referenceFieldId": current_field_id
+                        })
+                else:
+                    fail_no_field_id.append({
+                        "key": current_block_key,
+                        "referenceEndpoint": old_endpoint
+                    })
 
             if line.strip() == '}' or line.strip() == '},':
                 current_field_id = None
@@ -495,11 +504,10 @@ class FileGeneratorService:
 
             result_lines.append(line)
 
-        if total_duplicate_endpoints > 0:
+        if success_list or fail_not_in_keyid or fail_no_field_id:
             fail_count = len(fail_no_field_id) + len(fail_not_in_keyid)
-            Logger.info(f"\n  [{file_label}] 중복 API referenceEndpoint 매핑 통계:")
-            Logger.info(f"    - 중복 API명 목록: {duplicate_endpoints}")
-            Logger.info(f"    - 중복 API referenceEndpoint 개수: {total_duplicate_endpoints}")
+            Logger.info(f"\n  [{file_label}] referenceEndpoint 매핑 통계 (fieldId 기준 전 규칙):")
+            Logger.info(f"    - 중복 API명 목록: {duplicate_endpoints} (해당 {total_duplicate_endpoints}건)")
             Logger.info(f"    - 매핑 성공: {len(success_list)}")
             Logger.info(f"    - 매핑 실패: {fail_count}")
 
