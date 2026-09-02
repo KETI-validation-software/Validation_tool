@@ -1443,14 +1443,15 @@ class Server(BaseHTTPRequestHandler):
                             if "doorRelayStatus" in save_data:
                                 save_data["doorRelaySensor"] = save_data.pop("doorRelayStatus")
 
-                            if "doorRelaySensor" not in save_data or not save_data["doorRelaySensor"]:
-                                save_data["doorRelaySensor"] = "일반"
-
-                            if "doorSensor" not in save_data or save_data["doorSensor"] == "0":
-                                save_data["doorSensor"] = "Lock"
-
-                            if "doorSensor" not in save_data or save_data["doorSensor"] == "1":
-                                save_data["doorSensor"] = "Unlock"
+                            # ✅ 받은 값을 그대로 기억한다.
+                            #    예전에는 doorSensor가 없거나 "0"/"1"이면 "Lock"/"Unlock"으로,
+                            #    doorRelaySensor가 비면 "일반"으로 채워 넣었다. 규격에 맞지
+                            #    않는 데이터를 도구가 몰래 고쳐 통과시키는 셈이라, 잘못된
+                            #    데이터는 잘못됐다고 판정되도록 보정을 제거했다.
+                            for _f in ("doorSensor", "doorRelaySensor"):
+                                if _f not in save_data or save_data[_f] in ("", None):
+                                    Logger.warning(f" ⚠ {door_id}: {_f} 값이 비어 있음 "
+                                                   f"(보정 없이 그대로 기록)")
 
                             Server.door_memory[door_id] = {
                                 key: value for key, value in save_data.items()
