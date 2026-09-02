@@ -1049,6 +1049,22 @@ def _validate_field_match(field_path, field_value, rule, reference_context,
     return True
 
 
+def _to_comparable_number(value):
+    """비교용 숫자로 변환. 17자리 시각 문자열은 정수로(float는 정밀도 손실).
+    변환 불가면 None."""
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        return value
+    text = str(value).strip()
+    if not text:
+        return None
+    try:
+        return int(text) if text.lstrip('-').isdigit() else float(text)
+    except (TypeError, ValueError):
+        return None
+
+
 def _validate_range_match(field_path, field_value, rule, reference_context,
                           field_errors, global_errors):
     """필드 값이 참조 범위 내에 있는지 검증"""
@@ -1058,7 +1074,12 @@ def _validate_range_match(field_path, field_value, rule, reference_context,
     ref_field_min = rule.get('referenceFieldMin')
     ref_endpoint_max = rule.get('referenceEndpointMax')
     ref_endpoint_min = rule.get('referenceEndpointMin')
-    ref_operator = rule.get('referenceRangeOperator', 'between')
+    # 관리도구는 이 값을 rangeOperator로 내려준다(실측 2026-09-02).
+    # 예전에는 referenceRangeOperator만 읽어 늘 기본값 between으로 떨어졌고,
+    # '이상'으로 설정해도 max가 없다며 실패로 잡혔다.
+    ref_operator = (rule.get('rangeOperator')
+                    or rule.get('referenceRangeOperator')
+                    or 'between')
 
     # ✅ field_value가 리스트인 경우 각 요소를 검증
     if isinstance(field_value, list):
@@ -1072,16 +1093,22 @@ def _validate_range_match(field_path, field_value, rule, reference_context,
 
         all_valid = True
         for idx, val in enumerate(field_value):
-            if isinstance(val, (int, float)):
-                # 각 요소에 대해 범위 검증 수행
-                if not _validate_single_value_in_range(
-                        field_path, val, ref_endpoint_max, ref_endpoint_min,
-                        ref_field_max, ref_field_min, ref_operator,
-                        reference_context, field_errors, global_errors, idx
-                ):
-                    all_valid = False
-            else:
-                Logger.debug(f"  [DEBUG] 리스트 요소[{idx}]가 검증 불가능한 타입: {type(val)}")
+            # 17자리 시각은 String으로 오므로 숫자로 바꿔서 검증한다.
+            # 예전에는 int/float만 검증하고 나머지는 조용히 건너뛰어,
+            # 문자열 시각 배열이 검증 없이 통과했다(2026-09-02 ReplayURL 실측).
+            num = _to_comparable_number(val)
+            if num is None:
+                error_msg = f"index[{idx}] 숫자 변환 실패: {val}"
+                field_errors.append(error_msg)
+                global_errors.append(f"[의미] {field_path}: {error_msg}")
+                all_valid = False
+                continue
+            if not _validate_single_value_in_range(
+                    field_path, num, ref_endpoint_max, ref_endpoint_min,
+                    ref_field_max, ref_field_min, ref_operator,
+                    reference_context, field_errors, global_errors, idx
+            ):
+                all_valid = False
 
         return all_valid
 
@@ -1124,20 +1151,63 @@ def _validate_single_value_in_range(field_path, field_value, ref_endpoint_max, r
                 Logger.debug(f"  [DEBUG] Min value from {ref_endpoint_min}.{ref_field_min}: {min_value}")
 
     # 3) range 검증 수행
-    if ref_operator == 'between' and min_value is not None and max_value is not None:
-        if not (min_value <= field_value <= max_value):
-            error_msg = f"범위 초과: {field_value}가 [{min_value}, {max_value}] 범위를 벗어남"
-            field_errors.append(error_msg)
-            global_errors.append(f"[의미] {display_path}: {error_msg}")
-            return False
-        else:
-            Logger.debug(f"  [DEBUG] ✅ Value {field_value} is between {min_value} and {max_value}")
-            return True
-    else:
-        error_msg = f"범위 검증 실패: min={min_value}, max={max_value}, operator={ref_operator}"
+    # ✅ '이상/이하/초과/미만'은 한쪽 경계만 있으면 판정할 수 있다.
+    #    예전에는 between만 구현돼 있어, 관리도구에서 '이상'으로 설정하면
+    #    max가 없다며 무조건 실패로 잡혔다 (2026-09-02 실측).
+    value = _to_comparable_number(field_value)
+    if value is None:
+        error_msg = f"숫자 변환 실패: {field_value}"
         field_errors.append(error_msg)
         global_errors.append(f"[의미] {display_path}: {error_msg}")
         return False
+
+    # 참조에서 뽑은 경계값도 17자리 시각이면 문자열이다.
+    # 숫자로 맞춰두지 않으면 int와 str을 비교하다 TypeError가 난다.
+    min_value = _to_comparable_number(min_value) if min_value is not None else None
+    max_value = _to_comparable_number(max_value) if max_value is not None else None
+
+    # (연산자, 필요한 경계, 판정식, 실패 문구)
+    checks = {
+        'greater-equal': (min_value, lambda v, b: v >= b, "미만"),
+        'greater-than': (min_value, lambda v, b: v > b, "이하"),
+        'less-equal': (max_value, lambda v, b: v <= b, "초과"),
+        'less-than': (max_value, lambda v, b: v < b, "이상"),
+    }
+
+    if ref_operator == 'between':
+        if min_value is None or max_value is None:
+            error_msg = (f"범위 검증 실패: 구간 양끝이 필요한데 "
+                         f"min={min_value}, max={max_value}")
+            field_errors.append(error_msg)
+            global_errors.append(f"[의미] {display_path}: {error_msg}")
+            return False
+        if not (min_value <= value <= max_value):
+            error_msg = f"범위 초과: {value}가 [{min_value}, {max_value}] 범위를 벗어남"
+            field_errors.append(error_msg)
+            global_errors.append(f"[의미] {display_path}: {error_msg}")
+            return False
+        Logger.debug(f"  [DEBUG] ✅ {value} is between {min_value} and {max_value}")
+        return True
+
+    if ref_operator in checks:
+        bound, ok, word = checks[ref_operator]
+        if bound is None:
+            error_msg = f"범위 검증 실패: {ref_operator} 기준값 없음"
+            field_errors.append(error_msg)
+            global_errors.append(f"[의미] {display_path}: {error_msg}")
+            return False
+        if not ok(value, bound):
+            error_msg = f"범위 벗어남: {value}가 기준 {bound} {word}"
+            field_errors.append(error_msg)
+            global_errors.append(f"[의미] {display_path}: {error_msg}")
+            return False
+        Logger.debug(f"  [DEBUG] ✅ {value} {ref_operator} {bound}")
+        return True
+
+    error_msg = f"범위 검증 실패: 지원하지 않는 연산자 {ref_operator}"
+    field_errors.append(error_msg)
+    global_errors.append(f"[의미] {display_path}: {error_msg}")
+    return False
 
 
 def _validate_valid_value_match(field_path, field_value, rule, field_errors, global_errors):
