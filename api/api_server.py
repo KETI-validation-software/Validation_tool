@@ -147,6 +147,22 @@ class Server(BaseHTTPRequestHandler):
             return Server.latest_event[api_name].get(direction)  # 클래스 변수 사용
         return None
 
+    @staticmethod
+    def _numbered_or_base(numbered, base_api_name):
+        """번호 붙은 이름이 시나리오에 등록돼 있을 때만 사용한다.
+
+        시나리오에 한 단계만 등록된 API를 상대가 두 번 호출하면 예전에는
+        'X2'로 바꿨다가 목록에서 못 찾아 404 '호출 횟수 초과'를 냈다.
+        여분 호출도 정상 응답하되 채점은 첫 회차만 하기로 해(2026-09-02),
+        등록되지 않은 번호면 기본 이름으로 되돌린다.
+        """
+        registered = getattr(Server, 'message', None) or []
+        if numbered in registered:
+            return numbered
+        Logger.info(f" {base_api_name} 여분 호출 — 시나리오에 {numbered} 없음. "
+                    f"정상 응답하되 채점은 첫 회차만 반영")
+        return base_api_name
+
     def get_api_name_with_retry_suffix(self, base_api_name):
         """
         같은 API가 재호출될 때 숫자 접미사 추가
@@ -190,7 +206,7 @@ class Server(BaseHTTPRequestHandler):
 
                     new_api_name = f"{base_api_name}{new_number}"
                     Logger.debug(f" 중간에 다른 API 끼어듦: {base_api_name} → {new_api_name}")
-                    return new_api_name
+                    return self._numbered_or_base(new_api_name, base_api_name)
 
             # ✅ 연속 호출 중 → retry_limit 확인
             current_key = last_processed_key
@@ -230,7 +246,7 @@ class Server(BaseHTTPRequestHandler):
 
                 new_api_name = f"{base_api_name}{new_number}"
                 Logger.debug(f" Limit 도달: {current_key} → {new_api_name}")
-                return new_api_name
+                return self._numbered_or_base(new_api_name, base_api_name)
 
         except Exception as e:
             Logger.error(f"[RETRY_SUFFIX] 오류 발생: {e}")
