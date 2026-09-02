@@ -2360,6 +2360,21 @@ class MyApp(SystemMainUI):
                             res_data,
                             self.flag_opt
                         )
+
+                    # 시험 대상 장치가 없어 수행 자체가 불가능했던 회차는 결과를
+                    # 실패로 확정한다. 존재할 수 없는 ID(NoDevice)를 보냈으므로
+                    # 상대가 무엇을 응답하든(하드코딩 200 포함) 통과일 수 없다.
+                    _unrunnable = getattr(self.generator, "unrunnable_reason", None)
+                    if _unrunnable:
+                        from core.json_checker_new import timeout_field_finder
+                        _rqd, _opt = timeout_field_finder(self.outSchema[self.cnt])
+                        val_result = "FAIL"
+                        val_text = (f"시험 수행 불가: {_unrunnable}\n"
+                                    f"- 보낸 ID: {self.generator.NO_DEVICE_ID}\n")
+                        key_psss_cnt, key_error_cnt = 0, _rqd if _rqd > 0 else 1
+                        opt_correct, opt_error = 0, (_opt if self.flag_opt else 0)
+                        Logger.error(f"  ❌ {self.message[self.cnt]} — {val_text.strip()}")
+
                     if self.message[self.cnt] == "Authentication":
                         self.handle_authentication_response(res_data)
 

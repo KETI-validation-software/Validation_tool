@@ -19,6 +19,9 @@ class ConstraintDataGenerator:
         latest_events: API 이벤트 저장소 {api_name: {direction: event_data}}
         """
         self.latest_events = latest_events if latest_events is not None else {}
+        # 시험 대상 장치가 없어 이번 회차를 수행할 수 없을 때의 사유.
+        # 요청을 만들 때마다 초기화되고, 설정되면 호출부가 그 회차를 실패로 확정한다.
+        self.unrunnable_reason = None
 
     def _find_requested_ids(self, constraints, field, default_endpoint):
         """앞서 보낸 요청(구독/조회)에서 해당 필드의 ID 후보를 찾는다.
@@ -111,6 +114,9 @@ class ConstraintDataGenerator:
         door_memory: 문 상태 저장소
         is_webhook: 웹훅 이벤트 생성 여부 (True이면 랜덤 선택 안함)
         """
+        # 회차마다 새로 판단한다 (앞 회차의 '수행 불가'가 남지 않도록)
+        self.unrunnable_reason = None
+
         # ✅ sensorDeviceList 구조를 가진 웹훅 데이터 동적 생성 (범용)
         if is_webhook and "sensorDeviceList" in template_data:
             # request_data에서 요청한 sensorDeviceID 추출
@@ -480,6 +486,19 @@ class ConstraintDataGenerator:
         # (예전에는 여기서 지역변수 미할당으로 예외가 나고 바깥 except가 삼켰다)
         return request_data
 
+    NO_DEVICE_ID = "NoDevice"
+
+    @classmethod
+    def _no_device_id(cls, existing):
+        """실제 장치와 겹치지 않는 '장치 없음' 표식 ID"""
+        taken = {str(v) for v in (existing or [])}
+        if cls.NO_DEVICE_ID not in taken:
+            return cls.NO_DEVICE_ID
+        n = 1
+        while f"{cls.NO_DEVICE_ID}{n}" in taken:
+            n += 1
+        return f"{cls.NO_DEVICE_ID}{n}"
+
     @staticmethod
     def _is_ptz_api(api_name):
         """PTZ 제어 계열 API인지 (PTZStatus, PTZControl 등 — 대소문자 무시)"""
@@ -548,8 +567,19 @@ class ConstraintDataGenerator:
                                         f"(전체 {len(values)}대 중 {len(picked)}대)")
                             values = picked
                         else:
-                            Logger.warning(f"  ⚠ {api_name}: PTZ 카메라가 없음 "
-                                           f"(camType 전부 비-PTZ) → 전체 목록 그대로 사용")
+                            # 대상 장치가 없으면 이 회차는 수행 자체가 불가능하다.
+                            # 아무 카메라나 골라 보내거나 빈 값을 보내면 결과가
+                            # 상대 구현(하드코딩 응답 등)에 좌우되므로, 실제로
+                            # 존재할 수 없는 ID를 보내고 회차를 실패로 확정한다.
+                            sentinel = self._no_device_id(values)
+                            cam_types = sorted({str(t) for t in
+                                                self.find_key(event_data, "camType")})
+                            self.unrunnable_reason = (
+                                f"PTZ 카메라 없음 (camType: {', '.join(cam_types) or '없음'})"
+                            )
+                            Logger.error(f"  ❌ {api_name}: 시험 수행 불가 — "
+                                         f"{self.unrunnable_reason} → {ref_field}={sentinel} 전송")
+                            values = [sentinel]
 
                     # response-based(시스템 요청)만 랜덤 선택, request-based(플랫폼 응답/웹훅)는 그대로 사용 (01/08)
                     if value_type == "response-based" and not is_webhook and values and len(values) > 0:

@@ -105,6 +105,74 @@ def test_filter_preserves_order_and_subset():
     print("✅ 부분집합·순서 유지")
 
 
+def test_no_device_sentinel_is_unique():
+    """'장치 없음' 표식 ID는 실제 camID와 겹치지 않는다"""
+    assert G._no_device_id([]) == "NoDevice"
+    assert G._no_device_id(["cam0001", "cam0002"]) == "NoDevice"
+    assert G._no_device_id(["NoDevice"]) == "NoDevice1"
+    assert G._no_device_id(["NoDevice", "NoDevice1"]) == "NoDevice2"
+    print("✅ NoDevice 표식 충돌 회피")
+
+
+def test_unrunnable_flag_flow():
+    """PTZ 카메라가 없으면 수행 불가 사유가 남고 NoDevice가 실린다"""
+    gen = G.__new__(G)
+    gen.latest_events = {"CameraProfiles": {"RESPONSE": {"data": _cams(
+        ("cam0001", "Dome"), ("cam0002", "Bullet"))}}}
+    gen.unrunnable_reason = None
+
+    constraints = {"camList.camID": {
+        "valueType": "response-based",
+        "referenceEndpoint": "/CameraProfiles",
+        "referenceField": "camID",
+    }}
+    cmap = gen._build_constraint_map(constraints, {}, api_name="PTZStatus")
+
+    assert gen.unrunnable_reason, "수행 불가 사유가 기록되지 않음"
+    assert "PTZ 카메라 없음" in gen.unrunnable_reason, gen.unrunnable_reason
+    assert "Dome" in gen.unrunnable_reason and "Bullet" in gen.unrunnable_reason
+    assert cmap["camList.camID"]["values"] == ["NoDevice"], cmap["camList.camID"]
+    print(f"✅ 수행 불가 판정: {gen.unrunnable_reason} → NoDevice 전송")
+
+
+def test_ptz_present_no_flag():
+    """PTZ 카메라가 있으면 수행 불가 표식이 없다"""
+    gen = G.__new__(G)
+    gen.latest_events = {"CameraProfiles": {"RESPONSE": {"data": _cams(
+        ("cam0001", "Dome"), ("cam0002", "PTZ Camera"))}}}
+    gen.unrunnable_reason = None
+
+    constraints = {"camList.camID": {
+        "valueType": "response-based",
+        "referenceEndpoint": "/CameraProfiles",
+        "referenceField": "camID",
+    }}
+    cmap = gen._build_constraint_map(constraints, {}, api_name="PTZStatus")
+
+    assert gen.unrunnable_reason is None, gen.unrunnable_reason
+    assert cmap["camList.camID"]["values"] == ["cam0002"], cmap["camList.camID"]
+    print("✅ PTZ 있으면 정상 진행")
+
+
+def test_non_ptz_api_untouched():
+    """PTZ 계열이 아닌 API는 선별도 수행 불가 판정도 하지 않는다"""
+    gen = G.__new__(G)
+    gen.latest_events = {"CameraProfiles": {"RESPONSE": {"data": _cams(
+        ("cam0001", "Dome"), ("cam0002", "Bullet"))}}}
+    gen.unrunnable_reason = None
+
+    constraints = {"camList.camID": {
+        "valueType": "random-response",   # RESPONSE 참조 + 랜덤 표본 없음
+        "referenceEndpoint": "/CameraProfiles",
+        "referenceField": "camID",
+    }}
+    cmap = gen._build_constraint_map(constraints, {}, api_name="StreamURLs")
+
+    assert gen.unrunnable_reason is None
+    assert cmap["camList.camID"]["values"] == ["cam0001", "cam0002"], cmap["camList.camID"]
+    print("✅ 비-PTZ API는 영향 없음")
+
+
 if __name__ == "__main__":
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     failed = 0
