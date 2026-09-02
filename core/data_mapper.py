@@ -152,7 +152,7 @@ class ConstraintDataGenerator:
                 # 같은 참조 설정이 한 번도 실행되지 않았다 — 웹훅이 템플릿 빈 값 그대로
                 # 나가던 원인 (2026-08-20 sensor001 리허설 실측).
                 constraint_map = self._build_constraint_map(constraints or {}, request_data,
-                                                            is_webhook=True)
+                                                            is_webhook=True, api_name=api_name)
                 if constraint_map:
                     filled_list = []
                     for row in new_sensor_list:
@@ -221,7 +221,7 @@ class ConstraintDataGenerator:
                     # 그대로 나가던 원인 (sensor 웹훅 3cea01b와 동일 유형,
                     # 2026-08-26 RealtimeVerifEventInfos 리허설 실측).
                     constraint_map = self._build_constraint_map(constraints or {}, request_data,
-                                                                is_webhook=True)
+                                                                is_webhook=True, api_name=api_name)
                     if constraint_map:
                         filled_list = []
                         for row in new_door_list:
@@ -349,7 +349,8 @@ class ConstraintDataGenerator:
                 other_constraints = {k: v for k, v in (constraints or {}).items()
                                      if not str(k).startswith("doorList")}
                 if other_constraints:
-                    constraint_map = self._build_constraint_map(other_constraints, request_data)
+                    constraint_map = self._build_constraint_map(other_constraints, request_data,
+                                                                api_name=api_name)
                     filled = self._generate_from_template(template_data, constraint_map)
                     filled["doorList"] = new_door_list  # 확정한 doorList 보존
                     template_data.update(filled)
@@ -430,7 +431,8 @@ class ConstraintDataGenerator:
             return template_data
 
 
-        constraint_map = self._build_constraint_map(constraints, request_data, is_webhook)
+        constraint_map = self._build_constraint_map(constraints, request_data, is_webhook,
+                                                    api_name=api_name)
         response = self._generate_from_template(template_data, constraint_map)
         template_data.update(response)
         return template_data
@@ -478,7 +480,13 @@ class ConstraintDataGenerator:
         # (예전에는 여기서 지역변수 미할당으로 예외가 나고 바깥 except가 삼켰다)
         return request_data
 
-    def _build_constraint_map(self, constraints, request_data, is_webhook=False):
+    @staticmethod
+    def _is_ptz_api(api_name):
+        """PTZ 제어 계열 API인지 (PTZStatus, PTZControl 등 — 대소문자 무시)"""
+        return "ptz" in str(api_name or "").lower()
+
+    def _build_constraint_map(self, constraints, request_data, is_webhook=False,
+                              api_name=None):
         """constraints를 분석하여 각 필드의 제약 조건과 참조 값을 매핑"""
         constraint_map = {}
 
@@ -527,7 +535,22 @@ class ConstraintDataGenerator:
                     Logger.debug(f"[BUILD_MAP]   event_data: {event_data}")
                     values = self.find_key(event_data, ref_field)
                     Logger.debug(f"[BUILD_MAP]   Found values from event: {values}")
-                    
+
+                    # PTZ 제어 API는 PTZ 카메라에만 유효하다. Dome/Bullet 카메라를
+                    # 뽑아 보내면 상대가 정상적으로 거절해 실패로 잡히던 문제.
+                    if values and self._is_ptz_api(api_name):
+                        ptz_ids = self._collect_ptz_ids(event_data, ref_field)
+                        if ptz_ids is None:
+                            Logger.debug(f"[BUILD_MAP]   camType 정보 없음 → PTZ 선별 생략")
+                        elif ptz_ids:
+                            picked = [v for v in values if v in ptz_ids]
+                            Logger.info(f"  PTZ 카메라만 선별: {picked} "
+                                        f"(전체 {len(values)}대 중 {len(picked)}대)")
+                            values = picked
+                        else:
+                            Logger.warning(f"  ⚠ {api_name}: PTZ 카메라가 없음 "
+                                           f"(camType 전부 비-PTZ) → 전체 목록 그대로 사용")
+
                     # response-based(시스템 요청)만 랜덤 선택, request-based(플랫폼 응답/웹훅)는 그대로 사용 (01/08)
                     if value_type == "response-based" and not is_webhook and values and len(values) > 0:
                         original_count = len(values)
@@ -1283,6 +1306,40 @@ class ConstraintDataGenerator:
 
         traverse(new_data)
         return new_data
+
+    # PTZ 제어는 PTZ 카메라에만 유효하다. camType 표기는 상대 시스템마다
+    # 'PTZ' / 'ptz' / 'Ptz'로 제각각이라 대소문자를 무시하고 같은 값으로 본다.
+    PTZ_CAM_TYPE = "ptz"
+
+    def _collect_ptz_ids(self, event_data, id_field):
+        """참조 응답에서 camType이 PTZ인 항목의 ID만 모은다.
+
+        camType이 어디에도 없으면 None을 돌려 호출부가 거르지 않도록 한다
+        (CameraProfiles 응답에 camType이 없는 규격일 수 있음).
+        """
+        ptz_ids, saw_type = [], False
+
+        def walk(node):
+            nonlocal saw_type
+            if isinstance(node, list):
+                for item in node:
+                    walk(item)
+                return
+            if not isinstance(node, dict):
+                return
+
+            if id_field in node:
+                cam_type = self.find_key(node, "camType")
+                if cam_type:
+                    saw_type = True
+                    if any(str(t).strip().lower() == self.PTZ_CAM_TYPE for t in cam_type):
+                        ptz_ids.append(node[id_field])
+            for v in node.values():
+                if isinstance(v, (dict, list)):
+                    walk(v)
+
+        walk(event_data)
+        return ptz_ids if saw_type else None
 
     def find_key(self, data, target_key):
         """재귀적으로 데이터에서 키 찾기"""
