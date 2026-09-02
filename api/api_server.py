@@ -281,7 +281,7 @@ class Server(BaseHTTPRequestHandler):
 
         # 1. 시각 필드 판정 → 201 또는 400 (유도 방식과 짝)
         #    스키마 없이도 판정할 수 있으므로 스키마 유무와 무관하게 먼저 본다.
-        time_verdict = self._judge_time_fields(request_data)
+        time_verdict = self._judge_time_fields(request_data, api_name)
         if time_verdict:
             code, reason = time_verdict
             Logger.debug(f" 시각 판정: {code} — {reason}")
@@ -492,7 +492,12 @@ class Server(BaseHTTPRequestHandler):
 
         return None
 
-    def _judge_time_fields(self, request_data):
+    @staticmethod
+    def _is_subscription_api(api_name):
+        """실시간 이벤트 구독 API인지 (RealtimeDoorStatus, RealtimeVerifEventInfos 등)"""
+        return str(api_name or "").lstrip("/").lower().startswith("realtime")
+
+    def _judge_time_fields(self, request_data, api_name=None):
         """시각 필드 판정 — 유도 방식 개편(2026-08-23)과 짝을 맞춘다.
 
         유도 값이 두 종류로 분리됐다:
@@ -503,10 +508,15 @@ class Server(BaseHTTPRequestHandler):
         - 시각 필드가 String 전환됐으므로 문자열도 숫자로 변환해 본다
         - startTime은 timePeriod.startTime처럼 중첩돼 있어 재귀로 찾는다
         - 정상 과거 시각(시나리오 데이터의 2022년 등)은 판정하지 않는다
+        - ✅ 미래 구간(201) 판정은 저장 데이터 조회 API에만 적용한다.
+          실시간 구독(Realtime*)의 startTime은 "언제부터 받을지"라 미래가 정상인데,
+          구독 요청에까지 적용해 201 '정보 없음'으로 거절하던 문제(2026-09-02).
+          형식 위반(400)은 어느 API든 오류이므로 그대로 판정한다.
 
         Returns:
             (code, reason) 튜플 — "201"/"400" — 또는 None (정상)
         """
+        is_subscription = self._is_subscription_api(api_name)
         try:
             now17 = int(datetime.datetime.now().strftime("%Y%m%d%H%M%S") + "999")
             for value in self.generator.find_key(request_data, "startTime"):
@@ -527,6 +537,10 @@ class Server(BaseHTTPRequestHandler):
                     except ValueError:
                         return ("400", f"시각 형식 무효(날짜 불성립): startTime={value!r}")
                     if num > now17:
+                        if is_subscription:
+                            Logger.debug(f" 실시간 구독이므로 미래 startTime 정상: "
+                                         f"{api_name} startTime={value!r}")
+                            continue
                         return ("201", f"조회 구간이 미래: startTime={value!r}")
         except Exception as e:
             Logger.error(f" 시각 판정 실패: {e}")
