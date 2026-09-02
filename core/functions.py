@@ -485,6 +485,20 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
                 "is_optional": is_optional
             }
 
+            # LongPolling 구독은 웹훅 수신 주소가 필요 없다.
+            # transProtocolDesc는 그때 의미 없는 필드이므로 값이 무엇이든
+            # (null·빈 값 포함) 판정하지 않고 통과시킨다 (2026-09-02 결정).
+            if _is_desc_exempt(field_path, data):
+                field_results[field_path]["struct_pass"] = True
+                field_results[field_path]["semantic_pass"] = True
+                total_correct += 1
+                if is_optional:
+                    opt_correct += 1
+                else:
+                    required_correct += 1
+                Logger.debug(f"  ⊙ LongPolling이므로 수신 주소 불필요 — 판정 생략 (자동 PASS)")
+                continue
+
             expected_type = flat_fields[field_path]
 
             # 4-1) 구조 검증: 필드 존재 여부
@@ -1047,6 +1061,30 @@ def _validate_field_match(field_path, field_value, rule, reference_context,
             global_errors.append(f"[의미] {field_path}: {error_msg}")
             return False
     return True
+
+
+def _is_desc_exempt(field_path, data):
+    """LongPolling 구독의 transProtocolDesc는 판정 대상에서 뺀다.
+
+    RealtimeDoorStatus처럼 전송 방식이 LongPolling으로 고정된 API는 웹훅 수신
+    주소를 쓰지 않는다. 그래서 transProtocolDesc에 null·빈 값이 와도 정상인데,
+    스키마·검증 규칙은 그대로 걸려 있어 실패로 잡히던 문제(2026-09-02).
+
+    같은 요청 안의 transProtocolType을 보고 판단하므로, 같은 API라도
+    WebHook으로 설정된 회차에서는 평소대로 검사한다.
+    """
+    if not str(field_path).endswith("transProtocolDesc"):
+        return False
+    if not isinstance(data, dict):
+        return False
+
+    proto = data.get("transProtocol")
+    if not isinstance(proto, dict):
+        return False
+    ptype = proto.get("transProtocolType")
+    if ptype is None:
+        return False   # 방식을 모르면 평소대로 검사 (type 자체는 별도 규칙이 잡는다)
+    return "webhook" not in str(ptype).lower()
 
 
 def _to_comparable_number(value):
