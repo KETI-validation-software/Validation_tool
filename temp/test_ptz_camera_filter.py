@@ -6,8 +6,9 @@ PTZ 제어(PTZStatus 등)는 PTZ 카메라에만 유효한데, CameraProfiles �
 camID 전체에서 무작위로 골라 보내다 보니 Dome/Bullet 카메라가 뽑히면
 상대가 정상적으로 거절해 실패로 잡혔다.
 
-camType 표기는 시스템마다 'PTZ' / 'ptz' / 'Ptz'로 제각각이라 대소문자를
-무시하고 같은 값으로 본다. CameraProfiles 자체는 어떤 camType이든 그대로 받는다.
+camType 표기는 시스템마다 제각각이라, 대소문자를 무시하고 문자열에 'ptz'가
+들어 있으면 모두 같은 PTZ 카메라로 본다 ('PTZ Camera', '고정형PTZ' 등 포함).
+CameraProfiles 자체는 어떤 camType이든 그대로 받는다.
 
 실행: .venv\Scripts\python.exe temp\test_ptz_camera_filter.py
 """
@@ -45,6 +46,14 @@ def test_case_insensitive_ptz():
                  ("cam0004", " PTZ "))
     assert _collect(data) == ["cam0001", "cam0002", "cam0003", "cam0004"], _collect(data)
     print("✅ 대소문자·공백 무시")
+
+
+def test_substring_ptz():
+    """문자열 어디든 'ptz'가 들어 있으면 PTZ로 인정"""
+    data = _cams(("cam0001", "PTZ Camera"), ("cam0002", "ptz-dome"),
+                 ("cam0003", "고정형PTZ"), ("cam0004", "Speed_Ptz_01"))
+    assert _collect(data) == ["cam0001", "cam0002", "cam0003", "cam0004"], _collect(data)
+    print("✅ 부분 문자열 포함도 PTZ로 인정")
 
 
 def test_non_ptz_excluded():

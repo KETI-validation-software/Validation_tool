@@ -1308,7 +1308,8 @@ class ConstraintDataGenerator:
         return new_data
 
     # PTZ 제어는 PTZ 카메라에만 유효하다. camType 표기는 상대 시스템마다
-    # 'PTZ' / 'ptz' / 'Ptz'로 제각각이라 대소문자를 무시하고 같은 값으로 본다.
+    # 'PTZ' / 'ptz' / 'PTZ Camera' / '고정형PTZ'처럼 제각각이라,
+    # 대소문자 무시하고 문자열에 'ptz'가 들어 있으면 모두 PTZ로 본다.
     PTZ_CAM_TYPE = "ptz"
 
     def _collect_ptz_ids(self, event_data, id_field):
@@ -1332,7 +1333,7 @@ class ConstraintDataGenerator:
                 cam_type = self.find_key(node, "camType")
                 if cam_type:
                     saw_type = True
-                    if any(str(t).strip().lower() == self.PTZ_CAM_TYPE for t in cam_type):
+                    if any(self.PTZ_CAM_TYPE in str(t).lower() for t in cam_type):
                         ptz_ids.append(node[id_field])
             for v in node.values():
                 if isinstance(v, (dict, list)):
