@@ -713,3 +713,34 @@ def get_result_icon_path(result, img_pass, img_fail, img_none):
         return img_fail
     return img_none
 
+
+
+def webhook_api_names(messages, protocols=None):
+    """웹훅으로 이벤트를 보내는 API 이름 목록을 순서대로 돌려준다.
+
+    자료를 걸러내는 쪽(platformVal)과 꺼내 쓰는 쪽(api_server)이 각자
+    'Realtime'이 이름에 들어가면 웹훅'이라고 판단했다. 이름과 실제 전송 방식은
+    별개라서, RealtimeDoorStatus처럼 이름은 Realtime이지만 LongPolling인 API가
+    웹훅 목록에 끼어 번호를 한 칸씩 밀었다 (2026-09-07).
+
+    전송 방식(trans_protocol)을 기준으로 판단하고, 방식 정보가 없을 때만
+    예전처럼 이름으로 판단한다(하위 호환).
+
+    Args:
+        messages: API 이름 목록
+        protocols: 같은 순서의 전송 방식 목록 ('basic'/'LongPolling'/'WebHook')
+
+    Returns:
+        list[str] — 웹훅 API 이름 (messages의 순서 유지)
+    """
+    names = list(messages or [])
+    protos = list(protocols or [])
+
+    if protos:
+        picked = [n for i, n in enumerate(names)
+                  if i < len(protos) and "webhook" in str(protos[i] or "").lower()]
+        if picked:
+            return picked
+        # 방식 목록은 있는데 웹훅이 하나도 없으면 설정이 안 실린 경우일 수 있어
+        # 이름 기준으로 한 번 더 본다 (기존 동작 보존).
+    return [n for n in names if "Realtime" in str(n)]

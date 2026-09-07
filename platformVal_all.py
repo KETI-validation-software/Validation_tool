@@ -1980,12 +1980,15 @@ class MyApp(PlatformMainUI):
                     self.Server.inSchema = self.videoInSchema
                     self.Server.webhookSchema = self.videoWebhookSchema
 
-                    # ✅ api_server는 "Realtime"이 포함된 API만 별도 인덱싱하므로 데이터 필터링
+                    # ✅ api_server가 웹훅 API만 별도 인덱싱하므로 같은 규칙으로 걸러낸다.
+                    #    이름이 아니라 실제 전송 방식 기준 (core.utils.webhook_api_names).
+                    from core.utils import webhook_api_names as _wh_names
+                    _wh_set = set(_wh_names(self.videoMessages, self.trans_protocols))
                     filtered_webhook_data = []
                     filtered_webhook_con = []
                     if self.videoMessages:
                         for i, msg in enumerate(self.videoMessages):
-                            if "Realtime" in msg:
+                            if msg in _wh_set:
                                 if self.videoWebhookData and i < len(self.videoWebhookData):
                                     filtered_webhook_data.append(self.videoWebhookData[i])
                                 else:
@@ -2671,12 +2674,15 @@ class MyApp(PlatformMainUI):
             self.Server.inSchema = self.videoInSchema
             self.Server.outCon = self.videoOutConstraint
 
-            # ✅ api_server는 "Realtime"이 포함된 API만 별도 인덱싱하므로 데이터 필터링
+            # ✅ api_server가 웹훅 API만 별도 인덱싱하므로 같은 규칙으로 걸러낸다.
+            #    이름이 아니라 실제 전송 방식 기준 (core.utils.webhook_api_names).
+            from core.utils import webhook_api_names as _wh_names
+            _wh_set = set(_wh_names(self.videoMessages, self.trans_protocols))
             filtered_webhook_data = []
             filtered_webhook_con = []
             if self.videoMessages:
                 for i, msg in enumerate(self.videoMessages):
-                    if "Realtime" in msg:
+                    if msg in _wh_set:
                         if self.videoWebhookData and i < len(self.videoWebhookData):
                             filtered_webhook_data.append(self.videoWebhookData[i])
                         else:

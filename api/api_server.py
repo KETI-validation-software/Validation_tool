@@ -1188,8 +1188,11 @@ class Server(BaseHTTPRequestHandler):
                 api_name = self.message[message_cnt]
                 Logger.debug(f"[SERVER] 현재 API: {api_name}")
 
-                # 웹훅이 있는 API들만 필터링 (Realtime이 들어간 API)
-                webhook_apis = [msg for msg in self.message if "Realtime" in msg]
+                # 웹훅 API 선별 — 이름이 아니라 실제 전송 방식 기준.
+                # 자료를 걸러내는 platformVal과 반드시 같은 규칙이어야 번호가 맞는다.
+                from core.utils import webhook_api_names
+                webhook_apis = webhook_api_names(self.message,
+                                                 getattr(Server, 'trans_protocol', None))
                 Logger.debug(f"[SERVER] 웹훅 API 목록: {webhook_apis}")
 
                 # 현재 API가 웹훅 API 목록에 있는지 확인
