@@ -906,7 +906,11 @@ class MyApp(PlatformMainUI):
 
                         Logger.debug(f"json_check_ 성공: result={val_result}, pass={key_psss_cnt}, error={key_error_cnt}")
                     except TypeError as e:
-                        Logger.debug(f" TypeError 발생, 맥락 검증 제외 하고 다시 시도: {e}")
+                        # 이 폴백은 의미 검증을 통째로 빼고 재시도한다 — 규칙이 없으면
+                        # 전 필드가 자동 통과라 실패가 있던 회차도 100점이 된다.
+                        # 조용히 넘어가면 채점이 틀렸는지 알 수 없으므로 크게 남긴다.
+                        Logger.error(f" ❌ 의미 검증 중 TypeError — 이 회차는 구조 검증만 "
+                                     f"수행되며 채점을 신뢰할 수 없습니다: {e}")
                         val_result, val_text, key_psss_cnt, key_error_cnt, opt_correct, opt_error = json_check_(
                             in_schema,
                             current_data,

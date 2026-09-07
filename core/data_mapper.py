@@ -545,7 +545,7 @@ class ConstraintDataGenerator:
                 if ref_key in self.latest_events:
                     Logger.debug(f"[BUILD_MAP]   Found referenceEndpoint in latest_events")
                     # valueType에 따라 REQUEST 또는 RESPONSE에서 가져오기
-                    if value_type == "request-based":
+                    if value_type in self.REQUEST_BASED_TYPES:
                         event = self.latest_events[ref_key].get("REQUEST", {})
                         Logger.debug(f"[BUILD_MAP]   Using REQUEST event")
                     else:  # random-response 등 다른 타입
@@ -607,7 +607,7 @@ class ConstraintDataGenerator:
                     "values": values if values else []
                 }
 
-            elif value_type == "request-based":
+            elif value_type in self.REQUEST_BASED_TYPES:
                 # referenceEndpoint 없으면 현재 request_data에서 찾기
                 Logger.debug(f"[BUILD_MAP]   Searching in current request_data")
                 values = self.find_key(request_data, ref_field)
@@ -902,7 +902,7 @@ class ConstraintDataGenerator:
             # 최상위 레벨에서 constraint 확인
             if key in constraint_map:
                 constraint = constraint_map[key]
-                if constraint["type"] in ["random-response", "random", "request-based", "response-based", ]:
+                if constraint["type"] in self.VALUE_PICK_TYPES:
                     # 랜덤 값 선택 — 템플릿이 배열이면 배열 타입 유지 (classFilter 등
                     # 문자열 배열 필드가 낱값으로 변형돼 나가던 문제 방지)
                     if constraint["values"]:
@@ -980,8 +980,7 @@ class ConstraintDataGenerator:
                         shared_values[field_path] = constraint["values"][0]
 
                 # 그 외 필드는 중복 방지
-                elif constraint["type"] in ["request-based", "random-response", "random",
-                                            "response-based"]:  # ← response-based 추가
+                elif constraint["type"] in self.VALUE_PICK_TYPES:
                     if constraint["values"]:
                         available_values[field_path] = constraint["values"].copy()
                         used_values[field_path] = []
@@ -1048,8 +1047,7 @@ class ConstraintDataGenerator:
                     item[field] = shared_values[field_path]
 
                 # ✅ request-based, random-response, random: 중복 방지 (순차 할당)
-                elif constraint["type"] in ["request-based", "random-response", "random",
-                                            "response-based"]:  # ← response-based 추가
+                elif constraint["type"] in self.VALUE_PICK_TYPES:
                     if field_path in available_values and available_values[field_path]:
                         values_list = available_values[field_path]
                         used_list = used_values.get(field_path, [])
@@ -1338,6 +1336,13 @@ class ConstraintDataGenerator:
 
         traverse(new_data)
         return new_data
+
+    # 관리도구가 내려주는 valueType 이름. request-array-based는 요청의 배열
+    # 필드에서 값을 가져오라는 뜻인데 목록에 없어 값이 한 번도 안 채워졌다
+    # (2026-09-07 실측: camID·eventName이 빈 값으로 나감).
+    REQUEST_BASED_TYPES = ("request-based", "request-array-based")
+    VALUE_PICK_TYPES = ("random-response", "random", "response-based",
+                        "request-based", "request-array-based")
 
     # PTZ 제어는 PTZ 카메라에만 유효하다. camType 표기는 상대 시스템마다
     # 'PTZ' / 'ptz' / 'PTZ Camera' / '고정형PTZ'처럼 제각각이라,

@@ -1299,8 +1299,12 @@ def _validate_specified_value_match(field_path, field_value, rule, field_errors,
 def _validate_range_match_direct(field_path, field_value, rule, field_errors, global_errors):
     """직접 범위 검증 (reference 없이)"""
     operator = rule.get('rangeOperator')
-    min_val = rule.get('rangeMin')
-    max_val = rule.get('rangeMax')
+    # 관리도구가 17자리 시각을 String으로 내려주면서 경계값도 문자열이 됐다.
+    # 값(v_num)은 숫자로 바꿔 쓰는데 경계는 그대로라 int와 str을 비교하다
+    # TypeError가 났고, 그 예외로 의미 검증 전체가 건너뛰어져 실패가 있는
+    # 회차까지 100점으로 통과했다 (2026-09-07 실측). 경계도 숫자로 맞춘다.
+    min_val = _to_comparable_number(rule.get('rangeMin'))
+    max_val = _to_comparable_number(rule.get('rangeMax'))
 
     # 리스트인 경우 모든 요소 검증
     values = [field_value] if not isinstance(field_value, list) else field_value
