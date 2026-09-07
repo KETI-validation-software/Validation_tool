@@ -98,14 +98,14 @@ class Server(BaseHTTPRequestHandler):
                 "data": payload_copy
             }
 
-            Logger.debug(f"[_push_event] 저장 시도: api={api_name}, dir={direction}")
-            Logger.debug(f"[_push_event] 저장 전 latest_event 키: {list(Server.latest_event.keys())}")
-
             Server.trace[api_name].append(evt)  # ✅ 클래스 변수 사용
             Server.latest_event[api_name][direction] = evt  # ✅ 클래스 변수 사용
 
-            Logger.debug(f"[_push_event] 저장 후 latest_event 키: {list(Server.latest_event.keys())}")
-            Logger.debug(f"[_push_event] 저장된 데이터: {api_name} -> {list(Server.latest_event[api_name].keys())}")
+            # 예전에는 저장 전/후 키 목록까지 4줄을 찍었다. 저장 전후로 달라지는
+            # 정보가 없어(추가만 함) 한 줄로 합쳤다 (2026-09-02).
+            Logger.debug(f"[_push_event] {api_name} {direction} 저장 "
+                         f"→ 보유: {list(Server.latest_event[api_name].keys())} "
+                         f"(누적 {len(Server.latest_event)}개 API)")
 
             # 파일 쓰기는 선택적으로 (환경 변수나 설정으로 제어 가능)
             # 성능이 중요하면 주석 처리하거나 비동기로 처리
@@ -493,6 +493,16 @@ class Server(BaseHTTPRequestHandler):
         return None
 
     @staticmethod
+    def _is_loopback_url(url):
+        """웹훅 주소가 자기 자신(루프백)을 가리키는지"""
+        try:
+            from urllib.parse import urlparse
+            host = (urlparse(str(url)).hostname or "").lower()
+        except Exception:
+            return False
+        return host in ("localhost", "::1") or host.startswith("127.")
+
+    @staticmethod
     def _is_subscription_api(api_name):
         """실시간 이벤트 구독 API인지 (RealtimeDoorStatus, RealtimeVerifEventInfos 등)"""
         return str(api_name or "").lstrip("/").lower().startswith("realtime")
@@ -644,7 +654,14 @@ class Server(BaseHTTPRequestHandler):
             error_msg = json.dumps({"code": "400", "message": "잘못된 URL 형식"})
             self.wfile.write(error_msg.encode('utf-8'))
             return
-        Logger.debug(f"[SERVER] do_POST called, path={self.path}, auth_type={self.auth_type}, headers={dict(self.headers)}")
+        # 헤더 전문을 찍으면 한 줄 300자 + 토큰이 그대로 노출된다.
+        # 판독에 필요한 항목만 남긴다 (2026-09-02).
+        _h = dict(self.headers)
+        _auth = _h.get("Authorization") or _h.get("authorization")
+        Logger.debug(f"[SERVER] do_POST path={self.path}, auth_type={self.auth_type}, "
+                     f"Content-Length={_h.get('Content-Length') or _h.get('content-length')}, "
+                     f"Authorization={'있음' if _auth else '없음'}, "
+                     f"User-Agent={_h.get('User-Agent') or _h.get('user-agent')}")
         ctype = self.headers.get_content_type()
 
         # ✅ 1단계: 요청 본문 먼저 읽기 (self.request_data 생성)
@@ -994,6 +1011,16 @@ class Server(BaseHTTPRequestHandler):
                         url_tmp = str(url_tmp).strip()
                         Logger.debug(f"[SERVER] Webhook URL (시스템에서 받은 주소): {url_tmp}")
 
+                        # 루프백 주소는 "보내는 쪽 자신"을 가리킨다. 형식은 멀쩡해서
+                        # 그대로 보내지만 상대 시스템에는 절대 도달하지 않는다.
+                        # 로그를 뒤져야 원인을 알 수 있어 전송 전에 미리 경고한다
+                        # (2026-09-02 실측: https://127.0.0.1:20000/... → 연결 거부).
+                        if self._is_loopback_url(url_tmp):
+                            Logger.warning(
+                                f" ⚠ 웹훅 주소가 자기 자신을 가리킴: {url_tmp}\n"
+                                f"    보내는 쪽(평가도구) 기준으로 해석되므로 상대 시스템에 "
+                                f"도달하지 않습니다. 상대 시스템의 실제 IP 주소가 필요합니다.")
+
                         # 4단계: 올바른 인덱스 사용
                         message = self.outMessage[message_cnt]
 
@@ -1044,8 +1071,11 @@ class Server(BaseHTTPRequestHandler):
         try:
             # constraints 디버그 로그
             Logger.debug(f"[CONSTRAINTS] out_con type: {type(out_con)}")
-            Logger.debug(f"[CONSTRAINTS] out_con value: {out_con}")
-            Logger.debug(f"[CONSTRAINTS] out_con length: {len(out_con) if isinstance(out_con, dict) else 'N/A'}")
+            # 같은 내용을 [BUILD_MAP] constraints가 다시 찍어 로그의 9%를 차지했다.
+            # 여기서는 어떤 필드가 걸려 있는지 키만 남긴다 (2026-09-02).
+            Logger.debug(f"[CONSTRAINTS] out_con 필드 "
+                         f"{len(out_con) if isinstance(out_con, dict) else 'N/A'}개: "
+                         f"{list(out_con.keys()) if isinstance(out_con, dict) else out_con}")
             Logger.debug(f"[CONSTRAINTS] 원본 message 내용: {json.dumps(message, ensure_ascii=False)[:200]}")
             Logger.debug(f"[CONSTRAINTS] ★ latest_event 키 목록: {list(Server.latest_event.keys())}")
             Logger.debug(f"[CONSTRAINTS] ★ generator.latest_events 동일 객체?: {id(self.generator.latest_events) == id(Server.latest_event)}")

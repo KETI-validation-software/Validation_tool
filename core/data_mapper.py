@@ -511,7 +511,9 @@ class ConstraintDataGenerator:
 
         # latest_events는 단계가 진행될수록 누적돼, 통째로 찍으면 한 줄이 수천 자가
         # 된다(로그 가독성 저하의 주범). 어떤 API가 쌓여 있는지 키만 남긴다.
-        Logger.debug(f"[BUILD_MAP] constraints: {constraints}")
+        # 전체 덤프는 [CONSTRAINTS] out_con과 같은 내용이라 두 번 찍혔다.
+        # 필드별 상세는 바로 아래 "path: valueType=..." 줄에 이미 나온다.
+        Logger.debug(f"[BUILD_MAP] constraints {len(constraints)}개 필드")
         Logger.debug(f"[BUILD_MAP] request_data: {request_data}")
         Logger.debug(f"[BUILD_MAP] 참조 가능 이벤트 {len(self.latest_events)}건: "
                      f"{sorted(k for k in self.latest_events if not k.startswith('/'))}")
