@@ -1055,8 +1055,24 @@ def _validate_field_match(field_path, field_value, rule, reference_context,
             return False
         return True
     else:
-        if lhs_list != rhs_list:
-            error_msg = f"값 오류\n- 입력값: {lhs_list}\n- 예상값: {rhs_list}"
+        # 순서는 보지 않는다 — 어느 카메라를 조회할지의 순서는 규격이 정하는
+        # 바가 아니고, 상대 시스템이 임의 순서로 응답해도 정상이다.
+        # 예전에는 리스트를 통째로 비교해 같은 5개가 순서만 다르면 실패했다.
+        # 참조가 1개일 때는 위 분기를 타서 순서 문제가 안 드러났다
+        # (2026-09-07 실측: 카메라 1대일 때 통과 → 5대에서 실패).
+        # 개수·내용은 그대로 확인한다(같은 ID가 두 번 오는 경우는 없다).
+        lhs_sorted = sorted(lhs_list, key=str)
+        rhs_sorted = sorted(rhs_list, key=str)
+        if lhs_sorted != rhs_sorted:
+            missing = [v for v in rhs_sorted if v not in lhs_sorted]
+            extra = [v for v in lhs_sorted if v not in rhs_sorted]
+            detail = ""
+            if missing:
+                detail += f"\n- 빠진 값: {missing}"
+            if extra:
+                detail += f"\n- 없는 값: {extra}"
+            error_msg = (f"값 오류 (순서는 무관)\n- 입력값: {lhs_sorted}"
+                         f"\n- 예상값: {rhs_sorted}{detail}")
             field_errors.append(error_msg)
             global_errors.append(f"[의미] {field_path}: {error_msg}")
             return False
