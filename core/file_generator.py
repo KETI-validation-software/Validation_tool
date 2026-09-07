@@ -244,8 +244,19 @@ class FileGeneratorService:
 
                     validation_content += f"# {spec_id} WebHook 검증 리스트\n"
                     validation_content += f"{webhook_v_list_name} = [\n"
-                    for vname in webhook_validation_names:
-                        validation_content += f"    {temp_spec_id}{vname},\n"
+                    # ✅ 스키마·데이터·제약과 동일하게 API 수만큼 자리를 맞춘다.
+                    #    예전에는 웹훅 API 것만 나열해 목록이 짧았고, 읽는 쪽은
+                    #    단계 번호(webhook_cnt)로 접근해 자리가 어긋났다 —
+                    #    웹훅 검증이 규칙 없이 돌거나 다른 API 규칙을 집었다
+                    #    (2026-09-02 실측: API 5개인데 목록은 1칸).
+                    for endpoint in endpoint_names:
+                        webhook_v_name = (f"{endpoint}_webhook_out_validation"
+                                          if schema_type == "request"
+                                          else f"{endpoint}_webhook_in_validation")
+                        if webhook_v_name in webhook_validation_names:
+                            validation_content += f"    {temp_spec_id}{webhook_v_name},\n"
+                        else:
+                            validation_content += f"    None,\n"
                     validation_content += "]\n\n"
 
                 # 데이터 리스트 생성
