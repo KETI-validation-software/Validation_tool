@@ -8,6 +8,7 @@ import traceback
 import os
 import copy  # deepcopy를 위해 추가
 from core.functions import resource_path
+from core.utils import summarize_payload
 from core.data_mapper import ConstraintDataGenerator
 from core.logger import Logger
 from requests.auth import HTTPDigestAuth
@@ -97,14 +98,14 @@ class Server(BaseHTTPRequestHandler):
                 "data": payload_copy
             }
 
-            Logger.debug(f"[_push_event] 저장 시도: api={api_name}, dir={direction}")
-            Logger.debug(f"[_push_event] 저장 전 latest_event 키: {list(Server.latest_event.keys())}")
-
             Server.trace[api_name].append(evt)  # ✅ 클래스 변수 사용
             Server.latest_event[api_name][direction] = evt  # ✅ 클래스 변수 사용
 
-            Logger.debug(f"[_push_event] 저장 후 latest_event 키: {list(Server.latest_event.keys())}")
-            Logger.debug(f"[_push_event] 저장된 데이터: {api_name} -> {list(Server.latest_event[api_name].keys())}")
+            # 예전에는 저장 전/후 키 목록까지 4줄을 찍었다. 저장 전후로 달라지는
+            # 정보가 없어(추가만 함) 한 줄로 합쳤다 (2026-09-02).
+            Logger.debug(f"[_push_event] {api_name} {direction} 저장 "
+                         f"→ 보유: {list(Server.latest_event[api_name].keys())} "
+                         f"(누적 {len(Server.latest_event)}개 API)")
 
             # 파일 쓰기는 선택적으로 (환경 변수나 설정으로 제어 가능)
             # 성능이 중요하면 주석 처리하거나 비동기로 처리
@@ -145,6 +146,22 @@ class Server(BaseHTTPRequestHandler):
         if api_name in Server.latest_event:  # 클래스 변수 사용
             return Server.latest_event[api_name].get(direction)  # 클래스 변수 사용
         return None
+
+    @staticmethod
+    def _numbered_or_base(numbered, base_api_name):
+        """번호 붙은 이름이 시나리오에 등록돼 있을 때만 사용한다.
+
+        시나리오에 한 단계만 등록된 API를 상대가 두 번 호출하면 예전에는
+        'X2'로 바꿨다가 목록에서 못 찾아 404 '호출 횟수 초과'를 냈다.
+        여분 호출도 정상 응답하되 채점은 첫 회차만 하기로 해(2026-09-02),
+        등록되지 않은 번호면 기본 이름으로 되돌린다.
+        """
+        registered = getattr(Server, 'message', None) or []
+        if numbered in registered:
+            return numbered
+        Logger.info(f" {base_api_name} 여분 호출 — 시나리오에 {numbered} 없음. "
+                    f"정상 응답하되 채점은 첫 회차만 반영")
+        return base_api_name
 
     def get_api_name_with_retry_suffix(self, base_api_name):
         """
@@ -189,7 +206,7 @@ class Server(BaseHTTPRequestHandler):
 
                     new_api_name = f"{base_api_name}{new_number}"
                     Logger.debug(f" 중간에 다른 API 끼어듦: {base_api_name} → {new_api_name}")
-                    return new_api_name
+                    return self._numbered_or_base(new_api_name, base_api_name)
 
             # ✅ 연속 호출 중 → retry_limit 확인
             current_key = last_processed_key
@@ -229,7 +246,7 @@ class Server(BaseHTTPRequestHandler):
 
                 new_api_name = f"{base_api_name}{new_number}"
                 Logger.debug(f" Limit 도달: {current_key} → {new_api_name}")
-                return new_api_name
+                return self._numbered_or_base(new_api_name, base_api_name)
 
         except Exception as e:
             Logger.error(f"[RETRY_SUFFIX] 오류 발생: {e}")
@@ -264,7 +281,7 @@ class Server(BaseHTTPRequestHandler):
 
         # 1. 시각 필드 판정 → 201 또는 400 (유도 방식과 짝)
         #    스키마 없이도 판정할 수 있으므로 스키마 유무와 무관하게 먼저 본다.
-        time_verdict = self._judge_time_fields(request_data)
+        time_verdict = self._judge_time_fields(request_data, api_name)
         if time_verdict:
             code, reason = time_verdict
             Logger.debug(f" 시각 판정: {code} — {reason}")
@@ -475,7 +492,22 @@ class Server(BaseHTTPRequestHandler):
 
         return None
 
-    def _judge_time_fields(self, request_data):
+    @staticmethod
+    def _is_loopback_url(url):
+        """웹훅 주소가 자기 자신(루프백)을 가리키는지"""
+        try:
+            from urllib.parse import urlparse
+            host = (urlparse(str(url)).hostname or "").lower()
+        except Exception:
+            return False
+        return host in ("localhost", "::1") or host.startswith("127.")
+
+    @staticmethod
+    def _is_subscription_api(api_name):
+        """실시간 이벤트 구독 API인지 (RealtimeDoorStatus, RealtimeVerifEventInfos 등)"""
+        return str(api_name or "").lstrip("/").lower().startswith("realtime")
+
+    def _judge_time_fields(self, request_data, api_name=None):
         """시각 필드 판정 — 유도 방식 개편(2026-08-23)과 짝을 맞춘다.
 
         유도 값이 두 종류로 분리됐다:
@@ -486,10 +518,15 @@ class Server(BaseHTTPRequestHandler):
         - 시각 필드가 String 전환됐으므로 문자열도 숫자로 변환해 본다
         - startTime은 timePeriod.startTime처럼 중첩돼 있어 재귀로 찾는다
         - 정상 과거 시각(시나리오 데이터의 2022년 등)은 판정하지 않는다
+        - ✅ 미래 구간(201) 판정은 저장 데이터 조회 API에만 적용한다.
+          실시간 구독(Realtime*)의 startTime은 "언제부터 받을지"라 미래가 정상인데,
+          구독 요청에까지 적용해 201 '정보 없음'으로 거절하던 문제(2026-09-02).
+          형식 위반(400)은 어느 API든 오류이므로 그대로 판정한다.
 
         Returns:
             (code, reason) 튜플 — "201"/"400" — 또는 None (정상)
         """
+        is_subscription = self._is_subscription_api(api_name)
         try:
             now17 = int(datetime.datetime.now().strftime("%Y%m%d%H%M%S") + "999")
             for value in self.generator.find_key(request_data, "startTime"):
@@ -510,6 +547,10 @@ class Server(BaseHTTPRequestHandler):
                     except ValueError:
                         return ("400", f"시각 형식 무효(날짜 불성립): startTime={value!r}")
                     if num > now17:
+                        if is_subscription:
+                            Logger.debug(f" 실시간 구독이므로 미래 startTime 정상: "
+                                         f"{api_name} startTime={value!r}")
+                            continue
                         return ("201", f"조회 구간이 미래: startTime={value!r}")
         except Exception as e:
             Logger.error(f" 시각 판정 실패: {e}")
@@ -613,7 +654,14 @@ class Server(BaseHTTPRequestHandler):
             error_msg = json.dumps({"code": "400", "message": "잘못된 URL 형식"})
             self.wfile.write(error_msg.encode('utf-8'))
             return
-        Logger.debug(f"[SERVER] do_POST called, path={self.path}, auth_type={self.auth_type}, headers={dict(self.headers)}")
+        # 헤더 전문을 찍으면 한 줄 300자 + 토큰이 그대로 노출된다.
+        # 판독에 필요한 항목만 남긴다 (2026-09-02).
+        _h = dict(self.headers)
+        _auth = _h.get("Authorization") or _h.get("authorization")
+        Logger.debug(f"[SERVER] do_POST path={self.path}, auth_type={self.auth_type}, "
+                     f"Content-Length={_h.get('Content-Length') or _h.get('content-length')}, "
+                     f"Authorization={'있음' if _auth else '없음'}, "
+                     f"User-Agent={_h.get('User-Agent') or _h.get('user-agent')}")
         ctype = self.headers.get_content_type()
 
         # ✅ 1단계: 요청 본문 먼저 읽기 (self.request_data 생성)
@@ -626,6 +674,8 @@ class Server(BaseHTTPRequestHandler):
             try:
                 self.request_data = json.loads(request_body.decode('utf-8'))
                 Logger.debug(f"[SERVER] 파싱된 요청 데이터: {self.request_data}")
+                # 실제 오간 값 한눈에 보기 — 개수가 아니라 내용(cam0001…)을 남긴다
+                Logger.info(f"[데이터] ← 수신 {api_name}: {summarize_payload(self.request_data)}")
 
                 # ✅ API 이름으로 로깅 (spec_id 제외)
                 Logger.debug(f"[TRACE WRITE] API 이름: {api_name}")
@@ -961,6 +1011,16 @@ class Server(BaseHTTPRequestHandler):
                         url_tmp = str(url_tmp).strip()
                         Logger.debug(f"[SERVER] Webhook URL (시스템에서 받은 주소): {url_tmp}")
 
+                        # 루프백 주소는 "보내는 쪽 자신"을 가리킨다. 형식은 멀쩡해서
+                        # 그대로 보내지만 상대 시스템에는 절대 도달하지 않는다.
+                        # 로그를 뒤져야 원인을 알 수 있어 전송 전에 미리 경고한다
+                        # (2026-09-02 실측: https://127.0.0.1:20000/... → 연결 거부).
+                        if self._is_loopback_url(url_tmp):
+                            Logger.warning(
+                                f" ⚠ 웹훅 주소가 자기 자신을 가리킴: {url_tmp}\n"
+                                f"    보내는 쪽(평가도구) 기준으로 해석되므로 상대 시스템에 "
+                                f"도달하지 않습니다. 상대 시스템의 실제 IP 주소가 필요합니다.")
+
                         # 4단계: 올바른 인덱스 사용
                         message = self.outMessage[message_cnt]
 
@@ -1011,8 +1071,11 @@ class Server(BaseHTTPRequestHandler):
         try:
             # constraints 디버그 로그
             Logger.debug(f"[CONSTRAINTS] out_con type: {type(out_con)}")
-            Logger.debug(f"[CONSTRAINTS] out_con value: {out_con}")
-            Logger.debug(f"[CONSTRAINTS] out_con length: {len(out_con) if isinstance(out_con, dict) else 'N/A'}")
+            # 같은 내용을 [BUILD_MAP] constraints가 다시 찍어 로그의 9%를 차지했다.
+            # 여기서는 어떤 필드가 걸려 있는지 키만 남긴다 (2026-09-02).
+            Logger.debug(f"[CONSTRAINTS] out_con 필드 "
+                         f"{len(out_con) if isinstance(out_con, dict) else 'N/A'}개: "
+                         f"{list(out_con.keys()) if isinstance(out_con, dict) else out_con}")
             Logger.debug(f"[CONSTRAINTS] 원본 message 내용: {json.dumps(message, ensure_ascii=False)[:200]}")
             Logger.debug(f"[CONSTRAINTS] ★ latest_event 키 목록: {list(Server.latest_event.keys())}")
             Logger.debug(f"[CONSTRAINTS] ★ generator.latest_events 동일 객체?: {id(self.generator.latest_events) == id(Server.latest_event)}")
@@ -1040,6 +1103,7 @@ class Server(BaseHTTPRequestHandler):
                     is_webhook=False
                 )
                 Logger.debug(f"[CONSTRAINTS] 업데이트된 message 내용: {json.dumps(updated_message, ensure_ascii=False)[:200]}")
+                Logger.info(f"[데이터] → 송신 {api_name}: {summarize_payload(updated_message)}")
 
                 # ✅ trace 저장 (_push_event 내부에서 deepcopy 수행)
                 self._push_event(api_name, "RESPONSE", updated_message)
@@ -1124,8 +1188,11 @@ class Server(BaseHTTPRequestHandler):
                 api_name = self.message[message_cnt]
                 Logger.debug(f"[SERVER] 현재 API: {api_name}")
 
-                # 웹훅이 있는 API들만 필터링 (Realtime이 들어간 API)
-                webhook_apis = [msg for msg in self.message if "Realtime" in msg]
+                # 웹훅 API 선별 — 이름이 아니라 실제 전송 방식 기준.
+                # 자료를 걸러내는 platformVal과 반드시 같은 규칙이어야 번호가 맞는다.
+                from core.utils import webhook_api_names
+                webhook_apis = webhook_api_names(self.message,
+                                                 getattr(Server, 'trans_protocol', None))
                 Logger.debug(f"[SERVER] 웹훅 API 목록: {webhook_apis}")
 
                 # 현재 API가 웹훅 API 목록에 있는지 확인
@@ -1439,14 +1506,15 @@ class Server(BaseHTTPRequestHandler):
                             if "doorRelayStatus" in save_data:
                                 save_data["doorRelaySensor"] = save_data.pop("doorRelayStatus")
 
-                            if "doorRelaySensor" not in save_data or not save_data["doorRelaySensor"]:
-                                save_data["doorRelaySensor"] = "일반"
-
-                            if "doorSensor" not in save_data or save_data["doorSensor"] == "0":
-                                save_data["doorSensor"] = "Lock"
-
-                            if "doorSensor" not in save_data or save_data["doorSensor"] == "1":
-                                save_data["doorSensor"] = "Unlock"
+                            # ✅ 받은 값을 그대로 기억한다.
+                            #    예전에는 doorSensor가 없거나 "0"/"1"이면 "Lock"/"Unlock"으로,
+                            #    doorRelaySensor가 비면 "일반"으로 채워 넣었다. 규격에 맞지
+                            #    않는 데이터를 도구가 몰래 고쳐 통과시키는 셈이라, 잘못된
+                            #    데이터는 잘못됐다고 판정되도록 보정을 제거했다.
+                            for _f in ("doorSensor", "doorRelaySensor"):
+                                if _f not in save_data or save_data[_f] in ("", None):
+                                    Logger.warning(f" ⚠ {door_id}: {_f} 값이 비어 있음 "
+                                                   f"(보정 없이 그대로 기록)")
 
                             Server.door_memory[door_id] = {
                                 key: value for key, value in save_data.items()

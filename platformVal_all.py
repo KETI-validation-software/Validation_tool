@@ -406,6 +406,23 @@ class MyApp(PlatformMainUI):
         previous_elapsed = int(getattr(self, f"_api_timer_elapsed_{row}", 0))
         return max(previous_elapsed, elapsed)
 
+    def _log_polling(self, key, msg, every=10.0):
+        """대기 폴링 로그 중복 억제.
+
+        요청을 기다리는 동안 1초마다 같은 줄이 반복돼 로그의 3분의 1을 차지했다
+        (실측: 실시간 시험 6,817줄 중 2,934줄). 내용이 바뀌었을 때와
+        every초마다 한 번만 남긴다. 정보는 그대로 남고 반복만 줄인다.
+        """
+        state = getattr(self, "_polling_log_state", None)
+        if state is None:
+            state = self._polling_log_state = {}
+        now = time.time()
+        last_msg, last_at = state.get(key, (None, 0.0))
+        if msg == last_msg and (now - last_at) < every:
+            return
+        state[key] = (msg, now)
+        Logger.debug(msg)
+
     def _set_timer_running(self, row, time_interval=None):
         self.set_api_timer_state(row, "running", self._timer_elapsed_seconds(time_interval))
 
@@ -550,13 +567,16 @@ class MyApp(PlatformMainUI):
                 return
             else:
                 time_interval = time.time() - self.time_pre
-                Logger.debug(f" 시간 간격: {time_interval}초")
+                # 대기 중에는 1초마다 같은 줄이 반복돼 로그의 3분의 1을 차지했다.
+                # 단계가 바뀌었을 때와 10초마다 한 번만 남긴다 (2026-09-02).
+                self._log_polling(f"interval:{self.cnt}", f" 시간 간격: {time_interval:.1f}초")
 
             if self.realtime_flag is True:
                 Logger.debug(f"[json_check] do_checker 호출")
 
             # SPEC_CONFIG에서 timeout
-            current_timeout = (self.time_outs[self.cnt] / 1000) if self.cnt < len(self.time_outs) else 5.0
+            # 안내서 표 3-2: 메시지당 제한 시간은 60초 — 관리도구 설정과 무관하게 고정
+            current_timeout = float(getattr(self.CONSTANTS, 'MESSAGE_TIMEOUT_SEC', 60))
 
             # timeout이 0인 경우
             if current_timeout == 0 or time_interval < current_timeout:
@@ -590,7 +610,7 @@ class MyApp(PlatformMainUI):
                 # 대신 플래그만 세팅하여 중복 실행 방지
                 self.step_start_log_printed = True
 
-                Logger.debug(f" API 처리 시작: {api_name}")
+                self._log_polling(f"step:{self.cnt}", f" API 처리 시작: {api_name}")
 
                 current_validation = {}
 
@@ -601,7 +621,9 @@ class MyApp(PlatformMainUI):
                         direction="in",
                     ) or {}
                     if current_validation:
-                        Logger.debug(f" 현재 API의 검증 규칙 로드 완료: {list(current_validation.keys())}")
+                        self._log_polling(
+                            f"rules:{self.cnt}",
+                            f" 현재 API의 검증 규칙 로드 완료: {list(current_validation.keys())}")
                 except Exception as e:
                     current_validation = {}
                     Logger.debug(f" 현재 API의 검증 규칙 로드 실패: {e}")
@@ -613,7 +635,8 @@ class MyApp(PlatformMainUI):
                 # Server 클래스 변수 request_counter 확인
                 if hasattr(self.Server, 'request_counter') and api_name in self.Server.request_counter:
                     actual_count = self.Server.request_counter[api_name]
-                    Logger.debug(f" API: {api_name}, 예상: {expected_count}, 실제: {actual_count}")
+                    self._log_polling(f"count:{self.cnt}",
+                                      f" API: {api_name}, 예상: {expected_count}, 실제: {actual_count}")
                     if actual_count >= expected_count:
                         request_received = True
 
@@ -628,7 +651,11 @@ class MyApp(PlatformMainUI):
                     self._set_timer_running(self.cnt, 0)
 
                     if self.current_retry == 0:
-                        Logger.debug(f"능동 대기(WAIT): 시스템 요청 대기 중 (API: {api_name}, 예상: {expected_count}회, 실제: {actual_count}회)")
+                        self._log_polling(
+                            f"wait:{self.cnt}",
+                            f"능동 대기(WAIT): 시스템 요청 대기 중 (API: {api_name}, "
+                            f"예상: {expected_count}회, 실제: {actual_count}회) "
+                            f"— {int(time_interval)}초 경과")
                     return
                 
                 # ✅ 요청 수신 완료 - 타이머 라인 제거 (기능 비활성화됨)
@@ -879,7 +906,11 @@ class MyApp(PlatformMainUI):
 
                         Logger.debug(f"json_check_ 성공: result={val_result}, pass={key_psss_cnt}, error={key_error_cnt}")
                     except TypeError as e:
-                        Logger.debug(f" TypeError 발생, 맥락 검증 제외 하고 다시 시도: {e}")
+                        # 이 폴백은 의미 검증을 통째로 빼고 재시도한다 — 규칙이 없으면
+                        # 전 필드가 자동 통과라 실패가 있던 회차도 100점이 된다.
+                        # 조용히 넘어가면 채점이 틀렸는지 알 수 없으므로 크게 남긴다.
+                        Logger.error(f" ❌ 의미 검증 중 TypeError — 이 회차는 구조 검증만 "
+                                     f"수행되며 채점을 신뢰할 수 없습니다: {e}")
                         val_result, val_text, key_psss_cnt, key_error_cnt, opt_correct, opt_error = json_check_(
                             in_schema,
                             current_data,
@@ -1953,12 +1984,15 @@ class MyApp(PlatformMainUI):
                     self.Server.inSchema = self.videoInSchema
                     self.Server.webhookSchema = self.videoWebhookSchema
 
-                    # ✅ api_server는 "Realtime"이 포함된 API만 별도 인덱싱하므로 데이터 필터링
+                    # ✅ api_server가 웹훅 API만 별도 인덱싱하므로 같은 규칙으로 걸러낸다.
+                    #    이름이 아니라 실제 전송 방식 기준 (core.utils.webhook_api_names).
+                    from core.utils import webhook_api_names as _wh_names
+                    _wh_set = set(_wh_names(self.videoMessages, self.trans_protocols))
                     filtered_webhook_data = []
                     filtered_webhook_con = []
                     if self.videoMessages:
                         for i, msg in enumerate(self.videoMessages):
-                            if "Realtime" in msg:
+                            if msg in _wh_set:
                                 if self.videoWebhookData and i < len(self.videoWebhookData):
                                     filtered_webhook_data.append(self.videoWebhookData[i])
                                 else:
@@ -2644,12 +2678,15 @@ class MyApp(PlatformMainUI):
             self.Server.inSchema = self.videoInSchema
             self.Server.outCon = self.videoOutConstraint
 
-            # ✅ api_server는 "Realtime"이 포함된 API만 별도 인덱싱하므로 데이터 필터링
+            # ✅ api_server가 웹훅 API만 별도 인덱싱하므로 같은 규칙으로 걸러낸다.
+            #    이름이 아니라 실제 전송 방식 기준 (core.utils.webhook_api_names).
+            from core.utils import webhook_api_names as _wh_names
+            _wh_set = set(_wh_names(self.videoMessages, self.trans_protocols))
             filtered_webhook_data = []
             filtered_webhook_con = []
             if self.videoMessages:
                 for i, msg in enumerate(self.videoMessages):
-                    if "Realtime" in msg:
+                    if msg in _wh_set:
                         if self.videoWebhookData and i < len(self.videoWebhookData):
                             filtered_webhook_data.append(self.videoWebhookData[i])
                         else:

@@ -27,6 +27,60 @@ def remove_api_number_suffix(api_name):
         
     return re.sub(r'\d+$', '', api_name)
 
+def summarize_payload(data, max_items=12, max_text=40):
+    """메시지 내용을 한 줄로 요약 — 실제 오간 값을 눈으로 확인하기 위한 것.
+
+    개수만으로는 "무엇이 오갔는지" 알 수 없어(cam0001인지 cam9999인지),
+    목록은 대표 값들을, 낱값은 값 자체를 보여준다.
+
+    예) camList 5건 [cam0001, cam0002, cam0003, cam0004, cam0005] | code=200
+        timePeriod{startTime=20260817163010123, endTime=20260822163010123}
+    """
+    def brief(v):
+        text = str(v)
+        return text if len(text) <= max_text else text[:max_text] + "…"
+
+    def rep_key(rows):
+        """목록에서 보여줄 대표 필드 — ID류 우선, 없으면 첫 필드"""
+        keys = [k for r in rows if isinstance(r, dict) for k in r.keys()]
+        for kw in ("ID", "Id", "Name", "Time"):
+            for k in keys:
+                if k.endswith(kw):
+                    return k
+        return keys[0] if keys else None
+
+    if not isinstance(data, dict):
+        return brief(data)
+
+    # 비밀번호·토큰은 값 대신 ***  (요약 줄은 캡처·공유가 잦다)
+    secret_keys = {"userPW", "accessToken", "token", "password", "secret", "apiKey",
+                   "accessPW", "Authorization"}
+
+    parts = []
+    for key, value in data.items():
+        if key in secret_keys:
+            parts.append(f"{key}=***")
+            continue
+        if isinstance(value, list):
+            if value and isinstance(value[0], dict):
+                rk = rep_key(value)
+                shown = [brief(r.get(rk)) for r in value[:max_items] if isinstance(r, dict)]
+                more = f" 외 {len(value) - max_items}건" if len(value) > max_items else ""
+                label = f"{key} {len(value)}건"
+                parts.append(f"{label} [{', '.join(shown)}{more}]" if rk else f"{label}")
+            else:
+                shown = [brief(v) for v in value[:max_items]]
+                more = f" 외 {len(value) - max_items}" if len(value) > max_items else ""
+                parts.append(f"{key} {len(value)}건 [{', '.join(shown)}{more}]")
+        elif isinstance(value, dict):
+            inner = ", ".join(f"{k}={brief(v)}" for k, v in list(value.items())[:4]
+                              if not isinstance(v, (dict, list)))
+            parts.append(f"{key}{{{inner}}}" if inner else f"{key}{{...}}")
+        else:
+            parts.append(f"{key}={brief(value)}")
+    return " | ".join(parts) if parts else "(빈 메시지)"
+
+
 def safe_str(value):
     """
     UI 표시를 위해 데이터를 안전하게 문자열로 변환하는 함수
@@ -451,6 +505,9 @@ def load_external_constants(constants_module):
                     'ENABLE_ERROR_REQUEST_MUTATION',      # ✅ 오류 유도 시험 — 외부 파일로 재빌드 없이 켜고 끄기
                     'ENABLE_WEBHOOK_CONTEXT_VALIDATION',  # ✅ 웹훅 맥락 검증 — 문제 시 외부 파일에서 False로 즉시 롤백
                     'ENABLE_ERROR_RESPONSE_CHECK',        # ✅ 장치 역할의 오류 코드 응답 — 리허설용, 오탐 시 즉시 롤백
+                    'MESSAGE_TIMEOUT_SEC',                # ✅ 메시지 제한 시간(안내서 60초 고정) — 외부 파일로 조정
+                    'ENABLE_LIST_COUNT_CHECK',            # ✅ 목록 구성 개수(5~100) 판정 — 오탐 시 외부 파일에서 즉시 롤백
+                    'LIST_COUNT_MIN', 'LIST_COUNT_MAX', 'LIST_COUNT_TARGETS',
                 ]
 
                 # 덮어씌우기
@@ -656,3 +713,34 @@ def get_result_icon_path(result, img_pass, img_fail, img_none):
         return img_fail
     return img_none
 
+
+
+def webhook_api_names(messages, protocols=None):
+    """웹훅으로 이벤트를 보내는 API 이름 목록을 순서대로 돌려준다.
+
+    자료를 걸러내는 쪽(platformVal)과 꺼내 쓰는 쪽(api_server)이 각자
+    'Realtime'이 이름에 들어가면 웹훅'이라고 판단했다. 이름과 실제 전송 방식은
+    별개라서, RealtimeDoorStatus처럼 이름은 Realtime이지만 LongPolling인 API가
+    웹훅 목록에 끼어 번호를 한 칸씩 밀었다 (2026-09-07).
+
+    전송 방식(trans_protocol)을 기준으로 판단하고, 방식 정보가 없을 때만
+    예전처럼 이름으로 판단한다(하위 호환).
+
+    Args:
+        messages: API 이름 목록
+        protocols: 같은 순서의 전송 방식 목록 ('basic'/'LongPolling'/'WebHook')
+
+    Returns:
+        list[str] — 웹훅 API 이름 (messages의 순서 유지)
+    """
+    names = list(messages or [])
+    protos = list(protocols or [])
+
+    if protos:
+        picked = [n for i, n in enumerate(names)
+                  if i < len(protos) and "webhook" in str(protos[i] or "").lower()]
+        if picked:
+            return picked
+        # 방식 목록은 있는데 웹훅이 하나도 없으면 설정이 안 실린 경우일 수 있어
+        # 이름 기준으로 한 번 더 본다 (기존 동작 보존).
+    return [n for n in names if "Realtime" in str(n)]

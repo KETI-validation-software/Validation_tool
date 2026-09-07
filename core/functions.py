@@ -179,7 +179,42 @@ def format_errors_as_tree(error_messages):
 # ================================================================
 # 필드별 순차 검증 (구조 → 의미)
 # ================================================================
-def json_check_(schema, data, flag, validation_rules=None, reference_context=None):
+def check_list_counts(api_name, data):
+    """목록 구성 개수(5~100) 판정 — 안내서 표 2-1 "목록 정보", 부록 표 Ⅰ-12.
+
+    프로필 조회 응답의 목록은 5개 이상 100개 이하여야 한다("송신 조건 불충족").
+    대상은 CONSTANTS.LIST_COUNT_TARGETS에 등록된 (API, 필드)뿐이다 — 이벤트 목록은
+    1건 이상이면 정상이라 대상이 아니다.
+
+    Returns:
+        list[(field, count, ok)] — 판정한 목록들. 대상이 없으면 빈 목록.
+    """
+    if not getattr(CONSTANTS, "ENABLE_LIST_COUNT_CHECK", False):
+        return []
+    if not isinstance(data, dict) or not api_name:
+        return []
+
+    # 재시도로 붙는 숫자 접미사(CameraProfiles2 등)를 떼고 대조한다
+    base_api = re.sub(r'\d+$', '', str(api_name))
+    targets = (getattr(CONSTANTS, "LIST_COUNT_TARGETS", {}) or {}).get(base_api, [])
+    if not targets:
+        return []
+
+    lo = getattr(CONSTANTS, "LIST_COUNT_MIN", 5)
+    hi = getattr(CONSTANTS, "LIST_COUNT_MAX", 100)
+
+    results = []
+    for field in targets:
+        value = data.get(field)
+        if not isinstance(value, list):
+            continue  # 필드 자체가 없거나 목록이 아니면 구조 검증이 잡는다
+        count = len(value)
+        results.append((field, count, lo <= count <= hi))
+    return results
+
+
+def json_check_(schema, data, flag, validation_rules=None, reference_context=None,
+                api_name=None):
     """
     각 필드마다 '구조 검증 → 의미 검증'을 순차적으로 수행
 
@@ -188,6 +223,7 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
     flag:   옵션(기존 그대로)
     validation_rules: (선택) 의미 검증 규칙 dict
     reference_context: (선택) 다른 엔드포인트 응답 사전
+    api_name: (선택) 목록 구성 개수 판정 대상 식별용 API 이름
 
     반환: (result, error_msg, correct_cnt, error_cnt)
     """
@@ -247,6 +283,14 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
             else:
                 rules_dict = extract_validation_rules(validation_rules)
             Logger.debug(f"[json_check_] 의미 검증 규칙 키: {list(rules_dict.keys())}")
+
+        # 2-1) 목록 구성 개수 판정 (5~100) — 대상 목록만, 개수는 항상 로그에 남긴다
+        #      (안내서: "실제 시험한 개수는 시험결과서에 표기됩니다")
+        list_count_map = {}
+        for _field, _count, _ok in check_list_counts(api_name, data):
+            list_count_map[_field] = (_count, _ok)
+            Logger.info(f"[목록 개수] {api_name}.{_field}: {_count}개 "
+                        f"({'적합' if _ok else '기준 미달/초과'})")
 
         # 3) 필드별 결과 저장
         field_results = {}
@@ -441,6 +485,20 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
                 "is_optional": is_optional
             }
 
+            # LongPolling 구독은 웹훅 수신 주소가 필요 없다.
+            # transProtocolDesc는 그때 의미 없는 필드이므로 값이 무엇이든
+            # (null·빈 값 포함) 판정하지 않고 통과시킨다 (2026-09-02 결정).
+            if _is_desc_exempt(field_path, data):
+                field_results[field_path]["struct_pass"] = True
+                field_results[field_path]["semantic_pass"] = True
+                total_correct += 1
+                if is_optional:
+                    opt_correct += 1
+                else:
+                    required_correct += 1
+                Logger.debug(f"  ⊙ LongPolling이므로 수신 주소 불필요 — 판정 생략 (자동 PASS)")
+                continue
+
             expected_type = flat_fields[field_path]
 
             # 4-1) 구조 검증: 필드 존재 여부
@@ -503,6 +561,26 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
             # 구조 검증 통과
             field_results[field_path]["struct_pass"] = True
             Logger.debug(f"  ✅ 구조: 타입 검증 통과")
+
+            # 4-2-1) 목록 구성 개수(송신 조건) — 기준 미달·초과면 데이터 유효성 실패
+            if field_path in list_count_map:
+                _count, _ok = list_count_map[field_path]
+                if not _ok:
+                    _lo = getattr(CONSTANTS, "LIST_COUNT_MIN", 5)
+                    _hi = getattr(CONSTANTS, "LIST_COUNT_MAX", 100)
+                    error_msg = (f"목록 구성 개수 기준 미충족\n- 실제: {_count}개"
+                                 f"\n- 기준: {_lo}개 이상 {_hi}개 이하\n")
+                    field_results[field_path]["errors"].append(error_msg)
+                    error_messages.append(f"[의미] {field_path}: {error_msg}")
+                    field_results[field_path]["semantic_pass"] = False
+                    total_error += 1
+                    if is_optional:
+                        opt_error += 1
+                    else:
+                        required_error += 1
+                    Logger.error(f"  ❌ [실패] {field_path} (목록 구성 개수) — "
+                                 f"{_count}개 (기준: {_lo}~{_hi}개)")
+                    continue
 
             # 4-3) 의미 검증
             if field_path not in rules_dict:
@@ -977,12 +1055,68 @@ def _validate_field_match(field_path, field_value, rule, reference_context,
             return False
         return True
     else:
-        if lhs_list != rhs_list:
-            error_msg = f"값 오류\n- 입력값: {lhs_list}\n- 예상값: {rhs_list}"
+        # 순서는 보지 않는다 — 어느 카메라를 조회할지의 순서는 규격이 정하는
+        # 바가 아니고, 상대 시스템이 임의 순서로 응답해도 정상이다.
+        # 예전에는 리스트를 통째로 비교해 같은 5개가 순서만 다르면 실패했다.
+        # 참조가 1개일 때는 위 분기를 타서 순서 문제가 안 드러났다
+        # (2026-09-07 실측: 카메라 1대일 때 통과 → 5대에서 실패).
+        # 개수·내용은 그대로 확인한다(같은 ID가 두 번 오는 경우는 없다).
+        lhs_sorted = sorted(lhs_list, key=str)
+        rhs_sorted = sorted(rhs_list, key=str)
+        if lhs_sorted != rhs_sorted:
+            missing = [v for v in rhs_sorted if v not in lhs_sorted]
+            extra = [v for v in lhs_sorted if v not in rhs_sorted]
+            detail = ""
+            if missing:
+                detail += f"\n- 빠진 값: {missing}"
+            if extra:
+                detail += f"\n- 없는 값: {extra}"
+            error_msg = (f"값 오류 (순서는 무관)\n- 입력값: {lhs_sorted}"
+                         f"\n- 예상값: {rhs_sorted}{detail}")
             field_errors.append(error_msg)
             global_errors.append(f"[의미] {field_path}: {error_msg}")
             return False
     return True
+
+
+def _is_desc_exempt(field_path, data):
+    """LongPolling 구독의 transProtocolDesc는 판정 대상에서 뺀다.
+
+    RealtimeDoorStatus처럼 전송 방식이 LongPolling으로 고정된 API는 웹훅 수신
+    주소를 쓰지 않는다. 그래서 transProtocolDesc에 null·빈 값이 와도 정상인데,
+    스키마·검증 규칙은 그대로 걸려 있어 실패로 잡히던 문제(2026-09-02).
+
+    같은 요청 안의 transProtocolType을 보고 판단하므로, 같은 API라도
+    WebHook으로 설정된 회차에서는 평소대로 검사한다.
+    """
+    if not str(field_path).endswith("transProtocolDesc"):
+        return False
+    if not isinstance(data, dict):
+        return False
+
+    proto = data.get("transProtocol")
+    if not isinstance(proto, dict):
+        return False
+    ptype = proto.get("transProtocolType")
+    if ptype is None:
+        return False   # 방식을 모르면 평소대로 검사 (type 자체는 별도 규칙이 잡는다)
+    return "webhook" not in str(ptype).lower()
+
+
+def _to_comparable_number(value):
+    """비교용 숫자로 변환. 17자리 시각 문자열은 정수로(float는 정밀도 손실).
+    변환 불가면 None."""
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        return value
+    text = str(value).strip()
+    if not text:
+        return None
+    try:
+        return int(text) if text.lstrip('-').isdigit() else float(text)
+    except (TypeError, ValueError):
+        return None
 
 
 def _validate_range_match(field_path, field_value, rule, reference_context,
@@ -994,7 +1128,12 @@ def _validate_range_match(field_path, field_value, rule, reference_context,
     ref_field_min = rule.get('referenceFieldMin')
     ref_endpoint_max = rule.get('referenceEndpointMax')
     ref_endpoint_min = rule.get('referenceEndpointMin')
-    ref_operator = rule.get('referenceRangeOperator', 'between')
+    # 관리도구는 이 값을 rangeOperator로 내려준다(실측 2026-09-02).
+    # 예전에는 referenceRangeOperator만 읽어 늘 기본값 between으로 떨어졌고,
+    # '이상'으로 설정해도 max가 없다며 실패로 잡혔다.
+    ref_operator = (rule.get('rangeOperator')
+                    or rule.get('referenceRangeOperator')
+                    or 'between')
 
     # ✅ field_value가 리스트인 경우 각 요소를 검증
     if isinstance(field_value, list):
@@ -1008,16 +1147,22 @@ def _validate_range_match(field_path, field_value, rule, reference_context,
 
         all_valid = True
         for idx, val in enumerate(field_value):
-            if isinstance(val, (int, float)):
-                # 각 요소에 대해 범위 검증 수행
-                if not _validate_single_value_in_range(
-                        field_path, val, ref_endpoint_max, ref_endpoint_min,
-                        ref_field_max, ref_field_min, ref_operator,
-                        reference_context, field_errors, global_errors, idx
-                ):
-                    all_valid = False
-            else:
-                Logger.debug(f"  [DEBUG] 리스트 요소[{idx}]가 검증 불가능한 타입: {type(val)}")
+            # 17자리 시각은 String으로 오므로 숫자로 바꿔서 검증한다.
+            # 예전에는 int/float만 검증하고 나머지는 조용히 건너뛰어,
+            # 문자열 시각 배열이 검증 없이 통과했다(2026-09-02 ReplayURL 실측).
+            num = _to_comparable_number(val)
+            if num is None:
+                error_msg = f"index[{idx}] 숫자 변환 실패: {val}"
+                field_errors.append(error_msg)
+                global_errors.append(f"[의미] {field_path}: {error_msg}")
+                all_valid = False
+                continue
+            if not _validate_single_value_in_range(
+                    field_path, num, ref_endpoint_max, ref_endpoint_min,
+                    ref_field_max, ref_field_min, ref_operator,
+                    reference_context, field_errors, global_errors, idx
+            ):
+                all_valid = False
 
         return all_valid
 
@@ -1060,20 +1205,63 @@ def _validate_single_value_in_range(field_path, field_value, ref_endpoint_max, r
                 Logger.debug(f"  [DEBUG] Min value from {ref_endpoint_min}.{ref_field_min}: {min_value}")
 
     # 3) range 검증 수행
-    if ref_operator == 'between' and min_value is not None and max_value is not None:
-        if not (min_value <= field_value <= max_value):
-            error_msg = f"범위 초과: {field_value}가 [{min_value}, {max_value}] 범위를 벗어남"
-            field_errors.append(error_msg)
-            global_errors.append(f"[의미] {display_path}: {error_msg}")
-            return False
-        else:
-            Logger.debug(f"  [DEBUG] ✅ Value {field_value} is between {min_value} and {max_value}")
-            return True
-    else:
-        error_msg = f"범위 검증 실패: min={min_value}, max={max_value}, operator={ref_operator}"
+    # ✅ '이상/이하/초과/미만'은 한쪽 경계만 있으면 판정할 수 있다.
+    #    예전에는 between만 구현돼 있어, 관리도구에서 '이상'으로 설정하면
+    #    max가 없다며 무조건 실패로 잡혔다 (2026-09-02 실측).
+    value = _to_comparable_number(field_value)
+    if value is None:
+        error_msg = f"숫자 변환 실패: {field_value}"
         field_errors.append(error_msg)
         global_errors.append(f"[의미] {display_path}: {error_msg}")
         return False
+
+    # 참조에서 뽑은 경계값도 17자리 시각이면 문자열이다.
+    # 숫자로 맞춰두지 않으면 int와 str을 비교하다 TypeError가 난다.
+    min_value = _to_comparable_number(min_value) if min_value is not None else None
+    max_value = _to_comparable_number(max_value) if max_value is not None else None
+
+    # (연산자, 필요한 경계, 판정식, 실패 문구)
+    checks = {
+        'greater-equal': (min_value, lambda v, b: v >= b, "미만"),
+        'greater-than': (min_value, lambda v, b: v > b, "이하"),
+        'less-equal': (max_value, lambda v, b: v <= b, "초과"),
+        'less-than': (max_value, lambda v, b: v < b, "이상"),
+    }
+
+    if ref_operator == 'between':
+        if min_value is None or max_value is None:
+            error_msg = (f"범위 검증 실패: 구간 양끝이 필요한데 "
+                         f"min={min_value}, max={max_value}")
+            field_errors.append(error_msg)
+            global_errors.append(f"[의미] {display_path}: {error_msg}")
+            return False
+        if not (min_value <= value <= max_value):
+            error_msg = f"범위 초과: {value}가 [{min_value}, {max_value}] 범위를 벗어남"
+            field_errors.append(error_msg)
+            global_errors.append(f"[의미] {display_path}: {error_msg}")
+            return False
+        Logger.debug(f"  [DEBUG] ✅ {value} is between {min_value} and {max_value}")
+        return True
+
+    if ref_operator in checks:
+        bound, ok, word = checks[ref_operator]
+        if bound is None:
+            error_msg = f"범위 검증 실패: {ref_operator} 기준값 없음"
+            field_errors.append(error_msg)
+            global_errors.append(f"[의미] {display_path}: {error_msg}")
+            return False
+        if not ok(value, bound):
+            error_msg = f"범위 벗어남: {value}가 기준 {bound} {word}"
+            field_errors.append(error_msg)
+            global_errors.append(f"[의미] {display_path}: {error_msg}")
+            return False
+        Logger.debug(f"  [DEBUG] ✅ {value} {ref_operator} {bound}")
+        return True
+
+    error_msg = f"범위 검증 실패: 지원하지 않는 연산자 {ref_operator}"
+    field_errors.append(error_msg)
+    global_errors.append(f"[의미] {display_path}: {error_msg}")
+    return False
 
 
 def _validate_valid_value_match(field_path, field_value, rule, field_errors, global_errors):
@@ -1109,8 +1297,14 @@ def _validate_specified_value_match(field_path, field_value, rule, field_errors,
     """지정된 값과 일치하는지 검증"""
     specified = rule.get('allowedValues', [])
 
-    if field_value not in specified:
-        error_msg = f"값 불일치: {field_value}가 지정값 {specified}에 없음"
+    # 리스트 필드(camList[].streamProtocolType 등)는 요소별로 대조한다.
+    # 예전에는 배열을 통째로 비교해 ['RTSP','RTSP']가 ['RTSP']에 없다고
+    # 오판했다 (valid-value-match 2ed16e4와 같은 유형, 2026-09-01 실측).
+    elements = field_value if isinstance(field_value, list) else [field_value]
+
+    invalid = [v for v in elements if v not in specified]
+    if invalid:
+        error_msg = f"값 불일치: {invalid}가 지정값 {specified}에 없음"
         field_errors.append(error_msg)
         global_errors.append(f"[의미] {field_path}: {error_msg}")
         return False
@@ -1121,15 +1315,21 @@ def _validate_specified_value_match(field_path, field_value, rule, field_errors,
 def _validate_range_match_direct(field_path, field_value, rule, field_errors, global_errors):
     """직접 범위 검증 (reference 없이)"""
     operator = rule.get('rangeOperator')
-    min_val = rule.get('rangeMin')
-    max_val = rule.get('rangeMax')
+    # 관리도구가 17자리 시각을 String으로 내려주면서 경계값도 문자열이 됐다.
+    # 값(v_num)은 숫자로 바꿔 쓰는데 경계는 그대로라 int와 str을 비교하다
+    # TypeError가 났고, 그 예외로 의미 검증 전체가 건너뛰어져 실패가 있는
+    # 회차까지 100점으로 통과했다 (2026-09-07 실측). 경계도 숫자로 맞춘다.
+    min_val = _to_comparable_number(rule.get('rangeMin'))
+    max_val = _to_comparable_number(rule.get('rangeMax'))
 
     # 리스트인 경우 모든 요소 검증
     values = [field_value] if not isinstance(field_value, list) else field_value
 
     for v in values:
         try:
-            v_num = float(v)
+            # 17자리 시각은 float로 바꾸면 정밀도가 깨지고(2.02e+16) 오류 문구도
+            # 읽을 수 없게 된다 — 정수로 먼저 시도한다.
+            v_num = int(str(v).strip()) if str(v).strip().lstrip('-').isdigit() else float(v)
         except (ValueError, TypeError):
             error_msg = f"숫자 변환 실패: {v}"
             field_errors.append(error_msg)

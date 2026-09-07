@@ -19,6 +19,9 @@ class ConstraintDataGenerator:
         latest_events: API 이벤트 저장소 {api_name: {direction: event_data}}
         """
         self.latest_events = latest_events if latest_events is not None else {}
+        # 시험 대상 장치가 없어 이번 회차를 수행할 수 없을 때의 사유.
+        # 요청을 만들 때마다 초기화되고, 설정되면 호출부가 그 회차를 실패로 확정한다.
+        self.unrunnable_reason = None
 
     def _find_requested_ids(self, constraints, field, default_endpoint):
         """앞서 보낸 요청(구독/조회)에서 해당 필드의 ID 후보를 찾는다.
@@ -111,6 +114,9 @@ class ConstraintDataGenerator:
         door_memory: 문 상태 저장소
         is_webhook: 웹훅 이벤트 생성 여부 (True이면 랜덤 선택 안함)
         """
+        # 회차마다 새로 판단한다 (앞 회차의 '수행 불가'가 남지 않도록)
+        self.unrunnable_reason = None
+
         # ✅ sensorDeviceList 구조를 가진 웹훅 데이터 동적 생성 (범용)
         if is_webhook and "sensorDeviceList" in template_data:
             # request_data에서 요청한 sensorDeviceID 추출
@@ -152,7 +158,7 @@ class ConstraintDataGenerator:
                 # 같은 참조 설정이 한 번도 실행되지 않았다 — 웹훅이 템플릿 빈 값 그대로
                 # 나가던 원인 (2026-08-20 sensor001 리허설 실측).
                 constraint_map = self._build_constraint_map(constraints or {}, request_data,
-                                                            is_webhook=True)
+                                                            is_webhook=True, api_name=api_name)
                 if constraint_map:
                     filled_list = []
                     for row in new_sensor_list:
@@ -221,7 +227,7 @@ class ConstraintDataGenerator:
                     # 그대로 나가던 원인 (sensor 웹훅 3cea01b와 동일 유형,
                     # 2026-08-26 RealtimeVerifEventInfos 리허설 실측).
                     constraint_map = self._build_constraint_map(constraints or {}, request_data,
-                                                                is_webhook=True)
+                                                                is_webhook=True, api_name=api_name)
                     if constraint_map:
                         filled_list = []
                         for row in new_door_list:
@@ -349,7 +355,8 @@ class ConstraintDataGenerator:
                 other_constraints = {k: v for k, v in (constraints or {}).items()
                                      if not str(k).startswith("doorList")}
                 if other_constraints:
-                    constraint_map = self._build_constraint_map(other_constraints, request_data)
+                    constraint_map = self._build_constraint_map(other_constraints, request_data,
+                                                                api_name=api_name)
                     filled = self._generate_from_template(template_data, constraint_map)
                     filled["doorList"] = new_door_list  # 확정한 doorList 보존
                     template_data.update(filled)
@@ -430,7 +437,8 @@ class ConstraintDataGenerator:
             return template_data
 
 
-        constraint_map = self._build_constraint_map(constraints, request_data, is_webhook)
+        constraint_map = self._build_constraint_map(constraints, request_data, is_webhook,
+                                                    api_name=api_name)
         response = self._generate_from_template(template_data, constraint_map)
         template_data.update(response)
         return template_data
@@ -478,13 +486,34 @@ class ConstraintDataGenerator:
         # (예전에는 여기서 지역변수 미할당으로 예외가 나고 바깥 except가 삼켰다)
         return request_data
 
-    def _build_constraint_map(self, constraints, request_data, is_webhook=False):
+    NO_DEVICE_ID = "NoDevice"
+
+    @classmethod
+    def _no_device_id(cls, existing):
+        """실제 장치와 겹치지 않는 '장치 없음' 표식 ID"""
+        taken = {str(v) for v in (existing or [])}
+        if cls.NO_DEVICE_ID not in taken:
+            return cls.NO_DEVICE_ID
+        n = 1
+        while f"{cls.NO_DEVICE_ID}{n}" in taken:
+            n += 1
+        return f"{cls.NO_DEVICE_ID}{n}"
+
+    @staticmethod
+    def _is_ptz_api(api_name):
+        """PTZ 제어 계열 API인지 (PTZStatus, PTZControl 등 — 대소문자 무시)"""
+        return "ptz" in str(api_name or "").lower()
+
+    def _build_constraint_map(self, constraints, request_data, is_webhook=False,
+                              api_name=None):
         """constraints를 분석하여 각 필드의 제약 조건과 참조 값을 매핑"""
         constraint_map = {}
 
         # latest_events는 단계가 진행될수록 누적돼, 통째로 찍으면 한 줄이 수천 자가
         # 된다(로그 가독성 저하의 주범). 어떤 API가 쌓여 있는지 키만 남긴다.
-        Logger.debug(f"[BUILD_MAP] constraints: {constraints}")
+        # 전체 덤프는 [CONSTRAINTS] out_con과 같은 내용이라 두 번 찍혔다.
+        # 필드별 상세는 바로 아래 "path: valueType=..." 줄에 이미 나온다.
+        Logger.debug(f"[BUILD_MAP] constraints {len(constraints)}개 필드")
         Logger.debug(f"[BUILD_MAP] request_data: {request_data}")
         Logger.debug(f"[BUILD_MAP] 참조 가능 이벤트 {len(self.latest_events)}건: "
                      f"{sorted(k for k in self.latest_events if not k.startswith('/'))}")
@@ -516,7 +545,7 @@ class ConstraintDataGenerator:
                 if ref_key in self.latest_events:
                     Logger.debug(f"[BUILD_MAP]   Found referenceEndpoint in latest_events")
                     # valueType에 따라 REQUEST 또는 RESPONSE에서 가져오기
-                    if value_type == "request-based":
+                    if value_type in self.REQUEST_BASED_TYPES:
                         event = self.latest_events[ref_key].get("REQUEST", {})
                         Logger.debug(f"[BUILD_MAP]   Using REQUEST event")
                     else:  # random-response 등 다른 타입
@@ -527,7 +556,33 @@ class ConstraintDataGenerator:
                     Logger.debug(f"[BUILD_MAP]   event_data: {event_data}")
                     values = self.find_key(event_data, ref_field)
                     Logger.debug(f"[BUILD_MAP]   Found values from event: {values}")
-                    
+
+                    # PTZ 제어 API는 PTZ 카메라에만 유효하다. Dome/Bullet 카메라를
+                    # 뽑아 보내면 상대가 정상적으로 거절해 실패로 잡히던 문제.
+                    if values and self._is_ptz_api(api_name):
+                        ptz_ids = self._collect_ptz_ids(event_data, ref_field)
+                        if ptz_ids is None:
+                            Logger.debug(f"[BUILD_MAP]   camType 정보 없음 → PTZ 선별 생략")
+                        elif ptz_ids:
+                            picked = [v for v in values if v in ptz_ids]
+                            Logger.info(f"  PTZ 카메라만 선별: {picked} "
+                                        f"(전체 {len(values)}대 중 {len(picked)}대)")
+                            values = picked
+                        else:
+                            # 대상 장치가 없으면 이 회차는 수행 자체가 불가능하다.
+                            # 아무 카메라나 골라 보내거나 빈 값을 보내면 결과가
+                            # 상대 구현(하드코딩 응답 등)에 좌우되므로, 실제로
+                            # 존재할 수 없는 ID를 보내고 회차를 실패로 확정한다.
+                            sentinel = self._no_device_id(values)
+                            cam_types = sorted({str(t) for t in
+                                                self.find_key(event_data, "camType")})
+                            self.unrunnable_reason = (
+                                f"PTZ 카메라 없음 (camType: {', '.join(cam_types) or '없음'})"
+                            )
+                            Logger.error(f"  ❌ {api_name}: 시험 수행 불가 — "
+                                         f"{self.unrunnable_reason} → {ref_field}={sentinel} 전송")
+                            values = [sentinel]
+
                     # response-based(시스템 요청)만 랜덤 선택, request-based(플랫폼 응답/웹훅)는 그대로 사용 (01/08)
                     if value_type == "response-based" and not is_webhook and values and len(values) > 0:
                         original_count = len(values)
@@ -552,7 +607,7 @@ class ConstraintDataGenerator:
                     "values": values if values else []
                 }
 
-            elif value_type == "request-based":
+            elif value_type in self.REQUEST_BASED_TYPES:
                 # referenceEndpoint 없으면 현재 request_data에서 찾기
                 Logger.debug(f"[BUILD_MAP]   Searching in current request_data")
                 values = self.find_key(request_data, ref_field)
@@ -737,6 +792,53 @@ class ConstraintDataGenerator:
             values = rule.get("specifiedValues") or []
         return list(values)
 
+    # 17자리 시각 표기 yyyyMMddHHmmssSSS (안내서 표 2-1)
+    TIME_FORMAT_LEN = 17
+
+    @staticmethod
+    def _parse_time17(value):
+        """17자리 시각 문자열/숫자를 datetime으로. 시각이 아니면 None."""
+        import datetime
+        text = str(value).strip()
+        if len(text) != ConstraintDataGenerator.TIME_FORMAT_LEN or not text.isdigit():
+            return None
+        try:
+            base = datetime.datetime.strptime(text[:14], "%Y%m%d%H%M%S")
+            return base + datetime.timedelta(milliseconds=int(text[14:]))
+        except ValueError:
+            return None  # 13월 40일 같은 달력에 없는 날짜
+
+    @staticmethod
+    def _format_time17(dt):
+        """datetime → 17자리 시각 문자열"""
+        return dt.strftime("%Y%m%d%H%M%S") + f"{dt.microsecond // 1000:03d}"
+
+    def _pick_time_in_range(self, min_val, max_val, exclusive_min=False):
+        """구간 안의 '실제로 존재하는 시각'을 뽑는다.
+
+        예전에는 17자리 숫자 구간에서 random.randint로 정수를 뽑아 문자열로만
+        바꿨다 — 숫자로는 구간 안이어도 달력에 없는 날짜(월 13·일 40 등)가
+        나올 수 있었다("날짜가 난수로 나가던" 문제). 구간을 날짜로 해석해
+        밀리초 단위로 뽑고 다시 17자리로 포맷한다.
+
+        Returns:
+            str | None — 양 끝을 시각으로 해석하지 못하면 None(호출부가 폴백)
+        """
+        import datetime
+        start = self._parse_time17(min_val)
+        end = self._parse_time17(max_val)
+        if start is None or end is None:
+            return None
+        if end < start:
+            start, end = end, start
+        span_ms = int((end - start).total_seconds() * 1000)
+        if exclusive_min:
+            # endTime 등 "start보다 뒤" 조건 — 최소 1ms 뒤
+            offset = random.randint(1, span_ms) if span_ms >= 1 else 1
+        else:
+            offset = random.randint(0, span_ms) if span_ms > 0 else 0
+        return self._format_time17(start + datetime.timedelta(milliseconds=offset))
+
     def _pick_range_value(self, constraint, template_value, sibling_start=None):
         """request-range 값 생성 (최상위·리스트 줄 공용).
 
@@ -747,22 +849,42 @@ class ConstraintDataGenerator:
         """
         raw_min = constraint.get("min", 0)
         raw_max = constraint.get("max", self.MAX_TIMESTAMP)
-        min_val = self._to_number(raw_min, 0)
-        max_val = self._to_number(raw_max, self.MAX_TIMESTAMP)
+        # 참조 대상이 비어 있으면 min/max가 빈 문자열("")로 들어온다.
+        # 문자열이라는 이유만으로 "참조 있음"으로 보면 아래 참조 없음 판정을
+        # 빠져나가 0~13자리 난수가 시각 자리에 나갔다.
+        norm_min = 0 if isinstance(raw_min, str) and not raw_min.strip() else raw_min
+        norm_max = (self.MAX_TIMESTAMP
+                    if isinstance(raw_max, str) and not raw_max.strip() else raw_max)
+        min_val = self._to_number(norm_min, 0)
+        max_val = self._to_number(norm_max, self.MAX_TIMESTAMP)
 
-        reference_missing = min_val == 0 and not isinstance(raw_min, str)
+        reference_missing = min_val == 0 and not isinstance(norm_min, str)
         as_string = (isinstance(raw_min, str) or isinstance(raw_max, str)
                      or (reference_missing and isinstance(template_value, str)))
 
         # 참조가 없으면 범위가 0~13자리 난수가 돼 시각으로서 무의미하다.
-        # 템플릿에 시각 값이 있으면 그 근방을 기준으로 삼는다.
+        # 템플릿에 시각 값이 있으면 그 근방을, 그것도 비어 있으면 현재 시각을 쓴다.
         if reference_missing:
             template_num = self._to_number(template_value, 0)
             if template_num > 0:
                 min_val = template_num
+            else:
+                import datetime
+                now17 = self._format_time17(datetime.datetime.now())
+                Logger.warning(f"  ⚠ request-range 참조·템플릿 모두 비어 있음 "
+                               f"→ 현재 시각 {now17} 사용")
+                return now17 if as_string else int(now17)
 
         if min_val >= max_val:
             max_val = min_val + 1000
+
+        # ✅ 시각 구간이면 '실제로 존재하는 시각'을 뽑는다 (달력에 없는 날짜 방지).
+        #    양 끝이 17자리 시각으로 해석되지 않으면(일반 숫자 범위) 기존 방식으로 폴백.
+        lo_for_time = sibling_start if sibling_start is not None else min_val
+        picked_time = self._pick_time_in_range(lo_for_time, max_val,
+                                               exclusive_min=sibling_start is not None)
+        if picked_time is not None:
+            return picked_time if as_string else int(picked_time)
 
         if sibling_start is not None:
             start_num = self._to_number(sibling_start, min_val)
@@ -780,7 +902,7 @@ class ConstraintDataGenerator:
             # 최상위 레벨에서 constraint 확인
             if key in constraint_map:
                 constraint = constraint_map[key]
-                if constraint["type"] in ["random-response", "random", "request-based", "response-based", ]:
+                if constraint["type"] in self.VALUE_PICK_TYPES:
                     # 랜덤 값 선택 — 템플릿이 배열이면 배열 타입 유지 (classFilter 등
                     # 문자열 배열 필드가 낱값으로 변형돼 나가던 문제 방지)
                     if constraint["values"]:
@@ -858,8 +980,7 @@ class ConstraintDataGenerator:
                         shared_values[field_path] = constraint["values"][0]
 
                 # 그 외 필드는 중복 방지
-                elif constraint["type"] in ["request-based", "random-response", "random",
-                                            "response-based"]:  # ← response-based 추가
+                elif constraint["type"] in self.VALUE_PICK_TYPES:
                     if constraint["values"]:
                         available_values[field_path] = constraint["values"].copy()
                         used_values[field_path] = []
@@ -926,8 +1047,7 @@ class ConstraintDataGenerator:
                     item[field] = shared_values[field_path]
 
                 # ✅ request-based, random-response, random: 중복 방지 (순차 할당)
-                elif constraint["type"] in ["request-based", "random-response", "random",
-                                            "response-based"]:  # ← response-based 추가
+                elif constraint["type"] in self.VALUE_PICK_TYPES:
                     if field_path in available_values and available_values[field_path]:
                         values_list = available_values[field_path]
                         used_list = used_values.get(field_path, [])
@@ -1216,6 +1336,48 @@ class ConstraintDataGenerator:
 
         traverse(new_data)
         return new_data
+
+    # 관리도구가 내려주는 valueType 이름. request-array-based는 요청의 배열
+    # 필드에서 값을 가져오라는 뜻인데 목록에 없어 값이 한 번도 안 채워졌다
+    # (2026-09-07 실측: camID·eventName이 빈 값으로 나감).
+    REQUEST_BASED_TYPES = ("request-based", "request-array-based")
+    VALUE_PICK_TYPES = ("random-response", "random", "response-based",
+                        "request-based", "request-array-based")
+
+    # PTZ 제어는 PTZ 카메라에만 유효하다. camType 표기는 상대 시스템마다
+    # 'PTZ' / 'ptz' / 'PTZ Camera' / '고정형PTZ'처럼 제각각이라,
+    # 대소문자 무시하고 문자열에 'ptz'가 들어 있으면 모두 PTZ로 본다.
+    PTZ_CAM_TYPE = "ptz"
+
+    def _collect_ptz_ids(self, event_data, id_field):
+        """참조 응답에서 camType이 PTZ인 항목의 ID만 모은다.
+
+        camType이 어디에도 없으면 None을 돌려 호출부가 거르지 않도록 한다
+        (CameraProfiles 응답에 camType이 없는 규격일 수 있음).
+        """
+        ptz_ids, saw_type = [], False
+
+        def walk(node):
+            nonlocal saw_type
+            if isinstance(node, list):
+                for item in node:
+                    walk(item)
+                return
+            if not isinstance(node, dict):
+                return
+
+            if id_field in node:
+                cam_type = self.find_key(node, "camType")
+                if cam_type:
+                    saw_type = True
+                    if any(self.PTZ_CAM_TYPE in str(t).lower() for t in cam_type):
+                        ptz_ids.append(node[id_field])
+            for v in node.values():
+                if isinstance(v, (dict, list)):
+                    walk(v)
+
+        walk(event_data)
+        return ptz_ids if saw_type else None
 
     def find_key(self, data, target_key):
         """재귀적으로 데이터에서 키 찾기"""

@@ -55,7 +55,7 @@ importlib.reload(constraints_request_module)
 
 result_dir = CONSTANTS.result_dir
 os.makedirs(result_dir, exist_ok=True)
-from core.utils import to_detail_text, redact, remove_api_number_suffix, build_monitor_step_name, build_webhook_monitor_step_name, build_monitor_result_title, build_monitor_start_title, build_monitor_start_details, build_monitor_progress_details, build_monitor_result_details, generate_monitor_notice_html, response_time_ms_to_table_seconds, should_send_error_heartbeat_on_close
+from core.utils import summarize_payload, to_detail_text, redact, remove_api_number_suffix, build_monitor_step_name, build_webhook_monitor_step_name, build_monitor_result_title, build_monitor_start_title, build_monitor_start_details, build_monitor_progress_details, build_monitor_result_details, generate_monitor_notice_html, response_time_ms_to_table_seconds, should_send_error_heartbeat_on_close
 
 class MyApp(SystemMainUI):
     previousPageRequested = pyqtSignal(object)
@@ -65,7 +65,9 @@ class MyApp(SystemMainUI):
 
     def _get_effective_timeout_seconds(self, idx):
         """Webhook API는 긴 시나리오 timeout 대신 fail-fast timeout을 적용한다."""
-        base_timeout = self.time_outs[idx] / 1000 if idx < len(self.time_outs) else 5.0
+        # 안내서 표 3-2: 메시지당 제한 시간은 60초 — 관리도구 설정과 무관하게 고정한다
+        # (예전에는 self.time_outs[idx]를 그대로 써서 등록값에 따라 기준이 흔들렸다)
+        base_timeout = float(getattr(self.CONSTANTS, 'MESSAGE_TIMEOUT_SEC', 60))
         try:
             if idx < len(self.trans_protocols):
                 protocol = str(self.trans_protocols[idx]).strip().lower()
@@ -1464,6 +1466,12 @@ class MyApp(SystemMainUI):
             path = re.sub(r'\d+$', '', path)
             Logger.debug(f" [post] Sending request to {path} with auth_type={self.r2}, token={self.token}")
             Logger.debug(f" [post] request message {json_data}")
+            # 실제 오간 값 한눈에 보기 — 개수가 아니라 내용(cam0001…)을 남긴다
+            _api = self.message[self.cnt] if self.cnt < len(self.message) else path.rsplit('/', 1)[-1]
+            try:
+                Logger.info(f"[데이터] → 송신 {_api}: {summarize_payload(json.loads(json_data))}")
+            except Exception:
+                pass
             self.res = requests.post(
                 path,
                 headers=headers,
@@ -1481,6 +1489,11 @@ class MyApp(SystemMainUI):
             Logger.debug(
                 f"{self.res.json() if self.res.headers.get('Content-Type', '').startswith('application/json') else self.res.text}"
             )
+            try:
+                Logger.info(f"[데이터] ← 수신 {_api} ({self.res.status_code}): "
+                            f"{summarize_payload(self.res.json())}")
+            except Exception:
+                pass
         except Exception as e:
             Logger.debug(str(e))
 
@@ -1883,11 +1896,14 @@ class MyApp(SystemMainUI):
                         WEBHOOK_PORT = self.CONSTANTS.WEBHOOK_PORT  # 웹훅 수신 포트
                         WEBHOOK_URL = f"https://{WEBHOOK_IP}:{WEBHOOK_PORT}"  # 플랫폼/시스템이 웹훅을 보낼 주소
 
-                        trans_protocol = {
-                            "transProtocolType": "WebHook",
-                            "transProtocolDesc": WEBHOOK_URL
-                        }
-                        
+                        # ✅ transProtocolType은 관리도구 설정값을 그대로 둔다.
+                        #    예전에는 객체를 통째로 새로 만들며 내부 프로토콜 이름
+                        #    "WebHook"(대문자 H)을 같이 써버려, 관리도구에 "Webhook"으로
+                        #    설정해도 전송 시점에 값이 바뀌어 지정값 대조에서 실패했다.
+                        #    실제로 갈아끼워야 하는 건 수신 주소(Desc)뿐이다.
+                        trans_protocol = dict(trans_protocol)
+                        trans_protocol["transProtocolDesc"] = WEBHOOK_URL
+
                         # ngrok 하드 코딩 부분 (01/09)
                         # ---- 여기부터
                         # WEBHOOK_DISPLAY_URL = CONSTANTS.WEBHOOK_DISPLAY_URL
@@ -2333,7 +2349,9 @@ class MyApp(SystemMainUI):
                             res_data,
                             self.flag_opt,
                             validation_rules=resp_rules,
-                            reference_context=self.reference_context
+                            reference_context=self.reference_context,
+                            # 목록 구성 개수(5~100) 판정 대상 식별용 — 프로필 조회 응답에만 적용
+                            api_name=self.message[self.cnt] if self.cnt < len(self.message) else None
                         )
                     except TypeError as te:
                         Logger.error(f" 응답 검증 중 TypeError 발생: {te}, 일반 검증으로 재시도")
@@ -2342,6 +2360,21 @@ class MyApp(SystemMainUI):
                             res_data,
                             self.flag_opt
                         )
+
+                    # 시험 대상 장치가 없어 수행 자체가 불가능했던 회차는 결과를
+                    # 실패로 확정한다. 존재할 수 없는 ID(NoDevice)를 보냈으므로
+                    # 상대가 무엇을 응답하든(하드코딩 200 포함) 통과일 수 없다.
+                    _unrunnable = getattr(self.generator, "unrunnable_reason", None)
+                    if _unrunnable:
+                        from core.json_checker_new import timeout_field_finder
+                        _rqd, _opt = timeout_field_finder(self.outSchema[self.cnt])
+                        val_result = "FAIL"
+                        val_text = (f"시험 수행 불가: {_unrunnable}\n"
+                                    f"- 보낸 ID: {self.generator.NO_DEVICE_ID}\n")
+                        key_psss_cnt, key_error_cnt = 0, _rqd if _rqd > 0 else 1
+                        opt_correct, opt_error = 0, (_opt if self.flag_opt else 0)
+                        Logger.error(f"  ❌ {self.message[self.cnt]} — {val_text.strip()}")
+
                     if self.message[self.cnt] == "Authentication":
                         self.handle_authentication_response(res_data)
 
