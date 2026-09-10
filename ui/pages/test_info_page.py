@@ -63,7 +63,7 @@ def create_test_info_page(parent_widget):
 
 
 def _resolve_header_title_path(parent_widget):
-    return "assets/image/test_info/header_title.png"
+    return "assets/image/test_info/title_final.png"
 
 
 def _get_header_title_display_size(parent_widget):
@@ -71,7 +71,7 @@ def _get_header_title_display_size(parent_widget):
 
 
 def _get_header_title_top_offset():
-    return 3
+    return 1
 
 
 def update_test_info_header_title(parent_widget):
@@ -81,12 +81,13 @@ def update_test_info_header_title(parent_widget):
     header_title_pixmap = QPixmap(resource_path(_resolve_header_title_path(parent_widget)))
     title_size = _get_header_title_display_size(parent_widget)
     top_offset = _get_header_title_top_offset()
+    extra_height = top_offset * 2
     parent_widget.page1_header_title_label.setPixmap(
         header_title_pixmap.scaled(title_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
     )
-    parent_widget.page1_header_title_label.setContentsMargins(0, top_offset, 0, 0)
+    parent_widget.page1_header_title_label.setContentsMargins(0, 0, 0, extra_height)
     parent_widget.page1_header_title_label.setAlignment(Qt.AlignLeft | Qt.AlignTop)
-    parent_widget.page1_header_title_label.setFixedSize(title_size.width(), title_size.height() + top_offset)
+    parent_widget.page1_header_title_label.setFixedSize(title_size.width(), title_size.height() + extra_height)
 
 
 def _setup_header(parent_widget, main_layout):
@@ -123,16 +124,17 @@ def _setup_header(parent_widget, main_layout):
 
     header_layout.addSpacing(20)
 
-    # 타이틀 이미지 (269x30)
+    # 타이틀 이미지
     header_title_label = QLabel()
     parent_widget.page1_header_title_label = header_title_label
     header_title_pixmap = QPixmap(resource_path(_resolve_header_title_path(parent_widget)))
     title_size = _get_header_title_display_size(parent_widget)
     top_offset = _get_header_title_top_offset()
+    extra_height = top_offset * 2
     header_title_label.setPixmap(header_title_pixmap.scaled(title_size, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-    header_title_label.setContentsMargins(0, top_offset, 0, 0)
+    header_title_label.setContentsMargins(0, 0, 0, extra_height)
     header_title_label.setAlignment(Qt.AlignLeft | Qt.AlignTop)
-    header_title_label.setFixedSize(title_size.width(), title_size.height() + top_offset)
+    header_title_label.setFixedSize(title_size.width(), title_size.height() + extra_height)
     header_layout.addWidget(header_title_label)
 
     header_layout.addStretch()

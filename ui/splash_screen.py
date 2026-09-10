@@ -25,7 +25,7 @@ class SplashScreen(QSplashScreen):
     """
     def __init__(self, width=650, height=250):
         # 배경 이미지 로드
-        self._bg_image_path = resource_path('assets/image/splash/splash_bg.png')
+        self._bg_image_path = resource_path('assets/image/splash/splash_bg_real.png')
         self._bg_pixmap = QPixmap(self._bg_image_path)
 
         # 이미지 크기에 맞춤
@@ -203,7 +203,7 @@ class LoadingPopup(QSplashScreen):
     def __init__(self, width=400, height=200):
         try:
             # 배경 이미지 로드
-            self._bg_image_path = resource_path('assets/image/splash/loading_bg.png')
+            self._bg_image_path = resource_path('assets/image/splash/loading_bg_real.png')
             self._bg_pixmap = QPixmap(self._bg_image_path)
 
             # 이미지 크기에 맞춤

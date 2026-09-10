@@ -148,8 +148,8 @@ class ResultPageWidget(QWidget):
     def _get_result_header_title_path(self):
         mode = getattr(self.parent, "validation_mode", "platform")
         title_map = {
-            "platform": "assets/image/test_runner/platform_result_title.png",
-            "system": "assets/image/test_runner/system_result_title.png",
+            "platform": "assets/image/test_runner/platform_result_title_final.png",
+            "system": "assets/image/test_runner/system_result_title_final.png",
         }
         return title_map.get(mode, title_map["platform"])
 
@@ -894,7 +894,7 @@ class ResultPageWidget(QWidget):
         summary = self._extract_score_summary_data()
         return self._create_score_display_group(
             "group",
-            "분야별 점수",
+            "기능별 점수",
             summary.get("group_name") or "-",
             summary["group"],
         )
@@ -1549,7 +1549,7 @@ class ResultPageWidget(QWidget):
             except:
                 pass
 
-            QMessageBox.warning(self, "오류", f"시나리오 전환 중 오류가 발생했습니다.\n{str(e)}")
+            QMessageBox.warning(self, "오류", f"세부분야 전환 중 오류가 발생했습니다.\n{str(e)}")
 
     def _is_webhook_api(self, row):
         if hasattr(self.parent, 'trans_protocols') and row < len(self.parent.trans_protocols):
@@ -2443,7 +2443,7 @@ class ResultPageWidget(QWidget):
         header_layout.addWidget(icon_label, alignment=Qt.AlignVCenter)
 
         # 분야별 점수 레이블 (500 Medium 20px)
-        score_type_label = QLabel("시나리오별 점수")
+        score_type_label = QLabel("세부분야별 점수")
         score_type_label.setStyleSheet("""
             color: #000000;
             font-family: "Noto Sans KR";
@@ -2584,7 +2584,7 @@ class ResultPageWidget(QWidget):
 
         return self._create_summary_score_card(
             prefix="total",
-            title="분야별 점수",
+            title="기능별 점수",
             score_block=summary["group"],
             info_text=self._build_dynamic_group_mode_text(summary),
             rounded_bottom=False,
