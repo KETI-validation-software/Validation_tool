@@ -255,7 +255,7 @@ class Server(BaseHTTPRequestHandler):
             return base_api_name
 
     # ========== 오류 검사 함수들 (400/201/404) ==========
-    # 상대(플랫폼 역할)가 ENABLE_ERROR_REQUEST_MUTATION으로 망가뜨려 보낸 요청을
+    # 상대(플랫폼 역할)가 시나리오에 박아 망가뜨려 보낸 요청을
     # 여기서 판정해 오류 코드로 돌려준다. 유도 방식과 판정 기준이 짝이 맞아야 한다.
     #   startTime을 0/"0"으로 변조  → 201 정보 없음
     #   임의 leaf의 타입을 변조     → 400 잘못된 요청

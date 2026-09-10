@@ -240,19 +240,19 @@ class MyApp(SystemMainUI):
 
                 # ⑤ 토큰 미포함(403)은 요청 본문이 아니라 헤더를 건드린다.
                 # post()가 이 플래그를 보고 Authorization 헤더를 한 번만 빼고 보낸다.
-                if str(allowed_value) == "403" and getattr(
-                        self.CONSTANTS, "ENABLE_ERROR_REQUEST_MUTATION", False):
+                if str(allowed_value) == "403":
                     self.omit_token_once = True
                     Logger.debug("[오류주입] ⑤ 토큰 미포함 — 다음 요청에서 인증 헤더 제외")
                     return updated_request
 
-                updated_request = self.generator._applied_codevalue(
-                    request_data=updated_request,
-                    allowed_value=allowed_value,
-                    constraints=constraints,
-                    # 시험범위: flag_opt=False가 필수 범위 — 선택 필드는 주입 대상이 아니다
-                    include_optional=getattr(self, "flag_opt", True),
-                )
+                # 오류 회차(201·400·404)는 관리도구가 요청에 틀린 값을 직접 박아 내려준다.
+                # 값 생성을 태우면 참조·무작위 설정이 그 값을 덮어써 주입이 무력화되므로,
+                # 채우기 전 템플릿을 그대로 보낸다 (2026-09-10 결정).
+                # 200·403은 종전대로 값을 채워 보낸다.
+                if str(allowed_value) not in ("200", "403"):
+                    Logger.debug(f"[오류회차] 기대 코드 {allowed_value} — 관리도구 요청 원본 송신")
+                    return request_data
+
                 return updated_request
             except Exception as e:
                 # Logger.warning(f"constraint 적용 중 일부 실패: {e}")
@@ -2593,7 +2593,7 @@ class MyApp(SystemMainUI):
                         # ✅ 선택 필드 에러 수도 전체 점수에 누적
                         self.global_opt_error_cnt += final_opt_error_count
 
-                        Logger.debug(f" 분야별 점수: pass={self.total_pass_cnt}, error={self.total_error_cnt}")
+                        Logger.debug(f" 세부분야별 점수: pass={self.total_pass_cnt}, error={self.total_error_cnt}")
                         Logger.debug(f" 전체 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}")
 
                         # ✅ 전체 점수 포함하여 디스플레이 업데이트 (재시도 완료 후에만)
@@ -2649,7 +2649,7 @@ class MyApp(SystemMainUI):
                 # ✅ 전체 점수 최종 확인 로그
                 global_total = self.global_pass_cnt + self.global_error_cnt
                 global_score = (self.global_pass_cnt / global_total * 100) if global_total > 0 else 0
-                Logger.debug(f"분야별 점수: pass={self.total_pass_cnt}, error={self.total_error_cnt}, score={final_score:.1f}%")
+                Logger.debug(f"세부분야별 점수: pass={self.total_pass_cnt}, error={self.total_error_cnt}, score={final_score:.1f}%")
                 Logger.debug(f"전체 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}, score={global_score:.1f}%")
 
                 if not self._should_send_final_result_now():
@@ -2810,7 +2810,7 @@ class MyApp(SystemMainUI):
         else:
             # ✅ 1. 시나리오 선택 확인 (수동 시작 시에만)
             if not hasattr(self, 'current_spec_id') or not self.current_spec_id:
-                QMessageBox.warning(self, "알림", "시험 시나리오를 먼저 선택하세요.")
+                QMessageBox.warning(self, "알림", "세부분야를 먼저 선택하세요.")
                 return
 
         self._prepare_final_result_tracking()
