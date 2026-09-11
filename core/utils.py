@@ -505,8 +505,7 @@ def load_external_constants(constants_module):
                     'ENABLE_WEBHOOK_CONTEXT_VALIDATION',  # ✅ 웹훅 맥락 검증 — 문제 시 외부 파일에서 False로 즉시 롤백
                     'ENABLE_ERROR_RESPONSE_CHECK',        # ✅ 장치 역할의 오류 코드 응답 — 리허설용, 오탐 시 즉시 롤백
                     'MESSAGE_TIMEOUT_SEC',                # ✅ 메시지 제한 시간(안내서 60초 고정) — 외부 파일로 조정
-                    'ENABLE_LIST_COUNT_CHECK',            # ✅ 목록 구성 개수(5~100) 판정 — 오탐 시 외부 파일에서 즉시 롤백
-                    'LIST_COUNT_MIN', 'LIST_COUNT_MAX', 'LIST_COUNT_TARGETS',
+                    'ENABLE_LIST_COUNT_CHECK',            # ✅ 항목 개수 범위 판정 — 오탐 시 외부 파일에서 즉시 롤백
                 ]
 
                 # 덮어씌우기

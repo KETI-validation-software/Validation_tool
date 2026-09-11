@@ -455,7 +455,9 @@ class FileGeneratorService:
         current_block_key = None
 
         for line in lines:
-            block_key_match = re.search(r'"(\w+)":\s*\{', line)
+            # \w+ 는 점을 못 읽어 "camList.camID" 같은 경로 키가 통째로 안 잡혔다
+            # (실패 목록의 규칙 이름이 전부 None으로 남던 원인)
+            block_key_match = re.search(r'"([^"]+)":\s*\{', line)
             if block_key_match:
                 current_block_key = block_key_match.group(1)
                 skip_current_block = False
@@ -503,6 +505,19 @@ class FileGeneratorService:
                             "referenceEndpoint": old_endpoint,
                             "referenceFieldId": current_field_id
                         })
+                        # 같은 이름의 API가 시나리오에 둘 이상인데 fieldId로도 못 가리면
+                        # 어느 회차를 뜻하는지 알 길이 없다. 예전에는 이름만 보고 첫 회차를
+                        # 집어 엉뚱한 목록과 대조했다(결과 조회 문 1개 vs 상태 조회 문 5개,
+                        # 2026-09-12 실측). 추측하지 않고 '모호'로 표시해 검증 단계에서
+                        # 원인이 보이게 실패시킨다. 관리도구에서 참조 필드를 다시 고르면 풀린다.
+                        if endpoint_name in duplicate_endpoints:
+                            line = line.replace(f'"referenceEndpoint": "{old_endpoint}"',
+                                                f'"referenceEndpoint": "{old_endpoint}#ambiguous"')
+                            Logger.error(f"  [{file_label}] 참조 모호: {current_block_key} → "
+                                         f"{old_endpoint} 가 시나리오에 여러 번 있는데 "
+                                         f"referenceFieldId={current_field_id} 를 어느 단계에서도 "
+                                         f"찾지 못함 (낡은 참조 ID). 관리도구에서 이 필드의 "
+                                         f"참조 필드를 다시 선택해야 합니다.")
                 else:
                     fail_no_field_id.append({
                         "key": current_block_key,
@@ -521,6 +536,17 @@ class FileGeneratorService:
             Logger.info(f"    - 중복 API명 목록: {duplicate_endpoints} (해당 {total_duplicate_endpoints}건)")
             Logger.info(f"    - 매핑 성공: {len(success_list)}")
             Logger.info(f"    - 매핑 실패: {fail_count}")
+
+            # 실패는 개수만 찍혀서 "어느 규칙이 어디를 가리키는지"를 알 수 없었다.
+            # 보정을 못 하면 관리도구가 준 referenceEndpoint를 그대로 믿고 쓰므로,
+            # 그게 틀렸을 때 조용히 엉뚱한 API를 참조한다 — 목록을 남겨 확인 가능하게.
+            for item in fail_not_in_keyid:
+                Logger.info(f"      · 번호를 표에서 못 찾음: {item['key']} "
+                            f"→ 관리도구가 준 대로 사용: {item['referenceEndpoint']} "
+                            f"(referenceFieldId={item['referenceFieldId']})")
+            for item in fail_no_field_id:
+                Logger.info(f"      · 번호 자체가 없음: {item['key']} "
+                            f"→ 관리도구가 준 대로 사용: {item['referenceEndpoint']}")
 
         return '\n'.join(result_lines)
 

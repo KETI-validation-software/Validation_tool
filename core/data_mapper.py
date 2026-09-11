@@ -23,6 +23,32 @@ class ConstraintDataGenerator:
         # 요청을 만들 때마다 초기화되고, 설정되면 호출부가 그 회차를 실패로 확정한다.
         self.unrunnable_reason = None
 
+    @staticmethod
+    def _fold_indexed_paths(constraints):
+        """제약 경로의 줄 번호 구간을 접는다.
+
+        관리도구가 하드코딩된 배열을 줄별로 펼쳐 내려보내는 형식이 생겼다.
+            camList.0.camID / camList.1.camID / ... / camList.4.camID
+        생성기는 줄 번호 없는 camList.camID 하나로만 조회하므로, 접지 않으면
+        제약이 통째로 무시되고 템플릿 값이 그대로 나간다(무작위·참조 설정이
+        조용히 사라짐). 줄별 규칙은 실측상 내용이 모두 같아 접어도 손실이 없다.
+
+        camList.0 → camList처럼 상위 항목과 부딪히는 경우가 있어 먼저 온 것을
+        남긴다 (상위 항목이 arrayElementType 등 실제 설정을 들고 있다).
+        """
+        if not isinstance(constraints, dict):
+            return constraints
+        if not any(s.isdigit() for k in constraints for s in str(k).split(".")):
+            return constraints  # 줄 번호가 없으면 그대로 (기존 형식)
+
+        folded = {}
+        for path, rule in constraints.items():
+            key = ".".join(s for s in str(path).split(".") if not s.isdigit())
+            if key not in folded:
+                folded[key] = rule
+        Logger.debug(f"[DATA_MAPPER] 제약 경로 접기: {len(constraints)}개 → {len(folded)}개")
+        return folded
+
     def _find_requested_ids(self, constraints, field, default_endpoint):
         """앞서 보낸 요청(구독/조회)에서 해당 필드의 ID 후보를 찾는다.
 
@@ -117,8 +143,12 @@ class ConstraintDataGenerator:
         # 회차마다 새로 판단한다 (앞 회차의 '수행 불가'가 남지 않도록)
         self.unrunnable_reason = None
 
+        # 제약 경로를 접어서 들어온다 — 이후 모든 조회가 같은 형태를 보게 한다
+        constraints = self._fold_indexed_paths(constraints)
+
         # ✅ sensorDeviceList 구조를 가진 웹훅 데이터 동적 생성 (범용)
-        if is_webhook and "sensorDeviceList" in template_data:
+        if (is_webhook and "sensorDeviceList" in template_data
+                and not self._is_preset(constraints, "sensorDeviceID")):
             # request_data에서 요청한 sensorDeviceID 추출
             requested_ids = self.find_key(request_data, "sensorDeviceID")
             
@@ -179,7 +209,11 @@ class ConstraintDataGenerator:
             return template_data
         
         # ✅ doorList 구조를 가진 데이터 동적 생성 (범용)
-        if "doorList" in template_data:
+        #    doorID가 고정값이면 관리도구가 적어준 목록을 그대로 쓴다 — 전용 경로 진입 안 함
+        if "doorList" in template_data and self._is_preset(constraints, "doorID"):
+            Logger.info(f"[DATA_MAPPER] doorID 고정값 — 템플릿 doorList 그대로 사용: "
+                        f"{template_data.get('doorList')}")
+        elif "doorList" in template_data:
             is_response_template = "code" in template_data
             
             if is_webhook:
@@ -256,8 +290,8 @@ class ConstraintDataGenerator:
                         if "doorID" in field_path and isinstance(rule, dict):
                             ref_endpoint = rule.get("referenceEndpoint")
                             value_type = rule.get("valueType")
-                            if ref_endpoint:
-                                Logger.debug(f"[DATA_MAPPER] doorID의 referenceEndpoint 발견: {ref_endpoint}, valueType: {value_type}")
+                            if ref_endpoint or value_type == "preset":
+                                Logger.debug(f"[DATA_MAPPER] doorID 설정 발견: referenceEndpoint={ref_endpoint}, valueType={value_type}")
                                 break
                 
                 # referenceEndpoint가 없으면 기본값 사용
@@ -369,12 +403,17 @@ class ConstraintDataGenerator:
             )
         
         # ✅ commandType 구조를 가진 데이터 동적 생성 (범용 - DoorControl 등)
-        if "commandType" in template_data and "doorID" in template_data:
+        #    commandType이 고정값이면 토글하지 않는다 — 관리도구가 적어준 명령 그대로
+        if ("commandType" in template_data and "doorID" in template_data
+                and not self._is_preset(constraints, "commandType")):
             Logger.debug(f" commandType 데이터 동적 생성 시작 (API: {api_name})")
 
             # doorID 추출
             target_door_id = None
-            if request_data and "doorID" in request_data:
+            if self._is_preset(constraints, "doorID"):
+                # doorID는 관리도구 지정값 — 그 문의 상태만 찾아 명령을 정한다
+                target_door_id = template_data.get("doorID")
+            elif request_data and "doorID" in request_data:
                 target_door_id = request_data["doorID"]
             elif door_memory and len(door_memory) > 0:
                 target_door_id = random.choice(list(door_memory.keys()))
@@ -444,6 +483,38 @@ class ConstraintDataGenerator:
         return template_data
 
 
+    NO_DEVICE_ID = "NoDevice"
+
+    @classmethod
+    def _no_device_id(cls, existing):
+        """실제 장치와 겹치지 않는 '장치 없음' 표식 ID
+
+        PTZ 대상 장치가 하나도 없을 때 이 값을 보내 회차를 실패로 확정한다.
+        (오류 주입과 무관한 경로다 — 주입 코드를 걷어낼 때 같이 지웠다가 되살렸다.)
+        """
+        taken = {str(v) for v in (existing or [])}
+        if cls.NO_DEVICE_ID not in taken:
+            return cls.NO_DEVICE_ID
+        n = 1
+        while f"{cls.NO_DEVICE_ID}{n}" in taken:
+            n += 1
+        return f"{cls.NO_DEVICE_ID}{n}"
+
+    @staticmethod
+    def _is_preset(constraints, field_name):
+        """관리도구가 이 필드를 고정값(preset)으로 지정했는가.
+
+        규칙은 둘뿐이다 — ① 채우라고 하면 채우고 ② 지정한 값이 있으면 그 값을 쓴다.
+        일반 생성기는 이걸 지키는데, doorList·sensorDeviceList·commandType처럼 일반
+        생성기를 거치지 않는 전용 경로들은 값 설정이 생기기 전 논리를 그대로 돌려
+        지정값을 덮어썼다(door9999 사전 입력이 실제 ID로 바뀐 건, 2026-09-12 실측).
+        전용 경로에 들어가기 전에 이 한 곳에서 묻는다.
+        """
+        for path, rule in (constraints or {}).items():
+            if isinstance(rule, dict) and (path == field_name or path.endswith("." + field_name)):
+                return rule.get("valueType") == "preset"
+        return False
+
     @staticmethod
     def _is_ptz_api(api_name):
         """PTZ 제어 계열 API인지 (PTZStatus, PTZControl 등 — 대소문자 무시)"""
@@ -472,14 +543,32 @@ class ConstraintDataGenerator:
             ref_text = f", 참조={ref_endpoint}.{ref_field}" if ref_endpoint else ""
             Logger.debug(f"[BUILD_MAP] {path}: valueType={value_type}{ref_text}")
 
+            # ✅ 고정값(preset)은 제약 맵에 넣지 않는다 — 관리도구가 적어준 값 그대로.
+            # 관리도구에서 고정값으로 바꿔도 예전 참조(referenceEndpoint)가 필드에 붙은 채
+            # 내려오는데, 아래 분기는 참조가 있다는 이유만으로 값을 끌어와 덮어썼다
+            # (door9999 사전 입력이 DoorProfiles의 door0002로 바뀜, 2026-09-12 실측).
+            # 규칙은 둘뿐이다: 채우라면 채우고, 지정했으면 지정값. 여기서 끝낸다.
+            if value_type == "preset":
+                Logger.debug(f"[BUILD_MAP]   고정값 — 참조·무작위 적용 안 함")
+                continue
+
             # valueType이 "random"이고 randomType이 있으면 아래에서 별도 처리
             random_type = rule.get("randomType")
             
             # referenceEndpoint가 있으면 latest_events에서 데이터 찾기
             # 단, referenceField가 "(참조 필드 미선택)"이면 참조 안 함
             # 단, valueType이 "random"이고 randomType이 있으면 건너뜀 (아래에서 처리)
-            if ref_endpoint and ref_field and ref_field != "(참조 필드 미선택)" and not (value_type == "random" and random_type):
+            # request-range는 아래 전용 분기가 requestRange의 minField/maxField로
+            # 구간을 만든다. 여기서 가로채면 min/max 없이 {"type":"request-range"}만
+            # 남아 구간을 잃고, 생성기가 "지금 시각"을 찍어 요청 구간 밖 값이
+            # 나갔다 (2026-09-11 실측: 5월 구간을 요청했는데 9월 시각이 응답).
+            if (ref_endpoint and ref_field and ref_field != "(참조 필드 미선택)"
+                    and value_type != "request-range"
+                    and not (value_type == "random" and random_type)):
                 values = []
+                # 같은 참조 목록을 보는 필드끼리 줄을 맞추기 위한 표식.
+                # 값을 걸러내거나 표본을 뽑으면 순서가 어긋나므로 그때는 끈다.
+                ref_aligned = True
 
                 # referenceEndpoint의 슬래시 처리 (있든 없든 찾을 수 있도록)
                 # 예: "/StoredVideoEventInfos" → "StoredVideoEventInfos"
@@ -513,6 +602,7 @@ class ConstraintDataGenerator:
                             Logger.info(f"  PTZ 카메라만 선별: {picked} "
                                         f"(전체 {len(values)}대 중 {len(picked)}대)")
                             values = picked
+                            ref_aligned = False   # 걸러낸 뒤라 원본 줄 번호와 어긋난다
                         else:
                             # 대상 장치가 없으면 이 회차는 수행 자체가 불가능하다.
                             # 아무 카메라나 골라 보내거나 빈 값을 보내면 결과가
@@ -527,18 +617,25 @@ class ConstraintDataGenerator:
                             Logger.error(f"  ❌ {api_name}: 시험 수행 불가 — "
                                          f"{self.unrunnable_reason} → {ref_field}={sentinel} 전송")
                             values = [sentinel]
+                            ref_aligned = False
 
                     # response-based(시스템 요청)만 랜덤 선택, request-based(플랫폼 응답/웹훅)는 그대로 사용 (01/08)
                     if value_type == "response-based" and not is_webhook and values and len(values) > 0:
                         original_count = len(values)
                         random_count = random.randint(1, len(values))
                         values = random.sample(values, random_count)
+                        ref_aligned = False   # 표본을 뽑은 뒤라 원본 줄 번호와 어긋난다
                         Logger.debug(f"[BUILD_MAP]   Random selection: {random_count}/{original_count} items selected (시스템 요청)")
                     else:
                         Logger.debug(f"[BUILD_MAP]   랜덤 선택 안함 (valueType={value_type}, is_webhook={is_webhook}), 전체 사용: {len(values)}개")
                 else:
                     Logger.debug(f"[BUILD_MAP]   referenceEndpoint NOT found in latest_events")
                     Logger.debug(f"[BUILD_MAP]   Available endpoints: {list(self.latest_events.keys())}")
+
+                # 참조(앞선 응답·요청)에서 실제로 가져온 값인지 — 폴백 전에 판단한다.
+                # 목록을 몇 줄로 늘릴지는 "장치가 몇 대인가"로 정해야 하고,
+                # "고를 수 있는 값이 몇 가지인가"로 정하면 안 된다.
+                from_reference = bool(values)
 
                 # ✅ 무작위 계열은 참조에서 값을 못 찾으면 관리도구 설정값으로 폴백.
                 # 요청 생성 시점에는 참조 응답이 아직 없는 게 보통이라, 폴백이 없으면
@@ -547,9 +644,30 @@ class ConstraintDataGenerator:
                     values = self._get_static_random_values(rule)
                     Logger.debug(f"[BUILD_MAP]   참조 값 없음 → 설정값 폴백: {values}")
 
+                # 참조도 폴백도 비면 템플릿 값(보통 빈 문자열)이 그대로 나간다.
+                # 그러면 우리가 못 채운 값을 상대 잘못처럼 채점하게 되므로 크게 남긴다.
+                if not values:
+                    Logger.error(
+                        f"  ❌ 값을 채우지 못했습니다: {path} "
+                        f"(참조 {ref_endpoint}.{ref_field}, valueType={value_type}) — "
+                        f"템플릿 값이 그대로 전송됩니다. "
+                        f"보유 참조: {sorted(k for k in self.latest_events if not k.startswith('/'))}"
+                    )
+
+                # 같은 응답의 같은 목록을 보는 필드들을 한 묶음으로 묶는 열쇠.
+                # camID와 camName을 따로 뽑으면 cam0003에 "카메라1"이 붙는다 —
+                # 명단에서 줄을 골라야지 칸을 따로 고르면 짝이 어긋난다.
+                # ponytail: 여기서는 "어느 응답에서 왔나"만 적는다. 경로만으로는
+                #           camList.camID와 camList.camLoc.desc가 같은 목록에서 온
+                #           형제라는 걸 알 수 없어서다 — 실제로 한 줄인지는
+                #           _align_group_picks가 템플릿 구조와 값 개수로 가른다.
+                ref_group = ref_key if from_reference and ref_aligned else None
+
                 constraint_map[path] = {
                     "type": value_type,
-                    "values": values if values else []
+                    "values": values if values else [],
+                    "from_reference": from_reference,
+                    "ref_group": ref_group,
                 }
 
             elif value_type in self.REQUEST_BASED_TYPES:
@@ -559,7 +677,8 @@ class ConstraintDataGenerator:
                 Logger.debug(f"[BUILD_MAP]   Found values from request: {values}")
                 constraint_map[path] = {
                     "type": "request-based",
-                    "values": values if values else []
+                    "values": values if values else [],
+                    "from_reference": bool(values),
                 }
 
             elif value_type == "random-response":
@@ -601,6 +720,16 @@ class ConstraintDataGenerator:
                         
                         Logger.debug(f"[BUILD_MAP]   validValues after exclude: {valid_values}")
                 
+                if not valid_values:
+                    # 참조 없이 관리도구 후보값만 쓰는 필드다. 후보가 비면 템플릿 값이
+                    # 그대로 나가는데(빈 배열·빈 문자열) 아무 흔적이 없어 진단이 막혔다.
+                    # 관리도구가 다른 키 이름으로 보냈을 수도 있어 가진 키를 함께 남긴다.
+                    Logger.error(
+                        f"  ❌ 값을 채우지 못했습니다: {path} (valueType=random) — "
+                        f"관리도구 후보값(validValues/specifiedValues)이 비어 있습니다. "
+                        f"템플릿 값이 그대로 전송됩니다. 규칙이 가진 키: {sorted(rule.keys())}"
+                    )
+
                 constraint_map[path] = {
                     "type": "random",
                     "values": valid_values
@@ -716,7 +845,8 @@ class ConstraintDataGenerator:
                 Logger.debug(f"[BUILD_MAP]   Found values from request: {values}")
                 constraint_map[path] = {
                     "type": "request-based",
-                    "values": values if values else []
+                    "values": values if values else [],
+                    "from_reference": bool(values),
                 }
 
             elif value_type == "random-response":
@@ -844,22 +974,32 @@ class ConstraintDataGenerator:
         result = {}
 
         for key, value in template.items():
+            constraint = constraint_map.get(key)
+            ctype = constraint["type"] if constraint else None
+            is_object_list = (isinstance(value, list) and len(value) > 0
+                              and isinstance(value[0], dict))
+            is_object = isinstance(value, dict)
+            # 컨테이너(객체 목록·중첩 객체)는 자기 제약이 있어도 구조를 따라 내려간다.
+            # 관리도구가 컨테이너에도 참조를 달아 내려주기 시작하면서
+            # (camList: valueType=preset, 참조=/CameraProfiles.camID), 예전 구조에서는
+            # 여기서 걸려 하위 항목 생성이 통째로 건너뛰어졌다 — 목록 안의 camID가
+            # 빈 값으로 나가던 원인 (2026-09-11 리허설 실측).
+            is_container = is_object_list or is_object
+
             # 최상위 레벨에서 constraint 확인
-            if key in constraint_map:
-                constraint = constraint_map[key]
-                if constraint["type"] in self.VALUE_PICK_TYPES:
-                    # 랜덤 값 선택 — 템플릿이 배열이면 배열 타입 유지 (classFilter 등
-                    # 문자열 배열 필드가 낱값으로 변형돼 나가던 문제 방지)
-                    if constraint["values"]:
-                        picked = random.choice(constraint["values"])
-                        result[key] = [picked] if isinstance(value, list) else picked
-                    else:
-                        result[key] = value
-                elif constraint["type"] == "request-range":
-                    # ✅ 최상위 시각 필드의 범위 설정 — 예전에는 미처리로 템플릿 값이
-                    # 그대로 나갔다 (2026-08-26 전수 검사에서 확인)
-                    result[key] = self._pick_range_value(constraint, value)
-            elif isinstance(value, list) and len(value) > 0 and isinstance(value[0], dict):
+            if not is_container and ctype in self.VALUE_PICK_TYPES:
+                # 랜덤 값 선택 — 템플릿이 배열이면 배열 타입 유지 (classFilter 등
+                # 문자열 배열 필드가 낱값으로 변형돼 나가던 문제 방지)
+                if constraint["values"]:
+                    picked = random.choice(constraint["values"])
+                    result[key] = [picked] if isinstance(value, list) else picked
+                else:
+                    result[key] = value
+            elif not is_container and ctype == "request-range":
+                # ✅ 최상위 시각 필드의 범위 설정 — 예전에는 미처리로 템플릿 값이
+                # 그대로 나갔다 (2026-08-26 전수 검사에서 확인)
+                result[key] = self._pick_range_value(constraint, value)
+            elif is_object_list:
                 # 리스트 형태의 구조 처리
                 # ✅ 템플릿의 리스트 길이 자동 감지
                 n = len(value)
@@ -877,16 +1017,28 @@ class ConstraintDataGenerator:
                     # 등록된 줄이 여럿이면 줄별로 채운다.
                     # 첫 줄만 본으로 삼아 n개를 찍어내면 2번째 이후 줄(카메라2, door0002 등)이
                     # 사라지고 첫 줄이 복제된다.
+                    # 단 값 풀은 줄 사이에서 공유한다 — 줄마다 _generate_list_items를
+                    # 새로 부르면 "이미 쓴 값" 목록이 매번 초기화돼 모든 줄이 첫
+                    # 참조값(cam0001)만 집었다.
+                    avail, used, shared, _ = self._collect_value_pools(
+                        key, value[0], constraint_map
+                    )
+                    aligned = self._align_group_picks(key, value[0], constraint_map, n)
                     result[key] = [
-                        self._generate_list_items(key, row, constraint_map, 1)[0]
-                        for row in value
+                        self._generate_item(key, row, constraint_map, n,
+                                            available_values=avail,
+                                            used_values=used,
+                                            shared_values=shared,
+                                            item_index=i,
+                                            aligned_picks=aligned)
+                        for i, row in enumerate(value)
                     ]
                 else:
                     # 줄이 하나면 요청 개수만큼 늘리는 기존 방식 (영상 계열 등)
                     result[key] = self._generate_list_items(
                         key, value[0], constraint_map, n
                     )
-            elif isinstance(value, dict):
+            elif is_object:
                 # ✅ 중첩 딕셔너리: 하위 경로(key.field)에 제약이 있으면 재귀 적용.
                 # 예전에는 무조건 그대로 둬서 filter.eventFilter 같은 중첩 필드의
                 # 무작위/참조 설정이 조용히 무시됐다 (2026-08-23 이식).
@@ -900,11 +1052,15 @@ class ConstraintDataGenerator:
 
         return result
 
-    def _generate_list_items(self, parent_key, item_template, constraint_map, n):
-        """리스트 항목 생성 - 중복 방지 (각 항목은 고유한 값)"""
-        items = []
+    def _collect_value_pools(self, parent_key, item_template, constraint_map):
+        """리스트 한 줄을 채우는 데 쓸 값 풀을 모은다.
 
-        # ✅ 사용 가능한 값들을 미리 수집
+        반환: (available_values, used_values, shared_values, min_available_count)
+
+        줄 여러 개를 채울 때는 이 풀을 줄 사이에서 공유해야 한다. 줄마다 새로
+        만들면 "이미 쓴 값" 목록이 매번 비어 있어 모든 줄이 첫 값(cam0001)만
+        집는다.
+        """
         available_values = {}
         used_values = {}  # 이미 사용된 값 추적
         shared_values = {}  # 필터 필드 (모든 항목에 동일한 값)
@@ -930,26 +1086,108 @@ class ConstraintDataGenerator:
                         available_values[field_path] = constraint["values"].copy()
                         used_values[field_path] = []
 
-                        # 최소 값 개수 추적
-                        min_available_count = min(min_available_count, len(constraint["values"]))
+                        # 목록을 몇 줄로 늘릴지는 참조에서 가져온 값만 기준이 된다.
+                        # 카메라 5대면 5줄이 말이 되지만, 허용값이 27가지라고 해서
+                        # 27줄을 보내는 건 말이 안 된다 — 고를 수 있는 가짓수일 뿐이다
+                        # (filterList가 속성 개수만큼 부풀던 문제, 2026-09-11 실측).
+                        if constraint.get("from_reference"):
+                            min_available_count = min(min_available_count,
+                                                      len(constraint["values"]))
 
-        # ✅ 랜덤한 개수 생성 -> 가능한 최대 개수로 고정 (참조 데이터 누락 방지)
+        return available_values, used_values, shared_values, min_available_count
+
+    def _align_group_picks(self, parent_key, item_template, constraint_map, n):
+        """같은 참조 목록을 보는 필드들을 줄 단위로 맞춰 뽑는다.
+
+        반환: {필드경로: [1줄값, 2줄값, ...]} — 맞출 게 없으면 빈 dict.
+
+        명단에서 줄 번호를 먼저 n개 고르고, 한 묶음의 모든 필드가 같은 줄에서
+        값을 꺼낸다. 칸마다 따로 뽑으면 cam0003에 "카메라1"이 붙어 나간다
+        (참조 필드가 한 줄에 둘 이상 걸리는 순간 드러나는 문제).
+
+        한 줄에 속하는 범위는 템플릿을 따라간다 — 중첩 객체(camLoc)는 같은 줄이지만
+        안쪽 목록(timeList)은 자기 줄 수로 따로 만들어지므로 여기서 제외한다.
+        """
+        paths = []
+        self._collect_aligned_paths(parent_key, item_template, constraint_map, paths)
+
+        # 묶는 기준에 값 개수를 함께 넣는다 — 같은 응답이라도 개수가 다르면 다른 목록이다
+        groups = {}
+        for field_path in paths:
+            constraint = constraint_map[field_path]
+            key = (constraint["ref_group"], len(constraint["values"]))
+            groups.setdefault(key, []).append(field_path)
+
+        picks = {}
+        for (group, total), members in groups.items():
+            if total < n:
+                Logger.debug(f"[ALIGN] {group}: 원본 {total}줄 < 필요 {n}줄 → 줄 맞춤 생략")
+                continue
+            rows = random.sample(range(total), n)
+            for member in members:
+                picks[member] = [constraint_map[member]["values"][i] for i in rows]
+            if len(members) > 1:
+                Logger.debug(f"[ALIGN] {group}: {sorted(members)} → 원본 줄 {rows} 로 맞춤")
+        return picks
+
+    @classmethod
+    def _collect_aligned_paths(cls, parent_key, template, constraint_map, out):
+        """한 줄에 함께 담기는 참조 필드 경로를 모은다 (중첩 객체까지, 목록은 제외)."""
+        for field, value in template.items():
+            field_path = f"{parent_key}.{field}"
+            if isinstance(value, dict):
+                cls._collect_aligned_paths(field_path, value, constraint_map, out)
+            elif isinstance(value, list):
+                continue          # 안쪽 목록은 자기 템플릿으로 따로 생성된다
+            else:
+                constraint = constraint_map.get(field_path) or {}
+                if constraint.get("ref_group") and constraint.get("values"):
+                    out.append(field_path)
+
+    def _generate_list_items(self, parent_key, item_template, constraint_map, n):
+        """리스트 항목 생성 - 중복 방지 (각 항목은 고유한 값)"""
+        items = []
+
+        available_values, used_values, shared_values, min_available_count = \
+            self._collect_value_pools(parent_key, item_template, constraint_map)
+
+        # 템플릿이 한 줄일 때 몇 건으로 늘릴지 — 참조 개수 안에서 매번 다르게 뽑는다.
+        # 늘 참조 개수와 같으면(카메라 5대 → 항상 5건) 상대가 "이 API는 늘 5건"으로
+        # 하드코딩한 응답을 내도 구분되지 않는다. StreamURLs부터는 특정 카메라를
+        # 지목해 명령하는 구간이라 요청대로 처리하는지가 시험의 핵심이다.
+        # 값 풀은 그대로 두고 뽑는 개수만 줄이므로 중복은 생기지 않는다.
+        #
+        # 단 받은 요청을 되돌려주는 경우(request-based — 응답·웹훅)는 제외한다.
+        # 그쪽은 요청에 담긴 항목과 1:1로 맞춰야 하므로 개수를 흔들면 안 된다.
+        mirrors_request = any(
+            (constraint_map.get(fp) or {}).get("type") in self.REQUEST_BASED_TYPES
+            for fp in available_values
+        )
         if min_available_count != float('inf'):
-            n = min_available_count
-            Logger.info(f" {parent_key}: {n}개 생성합니다. (참조 데이터 개수 일치)")
+            if mirrors_request:
+                n = min_available_count
+                Logger.info(f" {parent_key}: {n}개 생성합니다. (요청 항목과 1:1)")
+            else:
+                n = random.randint(1, min_available_count)
+                Logger.info(f" {parent_key}: {n}개 생성합니다. "
+                            f"(참조 {min_available_count}건 중 무작위)")
+
+        # 줄 수가 정해진 뒤에 원본 줄을 고른다 — 같은 참조를 보는 필드끼리 짝을 맞춘다
+        aligned_picks = self._align_group_picks(parent_key, item_template, constraint_map, n)
 
         for i in range(n):
             item = self._generate_item(parent_key, item_template, constraint_map, n,
                                        available_values=available_values,
                                        used_values=used_values,
                                        shared_values=shared_values,
-                                       item_index=i)
+                                       item_index=i,
+                                       aligned_picks=aligned_picks)
             items.append(item)
 
         return items
 
     def _generate_item(self, parent_key, template, constraint_map, n, available_values=None, used_values=None,
-                       shared_values=None, item_index=0):
+                       shared_values=None, item_index=0, aligned_picks=None):
         """단일 항목 생성 (재귀적으로 중첩 구조 처리) - 중복 방지"""
         item = {}
 
@@ -959,6 +1197,8 @@ class ConstraintDataGenerator:
             used_values = {}
         if shared_values is None:
             shared_values = {}
+        if aligned_picks is None:
+            aligned_picks = {}
 
         for field, value in template.items():
             field_path = f"{parent_key}.{field}"
@@ -966,13 +1206,17 @@ class ConstraintDataGenerator:
             # 중첩된 딕셔너리 처리 (예: videoInfo)
             if isinstance(value, dict):
                 item[field] = self._generate_item(field_path, value, constraint_map, n,
-                                                  available_values, used_values, shared_values, item_index)
+                                                  available_values, used_values, shared_values,
+                                                  item_index, aligned_picks)
 
             # 중첩된 리스트 처리 (예: timeList)
             elif isinstance(value, list):
                 if len(value) > 0 and isinstance(value[0], dict):
+                    # 안쪽 목록 길이는 자기 템플릿에서 정한다. 바깥 줄 수(n)를
+                    # 그대로 물려주면 "카메라 3대 → 카메라마다 시간 3개"처럼
+                    # 상관없는 개수가 따라붙는다 (2026-09-11 실측).
                     item[field] = self._generate_list_items(
-                        field_path, value[0], constraint_map, n
+                        field_path, value[0], constraint_map, len(value)
                     )
                 elif field_path in constraint_map and constraint_map[field_path].get("values"):
                     # ✅ 문자열 배열 필드(filterList.classFilter 등)도 값 설정을 적용한다.
@@ -991,6 +1235,10 @@ class ConstraintDataGenerator:
                 if field_path in shared_values:
                     item[field] = shared_values[field_path]
 
+                # ✅ 줄 맞춤: 같은 참조 목록을 보는 필드는 원본에서 같은 줄의 값을 쓴다
+                elif item_index < len(aligned_picks.get(field_path, [])):
+                    item[field] = aligned_picks[field_path][item_index]
+
                 # ✅ request-based, random-response, random: 중복 방지 (순차 할당)
                 elif constraint["type"] in self.VALUE_PICK_TYPES:
                     if field_path in available_values and available_values[field_path]:
@@ -1001,8 +1249,9 @@ class ConstraintDataGenerator:
                         unused_values = [v for v in values_list if v not in used_list]
 
                         if unused_values:
-                            # 사용하지 않은 값 중 첫 번째 선택
-                            selected_value = unused_values[0]
+                            # 아직 안 쓴 값 중에서 무작위로 — 예전에는 [0]을 집어
+                            # 늘 참조 목록 순서(cam0001, cam0002 …)대로 나갔다
+                            selected_value = random.choice(unused_values)
                             item[field] = selected_value
                             # 사용된 값으로 표시
                             if field_path not in used_values:
@@ -1026,7 +1275,9 @@ class ConstraintDataGenerator:
                         unused_values = [v for v in values_list if v not in used_list]
 
                         if unused_values:
-                            selected_value = unused_values[0]
+                            # 값 풀 없이 들어온 경로(중첩 객체 안의 단일 필드 등).
+                            # 여기도 [0]이라 늘 첫 값만 나갔다.
+                            selected_value = random.choice(unused_values)
                             item[field] = selected_value
                             used_values[field_path].append(selected_value)
                         elif values_list:
@@ -1042,6 +1293,13 @@ class ConstraintDataGenerator:
                     sibling_start = (item.get("startTime")
                                      if "endTime" in field and "startTime" in item else None)
                     item[field] = self._pick_range_value(constraint, value, sibling_start)
+
+                else:
+                    # preset 등 값을 만들지 않는 설정 — 템플릿 값을 그대로 둔다.
+                    # 예전에는 여기에 else가 없어 item[field] 자체가 설정되지 않았고,
+                    # 필드가 응답·요청에서 통째로 사라졌다(관리도구가 목록 안 필드를
+                    # preset으로 내려주면 재현).
+                    item[field] = value
 
             else:
                 # constraint 없는 필드는 기본값 유지
@@ -1094,17 +1352,31 @@ class ConstraintDataGenerator:
 
     def find_key(self, data, target_key):
         """재귀적으로 데이터에서 키 찾기"""
-        results = []
+        def _search(node, name):
+            found = []
+            if isinstance(node, dict):
+                for k, v in node.items():
+                    if k == name:
+                        found.append(v)
+                    elif isinstance(v, (dict, list)):
+                        found.extend(_search(v, name))
+            elif isinstance(node, list):
+                for item in node:
+                    found.extend(_search(item, name))
+            return found
 
-        if isinstance(data, dict):
-            for k, v in data.items():
-                if k == target_key:
-                    results.append(v)
-                elif isinstance(v, (dict, list)):
-                    results.extend(self.find_key(v, target_key))
-        elif isinstance(data, list):
-            for item in data:
-                results.extend(self.find_key(item, target_key))
+        results = _search(data, target_key)
+
+        # 관리도구가 참조 필드를 이름("camID")으로도, 경로("camList.camID")로도
+        # 내려준다. 경로로 오면 그런 이름의 키가 없어 조회가 통째로 빈다
+        # (참조 기반 필드가 전부 빈 값으로 나가던 원인, 2026-09-11 실측).
+        # 마지막 조각을 이름으로 다시 찾는다 — 이 함수가 이미 깊이 무관
+        # 재귀 검색이라 이름으로 내려오던 때와 결과가 같다.
+        if not results and "." in str(target_key):
+            leaf = str(target_key).rsplit(".", 1)[-1]
+            results = _search(data, leaf)
+            if results:
+                Logger.debug(f"[find_key] 경로 표기 '{target_key}' → 이름 '{leaf}'로 조회")
 
         return results
 

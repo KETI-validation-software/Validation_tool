@@ -281,7 +281,7 @@ class TestApiSection(QGroupBox):
 
     def _setup_placeholder(self):
         """시험 API 안내 문구 설정"""
-        self.api_placeholder_label = QLabel("시험 시나리오를 선택하면\nAPI가 표시됩니다.")
+        self.api_placeholder_label = QLabel("기능을 선택하면\nAPI가 표시됩니다.")
         self.api_placeholder_label.setParent(self.api_test_table)
         self.api_placeholder_label.setAlignment(Qt.AlignCenter)
         self.api_placeholder_label.setStyleSheet("""

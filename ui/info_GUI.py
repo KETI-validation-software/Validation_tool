@@ -725,7 +725,7 @@ class InfoWidget(QWidget):
             return
 
         if not self.test_field_table.rowCount() > 0:
-            QMessageBox.warning(self, "입력 필요", "시험 분야 데이터가 없습니다.")
+            QMessageBox.warning(self, "입력 필요", "시험 기능 데이터가 없습니다.")
             return
 
         if self.current_page < 1:
@@ -1100,7 +1100,7 @@ class InfoWidget(QWidget):
 
             # spec_id 추출 (testSpecs의 첫 번째 항목)
             if not self.test_specs or len(self.test_specs) == 0:
-                QMessageBox.warning(self, "오류", "시험 시나리오 정보가 없습니다.")
+                QMessageBox.warning(self, "오류", "시험 기능 정보가 없습니다.")
                 return
 
             # test_specs[0]이 딕셔너리인지 확인
@@ -1108,7 +1108,7 @@ class InfoWidget(QWidget):
             if isinstance(first_spec, dict):
                 spec_id = first_spec.get("id", "")
             else:
-                QMessageBox.warning(self, "오류", f"시험 시나리오 데이터 형식이 올바르지 않습니다: {type(first_spec)}")
+                QMessageBox.warning(self, "오류", f"시험 기능 데이터 형식이 올바르지 않습니다: {type(first_spec)}")
                 return
 
             # 물리보안(시스템 검증)일 경우: UI에서 수정한 ID/PW로 Data_request.py 업데이트
@@ -1542,7 +1542,9 @@ class InfoWidget(QWidget):
                 self.target_system = "단일시스템"
             elif self.target_system == "INTEGRATED_SYSTEM":
                 self.target_system = "통합시스템"
-            self.target_system_edit.setText(self.target_system)
+            # 화면 표시용 문구 (내부 분기값 self.target_system은 그대로 유지)
+            target_system_display = {"단일시스템": "물리보안 단일시스템", "통합시스템": "물리보안 통합시스템"}
+            self.target_system_edit.setText(target_system_display.get(self.target_system, self.target_system))
             self._refresh_page_header_titles()
 
             self.test_group_edit.setText(combined_group_names)  # 콤마로 연결된 그룹 이름들
@@ -1550,9 +1552,9 @@ class InfoWidget(QWidget):
             # 시험범위를 UI용 텍스트로 변환하여 표시
             display_test_range = combined_group_ranges
             if "ALL_FIELDS" in combined_group_ranges or combined_group_ranges == "전체 필드":
-                display_test_range = "전체필드"
+                display_test_range = "전체 항목"
             elif combined_group_ranges:
-                display_test_range = "필수필드"
+                display_test_range = "필수 항목"
             self.test_range_edit.setText(display_test_range)
 
             self.contact_person = eval_target.get("contactPerson", "")
@@ -1939,7 +1941,7 @@ class InfoWidget(QWidget):
 
         except Exception as e:
             Logger.debug(f"시험 분야 선택 처리 실패: {e}")
-            QMessageBox.warning(self, "오류", f"시험 분야 데이터 로드 중 오류가 발생했습니다:\n{str(e)}")
+            QMessageBox.warning(self, "오류", f"시험 기능 데이터 로드 중 오류가 발생했습니다:\n{str(e)}")
 
     def on_scenario_selected(self, row, col):
         """시나리오 테이블 클릭 시 체크박스 상태 변경 및 API 테이블 업데이트"""
@@ -1973,7 +1975,7 @@ class InfoWidget(QWidget):
 
         except Exception as e:
             Logger.debug(f"시나리오 선택 처리 실패: {e}")
-            QMessageBox.warning(self, "오류", f"시나리오 데이터 로드 중 오류가 발생했습니다:\n{str(e)}")
+            QMessageBox.warning(self, "오류", f"시험 기능 데이터 로드 중 오류가 발생했습니다:\n{str(e)}")
 
     def toggle_address_popover(self):
         """주소 추가 팝오버 표시/숨김 토글"""

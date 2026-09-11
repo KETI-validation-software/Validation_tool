@@ -105,7 +105,8 @@ class FormValidator:
         self.opt_loader = OptLoader()
         self._steps_cache = {}
         self._test_step_cache = {}
-        self._spec_names_cache = {}  # spec_id -> spec_name 매핑
+        self._spec_names_cache = {}  # spec_id -> spec_name 매핑 (화면 표시용)
+        self._spec_delims_cache = {}  # spec_id -> delimiter 매핑 (시험 URL 경로용)
         self._group_specs = {}  # group_name -> [spec1, spec2, ...]
 
         # 분리된 서비스 초기화
@@ -220,16 +221,16 @@ class FormValidator:
         if not test_range:
             return
 
-        if test_range in ["전체필드", "필수필드"]:
+        if test_range in ["전체 항목", "필수 항목"]:
             return
 
         self.parent.original_test_range = test_range
 
         # API에서 받아온 영문 값이 있는 경우를 위한 처리
         if test_range == "ALL_FIELDS" or test_range == "전체 필드":
-            self.parent.test_range_edit.setText("전체필드")
+            self.parent.test_range_edit.setText("전체 항목")
         elif test_range == "REQUIRED_FIELDS" or test_range == "필수 필드":
-            self.parent.test_range_edit.setText("필수필드")
+            self.parent.test_range_edit.setText("필수 항목")
         else:
             # 이미 한글인 경우는 그대로 유지
             pass
@@ -301,10 +302,10 @@ class FormValidator:
         elif test_category == "사전시험":
             test_category = self.parent.original_test_category if self.parent.original_test_category else "사전시험"
 
-        # test_range 변환: UI 표시용("전체필드") -> CONSTANTS.py용("전체 필드")
-        if test_range == "전체필드":
+        # test_range 변환: UI 표시용("전체 항목") -> CONSTANTS.py용("전체 필드")
+        if test_range == "전체 항목":
             test_range = "전체 필드"
-        elif test_range == "필수필드":
+        elif test_range == "필수 항목":
             original_range = self.parent.original_test_range if hasattr(self.parent, 'original_test_range') else "필수 필드"
             # "ALL_FIELDS"가 포함된 경우 한글로 변환
             if "ALL_FIELDS" in original_range:
@@ -542,7 +543,8 @@ class FormValidator:
                     "num_retries": _fit(num_retries, 1),
                 }
 
-            mode = self.parent.target_system_edit.text().strip()
+            # 화면 문구("물리보안 통합시스템")가 아니라 내부 분기값("단일시스템"/"통합시스템")으로 판단
+            mode = getattr(self.parent, "target_system", "") or self.parent.target_system_edit.text().strip()
 
             if getattr(sys, 'frozen', False):
                 exe_dir = os.path.dirname(sys.executable)
@@ -574,6 +576,7 @@ class FormValidator:
             for spec_id in sorted(merged_result.keys()):
                 QApplication.processEvents()
                 spec_name = self._spec_names_cache.get(spec_id, "")
+                spec_delim = self._spec_delims_cache.get(spec_id, "")
                 file_map = merged_result[spec_id]
                 all_lists = []
 
@@ -630,6 +633,7 @@ class FormValidator:
                 entry = (
                     f'"{spec_id}": {{\n'
                     f'    "test_name": "{spec_name}",\n'
+                    f'    "url_delimiter": "{spec_delim}",\n'
                     f'    "specs": {specs_list},\n'
                     f'    "api_name": {spec_config_data.get("api_name", [])},\n'
                     f'    "api_id": {spec_config_data.get("api_id", [])},\n'
@@ -822,8 +826,14 @@ class FormValidator:
                 spec_id = spec.get("id", "")
                 spec_name = spec.get("name", "")
                 group_name = spec.get("group_name", "")
+                # 시험 URL 경로에 쓸 구분자 — 표시용 이름과 별개로 관리도구가 내려준다
+                spec_delim = str(spec.get("delimiter", "") or "").strip()
 
                 self._spec_names_cache[spec_id] = spec_name
+                self._spec_delims_cache[spec_id] = spec_delim
+                if not spec_delim:
+                    Logger.warning(f"[구분자] spec_id={spec_id} ('{spec_name}')에 "
+                                   f"delimiter가 없음 → URL은 이름으로 대체됨")
 
                 if group_name not in self._group_specs:
                     self._group_specs[group_name] = []

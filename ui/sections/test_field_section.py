@@ -77,12 +77,12 @@ class TestFieldSection(QGroupBox):
         # 시험 분야 테이블 (371px x 240px)
         self.test_field_table = TestFieldTableWidget(0, 1)
         self.test_field_table.setFixedSize(371, 240)
-        self.test_field_table.setHorizontalHeaderLabels(["시험 분야"])
+        self.test_field_table.setHorizontalHeaderLabels(["시험 분야 및 범위"])
 
         # 시험 시나리오 테이블 (372px x 240px)
         self.scenario_table = TestFieldTableWidget(0, 1)
         self.scenario_table.setFixedSize(372, 240)
-        self.scenario_table.setHorizontalHeaderLabels(["시험 시나리오"])
+        self.scenario_table.setHorizontalHeaderLabels(["시험 기능"])
 
         # 시험 분야 테이블 설정
         self._setup_field_table()
@@ -292,7 +292,7 @@ class TestFieldSection(QGroupBox):
         self.scenario_column_background.hide()
 
         # 시나리오 안내 문구
-        self.scenario_placeholder_label = QLabel("시험분야를 선택하면\n시험 시나리오가 표시됩니다.")
+        self.scenario_placeholder_label = QLabel("시험 분야를 선택하면\n기능이 표시됩니다.")
         self.scenario_placeholder_label.setParent(self.scenario_table)
         self.scenario_placeholder_label.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
         self.scenario_placeholder_label.setStyleSheet("""

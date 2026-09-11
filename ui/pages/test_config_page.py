@@ -209,7 +209,7 @@ def _setup_title_container(parent_widget, bg_root_layout):
     title_inner_layout.addSpacing(13)
 
     # 텍스트
-    parent_widget.page2_title_text = QLabel("시험 기능별로 세부분야를 확인하고 시험 환경을 설정하세요.")
+    parent_widget.page2_title_text = QLabel("시험 분야별로 기능을 확인하고 시험 환경을 설정하세요.")
     parent_widget.page2_title_text.setStyleSheet("""
         QLabel {
             font-family: 'Noto Sans KR';
@@ -271,7 +271,7 @@ def _setup_left_panel(parent_widget, panels_layout):
     left_layout.setSpacing(0)
 
     # 시험 분야별 시나리오 타이틀
-    parent_widget.field_scenario_title = QLabel("시험 기능별 세부분야")
+    parent_widget.field_scenario_title = QLabel("시험 분야별 기능")
     parent_widget.field_scenario_title.setFixedSize(744, 24)
     parent_widget.original_field_scenario_title_size = (744, 24)
     parent_widget.field_scenario_title.setStyleSheet("""

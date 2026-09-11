@@ -1,5 +1,18 @@
 # data.py
+import re
 from typing import Dict, List, Any, Union
+
+# 관리도구가 배열 한 칸을 가리킬 때 쓰는 자리표시 이름 — "" 또는 "[0]", "[1]" …
+# 필드 이름이 아니므로 데이터의 키가 되면 안 된다. 껍데기를 한 겹 더 씌워
+# {"[0]": {...}} 로 나가던 문제 (2026-09-11 출입통제 리허설 실측: 항목이
+# 하나뿐인 bioDeviceList·otherDeviceList가 전부 이 모양이었다).
+_INDEX_PLACEHOLDER = re.compile(r"^\[\d+\]$")
+
+
+def _field_key(raw):
+    """자리표시 이름은 빈 이름으로 본다."""
+    key = raw or ""
+    return "" if _INDEX_PLACEHOLDER.match(key) else key
 
 
 class dataGenerator:
@@ -55,7 +68,7 @@ class dataGenerator:
             if not isinstance(item, dict):
                 continue
 
-            key = item.get("key", "")
+            key = _field_key(item.get("key", ""))
             t = (item.get("type") or "string").lower()
             required = bool(item.get("required", False))
             value = item.get("value", None)
@@ -87,7 +100,7 @@ class dataGenerator:
         for child in children:
             if not isinstance(child, dict):
                 continue
-            k = child.get("key", "")
+            k = _field_key(child.get("key", ""))
             t = (child.get("type") or "string").lower()
             v = child.get("value", None)
             req = bool(child.get("required", False))
@@ -143,7 +156,7 @@ class dataGenerator:
                     if (isinstance(sub_children, list) and len(sub_children) == 1 and
                             isinstance(sub_children[0], dict) and
                             sub_children[0].get("type", "").lower() == "object" and
-                            sub_children[0].get("key", "") == "" and
+                            _field_key(sub_children[0].get("key", "")) == "" and
                             isinstance(sub_children[0].get("children"), list)):
                         sub_children = sub_children[0]["children"]
 
@@ -155,7 +168,7 @@ class dataGenerator:
             real_children = children
             if len(children) == 1 and isinstance(children[0], dict):
                 c0 = children[0]
-                if (c0.get("type", "").lower() == "object") and (c0.get("key", "") == "") and isinstance(
+                if (c0.get("type", "").lower() == "object") and (_field_key(c0.get("key", "")) == "") and isinstance(
                         c0.get("children"), list):
                     real_children = c0["children"]
             obj = self._build_object_from_children(real_children, required=True)
