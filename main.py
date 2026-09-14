@@ -4,7 +4,7 @@ import urllib3
 import traceback
 from core.logger import Logger
 from PyQt5.QtWidgets import QApplication, QMainWindow, QStackedWidget, QMessageBox
-from PyQt5.QtGui import QFontDatabase, QFont
+from PyQt5.QtGui import QFontDatabase, QFont, QIcon
 from PyQt5.QtCore import Qt
 
 # ===== PyInstaller 환경에서 외부 config 우선 사용 =====
@@ -320,7 +320,18 @@ if __name__ == "__main__":
     Logger.set_level(CONSTANTS.DEBUG_LEVEL)
     Logger.info(f"[INIT] 디버그 레벨 설정: {CONSTANTS.DEBUG_LEVEL}")
 
+    # 작업표시줄이 python.exe/기본 아이콘으로 묶이지 않게 앱 고유 ID를 먼저 지정 (Windows 전용)
+    if sys.platform == "win32":
+        try:
+            import ctypes
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("KISA.InteroperabilityTool")
+        except Exception:
+            pass
+
     app = QApplication(sys.argv)
+    # 실행파일(.exe) 아이콘은 빌드 설정(spec icon=)이 넣지만, 실행 중 창 제목줄·작업표시줄
+    # 아이콘은 Qt가 따로 정한다. 지정하지 않아 기본 아이콘으로 떴다 (2026-09-14).
+    app.setWindowIcon(QIcon(resource_path('assets/image/icon/app.ico')))
     install_gradient_messagebox()
 
     # ===== 스플래시 스크린 표시 (즉시!) =====
