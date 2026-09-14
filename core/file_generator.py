@@ -368,10 +368,10 @@ class FileGeneratorService:
                 combined_reverse_map = {**request_reverse_map, **response_reverse_map}
 
                 if schema_type == "request":
-                    validation_content = self._update_reference_endpoints(validation_content, combined_reverse_map, "Validation_request", all_duplicate_endpoints)
+                    validation_content = self._update_reference_endpoints(validation_content, combined_reverse_map, "Validation_request", all_duplicate_endpoints, mark_ambiguous=True)
                     constraints_content = self._update_reference_endpoints(constraints_content, combined_reverse_map, "Constraints_response", all_duplicate_endpoints)
                 else:
-                    validation_content = self._update_reference_endpoints(validation_content, combined_reverse_map, "Validation_response", all_duplicate_endpoints)
+                    validation_content = self._update_reference_endpoints(validation_content, combined_reverse_map, "Validation_response", all_duplicate_endpoints, mark_ambiguous=True)
                     constraints_content = self._update_reference_endpoints(constraints_content, combined_reverse_map, "Constraints_request", all_duplicate_endpoints)
 
             # 파일 저장
@@ -435,7 +435,7 @@ class FileGeneratorService:
             Logger.error(traceback.format_exc())
             return []
 
-    def _update_reference_endpoints(self, content: str, reverse_map: dict, file_label: str = "", duplicate_endpoints: list = None) -> str:
+    def _update_reference_endpoints(self, content: str, reverse_map: dict, file_label: str = "", duplicate_endpoints: list = None, mark_ambiguous: bool = False) -> str:
         """validation/constraints 내용에서 referenceFieldId를 기반으로 referenceEndpoint를 업데이트"""
         total_duplicate_endpoints = 0
         success_list = []
@@ -510,7 +510,11 @@ class FileGeneratorService:
                         # 집어 엉뚱한 목록과 대조했다(결과 조회 문 1개 vs 상태 조회 문 5개,
                         # 2026-09-12 실측). 추측하지 않고 '모호'로 표시해 검증 단계에서
                         # 원인이 보이게 실패시킨다. 관리도구에서 참조 필드를 다시 고르면 풀린다.
-                        if endpoint_name in duplicate_endpoints:
+                        # 단 채점 규칙(Validation)에만 붙인다. 값 생성 규칙(Constraints)까지
+                        # 표시하면 참조를 못 찾아 빈 값을 보내고, 그 빈 값이 다음 API의 참조로
+                        # 번져 시나리오가 통째로 무너진다 (2026-09-12 실측: DoorControl이
+                        # doorID="" 로 나가고 RealtimeDoorStatus2의 doorList가 0건이 됨).
+                        if mark_ambiguous and endpoint_name in duplicate_endpoints:
                             line = line.replace(f'"referenceEndpoint": "{old_endpoint}"',
                                                 f'"referenceEndpoint": "{old_endpoint}#ambiguous"')
                             Logger.error(f"  [{file_label}] 참조 모호: {current_block_key} → "

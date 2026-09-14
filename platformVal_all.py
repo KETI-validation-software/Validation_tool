@@ -1018,6 +1018,15 @@ class MyApp(PlatformMainUI):
                             #    0→창시간 카운트업 후 확정값으로 떨어지는 점프(예: 0→15→0)가 사라진다.
                             self._set_timer_success(self.cnt)
 
+                    # ✅ 우리가 오류 코드로 응답했으면 이벤트 창을 열지 않는다.
+                    # 구독을 거절해놓고 duration(60초)만큼 창을 채우는 건 의미가 없다.
+                    # 단일시스템 쪽(systemVal_all._webhook_ack_rejected)과 짝을 맞춘다
+                    # — 보낸 쪽은 바로 끝났는데 받는 쪽만 60초 기다리던 문제 (2026-09-12).
+                    _ack_code = str((response_data or {}).get("code", "")).strip()
+                    if current_protocol == "WebHook" and _ack_code and _ack_code != "200":
+                        Logger.info(f"[webhook] 오류 응답(code={_ack_code}) — 이벤트 창을 열지 않고 종료")
+                        current_protocol = "basic"
+
                     # WebHook 프로토콜인 경우
                     if current_protocol == "WebHook":
 
