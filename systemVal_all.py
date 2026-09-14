@@ -1796,6 +1796,23 @@ class MyApp(SystemMainUI):
         self.webhook_flag = False
 
     @staticmethod
+    def _effective_protocol(current_protocol, step_buffer):
+        """이번 회차를 실제로 어떤 방식으로 처리했는가.
+
+        시나리오 설정이 WebHook이어도 구독이 거절되면(오류 회차, post()가
+        is_webhook_api=False로 내림) 웹훅 경로를 타지 않는다. 그런데 응답 처리는
+        설정값만 보고 "수신 로그·결과는 웹훅 경로가 찍는다"며 둘 다 건너뛰어,
+        모니터에 응답과 검증 결과가 아예 안 나오고 필드 수도 0/0으로 남았다
+        (2026-09-14 RealtimeVerifEventInfos door9999 회차). 통합시스템 쪽
+        (platformVal_all 거절 시 basic 전환)과 맞춰 일반 응답으로 처리한다.
+        """
+        if (str(current_protocol or "").strip().lower() == "webhook"
+                and isinstance(step_buffer, dict)
+                and not step_buffer.get("is_webhook_api", False)):
+            return "basic"
+        return current_protocol
+
+    @staticmethod
     def _should_emit_primary_result_log(current_protocol, current_retry, current_retries):
         protocol = str(current_protocol or "").strip().lower()
         is_final_attempt = (current_retry + 1) >= current_retries
@@ -2270,6 +2287,10 @@ class MyApp(SystemMainUI):
                             self.num_retries_list) else 1
                         current_protocol = self.trans_protocols[self.cnt] if self.cnt < len(
                             self.trans_protocols) else "Unknown"
+                        current_protocol = self._effective_protocol(
+                            current_protocol,
+                            self.step_buffers[self.cnt] if self.cnt < len(self.step_buffers) else None,
+                        )
 
                         # 단일 응답에 대한 검증 처리
                         from core.utils import replace_transport_desc_for_display
