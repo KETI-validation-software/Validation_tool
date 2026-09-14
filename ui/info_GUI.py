@@ -392,9 +392,12 @@ class InfoWidget(QWidget):
                 # 인풋 컨테이너 (가로만)
                 self._resize_widget('input_container', 'original_input_container_size', width_ratio)
 
-                # 시험유형/시험분야 필드 (가로만)
+                # 시험유형/시험 기능 필드 (가로만)
+                # 이 둘의 바깥 틀은 test_category_widget / test_group_widget 이다
+                # (기업명 등은 *_field_widget). 이름을 잘못 적어 틀은 776px 그대로 두고
+                # 안쪽 입력칸만 넓혀, 전체 화면에서 두 칸이 오른쪽으로 밀리고 끝이 잘렸다.
                 for prefix in ['test_category', 'test_group']:
-                    self._resize_widget(f'{prefix}_field_widget', f'original_{prefix}_field_size', width_ratio)
+                    self._resize_widget(f'{prefix}_widget', f'original_{prefix}_field_size', width_ratio)
                     self._resize_widget(f'{prefix}_label', f'original_{prefix}_label_size', width_ratio)
                     self._resize_widget(f'{prefix}_edit', f'original_{prefix}_edit_size', width_ratio)
 
