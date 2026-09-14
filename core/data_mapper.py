@@ -1370,6 +1370,10 @@ class ConstraintDataGenerator:
         (CameraProfiles 응답에 camType이 없는 규격일 수 있음).
         """
         ptz_ids, saw_type = [], False
+        # 관리도구가 참조 필드를 경로("camList.camID")로 준다. 응답 줄 안의 칸 이름은
+        # "camID"라 경로째로 찾으면 한 줄도 못 찾아 선별이 통째로 생략됐다 —
+        # Dome·Bullet 카메라에 PTZ 명령이 나감 (2026-09-14, find_key와 같은 유형)
+        id_field = str(id_field).rsplit(".", 1)[-1]
 
         def walk(node):
             nonlocal saw_type

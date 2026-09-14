@@ -105,6 +105,22 @@ def test_filter_preserves_order_and_subset():
     print("✅ 부분집합·순서 유지")
 
 
+def test_path_style_reference_field():
+    """관리도구가 참조 필드를 경로("camList.camID")로 줘도 선별한다"""
+    data = _cams(("cam0001", "PTZ"), ("cam0002", "Dome"), ("cam0003", "Bullet"))
+    assert _collect(data, "camList.camID") == ["cam0001"], _collect(data, "camList.camID")
+
+    # 실제 생성 경로: 무작위+응답으로 PtzContinuousMove camID를 채울 때 PTZ만 나간다
+    gen = G({"CameraProfiles": {"RESPONSE": {"data": data}}})
+    constraints = {"camID": {"valueType": "random-response",
+                             "referenceEndpoint": "/CameraProfiles",
+                             "referenceField": "camList.camID"}}
+    for _ in range(30):
+        out = gen._applied_constraints({}, {"camID": ""}, constraints, api_name="PtzContinuousMove")
+        assert out["camID"] == "cam0001", out
+    print("✅ 경로 표기 참조 필드(camList.camID)도 PTZ만 선별")
+
+
 def test_no_device_sentinel_is_unique():
     """'장치 없음' 표식 ID는 실제 camID와 겹치지 않는다"""
     assert G._no_device_id([]) == "NoDevice"
