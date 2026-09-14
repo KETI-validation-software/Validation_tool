@@ -465,6 +465,15 @@ class Server(BaseHTTPRequestHandler):
                         Logger.debug(f" {sub_path}: 필수 필드 누락")
                         return sub_path
                     continue
+                # 필수 항목 목록(doorList: [{doorID}] 등)이 빈 배열이면 누락과 같다 —
+                # 줄이 없으면 줄 안 필수 칸 검사가 통째로 건너뛰어져 200이 나갔다
+                # (2026-09-14: doorList: [] 요청). 문자열 배열(classFilter 등)은
+                # 빈 배열이 "필터 없음"이라 정상이므로 항목 목록에만 적용한다.
+                if (isinstance(field, str) and isinstance(expected, list) and expected
+                        and isinstance(expected[0], dict)
+                        and isinstance(data[field_name], list) and not data[field_name]):
+                    Logger.debug(f" {sub_path}: 필수 목록이 비어 있음")
+                    return sub_path
                 bad = self._walk_type_check(data[field_name], expected, sub_path)
                 if bad:
                     return bad
