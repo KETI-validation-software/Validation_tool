@@ -345,17 +345,19 @@ class ConstraintDataGenerator:
                         if door_id:
                             all_door_ids.append(door_id)
                     
-                    # valueType이 response-based면 랜덤 선택
-                    if value_type == "response-based" and all_door_ids:
+                    # 무작위 계열(response-based, random-response)이면 1개~전체 중 무작위 개수.
+                    # random-response는 예전에 여기서 빠져 문이 늘 전부(5개) 들어갔다 — 일반
+                    # 경로의 목록은 이미 1~N 무작위라 이 전용 경로만 어긋나 있었다 (2026-09-14).
+                    if value_type in ("response-based", "random-response") and all_door_ids:
                         original_count = len(all_door_ids)
                         random_count = random.randint(1, len(all_door_ids))
                         selected_ids = random.sample(all_door_ids, random_count)
-                        Logger.info(f"[DATA_MAPPER] response-based: {original_count}개 중 {random_count}개 랜덤 선택")
+                        Logger.info(f"[DATA_MAPPER] {value_type}: {original_count}개 중 {random_count}개 랜덤 선택")
                         for door_id in selected_ids:
                             new_door_list.append({"doorID": door_id})
                             Logger.debug(f"[DATA_MAPPER] doorID 추가: {door_id}")
                     else:
-                        # request-based 또는 valueType 없으면 전체 사용
+                        # request-based·고정값 등은 전체 사용
                         for door_id in all_door_ids:
                             new_door_list.append({"doorID": door_id})
                             Logger.debug(f"[DATA_MAPPER] doorID 추가: {door_id}")
