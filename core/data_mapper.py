@@ -86,6 +86,11 @@ class ConstraintDataGenerator:
         ref_field = rule.get("referenceField")
         if not ref_field or ref_field == "(참조 필드 미선택)":
             return None
+        # 관리도구는 목록 안 필드를 경로째로 준다(doorList.doorSensor). 줄 안에서는
+        # 끝 이름(doorSensor)으로 찾아야 한다 — 경로째로 찾으면 늘 못 찾아 선택한 문의
+        # 상태를 모른 채 무작위 명령이 나갔다. 문이 여러 개면 절반쯤 "잠긴 문에 Lock"
+        # 으로 맥락 검증에서 떨어졌다 (2026-09-14 실측, 5개 중 door0004).
+        leaf = ref_field.rsplit(".", 1)[-1]
 
         # 상태는 응답이 아니라 웹훅 이벤트로 오므로 이벤트를 먼저 본다
         for key in (ref_key, f"/{ref_key}"):
@@ -98,8 +103,8 @@ class ConstraintDataGenerator:
                     for item in values:
                         if not isinstance(item, dict):
                             continue
-                        if item.get(id_field) == item_id and item.get(ref_field):
-                            return item[ref_field]
+                        if item.get(id_field) == item_id and item.get(leaf):
+                            return item[leaf]
         return None
 
     @staticmethod

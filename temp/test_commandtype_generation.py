@@ -76,15 +76,40 @@ def main():
     # 플랫폼 역할에서 제어 대상 문은 "구독한 문" 중에서 골라야 한다.
     # (구독은 무작위 부분집합인데 템플릿 고정값 door0001을 쓰면
     #  구독하지 않은 문을 제어하게 되어 맥락 검증에서 확률적으로 실패)
+    # doorID는 관리도구 실제 설정대로 request-based(RealtimeDoorStatus의 doorList.doorID).
+    # 고정값(preset)이면 지정값을 그대로 쓰는 게 맞으므로(674e83b) 이 검사에 쓰면 안 된다.
+    subscribed = dict(CONSTRAINTS, doorID={
+        "valueType": "request-based", "required": True,
+        "referenceEndpoint": "/RealtimeDoorStatus", "referenceField": "doorList.doorID"})
     events = {
         "RealtimeDoorStatus": {
             "REQUEST": {"data": {"doorList": [{"doorID": "door0002"}]}},
             "WEBHOOK": {"data": {"doorList": [{"doorID": "door0002", "doorSensor": "Lock"}]}},
         }
     }
-    result = generate(CONSTRAINTS, {}, events)
+    result = generate(subscribed, {}, events)
     assert result["doorID"] == "door0002", result       # 템플릿의 door0001이 아니라 구독한 문
     assert result["commandType"] == "Unlock", result    # 그 문의 현재 상태(Lock)의 반대
+
+    # 관리도구가 참조 필드를 경로째로(doorList.doorSensor) 주고 문이 여러 개일 때도
+    # 고른 그 문의 상태 반대가 나가야 한다 (2026-09-14: 5개 중 잠긴 door0004에 Lock)
+    full_path = {
+        "doorID": {"valueType": "request-based", "required": True,
+                   "referenceEndpoint": "/RealtimeDoorStatus", "referenceField": "doorList.doorID"},
+        "commandType": dict(CONSTRAINTS["commandType"], referenceField="doorList.doorSensor"),
+    }
+    states = {"door0001": "Lock", "door0002": "Unlock", "door0003": "Lock",
+              "door0004": "Lock", "door0005": "Unlock"}
+    events = {
+        "RealtimeDoorStatus": {
+            "REQUEST": {"data": {"doorList": [{"doorID": d} for d in states]}},
+            "RESPONSE": {"data": {"doorList": [{"doorID": d, "doorSensor": s}
+                                               for d, s in states.items()]}},
+        }
+    }
+    for _ in range(100):
+        result = generate(full_path, {}, events)
+        assert result["commandType"] != states[result["doorID"]], result
 
     # 구독 기록이 없으면 기존처럼 템플릿 기본값 유지 (하위 호환)
     result = generate(CONSTRAINTS, {}, {})
