@@ -179,40 +179,6 @@ def format_errors_as_tree(error_messages):
 # ================================================================
 # 필드별 순차 검증 (구조 → 의미)
 # ================================================================
-def check_list_counts(api_name, data):
-    """목록 구성 개수(5~100) 판정 — 안내서 표 2-1 "목록 정보", 부록 표 Ⅰ-12.
-
-    프로필 조회 응답의 목록은 5개 이상 100개 이하여야 한다("송신 조건 불충족").
-    대상은 CONSTANTS.LIST_COUNT_TARGETS에 등록된 (API, 필드)뿐이다 — 이벤트 목록은
-    1건 이상이면 정상이라 대상이 아니다.
-
-    Returns:
-        list[(field, count, ok)] — 판정한 목록들. 대상이 없으면 빈 목록.
-    """
-    if not getattr(CONSTANTS, "ENABLE_LIST_COUNT_CHECK", False):
-        return []
-    if not isinstance(data, dict) or not api_name:
-        return []
-
-    # 재시도로 붙는 숫자 접미사(CameraProfiles2 등)를 떼고 대조한다
-    base_api = re.sub(r'\d+$', '', str(api_name))
-    targets = (getattr(CONSTANTS, "LIST_COUNT_TARGETS", {}) or {}).get(base_api, [])
-    if not targets:
-        return []
-
-    lo = getattr(CONSTANTS, "LIST_COUNT_MIN", 5)
-    hi = getattr(CONSTANTS, "LIST_COUNT_MAX", 100)
-
-    results = []
-    for field in targets:
-        value = data.get(field)
-        if not isinstance(value, list):
-            continue  # 필드 자체가 없거나 목록이 아니면 구조 검증이 잡는다
-        count = len(value)
-        results.append((field, count, lo <= count <= hi))
-    return results
-
-
 def json_check_(schema, data, flag, validation_rules=None, reference_context=None,
                 api_name=None):
     """
@@ -283,14 +249,6 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
             else:
                 rules_dict = extract_validation_rules(validation_rules)
             Logger.debug(f"[json_check_] 의미 검증 규칙 키: {list(rules_dict.keys())}")
-
-        # 2-1) 목록 구성 개수 판정 (5~100) — 대상 목록만, 개수는 항상 로그에 남긴다
-        #      (안내서: "실제 시험한 개수는 시험결과서에 표기됩니다")
-        list_count_map = {}
-        for _field, _count, _ok in check_list_counts(api_name, data):
-            list_count_map[_field] = (_count, _ok)
-            Logger.info(f"[목록 개수] {api_name}.{_field}: {_count}개 "
-                        f"({'적합' if _ok else '기준 미달/초과'})")
 
         # 3) 필드별 결과 저장
         field_results = {}
@@ -562,26 +520,6 @@ def json_check_(schema, data, flag, validation_rules=None, reference_context=Non
             field_results[field_path]["struct_pass"] = True
             Logger.debug(f"  ✅ 구조: 타입 검증 통과")
 
-            # 4-2-1) 목록 구성 개수(송신 조건) — 기준 미달·초과면 데이터 유효성 실패
-            if field_path in list_count_map:
-                _count, _ok = list_count_map[field_path]
-                if not _ok:
-                    _lo = getattr(CONSTANTS, "LIST_COUNT_MIN", 5)
-                    _hi = getattr(CONSTANTS, "LIST_COUNT_MAX", 100)
-                    error_msg = (f"목록 구성 개수 기준 미충족\n- 실제: {_count}개"
-                                 f"\n- 기준: {_lo}개 이상 {_hi}개 이하\n")
-                    field_results[field_path]["errors"].append(error_msg)
-                    error_messages.append(f"[의미] {field_path}: {error_msg}")
-                    field_results[field_path]["semantic_pass"] = False
-                    total_error += 1
-                    if is_optional:
-                        opt_error += 1
-                    else:
-                        required_error += 1
-                    Logger.error(f"  ❌ [실패] {field_path} (목록 구성 개수) — "
-                                 f"{_count}개 (기준: {_lo}~{_hi}개)")
-                    continue
-
             # 4-3) 의미 검증
             if field_path not in rules_dict:
                 # 의미 검증 규칙 없음 → 자동 PASS
@@ -820,9 +758,67 @@ def _validate_field_type(field_path, field_value, expected_type):
             return True, None
 
 
+# 요청 시각을 참조 꾸러미에 얹을 때 쓰는 예약 키.
+# 엔드포인트 이름과 겹치지 않도록 밑줄로 감쌌다.
+REQUEST_TIME_KEY = "__request_time__"
+
+
+def now_time17():
+    """현재 시각을 17자리 문자열로 — 연동 메시지의 시각 표기와 같은 형식.
+
+    로컬 시간대다. trace의 'time'은 UTC라 여기에 쓸 수 없다 — 메시지의 17자리
+    시각은 로컬로 만들어지므로 UTC를 기준으로 삼으면 9시간이 통째로 통과한다.
+    """
+    dt = datetime.now()
+    return dt.strftime("%Y%m%d%H%M%S") + f"{dt.microsecond // 1000:03d}"
+
+
+# 도구를 실행한 순간. 이 모듈이 처음 올라올 때 한 번 찍는다.
+TOOL_START_TIME17 = now_time17()
+
+
+def _time_base_for(ref_operator, bound, reference_context, display_path):
+    """관리도구가 "요청 시점"이라고 적어 보낸 경계를 실제 시각으로 바꾼다.
+
+    사이(between)의 위쪽 끝만 "그 API 메시지를 주고받은 시각"이고, 나머지는
+    (사이의 아래쪽 끝, 그리고 이상·이하·초과·미만) 전부 도구를 실행한 시각이다.
+    관리도구가 두 경우를 같은 이름(request-timestamp)으로 내려주므로 비교 조건으로
+    가른다 (2026-09-12 확정).
+
+    없으면 None — 그때는 이 검사만 건너뛴다.
+    """
+    if ref_operator == "between" and bound == "max":
+        stamped = (reference_context or {}).get(REQUEST_TIME_KEY)
+        if not stamped:
+            # 참조 꾸러미를 넘기지 않는 호출(의미 검증 실패 후 구조 검증만으로 재시도,
+            # 웹훅 ACK의 code/message 확인)에서만 걸린다. 정상 흐름에는 시각이 있다.
+            # 우리 쪽 사정이지 업체 잘못이 아니므로 이 검사만 건너뛴다.
+            Logger.error(f"  ❌ 요청 시각이 없어 범위 검증을 건너뜀: {display_path} "
+                         f"— 요청 시각 기록이 채점까지 전달되지 않았습니다")
+            return None
+        Logger.debug(f"  [범위] {bound}을 메시지 주고받은 시각으로: {stamped}")
+        return stamped
+
+    Logger.debug(f"  [범위] {bound}을 도구 실행 시각으로: {TOOL_START_TIME17}")
+    return TOOL_START_TIME17
+
+
 def ref_direction(rule):
-    """규칙 종류로 참조할 방향을 결정 — 참조 데이터를 적재하는 쪽과 동일한 규칙"""
-    return "REQUEST" if "request-field" in (rule.get("validationType") or "") else "RESPONSE"
+    """규칙 종류로 참조할 방향을 결정 — 참조 데이터를 적재하는 쪽과 동일한 규칙
+
+    request-time-compare처럼 이름에 'request-field'가 없는 요청 참조 규칙이
+    생겨서, 접두사와 참조 출처(referenceTimeSource*) 둘 다 본다. 예전에는
+    'request-field' 문자열만 찾아 응답 쪽에서 기준값을 뒤졌다.
+    """
+    vtype = rule.get("validationType") or ""
+    if vtype.startswith("request-"):
+        return "REQUEST"
+    sources = (rule.get("referenceTimeSource"),
+               rule.get("referenceTimeSourceMin"),
+               rule.get("referenceTimeSourceMax"))
+    if any(s == "request-field" for s in sources):
+        return "REQUEST"
+    return "RESPONSE"
 
 
 def ref_context_key(endpoint, direction):
@@ -833,6 +829,18 @@ def ref_context_key(endpoint, direction):
     (예: DoorControl의 doorID=요청 / commandType=응답)
     """
     return f"{endpoint}#{direction}"
+
+
+
+def _reference_missing_msg(ref_endpoint):
+    """참조를 못 찾은 이유를 그대로 적는다 — '모호' 표식이면 관리도구 쪽 조치를 안내."""
+    endpoint = str(ref_endpoint or "")
+    if endpoint.endswith("#ambiguous"):
+        name = endpoint[:-len("#ambiguous")]
+        return (f"참조 모호: {name} 가 시나리오에 여러 번 있는데 관리도구가 내려준 참조 ID가 "
+                f"어느 단계에도 없어 어느 회차인지 정할 수 없음 — 관리도구에서 이 필드의 "
+                f"참조 필드를 다시 선택해야 합니다")
+    return f"참조 엔드포인트 없음: {ref_endpoint}"
 
 
 def get_reference_data(reference_context, endpoint, rule):
@@ -862,7 +870,7 @@ def _validate_field_semantic(field_path, field_value, rule, data, reference_cont
         return _validate_range_match(field_path, field_value, rule, reference_context,
                                      field_errors, global_errors)
 
-    elif validation_type == "request-field-list-match":
+    elif validation_type in ("request-field-list-match", "request-field-list-equality"):
         return _validate_list_match(field_path, field_value, rule, data, reference_context,
                                     field_errors, global_errors)
 
@@ -876,7 +884,8 @@ def _validate_field_semantic(field_path, field_value, rule, data, reference_cont
 
     elif validation_type == "valid-value-match":
         return _validate_valid_value_match(field_path, field_value, rule,
-                                           field_errors, global_errors)
+                                           field_errors, global_errors,
+                                           data=data, reference_context=reference_context)
 
     elif validation_type == "specified-value-match":
         return _validate_specified_value_match(field_path, field_value, rule,
@@ -897,6 +906,18 @@ def _validate_field_semantic(field_path, field_value, rule, data, reference_cont
     elif validation_type == "required":
         return _validate_required(field_path, field_value, rule,
                                   field_errors, global_errors)
+
+    elif validation_type == "request-time-compare":
+        return _validate_request_time_compare(field_path, field_value, rule, reference_context,
+                                              field_errors, global_errors)
+
+    elif validation_type == "object-count-between":
+        return _validate_object_count_between(field_path, field_value, rule,
+                                              field_errors, global_errors)
+
+    elif validation_type == "conditional-required":
+        return _validate_conditional_required(field_path, field_value, rule,
+                                              field_errors, global_errors)
 
     elif validation_type == "unique":
         return _validate_unique(field_path, field_value, rule,
@@ -924,6 +945,19 @@ def _validate_field_semantic(field_path, field_value, rule, data, reference_cont
         return True
 
 
+def _warn_unknown_equality_mode(rule, field_path):
+    """listEqualityMode가 우리가 아는 값인지 확인하고, 아니면 크게 남긴다.
+
+    ponytail: 지금은 "set"(순서·중복 무시하고 집합이 같은지)만 구현한다. 실제로
+              내려오는 값이 그것뿐이라서다. 다른 값이 오면 집합 비교로 처리하되
+              조용히 넘기지는 않는다 — 순서까지 봐야 하는 규칙이었다면 우리가
+              느슨하게 통과시키는 셈이므로 로그에서 바로 드러나야 한다.
+    """
+    mode = rule.get("listEqualityMode")
+    if mode and str(mode).lower() != "set":
+        Logger.warning(f"  ⚠ 모르는 목록 비교 방식 '{mode}' — 집합 비교로 처리: {field_path}")
+
+
 def _validate_list_match(field_path, field_value, rule, data, reference_context,
                          field_errors, global_errors):
     """리스트 필드의 값들이 참조 리스트에 모두 존재하는지 검증"""
@@ -934,7 +968,7 @@ def _validate_list_match(field_path, field_value, rule, data, reference_context,
 
     ref_data = get_reference_data(reference_context, ref_endpoint, rule)
     if ref_data is None:
-        error_msg = f"참조 엔드포인트 없음: {ref_endpoint}"
+        error_msg = _reference_missing_msg(ref_endpoint)
         field_errors.append(error_msg)
         global_errors.append(f"[의미] {error_msg}")
         return False
@@ -984,6 +1018,29 @@ def _validate_list_match(field_path, field_value, rule, data, reference_context,
             global_errors.append(f"[의미] {field_path}: {error_msg}")
             return False
 
+        # 요청 대조는 양방향으로 본다 — 요청한 항목을 빠뜨려도 실패다.
+        # 예전에는 "응답에 담긴 값이 요청에 있었나"만 봐서, 세 대를 요청했는데
+        # 한 대만 답하거나 아예 빈 목록을 보내도 통과했다 (2026-09-07 미결 건).
+        # 앞선 응답의 목록과 대조하는 response-field-list-match는 일부만 써도
+        # 정상이므로 여기에 포함하지 않는다.
+        # request-field-list-equality도 같은 판정이다. 관리도구가 이 이름으로
+        # 내려주기 시작했는데(2026-09-12 실측) 우리가 모르는 타입이라 경고만 남기고
+        # 전부 통과시키고 있었다 — doorID 검증 여섯 자리가 통째로 비어 있었다.
+        if rule.get("validationType") in ("request-field-list-match",
+                                          "request-field-list-equality"):
+            _warn_unknown_equality_mode(rule, field_path)
+            responded = [item.get(child_field) for item in parent_data
+                         if isinstance(item, dict)]
+            missing = [v for v in ref_list if v not in responded]
+            if missing:
+                error_msg = (f"요청 항목 누락\n"
+                             f"- 요청: {', '.join(str(v) for v in ref_list) or '(없음)'}\n"
+                             f"- 응답: {', '.join(str(v) for v in responded) or '(없음)'}\n"
+                             f"- 빠진 값: {', '.join(str(v) for v in missing)}\n")
+                field_errors.append(error_msg)
+                global_errors.append(f"[의미] {field_path}: {error_msg}")
+                return False
+
         return True
 
     # 단일 값 검증
@@ -1015,7 +1072,7 @@ def _validate_field_match(field_path, field_value, rule, reference_context,
 
     ref_data = get_reference_data(reference_context, ref_endpoint, rule)
     if ref_data is None:
-        error_msg = f"참조 엔드포인트 없음: {ref_endpoint}"
+        error_msg = _reference_missing_msg(ref_endpoint)
         field_errors.append(error_msg)
         global_errors.append(f"[의미] {error_msg}")
         return False
@@ -1133,6 +1190,7 @@ def _validate_range_match(field_path, field_value, rule, reference_context,
     # '이상'으로 설정해도 max가 없다며 실패로 잡혔다.
     ref_operator = (rule.get('rangeOperator')
                     or rule.get('referenceRangeOperator')
+                    or rule.get('timeCompareOperator')  # request-time-compare
                     or 'between')
 
     # ✅ field_value가 리스트인 경우 각 요소를 검증
@@ -1160,7 +1218,7 @@ def _validate_range_match(field_path, field_value, rule, reference_context,
             if not _validate_single_value_in_range(
                     field_path, num, ref_endpoint_max, ref_endpoint_min,
                     ref_field_max, ref_field_min, ref_operator,
-                    reference_context, field_errors, global_errors, idx
+                    reference_context, field_errors, global_errors, idx, rule
             ):
                 all_valid = False
 
@@ -1170,13 +1228,14 @@ def _validate_range_match(field_path, field_value, rule, reference_context,
     return _validate_single_value_in_range(
         field_path, field_value, ref_endpoint_max, ref_endpoint_min,
         ref_field_max, ref_field_min, ref_operator,
-        reference_context, field_errors, global_errors
+        reference_context, field_errors, global_errors, None, rule
     )
 
 
 def _validate_single_value_in_range(field_path, field_value, ref_endpoint_max, ref_endpoint_min,
                                     ref_field_max, ref_field_min, ref_operator,
-                                    reference_context, field_errors, global_errors, index=None):
+                                    reference_context, field_errors, global_errors, index=None,
+                                    rule=None):
     """단일 값에 대한 범위 검증"""
     from core.json_checker_new import collect_all_values_by_key
 
@@ -1215,6 +1274,19 @@ def _validate_single_value_in_range(field_path, field_value, ref_endpoint_max, r
         global_errors.append(f"[의미] {display_path}: {error_msg}")
         return False
 
+    # 경계를 "요청 시점"으로 지정한 경우 — 관리도구가 값을 주는 게 아니라
+    # 우리가 요청을 주고받을 때 찍어둔 시각이 기준이다. 참조 필드에서 뽑을 게
+    # 없으므로 여기서 채워 넣지 않으면 max=None으로 남아 실패한다.
+    if rule:
+        if min_value is None and rule.get("referenceTimeSourceMin") == "request-timestamp":
+            min_value = _time_base_for(ref_operator, "min", reference_context, display_path)
+            if min_value is None:
+                return True
+        if max_value is None and rule.get("referenceTimeSourceMax") == "request-timestamp":
+            max_value = _time_base_for(ref_operator, "max", reference_context, display_path)
+            if max_value is None:
+                return True
+
     # 참조에서 뽑은 경계값도 17자리 시각이면 문자열이다.
     # 숫자로 맞춰두지 않으면 int와 str을 비교하다 TypeError가 난다.
     min_value = _to_comparable_number(min_value) if min_value is not None else None
@@ -1230,8 +1302,13 @@ def _validate_single_value_in_range(field_path, field_value, ref_endpoint_max, r
 
     if ref_operator == 'between':
         if min_value is None or max_value is None:
+            # 어느 쪽이 왜 비었는지 보여야 관리도구 설정 문제인지 우리 문제인지 갈린다
+            src = ""
+            if rule:
+                src = (f"\n- 설정: min={rule.get('referenceTimeSourceMin') or rule.get('referenceFieldMin') or '미지정'}"
+                       f", max={rule.get('referenceTimeSourceMax') or rule.get('referenceFieldMax') or '미지정'}")
             error_msg = (f"범위 검증 실패: 구간 양끝이 필요한데 "
-                         f"min={min_value}, max={max_value}")
+                         f"min={min_value}, max={max_value}{src}")
             field_errors.append(error_msg)
             global_errors.append(f"[의미] {display_path}: {error_msg}")
             return False
@@ -1264,28 +1341,122 @@ def _validate_single_value_in_range(field_path, field_value, ref_endpoint_max, r
     return False
 
 
-def _validate_valid_value_match(field_path, field_value, rule, field_errors, global_errors):
-    """허용된 값 목록과 일치하는지 검증"""
+def _display_value(value):
+    """빈 값·널을 눈에 보이는 말로 바꾼다."""
+    if value == "":
+        return "Empty"
+    if value is None:
+        return "null"
+    return str(value)
+
+
+def _paired_reference_value(data, ref_data, ref_field):
+    """참조 목록에서 '지금 검증 중인 그 장치'의 값 하나를 골라낸다.
+
+    예) DoorControl 요청 {doorID: door0002, ...}을 검증하는데 참조가
+        RealtimeDoorStatus 응답 doorList[{doorID, doorSensor}, ...]인 경우,
+        doorID가 door0002인 줄의 doorSensor만 꺼내야 한다.
+        전부를 놓고 비교하면 문 5개 중 하나만 상태가 달라도 판정이 흔들린다.
+
+    짝을 못 지으면 None을 돌려 호출부가 '참조 전체'로 폴백하게 둔다.
+    """
+    from core.json_checker_new import get_by_path
+
+    if not isinstance(data, dict) or not isinstance(ref_data, dict) or "." not in ref_field:
+        return None
+
+    parent_path, leaf = ref_field.rsplit(".", 1)
+    parent = get_by_path(ref_data, parent_path)
+    if isinstance(parent, dict):
+        parent = [parent]
+    if not isinstance(parent, list):
+        return None
+
+    # 검증 대상 쪽의 스칼라 값들과 같은 키·같은 값을 가진 줄을 찾는다
+    own = {k: v for k, v in data.items() if isinstance(v, (str, int, float))}
+    for entry in parent:
+        if not isinstance(entry, dict) or leaf not in entry:
+            continue
+        for key, value in own.items():
+            if key in entry and entry[key] == value:
+                return entry[leaf]
+    return None
+
+
+def _validate_valid_value_match(field_path, field_value, rule, field_errors, global_errors,
+                                data=None, reference_context=None):
+    """허용된 값 목록과 일치하는지 검증
+
+    목록 필드(doorList[].doorSensor 등)는 요소별로 대조한다. 예전에는 배열을
+    통째로 비교해 ['Lock','Unlock']이 허용 목록 ['Lock','Unlock']에 "없다"고
+    오판했다 — 값이 하나뿐인 ['Lock']도 실패였다. 상대가 제대로 보내도
+    목록 필드면 무조건 떨어졌다 (2026-09-11 실측).
+
+    specified-value-match는 2026-09-01에 같은 방식으로 고쳤는데 이쪽이 빠져
+    있었다. 400 판정 경로(_check_valid_values)는 2ed16e4에서 따로 고쳤다.
+    """
     allowed = rule.get('allowedValues', [])
     operator = rule.get('validValueOperator', 'equalsAny')
+
+    elements = field_value if isinstance(field_value, list) else [field_value]
 
     if operator == 'equals':
         # 단일 값만 허용 (allowed가 리스트이면 첫 값 기준)
         expected = allowed[0] if allowed else None
-        if field_value != expected:
-            # 빈 값 표시 처리
-            display_value = "Empty" if field_value == "" else "null" if field_value is None else str(field_value)
-            display_expected = "Empty" if expected == "" else "null" if expected is None else str(expected)
-            error_msg = f"값 불일치\n- 입력값: {display_value}\n- 예상값: {display_expected}\n"
+        invalid = [v for v in elements if v != expected]
+        if invalid:
+            error_msg = (f"값 불일치\n- 입력값: {_display_value(field_value)}"
+                         f"\n- 예상값: {_display_value(expected)}\n")
             field_errors.append(error_msg)
             global_errors.append(f"[의미] {field_path}: {error_msg}")
             return False
-    else:  # equalsAny
-        if field_value not in allowed:
-            # 빈 값 표시 처리
-            display_value = "Empty" if field_value == "" else "null" if field_value is None else str(field_value)
+    else:  # equalsAny, excludeReference
+        invalid = [v for v in elements if v not in allowed]
+        if invalid:
             allowed_str = " | ".join(str(v) for v in allowed)
-            error_msg = f"값 불일치\n- 입력값: {display_value}\n- 선택 가능 옵션: {allowed_str}\n"
+            # 어느 값이 걸렸는지 — 다섯 개 중 하나만 틀렸을 때 눈에 띄게
+            culprit = ", ".join(_display_value(v) for v in dict.fromkeys(invalid))
+            error_msg = (f"값 불일치\n- 입력값: {_display_value(field_value)}"
+                         f"\n- 허용 목록에 없는 값: {culprit}"
+                         f"\n- 선택 가능 옵션: {allowed_str}\n")
+            field_errors.append(error_msg)
+            global_errors.append(f"[의미] {field_path}: {error_msg}")
+            return False
+
+    # ✅ excludeReference — 참조한 현재 상태와 "달라야" 통과한다.
+    # 제어 시나리오의 commandType이 여기 해당한다: 문이 Lock이면 Unlock을,
+    # Unlock이면 Lock을 보내야 한다(안내서 표 3-8 5-1 / 표 3-11 5-1).
+    # 예전에는 이 연산자를 몰라 equalsAny로 떨어졌고, 그래서 "Lock인 문에
+    # 다시 Lock" 같은 요청도 통과했다 — 토글 요구가 사실상 검사되지 않았다.
+    if operator == 'excludeReference':
+        from core.json_checker_new import get_by_path
+
+        ref_endpoint = rule.get('referenceEndpoint')
+        ref_field = rule.get('referenceField')
+        ref_data = get_reference_data(reference_context, ref_endpoint, rule)
+        if ref_data is None or not ref_field:
+            Logger.warning(f"[경고] {field_path}: excludeReference 참조 없음 "
+                           f"({ref_endpoint}.{ref_field}) — 제외 검증 건너뜀")
+            return True
+
+        paired = _paired_reference_value(data, ref_data, ref_field)
+        if paired is not None:
+            excluded = [paired]
+        else:
+            found = get_by_path(ref_data, ref_field)
+            excluded = found if isinstance(found, list) else ([] if found is None else [found])
+
+        if not excluded:
+            Logger.warning(f"[경고] {field_path}: excludeReference 참조값이 비어 있음 "
+                           f"({ref_endpoint}.{ref_field}) — 제외 검증 건너뜀")
+            return True
+
+        same = [v for v in elements if v in excluded]
+        if same:
+            culprit = ", ".join(_display_value(v) for v in dict.fromkeys(same))
+            error_msg = (f"참조값과 같음 (달라야 함)\n- 입력값: {_display_value(field_value)}"
+                         f"\n- 참조값({ref_endpoint}.{ref_field}): {_display_value(excluded[0] if len(excluded) == 1 else excluded)}"
+                         f"\n- 겹친 값: {culprit}\n")
             field_errors.append(error_msg)
             global_errors.append(f"[의미] {field_path}: {error_msg}")
             return False
@@ -1593,6 +1764,195 @@ def _validate_array(field_path, field_value, rule, data, reference_context,
     return all_valid
 
 
+def _validate_request_time_compare(field_path, field_value, rule, reference_context,
+                                   field_errors, global_errors):
+    """요청 시점 기준 시각 비교 (request-time-compare)
+
+    between: 요청에 실어 보낸 두 시각 필드 사이인지 본다. 하는 일이
+        request-field-range-match와 같아 기존 범위 검증을 그대로 쓴다
+        (referenceFieldMin/Max·referenceEndpointMin/Max 키 이름도 동일).
+
+    그 외 연산자(greater-than 등): 기준은 도구를 실행한 시각이다. 메시지에 담긴
+        시각은 메시지를 만들 때 찍히므로 그 메시지가 오간 시각보다 언제나 이르다 —
+        "요청 시각 이후"를 그 시각 기준으로 보면 아무도 통과할 수 없다. 바닥선을
+        도구 실행 시각으로 두면 "옛날 시각을 박아 보내는 것"은 그대로 잡힌다
+        (2026-09-12 확정).
+    """
+    operator = rule.get("timeCompareOperator") or "between"
+
+    if operator == "between":
+        return _validate_range_match(field_path, field_value, rule, reference_context,
+                                     field_errors, global_errors)
+
+    # 단일 비교 — 기준은 도구를 실행한 시각
+    base_raw = TOOL_START_TIME17
+
+    base = _to_comparable_number(base_raw)
+    value = _to_comparable_number(field_value)
+    if base is None or value is None:
+        Logger.warning(f"  ⚠ 시각을 숫자로 바꾸지 못해 비교를 건너뜀: "
+                       f"{field_path} (값={field_value!r}, 기준={base_raw!r})")
+        return True
+
+    checks = {
+        'greater-than': (lambda v, b: v > b, "이후"),
+        'greater-equal': (lambda v, b: v >= b, "이후(같음 포함)"),
+        'less-than': (lambda v, b: v < b, "이전"),
+        'less-equal': (lambda v, b: v <= b, "이전(같음 포함)"),
+    }
+    if operator not in checks:
+        Logger.warning(f"  ⚠ 지원하지 않는 시각 비교 연산자 — 통과 처리: {operator}")
+        return True
+
+    ok, word = checks[operator]
+    if ok(value, base):
+        return True
+
+    # 시계가 어긋난 건지 진짜 위반인지 현장에서 가릴 수 있게 차이를 남긴다
+    gap = _time17_gap_ms(value, base)
+    gap_text = f" (차이 {gap:+,}ms)" if gap is not None else ""
+    error_msg = (f"요청 시점 기준 미충족\n- 값: {field_value}"
+                 f"\n- 기준: 도구 실행 시각 {base_raw} {word}{gap_text}\n")
+    field_errors.append(error_msg)
+    global_errors.append(f"[의미] {field_path}: {error_msg}")
+    Logger.error(f"  ❌ [실패] {field_path} (요청 시점 비교) — "
+                 f"값 {field_value} / 도구 실행 {base_raw}{gap_text}")
+    return False
+
+
+def _time17_gap_ms(value, base):
+    """두 17자리 시각의 차이(밀리초). 형식이 다르면 None."""
+    fmt = "%Y%m%d%H%M%S"
+    try:
+        v, b = str(int(value)), str(int(base))
+        if len(v) != 17 or len(b) != 17:
+            return None
+        vt = datetime.strptime(v[:14], fmt).replace(microsecond=int(v[14:]) * 1000)
+        bt = datetime.strptime(b[:14], fmt).replace(microsecond=int(b[14:]) * 1000)
+        return int(round((vt - bt).total_seconds() * 1000))
+    except (ValueError, TypeError):
+        return None
+
+
+def _validate_object_count_between(field_path, field_value, rule,
+                                   field_errors, global_errors):
+    """항목 개수 범위 (object-count-between)
+
+    array면 항목 수, object면 하위 필드 수를 센다. 경계는 포함이다.
+    프로필 목록의 "5개 이상 100개 이하"(안내서 표 2-1)가 이 규칙으로 온다 —
+    예전에는 CONSTANTS.LIST_COUNT_TARGETS에 API·필드를 하드코딩해 두고
+    5~100을 고정으로 썼다.
+    """
+    if not getattr(CONSTANTS, "ENABLE_LIST_COUNT_CHECK", True):
+        Logger.debug(f"  개수 판정 꺼짐(ENABLE_LIST_COUNT_CHECK=False) — 건너뜀: {field_path}")
+        return True
+
+    lo = rule.get("rangeMin")
+    hi = rule.get("rangeMax")
+
+    if lo is None and hi is None:
+        # 규칙 설정이 비어 있는 것은 시험 대상 시스템의 잘못이 아니다
+        Logger.warning(f"  ⚠ object-count-between에 rangeMin/rangeMax가 없음: {field_path}")
+        return True
+
+    if not isinstance(field_value, (list, dict)):
+        error_msg = f"목록/객체가 아님 (타입: {type(field_value).__name__})"
+        field_errors.append(error_msg)
+        global_errors.append(f"[의미] {field_path}: {error_msg}")
+        return False
+
+    count = len(field_value)
+    unit = "개" if isinstance(field_value, list) else "개 필드"
+
+    if (lo is not None and count < lo) or (hi is not None and count > hi):
+        bound = f"{lo}개 이상" if lo is not None else ""
+        bound += " " if lo is not None and hi is not None else ""
+        bound += f"{hi}개 이하" if hi is not None else ""
+        error_msg = (f"개수 기준 미충족\n- 실제: {count}{unit}\n- 기준: {bound}\n")
+        field_errors.append(error_msg)
+        global_errors.append(f"[의미] {field_path}: {error_msg}")
+        return False
+
+    return True
+
+
+def _validate_conditional_required(field_path, field_value, rule,
+                                   field_errors, global_errors):
+    """조건부 필수 (conditional-required)
+
+    지정한 하위 필드 중 최소 몇 개가 실제로 채워졌는지 본다.
+    PtzContinuousMove의 velocity(pan/tilt/zoom 중 1개 이상)가 이 규칙을 쓴다.
+    개별 필드는 required=false라 구조 검증으로는 전부 비어도 통과하므로,
+    "셋 중 하나는 있어야 한다"는 안내서 기준을 여기서 잡는다.
+    """
+    config = rule.get("config") or {}
+    targets = config.get("targetFields") or []
+    minimum = config.get("minRequiredCount", 1)
+    value_type = str(config.get("valueType") or "").lower()
+    require_true = bool(config.get("booleanRequireTrue"))
+
+    # 옛 형식(presenceMode) 호환 — 관리도구 교체 전에 만들어진 spec 파일용
+    if not value_type:
+        if config.get("presenceMode") == "true":
+            value_type, require_true = "boolean", True
+
+    if not targets:
+        # 규칙 설정이 비어 있는 것은 시험 대상 시스템의 잘못이 아니다
+        Logger.warning(f"  ⚠ conditional-required의 targetFields가 비어 있음: {field_path}")
+        return True
+
+    if not isinstance(field_value, dict):
+        error_msg = f"객체가 아님 (타입: {type(field_value).__name__})"
+        field_errors.append(error_msg)
+        global_errors.append(f"[의미] {field_path}: {error_msg}")
+        return False
+
+    def _is_present(value):
+        if value is None:
+            return False
+
+        if value_type == "boolean":
+            if not isinstance(value, bool):
+                return False
+            return value if require_true else True
+
+        if value_type == "number":
+            # bool은 파이썬에서 int의 하위 타입이라 먼저 걸러낸다
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
+                return False
+            if value != value:  # NaN
+                return False
+            # PTZ 속도 0은 "그 축은 제어하지 않음"이라 채운 것으로 세지 않는다.
+            # 셋 다 0이면 아무 데도 움직이지 않는 이동 명령이 된다.
+            return value != 0
+
+        if value_type == "string":
+            return isinstance(value, str) and value.strip() != ""
+
+        # valueType 미지정 — 타입을 가리지 않고 "값이 채워졌는가"로 본다
+        if value == "":
+            return False
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, (int, float)):
+            return value != 0
+        return True
+
+    present = [t for t in targets if _is_present(field_value.get(t))]
+
+    if len(present) < minimum:
+        actual = ", ".join(f"{t}={field_value.get(t, '없음')!r}" for t in targets)
+        error_msg = (f"조건부 필수 미충족\n"
+                     f"- 대상 필드: {', '.join(targets)}\n"
+                     f"- 최소 {minimum}개 필요, 실제 {len(present)}개\n"
+                     f"- 입력값: {actual}\n")
+        field_errors.append(error_msg)
+        global_errors.append(f"[의미] {field_path}: {error_msg}")
+        return False
+
+    return True
+
+
 def _validate_object(field_path, field_value, rule, data, reference_context,
                      field_errors, global_errors):
     """객체 검증 (object-validation)"""
@@ -1741,8 +2101,23 @@ def normalize_result_test_range(test_range):
     return "REQUIRED_FIELDS" if not normalized else normalized
 
 
+def get_url_delimiter(spec_config, fallback_id=""):
+    """시험 URL의 시나리오 구분자를 돌려준다.
+
+    관리도구가 testSpecs[].delimiter로 내려주는 URL 전용 값이다.
+    화면에 뿌리는 이름(test_name)과 역할을 분리했다 — 예전에는 한 값이 표시와
+    URL을 겸해서, 이름이 여러 시나리오에 겹치거나("저장 기능"·"제어 기능" 둘 다
+    video) 이름에 대괄호·공백이 들어가면("[전체] vid001") 그대로 URL로 나갔다.
+
+    or 체인은 폴백 장치가 아니라 빈 세그먼트(base//API명) 방지용이다.
+    """
+    cfg = spec_config or {}
+    seg = cfg.get("url_delimiter") or cfg.get("test_name") or fallback_id
+    return str(seg).replace("/", "").strip()
+
+
 def get_spec_test_name(spec_id):
-    """SPEC_CONFIG에서 spec_id에 해당하는 test_name 가져오기"""
+    """SPEC_CONFIG에서 spec_id에 해당하는 test_name 가져오기 (화면 표시용)"""
     for group in CONSTANTS.SPEC_CONFIG:
         for key, value in group.items():
             if key == spec_id and isinstance(value, dict):

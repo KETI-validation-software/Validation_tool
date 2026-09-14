@@ -151,7 +151,7 @@ class BasicInfoPanel(QWidget):
         input_layout.addWidget(self.test_category_widget, alignment=Qt.AlignHCenter)
 
         # 시험분야 필드
-        self.test_group_widget, self.test_group_label, self.test_group_edit = self._create_readonly_field("시험분야", 776, truncation_popup=True)
+        self.test_group_widget, self.test_group_label, self.test_group_edit = self._create_readonly_field("시험 기능", 776, truncation_popup=True)
         input_layout.addWidget(self.test_group_widget, alignment=Qt.AlignHCenter)
 
         # 시험대상/시험범위 행
@@ -276,10 +276,10 @@ class BasicInfoPanel(QWidget):
         row_layout.setContentsMargins(0, 0, 0, 0)
         row_layout.setSpacing(20)
 
-        self.target_system_widget, self.target_system_label, self.target_system_edit = self._create_readonly_field("시험대상", 378)
+        self.target_system_widget, self.target_system_label, self.target_system_edit = self._create_readonly_field("시험 분야", 378)
         row_layout.addWidget(self.target_system_widget)
 
-        self.test_range_widget, self.test_range_label, self.test_range_edit = self._create_readonly_field("시험범위", 378)
+        self.test_range_widget, self.test_range_label, self.test_range_edit = self._create_readonly_field("시험 범위", 378)
         row_layout.addWidget(self.test_range_widget)
 
         parent_layout.addWidget(self.target_range_row, alignment=Qt.AlignHCenter)

@@ -16,7 +16,7 @@ from core.functions import build_result_json, upsert_attempt_log, append_attempt
 import requests
 import config.CONSTANTS as CONSTANTS
 from core.json_checker_new import timeout_field_finder
-from core.functions import json_check_, resource_path, json_to_data, ref_context_key
+from core.functions import json_check_, resource_path, json_to_data, ref_context_key, get_url_delimiter, ref_direction, REQUEST_TIME_KEY
 from ui.splash_screen import LoadingPopup
 from ui.detail_dialog import CombinedDetailDialog
 from ui.result_page import ResultPageWidget
@@ -587,8 +587,8 @@ class MyApp(PlatformMainUI):
                 if hasattr(self, 'url_text_box'):
                     fresh_base_url = self._original_base_url # 플랫폼은 초기화 시 저장된 원본 사용
                     if hasattr(self, 'spec_config'):
-                        test_name = self.spec_config.get('test_name', self.current_spec_id).replace("/", "")
-                        base_with_scenario = fresh_base_url.rstrip('/') + "/" + test_name
+                        url_delim = get_url_delimiter(self.spec_config, self.current_spec_id)
+                        base_with_scenario = fresh_base_url.rstrip('/') + "/" + url_delim
                     else:
                         base_with_scenario = fresh_base_url.rstrip('/')
                     
@@ -735,12 +735,32 @@ class MyApp(PlatformMainUI):
                 else:
                     Logger.debug(f" ✅ trace 파일에서 응답 데이터 로드 완료: {len(str(response_data))} bytes")
 
+                # 1-2. 시각 비교(request-time-compare)용 — 업체 요청이 도착한 시각.
+                #      서버가 받는 순간 찍어 둔 로컬 시각을 채점 쪽으로 옮긴다.
+                _req_evt = (self.Server.latest_event.get(api_name) or {}).get("REQUEST")
+                if not _req_evt:
+                    # 재시도 회차는 서버가 CameraProfiles2처럼 숫자 접미사를 붙여
+                    # 저장한다. 여기서 쓰는 이름에는 접미사가 없어 그대로 찾으면
+                    # 재시도마다 빗나간다 — 접미사를 떼고 맞춰본다(뒤엣것이 최근).
+                    _base = remove_api_number_suffix(api_name)
+                    for _k, _v in self.Server.latest_event.items():
+                        if remove_api_number_suffix(_k) == _base and (_v or {}).get("REQUEST"):
+                            _req_evt = _v["REQUEST"]
+                _req_time17 = (_req_evt or {}).get("time17")
+                if _req_time17:
+                    self.reference_context[REQUEST_TIME_KEY] = _req_time17
+                else:
+                    self.reference_context.pop(REQUEST_TIME_KEY, None)
+                    Logger.error(f" ❌ 요청 도착 시각을 찾지 못했습니다: {api_name} "
+                                 f"(보유: {list(self.Server.latest_event.keys())}) "
+                                 f"— 시각 기준 검증이 건너뛰어집니다")
+
                 # 2. 맥락 검증용
                 if current_validation:
 
                     for field_path, validation_rule in current_validation.items():
                         validation_type = validation_rule.get("validationType", "")
-                        direction = "REQUEST" if "request-field" in validation_type else "RESPONSE"
+                        direction = ref_direction(validation_rule)
 
                         ref_endpoint = validation_rule.get("referenceEndpoint", "")
                         if ref_endpoint:
@@ -997,6 +1017,15 @@ class MyApp(PlatformMainUI):
                             #    웹훅 창(아래) 동안에는 카운트업하지 않고 이 실제 응답시간을 고정 표시 →
                             #    0→창시간 카운트업 후 확정값으로 떨어지는 점프(예: 0→15→0)가 사라진다.
                             self._set_timer_success(self.cnt)
+
+                    # ✅ 우리가 오류 코드로 응답했으면 이벤트 창을 열지 않는다.
+                    # 구독을 거절해놓고 duration(60초)만큼 창을 채우는 건 의미가 없다.
+                    # 단일시스템 쪽(systemVal_all._webhook_ack_rejected)과 짝을 맞춘다
+                    # — 보낸 쪽은 바로 끝났는데 받는 쪽만 60초 기다리던 문제 (2026-09-12).
+                    _ack_code = str((response_data or {}).get("code", "")).strip()
+                    if current_protocol == "WebHook" and _ack_code and _ack_code != "200":
+                        Logger.info(f"[webhook] 오류 응답(code={_ack_code}) — 이벤트 창을 열지 않고 종료")
+                        current_protocol = "basic"
 
                     # WebHook 프로토콜인 경우
                     if current_protocol == "WebHook":
@@ -2012,13 +2041,13 @@ class MyApp(PlatformMainUI):
                 self.update_score_display()
 
                 # URL 업데이트 (base_url + 시나리오명)
-                test_name = self.spec_config.get('test_name', self.current_spec_id).replace("/", "")
+                url_delim = get_url_delimiter(self.spec_config, self.current_spec_id)
                 # ✅ 깨끗한 base에서 재구성 (칸 편집 시 그 주소 우선)
                 fresh_base_url = self._fresh_base_url()
                 print(f"\n=== [시나리오 전환] URL 생성 ===")
                 print(f"CONSTANTS.url: {fresh_base_url}")
-                print(f"test_name: {test_name}")
-                self.pathUrl = fresh_base_url.rstrip('/') + "/" + test_name
+                print(f"URL 구분자: {url_delim}")
+                self.pathUrl = fresh_base_url.rstrip('/') + "/" + url_delim
                 print(f"최종 URL: {self.pathUrl}\n")
                 self.url_text_box.setText(self.pathUrl)
                 
@@ -2189,9 +2218,9 @@ class MyApp(PlatformMainUI):
                 first_spec_id = self.index_to_spec_id.get(0)
                 Logger.debug(f" 첫 번째 시나리오 선택: spec_id={first_spec_id}")
                 # URL 업데이트 (base_url + 시나리오명)
-                test_name = self.spec_config.get('test_name', first_spec_id).replace("/", "")
+                url_delim = get_url_delimiter(self.spec_config, first_spec_id)
                 # ✅ 깨끗한 base에서 재구성 (칸 편집 시 그 주소 우선)
-                self.pathUrl = self._fresh_base_url().rstrip('/') + "/" + test_name
+                self.pathUrl = self._fresh_base_url().rstrip('/') + "/" + url_delim
 
                 self.Server.current_spec_id = first_spec_id
                 self.Server.num_retries = self.spec_config.get('num_retries', first_spec_id)
@@ -2400,7 +2429,7 @@ class MyApp(PlatformMainUI):
             # ✅ 시나리오 선택 확인 (자동 재시작이 아닐 때만 검증)
             selected_rows = self.test_field_table.selectionModel().selectedRows()
             if not is_auto_restart and not selected_rows:
-                QMessageBox.warning(self, "알림", "시험 시나리오를 선택하세요.")
+                QMessageBox.warning(self, "알림", "시험 기능을 선택하세요.")
                 return
             
             self.save_current_spec_data()
@@ -2424,13 +2453,13 @@ class MyApp(PlatformMainUI):
                 
                 # ✅ URL 초기화 (base_url + 시나리오명) - API 경로 누적 방지
                 if hasattr(self, 'url_text_box') and hasattr(self, 'spec_config'):
-                    test_name = self.spec_config.get('test_name', self.current_spec_id).replace("/", "")
+                    url_delim = get_url_delimiter(self.spec_config, self.current_spec_id)
                     # ✅ 깨끗한 base에서 재구성 (칸 편집 시 그 주소 우선)
                     fresh_base_url = self._fresh_base_url()
                     print(f"\n=== [시험 시작] URL 생성 ===")
                     print(f"CONSTANTS.url: {fresh_base_url}")
-                    print(f"test_name: {test_name}")
-                    self.pathUrl = fresh_base_url.rstrip('/') + "/" + test_name
+                    print(f"URL 구분자: {url_delim}")
+                    self.pathUrl = fresh_base_url.rstrip('/') + "/" + url_delim
                     print(f"최종 URL: {self.pathUrl}\n")
                     self.url_text_box.setText(self.pathUrl)
                 
@@ -3281,13 +3310,13 @@ class MyApp(PlatformMainUI):
 
         # ✅ URL 업데이트 (base_url + 시나리오명) - spec_config가 로드된 후 실행
         if hasattr(self, 'url_text_box'):
-            test_name = self.spec_config.get('test_name', self.current_spec_id).replace("/", "")
+            url_delim = get_url_delimiter(self.spec_config, self.current_spec_id)
             # ✅ 깨끗한 base에서 재구성 (칸 편집 시 그 주소 우선)
             fresh_base_url = self._fresh_base_url()
             print(f"\n=== [get_setting] URL 생성 ===")
             print(f"CONSTANTS.url: {fresh_base_url}")
-            print(f"test_name: {test_name}")
-            self.pathUrl = fresh_base_url.rstrip('/') + "/" + test_name
+            print(f"URL 구분자: {url_delim}")
+            self.pathUrl = fresh_base_url.rstrip('/') + "/" + url_delim
             print(f"최종 URL: {self.pathUrl}\n")
             self.url_text_box.setText(self.pathUrl)
 

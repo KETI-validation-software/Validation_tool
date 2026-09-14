@@ -7,7 +7,7 @@ import time
 import traceback
 import os
 import copy  # deepcopy를 위해 추가
-from core.functions import resource_path
+from core.functions import resource_path, now_time17
 from core.utils import summarize_payload
 from core.data_mapper import ConstraintDataGenerator
 from core.logger import Logger
@@ -93,6 +93,9 @@ class Server(BaseHTTPRequestHandler):
 
             evt = {
                 "time": datetime.datetime.utcnow().isoformat() + "Z",
+                # 시각 비교용 로컬 시각 — 위 time은 UTC라 메시지의 17자리 시각과
+                # 9시간 어긋난다. 기존 time은 다른 곳에서 쓰므로 그대로 둔다.
+                "time17": now_time17(),
                 "api": api_name,
                 "dir": direction,  # "REQUEST" | "RESPONSE" | "WEBHOOK"
                 "data": payload_copy
@@ -255,7 +258,7 @@ class Server(BaseHTTPRequestHandler):
             return base_api_name
 
     # ========== 오류 검사 함수들 (400/201/404) ==========
-    # 상대(플랫폼 역할)가 ENABLE_ERROR_REQUEST_MUTATION으로 망가뜨려 보낸 요청을
+    # 상대(플랫폼 역할)가 시나리오에 박아 망가뜨려 보낸 요청을
     # 여기서 판정해 오류 코드로 돌려준다. 유도 방식과 판정 기준이 짝이 맞아야 한다.
     #   startTime을 0/"0"으로 변조  → 201 정보 없음
     #   임의 leaf의 타입을 변조     → 400 잘못된 요청
@@ -1392,7 +1395,7 @@ class Server(BaseHTTPRequestHandler):
 
         지원 형식:
         1. /spec_id/api_name  (예: /cmgvieyak001b6cd04cgaawmm/Authentication)
-        2. /test_name/api_name (예: /test_video_001/Authentication - test_name을 spec_id로 변환)
+        2. /구분자/api_name   (예: /AUTH-01/Authentication - delimiter를 spec_id로 변환)
         3. /api_name          (예: /Authentication - 하위 호환성)
 
         Returns:
@@ -1434,10 +1437,10 @@ class Server(BaseHTTPRequestHandler):
 
     def _resolve_spec_id(self, spec_id_or_name):
         """
-        test_name 또는 spec_id를 실제 spec_id로 변환
+        URL 구분자 또는 spec_id를 실제 spec_id로 변환
 
         Args:
-            spec_id_or_name: URL에서 추출한 spec_id 또는 test_name
+            spec_id_or_name: URL에서 추출한 spec_id 또는 구분자(delimiter)
 
         Returns:
             str: 실제 spec_id (변환 실패 시 원본 반환)
@@ -1451,28 +1454,42 @@ class Server(BaseHTTPRequestHandler):
 
             self.SPEC_CONFIG = getattr(self.CONSTANTS, 'SPEC_CONFIG', [])
 
-            # ✅ 2.5 같은 test_name이 여러 시나리오에 있으면(예: 셋 다 "sensor")
-            #     항상 첫 번째로 매칭돼 두 번째 시험부터 do_POST의 spec_id 대조에서
-            #     전부 400으로 거절되던 문제 — 지금 화면에서 진행 중인 시나리오의
-            #     이름과 일치하면 그것을 우선한다. 이름이 서로 다르면 결과는 기존과 동일.
+            def _matches(cfg):
+                """URL 세그먼트가 이 시나리오를 가리키는가.
+
+                구분자가 정식 경로. test_name 대조는 구분자가 없던 옛 설정
+                (예전 빌드가 쓰던 CONSTANTS.py)을 위해 남긴다.
+                """
+                if not isinstance(cfg, dict):
+                    return False
+                delim = str(cfg.get('url_delimiter') or '').strip()
+                if delim:
+                    return delim == spec_id_or_name
+                return cfg.get('test_name', '') == spec_id_or_name
+
+            # ✅ 2.5 구분자는 시험 간 중복이 허용되므로 URL만으로는 시나리오를
+            #     특정할 수 없다. 지금 화면에서 진행 중인 시나리오가 걸리면 그것을
+            #     우선한다. (예전 test_name 시절 "셋 다 sensor"여서 두 번째 시험부터
+            #     do_POST의 spec_id 대조가 전부 400으로 거절되던 문제와 같은 이유)
             current = Server.current_spec_id
             if current:
                 for group in self.SPEC_CONFIG:
-                    value = group.get(current)
-                    if isinstance(value, dict) and value.get('test_name', '') == spec_id_or_name:
-                        Logger.debug(f" test_name '{spec_id_or_name}' → 진행 중인 spec_id '{current}' 우선")
+                    if _matches(group.get(current)):
+                        Logger.debug(f" 구분자 '{spec_id_or_name}' → 진행 중인 spec_id '{current}' 우선")
                         return current
 
-            # ✅ 3. test_name으로 spec_id 찾기
-            for group in self.SPEC_CONFIG:
-                for key, value in group.items():
-                    if key in ['group_name', 'group_id']:
-                        continue
-                    if isinstance(value, dict):
-                        test_name = value.get('test_name', '')
-                        if test_name == spec_id_or_name:
-                            Logger.debug(f" test_name '{spec_id_or_name}' → spec_id '{key}'")
-                            return key
+            # ✅ 3. 구분자로 spec_id 찾기
+            matched = [key
+                       for group in self.SPEC_CONFIG
+                       for key, value in group.items()
+                       if key not in ('group_name', 'group_id') and _matches(value)]
+            if matched:
+                if len(matched) > 1:
+                    Logger.warning(f" 구분자 '{spec_id_or_name}'가 시나리오 {len(matched)}개에 "
+                                   f"겹침: {matched} → 첫 번째 사용 "
+                                   f"(진행 중인 시나리오가 없어 URL만으로는 특정 불가)")
+                Logger.debug(f" 구분자 '{spec_id_or_name}' → spec_id '{matched[0]}'")
+                return matched[0]
 
             # ✅ 4. 변환 실패 시 원본 반환
             Logger.debug(f" '{spec_id_or_name}' 변환 실패, 원본 사용")

@@ -134,12 +134,12 @@ class CommonMainUI(QWidget):
     def get_header_title_path(self, page_type):
         title_map = {
             "platform": {
-                "runner": "assets/image/test_runner/platform_runner_title.png",
-                "result": "assets/image/test_runner/platform_result_title.png",
+                "runner": "assets/image/test_runner/platform_runner_title_final.png",
+                "result": "assets/image/test_runner/platform_result_title_final.png",
             },
             "system": {
-                "runner": "assets/image/test_runner/system_runner_title.png",
-                "result": "assets/image/test_runner/system_result_title.png",
+                "runner": "assets/image/test_runner/system_runner_title_final.png",
+                "result": "assets/image/test_runner/system_result_title_final.png",
             },
         }
         mode = self.validation_mode if self.validation_mode in title_map else "platform"
@@ -1732,7 +1732,7 @@ class CommonMainUI(QWidget):
         icon_label.setAlignment(Qt.AlignCenter)
 
         # 분야별 점수 레이블 (500 Medium 20px)
-        score_type_label = QLabel("시나리오별 점수")
+        score_type_label = QLabel("기능별 점수")
         score_type_label.setStyleSheet("""
             color: #000;
             font-family: "Noto Sans KR";

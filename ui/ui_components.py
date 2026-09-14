@@ -120,7 +120,7 @@ class TestSelectionPanel(QWidget):
         group_header_layout.setContentsMargins(0, 0, 14, 0)
         group_header_layout.setSpacing(0)
 
-        group_header_label = QLabel("시험 분야")
+        group_header_label = QLabel("시험 분야 및 범위")
         group_header_label.setAlignment(Qt.AlignCenter)
         group_header_label.setStyleSheet("""
             QLabel {
@@ -138,7 +138,7 @@ class TestSelectionPanel(QWidget):
         layout.addWidget(self.group_table_header_widget)
 
         self.group_table = QTableWidget(0, 1)
-        self.group_table.setHorizontalHeaderLabels(["시험 분야"])
+        self.group_table.setHorizontalHeaderLabels(["시험 분야 및 범위"])
         self.group_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.group_table.horizontalHeader().setVisible(False)
         self.group_table.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -246,7 +246,7 @@ class TestSelectionPanel(QWidget):
         layout.setSpacing(0)
 
         self.test_field_table = QTableWidget(0, 1)
-        self.test_field_table.setHorizontalHeaderLabels(["시험 시나리오"])
+        self.test_field_table.setHorizontalHeaderLabels(["시험 기능"])
         self.test_field_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.test_field_table.horizontalHeader().setFixedHeight(31)
         self.test_field_table.setSelectionBehavior(QAbstractItemView.SelectRows)

@@ -32,6 +32,10 @@ from core.functions import (
     upsert_attempt_log,
     append_attempt_log_text,
     ref_context_key,
+    get_url_delimiter,
+    ref_direction,
+    now_time17,
+    REQUEST_TIME_KEY,
 )
 from core.data_mapper import ConstraintDataGenerator
 from core.logger import Logger
@@ -240,19 +244,16 @@ class MyApp(SystemMainUI):
 
                 # ⑤ 토큰 미포함(403)은 요청 본문이 아니라 헤더를 건드린다.
                 # post()가 이 플래그를 보고 Authorization 헤더를 한 번만 빼고 보낸다.
-                if str(allowed_value) == "403" and getattr(
-                        self.CONSTANTS, "ENABLE_ERROR_REQUEST_MUTATION", False):
+                if str(allowed_value) == "403":
                     self.omit_token_once = True
                     Logger.debug("[오류주입] ⑤ 토큰 미포함 — 다음 요청에서 인증 헤더 제외")
                     return updated_request
 
-                updated_request = self.generator._applied_codevalue(
-                    request_data=updated_request,
-                    allowed_value=allowed_value,
-                    constraints=constraints,
-                    # 시험범위: flag_opt=False가 필수 범위 — 선택 필드는 주입 대상이 아니다
-                    include_optional=getattr(self, "flag_opt", True),
-                )
+                # 오류 회차(201·400·404)도 값 생성을 정상적으로 태운다.
+                # 관리도구가 틀린 값을 박아둔 필드는 고정값(preset)이라 생성기가 건드리지
+                # 않고, 무작위·참조가 걸린 나머지 필드(eventFilter 등)는 평소처럼 채워진다.
+                # 한때 이 회차만 생성을 통째로 건너뛰었더니 그 나머지 필드가 전부 빈 값으로
+                # 나갔다 (2026-09-12 실측) — 주입 필드만 고정값으로 두면 되는 일이었다.
                 return updated_request
             except Exception as e:
                 # Logger.warning(f"constraint 적용 중 일부 실패: {e}")
@@ -744,7 +745,9 @@ class MyApp(SystemMainUI):
         self.url = url_value  # ✅ 외부 CONSTANTS.py에 정의된 url도 반영
         self._original_base_url = str(url_value)  # ✅ 오염 방지용 불변 복사본
         if hasattr(self, 'url_text_box') and self.url:
-            self.url_text_box.setText(self.url)
+            # _set_url_box로 써야 _last_auto_url이 남는다 — raw setText면 이후
+            # _url_box_edited()가 사용자 편집으로 오판한다
+            self._set_url_box(self.url)
             
         self.auth_type = auth_type
         self.auth_info = auth_info
@@ -1181,9 +1184,9 @@ class MyApp(SystemMainUI):
                 self.update_score_display()
 
                 # URL 업데이트 (base_url + 시나리오명) - 오염 방지: CONSTANTS에서 직접 읽기
-                test_name = self.spec_config.get('test_name', self.current_spec_id).replace("/", "")
+                url_delim = get_url_delimiter(self.spec_config, self.current_spec_id)
                 fresh_base_url = str(getattr(self.CONSTANTS, 'url', self._original_base_url))
-                self.pathUrl = fresh_base_url.rstrip('/') + "/" + test_name
+                self.pathUrl = fresh_base_url.rstrip('/') + "/" + url_delim
                 self._url_prefix_override = None  # 시나리오 전환 → URL 편집 초기화
                 self._set_url_box(self.pathUrl)  # 안내 문구 변경
                 Logger.debug(f" 시험 URL 업데이트: {self.pathUrl}")
@@ -1393,6 +1396,28 @@ class MyApp(SystemMainUI):
             # 행 높이 설정
             self.tableWidget.setRowHeight(row, 40)
 
+    @staticmethod
+    def _webhook_ack_rejected(res):
+        """구독 응답(ACK)이 오류 코드인가 — 그러면 이벤트가 올 리 없으니 창을 열지 않는다.
+
+        표준은 오류를 본문 code로 돌려주므로 본문 code를 먼저 본다. 본문이 JSON이
+        아니면 HTTP 상태로 판단한다. code가 아예 없으면 근거가 없으니 종전대로 창을 연다.
+        """
+        if res is None:
+            return False
+        code = None
+        try:
+            body = res.json()
+            if isinstance(body, dict) and "code" in body:
+                code = str(body.get("code")).strip()
+        except Exception:
+            body = None
+        if code is not None:
+            return code != "200"
+        if body is None:
+            return int(getattr(res, "status_code", 200) or 200) != 200
+        return False
+
     def post(self, path, json_data, time_out):
         self.res = None
         headers = CONSTANTS.headers.copy()
@@ -1472,6 +1497,8 @@ class MyApp(SystemMainUI):
                 Logger.info(f"[데이터] → 송신 {_api}: {summarize_payload(json.loads(json_data))}")
             except Exception:
                 pass
+            # 시각 비교(request-time-compare)용 — 보내는 순간의 로컬 시각을 남긴다
+            self.reference_context[REQUEST_TIME_KEY] = now_time17()
             self.res = requests.post(
                 path,
                 headers=headers,
@@ -1489,6 +1516,20 @@ class MyApp(SystemMainUI):
             Logger.debug(
                 f"{self.res.json() if self.res.headers.get('Content-Type', '').startswith('application/json') else self.res.text}"
             )
+            # ✅ 구독 응답이 오류 코드면 이벤트 창을 열지 않는다.
+            # 거절된 구독에 이벤트가 올 리 없는데 duration(60초)을 통째로 기다린 뒤
+            # "웹훅 메시지 미수신"까지 얹어 채점했다. 오류 시나리오는 응답 코드만
+            # 보면 되므로(안내서 표 3-12) 바로 응답 검증으로 넘어간다 (2026-09-12).
+            if self.webhook_flag and self._webhook_ack_rejected(self.res):
+                Logger.info(f"[Webhook] 구독 응답이 오류 — 이벤트 창을 열지 않고 응답 검증으로 진행 "
+                            f"(HTTP {self.res.status_code})")
+                if hasattr(self, 'webhook_thread') and self.webhook_thread is not None:
+                    self.webhook_thread.stop()
+                    self.webhook_thread = None
+                self.webhook_flag = False
+                # 이 회차는 일반 요청→응답으로 집계한다 (웹훅 이벤트 합산 경로 안 탐)
+                if self.cnt < len(self.step_buffers):
+                    self.step_buffers[self.cnt]["is_webhook_api"] = False
             try:
                 Logger.info(f"[데이터] ← 수신 {_api} ({self.res.status_code}): "
                             f"{summarize_payload(self.res.json())}")
@@ -1850,8 +1891,8 @@ class MyApp(SystemMainUI):
                 # ✅ URL 오염 방지: pathUrl을 매번 깨끗한 base로 재구성 (칸 편집 시 그 주소 우선)
                 fresh_base_url = self._fresh_base_url()
                 if hasattr(self, 'spec_config'):
-                    test_name = self.spec_config.get('test_name', self.current_spec_id).replace("/", "")
-                    base_with_scenario = fresh_base_url.rstrip('/') + "/" + test_name
+                    url_delim = get_url_delimiter(self.spec_config, self.current_spec_id)
+                    base_with_scenario = fresh_base_url.rstrip('/') + "/" + url_delim
                 else:
                     base_with_scenario = fresh_base_url.rstrip('/')
                 
@@ -2287,7 +2328,7 @@ class MyApp(SystemMainUI):
                     if resp_rules:
                         for field_path, validation_rule in resp_rules.items():
                             validation_type = validation_rule.get("validationType", "")
-                            direction = "REQUEST" if "request-field" in validation_type else "RESPONSE"
+                            direction = ref_direction(validation_rule)
 
                             # referenceEndpoint 처리
                             ref_endpoint = validation_rule.get("referenceEndpoint", "")
@@ -2593,7 +2634,7 @@ class MyApp(SystemMainUI):
                         # ✅ 선택 필드 에러 수도 전체 점수에 누적
                         self.global_opt_error_cnt += final_opt_error_count
 
-                        Logger.debug(f" 분야별 점수: pass={self.total_pass_cnt}, error={self.total_error_cnt}")
+                        Logger.debug(f" 기능별 점수: pass={self.total_pass_cnt}, error={self.total_error_cnt}")
                         Logger.debug(f" 전체 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}")
 
                         # ✅ 전체 점수 포함하여 디스플레이 업데이트 (재시도 완료 후에만)
@@ -2649,7 +2690,7 @@ class MyApp(SystemMainUI):
                 # ✅ 전체 점수 최종 확인 로그
                 global_total = self.global_pass_cnt + self.global_error_cnt
                 global_score = (self.global_pass_cnt / global_total * 100) if global_total > 0 else 0
-                Logger.debug(f"분야별 점수: pass={self.total_pass_cnt}, error={self.total_error_cnt}, score={final_score:.1f}%")
+                Logger.debug(f"기능별 점수: pass={self.total_pass_cnt}, error={self.total_error_cnt}, score={final_score:.1f}%")
                 Logger.debug(f"전체 점수: pass={self.global_pass_cnt}, error={self.global_error_cnt}, score={global_score:.1f}%")
 
                 if not self._should_send_final_result_now():
@@ -2810,7 +2851,7 @@ class MyApp(SystemMainUI):
         else:
             # ✅ 1. 시나리오 선택 확인 (수동 시작 시에만)
             if not hasattr(self, 'current_spec_id') or not self.current_spec_id:
-                QMessageBox.warning(self, "알림", "시험 시나리오를 먼저 선택하세요.")
+                QMessageBox.warning(self, "알림", "시험 기능을 먼저 선택하세요.")
                 return
 
         self._prepare_final_result_tracking()
@@ -2844,8 +2885,8 @@ class MyApp(SystemMainUI):
         # ✅ URL 오염 방지: 깨끗한 base에서 재구성 (칸 편집 시 그 주소 우선)
         fresh_base_url = self._fresh_base_url()
         if hasattr(self, 'spec_config'):
-            test_name = self.spec_config.get('test_name', self.current_spec_id).replace("/", "")
-            self.pathUrl = fresh_base_url.rstrip('/') + "/" + test_name
+            url_delim = get_url_delimiter(self.spec_config, self.current_spec_id)
+            self.pathUrl = fresh_base_url.rstrip('/') + "/" + url_delim
         else:
             self.pathUrl = fresh_base_url
         print(f"[SYSTEM DEBUG] sbtn_push에서 pathUrl 설정: {self.pathUrl}")
@@ -2999,8 +3040,8 @@ class MyApp(SystemMainUI):
             # ✅ 17. URL 설정 (오염 방지: 깨끗한 base에서 재구성, 칸 편집 시 그 주소 우선)
             fresh_base_url = self._fresh_base_url()
             if hasattr(self, 'spec_config'):
-                test_name = self.spec_config.get('test_name', self.current_spec_id).replace("/", "")
-                self.pathUrl = fresh_base_url.rstrip('/') + "/" + test_name
+                url_delim = get_url_delimiter(self.spec_config, self.current_spec_id)
+                self.pathUrl = fresh_base_url.rstrip('/') + "/" + url_delim
             else:
                 self.pathUrl = fresh_base_url
             self._set_url_box(self.pathUrl, preserve_edit=True)  # 시작 직전 사용자 편집은 유지
@@ -3671,9 +3712,9 @@ class MyApp(SystemMainUI):
 
         # ✅ URL 업데이트 (base_url + 시나리오명) - 오염 방지: 깨끗한 base에서 재구성 (칸 편집 시 그 주소 우선)
         if hasattr(self, 'spec_config') and hasattr(self, 'url_text_box'):
-            test_name = self.spec_config.get('test_name', self.current_spec_id).replace("/", "")
+            url_delim = get_url_delimiter(self.spec_config, self.current_spec_id)
             fresh_base_url = self._fresh_base_url()
-            self.pathUrl = fresh_base_url.rstrip('/') + "/" + test_name
+            self.pathUrl = fresh_base_url.rstrip('/') + "/" + url_delim
             self._url_prefix_override = None  # 시나리오 전환 → URL 편집 초기화
             self._set_url_box(self.pathUrl)
             print(f"[SYSTEM DEBUG] get_setting에서 pathUrl 설정: {self.pathUrl}")

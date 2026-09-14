@@ -123,6 +123,13 @@ def collect_all_values_by_key(data, key):
     """
     results = []
 
+    # 관리도구가 참조 필드를 이름("camID")으로도, 경로("camList.camID")로도 내려준다.
+    # 경로로 오면 그런 이름의 키가 없어 참조 목록이 통째로 비고, 상대가 제대로
+    # 보내도 전부 "값 불일치"로 떨어진다 (2026-09-11 실측).
+    # 이 함수는 깊이 무관 재귀 검색이라 마지막 조각만 쓰면 결과가 같다.
+    if "." in str(key):
+        key = str(key).rsplit(".", 1)[-1]
+
     def _recursive_search(obj):
         if isinstance(obj, dict):
             for k, v in obj.items():
