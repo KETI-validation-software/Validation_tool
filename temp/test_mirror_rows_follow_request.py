@@ -42,7 +42,7 @@ def generate(door_count, user_count):
               "AccessUserInfos": {"RESPONSE": {"data": users}}}
     out = ConstraintDataGenerator(events)._applied_constraints(
         request_data=request, template_data=json.loads(json.dumps(TEMPLATE)),
-        constraints=CONSTRAINTS, api_name="StoredVerifEventInfos", door_memory={})
+        constraints=CONSTRAINTS, api_name="StoredVerifEventInfos")
     return request, users, out["doorList"]
 
 

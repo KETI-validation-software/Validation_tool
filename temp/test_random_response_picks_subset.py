@@ -31,7 +31,7 @@ def door_request(value_type, endpoint="/DoorProfiles"):
     template = {"doorList": [{"doorID": ""}], "duration": 60}
     out = ConstraintDataGenerator(EVENTS)._applied_constraints(
         request_data={}, template_data=json.loads(json.dumps(template)),
-        constraints=constraints, api_name="RealtimeDoorStatus", door_memory={})
+        constraints=constraints, api_name="RealtimeDoorStatus")
     return [row["doorID"] for row in out["doorList"]]
 
 
@@ -42,7 +42,7 @@ def cam_request(value_type):
     template = {"camList": [{"camID": ""}]}
     out = ConstraintDataGenerator(EVENTS)._applied_constraints(
         request_data={}, template_data=json.loads(json.dumps(template)),
-        constraints=constraints, api_name="StreamURLs", door_memory={})
+        constraints=constraints, api_name="StreamURLs")
     return [row["camID"] for row in out["camList"]]
 
 

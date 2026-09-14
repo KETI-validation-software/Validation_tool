@@ -20,7 +20,6 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor, QPixmap
 from PyQt5.QtCore import *
 from api.webhook_api import WebhookThread
-from api.api_server import Server  # ✅ door_memory 접근을 위한 import 추가
 from api.client import APIClient
 from core.json_checker_new import timeout_field_finder
 from core.functions import (
@@ -209,12 +208,6 @@ class MyApp(SystemMainUI):
             
             api_name = self.message[cnt] if cnt < len(self.message) else ""
 
-            # 둘 다 무조건 맵핑 되어야 함
-            if "RealtimeDoorStatus" in api_name:
-                if "DoorProfiles" not in self.latest_events or "RESPONSE" not in self.latest_events.get("DoorProfiles", {}):
-                    Logger.debug(f"RealtimeDoorStatus용 DoorProfiles RESPONSE 로드 시도")
-                    self._load_from_trace_file("DoorProfiles", "RESPONSE")
-            
             self.generator.latest_events = self.latest_events
 
             updated_request = self.generator._applied_constraints(
@@ -222,7 +215,6 @@ class MyApp(SystemMainUI):
                 template_data=request_data.copy(),  # 현재 요청 데이터를 템플릿으로
                 constraints=constraints,
                 api_name=api_name,  # ✅ API 이름 전달
-                door_memory=Server.door_memory  # ✅ 문 상태 저장소 전달
             )
 
             self.resp_rules = get_validation_rules(

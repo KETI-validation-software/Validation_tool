@@ -83,17 +83,15 @@ def test_no_starttime_still_string():
     print("✅ startTime 생략 요청 → eventTime 폴백도 String, 빈 값 없음")
 
 
-def test_no_constraints_keeps_old_behavior():
-    """제약이 없으면 예전 그대로 — ID만 채우고 나머지는 템플릿 값 유지"""
+def test_no_constraints_keeps_template():
+    """설정이 없으면 템플릿 그대로 — 요청을 보고 ID를 채우지 않는다 (2026-09-14 전용 경로 정리)"""
     request = {"sensorDeviceList": [{"sensorDeviceID": "iot0001"}]}
     events = {"RealtimeSensorEventInfos": {"REQUEST": {"data": request}}}
     out = ConstraintDataGenerator(events)._applied_constraints(
         request_data=request, template_data=copy.deepcopy(TEMPLATE),
         constraints={}, api_name="RealtimeSensorEventInfos", is_webhook=True)
-    row = out["sensorDeviceList"][0]
-    assert row["sensorDeviceID"] == "iot0001"
-    assert row["eventDesc"] == "100도"
-    print("✅ 제약 없는 스펙은 기존 동작 유지 (ID만 채움)")
+    assert out == TEMPLATE, f"설정이 없는데 템플릿이 바뀜: {out}"
+    print("✅ 설정 없는 스펙은 템플릿 그대로")
 
 
 if __name__ == "__main__":
