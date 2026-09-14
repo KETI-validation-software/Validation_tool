@@ -1170,7 +1170,11 @@ class ConstraintDataGenerator:
         )
         if min_available_count != float('inf'):
             if mirrors_request:
-                n = min_available_count
+                # 줄 수는 요청 항목 수로만 정한다. 다른 참조 필드(userID 등)의 값 가짓수까지
+                # 최솟값에 넣으면 문 5개를 요청해도 사용자가 2명이면 2줄만 나갔다
+                # (2026-09-14 StoredVerifEventInfos 실측). 그런 필드는 줄 사이 중복을 허용한다.
+                n = min(len(constraint_map[fp]["values"]) for fp in available_values
+                        if constraint_map[fp].get("type") in self.REQUEST_BASED_TYPES)
                 Logger.info(f" {parent_key}: {n}개 생성합니다. (요청 항목과 1:1)")
             else:
                 n = random.randint(1, min_available_count)
@@ -1262,6 +1266,12 @@ class ConstraintDataGenerator:
                             if field_path not in used_values:
                                 used_values[field_path] = []
                             used_values[field_path].append(selected_value)
+                        elif values_list and constraint["type"] not in self.REQUEST_BASED_TYPES:
+                            # 줄 수를 요청 항목 수에 맞춘 경우 — 이 필드는 가짓수가 모자라 중복 허용
+                            selected_value = random.choice(values_list)
+                            item[field] = selected_value
+                            Logger.debug(f" {field_path}: 값 {len(values_list)}가지를 다 써서 "
+                                         f"중복 사용 → {selected_value}")
                         elif values_list:
                             # ⚠️ 모든 값을 다 사용했는데 여기 도달하면 안 됨 (n이 조정되었어야 함)
                             Logger.error(f" {field_path}: 모든 값이 소진되었습니다. 생성 개수 조정 실패.")
