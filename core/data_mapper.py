@@ -864,6 +864,28 @@ class ConstraintDataGenerator:
 
         return constraint_map
 
+    def _pick_array_values(self, constraint):
+        """문자열 배열 칸(classFilter 등)에 넣을 값 목록. 넣을 게 없으면 None.
+
+        예전에는 값 풀에서 하나만 골라 [ ]로 감쌌다. 그래서
+        - 무작위는 후보가 여럿이어도 늘 1개만 들어갔고,
+        - 참조한 칸 자체가 배열이면 배열이 통째로 뽑혀 [["Human", "Vehicle"]]
+          이중 배열이 나갔다 (2026-09-14 확인).
+        참조에서 온 배열은 펼쳐서 한 풀로 모은 뒤,
+        - 요청을 되돌려주는 설정(request-based)은 전부 그대로,
+        - 무작위 계열은 1개~전체 중 무작위 개수를 겹치지 않게 넣는다.
+        """
+        pool = []
+        for v in constraint.get("values") or []:
+            for x in (v if isinstance(v, list) else [v]):
+                if x not in ("", None) and x not in pool:
+                    pool.append(x)
+        if not pool:
+            return None
+        if constraint.get("type") in self.REQUEST_BASED_TYPES:
+            return pool
+        return random.sample(pool, random.randint(1, len(pool)))
+
     @staticmethod
     def _get_static_random_values(rule):
         """관리도구 '무작위' 설정값 추출 — validValues 우선, 없으면 specifiedValues."""
@@ -993,11 +1015,12 @@ class ConstraintDataGenerator:
 
             # 최상위 레벨에서 constraint 확인
             if not is_container and ctype in self.VALUE_PICK_TYPES:
-                # 랜덤 값 선택 — 템플릿이 배열이면 배열 타입 유지 (classFilter 등
-                # 문자열 배열 필드가 낱값으로 변형돼 나가던 문제 방지)
-                if constraint["values"]:
-                    picked = random.choice(constraint["values"])
-                    result[key] = [picked] if isinstance(value, list) else picked
+                if isinstance(value, list):
+                    # 문자열 배열 필드(classFilter 등)는 배열 안에 여러 값을 담는다
+                    picked = self._pick_array_values(constraint)
+                    result[key] = picked if picked is not None else value
+                elif constraint["values"]:
+                    result[key] = random.choice(constraint["values"])
                 else:
                     result[key] = value
             elif not is_container and ctype == "request-range":
@@ -1076,6 +1099,11 @@ class ConstraintDataGenerator:
 
         for field, value in item_template.items():
             field_path = f"{parent_key}.{field}"
+            # 배열 칸(classFilter 등)은 줄 수를 정하는 데 끼지 않는다. 끼면 참조 클래스
+            # 5개가 "filterList 1~5줄 × 줄마다 1개"로 나갔다 — 원하는 모양은 "1줄에
+            # 클래스 여러 개"다 (2026-09-14). 배열 안의 값은 _pick_array_values가 채운다.
+            if isinstance(value, list):
+                continue
             if field_path in constraint_map:
                 constraint = constraint_map[field_path]
 
@@ -1231,8 +1259,8 @@ class ConstraintDataGenerator:
                     # ✅ 문자열 배열 필드(filterList.classFilter 등)도 값 설정을 적용한다.
                     # 예전에는 리스트라는 이유로 규칙 확인 없이 원본([])을 그대로 둬서
                     # 무작위 설정이 조용히 무시됐다 (2026-08-26 리허설 실측).
-                    # 배열 타입을 유지하기 위해 뽑은 값을 배열로 감싼다.
-                    item[field] = [random.choice(constraint_map[field_path]["values"])]
+                    picked = self._pick_array_values(constraint_map[field_path])
+                    item[field] = picked if picked is not None else value
                 else:
                     item[field] = value
 
