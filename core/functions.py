@@ -2806,13 +2806,19 @@ def _validate_url_video(field_path, field_value, rule, reference_context, field_
         cap = None
         try:
             Logger.debug(f"    [url-video] {url_index} 연결 시도 중...")
-            cap = cv2.VideoCapture(actual_test_url)
-
+            # 타임아웃은 여는 순간에 넘겨야 적용된다. 예전에는 VideoCapture(url)로 이미
+            # 연결을 시도한 뒤 cap.set()으로 설정해 효과가 없었고, 닿지 않는 주소
+            # (rtsp://192.168.0.1:8000)에서 URL 하나에 123초씩 멈췄다 (2026-09-14 실측,
+            # 여는 순간 전달 시 5.1초).
             try:
-                cap.set(cv2.CAP_PROP_OPEN_TIMEOUT_MSEC, 5000)
-                cap.set(cv2.CAP_PROP_READ_TIMEOUT_MSEC, 3000)
-            except:
-                Logger.warning(f"    [url-video] {url_index} ⚠️ 타임아웃 설정 실패")
+                cap = cv2.VideoCapture(actual_test_url, cv2.CAP_FFMPEG, [
+                    cv2.CAP_PROP_OPEN_TIMEOUT_MSEC, 5000,
+                    cv2.CAP_PROP_READ_TIMEOUT_MSEC, 3000,
+                ])
+            except (TypeError, AttributeError, cv2.error):
+                # 타임아웃 인자를 모르는 OpenCV 빌드 — 기존 방식으로 연다
+                Logger.warning(f"    [url-video] {url_index} ⚠️ 타임아웃 설정 미지원 — 기본 대기로 연결")
+                cap = cv2.VideoCapture(actual_test_url)
 
             if not cap.isOpened():
                 error_msg = f"{url_index} 스트림 연결 실패: {actual_test_url}"
