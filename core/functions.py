@@ -1350,6 +1350,21 @@ def _display_value(value):
     return str(value)
 
 
+def _in_values(value, candidates):
+    """허용·지정값 목록에 있는가 — 숫자는 표기(100 / "100")가 달라도 같은 값으로 본다.
+
+    관리도구는 지정값을 늘 문자열로 내려주는데 스키마가 int인 필드(maxCount 등)는
+    상대가 숫자로 보내는 게 맞다. 타입까지 비교하면 제대로 보낸 100이
+    ['100']에 없다고 떨어졌다 (2026-09-14 StoredVerifEventInfos 실측).
+    """
+    if value in candidates:
+        return True
+    number = _to_comparable_number(value)
+    if number is None:
+        return False
+    return any(_to_comparable_number(c) == number for c in candidates)
+
+
 def _paired_reference_value(data, ref_data, ref_field):
     """참조 목록에서 '지금 검증 중인 그 장치'의 값 하나를 골라낸다.
 
@@ -1403,7 +1418,7 @@ def _validate_valid_value_match(field_path, field_value, rule, field_errors, glo
     if operator == 'equals':
         # 단일 값만 허용 (allowed가 리스트이면 첫 값 기준)
         expected = allowed[0] if allowed else None
-        invalid = [v for v in elements if v != expected]
+        invalid = [v for v in elements if not _in_values(v, [expected])]
         if invalid:
             error_msg = (f"값 불일치\n- 입력값: {_display_value(field_value)}"
                          f"\n- 예상값: {_display_value(expected)}\n")
@@ -1411,7 +1426,7 @@ def _validate_valid_value_match(field_path, field_value, rule, field_errors, glo
             global_errors.append(f"[의미] {field_path}: {error_msg}")
             return False
     else:  # equalsAny, excludeReference
-        invalid = [v for v in elements if v not in allowed]
+        invalid = [v for v in elements if not _in_values(v, allowed)]
         if invalid:
             allowed_str = " | ".join(str(v) for v in allowed)
             # 어느 값이 걸렸는지 — 다섯 개 중 하나만 틀렸을 때 눈에 띄게
@@ -1473,7 +1488,7 @@ def _validate_specified_value_match(field_path, field_value, rule, field_errors,
     # 오판했다 (valid-value-match 2ed16e4와 같은 유형, 2026-09-01 실측).
     elements = field_value if isinstance(field_value, list) else [field_value]
 
-    invalid = [v for v in elements if v not in specified]
+    invalid = [v for v in elements if not _in_values(v, specified)]
     if invalid:
         error_msg = f"값 불일치: {invalid}가 지정값 {specified}에 없음"
         field_errors.append(error_msg)
