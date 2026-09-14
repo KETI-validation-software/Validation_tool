@@ -275,6 +275,7 @@ class ConstraintDataGenerator:
                             values = [sentinel]
                             ref_aligned = False
 
+                    # 여기 참조필드 규칙 다시 걸어야함 -> 무작위+응답인 경우(ptzcontinuousMove)에서 랜덤으로 뽑고 -> ptzstop에서는 요청기반으로 해서 해당 camID에 대해서만 제어를 해야함
                     # response-based(시스템 요청)만 랜덤 선택, request-based(플랫폼 응답/웹훅)는 그대로 사용 (01/08)
                     if value_type == "response-based" and not is_webhook and values and len(values) > 0:
                         original_count = len(values)
