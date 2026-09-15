@@ -256,6 +256,25 @@ class MyApp(SystemMainUI):
             
             return request_data
 
+    @staticmethod
+    def _align_webhook_rules(rules_list, schemas):
+        """웹훅 검증 규칙 목록을 단계 번호에 맞춘다.
+
+        길이가 스키마 목록과 같으면 자리맞춤 목록(12597aa 이후 형식)이라 그대로 쓰고,
+        다르면 웹훅 API만 압축된 옛 목록으로 보고 스키마의 None 위치에 맞춰 편다.
+        """
+        rules_list = list(rules_list or [])
+        schemas = list(schemas or [])
+        if len(rules_list) == len(schemas):
+            return [(r or {}) for r in rules_list]
+        Logger.warning(f"[Webhook] 규칙 목록 길이({len(rules_list)})가 단계 수({len(schemas)})와 달라 "
+                       f"압축 목록으로 간주해 정렬합니다")
+        aligned = []
+        rule_iter = iter(rules_list)
+        for sch in schemas:
+            aligned.append((next(rule_iter, {}) or {}) if sch else {})
+        return aligned
+
     def _append_text(self, obj):
         import json
         from html import escape
@@ -911,16 +930,24 @@ class MyApp(SystemMainUI):
             self.webhookInSchema = []
 
         # ✅ 웹훅 맥락 검증 규칙 로드 — 스키마와 같은 방식으로 validation_response에서 가져온다.
-        #    스키마 목록은 단계별 자리맞춤(웹훅 없는 단계는 None), 규칙 목록은 웹훅 API만
-        #    압축돼 있으므로 스키마의 None 위치에 맞춰 정렬해 둔다.
+        #    규칙 목록은 12597aa(2026-09-07)부터 스키마처럼 단계별 자리맞춤(웹훅 없는
+        #    단계는 None)으로 생성된다. 그 전에는 웹훅 API만 압축돼 있어 스키마의 None
+        #    위치에 맞춰 정렬했는데, 자리맞춤 목록에 그 정렬을 적용하면 첫 None을
+        #    집어 규칙이 0개가 됐다 — 09-07 이후 모든 단일시스템 실행이 "맥락 검증
+        #    규칙 로드: 0개 단계"로 웹훅 메시지를 규칙 없이 통과시켰다 (2026-09-15 실측).
+        #    길이가 스키마와 같으면 자리맞춤 목록으로 보고 그대로 쓰고, 다르면 옛 압축
+        #    목록으로 보고 정렬한다.
         self.webhookInValidation = []
         try:
             validation_response_module = self._load_spec_module('spec.validation_response', 'validation_response.py')
-            compact_rules = getattr(validation_response_module, f"{self.current_spec_id}_webhook_inValidation", []) or []
-            rule_iter = iter(compact_rules)
-            for sch in (self.webhookInSchema or []):
-                self.webhookInValidation.append((next(rule_iter, {}) or {}) if sch else {})
+            rules_list = getattr(validation_response_module, f"{self.current_spec_id}_webhook_inValidation", []) or []
+            schemas = self.webhookInSchema or []
+            self.webhookInValidation = self._align_webhook_rules(rules_list, schemas)
             n_rules = sum(1 for r in self.webhookInValidation if r)
+            n_schemas = sum(1 for s in schemas if s)
+            if n_rules < n_schemas:
+                Logger.error(f"[Webhook] 웹훅 단계 {n_schemas}개 중 규칙이 있는 단계는 {n_rules}개 — "
+                             f"나머지는 규격 검증만 수행됩니다")
             Logger.info(f"[Webhook] 맥락 검증 규칙 로드: {n_rules}개 단계 (spec={self.current_spec_id})")
         except Exception as e:
             Logger.error(f"웹훅 검증 규칙 로드 실패(규격 검증만 수행됨): {e}")
