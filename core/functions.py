@@ -1406,7 +1406,7 @@ def _validate_valid_value_match(field_path, field_value, rule, field_errors, glo
     목록 필드면 무조건 떨어졌다 (2026-09-11 실측).
 
     specified-value-match는 2026-09-01에 같은 방식으로 고쳤는데 이쪽이 빠져
-    있었다. 400 판정 경로(_check_valid_values)는 2ed16e4에서 따로 고쳤다.
+    있었다. 400 판정 경로는 2ed16e4에서 따로 고쳤고, 2026-09-15부터는 이 함수를 같이 쓴다.
     """
     allowed = rule.get('allowedValues', [])
     operator = rule.get('validValueOperator', 'equalsAny')

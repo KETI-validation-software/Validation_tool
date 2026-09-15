@@ -309,10 +309,11 @@ class Server(BaseHTTPRequestHandler):
         else:
             Logger.debug(f" 요청 스키마 없음 → 필드 검사 생략: {api_name}")
 
-        # 4. 유효 값 위반 검사 → 400 (④ 유도와 짝, 요청 제약의 validValues와 대조)
-        value_error = self._check_valid_values(api_name, request_data)
-        if value_error:
-            Logger.debug(f" 유효 값 위반 감지: {value_error}")
+        # 4. 요청 검증 규칙 판정 → 400 (④ 유도와 짝). 관리도구가 내려준 요청 검증
+        #    규칙을 채점 검증기로 돌리고, 값 규칙이 어긋나면 잘못된 요청으로 본다.
+        rule_error = self._judge_request_rules(api_name, request_data)
+        if rule_error:
+            Logger.debug(f" 요청 규칙 위반 감지: {rule_error}")
             Server.request_has_error[api_name] = True
             return {"code": "400", "message": "잘못된 요청"}
 
@@ -355,14 +356,13 @@ class Server(BaseHTTPRequestHandler):
         return None
 
     def _get_request_valid_rules(self, api_name):
-        """④ 유효 값 판정에 쓸 요청 규칙을 가져온다.
+        """④ 요청 규칙 판정에 쓸 요청 검증 규칙을 가져온다.
 
         통합 도구가 관리시스템에서 내려받는 산출물에는 Constraints_request.py가
         없다(6종: KeyId/ResponseCode/Schema_request/Data_response/validation_request/
-        Constraints_response). 허용 값 목록은 validation_request.py의 요청 검증 규칙
-        (valid-value-match의 allowedValues)에 들어 있으므로 registry에서 읽는다.
+        Constraints_response). validation_request.py의 요청 검증 규칙을 registry에서 읽는다.
         """
-        # 시험 주입용 오버라이드 (temp/test_error_response_check.py)
+        # 시험 주입용 오버라이드 (tests/test_api_server_valid_value_400.py)
         in_con = getattr(Server, 'inCon', None)
         if in_con and self.message:
             for i, msg in enumerate(self.message):
@@ -380,44 +380,87 @@ class Server(BaseHTTPRequestHandler):
             Logger.error(f" 요청 검증 규칙 가져오기 실패: {e}")
         return None
 
-    def _check_valid_values(self, api_name, request_data):
-        """
-        ④ 유효 값 위반 검사 → 400
+    # 요청 검증 규칙(validation_request)의 종류를 오류 판정에서 어떻게 다루는지.
+    # 규칙 검사 자체는 채점 검증기(core.functions._validate_field_semantic)와 같은
+    # 함수를 쓴다 — 예전에는 규칙 이름을 하나씩 골라 축소판을 따로 구현해서,
+    # 관리도구가 같은 뜻의 다른 규칙(specified-value-match)을 쓰자 채점은 실패인데
+    # 응답은 200으로 나갔다 (2026-09-15 실측). 표에 없는 종류는 'value'로 본다.
+    #   value     : 값 규칙. 어긋나면 400 잘못된 요청
+    #   time      : 시각 규칙. 시각 판정(_judge_time_fields)이 201/400을 따로 낸다.
+    #               range-match는 지금 시험 구간(timePeriod) 규칙으로만 쓰이는데,
+    #               구간 밖 조회는 형식이 맞으면 400이 아니라 201 몫이라 여기서 안 본다.
+    #   reference : 다른 API를 참조하는 규칙. 장치 목록은 _check_device_exists가 404,
+    #               나머지는 참조 꾸러미가 없어 판정할 수 없다.
+    #   scoring   : 채점 전용. 응답 코드와 무관.
+    REQUEST_RULE_JUDGEMENT = {
+        "valid-value-match": "value",
+        "specified-value-match": "value",
+        "length": "value",
+        "regex": "value",
+        "unique": "value",
+        "range-match": "time",
+        "request-field-range-match": "time",
+        "request-time-compare": "time",
+        "response-field-list-match": "reference",
+        "response-field-match": "reference",
+        "response-field-range-match": "reference",
+        "request-field-list-match": "reference",
+        "request-field-list-equality": "reference",
+        "request-field-match": "reference",
+        "url-video": "scoring",
+        "custom": "scoring",
+        # 개수 규칙은 아직 응답 쪽에만 내려온다. 요청에 쓰이면 400으로 볼지 정한다.
+        "object-count-between": "scoring",
+        "array-validation": "scoring",
+        "object-validation": "scoring",
+    }
+    # 자격 증명(userID/userPW)은 지정값 규칙이지만 인증 경로가 401로 판정한다.
+    RULE_JUDGEMENT_EXEMPT_APIS = ("Authentication",)
 
-        요청 규칙의 허용 값 목록과 요청 값을 대조한다.
-        경로 키("transProtocol.transProtocolType")의 마지막 이름으로 중첩까지 찾는다.
+    def _judge_request_rules(self, api_name, request_data):
+        """
+        ④ 요청 검증 규칙 판정 → 400
+
+        요청 검증 규칙을 채점과 같은 검증기로 돌린다. 값 규칙(REQUEST_RULE_JUDGEMENT의
+        'value')이 어긋나면 오류. 값이 없는 필드는 보지 않는다 — 누락은 스키마 검사 몫.
 
         Returns:
             str: 오류 메시지 (오류 있을 때) 또는 None (정상)
         """
+        if api_name in self.RULE_JUDGEMENT_EXEMPT_APIS:
+            return None
         rules = self._get_request_valid_rules(api_name)
         if not isinstance(rules, dict):
             return None
         try:
+            from core.functions import _validate_field_semantic
+            from core.json_checker_new import get_flat_data_from_response
+
+            flat_data = get_flat_data_from_response(request_data)
             for path, rule in rules.items():
                 if not isinstance(rule, dict):
                     continue
-                # 제약 형식은 validValues, 검증 규칙 형식은 valid-value-match의
-                # allowedValues. 다른 규칙 종류의 allowedValues(예: specified-value-
-                # match)는 유효 값 목록이 아니므로 쓰지 않는다.
-                allowed = rule.get("validValues")
-                if allowed is None and rule.get("validationType") == "valid-value-match":
-                    allowed = rule.get("allowedValues")
-                if not allowed:
+                vtype = rule.get("validationType")
+                category = self.REQUEST_RULE_JUDGEMENT.get(vtype, "value")
+                if category != "value":
+                    Logger.debug(f" [판정] {path}: {vtype}는 {category} 규칙 — 여기서 판정 안 함")
                     continue
-                leaf = str(path).split(".")[-1]
-                for value in self.generator.find_key(request_data, leaf):
-                    if value is None:
-                        continue
-                    # 배열 필드(classFilter 등)는 원소별로 대조한다(equalsAny 의미).
-                    # 빈 배열은 "필터 없음"이므로 정상 — 통째 비교하면 []가
-                    # 허용 목록에 없다는 이유로 400 오판이 난다 (2026-08-19 실측).
-                    elements = value if isinstance(value, list) else [value]
-                    for element in elements:
-                        if element is not None and element not in allowed:
-                            return f"{path}: 허용 외 값 {element!r} (허용: {allowed})"
+                if not rule.get("enabled", True):
+                    Logger.debug(f" [판정] {path}: {vtype} 규칙 비활성화 — 건너뜀")
+                    continue
+                value = flat_data.get(path)
+                if value is None:
+                    continue
+                field_errors, global_errors = [], []
+                ok = _validate_field_semantic(path, value, rule, request_data, None,
+                                              field_errors, global_errors)
+                if not ok:
+                    reason = " / ".join(str(e).replace("\n", " ").strip() for e in field_errors) or "사유 미기록"
+                    Logger.debug(f" [판정] {path}: {vtype} 위반 → 400 — {reason}")
+                    return f"{path}: {vtype} 위반 — {reason}"
+                Logger.debug(f" [판정] {path}: {vtype} 통과")
         except Exception as e:
-            Logger.error(f" 유효 값 검사 실패: {e}")
+            Logger.error(f" 요청 규칙 판정 실패: {e}")
         return None
 
     def _check_type_mismatch(self, request_data, schema):
