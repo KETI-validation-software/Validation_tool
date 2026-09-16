@@ -777,6 +777,7 @@ def now_time17():
 TOOL_START_TIME17 = now_time17()
 
 
+# [시각 기준 정하기] 관리도구의 '요청 시점'을 실제 비교할 시각으로 바꿈
 def _time_base_for(ref_operator, bound, reference_context, display_path):
     """관리도구가 "요청 시점"이라고 적어 보낸 경계를 실제 시각으로 바꾼다.
 
@@ -803,6 +804,7 @@ def _time_base_for(ref_operator, bound, reference_context, display_path):
     return TOOL_START_TIME17
 
 
+# [참조 방향 정하기] 규칙이 요청을 볼지 응답을 볼지 결정
 def ref_direction(rule):
     """규칙 종류로 참조할 방향을 결정 — 참조 데이터를 적재하는 쪽과 동일한 규칙
 
@@ -821,6 +823,7 @@ def ref_direction(rule):
     return "RESPONSE"
 
 
+# [참조 보관 칸 이름] API명#REQUEST / API명#RESPONSE
 def ref_context_key(endpoint, direction):
     """참조 저장 키 — 같은 엔드포인트라도 요청/응답을 다른 칸에 보관한다.
 
@@ -832,6 +835,7 @@ def ref_context_key(endpoint, direction):
 
 
 
+# [참조 없음 안내 문구] 참조를 못 찾았을 때 화면에 띄울 사유
 def _reference_missing_msg(ref_endpoint):
     """참조를 못 찾은 이유를 그대로 적는다 — '모호' 표식이면 관리도구 쪽 조치를 안내."""
     endpoint = str(ref_endpoint or "")
@@ -843,6 +847,7 @@ def _reference_missing_msg(ref_endpoint):
     return f"참조 엔드포인트 없음: {ref_endpoint}"
 
 
+# [참조 데이터 꺼내기] 규칙에 맞는 방향(요청/응답)의 참조 메시지
 def get_reference_data(reference_context, endpoint, rule):
     """규칙이 필요로 하는 방향의 참조 데이터를 꺼낸다 (없으면 방향 없는 옛 키로 폴백)"""
     if not reference_context or not endpoint:
@@ -853,6 +858,7 @@ def get_reference_data(reference_context, endpoint, rule):
     return data
 
 
+# [의미 검증 분배] 규칙 종류(validationType)를 보고 아래 검증 함수로 보냄
 def _validate_field_semantic(field_path, field_value, rule, data, reference_context,
                              field_errors, global_errors):
     """단일 필드의 의미 검증 수행"""
@@ -958,6 +964,8 @@ def _warn_unknown_equality_mode(rule, field_path):
         Logger.warning(f"  ⚠ 모르는 목록 비교 방식 '{mode}' — 집합 비교로 처리: {field_path}")
 
 
+# [목록 안에 있는지] 응답 기반 목록 일치(response-field-list-match) ·
+#   요청 기반 목록 일치(request-field-list-match) · 요청 기반 목록 동일(request-field-list-equality)
 def _validate_list_match(field_path, field_value, rule, data, reference_context,
                          field_errors, global_errors):
     """리스트 필드의 값들이 참조 리스트에 모두 존재하는지 검증"""
@@ -1058,6 +1066,7 @@ def _validate_list_match(field_path, field_value, rule, data, reference_context,
         return True
 
 
+# [값 일치] 응답 기반 값 일치(response-field-match) · 요청 기반 값 일치(request-field-match)
 def _validate_field_match(field_path, field_value, rule, reference_context,
                           field_errors, global_errors):
     """단일 필드 값이 참조 필드 값과 일치하는지 검증"""
@@ -1176,6 +1185,7 @@ def _to_comparable_number(value):
         return None
 
 
+# [참조 범위] 요청 기반 범위(request-field-range-match) · 응답 기반 범위(response-field-range-match)
 def _validate_range_match(field_path, field_value, rule, reference_context,
                           field_errors, global_errors):
     """필드 값이 참조 범위 내에 있는지 검증"""
@@ -1232,6 +1242,7 @@ def _validate_range_match(field_path, field_value, rule, reference_context,
     )
 
 
+# [참조 범위 - 값 하나 비교] _validate_range_match의 도우미
 def _validate_single_value_in_range(field_path, field_value, ref_endpoint_max, ref_endpoint_min,
                                     ref_field_max, ref_field_min, ref_operator,
                                     reference_context, field_errors, global_errors, index=None,
@@ -1350,6 +1361,7 @@ def _display_value(value):
     return str(value)
 
 
+# [같은 장치 줄의 참조값 찾기] 유효값 일치(참조 제외)의 도우미
 def _paired_reference_value(data, ref_data, ref_field):
     """참조 목록에서 '지금 검증 중인 그 장치'의 값 하나를 골라낸다.
 
@@ -1383,6 +1395,7 @@ def _paired_reference_value(data, ref_data, ref_field):
     return None
 
 
+# [유효값 일치] valid-value-match — 허용 목록 중 하나인지 (참조값 제외 옵션 포함)
 def _validate_valid_value_match(field_path, field_value, rule, field_errors, global_errors,
                                 data=None, reference_context=None):
     """허용된 값 목록과 일치하는지 검증
@@ -1393,7 +1406,7 @@ def _validate_valid_value_match(field_path, field_value, rule, field_errors, glo
     목록 필드면 무조건 떨어졌다 (2026-09-11 실측).
 
     specified-value-match는 2026-09-01에 같은 방식으로 고쳤는데 이쪽이 빠져
-    있었다. 400 판정 경로(_check_valid_values)는 2ed16e4에서 따로 고쳤다.
+    있었다. 400 판정 경로는 2ed16e4에서 따로 고쳤고, 2026-09-15부터는 이 함수를 같이 쓴다.
     """
     allowed = rule.get('allowedValues', [])
     operator = rule.get('validValueOperator', 'equalsAny')
@@ -1464,6 +1477,7 @@ def _validate_valid_value_match(field_path, field_value, rule, field_errors, glo
     return True
 
 
+# [지정값 일치] specified-value-match — 관리도구에 적은 값과 같은지
 def _validate_specified_value_match(field_path, field_value, rule, field_errors, global_errors):
     """지정된 값과 일치하는지 검증"""
     specified = rule.get('allowedValues', [])
@@ -1483,6 +1497,7 @@ def _validate_specified_value_match(field_path, field_value, rule, field_errors,
     return True
 
 
+# [직접 범위] range-match — 참조 없이 적어준 최소·최대 사이인지
 def _validate_range_match_direct(field_path, field_value, rule, field_errors, global_errors):
     """직접 범위 검증 (reference 없이)"""
     operator = rule.get('rangeOperator')
@@ -1545,6 +1560,7 @@ def _validate_range_match_direct(field_path, field_value, rule, field_errors, gl
     return True
 
 
+# [길이] length
 def _validate_length(field_path, field_value, rule, field_errors, global_errors):
     """길이 검증"""
     min_length = rule.get('minLength')
@@ -1572,6 +1588,7 @@ def _validate_length(field_path, field_value, rule, field_errors, global_errors)
     return True
 
 
+# [정규식] regex
 def _validate_regex(field_path, field_value, rule, field_errors, global_errors):
     """정규식 검증"""
     pattern = rule.get('pattern')
@@ -1601,6 +1618,7 @@ def _validate_regex(field_path, field_value, rule, field_errors, global_errors):
     return True
 
 
+# [필수] required
 def _validate_required(field_path, field_value, rule, field_errors, global_errors):
     """필수 필드 검증"""
     # 리스트인 경우 모든 요소 검증
@@ -1615,6 +1633,7 @@ def _validate_required(field_path, field_value, rule, field_errors, global_error
     return True
 
 
+# [중복 없음] unique
 def _validate_unique(field_path, field_value, rule, field_errors, global_errors):
     """유일성 검증 (리스트 내 중복 체크)"""
     if not isinstance(field_value, list):
@@ -1651,6 +1670,7 @@ def _validate_unique(field_path, field_value, rule, field_errors, global_errors)
     return True
 
 
+# [사용자 정의 함수] custom
 def _validate_custom(field_path, field_value, rule, field_errors, global_errors):
     """커스텀 함수 검증"""
     func = rule.get('customFunction')
@@ -1676,6 +1696,7 @@ def _validate_custom(field_path, field_value, rule, field_errors, global_errors)
     return True
 
 
+# [배열 검증] array-validation — 배열 안 항목마다 하위 규칙 적용
 def _validate_array(field_path, field_value, rule, data, reference_context,
                     field_errors, global_errors):
     """배열 검증 (array-validation)"""
@@ -1764,6 +1785,7 @@ def _validate_array(field_path, field_value, rule, data, reference_context,
     return all_valid
 
 
+# [요청 시각 비교] request-time-compare
 def _validate_request_time_compare(field_path, field_value, rule, reference_context,
                                    field_errors, global_errors):
     """요청 시점 기준 시각 비교 (request-time-compare)
@@ -1834,6 +1856,7 @@ def _time17_gap_ms(value, base):
         return None
 
 
+# [항목 개수 범위] object-count-between
 def _validate_object_count_between(field_path, field_value, rule,
                                    field_errors, global_errors):
     """항목 개수 범위 (object-count-between)
@@ -1876,6 +1899,7 @@ def _validate_object_count_between(field_path, field_value, rule,
     return True
 
 
+# [조건부 필수] conditional-required
 def _validate_conditional_required(field_path, field_value, rule,
                                    field_errors, global_errors):
     """조건부 필수 (conditional-required)
@@ -1953,6 +1977,7 @@ def _validate_conditional_required(field_path, field_value, rule,
     return True
 
 
+# [객체 검증] object-validation — 객체 안 하위 필드마다 규칙 적용
 def _validate_object(field_path, field_value, rule, data, reference_context,
                      field_errors, global_errors):
     """객체 검증 (object-validation)"""
@@ -2679,6 +2704,7 @@ def save_result_json(myapp_instance, output_path="results/validation_result.json
     return output_path
 
 
+# [영상 URL 재생 확인] url-video — RTSP 주소가 실제로 열리는지
 def _validate_url_video(field_path, field_value, rule, reference_context, field_errors, global_errors):
     """RTSP URL 스트리밍 가능 여부 검증"""
     from core.json_checker_new import collect_all_values_by_key, get_by_path
@@ -2780,13 +2806,19 @@ def _validate_url_video(field_path, field_value, rule, reference_context, field_
         cap = None
         try:
             Logger.debug(f"    [url-video] {url_index} 연결 시도 중...")
-            cap = cv2.VideoCapture(actual_test_url)
-
+            # 타임아웃은 여는 순간에 넘겨야 적용된다. 예전에는 VideoCapture(url)로 이미
+            # 연결을 시도한 뒤 cap.set()으로 설정해 효과가 없었고, 닿지 않는 주소
+            # (rtsp://192.168.0.1:8000)에서 URL 하나에 123초씩 멈췄다 (2026-09-14 실측,
+            # 여는 순간 전달 시 5.1초).
             try:
-                cap.set(cv2.CAP_PROP_OPEN_TIMEOUT_MSEC, 5000)
-                cap.set(cv2.CAP_PROP_READ_TIMEOUT_MSEC, 3000)
-            except:
-                Logger.warning(f"    [url-video] {url_index} ⚠️ 타임아웃 설정 실패")
+                cap = cv2.VideoCapture(actual_test_url, cv2.CAP_FFMPEG, [
+                    cv2.CAP_PROP_OPEN_TIMEOUT_MSEC, 5000,
+                    cv2.CAP_PROP_READ_TIMEOUT_MSEC, 3000,
+                ])
+            except (TypeError, AttributeError, cv2.error):
+                # 타임아웃 인자를 모르는 OpenCV 빌드 — 기존 방식으로 연다
+                Logger.warning(f"    [url-video] {url_index} ⚠️ 타임아웃 설정 미지원 — 기본 대기로 연결")
+                cap = cv2.VideoCapture(actual_test_url)
 
             if not cap.isOpened():
                 error_msg = f"{url_index} 스트림 연결 실패: {actual_test_url}"

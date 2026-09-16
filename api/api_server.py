@@ -73,9 +73,6 @@ class Server(BaseHTTPRequestHandler):
     #    판정하지 않으므로(오탐 방지) 하드코딩 초기값이 필요 없다.
     valid_ids_by_field = {"camID": set(), "doorID": set(), "sensorDeviceID": set()}
 
-    # ✅ 데이터 맵핑 저장소 (ac002 시나리오용)
-    door_memory = {}  # doorID를 키로 하는 문 정보 저장소
-
     def __init__(self, *args, **kwargs):
         self.result = ""
         self.webhook_flag = False
@@ -312,10 +309,11 @@ class Server(BaseHTTPRequestHandler):
         else:
             Logger.debug(f" 요청 스키마 없음 → 필드 검사 생략: {api_name}")
 
-        # 4. 유효 값 위반 검사 → 400 (④ 유도와 짝, 요청 제약의 validValues와 대조)
-        value_error = self._check_valid_values(api_name, request_data)
-        if value_error:
-            Logger.debug(f" 유효 값 위반 감지: {value_error}")
+        # 4. 요청 검증 규칙 판정 → 400 (④ 유도와 짝). 관리도구가 내려준 요청 검증
+        #    규칙을 채점 검증기로 돌리고, 값 규칙이 어긋나면 잘못된 요청으로 본다.
+        rule_error = self._judge_request_rules(api_name, request_data)
+        if rule_error:
+            Logger.debug(f" 요청 규칙 위반 감지: {rule_error}")
             Server.request_has_error[api_name] = True
             return {"code": "400", "message": "잘못된 요청"}
 
@@ -358,14 +356,13 @@ class Server(BaseHTTPRequestHandler):
         return None
 
     def _get_request_valid_rules(self, api_name):
-        """④ 유효 값 판정에 쓸 요청 규칙을 가져온다.
+        """④ 요청 규칙 판정에 쓸 요청 검증 규칙을 가져온다.
 
         통합 도구가 관리시스템에서 내려받는 산출물에는 Constraints_request.py가
         없다(6종: KeyId/ResponseCode/Schema_request/Data_response/validation_request/
-        Constraints_response). 허용 값 목록은 validation_request.py의 요청 검증 규칙
-        (valid-value-match의 allowedValues)에 들어 있으므로 registry에서 읽는다.
+        Constraints_response). validation_request.py의 요청 검증 규칙을 registry에서 읽는다.
         """
-        # 시험 주입용 오버라이드 (temp/test_error_response_check.py)
+        # 시험 주입용 오버라이드 (tests/test_api_server_valid_value_400.py)
         in_con = getattr(Server, 'inCon', None)
         if in_con and self.message:
             for i, msg in enumerate(self.message):
@@ -383,44 +380,87 @@ class Server(BaseHTTPRequestHandler):
             Logger.error(f" 요청 검증 규칙 가져오기 실패: {e}")
         return None
 
-    def _check_valid_values(self, api_name, request_data):
-        """
-        ④ 유효 값 위반 검사 → 400
+    # 요청 검증 규칙(validation_request)의 종류를 오류 판정에서 어떻게 다루는지.
+    # 규칙 검사 자체는 채점 검증기(core.functions._validate_field_semantic)와 같은
+    # 함수를 쓴다 — 예전에는 규칙 이름을 하나씩 골라 축소판을 따로 구현해서,
+    # 관리도구가 같은 뜻의 다른 규칙(specified-value-match)을 쓰자 채점은 실패인데
+    # 응답은 200으로 나갔다 (2026-09-15 실측). 표에 없는 종류는 'value'로 본다.
+    #   value     : 값 규칙. 어긋나면 400 잘못된 요청
+    #   time      : 시각 규칙. 시각 판정(_judge_time_fields)이 201/400을 따로 낸다.
+    #               range-match는 지금 시험 구간(timePeriod) 규칙으로만 쓰이는데,
+    #               구간 밖 조회는 형식이 맞으면 400이 아니라 201 몫이라 여기서 안 본다.
+    #   reference : 다른 API를 참조하는 규칙. 장치 목록은 _check_device_exists가 404,
+    #               나머지는 참조 꾸러미가 없어 판정할 수 없다.
+    #   scoring   : 채점 전용. 응답 코드와 무관.
+    REQUEST_RULE_JUDGEMENT = {
+        "valid-value-match": "value",
+        "specified-value-match": "value",
+        "length": "value",
+        "regex": "value",
+        "unique": "value",
+        "range-match": "time",
+        "request-field-range-match": "time",
+        "request-time-compare": "time",
+        "response-field-list-match": "reference",
+        "response-field-match": "reference",
+        "response-field-range-match": "reference",
+        "request-field-list-match": "reference",
+        "request-field-list-equality": "reference",
+        "request-field-match": "reference",
+        "url-video": "scoring",
+        "custom": "scoring",
+        # 개수 규칙은 아직 응답 쪽에만 내려온다. 요청에 쓰이면 400으로 볼지 정한다.
+        "object-count-between": "scoring",
+        "array-validation": "scoring",
+        "object-validation": "scoring",
+    }
+    # 자격 증명(userID/userPW)은 지정값 규칙이지만 인증 경로가 401로 판정한다.
+    RULE_JUDGEMENT_EXEMPT_APIS = ("Authentication",)
 
-        요청 규칙의 허용 값 목록과 요청 값을 대조한다.
-        경로 키("transProtocol.transProtocolType")의 마지막 이름으로 중첩까지 찾는다.
+    def _judge_request_rules(self, api_name, request_data):
+        """
+        ④ 요청 검증 규칙 판정 → 400
+
+        요청 검증 규칙을 채점과 같은 검증기로 돌린다. 값 규칙(REQUEST_RULE_JUDGEMENT의
+        'value')이 어긋나면 오류. 값이 없는 필드는 보지 않는다 — 누락은 스키마 검사 몫.
 
         Returns:
             str: 오류 메시지 (오류 있을 때) 또는 None (정상)
         """
+        if api_name in self.RULE_JUDGEMENT_EXEMPT_APIS:
+            return None
         rules = self._get_request_valid_rules(api_name)
         if not isinstance(rules, dict):
             return None
         try:
+            from core.functions import _validate_field_semantic
+            from core.json_checker_new import get_flat_data_from_response
+
+            flat_data = get_flat_data_from_response(request_data)
             for path, rule in rules.items():
                 if not isinstance(rule, dict):
                     continue
-                # 제약 형식은 validValues, 검증 규칙 형식은 valid-value-match의
-                # allowedValues. 다른 규칙 종류의 allowedValues(예: specified-value-
-                # match)는 유효 값 목록이 아니므로 쓰지 않는다.
-                allowed = rule.get("validValues")
-                if allowed is None and rule.get("validationType") == "valid-value-match":
-                    allowed = rule.get("allowedValues")
-                if not allowed:
+                vtype = rule.get("validationType")
+                category = self.REQUEST_RULE_JUDGEMENT.get(vtype, "value")
+                if category != "value":
+                    Logger.debug(f" [판정] {path}: {vtype}는 {category} 규칙 — 여기서 판정 안 함")
                     continue
-                leaf = str(path).split(".")[-1]
-                for value in self.generator.find_key(request_data, leaf):
-                    if value is None:
-                        continue
-                    # 배열 필드(classFilter 등)는 원소별로 대조한다(equalsAny 의미).
-                    # 빈 배열은 "필터 없음"이므로 정상 — 통째 비교하면 []가
-                    # 허용 목록에 없다는 이유로 400 오판이 난다 (2026-08-19 실측).
-                    elements = value if isinstance(value, list) else [value]
-                    for element in elements:
-                        if element is not None and element not in allowed:
-                            return f"{path}: 허용 외 값 {element!r} (허용: {allowed})"
+                if not rule.get("enabled", True):
+                    Logger.debug(f" [판정] {path}: {vtype} 규칙 비활성화 — 건너뜀")
+                    continue
+                value = flat_data.get(path)
+                if value is None:
+                    continue
+                field_errors, global_errors = [], []
+                ok = _validate_field_semantic(path, value, rule, request_data, None,
+                                              field_errors, global_errors)
+                if not ok:
+                    reason = " / ".join(str(e).replace("\n", " ").strip() for e in field_errors) or "사유 미기록"
+                    Logger.debug(f" [판정] {path}: {vtype} 위반 → 400 — {reason}")
+                    return f"{path}: {vtype} 위반 — {reason}"
+                Logger.debug(f" [판정] {path}: {vtype} 통과")
         except Exception as e:
-            Logger.error(f" 유효 값 검사 실패: {e}")
+            Logger.error(f" 요청 규칙 판정 실패: {e}")
         return None
 
     def _check_type_mismatch(self, request_data, schema):
@@ -468,6 +508,15 @@ class Server(BaseHTTPRequestHandler):
                         Logger.debug(f" {sub_path}: 필수 필드 누락")
                         return sub_path
                     continue
+                # 필수 항목 목록(doorList: [{doorID}] 등)이 빈 배열이면 누락과 같다 —
+                # 줄이 없으면 줄 안 필수 칸 검사가 통째로 건너뛰어져 200이 나갔다
+                # (2026-09-14: doorList: [] 요청). 문자열 배열(classFilter 등)은
+                # 빈 배열이 "필터 없음"이라 정상이므로 항목 목록에만 적용한다.
+                if (isinstance(field, str) and isinstance(expected, list) and expected
+                        and isinstance(expected[0], dict)
+                        and isinstance(data[field_name], list) and not data[field_name]):
+                    Logger.debug(f" {sub_path}: 필수 목록이 비어 있음")
+                    return sub_path
                 bad = self._walk_type_check(data[field_name], expected, sub_path)
                 if bad:
                     return bad
@@ -1096,13 +1145,11 @@ class Server(BaseHTTPRequestHandler):
 
                 # ✅ 템플릿 그대로 사용 (n 파라미터 제거)
                 # request_data, template_data, constraints 순서로 전달
-                # ✅ RealtimeDoorStatus2 대응: api_name과 door_memory 전달
                 updated_message = self.generator._applied_constraints(
                     request_data=self.request_data,
                     template_data=copy.deepcopy(message),  # deepcopy로 원본 보호
                     constraints=out_con,
                     api_name=api_name,  # ✅ API 이름 전달
-                    door_memory=Server.door_memory,  # ✅ 문 상태 저장소 전달
                     is_webhook=False
                 )
                 Logger.debug(f"[CONSTRAINTS] 업데이트된 message 내용: {json.dumps(updated_message, ensure_ascii=False)[:200]}")
@@ -1166,9 +1213,6 @@ class Server(BaseHTTPRequestHandler):
         try:
             self._set_headers()
             self.wfile.write(a)
-
-            # ✅ 데이터 맵핑: 응답 전송 직후 처리
-            self._process_data_mapping(api_name, updated_message if out_con else message)
 
         except (ConnectionAbortedError, BrokenPipeError, ConnectionResetError) as e:
             Logger.debug(f" 클라이언트 연결 끊김: {e}")
@@ -1250,7 +1294,6 @@ class Server(BaseHTTPRequestHandler):
                                     template_data=webhook_payload,
                                     constraints=webhook_con,
                                     api_name=api_name,
-                                    door_memory=Server.door_memory,
                                     is_webhook=True
                                 )
                                 Logger.debug(f"[WEBHOOK_CONSTRAINTS] constraints 적용 완료")
@@ -1498,116 +1541,4 @@ class Server(BaseHTTPRequestHandler):
         except Exception as e:
             Logger.error(f"[RESOLVE] spec_id 변환 실패: {e}")
             return spec_id_or_name
-
-    def _process_data_mapping(self, api_name, response_data):
-        """
-        데이터 맵핑 처리 (ac002 시나리오용)
-        - RealtimeDoorStatus: doorList 데이터를 door_memory에 저장
-        - DoorControl: commandType에 따라 doorSensor 상태 업데이트
-        """
-        try:
-            Logger.debug(f" API: {api_name}")
-
-            if "DoorProfiles" in api_name:
-                Logger.debug(f" DoorProfiles 응답 - 별도 처리 없음")
-
-                door_list = None
-                if isinstance(response_data, dict) and "doorList" in response_data:
-                    door_list = response_data.get("doorList", [])
-
-                if door_list:
-                    for door in door_list:
-                        if isinstance(door, dict) and "doorID" in door:
-                            door_id = door["doorID"]
-                            save_data = door.copy()
-                            if "doorRelayStatus" in save_data:
-                                save_data["doorRelaySensor"] = save_data.pop("doorRelayStatus")
-
-                            # ✅ 받은 값을 그대로 기억한다.
-                            #    예전에는 doorSensor가 없거나 "0"/"1"이면 "Lock"/"Unlock"으로,
-                            #    doorRelaySensor가 비면 "일반"으로 채워 넣었다. 규격에 맞지
-                            #    않는 데이터를 도구가 몰래 고쳐 통과시키는 셈이라, 잘못된
-                            #    데이터는 잘못됐다고 판정되도록 보정을 제거했다.
-                            for _f in ("doorSensor", "doorRelaySensor"):
-                                if _f not in save_data or save_data[_f] in ("", None):
-                                    Logger.warning(f" ⚠ {door_id}: {_f} 값이 비어 있음 "
-                                                   f"(보정 없이 그대로 기록)")
-
-                            Server.door_memory[door_id] = {
-                                key: value for key, value in save_data.items()
-                                if key != "doorID"
-                            }
-
-                else:
-                    Logger.debug(f" 경고: DoorProfiles에서 doorList를 찾을 수 없음")
-            # RealtimeDoorStatus (첫 번째 호출) - 응답 데이터 저장
-            # ✅ 일반 응답에는 doorList가 없을 수 있으므로 latest_events의 WEBHOOK_OUT 확인
-            if "RealtimeDoorStatus" in api_name and "2" not in api_name:
-                # 먼저 response_data 확인
-                door_list = None
-                if isinstance(response_data, dict) and "doorList" in response_data:
-                    door_list = response_data.get("doorList", [])
-                    Logger.debug(f" RealtimeDoorStatus 응답에서 doorList 발견")
-
-                # response_data에 없으면 latest_events의 WEBHOOK_OUT에서 확인
-                if not door_list:
-                    api_key = api_name.lstrip('/')
-                    if api_key in Server.latest_event:
-                        webhook_out = Server.latest_event[api_key].get("WEBHOOK_OUT", {})
-                        webhook_data = webhook_out.get("data", {})
-                        if "doorList" in webhook_data:
-                            door_list = webhook_data.get("doorList", [])
-                            Logger.debug(f" WEBHOOK_OUT에서 doorList 발견")
-
-                if door_list:
-                    Logger.debug(f" RealtimeDoorStatus에서 {len(door_list)}개 문 정보 저장")
-
-                    for door in door_list:
-                        if isinstance(door, dict) and "doorID" in door:
-                            door_id = door["doorID"]
-                            if not door_id or door_id.strip() == "":
-                                Logger.debug(f" 경고: doorID가 비어있음, 건너뜀")
-                                continue
-
-                            # 모든 필드 저장 (doorName, doorRelaySensor, doorSensor 등)
-                            Server.door_memory[door_id] = {
-                                key: value for key, value in door.items()
-                                if key != "doorID"  # doorID는 키로 사용하므로 중복 저장 안 함
-                            }
-                            Logger.debug(f" 저장: {door_id} -> {Server.door_memory[door_id]}")
-                else:
-                    Logger.debug(f" 경고: doorList를 찾을 수 없음")
-
-            # DoorControl - commandType에 따라 doorSensor 상태 업데이트
-            elif "DoorControl" in api_name:
-                if isinstance(self.request_data, dict):
-                    door_id = self.request_data.get("doorID")
-                    command_type = self.request_data.get("commandType")
-
-                    if door_id and command_type:
-                        Logger.debug(f" DoorControl: {door_id} -> commandType: {command_type}")
-
-                        # door_memory에 해당 doorID가 있으면 doorSensor 업데이트
-                        if door_id in Server.door_memory:
-                            # commandType에 따라 doorSensor 값 변경
-                            # unlock -> Unlock, lock -> Lock 등
-                            if command_type.lower() == "unlock":
-                                Server.door_memory[door_id]["doorSensor"] = "Unlock"
-                            elif command_type.lower() == "lock":
-                                Server.door_memory[door_id]["doorSensor"] = "Lock"
-                            else:
-                                # 기타 commandType은 첫 글자만 대문자로
-                                Server.door_memory[door_id]["doorSensor"] = command_type.capitalize()
-
-                            Logger.debug(f"[DATA_MAPPING] 업데이트: {door_id} doorSensor -> {Server.door_memory[door_id]['doorSensor']}")
-                        else:
-                            Logger.debug(f" 경고: {door_id}가 door_memory에 없음")
-
-            # RealtimeDoorStatus2 (두 번째 호출) - 저장된 데이터 활용은 constraints에서 처리
-            # 여기서는 별도 처리 불필요
-
-        except Exception as e:
-            Logger.error(f"[DATA_MAPPING] 데이터 맵핑 처리 중 오류: {e}")
-            import traceback
-            traceback.print_exc()
 

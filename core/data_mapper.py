@@ -49,25 +49,6 @@ class ConstraintDataGenerator:
         Logger.debug(f"[DATA_MAPPER] 제약 경로 접기: {len(constraints)}개 → {len(folded)}개")
         return folded
 
-    def _find_requested_ids(self, constraints, field, default_endpoint):
-        """앞서 보낸 요청(구독/조회)에서 해당 필드의 ID 후보를 찾는다.
-
-        제약에 referenceEndpoint가 있으면 그 API를, 없으면 default_endpoint의
-        REQUEST 기록(latest_events)을 본다. 기록이 없으면 빈 목록(폴백은 호출부).
-        """
-        rule = next(
-            (r for k, r in (constraints or {}).items()
-             if field in k and isinstance(r, dict) and r.get("referenceEndpoint")),
-            None,
-        )
-        ref_key = rule["referenceEndpoint"].lstrip("/") if rule else default_endpoint
-        for key in (ref_key, f"/{ref_key}"):
-            event = self.latest_events.get(key, {}).get("REQUEST") or {}
-            ids = [v for v in self.find_key(event.get("data") or {}, field) if v]
-            if ids:
-                return ids
-        return []
-
     def _find_reference_state(self, constraints, field, item_id, id_field):
         """수신한 이벤트에서 특정 항목의 현재 상태를 찾는다.
 
@@ -86,6 +67,11 @@ class ConstraintDataGenerator:
         ref_field = rule.get("referenceField")
         if not ref_field or ref_field == "(참조 필드 미선택)":
             return None
+        # 관리도구는 목록 안 필드를 경로째로 준다(doorList.doorSensor). 줄 안에서는
+        # 끝 이름(doorSensor)으로 찾아야 한다 — 경로째로 찾으면 늘 못 찾아 선택한 문의
+        # 상태를 모른 채 무작위 명령이 나갔다. 문이 여러 개면 절반쯤 "잠긴 문에 Lock"
+        # 으로 맥락 검증에서 떨어졌다 (2026-09-14 실측, 5개 중 door0004).
+        leaf = ref_field.rsplit(".", 1)[-1]
 
         # 상태는 응답이 아니라 웹훅 이벤트로 오므로 이벤트를 먼저 본다
         for key in (ref_key, f"/{ref_key}"):
@@ -98,8 +84,8 @@ class ConstraintDataGenerator:
                     for item in values:
                         if not isinstance(item, dict):
                             continue
-                        if item.get(id_field) == item_id and item.get(ref_field):
-                            return item[ref_field]
+                        if item.get(id_field) == item_id and item.get(leaf):
+                            return item[leaf]
         return None
 
     @staticmethod
@@ -110,35 +96,18 @@ class ConstraintDataGenerator:
         except (TypeError, ValueError):
             return default
 
-    def _filter_rows_by_request(self, rows, request_data, id_field):
-        """조회 응답에서 요청 조건에 해당하는 줄만 남긴다.
+    def _applied_constraints(self, request_data, template_data, constraints, api_name=None, is_webhook=False):
+        """관리도구 설정(constraints)대로 템플릿을 채운다.
 
-        저장된 기록(템플릿 줄)을 그대로 두고 걸러내기만 한다. 값을 바꾸거나 줄을 늘리지 않는다.
-        템플릿 줄의 ID가 비어 있으면 요청 개수만큼 채워 쓰는 구조이므로 걸러내지 않는다.
-        """
-        if not isinstance(rows, list) or not rows:
-            return rows
+        request_data: 지금 받은/보내는 요청 (참조 API가 없는 request-based 규칙이 여기서 찾는다)
+        template_data: 요청·응답·웹훅 템플릿
+        constraints: 관리도구 값 설정
+        api_name: 번호 붙은 API 이름 (PTZ 선별 등)
+        is_webhook: 웹훅 이벤트 생성 여부
 
-        requested = [v for v in (self.find_key(request_data, id_field) or []) if v]
-        if not requested:
-            # 조회 조건이 없는 API(DoorProfiles 등)는 전체를 그대로 응답한다
-            return rows
-
-        if not all(isinstance(r, dict) and r.get(id_field) for r in rows):
-            return rows
-
-        filtered = [r for r in rows if r.get(id_field) in requested]
-        Logger.info(f"[DATA_MAPPER] 조회 조건 적용: {len(rows)}건 중 {len(filtered)}건 응답 (요청 {id_field}: {requested})")
-        return filtered
-
-    def _applied_constraints(self, request_data, template_data, constraints, api_name=None, door_memory=None, is_webhook=False):
-        """
-        request_data: 요청 데이터 (camID 후보 등)
-        template_data: request 또는 response 템플릿
-        constraints: 제약 조건
-        api_name: API 이름 (RealtimeDoorStatus2 등)
-        door_memory: 문 상태 저장소
-        is_webhook: 웹훅 이벤트 생성 여부 (True이면 랜덤 선택 안함)
+        API 이름을 보고 채우는 전용 경로(doorList·sensorDeviceList·commandType)는 두지 않는다.
+        예전에는 설정이 부족하던 시기(2026-01)의 경로가 남아 설정을 뒤집었다 — doorID를 뺀
+        요청에 DoorProfiles의 문 5개를 채워 넣는 등 (2026-09-14 실측). 설정에 없으면 템플릿 그대로.
         """
         # 회차마다 새로 판단한다 (앞 회차의 '수행 불가'가 남지 않도록)
         self.unrunnable_reason = None
@@ -146,341 +115,43 @@ class ConstraintDataGenerator:
         # 제약 경로를 접어서 들어온다 — 이후 모든 조회가 같은 형태를 보게 한다
         constraints = self._fold_indexed_paths(constraints)
 
-        # ✅ sensorDeviceList 구조를 가진 웹훅 데이터 동적 생성 (범용)
-        if (is_webhook and "sensorDeviceList" in template_data
-                and not self._is_preset(constraints, "sensorDeviceID")):
-            # request_data에서 요청한 sensorDeviceID 추출
-            requested_ids = self.find_key(request_data, "sensorDeviceID")
-            
-            # sensorDeviceID가 요청에 있고, 템플릿에 sensorDeviceList가 있으면 처리
-            if requested_ids and isinstance(template_data["sensorDeviceList"], list) and len(template_data["sensorDeviceList"]) > 0:
-                Logger.info(f"[DATA_MAPPER] sensorDeviceList 웹훅 데이터 동적 생성 시작 (API: {api_name})")
-                Logger.debug(f"[DATA_MAPPER] 요청한 sensorDeviceID: {requested_ids}")
-                
-                # 템플릿의 첫 번째 항목을 기준으로 허용 키 확인
-                allowed_keys = set(template_data["sensorDeviceList"][0].keys())
-                Logger.debug(f" 템플릿 구조 기반 허용 키: {allowed_keys}")
-                
-                # 요청한 ID만 포함하도록 필터링
-                new_sensor_list = []
-                for sensor_id in requested_ids:
-                    # 템플릿에서 해당 ID를 가진 항목 찾기
-                    matching_item = None
-                    for item in template_data["sensorDeviceList"]:
-                        if item.get("sensorDeviceID") == sensor_id:
-                            matching_item = item
-                            break
-                    
-                    # 매칭 항목이 있으면 사용, 없으면 템플릿 첫 항목 복사 후 ID만 변경
-                    if matching_item:
-                        filtered_item = {k: v for k, v in matching_item.items() if k in allowed_keys}
-                    else:
-                        # 템플릿 첫 번째 항목 복사
-                        template_item = template_data["sensorDeviceList"][0]
-                        filtered_item = {k: v for k, v in template_item.items() if k in allowed_keys}
-                        # ID만 요청한 값으로 변경
-                        filtered_item["sensorDeviceID"] = sensor_id
-                    
-                    new_sensor_list.append(filtered_item)
-                
-                # ✅ 줄 생성(ID 채움) 후 값 채우기 설정까지 마저 적용한다.
-                # 예전에는 여기서 바로 반환해 eventName(←eventFilter)·eventTime(←startTime)
-                # 같은 참조 설정이 한 번도 실행되지 않았다 — 웹훅이 템플릿 빈 값 그대로
-                # 나가던 원인 (2026-08-20 sensor001 리허설 실측).
-                constraint_map = self._build_constraint_map(constraints or {}, request_data,
-                                                            is_webhook=True, api_name=api_name)
-                if constraint_map:
-                    filled_list = []
-                    for row in new_sensor_list:
-                        filled = self._generate_list_items("sensorDeviceList", row,
-                                                           constraint_map, 1)[0]
-                        # ID는 위에서 요청 순서대로 정해둔 값을 유지한다
-                        # (줄별 생성은 매번 첫 후보를 집어 전 줄이 같은 ID가 된다)
-                        filled["sensorDeviceID"] = row.get("sensorDeviceID",
-                                                           filled.get("sensorDeviceID"))
-                        filled_list.append(filled)
-                    new_sensor_list = filled_list
-                    Logger.debug(f"[DATA_MAPPER] 값 채우기 적용 후: {new_sensor_list}")
-
-                template_data["sensorDeviceList"] = new_sensor_list
-                Logger.info(f"[DATA_MAPPER] 생성된 sensorDeviceList: {len(new_sensor_list)}개")
-                Logger.debug(f"[DATA_MAPPER] 상세: {new_sensor_list}")
-
-            return template_data
-        
-        # ✅ doorList 구조를 가진 데이터 동적 생성 (범용)
-        #    doorID가 고정값이면 관리도구가 적어준 목록을 그대로 쓴다 — 전용 경로 진입 안 함
-        if "doorList" in template_data and self._is_preset(constraints, "doorID"):
-            Logger.info(f"[DATA_MAPPER] doorID 고정값 — 템플릿 doorList 그대로 사용: "
-                        f"{template_data.get('doorList')}")
-        elif "doorList" in template_data:
-            is_response_template = "code" in template_data
-            
-            if is_webhook:
-                requested_ids = self.find_key(request_data, "doorID")
-                
-                # doorID가 요청에 있고, 템플릿에 doorList가 있으면 처리
-                if requested_ids and isinstance(template_data["doorList"], list) and len(template_data["doorList"]) > 0:
-                    Logger.info(f"[DATA_MAPPER] doorList 웹훅 데이터 동적 생성 시작 (API: {api_name})")
-                    Logger.debug(f"[DATA_MAPPER] 요청한 doorID: {requested_ids}")
-                    
-                    new_door_list = []
-                    allowed_keys = set(template_data["doorList"][0].keys())
-                    Logger.debug(f"[DATA_MAPPER] 템플릿 구조 기반 허용 키: {allowed_keys}")
-                    
-                    for door_id in requested_ids:
-                        # 템플릿에서 해당 ID를 가진 항목 찾기
-                        matching_item = None
-                        for item in template_data["doorList"]:
-                            if item.get("doorID") == door_id:
-                                matching_item = item
-                                break
-                        
-                        # 매칭 항목이 있으면 사용, 없으면 템플릿 첫 항목 복사 후 ID만 변경
-                        if matching_item:
-                            filtered_item = {k: v for k, v in matching_item.items() if k in allowed_keys}
-                        else:
-                            # 템플릿 첫 번째 항목 복사 (door_memory 활용)
-                            template_item = template_data["doorList"][0]
-                            filtered_item = {k: v for k, v in template_item.items() if k in allowed_keys}
-                            # ID만 요청한 값으로 변경
-                            filtered_item["doorID"] = door_id
-                            
-                            # door_memory가 있으면 추가 정보 업데이트
-                            if door_memory and door_id in door_memory:
-                                raw_info = door_memory[door_id]
-                                for key in allowed_keys:
-                                    if key != "doorID" and key in raw_info:
-                                        filtered_item[key] = raw_info[key]
-                        
-                        new_door_list.append(filtered_item)
-
-                    # ✅ 줄 생성(ID 채움) 후 값 채우기 설정까지 마저 적용한다.
-                    # 예전에는 여기서 바로 반환해 eventName(←eventFilter)·eventTime
-                    # 같은 참조 설정이 한 번도 실행되지 않았다 — 웹훅이 템플릿 빈 값
-                    # 그대로 나가던 원인 (sensor 웹훅 3cea01b와 동일 유형,
-                    # 2026-08-26 RealtimeVerifEventInfos 리허설 실측).
-                    constraint_map = self._build_constraint_map(constraints or {}, request_data,
-                                                                is_webhook=True, api_name=api_name)
-                    if constraint_map:
-                        filled_list = []
-                        for row in new_door_list:
-                            filled = self._generate_list_items("doorList", row,
-                                                               constraint_map, 1)[0]
-                            # ID는 위에서 요청 순서대로 정해둔 값을 유지한다
-                            filled["doorID"] = row.get("doorID", filled.get("doorID"))
-                            filled_list.append(filled)
-                        new_door_list = filled_list
-                        Logger.debug(f"[DATA_MAPPER] 값 채우기 적용 후: {new_door_list}")
-
-                    template_data["doorList"] = new_door_list
-                    Logger.debug(f" 생성된 doorList ({len(new_door_list)}개): {new_door_list}")
-
-                return template_data
-
-
-            if not is_webhook and not is_response_template:
-                Logger.info(f"[DATA_MAPPER] doorList REQUEST 데이터 동적 생성 시작 (API: {api_name})")
-                
-                # ✅ constraints에서 doorID의 referenceEndpoint와 valueType을 동적으로 찾기
-                ref_endpoint = None
-                value_type = None
-                if constraints:
-                    for field_path, rule in constraints.items():
-                        if "doorID" in field_path and isinstance(rule, dict):
-                            ref_endpoint = rule.get("referenceEndpoint")
-                            value_type = rule.get("valueType")
-                            if ref_endpoint or value_type == "preset":
-                                Logger.debug(f"[DATA_MAPPER] doorID 설정 발견: referenceEndpoint={ref_endpoint}, valueType={value_type}")
-                                break
-                
-                # referenceEndpoint가 없으면 기본값 사용
-                if not ref_endpoint:
-                    ref_endpoint = "DoorProfiles"
-                    Logger.debug(f"[DATA_MAPPER] referenceEndpoint 없음 - 기본값 사용: {ref_endpoint}")
-                
-                # 슬래시 제거 및 검색 키 생성
-                ref_endpoint_clean = ref_endpoint.lstrip("/")
-                keys_to_search = [ref_endpoint_clean, f"/{ref_endpoint_clean}"]
-                
-                Logger.debug(f"[DATA_MAPPER] latest_events 키 목록: {list(self.latest_events.keys())}")
-                Logger.debug(f"[DATA_MAPPER] 검색할 키: {keys_to_search}")
-                
-                # valueType에 따라 REQUEST 또는 RESPONSE에서 가져오기
-                direction = "REQUEST" if value_type == "request-based" else "RESPONSE"
-                Logger.debug(f"[DATA_MAPPER] valueType={value_type} → {direction}에서 데이터 조회")
-                
-                # latest_events에서 참조 API 데이터 찾기
-                door_profiles_data = None
-                for key in keys_to_search:
-                    if key in self.latest_events and direction in self.latest_events[key]:
-                        door_profiles_data = self.latest_events[key][direction].get("data", {})
-                        Logger.info(f"[DATA_MAPPER] latest_events에서 {key} {direction} 발견!")
-                        Logger.debug(f"[DATA_MAPPER] door_profiles_data: {door_profiles_data}")
-                        break
-                
-                if not door_profiles_data:
-                    Logger.warn(f"[DATA_MAPPER] ⚠️ latest_events에서 {ref_endpoint} {direction}를 찾을 수 없음!")
-                
-                # 찾은 데이터에서 doorID 추출하여 리스트 생성
-                new_door_list = []
-                
-                # DoorControl REQUEST처럼 doorList가 아닌 단일 doorID인 경우 처리
-                if door_profiles_data and "doorID" in door_profiles_data and "doorList" not in door_profiles_data:
-                    door_id = door_profiles_data.get("doorID")
-                    if door_id:
-                        new_door_list.append({"doorID": door_id})
-                        Logger.info(f"[DATA_MAPPER] ✅ {ref_endpoint}에서 단일 doorID 추출: {door_id}")
-                # doorList 배열인 경우 처리
-                elif door_profiles_data and "doorList" in door_profiles_data:
-                    Logger.debug(f"[DATA_MAPPER] door_profiles_data에 doorList 발견, 개수: {len(door_profiles_data.get('doorList', []))}")
-                    all_door_ids = []
-                    for profile in door_profiles_data.get("doorList", []):
-                        door_id = profile.get("doorID")
-                        if door_id:
-                            all_door_ids.append(door_id)
-                    
-                    # valueType이 response-based면 랜덤 선택
-                    if value_type == "response-based" and all_door_ids:
-                        original_count = len(all_door_ids)
-                        random_count = random.randint(1, len(all_door_ids))
-                        selected_ids = random.sample(all_door_ids, random_count)
-                        Logger.info(f"[DATA_MAPPER] response-based: {original_count}개 중 {random_count}개 랜덤 선택")
-                        for door_id in selected_ids:
-                            new_door_list.append({"doorID": door_id})
-                            Logger.debug(f"[DATA_MAPPER] doorID 추가: {door_id}")
-                    else:
-                        # request-based 또는 valueType 없으면 전체 사용
-                        for door_id in all_door_ids:
-                            new_door_list.append({"doorID": door_id})
-                            Logger.debug(f"[DATA_MAPPER] doorID 추가: {door_id}")
-                    
-                    Logger.info(f"[DATA_MAPPER] ✅ {ref_endpoint}에서 {len(new_door_list)}개의 doorID 추출 완료")
-                elif door_profiles_data:
-                    Logger.warning(f"[DATA_MAPPER] ⚠️ door_profiles_data에 doorList 없음!")
-                    Logger.info(f"[DATA_MAPPER] ✅ DoorProfiles에서 {len(new_door_list)}개의 doorID 추출 완료")
-                elif door_profiles_data:
-                    Logger.warning(f"[DATA_MAPPER] ⚠️ door_profiles_data에 doorList 없음!")
-                
-                # 만약 DoorProfiles가 없으면(단독 실행 등), 템플릿 기반으로 생성
-                if not new_door_list:
-                    Logger.warn(f"[DATA_MAPPER] ⚠️ DoorProfiles에서 doorID를 가져오지 못함, 템플릿 기반으로 생성 시도")
-                    # 템플릿의 doorList에서 구조 가져오기
-                    if "doorList" in template_data and isinstance(template_data["doorList"], list) and len(template_data["doorList"]) > 0:
-                        template_item = template_data["doorList"][0]
-                        # doorID만 추출하여 리스트 생성 (템플릿에 있는 doorID 사용)
-                        for item in template_data["doorList"]:
-                            door_id = item.get("doorID", "")
-                            if door_id:
-                                new_door_list.append({"doorID": door_id})
-                                Logger.debug(f"[DATA_MAPPER] 템플릿에서 doorID 추가: {door_id}")
-                        Logger.info(f"[DATA_MAPPER] 템플릿에서 {len(new_door_list)}개의 doorID 생성")
-                    else:
-                        Logger.error(f"[DATA_MAPPER] ❌ 템플릿에도 doorList가 없거나 비어있음!")
-
-                Logger.info(f"[DATA_MAPPER] 최종 doorList 설정: {len(new_door_list)}개 항목")
-                template_data["doorList"] = new_door_list
-
-                # ✅ doorList만 채우고 바로 반환하던 조기 반환 제거 — eventFilter 같은
-                #    나머지 최상위 필드의 값 설정(무작위 등)이 한 번도 적용되지 않아
-                #    빈 값으로 나가던 원인 (sensor 웹훅 3cea01b와 동일 유형).
-                #    doorList는 위에서 확정했으므로 doorList 계열 제약은 빼고
-                #    나머지 필드만 공통 경로로 마저 채운다.
-                other_constraints = {k: v for k, v in (constraints or {}).items()
-                                     if not str(k).startswith("doorList")}
-                if other_constraints:
-                    constraint_map = self._build_constraint_map(other_constraints, request_data,
-                                                                api_name=api_name)
-                    filled = self._generate_from_template(template_data, constraint_map)
-                    filled["doorList"] = new_door_list  # 확정한 doorList 보존
-                    template_data.update(filled)
-                return template_data
-
-            # 조회 응답: 저장된 기록 중 요청 조건에 해당하는 줄만 남긴다.
-            # 걸러낸 뒤에는 아래 공통 경로로 내려가 값 채우기 설정(eventName 등)이 적용된다.
-            template_data["doorList"] = self._filter_rows_by_request(
-                template_data["doorList"], request_data, "doorID"
-            )
-        
-        # ✅ commandType 구조를 가진 데이터 동적 생성 (범용 - DoorControl 등)
-        #    commandType이 고정값이면 토글하지 않는다 — 관리도구가 적어준 명령 그대로
-        if ("commandType" in template_data and "doorID" in template_data
-                and not self._is_preset(constraints, "commandType")):
-            Logger.debug(f" commandType 데이터 동적 생성 시작 (API: {api_name})")
-
-            # doorID 추출
-            target_door_id = None
-            if self._is_preset(constraints, "doorID"):
-                # doorID는 관리도구 지정값 — 그 문의 상태만 찾아 명령을 정한다
-                target_door_id = template_data.get("doorID")
-            elif request_data and "doorID" in request_data:
-                target_door_id = request_data["doorID"]
-            elif door_memory and len(door_memory) > 0:
-                target_door_id = random.choice(list(door_memory.keys()))
-            else:
-                # 플랫폼 역할: 앞서 보낸 상태조회(구독) 요청에서 구독한 문 중 하나를 고른다.
-                # 구독은 무작위 부분집합인데 제어가 템플릿 고정값(door0001)이면
-                # "구독하지 않은 문을 제어"하게 되어 맥락 검증에서 확률적으로 실패한다.
-                subscribed = self._find_requested_ids(constraints, "doorID", "RealtimeDoorStatus")
-                if subscribed:
-                    target_door_id = random.choice(subscribed)
-                    Logger.debug(f" 구독한 문 중에서 선택: {target_door_id} (후보: {subscribed})")
-                else:
-                    # 템플릿 기본값 사용 (템플릿에 이미 있는 값 그대로)
-                    target_door_id = template_data.get("doorID", "")
-            
-            template_data["doorID"] = target_door_id
-            Logger.debug(f" 선택된 doorID: {target_door_id}")
-
-            # 현재 상태 가져오기
-            current_status = template_data.get("commandType", "")  # 템플릿 기본값 사용
-            if door_memory and target_door_id in door_memory:
-                current_status = door_memory[target_door_id].get("doorSensor", current_status)
-            else:
-                # door_memory는 우리가 장치 역할일 때만 채워진다.
-                # 플랫폼 역할(단일시스템 시험)에서는 비어 있으므로 수신한 상태 이벤트에서 찾는다.
-                found = self._find_reference_state(constraints, "commandType", target_door_id, "doorID")
-                if found:
-                    current_status = found
-                    Logger.debug(f" 수신 이벤트에서 {target_door_id} 현재 상태 확인: {found}")
-            
-            # constraints에서 후보값 추출
-            # 제약은 validValues, 검증 규칙은 allowedValues로 이름이 다르므로 둘 다 인정한다
-            allowed_values = []
-            if constraints:
-                for key, rule in constraints.items():
-                    if "commandType" not in key or not isinstance(rule, dict):
-                        continue
-                    allowed_values = rule.get("validValues") or rule.get("allowedValues") or []
-                    if allowed_values:
-                        Logger.debug(f" constraints에서 후보값 발견: {allowed_values}")
-                        break
-            
-            # 현재 상태와 다른 명령어 선택 (토글)
-            if allowed_values:
-                candidates = [
-                    val for val in allowed_values
-                    if str(val).lower() != str(current_status).lower()
-                ]
-                
-                if candidates:
-                    command = random.choice(candidates)
-                else:
-                    command = random.choice(allowed_values)
-                
-                template_data["commandType"] = command
-                Logger.debug(f" 생성된 commandType: {command} (현재 상태: {current_status})")
-            else:
-                # constraints가 없으면 템플릿 기본값 유지
-                Logger.debug(f" constraints 없음 - 템플릿 기본값 유지: {template_data['commandType']}")
-            return template_data
-
-
         constraint_map = self._build_constraint_map(constraints, request_data, is_webhook,
                                                     api_name=api_name)
         response = self._generate_from_template(template_data, constraint_map)
         template_data.update(response)
+        self._apply_paired_exclusion(template_data, constraints)
         return template_data
+
+    EXCLUDE_REFERENCE = "exclude-reference-valid-values"
+
+    def _apply_paired_exclusion(self, data, constraints):
+        """'참조 제외 무작위' 설정을 같은 장치 줄 기준으로 맞춘다.
+
+        일반 경로는 참조 목록의 값 전부를 후보에서 뺀다. 문이 여러 개면 Lock·Unlock이
+        모두 빠져 후보가 비고, 결국 아무 값이나 골라 "잠긴 문에 Lock"이 나갔다.
+        채점(_paired_reference_value)은 같은 ID 줄의 값과만 비교하므로 생성도 맞춘다.
+        같은 줄은 이 칸과 같은 객체에 있는 ...ID 칸 값으로 찾는다 (예: DoorControl.doorID).
+        """
+        for path, rule in (constraints or {}).items():
+            if not isinstance(rule, dict) or rule.get("randomType") != self.EXCLUDE_REFERENCE:
+                continue
+            if rule.get("valueType") == "preset" or "." in str(path) or path not in data:
+                continue  # 최상위 칸만 — 목록 안 칸은 짝지을 ID 칸이 줄마다 달라 다루지 않는다
+            candidates = self._get_static_random_values(rule)
+            if not candidates:
+                continue
+            for id_field, item_id in data.items():
+                if not str(id_field).endswith("ID") or not isinstance(item_id, str) or not item_id:
+                    continue
+                current = self._find_reference_state(constraints, path, item_id, id_field)
+                if current is None:
+                    continue
+                others = [v for v in candidates if str(v).lower() != str(current).lower()]
+                if others:
+                    data[path] = random.choice(others)
+                    Logger.debug(f" {path}: {id_field}={item_id} 현재 {current} → {data[path]} (같은 줄 제외)")
+                break
+
 
 
     NO_DEVICE_ID = "NoDevice"
@@ -499,21 +170,6 @@ class ConstraintDataGenerator:
         while f"{cls.NO_DEVICE_ID}{n}" in taken:
             n += 1
         return f"{cls.NO_DEVICE_ID}{n}"
-
-    @staticmethod
-    def _is_preset(constraints, field_name):
-        """관리도구가 이 필드를 고정값(preset)으로 지정했는가.
-
-        규칙은 둘뿐이다 — ① 채우라고 하면 채우고 ② 지정한 값이 있으면 그 값을 쓴다.
-        일반 생성기는 이걸 지키는데, doorList·sensorDeviceList·commandType처럼 일반
-        생성기를 거치지 않는 전용 경로들은 값 설정이 생기기 전 논리를 그대로 돌려
-        지정값을 덮어썼다(door9999 사전 입력이 실제 ID로 바뀐 건, 2026-09-12 실측).
-        전용 경로에 들어가기 전에 이 한 곳에서 묻는다.
-        """
-        for path, rule in (constraints or {}).items():
-            if isinstance(rule, dict) and (path == field_name or path.endswith("." + field_name)):
-                return rule.get("valueType") == "preset"
-        return False
 
     @staticmethod
     def _is_ptz_api(api_name):
@@ -619,6 +275,7 @@ class ConstraintDataGenerator:
                             values = [sentinel]
                             ref_aligned = False
 
+                    # 여기 참조필드 규칙 다시 걸어야함 -> 무작위+응답인 경우(ptzcontinuousMove)에서 랜덤으로 뽑고 -> ptzstop에서는 요청기반으로 해서 해당 camID에 대해서만 제어를 해야함
                     # response-based(시스템 요청)만 랜덤 선택, request-based(플랫폼 응답/웹훅)는 그대로 사용 (01/08)
                     if value_type == "response-based" and not is_webhook and values and len(values) > 0:
                         original_count = len(values)
@@ -859,6 +516,28 @@ class ConstraintDataGenerator:
 
         return constraint_map
 
+    def _pick_array_values(self, constraint):
+        """문자열 배열 칸(classFilter 등)에 넣을 값 목록. 넣을 게 없으면 None.
+
+        예전에는 값 풀에서 하나만 골라 [ ]로 감쌌다. 그래서
+        - 무작위는 후보가 여럿이어도 늘 1개만 들어갔고,
+        - 참조한 칸 자체가 배열이면 배열이 통째로 뽑혀 [["Human", "Vehicle"]]
+          이중 배열이 나갔다 (2026-09-14 확인).
+        참조에서 온 배열은 펼쳐서 한 풀로 모은 뒤,
+        - 요청을 되돌려주는 설정(request-based)은 전부 그대로,
+        - 무작위 계열은 1개~전체 중 무작위 개수를 겹치지 않게 넣는다.
+        """
+        pool = []
+        for v in constraint.get("values") or []:
+            for x in (v if isinstance(v, list) else [v]):
+                if x not in ("", None) and x not in pool:
+                    pool.append(x)
+        if not pool:
+            return None
+        if constraint.get("type") in self.REQUEST_BASED_TYPES:
+            return pool
+        return random.sample(pool, random.randint(1, len(pool)))
+
     @staticmethod
     def _get_static_random_values(rule):
         """관리도구 '무작위' 설정값 추출 — validValues 우선, 없으면 specifiedValues."""
@@ -988,11 +667,12 @@ class ConstraintDataGenerator:
 
             # 최상위 레벨에서 constraint 확인
             if not is_container and ctype in self.VALUE_PICK_TYPES:
-                # 랜덤 값 선택 — 템플릿이 배열이면 배열 타입 유지 (classFilter 등
-                # 문자열 배열 필드가 낱값으로 변형돼 나가던 문제 방지)
-                if constraint["values"]:
-                    picked = random.choice(constraint["values"])
-                    result[key] = [picked] if isinstance(value, list) else picked
+                if isinstance(value, list):
+                    # 문자열 배열 필드(classFilter 등)는 배열 안에 여러 값을 담는다
+                    picked = self._pick_array_values(constraint)
+                    result[key] = picked if picked is not None else value
+                elif constraint["values"]:
+                    result[key] = random.choice(constraint["values"])
                 else:
                     result[key] = value
             elif not is_container and ctype == "request-range":
@@ -1071,6 +751,11 @@ class ConstraintDataGenerator:
 
         for field, value in item_template.items():
             field_path = f"{parent_key}.{field}"
+            # 배열 칸(classFilter 등)은 줄 수를 정하는 데 끼지 않는다. 끼면 참조 클래스
+            # 5개가 "filterList 1~5줄 × 줄마다 1개"로 나갔다 — 원하는 모양은 "1줄에
+            # 클래스 여러 개"다 (2026-09-14). 배열 안의 값은 _pick_array_values가 채운다.
+            if isinstance(value, list):
+                continue
             if field_path in constraint_map:
                 constraint = constraint_map[field_path]
 
@@ -1123,7 +808,12 @@ class ConstraintDataGenerator:
             if total < n:
                 Logger.debug(f"[ALIGN] {group}: 원본 {total}줄 < 필요 {n}줄 → 줄 맞춤 생략")
                 continue
-            rows = random.sample(range(total), n)
+            # 요청을 되돌려주는 묶음(request-based)은 요청 순서 그대로 — 섞으면 door0001,
+            # door0002를 요청했는데 door0002부터 나가 순서를 보는 채점·비교가 흔들렸다
+            if all(constraint_map[m].get("type") in self.REQUEST_BASED_TYPES for m in members):
+                rows = list(range(n))
+            else:
+                rows = random.sample(range(total), n)
             for member in members:
                 picks[member] = [constraint_map[member]["values"][i] for i in rows]
             if len(members) > 1:
@@ -1165,7 +855,11 @@ class ConstraintDataGenerator:
         )
         if min_available_count != float('inf'):
             if mirrors_request:
-                n = min_available_count
+                # 줄 수는 요청 항목 수로만 정한다. 다른 참조 필드(userID 등)의 값 가짓수까지
+                # 최솟값에 넣으면 문 5개를 요청해도 사용자가 2명이면 2줄만 나갔다
+                # (2026-09-14 StoredVerifEventInfos 실측). 그런 필드는 줄 사이 중복을 허용한다.
+                n = min(len(constraint_map[fp]["values"]) for fp in available_values
+                        if constraint_map[fp].get("type") in self.REQUEST_BASED_TYPES)
                 Logger.info(f" {parent_key}: {n}개 생성합니다. (요청 항목과 1:1)")
             else:
                 n = random.randint(1, min_available_count)
@@ -1222,8 +916,8 @@ class ConstraintDataGenerator:
                     # ✅ 문자열 배열 필드(filterList.classFilter 등)도 값 설정을 적용한다.
                     # 예전에는 리스트라는 이유로 규칙 확인 없이 원본([])을 그대로 둬서
                     # 무작위 설정이 조용히 무시됐다 (2026-08-26 리허설 실측).
-                    # 배열 타입을 유지하기 위해 뽑은 값을 배열로 감싼다.
-                    item[field] = [random.choice(constraint_map[field_path]["values"])]
+                    picked = self._pick_array_values(constraint_map[field_path])
+                    item[field] = picked if picked is not None else value
                 else:
                     item[field] = value
 
@@ -1250,13 +944,22 @@ class ConstraintDataGenerator:
 
                         if unused_values:
                             # 아직 안 쓴 값 중에서 무작위로 — 예전에는 [0]을 집어
-                            # 늘 참조 목록 순서(cam0001, cam0002 …)대로 나갔다
-                            selected_value = random.choice(unused_values)
+                            # 늘 참조 목록 순서(cam0001, cam0002 …)대로 나갔다.
+                            # 단 요청을 되돌려주는 설정은 요청 순서대로 쓴다.
+                            selected_value = (unused_values[0]
+                                              if constraint["type"] in self.REQUEST_BASED_TYPES
+                                              else random.choice(unused_values))
                             item[field] = selected_value
                             # 사용된 값으로 표시
                             if field_path not in used_values:
                                 used_values[field_path] = []
                             used_values[field_path].append(selected_value)
+                        elif values_list and constraint["type"] not in self.REQUEST_BASED_TYPES:
+                            # 줄 수를 요청 항목 수에 맞춘 경우 — 이 필드는 가짓수가 모자라 중복 허용
+                            selected_value = random.choice(values_list)
+                            item[field] = selected_value
+                            Logger.debug(f" {field_path}: 값 {len(values_list)}가지를 다 써서 "
+                                         f"중복 사용 → {selected_value}")
                         elif values_list:
                             # ⚠️ 모든 값을 다 사용했는데 여기 도달하면 안 됨 (n이 조정되었어야 함)
                             Logger.error(f" {field_path}: 모든 값이 소진되었습니다. 생성 개수 조정 실패.")
@@ -1276,8 +979,10 @@ class ConstraintDataGenerator:
 
                         if unused_values:
                             # 값 풀 없이 들어온 경로(중첩 객체 안의 단일 필드 등).
-                            # 여기도 [0]이라 늘 첫 값만 나갔다.
-                            selected_value = random.choice(unused_values)
+                            # 여기도 [0]이라 늘 첫 값만 나갔다. 요청 되돌려주기는 순서대로.
+                            selected_value = (unused_values[0]
+                                              if constraint["type"] in self.REQUEST_BASED_TYPES
+                                              else random.choice(unused_values))
                             item[field] = selected_value
                             used_values[field_path].append(selected_value)
                         elif values_list:
@@ -1327,6 +1032,10 @@ class ConstraintDataGenerator:
         (CameraProfiles 응답에 camType이 없는 규격일 수 있음).
         """
         ptz_ids, saw_type = [], False
+        # 관리도구가 참조 필드를 경로("camList.camID")로 준다. 응답 줄 안의 칸 이름은
+        # "camID"라 경로째로 찾으면 한 줄도 못 찾아 선별이 통째로 생략됐다 —
+        # Dome·Bullet 카메라에 PTZ 명령이 나감 (2026-09-14, find_key와 같은 유형)
+        id_field = str(id_field).rsplit(".", 1)[-1]
 
         def walk(node):
             nonlocal saw_type

@@ -2,60 +2,137 @@ from json_checker import OptionalKey
 
 
 # Authentication
-cmsy90xd705aarc0quh4je1k0_Authentication_in_schema = {
+cmsmh2go501w6rc0q4s8zyqdp_Authentication_in_schema = {
     "userID": str,
     "userPW": str,
 }
 
 # Capabilities
-cmsy90xd705aarc0quh4je1k0_Capabilities_in_schema = {}
+cmsmh2go501w6rc0q4s8zyqdp_Capabilities_in_schema = {}
 
-# CameraProfiles
-cmsy90xd705aarc0quh4je1k0_CameraProfiles_in_schema = {}
+# SensorDeviceProfiles
+cmsmh2go501w6rc0q4s8zyqdp_SensorDeviceProfiles_in_schema = {}
 
-# StreamURLs
-cmsy90xd705aarc0quh4je1k0_StreamURLs_in_schema = {
-    "camList": [{
-    "camID": str,
-    "streamProtocolType": str,
+# StoredSensorEventInfos
+cmsmh2go501w6rc0q4s8zyqdp_StoredSensorEventInfos_in_schema = {
+    "timePeriod": {
+    "startTime": str,
+    "endTime": str,
+},
+    "sensorDeviceList": [{
+    "sensorDeviceID": str,
 }],
+    OptionalKey("maxCount"): int,
+    OptionalKey("eventFilter"): str,
 }
 
-# RealtimeVideoEventInfos
-cmsy90xd705aarc0quh4je1k0_RealtimeVideoEventInfos_in_schema = {
-    "camList": [{
-    "camID": str,
+# cmsmh2go501w6rc0q4s8zyqdp 스키마 리스트
+cmsmh2go501w6rc0q4s8zyqdp_inSchema = [
+    cmsmh2go501w6rc0q4s8zyqdp_Authentication_in_schema,
+    cmsmh2go501w6rc0q4s8zyqdp_Capabilities_in_schema,
+    cmsmh2go501w6rc0q4s8zyqdp_SensorDeviceProfiles_in_schema,
+    cmsmh2go501w6rc0q4s8zyqdp_StoredSensorEventInfos_in_schema,
+]
+
+# Authentication
+cmiqr201z00i8ie8fitdg5t1b_Authentication_in_schema = {
+    "userID": str,
+    "userPW": str,
+}
+
+# Capabilities
+cmiqr201z00i8ie8fitdg5t1b_Capabilities_in_schema = {}
+
+# SensorDeviceProfiles
+cmiqr201z00i8ie8fitdg5t1b_SensorDeviceProfiles_in_schema = {}
+
+# SensorDeviceControl
+cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_in_schema = {
+    "sensorDeviceID": str,
+    OptionalKey("commandType"): str,
+}
+
+# SensorDeviceControl2
+cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl2_in_schema = {
+    "sensorDeviceID": str,
+    "commandType": str,
+}
+
+# cmiqr201z00i8ie8fitdg5t1b 스키마 리스트
+cmiqr201z00i8ie8fitdg5t1b_inSchema = [
+    cmiqr201z00i8ie8fitdg5t1b_Authentication_in_schema,
+    cmiqr201z00i8ie8fitdg5t1b_Capabilities_in_schema,
+    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceProfiles_in_schema,
+    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl_in_schema,
+    cmiqr201z00i8ie8fitdg5t1b_SensorDeviceControl2_in_schema,
+]
+
+# Authentication
+cmii7shen005i8z1tagevx4qh_Authentication_in_schema = {
+    "userID": str,
+    "userPW": str,
+}
+
+# Capabilities
+cmii7shen005i8z1tagevx4qh_Capabilities_in_schema = {}
+
+# SensorDeviceProfiles
+cmii7shen005i8z1tagevx4qh_SensorDeviceProfiles_in_schema = {}
+
+# RealtimeSensorData
+cmii7shen005i8z1tagevx4qh_RealtimeSensorData_in_schema = {
+    "sensorDeviceList": [{
+    "sensorDeviceID": str,
+}],
+    "duration": int,
+    "transProtocol": {
+    "transProtocolType": str,
+    OptionalKey("transProtocolDesc"): str,
+},
+    OptionalKey("startTime"): str,
+}
+
+# RealtimeSensorData WebHook OUT Schema
+cmii7shen005i8z1tagevx4qh_RealtimeSensorData_webhook_out_schema = {
+    "code": str,
+    "message": str,
+}
+
+# RealtimeSensorEventInfos
+cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_in_schema = {
+    "sensorDeviceList": [{
+    "sensorDeviceID": str,
 }],
     "transProtocol": {
     "transProtocolType": str,
     OptionalKey("transProtocolDesc"): str,
 },
-    "duration": int,
+    OptionalKey("duration"): int,
     OptionalKey("eventFilter"): str,
     OptionalKey("startTime"): str,
 }
 
-# RealtimeVideoEventInfos WebHook OUT Schema
-cmsy90xd705aarc0quh4je1k0_RealtimeVideoEventInfos_webhook_out_schema = {
+# RealtimeSensorEventInfos WebHook OUT Schema
+cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_webhook_out_schema = {
     "code": str,
     "message": str,
 }
 
-# cmsy90xd705aarc0quh4je1k0 스키마 리스트
-cmsy90xd705aarc0quh4je1k0_inSchema = [
-    cmsy90xd705aarc0quh4je1k0_Authentication_in_schema,
-    cmsy90xd705aarc0quh4je1k0_Capabilities_in_schema,
-    cmsy90xd705aarc0quh4je1k0_CameraProfiles_in_schema,
-    cmsy90xd705aarc0quh4je1k0_StreamURLs_in_schema,
-    cmsy90xd705aarc0quh4je1k0_RealtimeVideoEventInfos_in_schema,
+# cmii7shen005i8z1tagevx4qh 스키마 리스트
+cmii7shen005i8z1tagevx4qh_inSchema = [
+    cmii7shen005i8z1tagevx4qh_Authentication_in_schema,
+    cmii7shen005i8z1tagevx4qh_Capabilities_in_schema,
+    cmii7shen005i8z1tagevx4qh_SensorDeviceProfiles_in_schema,
+    cmii7shen005i8z1tagevx4qh_RealtimeSensorData_in_schema,
+    cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_in_schema,
 ]
 
-# cmsy90xd705aarc0quh4je1k0 WebHook 스키마 리스트
-cmsy90xd705aarc0quh4je1k0_webhook_OutSchema = [
+# cmii7shen005i8z1tagevx4qh WebHook 스키마 리스트
+cmii7shen005i8z1tagevx4qh_webhook_OutSchema = [
     None,
     None,
     None,
-    None,
-    cmsy90xd705aarc0quh4je1k0_RealtimeVideoEventInfos_webhook_out_schema,
+    cmii7shen005i8z1tagevx4qh_RealtimeSensorData_webhook_out_schema,
+    cmii7shen005i8z1tagevx4qh_RealtimeSensorEventInfos_webhook_out_schema,
 ]
 

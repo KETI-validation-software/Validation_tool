@@ -77,16 +77,15 @@ def test_preset_fields_kept():
 
 
 def test_no_constraints_unchanged():
-    """제약이 없으면 기존 동작(ID만 채움) 그대로"""
+    """설정이 없으면 템플릿 그대로 — 요청을 보고 doorID 줄을 만들지 않는다 (2026-09-14 전용 경로 정리)"""
     import copy
     gen = ConstraintDataGenerator({})
     out = gen._applied_constraints(request_data=copy.deepcopy(REQUEST),
                                    template_data=copy.deepcopy(TEMPLATE),
                                    constraints={}, api_name="RealtimeVerifEventInfos",
                                    is_webhook=True)
-    ids = [d.get("doorID") for d in out["doorList"]]
-    assert ids == ["door0001", "door0002"], f"제약 없음 경로가 깨짐: {out}"
-    print("✅ 제약 없으면 기존 동작 그대로")
+    assert out == TEMPLATE, f"설정이 없는데 템플릿이 바뀜: {out}"
+    print("✅ 설정 없으면 템플릿 그대로")
 
 
 if __name__ == "__main__":

@@ -1099,6 +1099,12 @@ class MyApp(PlatformMainUI):
                                 )
                                 _rendered_wh += 1
 
+                        # ✅ 웹훅 응답(ACK) 채점 규칙 — 관리도구가 내려준 code/message 지정값.
+                        #    2025-12-15부터 파일로는 생성됐지만 여기서 읽는 코드가 없어, ACK는
+                        #    구조(문자열 타입)만 보고 통과시켰다. 업체가 message를 "Success"로
+                        #    보내도 2/2 통과였다 (2026-09-15 유니온바이오메트릭스 시험 실측).
+                        webhook_ack_rules = self._webhook_ack_rules(api_name)
+
                         # 실제 웹훅 응답 사용
                         # ✅ 웹훅 응답이 null인 경우에도 검증을 수행하여 실패로 카운트
                         if hasattr(self.Server, 'webhook_response'):
@@ -1137,7 +1143,8 @@ class MyApp(PlatformMainUI):
                                     _wh_acks.append(_ack)
 
                                     _vr, _vt, _vp, _ve, _vop, _voe = json_check_(
-                                        (self.videoWebhookSchema[self.cnt] if self.cnt < len(self.videoWebhookSchema) else {}), _wh, self.flag_opt
+                                        (self.videoWebhookSchema[self.cnt] if self.cnt < len(self.videoWebhookSchema) else {}), _wh, self.flag_opt,
+                                        validation_rules=webhook_ack_rules, reference_context=self.reference_context,
                                     )
                                     add_pass += _vp
                                     add_err += _ve
@@ -1162,7 +1169,8 @@ class MyApp(PlatformMainUI):
                                 webhook_monitor_pairs.append((tmp_webhook_event, "null", 1))
                                 accumulated['data_parts'].append(f"\nnull")
                                 _vr, _vt, _vp, _ve, _vop, _voe = json_check_(
-                                    (self.videoWebhookSchema[self.cnt] if self.cnt < len(self.videoWebhookSchema) else {}), {}, self.flag_opt
+                                    (self.videoWebhookSchema[self.cnt] if self.cnt < len(self.videoWebhookSchema) else {}), {}, self.flag_opt,
+                                    validation_rules=webhook_ack_rules, reference_context=self.reference_context,
                                 )
                                 add_pass += _vp
                                 add_err += _ve
@@ -1201,7 +1209,8 @@ class MyApp(PlatformMainUI):
                             # 웹훅 스키마가 있는 경우 빈 딕셔너리로 검증 수행
                             webhook_response = {}
                             webhook_resp_val_result, webhook_resp_val_text, webhook_resp_key_psss_cnt, webhook_resp_key_error_cnt, opt_correct, opt_error = json_check_(
-                                (self.videoWebhookSchema[self.cnt] if self.cnt < len(self.videoWebhookSchema) else {}), webhook_response, self.flag_opt
+                                (self.videoWebhookSchema[self.cnt] if self.cnt < len(self.videoWebhookSchema) else {}), webhook_response, self.flag_opt,
+                                validation_rules=webhook_ack_rules, reference_context=self.reference_context,
                             )
 
                             add_pass += webhook_resp_key_psss_cnt
@@ -1733,6 +1742,28 @@ class MyApp(PlatformMainUI):
                 elif "FAIL" in tooltip:
                     return "FAIL"
         return "NONE"
+
+    def _webhook_ack_rules(self, api_name):
+        """웹훅 응답(ACK) 채점 규칙을 registry에서 가져온다.
+
+        관리도구 산출물의 이름은 {spec}_{API}_webhook_out_validation 이고, registry는
+        이를 api="{API}_webhook", direction="out" 으로 등록한다. 없으면 빈 dict —
+        그때는 구조 검증만 돌고, 로그에 규칙 없음을 남긴다.
+        """
+        try:
+            rules = get_validation_rules(
+                spec_id=self.current_spec_id,
+                api_name=f"{api_name}_webhook",
+                direction="out",
+            ) or {}
+        except Exception as e:
+            Logger.error(f" 웹훅 응답 채점 규칙 조회 실패: {api_name} — {e}")
+            rules = {}
+        if rules:
+            Logger.debug(f" 웹훅 응답 채점 규칙 로드: {api_name} → {list(rules.keys())}")
+        else:
+            Logger.warning(f" 웹훅 응답 채점 규칙 없음: {api_name} — 구조 검증만 수행")
+        return rules
 
     def _is_webhook_api_row(self, row):
         if hasattr(self, 'trans_protocols') and row < len(self.trans_protocols):

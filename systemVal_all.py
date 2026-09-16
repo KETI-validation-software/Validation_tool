@@ -20,7 +20,6 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QIcon, QFontDatabase, QFont, QColor, QPixmap
 from PyQt5.QtCore import *
 from api.webhook_api import WebhookThread
-from api.api_server import Server  # ✅ door_memory 접근을 위한 import 추가
 from api.client import APIClient
 from core.json_checker_new import timeout_field_finder
 from core.functions import (
@@ -209,12 +208,6 @@ class MyApp(SystemMainUI):
             
             api_name = self.message[cnt] if cnt < len(self.message) else ""
 
-            # 둘 다 무조건 맵핑 되어야 함
-            if "RealtimeDoorStatus" in api_name:
-                if "DoorProfiles" not in self.latest_events or "RESPONSE" not in self.latest_events.get("DoorProfiles", {}):
-                    Logger.debug(f"RealtimeDoorStatus용 DoorProfiles RESPONSE 로드 시도")
-                    self._load_from_trace_file("DoorProfiles", "RESPONSE")
-            
             self.generator.latest_events = self.latest_events
 
             updated_request = self.generator._applied_constraints(
@@ -222,7 +215,6 @@ class MyApp(SystemMainUI):
                 template_data=request_data.copy(),  # 현재 요청 데이터를 템플릿으로
                 constraints=constraints,
                 api_name=api_name,  # ✅ API 이름 전달
-                door_memory=Server.door_memory  # ✅ 문 상태 저장소 전달
             )
 
             self.resp_rules = get_validation_rules(
@@ -263,6 +255,25 @@ class MyApp(SystemMainUI):
             import traceback
             
             return request_data
+
+    @staticmethod
+    def _align_webhook_rules(rules_list, schemas):
+        """웹훅 검증 규칙 목록을 단계 번호에 맞춘다.
+
+        길이가 스키마 목록과 같으면 자리맞춤 목록(12597aa 이후 형식)이라 그대로 쓰고,
+        다르면 웹훅 API만 압축된 옛 목록으로 보고 스키마의 None 위치에 맞춰 편다.
+        """
+        rules_list = list(rules_list or [])
+        schemas = list(schemas or [])
+        if len(rules_list) == len(schemas):
+            return [(r or {}) for r in rules_list]
+        Logger.warning(f"[Webhook] 규칙 목록 길이({len(rules_list)})가 단계 수({len(schemas)})와 달라 "
+                       f"압축 목록으로 간주해 정렬합니다")
+        aligned = []
+        rule_iter = iter(rules_list)
+        for sch in schemas:
+            aligned.append((next(rule_iter, {}) or {}) if sch else {})
+        return aligned
 
     def _append_text(self, obj):
         import json
@@ -919,16 +930,24 @@ class MyApp(SystemMainUI):
             self.webhookInSchema = []
 
         # ✅ 웹훅 맥락 검증 규칙 로드 — 스키마와 같은 방식으로 validation_response에서 가져온다.
-        #    스키마 목록은 단계별 자리맞춤(웹훅 없는 단계는 None), 규칙 목록은 웹훅 API만
-        #    압축돼 있으므로 스키마의 None 위치에 맞춰 정렬해 둔다.
+        #    규칙 목록은 12597aa(2026-09-07)부터 스키마처럼 단계별 자리맞춤(웹훅 없는
+        #    단계는 None)으로 생성된다. 그 전에는 웹훅 API만 압축돼 있어 스키마의 None
+        #    위치에 맞춰 정렬했는데, 자리맞춤 목록에 그 정렬을 적용하면 첫 None을
+        #    집어 규칙이 0개가 됐다 — 09-07 이후 모든 단일시스템 실행이 "맥락 검증
+        #    규칙 로드: 0개 단계"로 웹훅 메시지를 규칙 없이 통과시켰다 (2026-09-15 실측).
+        #    길이가 스키마와 같으면 자리맞춤 목록으로 보고 그대로 쓰고, 다르면 옛 압축
+        #    목록으로 보고 정렬한다.
         self.webhookInValidation = []
         try:
             validation_response_module = self._load_spec_module('spec.validation_response', 'validation_response.py')
-            compact_rules = getattr(validation_response_module, f"{self.current_spec_id}_webhook_inValidation", []) or []
-            rule_iter = iter(compact_rules)
-            for sch in (self.webhookInSchema or []):
-                self.webhookInValidation.append((next(rule_iter, {}) or {}) if sch else {})
+            rules_list = getattr(validation_response_module, f"{self.current_spec_id}_webhook_inValidation", []) or []
+            schemas = self.webhookInSchema or []
+            self.webhookInValidation = self._align_webhook_rules(rules_list, schemas)
             n_rules = sum(1 for r in self.webhookInValidation if r)
+            n_schemas = sum(1 for s in schemas if s)
+            if n_rules < n_schemas:
+                Logger.error(f"[Webhook] 웹훅 단계 {n_schemas}개 중 규칙이 있는 단계는 {n_rules}개 — "
+                             f"나머지는 규격 검증만 수행됩니다")
             Logger.info(f"[Webhook] 맥락 검증 규칙 로드: {n_rules}개 단계 (spec={self.current_spec_id})")
         except Exception as e:
             Logger.error(f"웹훅 검증 규칙 로드 실패(규격 검증만 수행됨): {e}")
@@ -1796,6 +1815,23 @@ class MyApp(SystemMainUI):
         self.webhook_flag = False
 
     @staticmethod
+    def _effective_protocol(current_protocol, step_buffer):
+        """이번 회차를 실제로 어떤 방식으로 처리했는가.
+
+        시나리오 설정이 WebHook이어도 구독이 거절되면(오류 회차, post()가
+        is_webhook_api=False로 내림) 웹훅 경로를 타지 않는다. 그런데 응답 처리는
+        설정값만 보고 "수신 로그·결과는 웹훅 경로가 찍는다"며 둘 다 건너뛰어,
+        모니터에 응답과 검증 결과가 아예 안 나오고 필드 수도 0/0으로 남았다
+        (2026-09-14 RealtimeVerifEventInfos door9999 회차). 통합시스템 쪽
+        (platformVal_all 거절 시 basic 전환)과 맞춰 일반 응답으로 처리한다.
+        """
+        if (str(current_protocol or "").strip().lower() == "webhook"
+                and isinstance(step_buffer, dict)
+                and not step_buffer.get("is_webhook_api", False)):
+            return "basic"
+        return current_protocol
+
+    @staticmethod
     def _should_emit_primary_result_log(current_protocol, current_retry, current_retries):
         protocol = str(current_protocol or "").strip().lower()
         is_final_attempt = (current_retry + 1) >= current_retries
@@ -2270,6 +2306,10 @@ class MyApp(SystemMainUI):
                             self.num_retries_list) else 1
                         current_protocol = self.trans_protocols[self.cnt] if self.cnt < len(
                             self.trans_protocols) else "Unknown"
+                        current_protocol = self._effective_protocol(
+                            current_protocol,
+                            self.step_buffers[self.cnt] if self.cnt < len(self.step_buffers) else None,
+                        )
 
                         # 단일 응답에 대한 검증 처리
                         from core.utils import replace_transport_desc_for_display
