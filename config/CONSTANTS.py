@@ -148,19 +148,19 @@ none_request_message = ['Capabilities',
                         'SensorDeviceProfiles']
 # 로컬 테스트용 주소
 # test-info -> (주의) auth_info의 id, pw: admin, 1234 아닐 시 digest auth 인증방식 작동하지 않음
-company_name = "필테 - 통합"
-product_name = "필테 - 통합"
-version = "필테 - 통합"
+company_name = "KISA"
+product_name = "올리브유"
+version = "v2.1.0"
 test_category = "본시험"
-test_target = "[필수] 통합 테스트"
-test_range = "필수 필드"
-auth_type = "Digest Auth"
+test_target = "통합시스템/보안용센서/전체/1"
+test_range = "전체 필드"
+auth_type = "Bearer Token"
 auth_info = "kisa,kisa_k1!2@"
 admin_code = "123456"
-url = "https://192.168.1.30:8080"
-contact_person = "필테 - 통합"
-model_name = "필테 - 통합"
-request_id = "cmszckit9011xilyrbf55edkr"
+url = "https://10.20.30.104:8080"
+contact_person = "강정민"
+model_name = "버진엑스트라"
+request_id = "cmu3ln6ru00065ttngatmynia"
 
 # opt 검증 - False 이면 검증 안함, 현재는 루프문에 의해 True인 상황
 flag_opt = False
@@ -210,11 +210,11 @@ DEBUG_LEVEL = 3 # 기본값: WARN (권장)
 WEBHOOK_HOST = "0.0.0.0"  # 서버 바인딩 주소 (모든 인터페이스에서 수신)
 WEBHOOK_PORT = 8081
 WEBHOOK_WINDOW_SEC = 10.0  # ✅ 웹훅 창/대기시간(초) — 시스템 수신·플랫폼 송신·플랫폼 join 공통 (단일 소스, 함께 변경됨)
-WEBHOOK_PUBLIC_IP = "192.168.1.30"
+WEBHOOK_PUBLIC_IP = "10.20.30.104"
 # ✅ 웹훅 공개 IP 설정: info_GUI에서 선택한 시험 URL의 IP 사용
 # 초기값은 URL에서 추출, info_GUI에서 주소 선택 후 자동 업데이트됨
 
-WEBHOOK_URL = "https://192.168.1.30:8081"
+WEBHOOK_URL = "https://10.20.30.104:8081"
 # 주소 선택 후 form_validator.py에서 자동으로 업데이트됨
 
 # ✅ 웹훅 외부 접근 주소 (플랫폼에 전송할 주소 - ngrok 등) (01/08 임시로 추가)
@@ -224,15 +224,38 @@ WEBHOOK_DISPLAY_URL = "https://webhook2026.ngrok.dev"
 
 SPEC_CONFIG = [
     {
-        "group_name": "[필수] 통합 테스트",
-        "group_id": "cmszcjoz4011oilyre63lt0vw",
-        "cmsy90xd705aarc0quh4je1k0": {
-    "test_name": "req_vid001",
-    "specs": ['cmsy90xd705aarc0quh4je1k0_inSchema', 'cmsy90xd705aarc0quh4je1k0_outData', 'cmsy90xd705aarc0quh4je1k0_messages', 'cmsy90xd705aarc0quh4je1k0_webhook_OutSchema', 'cmsy90xd705aarc0quh4je1k0_webhook_inData'],
-    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '카메라 목록 연동', '실시간 영상(CCTV) 전송 ', '실시간 이벤트 분석 정보 연동'],
-    "api_id": ['cmsy91ipk05agrc0qm4x2cf08', 'cmsy93mqm05birc0q5k2fpbqu', 'cmsy99ujz05chrc0qw4kx4kn5', 'cmsyafs4605dprc0qqh72ak77', 'cmsyau2qn05f3rc0qjkcsrloa'],
-    "api_endpoint": ['/Authentication', '/Capabilities', '/CameraProfiles', '/StreamURLs', '/RealtimeVideoEventInfos'],
-    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'WebHook'],
+        "group_name": "통합시스템/보안용센서/전체/1",
+        "group_id": "cmu21fptt01ebu9w6cv14dvlm",
+        "cmsmh2go501w6rc0q4s8zyqdp": {
+    "test_name": "저장 기능",
+    "url_delimiter": "sensor",
+    "specs": ['cmsmh2go501w6rc0q4s8zyqdp_inSchema', 'cmsmh2go501w6rc0q4s8zyqdp_outData', 'cmsmh2go501w6rc0q4s8zyqdp_messages'],
+    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '보안용 센서 단말 목록 정보 연동', '저장된 보안용 센서 이벤트 분석 정보 연동'],
+    "api_id": ['cmsmh2go701w8rc0qjaxy9akj', 'cmsmh2gp901wurc0qkfrpa4b3', 'cmsmh2gpx01xcrc0qldmuwfq1', 'cmsmh2h0p0224rc0qk05ypfml'],
+    "api_endpoint": ['/Authentication', '/Capabilities', '/SensorDeviceProfiles', '/StoredSensorEventInfos'],
+    "trans_protocol": ['basic', 'basic', 'basic', 'basic'],
+    "time_out": [60000, 60000, 60000, 60000],
+    "num_retries": [1, 1, 1, 1]
+},
+        "cmiqr201z00i8ie8fitdg5t1b": {
+    "test_name": "제어 기능",
+    "url_delimiter": "sensor",
+    "specs": ['cmiqr201z00i8ie8fitdg5t1b_inSchema', 'cmiqr201z00i8ie8fitdg5t1b_outData', 'cmiqr201z00i8ie8fitdg5t1b_messages'],
+    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '보안용 센서 단말 목록 정보 연동', '보안용 센서 단말 제어 정보 연동-상태연동', '보안용 센서 단말 제어 정보 연동-제어'],
+    "api_id": ['cmise5c9900jr5vy7j5kdk1z6', 'cmisebj3b00s65vy7377edoan', 'cmiseuulh03d75vy7wmr8iroc', 'cmisfu13v07xs5vy7gthbhp0p', 'cmisge6mr08di5vy7hirl5jp1'],
+    "api_endpoint": ['/Authentication', '/Capabilities', '/SensorDeviceProfiles', '/SensorDeviceControl', '/SensorDeviceControl2'],
+    "trans_protocol": ['basic', 'basic', 'basic', 'basic', 'basic'],
+    "time_out": [60000, 60000, 60000, 60000, 60000],
+    "num_retries": [1, 1, 1, 1, 1]
+},
+        "cmii7shen005i8z1tagevx4qh": {
+    "test_name": "실시간 처리 기능",
+    "url_delimiter": "sensor",
+    "specs": ['cmii7shen005i8z1tagevx4qh_inSchema', 'cmii7shen005i8z1tagevx4qh_outData', 'cmii7shen005i8z1tagevx4qh_messages', 'cmii7shen005i8z1tagevx4qh_webhook_OutSchema', 'cmii7shen005i8z1tagevx4qh_webhook_inData'],
+    "api_name": ['사용자 인증', '전송 지원 기능 정보 연동', '보안용 센서 단말 목록 정보 연동', '실시간 보안용 센서 데이터 정보 연동', '실시간 보안용 센서 이벤트 분석 정보 연동'],
+    "api_id": ['cmii7ubap005m8z1tyhf1yc1r', 'cmiwkc2st000a844gm9yjeqhp', 'cmiwkf9cp003k844gk2elz2wz', 'cmiwkqkje01dz844gz2h21eva', 'cmiwl0xkh02yi844gg45hcjop'],
+    "api_endpoint": ['/Authentication', '/Capabilities', '/SensorDeviceProfiles', '/RealtimeSensorData', '/RealtimeSensorEventInfos'],
+    "trans_protocol": ['basic', 'basic', 'basic', 'WebHook', 'WebHook'],
     "time_out": [60000, 60000, 60000, 60000, 60000],
     "num_retries": [1, 1, 1, 1, 1]
 }
