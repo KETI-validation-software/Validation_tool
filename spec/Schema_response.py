@@ -2,7 +2,7 @@ from json_checker import OptionalKey
 
 
 # Authentication
-cmii7v8pr006g8z1tvo55a50u_Authentication_out_schema = {
+cmtwtwdiz02o1245txoqxczwz_Authentication_out_schema = {
     "code": str,
     "message": str,
     "userName": str,
@@ -11,378 +11,13 @@ cmii7v8pr006g8z1tvo55a50u_Authentication_out_schema = {
 }
 
 # Capabilities
-cmii7v8pr006g8z1tvo55a50u_Capabilities_out_schema = {
+cmtwtwdiz02o1245txoqxczwz_Capabilities_out_schema = {
     "code": str,
     "message": str,
-    "streamingSupport": [{
-    "streamProtocolType": str,
-    "streamProtocolDesc": str,
-}],
-    "transportSupport": [{
-    "transProtocolType": str,
-    "transProtocolDesc": str,
-}],
-}
-
-# CameraProfiles
-cmii7v8pr006g8z1tvo55a50u_CameraProfiles_out_schema = {
-    "code": str,
-    "message": str,
-    "camList": [{
-    "camID": str,
-    "camName": str,
-    OptionalKey("camLoc"): {
-    "lon": str,
-    "lat": str,
-    OptionalKey("alt"): str,
-    OptionalKey("desc"): str,
-},
-    OptionalKey("camConfig"): {
-    "camType": str,
-},
-}],
-}
-
-# StreamURLs
-cmii7v8pr006g8z1tvo55a50u_StreamURLs_out_schema = {
-    "code": str,
-    "message": str,
-    "camList": [{
-    "camID": str,
-    OptionalKey("accessID"): str,
-    OptionalKey("accessPW"): str,
-    "camURL": str,
-    OptionalKey("videoInfo"): {
-    OptionalKey("resolution"): str,
-    OptionalKey("fps"): int,
-    OptionalKey("videoCodec"): str,
-    OptionalKey("audioCodec"): str,
-},
-}],
-}
-
-# RealtimeVideoEventInfos
-cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_out_schema = {
-    "code": str,
-    "message": str,
-}
-
-# RealtimeVideoEventInfos WebHook IN Schema
-cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_webhook_in_schema = {
-    "camList": [{
-    "camID": str,
-    "eventUUID": str,
-    "eventName": str,
-    "startTime": str,
-    OptionalKey("endTime"): str,
-    OptionalKey("eventDesc"): str,
-}],
-}
-
-# cmii7v8pr006g8z1tvo55a50u 스키마 리스트
-cmii7v8pr006g8z1tvo55a50u_outSchema = [
-    cmii7v8pr006g8z1tvo55a50u_Authentication_out_schema,
-    cmii7v8pr006g8z1tvo55a50u_Capabilities_out_schema,
-    cmii7v8pr006g8z1tvo55a50u_CameraProfiles_out_schema,
-    cmii7v8pr006g8z1tvo55a50u_StreamURLs_out_schema,
-    cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_out_schema,
-]
-
-# cmii7v8pr006g8z1tvo55a50u WebHook 스키마 리스트
-cmii7v8pr006g8z1tvo55a50u_webhook_inSchema = [
-    None,
-    None,
-    None,
-    None,
-    cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_webhook_in_schema,
-]
-
-# Authentication
-cmsmj2a0g037grc0qddx8wie2_Authentication_out_schema = {
-    "code": str,
-    "message": str,
-    "userName": str,
-    "userAff": str,
-    OptionalKey("accessToken"): str,
-}
-
-# Capabilities
-cmsmj2a0g037grc0qddx8wie2_Capabilities_out_schema = {
-    "code": str,
-    "message": str,
-    "transportSupport": [{
-    "transProtocolType": str,
-    OptionalKey("transProtocolDesc"): str,
-}],
-}
-
-# SensorDeviceProfiles
-cmsmj2a0g037grc0qddx8wie2_SensorDeviceProfiles_out_schema = {
-    "code": str,
-    "message": str,
-    "sensorDeviceList": [{
-    "sensorDeviceID": str,
-    "sensorDeviceType": str,
-    "sensorDeviceName": str,
-    OptionalKey("sensorDeviceLoc"): {
-    "lon": str,
-    "lat": str,
-    OptionalKey("alt"): str,
-    OptionalKey("desc"): str,
-},
-}],
-}
-
-# StoredSensorEventInfos
-cmsmj2a0g037grc0qddx8wie2_StoredSensorEventInfos_out_schema = {
-    "code": str,
-    "message": str,
-    "sensorDeviceList": [{
-    "sensorDeviceID": str,
-    "eventName": str,
-    "eventTime": str,
-    OptionalKey("eventDesc"): str,
-}],
-}
-
-# cmsmj2a0g037grc0qddx8wie2 스키마 리스트
-cmsmj2a0g037grc0qddx8wie2_outSchema = [
-    cmsmj2a0g037grc0qddx8wie2_Authentication_out_schema,
-    cmsmj2a0g037grc0qddx8wie2_Capabilities_out_schema,
-    cmsmj2a0g037grc0qddx8wie2_SensorDeviceProfiles_out_schema,
-    cmsmj2a0g037grc0qddx8wie2_StoredSensorEventInfos_out_schema,
-]
-
-# Authentication
-cmsmiz4rk030drc0qgs8hvb18_Authentication_out_schema = {
-    "code": str,
-    "message": str,
-    "userName": str,
-    "userAff": str,
-    OptionalKey("accessToken"): str,
-}
-
-# Capabilities
-cmsmiz4rk030drc0qgs8hvb18_Capabilities_out_schema = {
-    "code": str,
-    "message": str,
-    "transportSupport": [{
-    "transProtocolType": str,
-    OptionalKey("transProtocolDesc"): str,
-}],
 }
 
 # DoorProfiles
-cmsmiz4rk030drc0qgs8hvb18_DoorProfiles_out_schema = {
-    "code": str,
-    "message": str,
-    "doorList": [{
-    "doorID": str,
-    "doorName": str,
-    "doorRelayStatus": str,
-    OptionalKey("doorSensor"): str,
-    OptionalKey("doorLoc"): {
-    "lon": str,
-    "lat": str,
-    OptionalKey("alt"): str,
-    OptionalKey("desc"): str,
-},
-    OptionalKey("bioDeviceList"): [{
-    OptionalKey("bioDeviceID"): str,
-    OptionalKey("bioDeviceName"): str,
-    "bioDeviceAuthTypeList": [str],
-}],
-    OptionalKey("otherDeviceList"): [{
-    OptionalKey("otherDeviceID"): str,
-    OptionalKey("otherDeviceName"): str,
-    "otherDeviceAuthTypeList": [str],
-}],
-}],
-}
-
-# AccessUserInfos
-cmsmiz4rk030drc0qgs8hvb18_AccessUserInfos_out_schema = {
-    "code": str,
-    "message": str,
-    "userList": [{
-    "userID": str,
-    "userName": str,
-    OptionalKey("userDesc"): str,
-    "doorList": [{
-    "doorID": str,
-    "timePeriod": {
-    "startTime": str,
-    "endTime": str,
-},
-}],
-}],
-}
-
-# StoredVerifEventInfos
-cmsmiz4rk030drc0qgs8hvb18_StoredVerifEventInfos_out_schema = {
-    "code": str,
-    "message": str,
-    "doorList": [{
-    "eventTime": str,
-    "doorID": str,
-    OptionalKey("userID"): str,
-    OptionalKey("bioAuthTypeList"): [str],
-    OptionalKey("otherAuthTypeList"): [str],
-    "eventName": str,
-}],
-}
-
-# cmsmiz4rk030drc0qgs8hvb18 스키마 리스트
-cmsmiz4rk030drc0qgs8hvb18_outSchema = [
-    cmsmiz4rk030drc0qgs8hvb18_Authentication_out_schema,
-    cmsmiz4rk030drc0qgs8hvb18_Capabilities_out_schema,
-    cmsmiz4rk030drc0qgs8hvb18_DoorProfiles_out_schema,
-    cmsmiz4rk030drc0qgs8hvb18_AccessUserInfos_out_schema,
-    cmsmiz4rk030drc0qgs8hvb18_StoredVerifEventInfos_out_schema,
-]
-
-# Authentication
-cmsmhhyl502ncrc0qnjtvbt43_Authentication_out_schema = {
-    "code": str,
-    "message": str,
-    "userName": str,
-    "userAff": str,
-    OptionalKey("accessToken"): str,
-}
-
-# Capabilities
-cmsmhhyl502ncrc0qnjtvbt43_Capabilities_out_schema = {
-    "code": str,
-    "message": str,
-    "streamingSupport": [{
-    "streamProtocolType": str,
-    "streamProtocolDesc": str,
-}],
-    "transportSupport": [{
-    "transProtocolType": str,
-    "transProtocolDesc": str,
-}],
-}
-
-# CameraProfiles
-cmsmhhyl502ncrc0qnjtvbt43_CameraProfiles_out_schema = {
-    "code": str,
-    "message": str,
-    "camList": [{
-    "camID": str,
-    "camName": str,
-    OptionalKey("camLoc"): {
-    "lon": str,
-    "lat": str,
-    OptionalKey("alt"): str,
-    OptionalKey("desc"): str,
-},
-    OptionalKey("camConfig"): {
-    "camType": str,
-},
-}],
-}
-
-# StoredVideoInfos
-cmsmhhyl502ncrc0qnjtvbt43_StoredVideoInfos_out_schema = {
-    "code": str,
-    "message": str,
-    "camList": [{
-    "camID": str,
-    "timeList": [{
-    "startTime": str,
-    OptionalKey("endTime"): str,
-}],
-}],
-}
-
-# ReplayURL
-cmsmhhyl502ncrc0qnjtvbt43_ReplayURL_out_schema = {
-    "code": str,
-    "message": str,
-    OptionalKey("camList"): [{
-    "camID": str,
-    OptionalKey("accessID"): str,
-    OptionalKey("accessPW"): str,
-    "camURL": str,
-    OptionalKey("videoInfo"): {
-    OptionalKey("resolution"): str,
-    OptionalKey("fps"): int,
-    OptionalKey("videoCodec"): str,
-    OptionalKey("audioCodec"): str,
-},
-}],
-}
-
-# StoredVideoEventInfos
-cmsmhhyl502ncrc0qnjtvbt43_StoredVideoEventInfos_out_schema = {
-    "code": str,
-    "message": str,
-    "camList": [{
-    "camID": str,
-    "eventUUID": str,
-    "eventName": str,
-    "startTime": str,
-    OptionalKey("endTime"): str,
-    OptionalKey("eventDesc"): str,
-}],
-}
-
-# StoredObjectAnalyticsInfos
-cmsmhhyl502ncrc0qnjtvbt43_StoredObjectAnalyticsInfos_out_schema = {
-    "code": str,
-    "message": str,
-    OptionalKey("camList"): [{
-    "camID": str,
-    "analyticsTime": str,
-    "anlayticsResultList": [{
-    "anayticsID": str,
-    "analyticsClass": str,
-    OptionalKey("analyticsAttribute"): [str],
-    OptionalKey("analyticsConfidence"): int,
-    OptionalKey("analyticsBoundingBox"): {
-    "left": int,
-    "top": int,
-    "right": int,
-    "bottom": int,
-},
-    OptionalKey("analyticsDesc"): str,
-}],
-}],
-}
-
-# cmsmhhyl502ncrc0qnjtvbt43 스키마 리스트
-cmsmhhyl502ncrc0qnjtvbt43_outSchema = [
-    cmsmhhyl502ncrc0qnjtvbt43_Authentication_out_schema,
-    cmsmhhyl502ncrc0qnjtvbt43_Capabilities_out_schema,
-    cmsmhhyl502ncrc0qnjtvbt43_CameraProfiles_out_schema,
-    cmsmhhyl502ncrc0qnjtvbt43_StoredVideoInfos_out_schema,
-    cmsmhhyl502ncrc0qnjtvbt43_ReplayURL_out_schema,
-    cmsmhhyl502ncrc0qnjtvbt43_StoredVideoEventInfos_out_schema,
-    cmsmhhyl502ncrc0qnjtvbt43_StoredObjectAnalyticsInfos_out_schema,
-]
-
-# Authentication
-cmiqr1jha00i6ie8fb1scb3go_Authentication_out_schema = {
-    "code": str,
-    "message": str,
-    "userName": str,
-    "userAff": str,
-    OptionalKey("accessToken"): str,
-}
-
-# Capabilities
-cmiqr1jha00i6ie8fb1scb3go_Capabilities_out_schema = {
-    "code": str,
-    "message": str,
-    "transportSupport": [{
-    "transProtocolType": str,
-    OptionalKey("transProtocolDesc"): str,
-}],
-}
-
-# DoorProfiles
-cmiqr1jha00i6ie8fb1scb3go_DoorProfiles_out_schema = {
+cmtwtwdiz02o1245txoqxczwz_DoorProfiles_out_schema = {
     "code": str,
     "message": str,
     "doorList": [{
@@ -410,35 +45,9 @@ cmiqr1jha00i6ie8fb1scb3go_DoorProfiles_out_schema = {
 }
 
 # RealtimeDoorStatus
-cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_out_schema = {
+cmtwtwdiz02o1245txoqxczwz_RealtimeDoorStatus_out_schema = {
     "code": str,
     "message": str,
-}
-
-# RealtimeDoorStatus WebHook IN Schema
-cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_webhook_in_schema = {
-    "doorList": [{
-    "doorID": str,
-    "doorName": str,
-    OptionalKey("doorRelaySensor"): str,
-    "doorSensor": str,
-}],
-}
-
-# DoorControl
-cmiqr1jha00i6ie8fb1scb3go_DoorControl_out_schema = {
-    "code": str,
-    "message": str,
-}
-
-# RealtimeDoorStatus2
-cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_out_schema = {
-    "code": str,
-    "message": str,
-}
-
-# RealtimeDoorStatus2 WebHook IN Schema
-cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_webhook_in_schema = {
     "doorList": [{
     "doorID": str,
     "doorName": str,
@@ -447,28 +56,30 @@ cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_webhook_in_schema = {
 }],
 }
 
-# cmiqr1jha00i6ie8fb1scb3go 스키마 리스트
-cmiqr1jha00i6ie8fb1scb3go_outSchema = [
-    cmiqr1jha00i6ie8fb1scb3go_Authentication_out_schema,
-    cmiqr1jha00i6ie8fb1scb3go_Capabilities_out_schema,
-    cmiqr1jha00i6ie8fb1scb3go_DoorProfiles_out_schema,
-    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_out_schema,
-    cmiqr1jha00i6ie8fb1scb3go_DoorControl_out_schema,
-    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_out_schema,
-]
+# DoorControl
+cmtwtwdiz02o1245txoqxczwz_DoorControl_out_schema = {
+    "code": str,
+    "message": str,
+}
 
-# cmiqr1jha00i6ie8fb1scb3go WebHook 스키마 리스트
-cmiqr1jha00i6ie8fb1scb3go_webhook_inSchema = [
-    None,
-    None,
-    None,
-    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_webhook_in_schema,
-    None,
-    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_webhook_in_schema,
+# RealtimeDoorStatus2
+cmtwtwdiz02o1245txoqxczwz_RealtimeDoorStatus2_out_schema = {
+    "code": str,
+    "message": str,
+}
+
+# cmtwtwdiz02o1245txoqxczwz 스키마 리스트
+cmtwtwdiz02o1245txoqxczwz_outSchema = [
+    cmtwtwdiz02o1245txoqxczwz_Authentication_out_schema,
+    cmtwtwdiz02o1245txoqxczwz_Capabilities_out_schema,
+    cmtwtwdiz02o1245txoqxczwz_DoorProfiles_out_schema,
+    cmtwtwdiz02o1245txoqxczwz_RealtimeDoorStatus_out_schema,
+    cmtwtwdiz02o1245txoqxczwz_DoorControl_out_schema,
+    cmtwtwdiz02o1245txoqxczwz_RealtimeDoorStatus2_out_schema,
 ]
 
 # Authentication
-cmiqr2b9j00i9ie8frw439h8i_Authentication_out_schema = {
+cmtwtvuyb02i1245t2su90084_Authentication_out_schema = {
     "code": str,
     "message": str,
     "userName": str,
@@ -477,245 +88,13 @@ cmiqr2b9j00i9ie8frw439h8i_Authentication_out_schema = {
 }
 
 # Capabilities
-cmiqr2b9j00i9ie8frw439h8i_Capabilities_out_schema = {
+cmtwtvuyb02i1245t2su90084_Capabilities_out_schema = {
     "code": str,
     "message": str,
-    "transportSupport": [{
-    "transProtocolType": str,
-    OptionalKey("transProtocolDesc"): str,
-}],
-}
-
-# SensorDeviceProfiles
-cmiqr2b9j00i9ie8frw439h8i_SensorDeviceProfiles_out_schema = {
-    "code": str,
-    "message": str,
-    "sensorDeviceList": [{
-    "sensorDeviceID": str,
-    "sensorDeviceType": str,
-    "sensorDeviceName": str,
-    OptionalKey("sensorDeviceLoc"): {
-    "lon": str,
-    "lat": str,
-    OptionalKey("alt"): str,
-    OptionalKey("desc"): str,
-},
-}],
-}
-
-# SensorDeviceControl
-cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl_out_schema = {
-    "code": str,
-    "message": str,
-    "sensorDeviceID": str,
-    "sensorDeviceStatus": str,
-}
-
-# SensorDeviceControl2
-cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl2_out_schema = {
-    "code": str,
-    "message": str,
-    "sensorDeviceID": str,
-    "sensorDeviceStatus": str,
-}
-
-# cmiqr2b9j00i9ie8frw439h8i 스키마 리스트
-cmiqr2b9j00i9ie8frw439h8i_outSchema = [
-    cmiqr2b9j00i9ie8frw439h8i_Authentication_out_schema,
-    cmiqr2b9j00i9ie8frw439h8i_Capabilities_out_schema,
-    cmiqr2b9j00i9ie8frw439h8i_SensorDeviceProfiles_out_schema,
-    cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl_out_schema,
-    cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl2_out_schema,
-]
-
-# Authentication
-cmiqr0kdw00i4ie8fr3firjtg_Authentication_out_schema = {
-    "code": str,
-    "message": str,
-    "userName": str,
-    "userAff": str,
-    OptionalKey("accessToken"): str,
-}
-
-# Capabilities
-cmiqr0kdw00i4ie8fr3firjtg_Capabilities_out_schema = {
-    "code": str,
-    "message": str,
-    "streamingSupport": [{
-    "streamProtocolType": str,
-    OptionalKey("streamProtocolDesc"): str,
-}],
-    "transportSupport": [{
-    "transProtocolType": str,
-    OptionalKey("transProtocolDesc"): str,
-}],
-}
-
-# CameraProfiles
-cmiqr0kdw00i4ie8fr3firjtg_CameraProfiles_out_schema = {
-    "code": str,
-    "message": str,
-    "camList": [{
-    "camID": str,
-    "camName": str,
-    OptionalKey("camLoc"): {
-    "lon": str,
-    "lat": str,
-    OptionalKey("alt"): str,
-    OptionalKey("desc"): str,
-},
-    OptionalKey("camConfig"): {
-    "camType": str,
-},
-}],
-}
-
-# PtzStatus
-cmiqr0kdw00i4ie8fr3firjtg_PtzStatus_out_schema = {
-    "code": str,
-    "message": str,
-    OptionalKey("position"): {
-    OptionalKey("pan"): int,
-    OptionalKey("tilt"): int,
-    OptionalKey("zoom"): int,
-},
-    "moveStatus": {
-    OptionalKey("pan"): str,
-    OptionalKey("tilt"): str,
-    OptionalKey("zoom"): str,
-},
-}
-
-# PtzContinuousMove
-cmiqr0kdw00i4ie8fr3firjtg_PtzContinuousMove_out_schema = {
-    "code": str,
-    "message": str,
-}
-
-# PtzStop
-cmiqr0kdw00i4ie8fr3firjtg_PtzStop_out_schema = {
-    "code": str,
-    "message": str,
-}
-
-# cmiqr0kdw00i4ie8fr3firjtg 스키마 리스트
-cmiqr0kdw00i4ie8fr3firjtg_outSchema = [
-    cmiqr0kdw00i4ie8fr3firjtg_Authentication_out_schema,
-    cmiqr0kdw00i4ie8fr3firjtg_Capabilities_out_schema,
-    cmiqr0kdw00i4ie8fr3firjtg_CameraProfiles_out_schema,
-    cmiqr0kdw00i4ie8fr3firjtg_PtzStatus_out_schema,
-    cmiqr0kdw00i4ie8fr3firjtg_PtzContinuousMove_out_schema,
-    cmiqr0kdw00i4ie8fr3firjtg_PtzStop_out_schema,
-]
-
-# Authentication
-cmii7wfuf006i8z1tcds6q69g_Authentication_out_schema = {
-    "code": str,
-    "message": str,
-    "userName": str,
-    "userAff": str,
-    OptionalKey("accessToken"): str,
-}
-
-# Capabilities
-cmii7wfuf006i8z1tcds6q69g_Capabilities_out_schema = {
-    "code": str,
-    "message": str,
-    "transportSupport": [{
-    "transProtocolType": str,
-    OptionalKey("transProtocolDesc"): str,
-}],
-}
-
-# SensorDeviceProfiles
-cmii7wfuf006i8z1tcds6q69g_SensorDeviceProfiles_out_schema = {
-    "code": str,
-    "message": str,
-    "sensorDeviceList": [{
-    "sensorDeviceID": str,
-    "sensorDeviceType": str,
-    "sensorDeviceName": str,
-    OptionalKey("sensorDeviceLoc"): {
-    "lon": str,
-    "lat": str,
-    OptionalKey("alt"): str,
-    OptionalKey("desc"): str,
-},
-}],
-}
-
-# RealtimeSensorData
-cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_out_schema = {
-    "code": str,
-    "message": str,
-}
-
-# RealtimeSensorData WebHook IN Schema
-cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_webhook_in_schema = {
-    "sensorDeviceList": [{
-    "sensorDeviceID": str,
-    "measureTime": str,
-    "sensorDeviceType": str,
-    "sensorDeviceUnit": str,
-    "sensorDeviceValue": str,
-}],
-}
-
-# RealtimeSensorEventInfos
-cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_out_schema = {
-    "code": str,
-    "message": str,
-}
-
-# RealtimeSensorEventInfos WebHook IN Schema
-cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_webhook_in_schema = {
-    "sensorDeviceList": [{
-    "sensorDeviceID": str,
-    "eventName": str,
-    "eventTime": str,
-    OptionalKey("eventDesc"): str,
-}],
-}
-
-# cmii7wfuf006i8z1tcds6q69g 스키마 리스트
-cmii7wfuf006i8z1tcds6q69g_outSchema = [
-    cmii7wfuf006i8z1tcds6q69g_Authentication_out_schema,
-    cmii7wfuf006i8z1tcds6q69g_Capabilities_out_schema,
-    cmii7wfuf006i8z1tcds6q69g_SensorDeviceProfiles_out_schema,
-    cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_out_schema,
-    cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_out_schema,
-]
-
-# cmii7wfuf006i8z1tcds6q69g WebHook 스키마 리스트
-cmii7wfuf006i8z1tcds6q69g_webhook_inSchema = [
-    None,
-    None,
-    None,
-    cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_webhook_in_schema,
-    cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_webhook_in_schema,
-]
-
-# Authentication
-cmii7w683006h8z1t7usnin5g_Authentication_out_schema = {
-    "code": str,
-    "message": str,
-    "userName": str,
-    "userAff": str,
-    OptionalKey("accessToken"): str,
-}
-
-# Capabilities
-cmii7w683006h8z1t7usnin5g_Capabilities_out_schema = {
-    "code": str,
-    "message": str,
-    "transportSupport": [{
-    "transProtocolType": str,
-    OptionalKey("transProtocolDesc"): str,
-}],
 }
 
 # DoorProfiles
-cmii7w683006h8z1t7usnin5g_DoorProfiles_out_schema = {
+cmtwtvuyb02i1245t2su90084_DoorProfiles_out_schema = {
     "code": str,
     "message": str,
     "doorList": [{
@@ -743,7 +122,83 @@ cmii7w683006h8z1t7usnin5g_DoorProfiles_out_schema = {
 }
 
 # AccessUserInfos
-cmii7w683006h8z1t7usnin5g_AccessUserInfos_out_schema = {
+cmtwtvuyb02i1245t2su90084_AccessUserInfos_out_schema = {
+    "code": str,
+    "message": str,
+    "userList": [{
+    "userID": str,
+    "userName": str,
+    OptionalKey("userDesc"): str,
+    "doorList": [{
+    "doorID": str,
+    "timePeriod": {
+    "startTime": str,
+    "endTime": str,
+},
+}],
+}],
+}
+
+# StoredVerifEventInfos
+cmtwtvuyb02i1245t2su90084_StoredVerifEventInfos_out_schema = {
+    "code": str,
+    "message": str,
+}
+
+# cmtwtvuyb02i1245t2su90084 스키마 리스트
+cmtwtvuyb02i1245t2su90084_outSchema = [
+    cmtwtvuyb02i1245t2su90084_Authentication_out_schema,
+    cmtwtvuyb02i1245t2su90084_Capabilities_out_schema,
+    cmtwtvuyb02i1245t2su90084_DoorProfiles_out_schema,
+    cmtwtvuyb02i1245t2su90084_AccessUserInfos_out_schema,
+    cmtwtvuyb02i1245t2su90084_StoredVerifEventInfos_out_schema,
+]
+
+# Authentication
+cmtwtvjfm02br245tbzi9gej7_Authentication_out_schema = {
+    "code": str,
+    "message": str,
+    "userName": str,
+    "userAff": str,
+    OptionalKey("accessToken"): str,
+}
+
+# Capabilities
+cmtwtvjfm02br245tbzi9gej7_Capabilities_out_schema = {
+    "code": str,
+    "message": str,
+}
+
+# DoorProfiles
+cmtwtvjfm02br245tbzi9gej7_DoorProfiles_out_schema = {
+    "code": str,
+    "message": str,
+    "doorList": [{
+    "doorID": str,
+    "doorName": str,
+    "doorRelayStatus": str,
+    OptionalKey("doorSensor"): str,
+    OptionalKey("doorLoc"): {
+    "lon": str,
+    "lat": str,
+    OptionalKey("alt"): str,
+    OptionalKey("desc"): str,
+},
+    OptionalKey("bioDeviceList"): [{
+    OptionalKey("bioDeviceID"): str,
+    OptionalKey("bioDeviceName"): str,
+    "bioDeviceAuthTypeList": [str],
+}],
+    OptionalKey("otherDeviceList"): [{
+    OptionalKey("otherDeviceID"): str,
+    OptionalKey("otherDeviceName"): str,
+    "otherDeviceAuthTypeList": [str],
+}],
+}],
+}
+
+# AccessUserInfos
+cmtwtvjfm02br245tbzi9gej7_AccessUserInfos_out_schema = {
     "code": str,
     "message": str,
     "userList": [{
@@ -761,13 +216,13 @@ cmii7w683006h8z1t7usnin5g_AccessUserInfos_out_schema = {
 }
 
 # RealtimeVerifEventInfos
-cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_out_schema = {
+cmtwtvjfm02br245tbzi9gej7_RealtimeVerifEventInfos_out_schema = {
     "code": str,
     "message": str,
 }
 
 # RealtimeVerifEventInfos WebHook IN Schema
-cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_webhook_in_schema = {
+cmtwtvjfm02br245tbzi9gej7_RealtimeVerifEventInfos_webhook_in_schema = {
     "doorList": [{
     "eventTime": str,
     "doorID": str,
@@ -779,21 +234,299 @@ cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_webhook_in_schema = {
 }],
 }
 
-# cmii7w683006h8z1t7usnin5g 스키마 리스트
-cmii7w683006h8z1t7usnin5g_outSchema = [
-    cmii7w683006h8z1t7usnin5g_Authentication_out_schema,
-    cmii7w683006h8z1t7usnin5g_Capabilities_out_schema,
-    cmii7w683006h8z1t7usnin5g_DoorProfiles_out_schema,
-    cmii7w683006h8z1t7usnin5g_AccessUserInfos_out_schema,
-    cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_out_schema,
+# cmtwtvjfm02br245tbzi9gej7 스키마 리스트
+cmtwtvjfm02br245tbzi9gej7_outSchema = [
+    cmtwtvjfm02br245tbzi9gej7_Authentication_out_schema,
+    cmtwtvjfm02br245tbzi9gej7_Capabilities_out_schema,
+    cmtwtvjfm02br245tbzi9gej7_DoorProfiles_out_schema,
+    cmtwtvjfm02br245tbzi9gej7_AccessUserInfos_out_schema,
+    cmtwtvjfm02br245tbzi9gej7_RealtimeVerifEventInfos_out_schema,
 ]
 
-# cmii7w683006h8z1t7usnin5g WebHook 스키마 리스트
-cmii7w683006h8z1t7usnin5g_webhook_inSchema = [
+# cmtwtvjfm02br245tbzi9gej7 WebHook 스키마 리스트
+cmtwtvjfm02br245tbzi9gej7_webhook_inSchema = [
     None,
     None,
     None,
     None,
-    cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_webhook_in_schema,
+    cmtwtvjfm02br245tbzi9gej7_RealtimeVerifEventInfos_webhook_in_schema,
+]
+
+# Authentication
+cmtwil1oo00ztt4ht7y9se1ur_Authentication_out_schema = {
+    "code": str,
+    "message": str,
+    "userName": str,
+    "userAff": str,
+    OptionalKey("accessToken"): str,
+}
+
+# Capabilities
+cmtwil1oo00ztt4ht7y9se1ur_Capabilities_out_schema = {
+    "code": str,
+    "message": str,
+    "transportSupport": [{
+    "transProtocolType": str,
+    OptionalKey("transProtocolDesc"): str,
+}],
+}
+
+# DoorProfiles
+cmtwil1oo00ztt4ht7y9se1ur_DoorProfiles_out_schema = {
+    "code": str,
+    "message": str,
+    "doorList": [{
+    "doorID": str,
+    "doorName": str,
+    "doorRelayStatus": str,
+    OptionalKey("doorSensor"): str,
+    OptionalKey("doorLoc"): {
+    "lon": str,
+    "lat": str,
+    OptionalKey("alt"): str,
+    OptionalKey("desc"): str,
+},
+    OptionalKey("bioDeviceList"): [{
+    OptionalKey("bioDeviceID"): str,
+    OptionalKey("bioDeviceName"): str,
+    "bioDeviceAuthTypeList": [str],
+}],
+    OptionalKey("otherDeviceList"): [{
+    OptionalKey("otherDeviceID"): str,
+    OptionalKey("otherDeviceName"): str,
+    "otherDeviceAuthTypeList": [str],
+}],
+}],
+}
+
+# RealtimeDoorStatus
+cmtwil1oo00ztt4ht7y9se1ur_RealtimeDoorStatus_out_schema = {
+    "code": str,
+    "message": str,
+    "doorList": [{
+    "doorID": str,
+    "doorName": str,
+    "doorRelaySensor": str,
+    "doorSensor": str,
+}],
+}
+
+# DoorControl
+cmtwil1oo00ztt4ht7y9se1ur_DoorControl_out_schema = {
+    "code": str,
+    "message": str,
+}
+
+# RealtimeDoorStatus2
+cmtwil1oo00ztt4ht7y9se1ur_RealtimeDoorStatus2_out_schema = {
+    "code": str,
+    "message": str,
+    "doorList": [{
+    "doorID": str,
+    "doorName": str,
+    OptionalKey("doorRelaySensor"): str,
+    OptionalKey("doorSensor"): str,
+}],
+}
+
+# cmtwil1oo00ztt4ht7y9se1ur 스키마 리스트
+cmtwil1oo00ztt4ht7y9se1ur_outSchema = [
+    cmtwil1oo00ztt4ht7y9se1ur_Authentication_out_schema,
+    cmtwil1oo00ztt4ht7y9se1ur_Capabilities_out_schema,
+    cmtwil1oo00ztt4ht7y9se1ur_DoorProfiles_out_schema,
+    cmtwil1oo00ztt4ht7y9se1ur_RealtimeDoorStatus_out_schema,
+    cmtwil1oo00ztt4ht7y9se1ur_DoorControl_out_schema,
+    cmtwil1oo00ztt4ht7y9se1ur_RealtimeDoorStatus2_out_schema,
+]
+
+# Authentication
+cmtwfeiw4003dt4htizadqzzr_Authentication_out_schema = {
+    "code": str,
+    "message": str,
+    "userName": str,
+    "userAff": str,
+    OptionalKey("accessToken"): str,
+}
+
+# Capabilities
+cmtwfeiw4003dt4htizadqzzr_Capabilities_out_schema = {
+    "code": str,
+    "message": str,
+    "transportSupport": [{
+    "transProtocolType": str,
+    OptionalKey("transProtocolDesc"): str,
+}],
+}
+
+# DoorProfiles
+cmtwfeiw4003dt4htizadqzzr_DoorProfiles_out_schema = {
+    "code": str,
+    "message": str,
+    "doorList": [{
+    "doorID": str,
+    "doorName": str,
+    "doorRelayStatus": str,
+    OptionalKey("doorSensor"): str,
+    OptionalKey("doorLoc"): {
+    "lon": str,
+    "lat": str,
+    OptionalKey("alt"): str,
+    OptionalKey("desc"): str,
+},
+    OptionalKey("bioDeviceList"): [{
+    OptionalKey("bioDeviceID"): str,
+    OptionalKey("bioDeviceName"): str,
+    "bioDeviceAuthTypeList": [str],
+}],
+    OptionalKey("otherDeviceList"): [{
+    OptionalKey("otherDeviceID"): str,
+    OptionalKey("otherDeviceName"): str,
+    "otherDeviceAuthTypeList": [str],
+}],
+}],
+}
+
+# AccessUserInfos
+cmtwfeiw4003dt4htizadqzzr_AccessUserInfos_out_schema = {
+    "code": str,
+    "message": str,
+    "userList": [{
+    "userID": str,
+    "userName": str,
+    OptionalKey("userDesc"): str,
+    "doorList": [{
+    "doorID": str,
+    "timePeriod": {
+    "startTime": str,
+    "endTime": str,
+},
+}],
+}],
+}
+
+# StoredVerifEventInfos
+cmtwfeiw4003dt4htizadqzzr_StoredVerifEventInfos_out_schema = {
+    "code": str,
+    "message": str,
+    "doorList": [{
+    "eventTime": str,
+    "doorID": str,
+    OptionalKey("userID"): str,
+    OptionalKey("bioAuthTypeList"): [str],
+    OptionalKey("otherAuthTypeList"): [str],
+    "eventName": str,
+    "eventDesc": str,
+}],
+}
+
+# cmtwfeiw4003dt4htizadqzzr 스키마 리스트
+cmtwfeiw4003dt4htizadqzzr_outSchema = [
+    cmtwfeiw4003dt4htizadqzzr_Authentication_out_schema,
+    cmtwfeiw4003dt4htizadqzzr_Capabilities_out_schema,
+    cmtwfeiw4003dt4htizadqzzr_DoorProfiles_out_schema,
+    cmtwfeiw4003dt4htizadqzzr_AccessUserInfos_out_schema,
+    cmtwfeiw4003dt4htizadqzzr_StoredVerifEventInfos_out_schema,
+]
+
+# Authentication
+cmtw8wcts00o1126muckytfg2_Authentication_out_schema = {
+    "code": str,
+    "message": str,
+    "userName": str,
+    "userAff": str,
+    OptionalKey("accessToken"): str,
+}
+
+# Capabilities
+cmtw8wcts00o1126muckytfg2_Capabilities_out_schema = {
+    "code": str,
+    "message": str,
+    "transportSupport": [{
+    "transProtocolType": str,
+    OptionalKey("transProtocolDesc"): str,
+}],
+}
+
+# DoorProfiles
+cmtw8wcts00o1126muckytfg2_DoorProfiles_out_schema = {
+    "code": str,
+    "message": str,
+    "doorList": [{
+    "doorID": str,
+    "doorName": str,
+    "doorRelayStatus": str,
+    OptionalKey("doorSensor"): str,
+    OptionalKey("doorLoc"): {
+    "lon": str,
+    "lat": str,
+    OptionalKey("alt"): str,
+    OptionalKey("desc"): str,
+},
+    OptionalKey("bioDeviceList"): [{
+    OptionalKey("bioDeviceID"): str,
+    OptionalKey("bioDeviceName"): str,
+    "bioDeviceAuthTypeList": [str],
+}],
+    OptionalKey("otherDeviceList"): [{
+    OptionalKey("otherDeviceID"): str,
+    OptionalKey("otherDeviceName"): str,
+    "otherDeviceAuthTypeList": [str],
+}],
+}],
+}
+
+# AccessUserInfos
+cmtw8wcts00o1126muckytfg2_AccessUserInfos_out_schema = {
+    "code": str,
+    "message": str,
+    "userList": [{
+    "userID": str,
+    "userName": str,
+    OptionalKey("userDesc"): str,
+    "doorList": [{
+    "doorID": str,
+    "timePeriod": {
+    "startTime": str,
+    "endTime": str,
+},
+}],
+}],
+}
+
+# RealtimeVerifEventInfos
+cmtw8wcts00o1126muckytfg2_RealtimeVerifEventInfos_out_schema = {
+    "code": str,
+    "message": str,
+}
+
+# RealtimeVerifEventInfos WebHook IN Schema
+cmtw8wcts00o1126muckytfg2_RealtimeVerifEventInfos_webhook_in_schema = {
+    "doorList": [{
+    "eventTime": str,
+    "doorID": str,
+    OptionalKey("userID"): str,
+    OptionalKey("bioAuthTypeList"): [str],
+    OptionalKey("otherAuthTypeList"): [str],
+    "eventName": str,
+    OptionalKey("eventDesc"): str,
+}],
+}
+
+# cmtw8wcts00o1126muckytfg2 스키마 리스트
+cmtw8wcts00o1126muckytfg2_outSchema = [
+    cmtw8wcts00o1126muckytfg2_Authentication_out_schema,
+    cmtw8wcts00o1126muckytfg2_Capabilities_out_schema,
+    cmtw8wcts00o1126muckytfg2_DoorProfiles_out_schema,
+    cmtw8wcts00o1126muckytfg2_AccessUserInfos_out_schema,
+    cmtw8wcts00o1126muckytfg2_RealtimeVerifEventInfos_out_schema,
+]
+
+# cmtw8wcts00o1126muckytfg2 WebHook 스키마 리스트
+cmtw8wcts00o1126muckytfg2_webhook_inSchema = [
+    None,
+    None,
+    None,
+    None,
+    cmtw8wcts00o1126muckytfg2_RealtimeVerifEventInfos_webhook_in_schema,
 ]
 

@@ -1,14 +1,207 @@
 # Authentication
-cmii7v8pr006g8z1tvo55a50u_Authentication_out_validation = {}
+cmtwtwdiz02o1245txoqxczwz_Authentication_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "200"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "성공"
+    ],
+    "score": 0
+  }
+}
 
 # Capabilities
-cmii7v8pr006g8z1tvo55a50u_Capabilities_out_validation = {}
+cmtwtwdiz02o1245txoqxczwz_Capabilities_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "403"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "권한 없음"
+    ],
+    "score": 0
+  }
+}
 
-# CameraProfiles
-cmii7v8pr006g8z1tvo55a50u_CameraProfiles_out_validation = {}
+# DoorProfiles
+cmtwtwdiz02o1245txoqxczwz_DoorProfiles_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "200"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "성공"
+    ],
+    "score": 0
+  },
+  "doorList": {
+    "enabled": True,
+    "validationType": "object-count-between",
+    "rangeMin": 5,
+    "rangeMax": 100,
+    "score": 0
+  },
+  "doorList.doorRelayStatus": {
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueMatchType": "validation-field",
+    "validValueFieldName": "acRelay",
+    "validValueOperator": "equalsAny",
+    "allowedValues": [
+      "Normal",
+      "ManualOpen",
+      "ManualClose",
+      "ScheduleOpen",
+      "ScheduleClose",
+      "None",
+      "Active",
+      "Inactive",
+      "일반",
+      "수동개방",
+      "수동폐쇄",
+      "스케줄개방",
+      "스케줄폐쇄",
+      "상태없음",
+      "활성",
+      "비활성"
+    ],
+    "score": 0
+  },
+  "doorList.doorSensor": {
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueMatchType": "validation-field",
+    "validValueFieldName": "acControl",
+    "validValueOperator": "equalsAny",
+    "allowedValues": [
+      "Lock",
+      "Unlock"
+    ],
+    "score": 0
+  }
+}
 
-# StreamURLs
-cmii7v8pr006g8z1tvo55a50u_StreamURLs_out_validation = {
+# RealtimeDoorStatus
+cmtwtwdiz02o1245txoqxczwz_RealtimeDoorStatus_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "200"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "성공"
+    ],
+    "score": 0
+  },
+  "doorList.doorID": {
+    "enabled": True,
+    "validationType": "request-field-list-equality",
+    "referenceFieldId": "cmtwtwdsr02sf245thyfh74ss",
+    "referenceField": "doorList.doorID",
+    "referenceEndpoint": "/RealtimeDoorStatus",
+    "score": 0,
+    "isArrayFieldPath": True,
+    "listEqualityMode": "set"
+  },
+  "doorList.doorName": {
+    "enabled": True,
+    "validationType": "response-field-list-match",
+    "referenceFieldId": "cmtwtwdny02qj245tdyx3gntu",
+    "referenceField": "doorList.doorName",
+    "referenceEndpoint": "/DoorProfiles",
+    "score": 0,
+    "isArrayFieldPath": True
+  },
+  "doorList.doorRelaySensor": {
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueMatchType": "validation-field",
+    "validValueFieldName": "acRelay",
+    "validValueOperator": "equalsAny",
+    "allowedValues": [
+      "Normal",
+      "ManualOpen",
+      "ManualClose",
+      "ScheduleOpen",
+      "ScheduleClose",
+      "None",
+      "Active",
+      "Inactive",
+      "일반",
+      "수동개방",
+      "수동폐쇄",
+      "스케줄개방",
+      "스케줄폐쇄",
+      "상태없음",
+      "활성",
+      "비활성"
+    ],
+    "score": 0
+  },
+  "doorList.doorSensor": {
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueMatchType": "validation-field",
+    "validValueFieldName": "acControl",
+    "validValueOperator": "equalsAny",
+    "allowedValues": [
+      "Lock",
+      "Unlock"
+    ],
+    "score": 0
+  }
+}
+
+# DoorControl
+cmtwtwdiz02o1245txoqxczwz_DoorControl_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "200"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "성공"
+    ],
+    "score": 0
+  }
+}
+
+# RealtimeDoorStatus2
+cmtwtwdiz02o1245txoqxczwz_RealtimeDoorStatus2_out_validation = {
   "code": {
     "enabled": True,
     "validationType": "specified-value-match",
@@ -27,51 +220,23 @@ cmii7v8pr006g8z1tvo55a50u_StreamURLs_out_validation = {
   }
 }
 
-# RealtimeVideoEventInfos
-cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_out_validation = {}
-
-# RealtimeVideoEventInfos WebHook IN Validation
-cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_webhook_in_validation = {
-  "camList.camID": {
-    "enabled": True,
-    "validationType": "request-field-list-match",
-    "referenceFieldId": "cmiwrf69i0bu6844g22ccsjtr",
-    "referenceField": "camID",
-    "referenceEndpoint": "/RealtimeVideoEventInfos",
-    "score": 0
-  }
-}
-
-# cmii7v8pr006g8z1tvo55a50u WebHook 검증 리스트
-cmii7v8pr006g8z1tvo55a50u_webhook_inValidation = [
-    cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_webhook_in_validation,
-]
-
-# cmii7v8pr006g8z1tvo55a50u 검증 리스트
-cmii7v8pr006g8z1tvo55a50u_outValidation = [
-    cmii7v8pr006g8z1tvo55a50u_Authentication_out_validation,
-    cmii7v8pr006g8z1tvo55a50u_Capabilities_out_validation,
-    cmii7v8pr006g8z1tvo55a50u_CameraProfiles_out_validation,
-    cmii7v8pr006g8z1tvo55a50u_StreamURLs_out_validation,
-    cmii7v8pr006g8z1tvo55a50u_RealtimeVideoEventInfos_out_validation,
+# cmtwtwdiz02o1245txoqxczwz 검증 리스트
+cmtwtwdiz02o1245txoqxczwz_outValidation = [
+    cmtwtwdiz02o1245txoqxczwz_Authentication_out_validation,
+    cmtwtwdiz02o1245txoqxczwz_Capabilities_out_validation,
+    cmtwtwdiz02o1245txoqxczwz_DoorProfiles_out_validation,
+    cmtwtwdiz02o1245txoqxczwz_RealtimeDoorStatus_out_validation,
+    cmtwtwdiz02o1245txoqxczwz_DoorControl_out_validation,
+    cmtwtwdiz02o1245txoqxczwz_RealtimeDoorStatus2_out_validation,
 ]
 
 # Authentication
-cmsmj2a0g037grc0qddx8wie2_Authentication_out_validation = {}
-
-# Capabilities
-cmsmj2a0g037grc0qddx8wie2_Capabilities_out_validation = {}
-
-# SensorDeviceProfiles
-cmsmj2a0g037grc0qddx8wie2_SensorDeviceProfiles_out_validation = {}
-
-# StoredSensorEventInfos
-cmsmj2a0g037grc0qddx8wie2_StoredSensorEventInfos_out_validation = {
+cmtwtvuyb02i1245t2su90084_Authentication_out_validation = {
   "code": {
     "enabled": True,
     "validationType": "specified-value-match",
     "allowedValues": [
-      "201"
+      "200"
     ],
     "score": 0
   },
@@ -79,42 +244,119 @@ cmsmj2a0g037grc0qddx8wie2_StoredSensorEventInfos_out_validation = {
     "enabled": True,
     "validationType": "specified-value-match",
     "allowedValues": [
-      "정보 없음"
+      "성공"
     ],
-    "score": 0
-  },
-  "sensorDeviceList.sensorDeviceID": {
-    "enabled": True,
-    "validationType": "request-field-list-match",
-    "referenceFieldId": "cmsmj2acm03d6rc0qln8u5ijy",
-    "referenceField": "sensorDeviceID",
-    "referenceEndpoint": "/StoredSensorEventInfos",
     "score": 0
   }
 }
 
-# cmsmj2a0g037grc0qddx8wie2 검증 리스트
-cmsmj2a0g037grc0qddx8wie2_outValidation = [
-    cmsmj2a0g037grc0qddx8wie2_Authentication_out_validation,
-    cmsmj2a0g037grc0qddx8wie2_Capabilities_out_validation,
-    cmsmj2a0g037grc0qddx8wie2_SensorDeviceProfiles_out_validation,
-    cmsmj2a0g037grc0qddx8wie2_StoredSensorEventInfos_out_validation,
-]
-
-# Authentication
-cmsmiz4rk030drc0qgs8hvb18_Authentication_out_validation = {}
-
 # Capabilities
-cmsmiz4rk030drc0qgs8hvb18_Capabilities_out_validation = {}
+cmtwtvuyb02i1245t2su90084_Capabilities_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "403"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "권한 없음"
+    ],
+    "score": 0
+  }
+}
 
 # DoorProfiles
-cmsmiz4rk030drc0qgs8hvb18_DoorProfiles_out_validation = {}
+cmtwtvuyb02i1245t2su90084_DoorProfiles_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "200"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "성공"
+    ],
+    "score": 0
+  },
+  "doorList": {
+    "enabled": True,
+    "validationType": "object-count-between",
+    "rangeMin": 5,
+    "rangeMax": 100,
+    "score": 0
+  },
+  "doorList.doorRelayStatus": {
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueMatchType": "validation-field",
+    "validValueFieldName": "acRelay",
+    "validValueOperator": "equalsAny",
+    "allowedValues": [
+      "Normal",
+      "ManualOpen",
+      "ManualClose",
+      "ScheduleOpen",
+      "ScheduleClose",
+      "None",
+      "Active",
+      "Inactive",
+      "일반",
+      "수동개방",
+      "수동폐쇄",
+      "스케줄개방",
+      "스케줄폐쇄",
+      "상태없음",
+      "활성",
+      "비활성"
+    ],
+    "score": 0
+  },
+  "doorList.doorSensor": {
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueMatchType": "validation-field",
+    "validValueFieldName": "acControl",
+    "validValueOperator": "equalsAny",
+    "allowedValues": [
+      "Lock",
+      "Unlock"
+    ],
+    "score": 0
+  }
+}
 
 # AccessUserInfos
-cmsmiz4rk030drc0qgs8hvb18_AccessUserInfos_out_validation = {}
+cmtwtvuyb02i1245t2su90084_AccessUserInfos_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "200"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "성공"
+    ],
+    "score": 0
+  }
+}
 
 # StoredVerifEventInfos
-cmsmiz4rk030drc0qgs8hvb18_StoredVerifEventInfos_out_validation = {
+cmtwtvuyb02i1245t2su90084_StoredVerifEventInfos_out_validation = {
   "code": {
     "enabled": True,
     "validationType": "specified-value-match",
@@ -130,51 +372,145 @@ cmsmiz4rk030drc0qgs8hvb18_StoredVerifEventInfos_out_validation = {
       "정보 없음"
     ],
     "score": 0
-  },
-  "doorList.doorID": {
+  }
+}
+
+# cmtwtvuyb02i1245t2su90084 검증 리스트
+cmtwtvuyb02i1245t2su90084_outValidation = [
+    cmtwtvuyb02i1245t2su90084_Authentication_out_validation,
+    cmtwtvuyb02i1245t2su90084_Capabilities_out_validation,
+    cmtwtvuyb02i1245t2su90084_DoorProfiles_out_validation,
+    cmtwtvuyb02i1245t2su90084_AccessUserInfos_out_validation,
+    cmtwtvuyb02i1245t2su90084_StoredVerifEventInfos_out_validation,
+]
+
+# Authentication
+cmtwtvjfm02br245tbzi9gej7_Authentication_out_validation = {
+  "code": {
     "enabled": True,
-    "validationType": "request-field-list-match",
-    "referenceFieldId": "cmsmiz55t036nrc0qstfwj7er",
-    "referenceField": "doorID",
-    "referenceEndpoint": "/StoredVerifEventInfos",
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "200"
+    ],
     "score": 0
   },
-  "doorList.eventName": {
+  "message": {
     "enabled": True,
-    "validationType": "request-field-match",
-    "referenceFieldId": "cmsmiz55y036rrc0qvnkripmq",
-    "referenceField": "eventFilter",
-    "referenceEndpoint": "/StoredVerifEventInfos",
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "성공"
+    ],
     "score": 0
   }
 }
 
-# cmsmiz4rk030drc0qgs8hvb18 검증 리스트
-cmsmiz4rk030drc0qgs8hvb18_outValidation = [
-    cmsmiz4rk030drc0qgs8hvb18_Authentication_out_validation,
-    cmsmiz4rk030drc0qgs8hvb18_Capabilities_out_validation,
-    cmsmiz4rk030drc0qgs8hvb18_DoorProfiles_out_validation,
-    cmsmiz4rk030drc0qgs8hvb18_AccessUserInfos_out_validation,
-    cmsmiz4rk030drc0qgs8hvb18_StoredVerifEventInfos_out_validation,
-]
-
-# Authentication
-cmsmhhyl502ncrc0qnjtvbt43_Authentication_out_validation = {}
-
 # Capabilities
-cmsmhhyl502ncrc0qnjtvbt43_Capabilities_out_validation = {}
+cmtwtvjfm02br245tbzi9gej7_Capabilities_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "403"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "권한 없음"
+    ],
+    "score": 0
+  }
+}
 
-# CameraProfiles
-cmsmhhyl502ncrc0qnjtvbt43_CameraProfiles_out_validation = {}
+# DoorProfiles
+cmtwtvjfm02br245tbzi9gej7_DoorProfiles_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "200"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "성공"
+    ],
+    "score": 0
+  },
+  "doorList": {
+    "enabled": True,
+    "validationType": "object-count-between",
+    "rangeMin": 5,
+    "rangeMax": 100,
+    "score": 0
+  },
+  "doorList.doorRelayStatus": {
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueMatchType": "validation-field",
+    "validValueFieldName": "acRelay",
+    "validValueOperator": "equalsAny",
+    "allowedValues": [
+      "Normal",
+      "ManualOpen",
+      "ManualClose",
+      "ScheduleOpen",
+      "ScheduleClose",
+      "None",
+      "Active",
+      "Inactive",
+      "일반",
+      "수동개방",
+      "수동폐쇄",
+      "스케줄개방",
+      "스케줄폐쇄",
+      "상태없음",
+      "활성",
+      "비활성"
+    ],
+    "score": 0
+  },
+  "doorList.doorSensor": {
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueMatchType": "validation-field",
+    "validValueFieldName": "acControl",
+    "validValueOperator": "equalsAny",
+    "allowedValues": [
+      "Lock",
+      "Unlock"
+    ],
+    "score": 0
+  }
+}
 
-# StoredVideoInfos
-cmsmhhyl502ncrc0qnjtvbt43_StoredVideoInfos_out_validation = {}
+# AccessUserInfos
+cmtwtvjfm02br245tbzi9gej7_AccessUserInfos_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "200"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "성공"
+    ],
+    "score": 0
+  }
+}
 
-# ReplayURL
-cmsmhhyl502ncrc0qnjtvbt43_ReplayURL_out_validation = {}
-
-# StoredVideoEventInfos
-cmsmhhyl502ncrc0qnjtvbt43_StoredVideoEventInfos_out_validation = {
+# RealtimeVerifEventInfos
+cmtwtvjfm02br245tbzi9gej7_RealtimeVerifEventInfos_out_validation = {
   "code": {
     "enabled": True,
     "validationType": "specified-value-match",
@@ -193,40 +529,232 @@ cmsmhhyl502ncrc0qnjtvbt43_StoredVideoEventInfos_out_validation = {
   }
 }
 
-# StoredObjectAnalyticsInfos
-cmsmhhyl502ncrc0qnjtvbt43_StoredObjectAnalyticsInfos_out_validation = {}
+# RealtimeVerifEventInfos WebHook IN Validation
+cmtwtvjfm02br245tbzi9gej7_RealtimeVerifEventInfos_webhook_in_validation = {
+  "doorList.eventTime": {
+    "enabled": True,
+    "validationType": "request-time-compare",
+    "referenceFieldMin": "startTime",
+    "referenceFieldMinId": "cmtwtvjnq02fx245thcfe48qa",
+    "referenceEndpointMin": "/RealtimeVerifEventInfos",
+    "referenceTimeSourceMin": "request-field",
+    "referenceTimeSourceMax": "request-timestamp",
+    "timeCompareOperator": "between",
+    "score": 0
+  },
+  "doorList.doorID": {
+    "enabled": True,
+    "validationType": "request-field-list-equality",
+    "referenceFieldId": "cmtwtvjni02fr245tg4lng44z",
+    "referenceField": "doorList.doorID",
+    "referenceEndpoint": "/RealtimeVerifEventInfos",
+    "isArrayFieldPath": True,
+    "listEqualityMode": "set",
+    "score": 0
+  },
+  "doorList.eventName": {
+    "enabled": True,
+    "validationType": "request-field-match",
+    "referenceFieldId": "cmtwtvjnn02fv245t5d4al29w",
+    "referenceField": "eventFilter",
+    "referenceEndpoint": "/RealtimeVerifEventInfos",
+    "score": 0
+  }
+}
 
-# cmsmhhyl502ncrc0qnjtvbt43 검증 리스트
-cmsmhhyl502ncrc0qnjtvbt43_outValidation = [
-    cmsmhhyl502ncrc0qnjtvbt43_Authentication_out_validation,
-    cmsmhhyl502ncrc0qnjtvbt43_Capabilities_out_validation,
-    cmsmhhyl502ncrc0qnjtvbt43_CameraProfiles_out_validation,
-    cmsmhhyl502ncrc0qnjtvbt43_StoredVideoInfos_out_validation,
-    cmsmhhyl502ncrc0qnjtvbt43_ReplayURL_out_validation,
-    cmsmhhyl502ncrc0qnjtvbt43_StoredVideoEventInfos_out_validation,
-    cmsmhhyl502ncrc0qnjtvbt43_StoredObjectAnalyticsInfos_out_validation,
+# cmtwtvjfm02br245tbzi9gej7 WebHook 검증 리스트
+cmtwtvjfm02br245tbzi9gej7_webhook_inValidation = [
+    None,
+    None,
+    None,
+    None,
+    cmtwtvjfm02br245tbzi9gej7_RealtimeVerifEventInfos_webhook_in_validation,
+]
+
+# cmtwtvjfm02br245tbzi9gej7 검증 리스트
+cmtwtvjfm02br245tbzi9gej7_outValidation = [
+    cmtwtvjfm02br245tbzi9gej7_Authentication_out_validation,
+    cmtwtvjfm02br245tbzi9gej7_Capabilities_out_validation,
+    cmtwtvjfm02br245tbzi9gej7_DoorProfiles_out_validation,
+    cmtwtvjfm02br245tbzi9gej7_AccessUserInfos_out_validation,
+    cmtwtvjfm02br245tbzi9gej7_RealtimeVerifEventInfos_out_validation,
 ]
 
 # Authentication
-cmiqr1jha00i6ie8fb1scb3go_Authentication_out_validation = {}
+cmtwil1oo00ztt4ht7y9se1ur_Authentication_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "200"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "성공"
+    ],
+    "score": 0
+  }
+}
 
 # Capabilities
-cmiqr1jha00i6ie8fb1scb3go_Capabilities_out_validation = {}
+cmtwil1oo00ztt4ht7y9se1ur_Capabilities_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "200"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "성공"
+    ],
+    "score": 0
+  },
+  "transportSupport.transProtocolType": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "LongPolling",
+      "Webhook"
+    ],
+    "score": 0
+  }
+}
 
 # DoorProfiles
-cmiqr1jha00i6ie8fb1scb3go_DoorProfiles_out_validation = {}
+cmtwil1oo00ztt4ht7y9se1ur_DoorProfiles_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "200"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "성공"
+    ],
+    "score": 0
+  },
+  "doorList": {
+    "enabled": True,
+    "validationType": "object-count-between",
+    "rangeMin": 5,
+    "rangeMax": 100,
+    "score": 0
+  },
+  "doorList.doorRelayStatus": {
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueMatchType": "validation-field",
+    "validValueFieldName": "acRelay",
+    "validValueOperator": "equalsAny",
+    "allowedValues": [
+      "Normal",
+      "ManualOpen",
+      "ManualClose",
+      "ScheduleOpen",
+      "ScheduleClose",
+      "None",
+      "Active",
+      "Inactive",
+      "일반",
+      "수동개방",
+      "수동폐쇄",
+      "스케줄개방",
+      "스케줄폐쇄",
+      "상태없음",
+      "활성",
+      "비활성"
+    ],
+    "score": 0
+  },
+  "doorList.doorSensor": {
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueMatchType": "validation-field",
+    "validValueFieldName": "acControl",
+    "validValueOperator": "equalsAny",
+    "allowedValues": [
+      "Lock",
+      "Unlock"
+    ],
+    "score": 0
+  }
+}
 
 # RealtimeDoorStatus
-cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_out_validation = {}
-
-# RealtimeDoorStatus WebHook IN Validation
-cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_webhook_in_validation = {
+cmtwil1oo00ztt4ht7y9se1ur_RealtimeDoorStatus_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "200"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "성공"
+    ],
+    "score": 0
+  },
   "doorList.doorID": {
     "enabled": True,
-    "validationType": "request-field-list-match",
-    "referenceFieldId": "cmixusnx90hatp002m3rnln60",
-    "referenceField": "doorID",
+    "validationType": "request-field-list-equality",
+    "referenceFieldId": "cmtwil1z80137t4ht6cedc5cg",
+    "referenceField": "doorList.doorID",
     "referenceEndpoint": "/RealtimeDoorStatus",
+    "score": 0,
+    "isArrayFieldPath": True,
+    "listEqualityMode": "set"
+  },
+  "doorList.doorName": {
+    "enabled": True,
+    "validationType": "response-field-list-match",
+    "referenceFieldId": "cmtwil1r7011ht4htnr4eaybb",
+    "referenceField": "doorList.doorName",
+    "referenceEndpoint": "/DoorProfiles",
+    "score": 0,
+    "isArrayFieldPath": True
+  },
+  "doorList.doorRelaySensor": {
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueMatchType": "validation-field",
+    "validValueFieldName": "acRelay",
+    "validValueOperator": "equalsAny",
+    "allowedValues": [
+      "Normal",
+      "ManualOpen",
+      "ManualClose",
+      "ScheduleOpen",
+      "ScheduleClose",
+      "None",
+      "Active",
+      "Inactive",
+      "일반",
+      "수동개방",
+      "수동폐쇄",
+      "스케줄개방",
+      "스케줄폐쇄",
+      "상태없음",
+      "활성",
+      "비활성"
+    ],
     "score": 0
   },
   "doorList.doorSensor": {
@@ -244,253 +772,511 @@ cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_webhook_in_validation = {
 }
 
 # DoorControl
-cmiqr1jha00i6ie8fb1scb3go_DoorControl_out_validation = {}
-
-# RealtimeDoorStatus2
-cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_out_validation = {}
-
-# RealtimeDoorStatus2 WebHook IN Validation
-cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_webhook_in_validation = {
-  "doorList.doorID": {
+cmtwil1oo00ztt4ht7y9se1ur_DoorControl_out_validation = {
+  "code": {
     "enabled": True,
-    "validationType": "request-field-match",
-    "referenceFieldId": "cmixuykwk0hmep002xddae990",
-    "referenceField": "doorID",
-    "referenceEndpoint": "/RealtimeDoorStatus2",
-    "score": 0
-  },
-  "doorList.doorSensor": {
-    "enabled": True,
-    "validationType": "request-field-match",
-    "referenceFieldId": "cmj83qob2000isnx0rwhvblif",
-    "referenceField": "commandType",
-    "referenceEndpoint": "/DoorControl",
-    "score": 0
-  }
-}
-
-# cmiqr1jha00i6ie8fb1scb3go WebHook 검증 리스트
-cmiqr1jha00i6ie8fb1scb3go_webhook_inValidation = [
-    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_webhook_in_validation,
-    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_webhook_in_validation,
-]
-
-# cmiqr1jha00i6ie8fb1scb3go 검증 리스트
-cmiqr1jha00i6ie8fb1scb3go_outValidation = [
-    cmiqr1jha00i6ie8fb1scb3go_Authentication_out_validation,
-    cmiqr1jha00i6ie8fb1scb3go_Capabilities_out_validation,
-    cmiqr1jha00i6ie8fb1scb3go_DoorProfiles_out_validation,
-    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus_out_validation,
-    cmiqr1jha00i6ie8fb1scb3go_DoorControl_out_validation,
-    cmiqr1jha00i6ie8fb1scb3go_RealtimeDoorStatus2_out_validation,
-]
-
-# Authentication
-cmiqr2b9j00i9ie8frw439h8i_Authentication_out_validation = {}
-
-# Capabilities
-cmiqr2b9j00i9ie8frw439h8i_Capabilities_out_validation = {}
-
-# SensorDeviceProfiles
-cmiqr2b9j00i9ie8frw439h8i_SensorDeviceProfiles_out_validation = {}
-
-# SensorDeviceControl
-cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl_out_validation = {
-  "sensorDeviceID": {
-    "enabled": True,
-    "validationType": "request-field-match",
-    "referenceFieldId": "cmisfqqxc07ub5vy7ao1d67bu",
-    "referenceField": "sensorDeviceID",
-    "referenceEndpoint": "/SensorDeviceControl",
-    "score": 0
-  },
-  "sensorDeviceStatus": {
-    "enabled": True,
-    "validationType": "valid-value-match",
-    "validValueMatchType": "validation-field",
-    "validValueFieldName": "sensorControl",
-    "validValueOperator": "equalsAny",
+    "validationType": "specified-value-match",
     "allowedValues": [
-      "AlarmOn",
-      "AlarmOff"
+      "200"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "성공"
     ],
     "score": 0
   }
 }
 
-# SensorDeviceControl2
-cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl2_out_validation = {
-  "sensorDeviceID": {
+# RealtimeDoorStatus2
+cmtwil1oo00ztt4ht7y9se1ur_RealtimeDoorStatus2_out_validation = {
+  "code": {
     "enabled": True,
-    "validationType": "request-field-match",
-    "referenceFieldId": "cmisg8fmw08c55vy7eby9fson",
-    "referenceField": "sensorDeviceID",
-    "referenceEndpoint": "/SensorDeviceControl2",
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "200"
+    ],
     "score": 0
   },
-  "sensorDeviceStatus": {
+  "message": {
     "enabled": True,
-    "validationType": "request-field-match",
-    "referenceFieldId": "cmisg8hg208ca5vy7ijzfeelo",
-    "referenceField": "commandType",
-    "referenceEndpoint": "/SensorDeviceControl2",
-    "score": 0
-  }
-}
-
-# cmiqr2b9j00i9ie8frw439h8i 검증 리스트
-cmiqr2b9j00i9ie8frw439h8i_outValidation = [
-    cmiqr2b9j00i9ie8frw439h8i_Authentication_out_validation,
-    cmiqr2b9j00i9ie8frw439h8i_Capabilities_out_validation,
-    cmiqr2b9j00i9ie8frw439h8i_SensorDeviceProfiles_out_validation,
-    cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl_out_validation,
-    cmiqr2b9j00i9ie8frw439h8i_SensorDeviceControl2_out_validation,
-]
-
-# Authentication
-cmiqr0kdw00i4ie8fr3firjtg_Authentication_out_validation = {}
-
-# Capabilities
-cmiqr0kdw00i4ie8fr3firjtg_Capabilities_out_validation = {}
-
-# CameraProfiles
-cmiqr0kdw00i4ie8fr3firjtg_CameraProfiles_out_validation = {}
-
-# PtzStatus
-cmiqr0kdw00i4ie8fr3firjtg_PtzStatus_out_validation = {}
-
-# PtzContinuousMove
-cmiqr0kdw00i4ie8fr3firjtg_PtzContinuousMove_out_validation = {}
-
-# PtzStop
-cmiqr0kdw00i4ie8fr3firjtg_PtzStop_out_validation = {}
-
-# cmiqr0kdw00i4ie8fr3firjtg 검증 리스트
-cmiqr0kdw00i4ie8fr3firjtg_outValidation = [
-    cmiqr0kdw00i4ie8fr3firjtg_Authentication_out_validation,
-    cmiqr0kdw00i4ie8fr3firjtg_Capabilities_out_validation,
-    cmiqr0kdw00i4ie8fr3firjtg_CameraProfiles_out_validation,
-    cmiqr0kdw00i4ie8fr3firjtg_PtzStatus_out_validation,
-    cmiqr0kdw00i4ie8fr3firjtg_PtzContinuousMove_out_validation,
-    cmiqr0kdw00i4ie8fr3firjtg_PtzStop_out_validation,
-]
-
-# Authentication
-cmii7wfuf006i8z1tcds6q69g_Authentication_out_validation = {}
-
-# Capabilities
-cmii7wfuf006i8z1tcds6q69g_Capabilities_out_validation = {}
-
-# SensorDeviceProfiles
-cmii7wfuf006i8z1tcds6q69g_SensorDeviceProfiles_out_validation = {}
-
-# RealtimeSensorData
-cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_out_validation = {}
-
-# RealtimeSensorData WebHook IN Validation
-cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_webhook_in_validation = {
-  "sensorDeviceList.sensorDeviceID": {
-    "enabled": True,
-    "validationType": "request-field-list-match",
-    "referenceFieldId": "cmiwuxvls0cj1p002zte0s84o",
-    "referenceField": "sensorDeviceID",
-    "referenceEndpoint": "/RealtimeSensorData",
-    "score": 0
-  }
-}
-
-# RealtimeSensorEventInfos
-cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_out_validation = {}
-
-# RealtimeSensorEventInfos WebHook IN Validation
-cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_webhook_in_validation = {
-  "sensorDeviceList.sensorDeviceID": {
-    "enabled": True,
-    "validationType": "request-field-list-match",
-    "referenceFieldId": "cmj6feinr01aixei0iwq8v8ia",
-    "referenceField": "sensorDeviceID",
-    "referenceEndpoint": "/RealtimeSensorEventInfos",
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "성공"
+    ],
     "score": 0
   },
-  "sensorDeviceList.eventName": {
-    "enabled": True,
-    "validationType": "request-field-match",
-    "referenceFieldId": "cmj6fdgsb0184xei0mr9kacqd",
-    "referenceField": "eventFilter",
-    "referenceEndpoint": "/RealtimeSensorEventInfos",
-    "score": 0
-  },
-  "sensorDeviceList.eventTime": {
-    "enabled": True,
-    "validationType": "range-match",
-    "rangeMin": 20251105163010124,
-    "rangeMax": 20251105163010124,
-    "rangeOperator": "between",
-    "score": 0
-  }
-}
-
-# cmii7wfuf006i8z1tcds6q69g WebHook 검증 리스트
-cmii7wfuf006i8z1tcds6q69g_webhook_inValidation = [
-    cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_webhook_in_validation,
-    cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_webhook_in_validation,
-]
-
-# cmii7wfuf006i8z1tcds6q69g 검증 리스트
-cmii7wfuf006i8z1tcds6q69g_outValidation = [
-    cmii7wfuf006i8z1tcds6q69g_Authentication_out_validation,
-    cmii7wfuf006i8z1tcds6q69g_Capabilities_out_validation,
-    cmii7wfuf006i8z1tcds6q69g_SensorDeviceProfiles_out_validation,
-    cmii7wfuf006i8z1tcds6q69g_RealtimeSensorData_out_validation,
-    cmii7wfuf006i8z1tcds6q69g_RealtimeSensorEventInfos_out_validation,
-]
-
-# Authentication
-cmii7w683006h8z1t7usnin5g_Authentication_out_validation = {}
-
-# Capabilities
-cmii7w683006h8z1t7usnin5g_Capabilities_out_validation = {}
-
-# DoorProfiles
-cmii7w683006h8z1t7usnin5g_DoorProfiles_out_validation = {}
-
-# AccessUserInfos
-cmii7w683006h8z1t7usnin5g_AccessUserInfos_out_validation = {}
-
-# RealtimeVerifEventInfos
-cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_out_validation = {}
-
-# RealtimeVerifEventInfos WebHook IN Validation
-cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_webhook_in_validation = {
   "doorList.doorID": {
     "enabled": True,
-    "validationType": "request-field-list-match",
-    "referenceFieldId": "cmiwt9k7208sxp002x2a5b3x3",
-    "referenceField": "doorID",
+    "validationType": "request-field-match",
+    "referenceFieldId": "cmtwil24j015jt4htlug66sag",
+    "referenceField": "doorList.doorID",
+    "referenceEndpoint": "/RealtimeDoorStatus2",
+    "referenceListField": "doorList.doorID",
+    "referenceListEndpoint": "/RealtimeDoorStatus",
+    "score": 0,
+    "config": {
+      "isArrayFieldPath": True
+    },
+    "isArrayFieldPath": True
+  },
+  "doorList.doorName": {
+    "enabled": True,
+    "validationType": "response-field-list-match",
+    "referenceFieldId": "cmtwil1r7011ht4htnr4eaybb",
+    "referenceField": "doorList.doorName",
+    "referenceEndpoint": "/DoorProfiles",
+    "score": 0,
+    "config": {
+      "isArrayFieldPath": True
+    },
+    "isArrayFieldPath": True
+  },
+  "doorList.doorRelaySensor": {
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueMatchType": "validation-field",
+    "validValueFieldName": "acRelay",
+    "validValueOperator": "equalsAny",
+    "allowedValues": [
+      "Normal",
+      "ManualOpen",
+      "ManualClose",
+      "ScheduleOpen",
+      "ScheduleClose",
+      "None",
+      "Active",
+      "Inactive",
+      "일반",
+      "수동개방",
+      "수동폐쇄",
+      "스케줄개방",
+      "스케줄폐쇄",
+      "상태없음",
+      "활성",
+      "비활성"
+    ],
+    "score": 0
+  },
+  "doorList.doorSensor": {
+    "enabled": True,
+    "validationType": "request-field-match",
+    "referenceFieldId": "cmtwil21j0145t4htgsi3ngs4",
+    "referenceField": "commandType",
+    "referenceEndpoint": "/DoorControl",
+    "referenceListEndpoint": "/DoorControl",
+    "score": 0
+  }
+}
+
+# cmtwil1oo00ztt4ht7y9se1ur 검증 리스트
+cmtwil1oo00ztt4ht7y9se1ur_outValidation = [
+    cmtwil1oo00ztt4ht7y9se1ur_Authentication_out_validation,
+    cmtwil1oo00ztt4ht7y9se1ur_Capabilities_out_validation,
+    cmtwil1oo00ztt4ht7y9se1ur_DoorProfiles_out_validation,
+    cmtwil1oo00ztt4ht7y9se1ur_RealtimeDoorStatus_out_validation,
+    cmtwil1oo00ztt4ht7y9se1ur_DoorControl_out_validation,
+    cmtwil1oo00ztt4ht7y9se1ur_RealtimeDoorStatus2_out_validation,
+]
+
+# Authentication
+cmtwfeiw4003dt4htizadqzzr_Authentication_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "200"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "성공"
+    ],
+    "score": 0
+  }
+}
+
+# Capabilities
+cmtwfeiw4003dt4htizadqzzr_Capabilities_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "200"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "성공"
+    ],
+    "score": 0
+  },
+  "transportSupport.transProtocolType": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "LongPolling",
+      "Webhook"
+    ],
+    "score": 0
+  }
+}
+
+# DoorProfiles
+cmtwfeiw4003dt4htizadqzzr_DoorProfiles_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "200"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "성공"
+    ],
+    "score": 0
+  },
+  "doorList": {
+    "enabled": True,
+    "validationType": "object-count-between",
+    "rangeMin": 5,
+    "rangeMax": 100,
+    "score": 0
+  },
+  "doorList.doorRelayStatus": {
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueMatchType": "validation-field",
+    "validValueFieldName": "acRelay",
+    "validValueOperator": "equalsAny",
+    "allowedValues": [
+      "Normal",
+      "ManualOpen",
+      "ManualClose",
+      "ScheduleOpen",
+      "ScheduleClose",
+      "None",
+      "Active",
+      "Inactive",
+      "일반",
+      "수동개방",
+      "수동폐쇄",
+      "스케줄개방",
+      "스케줄폐쇄",
+      "상태없음",
+      "활성",
+      "비활성"
+    ],
+    "score": 0
+  },
+  "doorList.doorSensor": {
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueMatchType": "validation-field",
+    "validValueFieldName": "acControl",
+    "validValueOperator": "equalsAny",
+    "allowedValues": [
+      "Lock",
+      "Unlock"
+    ],
+    "score": 0
+  }
+}
+
+# AccessUserInfos
+cmtwfeiw4003dt4htizadqzzr_AccessUserInfos_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "200"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "성공"
+    ],
+    "score": 0
+  }
+}
+
+# StoredVerifEventInfos
+cmtwfeiw4003dt4htizadqzzr_StoredVerifEventInfos_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "200"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "성공"
+    ],
+    "score": 0
+  },
+  "doorList.eventTime": {
+    "enabled": True,
+    "validationType": "request-field-range-match",
+    "rangeOperator": "between",
+    "referenceFieldMin": "timePeriod.startTime",
+    "referenceFieldMinId": "cmtwfejan0085t4htwdzww0wd",
+    "referenceFieldMax": "timePeriod.endTime",
+    "referenceFieldMaxId": "cmtwfejaq0087t4htaq13s6mq",
+    "referenceEndpointMin": "/StoredVerifEventInfos",
+    "referenceEndpointMax": "/StoredVerifEventInfos",
+    "score": 0
+  },
+  "doorList.doorID": {
+    "enabled": True,
+    "validationType": "request-field-list-equality",
+    "referenceFieldId": "cmtwfejc8008dt4htm61szvt0",
+    "referenceField": "doorList.doorID",
+    "referenceEndpoint": "/StoredVerifEventInfos",
+    "score": 0,
+    "isArrayFieldPath": True,
+    "listEqualityMode": "set"
+  },
+  "doorList.eventName": {
+    "enabled": True,
+    "validationType": "request-field-match",
+    "referenceFieldId": "cmtwfejai0081t4htfx2wjpru",
+    "referenceField": "eventFilter",
+    "referenceEndpoint": "/StoredVerifEventInfos",
+    "score": 0
+  }
+}
+
+# cmtwfeiw4003dt4htizadqzzr 검증 리스트
+cmtwfeiw4003dt4htizadqzzr_outValidation = [
+    cmtwfeiw4003dt4htizadqzzr_Authentication_out_validation,
+    cmtwfeiw4003dt4htizadqzzr_Capabilities_out_validation,
+    cmtwfeiw4003dt4htizadqzzr_DoorProfiles_out_validation,
+    cmtwfeiw4003dt4htizadqzzr_AccessUserInfos_out_validation,
+    cmtwfeiw4003dt4htizadqzzr_StoredVerifEventInfos_out_validation,
+]
+
+# Authentication
+cmtw8wcts00o1126muckytfg2_Authentication_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "200"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "성공"
+    ],
+    "score": 0
+  }
+}
+
+# Capabilities
+cmtw8wcts00o1126muckytfg2_Capabilities_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "200"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "성공"
+    ],
+    "score": 0
+  },
+  "transportSupport.transProtocolType": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "LongPolling",
+      "Webhook"
+    ],
+    "score": 0
+  }
+}
+
+# DoorProfiles
+cmtw8wcts00o1126muckytfg2_DoorProfiles_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "200"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "성공"
+    ],
+    "score": 0
+  },
+  "doorList": {
+    "enabled": True,
+    "validationType": "object-count-between",
+    "rangeMin": 5,
+    "rangeMax": 100,
+    "score": 0
+  },
+  "doorList.doorRelayStatus": {
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueMatchType": "validation-field",
+    "validValueFieldName": "acRelay",
+    "validValueOperator": "equalsAny",
+    "allowedValues": [
+      "Normal",
+      "ManualOpen",
+      "ManualClose",
+      "ScheduleOpen",
+      "ScheduleClose",
+      "None",
+      "Active",
+      "Inactive",
+      "일반",
+      "수동개방",
+      "수동폐쇄",
+      "스케줄개방",
+      "스케줄폐쇄",
+      "상태없음",
+      "활성",
+      "비활성"
+    ],
+    "score": 0
+  },
+  "doorList.doorSensor": {
+    "enabled": True,
+    "validationType": "valid-value-match",
+    "validValueMatchType": "validation-field",
+    "validValueFieldName": "acControl",
+    "validValueOperator": "equalsAny",
+    "allowedValues": [
+      "Lock",
+      "Unlock"
+    ],
+    "score": 0
+  }
+}
+
+# AccessUserInfos
+cmtw8wcts00o1126muckytfg2_AccessUserInfos_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "200"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "성공"
+    ],
+    "score": 0
+  }
+}
+
+# RealtimeVerifEventInfos
+cmtw8wcts00o1126muckytfg2_RealtimeVerifEventInfos_out_validation = {
+  "code": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "200"
+    ],
+    "score": 0
+  },
+  "message": {
+    "enabled": True,
+    "validationType": "specified-value-match",
+    "allowedValues": [
+      "성공"
+    ],
+    "score": 0
+  }
+}
+
+# RealtimeVerifEventInfos WebHook IN Validation
+cmtw8wcts00o1126muckytfg2_RealtimeVerifEventInfos_webhook_in_validation = {
+  "doorList.eventTime": {
+    "enabled": True,
+    "validationType": "request-time-compare",
+    "referenceFieldMin": "startTime",
+    "referenceFieldMinId": "cmtw8wd8100sp126mxt2kkk06",
+    "referenceEndpointMin": "/RealtimeVerifEventInfos",
+    "referenceTimeSourceMin": "request-field",
+    "referenceTimeSourceMax": "request-timestamp",
+    "timeCompareOperator": "between",
+    "score": 0
+  },
+  "doorList.doorID": {
+    "enabled": True,
+    "validationType": "request-field-list-equality",
+    "referenceFieldId": "cmtw8wd9g00sv126mczcjpm2o",
+    "referenceField": "doorList.doorID",
     "referenceEndpoint": "/RealtimeVerifEventInfos",
+    "isArrayFieldPath": True,
+    "listEqualityMode": "set",
     "score": 0
   },
   "doorList.eventName": {
     "enabled": True,
     "validationType": "request-field-match",
-    "referenceFieldId": "cmiwt94g908r6p00262pdfkog",
+    "referenceFieldId": "cmtw8wd7y00sn126mkvsn6i94",
     "referenceField": "eventFilter",
     "referenceEndpoint": "/RealtimeVerifEventInfos",
     "score": 0
   }
 }
 
-# cmii7w683006h8z1t7usnin5g WebHook 검증 리스트
-cmii7w683006h8z1t7usnin5g_webhook_inValidation = [
-    cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_webhook_in_validation,
+# cmtw8wcts00o1126muckytfg2 WebHook 검증 리스트
+cmtw8wcts00o1126muckytfg2_webhook_inValidation = [
+    None,
+    None,
+    None,
+    None,
+    cmtw8wcts00o1126muckytfg2_RealtimeVerifEventInfos_webhook_in_validation,
 ]
 
-# cmii7w683006h8z1t7usnin5g 검증 리스트
-cmii7w683006h8z1t7usnin5g_outValidation = [
-    cmii7w683006h8z1t7usnin5g_Authentication_out_validation,
-    cmii7w683006h8z1t7usnin5g_Capabilities_out_validation,
-    cmii7w683006h8z1t7usnin5g_DoorProfiles_out_validation,
-    cmii7w683006h8z1t7usnin5g_AccessUserInfos_out_validation,
-    cmii7w683006h8z1t7usnin5g_RealtimeVerifEventInfos_out_validation,
+# cmtw8wcts00o1126muckytfg2 검증 리스트
+cmtw8wcts00o1126muckytfg2_outValidation = [
+    cmtw8wcts00o1126muckytfg2_Authentication_out_validation,
+    cmtw8wcts00o1126muckytfg2_Capabilities_out_validation,
+    cmtw8wcts00o1126muckytfg2_DoorProfiles_out_validation,
+    cmtw8wcts00o1126muckytfg2_AccessUserInfos_out_validation,
+    cmtw8wcts00o1126muckytfg2_RealtimeVerifEventInfos_out_validation,
 ]
 
